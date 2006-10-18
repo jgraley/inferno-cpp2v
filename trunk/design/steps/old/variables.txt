@@ -1,0 +1,99 @@
+
+Variables
+=========
+
+Pseudo-latches
+--------------
+
+In many places we attempt to mix and match the sequential behaviour of combed out logic with the sequential behaviour of clocked processes (basically keeping everythign combinational until something forces us to wait one or more clock cycles).
+
+The most useful element for this is the latch, since it can be updated within a combinational process as well as over a clock transition. (Aside: a latch is not a complete replacement for a flip-flop, because a flip-flop can be updated on every cycle and remember each value for 1 cycle wheras a latch can only be update or remember in a single cycle, not both. So a latch has half the bandwidth of a flip-flop).
+
+A pseudo-latch appears as follows:
+
+wire x;
+
+always @(*)
+begin
+    x = stored_x;
+    ...
+    if( valid )
+        x = whatever;
+    ...
+end
+
+reg stored_x;
+
+clocked_always
+begin
+    stored_x <= x;
+end    
+
+This way, x may be assigned more than once in the same combinational section and the flop stored_x will retain the correct value. Essentially, the wire is initialised from the flop at the start of each clock pariod and then the resulting x value is written back to the flop at the end. x may be used in the combinational block in the natural software (sequential) way and will contain the expected value in the next clock period. The valid signal is used in cases where the computation will span multiple clock cycles and indicates that the value on the wire x is valid during a particular clock cycle. It's OK for more than one such test to pass - this just means x gets assigned to more than once, but only the final assignment actually goes into the flop. Therefore it is safe to generate the procedural code in execution order and allow the valid state the propogate through the implementation with earlier valid signals staying true.
+
+Note that this method does not generate a glitch-free version of x, even if you multiplex between the wire x and the flop stored_x. A true latch is the only way to do that (or wait an extra cycle and just use stored_x). Devices that require glitch-free signals across clocks will be wrapped with special HDL code that deals with this.
+
+
+Variable servers
+----------------
+
+Variables may be exposed as servers by providing read and write interfaces over the protocol. This permits access to be controlled by arbiters and routers, thereby supporting multiple users of a variable and access via pointers. 
+
+The transactions are as follows:
+
+Read: call via <varibale name>_read interface. No input data; return data is the value in the variable. This call completes combinationally.
+
+Write: call via <variable_name>_write interface. Input data is new value to write. If the variable is a pseudo-latch (or a real latch) the write returns combinationally and reflects 
+
+There are basically 3 possible models which differ in whether to support read and write in the same cycle: 
+- Exclusive: simulataneous read and write not allowed
+- Read-before-write: the read returns the value that was in the variable before the write
+- Write-before-read: the read returns the same data that was passed to the write
+
+Note that since server calls pass through moodule boundaries, we cannot rely on the combing-out process to automatically emualte the correct sequence of events - this is only possible within a single procedural block, which is why the order of events must be defined. Obviously write-before-read is not very useful, and can trivially be emulated at the client under eith of the other two schemes.
+
+The only benefit of the exclusive model is that a single server interface may be used for read and write (with the addition of a read/write line). However, we do not use inout wires in the protocol and therefore must use seperate wires for read data and write data. Therefore the additional cost of a second set of handshake lines will typically be negligable, and in some cases these lines will get optimised away in synthesis.
+
+We therefore choose read-before-write as a convention. Combinational clients must use the read interface for the first read if it happens before any writes. Thereafter the last-read value may be used (probably still on read data port) until a write takes place at which point the data that was written should be used directly (local forwarding). If there are multiple writes, an arbiter is needed and it will split the writes out into multiple clock cycles. Client should again reuse the written values in this case.
+
+When a variable is used both internally and externally, the underlying pseudo-latch must be shared. Typically, the read and write implementations are placed at the start of the combinational block. We do not attempt to provide locking by default because (a) it creates complexity which might not be needed and (b) the risk of unexpcted deadlocks.
+
+Example
+-------
+
+We take the earlier example and add read/write protocols. 
+wire x, update_x;
+
+always @(*)
+begin
+    x = stored_x;
+    x_read_call_ready = 1;
+    x_read_return_data = x;
+    x_read_return_valid = 1;
+    x_write_call_ready = 1;
+    if( x_write_call_valid )
+        x = x_write_call_data;
+    x_write_return_valid = 1;
+        
+    ...
+    if( valid )
+        x = whatever;
+    ...
+end
+
+reg stored_x;
+
+clocked_always
+begin
+    stored_x <= x;
+end    
+
+
+Arrays
+------
+
+An array becomes a server object that contains the required number of subobjects plus a router to permit selection of the correct object. This is similar to the case of a structure containing n copies of the subobject except that we allow pointer arithmatic on pointers to the obejcts so they must have consecutive addresses.
+
+
+[@todo more on basic types also structs etc]
+[@todo what about an object that is a local to a funciton? What if it's implicitly declared?]

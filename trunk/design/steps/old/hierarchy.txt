@@ -1,0 +1,32 @@
+
+
+Hierarchy
+=========
+
+
+[@todo inheritance!]
+
+
+Servers
+-------
+
+Each data object (from an int to a large class) and each function will map to a server. A server includes server interface(s) for calls (in the case of fundamental data types, read and write count as calls) and client interface(s) for calls to other servers.
+
+Each server will be implemented as a module, and the module will also contain the modules for any other servers that are local to the server being implemented. Therfore, the server module for a class contains (instances) servers for all member functions and all member data objects.
+
+A server module's port list consists of all public server interfaces and all client interfaces required by the server and its sub-servers. Note that we wish to be able to instance multiple copies of a server by instancing the module repreatedly, therefore the port list must depend only on server internals not, for example, external calll patterns. We restrict class interfaces to public members to reduce bulk in the port lists.
+
+Member class declarations (declaration of a class inside the declaration of another) will not affect the mapping at this stage because these are only syntactical constructions. 
+
+If a class contains a pointer to object of another class then its module will contain the pointer, but not the pointed-to object. Even though managing a pointer to a dynamiaclly allocated object is a commonly accepted way of expressing ownership, the many-to-many relationship between pointers and pointed-to objects prohibits direct inclusion.
+
+
+Program startup
+---------------
+
+All top-level items are grouped into a module called "system". A "main" function is assuemd present in this block and will be driven by initial/always blocks that implement a single funciton call transaction. By default, there will be no parameters to main and its return value will be ignored, but this could change in other circumstances.
+
+"system" takes only clock and reset signals. 
+
+
+[@todo global scope must also be a module]

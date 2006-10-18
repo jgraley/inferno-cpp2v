@@ -1,0 +1,129 @@
+
+
+----------------------------------- A stated server with abstract protocol and clock/reset --------------------------------------
+
+clock_reset_module F( server param=int n return=int y )
+
+wire [31:0] a, b, n;
+wire [31:0] state;
+reg [31:0] stored_a, stored_b;
+reg [31:0] stored_state;    
+    
+always @(*)
+begin    
+    a = stored_a;
+    b = stored_b;
+    state = stored_state
+    done = false;
+    case( state )
+        0:        
+	  begin
+	      if( server_is_call_ready ) // could move this test down into next state if make assignments conditional
+	      begin	 
+		    a = 0;
+		    b = 0;
+		    state = 1;
+		end
+	  end	
+				
+	  1:
+	  begin
+		b = b + a;
+		a = a + 1;
+		n = server_get n; // happens several times
+		if( a < n ) 
+		begin
+		    state = 1;
+		end
+		else 
+		begin
+		    state = 2;
+      	    server_accept_call; // might not be easy to put this here
+	      end
+	  end	
+		
+	  2:
+	  begin
+		if( server_can_return )
+		begin
+		    b = b * b;
+		    server_set y = b;
+		    server_return;
+		    state = 0;
+		end
+	  end
+    endcase	
+end
+  
+  
+    
+always @( clock_reset_sens_list )    
+begin    
+    if( clock_reset_should_reset )
+    begin
+        stored_state <= 0;
+    end
+    else
+    begin
+        stored_a <= a;
+        stored_b <= b;
+        stored_state <= state;
+    end
+end      
+
+endmodule
+
+
+----------------------------------- A combed server with abstract protocol --------------------------------------
+
+module F( server param=int n return=int y )
+
+wire [31:0] a, b;
+wire [31:0] state;
+    
+always @(*)
+begin
+    if( server_is_call_ready && server_can_return ) // check both upfront since combinational
+    begin   
+        n = server_get n;
+  	  server_accept_call; // can no longer look at inputs
+        a = n*3;
+        b = a-1;
+        server_set y = b;
+        server_return;
+    end;
+end
+
+endmodule
+  
+------------------------------ A register server with abstract protocol and clock/reset -----------------------------------
+
+clock_reset_module R( (server:write param=int xin), (server:read return=int xout) )
+
+reg x;
+
+always @( clock_reset_sens_list )    
+begin    
+    if( clock_reset_should_reset )
+    begin
+        x <= 0;
+    end
+    else if( server_is_call_ready:write && server_can_return:write )
+    begin
+        x <= xin;
+	  server_accept_call:write; // can no longer look at inputs
+	  server_return:write;
+    end
+end      
+  
+always @(*)
+begin    
+    if( server_is_call_ready:read && server_can_return:read )
+    begin   
+        server_accept_call:read; // can no longer look at inputs    
+        server_set:read xout = x;
+        server_return:read;
+    end	
+end
+
+endmodule

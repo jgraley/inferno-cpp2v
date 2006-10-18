@@ -1,0 +1,10 @@
+
+Piping-out
+==========
+
+Follows on from combing-out and will use bits of stating-out too.
+
+Issue with "if"s whereby both legs could have many calls pipelined so how do you know which one to get next output from?
+Use a shift register: clock the condition (or switch selector value) in on call_valid && call_ready. Use current head entry  to mux the legs (valid, ready and data). Pop head element when valid && ready goes true at mux output.
+
+All live working data would also need to go through the shift register!!

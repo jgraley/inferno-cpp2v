@@ -1,0 +1,171 @@
+
+
+Himple language
+===============
+
+We need to extend the gimple language to accomodate HDL constructs. Himple will be defined in terms of corresponding Verilog but we aim to retain compatibility with VHDL. We will use C constructs directly where they have a direct correspondance in HDL. We will disambiguate the correspondance here. We will also describe "hybrid" forms whereby HDL and C constructs may be intermixed in a manner that is not valid in either a software or hardware context; such constructs are for intermediate representations during the mapping process and should be kept to a minimum and be well defined.
+
+In terms of style, we will keep to Gimple conventions as far as possible. We prefer tree_list type structures over arrays since they are more natural in a general tree structure. Lists are implemented using "chain" or "tree_list". A chain is a sequence of nodes in which each has a CHAN field that points to the next element. A tree_list is a chain of "tree_list" nodes which also have VALU fields that point to the sequence elements.
+
+The language is specified for internal representation only: we will not define a "pretty" source-like form since the C and Verilog languages provide sufficient obvious cues as to what the constructs would look like and we do not want to inadvertantly tie ourselves down to specific language constructs. Nodes are given a textual node type and can contain parameters (strings) and children (references to other nodes), which are identified by four-letter capitalised names.
+
+We will not guarantee the absence of recursion or node reuse (multiple references to a node) after Gimple.
+
+EXTREME NOTE: This representation MUST NOT support non-synthesisable constructs. The non-synthesisable superset of Verilog is just helper functionality and syntactic sugar. We don't need it: simulations should call through to support routines compiled for the host machine.
+
+
+Module
+------
+
+Represents a Verilog module, which is basicaly a catch-all container which may be nested in order to create hierarchy. All ports are basically wires (a register output is identical to an internal register with its ouptut connected to a wire port; a register input is not allowed in Verilog).
+
+Node type: "module"
+SRCP: a string containing a relevent source pointer (file:line form) or an empty string
+NAME: an "identifier_node" giving the name of the module
+CPRM: chain of "compile_parm_decl" nodes for all parameters (as in compile-time parameters)
+PORT: chain of "port_decl" nodes for all ports
+VARS: chain of "var_decl" nodes for all wires and registers (these may be "integer_type" or "register_type")
+ASSI: tree_list of "modify_expr" nodes containing assign expressions. Destination must not be register_type.
+ALWY: chain of "always" nodes for generic always blocks
+ALCL: chain of "always_clocked" nodes for each synchronous always block
+ALCO: chain of "always_comb" nodes for each combinational always block
+SUBM: chain of "module_instance" nodes for instantiated sub-modules
+
+Note no type is required because modules refer to each other directly, not via type. This is because HDL tools merge all modules together anyway. The "body" of a module is not considered an expression (but the bodies of always statements are). The chain and tree_list fields may be absent if the corresponding set is empty.
+
+
+Compile-time parameter declaration
+----------------------------------
+
+These are the parameters that are specified at compile time by the invoking module or a default value.
+
+Node type: "compile_parm_decl"
+NAME: an "identifier_node" giving the name of the parameter
+DEFU: an "integer_cst" node giving the default value
+CHAN: points to the next compile-time parameter if there is one
+
+
+Port declaration
+----------------
+
+These are the ports of a module. They are basically like parm_decls except we specify which way the drive goes: output means out of the module.
+
+Node type "port_decl"
+This node is based on Gimple's "parm_decl". NAME is required, plus the following:
+DIRN: a string containing "input", "output" or "inout"
+TYPE: points to an "integer_type" or "wire_type" node
+CHAN: points to the next port if there is one
+
+
+Register type
+-------------
+
+Registers are used to generate flip-flops within a module. Note that wires are represented using "integer_type" nodes directly since they are the destinations of blocking assignments which more closely resemble C assignments. 
+
+Node type "register_type". All fields equivilant to those in Gimple's "integer_type".
+
+
+Always blocks
+-------------
+
+A generic always block in which we explicitly write the sensitivity list. Note that these are generated at a post-processing stage from the other two more specialised always block types.
+
+Node type "always"
+SENS: chain of "sensitivity" nodes to form sensitivity list or the string "*" meaning all events
+BODY: "bind_expr" containing the body of the block
+CHAN: points to the next always block if there is one
+
+
+Sensitivity item
+----------------
+
+Node type "sensitivity"
+SGNL: the declaration of a signal to which we are sensitive 
+MODE: a string, one of "posedge", "negedge" or a null string for either transition
+CHAN: points to the next sensitivity item if there is one
+
+
+Clocked always blocks (hybrid)
+------------------------------
+
+Similar to an always block but without the SENS field. The sensitivity list is assumed suitable for clocked (synchronous) processing.
+
+
+Combinational always blocks (hybrid)
+------------------------------------
+
+Similar to an always block but without the SENS field. The sensitivity list is assumed suitable for combinational logic.
+
+
+Initial blocks
+--------------
+
+NOT SUPPORTED since they are not synthesisable. 
+
+
+Module instance
+---------------
+
+Indicates the instantiation of a module with port connections supplied
+
+Node type: module_instance
+NAME: an "identifier_node" giving the module name
+CPRM: chain of "compile_parm_decl" nodes for only those compile-time parameters that are to be overridden
+CVAL: tree_list of "integer_cst" nodes for the overriding compile-time parameter values
+PORT: chain of "port_decl" nodes for all ports (named in the scope of the sub-module)
+CONN: tree_list of "port_decl" or "var_decl" objects (named in the scope of the enclosing module)
+CHAN: points to the next module instance if there is one
+
+The elements in the PORT list correspond with respective elements in the CONN list, providing a representation equivilant to Verilog's .sub_module_port( enclosing_module_signal ) form. Similarly for CPRM and CVAL, though this list does not need to be complete.
+
+Note that in line with verilog semantics we do not support such a thing as a module declaration or module type. Naming the ports in the invocation allows the verilog tools to detect a port mismatch between invoker and invoked module as well as improving readability.
+
+
+Bind expressions
+----------------
+
+We allow a bind_expr node to include a name:
+NAME: an "identifier_node" giving a name for the scope
+
+NAME is essential if VARS is present (verilog requirement). TYPE is optional but if present must point to void_type. Statements and expressions are exactly as per Gimple apart from certain extensions listed in this document.
+
+
+Functions
+---------
+
+The exact same form used for C functions may also be used for HDL functions. Functions and function calls are expected only to be needed when explicitly requested by the user and will use the Gimple constructs directly (maybe converting them to tasks if required).
+
+
+Tasks
+-----
+
+As functions except that:
+ - function_type becomes task_type and there is no RETN field 
+ - function_decl becomes task_decl and the ARGS field is replaced by a PORT field as per "module" above
+ 
+
+Call expressions
+----------------
+
+A "call_expr" my be used in an expression as in Gimple and it may call a Himple function or task but not anything else, eg invoking a module that implements a function server is not allowed (this would mix models at the caller and the callee).
+
+
+Non-blocking assignments
+------------------------
+
+Node type: "non_blocking_modify_expr"
+Otherwise identical to modify_expr. The non-blocking expressions should be used on registers in clocked always blocks. The blocking forms should be used on wires (which correspond to normal variables) in combinational always blocks. The right-hand expressions can be basically anything.
+
+
+Rationale for using Gimple's integer type and modify expression for wires, not registers
+----------------------------------------------------------------------------------------
+
+[@todo somewhere else?]
+A Verilog function emulates a C function exactly within the limited expressivity of the former. In such functions we use = which is known in Verilog terms as the blocking assignment operator. Since in this context it maps directly to C assignment we choose to use that correspondance in Himple. This way, a Gimple function and a Himple function have identical representations.
+
+In general wires behave like C variables within the context of a procedual block (combinational always, function, task) and only take on their channel-like semantics outside of such blocks. An "assign" can be considered a combinational always block with one statement (the blocking assignment) and is consistent with the above. Therefore *at the point of use* a blocking assignment is doing exactly what a C assignment does.
+
+Conversely, non-blocking assignments are simply nothing like anything you get in C. That flip-flops can store data is irrelevent because they do not behave like C variables. A latch is more similar and one writes to them using blocking assignments. If latches are unacceptable for whatever reason, pseudo-letches will do for most purely sequential cases.
+
+Special (eg concurrent) programming constructs may expose a direct mapping to non-blocking assignments but Verilog's strict rules regarding the intermixture of blocking and non-blocking assignments may disallow the direct use of non-blocking assignments in this way.
+

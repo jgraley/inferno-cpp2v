@@ -1,0 +1,45 @@
+
+
+
+Models
+------
+
+
+Imperitive -> Passive
+
+Imperitive refers to an event initiated by a function call from the event source module that gives rise to (or is) a function call into the destination module. Passive indicates that the destinaiton module should detect the event by making a function call instead of receiving one. The passive calls may be blocking, polling or getting stored info.
+
+
+ 
+Shared Context -> Local Context
+
+A context is a thread that does not pre-empt (see cooperative multitasking, coroutines etc). Shared context means a single context for the whole system. Local context means a context for each module (master or slave). Boundary between harness and context boundary is fuzzy ie there can be harness code running in the local context (eg main loop) and there can be module code running in other contexts (eg non-blocking call implementation).
+
+
+
+Single Phase -> Two Phase
+
+Single phase means whole transaction is a single event which may or may not have duration. Two phase means there is an instantanious event at the start of the transaction and another at the end, possibly some time later.
+
+
+
+Blocking -> Non Blocking
+
+In terns of function calls, blocking is synonymous with single phase and non blocking with two phase. The other combinations are ugly contrivances and will not be contemplated.
+
+
+Derived models
+--------------
+
+Pure Local Context
+
+Local context model in which there is no harness code running in the local context. Passivity is thus required because incoming calls would have
+
+
+
+Software:
+
+If threads are in use we might be able to recognise (or be hinted) that some partial local context implmentation is possible, but even so most of the modules will share contexts so shared context is the basic situation. If passive or two-phase models are in place we will not be able to differentiate them without heuristics, so we must assume imperitive and single-phase.
+
+Hardware:
+

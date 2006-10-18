@@ -1,0 +1,94 @@
+
+Routing 
+=======
+
+[@todo more diagrams!]
+
+All interactions between modules are in the form of transactions which involve data lines, handshake lines and a protocol. All transactions take place between a client and a server module, possibly passing through enclosing module boundaries on the way.
+
+We subdivide all funciton calls into 2 categories: definite and indefinite. 
+
+Definite calls
+--------------
+
+Definite function calls are ones in which both the funciton and the associated object (if a member call) are determined at compile time. Consequently the module to which the call must be routed is known. 
+
+Calls are generally specified from global-scope objects or member objects of the calling class. Public member objects may be specified using . notation and array indices may be used if the index is a compile-time constant. Such calls simply require routing through all intervening module boundaries as shown:
+
++-----------+
+|A   +----+ |    +----+
+|    |B   | |    |C   |
+|    |    |======|    |
+|    |    | |    |    |
+|    +----+ |    +----+
++-----------+
+
+A, B and C are modules. A must include ports for the fucntion call lines, in the same sense as its child module. So if B is the client, then A must also have the client lines. Connections are made directly using eg Verilog's assign keyword in order to indicate that the purpose is connectivity rather than functionality.
+
+Indefinite calls
+----------------
+
+Indefinite calls are ones to which the funciton implementation or object data can vary at runtime. This include non-virtual calls though a pointer, all vcalls, function pointers and member function pointers. Such calls must be routed to a module which will be selected at runtime.
+
+Clients of indefinite functions must provide additional routing data as follows:
+non-virtual member fucntion through pointer: "this" pointer
+virtual member function through pointer: "this" pointer
+function pointer: funciton pointer value
+member function pointer: "this" pointer and a selector for funcitons within the module.
+
+See the section on pointers for the scheme used to represent them. Note that our implementation of member function pointers will be more restrictive than most compilers in that the fucntion must belong to the specified class. Hopefully it will be standards-compliant though.
+
+Routers are located for mutual visibility as discussed below. At each location there will be one router for each differnt type of call that passes through that point (specifically one for each set of calls that can reach the same set of funcitons). The router will posess a single server-interface including the routing signals, and a set of client interfaces that correspond to each of the possible legal values of the routing signals. Subject to the protoocl in use, the router acts as a large demultiplexer, and simply selects a the lines for the required client. Routers use the protocol of the client fucntions which may differ between funcitons. Selection of the router's own protocol may be automatic or may be subject to pragmas around the declaration of the pointer type.
+
+[@todo nica ascii diagram]
+
+Each client interface corresponds to a definite call so requires no routing signals and may be routed to its destination as shown above.
+
+Multiple callers
+----------------
+
+Where a fucntion may be called by multiple clients, an arbiter is required. In a non-concurrent non-recursive system, the arbiter is just a multiplexer driven by the handshake lines of the various clients because only one call-return transaction will occur at a time. In other systems, arbiters will need to support multiple concurrent requests and will therefore need to be able to introduce additional delay cycles for clients.
+
+Arbiters are located for mutual visibility as discussed below. At each location there will be one arbiter for each differnt client that requires arbitration. Arbiter behaviour depends on the server funciton's protocol.
+
+
+Multiple callers to indefinite functions
+----------------------------------------
+
+In this case routers and arbiters are both required. We have the option of route-then-arbitrate or arbitrate-then-route. With N clients and M server, the former option creates O(N*M) wires between N M-way routers and M N-way arbiters [@todo diagram?]. The latter case only requires a single wire, but can suffer recursion problems if one of the servers generates a call to another server. [@todo we need a broader version of the concept of recursion in order to clarify this sort of issue].
+
+In concurrent systems, the link between arbiter and router in the latter case will tend to be a bottleneck in terms of system connectivity. We address this by using a multi-lane bus, the implementation of which is covered in the protocols seciton. This lets us configure the size vs speed trade-off.
+
+We will adopt arbitrate-then-route where an arbiter and a router are required in the same location (see mutual visibility below). Once an arbiter and router are in place in a particular location, we will "draw-in" clients that call the same set of servers but do not require routing or have different routing requirements into the router so that all calls go through the arbiter-router combination.
+
+A possibly-useful generalisation we can make here is that of an "interchange" which is effectively an arbiter followed by a router, implemented as a single unit. Such a unit can be considered present in all modules and active on all calls into or out of the modules. Available funcitons are divided into distinct sets based on "signature" such that an indefinite call may only reach servers with a certain signature. We introduce a single interchange for each signature, and the interchange has client interfaces for all definite and indefinite calls of that signature. It also has client interfaces for each server of that signature. We then "optimise-out" the following special cases:
+- decoding of routing signals for definite calls
+- only one client
+- only one server
+- no clients
+
+Mutual visibility
+-----------------
+
+It is possible to place interchages or routers/arbiters at top level in order to gain access to the entire set of clients and servers in the hierarchy. However, this creates a top-heavy architecture particularly when using the interchage generalisation (since even definite calls would be routed through top-level). Modules high up in the hierarchy would have an excessive number of ports.
+
+We therefore propose to instance an interchange in every module (except the auto-generated funciton and varible modules). The interchange is used to reduce the number of interfaces at the module to a single port-set for each signature of incoming calls and a single port-set for each signature of outgoing calls. We further aim to prevent purely internal calls requiring any ports at all.
+
+The highest-level interchange for any given client-server pair is therefore at the point where both are visible (ie both are contained within the module or at global scope). Each interchange has the following interfaces:
+
+- Server interface with routing signals exposed as module ports
+- Client interface with routing signals exposed as module ports
+- Multiple server interfaces with routing signals for indefinite member clients
+- Multiple server interfaces without routing signals for definite member clients
+- Multiple client interfaces with reduced routing signals for member servers
+
+The term "reduced routing signals" simply refers to the possibility of removing bits from the routing data due to the fact that the choice of server has been partially (or wholly) discarded. If routing directly to a specific server as opposed to a module containing multiple servers, the data may be removed entirely.
+
+Some consideration should be given to the fact that we may need to generate routing data even when calls are definite in order to be able to channel the call though a possibly-shared interface. If routing signals are combinational, then synthesis tools should be able to remove them if they turn out not to be required.
+
+Consideration should be given to the possibility of detecting member-funciton-pointer usage on particular classes and function-pointer usage globally, so that in cases where they are not used functions that have identical interfaces may be considered not to have identical signatures, thereby preventing generation of routing logic.
+
+Alternatively, a pragma may be used at class level to inhibit the generation of routing logic and forward interfaaces directly through module ports. The responsibility for routing and arbitration would then fall to the enclosing module's interchange.
+
+
+

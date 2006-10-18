@@ -1,0 +1,250 @@
+
+(C) Copyright 2006 John Graley
+Available under the terms of the BSD license. 
+
+
+This file lists the steps in the mapping process. Since this is likely to change repeatedly, it will be kept under version control. Steps are not numbered to avoid the need to renumber after insert or delete.
+
+
+
+
+----------------------------------------------------------------------------
+Use Get()/Set()
+
+For fundamental types that are exposed publically, make all inter-object reads and writes be function calls.
+
+Invariant: every inter-object interation is a function call
+
+Note: what about p->x++ where p points to the same class as "this" and x is private?
+
+----------------------------------------------------------------------------
+Staticise heap
+
+Explicitly implement new/delete to allocate objects from static arrays. 
+
+Invariant: No dynamic allocation
+
+Note: need to provide dynamic constructors for these objects, and un-const any const pointers.
+
+----------------------------------------------------------------------------
+Call through pointers
+
+Get rid of all direct calls between objects eg x.y() and replace with calls though a constant pointer initialised at construct time.
+
+Invariant: All inter-object calls go through a pointer
+
+----------------------------------------------------------------------------
+Outgoing interfaces
+
+Add interfaces to each object to represent the calls it makes to other objects. 
+
+Note: Still not completely sure if we need this.
+
+----------------------------------------------------------------------------
+Forward at class boundaries
+
+Any call from a member object to an external object or vice-versa should be forwarded through new thunk functions within the object. These will develop into arbiters. Inter-object calls should now be 1:1 correspondance.
+
+Invariant: Each interface has only one caller
+
+----------------------------------------------------------------------------
+Add backchannels
+
+Add a marker of some sort at each interface that refers to its (now unique) caller. This is useful to later steps. A partial check could look at __builtin_return_address().
+
+Invariant: Any static (const pointer) interation may be reversed
+
+----------------------------------------------------------------------------
+Lower NULL pointers
+
+Replace every variable pointer with a non-null pointer and a bool. If the bool is false, the pointer is considered NULL. Otherwise the pointer is not NULL and it may be dereferenced.
+
+Invariant: pointers are not NULL
+
+----------------------------------------------------------------------------
+Lower pointer arithmatic
+
+Associate every variable pointer with an int, which begins at zero, and is then the subject of all pointer arithmatic. Then use array style for derefs. Eg 
+
+p++; return *p; 
+
+becomes 
+
+p.index++; return p[p.index];
+
+Invariant: Pointers never modified; only created and overwritten
+
+----------------------------------------------------------------------------
+Add dereferencer functions
+
+Add functions to each class, for each type required, that do pointer derefs eg T dereference( T *p, int index ) { return p[index]; }
+
+Note: may need to inline this to avoid copying a T.
+
+Note: not const pointers!!
+
+----------------------------------------------------------------------------
+Refer variable pointers back to provider
+
+For each stored pointer, store an enum representing (a) whether the pointer was taken locally and if not, (b) which interface (hence which other object) it came from. Dereference function should decode this then forward the call to that object's dereferencer function.
+
+Note: the new call may pass a pointer as a param, in which case there may be a new deref interface that has to be represented by this step. Therefore this step must iterate until it stabilises. Only two deref call interfaces are needed between each pair of objects for each type (one either way) so the iterations will terminate.
+
+Invariant: all inter-object calls via const pointers
+
+Note: not const pointers!!
+
+Note: new call also needs a backchannel
+
+----------------------------------------------------------------------------
+Enumerate local variable pointers
+
+Create an enum for all member objects whose address gets taken. Substitute an enum ie PTR_X for each &x and get the deref function to decode the enum and return x as required.
+
+Note: this includes non-trivial class objects; otherwise taking their address would require a new channel beween parent and child that isn't required otherwise and wasn't processed in the "Outgoing interfaces" or "Forward at class boundaries" steps.
+
+Invariant: no variable pointers
+
+Note: not const pointers!!
+
+----------------------------------------------------------------------------
+Change const pointers to ports
+
+Replace Obj *p; with SystemC ports eg sc_port<Obj>.
+
+Invariant: no pointers
+
+Note: this gives us SystemC's "direct TLM" style. 
+
+----------------------------------------------------------------------------
+Add local context
+
+Derive all classes from SC_THREAD. Incoming calls should wake the local context and wait for it to complete before returning.
+
+Invariant: no cumulative nesting in calls between objects
+
+Note: this gives us SystemC's "blocking TLM" style. 
+
+----------------------------------------------------------------------------
+Move to 2-phase transactions
+
+Turn incoming calls into "fake" nonblocking by adding a return call (via backchannel) after the waits, just before the original called function returns. Outgoing calls should wait after making the initial call and then kick themselves in the return function.
+
+Invariant: no return values on inter-object calls
+
+Note: Since the return call and the kick will come *before* the outgoing call returns and the wait begins (which is why we call it fake) the semaphore should be 1-in-1-out.
+
+----------------------------------------------------------------------------
+Make transactions non-blocking
+
+The incoming call should return immediately after starting the local thread. The local thread should still kick the client thread - only difference is that it's now waiting in its own code.
+
+Invariant: all inter-object calls are notionally instantanious
+
+Note: this gives us SystemC's "non-blocking TLM" style. 
+
+----------------------------------------------------------------------------
+Passivate
+
+Create a pure "channel" object for each pair of objects that interact (call each other). Provide it with purely passive 2-phase interfaces for caller and callee such that all calls between objects go into the channel and the channel kicks (wakes up) the obejcts when something interesting happens.
+
+Invariant: objects do not receive incoming calls
+
+----------------------------------------------------------------------------
+Insert clock and reset
+
+Nove all classes to SC_CTHREAD. Replace all wait(event) with while(!event) wait(clk).
+
+Invariant: clock edge is the only event
+
+Note: not sure about clock distribution or how to handle reset.
+
+----------------------------------------------------------------------------
+Merge member functions
+
+Merge all the member functions in a class into a single one that uses a big switch statement to select the implementation based on a new enum param. Other parameters should be grouped into a struct for each of the original member functions then unuined together for the big funciton.
+
+Invariant: all calls are simple recursions
+
+Note: this single function is now the run function. All other calls (apart from SystemC ones which don't count) have now become simple recursions of this function.
+
+----------------------------------------------------------------------------
+Lower constructs
+
+Lower constructs that are not supported in combable (synthesisable) verilog into conditional branches ie if(cond) goto label; Also after each wait(); add a goto WAIT_STATE; WAIT_STATE:; 
+
+Invariant: all constructs synthesisable or trivially stated-out
+
+Note: there's some flexibility here in how much stuff we lower. It corresponds to design tradeoffs in the final HW. Any construct surrounding a label must itself be lowered. 
+
+Note: retain local scope structure for now
+
+----------------------------------------------------------------------------
+Add state variable
+
+Add an enum with a value for each label, add a local variable of that type called state and maintain it correctly by assigning to it immediately before each goto. Initialise to eg INIT_STATE at start of function.
+
+Note: assert this at each label as a double check since we have a little redundancy at this point.
+
+Note: the point of this is to establish the state as local, i.e. needs to be stacked when we recurse.
+
+----------------------------------------------------------------------------
+Staticise locals
+
+Generate a data structure to represent the local variables. Use unions for variables whose scope does not overlap. Declare a static array of these structures, up to the max nesting depth. Create a static stack pointer which should initialised to zero. Increment it at the start of the function and decrement just before returning. Change all code to use the array indexed by the stack pointer.
+
+Invariant: all data is static
+
+Note: includes state
+
+Note: get rid of local scopes at this stage
+
+----------------------------------------------------------------------------
+Lower recursion
+
+Turn each recursion call point into a goto to the start of the function and at the very end of the function insert a goto to the label implied by the state variable.
+ 
+Invariant: no recursion; no non-trivial function calls 
+
+Note: the "goto a variable" construct would have to become eg a switch statement for the purposes of testing this step. It vanishes in the "State-out" step.
+
+----------------------------------------------------------------------------
+State-out
+
+Surround the entire function with a switch statement on the state variable. Generate a case for each label. Unconditional gotos should terminate states (any code between them and the next label is unreachable). Conditional gotos should place any following code in their "else" clause. The actual gotos may then be removed, leaving only the assignments to the state variable. 
+
+Invariant: context is released between each combable block
+
+Note: Place an infinite loop around the switch statement if SC_CTHREAD doesn't do so for you.
+
+----------------------------------------------------------------------------
+Extract waits
+
+Replace all wait() calls with a single one at the bottom of the function (inside the overall loop if one was added).
+
+Invariant: no non-trivial context across a wait()
+
+----------------------------------------------------------------------------
+Remove local context
+
+Move to SC_METHOD. If an overall loop was needed, remove it. Also remove the wait() call.
+
+Invariant: no persistent implicit context
+
+----------------------------------------------------------------------------
+Initialise data
+
+All initialised statics to be initialised in a "initial" block.
+
+Invariant: no inline initialisation
+
+Note: how do initial blocks in SC?
+
+----------------------------------------------------------------------------
+Lower types
+
+Convert types like char, int into bit vectors. Support bit fields properly. Bool becomes a 1-bit type. 
+
+Invariant: no types unknown to Verilog
+
+Note: we will hopefully be able to tolerate arbitrary bit vectors in SC form eg sc_bitvec<5> all the way through the process.
