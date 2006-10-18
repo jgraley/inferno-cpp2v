@@ -1,0 +1,15 @@
+
+New and delete
+==============
+
+We support dynamic object allocation by providing staticarrays of objects which may be used as general purpose pools for new and delete to use for object allocation.
+
+Where the underlying type is an object with functionality, we want our pool to be a collection of these rather than a block of memory. We would like to use a C algorithm to actually implement the pool, and to do so the C algorithm would need to use placement new and placement delete operators to forcibly schedule construction and deleteion. We must therefore support these properly.
+
+The actual software implementation of pools should conform to the following requirements:
+- The pool for a given type T should be obtained by creating a global instance P of a class templated on T and the size.
+- The P should contain the actual obejcts T as well as control information
+- The pool should support new and delete for type T
+- The pool should also support array new and delete[]
+- Where N objects are allocated as M seperate array allocations (M<N) the support data should be O(M) in size
+

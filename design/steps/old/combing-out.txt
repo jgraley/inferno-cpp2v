@@ -1,0 +1,225 @@
+
+Combing-out
+===========
+
+Combing-out refers to the process of converting a software algorithm (sequential by nature) into combinational logic. This is made easier by the fact that HDL languages permit a sequential style in so-called procedural blocks (or processes). Simulators presumably execute this code, but synthesis tools convert it to combinational logic.
+
+Verilog procedural blocks can comb-out the following:
+
+- re-assignment, where a variable is assigned to more than once: duplicate variables are generated as per static-single-assignment (SSA) form.
+- if and switch (=case) statements: all legs are executed and the results of the selected one obtained via multiplexer (but we may have a problem with this!)
+- "for" loops: certain cases in which the number of iterations is known get combed by repeating the implementation that many times
+
+We would like to add support for:
+
+- general "for" loops (lower to while loops)
+- while loops (maybe lower to arbitrary gotos)
+- exception handling (lower to arbitrary gotos)
+- arbitrary gotos
+- function calls
+- updating external persistent variables
+
+Unbounded for loops (or loops with very large bounds such as 2^32) are not practical for combing-out. Therefore combing-out has only limited applicability, and is an option most suited to manually selected special case fucntions.
+
+At present, we consider only function calls and external persistent variable writes. These are both server transactions so we nen.
+
+
+Server calls (combinational)
+----------------------------
+
+An idempotent single-cycle server operation is effectively executing all the time. It is sufficient to send the inputs to the server via wires and use the output value directly. We can simply hard-wire the call_valid and return_ready lines to 1. However, we cannot execute at all if the functions we need to call are busy, so we must pass the call_ready and return_valid signals back to the caller. This approach has two drawbacks:
+
+- Disadvantage 1: we cannot call the same server more than once. In fact, this does work if we create two client ports and use an arbiter to merge them, but the result will no longer be combinational even if the called server is.
+
+- Disadvantage 2: we are invoking the server at every clock cycle which is incorrect if it has side-effects (non-idempotent).
+
+The first disadvantage is endemic: by invoking the server twice we are effectively iterating, and that must require more than one clock cycle. We can address the second disadvantage by using the correct value for the server's call_valid signals, which gives the following:
+
+module F
+
+input call_valid, call_params, return_ready;
+output call_ready, return_valid, return_value;
+
+wire g_call_valid, g_call_ready, g_call_params, g_return_valid, g_return_ready, g_return_value;
+G g( g_call_valid, g_call_ready, g_call_params, g_return_valid, g_return_ready, g_return_value );
+
+wire h_call_valid, h_call_ready, h_call_params, h_return_valid, h_return_ready, h_return_value;
+G g( h_call_valid, h_call_ready, h_call_params, h_return_valid, h_return_ready, h_return_value );
+
+assign call_ready = return_ready && g_call_ready && h_call_ready;
+assign return_valid = call_valid && g_return_valid && h_return_valid;
+assign g_call_valid = call_valid;
+assign g_return_ready = 1;
+assign h_call_valid = call_valid;
+assign h_return_ready = 1;
+
+always @(*)
+begin
+    // Do some computation before the call
+    a = call_params*2;
+    
+    // Do the first call
+    g_call_params = a;
+    b = g_return_value;
+    
+    // Do some more computation
+    c = b/2;
+    
+    // Do the second call
+    h_call_params = c;
+    d = h_return_value;
+    
+    // Do some more computation
+    e = d+1;
+    return_value = e; 
+end
+
+endmodule
+
+
+Server calls (general)
+----------------------
+
+It is in fact possible to extend the above to support servers that are not combinational - i.e. servers that may require one or more clock cycles before asserting return_valid. The first server is driven by F's call_valid input. Successive servers are driven by the return_valid signal from previous stages. We do this in the combinational block to make the sequential intention clear. 
+
+In this scenaio, we would like to be able to begin processing before our caller asserts return_ready, since this avoids an unnecessary sequential dependency: we only need to check return_ready at the end of our processing, but must then thread the ready signals backwards through the calls to the servers. The example becomes:
+
+module F
+
+input call_valid, call_params, return_ready;
+output call_ready, return_valid, return_value;
+
+wire g_call_valid, g_call_ready, g_call_params, g_return_valid, g_return_ready, g_return_value;
+G g( g_call_valid, g_call_ready, g_call_params, g_return_valid, g_return_ready, g_return_value );
+
+wire h_call_valid, h_call_ready, h_call_params, h_return_valid, h_return_ready, h_return_value;
+G g( h_call_valid, h_call_ready, h_call_params, h_return_valid, h_return_ready, h_return_value );
+
+assign 
+
+always @(*)
+begin
+    call_ready = g_call_ready;
+
+    // Do some computation before the call
+    a = call_params*2;
+    
+    // Do the first call
+    g_call_params = a;
+    g_call_valid = call_valid;
+    g_return_ready = h_call_ready;
+    b = g_return_value;
+    
+    // Do some more computation
+    c = b/2;
+    
+    // Do the second call
+    h_call_params = c;
+    h_call_valid = g_return_valid;
+    h_return_ready = return_ready;
+    d = h_return_value;
+    
+    // Do some more computation
+    e = d+1;
+    return_value = e; 
+    return_valid = h_return_valid;
+end
+
+endmodule
+
+Notice that we now only need to use the final server (h)'s return_valid signal for F's return_valid signal. This is because h will not assert return_valid until g has, and g will not until the caller of F has asserted call_valid. 
+
+
+Ifs and switch statements
+-------------------------
+
+In the case of an if or switch statement, we need to ensure that the side effects do not manifest for calls in the failing leg. This means that the call_valid signal should not be propogated for calls in the failing leg. As a result, its return_valid signal will be 0. We assume it is OK to assert the return_ready signal of both servers from our own return_ready input [this is wrong in the pipeline case]. The layout in the previous example is suitable with the additional proviso that we need to avoid generating latches. Inserting an if into the example gives us:
+
+module F
+
+input call_valid, call_params, return_ready;
+output call_ready, return_valid, return_value;
+
+wire g_call_valid, g_call_ready, g_call_params, g_return_valid, g_return_ready, g_return_value;
+G g( g_call_valid, g_call_ready, g_call_params, g_return_valid, g_return_ready, g_return_value );
+
+wire h_call_valid, h_call_ready, h_call_params, h_return_valid, h_return_ready, h_return_value;
+G g( h_call_valid, h_call_ready, h_call_params, h_return_valid, h_return_ready, h_return_value );
+
+assign call_ready = return_ready;
+
+always @(*)
+begin
+    g_call_valid = 0; // avoid latches and don't call by default
+    h_call_valid = 0;
+    g_call_params = 0; // avoid latches    
+    h_call_params = 0;
+    call_ready = call_valid && if_ready;
+    
+    // Do some computation before the call
+    a = call_params*2;
+    
+    if( a > 9 )
+    begin
+        // Do the first call
+        if_ready = g_call_ready;
+        g_call_params = a;
+        g_call_valid = call_valid;
+        g_return_ready = return_ready;
+        if_valid = g_return_valid;
+    end
+    else
+    begin
+        // Do the second call
+        if_ready = h_call_ready;
+        h_call_params = a;
+        h_call_valid = call_valid;
+        h_return_ready = return_ready;
+        if_valid = h_return_valid;
+    end
+    
+    if( g_return_valid )
+        b = g_return_value;
+    else if( h_return_valid )     
+        b = h_return_value;
+    
+    // Do some more computation
+    c = b+1;
+    return_value = c; 
+    return_valid = h_return_valid || g_return_valid;
+end
+
+endmodule
+
+We needed to introduce multiplexed valid and ready signals for the if construct. These two multiplexed handshake signals are only valid when the if's test expresison is valid since that is what controls the mutiplexer. We therefore logical-AND these signals with the valid signal for the stage before the "if". 
+
+Note that if a server call is located in the brackets of the "if" it must be moved out and treated as a previous stage before the if.
+
+
+For loops
+---------
+
+For loops containing calls fall foul of the problems of repeated calls to the same server. The best we can do is generate multiple client ports and allow an arbiter to resolve the calls. This has value in cases where the loop only calls the server for some of the iterations, or where different iterations call different servers.
+
+We support this using a pessimistic approach whereby each iteration is assumed capable of making a call. We therefore generate a port per iteration based on vector slicing as follows:
+
+for( int i=0; i<10; i++ )
+begin
+    g_call_params[i*G_PARAMS_WIDTH+G_PARAMS_WIDTH-1 -: G_PARAMS_WIDTH] = a;
+    g_call_valid[i -: 1] = (i==0) ? call_valid : g_call_valid[i-1 -: 1];
+    g_return_ready[i -: 1] = (i==9) ? return_ready : g_call_valid[i-1 -: 1];;
+    b = b | (g_return_valid ? g_return_value : 0);
+    b_valid = g_return_valid;    
+end
+
+
+Working data
+------------
+
+Working data presents a curious conundrum when we call servers that may complete combinationally or may require multiple cycles. If we proceed as in the examples above, we will infer latches for variables that may get assigned blockingly or may not get assigned at all in any one clock cycle. 
+
+We can avoid real latches by using pseudo-latches for all local variables. [@todo how good are HDL tools at optimising these down to flops or gates or nothing at all?]
+
+
+[@todo support forward branches by turning them into ifs and hence exceptions]
+[@todo detect for loops with an upper bound by rangealizing the limit value, and implement by inserting an if into the loop]

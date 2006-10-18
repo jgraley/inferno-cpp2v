@@ -1,0 +1,307 @@
+
+@todo funciton calls. Also argue that writing to external data eg member data is really a function call due to temporal issues (need to wait a cycle for destination register to clock in new value). What about reading, is that OK? Try to prove that we will non-trivially state out all non-idempotent functions. Also try to prove the requirement for equivilance over groups of always blocks versus running the corresponding code in sequence.
+
+
+Stating Out
+-----------
+
+Consider the following C++ function. We will try to state-out this function so that it may be implemented in hardware
+
+int f( int n )
+{
+    int a, b;
+    
+    a = 0;
+    b = 0;
+        
+    do
+    {        
+	b = b + a;
+	a = a + 1;
+    }
+    while( a < n );
+        
+    b = b * b
+    
+    return b; 
+}    
+
+
+This contains a single label and a single conditional goto. We choose to split states at the label so we have 2 states. They are:
+
+STATE 0:
+    Actions:
+        a = 0;
+        b = 0;
+    Next state:
+        1
+	
+STATE 1:
+    Actions:
+        b = b + a;
+	a = a + 1;
+    Next state:
+        if( a < n ) 1 else 2
+	
+STATE 2:
+    Actions:
+        b = b * b;
+	return b;
+    Next state:
+        done	
+	
+	
+If we introduce an extra variable called "state" we can build the state machine using a switch statement as follows. State 3 is a sort of "done" or "idle" state. Other variables may be accessed from the outside by some means or other.
+
+int n;
+int a, b, state;
+
+switch( state )
+{
+    case 0:
+        a = 0;
+	b = 0;
+	state = 1;
+	break;
+	
+    case 1:
+        b = b + a;
+	a = a + 1;
+	if( a < n ) state = 1 else state = 2;
+	break;
+	
+    case 2:
+        b = b * b;
+	return b;
+	state = 3;				
+}
+
+We have to address the question of starting our algoithm and knowing when it's finished. We need it to be ready to run again when it finishes. We also want a trivial single-state state amchine to naturally be a combinational (stateless) function so we will not add extra states if we can help it. Startup is signalled by setting the "go" input true for a single iteration. The state machine will pulse the "done" signal for one iteration when complete.
+
+int n;
+int a, b;
+int state;
+bool go, done;
+int output;
+
+switch( state )
+{
+    case 0:
+        done = false;
+        if( go )
+	{ 
+	    a = 0;
+	    b = 0;
+	    state = 1;
+	}
+	break;
+	
+    case 1:
+        b = b + a;
+	a = a + 1;
+	if( a < n ) state = 1 else state = 2;
+	break;
+	
+    case 2:
+        b = b * b;
+	output = b;
+	done = true;
+	state = 0;		
+	break;		
+}
+
+The protocol in use here is somewhat limited, but protocols will be the subject of a seperate investigation. Suffice it to say the state machine could easily support something like AMBA AXI handshakes. Though we are not ready to move to HDL just yet, we observe at this stage that sequences like b=b+a; a=a+1 must be implemented using blocking assignments wheras update of registers may only be performed via non-blocking assignments. We therefore split the state machine into combinational and sequential parts as follows (registers are commented as such; other variables are wires):
+
+
+int n;
+int a, b;
+int state;
+int stored_a, stored_b; // register
+int stored_state; // register
+bool go, done;
+int output;
+
+// This construct is combinational
+{
+    a = stored_a;
+    b = stored_b;
+    state = stored_state
+    output = 0; // output can be anything when done==false, could use X in verliog
+    done = false;
+    switch( state )
+    {
+        case 0:        
+            if( go )
+	    { 
+	        a = 0;
+	        b = 0;
+    	    }
+	    break;
+	
+        case 1:
+            b = b + a;
+	    a = a + 1;
+	    if( a < n ) state = 1 else state = 2;
+	    break;
+	
+        case 2:
+            b = b * b;
+	    output = b;
+	    done = true;
+	    state = 0;
+	    break;
+    }
+}
+
+// Sequential part of state machine
+{
+    stored_a = a;
+    stored_b = b;
+    stored_state = state;
+}    
+
+Now we wish to wrap the code up in a C funciton. Due to the dataflow in out algorithm, we will get the right results if we simply execute the combinational block followed by the sequential block in the order shown above. Therefore our function appears as follows:
+
+
+void iterate_f( bool go, int n, bool &done, int &output )
+{
+    int a, b;
+    int state;
+    static int stored_a, stored_b;
+    static int stored_state;
+
+    // This construct is combinational
+    {
+        a = stored_a;
+        b = stored_b;
+        state = stored_state
+        output = 0; // output can be anything when done==false, could use X in verliog
+        done = false;
+        switch( state )
+        {
+	    case 0:        
+		if( go )
+		{ 
+		a = 0;
+		b = 0;
+		}
+		break;
+		
+	    case 1:
+		b = b + a;
+		a = a + 1;
+		if( a < n ) state = 1 else state = 2;
+		break;
+		
+	    case 2:
+		b = b * b;
+		output = b;
+		done = true;
+		state = 0;
+		break;
+	}
+    }
+
+    // Sequential part of state machine
+    {
+        stored_a = a;
+        stored_b = b;
+        stored_state = state;
+    }    
+}
+
+We have been able to locate variables more usefully: inputs and outputs (including protocol) are now parameters, with outputs being represented by reference (alternatives include return value and by-pointer, but the former is messy with multiple outputs and the latter would conflict with other pointer-representation methods). Registers are now static local variables, wires are automatics. At this stage we divert to consider the calling parttern of our state machine. Invoking code would resemble the following:
+
+bool done;
+int output;
+iterate_f( true, 12, done, output );
+while( !done )
+    iterate_f( false, 12, done, output );
+    
+Note that we must hold our inputs for the duration of execution - this is a protocol issue and not discussed here. It is worth noting that the function may also be invoked even when no processing is required. Therefore a client that will invoke many such state machines can use eg
+
+while(1)
+{
+    ...decide which state machines to start and their inputs...
+      
+    iterate_f( f_go, f_in..., f_done, f_output );
+    iterate_g( g_go, g_in..., g_done, g_output );
+    iterate_h( h_go, h_in..., h_done, h_output );
+    
+    ...handle done state machines...
+}
+
+Actually invoking stated-out C code is not in the scope of this document, but could be useful in a simulation environment as an alternative to simulation via compilation/interpritation of HDL code.
+
+We can only use one instance of the state machine iterate_f() due to its use of static variables, so we will choose to generate an enclosing C++ class which will contain the offending variables as private members:
+
+class _f
+{
+public:
+    iterate( bool go, int n, bool &done, int &output );
+    
+private:    
+    int stored_a, stored_b;
+    int stored_state;    
+};
+
+_f f; // make one
+
+The function becomes a member function and loses the static locals. If the original fucntion was a class member in its own right, we can simply make the new class a member of the original class. For example
+
+class original
+{
+public:
+    class
+    {
+    public:
+        iterate( bool go, int n, bool &done, int &output );
+    
+    private:    
+        int stored_a, stored_b;
+        int stored_state;    
+    } f; // make one
+    
+    ...same for g, h etc...
+    
+private:
+    friend class f; // In the opinion of the author, this should happen automatically
+    ...class member data...
+};
+
+The alternative approach is to merge the classes into one big class. This will certainly generate cleaner HDL but is more complex, for example the iterate fucntions will need different names.
+
+
+In order to convert all this to HDL we proceed as follows (using verilog for example HDL syntax):
+
+	class becomes module
+	
+All the parameters of all the public member functions are exposed as module ports. In addition, the public interfaces of every member object are also exposed. The hierarchy of classes becomes the hierarchy of modules. Note that we want to generate a single file that does the job of the class declaration and definitions of the member functions all at once for each class.
+
+Member class declarations must be removed and their names made unique
+
+Each instance of a class will therefore generate seperate physical hardware for the algorithms in the member functions (combinational logic) as well as seperate storage registers. This duplication permits locality to be exploited, making each class as fast as if there were only one regardless of how many we instance.
+ 
+	member functions
+	
+We discard the implicit "this" pointer because the function algorithm is duplicated for each instance, as discussed above.
+
+	non-idempotent functions
+	
+Stating out should catch all non-idempotent functions and turn them into iterate fucntions, whose internal structure is known and can be turned into:
+
+always( @* )
+begin
+    ...combinational stuff...
+end    
+
+always( @posedge clk )
+begin
+   ...sequential stuff...
+end
+
+Since the user may wish to disable stating out and write their oen non-idempotent fucntion, we proceed by analysing the fucntion to see whether it is non-idempotent and if so whether it conforms to a pattern that may be safely converted into the above pair of always blocks. The pattern is probably fairly limited, something like
+   
+inputs -> comb block a -> one layer of registers -> comb block b -> outputs
+
+

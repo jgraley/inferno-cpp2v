@@ -1,0 +1,79 @@
+
+
+
+Pointers
+========
+
+Pointers are used to refer to servers (function or variable). 
+
+This divides the set of servers that may be pointed to into a number of distinct subsets between which pointers may not be converted. These will be called "spaces". A pointer must therefore be able to identify a particular server within its space.
+
+
+Pointer arithmatic
+------------------
+
+Pointer arithmatic will only be valid within arrays. The value stored in the pointer will obey pointer arithmatic rules within each array. Therefore the first item will have pointer value n, the second will be n+1 and so on. Two seperate arrays in the same space will use distinct value ranges.
+
+
+Null
+----
+
+All pointers must be able to represent NULL. No legal pointer arithmatic should result in a NULL pointer.
+
+
+Pointer casts
+-------------
+
+All pointer casts are to be conceptually decomposed into casts to and from a base type which will be char at whatever size char is configured to be. When a pointer is converted to a char pointer, it must be fitted uniquely into a common representation which requires that the id of the original space and the original pointer value be included. This rep is called a "flattened pointer to T" where T was the original type. Pointers that have not been cast atre termed "typed" pointers.
+
+We require that flattned pointers to different types may be interchanged (since the original software thinks they're just char *). For simplicity and consistency it would be nice if char * pointers flattened to themselves. 
+
+If a flattened pointer is taken into an array, we need to permit the pointer to be incremented from element to element by eg adding sizeof(object). This means the char offset must overflow into the original pointer value.
+ 
+We also restrict our use of terminology from the more general "server" to the more specific "object" since other types of server eg functions cannot be meaningfully flattened and will not support the required serialisation interface.
+
+Any cast on a flattened pointer does not change the representation. The C type of the pointer variable itself is sufficient to determine the new (post-cast) type and the space id in the rep should *always* refer to the original pointer type before any casting took place.
+
+[@todo what about casting up/down inheritance tree and the issues with multiple inheritance? Can we avoid the nasty adds requred to tweak the obejct base address?]
+
+
+Representation
+--------------
+
+A pointer may be represented in one of 2 ways.
+
+
+Typed pointer representation
+----------------------------
+
+An n-bit binary number with sufficient bits to represent a choice of any of the servers in the space plus the NULL value. Therefore we require 2^N >= num_servers+1. NULL is represented by all bits being zer and should be detected using the reduction-or operator eg
+
+isnull = ! | pointer;
+
+Note that pointers are unsigned and right-justified so that supplying fewer lines than required implies the high-order lines are zero. 
+
+
+Flattened pointer representation
+--------------------------------
+
+Flattened pointers ar represented usingg two values, both unsigned and right-justified. The first field is the offset field and is constructed as follows:
+
+{ typed_value, char_offset }
+
+Typed value is the value from the original typed pointer. The char offset field is big enough to hold all char * offsets within an object. This is allowed to vary between original spaces.
+
+NOTE: in the case of arrays, consecutive original_value values may be legally obtained though the flattened pointer by adding sizeof( object ). However, an array router needs to be able to convert the pointer back to a typed pointer (meaning recovering the typed value) and we don't want to do a divide. Therfore all sizeof() must be powers of 2. This may require compiler modifications (or at least a replacement for sizeof).
+
+This field need only use as many bits as required to identify all offsets into all objects of the original pointer's space.
+
+The second field is simply a unique identifier for the space of the original pointer (space_id). The space id for "char" is always zero. 
+
+NULL is represented here by setting both values to 0. This forces the space_id to be "char *" which is OK because NULL pinters may not be represented. We requre when flattening a pointer that NULL pointers be espcailly converted into this form. Flattened pointers in which the space_id is nonzero but the typed_value is zero are *invalid*. This is so that any NULL pinter compares equal to any other non-NULL pointer.
+
+
+Representation for distributed routers
+--------------------------------------
+
+In either the typed or flattened representation, the field that selects the object (typed_value) may be constructed from seperate bitfields wcith seperate bits to describe the choice of subobject at each hierarchical level. Thus if module A contains modules B, C and D, two bits will be used for this and the binary value 11 for these bits will be unused and illegal. This simplifies the process of extracting the required part of the pointer at each router.
+
+ 

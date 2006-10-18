@@ -1,0 +1,133 @@
+
+
+
+Protocol
+========
+
+The following protocol will be used for all client/server transactions. It is based around valid-ready handshakes for call and return, and therefore requires a total of 4 handshake signals in addition to parameter and return value signals. the protoocl supports latencies of 0 cycles (combinational) or more (sequential). It is therefore termed a "zero-plus" protocol.
+
+
+Handshake signals
+-----------------
+
+call_valid		client to server	Indicates that the client wishes to begin a transaction and param lines are valid
+call_ready		server to client	Indicates that the server can accept a call
+return_valid	server to client  Indicates that the transaction has completed and return value lines are valid 
+return_ready	client to server  Indicates that the client can accept the return
+
+The client must:
+
+1. Set up the parameter values on the parameter lines
+2. Assert call_valid
+3. Parameter values must stay valid until the clock period after call_ready has been asserted
+4. call_valid must stay asserted until the clock period after call_ready, then must be de-asserted unless another call is required
+5. Assert return_ready when it can accept a return value from the server
+6. When the server asserts return_valid, the client must sample the return value within one clock period
+
+The server must:
+
+1. Assert call_ready when it can accept a call from the client
+2. When the client asserts call_valid, the server must sample the parameters within one clock period
+3. Set up the return value on the return value lines
+4. Assert return_valid
+5. return value must stay valid until the clock period after return_ready has been asserted
+6. return_valid must stay asserted until the clock period after return_ready, then must be de-asserted.
+
+A call is made when both call_valid and call_ready are asserted for a single clock cycle. The call returns when return_valid and return_ready are both asserted for a single clock cycle. There should be exactly one return for each call. A client may attempt to make a second call before the first has completed: the server may accept this using call_ready. Multiple pending calls are handled on a strictly first-in-first-out basis and no protocol lines are required to support this.
+
+One call and one return may occur in a single cycle, and the return is allowed to be for the call that occurs in the same cycle. Any side-effects to the call must be available in the same cycle.
+
+
+Examples
+--------
+
+A combinational server looks like this:
+
+return_value = comb_func( call_params ); // Always process the function
+call_ready = return_ready; // We can accept a call in the same cycle that the client can accept the return
+return_valid = call_valid; // Want to return as soon as the call is made
+
+A stated out server looks like this:
+
+call_ready = (state==0);
+return_valid = (state==n);
+
+case( state )
+    0:
+    begin
+        return_valid = false;
+        if( call_valid )
+        begin
+	      local_params = call_params;
+	      state=1;
+	  end
+    end
+    ...
+    n:
+    begin
+        return_value = local_return_value;
+	  return_valid = true;
+        if( return_ready )
+	      state = 0;
+    end
+    
+    
+This could be refined further to merge the call and return states (0 and n) and to permit optional combinational behaviour based on data values.    
+
+A piped out server (with global stall) will tend to perform the following:
+
+stall = stagem_valid && !return_ready;
+
+always_clocked
+begin : stage 0
+    if( !stall && call_valid )
+    begin
+        stage0_out <= stage0_func( call_params );
+        call_ready <= 1;
+        stage0_valid <= 1;
+    end
+    else
+    begin
+        call_ready <= 0;
+	  stage0_valid <= 0;
+    end
+end
+...
+
+always_clocked
+begin : stage n
+    if( !stall && stagem_valid )
+    begin
+        return_value <= stagen_func( call_params );
+        return_valid <= stagem_valid;
+    end    
+    else
+    begin
+        return_valid <= 0;
+    end
+end
+
+However it would appear to make sense to generate each stage of the pipeline as a stated server with 2 states and then chain them via
+
+assign stage1_call_valid = stage0_return_valid;
+assign stage0_return_ready = stage1_call_ready;
+
+A variable server based on a register looks like this:
+
+always_clocked 
+    x <= next_x;
+    
+always
+begin
+    next_x = write_call_valid ? write_call_params : x;
+    write_call_ready = 1; 
+    read_return_value = next_x; // Always process the function
+    read_call_ready = read_return_ready; // We can accept a call in the same cycle that the client can accept the return
+    read_return_valid = read_call_valid; // Want to return as soon as the call is made
+end
+    
+
+
+
+[@todo discussion on inout vs input+output]
+[@doto multi-lane busses for high-traffic interconnections]
