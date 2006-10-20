@@ -9,22 +9,31 @@ This file lists the steps in the mapping process. Since this is likely to change
 
 
 ----------------------------------------------------------------------------
+Staticise heap
+
+Explicitly implement new/delete to allocate objects from static arrays. Provide dynamic constructors for these objects, and un-const any const pointers in them. 
+
+Invariant: No dynamic allocation. All const-member pointers are now gloablly constant.
+
+Note: An optimisation would be to detect when certain constructors can still be static and certain members can still be const. 
+
+----------------------------------------------------------------------------
+Lower this->
+
+Remove dereferences through the "this" pointer or and const pointer equal to "this".
+
+Invariant: All known accesses to something in the same module do not use pointers.
+
+Note: Strictly an optimisation, but the invariant helps to clarify.
+
+----------------------------------------------------------------------------
 Use Get()/Set()
 
 For fundamental types that are exposed publically, make all inter-object reads and writes be function calls.
 
 Invariant: every inter-object interation is a function call
 
-Note: what about p->x++ where p points to the same class as "this" and x is private?
-
-----------------------------------------------------------------------------
-Staticise heap
-
-Explicitly implement new/delete to allocate objects from static arrays. 
-
-Invariant: No dynamic allocation
-
-Note: need to provide dynamic constructors for these objects, and un-const any const pointers.
+Note: the pointer *could* equal "this", but only if it's non-constant in which case we must support the possibility that it is not "this".
 
 ----------------------------------------------------------------------------
 Call through pointers
