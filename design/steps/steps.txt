@@ -13,12 +13,12 @@ Staticise heap
 
 Explicitly implement new/delete to allocate objects from static arrays. Provide dynamic constructors for these objects, and un-const any const pointers in them. 
 
-Invariant: No dynamic allocation. All const-member pointers are now gloablly constant.
+Invariant: No dynamic allocation. All const-member pointers are now globally constant.
 
 Note: An optimisation would be to detect when certain constructors can still be static and certain members can still be const. 
 
 ----------------------------------------------------------------------------
-Lower this->
+Eliminate this->
 
 Remove dereferences through the "this" pointer or and const pointer equal to "this".
 
@@ -31,7 +31,7 @@ Use Get()/Set()
 
 For fundamental types that are exposed publically, make all inter-object reads and writes be function calls.
 
-Invariant: every inter-object interation is a function call
+Invariant: every inter-object interaction is a function call
 
 Note: the pointer *could* equal "this", but only if it's non-constant in which case we must support the possibility that it is not "this".
 
@@ -52,7 +52,7 @@ Note: Still not completely sure if we need this.
 ----------------------------------------------------------------------------
 Forward at class boundaries
 
-Any call from a member object to an external object or vice-versa should be forwarded through new thunk functions within the object. These will develop into arbiters. Inter-object calls should now be 1:1 correspondance.
+Any call from a member object to an external object or vice-versa should be forwarded through new thunk functions within the object. These will develop into arbiters. Inter-object calls should now be 1:1 correspondence.
 
 Invariant: Each interface has only one caller
 
@@ -61,19 +61,21 @@ Add backchannels
 
 Add a marker of some sort at each interface that refers to its (now unique) caller. This is useful to later steps. A partial check could look at __builtin_return_address().
 
-Invariant: Any static (const pointer) interation may be reversed
+Invariant: Any static (const pointer) interaction may be reversed
 
 ----------------------------------------------------------------------------
 Lower NULL pointers
 
 Replace every variable pointer with a non-null pointer and a bool. If the bool is false, the pointer is considered NULL. Otherwise the pointer is not NULL and it may be dereferenced.
 
-Invariant: pointers are not NULL
+Invariant: all pointers are non-NULL
+
+Note: No need to do this to const pointers
 
 ----------------------------------------------------------------------------
-Lower pointer arithmatic
+Lower pointer arithmetic
 
-Associate every variable pointer with an int, which begins at zero, and is then the subject of all pointer arithmatic. Then use array style for derefs. Eg 
+Associate every variable pointer with an int, which begins at zero, and is then the subject of all pointer arithmetic. Then use array style for derefs. Eg 
 
 p++; return *p; 
 
@@ -81,27 +83,31 @@ becomes
 
 p.index++; return p[p.index];
 
-Invariant: Pointers never modified; only created and overwritten
+Invariant: No pointer arithmetic; pointers only created and overwritten
+
+Note: what about const pointers?
 
 ----------------------------------------------------------------------------
 Add dereferencer functions
 
 Add functions to each class, for each type required, that do pointer derefs eg T dereference( T *p, int index ) { return p[index]; }
 
-Note: may need to inline this to avoid copying a T.
+Invariant: no pointer dereferences outside special dereferencer functions
 
-Note: not const pointers!!
+Note: may need to inline this or return a reference to avoid copying a T.
+
+Note: only do this to variable pointers!
 
 ----------------------------------------------------------------------------
 Refer variable pointers back to provider
 
-For each stored pointer, store an enum representing (a) whether the pointer was taken locally and if not, (b) which interface (hence which other object) it came from. Dereference function should decode this then forward the call to that object's dereferencer function.
+With each pointer, associate an enum representing (a) whether the pointer was taken locally and if not, (b) which interface (hence which other object) it came from. Dereference function should decode this then forward the call to that object's dereferencer function. The new interface is called a deref interface and is made via the (const) backchannel pointer.
 
-Note: the new call may pass a pointer as a param, in which case there may be a new deref interface that has to be represented by this step. Therefore this step must iterate until it stabilises. Only two deref call interfaces are needed between each pair of objects for each type (one either way) so the iterations will terminate.
+Note: this new call may pass a pointer as a param, in which case that object may gain a new enum value and dereferencer object. Therefore this step must iterate until no more new deref interfaces are required. Only two deref interfaces are needed between each pair of objects for each type (one either way) so the iterations will terminate.
 
-Invariant: all inter-object calls via const pointers
+Invariant: all inter-object calls are now via const pointers; interpretation of variable pointers is now local
 
-Note: not const pointers!!
+Note: only do this to variable pointers!
 
 Note: new call also needs a backchannel
 
@@ -110,7 +116,7 @@ Enumerate local variable pointers
 
 Create an enum for all member objects whose address gets taken. Substitute an enum ie PTR_X for each &x and get the deref function to decode the enum and return x as required.
 
-Note: this includes non-trivial class objects; otherwise taking their address would require a new channel beween parent and child that isn't required otherwise and wasn't processed in the "Outgoing interfaces" or "Forward at class boundaries" steps.
+Note: this includes non-trivial class objects; otherwise taking their address would require a new channel between parent and child that isn't required otherwise and wasn't processed in the "Outgoing interfaces" or "Forward at class boundaries" steps.
 
 Invariant: no variable pointers
 
@@ -148,30 +154,32 @@ Make transactions non-blocking
 
 The incoming call should return immediately after starting the local thread. The local thread should still kick the client thread - only difference is that it's now waiting in its own code.
 
-Invariant: all inter-object calls are notionally instantanious
+Invariant: all inter-object calls are notionally instantaneous
 
 Note: this gives us SystemC's "non-blocking TLM" style. 
 
 ----------------------------------------------------------------------------
 Passivate
 
-Create a pure "channel" object for each pair of objects that interact (call each other). Provide it with purely passive 2-phase interfaces for caller and callee such that all calls between objects go into the channel and the channel kicks (wakes up) the obejcts when something interesting happens.
+Create a pure "channel" object for each pair of objects that interact (call each other). Provide it with purely passive 2-phase interfaces for caller and callee such that all calls between objects go into the channel and the channel kicks (wakes up) the objects when something interesting happens.
 
 Invariant: objects do not receive incoming calls
 
 ----------------------------------------------------------------------------
 Insert clock and reset
 
-Nove all classes to SC_CTHREAD. Replace all wait(event) with while(!event) wait(clk).
+Move all classes to SC_CTHREAD. Replace all wait(event) with while(!event) wait(clk).
 
 Invariant: clock edge is the only event
 
 Note: not sure about clock distribution or how to handle reset.
 
+Note: might be able to do this step later if waits are implemented as "send event to self" type loops - iterations of that loop can then become clock periods after all the stating-out.
+
 ----------------------------------------------------------------------------
 Merge member functions
 
-Merge all the member functions in a class into a single one that uses a big switch statement to select the implementation based on a new enum param. Other parameters should be grouped into a struct for each of the original member functions then unuined together for the big funciton.
+Merge all the member functions in a class into a single one that uses a big switch statement to select the implementation based on a new enum param. Other parameters should be grouped into a struct for each of the original member functions then unioned together for the big function.
 
 Invariant: all calls are simple recursions
 
