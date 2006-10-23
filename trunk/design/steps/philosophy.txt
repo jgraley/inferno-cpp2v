@@ -81,21 +81,21 @@ This basically prohibits the use of pointers as flat addresses which means in pr
 Minimal recreation of computer-like hardware
 --------------------------------------------
 
-It should be understood that one trivial solution to the problem of producing hardware that implements a software program is to simply provide a conventional computer that includes (a compiled version of) the program in a ROM.
+It should be understood that one trivial solution to the problem of producing hardware that implements a software program is to simply provide a conventional computer that includes (a compiled version of) the software program in a ROM.
 
 This solution does not advance the state of the art; in spite of decades of development it is still power-hungry, slow, has poor locality and limited concurrency. The mappings described here improve on that for "easy" cases in which the software language corresponds well with hardware capabilities.
 
 However, when faced with more difficult problems it is helpful to consider that conventional computers nonetheless *always* offer an answer to the problem of how to implement some software idiom in hardware.
 
-In order to exploit this and still avoid the drawbacks of conventional computers, we consider minimal forms that include the features we need and avoid the bloat of a full processor. This is best achieved by (a) minimising the problem as much as possible by stripping away easily solved parts of it and then (b) picking out exactly the features that a processor has that we need to solve the remaining stripped-down problem.
+In order to exploit this and still avoid the drawbacks of conventional computers, we consider minimal forms that include the features we need and avoid the bloat of a full computer. This is best achieved by (a) minimising the problem as much as possible by stripping away easily solved parts of it and then (b) picking out exactly the features that a computer has that we need to solve the remaining stripped-down problem.
 
-For example, the problem of the retained context (mentioned above) is to note that the only problem is that the software's execution needs to be spread over time, and that is exactly what a conventional computer does by executing one machine instruction at a time (or at least not *all* of them at once!).
+For example, the problem of the retained context (mentioned above) is to note that the only difficult aspect is that the software's execution needs to be spread over time, and that is exactly what a conventional computer does by executing one machine instruction at a time (or a small number at a time).
 
-The minimal elements that a computer uses to achieve this are: (1) facilities for performing each atomic action that will be needed by whatever means, (2) a read-only record of which action to do at which step in the process and (3) a read-write variable to hold the current step. Looking at a conventional computer from this point of view makes it resemble a classical state machine. We can now know that this state machine can certainly be created because conventional computers already have been created and seem to work for the most part.
+The minimal elements that a computer uses to achieve this are: (1) facilities for performing each atomic action that will be needed, (2) a read-only record of which action to do at which step in the process and (3) a read-write variable to hold the current step. Looking at a conventional computer from this point of view makes it resemble a traditional state machine. We now know that we may solve the problem by creating a state machine.
 
-A further example is recursion. A traditional state machine seems unable to support recursion. So we ask: what is it that a conventional computer has that a traditional state machine does not and that lets it recurse? The answer is a stack, and a stack pointer. Since that stack stores the program counter, our stack must now store out state variable and this fundamentally changes the state machine, but it can now recurse.
+A further example is recursion. A traditional state machine seems unable to support recursion. So we ask: what is it that a conventional computer has that a traditional state machine does not and that lets it recurse? The answer is a stack, and a stack pointer. Since that stack stores the program counter, our stack must now store our state variable and this fundamentally changes the state machine, but it can now recurse.
 
-The minimal recreation of computer-like hardware is not a guiding concept for the project - direct correspondences are the more powerful technique - but it is a useful crutch. Note that the computer-like devices are always seen as the *internals* of a given object. Inter-object interactions more closely resemble a network of very simple conventional computers.
+The minimal recreation of computer-like hardware is not a guiding concept for the project - direct correspondences are the more powerful technique - but it is a useful fall-back. Note that the computer-like devices are always seen as the *internals* of a given object. Inter-object interactions more closely resemble a network of very simple conventional computers.
 
 
 @todo find links on contexts, coroutines, cooperative tasking etc
