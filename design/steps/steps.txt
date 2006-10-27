@@ -10,6 +10,8 @@ Since this is likely to change repeatedly, it will be kept under version control
 Invariants will usually be the absence of types of constructs or guarantees about behaviour/properties of parts of the system. Occasionally they may be expression of redundancy (duplication of information in the program though guaranteed equivilances) though this is discouraged.
 
 
+@todo early steps for RTTI, Exceptions
+
 ----------------------------------------------------------------------------
 Staticise heap
 
@@ -142,6 +144,8 @@ Invariant: no cumulative nesting in calls between objects
 
 Note: this gives us SystemC's "blocking TLM" style. 
 
+Note: Possible major problem here supporting inter-object recursion between this step and the "make transactions non-blocking" step. Since each object's local context "camps" in the other object's function while awaiting completion of the call it is not straightforward for it to resume chacking for incoming calls while waiting. Solution is to employ a pool of contexts for each object and use a "wake one waiter" event mechanism to ensure we select one waiting context for each incoming call. Hopefully SystemC supports this.
+
 ----------------------------------------------------------------------------
 Move to 2-phase transactions
 
@@ -154,11 +158,13 @@ Note: Since the return call and the kick will come *before* the outgoing call re
 ----------------------------------------------------------------------------
 Make transactions non-blocking
 
-The incoming call should return immediately after starting the local thread. The local thread should still kick the client thread - only difference is that it's now waiting in its own code.
+The incoming call should return immediately after kicking the local context. The local context should still kick the caller's thread on completion - only difference is that the caller is now waiting in its own code.
 
 Invariant: all inter-object calls are notionally instantaneous
 
 Note: this gives us SystemC's "non-blocking TLM" style. 
+
+Note: Now reduce to one local context. Wait for outgoing calls to return by recursing back into the context's executive function. This supports recursive calls.
 
 ----------------------------------------------------------------------------
 Passivate
@@ -210,7 +216,7 @@ Note: the point of this is to establish the state as local, i.e. needs to be sta
 ----------------------------------------------------------------------------
 Staticise locals
 
-Generate a data structure to represent the local variables. Use unions for variables whose scope does not overlap. Declare a static array of these structures, up to the max nesting depth. Create a static stack pointer which should initialised to zero. Increment it at the start of the function and decrement just before returning. Change all code to use the array indexed by the stack pointer.
+Generate a data structure to represent the local variables. Use unions for variables whose scope does not overlap. Declare a static array of these structures, up to the max nesting depth. Create a static stack pointer which should be initialised to zero. Increment it at the start of the function and decrement just before returning. Change all code to use the array indexed by the stack pointer.
 
 Invariant: all data is static
 
@@ -267,3 +273,6 @@ Convert types like char, int into bit vectors. Support bit fields properly. Bool
 Invariant: no types unknown to Verilog
 
 Note: we will hopefully be able to tolerate arbitrary bit vectors in SC form eg sc_bitvec<5> all the way through the process.
+
+
+@todo late steps for dealing with wire vs latch vs flip-flop
