@@ -1,7 +1,7 @@
 (C) Copyright 2006 John Graley
 Available under the terms of the BSD license. 
 
-Philospohy of the program transformation
+Philosophy of the program transformation
 
 
 Intro
@@ -19,11 +19,11 @@ Objects correspond to modules
 
 The C++ concept of the object (instance of a class) corresponds closely to the Verilog module. Each encapsulates data storage and functionality, and presents an interface to other objects/modules. They may be nested in a tree structure that emanates from the global scope and the languages limit access to child object/modules from external objects/modules.
 
-Locality is attributable to both: in the case of objects this locality simplifies design/maintainence/debugging and may improve cachability of the resultant program. Synthesis turns a verilog module into a physically localised area within the layout; speed and power advantages are to be gained from shorter wires and simpler routing.
+Locality is attributable to both: in the case of objects this locality simplifies design/maintenance/debugging and may improve cachability of the resultant program. Synthesis turns a verilog module into a physically localised area within the layout; speed and power advantages are to be gained from shorter wires and simpler routing.
 
 Both structural forms relate indirectly to concurrency by delineating the extent to which different concurrency models will be used. Concurrency between objects and modules is typically a "loose" style in which event/timing interdependencies are the minimum required for the system to function. In C++ we have threads where most objects do not "own" more than one thread, so threading may be viewed as inter-object. In Verilog we see busses between modules where the modules cannot know when the next request will arrive. In both languages, explicit synchronisation is required when interactions do occur in loosely concurrent environments.
 
-Concurrency occurs within Verilog modules too, but usually in a much more tightly controlled fashion whereby shared implementation details remove the need for explicit synchronisation. An equivalant in software would be a "PAR" block as found in the Occam language.
+Concurrency occurs within Verilog modules too, but usually in a much more tightly controlled fashion whereby shared implementation details remove the need for explicit synchronisation. An equivalent in software would be a "PAR" block as found in the Occam language.
 
 The similarities are such that it appears advisable to map C++ objects directly to Verilog modules on a 1:1 basis. 
 
@@ -109,13 +109,13 @@ This approach is preferred for two reasons:
 - It more closely resembles actual hardware designs
 - It may map to the programmer's intentions more precisely
 
-Only the last of these is contraversial. We are justifying moving *away* from a single-computer solution that resembles the original platform for which the original program was written on the basis that the programmer really wanted to construct a more parallel, interacting agents, pattern at the highest level of his or her program.
+Only the last of these is controversial. We are justifying moving *away* from a single-computer solution that resembles the original platform for which the original program was written on the basis that the programmer really wanted to construct a more parallel, interacting agents, pattern at the highest level of his or her program.
 
-I believe something like this is often, indeed typically, the case. Whether designe4d or evolved, software programs inevitably develop sufficient complexity in their sequential interactions that some sort of guiding structure is required to manage the complexity of the interactions between different parts. The public interfaces of C++ classes are an example of this. The member function prototypes explicitly define parameters and return values, but a non-trivial class usually also specifies the required sequence of calls to its member functions eg construct-init-modifiers/accessors-destruct. Such a specification may be seen as a protocol, and its presence shows that the program has been segregated into seperate parts which may function independently. 
+I believe something like this is often, indeed typically, the case. Whether designed or evolved, software programs inevitably develop sufficient complexity in their sequential interactions that some sort of guiding structure is required to manage the complexity of the interactions between different parts. The public interfaces of C++ classes are an example of this. The member function prototypes explicitly define parameters and return values, but a non-trivial class usually also specifies the required sequence of calls to its member functions eg construct-init-modifiers/accessors-destruct. Such a specification may be seen as a protocol, and its presence shows that the program has been segregated into separate parts which may function independently. 
 
-The important point here is that once the programmer has commited to segregating the program based on this kind of interface, we are no longer required to preserve any coherency between the implementations on either side of that interface except as specifically required by the interface definitions. Therefore the programmer's bid to simplify high-level structure translates to greater scope to segregate the resulting hardware. This is what leads to limiting the level at which computer re-creation will be applied: we can do better at the higher levels by using program structure as a guide.
+The important point here is that once the programmer has committed to segregating the program based on this kind of interface, we are no longer required to preserve any coherency between the implementations on either side of that interface except as specifically required by the interface definitions. Therefore the programmer's bid to simplify high-level structure translates to greater scope to segregate the resulting hardware. This is what leads to limiting the level at which computer re-creation will be applied: we can do better at the higher levels by using program structure as a guide.
 
-Further, obviously, if a program uses multiple processes then it has in fact been written for multiple independant computers and an operating system will map it onto a single computer if necessary. Such programs are the clearest example of the kind of segregation that corresponds well to our apprach and processes, where used, represent the highest level of program decomposition (at least for programs that *can* run on a single machine). Threads may resemble processes in cases where the sharing of data is minimal and properly controlled using mutexes etc.
+Further, obviously, if a program uses multiple processes then it has in fact been written for multiple independent computers and an operating system will map it onto a single computer if necessary. Such programs are the clearest example of the kind of segregation that corresponds well to our approach and processes, where used, represent the highest level of program decomposition (at least for programs that *can* run on a single machine). Threads may resemble processes in cases where the sharing of data is minimal and properly controlled using mutexes etc.
 
 
 Summary
@@ -123,11 +123,26 @@ Summary
 
 We divide up software programs into three levels. Starting at the bottom they are: atomic, sequential and structural. At the atomic level, we transliterate individual statements or small blocks of statements into simple (combinational) logic.
 
-The sequential level may be thought of as the implmentation within a typical class, consists of state machines, sequential code sequences and (possibly recursive) internal function calls. We device a minimally computer-like solution for each class, and instance it once per object. The extent to which we add computer-like infrastructure depends on the complexity of the class and should never be disproportionate. This permits us to acheive sequential control and algorithmic processing with the full expressivity of a software language but it is not particularly parallelisable.
+The sequential level may be thought of as the implementation within a typical class, consists of state machines, sequential code sequences and (possibly recursive) internal function calls. We device a minimally computer-like solution for each class, and instance it once per object. The extent to which we add computer-like infrastructure depends on the complexity of the class and should never be disproportionate. This permits us to achieve sequential control and algorithmic processing with the full expressivity of a software language but it is not particularly parallelisable.
 
-The structural level deals with the allocation of objects, object hierarchy and interactions between objects. For this purpose we regard objects as autonomous interacting agents and interactions between objects (eg inter-object member funciton calls) become interactions over a protocol. This approach adds bulk in duplicated functionality and protocol support infrastructure, but has improved parallelism capability and arguably matches the conceptual structure of the original program.
+The structural level deals with the allocation of objects, object hierarchy and interactions between objects. For this purpose we regard objects as autonomous interacting agents and interactions between objects (eg inter-object member function calls) become interactions over a protocol. This approach adds bulk in duplicated functionality and protocol support infrastructure, but has improved parallelism capability and arguably matches the conceptual structure of the original program.
 
-The distinction between these approaches will complicate the process of conversion. At some level, the "kink" in our transformation of functionality between the insides of objects and between objects reflects the kink that already exists in all large software systems: low-level implementation details are "close" to the single, central processor and must be coded to make good use of it, wheras the higher levels of a program are more distant and may therefore be viewed as a more generic technology problem. Therefore in the former case we must deal with the loss of that central processor, wheras in the latter case we may convert more directly. 
+The distinction between these approaches will complicate the process of conversion. At some level, the "kink" in our transformation of functionality between the insides of objects and between objects reflects the kink that already exists in all large software systems: low-level implementation details are "close" to the single, central processor and must be coded to make good use of it, whereas the higher levels of a program are more distant and may therefore be viewed as a more generic technology problem. Therefore in the former case we must deal with the loss of that central processor, whereas in the latter case we may convert more directly. 
 
 Since the atomic level corresponds (roughly) directly to technologies found inside a processor but not specific to it, we may simply build the same solutions directly into the end hardware.
+
+
+Other documents in this directory
+---------------------------------
+
+Note that this directory, "design/steps" considers only the transformation algorithms; for info about the construction of the inferno program, see "design/program". A more concrete discussion of the ideas in here is given in a few other documents as follows:
+- cplusplus.txt is for tricky C++ constructs that do not really fit into this philosophy and must be lowered by brute force.
+- pointers.txt focuses on dealing with pointers in preparation for the main structure transformations.
+- structure.txt shows how to complete the transformation of structure into an interacting agents pattern as discussed above.
+- sequential.txt deals with the state machine generation and recursion required within objects
+- verilog.txt is for changes required before HDL may be generated (and not really addressed here)
+
+The transformations themselves take place in a number of steps; each step corresponds (roughly) to one of the above. The overall order of conversions is basically as given in the bullet list above, but steps may be moved around and may be "mixed up" to some extent.
+
+
 
