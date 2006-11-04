@@ -233,9 +233,16 @@ Invariant: all data is static or member
 
 Note: includes state
 
-Note: get rid of local scopes at this stage
+Note: the same step was done on object type locals earlier on - try to build new locals into same structure.
 
-Note: the same step was done on object type locals earlier on - try to build new variables into same structure.
+----------------------------------------------------------------------------
+Remove scopes
+
+Scoped blocks (surrounded by {}) should now be completely redundant. Get rid of them.
+
+Note: was part of memberise locals, but now that step has to be run twice and the first time doesn't want to do this.
+
+Invariant: No scopes (apart from overall function scope)
 
 ----------------------------------------------------------------------------
 Lower recursion
