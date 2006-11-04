@@ -135,16 +135,16 @@ Invariant: all calls are simple recursions
 
 Note: this single function is now the run function. All other calls (apart from SystemC ones which don't count) have now become simple recursions of this function.
 
-Note: moved up to be before staticising locals
+Note: moved up to be before memberising local objects
 
 ----------------------------------------------------------------------------
-Staticise local objects
+Memberise local objects
 
-Generate a data structure to represent the local object variables. Use unions for objects whose scope does not overlap. Declare a static array of these structures, up to the max nesting depth. Create a static stack pointer which should be initialised to zero. Increment it at the start of the function and decrement just before returning. Change all code to use the array indexed by the stack pointer.
+Generate a data structure to represent the local object variables. Use unions for objects whose scope does not overlap. Add an array of these structures, up to the max nesting depth, as a class member. Create a member stack pointer which should be initialised to zero. Increment it at the start of the function and decrement just before returning. Change all code to use the array indexed by the stack pointer.
 
-Invariant: all objects are static
+Invariant: all objects are static or members
 
-Note: we have to do this before any SystemC stuff, because it needs all objects to be static. But we will add more locals later and so this step will be repeated later. Hopefully re-use implmentation!
+Note: we have to do this before any SystemC stuff, because it needs all objects to be static (or members). But we will add more locals later and so this step will be repeated later. Hopefully re-use implmentation!
 
 ----------------------------------------------------------------------------
 Change const pointers to ports
@@ -225,11 +225,11 @@ Note: assert this at each label as a double check since we have a little redunda
 Note: the point of this is to establish the state as local, i.e. needs to be stacked when we recurse.
 
 ----------------------------------------------------------------------------
-Staticise locals
+Memberise locals
 
-Generate a data structure to represent the local variables. Use unions for variables whose scope does not overlap. Declare a static array of these structures, up to the max nesting depth. Create a static stack pointer which should be initialised to zero. Increment it at the start of the function and decrement just before returning. Change all code to use the array indexed by the stack pointer.
+Generate a data structure to represent the local variables. Use unions for variables whose scope does not overlap. Add an array of these structures, up to the max nesting depth, as a class member. Create a member stack pointer which should be initialised to zero. Increment it at the start of the function and decrement just before returning. Change all code to use the array indexed by the stack pointer.
 
-Invariant: all data is static
+Invariant: all data is static or member
 
 Note: includes state
 
