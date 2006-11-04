@@ -127,6 +127,26 @@ Invariant: no variable pointers
 Note: not const pointers!!
 
 ----------------------------------------------------------------------------
+Merge member functions
+
+Merge all the member functions in a class into a single one that uses a big switch statement to select the implementation based on a new enum param. Other parameters should be grouped into a struct for each of the original member functions then unioned together for the big function.
+
+Invariant: all calls are simple recursions
+
+Note: this single function is now the run function. All other calls (apart from SystemC ones which don't count) have now become simple recursions of this function.
+
+Note: moved up to be before staticising locals
+
+----------------------------------------------------------------------------
+Staticise local objects
+
+Generate a data structure to represent the local object variables. Use unions for objects whose scope does not overlap. Declare a static array of these structures, up to the max nesting depth. Create a static stack pointer which should be initialised to zero. Increment it at the start of the function and decrement just before returning. Change all code to use the array indexed by the stack pointer.
+
+Invariant: all objects are static
+
+Note: we have to do this before any SystemC stuff, because it needs all objects to be static. But we will add more locals later and so this step will be repeated later. Hopefully re-use implmentation!
+
+----------------------------------------------------------------------------
 Change const pointers to ports
 
 Replace Obj *p; with SystemC ports eg sc_port<Obj>.
@@ -185,15 +205,6 @@ Note: not sure about clock distribution or how to handle reset.
 Note: might be able to do this step later if waits are implemented as "send event to self" type loops - iterations of that loop can then become clock periods after all the stating-out.
 
 ----------------------------------------------------------------------------
-Merge member functions
-
-Merge all the member functions in a class into a single one that uses a big switch statement to select the implementation based on a new enum param. Other parameters should be grouped into a struct for each of the original member functions then unioned together for the big function.
-
-Invariant: all calls are simple recursions
-
-Note: this single function is now the run function. All other calls (apart from SystemC ones which don't count) have now become simple recursions of this function.
-
-----------------------------------------------------------------------------
 Lower constructs
 
 Lower constructs that are not supported in combable (synthesisable) verilog into conditional branches ie if(cond) goto label; Also after each wait(); add a goto WAIT_STATE; WAIT_STATE:; 
@@ -223,6 +234,8 @@ Invariant: all data is static
 Note: includes state
 
 Note: get rid of local scopes at this stage
+
+Note: the same step was done on object type locals earlier on - try to build new variables into same structure.
 
 ----------------------------------------------------------------------------
 Lower recursion
