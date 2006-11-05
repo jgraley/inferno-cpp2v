@@ -110,6 +110,17 @@ Invariant: no references
 Note: do this after lowering NULL and pointer arithmetic because the pointers that we will generate for refs don't need to support either of these things. 
 
 ----------------------------------------------------------------------------
+Memberise locals
+
+Generate a data structure to represent the local variables. Use unions for variables whose scope does not overlap. Add an array of these structures, up to the max nesting depth, as a class member. Create a member stack pointer which should be initialised to zero. Increment it at the start of the function and decrement just before returning. Change all code to use the array indexed by the stack pointer.
+
+Invariant: all variables are static or members
+
+Note: we have to do this before any SystemC stuff, because it needs all objects to be static (or members). But we will add more locals later and so this step will be repeated later. Hopefully re-use implmentation!
+
+Note: furthermore, "add dereferencing layer" lowering neest *all* locals to be memberised first, so moved up again and now applies to all locals
+
+----------------------------------------------------------------------------
 Add dereferencing layer
 
 Add functions to each class, for each type required, that forward function calls to member objects based on a pointer. So if member objects a and b of type C both have a function footle( int x ) then we create deref_footle( C *p, int x ) which invokes the correct footle() based on p. For fundamental types add eg deref_get( type *p ) and deref_set( type *p, type val ). Replace pointer derefs with the corresponding function. 
@@ -155,16 +166,7 @@ Invariant: all calls are simple recursions
 
 Note: this single function is now the run function. All other calls (apart from SystemC ones which don't count) have now become simple recursions of this function.
 
-Note: moved up to be before memberising local objects
-
-----------------------------------------------------------------------------
-Memberise local objects
-
-Generate a data structure to represent the local object variables. Use unions for objects whose scope does not overlap. Add an array of these structures, up to the max nesting depth, as a class member. Create a member stack pointer which should be initialised to zero. Increment it at the start of the function and decrement just before returning. Change all code to use the array indexed by the stack pointer.
-
-Invariant: all objects are static or members
-
-Note: we have to do this before any SystemC stuff, because it needs all objects to be static (or members). But we will add more locals later and so this step will be repeated later. Hopefully re-use implmentation!
+Note: originally was before memberise locals, but that proved impossible due to pointer lowering steps. Now this is above structural steps to make them easier, but if that proves wrong (or structural steps invalidate this step's invariant) then this step may be moved back to below structural.
 
 ----------------------------------------------------------------------------
 Change const pointers to ports
