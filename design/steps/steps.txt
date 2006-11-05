@@ -48,8 +48,6 @@ Invariant: every inter-object interaction is a function call
 
 Note: the pointer *could* equal "this", but only if it's non-constant in which case we must support the possibility that it is not "this".
 
-Note: maybe need to do something here for non-trivial objects/structs that lack copy constructors?
-
 ----------------------------------------------------------------------------
 Call through pointers
 
@@ -112,13 +110,15 @@ Invariant: no references
 Note: do this after lowering NULL and pointer arithmetic because the pointers that we will generate for refs don't need to support either of these things. 
 
 ----------------------------------------------------------------------------
-Add dereferencer functions
+Add dereferencing layer
 
-Add functions to each class, for each type required, that do pointer derefs eg T dereference( T *p, int index ) { return p[index]; }
+Add functions to each class, for each type required, that forward function calls to member objects based on a pointer. So if member objects a and b of type C both have a function footle( int x ) then we create deref_footle( C *p, int x ) which invokes the correct footle() based on p. For fundamental types add eg deref_get( type *p ) and deref_set( type *p, type val ). Replace pointer derefs with the corresponding function. 
 
 Invariant: no pointer dereferences outside special dereferencer functions
 
-Note: may need to inline this or return a reference to avoid copying a T.
+Note: p->f() and equivilantly (*p).f() should *not* be broken down into the *p and the .f() but should be treated as a unit (becomes deref_f(p))
+
+Note: there's now no problem with copying the object because we always bring the action to the object, not the other way around
 
 Note: only do this to variable pointers!
 
