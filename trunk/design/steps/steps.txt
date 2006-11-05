@@ -285,21 +285,25 @@ Surround the entire function with a switch statement on the state variable. Gene
 
 Invariant: context is released between each combable block
 
-Note: Place an infinite loop around the switch statement if SC_CTHREAD doesn't do so for you.
+Note: we are taking advantage of the fact that SC_CTHREAD loops infinitely
 
 ----------------------------------------------------------------------------
 Extract waits
 
-Replace all wait() calls with a single one at the bottom of the function (inside the overall loop if one was added).
+Replace all wait() calls with a single one at the bottom of the function.
 
 Invariant: no non-trivial context across a wait()
+
+Note: this is possible because all the wait() calls are at the ends of state cases and there's nothing after them until you get to the bottom of the function.
 
 ----------------------------------------------------------------------------
 Remove local context
 
-Move to SC_METHOD. If an overall loop was needed, remove it. Also remove the wait() call.
+Move to SC_METHOD. Remove the wait() call.
 
 Invariant: no persistent implicit context
+
+Note: this is really a pattern reduction: SC_CTHREAD{ ...; wait(); } becomes SC_METHOD{ ...; }. If any functions don't match the pattern we have an error.
 
 ----------------------------------------------------------------------------
 Initialise data
