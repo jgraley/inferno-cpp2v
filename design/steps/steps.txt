@@ -279,9 +279,16 @@ Invariant: no recursion; no non-trivial function calls
 Note: the "goto a variable" construct would have to become eg a switch statement for the purposes of testing this step. It vanishes in the "State-out" step.
 
 ----------------------------------------------------------------------------
+Else clauses for skipped code
+
+Place code after a conditional goto (a goto in an if) up to the next label into an else clause if it isn't already in one. If there is code between an unconditional goto and the next label, it is an error (the code is unreachable)
+
+Invariant: sections of code between labels is now combable
+
+----------------------------------------------------------------------------
 State-out
 
-Surround the entire function with a switch statement on the state variable. Generate a case for each label. Unconditional gotos should terminate states (any code between them and the next label is unreachable). Conditional gotos should place any following code in their "else" clause. The actual gotos may then be removed, leaving only the assignments to the state variable. 
+Surround the entire function with a switch statement on the state variable. Generate a case for each label ending just beofre the next label. Insert a break at the end of each case. Remove the gotos, leaving only the assignments to the state variable. 
 
 Invariant: context is released between each combable block
 
