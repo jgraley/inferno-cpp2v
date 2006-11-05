@@ -13,6 +13,15 @@ Invariants will usually be the absence of types of constructs or guarantees abou
 @todo early steps for RTTI, Exceptions
 
 ----------------------------------------------------------------------------
+Make constructors/destructors explicit
+
+All constructors, copy constructors and destructors get turned into regular member functions and we add explicit calls to them in the code. Need to treat each kind of scope correctly: static, member, heap, local. If an object is passed by value and has a copy constructor, we must turn that into pass by reference and then insert the copy construct call at the top of the function.
+
+Invariant: pass-by-value only for memcpy()able objects; actual object lifecycle may now differ from that in the original program
+
+Note: We choose not to generate any copy constructor if not already there - these objects will be treated like fundamental types
+
+----------------------------------------------------------------------------
 Staticise heap
 
 Explicitly implement new/delete to allocate objects from static arrays. Provide dynamic constructors for these objects, and un-const any const pointers in them. 
@@ -24,7 +33,7 @@ Note: An optimisation would be to detect when certain constructors can still be 
 ----------------------------------------------------------------------------
 Eliminate this->
 
-Remove dereferences through the "this" pointer or and const pointer equal to "this".
+Remove dereferences through the "this" pointer or any const pointer equal to "this".
 
 Invariant: All known accesses to something in the same module do not use pointers.
 
@@ -38,6 +47,8 @@ For fundamental types that are exposed publically, make all inter-object reads a
 Invariant: every inter-object interaction is a function call
 
 Note: the pointer *could* equal "this", but only if it's non-constant in which case we must support the possibility that it is not "this".
+
+Note: maybe need to do something here for non-trivial objects/structs that lack copy constructors?
 
 ----------------------------------------------------------------------------
 Call through pointers
@@ -90,6 +101,15 @@ p.index++; return p[p.index];
 Invariant: No pointer arithmetic; pointers only created and overwritten
 
 Note: what about const pointers?
+
+----------------------------------------------------------------------------
+Remove references
+
+Implement references using pointers
+
+Invariant: no references
+
+Note: do this after lowering NULL and pointer arithmetic because the pointers that we will generate for refs don't need to support either of these things. 
 
 ----------------------------------------------------------------------------
 Add dereferencer functions
