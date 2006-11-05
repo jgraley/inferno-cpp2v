@@ -21,14 +21,17 @@ Invariant: pass-by-value only for memcpy()able objects; actual object lifecycle 
 
 Note: We choose not to generate any copy constructor if not already there - these objects will be treated like fundamental types
 
+Note: this means that const members will need to be un-consted except in the case of static objects with sufficiently simple initialisation algorithms.
+Optimisations could include converting member poointers initialised by new() into member objects and detecting when a constructor parameter is always supplied from a const.
+
 ----------------------------------------------------------------------------
 Staticise heap
 
-Explicitly implement new/delete to allocate objects from static arrays. Provide dynamic constructors for these objects, and un-const any const pointers in them. 
+Explicitly implement new/delete to allocate objects from static arrays. 
 
 Invariant: No dynamic allocation. All const-member pointers are now globally constant.
 
-Note: An optimisation would be to detect when certain constructors can still be static and certain members can still be const. 
+Note: No need to worry about constructors/destructors since that should have been dealt with in the previous step.
 
 ----------------------------------------------------------------------------
 Eliminate this->
