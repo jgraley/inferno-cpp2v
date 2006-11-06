@@ -183,19 +183,23 @@ action to the object, not the other way around
 Note: only do this to variable pointers!
 
 ----------------------------------------------------------------------------
-Refer variable pointers back to provider
+Refer-back variable pointers
 
 With each pointer, associate an enum representing (a) whether the pointer was
 taken locally and if not, (b) which interface (hence which other object) it came
-from. Dereference function should decode this then forward the call to that
-object's dereferencer function. The new interface is called a deref interface
-and is made via the (const) backchannel pointer.
+from. This other object is the referee object. 
 
-Note: this new call may pass a pointer as a param, in which case that object may
-gain a new enum value and dereferencer object. Therefore this step must iterate
-until no more new deref interfaces are required. Only two deref interfaces are
-needed between each pair of objects for each type (one either way) so the
-iterations will terminate.
+In case (b) the deref function should decode the pointer then forward the call
+to the referee object's dereferencer function via a new interface on the referee
+object. The new interface is called a deref interface and is made via the
+(const) backchannel pointer.
+
+Note: this new call may pass some other pointer, in which case the referee
+object may gain a new enum value for which the original object is referee.
+Therefore this step must iterate until no more new deref interfaces are
+required. Only two deref interfaces are needed between each pair of objects for
+any given pointed-to type (one in each direction) so the iterations will
+terminate.
 
 Invariant: all inter-object calls are now via const pointers; interpretation of
 variable pointers is now local
