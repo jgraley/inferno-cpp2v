@@ -4,17 +4,17 @@ Available under the terms of the BSD license.
 
 
 This file lists the steps in the mapping process. Currently rather brief and 
-ambigous I'm afraid, and more detail will go in over time. 
+ambiguous I'm afraid, and more detail will go in over time. 
 
 Since this is likely to change repeatedly, it will be kept under version
 control. 
 Steps are not numbered to avoid the need to renumber after insert or delete; 
-instead they are seperated by long lines of -.
+instead they are separated by long lines of -.
 
 Invariants will usually be the absence of types of constructs or guarantees
 about behaviour/properties of parts of the system. Occasionally they may be
 expression of redundancy (duplication of information in the program though
-guaranteed equivilances) though this is discouraged.
+guaranteed equivalences) though this is discouraged.
 
 
 @todo early steps for RTTI, Exceptions
@@ -36,7 +36,7 @@ these objects will be treated like fundamental types
 
 Note: this means that const members will need to be un-consted except in the
 case of static objects with sufficiently simple initialisation algorithms.
-Optimisations could include converting member poointers initialised by new()
+Optimisations could include converting member pointers initialised by new()
 into member objects and detecting when a constructor parameter is always
 supplied from a const.
 
@@ -157,9 +157,9 @@ Invariant: all variables are static or members
 
 Note: we have to do this before any SystemC stuff, because it needs all objects
 to be static (or members). But we will add more locals later and so this step
-will be repeated later. Hopefully re-use implmentation!
+will be repeated later. Hopefully re-use implementation!
 
-Note: furthermore, "add dereferencing layer" lowering neest *all* locals to be
+Note: furthermore, "add dereferencing layer" lowering needs *all* locals to be
 memberised first, so moved up again and now applies to all locals
 
 ----------------------------------------------------------------------------
@@ -174,7 +174,7 @@ with the corresponding function.
 
 Invariant: no pointer dereferences outside special dereferencer functions
 
-Note: p->f() and equivilantly (*p).f() should *not* be broken down into the *p
+Note: p->f() and equivalently (*p).f() should *not* be broken down into the *p
 and the .f() but should be treated as a unit (becomes deref_f(p))
 
 Note: there's now no problem with copying the object because we always bring the
@@ -261,7 +261,7 @@ Note: this gives us SystemC's "blocking TLM" style.
 Note: Possible major problem here supporting inter-object recursion between this
 step and the "make transactions non-blocking" step. Since each object's local
 context "camps" in the other object's function while awaiting completion of the
-call it is not straightforward for it to resume chacking for incoming calls
+call it is not straightforward for it to resume checking for incoming calls
 while waiting. Solution is to employ a pool of contexts for each object and use
 a "wake one waiter" event mechanism to ensure we select one waiting context for
 each incoming call. Hopefully SystemC supports this.
@@ -400,7 +400,7 @@ Invariant: sections of code between labels is now combable
 State-out
 
 Surround the entire function with a switch statement on the state variable.
-Generate a case for each label ending just beofre the next label. Insert a break
+Generate a case for each label ending just before the next label. Insert a break
 at the end of each case. Remove the gotos, leaving only the assignments to the
 state variable. 
 
