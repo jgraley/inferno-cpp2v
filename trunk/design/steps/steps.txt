@@ -250,6 +250,8 @@ Replace Obj *p; with SystemC ports eg sc_port<Obj>.
 
 Invariant: no pointers
 
+Note: ports require 1:1 relationships
+
 Note: this gives us SystemC's "direct TLM" style. 
 
 ----------------------------------------------------------------------------
@@ -284,6 +286,8 @@ Note: Since the return call and the kick will come *before* the outgoing call
 returns and the wait begins (which is why we call it fake) the semaphore should
 be 1-in-1-out.
 
+Note: return call is a "functriono". Incoming call looks like one but isn't really.
+
 ----------------------------------------------------------------------------
 Make transactions non-blocking
 
@@ -298,6 +302,8 @@ Note: this gives us SystemC's "non-blocking TLM" style.
 Note: Now reduce to one local context. Wait for outgoing calls to return by
 recursing back into the context's executive function. This supports recursive
 calls.
+
+Note: both calls are functrinos.
 
 ----------------------------------------------------------------------------
 Passivate
