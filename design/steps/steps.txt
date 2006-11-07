@@ -272,32 +272,39 @@ while waiting. Solution is to employ a pool of contexts for each object and use
 a "wake one waiter" event mechanism to ensure we select one waiting context for
 each incoming call. Hopefully SystemC supports this.
 
+Note: only change callee (upper executive)
+
 ----------------------------------------------------------------------------
 Move to 2-phase transactions
 
-Turn incoming calls into "fake" nonblocking by adding a return call (via
-backchannel) after the waits, just before the original called function returns.
+Turn function calls into "fake" nonblocking by adding a new call back to the
+original caller after processing is complete, just before the original called
+function returns. This is called a return functrino.
 Outgoing calls should wait after making the initial call and then kick
-themselves in the return function.
+themselves in the return functrino.
 
 Invariant: no return values on inter-object calls
 
-Note: Since the return call and the kick will come *before* the outgoing call
-returns and the wait begins (which is why we call it fake) the semaphore should
-be 1-in-1-out.
+Note: only change caller (lower executive)
 
-Note: return call is a "functriono". Incoming call looks like one but isn't really.
+Note: incoming call looks like a funtrino to the caller but isn't implemented
+as one. Hence "fake" 2-phase.
+
+Note: Since the return functrino and the kick will come *before* the outgoing
+call
+returns and the wait begins the semaphore should be 1-in-1-out.
 
 ----------------------------------------------------------------------------
 Make transactions non-blocking
 
 The incoming call should return immediately after kicking the local context. The
-local context should still kick the caller's thread on completion - only
-difference is that the caller is now waiting in its own code.
+return funtrino should now come from the callee's local context if not already. 
 
-Invariant: all inter-object calls are notionally instantaneous
+Invariant: all inter-object calls are functrinos
 
 Note: this gives us SystemC's "non-blocking TLM" style. 
+
+Note: only change callee (upper executive)
 
 Note: Now reduce to one local context. Wait for outgoing calls to return by
 recursing back into the context's executive function. This supports recursive
@@ -306,14 +313,33 @@ calls.
 Note: both calls are functrinos.
 
 ----------------------------------------------------------------------------
+Add channels
+
+Create a new "channel" (in the SystemC TLM sense) for each caller-callee pair of
+objects. Forward the functrinos. 
+
+Note: the channel implementation we create will not be stated out but instead
+will be converted to wires (=signals) by the protocol step(s) (which have not
+been added yet at the time of writing). They will mostly be boiler-plate code.
+
+Note: changes caller and callee but trivially (outgoing functrinos go to
+channel)
+
+----------------------------------------------------------------------------
 Passivate
 
-Create a pure "channel" object for each pair of objects that interact (call each
-other). Provide it with purely passive 2-phase interfaces for caller and callee
-such that all calls between objects go into the channel and the channel kicks
-(wakes up) the objects when something interesting happens.
+Modify the channel. Provide it with passive (call-in) 2-phase interfaces for
+both caller and callee. All functrinos go into the channel and the channel kicks
+(wakes up) the callee which then collects the parameters. 
 
-Invariant: objects do not receive incoming calls
+Invariant: objects do not receive incoming functrinos
+
+Note: after this step, a functrino is still used to pass a message to the
+channel, but to get the message out at the other end we have an event followed
+by a "get params" type call on the channel. Maybe the latter is an
+anti-functriono?
+
+Note: only change functrino recipiants
 
 ----------------------------------------------------------------------------
 Insert clock and reset
@@ -461,3 +487,6 @@ sc_bitvec<5> all the way through the process.
 
 
 @todo late steps for dealing with wire vs latch vs flip-flop
+@todo replace events with some kind of protocol - maybe just after insert
+clock/reset
+
