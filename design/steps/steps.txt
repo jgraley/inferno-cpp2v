@@ -340,18 +340,8 @@ anti-functriono?
 Note: only change functrino recipiants
 
 ----------------------------------------------------------------------------
-Insert clock and reset
-
-Move all classes to SC_CTHREAD. Replace all wait(event) with while(!event)
-wait(clk).
-
-Invariant: clock edge is the only event
-
-Note: not sure about clock distribution or how to handle reset.
-
-Note: might be able to do this step later if waits are implemented as "send
-event to self" type loops - iterations of that loop can then become clock
-periods after all the stating-out.
+Placeholder for protocol steps soon to be added
+all wait(event) will become poll loops based on delay()
 
 ----------------------------------------------------------------------------
 Lower constructs
@@ -445,13 +435,24 @@ Note: we are taking advantage of the fact that SC_CTHREAD loops infinitely
 ----------------------------------------------------------------------------
 Extract waits
 
-Replace all wait() calls with a single one at the bottom of the function.
+Replace all delay() calls with a single one at the bottom of the function.
 
-Invariant: no non-trivial context across a wait()
+Invariant: no non-trivial context across a delay()
 
-Note: this is possible because all the wait() calls are at the ends of state
+Note: this is possible because all the delay() calls are at the ends of state
 cases and there's nothing after them until you get to the bottom of the
 function.
+
+----------------------------------------------------------------------------
+Insert clock and reset
+
+Move all classes to SC_CTHREAD. Replace the delay() at the bottom with 
+wait(clk).
+
+Invariant: no more arbitrary delay() calls - all events explicitly controlled 
+by clock
+
+Note: not sure about clock distribution or how to handle reset.
 
 ----------------------------------------------------------------------------
 Remove local context
