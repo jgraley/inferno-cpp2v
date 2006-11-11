@@ -415,7 +415,7 @@ Lower constructs that are not supported in combable (synthesisable) verilog into
 conditional branches ie if(cond) goto label; Also after each delay(); add a goto
 WAIT_STATE; WAIT_STATE:; 
 
-Invariant: all constructs synthesisable or trivially stated-out
+Invariant: all constructs synthesisable or can be trivially stated-out
 
 Note: there's some flexibility here in how much stuff we lower. It corresponds
 to design tradeoffs in the final HW. Any construct surrounding a label must
