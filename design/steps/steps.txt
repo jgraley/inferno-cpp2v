@@ -177,7 +177,7 @@ Invariant: no pointer dereferences outside special dereferencer functions
 Note: p->f() and equivalently (*p).f() should *not* be broken down into the *p
 and the .f() but should be treated as a unit (becomes deref_f(p))
 
-Note: there's now no problem with copying the object because we always bring the
+Note: there's now no need to copy the object because we always bring the
 action to the object, not the other way around
 
 Note: only do this to variable pointers!
