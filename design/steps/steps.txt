@@ -290,7 +290,8 @@ as one. Hence "fake" 2-phase.
 
 Note: Since the return functrino and the kick will come *before* the outgoing
 call
-returns and the wait begins the semaphore should be 1-in-1-out.
+returns and the wait begins the semaphore should be 1-in-1-out (or a 1-queue 
+event).
 
 ----------------------------------------------------------------------------
 Make transactions non-blocking
