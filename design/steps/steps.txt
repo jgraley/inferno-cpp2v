@@ -340,17 +340,6 @@ anti-functrino?
 Note: only change functrino recipients
 
 ----------------------------------------------------------------------------
-Introduce minor delay
-
-Introduce a primitive called delay() which generates an event to the current
-thread then waits for it. This is called a minor delay.
-
-Invariant: can now express minor delays
-
-Note: when we add protocols, we need to be able to avoid combinational loops
-so we use this primitive to break them. 
-
-----------------------------------------------------------------------------
 Make transactions 0-queue
 
 For each channel, add an "ack" channel which goes the in the other direction
@@ -373,6 +362,17 @@ to signal the event and a data-only channel for the data.
 Invariant: can now treat the two kinds of channels separately
 
 Note: the ack channel is already an event-only channel
+
+----------------------------------------------------------------------------
+Introduce minor delay
+
+Introduce a primitive called delay() which generates an event to the current
+thread then waits for it. This is called a minor delay.
+
+Invariant: can now express minor delays
+
+Note: when we add protocols, we need to be able to avoid combinational loops
+so we use this primitive to break them. 
 
 ----------------------------------------------------------------------------
 Move to signals
