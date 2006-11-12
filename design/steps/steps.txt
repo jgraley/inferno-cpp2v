@@ -82,29 +82,23 @@ though a constant pointer initialised at construct time.
 Invariant: All inter-object calls go through a pointer
 
 ----------------------------------------------------------------------------
-Outgoing interfaces
-
-Add interfaces to each object to represent the calls it makes to other objects. 
-
-Note: Still not completely sure if we need this.
-
-----------------------------------------------------------------------------
-Forward at class boundaries
+Forwarding and 1:1
 
 Any call from a member object to an external object or vice-versa should be
 forwarded through new thunk functions within the object. These will develop into
-arbiters. Inter-object calls should now be 1:1 correspondence.
+arbiters. For each interface that is used (has >0 call sites) create a forwarding 
+funciton for each call site f1, f2, ... *and* another one fd. all the f1, f2, ...
+should call fd which finally forwards the call to the destination. 
 
-Invariant: Each interface has only one caller
+Invariant: Inter-server calls should now be 1:1 correspondence.
 
-----------------------------------------------------------------------------
-Add backchannels
+Note: f1, f2, ... and fd should all be marked for merging during "merge 
+functions" step.
 
-Add a marker of some sort at each interface that refers to its (now unique)
-caller. This is useful to later steps. A partial check could look at
-__builtin_return_address().
+Note: if f1, f2, ... are to go in the same server as the destination, then fd
+may be omitted.
 
-Invariant: Any static (const pointer) interaction may be reversed
+Note: Do the right thing for calls out of objects as well as into.
 
 ----------------------------------------------------------------------------
 Lower NULL pointers
@@ -223,25 +217,6 @@ boundaries" steps.
 Invariant: no variable pointers
 
 Note: not const pointers!!
-
-----------------------------------------------------------------------------
-Merge member functions
-
-Merge all the member functions in a class into a single one that uses a big
-switch statement to select the implementation based on a new enum param. Other
-parameters should be grouped into a struct for each of the original member
-functions then unioned together for the big function.
-
-Invariant: all calls are simple recursions
-
-Note: this single function is now the run function. All other calls (apart from
-SystemC ones which don't count) have now become simple recursions of this
-function.
-
-Note: originally was before memberise locals, but that proved impossible due to
-pointer lowering steps. Now this is above structural steps to make them easier,
-but if that proves wrong (or structural steps invalidate this step's invariant)
-then this step may be moved back to below structural.
 
 ----------------------------------------------------------------------------
 Change const pointers to ports
@@ -408,6 +383,24 @@ so we can state-out the loop.
 
 Note: we may not need this if using asynchronous technology. State-out should be
 able to still work if we skip this step leaving wait(x) in place of delay() loops.
+
+----------------------------------------------------------------------------
+Merge member functions
+
+Merge all the member functions in a class into a single one that uses a big
+switch statement to select the implementation based on a new enum param. Other
+parameters should be grouped into a struct for each of the original member
+functions then unioned together for the big function.
+
+Invariant: all calls are simple recursions
+
+Note: this single function is now the run function. All other calls (apart from
+SystemC ones which don't count) have now become simple recursions of this
+function.
+
+Note: originally was before memberise locals, but that proved impossible due to
+pointer lowering steps. This must be done after structural steps to ensure we
+keep seperate call interfaces for seperate call sites (1:1 wiring).
 
 ----------------------------------------------------------------------------
 Lower constructs
