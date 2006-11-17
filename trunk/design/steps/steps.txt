@@ -20,6 +20,27 @@ guaranteed equivalences) though this is discouraged.
 @todo early steps for templates, RTTI, Exceptions
 
 ----------------------------------------------------------------------------
+Specify servers
+
+Determine (by whatever means) how the member functions and trivial 
+(non-object) member variables will be divided up into servers. Insert servers
+as a hierarchical level between class level and individual functions and POD
+data members.
+
+Invariant: Sequential/structural divide now explicit 
+
+Note: Member objects exist at same level as servers, but servers are not 
+nestable.
+
+Note: Test code generation should strip out the server layer.
+
+Note: We do this early because other steps add functions to classes and in 
+some cases we need to specifiy server structure. 
+
+Note: servers do not nest and exist beow objects. Hence a server may not
+contain another server or an object. An object may contain both.
+
+----------------------------------------------------------------------------
 Make constructors/destructors explicit
 
 All constructors, copy constructors and destructors get turned into regular
@@ -27,6 +48,7 @@ member functions and we add explicit calls to them in the code. Need to treat
 each kind of scope correctly: static, member, heap, local. If an object is
 passed by value and has a copy constructor, we must turn that into pass by
 reference and then insert the copy construct call at the top of the function.
+New functions go in same server as original con/de-structors.
 
 Invariant: pass-by-value only for memcpy()able objects; actual object lifecycle
 may now differ from that in the original program
@@ -51,6 +73,10 @@ constant.
 Note: No need to worry about constructors/destructors since that should have
 been dealt with in the previous step.
 
+Note: Maybe place in a class if use cases are all below that class (ie 
+coming from member funcitons or member objects). New and delete for a given 
+type go in the same server.
+
 ----------------------------------------------------------------------------
 Eliminate this->
 
@@ -66,7 +92,8 @@ Note: Strictly an optimisation, but the invariant helps to clarify.
 Use Get()/Set()
 
 For fundamental types that are exposed publically, make all inter-object reads
-and writes be function calls.
+and writes be function calls. New functions go in same server as the public 
+member.
 
 Invariant: every inter-object interaction is a function call
 
@@ -82,23 +109,28 @@ though a constant pointer initialised at construct time.
 Invariant: All inter-object calls go through a pointer
 
 ----------------------------------------------------------------------------
-Forwarding and 1:1
+Object boundary forwarding
 
-Any call from a member object to an external object or vice-versa should be
-forwarded through new thunk functions within the object. These will develop into
-arbiters. For each interface that is used (has >0 call sites) create a forwarding 
-funciton for each call site f1, f2, ... *and* another one fd. all the f1, f2, ...
-should call fd which finally forwards the call to the destination. 
+Introduce thunk functions (trivial forwarding of the call) such that any call 
+from a member object to an external object or vice-versa is forwarded through 
+a new thunk function within the object. The new thunk function should exist
+in a new server.
+
+Invariant: call calls into or out of an object are forwarded hence visible at 
+the object's class definition.
+
+----------------------------------------------------------------------------
+1:1 caller-callee relationship
+
+Whenever a function fd is called by more than one external server, add 
+new functions f1, f2, ... within fd's server, one for each calling server. 
+The servers should now call the f1, f2 etc and they should forward to fd.
 
 Invariant: Inter-server calls should now be 1:1 correspondence.
 
-Note: f1, f2, ... and fd should all be marked for merging during "merge 
-functions" step.
-
-Note: if f1, f2, ... are to go in the same server as the destination, then fd
-may be omitted.
-
-Note: Do the right thing for calls out of objects as well as into.
+Note: This will result in router/arbiter functionality in each server affected.
+Servers generated during the object boundary forwarding step will become 
+dedicated arbiters. Nice.
 
 ----------------------------------------------------------------------------
 Lower NULL pointers
@@ -140,12 +172,12 @@ that we will generate for refs don't need to support either of these things.
 ----------------------------------------------------------------------------
 Memberise locals
 
-Generate a data structure to represent the local variables. Use unions for
-variables whose scope does not overlap. Add an array of these structures, up to
-the max nesting depth, as a class member. Create a member stack pointer which
-should be initialised to zero. Increment it at the start of the function and
-decrement just before returning. Change all code to use the array indexed by the
-stack pointer.
+Generate a data structure to represent the local variables in each server. Use 
+unions for variables whose scope does not overlap. Add an array of these 
+structures, up to the max nesting depth, as a server member. Create a member 
+stack pointer which should be initialised to zero. Increment it at the start 
+of the function and decrement just before returning. Change all code to use the 
+array indexed by the stack pointer.
 
 Invariant: all variables are static or members
 
@@ -157,66 +189,58 @@ Note: furthermore, "add dereferencing layer" lowering needs *all* locals to be
 memberised first, so moved up again and now applies to all locals
 
 ----------------------------------------------------------------------------
-Add dereferencing layer
+Add server-level dereferencing layer
 
-Add functions to each class, for each type required, that forward function calls
-to member objects based on a pointer. So if member objects a and b of type C
-both have a function footle( int x ) then we create deref_footle( C *p, int x )
-which invokes the correct footle() based on p. For fundamental types add eg
+For each server, create an enum with a value for each address-of operation on
+a different object/POD data item. This include taking the address of objects or
+data outside of the server. Substitute the enum value for the address.
+
+Add functions to each server, for each enum value, that forward function calls 
+to the corresponding object/POD item. So if member objects a and b of type C both 
+have a function footle( int x ) then we create deref_footle( C *p, int x ) which 
+invokes the correct footle() based on p. For fundamental types add eg
 deref_get( type *p ) and deref_set( type *p, type val ). Replace pointer derefs
 with the corresponding function. 
 
-Invariant: no pointer dereferences outside special dereferencer functions
+Invariant: server handles all derefs of internal data
 
 Note: p->f() and equivalently (*p).f() should *not* be broken down into the *p
 and the .f() but should be treated as a unit (becomes deref_f(p))
 
-Note: there's now no need to copy the object because we always bring the
-action to the object, not the other way around
+Note: there's now no need to copy the data because we always bring the
+action to the data, not the other way around
 
 Note: only do this to variable pointers!
+
+Note: assumes we can call anything whose address can be taken @todo may mean 
+we have to do object boundary forwarding of address-of somehow.
+
+Note: since >1 server in an object may have deref functions for the same
+data type, we need to unique-ise the names, at least for testing.
 
 ----------------------------------------------------------------------------
 Refer-back variable pointers
 
 With each pointer, associate an enum representing (a) whether the pointer was
-taken locally and if not, (b) which interface (hence which other object) it came
-from. This other object is the referee object. 
+taken locally and if not, (b) which server it came from. Or just add values to 
+the existing enum. This other server is the referee server. 
 
-In case (b) the deref function should decode the pointer then forward the call
-to the referee object's dereferencer function via a new interface on the referee
-object. The new interface is called a deref interface and is made via the
-(const) backchannel pointer.
+In case (b) add a deref function that decodes the pointer then forwards the call
+to the referee server's dereferencer function. 
 
 Note: this new call may pass some other pointer, in which case the referee
-object may gain a new enum value for which the original object is referee.
-Therefore this step must iterate until no more new deref interfaces are
-required. Only two deref interfaces are needed between each pair of objects for
+server may gain a new enum value for which the original server is referee.
+Therefore this step must iterate until no more new deref calls are
+required. Only two deref calls are needed between each pair of objects for
 any given pointed-to type (one in each direction) so the iterations will
 terminate.
 
-Invariant: all inter-object calls are now via const pointers; interpretation of
+Invariant: all inter-server calls are now via const pointers; interpretation of
 variable pointers is now local
 
 Note: only do this to variable pointers!
 
 Note: new call also needs a backchannel
-
-----------------------------------------------------------------------------
-Enumerate local variable pointers
-
-Create an enum for all member objects whose address gets taken. Substitute an
-enum ie PTR_X for each &x and get the deref function to decode the enum and
-return x as required.
-
-Note: this includes non-trivial class objects; otherwise taking their address
-would require a new channel between parent and child that isn't required
-otherwise and wasn't processed in the "Outgoing interfaces" or "Forward at class
-boundaries" steps.
-
-Invariant: no variable pointers
-
-Note: not const pointers!!
 
 ----------------------------------------------------------------------------
 Change const pointers to ports
@@ -232,16 +256,16 @@ Note: this gives us SystemC's "direct TLM" style.
 ----------------------------------------------------------------------------
 Add local context
 
-Derive all classes from SC_THREAD. Incoming calls should wake the local context
+Add an SC_THREAD for each server. Incoming calls should wake the local context
 and wait for it to complete before returning.
 
-Invariant: no cumulative nesting in calls between objects
+Invariant: no cumulative nesting in calls between servers
 
 Note: this gives us SystemC's "blocking TLM" style. 
 
-Note: Possible major problem here supporting inter-object recursion between this
-step and the "make transactions non-blocking" step. Since each object's local
-context "camps" in the other object's function while awaiting completion of the
+Note: Possible major problem here supporting inter-server recursion between this
+step and the "make transactions non-blocking" step. Since each server's local
+context "camps" in the other server's function while awaiting completion of the
 call it is not straightforward for it to resume checking for incoming calls
 while waiting. Solution is to employ a pool of contexts for each object and use
 a "wake one waiter" event mechanism to ensure we select one waiting context for
@@ -258,7 +282,7 @@ function returns. This is called a return functrino.
 Outgoing calls should wait after making the initial call and then kick
 themselves in the return functrino.
 
-Invariant: no return values on inter-object calls
+Invariant: no return values on inter-server calls
 
 Note: incoming call looks like a functrino to the caller but isn't implemented
 as one. Hence "fake" 2-phase.
@@ -274,7 +298,7 @@ Make transactions non-blocking
 The incoming call should return immediately after kicking the local context. The
 return functrino should now come from the callee's local context if not already. 
 
-Invariant: all inter-object calls are functrinos
+Invariant: all inter-server calls are functrinos
 
 Note: this gives us SystemC's "non-blocking TLM" style. 
 
@@ -290,7 +314,7 @@ Note: both calls are functrinos.
 Add channels
 
 Create a new "channel" (in the SystemC TLM sense) for each caller-callee pair of
-objects. Forward the functrinos. 
+server. Forward the functrinos. 
 
 Note: the channel implementation we create will not be stated out but instead
 will be converted to wires (=signals) by the protocol step(s) (which have not
@@ -387,16 +411,16 @@ able to still work if we skip this step leaving wait(x) in place of delay() loop
 ----------------------------------------------------------------------------
 Merge member functions
 
-Merge all the member functions in a class into a single one that uses a big
+Merge all the member functions in a server into a single one that uses a big
 switch statement to select the implementation based on a new enum param. Other
 parameters should be grouped into a struct for each of the original member
 functions then unioned together for the big function.
 
 Invariant: all calls are simple recursions
 
-Note: this single function is now the run function. All other calls (apart from
-SystemC ones which don't count) have now become simple recursions of this
-function.
+Note: this single function is now the server's run function. All other calls 
+(apart from SystemC ones which don't count) have now become simple recursions 
+of this function.
 
 Note: originally was before memberise locals, but that proved impossible due to
 pointer lowering steps. This must be done after structural steps to ensure we
