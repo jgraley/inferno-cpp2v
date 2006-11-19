@@ -31,7 +31,7 @@ programs anyway.
 Remove stack unwind
 
 Whenever a function can throw an exception, arrange for the function to catch 
-all exceptions and return the excption object. If a return value exists already
+all exceptions and return the exception object. If a return value exists already
 then combine in a struct. Object should be a null object if there was no 
 exception. 
 
@@ -47,7 +47,7 @@ Remove try and catch keywords leaving pairs of plain scopes. Insert a goto
 to skip what was the catch block. Convert throw into a goto to the beginning 
 of the catch block. Use a local to hold the exception object. 
 
-Invariant: no excpetion handling
+Invariant: no exception handling
 
 Note: this step could be moved down to state-out if required: the above
 "Remove stack unwind" is the part that has to be done early.
@@ -70,7 +70,7 @@ Where class B inherits from class A, copy non-overridden functions from A
 to B. Also copy any functions that are overridden but get called explicitly
 via eg A::f()
 
-Invariant: no interitance
+Invariant: no inheritance
 
 Note: Need a strategy for multiple inheritance
 
@@ -93,9 +93,9 @@ nestable.
 Note: Test code generation should strip out the server layer.
 
 Note: We do this early because other steps add functions to classes and in 
-some cases we need to specifiy server structure. 
+some cases we need to specify server structure. 
 
-Note: servers do not nest and exist beow objects. Hence a server may not
+Note: servers do not nest and exist below objects. Hence a server may not
 contain another server or an object. An object may contain both.
 
 ----------------------------------------------------------------------------
@@ -495,7 +495,7 @@ of this function.
 
 Note: originally was before memberise locals, but that proved impossible due to
 pointer lowering steps. This must be done after structural steps to ensure we
-keep seperate call interfaces for seperate call sites (1:1 wiring).
+keep separate call interfaces for separate call sites (1:1 wiring).
 
 ----------------------------------------------------------------------------
 Lower constructs
