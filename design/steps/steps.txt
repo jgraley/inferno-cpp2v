@@ -606,7 +606,8 @@ wait(clk).
 Invariant: no more arbitrary delay() calls - all events explicitly controlled 
 by clock
 
-Note: not sure about clock distribution or how to handle reset.
+Note: not sure about clock distribution or how to handle reset. Maybe reset 
+should zero all stored data as a first step in startup.
 
 ----------------------------------------------------------------------------
 Remove local context
@@ -619,15 +620,6 @@ Note: this is really a pattern reduction: SC_CTHREAD{ ...; wait(); } becomes
 SC_METHOD{ ...; }. If any functions don't match the pattern we have an error.
 
 ----------------------------------------------------------------------------
-Initialise data
-
-All initialised statics to be initialised in a "initial" block.
-
-Invariant: no inline initialisation
-
-Note: how do initial blocks in SC?
-
-----------------------------------------------------------------------------
 Lower types
 
 Convert types like char, int into bit vectors. Support bit fields properly. Bool
@@ -638,8 +630,20 @@ Invariant: no types unknown to Verilog
 Note: we will hopefully be able to tolerate arbitrary bit vectors in SC form eg
 sc_bitvec<5> all the way through the process.
 
+----------------------------------------------------------------------------
+Implement variables as registers and wires
 
-@todo late steps for dealing with wire vs latch vs flip-flop
-@todo replace events with some kind of protocol - maybe just after insert
-clock/reset
+Create some combination of registers and wires in place of variables. Try to
+avoid duplicating the combing-out that Verilog can do for us.
+
+Invariant: storage elements represented in a Verilog-compatible style.
+
+----------------------------------------------------------------------------
+Go to Verilog
+
+Insert Verilog constructs as follows: objects->modules; servers(=functions)->
+always blocks and everything else maps as usual. Use synthesisible Verilog 
+2001. Always blocks should be the clocked kind.
+
+Invariant: program is now verilog
 
