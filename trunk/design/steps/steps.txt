@@ -112,7 +112,7 @@ Invariant: pass-by-value only for memcpy()able objects; actual object lifecycle
 may now differ from that in the original program
 
 Note: We choose not to generate any copy constructor if not already there -
-these objects will be treated like fundamental types
+these objects will be treated like POD types
 
 Note: this means that const members will need to be un-consted except in the
 case of static objects with sufficiently simple initialisation algorithms.
@@ -151,7 +151,7 @@ Note: Strictly an optimisation, but the invariant helps to clarify.
 ----------------------------------------------------------------------------
 Use get()/set()
 
-For fundamental types that are exposed publically, make all inter-object reads
+For POD types that are exposed publically, make all inter-object reads
 and writes be function calls. New functions go in same server as the public 
 member.
 
@@ -173,7 +173,7 @@ should exist in the same server as the corresponding data.
 Invariant: A function call takes place whenever inter-object addresses are 
 taken. Also, & now only used for POD in the same server (except for case (a))
 
-Note: Do not generate for non-trivial member objects - their address should 
+Note: Do not generate for member objects - their address should 
 be got by calling them directly. This is important for routing etc.
 
 Note: case (a) doesn't actually need to return any meaningful data. The sole
@@ -264,13 +264,12 @@ memberised first, so moved up again and now applies to all locals
 Add server-level dereferencing layer
 
 For each server, create an enum with a value for each address-of operation on
-a different object/POD data item. This include taking the address of objects or
-data outside of the server. Substitute the enum value for the address.
+a different POD data item. Substitute the enum value for the address.
 
 Add functions to each server, for each enum value, that forward function calls 
-to the corresponding object/POD item. So if member objects a and b of type C both 
-have a function footle( int x ) then we create deref_footle( C *p, int x ) which 
-invokes the correct footle() based on p. For fundamental types add eg
+to the corresponding object/POD item. So if member objects a and b of type C 
+both have a function footle( int x ) then we create deref_footle( C *p, int x ) 
+which invokes the correct footle() based on p. For POD types add eg
 deref_get( type *p ) and deref_set( type *p, type val ). Replace pointer derefs
 with the corresponding function. 
 
@@ -316,7 +315,7 @@ Note: new call also needs a backchannel
 ----------------------------------------------------------------------------
 Change const pointers to ports
 
-Replace Obj *p; with SystemC ports eg sc_port<Obj>.
+Replace Obj *p with SystemC ports eg sc_port<Obj>.
 
 Invariant: no pointers
 
@@ -325,9 +324,9 @@ Note: ports require 1:1 relationships
 Note: this gives us SystemC's "direct TLM" style. 
 
 ----------------------------------------------------------------------------
-Add local context
+Add server context
 
-Add an SC_THREAD for each server. Incoming calls should wake the local context
+Add an SC_THREAD for each server. Incoming calls should wake the server context
 and wait for it to complete before returning.
 
 Invariant: no cumulative nesting in calls between servers
@@ -366,8 +365,8 @@ event).
 ----------------------------------------------------------------------------
 Make transactions non-blocking
 
-The incoming call should return immediately after kicking the local context. The
-return functrino should now come from the callee's local context if not already. 
+The incoming call should return immediately after kicking the server context. The
+return functrino should now come from the callee's server context if not already. 
 
 Invariant: all inter-server calls are functrinos
 
@@ -375,7 +374,7 @@ Note: this gives us SystemC's "non-blocking TLM" style.
 
 Note: only change callee (upper executive)
 
-Note: Now reduce to one local context. Wait for outgoing calls to return by
+Note: Now reduce to one server context. Wait for outgoing calls to return by
 recursing back into the context's executive function. This supports recursive
 calls.
 
@@ -610,7 +609,7 @@ Note: not sure about clock distribution or how to handle reset. Maybe reset
 should zero all stored data as a first step in startup.
 
 ----------------------------------------------------------------------------
-Remove local context
+Remove server context
 
 Move to SC_METHOD. Remove the wait() call.
 
