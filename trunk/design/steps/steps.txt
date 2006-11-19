@@ -149,7 +149,7 @@ pointers.
 Note: Strictly an optimisation, but the invariant helps to clarify.
 
 ----------------------------------------------------------------------------
-Use Get()/Set()
+Use get()/set()
 
 For fundamental types that are exposed publically, make all inter-object reads
 and writes be function calls. New functions go in same server as the public 
@@ -161,12 +161,24 @@ Note: the pointer *could* equal "this", but only if it's non-constant in which
 case we must support the possibility that it is not "this".
 
 ----------------------------------------------------------------------------
-Call through pointers
+Add addressof functions
 
-Get rid of all direct calls between objects eg x.y() and replace with calls
-though a constant pointer initialised at construct time.
+Add member functions to each object that return the address of (a) the object 
+itself (addressof()) and (b) the addresses of any public POD data member x
+(x_addressof()). Replace &y with y.addressof() as appropriate.
 
-Invariant: All inter-object calls go through a pointer
+A new server should be created for case (a), and in case (b) the functions
+should exist in the same server as the corresponding data.
+
+Invariant: A function call takes place whenever inter-object addresses are 
+taken. Also, & now only used for POD in the same server (except for case (a))
+
+Note: Do not generate for non-trivial member objects - their address should 
+be got by calling them directly. This is important for routing etc.
+
+Note: case (a) doesn't actually need to return any meaningful data. The sole
+purpose of the call is to establish routing so that derefs can be routed back 
+to the object.
 
 ----------------------------------------------------------------------------
 Object boundary forwarding
@@ -272,8 +284,7 @@ action to the data, not the other way around
 
 Note: only do this to variable pointers!
 
-Note: assumes we can call anything whose address can be taken @todo may mean 
-we have to do object boundary forwarding of address-of somehow.
+Note: assumes we can call anything whose address can be taken.
 
 Note: since >1 server in an object may have deref functions for the same
 data type, we need to unique-ise the names, at least for testing.
