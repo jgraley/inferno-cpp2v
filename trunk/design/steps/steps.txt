@@ -17,7 +17,65 @@ expression of redundancy (duplication of information in the program though
 guaranteed equivalences) though this is discouraged.
 
 
-@todo early steps for templates, RTTI, Exceptions
+----------------------------------------------------------------------------
+Expand templates
+
+Expand all template instantiations. 
+
+Invariant: no templates
+
+Note: this will make the program bigger, but that's what templates do to
+programs anyway.
+
+----------------------------------------------------------------------------
+Remove stack unwind
+
+Whenever a function can throw an exception, arrange for the function to catch 
+all exceptions and return the excption object. If a return value exists already
+then combine in a struct. Object should be a null object if there was no 
+exception. 
+
+Calls to such functions should be in try blocks and if an exception is returned
+should re-throw it.
+
+Invariant: return is the only path out of a function
+
+----------------------------------------------------------------------------
+Lower try/throw/catch
+
+Remove try and catch keywords leaving pairs of plain scopes. Insert a goto 
+to skip what was the catch block. Convert throw into a goto to the beginning 
+of the catch block. Use a local to hold the exception object. 
+
+Invariant: no excpetion handling
+
+Note: this step could be moved down to state-out if required: the above
+"Remove stack unwind" is the part that has to be done early.
+
+Note: the additional destructor calls get added in the "Make constructors/
+destructors explicit" step further down. This is triggered by the gotos.
+
+----------------------------------------------------------------------------
+Implement run-time type information
+
+Implement typeof and dynamic_cast as virtual member functions within 
+class hierarchies and modify calls to be member calls.
+
+Invariant: no RTTI
+
+----------------------------------------------------------------------------
+Expand inheritance
+
+Where class B inherits from class A, copy non-overridden functions from A
+to B. Also copy any functions that are overridden but get called explicitly
+via eg A::f()
+
+Invariant: no interitance
+
+Note: Need a strategy for multiple inheritance
+
+Note: Duplicating the functions seems wasteful but it isn't: all the 
+functions get duplicated per-object anyway.
 
 ----------------------------------------------------------------------------
 Specify servers
@@ -61,6 +119,8 @@ case of static objects with sufficiently simple initialisation algorithms.
 Optimisations could include converting member pointers initialised by new()
 into member objects and detecting when a constructor parameter is always
 supplied from a const.
+
+Note: destructors must get called at early returns and gotos out of scopes!
 
 ----------------------------------------------------------------------------
 Staticise heap
