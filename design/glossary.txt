@@ -1,7 +1,21 @@
 Glossary
 --------
 
+Ack, acknowledgement - an event that is sent via a backchannel in response to another event. This can be for managing protocol event lines or to aid in the transfer of associated data.
+
+Active - a way of receiving an event and data via an explicit function or functrino call, as is typically found in functional languages and C/C++. See Passive.
+
+Back-channel - A channel (in its broader sense) that joins the same pair of subsystems as an existing channel bu which passes events and data in the opposite direction. Used for various reasons. See channel.
+
+Channel - a persistent communication primative between two subsystems that permits events and data to be propogated. We use the word in the SystemC TLM sense, which is a specialisation of the above definition.
+
+Combinational logic - a kind of system built in electronic logic that contains no storage elements. Outputs are derived from inputs via gates. Though the output typically becomes correct after some finite delay, it cannot be considered sequential since there is no defined sequence of steps. It is instead a concurrent system with latency. 
+
+Comb-out - The process of converting a sequential algorithm into combinational logic. Note that the process can be wasteful and certain corner cases would require an unboundedly large implementation: the term combable refers to code that can be combed-out without these problems. See combinational logic.
+
 Context - the working data required for a computer to execute code. This includes program counter, stack and possibly other data. Where multiple contexts are present it is possible to switch between them explicitly. Contexts resemble threads without pre-emption and may be implemented easily using threads. Coroutines and cooperative multitasking are other terms for contexts.
+
+Delay - a primative concept that we add to SystemC referring to the passage of time within a sequential context. Delays are divided into minor and major delays: see the corresponding entries.
 
 Event - a primitive concept of a link in the cause-and-effect chain within a system. Usually, it is one part of the system waking some other part and the process is nominally instantaneous. Events do not include data.
 
@@ -19,11 +33,31 @@ Lower - a term from compiler design which refers to removing a construct and re-
 
 Memberise - to convert soemthing into a class member.
 
+Message - a combination of an event and some data. Depracated term - too vague!
+
+Minor delay - a delay that is long enough to allow combinational logic to settle but of the order of a single step within a sequential algorithm. Minor delays may be created to order to seperate protocol events. See delay.
+
+Major delay - a delay corresponding to multiple steps within a sequential algorithm.
+
+Params, parameters - the data associated with a function call event.
+
+Passive - a way of recieving incoming events and data by making only outgoing calls to wait for the event and collect the data without needing to receive an incoming funciton or functrino call. See Active.
+
+Pointer - we use the term pointer in the C/C++ sense.
+
+Poll, poll loop - polling refers to checking the state of a signal to detect a change that implies that an event has occurred. A poll loop refers to a sequential construction that polls repeatedly with some delay in between polls. Polling may be considered as inferring events from data.
+
+Port - the SystemC primative (sc_port<>) for connecting a module to a channel or another module. We will use ports for inter-server connections too. A port resembles a pointer with additional event semantics.
+
 Phase, N-phase - an N-phase transaction completes after N specific events have occurred, possibly with time delays between them.
+
+Protocol - a detailed description of a way of conveying events and data using signals. Protocols allow us to convert SystemC TLM transactions into low-level SystemC.
 
 POD - Plain Old Data - data consisting of fundamental types, pointers and arrays of fundamental types but not instances of objects.
 
 Queue, N-queue - classification of event propogation mechanisms via analogy to FIFO queues. A 0-queue event resembles a FIFO of length 0 because it cannot store the event and so blocks both waker and wakee forcing a rendez-vous. A 1-queue event permits waker to return immediately if empty and wakee to return immediately if full.
+
+Recursion - when a function makes a call to itself, or to another fucntion that ultimately results in another call to the original function. Recursion takes place inside a single context, and requires that the context platform is implemented appropriately.
 
 Scope - a funciton or section of a function delimited by braces {} in C/C++ or various mechanisms including begin/end in Verilog. Scopes must end in the opposite order they began which permits local variables to be allocated on a stack as well as supporting structured programming.  
 
@@ -31,11 +65,23 @@ Sequential - in reference to an algorithm, sequential implies that the algorithm
 
 Server - a group of one or more member functions and POD data members from within a single object. Every member funciton and POD member datum must belong to a server. Therefore servers form a hierarchical layer between objects and functions/data. The server level is the boundary between sequential and structural mapping approaches.
 
+Signal - a simple model of an electrical wire. We use the SystemC sc_signal<> for this.
+
+Stack - a stack is FILO (First-In-Last-Out) data structure which may be used to hold working data for a function call mechanism as well as the local variables in an efficient manner.
+
+State - a particular value of the state variable in a state machine; description of a state machine whose state variable holds a certain value. A state is held for a period of time. It is entered and left via state transitions at different times. See State machine.
+
+State machine - a way of implementing sequential behaviour on top of concurrent behaviour by explicitly maintaining a state variable and selecting behaviour based on its value. Behaviour includes mapping of inputs to outputs and transitions to new state values based on events.
+
+State-out - to convert an explicitly sequential algorithm into a state machine with the same behaviour. By creating a state machine, the need for a sequential platform is removed. See State machine.
+
 Staticise, static - data and objects whose existence is inferred before execution and which exist throughout execution. Their method of allocation is basically invisible to the program itself.
 
 Structural - in reference to a system, structure descibes the hierarchical breakdown into concurrently-existing subsystems, the topology of their interconnections and protocols for communication.
 
 Style - a choice of programming constructions to use when representing a program; the course-grained aspect of program representation. Intermediate styles are ones passed through during transformation but that do not appear in the input C++ or output Verilog.
+
+Synthesis - the process of converting a Verilog (or similar HDL construct) into physical hardware. This is not an objective of the project, however the ability to perform synthesis imposes limitations on the styles of SystemC and Verilog we can include in our output.
 
 Thunk - a forwarding function
 

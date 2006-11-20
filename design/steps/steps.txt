@@ -373,7 +373,7 @@ Note: this gives us SystemC's "non-blocking TLM" style.
 
 Note: only change callee (upper executive)
 
-Note: Now reduce to one server context. Wait for outgoing calls to return by
+Note: Now reduce to one context per server. Wait for outgoing calls to return by
 recursing back into the context's executive function. This supports recursive
 calls.
 
@@ -399,12 +399,14 @@ Modify the channel. Provide it with passive (call-in) 2-phase interfaces for
 both caller and callee. All functrinos go into the channel and the channel kicks
 (wakes up) the callee which then collects the parameters. 
 
-Invariant: objects do not receive incoming functrinos
+Invariant: servers do not receive incoming functrinos
 
 Note: after this step, a functrino is still used to pass a message to the
 channel, but to get the message out at the other end we have an event followed
-by a "get params" type call on the channel. Maybe the latter is an
-anti-functrino?
+by a "get params" type call on the channel. 
+
+Note: the call to the channel to get the params is not a functrino since 
+it goes to a communications primative (the channel) and not a server.
 
 Note: only change functrino recipients
 
