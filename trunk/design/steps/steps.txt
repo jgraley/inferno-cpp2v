@@ -349,6 +349,7 @@ Move to 2-phase transactions
 Turn function calls into "fake" nonblocking by adding a new call back to the
 original caller after processing is complete, just before the original called
 function returns. This is called a return functrino.
+
 Outgoing calls should wait after making the initial call and then kick
 themselves in the return functrino.
 
@@ -358,9 +359,7 @@ Note: incoming call looks like a functrino to the caller but isn't implemented
 as one. Hence "fake" 2-phase.
 
 Note: Since the return functrino and the kick will come *before* the outgoing
-call
-returns and the wait begins the semaphore should be 1-in-1-out (or a 1-queue 
-event).
+call returns and the wait begins the semaphore should be a 1-queue event.
 
 ----------------------------------------------------------------------------
 Make transactions non-blocking
