@@ -32,11 +32,11 @@ Remove stack unwind
 
 Whenever a function can throw an exception, arrange for the function to catch 
 all exceptions and return the exception object. If a return value exists already
-then combine in a struct. Object should be a null object if there was no 
-exception. 
+then combine in a struct. Returned object should be a null object if there was 
+no exception. 
 
 Calls to such functions should be in try blocks and if an exception is returned
-should re-throw it.
+then they should be rethrown.
 
 Invariant: return is the only path out of a function
 
@@ -44,22 +44,23 @@ Invariant: return is the only path out of a function
 Lower try/throw/catch
 
 Remove try and catch keywords leaving pairs of plain scopes. Insert a goto 
-to skip what was the catch block. Convert throw into a goto to the beginning 
-of the catch block. Use a local to hold the exception object. 
+to skip what used to be the catch block. Convert throw into a goto to the
+beginning of the catch block. Use a local to hold the exception object. 
 
-Invariant: no exception handling
+Invariant: no exceptions
 
 Note: this step could be moved down to state-out if required: the above
 "Remove stack unwind" is the part that has to be done early.
 
-Note: the additional destructor calls get added in the "Make constructors/
-destructors explicit" step further down. This is triggered by the gotos.
+Note: the additional destructor calls implied here get added in the "Make
+constructors/destructors explicit" step further down. This is triggered by the
+gotos.
 
 ----------------------------------------------------------------------------
 Implement run-time type information
 
 Implement typeof and dynamic_cast as virtual member functions within 
-class hierarchies and modify calls to be member calls.
+class hierarchies and modify calls to be member function calls.
 
 Invariant: no RTTI
 
@@ -87,16 +88,15 @@ data members.
 
 Invariant: Sequential/structural divide now explicit 
 
-Note: Member objects exist at same level as servers, but servers are not 
-nestable.
-
 Note: Test code generation should strip out the server layer.
 
 Note: We do this early because other steps add functions to classes and in 
-some cases we need to specify server structure. 
+some cases they need to specify server structure in order to develop the 
+correct invariants. 
 
-Note: servers do not nest and exist below objects. Hence a server may not
-contain another server or an object. An object may contain both.
+Note: servers do not nest and exist below objects in the hierarchy. Hence a
+server may not contain another server or an object. An object may contain both.
+Within an object, servers and member objects exist at the same level.
 
 ----------------------------------------------------------------------------
 Make constructors/destructors explicit
@@ -104,15 +104,15 @@ Make constructors/destructors explicit
 All constructors, copy constructors and destructors get turned into regular
 member functions and we add explicit calls to them in the code. Need to treat
 each kind of scope correctly: static, member, heap, local. If an object is
-passed by value and has a copy constructor, we must turn that into pass by
-reference and then insert the copy construct call at the top of the function.
-New functions go in same server as original con/de-structors.
+passed by value and has a copy constructor, we must turn that into
+pass-by-reference and then insert the copy construct call at the top of the
+function. New functions go in same server as original con/de-structors.
 
-Invariant: pass-by-value only for memcpy()able objects; actual object lifecycle
-may now differ from that in the original program
+Invariant: pass-by-value only for memcpy()able objects; underlying object
+lifecycle may now differ from that in the original program.
 
 Note: We choose not to generate any copy constructor if not already there -
-these objects will be treated like POD types
+these objects will be treated like POD types. @todo or will they?
 
 Note: this means that const members will need to be un-consted except in the
 case of static objects with sufficiently simple initialisation algorithms.
@@ -120,7 +120,7 @@ Optimisations could include converting member pointers initialised by new()
 into member objects and detecting when a constructor parameter is always
 supplied from a const.
 
-Note: destructors must get called at early returns and gotos out of scopes!
+Note: destructors must get called at early returns and gotos out of scopes.
 
 ----------------------------------------------------------------------------
 Staticise heap
@@ -130,18 +130,18 @@ Explicitly implement new/delete to allocate objects from static arrays.
 Invariant: No dynamic allocation. All const-member pointers are now globally
 constant.
 
-Note: No need to worry about constructors/destructors since that should have
+Note: No need to worry about constructors/destructors since they should have
 been dealt with in the previous step.
 
 Note: Maybe place in a class if use cases are all below that class (ie 
-coming from member funcitons or member objects). New and delete for a given 
+coming from member functions or member objects). New and delete for a given 
 type go in the same server.
 
 ----------------------------------------------------------------------------
 Eliminate this->
 
-Remove dereferences through the "this" pointer or any const pointer equal to
-"this".
+Remove dereferences through the "this" pointer or any const pointer known 
+equal to "this".
 
 Invariant: All known accesses to something in the same module do not use
 pointers.
@@ -163,7 +163,7 @@ case we must support the possibility that it is not "this".
 ----------------------------------------------------------------------------
 Add addressof functions
 
-Add member functions to each object that return the address of (a) the object 
+Add member functions to each object that returns the address of (a) the object 
 itself (addressof()) and (b) the addresses of any public POD data member x
 (x_addressof()). Replace &y with y.addressof() as appropriate.
 
@@ -183,12 +183,11 @@ to the object.
 ----------------------------------------------------------------------------
 Object boundary forwarding
 
-Introduce thunk functions (trivial forwarding of the call) such that any call 
-from a member object to an external object or vice-versa is forwarded through 
-a new thunk function within the object. The new thunk function should exist
-in a new server.
+Introduce thunk functions such that any call from a member object to an external
+object or vice-versa is forwarded through a new thunk function within the object.
+The new thunk function should exist in a new server.
 
-Invariant: call calls into or out of an object are forwarded hence visible at 
+Invariant: calls into or out of an object are forwarded hence visible at 
 the object's class definition.
 
 ----------------------------------------------------------------------------
@@ -196,7 +195,7 @@ the object's class definition.
 
 Whenever a function fd is called by more than one external server, add 
 new functions f1, f2, ... within fd's server, one for each calling server. 
-The servers should now call the f1, f2 etc and they should forward to fd.
+The servers should now call the f1, f2 etc and these should forward to fd.
 
 Invariant: Inter-server calls should now be 1:1 correspondence.
 
@@ -232,7 +231,7 @@ Invariant: No pointer arithmetic; pointers only created and overwritten
 Note: what about const pointers?
 
 ----------------------------------------------------------------------------
-Remove references
+Lower references
 
 Implement references using pointers
 
@@ -254,8 +253,8 @@ array indexed by the stack pointer.
 Invariant: all variables are static or members
 
 Note: we have to do this before any SystemC stuff, because it needs all objects
-to be static (or members). But we will add more locals later and so this step
-will be repeated later. Hopefully re-use implementation!
+to be static (or members). But we will add more locals later on and so this step
+will be repeated. Hopefully re-use implementation!
 
 Note: furthermore, "add dereferencing layer" lowering needs *all* locals to be
 memberised first, so moved up again and now applies to all locals
@@ -263,15 +262,15 @@ memberised first, so moved up again and now applies to all locals
 ----------------------------------------------------------------------------
 Add server-level dereferencing layer
 
-For each server, create an enum with a value for each address-of operation on
-a different POD data item. Substitute the enum value for the address.
+For each server, create an enum with a value for POD data item whose address is
+taken. Substitute the enum value for the address.
 
 Add functions to each server, for each enum value, that forward function calls 
 to the corresponding object/POD item. So if member objects a and b of type C 
 both have a function footle( int x ) then we create deref_footle( C *p, int x ) 
 which invokes the correct footle() based on p. For POD types add eg
 deref_get( type *p ) and deref_set( type *p, type val ). Replace pointer derefs
-with the corresponding function. 
+with the corresponding function. @todo but we're only doing this for POD types!
 
 Invariant: server handles all derefs of internal data
 
@@ -282,8 +281,6 @@ Note: there's now no need to copy the data because we always bring the
 action to the data, not the other way around
 
 Note: only do this to variable pointers!
-
-Note: assumes we can call anything whose address can be taken.
 
 Note: since >1 server in an object may have deref functions for the same
 data type, we need to unique-ise the names, at least for testing.
