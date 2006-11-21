@@ -38,6 +38,11 @@ Delay - a primitive concept that we add to SystemC referring to the passage of
 time within a sequential context. Delays are divided into minor and major
 delays: see the corresponding entries.
 
+Deref function - dereferencing function - a function that implements a comination
+of address taking and some member function call on the resulting object. These 
+are combined on the basis of taking the action to the object, not the object to 
+the action.
+
 Event - a primitive concept of a link in the cause-and-effect chain within a
 system. Usually, it is one part of the system waking some other part and the
 process is nominally instantaneous. Events do not include data.
@@ -56,7 +61,8 @@ steps.
 Heap - an area of memory used for dynamic allocation via malloc() and new().
 
 Invariant - a property of a style or representation of a program that may be
-introduced by a transformation step and may be required by other steps.
+introduced by a transformation step and may be required by other steps. This
+concept may be further refined in the future.
 
 Local - a data item whose lifetime is tied to a scope block. Usually allocated
 from stack memory. 
@@ -95,6 +101,9 @@ resembles a pointer with additional event semantics.
 Phase, N-phase - an N-phase transaction completes after N specific events have
 occurred, possibly with time delays between them.
 
+Plain scope - a scope not under the control of a construct such as while, if or try/catch. A plain scope is only useful for its ability to control
+construction/destruction of locals and goto behaviour.
+
 Protocol - a detailed description of a way of conveying events and data using
 signals. Protocols allow us to convert SystemC TLM transactions into low-level
 SystemC.
@@ -112,6 +121,10 @@ Recursion - when a function makes a call to itself, or to another function that
 ultimately results in another call to the original function. Recursion takes
 place inside a single context, and requires that the context platform is
 implemented appropriately.
+
+Referee server - a server that passes a pointer (via parameter or return value)
+to another server and is therefore relied on by the other server to implement
+deref functions against the supplied pointer.
 
 Scope - a function or section of a function delimited by braces {} in C/C++ or
 various mechanisms including begin/end in Verilog. Scopes must end in the
