@@ -1,6 +1,12 @@
 Glossary
 --------
 
+Mainly concentrates on words whose meaning is modified or new for this project.
+We also use words from programming theory, electronics, C, C++, SystemC, TLM and
+Verilog. Try searching on the word to see how it is used in other definitions.
+
+-----
+
 Ack, acknowledgement - an event that is sent via a backchannel in response to
 another event. This can be for managing protocol event lines or to aid in the
 transfer of associated data.
@@ -9,9 +15,17 @@ Active - a way of receiving an event and data via an explicit function or
 functrino call, as is typically found in functional languages and C/C++. See
 Passive.
 
+Assert - a check placed in code to check that some factor is true. We do not
+propose to use asserts for the step invariants as defined here - instead they
+are generated to enforce consistency when we introduce redundancy (not often).
+
 Back-channel - A channel (in its broader sense) that joins the same pair of
 subsystems as an existing channel but which passes events and data in the
 opposite direction. Used for various reasons. See channel.
+
+Call-functrino - a functrino in a 2-phase style that signifies the invocation
+of a function and conveys parameter data. See functrino and return-functrino.
+@todo deprecate: may be confusing when we go to four functrinos per transaction.
 
 Channel - a persistent communication primitive between two subsystems that
 permits events and data to be propagated. We use the word in the SystemC TLM
@@ -38,14 +52,22 @@ Delay - a primitive concept that we add to SystemC referring to the passage of
 time within a sequential context. Delays are divided into minor and major
 delays: see the corresponding entries.
 
-Deref function - dereferencing function - a function that implements a comination
-of address taking and some member function call on the resulting object. These 
-are combined on the basis of taking the action to the object, not the object to 
-the action.
+Deref function - dereferencing function - a function that implements a
+combination of address taking and some member function call on the resulting
+object. These are combined on the basis of taking the action to the object, not
+the object to the action.
 
 Event - a primitive concept of a link in the cause-and-effect chain within a
 system. Usually, it is one part of the system waking some other part and the
 process is nominally instantaneous. Events do not include data.
+
+Executive - extra code added to servers to allow them to participate in the
+structural style. The term is taken from simple operating systems, but the
+executives we create will be too simple for the operating system moniker.
+Divided into upper and lower halves, see upper executive and lower executive.
+
+Fake nonblocking - a style with the semantics of nonblocking but where the 
+call-functrino actually blocks.
 
 Forwarding - a forwarding function f simply invokes another function g with the
 same parameter values and returns g's return value. They add nothing to the
@@ -70,6 +92,9 @@ from stack memory.
 Lower - a term from compiler design which refers to removing a construct and
 re-implementing the same functionality using lower level constructs.
 
+Lower executive - additional code that we add around outgoing function calls 
+from servers in order to support the structural style. See upper executive.
+
 Memberise - to convert something into a class member.
 
 Message - a combination of an event and some data. Deprecated term - too vague!
@@ -83,9 +108,10 @@ algorithm.
 
 Params, parameters - the data associated with a function call event.
 
-Passive - a way of receiving incoming events and data by making only outgoing
-calls to wait for the event and collect the data without needing to receive an
-incoming function or functrino call. See Active.
+Passive, passivate - a way of receiving incoming events and data by making only
+outgoing calls to wait for the event and collect the data without needing to 
+receive an incoming function or functrino call. Passivation is the process of
+converting an active model to passive. See Active.
 
 Pointer - we use the term pointer in the C/C++ sense.
 
@@ -101,8 +127,14 @@ resembles a pointer with additional event semantics.
 Phase, N-phase - an N-phase transaction completes after N specific events have
 occurred, possibly with time delays between them.
 
-Plain scope - a scope not under the control of a construct such as while, if or try/catch. A plain scope is only useful for its ability to control
+Plain scope - a scope not under the control of a construct such as while, if or
+try/catch. A plain scope is only useful for its ability to control
 construction/destruction of locals and goto behaviour.
+
+Primitive - a language element we add for intermediate styles that does not 
+get subsumed into later steps as program functionality but instead retains a
+distinct behaviour throughout which has to be handled specifically by later
+steps. An implementation for testing should always be offered.
 
 Protocol - a detailed description of a way of conveying events and data using
 signals. Protocols allow us to convert SystemC TLM transactions into low-level
@@ -124,7 +156,11 @@ implemented appropriately.
 
 Referee server - a server that passes a pointer (via parameter or return value)
 to another server and is therefore relied on by the other server to implement
-deref functions against the supplied pointer.
+deref functions against the supplied pointer. See server.
+
+Return-functrino - a functrino in a 2-phase style that signifies the completion
+of a function and conveys return value data. See functrino and call-functrino. 
+@todo deprecate: may be confusing when we go to four functrinos per transaction.
 
 Scope - a function or section of a function delimited by braces {} in C/C++ or
 various mechanisms including begin/end in Verilog. Scopes must end in the
@@ -144,6 +180,12 @@ structural mapping approaches.
 
 Signal - a simple model of an electrical wire. We use the SystemC sc_signal<>
 for this.
+
+Smearing - A possible weakness in the design whereby some of the functionality 
+of one step is duplicated in another. For example if step A converts all simple 
+x into complicated y, and a later step B creates new y, then B duplicates some
+of A's complexity-generating functionality. Better to do B first and have it
+generate x which A will then turn into y in due course. 
 
 Stack - a stack is FILO (First-In-Last-Out) data structure which may be used to
 hold working data for a function call mechanism as well as the local variables
@@ -171,15 +213,26 @@ Structural - in reference to a system, structure describes the hierarchical
 breakdown into concurrently-existing subsystems, the topology of their
 interconnections and protocols for communication.
 
-Style - a choice of programming constructions to use when representing a
+Style - a choice of programming constructs to use when representing a
 program; the course-grained aspect of program representation. Intermediate
 styles are ones passed through during transformation but that do not appear in
 the input C++ or output Verilog.
+
+Sub-transaction - a well-defined interaction between two servers in which an
+event and some data are propagated in one direction. There are two
+sub-transactions for each function call corresponding to call and return.
 
 Synthesis - the process of converting a Verilog (or similar HDL construct) into
 physical hardware. This is not an objective of the project, however the ability
 to perform synthesis imposes limitations on the styles of SystemC and Verilog we
 can include in our output.
+
+There-and-back-again - A possible weakness in the design whereby some of the
+functionality of one step is undone in another. For example if step A converts
+all x into y, and step B converts y back to x, then effort may have been wasted.
+This is only a problem if the new x corresponds to the same input program
+element as the original x - otherwise it may be
+there-and-back-to-somewhere-else.
 
 Thunk - a forwarding function
 
@@ -191,3 +244,8 @@ Transformation step - a part of the mid-level design of the code translation
 algorithm which performs a specified, relatively simple, transformation on the
 code such that the code may be successfully executed for test purposes before
 and after.
+
+Upper executive - code that we add to a server to support incoming function
+calls and overall execution control in order to support structural style. See
+lower executive.
+
