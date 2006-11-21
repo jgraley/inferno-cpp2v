@@ -184,7 +184,8 @@ to the object.
 Object boundary forwarding
 
 Introduce thunk functions such that any call from a member object to an external
-object or vice-versa is forwarded through a new thunk function within the object.
+object or vice-versa is forwarded through a new thunk function within the
+object.
 The new thunk function should exist in a new server.
 
 Invariant: calls into or out of an object are forwarded hence visible at 
@@ -316,7 +317,7 @@ Replace Obj *p with SystemC ports eg sc_port<Obj>.
 
 Invariant: no pointers
 
-Note: ports require 1:1 relationships
+Note: ports require 1:1 caller-callee relationships
 
 Note: this gives us SystemC's "direct TLM" style. 
 
@@ -324,11 +325,15 @@ Note: this gives us SystemC's "direct TLM" style.
 Add server context
 
 Add an SC_THREAD for each server. Incoming calls should wake the server context
-and wait for it to complete before returning.
+and wait for it to complete executing the function before returning. Completion
+should be signalled by an event.
 
 Invariant: no cumulative nesting in calls between servers
 
 Note: this gives us SystemC's "blocking TLM" style. 
+
+Note: at this stage, all events are internal to servers, and do not go between
+servers.
 
 Note: Possible major problem here supporting inter-server recursion between this
 step and the "make transactions non-blocking" step. Since each server's local
@@ -336,7 +341,7 @@ context "camps" in the other server's function while awaiting completion of the
 call it is not straightforward for it to resume checking for incoming calls
 while waiting. Solution is to employ a pool of contexts for each object and use
 a "wake one waiter" event mechanism to ensure we select one waiting context for
-each incoming call. Hopefully SystemC supports this.
+each incoming call. Hopefully SystemC supports this @todo check!
 
 Note: only change callee (upper executive)
 
@@ -345,24 +350,29 @@ Move to 2-phase transactions
 
 Turn function calls into "fake" nonblocking by adding a new call back to the
 original caller after processing is complete, just before the original called
-function returns. This is called a return functrino.
+function returns. The original call is now called a call-functrino, and the new
+call is called a return-functrino.
 
-Outgoing calls should wait after making the initial call and then kick
-themselves in the return functrino.
+Outgoing call sites should wait after invoking the call-functrino and then kick
+themselves in the return-functrino.
 
 Invariant: no return values on inter-server calls
 
-Note: incoming call looks like a functrino to the caller but isn't implemented
+Note: initial call is a functrino to the caller but isn't implemented
 as one. Hence "fake" 2-phase.
 
-Note: Since the return functrino and the kick will come *before* the outgoing
-call returns and the wait begins the semaphore should be a 1-queue event.
+Note: Since the return-functrino and the kick will come *before* the
+call-functrino returns and the wait begins the semaphore must be a 1-queue
+event.
+
+Note: affects caller and callee (upper and lower executives)
 
 ----------------------------------------------------------------------------
 Make transactions non-blocking
 
-The incoming call should return immediately after kicking the server context. The
-return functrino should now come from the callee's server context if not already. 
+The call-functrino should return immediately after kicking the server context.
+The return-functrino should now come from the callee's server context if not
+already. 
 
 Invariant: all inter-server calls are functrinos
 
@@ -371,48 +381,51 @@ Note: this gives us SystemC's "non-blocking TLM" style.
 Note: only change callee (upper executive)
 
 Note: Now reduce to one context per server. Wait for outgoing calls to return by
-recursing back into the context's executive function. This supports recursive
+recursing back into the context's upper executive code. This supports recursive
 calls.
 
-Note: both calls are functrinos.
+Note: at this stage, each functrino corresponds to a sub-transaction.
 
 ----------------------------------------------------------------------------
 Add channels
 
-Create a new "channel" (in the SystemC TLM sense) for each caller-callee pair of
-server. Forward the functrinos. 
+Create a new "channel" (in the SystemC TLM sense) for each sub-transaction. The
+channel should forward the functrino calls. 
+
+Invariant: we have a presence, in the form of a channel, between communicating 
+pairs of servers.
 
 Note: the channel implementation we create will not be stated out but instead
-will be converted to wires (=signals) by the protocol step(s) (which have not
-been added yet at the time of writing). They will mostly be boiler-plate code.
+will be converted to wires (=signals) by the protocol step(s) so it is not a
+server. It will mostly be boiler-plate code.
 
 Note: changes caller and callee but trivially (outgoing functrinos go to
-channel)
+channel). 
 
 ----------------------------------------------------------------------------
 Passivate
 
-Modify the channel. Provide it with passive (call-in) 2-phase interfaces for
+Modify the channels. Provide each with passive (call-in) 2-phase interfaces for
 both caller and callee. All functrinos go into the channel and the channel kicks
 (wakes up) the callee which then collects the parameters. 
 
 Invariant: servers do not receive incoming functrinos
 
-Note: after this step, a functrino is still used to pass a message to the
-channel, but to get the message out at the other end we have an event followed
-by a "get params" type call on the channel. 
+Note: after this step, a functrino is still used to initiate a sub-transaction,
+but the recipient gets an event and does a "get data" type call on the channel
+to get the data. 
 
-Note: the call to the channel to get the params is not a functrino since 
-it goes to a communications primative (the channel) and not a server.
+Note: the call into the channel to get the params is not a functrino since 
+it goes to a communications primitive (the channel) and not a server.
 
 Note: only change functrino recipients
 
 ----------------------------------------------------------------------------
-Make transactions 0-queue
+Make sub-transactions 0-queue
 
 For each channel, add an "ack" channel which goes the in the other direction
-and has no data. The recipient should ack immediately after receiving the event
-and the originator should wait for the ack.
+and has no data (same passive model). The recipient should ack immediately after
+receiving the event and the originator should wait for the ack.
 
 Invariant: now all transactions rendez-vous meaning the data doesn't have to 
 be stored externally between origination and receipt.
@@ -420,6 +433,8 @@ be stored externally between origination and receipt.
 Note: Now there are 4 events: call, call ack, return, return ack. Call ack 
 and return events could be merged but we will regard that as an optional future
 optimisation.
+
+Note: transactions now 4-phase; sub-transactions now 2-phase
 
 ----------------------------------------------------------------------------
 Split out data and event channels
@@ -447,7 +462,7 @@ Move to signals
 
 The event-only channels become sc_signal<bool> backed by a member variable. 
 An event is generated by toggling the value: 1 goes to 0; 0 goes to 1. Reset 
-value is 0. The data-only channels become sc_signals<x> where x is the data 
+value is 0. The data-only channels become sc_signal<x> where x is the data 
 type used. Multiple data items (eg multiple parameters) should result in 
 multiple signals (no need to put them in a struct or anything). Add a single 
 delay() to the originator algorithm just after the transaction. 
@@ -457,9 +472,9 @@ Invariant: All communication is via sc_signal
 Note: No need for backing members on data channels because the algorithm will
 block during the transaction so the supplied data can't change. 
 
-Note: since we are now dealing with wires, we need to take account of the 
-need to avoid combinational loops (which are viewed as part of the behaviour 
-of wires). We do this by adding a delay() in such a way that no two transactions 
+Note: since we are now dealing with wires (which is what signals really are),
+we need to avoid combinational loops (which are viewed as part of the behaviour
+of wires). We do this by adding a delay() in such a way that no two transactions
 can occur simultaneously (though the ack can be simultaneous)
 
 ----------------------------------------------------------------------------
@@ -467,28 +482,30 @@ Add poll loops
 
 Replace all occurrences of wait(x) with while(!x) delay().
 
-Invariant: our reliance on SystemC eventing is hidden and the need for poll loops
+Invariant: our reliance on SystemC eventing is hidden and the need for poll
+loops
 made explicit.
 
 Note: this is really associated with "add clock/reset" but we do it up here 
 so we can state-out the loop.
 
 Note: we may not need this if using asynchronous technology. State-out should be
-able to still work if we skip this step leaving wait(x) in place of delay() loops.
+able to still work if we skip this step leaving wait(x) in place of delay()
+loops.
 
 ----------------------------------------------------------------------------
 Merge member functions
 
 Merge all the member functions in a server into a single one that uses a big
-switch statement to select the implementation based on a new enum param. Other
-parameters should be grouped into a struct for each of the original member
-functions then unioned together for the big function.
+switch statement to select the implementation based on a new enum parameter.
+Parameters of the original functions should be grouped into a struct for each of
+the original member functions then unioned together for the big function.
 
-Invariant: all calls are simple recursions
+Invariant: all calls are simple recursions on the big function
 
 Note: this single function is now the server's run function. All other calls 
-(apart from SystemC ones which don't count) have now become simple recursions 
-of this function.
+(apart from SystemC primatives) have now become simple recursions of this
+function.
 
 Note: originally was before memberise locals, but that proved impossible due to
 pointer lowering steps. This must be done after structural steps to ensure we
@@ -497,14 +514,15 @@ keep separate call interfaces for separate call sites (1:1 wiring).
 ----------------------------------------------------------------------------
 Lower constructs
 
-Lower constructs that are not supported in combable (synthesisable) verilog into
+Lower constructs that are not supported in combable (synthesisable) Verilog into
 conditional branches ie if(cond) goto label; Also after each delay(); add a goto
 WAIT_STATE; WAIT_STATE:; 
 
-Invariant: all constructs synthesisable or can be trivially stated-out
+Invariant: all constructs combable or can be trivially stated-out
 
 Note: there's some flexibility here in how much stuff we lower. It corresponds
-to design tradeoffs in the final HW. Any construct surrounding a label must
+to design tradeoffs in the final hardware. Any construct surrounding a label
+must
 itself be lowered. 
 
 Note: retain local scope structure for now
@@ -555,11 +573,11 @@ Lower recursion
 
 Turn each recursion call point into a goto to the start of the function and at
 the very end of the function insert a goto to the label implied by the state
-variable.
+variable. Add a new primitive for this.
  
 Invariant: no recursion; no non-trivial function calls 
 
-Note: the "goto a variable" construct would have to become eg a switch statement
+Note: the "goto a variable" primitive would have to become eg a switch statement
 for the purposes of testing this step. It vanishes in the "State-out" step.
 
 ----------------------------------------------------------------------------
@@ -569,7 +587,7 @@ Place code after a conditional goto (a goto in an if) up to the next label into
 an else clause if it isn't already in one. If there is code between an
 unconditional goto and the next label, it is an error (the code is unreachable)
 
-Invariant: sections of code between labels is now combable
+Invariant: sections of code between labels are now combable
 
 ----------------------------------------------------------------------------
 State-out
@@ -597,19 +615,19 @@ function.
 ----------------------------------------------------------------------------
 Insert clock and reset
 
-Move all classes to SC_CTHREAD. Replace the delay() at the bottom with 
+Move all servers to SC_CTHREAD. Replace the delay() at the bottom with 
 wait(clk).
 
-Invariant: no more arbitrary delay() calls - all events explicitly controlled 
+Invariant: no more delay() primitive - all events explicitly controlled 
 by clock
 
 Note: not sure about clock distribution or how to handle reset. Maybe reset 
-should zero all stored data as a first step in startup.
+should zero all stored data as a first step in startup. @todo
 
 ----------------------------------------------------------------------------
 Remove server context
 
-Move to SC_METHOD. Remove the wait() call.
+Move to SC_METHOD. Remove the wait(clk) primitive.
 
 Invariant: no persistent implicit context
 
@@ -625,22 +643,22 @@ becomes a 1-bit type.
 Invariant: no types unknown to Verilog
 
 Note: we will hopefully be able to tolerate arbitrary bit vectors in SC form eg
-sc_bitvec<5> all the way through the process.
+sc_bitvec<5> all the way through the process. @todo check
 
 ----------------------------------------------------------------------------
 Implement variables as registers and wires
 
 Create some combination of registers and wires in place of variables. Try to
-avoid duplicating the combing-out that Verilog can do for us.
+avoid duplicating the combing-out that Verilog synthesis can do for us.
 
 Invariant: storage elements represented in a Verilog-compatible style.
 
 ----------------------------------------------------------------------------
 Go to Verilog
 
-Insert Verilog constructs as follows: objects->modules; servers(=functions)->
-always blocks and everything else maps as usual. Use synthesisible Verilog 
+Insert Verilog constructs as follows: objects->modules; servers->
+"always" blocks and everything else maps as usual. Use synthesisible Verilog 
 2001. Always blocks should be the clocked kind.
 
-Invariant: program is now verilog
+Invariant: program is now Verilog
 
