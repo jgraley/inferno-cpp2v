@@ -2,3 +2,162 @@
 Available under the terms of the BSD license. 
 
 Steps that deal with intra-object code, including stating-out and recursion
+
+
+----------------------------------------------------------------------------
+Add poll loops
+
+Replace all occurrences of wait(x) with while(!x) delay().
+
+Invariant: our reliance on SystemC eventing is hidden and the need for poll
+loops
+made explicit.
+
+Note: this is really associated with "add clock/reset" but we do it up here 
+so we can state-out the loop.
+
+Note: we may not need this if using asynchronous technology. State-out should be
+able to still work if we skip this step leaving wait(x) in place of delay()
+loops.
+
+----------------------------------------------------------------------------
+Merge member functions
+
+Merge all the member functions in a server into a single one that uses a big
+switch statement to select the implementation based on a new enum parameter.
+Parameters of the original functions should be grouped into a struct for each of
+the original member functions then unioned together for the big function.
+
+Invariant: all calls are simple recursions on the big function
+
+Note: this single function is now the server's run function. All other calls 
+(apart from SystemC primatives) have now become simple recursions of this
+function.
+
+Note: originally was before memberise locals, but that proved impossible due to
+pointer lowering steps. This must be done after structural steps to ensure we
+keep separate call interfaces for separate call sites (1:1 wiring).
+
+----------------------------------------------------------------------------
+Lower constructs
+
+Lower constructs that are not supported in combable (synthesisable) Verilog into
+conditional branches ie if(cond) goto label; Also after each delay(); add a goto
+WAIT_STATE; WAIT_STATE:; 
+
+Invariant: all constructs combable or can be trivially stated-out
+
+Note: there's some flexibility here in how much stuff we lower. It corresponds
+to design tradeoffs in the final hardware. Any construct surrounding a label
+must
+itself be lowered. 
+
+Note: retain local scope structure for now
+
+----------------------------------------------------------------------------
+Add state variable
+
+Add an enum with a value for each label, add a local variable of that type
+called state and maintain it correctly by assigning to it immediately before
+each goto. Initialise to eg INIT_STATE at start of function.
+
+Note: assert this at each label as a double check since we have a little
+redundancy at this point.
+
+Note: the point of this is to establish the state as local, i.e. needs to be
+stacked when we recurse.
+
+----------------------------------------------------------------------------
+Memberise locals
+
+Generate a data structure to represent the local variables. Use unions for
+variables whose scope does not overlap. Add an array of these structures, up to
+the max nesting depth, as a class member. Create a member stack pointer which
+should be initialised to zero. Increment it at the start of the function and
+decrement just before returning. Change all code to use the array indexed by the
+stack pointer.
+
+Invariant: all data is static or member
+
+Note: includes state
+
+Note: the same step was done on object type locals earlier on - try to build new
+locals into same structure.
+
+----------------------------------------------------------------------------
+Remove scopes
+
+Scoped blocks (surrounded by {}) should now be completely redundant. Get rid of
+them.
+
+Note: was part of memberise locals, but now that step has to be run twice and
+the first time doesn't want to do this.
+
+Invariant: No scopes (apart from overall function scope)
+
+----------------------------------------------------------------------------
+Lower recursion
+
+Turn each recursion call point into a goto to the start of the function and at
+the very end of the function insert a goto to the label implied by the state
+variable. Add a new primitive for this.
+ 
+Invariant: no recursion; no non-trivial function calls 
+
+Note: the "goto a variable" primitive would have to become eg a switch statement
+for the purposes of testing this step. It vanishes in the "State-out" step.
+
+----------------------------------------------------------------------------
+Else clauses for skipped code
+
+Place code after a conditional goto (a goto in an if) up to the next label into
+an else clause if it isn't already in one. If there is code between an
+unconditional goto and the next label, it is an error (the code is unreachable)
+
+Invariant: sections of code between labels are now combable
+
+----------------------------------------------------------------------------
+State-out
+
+Surround the entire function with a switch statement on the state variable.
+Generate a case for each label ending just before the next label. Insert a break
+at the end of each case. Remove the gotos, leaving only the assignments to the
+state variable. 
+
+Invariant: context is released between each combable block
+
+Note: we are taking advantage of the fact that SC_THREAD loops infinitely
+
+----------------------------------------------------------------------------
+Extract waits
+
+Replace all delay() calls with a single one at the bottom of the function.
+
+Invariant: no non-trivial context across a delay()
+
+Note: this is possible because all the delay() calls are at the ends of state
+cases and there's nothing after them until you get to the bottom of the
+function.
+
+----------------------------------------------------------------------------
+Insert clock and reset
+
+Move all servers to SC_CTHREAD. Replace the delay() at the bottom with 
+wait(clk).
+
+Invariant: no more delay() primitive - all events explicitly controlled 
+by clock
+
+Note: not sure about clock distribution or how to handle reset. Maybe reset 
+should zero all stored data as a first step in startup. @todo
+
+----------------------------------------------------------------------------
+Remove server context
+
+Move to SC_METHOD. Remove the wait(clk) primitive.
+
+Invariant: no persistent implicit context
+
+Note: this is really a pattern reduction: SC_CTHREAD{ ...; wait(); } becomes
+SC_METHOD{ ...; }. If any functions don't match the pattern we have an error.
+

@@ -3,5 +3,112 @@ Available under the terms of the BSD license.
 
 Steps that deal with C++-specific language constructs in a purely software-oriented way.
 
+@todo we also have server designation in here - is that really for this phase? 
+Maybe it is? Maybe it shouldn't really be a step at all, but a user hinting
+thing (ie already present in input program).
 
+----------------------------------------------------------------------------
+Expand templates
+
+Expand all template instantiations. 
+
+Invariant: no templates
+
+Note: this will make the program bigger, but that's what templates do to
+programs anyway.
+
+----------------------------------------------------------------------------
+Remove stack unwind
+
+Whenever a function can throw an exception, arrange for the function to catch 
+all exceptions and return the exception object. If a return value exists already
+then combine in a struct. Returned object should be a null object if there was 
+no exception. 
+
+Calls to such functions should be in try blocks and if an exception is returned
+then they should be rethrown.
+
+Invariant: return is the only path out of a function
+
+----------------------------------------------------------------------------
+Lower try/throw/catch
+
+Remove try and catch keywords leaving pairs of plain scopes. Insert a goto 
+to skip what used to be the catch block. Convert throw into a goto to the
+beginning of the catch block. Use a local to hold the exception object. 
+
+Invariant: no exceptions
+
+Note: this step could be moved down to state-out if required: the above
+"Remove stack unwind" is the part that has to be done early.
+
+Note: the additional destructor calls implied here get added in the "Make
+constructors/destructors explicit" step further down. This is triggered by the
+gotos.
+
+----------------------------------------------------------------------------
+Implement run-time type information
+
+Implement typeof and dynamic_cast as virtual member functions within 
+class hierarchies and modify calls to be member function calls.
+
+Invariant: no RTTI
+
+----------------------------------------------------------------------------
+Expand inheritance
+
+Where class B inherits from class A, copy non-overridden functions from A
+to B. Also copy any functions that are overridden but get called explicitly
+via eg A::f()
+
+Invariant: no inheritance
+
+Note: Need a strategy for multiple inheritance
+
+Note: Duplicating the functions seems wasteful but it isn't: all the 
+functions get duplicated per-object anyway.
+
+----------------------------------------------------------------------------
+Specify servers
+
+Determine (by whatever means) how the member functions and trivial 
+(non-object) member variables will be divided up into servers. Insert servers
+as a hierarchical level between class level and individual functions and POD
+data members.
+
+Invariant: Sequential/structural divide now explicit 
+
+Note: Test code generation should strip out the server layer.
+
+Note: We do this early because other steps add functions to classes and in 
+some cases they need to specify server structure in order to develop the 
+correct invariants. 
+
+Note: servers do not nest and exist below objects in the hierarchy. Hence a
+server may not contain another server or an object. An object may contain both.
+Within an object, servers and member objects exist at the same level.
+
+----------------------------------------------------------------------------
+Make constructors/destructors explicit
+
+All constructors, copy constructors and destructors get turned into regular
+member functions and we add explicit calls to them in the code. Need to treat
+each kind of scope correctly: static, member, heap, local. If an object is
+passed by value and has a copy constructor, we must turn that into
+pass-by-reference and then insert the copy construct call at the top of the
+function. New functions go in same server as original con/de-structors.
+
+Invariant: pass-by-value only for memcpy()able objects; underlying object
+lifecycle may now differ from that in the original program.
+
+Note: We choose not to generate any copy constructor if not already there -
+these objects will be treated like POD types. @todo or will they?
+
+Note: this means that const members will need to be un-consted except in the
+case of static objects with sufficiently simple initialisation algorithms.
+Optimisations could include converting member pointers initialised by new()
+into member objects and detecting when a constructor parameter is always
+supplied from a const.
+
+Note: destructors must get called at early returns and gotos out of scopes.
 

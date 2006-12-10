@@ -2,3 +2,149 @@
 Available under the terms of the BSD license. 
 
 Steps for data staticisation including dealing with pointers
+
+
+----------------------------------------------------------------------------
+Staticise heap
+
+Explicitly implement new/delete to allocate objects from static arrays. 
+
+Invariant: No dynamic allocation. All const-member pointers are now globally
+constant.
+
+Note: No need to worry about constructors/destructors since they should have
+been dealt with in the previous step.
+
+Note: Maybe place in a class if use cases are all below that class (ie 
+coming from member functions or member objects). New and delete for a given 
+type go in the same server.
+
+----------------------------------------------------------------------------
+Eliminate this->
+
+Remove dereferences through the "this" pointer or any const pointer known 
+equal to "this".
+
+Invariant: All known accesses to something in the same module do not use
+pointers.
+
+Note: Strictly an optimisation, but the invariant helps to clarify.
+
+----------------------------------------------------------------------------
+Use get()/set()
+
+For POD types that are exposed publically, make all inter-object reads
+and writes be function calls. New functions go in same server as the public 
+member.
+
+Invariant: every inter-object interaction is a function call
+
+Note: the pointer *could* equal "this", but only if it's non-constant in which
+case we must support the possibility that it is not "this".
+
+----------------------------------------------------------------------------
+Lower NULL pointers
+
+Replace every variable pointer with a non-null pointer and a bool. If the bool
+is false, the pointer is considered NULL. Otherwise the pointer is not NULL and
+it may be dereferenced.
+
+Invariant: all pointers are non-NULL
+
+Note: No need to do this to const pointers
+
+----------------------------------------------------------------------------
+Lower pointer arithmetic
+
+Associate every variable pointer with an int, which begins at zero, and is then
+the subject of all pointer arithmetic. Then use array style for derefs. Eg 
+
+p++; return *p; 
+
+becomes 
+
+p.index++; return p[p.index];
+
+Invariant: No pointer arithmetic; pointers only created and overwritten
+
+Note: what about const pointers?
+
+----------------------------------------------------------------------------
+Lower references
+
+Implement references using pointers
+
+Invariant: no references
+
+Note: do this after lowering NULL and pointer arithmetic because the pointers
+that we will generate for refs don't need to support either of these things. 
+
+----------------------------------------------------------------------------
+Memberise locals
+
+Generate a data structure to represent the local variables in each server. Use 
+unions for variables whose scope does not overlap. Add an array of these 
+structures, up to the max nesting depth, as a server member. Create a member 
+stack pointer which should be initialised to zero. Increment it at the start 
+of the function and decrement just before returning. Change all code to use the 
+array indexed by the stack pointer.
+
+Invariant: all variables are static or members
+
+Note: we have to do this before any SystemC stuff, because it needs all objects
+to be static (or members). But we will add more locals later on and so this step
+will be repeated. Hopefully re-use implementation!
+
+Note: furthermore, "add dereferencing layer" lowering needs *all* locals to be
+memberised first, so moved up again and now applies to all locals
+
+----------------------------------------------------------------------------
+Add server-level dereferencing layer
+
+For each server, create an enum with a value for POD data item whose address is
+taken. Substitute the enum value for the address.
+
+Add functions to each server, for each enum value, that forward function calls 
+to the corresponding object/POD item. So if member objects a and b of type C 
+both have a function footle( int x ) then we create deref_footle( C *p, int x ) 
+which invokes the correct footle() based on p. For POD types add eg
+deref_get( type *p ) and deref_set( type *p, type val ). Replace pointer derefs
+with the corresponding function. @todo but we're only doing this for POD types!
+
+Invariant: server handles all derefs of internal data
+
+Note: p->f() and equivalently (*p).f() should *not* be broken down into the *p
+and the .f() but should be treated as a unit (becomes deref_f(p))
+
+Note: there's now no need to copy the data because we always bring the
+action to the data, not the other way around
+
+Note: only do this to variable pointers!
+
+Note: since >1 server in an object may have deref functions for the same
+data type, we need to unique-ise the names, at least for testing.
+
+----------------------------------------------------------------------------
+Refer-back variable pointers
+
+With each pointer, associate an enum representing (a) whether the pointer was
+taken locally and if not, (b) which server it came from. Or just add values to 
+the existing enum. This other server is the referee server. 
+
+In case (b) add a deref function that decodes the pointer then forwards the call
+to the referee server's dereferencer function. 
+
+Note: this new call may pass some other pointer, in which case the referee
+server may gain a new enum value for which the original server is referee.
+Therefore this step must iterate until no more new deref calls are
+required. Only two deref calls are needed between each pair of objects for
+any given pointed-to type (one in each direction) so the iterations will
+terminate.
+
+Invariant: all inter-server calls are now via const pointers; interpretation of
+variable pointers is now local
+
+Note: only do this to variable pointers!
+
+Note: new call also needs a backchannel
+

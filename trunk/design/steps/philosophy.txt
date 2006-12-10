@@ -307,23 +307,11 @@ Other documents in this directory
 
 Note that this directory, "design/steps" considers only the transformation
 algorithms; for info about the construction of the inferno program, see
-"design/program". A more concrete discussion of the ideas in here is given in a
-few other documents as follows:
-- cplusplus.txt is for tricky C++ constructs that do not really fit into this
-philosophy and must be lowered by brute force.
-- pointers.txt focuses on dealing with pointers in preparation for the main
-structure transformations.
-- structure.txt shows how to complete the transformation of structure into an
-interacting agents pattern as discussed above.
-- sequential.txt deals with the state machine generation and recursion required
-within objects
-- verilog.txt is for changes required before HDL may be generated (and not
-really addressed here)
+"design/program". 
 
-The transformations themselves take place in a number of steps; each step
-corresponds (roughly) to one of the above. The overall order of conversions is
-basically as given in the bullet list above, but steps may be moved around and
-may be "mixed up" to some extent.
+The transformation is divided into a number of phases and each phase contains 
+a number of steps. The phases are listed in phases.txt, and each phase has a
+seperate text document describing its rationale and the steps within it. 
 
-
+See also glossary.txt for definitions of terms used in the project.
 

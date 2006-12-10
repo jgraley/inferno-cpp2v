@@ -2,3 +2,190 @@
 Available under the terms of the BSD license. 
 
 Steps relating to program structure (inter-server level)
+
+
+----------------------------------------------------------------------------
+Add server context
+
+Add an SC_THREAD for each server. Incoming calls should wake the server context
+and wait for it to complete executing the function before returning. Completion
+should be signalled by an event.
+
+Invariant: no cumulative nesting in calls between servers
+
+Note: at this stage, all events are internal to servers, and do not go between
+servers.
+
+Note: Possible major problem here supporting inter-server recursion between this
+step and the "make transactions non-blocking" step. Since each server's local
+context "camps" in the other server's function while awaiting completion of the
+call it is not straightforward for it to resume checking for incoming calls
+while waiting. Solution is to employ a pool of contexts for each object and use
+a "wake one waiter" event mechanism to ensure we select one waiting context for
+each incoming call. Hopefully SystemC supports this @todo check!
+
+Note: only change callee (upper executive)
+
+----------------------------------------------------------------------------
+Move to 2-phase transactions
+
+Turn function calls into "fake" nonblocking by adding a new call back to the
+original caller after processing is complete, just before the original called
+function returns. The original call is now called a call-functrino, and the new
+call is called a return-functrino.
+
+Outgoing call sites should wait after invoking the call-functrino and then kick
+themselves in the return-functrino.
+
+Invariant: no return values on inter-server calls
+
+Note: initial call is a functrino to the caller but isn't implemented
+as one. Hence "fake" 2-phase.
+
+Note: Since the return-functrino and the kick will come *before* the
+call-functrino returns and the wait begins the semaphore must be a 1-queue
+event.
+
+Note: affects caller and callee (upper and lower executives)
+
+----------------------------------------------------------------------------
+Object boundary forwarding
+
+Introduce thunk functions such that any call from a member object to an external
+object or vice-versa is forwarded through a new thunk function within the
+object.
+The new thunk function should exist in a new server.
+
+Invariant: calls into or out of an object are forwarded hence visible at 
+the object's class definition.
+
+----------------------------------------------------------------------------
+1:1 caller-callee relationship
+
+Whenever a function fd is called by more than one external server, add 
+new functions f1, f2, ... within fd's server, one for each calling server. 
+The servers should now call the f1, f2 etc and these should forward to fd.
+
+Invariant: Inter-server calls should now be 1:1 correspondence.
+
+Note: This will result in router/arbiter functionality in each server affected.
+Servers generated during the object boundary forwarding step will become 
+dedicated arbiters. Nice.
+
+----------------------------------------------------------------------------
+Change const pointers to ports
+
+Replace Obj *p with SystemC ports eg sc_port<Obj>.
+
+Invariant: no pointers
+
+Note: ports require 1:1 caller-callee relationships
+
+----------------------------------------------------------------------------
+Make transactions non-blocking
+
+The call-functrino should return immediately after kicking the server context.
+The return-functrino should now come from the callee's server context if not
+already. 
+
+Invariant: all inter-server calls are functrinos
+
+Note: only change callee (upper executive)
+
+Note: Now reduce to one context per server. Wait for outgoing calls to return by
+recursing back into the context's upper executive code. This supports recursive
+calls.
+
+Note: at this stage, each functrino corresponds to a sub-transaction.
+
+----------------------------------------------------------------------------
+Add channels
+
+Create a new "channel" (in the SystemC TLM sense) for each sub-transaction. The
+channel should forward the functrino calls. 
+
+Invariant: we have a presence, in the form of a channel, between communicating 
+pairs of servers.
+
+Note: the channel implementation we create will not be stated out but instead
+will be converted to wires (=signals) by the protocol step(s) so it is not a
+server. It will mostly be boiler-plate code.
+
+Note: changes caller and callee but trivially (outgoing functrinos go to
+channel). 
+
+----------------------------------------------------------------------------
+Passivate
+
+Modify the channels. Provide each with passive (call-in) 2-phase interfaces for
+both caller and callee. All functrinos go into the channel and the channel kicks
+(wakes up) the callee which then collects the parameters. 
+
+Invariant: servers do not receive incoming functrinos
+
+Note: after this step, a functrino is still used to initiate a sub-transaction,
+but the recipient gets an event and does a "get data" type call on the channel
+to get the data. 
+
+Note: the call into the channel to get the params is not a functrino since 
+it goes to a communications primitive (the channel) and not a server.
+
+Note: only change functrino recipients
+
+----------------------------------------------------------------------------
+Make sub-transactions 0-queue
+
+For each channel, add an "ack" channel which goes the in the other direction
+and has no data (same passive model). The recipient should ack immediately after
+receiving the event and the originator should wait for the ack.
+
+Invariant: now all transactions rendez-vous meaning the data doesn't have to 
+be stored externally between origination and receipt.
+
+Note: Now there are 4 events: call, call ack, return, return ack. Call ack 
+and return events could be merged but we will regard that as an optional future
+optimisation.
+
+Note: transactions now 4-phase; sub-transactions now 2-phase
+
+----------------------------------------------------------------------------
+Split out data and event channels
+
+The outgoing channels should be split into 2 channels: an event-only channel
+to signal the event and a data-only channel for the data.
+
+Invariant: can now treat the two kinds of channels separately
+
+Note: the ack channel is already an event-only channel
+
+----------------------------------------------------------------------------
+Introduce minor delay
+
+Introduce a primitive called delay() which generates an event to the current
+thread then waits for it. This is called a minor delay.
+
+Invariant: can now express minor delays
+
+Note: when we add protocols, we need to be able to avoid combinational loops
+so we use this primitive to break them. 
+
+----------------------------------------------------------------------------
+Move to signals
+
+The event-only channels become sc_signal<bool> backed by a member variable. 
+An event is generated by toggling the value: 1 goes to 0; 0 goes to 1. Reset 
+value is 0. The data-only channels become sc_signal<x> where x is the data 
+type used. Multiple data items (eg multiple parameters) should result in 
+multiple signals (no need to put them in a struct or anything). Add a single 
+delay() to the originator algorithm just after the transaction. 
+
+Invariant: All communication is via sc_signal
+
+Note: No need for backing members on data channels because the algorithm will
+block during the transaction so the supplied data can't change. 
+
+Note: since we are now dealing with wires (which is what signals really are),
+we need to avoid combinational loops (which are viewed as part of the behaviour
+of wires). We do this by adding a delay() in such a way that no two transactions
+can occur simultaneously (though the ack can be simultaneous)
+
