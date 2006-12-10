@@ -161,26 +161,6 @@ Note: the pointer *could* equal "this", but only if it's non-constant in which
 case we must support the possibility that it is not "this".
 
 ----------------------------------------------------------------------------
-Add addressof functions
-
-Add member functions to each object that returns the address of (a) the object 
-itself (addressof()) and (b) the addresses of any public POD data member x
-(x_addressof()). Replace &y with y.addressof() as appropriate.
-
-A new server should be created for case (a), and in case (b) the functions
-should exist in the same server as the corresponding data.
-
-Invariant: A function call takes place whenever inter-object addresses are 
-taken. Also, & now only used for POD in the same server (except for case (a))
-
-Note: Do not generate for member objects - their address should 
-be got by calling them directly. This is important for routing etc.
-
-Note: case (a) doesn't actually need to return any meaningful data. The sole
-purpose of the call is to establish routing so that derefs can be routed back 
-to the object.
-
-----------------------------------------------------------------------------
 Lower NULL pointers
 
 Replace every variable pointer with a non-null pointer and a bool. If the bool
