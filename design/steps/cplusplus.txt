@@ -1,7 +1,42 @@
 (C) Copyright 2006 John Graley
 Available under the terms of the BSD license. 
 
-Steps that deal with C++-specific language constructs in a purely software-oriented way.
+Steps that deal with C++-specific language constructs in a purely
+software-oriented way.
+
+The object of this phase is to get rid of C++ language constructs that would
+complicate later steps without benefit, or which must be lowered early on during
+compilation by the way they are defined.
+
+We aim to end up with an intermediate style that is definitely still a software
+style and could maybe be described as "C with classes", since the object-wise
+grouping of functions and data is definitely considered a benefit to later steps
+in its ability to express structure (see philosphy.txt).
+
+Templates are by definition expanded early in the compilation process (at least
+in terms of the programmer's view of the compilation process) and we reproduce
+that here.
+
+Exceptions would cause problems later on because of the need to unwind function
+calls across servers - the distributed nature of the structural implementation
+means we can only unwind by returning from the called functions, one level at a
+time. Therefore the inter-function unwinding must be dealt with here. The 
+removal of try/throw/catch from within fucntions is made into a seperate step
+because this second step could be moved down into sequential phase easily, maybe
+for an optimisation. We do not do this at present because the exeptions without
+unwind are look a bit silly and will just get in the way.
+
+RTTI is on indefinite hold pending a real incentive for me to learn about them.
+
+Inheritance does 2 things: (1) lets you avoid duplicating funcitons in 
+derived classes and (2) polymorphism. We deal with (1) by duplicating the
+functions by hand, which is not really wasteful since our policy is to duplicate
+functions per *object* anyway and (2) must be supported explicitly, possibly
+with something analogous to a Vtable. I may split the step into 2 halves.
+
+We also turn constructors and destructors into regular member functions. This
+simplifies the data phase and gets rid of tricky passing-nontrivial-objects-by
+-value problem, which complicates matters and is really a C++ issue.
 
 @todo we also have server designation in here - is that really for this phase? 
 Maybe it is? Maybe it shouldn't really be a step at all, but a user hinting
@@ -17,6 +52,9 @@ Invariant: no templates
 Note: this will make the program bigger, but that's what templates do to
 programs anyway.
 
+Note: they say C++ templates are a turing-complete language that runs at
+compile time. Run the template meta-program here.
+
 ----------------------------------------------------------------------------
 Remove stack unwind
 
@@ -29,6 +67,23 @@ Calls to such functions should be in try blocks and if an exception is returned
 then they should be rethrown.
 
 Invariant: return is the only path out of a function
+
+Example output:
+
+Exception f()
+{
+    Exception ex;
+    try
+    {
+        ex = g();
+	  if( ex != NullException )
+	      throw ex; 
+    }
+    catch( ex )
+    {
+        return ex; 
+    }
+}
 
 ----------------------------------------------------------------------------
 Lower try/throw/catch
@@ -46,6 +101,29 @@ Note: the additional destructor calls implied here get added in the "Make
 constructors/destructors explicit" step further down. This is triggered by the
 gotos.
 
+Example output:
+
+Exception f()
+{
+    Exception ex;
+
+    // Was the try block
+    {
+        ex = g();
+	  if( ex != NullException )
+            goto catch;
+    }
+    
+    // Was the catch block
+    catch:
+    {       
+        return ex;
+    }
+    
+    done:
+    return NullException;
+}
+
 ----------------------------------------------------------------------------
 Implement run-time type information
 
@@ -54,19 +132,44 @@ class hierarchies and modify calls to be member function calls.
 
 Invariant: no RTTI
 
+@todo should explain more and do an example but I've never used RTTI, I don't
+intend to and I'm not even very interested in learning. Perhaps this step
+can go on hold until someone who cares fills it in.
+
 ----------------------------------------------------------------------------
 Expand inheritance
 
 Where class B inherits from class A, copy non-overridden functions from A
 to B. Also copy any functions that are overridden but get called explicitly
-via eg A::f()
+via eg A::f(). 
 
 Invariant: no inheritance
 
-Note: Need a strategy for multiple inheritance
+Note: Need a strategy for multiple inheritance @todo
 
 Note: Duplicating the functions seems wasteful but it isn't: all the 
 functions get duplicated per-object anyway.
+
+Note: Where inherited fucntions are copied into the derived class, 
+there should probably be some link back to the declarations in the base class
+so that polymorphic pointers can be bound to the correct fucntion. This could be
+a VTable-like construct that maps vcall ids onto actual functions.
+
+@todo this step can probably be seperated into (a) duplicating inherited 
+member functions and (b) getting rid of the actual inheritance.
+
+Example output:
+
+class B // : public A    used to derive from A
+{
+    int f(); // was originally part of B
+    int g(); // G was in A but not B; now added to B    
+    
+    const struct { int vcall_id, (int B::*ptr)() }[] = { 1, &g }; 
+    // This is probably wrong, but demonstrates the idea of allowing a 
+    // caller who knows only of the interface of A to call B::g() 
+    // polymorphically, sort of like a vtable. 
+};
 
 ----------------------------------------------------------------------------
 Specify servers
@@ -88,6 +191,23 @@ Note: servers do not nest and exist below objects in the hierarchy. Hence a
 server may not contain another server or an object. An object may contain both.
 Within an object, servers and member objects exist at the same level.
 
+Example output:
+class A
+{
+    server A1
+    {
+        void f();
+    }
+    
+    server A2
+    {
+        int x;
+    }
+    
+    B member_obj; // B is some other non-trivial class
+};
+
+
 ----------------------------------------------------------------------------
 Make constructors/destructors explicit
 
@@ -104,11 +224,65 @@ lifecycle may now differ from that in the original program.
 Note: We choose not to generate any copy constructor if not already there -
 these objects will be treated like POD types. @todo or will they?
 
-Note: this means that const members will need to be un-consted except in the
-case of static objects with sufficiently simple initialisation algorithms.
-Optimisations could include converting member pointers initialised by new()
-into member objects and detecting when a constructor parameter is always
-supplied from a const.
+Note: this means that some const members will need to be un-consted except
+ones whose initialisation values are known at compile time. Optimisations 
+could include converting member pointers initialised by new() into member 
+objects and detecting when a constructor parameter is always supplied from 
+a const.
 
 Note: destructors must get called at early returns and gotos out of scopes.
+
+Note: getting rid of non-trivial pass-by-value is important for later on - we
+can't make wires for a data transfer that isn't just a straightforward copy 
+(but we are still allowed refs/pointers). Getting rid of all manually coded
+copy constructors ensures this, I think.
+
+Note: No need to worry about assignment, I don't think.
+
+Copy constructor example output:
+
+void f( A const &a ); // Used to be pass-by-value here but A is non-trivial
+object. 
+{
+    A local_a; // we permit C++ to construct the object with no init.
+    local_a.Construct( a ); // a goes into copy constructor by reference. 
+        
+    ...blah...
+    
+    local_a.Destruct(); // What goes up must come down
+}
+
+new/delete example output:
+
+void f()
+{
+    A *ptr_a = new A; // the new used to have parameters
+    ptr_a->Construct( ...blah... ); // now params go into construct call
+    
+    ...blah...
+    
+    ptr_a->Destruct(); // Do this before the delete
+    delete ptr_a; 
+}
+
+Extra destructor example:
+
+void f()
+{
+    {
+        A a;
+	  a->Construct();
+	  
+	  if( ...foo...)
+	  {
+	      a->Destruct(); // had to add this since goto skips the destruct at the
+end of the block
+	      goto done; // could also be an early return; same applies
+	  }
+	  
+	  b->Destruct();
+    }
+    
+    done:    
+}
 
