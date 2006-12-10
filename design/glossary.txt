@@ -83,8 +83,11 @@ steps.
 Heap - an area of memory used for dynamic allocation via malloc() and new().
 
 Invariant - a property of a style or representation of a program that may be
-introduced by a transformation step and may be required by other steps. This
-concept may be further refined in the future.
+introduced by a transformation step and may be required by other steps.
+Invariants will usually be the absence of types of constructs or guarantees
+about behaviour/properties of parts of the system. Occasionally they may be
+expression of redundancy (duplication of information in the program though
+guaranteed equivalences) though this is discouraged.
 
 Local - a data item whose lifetime is tied to a scope block. Usually allocated
 from stack memory. 

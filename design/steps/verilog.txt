@@ -2,3 +2,33 @@
 Available under the terms of the BSD license. 
 
 Steps that address HDL-specific (or Verilog-specific) language elements.
+
+
+----------------------------------------------------------------------------
+Lower types
+
+Convert types like char, int into bit vectors. Support bit fields properly. Bool
+becomes a 1-bit type. 
+
+Invariant: no types unknown to Verilog
+
+Note: we will hopefully be able to tolerate arbitrary bit vectors in SC form eg
+sc_bitvec<5> all the way through the process. @todo check
+
+----------------------------------------------------------------------------
+Implement variables as registers and wires
+
+Create some combination of registers and wires in place of variables. Try to
+avoid duplicating the combing-out that Verilog synthesis can do for us.
+
+Invariant: storage elements represented in a Verilog-compatible style.
+
+----------------------------------------------------------------------------
+Go to Verilog
+
+Insert Verilog constructs as follows: objects->modules; servers->
+"always" blocks and everything else maps as usual. Use synthesisible Verilog 
+2001. Always blocks should be the clocked kind.
+
+Invariant: program is now Verilog
+
