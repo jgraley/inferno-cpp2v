@@ -113,6 +113,12 @@ outgoing calls to wait for the event and collect the data without needing to
 receive an incoming function or functrino call. Passivation is the process of
 converting an active model to passive. See Active.
 
+Phase - the top level of granularity of the translation process. Each phase
+contains a number of steps which together address a broad part of the
+trnaslation required. They do not overlap - all steps in one phase are completed
+before any in the next phase. This ensures a single intermediate style between a
+neighbouring pair of phases.
+
 Pointer - we use the term pointer in the C/C++ sense.
 
 Poll, poll loop - polling refers to checking the state of a signal to detect a
