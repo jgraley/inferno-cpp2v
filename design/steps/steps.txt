@@ -319,8 +319,6 @@ Invariant: no pointers
 
 Note: ports require 1:1 caller-callee relationships
 
-Note: this gives us SystemC's "direct TLM" style. 
-
 ----------------------------------------------------------------------------
 Add server context
 
@@ -329,8 +327,6 @@ and wait for it to complete executing the function before returning. Completion
 should be signalled by an event.
 
 Invariant: no cumulative nesting in calls between servers
-
-Note: this gives us SystemC's "blocking TLM" style. 
 
 Note: at this stage, all events are internal to servers, and do not go between
 servers.
@@ -375,8 +371,6 @@ The return-functrino should now come from the callee's server context if not
 already. 
 
 Invariant: all inter-server calls are functrinos
-
-Note: this gives us SystemC's "non-blocking TLM" style. 
 
 Note: only change callee (upper executive)
 
