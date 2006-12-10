@@ -181,30 +181,6 @@ purpose of the call is to establish routing so that derefs can be routed back
 to the object.
 
 ----------------------------------------------------------------------------
-Object boundary forwarding
-
-Introduce thunk functions such that any call from a member object to an external
-object or vice-versa is forwarded through a new thunk function within the
-object.
-The new thunk function should exist in a new server.
-
-Invariant: calls into or out of an object are forwarded hence visible at 
-the object's class definition.
-
-----------------------------------------------------------------------------
-1:1 caller-callee relationship
-
-Whenever a function fd is called by more than one external server, add 
-new functions f1, f2, ... within fd's server, one for each calling server. 
-The servers should now call the f1, f2 etc and these should forward to fd.
-
-Invariant: Inter-server calls should now be 1:1 correspondence.
-
-Note: This will result in router/arbiter functionality in each server affected.
-Servers generated during the object boundary forwarding step will become 
-dedicated arbiters. Nice.
-
-----------------------------------------------------------------------------
 Lower NULL pointers
 
 Replace every variable pointer with a non-null pointer and a bool. If the bool
@@ -311,15 +287,6 @@ Note: only do this to variable pointers!
 Note: new call also needs a backchannel
 
 ----------------------------------------------------------------------------
-Change const pointers to ports
-
-Replace Obj *p with SystemC ports eg sc_port<Obj>.
-
-Invariant: no pointers
-
-Note: ports require 1:1 caller-callee relationships
-
-----------------------------------------------------------------------------
 Add server context
 
 Add an SC_THREAD for each server. Incoming calls should wake the server context
@@ -362,6 +329,39 @@ call-functrino returns and the wait begins the semaphore must be a 1-queue
 event.
 
 Note: affects caller and callee (upper and lower executives)
+
+----------------------------------------------------------------------------
+Object boundary forwarding
+
+Introduce thunk functions such that any call from a member object to an external
+object or vice-versa is forwarded through a new thunk function within the
+object.
+The new thunk function should exist in a new server.
+
+Invariant: calls into or out of an object are forwarded hence visible at 
+the object's class definition.
+
+----------------------------------------------------------------------------
+1:1 caller-callee relationship
+
+Whenever a function fd is called by more than one external server, add 
+new functions f1, f2, ... within fd's server, one for each calling server. 
+The servers should now call the f1, f2 etc and these should forward to fd.
+
+Invariant: Inter-server calls should now be 1:1 correspondence.
+
+Note: This will result in router/arbiter functionality in each server affected.
+Servers generated during the object boundary forwarding step will become 
+dedicated arbiters. Nice.
+
+----------------------------------------------------------------------------
+Change const pointers to ports
+
+Replace Obj *p with SystemC ports eg sc_port<Obj>.
+
+Invariant: no pointers
+
+Note: ports require 1:1 caller-callee relationships
 
 ----------------------------------------------------------------------------
 Make transactions non-blocking
