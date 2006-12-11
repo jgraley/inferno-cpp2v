@@ -218,6 +218,11 @@ Staticise, static - data and objects whose existence is inferred before
 execution and which exist throughout execution. Their method of allocation is
 basically invisible to the program itself.
 
+Step - A small part of the project's transformation process. There are a number 
+of steps in each phase, and they are performed one at a time. The intermediate
+style between each pair of consecutive steps should be well-defined and 
+compilable for testing purposes. Most steps introduce invariants.
+
 Structural - in reference to a system, structure describes the hierarchical
 breakdown into concurrently-existing subsystems, the topology of their
 interconnections and protocols for communication.
