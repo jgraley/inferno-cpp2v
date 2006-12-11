@@ -82,12 +82,22 @@ steps.
 
 Heap - an area of memory used for dynamic allocation via malloc() and new().
 
+Iff - lit. if and only if
+
 Invariant - a property of a style or representation of a program that may be
 introduced by a transformation step and may be required by other steps.
 Invariants will usually be the absence of types of constructs or guarantees
 about behaviour/properties of parts of the system. Occasionally they may be
 expression of redundancy (duplication of information in the program though
 guaranteed equivalences) though this is discouraged.
+
+Inversion - a method of modifying a programming language's semantics using
+features provided by the language itself. This may be to change language rules,
+add instrumentation or make the compiled object self-interpreting, for example.
+C++ features like templates and operator overloading assist with this to a
+limited extent. SystemC is partly inversion and partly explicit library. We 
+choose explicit program transformation instead because inversion (in C++) is 
+limited in expressivity plus gets very confusing very quickly.
 
 Local - a data item whose lifetime is tied to a scope block. Usually allocated
 from stack memory. 

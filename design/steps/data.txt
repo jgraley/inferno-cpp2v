@@ -3,21 +3,65 @@ Available under the terms of the BSD license.
 
 Steps for data staticisation including dealing with pointers
 
+@todo maybe something for global statics and static members involving making new classes for them that feature a single instance.
 
 ----------------------------------------------------------------------------
 Staticise heap
 
-Explicitly implement new/delete to allocate objects from static arrays. 
+Explicitly implement new/delete to allocate objects from static arrays. A 
+seperate pool will be needed for each data type that may be newed. Array new
+(new[x]) should also be supported and since the size is a runtime variable, 
+fragmentation may occur. Fundamental types should be supported with one pool for each sizeof() value.
 
 Invariant: No dynamic allocation. All const-member pointers are now globally
 constant.
 
 Note: No need to worry about constructors/destructors since they should have
-been dealt with in the previous step.
+been dealt with in the cplusplus phase. We only need to implement the actual
+allocation.
 
 Note: Maybe place in a class if use cases are all below that class (ie 
-coming from member functions or member objects). New and delete for a given 
-type go in the same server.
+coming from member functions or member objects). 
+
+Note: New and delete for a given type, as well as the array itself, go in a
+single server.
+
+Note: Q: do wae not want to use a template over allocated type for this? 
+A: No we don't because we can generate code and repeated patterns such as 
+this are easy. Code generation is like templates but a bazillion
+times more powerful and a gazillion times more readable. Templates would 
+be useful if we were trying to use inversion, but we aren't.
+
+Note: The required size of the pool depends on run-time considerations. 
+If known, it may be hinted by the programmer. Otherwise it must be determined
+by testing (posisbly with an "engineering margin"). Finally, a caching approach
+based on casting to an array of some fundamental type may be considered, but it
+will be very inefficient.
+
+Example output for call to new and delete:
+
+void f()
+{
+    A *a_ptr = type_A_allocator.New(); // was new A;
+    
+    ...blah...
+    
+    type_A_allocator.Delete( a_ptr ); 
+}
+
+Example implementation (details omitted):
+
+static class
+{
+public:
+    A *New() { ...find one with allocated==false; set allocated=true... }
+    void Delete() { ...set allocated=false... }
+    
+private:
+    struct { A object, bool allocated } pool[A_SIZE];
+
+} type_A_allocator;
+
 
 ----------------------------------------------------------------------------
 Eliminate this->
@@ -35,12 +79,30 @@ Use get()/set()
 
 For POD types that are exposed publically, make all inter-object reads
 and writes be function calls. New functions go in same server as the public 
-member.
+member. 
 
 Invariant: every inter-object interaction is a function call
 
 Note: the pointer *could* equal "this", but only if it's non-constant in which
 case we must support the possibility that it is not "this".
+
+Note: non-trivial objects get dealt with in other ways, so don't worry about 
+them.
+
+Note: trivial get/set functions are considered bat style since they're no better
+than just making the member public. We only do this for the invariant which helps
+later on.
+
+Example output:
+
+class A
+{
+public:
+    A Get_a() { return a; }      // new accessor
+    void Set_a(A _a) { a = _a; } // new modifier
+private:      
+    A a; // used to be public
+};
 
 ----------------------------------------------------------------------------
 Lower NULL pointers
@@ -53,21 +115,56 @@ Invariant: all pointers are non-NULL
 
 Note: No need to do this to const pointers
 
+Example declaration and usage:
+
+void f()
+{
+   struct { A *non_null_ptr, bool is_null } a_ptr; // used to be A *a;
+
+   if( ...stuff... ) // determine whether object x exists
+   {
+       a_ptr.is_null = false;   // a_ptr = &x;
+       a_ptr.non_null_ptr = &x; // ...
+   }
+   else
+   {
+       a_ptr.is_null = true; // a_ptr = NULL;
+   }
+   
+   if( !a_ptr.is_null ) // was if( a != NULL )
+   {
+      a_ptr.non_null_ptr->g(); // was a_ptr->g();
+   }
+}
+
 ----------------------------------------------------------------------------
 Lower pointer arithmetic
 
 Associate every variable pointer with an int, which begins at zero, and is then
-the subject of all pointer arithmetic. Then use array style for derefs. Eg 
-
-p++; return *p; 
-
-becomes 
-
-p.index++; return p[p.index];
+the subject of all pointer arithmetic. Then use array style for derefs. 
 
 Invariant: No pointer arithmetic; pointers only created and overwritten
 
-Note: what about const pointers?
+Note: try to merge with the above struct if easy, otherwise just add 
+a new surronding struct.
+
+Note: this assumes that you can't go off the end of an array legally, which
+is true iff the relative locations of seperate data items (including arrays) 
+are undefined. We rely on the assumption that the SW is written to not assume
+otherwise. Assume is spelt Ass-u-me; that is to say it makes an Ass of U
+and Me.
+
+Example declaration and usage:
+
+void f()
+{
+   struct { A *non_null_ptr, bool is_null, int index } a_ptr;
+
+   a_ptr.index++; // was a_ptr++; 
+   y = a_ptr.non_null_ptr[x]; // was y = a_ptr[x]; 
+   return a_ptr.non_null_ptr[a_ptr.index]; // was return *a_ptr; 
+}
+
 
 ----------------------------------------------------------------------------
 Lower references
@@ -78,6 +175,16 @@ Invariant: no references
 
 Note: do this after lowering NULL and pointer arithmetic because the pointers
 that we will generate for refs don't need to support either of these things. 
+This is why this step is not part of the cplusplus phase.
+
+@todo maybe we can turn pointers into refs instead of refs into pointers.
+
+Example output:
+
+void f( A *r ) // used to be f( A &r )
+{
+    r->Thang(); // used to be r.Thang();
+}
 
 ----------------------------------------------------------------------------
 Memberise locals
@@ -97,6 +204,34 @@ will be repeated. Hopefully re-use implementation!
 
 Note: furthermore, "add dereferencing layer" lowering needs *all* locals to be
 memberised first, so moved up again and now applies to all locals
+
+@todo initialise stack pointer to 0 - this needs to be a global init
+
+@todo I thought we weren't going to depend on servers in this phase?
+
+Example output:
+
+class A
+{
+    server P
+    {
+        struct { int x, B b } p_stack[A_P_STACKSIZE]; 
+	  // struct includes ALL locals from ALL functions in P
+	  int p_stack_pointer;
+	  
+	  void f()
+	  {
+	      p_stack_pointer++; // on entry
+	      
+	      g( p_stack[p_stack_pointer].x ); // was g( x );
+	      p_stack[p_stack_pointer].b.h(); // was b.h();
+	      
+	      ...maybe recurse f here...
+	      
+	      p_stack_pointer--; // on exit
+	  }
+    }	  
+};
 
 ----------------------------------------------------------------------------
 Add server-level dereferencing layer
@@ -124,6 +259,45 @@ Note: only do this to variable pointers!
 Note: since >1 server in an object may have deref functions for the same
 data type, we need to unique-ise the names, at least for testing.
 
+@todo I think we should enumerate ALL & operations within the object, period.
+This works locally and mnimises the extent to which we need to do the "refer-
+back" step. Also fewer, bigger enoumerations make for more compact use of
+bits in compound representations.
+
+Example output:
+
+int x;
+
+class A
+{
+    int y;
+    
+    enum{ ADDRESSOF_GLOBAL_X, ADDRESSOF_Y } Local_Int_Ptr; // anything whose address we take using &
+    
+    void f()
+    {
+        Local_Int_Ptr p = ADDRESSOF_GLOBAL_X; // was int *p = &x;
+	
+	  ... maybe modify p, but in accordance with this step...
+	  
+	  WriteIntThroughPtr( p, 99 ); // was *p = 99;
+    }
+    
+    // completely new function
+    void WriteIntThroughPtr( Local_Int_Ptr p, int newval )
+    {
+        switch( p )
+	  {
+	  case ADDRESSOF_GLOBAL_X:
+	      x = newval;
+	      break;
+	  case ADDRESSOF_Y:
+	      y = newval;
+	      break;
+	  }
+    }    
+};
+
 ----------------------------------------------------------------------------
 Refer-back variable pointers
 
@@ -147,4 +321,56 @@ variable pointers is now local
 Note: only do this to variable pointers!
 
 Note: new call also needs a backchannel
+
+@todo maybe the example shouldn't use * and & notation since we got rid of those in the previous step! In fact, the example is a little ropey - needs looking at 
+more.
+
+@todo wondering about using the word "handle" for pointers not defined locally. In the example, A would see a pointer whereas B would see a handle. The handle is opaque to B.
+
+Example output:
+
+enum { A } Referee; // give an ID to the object A so it can be a referee for pointer dereferences.
+
+class A
+{
+    C x; // unchanged
+    void f() 
+    {
+        a.TakeAPointer( A, &x ); // was a.TakeAPointer( &x ); now need to pass our id.
+    }
+    
+    void ReferFoo( C *ptr, int param )  // new code; handles derefs on the pointer we supplied to B (when calling foo, in this example)
+    {
+        ptr->foo( param ); // Only dereferencing locally.
+    }
+    
+} a;
+
+class B
+{
+    struct ExtCPtr { C *external_ptr, Referee referee_id } ptr;
+    void TakeAPointer( Referee id, C *p )
+    {
+        ptr.external_ptr = p;
+	  ptr.referee_id = id; // remember both!
+    }
+    
+    void f()
+    {
+        // now time to try and use the pointer
+	  CallFooThroughExternalCPtr( ptr, 9 ); // used to be ptr->foo(9);
+    }
+    
+    void CallFooThroughExternalCPtr( ExtCPtr p, int param ) // new code
+    {
+        switch( p.referee_id )
+	  {
+	  case A: // identify the referee object...
+	      a.ReferFoo( p.external_ptr, param ); // ...then get it to do the deref and the call to foo().
+	      break;	     
+ 	  } 
+    }
+} b;
+
+
 
