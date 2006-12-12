@@ -1,9 +1,39 @@
 (C) Copyright 2006 John Graley
 Available under the terms of the BSD license. 
 
-Steps for data staticisation including dealing with pointers
+Data Phase - Steps for data staticisation including dealing with pointers
+
+C++ and most software languages provide a dazzling array of different ways in which data may be allocated and accesed: statics, locals, members, dynamic allocation. Pointers and references may be added as additional ways of accessing data that has been allocated by some other means.
+
+Verilog provides two methods: registers, which are a hardware primative, and intermediate values in procedural blocks, which are removed during combing-out.
+
+We must reconcile this discrepancy. Registers resemble statics and we rely on that correspondance throughout the process. Procedural block intermediates resemble locals, but are less expressive since they do not persist across as many different kinds of operations as locals do (locals within main() have nearly whole-program lifetime) therefore we choose not to maintain that correspondance.
+
+The solution is to convert all of the aforementioned C++ data formats into static allocation and direct (static-style) access.
+
+In early versions of the design, the lowering of C++ data was close to the lowering of corresponding code and there would not have been an identifiable data phase. However, maintinaing support for such constructs varied from confusing to impossible during structural and other data steps (pointers in particular). So they gravitated up to a position just below the C++-specific phase. See extensive notes in design forum and against tasks.
+
+Losing familiar data mechanisms may be inconvenient in later steps, and in a couple of cases there is a little smear, but this is the lesser evil.
+
+We therefore propose a phase in which dynamic data, locals, pointer and references are all lowered into static data and direct accesses. Member data does not need attention becuase by induction if top-level objects are all static then members are effectively static and members of members etc.
+
+This phase uses purely software implementations (test executables are just C++) like the C++ phase before it. However, we are now moving away from a style that con reasonably be called a natural software style, due to the hoops we must now jump through to deal with the absence of C++ data formats.
+
+Dynamic allocation is dealt with by building dynamic allocation pools. At this point, we still have pointers so the pools only need to release a pointer to the allocated object. We prefer to allocate by object to be consistent with the general thesis of keeping objects self-sufficient, physically containing their own data and functions.
+
+Locals are handled by the introduction of explicit stacks. Originally, stack creation was seen as part of the sequential phase, but analysis revealed that the need to eliminate locals was much more urgent then the need to state-out. We do so simply by creating a data structure containing all required locals and then implementing an explicit stack which is then declared as a member. This should be sufficient to support all forms of recursion that may be present in the program at the cost of a little multiplexing.
+
+The most complex part of this phase is the pointer solution - this will be the most work - and so keeping it in a pure SW implementation is a welcome simplification. We lower pointers at a local level by simply enumerating variables. This enum corresponds to an address that is valid only at a local level. When pointers are passed between objects, the recipient treats the pointer like a block box and passes the pointer beck to the object that supplied it (we call that object the referee) for dereferencing. This is called referring-back. When applied recursively, this ensures that all dereferences can be carried out locally. The resulting increase in the number of inter-obejct calls is belived essential to turn a pointer-rich C++ program into a distributed system as required by the project's philosophy.
+
+Further, when a dereference preceeds a member call on the dereferenced object (eg p->foo()) we choose to refer-back a package of work including the deref and the call itself. Conceptually this amounts to bringing the action to the object (as opposed to bringing the object to the action). We prefer to pass the parameters of the call than to try and move or copy the dereferenced object to the dereferencing code. In fact, it is now not necessary to move objects around at all, which fits in with the idea of generating physical hardware for each object.
+
+We don't really have an answer to casting as yet; most likely, it will be supported at some cost in efficiency (though cast-to-base-type should be efficient).
+
+One pending issue at the time of writing is the role servers play in the data phase. I think I want to make objects, not servers, be the designator of data scope. Thus the relevence of servers is only that we have to decide which server to put new functions into. THis is all TBD.
 
 @todo maybe something for global statics and static members involving making new classes for them that feature a single instance.
+
+The steps in this phase follow...
 
 ----------------------------------------------------------------------------
 Staticise heap
