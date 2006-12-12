@@ -1,7 +1,7 @@
 (C) Copyright 2006 John Graley
 Available under the terms of the BSD license. 
 
-Steps that deal with C++-specific language constructs in a purely
+C++ phase - steps that deal with C++-specific language constructs in a purely
 software-oriented way.
 
 The object of this phase is to get rid of C++ language constructs that would
@@ -41,6 +41,8 @@ simplifies the data phase and gets rid of tricky passing-nontrivial-objects-by
 @todo we also have server designation in here - is that really for this phase? 
 Maybe it is? Maybe it shouldn't really be a step at all, but a user hinting
 thing (ie already present in input program).
+
+The steps within this phase follow:
 
 ----------------------------------------------------------------------------
 Expand templates
