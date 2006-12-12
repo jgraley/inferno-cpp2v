@@ -3,35 +3,90 @@ Available under the terms of the BSD license.
 
 Data Phase - Steps for data staticisation including dealing with pointers
 
-C++ and most software languages provide a dazzling array of different ways in which data may be allocated and accesed: statics, locals, members, dynamic allocation. Pointers and references may be added as additional ways of accessing data that has been allocated by some other means.
+C++ and most software languages provide a dazzling array of different ways in
+which data may be allocated and accesed: statics, locals, members, dynamic
+allocation. Pointers and references may be added as additional ways of accessing
+data that has been allocated by some other means.
 
-Verilog provides two methods: registers, which are a hardware primative, and intermediate values in procedural blocks, which are removed during combing-out.
+Verilog provides two methods: registers, which are a hardware primative, and
+intermediate values in procedural blocks, which are removed during combing-out.
 
-We must reconcile this discrepancy. Registers resemble statics and we rely on that correspondance throughout the process. Procedural block intermediates resemble locals, but are less expressive since they do not persist across as many different kinds of operations as locals do (locals within main() have nearly whole-program lifetime) therefore we choose not to maintain that correspondance.
+We must reconcile this discrepancy. Registers resemble statics and we rely on
+that correspondance throughout the process. Procedural block intermediates
+resemble locals, but are less expressive since they do not persist across as
+many different kinds of operations as locals do (locals within main() have
+nearly whole-program lifetime) therefore we choose not to maintain that
+correspondance.
 
-The solution is to convert all of the aforementioned C++ data formats into static allocation and direct (static-style) access.
+The solution is to convert all of the aforementioned C++ data formats into
+static allocation and direct (static-style) access.
 
-In early versions of the design, the lowering of C++ data was close to the lowering of corresponding code and there would not have been an identifiable data phase. However, maintinaing support for such constructs varied from confusing to impossible during structural and other data steps (pointers in particular). So they gravitated up to a position just below the C++-specific phase. See extensive notes in design forum and against tasks.
+In early versions of the design, the lowering of C++ data was close to the
+lowering of corresponding code and there would not have been an identifiable
+data phase. However, maintinaing support for such constructs varied from
+confusing to impossible during structural and other data steps (pointers in
+particular). So they gravitated up to a position just below the C++-specific
+phase. See extensive notes in design forum and against tasks.
 
-Losing familiar data mechanisms may be inconvenient in later steps, and in a couple of cases there is a little smear, but this is the lesser evil.
+Losing familiar data mechanisms may be inconvenient in later steps, and in a
+couple of cases there is a little smear, but this is the lesser evil.
 
-We therefore propose a phase in which dynamic data, locals, pointer and references are all lowered into static data and direct accesses. Member data does not need attention becuase by induction if top-level objects are all static then members are effectively static and members of members etc.
+We therefore propose a phase in which dynamic data, locals, pointer and
+references are all lowered into static data and direct accesses. Member data
+does not need attention becuase by induction if top-level objects are all static
+then members are effectively static and members of members etc.
 
-This phase uses purely software implementations (test executables are just C++) like the C++ phase before it. However, we are now moving away from a style that con reasonably be called a natural software style, due to the hoops we must now jump through to deal with the absence of C++ data formats.
+This phase uses purely software implementations (test executables are just C++)
+like the C++ phase before it. However, we are now moving away from a style that
+con reasonably be called a natural software style, due to the hoops we must now
+jump through to deal with the absence of C++ data formats.
 
-Dynamic allocation is dealt with by building dynamic allocation pools. At this point, we still have pointers so the pools only need to release a pointer to the allocated object. We prefer to allocate by object to be consistent with the general thesis of keeping objects self-sufficient, physically containing their own data and functions.
+Dynamic allocation is dealt with by building dynamic allocation pools. At this
+point, we still have pointers so the pools only need to release a pointer to the
+allocated object. We prefer to allocate by object to be consistent with the
+general thesis of keeping objects self-sufficient, physically containing their
+own data and functions.
 
-Locals are handled by the introduction of explicit stacks. Originally, stack creation was seen as part of the sequential phase, but analysis revealed that the need to eliminate locals was much more urgent then the need to state-out. We do so simply by creating a data structure containing all required locals and then implementing an explicit stack which is then declared as a member. This should be sufficient to support all forms of recursion that may be present in the program at the cost of a little multiplexing.
+Locals are handled by the introduction of explicit stacks. Originally, stack
+creation was seen as part of the sequential phase, but analysis revealed that
+the need to eliminate locals was much more urgent then the need to state-out. We
+do so simply by creating a data structure containing all required locals and
+then implementing an explicit stack which is then declared as a member. This
+should be sufficient to support all forms of recursion that may be present in
+the program at the cost of a little multiplexing.
 
-The most complex part of this phase is the pointer solution - this will be the most work - and so keeping it in a pure SW implementation is a welcome simplification. We lower pointers at a local level by simply enumerating variables. This enum corresponds to an address that is valid only at a local level. When pointers are passed between objects, the recipient treats the pointer like a block box and passes the pointer beck to the object that supplied it (we call that object the referee) for dereferencing. This is called referring-back. When applied recursively, this ensures that all dereferences can be carried out locally. The resulting increase in the number of inter-obejct calls is belived essential to turn a pointer-rich C++ program into a distributed system as required by the project's philosophy.
+The most complex part of this phase is the pointer solution - this will be the
+most work - and so keeping it in a pure SW implementation is a welcome
+simplification. We lower pointers at a local level by simply enumerating
+variables. This enum corresponds to an address that is valid only at a local
+level. When pointers are passed between objects, the recipient treats the
+pointer like a block box and passes the pointer beck to the object that supplied
+it (we call that object the referee) for dereferencing. This is called
+referring-back. When applied recursively, this ensures that all dereferences can
+be carried out locally. The resulting increase in the number of inter-obejct
+calls is belived essential to turn a pointer-rich C++ program into a distributed
+system as required by the project's philosophy.
 
-Further, when a dereference preceeds a member call on the dereferenced object (eg p->foo()) we choose to refer-back a package of work including the deref and the call itself. Conceptually this amounts to bringing the action to the object (as opposed to bringing the object to the action). We prefer to pass the parameters of the call than to try and move or copy the dereferenced object to the dereferencing code. In fact, it is now not necessary to move objects around at all, which fits in with the idea of generating physical hardware for each object.
+Further, when a dereference preceeds a member call on the dereferenced object
+(eg p->foo()) we choose to refer-back a package of work including the deref and
+the call itself. Conceptually this amounts to bringing the action to the object
+(as opposed to bringing the object to the action). We prefer to pass the
+parameters of the call than to try and move or copy the dereferenced object to
+the dereferencing code. In fact, it is now not necessary to move objects around
+at all, which fits in with the idea of generating physical hardware for each
+object.
 
-We don't really have an answer to casting as yet; most likely, it will be supported at some cost in efficiency (though cast-to-base-type should be efficient).
+We don't really have an answer to casting as yet; most likely, it will be
+supported at some cost in efficiency (though cast-to-base-type should be
+efficient).
 
-One pending issue at the time of writing is the role servers play in the data phase. I think I want to make objects, not servers, be the designator of data scope. Thus the relevence of servers is only that we have to decide which server to put new functions into. THis is all TBD.
+One pending issue at the time of writing is the role servers play in the data
+phase. I think I want to make objects, not servers, be the designator of data
+scope. Thus the relevence of servers is only that we have to decide which server
+to put new functions into. THis is all TBD.
 
-@todo maybe something for global statics and static members involving making new classes for them that feature a single instance.
+@todo maybe something for global statics and static members involving making new
+classes for them that feature a single instance.
 
 The steps in this phase follow...
 
@@ -41,7 +96,8 @@ Staticise heap
 Explicitly implement new/delete to allocate objects from static arrays. A 
 seperate pool will be needed for each data type that may be newed. Array new
 (new[x]) should also be supported and since the size is a runtime variable, 
-fragmentation may occur. Fundamental types should be supported with one pool for each sizeof() value.
+fragmentation may occur. Fundamental types should be supported with one pool for
+each sizeof() value.
 
 Invariant: No dynamic allocation. All const-member pointers are now globally
 constant.
@@ -120,7 +176,8 @@ Note: non-trivial objects get dealt with in other ways, so don't worry about
 them.
 
 Note: trivial get/set functions are considered bat style since they're no better
-than just making the member public. We only do this for the invariant which helps
+than just making the member public. We only do this for the invariant which
+helps
 later on.
 
 Example output:
@@ -302,7 +359,8 @@ class A
 {
     int y;
     
-    enum{ ADDRESSOF_GLOBAL_X, ADDRESSOF_Y } Local_Int_Ptr; // anything whose address we take using &
+    enum{ ADDRESSOF_GLOBAL_X, ADDRESSOF_Y } Local_Int_Ptr; // anything whose
+address we take using &
     
     void f()
     {
@@ -352,24 +410,30 @@ Note: only do this to variable pointers!
 
 Note: new call also needs a backchannel
 
-@todo maybe the example shouldn't use * and & notation since we got rid of those in the previous step! In fact, the example is a little ropey - needs looking at 
+@todo maybe the example shouldn't use * and & notation since we got rid of those
+in the previous step! In fact, the example is a little ropey - needs looking at 
 more.
 
-@todo wondering about using the word "handle" for pointers not defined locally. In the example, A would see a pointer whereas B would see a handle. The handle is opaque to B.
+@todo wondering about using the word "handle" for pointers not defined locally.
+In the example, A would see a pointer whereas B would see a handle. The handle
+is opaque to B.
 
 Example output:
 
-enum { A } Referee; // give an ID to the object A so it can be a referee for pointer dereferences.
+enum { A } Referee; // give an ID to the object A so it can be a referee for
+pointer dereferences.
 
 class A
 {
     C x; // unchanged
     void f() 
     {
-        a.TakeAPointer( A, &x ); // was a.TakeAPointer( &x ); now need to pass our id.
+        a.TakeAPointer( A, &x ); // was a.TakeAPointer( &x ); now need to pass
+our id.
     }
     
-    void ReferFoo( C *ptr, int param )  // new code; handles derefs on the pointer we supplied to B (when calling foo, in this example)
+    void ReferFoo( C *ptr, int param )  // new code; handles derefs on the
+pointer we supplied to B (when calling foo, in this example)
     {
         ptr->foo( param ); // Only dereferencing locally.
     }
@@ -396,7 +460,8 @@ class B
         switch( p.referee_id )
 	  {
 	  case A: // identify the referee object...
-	      a.ReferFoo( p.external_ptr, param ); // ...then get it to do the deref and the call to foo().
+	      a.ReferFoo( p.external_ptr, param ); // ...then get it to do the deref
+and the call to foo().
 	      break;	     
  	  } 
     }
