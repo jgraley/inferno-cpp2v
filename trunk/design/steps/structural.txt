@@ -26,6 +26,9 @@ each incoming call. Hopefully SystemC supports this @todo check!
 
 Note: only change callee (upper executive)
 
+@todo this step *must* move below 1:1 otherwise emergent arbiter/router
+creation won't work!
+
 ----------------------------------------------------------------------------
 Move to 2-phase transactions
 
@@ -39,8 +42,8 @@ themselves in the return-functrino.
 
 Invariant: no return values on inter-server calls
 
-Note: initial call is a functrino to the caller but isn't implemented
-as one. Hence "fake" 2-phase.
+Note: initial call is a functrino as far as the caller is concerned but isn't 
+implemented as one by callee. Hence "fake" 2-phase.
 
 Note: Since the return-functrino and the kick will come *before* the
 call-functrino returns and the wait begins the semaphore must be a 1-queue
@@ -77,7 +80,7 @@ Change const pointers to ports
 
 Replace Obj *p with SystemC ports eg sc_port<Obj>.
 
-Invariant: no pointers
+Invariant: no pointers @todo this is probably wrong
 
 Note: ports require 1:1 caller-callee relationships
 
@@ -119,7 +122,7 @@ Passivate
 
 Modify the channels. Provide each with passive (call-in) 2-phase interfaces for
 both caller and callee. All functrinos go into the channel and the channel kicks
-(wakes up) the callee which then collects the parameters. 
+(wakes up) the callee using an event and it then collects the parameters. 
 
 Invariant: servers do not receive incoming functrinos
 
