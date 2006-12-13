@@ -113,7 +113,8 @@ Pointers
 Pointers play an important role in defining the communication structure in the
 context of the interacting agents pattern given above. In this role, we choose
 the pointer as the C++ construct that will ultimately become the fully-featured
-communications infrastructure required for this pattern's hardware realisation.
+communications infrastructure required for this pattern's hardware realisation. 
+@todo not really true any more.
 
 Pointers have very flexible run-time behaviour, and the closest correspondence
 that a hardware communications infrastructure can offer is routing (which means
@@ -123,7 +124,7 @@ somehow correspond with the control input to routers.
 A helpful intermediate way of thinking about pointers is as "channels" in the
 sense used in a number of papers on the subject. We therefore aim to understand
 the correspondence between pointers, channels and physical bus/router/arbiter
-systems and transform them accordingly.
+systems and transform them accordingly. @todo emergent routers/arbiters.
 
 
 Recursion
@@ -272,12 +273,12 @@ logic.
 
 The sequential level may be thought of as the implementation within a typical
 class, consists of state machines, sequential code sequences and (possibly
-recursive) internal function calls. We device a minimally computer-like solution
+recursive) internal function calls. We devise a minimally computer-like solution
 for each class, and instance it once per object. The extent to which we add
 computer-like infrastructure depends on the complexity of the class and should
 never be disproportionate. This permits us to achieve sequential control and
 algorithmic processing with the full expressivity of a software language but it
-is not particularly parallelisable.
+is not particularly parallelisable. @todo servers
 
 The structural level deals with the allocation of objects, object hierarchy and
 interactions between objects. For this purpose we regard objects as autonomous
