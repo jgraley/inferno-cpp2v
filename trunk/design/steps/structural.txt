@@ -1,17 +1,88 @@
 (C) Copyright 2006 John Graley
 Available under the terms of the BSD license. 
 
-Steps relating to program structure (inter-server level)
+Structural phase - steps relating to program structure (inter-server level)
 
+In this phase, we deliver on the promise made in the philosphy document: that we
+would avoid simply re-creating a single computer (by doing state-out and similar
+on the whole input program at once) and instead regard the program as a network
+of semi-autonomous interacting agents.
+
+These agents will each be subjected to state-out seperately. Each one is capable
+of implementing whatever code we partition into it as well as any code we choose
+to add. Any code we add must confirm to the subset of C++ established in earlier
+phases. We partition at server level. 
+
+We choose to replace function calls between servers with pairs of
+funciton-call-like things called functrinos. A functrino has a call event and
+parameters but no return or return value. There's a functrino for a function
+call and another for its return. Functrinos could probably be used to model
+other things like messages, and some "void" functions with the right properties
+could be modelled with only a call-functrino, but that's for the future. The
+real advantage is that we've get rid of some inconvenient aspects of functions.
+
+We will choose to pass functrinos through a number of "thunks" or forwarding
+functrinos that simply call through to another functrino. This is done to
+establish the paths that will be taken by what will eventually become wires. We
+need to be able to tell Verilog where they go, and we need to marshall them and
+avoid blatant duplication. These steps actually give rise to arbiters (and
+possibly routers) as structures that emerge from thunks as the later structural
+and sequential steps execute. This is a nice result.
+
+Each server, after state-out, will posess its own context of execution in the
+form of a physically manifest state variable. In this phase, we choose to model
+them using SystemC's SC_THREAD primative, which is really just a wrapper for an
+OS thread. It helps us run tests on intermediates and is also a conceptual aid
+since we can "re-use" understanding of multi-threaded programming, admittedly in
+SystemC's esoteric style (but remember SystemC is designed to be mappable to
+hardware). We ensure that functrino interactions between threads are
+non-blocking, so that each functrino may be consuidered as an instantanious
+event (at least for now). 
+
+Functrinos going between servers are still unacceptable for state-out. We
+therefore need to go quite low-level in this phase in terms of describing a
+protocol that makes the program structure look like the ends of some
+sell-defined wires from the perspective of a server. 
+
+We begin by introducing the Transaction Level Modelling concept of a channel for
+each functrino. Over a few steps, the channels are modified to avoid making
+calls into servers (instead they use SystemC's channel->module wakeup scheme)
+and split up into finer, more role-specific channels.
+
+We add an acknowledgement for each functrino. This is to be understood as a
+low-level ack that serves protocol functions: flow control and data validity
+marshalling. The reader may object that we have divided function calls twice
+now: first into call-functrino/return-functrino, then into  call-request/call-ack/return-request/return-ack. But this is no different to
+ARM's AXI bus spec, that has avalid/aready/rvalid/rready for a read transaction.
+If you think AXI is too complex, talk to the ARM because the face ain't
+listenin', sista.
+
+Finally, we actually insert SystemC's version of wires, the sc_signal<x>
+pre-defined channel. In the interests of proper correctness, we also choose now
+to add a notional time delay, called a "minor delay" in order to prevent servers
+from trying to do impossible things like toggling a wire twice simultaneously.
+
+@todo need a step to insert SC_MODULE around all classes?
 
 ----------------------------------------------------------------------------
 Add server context
 
-Add an SC_THREAD for each server. Incoming calls should wake the server context
-and wait for it to complete executing the function before returning. Completion
-should be signalled by an event.
+Add an SC_THREAD for each server. Each function f() called from outside the
+server should be renamed as f_impl(). New functions named as per the original
+functions should wake the context via an event and wait for another event that
+signals that execution has completed. 
 
-Invariant: no cumulative nesting in calls between servers
+The SC_THREAD function should detect the event and call the appropriate _impl
+function. When that returns, it should generate the return event. An enum should
+be created to differentiate between multiple functions.
+
+The idea is to introduce a context (in the form of a SC_THREAD) for each server
+and ensure that it is used to execute all existing functions within that server.
+We have to use events to signal the threads, but we keep the external interface
+of the servers the same.
+
+Invariant: A given server's code is executed within a context that belongs to
+it.
 
 Note: at this stage, all events are internal to servers, and do not go between
 servers.
@@ -24,10 +95,80 @@ while waiting. Solution is to employ a pool of contexts for each object and use
 a "wake one waiter" event mechanism to ensure we select one waiting context for
 each incoming call. Hopefully SystemC supports this @todo check!
 
-Note: only change callee (upper executive)
+Note: maybe use a clean internal format for remembering what's a SC_THREAD etc
+and what its sensitivities are, and only generate the SC_CTOR when rendering for
+test.
 
 @todo this step *must* move below 1:1 otherwise emergent arbiter/router
 creation won't work!
+
+@todo the return event mey be a problem because I think you have to route the
+wakeup all the way back to the calling object. It will be easier to do this
+after 2-phase because functrinos don't have a return.
+
+Example output:
+
+SC_MODULE(A)
+{
+    enum { F, G } which;
+    sc_event X_wake, f_wake, g_wake;
+
+    void X_context()
+    {
+        while(1)
+        {
+            wait( X_wake );
+            switch( which )
+            {
+                case F:
+                    f_impl();
+                    @todo event f_wake             
+                    break;
+                    
+                case G:
+                    g_impl();
+                    @todo event g_wake
+                    break;
+            }            
+        }
+    }
+
+    SC_CTOR(A)
+    {
+        SC_THREAD(X_context)
+        sensitive << X_wake;
+    }
+    
+    server X
+    {
+    public:
+        void f()
+        { 
+            which = F;
+            @todo event X_wake;
+            wait( f_wake );
+        }
+
+        void g()
+        {
+            which = G;
+            @todo event X_wake;
+            wait( g_wake );
+        }
+
+    private:
+        void f_impl()
+        {
+            ...code taken from f()...
+        }
+
+        void g_impl()
+        {
+            ...code taken from g()...
+        }
+    }
+};
+
 
 ----------------------------------------------------------------------------
 Move to 2-phase transactions
@@ -40,27 +181,103 @@ call is called a return-functrino.
 Outgoing call sites should wait after invoking the call-functrino and then kick
 themselves in the return-functrino.
 
-Invariant: no return values on inter-server calls
+The idea here is to establish that the return event and return value come via a
+second call. Now, each of these calls has no return value and the only important
+event is their calls, not their returns. These are the characteristics of
+functrinos.
+
+Invariant: only functrinos between servers.
 
 Note: initial call is a functrino as far as the caller is concerned but isn't 
 implemented as one by callee. Hence "fake" 2-phase.
 
-Note: Since the return-functrino and the kick will come *before* the
-call-functrino returns and the wait begins the semaphore must be a 1-queue
-event.
+Note: Events and waits are included in the example code below but are not
+needed. Maybe insert markers into the internal representation but leave them out
+when testing.
 
-Note: affects caller and callee (upper and lower executives)
+
+Example output:
+
+class A
+{
+    event g_done_event; // optional in fake 2-phase; needed if real
+    int g_retval;
+
+    void f()
+    {
+        ...
+        b.g_call();
+        wait( g_done_event ); // optional in fake 2-phase; needed if real
+        y = g_retval;
+        ...
+    }
+
+public:    
+    void g_return( int retval ) // functrino
+    {
+        g_retval = retval;
+        wake( g_done_event ); // optional in fake 2-phase; needed if real
+    }    
+} a;
+
+class B
+{
+public:    
+    void g_call() // "fake" functrino
+    {
+        ... g()'s algorithm ...
+        int retval = x; // or whatever
+        a.g_return(retval);
+    }    
+    
+    // g used to be 
+    // int g() { return x; }
+} b;
+
 
 ----------------------------------------------------------------------------
 Object boundary forwarding
 
 Introduce thunk functions such that any call from a member object to an external
 object or vice-versa is forwarded through a new thunk function within the
-object.
-The new thunk function should exist in a new server.
+object. The new thunk function should exist in a new server.
+
+Veriog modules require that all interaction between "stuff" inside and "stuff"
+outside the module is explicitly manifested by wires. This step helps to make
+all interactions visible at the required level(s) of the hierarchy.
+
+We could just use a primative in the internal representation for this, that
+doesn't render to anything in test builds, but the functions we generate will
+turn into Arbiters as later steps are applied to them, and will give us the
+associated streamlining and reduction of wiring complexity.
 
 Invariant: calls into or out of an object are forwarded hence visible at 
 the object's class definition.
+
+@todo this is done on functrinos, not functions!!
+
+Example output:
+
+class A
+{
+public:
+    int f( int );
+};
+
+class B
+{
+private: // used to be public
+    A subobject;
+    
+public:         
+    server X
+    {
+        int subobject_f( int x )
+        {
+            return subobject->f( x );
+        }
+    }
+};
 
 ----------------------------------------------------------------------------
 1:1 caller-callee relationship
@@ -69,20 +286,99 @@ Whenever a function fd is called by more than one external server, add
 new functions f1, f2, ... within fd's server, one for each calling server. 
 The servers should now call the f1, f2 etc and these should forward to fd.
 
+We need a 1:1 caller-callee match in order to be able to bind ports and
+introduce channels. This step was originally much higher up because it was
+thought a prerequisite for pointers and 2-phase. However, those steps are no
+harder without, so we now do this as late as channel construction will allow.
+
+This will result in router/arbiter functionality in each server affected.
+Servers generated during the object boundary forwarding step will become 
+dedicated arbiters. 
+
 Invariant: Inter-server calls should now be 1:1 correspondence.
 
-Note: This will result in router/arbiter functionality in each server affected.
-Servers generated during the object boundary forwarding step will become 
-dedicated arbiters. Nice.
+@todo do I need to collect together all the outgoing calls eg in server Y 
+in the example output?
+
+@todo this is done on functrinos, not functions!!
+
+Example output:
+
+server X
+{
+private:    
+    void fd()
+    {
+        ...blah...
+    }
+    
+    
+public:
+    void f1() // new funciton
+    {
+        fd();
+    }
+    
+    void f2() // new function
+    {
+        fd();
+    }
+}
+
+server Y // uses f1
+{
+    void g()
+    {
+        f1();
+        f1();
+    }
+    
+    void h()
+    {
+        f1();
+    }
+}
+
+server Z // uses f2
+{
+    void i()
+    {
+        f2();
+    }
+}
 
 ----------------------------------------------------------------------------
 Change const pointers to ports
 
-Replace Obj *p with SystemC ports eg sc_port<Obj>.
+Replace Obj *p with SystemC ports eg sc_port<Obj>. We're doing this to prepare
+for the addition of channels, but we will immediately make correct use of the
+wakeup mechanism supported by ports.
 
-Invariant: no pointers @todo this is probably wrong
+Invariant: no pointers 
 
 Note: ports require 1:1 caller-callee relationships
+
+@todo depends what we do with pointers; we may have direct calls at this stage
+rather than through const pointers.
+
+Note: also need to propogate events though the ports instead of directly
+
+Example output:
+
+SC_MODULE(B)
+{
+   ...
+};
+
+SC_MODULE(A)
+{
+    sc_port<B> b_port; // was B * const b_ptr;
+    SC_CTOR(A)
+    {
+        SC_THREAD(f);
+        sensitive << b_port; // wakeups from B
+    }
+};
 
 ----------------------------------------------------------------------------
 Make transactions non-blocking
@@ -90,6 +386,12 @@ Make transactions non-blocking
 The call-functrino should return immediately after kicking the server context.
 The return-functrino should now come from the callee's server context if not
 already. 
+
+By allowing the call-functrino to return immediately, we are allowing the
+execution paths of caller and callee to proceed independently, at least to an
+extent. This will be an important step when parallelism becomes important. It
+may also be viewed as a natural consquence of having done both "fake 2-phase"
+and "add server context" and then cleaning up the resulting code.
 
 Invariant: all inter-server calls are functrinos
 
@@ -101,11 +403,81 @@ calls.
 
 Note: at this stage, each functrino corresponds to a sub-transaction.
 
+Example output:
+
+SC_MODULE(A)
+{
+    event g_done_event; 
+    int g_retval;
+
+    void f()
+    {
+        ...
+        b.g_call();
+        wait( g_done_event ); 
+        y = g_retval;
+        ...
+    }
+
+public:    
+    void g_return( int retval ) // functrino
+    {
+        g_retval = retval;
+        wake( g_done_event ); 
+    }    
+} a;
+
+SC_MODULE(B)
+{
+    enum { G } which;
+    sc_event X_wake;
+
+    void X_context()
+    {
+        while(1)
+        {
+            wait( X_wake );
+            switch( which )
+            {
+                case G:
+                    g_impl();
+                    a.g_return()      
+                    break;
+            }            
+        }
+    }
+
+    SC_CTOR(B)
+    {
+        SC_THREAD(X_context)
+        sensitive << X_wake;
+    }
+    
+    server X
+    {
+    public:
+        void g_call()
+        { 
+            which = G;
+            @todo event X_wake;
+        }
+
+    private:
+        void g_impl()
+        {
+            ...code taken from g()...
+        }
+    }
+};
+
+
 ----------------------------------------------------------------------------
 Add channels
 
 Create a new "channel" (in the SystemC TLM sense) for each sub-transaction. The
-channel should forward the functrino calls. 
+channel should forward the functrino calls. The idea is that we turn functrinos
+into channels and then expand their functionality towards wires while staying
+with channels so that wires will be easy to derive when the time comes.
 
 Invariant: we have a presence, in the form of a channel, between communicating 
 pairs of servers.
@@ -117,6 +489,21 @@ server. It will mostly be boiler-plate code.
 Note: changes caller and callee but trivially (outgoing functrinos go to
 channel). 
 
+Example test render (channel for functrino k(char c)):
+
+// Note: this is all just for test rendering; it doesn't get fed into later
+// stages.
+class Channel_k : public sc_interface
+{
+    void do_functrino( char c )
+    {
+        dest.k( c );
+    }    
+};
+
+Code in servers doesn't really change - just calls functrinos through the
+channel instead of directly.
+
 ----------------------------------------------------------------------------
 Passivate
 
@@ -124,16 +511,46 @@ Modify the channels. Provide each with passive (call-in) 2-phase interfaces for
 both caller and callee. All functrinos go into the channel and the channel kicks
 (wakes up) the callee using an event and it then collects the parameters. 
 
+The passive call model is an essential step since the function call modal
+produced in the sequential phase (state-out) will only be able to handle
+function calls within servers. In this phase, therefore, we must eliminate calls
+outside of servers completely. This phase removes calls that go into servers,
+and calls coming out of servers will be broken down into primatives that make
+sense in Verilog.
+
 Invariant: servers do not receive incoming functrinos
 
 Note: after this step, a functrino is still used to initiate a sub-transaction,
 but the recipient gets an event and does a "get data" type call on the channel
-to get the data. 
+to get the data. We therefore rely on SystemC to convey events into servers.
 
 Note: the call into the channel to get the params is not a functrino since 
 it goes to a communications primitive (the channel) and not a server.
 
 Note: only change functrino recipients
+
+Example test render (channel for functrino k(char c)):
+
+// Note: this is all just for test rendering; it doesn't get fed into later
+// stages.
+class Channel_k : public sc_interface
+{
+    char param_c;
+    
+    void do_functrino( char c )
+    {
+        param_c = c;
+        @todo event the connected destination port
+    }
+    
+    void get_data( char &c )
+    {
+        return c;
+    }
+};
+
+do_functrino() replaces f_data() (for call-functrinos) or f_return() (for
+return-functrinos). 
 
 ----------------------------------------------------------------------------
 Make sub-transactions 0-queue
@@ -141,6 +558,19 @@ Make sub-transactions 0-queue
 For each channel, add an "ack" channel which goes the in the other direction
 and has no data (same passive model). The recipient should ack immediately after
 receiving the event and the originator should wait for the ack.
+
+The ack serves two purposes: (1) marshalling of interactions to ensure that
+events are not sent too rapidly for the recipient to handle them and (2) to
+ensure that there is a well defined period of time for the recipient to read the
+accompanying data.
+
+This model is a rendez-vous model. The rendez-vous takes place for a finite
+period of time beginning at recipt of the request and ending when the ack is
+sent. A single request-ack cycle is a sub-transaction and the accompanying data
+is valid for the recipent during this period.
+
+It is expected that the request-ack period should be much shorter than the
+call-return delay in a real system.
 
 Invariant: now all transactions rendez-vous meaning the data doesn't have to 
 be stored externally between origination and receipt.
@@ -151,15 +581,107 @@ optimisation.
 
 Note: transactions now 4-phase; sub-transactions now 2-phase
 
+@todo not sure about the naming of this step
+
+@todo maybe we can arrange for the "ack" to clear the stored data, or mark it as
+unavailable for testing, to ensure we only consult the data when it is actually
+available. Also ensure another request is not sent before the ack from the
+previous one.
+
+Example test render (channel for functrino k(char c)):
+
+// Note: this is all just for test rendering; it doesn't get fed into later
+// stages.
+class Request_k : public sc_interface
+{
+    char param_c;
+    
+    void do_request( char c )
+    {
+        param_c = c;
+        @todo event the connected destination port
+    }
+    
+    void get_data( char &c )
+    {
+        return c;
+    }
+};
+
+channel Ack_k : public sc_interface
+{
+    void do_ack()
+    {
+        event the source port
+    }
+};
+
+Sender code goes:
+    ...
+    request_k.do_request('a');
+    wait( ack_k );
+    ...
+    
+Recipient event handler code goes:
+    case K:
+        c = request_k.get_data();
+        ack_k.do_ack(); // Ack immediately
+        ...do whatever is implied by functrino k...
+
 ----------------------------------------------------------------------------
 Split out data and event channels
 
-The outgoing channels should be split into 2 channels: an event-only channel
-to signal the event and a data-only channel for the data.
+The outgoing request channels should be split into 2 channels: an event-only
+channel to signal the event and data-only channels for the data. This step
+simply makes the channel structure look more similar to what will be acheived
+using wires. In particular we go from having request channels and ack channels
+to having event channels and data channels.
 
 Invariant: can now treat the two kinds of channels separately
 
 Note: the ack channel is already an event-only channel
+
+Note: if >1 param, create multiple seperate data channels one for each param.
+
+Example test render (channel for functrino k(char c)):
+
+// Note: this is all just for test rendering; it doesn't get fed into later
+// stages.
+class Data_k : public sc_interface
+{
+    char param_c;
+    
+    void set_data( char c )
+    {
+        param_c = c;
+    }
+    
+    void get_data( char &c )
+    {
+        return c;
+    }
+};
+
+class Request_k : public sc_interface
+{    
+    void do_request()
+    {     
+        @todo event the connected destination port
+    }
+};
+
+Sender code goes:
+    ...
+    data_k.SetData('a');
+    request_k.do_request();
+    wait( ack_k );
+    ...
+    
+Recipient event handler code goes:
+    case K:
+        c = data_k.get_data();
+        ack_k.do_ack(); // Ack immediately
+        ...do whatever is implied by functrino k...
 
 ----------------------------------------------------------------------------
 Introduce minor delay
@@ -167,10 +689,23 @@ Introduce minor delay
 Introduce a primitive called delay() which generates an event to the current
 thread then waits for it. This is called a minor delay.
 
+At present, we do not actually use these anywhere; the significance of this step
+is that we have added our first sequential/timing construct apart from the
+natural execution sequence of software. We have to do this in the structural
+phase because the wire-based protocol cannot be correctly described without it.
+
 Invariant: can now express minor delays
 
 Note: when we add protocols, we need to be able to avoid combinational loops
 so we use this primitive to break them. 
+
+Example test render for delay():
+
+dalay()
+{
+    @todo event current thread
+    wait( delay_event );
+}
 
 ----------------------------------------------------------------------------
 Move to signals
@@ -191,4 +726,31 @@ Note: since we are now dealing with wires (which is what signals really are),
 we need to avoid combinational loops (which are viewed as part of the behaviour
 of wires). We do this by adding a delay() in such a way that no two transactions
 can occur simultaneously (though the ack can be simultaneous)
+
+@todo shouln't the delay go after request but before ack, since that is when the
+data is being held ready? In a single cycle "req#1 and ack#1", is the data
+valid? the req says yes, the ack says no! But if it was eg a "ack#1 and req#2"
+we would know the data from sub-transaction #1 had gone and the data line
+certainly holds data for #2 now.
+
+Examples:
+
+Data_k, Request_k and Ack_k replaced by
+
+sc_signal<char> data_k;
+sc_signal<bool> request_k, ack_k;
+
+Sender code goes:
+    ...
+    data_k = 'a';
+    request_k = !request_k;
+    wait( ack_k );
+    ...
+    
+Recipient event handler code goes:
+    case K:
+        c = data_k;
+        ack_k = !ack_k; // Ack immediately. @todo How about ack_k=request_k?
+        delay(); // next request must happen after a minor delay to avoid a loop
+        ...do whatever is implied by functrino k...
 

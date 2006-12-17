@@ -177,6 +177,10 @@ Referee server - a server that passes a pointer (via parameter or return value)
 to another server and is therefore relied on by the other server to implement
 deref functions against the supplied pointer. See server.
 
+Rendering - converting the internal representation (at any stage) into valid
+code which may be C++, SystemC or Verilog. Rendering is used to generate test
+programs for intermediate stages as well as the final Verilog output.
+
 Return-functrino - a functrino in a 2-phase style that signifies the completion
 of a function and conveys return value data. See functrino and call-functrino. 
 @todo deprecate: may be confusing when we go to four functrinos per transaction.
