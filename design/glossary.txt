@@ -204,7 +204,7 @@ structural mapping approaches.
 Signal - a simple model of an electrical wire. We use the SystemC sc_signal<>
 for this.
 
-Smearing - A possible weakness in the design whereby some of the functionality 
+Smearing - A possible weakness in a design whereby some of the functionality 
 of one step is duplicated in another. For example if step A converts all simple 
 x into complicated y, and a later step B creates new y, then B duplicates some
 of A's complexity-generating functionality. Better to do B first and have it

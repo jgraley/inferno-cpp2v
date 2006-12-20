@@ -7,18 +7,25 @@ Steps that deal with intra-object code, including stating-out and recursion
 ----------------------------------------------------------------------------
 Add poll loops
 
-Replace all occurrences of wait(x) with while(!x) delay().
+Replace all wait() calls with a poll loop that checks the condition repeatedly.
+Insert a minor delay into the loop in order to explicitly spread it out over
+time. This is really associated with "add clock/reset" but we do it up here 
+so we can state-out the loop.
 
 Invariant: our reliance on SystemC eventing is hidden and the need for poll
-loops
-made explicit.
-
-Note: this is really associated with "add clock/reset" but we do it up here 
-so we can state-out the loop.
+loops made explicit.
 
 Note: we may not need this if using asynchronous technology. State-out should be
 able to still work if we skip this step leaving wait(x) in place of delay()
 loops.
+
+Example output:
+
+void f()
+{
+   // x is some event or group of events
+   while(!x) delay(); // used to be wait(x)
+}
 
 ----------------------------------------------------------------------------
 Merge member functions
@@ -26,63 +33,197 @@ Merge member functions
 Merge all the member functions in a server into a single one that uses a big
 switch statement to select the implementation based on a new enum parameter.
 Parameters of the original functions should be grouped into a struct for each of
-the original member functions then unioned together for the big function.
+the original member functions then unioned together for the big function. Return
+value should be handled similarly.
 
-Invariant: all calls are simple recursions on the big function
+Invariant: all calls are simple recursions on the big function (apart from
+SystemC primatives) since there's nothing else to call.
 
-Note: this single function is now the server's run function. All other calls 
-(apart from SystemC primatives) have now become simple recursions of this
-function.
+Note: this single function is now the server's run (process) function. Since
+SystemC expects the run function to be void(void) we will have to add a
+primative to forward the call. The "which" enum value supplied should be 0 for
+the run function; this thunk can be removed after flattening recursion.
 
 Note: originally was before memberise locals, but that proved impossible due to
 pointer lowering steps. This must be done after structural steps to ensure we
 keep separate call interfaces for separate call sites (1:1 wiring).
 
+Note: also merge the explicit stacks for the functions @todo maybe more
+efficient not to; but we need somewhere to put the stacked state. 
+
+@todo Need to stack the new locals added here 
+
+Example output (intial functions were char f(char) and int g(int, int)):
+
+struct g_params { int p1, int p2 };
+
+union big_params { char f, g_params g };
+union big_result { int f, char g };
+
+enum which { F, G };
+
+big_result big_function( which w, big_params bp )
+{
+    big_result br;
+    switch( which )
+    {
+        case F:
+            param = bp.f;
+            ...algorithm from f...
+            br.f = return_value;
+            break;
+            
+        case G:
+            param_1 = bp.g.p1;
+            param_2 = bp.g.p2;
+            ...algorithm from f...
+            br.g = return_value;
+            break;                                    
+    }
+    return br;
+}
+
 ----------------------------------------------------------------------------
 Lower constructs
 
 Lower constructs that are not supported in combable (synthesisable) Verilog into
-conditional branches ie if(cond) goto label; Also after each delay(); add a goto
-WAIT_STATE; WAIT_STATE:; 
+conditional branches ie if(cond) goto label; Also force a state transition for
+each delay(). 
 
+Lower the following in all cases:
+    for - lower into a while loop (@todo should this be a seperate step?)
+         while - test at start and jump out if fail; jump back to start at the
+end. Break jumps out; continue jumps to test.
+    do-while - test at end and jump back to start if pass. Break as   
+               per while() @todo what does continue do in a do-while. I      
+should know. I don't.
+    delay() - add a trivial "goto here" and label.
+    
+    
+Lower if a label is contained within the construct (after the above lowering):
+    if - test and jump past "then" blocvk if fail; end of "then" block jumps   
+         past "else" block.
+    switch - build a lookup table of case values to real labels (enumerated).
+             Generate the "goto x" primative. Break jumps out.
+       
 Invariant: all constructs combable or can be trivially stated-out
 
 Note: there's some flexibility here in how much stuff we lower. It corresponds
 to design tradeoffs in the final hardware. Any construct surrounding a label
-must
-itself be lowered. 
+must itself be lowered. 
 
-Note: retain local scope structure for now
+Note: Ifs etc could be partially stated if for example the "then" block
+contains a label but the "else" block does not. Likewise switch statements.
+    
+Note: the "goto x" primative is needed when lowering recursion in order to jump
+back to the correct state when returning - ensure same primative is used.
+
+Note: switch statements may be optimised by choosing the enum values for states
+to match the suer-supplied case values, or by making the mapping simple (eg
+prepend a bit pattern). Since multiple switch statements will tend to overload
+the space, the optimisation should be performed after this step. This will help
+allow a manually written state amchine in the input program to be preserved as
+such.
+
+Note: Retain local scope structure for now. @todo check whether we will break
+goto/scope rules here.
+
+@todo early returns
+
+Example, lowering for( x, y, z ) {...} 
+
+{ 
+    x; 
+    while( y ) 
+    { 
+        {...} 
+        z; 
+    } 
+}
+
+Example, lowering while(x) {...}
+
+{
+    CONTINUE:
+    if( !x ) goto BREAK;
+    {...} // break becomes goto BREAK, continue becomes goto CONTINUE
+    goto CONTINUE;
+    BREAK: 
+}
+       
+Example, lowering do {...} while(x)
+
+{
+    DO:
+    {...} // break becomes goto BREAK, dunno about continue
+    if( x ) goto DO;
+    BREAK: 
+}
+       
+Example, lowering delay()
+
+{
+    goto DELAY; // create a state change. 
+    // Maybe put a barrier here to stop this construct getting optimised away.
+    DELAY:
+}
+       
+Example, fully lowering if(x) {...} else {,,,}
+
+{
+    if( !x ) goto ELSE;
+    {...}
+    goto ENDIF;
+    ELSE:
+    {,,,}
+    ENDIF:
+}
+
+Example, fully lowering switch(x) { case 1: ...; case 2: ,,,; }    
+
+{
+    Label y = primative_lookup(x); // @todo what, exactly do we want here?
+    goto y; // goto-a-variable primative (will optimise out later)
+    CASE_1:
+    ...; // break becomes goto BREAK;
+    CASE_2:
+    ,,,; 
+    BREAK:    
+}
+
 
 ----------------------------------------------------------------------------
 Add state variable
 
 Add an enum with a value for each label, add a local variable of that type
 called state and maintain it correctly by assigning to it immediately before
-each goto. Initialise to eg INIT_STATE at start of function.
+each goto. Initialise to eg INIT_STATE at start of the function (regardless of
+recursion depth).
 
 Note: assert this at each label as a double check since we have a little
-redundancy at this point.
+redundancy at this point. Treat assert as a primative (and use the "standard"
+kind of assert as in assert.h).
 
-Note: the point of this is to establish the state as local, i.e. needs to be
-stacked when we recurse.
+Note: the state variable should be inserted into the local variables data
+structure so that it gets stacked when the function recurses.
 
-----------------------------------------------------------------------------
-Memberise locals
+Example output:
 
-Generate a data structure to represent the local variables. Use unions for
-variables whose scope does not overlap. Add an array of these structures, up to
-the max nesting depth, as a class member. Create a member stack pointer which
-should be initialised to zero. Increment it at the start of the function and
-decrement just before returning. Change all code to use the array indexed by the
-stack pointer.
+void f()
+{
+    // initialising the state
+    locals[stack_pointer].state = INIT_STATE;
 
-Invariant: all data is static or member
-
-Note: includes state
-
-Note: the same step was done on object type locals earlier on - try to build new
-locals into same structure.
+    
+    // if( x ) goto FOO; becomes...
+    if( x ) { locals[stack_pointer].state = STATE_FOO; goto FOO; }
+    
+    ...
+    
+    // FOO: becomes...
+    FOO:
+    assert( locals[stack_pointer].state==STATE_FOO );
+}
 
 ----------------------------------------------------------------------------
 Remove scopes
@@ -90,8 +231,7 @@ Remove scopes
 Scoped blocks (surrounded by {}) should now be completely redundant. Get rid of
 them.
 
-Note: was part of memberise locals, but now that step has to be run twice and
-the first time doesn't want to do this.
+Note: was part of memberise locals, but that got moved up into the data phase.
 
 Invariant: No scopes (apart from overall function scope)
 
@@ -106,6 +246,41 @@ Invariant: no recursion; no non-trivial function calls
 
 Note: the "goto a variable" primitive would have to become eg a switch statement
 for the purposes of testing this step. It vanishes in the "State-out" step.
+
+Note: every LABEL: must have an assert( state==LABEL_STATE ); otherwise
+state-out won't work. This is why we have to duplicate the sp++ and state=INIT
+for each fn call. But we're close enough to Verilog that synth tools should be
+able to help ;-)
+
+@todo deal with params/return value
+
+Note: at the end of this stage, the only caller to the function will be to start
+the process - so can fold in the thunk we added in at function merge.
+
+Example output:
+
+void f()
+{
+    locals[stack_pointer].state = INIT_STATE; // from add state variable step
+    INIT_STATE: // new
+    assert( state==AFTER_RECURSION_STATE );
+
+    ...
+    
+    // used to be f();
+    locals[stack_pointer].state = AFTER_RECURSION;
+    stack_pointer++;
+    locals[stack_pointer].state = INIT_STATE; 
+
+    AFTER_RECURSION:
+    assert( state==AFTER_RECURSION_STATE )
+    
+    ...
+    
+    // end of function
+    stack_pointer--;
+    goto locals[stack_pointer].state;
+}    
 
 ----------------------------------------------------------------------------
 Else clauses for skipped code
