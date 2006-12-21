@@ -97,7 +97,7 @@ end. Break jumps out; continue jumps to test.
     do-while - test at end and jump back to start if pass. Break as   
                per while() @todo what does continue do in a do-while. I      
 should know. I don't.
-    delay() - add a trivial "goto here" and label.
+    delay() - add a trivial "goto here" and label, but keep the delay() call.
     
     
 Lower if a label is contained within the construct (after the above lowering):
@@ -163,6 +163,7 @@ Example, lowering do {...} while(x)
 Example, lowering delay()
 
 {
+    delay();
     goto DELAY; // create a state change. 
     // Maybe put a barrier here to stop this construct getting optimised away.
     DELAY:
@@ -233,6 +234,8 @@ them.
 
 Note: was part of memberise locals, but that got moved up into the data phase.
 
+@todo we can't remove all scopes - we want to keep scopes on constructs that have not been lowered (because they will be combed-out by Verilog) and indeed the "else clauses" step actually adds scopes. So need a criterion for deciding which scopes to remove. Maybe the invariant should be no scopes around labels?
+
 Invariant: No scopes (apart from overall function scope)
 
 ----------------------------------------------------------------------------
@@ -287,9 +290,39 @@ Else clauses for skipped code
 
 Place code after a conditional goto (a goto in an if) up to the next label into
 an else clause if it isn't already in one. If there is code between an
-unconditional goto and the next label, it is an error (the code is unreachable)
+unconditional goto and the next label, it is an error (the code is unreachable). In general, there may be more than one goto in between each consecutive pair of labels and these gotos may be combed out so that there is a state for each label. This could be regarded as an optimisation (compared to adding a state for each goto), but we include it because it permits the result of state-out to resemble what one would expect from the lower-constructs step.
 
-Invariant: sections of code between labels are now combable
+The idea is to ensure that there is no code in an executable path between a goto and the next label.
+
+Invariant: gotos do not need to be enacted until the next label is reached
+
+Note: at the start of this step, there should be 0 or more if(something) goto SOMEWHERE; and then one unconditional goto SOMEWHERE_ELSE; just before the label. If this is not true, it is an error.
+
+Example:
+
+LABEL1:
+if(x) { state = X; goto X; }
+...
+if(y) { state = Y; goto Y; }
+,,,
+{ state = Z; goto Z; }
+LABEL2:
+
+becomes:
+
+LABEL1:
+if(x) { state = X; goto X; }
+else
+{
+    ...
+    if(y) { state = Y; goto Y; }
+    else
+    {
+        ,,,
+        { state = Z; goto Z; }
+    }
+}
+LABEL2:
 
 ----------------------------------------------------------------------------
 State-out
@@ -301,35 +334,100 @@ state variable.
 
 Invariant: context is released between each combable block
 
-Note: we are taking advantage of the fact that SC_THREAD loops infinitely
+Note: we are taking advantage of the fact that SC_THREAD loops infinitely 
+
+Example:
+
+void f()
+{
+    LABEL1:
+    ...
+    { state = LABEL3; goto LABEL3; }
+    LABEL2:
+    if( x )
+        { state = LABEL1; goto LABEL1; }
+    else
+    {
+        ,,,
+        { state = LABEL3; goto LABEL3; }
+    }
+    LABEL3:
+    '''
+    { state = LABEL2; goto LABEL2; }
+}
+
+becomes:
+
+void f()
+{
+    switch( state )
+    {
+    case LABEL1:
+        ...
+        state = LABEL3;
+        break;
+    
+    case LABEL2:
+        if( x )
+            state = LABEL1;
+        else
+        {  
+            ,,,
+            state = LABEL3;
+        } 
+        break;
+    
+    case LABEL3:
+        '''
+        state = LABEL2;
+        break;
+    }
+    // When switch falls out we exit the function, but funciton is a SC_THREAD
+    // and SC will just call it again in an infinite loop.
+}
 
 ----------------------------------------------------------------------------
 Extract waits
 
-Replace all delay() calls with a single one at the bottom of the function.
+Replace all delay() calls with a single one at the bottom of the function. We now have a minor delay for all the minor delays that were explicitly requested, and also for each state transition. This is the step that establishes the states as being spread out over time, in the manner of a computer.
 
 Invariant: no non-trivial context across a delay()
 
 Note: this is possible because all the delay() calls are at the ends of state
-cases and there's nothing after them until you get to the bottom of the
+cases and there's now nothing after them until you get to the bottom of the
 function.
+
+Example output:
+
+void f()
+{
+    switch( state )
+    {
+       ...blah blah, but we've removed all the delay() calls
+    }
+    delay();
+}
 
 ----------------------------------------------------------------------------
 Insert clock and reset
 
 Move all servers to SC_CTHREAD. Replace the delay() at the bottom with 
-wait(clk).
+wait(clk). @todo or whatever you do in an SC_CTHREAD to await a clock pulse.
+
+This step is simply a clarification of the fact that we will generate a clocked architecture, and not eg an asynchronous design. We are implementing the minor delay as a period of time equal to 1/Fc. This step also implies the existance of clock signal routing.
 
 Invariant: no more delay() primitive - all events explicitly controlled 
 by clock
 
-Note: not sure about clock distribution or how to handle reset. Maybe reset 
+@todo not sure about clock distribution or how to handle reset. Maybe reset 
 should zero all stored data as a first step in startup. @todo
 
 ----------------------------------------------------------------------------
 Remove server context
 
-Move to SC_METHOD. Remove the wait(clk) primitive.
+Move to SC_METHOD. Remove the wait(clk) primitive. This step is simply a result of the fact that we are able to use SystemC's process model that invokes functionality once per clock instead of on a continuous basis. The underlying condition for this to be possible is that the only wait(clk) is in a trivial position - just before returning. Since funciton return and delay are together, the implicaiton is that we do not need to keep any execution context across a wait(clk). We can therefore release the context after each combable (=nominally instantaneous) bit of work. Consequently, we don't need our own context any more, we can just borrow some common shared context. 
+
+The test rendering from this step will therefore not be multi-threeaded.
 
 Invariant: no persistent implicit context
 
