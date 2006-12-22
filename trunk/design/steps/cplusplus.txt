@@ -11,7 +11,7 @@ compilation by the way they are defined.
 We aim to end up with an intermediate style that is definitely still a software
 style and could maybe be described as "C with classes", since the object-wise
 grouping of functions and data is definitely considered a benefit to later steps
-in its ability to express structure (see philosphy.txt).
+in its ability to express structure (see philosophy.txt).
 
 Templates are by definition expanded early in the compilation process (at least
 in terms of the programmer's view of the compilation process) and we reproduce
@@ -21,9 +21,9 @@ Exceptions would cause problems later on because of the need to unwind function
 calls across servers - the distributed nature of the structural implementation
 means we can only unwind by returning from the called functions, one level at a
 time. Therefore the inter-function unwinding must be dealt with here. The 
-removal of try/throw/catch from within fucntions is made into a seperate step
+removal of try/throw/catch from within functions is made into a separate step
 because this second step could be moved down into sequential phase easily, maybe
-for an optimisation. We do not do this at present because the exeptions without
+for an optimisation. We do not do this at present because the exceptions without
 unwind are look a bit silly and will just get in the way.
 
 RTTI is on indefinite hold pending a real incentive for me to learn about them.
@@ -54,7 +54,7 @@ Invariant: no templates
 Note: this will make the program bigger, but that's what templates do to
 programs anyway.
 
-Note: they say C++ templates are a turing-complete language that runs at
+Note: they say C++ templates are a Turing-complete language that runs at
 compile time. Run the template meta-program here.
 
 ----------------------------------------------------------------------------
@@ -152,12 +152,12 @@ Note: Need a strategy for multiple inheritance @todo
 Note: Duplicating the functions seems wasteful but it isn't: all the 
 functions get duplicated per-object anyway.
 
-Note: Where inherited fucntions are copied into the derived class, 
+Note: Where inherited functions are copied into the derived class, 
 there should probably be some link back to the declarations in the base class
-so that polymorphic pointers can be bound to the correct fucntion. This could be
+so that polymorphic pointers can be bound to the correct function. This could be
 a VTable-like construct that maps vcall ids onto actual functions.
 
-@todo this step can probably be seperated into (a) duplicating inherited 
+@todo this step can probably be separated into (a) duplicating inherited 
 member functions and (b) getting rid of the actual inheritance.
 
 Example output:

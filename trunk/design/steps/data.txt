@@ -4,26 +4,26 @@ Available under the terms of the BSD license.
 Data Phase - Steps for data staticisation including dealing with pointers
 
 C++ and most software languages provide a dazzling array of different ways in
-which data may be allocated and accesed: statics, locals, members, dynamic
+which data may be allocated and accessed: statics, locals, members, dynamic
 allocation. Pointers and references may be added as additional ways of accessing
 data that has been allocated by some other means.
 
-Verilog provides two methods: registers, which are a hardware primative, and
+Verilog provides two methods: registers, which are a hardware primitive, and
 intermediate values in procedural blocks, which are removed during combing-out.
 
 We must reconcile this discrepancy. Registers resemble statics and we rely on
-that correspondance throughout the process. Procedural block intermediates
+that correspondence throughout the process. Procedural block intermediates
 resemble locals, but are less expressive since they do not persist across as
 many different kinds of operations as locals do (locals within main() have
 nearly whole-program lifetime) therefore we choose not to maintain that
-correspondance.
+correspondence.
 
 The solution is to convert all of the aforementioned C++ data formats into
 static allocation and direct (static-style) access.
 
 In early versions of the design, the lowering of C++ data was close to the
 lowering of corresponding code and there would not have been an identifiable
-data phase. However, maintinaing support for such constructs varied from
+data phase. However, maintining support for such constructs varied from
 confusing to impossible during structural and other data steps (pointers in
 particular). So they gravitated up to a position just below the C++-specific
 phase. See extensive notes in design forum and against tasks.
@@ -33,7 +33,7 @@ couple of cases there is a little smear, but this is the lesser evil.
 
 We therefore propose a phase in which dynamic data, locals, pointer and
 references are all lowered into static data and direct accesses. Member data
-does not need attention becuase by induction if top-level objects are all static
+does not need attention because by induction if top-level objects are all static
 then members are effectively static and members of members etc.
 
 This phase uses purely software implementations (test executables are just C++)
@@ -63,11 +63,11 @@ level. When pointers are passed between objects, the recipient treats the
 pointer like a block box and passes the pointer beck to the object that supplied
 it (we call that object the referee) for dereferencing. This is called
 referring-back. When applied recursively, this ensures that all dereferences can
-be carried out locally. The resulting increase in the number of inter-obejct
-calls is belived essential to turn a pointer-rich C++ program into a distributed
+be carried out locally. The resulting increase in the number of inter-object
+calls is believed essential to turn a pointer-rich C++ program into a distributed
 system as required by the project's philosophy.
 
-Further, when a dereference preceeds a member call on the dereferenced object
+Further, when a dereference precedes a member call on the dereferenced object
 (eg p->foo()) we choose to refer-back a package of work including the deref and
 the call itself. Conceptually this amounts to bringing the action to the object
 (as opposed to bringing the object to the action). We prefer to pass the
@@ -82,8 +82,8 @@ efficient).
 
 One pending issue at the time of writing is the role servers play in the data
 phase. I think I want to make objects, not servers, be the designator of data
-scope. Thus the relevence of servers is only that we have to decide which server
-to put new functions into. THis is all TBD.
+scope. Thus the relevance of servers is only that we have to decide which server
+to put new functions into. This is all TBD.
 
 @todo maybe something for global statics and static members involving making new
 classes for them that feature a single instance.
@@ -94,7 +94,7 @@ The steps in this phase follow...
 Staticise heap
 
 Explicitly implement new/delete to allocate objects from static arrays. A 
-seperate pool will be needed for each data type that may be newed. Array new
+separate pool will be needed for each data type that may be newed. Array new
 (new[x]) should also be supported and since the size is a runtime variable, 
 fragmentation may occur. Fundamental types should be supported with one pool for
 each sizeof() value.
@@ -112,7 +112,7 @@ coming from member functions or member objects).
 Note: New and delete for a given type, as well as the array itself, go in a
 single server.
 
-Note: Q: do wae not want to use a template over allocated type for this? 
+Note: Q: do we not want to use a template over allocated type for this? 
 A: No we don't because we can generate code and repeated patterns such as 
 this are easy. Code generation is like templates but a bazillion
 times more powerful and a gazillion times more readable. Templates would 
@@ -120,7 +120,7 @@ be useful if we were trying to use inversion, but we aren't.
 
 Note: The required size of the pool depends on run-time considerations. 
 If known, it may be hinted by the programmer. Otherwise it must be determined
-by testing (posisbly with an "engineering margin"). Finally, a caching approach
+by testing (possibly with an "engineering margin"). Finally, a caching approach
 based on casting to an array of some fundamental type may be considered, but it
 will be very inefficient.
 
@@ -233,10 +233,10 @@ the subject of all pointer arithmetic. Then use array style for derefs.
 Invariant: No pointer arithmetic; pointers only created and overwritten
 
 Note: try to merge with the above struct if easy, otherwise just add 
-a new surronding struct.
+a new surrounding struct.
 
 Note: this assumes that you can't go off the end of an array legally, which
-is true iff the relative locations of seperate data items (including arrays) 
+is true iff the relative locations of separate data items (including arrays) 
 are undefined. We rely on the assumption that the SW is written to not assume
 otherwise. Assume is spelt Ass-u-me; that is to say it makes an Ass of U
 and Me.
@@ -347,8 +347,8 @@ Note: since >1 server in an object may have deref functions for the same
 data type, we need to unique-ise the names, at least for testing.
 
 @todo I think we should enumerate ALL & operations within the object, period.
-This works locally and mnimises the extent to which we need to do the "refer-
-back" step. Also fewer, bigger enoumerations make for more compact use of
+This works locally and minimises the extent to which we need to do the "refer-
+back" step. Also fewer, bigger enumerations make for more compact use of
 bits in compound representations.
 
 Example output:
