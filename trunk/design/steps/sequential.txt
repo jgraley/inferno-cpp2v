@@ -1,8 +1,93 @@
 (C) Copyright 2006 John Graley
 Available under the terms of the BSD license. 
 
-Steps that deal with intra-object code, including stating-out and recursion
+Sequential phase - steps that deal with intra-object code, including stating-out
+and recursion.
 
+This phase contains the recognisable transformations that implement sequential
+algorithms by spacing a number of combable operations out over time.
+
+Our input consists of a number of servers conencted up by wires (sc_signal) and
+we act upon each server individually. A server resembles a simplified computer
+and runs in a server context (SC_THREAD). In addition to user functionality, the
+servers contain generated code from all three previous phases. In particular,
+the structural phase generates significant executive and protocol marshalling
+code. This is why the present phase occurs late-on in the transformation
+process; we can generate functionality in sequential C style and let it pass
+through this phase, instead of trying to generate the Verilog directly for the
+new functionality.
+
+Broadly speaking, the phase begins with steps that correspond to compilation
+(some more closely than others) followed by steps that introduce the minimal
+computer-like infrastructure required to execute the compiled program. Viewing
+the phase in this way leads us to question what instructions are available, to
+which the answer is that any combable block of code found in the initial server
+algorithm can become an instruction. However, there is no fundamental reason for
+compilation and computer recreation steps not to be swapped around if that
+helps.
+
+We firstly merge all the functions in the server into a single one. This
+corresponds to the linking performed by a software toolchain. We bring it out to
+near the start of the phase because it is reasonably seperable, and the
+remaining work is simpler. In particular all recursions are just calls back to
+the merged (big) function - so the recursion call pattern is simplified.
+
+We now perform the classic compilation task of lowering constructs such as while
+loops down into conditional gotos (a goto in an if). Gotos and labels will later
+turn into state transitions, therefore anything we lower to gotos will get
+stated out. We can also sometimes leave constructs in place in which case they
+will appear in the output Verilog and hence be combed-out during syntheis.
+Therefore this step decides what gets stated and what gets combed.
+
+Switch statements demand special attention - we choose to use a lookup table
+followed by a "goto a variable" primative to get to the right case. In the ideal
+situaiton, the lookup can be optimised to identity by choosing mathing label
+(=state) values and the goto-a-variable will just copy the variable over the
+state.
+
+We remove recursion by simply arranging to jump back to the start of the
+function instead of (re-)invoking it. This requires that we have an explicit
+stack (which we already have courtesy of the data phase) and an explicit state
+variable so that we can use the "goto a variable" primative to implement return.
+We do not wish to actually state out before this step, so instead we insert the
+state variable in parallel with the gotos and labels just before doing this step
+(so that it is available for return).
+
+We now have a single function in each server that will be called once at startup
+and will simply execute forever - not calling any other functions and not being
+called by any other functions. 
+
+When we state-out, we choose to create a state for each label. The states are
+reached by means of an overall switch statement and gotos are implemented by
+assigning a new value to the state variable. The overall switch statement must
+be iterated indefinitely but this is the behaviour of SC_THREAD anyway, no no
+actual loop needs to be created. 
+
+Since a state may contain conditional gotos followed by code, we need to place
+that code in an else clause of the if otherwise it will get executed when it
+shouldn't when the gotos are removed. We do this just before state-out.
+
+State-out may be regarded as turning a program that is manifestly implemented as
+a series of combable sections of code (similar to machine instructions) into a
+microprocessor implementation that may execute any such instruction at any time
+and chooses which one to execute based on stored data (the state variable, which
+may be regarded as analogous to a program counter).
+
+Finally, we move from SC_THREAD via SC_CTHREAD to SC_METHOD in a few simple
+steps. First, we replace all minor delays with a single one at the end of the
+function, then convert it according to process model: we have delay() under
+SC_THREAD, wait(clk) under SC_CTHREAD and nothing under SC_METHOD. These steps
+progressively define the synchronous timing model, and would differ
+substantially in an asynchronous implementation.
+
+Once we reach SC_METHOD, we have got rid of the need for a server context.
+Furthermore whenever SystemC invokes our code, it will perform only nomainally
+instantaneous actions which (a) are combable and (b) do not violate protocol
+rules by causing combinational loops. Note that this is distinct from the
+situation before server contexts were introduced, where a function could run for
+as long as it wanted and possibly indeterminately.
+
+The steps within this phase follow:
 
 ----------------------------------------------------------------------------
 Add poll loops
@@ -11,6 +96,11 @@ Replace all wait() calls with a poll loop that checks the condition repeatedly.
 Insert a minor delay into the loop in order to explicitly spread it out over
 time. This is really associated with "add clock/reset" but we do it up here 
 so we can state-out the loop.
+
+This step arguably finishes off the protocol generation step. However the choice
+of a poll loop as a way of waiting for an event is a decision local to servers
+and wheras wait-for-event is fairly generic, a poll loop is quite a specific
+sequential construction.
 
 Invariant: our reliance on SystemC eventing is hidden and the need for poll
 loops made explicit.
