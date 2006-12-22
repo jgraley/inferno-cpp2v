@@ -150,6 +150,9 @@ Plain scope - a scope not under the control of a construct such as while, if or
 try/catch. A plain scope is only useful for its ability to control
 construction/destruction of locals and goto behaviour.
 
+POD - Plain Old Data - data consisting of fundamental types, pointers and arrays
+of fundamental types but not instances of objects.
+
 Primitive - a language element we add for intermediate styles that does not 
 get subsumed into later steps as program functionality but instead retains a
 distinct behaviour throughout which has to be handled specifically by later
@@ -159,8 +162,8 @@ Protocol - a detailed description of a way of conveying events and data using
 signals. Protocols allow us to convert SystemC TLM transactions into low-level
 SystemC.
 
-POD - Plain Old Data - data consisting of fundamental types, pointers and arrays
-of fundamental types but not instances of objects.
+Pseudo-latch - a Verilog construction based on a flip-flop and a multiplexer
+that emulated the behaviour of a latch in a synchronous environment.
 
 Queue, N-queue - classification of event propagation mechanisms via analogy to
 FIFO queues. A 0-queue event resembles a FIFO of length 0 because it cannot
