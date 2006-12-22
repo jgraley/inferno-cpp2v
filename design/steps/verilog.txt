@@ -11,7 +11,7 @@ somewhat incomplete and the examples are not necessarily correct.
 Basically, we have a single step that actually switches languages from SystemC
 to Verilog. We try to ensure that this step is a simple trans-literation by
 performing preparatory SystemC transformations first. The output of this step
-should be simualtable for testing, but it does not need to be synthesisable or
+should be simulateable for testing, but it does not need to be synthesisable or
 in any "preferred" style (ie free of latches).
 
 Later steps fix up style issues and make the verilog synthesisable.
@@ -25,21 +25,21 @@ this phase.
 The conversion to Verilog itself is a transliteration as mentioned above. The
 Gimple extensions fir SystemC and Verilog will be distinct, but will map fairly
 directly on to each other. For example, the weighty SystemC SC_CTOR function
-will be represented as a primative, not as code, so there is no need to attempt
+will be represented as a primitive, not as code, so there is no need to attempt
 to induce its meaning. 
 
 Unwanted Verilog features (like the ability to confound and infuriate
 maintainers with backwards or floating vector bit numbering) will be concretely
 bypassed according to written conventions in the design docs.
 
-Verilog supports, to some extent, variable semantics simialr to those of C++ in
+Verilog supports, to some extent, variable semantics similar to those of C++ in
 the sense that if you overwrite a variable, the overright takes effect
 immediately and if you don't, you get the old value which has been stored for
 you. However, in general this leads the synthesiser to infer latches which are
 considered bad style. It is possible to build latch-type behaviour on flip-flops
 using pseudo-latches, and so we do this before outputting the final Verilog.
 
-@todo finish this phase!
+@todo finish this phase! Maybe see what sc2v does?
 
 The steps in this phase follow...
 
@@ -93,7 +93,7 @@ SC_MODULE(A)
     sc_int<32> number;
     
     SC_CTOR(A)                 // This whole block is internally 
-    {                          // represented as a primative along the
+    {                          // represented as a primitive along the
         SC_THREAD(f);          // lines of
         sensitive << port;     //     PROCESS( SC_THREAD, port )
     }                          // in the declaration of f() 

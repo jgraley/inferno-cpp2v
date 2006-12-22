@@ -3,18 +3,15 @@ Available under the terms of the BSD license.
 
 Structural phase - steps relating to program structure (inter-server level)
 
-In this phase, we deliver on the promise made in the philosphy document: that we
-would avoid simply re-creating a single computer (by doing state-out and similar
-on the whole input program at once) and instead regard the program as a network
-of semi-autonomous interacting agents.
+In this phase, we deliver on the promise made in the philosophy document: that we would avoid simply re-creating a single computer (by doing state-out and similar on the whole input program at once) and instead regard the program as a network of semi-autonomous interacting agents.
 
-These agents will each be subjected to state-out seperately. Each one is capable
+These agents will each be subjected to state-out separately. Each one is capable
 of implementing whatever code we partition into it as well as any code we choose
 to add. Any code we add must confirm to the subset of C++ established in earlier
 phases. We partition at server level. 
 
 We choose to replace function calls between servers with pairs of
-funciton-call-like things called functrinos. A functrino has a call event and
+function-call-like things called functrinos. A functrino has a call event and
 parameters but no return or return value. There's a functrino for a function
 call and another for its return. Functrinos could probably be used to model
 other things like messages, and some "void" functions with the right properties
@@ -29,14 +26,14 @@ avoid blatant duplication. These steps actually give rise to arbiters (and
 possibly routers) as structures that emerge from thunks as the later structural
 and sequential steps execute. This is a nice result.
 
-Each server, after state-out, will posess its own context of execution in the
+Each server, after state-out, will possess its own context of execution in the
 form of a physically manifest state variable. In this phase, we choose to model
-them using SystemC's SC_THREAD primative, which is really just a wrapper for an
+them using SystemC's SC_THREAD primitive, which is really just a wrapper for an
 OS thread. It helps us run tests on intermediates and is also a conceptual aid
 since we can "re-use" understanding of multi-threaded programming, admittedly in
 SystemC's esoteric style (but remember SystemC is designed to be mappable to
 hardware). We ensure that functrino interactions between threads are
-non-blocking, so that each functrino may be consuidered as an instantanious
+non-blocking, so that each functrino may be considered as an instantaneous
 event (at least for now). 
 
 Functrinos going between servers are still unacceptable for state-out. We
@@ -51,7 +48,7 @@ and split up into finer, more role-specific channels.
 
 We add an acknowledgement for each functrino. This is to be understood as a
 low-level ack that serves protocol functions: flow control and data validity
-marshalling. The reader may object that we have divided function calls twice
+marshaling. The reader may object that we have divided function calls twice
 now: first into call-functrino/return-functrino, then into  call-request/call-ack/return-request/return-ack. But this is no different to
 ARM's AXI bus spec, that has avalid/aready/rvalid/rready for a read transaction.
 If you think AXI is too complex, talk to the ARM because the face ain't
@@ -104,7 +101,7 @@ test.
 @todo this step *must* move below 1:1 otherwise emergent arbiter/router
 creation won't work!
 
-@todo the return event mey be a problem because I think you have to route the
+@todo the return event may be a problem because I think you have to route the
 wakeup all the way back to the calling object. It will be easier to do this
 after 2-phase because functrinos don't have a return.
 
@@ -244,11 +241,11 @@ Introduce thunk functions such that any call from a member object to an external
 object or vice-versa is forwarded through a new thunk function within the
 object. The new thunk function should exist in a new server.
 
-Veriog modules require that all interaction between "stuff" inside and "stuff"
+Verilog modules require that all interaction between "stuff" inside and "stuff"
 outside the module is explicitly manifested by wires. This step helps to make
 all interactions visible at the required level(s) of the hierarchy.
 
-We could just use a primative in the internal representation for this, that
+We could just use a primitive in the internal representation for this, that
 doesn't render to anything in test builds, but the functions we generate will
 turn into Arbiters as later steps are applied to them, and will give us the
 associated streamlining and reduction of wiring complexity.
@@ -316,7 +313,7 @@ private:
     
     
 public:
-    void f1() // new funciton
+    void f1() // new function
     {
         fd();
     }
@@ -363,7 +360,7 @@ Note: ports require 1:1 caller-callee relationships
 @todo depends what we do with pointers; we may have direct calls at this stage
 rather than through const pointers.
 
-Note: also need to propogate events though the ports instead of directly
+Note: also need to propagate events though the ports instead of directly
 
 Example output:
 
@@ -392,7 +389,7 @@ already.
 By allowing the call-functrino to return immediately, we are allowing the
 execution paths of caller and callee to proceed independently, at least to an
 extent. This will be an important step when parallelism becomes important. It
-may also be viewed as a natural consquence of having done both "fake 2-phase"
+may also be viewed as a natural consequence of having done both "fake 2-phase"
 and "add server context" and then cleaning up the resulting code.
 
 Invariant: all inter-server calls are functrinos
@@ -561,15 +558,15 @@ For each channel, add an "ack" channel which goes the in the other direction
 and has no data (same passive model). The recipient should ack immediately after
 receiving the event and the originator should wait for the ack.
 
-The ack serves two purposes: (1) marshalling of interactions to ensure that
+The ack serves two purposes: (1) marshaling of interactions to ensure that
 events are not sent too rapidly for the recipient to handle them and (2) to
 ensure that there is a well defined period of time for the recipient to read the
 accompanying data.
 
 This model is a rendez-vous model. The rendez-vous takes place for a finite
-period of time beginning at recipt of the request and ending when the ack is
+period of time beginning at receipt of the request and ending when the ack is
 sent. A single request-ack cycle is a sub-transaction and the accompanying data
-is valid for the recipent during this period.
+is valid for the recipient during this period.
 
 It is expected that the request-ack period should be much shorter than the
 call-return delay in a real system.
@@ -635,7 +632,7 @@ Split out data and event channels
 
 The outgoing request channels should be split into 2 channels: an event-only
 channel to signal the event and data-only channels for the data. This step
-simply makes the channel structure look more similar to what will be acheived
+simply makes the channel structure look more similar to what will be achieved
 using wires. In particular we go from having request channels and ack channels
 to having event channels and data channels.
 
@@ -643,7 +640,7 @@ Invariant: can now treat the two kinds of channels separately
 
 Note: the ack channel is already an event-only channel
 
-Note: if >1 param, create multiple seperate data channels one for each param.
+Note: if >1 param, create multiple separate data channels one for each param.
 
 Example test render (channel for functrino k(char c)):
 
@@ -703,7 +700,7 @@ so we use this primitive to break them.
 
 Example test render for delay():
 
-dalay()
+delay()
 {
     @todo event current thread
     wait( delay_event );
@@ -729,8 +726,7 @@ we need to avoid combinational loops (which are viewed as part of the behaviour
 of wires). We do this by adding a delay() in such a way that no two transactions
 can occur simultaneously (though the ack can be simultaneous)
 
-@todo shouln't the delay go after request but before ack, since that is when the
-data is being held ready? In a single cycle "req#1 and ack#1", is the data
+@todo shouldn't the delay go after request but before ack, since that is when the data is being held ready? In a single cycle "req#1 and ack#1", is the data
 valid? the req says yes, the ack says no! But if it was eg a "ack#1 and req#2"
 we would know the data from sub-transaction #1 had gone and the data line
 certainly holds data for #2 now.

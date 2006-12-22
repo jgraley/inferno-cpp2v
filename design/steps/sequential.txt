@@ -7,11 +7,11 @@ and recursion.
 This phase contains the recognisable transformations that implement sequential
 algorithms by spacing a number of combable operations out over time.
 
-Our input consists of a number of servers conencted up by wires (sc_signal) and
+Our input consists of a number of servers connected up by wires (sc_signal) and
 we act upon each server individually. A server resembles a simplified computer
 and runs in a server context (SC_THREAD). In addition to user functionality, the
 servers contain generated code from all three previous phases. In particular,
-the structural phase generates significant executive and protocol marshalling
+the structural phase generates significant executive and protocol marshaling
 code. This is why the present phase occurs late-on in the transformation
 process; we can generate functionality in sequential C style and let it pass
 through this phase, instead of trying to generate the Verilog directly for the
@@ -28,7 +28,7 @@ helps.
 
 We firstly merge all the functions in the server into a single one. This
 corresponds to the linking performed by a software toolchain. We bring it out to
-near the start of the phase because it is reasonably seperable, and the
+near the start of the phase because it is reasonably separable, and the
 remaining work is simpler. In particular all recursions are just calls back to
 the merged (big) function - so the recursion call pattern is simplified.
 
@@ -36,19 +36,19 @@ We now perform the classic compilation task of lowering constructs such as while
 loops down into conditional gotos (a goto in an if). Gotos and labels will later
 turn into state transitions, therefore anything we lower to gotos will get
 stated out. We can also sometimes leave constructs in place in which case they
-will appear in the output Verilog and hence be combed-out during syntheis.
+will appear in the output Verilog and hence be combed-out during synthesis.
 Therefore this step decides what gets stated and what gets combed.
 
 Switch statements demand special attention - we choose to use a lookup table
-followed by a "goto a variable" primative to get to the right case. In the ideal
-situaiton, the lookup can be optimised to identity by choosing mathing label
+followed by a "goto a variable" primitive to get to the right case. In the ideal
+situation, the lookup can be optimised to identity by choosing matching label
 (=state) values and the goto-a-variable will just copy the variable over the
 state.
 
 We remove recursion by simply arranging to jump back to the start of the
 function instead of (re-)invoking it. This requires that we have an explicit
 stack (which we already have courtesy of the data phase) and an explicit state
-variable so that we can use the "goto a variable" primative to implement return.
+variable so that we can use the "goto a variable" primitive to implement return.
 We do not wish to actually state out before this step, so instead we insert the
 state variable in parallel with the gotos and labels just before doing this step
 (so that it is available for return).
@@ -81,7 +81,7 @@ progressively define the synchronous timing model, and would differ
 substantially in an asynchronous implementation.
 
 Once we reach SC_METHOD, we have got rid of the need for a server context.
-Furthermore whenever SystemC invokes our code, it will perform only nomainally
+Furthermore whenever SystemC invokes our code, it will perform only nominally
 instantaneous actions which (a) are combable and (b) do not violate protocol
 rules by causing combinational loops. Note that this is distinct from the
 situation before server contexts were introduced, where a function could run for
@@ -99,7 +99,7 @@ so we can state-out the loop.
 
 This step arguably finishes off the protocol generation step. However the choice
 of a poll loop as a way of waiting for an event is a decision local to servers
-and wheras wait-for-event is fairly generic, a poll loop is quite a specific
+and whereas wait-for-event is fairly generic, a poll loop is quite a specific
 sequential construction.
 
 Invariant: our reliance on SystemC eventing is hidden and the need for poll
@@ -131,7 +131,7 @@ SystemC primatives) since there's nothing else to call.
 
 Note: this single function is now the server's run (process) function. Since
 SystemC expects the run function to be void(void) we will have to add a
-primative to forward the call. The "which" enum value supplied should be 0 for
+primitive to forward the call. The "which" enum value supplied should be 0 for
 the run function; this thunk can be removed after flattening recursion.
 
 Note: originally was before memberise locals, but that proved impossible due to
@@ -143,7 +143,7 @@ efficient not to; but we need somewhere to put the stacked state.
 
 @todo Need to stack the new locals added here 
 
-Example output (intial functions were char f(char) and int g(int, int)):
+Example output (initial functions were char f(char) and int g(int, int)):
 
 struct g_params { int p1, int p2 };
 
@@ -181,7 +181,7 @@ conditional branches ie if(cond) goto label; Also force a state transition for
 each delay(). 
 
 Lower the following in all cases:
-    for - lower into a while loop (@todo should this be a seperate step?)
+    for - lower into a while loop (@todo should this be a separate step?)
          while - test at start and jump out if fail; jump back to start at the
 end. Break jumps out; continue jumps to test.
     do-while - test at end and jump back to start if pass. Break as   
@@ -191,10 +191,10 @@ should know. I don't.
     
     
 Lower if a label is contained within the construct (after the above lowering):
-    if - test and jump past "then" blocvk if fail; end of "then" block jumps   
+    if - test and jump past "then" block if fail; end of "then" block jumps   
          past "else" block.
     switch - build a lookup table of case values to real labels (enumerated).
-             Generate the "goto x" primative. Break jumps out.
+             Generate the "goto x" primitive. Break jumps out.
        
 Invariant: all constructs combable or can be trivially stated-out
 
@@ -205,14 +205,14 @@ must itself be lowered.
 Note: Ifs etc could be partially stated if for example the "then" block
 contains a label but the "else" block does not. Likewise switch statements.
     
-Note: the "goto x" primative is needed when lowering recursion in order to jump
-back to the correct state when returning - ensure same primative is used.
+Note: the "goto x" primitive is needed when lowering recursion in order to jump
+back to the correct state when returning - ensure same primitive is used.
 
 Note: switch statements may be optimised by choosing the enum values for states
 to match the suer-supplied case values, or by making the mapping simple (eg
 prepend a bit pattern). Since multiple switch statements will tend to overload
 the space, the optimisation should be performed after this step. This will help
-allow a manually written state amchine in the input program to be preserved as
+allow a manually written state machine in the input program to be preserved as
 such.
 
 Note: Retain local scope structure for now. @todo check whether we will break
@@ -273,8 +273,8 @@ Example, fully lowering if(x) {...} else {,,,}
 Example, fully lowering switch(x) { case 1: ...; case 2: ,,,; }    
 
 {
-    Label y = primative_lookup(x); // @todo what, exactly do we want here?
-    goto y; // goto-a-variable primative (will optimise out later)
+    Label y = primitive_lookup(x); // @todo what, exactly do we want here?
+    goto y; // goto-a-variable primitive (will optimise out later)
     CASE_1:
     ...; // break becomes goto BREAK;
     CASE_2:
@@ -292,7 +292,7 @@ each goto. Initialise to eg INIT_STATE at start of the function (regardless of
 recursion depth).
 
 Note: assert this at each label as a double check since we have a little
-redundancy at this point. Treat assert as a primative (and use the "standard"
+redundancy at this point. Treat assert as a primitive (and use the "standard"
 kind of assert as in assert.h).
 
 Note: the state variable should be inserted into the local variables data
@@ -483,7 +483,7 @@ void f()
         state = LABEL2;
         break;
     }
-    // When switch falls out we exit the function, but funciton is a SC_THREAD
+    // When switch falls out we exit the function, but function is a SC_THREAD
     // and SC will just call it again in an infinite loop.
 }
 
@@ -520,7 +520,7 @@ wait(clk). @todo or whatever you do in an SC_CTHREAD to await a clock pulse.
 
 This step is simply a clarification of the fact that we will generate a clocked
 architecture, and not eg an asynchronous design. We are implementing the minor
-delay as a period of time equal to 1/Fc. This step also implies the existance of
+delay as a period of time equal to 1/Fc. This step also implies the existence of
 clock signal routing.
 
 Invariant: no more delay() primitive - all events explicitly controlled 
@@ -536,13 +536,13 @@ Move to SC_METHOD. Remove the wait(clk) primitive. This step is simply a result
 of the fact that we are able to use SystemC's process model that invokes
 functionality once per clock instead of on a continuous basis. The underlying
 condition for this to be possible is that the only wait(clk) is in a trivial
-position - just before returning. Since funciton return and delay are together,
-the implicaiton is that we do not need to keep any execution context across a
+position - just before returning. Since function return and delay are together,
+the implication is that we do not need to keep any execution context across a
 wait(clk). We can therefore release the context after each combable (=nominally
 instantaneous) bit of work. Consequently, we don't need our own context any
 more, we can just borrow some common shared context. 
 
-The test rendering from this step will therefore not be multi-threeaded.
+The test rendering from this step will therefore not be multi-threaded.
 
 Invariant: no persistent implicit context
 
