@@ -198,11 +198,7 @@ may be broken up into a sequence of operations performed one after the other
 over time. Outputs from earlier operations are stored and then provided as
 inputs to later operations.
 
-Server - a group of one or more member functions and POD data members from
-within a single object. Every member function and POD member datum must belong
-to a server. Therefore servers form a hierarchical layer between objects and
-functions/data. The server level is the boundary between sequential and
-structural mapping approaches.
+Server - a group of one or more member functions from within a single object. Every member function must belong to a server. Therefore servers form a hierarchical layer between objects and functions. The server level is the boundary between sequential and structural mapping approaches.
 
 Signal - a simple model of an electrical wire. We use the SystemC sc_signal<>
 for this.
