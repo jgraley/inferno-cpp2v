@@ -347,20 +347,13 @@ server Z // uses f2
 }
 
 ----------------------------------------------------------------------------
-Change const pointers to ports
+Use ports between servers
 
-Replace Obj *p with SystemC ports eg sc_port<Obj>. We're doing this to prepare
-for the addition of channels, but we will immediately make correct use of the
-wakeup mechanism supported by ports.
-
-Invariant: no pointers 
+Add an sc_port for each external server that we call or are called from. We're doing this to prepare for the addition of channels, but we will immediately make correct use of the wakeup mechanism supported by ports. @todo seems to be wrong - we don't have events going between servers yet. Maybe move this down? Check the TLM examples!
 
 Note: ports require 1:1 caller-callee relationships
 
-@todo depends what we do with pointers; we may have direct calls at this stage
-rather than through const pointers.
-
-Note: also need to propagate events though the ports instead of directly
+@todo better example
 
 Example output:
 
@@ -371,7 +364,7 @@ SC_MODULE(B)
 
 SC_MODULE(A)
 {
-    sc_port<B> b_port; // was B * const b_ptr;
+    sc_port<B> b_port; // we call a function in B
     SC_CTOR(A)
     {
         SC_THREAD(f);

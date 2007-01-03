@@ -64,8 +64,8 @@ pointer like a block box and passes the pointer beck to the object that supplied
 it (we call that object the referee) for dereferencing. This is called
 referring-back. When applied recursively, this ensures that all dereferences can
 be carried out locally. The resulting increase in the number of inter-object
-calls is believed essential to turn a pointer-rich C++ program into a distributed
-system as required by the project's philosophy.
+calls is believed essential to turn a pointer-rich C++ program into a
+distributed system as required by the project's philosophy.
 
 Further, when a dereference precedes a member call on the dereferenced object
 (eg p->foo()) we choose to refer-back a package of work including the deref and
@@ -194,13 +194,11 @@ private:
 ----------------------------------------------------------------------------
 Lower NULL pointers
 
-Replace every variable pointer with a non-null pointer and a bool. If the bool
+Replace every pointer with a non-null pointer and a bool. If the bool
 is false, the pointer is considered NULL. Otherwise the pointer is not NULL and
 it may be dereferenced.
 
 Invariant: all pointers are non-NULL
-
-Note: No need to do this to const pointers
 
 Example declaration and usage:
 
@@ -227,7 +225,7 @@ void f()
 ----------------------------------------------------------------------------
 Lower pointer arithmetic
 
-Associate every variable pointer with an int, which begins at zero, and is then
+Associate every pointer with an int, which begins at zero, and is then
 the subject of all pointer arithmetic. Then use array style for derefs. 
 
 Invariant: No pointer arithmetic; pointers only created and overwritten
@@ -238,8 +236,7 @@ a new surrounding struct.
 Note: this assumes that you can't go off the end of an array legally, which
 is true iff the relative locations of separate data items (including arrays) 
 are undefined. We rely on the assumption that the SW is written to not assume
-otherwise. Assume is spelt Ass-u-me; that is to say it makes an Ass of U
-and Me.
+otherwise. 
 
 Example declaration and usage:
 
@@ -276,7 +273,8 @@ void f( A *r ) // used to be f( A &r )
 ----------------------------------------------------------------------------
 Memberise locals
 
-Generate a data structure to represent the local variables in each server. Use 
+Generate a data structure to represent the local variables in each function.
+Use 
 unions for variables whose scope does not overlap. Add an array of these 
 structures, up to the max nesting depth, as a server member. Create a member 
 stack pointer which should be initialised to zero. Increment it at the start 
@@ -294,57 +292,47 @@ memberised first, so moved up again and now applies to all locals
 
 @todo initialise stack pointer to 0 - this needs to be a global init
 
-@todo I thought we weren't going to depend on servers in this phase?
-
 Example output:
 
 class A
 {
-    server P
-    {
-        struct { int x, B b } p_stack[A_P_STACKSIZE]; 
-	  // struct includes ALL locals from ALL functions in P
-	  int p_stack_pointer;
+     struct { int x, B b } f_stack[A_f_STACKSIZE]; 
+	  // struct includes all locals from f()
+	  int f_stack_pointer;
 	  
 	  void f()
 	  {
-	      p_stack_pointer++; // on entry
+	      f_stack_pointer++; // on entry
 	      
-	      g( p_stack[p_stack_pointer].x ); // was g( x );
-	      p_stack[p_stack_pointer].b.h(); // was b.h();
+	      g( f_stack[f_stack_pointer].x ); // was g( x );
+	      f_stack[f_stack_pointer].b.h(); // was b.h();
 	      
 	      ...maybe recurse f here...
 	      
-	      p_stack_pointer--; // on exit
+	      f_stack_pointer--; // on exit
 	  }
-    }	  
 };
 
 ----------------------------------------------------------------------------
-Add server-level dereferencing layer
+Add class-level dereferencing layer
 
-For each server, create an enum with a value for POD data item whose address is
-taken. Substitute the enum value for the address.
+For each class, create an enum with a value for each object or POD data item
+whose address is taken. Substitute the enum value for the address.
 
-Add functions to each server, for each enum value, that forward function calls 
+Add functions to each class, for each enum value, that forward function calls 
 to the corresponding object/POD item. So if member objects a and b of type C 
 both have a function footle( int x ) then we create deref_footle( C *p, int x ) 
 which invokes the correct footle() based on p. For POD types add eg
 deref_get( type *p ) and deref_set( type *p, type val ). Replace pointer derefs
-with the corresponding function. @todo but we're only doing this for POD types!
+with the corresponding function. 
 
-Invariant: server handles all derefs of internal data
+Invariant: class handles all derefs of internal data
 
 Note: p->f() and equivalently (*p).f() should *not* be broken down into the *p
 and the .f() but should be treated as a unit (becomes deref_f(p))
 
 Note: there's now no need to copy the data because we always bring the
 action to the data, not the other way around
-
-Note: only do this to variable pointers!
-
-Note: since >1 server in an object may have deref functions for the same
-data type, we need to unique-ise the names, at least for testing.
 
 @todo I think we should enumerate ALL & operations within the object, period.
 This works locally and minimises the extent to which we need to do the "refer-
@@ -387,7 +375,7 @@ address we take using &
 };
 
 ----------------------------------------------------------------------------
-Refer-back variable pointers
+Refer-back pointers
 
 With each pointer, associate an enum representing (a) whether the pointer was
 taken locally and if not, (b) which server it came from. Or just add values to 
@@ -403,10 +391,7 @@ required. Only two deref calls are needed between each pair of objects for
 any given pointed-to type (one in each direction) so the iterations will
 terminate.
 
-Invariant: all inter-server calls are now via const pointers; interpretation of
-variable pointers is now local
-
-Note: only do this to variable pointers!
+Invariant: all inter-object calls are now implemented via direct calls 
 
 Note: new call also needs a backchannel
 
