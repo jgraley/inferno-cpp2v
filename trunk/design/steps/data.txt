@@ -177,8 +177,7 @@ them.
 
 Note: trivial get/set functions are considered bat style since they're no better
 than just making the member public. We only do this for the invariant which
-helps
-later on.
+helps later on.
 
 Example output:
 
@@ -274,8 +273,7 @@ void f( A *r ) // used to be f( A &r )
 Memberise locals
 
 Generate a data structure to represent the local variables in each function.
-Use 
-unions for variables whose scope does not overlap. Add an array of these 
+Use unions for variables whose scope does not overlap. Add an array of these 
 structures, up to the max nesting depth, as a server member. Create a member 
 stack pointer which should be initialised to zero. Increment it at the start 
 of the function and decrement just before returning. Change all code to use the 
@@ -378,14 +376,14 @@ address we take using &
 Refer-back pointers
 
 With each pointer, associate an enum representing (a) whether the pointer was
-taken locally and if not, (b) which server it came from. Or just add values to 
-the existing enum. This other server is the referee server. 
+taken locally and if not, (b) which object it came from. Or just add values to 
+the existing enum. This other object is the referee object. 
 
 In case (b) add a deref function that decodes the pointer then forwards the call
-to the referee server's dereferencer function. 
+to the referee object's dereferencer function. 
 
 Note: this new call may pass some other pointer, in which case the referee
-server may gain a new enum value for which the original server is referee.
+object may gain a new enum value for which the original object is referee.
 Therefore this step must iterate until no more new deref calls are
 required. Only two deref calls are needed between each pair of objects for
 any given pointed-to type (one in each direction) so the iterations will
