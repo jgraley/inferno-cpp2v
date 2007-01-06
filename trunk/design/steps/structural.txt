@@ -3,7 +3,10 @@ Available under the terms of the BSD license.
 
 Structural phase - steps relating to program structure (inter-server level)
 
-In this phase, we deliver on the promise made in the philosophy document: that we would avoid simply re-creating a single computer (by doing state-out and similar on the whole input program at once) and instead regard the program as a network of semi-autonomous interacting agents.
+In this phase, we deliver on the promise made in the philosophy document: that
+we would avoid simply re-creating a single computer (by doing state-out and
+similar on the whole input program at once) and instead regard the program as a
+network of semi-autonomous interacting agents.
 
 These agents will each be subjected to state-out separately. Each one is capable
 of implementing whatever code we partition into it as well as any code we choose
@@ -49,10 +52,9 @@ and split up into finer, more role-specific channels.
 We add an acknowledgement for each functrino. This is to be understood as a
 low-level ack that serves protocol functions: flow control and data validity
 marshaling. The reader may object that we have divided function calls twice
-now: first into call-functrino/return-functrino, then into  call-request/call-ack/return-request/return-ack. But this is no different to
+now: first into call-functrino/return-functrino, then into 
+call-request/call-ack/return-request/return-ack. But this is no different to
 ARM's AXI bus spec, that has avalid/aready/rvalid/rready for a read transaction.
-If you think AXI is too complex, talk to the ARM because the face ain't
-listenin', sista.
 
 Finally, we actually insert SystemC's version of wires, the sc_signal<x>
 pre-defined channel. In the interests of proper correctness, we also choose now
@@ -64,121 +66,16 @@ from trying to do impossible things like toggling a wire twice simultaneously.
 The steps within this phase follow:
 
 ----------------------------------------------------------------------------
-Add server context
-
-Add an SC_THREAD for each server. Each function f() called from outside the
-server should be renamed as f_impl(). New functions named as per the original
-functions should wake the context via an event and wait for another event that
-signals that execution has completed. 
-
-The SC_THREAD function should detect the event and call the appropriate _impl
-function. When that returns, it should generate the return event. An enum should
-be created to differentiate between multiple functions.
-
-The idea is to introduce a context (in the form of a SC_THREAD) for each server
-and ensure that it is used to execute all existing functions within that server.
-We have to use events to signal the threads, but we keep the external interface
-of the servers the same.
-
-Invariant: A given server's code is executed within a context that belongs to
-it.
-
-Note: at this stage, all events are internal to servers, and do not go between
-servers.
-
-Note: Possible major problem here supporting inter-server recursion between this
-step and the "make transactions non-blocking" step. Since each server's local
-context "camps" in the other server's function while awaiting completion of the
-call it is not straightforward for it to resume checking for incoming calls
-while waiting. Solution is to employ a pool of contexts for each object and use
-a "wake one waiter" event mechanism to ensure we select one waiting context for
-each incoming call. Hopefully SystemC supports this @todo check!
-
-Note: maybe use a clean internal format for remembering what's a SC_THREAD etc
-and what its sensitivities are, and only generate the SC_CTOR when rendering for
-test.
-
-@todo this step *must* move below 1:1 otherwise emergent arbiter/router
-creation won't work!
-
-@todo the return event may be a problem because I think you have to route the
-wakeup all the way back to the calling object. It will be easier to do this
-after 2-phase because functrinos don't have a return.
-
-Example output:
-
-SC_MODULE(A)
-{
-    enum { F, G } which;
-    sc_event X_wake, f_wake, g_wake;
-
-    void X_context()
-    {
-        while(1)
-        {
-            wait( X_wake );
-            switch( which )
-            {
-                case F:
-                    f_impl();
-                    @todo event f_wake             
-                    break;
-                    
-                case G:
-                    g_impl();
-                    @todo event g_wake
-                    break;
-            }            
-        }
-    }
-
-    SC_CTOR(A)
-    {
-        SC_THREAD(X_context)
-        sensitive << X_wake;
-    }
-    
-    server X
-    {
-    public:
-        void f()
-        { 
-            which = F;
-            @todo event X_wake;
-            wait( f_wake );
-        }
-
-        void g()
-        {
-            which = G;
-            @todo event X_wake;
-            wait( g_wake );
-        }
-
-    private:
-        void f_impl()
-        {
-            ...code taken from f()...
-        }
-
-        void g_impl()
-        {
-            ...code taken from g()...
-        }
-    }
-};
-
-
-----------------------------------------------------------------------------
 Move to 2-phase transactions
 
-Turn function calls into "fake" nonblocking by adding a new call back to the
-original caller after processing is complete, just before the original called
-function returns. The original call is now called a call-functrino, and the new
-call is called a return-functrino.
+Turn function calls between servers into "fake" nonblocking by adding a new call
+back to the original caller after processing is complete, just before the
+original called function returns. The original call is now called a
+call-functrino, and the new call is called a return-functrino.
 
-Outgoing call sites should wait after invoking the call-functrino and then kick
-themselves in the return-functrino.
+Outgoing call sites should use a special waiting primitive, eg wait_return()
+after invoking the call-functrino. It may be implemented as an empty function in
+test renders for the next few steps, until otherwise specified.
 
 The idea here is to establish that the return event and return value come via a
 second call. Now, each of these calls has no return value and the only important
@@ -189,10 +86,6 @@ Invariant: only functrinos between servers.
 
 Note: initial call is a functrino as far as the caller is concerned but isn't 
 implemented as one by callee. Hence "fake" 2-phase.
-
-Note: Events and waits are included in the example code below but are not
-needed. Maybe insert markers into the internal representation but leave them out
-when testing.
 
 
 Example output:
@@ -206,7 +99,7 @@ class A
     {
         ...
         b.g_call();
-        wait( g_done_event ); // optional in fake 2-phase; needed if real
+        wait_return( g_done_event ); // optional in fake 2-phase; needed if real
         y = g_retval;
         ...
     }
@@ -215,7 +108,7 @@ public:
     void g_return( int retval ) // functrino
     {
         g_retval = retval;
-        wake( g_done_event ); // optional in fake 2-phase; needed if real
+        signal_return( g_done_event ); // optional in fake 2-phase
     }    
 } a;
 
@@ -237,9 +130,9 @@ public:
 ----------------------------------------------------------------------------
 Object boundary forwarding
 
-Introduce thunk functions such that any call from a member object to an external
-object or vice-versa is forwarded through a new thunk function within the
-object. The new thunk function should exist in a new server.
+Introduce thunk functrinos such that any functrino call from a member object to
+an external object or vice-versa is forwarded through a new thunk functrino
+within the object. The new thunk functrino should exist in a new server.
 
 Verilog modules require that all interaction between "stuff" inside and "stuff"
 outside the module is explicitly manifested by wires. This step helps to make
@@ -253,14 +146,12 @@ associated streamlining and reduction of wiring complexity.
 Invariant: calls into or out of an object are forwarded hence visible at 
 the object's class definition.
 
-@todo this is done on functrinos, not functions!!
-
 Example output:
 
 class A
 {
 public:
-    int f( int );
+    void p( int ); // functrino
 };
 
 class B
@@ -271,9 +162,10 @@ private: // used to be public
 public:         
     server X
     {
-        int subobject_f( int x )
+        // Thunk functrino just forwards the call
+        void subobject_p( int x )
         {
-            return subobject->f( x );
+            subobject->p( x );
         }
     }
 };
@@ -281,9 +173,9 @@ public:
 ----------------------------------------------------------------------------
 1:1 caller-callee relationship
 
-Whenever a function fd is called by more than one external server, add 
-new functions f1, f2, ... within fd's server, one for each calling server. 
-The servers should now call the f1, f2 etc and these should forward to fd.
+Whenever a functrino pd is called by more than one external server, add 
+new functrinos p1, p2, ... within pd's server, one for each calling server. 
+The servers should now call the p1, p2 etc and these should forward to pd.
 
 We need a 1:1 caller-callee match in order to be able to bind ports and
 introduce channels. This step was originally much higher up because it was
@@ -299,57 +191,59 @@ Invariant: Inter-server calls should now be 1:1 correspondence.
 @todo do I need to collect together all the outgoing calls eg in server Y 
 in the example output?
 
-@todo this is done on functrinos, not functions!!
-
 Example output:
 
 server X
 {
 private:    
-    void fd()
+    void pd()
     {
         ...blah...
     }
     
     
 public:
-    void f1() // new function
+    void p1() // new functrino
     {
-        fd();
+        pd();
     }
     
-    void f2() // new function
+    void p2() // new functrino
     {
-        fd();
+        pd();
     }
 }
 
-server Y // uses f1
+server Y // use p1 for all loutgoing calls from this server
 {
-    void g()
+    void q()
     {
-        f1();
-        f1();
+        p1();
+        p1();
     }
     
-    void h()
+    void r()
     {
-        f1();
+        p1();
     }
 }
 
-server Z // uses f2
+server Z // use p2 since now in a different server
 {
     void i()
     {
-        f2();
+        p2();
     }
 }
 
 ----------------------------------------------------------------------------
 Use ports between servers
 
-Add an sc_port for each external server that we call or are called from. We're doing this to prepare for the addition of channels, but we will immediately make correct use of the wakeup mechanism supported by ports. @todo seems to be wrong - we don't have events going between servers yet. Maybe move this down? Check the TLM examples!
+Add an sc_port for each external server that we call or are called from. We're
+doing this to prepare for the addition of channels, but we will immediately make
+correct use of the wakeup mechanism supported by ports. @todo seems to be wrong
+- we don't have events going between servers yet. Maybe move this down? Check
+the TLM examples!
 
 Note: ports require 1:1 caller-callee relationships
 
@@ -373,19 +267,127 @@ SC_MODULE(A)
 };
 
 ----------------------------------------------------------------------------
+Add server context
+
+Add an SC_THREAD for each server. Each incoming functrino p() should store its
+parameters and generate an event that wakes the server's context (which is
+running an upper executive function). The upper executive should invoke an
+implementation function eg p_impl(); An enum should be created to differentiate
+between multiple functrinos.
+
+The idea is to introduce a context (in the form of a SC_THREAD) for each server
+and ensure that it is used to execute all existing functrinos within that
+server.
+We have to use events to signal the threads, but we keep the external interface
+of the servers the same. This step does the same thing to all functrinos
+regardless.
+
+Invariant: A given server's code is executed within a context that belongs to
+it.
+
+Note: at this stage, all events are internal to servers, and do not go between
+servers.
+
+Note: Possible major problem here supporting inter-server recursion between this
+step and the "make transactions non-blocking" step. Since each server's local
+context "camps" in the other server's function while awaiting completion of the
+call it is not straightforward for it to resume checking for incoming calls
+while waiting. Solution is to employ a pool of contexts for each object and use
+a "wake one waiter" event mechanism to ensure we select one waiting context for
+each incoming call. Hopefully SystemC supports this @todo check!
+
+Note: maybe use a clean internal format for remembering what's a SC_THREAD etc
+and what its sensitivities are, and only generate the SC_CTOR when rendering for
+test.
+
+@todo maybe extract a step that splits p() into a trivial p() and a p_impl() and
+add the executive in a separate step above this one, lashed up so that p()
+invokes the executive directly. That might simplify the changes that are loaded
+onto adding contexts (which seem rather heavy atm).
+
+Example output:
+
+SC_MODULE(A)
+{
+    enum { P, Q } which;
+    sc_event X_wake, p_wake, q_wake;
+
+    void X_executive() // upper executive
+    {
+        while(1)
+        {
+            wait( X_wake );
+            switch( which )
+            {
+                case P:
+                    p_impl();
+                    @todo event p_wake             
+                    break;
+                    
+                case Q:
+                    q_impl();
+                    @todo event q_wake
+                    break;
+            }            
+        }
+    }
+
+    SC_CTOR(A)
+    {
+        SC_THREAD(X_context)
+        sensitive << X_wake;
+    }
+    
+    server X
+    {
+    public:
+        void p()
+        { 
+            which = P;
+            @todo event X_wake;
+            wait( p_wake );
+        }
+
+        void q()
+        {
+            which = Q;
+            @todo event X_wake;
+            wait( q_wake );
+        }
+
+    private:
+        void p_impl()
+        {
+            ...code taken from original p()...
+        }
+
+        void q_impl()
+        {
+            ...code taken from original g()...
+        }
+    }
+};
+
+
+----------------------------------------------------------------------------
 Make transactions non-blocking
 
-The call-functrino should return immediately after kicking the server context.
-The return-functrino should now come from the callee's server context if not
-already. 
+Functrinos should return immediately after kicking the server context.
 
-By allowing the call-functrino to return immediately, we are allowing the
+By allowing the functrinos to return immediately, we are allowing the
 execution paths of caller and callee to proceed independently, at least to an
 extent. This will be an important step when parallelism becomes important. It
 may also be viewed as a natural consequence of having done both "fake 2-phase"
 and "add server context" and then cleaning up the resulting code.
 
-Invariant: all inter-server calls are functrinos
+The wait_return() primitive must now be implemented properly, since the
+call-functrino returns immediately and can no longer be used to discover when
+the function call has completed. wait_return() should be implemented as a
+recursion into the server's upper executive function. The signal_return()
+function should set a flag that causes the upper executive to return (exactly
+once).
+
+Invariant: all functrinos return immediately
 
 Note: only change callee (upper executive)
 
@@ -395,48 +397,59 @@ calls.
 
 Note: at this stage, each functrino corresponds to a sub-transaction.
 
+@todo example confusing because there are 2 distinct pairs of
+wait_return()/signal_return() in the 2 modules.
+
+@todo split out the wait_return()/signal_return() implementation via recursing
+the upper executive into a separate step above this one.
+
 Example output:
 
 SC_MODULE(A)
 {
-    event g_done_event; 
-    int g_retval;
+    event q_done_event; 
+    int q_retval;
 
-    void f()
+    void p()
     {
         ...
-        b.g_call();
-        wait( g_done_event ); 
-        y = g_retval;
+        b.q_call();
+        wait_return( q_done_event ); 
+        y = q_retval;
         ...
     }
 
 public:    
-    void g_return( int retval ) // functrino
+    void q_return( int retval ) // functrino
     {
-        g_retval = retval;
-        wake( g_done_event ); 
+        q_retval = retval;
+        signal_return( q_done_event ); 
     }    
 } a;
 
 SC_MODULE(B)
 {
-    enum { G } which;
+    enum { Q } which;
     sc_event X_wake;
+    bool got_return;
+    
+    void wait_return() { X_executive(); }
+    void signal_return() { got_return=true; }
 
-    void X_context()
+    void X_executive()
     {
-        while(1)
+        while(!got_return)
         {
             wait( X_wake );
             switch( which )
             {
-                case G:
-                    g_impl();
-                    a.g_return()      
+                case Q:
+                    q_impl();
+                    a.q_return()      
                     break;
             }            
         }
+        got_return=false;
     }
 
     SC_CTOR(B)
@@ -448,16 +461,16 @@ SC_MODULE(B)
     server X
     {
     public:
-        void g_call()
+        void q_call()
         { 
-            which = G;
+            which = Q;
             @todo event X_wake;
         }
 
     private:
-        void g_impl()
+        void q_impl()
         {
-            ...code taken from g()...
+            ...code taken from original q()...
         }
     }
 };
@@ -719,7 +732,8 @@ we need to avoid combinational loops (which are viewed as part of the behaviour
 of wires). We do this by adding a delay() in such a way that no two transactions
 can occur simultaneously (though the ack can be simultaneous)
 
-@todo shouldn't the delay go after request but before ack, since that is when the data is being held ready? In a single cycle "req#1 and ack#1", is the data
+@todo shouldn't the delay go after request but before ack, since that is when
+the data is being held ready? In a single cycle "req#1 and ack#1", is the data
 valid? the req says yes, the ack says no! But if it was eg a "ack#1 and req#2"
 we would know the data from sub-transaction #1 had gone and the data line
 certainly holds data for #2 now.
