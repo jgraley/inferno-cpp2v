@@ -314,8 +314,7 @@ class A
 ----------------------------------------------------------------------------
 Add class-level dereferencing layer
 
-For each class, create an enum with a value for each object or POD data item
-whose address is taken. Substitute the enum value for the address.
+For each class, create an enum with a value for each usage of & on a distinct object or POD data item. Substitute the enum value for the address. This includes objects ouside the current object.
 
 Add functions to each class, for each enum value, that forward function calls 
 to the corresponding object/POD item. So if member objects a and b of type C 
@@ -324,18 +323,13 @@ which invokes the correct footle() based on p. For POD types add eg
 deref_get( type *p ) and deref_set( type *p, type val ). Replace pointer derefs
 with the corresponding function. 
 
-Invariant: class handles all derefs of internal data
+Invariant: class handles all derefs of data whose address is taken by the class.
 
 Note: p->f() and equivalently (*p).f() should *not* be broken down into the *p
 and the .f() but should be treated as a unit (becomes deref_f(p))
 
 Note: there's now no need to copy the data because we always bring the
 action to the data, not the other way around
-
-@todo I think we should enumerate ALL & operations within the object, period.
-This works locally and minimises the extent to which we need to do the "refer-
-back" step. Also fewer, bigger enumerations make for more compact use of
-bits in compound representations.
 
 Example output:
 
@@ -351,24 +345,24 @@ address we take using &
     void f()
     {
         Local_Int_Ptr p = ADDRESSOF_GLOBAL_X; // was int *p = &x;
-	
-	  ... maybe modify p, but in accordance with this step...
-	  
-	  WriteIntThroughPtr( p, 99 ); // was *p = 99;
+   
+        ... maybe modify p, but in accordance with this step...
+     
+        WriteIntThroughPtr( p, 99 ); // was *p = 99;
     }
     
     // completely new function
     void WriteIntThroughPtr( Local_Int_Ptr p, int newval )
     {
         switch( p )
-	  {
-	  case ADDRESSOF_GLOBAL_X:
-	      x = newval;
-	      break;
-	  case ADDRESSOF_Y:
-	      y = newval;
-	      break;
-	  }
+        {
+        case ADDRESSOF_GLOBAL_X:
+            x = newval;
+            break;
+        case ADDRESSOF_Y:
+            y = newval;
+            break;
+        }
     }    
 };
 
