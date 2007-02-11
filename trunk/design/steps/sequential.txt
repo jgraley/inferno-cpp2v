@@ -185,8 +185,7 @@ Lower the following in all cases:
          while - test at start and jump out if fail; jump back to start at the
 end. Break jumps out; continue jumps to test.
     do-while - test at end and jump back to start if pass. Break as   
-               per while() @todo what does continue do in a do-while. I      
-should know. I don't.
+               per while() continue jumps to the condition test at the bottom.
     delay() - add a trivial "goto here" and label, but keep the delay() call.
     
     
@@ -245,7 +244,8 @@ Example, lowering do {...} while(x)
 
 {
     DO:
-    {...} // break becomes goto BREAK, dunno about continue
+    {...} // break becomes goto BREAK, continue becomes goto CONTINUE
+    CONTINUE:
     if( x ) goto DO;
     BREAK: 
 }
