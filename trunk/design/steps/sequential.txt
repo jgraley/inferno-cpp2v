@@ -16,7 +16,7 @@ code. This is why the present phase occurs late-on in the transformation
 process; we can generate functionality in sequential C style and let it pass
 through this phase, instead of trying to generate the Verilog directly for the
 new functionality.
-
+ 
 Broadly speaking, the phase begins with steps that correspond to compilation
 (some more closely than others) followed by steps that introduce the minimal
 computer-like infrastructure required to execute the compiled program. Viewing
