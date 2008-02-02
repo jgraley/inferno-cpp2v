@@ -108,7 +108,8 @@ re-implementing the same functionality using lower level constructs.
 Lower executive - additional code that we add around outgoing function calls 
 from servers in order to support the structural style. See upper executive.
 
-Memberise - to convert something into a class member.
+Memberise - to convert data (eg a local variable) into a class member. cf 
+Staticise.
 
 Message - a combination of an event and some data. Deprecated term - too vague!
 
@@ -171,6 +172,11 @@ store the event and so blocks both waker and wakee forcing a rendez-vous. A
 1-queue event permits waker to return immediately if empty and wakee to return
 immediately if full.
 
+Raw data - data that is directly accessible with no arbitration. In C it 
+corresponds to statics and members that are read/written directly. In Verilog
+it corresponds to direct use of pseudo-latches. cf Wrapped data. An item of 
+raw data may only be read/written by a single state machine.
+
 Recursion - when a function makes a call to itself, or to another function that
 ultimately results in another call to the original function. Recursion takes
 place inside a single context, and requires that the context platform is
@@ -227,9 +233,12 @@ State-out - to convert an explicitly sequential algorithm into a state machine
 with the same behaviour. By creating a state machine, the need for a sequential
 platform is removed. See State machine.
 
-Staticise, static - data and objects whose existence is inferred before
+static - data and objects whose existence is inferred before
 execution and which exist throughout execution. Their method of allocation is
 basically invisible to the program itself.
+
+Staticise - to convert data (eg a local variable) into a class member. cf 
+Memberise.
 
 Step - A small part of the project's transformation process. There are a number 
 of steps in each phase, and they are performed one at a time. The intermediate
@@ -275,4 +284,8 @@ and after.
 Upper executive - code that we add to a server to support incoming function
 calls and overall execution control in order to support structural style. See
 lower executive.
+
+Wrapped data - Raw data that has been placed inside a class, made private and is
+accessed/modified via member functions. In verilog, it is controlled by arbiters.
+Wrapped data may therefore be accessed/modified by multiple clents. cf raw data.
 
