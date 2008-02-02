@@ -84,6 +84,10 @@ Heap - an area of memory used for dynamic allocation via malloc() and new().
 
 Iff - lit. if and only if
 
+Integral - a data type that holds signed or unsigned integer numbers eg int, 
+char etc. The bit width of representation is typically arbitrary and depends
+on the biggest number that will be stored.
+
 Invariant - a property of a style or representation of a program that may be
 introduced by a transformation step and may be required by other steps.
 Invariants will usually be the absence of types of constructs or guarantees
@@ -235,9 +239,10 @@ platform is removed. See State machine.
 
 static - data and objects whose existence is inferred before
 execution and which exist throughout execution. Their method of allocation is
-basically invisible to the program itself.
+basically invisible to the program itself. NOTE often used to describe members
+of objects that are themselves static, which is of debatable correctness.
 
-Staticise - to convert data (eg a local variable) into a class member. cf 
+Staticise - to convert data (eg a local variable) into a static variable. cf 
 Memberise.
 
 Step - A small part of the project's transformation process. There are a number 
