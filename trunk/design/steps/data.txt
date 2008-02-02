@@ -55,12 +55,14 @@ then implementing an explicit stack which is then declared as a member. This
 should be sufficient to support all forms of recursion that may be present in
 the program at the cost of a little multiplexing.
 
+Set/get functions are created for all data members and have the same public/privateness. These are used for setting/getting data in all cases.
+
 The most complex part of this phase is the pointer solution - this will be the
 most work - and so keeping it in a pure SW implementation is a welcome
 simplification. We lower pointers at a local level by simply enumerating
 variables. This enum corresponds to an address that is valid only at a local
 level. When pointers are passed between objects, the recipient treats the
-pointer like a block box and passes the pointer beck to the object that supplied
+pointer like a black box and passes the pointer beck to the object that supplied
 it (we call that object the referee) for dereferencing. This is called
 referring-back. When applied recursively, this ensures that all dereferences can
 be carried out locally. The resulting increase in the number of inter-object
@@ -89,6 +91,7 @@ to put new functions into. This is all TBD.
 classes for them that feature a single instance.
 
 The steps in this phase follow...
+
 
 ----------------------------------------------------------------------------
 Staticise heap
@@ -163,7 +166,7 @@ Note: Strictly an optimisation, but the invariant helps to clarify.
 ----------------------------------------------------------------------------
 Use get()/set()
 
-For POD types that are exposed publically, make all inter-object reads
+For raw data types that are exposed publically, make all inter-object reads
 and writes be function calls. New functions go in same server as the public 
 member. 
 
@@ -272,12 +275,10 @@ void f( A *r ) // used to be f( A &r )
 ----------------------------------------------------------------------------
 Memberise locals
 
-Generate a data structure to represent the local variables in each function.
-Use unions for variables whose scope does not overlap. Add an array of these 
-structures, up to the max nesting depth, as a server member. Create a member 
-stack pointer which should be initialised to zero. Increment it at the start 
-of the function and decrement just before returning. Change all code to use the 
-array indexed by the stack pointer.
+Add a stack pointer for each function. It should be a raw integral class member 
+big enough to represent the max recursion depth. Add code to increment the stack pointer on entry and decrement on leaving the corresponding function. Add code to initialise the stack pointers to the constructor.
+
+For each local variable, move the variable to be a member, and make it an array. Update every access in the function to index the array using the stack pointer.
 
 Invariant: all variables are static or members
 
@@ -288,38 +289,50 @@ will be repeated. Hopefully re-use implementation!
 Note: furthermore, "add dereferencing layer" lowering needs *all* locals to be
 memberised first, so moved up again and now applies to all locals
 
-@todo initialise stack pointer to 0 - this needs to be a global init
+Note: arrays of raw variables are a supported primative right through into the
+verilog phase, so we're allowed to leave them lying around at the end of this 
+phase.
 
 Example output:
 
 class A
 {
-     struct { int x, B b } f_stack[A_f_STACKSIZE]; 
-	  // struct includes all locals from f()
+     int x_f_stack[A_f_STACKSIZE]; 
+     B b_f_stack[A_f_STACKSIZE]; 
 	  int f_stack_pointer;
 	  
 	  void f()
 	  {
-	      f_stack_pointer++; // on entry
+	      // was int x; 
+		   // was B b; 
+		   f_stack_pointer++; // on entry
 	      
-	      g( f_stack[f_stack_pointer].x ); // was g( x );
-	      f_stack[f_stack_pointer].b.h(); // was b.h();
+	      g( x_f_stack[f_stack_pointer] ); // was g( x );
+	      b_f_stack[f_stack_pointer].h(); // was b.h();
 	      
 	      ...maybe recurse f here...
 	      
 	      f_stack_pointer--; // on exit
 	  }
+	  
+	  A()
+	  {
+	      // init stack pointers
+	      f_stack_pointer=-1; // it gets incremented on the first call 
+		                       // (though the actual init value doesn't really matter)
+	  }
 };
+
 
 ----------------------------------------------------------------------------
 Add class-level dereferencing layer
 
-For each class, create an enum with a value for each usage of & on a distinct object or POD data item. Substitute the enum value for the address. This includes objects ouside the current object.
+For each class, create an enum with a value for each usage of & on a distinct object or raw data item. Substitute the enum value for the address. This includes objects ouside the current object.
 
 Add functions to each class, for each enum value, that forward function calls 
-to the corresponding object/POD item. So if member objects a and b of type C 
+to the corresponding object/raw data item. So if member objects a and b of type C 
 both have a function footle( int x ) then we create deref_footle( C *p, int x ) 
-which invokes the correct footle() based on p. For POD types add eg
+which invokes the correct footle() based on p. For raw data types add eg
 deref_get( type *p ) and deref_set( type *p, type val ). Replace pointer derefs
 with the corresponding function. 
 
@@ -444,5 +457,28 @@ and the call to foo().
     }
 } b;
 
+----------------------------------------------------------------------------
+Introduce set/get functions for raw data
+
+Add set() and get() functions for every raw data member. Every access to every 
+data member apart from in the implementations of these functions should call these 
+functions to access or modifiy the data. That includes in the same object and inter-object.
+
+Invariant: all access/modification now done via functions.
+
+Note: new fucntions to have same public/privateness as the member variable
+
+Note: no action required for member objects
+
+Note: done after pointer stuff to avoid turning &a into &get_a()
+
+Example output:
+
+class foo
+{
+   int a; // the original member variable
+   int get_a() { return a; } // accessor for a
+   void set_a( int newval ) { a = newval; } // modifier for a
+}
 
 

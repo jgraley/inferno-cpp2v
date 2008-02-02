@@ -122,12 +122,11 @@ Merge member functions
 
 Merge all the member functions in a server into a single one that uses a big
 switch statement to select the implementation based on a new enum parameter.
-Parameters of the original functions should be grouped into a struct for each of
-the original member functions then unioned together for the big function. Return
-value should be handled similarly.
+The new function should have a selection parameter and all the paramerters of all the previous functions in a single long parameter list.
 
 Invariant: all calls are simple recursions on the big function (apart from
-SystemC primatives) since there's nothing else to call.
+SystemC primatives) since this is now the only function in this object's execution
+context. 
 
 Note: this single function is now the server's run (process) function. Since
 SystemC expects the run function to be void(void) we will have to add a
@@ -138,36 +137,28 @@ Note: originally was before memberise locals, but that proved impossible due to
 pointer lowering steps. This must be done after structural steps to ensure we
 keep separate call interfaces for separate call sites (1:1 wiring).
 
-Note: also merge the explicit stacks for the functions @todo maybe more
-efficient not to; but we need somewhere to put the stacked state. 
+Any new locals should be explicitly stacked.
 
-@todo Need to stack the new locals added here 
+@todo deal with return values from different functions (can't use refs, pointers, structs or unions).
 
 Example output (initial functions were char f(char) and int g(int, int)):
 
-struct g_params { int p1, int p2 };
-
-union big_params { char f, g_params g };
-union big_result { int f, char g };
-
 enum which { F, G };
 
-big_result big_function( which w, big_params bp )
+void big_function( which w, char f, int g1, int g2 )
 {
     big_result br;
     switch( which )
     {
         case F:
-            param = bp.f;
+            param = f;
             ...algorithm from f...
-            br.f = return_value;
             break;
             
         case G:
-            param_1 = bp.g.p1;
-            param_2 = bp.g.p2;
-            ...algorithm from f...
-            br.g = return_value;
+            param_1 = g1;
+            param_2 = g2;
+            ...algorithm from g...
             break;                                    
     }
     return br;
@@ -295,8 +286,7 @@ Note: assert this at each label as a double check since we have a little
 redundancy at this point. Treat assert as a primitive (and use the "standard"
 kind of assert as in assert.h).
 
-Note: the state variable should be inserted into the local variables data
-structure so that it gets stacked when the function recurses.
+Note: the state variable should be explicitly stacked.
 
 Example output:
 

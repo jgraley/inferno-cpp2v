@@ -214,7 +214,7 @@ public:
     }
 }
 
-server Y // use p1 for all loutgoing calls from this server
+server Y // use p1 for all outgoing calls from this server
 {
     void q()
     {
@@ -385,7 +385,9 @@ call-functrino returns immediately and can no longer be used to discover when
 the function call has completed. wait_return() should be implemented as a
 recursion into the server's upper executive function. The signal_return()
 function should set a flag that causes the upper executive to return (exactly
-once).
+once). 
+
+All data used in the now-recursive executive must be explicitly stacked with a new stack pointer. All new data must be raw integral member data. This is because local variables and the stacks that support them have already been lowered out in the data phase.
 
 Invariant: all functrinos return immediately
 
@@ -401,7 +403,7 @@ Note: at this stage, each functrino corresponds to a sub-transaction.
 wait_return()/signal_return() in the 2 modules.
 
 @todo split out the wait_return()/signal_return() implementation via recursing
-the upper executive into a separate step above this one.
+the upper executive into a separate step above this one. Yes, and the explicit stack creation.
 
 Example output:
 

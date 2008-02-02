@@ -288,3 +288,26 @@ end of the block
     done:    
 }
 
+----------------------------------------------------------------------------
+Implement assignment operator
+
+If there is no assignment operator defined for the class, implement one
+as overloaded operator= that does the same thing as the default assignment
+operator.
+
+Invariant: Class-level operations all go through an explicit member function
+
+Example output:
+
+class foo
+{
+    int a;
+	 char b;
+	 my_other_class c;
+    operator=( class foo &other )
+	 {
+	     a = other.a;
+		  b = other.b;
+		  c = other.c;
+    }
+};
