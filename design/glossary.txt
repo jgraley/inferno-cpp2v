@@ -61,7 +61,7 @@ Event - a primitive concept of a link in the cause-and-effect chain within a
 system. Usually, it is one part of the system waking some other part and the
 process is nominally instantaneous. Events do not include data.
 
-Executive - extra code added to servers to allow them to participate in the
+Executive - extra code added to objects to allow them to participate in the
 structural style. The term is taken from simple operating systems, but the
 executives we create will be too simple for the operating system moniker.
 Divided into upper and lower halves, see upper executive and lower executive.
@@ -110,7 +110,7 @@ Lower - a term from compiler design which refers to removing a construct and
 re-implementing the same functionality using lower level constructs.
 
 Lower executive - additional code that we add around outgoing function calls 
-from servers in order to support the structural style. See upper executive.
+from objects in order to support the structural style. See upper executive.
 
 Memberise - to convert data (eg a local variable) into a class member. cf 
 Staticise.
@@ -145,7 +145,7 @@ sequential construction that polls repeatedly with some delay in between polls.
 Polling may be considered as inferring events from data.
 
 Port - the SystemC primitive (sc_port<>) for connecting a module to a channel or
-another module. We will use ports for inter-server connections too. A port
+another module. We will use ports for inter-object connections too. A port
 resembles a pointer with additional event semantics.
 
 Phase, N-phase - an N-phase transaction completes after N specific events have
@@ -186,7 +186,7 @@ ultimately results in another call to the original function. Recursion takes
 place inside a single context, and requires that the context platform is
 implemented appropriately.
 
-Referee server - a server that passes a pointer (via parameter or return value)
+Referee object - an object that passes a pointer (via parameter or return value)
 to another server and is therefore relied on by the other server to implement
 deref functions against the supplied pointer. See server.
 
@@ -208,7 +208,9 @@ may be broken up into a sequence of operations performed one after the other
 over time. Outputs from earlier operations are stored and then provided as
 inputs to later operations.
 
-Server - a group of one or more member functions from within a single object. Every member function must belong to a server. Therefore servers form a hierarchical layer between objects and functions. The server level is the boundary between sequential and structural mapping approaches.
+Server - depracated. Servers used to split objects into one or more state machines.
+It has been decided that objects will have exactly one state machine so what used
+to apply to servers now applies to objects.
 
 Signal - a simple model of an electrical wire. We use the SystemC sc_signal<>
 for this.
@@ -259,7 +261,7 @@ program; the course-grained aspect of program representation. Intermediate
 styles are ones passed through during transformation but that do not appear in
 the input C++ or output Verilog.
 
-Sub-transaction - a well-defined interaction between two servers in which an
+Sub-transaction - a well-defined interaction between two objects in which an
 event and some data are propagated in one direction. There are two
 sub-transactions for each function call corresponding to call and return.
 
@@ -277,16 +279,16 @@ there-and-back-to-somewhere-else.
 
 Thunk - a forwarding function
 
-Transaction - a well-defined interaction between two servers in which events and
+Transaction - a well-defined interaction between two objects in which events and
 data may be exchanged. A function call becomes a transaction when caller and
-callee are regarded as separate, concurrent servers.
+callee are regarded as separate, concurrent objects.
 
 Transformation step - a part of the mid-level design of the code translation
 algorithm which performs a specified, relatively simple, transformation on the
 code such that the code may be successfully executed for test purposes before
 and after.
 
-Upper executive - code that we add to a server to support incoming function
+Upper executive - code that we add to an object to support incoming function
 calls and overall execution control in order to support structural style. See
 lower executive.
 

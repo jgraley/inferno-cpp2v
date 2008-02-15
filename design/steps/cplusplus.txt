@@ -18,7 +18,7 @@ in terms of the programmer's view of the compilation process) and we reproduce
 that here.
 
 Exceptions would cause problems later on because of the need to unwind function
-calls across servers - the distributed nature of the structural implementation
+calls between objects - the distributed nature of the structural implementation
 means we can only unwind by returning from the called functions, one level at a
 time. Therefore the inter-function unwinding must be dealt with here. The 
 removal of try/throw/catch from within functions is made into a separate step
@@ -37,10 +37,6 @@ with something analogous to a Vtable. I may split the step into 2 halves.
 We also turn constructors and destructors into regular member functions. This
 simplifies the data phase and gets rid of tricky passing-nontrivial-objects-by
 -value problem, which complicates matters and is really a C++ issue.
-
-@todo we also have server designation in here - is that really for this phase? 
-Maybe it is? Maybe it shouldn't really be a step at all, but a user hinting
-thing (ie already present in input program).
 
 The steps within this phase follow:
 
@@ -174,41 +170,10 @@ class B // : public A    used to derive from A
 };
 
 ----------------------------------------------------------------------------
-Specify servers
-
-Determine (by whatever means) how the member functions and trivial 
-(non-object) member variables will be divided up into servers. Insert servers
-as a hierarchical level between class level and individual functions and POD
-data members.
-
-Invariant: Sequential/structural divide now explicit 
-
-Note: Test code generation should strip out the server layer.
-
-Note: We do this early because other steps add functions to classes and in 
-some cases they need to specify server structure in order to develop the 
-correct invariants. 
-
-Note: servers do not nest and exist below objects in the hierarchy. Hence a
-server may not contain another server or an object. An object may contain both.
-Within an object, servers and member objects exist at the same level.
-
-Example output:
-class A
-{
-    server A1
-    {
-        void f();
-    }
-    
-    server A2
-    {
-        int x;
-    }
-    
-    B member_obj; // B is some other non-trivial class
-};
-
+Specify servers - step removed. Now each object contains exactly one
+instance of what used to be a server, and the term server is depracated.
+To get the same effect as multiple servers in one object, the user
+must define a class that contains multiple member classes.
 
 ----------------------------------------------------------------------------
 Make constructors/destructors explicit
@@ -218,14 +183,13 @@ member functions and we add explicit calls to them in the code. Need to treat
 each kind of scope correctly: static, member, heap, local. If an object is
 passed by value and has a copy constructor, we must turn that into
 pass-by-reference and then insert the copy construct call at the top of the
-function. New functions go in same server as original con/de-structors.
+function. 
 
 Invariant: pass-by-value only for memcpy()able objects; underlying object
 lifecycle may now differ from that in the original program.
 
 Note: We choose not to generate any copy constructor if not already there -
-these objects will be treated like POD types. @todo or will they?
-
+these objects will be treated like POD types. @todo or will they?nd
 Note: this means that some const members will need to be un-consted except
 ones whose initialisation values are known at compile time. Optimisations 
 could include converting member pointers initialised by new() into member 

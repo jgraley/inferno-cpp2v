@@ -82,11 +82,6 @@ We don't really have an answer to casting as yet; most likely, it will be
 supported at some cost in efficiency (though cast-to-base-type should be
 efficient).
 
-One pending issue at the time of writing is the role servers play in the data
-phase. I think I want to make objects, not servers, be the designator of data
-scope. Thus the relevance of servers is only that we have to decide which server
-to put new functions into. This is all TBD.
-
 @todo maybe something for global statics and static members involving making new
 classes for them that feature a single instance.
 
@@ -109,11 +104,11 @@ Note: No need to worry about constructors/destructors since they should have
 been dealt with in the cplusplus phase. We only need to implement the actual
 allocation.
 
-Note: Maybe place in a class if use cases are all below that class (ie 
-coming from member functions or member objects). 
+Note: Maybe place in an existing class if use cases are all within that class 
+and its members, to increase locality.
 
 Note: New and delete for a given type, as well as the array itself, go in a
-single server.
+single object.
 
 Note: Q: do we not want to use a template over allocated type for this? 
 A: No we don't because we can generate code and repeated patterns such as 
@@ -167,8 +162,7 @@ Note: Strictly an optimisation, but the invariant helps to clarify.
 Use get()/set()
 
 For raw data types that are exposed publically, make all inter-object reads
-and writes be function calls. New functions go in same server as the public 
-member. 
+and writes be member function calls. 
 
 Invariant: every inter-object interaction is a function call
 

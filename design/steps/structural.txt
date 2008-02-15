@@ -1,19 +1,19 @@
 (C) Copyright 2006 John Graley
 Available under the terms of the BSD license. 
 
-Structural phase - steps relating to program structure (inter-server level)
+Structural phase - steps relating to program structure (inter-object level)
 
 In this phase, we deliver on the promise made in the philosophy document: that
 we would avoid simply re-creating a single computer (by doing state-out and
 similar on the whole input program at once) and instead regard the program as a
 network of semi-autonomous interacting agents.
 
-These agents will each be subjected to state-out separately. Each one is capable
+These agents will each be stated-out separately. Each one is capable
 of implementing whatever code we partition into it as well as any code we choose
 to add. Any code we add must confirm to the subset of C++ established in earlier
-phases. We partition at server level. 
+phases. We partition at object level. 
 
-We choose to replace function calls between servers with pairs of
+We choose to replace function calls between objects with pairs of
 function-call-like things called functrinos. A functrino has a call event and
 parameters but no return or return value. There's a functrino for a function
 call and another for its return. Functrinos could probably be used to model
@@ -29,7 +29,7 @@ avoid blatant duplication. These steps actually give rise to arbiters (and
 possibly routers) as structures that emerge from thunks as the later structural
 and sequential steps execute. This is a nice result.
 
-Each server, after state-out, will possess its own context of execution in the
+Each object, after state-out, will possess its own context of execution in the
 form of a physically manifest state variable. In this phase, we choose to model
 them using SystemC's SC_THREAD primitive, which is really just a wrapper for an
 OS thread. It helps us run tests on intermediates and is also a conceptual aid
@@ -39,14 +39,15 @@ hardware). We ensure that functrino interactions between threads are
 non-blocking, so that each functrino may be considered as an instantaneous
 event (at least for now). 
 
-Functrinos going between servers are still unacceptable for state-out. We
+Functrinos going between objects are still unacceptable for state-out.
+TODO why? We
 therefore need to go quite low-level in this phase in terms of describing a
 protocol that makes the program structure look like the ends of some
-sell-defined wires from the perspective of a server. 
+well-defined wires from the perspective of an object. 
 
 We begin by introducing the Transaction Level Modelling concept of a channel for
 each functrino. Over a few steps, the channels are modified to avoid making
-calls into servers (instead they use SystemC's channel->module wakeup scheme)
+calls into objects (instead they use SystemC's channel->module wakeup scheme)
 and split up into finer, more role-specific channels.
 
 We add an acknowledgement for each functrino. This is to be understood as a
@@ -58,7 +59,7 @@ ARM's AXI bus spec, that has avalid/aready/rvalid/rready for a read transaction.
 
 Finally, we actually insert SystemC's version of wires, the sc_signal<x>
 pre-defined channel. In the interests of proper correctness, we also choose now
-to add a notional time delay, called a "minor delay" in order to prevent servers
+to add a notional time delay, called a "minor delay" in order to prevent objects
 from trying to do impossible things like toggling a wire twice simultaneously.
 
 @todo need a step to insert SC_MODULE around all classes?
@@ -68,7 +69,7 @@ The steps within this phase follow:
 ----------------------------------------------------------------------------
 Move to 2-phase transactions
 
-Turn function calls between servers into "fake" nonblocking by adding a new call
+Turn function calls between objects into "fake" nonblocking by adding a new call
 back to the original caller after processing is complete, just before the
 original called function returns. The original call is now called a
 call-functrino, and the new call is called a return-functrino.
@@ -82,7 +83,7 @@ second call. Now, each of these calls has no return value and the only important
 event is their calls, not their returns. These are the characteristics of
 functrinos.
 
-Invariant: only functrinos between servers.
+Invariant: only functrinos between objects.
 
 Note: initial call is a functrino as far as the caller is concerned but isn't 
 implemented as one by callee. Hence "fake" 2-phase.
@@ -132,7 +133,8 @@ Object boundary forwarding
 
 Introduce thunk functrinos such that any functrino call from a member object to
 an external object or vice-versa is forwarded through a new thunk functrino
-within the object. The new thunk functrino should exist in a new server.
+within the object. The new thunk functrino should be a member of the aforementioned
+object.
 
 Verilog modules require that all interaction between "stuff" inside and "stuff"
 outside the module is explicitly manifested by wires. This step helps to make
@@ -142,6 +144,12 @@ We could just use a primitive in the internal representation for this, that
 doesn't render to anything in test builds, but the functions we generate will
 turn into Arbiters as later steps are applied to them, and will give us the
 associated streamlining and reduction of wiring complexity.
+
+Note: since all member functions will be merged into a single state machine,
+this means that such functrinos will be sequentialised against all other
+similar external/member functrinos as well as the implementations of the 
+object's own functions. This limitation may be mitagated by choice of 
+class hierarchy in the input program.
 
 Invariant: calls into or out of an object are forwarded hence visible at 
 the object's class definition.
@@ -160,40 +168,35 @@ private: // used to be public
     A subobject;
     
 public:         
-    server X
+    // Thunk functrino just forwards the call
+    void subobject_p( int x )
     {
-        // Thunk functrino just forwards the call
-        void subobject_p( int x )
-        {
-            subobject->p( x );
-        }
+        subobject->p( x );
     }
 };
 
 ----------------------------------------------------------------------------
 1:1 caller-callee relationship
 
-Whenever a functrino pd is called by more than one external server, add 
-new functrinos p1, p2, ... within pd's server, one for each calling server. 
-The servers should now call the p1, p2 etc and these should forward to pd.
+Whenever a functrino pd is called by more than one external object, add 
+new functrinos p1, p2, ... within pd's object, one for each calling object. 
+These objects should now call the p1, p2 etc which should forward to pd.
 
 We need a 1:1 caller-callee match in order to be able to bind ports and
 introduce channels. This step was originally much higher up because it was
 thought a prerequisite for pointers and 2-phase. However, those steps are no
 harder without, so we now do this as late as channel construction will allow.
 
-This will result in router/arbiter functionality in each server affected.
-Servers generated during the object boundary forwarding step will become 
-dedicated arbiters. 
+This will result in router/arbiter functionality in each object affected.
 
-Invariant: Inter-server calls should now be 1:1 correspondence.
+Invariant: Inter-object calls should now be 1:1 caller-callee correspondence.
 
-@todo do I need to collect together all the outgoing calls eg in server Y 
+@todo do I need to collect together all the outgoing calls eg in object Y 
 in the example output?
 
 Example output:
 
-server X
+class X // this class used to just have pd() but has now had the 1:1 step done on it.
 {
 private:    
     void pd()
@@ -214,7 +217,7 @@ public:
     }
 }
 
-server Y // use p1 for all outgoing calls from this server
+class Y // use p1 for all outgoing calls from this object
 {
     void q()
     {
@@ -228,7 +231,7 @@ server Y // use p1 for all outgoing calls from this server
     }
 }
 
-server Z // use p2 since now in a different server
+class Z // use p2 since now in a different object
 {
     void i()
     {
@@ -237,12 +240,12 @@ server Z // use p2 since now in a different server
 }
 
 ----------------------------------------------------------------------------
-Use ports between servers
+Use ports between objects
 
-Add an sc_port for each external server that we call or are called from. We're
+Add an sc_port for each external object that we call or are called from. We're
 doing this to prepare for the addition of channels, but we will immediately make
 correct use of the wakeup mechanism supported by ports. @todo seems to be wrong
-- we don't have events going between servers yet. Maybe move this down? Check
+- we don't have events going between objects yet. Maybe move this down? Check
 the TLM examples!
 
 Note: ports require 1:1 caller-callee relationships
@@ -267,30 +270,30 @@ SC_MODULE(A)
 };
 
 ----------------------------------------------------------------------------
-Add server context
+Add local context
 
-Add an SC_THREAD for each server. Each incoming functrino p() should store its
-parameters and generate an event that wakes the server's context (which is
+Add an SC_THREAD for each object. Each incoming functrino p() should store its
+parameters and generate an event that wakes the SC_THREAD (which is
 running an upper executive function). The upper executive should invoke an
 implementation function eg p_impl(); An enum should be created to differentiate
 between multiple functrinos.
 
-The idea is to introduce a context (in the form of a SC_THREAD) for each server
+The idea is to introduce a context (in the form of a SC_THREAD) for each object
 and ensure that it is used to execute all existing functrinos within that
-server.
+object.
 We have to use events to signal the threads, but we keep the external interface
 of the servers the same. This step does the same thing to all functrinos
 regardless.
 
-Invariant: A given server's code is executed within a context that belongs to
+Invariant: A given object's code is executed within a context that belongs to
 it.
 
-Note: at this stage, all events are internal to servers, and do not go between
+Note: at this stage, all events are internal to objects, and do not go between
 servers.
 
-Note: Possible major problem here supporting inter-server recursion between this
-step and the "make transactions non-blocking" step. Since each server's local
-context "camps" in the other server's function while awaiting completion of the
+Note: Possible major problem here supporting inter-object recursion between this
+step and the "make transactions non-blocking" step. Since each object's local
+context "camps" in the other object's function while awaiting completion of the
 call it is not straightforward for it to resume checking for incoming calls
 while waiting. Solution is to employ a pool of contexts for each object and use
 a "wake one waiter" event mechanism to ensure we select one waiting context for
@@ -372,28 +375,31 @@ SC_MODULE(A)
 ----------------------------------------------------------------------------
 Make transactions non-blocking
 
-Functrinos should return immediately after kicking the server context.
+Functrinos should return immediately after kicking the object context.
 
 By allowing the functrinos to return immediately, we are allowing the
 execution paths of caller and callee to proceed independently, at least to an
 extent. This will be an important step when parallelism becomes important. It
 may also be viewed as a natural consequence of having done both "fake 2-phase"
-and "add server context" and then cleaning up the resulting code.
+and "add local context" and then cleaning up the resulting code.
 
 The wait_return() primitive must now be implemented properly, since the
 call-functrino returns immediately and can no longer be used to discover when
 the function call has completed. wait_return() should be implemented as a
-recursion into the server's upper executive function. The signal_return()
+recursion into the object's upper executive function. The signal_return()
 function should set a flag that causes the upper executive to return (exactly
 once). 
 
-All data used in the now-recursive executive must be explicitly stacked with a new stack pointer. All new data must be raw integral member data. This is because local variables and the stacks that support them have already been lowered out in the data phase.
+All data used in the now-recursive executive must be explicitly stacked with a 
+new stack pointer. All new data must be raw integral member data. This is because 
+local variables and the stacks that support them have already been lowered out 
+in the data phase.
 
 Invariant: all functrinos return immediately
 
 Note: only change callee (upper executive)
 
-Note: Now reduce to one context per server. Wait for outgoing calls to return by
+Note: Now reduce to one context per object. Wait for outgoing calls to return by
 recursing back into the context's upper executive code. This supports recursive
 calls.
 
@@ -460,20 +466,15 @@ SC_MODULE(B)
         sensitive << X_wake;
     }
     
-    server X
-    {
-    public:
-        void q_call()
-        { 
-            which = Q;
-            @todo event X_wake;
-        }
+    void q_call()
+    { 
+        which = Q;
+        @todo event X_wake;
+    }
 
-    private:
-        void q_impl()
-        {
-            ...code taken from original q()...
-        }
+    void q_impl()
+    {
+       ...code taken from original q()...
     }
 };
 
@@ -487,7 +488,7 @@ into channels and then expand their functionality towards wires while staying
 with channels so that wires will be easy to derive when the time comes.
 
 Invariant: we have a presence, in the form of a channel, between communicating 
-pairs of servers.
+pairs of objects.
 
 Note: the channel implementation we create will not be stated out but instead
 will be converted to wires (=signals) by the protocol step(s) so it is not a
@@ -508,7 +509,7 @@ class Channel_k : public sc_interface
     }    
 };
 
-Code in servers doesn't really change - just calls functrinos through the
+Code in objects doesn't really change - just calls functrinos through the
 channel instead of directly.
 
 ----------------------------------------------------------------------------
@@ -520,19 +521,19 @@ both caller and callee. All functrinos go into the channel and the channel kicks
 
 The passive call model is an essential step since the function call modal
 produced in the sequential phase (state-out) will only be able to handle
-function calls within servers. In this phase, therefore, we must eliminate calls
-outside of servers completely. This phase removes calls that go into servers,
-and calls coming out of servers will be broken down into primatives that make
-sense in Verilog.
+function calls within objects. In this phase, therefore, we must eliminate calls
+between objects completely. This phase removes calls that go into objects,
+and calls coming out of objects will be broken down into primatives that
+correspond to driving or polling inter-object wires.
 
-Invariant: servers do not receive incoming functrinos
+Invariant: objects do not receive incoming functrinos
 
 Note: after this step, a functrino is still used to initiate a sub-transaction,
 but the recipient gets an event and does a "get data" type call on the channel
-to get the data. We therefore rely on SystemC to convey events into servers.
+to get the data. We therefore rely on SystemC to convey events into objects.
 
 Note: the call into the channel to get the params is not a functrino since 
-it goes to a communications primitive (the channel) and not a server.
+it goes to a communications primitive (the channel) and not an object.
 
 Note: only change functrino recipients
 
