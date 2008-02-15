@@ -7,10 +7,10 @@ and recursion.
 This phase contains the recognisable transformations that implement sequential
 algorithms by spacing a number of combable operations out over time.
 
-Our input consists of a number of servers connected up by wires (sc_signal) and
-we act upon each server individually. A server resembles a simplified computer
-and runs in a server context (SC_THREAD). In addition to user functionality, the
-servers contain generated code from all three previous phases. In particular,
+Our input consists of a number of objects connected up by wires (sc_signal) and
+we act upon each object individually. An object resembles a simplified computer
+and runs in a local context (SC_THREAD). In addition to user functionality, the
+objects contain generated code from all three previous phases. In particular,
 the structural phase generates significant executive and protocol marshaling
 code. This is why the present phase occurs late-on in the transformation
 process; we can generate functionality in sequential C style and let it pass
@@ -21,12 +21,12 @@ Broadly speaking, the phase begins with steps that correspond to compilation
 (some more closely than others) followed by steps that introduce the minimal
 computer-like infrastructure required to execute the compiled program. Viewing
 the phase in this way leads us to question what instructions are available, to
-which the answer is that any combable block of code found in the initial server
+which the answer is that any combable block of code found in the initial object
 algorithm can become an instruction. However, there is no fundamental reason for
 compilation and computer recreation steps not to be swapped around if that
 helps.
 
-We firstly merge all the functions in the server into a single one. This
+We firstly merge all the functions in the object into a single one. This
 corresponds to the linking performed by a software toolchain. We bring it out to
 near the start of the phase because it is reasonably separable, and the
 remaining work is simpler. In particular all recursions are just calls back to
@@ -53,7 +53,7 @@ We do not wish to actually state out before this step, so instead we insert the
 state variable in parallel with the gotos and labels just before doing this step
 (so that it is available for return).
 
-We now have a single function in each server that will be called once at startup
+We now have a single function in each object that will be called once at startup
 and will simply execute forever - not calling any other functions and not being
 called by any other functions. 
 
@@ -80,11 +80,11 @@ SC_THREAD, wait(clk) under SC_CTHREAD and nothing under SC_METHOD. These steps
 progressively define the synchronous timing model, and would differ
 substantially in an asynchronous implementation.
 
-Once we reach SC_METHOD, we have got rid of the need for a server context.
+Once we reach SC_METHOD, we have got rid of the need for a local context.
 Furthermore whenever SystemC invokes our code, it will perform only nominally
 instantaneous actions which (a) are combable and (b) do not violate protocol
 rules by causing combinational loops. Note that this is distinct from the
-situation before server contexts were introduced, where a function could run for
+situation before local contexts were introduced, where a function could run for
 as long as it wanted and possibly indeterminately.
 
 The steps within this phase follow:
@@ -98,9 +98,9 @@ time. This is really associated with "add clock/reset" but we do it up here
 so we can state-out the loop.
 
 This step arguably finishes off the protocol generation step. However the choice
-of a poll loop as a way of waiting for an event is a decision local to servers
-and whereas wait-for-event is fairly generic, a poll loop is quite a specific
-sequential construction.
+of a poll loop as a way of waiting for an event is a matter of object
+implementation and whereas wait-for-event is fairly generic, a poll loop is 
+quite a specific sequential construction.
 
 Invariant: our reliance on SystemC eventing is hidden and the need for poll
 loops made explicit.
@@ -120,15 +120,16 @@ void f()
 ----------------------------------------------------------------------------
 Merge member functions
 
-Merge all the member functions in a server into a single one that uses a big
+Merge all the member functions in an object into a single one that uses a big
 switch statement to select the implementation based on a new enum parameter.
-The new function should have a selection parameter and all the paramerters of all the previous functions in a single long parameter list.
+The new function should have a selection parameter and all the paramerters 
+of all the previous functions in a single long parameter list.
 
 Invariant: all calls are simple recursions on the big function (apart from
 SystemC primatives) since this is now the only function in this object's execution
 context. 
 
-Note: this single function is now the server's run (process) function. Since
+Note: this single function is now the object's run (process) function. Since
 SystemC expects the run function to be void(void) we will have to add a
 primitive to forward the call. The "which" enum value supplied should be 0 for
 the run function; this thunk can be removed after flattening recursion.
@@ -505,7 +506,7 @@ void f()
 ----------------------------------------------------------------------------
 Insert clock and reset
 
-Move all servers to SC_CTHREAD. Replace the delay() at the bottom with 
+Move all objects to SC_CTHREAD. Replace the delay() at the bottom with 
 wait(clk). @todo or whatever you do in an SC_CTHREAD to await a clock pulse.
 
 This step is simply a clarification of the fact that we will generate a clocked
@@ -520,7 +521,7 @@ by clock
 should zero all stored data as a first step in startup. @todo
 
 ----------------------------------------------------------------------------
-Remove server context
+Remove local context
 
 Move to SC_METHOD. Remove the wait(clk) primitive. This step is simply a result
 of the fact that we are able to use SystemC's process model that invokes

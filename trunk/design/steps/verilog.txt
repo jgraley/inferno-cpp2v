@@ -73,16 +73,18 @@ class A
 ----------------------------------------------------------------------------
 Go to Verilog
 
-Insert Verilog constructs as follows: objects->modules; servers->
-"always" blocks and everything else maps as usual. Use Verilog 2001. Always
-blocks should be the clocked kind. All data to become registers.
+Transliterate from SystemC to Verilog. Use Verilog 2001. Each class should
+become a module definition and each obejct a module instance in the corresponding
+position in the hierarchy. The run (process) function for each class should
+be placed in a clocked "always" block within the corresponding module.
 
 Invariant: program is now Verilog
 
 Note: from here on we use a Verilog simulator such as Icarus Verilog to render
 test programs.
 
-Note: bit vectors are always numbered [N-1:0]. Always.
+Note: bit vectors are always numbered [N-1:0]. Backward numbered bit vectors 
+are a hateful contrivance.
 
 Example:
 
