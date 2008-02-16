@@ -43,7 +43,8 @@ The steps within this phase follow:
 ----------------------------------------------------------------------------
 Expand templates
 
-Expand all template instantiations. 
+Expand all template instantiations. This creates new function definitions 
+and classes
 
 Invariant: no templates
 
@@ -56,30 +57,53 @@ compile time. Run the template meta-program here.
 ----------------------------------------------------------------------------
 Remove stack unwind
 
-Whenever a function can throw an exception, arrange for the function to catch 
-all exceptions and return the exception object. If a return value exists already
-then combine in a struct. Returned object should be a null object if there was 
+Whenever a function can throw an exception (including by calling another function
+that can throw an exeception) arrange for the function to catch all exceptions 
+and return the exception object. If a return value exists already then combine 
+in a struct. The returned exception object should be a null object if there was 
 no exception. 
+
+Return value should be a struct containing the original return type if there
+was one and the exception datum. The exception member should be named __exception
+and the presence of a structure with a member so named denotes that the function 
+can throw an exception. The original return value should be named __return.
 
 Calls to such functions should be in try blocks and if an exception is returned
 then they should be rethrown.
+
+todo: determine what types are allowed as execption data. If non-trivial objects
+are allowed, check whether this will work (it ought to work just as well as any
+other case of returning a non-trivial object).
 
 Invariant: return is the only path out of a function
 
 Example output:
 
-Exception f()
+struct f_return
+{
+   int __return; // function used to be int f();
+   Exception __exception;
+}
+
+f_return f()
 {
     Exception ex;
     try
     {
         ex = g();
 	  if( ex != NullException )
-	      throw ex; 
+	      throw ex;
+        ...work stuff out...
+        f_return ret;
+        ret.__exception = NullException;
+        ret.__return = ...result of our calcualtions...
+        return ret; 
     }
     catch( ex )
     {
-        return ex; 
+        f_return ret;
+        ret.__exception = ex;
+        return ret; 
     }
 }
 
@@ -101,7 +125,7 @@ gotos.
 
 Example output:
 
-Exception f()
+f_return f()
 {
     Exception ex;
 
@@ -110,16 +134,20 @@ Exception f()
         ex = g();
 	  if( ex != NullException )
             goto catch;
+        ...work stuff out...
+        f_return ret;
+        ret.__exception = NullException;
+        ret.__return = ...result of our calcualtions...
+        return ret; 
     }
     
     // Was the catch block
     catch:
     {       
-        return ex;
+        f_return ret;
+        ret.__exception = ex;
+        return ret; 
     }
-    
-    done:
-    return NullException;
 }
 
 ----------------------------------------------------------------------------
@@ -141,7 +169,7 @@ Where class B inherits from class A, copy non-overridden functions from A
 to B. Also copy any functions that are overridden but get called explicitly
 via eg A::f(). 
 
-Invariant: no inheritance
+Invariant: no inheritance; no protected members
 
 Note: Need a strategy for multiple inheritance @todo
 
@@ -210,7 +238,8 @@ Copy constructor example output:
 void f( A const &a ); // Used to be pass-by-value here but A is non-trivial
 object. 
 {
-    A local_a; // we permit C++ to construct the object with no init.
+    A local_a; // we permit C++ to construct the object - but there's no 
+               // C++ constructor so it just allocates the mem
     local_a.Construct( a ); // a goes into copy constructor by reference. 
         
     ...blah...
@@ -222,7 +251,9 @@ new/delete example output:
 
 void f()
 {
-    A *ptr_a = new A; // the new used to have parameters
+    A *ptr_a = new A; // the new used to have parameters. There's no 
+                      // C++ constructor so it just allocates the mem
+
     ptr_a->Construct( ...blah... ); // now params go into construct call
     
     ...blah...
@@ -231,7 +262,7 @@ void f()
     delete ptr_a; 
 }
 
-Extra destructor example:
+Extra destructor due to goto example:
 
 void f()
 {
@@ -246,7 +277,7 @@ end of the block
 	      goto done; // could also be an early return; same applies
 	  }
 	  
-	  b->Destruct();
+	  a->Destruct();
     }
     
     done:    
@@ -257,7 +288,7 @@ Implement assignment operator
 
 If there is no assignment operator defined for the class, implement one
 as overloaded operator= that does the same thing as the default assignment
-operator.
+operator - ie individually assign each data member.
 
 Invariant: Class-level operations all go through an explicit member function
 

@@ -55,7 +55,8 @@ then implementing an explicit stack which is then declared as a member. This
 should be sufficient to support all forms of recursion that may be present in
 the program at the cost of a little multiplexing.
 
-Set/get functions are created for all data members and have the same public/privateness. These are used for setting/getting data in all cases.
+Set/get functions are created for all data members and have the same public/
+privateness. These are used for setting/getting data in all cases.
 
 The most complex part of this phase is the pointer solution - this will be the
 most work - and so keeping it in a pure SW implementation is a welcome
@@ -91,11 +92,15 @@ The steps in this phase follow...
 ----------------------------------------------------------------------------
 Staticise heap
 
-Explicitly implement new/delete to allocate objects from static arrays. A 
-separate pool will be needed for each data type that may be newed. Array new
-(new[x]) should also be supported and since the size is a runtime variable, 
-fragmentation may occur. Fundamental types should be supported with one pool for
-each sizeof() value.
+Explicitly implement new/delete to allocate objects from pools implemented as 
+static arrays. A separate pool will be needed for each data type that may be 
+newed. Array new (new[x]) should also be supported and since the size is a 
+runtime variable, fragmentation may occur. Fundamental types should be 
+supported with one pool for each sizeof() value.
+
+Each pool will be implemented as a C++ class containing the new and delete 
+functions and the array of allocatable objects. This class will have one static 
+global instance.
 
 Invariant: No dynamic allocation. All const-member pointers are now globally
 constant.
@@ -104,11 +109,8 @@ Note: No need to worry about constructors/destructors since they should have
 been dealt with in the cplusplus phase. We only need to implement the actual
 allocation.
 
-Note: Maybe place in an existing class if use cases are all within that class 
+todo: Maybe place inside an existing class if use cases are all within that class 
 and its members, to increase locality.
-
-Note: New and delete for a given type, as well as the array itself, go in a
-single object.
 
 Note: Q: do we not want to use a template over allocated type for this? 
 A: No we don't because we can generate code and repeated patterns such as 
@@ -121,6 +123,8 @@ If known, it may be hinted by the programmer. Otherwise it must be determined
 by testing (possibly with an "engineering margin"). Finally, a caching approach
 based on casting to an array of some fundamental type may be considered, but it
 will be very inefficient.
+
+todo: tactics for new on specified size types/bitfields
 
 Example output for call to new and delete:
 
@@ -139,7 +143,7 @@ static class
 {
 public:
     A *New() { ...find one with allocated==false; set allocated=true... }
-    void Delete() { ...set allocated=false... }
+    void Delete(A *) { ...set allocated=false... }
     
 private:
     struct { A object, bool allocated } pool[A_SIZE];
@@ -161,20 +165,20 @@ Note: Strictly an optimisation, but the invariant helps to clarify.
 ----------------------------------------------------------------------------
 Use get()/set()
 
-For raw data types that are exposed publically, make all inter-object reads
-and writes be member function calls. 
+Generate a set and a get function for each public member of a class. Make 
+the set/get functions public and make the data member private.
 
-Invariant: every inter-object interaction is a function call
+Invariant: every inter-object interaction is a function call; all data members
+private.
 
-Note: the pointer *could* equal "this", but only if it's non-constant in which
-case we must support the possibility that it is not "this".
-
-Note: non-trivial objects get dealt with in other ways, so don't worry about 
-them.
-
-Note: trivial get/set functions are considered bat style since they're no better
+Note: trivial get/set functions are considered bad style since they're no better
 than just making the member public. We only do this for the invariant which
 helps later on.
+
+Note: just classes, not structs.
+
+Note: do all non-private data members, regardless of whether they actually get
+used.
 
 Example output:
 
@@ -269,10 +273,16 @@ void f( A *r ) // used to be f( A &r )
 ----------------------------------------------------------------------------
 Memberise locals
 
-Add a stack pointer for each function. It should be a raw integral class member 
-big enough to represent the max recursion depth. Add code to increment the stack pointer on entry and decrement on leaving the corresponding function. Add code to initialise the stack pointers to the constructor.
+Add a stack pointer for each member function in each class. It should be an 
+integer member variable big enough to represent the max recursion depth. Add
+code to increment the stack pointer on entry and decrement on leaving the 
+corresponding function. Add code to initialise the stack pointers to the 
+constructor function.
 
-For each local variable, move the variable to be a member, and make it an array. Update every access in the function to index the array using the stack pointer.
+For each local variable, move the variable to be a private class member 
+(uniquified for the function it came from), and make it an array. Update 
+every access in the function to index the array using the function's stack 
+pointer.
 
 Invariant: all variables are static or members
 
@@ -286,6 +296,9 @@ memberised first, so moved up again and now applies to all locals
 Note: arrays of raw variables are a supported primative right through into the
 verilog phase, so we're allowed to leave them lying around at the end of this 
 phase.
+
+todo: detect "leaf scopes" where there are no outgoing function calls during
+the scope of a local. Do not stack these but just make them class members.
 
 Example output:
 
@@ -321,22 +334,48 @@ class A
 ----------------------------------------------------------------------------
 Add class-level dereferencing layer
 
-For each class, create an enum with a value for each usage of & on a distinct object or raw data item. Substitute the enum value for the address. This includes objects ouside the current object.
+For each class, create an enum with a different value for each position in any 
+member function at which a dereference occurs either via & or implcitly as with
+arrays. Substitute the enum value for the address. This includes objects ouside 
+the current object.
 
-Add functions to each class, for each enum value, that forward function calls 
-to the corresponding object/raw data item. So if member objects a and b of type C 
-both have a function footle( int x ) then we create deref_footle( C *p, int x ) 
-which invokes the correct footle() based on p. For raw data types add eg
-deref_get( type *p ) and deref_set( type *p, type val ). Replace pointer derefs
-with the corresponding function. 
+Add functions to each class C, for each public member function in each class 
+dereferenced in C, which forward function calls to the object that was the 
+subject of the dereference. So if objects a and b of class D have a function 
+footle( int x ) and we take the address of either a or b in any member function
+of the current class, then we create deref_D_footle( D_ptr p, int x ) which invokes 
+the correct footle() based on the value of p.
 
-Invariant: class handles all derefs of data whose address is taken by the class.
+For raw data types add eg deref_int_get( int_ptr p ) and deref_int_set( int_ptr p, 
+int val ). These should call through to the corresponding get and set functions
+introduced in an earlier step.
+ 
+Replace all pointer dereferences and through-pointer invocations with the 
+corresponding local deref function. 
+
+Invariant: class explicitly handles all derefs of data whose address is taken by the class.
 
 Note: p->f() and equivalently (*p).f() should *not* be broken down into the *p
-and the .f() but should be treated as a unit (becomes deref_f(p))
+and the .f() but should be treated as a unit (becomes deref_type_f(p))
 
 Note: there's now no need to copy the data because we always bring the
 action to the data, not the other way around
+
+todo: member function pointers
+
+todo: pointers to array elements
+
+todo: split this step into (a) adding the functions but still using actual pointers
+for the ptr param and then (b) replacing the pointers with the enum
+
+todo: IMPORTANT
+this intermediate won't work because we've turned pointers into enums but still
+happily pass them to other objects (eg in function calls) that don't know what to do
+with them and will either try to dereference them directly or call a deref funciton
+that uses a different enum. Better to split this step as commented above and then 
+do the adding-funcitons part of this step, followed by the next step (referring back)
+and only once we have the invarient that pointers are never dereferenced but only ever 
+used in switch statements (comparisons) then we can safely introduce the enums.
 
 Example output:
 
@@ -378,17 +417,43 @@ Refer-back pointers
 
 With each pointer, associate an enum representing (a) whether the pointer was
 taken locally and if not, (b) which object it came from. Or just add values to 
-the existing enum. This other object is the referee object. 
+the enum created in a previous step. 
 
-In case (b) add a deref function that decodes the pointer then forwards the call
-to the referee object's dereferencer function. 
+A pointer can come from another object if it is a parameter in an incoming
+function call, or the return value of an outgoing call. Either way, the object 
+that supplied the pointer is the referee object. 
+
+Multiple objects of the same class must have different values in the enum. This
+can be achieved with a primitive for now (perhaps using the actual address or
+a static counter) and will have to be implemented in Verilog using eg module
+paraemters.
+
+Create referral functions that decode the pointer and then forward the call 
+to either (a) the deref function or (b) the corresponding referral function
+in the referee object. Referral functions should be created when a pointer
+that came from another object must be dereferenced or passed to a third 
+external object.
+
+We can receive a pointer from an external object when either (a) we expose
+a public member function that accepts a pointer as a parameter (or member
+of a parameter if parameter is a struct) or (b) there is an outgoing call
+somewhere in our member functions to a member function of another object
+that is declared to return a pointer (or a struct containing a pointer).
+
+The converse applies to determine when we can pass pointers to other objects.
 
 Note: this new call may pass some other pointer, in which case the referee
 object may gain a new enum value for which the original object is referee.
-Therefore this step must iterate until no more new deref calls are
-required. Only two deref calls are needed between each pair of objects for
+Therefore this step must iterate until no more new referral calls are
+required. Only two referral functions are needed between each pair of objects for
 any given pointed-to type (one in each direction) so the iterations will
 terminate.
+
+Note: This step is the only pointers step that affects class interfaces. In 
+all cases, a class interface is extended based on that classes' declaration
+and implementation, and the declarations of any classes it can call into.
+Apart from the need to seed different objects with different pointer values,
+every object of a class can be identical.
 
 Invariant: all inter-object calls are now implemented via direct calls 
 
@@ -401,6 +466,11 @@ more.
 @todo wondering about using the word "handle" for pointers not defined locally.
 In the example, A would see a pointer whereas B would see a handle. The handle
 is opaque to B.
+
+todo: object pointers need to be distinct for objects in the same virtual 
+hierarchy so that they can be used interchangably.
+
+todo see the important todo in the deref layer step
 
 Example output:
 
@@ -465,6 +535,9 @@ Note: new fucntions to have same public/privateness as the member variable
 Note: no action required for member objects
 
 Note: done after pointer stuff to avoid turning &a into &get_a()
+
+todo: this duplicates an earlier step!! decide whether you want to do this 
+before or after the pointer shenanigens.
 
 Example output:
 
