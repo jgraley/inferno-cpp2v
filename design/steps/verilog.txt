@@ -122,6 +122,27 @@ endmodule
 @todo fix numerous errors in example
 
 ----------------------------------------------------------------------------
+Unport internals
+
+Where module ports are only connected from inside the module (as will happen
+when an object contains a non-trivial member object), turn these ports into
+wires and remove them from the module interface. 
+
+Only do this when none of the instances of the module use the ports - so that
+the same module definition may be used for all objects. 
+
+Note: at present, this step appears to be an optimisation. But it is important
+to be clear that C++ requires functions to be in a class's public interface 
+before member objects can call them, wheras Verilog modules can keep connections
+to sub-modules completely internal.
+
+todo: consider using a designation approach rather than examining usage in order
+to decide which wires to make internal - basically labelling the "internal" 
+function calls in some way and then propogating the information down to this step
+and of course asserting that there really aren't external connections to the ports
+thus labelled.
+
+----------------------------------------------------------------------------
 Resolve latches
 
 Introduce a pseudo-latch wherever Verilog would infer a latch. A pseudo-latch is

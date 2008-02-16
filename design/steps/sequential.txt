@@ -166,52 +166,13 @@ void big_function( which w, char f, int g1, int g2 )
 }
 
 ----------------------------------------------------------------------------
-Lower constructs
+Lower "for" loop
 
-Lower constructs that are not supported in combable (synthesisable) Verilog into
-conditional branches ie if(cond) goto label; Also force a state transition for
-each delay(). 
+Convert for loops into while loops as follows:
 
-Lower the following in all cases:
-    for - lower into a while loop (@todo should this be a separate step?)
-         while - test at start and jump out if fail; jump back to start at the
-end. Break jumps out; continue jumps to test.
-    do-while - test at end and jump back to start if pass. Break as   
-               per while() continue jumps to the condition test at the bottom.
-    delay() - add a trivial "goto here" and label, but keep the delay() call.
-    
-    
-Lower if a label is contained within the construct (after the above lowering):
-    if - test and jump past "then" block if fail; end of "then" block jumps   
-         past "else" block.
-    switch - build a lookup table of case values to real labels (enumerated).
-             Generate the "goto x" primitive. Break jumps out.
-       
-Invariant: all constructs combable or can be trivially stated-out
+for( x, y, z ) {...} 
 
-Note: there's some flexibility here in how much stuff we lower. It corresponds
-to design tradeoffs in the final hardware. Any construct surrounding a label
-must itself be lowered. 
-
-Note: Ifs etc could be partially stated if for example the "then" block
-contains a label but the "else" block does not. Likewise switch statements.
-    
-Note: the "goto x" primitive is needed when lowering recursion in order to jump
-back to the correct state when returning - ensure same primitive is used.
-
-Note: switch statements may be optimised by choosing the enum values for states
-to match the suer-supplied case values, or by making the mapping simple (eg
-prepend a bit pattern). Since multiple switch statements will tend to overload
-the space, the optimisation should be performed after this step. This will help
-allow a manually written state machine in the input program to be preserved as
-such.
-
-Note: Retain local scope structure for now. @todo check whether we will break
-goto/scope rules here.
-
-@todo early returns
-
-Example, lowering for( x, y, z ) {...} 
+becomes
 
 { 
     x; 
@@ -222,7 +183,23 @@ Example, lowering for( x, y, z ) {...}
     } 
 }
 
-Example, lowering while(x) {...}
+break and continue should be left in place since the semantics are the same
+in while() loops.
+
+Note: consider leaving combable for loops in place. Such loops must be combable
+in the Verilog sense and must not contain any labels, gotos or other non-combable
+constructs.
+
+Invariant: no un-combable for loops
+
+----------------------------------------------------------------------------
+Lower "while" loop
+
+Implement while loops and do-while loops using conditional gotos as follows:
+
+while(x) {...}
+
+becomes
 
 {
     CONTINUE:
@@ -232,7 +209,9 @@ Example, lowering while(x) {...}
     BREAK: 
 }
        
-Example, lowering do {...} while(x)
+do {...} while(x)
+
+becomes
 
 {
     DO:
@@ -241,17 +220,86 @@ Example, lowering do {...} while(x)
     if( x ) goto DO;
     BREAK: 
 }
-       
-Example, lowering delay()
 
-{
-    delay();
-    goto DELAY; // create a state change. 
-    // Maybe put a barrier here to stop this construct getting optimised away.
-    DELAY:
+Invariant: no while or do-while loops
+
+----------------------------------------------------------------------------
+Lower "switch" construct
+
+Switch statements should be left intact except for cases that
+(a) contain a label or other uncombable construct or
+(b) come immediately after a case that has no break (or the break is conditional)
+
+Such cases should be replaced with a goto to a new label outside the switch 
+which is followed by the code from that case. Normal program flow should bypass
+this new section. break to be implemented by a goto to a label at the end of
+the construct.
+
+switch(a) 
+{ 
+    case 0:
+        ```
+        break;
+    case 1:
+        ...
+        // fall through
+    case 2:
+        ,,, 
+        break; 
+    case 3: 
+        '''  // uncombable
+        break;
 }
-       
-Example, fully lowering if(x) {...} else {,,,}
+
+becomes
+
+switch(a)
+{
+    case 0:
+        ```
+        break;
+    case 1:
+        ...
+        goto CASE_2;
+        break; // break after goto just to make it clear 
+               // we now break at the end of *every* case
+    case 2:
+        goto CASE_2;
+        break;
+    case 3:
+        goto CASE_3;
+        break;
+}
+goto BREAK;
+CASE_2:
+    ,,,
+    goto BREAK;
+CASE_3:
+    '''
+    goto BREAK;
+BREAK:
+
+Note: "default" to be handled just like any other case.
+
+Note: Verilog terminates every case in a switch statement. When faced 
+with a chain of cases that have no break, we state-out all but the 
+first case. There are other ways of doing this for example each
+case in an "if" or copying code from one case to another, but the
+present approach keeps the switch statement intact and avoids 
+duplication.
+
+Invariant: no uncombable content in switch cases *and* every case is
+terminated by a break
+
+----------------------------------------------------------------------------
+Lower "if" construct
+
+Only lower if statements when there is a label in the "then" or "else" code 
+blocks. Lower such ifs as follows:
+
+if(x) {...} else {,,,}
+
+becomes
 
 {
     if( !x ) goto ELSE;
@@ -262,18 +310,36 @@ Example, fully lowering if(x) {...} else {,,,}
     ENDIF:
 }
 
-Example, fully lowering switch(x) { case 1: ...; case 2: ,,,; }    
+Note: ifs that don't contain a label could also be lowered, but avoid 
+lowering the new if construct generated by lowering an if!
+
+todo: consider only stating one block, eg the "then" or "else" blocks, if
+only one block needs it.
+
+Invariant: no uncombable ifs
+
+----------------------------------------------------------------------------
+Add state transition at minor delay
+
+At each minor delay (call to delay()) add a "goto" to a label immediately 
+following. This will force a state transition and hence a one clock cycle 
+delay.
+
+Note: we leave the delay call in there until we establish that state 
+transitions really do incur a delay. Until then, the program is incorrect
+without the delay() call because state transitions can be imagined to be
+instantaneous.
+
+delay();
+
+becomes
 
 {
-    Label y = primitive_lookup(x); // @todo what, exactly do we want here?
-    goto y; // goto-a-variable primitive (will optimise out later)
-    CASE_1:
-    ...; // break becomes goto BREAK;
-    CASE_2:
-    ,,,; 
-    BREAK:    
+    delay();
+    goto DELAY; // create a state change. 
+    // Maybe put a barrier here to stop this construct getting optimised away.
+    DELAY:
 }
-
 
 ----------------------------------------------------------------------------
 Add state variable
@@ -325,14 +391,12 @@ Invariant: No scopes (apart from overall function scope)
 ----------------------------------------------------------------------------
 Lower recursion
 
-Turn each recursion call point into a goto to the start of the function and at
-the very end of the function insert a goto to the label implied by the state
-variable. Add a new primitive for this.
- 
-Invariant: no recursion; no non-trivial function calls 
+Turn each recursion call point into a goto to the start of the function and 
+replace each return statement with a goto to the label implied by the state
+variable. Also do this at the end of the function if there is no return 
+statement.
 
-Note: the "goto a variable" primitive would have to become eg a switch statement
-for the purposes of testing this step. It vanishes in the "State-out" step.
+Invariant: no recursion; no non-trivial function calls 
 
 Note: every LABEL: must have an assert( state==LABEL_STATE ); otherwise
 state-out won't work. This is why we have to duplicate the sp++ and state=INIT
@@ -341,8 +405,13 @@ able to help ;-)
 
 @todo deal with params/return value
 
+Note: the "goto a variable" primitive would have to become eg a switch statement
+for the purposes of testing this step. It vanishes in the "State-out" step.
+
 Note: at the end of this stage, the only caller to the function will be to start
 the process - so can fold in the thunk we added in at function merge.
+
+Note: the function will lose its paraneters and return value.
 
 Example output:
 
@@ -364,7 +433,7 @@ void f()
     
     ...
     
-    // end of function
+    // used to be return
     stack_pointer--;
     goto locals[stack_pointer].state;
 }    
