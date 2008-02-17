@@ -166,7 +166,9 @@ Note: Strictly an optimisation, but the invariant helps to clarify.
 Use get()/set()
 
 Generate a set and a get function for each public member of a class. Make 
-the set/get functions public and make the data member private.
+the set/get functions public and make the data member private. Use these 
+functions for all direct (non-pointer) accesses between objects. Internal
+usage may be left alone.
 
 Invariant: every inter-object interaction is a function call; all data members
 private.
@@ -179,6 +181,14 @@ Note: just classes, not structs.
 
 Note: do all non-private data members, regardless of whether they actually get
 used.
+
+Note: no point in using these for internal accesses as we get no new invariant
+from doing that - either way local member functions are accessing local member
+data.
+
+Note: this step is best done before the pointers lowering so that the pointer
+steps can rely on the invariant given here. This slightly simplifies the search
+for incoming/outgoing pointers.
 
 Example output:
 
@@ -520,32 +530,4 @@ and the call to foo().
  	  } 
     }
 } b;
-
-----------------------------------------------------------------------------
-Introduce set/get functions for raw data
-
-Add set() and get() functions for every raw data member. Every access to every 
-data member apart from in the implementations of these functions should call these 
-functions to access or modifiy the data. That includes in the same object and inter-object.
-
-Invariant: all access/modification now done via functions.
-
-Note: new fucntions to have same public/privateness as the member variable
-
-Note: no action required for member objects
-
-Note: done after pointer stuff to avoid turning &a into &get_a()
-
-todo: this duplicates an earlier step!! decide whether you want to do this 
-before or after the pointer shenanigens.
-
-Example output:
-
-class foo
-{
-   int a; // the original member variable
-   int get_a() { return a; } // accessor for a
-   void set_a( int newval ) { a = newval; } // modifier for a
-}
-
 
