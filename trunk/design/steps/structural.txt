@@ -228,8 +228,11 @@ count as a single caller to a function F even if the code in the object
 has multiple call points.
 
 The forwarding has already ensured that external calls can only come from
-the enclosing object. So the only case that actually needs to be modified is 
-when two or more member objects call the same function.
+the enclosing object. So only one call can come from outside the present
+object. However, member objects may make calls too. So the original functrino
+interface should be preserved for calls from the outside, and duplicates
+should be created for as many member objects contain the code to call the
+functrino interface.
 
 This will result in router/arbiter functionality in each object affected.
 
@@ -791,15 +794,26 @@ block during the transaction so the supplied data can't change.
 Note: since we are now dealing with wires (which is what signals really are),
 we need to avoid combinational loops (which are viewed as part of the behaviour
 of wires). We do this by adding a minor delay so that no two transactions
-can occur simultaneously (though the ack can be simultaneous)
+can occur simultaneously (though the ack can be simultaneous).
 
-Note: The delay goes after request but before ack, since that is when
-the data is being held ready. During a single clock cycle, we have eg 
-"ack#1 and req#2" and the data line holds data for #2.
+The protocol allows ack to be derived combinationally from the request
+line, i.e. with no delay. A delay is required after the transaction, so that
+the next transaction does not occur simulataniously. In an earlier design,
+the delay was required to be between request and ack but this prevents us 
+from implementing guaranteed instant ack by simply connecting ack line to
+request line (which then allows synth tools to remove the ack wire and
+maybe also the request wire). For clarification, if both request and ack 
+toggle in the same clock cycle, then they correspond to the same transaction
+and the data lines are valid for that transaction at the time of the toggle.
 
-Examples:
+Note: we use toggling for our pulse model because: (a) using logic 1 for a
+pulse requires that we measure clock cycles as with AXI protocol ready and
+valid lines and (b) doing a complete 0-1-0 pulse would require 2 minor 
+delays which is >= 2 clock cycles.
 
-Data_k, Request_k and Ack_k replaced by
+Example for a functrino k(char):
+
+Channels Data_k, Request_k and Ack_k are replaced by
 
 sc_signal<char> data_k;
 sc_signal<bool> request_k, ack_k;
@@ -809,14 +823,22 @@ Sender code goes:
     data_k = 'a';
     request_k = !request_k;
     wait( ack_k );
+    delay();
     ...
-    
+
 Recipient event handler code goes:
+
     case K:
         c = data_k;
-        delay(); // minor delay to prevent multiple simulatnious transactions
-        ack_k = !ack_k; // Acknowledge we're done with the data. Note that the 
-                        // next request could appear immediately (ie combinationally
-                        // from the ack signal).
+        ack_k = !ack_k; 
         ...do whatever is implied by functrino k...
 
+Wait function implemented thus:
+
+wait( sc_signal<bool> s )
+{
+    bool os = s;
+    while(os == s) 
+    {
+    }
+}
