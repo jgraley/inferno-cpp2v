@@ -233,6 +233,9 @@ copy constructors ensures this, I think.
 
 Note: No need to worry about assignment, I don't think.
 
+Note: Inline constructors/destructors should remain inline through 
+explicitisation.
+
 Copy constructor example output:
 
 void f( A const &a ); // Used to be pass-by-value here but A is non-trivial
@@ -306,3 +309,49 @@ class foo
 		  c = other.c;
     }
 };
+
+-----------------------------------------------------------------------------
+Expand inlines
+
+For each call to an inlined function, expand the function at the call point
+in a local scope. Whatever means was used to reach the function when making
+the call (eg pointer or dotted path) should be applied to any member functions
+or member data accessed by the inlined function that comes from the same
+class.
+
+Note: this step should come after template expansion (obviously) and 
+explicitising constructors and destructors (because we don't want to 
+expand inline constructors before exlicitising them).
+
+Note: this step applies equally to calls between classes. This is the only
+case in the whole Inferno schema in which functionality is moved away from 
+data, since the expanded inline code appears in the calling object but the 
+member data it uses remains in the callee object. All data accesses (and
+calls to other non-inlined member functions from the same object must
+be routed through the protocol, making this an expensive game.
+
+Invariant: no inlines
+
+Example:
+
+void f()
+{
+    ...    
+    ptr->g();
+}
+
+inline g()
+{
+    spooge++;
+}
+
+becomes:
+
+void f()
+{
+    ...
+    { 
+        ptr->spooge++;
+    }
+}
+
