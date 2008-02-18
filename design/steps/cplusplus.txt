@@ -204,6 +204,31 @@ To get the same effect as multiple servers in one object, the user
 must define a class that contains multiple member classes.
 
 ----------------------------------------------------------------------------
+Implement assignment and copy constructor
+
+If there is no assignment operator defined for the class, implement one
+as overloaded operator= that does the same thing as the default assignment
+operator - ie individually assign each data member. Same for copy 
+constructor.
+
+Invariant: No implicitly generated functions
+
+Example output:
+
+class foo
+{
+    int a;
+    char b;
+    my_other_class c;
+    operator=( class foo &other )
+    {
+	  a = other.a;
+	  b = other.b;
+	  c = other.c;
+    }
+};
+
+----------------------------------------------------------------------------
 Make constructors/destructors explicit
 
 All constructors, copy constructors and destructors get turned into regular
@@ -213,11 +238,8 @@ passed by value and has a copy constructor, we must turn that into
 pass-by-reference and then insert the copy construct call at the top of the
 function. 
 
-Invariant: pass-by-value only for memcpy()able objects; underlying object
-lifecycle may now differ from that in the original program.
+Invariant: Class-level operations all go through a regular member function
 
-Note: We choose not to generate any copy constructor if not already there -
-these objects will be treated like POD types. @todo or will they?nd
 Note: this means that some const members will need to be un-consted except
 ones whose initialisation values are known at compile time. Optimisations 
 could include converting member pointers initialised by new() into member 
@@ -285,30 +307,6 @@ end of the block
     
     done:    
 }
-
-----------------------------------------------------------------------------
-Implement assignment operator
-
-If there is no assignment operator defined for the class, implement one
-as overloaded operator= that does the same thing as the default assignment
-operator - ie individually assign each data member.
-
-Invariant: Class-level operations all go through an explicit member function
-
-Example output:
-
-class foo
-{
-    int a;
-	 char b;
-	 my_other_class c;
-    operator=( class foo &other )
-	 {
-	     a = other.a;
-		  b = other.b;
-		  c = other.c;
-    }
-};
 
 -----------------------------------------------------------------------------
 Expand inlines
