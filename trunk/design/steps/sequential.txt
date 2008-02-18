@@ -138,8 +138,7 @@ Note: originally was before memberise locals, but that proved impossible due to
 pointer lowering steps. This must be done after structural steps to ensure we
 keep separate call interfaces for separate call sites (1:1 wiring).
 
-Note: also merge the explicit stacks for the functions @todo maybe more
-efficient not to; but we need somewhere to put the stacked state. 
+Note: also merge the explicit stacks for the functions. 
 
 @todo Need to stack the new locals added here 
 
@@ -613,7 +612,7 @@ Invariant: no more delay() primitive - all events explicitly controlled
 by clock
 
 @todo not sure about clock distribution or how to handle reset. Maybe reset 
-should zero all stored data as a first step in startup. @todo
+should zero all stored data as a first step in startup. 
 
 ----------------------------------------------------------------------------
 Remove local context
@@ -659,7 +658,5 @@ must be addressed).
 
 Note: we must do all three in this step because we need to be able to 
 support any nested combination.
-
-todo: rename the verilog phase as the HDL phase and move this step into it.
 
 todo: example code
