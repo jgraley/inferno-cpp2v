@@ -83,9 +83,6 @@ We don't really have an answer to casting as yet; most likely, it will be
 supported at some cost in efficiency (though cast-to-base-type should be
 efficient).
 
-@todo maybe something for global statics and static members involving making new
-classes for them that feature a single instance.
-
 The steps in this phase follow...
 
 
@@ -363,48 +360,35 @@ class A
 ----------------------------------------------------------------------------
 Add class-level dereferencing layer
 
-For each class, create an enum with a different value for each position in any 
-member function at which a dereference occurs either via & or implcitly as with
-arrays. Substitute the enum value for the address. This includes objects ouside 
-the current object.
-
 Add functions to each class C, for each public member function in each class 
 dereferenced in C, which forward function calls to the object that was the 
 subject of the dereference. So if objects a and b of class D have a function 
 footle( int x ) and we take the address of either a or b in any member function
-of the current class, then we create deref_D_footle( D_ptr p, int x ) which invokes 
+of the current class, then we create deref_D_footle( D *p, int x ) which invokes 
 the correct footle() based on the value of p.
 
-For raw data types add eg deref_int_get( int_ptr p ) and deref_int_set( int_ptr p, 
+For raw data types add eg deref_int_get( int *p ) and deref_int_set( int * p, 
 int val ). These should call through to the corresponding get and set functions
 introduced in an earlier step.
  
 Replace all pointer dereferences and through-pointer invocations with the 
 corresponding local deref function. 
 
-Invariant: class explicitly handles all derefs of data whose address is taken by the class.
+Deref functions should be implemented to use switch() on the pointer value using
+case values that are explicitly taken addresses. Cast to int if necessary to
+compile this.
+
+Invariant: class explicitly handles all derefs of data whose address is 
+taken by the class.
 
 Note: p->f() and equivalently (*p).f() should *not* be broken down into the *p
-and the .f() but should be treated as a unit (becomes deref_type_f(p))
-
-Note: there's now no need to copy the data because we always bring the
-action to the data, not the other way around
+and the .f() but should be treated as a unit (becomes deref_type_f(p)). Because 
+of this, there's no need to copy the data because we always bring the action to 
+the data, not the other way around
 
 todo: member function pointers
 
 todo: pointers to array elements
-
-todo: split this step into (a) adding the functions but still using actual pointers
-for the ptr param and then (b) replacing the pointers with the enum
-
-todo: IMPORTANT
-this intermediate won't work because we've turned pointers into enums but still
-happily pass them to other objects (eg in function calls) that don't know what to do
-with them and will either try to dereference them directly or call a deref funciton
-that uses a different enum. Better to split this step as commented above and then 
-do the adding-funcitons part of this step, followed by the next step (referring back)
-and only once we have the invarient that pointers are never dereferenced but only ever 
-used in switch statements (comparisons) then we can safely introduce the enums.
 
 Example output:
 
@@ -413,13 +397,10 @@ int x;
 class A
 {
     int y;
-    
-    enum{ ADDRESSOF_GLOBAL_X, ADDRESSOF_Y } Local_Int_Ptr; // anything whose
-address we take using &
-    
+        
     void f()
     {
-        Local_Int_Ptr p = ADDRESSOF_GLOBAL_X; // was int *p = &x;
+        int *p = &x;
    
         ... maybe modify p, but in accordance with this step...
      
@@ -427,14 +408,14 @@ address we take using &
     }
     
     // completely new function
-    void WriteIntThroughPtr( Local_Int_Ptr p, int newval )
+    void WriteIntThroughPtr( int *p, int newval )
     {
         switch( p )
         {
-        case ADDRESSOF_GLOBAL_X:
+        case &x:
             x = newval;
             break;
-        case ADDRESSOF_Y:
+        case &y:
             y = newval;
             break;
         }
@@ -488,18 +469,13 @@ Invariant: all inter-object calls are now implemented via direct calls
 
 Note: new call also needs a backchannel
 
-@todo maybe the example shouldn't use * and & notation since we got rid of those
-in the previous step! In fact, the example is a little ropey - needs looking at 
-more.
-
-@todo wondering about using the word "handle" for pointers not defined locally.
-In the example, A would see a pointer whereas B would see a handle. The handle
-is opaque to B.
-
 todo: object pointers need to be distinct for objects in the same virtual 
 hierarchy so that they can be used interchangably.
 
-todo see the important todo in the deref layer step
+todo consider splitting out the part that establishes the referral relationships
+from the part that creates the enums. The first part would be recursive and
+would build structs containing the pointer from the deref step as well as object 
+pointers for referring back. Then the second step would replace with enums.
 
 Example output:
 
@@ -550,3 +526,45 @@ and the call to foo().
     }
 } b;
 
+----------------------------------------------------------------------------
+Enumerate addresses
+
+For each class, create an enum with a different value for each object whose
+address gets taken within the class' member functions. Substitute the enum 
+value for the address. This includes taking the address of objects ouside 
+the current object.
+
+Example output:
+
+int x;
+
+class A
+{
+    int y;
+    
+    enum{ ADDRESSOF_GLOBAL_X, ADDRESSOF_Y } Local_Int_Ptr; // anything whose
+                                                           // address we take using &
+    
+    void f()
+    {
+        Local_Int_Ptr p = ADDRESSOF_GLOBAL_X; // was int *p = &x;
+   
+        ... maybe modify p, but in accordance with this step...
+     
+        WriteIntThroughPtr( p, 99 ); // was *p = 99;
+    }
+    
+    // deref function
+    void WriteIntThroughPtr( Local_Int_Ptr p, int newval )
+    {
+        switch( p )
+        {
+        case ADDRESSOF_GLOBAL_X:
+            x = newval;
+            break;
+        case ADDRESSOF_Y:
+            y = newval;
+            break;
+        }
+    }    
+};
