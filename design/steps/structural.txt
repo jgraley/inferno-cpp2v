@@ -62,8 +62,6 @@ pre-defined channel. In the interests of proper correctness, we also choose now
 to add a notional time delay, called a "minor delay" in order to prevent objects
 from trying to do impossible things like toggling a wire twice simultaneously.
 
-@todo need a step to insert SC_MODULE around all classes?
-
 The steps within this phase follow:
 
 ----------------------------------------------------------------------------
@@ -241,7 +239,7 @@ Invariant: Inter-object calls should now be 1:1 caller-callee correspondence.
 todo: IMPORTANT 
 this step seems to require looking into member object code to spot 
 outgoing calls, or to duplicate *every* callable member function for every
-member obejct just in case it makes a call. Neither is very desirable so it 
+member object just in case it makes a call. Neither is very desirable so it 
 may be better to add a "designate outgoing calls" step that moves outgoing
 call knowledge from implementation to interface. Forwarding and functrino 
 generation might benefit from this too. 
@@ -296,6 +294,21 @@ public:
     }
 } x;
 
+----------------------------------------------------------------------------
+Use SC_MODULE
+
+Replace class declaraions with SC_MODULE declarations. Name the modules as
+per the class names. If there's anything else that must be done to make
+legal SC modules, do that too.
+
+We will not use the SC_MODULE's context at this time. Either leave it 
+unimplemented or generate a trivial implementation that does not 
+spin busy.
+
+Note: SC_MODULE is really a #define for a base class. However, we will
+use a primative for this.
+
+Invariant: no (C++ style) classes
 
 ----------------------------------------------------------------------------
 Use ports between objects
@@ -303,8 +316,6 @@ Use ports between objects
 Add an sc_port for each external object that we call or are called from. We're
 doing this to prepare for the addition of channels, but we will immediately make
 correct use of the wakeup mechanism supported by ports. 
-
-@todo delete this step because it has become redundant
 
 Note: ports require 1:1 caller-callee relationships
 
@@ -330,17 +341,15 @@ SC_MODULE(A)
 ----------------------------------------------------------------------------
 Add local context
 
-Add an SC_THREAD for each object. Each incoming functrino p() should store its
-parameters and generate an event that wakes the SC_THREAD (which is
-running an upper executive function). The upper executive should invoke an
-implementation function eg p_impl(); An enum should be created to differentiate
-between multiple functrinos.
+Each incoming functrino p() should store its parameters and generate an event 
+that wakes the SC_THREAD which should be running an upper executive function. 
+The upper executive should invoke an implementation function eg p_impl(); An 
+enum should be created to differentiate between multiple functrinos.
 
 The idea is to introduce a context (in the form of a SC_THREAD) for each object
 and ensure that it is used to execute all existing functrinos within that
-object.
-We have to use events to signal the threads, but we keep the external interface
-of the servers the same. This step does the same thing to all functrinos
+object. We have to use events to signal the threads, but we keep the external 
+interface of the servers the same. This step does the same thing to all functrinos
 regardless.
 
 Invariant: A given object's code is executed within a context that belongs to
@@ -467,7 +476,8 @@ Note: at this stage, each functrino corresponds to a sub-transaction.
 wait_return()/signal_return() in the 2 modules.
 
 @todo split out the wait_return()/signal_return() implementation via recursing
-the upper executive into a separate step above this one. Yes, and the explicit stack creation.
+the upper executive into a separate step above this one. Yes, and the explicit 
+stack creation.
 
 Example output:
 
