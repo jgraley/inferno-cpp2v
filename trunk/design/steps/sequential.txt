@@ -120,16 +120,16 @@ void f()
 ----------------------------------------------------------------------------
 Merge member functions
 
-Merge all the member functions in an object into a single one that uses a big
+Merge all the member functions in a server into a single one that uses a big
 switch statement to select the implementation based on a new enum parameter.
-The new function should have a selection parameter and all the paramerters 
-of all the previous functions in a single long parameter list.
+Parameters of the original functions should be grouped into a struct for each of
+the original member functions then unioned together for the big function. Return
+value should be handled similarly.
 
 Invariant: all calls are simple recursions on the big function (apart from
-SystemC primatives) since this is now the only function in this object's execution
-context. 
+SystemC primatives) since there's nothing else to call.
 
-Note: this single function is now the object's run (process) function. Since
+Note: this single function is now the server's run (process) function. Since
 SystemC expects the run function to be void(void) we will have to add a
 primitive to forward the call. The "which" enum value supplied should be 0 for
 the run function; this thunk can be removed after flattening recursion.
@@ -138,28 +138,36 @@ Note: originally was before memberise locals, but that proved impossible due to
 pointer lowering steps. This must be done after structural steps to ensure we
 keep separate call interfaces for separate call sites (1:1 wiring).
 
-Any new locals should be explicitly stacked.
+Note: also merge the explicit stacks for the functions @todo maybe more
+efficient not to; but we need somewhere to put the stacked state. 
 
-@todo deal with return values from different functions (can't use refs, pointers, structs or unions).
+@todo Need to stack the new locals added here 
 
 Example output (initial functions were char f(char) and int g(int, int)):
 
+struct g_params { int p1, int p2 };
+
+union big_params { char f, g_params g };
+union big_result { int f, char g };
+
 enum which { F, G };
 
-void big_function( which w, char f, int g1, int g2 )
+big_result big_function( which w, big_params bp )
 {
     big_result br;
     switch( which )
     {
         case F:
-            param = f;
+            param = bp.f;
             ...algorithm from f...
+            br.f = return_value;
             break;
             
         case G:
-            param_1 = g1;
-            param_2 = g2;
-            ...algorithm from g...
+            param_1 = bp.g.p1;
+            param_2 = bp.g.p2;
+            ...algorithm from f...
+            br.g = return_value;
             break;                                    
     }
     return br;
@@ -389,6 +397,27 @@ which scopes to remove. Maybe the invariant should be no scopes around labels?
 Invariant: No scopes (apart from overall function scope)
 
 ----------------------------------------------------------------------------
+Lower parameters and return value
+
+New local variables should be added to the stack for the parameters and
+the return value. These are populated for the stack frame of the callee
+(so the callee accesses them like normal locals, but the caller has to 
+access them via stack_pointer+1). 
+
+Parameters should be initialised before the call; they may then be used 
+directly; return x becomes an assignment to the return value; caller 
+substitutes return value for the recursion point.
+
+Note: addition of locals for params is OK since that's what they are. It
+seems unfortunate to do this for the return value, but without inlining
+part of the function there's no way we can avoid it. Compilers do so when
+ABIs specify eg return value in R0.
+
+Invariant: no parameters or return values
+
+todo: example code
+
+----------------------------------------------------------------------------
 Lower recursion
 
 Turn each recursion call point into a goto to the start of the function and 
@@ -396,14 +425,13 @@ replace each return statement with a goto to the label implied by the state
 variable. Also do this at the end of the function if there is no return 
 statement.
 
-Invariant: no recursion; no non-trivial function calls 
+Invariant: no recursion; no non-trivial function calls; no params or return
+values.
 
 Note: every LABEL: must have an assert( state==LABEL_STATE ); otherwise
 state-out won't work. This is why we have to duplicate the sp++ and state=INIT
 for each fn call. But we're close enough to Verilog that synth tools should be
 able to help ;-)
-
-@todo deal with params/return value
 
 Note: the "goto a variable" primitive would have to become eg a switch statement
 for the purposes of testing this step. It vanishes in the "State-out" step.
@@ -411,14 +439,12 @@ for the purposes of testing this step. It vanishes in the "State-out" step.
 Note: at the end of this stage, the only caller to the function will be to start
 the process - so can fold in the thunk we added in at function merge.
 
-Note: the function will lose its paraneters and return value.
-
 Example output:
 
 void f()
 {
     locals[stack_pointer].state = INIT_STATE; // from add state variable step
-    INIT_STATE: // new
+    INIT_STATE: // new label
     assert( state==AFTER_RECURSION_STATE );
 
     ...
@@ -609,3 +635,31 @@ Invariant: no persistent implicit context
 Note: this is really a pattern reduction: SC_CTHREAD{ ...; wait(); } becomes
 SC_METHOD{ ...; }. If any functions don't match the pattern we have an error.
 
+----------------------------------------------------------------------------
+Implement structs, unions and arrays
+
+Recursively convert all data structures made up of structs, unions and 
+arrays into SystemC bit vectors according to:
+
+- structs become bit vectors of the total cumulative size, accesses to
+members use the correct bit range and operations as whole operate on the
+whole bit vector.
+
+- unions become bit vectors of the length of the largest item, accesses to
+members can use any legal bit range and operations as whole operate on the
+whole bit vector.
+
+- arrays become bit vectors of the element size times the number of elements.
+Accesses as per structs.
+
+In the case of nested structures, the bit range operators should be merged. 
+Apply this step to registers within objects, and to ports and signals that
+go between objects (inter-object calls with structs among the parameters
+must be addressed).
+
+Note: we must do all three in this step because we need to be able to 
+support any nested combination.
+
+todo: rename the verilog phase as the HDL phase and move this step into it.
+
+todo: example code

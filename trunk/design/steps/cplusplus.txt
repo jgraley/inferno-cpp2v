@@ -323,6 +323,10 @@ Note: this step should come after template expansion (obviously) and
 explicitising constructors and destructors (because we don't want to 
 expand inline constructors before exlicitising them).
 
+Note: and protected or private data that the inline needs to access will 
+need to be made public (or in general get the same status as the inline
+function itself).
+
 Note: this step applies equally to calls between classes. This is the only
 case in the whole Inferno schema in which functionality is moved away from 
 data, since the expanded inline code appears in the calling object but the 
