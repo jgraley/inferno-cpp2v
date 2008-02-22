@@ -1,0 +1,182 @@
+
+
+Back port definitions. Note that MixedCaseNoUnderscore is used for 
+substitutable items, which will be defined in the text.
+
+
+General idea:
+
+Consider two module instances, the Originator and the Replier. A 
+port on the originator is statically bound to an interface on the
+Replier. The originator makes a call though that port to the 
+Replier. Now, the replier wants to call back to an interface on 
+the originator. If the port-interface bindings are static and 1:1 
+then it's unambiguous at binding time where the replier's port should 
+be bound.
+
+But suppose there are other module instances that *also* have ports
+bound to the same interface at the replier. For this case, we must 
+extend SC so that
+(a) replier "knows" which module instance called it and
+(b) replier can make a call back to the originator 
+
+We prefer not to use C/C++ style pointers explicitly in the SC code
+since this goes against SC style and pointers tend to bypass 
+routing hierarchy and just go directly to the pointed-to item (bad
+when you're trying to express the routing hierarchy). Conversely, 
+we prefer not to require the SC programmer to introduce switch 
+statements to select the correct module instance to call back to, 
+because these will need recreating whenever the routing hierarchy 
+is changed (i.e. this style is heavy with redundancy).
+
+We choose a middle road, based on new SC primatives that extend the
+sc_port as required. They provide run-time binding to avoid switch
+statements, but their usage is constrained such that the 
+dynamically bound calls can only ever be the reverse of an earlier
+statically bound call, and so the structure of the statically bound
+calls is respected.
+
+
+Caller-Id type template:
+
+sc_caller_id< ForwardInterface, BackInterface >
+
+Defines the type of the caller id. It may be stored and passed 
+around like a pointer but no arithmetic or NULL allowed. It may
+not be passed between modules except as provided for by the back 
+port primatives described here. ForwardInterface is the interface
+to which the original call will be made in the replier module
+instance. BackInterface is the interface to which the call-back 
+will be made in the originator module instance. Both may include 
+more than one function if required.
+
+
+Generating caller-id values:
+
+SC_MY_CALLER_ID( ForwardInterface, BackInterface )
+
+Returns an object of type sc_caller_id< ForwardInterface, 
+BackInterface > that identifies the current module instance.
+Should be used only by originator (any module that uses this
+should implement BackInterface).
+
+
+Making the initial call:
+
+Originator should pass caller id obtained above as an extra parameter
+to the function it calls (which should be a function from 
+ForwardInterface), eg
+
+
+ForwardPort.Func( SC_MY_CALLER_ID( ForwardInterface, BackInterface ), ... )
+
+Note that a regular port may be used for this call, or when nesting
+call backs, a call back port may be used. If ForwardPort is a regular 
+port, then it has been bound to the replier via the ForwardInterface.
+
+
+Receiving the initial call:
+
+Replier should store the caller id until it wants to make a callback.
+To call back, receiver should use a back port eg
+
+sc_back_port< ForwardInterface, BackInterface > BackPort;
+...
+BackPort(CallerId).BackFunc(...);
+
+BackFunc should be declared in BackInterface. BackPort does *not* need 
+any static binding.
+
+
+Receiving the call back:
+
+Originator receives the call as normal.
+
+
+How to use back ports as a substitute for pointers:
+
+Pointers should be lowered where created in the same module instance, 
+and should be simplified through referral (as described in data phase).
+Then referral should be implemented using back ports such that the 
+referee is the originator and the dereferencer is the replier. The
+initial call is the one where the pointer gets passed to the dereferencer
+and the call back is made when the dereferencer wants to dereference.
+
+Here, the ForwardInterface is whatever interface contains the
+original function that receives the pointer as a parameter. The 
+BackInterface is exactly the interface pointed to by the pointer.
+
+
+How to use back ports to split transactions into 2 phases.
+
+Calls to a function F() may be split into 2 phases by inserting
+a "thunk" function for F() (say, F_call()) that invokes F() 
+asynchronously and retrns immediately while F() is still running.
+Then at the end of F() a call for F_return() is made on the module
+instance that originally called F_call(). 
+
+Where there may be more than one originating module instance, the
+back channel should be used whereby the original calling module
+instance is the originator, the module implementing F() is the 
+replier, F_call() is the ForwardInterface and F_return() is the
+BackInterface.
+
+
+How to refine-out back ports:
+
+This is best done after the routing hierarchy is in place. For
+each ( ForwardInterface, BackInterface ) pair, every instance of
+every module type that uses SC_MY_CALLER_ID( ForwardInterface, 
+BackInterface ) should be enumerated, and the enumeration value
+substituted for the macro. 
+
+BackPort(CallerId).BackFunc(...) should be replaced with a switch
+statement on CallerId which selects the correct object according 
+to the above enumeration and routes the calls directly though 
+new sc_port constructs (which should be statically bound) eg
+
+sc_port<BackInterface> BackPortCID1123;
+...
+BackPortCID1123( TopLevel.OtherLevel.Originator );
+...
+   case 1123:
+       BackPortCID1123.BackFunc(...);
+
+
+How to implement in SC simulations:
+
+CallerId will be a pointer to BackInterface. SC_MY_CALLER_ID
+will return "this". BackPort(CallerId) will create a local 
+sc_port, bind to *CallerId, and return the sc_port. Some haxxoring
+to sc_port micht be needed to make this allowable. 
+
+Alternatively, BackPort(CallerId) could just return a reference
+hacked to equal CallerId, but this would miss out any handy
+debugging foo in sc_port.
+
+
+What about channels?
+
+All this is meant to occur at a higher level of abstraction where
+sc_port and sc_interface are used to confer function call-like
+semantics for interaction between modules. It is assumed that
+back ports will have been lowered out before channels are introduced.
+
+We could introduce a channel for call bakcs (one interface for
+the replier; many ports for all the originator back interfaces)
+but this would appear to coerce the user's choices of ports, channels
+and interfaces. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
