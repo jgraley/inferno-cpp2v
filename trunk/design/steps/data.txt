@@ -367,14 +367,21 @@ footle( int x ) and we take the address of either a or b in any member function
 of C, then we create deref_D_footle( D *p, int x ) which invokes the correct 
 footle() based on the value of p.
 
-When the address of a raw data type or a pointer is taken add eg deref_int_get( int *p ) and deref_int_set( int * p, int val ). These should call through to the corresponding get and set functions introduced in an earlier step.
+When the address of a raw data type or a pointer is taken add eg deref_int_get( 
+int *p ) and deref_int_set( int * p, int val ). These should call through to 
+the corresponding get and set functions introduced in an earlier step.
  
+When a pointer type can be obetained internally by taking the address *or* 
+externally via incoming call or return value, associate the pointer with an
+enum that indicates how the pointer was obtained.
+
 Replace all pointer dereferences and through-pointer invocations with the 
 corresponding local deref function. 
 
 Deref functions should be implemented to use switch() on the pointer value using
-case values that are explicitly taken addresses. Cast to int if necessary to
-compile this.
+case values that are explicitly taken addresses when the pointer was generated
+internally. Cast to int if necessary to compile this. When the pointer was received
+from outside, it should be directly dereferenced (this will be taken care of later).
 
 Invariant: class explicitly handles all derefs of data whose address is 
 taken by the class.
@@ -383,15 +390,6 @@ Note: p->f() and equivalently (*p).f() should *not* be broken down into the *p
 and the .f() but should be treated as a unit (becomes deref_type_f(p)). Because 
 of this, there's no need to copy the data because we always bring the action to 
 the data, not the other way around
-
-
-todo IMPORTANT:
-this won't work because we don't record whether pointers were taken inside
-the class or externally then passed in. So we'll try the deref function on
-pointers passid in from the outside and the switch will miss all it's cases.
-Adding stuff to differentiate betwene the two kinds of pointers into this 
-step would appear to smear the referring back step. So maybe this step should
-come below referring back, since by then only local pointers will remain?
 
 
 todo: member function pointers
@@ -405,27 +403,134 @@ int x;
 class A
 {
     int y;
+	
+	 struct int_ptr
+	 {
+	     int *ptr;
+		  enum 
+		  { 
+		      LOCAL, 
+			   EXTERNAL 
+		  } whence;
+    } p;
         
-    void f()
+    void f() // generate internally
     {
-        int *p = &x;
-   
+        int_ptr p; // these lines were int *p = &x;
+		  p.ptr = &x;
+        p.whence = LOCAL;
+		
         ... maybe modify p, but in accordance with this step...
      
         deref_int_set( p, 99 ); // was *p = 99;
     }
+	
+	 void g( int *inp ) // get from outside
+	 {
+        int_ptr p; // these lines were int *p = inp;
+		  p.ptr = inp;
+        p.whence = EXTERNAL;
+	 }
     
     // completely new function
-    void deref_int_set( int *p, int val )
+    void deref_int_set( int_ptr p, int val )
     {
-        switch( p )
-        {
-        case &x:
-            x = val;
-            break;
-        case &y:
-            y = val;
-            break;
+	     switch( p.whence )
+		  {
+		  case LOCAL: // local case: avoid dereferencing by switching over possible values
+            switch( p.ptr )
+            {
+            case &x:
+                x = val;
+                break;
+            case &y:
+                y = val;
+                break;
+				}
+				break;
+		  case EXTERNAL: // external case: just leave the deref, it'll get changed later
+		      *p.ptr = val;
+        }
+    }    
+};
+
+----------------------------------------------------------------------------
+Enumerate local addresses
+
+For each class C and each type T, create an enum with a different value for each 
+object of type T whose address gets taken within the C's member functions. This 
+includes taking the address of objects not members of C.
+
+If pointers to T can be obtained externally, create a union of the enum and the 
+original pointer type, and substitute that into the pointer representation 
+created in the "Add class-level dereferencing layer" step in place of the 
+actual pointer member.
+
+Example output:
+
+
+   enum{ ADDRESSOF_GLOBAL_X, ADDRESSOF_Y } Local_Int_Ptr; // anything whose
+
+
+int x;
+
+class A
+{
+    int y;
+	
+	 struct int_ptr
+	 {
+	     union
+		  {
+		      enum
+			   { 
+			       ADDRESSOF_GLOBAL_X, 
+				    ADDRESSOF_Y 
+				} local_ptr;
+			   int *external_ptr;			   
+		  enum 
+		  { 
+		      LOCAL, 
+			   EXTERNAL 
+		  } whence;
+    } p;
+        
+    void f() // generate internally
+    {
+        int_ptr p; // these lines were int *p = &x;
+		  p.local_ptr = ADDRESSOF_GLOBAL_X;
+        p.whence = LOCAL;
+		
+        ... maybe modify p, but in accordance with this step...
+     
+        deref_int_set( p, 99 ); // was *p = 99;
+    }
+	
+	 void g( int *inp ) // get from outside
+	 {
+        int_ptr p; // these lines were int *p = inp;
+		  p.external_ptr = inp;
+        p.whence = EXTERNAL;
+	 }
+    
+    // completely new function
+    void deref_int_set( int_ptr p, int val )
+    {
+	     switch( p.whence )
+		  {
+		  case LOCAL: // local case: avoid dereferencing by switching over possible values
+            switch( p.local_ptr )
+            {
+            case ADDRESSOF_GLOBAL_X:
+                x = val;
+                break;
+            case ADDRESSOF_Y:
+                y = val;
+                break;
+				}
+				break;
+		  case EXTERNAL: // external case: just leave the deref, it'll get changed later
+		      *p.external_ptr = val;
         }
     }    
 };
@@ -514,16 +619,11 @@ The refer-back condition is like this:
        or 2. D contains a call to a C where a P * is the return value
 
 Determine the data type used internally in C to represent the supplied 
-pointer where P * would ordinatily be used.	This type may be P * or a
-compound type. Call this type Q.
+pointer where P * would ordinatily be used. This type may be P * or a
+struct generated by the earlier pointer steps. Call this type Q.
 
 Make the actual parameter or return value that conveys P * from C to D
 actually use type Q. Also use type Q internally within D in place of P *.
-
-If a P * can be generated inside D i.e. by taking the address of a 
-P, then make a union of Q and P * and append a flag to indicate
-whether initialisation took place due to local address-taking or via
-a call from D. Call this new type S.
 
 Create a referral interface for Q, called refer_P_x where the number x
 differentialtes between all different Q that can be generated for P. 
@@ -545,8 +645,6 @@ D for forwarding (nearly as good).
 If no suitable dyn id was found, associate the recieved Q with a dynamic binding
 id of type sc_dyn_id< refer_Q_x > (see design/SystemC/back port.txt). Refit this
 compound type throughout module D in place of Q. This new type is R. 
-
-Note: since R replaces Q not S, it will go inside S if S was created.
 
 At the point of receiving the pointer value from C, initialise the dynamic id
 to refer to the module instance that supplied the pointer (which should 
@@ -590,61 +688,3 @@ struct R // C can interpret q, and this struct has the id of C
 	 sc_dyn_id< refer_Q_0 > referee_id; // the id of that instance
 }
 
-struct S // this struct has the properties of a P * and an R for
-         // when P * got taken locally as well as passed in.
-{
-    enum
-	 {   
-	     LOCAL,
-		  EXTERNAL
-    } whence; // 
-    union
-	 {
-	     P *local_pointer;
-		  R external_pointer;
-	 } data;
-}
-
-
-----------------------------------------------------------------------------
-Enumerate addresses
-
-For each class, create an enum with a different value for each object whose
-address gets taken within the class' member functions. Substitute the enum 
-value for the address. This includes taking the address of objects ouside 
-the current object.
-
-Example output:
-
-int x;
-
-class A
-{
-    int y;
-    
-    enum{ ADDRESSOF_GLOBAL_X, ADDRESSOF_Y } Local_Int_Ptr; // anything whose
-                                                           // address we take using &
-    
-    void f()
-    {
-        Local_Int_Ptr p = ADDRESSOF_GLOBAL_X; // was int *p = &x;
-   
-        ... maybe modify p, but in accordance with this step...
-     
-        WriteIntThroughPtr( p, 99 ); // was *p = 99;
-    }
-    
-    // deref function
-    void WriteIntThroughPtr( Local_Int_Ptr p, int newval )
-    {
-        switch( p )
-        {
-        case ADDRESSOF_GLOBAL_X:
-            x = newval;
-            break;
-        case ADDRESSOF_Y:
-            y = newval;
-            break;
-        }
-    }    
-};
