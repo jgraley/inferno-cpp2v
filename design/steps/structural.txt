@@ -295,50 +295,6 @@ public:
 } x;
 
 ----------------------------------------------------------------------------
-Use SC_MODULE
-
-Replace class declaraions with SC_MODULE declarations. Name the modules as
-per the class names. If there's anything else that must be done to make
-legal SC modules, do that too.
-
-We will not use the SC_MODULE's context at this time. Either leave it 
-unimplemented or generate a trivial implementation that does not 
-spin busy.
-
-Note: SC_MODULE is really a #define for a base class. However, we will
-use a primative for this.
-
-Invariant: no (C++ style) classes
-
-----------------------------------------------------------------------------
-Use ports between objects
-
-Add an sc_port for each external object that we call or are called from. We're
-doing this to prepare for the addition of channels, but we will immediately make
-correct use of the wakeup mechanism supported by ports. 
-
-Note: ports require 1:1 caller-callee relationships
-
-@todo better example
-
-Example output:
-
-SC_MODULE(B)
-{
-   ...
-};
-
-SC_MODULE(A)
-{
-    sc_port<B> b_port; // we call a function in B
-    SC_CTOR(A)
-    {
-        SC_THREAD(f);
-        sensitive << b_port; // wakeups from B
-    }
-};
-
-----------------------------------------------------------------------------
 Add local context
 
 Each incoming functrino p() should store its parameters and generate an event 
