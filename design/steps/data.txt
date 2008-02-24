@@ -384,6 +384,16 @@ and the .f() but should be treated as a unit (becomes deref_type_f(p)). Because
 of this, there's no need to copy the data because we always bring the action to 
 the data, not the other way around
 
+
+todo IMPORTANT:
+this won't work because we don't record whether pointers were taken inside
+the class or externally then passed in. So we'll try the deref function on
+pointers passid in from the outside and the switch will miss all it's cases.
+Adding stuff to differentiate betwene the two kinds of pointers into this 
+step would appear to smear the referring back step. So maybe this step should
+come below referring back, since by then only local pointers will remain?
+
+
 todo: member function pointers
 
 todo: pointers to array elements
@@ -487,143 +497,114 @@ class C : public sc_module
 	 }
     void f()
 	 {
-	     portd.g(); // call throuhg the port
+	     portd.g(); // call through the port
     }
 };
 
 ----------------------------------------------------------------------------
 Refer-back pointers
 
-With each pointer, associate an enum representing (a) whether the pointer was
-taken locally and if not, (b) which object it came from. Or just add values to 
-the enum created in a previous step. 
+This step must iterate over every example in the code that satisfies the 
+following condition. Each iteration should result in a valid runnable test render.
 
-A pointer can come from another object if it is a parameter in an incoming
-function call, or the return value of an outgoing call. Either way, the object 
-that supplied the pointer is the referee object. 
+The refer-back condition is like this:
+- There exist 2 module definitions, C and D which could be the same.
+- There exists a pointer type P *
+- Either: 1. C contains a call to a D where a P * is one of the parameters
+       or 2. D contains a call to a C where a P * is the return value
 
-Multiple objects of the same class must have different values in the enum. This
-can be achieved with a primitive for now (perhaps using the actual address or
-a static counter) and will have to be implemented in Verilog using eg module
-paraemters.
+Determine the data type used internally in C to represent the supplied 
+pointer where P * would ordinatily be used.	This type may be P * or a
+compound type. Call this type Q.
 
-Create referral functions that decode the pointer and then forward the call 
-to either (a) the deref function or (b) the corresponding referral function
-in the referee object. Referral functions should be created when a pointer
-that came from another object must be dereferenced or passed to a third 
-external object.
+Make the actual parameter or return value that conveys P * from C to D
+actually use type Q. Also use type Q internally within D in place of P *.
 
-We can receive a pointer from an external object when either (a) we expose
-a public member function that accepts a pointer as a parameter (or member
-of a parameter if parameter is a struct) or (b) there is an outgoing call
-somewhere in our member functions to a member function of another object
-that is declared to return a pointer (or a struct containing a pointer).
+If a P * can be generated inside D i.e. by taking the address of a 
+P, then make a union of Q and P * and append a flag to indicate
+whether initialisation took place due to local address-taking or via
+a call from D. Call this new type S.
 
-When pointers are returned from a function, the caller knows which object
-the function was called on, so no extra information need be returned. But
-when a pointer is passed among function parameters, the referrel id must
-be supplied along with the other params. It need only be supplied once,
-so add it as a new parameter #1.
+Create a referral interface for Q, called refer_P_x where the number x
+differentialtes between all different Q that can be generated for P. 
+This interface should resemble the interface to P except that: all 
+function names prefixed with "refer_Q_x_" and all calls have an additional 
+parameter of type Q.
 
-The converse applies to determine when we can pass pointers to other objects.
+Make module C implement this referral interface. Functions should simply
+dereference the supplied pointer P using the supplied params and return the
+return value.
 
-Note: this new call may pass some other pointer, in which case the referee
-object may gain a new enum value for which the original object is referee.
-Therefore this step must iterate until no more new referral calls are
-required. Only two referral functions are needed between each pair of objects for
-any given pointed-to type (one in each direction) so the iterations will
-terminate.
+In the implementation of D, search through the definition of type Q looking 
+for a dynamic id to C or D (ie sc_dyn_id< refer_Q_x > or sc_dyn_id< refer_S_x >). 
+If found make type R the same as Q. Bascially since dyn id binding addresses 
+every instance of a module, any existing id to D will just get us more directly 
+to the correct instance of d. And an id to D means we can use the instances of 
+D for forwarding (nearly as good).
 
-Note: This step is the only pointers step that affects class interfaces. In 
-all cases, a class interface is extended based on that classes' declaration
-and implementation, and the declarations of any classes it can call into.
-Apart from the need to seed different objects with different pointer values,
-every object of a class can be identical.
+If no suitable dyn id was found, associate the recieved Q with a dynamic binding
+id of type sc_dyn_id< refer_Q_x > (see design/SystemC/back port.txt). Refit this
+compound type throughout module D in place of Q. This new type is R. 
 
-Invariant: all inter-object calls are now implemented via direct calls 
+Note: since R replaces Q not S, it will go inside S if S was created.
+
+At the point of receiving the pointer value from C, initialise the dynamic id
+to refer to the module instance that supplied the pointer (which should 
+by now implement the referral interface refer_Q_x.
+
+Whenever the pointer was dereferenced, instead issue a dynamically bound 
+call to the referral function in whichever module instance the id selects.
+
+If an instance of D passes the pointer back to an instance of another 
+module (via param or return value), just pass the pointer and ignore the
+dynamic id (this will get updated in a future iteration).
+
+Invariant: all inter-object calls now go through bound ports
 
 todo: object pointers need to be distinct for objects in the same virtual 
 hierarchy so that they can be used interchangably.
 
-todo consider splitting out the part that establishes the referral relationships
-from the part that creates the enums. The first part would be recursive and
-would build structs containing the pointer from the deref step as well as object 
-pointers for referring back. Then the second step would replace with enums.
+todo more on pointers to raw data types.
 
-Example output:
+todo more examples?
 
-class A // this object will be the referee object 
+Example referral interface:
+
+class refer_Q_0 : public sc_interface
 {
-    C x; // unchanged
-    void f() 
-    {
-        // in the case where we supply a pointer in the params of an outgoing
-        // call, we must supply caller id
-        b.GiveAPointer( B::A, &x ); // was b.TakeAPointer( &x ); now need to pass
-our id.
-    }
+    virtual int f( Q q, char c );
+	 // in P's interface, this function is int f( char c );
+};
 
-    C *TakeAPointer()
-    {
-        // in the case where we return a pointer as a return value, we need not
-        // supply an id for referral because the caller knows who we are. So
-        // this function has not changed.
-        return &x;
-    } 
-    
-    void ReferFoo( C *ptr, int param )  // new code; handles derefs on the
-                                        //pointer we supplied to B (when calling foo, in this example)
-    {
-        ptr->foo( param ); // Only dereferencing locally.
-    }
-    
-} a;
+Example types/structures:
 
-class B
+class P; // the original type and a pointer to it
+P *p;
+
+typedef ... Q; // Q can represent what P * can represent as far as C knows, but
+               // we don't care how it's implemented
+
+struct R // C can interpret q, and this struct has the id of C
 {
-public:
-    enum { A } Referee; // must include a unique id for every object of every class
-                        // that can call an object of class B with a pointer
+    Q q; // came from instance of C
+	 sc_dyn_id< refer_Q_0 > referee_id; // the id of that instance
+}
 
-    struct ExtCPtr { C *external_ptr, Referee referee_id } ptr; // C is the pointed-to type
+struct S // this struct has the properties of a P * and an R for
+         // when P * got taken locally as well as passed in.
+{
+    enum
+	 {   
+	     LOCAL,
+		  EXTERNAL
+    } whence; // 
+    union
+	 {
+	     P *local_pointer;
+		  R external_pointer;
+	 } data;
+}
 
-    // this code only applies to the example of getting
-    // a pointer as a parameter to an incoming call
-    void GiveAPointer( Referee id, C *p )
-    {
-        ptr.external_ptr = p;
-	  ptr.referee_id = id; // the calling object has given us its id
-    }
-    
-private:
-    void g()
-    {
-        // this section of code only applies to the example of 
-        // getting a pointer in the return value of an outgoing call.
-        if( return_example )
-        {    
-            ptr.external_ptr = a.TakeAPointer()  
-            ptr.referee_id = A; // no need to get referee id from a as 
-                                // we know which obejct we called
-        }
-
-        // now time to try and use the pointer
-	  CallFooThroughExternalCPtr( ptr, 9 ); // used to be ptr->foo(9);
-    }
-    
-    void CallFooThroughExternalCPtr( ExtCPtr p, int param ) // new code
-    {
-        switch( p.referee_id )
-	  {
-	  case A: // identify the referee object...
-	      a.ReferFoo( p.external_ptr, param ); // ...then get it to do the deref
-and the call to foo().
-	      break;	
-        case B:
-            error // there is no function foo in B     
- 	  } 
-    }
-} b;
 
 ----------------------------------------------------------------------------
 Enumerate addresses
