@@ -450,6 +450,12 @@ of a parameter if parameter is a struct) or (b) there is an outgoing call
 somewhere in our member functions to a member function of another object
 that is declared to return a pointer (or a struct containing a pointer).
 
+When pointers are returned from a function, the caller knows which object
+the function was called on, so no extra information need be returned. But
+when a pointer is passed among function parameters, the referrel id must
+be supplied along with the other params. It need only be supplied once,
+so add it as a new parameter #1.
+
 The converse applies to determine when we can pass pointers to other objects.
 
 Note: this new call may pass some other pointer, in which case the referee
@@ -467,8 +473,6 @@ every object of a class can be identical.
 
 Invariant: all inter-object calls are now implemented via direct calls 
 
-Note: new call also needs a backchannel
-
 todo: object pointers need to be distinct for objects in the same virtual 
 hierarchy so that they can be used interchangably.
 
@@ -479,20 +483,27 @@ pointers for referring back. Then the second step would replace with enums.
 
 Example output:
 
-enum { A } Referee; // give an ID to the object A so it can be a referee for
-pointer dereferences.
-
-class A
+class A // this object will be the referee object 
 {
     C x; // unchanged
     void f() 
     {
-        a.TakeAPointer( A, &x ); // was a.TakeAPointer( &x ); now need to pass
+        // in the case where we supply a pointer in the params of an outgoing
+        // call, we must supply caller id
+        b.GiveAPointer( B::A, &x ); // was b.TakeAPointer( &x ); now need to pass
 our id.
     }
+
+    C *TakeAPointer()
+    {
+        // in the case where we return a pointer as a return value, we need not
+        // supply an id for referral because the caller knows who we are. So
+        // this function has not changed.
+        return &x;
+    } 
     
     void ReferFoo( C *ptr, int param )  // new code; handles derefs on the
-pointer we supplied to B (when calling foo, in this example)
+                                        //pointer we supplied to B (when calling foo, in this example)
     {
         ptr->foo( param ); // Only dereferencing locally.
     }
@@ -501,15 +512,32 @@ pointer we supplied to B (when calling foo, in this example)
 
 class B
 {
-    struct ExtCPtr { C *external_ptr, Referee referee_id } ptr;
-    void TakeAPointer( Referee id, C *p )
+public:
+    enum { A } Referee; // must include a unique id for every object of every class
+                        // that can call an object of class B with a pointer
+
+    struct ExtCPtr { C *external_ptr, Referee referee_id } ptr; // C is the pointed-to type
+
+    // this code only applies to the example of getting
+    // a pointer as a parameter to an incoming call
+    void GiveAPointer( Referee id, C *p )
     {
         ptr.external_ptr = p;
-	  ptr.referee_id = id; // remember both!
+	  ptr.referee_id = id; // the calling object has given us its id
     }
     
-    void f()
+private:
+    void g()
     {
+        // this section of code only applies to the example of 
+        // getting a pointer in the return value of an outgoing call.
+        if( return_example )
+        {    
+            ptr.external_ptr = a.TakeAPointer()  
+            ptr.referee_id = A; // no need to get referee id from a as 
+                                // we know which obejct we called
+        }
+
         // now time to try and use the pointer
 	  CallFooThroughExternalCPtr( ptr, 9 ); // used to be ptr->foo(9);
     }
@@ -521,7 +549,9 @@ class B
 	  case A: // identify the referee object...
 	      a.ReferFoo( p.external_ptr, param ); // ...then get it to do the deref
 and the call to foo().
-	      break;	     
+	      break;	
+        case B:
+            error // there is no function foo in B     
  	  } 
     }
 } b;
