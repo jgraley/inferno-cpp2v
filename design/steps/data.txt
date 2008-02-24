@@ -360,16 +360,14 @@ class A
 ----------------------------------------------------------------------------
 Add class-level dereferencing layer
 
-Add functions to each class C, for each public member function in each class 
-dereferenced in C, which forward function calls to the object that was the 
-subject of the dereference. So if objects a and b of class D have a function 
+For each class C add deref functionas as follows: for each object A whose address 
+gets taken within C's member functions, add functions to C that forward 
+dereferenced function calls to A. So if objects a and b of class D have a function 
 footle( int x ) and we take the address of either a or b in any member function
-of the current class, then we create deref_D_footle( D *p, int x ) which invokes 
-the correct footle() based on the value of p.
+of C, then we create deref_D_footle( D *p, int x ) which invokes the correct 
+footle() based on the value of p.
 
-For raw data types add eg deref_int_get( int *p ) and deref_int_set( int * p, 
-int val ). These should call through to the corresponding get and set functions
-introduced in an earlier step.
+When the address of a raw data type or a pointer is taken add eg deref_int_get( int *p ) and deref_int_set( int * p, int val ). These should call through to the corresponding get and set functions introduced in an earlier step.
  
 Replace all pointer dereferences and through-pointer invocations with the 
 corresponding local deref function. 
@@ -404,19 +402,19 @@ class A
    
         ... maybe modify p, but in accordance with this step...
      
-        WriteIntThroughPtr( p, 99 ); // was *p = 99;
+        deref_int_set( p, 99 ); // was *p = 99;
     }
     
     // completely new function
-    void WriteIntThroughPtr( int *p, int newval )
+    void deref_int_set( int *p, int val )
     {
         switch( p )
         {
         case &x:
-            x = newval;
+            x = val;
             break;
         case &y:
-            y = newval;
+            y = val;
             break;
         }
     }    

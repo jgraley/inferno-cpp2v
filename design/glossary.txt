@@ -19,9 +19,8 @@ Assert - a check placed in code to check that some factor is true. We do not
 propose to use asserts for the step invariants as defined here - instead they
 are generated to enforce consistency when we introduce redundancy (not often).
 
-Back-channel - A channel (in its broader sense) that joins the same pair of
-subsystems as an existing channel but which passes events and data in the
-opposite direction. Used for various reasons. See channel.
+Binding - association of a SystemC port with a SystemC interface, such that
+the port can make calls to the interface. See static binding and dynamic binding. 
 
 Call-functrino - a functrino in a 2-phase style that signifies the invocation
 of a function and conveys parameter data. See functrino and return-functrino.
@@ -56,6 +55,10 @@ Deref function - dereferencing function - a function that implements a
 combination of address taking and some member function call on the resulting
 object. These are combined on the basis of taking the action to the object, not
 the object to the action.
+
+Dynamic binding - binding relationships that can change during execution. The
+destiantion interface is selected at runtime from a set of choices determined
+in advance.
 
 Event - a primitive concept of a link in the cause-and-effect chain within a
 system. Usually, it is one part of the system waking some other part and the
@@ -239,10 +242,13 @@ State-out - to convert an explicitly sequential algorithm into a state machine
 with the same behaviour. By creating a state machine, the need for a sequential
 platform is removed. See State machine.
 
-static - data and objects whose existence is inferred before
+Static - data and objects whose existence is inferred before
 execution and which exist throughout execution. Their method of allocation is
 basically invisible to the program itself. NOTE often used to describe members
 of objects that are themselves static, which is of debatable correctness.
+
+Static binding - binding relationships that are specified fully in the 
+program code and can never change during execution.
 
 Staticise - to convert data (eg a local variable) into a static variable. cf 
 Memberise.
