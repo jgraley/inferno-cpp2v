@@ -332,28 +332,28 @@ class A
 {
      int x_f_stack[A_f_STACKSIZE]; 
      B b_f_stack[A_f_STACKSIZE]; 
-	  int f_stack_pointer;
-	  
-	  void f()
-	  {
-	      // was int x; 
-		   // was B b; 
-		   f_stack_pointer++; // on entry
-	      
-	      g( x_f_stack[f_stack_pointer] ); // was g( x );
-	      b_f_stack[f_stack_pointer].h(); // was b.h();
-	      
-	      ...maybe recurse f here...
-	      
-	      f_stack_pointer--; // on exit
-	  }
-	  
-	  A()
-	  {
-	      // init stack pointers
-	      f_stack_pointer=-1; // it gets incremented on the first call 
-		                       // (though the actual init value doesn't really matter)
-	  }
+     int f_stack_pointer;
+     
+     void f()
+     {
+         // was int x; 
+         // was B b; 
+         f_stack_pointer++; // on entry
+         
+         g( x_f_stack[f_stack_pointer] ); // was g( x );
+         b_f_stack[f_stack_pointer].h(); // was b.h();
+         
+         ...maybe recurse f here...
+         
+         f_stack_pointer--; // on exit
+     }
+     
+     A()
+     {
+         // init stack pointers
+         f_stack_pointer=-1; // it gets incremented on the first call 
+                             // (though the actual init value doesn't really matter)
+     }
 };
 
 
@@ -403,41 +403,41 @@ int x;
 class A
 {
     int y;
-	
-	 struct int_ptr
-	 {
-	     int *ptr;
-		  enum 
-		  { 
-		      LOCAL, 
-			   EXTERNAL 
-		  } whence;
+   
+    struct int_ptr
+    {
+        int *ptr;
+        enum 
+        { 
+             LOCAL, 
+                EXTERNAL 
+          } whence;
     } p;
         
     void f() // generate internally
     {
         int_ptr p; // these lines were int *p = &x;
-		  p.ptr = &x;
+      p.ptr = &x;
         p.whence = LOCAL;
-		
+        
         ... maybe modify p, but in accordance with this step...
      
         deref_int_set( p, 99 ); // was *p = 99;
     }
-	
-	 void g( int *inp ) // get from outside
-	 {
+    
+     void g( int *inp ) // get from outside
+     {
         int_ptr p; // these lines were int *p = inp;
-		  p.ptr = inp;
+          p.ptr = inp;
         p.whence = EXTERNAL;
-	 }
+     }
     
     // completely new function
     void deref_int_set( int_ptr p, int val )
     {
-	     switch( p.whence )
-		  {
-		  case LOCAL: // local case: avoid dereferencing by switching over possible values
+         switch( p.whence )
+          {
+          case LOCAL: // local case: avoid dereferencing by switching over possible values
             switch( p.ptr )
             {
             case &x:
@@ -446,10 +446,10 @@ class A
             case &y:
                 y = val;
                 break;
-				}
-				break;
-		  case EXTERNAL: // external case: just leave the deref, it'll get changed later
-		      *p.ptr = val;
+                }
+                break;
+          case EXTERNAL: // external case: just leave the deref, it'll get changed later
+              *p.ptr = val;
         }
     }    
 };
@@ -477,48 +477,48 @@ int x;
 class A
 {
     int y;
-	
-	 struct int_ptr
-	 {
-	     union
-		  {
-		      enum
-			   { 
-			       ADDRESSOF_GLOBAL_X, 
-				    ADDRESSOF_Y 
-				} local_ptr;
-			   int *external_ptr;			   
-		  enum 
-		  { 
-		      LOCAL, 
-			   EXTERNAL 
-		  } whence;
+    
+     struct int_ptr
+     {
+         union
+          {
+              enum
+               { 
+                   ADDRESSOF_GLOBAL_X, 
+                    ADDRESSOF_Y 
+                } local_ptr;
+            int *external_ptr;            
+        enum 
+        { 
+            LOCAL, 
+            EXTERNAL 
+        } whence;
     } p;
         
     void f() // generate internally
     {
         int_ptr p; // these lines were int *p = &x;
-		  p.local_ptr = ADDRESSOF_GLOBAL_X;
+        p.local_ptr = ADDRESSOF_GLOBAL_X;
         p.whence = LOCAL;
-		
+      
         ... maybe modify p, but in accordance with this step...
      
         deref_int_set( p, 99 ); // was *p = 99;
     }
-	
-	 void g( int *inp ) // get from outside
-	 {
+   
+    void g( int *inp ) // get from outside
+    {
         int_ptr p; // these lines were int *p = inp;
-		  p.external_ptr = inp;
+        p.external_ptr = inp;
         p.whence = EXTERNAL;
-	 }
+    }
     
     // completely new function
     void deref_int_set( int_ptr p, int val )
     {
-	     switch( p.whence )
-		  {
-		  case LOCAL: // local case: avoid dereferencing by switching over possible values
+        switch( p.whence )
+        {
+        case LOCAL: // local case: avoid dereferencing by switching over possible values
             switch( p.local_ptr )
             {
             case ADDRESSOF_GLOBAL_X:
@@ -527,10 +527,10 @@ class A
             case ADDRESSOF_Y:
                 y = val;
                 break;
-				}
-				break;
-		  case EXTERNAL: // external case: just leave the deref, it'll get changed later
-		      *p.external_ptr = val;
+            }
+            break;
+        case EXTERNAL: // external case: just leave the deref, it'll get changed later
+            *p.external_ptr = val;
         }
     }    
 };
@@ -565,9 +565,9 @@ becomes:
 class C : public sc_module
 {
     SC_CTOR(C) // SC_CTOR really means SC_ELABORATION_STUFF
-	 { // nothing here yet
-	 }
-	 ...
+    { // nothing here yet
+    }
+    ...
 };
 
 ----------------------------------------------------------------------------
@@ -583,11 +583,11 @@ Example:
 class C : public sc_module
 {
     SC_CTOR(C) 
-	 { 
-	 }
+    { 
+    }
     void f()
-	 {
-	     d.g(); // d is an instance of some other module with function g()
+    {
+        d.g(); // d is an instance of some other module with function g()
     }
 };
 
@@ -597,12 +597,12 @@ class C : public sc_module
 {
     sc_port<D> portd; // D is the module definition of d
     SC_CTOR(C) 
-	 { 
-	     portd(d); // bind statically
-	 }
+    { 
+        portd(d); // bind statically
+    }
     void f()
-	 {
-	     portd.g(); // call through the port
+    {
+        portd.g(); // call through the port
     }
 };
 
@@ -671,7 +671,7 @@ Example referral interface:
 class refer_Q_0 : public sc_interface
 {
     virtual int f( Q q, char c );
-	 // in P's interface, this function is int f( char c );
+    // in P's interface, this function is int f( char c );
 };
 
 Example types/structures:
@@ -685,6 +685,6 @@ typedef ... Q; // Q can represent what P * can represent as far as C knows, but
 struct R // C can interpret q, and this struct has the id of C
 {
     Q q; // came from instance of C
-	 sc_dyn_id< refer_Q_0 > referee_id; // the id of that instance
+    sc_dyn_id< refer_Q_0 > referee_id; // the id of that instance
 }
 
