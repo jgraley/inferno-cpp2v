@@ -383,6 +383,9 @@ case values that are explicitly taken addresses when the pointer was generated
 internally. Cast to int if necessary to compile this. When the pointer was received
 from outside, it should be directly dereferenced (this will be taken care of later).
 
+If a pointer is passed to another object, use the actual pointer value from 
+inside the struct.
+
 Invariant: class explicitly handles all derefs of data whose address is 
 taken by the class.
 
@@ -391,6 +394,7 @@ and the .f() but should be treated as a unit (becomes deref_type_f(p)). Because
 of this, there's no need to copy the data because we always bring the action to 
 the data, not the other way around
 
+todo optimise out the "whence" if either option impossible.
 
 todo: member function pointers
 
@@ -410,14 +414,14 @@ class A
         enum 
         { 
              LOCAL, 
-                EXTERNAL 
-          } whence;
+             EXTERNAL 
+        } whence;
     } p;
         
     void f() // generate internally
     {
         int_ptr p; // these lines were int *p = &x;
-      p.ptr = &x;
+        p.ptr = &x;
         p.whence = LOCAL;
         
         ... maybe modify p, but in accordance with this step...
@@ -425,19 +429,19 @@ class A
         deref_int_set( p, 99 ); // was *p = 99;
     }
     
-     void g( int *inp ) // get from outside
-     {
+    void g( int *inp ) // get from outside
+    {
         int_ptr p; // these lines were int *p = inp;
-          p.ptr = inp;
+        p.ptr = inp;
         p.whence = EXTERNAL;
-     }
+    }
     
     // completely new function
     void deref_int_set( int_ptr p, int val )
     {
-         switch( p.whence )
-          {
-          case LOCAL: // local case: avoid dereferencing by switching over possible values
+        switch( p.whence )
+        {
+        case LOCAL: // local case: avoid dereferencing by switching over possible values
             switch( p.ptr )
             {
             case &x:
@@ -446,10 +450,11 @@ class A
             case &y:
                 y = val;
                 break;
-                }
-                break;
-          case EXTERNAL: // external case: just leave the deref, it'll get changed later
-              *p.ptr = val;
+            }
+            break;
+        case EXTERNAL: // external case: just leave the deref, it'll get changed later
+            *p.ptr = val;
+            break;
         }
     }    
 };
@@ -466,11 +471,12 @@ original pointer type, and substitute that into the pointer representation
 created in the "Add class-level dereferencing layer" step in place of the 
 actual pointer member.
 
+If a pointer is passed to another object, use the external pointer value from 
+inside the struct.
+
 Example output:
 
-
-   enum{ ADDRESSOF_GLOBAL_X, ADDRESSOF_Y } Local_Int_Ptr; // anything whose
-
+enum{ ADDRESSOF_GLOBAL_X, ADDRESSOF_Y } Local_Int_Ptr; // anything whose
 
 int x;
 
@@ -478,16 +484,17 @@ class A
 {
     int y;
     
-     struct int_ptr
-     {
-         union
-          {
-              enum
-               { 
-                   ADDRESSOF_GLOBAL_X, 
-                    ADDRESSOF_Y 
-                } local_ptr;
-            int *external_ptr;            
+    struct int_ptr
+    {
+        union
+        {
+            enum
+            { 
+                ADDRESSOF_GLOBAL_X, 
+                ADDRESSOF_Y 
+            } local_ptr;
+            int *external_ptr;
+        }            
         enum 
         { 
             LOCAL, 
@@ -531,6 +538,7 @@ class A
             break;
         case EXTERNAL: // external case: just leave the deref, it'll get changed later
             *p.external_ptr = val;
+            break;
         }
     }    
 };
@@ -607,84 +615,172 @@ class C : public sc_module
 };
 
 ----------------------------------------------------------------------------
-Refer-back pointers
+Add pointer holder type
 
-This step must iterate over every example in the code that satisfies the 
-following condition. Each iteration should result in a valid runnable test render.
+Specify the global bit-width for all pointer representations. Replace all 
+usage of pointers with a bit vector of this size. This applies to both
+between module instances and inside module instances.
 
-The refer-back condition is like this:
-- There exist 2 module definitions, C and D which could be the same.
-- There exists a pointer type P *
-- Either: 1. C contains a call to a D where a P * is one of the parameters
-       or 2. D contains a call to a C where a P * is the return value
+Use casts to ensure that the contents of the bit vector remain the same
+(right-justified, i.e. to the least significant bits) as before this
+step. That means that for conversion to/from the local pointer struct, 
+we must cast from bit-vector to expected rep, convert to desired rep, 
+then cast back to bit-vector.
 
-Determine the data type used internally in C to represent the supplied 
-pointer where P * would ordinatily be used. This type may be P * or a
-struct generated by the earlier pointer steps. Call this type Q.
+Note: bit vectors cannot all be used interchangably - the representation
+within the bit vector varies.
 
-Make the actual parameter or return value that conveys P * from C to D
-actually use type Q. Also use type Q internally within D in place of P *.
+Note: actually generate a seperate bit vector type for every different 
+pointed-to type T. Allow differing representation sizes.
 
-Create a referral interface for Q, called refer_P_x where the number x
-differentialtes between all different Q that can be generated for P. 
-This interface should resemble the interface to P except that: all 
-function names prefixed with "refer_Q_x_" and all calls have an additional 
-parameter of type Q.
+Invariant: common type for all pointers; pointer rep has spare bits
 
-Make module C implement this referral interface. Functions should simply
-dereference the supplied pointer P using the supplied params and return the
-return value.
+Example:
 
-In the implementation of D, search through the definition of type Q looking 
-for a dynamic id to C or D (ie sc_dyn_id< refer_Q_x > or sc_dyn_id< refer_S_x >). 
-If found make type R the same as Q. Bascially since dyn id binding addresses 
-every instance of a module, any existing id to D will just get us more directly 
-to the correct instance of d. And an id to D means we can use the instances of 
-D for forwarding (nearly as good).
+Just the "receiving a pointer as a param from another module instance" 
+case is given here; others should be similar.
 
-If no suitable dyn id was found, associate the recieved Q with a dynamic binding
-id of type sc_dyn_id< refer_Q_x > (see design/SystemC/back port.txt). Refit this
-compound type throughout module D in place of Q. This new type is R. 
-
-At the point of receiving the pointer value from C, initialise the dynamic id
-to refer to the module instance that supplied the pointer (which should 
-by now implement the referral interface refer_Q_x.
-
-Whenever the pointer was dereferenced, instead issue a dynamically bound 
-call to the referral function in whichever module instance the id selects.
-
-If an instance of D passes the pointer back to an instance of another 
-module (via param or return value), just pass the pointer and ignore the
-dynamic id (this will get updated in a future iteration).
-
-Invariant: all inter-object calls now go through bound ports
-
-todo: object pointers need to be distinct for objects in the same virtual 
-hierarchy so that they can be used interchangably.
-
-todo more on pointers to raw data types.
-
-todo more examples?
-
-Example referral interface:
-
-class refer_Q_0 : public sc_interface
+void g( bit_vector<pointer_bits_int> inbv )
 {
-    virtual int f( Q q, char c );
-    // in P's interface, this function is int f( char c );
+    int *inp = (int *)inbv; // cast to int *
+      
+    int_ptr p; // conversion - as before
+    p.external_ptr = inp;
+    p.whence = EXTERNAL;
+
+    bit_vector<pointer_bits_int> pbv = (bit_vector<pointer_bits_int>)p; // cast to bit vector
+
+    ... // now store/use pbv
+}
+
+----------------------------------------------------------------------------
+Add referral interfaces
+
+For each type T that is pointed to anywhere in any module definition, define  
+a referral interface to be the same as the T interface except that:
+- All member function names prefixed with refer_T_
+- Extra parameter to be inserted at the start of the param list - this should
+be the designated bit_vector type. 
+
+If T is a raw data type, refer_T_set() and refer_T_get() functions should be 
+provided.
+
+Make this a SystemC interface (derive from sc_interface) called refer_T.
+
+Support this interface on all module definitions that can pass a pointer to 
+type T. Implementations should simply call the corresponding deref function. 
+
+Example:
+
+class C
+{
+    int f( char x );
 };
 
-Example types/structures:
+Generates:
 
-class P; // the original type and a pointer to it
-P *p;
-
-typedef ... Q; // Q can represent what P * can represent as far as C knows, but
-               // we don't care how it's implemented
-
-struct R // C can interpret q, and this struct has the id of C
+class refer_C : public sc_interface
 {
-    Q q; // came from instance of C
-    sc_dyn_id< refer_Q_0 > referee_id; // the id of that instance
+    virtual int refer_C_f( bit_vector<pointer_bits_C> p, char x ) = 0; 
+};
+
+Implementation in D looks like:
+
+int D::refer_C_f( bit_vector<pointer_bits_C> p, char x ) 
+{
+    return deref( p, x );
 }
+
+----------------------------------------------------------------------------
+Refer-back pointers
+
+Modify the <x>_ptr structure so that the external_ptr member is a dynamic
+binding id for the pointed-to type. 
+
+Make the following code changes:
+
+- when a pointer is taken locally, no change,
+- when a pointer received via incoming call:
+  (1) build local struct, filling in the external_ptr using the incoming 
+      dynamic id,
+  (2) shift the incoming bit vector left by the bit-size of the local ptr 
+      struct, 
+  (3) OR in the newly built local struct into the right-most bits,
+- when a pointer received via return from outgo,ing call, do the same but
+  use the outgoing dyn id from the port used to make the call,
+- when dereferencing, only change the EXTERNAL case:
+  (1) invoke the corresponding referral function via a dynamically bound 
+      call using exernal_ptr as the id,
+  (2) pass the bit vector shifted right by the bit-size of the local ptr 
+      struct,
+- when a pointer is passed to another module instance via call param, just 
+  pass the bit vector diretly - do not extract the external_ptr member any more,
+- when a pointer is passed to another module instnce via function call 
+  return, do the same as above.
+
+Note: this strategy is fully instance-based and will refer back to the
+exact correct module instance in all cases. This is essential so that
+wiring follows the object structure (imagine a small helper class with
+objects dotted around everywhere - we wouldn't want to impose a routing
+over all those objects). This also avoids differentiating the implementation
+of module instances (modulo use of dyn id primative) so no need to 
+brance module definitions. The "shift left and insert" operation 
+disappears into wiring in HDL.
+
+Note: run-time behaviour can of course overflow the bit vector. Just have
+to size the vector so this doesn't happen.
+
+Todo: optimisation by detecting loops and shifting them out. Loops will be
+concatenations of alternating dyn id's and the EXTERNAL enum value. If
+identified, simply shift right to remove cancelling ids. So { d->c, E, c->d,
+E, b->c, E, a->b } loses the fist two steps and becomes simply { b->c, E, a->b } 
+
+todo consider polymorphic pointers
+
+Invariant: no pointers
+
+Examples:
+
+Recipt of a pointer through a param:
+
+void g( bit_vector<pointer_bits_int> inbv )
+{
+    int_ptr p; 
+    p.external_ptr = sv_get_incoming_id(); // now just use the dyn id of the caller
+    p.whence = EXTERNAL;
+
+    // essentially an insert-at-lsb into the received vector
+    bit_vector<pointer_bits_int> pbv = 
+        (bit_vector<pointer_bits_int>)p | ( inbv << bitsize(int_ptr) ); 
+
+    ... // now store/use pbv
+}
+
+Example of a deref function
+
+sc_port< refer_int > port_refer_int; // do not bind this statically
+
+void deref_int_set( bit_vector<pointer_bits_int> pbv, int val )
+{
+    int_ptr p = (int_ptr)pbv;
+    switch( p.whence )
+    {
+    case LOCAL: // this case hasn't changed
+        switch( p.local_ptr )
+        {
+        case ADDRESSOF_GLOBAL_X:
+            x = val;
+            break;
+        case ADDRESSOF_Y:
+            y = val;
+            break;
+        }
+        break;
+    case EXTERNAL: // this case now refers back
+        sc_dyn_id referee_id = p.external_ptr;
+        bit_vector<pointer_bits_int> outbv = pbv >> bitsize(int_ptr);
+        port_refer_int( referee_id ).refer_int_set( outbv, val );
+        break;
+    }
+}    
 
