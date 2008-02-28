@@ -586,6 +586,11 @@ a pointer (eg a.b.foo() but not p->foo()), add a SystemC port to the
 calling module definition, bind the port in the SC_CTOR() and then make
 the calls though the port.
 
+Note: all static calls to go through ports, including calls to member modules
+even though SystemC conventions dont require this.
+
+Invariant: all static calls statically bound through ports.
+
 Example:
 
 class C : public sc_module
