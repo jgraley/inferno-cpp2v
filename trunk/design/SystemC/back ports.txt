@@ -62,7 +62,7 @@ Getting the dynamic id of an incoming call:
 
 First derive the module from sc_dyn_interface< TargetInterface > 
 instead of sc_interface. In the called function implementation, 
-use DynId sc_get_incoming_id()
+use DynId = sc_get_incoming_id()
 
 
 Getting the dynamic id of an outgoing call:
