@@ -7,6 +7,6 @@ int main()
     {
         char b[256];
         gets( b );
-        printf("%s\n", b ); 
+        printf("%s %d\n", b, feof(STDIN)  ); 
     }
 }
