@@ -47,7 +47,7 @@ void do_test( int revision )
     
     printf("END TEST\n\n");
 }
-
+ 
 // Must be invoked in reverse order ie last lable first because
 // we insert null terminators
 char *locate( char *buf, const char *label )
