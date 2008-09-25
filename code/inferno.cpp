@@ -16,6 +16,12 @@
 
 using namespace clang;
 
+/*
+Note: the default implementation of ActOnStartOfFunctionDef() appears in
+MinimalAction and can cause spurious ActOnDeclarator() calls if we always
+call through. Therefore we don't and instead just call explicitly implemented
+functions in MinimalAction where required.
+*/
 class InfernoAction : public MinimalAction
 {
 public:
@@ -24,17 +30,46 @@ public:
     }
  
  private:   
-    virtual void ActOnEndOfTranslationUnit() 
+    void PrintType( const DeclSpec &DS )
     {
-        printf("End\n");
+        switch( DS.getTypeSpecType() )
+        {
+            case DeclSpec::TST_int:
+                printf("int ");
+                break;
+            case DeclSpec::TST_char:
+                printf("char ");
+                break;
+            default:
+                printf("Type<%d> ", DS.getTypeSpecType() );
+                break;
+        }
     }
-    
     
     virtual DeclTy *ActOnDeclarator(Scope *S, Declarator &D, DeclTy *LastInGroup)
     {
-        printf("Declarator %s\n", D.getIdentifier()->getName() );
-        MinimalAction::ActOnDeclarator( S, D, LastInGroup );     
+        PrintType( D.getDeclSpec() );
+        printf("%s;\n", D.getIdentifier()->getName() );
+        
+        return MinimalAction::ActOnDeclarator( S, D, LastInGroup );     
     }
+    
+    virtual DeclTy *ActOnStartOfFunctionDef(Scope *FnBodyScope, Declarator &D) 
+    {
+        PrintType( D.getDeclSpec() );
+        printf("%s()\n", D.getIdentifier()->getName() );
+        printf("{\n");
+       
+        return MinimalAction::ActOnDeclarator( FnBodyScope, D, NULL );     
+    }
+    
+    virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtTy *Body) 
+    {
+        printf("}\n");
+        
+        return MinimalAction::ActOnFinishFunctionBody( Decl, Body );
+    }
+
 };
 
 int main()
