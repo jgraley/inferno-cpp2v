@@ -1,0 +1,19 @@
+
+Building LLVM/Clang
+
+LLVM directory hierarchy should be rooted in same directory as inferno-synth so you can have
+> ls
+inferno-synth/
+llvm-x.y/
+
+Clang directory hierarchy should be rooted in llvm-x.y/tools/ so you can have eg llvm-x.y/tools/clang/lib/... etc
+
+Apply patches as per my latest diffs for LLVM and Clang. Note that some libraries are removed from the makefiles
+in clang/lib and llvm-x.y/lib. These are not needed and didn't seem to compile. Also note #includes of 
+llvm_inferno_include.h
+from various places in llvm and clang.
+
+From llvm-x.y/lib and llvm-x.y/tools/clang/lib, type
+
+make ENABLE_OPTIMISED=0
+
