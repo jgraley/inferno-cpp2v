@@ -1,81 +1,80 @@
 
+#ifndef REFCOUNT_HPP
+#define REFCOUNT_HPP
+
+#include <assert.h>
+
+template<typename TARGET>
+class RCPtr;
+
 // Reverse template
 template<typename TARGET>
-class RCTarget<TARGET>
+class RCTarget
 {
 public:
     RCTarget() :
-        count(1), // You get a free ref on constructions (assuming local)
-        ptr(NULL)
+        count(0)
     {
     }
 
-private: friend class RCPtr
-    int count;
-    TARGET *target_this; // not guaranteed to == this
-    
     ~RCTarget()    
     {
-        switch( count )
-        {
-            case 0:
-            // Was spawned, and the last pointer was destructed (dynamic destruct)
-            return;
-            
-            case 1:
-            // Was not spawned, reached the end of local scope, no pointers created or all were deleted
-            return;
-            
-            default:
-            // Was not spawned, reached the end of local scope, pointers still in existence 
-            // so spawn now using dynamic allocation
-            TARGET *p = new TARGET(*target_this);
-            p->count = count-1;    // You lose a ref on destruction (assuming local)
-        }
+        assert( count == 0 );
     }
+
+private: friend class RCPtr<TARGET>;
+    unsigned count;
 };
 
 template<typename TARGET>
-class RCPtr<TARGET>
+class RCPtr
 {
 public:
-    RCPtr() :
-        ptr( NULL )
+    inline RCPtr() :
+        ptr( 0 )
     {
     }
 
-    RCPtr( const RCPtr &o )
+    inline RCPtr( const RCPtr &o )
     {
         ptr = o.ptr;
-        if( ptr )
-            ptr->count++;
+        Inc();
     }
 
-    operator =(TARGET *t)
+    inline RCPtr &operator =(TARGET *t)
     {
+        Dec();
         ptr = t;
-        if( ptr )
-        {
-            ptr->target_this = ptr;
-            ptr->count++;
-        }
+        Inc();
+        return *this;
     }
     
-    ~RCPtr()
+    inline ~RCPtr()
     {
-        if( ptr )
-        {
-            ptr->count--;
-            if( ptr->count==0 )
-                delete ptr;
-        }
+        Dec();
     }
     
-    operator ->()
+    inline TARGET *operator ->()
     {
         return ptr;
     }
 
 private:
     TARGET *ptr;
+    inline void Inc()
+    {
+        if( ptr )
+            ((RCTarget<TARGET> *)ptr)->count++;
+    }
+    inline void Dec()
+    {
+        if( ptr )
+        {
+            ((RCTarget<TARGET> *)ptr)->count--;
+            if( ((RCTarget<TARGET> *)ptr)->count==0 )
+                delete ptr;
+        }
+    }
 };
+
+#endif
