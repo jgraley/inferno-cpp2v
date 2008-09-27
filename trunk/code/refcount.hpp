@@ -39,13 +39,12 @@ public:
     
     inline RCPtr( const RCPtr<TARGET> &o )
     {
-        printf("fgasd\n");
         ptr = o.ptr;
         Inc();
     }
 
     inline RCPtr( TARGET *t )
-    {printf("ggggggg\n");
+    {
         ptr = t;
         Inc();
     }
@@ -53,7 +52,6 @@ public:
     template<typename OTHER_TARGET>
     inline RCPtr &operator =( const RCPtr<OTHER_TARGET> &o )
     {
-        printf("dfkjhlkfdghsldkjfhg\n");
         Dec();
         ptr = o.ptr;
         Inc();
@@ -79,6 +77,11 @@ public:
         return ptr;
     }
 
+    inline operator TARGET *()
+    {
+        return ptr;
+    }
+
     TARGET *ptr;
     
 private:
@@ -87,7 +90,7 @@ private:
         if( ptr )
         {        
             ((RCTarget*)ptr)->ref_count++;
-            printf("%p++%d\n", (RCTarget*)ptr, ((RCTarget*)ptr)->ref_count);
+            //printf("%p++%d\n", (RCTarget*)ptr, ((RCTarget*)ptr)->ref_count);
         }
     }
     inline void Dec()
@@ -96,7 +99,7 @@ private:
         {
             assert( ((RCTarget *)ptr)->ref_count != 0 && "ref count out of sync");
             ((RCTarget *)ptr)->ref_count--;
-            printf("%p--%d\n", (RCTarget*)ptr, ((RCTarget*)ptr)->ref_count);
+            //printf("%p--%d\n", (RCTarget*)ptr, ((RCTarget*)ptr)->ref_count);
             if( ((RCTarget *)ptr)->ref_count==0 )
                 delete ptr;
         }

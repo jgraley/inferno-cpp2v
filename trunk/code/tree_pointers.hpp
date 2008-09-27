@@ -18,13 +18,12 @@ public:
         RCPtr<TARGET>(p),
         node(n)
     {
-    printf("aaaa\n");
     }  
 
 private:    
     inline OwnerPtr() // not allowed: we always need the node
     {
-        assert(!"OwnedPtr must be supplied with the containing node pointer");
+        assert(!"OwnerPtr must be supplied with the containing node pointer");
     }
     RCTarget * const node;
 };

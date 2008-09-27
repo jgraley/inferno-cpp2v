@@ -12,9 +12,11 @@
 #include "clang/Parse/DeclSpec.h"
 #include "clang/Driver/TextDiagnosticPrinter.h"
 
+#include "tree.hpp"
+
 #define INFERNO_TRIPLE "arm-linux" 
 
-using namespace clang;
+//using namespace clang;
 
 /*
 Note: the default implementation of ActOnStartOfFunctionDef() appears in
@@ -22,22 +24,22 @@ MinimalAction and can cause spurious ActOnDeclarator() calls if we always
 call through. Therefore we don't and instead just call explicitly implemented
 functions in MinimalAction where required.
 */
-class InfernoAction : public MinimalAction
+class InfernoAction : public clang::MinimalAction
 {
 public:
-    InfernoAction(IdentifierTable &IT) : MinimalAction(IT)
+    InfernoAction(clang::IdentifierTable &IT) : MinimalAction(IT)
     {
     }
  
  private:   
-    void PrintType( const DeclSpec &DS )
+    void PrintType( const clang::DeclSpec &DS )
     {
         switch( DS.getTypeSpecType() )
         {
-            case DeclSpec::TST_int:
+            case clang::DeclSpec::TST_int:
                 printf("int ");
                 break;
-            case DeclSpec::TST_char:
+            case clang::DeclSpec::TST_char:
                 printf("char ");
                 break;
             default:
@@ -46,7 +48,7 @@ public:
         }
     }
     
-    virtual DeclTy *ActOnDeclarator(Scope *S, Declarator &D, DeclTy *LastInGroup)
+    virtual DeclTy *ActOnDeclarator(clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup)
     {
         PrintType( D.getDeclSpec() );
         printf("%s;\n", D.getIdentifier()->getName() );
@@ -54,7 +56,7 @@ public:
         return MinimalAction::ActOnDeclarator( S, D, LastInGroup );     
     }
     
-    virtual DeclTy *ActOnStartOfFunctionDef(Scope *FnBodyScope, Declarator &D) 
+    virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D) 
     {
         PrintType( D.getDeclSpec() );
         printf("%s()\n", D.getIdentifier()->getName() );
@@ -74,22 +76,21 @@ public:
 
 int main()
 {
-    FileManager fm; 
-    TextDiagnosticPrinter diag_printer;
-    Diagnostic diags( &diag_printer ); 
-    LangOptions opts;
-    TargetInfo* ptarget = TargetInfo::CreateTargetInfo(INFERNO_TRIPLE);
+    clang::FileManager fm; 
+    clang::TextDiagnosticPrinter diag_printer;
+    clang::Diagnostic diags( &diag_printer ); 
+    clang::LangOptions opts;
+    clang::TargetInfo* ptarget = clang::TargetInfo::CreateTargetInfo(INFERNO_TRIPLE);
     assert(ptarget);
-    SourceManager sm;
-    HeaderSearch headers( fm );
+    clang::SourceManager sm;
+    clang::HeaderSearch headers( fm );
     
-    Preprocessor pp( diags, opts, *ptarget,
-                     sm, headers );
+    clang::Preprocessor pp( diags, opts, *ptarget, sm, headers );
     
     std::string infile="in.c";
-    const FileEntry *file = fm.getFile(infile);
+    const clang::FileEntry *file = fm.getFile(infile);
     if (file) 
-        sm.createMainFileID(file, SourceLocation());
+        sm.createMainFileID(file, clang::SourceLocation());
     if (sm.getMainFileID() == 0) 
     {
         fprintf(stderr, "Error reading '%s'!\n",infile.c_str());
@@ -97,10 +98,10 @@ int main()
     }
     pp.EnterMainSourceFile();
 
-    IdentifierTable it( opts );                 
+    clang::IdentifierTable it( opts );                 
     InfernoAction actions( it );                 
     
-    Parser parser( pp, actions );
+    clang::Parser parser( pp, actions );
     
     parser.ParseTranslationUnit();
 }
