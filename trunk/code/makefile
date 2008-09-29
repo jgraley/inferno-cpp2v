@@ -24,8 +24,10 @@ CLANG_LIBS = $(LLVM)/$(BUILD)/lib/libclang*.a $(LLVM)/$(BUILD)/lib/libclangBasic
 
 STANDARD_LIBS = -lstdc++
 
+INFERNO_SOURCES = inferno.cpp tree.cpp refcount.cpp
+
 all : inferno.cpp
-	$(CC) $(INCLUDE_PATH) $(LLVM_OPTIONS) inferno.cpp $(CLANG_LIBS) $(LLVM_LIBS) $(STANDARD_LIBS) -o inferno
+	$(CC) $(INCLUDE_PATH) $(LLVM_OPTIONS) $(INFERNO_SOURCES) $(CLANG_LIBS) $(LLVM_LIBS) $(STANDARD_LIBS) -ggdb -o inferno
 
 clang :
 	cd $(CLANG); $(MAKE) ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED)

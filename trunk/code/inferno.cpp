@@ -16,7 +16,10 @@
 
 #define INFERNO_TRIPLE "arm-linux" 
 
-//using namespace clang;
+RCPtr<Program> program;
+RCPtr< Sequence<ProgramElement> > curseq;
+
+bool isf=false;
 
 /*
 Note: the default implementation of ActOnStartOfFunctionDef() appears in
@@ -24,6 +27,7 @@ MinimalAction and can cause spurious ActOnDeclarator() calls if we always
 call through. Therefore we don't and instead just call explicitly implemented
 functions in MinimalAction where required.
 */
+
 class InfernoAction : public clang::MinimalAction
 {
 public:
@@ -32,50 +36,93 @@ public:
     }
  
  private:   
-    void PrintType( const clang::DeclSpec &DS )
+    Type *ConvertType( const clang::DeclSpec &DS )
     {
         switch( DS.getTypeSpecType() )
         {
             case clang::DeclSpec::TST_int:
-                printf("int ");
+                return new Int();
                 break;
             case clang::DeclSpec::TST_char:
-                printf("char ");
+                return new Char();
                 break;
             default:
-                printf("Type<%d> ", DS.getTypeSpecType() );
+                assert(0);
                 break;
         }
     }
     
-    virtual DeclTy *ActOnDeclarator(clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup)
+    Identifier *ConvertIdentifier( const clang::IdentifierInfo *ID )
     {
-        PrintType( D.getDeclSpec() );
-        printf("%s;\n", D.getIdentifier()->getName() );
-        
+        Identifier *i = new Identifier();
+        i->assign( ID->getName() );
+        return i;
+    }
+    
+    virtual DeclTy *ActOnDeclarator( clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup )
+    {
+        RCPtr<VariableDeclarator> p = new VariableDeclarator;
+        curseq->push_back(p);
+        p->storage_class = VariableDeclarator::STATIC;
+        p->type = ConvertType( D.getDeclSpec() );
+        p->identifier = ConvertIdentifier( D.getIdentifier() );        
+        //printf("cs %p\n", &*curseq );
+        //printf("id %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
         return MinimalAction::ActOnDeclarator( S, D, LastInGroup );     
     }
     
     virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D) 
     {
-        PrintType( D.getDeclSpec() );
-        printf("%s()\n", D.getIdentifier()->getName() );
-        printf("{\n");
-       
+        RCPtr<FunctionDeclarator> p = new FunctionDeclarator;
+        curseq->push_back(p);
+        p->return_type = ConvertType( D.getDeclSpec() );
+        p->body = new Sequence<ProgramElement>;
+        p->identifier = ConvertIdentifier( D.getIdentifier() );  
+
+        curseq = p->body;
         return MinimalAction::ActOnDeclarator( FnBodyScope, D, NULL );     
     }
     
     virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtTy *Body) 
     {
-        printf("}\n");
-        
+        curseq = program;
         return MinimalAction::ActOnFinishFunctionBody( Decl, Body );
     }
 
 };
 
+
+std::string RenderType( RCPtr<const Type> type )
+{
+    if( DynamicCast< const Int >(type) )
+        return "int";
+    else if( DynamicCast< const Char >(type) )
+        return "char";
+}
+
+std::string Render( RCPtr< Sequence<ProgramElement> > program )
+{
+    std::string s;
+    for( int i=0; i<program->size(); i++ )
+    {
+        RCPtr<ProgramElement> pe = (*program)[i];
+        if( RCPtr<VariableDeclarator> vd = DynamicCast< VariableDeclarator >(pe) )
+        {
+            //printf("id %s %p %p\n", vd->identifier->c_str(), &*vd->identifier, &*vd );
+            s += RenderType(vd->type)+" "+(*vd->identifier)+";\n";
+        }
+        else if( RCPtr<FunctionDeclarator> fd = DynamicCast< FunctionDeclarator >(pe) )
+        {
+            s += RenderType(fd->return_type)+" "+(*fd->identifier)+"()\n{\n" + Render(fd->body) + "}\n";
+        }
+    }
+    return s;
+}
+
 int main()
 {
+    RCTarget::Start();
+
     clang::FileManager fm; 
     clang::TextDiagnosticPrinter diag_printer;
     clang::Diagnostic diags( &diag_printer ); 
@@ -103,5 +150,13 @@ int main()
     
     clang::Parser parser( pp, actions );
     
+    program = new Program();  
+    curseq = program;
     parser.ParseTranslationUnit();
+    assert( &*curseq==&*program );
+    
+    std::string ss = Render( program );
+    printf( "%s", ss.c_str() );   
+        
+    RCTarget::Finished();
 }

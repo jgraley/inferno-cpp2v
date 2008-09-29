@@ -20,6 +20,19 @@ public:
     {
     }  
 
+    inline OwnerPtr &operator =( const OwnerPtr<TARGET> &o )
+    {
+        this->RCPtr<TARGET>::operator=( *(RCPtr<TARGET> *)&o );
+        return *this;
+    }       
+
+    template<typename OTHER>
+    inline OwnerPtr &operator =( const OTHER &o )
+    {
+        this->RCPtr<TARGET>::operator=(o);
+        return *this;
+    }       
+
 private:    
     inline OwnerPtr() // not allowed: we always need the node
     {
