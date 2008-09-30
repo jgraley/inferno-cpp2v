@@ -7,13 +7,15 @@
 
 int main( int argc, char *argv[] )
 {
-    RCTarget::Start();
+    // detects static RCTarget objects (which are bad, because we might do: delete &static_variable_oh_noes_one_one_one)
+    RCTarget::Start(); 
 
-    read_args( argc, argv );
+    // Check the command line arguments 
+    ReadArgs::Read( argc, argv );
 
     RCPtr<Program> program = new Program;  
 
-    Parse p(infile);    
+    Parse p(ReadArgs::infile);    
     Render r;
     
     Pass *parse = &p;
@@ -21,5 +23,6 @@ int main( int argc, char *argv[] )
     (*parse)( program );
     (*render)( program );
         
-    RCTarget::Finished();
+    // cancel asserts and automatic indirection through RCPtr
+    RCTarget::Finished(); 
 }
