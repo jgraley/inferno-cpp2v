@@ -68,7 +68,8 @@ public:
         p->identifier = ConvertIdentifier( D.getIdentifier() );        
         //printf("cs %p\n", &*curseq );
         //printf("id %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
-        return MinimalAction::ActOnDeclarator( S, D, LastInGroup );     
+        (void)MinimalAction::ActOnDeclarator( S, D, LastInGroup );     
+        return 0;
     }
     
     virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D) 
@@ -80,13 +81,13 @@ public:
         p->identifier = ConvertIdentifier( D.getIdentifier() );  
 
         curseq = p->body;
-        return MinimalAction::ActOnDeclarator( FnBodyScope, D, NULL );     
+        return 0;     
     }
     
     virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtTy *Body) 
     {
         curseq = program;
-        return MinimalAction::ActOnFinishFunctionBody( Decl, Body );
+        return 0;
     }
 
 };
@@ -119,9 +120,23 @@ std::string Render( RCPtr< Sequence<ProgramElement> > program )
     return s;
 }
 
-int main()
+int main( int argc, char *argv[] )
 {
     RCTarget::Start();
+
+    std::string infile;
+    int i=1;
+    while( i<argc )
+    {
+        if( argv[i]==std::string("-i") && argc>i+1 )
+            infile = argv[++i];
+        else 
+        {
+            fprintf(stderr, "Usage: inferno -i <infile>\n");
+            exit(1);
+        }
+        i++;    
+    }
 
     clang::FileManager fm; 
     clang::TextDiagnosticPrinter diag_printer;
@@ -134,7 +149,6 @@ int main()
     
     clang::Preprocessor pp( diags, opts, *ptarget, sm, headers );
     
-    std::string infile="in.c";
     const clang::FileEntry *file = fm.getFile(infile);
     if (file) 
         sm.createMainFileID(file, clang::SourceLocation());
