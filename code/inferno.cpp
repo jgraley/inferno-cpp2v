@@ -11,15 +11,15 @@ int main( int argc, char *argv[] )
 
     read_args( argc, argv );
 
-    RCPtr<Program> program = new Program();  
+    RCPtr<Program> program = new Program;  
 
-    Parse p;    
-    p( program, infile );
-    
+    Parse p(infile);    
     Render r;
-    std::string ss = r( program );
     
-    printf( "%s", ss.c_str() );   
+    Pass *parse = &p;
+    Pass *render = &r;
+    (*parse)( program );
+    (*render)( program );
         
     RCTarget::Finished();
 }
