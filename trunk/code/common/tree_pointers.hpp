@@ -1,3 +1,5 @@
+#error depracated
+
 #ifndef TREE_POINTERS_HPP
 #define TREE_POINTERS_HPP
 
