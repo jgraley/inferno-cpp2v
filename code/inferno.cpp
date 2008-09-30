@@ -12,7 +12,8 @@
 #include "clang/Parse/DeclSpec.h"
 #include "clang/Driver/TextDiagnosticPrinter.h"
 
-#include "tree.hpp"
+#include "tree/tree.hpp"
+#include "common/refcount.hpp"
 
 #define INFERNO_TRIPLE "arm-linux" 
 
@@ -170,7 +171,7 @@ private:
     }
 };
 
-static std::string infile;
+std::string infile;
 void read_args( int argc, char *argv[] )
 {
     int i=1;

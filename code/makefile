@@ -11,20 +11,21 @@ MAKE ?= make
 
 # Some stuff that is not under revision control goes into the same directory
 # that contains the SVN root dir (inferno-synth/). This is the path to it.
-OUTSIDE_SVN = ../../..
+OUTSIDE_SVN := ../../..
 
 # Including and linking with the LLVM and Clang
-LLVM = $(OUTSIDE_SVN)/llvm-2.3
-CLANG = $(LLVM)/tools/clang
-INCLUDE_PATH = -I$(LLVM)/include -I$(CLANG)/include
-LLVM_OPTIONS = -D__STDC_LIMIT_MACROS
-LLVM_LIBS = $(LLVM)/$(BUILD)/lib/libLLVM*.a
+LLVM := $(OUTSIDE_SVN)/llvm-2.3
+CLANG := $(LLVM)/tools/clang
+INCLUDE_PATH := -I$(LLVM)/include -I$(CLANG)/include
+LLVM_OPTIONS := -D__STDC_LIMIT_MACROS
+LLVM_LIBS := $(LLVM)/$(BUILD)/lib/libLLVM*.a
 # JSG added basic at the end since other libs depend on it. Should really specify them all in order TODO
-CLANG_LIBS = $(LLVM)/$(BUILD)/lib/libclang*.a $(LLVM)/$(BUILD)/lib/libclangBasic.a 
+CLANG_LIBS := $(LLVM)/$(BUILD)/lib/libclang*.a $(LLVM)/$(BUILD)/lib/libclangBasic.a 
 
-STANDARD_LIBS = -lstdc++
-
-INFERNO_SOURCES = inferno.cpp tree.cpp refcount.cpp
+# For inferno
+STANDARD_LIBS := -lstdc++
+INCLUDE_PATH := $(INCLUDE_PATH) -I.
+INFERNO_SOURCES := inferno.cpp tree/tree.cpp common/refcount.cpp
 
 all : inferno.cpp
 	$(CC) $(INCLUDE_PATH) $(LLVM_OPTIONS) $(INFERNO_SOURCES) $(CLANG_LIBS) $(LLVM_LIBS) $(STANDARD_LIBS) -ggdb -o inferno
