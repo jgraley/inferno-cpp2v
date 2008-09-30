@@ -2,9 +2,9 @@
 #include "read_args.hpp"
 #include <string>
 
-std::string infile;
+std::string ReadArgs::infile;
 
-void read_args( int argc, char *argv[] )
+void ReadArgs::Read( int argc, char *argv[] )
 {
     int i=1;
     while( i<argc )
