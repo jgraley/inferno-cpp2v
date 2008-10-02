@@ -4,14 +4,18 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <vector>
 
-template<typename TARGET>
+template<class TARGET>
 class RCPtr;
 
 
-// Reverse template
 class RCTarget
 {
+// Reverse template for the target of RCPtr. Use eg
+// class MyObject : public RCPtr<MyObject>
+
+
 public:
     inline RCTarget() :
         ref_count(0),
@@ -28,7 +32,7 @@ public:
     }
 
 public:
-//private: friend class RCPtr<typename>;
+//private: friend class RCPtr<class>; // not private due to problems friending across template instantations
     unsigned ref_count;
     static void Finished() 
     {
@@ -39,7 +43,7 @@ public:
         started = true;
     } 
     
-//private:
+//private:// not private due to problems friending across template instantations
     static bool started;
     static bool finished;
     
@@ -48,7 +52,7 @@ private:
 };
 
 
-template<typename TARGET>
+template<class TARGET>
 class RCPtr
 {
 public:
@@ -69,14 +73,14 @@ public:
         Inc();
     }
 
-    template<typename OTHER_TARGET>
+    template<class OTHER_TARGET>
     inline RCPtr( const RCPtr<OTHER_TARGET> &o )
     { 
         ptr = o.ptr;
         Inc();
     }
   
-    template<typename OTHER_TARGET>
+    template<class OTHER_TARGET>
     inline RCPtr &operator =( const RCPtr<OTHER_TARGET> &o )
     {
         o.Inc(); 
@@ -93,7 +97,7 @@ public:
         return *this;
     }
     
-    template<typename OTHER_TARGET>
+    template<class OTHER_TARGET>
     void ff( const RCPtr<OTHER_TARGET> &o )
     {
     }
@@ -132,7 +136,7 @@ public:
         return *ptr;
     }
 
-    TARGET *ptr;
+    TARGET *ptr; // not private due to problems friending across template instantations
     
     inline void Inc() const 
     {
@@ -163,5 +167,41 @@ RCPtr<CANDIDATE> DynamicCast( RCPtr<BASE> p )
 {
     return RCPtr<CANDIDATE>( dynamic_cast<CANDIDATE *>(p.ptr) );
 }
+
+class RCHold
+{
+//
+// This class converts between RCPtr and void * pointers and ensures that target
+// objects whoose RCPtr has been converted to void * remain in existance even if
+// the number of RCPtrs to it falls to zero.
+//
+// Target objects will be held in existance until the corresponding RCHold object
+// is destructed, after which only target objects with RCPtr refs will remain.
+//
+// For a set of raw pointers, create an RCHold object whose lifetime is a minimal
+// superset of the union of the raw pointers' lifetimes. Do all assignment to/from
+// those raw pointers using ToRaw() and FromRaw(). Note: always assign the return 
+// of new/malloc to an RCPtr and then convert to a raw ptr using ToRaw() if required,
+// otherwise the required extra ref will not be created.
+public:
+    template<class TARGET>
+    void *ToRaw( RCPtr<TARGET> p )
+    {
+        RCPtr<RCTarget> bp(p.ptr); // Genericise the target since we can only store one type
+        hold_list.push_back( bp );
+        return reinterpret_cast<void *>( p.ptr );
+    }
+    
+    template<class TARGET>
+    RCPtr<TARGET> FromRaw( void *p )
+    {
+        return RCPtr<TARGET>( reinterpret_cast<TARGET *>( p ) );
+    }
+    
+private:
+    // When this object is destructed, all the members of the vector will be 
+    // destructed and targets that then have no refs will be destructed.
+    std::vector< RCPtr< RCTarget > > hold_list;  // TODO does this need to be a vector?
+};
 
 #endif

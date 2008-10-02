@@ -68,4 +68,22 @@ struct Char : public Type
 {
 };
 
+struct Statement : public ProgramElement
+{
+};
+
+struct Expression : public Node
+{
+};
+
+struct Return : public Statement
+{
+    RCPtr<Expression> return_value;
+};
+
+struct NumericConstant : public Expression
+{
+    int value;
+};
+
 #endif
