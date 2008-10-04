@@ -12,10 +12,6 @@ class RCPtr;
 
 class RCTarget
 {
-// Reverse template for the target of RCPtr. Use eg
-// class MyObject : public RCPtr<MyObject>
-
-
 public:
     inline RCTarget() :
         ref_count(0),
@@ -183,19 +179,30 @@ class RCHold
 // those raw pointers using ToRaw() and FromRaw(). Note: always assign the return 
 // of new/malloc to an RCPtr and then convert to a raw ptr using ToRaw() if required,
 // otherwise the required extra ref will not be created.
+#define CHECK_POINTERS
 public:
     template<class TARGET>
     void *ToRaw( RCPtr<TARGET> p )
     {
         RCPtr<RCTarget> bp(p.ptr); // Genericise the target since we can only store one type
         hold_list.push_back( bp );
-        return reinterpret_cast<void *>( p.ptr );
+        void *vp = reinterpret_cast<void *>( p.ptr );
+#ifdef CHECK_POINTERS
+        assert( ((unsigned)vp & 3) == 0 );
+        vp = (void *)((unsigned)vp | 3);
+#endif        
+        return vp;
     }
     
     template<class TARGET>
     RCPtr<TARGET> FromRaw( void *p )
     {
-        return RCPtr<TARGET>( reinterpret_cast<TARGET *>( p ) );
+        void *vp = p;
+#ifdef CHECK_POINTERS
+        assert( ((unsigned)vp & 3) == 3 );
+        vp = (void *)((unsigned)vp & ~3);
+#endif             
+        return RCPtr<TARGET>( reinterpret_cast<TARGET *>( vp ) );
     }
     
 private:
