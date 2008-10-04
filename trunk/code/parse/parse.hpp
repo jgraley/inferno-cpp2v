@@ -17,6 +17,7 @@
 #include "tree/tree.hpp"
 #include "common/refcount.hpp"
 #include "common/pass.hpp"
+#include "common/trace.hpp"
 
 #include "inferno_minimal_action.hpp"
 
@@ -84,7 +85,7 @@ private:
         RCPtr< Sequence<ProgramElement> > curseq;
         RCHold hold;
     
-        Type *ConvertType( const clang::DeclSpec &DS )
+        Type *CreateTypeNode( const clang::DeclSpec &DS )
         {
             switch( DS.getTypeSpecType() )
             {
@@ -103,11 +104,11 @@ private:
             }
         }
         
-        RCPtr<Identifier> ConvertIdentifier( clang::IdentifierInfo *ID )
+        RCPtr<Identifier> CreateIdenifierNode( clang::IdentifierInfo *ID )
         { 
             RCPtr<Identifier> i = new Identifier();
             i->assign( ID->getName() );
-            printf("ci %s %p %p\n", ID->getName(), i.ptr, ID );            
+            TRACE("ci %s %p %p\n", ID->getName(), i.ptr, ID );            
             return i;
         }
         
@@ -116,9 +117,9 @@ private:
             RCPtr<VariableDeclarator> p = new VariableDeclarator;
             curseq->push_back(p);
             p->storage_class = VariableDeclarator::STATIC;
-            p->type = ConvertType( D.getDeclSpec() );
-            p->identifier = ConvertIdentifier( D.getIdentifier() );        
-            printf("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
+            p->type = CreateTypeNode( D.getDeclSpec() );
+            p->identifier = CreateIdenifierNode( D.getIdentifier() );        
+            TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
             RCPtr<Identifier> i = p->identifier;
             (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, i );     
             return hold.ToRaw( p );
@@ -134,9 +135,9 @@ private:
         {
             RCPtr<FunctionDeclarator> p = new FunctionDeclarator;
             curseq->push_back(p);
-            p->return_type = ConvertType( D.getDeclSpec() );
+            p->return_type = CreateTypeNode( D.getDeclSpec() );
             p->body = new Sequence<ProgramElement>;
-            p->identifier = ConvertIdentifier( D.getIdentifier() );  
+            p->identifier = CreateIdenifierNode( D.getIdentifier() );  
     
             curseq = p->body;
             return hold.ToRaw( p );     
@@ -163,16 +164,15 @@ private:
                                                 bool HasTrailingLParen ) 
         {
             assert( !HasTrailingLParen ); // not done yet
-            printf("aoie %s\n", II.getName() );
-            printf("aoie2 %p\n", &II );
+            TRACE("aoie %s\n", II.getName() );
+            TRACE("aoie2 %p\n", &II );
             RCPtr<IdentifierExpression> ie = new IdentifierExpression;
-            RCTarget *rcp = (RCTarget *)(clang::InfernoMinimalAction::GetCurrentIdentifierRCPtr( II ));
-            printf("aoie3 %p\n", rcp );
+            RCPtr<RCTarget> rcp = clang::InfernoMinimalAction::GetCurrentIdentifierRCPtr( II );
             assert(rcp && "no RCPtr was stored with this identifier");
-            ie->identifier = dynamic_cast<Identifier *>(rcp);
-            assert(ie->identifier && "The RCPtr stored with this identifier was not pointing to an Identifier");
+            ie->identifier = RCPtr<Identifier>::Specialise(rcp);
+            assert(ie->identifier && "The RCPtr stored with this identifier was not pointing to an Identifier node");
             RCPtr<Expression> e = ie;
-            printf("aoie4 %p\n", e.ptr);
+            TRACE("aoie4 %p\n", e.ptr);
             return ExprResult( hold.ToRaw( e ) );            
         }                                                
     };

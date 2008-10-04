@@ -153,16 +153,17 @@ public:
                 delete ptr;
         }
     }
+
+    // A version of dynamic_cast for RCPtr. Conveniently, you only need to
+    // explicitly specify CANDIDATE, so the syntax is identical to 
+    // dynamic_cast.
+    template<class BASE >
+    static RCPtr Specialise( RCPtr<BASE> p )
+    {
+        return RCPtr<TARGET>( dynamic_cast<TARGET *>(p.ptr) );
+    }
 };
 
-// A version of dynamic_cast for RCPtr. Conveniently, you only need to
-// explicitly specify CANDIDATE, so the syntax is identical to 
-// dynamic_cast.
-template< class CANDIDATE, class BASE >
-RCPtr<CANDIDATE> DynamicCast( RCPtr<BASE> p )
-{
-    return RCPtr<CANDIDATE>( dynamic_cast<CANDIDATE *>(p.ptr) );
-}
 
 class RCHold
 {
