@@ -1,6 +1,9 @@
 #ifndef PARSE_HPP
 #define PARSE_HPP
 
+#include "llvm/ADT/APInt.h"
+#include "llvm/ADT/SmallString.h"
+
 #include "clang/Basic/FileManager.h"
 #include "clang/Basic/Diagnostic.h"
 #include "clang/Basic/LangOptions.h"
@@ -13,6 +16,7 @@
 #include "clang/Parse/Parser.h"
 #include "clang/Parse/DeclSpec.h"
 #include "clang/Driver/TextDiagnosticPrinter.h"
+#include "clang/Lex/LiteralSupport.h"
 
 #include "tree/tree.hpp"
 #include "common/refcount.hpp"
@@ -55,7 +59,7 @@ public:
         pp.EnterMainSourceFile();
     
         clang::IdentifierTable it( opts );                 
-        InfernoAction actions( program, it );                 
+        InfernoAction actions( program, it, pp );                 
         
         clang::Parser parser( pp, actions );
         
@@ -68,8 +72,9 @@ private:
     class InfernoAction : public clang::InfernoMinimalAction
     {
     public:
-        InfernoAction(RCPtr<Program> p, clang::IdentifierTable &IT) : 
+        InfernoAction(RCPtr<Program> p, clang::IdentifierTable &IT, clang::Preprocessor &pp) : 
             InfernoMinimalAction(IT),
+            preprocessor(pp),
             program(p),
             curseq(p)
         {
@@ -81,6 +86,7 @@ private:
         }
      
      private:   
+        clang::Preprocessor &preprocessor;
         RCPtr<Program> program;
         RCPtr< Sequence<ProgramElement> > curseq;
         RCHold hold;
@@ -114,6 +120,13 @@ private:
         
         virtual DeclTy *ActOnDeclarator( clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup )
         {
+            // TODO the spurious char __builtin_va_list; line comes from the target info.
+            // Create an inferno target info customised for Inferno that doesn't do this.
+            //TRACE("\"%s\"\n", D.getIdentifier()->getName().c_str() ); 
+            if( strcmp(D.getIdentifier()->getName(), "__builtin_va_list")==0 )
+            {            
+                return 0;
+            }
             RCPtr<VariableDeclarator> p = new VariableDeclarator;
             curseq->push_back(p);
             p->storage_class = VariableDeclarator::STATIC;
@@ -155,7 +168,17 @@ private:
             RCPtr<ExpressionStatement> es = new ExpressionStatement;
             es->expression = e;
             curseq->push_back( es );
-            return StmtResult(Expr);
+            return hold.ToRaw( es );
+        }
+
+        virtual StmtResult ActOnReturnStmt( clang::SourceLocation ReturnLoc,
+                                            ExprTy *RetValExp ) 
+        {           
+            RCPtr<Expression> e = hold.FromRaw<Expression>(RetValExp);
+            RCPtr<Return> r = new Return;
+            r->return_value = e;
+            curseq->push_back( r );
+            return hold.ToRaw( r );
         }
 
         virtual ExprResult ActOnIdentifierExpr( clang::Scope *S, 
@@ -174,7 +197,41 @@ private:
             RCPtr<Expression> e = ie;
             TRACE("aoie4 %p\n", e.ptr);
             return ExprResult( hold.ToRaw( e ) );            
-        }                                                
+        }                                   
+        
+        llvm::APInt EvaluateNumericConstant(const clang::Token &tok)
+        {
+            llvm::SmallString<512> int_buffer;
+            int_buffer.resize(tok.getLength());
+            const char *this_tok_begin = &int_buffer[0];
+          
+            // Get the spelling of the token, which eliminates trigraphs, etc.
+            unsigned actual_length = preprocessor.getSpelling(tok, this_tok_begin);
+            clang::NumericLiteralParser literal(this_tok_begin, this_tok_begin+actual_length, 
+                                                tok.getLocation(), preprocessor);
+            assert(!literal.hadError);
+
+            if (literal.isIntegerLiteral()) 
+            {
+                // Get the value in the widest-possible width.
+                llvm::APInt rv(64, 0);
+               
+                bool err = literal.GetIntegerValue(rv);
+                
+                assert( !err );
+                return rv;
+            }
+            assert(!"only ints supported");
+        }
+        
+        virtual ExprResult ActOnNumericConstant(const clang::Token &tok) 
+        { 
+            RCPtr<NumericConstant> nc = new NumericConstant;
+            *(llvm::APInt *)nc = EvaluateNumericConstant( tok );
+            return ExprResult( hold.ToRaw( nc ) );            
+        }
+  
+                     
     };
 };  
 

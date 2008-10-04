@@ -160,6 +160,7 @@ public:
     template<class BASE >
     static RCPtr Specialise( RCPtr<BASE> p )
     {
+        assert( p && "Input to Specialise<>() must be non-NULL"); // since we return NULL when the cast isn't possible
         return RCPtr<TARGET>( dynamic_cast<TARGET *>(p.ptr) );
     }
 };
@@ -200,6 +201,7 @@ public:
     {
         void *vp = p;
 #ifdef CHECK_POINTERS
+        assert( p != 0 && "Raw pointer was set to 0 or not set at all");
         assert( ((unsigned)vp & 3) == 3 );
         vp = (void *)((unsigned)vp & ~3);
 #endif             

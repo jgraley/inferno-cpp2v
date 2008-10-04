@@ -42,6 +42,11 @@ private:
             TRACE("%p\n", &*ie->identifier);
             return (*ie->identifier);
         }
+        else if( RCPtr<NumericConstant> nc = RCPtr< NumericConstant >::Specialise(expression) )
+        {
+           // TRACE("%p\n", &*ie->identifier);
+            return (nc->toString(10, true));
+        }
         else
             return ERROR_UNSUPPORTED(expression);
         TRACE("ok\n");
@@ -54,11 +59,13 @@ private:
         {
             RCPtr<ProgramElement> pe = (*spe)[i];
             if( RCPtr<VariableDeclarator> vd = RCPtr< VariableDeclarator >::Specialise(pe) )
-                s += RenderType(vd->type)+" "+(*vd->identifier)+";\n";
+                s += RenderType(vd->type) + " " + (*vd->identifier) + ";\n";
             else if( RCPtr<FunctionDeclarator> fd = RCPtr< FunctionDeclarator >::Specialise(pe) )
-                s += RenderType(fd->return_type)+" "+(*fd->identifier)+"()\n{\n" + RenderSPE(fd->body) + "}\n";
+                s += RenderType(fd->return_type) + " " + (*fd->identifier) + "()\n{\n" + RenderSPE(fd->body) + "}\n";
             else if( RCPtr<ExpressionStatement> es = RCPtr< ExpressionStatement >::Specialise(pe) )
                 s += RenderExpression(es->expression) + ";\n";
+            else if( RCPtr<Return> es = RCPtr<Return>::Specialise(pe) )
+                s += "return " + RenderExpression(es->return_value) + ";\n";
             else
                 s += ERROR_UNSUPPORTED(pe);
         }
