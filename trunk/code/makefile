@@ -25,7 +25,7 @@ CLANG_LIBS := $(LLVM)/$(BUILD)/lib/libclang*.a $(LLVM)/$(BUILD)/lib/libclangBasi
 # For inferno
 STANDARD_LIBS := -lstdc++
 INCLUDE_PATH := $(INCLUDE_PATH) -I.
-INFERNO_SOURCES := inferno.cpp tree/tree.cpp common/refcount.cpp common/read_args.cpp
+INFERNO_SOURCES := inferno.cpp tree/tree.cpp common/refcount.cpp common/read_args.cpp parse/inferno_minimal_action.cpp
 
 all : inferno.cpp
 	$(CC) $(INCLUDE_PATH) $(LLVM_OPTIONS) $(INFERNO_SOURCES) $(CLANG_LIBS) $(LLVM_LIBS) $(STANDARD_LIBS) -ggdb -o inferno

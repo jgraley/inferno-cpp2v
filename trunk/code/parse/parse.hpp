@@ -18,6 +18,8 @@
 #include "common/refcount.hpp"
 #include "common/pass.hpp"
 
+#include "inferno_minimal_action.hpp"
+
 #define INFERNO_TRIPLE "arm-linux" 
 
 class Parse : public Pass
@@ -62,11 +64,11 @@ public:
 private:
     std::string infile;
     
-    class InfernoAction : public clang::MinimalAction
+    class InfernoAction : public clang::InfernoMinimalAction
     {
     public:
         InfernoAction(RCPtr<Program> p, clang::IdentifierTable &IT) : 
-            MinimalAction(IT),
+            InfernoMinimalAction(IT),
             program(p),
             curseq(p)
         {
@@ -80,6 +82,7 @@ private:
      private:   
         RCPtr<Program> program;
         RCPtr< Sequence<ProgramElement> > curseq;
+        RCHold hold;
     
         Type *ConvertType( const clang::DeclSpec &DS )
         {
@@ -91,16 +94,20 @@ private:
                 case clang::DeclSpec::TST_char:
                     return new Char();
                     break;
+                case clang::DeclSpec::TST_void:
+                    return new Void();
+                    break;
                 default:
                     assert(0);
                     break;
             }
         }
         
-        Identifier *ConvertIdentifier( const clang::IdentifierInfo *ID )
+        RCPtr<Identifier> ConvertIdentifier( clang::IdentifierInfo *ID )
         { 
-            Identifier *i = new Identifier();
+            RCPtr<Identifier> i = new Identifier();
             i->assign( ID->getName() );
+            printf("ci %s %p %p\n", ID->getName(), i.ptr, ID );            
             return i;
         }
         
@@ -111,17 +118,17 @@ private:
             p->storage_class = VariableDeclarator::STATIC;
             p->type = ConvertType( D.getDeclSpec() );
             p->identifier = ConvertIdentifier( D.getIdentifier() );        
-            //printf("cs %p\n", &*curseq );
-            //printf("id %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
-            (void)MinimalAction::ActOnDeclarator( S, D, LastInGroup );     
-            return 0;
+            printf("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
+            RCPtr<Identifier> i = p->identifier;
+            (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, i );     
+            return hold.ToRaw( p );
         }
         
         /*
         Note: the default implementation of ActOnStartOfFunctionDef() appears in
-        MinimalAction and can cause spurious ActOnDeclarator() calls if we always
+        InfernoMinimalAction and can cause spurious ActOnDeclarator() calls if we always
         call through. Therefore we don't and instead just call explicitly implemented
-        functions in MinimalAction where required.
+        functions in InfernoMinimalAction where required.
         */
         virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D) 
         {
@@ -132,14 +139,42 @@ private:
             p->identifier = ConvertIdentifier( D.getIdentifier() );  
     
             curseq = p->body;
-            return 0;     
+            return hold.ToRaw( p );     
         }
         
         virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtTy *Body) 
         {
             curseq = program;
-            return 0;
+            return Decl;
         }    
+        
+        virtual StmtResult ActOnExprStmt(ExprTy *Expr) 
+        {
+            RCPtr<Expression> e = hold.FromRaw<Expression>(Expr);
+            RCPtr<ExpressionStatement> es = new ExpressionStatement;
+            es->expression = e;
+            curseq->push_back( es );
+            return StmtResult(Expr);
+        }
+
+        virtual ExprResult ActOnIdentifierExpr( clang::Scope *S, 
+                                                clang::SourceLocation Loc,
+                                                clang::IdentifierInfo &II,
+                                                bool HasTrailingLParen ) 
+        {
+            assert( !HasTrailingLParen ); // not done yet
+            printf("aoie %s\n", II.getName() );
+            printf("aoie2 %p\n", &II );
+            RCPtr<IdentifierExpression> ie = new IdentifierExpression;
+            RCTarget *rcp = (RCTarget *)(clang::InfernoMinimalAction::GetCurrentIdentifierRCPtr( II ));
+            printf("aoie3 %p\n", rcp );
+            assert(rcp && "no RCPtr was stored with this identifier");
+            ie->identifier = dynamic_cast<Identifier *>(rcp);
+            assert(ie->identifier && "The RCPtr stored with this identifier was not pointing to an Identifier");
+            RCPtr<Expression> e = ie;
+            printf("aoie4 %p\n", e.ptr);
+            return ExprResult( hold.ToRaw( e ) );            
+        }                                                
     };
 };  
 

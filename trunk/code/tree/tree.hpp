@@ -68,12 +68,26 @@ struct Char : public Type
 {
 };
 
-struct Statement : public ProgramElement
+struct Void : public Type
 {
 };
 
 struct Expression : public Node
 {
+};
+
+struct IdentifierExpression : public Expression
+{
+    RCPtr<Identifier> identifier;
+};
+
+struct Statement : public ProgramElement
+{
+};
+
+struct ExpressionStatement : public Statement
+{
+    RCPtr<Expression> expression;
 };
 
 struct Return : public Statement
