@@ -3,6 +3,8 @@
 
 #include "common/refcount.hpp"
 #include "clang/Basic/SourceLocation.h"
+#include "llvm/ADT/APInt.h"
+
 #include <string>
 #include <vector>
 
@@ -95,9 +97,9 @@ struct Return : public Statement
     RCPtr<Expression> return_value;
 };
 
-struct NumericConstant : public Expression
+struct NumericConstant : public Expression,
+                         public llvm::APInt
 {
-    int value;
 };
 
 #endif
