@@ -9,6 +9,11 @@
 #include <string>
 #include <vector>
 
+template<typename ELEMENT>
+struct Sequence : public std::vector< RCPtr<ELEMENT> >
+{
+};                   
+
 struct Node : public RCTarget,
               public clang::SourceLocation
 {                 
@@ -32,9 +37,8 @@ struct Declarator : public ProgramElement
     RCPtr<Identifier> identifier;
 };
 
-template<typename ELEMENT>
-struct Sequence : public Node,
-                  public std::vector< RCPtr<ELEMENT> >
+struct Scope : public Node,
+               public Sequence<ProgramElement>
 {
 };                   
 
@@ -56,11 +60,11 @@ struct VariableDeclarator : public Declarator
 struct FunctionDeclarator : public Declarator
 {
     RCPtr<Type> return_type;
-    std::vector< RCPtr<VariableDeclarator> > params; // in C++ these are all AUTO
-    RCPtr< Sequence<ProgramElement> > body;
+    Sequence<VariableDeclarator> parameters;
+    RCPtr<Scope> body;
 };
 
-struct Program : public Sequence<ProgramElement>
+struct Program : public Scope
 {
 };
 
@@ -87,7 +91,7 @@ struct IdentifierExpression : public Expression
 
 struct Operator : public Expression
 {
-    std::vector< RCPtr<Expression> > operands;
+    Sequence<Expression> operands;
     clang::tok::TokenKind kind;
 };
 

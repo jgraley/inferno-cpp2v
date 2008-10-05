@@ -89,7 +89,7 @@ private:
      private:   
         clang::Preprocessor &preprocessor;
         RCPtr<Program> program;
-        RCPtr< Sequence<ProgramElement> > curseq;
+        RCPtr<Scope> curseq;
         RCHold hold;
     
         Type *CreateTypeNode( const clang::DeclSpec &DS )
@@ -165,18 +165,14 @@ private:
             RCPtr<FunctionDeclarator> p = new FunctionDeclarator;
             curseq->push_back(p);
             p->return_type = CreateTypeNode( D.getDeclSpec() );
-            p->body = new Sequence<ProgramElement>;
+            p->body = new Scope;
             p->identifier = CreateIdenifierNode( D.getIdentifier() );  
             clang::DeclaratorChunk::FunctionTypeInfo &pti = D.getTypeObject(0).Fun; // TODO deal with compounded types
             for( int i=0; i<pti.NumArgs; i++ )
             {
                 RCPtr<VariableDeclarator> vd = new VariableDeclarator;
-                //vd->storage_class = VariableDeclarator::AUTO;
-                //printf("gtgtg\n");
-                //assert(pti.ArgInfo[i].Param);
                 vd = hold.FromRaw<VariableDeclarator>( pti.ArgInfo[i].Param );
-                //vd->identifier = CreateIdenifierNode( pti.ArgInfo[i].Ident );
-                p->params.push_back( vd );
+                p->parameters.push_back( vd );
             }
             curseq = p->body;
             return hold.ToRaw( p );     
@@ -296,8 +292,9 @@ private:
             return hold.ToRaw( o );            
         }                     
 
+        // Not sure if this one has been tested!!
         virtual TypeResult ActOnTypeName(clang::Scope *S, clang::Declarator &D) 
-        {printf("lkjdfas\n");
+        {
             RCPtr<Type> t = CreateTypeNode( D.getDeclSpec() );
             return hold.ToRaw( t );
         }

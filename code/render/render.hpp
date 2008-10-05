@@ -24,7 +24,7 @@ public:
     
     void operator()( RCPtr<Program> program )       
     {
-        std::string s = RenderVector( *program, ";\n", true );
+        std::string s = RenderSequence( *program, ";\n", true );
         puts( s.c_str() ); // TODO allow a file to be specified in the constructor
     }
 
@@ -82,21 +82,21 @@ private:
     }
     
     template< class ELEMENT >
-    std::string RenderVector(  std::vector<ELEMENT> spe, std::string separator, bool seperate_last )
+    std::string RenderSequence( Sequence<ELEMENT> spe, std::string separator, bool seperate_last )
     {
         std::string s;
         for( int i=0; i<spe.size(); i++ )
         {
             std::string sep = (seperate_last || i+1<spe.size()) ? separator : "";
-            RCPtr<ProgramElement> pe = spe[i];            
+            RCPtr<ELEMENT> pe = spe[i];            
             if( RCPtr<VariableDeclarator> vd = RCPtr< VariableDeclarator >::Specialise(pe) )
                 s += RenderType(vd->type) + " " + 
                      (*vd->identifier) + sep;
             else if( RCPtr<FunctionDeclarator> fd = RCPtr< FunctionDeclarator >::Specialise(pe) )
                 s += RenderType(fd->return_type) + " " + 
                      (*fd->identifier) + "(" + 
-                     RenderVector(fd->params, ", ", false) + ")\n{\n" + 
-                     RenderVector(*(fd->body), ";\n", true) + "}\n";
+                     RenderSequence(fd->parameters, ", ", false) + ")\n{\n" + 
+                     RenderSequence(*(fd->body), ";\n", true) + "}\n";
             else if( RCPtr<ExpressionStatement> es = RCPtr< ExpressionStatement >::Specialise(pe) )
                 s += RenderExpression(es->expression) + sep;
             else if( RCPtr<Return> es = RCPtr<Return>::Specialise(pe) )
