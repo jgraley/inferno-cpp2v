@@ -7,6 +7,7 @@
 #include "clang/Basic/FileManager.h"
 #include "clang/Basic/Diagnostic.h"
 #include "clang/Basic/LangOptions.h"
+#include "clang/Basic/TokenKinds.h"
 #include "clang/Basic/TargetInfo.h"
 #include "clang/Basic/SourceManager.h"
 #include "clang/Lex/HeaderSearch.h"
@@ -138,6 +139,21 @@ private:
             return hold.ToRaw( p );
         }
         
+          /// ActOnParamDeclarator - This callback is invoked when a parameter
+          /// declarator is parsed. This callback only occurs for functions
+          /// with prototypes. S is the function prototype scope for the
+          /// parameters (C++ [basic.scope.proto]).
+        virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D) 
+        {
+            RCPtr<VariableDeclarator> p = new VariableDeclarator;
+            p->storage_class = VariableDeclarator::STATIC;
+            p->type = CreateTypeNode( D.getDeclSpec() );
+            p->identifier = CreateIdenifierNode( D.getIdentifier() );        
+            TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
+            RCPtr<Identifier> i = p->identifier;   
+            return hold.ToRaw( p );
+        }
+
         /*
         Note: the default implementation of ActOnStartOfFunctionDef() appears in
         InfernoMinimalAction and can cause spurious ActOnDeclarator() calls if we always
@@ -151,7 +167,17 @@ private:
             p->return_type = CreateTypeNode( D.getDeclSpec() );
             p->body = new Sequence<ProgramElement>;
             p->identifier = CreateIdenifierNode( D.getIdentifier() );  
-    
+            clang::DeclaratorChunk::FunctionTypeInfo &pti = D.getTypeObject(0).Fun; // TODO deal with compounded types
+            for( int i=0; i<pti.NumArgs; i++ )
+            {
+                RCPtr<VariableDeclarator> vd = new VariableDeclarator;
+                //vd->storage_class = VariableDeclarator::AUTO;
+                //printf("gtgtg\n");
+                //assert(pti.ArgInfo[i].Param);
+                vd = hold.FromRaw<VariableDeclarator>( pti.ArgInfo[i].Param );
+                //vd->identifier = CreateIdenifierNode( pti.ArgInfo[i].Ident );
+                p->params.push_back( vd );
+            }
             curseq = p->body;
             return hold.ToRaw( p );     
         }
@@ -231,7 +257,50 @@ private:
             return ExprResult( hold.ToRaw( nc ) );            
         }
   
-                     
+        virtual ExprResult ActOnBinOp(clang::SourceLocation TokLoc, clang::tok::TokenKind Kind,
+                                      ExprTy *LHS, ExprTy *RHS) 
+        {
+            RCPtr<Infix> o = new Infix;
+            o->kind = Kind;
+            o->operands.push_back( hold.FromRaw<Expression>(LHS) );
+            o->operands.push_back( hold.FromRaw<Expression>(RHS) );
+            return hold.ToRaw( o );            
+        }                     
+
+        virtual ExprResult ActOnPostfixUnaryOp(clang::SourceLocation OpLoc, clang::tok::TokenKind Kind,
+                                               ExprTy *Input) 
+        {
+            RCPtr<Postfix> o = new Postfix;
+            o->kind = Kind;
+            o->operands.push_back( hold.FromRaw<Expression>(Input) );
+            return hold.ToRaw( o );            
+        }                     
+
+        virtual ExprResult ActOnUnaryOp(clang::SourceLocation OpLoc, clang::tok::TokenKind Kind,
+                                               ExprTy *Input) 
+        {
+            RCPtr<Prefix> o = new Prefix;
+            o->kind = Kind;
+            o->operands.push_back( hold.FromRaw<Expression>(Input) );
+            return hold.ToRaw( o );            
+        }                     
+
+       virtual ExprResult ActOnConditionalOp(clang::SourceLocation QuestionLoc, 
+                                             clang::SourceLocation ColonLoc,
+                                             ExprTy *Cond, ExprTy *LHS, ExprTy *RHS)
+        {
+            RCPtr<ConditionalOperator> o = new ConditionalOperator;
+            o->condition = hold.FromRaw<Expression>(Cond);
+            o->if_true = hold.FromRaw<Expression>(LHS);
+            o->if_false = hold.FromRaw<Expression>(RHS);
+            return hold.ToRaw( o );            
+        }                     
+
+        virtual TypeResult ActOnTypeName(clang::Scope *S, clang::Declarator &D) 
+        {printf("lkjdfas\n");
+            RCPtr<Type> t = CreateTypeNode( D.getDeclSpec() );
+            return hold.ToRaw( t );
+        }
     };
 };  
 
