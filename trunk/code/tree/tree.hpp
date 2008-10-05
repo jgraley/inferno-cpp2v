@@ -3,6 +3,7 @@
 
 #include "common/refcount.hpp"
 #include "clang/Basic/SourceLocation.h"
+#include "clang/Basic/TokenKinds.h"
 #include "llvm/ADT/APInt.h"
 
 #include <string>
@@ -55,6 +56,7 @@ struct VariableDeclarator : public Declarator
 struct FunctionDeclarator : public Declarator
 {
     RCPtr<Type> return_type;
+    std::vector< RCPtr<VariableDeclarator> > params; // in C++ these are all AUTO
     RCPtr< Sequence<ProgramElement> > body;
 };
 
@@ -81,6 +83,31 @@ struct Expression : public Node
 struct IdentifierExpression : public Expression
 {
     RCPtr<Identifier> identifier;
+};
+
+struct Operator : public Expression
+{
+    std::vector< RCPtr<Expression> > operands;
+    clang::tok::TokenKind kind;
+};
+
+struct Prefix : public Operator
+{
+};
+
+struct Postfix : public Operator
+{
+};
+
+struct Infix : public Operator
+{
+};
+
+struct ConditionalOperator : public Expression // eg ?:
+{
+    RCPtr<Expression> condition;
+    RCPtr<Expression> if_true;
+    RCPtr<Expression> if_false;
 };
 
 struct Statement : public ProgramElement
