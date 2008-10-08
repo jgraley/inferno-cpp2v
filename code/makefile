@@ -13,6 +13,10 @@ MAKE ?= make
 # that contains the SVN root dir (inferno-synth/). This is the path to it.
 OUTSIDE_SVN := ../../..
 
+# For boost
+# JSG I need this to get the boost includes in a cygwin setup
+BOOST_PATH := -I/usr/include/boost-1_33_1
+
 # Including and linking with the LLVM and Clang
 LLVM := $(OUTSIDE_SVN)/llvm-2.3
 CLANG := $(LLVM)/tools/clang
@@ -28,7 +32,7 @@ INCLUDE_PATH := $(INCLUDE_PATH) -I.
 INFERNO_SOURCES := inferno.cpp tree/tree.cpp common/refcount.cpp common/read_args.cpp parse/inferno_minimal_action.cpp
 
 all : inferno.cpp
-	$(CC) $(INCLUDE_PATH) $(LLVM_OPTIONS) $(INFERNO_SOURCES) $(CLANG_LIBS) $(LLVM_LIBS) $(STANDARD_LIBS) -ggdb -o inferno
+	$(CC) $(INCLUDE_PATH) $(LLVM_OPTIONS) $(INFERNO_SOURCES) $(CLANG_LIBS) $(LLVM_LIBS) $(STANDARD_LIBS) $(BOOST_PATH) -ggdb -o inferno
 
 clang :
 	cd $(CLANG); $(MAKE) ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED)

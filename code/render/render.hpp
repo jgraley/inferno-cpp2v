@@ -45,7 +45,7 @@ private:
 
     std::string RenderExpression( RCPtr<Expression> expression, bool bracketize_operator=false )
     {
-        TRACE("re %p\n", expression.ptr);
+        TRACE("re %p\n", &*expression);
         
         std::string before = bracketize_operator ? "(" : "";
         std::string after = bracketize_operator ? ")" : "";

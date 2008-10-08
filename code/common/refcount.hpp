@@ -9,7 +9,6 @@
 template<class TARGET>
 class RCPtr;
 
-
 class RCTarget
 {
 public:
@@ -47,6 +46,38 @@ private:
     unsigned valid;    
 };
 
+#if 0
+
+#include <boost/shared_ptr.hpp>
+
+template<class TARGET>
+class RCPtr : public boost::shared_ptr<TARGET>
+{
+public:
+    inline RCPtr() :
+        boost::shared_ptr<TARGET>()
+    { 
+    }
+    template<class OTHER_TARGET>
+    inline RCPtr( const RCPtr<OTHER_TARGET> &o ) :
+        boost::shared_ptr<TARGET>( &*o )
+    { 
+    }
+    template<class OTHER_TARGET>
+    inline RCPtr( OTHER_TARGET *o ) :
+        boost::shared_ptr<TARGET>( o )
+    { 
+    }
+    template<class BASE >
+    static RCPtr Specialise( RCPtr<BASE> p )
+    {
+        assert( p && "Input to Specialise<>() must be non-NULL"); // since we return NULL when the cast isn't possible
+        return RCPtr<TARGET>( dynamic_cast<TARGET *>(&*p) );
+    }
+    
+};
+
+#else
 
 template<class TARGET>
 class RCPtr
@@ -165,6 +196,7 @@ public:
     }
 };
 
+#endif
 
 class RCHold
 {
@@ -186,9 +218,9 @@ public:
     template<class TARGET>
     void *ToRaw( RCPtr<TARGET> p )
     {
-        RCPtr<RCTarget> bp(p.ptr); // Genericise the target since we can only store one type
+        RCPtr<RCTarget> bp(&*p); // Genericise the target since we can only store one type
         hold_list.push_back( bp );
-        void *vp = reinterpret_cast<void *>( p.ptr );
+        void *vp = reinterpret_cast<void *>( &*p );
 #ifdef CHECK_POINTERS
         assert( ((unsigned)vp & 3) == 0 );
         vp = (void *)((unsigned)vp | 3);

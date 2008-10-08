@@ -61,7 +61,6 @@ public:
     
         clang::IdentifierTable it( opts );                 
         InfernoAction actions( program, it, pp );                 
-        
         clang::Parser parser( pp, actions );
         
         parser.ParseTranslationUnit();        
@@ -115,7 +114,7 @@ private:
         { 
             RCPtr<Identifier> i = new Identifier();
             i->assign( ID->getName() );
-            TRACE("ci %s %p %p\n", ID->getName(), i.ptr, ID );            
+            TRACE("ci %s %p %p\n", ID->getName(), &*i, ID );            
             return i;
         }
         
@@ -217,7 +216,7 @@ private:
             ie->identifier = RCPtr<Identifier>::Specialise(rcp);
             assert(ie->identifier && "The RCPtr stored with this identifier was not pointing to an Identifier node");
             RCPtr<Expression> e = ie;
-            TRACE("aoie4 %p\n", e.ptr);
+            TRACE("aoie4 %p\n", &*e);
             return ExprResult( hold.ToRaw( e ) );            
         }                                   
         
@@ -249,7 +248,7 @@ private:
         virtual ExprResult ActOnNumericConstant(const clang::Token &tok) 
         { 
             RCPtr<NumericConstant> nc = new NumericConstant;
-            *(llvm::APInt *)nc = EvaluateNumericConstant( tok );
+            *(llvm::APInt *)&*nc = EvaluateNumericConstant( tok );
             return ExprResult( hold.ToRaw( nc ) );            
         }
   

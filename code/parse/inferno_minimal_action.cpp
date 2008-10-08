@@ -78,7 +78,6 @@ InfernoMinimalAction::ActOnDeclarator(Scope *S, clang::Declarator &D, DeclTy *La
   
   TypeNameInfo *weCurrentlyHaveTypeInfo = II->getFETokenInfo<TypeNameInfo>();
   bool isTypeName = D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_typedef;
-
   TypeNameInfo *TI = new TypeNameInfo(isTypeName, weCurrentlyHaveTypeInfo, rcp);
 
   II->setFETokenInfo(TI);
