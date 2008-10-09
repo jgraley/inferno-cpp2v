@@ -46,7 +46,7 @@ private:
     unsigned valid;    
 };
 
-#if 0
+#if 1
 
 #include <boost/shared_ptr.hpp>
 
@@ -60,7 +60,7 @@ public:
     }
     template<class OTHER_TARGET>
     inline RCPtr( const RCPtr<OTHER_TARGET> &o ) :
-        boost::shared_ptr<TARGET>( &*o )
+        boost::shared_ptr<TARGET>( boost::static_pointer_cast<TARGET>(o) )
     { 
     }
     template<class OTHER_TARGET>
@@ -68,11 +68,15 @@ public:
         boost::shared_ptr<TARGET>( o )
     { 
     }
+    inline RCPtr( boost::shared_ptr<TARGET> p ) :
+        boost::shared_ptr<TARGET>(p)
+    { 
+    }
     template<class BASE >
     static RCPtr Specialise( RCPtr<BASE> p )
     {
         assert( p && "Input to Specialise<>() must be non-NULL"); // since we return NULL when the cast isn't possible
-        return RCPtr<TARGET>( dynamic_cast<TARGET *>(&*p) );
+        return RCPtr( boost::dynamic_pointer_cast<TARGET>(p) );
     }
     
 };
@@ -213,31 +217,33 @@ class RCHold
 // those raw pointers using ToRaw() and FromRaw(). Note: always assign the return 
 // of new/malloc to an RCPtr and then convert to a raw ptr using ToRaw() if required,
 // otherwise the required extra ref will not be created.
+//
+// TODO: Template the class on the RCPtr target *and* the raw type. And lose
+// the specialise/dynamic_cast
 #define CHECK_POINTERS
 public:
     template<class TARGET>
     void *ToRaw( RCPtr<TARGET> p )
     {
-        RCPtr<RCTarget> bp(&*p); // Genericise the target since we can only store one type
+        RCPtr<RCTarget> bp = RCPtr<RCTarget>::Specialise(p); // Genericise the target since we can only store one type
+        void *vp = reinterpret_cast<void *>( (unsigned)hold_list.size() ); // the index of the next push_back
         hold_list.push_back( bp );
-        void *vp = reinterpret_cast<void *>( &*p );
-#ifdef CHECK_POINTERS
-        assert( ((unsigned)vp & 3) == 0 );
-        vp = (void *)((unsigned)vp | 3);
-#endif        
         return vp;
     }
     
     template<class TARGET>
     RCPtr<TARGET> FromRaw( void *p )
     {
-        void *vp = p;
-#ifdef CHECK_POINTERS
-        assert( p != 0 && "Raw pointer was set to 0 or not set at all");
-        assert( ((unsigned)vp & 3) == 3 );
-        vp = (void *)((unsigned)vp & ~3);
-#endif             
-        return RCPtr<TARGET>( reinterpret_cast<TARGET *>( vp ) );
+        int i = reinterpret_cast<unsigned>(p);
+        RCPtr<RCTarget> tp = hold_list[i];
+        if( tp )
+        {
+            RCPtr<TARGET> xp = RCPtr<TARGET>::Specialise(tp);
+            assert( xp && "dynamic cast failed, hold types mismatch");
+            return xp;
+        }
+        else
+            return RCPtr<TARGET>();    
     }
     
 private:
