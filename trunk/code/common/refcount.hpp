@@ -100,11 +100,20 @@ class RCHold
 // the specialise/dynamic_cast
 #define CHECK_POINTERS
 public:
+    RCHold() :
+        id( ((unsigned)this % 255) << 24 )
+    {
+    }
+    
+
     template<class TARGET>
     void *ToRaw( RCPtr<TARGET> p )
     {
         RCPtr<RCTarget> bp = RCPtr<RCTarget>::Specialise(p); // Genericise the target since we can only store one type
-        void *vp = reinterpret_cast<void *>( (unsigned)hold_list.size() ); // the index of the next push_back
+        unsigned i = (unsigned)hold_list.size(); // the index of the next push_back()
+        assert( (i & 0xFF000000) == 0 && "gone over maximum number of elements, probably due to infinite loop, if not rejig id" );
+        i |= id; // embed an id for the current hold object  
+        void *vp = reinterpret_cast<void *>( i ); 
         hold_list.push_back( bp );
         return vp;
     }
@@ -112,7 +121,9 @@ public:
     template<class TARGET>
     RCPtr<TARGET> FromRaw( void *p )
     {
-        int i = reinterpret_cast<unsigned>(p);
+        unsigned i = reinterpret_cast<unsigned>(p);
+        assert( (i & 0xFF000000) == id && "this raw value was stored to a different holder");
+        i &= 0x00FFFFFF; 
         RCPtr<RCTarget> tp = hold_list[i];
         if( tp )
         {
@@ -127,6 +138,7 @@ public:
 private:
     // When this object is destructed, all the members of the vector will be 
     // destructed and targets that then have no refs will be destructed.
+    const unsigned id;
     std::vector< RCPtr< RCTarget > > hold_list;  // TODO does this need to be a vector?
 };
 
