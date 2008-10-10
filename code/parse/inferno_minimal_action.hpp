@@ -5,6 +5,11 @@
 #include "clang/Parse/Action.h"
 #include "common/refcount.hpp"
 
+class Identifier; // this will be the identifier from the inferno tree. 
+                  // Try not to include the tree here because we enter the clang namespace
+                  // and there would be conflicts
+typedef Identifier InfernoIdentifier;
+
 namespace clang {
 
   // Semantic.
@@ -42,7 +47,7 @@ public:
   /// ActOnDeclarator - If this is a typedef declarator, we modify the
   /// IdentifierInfo::FETokenInfo field to keep track of this fact, until S is
   /// popped.
-  virtual DeclTy *ActOnDeclarator(Scope *S, Declarator &D, DeclTy *LastInGroup, RCPtr<RCTarget> rcp);
+  virtual DeclTy *ActOnDeclarator(Scope *S, Declarator &D, DeclTy *LastInGroup, RCPtr<InfernoIdentifier> rcp);
   
   /// ActOnPopScope - When a scope is popped, if any typedefs are now 
   /// out-of-scope, they are removed from the IdentifierInfo::FETokenInfo field.
@@ -52,7 +57,7 @@ public:
   virtual DeclTy *ActOnForwardClassDeclaration(SourceLocation AtClassLoc,
                                                IdentifierInfo **IdentList,
                                                unsigned NumElts,
-                                               RCPtr<RCTarget> rcp);
+                                               RCPtr<InfernoIdentifier> rcp);
   
   virtual DeclTy *ActOnStartClassInterface(SourceLocation interLoc,
                                            IdentifierInfo *ClassName,
@@ -63,11 +68,11 @@ public:
                                            unsigned NumProtoRefs,
                                            SourceLocation EndProtoLoc,
                                            AttributeList *AttrList, 
-                                           RCPtr<RCTarget> rcp);
+                                           RCPtr<InfernoIdentifier> rcp);
   
   // Extract the RCPtr for the identifier. Where the identifier is differently declared
   // in nested scopes, we get the one that applies currently (which is the innermost one)  
-  RCPtr<RCTarget> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const IdentifierInfo &II );                                         
+  RCPtr<InfernoIdentifier> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const IdentifierInfo &II );                                         
 };
 
 }  // end namespace clang

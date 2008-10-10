@@ -24,8 +24,8 @@ using namespace clang;
 struct TypeNameInfo {
   TypeNameInfo *Prev;
   bool isTypeName;
-  RCPtr<RCTarget> rcptr;
-  TypeNameInfo(bool istypename, TypeNameInfo *prev, RCPtr<RCTarget> rcp) {
+  RCPtr<InfernoIdentifier> rcptr;
+  TypeNameInfo(bool istypename, TypeNameInfo *prev, RCPtr<InfernoIdentifier> rcp) {
     isTypeName = istypename;
     Prev = prev;
     rcptr = rcp;
@@ -70,7 +70,7 @@ InfernoMinimalAction::isTypeName(const IdentifierInfo &II, Scope *S) {
 /// IdentifierInfo::FETokenInfo field to keep track of this fact, until S is
 /// popped.
 Action::DeclTy *
-InfernoMinimalAction::ActOnDeclarator(Scope *S, clang::Declarator &D, DeclTy *LastInGroup, RCPtr<RCTarget> rcp) {
+InfernoMinimalAction::ActOnDeclarator(Scope *S, clang::Declarator &D, DeclTy *LastInGroup, RCPtr<InfernoIdentifier> rcp) {
   IdentifierInfo *II = D.getIdentifier();
   
   // If there is no identifier associated with this declarator, bail out.
@@ -98,7 +98,7 @@ InfernoMinimalAction::ActOnStartClassInterface(SourceLocation AtInterfaceLoc,
                                         unsigned NumProtocols,
                                         SourceLocation EndProtoLoc,
                                         AttributeList *AttrList,
-                                        RCPtr<RCTarget> rcp) {
+                                        RCPtr<InfernoIdentifier> rcp) {
   TypeNameInfo *TI =
     new TypeNameInfo(1, ClassName->getFETokenInfo<TypeNameInfo>(), rcp);
 
@@ -111,7 +111,7 @@ InfernoMinimalAction::ActOnStartClassInterface(SourceLocation AtInterfaceLoc,
 Action::DeclTy *
 InfernoMinimalAction::ActOnForwardClassDeclaration(SourceLocation AtClassLoc,
                                 IdentifierInfo **IdentList, unsigned NumElts,
-                                RCPtr<RCTarget> rcp) {
+                                RCPtr<InfernoIdentifier> rcp) {
   for (unsigned i = 0; i != NumElts; ++i) {
     TypeNameInfo *TI =
       new TypeNameInfo(1, IdentList[i]->getFETokenInfo<TypeNameInfo>(), rcp);
@@ -142,12 +142,12 @@ void InfernoMinimalAction::ActOnPopScope(SourceLocation Loc, Scope *S) {
   }
 }
 
-RCPtr<RCTarget> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const IdentifierInfo &II )
+RCPtr<InfernoIdentifier> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const IdentifierInfo &II )
 {
     TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>();
     assert(TI && "This decl didn't get pushed??"); // could remove this
     if( TI )
         return TI->rcptr;
     else
-        return RCPtr<RCTarget>();
+        return RCPtr<InfernoIdentifier>();
 }
