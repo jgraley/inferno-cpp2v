@@ -89,8 +89,11 @@ private:
         clang::Preprocessor &preprocessor;
         RCPtr<Program> program;
         RCPtr<Scope> curseq;
-        RCHold hold;
-    
+        RCHold<Declarator, DeclTy *> hold_decl;
+        RCHold<Expression, ExprTy *> hold_expr;
+        RCHold<Statement, StmtTy *> hold_stmt;
+        RCHold<Type, TypeTy *> hold_type;
+     
         Type *CreateTypeNode( const clang::DeclSpec &DS )
         {
             switch( DS.getTypeSpecType() )
@@ -135,7 +138,7 @@ private:
             TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
             RCPtr<Identifier> i = p->identifier;
             (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, i );     
-            return hold.ToRaw( p );
+            return hold_decl.ToRaw( p );
         }
         
           /// ActOnParamDeclarator - This callback is invoked when a parameter
@@ -150,7 +153,7 @@ private:
             p->identifier = CreateIdenifierNode( D.getIdentifier() );        
             TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
             RCPtr<Identifier> i = p->identifier;   
-            return hold.ToRaw( p );
+            return hold_decl.ToRaw( p );
         }
 
         /*
@@ -169,12 +172,12 @@ private:
             clang::DeclaratorChunk::FunctionTypeInfo &pti = D.getTypeObject(0).Fun; // TODO deal with compounded types
             for( int i=0; i<pti.NumArgs; i++ )
             {
-                RCPtr<VariableDeclarator> vd = new VariableDeclarator;
-                vd = hold.FromRaw<VariableDeclarator>( pti.ArgInfo[i].Param );
+                RCPtr<Declarator> d = hold_decl.FromRaw( pti.ArgInfo[i].Param );
+                RCPtr<VariableDeclarator> vd = RCPtr<VariableDeclarator>::Specialise(d);
                 p->parameters.push_back( vd );
             }
             curseq = p->body;
-            return hold.ToRaw( p );     
+            return hold_decl.ToRaw( p );     
         }
         
         virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtTy *Body) 
@@ -185,21 +188,21 @@ private:
         
         virtual StmtResult ActOnExprStmt(ExprTy *Expr) 
         {
-            RCPtr<Expression> e = hold.FromRaw<Expression>(Expr);
+            RCPtr<Expression> e = hold_expr.FromRaw(Expr);
             RCPtr<ExpressionStatement> es = new ExpressionStatement;
             es->expression = e;
             curseq->push_back( es );
-            return hold.ToRaw( es );
+            return hold_stmt.ToRaw( es );
         }
 
         virtual StmtResult ActOnReturnStmt( clang::SourceLocation ReturnLoc,
                                             ExprTy *RetValExp ) 
         {           
-            RCPtr<Expression> e = hold.FromRaw<Expression>(RetValExp);
+            RCPtr<Expression> e = hold_expr.FromRaw(RetValExp);
             RCPtr<Return> r = new Return;
             r->return_value = e;
             curseq->push_back( r );
-            return hold.ToRaw( r );
+            return hold_stmt.ToRaw( r );
         }
 
         virtual ExprResult ActOnIdentifierExpr( clang::Scope *S, 
@@ -217,7 +220,7 @@ private:
             assert(ie->identifier && "The RCPtr stored with this identifier was not pointing to an Identifier node");
             RCPtr<Expression> e = ie;
             TRACE("aoie4 %p\n", &*e);
-            return ExprResult( hold.ToRaw( e ) );            
+            return hold_expr.ToRaw( e );            
         }                                   
         
         llvm::APInt EvaluateNumericConstant(const clang::Token &tok)
@@ -249,7 +252,7 @@ private:
         { 
             RCPtr<NumericConstant> nc = new NumericConstant;
             *(llvm::APInt *)&*nc = EvaluateNumericConstant( tok );
-            return ExprResult( hold.ToRaw( nc ) );            
+            return hold_expr.ToRaw( nc );            
         }
   
         virtual ExprResult ActOnBinOp(clang::SourceLocation TokLoc, clang::tok::TokenKind Kind,
@@ -257,9 +260,9 @@ private:
         {
             RCPtr<Infix> o = new Infix;
             o->kind = Kind;
-            o->operands.push_back( hold.FromRaw<Expression>(LHS) );
-            o->operands.push_back( hold.FromRaw<Expression>(RHS) );
-            return hold.ToRaw( o );            
+            o->operands.push_back( hold_expr.FromRaw(LHS) );
+            o->operands.push_back( hold_expr.FromRaw(RHS) );
+            return hold_expr.ToRaw( o );            
         }                     
 
         virtual ExprResult ActOnPostfixUnaryOp(clang::SourceLocation OpLoc, clang::tok::TokenKind Kind,
@@ -267,8 +270,8 @@ private:
         {
             RCPtr<Postfix> o = new Postfix;
             o->kind = Kind;
-            o->operands.push_back( hold.FromRaw<Expression>(Input) );
-            return hold.ToRaw( o );            
+            o->operands.push_back( hold_expr.FromRaw(Input) );
+            return hold_expr.ToRaw( o );            
         }                     
 
         virtual ExprResult ActOnUnaryOp(clang::SourceLocation OpLoc, clang::tok::TokenKind Kind,
@@ -276,8 +279,8 @@ private:
         {
             RCPtr<Prefix> o = new Prefix;
             o->kind = Kind;
-            o->operands.push_back( hold.FromRaw<Expression>(Input) );
-            return hold.ToRaw( o );            
+            o->operands.push_back( hold_expr.FromRaw(Input) );
+            return hold_expr.ToRaw( o );                        
         }                     
 
        virtual ExprResult ActOnConditionalOp(clang::SourceLocation QuestionLoc, 
@@ -285,17 +288,17 @@ private:
                                              ExprTy *Cond, ExprTy *LHS, ExprTy *RHS)
         {
             RCPtr<ConditionalOperator> o = new ConditionalOperator;
-            o->condition = hold.FromRaw<Expression>(Cond);
-            o->if_true = hold.FromRaw<Expression>(LHS);
-            o->if_false = hold.FromRaw<Expression>(RHS);
-            return hold.ToRaw( o );            
+            o->condition = hold_expr.FromRaw(Cond);
+            o->if_true = hold_expr.FromRaw(LHS);
+            o->if_false = hold_expr.FromRaw(RHS);
+            return hold_expr.ToRaw( o );                        
         }                     
 
         // Not sure if this one has been tested!!
         virtual TypeResult ActOnTypeName(clang::Scope *S, clang::Declarator &D) 
         {
             RCPtr<Type> t = CreateTypeNode( D.getDeclSpec() );
-            return hold.ToRaw( t );
+            return hold_type.ToRaw( t );
         }
     };
 };  

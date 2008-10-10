@@ -79,7 +79,7 @@ public:
     
 };
 
-
+template<typename NODE, typename RAW>
 class RCHold
 {
 //
@@ -98,7 +98,6 @@ class RCHold
 //
 // TODO: Template the class on the RCPtr target *and* the raw type. And lose
 // the specialise/dynamic_cast
-#define CHECK_POINTERS
 public:
     RCHold() :
         id( ((unsigned)this % 255) << 24 )
@@ -106,40 +105,29 @@ public:
     }
     
 
-    template<class TARGET>
-    void *ToRaw( RCPtr<TARGET> p )
+    RAW ToRaw( RCPtr<NODE> p )
     {
-        RCPtr<RCTarget> bp = RCPtr<RCTarget>::Specialise(p); // Genericise the target since we can only store one type
         unsigned i = (unsigned)hold_list.size(); // the index of the next push_back()
         assert( (i & 0xFF000000) == 0 && "gone over maximum number of elements, probably due to infinite loop, if not rejig id" );
         i |= id; // embed an id for the current hold object  
         void *vp = reinterpret_cast<void *>( i ); 
-        hold_list.push_back( bp );
+        hold_list.push_back( p );
         return vp;
     }
     
-    template<class TARGET>
-    RCPtr<TARGET> FromRaw( void *p )
+    RCPtr<NODE> FromRaw( RAW p )
     {
         unsigned i = reinterpret_cast<unsigned>(p);
         assert( (i & 0xFF000000) == id && "this raw value was stored to a different holder");
         i &= 0x00FFFFFF; 
-        RCPtr<RCTarget> tp = hold_list[i];
-        if( tp )
-        {
-            RCPtr<TARGET> xp = RCPtr<TARGET>::Specialise(tp);
-            assert( xp && "dynamic cast failed, hold types mismatch");
-            return xp;
-        }
-        else
-            return RCPtr<TARGET>();    
+        return hold_list[i];
     }
     
 private:
     // When this object is destructed, all the members of the vector will be 
     // destructed and targets that then have no refs will be destructed.
     const unsigned id;
-    std::vector< RCPtr< RCTarget > > hold_list;  // TODO does this need to be a vector?
+    std::vector< RCPtr< NODE > > hold_list;  // TODO does this need to be a vector?
 };
 
 #endif
