@@ -8,7 +8,7 @@ class Pass
 {
 public:
     // Apply this pass to the supplied program
-    virtual void operator()( RCPtr<Program> ) = 0; 
+    virtual void operator()( shared_ptr<Program> ) = 0; 
     
     // Note: cannot template virtual functions so alternative
     // entry points for eg functions or classes must be added

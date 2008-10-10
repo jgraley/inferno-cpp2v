@@ -22,7 +22,7 @@ public:
 #include "operator_text.inc"
     }
     
-    void operator()( RCPtr<Program> program )       
+    void operator()( shared_ptr<Program> program )       
     {
         std::string s = RenderSequence( *program, ";\n", true );
         puts( s.c_str() ); // TODO allow a file to be specified in the constructor
@@ -31,46 +31,46 @@ public:
 private:
     std::vector<std::string> operator_text;
 
-    std::string RenderType( RCPtr<Type> type )
+    std::string RenderType( shared_ptr<Type> type )
     {
-        if( RCPtr< Int >::Specialise(type) )
+        if( dynamic_pointer_cast< Int >(type) )
             return "int";
-        else if( RCPtr< Char >::Specialise(type) )
+        else if( dynamic_pointer_cast< Char >(type) )
             return "char";
-        else if( RCPtr< Void >::Specialise(type) )
+        else if( dynamic_pointer_cast< Void >(type) )
             return "void";
         else
             return ERROR_UNSUPPORTED(type);
     }
 
-    std::string RenderExpression( RCPtr<Expression> expression, bool bracketize_operator=false )
+    std::string RenderExpression( shared_ptr<Expression> expression, bool bracketize_operator=false )
     {
         TRACE("re %p\n", &*expression);
         
         std::string before = bracketize_operator ? "(" : "";
         std::string after = bracketize_operator ? ")" : "";
         
-        if( RCPtr<IdentifierExpression> ie = RCPtr< IdentifierExpression >::Specialise(expression) )
+        if( shared_ptr<IdentifierExpression> ie = dynamic_pointer_cast< IdentifierExpression >(expression) )
             return (*ie->identifier);
-        else if( RCPtr<NumericConstant> nc = RCPtr< NumericConstant >::Specialise(expression) )
+        else if( shared_ptr<NumericConstant> nc = dynamic_pointer_cast< NumericConstant >(expression) )
             return (nc->toString(10, true));
-        else if( RCPtr<Infix> o = RCPtr< Infix >::Specialise(expression) )
+        else if( shared_ptr<Infix> o = dynamic_pointer_cast< Infix >(expression) )
             return before + 
                    RenderExpression( o->operands[0], true ) +
                    operator_text[o->kind] + 
                    RenderExpression( o->operands[1], true ) +
                    after;
-        else if( RCPtr<Postfix> o = RCPtr< Postfix >::Specialise(expression) )
+        else if( shared_ptr<Postfix> o = dynamic_pointer_cast< Postfix >(expression) )
             return before + 
                    RenderExpression( o->operands[0], true ) + 
                    operator_text[o->kind] +
                    after;
-        else if( RCPtr<Prefix> o = RCPtr< Prefix >::Specialise(expression) )
+        else if( shared_ptr<Prefix> o = dynamic_pointer_cast< Prefix >(expression) )
             return before + 
                    operator_text[o->kind] + 
                    RenderExpression( o->operands[0], true ) +
                    after;
-        else if( RCPtr<ConditionalOperator> o = RCPtr< ConditionalOperator >::Specialise(expression) )
+        else if( shared_ptr<ConditionalOperator> o = dynamic_pointer_cast< ConditionalOperator >(expression) )
             return before + 
                    RenderExpression( o->condition, true ) + "?" +
                    RenderExpression( o->if_true, true ) + ":" +
@@ -88,18 +88,18 @@ private:
         for( int i=0; i<spe.size(); i++ )
         {
             std::string sep = (seperate_last || i+1<spe.size()) ? separator : "";
-            RCPtr<ELEMENT> pe = spe[i];            
-            if( RCPtr<VariableDeclarator> vd = RCPtr< VariableDeclarator >::Specialise(pe) )
+            shared_ptr<ELEMENT> pe = spe[i];            
+            if( shared_ptr<VariableDeclarator> vd = dynamic_pointer_cast< VariableDeclarator >(pe) )
                 s += RenderType(vd->type) + " " + 
                      (*vd->identifier) + sep;
-            else if( RCPtr<FunctionDeclarator> fd = RCPtr< FunctionDeclarator >::Specialise(pe) )
+            else if( shared_ptr<FunctionDeclarator> fd = dynamic_pointer_cast< FunctionDeclarator >(pe) )
                 s += RenderType(fd->return_type) + " " + 
                      (*fd->identifier) + "(" + 
                      RenderSequence(fd->parameters, ", ", false) + ")\n{\n" + 
                      RenderSequence(*(fd->body), ";\n", true) + "}\n";
-            else if( RCPtr<ExpressionStatement> es = RCPtr< ExpressionStatement >::Specialise(pe) )
+            else if( shared_ptr<ExpressionStatement> es = dynamic_pointer_cast< ExpressionStatement >(pe) )
                 s += RenderExpression(es->expression) + sep;
-            else if( RCPtr<Return> es = RCPtr<Return>::Specialise(pe) )
+            else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(pe) )
                 s += "return " + RenderExpression(es->return_value) + sep;
             else
                 s += ERROR_UNSUPPORTED(pe);

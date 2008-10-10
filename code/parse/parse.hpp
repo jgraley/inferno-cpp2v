@@ -36,7 +36,7 @@ public:
     {
     }
     
-    void operator()( RCPtr<Program> program )
+    void operator()( shared_ptr<Program> program )
     {        
         clang::FileManager fm; 
         clang::TextDiagnosticPrinter diag_printer;
@@ -72,7 +72,7 @@ private:
     class InfernoAction : public clang::InfernoMinimalAction
     {
     public:
-        InfernoAction(RCPtr<Program> p, clang::IdentifierTable &IT, clang::Preprocessor &pp) : 
+        InfernoAction(shared_ptr<Program> p, clang::IdentifierTable &IT, clang::Preprocessor &pp) : 
             InfernoMinimalAction(IT),
             preprocessor(pp),
             program(p),
@@ -82,30 +82,30 @@ private:
      
         ~InfernoAction()
         {
-            assert( &*curseq==&*program ); // TODO operator== in RCPtr<> 
+            assert( &*curseq==&*program ); // TODO operator== in shared_ptr<> 
         }
      
      private:   
         clang::Preprocessor &preprocessor;
-        RCPtr<Program> program;
-        RCPtr<Scope> curseq;
+        shared_ptr<Program> program;
+        shared_ptr<Scope> curseq;
         RCHold<Declarator, DeclTy *> hold_decl;
         RCHold<Expression, ExprTy *> hold_expr;
         RCHold<Statement, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
      
-        Type *CreateTypeNode( const clang::DeclSpec &DS )
+        shared_ptr<Type> CreateTypeNode( const clang::DeclSpec &DS )
         {
             switch( DS.getTypeSpecType() )
             {
                 case clang::DeclSpec::TST_int:
-                    return new Int();
+                    return shared_ptr<Type>(new Int());
                     break;
                 case clang::DeclSpec::TST_char:
-                    return new Char();
+                    return shared_ptr<Type>(new Char());
                     break;
                 case clang::DeclSpec::TST_void:
-                    return new Void();
+                    return shared_ptr<Type>(new Void());
                     break;
                 default:
                     assert(0);
@@ -113,9 +113,9 @@ private:
             }
         }
         
-        RCPtr<Identifier> CreateIdenifierNode( clang::IdentifierInfo *ID )
+        shared_ptr<Identifier> CreateIdenifierNode( clang::IdentifierInfo *ID )
         { 
-            RCPtr<Identifier> i = new Identifier();
+            shared_ptr<Identifier> i(new Identifier());
             i->assign( ID->getName() );
             TRACE("ci %s %p %p\n", ID->getName(), &*i, ID );            
             return i;
@@ -130,13 +130,13 @@ private:
             {            
                 return 0;
             }
-            RCPtr<VariableDeclarator> p = new VariableDeclarator;
+            shared_ptr<VariableDeclarator> p(new VariableDeclarator);
             curseq->push_back(p);
             p->storage_class = VariableDeclarator::STATIC;
             p->type = CreateTypeNode( D.getDeclSpec() );
             p->identifier = CreateIdenifierNode( D.getIdentifier() );        
             TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
-            RCPtr<Identifier> i = p->identifier;
+            shared_ptr<Identifier> i(p->identifier);
             (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, i );     
             return hold_decl.ToRaw( p );
         }
@@ -147,12 +147,12 @@ private:
           /// parameters (C++ [basic.scope.proto]).
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D) 
         {
-            RCPtr<VariableDeclarator> p = new VariableDeclarator;
+            shared_ptr<VariableDeclarator> p(new VariableDeclarator);
             p->storage_class = VariableDeclarator::STATIC;
             p->type = CreateTypeNode( D.getDeclSpec() );
             p->identifier = CreateIdenifierNode( D.getIdentifier() );        
             TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
-            RCPtr<Identifier> i = p->identifier;   
+            shared_ptr<Identifier> i = p->identifier;   
             return hold_decl.ToRaw( p );
         }
 
@@ -164,16 +164,16 @@ private:
         */
         virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D) 
         {
-            RCPtr<FunctionDeclarator> p = new FunctionDeclarator;
+            shared_ptr<FunctionDeclarator> p(new FunctionDeclarator);
             curseq->push_back(p);
             p->return_type = CreateTypeNode( D.getDeclSpec() );
-            p->body = new Scope;
+            p->body = shared_ptr<Scope>(new Scope);
             p->identifier = CreateIdenifierNode( D.getIdentifier() );  
             clang::DeclaratorChunk::FunctionTypeInfo &pti = D.getTypeObject(0).Fun; // TODO deal with compounded types
             for( int i=0; i<pti.NumArgs; i++ )
             {
-                RCPtr<Declarator> d = hold_decl.FromRaw( pti.ArgInfo[i].Param );
-                RCPtr<VariableDeclarator> vd = RCPtr<VariableDeclarator>::Specialise(d);
+                shared_ptr<Declarator> d = hold_decl.FromRaw( pti.ArgInfo[i].Param );
+                shared_ptr<VariableDeclarator> vd = dynamic_pointer_cast<VariableDeclarator>(d); // just push the declarators, no need for dynamic cast?
                 p->parameters.push_back( vd );
             }
             curseq = p->body;
@@ -188,8 +188,8 @@ private:
         
         virtual StmtResult ActOnExprStmt(ExprTy *Expr) 
         {
-            RCPtr<Expression> e = hold_expr.FromRaw(Expr);
-            RCPtr<ExpressionStatement> es = new ExpressionStatement;
+            shared_ptr<Expression> e = hold_expr.FromRaw(Expr);
+            shared_ptr<ExpressionStatement> es(new ExpressionStatement);
             es->expression = e;
             curseq->push_back( es );
             return hold_stmt.ToRaw( es );
@@ -198,8 +198,8 @@ private:
         virtual StmtResult ActOnReturnStmt( clang::SourceLocation ReturnLoc,
                                             ExprTy *RetValExp ) 
         {           
-            RCPtr<Expression> e = hold_expr.FromRaw(RetValExp);
-            RCPtr<Return> r = new Return;
+            shared_ptr<Expression> e = hold_expr.FromRaw(RetValExp);
+            shared_ptr<Return> r(new Return);
             r->return_value = e;
             curseq->push_back( r );
             return hold_stmt.ToRaw( r );
@@ -213,9 +213,9 @@ private:
             assert( !HasTrailingLParen ); // not done yet
             TRACE("aoie %s\n", II.getName() );
             TRACE("aoie2 %p\n", &II );
-            RCPtr<IdentifierExpression> ie = new IdentifierExpression;
+            shared_ptr<IdentifierExpression> ie(new IdentifierExpression);
             ie->identifier = clang::InfernoMinimalAction::GetCurrentIdentifierRCPtr( II );
-            RCPtr<Expression> e = ie;
+            shared_ptr<Expression> e = ie;
             TRACE("aoie4 %p\n", &*e);
             return hold_expr.ToRaw( e );            
         }                                   
@@ -247,7 +247,7 @@ private:
         
         virtual ExprResult ActOnNumericConstant(const clang::Token &tok) 
         { 
-            RCPtr<NumericConstant> nc = new NumericConstant;
+            shared_ptr<NumericConstant> nc(new NumericConstant);
             *(llvm::APInt *)&*nc = EvaluateNumericConstant( tok );
             return hold_expr.ToRaw( nc );            
         }
@@ -255,7 +255,7 @@ private:
         virtual ExprResult ActOnBinOp(clang::SourceLocation TokLoc, clang::tok::TokenKind Kind,
                                       ExprTy *LHS, ExprTy *RHS) 
         {
-            RCPtr<Infix> o = new Infix;
+            shared_ptr<Infix> o(new Infix);
             o->kind = Kind;
             o->operands.push_back( hold_expr.FromRaw(LHS) );
             o->operands.push_back( hold_expr.FromRaw(RHS) );
@@ -265,7 +265,7 @@ private:
         virtual ExprResult ActOnPostfixUnaryOp(clang::SourceLocation OpLoc, clang::tok::TokenKind Kind,
                                                ExprTy *Input) 
         {
-            RCPtr<Postfix> o = new Postfix;
+            shared_ptr<Postfix> o(new Postfix);
             o->kind = Kind;
             o->operands.push_back( hold_expr.FromRaw(Input) );
             return hold_expr.ToRaw( o );            
@@ -274,7 +274,7 @@ private:
         virtual ExprResult ActOnUnaryOp(clang::SourceLocation OpLoc, clang::tok::TokenKind Kind,
                                                ExprTy *Input) 
         {
-            RCPtr<Prefix> o = new Prefix;
+            shared_ptr<Prefix> o(new Prefix);
             o->kind = Kind;
             o->operands.push_back( hold_expr.FromRaw(Input) );
             return hold_expr.ToRaw( o );                        
@@ -284,7 +284,7 @@ private:
                                              clang::SourceLocation ColonLoc,
                                              ExprTy *Cond, ExprTy *LHS, ExprTy *RHS)
         {
-            RCPtr<ConditionalOperator> o = new ConditionalOperator;
+            shared_ptr<ConditionalOperator> o(new ConditionalOperator);
             o->condition = hold_expr.FromRaw(Cond);
             o->if_true = hold_expr.FromRaw(LHS);
             o->if_false = hold_expr.FromRaw(RHS);
@@ -294,7 +294,7 @@ private:
         // Not sure if this one has been tested!!
         virtual TypeResult ActOnTypeName(clang::Scope *S, clang::Declarator &D) 
         {
-            RCPtr<Type> t = CreateTypeNode( D.getDeclSpec() );
+            shared_ptr<Type> t = CreateTypeNode( D.getDeclSpec() );
             return hold_type.ToRaw( t );
         }
     };

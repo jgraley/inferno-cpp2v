@@ -47,7 +47,7 @@ public:
   /// ActOnDeclarator - If this is a typedef declarator, we modify the
   /// IdentifierInfo::FETokenInfo field to keep track of this fact, until S is
   /// popped.
-  virtual DeclTy *ActOnDeclarator(Scope *S, Declarator &D, DeclTy *LastInGroup, RCPtr<InfernoIdentifier> rcp);
+  virtual DeclTy *ActOnDeclarator(Scope *S, Declarator &D, DeclTy *LastInGroup, shared_ptr<InfernoIdentifier> rcp);
   
   /// ActOnPopScope - When a scope is popped, if any typedefs are now 
   /// out-of-scope, they are removed from the IdentifierInfo::FETokenInfo field.
@@ -57,7 +57,7 @@ public:
   virtual DeclTy *ActOnForwardClassDeclaration(SourceLocation AtClassLoc,
                                                IdentifierInfo **IdentList,
                                                unsigned NumElts,
-                                               RCPtr<InfernoIdentifier> rcp);
+                                               shared_ptr<InfernoIdentifier> rcp);
   
   virtual DeclTy *ActOnStartClassInterface(SourceLocation interLoc,
                                            IdentifierInfo *ClassName,
@@ -68,11 +68,11 @@ public:
                                            unsigned NumProtoRefs,
                                            SourceLocation EndProtoLoc,
                                            AttributeList *AttrList, 
-                                           RCPtr<InfernoIdentifier> rcp);
+                                           shared_ptr<InfernoIdentifier> rcp);
   
-  // Extract the RCPtr for the identifier. Where the identifier is differently declared
+  // Extract the shared_ptr for the identifier. Where the identifier is differently declared
   // in nested scopes, we get the one that applies currently (which is the innermost one)  
-  RCPtr<InfernoIdentifier> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const IdentifierInfo &II );                                         
+  shared_ptr<InfernoIdentifier> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const IdentifierInfo &II );                                         
 };
 
 }  // end namespace clang
