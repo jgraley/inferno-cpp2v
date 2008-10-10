@@ -214,7 +214,7 @@ private:
             TRACE("aoie %s\n", II.getName() );
             TRACE("aoie2 %p\n", &II );
             RCPtr<IdentifierExpression> ie = new IdentifierExpression;
-            RCPtr<RCTarget> rcp = clang::InfernoMinimalAction::GetCurrentIdentifierRCPtr( II );
+            RCPtr<Identifier> rcp = clang::InfernoMinimalAction::GetCurrentIdentifierRCPtr( II );
             assert(rcp && "no RCPtr was stored with this identifier");
             ie->identifier = RCPtr<Identifier>::Specialise(rcp);
             assert(ie->identifier && "The RCPtr stored with this identifier was not pointing to an Identifier node");
