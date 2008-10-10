@@ -1,4 +1,3 @@
-
 #ifndef REFCOUNT_HPP
 #define REFCOUNT_HPP
 
@@ -7,56 +6,26 @@
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
-
-template<class TARGET>
-class RCPtr : public boost::shared_ptr<TARGET>
-{
-public:
-    inline RCPtr() :
-        boost::shared_ptr<TARGET>()
-    { 
-    }
-    template<class OTHER_TARGET>
-    inline RCPtr( const RCPtr<OTHER_TARGET> &o ) :
-        boost::shared_ptr<TARGET>( boost::static_pointer_cast<TARGET>(o) )
-    { 
-    }
-    template<class OTHER_TARGET>
-    inline RCPtr( OTHER_TARGET *o ) :
-        boost::shared_ptr<TARGET>( o )
-    { 
-    }
-    inline RCPtr( boost::shared_ptr<TARGET> p ) :
-        boost::shared_ptr<TARGET>(p)
-    { 
-    }
-    template<class BASE >
-    static RCPtr Specialise( RCPtr<BASE> p )
-    {
-        assert( p && "Input to Specialise<>() must be non-NULL"); // since we return NULL when the cast isn't possible
-        return RCPtr( boost::dynamic_pointer_cast<TARGET>(p) );
-    }
-    
-};
+using namespace boost;
 
 template<typename NODE, typename RAW>
 class RCHold
 {
 //
-// This class converts between RCPtr and void * pointers and ensures that target
-// objects whoose RCPtr has been converted to void * remain in existance even if
+// This class converts between shared_ptr and void * pointers and ensures that target
+// objects whoose shared_ptr has been converted to void * remain in existance even if
 // the number of RCPtrs to it falls to zero.
 //
 // Target objects will be held in existance until the corresponding RCHold object
-// is destructed, after which only target objects with RCPtr refs will remain.
+// is destructed, after which only target objects with shared_ptr refs will remain.
 //
 // For a set of raw pointers, create an RCHold object whose lifetime is a minimal
 // superset of the union of the raw pointers' lifetimes. Do all assignment to/from
 // those raw pointers using ToRaw() and FromRaw(). Note: always assign the return 
-// of new/malloc to an RCPtr and then convert to a raw ptr using ToRaw() if required,
+// of new/malloc to an shared_ptr and then convert to a raw ptr using ToRaw() if required,
 // otherwise the required extra ref will not be created.
 //
-// TODO: Template the class on the RCPtr target *and* the raw type. And lose
+// TODO: Template the class on the shared_ptr target *and* the raw type. And lose
 // the specialise/dynamic_cast
 public:
     RCHold() :
@@ -65,7 +34,7 @@ public:
     }
     
 
-    RAW ToRaw( RCPtr<NODE> p )
+    RAW ToRaw( shared_ptr<NODE> p )
     {
         unsigned i = (unsigned)hold_list.size(); // the index of the next push_back()
         assert( (i & 0xFF000000) == 0 && "gone over maximum number of elements, probably due to infinite loop, if not rejig id" );
@@ -75,7 +44,7 @@ public:
         return vp;
     }
     
-    RCPtr<NODE> FromRaw( RAW p )
+    shared_ptr<NODE> FromRaw( RAW p )
     {
         unsigned i = reinterpret_cast<unsigned>(p);
         assert( (i & 0xFF000000) == id && "this raw value was stored to a different holder");
@@ -87,7 +56,7 @@ private:
     // When this object is destructed, all the members of the vector will be 
     // destructed and targets that then have no refs will be destructed.
     const unsigned id;
-    std::vector< RCPtr< NODE > > hold_list;  // TODO does this need to be a vector?
+    std::vector< shared_ptr< NODE > > hold_list;  // TODO does this need to be a vector?
 };
 
 #endif

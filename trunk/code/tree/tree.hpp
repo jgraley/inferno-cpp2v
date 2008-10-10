@@ -10,13 +10,13 @@
 #include <vector>
 
 template<typename ELEMENT>
-struct Sequence : public std::vector< RCPtr<ELEMENT> >
+struct Sequence : public std::vector< shared_ptr<ELEMENT> >
 {
 };                   
 
-struct Node : public clang::SourceLocation
+struct Node
 {               
-    virtual ~Node(){}  
+    virtual ~Node(){}  // be a virtual hierarchy
 };
 
 struct Identifier : public Node,
@@ -34,7 +34,7 @@ struct ProgramElement : public Node
 
 struct Declarator : public ProgramElement
 {   
-    RCPtr<Identifier> identifier;
+    shared_ptr<Identifier> identifier;
 };
 
 struct Scope : public Node,
@@ -48,7 +48,7 @@ struct Type : public Node
 
 struct VariableDeclarator : public Declarator
 {
-    RCPtr<Type> type;
+    shared_ptr<Type> type;
     enum
     {
         DEFAULT,
@@ -59,9 +59,9 @@ struct VariableDeclarator : public Declarator
 
 struct FunctionDeclarator : public Declarator
 {
-    RCPtr<Type> return_type;
+    shared_ptr<Type> return_type;
     Sequence<VariableDeclarator> parameters;
-    RCPtr<Scope> body;
+    shared_ptr<Scope> body;
 };
 
 struct Program : public Scope
@@ -86,7 +86,7 @@ struct Expression : public Node
 
 struct IdentifierExpression : public Expression
 {
-    RCPtr<Identifier> identifier;
+    shared_ptr<Identifier> identifier;
 };
 
 struct Operator : public Expression
@@ -109,9 +109,9 @@ struct Infix : public Operator
 
 struct ConditionalOperator : public Expression // eg ?:
 {
-    RCPtr<Expression> condition;
-    RCPtr<Expression> if_true;
-    RCPtr<Expression> if_false;
+    shared_ptr<Expression> condition;
+    shared_ptr<Expression> if_true;
+    shared_ptr<Expression> if_false;
 };
 
 struct Statement : public ProgramElement
@@ -120,12 +120,12 @@ struct Statement : public ProgramElement
 
 struct ExpressionStatement : public Statement
 {
-    RCPtr<Expression> expression;
+    shared_ptr<Expression> expression;
 };
 
 struct Return : public Statement
 {
-    RCPtr<Expression> return_value;
+    shared_ptr<Expression> return_value;
 };
 
 struct NumericConstant : public Expression,

@@ -10,7 +10,7 @@ int main( int argc, char *argv[] )
     // Check the command line arguments 
     ReadArgs::Read( argc, argv );
 
-    RCPtr<Program> program = new Program;  
+    shared_ptr<Program> program(new Program);  
 
     Parse p(ReadArgs::infile);    
     Render r;
