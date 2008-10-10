@@ -6,46 +6,6 @@
 #include <stdio.h>
 #include <vector>
 
-template<class TARGET>
-class RCPtr;
-
-class RCTarget
-{
-public:
-    inline RCTarget() :
-        ref_count(0),
-        valid(0x11111111)
-    {
-        assert( started ); // disallow static allocation
-    }
-
-    virtual inline ~RCTarget()    
-    {
-        assert( finished || ref_count == 0 && "Object was explicitly destructed with references remaining");
-        assert( valid==0x11111111 );
-        valid=0xdeaddead;
-    }
-
-public:
-//private: friend class RCPtr<class>; // not private due to problems friending across template instantations
-    unsigned ref_count;
-    static void Finished() 
-    {
-        finished = true;
-    } 
-    static void Start() 
-    {
-        started = true;
-    } 
-    
-//private:// not private due to problems friending across template instantations
-    static bool started;
-    static bool finished;
-    
-private:
-    unsigned valid;    
-};
-
 #include <boost/shared_ptr.hpp>
 
 template<class TARGET>

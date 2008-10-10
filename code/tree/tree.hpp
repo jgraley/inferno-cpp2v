@@ -14,9 +14,9 @@ struct Sequence : public std::vector< RCPtr<ELEMENT> >
 {
 };                   
 
-struct Node : public RCTarget,
-              public clang::SourceLocation
-{                 
+struct Node : public clang::SourceLocation
+{               
+    virtual ~Node(){}  
 };
 
 struct Identifier : public Node,
