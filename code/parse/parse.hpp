@@ -16,6 +16,7 @@
 #include "clang/Parse/Action.h"
 #include "clang/Parse/Parser.h"
 #include "clang/Parse/DeclSpec.h"
+#include "clang/Parse/Scope.h"
 #include "clang/Driver/TextDiagnosticPrinter.h"
 #include "clang/Lex/LiteralSupport.h"
 
@@ -176,7 +177,8 @@ private:
                 p->parameters.push_back( vd );
             }
             curseq = p->body;
-            (void)clang::InfernoMinimalAction::ActOnDeclarator( FnBodyScope, D, 0, p->identifier );     
+            clang::Scope *GlobalScope = FnBodyScope->getParent();
+            (void)clang::InfernoMinimalAction::ActOnDeclarator( GlobalScope, D, 0, p->identifier );     
             return hold_decl.ToRaw( p );     
         }
         
