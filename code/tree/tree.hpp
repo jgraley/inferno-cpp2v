@@ -128,6 +128,12 @@ struct Return : public Statement
     shared_ptr<Expression> return_value;
 };
 
+struct Call : public Expression
+{
+    shared_ptr<Expression> function;
+    Sequence<Expression> arguments;
+};
+
 struct NumericConstant : public Expression,
                          public llvm::APInt
 {

@@ -76,6 +76,11 @@ private:
                    RenderExpression( o->if_true, true ) + ":" +
                    RenderExpression( o->if_false, true ) +
                    after;
+        else if( shared_ptr<Call> o = dynamic_pointer_cast< Call >(expression) )
+            return before + 
+                   RenderExpression( o->function, true ) + "(" +
+                   RenderSequence( o->arguments, ", ", false ) + ")" +
+                   after;
         else
             return ERROR_UNSUPPORTED(expression);
         TRACE("ok\n");
@@ -99,6 +104,8 @@ private:
                      RenderSequence(*(fd->body), ";\n", true) + "}\n";
             else if( shared_ptr<ExpressionStatement> es = dynamic_pointer_cast< ExpressionStatement >(pe) )
                 s += RenderExpression(es->expression) + sep;
+            else if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(pe) )
+                s += RenderExpression(e) + sep;
             else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(pe) )
                 s += "return " + RenderExpression(es->return_value) + sep;
             else

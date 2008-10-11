@@ -136,8 +136,7 @@ private:
             p->type = CreateTypeNode( D.getDeclSpec() );
             p->identifier = CreateIdenifierNode( D.getIdentifier() );        
             TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
-            shared_ptr<Identifier> i(p->identifier);
-            (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, i );     
+            (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, p->identifier );     
             return hold_decl.ToRaw( p );
         }
         
@@ -152,7 +151,7 @@ private:
             p->type = CreateTypeNode( D.getDeclSpec() );
             p->identifier = CreateIdenifierNode( D.getIdentifier() );        
             TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
-            shared_ptr<Identifier> i = p->identifier;   
+            (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, 0, p->identifier );     
             return hold_decl.ToRaw( p );
         }
 
@@ -177,6 +176,7 @@ private:
                 p->parameters.push_back( vd );
             }
             curseq = p->body;
+            (void)clang::InfernoMinimalAction::ActOnDeclarator( FnBodyScope, D, 0, p->identifier );     
             return hold_decl.ToRaw( p );     
         }
         
@@ -210,7 +210,6 @@ private:
                                                 clang::IdentifierInfo &II,
                                                 bool HasTrailingLParen ) 
         {
-            assert( !HasTrailingLParen ); // not done yet
             TRACE("aoie %s\n", II.getName() );
             TRACE("aoie2 %p\n", &II );
             shared_ptr<IdentifierExpression> ie(new IdentifierExpression);
@@ -291,6 +290,18 @@ private:
             return hold_expr.ToRaw( o );                        
         }                     
 
+        virtual ExprResult ActOnCallExpr(ExprTy *Fn, clang::SourceLocation LParenLoc,
+                                         ExprTy **Args, unsigned NumArgs,
+                                         clang::SourceLocation *CommaLocs,
+                                         clang::SourceLocation RParenLoc) 
+        {
+            shared_ptr<Call> c(new Call);
+            c->function = hold_expr.FromRaw(Fn);
+            for(int i=0; i<NumArgs; i++ )
+                c->arguments.push_back( hold_expr.FromRaw(Args[i]) );
+            return hold_expr.ToRaw( c );
+        }
+        
         // Not sure if this one has been tested!!
         virtual TypeResult ActOnTypeName(clang::Scope *S, clang::Declarator &D) 
         {
