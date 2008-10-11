@@ -10,7 +10,7 @@
 #include <vector>
 
 template<typename ELEMENT>
-struct Sequence : public std::vector< shared_ptr<ELEMENT> >
+struct Sequence : public vector< shared_ptr<ELEMENT> >
 {
 };                   
 
@@ -20,7 +20,7 @@ struct Node
 };
 
 struct Identifier : public Node,
-                    public std::string
+                    public string
 {
 };
 

@@ -31,7 +31,7 @@
 class Parse : public Pass
 {
 public:
-    Parse( std::string i ) :
+    Parse( string i ) :
         infile(i)
     {
     }
@@ -67,7 +67,7 @@ public:
     }
     
 private:
-    std::string infile;
+    string infile;
     
     class InfernoAction : public clang::InfernoMinimalAction
     {
