@@ -72,7 +72,7 @@ InfernoMinimalAction::isTypeName(const IdentifierInfo &II, Scope *S) {
 Action::DeclTy *
 InfernoMinimalAction::ActOnDeclarator(Scope *S, clang::Declarator &D, DeclTy *LastInGroup, shared_ptr<InfernoIdentifier> rcp) {
   IdentifierInfo *II = D.getIdentifier();
-  
+//  printf("pushing identifier \"%s\"\n", D.getIdentifier()->getName() );
   // If there is no identifier associated with this declarator, bail out.
   if (II == 0) return 0;
   
@@ -145,6 +145,8 @@ void InfernoMinimalAction::ActOnPopScope(SourceLocation Loc, Scope *S) {
 shared_ptr<InfernoIdentifier> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const IdentifierInfo &II )
 {
     TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>();
+    if( !TI )
+        printf("Identifier has no info: \"%s\"\n", II.getName());
     assert(TI && "This decl didn't get pushed??"); // could remove this
     if( TI )
         return TI->rcptr;
