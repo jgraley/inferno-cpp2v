@@ -8,9 +8,9 @@
 
 // TODO indent back to previous level at end of string
 #define ERROR_UNSUPPORTED(P) \
-    std::string( "\n#error " ) + \
-    std::string( typeid(*P).name() ) + \
-    std::string( " not supported in "__FILE__"\n" );
+    string( "\n#error " ) + \
+    string( typeid(*P).name() ) + \
+    string( " not supported in "__FILE__"\n" );
 
 class Render : public Pass
 {
@@ -24,14 +24,14 @@ public:
     
     void operator()( shared_ptr<Program> program )       
     {
-        std::string s = RenderSequence( *program, ";\n", true );
+        string s = RenderSequence( *program, ";\n", true );
         puts( s.c_str() ); // TODO allow a file to be specified in the constructor
     }
 
 private:
-    std::vector<std::string> operator_text;
+    vector<string> operator_text;
 
-    std::string RenderType( shared_ptr<Type> type )
+    string RenderType( shared_ptr<Type> type )
     {
         if( dynamic_pointer_cast< Int >(type) )
             return "int";
@@ -43,12 +43,12 @@ private:
             return ERROR_UNSUPPORTED(type);
     }
 
-    std::string RenderExpression( shared_ptr<Expression> expression, bool bracketize_operator=false )
+    string RenderExpression( shared_ptr<Expression> expression, bool bracketize_operator=false )
     {
         TRACE("re %p\n", &*expression);
         
-        std::string before = bracketize_operator ? "(" : "";
-        std::string after = bracketize_operator ? ")" : "";
+        string before = bracketize_operator ? "(" : "";
+        string after = bracketize_operator ? ")" : "";
         
         if( shared_ptr<IdentifierExpression> ie = dynamic_pointer_cast< IdentifierExpression >(expression) )
             return (*ie->identifier);
@@ -82,12 +82,12 @@ private:
     }
     
     template< class ELEMENT >
-    std::string RenderSequence( Sequence<ELEMENT> spe, std::string separator, bool seperate_last )
+    string RenderSequence( Sequence<ELEMENT> spe, string separator, bool seperate_last )
     {
-        std::string s;
+        string s;
         for( int i=0; i<spe.size(); i++ )
         {
-            std::string sep = (seperate_last || i+1<spe.size()) ? separator : "";
+            string sep = (seperate_last || i+1<spe.size()) ? separator : "";
             shared_ptr<ELEMENT> pe = spe[i];            
             if( shared_ptr<VariableDeclarator> vd = dynamic_pointer_cast< VariableDeclarator >(pe) )
                 s += RenderType(vd->type) + " " + 

@@ -1,12 +1,7 @@
 #ifndef REFCOUNT_HPP
 #define REFCOUNT_HPP
 
-#include <assert.h>
-#include <stdio.h>
-#include <vector>
-
-#include <boost/shared_ptr.hpp>
-using namespace boost;
+#include "common.hpp"
 
 template<typename NODE, typename RAW>
 class RCHold
@@ -56,7 +51,7 @@ private:
     // When this object is destructed, all the members of the vector will be 
     // destructed and targets that then have no refs will be destructed.
     const unsigned id;
-    std::vector< shared_ptr< NODE > > hold_list;  // TODO does this need to be a vector?
+    vector< shared_ptr< NODE > > hold_list;  // TODO does this need to be a vector?
 };
 
 #endif
