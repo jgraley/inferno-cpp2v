@@ -30,6 +30,14 @@ public:
 
 private:
     vector<string> operator_text;
+    
+    string RenderIdentifier( shared_ptr<Identifier> id )
+    {
+        if( id )
+            return *id;
+        else
+            return string();
+    }
 
     string RenderType( shared_ptr<Type> type, string base=string() )
     {
@@ -53,7 +61,7 @@ private:
         string after = bracketize_operator ? ")" : "";
         
         if( shared_ptr<IdentifierExpression> ie = dynamic_pointer_cast< IdentifierExpression >(expression) )
-            return (*ie->identifier);
+            return RenderIdentifier( ie->identifier );
         else if( shared_ptr<NumericConstant> nc = dynamic_pointer_cast< NumericConstant >(expression) )
             return (nc->toString(10, true));
         else if( shared_ptr<Infix> o = dynamic_pointer_cast< Infix >(expression) )
@@ -104,13 +112,13 @@ private:
             shared_ptr<ELEMENT> pe = spe[i];            
             if( shared_ptr<VariableDeclarator> vd = dynamic_pointer_cast< VariableDeclarator >(pe) )
             {
-                s += RenderType(vd->type, *vd->identifier);
+                s += RenderType( vd->type, RenderIdentifier(vd->identifier) );
                 if(vd->initialiser)
                     s += " = " + RenderExpression(vd->initialiser);
                 s += sep;
             }
             else if( shared_ptr<FunctionDeclarator> fd = dynamic_pointer_cast< FunctionDeclarator >(pe) )
-                s += RenderType(fd->type, *fd->identifier) + "\n" + 
+                s += RenderType( fd->type, RenderIdentifier( fd->identifier ) ) + "\n" + 
                      RenderExpression(fd->initialiser);
             else if( shared_ptr<ExpressionStatement> es = dynamic_pointer_cast< ExpressionStatement >(pe) )
                 s += RenderExpression(es->expression) + sep;

@@ -54,8 +54,8 @@ struct Declarator : public ProgramElement
         AUTO
     } storage_class;
     shared_ptr<Type> type;
-    shared_ptr<Identifier> identifier;
-    shared_ptr<Expression> initialiser; // null if uninitialised
+    shared_ptr<Identifier> identifier; // NULL if anonymous
+    shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
 struct VariableDeclarator : public Declarator
