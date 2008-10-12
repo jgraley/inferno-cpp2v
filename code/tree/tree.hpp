@@ -36,30 +36,30 @@ struct Expression : public Node
 {
 };
 
-struct Scope : public Node,
+struct Scope : public Expression,
                public Sequence<ProgramElement>
 {
 };                   
-
-struct Declarator : public ProgramElement
-{   
-    shared_ptr<Identifier> identifier;
-    shared_ptr<Expression> initialiser;
-};
 
 struct Type : public Node
 {
 };
 
-struct VariableDeclarator : public Declarator
-{
-    shared_ptr<Type> type;
+struct Declarator : public ProgramElement
+{   
     enum
     {
         DEFAULT,
         STATIC,
         AUTO
     } storage_class;
+    shared_ptr<Type> type;
+    shared_ptr<Identifier> identifier;
+    shared_ptr<Expression> initialiser; // null if uninitialised
+};
+
+struct VariableDeclarator : public Declarator
+{
 };
 
 struct FunctionPrototype : public Type
@@ -70,8 +70,6 @@ struct FunctionPrototype : public Type
 
 struct FunctionDeclarator : public Declarator
 {
-    shared_ptr<Type> prototype;
-    shared_ptr<Scope> body;
 };
 
 struct Program : public Scope
