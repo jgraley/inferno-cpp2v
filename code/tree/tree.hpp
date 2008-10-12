@@ -57,10 +57,15 @@ struct VariableDeclarator : public Declarator
     } storage_class;
 };
 
-struct FunctionDeclarator : public Declarator
+struct FunctionPrototype : public Type
 {
     shared_ptr<Type> return_type;
     Sequence<VariableDeclarator> parameters;
+};
+
+struct FunctionDeclarator : public Declarator
+{
+    shared_ptr<Type> prototype;
     shared_ptr<Scope> body;
 };
 

@@ -95,26 +95,57 @@ private:
         RCHold<Statement, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
      
-        shared_ptr<Type> CreateTypeNode( const clang::DeclSpec &DS )
+        shared_ptr<Type> CreateTypeNode( clang::Declarator &D, int depth=0 )
         {
-            switch( DS.getTypeSpecType() )
+            assert( depth>=0 );
+            assert( depth<=D.getNumTypeObjects() );
+            
+            if( depth==D.getNumTypeObjects() )
             {
-                case clang::DeclSpec::TST_int:
-                    return shared_ptr<Type>(new Int());
-                    break;
-                case clang::DeclSpec::TST_char:
-                    return shared_ptr<Type>(new Char());
-                    break;
-                case clang::DeclSpec::TST_void:
-                    return shared_ptr<Type>(new Void());
-                    break;
+                const clang::DeclSpec &DS = D.getDeclSpec();
+                switch( DS.getTypeSpecType() )
+                {
+                    case clang::DeclSpec::TST_int:
+                        return shared_ptr<Type>(new Int());
+                        break;
+                    case clang::DeclSpec::TST_char:
+                        return shared_ptr<Type>(new Char());
+                        break;
+                    case clang::DeclSpec::TST_void:
+                        return shared_ptr<Type>(new Void());
+                        break;
+                    default:
+                        assert(0);
+                        break;
+                }
+            }
+            else
+            {
+                const clang::DeclaratorChunk &chunk = D.getTypeObject(depth);
+                switch( chunk.Kind )
+                {
+                case clang::DeclaratorChunk::Function:
+                    {
+                        const clang::DeclaratorChunk::FunctionTypeInfo &fchunk = chunk.Fun; // TODO deal with compounded types
+                        shared_ptr<FunctionPrototype> f(new FunctionPrototype);
+                        for( int i=0; i<fchunk.NumArgs; i++ )
+                        {
+                            shared_ptr<Declarator> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
+                            shared_ptr<VariableDeclarator> vd = dynamic_pointer_cast<VariableDeclarator>(d); // just push the declarators, no need for dynamic cast?
+                            f->parameters.push_back( vd );
+                        }
+                        f->return_type = CreateTypeNode( D, depth+1 );                        
+                        return f;
+                    }
+                    
                 default:
-                    assert(0);
+                assert(!"Unknown type chunk");                     
                     break;
+                }
             }
         }
         
-        shared_ptr<Identifier> CreateIdenifierNode( clang::IdentifierInfo *ID )
+        shared_ptr<Identifier> CreateIdentifierNode( clang::IdentifierInfo *ID )
         { 
             shared_ptr<Identifier> i(new Identifier());
             i->assign( ID->getName() );
@@ -134,9 +165,11 @@ private:
             shared_ptr<VariableDeclarator> p(new VariableDeclarator);
             curseq->push_back(p);
             p->storage_class = VariableDeclarator::STATIC;
-            p->type = CreateTypeNode( D.getDeclSpec() );
-            p->identifier = CreateIdenifierNode( D.getIdentifier() );        
+            p->identifier = CreateIdentifierNode( D.getIdentifier() );        
+
+            p->type = CreateTypeNode( D );
             TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
+
             (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, p->identifier );     
             return hold_decl.ToRaw( p );
         }
@@ -149,8 +182,8 @@ private:
         {
             shared_ptr<VariableDeclarator> p(new VariableDeclarator);
             p->storage_class = VariableDeclarator::STATIC;
-            p->type = CreateTypeNode( D.getDeclSpec() );
-            p->identifier = CreateIdenifierNode( D.getIdentifier() );        
+            p->type = CreateTypeNode( D );
+            p->identifier = CreateIdentifierNode( D.getIdentifier() );        
             TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
             (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, 0, p->identifier );     
             return hold_decl.ToRaw( p );
@@ -166,9 +199,8 @@ private:
         {
             shared_ptr<FunctionDeclarator> p(new FunctionDeclarator);
             curseq->push_back(p);
-            p->return_type = CreateTypeNode( D.getDeclSpec() );
-            p->body = shared_ptr<Scope>(new Scope);
-            p->identifier = CreateIdenifierNode( D.getIdentifier() );  
+            p->identifier = CreateIdentifierNode( D.getIdentifier() );
+            /*  
             clang::DeclaratorChunk::FunctionTypeInfo &pti = D.getTypeObject(0).Fun; // TODO deal with compounded types
             for( int i=0; i<pti.NumArgs; i++ )
             {
@@ -176,7 +208,9 @@ private:
                 shared_ptr<VariableDeclarator> vd = dynamic_pointer_cast<VariableDeclarator>(d); // just push the declarators, no need for dynamic cast?
                 p->parameters.push_back( vd );
             }
-            curseq = p->body;
+*/
+            p->prototype = CreateTypeNode( D );
+            curseq = p->body = shared_ptr<Scope>(new Scope);
             clang::Scope *GlobalScope = FnBodyScope->getParent();
             (void)clang::InfernoMinimalAction::ActOnDeclarator( GlobalScope, D, 0, p->identifier );     
             return hold_decl.ToRaw( p );     
@@ -307,7 +341,7 @@ private:
         // Not sure if this one has been tested!!
         virtual TypeResult ActOnTypeName(clang::Scope *S, clang::Declarator &D) 
         {
-            shared_ptr<Type> t = CreateTypeNode( D.getDeclSpec() );
+            shared_ptr<Type> t = CreateTypeNode( D );
             return hold_type.ToRaw( t );
         }
     };

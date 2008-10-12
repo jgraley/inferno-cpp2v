@@ -31,14 +31,16 @@ public:
 private:
     vector<string> operator_text;
 
-    string RenderType( shared_ptr<Type> type )
+    string RenderType( shared_ptr<Type> type, string base=string() )
     {
         if( dynamic_pointer_cast< Int >(type) )
-            return "int";
+            return "int " + base;
         else if( dynamic_pointer_cast< Char >(type) )
-            return "char";
+            return "char " + base;
         else if( dynamic_pointer_cast< Void >(type) )
-            return "void";
+            return "void " + base;
+        else if( shared_ptr<FunctionPrototype> f = dynamic_pointer_cast< FunctionPrototype >(type) )
+            return RenderType( f->return_type, "(" + base + ")(" + RenderSequence(f->parameters, ", ", false) + ")" );
         else
             return ERROR_UNSUPPORTED(type);
     }
@@ -95,12 +97,9 @@ private:
             string sep = (seperate_last || i+1<spe.size()) ? separator : "";
             shared_ptr<ELEMENT> pe = spe[i];            
             if( shared_ptr<VariableDeclarator> vd = dynamic_pointer_cast< VariableDeclarator >(pe) )
-                s += RenderType(vd->type) + " " + 
-                     (*vd->identifier) + sep;
+                s += RenderType(vd->type, *vd->identifier) + sep;
             else if( shared_ptr<FunctionDeclarator> fd = dynamic_pointer_cast< FunctionDeclarator >(pe) )
-                s += RenderType(fd->return_type) + " " + 
-                     (*fd->identifier) + "(" + 
-                     RenderSequence(fd->parameters, ", ", false) + ")\n{\n" + 
+                s += RenderType(fd->prototype, *fd->identifier) + "\n{\n" + 
                      RenderSequence(*(fd->body), ";\n", true) + "}\n";
             else if( shared_ptr<ExpressionStatement> es = dynamic_pointer_cast< ExpressionStatement >(pe) )
                 s += RenderExpression(es->expression) + sep;
