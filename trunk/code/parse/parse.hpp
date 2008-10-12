@@ -147,7 +147,7 @@ private:
         
         shared_ptr<Identifier> CreateIdentifierNode( clang::IdentifierInfo *ID )
         { 
-            shared_ptr<Identifier> i(new Identifier());
+            shared_ptr<Identifier> i(new Identifier());            
             i->assign( ID->getName() );
             TRACE("ci %s %p %p\n", ID->getName(), &*i, ID );            
             return i;
@@ -167,6 +167,7 @@ private:
             p->storage_class = VariableDeclarator::STATIC;
             p->type = CreateTypeNode( D );
             p->identifier = CreateIdentifierNode( D.getIdentifier() );        
+            p->initialiser = shared_ptr<Expression>(); // might fill in later if init
             TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
             (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, p->identifier );     
             return hold_decl.ToRaw( p );
@@ -180,9 +181,12 @@ private:
         {
             shared_ptr<VariableDeclarator> p(new VariableDeclarator);
             p->storage_class = VariableDeclarator::AUTO;
-            p->type = CreateTypeNode( D );
-            p->identifier = CreateIdentifierNode( D.getIdentifier() );        
-            TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
+            p->type = CreateTypeNode( D );            
+            if( D.getIdentifier() )
+                p->identifier = CreateIdentifierNode( D.getIdentifier() );        
+            else
+                p->identifier = shared_ptr<Identifier>();
+            p->initialiser = shared_ptr<Expression>(); // might fill in later if init
             (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, 0, p->identifier );     
             return hold_decl.ToRaw( p );
         }
