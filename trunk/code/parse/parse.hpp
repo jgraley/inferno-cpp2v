@@ -165,11 +165,9 @@ private:
             shared_ptr<VariableDeclarator> p(new VariableDeclarator);
             curseq->push_back(p);
             p->storage_class = VariableDeclarator::STATIC;
-            p->identifier = CreateIdentifierNode( D.getIdentifier() );        
-
             p->type = CreateTypeNode( D );
+            p->identifier = CreateIdentifierNode( D.getIdentifier() );        
             TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
-
             (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, p->identifier );     
             return hold_decl.ToRaw( p );
         }
@@ -207,9 +205,10 @@ private:
         {
             shared_ptr<FunctionDeclarator> p(new FunctionDeclarator);
             curseq->push_back(p);
+            p->storage_class = VariableDeclarator::STATIC;
+            p->type = CreateTypeNode( D );
             p->identifier = CreateIdentifierNode( D.getIdentifier() );
-            p->prototype = CreateTypeNode( D );
-            curseq = p->body = shared_ptr<Scope>(new Scope);
+            p->initialiser = curseq = shared_ptr<Scope>(new Scope);
             clang::Scope *GlobalScope = FnBodyScope->getParent();
             (void)clang::InfernoMinimalAction::ActOnDeclarator( GlobalScope, D, 0, p->identifier );     
             return hold_decl.ToRaw( p );     

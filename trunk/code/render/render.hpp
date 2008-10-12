@@ -83,6 +83,12 @@ private:
                    RenderExpression( o->function, true ) + "(" +
                    RenderSequence( o->arguments, ", ", false ) + ")" +
                    after;
+        else if( shared_ptr<Scope> o = dynamic_pointer_cast< Scope >(expression) )
+            return before + 
+                   "{\n" + 
+                   RenderSequence(*o, ";\n", true) +
+                   "}\n" +
+                   after;
         else
             return ERROR_UNSUPPORTED(expression);
         TRACE("ok\n");
@@ -104,8 +110,8 @@ private:
                 s += sep;
             }
             else if( shared_ptr<FunctionDeclarator> fd = dynamic_pointer_cast< FunctionDeclarator >(pe) )
-                s += RenderType(fd->prototype, *fd->identifier) + "\n{\n" + 
-                     RenderSequence(*(fd->body), ";\n", true) + "}\n";
+                s += RenderType(fd->type, *fd->identifier) + "\n" + 
+                     RenderExpression(fd->initialiser);
             else if( shared_ptr<ExpressionStatement> es = dynamic_pointer_cast< ExpressionStatement >(pe) )
                 s += RenderExpression(es->expression) + sep;
             else if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(pe) )
