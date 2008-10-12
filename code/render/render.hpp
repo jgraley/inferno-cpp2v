@@ -97,7 +97,12 @@ private:
             string sep = (seperate_last || i+1<spe.size()) ? separator : "";
             shared_ptr<ELEMENT> pe = spe[i];            
             if( shared_ptr<VariableDeclarator> vd = dynamic_pointer_cast< VariableDeclarator >(pe) )
-                s += RenderType(vd->type, *vd->identifier) + sep;
+            {
+                s += RenderType(vd->type, *vd->identifier);
+                if(vd->initialiser)
+                    s += " = " + RenderExpression(vd->initialiser);
+                s += sep;
+            }
             else if( shared_ptr<FunctionDeclarator> fd = dynamic_pointer_cast< FunctionDeclarator >(pe) )
                 s += RenderType(fd->prototype, *fd->identifier) + "\n{\n" + 
                      RenderSequence(*(fd->body), ";\n", true) + "}\n";

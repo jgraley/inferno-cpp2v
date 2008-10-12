@@ -32,15 +32,20 @@ struct ProgramElement : public Node
 {
 };
 
-struct Declarator : public ProgramElement
-{   
-    shared_ptr<Identifier> identifier;
+struct Expression : public Node
+{
 };
 
 struct Scope : public Node,
                public Sequence<ProgramElement>
 {
 };                   
+
+struct Declarator : public ProgramElement
+{   
+    shared_ptr<Identifier> identifier;
+    shared_ptr<Expression> initialiser;
+};
 
 struct Type : public Node
 {
@@ -82,10 +87,6 @@ struct Char : public Type
 };
 
 struct Void : public Type
-{
-};
-
-struct Expression : public Node
 {
 };
 
