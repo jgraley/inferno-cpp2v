@@ -181,12 +181,20 @@ private:
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D) 
         {
             shared_ptr<VariableDeclarator> p(new VariableDeclarator);
-            p->storage_class = VariableDeclarator::STATIC;
+            p->storage_class = VariableDeclarator::AUTO;
             p->type = CreateTypeNode( D );
             p->identifier = CreateIdentifierNode( D.getIdentifier() );        
             TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
             (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, 0, p->identifier );     
             return hold_decl.ToRaw( p );
+        }
+
+        virtual void AddInitializerToDecl(DeclTy *Dcl, ExprTy *Init) 
+        {
+            shared_ptr<Declarator> d = hold_decl.FromRaw( Dcl );
+            shared_ptr<Expression> e = hold_expr.FromRaw( Init );
+            
+            d->initialiser = e;            
         }
 
         /*
@@ -200,15 +208,6 @@ private:
             shared_ptr<FunctionDeclarator> p(new FunctionDeclarator);
             curseq->push_back(p);
             p->identifier = CreateIdentifierNode( D.getIdentifier() );
-            /*  
-            clang::DeclaratorChunk::FunctionTypeInfo &pti = D.getTypeObject(0).Fun; // TODO deal with compounded types
-            for( int i=0; i<pti.NumArgs; i++ )
-            {
-                shared_ptr<Declarator> d = hold_decl.FromRaw( pti.ArgInfo[i].Param );
-                shared_ptr<VariableDeclarator> vd = dynamic_pointer_cast<VariableDeclarator>(d); // just push the declarators, no need for dynamic cast?
-                p->parameters.push_back( vd );
-            }
-*/
             p->prototype = CreateTypeNode( D );
             curseq = p->body = shared_ptr<Scope>(new Scope);
             clang::Scope *GlobalScope = FnBodyScope->getParent();
