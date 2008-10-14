@@ -4,23 +4,15 @@
 
 #include "clang/Parse/Action.h"
 #include "common/refcount.hpp"
-
-class Identifier; // this will be the identifier from the inferno tree. 
-                  // Try not to include the tree here because we enter the clang namespace
-                  // and there would be conflicts
-typedef Identifier InfernoIdentifier;
-
-namespace clang {
+#include "tree/tree.hpp"
 
   // Semantic.
   class DeclSpec;
   class ObjCDeclSpec;
-  class Declarator;
+  class clang::Declarator;
   class AttributeList;
   struct FieldDeclarator;
   // Parse.
-  class Scope;
-  class Action;
   class Selector;
   // Lex.
   class Token;
@@ -31,50 +23,50 @@ namespace clang {
 /// identifiers.  By using a simpler interface than the SemanticAction class,
 /// the parser doesn't have to build complex data structures and thus runs more
 /// quickly.
-class InfernoMinimalAction : public Action {
-  /// Translation Unit Scope - useful to Objective-C actions that need
+class InfernoMinimalAction : public clang::Action {
+  /// Translation Unit clang::Scope - useful to Objective-C actions that need
   /// to lookup file scope declarations in the "ordinary" C decl namespace.
   /// For example, user-defined classes, built-in "id" type, etc.
-  Scope *TUScope;
-  IdentifierTable &Idents;
+  clang::Scope *TUScope;
+  clang::IdentifierTable &Idents;
 public:
-  InfernoMinimalAction(IdentifierTable &IT) : Idents(IT) {}
+  InfernoMinimalAction(clang::IdentifierTable &IT) : Idents(IT) {}
   
-  /// isTypeName - This looks at the IdentifierInfo::FETokenInfo field to
+  /// isTypeName - This looks at the clang::IdentifierInfo::FETokenInfo field to
   /// determine whether the name is a typedef or not in this scope.
-  virtual TypeTy *isTypeName(const IdentifierInfo &II, Scope *S);
+  virtual TypeTy *isTypeName(const clang::IdentifierInfo &II, clang::Scope *S);
   
   /// ActOnDeclarator - If this is a typedef declarator, we modify the
-  /// IdentifierInfo::FETokenInfo field to keep track of this fact, until S is
+  /// clang::IdentifierInfo::FETokenInfo field to keep track of this fact, until S is
   /// popped.
-  virtual DeclTy *ActOnDeclarator(Scope *S, Declarator &D, DeclTy *LastInGroup, shared_ptr<InfernoIdentifier> rcp);
+  virtual DeclTy *ActOnDeclarator(clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup, shared_ptr<Identifier> rcp);
+  
+  void AddNakedIdentifier(clang::Scope *S, clang::IdentifierInfo *II, shared_ptr<Identifier> rcp, bool istype);  
   
   /// ActOnPopScope - When a scope is popped, if any typedefs are now 
-  /// out-of-scope, they are removed from the IdentifierInfo::FETokenInfo field.
-  virtual void ActOnPopScope(SourceLocation Loc, Scope *S);
-  virtual void ActOnTranslationUnitScope(SourceLocation Loc, Scope *S);
+  /// out-of-scope, they are removed from the clang::IdentifierInfo::FETokenInfo field.
+  virtual void ActOnPopScope(clang::SourceLocation Loc, clang::Scope *S);
+  virtual void ActOnTranslationUnitScope(clang::SourceLocation Loc, clang::Scope *S);
   
-  virtual DeclTy *ActOnForwardClassDeclaration(SourceLocation AtClassLoc,
-                                               IdentifierInfo **IdentList,
+  virtual DeclTy *ActOnForwardClassDeclaration(clang::SourceLocation AtClassLoc,
+                                               clang::IdentifierInfo **IdentList,
                                                unsigned NumElts,
-                                               shared_ptr<InfernoIdentifier> rcp);
+                                               shared_ptr<Identifier> rcp);
   
-  virtual DeclTy *ActOnStartClassInterface(SourceLocation interLoc,
-                                           IdentifierInfo *ClassName,
-                                           SourceLocation ClassLoc,
-                                           IdentifierInfo *SuperName,
-                                           SourceLocation SuperLoc,
+  virtual DeclTy *ActOnStartClassInterface(clang::SourceLocation interLoc,
+                                           clang::IdentifierInfo *ClassName,
+                                           clang::SourceLocation ClassLoc,
+                                           clang::IdentifierInfo *SuperName,
+                                           clang::SourceLocation SuperLoc,
                                            DeclTy * const *ProtoRefs, 
                                            unsigned NumProtoRefs,
-                                           SourceLocation EndProtoLoc,
+                                           clang::SourceLocation EndProtoLoc,
                                            AttributeList *AttrList, 
-                                           shared_ptr<InfernoIdentifier> rcp);
+                                           shared_ptr<Identifier> rcp);
   
   // Extract the shared_ptr for the identifier. Where the identifier is differently declared
   // in nested scopes, we get the one that applies currently (which is the innermost one)  
-  shared_ptr<InfernoIdentifier> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const IdentifierInfo &II );                                         
+  shared_ptr<Identifier> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II );                                         
 };
-
-}  // end namespace clang
 
 #endif

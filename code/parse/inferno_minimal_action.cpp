@@ -17,24 +17,22 @@
 
 #include "inferno_minimal_action.hpp"
 
-using namespace clang;
-
 /// TypeNameInfo - A link exists here for each scope that an identifier is
 /// defined.
 struct TypeNameInfo {
   TypeNameInfo *Prev;
   bool isTypeName;
-  shared_ptr<InfernoIdentifier> rcptr;
-  TypeNameInfo(bool istypename, TypeNameInfo *prev, shared_ptr<InfernoIdentifier> rcp) {
+  shared_ptr<Identifier> rcptr;
+  TypeNameInfo(bool istypename, TypeNameInfo *prev, shared_ptr<Identifier> rcp) {
     isTypeName = istypename;
     Prev = prev;
     rcptr = rcp;
   }
 };
 
-void InfernoMinimalAction:: ActOnTranslationUnitScope(SourceLocation Loc, Scope *S) {
+void InfernoMinimalAction::ActOnTranslationUnitScope(clang::SourceLocation Loc, clang::Scope *S) {
   TUScope = S;
-  IdentifierInfo *II;
+  clang::IdentifierInfo *II;
   TypeNameInfo *TI;
   
   // recognize the ObjC built-in type identifiers.
@@ -55,11 +53,11 @@ void InfernoMinimalAction:: ActOnTranslationUnitScope(SourceLocation Loc, Scope 
   */
 }
 
-/// isTypeName - This looks at the IdentifierInfo::FETokenInfo field to
+/// isTypeName - This looks at the clang::IdentifierInfo::FETokenInfo field to
 /// determine whether the name is a type name (objc class name or typedef) or
 /// not in this scope.
-Action::TypeTy *
-InfernoMinimalAction::isTypeName(const IdentifierInfo &II, Scope *S) {
+clang::Action::TypeTy *
+InfernoMinimalAction::isTypeName(const clang::IdentifierInfo &II, clang::Scope *S) {
   if (TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>())
     if (TI->isTypeName)
       return TI;
@@ -67,38 +65,42 @@ InfernoMinimalAction::isTypeName(const IdentifierInfo &II, Scope *S) {
 }
 
 /// ActOnDeclarator - If this is a typedef declarator, we modify the
-/// IdentifierInfo::FETokenInfo field to keep track of this fact, until S is
+/// clang::IdentifierInfo::FETokenInfo field to keep track of this fact, until S is
 /// popped.
-Action::DeclTy *
-InfernoMinimalAction::ActOnDeclarator(Scope *S, clang::Declarator &D, DeclTy *LastInGroup, shared_ptr<InfernoIdentifier> rcp) {
-  IdentifierInfo *II = D.getIdentifier();
-//  printf("pushing identifier \"%s\"\n", D.getIdentifier()->getName() );
+clang::Action::DeclTy *
+InfernoMinimalAction::ActOnDeclarator(clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup, shared_ptr<Identifier> rcp) 
+{
+  clang::IdentifierInfo *II = D.getIdentifier();
+  //  printf("pushing identifier \"%s\"\n", D.getIdentifier()->getName() );
   // If there is no identifier associated with this declarator, bail out.
   if (II == 0) return 0;
   
-  TypeNameInfo *weCurrentlyHaveTypeInfo = II->getFETokenInfo<TypeNameInfo>();
-  bool isTypeName = D.getDeclSpec().getStorageClassSpec() == DeclSpec::SCS_typedef;
-  TypeNameInfo *TI = new TypeNameInfo(isTypeName, weCurrentlyHaveTypeInfo, rcp);
+  bool isTypeName = D.getDeclSpec().getStorageClassSpec() == clang::DeclSpec::SCS_typedef;
+  AddNakedIdentifier(S, II, rcp, isTypeName); 
+  return 0;
+}
 
+void InfernoMinimalAction::AddNakedIdentifier(clang::Scope *S, clang::IdentifierInfo *II, shared_ptr<Identifier> rcp, bool istype) 
+{
+  TypeNameInfo *weCurrentlyHaveTypeInfo = II->getFETokenInfo<TypeNameInfo>();
+  TypeNameInfo *TI = new TypeNameInfo(istype, weCurrentlyHaveTypeInfo, rcp);
   II->setFETokenInfo(TI);
   
   // Remember that this needs to be removed when the scope is popped.
   S->AddDecl(II);
-
-  return 0;
 }
 
-Action::DeclTy *
-InfernoMinimalAction::ActOnStartClassInterface(SourceLocation AtInterfaceLoc,
-                                        IdentifierInfo *ClassName,
-                                        SourceLocation ClassLoc,
-                                        IdentifierInfo *SuperName,
-                                        SourceLocation SuperLoc,
+clang::Action::DeclTy *
+InfernoMinimalAction::ActOnStartClassInterface(clang::SourceLocation AtInterfaceLoc,
+                                        clang::IdentifierInfo *ClassName,
+                                        clang::SourceLocation ClassLoc,
+                                        clang::IdentifierInfo *SuperName,
+                                        clang::SourceLocation SuperLoc,
                                         DeclTy * const *ProtoRefs,
                                         unsigned NumProtocols,
-                                        SourceLocation EndProtoLoc,
+                                        clang::SourceLocation EndProtoLoc,
                                         AttributeList *AttrList,
-                                        shared_ptr<InfernoIdentifier> rcp) {
+                                        shared_ptr<Identifier> rcp) {
   TypeNameInfo *TI =
     new TypeNameInfo(1, ClassName->getFETokenInfo<TypeNameInfo>(), rcp);
 
@@ -107,11 +109,11 @@ InfernoMinimalAction::ActOnStartClassInterface(SourceLocation AtInterfaceLoc,
 }
 
 /// ActOnForwardClassDeclaration - 
-/// Scope will always be top level file scope. 
-Action::DeclTy *
-InfernoMinimalAction::ActOnForwardClassDeclaration(SourceLocation AtClassLoc,
-                                IdentifierInfo **IdentList, unsigned NumElts,
-                                shared_ptr<InfernoIdentifier> rcp) {
+/// clang::Scope will always be top level file scope. 
+clang::Action::DeclTy *
+InfernoMinimalAction::ActOnForwardClassDeclaration(clang::SourceLocation AtClassLoc,
+                                clang::IdentifierInfo **IdentList, unsigned NumElts,
+                                shared_ptr<Identifier> rcp) {
   for (unsigned i = 0; i != NumElts; ++i) {
     TypeNameInfo *TI =
       new TypeNameInfo(1, IdentList[i]->getFETokenInfo<TypeNameInfo>(), rcp);
@@ -125,14 +127,13 @@ InfernoMinimalAction::ActOnForwardClassDeclaration(SourceLocation AtClassLoc,
 }
 
 /// ActOnPopScope - When a scope is popped, if any typedefs are now
-/// out-of-scope, they are removed from the IdentifierInfo::FETokenInfo field.
-void InfernoMinimalAction::ActOnPopScope(SourceLocation Loc, Scope *S) {
-  for (Scope::decl_iterator I = S->decl_begin(), E = S->decl_end();
+/// out-of-scope, they are removed from the clang::IdentifierInfo::FETokenInfo field.
+void InfernoMinimalAction::ActOnPopScope(clang::SourceLocation Loc, clang::Scope *S) {
+  for (clang::Scope::decl_iterator I = S->decl_begin(), E = S->decl_end();
        I != E; ++I) {
-    IdentifierInfo &II = *static_cast<IdentifierInfo*>(*I);
+    clang::IdentifierInfo &II = *static_cast<clang::IdentifierInfo*>(*I);
     TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>();
     assert(TI && "This decl didn't get pushed??");
-    
     if (TI) {
       TypeNameInfo *Next = TI->Prev;
       delete TI;
@@ -142,7 +143,7 @@ void InfernoMinimalAction::ActOnPopScope(SourceLocation Loc, Scope *S) {
   }
 }
 
-shared_ptr<InfernoIdentifier> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const IdentifierInfo &II )
+shared_ptr<Identifier> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II )
 {
     TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>();
     if( !TI )
@@ -151,5 +152,5 @@ shared_ptr<InfernoIdentifier> InfernoMinimalAction::GetCurrentIdentifierRCPtr( c
     if( TI )
         return TI->rcptr;
     else
-        return shared_ptr<InfernoIdentifier>();
+        return shared_ptr<Identifier>();
 }
