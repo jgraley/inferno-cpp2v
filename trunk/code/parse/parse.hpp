@@ -70,26 +70,36 @@ public:
 private:
     string infile;
     
-    class InfernoAction : public clang::InfernoMinimalAction
+    // Extend the tree so we can store function parameter decls during prototype parse
+    // and read them back at the start of function body, which is a seperate scope.
+    struct ParseParameterDeclarator : public VariableDeclarator
+    {
+        clang::IdentifierInfo *clang_identifier;
+    };
+    
+    class InfernoAction : public InfernoMinimalAction
     {
     public:
         InfernoAction(shared_ptr<Program> p, clang::IdentifierTable &IT, clang::Preprocessor &pp) : 
             InfernoMinimalAction(IT),
             preprocessor(pp),
             program(p),
-            curseq(p)
+            curseq(p),
+            curfunc()
         {
         }
      
         ~InfernoAction()
         {
             assert( &*curseq==&*program ); // TODO operator== in shared_ptr<> 
+            assert( !curfunc );
         }
      
      private:   
         clang::Preprocessor &preprocessor;
         shared_ptr<Program> program;
         shared_ptr<Scope> curseq;
+        shared_ptr<FunctionPrototype> curfunc; 
         RCHold<Declarator, DeclTy *> hold_decl;
         RCHold<Expression, ExprTy *> hold_expr;
         RCHold<Statement, StmtTy *> hold_stmt;
@@ -167,19 +177,19 @@ private:
             p->storage_class = VariableDeclarator::STATIC;
             p->type = CreateTypeNode( D );
             p->identifier = CreateIdentifierNode( D.getIdentifier() );        
-            p->initialiser = shared_ptr<Expression>(); // might fill in later if init
+            p->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
             TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
-            (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, p->identifier );     
+            (void)InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, p->identifier );     
             return hold_decl.ToRaw( p );
         }
         
-          /// ActOnParamDeclarator - This callback is invoked when a parameter
-          /// declarator is parsed. This callback only occurs for functions
-          /// with prototypes. S is the function prototype scope for the
-          /// parameters (C++ [basic.scope.proto]).
+        /// ActOnParamDeclarator - This callback is invoked when a parameter
+        /// declarator is parsed. This callback only occurs for functions
+        /// with prototypes. S is the function prototype scope for the
+        /// parameters (C++ [basic.scope.proto]).
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D) 
         {
-            shared_ptr<VariableDeclarator> p(new VariableDeclarator);
+            shared_ptr<ParseParameterDeclarator> p(new ParseParameterDeclarator);
             p->storage_class = VariableDeclarator::AUTO;
             p->type = CreateTypeNode( D );            
             if( D.getIdentifier() )
@@ -187,7 +197,8 @@ private:
             else
                 p->identifier = shared_ptr<Identifier>();
             p->initialiser = shared_ptr<Expression>(); // might fill in later if init
-            (void)clang::InfernoMinimalAction::ActOnDeclarator( S, D, 0, p->identifier );     
+            p->clang_identifier = D.getIdentifier(); // allow us to re-register the identifier
+            (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, p->identifier );     
             return hold_decl.ToRaw( p );
         }
 
@@ -214,13 +225,24 @@ private:
             p->identifier = CreateIdentifierNode( D.getIdentifier() );
             p->initialiser = curseq = shared_ptr<Scope>(new Scope);
             clang::Scope *GlobalScope = FnBodyScope->getParent();
-            (void)clang::InfernoMinimalAction::ActOnDeclarator( GlobalScope, D, 0, p->identifier );     
+            (void)InfernoMinimalAction::ActOnDeclarator( GlobalScope, D, 0, p->identifier );     
+            
+            shared_ptr<FunctionPrototype> fp = dynamic_pointer_cast<FunctionPrototype>( p->type );
+            assert(fp);
+            for( int i=0; i<fp->parameters.size(); i++ )
+            {
+                shared_ptr<ParseParameterDeclarator> ppd = dynamic_pointer_cast<ParseParameterDeclarator>( fp->parameters[i] );                
+                assert(ppd);
+                InfernoMinimalAction::AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->identifier, false);
+            }
             return hold_decl.ToRaw( p );     
         }
+
         
         virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtTy *Body) 
         {
             curseq = program;
+            curfunc = shared_ptr<FunctionPrototype>();
             return Decl;
         }    
         
@@ -251,7 +273,7 @@ private:
             TRACE("aoie %s\n", II.getName() );
             TRACE("aoie2 %p\n", &II );
             shared_ptr<IdentifierExpression> ie(new IdentifierExpression);
-            ie->identifier = clang::InfernoMinimalAction::GetCurrentIdentifierRCPtr( II );
+            ie->identifier = InfernoMinimalAction::GetCurrentIdentifierRCPtr( II );
             shared_ptr<Expression> e = ie;
             TRACE("aoie4 %p\n", &*e);
             return hold_expr.ToRaw( e );            
