@@ -84,22 +84,19 @@ private:
             InfernoMinimalAction(IT),
             preprocessor(pp),
             program(p),
-            curseq(p),
-            curfunc()
+            curseq(p)
         {
         }
      
         ~InfernoAction()
         {
             assert( &*curseq==&*program ); // TODO operator== in shared_ptr<> 
-            assert( !curfunc );
         }
      
      private:   
         clang::Preprocessor &preprocessor;
         shared_ptr<Program> program;
         shared_ptr<Scope> curseq;
-        shared_ptr<FunctionPrototype> curfunc; 
         RCHold<Declarator, DeclTy *> hold_decl;
         RCHold<Expression, ExprTy *> hold_expr;
         RCHold<Statement, StmtTy *> hold_stmt;
@@ -242,7 +239,6 @@ private:
         virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtTy *Body) 
         {
             curseq = program;
-            curfunc = shared_ptr<FunctionPrototype>();
             return Decl;
         }    
         
