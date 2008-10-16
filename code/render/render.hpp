@@ -120,8 +120,8 @@ private:
             else if( shared_ptr<FunctionDeclarator> fd = dynamic_pointer_cast< FunctionDeclarator >(pe) )
                 s += RenderType( fd->type, RenderIdentifier( fd->identifier ) ) + "\n" + 
                      RenderExpression(fd->initialiser);
-            else if( shared_ptr<ExpressionStatement> es = dynamic_pointer_cast< ExpressionStatement >(pe) )
-                s += RenderExpression(es->expression) + sep;
+            else if( shared_ptr<Scope> sc = dynamic_pointer_cast< Scope >(pe) ) // Never put ; after a scope - you'd get {blah};
+                s += RenderExpression(shared_ptr<Expression>(sc));
             else if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(pe) )
                 s += RenderExpression(e) + sep;
             else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(pe) )

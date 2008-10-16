@@ -83,23 +83,20 @@ private:
         InfernoAction(shared_ptr<Program> p, clang::IdentifierTable &IT, clang::Preprocessor &pp) : 
             InfernoMinimalAction(IT),
             preprocessor(pp),
-            program(p),
-            curseq(p)
+            program(p)
         {
         }
      
         ~InfernoAction()
         {
-            assert( &*curseq==&*program ); // TODO operator== in shared_ptr<> 
         }
      
      private:   
         clang::Preprocessor &preprocessor;
         shared_ptr<Program> program;
-        shared_ptr<Scope> curseq;
         RCHold<Declarator, DeclTy *> hold_decl;
         RCHold<Expression, ExprTy *> hold_expr;
-        RCHold<Statement, StmtTy *> hold_stmt;
+        RCHold<ProgramElement, StmtTy *> hold_stmt; // allow decls as well as statements
         RCHold<Type, TypeTy *> hold_type;
      
         shared_ptr<Type> CreateTypeNode( clang::Declarator &D, int depth=0 )
@@ -170,13 +167,14 @@ private:
                 return 0;
             }
             shared_ptr<VariableDeclarator> p(new VariableDeclarator);
-            curseq->push_back(p);
             p->storage_class = VariableDeclarator::STATIC;
             p->type = CreateTypeNode( D );
             p->identifier = CreateIdentifierNode( D.getIdentifier() );        
             p->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
             TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
-            (void)InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, p->identifier );     
+            (void)InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, p->identifier );                 
+            if( !(S->getParent()) )
+                program->push_back( p );
             return hold_decl.ToRaw( p );
         }
         
@@ -195,6 +193,7 @@ private:
                 p->identifier = shared_ptr<Identifier>();
             p->initialiser = shared_ptr<Expression>(); // might fill in later if init
             p->clang_identifier = D.getIdentifier(); // allow us to re-register the identifier
+            TRACE("aopd %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
             (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, p->identifier );     
             return hold_decl.ToRaw( p );
         }
@@ -216,11 +215,10 @@ private:
         virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D) 
         {
             shared_ptr<FunctionDeclarator> p(new FunctionDeclarator);
-            curseq->push_back(p);
             p->storage_class = VariableDeclarator::STATIC;
             p->type = CreateTypeNode( D );
             p->identifier = CreateIdentifierNode( D.getIdentifier() );
-            p->initialiser = curseq = shared_ptr<Scope>(new Scope);
+            
             clang::Scope *GlobalScope = FnBodyScope->getParent();
             (void)InfernoMinimalAction::ActOnDeclarator( GlobalScope, D, 0, p->identifier );     
             
@@ -232,23 +230,25 @@ private:
                 assert(ppd);
                 InfernoMinimalAction::AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->identifier, false);
             }
+            
+            program->push_back( p );
             return hold_decl.ToRaw( p );     
         }
-
         
         virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtTy *Body) 
         {
-            curseq = program;
+            shared_ptr<Declarator> d( hold_decl.FromRaw(Decl) );
+            shared_ptr<Expression> e( dynamic_pointer_cast<Expression>( hold_stmt.FromRaw(Body) ) );
+            assert(e); // function body must be a scope or 0
+            d->initialiser = e;
             return Decl;
         }    
         
         virtual StmtResult ActOnExprStmt(ExprTy *Expr) 
         {
             shared_ptr<Expression> e = hold_expr.FromRaw(Expr);
-            shared_ptr<ExpressionStatement> es(new ExpressionStatement);
-            es->expression = e;
-            curseq->push_back( es );
-            return hold_stmt.ToRaw( es );
+            //TRACE("aoes %p\n", &*es );
+            return hold_stmt.ToRaw( e );
         }
 
         virtual StmtResult ActOnReturnStmt( clang::SourceLocation ReturnLoc,
@@ -257,7 +257,7 @@ private:
             shared_ptr<Expression> e = hold_expr.FromRaw(RetValExp);
             shared_ptr<Return> r(new Return);
             r->return_value = e;
-            curseq->push_back( r );
+            TRACE("aors %p\n", &*r );
             return hold_stmt.ToRaw( r );
         }
 
@@ -267,11 +267,9 @@ private:
                                                 bool HasTrailingLParen ) 
         {
             TRACE("aoie %s\n", II.getName() );
-            TRACE("aoie2 %p\n", &II );
             shared_ptr<IdentifierExpression> ie(new IdentifierExpression);
             ie->identifier = InfernoMinimalAction::GetCurrentIdentifierRCPtr( II );
             shared_ptr<Expression> e = ie;
-            TRACE("aoie4 %p\n", &*e);
             return hold_expr.ToRaw( e );            
         }                                   
         
@@ -363,6 +361,23 @@ private:
         {
             shared_ptr<Type> t = CreateTypeNode( D );
             return hold_type.ToRaw( t );
+        }
+
+        virtual StmtResult ActOnCompoundStmt(clang::SourceLocation L, clang::SourceLocation R,
+                                             StmtTy **Elts, unsigned NumElts,
+                                             bool isStmtExpr) 
+        {
+            shared_ptr<Scope> s(new Scope);
+            for( int i=0; i<NumElts; i++ )
+                s->push_back( hold_stmt.FromRaw(Elts[i]) );
+            return hold_stmt.ToRaw( s );
+        }
+        
+        virtual StmtResult ActOnDeclStmt(DeclTy *Decl, clang::SourceLocation StartLoc,
+                                         clang::SourceLocation EndLoc) 
+        {
+            shared_ptr<Declarator> d( hold_decl.FromRaw(Decl) );
+            return hold_stmt.ToRaw( d );
         }
     };
 };  
