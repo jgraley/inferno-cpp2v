@@ -24,7 +24,7 @@ class RCHold
 // the specialise/dynamic_cast
 public:
     RCHold() :
-        id( ((unsigned)this % 255) << 24 )
+        id( ((unsigned)this % 255+1) << 24 ) // 8-bit hash of this pointer, never zero, placed in top 8 bits
     {
     }
     
@@ -36,6 +36,7 @@ public:
         i |= id; // embed an id for the current hold object  
         void *vp = reinterpret_cast<void *>( i ); 
         hold_list.push_back( p );
+        assert(vp); // cannot return a NULL pointer, since clang inteprets that as an error
         return vp;
     }
     

@@ -32,7 +32,11 @@ struct ProgramElement : public Node
 {
 };
 
-struct Expression : public Node
+struct Statement : public ProgramElement
+{
+};
+
+struct Expression : public Statement
 {
 };
 
@@ -116,15 +120,6 @@ struct ConditionalOperator : public Expression // eg ?:
     shared_ptr<Expression> condition;
     shared_ptr<Expression> if_true;
     shared_ptr<Expression> if_false;
-};
-
-struct Statement : public ProgramElement
-{
-};
-
-struct ExpressionStatement : public Statement
-{
-    shared_ptr<Expression> expression;
 };
 
 struct Return : public Statement
