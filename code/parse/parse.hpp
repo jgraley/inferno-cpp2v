@@ -75,7 +75,7 @@ private:
     
     // Extend the tree so we can store function parameter decls during prototype parse
     // and read them back at the start of function body, which is a seperate scope.
-    struct ParseParameterDeclarator : public VariableDeclarator
+    struct ParseParameterDeclaration : public VariableDeclaration
     {
         clang::IdentifierInfo *clang_identifier;
     };
@@ -97,9 +97,9 @@ private:
      private:   
         clang::Preprocessor &preprocessor;
         shared_ptr<Program> program;
-        RCHold<Declarator, DeclTy *> hold_decl;
+        RCHold<Declaration, DeclTy *> hold_decl;
         RCHold<Expression, ExprTy *> hold_expr;
-        RCHold<ProgramElement, StmtTy *> hold_stmt; // allow decls as well as statements
+        RCHold<Statement, StmtTy *> hold_stmt; // allow decls as well as statements
         RCHold<Type, TypeTy *> hold_type;
      
         shared_ptr<Type> CreateTypeNode( clang::Declarator &D, int depth=0 )
@@ -143,8 +143,8 @@ private:
                         shared_ptr<FunctionPrototype> f(new FunctionPrototype);
                         for( int i=0; i<fchunk.NumArgs; i++ )
                         {
-                            shared_ptr<Declarator> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
-                            shared_ptr<VariableDeclarator> vd = dynamic_pointer_cast<VariableDeclarator>(d); // TODO just push the declarators, no need for dynamic cast?
+                            shared_ptr<Declaration> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
+                            shared_ptr<VariableDeclaration> vd = dynamic_pointer_cast<VariableDeclaration>(d); // TODO just push the declarators, no need for dynamic cast?
                             f->parameters.push_back( vd );
                         }
                         f->return_type = CreateTypeNode( D, depth+1 );                        
@@ -195,8 +195,8 @@ private:
             {            
                 return 0;
             }
-            shared_ptr<VariableDeclarator> p(new VariableDeclarator);
-            p->storage_class = VariableDeclarator::STATIC;
+            shared_ptr<VariableDeclaration> p(new VariableDeclaration);
+            p->storage_class = VariableDeclaration::STATIC;
             p->type = CreateTypeNode( D );
             p->identifier = CreateIdentifierNode( D.getIdentifier() );        
             p->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
@@ -213,8 +213,8 @@ private:
         /// parameters (C++ [basic.scope.proto]).
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D) 
         {
-            shared_ptr<ParseParameterDeclarator> p(new ParseParameterDeclarator);
-            p->storage_class = VariableDeclarator::AUTO;
+            shared_ptr<ParseParameterDeclaration> p(new ParseParameterDeclaration);
+            p->storage_class = VariableDeclaration::AUTO;
             p->type = CreateTypeNode( D );            
             if( D.getIdentifier() )
                 p->identifier = CreateIdentifierNode( D.getIdentifier() );        
@@ -229,7 +229,7 @@ private:
 
         virtual void AddInitializerToDecl(DeclTy *Dcl, ExprTy *Init) 
         {
-            shared_ptr<Declarator> d = hold_decl.FromRaw( Dcl );
+            shared_ptr<Declaration> d = hold_decl.FromRaw( Dcl );
             shared_ptr<Expression> e = hold_expr.FromRaw( Init );
             
             d->initialiser = e;            
@@ -243,8 +243,8 @@ private:
         */
         virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D) 
         {
-            shared_ptr<FunctionDeclarator> p(new FunctionDeclarator);
-            p->storage_class = VariableDeclarator::STATIC;
+            shared_ptr<FunctionDeclaration> p(new FunctionDeclaration);
+            p->storage_class = VariableDeclaration::STATIC;
             p->type = CreateTypeNode( D );
             p->identifier = CreateIdentifierNode( D.getIdentifier() );
             
@@ -255,7 +255,7 @@ private:
             assert(fp);
             for( int i=0; i<fp->parameters.size(); i++ )
             {
-                shared_ptr<ParseParameterDeclarator> ppd = dynamic_pointer_cast<ParseParameterDeclarator>( fp->parameters[i] );                
+                shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( fp->parameters[i] );                
                 assert(ppd);
                 InfernoMinimalAction::AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->identifier, false);
             }
@@ -266,7 +266,7 @@ private:
         
         virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtTy *Body) 
         {
-            shared_ptr<Declarator> d( hold_decl.FromRaw(Decl) );
+            shared_ptr<Declaration> d( hold_decl.FromRaw(Decl) );
             shared_ptr<Expression> e( dynamic_pointer_cast<Expression>( hold_stmt.FromRaw(Body) ) );
             assert(e); // function body must be a scope or 0
             d->initialiser = e;
@@ -405,7 +405,7 @@ private:
         virtual StmtResult ActOnDeclStmt(DeclTy *Decl, clang::SourceLocation StartLoc,
                                          clang::SourceLocation EndLoc) 
         {
-            shared_ptr<Declarator> d( hold_decl.FromRaw(Decl) );
+            shared_ptr<Declaration> d( hold_decl.FromRaw(Decl) );
             return hold_stmt.ToRaw( d );
         }
     };

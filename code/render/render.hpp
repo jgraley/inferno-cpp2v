@@ -116,14 +116,14 @@ private:
         {
             string sep = (seperate_last || i+1<spe.size()) ? separator : "";
             shared_ptr<ELEMENT> pe = spe[i];            
-            if( shared_ptr<VariableDeclarator> vd = dynamic_pointer_cast< VariableDeclarator >(pe) )
+            if( shared_ptr<VariableDeclaration> vd = dynamic_pointer_cast< VariableDeclaration >(pe) )
             {
                 s += RenderType( vd->type, RenderIdentifier(vd->identifier) );
                 if(vd->initialiser)
                     s += " = " + RenderExpression(vd->initialiser);
                 s += sep;
             }
-            else if( shared_ptr<FunctionDeclarator> fd = dynamic_pointer_cast< FunctionDeclarator >(pe) )
+            else if( shared_ptr<FunctionDeclaration> fd = dynamic_pointer_cast< FunctionDeclaration >(pe) )
                 s += RenderType( fd->type, RenderIdentifier( fd->identifier ) ) + "\n" + 
                      RenderExpression(fd->initialiser);
             else if( shared_ptr<Scope> sc = dynamic_pointer_cast< Scope >(pe) ) // Never put ; after a scope - you'd get {blah};
