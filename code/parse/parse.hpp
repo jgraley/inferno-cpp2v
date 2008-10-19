@@ -182,7 +182,7 @@ private:
         { 
             shared_ptr<Identifier> i(new Identifier());            
             i->assign( ID->getName() );
-            TRACE("ci %s %p %p\n", ID->getName(), &*i, ID );            
+            TRACE("ci %s %p %p\n", ID->getName(), i.get(), ID );            
             return i;
         }
         
@@ -200,7 +200,7 @@ private:
             p->type = CreateTypeNode( D );
             p->identifier = CreateIdentifierNode( D.getIdentifier() );        
             p->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
-            TRACE("aod %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
+            TRACE("aod %s %p %p\n", p->identifier->c_str(), p->identifier.get(), p.get() );
             (void)InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, p->identifier );                 
             if( !(S->getParent()) )
                 program->push_back( p );
@@ -222,7 +222,7 @@ private:
                 p->identifier = shared_ptr<Identifier>();
             p->initialiser = shared_ptr<Expression>(); // might fill in later if init
             p->clang_identifier = D.getIdentifier(); // allow us to re-register the identifier
-            TRACE("aopd %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
+            TRACE("aopd %s %p %p\n", 0, p->identifier.get(), p.get() );
             (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, p->identifier );     
             return hold_decl.ToRaw( p );
         }
@@ -276,7 +276,7 @@ private:
         virtual StmtResult ActOnExprStmt(ExprTy *Expr) 
         {
             shared_ptr<Expression> e = hold_expr.FromRaw(Expr);
-            //TRACE("aoes %p\n", &*es );
+            //TRACE("aoes %p\n", es.get() );
             return hold_stmt.ToRaw( e );
         }
 
@@ -286,7 +286,7 @@ private:
             shared_ptr<Expression> e = hold_expr.FromRaw(RetValExp);
             shared_ptr<Return> r(new Return);
             r->return_value = e;
-            TRACE("aors %p\n", &*r );
+            TRACE("aors %p\n", r.get() );
             return hold_stmt.ToRaw( r );
         }
 
@@ -330,7 +330,7 @@ private:
         virtual ExprResult ActOnNumericConstant(const clang::Token &tok) 
         { 
             shared_ptr<NumericConstant> nc(new NumericConstant);
-            *(llvm::APInt *)&*nc = EvaluateNumericConstant( tok );
+            *(llvm::APInt *)(nc.get()) = EvaluateNumericConstant( tok );
             return hold_expr.ToRaw( nc );            
         }
   
