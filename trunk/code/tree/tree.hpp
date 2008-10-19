@@ -99,6 +99,11 @@ struct IdentifierExpression : public Expression
     shared_ptr<Identifier> identifier;
 };
 
+struct LabelExpression : public Expression
+{
+    shared_ptr<Identifier> identifier;
+};
+
 struct Operator : public Expression
 {
     Sequence<Expression> operands;
