@@ -443,6 +443,17 @@ private:
             g->destination = hold_expr.FromRaw( DestExp );
             return hold_stmt.ToRaw( g );
         }
+
+        virtual ExprResult ActOnAddrLabel(clang::SourceLocation OpLoc, clang::SourceLocation LabLoc,
+                                          clang::IdentifierInfo *LabelII)  // "&&foo"
+        {                                 
+            if( !(LabelII->getFETokenInfo<void *>()) )                        
+                LabelII->setFETokenInfo( hold_ident.ToRaw( CreateIdentifierNode( LabelII ) ) );
+
+            shared_ptr<LabelExpression> le( new LabelExpression );
+            le->identifier = hold_ident.FromRaw( LabelII->getFETokenInfo<void *>() );
+            return hold_expr.ToRaw( le );
+        }
     };
 };  
 

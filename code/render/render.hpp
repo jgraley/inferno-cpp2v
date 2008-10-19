@@ -86,6 +86,10 @@ private:
                    operator_text[o->kind] + 
                    RenderExpression( o->operands[0], true ) +
                    after;
+        else if( shared_ptr<LabelExpression> le = dynamic_pointer_cast< LabelExpression >(expression) )
+            return before + 
+                   "&&" + RenderIdentifier( le->identifier ) +
+                   after;
         else if( shared_ptr<ConditionalOperator> o = dynamic_pointer_cast< ConditionalOperator >(expression) )
             return before + 
                    RenderExpression( o->condition, true ) + "?" +
