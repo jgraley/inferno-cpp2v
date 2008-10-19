@@ -13,6 +13,9 @@ using namespace boost;
 #define foreach         BOOST_FOREACH
 #define reverse_foreach BOOST_REVERSE_FOREACH
 
+//#undef assert
+//#define assert(X) do{ if(!X) (*(int *)-1)++; } while(0)
+
 #include "trace.hpp"
 
 #endif
