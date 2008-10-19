@@ -32,18 +32,18 @@ public:
     RAW ToRaw( shared_ptr<NODE> p )
     {
         unsigned i = (unsigned)hold_list.size(); // the index of the next push_back()
-        assert( (i & 0xFF000000) == 0 && "gone over maximum number of elements, probably due to infinite loop, if not rejig id" );
+        ASSERT( (i & 0xFF000000) == 0 && "gone over maximum number of elements, probably due to infinite loop, if not rejig id" );
         i |= id; // embed an id for the current hold object  
         void *vp = reinterpret_cast<void *>( i ); 
         hold_list.push_back( p );
-        assert(vp); // cannot return a NULL pointer, since clang inteprets that as an error
+        ASSERT(vp); // cannot return a NULL pointer, since clang inteprets that as an error
         return vp;
     }
     
     shared_ptr<NODE> FromRaw( RAW p )
     {
         unsigned i = reinterpret_cast<unsigned>(p);
-        assert( (i & 0xFF000000) == id && "this raw value was stored to a different holder");
+        ASSERT( (i & 0xFF000000) == id && "this raw value was stored to a different holder");
         i &= 0x00FFFFFF; 
         return hold_list[i];
     }
