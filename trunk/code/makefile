@@ -15,7 +15,7 @@ OUTSIDE_SVN := ../../..
 
 # For boost
 # JSG I need this to get the boost includes in a cygwin setup
-BOOST_PATH := -I/usr/include/boost-1_33_1
+BOOST_PATH := -I/usr/include/boost-1_33_1 -DBOOST_ENABLE_ASSERT_HANDLER
 
 # Including and linking with the LLVM and Clang
 LLVM := $(OUTSIDE_SVN)/llvm-2.3
@@ -29,7 +29,7 @@ CLANG_LIBS := $(LLVM)/$(BUILD)/lib/libclang*.a $(LLVM)/$(BUILD)/lib/libclangBasi
 # For inferno
 STANDARD_LIBS := -lstdc++
 INCLUDE_PATH := $(INCLUDE_PATH) -I.
-INFERNO_SOURCES := inferno.cpp tree/tree.cpp common/refcount.cpp common/read_args.cpp parse/inferno_minimal_action.cpp
+INFERNO_SOURCES := inferno.cpp tree/tree.cpp common/refcount.cpp common/read_args.cpp common/trace.cpp parse/inferno_minimal_action.cpp
 
 all : inferno.cpp
 	$(CC) $(INCLUDE_PATH) $(LLVM_OPTIONS) $(INFERNO_SOURCES) $(CLANG_LIBS) $(LLVM_LIBS) $(STANDARD_LIBS) $(BOOST_PATH) -ggdb -o inferno

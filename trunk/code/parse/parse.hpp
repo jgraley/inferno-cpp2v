@@ -222,6 +222,7 @@ private:
                 p->identifier = shared_ptr<Identifier>();
             p->initialiser = shared_ptr<Expression>(); // might fill in later if init
             p->clang_identifier = D.getIdentifier(); // allow us to re-register the identifier
+            TRACE("aopd %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
             (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, p->identifier );     
             return hold_decl.ToRaw( p );
         }

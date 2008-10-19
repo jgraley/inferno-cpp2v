@@ -1,41 +1,37 @@
-
 #ifndef TRACE_HPP
 #define TRACE_HPP
 
-#include <stdarg.h>
-#include "read_args.hpp"
+/*
+ * How it works:
+ *
+ * TRACE
+ * We use a functor class "Tracer" to make TRACE look like a funciton that works
+ * just like printf(). Note that Boost provides a multi-platform "name of 
+ * currrent function" macro, which we use.
+ *
+ * ASSERT
+ * Boost asserts due to shared_ptr errors happen quite a lot. We compile with
+ * BOOST_ENABLE_ASSERT_HANDLER defined which makes Boost call 
+ * boost::assertion_failed() when its own BOOST_ASSERT() fails. We fill this
+ * in to print a message (using our Tracer class), and then crash in a way
+ * that assures a stack dump. We define our own ASSERT() to use BOOST_ASSERT().
+ */
 
 class Tracer
 {
 public:
-    Tracer( const char *f, int l, const char *fu ) :
-        file( f ),
-        line( l ),
-        function( fu )        
-    {
-    }
-    void operator()()
-    {
-        printf("%s:%d in %s()\n", file, line, function);
-    }
-    void operator()(const char *fmt, ...)
-    {
-        if( !ReadArgs::trace )
-            return;
-        
-        va_list vl;
-        va_start( vl, fmt );
-        printf("%s:%d in %s()\n    ", file, line, function);
-        vprintf( fmt, vl );
-        va_end( vl );
-    }
+    Tracer( const char *f, int l, const char *fu );
+    void operator()();
+    void operator()(const char *fmt, ...);
     // TODO ostream support?
+    
 private:
     const char * const file;
     const int line;
     const char * const function;
 };
 
-#define TRACE Tracer( __FILE__, __LINE__, __func__ )
+#define TRACE Tracer( __FILE__, __LINE__, BOOST_CURRENT_FUNCTION )
+#define ASSERT BOOST_ASSERT
 
 #endif
