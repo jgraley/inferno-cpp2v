@@ -135,7 +135,7 @@ void InfernoMinimalAction::ActOnPopScope(clang::SourceLocation Loc, clang::Scope
        I != E; ++I) {
     clang::IdentifierInfo &II = *static_cast<clang::IdentifierInfo*>(*I);
     TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>();
-    assert(TI && "This decl didn't get pushed??");
+    ASSERT(TI && "This decl didn't get pushed??");
     if (TI) {
       TypeNameInfo *Next = TI->Prev;
       delete TI;
@@ -150,7 +150,7 @@ shared_ptr<Identifier> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const cl
     TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>();
     if( !TI )
         printf("Identifier has no info: \"%s\"\n", II.getName());
-    assert(TI && "This decl didn't get pushed??"); // could remove this
+    ASSERT(TI && "This decl didn't get pushed??"); // could remove this
     if( TI )
         return TI->rcptr;
     else

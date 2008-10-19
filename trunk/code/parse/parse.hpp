@@ -47,7 +47,7 @@ public:
         clang::LangOptions opts;
         opts.CPlusPlus = 1; // TODO set based on input file extension
         clang::TargetInfo* ptarget = clang::TargetInfo::CreateTargetInfo(INFERNO_TRIPLE);
-        assert(ptarget);
+        ASSERT(ptarget);
         clang::SourceManager sm;
         clang::HeaderSearch headers( fm );
         
@@ -99,14 +99,15 @@ private:
         shared_ptr<Program> program;
         RCHold<Declaration, DeclTy *> hold_decl;
         RCHold<Expression, ExprTy *> hold_expr;
-        RCHold<Statement, StmtTy *> hold_stmt; // allow decls as well as statements
+        RCHold<Statement, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
-     
+        RCHold<Identifier, void *> hold_ident;
+        
         shared_ptr<Type> CreateTypeNode( clang::Declarator &D, int depth=0 )
         {
             TRACE("%d, %d\n", depth, D.getNumTypeObjects() );
-            assert( depth>=0 );
-            assert( depth<=D.getNumTypeObjects() );
+            ASSERT( depth>=0 );
+            ASSERT( depth<=D.getNumTypeObjects() );
             
             TRACE();
             if( depth==D.getNumTypeObjects() )
@@ -126,7 +127,7 @@ private:
                         return shared_ptr<Type>(new Void());
                         break;
                     default:                    
-                        assert(0);
+                        ASSERT(0);
                         break;
                 }
             }
@@ -166,13 +167,13 @@ private:
                         TRACE("ref\n");
                         const clang::DeclaratorChunk::ReferenceTypeInfo &rchunk = chunk.Ref; 
                         shared_ptr<Reference> r(new Reference);
-                        assert(r);
+                        ASSERT(r);
                         r->destination = CreateTypeNode( D, depth+1 );                        
                         return r;
                     }
                     
                 default:
-                assert(!"Unknown type chunk");                     
+                ASSERT(!"Unknown type chunk");                     
                     break;
                 }
             }
@@ -252,11 +253,11 @@ private:
             (void)InfernoMinimalAction::ActOnDeclarator( GlobalScope, D, 0, p->identifier );     
             
             shared_ptr<FunctionPrototype> fp = dynamic_pointer_cast<FunctionPrototype>( p->type );
-            assert(fp);
+            ASSERT(fp);
             for( int i=0; i<fp->parameters.size(); i++ )
             {
                 shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( fp->parameters[i] );                
-                assert(ppd);
+                ASSERT(ppd);
                 InfernoMinimalAction::AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->identifier, false);
             }
             
@@ -268,7 +269,7 @@ private:
         {
             shared_ptr<Declaration> d( hold_decl.FromRaw(Decl) );
             shared_ptr<Expression> e( dynamic_pointer_cast<Expression>( hold_stmt.FromRaw(Body) ) );
-            assert(e); // function body must be a scope or 0
+            ASSERT(e); // function body must be a scope or 0
             d->initialiser = e;
             return Decl;
         }    
@@ -312,7 +313,7 @@ private:
             unsigned actual_length = preprocessor.getSpelling(tok, this_tok_begin);
             clang::NumericLiteralParser literal(this_tok_begin, this_tok_begin+actual_length, 
                                                 tok.getLocation(), preprocessor);
-            assert(!literal.hadError);
+            ASSERT(!literal.hadError);
 
             if (literal.isIntegerLiteral()) 
             {
@@ -321,10 +322,10 @@ private:
                
                 bool err = literal.GetIntegerValue(rv);
                 
-                assert( !err );
+                ASSERT( !err );
                 return rv;
             }
-            assert(!"only ints supported");
+            ASSERT(!"only ints supported");
         }
         
         virtual ExprResult ActOnNumericConstant(const clang::Token &tok) 
@@ -407,6 +408,40 @@ private:
         {
             shared_ptr<Declaration> d( hold_decl.FromRaw(Decl) );
             return hold_stmt.ToRaw( d );
+        }
+        
+        virtual StmtResult ActOnLabelStmt(clang::SourceLocation IdentLoc, clang::IdentifierInfo *II,
+                                          clang::SourceLocation ColonLoc, StmtTy *SubStmt) 
+        {
+            if( !(II->getFETokenInfo<void *>()) )                        
+                II->setFETokenInfo( hold_ident.ToRaw( CreateIdentifierNode( II ) ) );
+            
+            shared_ptr<Label> l( new Label );
+            l->identifier = hold_ident.FromRaw( II->getFETokenInfo<void *>() );
+            return hold_stmt.ToRaw( l );
+        }
+        
+        virtual StmtResult ActOnGotoStmt(clang::SourceLocation GotoLoc,
+                                         clang::SourceLocation LabelLoc,
+                                         clang::IdentifierInfo *LabelII) 
+        {
+            if( !(LabelII->getFETokenInfo<void *>()) )                        
+                LabelII->setFETokenInfo( hold_ident.ToRaw( CreateIdentifierNode( LabelII ) ) );
+
+            shared_ptr<IdentifierExpression> ie( new IdentifierExpression );
+            ie->identifier = hold_ident.FromRaw( LabelII->getFETokenInfo<void *>() );
+            shared_ptr<Goto> g( new Goto );
+            g->destination = ie;
+            return hold_stmt.ToRaw( g );
+        }
+        
+        virtual StmtResult ActOnIndirectGotoStmt(clang::SourceLocation GotoLoc,
+                                                 clang::SourceLocation StarLoc,
+                                                 ExprTy *DestExp) 
+        {
+            shared_ptr<Goto> g( new Goto );
+            g->destination = hold_expr.FromRaw( DestExp );
+            return hold_stmt.ToRaw( g );
         }
     };
 };  

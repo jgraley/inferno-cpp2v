@@ -132,6 +132,10 @@ private:
                 s += RenderExpression(e) + sep;
             else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(pe) )
                 s += "return " + RenderExpression(es->return_value) + sep;
+            else if( shared_ptr<Label> l = dynamic_pointer_cast<Label>(pe) )
+                s += RenderIdentifier(l->identifier) + ":\n"; // no ; after a label
+            else if( shared_ptr<Goto> g = dynamic_pointer_cast<Goto>(pe) )
+                s += "goto " + RenderExpression(g->destination) + sep; 
             else
                 s += ERROR_UNSUPPORTED(pe);
         }

@@ -140,4 +140,16 @@ struct NumericConstant : public Expression,
 {
 };
 
+struct Label : public Statement
+{
+    shared_ptr<Identifier> identifier;
+};
+
+struct Goto : public Statement
+{
+    // Dest is an expression for goto-a-variable support.
+    // Ordinary gotos will have IdentifierExpression here.
+    shared_ptr<Expression> destination;
+};
+
 #endif
