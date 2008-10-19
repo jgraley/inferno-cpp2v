@@ -72,6 +72,16 @@ struct FunctionPrototype : public Type
     Sequence<VariableDeclarator> parameters;
 };
 
+struct Pointer : public Type
+{
+    shared_ptr<Type> destination;
+};
+
+struct Reference : public Type // TODO could ref derive from ptr?
+{
+    shared_ptr<Type> destination;
+};
+
 struct FunctionDeclarator : public Declarator
 {
 };

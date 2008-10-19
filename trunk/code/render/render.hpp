@@ -39,16 +39,20 @@ private:
             return string();
     }
 
-    string RenderType( shared_ptr<Type> type, string base=string() )
+    string RenderType( shared_ptr<Type> type, string object=string() )
     {
         if( dynamic_pointer_cast< Int >(type) )
-            return "int " + base;
+            return "int " + object;
         else if( dynamic_pointer_cast< Char >(type) )
-            return "char " + base;
+            return "char " + object;
         else if( dynamic_pointer_cast< Void >(type) )
-            return "void " + base;
+            return "void " + object;
         else if( shared_ptr<FunctionPrototype> f = dynamic_pointer_cast< FunctionPrototype >(type) )
-            return RenderType( f->return_type, "(" + base + ")(" + RenderSequence(f->parameters, ", ", false) + ")" );
+            return RenderType( f->return_type, "(" + object + ")(" + RenderSequence(f->parameters, ", ", false) + ")" );
+        else if( shared_ptr<Pointer> p = dynamic_pointer_cast< Pointer >(type) )
+            return RenderType( p->destination, "(*" + object + ")" );
+        else if( shared_ptr<Reference> r = dynamic_pointer_cast< Reference >(type) )
+            return RenderType( r->destination, "(&" + object + ")" );
         else
             return ERROR_UNSUPPORTED(type);
     }

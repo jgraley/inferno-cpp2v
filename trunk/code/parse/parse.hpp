@@ -101,6 +101,7 @@ private:
      
         shared_ptr<Type> CreateTypeNode( clang::Declarator &D, int depth=0 )
         {
+            TRACE("%d\n", depth);
             assert( depth>=0 );
             assert( depth<=D.getNumTypeObjects() );
             
@@ -130,16 +131,36 @@ private:
                 {
                 case clang::DeclaratorChunk::Function:
                     {
-                        const clang::DeclaratorChunk::FunctionTypeInfo &fchunk = chunk.Fun; // TODO deal with compounded types
+                        const clang::DeclaratorChunk::FunctionTypeInfo &fchunk = chunk.Fun; 
                         shared_ptr<FunctionPrototype> f(new FunctionPrototype);
                         for( int i=0; i<fchunk.NumArgs; i++ )
                         {
                             shared_ptr<Declarator> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
-                            shared_ptr<VariableDeclarator> vd = dynamic_pointer_cast<VariableDeclarator>(d); // just push the declarators, no need for dynamic cast?
+                            shared_ptr<VariableDeclarator> vd = dynamic_pointer_cast<VariableDeclarator>(d); // TODO just push the declarators, no need for dynamic cast?
                             f->parameters.push_back( vd );
                         }
                         f->return_type = CreateTypeNode( D, depth+1 );                        
                         return f;
+                    }
+                    
+                case clang::DeclaratorChunk::Pointer:
+                    {
+                        // TODO attributes
+                        const clang::DeclaratorChunk::PointerTypeInfo &pchunk = chunk.Ptr; 
+                        shared_ptr<Pointer> p(new Pointer);
+                        p->destination = CreateTypeNode( D, depth+1 );                        
+                        return p;
+                    }
+                    
+                case clang::DeclaratorChunk::Reference:
+                    {
+                        // TODO attributes
+                        TRACE("ref\n");
+                        const clang::DeclaratorChunk::ReferenceTypeInfo &rchunk = chunk.Ref; 
+                        shared_ptr<Reference> r(new Reference);
+                        assert(r);
+                        r->destination = CreateTypeNode( D, depth+1 );                        
+                        return r;
                     }
                     
                 default:
