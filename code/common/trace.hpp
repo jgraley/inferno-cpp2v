@@ -14,6 +14,10 @@ public:
         function( fu )        
     {
     }
+    void operator()()
+    {
+        printf("%s:%d in %s()\n", file, line, function);
+    }
     void operator()(const char *fmt, ...)
     {
         if( !ReadArgs::trace )

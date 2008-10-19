@@ -1,6 +1,8 @@
 #ifndef PARSE_HPP
 #define PARSE_HPP
 
+#include "common/common.hpp"
+
 #include "llvm/ADT/APInt.h"
 #include "llvm/ADT/SmallString.h"
 
@@ -43,6 +45,7 @@ public:
         clang::TextDiagnosticPrinter diag_printer;
         clang::Diagnostic diags( &diag_printer ); 
         clang::LangOptions opts;
+        opts.CPlusPlus = 1; // TODO set based on input file extension
         clang::TargetInfo* ptarget = clang::TargetInfo::CreateTargetInfo(INFERNO_TRIPLE);
         assert(ptarget);
         clang::SourceManager sm;
@@ -101,16 +104,19 @@ private:
      
         shared_ptr<Type> CreateTypeNode( clang::Declarator &D, int depth=0 )
         {
-            TRACE("%d\n", depth);
+            TRACE("%d, %d\n", depth, D.getNumTypeObjects() );
             assert( depth>=0 );
             assert( depth<=D.getNumTypeObjects() );
             
+            TRACE();
             if( depth==D.getNumTypeObjects() )
             {
+                TRACE();
                 const clang::DeclSpec &DS = D.getDeclSpec();
                 switch( DS.getTypeSpecType() )
                 {
                     case clang::DeclSpec::TST_int:
+                        TRACE();
                         return shared_ptr<Type>(new Int());
                         break;
                     case clang::DeclSpec::TST_char:
@@ -119,14 +125,16 @@ private:
                     case clang::DeclSpec::TST_void:
                         return shared_ptr<Type>(new Void());
                         break;
-                    default:
+                    default:                    
                         assert(0);
                         break;
                 }
             }
             else
             {
+                TRACE();
                 const clang::DeclaratorChunk &chunk = D.getTypeObject(depth);
+                TRACE();
                 switch( chunk.Kind )
                 {
                 case clang::DeclaratorChunk::Function:
@@ -214,7 +222,6 @@ private:
                 p->identifier = shared_ptr<Identifier>();
             p->initialiser = shared_ptr<Expression>(); // might fill in later if init
             p->clang_identifier = D.getIdentifier(); // allow us to re-register the identifier
-            TRACE("aopd %s %p %p\n", p->identifier->c_str(), &*p->identifier, &*p );
             (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, p->identifier );     
             return hold_decl.ToRaw( p );
         }

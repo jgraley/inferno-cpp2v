@@ -33,10 +33,12 @@ private:
     
     string RenderIdentifier( shared_ptr<Identifier> id )
     {
+        string ids;
+        TRACE();
         if( id )
-            return *id;
-        else
-            return string();
+            ids = *id;
+        TRACE();
+        return ids;
     }
 
     string RenderType( shared_ptr<Type> type, string object=string() )
