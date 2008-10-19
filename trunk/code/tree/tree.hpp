@@ -24,15 +24,7 @@ struct Identifier : public Node,
 {
 };
 
-// ProgramElement is the base class for Statement and Declarator. There's 
-// nothing in Clang or C++ BNF for this, but we need it to avoid 
-// a multiple inheritance diamond because certain decls (eg int a;)
-// can appear at top level and in fn bodies. 
-struct ProgramElement : public Node
-{
-};
-
-struct Statement : public ProgramElement
+struct Statement : public Node
 {
 };
 
@@ -41,7 +33,7 @@ struct Expression : public Statement
 };
 
 struct Scope : public Expression,
-               public Sequence<ProgramElement>
+               public Sequence<Statement>
 {
 };                   
 
@@ -49,7 +41,7 @@ struct Type : public Node
 {
 };
 
-struct Declarator : public ProgramElement
+struct Declaration : public Statement
 {   
     enum
     {
@@ -62,14 +54,14 @@ struct Declarator : public ProgramElement
     shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
-struct VariableDeclarator : public Declarator
+struct VariableDeclaration : public Declaration
 {
 };
 
 struct FunctionPrototype : public Type
 {
     shared_ptr<Type> return_type;
-    Sequence<VariableDeclarator> parameters;
+    Sequence<VariableDeclaration> parameters;
 };
 
 struct Pointer : public Type
@@ -82,7 +74,7 @@ struct Reference : public Type // TODO could ref derive from ptr?
     shared_ptr<Type> destination;
 };
 
-struct FunctionDeclarator : public Declarator
+struct FunctionDeclaration : public Declaration
 {
 };
 
