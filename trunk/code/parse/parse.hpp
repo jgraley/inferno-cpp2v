@@ -454,6 +454,18 @@ private:
             le->identifier = hold_ident.FromRaw( LabelII->getFETokenInfo<void *>() );
             return hold_expr.ToRaw( le );
         }
+        
+        virtual StmtResult ActOnIfStmt(clang::SourceLocation IfLoc, ExprTy *CondVal,
+                                       StmtTy *ThenVal, clang::SourceLocation ElseLoc,
+                                       StmtTy *ElseVal) 
+        {
+            shared_ptr<If> i( new If );
+            i->condition = hold_expr.FromRaw( CondVal );
+            i->then = hold_stmt.FromRaw( ThenVal );
+            if( ElseVal )
+                i->otherwise = hold_stmt.FromRaw( ElseVal );
+            return hold_stmt.ToRaw( i );
+        }
     };
 };  
 

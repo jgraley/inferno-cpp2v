@@ -112,6 +112,48 @@ private:
         TRACE("ok\n");
     }
     
+    string RenderStatement( shared_ptr<Statement> statement, string sep )
+    {
+        if( shared_ptr<VariableDeclaration> vd = dynamic_pointer_cast< VariableDeclaration >(statement) )
+        {
+            string s;
+            s += RenderType( vd->type, RenderIdentifier(vd->identifier) );
+            if(vd->initialiser)
+                s += " = " + RenderExpression(vd->initialiser);
+            s += sep;
+            return s;
+        }
+        else if( shared_ptr<FunctionDeclaration> fd = dynamic_pointer_cast< FunctionDeclaration >(statement) )
+            return RenderType( fd->type, RenderIdentifier( fd->identifier ) ) + "\n" + 
+                 RenderExpression(fd->initialiser);
+        else if( shared_ptr<Scope> sc = dynamic_pointer_cast< Scope >(statement) ) // Never put ; after a scope - you'd get {blah};
+            return RenderExpression(shared_ptr<Expression>(sc));
+        else if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(statement) )
+            return RenderExpression(e) + sep;
+        else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(statement) )
+            return "return " + RenderExpression(es->return_value) + sep;
+        else if( shared_ptr<Label> l = dynamic_pointer_cast<Label>(statement) )
+            return RenderIdentifier(l->identifier) + ":\n"; // no ; after a label
+        else if( shared_ptr<Goto> g = dynamic_pointer_cast<Goto>(statement) )
+            return "goto " + RenderExpression(g->destination) + sep; 
+        else if( shared_ptr<If> i = dynamic_pointer_cast<If>(statement) )
+        {
+            string s;
+            s += "if(" + RenderExpression(i->condition) + ")\n"
+                 "{\n"+ 
+                 RenderStatement(i->then, ";\n") +
+                 "}\n";
+            if( i->otherwise )
+                s += "else\n"
+                     "{\n" + 
+                     RenderStatement(i->otherwise, ";\n") + 
+                     "}\n";
+            return s;
+        } 
+        else
+            return ERROR_UNSUPPORTED(statement);
+    }
+    
     template< class ELEMENT >
     string RenderSequence( Sequence<ELEMENT> spe, string separator, bool seperate_last )
     {
@@ -119,29 +161,8 @@ private:
         for( int i=0; i<spe.size(); i++ )
         {
             string sep = (seperate_last || i+1<spe.size()) ? separator : "";
-            shared_ptr<ELEMENT> pe = spe[i];            
-            if( shared_ptr<VariableDeclaration> vd = dynamic_pointer_cast< VariableDeclaration >(pe) )
-            {
-                s += RenderType( vd->type, RenderIdentifier(vd->identifier) );
-                if(vd->initialiser)
-                    s += " = " + RenderExpression(vd->initialiser);
-                s += sep;
-            }
-            else if( shared_ptr<FunctionDeclaration> fd = dynamic_pointer_cast< FunctionDeclaration >(pe) )
-                s += RenderType( fd->type, RenderIdentifier( fd->identifier ) ) + "\n" + 
-                     RenderExpression(fd->initialiser);
-            else if( shared_ptr<Scope> sc = dynamic_pointer_cast< Scope >(pe) ) // Never put ; after a scope - you'd get {blah};
-                s += RenderExpression(shared_ptr<Expression>(sc));
-            else if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(pe) )
-                s += RenderExpression(e) + sep;
-            else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(pe) )
-                s += "return " + RenderExpression(es->return_value) + sep;
-            else if( shared_ptr<Label> l = dynamic_pointer_cast<Label>(pe) )
-                s += RenderIdentifier(l->identifier) + ":\n"; // no ; after a label
-            else if( shared_ptr<Goto> g = dynamic_pointer_cast<Goto>(pe) )
-                s += "goto " + RenderExpression(g->destination) + sep; 
-            else
-                s += ERROR_UNSUPPORTED(pe);
+            shared_ptr<ELEMENT> pe = spe[i];                        
+            s += RenderStatement( pe, sep );
         }
         return s;
     }

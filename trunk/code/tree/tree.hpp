@@ -157,4 +157,12 @@ struct Goto : public Statement
     shared_ptr<Expression> destination;
 };
 
+struct If : public Statement
+{
+    shared_ptr<Expression> condition;
+    shared_ptr<Statement> then;
+    shared_ptr<Statement> otherwise; // can be NULL if no else
+                                     // "else" is a keyword
+};
+
 #endif
