@@ -112,9 +112,9 @@ private:
         TRACE("ok\n");
     }
     
-    string RenderStatement( shared_ptr<Statement> statement, string sep )
+    string RenderDeclaration( shared_ptr<Statement> declaration, string sep )
     {
-        if( shared_ptr<VariableDeclaration> vd = dynamic_pointer_cast< VariableDeclaration >(statement) )
+        if( shared_ptr<VariableDeclaration> vd = dynamic_pointer_cast< VariableDeclaration >(declaration) )
         {
             string s;
             s += RenderType( vd->type, RenderIdentifier(vd->identifier) );
@@ -123,9 +123,15 @@ private:
             s += sep;
             return s;
         }
-        else if( shared_ptr<FunctionDeclaration> fd = dynamic_pointer_cast< FunctionDeclaration >(statement) )
+        else if( shared_ptr<FunctionDeclaration> fd = dynamic_pointer_cast< FunctionDeclaration >(declaration) )
             return RenderType( fd->type, RenderIdentifier( fd->identifier ) ) + "\n" + 
-                 RenderExpression(fd->initialiser);
+                   RenderExpression(fd->initialiser);
+    }
+
+    string RenderStatement( shared_ptr<Statement> statement, string sep )
+    {
+        if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(statement) )
+            return RenderDeclaration( d, sep );
         else if( shared_ptr<Scope> sc = dynamic_pointer_cast< Scope >(statement) ) // Never put ; after a scope - you'd get {blah};
             return RenderExpression(shared_ptr<Expression>(sc));
         else if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(statement) )
@@ -143,7 +149,7 @@ private:
                  "{\n"+ 
                  RenderStatement(i->then, ";\n") +
                  "}\n";
-            if( i->otherwise )
+            if( i->otherwise )  // else is optional
                 s += "else\n"
                      "{\n" + 
                      RenderStatement(i->otherwise, ";\n") + 
@@ -162,7 +168,7 @@ private:
         {
             string sep = (seperate_last || i+1<spe.size()) ? separator : "";
             shared_ptr<ELEMENT> pe = spe[i];                        
-            s += RenderStatement( pe, sep );
+            s += RenderStatement( pe, sep ); // Use this since statement is a base for declaration and expression
         }
         return s;
     }
