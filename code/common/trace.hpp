@@ -20,7 +20,11 @@
 class Tracer
 {
 public:
-    Tracer( const char *f, int l, const char *fu );
+    enum Flags
+    {
+        FORCE = 1 // Generate the output even when -t is not specfied on the command line
+    };
+    Tracer( const char *f, int l, const char *fu, Flags fl=(Flags)0 );
     void operator()();
     void operator()(const char *fmt, ...);
     // TODO ostream support?
@@ -29,6 +33,7 @@ private:
     const char * const file;
     const int line;
     const char * const function;
+    Flags flags;
 };
 
 #define TRACE Tracer( __FILE__, __LINE__, BOOST_CURRENT_FUNCTION )
