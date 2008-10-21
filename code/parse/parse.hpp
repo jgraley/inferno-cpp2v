@@ -179,12 +179,20 @@ private:
             }
         }
         
-        shared_ptr<Identifier> CreateIdentifierNode( clang::IdentifierInfo *ID )
+        shared_ptr<Variable> CreateVariableNode( clang::IdentifierInfo *ID )
         { 
-            shared_ptr<Identifier> i(new Identifier());            
-            i->assign( ID->getName() );
-            TRACE("ci %s %p %p\n", ID->getName(), i.get(), ID );            
-            return i;
+            shared_ptr<Variable> v(new Variable());            
+            v->assign( ID->getName() );
+            TRACE("ci %s %p %p\n", ID->getName(), v.get(), ID );            
+            return v;
+        }
+
+        shared_ptr<Label> CreateLabelNode( clang::IdentifierInfo *ID )
+        { 
+            shared_ptr<Label> l(new Label());            
+            l->assign( ID->getName() );
+            TRACE("ci %s %p %p\n", ID->getName(), l.get(), ID );            
+            return l;
         }
         
         virtual DeclTy *ActOnDeclarator( clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup )
@@ -199,7 +207,7 @@ private:
             shared_ptr<VariableDeclaration> p(new VariableDeclaration);
             p->storage_class = VariableDeclaration::STATIC;
             p->type = CreateTypeNode( D );
-            p->identifier = CreateIdentifierNode( D.getIdentifier() );        
+            p->identifier = CreateVariableNode( D.getIdentifier() );        
             p->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
             TRACE("aod %s %p %p\n", p->identifier->c_str(), p->identifier.get(), p.get() );
             (void)InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, p->identifier );                 
@@ -218,7 +226,7 @@ private:
             p->storage_class = VariableDeclaration::AUTO;
             p->type = CreateTypeNode( D );            
             if( D.getIdentifier() )
-                p->identifier = CreateIdentifierNode( D.getIdentifier() );        
+                p->identifier = CreateVariableNode( D.getIdentifier() );        
             else
                 p->identifier = shared_ptr<Identifier>();
             p->initialiser = shared_ptr<Expression>(); // might fill in later if init
@@ -247,7 +255,7 @@ private:
             shared_ptr<FunctionDeclaration> p(new FunctionDeclaration);
             p->storage_class = VariableDeclaration::STATIC;
             p->type = CreateTypeNode( D );
-            p->identifier = CreateIdentifierNode( D.getIdentifier() );
+            p->identifier = CreateVariableNode( D.getIdentifier() );
             
             clang::Scope *GlobalScope = FnBodyScope->getParent();
             (void)InfernoMinimalAction::ActOnDeclarator( GlobalScope, D, 0, p->identifier );     
@@ -297,10 +305,7 @@ private:
                                                 bool HasTrailingLParen ) 
         {
             TRACE("aoie %s\n", II.getName() );
-            shared_ptr<IdentifierExpression> ie(new IdentifierExpression);
-            ie->identifier = InfernoMinimalAction::GetCurrentIdentifierRCPtr( II );
-            shared_ptr<Expression> e = ie;
-            return hold_expr.ToRaw( e );            
+            return hold_expr.ToRaw( InfernoMinimalAction::GetCurrentIdentifierRCPtr( II ) );            
         }                                   
         
         llvm::APInt EvaluateNumericConstant(const clang::Token &tok)
@@ -414,9 +419,9 @@ private:
                                           clang::SourceLocation ColonLoc, StmtTy *SubStmt) 
         {
             if( !(II->getFETokenInfo<void *>()) )                        
-                II->setFETokenInfo( hold_ident.ToRaw( CreateIdentifierNode( II ) ) );
+                II->setFETokenInfo( hold_ident.ToRaw( CreateLabelNode( II ) ) );
             
-            shared_ptr<Label> l( new Label );
+            shared_ptr<LabelMarker> l( new LabelMarker );
             l->identifier = hold_ident.FromRaw( II->getFETokenInfo<void *>() );
             return hold_stmt.ToRaw( l );
         }
@@ -426,12 +431,10 @@ private:
                                          clang::IdentifierInfo *LabelII) 
         {
             if( !(LabelII->getFETokenInfo<void *>()) )                        
-                LabelII->setFETokenInfo( hold_ident.ToRaw( CreateIdentifierNode( LabelII ) ) );
+                LabelII->setFETokenInfo( hold_ident.ToRaw( CreateLabelNode( LabelII ) ) );
 
-            shared_ptr<IdentifierExpression> ie( new IdentifierExpression );
-            ie->identifier = hold_ident.FromRaw( LabelII->getFETokenInfo<void *>() );
             shared_ptr<Goto> g( new Goto );
-            g->destination = ie;
+            g->destination = hold_ident.FromRaw( LabelII->getFETokenInfo<void *>() );
             return hold_stmt.ToRaw( g );
         }
         
@@ -448,11 +451,9 @@ private:
                                           clang::IdentifierInfo *LabelII)  // "&&foo"
         {                                 
             if( !(LabelII->getFETokenInfo<void *>()) )                        
-                LabelII->setFETokenInfo( hold_ident.ToRaw( CreateIdentifierNode( LabelII ) ) );
+                LabelII->setFETokenInfo( hold_ident.ToRaw( CreateLabelNode( LabelII ) ) );
 
-            shared_ptr<LabelExpression> le( new LabelExpression );
-            le->identifier = hold_ident.FromRaw( LabelII->getFETokenInfo<void *>() );
-            return hold_expr.ToRaw( le );
+            return hold_expr.ToRaw( hold_ident.FromRaw( LabelII->getFETokenInfo<void *>() ) );
         }
         
         virtual StmtResult ActOnIfStmt(clang::SourceLocation IfLoc, ExprTy *CondVal,
