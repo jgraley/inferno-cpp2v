@@ -70,7 +70,7 @@ private:
             return string();            
         else if( shared_ptr<Label> l = dynamic_pointer_cast< Label >(expression) )
             return before + 
-                   "&&" + RenderIdentifier( l ) +
+                   "&&" + RenderIdentifier( l ) + // label-as-variable (GCC extension)
                    after;
         else if( shared_ptr<Variable> v = dynamic_pointer_cast< Variable >(expression) )
             return RenderIdentifier( v );
@@ -143,9 +143,14 @@ private:
         else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(statement) )
             return "return " + RenderExpression(es->return_value) + sep;
         else if( shared_ptr<LabelMarker> l = dynamic_pointer_cast<LabelMarker>(statement) )
-            return RenderIdentifier(l->identifier) + ":\n"; // no ; after a label
+            return RenderIdentifier(l->label) + ":\n"; // no ; after a label
         else if( shared_ptr<Goto> g = dynamic_pointer_cast<Goto>(statement) )
-            return "goto " + RenderExpression(g->destination) + sep; 
+        {
+            if( shared_ptr<Label> l = dynamic_pointer_cast< Label >(g->destination) )
+                return "goto " + RenderIdentifier(l) + sep;  // regular goto
+            else
+                return "goto " + RenderExpression(g->destination) + sep; // goto-a-variable (GCC extension)
+        }
         else if( shared_ptr<If> i = dynamic_pointer_cast<If>(statement) )
         {
             string s;

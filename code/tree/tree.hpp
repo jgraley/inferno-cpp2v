@@ -145,7 +145,7 @@ struct NumericConstant :  Expression,
 
 struct LabelMarker :  Statement
 {
-    shared_ptr<Identifier> identifier;
+    shared_ptr<Label> label;
 };
 
 struct Goto :  Statement

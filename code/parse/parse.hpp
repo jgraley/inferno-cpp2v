@@ -101,7 +101,7 @@ private:
         RCHold<Expression, ExprTy *> hold_expr;
         RCHold<Statement, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
-        RCHold<Identifier, void *> hold_ident;
+        RCHold<Label, void *> hold_label;
         
         shared_ptr<Type> CreateTypeNode( clang::Declarator &D, int depth=0 )
         {
@@ -419,10 +419,10 @@ private:
                                           clang::SourceLocation ColonLoc, StmtTy *SubStmt) 
         {
             if( !(II->getFETokenInfo<void *>()) )                        
-                II->setFETokenInfo( hold_ident.ToRaw( CreateLabelNode( II ) ) );
+                II->setFETokenInfo( hold_label.ToRaw( CreateLabelNode( II ) ) );
             
             shared_ptr<LabelMarker> l( new LabelMarker );
-            l->identifier = hold_ident.FromRaw( II->getFETokenInfo<void *>() );
+            l->label = hold_label.FromRaw( II->getFETokenInfo<void *>() );
             return hold_stmt.ToRaw( l );
         }
         
@@ -431,10 +431,10 @@ private:
                                          clang::IdentifierInfo *LabelII) 
         {
             if( !(LabelII->getFETokenInfo<void *>()) )                        
-                LabelII->setFETokenInfo( hold_ident.ToRaw( CreateLabelNode( LabelII ) ) );
+                LabelII->setFETokenInfo( hold_label.ToRaw( CreateLabelNode( LabelII ) ) );
 
             shared_ptr<Goto> g( new Goto );
-            g->destination = hold_ident.FromRaw( LabelII->getFETokenInfo<void *>() );
+            g->destination = hold_label.FromRaw( LabelII->getFETokenInfo<void *>() );
             return hold_stmt.ToRaw( g );
         }
         
@@ -451,9 +451,9 @@ private:
                                           clang::IdentifierInfo *LabelII)  // "&&foo"
         {                                 
             if( !(LabelII->getFETokenInfo<void *>()) )                        
-                LabelII->setFETokenInfo( hold_ident.ToRaw( CreateLabelNode( LabelII ) ) );
+                LabelII->setFETokenInfo( hold_label.ToRaw( CreateLabelNode( LabelII ) ) );
 
-            return hold_expr.ToRaw( hold_ident.FromRaw( LabelII->getFETokenInfo<void *>() ) );
+            return hold_expr.ToRaw( hold_label.FromRaw( LabelII->getFETokenInfo<void *>() ) );
         }
         
         virtual StmtResult ActOnIfStmt(clang::SourceLocation IfLoc, ExprTy *CondVal,
