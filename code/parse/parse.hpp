@@ -73,13 +73,6 @@ public:
 private:
     string infile;
     
-    // Extend the tree so we can store function parameter decls during prototype parse
-    // and read them back at the start of function body, which is a seperate scope.
-    struct ParseParameterDeclaration : public VariableDeclaration
-    {
-        clang::IdentifierInfo *clang_identifier;
-    };
-    
     class InfernoAction : public InfernoMinimalAction
     {
     public:
@@ -94,7 +87,28 @@ private:
         {
         }
      
-     private:   
+    private:   
+        // Extend the tree so we can store function parameter decls during prototype parse
+        // and read them back at the start of function body, which is a seperate scope.
+        struct ParseParameterDeclaration : VariableDeclaration
+        {
+            clang::IdentifierInfo *clang_identifier;
+        };
+        
+        // Extend tree so we can insert sub statements at the same level as the label
+        struct ParseLabelMarker : LabelMarker
+        {
+            StmtTy *sub;
+        };
+        struct ParseCase : Case
+        {
+            StmtTy *sub;
+        };
+        struct ParseDefault : Default
+        {
+            StmtTy *sub;
+        };
+    
         clang::Preprocessor &preprocessor;
         shared_ptr<Program> program;
         RCHold<Declaration, DeclTy *> hold_decl;
@@ -397,14 +411,30 @@ private:
             shared_ptr<Type> t = CreateTypeNode( D );
             return hold_type.ToRaw( t );
         }
+        
+        void PushStmt( shared_ptr<Scope> s, StmtTy *stmt )
+        {
+            shared_ptr<Statement> st = hold_stmt.FromRaw(stmt);
+            s->push_back( st );
+                
+            // Flatten the "sub" statements of labels etc
+            if( shared_ptr<ParseLabelMarker> plm = dynamic_pointer_cast<ParseLabelMarker>( st ) )
+                PushStmt( s, plm->sub );   
+            else if( shared_ptr<ParseCase> pc = dynamic_pointer_cast<ParseCase>( st ) )
+                PushStmt( s, pc->sub );   
+            else if( shared_ptr<ParseDefault> pc = dynamic_pointer_cast<ParseDefault>( st ) )
+                PushStmt( s, pc->sub );   
+        }
 
         virtual StmtResult ActOnCompoundStmt(clang::SourceLocation L, clang::SourceLocation R,
                                              StmtTy **Elts, unsigned NumElts,
                                              bool isStmtExpr) 
         {
             shared_ptr<Scope> s(new Scope);
+
             for( int i=0; i<NumElts; i++ )
-                s->push_back( hold_stmt.FromRaw(Elts[i]) );
+                PushStmt( s, Elts[i] );
+
             return hold_stmt.ToRaw( s );
         }
         
@@ -421,8 +451,9 @@ private:
             if( !(II->getFETokenInfo<void *>()) )                        
                 II->setFETokenInfo( hold_label.ToRaw( CreateLabelNode( II ) ) );
             
-            shared_ptr<LabelMarker> l( new LabelMarker );
+            shared_ptr<ParseLabelMarker> l( new ParseLabelMarker );
             l->label = hold_label.FromRaw( II->getFETokenInfo<void *>() );
+            l->sub = SubStmt;
             return hold_stmt.ToRaw( l );
         }
         
@@ -502,6 +533,49 @@ private:
             f->body = hold_stmt.FromRaw( Body );
             return hold_stmt.ToRaw( f );
         }
+
+        virtual StmtResult ActOnStartOfSwitchStmt(ExprTy *Cond) 
+        {
+            shared_ptr<Switch> s( new Switch );
+            s->condition = hold_expr.FromRaw( Cond );
+            return hold_stmt.ToRaw( s );
+        }
+  
+        virtual StmtResult ActOnFinishSwitchStmt(clang::SourceLocation SwitchLoc, 
+                                                 StmtTy *rsw, ExprTy *Body) 
+        {
+            shared_ptr<Statement> s( hold_stmt.FromRaw( rsw ) );
+            shared_ptr<Switch> sw( dynamic_pointer_cast<Switch>(s) );
+            ASSERT(sw && "expecting a switch statement");
+        
+            StmtTy *body = (StmtTy *)Body; // Third is really a statement, the Actions API is wrong                        
+            sw->body = hold_stmt.FromRaw( body );
+            return hold_stmt.ToRaw( s );
+        }
+
+        /// ActOnCaseStmt - Note that this handles the GNU 'case 1 ... 4' extension,
+        /// which can specify an RHS value.
+        virtual StmtResult ActOnCaseStmt(clang::SourceLocation CaseLoc, ExprTy *LHSVal,
+                                         clang::SourceLocation DotDotDotLoc, ExprTy *RHSVal,
+                                         clang::SourceLocation ColonLoc, StmtTy *SubStmt) 
+        {
+            TRACE();
+            ASSERT(!RHSVal); // ... not supported
+            shared_ptr<ParseCase> c( new ParseCase );
+            c->value = hold_expr.FromRaw( LHSVal );
+            c->sub = SubStmt;
+            return hold_stmt.ToRaw( c );
+        }
+        
+        virtual StmtResult ActOnDefaultStmt(clang::SourceLocation DefaultLoc,
+                                            clang::SourceLocation ColonLoc, StmtTy *SubStmt,
+                                            clang::Scope *CurScope)
+        {
+            TRACE();
+            shared_ptr<ParseDefault> d( new ParseDefault );
+            d->sub = SubStmt;
+            return hold_stmt.ToRaw( d );
+        }        
     };
 };  
 
