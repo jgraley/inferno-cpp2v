@@ -461,10 +461,45 @@ private:
         {
             shared_ptr<If> i( new If );
             i->condition = hold_expr.FromRaw( CondVal );
-            i->then = hold_stmt.FromRaw( ThenVal );
+            i->body = hold_stmt.FromRaw( ThenVal );
             if( ElseVal )
-                i->otherwise = hold_stmt.FromRaw( ElseVal );
+                i->else_body = hold_stmt.FromRaw( ElseVal );
             return hold_stmt.ToRaw( i );
+        }
+        
+        virtual StmtResult ActOnWhileStmt(clang::SourceLocation WhileLoc, ExprTy *Cond,
+                                          StmtTy *Body) 
+        {
+            shared_ptr<While> w( new While );
+            w->condition = hold_expr.FromRaw( Cond );
+            w->body = hold_stmt.FromRaw( Body );
+            return hold_stmt.ToRaw( w );
+        }
+        
+        virtual StmtResult ActOnDoStmt(clang::SourceLocation DoLoc, StmtTy *Body,
+                                       clang::SourceLocation WhileLoc, ExprTy *Cond) 
+        {
+            shared_ptr<Do> d( new Do );
+            d->body = hold_stmt.FromRaw( Body );
+            d->condition = hold_expr.FromRaw( Cond );
+            return hold_stmt.ToRaw( d );
+        }
+        
+        virtual StmtResult ActOnForStmt(clang::SourceLocation ForLoc, 
+                                        clang::SourceLocation LParenLoc, 
+                                        StmtTy *First, ExprTy *Second, ExprTy *Third,
+                                        clang::SourceLocation RParenLoc, StmtTy *Body)
+        {
+            shared_ptr<For> f( new For );
+            if( First )
+                f->initialisation = hold_stmt.FromRaw( First );
+            if( Second )
+                f->condition = hold_expr.FromRaw( Second );
+            StmtTy *third = (StmtTy *)Third; // Third is really a statement, the Actions API is wrong
+            if( third )
+                f->increment = hold_stmt.FromRaw( third );
+            f->body = hold_stmt.FromRaw( Body );
+            return hold_stmt.ToRaw( f );
         }
     };
 };  
