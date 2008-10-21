@@ -61,12 +61,14 @@ private:
 
     string RenderExpression( shared_ptr<Expression> expression, bool bracketize_operator=false )
     {
-        TRACE("re %p\n", &*expression);
+        TRACE("re %p\n", expression.get());
         
         string before = bracketize_operator ? "(" : "";
         string after = bracketize_operator ? ")" : "";
         
-        if( shared_ptr<IdentifierExpression> ie = dynamic_pointer_cast< IdentifierExpression >(expression) )
+        if( !expression )
+            return string();            
+        else if( shared_ptr<IdentifierExpression> ie = dynamic_pointer_cast< IdentifierExpression >(expression) )
             return RenderIdentifier( ie->identifier );
         else if( shared_ptr<NumericConstant> nc = dynamic_pointer_cast< NumericConstant >(expression) )
             return (nc->toString(10, true));
@@ -130,7 +132,9 @@ private:
 
     string RenderStatement( shared_ptr<Statement> statement, string sep )
     {
-        if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(statement) )
+        if( !statement )
+            return sep;            
+        else if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(statement) )
             return RenderDeclaration( d, sep );
         else if( shared_ptr<Scope> sc = dynamic_pointer_cast< Scope >(statement) ) // Never put ; after a scope - you'd get {blah};
             return RenderExpression(shared_ptr<Expression>(sc));
@@ -145,17 +149,25 @@ private:
         else if( shared_ptr<If> i = dynamic_pointer_cast<If>(statement) )
         {
             string s;
-            s += "if(" + RenderExpression(i->condition) + ")\n"
-                 "{\n"+ 
-                 RenderStatement(i->then, ";\n") +
+            s += "if( " + RenderExpression(i->condition) + " )\n"
+                 "{\n" + // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
+                 RenderStatement(i->body, ";\n") +
                  "}\n";
-            if( i->otherwise )  // else is optional
-                s += "else\n"
-                     "{\n" + 
-                     RenderStatement(i->otherwise, ";\n") + 
-                     "}\n";
+            if( i->else_body )  // else is optional
+                s += "else\n" +
+                     RenderStatement(i->else_body, ";\n");
             return s;
         } 
+        else if( shared_ptr<While> w = dynamic_pointer_cast<While>(statement) )
+            return "while( " + RenderExpression(w->condition) + " )\n" +
+                   RenderStatement(w->body, ";\n");
+        else if( shared_ptr<Do> d = dynamic_pointer_cast<Do>(statement) )
+            return "do\n" +
+                   RenderStatement(d->body, ";\n") +
+                   "while( " + RenderExpression(d->condition) + " )" + sep;
+        else if( shared_ptr<For> f = dynamic_pointer_cast<For>(statement) )
+            return "for( " + RenderStatement(f->initialisation, "") + "; " + RenderExpression(f->condition) + "; "+ RenderStatement(f->increment, "") + " )\n" +
+                   RenderStatement(f->body, ";\n");
         else
             return ERROR_UNSUPPORTED(statement);
     }

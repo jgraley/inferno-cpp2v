@@ -160,9 +160,31 @@ struct Goto : public Statement
 struct If : public Statement
 {
     shared_ptr<Expression> condition;
-    shared_ptr<Statement> then;
-    shared_ptr<Statement> otherwise; // can be NULL if no else
-                                     // "else" is a keyword
+    shared_ptr<Statement> body;
+    shared_ptr<Statement> else_body; // can be NULL if no else clause
+};
+
+struct Loop : public Statement
+{
+    shared_ptr<Statement> body;
+};
+
+struct While : public Loop
+{
+    shared_ptr<Expression> condition;
+};
+
+struct Do : public Loop // a do..while() construct 
+{
+    shared_ptr<Expression> condition;
+};
+
+struct For : Loop
+{
+    // Any of these can be NULL if absent. NULL condition evaluates true.
+    shared_ptr<Statement> initialisation;
+    shared_ptr<Expression> condition;
+    shared_ptr<Statement> increment;    
 };
 
 #endif
