@@ -173,6 +173,13 @@ private:
         else if( shared_ptr<For> f = dynamic_pointer_cast<For>(statement) )
             return "for( " + RenderStatement(f->initialisation, "") + "; " + RenderExpression(f->condition) + "; "+ RenderStatement(f->increment, "") + " )\n" +
                    RenderStatement(f->body, ";\n");
+        else if( shared_ptr<Switch> s = dynamic_pointer_cast<Switch>(statement) )
+            return "switch( " + RenderExpression(s->condition) + " )\n" +
+                   RenderStatement(s->body, ";\n");
+        else if( shared_ptr<Case> c = dynamic_pointer_cast<Case>(statement) )
+            return "case " + RenderExpression(c->value) + ":\n";
+        else if( shared_ptr<Default> d = dynamic_pointer_cast<Default>(statement) )
+            return "default:\n";
         else
             return ERROR_UNSUPPORTED(statement);
     }

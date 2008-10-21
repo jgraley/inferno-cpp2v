@@ -28,7 +28,7 @@ struct Expression : Statement
 };
 
 struct Identifier : Expression,
-                     string
+                    string
 {
 };
 
@@ -41,7 +41,7 @@ struct Variable : Identifier
 };
 
 struct Scope : Expression,
-                Sequence<Statement>
+               Sequence<Statement>
 {
 };                   
 
@@ -183,6 +183,25 @@ struct For : Loop
     shared_ptr<Statement> initialisation;
     shared_ptr<Expression> condition;
     shared_ptr<Statement> increment;    
+};
+
+struct Switch : Statement
+{
+    shared_ptr<Expression> condition;
+    shared_ptr<Statement> body;
+};
+
+struct SwitchMarker : Statement
+{
+};
+
+struct Case : SwitchMarker
+{
+    shared_ptr<Expression> value;
+};
+
+struct Default : SwitchMarker
+{
 };
 
 #endif
