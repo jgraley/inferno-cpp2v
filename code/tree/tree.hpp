@@ -10,7 +10,7 @@
 #include <vector>
 
 template<typename ELEMENT>
-struct Sequence :  vector< shared_ptr<ELEMENT> >
+struct Sequence : vector< shared_ptr<ELEMENT> >
 {
 };                   
 
@@ -19,15 +19,15 @@ struct Node
     virtual ~Node(){}  // be a virtual hierarchy
 };
 
-struct Statement :  Node
+struct Statement : Node
 {
 };
 
-struct Expression :  Statement
+struct Expression : Statement
 {
 };
 
-struct Identifier :  Expression,
+struct Identifier : Expression,
                      string
 {
 };
@@ -40,16 +40,16 @@ struct Variable : Identifier
 {
 };
 
-struct Scope :  Expression,
+struct Scope : Expression,
                 Sequence<Statement>
 {
 };                   
 
-struct Type :  Node
+struct Type : Node
 {
 };
 
-struct Declaration :  Statement
+struct Declaration : Statement
 {   
     enum
     {
@@ -62,117 +62,117 @@ struct Declaration :  Statement
     shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
-struct VariableDeclaration :  Declaration
+struct VariableDeclaration : Declaration
 {
 };
 
-struct FunctionPrototype :  Type
+struct FunctionPrototype : Type
 {
     shared_ptr<Type> return_type;
     Sequence<VariableDeclaration> parameters;
 };
 
-struct Pointer :  Type
+struct Pointer : Type
 {
     shared_ptr<Type> destination;
 };
 
-struct Reference :  Type // TODO could ref derive from ptr?
+struct Reference : Type // TODO could ref derive from ptr?
 {
     shared_ptr<Type> destination;
 };
 
-struct FunctionDeclaration :  Declaration
+struct FunctionDeclaration : Declaration
 {
 };
 
-struct Program :  Scope
+struct Program : Scope
 {
 };
 
-struct Int :  Type
+struct Int : Type
 {
 };
 
-struct Char :  Type
+struct Char : Type
 {
 };
 
-struct Void :  Type
+struct Void : Type
 {
 };
 
-struct Operator :  Expression
+struct Operator : Expression
 {
     Sequence<Expression> operands;
     clang::tok::TokenKind kind;
 };
 
-struct Prefix :  Operator
+struct Prefix : Operator
 {
 };
 
-struct Postfix :  Operator
+struct Postfix : Operator
 {
 };
 
-struct Infix :  Operator
+struct Infix : Operator
 {
 };
 
-struct ConditionalOperator :  Expression // eg ?:
+struct ConditionalOperator : Expression // eg ?:
 {
     shared_ptr<Expression> condition;
     shared_ptr<Expression> if_true;
     shared_ptr<Expression> if_false;
 };
 
-struct Return :  Statement
+struct Return : Statement
 {
     shared_ptr<Expression> return_value;
 };
 
-struct Call :  Expression
+struct Call : Expression
 {
     shared_ptr<Expression> function;
     Sequence<Expression> arguments;
 };
 
-struct NumericConstant :  Expression,
+struct NumericConstant : Expression,
                           llvm::APInt
 {
 };
 
-struct LabelMarker :  Statement
+struct LabelMarker : Statement
 {
     shared_ptr<Label> label;
 };
 
-struct Goto :  Statement
+struct Goto : Statement
 {
     // Dest is an expression for goto-a-variable support.
     // Ordinary gotos will have IdentifierExpression here.
     shared_ptr<Expression> destination;
 };
 
-struct If :  Statement
+struct If : Statement
 {
     shared_ptr<Expression> condition;
     shared_ptr<Statement> body;
     shared_ptr<Statement> else_body; // can be NULL if no else clause
 };
 
-struct Loop :  Statement
+struct Loop : Statement
 {
     shared_ptr<Statement> body;
 };
 
-struct While :  Loop
+struct While : Loop
 {
     shared_ptr<Expression> condition;
 };
 
-struct Do :  Loop // a do..while() construct 
+struct Do : Loop // a do..while() construct 
 {
     shared_ptr<Expression> condition;
 };
