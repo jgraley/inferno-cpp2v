@@ -19,16 +19,24 @@ struct Node
     virtual ~Node(){}  // be a virtual hierarchy
 };
 
-struct Identifier : public Node,
-                    public string
-{
-};
-
 struct Statement : public Node
 {
 };
 
 struct Expression : public Statement
+{
+};
+
+struct Identifier : public Expression,
+                    public string
+{
+};
+
+struct Label : Identifier
+{
+};
+
+struct Variable : Identifier
 {
 };
 
@@ -94,16 +102,6 @@ struct Void : public Type
 {
 };
 
-struct IdentifierExpression : public Expression
-{
-    shared_ptr<Identifier> identifier;
-};
-
-struct LabelExpression : public Expression
-{
-    shared_ptr<Identifier> identifier;
-};
-
 struct Operator : public Expression
 {
     Sequence<Expression> operands;
@@ -145,7 +143,7 @@ struct NumericConstant : public Expression,
 {
 };
 
-struct Label : public Statement
+struct LabelMarker : public Statement
 {
     shared_ptr<Identifier> identifier;
 };

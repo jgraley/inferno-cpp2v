@@ -68,8 +68,12 @@ private:
         
         if( !expression )
             return string();            
-        else if( shared_ptr<IdentifierExpression> ie = dynamic_pointer_cast< IdentifierExpression >(expression) )
-            return RenderIdentifier( ie->identifier );
+        else if( shared_ptr<Label> l = dynamic_pointer_cast< Label >(expression) )
+            return before + 
+                   "&&" + RenderIdentifier( l ) +
+                   after;
+        else if( shared_ptr<Variable> v = dynamic_pointer_cast< Variable >(expression) )
+            return RenderIdentifier( v );
         else if( shared_ptr<NumericConstant> nc = dynamic_pointer_cast< NumericConstant >(expression) )
             return (nc->toString(10, true));
         else if( shared_ptr<Infix> o = dynamic_pointer_cast< Infix >(expression) )
@@ -87,10 +91,6 @@ private:
             return before + 
                    operator_text[o->kind] + 
                    RenderExpression( o->operands[0], true ) +
-                   after;
-        else if( shared_ptr<LabelExpression> le = dynamic_pointer_cast< LabelExpression >(expression) )
-            return before + 
-                   "&&" + RenderIdentifier( le->identifier ) +
                    after;
         else if( shared_ptr<ConditionalOperator> o = dynamic_pointer_cast< ConditionalOperator >(expression) )
             return before + 
@@ -142,7 +142,7 @@ private:
             return RenderExpression(e) + sep;
         else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(statement) )
             return "return " + RenderExpression(es->return_value) + sep;
-        else if( shared_ptr<Label> l = dynamic_pointer_cast<Label>(statement) )
+        else if( shared_ptr<LabelMarker> l = dynamic_pointer_cast<LabelMarker>(statement) )
             return RenderIdentifier(l->identifier) + ":\n"; // no ; after a label
         else if( shared_ptr<Goto> g = dynamic_pointer_cast<Goto>(statement) )
             return "goto " + RenderExpression(g->destination) + sep; 
