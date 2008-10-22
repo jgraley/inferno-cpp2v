@@ -53,7 +53,7 @@ struct Declaration : Statement
 {   
     enum
     {
-        DEFAULT,
+        DEFAULT, // TODO get rid of default and fill in properly
         STATIC,
         AUTO
     } storage_class;
@@ -145,7 +145,7 @@ struct NumericConstant : Expression,
 
 struct LabelMarker : Statement
 {
-    shared_ptr<Label> label;
+    shared_ptr<Label> label; // TODO these should be function scope
 };
 
 struct Goto : Statement
@@ -201,6 +201,14 @@ struct Case : SwitchMarker
 };
 
 struct Default : SwitchMarker
+{
+};
+
+struct Continue : Statement
+{
+};
+
+struct Break : Statement
 {
 };
 

@@ -180,6 +180,10 @@ private:
             return "case " + RenderExpression(c->value) + ":\n";
         else if( shared_ptr<Default> d = dynamic_pointer_cast<Default>(statement) )
             return "default:\n";
+        else if( shared_ptr<Continue> d = dynamic_pointer_cast<Continue>(statement) )
+            return "continue" + sep;
+        else if( shared_ptr<Break> d = dynamic_pointer_cast<Break>(statement) )
+            return "break" + sep;
         else
             return ERROR_UNSUPPORTED(statement);
     }

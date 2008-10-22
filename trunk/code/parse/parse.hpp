@@ -575,7 +575,18 @@ private:
             shared_ptr<ParseDefault> d( new ParseDefault );
             d->sub = SubStmt;
             return hold_stmt.ToRaw( d );
-        }        
+        }
+                
+        virtual StmtResult ActOnContinueStmt(clang::SourceLocation ContinueLoc,
+                                             clang::Scope *CurScope) 
+        {
+            return hold_stmt.ToRaw( shared_ptr<Continue>( new Continue ) );
+        }
+  
+        virtual StmtResult ActOnBreakStmt(clang::SourceLocation GotoLoc, clang::Scope *CurScope) 
+        {        
+            return hold_stmt.ToRaw( shared_ptr<Break>( new Break ) );
+        }
     };
 };  
 
