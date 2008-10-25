@@ -90,7 +90,7 @@ private:
     private:   
         // Extend the tree so we can store function parameter decls during prototype parse
         // and read them back at the start of function body, which is a seperate scope.
-        struct ParseParameterDeclaration : VariableDeclaration
+        struct ParseParameterDeclaration : ObjectDeclaration
         {
             clang::IdentifierInfo *clang_identifier;
         };
@@ -159,7 +159,7 @@ private:
                         for( int i=0; i<fchunk.NumArgs; i++ )
                         {
                             shared_ptr<Declaration> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
-                            shared_ptr<VariableDeclaration> vd = dynamic_pointer_cast<VariableDeclaration>(d); // TODO just push the declarators, no need for dynamic cast?
+                            shared_ptr<ObjectDeclaration> vd = dynamic_pointer_cast<ObjectDeclaration>(d); // TODO just push the declarators, no need for dynamic cast?
                             f->parameters.push_back( vd );
                         }
                         f->return_type = CreateTypeNode( D, depth+1 );                        
@@ -193,10 +193,15 @@ private:
             }
         }
         
-        shared_ptr<Variable> CreateVariableNode( clang::IdentifierInfo *ID )
+        shared_ptr<Object> CreateObjectNode( clang::IdentifierInfo *ID,
+                                             Object::StorageClass storage,
+                                             shared_ptr<Type> type )
         { 
-            shared_ptr<Variable> v(new Variable());            
-            v->assign( ID->getName() );
+            shared_ptr<Object> v(new Object());            
+            if(ID)
+                v->identifier = ID->getName();
+            v->storage_class = storage;
+            v->type = type;
             TRACE("ci %s %p %p\n", ID->getName(), v.get(), ID );            
             return v;
         }
@@ -204,7 +209,7 @@ private:
         shared_ptr<Label> CreateLabelNode( clang::IdentifierInfo *ID )
         { 
             shared_ptr<Label> l(new Label());            
-            l->assign( ID->getName() );
+            l->identifier = ID->getName();
             TRACE("ci %s %p %p\n", ID->getName(), l.get(), ID );            
             return l;
         }
@@ -218,13 +223,13 @@ private:
             {            
                 return 0;
             }
-            shared_ptr<VariableDeclaration> p(new VariableDeclaration);
-            p->storage_class = VariableDeclaration::STATIC;
-            p->type = CreateTypeNode( D );
-            p->identifier = CreateVariableNode( D.getIdentifier() );        
+            shared_ptr<ObjectDeclaration> p(new ObjectDeclaration);
+            p->object = CreateObjectNode( D.getIdentifier(), 
+                                                Object::STATIC, 
+                                                CreateTypeNode( D ) );        
             p->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
-            TRACE("aod %s %p %p\n", p->identifier->c_str(), p->identifier.get(), p.get() );
-            (void)InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, p->identifier );                 
+            TRACE("aod %s %p %p\n", p->object->identifier.c_str(), p->object.get(), p.get() );
+            (void)InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, p->object );                 
             if( !(S->getParent()) )
                 program->push_back( p );
             return hold_decl.ToRaw( p );
@@ -237,16 +242,13 @@ private:
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D) 
         {
             shared_ptr<ParseParameterDeclaration> p(new ParseParameterDeclaration);
-            p->storage_class = VariableDeclaration::AUTO;
-            p->type = CreateTypeNode( D );            
-            if( D.getIdentifier() )
-                p->identifier = CreateVariableNode( D.getIdentifier() );        
-            else
-                p->identifier = shared_ptr<Identifier>();
+            p->object = CreateObjectNode( D.getIdentifier(), 
+                                                Object::AUTO, 
+                                                CreateTypeNode( D ) );        
             p->initialiser = shared_ptr<Expression>(); // might fill in later if init
-            p->clang_identifier = D.getIdentifier(); // allow us to re-register the identifier
-            TRACE("aopd %s %p %p\n", 0, p->identifier.get(), p.get() );
-            (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, p->identifier );     
+            p->clang_identifier = D.getIdentifier(); // allow us to re-register the object
+            TRACE("aopd %s %p %p\n", 0, p->object.get(), p.get() );
+            (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, p->object );     
             return hold_decl.ToRaw( p );
         }
 
@@ -267,20 +269,20 @@ private:
         virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D) 
         {
             shared_ptr<FunctionDeclaration> p(new FunctionDeclaration);
-            p->storage_class = VariableDeclaration::STATIC;
-            p->type = CreateTypeNode( D );
-            p->identifier = CreateVariableNode( D.getIdentifier() );
+            p->object = CreateObjectNode( D.getIdentifier(), 
+                                                Object::STATIC, 
+                                                CreateTypeNode( D ) );
             
             clang::Scope *GlobalScope = FnBodyScope->getParent();
-            (void)InfernoMinimalAction::ActOnDeclarator( GlobalScope, D, 0, p->identifier );     
+            (void)InfernoMinimalAction::ActOnDeclarator( GlobalScope, D, 0, p->object );     
             
-            shared_ptr<FunctionPrototype> fp = dynamic_pointer_cast<FunctionPrototype>( p->type );
+            shared_ptr<FunctionPrototype> fp = dynamic_pointer_cast<FunctionPrototype>( p->object->type );
             ASSERT(fp);
             for( int i=0; i<fp->parameters.size(); i++ )
             {
                 shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( fp->parameters[i] );                
                 ASSERT(ppd);
-                InfernoMinimalAction::AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->identifier, false);
+                InfernoMinimalAction::AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->object, false);
             }
             
             program->push_back( p );

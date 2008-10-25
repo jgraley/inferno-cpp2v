@@ -36,7 +36,7 @@ private:
         string ids;
         TRACE();
         if( id )
-            ids = *id;
+            ids = id->identifier;
         TRACE();
         return ids;
     }
@@ -72,7 +72,7 @@ private:
             return before + 
                    "&&" + RenderIdentifier( l ) + // label-as-variable (GCC extension)
                    after;
-        else if( shared_ptr<Variable> v = dynamic_pointer_cast< Variable >(expression) )
+        else if( shared_ptr<Object> v = dynamic_pointer_cast< Object >(expression) )
             return RenderIdentifier( v );
         else if( shared_ptr<NumericConstant> nc = dynamic_pointer_cast< NumericConstant >(expression) )
             return (nc->toString(10, true));
@@ -116,17 +116,18 @@ private:
     
     string RenderDeclaration( shared_ptr<Statement> declaration, string sep )
     {
-        if( shared_ptr<VariableDeclaration> vd = dynamic_pointer_cast< VariableDeclaration >(declaration) )
+        if( shared_ptr<ObjectDeclaration> vd = dynamic_pointer_cast< ObjectDeclaration >(declaration) )
         {
             string s;
-            s += RenderType( vd->type, RenderIdentifier(vd->identifier) );
+            //TODO storage class 
+            s += RenderType( vd->object->type, RenderIdentifier(vd->object) );
             if(vd->initialiser)
                 s += " = " + RenderExpression(vd->initialiser);
             s += sep;
             return s;
         }
         else if( shared_ptr<FunctionDeclaration> fd = dynamic_pointer_cast< FunctionDeclaration >(declaration) )
-            return RenderType( fd->type, RenderIdentifier( fd->identifier ) ) + "\n" + 
+            return RenderType( fd->object->type, RenderIdentifier( fd->object ) ) + "\n" + 
                    RenderExpression(fd->initialiser);
     }
 
