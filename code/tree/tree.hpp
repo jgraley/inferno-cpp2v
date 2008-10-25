@@ -23,21 +23,32 @@ struct Statement : Node
 {
 };
 
+struct Type : Node
+{
+};
+
 struct Expression : Statement
 {
 };
 
-struct Identifier : Expression,
-                    string
+struct Identifier : Expression
 {
+    string identifier;
 };
 
 struct Label : Identifier
 {
 };
 
-struct Variable : Identifier
+struct Object : Identifier
 {
+    enum StorageClass
+    {
+        DEFAULT, // TODO get rid of default and fill in properly
+        STATIC,
+        AUTO
+    } storage_class;
+    shared_ptr<Type> type;
 };
 
 struct Scope : Expression,
@@ -45,31 +56,20 @@ struct Scope : Expression,
 {
 };                   
 
-struct Type : Node
-{
-};
-
 struct Declaration : Statement
 {   
-    enum
-    {
-        DEFAULT, // TODO get rid of default and fill in properly
-        STATIC,
-        AUTO
-    } storage_class;
-    shared_ptr<Type> type;
-    shared_ptr<Identifier> identifier; // NULL if anonymous
+    shared_ptr<Object> object; 
     shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
-struct VariableDeclaration : Declaration
+struct ObjectDeclaration : Declaration
 {
 };
 
 struct FunctionPrototype : Type
 {
     shared_ptr<Type> return_type;
-    Sequence<VariableDeclaration> parameters;
+    Sequence<ObjectDeclaration> parameters;
 };
 
 struct Pointer : Type
