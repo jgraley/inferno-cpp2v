@@ -43,6 +43,7 @@ private:
 
     string RenderType( shared_ptr<Type> type, string object=string() )
     {
+        TRACE();
         if( dynamic_pointer_cast< Int >(type) )
             return "int " + object;
         else if( dynamic_pointer_cast< Char >(type) )
@@ -55,13 +56,15 @@ private:
             return RenderType( p->destination, "(*" + object + ")" );
         else if( shared_ptr<Reference> r = dynamic_pointer_cast< Reference >(type) )
             return RenderType( r->destination, "(&" + object + ")" );
+        else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
+            return t->identifier + " " + object;
         else
             return ERROR_UNSUPPORTED(type);
     }
 
     string RenderExpression( shared_ptr<Expression> expression, bool bracketize_operator=false )
     {
-        TRACE("re %p\n", expression.get());
+        TRACE("%p\n", expression.get());
         
         string before = bracketize_operator ? "(" : "";
         string after = bracketize_operator ? ")" : "";
@@ -116,6 +119,7 @@ private:
     
     string RenderDeclaration( shared_ptr<Statement> declaration, string sep )
     {
+        TRACE();
         if( shared_ptr<ObjectDeclaration> vd = dynamic_pointer_cast< ObjectDeclaration >(declaration) )
         {
             string s;
@@ -129,10 +133,19 @@ private:
         else if( shared_ptr<FunctionDeclaration> fd = dynamic_pointer_cast< FunctionDeclaration >(declaration) )
             return RenderType( fd->object->type, RenderIdentifier( fd->object ) ) + "\n" + 
                    RenderExpression(fd->initialiser);
+        else if( shared_ptr<TypeDeclaration> td = dynamic_pointer_cast< TypeDeclaration >(declaration) )
+        {
+            shared_ptr<Typedef> t = dynamic_pointer_cast<Typedef>( td->type );
+            ASSERT( t );
+            return "typedef " + RenderType( t->type, t->identifier ) + sep;
+        }
+        else
+            return ERROR_UNSUPPORTED(declaration);
     }
 
     string RenderStatement( shared_ptr<Statement> statement, string sep )
     {
+        TRACE();
         if( !statement )
             return sep;            
         else if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(statement) )
@@ -192,6 +205,7 @@ private:
     template< class ELEMENT >
     string RenderSequence( Sequence<ELEMENT> spe, string separator, bool seperate_last )
     {
+        TRACE();
         string s;
         for( int i=0; i<spe.size(); i++ )
         {
