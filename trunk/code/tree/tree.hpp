@@ -17,9 +17,11 @@ struct Sequence : vector< shared_ptr<ELEMENT> >
 struct Node
 {               
     virtual ~Node(){}  // be a virtual hierarchy
+    // Node must be inherited virtually, to allow MIK diamonds 
+    // without making Node ambiguous
 };
 
-struct Statement : Node
+struct Statement : virtual Node
 {
 };
 
@@ -29,10 +31,9 @@ struct Expression : Statement
 
 struct Declaration : Statement
 {   
-    shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
-struct Type : Declaration 
+struct Type : virtual Node
 {
 };
 
@@ -41,7 +42,8 @@ struct Identifier : Expression
     string identifier;
 };
 
-struct Typedef : Type
+struct Typedef : Type,
+                 Declaration
 {
     string identifier;
     shared_ptr<Type> type;
@@ -70,6 +72,7 @@ struct Scope : Expression,
 struct ObjectDeclaration : Declaration
 {
     shared_ptr<Object> object; 
+    shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
 struct FunctionPrototype : Type
@@ -91,6 +94,7 @@ struct Reference : Type // TODO could ref derive from ptr?
 struct FunctionDeclaration : Declaration
 {
     shared_ptr<Object> object; 
+    shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
 struct TypeDeclaration : Declaration
