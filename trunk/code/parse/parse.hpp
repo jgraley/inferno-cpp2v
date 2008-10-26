@@ -163,12 +163,8 @@ private:
                         break;
                     case clang::DeclSpec::TST_typedef:
                     {
-                        TRACE();
                         shared_ptr<Type> t = hold_type.FromRaw( DS.getTypeRep() );
-                        //shared_ptr<TypeDeclaration> td = dynamic_pointer_cast<TypeDeclaration>(d);
-                        TRACE();
                         ASSERT( t );
-                        TRACE();
                         return t;
                         break;
                     }
@@ -273,13 +269,11 @@ private:
             const clang::DeclSpec &DS = D.getDeclSpec();
             if( DS.getStorageClassSpec() == clang::DeclSpec::SCS_typedef )
             {
-                shared_ptr<TypeDeclaration> td(new TypeDeclaration);
-                td->type = CreateTypedefNode( S, D );                
-                td->initialiser = shared_ptr<Expression>(); // TODO can never init a typedef
+                shared_ptr<Typedef> t = CreateTypedefNode( S, D );                
                 if( IsGlobal(S) )
-                    program->push_back( td );
+                    program->push_back( t );
                 TRACE();
-                return hold_decl.ToRaw( td );
+                return hold_decl.ToRaw( t );
             }    
             else
             {                
