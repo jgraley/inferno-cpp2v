@@ -301,14 +301,14 @@ private:
             return hold_decl.ToRaw( p );
         }
 
-        virtual void AddInitializerToDecl(DeclTy *Dcl, ExprTy *Init) 
+ /*       virtual void AddInitializerToDecl(DeclTy *Dcl, ExprTy *Init) 
         {
             shared_ptr<Declaration> d = hold_decl.FromRaw( Dcl );
             shared_ptr<Expression> e = hold_expr.FromRaw( Init );
             
             d->initialiser = e;            
         }
-
+*/
         /*
         Note: the default implementation of ActOnStartOfFunctionDef() appears in
         InfernoMinimalAction and can cause spurious ActOnDeclarator() calls if we always
@@ -336,10 +336,11 @@ private:
         
         virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtTy *Body) 
         {
-            shared_ptr<Declaration> d( hold_decl.FromRaw(Decl) );
+            shared_ptr<FunctionDeclaration> fd( dynamic_pointer_cast<FunctionDeclaration>( hold_decl.FromRaw(Decl) ) );
+            ASSERT(fd);
             shared_ptr<Expression> e( dynamic_pointer_cast<Expression>( hold_stmt.FromRaw(Body) ) );
             ASSERT(e); // function body must be a scope or 0
-            d->initialiser = e;
+            fd->initialiser = e;
             return Decl;
         }    
         
