@@ -133,12 +133,8 @@ private:
         else if( shared_ptr<FunctionDeclaration> fd = dynamic_pointer_cast< FunctionDeclaration >(declaration) )
             return RenderType( fd->object->type, RenderIdentifier( fd->object ) ) + "\n" + 
                    RenderExpression(fd->initialiser);
-        else if( shared_ptr<TypeDeclaration> td = dynamic_pointer_cast< TypeDeclaration >(declaration) )
-        {
-            shared_ptr<Typedef> t = dynamic_pointer_cast<Typedef>( td->type );
-            ASSERT( t );
+        else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
             return "typedef " + RenderType( t->type, t->identifier ) + sep;
-        }
         else
             return ERROR_UNSUPPORTED(declaration);
     }

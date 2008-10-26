@@ -23,11 +23,16 @@ struct Statement : Node
 {
 };
 
-struct Type : Node
+struct Expression : Statement
 {
 };
 
-struct Expression : Statement
+struct Declaration : Statement
+{   
+    shared_ptr<Expression> initialiser; // NULL if uninitialised
+};
+
+struct Type : Declaration 
 {
 };
 
@@ -40,7 +45,7 @@ struct Typedef : Type
 {
     string identifier;
     shared_ptr<Type> type;
-};
+}; 
 
 struct Label : Identifier
 {
@@ -61,11 +66,6 @@ struct Scope : Expression,
                Sequence<Statement>
 {
 };                   
-
-struct Declaration : Statement
-{   
-    shared_ptr<Expression> initialiser; // NULL if uninitialised
-};
 
 struct ObjectDeclaration : Declaration
 {
