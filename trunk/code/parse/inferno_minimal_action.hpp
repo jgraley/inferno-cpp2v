@@ -34,14 +34,14 @@ public:
   
   /// isTypeName - This looks at the clang::IdentifierInfo::FETokenInfo field to
   /// determine whether the name is a typedef or not in this scope.
-  virtual TypeTy *isTypeName(const clang::IdentifierInfo &II, clang::Scope *S);
+  virtual shared_ptr<Node> isTypeNameima(const clang::IdentifierInfo &II, clang::Scope *S);
   
   /// ActOnDeclarator - If this is a typedef declarator, we modify the
   /// clang::IdentifierInfo::FETokenInfo field to keep track of this fact, until S is
   /// popped.
-  virtual DeclTy *ActOnDeclarator(clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup, shared_ptr<Identifier> rcp);
+  virtual DeclTy *ActOnDeclarator(clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup, shared_ptr<Node> rcp);
   
-  void AddNakedIdentifier(clang::Scope *S, clang::IdentifierInfo *II, shared_ptr<Identifier> rcp, bool istype);  
+  void AddNakedIdentifier(clang::Scope *S, clang::IdentifierInfo *II, shared_ptr<Node> rcp, bool istype);  
   
   /// ActOnPopScope - When a scope is popped, if any typedefs are now 
   /// out-of-scope, they are removed from the clang::IdentifierInfo::FETokenInfo field.
@@ -51,7 +51,7 @@ public:
   virtual DeclTy *ActOnForwardClassDeclaration(clang::SourceLocation AtClassLoc,
                                                clang::IdentifierInfo **IdentList,
                                                unsigned NumElts,
-                                               shared_ptr<Identifier> rcp);
+                                               shared_ptr<Node> rcp);
   
   virtual DeclTy *ActOnStartClassInterface(clang::SourceLocation interLoc,
                                            clang::IdentifierInfo *ClassName,
@@ -62,11 +62,11 @@ public:
                                            unsigned NumProtoRefs,
                                            clang::SourceLocation EndProtoLoc,
                                            AttributeList *AttrList, 
-                                           shared_ptr<Identifier> rcp);
+                                           shared_ptr<Node> rcp);
   
   // Extract the shared_ptr for the identifier. Where the identifier is differently declared
   // in nested scopes, we get the one that applies currently (which is the innermost one)  
-  shared_ptr<Identifier> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II );                                         
+  shared_ptr<Node> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II );                                         
 };
 
 #endif

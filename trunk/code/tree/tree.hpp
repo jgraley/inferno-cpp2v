@@ -36,6 +36,12 @@ struct Identifier : Expression
     string identifier;
 };
 
+struct Typedef : Type
+{
+    string identifier;
+    shared_ptr<Type> type;
+};
+
 struct Label : Identifier
 {
 };
@@ -58,12 +64,12 @@ struct Scope : Expression,
 
 struct Declaration : Statement
 {   
-    shared_ptr<Object> object; 
     shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
 struct ObjectDeclaration : Declaration
 {
+    shared_ptr<Object> object; 
 };
 
 struct FunctionPrototype : Type
@@ -84,6 +90,12 @@ struct Reference : Type // TODO could ref derive from ptr?
 
 struct FunctionDeclaration : Declaration
 {
+    shared_ptr<Object> object; 
+};
+
+struct TypeDeclaration : Declaration
+{
+    shared_ptr<Type> type;
 };
 
 struct Program : Scope

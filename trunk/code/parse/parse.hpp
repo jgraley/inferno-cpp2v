@@ -66,8 +66,9 @@ public:
         clang::IdentifierTable it( opts );                 
         InfernoAction actions( program, it, pp );                 
         clang::Parser parser( pp, actions );
-        
+        TRACE("Start parse\n");
         parser.ParseTranslationUnit();        
+        TRACE("End parse\n");
     }
     
 private:
@@ -117,6 +118,26 @@ private:
         RCHold<Type, TypeTy *> hold_type;
         RCHold<Label, void *> hold_label;
         
+        clang::Action::TypeTy *isTypeName(const clang::IdentifierInfo &II, clang::Scope *S) 
+        {
+            shared_ptr<Node> n = InfernoMinimalAction::isTypeNameima(II, S);
+            
+            if(n)
+            {
+                //shared_ptr<TypeDeclaration> td = dynamic_pointer_cast<TypeDeclaration>(n);
+                //ASSERT( td );
+                shared_ptr<Typedef> t = dynamic_pointer_cast<Typedef>( n );
+                ASSERT( t ); //TODO the allowability of this cast could be used to detect type names?
+                return hold_type.ToRaw(t);
+            }
+        return 0;
+        }
+
+        bool IsGlobal(clang::Scope *S)
+        {
+            return !(S->getParent());
+        }
+        
         shared_ptr<Type> CreateTypeNode( clang::Declarator &D, int depth=0 )
         {
             TRACE("%d, %d\n", depth, D.getNumTypeObjects() );
@@ -140,6 +161,17 @@ private:
                     case clang::DeclSpec::TST_void:
                         return shared_ptr<Type>(new Void());
                         break;
+                    case clang::DeclSpec::TST_typedef:
+                    {
+                        TRACE();
+                        shared_ptr<Type> t = hold_type.FromRaw( DS.getTypeRep() );
+                        //shared_ptr<TypeDeclaration> td = dynamic_pointer_cast<TypeDeclaration>(d);
+                        TRACE();
+                        ASSERT( t );
+                        TRACE();
+                        return t;
+                        break;
+                    }
                     default:                    
                         ASSERT(0);
                         break;
@@ -193,24 +225,38 @@ private:
             }
         }
         
-        shared_ptr<Object> CreateObjectNode( clang::IdentifierInfo *ID,
-                                             Object::StorageClass storage,
-                                             shared_ptr<Type> type )
+        shared_ptr<Object> CreateObjectNode( clang::Scope *S, clang::Declarator &D )
         { 
-            shared_ptr<Object> v(new Object());            
+            shared_ptr<Object> o(new Object());
+            clang::IdentifierInfo *ID = D.getIdentifier();
             if(ID)
-                v->identifier = ID->getName();
-            v->storage_class = storage;
-            v->type = type;
-            TRACE("ci %s %p %p\n", ID->getName(), v.get(), ID );            
-            return v;
+                o->identifier = ID->getName();
+            o->storage_class = Object::DEFAULT;
+            o->type = CreateTypeNode( D );
+
+            (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, o );     
+            TRACE("ci %s %p %p\n", ID->getName(), o.get(), ID );            
+            return o;
+        }
+
+        shared_ptr<Typedef> CreateTypedefNode( clang::Scope *S, clang::Declarator &D )
+        { 
+            shared_ptr<Typedef> t(new Typedef);
+            clang::IdentifierInfo *ID = D.getIdentifier();
+            if(ID)
+                t->identifier = ID->getName();
+            t->type = CreateTypeNode( D );
+
+            (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, t );     
+            TRACE("%s %p %p\n", ID->getName(), t.get(), ID );            
+            return t;
         }
 
         shared_ptr<Label> CreateLabelNode( clang::IdentifierInfo *ID )
         { 
-            shared_ptr<Label> l(new Label());            
+            shared_ptr<Label> l(new Label);            
             l->identifier = ID->getName();
-            TRACE("ci %s %p %p\n", ID->getName(), l.get(), ID );            
+            TRACE("%s %p %p\n", ID->getName(), l.get(), ID );            
             return l;
         }
         
@@ -223,16 +269,28 @@ private:
             {            
                 return 0;
             }
-            shared_ptr<ObjectDeclaration> p(new ObjectDeclaration);
-            p->object = CreateObjectNode( D.getIdentifier(), 
-                                                Object::STATIC, 
-                                                CreateTypeNode( D ) );        
-            p->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
-            TRACE("aod %s %p %p\n", p->object->identifier.c_str(), p->object.get(), p.get() );
-            (void)InfernoMinimalAction::ActOnDeclarator( S, D, LastInGroup, p->object );                 
-            if( !(S->getParent()) )
-                program->push_back( p );
-            return hold_decl.ToRaw( p );
+            
+            const clang::DeclSpec &DS = D.getDeclSpec();
+            if( DS.getStorageClassSpec() == clang::DeclSpec::SCS_typedef )
+            {
+                shared_ptr<TypeDeclaration> td(new TypeDeclaration);
+                td->type = CreateTypedefNode( S, D );                
+                td->initialiser = shared_ptr<Expression>(); // TODO can never init a typedef
+                if( IsGlobal(S) )
+                    program->push_back( td );
+                TRACE();
+                return hold_decl.ToRaw( td );
+            }    
+            else
+            {                
+                shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
+                od->object = CreateObjectNode( S, D );        
+                od->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
+                TRACE("aod %s %p %p\n", od->object->identifier.c_str(), od->object.get(), od.get() );
+                if( IsGlobal(S) )
+                    program->push_back( od );
+                return hold_decl.ToRaw( od );
+            }
         }
         
         /// ActOnParamDeclarator - This callback is invoked when a parameter
@@ -242,13 +300,10 @@ private:
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D) 
         {
             shared_ptr<ParseParameterDeclaration> p(new ParseParameterDeclaration);
-            p->object = CreateObjectNode( D.getIdentifier(), 
-                                                Object::AUTO, 
-                                                CreateTypeNode( D ) );        
+            p->object = CreateObjectNode( S, D );        
             p->initialiser = shared_ptr<Expression>(); // might fill in later if init
             p->clang_identifier = D.getIdentifier(); // allow us to re-register the object
             TRACE("aopd %s %p %p\n", 0, p->object.get(), p.get() );
-            (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, p->object );     
             return hold_decl.ToRaw( p );
         }
 
@@ -269,13 +324,9 @@ private:
         virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D) 
         {
             shared_ptr<FunctionDeclaration> p(new FunctionDeclaration);
-            p->object = CreateObjectNode( D.getIdentifier(), 
-                                                Object::STATIC, 
-                                                CreateTypeNode( D ) );
-            
             clang::Scope *GlobalScope = FnBodyScope->getParent();
-            (void)InfernoMinimalAction::ActOnDeclarator( GlobalScope, D, 0, p->object );     
-            
+            p->object = CreateObjectNode( GlobalScope, D );
+                        
             shared_ptr<FunctionPrototype> fp = dynamic_pointer_cast<FunctionPrototype>( p->object->type );
             ASSERT(fp);
             for( int i=0; i<fp->parameters.size(); i++ )
@@ -321,7 +372,9 @@ private:
                                                 bool HasTrailingLParen ) 
         {
             TRACE("aoie %s\n", II.getName() );
-            return hold_expr.ToRaw( InfernoMinimalAction::GetCurrentIdentifierRCPtr( II ) );            
+            shared_ptr<Identifier> i = dynamic_pointer_cast<Identifier>( InfernoMinimalAction::GetCurrentIdentifierRCPtr( II ) );
+            ASSERT(i);
+            return hold_expr.ToRaw( i );            
         }                                   
         
         llvm::APInt EvaluateNumericConstant(const clang::Token &tok)
