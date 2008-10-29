@@ -7,17 +7,17 @@
 #include "llvm/ADT/APInt.h"
 
 #include <string>
-#include <vector>
+#include <deque>
 
 template<typename ELEMENT>
-struct Sequence : vector< shared_ptr<ELEMENT> >
+struct Sequence : deque< shared_ptr<ELEMENT> >
 {
 };                   
 
 struct Node
 {               
     virtual ~Node(){}  // be a virtual hierarchy
-    // Node must be inherited virtually, to allow MIK diamonds 
+    // Node must be inherited virtually, to allow MI diamonds 
     // without making Node ambiguous
 };
 
@@ -42,10 +42,17 @@ struct Identifier : Expression
     string identifier;
 };
 
-struct Typedef : Type,
-                 Declaration
+// A type that the user has created, and hence has a name. 
+// These can be linked directly from a delaration list to 
+// indicate their declaration (no seperate declaration node required).
+struct UserType : Type,
+                  Declaration
 {
     string identifier;
+};
+
+struct Typedef : UserType
+{
     shared_ptr<Type> type;
 }; 
 
@@ -97,12 +104,7 @@ struct FunctionDeclaration : Declaration
     shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
-struct TypeDeclaration : Declaration
-{
-    shared_ptr<Type> type;
-};
-
-struct Program : Scope
+struct Program : Sequence<Declaration>
 {
 };
 
@@ -155,7 +157,7 @@ struct Call : Expression
 };
 
 struct NumericConstant : Expression,
-                          llvm::APInt
+                         llvm::APInt
 {
 };
 
@@ -225,6 +227,28 @@ struct Continue : Statement
 };
 
 struct Break : Statement
+{
+};
+
+struct Holder : UserType
+{
+    Sequence<Declaration> members;
+};
+
+struct Union : Holder
+{
+};
+
+struct InheritanceHolder : Holder
+{
+    Sequence<Declaration> bases; // these have empty identifier and NULL initialiser
+};
+
+struct Struct : InheritanceHolder
+{
+};
+
+struct Class : InheritanceHolder
 {
 };
 
