@@ -135,6 +135,11 @@ private:
                    RenderExpression(fd->initialiser);
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
             return "typedef " + RenderType( t->type, t->identifier ) + sep;
+        else if( shared_ptr<Class> c = dynamic_pointer_cast< Class >(declaration) )
+            return "class " + c->identifier + "\n" 
+                   "{\n" +
+                   RenderSequence( c->members, ";\n", true ) +
+                   "};\n";
         else
             return ERROR_UNSUPPORTED(declaration);
     }
