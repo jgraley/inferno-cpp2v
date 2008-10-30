@@ -79,13 +79,15 @@ private:
     public:
         InfernoAction(shared_ptr<Program> p, clang::IdentifierTable &IT, clang::Preprocessor &pp) : 
             InfernoMinimalAction(IT),
-            preprocessor(pp),
-            program(p)
+            preprocessor(pp)
         {
+            decl_scope.push( &*p );
         }
      
         ~InfernoAction()
         {
+            decl_scope.pop();
+            assert( decl_scope.empty() );
         }
      
     private:   
@@ -111,7 +113,7 @@ private:
         };
     
         clang::Preprocessor &preprocessor;
-        shared_ptr<Program> program;
+        stack< Sequence<Declaration> * > decl_scope;
         RCHold<Declaration, DeclTy *> hold_decl;
         RCHold<Expression, ExprTy *> hold_expr;
         RCHold<Statement, StmtTy *> hold_stmt;
@@ -133,9 +135,9 @@ private:
         return 0;
         }
 
-        bool IsGlobal(clang::Scope *S)
+        bool IsInFunction(clang::Scope *S)
         {
-            return !(S->getParent());
+            return !!(S->getFnParent());
         }
         
         shared_ptr<Type> CreateTypeNode( clang::Declarator &D, int depth=0 )
@@ -231,7 +233,6 @@ private:
             o->type = CreateTypeNode( D );
 
             (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, o );     
-            TRACE("ci %s %p %p\n", ID->getName(), o.get(), ID );            
             return o;
         }
 
@@ -270,8 +271,8 @@ private:
             if( DS.getStorageClassSpec() == clang::DeclSpec::SCS_typedef )
             {
                 shared_ptr<Typedef> t = CreateTypedefNode( S, D );                
-                if( IsGlobal(S) )
-                    program->push_back( t );
+                if( !IsInFunction(S) ) // TODO are typedefs legal in functions?
+                    decl_scope.top()->push_back( t );
                 TRACE();
                 return hold_decl.ToRaw( t );
             }    
@@ -281,8 +282,8 @@ private:
                 od->object = CreateObjectNode( S, D );        
                 od->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
                 TRACE("aod %s %p %p\n", od->object->identifier.c_str(), od->object.get(), od.get() );
-                if( IsGlobal(S) )
-                    program->push_back( od );
+                if( !IsInFunction(S) )
+                    decl_scope.top()->push_back( od );
                 return hold_decl.ToRaw( od );
             }
         }
@@ -330,7 +331,7 @@ private:
                 InfernoMinimalAction::AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->object, false);
             }
             
-            program->push_back( p );
+            decl_scope.top()->push_back( p );
             return hold_decl.ToRaw( p );     
         }
         
@@ -637,7 +638,89 @@ private:
         {        
             return hold_stmt.ToRaw( shared_ptr<Break>( new Break ) );
         }
+        
+        virtual DeclTy *ActOnCXXMemberDeclarator(clang::Scope *S, clang::AccessSpecifier AS,
+                                                 clang::Declarator &D, ExprTy *BitfieldWidth,
+                                                 ExprTy *Init, DeclTy *LastInGroup) 
+        {
+            TRACE("Member %p\n", Init);
+            return ActOnDeclarator( S, D, LastInGroup );
+            // TODO initialiser (action seems to be commented out for some reason) 
+            // TODO set bitfield width (make a worker function for ActOnDeclarator())
+            // TODO set access specifier
+        }
+
+        virtual DeclTy *ActOnTag(clang::Scope *S, unsigned TagType, TagKind TK,
+                                 clang::SourceLocation KWLoc, clang::IdentifierInfo *Name,
+                                 clang::SourceLocation NameLoc, clang::AttributeList *Attr) 
+        {
+            TRACE("Tag type %d\n", TagType);
+            // TagType is an instance of DeclSpec::TST, indicating what kind of tag this
+            // is (struct/union/enum/class).
+            shared_ptr<Holder> h;
+            switch( (clang::DeclSpec::TST)TagType )
+            {
+                case clang::DeclSpec::TST_union:
+                    h = shared_ptr<Union>(new Union);
+                    break;
+                case clang::DeclSpec::TST_struct:
+                    h = shared_ptr<Struct>(new Struct);
+                    break;
+                case clang::DeclSpec::TST_class:
+                    h = shared_ptr<Class>(new Class);
+                    break;
+                default:
+                    ASSERT(0); // TODO add enum            
+                    break;        
+            }
+            
+            //TODO should we do something with TagKind? Maybe needed for render.
+            //TODO use the attibutes
+            
+            return hold_decl.ToRaw( h );            
+        }
+   
+/* Unused when language set to C++
+        virtual void ActOnFields(clang::Scope* S, clang::SourceLocation RecLoc, DeclTy *TagDecl,
+                                 DeclTy **Fields, unsigned NumFields, 
+                                 clang::SourceLocation LBrac, clang::SourceLocation RBrac) 
+        {
+            TRACE("Num fields %d\n", NumFields);
+            // Just populate the members container for the Holder node
+            // we already created. No need to return anything.
+            shared_ptr<Declaration> d = hold_decl.FromRaw( TagDecl );
+            shared_ptr<Holder> h = dynamic_pointer_cast<Holder>(d);
+            ASSERT(h); // If a Declaration has fields, it had better have been generated by ActOnTag() and hence be a Holder
+            
+            for( int i=0; i<NumFields; i++ )
+            {
+                h->members.push_back( hold_decl.FromRaw( Fields[i] ) );
+            }
+        }  
+*/  
+        /// ActOnStartCXXClassDef - This is called at the start of a class/struct/union
+        /// definition, when on C++.
+        virtual void ActOnStartCXXClassDef(clang::Scope *S, DeclTy *TagDecl,
+                                           clang::SourceLocation LBrace) 
+        {
+            TRACE();
+            // Just populate the members container for the Holder node
+            // we already created. No need to return anything.
+            shared_ptr<Declaration> d = hold_decl.FromRaw( TagDecl );
+            shared_ptr<Holder> h = dynamic_pointer_cast<Holder>(d);
+            decl_scope.push( &(h->members) );      // decls for members will go on this scope      
+        }
+  
+        /// ActOnFinishCXXClassDef - This is called when a class/struct/union has
+        /// completed parsing, when on C++.
+        virtual void ActOnFinishCXXClassDef(DeclTy *TagDecl) 
+        {
+            TRACE();
+            decl_scope.pop(); // class scope is complete
+            // TODO are structs etc definable in functions? If so, this will put the decl outside the function
+            decl_scope.top()->push_back( hold_decl.FromRaw(TagDecl) );
+        }
     };
-};  
+};   
 
 #endif
