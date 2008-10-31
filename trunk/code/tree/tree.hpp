@@ -60,6 +60,8 @@ struct Label : Identifier
 {
 };
 
+// Note that an object can be a function instance (ie the target
+// of a function pointer) as well as a class instance or variable
 struct Object : Identifier
 {
     enum StorageClass
@@ -68,6 +70,12 @@ struct Object : Identifier
         STATIC,
         AUTO
     } storage_class;
+    enum Access
+    {
+        PUBLIC,
+        PRIVATE,
+        PROTECTED
+    } access;
     shared_ptr<Type> type;
 };
 
@@ -82,7 +90,7 @@ struct ObjectDeclaration : Declaration
     shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
-struct FunctionPrototype : Type
+struct Function : Type
 {
     shared_ptr<Type> return_type;
     Sequence<ObjectDeclaration> parameters;
@@ -96,12 +104,6 @@ struct Pointer : Type
 struct Reference : Type // TODO could ref derive from ptr?
 {
     shared_ptr<Type> destination;
-};
-
-struct FunctionDeclaration : Declaration
-{
-    shared_ptr<Object> object; 
-    shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
 struct Program : Sequence<Declaration>

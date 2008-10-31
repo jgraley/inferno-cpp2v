@@ -52,7 +52,7 @@ private:
             return "char " + object;
         else if( dynamic_pointer_cast< Void >(type) )
             return "void " + object;
-        else if( shared_ptr<FunctionPrototype> f = dynamic_pointer_cast< FunctionPrototype >(type) )
+        else if( shared_ptr<Function> f = dynamic_pointer_cast< Function >(type) )
             return RenderType( f->return_type, "(" + object + ")(" + RenderSequence(f->parameters, ", ", false) + ")" );
         else if( shared_ptr<Pointer> p = dynamic_pointer_cast< Pointer >(type) )
             return RenderType( p->destination, "(*" + object + ")" );
@@ -122,19 +122,28 @@ private:
     string RenderDeclaration( shared_ptr<Statement> declaration, string sep )
     {
         TRACE();
-        if( shared_ptr<ObjectDeclaration> vd = dynamic_pointer_cast< ObjectDeclaration >(declaration) )
+        if( shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast< ObjectDeclaration >(declaration) )
         {
             string s;
-            //TODO storage class 
-            s += RenderType( vd->object->type, RenderIdentifier(vd->object) );
-            if(vd->initialiser)
-                s += " = " + RenderExpression(vd->initialiser);
-            s += sep;
+            //TODO storage class, access 
+            s += RenderType( od->object->type, RenderIdentifier(od->object) );
+            if(od->initialiser)
+            {
+                bool function_definition = !!dynamic_pointer_cast<Scope>(od->initialiser);
+                if( function_definition )
+                    s += "\n";
+                else
+                    s += " = ";
+                s += RenderExpression(od->initialiser);
+                if( !function_definition )
+                    s += sep;
+            }
+            else
+            {
+                s += sep;
+            }    
             return s;
         }
-        else if( shared_ptr<FunctionDeclaration> fd = dynamic_pointer_cast< FunctionDeclaration >(declaration) )
-            return RenderType( fd->object->type, RenderIdentifier( fd->object ) ) + "\n" + 
-                   RenderExpression(fd->initialiser);
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
             return "typedef " + RenderType( t->type, t->identifier ) + sep;
         else if( shared_ptr<Holder> h = dynamic_pointer_cast< Holder >(declaration) )

@@ -184,7 +184,7 @@ private:
                 case clang::DeclaratorChunk::Function:
                     {
                         const clang::DeclaratorChunk::FunctionTypeInfo &fchunk = chunk.Fun; 
-                        shared_ptr<FunctionPrototype> f(new FunctionPrototype);
+                        shared_ptr<Function> f(new Function);
                         for( int i=0; i<fchunk.NumArgs; i++ )
                         {
                             shared_ptr<Declaration> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
@@ -229,6 +229,7 @@ private:
             if(ID)
                 o->identifier = ID->getName();
             o->storage_class = Object::DEFAULT;
+            o->access = Object::PUBLIC; // default to public
             o->type = CreateTypeNode( D );
 
             (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, o );     
@@ -256,16 +257,8 @@ private:
             return l;
         }
         
-        virtual DeclTy *ActOnDeclarator( clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup )
+        shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D )
         {
-            // TODO the spurious char __builtin_va_list; line comes from the target info.
-            // Create an inferno target info customised for Inferno that doesn't do this.
-            //TRACE("\"%s\"\n", D.getIdentifier()->getName().c_str() ); 
-            if( strcmp(D.getIdentifier()->getName(), "__builtin_va_list")==0 )
-            {            
-                return 0;
-            }
-            
             const clang::DeclSpec &DS = D.getDeclSpec();
             if( DS.getStorageClassSpec() == clang::DeclSpec::SCS_typedef )
             {
@@ -273,7 +266,7 @@ private:
                 if( !IsInFunction(S) ) // TODO are typedefs legal in functions?
                     decl_scope.top()->push_back( t );
                 TRACE();
-                return hold_decl.ToRaw( t );
+                return t;
             }    
             else
             {                
@@ -283,8 +276,22 @@ private:
                 TRACE("aod %s %p %p\n", od->object->identifier.c_str(), od->object.get(), od.get() );
                 if( !IsInFunction(S) )
                     decl_scope.top()->push_back( od );
-                return hold_decl.ToRaw( od );
+                return od;
             }
+        }
+        
+        virtual DeclTy *ActOnDeclarator( clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup )
+        {
+            // TODO the spurious char __builtin_va_list; line comes from the target info.
+            // Create an inferno target info customised for Inferno that doesn't do this.
+            //TRACE("\"%s\"\n", D.getIdentifier()->getName().c_str() ); 
+            if( strcmp(D.getIdentifier()->getName(), "__builtin_va_list")==0 )
+            {            
+                return 0;
+            }
+ 
+            shared_ptr<Declaration> d = CreateDelcaration( S, D );            
+            return hold_decl.ToRaw( d );
         }
         
         /// ActOnParamDeclarator - This callback is invoked when a parameter
@@ -301,14 +308,17 @@ private:
             return hold_decl.ToRaw( p );
         }
 
- /*       virtual void AddInitializerToDecl(DeclTy *Dcl, ExprTy *Init) 
+        virtual void AddInitializerToDecl(DeclTy *Dcl, ExprTy *Init) 
         {
-            shared_ptr<Declaration> d = hold_decl.FromRaw( Dcl );
+            shared_ptr<Declaration> d = hold_decl.FromRaw( Dcl );            
+            shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast<ObjectDeclaration>(d);
+            ASSERT( od ); // Only objects can be initialised
+            
             shared_ptr<Expression> e = hold_expr.FromRaw( Init );
             
-            d->initialiser = e;            
+            od->initialiser = e;            
         }
-*/
+
         /*
         Note: the default implementation of ActOnStartOfFunctionDef() appears in
         InfernoMinimalAction and can cause spurious ActOnDeclarator() calls if we always
@@ -317,11 +327,11 @@ private:
         */
         virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D) 
         {
-            shared_ptr<FunctionDeclaration> p(new FunctionDeclaration);
+            shared_ptr<ObjectDeclaration> p(new ObjectDeclaration);
             clang::Scope *GlobalScope = FnBodyScope->getParent();
             p->object = CreateObjectNode( GlobalScope, D );
                         
-            shared_ptr<FunctionPrototype> fp = dynamic_pointer_cast<FunctionPrototype>( p->object->type );
+            shared_ptr<Function> fp = dynamic_pointer_cast<Function>( p->object->type );
             ASSERT(fp);
             for( int i=0; i<fp->parameters.size(); i++ )
             {
@@ -336,7 +346,7 @@ private:
         
         virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtTy *Body) 
         {
-            shared_ptr<FunctionDeclaration> fd( dynamic_pointer_cast<FunctionDeclaration>( hold_decl.FromRaw(Decl) ) );
+            shared_ptr<ObjectDeclaration> fd( dynamic_pointer_cast<ObjectDeclaration>( hold_decl.FromRaw(Decl) ) );
             ASSERT(fd);
             shared_ptr<Expression> e( dynamic_pointer_cast<Expression>( hold_stmt.FromRaw(Body) ) );
             ASSERT(e); // function body must be a scope or 0
@@ -643,10 +653,22 @@ private:
                                                  ExprTy *Init, DeclTy *LastInGroup) 
         {
             TRACE("Member %p\n", Init);
-            return ActOnDeclarator( S, D, LastInGroup );
-            // TODO initialiser (action seems to be commented out for some reason) 
+            shared_ptr<Declaration> d = CreateDelcaration( S, D );
+                        
+            if( Init )
+            {  
+                shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast<ObjectDeclaration>(d);
+                ASSERT( od ); // Only objects may be initialised
+                od->initialiser = hold_expr.FromRaw( Init );
+            }
+            
+         /*   switch( AS )
+            {
+                case AS_public:
+                    
+            }*/
+            
             // TODO set bitfield width (make a worker function for ActOnDeclarator())
-            // TODO set access specifier
         }
 
         virtual DeclTy *ActOnTag(clang::Scope *S, unsigned TagType, TagKind TK,
