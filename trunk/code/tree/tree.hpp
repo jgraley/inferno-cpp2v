@@ -31,6 +31,12 @@ struct Expression : Statement
 
 struct Declaration : Statement
 {   
+    enum Access
+    {
+        PUBLIC,
+        PRIVATE,
+        PROTECTED
+    } access;
 };
 
 struct Type : virtual Node
@@ -70,12 +76,6 @@ struct Object : Identifier
         STATIC,
         AUTO
     } storage_class;
-    enum Access
-    {
-        PUBLIC,
-        PRIVATE,
-        PROTECTED
-    } access;
     shared_ptr<Type> type;
 };
 

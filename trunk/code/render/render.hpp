@@ -36,10 +36,15 @@ private:
     string RenderIdentifier( shared_ptr<Identifier> id )
     {
         string ids;
-        TRACE();
         if( id )
+        {
             ids = id->identifier;
-        TRACE();
+            TRACE( "%s\n", ids.c_str() );
+        }
+        else
+        {
+            TRACE();
+        }
         return ids;
     }
 
@@ -119,12 +124,38 @@ private:
         TRACE("ok\n");
     }
     
-    string RenderDeclaration( shared_ptr<Statement> declaration, string sep )
+    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, Declaration::Access *access = NULL )
     {
         TRACE();
+        string s;
+        
+        if( declaration->access != *access )
+        {
+            switch( declaration->access )
+            {
+                case Declaration::PUBLIC:
+                    s += "public:\n";
+                    break;
+                case Declaration::PRIVATE:
+                    s += "private:\n";
+                    break;
+                case Declaration::PROTECTED:
+                    s += "protected:\n";
+                    break;
+                default:
+                    ASSERT(0);
+                    break;    
+            }
+            *access = declaration->access;
+        }
+        
+        /*char hhh[2];
+        hhh[0]='A'+(char)(declaration->access);
+        hhh[1]=0;
+        s += hhh;*/
+        
         if( shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast< ObjectDeclaration >(declaration) )
         {
-            string s;
             //TODO storage class, access 
             s += RenderType( od->object->type, RenderIdentifier(od->object) );
             if(od->initialiser)
@@ -145,23 +176,36 @@ private:
             return s;
         }
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
-            return "typedef " + RenderType( t->type, t->identifier ) + sep;
+            s += "typedef " + RenderType( t->type, t->identifier ) + sep;
         else if( shared_ptr<Holder> h = dynamic_pointer_cast< Holder >(declaration) )
         {
-            string s;
+            Declaration::Access a;
             if( dynamic_pointer_cast< Class >(h) )
-                s = "class";
+            {
+                s += "class";
+                a = Declaration::PRIVATE;
+            }
             else if( dynamic_pointer_cast< Struct >(h) )
-                s = "struct";
+            {
+                s += "struct";
+                a = Declaration::PUBLIC;
+            }
             else if( dynamic_pointer_cast< Union >(h) )
-                s = "union";
-            return s + " " + h->identifier + "\n" 
-                   "{\n" +
-                   RenderSequence( h->members, ";\n", true ) +
-                   "};\n";
+            {
+                s += "union";
+                a = Declaration::PUBLIC;
+            }
+            else
+                return ERROR_UNSUPPORTED(declaration);
+
+            s += " " + h->identifier + "\n" 
+                 "{\n" +
+                 RenderSequence( h->members, ";\n", true, a ) +
+                 "};\n";
         }
         else
-            return ERROR_UNSUPPORTED(declaration);
+            s += ERROR_UNSUPPORTED(declaration);
+        return s;    
     }
 
     string RenderStatement( shared_ptr<Statement> statement, string sep )
@@ -224,7 +268,10 @@ private:
     }
     
     template< class ELEMENT >
-    string RenderSequence( Sequence<ELEMENT> spe, string separator, bool seperate_last )
+    string RenderSequence( Sequence<ELEMENT> spe, 
+                           string separator, 
+                           bool seperate_last, 
+                           Declaration::Access init_access = Declaration::PRIVATE )
     {
         TRACE();
         string s;
@@ -232,7 +279,12 @@ private:
         {
             string sep = (seperate_last || i+1<spe.size()) ? separator : "";
             shared_ptr<ELEMENT> pe = spe[i];                        
-            s += RenderStatement( pe, sep ); // Use this since statement is a base for declaration and expression
+            if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
+                s += RenderDeclaration( d, sep, &init_access );
+            else if( shared_ptr<Statement> st = dynamic_pointer_cast< Statement >(pe) )
+                s += RenderStatement( st, sep ); 
+            else
+                s += ERROR_UNSUPPORTED(pe);
         }
         return s;
     }
