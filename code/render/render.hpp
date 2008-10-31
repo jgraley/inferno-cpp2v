@@ -10,7 +10,9 @@
 #define ERROR_UNSUPPORTED(P) \
     string( "\n#error " ) + \
     string( typeid(*P).name() ) + \
-    string( " not supported in "__FILE__"\n" );
+    string( " not supported in " ) + \
+    string( BOOST_CURRENT_FUNCTION ) + \
+    string( "\n" );
 
 class Render : public Pass
 {
@@ -56,8 +58,8 @@ private:
             return RenderType( p->destination, "(*" + object + ")" );
         else if( shared_ptr<Reference> r = dynamic_pointer_cast< Reference >(type) )
             return RenderType( r->destination, "(&" + object + ")" );
-        else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
-            return t->identifier + " " + object;
+        else if( shared_ptr<UserType> ut = dynamic_pointer_cast< UserType >(type) )
+            return ut->identifier + " " + object;
         else
             return ERROR_UNSUPPORTED(type);
     }
@@ -135,11 +137,20 @@ private:
                    RenderExpression(fd->initialiser);
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
             return "typedef " + RenderType( t->type, t->identifier ) + sep;
-        else if( shared_ptr<Class> c = dynamic_pointer_cast< Class >(declaration) )
-            return "class " + c->identifier + "\n" 
+        else if( shared_ptr<Holder> h = dynamic_pointer_cast< Holder >(declaration) )
+        {
+            string s;
+            if( dynamic_pointer_cast< Class >(h) )
+                s = "class";
+            else if( dynamic_pointer_cast< Struct >(h) )
+                s = "struct";
+            else if( dynamic_pointer_cast< Union >(h) )
+                s = "union";
+            return s + " " + h->identifier + "\n" 
                    "{\n" +
-                   RenderSequence( c->members, ";\n", true ) +
+                   RenderSequence( h->members, ";\n", true ) +
                    "};\n";
+        }
         else
             return ERROR_UNSUPPORTED(declaration);
     }
