@@ -76,10 +76,13 @@ class ccc
 {
     ms asasas;
     typedef int ti;
+public:
+    int ggh;
     struct nested
     {    
         ccc *p;
     };
+protected:
     int a;
 };
 

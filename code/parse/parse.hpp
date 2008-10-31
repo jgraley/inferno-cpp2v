@@ -229,7 +229,6 @@ private:
             if(ID)
                 o->identifier = ID->getName();
             o->storage_class = Object::DEFAULT;
-            o->access = Object::PUBLIC; // default to public
             o->type = CreateTypeNode( D );
 
             (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, o );     
@@ -260,13 +259,14 @@ private:
         shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D )
         {
             const clang::DeclSpec &DS = D.getDeclSpec();
+            shared_ptr<Declaration> d;
             if( DS.getStorageClassSpec() == clang::DeclSpec::SCS_typedef )
             {
                 shared_ptr<Typedef> t = CreateTypedefNode( S, D );                
                 if( !IsInFunction(S) ) // TODO are typedefs legal in functions?
                     decl_scope.top()->push_back( t );
                 TRACE();
-                return t;
+                d = t;
             }    
             else
             {                
@@ -276,8 +276,13 @@ private:
                 TRACE("aod %s %p %p\n", od->object->identifier.c_str(), od->object.get(), od.get() );
                 if( !IsInFunction(S) )
                     decl_scope.top()->push_back( od );
-                return od;
+                d = od;
             }
+            
+            // Default the access specifier
+            // PRIVATE means "only accessible within same scope" which is true for non-member decls 
+            d->access = Declaration::PRIVATE; 
+            return d;
         }
         
         virtual DeclTy *ActOnDeclarator( clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup )
@@ -330,7 +335,7 @@ private:
             shared_ptr<ObjectDeclaration> p(new ObjectDeclaration);
             clang::Scope *GlobalScope = FnBodyScope->getParent();
             p->object = CreateObjectNode( GlobalScope, D );
-                        
+            p->access = Declaration::PUBLIC;        // TODO not sure how to get access spec for this     
             shared_ptr<Function> fp = dynamic_pointer_cast<Function>( p->object->type );
             ASSERT(fp);
             for( int i=0; i<fp->parameters.size(); i++ )
@@ -662,11 +667,25 @@ private:
                 od->initialiser = hold_expr.FromRaw( Init );
             }
             
-         /*   switch( AS )
+            TRACE("as=%d\n", (unsigned)AS);
+            
+            // Fill in access specifier
+            switch( AS )
             {
-                case AS_public:
-                    
-            }*/
+                case clang::AS_public:
+                    d->access = Declaration::PUBLIC;
+                    break;
+                case clang::AS_protected:
+                    d->access = Declaration::PROTECTED;
+                    break;
+                case clang::AS_private:
+                    d->access = Declaration::PRIVATE;
+                    break;
+                case clang::AS_none:
+                default:
+                    ASSERT(0);
+                    break;
+            }
             
             // TODO set bitfield width (make a worker function for ActOnDeclarator())
         }
@@ -696,6 +715,7 @@ private:
             }
             
             h->identifier = Name->getName();
+            h->access = Declaration::PUBLIC; // must make all holder type decls public since clang doesnt seem to give us an AS
             //TODO should we do something with TagKind? Maybe needed for render.
             //TODO use the attibutes
             
