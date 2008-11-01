@@ -215,6 +215,21 @@ private:
                         return r;
                     }
                     
+                case clang::DeclaratorChunk::Array:
+                    {
+                        // TODO attributes
+                        TRACE("array\n");
+                        const clang::DeclaratorChunk::ArrayTypeInfo &achunk = chunk.Arr; 
+                        shared_ptr<Array> a(new Array);
+                        ASSERT(a);
+                        a->element = CreateTypeNode( D, depth+1 );
+                        if( achunk.NumElts )
+                            a->size = hold_expr.FromRaw( achunk.NumElts ); // number of elements was specified
+                        else
+                            a->size = shared_ptr<Expression>();    // number of elements was not specified eg int a[];
+                        return a;
+                    }
+                    
                 default:
                 ASSERT(!"Unknown type chunk");                     
                     break;
@@ -744,6 +759,23 @@ private:
             decl_scope.pop(); // class scope is complete
             // TODO are structs etc definable in functions? If so, this will put the decl outside the function
             decl_scope.top()->push_back( hold_decl.FromRaw(TagDecl) );
+        }
+        
+/*  virtual ExprResult ActOnMemberReferenceExpr(ExprTy *Base,SourceLocation OpLoc,
+                                              tok::TokenKind OpKind,
+                                              SourceLocation MemberLoc,
+                                              IdentifierInfo &Member) {
+    return 0;
+  }                                                                                         TODO!!! */
+        
+        
+        virtual ExprResult ActOnArraySubscriptExpr(ExprTy *Base, clang::SourceLocation LLoc,
+                                                   ExprTy *Idx, clang::SourceLocation RLoc) 
+        {
+            shared_ptr<Subscript> su( new Subscript );
+            su->base = hold_expr.FromRaw( Base );
+            su->index = hold_expr.FromRaw( Idx );
+            return hold_expr.ToRaw( su );
         }
     };
 };   

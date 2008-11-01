@@ -18,12 +18,13 @@ int main()
 {
     void *pl;// = &&here;
     char j=0;
-    int k = f(9, j);
+    int k[7] = f(9, j);
     {
         int a;
         a=0;
     }
     k--;
+    k[4]--;
     goto here;
     here:
     there:
