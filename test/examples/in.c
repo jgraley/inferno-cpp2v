@@ -73,6 +73,13 @@ union ms
     char *b;
 };
 
+ms x;
+
+int f()
+{
+    x.a = 9;
+}
+
 class ccc
 {
     ms asasas;
@@ -87,4 +94,3 @@ protected:
     int a;
 };
 
-ms x;

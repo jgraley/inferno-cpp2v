@@ -266,4 +266,11 @@ struct Subscript : Expression
     shared_ptr<Expression> index;
 };
 
+struct MemberAccess : Expression
+{
+    shared_ptr<Expression> base;
+    //shared_ptr<Identifier> member;    
+    string member;
+};
+
 #endif
