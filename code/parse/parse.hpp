@@ -774,12 +774,13 @@ private:
                                                     clang::SourceLocation MemberLoc,
                                                     clang::IdentifierInfo &Member) 
         {
-            shared_ptr<MemberAccess> ma( new MemberAccess );
-            ma->base = hold_expr.FromRaw( Base );
-            //shared_ptr<Object> o = dynamic_pointer_cast<Object>( InfernoMinimalAction::GetCurrentIdentifierRCPtr( Member ) );
-            //ASSERT(o);
-            ma->member = Member.getName();    
-            return hold_expr.ToRaw( ma );
+            ASSERT( OpKind == clang::tok::period ); // TODO tok::arrow  
+            shared_ptr<Access> a( new Access );
+            a->base = hold_expr.FromRaw( Base );
+            shared_ptr<Object> o( new Object );
+            o->identifier = Member.getName(); // Only the name is filled in TODO fill in (possibly in a pass)
+            a->member = o;    
+            return hold_expr.ToRaw( a );
         }
                 
         virtual ExprResult ActOnArraySubscriptExpr(ExprTy *Base, clang::SourceLocation LLoc,
