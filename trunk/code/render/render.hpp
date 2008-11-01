@@ -63,6 +63,8 @@ private:
             return RenderType( p->destination, "(*" + object + ")" );
         else if( shared_ptr<Reference> r = dynamic_pointer_cast< Reference >(type) )
             return RenderType( r->destination, "(&" + object + ")" );
+        else if( shared_ptr<Array> a = dynamic_pointer_cast< Array >(type) )
+            return RenderType( a->element, "(" + object + "[" + RenderExpression(a->size) + "])" );
         else if( shared_ptr<UserType> ut = dynamic_pointer_cast< UserType >(type) )
             return ut->identifier + " " + object;
         else
@@ -112,6 +114,11 @@ private:
             return before + 
                    RenderExpression( o->function, true ) + "(" +
                    RenderSequence( o->arguments, ", ", false ) + ")" +
+                   after;
+        else if( shared_ptr<Subscript> su = dynamic_pointer_cast< Subscript >(expression) )
+            return before + 
+                   RenderExpression( su->base, true ) + "[" +
+                   RenderExpression( su->index, false ) + "]" +
                    after;
         else if( shared_ptr<Scope> o = dynamic_pointer_cast< Scope >(expression) )
             return before + 

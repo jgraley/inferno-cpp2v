@@ -254,4 +254,16 @@ struct Class : InheritanceHolder
 {
 };
 
+struct Array : Type
+{
+    shared_ptr<Type> element;
+    shared_ptr<Expression> size; // NULL if undefined
+};
+
+struct Subscript : Expression
+{
+    shared_ptr<Expression> base;
+    shared_ptr<Expression> index;
+};
+
 #endif
