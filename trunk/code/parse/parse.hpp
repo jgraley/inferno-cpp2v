@@ -242,9 +242,18 @@ private:
             shared_ptr<Object> o(new Object());
             clang::IdentifierInfo *ID = D.getIdentifier();
             if(ID)
+            {
                 o->identifier = ID->getName();
+                TRACE("object %s\n", o->identifier.c_str());
+            }
+            else
+            {
+                TRACE();
+            }
+
             o->storage_class = Object::DEFAULT;
             o->type = CreateTypeNode( D );
+            
 
             (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, o );     
             return o;
@@ -295,8 +304,7 @@ private:
             }
             
             // Default the access specifier
-            // PRIVATE means "only accessible within same scope" which is true for non-member decls 
-            d->access = Declaration::PRIVATE; 
+            d->access = Declaration::PUBLIC; 
             return d;
         }
         
@@ -761,14 +769,19 @@ private:
             decl_scope.top()->push_back( hold_decl.FromRaw(TagDecl) );
         }
         
-/*  virtual ExprResult ActOnMemberReferenceExpr(ExprTy *Base,SourceLocation OpLoc,
-                                              tok::TokenKind OpKind,
-                                              SourceLocation MemberLoc,
-                                              IdentifierInfo &Member) {
-    return 0;
-  }                                                                                         TODO!!! */
-        
-        
+        virtual ExprResult ActOnMemberReferenceExpr(ExprTy *Base, clang::SourceLocation OpLoc,
+                                                    clang::tok::TokenKind OpKind,
+                                                    clang::SourceLocation MemberLoc,
+                                                    clang::IdentifierInfo &Member) 
+        {
+            shared_ptr<MemberAccess> ma( new MemberAccess );
+            ma->base = hold_expr.FromRaw( Base );
+            //shared_ptr<Object> o = dynamic_pointer_cast<Object>( InfernoMinimalAction::GetCurrentIdentifierRCPtr( Member ) );
+            //ASSERT(o);
+            ma->member = Member.getName();    
+            return hold_expr.ToRaw( ma );
+        }
+                
         virtual ExprResult ActOnArraySubscriptExpr(ExprTy *Base, clang::SourceLocation LLoc,
                                                    ExprTy *Idx, clang::SourceLocation RLoc) 
         {

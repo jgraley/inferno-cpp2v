@@ -120,6 +120,11 @@ private:
                    RenderExpression( su->base, true ) + "[" +
                    RenderExpression( su->index, false ) + "]" +
                    after;
+        else if( shared_ptr<MemberAccess> ma = dynamic_pointer_cast< MemberAccess >(expression) )
+            return before + 
+                   RenderExpression( ma->base, true ) + "." +
+                   ma->member +
+                   after;
         else if( shared_ptr<Scope> o = dynamic_pointer_cast< Scope >(expression) )
             return before + 
                    "{\n" + 
@@ -278,7 +283,7 @@ private:
     string RenderSequence( Sequence<ELEMENT> spe, 
                            string separator, 
                            bool seperate_last, 
-                           Declaration::Access init_access = Declaration::PRIVATE )
+                           Declaration::Access init_access = Declaration::PUBLIC )
     {
         TRACE();
         string s;
