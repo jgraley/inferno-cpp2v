@@ -791,6 +791,15 @@ private:
             su->index = hold_expr.FromRaw( Idx );
             return hold_expr.ToRaw( su );
         }
+
+        /// ActOnCXXBoolLiteral - Parse {true,false} literals.
+        virtual ExprResult ActOnCXXBoolLiteral(clang::SourceLocation OpLoc,
+                                               clang::tok::TokenKind Kind) //TODO not working - get node has no info
+        {
+            shared_ptr<NumericConstant> nc(new NumericConstant);
+            *(llvm::APInt *)(nc.get()) = (Kind == clang::tok::kw_true);
+            return hold_expr.ToRaw( nc );                       
+        }
     };
 };   
 

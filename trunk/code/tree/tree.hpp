@@ -10,9 +10,7 @@
 #include <deque>
 
 template<typename ELEMENT>
-struct Sequence : deque< shared_ptr<ELEMENT> >
-{
-};                   
+struct Sequence : deque< shared_ptr<ELEMENT> > {};                   
 
 struct Node
 {               
@@ -21,13 +19,9 @@ struct Node
     // without making Node ambiguous
 };
 
-struct Statement : virtual Node
-{
-};
+struct Statement : virtual Node {};
 
-struct Expression : Statement
-{
-};
+struct Expression : Statement {};
 
 struct Declaration : Statement
 {   
@@ -39,9 +33,7 @@ struct Declaration : Statement
     } access;
 };
 
-struct Type : virtual Node
-{
-};
+struct Type : virtual Node {};
 
 struct Identifier : Expression
 {
@@ -62,9 +54,7 @@ struct Typedef : UserType
     shared_ptr<Type> type;
 }; 
 
-struct Label : Identifier
-{
-};
+struct Label : Identifier {};
 
 // Note that an object can be a function instance (ie the target
 // of a function pointer) as well as a class instance or variable
@@ -80,9 +70,7 @@ struct Object : Identifier
 };
 
 struct Scope : Expression,
-               Sequence<Statement>
-{
-};                   
+               Sequence<Statement> {};                   
 
 struct ObjectDeclaration : Declaration
 {
@@ -110,17 +98,11 @@ struct Program : Sequence<Declaration>
 {
 };
 
-struct Int : Type
-{
-};
+struct Int : Type {};
 
-struct Char : Type
-{
-};
+struct Char : Type {};
 
-struct Void : Type
-{
-};
+struct Void : Type {};
 
 struct Operator : Expression
 {
@@ -128,17 +110,11 @@ struct Operator : Expression
     clang::tok::TokenKind kind;
 };
 
-struct Prefix : Operator
-{
-};
+struct Prefix : Operator {};  // 1 operand
 
-struct Postfix : Operator
-{
-};
+struct Postfix : Operator {}; // 1 operand
 
-struct Infix : Operator
-{
-};
+struct Infix : Operator {}; // 2 operands
 
 struct ConditionalOperator : Expression // eg ?:
 {
@@ -159,9 +135,7 @@ struct Call : Expression
 };
 
 struct NumericConstant : Expression,
-                         llvm::APInt
-{
-};
+                         llvm::APInt {};
 
 struct LabelMarker : Statement
 {
@@ -211,48 +185,34 @@ struct Switch : Statement
     shared_ptr<Statement> body;
 };
 
-struct SwitchMarker : Statement
-{
-};
+struct SwitchMarker : Statement {};
 
-struct Case : SwitchMarker
+struct Case : SwitchMarker 
 {
     shared_ptr<Expression> value;
 };
 
-struct Default : SwitchMarker
-{
-};
+struct Default : SwitchMarker {};
 
-struct Continue : Statement
-{
-};
+struct Continue : Statement {};
 
-struct Break : Statement
-{
-};
+struct Break : Statement {};
 
 struct Holder : UserType
 {
     Sequence<Declaration> members;
 };
 
-struct Union : Holder
-{
-};
+struct Union : Holder {};
 
 struct InheritanceHolder : Holder
 {
     Sequence<Declaration> bases; // these have empty identifier and NULL initialiser
 };
 
-struct Struct : InheritanceHolder
-{
-};
+struct Struct : InheritanceHolder {};
 
-struct Class : InheritanceHolder
-{
-};
+struct Class : InheritanceHolder {};
 
 struct Array : Type
 {
