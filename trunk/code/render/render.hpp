@@ -7,12 +7,16 @@
 #include "common/trace.hpp"
 
 // TODO indent back to previous level at end of string
-#define ERROR_UNSUPPORTED(P) \
+#define ERROR_UNKNOWN(V) \
     string( "\n#error " ) + \
-    string( typeid(*P).name() ) + \
+    string( V ) + \
     string( " not supported in " ) + \
     string( BOOST_CURRENT_FUNCTION ) + \
     string( "\n" );
+
+#define ERROR_UNSUPPORTED(P) \
+    ERROR_UNKNOWN( typeid(*P).name() );
+
 
 class Render : public Pass
 {
@@ -155,7 +159,7 @@ private:
                     s += "protected:\n";
                     break;
                 default:
-                    ASSERT(0);
+                    s += ERROR_UNKNOWN("access spec");
                     break;    
             }
             *access = declaration->access;
