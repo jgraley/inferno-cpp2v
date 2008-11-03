@@ -1,0 +1,96 @@
+
+
+Inferno Example Input Programs
+==============================
+
+Example programs will serve as input to automated tests, as well as for 
+demos and as food for thought when designing tranformations.
+
+General
+-------
+
+We need a range of sizes of programs from trivial 5-10 line programs 
+that use only a very limited range of language features up to "medium 
+size" programs of about 100-300 lines which use a greater propertion
+of the language. Programs should be written in a clear style, but there
+is no coding standard (but programs could be styled after the Inferno
+code in the ../code/*/ directories). Small programs may contain completely
+arbitrary code, wheras larger ones should attempt to implement some kind 
+of algorithm or meaningful function.
+
+Language features
+-----------------
+
+Example programs must be legal C++. However, many language features
+will not be supported for some time in Inferno. I would suggest that the 
+most basic 75% of C and the most basic 25% of C++ would be about right. 
+In particular, templates, exceptions and operator overloading should be 
+avoided, at least for now (but classes, inheritance and new/delete are OK). 
+There is no need to be systematic about language features because the 
+Clang test suite does this - we need more typical code to excercise the 
+Inferno transformations, which relate more to programming styles, constructs 
+and patterns than language elements (but to prescribe specific constructs
+would encourage common-mode blind spots).
+
+Smaller test programs should use a smaller subset of the language.
+
+Example programs should be self-contained and not #include any other 
+files, including library files. No kernel or C-library calls should be 
+made.
+
+Constructs that result in undefined behaviour should be avoided as should 
+compiler-specific extensions. Example programs should ideally compile
+on GCC and Visual C++ but successful compilation on any well known
+and up-to-date compiler is OK. Programs should not generate warnings
+under the default compiler settings.
+
+Test harness compatibility
+--------------------------
+
+Example programs should return an unsigned char result eg
+
+unsigned char main()
+{
+    unsigned char c;
+    ...
+    return c;
+}
+
+The result should be arbitrary byte value, preferably not 0 or 1 (these
+results could obtain too easily from a corrupted program). Note that the
+test harness will compile and run the program directly in order to obtain
+the expected return value - there is therefore no need to specify this
+value in any way and it would be better not to (so the program can be 
+modified by hand without needing to update the comment).
+
+Programs should avoid uninitialised variables and other causes of 
+indeterminacy, but if this becomes a problem I'll automate some kind of 
+checker, so don't worry about this too much. In general, there is *no
+need* to prove the expected result - the example programs themselves are
+not under test.
+
+Programs should ignore input arguemnts and not interact over stdin/out/err.
+
+License
+-------
+
+Inferno is subject to a BSD-style license, and submitted test programs
+must be submitted under this license. I'd be more comfortable if programs
+were completely original - if existing suitable resources exist, under
+a compatible license, please let me know.
+
+Submitted (and accepted) programs will be available on the public internet
+via Sourceforge.
+
+Getting programs to me
+----------------------
+
+Email is fine (jgraley@bigfoot.com) and please include a comment to
+the effect that you agree to licese the code to Inferno. Alternatively, 
+I can grant you checkin powers in the Inferno-synth Sourceforge project. 
+Example input programs go in inferno-synth/trunk/test/examples and 
+there will be some kind of filelist file (TBD)
+
+I cannot guarantee to use all submissions (but I can't see why I wouldn't).
+
+John Graley 3 Nov 2008
