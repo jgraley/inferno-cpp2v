@@ -98,6 +98,12 @@ struct Program : Sequence<Declaration>
 {
 };
 
+struct Integral : Type
+{
+    bool signed;
+    unsigned width;  // Bits, not bytes
+};
+
 struct Int : Type {};
 
 struct Char : Type {};

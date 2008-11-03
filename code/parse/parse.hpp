@@ -170,7 +170,7 @@ private:
                         break;
                     }
                     default:                    
-                        ASSERT(0);
+                        ASSERT(!"unsupported type");
                         break;
                 }
             }
@@ -329,7 +329,8 @@ private:
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D) 
         {
             shared_ptr<ParseParameterDeclaration> p(new ParseParameterDeclaration);
-            p->object = CreateObjectNode( S, D );        
+            p->object = CreateObjectNode( S, D );
+            p->access = Declaration::PUBLIC;        
             p->initialiser = shared_ptr<Expression>(); // might fill in later if init
             p->clang_identifier = D.getIdentifier(); // allow us to re-register the object
             TRACE("aopd %s %p %p\n", 0, p->object.get(), p.get() );
@@ -429,7 +430,7 @@ private:
                
                 bool err = literal.GetIntegerValue(rv);
                 
-                ASSERT( !err );
+                ASSERT( !err && "could not understand numeric literal" );
                 return rv;
             }
             ASSERT(!"only ints supported");
@@ -648,7 +649,7 @@ private:
                                          clang::SourceLocation ColonLoc, StmtTy *SubStmt) 
         {
             TRACE();
-            ASSERT(!RHSVal); // ... not supported
+            ASSERT(!RHSVal && "gcc extension ... not supported");
             shared_ptr<ParseCase> c( new ParseCase );
             c->value = hold_expr.FromRaw( LHSVal );
             c->sub = SubStmt;
