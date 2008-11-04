@@ -98,17 +98,20 @@ struct Program : Sequence<Declaration>
 {
 };
 
-struct Integral : Type
+struct Void : Type {};
+
+struct Bool : Type {};
+
+struct Datum : Type
 {
-    bool signed;
     unsigned width;  // Bits, not bytes
 };
 
-struct Int : Type {};
+struct Integral : Datum {};
 
-struct Char : Type {};
+struct Signed : Integral {};
 
-struct Void : Type {};
+struct Unsigned : Integral {};
 
 struct Operator : Expression
 {

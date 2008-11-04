@@ -11,7 +11,7 @@
     string( "\n#error " ) + \
     string( V ) + \
     string( " not supported in " ) + \
-    string( BOOST_CURRENT_FUNCTION ) + \
+    string( INFERNO_CURRENT_FUNCTION ) + \
     string( "\n" );
 
 #define ERROR_UNSUPPORTED(P) \
@@ -51,16 +51,44 @@ private:
         }
         return ids;
     }
+    
+    string RenderIntegralType( shared_ptr<Integral> type )
+    {
+        // Produce signed or unsigned as required
+        string s;
+        if( dynamic_pointer_cast< Signed >(type) )
+            s = "signed ";
+        else if( dynamic_pointer_cast< Unsigned >(type) )
+            s = "unsigned ";
+        else
+            return ERROR_UNSUPPORTED(type);
+
+        // Fix the width
+        if( type->width == TypeInfo::char_bits )
+            s += "char";
+        else if( type->width == TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified] )
+            s += "int";
+        else if( type->width == TypeInfo::integral_bits[clang::DeclSpec::TSW_short] )
+            s += "short";
+        else if( type->width == TypeInfo::integral_bits[clang::DeclSpec::TSW_long] )
+            s += "long";
+        else if( type->width == TypeInfo::integral_bits[clang::DeclSpec::TSW_longlong] )
+            s += "long long";
+        else    
+            ASSERT( !"no builtin type has required bit width"); // TODO drop in a bit vector
+        
+        return s;              
+    }
 
     string RenderType( shared_ptr<Type> type, string object=string() )
     {
         TRACE();
-        if( dynamic_pointer_cast< Int >(type) )
-            return "int " + object;
-        else if( dynamic_pointer_cast< Char >(type) )
-            return "char " + object;
+        if( shared_ptr<Integral> i = dynamic_pointer_cast< Integral >(type) )
+            return RenderIntegralType( i ) + " " + object;
         else if( dynamic_pointer_cast< Void >(type) )
             return "void " + object;
+        else if( dynamic_pointer_cast< Bool >(type) )
+            return "bool " + object;
         else if( shared_ptr<Function> f = dynamic_pointer_cast< Function >(type) )
             return RenderType( f->return_type, "(" + object + ")(" + RenderSequence(f->parameters, ", ", false) + ")" );
         else if( shared_ptr<Pointer> p = dynamic_pointer_cast< Pointer >(type) )
