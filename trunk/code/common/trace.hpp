@@ -5,7 +5,7 @@
  * How it works:
  *
  * TRACE
- * We use a functor class "Tracer" to make TRACE look like a funciton that works
+ * We use a functor class "Tracer" to make TRACE look like a function that works
  * just like printf(). Note that Boost provides a multi-platform "name of 
  * currrent function" macro, which we use.
  *
@@ -36,7 +36,11 @@ private:
     Flags flags;
 };
 
-#define TRACE Tracer( __FILE__, __LINE__, BOOST_CURRENT_FUNCTION )
+#define INFERNO_CURRENT_FUNCTION __func__
+// can be BOOST_CURRENT_FUNCTION if you want full signature but I find
+// it can get in the way
+
+#define TRACE Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION )
 #define ASSERT BOOST_ASSERT
 
 #endif

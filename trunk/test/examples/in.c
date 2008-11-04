@@ -1,5 +1,5 @@
 int g;
-int *i;
+char *i;
 
 typedef int mytype;
 mytype vv;
@@ -8,8 +8,8 @@ int fp(int);
 
 int f(int &i, char longidentifier)
 {
-   int x=i;
-   int y=4-1;
+   signed char x=i;
+   unsigned char y=4-1;
    x++;
    return x/y;
 }
@@ -69,13 +69,13 @@ int main()
 
 union ms
 {
-    int a;
-    char *b;
+    long long int a;
+    long long *b;
 };
 
 ms x;
 
-int f()
+unsigned f()
 {
     x.a = 9;
 }
@@ -83,7 +83,7 @@ int f()
 class ccc
 {
     ms asasas;
-    typedef int ti;
+    typedef short ti;
 public:
     int ggh;
     struct nested

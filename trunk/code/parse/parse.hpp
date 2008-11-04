@@ -26,6 +26,7 @@
 #include "common/refcount.hpp"
 #include "common/pass.hpp"
 #include "common/trace.hpp"
+#include "common/type_info.hpp"
 
 #include "inferno_minimal_action.hpp"
 
@@ -139,6 +140,33 @@ private:
             return !!(S->getFnParent());
         }
         
+        shared_ptr<Integral> CreateIntegralType( unsigned bits, bool default_signed, clang::DeclSpec::TSS type_spec_signed )
+        {
+            shared_ptr<Integral> i;
+            bool sign;
+            switch( type_spec_signed )
+            { 
+                case clang::DeclSpec::TSS_signed:
+                    sign = true;
+                    break;
+                case clang::DeclSpec::TSS_unsigned:
+                    sign = false;
+                    break;
+                case clang::DeclSpec::TSS_unspecified:
+                    sign = default_signed;
+                    break;
+            }
+            
+            if( sign )
+                i = shared_ptr<Signed>( new Signed );
+            else
+                i = shared_ptr<Unsigned>( new Unsigned );
+            
+            i->width = bits;
+            
+            return i;
+        }
+        
         shared_ptr<Type> CreateTypeNode( clang::Declarator &D, int depth=0 )
         {
             TRACE("%d, %d\n", depth, D.getNumTypeObjects() );
@@ -153,14 +181,21 @@ private:
                 switch( DS.getTypeSpecType() )
                 {
                     case clang::DeclSpec::TST_int:
-                        TRACE();
-                        return shared_ptr<Type>(new Int());
+                    case clang::DeclSpec::TST_unspecified:
+                        return CreateIntegralType( TypeInfo::integral_bits[DS.getTypeSpecWidth()], 
+                                                   TypeInfo::int_default_signed,
+                                                   DS.getTypeSpecSign() );
                         break;
                     case clang::DeclSpec::TST_char:
-                        return shared_ptr<Type>(new Char());
+                        return CreateIntegralType( TypeInfo::char_bits, 
+                                                   TypeInfo::char_default_signed,
+                                                   DS.getTypeSpecSign() );
                         break;
                     case clang::DeclSpec::TST_void:
                         return shared_ptr<Type>(new Void());
+                        break;
+                    case clang::DeclSpec::TST_bool:
+                        return shared_ptr<Type>(new Bool());
                         break;
                     case clang::DeclSpec::TST_typedef:
                     {
