@@ -1,0 +1,27 @@
+# If including this from a subdirectory, preset LEVEL the the required amount of ..
+LEVEL ?= .
+
+# Build type - Debug or Release. For clang and llvm, ENABLE_OPTIMIZED must be
+# 0 for debug and 1 for release
+BUILD ?= Debug
+ENABLE_OPTIMIZED ?= 0
+
+# Standard tools
+ICC ?= g++
+AR ?= ar
+MAKE ?= make
+
+# For inferno
+OPTIONS += -I.
+
+# For boost
+# JSG I need this to get the boost includes in a cygwin setup
+OPTIONS += -I/usr/include/boost-1_33_1 -DBOOST_ENABLE_ASSERT_HANDLER
+
+# For llvm/clang
+BUILD = Debug
+LLVM = $(LEVEL)/llvm
+CLANG = $(LLVM)/tools/clang
+OPTIONS += -I$(LLVM)/include -I$(CLANG)/include
+OPTIONS += -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS
+
