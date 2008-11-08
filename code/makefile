@@ -9,31 +9,28 @@ CC ?= g++
 AR ?= ar
 MAKE ?= make
 
-# Some stuff that is not under revision control goes into the same directory
-# that contains the SVN root dir (inferno-synth/). This is the path to it.
-OUTSIDE_SVN := ../../..
-
 # For boost
 # JSG I need this to get the boost includes in a cygwin setup
 BOOST_PATH := -I/usr/include/boost-1_33_1 -DBOOST_ENABLE_ASSERT_HANDLER
 
-# Including and linking with the LLVM and Clang
-LLVM := $(OUTSIDE_SVN)/llvm-2.3
+# Compiling with LLVM and Clang
+LLVM := ../llvm
 CLANG := $(LLVM)/tools/clang
 INCLUDE_PATH := -I$(LLVM)/include -I$(CLANG)/include
-LLVM_OPTIONS := -D__STDC_LIMIT_MACROS
-LLVM_LIBS := $(LLVM)/$(BUILD)/lib/libLLVM*.a
-# JSG added basic at the end since other libs depend on it. Should really specify them all in order TODO
-CLANG_LIBS := $(LLVM)/$(BUILD)/lib/libclang*.a $(LLVM)/$(BUILD)/lib/libclangBasic.a 
+LLVM_OPTIONS := -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS
 
 # For inferno
-STANDARD_LIBS := -lstdc++
 INCLUDE_PATH := $(INCLUDE_PATH) -I.
 INFERNO_SOURCES := inferno.cpp tree/tree.cpp common/refcount.cpp common/read_args.cpp common/trace.cpp parse/inferno_minimal_action.cpp common/type_info.cpp
 
 all : inferno.cpp
 	$(CC) $(INCLUDE_PATH) $(LLVM_OPTIONS) $(INFERNO_SOURCES) $(CLANG_LIBS) $(LLVM_LIBS) $(STANDARD_LIBS) $(BOOST_PATH) -ggdb -o inferno
 
+inferno.a :
+	$(CC) -c $(INCLUDE_PATH) $(LLVM_OPTIONS) $(INFERNO_SOURCES) $(BOOST_PATH) -ggdb
+	$(AR) -r inferno.a *.o
+
+    
 clang :
 	cd $(CLANG); $(MAKE) ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED)
 
