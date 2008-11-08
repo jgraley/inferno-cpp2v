@@ -1,5 +1,6 @@
 
 Building LLVM/Clang
+-------------------
 
 LLVM directory hierarchy should be rooted in same directory as inferno-synth so you can have
 > ls
@@ -15,5 +16,19 @@ from various places in llvm and clang.
 
 From llvm-x.y/lib and llvm-x.y/tools/clang/lib, type
 
-make ENABLE_OPTIMISED=0
+make ENABLE_OPTIMIZED=0
 
+or use the "llvm" and "clang" targets in the inferno makefile in inferno-synth/trunk/code (but these 
+go to wrong directory: "lib" missing
+
+archives: llvm-2.3/Debug/lib
+objects: in Debug/ dir among sources
+
+
+Other issues
+------------
+
+CygWin problems running svn on command line
+Symptom: gives "app failed" dialogs on Vista, apparently silent fail on XP
+Reason: svn depends on libaprutil, which depends on libexpat0. But the latter dependency is missing
+Fix: install libexpat0 using cygwin tool ("libexpat0" under "libs")
