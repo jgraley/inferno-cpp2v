@@ -1,10 +1,6 @@
 # If including this from a subdirectory, preset LEVEL the the required amount of ..
 LEVEL ?= .
 
-# Build type - Debug or Release. For clang and llvm, ENABLE_OPTIMIZED must be
-# 0 for debug and 1 for release
-BUILD ?= Debug
-ENABLE_OPTIMIZED ?= 0
 
 # Standard tools
 ICC ?= g++

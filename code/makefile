@@ -1,11 +1,16 @@
 LEVEL=..
 include ../makefile.common
 
-INFERNO_SOURCES := inferno.cpp tree/tree.cpp common/refcount.cpp common/read_args.cpp common/trace.cpp parse/inferno_minimal_action.cpp common/type_info.cpp
+INFERNO_MODULES = inferno
+INFERNO_MODULES += tree/tree 
+INFERNO_MODULES += common/refcount common/read_args common/trace common/type_info
+INFERNO_MODULES += parse/inferno_minimal_action 
 
-inferno.a :
-	$(ICC) -c $(OPTIONS) $(INFERNO_SOURCES) -ggdb
-	$(AR) -r inferno.a *.o
-	rm -r *.o
-	
-.PHONY: all clang llvm
+$(INFERNO_MODULES:%=build/%.o) : $(@:build/%.o=%.cpp) *.hpp */*.hpp
+	mkdir -p $(dir $@)
+	$(ICC) -c $(OPTIONS) $(@:build/%.o=%.cpp) -o $@ -ggdb
+
+build/inferno.a : $(INFERNO_MODULES:%=build/%.o)
+	mkdir -p build
+	$(AR) -r build/inferno.a $(INFERNO_MODULES:%=build/%.o)
+
