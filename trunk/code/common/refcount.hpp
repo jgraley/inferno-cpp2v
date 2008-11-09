@@ -46,7 +46,7 @@ public:
     {
         ASSERT( p != 0 && "this raw value is uninitialised");        
         unsigned i = reinterpret_cast<unsigned>(p);
-        TRACE("FromRaw 0x%08x\n", i );
+        TRACE("FromRaw 0x%08x (id=0x%08x)\n", i, id );
         ASSERT( (i & 0xFF000000) == id && "this raw value was stored to a different holder or uninitialised");
         i &= 0x00FFFFFF; 
         return hold_list[i];
