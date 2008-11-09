@@ -476,11 +476,13 @@ private:
             shared_ptr<NumericConstant> nc(new NumericConstant);
             *(llvm::APInt *)(nc.get()) = EvaluateNumericConstant( tok );
             return hold_expr.ToRaw( nc );            
-        }
+        } 
   
-        virtual ExprResult ActOnBinOp(clang::SourceLocation TokLoc, clang::tok::TokenKind Kind,
+        virtual ExprResult ActOnBinOp(clang::Scope *S,
+                                      clang::SourceLocation TokLoc, clang::tok::TokenKind Kind,
                                       ExprTy *LHS, ExprTy *RHS) 
         {
+            TRACE(); 
             shared_ptr<Infix> o(new Infix);
             o->kind = Kind;
             o->operands.push_back( hold_expr.FromRaw(LHS) );
