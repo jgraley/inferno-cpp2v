@@ -1,5 +1,5 @@
 include makefile.common
-.PHONY: all code/inferno.a get_llvm get_clang llvm clang
+.PHONY: all code/build/inferno.a get_llvm_clang
 all : inferno.exe
 
 #

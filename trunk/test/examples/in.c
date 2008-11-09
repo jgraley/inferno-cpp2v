@@ -9,7 +9,7 @@ int fp(int);
 int f(int &i, char longidentifier)
 {
    signed char x=i;
-   unsigned char y=4-1;
+   unsigned char y=4;
    x++;
    return x/y;
 }
