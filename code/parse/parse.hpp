@@ -176,9 +176,10 @@ private:
             TRACE();
             if( depth==D.getNumTypeObjects() )
             {
-                TRACE();
                 const clang::DeclSpec &DS = D.getDeclSpec();
-                switch( DS.getTypeSpecType() )
+                clang::DeclSpec::TST t = DS.getTypeSpecType();
+                TRACE("type spec type %d\n", (int)t);
+                switch( t )
                 {
                     case clang::DeclSpec::TST_int:
                     case clang::DeclSpec::TST_unspecified:
@@ -198,12 +199,15 @@ private:
                         return shared_ptr<Type>(new Bool());
                         break;
                     case clang::DeclSpec::TST_typedef:
-                    {
-                        shared_ptr<Type> t = hold_type.FromRaw( DS.getTypeRep() );
-                        ASSERT( t );
-                        return t;
+                        return hold_type.FromRaw( DS.getTypeRep() );
                         break;
-                    }
+                    case clang::DeclSpec::TST_struct:
+                    case clang::DeclSpec::TST_union:
+                    case clang::DeclSpec::TST_class:
+                        // Disgustingly, clang casts the DeclTy returned from ActOnTag() to 
+                        // a TypeTy. 
+                        return dynamic_pointer_cast<Holder>( hold_decl.FromRaw( DS.getTypeRep() ) );
+                        break;
                     default:                    
                         ASSERT(!"unsupported type");
                         break;

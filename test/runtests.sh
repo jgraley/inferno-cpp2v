@@ -1,8 +1,8 @@
 #!/bin/bash
 
 
-clang_tests=../../../llvm-2.3/tools/clang/test
-inferno=../code/inferno.exe
+clang_tests=../llvm/tools/clang/test
+inferno=../inferno.exe
 resfile=results.csv
 
 rm -f $resfile
@@ -11,7 +11,7 @@ do
  fb=`basename $infile`
  outfile=results/$fb
 
- $inferno -i $infile > $outfile
+ $inferno -t -i $infile > $outfile
  ires=$?
 
  gccres=0
