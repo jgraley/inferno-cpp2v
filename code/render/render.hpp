@@ -75,7 +75,24 @@ private:
         else if( type->width == TypeInfo::integral_bits[clang::DeclSpec::TSW_longlong] )
             s += "long long";
         else    
-            ASSERT( !"no builtin type has required bit width"); // TODO drop in a bit vector
+            ASSERT( !"no builtin integral type has required bit width"); // TODO drop in a bit vector
+        
+        return s;              
+    }
+
+    string RenderFloatingType( shared_ptr<Floating> type )
+    {
+        string s;
+    
+        // Fix the width
+        if( type->width == TypeInfo::float_bits )
+            s += "float";
+        else if( type->width == TypeInfo::double_bits )
+            s += "double";
+        else if( type->width == TypeInfo::long_double_bits )
+            s += "long double";
+        else    
+            ASSERT( !"no builtin floating type has required bit width"); // TODO drop in a bit vector
         
         return s;              
     }
@@ -85,6 +102,8 @@ private:
         TRACE();
         if( shared_ptr<Integral> i = dynamic_pointer_cast< Integral >(type) )
             return RenderIntegralType( i ) + " " + object;
+        if( shared_ptr<Floating> f = dynamic_pointer_cast< Floating >(type) )
+            return RenderFloatingType( f ) + " " + object;
         else if( dynamic_pointer_cast< Void >(type) )
             return "void " + object;
         else if( dynamic_pointer_cast< Bool >(type) )
@@ -162,6 +181,11 @@ private:
                    "{\n" + 
                    RenderSequence(*o, ";\n", true) +
                    "}\n" +
+                   after;
+        else if( shared_ptr<Cast> c = dynamic_pointer_cast< Cast >(expression) )
+            return before + 
+                   "(" + RenderType( c->type, "" ) + ")" +
+                   RenderExpression( c->operand, false ) + 
                    after;
         else
             return ERROR_UNSUPPORTED(expression);

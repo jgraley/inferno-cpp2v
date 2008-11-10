@@ -167,6 +167,13 @@ private:
             return i;
         }
         
+        shared_ptr<Floating> CreateFloatingType( unsigned bits )
+        {
+            shared_ptr<Floating> f( shared_ptr<Floating>( new Floating ) );
+            f->width = bits;
+            return f;
+        }
+        
         shared_ptr<Type> CreateTypeNode( clang::Declarator &D, int depth=0 )
         {
             TRACE("%d, %d\n", depth, D.getNumTypeObjects() );
@@ -179,6 +186,8 @@ private:
                 const clang::DeclSpec &DS = D.getDeclSpec();
                 clang::DeclSpec::TST t = DS.getTypeSpecType();
                 TRACE("type spec type %d\n", (int)t);
+                ASSERT( DS.getTypeSpecComplex() == clang::DeclSpec::TSC_unspecified &&
+                        "complex types not supported" );
                 switch( t )
                 {
                     case clang::DeclSpec::TST_int:
@@ -197,6 +206,14 @@ private:
                         break;
                     case clang::DeclSpec::TST_bool:
                         return shared_ptr<Type>(new Bool());
+                        break;
+                    case clang::DeclSpec::TST_float:
+                        return CreateFloatingType( TypeInfo::float_bits );
+                        break;
+                    case clang::DeclSpec::TST_double:
+                        return CreateFloatingType( DS.getTypeSpecWidth()==clang::DeclSpec::TSW_long ?
+                                                   TypeInfo::long_double_bits :
+                                                   TypeInfo::double_bits );
                         break;
                     case clang::DeclSpec::TST_typedef:
                         return hold_type.FromRaw( DS.getTypeRep() );
@@ -518,6 +535,7 @@ private:
         {
             shared_ptr<ConditionalOperator> o(new ConditionalOperator);
             o->condition = hold_expr.FromRaw(Cond);
+            ASSERT(LHS && "gnu extension not supported");
             o->if_true = hold_expr.FromRaw(LHS);
             o->if_false = hold_expr.FromRaw(RHS);
             return hold_expr.ToRaw( o );                        
@@ -779,12 +797,17 @@ private:
                     break;        
             }
             
-            h->identifier = Name->getName();
+            if(Name)
+            {
+                h->identifier = Name->getName();
+                (void)InfernoMinimalAction::AddNakedIdentifier(S, Name, h, true); 
+            }
+            
             h->access = Declaration::PUBLIC; // must make all holder type decls public since clang doesnt seem to give us an AS
+            
             //TODO should we do something with TagKind? Maybe needed for render.
             //TODO use the attibutes
             
-            (void)InfernoMinimalAction::AddNakedIdentifier(S, Name, h, true); 
             return hold_decl.ToRaw( h );            
         }
    
@@ -816,9 +839,20 @@ private:
                                                     clang::SourceLocation MemberLoc,
                                                     clang::IdentifierInfo &Member) 
         {
-            ASSERT( OpKind == clang::tok::period ); // TODO tok::arrow  
+            TRACE("kind %d\n", OpKind);
             shared_ptr<Access> a( new Access );
-            a->base = hold_expr.FromRaw( Base );
+            if( OpKind == clang::tok::period )
+            {
+                shared_ptr<Prefix> p( new Prefix );
+                p->operands.push_back( hold_expr.FromRaw( Base ) );
+                p->kind = clang::tok::star;
+                a->base = p;
+            }
+            else
+            {
+                a->base = hold_expr.FromRaw( Base );
+            }
+        
             shared_ptr<Object> o( new Object );
             o->identifier = Member.getName(); // Only the name is filled in TODO fill in (possibly in a pass)
             a->member = o;    
@@ -841,6 +875,15 @@ private:
             shared_ptr<NumericConstant> nc(new NumericConstant);
             *(llvm::APInt *)(nc.get()) = (Kind == clang::tok::kw_true);
             return hold_expr.ToRaw( nc );                       
+        }
+
+        virtual ExprResult ActOnCastExpr(clang::SourceLocation LParenLoc, TypeTy *Ty,
+                                         clang::SourceLocation RParenLoc, ExprTy *Op) 
+        {
+            shared_ptr<Cast> c(new Cast);
+            c->operand = hold_expr.FromRaw( Op );
+            c->type = hold_type.FromRaw( Ty );
+            return hold_expr.ToRaw( c );                       
         }
     };
 };   
