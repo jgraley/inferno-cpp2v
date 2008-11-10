@@ -119,6 +119,8 @@ struct Operator : Expression
     clang::tok::TokenKind kind;
 };
 
+struct Floating : Datum {}; // Note width determines float vs double 
+
 struct Prefix : Operator {};  // 1 operand
 
 struct Postfix : Operator {}; // 1 operand
@@ -237,8 +239,14 @@ struct Subscript : Expression
 
 struct Access : Expression
 {
-    shared_ptr<Expression> base;
+    shared_ptr<Expression> base; 
     shared_ptr<Object> member;    
+};
+
+struct Cast : Expression
+{
+    shared_ptr<Expression> operand;
+    shared_ptr<Type> type;        
 };
 
 #endif

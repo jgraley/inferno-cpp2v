@@ -11,14 +11,16 @@ do
  fb=`basename $infile`
  outfile=results/$fb
 
- $inferno -t -i $infile > $outfile
+ $inferno -i $infile > $outfile
  ires=$?
 
  gccres=0
  if test $ires -eq 0
  then
-  g++ -c $outfile
+  cd results
+  g++ -c $fb
   gccres=$?
+  cd ..
  fi
 
  echo $fb ", " $ires ", " $gccres >> $resfile
