@@ -1,5 +1,5 @@
 include makefile.common
-.PHONY: all code/build/inferno.a get_llvm_clang
+.PHONY: all code/build/inferno.a get_libs test
 all : inferno.exe
 
 #
@@ -14,8 +14,9 @@ CLANG_URL ?= http://llvm.org/svn/llvm-project/cfe/trunk
 #
 # Check out llvm and clang 
 #
-# Note: removing PlistDiagnostics.cpp that we don't need and doesn't seem to compile
-get_llvm_clang :
+# Patches:
+#  Remove PlistDiagnostics.cpp that we don't need and doesn't seem to compile
+get_libs : makefile
 	rm -rf llvm
 	svn checkout --revision $(LLVM_REVISION) $(LLVM_URL) llvm
 	cd llvm; ./configure
@@ -33,24 +34,30 @@ LLVM_CLANG_LIBS =  libclangDriver.a libclangParse.a libclangLex.a libclangBasic.
 LLVM_CLANG_LIBS += libLLVMBitWriter.a libLLVMBitReader.a libLLVMSupport.a libLLVMSystem.a 	
 LLVM_CLANG_OPTIONS := ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED)
 
-libLLVMBit%.a :
+libLLVMBit%.a : makefile
 	cd llvm/lib/Bitcode/$(@:libLLVMBit%.a=%); $(MAKE) $(LLVM_CLANG_OPTIONS)	
 
-libLLVM%.a :
+libLLVM%.a : makefile
 	cd llvm/lib/$(@:libLLVM%.a=%); $(MAKE) $(LLVM_CLANG_OPTIONS)	
 
-libclang%.a :
+libclang%.a : makefile
 	cd llvm/tools/clang/lib/$(@:libclang%.a=%); $(MAKE) $(LLVM_CLANG_OPTIONS)	
     	   	
 #
 # Compile inferno sources
 #    	
-code/build/inferno.a :
+code/build/inferno.a : makefile
 	cd code; $(MAKE) build/inferno.a
 
 #
 # Link inferno executable
 #
 STANDARD_LIBS += -lstdc++
-inferno.exe : code/build/inferno.a $(LLVM_CLANG_LIBS)
+inferno.exe : makefile code/build/inferno.a $(LLVM_CLANG_LIBS)
 	$(ICC) code/build/inferno.a $(LLVM_CLANG_LIBS:%=$(LLVM)/$(LLVM_BUILD)/lib/%) $(STANDARD_LIBS) -ggdb -o inferno.exe
+
+#
+# Run the tests
+#
+test : makefile inferno.exe
+	cd test; ./runtests.sh

@@ -6,11 +6,11 @@ INFERNO_MODULES += tree/tree
 INFERNO_MODULES += common/refcount common/read_args common/trace common/type_info
 INFERNO_MODULES += parse/inferno_minimal_action 
 
-$(INFERNO_MODULES:%=build/%.o) : $(@:build/%.o=%.cpp) */*.hpp
+$(INFERNO_MODULES:%=build/%.o) : build/%.o : %.cpp */*.hpp
 	mkdir -p $(dir $@)
-	$(ICC) -c $(OPTIONS) $(@:build/%.o=%.cpp) -o $@ -ggdb
+	$(ICC) -c $(OPTIONS) $< -o $@ -ggdb
 
-build/inferno.a : $(INFERNO_MODULES:%=build/%.o)
+build/inferno.a : makefile $(INFERNO_MODULES:%=build/%.o)
 	mkdir -p build
 	$(AR) -r build/inferno.a $(INFERNO_MODULES:%=build/%.o)
 

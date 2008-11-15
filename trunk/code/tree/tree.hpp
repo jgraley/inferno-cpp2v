@@ -60,12 +60,13 @@ struct Label : Identifier {};
 // of a function pointer) as well as a class instance or variable
 struct Object : Identifier
 {
-    enum StorageClass
+    enum Storage
     {
-        DEFAULT, // TODO get rid of default and fill in properly
+        DEFAULT, 
         STATIC,
+        MEMBER,
         AUTO
-    } storage_class;
+    } storage;
     shared_ptr<Type> type;
 };
 
