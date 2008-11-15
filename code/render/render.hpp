@@ -5,6 +5,7 @@
 #include "common/refcount.hpp"
 #include "common/pass.hpp"
 #include "common/trace.hpp"
+#include "common/read_args.hpp"
 
 // TODO indent back to previous level at end of string
 #define ERROR_UNKNOWN(V) \
@@ -31,7 +32,17 @@ public:
     void operator()( shared_ptr<Program> program )       
     {
         string s = RenderSequence( *program, ";\n", true );
-        puts( s.c_str() ); // TODO allow a file to be specified in the constructor
+        if( ReadArgs::outfile.empty() )
+        {
+            puts( s.c_str() );
+        }
+        else
+        {
+            FILE *fp = fopen( ReadArgs::outfile.c_str(), "wt" );
+            ASSERT( fp && "Cannot open output file" );
+            fputs( s.c_str(), fp );
+            fclose( fp );
+        }    
     }
 
 private:
@@ -225,6 +236,21 @@ private:
         if( shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast< ObjectDeclaration >(declaration) )
         {
             //TODO storage class, access 
+            switch( od->object->storage )
+            {
+            case Object::STATIC:
+                s += "static ";
+                break;
+            case Object::AUTO:
+                s += "auto ";
+                break;
+            case Object::DEFAULT:
+            case Object::MEMBER:
+                break;
+            default:
+                s += ERROR_UNKNOWN("storage class");
+                break;
+            }
             s += RenderType( od->object->type, RenderIdentifier(od->object) );
             if(od->initialiser)
             {

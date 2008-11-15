@@ -297,6 +297,7 @@ private:
         { 
             shared_ptr<Object> o(new Object());
             clang::IdentifierInfo *ID = D.getIdentifier();
+            const clang::DeclSpec &DS = D.getDeclSpec();
             if(ID)
             {
                 o->identifier = ID->getName();
@@ -307,10 +308,24 @@ private:
                 TRACE();
             }
 
-            o->storage_class = Object::DEFAULT;
+            switch( DS.getStorageClassSpec() )
+            {
+            case clang::DeclSpec::SCS_unspecified:
+                o->storage = Object::DEFAULT;
+                break;
+            case clang::DeclSpec::SCS_static:
+                o->storage = Object::STATIC;
+                break;
+            case clang::DeclSpec::SCS_auto:
+                o->storage = Object::AUTO;
+                break;
+            default:
+                ASSERT(!"Unsupported storage class");
+                break;
+            }
+            
             o->type = CreateTypeNode( D );
             
-
             (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, o );     
             return o;
         }
@@ -489,7 +504,7 @@ private:
                 ASSERT( !err && "could not understand numeric literal" );
                 return rv;
             }
-            ASSERT(!"only ints supported");
+            ASSERT(!"only integer literals supported"); // todo floating point
         }
         
         virtual ExprResult ActOnNumericConstant(const clang::Token &tok) 
@@ -792,8 +807,11 @@ private:
                 case clang::DeclSpec::TST_class:
                     h = shared_ptr<Class>(new Class);
                     break;
+                case clang::DeclSpec::TST_enum:
+                    ASSERT(!"TODO add enum");
+                    break;
                 default:
-                    ASSERT(0); // TODO add enum            
+                    ASSERT(!"Unknown type spec type");            
                     break;        
             }
             
@@ -841,17 +859,21 @@ private:
         {
             TRACE("kind %d\n", OpKind);
             shared_ptr<Access> a( new Access );
-            if( OpKind == clang::tok::period )
+            if( OpKind == clang::tok::period )  // Base.Member
             {
                 shared_ptr<Prefix> p( new Prefix );
                 p->operands.push_back( hold_expr.FromRaw( Base ) );
                 p->kind = clang::tok::star;
                 a->base = p;
             }
-            else
+            else if( OpKind == clang::tok::arrow ) // Base->Member
             {
                 a->base = hold_expr.FromRaw( Base );
             }
+            else
+            {
+                ASSERT(!"Unknown token accessing member");
+            }            
         
             shared_ptr<Object> o( new Object );
             o->identifier = Member.getName(); // Only the name is filled in TODO fill in (possibly in a pass)
@@ -885,6 +907,171 @@ private:
             c->type = hold_type.FromRaw( Ty );
             return hold_expr.ToRaw( c );                       
         }
+        
+   //--------------------------------------------- unimplemented actions -----------------------------------------------     
+   // Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC 
+   // extensions. These all assert out immediately.
+        
+  virtual DeclTy *ActOnFileScopeAsmDecl(clang::SourceLocation Loc, ExprTy *AsmString) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  /// ParsedFreeStandingDeclSpec - This method is invoked when a declspec with
+  /// no declarator (e.g. "struct foo;") is parsed.
+  virtual DeclTy *ParsedFreeStandingDeclSpec(clang::Scope *S, DeclSpec &DS) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual DeclTy *ActOnField(clang::Scope *S, clang::SourceLocation DeclStart,
+                             clang::Declarator &D, ExprTy *BitfieldWidth) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual DeclTy *ActOnIvar(clang::Scope *S, clang::SourceLocation DeclStart,
+                            clang::Declarator &D, ExprTy *BitfieldWidth,
+                            clang::tok::ObjCKeywordKind visibility) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual DeclTy *ActOnEnumConstant(clang::Scope *S, DeclTy *EnumDecl,
+                                    DeclTy *LastEnumConstant,
+                                    clang::SourceLocation IdLoc, clang::IdentifierInfo *Id,
+                                    clang::SourceLocation EqualLoc, ExprTy *Val) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual StmtResult ActOnNullStmt(clang::SourceLocation SemiLoc) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual StmtResult ActOnAsmStmt(clang::SourceLocation AsmLoc,
+                                  bool IsSimple,                                  
+                                  bool IsVolatile,
+                                  unsigned NumOutputs,
+                                  unsigned NumInputs,
+                                  std::string *Names,
+                                  ExprTy **Constraints,
+                                  ExprTy **Exprs,
+                                  ExprTy *AsmString,
+                                  unsigned NumClobbers,
+                                  ExprTy **Clobbers,
+                                  clang::SourceLocation RParenLoc) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual ExprResult ActOnPredefinedExpr(clang::SourceLocation Loc,
+                                         clang::tok::TokenKind Kind) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual ExprResult ActOnCharacterConstant(const Token &) { return 0; }
+
+  /// ActOnStringLiteral - The specified tokens were lexed as pasted string
+  /// fragments (e.g. "foo" "bar" L"baz").
+  virtual ExprResult ActOnStringLiteral(const Token *Toks, unsigned NumToks) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual ExprResult 
+    ActOnSizeOfAlignOfTypeExpr(clang::SourceLocation OpLoc, bool isSizeof, 
+                               clang::SourceLocation LParenLoc, TypeTy *Ty,
+                               clang::SourceLocation RParenLoc) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual ExprResult ActOnCompoundLiteral(clang::SourceLocation LParen, TypeTy *Ty,
+                                          clang::SourceLocation RParen, ExprTy *Op) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual ExprResult ActOnInitList(clang::SourceLocation LParenLoc,
+                                   ExprTy **InitList, unsigned NumInit,
+                                   clang::InitListDesignations &Designators,
+                                   clang::SourceLocation RParenLoc) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual DeclTy *ActOnStartNamespaceDef(clang::Scope *S, clang::SourceLocation IdentLoc,
+                                        clang::IdentifierInfo *Ident,
+                                        clang::SourceLocation LBrace) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual ExprResult ActOnCXXNamedCast(clang::SourceLocation OpLoc, clang::tok::TokenKind Kind,
+                                       clang::SourceLocation LAngleBracketLoc, TypeTy *Ty,
+                                       clang::SourceLocation RAngleBracketLoc,
+                                       clang::SourceLocation LParenLoc, ExprTy *Op,
+                                       clang::SourceLocation RParenLoc) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  /// ActOnCXXThis - Parse the C++ 'this' pointer.
+  virtual ExprResult ActOnCXXThis(clang::SourceLocation ThisLoc) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual ExprResult ActOnCXXThrow(clang::SourceLocation OpLoc,
+                                   ExprTy *Op = 0) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual ExprResult ActOnCXXTypeConstructExpr(clang::SourceRange TypeRange,
+                                               TypeTy *TypeRep,
+                                               clang::SourceLocation LParenLoc,
+                                               ExprTy **Exprs,
+                                               unsigned NumExprs,
+                                               clang::SourceLocation *CommaLocs,
+                                               clang::SourceLocation RParenLoc) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual ExprResult ActOnCXXConditionDeclarationExpr(clang::Scope *S,
+                                                      clang::SourceLocation StartLoc,
+                                                      clang::Declarator &D,
+                                                      clang::SourceLocation EqualLoc,
+                                                      ExprTy *AssignExprVal) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual BaseResult ActOnBaseSpecifier(DeclTy *classdecl, 
+                                        clang::SourceRange SpecifierRange,
+                                        bool Virtual, clang::AccessSpecifier Access,
+                                        TypeTy *basetype, 
+                                        clang::SourceLocation BaseLoc) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual MemInitResult ActOnMemInitializer(DeclTy *ConstructorDecl,
+                                            clang::Scope *S,
+                                            clang::IdentifierInfo *MemberOrBase,
+                                            clang::SourceLocation IdLoc,
+                                            clang::SourceLocation LParenLoc,
+                                            ExprTy **Args, unsigned NumArgs,
+                                            clang::SourceLocation *CommaLocs,
+                                            clang::SourceLocation RParenLoc) {
+    ASSERT(!"Unimplemented action");
+    return true;
+  }
+
     };
 };   
 

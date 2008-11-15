@@ -12,6 +12,7 @@ class ReadArgs
 {
 public:
     static std::string infile;
+    static std::string outfile;
     static void Read( int argc, char *argv[] );
     static bool trace;
 };
