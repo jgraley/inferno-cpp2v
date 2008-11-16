@@ -8,8 +8,8 @@ int fp(int);
 
 int f(int &i, char longidentifier)
 {
-   signed char x=i;
-   unsigned char y=4;
+   static signed char x=9;
+   auto unsigned char y=4;
    x++;
    return x/y;
 }
@@ -18,17 +18,17 @@ int main()
 {
     void *pl;// = &&here;
     char j=0;
-    int k[7] = f(9, j);
+    int k[7];
     {
         int a;
         a=0;
     }
-    k--;
+    j--;
     k[4]--;
     goto here;
     here:
     there:
-    --k;
+    --j;
     if( k )
         goto here;
     while(88)
@@ -37,34 +37,33 @@ int main()
     }
     do
     {
-        k--;
+        j--;
     } while(99);
     i++;
-    for( i=0, j=1; (j<10, i<10); i++, j++ )
+    for( *i=0, j=1; (j<10, *i<10); *i++, j++ )
     {
-        k=i;
+        *k=*i;
         break;
         continue;
     }
     for(;;)
-        k+=i;
+        *k += *i;
     switch(77)
     {
         case 675:
             i++;
-        default:
             j++;
+            break;
         case 676:
-            k++;
-        default:
+            k[1]++;
+            break;
         case 677:
         case 5:
         case 8:
         default:
-        default:
             g++;
     }    
-    return k*4+38;
+    return k[2]*4+38;
 }
 
 union ms
