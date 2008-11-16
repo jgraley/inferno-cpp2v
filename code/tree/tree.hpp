@@ -250,4 +250,6 @@ struct Cast : Expression
     shared_ptr<Type> type;        
 };
 
+struct Nop : Statement {};
+
 #endif

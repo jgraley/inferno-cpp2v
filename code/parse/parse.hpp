@@ -859,14 +859,14 @@ private:
         {
             TRACE("kind %d\n", OpKind);
             shared_ptr<Access> a( new Access );
-            if( OpKind == clang::tok::period )  // Base.Member
+            if( OpKind == clang::tok::arrow )  // Base->Member
             {
                 shared_ptr<Prefix> p( new Prefix );
                 p->operands.push_back( hold_expr.FromRaw( Base ) );
                 p->kind = clang::tok::star;
                 a->base = p;
             }
-            else if( OpKind == clang::tok::arrow ) // Base->Member
+            else if( OpKind == clang::tok::period ) // Base.Member
             {
                 a->base = hold_expr.FromRaw( Base );
             }
@@ -908,9 +908,16 @@ private:
             return hold_expr.ToRaw( c );                       
         }
         
-   //--------------------------------------------- unimplemented actions -----------------------------------------------     
-   // Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC 
-   // extensions. These all assert out immediately.
+        virtual StmtResult ActOnNullStmt(clang::SourceLocation SemiLoc) 
+        {
+            shared_ptr<Nop> n(new Nop);
+            return hold_stmt.ToRaw( n );                       
+        }
+        
+        
+        //--------------------------------------------- unimplemented actions -----------------------------------------------     
+        // Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC 
+        // extensions. These all assert out immediately.
         
   virtual DeclTy *ActOnFileScopeAsmDecl(clang::SourceLocation Loc, ExprTy *AsmString) {
     ASSERT(!"Unimplemented action");
@@ -941,11 +948,6 @@ private:
                                     DeclTy *LastEnumConstant,
                                     clang::SourceLocation IdLoc, clang::IdentifierInfo *Id,
                                     clang::SourceLocation EqualLoc, ExprTy *Val) {
-    ASSERT(!"Unimplemented action");
-    return 0;
-  }
-
-  virtual StmtResult ActOnNullStmt(clang::SourceLocation SemiLoc) {
     ASSERT(!"Unimplemented action");
     return 0;
   }
