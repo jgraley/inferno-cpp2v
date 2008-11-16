@@ -22,11 +22,11 @@ do
  c2res=1000
 
  echo Compile input...
- # note: we restrict input to ansi since that's th project's objective. But
+ # note: we restrict input to ansi since that's the project's objective. But
  # (1) we do not use -pedantic because its infuriating and
  # (2) we do not apply either restriction to intermediate output, which may
  # use gcc extensions etc
- g++ -ansi -c $infile -o results/1_$fb
+ g++ -ansi -c $infile -o results/"$fb"_in.o
  c1res=$?
 
  if test $c1res -eq 0
@@ -38,7 +38,7 @@ do
   if test $ires -eq 0
   then
    echo Compile output...
-   g++ -c $outfile -o results/2_$fb
+   g++ -c $outfile -o results/"$fb"_out.o
    c2res=$?
   fi
  fi
