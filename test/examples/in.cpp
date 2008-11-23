@@ -1,3 +1,6 @@
+// Just a junk program, doesnt do anything
+
+
 int g;
 char *i;
 
@@ -14,7 +17,7 @@ int f(int &i, char longidentifier)
    return x/y;
 }
 
-int main()
+int notmain()
 {
     void *pl;// = &&here;
     char j=0;

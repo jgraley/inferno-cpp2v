@@ -149,7 +149,7 @@ private:
         else if( shared_ptr<Object> v = dynamic_pointer_cast< Object >(expression) )
             return RenderIdentifier( v );
         else if( shared_ptr<NumericConstant> nc = dynamic_pointer_cast< NumericConstant >(expression) )
-            return (nc->toString(10, true));
+            return (nc->toString(10, false));// TODO render the correct signedness
         else if( shared_ptr<Infix> o = dynamic_pointer_cast< Infix >(expression) )
             return before + 
                    RenderExpression( o->operands[0], true ) +
@@ -208,7 +208,7 @@ private:
         TRACE();
         string s;
         
-        if( declaration->access != *access )
+        if( access && declaration->access != *access )
         {
             switch( declaration->access )
             {
@@ -267,7 +267,6 @@ private:
             {
                 s += sep;
             }    
-            return s;
         }
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
             s += "typedef " + RenderType( t->type, t->identifier ) + sep;
@@ -299,6 +298,8 @@ private:
         }
         else
             s += ERROR_UNSUPPORTED(declaration);
+            
+            TRACE();
         return s;    
     }
 
@@ -373,6 +374,7 @@ private:
         string s;
         for( int i=0; i<spe.size(); i++ )
         {
+            TRACE("%d %p\n", i, &i);
             string sep = (seperate_last || i+1<spe.size()) ? separator : "";
             shared_ptr<ELEMENT> pe = spe[i];                        
             if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
