@@ -3,44 +3,45 @@
 clang_tests=../llvm/tools/clang/test
 inferno=../inferno.exe
 resfile=results.csv
-infilelist="examples/* $clang_tests/CodeGen/*"
 
+# Usage:
+# runtests.sh - tests the known passing (regression) tests
+# runtests.sh all - tests all vectors including some that are expected to fail
+# runtests.sh <file list> - tests all named files
+if test -z $1
+then
+ infilelist="examples/*"
+else 
+ if test $1 == all
+ then
+  infilelist="examples/* $clang_tests/CodeGen/*"
+ else
+  infilelist=$*
+ fi
+fi
 
 rm -f $resfile
 mkdir -p results
 rm -f results/*
 
+echo testing files $infilelist
+
+failed=0
 for infile in $infilelist
 do
- fb=`basename $infile`
- outfile=results/$fb
-
- echo
- echo -------------- $fb ----------------
- c1res=1000
- ires=1000
- c2res=1000
-
- echo Compile input...
- # note: we restrict input to ansi since that's the project's objective. But
- # (1) we do not use -pedantic because its infuriating and
- # (2) we do not apply either restriction to intermediate output, which may
- # use gcc extensions etc
- g++ -ansi -c $infile -o results/"$fb"_in.o
- c1res=$?
-
- if test $c1res -eq 0
+ ./test.sh $infile $resfile
+ if test $? -ne 0
  then
-  echo Transform... 
-  $inferno -i $infile -o $outfile
-  ires=$?
-
-  if test $ires -eq 0
-  then
-   echo Compile output...
-   g++ -c $outfile -o results/"$fb"_out.o
-   c2res=$?
-  fi
+  failed=1
  fi
- echo $fb ", " $c1res ", " $ires ", " $c2res >> $resfile
 done
+
+echo
+echo ------------------------------------------
+
+if test $failed -eq 0
+then
+ echo ALL TESTS PASSED
+else
+ echo SOME TESTS FAILED
+fi

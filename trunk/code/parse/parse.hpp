@@ -176,51 +176,56 @@ private:
         
         shared_ptr<Type> CreateTypeNode( clang::Declarator &D, int depth=0 )
         {
-            TRACE("%d, %d\n", depth, D.getNumTypeObjects() );
             ASSERT( depth>=0 );
             ASSERT( depth<=D.getNumTypeObjects() );
             
-            TRACE();
             if( depth==D.getNumTypeObjects() )
             {
                 const clang::DeclSpec &DS = D.getDeclSpec();
                 clang::DeclSpec::TST t = DS.getTypeSpecType();
-                TRACE("type spec type %d\n", (int)t);
                 ASSERT( DS.getTypeSpecComplex() == clang::DeclSpec::TSC_unspecified &&
                         "complex types not supported" );
                 switch( t )
                 {
                     case clang::DeclSpec::TST_int:
                     case clang::DeclSpec::TST_unspecified:
+                        TRACE("int based %d %d\n", DS.getTypeSpecWidth(), DS.getTypeSpecSign() );
                         return CreateIntegralType( TypeInfo::integral_bits[DS.getTypeSpecWidth()], 
                                                    TypeInfo::int_default_signed,
                                                    DS.getTypeSpecSign() );
                         break;
                     case clang::DeclSpec::TST_char:
+                        TRACE("char based %d %d\n", DS.getTypeSpecWidth(), DS.getTypeSpecSign() );
                         return CreateIntegralType( TypeInfo::char_bits, 
                                                    TypeInfo::char_default_signed,
                                                    DS.getTypeSpecSign() );
                         break;
                     case clang::DeclSpec::TST_void:
+                        TRACE("void based %d %d\n", DS.getTypeSpecWidth(), DS.getTypeSpecSign() );
                         return shared_ptr<Type>(new Void());
                         break;
                     case clang::DeclSpec::TST_bool:
+                        TRACE("bool based %d %d\n", DS.getTypeSpecWidth(), DS.getTypeSpecSign() );
                         return shared_ptr<Type>(new Bool());
                         break;
                     case clang::DeclSpec::TST_float:
+                        TRACE("float based %d %d\n", DS.getTypeSpecWidth(), DS.getTypeSpecSign() );
                         return CreateFloatingType( TypeInfo::float_bits );
                         break;
                     case clang::DeclSpec::TST_double:
+                        TRACE("double based %d %d\n", DS.getTypeSpecWidth(), DS.getTypeSpecSign() );
                         return CreateFloatingType( DS.getTypeSpecWidth()==clang::DeclSpec::TSW_long ?
                                                    TypeInfo::long_double_bits :
                                                    TypeInfo::double_bits );
                         break;
                     case clang::DeclSpec::TST_typedef:
+                        TRACE("typedef\n");
                         return hold_type.FromRaw( DS.getTypeRep() );
                         break;
                     case clang::DeclSpec::TST_struct:
                     case clang::DeclSpec::TST_union:
                     case clang::DeclSpec::TST_class:
+                        TRACE("struct/union/class\n");
                         // Disgustingly, clang casts the DeclTy returned from ActOnTag() to 
                         // a TypeTy. 
                         return dynamic_pointer_cast<Holder>( hold_decl.FromRaw( DS.getTypeRep() ) );
@@ -232,9 +237,7 @@ private:
             }
             else
             {
-                TRACE();
                 const clang::DeclaratorChunk &chunk = D.getTypeObject(depth);
-                TRACE();
                 switch( chunk.Kind )
                 {
                 case clang::DeclaratorChunk::Function:
@@ -247,6 +250,7 @@ private:
                             shared_ptr<ObjectDeclaration> vd = dynamic_pointer_cast<ObjectDeclaration>(d); // TODO just push the declarators, no need for dynamic cast?
                             f->parameters.push_back( vd );
                         }
+                        TRACE("function returning...\n");
                         f->return_type = CreateTypeNode( D, depth+1 );                        
                         return f;
                     }
@@ -254,6 +258,7 @@ private:
                 case clang::DeclaratorChunk::Pointer:
                     {
                         // TODO attributes
+                        TRACE("pointer to...\n");
                         const clang::DeclaratorChunk::PointerTypeInfo &pchunk = chunk.Ptr; 
                         shared_ptr<Pointer> p(new Pointer);
                         p->destination = CreateTypeNode( D, depth+1 );                        
@@ -263,7 +268,7 @@ private:
                 case clang::DeclaratorChunk::Reference:
                     {
                         // TODO attributes
-                        TRACE("ref\n");
+                        TRACE("reference to...\n");
                         const clang::DeclaratorChunk::ReferenceTypeInfo &rchunk = chunk.Ref; 
                         shared_ptr<Reference> r(new Reference);
                         ASSERT(r);
@@ -274,8 +279,8 @@ private:
                 case clang::DeclaratorChunk::Array:
                     {
                         // TODO attributes
-                        TRACE("array\n");
                         const clang::DeclaratorChunk::ArrayTypeInfo &achunk = chunk.Arr; 
+                        TRACE("array [%d] of...\n", achunk.NumElts);
                         shared_ptr<Array> a(new Array);
                         ASSERT(a);
                         a->element = CreateTypeNode( D, depth+1 );
@@ -287,7 +292,7 @@ private:
                     }
                     
                 default:
-                ASSERT(!"Unknown type chunk");                     
+                    ASSERT(!"Unknown type chunk");                     
                     break;
                 }
             }
@@ -419,33 +424,61 @@ private:
             od->initialiser = e;            
         }
 
+        // Clang tends to parse parameters and function bodies in seperate
+        // scopes so when we see them being used we don't recognise them
+        // and cannot link back to the correct Object node. This function
+        // puts all the params back in the current scope assuming:
+        // 1. They have been added to the Function node correctly and
+        // 2. The pass-specific extension ParseParameterDeclaration has been used
+        void AddParamsToScope( shared_ptr<Function> fp, clang::Scope *FnBodyScope )
+        {
+            ASSERT(fp);
+            for( int i=0; i<fp->parameters.size(); i++ )
+            {
+                TRACE();
+                shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( fp->parameters[i] );                
+                ASSERT(ppd);
+                InfernoMinimalAction::AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->object, false);
+            }
+        }
+
         /*
         Note: the default implementation of ActOnStartOfFunctionDef() appears in
         InfernoMinimalAction and can cause spurious ActOnDeclarator() calls if we always
         call through. Therefore we don't and instead just call explicitly implemented
         functions in InfernoMinimalAction where required.
+        TODO consider removing this entirely - clang::Action base class will then
+             invoke ActOnDeclaration() followed by ActOnStartOfFunctionDef(DeclTy*)
+             and this might be correct.
         */
         virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D) 
         {
+            TRACE();
             shared_ptr<ObjectDeclaration> p(new ObjectDeclaration);
             clang::Scope *GlobalScope = FnBodyScope->getParent();
             p->object = CreateObjectNode( GlobalScope, D );
             p->access = Declaration::PUBLIC;        // TODO not sure how to get access spec for this     
             shared_ptr<Function> fp = dynamic_pointer_cast<Function>( p->object->type );
-            ASSERT(fp);
-            for( int i=0; i<fp->parameters.size(); i++ )
-            {
-                shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( fp->parameters[i] );                
-                ASSERT(ppd);
-                InfernoMinimalAction::AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->object, false);
-            }
+            AddParamsToScope( fp, FnBodyScope );
             
             decl_scope.top()->push_back( p );
+            return hold_decl.ToRaw( p );     
+        }
+
+        virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, DeclTy *D) 
+        {
+            TRACE();
+            shared_ptr<ObjectDeclaration> p = dynamic_pointer_cast<ObjectDeclaration>(hold_decl.FromRaw(D));
+            ASSERT(p);
+            shared_ptr<Function> fp = dynamic_pointer_cast<Function>( p->object->type );
+            AddParamsToScope( fp, FnBodyScope );
+            
             return hold_decl.ToRaw( p );     
         }
         
         virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtTy *Body) 
         {
+            TRACE();
             shared_ptr<ObjectDeclaration> fd( dynamic_pointer_cast<ObjectDeclaration>( hold_decl.FromRaw(Decl) ) );
             ASSERT(fd);
             shared_ptr<Expression> e( dynamic_pointer_cast<Expression>( hold_stmt.FromRaw(Body) ) );
@@ -757,14 +790,15 @@ private:
         {
             TRACE("Member %p\n", Init);
             shared_ptr<Declaration> d = CreateDelcaration( S, D );
-                        
+      
+            TRACE();
             if( Init )
             {  
                 shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast<ObjectDeclaration>(d);
                 ASSERT( od ); // Only objects may be initialised
                 od->initialiser = hold_expr.FromRaw( Init );
             }
-            
+                       
             TRACE("as=%d\n", (unsigned)AS);
             
             // Fill in access specifier
@@ -786,6 +820,7 @@ private:
             }
             
             // TODO set bitfield width (make a worker function for ActOnDeclarator())
+            return hold_decl.ToRaw( d );
         }
 
         virtual DeclTy *ActOnTag(clang::Scope *S, unsigned TagType, TagKind TK,
@@ -819,6 +854,14 @@ private:
             {
                 h->identifier = Name->getName();
                 (void)InfernoMinimalAction::AddNakedIdentifier(S, Name, h, true); 
+            }
+            else
+            {
+                // TODO make a general-lurpose anon name generator
+                char an[20];
+                static int ac=0;
+                sprintf( an, "__anon%d", ac++ );
+                h->identifier = an;
             }
             
             h->access = Declaration::PUBLIC; // must make all holder type decls public since clang doesnt seem to give us an AS
@@ -895,7 +938,8 @@ private:
                                                clang::tok::TokenKind Kind) //TODO not working - get node has no info
         {
             shared_ptr<NumericConstant> nc(new NumericConstant);
-            *(llvm::APInt *)(nc.get()) = (Kind == clang::tok::kw_true);
+            TRACE("true/false tk %d %d %d\n", Kind, clang::tok::kw_true, clang::tok::kw_false );
+            *(llvm::APInt *)(nc.get()) = (Kind == clang::tok::kw_true) ? llvm::APInt( 1, 1 ) : llvm::APInt( 1, 0 );
             return hold_expr.ToRaw( nc );                       
         }
 
@@ -910,6 +954,7 @@ private:
         
         virtual StmtResult ActOnNullStmt(clang::SourceLocation SemiLoc) 
         {
+            TRACE();
             shared_ptr<Nop> n(new Nop);
             return hold_stmt.ToRaw( n );                       
         }
