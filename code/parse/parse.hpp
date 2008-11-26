@@ -4,6 +4,7 @@
 #include "common/common.hpp"
 
 #include "llvm/ADT/APInt.h"
+#include "llvm/ADT/APSInt.h"
 #include "llvm/ADT/SmallString.h"
 
 #include "clang/Basic/FileManager.h"
@@ -515,7 +516,7 @@ private:
             return hold_expr.ToRaw( i );            
         }                                   
         
-        llvm::APInt EvaluateNumericConstant(const clang::Token &tok)
+        llvm::APSInt EvaluateNumericConstant(const clang::Token &tok)
         {
             llvm::SmallString<512> int_buffer;
             int_buffer.resize(tok.getLength());
@@ -529,12 +530,18 @@ private:
 
             if (literal.isIntegerLiteral()) 
             {
-                // Get the value in the widest-possible width.
-                llvm::APInt rv(64, 0);
-               
+                int bits;
+                if( literal.isLong )
+                    bits = TypeInfo::integral_bits[clang::DeclSpec::TSW_long];
+                else if( literal.isLongLong )
+                    bits = TypeInfo::integral_bits[clang::DeclSpec::TSW_longlong];
+                else
+                    bits = TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified];
+                    
+                llvm::APSInt rv(bits, literal.isUnsigned);
                 bool err = literal.GetIntegerValue(rv);
                 
-                ASSERT( !err && "could not understand numeric literal" );
+                ASSERT( !err && "numeric literal too big for its own type" );
                 return rv;
             }
             ASSERT(!"only integer literals supported"); // todo floating point
@@ -542,9 +549,9 @@ private:
         
         virtual ExprResult ActOnNumericConstant(const clang::Token &tok) 
         { 
-            shared_ptr<NumericConstant> nc(new NumericConstant);
-            *(llvm::APInt *)(nc.get()) = EvaluateNumericConstant( tok );
-            return hold_expr.ToRaw( nc );            
+            shared_ptr<IntegralConstant> ic(new IntegralConstant);
+            ic->value = EvaluateNumericConstant( tok );
+            return hold_expr.ToRaw( ic );            
         } 
   
         virtual ExprResult ActOnBinOp(clang::Scope *S,
@@ -937,10 +944,12 @@ private:
         virtual ExprResult ActOnCXXBoolLiteral(clang::SourceLocation OpLoc,
                                                clang::tok::TokenKind Kind) //TODO not working - get node has no info
         {
-            shared_ptr<NumericConstant> nc(new NumericConstant);
+            shared_ptr<IntegralConstant> ic(new IntegralConstant);
             TRACE("true/false tk %d %d %d\n", Kind, clang::tok::kw_true, clang::tok::kw_false );
-            *(llvm::APInt *)(nc.get()) = (Kind == clang::tok::kw_true) ? llvm::APInt( 1, 1 ) : llvm::APInt( 1, 0 );
-            return hold_expr.ToRaw( nc );                       
+            
+            llvm::APInt t = llvm::APInt( 1, (Kind == clang::tok::kw_true) );            
+            ic->value = llvm::APSInt( t, true );
+            return hold_expr.ToRaw( ic );                       
         }
 
         virtual ExprResult ActOnCastExpr(clang::SourceLocation LParenLoc, TypeTy *Ty,

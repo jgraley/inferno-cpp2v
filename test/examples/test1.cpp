@@ -15,6 +15,12 @@ int main()
     unsigned long long y = func( x, 9 );
     y += (x==6) ? 2 : 3;
     float z;
+    -1U; // wrong
+    4000000000; // wrong (>2^31)
+    2000000000;
+    4000000000U;
+    -2000000000;
+    3LL;
     z = 5;
     z /= 2;
     y += (int)z;

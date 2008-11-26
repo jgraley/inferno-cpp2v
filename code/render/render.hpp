@@ -148,8 +148,12 @@ private:
                    after;
         else if( shared_ptr<Object> v = dynamic_pointer_cast< Object >(expression) )
             return RenderIdentifier( v );
-        else if( shared_ptr<NumericConstant> nc = dynamic_pointer_cast< NumericConstant >(expression) )
-            return (nc->toString(10, false));// TODO render the correct signedness
+        else if( shared_ptr<IntegralConstant> ic = dynamic_pointer_cast< IntegralConstant >(expression) )
+            return string(ic->value.toString(10)) + 
+                   (ic->value.isUnsigned() ? "U" : "") + 
+                   (ic->value.getBitWidth()>TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
+                   (ic->value.getBitWidth()>TypeInfo::integral_bits[clang::DeclSpec::TSW_long] ? "L" : ""); 
+                   // note, assuming longlong bigger than long, so second L appends first to get LL
         else if( shared_ptr<Infix> o = dynamic_pointer_cast< Infix >(expression) )
             return before + 
                    RenderExpression( o->operands[0], true ) +
