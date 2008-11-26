@@ -5,6 +5,7 @@
 #include "clang/Basic/SourceLocation.h"
 #include "clang/Basic/TokenKinds.h"
 #include "llvm/ADT/APSInt.h"
+#include "llvm/ADT/APFloat.h"
 
 #include <string>
 #include <deque>
@@ -103,7 +104,7 @@ struct Void : Type {};
 
 struct Bool : Type {};
 
-struct Datum : Type
+struct Datum : Type // TODO rename Datum to Numeric, latter is more concise
 {
     unsigned width;  // Bits, not bytes
 };
@@ -146,9 +147,16 @@ struct Call : Expression
     Sequence<Expression> arguments;
 };
 
-struct IntegralConstant : Expression
+struct NumericConstant : Expression {};
+
+struct IntegralConstant : NumericConstant
 {
     llvm::APSInt value; // APSint can be signed or unsigned
+};
+
+struct FloatingConstant : NumericConstant
+{
+    llvm::APFloat value; 
 };
 
 struct LabelMarker : Statement
