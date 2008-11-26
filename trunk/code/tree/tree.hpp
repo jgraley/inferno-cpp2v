@@ -4,7 +4,7 @@
 #include "common/refcount.hpp"
 #include "clang/Basic/SourceLocation.h"
 #include "clang/Basic/TokenKinds.h"
-#include "llvm/ADT/APInt.h"
+#include "llvm/ADT/APSInt.h"
 
 #include <string>
 #include <deque>
@@ -146,8 +146,10 @@ struct Call : Expression
     Sequence<Expression> arguments;
 };
 
-struct NumericConstant : Expression,
-                         llvm::APInt {};
+struct IntegralConstant : Expression
+{
+    llvm::APSInt value; // APSint can be signed or unsigned
+};
 
 struct LabelMarker : Statement
 {

@@ -5,7 +5,7 @@ class Test
 {
 public:
     union { int i; float f; } d;
-    char f( int p )
+    virtual char f( int p )
     {
         return p+d.i;
     }
