@@ -516,7 +516,7 @@ private:
             return hold_expr.ToRaw( i );            
         }                                   
         
-        llvm::APSInt EvaluateNumericConstant(const clang::Token &tok)
+        shared_ptr<NumericConstant> CreateNumericConstant(const clang::Token &tok)
         {
             llvm::SmallString<512> int_buffer;
             int_buffer.resize(tok.getLength());
@@ -542,16 +542,22 @@ private:
                 bool err = literal.GetIntegerValue(rv);
                 
                 ASSERT( !err && "numeric literal too big for its own type" );
-                return rv;
+                shared_ptr<IntegralConstant> nc( new IntegralConstant );
+                nc->value = rv;
+                return nc;
             }
+         //   else if( literal.isFloatingLiteral() )
+         //  {
+         //       llvm::APFloat rv;
+         //   }
             ASSERT(!"only integer literals supported"); // todo floating point
         }
         
         virtual ExprResult ActOnNumericConstant(const clang::Token &tok) 
         { 
-            shared_ptr<IntegralConstant> ic(new IntegralConstant);
-            ic->value = EvaluateNumericConstant( tok );
-            return hold_expr.ToRaw( ic );            
+            shared_ptr<NumericConstant> nc(new NumericConstant);
+            nc = CreateNumericConstant( tok );
+            return hold_expr.ToRaw( nc );            
         } 
   
         virtual ExprResult ActOnBinOp(clang::Scope *S,
