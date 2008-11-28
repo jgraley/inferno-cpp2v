@@ -156,6 +156,7 @@ struct IntegralConstant : NumericConstant
 
 struct FloatingConstant : NumericConstant
 {
+    FloatingConstant( llvm::APFloat v ) : value(v) {};
     llvm::APFloat value; 
 };
 
