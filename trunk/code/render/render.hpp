@@ -154,6 +154,15 @@ private:
                    (ic->value.getBitWidth()>TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
                    (ic->value.getBitWidth()>TypeInfo::integral_bits[clang::DeclSpec::TSW_long] ? "L" : ""); 
                    // note, assuming longlong bigger than long, so second L appends first to get LL
+        else if( shared_ptr<FloatingConstant> fc = dynamic_pointer_cast< FloatingConstant >(expression) )
+        {
+            char hs[256];
+            // generate hex float since it can be exact
+            fc->value.convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
+            return string(hs) + 
+                   (&(fc->value.getSemantics())==TypeInfo::floating_semantics[clang::DeclSpec::TSW_short] ? "F" : "") +
+                   (&(fc->value.getSemantics())==TypeInfo::floating_semantics[clang::DeclSpec::TSW_long] ? "L" : ""); 
+        }           
         else if( shared_ptr<Infix> o = dynamic_pointer_cast< Infix >(expression) )
             return before + 
                    RenderExpression( o->operands[0], true ) +

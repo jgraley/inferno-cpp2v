@@ -1,4 +1,5 @@
 #include "type_info.hpp"
+#include "llvm/ADT/APFloat.h"
 
 //
 // Initialise all the sizes and signednesses according to the 
@@ -20,6 +21,14 @@ const unsigned TypeInfo::integral_bits[] =
     sizeof( short ) * 8,
     sizeof( long ) * 8,
     sizeof( long long ) * 8
+};
+
+const llvm::fltSemantics *(TypeInfo::floating_semantics[]) =
+{
+    &llvm::APFloat::IEEEdouble,
+    &llvm::APFloat::IEEEsingle, // pretend float == short double
+    &llvm::APFloat::IEEEquad,
+    NULL
 };
 
 const int TypeInfo::float_bits = sizeof( float ) * 8;

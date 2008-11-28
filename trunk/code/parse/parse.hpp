@@ -5,6 +5,7 @@
 
 #include "llvm/ADT/APInt.h"
 #include "llvm/ADT/APSInt.h"
+#include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/SmallString.h"
 
 #include "clang/Basic/FileManager.h"
@@ -546,11 +547,20 @@ private:
                 nc->value = rv;
                 return nc;
             }
-         //   else if( literal.isFloatingLiteral() )
-         //  {
-         //       llvm::APFloat rv;
-         //   }
-            ASSERT(!"only integer literals supported"); // todo floating point
+            else if( literal.isFloatingLiteral() )
+            {
+                const llvm::fltSemantics *semantics;
+                if( literal.isLong )
+                    semantics = TypeInfo::floating_semantics[clang::DeclSpec::TSW_long];
+                else if( literal.isFloat )
+                    semantics = TypeInfo::floating_semantics[clang::DeclSpec::TSW_short];
+                else
+                    semantics = TypeInfo::floating_semantics[clang::DeclSpec::TSW_unspecified];
+                llvm::APFloat rv( literal.GetFloatValue( *semantics ) );
+
+                shared_ptr<FloatingConstant> fc( new FloatingConstant( rv ) );
+                return fc;
+            }         
         }
         
         virtual ExprResult ActOnNumericConstant(const clang::Token &tok) 
