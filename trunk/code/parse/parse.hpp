@@ -67,7 +67,7 @@ public:
         pp.EnterMainSourceFile();
     
         clang::IdentifierTable it( opts );                 
-        InfernoAction actions( program, it, pp );                 
+        InfernoAction actions( program, it, pp, *ptarget );                 
         clang::Parser parser( pp, actions );
         TRACE("Start parse\n");
         parser.ParseTranslationUnit();        
@@ -80,9 +80,10 @@ private:
     class InfernoAction : public InfernoMinimalAction
     {
     public:
-        InfernoAction(shared_ptr<Program> p, clang::IdentifierTable &IT, clang::Preprocessor &pp) : 
+        InfernoAction(shared_ptr<Program> p, clang::IdentifierTable &IT, clang::Preprocessor &pp, clang::TargetInfo &T) : 
             InfernoMinimalAction(IT),
-            preprocessor(pp)
+            preprocessor(pp),
+            target_info(T)
         {
             decl_scope.push( &*p );
         }
@@ -116,6 +117,7 @@ private:
         };
     
         clang::Preprocessor &preprocessor;
+        clang::TargetInfo &target_info;
         stack< Sequence<Declaration> * > decl_scope;
         RCHold<Declaration, DeclTy *> hold_decl;
         RCHold<Expression, ExprTy *> hold_expr;
@@ -983,7 +985,56 @@ private:
             shared_ptr<Nop> n(new Nop);
             return hold_stmt.ToRaw( n );                       
         }
+                
+        virtual ExprResult ActOnCharacterConstant(const clang::Token &tok) 
+        { 
+            string t = preprocessor.getSpelling(tok);
         
+            clang::CharLiteralParser literal(t.c_str(), t.c_str()+t.size(), tok.getLocation(), preprocessor);
+  
+            if (literal.hadError())
+                return ExprResult(true);
+                
+            shared_ptr<IntegralConstant> nc( new IntegralConstant );
+            llvm::APSInt rv(TypeInfo::char_bits, !TypeInfo::char_default_signed);
+            rv = literal.getValue();
+            nc->value = rv;   
+            return hold_expr.ToRaw( nc );
+        }
+        /*
+        /// ActOnStringLiteral - The specified tokens were lexed as pasted string
+        /// fragments (e.g. "foo" "bar" L"baz"). 
+        virtual ExprResult ActOnStringLiteral(const clang::Token *Toks, unsigned NumToks) 
+        {
+            shared_ptr<Aggregate> ao(new Aggregate);
+            clang::StringLiteralParser literal(Toks, NumToks, preprocessor, target_info);
+            if (literal.hadError)
+                return ExprResult(true);
+
+            for(int i=0; i<literal.GetStringLength(); i++)
+            {
+                shared_ptr<IntegralConstant> ic( new IntegralConstant );
+                llvm::APSInt rv(TypeInfo::char_bits, !TypeInfo::char_default_signed);
+                rv = literal.GetString()[i];
+                ic->value = rv;   
+                ao->elements.push_back( ic );
+            }
+            return hold_expr.ToRaw( ao );                                 
+        }
+*/
+        /// ActOnStringLiteral - The specified tokens were lexed as pasted string
+        /// fragments (e.g. "foo" "bar" L"baz"). 
+        virtual ExprResult ActOnStringLiteral(const clang::Token *Toks, unsigned NumToks) 
+        {
+            shared_ptr<String> s(new String);
+            clang::StringLiteralParser literal(Toks, NumToks, preprocessor, target_info);
+            if (literal.hadError)
+                return ExprResult(true);
+                
+            s->value = literal.GetString();    
+
+            return hold_expr.ToRaw( s );                                 
+        }
         
         //--------------------------------------------- unimplemented actions -----------------------------------------------     
         // Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC 
@@ -1034,21 +1085,12 @@ private:
                                   unsigned NumClobbers,
                                   ExprTy **Clobbers,
                                   clang::SourceLocation RParenLoc) {
-    ASSERT(!"Unimplemented action");
+    ASSERT(!"Unimplemented action"); 
     return 0;
   }
 
   virtual ExprResult ActOnPredefinedExpr(clang::SourceLocation Loc,
                                          clang::tok::TokenKind Kind) {
-    ASSERT(!"Unimplemented action");
-    return 0;
-  }
-
-  virtual ExprResult ActOnCharacterConstant(const Token &) { return 0; }
-
-  /// ActOnStringLiteral - The specified tokens were lexed as pasted string
-  /// fragments (e.g. "foo" "bar" L"baz").
-  virtual ExprResult ActOnStringLiteral(const Token *Toks, unsigned NumToks) {
     ASSERT(!"Unimplemented action");
     return 0;
   }
