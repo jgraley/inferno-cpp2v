@@ -65,14 +65,19 @@ private:
     
     string RenderIntegralType( shared_ptr<Integral> type )
     {
-        // Produce signed or unsigned as required
-        string s;
-        if( dynamic_pointer_cast< Signed >(type) )
-            s = "signed ";
-        else if( dynamic_pointer_cast< Unsigned >(type) )
-            s = "unsigned ";
+        bool ds;
+        if( type->width == TypeInfo::char_bits )
+            ds = TypeInfo::char_default_signed;
         else
-            return ERROR_UNSUPPORTED(type);
+            ds = TypeInfo::int_default_signed;
+        
+        // Produce signed or unsigned if required
+        // Note: literal strings can be converted to char * but not unsigned char * or signed char * 
+        string s;
+        if( dynamic_pointer_cast< Signed >(type) && !ds )
+            s = "signed ";
+        else if( dynamic_pointer_cast< Unsigned >(type) && !ds )
+            s = "unsigned ";
 
         // Fix the width
         if( type->width == TypeInfo::char_bits )
@@ -210,6 +215,14 @@ private:
             return before + 
                    "(" + RenderType( c->type, "" ) + ")" +
                    RenderExpression( c->operand, false ) + 
+                   after;
+        else if( shared_ptr<Aggregate> ao = dynamic_pointer_cast< Aggregate >(expression) )
+            return before + 
+                   "{ " + RenderSequence( ao->elements, ", ", false ) + " }" +
+                   after;
+        else if( shared_ptr<String> ss = dynamic_pointer_cast< String >(expression) )
+            return before + 
+                   "\"" + ss->value + "\"" + // TODO unprintable characters
                    after;
         else
             return ERROR_UNSUPPORTED(expression);

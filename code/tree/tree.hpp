@@ -136,6 +136,11 @@ struct ConditionalOperator : Expression // eg ?:
     shared_ptr<Expression> if_false;
 };
 
+struct Aggregate : Expression
+{
+    Sequence<Expression> elements;
+};
+
 struct Return : Statement
 {
     shared_ptr<Expression> return_value;
@@ -158,6 +163,11 @@ struct FloatingConstant : NumericConstant
 {
     FloatingConstant( llvm::APFloat v ) : value(v) {};
     llvm::APFloat value; 
+};
+
+struct String : Expression
+{
+    string value;
 };
 
 struct LabelMarker : Statement
