@@ -137,6 +137,20 @@ private:
         else
             return ERROR_UNSUPPORTED(type);
     }
+    
+    // Insert escapes into a string so it can be put in source code
+    // TODO use \n \r etc and let printable ascii through
+    string Sanitise( string s )
+    {
+        string o;
+        for( int i=0; i<s.size(); i++ )
+        {
+            char c[10];
+            sprintf( c, "\\x%02x", s[i] );
+            o += c;
+        }
+        return o;
+    }
 
     string RenderExpression( shared_ptr<Expression> expression, bool bracketize_operator=false )
     {
@@ -222,7 +236,11 @@ private:
                    after;
         else if( shared_ptr<String> ss = dynamic_pointer_cast< String >(expression) )
             return before + 
-                   "\"" + ss->value + "\"" + // TODO unprintable characters
+                   "\"" + Sanitise( ss->value ) + "\"" + 
+                   after;
+        else if( dynamic_pointer_cast< This >(expression) )
+            return before + 
+                   "this" + 
                    after;
         else
             return ERROR_UNSUPPORTED(expression);

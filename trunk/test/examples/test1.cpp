@@ -1,5 +1,6 @@
 char *p = "jhf";
 
+int a[] = { 2, 3, 4 };
 
 int func( unsigned a, char b )
 {
@@ -25,7 +26,8 @@ int main()
     1.4;
     5.6f;
     7.7l;
-    y += 'A';
+    y += 'z';
+    y -= p[2];
     z = 5;
     z /= 2;
     y += (int)z;
