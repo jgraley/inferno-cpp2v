@@ -20,6 +20,7 @@
 #include "clang/Parse/Action.h"
 #include "clang/Parse/Parser.h"
 #include "clang/Parse/DeclSpec.h"
+#include "clang/Parse/Designator.h"
 #include "clang/Parse/Scope.h"
 #include "clang/Driver/TextDiagnosticPrinter.h"
 #include "clang/Lex/LiteralSupport.h"
@@ -1001,27 +1002,23 @@ private:
             nc->value = rv;   
             return hold_expr.ToRaw( nc );
         }
-        /*
-        /// ActOnStringLiteral - The specified tokens were lexed as pasted string
-        /// fragments (e.g. "foo" "bar" L"baz"). 
-        virtual ExprResult ActOnStringLiteral(const clang::Token *Toks, unsigned NumToks) 
+        
+        virtual ExprResult ActOnInitList(clang::SourceLocation LParenLoc,
+                                         ExprTy **InitList, unsigned NumInit,
+                                         clang::InitListDesignations &Designators,
+                                         clang::SourceLocation RParenLoc) 
         {
+            ASSERT( !Designators.hasAnyDesignators() && "Designators in init lists unsupported" ); 
+        
             shared_ptr<Aggregate> ao(new Aggregate);
-            clang::StringLiteralParser literal(Toks, NumToks, preprocessor, target_info);
-            if (literal.hadError)
-                return ExprResult(true);
-
-            for(int i=0; i<literal.GetStringLength(); i++)
+            for(int i=0; i<NumInit; i++)
             {
-                shared_ptr<IntegralConstant> ic( new IntegralConstant );
-                llvm::APSInt rv(TypeInfo::char_bits, !TypeInfo::char_default_signed);
-                rv = literal.GetString()[i];
-                ic->value = rv;   
-                ao->elements.push_back( ic );
+                shared_ptr<Expression> e = hold_expr.FromRaw( InitList[i] );
+                ao->elements.push_back( e );
             }
             return hold_expr.ToRaw( ao );                                 
         }
-*/
+
         /// ActOnStringLiteral - The specified tokens were lexed as pasted string
         /// fragments (e.g. "foo" "bar" L"baz"). 
         virtual ExprResult ActOnStringLiteral(const clang::Token *Toks, unsigned NumToks) 
@@ -1036,6 +1033,12 @@ private:
             return hold_expr.ToRaw( s );                                 
         }
         
+        /// ActOnCXXThis - Parse the C++ 'this' pointer.
+        virtual ExprResult ActOnCXXThis(clang::SourceLocation ThisLoc) 
+        {
+            return hold_expr.ToRaw( shared_ptr<This>( new This ) );
+        }
+
         //--------------------------------------------- unimplemented actions -----------------------------------------------     
         // Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC 
         // extensions. These all assert out immediately.
@@ -1109,14 +1112,6 @@ private:
     return 0;
   }
 
-  virtual ExprResult ActOnInitList(clang::SourceLocation LParenLoc,
-                                   ExprTy **InitList, unsigned NumInit,
-                                   clang::InitListDesignations &Designators,
-                                   clang::SourceLocation RParenLoc) {
-    ASSERT(!"Unimplemented action");
-    return 0;
-  }
-
   virtual DeclTy *ActOnStartNamespaceDef(clang::Scope *S, clang::SourceLocation IdentLoc,
                                         clang::IdentifierInfo *Ident,
                                         clang::SourceLocation LBrace) {
@@ -1129,12 +1124,6 @@ private:
                                        clang::SourceLocation RAngleBracketLoc,
                                        clang::SourceLocation LParenLoc, ExprTy *Op,
                                        clang::SourceLocation RParenLoc) {
-    ASSERT(!"Unimplemented action");
-    return 0;
-  }
-
-  /// ActOnCXXThis - Parse the C++ 'this' pointer.
-  virtual ExprResult ActOnCXXThis(clang::SourceLocation ThisLoc) {
     ASSERT(!"Unimplemented action");
     return 0;
   }
@@ -1185,8 +1174,7 @@ private:
     ASSERT(!"Unimplemented action");
     return true;
   }
-
-    };
+ };
 };   
 
 #endif

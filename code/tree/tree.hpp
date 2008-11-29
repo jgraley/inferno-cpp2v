@@ -170,6 +170,8 @@ struct String : Expression
     string value;
 };
 
+struct This : Expression {};
+
 struct LabelMarker : Statement
 {
     shared_ptr<Label> label; // TODO these should be function scope
