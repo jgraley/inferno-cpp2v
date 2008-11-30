@@ -145,7 +145,9 @@ private:
             return !!(S->getFnParent());
         }
         
-        shared_ptr<Integral> CreateIntegralType( unsigned bits, bool default_signed, clang::DeclSpec::TSS type_spec_signed )
+        shared_ptr<Integral> CreateIntegralType( unsigned bits, 
+                                                 bool default_signed, 
+                                                 clang::DeclSpec::TSS type_spec_signed = clang::DeclSpec::TSS_unspecified )
         {
             shared_ptr<Integral> i;
             bool sign;
@@ -230,6 +232,7 @@ private:
                     case clang::DeclSpec::TST_struct:
                     case clang::DeclSpec::TST_union:
                     case clang::DeclSpec::TST_class:
+                    case clang::DeclSpec::TST_enum:
                         TRACE("struct/union/class\n");
                         // Disgustingly, clang casts the DeclTy returned from ActOnTag() to 
                         // a TypeTy. 
@@ -392,8 +395,7 @@ private:
         virtual DeclTy *ActOnDeclarator( clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup )
         {
             // TODO the spurious char __builtin_va_list; line comes from the target info.
-            // Create an inferno target info customised for Inferno that doesn't do this.
-            //TRACE("\"%s\"\n", D.getIdentifier()->getName().c_str() ); 
+            // Create an inferno target info customised for Inferno that doesn't do this. 
             if( strcmp(D.getIdentifier()->getName(), "__builtin_va_list")==0 )
             {            
                 return 0;
@@ -869,7 +871,7 @@ private:
                     h = shared_ptr<Class>(new Class);
                     break;
                 case clang::DeclSpec::TST_enum:
-                    ASSERT(!"TODO add enum");
+                    h = shared_ptr<Enum>(new Enum);
                     break;
                 default:
                     ASSERT(!"Unknown type spec type");            
@@ -894,6 +896,14 @@ private:
             
             //TODO should we do something with TagKind? Maybe needed for render.
             //TODO use the attibutes
+            
+            // struct/class/union pushed by ActOnFinishCXXClassDef()
+            if( (clang::DeclSpec::TST)TagType == clang::DeclSpec::TST_enum )
+            { 
+                if( !IsInFunction(S) )
+                    decl_scope.top()->push_back( h );
+            }                        
+            TRACE("done tag\n");
             
             return hold_decl.ToRaw( h );            
         }
@@ -1039,6 +1049,58 @@ private:
             return hold_expr.ToRaw( shared_ptr<This>( new This ) );
         }
 
+        virtual DeclTy *ActOnEnumConstant(clang::Scope *S, DeclTy *EnumDecl,
+                                          DeclTy *LastEnumConstant,
+                                          clang::SourceLocation IdLoc, clang::IdentifierInfo *Id,
+                                          clang::SourceLocation EqualLoc, ExprTy *Val) 
+        {
+            shared_ptr<Object> o(new Object());
+            o->identifier = Id->getName();
+            o->storage = Object::SYMBOL;
+            o->type = CreateIntegralType( 32, false );
+            shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
+            od->object = o;
+            if( Val )
+            {
+                od->initialiser = hold_expr.FromRaw( Val );
+            }
+            else if( LastEnumConstant )
+            {                 
+                shared_ptr<Declaration> lastd( hold_decl.FromRaw( LastEnumConstant ) );
+                shared_ptr<ObjectDeclaration> lastod( dynamic_pointer_cast<ObjectDeclaration>(lastd) );
+                ASSERT(lastod && "unexpected kind of declaration inside an enum");
+                shared_ptr<Infix> inf( new Infix );
+                inf->operands.push_back(lastod->initialiser);
+                llvm::APSInt i(32, false);
+                i = 1;
+                shared_ptr<IntegralConstant> ic( new IntegralConstant );
+                ic->value = i;
+                inf->operands.push_back(ic);
+                inf->kind = clang::tok::plus;
+                od->initialiser = inf;
+            }
+            else
+            {
+                llvm::APSInt i(32, false);
+                i = 0;
+                shared_ptr<IntegralConstant> ic( new IntegralConstant );
+                ic->value = i;
+                od->initialiser = ic;
+            }
+            return hold_decl.ToRaw( od );
+        }
+        
+        virtual void ActOnEnumBody(clang::SourceLocation EnumLoc, DeclTy *EnumDecl,
+                                   DeclTy **Elements, unsigned NumElements) 
+        {
+            shared_ptr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
+            shared_ptr<Enum> e( dynamic_pointer_cast<Enum>(d) );
+            ASSERT( e && "expected the declaration to be an enum");
+            for( int i=0; i<NumElements; i++ )
+               e->members.push_back( hold_decl.FromRaw( Elements[i] ) );
+        }
+
+        
         //--------------------------------------------- unimplemented actions -----------------------------------------------     
         // Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC 
         // extensions. These all assert out immediately.
@@ -1057,21 +1119,6 @@ private:
 
   virtual DeclTy *ActOnField(clang::Scope *S, clang::SourceLocation DeclStart,
                              clang::Declarator &D, ExprTy *BitfieldWidth) {
-    ASSERT(!"Unimplemented action");
-    return 0;
-  }
-
-  virtual DeclTy *ActOnIvar(clang::Scope *S, clang::SourceLocation DeclStart,
-                            clang::Declarator &D, ExprTy *BitfieldWidth,
-                            clang::tok::ObjCKeywordKind visibility) {
-    ASSERT(!"Unimplemented action");
-    return 0;
-  }
-
-  virtual DeclTy *ActOnEnumConstant(clang::Scope *S, DeclTy *EnumDecl,
-                                    DeclTy *LastEnumConstant,
-                                    clang::SourceLocation IdLoc, clang::IdentifierInfo *Id,
-                                    clang::SourceLocation EqualLoc, ExprTy *Val) {
     ASSERT(!"Unimplemented action");
     return 0;
   }

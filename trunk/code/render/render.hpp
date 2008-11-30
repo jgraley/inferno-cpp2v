@@ -247,7 +247,7 @@ private:
         TRACE("ok\n");
     }
     
-    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, Declaration::Access *access = NULL )
+    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, Declaration::Access *access = NULL, bool showtype = true )
     {
         TRACE();
         string s;
@@ -290,12 +290,18 @@ private:
                 break;
             case Object::DEFAULT:
             case Object::MEMBER:
+            case Object::SYMBOL:
                 break;
             default:
                 s += ERROR_UNKNOWN("storage class");
                 break;
             }
-            s += RenderType( od->object->type, RenderIdentifier(od->object) );
+            
+            if(showtype)
+                s += RenderType( od->object->type, RenderIdentifier(od->object) );
+            else
+                s += RenderIdentifier(od->object);
+                
             if(od->initialiser)
             {
                 bool function_definition = !!dynamic_pointer_cast<Scope>(od->initialiser);
@@ -317,6 +323,8 @@ private:
         else if( shared_ptr<Holder> h = dynamic_pointer_cast< Holder >(declaration) )
         {
             Declaration::Access a;
+            bool showtype=true;
+            string sep2=";\n";
             if( dynamic_pointer_cast< Class >(h) )
             {
                 s += "class";
@@ -332,12 +340,19 @@ private:
                 s += "union";
                 a = Declaration::PUBLIC;
             }
+            else if( dynamic_pointer_cast< Enum >(h) )
+            {
+                s += "enum";
+                a = Declaration::PUBLIC;
+                sep2 = ",\n";
+                showtype = false;
+            }
             else
                 return ERROR_UNSUPPORTED(declaration);
 
             s += " " + h->identifier + "\n" 
                  "{\n" +
-                 RenderSequence( h->members, ";\n", true, a ) +
+                 RenderSequence( h->members, sep2, true, a, showtype ) +
                  "};\n";
         }
         else
@@ -412,7 +427,8 @@ private:
     string RenderSequence( Sequence<ELEMENT> spe, 
                            string separator, 
                            bool seperate_last, 
-                           Declaration::Access init_access = Declaration::PUBLIC )
+                           Declaration::Access init_access = Declaration::PUBLIC,
+                           bool showtype=true )
     {
         TRACE();
         string s;
@@ -422,7 +438,7 @@ private:
             string sep = (seperate_last || i+1<spe.size()) ? separator : "";
             shared_ptr<ELEMENT> pe = spe[i];                        
             if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
-                s += RenderDeclaration( d, sep, &init_access );
+                s += RenderDeclaration( d, sep, &init_access, showtype );
             else if( shared_ptr<Statement> st = dynamic_pointer_cast< Statement >(pe) )
                 s += RenderStatement( st, sep ); 
             else

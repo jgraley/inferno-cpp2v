@@ -66,7 +66,8 @@ struct Object : Identifier
         DEFAULT, 
         STATIC,
         MEMBER,
-        AUTO
+        AUTO,
+        SYMBOL // constant so no storage required
     } storage;
     shared_ptr<Type> type;
 };
@@ -266,6 +267,8 @@ struct Access : Expression
     shared_ptr<Expression> base; 
     shared_ptr<Object> member;    
 };
+
+struct Enum : Holder {};
 
 struct Cast : Expression
 {
