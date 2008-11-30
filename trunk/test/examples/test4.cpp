@@ -35,6 +35,7 @@ int main()
     t.d.i = 22;
     Test *pt = &t;
     int y = pt->f( 11 );
+    y += B+D-C;
     return (unsigned char)y;
 }
 
