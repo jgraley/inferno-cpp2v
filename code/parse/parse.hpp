@@ -516,9 +516,10 @@ private:
                                                 clang::IdentifierInfo &II,
                                                 bool HasTrailingLParen ) 
         {
-            TRACE("aoie %s\n", II.getName() );
-            shared_ptr<Identifier> i = dynamic_pointer_cast<Identifier>( InfernoMinimalAction::GetCurrentIdentifierRCPtr( II ) );
-            ASSERT(i);
+            shared_ptr<Node> n = InfernoMinimalAction::GetCurrentIdentifierRCPtr( II );
+            TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
+            shared_ptr<Identifier> i = dynamic_pointer_cast<Identifier>( n );
+            ASSERT( i );
             return hold_expr.ToRaw( i );            
         }                                   
         
@@ -1087,6 +1088,7 @@ private:
                 ic->value = i;
                 od->initialiser = ic;
             }
+            (void)InfernoMinimalAction::AddNakedIdentifier(S, Id, o, false); 
             return hold_decl.ToRaw( od );
         }
         
