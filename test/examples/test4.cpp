@@ -1,4 +1,3 @@
-
 struct { int a; } b;
 
 class Test
@@ -22,6 +21,13 @@ private:
 //{
 //}
 
+enum GGFF
+{
+   A,
+   B,
+   C=100,
+   D
+};
 
 int main()
 {
