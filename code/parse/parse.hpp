@@ -233,7 +233,7 @@ private:
                     case clang::DeclSpec::TST_union:
                     case clang::DeclSpec::TST_class:
                     case clang::DeclSpec::TST_enum:
-                        TRACE("struct/union/class\n");
+                        TRACE("struct/union/class/enum\n");
                         // Disgustingly, clang casts the DeclTy returned from ActOnTag() to 
                         // a TypeTy. 
                         return dynamic_pointer_cast<Holder>( hold_decl.FromRaw( DS.getTypeRep() ) );
@@ -445,7 +445,8 @@ private:
                 TRACE();
                 shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( fp->parameters[i] );                
                 ASSERT(ppd);
-                InfernoMinimalAction::AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->object, false);
+                if( ppd->clang_identifier )
+                    InfernoMinimalAction::AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->object, false);
             }
         }
 
@@ -894,6 +895,7 @@ private:
             }
             
             h->access = Declaration::PUBLIC; // must make all holder type decls public since clang doesnt seem to give us an AS
+            h->incomplete = true;
             
             //TODO should we do something with TagKind? Maybe needed for render.
             //TODO use the attibutes
@@ -919,6 +921,7 @@ private:
             // we already created. No need to return anything.
             shared_ptr<Declaration> d = hold_decl.FromRaw( TagDecl );
             shared_ptr<Holder> h = dynamic_pointer_cast<Holder>(d);
+            h->incomplete = false;
             decl_scope.push( &(h->members) );      // decls for members will go on this scope      
         }
   
@@ -1060,6 +1063,7 @@ private:
             o->storage = Object::SYMBOL;
             o->type = CreateIntegralType( 32, false );
             shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
+            od->access = Declaration::PUBLIC;
             od->object = o;
             if( Val )
             {
@@ -1100,6 +1104,25 @@ private:
             ASSERT( e && "expected the declaration to be an enum");
             for( int i=0; i<NumElements; i++ )
                e->members.push_back( hold_decl.FromRaw( Elements[i] ) );
+            e->incomplete = false;   
+        }
+
+        /// ParsedFreeStandingDeclSpec - This method is invoked when a declspec with
+        /// no declarator (e.g. "struct foo;") is parsed.
+        // JSG likely bug with C++ integratikon in clang means it parses the struct
+        // including stuff in {} and then detects the ; as meaning free standing.
+        virtual DeclTy *ParsedFreeStandingDeclSpec(clang::Scope *S, clang::DeclSpec &DS) 
+        {
+            TRACE();
+            shared_ptr<Declaration> d( hold_decl.FromRaw( DS.getTypeRep() ) );
+            shared_ptr<Holder> h( dynamic_pointer_cast<Holder>( d ) );
+            ASSERT( h );
+            if( !IsInFunction(S) )
+            {
+                if( decl_scope.top()->back() != d )  // Workaround for above bug in clang
+                    decl_scope.top()->push_back( d );
+            }
+            return hold_decl.ToRaw( d );
         }
 
         
@@ -1108,13 +1131,6 @@ private:
         // extensions. These all assert out immediately.
         
   virtual DeclTy *ActOnFileScopeAsmDecl(clang::SourceLocation Loc, ExprTy *AsmString) {
-    ASSERT(!"Unimplemented action");
-    return 0;
-  }
-
-  /// ParsedFreeStandingDeclSpec - This method is invoked when a declspec with
-  /// no declarator (e.g. "struct foo;") is parsed.
-  virtual DeclTy *ParsedFreeStandingDeclSpec(clang::Scope *S, DeclSpec &DS) {
     ASSERT(!"Unimplemented action");
     return 0;
   }
