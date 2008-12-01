@@ -350,10 +350,16 @@ private:
             else
                 return ERROR_UNSUPPORTED(declaration);
 
-            s += " " + h->identifier + "\n" 
-                 "{\n" +
-                 RenderSequence( h->members, sep2, true, a, showtype ) +
-                 "};\n";
+            s += " " + h->identifier;
+            
+            if( !h->incomplete )
+            {
+                 s += "\n{\n" +
+                      RenderSequence( h->members, sep2, true, a, showtype ) +
+                      "}";
+            }
+            
+            s += ";\n\n";
         }
         else
             s += ERROR_UNSUPPORTED(declaration);

@@ -237,6 +237,11 @@ struct Break : Statement {};
 struct Holder : UserType
 {
     Sequence<Declaration> members;
+    
+    // Where eg struct foo; is used we should create seperate nodes for
+    // the incomplete and complete types. This is so that mutually 
+    // referencing structs don't create a loop in the tree.
+    bool incomplete; 
 };
 
 struct Union : Holder {};
