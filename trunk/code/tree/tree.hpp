@@ -105,12 +105,12 @@ struct Void : Type {};
 
 struct Bool : Type {};
 
-struct Datum : Type // TODO rename Datum to Numeric, latter is more concise
+struct Numeric : Type // TODO rename Numeric to Numeric, latter is more concise
 {
     unsigned width;  // Bits, not bytes
 };
 
-struct Integral : Datum {};
+struct Integral : Numeric {};
 
 struct Signed : Integral {};
 
@@ -122,13 +122,20 @@ struct Operator : Expression
     clang::tok::TokenKind kind;
 };
 
-struct Floating : Datum {}; // Note width determines float vs double 
+struct Floating : Numeric {}; // Note width determines float vs double 
 
-struct Prefix : Operator {};  // 1 operand
+struct Prefix : Operator {};  // 1 operand (eg "++i" or "sizeof(i)")
 
 struct Postfix : Operator {}; // 1 operand
 
 struct Infix : Operator {}; // 2 operands
+
+// for eg sizeof(int) where the operand is a type
+struct PrefixOnType : Expression
+{
+    shared_ptr<Type> operand;
+    clang::tok::TokenKind kind;
+};
 
 struct ConditionalOperator : Expression // eg ?:
 {
@@ -225,7 +232,10 @@ struct SwitchMarker : Statement {};
 
 struct Case : SwitchMarker 
 {
-    shared_ptr<Expression> value;
+    // support gcc extension of case x..y:
+    // in other cases, value_lo==value_hi
+    shared_ptr<Expression> value_lo; // inclusive
+    shared_ptr<Expression> value_hi; // inclusive
 };
 
 struct Default : SwitchMarker {};

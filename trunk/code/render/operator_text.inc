@@ -42,5 +42,8 @@ OPERATOR(periodstar           , ".*" )
 OPERATOR(arrowstar            , "->*" )
 OPERATOR(at                   , "@" )
 
+OPERATOR(kw_sizeof               , "sizeof(" )
+OPERATOR(kw_alignof              , "alignof(" )
+
 
 #undef OPERATOR

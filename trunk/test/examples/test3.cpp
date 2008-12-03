@@ -1,4 +1,5 @@
-
+int a;
+int i = sizeof(a)+sizeof(int);
 
 int main()
 {
@@ -35,6 +36,9 @@ int main()
     case 3:
         y+=2;
         break;
+    case 5 ... 9:
+        y=99;
+        break;    
     default:
         y=1;
         break;
@@ -42,4 +46,5 @@ int main()
     
     return (unsigned char)y;
 }
+
 

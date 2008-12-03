@@ -23,8 +23,10 @@ class Render : public Pass
 {
 public:
     Render()
-    {
+    {        
         operator_text.resize( clang::tok::NUM_TOKENS );
+        for(int i=0; i<clang::tok::NUM_TOKENS; i++ )
+            operator_text[i] = "\n#error Token not defined in operator_text\n";
 #define OPERATOR(TOK, TEXT) operator_text[clang::tok::TOK] = TEXT;
 #include "operator_text.inc"
     }
@@ -132,8 +134,16 @@ private:
             return RenderType( r->destination, "(&" + object + ")" );
         else if( shared_ptr<Array> a = dynamic_pointer_cast< Array >(type) )
             return RenderType( a->element, "(" + object + "[" + RenderExpression(a->size) + "])" );
-        else if( shared_ptr<UserType> ut = dynamic_pointer_cast< UserType >(type) )
-            return ut->identifier + " " + object;
+        else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
+            return t->identifier + " " + object;
+        else if( shared_ptr<Struct> ss = dynamic_pointer_cast< Struct >(type) )
+            return "struct " + ss->identifier + " " + object;
+        else if( shared_ptr<Class> c = dynamic_pointer_cast< Class >(type) )
+            return "class " + c->identifier + " " + object;
+        else if( shared_ptr<Union> u = dynamic_pointer_cast< Union >(type) )
+            return "union " + u->identifier + " " + object;
+        else if( shared_ptr<Enum> e = dynamic_pointer_cast< Enum >(type) )
+            return "enum " + e->identifier + " " + object;
         else
             return ERROR_UNSUPPORTED(type);
     }
@@ -197,6 +207,13 @@ private:
             return before + 
                    operator_text[o->kind] + 
                    RenderExpression( o->operands[0], true ) +
+                   (operator_text[o->kind][operator_text[o->kind].size()-1]=='(' ? ")" : "") + // if the token is "x(", add ")"
+                   after;
+        else if( shared_ptr<PrefixOnType> pot = dynamic_pointer_cast< PrefixOnType >(expression) )
+            return before + 
+                   operator_text[pot->kind] + 
+                   RenderType( pot->operand, "" ) +
+                   (operator_text[pot->kind][operator_text[pot->kind].size()-1]=='(' ? ")" : "") + // if the token is "x(", add ")"
                    after;
         else if( shared_ptr<ConditionalOperator> o = dynamic_pointer_cast< ConditionalOperator >(expression) )
             return before + 
@@ -388,7 +405,7 @@ private:
             if( shared_ptr<Label> l = dynamic_pointer_cast< Label >(g->destination) )
                 return "goto " + RenderIdentifier(l) + sep;  // regular goto
             else
-                return "goto " + RenderExpression(g->destination) + sep; // goto-a-variable (GCC extension)
+                return "goto *" + RenderExpression(g->destination) + sep; // goto-a-variable (GCC extension)
         }
         else if( shared_ptr<If> i = dynamic_pointer_cast<If>(statement) )
         {
@@ -416,7 +433,7 @@ private:
             return "switch( " + RenderExpression(s->condition) + " )\n" +
                    RenderStatement(s->body, ";\n");
         else if( shared_ptr<Case> c = dynamic_pointer_cast<Case>(statement) )
-            return "case " + RenderExpression(c->value) + ":\n";
+            return "case " + RenderExpression(c->value_lo) + " ... " + RenderExpression(c->value_hi) + ":\n";
         else if( dynamic_pointer_cast<Default>(statement) )
             return "default:\n";
         else if( dynamic_pointer_cast<Continue>(statement) )
