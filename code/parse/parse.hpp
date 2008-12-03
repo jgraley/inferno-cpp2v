@@ -601,6 +601,7 @@ private:
         virtual ExprResult ActOnUnaryOp(clang::SourceLocation OpLoc, clang::tok::TokenKind Kind,
                                                ExprTy *Input) 
         {
+            TRACE();
             shared_ptr<Prefix> o(new Prefix);
             o->kind = Kind;
             o->operands.push_back( hold_expr.FromRaw(Input) );
@@ -786,9 +787,12 @@ private:
                                          clang::SourceLocation ColonLoc, StmtTy *SubStmt) 
         {
             TRACE();
-            ASSERT(!RHSVal && "gcc extension ... not supported");
             shared_ptr<ParseCase> c( new ParseCase );
-            c->value = hold_expr.FromRaw( LHSVal );
+            if( RHSVal )
+                c->value_hi = hold_expr.FromRaw( RHSVal ); 
+            else
+                c->value_hi = hold_expr.FromRaw( LHSVal );
+            c->value_lo = hold_expr.FromRaw( LHSVal );
             c->sub = SubStmt;
             return hold_stmt.ToRaw( c );
         }
@@ -917,6 +921,15 @@ private:
                                            clang::SourceLocation LBrace) 
         {
             TRACE();
+            
+            // When we're in a function, we let clang collect the decls. But
+            // clang doesnt allow for collecting the tag seperately from any
+            // variable declaration. To resolve, either
+            // 1. make local extensions for struc, class etc which show combined 
+            // def and decl and get seperated in ActOnCompoundStatement or
+            // 2. Allow such nodes in the tree
+            ASSERT( !IsInFunction(S) && "defining structs in functions not yet supported" );
+
             // Just populate the members container for the Holder node
             // we already created. No need to return anything.
             shared_ptr<Declaration> d = hold_decl.FromRaw( TagDecl );
@@ -1125,6 +1138,17 @@ private:
             return hold_decl.ToRaw( d );
         }
 
+        virtual ExprResult 
+            ActOnSizeOfAlignOfTypeExpr(clang::SourceLocation OpLoc, bool isSizeof, 
+                                       clang::SourceLocation LParenLoc, TypeTy *Ty,
+                                       clang::SourceLocation RParenLoc) 
+        {
+            TRACE();
+            shared_ptr<PrefixOnType> pot(new PrefixOnType);
+            pot->kind = isSizeof ? clang::tok::kw_sizeof : clang::tok::kw_alignof;
+            pot->operand = hold_type.FromRaw(Ty);
+            return hold_expr.ToRaw( pot );                                    
+        }
         
         //--------------------------------------------- unimplemented actions -----------------------------------------------     
         // Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC 
@@ -1159,14 +1183,6 @@ private:
 
   virtual ExprResult ActOnPredefinedExpr(clang::SourceLocation Loc,
                                          clang::tok::TokenKind Kind) {
-    ASSERT(!"Unimplemented action");
-    return 0;
-  }
-
-  virtual ExprResult 
-    ActOnSizeOfAlignOfTypeExpr(clang::SourceLocation OpLoc, bool isSizeof, 
-                               clang::SourceLocation LParenLoc, TypeTy *Ty,
-                               clang::SourceLocation RParenLoc) {
     ASSERT(!"Unimplemented action");
     return 0;
   }
