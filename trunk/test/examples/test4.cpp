@@ -1,4 +1,4 @@
-struct { int a; } b;
+/*struct { int a; } b;
 
 class Test
 {
@@ -28,14 +28,17 @@ enum GGFF
    C=100,
    D
 };
+*/
+struct { int c; } d;
 
 int main()
 {
-    Test t;
+    struct { int a; } b;
+  /*  Test t;
     t.d.i = 22;
     Test *pt = &t;
     int y = pt->f( 11 );
     y += B+D-C;
-    return (unsigned char)y;
+    return (unsigned char)y;*/
 }
 

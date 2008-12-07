@@ -11,7 +11,7 @@ int main()
            y = 11;
     } 
     
-    for( int a=0; a<3; a++ )
+    for( int as=0; as<3; as++ )
         y++;
     
     while( x > 3 )
@@ -20,12 +20,12 @@ int main()
         y+=10;
     }
     
-    int a=0;
+    int aa=0;
     do
     {
         y = y-x;
-        a++;
-    } while(a<2);
+        aa++;
+    } while(aa<2);
     
     switch( x )
     {
