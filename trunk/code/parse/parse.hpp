@@ -170,15 +170,15 @@ private:
             else
                 i = shared_ptr<Unsigned>( new Unsigned );
             
-            i->width = bits;
-            
+            i->width = CreateNumericConstant(bits);
+                        
             return i;
         }
         
         shared_ptr<Floating> CreateFloatingType( unsigned bits )
         {
             shared_ptr<Floating> f( shared_ptr<Floating>( new Floating ) );
-            f->width = bits;
+            f->width = CreateNumericConstant(bits);
             return f;
         }
         
@@ -558,6 +558,15 @@ private:
             ASSERT( i );
             return hold_expr.ToRaw( i );            
         }                                   
+        
+        shared_ptr<NumericConstant> CreateNumericConstant( unsigned value )        
+        {
+            llvm::APSInt rv(TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified], true);
+            rv = value;
+            shared_ptr<IntegralConstant> nc( new IntegralConstant );
+            nc->value = rv;
+            return nc;            
+        }
         
         shared_ptr<NumericConstant> CreateNumericConstant(const clang::Token &tok)
         {

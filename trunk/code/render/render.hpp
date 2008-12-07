@@ -68,7 +68,13 @@ private:
     string RenderIntegralType( shared_ptr<Integral> type )
     {
         bool ds;
-        if( type->width == TypeInfo::char_bits )
+        unsigned base_width;       
+        shared_ptr<IntegralConstant> ic = dynamic_pointer_cast<IntegralConstant>( type->width );
+        ASSERT(ic && "width must be constant integral"); 
+        if(ic)
+            base_width = ic->value.getLimitedValue();
+                          
+        if( base_width == TypeInfo::char_bits )
             ds = TypeInfo::char_default_signed;
         else
             ds = TypeInfo::int_default_signed;
@@ -82,15 +88,15 @@ private:
             s = "unsigned ";
 
         // Fix the width
-        if( type->width == TypeInfo::char_bits )
+        if( base_width == TypeInfo::char_bits )
             s += "char";
-        else if( type->width == TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified] )
+        else if( base_width == TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified] )
             s += "int";
-        else if( type->width == TypeInfo::integral_bits[clang::DeclSpec::TSW_short] )
+        else if( base_width == TypeInfo::integral_bits[clang::DeclSpec::TSW_short] )
             s += "short";
-        else if( type->width == TypeInfo::integral_bits[clang::DeclSpec::TSW_long] )
+        else if( base_width == TypeInfo::integral_bits[clang::DeclSpec::TSW_long] )
             s += "long";
-        else if( type->width == TypeInfo::integral_bits[clang::DeclSpec::TSW_longlong] )
+        else if( base_width == TypeInfo::integral_bits[clang::DeclSpec::TSW_longlong] )
             s += "long long";
         else    
             ASSERT( !"no builtin integral type has required bit width"); // TODO drop in a bit vector
@@ -101,13 +107,18 @@ private:
     string RenderFloatingType( shared_ptr<Floating> type )
     {
         string s;
+        unsigned base_width;       
+        shared_ptr<IntegralConstant> ic = dynamic_pointer_cast<IntegralConstant>( type->width );
+        ASSERT(ic && "width must be constant integral"); 
+        if(ic)
+            base_width = ic->value.getLimitedValue();
     
         // Fix the width
-        if( type->width == TypeInfo::float_bits )
+        if( base_width == TypeInfo::float_bits )
             s += "float";
-        else if( type->width == TypeInfo::double_bits )
+        else if( base_width == TypeInfo::double_bits )
             s += "double";
-        else if( type->width == TypeInfo::long_double_bits )
+        else if( base_width == TypeInfo::long_double_bits )
             s += "long double";
         else    
             ASSERT( !"no builtin floating type has required bit width"); // TODO drop in a bit vector
