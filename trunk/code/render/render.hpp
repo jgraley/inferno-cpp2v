@@ -65,16 +65,18 @@ private:
         return ids;
     }
     
-    string RenderIntegralType( shared_ptr<Integral> type )
+    string RenderIntegralType( shared_ptr<Integral> type, string object=string() )
     {
         bool ds;
-        unsigned base_width;       
+        unsigned width;       
         shared_ptr<IntegralConstant> ic = dynamic_pointer_cast<IntegralConstant>( type->width );
         ASSERT(ic && "width must be constant integral"); 
         if(ic)
-            base_width = ic->value.getLimitedValue();
+            width = ic->value.getLimitedValue();
+                  
+        TRACE("width %d\n", width);          
                           
-        if( base_width == TypeInfo::char_bits )
+        if( width == TypeInfo::char_bits )
             ds = TypeInfo::char_default_signed;
         else
             ds = TypeInfo::int_default_signed;
@@ -84,22 +86,35 @@ private:
         string s;
         if( dynamic_pointer_cast< Signed >(type) && !ds )
             s = "signed ";
-        else if( dynamic_pointer_cast< Unsigned >(type) && !ds )
+        else if( dynamic_pointer_cast< Unsigned >(type) && ds )
             s = "unsigned ";
 
         // Fix the width
-        if( base_width == TypeInfo::char_bits )
+        bool bitfield = false;
+        if( width == TypeInfo::char_bits )
             s += "char";
-        else if( base_width == TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified] )
+        else if( width == TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified] )
             s += "int";
-        else if( base_width == TypeInfo::integral_bits[clang::DeclSpec::TSW_short] )
+        else if( width == TypeInfo::integral_bits[clang::DeclSpec::TSW_short] )
             s += "short";
-        else if( base_width == TypeInfo::integral_bits[clang::DeclSpec::TSW_long] )
+        else if( width == TypeInfo::integral_bits[clang::DeclSpec::TSW_long] )
             s += "long";
-        else if( base_width == TypeInfo::integral_bits[clang::DeclSpec::TSW_longlong] )
+        else if( width == TypeInfo::integral_bits[clang::DeclSpec::TSW_longlong] )
             s += "long long";
-        else    
-            ASSERT( !"no builtin integral type has required bit width"); // TODO drop in a bit vector
+        else    // unmatched defaults to int for bitfields
+        {
+            s += "int";
+            bitfield = true;
+        }
+               
+        s += " " + object;
+        
+        if( bitfield )
+        {
+           char b[100];
+           sprintf(b, ":%d", width);
+           s += b;
+        }
         
         return s;              
     }
@@ -130,7 +145,7 @@ private:
     {
         TRACE();
         if( shared_ptr<Integral> i = dynamic_pointer_cast< Integral >(type) )
-            return RenderIntegralType( i ) + " " + object;
+            return RenderIntegralType( i, object );
         if( shared_ptr<Floating> f = dynamic_pointer_cast< Floating >(type) )
             return RenderFloatingType( f ) + " " + object;
         else if( dynamic_pointer_cast< Void >(type) )
