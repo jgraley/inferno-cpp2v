@@ -330,6 +330,9 @@ private:
             case clang::DeclSpec::SCS_static:
                 o->storage = Object::STATIC;
                 break;
+            case clang::DeclSpec::SCS_extern:
+                o->storage = Object::EXTERN;
+                break;
             case clang::DeclSpec::SCS_auto:
                 o->storage = Object::AUTO;
                 break;

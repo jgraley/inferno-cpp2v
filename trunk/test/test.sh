@@ -38,7 +38,7 @@ echo Compile input...
 # (1) we do not use -pedantic because its infuriating and
 # (2) we do not apply either restriction to intermediate output, which may
 # use gcc extensions etc
-g++ -ansi -c $infile -o results/"$fb"_in.o
+g++ -ansi -nostdinc -c $infile -o results/"$fb"_in.o
 c1res=$?
 if test $c1res -ne 0
 then
