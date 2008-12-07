@@ -86,13 +86,13 @@ private:
             preprocessor(pp),
             target_info(T)
         {
-            decl_scope.push( &*p );
+            inferno_scope_stack.push( &*p );
         }
      
         ~InfernoAction()
         {
-            decl_scope.pop();
-            assert( decl_scope.empty() );
+            inferno_scope_stack.pop();
+            assert( inferno_scope_stack.empty() );
         }
      
     private:   
@@ -116,10 +116,16 @@ private:
         {
             StmtTy *sub;
         };
+        struct ParseTwin : Declaration
+        {
+            shared_ptr<Declaration> d1;
+            shared_ptr<Declaration> d2;
+        };
+        shared_ptr<Declaration> decl_to_insert;
     
         clang::Preprocessor &preprocessor;
         clang::TargetInfo &target_info;
-        stack< Sequence<Declaration> * > decl_scope;
+        stack< Sequence<Declaration> * > inferno_scope_stack;
         RCHold<Declaration, DeclTy *> hold_decl;
         RCHold<Expression, ExprTy *> hold_expr;
         RCHold<Statement, StmtTy *> hold_stmt;
@@ -138,11 +144,6 @@ private:
             }
             
             return 0;
-        }
-
-        bool IsInFunction(clang::Scope *S)
-        {
-            return !!(S->getFnParent());
         }
         
         shared_ptr<Integral> CreateIntegralType( unsigned bits, 
@@ -371,8 +372,6 @@ private:
             if( DS.getStorageClassSpec() == clang::DeclSpec::SCS_typedef )
             {
                 shared_ptr<Typedef> t = CreateTypedefNode( S, D );                
-                if( !IsInFunction(S) ) // TODO are typedefs legal in functions?
-                    decl_scope.top()->push_back( t );
                 TRACE();
                 d = t;
             }    
@@ -382,14 +381,38 @@ private:
                 od->object = CreateObjectNode( S, D );        
                 od->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
                 TRACE("aod %s %p %p\n", od->object->identifier.c_str(), od->object.get(), od.get() );
-                if( !IsInFunction(S) )
-                    decl_scope.top()->push_back( od );
                 d = od;
             }
             
             // Default the access specifier
             d->access = Declaration::PUBLIC; 
+            
             return d;
+        }
+        
+        // Does 2 things:
+        // 1. Inserts a stored decl if there is one in decl_to_insert
+        // 2. Inserts the supplied decl into our list or returns it depending on whether we're in a function
+        DeclTy *IssueDeclaration( clang::Scope *S, shared_ptr<Declaration> d )
+        {
+            // Did we leave a decl lying around to insert later? If so, pack it together with
+            // the current decl, for insertion into the code sequence.
+            TRACE("Scope flags %x\n", S->getFlags() );
+            if( decl_to_insert )
+            {                
+                shared_ptr<ParseTwin> pt( new ParseTwin );
+                pt->d1 = decl_to_insert;
+                pt->d2 = d;
+                inferno_scope_stack.top()->push_back( decl_to_insert );
+                inferno_scope_stack.top()->push_back( d );
+                decl_to_insert = shared_ptr<Declaration>(); // don't need to generate it again
+                return hold_decl.ToRaw( pt );
+            }
+            else
+            {
+                inferno_scope_stack.top()->push_back( d );
+                return hold_decl.ToRaw( d ); 
+            }            
         }
         
         virtual DeclTy *ActOnDeclarator( clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup )
@@ -402,7 +425,8 @@ private:
             }
  
             shared_ptr<Declaration> d = CreateDelcaration( S, D );            
-            return hold_decl.ToRaw( d );
+
+            return IssueDeclaration( S, d );
         }
         
         /// ActOnParamDeclarator - This callback is invoked when a parameter
@@ -423,6 +447,10 @@ private:
         virtual void AddInitializerToDecl(DeclTy *Dcl, ExprTy *Init) 
         {
             shared_ptr<Declaration> d = hold_decl.FromRaw( Dcl );            
+            
+            if( shared_ptr<ParseTwin> pt = dynamic_pointer_cast<ParseTwin>(d) )
+                d = pt->d2;
+                
             shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast<ObjectDeclaration>(d);
             ASSERT( od ); // Only objects can be initialised
             
@@ -469,7 +497,9 @@ private:
             shared_ptr<Function> fp = dynamic_pointer_cast<Function>( p->object->type );
             AddParamsToScope( fp, FnBodyScope );
             
-            decl_scope.top()->push_back( p );
+            inferno_scope_stack.top()->push_back( p );
+
+            inferno_scope_stack.push( new Sequence<Declaration> ); 
             return hold_decl.ToRaw( p );     
         }
 
@@ -480,6 +510,7 @@ private:
             ASSERT(p);
             shared_ptr<Function> fp = dynamic_pointer_cast<Function>( p->object->type );
             AddParamsToScope( fp, FnBodyScope );
+            inferno_scope_stack.push( new Sequence<Declaration> ); 
             
             return hold_decl.ToRaw( p );     
         }
@@ -492,6 +523,7 @@ private:
             shared_ptr<Expression> e( dynamic_pointer_cast<Expression>( hold_stmt.FromRaw(Body) ) );
             ASSERT(e); // function body must be a scope or 0
             fd->initialiser = e;
+            inferno_scope_stack.pop(); // we dont use these - we use the clang-managed compound statement instead (passed in via Body)
             return Decl;
         }    
         
@@ -642,6 +674,14 @@ private:
         void PushStmt( shared_ptr<Scope> s, StmtTy *stmt )
         {
             shared_ptr<Statement> st = hold_stmt.FromRaw(stmt);
+            
+            if( shared_ptr<ParseTwin> pt = dynamic_pointer_cast<ParseTwin>( st ) )    
+            {
+                PushStmt( s, hold_stmt.ToRaw( pt->d1 ) );
+                PushStmt( s, hold_stmt.ToRaw( pt->d2 ) );
+                return;
+            }
+            
             s->push_back( st );
                 
             // Flatten the "sub" statements of labels etc
@@ -650,7 +690,7 @@ private:
             else if( shared_ptr<ParseCase> pc = dynamic_pointer_cast<ParseCase>( st ) )
                 PushStmt( s, pc->sub );   
             else if( shared_ptr<ParseDefault> pc = dynamic_pointer_cast<ParseDefault>( st ) )
-                PushStmt( s, pc->sub );   
+                PushStmt( s, pc->sub );                      
         }
 
         virtual StmtResult ActOnCompoundStmt(clang::SourceLocation L, clang::SourceLocation R,
@@ -854,7 +894,7 @@ private:
             }
             
             // TODO set bitfield width (make a worker function for ActOnDeclarator())
-            return hold_decl.ToRaw( d );
+            return IssueDeclaration( S, d );
         }
 
         virtual DeclTy *ActOnTag(clang::Scope *S, unsigned TagType, TagKind TK,
@@ -906,10 +946,8 @@ private:
             
             // struct/class/union pushed by ActOnFinishCXXClassDef()
             if( (clang::DeclSpec::TST)TagType == clang::DeclSpec::TST_enum )
-            { 
-                if( !IsInFunction(S) )
-                    decl_scope.top()->push_back( h );
-            }                        
+                decl_to_insert = h; 
+                                   
             TRACE("done tag\n");
             
             return hold_decl.ToRaw( h );            
@@ -922,30 +960,25 @@ private:
         {
             TRACE();
             
-            // When we're in a function, we let clang collect the decls. But
-            // clang doesnt allow for collecting the tag seperately from any
-            // variable declaration. To resolve, either
-            // 1. make local extensions for struc, class etc which show combined 
-            // def and decl and get seperated in ActOnCompoundStatement or
-            // 2. Allow such nodes in the tree
-            ASSERT( !IsInFunction(S) && "defining structs in functions not yet supported" );
-
             // Just populate the members container for the Holder node
             // we already created. No need to return anything.
             shared_ptr<Declaration> d = hold_decl.FromRaw( TagDecl );
             shared_ptr<Holder> h = dynamic_pointer_cast<Holder>(d);
             h->incomplete = false;
-            decl_scope.push( &(h->members) );      // decls for members will go on this scope      
+            
+            inferno_scope_stack.push( &(h->members) );      // decls for members will go on this scope      
         }
   
         /// ActOnFinishCXXClassDef - This is called when a class/struct/union has
         /// completed parsing, when on C++.
         virtual void ActOnFinishCXXClassDef(DeclTy *TagDecl) 
         {
-            TRACE();
-            decl_scope.pop(); // class scope is complete
-            // TODO are structs etc definable in functions? If so, this will put the decl outside the function
-            decl_scope.top()->push_back( hold_decl.FromRaw(TagDecl) );
+            inferno_scope_stack.pop(); // class scope is complete
+
+            // TODO are structs etc definable in functions? If so, this will put the decl outside the function            
+            shared_ptr<Declaration> d = hold_decl.FromRaw( TagDecl );
+            shared_ptr<Holder> h = dynamic_pointer_cast<Holder>(d);
+            decl_to_insert = h; 
         }
         
         virtual ExprResult ActOnMemberReferenceExpr(ExprTy *Base, clang::SourceLocation OpLoc,
@@ -1130,11 +1163,12 @@ private:
             shared_ptr<Declaration> d( hold_decl.FromRaw( DS.getTypeRep() ) );
             shared_ptr<Holder> h( dynamic_pointer_cast<Holder>( d ) );
             ASSERT( h );
-            if( !IsInFunction(S) )
-            {
-                if( decl_scope.top()->back() != d )  // Workaround for above bug in clang
-                    decl_scope.top()->push_back( d );
+            if( decl_to_insert )
+            {                
+                d = decl_to_insert;
+                decl_to_insert = shared_ptr<Declaration>();
             }
+            inferno_scope_stack.top()->push_back( d );
             return hold_decl.ToRaw( d );
         }
 
