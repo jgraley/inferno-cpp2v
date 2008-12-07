@@ -2,6 +2,12 @@ char *p = "jhf";
 
 int a[] = { 2, 3, 4 };
 
+struct foo
+{
+    int h : 6;
+    unsigned i : 7;
+};
+
 int func( unsigned a, char b )
 {
     bool ss = true;

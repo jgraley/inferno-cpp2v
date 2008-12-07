@@ -876,11 +876,18 @@ private:
         {
             TRACE("Member %p\n", Init);
             shared_ptr<Declaration> d = CreateDelcaration( S, D );
+            shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast<ObjectDeclaration>(d);
       
-            TRACE();
+            if( BitfieldWidth )
+            {
+                ASSERT( od );
+                shared_ptr<Numeric> n( dynamic_pointer_cast<Numeric>( od->object->type ) );
+                ASSERT( n );
+                n->width = hold_expr.FromRaw(BitfieldWidth);
+            }
+            
             if( Init )
             {  
-                shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast<ObjectDeclaration>(d);
                 ASSERT( od ); // Only objects may be initialised
                 od->initialiser = hold_expr.FromRaw( Init );
             }
@@ -905,7 +912,6 @@ private:
                     break;
             }
             
-            // TODO set bitfield width (make a worker function for ActOnDeclarator())
             return IssueDeclaration( S, d );
         }
 
