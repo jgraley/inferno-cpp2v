@@ -108,7 +108,7 @@ struct Bool : Type {};
 
 struct Numeric : Type // TODO rename Numeric to Numeric, latter is more concise
 {
-    unsigned width;  // Bits, not bytes
+    shared_ptr<Expression> width;  // Bits, not bytes
 };
 
 struct Integral : Numeric {};
