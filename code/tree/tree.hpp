@@ -65,6 +65,7 @@ struct Object : Identifier
     {
         DEFAULT, 
         STATIC,
+        EXTERN,
         MEMBER,
         AUTO,
         SYMBOL // constant so no storage required

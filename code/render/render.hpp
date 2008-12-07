@@ -302,6 +302,9 @@ private:
             case Object::STATIC:
                 s += "static ";
                 break;
+            case Object::EXTERN:
+                s += "extern ";
+                break;
             case Object::AUTO:
                 s += "auto ";
                 break;
