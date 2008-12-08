@@ -1,6 +1,6 @@
-/*struct { int a; } b;
+struct { int a; } b;
 
-class Test
+class Test 
 {
 public:
     union { int i; float f; } d;
@@ -16,6 +16,14 @@ private:
     };
 };
 
+class Other
+{
+};
+
+class Sub : public Test, public Other
+{
+};
+
 // Not yet supported in clang
 //void Test::g()
 //{
@@ -28,17 +36,17 @@ enum GGFF
    C=100,
    D
 };
-*/
+
 struct { int c; } d;
 
 int main()
 {
     struct { int a; } b;
-  /*  Test t;
+    Sub t;
     t.d.i = 22;
     Test *pt = &t;
     int y = pt->f( 11 );
     y += B+D-C;
-    return (unsigned char)y;*/
+    return (unsigned char)y;
 }
 
