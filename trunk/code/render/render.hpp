@@ -162,7 +162,8 @@ private:
             return RenderType( a->element, "(" + object + "[" + RenderExpression(a->size) + "])" );
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
             return t->identifier + " " + object;
-        else if( shared_ptr<Struct> ss = dynamic_pointer_cast< Struct >(type) )
+#if 0 // Should we include the word "class" etc when referencing holders as types?
+       else if( shared_ptr<Struct> ss = dynamic_pointer_cast< Struct >(type) )
             return "struct " + ss->identifier + " " + object;
         else if( shared_ptr<Class> c = dynamic_pointer_cast< Class >(type) )
             return "class " + c->identifier + " " + object;
@@ -170,6 +171,10 @@ private:
             return "union " + u->identifier + " " + object;
         else if( shared_ptr<Enum> e = dynamic_pointer_cast< Enum >(type) )
             return "enum " + e->identifier + " " + object;
+#else
+        else if( shared_ptr<UserType> ut = dynamic_pointer_cast< UserType >(type) )
+            return ut->identifier + " " + object;
+#endif
         else
             return ERROR_UNSUPPORTED(type);
     }
@@ -290,6 +295,21 @@ private:
         TRACE("ok\n");
     }
     
+    string RenderAccess( Declaration::Access access )
+    {
+        switch( access )
+        {
+            case Declaration::PUBLIC:
+                return "public";
+            case Declaration::PRIVATE:
+                return "private";
+            case Declaration::PROTECTED:
+                return "protected";
+            default:
+                return ERROR_UNKNOWN("access spec");
+        }        
+    }
+    
     string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, Declaration::Access *access = NULL, bool showtype = true )
     {
         TRACE();
@@ -297,21 +317,7 @@ private:
         
         if( access && declaration->access != *access )
         {
-            switch( declaration->access )
-            {
-                case Declaration::PUBLIC:
-                    s += "public:\n";
-                    break;
-                case Declaration::PRIVATE:
-                    s += "private:\n";
-                    break;
-                case Declaration::PROTECTED:
-                    s += "protected:\n";
-                    break;
-                default:
-                    s += ERROR_UNKNOWN("access spec");
-                    break;    
-            }
+            s += RenderAccess( declaration->access ) + ":\n";
             *access = declaration->access;
         }
         
@@ -397,6 +403,22 @@ private:
                 return ERROR_UNSUPPORTED(declaration);
 
             s += " " + h->identifier;
+            
+            if( shared_ptr<InheritanceHolder> ih = dynamic_pointer_cast< InheritanceHolder >(declaration) )
+            {
+                if( !ih->bases.empty() )
+                {
+                    s += " : ";
+                    for( int i=0; i<ih->bases.size(); i++ )
+                    {   
+                        if( i>0 )
+                            s += ", ";
+                        shared_ptr<InheritanceHolder> bih = dynamic_pointer_cast< InheritanceHolder >(ih->bases[i]);    
+                        ASSERT( bih );
+                        s += RenderAccess( bih->access ) + " " + bih->identifier;
+                    }
+                }
+            }
             
             if( !h->incomplete )
             {

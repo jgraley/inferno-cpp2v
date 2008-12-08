@@ -127,6 +127,7 @@ private:
         clang::TargetInfo &target_info;
         stack< Sequence<Declaration> * > inferno_scope_stack;
         RCHold<Declaration, DeclTy *> hold_decl;
+        RCHold<Declaration, DeclTy *> hold_base;
         RCHold<Expression, ExprTy *> hold_expr;
         RCHold<Statement, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
@@ -870,6 +871,27 @@ private:
             return hold_stmt.ToRaw( shared_ptr<Break>( new Break ) );
         }
         
+        Declaration::Access ConvertAccess( clang::AccessSpecifier AS )
+        {
+            switch( AS )
+            {
+                case clang::AS_public:
+                    return Declaration::PUBLIC;
+                    break;
+                case clang::AS_protected:
+                    return Declaration::PROTECTED;
+                    break;
+                case clang::AS_private:
+                    return Declaration::PRIVATE;
+                    break;
+                case clang::AS_none:
+                default:
+                    ASSERT(0);
+                    return Declaration::PUBLIC;
+                    break;
+            }
+        }
+        
         virtual DeclTy *ActOnCXXMemberDeclarator(clang::Scope *S, clang::AccessSpecifier AS,
                                                  clang::Declarator &D, ExprTy *BitfieldWidth,
                                                  ExprTy *Init, DeclTy *LastInGroup) 
@@ -892,26 +914,8 @@ private:
                 od->initialiser = hold_expr.FromRaw( Init );
             }
                        
-            TRACE("as=%d\n", (unsigned)AS);
-            
-            // Fill in access specifier
-            switch( AS )
-            {
-                case clang::AS_public:
-                    d->access = Declaration::PUBLIC;
-                    break;
-                case clang::AS_protected:
-                    d->access = Declaration::PROTECTED;
-                    break;
-                case clang::AS_private:
-                    d->access = Declaration::PRIVATE;
-                    break;
-                case clang::AS_none:
-                default:
-                    ASSERT(0);
-                    break;
-            }
-            
+            d->access = ConvertAccess( AS );           
+                        
             return IssueDeclaration( S, d );
         }
 
@@ -1202,6 +1206,33 @@ private:
             return hold_expr.ToRaw( pot );                                    
         }
         
+        virtual BaseResult ActOnBaseSpecifier(DeclTy *classdecl, 
+                                              clang::SourceRange SpecifierRange,
+                                              bool Virtual, clang::AccessSpecifier Access,
+                                              TypeTy *basetype, 
+                                              clang::SourceLocation BaseLoc) 
+        {
+            shared_ptr<Type> t( hold_type.FromRaw( basetype ) );
+            shared_ptr<InheritanceHolder> ih( dynamic_pointer_cast<InheritanceHolder>(t) );
+            ASSERT( ih );
+            ih->access = ConvertAccess( Access );           
+            // TODO Virtual
+            return hold_base.ToRaw( ih );
+        }
+        
+        virtual void ActOnBaseSpecifiers(DeclTy *ClassDecl, BaseTy **Bases, 
+                                         unsigned NumBases) 
+        {
+            shared_ptr<Declaration> cd( hold_decl.FromRaw( ClassDecl ) );
+            shared_ptr<InheritanceHolder> ih( dynamic_pointer_cast<InheritanceHolder>(cd) );
+            ASSERT( ih );
+            
+            for( int i=0; i<NumBases; i++ )
+            {
+                ih->bases.push_back( hold_base.FromRaw( Bases[i] ) );  
+            }
+        }
+        
         //--------------------------------------------- unimplemented actions -----------------------------------------------     
         // Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC 
         // extensions. These all assert out immediately.
@@ -1283,15 +1314,6 @@ private:
                                                       clang::Declarator &D,
                                                       clang::SourceLocation EqualLoc,
                                                       ExprTy *AssignExprVal) {
-    ASSERT(!"Unimplemented action");
-    return 0;
-  }
-
-  virtual BaseResult ActOnBaseSpecifier(DeclTy *classdecl, 
-                                        clang::SourceRange SpecifierRange,
-                                        bool Virtual, clang::AccessSpecifier Access,
-                                        TypeTy *basetype, 
-                                        clang::SourceLocation BaseLoc) {
     ASSERT(!"Unimplemented action");
     return 0;
   }
