@@ -5,8 +5,9 @@ all : inferno.exe
 #
 # Establish required revisions of external code
 #
-LLVM_REVISION ?= 58906
-CLANG_REVISION ?= 58906
+# previous version 58906
+LLVM_REVISION ?= 60777
+CLANG_REVISION ?= 60777
 
 LLVM_URL ?= http://llvm.org/svn/llvm-project/llvm/trunk
 CLANG_URL ?= http://llvm.org/svn/llvm-project/cfe/trunk

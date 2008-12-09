@@ -7,6 +7,7 @@
 #include "llvm/ADT/APSInt.h"
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/SmallString.h"
+#include "llvm/Support/raw_ostream.h"
 
 #include "clang/Basic/FileManager.h"
 #include "clang/Basic/Diagnostic.h"
@@ -46,7 +47,8 @@ public:
     void operator()( shared_ptr<Program> program )
     {        
         clang::FileManager fm; 
-        clang::TextDiagnosticPrinter diag_printer;
+        llvm::raw_stderr_ostream errstream; // goes to stderr
+        clang::TextDiagnosticPrinter diag_printer( errstream );
         clang::Diagnostic diags( &diag_printer ); 
         clang::LangOptions opts;
         opts.CPlusPlus = 1; // TODO set based on input file extension
@@ -133,9 +135,9 @@ private:
         RCHold<Type, TypeTy *> hold_type;
         RCHold<Label, void *> hold_label;
         
-        clang::Action::TypeTy *isTypeName(const clang::IdentifierInfo &II, clang::Scope *S) 
+        clang::Action::TypeTy *isTypeName( clang::IdentifierInfo &II, clang::Scope *S, const clang::CXXScopeSpec *SS) 
         {
-            shared_ptr<Node> n = InfernoMinimalAction::isTypeNameima(II, S);
+            shared_ptr<Node> n = InfernoMinimalAction::isTypeName_IMA(II, S, SS);
             
             if(n)
             {
@@ -536,7 +538,8 @@ private:
         virtual ExprResult ActOnIdentifierExpr( clang::Scope *S, 
                                                 clang::SourceLocation Loc,
                                                 clang::IdentifierInfo &II,
-                                                bool HasTrailingLParen ) 
+                                                bool HasTrailingLParen,
+                                                const clang::CXXScopeSpec *SS = 0 ) 
         {
             shared_ptr<Node> n = InfernoMinimalAction::GetCurrentIdentifierRCPtr( II );
             TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
@@ -619,8 +622,8 @@ private:
             return hold_expr.ToRaw( o );            
         }                     
 
-        virtual ExprResult ActOnPostfixUnaryOp(clang::SourceLocation OpLoc, clang::tok::TokenKind Kind,
-                                               ExprTy *Input) 
+        virtual ExprResult ActOnPostfixUnaryOp(clang::Scope *S, clang::SourceLocation OpLoc, 
+                                               clang::tok::TokenKind Kind, ExprTy *Input) 
         {
             shared_ptr<Postfix> o(new Postfix);
             o->kind = Kind;
@@ -628,8 +631,8 @@ private:
             return hold_expr.ToRaw( o );            
         }                     
 
-        virtual ExprResult ActOnUnaryOp(clang::SourceLocation OpLoc, clang::tok::TokenKind Kind,
-                                               ExprTy *Input) 
+        virtual ExprResult ActOnUnaryOp( clang::Scope *S, clang::SourceLocation OpLoc, 
+                                         clang::tok::TokenKind Kind, ExprTy *Input) 
         {
             TRACE();
             shared_ptr<Prefix> o(new Prefix);
@@ -650,7 +653,7 @@ private:
             return hold_expr.ToRaw( o );                        
         }                     
 
-        virtual ExprResult ActOnCallExpr(ExprTy *Fn, clang::SourceLocation LParenLoc,
+        virtual ExprResult ActOnCallExpr(clang::Scope *S, ExprTy *Fn, clang::SourceLocation LParenLoc,
                                          ExprTy **Args, unsigned NumArgs,
                                          clang::SourceLocation *CommaLocs,
                                          clang::SourceLocation RParenLoc) 
@@ -905,7 +908,8 @@ private:
         }
 
         virtual DeclTy *ActOnTag(clang::Scope *S, unsigned TagType, TagKind TK,
-                                 clang::SourceLocation KWLoc, clang::IdentifierInfo *Name,
+                                 clang::SourceLocation KWLoc, const clang::CXXScopeSpec &SS,
+                                 clang::IdentifierInfo *Name,
                                  clang::SourceLocation NameLoc, clang::AttributeList *Attr) 
         {
             TRACE("Tag type %d\n", TagType);
@@ -1017,7 +1021,8 @@ private:
             return hold_expr.ToRaw( a );
         }
                 
-        virtual ExprResult ActOnArraySubscriptExpr(ExprTy *Base, clang::SourceLocation LLoc,
+        virtual ExprResult ActOnArraySubscriptExpr(clang::Scope *S,
+                                                   ExprTy *Base, clang::SourceLocation LLoc,
                                                    ExprTy *Idx, clang::SourceLocation RLoc) 
         {
             shared_ptr<Subscript> su( new Subscript );
@@ -1178,18 +1183,27 @@ private:
             inferno_scope_stack.top()->push_back( d );
             return hold_decl.ToRaw( d );
         }
-
+        
         virtual ExprResult 
-            ActOnSizeOfAlignOfTypeExpr(clang::SourceLocation OpLoc, bool isSizeof, 
-                                       clang::SourceLocation LParenLoc, TypeTy *Ty,
-                                       clang::SourceLocation RParenLoc) 
+           ActOnSizeOfAlignOfExpr( clang::SourceLocation OpLoc, bool isSizeof, bool isType,
+                                   void *TyOrEx, const clang::SourceRange &ArgRange) 
         {
-            TRACE();
-            shared_ptr<PrefixOnType> pot(new PrefixOnType);
-            pot->kind = isSizeof ? clang::tok::kw_sizeof : clang::tok::kw_alignof;
-            pot->operand = hold_type.FromRaw(Ty);
-            return hold_expr.ToRaw( pot );                                    
+            if( isType )
+            {
+                shared_ptr<PrefixOnType> pot(new PrefixOnType);
+                pot->kind = isSizeof ? clang::tok::kw_sizeof : clang::tok::kw_alignof;
+                pot->operand = hold_type.FromRaw(TyOrEx);
+                return hold_expr.ToRaw( pot );                       
+            }
+            else
+            {
+                shared_ptr<Prefix> p(new Prefix);
+                p->kind = isSizeof ? clang::tok::kw_sizeof : clang::tok::kw_alignof;
+                p->operands.push_back( hold_expr.FromRaw(TyOrEx) );
+                return hold_expr.ToRaw( p );                       
+            }
         }
+
         
         virtual BaseResult ActOnBaseSpecifier(DeclTy *classdecl, 
                                               clang::SourceRange SpecifierRange,

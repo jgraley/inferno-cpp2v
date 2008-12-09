@@ -34,10 +34,11 @@ public:
   
   /// isTypeName - This looks at the clang::IdentifierInfo::FETokenInfo field to
   /// determine whether the name is a typedef or not in this scope.
-  virtual shared_ptr<Node> isTypeNameima(const clang::IdentifierInfo &II, clang::Scope *S);
+  // _IMA because we get called back from parser
+  virtual shared_ptr<Node> isTypeName_IMA(const clang::IdentifierInfo &II, clang::Scope *S, const clang::CXXScopeSpec *SS);
 
   // Just added to get it to build TODO implement properly
-  virtual bool isCurrentClassName(const clang::IdentifierInfo& II, clang::Scope *S) { return false;  }
+  virtual bool isCurrentClassName(const clang::IdentifierInfo& II, clang::Scope *S, const clang::CXXScopeSpec *SS) { return false;  }
 
   
   /// ActOnDeclarator - If this is a typedef declarator, we modify the

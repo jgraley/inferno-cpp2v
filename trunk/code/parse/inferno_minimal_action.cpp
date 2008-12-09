@@ -59,7 +59,7 @@ void InfernoMinimalAction::ActOnTranslationUnitScope(clang::SourceLocation Loc, 
 /// determine whether the name is a type name (objc class name or typedef) or
 /// not in this scope.
 shared_ptr<Node>
-InfernoMinimalAction::isTypeNameima(const clang::IdentifierInfo &II, clang::Scope *S) {
+InfernoMinimalAction::isTypeName_IMA(const clang::IdentifierInfo &II, clang::Scope *S, const clang::CXXScopeSpec *SS) {
   if (TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>())
     if (TI->isTypeName)
       return TI->rcptr;
