@@ -320,15 +320,12 @@ private:
             s += RenderAccess( declaration->access ) + ":\n";
             *access = declaration->access;
         }
-        
-        /*char hhh[2];
-        hhh[0]='A'+(char)(declaration->access);
-        hhh[1]=0;
-        s += hhh;*/
-        
+         
+        if( declaration->is_virtual )
+            s+= "virtual "; 
+                                
         if( shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast< ObjectDeclaration >(declaration) )
-        {
-            //TODO storage class, access 
+        {                
             switch( od->object->storage )
             {
             case Object::STATIC:

@@ -73,7 +73,7 @@ clang::Action::DeclTy *
 InfernoMinimalAction::ActOnDeclarator(clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup, shared_ptr<Node> rcp) 
 {
   clang::IdentifierInfo *II = D.getIdentifier();
-  //  printf("pushing identifier \"%s\"\n", D.getIdentifier()->getName() );
+  TRACE("pushing identifier \"%s\"\n", D.getIdentifier()->getName() );
   // If there is no identifier associated with this declarator, bail out.
   if (II == 0) return 0;
   

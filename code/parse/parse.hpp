@@ -390,13 +390,13 @@ private:
             
             // Default the access specifier
             d->access = Declaration::PUBLIC; 
+            d->is_virtual = DS.isVirtualSpecified();
             
             return d;
         }
         
         // Does 2 things:
         // 1. Inserts a stored decl if there is one in decl_to_insert
-        // 2. Inserts the supplied decl into our list or returns it depending on whether we're in a function
         DeclTy *IssueDeclaration( clang::Scope *S, shared_ptr<Declaration> d )
         {
             // Did we leave a decl lying around to insert later? If so, pack it together with
@@ -442,6 +442,7 @@ private:
             shared_ptr<ParseParameterDeclaration> p(new ParseParameterDeclaration);
             p->object = CreateObjectNode( S, D );
             p->access = Declaration::PUBLIC;        
+            p->is_virtual = false;
             p->initialiser = shared_ptr<Expression>(); // might fill in later if init
             p->clang_identifier = D.getIdentifier(); // allow us to re-register the object
             TRACE("aopd %s %p %p\n", 0, p->object.get(), p.get() );
@@ -482,29 +483,13 @@ private:
             }
         }
 
-        /*
-        Note: the default implementation of ActOnStartOfFunctionDef() appears in
-        InfernoMinimalAction and can cause spurious ActOnDeclarator() calls if we always
-        call through. Therefore we don't and instead just call explicitly implemented
-        functions in InfernoMinimalAction where required.
-        TODO consider removing this entirely - clang::Action base class will then
-             invoke ActOnDeclaration() followed by ActOnStartOfFunctionDef(DeclTy*)
-             and this might be correct.
-        */
+        // JSG this is like the defailt in Actions, except it passes the parent of the function
+        // body to ActOnDeclarator, since the function decl itself is not inside its own body.
         virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D) 
         {
-            TRACE();
-            shared_ptr<ObjectDeclaration> p(new ObjectDeclaration);
-            clang::Scope *GlobalScope = FnBodyScope->getParent();
-            p->object = CreateObjectNode( GlobalScope, D );
-            p->access = Declaration::PUBLIC;        // TODO not sure how to get access spec for this     
-            shared_ptr<Function> fp = dynamic_pointer_cast<Function>( p->object->type );
-            AddParamsToScope( fp, FnBodyScope );
-            
-            inferno_scope_stack.top()->push_back( p );
-
-            inferno_scope_stack.push( new Sequence<Declaration> ); 
-            return hold_decl.ToRaw( p );     
+            // Default to ActOnDeclarator.
+            return ActOnStartOfFunctionDef(FnBodyScope,
+                                           ActOnDeclarator(FnBodyScope->getParent(), D, 0));
         }
 
         virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, DeclTy *D) 
@@ -1216,7 +1201,7 @@ private:
             shared_ptr<InheritanceHolder> ih( dynamic_pointer_cast<InheritanceHolder>(t) );
             ASSERT( ih );
             ih->access = ConvertAccess( Access );           
-            // TODO Virtual
+            ih->is_virtual = Virtual;
             return hold_base.ToRaw( ih );
         }
         
