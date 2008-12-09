@@ -32,6 +32,7 @@ struct Declaration : Statement
         PRIVATE,
         PROTECTED
     } access;
+    bool is_virtual;
 };
 
 struct Type : virtual Node {};
