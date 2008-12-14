@@ -672,7 +672,7 @@ private:
             return hold_type.ToRaw( t );
         }
         
-        void PushStmt( shared_ptr<Scope> s, StmtTy *stmt )
+        void PushStmt( shared_ptr<Compound> s, StmtTy *stmt )
         {
             shared_ptr<Statement> st = hold_stmt.FromRaw(stmt);
             
@@ -683,7 +683,7 @@ private:
                 return;
             }
             
-            s->push_back( st );
+            s->statements.push_back( st );
                 
             // Flatten the "sub" statements of labels etc
             if( shared_ptr<ParseLabelMarker> plm = dynamic_pointer_cast<ParseLabelMarker>( st ) )
@@ -698,7 +698,7 @@ private:
                                              StmtTy **Elts, unsigned NumElts,
                                              bool isStmtExpr) 
         {
-            shared_ptr<Scope> s(new Scope);
+            shared_ptr<Compound> s(new Compound);
 
             for( int i=0; i<NumElts; i++ )
                 PushStmt( s, Elts[i] );
