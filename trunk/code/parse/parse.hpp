@@ -884,6 +884,7 @@ private:
                                                  clang::Declarator &D, ExprTy *BitfieldWidth,
                                                  ExprTy *Init, DeclTy *LastInGroup) 
         {
+            const clang::DeclSpec &DS = D.getDeclSpec();
             TRACE("Member %p\n", Init);
             shared_ptr<Declaration> d = CreateDelcaration( S, D );
             shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast<ObjectDeclaration>(d);
@@ -892,7 +893,7 @@ private:
             {
                 ASSERT( od );
                 shared_ptr<Numeric> n( dynamic_pointer_cast<Numeric>( od->object->type ) );
-                ASSERT( n );
+                ASSERT( n && "cannot specify width of non-numeric type" );
                 n->width = hold_expr.FromRaw(BitfieldWidth);
             }
             
@@ -903,6 +904,7 @@ private:
             }
                        
             d->access = ConvertAccess( AS );           
+            d->is_virtual = DS.isVirtualSpecified();
                         
             return IssueDeclaration( S, d );
         }
@@ -950,6 +952,7 @@ private:
             }
             
             h->access = Declaration::PUBLIC; // must make all holder type decls public since clang doesnt seem to give us an AS
+            h->is_virtual = false;
             h->incomplete = true;
             
             //TODO should we do something with TagKind? Maybe needed for render.
@@ -1122,6 +1125,7 @@ private:
             o->type = CreateIntegralType( 32, false );
             shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
             od->access = Declaration::PUBLIC;
+            od->is_virtual = false;
             od->object = o;
             if( Val )
             {

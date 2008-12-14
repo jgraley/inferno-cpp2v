@@ -40,6 +40,9 @@ struct Type : virtual Node {};
 struct Identifier
 {
     string identifier;
+    shared_ptr<Identifier> nested; // for foo::bar, this points to foo
+    // nested==NULL means rooted in current scope; nested points to ""
+    // means global scope (ie ::bar)
 };
 
 // A type that the user has created, and hence has a name. 
