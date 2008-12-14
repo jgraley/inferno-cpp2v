@@ -13,12 +13,24 @@
 template<typename ELEMENT>
 struct Sequence : deque< shared_ptr<ELEMENT> > {};                   
 
+//////////////////////////// Underlying Base Nodes ////////////////////////////
+
 struct Node
 {               
     virtual ~Node(){}  // be a virtual hierarchy
     // Node must be inherited virtually, to allow MI diamonds 
     // without making Node ambiguous
 };
+
+struct Identifier
+{
+    string identifier;
+    shared_ptr<Identifier> nested; // for foo::bar, this points to foo
+    // nested==NULL means rooted in current scope; nested points to ""
+    // means global scope (ie ::bar)
+};
+
+struct Type : virtual Node {};
 
 struct Statement : virtual Node {};
 
@@ -34,32 +46,6 @@ struct Declaration : Statement
     } access;
     bool is_virtual;
 };
-
-struct Type : virtual Node {};
-
-struct Identifier
-{
-    string identifier;
-    shared_ptr<Identifier> nested; // for foo::bar, this points to foo
-    // nested==NULL means rooted in current scope; nested points to ""
-    // means global scope (ie ::bar)
-};
-
-// A type that the user has created, and hence has a name. 
-// These can be linked directly from a Sequence<> to indicate 
-// their declaration (no seperate declaration node required).
-struct UserType : Type,
-                  Identifier,
-                  Declaration {};
-
-struct Typedef : UserType
-{
-    shared_ptr<Type> type;
-}; 
-
-// TODO consider making this an object, STATIC and void * type
-struct Label : Identifier,
-               Expression {}; 
 
 // Note that an object can be a function instance (ie the target
 // of a function pointer) as well as a class instance or variable.
@@ -79,21 +65,29 @@ struct Object : Identifier,
     shared_ptr<Type> type;
 };
 
-struct Compound : Expression 
-{
-    Sequence<Statement> statements;
-};                   
-
-struct InitCompound : Compound
-{
-    Sequence<Statement>  initialisers;
-};                   
-
 struct ObjectDeclaration : Declaration
 {
     shared_ptr<Object> object; 
     shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
+
+struct Program : Sequence<Declaration>
+{
+};
+
+//////////////////////////// Types ////////////////////////////
+
+// A type that the user has created, and hence has a name. 
+// These can be linked directly from a Sequence<> to indicate 
+// their declaration (no seperate declaration node required).
+struct UserType : Type,
+                  Identifier,
+                  Declaration {};
+
+struct Typedef : UserType
+{
+    shared_ptr<Type> type;
+}; 
 
 // Subroutine like in assembler, no params or return.
 // The type refers to the interface as seen by caller
@@ -124,10 +118,6 @@ struct Reference : Type // TODO could ref derive from ptr?
     shared_ptr<Type> destination;
 };
 
-struct Program : Sequence<Declaration>
-{
-};
-
 struct Void : Type {};
 
 struct Bool : Type {};
@@ -143,13 +133,58 @@ struct Signed : Integral {};
 
 struct Unsigned : Integral {};
 
+struct Floating : Numeric {}; // Note width determines float vs double 
+
+struct Holder : UserType
+{
+    Sequence<Declaration> members;
+    
+    // Where eg struct foo; is used we should create seperate nodes for
+    // the incomplete and complete types. This is so that mutually 
+    // referencing structs don't create a loop in the tree.
+    bool incomplete; 
+};
+
+struct Union : Holder {};
+
+struct InheritanceHolder : Holder
+{
+    Sequence<Declaration> bases; // these have empty identifier and NULL initialiser
+};
+
+struct Struct : InheritanceHolder {};
+
+struct Class : InheritanceHolder {};
+
+struct Array : Type
+{
+    shared_ptr<Type> element;
+    shared_ptr<Expression> size; // NULL if undefined
+};
+
+struct Enum : Holder {};
+
+//////////////////////////// Expressions ////////////////////////////
+
+// TODO consider making this an object, STATIC and void * type
+struct Label : Identifier,
+               Expression {}; 
+
+struct Compound : Expression 
+{
+    Sequence<Statement> statements;
+};                   
+
+struct InitCompound : Compound
+{
+    Sequence<Statement>  initialisers;
+};                   
+
 struct Operator : Expression
 {
     Sequence<Expression> operands;
     clang::tok::TokenKind kind;
 };
-
-struct Floating : Numeric {}; // Note width determines float vs double 
 
 struct Prefix : Operator {};  // 1 operand (eg "++i" or "sizeof(i)")
 
@@ -174,11 +209,6 @@ struct ConditionalOperator : Expression // eg ?:
 struct Aggregate : Expression
 {
     Sequence<Expression> elements;
-};
-
-struct Return : Statement
-{
-    shared_ptr<Expression> return_value;
 };
 
 struct Call : Expression
@@ -206,6 +236,31 @@ struct String : Expression
 };
 
 struct This : Expression {};
+
+struct Subscript : Expression
+{
+    shared_ptr<Expression> base;
+    shared_ptr<Expression> index;
+};
+
+struct Access : Expression
+{
+    shared_ptr<Expression> base; 
+    shared_ptr<Object> member;    
+};
+
+struct Cast : Expression
+{
+    shared_ptr<Expression> operand;
+    shared_ptr<Type> type;        
+};
+
+//////////////////////////// Statements ////////////////////////////
+
+struct Return : Statement
+{
+    shared_ptr<Expression> return_value;
+};
 
 struct LabelMarker : Statement
 {
@@ -270,53 +325,6 @@ struct Default : SwitchMarker {};
 struct Continue : Statement {};
 
 struct Break : Statement {};
-
-struct Holder : UserType
-{
-    Sequence<Declaration> members;
-    
-    // Where eg struct foo; is used we should create seperate nodes for
-    // the incomplete and complete types. This is so that mutually 
-    // referencing structs don't create a loop in the tree.
-    bool incomplete; 
-};
-
-struct Union : Holder {};
-
-struct InheritanceHolder : Holder
-{
-    Sequence<Declaration> bases; // these have empty identifier and NULL initialiser
-};
-
-struct Struct : InheritanceHolder {};
-
-struct Class : InheritanceHolder {};
-
-struct Array : Type
-{
-    shared_ptr<Type> element;
-    shared_ptr<Expression> size; // NULL if undefined
-};
-
-struct Subscript : Expression
-{
-    shared_ptr<Expression> base;
-    shared_ptr<Expression> index;
-};
-
-struct Access : Expression
-{
-    shared_ptr<Expression> base; 
-    shared_ptr<Object> member;    
-};
-
-struct Enum : Holder {};
-
-struct Cast : Expression
-{
-    shared_ptr<Expression> operand;
-    shared_ptr<Type> type;        
-};
 
 struct Nop : Statement {};
 
