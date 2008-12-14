@@ -79,8 +79,15 @@ struct Object : Identifier,
     shared_ptr<Type> type;
 };
 
-struct Scope : Expression,
-               Sequence<Statement> {};                   
+struct Compound : Expression 
+{
+    Sequence<Statement> statements;
+};                   
+
+struct InitCompound : Compound
+{
+    Sequence<Statement>  initialisers;
+};                   
 
 struct ObjectDeclaration : Declaration
 {
@@ -88,11 +95,24 @@ struct ObjectDeclaration : Declaration
     shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
-struct Function : Type
+// Subroutine like in assembler, no params or return.
+// The type refers to the interface as seen by caller
+struct Subroutine : Type {};
+
+// Like in pascal etc, params but no return value
+struct Procedure : Subroutine
 {
-    shared_ptr<Type> return_type;
     Sequence<ObjectDeclaration> parameters;
 };
+
+struct Function : Procedure
+{
+    shared_ptr<Type> return_type;
+};
+
+struct Constructor : Procedure {};
+
+struct Destructor : Subroutine {};
 
 struct Pointer : Type
 {

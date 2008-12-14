@@ -267,10 +267,10 @@ private:
                    RenderExpression( a->base, true ) + "." +
                    RenderIdentifier( a->member ) +
                    after;
-        else if( shared_ptr<Scope> o = dynamic_pointer_cast< Scope >(expression) )
+        else if( shared_ptr<Compound> c = dynamic_pointer_cast< Compound >(expression) )
             return before + 
                    "{\n" + 
-                   RenderSequence(*o, ";\n", true) +
+                   RenderSequence(c->statements, ";\n", true) +
                    "}\n" +
                    after;
         else if( shared_ptr<Cast> c = dynamic_pointer_cast< Cast >(expression) )
@@ -353,7 +353,7 @@ private:
                 
             if(od->initialiser)
             {
-                bool function_definition = !!dynamic_pointer_cast<Scope>(od->initialiser);
+                bool function_definition = !!dynamic_pointer_cast<Compound>(od->initialiser);
                 if( function_definition )
                     s += "\n";
                 else
@@ -440,8 +440,8 @@ private:
             return sep;            
         else if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(statement) )
             return RenderDeclaration( d, sep );
-        else if( shared_ptr<Scope> sc = dynamic_pointer_cast< Scope >(statement) ) // Never put ; after a scope - you'd get {blah};
-            return RenderExpression(shared_ptr<Expression>(sc));
+        else if( shared_ptr<Compound> c = dynamic_pointer_cast< Compound >(statement) ) // Never put ; after a scope - you'd get {blah};
+            return RenderExpression(c);
         else if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(statement) )
             return RenderExpression(e) + sep;
         else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(statement) )
