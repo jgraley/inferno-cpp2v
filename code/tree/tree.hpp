@@ -37,30 +37,32 @@ struct Declaration : Statement
 
 struct Type : virtual Node {};
 
-struct Identifier : Expression
+struct Identifier
 {
     string identifier;
 };
 
 // A type that the user has created, and hence has a name. 
-// These can be linked directly from a delaration list to 
-// indicate their declaration (no seperate declaration node required).
+// These can be linked directly from a Sequence<> to indicate 
+// their declaration (no seperate declaration node required).
 struct UserType : Type,
-                  Declaration
-{
-    string identifier;
-};
+                  Identifier,
+                  Declaration {};
 
 struct Typedef : UserType
 {
     shared_ptr<Type> type;
 }; 
 
-struct Label : Identifier {};
+// TODO consider making this an object, STATIC and void * type
+struct Label : Identifier,
+               Expression {}; 
 
 // Note that an object can be a function instance (ie the target
-// of a function pointer) as well as a class instance or variable
-struct Object : Identifier
+// of a function pointer) as well as a class instance or variable.
+// If it is a function, its value is the function implementation.
+struct Object : Identifier,
+                Expression
 {
     enum Storage
     {
@@ -190,7 +192,7 @@ struct LabelMarker : Statement
 struct Goto : Statement
 {
     // Dest is an expression for goto-a-variable support.
-    // Ordinary gotos will have IdentifierExpression here.
+    // Ordinary gotos will have Label here.
     shared_ptr<Expression> destination;
 };
 

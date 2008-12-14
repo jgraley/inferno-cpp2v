@@ -543,9 +543,9 @@ private:
         {
             shared_ptr<Node> n = InfernoMinimalAction::GetCurrentIdentifierRCPtr( II );
             TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
-            shared_ptr<Identifier> i = dynamic_pointer_cast<Identifier>( n );
-            ASSERT( i );
-            return hold_expr.ToRaw( i );            
+            shared_ptr<Object> o = dynamic_pointer_cast<Object>( n );
+            ASSERT( o );
+            return hold_expr.ToRaw( o );            
         }                                   
         
         shared_ptr<NumericConstant> CreateNumericConstant( unsigned value )        
