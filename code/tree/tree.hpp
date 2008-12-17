@@ -21,13 +21,10 @@ struct Node
     // Node must be inherited virtually, to allow MI diamonds 
     // without making Node ambiguous
 };
-
+ 
 struct Identifier
 {
     string identifier;
-    shared_ptr<Identifier> nested; // for foo::bar, this points to foo
-    // nested==NULL means rooted in current scope; nested points to ""
-    // means global scope (ie ::bar)
 };
 
 struct Type : virtual Node {};
@@ -262,7 +259,7 @@ struct Return : Statement
     shared_ptr<Expression> return_value;
 };
 
-struct LabelMarker : Statement
+struct LabelTarget : Statement
 {
     shared_ptr<Label> label; // TODO these should be function scope
 };
@@ -310,9 +307,9 @@ struct Switch : Statement
     shared_ptr<Statement> body;
 };
 
-struct SwitchMarker : Statement {};
+struct SwitchTarget : Statement {};
 
-struct Case : SwitchMarker 
+struct Case : SwitchTarget 
 {
     // support gcc extension of case x..y:
     // in other cases, value_lo==value_hi
@@ -320,7 +317,7 @@ struct Case : SwitchMarker
     shared_ptr<Expression> value_hi; // inclusive
 };
 
-struct Default : SwitchMarker {};
+struct Default : SwitchTarget {};
 
 struct Continue : Statement {};
 

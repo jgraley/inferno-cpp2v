@@ -446,7 +446,7 @@ private:
             return RenderExpression(e) + sep;
         else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(statement) )
             return "return " + RenderExpression(es->return_value) + sep;
-        else if( shared_ptr<LabelMarker> l = dynamic_pointer_cast<LabelMarker>(statement) )
+        else if( shared_ptr<LabelTarget> l = dynamic_pointer_cast<LabelTarget>(statement) )
             return RenderIdentifier(l->label) + ":\n"; // no ; after a label
         else if( shared_ptr<Goto> g = dynamic_pointer_cast<Goto>(statement) )
         {

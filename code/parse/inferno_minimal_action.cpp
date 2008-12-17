@@ -23,10 +23,8 @@
 /// defined.
 struct TypeNameInfo {
   TypeNameInfo *Prev;
-  bool isTypeName;
   shared_ptr<Node> rcptr;
-  TypeNameInfo(bool istypename, TypeNameInfo *prev, shared_ptr<Node> rcp) {
-    isTypeName = istypename;
+  TypeNameInfo(TypeNameInfo *prev, shared_ptr<Node> rcp) {
     Prev = prev;
     rcptr = rcp;
   }
@@ -55,16 +53,6 @@ void InfernoMinimalAction::ActOnTranslationUnitScope(clang::SourceLocation Loc, 
   */
 }
 
-/// isTypeName - This looks at the clang::IdentifierInfo::FETokenInfo field to
-/// determine whether the name is a type name (objc class name or typedef) or
-/// not in this scope.
-shared_ptr<Node>
-InfernoMinimalAction::isTypeName_IMA(const clang::IdentifierInfo &II, clang::Scope *S, const clang::CXXScopeSpec *SS) {
-  if (TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>())
-    if (TI->isTypeName)
-      return TI->rcptr;
-  return shared_ptr<Node>();
-}
 
 /// ActOnDeclarator - If this is a typedef declarator, we modify the
 /// clang::IdentifierInfo::FETokenInfo field to keep track of this fact, until S is
@@ -77,15 +65,14 @@ InfernoMinimalAction::ActOnDeclarator(clang::Scope *S, clang::Declarator &D, Dec
   // If there is no identifier associated with this declarator, bail out.
   if (II == 0) return 0;
   
-  bool isTypeName = D.getDeclSpec().getStorageClassSpec() == clang::DeclSpec::SCS_typedef;
-  AddNakedIdentifier(S, II, rcp, isTypeName); 
+  AddNakedIdentifier(S, II, rcp); 
   return 0;
 }
 
-void InfernoMinimalAction::AddNakedIdentifier(clang::Scope *S, clang::IdentifierInfo *II, shared_ptr<Node> rcp, bool istype) 
+void InfernoMinimalAction::AddNakedIdentifier(clang::Scope *S, clang::IdentifierInfo *II, shared_ptr<Node> rcp) 
 {
   TypeNameInfo *weCurrentlyHaveTypeInfo = II->getFETokenInfo<TypeNameInfo>();
-  TypeNameInfo *TI = new TypeNameInfo(istype, weCurrentlyHaveTypeInfo, rcp);
+  TypeNameInfo *TI = new TypeNameInfo(weCurrentlyHaveTypeInfo, rcp);
   II->setFETokenInfo(TI);
   
   // Remember that this needs to be removed when the scope is popped.
@@ -104,7 +91,7 @@ InfernoMinimalAction::ActOnStartClassInterface(clang::SourceLocation AtInterface
                                         AttributeList *AttrList,
                                         shared_ptr<Node> rcp) {
   TypeNameInfo *TI =
-    new TypeNameInfo(1, ClassName->getFETokenInfo<TypeNameInfo>(), rcp);
+    new TypeNameInfo(ClassName->getFETokenInfo<TypeNameInfo>(), rcp);
 
   ClassName->setFETokenInfo(TI);
   return 0;
@@ -119,7 +106,7 @@ InfernoMinimalAction::ActOnForwardClassDeclaration(clang::SourceLocation AtClass
   for (unsigned i = 0; i != NumElts; ++i) 
   {
     TypeNameInfo *TI =
-      new TypeNameInfo(1, IdentList[i]->getFETokenInfo<TypeNameInfo>(), rcp);
+      new TypeNameInfo(IdentList[i]->getFETokenInfo<TypeNameInfo>(), rcp);
 
     IdentList[i]->setFETokenInfo(TI);
   
@@ -152,6 +139,15 @@ shared_ptr<Node> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const clang::I
     if( !TI )
         printf("Node has no info: \"%s\"\n", II.getName());
     ASSERT(TI && "This decl didn't get pushed??"); // could remove this
+    if( TI )
+        return TI->rcptr;
+    else
+        return shared_ptr<Node>();
+}
+
+shared_ptr<Node> InfernoMinimalAction::TryGetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II )
+{
+    TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>();
     if( TI )
         return TI->rcptr;
     else

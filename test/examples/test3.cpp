@@ -14,6 +14,15 @@ int main()
     for( int as=0; as<3; as++ )
         y++;
     
+    {
+        int y; // this "y" should be a seperate variable due to scope
+        y=98761;        
+    }
+    {
+        struct y {};
+        y x;
+    }
+    
     while( x > 3 )
     {
         x--;

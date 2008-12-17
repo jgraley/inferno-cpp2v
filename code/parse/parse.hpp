@@ -106,7 +106,7 @@ private:
         };
         
         // Extend tree so we can insert sub statements at the same level as the label
-        struct ParseLabelMarker : LabelMarker
+        struct ParseLabelTarget : LabelTarget
         {
             StmtTy *sub;
         };
@@ -137,13 +137,12 @@ private:
         
         clang::Action::TypeTy *isTypeName( clang::IdentifierInfo &II, clang::Scope *S, const clang::CXXScopeSpec *SS) 
         {
-            shared_ptr<Node> n = InfernoMinimalAction::isTypeName_IMA(II, S, SS);
-            
+            shared_ptr<Node> n = InfernoMinimalAction::TryGetCurrentIdentifierRCPtr( II );                              
             if(n)
             {
                 shared_ptr<Type> t = dynamic_pointer_cast<UserType>( n );
-                ASSERT( t ); // If the node is not a type, n should be NULL
-                return hold_type.ToRaw(t);
+                if(t)
+                    return hold_type.ToRaw(t);
             }
             
             return 0;
@@ -481,7 +480,7 @@ private:
                 shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( fp->parameters[i] );                
                 ASSERT(ppd);
                 if( ppd->clang_identifier )
-                    InfernoMinimalAction::AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->object, false);
+                    InfernoMinimalAction::AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->object);
             }
         }
 
@@ -686,7 +685,7 @@ private:
             s->statements.push_back( st );
                 
             // Flatten the "sub" statements of labels etc
-            if( shared_ptr<ParseLabelMarker> plm = dynamic_pointer_cast<ParseLabelMarker>( st ) )
+            if( shared_ptr<ParseLabelTarget> plm = dynamic_pointer_cast<ParseLabelTarget>( st ) )
                 PushStmt( s, plm->sub );   
             else if( shared_ptr<ParseCase> pc = dynamic_pointer_cast<ParseCase>( st ) )
                 PushStmt( s, pc->sub );   
@@ -719,7 +718,7 @@ private:
             if( !(II->getFETokenInfo<void *>()) )                        
                 II->setFETokenInfo( hold_label.ToRaw( CreateLabelNode( II ) ) );
             
-            shared_ptr<ParseLabelMarker> l( new ParseLabelMarker );
+            shared_ptr<ParseLabelTarget> l( new ParseLabelTarget );
             l->label = hold_label.FromRaw( II->getFETokenInfo<void *>() );
             l->sub = SubStmt;
             return hold_stmt.ToRaw( l );
@@ -940,7 +939,7 @@ private:
             if(Name)
             {
                 h->identifier = Name->getName();
-                (void)InfernoMinimalAction::AddNakedIdentifier(S, Name, h, true); 
+                (void)InfernoMinimalAction::AddNakedIdentifier(S, Name, h); 
             }
             else
             {
@@ -1154,7 +1153,7 @@ private:
                 ic->value = i;
                 od->initialiser = ic;
             }
-            (void)InfernoMinimalAction::AddNakedIdentifier(S, Id, o, false); 
+            (void)InfernoMinimalAction::AddNakedIdentifier(S, Id, o); 
             return hold_decl.ToRaw( od );
         }
         
