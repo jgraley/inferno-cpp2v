@@ -32,11 +32,6 @@ class InfernoMinimalAction : public clang::Action {
 public:
   InfernoMinimalAction(clang::IdentifierTable &IT) : Idents(IT) {}
   
-  /// isTypeName - This looks at the clang::IdentifierInfo::FETokenInfo field to
-  /// determine whether the name is a typedef or not in this scope.
-  // _IMA because we get called back from parser
-  virtual shared_ptr<Node> isTypeName_IMA(const clang::IdentifierInfo &II, clang::Scope *S, const clang::CXXScopeSpec *SS);
-
   // Just added to get it to build TODO implement properly
   virtual bool isCurrentClassName(const clang::IdentifierInfo& II, clang::Scope *S, const clang::CXXScopeSpec *SS) { return false;  }
 
@@ -46,7 +41,7 @@ public:
   /// popped.
   virtual DeclTy *ActOnDeclarator(clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup, shared_ptr<Node> rcp);
   
-  void AddNakedIdentifier(clang::Scope *S, clang::IdentifierInfo *II, shared_ptr<Node> rcp, bool istype);  
+  void AddNakedIdentifier(clang::Scope *S, clang::IdentifierInfo *II, shared_ptr<Node> rcp);  
   
   /// ActOnPopScope - When a scope is popped, if any typedefs are now 
   /// out-of-scope, they are removed from the clang::IdentifierInfo::FETokenInfo field.
@@ -72,6 +67,9 @@ public:
   // Extract the shared_ptr for the identifier. Where the identifier is differently declared
   // in nested scopes, we get the one that applies currently (which is the innermost one)  
   shared_ptr<Node> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II );                                         
+  
+  // Version that just results NULL if identifier has not been added yet
+  shared_ptr<Node> InfernoMinimalAction::TryGetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II );                                         
 };
 
 #endif
