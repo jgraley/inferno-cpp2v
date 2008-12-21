@@ -1,4 +1,3 @@
-
 #ifndef IDENTIFIER_TRACKER
 #define IDENTIFIER_TRACKER
 
@@ -6,16 +5,16 @@
 #include "common/refcount.hpp"
 #include "tree/tree.hpp"
 
-  // Semantic.
-  class DeclSpec;
-  class ObjCDeclSpec;
-  class clang::Declarator;
-  class AttributeList;
-  struct FieldDeclarator;
-  // Parse.
-  class Selector;
-  // Lex.
-  class Token;
+// Semantic.
+class DeclSpec;
+class ObjCDeclSpec;
+class clang::Declarator;
+class AttributeList;
+struct FieldDeclarator;
+// Parse.
+class Selector;
+// Lex.
+class Token;
 
 /// IdentifierTracker - Minimal actions are used by light-weight clients of the
 /// parser that do not need name resolution or significant semantic analysis to
@@ -25,11 +24,7 @@
 /// quickly.
 class IdentifierTracker
 {
-  clang::IdentifierTable &Idents;
-
 public:
-  IdentifierTracker(clang::IdentifierTable &IT) : Idents(IT) {}
-  
   /// Add - If this is a typedef declarator, we modify the
   /// clang::IdentifierInfo::FETokenInfo field to keep track of this fact, until S is
   /// popped.
@@ -42,10 +37,10 @@ public:
   
   // Extract the shared_ptr for the identifier. Where the identifier is differently declared
   // in nested scopes, we get the one that applies currently (which is the innermost one)  
-  shared_ptr<Node> GetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II );                                         
+  shared_ptr<Node> Get( const clang::IdentifierInfo &II );                                         
   
   // Version that just results NULL if identifier has not been added yet
-  shared_ptr<Node> TryGetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II );                                         
+  shared_ptr<Node> TryGet( const clang::IdentifierInfo &II );                                         
 };
 
 #endif

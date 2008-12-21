@@ -60,19 +60,14 @@ void IdentifierTracker::PopScope(clang::Scope *S)
   }
 }
 
-shared_ptr<Node> IdentifierTracker::GetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II )
+shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo &II )
 {
-    TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>();
-    if( !TI )
-        printf("Node has no info: \"%s\"\n", II.getName());
-    ASSERT(TI && "This decl didn't get pushed??"); // could remove this
-    if( TI )
-        return TI->rcptr;
-    else
-        return shared_ptr<Node>();
+    shared_ptr<Node> n = TryGet( II );
+    ASSERT(n.get() && "This decl didn't get pushed??"); // could remove this
+    return n;
 }
 
-shared_ptr<Node> IdentifierTracker::TryGetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II )
+shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo &II )
 {
     TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>();
     if( TI )
