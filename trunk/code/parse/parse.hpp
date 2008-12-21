@@ -329,6 +329,7 @@ private:
             if(ID)
             {
                 o->identifier = ID->getName();
+                ident_track.Add( S, ID, o );     
                 TRACE("object %s\n", o->identifier.c_str());
             }
             else
@@ -357,7 +358,6 @@ private:
             
             o->type = CreateTypeNode( D );
             
-            ident_track.Add( S, D, o );     
             return o;
         }
 
@@ -366,10 +366,12 @@ private:
             shared_ptr<Typedef> t(new Typedef);
             clang::IdentifierInfo *ID = D.getIdentifier();
             if(ID)
+            {
                 t->identifier = ID->getName();
+                ident_track.Add( S, ID, t ); 
+            }
             t->type = CreateTypeNode( D );
-
-            ident_track.Add( S, D, t );  
+ 
             TRACE("%s %p %p\n", ID->getName(), t.get(), ID );            
             return t;
         }
@@ -951,7 +953,7 @@ private:
             if(Name)
             {
                 h->identifier = Name->getName();
-                (void)ident_track.Add(S, Name, h); 
+                ident_track.Add(S, Name, h); 
             }
             else
             {
@@ -1165,7 +1167,7 @@ private:
                 ic->value = i;
                 od->initialiser = ic;
             }
-            (void)ident_track.Add(S, Id, o); 
+            ident_track.Add(S, Id, o); 
             return hold_decl.ToRaw( od );
         }
         
