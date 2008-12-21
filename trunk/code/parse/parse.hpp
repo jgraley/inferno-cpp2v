@@ -85,8 +85,7 @@ private:
     public:
         InfernoAction(shared_ptr<Program> p, clang::IdentifierTable &IT, clang::Preprocessor &pp, clang::TargetInfo &T) : 
             preprocessor(pp),
-            target_info(T),
-            ident_track(IT)
+            target_info(T)
         {
             inferno_scope_stack.push( &*p );
         }
@@ -139,7 +138,7 @@ private:
         
         clang::Action::TypeTy *isTypeName( clang::IdentifierInfo &II, clang::Scope *S, const clang::CXXScopeSpec *SS) 
         {
-            shared_ptr<Node> n = ident_track.TryGetCurrentIdentifierRCPtr( II );                              
+            shared_ptr<Node> n = ident_track.TryGet( II );                              
             if(n)
             {
                 shared_ptr<Type> t = dynamic_pointer_cast<UserType>( n );
@@ -553,7 +552,7 @@ private:
                                                 bool HasTrailingLParen,
                                                 const clang::CXXScopeSpec *SS = 0 ) 
         {
-            shared_ptr<Node> n = ident_track.GetCurrentIdentifierRCPtr( II );
+            shared_ptr<Node> n = ident_track.Get( II );
             TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
             shared_ptr<Object> o = dynamic_pointer_cast<Object>( n );
             ASSERT( o );
