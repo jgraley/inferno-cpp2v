@@ -6,7 +6,7 @@
 #include "identifier_tracker.hpp"
 
 typedef stack< shared_ptr<Node> > Identifiers;
-
+/*
 void IdentifierTracker::Add(clang::Scope *S, clang::Declarator &D, shared_ptr<Node> rcp) 
 {
   clang::IdentifierInfo *II = D.getIdentifier();
@@ -18,7 +18,7 @@ void IdentifierTracker::Add(clang::Scope *S, clang::Declarator &D, shared_ptr<No
   
   Add(S, II, rcp);
 }
-  
+  */
 void IdentifierTracker::Add(clang::Scope *S, clang::IdentifierInfo *II, shared_ptr<Node> rcp) 
 {
   Identifiers *ti = II->getFETokenInfo<Identifiers>();

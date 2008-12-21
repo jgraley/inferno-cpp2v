@@ -28,7 +28,7 @@ public:
   /// Add - If this is a typedef declarator, we modify the
   /// clang::IdentifierInfo::FETokenInfo field to keep track of this fact, until S is
   /// popped.
-  void Add(clang::Scope *S, clang::Declarator &D,      shared_ptr<Node> rcp);
+  //void Add(clang::Scope *S, clang::Declarator &D,      shared_ptr<Node> rcp);
   void Add(clang::Scope *S, clang::IdentifierInfo *II, shared_ptr<Node> rcp);  
   
   /// ActOnPopScope - When a scope is popped, if any typedefs are now 
