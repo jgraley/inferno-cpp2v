@@ -32,7 +32,7 @@
 #include "common/trace.hpp"
 #include "common/type_info.hpp"
 
-#include "inferno_minimal_action.hpp"
+#include "identifier_tracker.hpp"
 
 #define INFERNO_TRIPLE "arm-linux" 
 
@@ -80,13 +80,13 @@ public:
 private:
     string infile;
     
-    class InfernoAction : public InfernoMinimalAction
+    class InfernoAction : public clang::Action
     {
     public:
         InfernoAction(shared_ptr<Program> p, clang::IdentifierTable &IT, clang::Preprocessor &pp, clang::TargetInfo &T) : 
-            InfernoMinimalAction(IT),
             preprocessor(pp),
-            target_info(T)
+            target_info(T),
+            ident_track(IT)
         {
             inferno_scope_stack.push( &*p );
         }
@@ -127,6 +127,7 @@ private:
     
         clang::Preprocessor &preprocessor;
         clang::TargetInfo &target_info;
+        
         stack< Sequence<Declaration> * > inferno_scope_stack;
         RCHold<Declaration, DeclTy *> hold_decl;
         RCHold<Declaration, DeclTy *> hold_base;
@@ -134,10 +135,11 @@ private:
         RCHold<Statement, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
         RCHold<Label, void *> hold_label;
+        IdentifierTracker ident_track;
         
         clang::Action::TypeTy *isTypeName( clang::IdentifierInfo &II, clang::Scope *S, const clang::CXXScopeSpec *SS) 
         {
-            shared_ptr<Node> n = InfernoMinimalAction::TryGetCurrentIdentifierRCPtr( II );                              
+            shared_ptr<Node> n = ident_track.TryGetCurrentIdentifierRCPtr( II );                              
             if(n)
             {
                 shared_ptr<Type> t = dynamic_pointer_cast<UserType>( n );
@@ -148,6 +150,22 @@ private:
             return 0;
         }
         
+        // Just added to get it to build TODO implement properly
+        virtual bool isCurrentClassName(const clang::IdentifierInfo& II, clang::Scope *S, const clang::CXXScopeSpec *SS) 
+        { 
+            return false;  //TODO
+        }
+
+        virtual void ActOnPopScope(clang::SourceLocation Loc, clang::Scope *S)
+        {
+            ident_track.ActOnPopScope(Loc, S);
+        }
+          
+        virtual void ActOnTranslationUnitScope(clang::SourceLocation Loc, clang::Scope *S)
+        {
+            ident_track.ActOnTranslationUnitScope(Loc, S);
+        }
+
         shared_ptr<Integral> CreateIntegralType( unsigned bits, 
                                                  bool default_signed, 
                                                  clang::DeclSpec::TSS type_spec_signed = clang::DeclSpec::TSS_unspecified )
@@ -345,7 +363,7 @@ private:
             
             o->type = CreateTypeNode( D );
             
-            (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, o );     
+            (void)ident_track.ActOnDeclarator( S, D, 0, o );     
             return o;
         }
 
@@ -357,7 +375,7 @@ private:
                 t->identifier = ID->getName();
             t->type = CreateTypeNode( D );
 
-            (void)InfernoMinimalAction::ActOnDeclarator( S, D, 0, t );     // TODO rename this function
+            (void)ident_track.ActOnDeclarator( S, D, 0, t );     // TODO rename this function
             TRACE("%s %p %p\n", ID->getName(), t.get(), ID );            
             return t;
         }
@@ -480,7 +498,7 @@ private:
                 shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( fp->parameters[i] );                
                 ASSERT(ppd);
                 if( ppd->clang_identifier )
-                    InfernoMinimalAction::AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->object);
+                    ident_track.AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->object);
             }
         }
 
@@ -540,7 +558,7 @@ private:
                                                 bool HasTrailingLParen,
                                                 const clang::CXXScopeSpec *SS = 0 ) 
         {
-            shared_ptr<Node> n = InfernoMinimalAction::GetCurrentIdentifierRCPtr( II );
+            shared_ptr<Node> n = ident_track.GetCurrentIdentifierRCPtr( II );
             TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
             shared_ptr<Object> o = dynamic_pointer_cast<Object>( n );
             ASSERT( o );
@@ -939,7 +957,7 @@ private:
             if(Name)
             {
                 h->identifier = Name->getName();
-                (void)InfernoMinimalAction::AddNakedIdentifier(S, Name, h); 
+                (void)ident_track.AddNakedIdentifier(S, Name, h); 
             }
             else
             {
@@ -1153,7 +1171,7 @@ private:
                 ic->value = i;
                 od->initialiser = ic;
             }
-            (void)InfernoMinimalAction::AddNakedIdentifier(S, Id, o); 
+            (void)ident_track.AddNakedIdentifier(S, Id, o); 
             return hold_decl.ToRaw( od );
         }
         

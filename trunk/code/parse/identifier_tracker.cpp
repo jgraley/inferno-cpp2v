@@ -1,15 +1,3 @@
-//===--- InfernoMinimalAction.cpp - Implement the InfernoMinimalAction class ------------===//
-//
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
-//
-//===----------------------------------------------------------------------===//
-//
-//  This file implements the InfernoMinimalAction interface.
-//
-//===----------------------------------------------------------------------===//
 
 #include "common/common.hpp"
 
@@ -17,7 +5,7 @@
 #include "clang/Parse/DeclSpec.h"
 #include "clang/Parse/Scope.h"
 
-#include "inferno_minimal_action.hpp"
+#include "identifier_tracker.hpp"
 
 /// TypeNameInfo - A link exists here for each scope that an identifier is
 /// defined.
@@ -30,7 +18,8 @@ struct TypeNameInfo {
   }
 };
 
-void InfernoMinimalAction::ActOnTranslationUnitScope(clang::SourceLocation Loc, clang::Scope *S) {
+void IdentifierTracker::ActOnTranslationUnitScope(clang::SourceLocation Loc, clang::Scope *S) 
+{
   TUScope = S;
   clang::IdentifierInfo *II;
   TypeNameInfo *TI;
@@ -58,7 +47,7 @@ void InfernoMinimalAction::ActOnTranslationUnitScope(clang::SourceLocation Loc, 
 /// clang::IdentifierInfo::FETokenInfo field to keep track of this fact, until S is
 /// popped.
 clang::Action::DeclTy *
-InfernoMinimalAction::ActOnDeclarator(clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup, shared_ptr<Node> rcp) 
+IdentifierTracker::ActOnDeclarator(clang::Scope *S, clang::Declarator &D, clang::Action::DeclTy *LastInGroup, shared_ptr<Node> rcp) 
 {
   clang::IdentifierInfo *II = D.getIdentifier();
   TRACE("pushing identifier \"%s\"\n", D.getIdentifier()->getName() );
@@ -69,7 +58,7 @@ InfernoMinimalAction::ActOnDeclarator(clang::Scope *S, clang::Declarator &D, Dec
   return 0;
 }
 
-void InfernoMinimalAction::AddNakedIdentifier(clang::Scope *S, clang::IdentifierInfo *II, shared_ptr<Node> rcp) 
+void IdentifierTracker::AddNakedIdentifier(clang::Scope *S, clang::IdentifierInfo *II, shared_ptr<Node> rcp) 
 {
   TypeNameInfo *weCurrentlyHaveTypeInfo = II->getFETokenInfo<TypeNameInfo>();
   TypeNameInfo *TI = new TypeNameInfo(weCurrentlyHaveTypeInfo, rcp);
@@ -81,7 +70,7 @@ void InfernoMinimalAction::AddNakedIdentifier(clang::Scope *S, clang::Identifier
 
 /// ActOnPopScope - When a scope is popped, if any typedefs are now
 /// out-of-scope, they are removed from the clang::IdentifierInfo::FETokenInfo field.
-void InfernoMinimalAction::ActOnPopScope(clang::SourceLocation Loc, clang::Scope *S) {
+void IdentifierTracker::ActOnPopScope(clang::SourceLocation Loc, clang::Scope *S) {
   for (clang::Scope::decl_iterator I = S->decl_begin(), E = S->decl_end();
        I != E; ++I) {
     clang::IdentifierInfo &II = *static_cast<clang::IdentifierInfo*>(*I);
@@ -96,7 +85,7 @@ void InfernoMinimalAction::ActOnPopScope(clang::SourceLocation Loc, clang::Scope
   }
 }
 
-shared_ptr<Node> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II )
+shared_ptr<Node> IdentifierTracker::GetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II )
 {
     TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>();
     if( !TI )
@@ -108,7 +97,7 @@ shared_ptr<Node> InfernoMinimalAction::GetCurrentIdentifierRCPtr( const clang::I
         return shared_ptr<Node>();
 }
 
-shared_ptr<Node> InfernoMinimalAction::TryGetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II )
+shared_ptr<Node> IdentifierTracker::TryGetCurrentIdentifierRCPtr( const clang::IdentifierInfo &II )
 {
     TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>();
     if( TI )
