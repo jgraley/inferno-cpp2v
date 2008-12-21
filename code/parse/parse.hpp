@@ -158,14 +158,9 @@ private:
 
         virtual void ActOnPopScope(clang::SourceLocation Loc, clang::Scope *S)
         {
-            ident_track.ActOnPopScope(Loc, S);
+            ident_track.PopScope(S);
         }
           
-        virtual void ActOnTranslationUnitScope(clang::SourceLocation Loc, clang::Scope *S)
-        {
-            ident_track.ActOnTranslationUnitScope(Loc, S);
-        }
-
         shared_ptr<Integral> CreateIntegralType( unsigned bits, 
                                                  bool default_signed, 
                                                  clang::DeclSpec::TSS type_spec_signed = clang::DeclSpec::TSS_unspecified )
@@ -363,7 +358,7 @@ private:
             
             o->type = CreateTypeNode( D );
             
-            (void)ident_track.ActOnDeclarator( S, D, 0, o );     
+            ident_track.Add( S, D, o );     
             return o;
         }
 
@@ -375,7 +370,7 @@ private:
                 t->identifier = ID->getName();
             t->type = CreateTypeNode( D );
 
-            (void)ident_track.ActOnDeclarator( S, D, 0, t );     // TODO rename this function
+            ident_track.Add( S, D, t );  
             TRACE("%s %p %p\n", ID->getName(), t.get(), ID );            
             return t;
         }
@@ -498,7 +493,7 @@ private:
                 shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( fp->parameters[i] );                
                 ASSERT(ppd);
                 if( ppd->clang_identifier )
-                    ident_track.AddNakedIdentifier(FnBodyScope, ppd->clang_identifier, ppd->object);
+                    ident_track.Add(FnBodyScope, ppd->clang_identifier, ppd->object);
             }
         }
 
@@ -957,7 +952,7 @@ private:
             if(Name)
             {
                 h->identifier = Name->getName();
-                (void)ident_track.AddNakedIdentifier(S, Name, h); 
+                (void)ident_track.Add(S, Name, h); 
             }
             else
             {
@@ -1171,7 +1166,7 @@ private:
                 ic->value = i;
                 od->initialiser = ic;
             }
-            (void)ident_track.AddNakedIdentifier(S, Id, o); 
+            (void)ident_track.Add(S, Id, o); 
             return hold_decl.ToRaw( od );
         }
         
