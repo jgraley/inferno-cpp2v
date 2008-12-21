@@ -1,22 +1,11 @@
 
 #include "common/common.hpp"
-
 #include "clang/Parse/Parser.h"
 #include "clang/Parse/DeclSpec.h"
 #include "clang/Parse/Scope.h"
-
 #include "identifier_tracker.hpp"
 
-/// TypeNameInfo - A link exists here for each scope that an identifier is
-/// defined.
-struct TypeNameInfo {
-  TypeNameInfo *Prev;
-  shared_ptr<Node> rcptr;
-  TypeNameInfo(TypeNameInfo *prev, shared_ptr<Node> rcp) {
-    Prev = prev;
-    rcptr = rcp;
-  }
-};
+typedef stack< shared_ptr<Node> > Identifiers;
 
 void IdentifierTracker::Add(clang::Scope *S, clang::Declarator &D, shared_ptr<Node> rcp) 
 {
@@ -29,14 +18,17 @@ void IdentifierTracker::Add(clang::Scope *S, clang::Declarator &D, shared_ptr<No
   
   Add(S, II, rcp);
 }
-
+  
 void IdentifierTracker::Add(clang::Scope *S, clang::IdentifierInfo *II, shared_ptr<Node> rcp) 
 {
-  TypeNameInfo *weCurrentlyHaveTypeInfo = II->getFETokenInfo<TypeNameInfo>();
-  TypeNameInfo *TI = new TypeNameInfo(weCurrentlyHaveTypeInfo, rcp);
-  II->setFETokenInfo(TI);
-  
-  // Remember that this needs to be removed when the scope is popped.
+  Identifiers *ti = II->getFETokenInfo<Identifiers>();
+  if( !ti )
+  {
+    ti = new Identifiers;
+    II->setFETokenInfo(ti);
+  }
+    
+  ti->push( rcp );  
   S->AddDecl(II);
 }
 
@@ -48,15 +40,9 @@ void IdentifierTracker::PopScope(clang::Scope *S)
        I != E; ++I) 
   {
     clang::IdentifierInfo &II = *static_cast<clang::IdentifierInfo*>(*I);
-    TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>();
-    ASSERT(TI && "This decl didn't get pushed??");
-    if (TI) 
-    {
-      TypeNameInfo *Next = TI->Prev;
-      delete TI;
-      
-      II.setFETokenInfo(Next);
-    }
+    Identifiers *ti = II.getFETokenInfo<Identifiers>();
+    ASSERT(ti && "type name info missing in pop???");
+    ti->pop();
   }
 }
 
@@ -69,9 +55,9 @@ shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo &II )
 
 shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo &II )
 {
-    TypeNameInfo *TI = II.getFETokenInfo<TypeNameInfo>();
-    if( TI )
-        return TI->rcptr;
+    Identifiers *ti = II.getFETokenInfo<Identifiers>();
+    if( ti )
+        return ti->top();
     else
         return shared_ptr<Node>();
 }
