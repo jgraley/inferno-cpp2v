@@ -88,7 +88,7 @@ void IdentifierTracker::PopScope(clang::Scope *S)
 string IdentifierTracker::ToString( shared_ptr<TNode> ts )
 {
     if( !ts )
-        return string("::");
+        return string("<nil>");
 
     string s;
     while( ts )
@@ -109,6 +109,10 @@ string IdentifierTracker::ToString( shared_ptr<TNode> ts )
         s = "::" + s;
         ts = ts->parent;        
     }
+    
+    if( s.empty() )
+        s = "::"; // global scope
+    
     return s;
 }
 
@@ -124,10 +128,10 @@ bool IdentifierTracker::IsIdentical( shared_ptr<TNode> current, shared_ptr<TNode
 
 // Does identifier "II" found in scope "current" match rooted "ident"? if not return NOMATCH otherwise
 // return the number of scopes we went down through from current to get a match (effectively a distance)
-int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNode> current, shared_ptr<TNode> ident )
+int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNode> start, shared_ptr<TNode> ident, bool recurse )
 {
     string cs, ips;
-    cs = ToString( current );
+    cs = ToString( start );
     ASSERT( ident );
     ips = ToString( ident->parent );
     ASSERT( II );
@@ -143,15 +147,15 @@ int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNod
         return NOMATCH; // different strings
     }
     
-    shared_ptr<TNode> cur_it = current; 
+    shared_ptr<TNode> cur_it = start; 
     shared_ptr<TNode> id_it = ident->parent;
     int d = 0;
     
-    // Try stepping out of the current scope, one scope at a time,
+    // Try stepping out of the starting scope, one scope at a time,
     // until we match the identifier's scope.
     while( !IsIdentical( cur_it, id_it ) )
     {
-        if( cur_it == NULL )
+        if( cur_it == NULL || !recurse )
         {
             TRACE("NOMATCH scope\n");
             return NOMATCH; 
@@ -178,24 +182,36 @@ shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, cla
     TRACE();
     
     // Choose the required identifier via a proximity search
-    int best=NOMATCH;
-    shared_ptr<Node> n;
-    shared_ptr<TNode> start = current;
+    shared_ptr<TNode> start;
+    bool recurse;
     if( iscope )
+    {
+        // A C++ style scope was supplied (iscope::II) - search in here and don't recurse
         start = Find( iscope );
+        recurse = false;
+        TRACE();
+    }    
+    else
+    {
+        // No C++ scope, so use the current scope and recurse through parents
+        start = current;
+        recurse = true;
+    }
         
+    int best_distance=NOMATCH;
+    shared_ptr<Node> best_node;
     for( int i=0; i<tnodes.size(); i++ )
     {
         
-        int t = IsMatch( II, current, tnodes[i] );
-        if( t < best )
+        int distance = IsMatch( II, start, tnodes[i], recurse );
+        if( distance < best_distance )
         {
-            best = t;
-            n = tnodes[i]->node;
+            best_distance = distance;
+            best_node = tnodes[i]->node;
         }
     }
  
-    return n;
+    return best_node;
 }
 
 
