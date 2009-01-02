@@ -4,6 +4,7 @@
 #include "parse/parse.hpp"  
 #include "render/render.hpp"
 #include "common/read_args.hpp"
+#include "helpers/walk.hpp"
 
 int main( int argc, char *argv[] )
 {
@@ -18,5 +19,10 @@ int main( int argc, char *argv[] )
     Pass *parse = &p;
     Pass *render = &r;
     (*parse)( program );
-    (*render)( program );
+//    (*render)( program );
+
+    Walk<Node> w(program);
+    for( int i=0; i<w.size(); i++ )
+        printf("%s\n", typeid(*w[i]).name() );
+
 }
