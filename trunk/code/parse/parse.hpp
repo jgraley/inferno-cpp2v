@@ -58,6 +58,7 @@ public:
         clang::HeaderSearch headers( fm );
         
         clang::Preprocessor pp( diags, opts, *ptarget, sm, headers );
+        pp.setPredefines("#define __INFERNO__ 1\n");
         
         const clang::FileEntry *file = fm.getFile(infile);
         if (file) 
@@ -85,7 +86,9 @@ private:
     public:
         InfernoAction(shared_ptr<Program> p, clang::IdentifierTable &IT, clang::Preprocessor &pp, clang::TargetInfo &T) : 
             preprocessor(pp),
-            target_info(T)
+            target_info(T),
+            ident_track( p ),
+            global_scope( p )
         {
             inferno_scope_stack.push( &*p );
         }
@@ -134,11 +137,29 @@ private:
         RCHold<Statement, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
         RCHold<Label, void *> hold_label;
+        RCHold<Node, CXXScopeTy *> hold_scope;
         IdentifierTracker ident_track;
+        shared_ptr<Node> global_scope;
+        
+        // Turn a clang::CXXScopeSpec into a pointer to the corresponding scope node.
+        // We have to deal with all the ways of it baing invalid, then just use hold_scope.
+        shared_ptr<Node> ConvertScope( const clang::CXXScopeSpec *SS )
+        {
+            if( !SS )
+                return shared_ptr<Node>();
+            
+            if( SS->isEmpty() )
+                return shared_ptr<Node>();
+        
+            if( !SS->isSet() )
+                return shared_ptr<Node>();
+        
+            return hold_scope.FromRaw( SS->getScopeRep() );    
+        }
         
         clang::Action::TypeTy *isTypeName( clang::IdentifierInfo &II, clang::Scope *S, const clang::CXXScopeSpec *SS) 
         {
-            shared_ptr<Node> n = ident_track.TryGet( II );                              
+            shared_ptr<Node> n = ident_track.TryGet( &II, S, ConvertScope( SS ) );                              
             if(n)
             {
                 shared_ptr<Type> t = dynamic_pointer_cast<UserType>( n );
@@ -251,7 +272,7 @@ private:
                         TRACE("struct/union/class/enum\n");
                         // Disgustingly, clang casts the DeclTy returned from ActOnTag() to 
                         // a TypeTy. 
-                        return dynamic_pointer_cast<Holder>( hold_decl.FromRaw( DS.getTypeRep() ) );
+                        return dynamic_pointer_cast<Record>( hold_decl.FromRaw( DS.getTypeRep() ) );
                         break;
                     default:                    
                         ASSERT(!"unsupported type");
@@ -328,9 +349,9 @@ private:
             const clang::DeclSpec &DS = D.getDeclSpec();
             if(ID)
             {
-                o->identifier = ID->getName();
-                ident_track.Add( S, ID, o );     
-                TRACE("object %s\n", o->identifier.c_str());
+                o->name = ID->getName();
+                ident_track.Add( ID, o, S, NULL );     
+                TRACE("object %s\n", o->name.c_str());
             }
             else
             {
@@ -367,8 +388,8 @@ private:
             clang::IdentifierInfo *ID = D.getIdentifier();
             if(ID)
             {
-                t->identifier = ID->getName();
-                ident_track.Add( S, ID, t ); 
+                t->name = ID->getName();
+                ident_track.Add( ID, t, S, NULL ); 
             }
             t->type = CreateTypeNode( D );
  
@@ -379,7 +400,7 @@ private:
         shared_ptr<Label> CreateLabelNode( clang::IdentifierInfo *ID )
         { 
             shared_ptr<Label> l(new Label);            
-            l->identifier = ID->getName();
+            l->name = ID->getName();
             TRACE("%s %p %p\n", ID->getName(), l.get(), ID );            
             return l;
         }
@@ -399,7 +420,7 @@ private:
                 shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
                 od->object = CreateObjectNode( S, D );        
                 od->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
-                TRACE("aod %s %p %p\n", od->object->identifier.c_str(), od->object.get(), od.get() );
+                TRACE("aod %s %p %p\n", od->object->name.c_str(), od->object.get(), od.get() );
                 d = od;
             }
             
@@ -410,7 +431,7 @@ private:
             return d;
         }
         
-        // Does 2 things:
+        // Does 1 thing:
         // 1. Inserts a stored decl if there is one in decl_to_insert
         DeclTy *IssueDeclaration( clang::Scope *S, shared_ptr<Declaration> d )
         {
@@ -494,7 +515,7 @@ private:
                 shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( fp->parameters[i] );                
                 ASSERT(ppd);
                 if( ppd->clang_identifier )
-                    ident_track.Add(FnBodyScope, ppd->clang_identifier, ppd->object);
+                    ident_track.Add( ppd->clang_identifier, ppd->object, FnBodyScope, NULL );
             }
         }
 
@@ -554,7 +575,7 @@ private:
                                                 bool HasTrailingLParen,
                                                 const clang::CXXScopeSpec *SS = 0 ) 
         {
-            shared_ptr<Node> n = ident_track.Get( II );
+            shared_ptr<Node> n = ident_track.Get( &II, S, ConvertScope( SS ) );
             TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
             shared_ptr<Object> o = dynamic_pointer_cast<Object>( n );
             ASSERT( o );
@@ -715,7 +736,7 @@ private:
 
             for( int i=0; i<NumElts; i++ )
                 PushStmt( s, Elts[i] );
-
+                
             return hold_stmt.ToRaw( s );
         }
         
@@ -872,7 +893,7 @@ private:
             return hold_stmt.ToRaw( shared_ptr<Break>( new Break ) );
         }
         
-        Declaration::Access ConvertAccess( clang::AccessSpecifier AS )
+        Declaration::Access ConvertAccess( clang::AccessSpecifier AS, shared_ptr<Record> rec = shared_ptr<Record>() )
         {
             switch( AS )
             {
@@ -886,8 +907,15 @@ private:
                     return Declaration::PRIVATE;
                     break;
                 case clang::AS_none:
+                    ASSERT( rec && "no access specifier and record not supplied so cannot deduce");
+                    // members are never AS_none because clang deals. Bases can be AS_none, so we supply the enclosing record type
+                    if( dynamic_pointer_cast<Class>(rec) )
+                        return Declaration::PRIVATE;
+                    else 
+                        return Declaration::PUBLIC;
+                    break;
                 default:
-                    ASSERT(0);
+                    ASSERT(!"Invalid access specfier");
                     return Declaration::PUBLIC;
                     break;
             }
@@ -930,7 +958,7 @@ private:
             TRACE("Tag type %d\n", TagType);
             // TagType is an instance of DeclSpec::TST, indicating what kind of tag this
             // is (struct/union/enum/class).
-            shared_ptr<Holder> h;
+            shared_ptr<Record> h;
             switch( (clang::DeclSpec::TST)TagType )
             {
                 case clang::DeclSpec::TST_union:
@@ -952,8 +980,8 @@ private:
             
             if(Name)
             {
-                h->identifier = Name->getName();
-                ident_track.Add(S, Name, h); 
+                h->name = Name->getName();
+                ident_track.Add(Name, h, S, &SS); 
             }
             else
             {
@@ -961,7 +989,7 @@ private:
                 char an[20];
                 static int ac=0;
                 sprintf( an, "__anon%d", ac++ );
-                h->identifier = an;
+                h->name = an;
             }
             
             h->access = Declaration::PUBLIC; // must make all holder type decls public since clang doesnt seem to give us an AS
@@ -979,6 +1007,7 @@ private:
             
             return hold_decl.ToRaw( h );            
         }
+        
    
         /// ActOnStartCXXClassDef - This is called at the start of a class/struct/union
         /// definition, when on C++.
@@ -987,12 +1016,15 @@ private:
         {
             TRACE();
             
-            // Just populate the members container for the Holder node
+            // Just populate the members container for the Record node
             // we already created. No need to return anything.
             shared_ptr<Declaration> d = hold_decl.FromRaw( TagDecl );
-            shared_ptr<Holder> h = dynamic_pointer_cast<Holder>(d);
+            shared_ptr<Record> h = dynamic_pointer_cast<Record>(d);
             h->incomplete = false;
             
+            if( h->name[0] != '_' ) // Do not enter the scope for anonymous names TODO deal with anons better
+                ident_track.SetNextRecord( h );
+                
             inferno_scope_stack.push( &(h->members) );      // decls for members will go on this scope      
         }
   
@@ -1001,10 +1033,11 @@ private:
         virtual void ActOnFinishCXXClassDef(DeclTy *TagDecl) 
         {
             inferno_scope_stack.pop(); // class scope is complete
+            ident_track.SetNextRecord();
 
             // TODO are structs etc definable in functions? If so, this will put the decl outside the function            
             shared_ptr<Declaration> d = hold_decl.FromRaw( TagDecl );
-            shared_ptr<Holder> h = dynamic_pointer_cast<Holder>(d);
+            shared_ptr<Record> h = dynamic_pointer_cast<Record>(d);
             decl_to_insert = h; 
         }
         
@@ -1032,7 +1065,7 @@ private:
             }            
         
             shared_ptr<Object> o( new Object );
-            o->identifier = Member.getName(); // Only the name is filled in TODO fill in (possibly in a pass)
+            o->name = Member.getName(); // Only the name is filled in TODO fill in (possibly in a pass)
             a->member = o;    
             return hold_expr.ToRaw( a );
         }
@@ -1133,7 +1166,7 @@ private:
                                           clang::SourceLocation EqualLoc, ExprTy *Val) 
         {
             shared_ptr<Object> o(new Object());
-            o->identifier = Id->getName();
+            o->name = Id->getName();
             o->storage = Object::SYMBOL;
             o->type = CreateIntegralType( 32, false );
             shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
@@ -1167,7 +1200,7 @@ private:
                 ic->value = i;
                 od->initialiser = ic;
             }
-            ident_track.Add(S, Id, o); 
+            ident_track.Add(Id, o, S, NULL); 
             return hold_decl.ToRaw( od );
         }
         
@@ -1190,7 +1223,7 @@ private:
         {
             TRACE();
             shared_ptr<Declaration> d( hold_decl.FromRaw( DS.getTypeRep() ) );
-            shared_ptr<Holder> h( dynamic_pointer_cast<Holder>( d ) );
+            shared_ptr<Record> h( dynamic_pointer_cast<Record>( d ) );
             ASSERT( h );
             if( decl_to_insert )
             {                
@@ -1229,9 +1262,12 @@ private:
                                               clang::SourceLocation BaseLoc) 
         {
             shared_ptr<Type> t( hold_type.FromRaw( basetype ) );
-            shared_ptr<InheritanceHolder> ih( dynamic_pointer_cast<InheritanceHolder>(t) );
+            shared_ptr<InheritanceRecord> ih( dynamic_pointer_cast<InheritanceRecord>(t) );
             ASSERT( ih );
-            ih->access = ConvertAccess( Access );           
+            shared_ptr<Declaration> d = hold_decl.FromRaw( classdecl );
+            shared_ptr<Record> r = dynamic_pointer_cast<Record>( d );
+            ASSERT( r );
+            ih->access = ConvertAccess( Access, r );           
             ih->is_virtual = Virtual;
             return hold_base.ToRaw( ih );
         }
@@ -1240,7 +1276,7 @@ private:
                                          unsigned NumBases) 
         {
             shared_ptr<Declaration> cd( hold_decl.FromRaw( ClassDecl ) );
-            shared_ptr<InheritanceHolder> ih( dynamic_pointer_cast<InheritanceHolder>(cd) );
+            shared_ptr<InheritanceRecord> ih( dynamic_pointer_cast<InheritanceRecord>(cd) );
             ASSERT( ih );
             
             for( int i=0; i<NumBases; i++ )
@@ -1249,6 +1285,32 @@ private:
             }
         }
         
+        /// ActOnCXXNestedNameSpecifier - Called during parsing of a
+        /// nested-name-specifier. e.g. for "foo::bar::" we parsed "foo::" and now
+        /// we want to resolve "bar::". 'SS' is empty or the previously parsed
+        /// nested-name part ("foo::"), 'IdLoc' is the source location of 'bar',
+        /// 'CCLoc' is the location of '::' and 'II' is the identifier for 'bar'.
+        /// Returns a CXXScopeTy* object representing the C++ scope.
+        virtual CXXScopeTy *ActOnCXXNestedNameSpecifier(clang::Scope *S,
+                                                        const clang::CXXScopeSpec &SS,
+                                                        clang::SourceLocation IdLoc,
+                                                        clang::SourceLocation CCLoc,
+                                                        clang::IdentifierInfo &II) 
+        {
+            shared_ptr<Node> n( ident_track.Get( &II, S, ConvertScope( &SS ) ) );
+            
+            return hold_scope.ToRaw( n );
+        }
+        
+        /// ActOnCXXGlobalScopeSpecifier - Return the object that represents the
+        /// global scope ('::').
+        virtual CXXScopeTy *ActOnCXXGlobalScopeSpecifier(clang::Scope *S,
+                                                         clang::SourceLocation CCLoc) 
+        {
+            return hold_scope.ToRaw( global_scope );
+        }
+
+
         //--------------------------------------------- unimplemented actions -----------------------------------------------     
         // Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC 
         // extensions. These all assert out immediately.
@@ -1345,6 +1407,26 @@ private:
     ASSERT(!"Unimplemented action");
     return true;
   }
+  
+  /// ActOnCXXEnterDeclaratorScope - Called when a C++ scope specifier (global
+  /// scope or nested-name-specifier) is parsed, part of a declarator-id.
+  /// After this method is called, according to [C++ 3.4.3p3], names should be
+  /// looked up in the declarator-id's scope, until the declarator is parsed and
+  /// ActOnCXXExitDeclaratorScope is called.
+  /// The 'SS' should be a non-empty valid CXXScopeSpec.
+  virtual void ActOnCXXEnterDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS) {
+    ASSERT(!"Unimplemented action");
+  }
+
+  /// ActOnCXXExitDeclaratorScope - Called when a declarator that previously
+  /// invoked ActOnCXXEnterDeclaratorScope(), is finished. 'SS' is the same
+  /// CXXScopeSpec that was passed to ActOnCXXEnterDeclaratorScope as well.
+  /// Used to indicate that names should revert to being looked up in the
+  /// defining scope.
+  virtual void ActOnCXXExitDeclaratorScope(const clang::CXXScopeSpec &SS) {
+    ASSERT(!"Unimplemented action");
+  }
+
  };
 };   
 

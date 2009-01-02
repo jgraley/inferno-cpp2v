@@ -3,11 +3,13 @@
 #include <stdarg.h>
 #include "read_args.hpp"
 
+bool Tracer::continuation = false;
+
 Tracer::Tracer( const char *f, int l, const char *fu, Flags fl ) :
     file( f ),
     line( l ),
     function( fu ),
-    flags( fl )        
+    flags( fl )
 {
 }
 
@@ -15,8 +17,13 @@ void Tracer::operator()()
 {
     if( !(ReadArgs::trace || (flags & FORCE)) )
         return;
+ 
+    if( continuation )
+        printf("\n");
 
-    fprintf(stderr, "%s:%d in %s()\n", file, line, function);
+    printf( "    %s:%d in %s()\n", file, line, function);
+    
+    continuation = false;
 }
 
 void Tracer::operator()(const char *fmt, ...)
@@ -26,9 +33,12 @@ void Tracer::operator()(const char *fmt, ...)
     
     va_list vl;
     va_start( vl, fmt );
-    fprintf(stderr, "%s:%d in %s()\n    ", file, line, function);
+    if( !continuation )
+        printf( "    %s:%d in %s()\n", file, line, function);
     vprintf( fmt, vl );
     va_end( vl );
+    
+    continuation = (fmt[strlen(fmt)-1]!='\n');
 }
 
 void boost::assertion_failed(char const * expr, char const * function, char const * file, long line)

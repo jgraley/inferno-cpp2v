@@ -16,31 +16,75 @@ class Selector;
 // Lex.
 class Token;
 
-/// IdentifierTracker - Minimal actions are used by light-weight clients of the
-/// parser that do not need name resolution or significant semantic analysis to
-/// be performed.  The actions implemented here are in the form of unresolved
-/// identifiers.  By using a simpler interface than the SemanticAction class,
-/// the parser doesn't have to build complex data structures and thus runs more
-/// quickly.
+
 class IdentifierTracker
 {
+    // The scope tree is made up of these. Each one represents an object, user type
+    // or compound statement. II is null if no name; parent is null if in global (root)
+    // scope. A TNode t should only have other TNodes pointing to it if it is a scope.
+    // Example:
+    // class C { void F() { struct S { int X; }; } };
+    // has parent pointers as: X -> S -> F -> C -> (NULL)
+    // F has no identifier info, since it's name is not relevent to scopes (anonymous scope)
+    // All should have valid node pointers (TODO fill in for compound statements)
+    // C, F, S should have clang scope cs filled in.      
+    struct TNode
+    {
+        shared_ptr<TNode> parent;
+        shared_ptr<Node> node;
+        clang::Scope *cs; // Note: this is the *corresponding* scope, not the containing scope.
+                          // Eg given struct A { int B; }; then A->cs is the struct scope and B->cs is NULL
+        clang::IdentifierInfo *II;
+    };
+    
+    // Our best effort to determine the current scope
+    shared_ptr<TNode> current;
+    
+    // Every TNode we ever create goes in this list, and is never deleted. 
+    deque< shared_ptr<TNode> > tnodes; 
+    
+    // Parser can "warn" us that the next clang::Scope we see will correspond to
+    // the supplied node (a Record node in fact).
+    shared_ptr<Node> next_record;
+
+    // Enter a new scope - clang doesn't tell us when to do this, so we deduce from
+    // calls to Add.
+    shared_ptr<TNode> Find( shared_ptr<Node> node );
+    void NewScope( clang::Scope *S, const clang::CXXScopeSpec *SS );
+    string ToString( shared_ptr<TNode> ts );
+    bool IsIdentical( shared_ptr<TNode> current, shared_ptr<TNode> ident );
+    int IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNode> current, shared_ptr<TNode> ident );
+
+    shared_ptr<Node> global;
+
 public:
-  /// Add - If this is a typedef declarator, we modify the
-  /// clang::IdentifierInfo::FETokenInfo field to keep track of this fact, until S is
-  /// popped.
-  //void Add(clang::Scope *S, clang::Declarator &D,      shared_ptr<Node> rcp);
-  void Add(clang::Scope *S, clang::IdentifierInfo *II, shared_ptr<Node> rcp);  
+    IdentifierTracker( shared_ptr<Node> g );
+    
+    /// Associate supplied node with supplied identifier and scope. Will remain 
+    /// until the scope is popped. S must be current scope due to implementation.
+    void Add( clang::IdentifierInfo *II, shared_ptr<Node> rcp, clang::Scope *S, const clang::CXXScopeSpec *SS );  
   
-  /// ActOnPopScope - When a scope is popped, if any typedefs are now 
-  /// out-of-scope, they are removed from the clang::IdentifierInfo::FETokenInfo field.
-  virtual void PopScope(clang::Scope *S);
+    /// ActOnPopScope - When a scope is popped, if any typedefs are now 
+    /// out-of-scope, they are removed from the clang::IdentifierInfo::FETokenInfo field.
+    virtual void PopScope(clang::Scope *S);
   
-  // Extract the shared_ptr for the identifier. Where the identifier is differently declared
-  // in nested scopes, we get the one that applies currently (which is the innermost one)  
-  shared_ptr<Node> Get( const clang::IdentifierInfo &II );                                         
+    // Extract the shared_ptr for the identifier. Where the identifier is differently declared
+    // in nested scopes, we get the one that applies currently (which is the innermost one)  
+    shared_ptr<Node> Get( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope = shared_ptr<Node>() );                                         
   
-  // Version that just results NULL if identifier has not been added yet
-  shared_ptr<Node> TryGet( const clang::IdentifierInfo &II );                                         
+    // Version that just results NULL if identifier has not been added yet
+    shared_ptr<Node> TryGet( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope = shared_ptr<Node>() );      
+    
+    // Indicate that the next Add() call will have the supplied node as parent.
+    // Omit to clear (eg after the struct)
+    void SetNextRecord( shared_ptr<Node> n = shared_ptr<Node>() )
+    {
+        TRACE("next scope is %p\n", n.get() );
+        next_record = n;
+    }                             
+    
+    // Find supplied identifier in supplied record, return the object node within said record or NULL
+    shared_ptr<Node> FindMemberNode( const clang::IdentifierInfo *II, shared_ptr<Node> record );
 };
 
 #endif
