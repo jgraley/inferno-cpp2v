@@ -7,6 +7,7 @@
 using namespace std;
 
 #include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 using namespace boost;
 
 // As suggested on http://www.boost.org/doc/libs/1_36_0/doc/html/foreach.html

@@ -22,7 +22,6 @@ int main()
     short x = 6;
     unsigned long long y = func( x, 9 );
     y += (x==6) ? 2 : 3;
-    float z;
     -1U; // wrong
     4000000000; // wrong (>2^31)
     2000000000;
@@ -34,8 +33,13 @@ int main()
     7.7l;
     y += 'z';
     y -= p[2];
-    z = 5;
-    z /= 2;
-    y += (int)z;
+    {
+        float z;
+        z = 5;
+        z /= 2;
+        y += (int)z;
+    }
+    int kk=0;
+    y += kk;
     return (unsigned char)y;
 }

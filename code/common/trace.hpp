@@ -34,6 +34,7 @@ private:
     const int line;
     const char * const function;
     Flags flags;
+    static bool continuation;
 };
 
 #define INFERNO_CURRENT_FUNCTION __func__

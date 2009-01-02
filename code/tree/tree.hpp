@@ -22,9 +22,10 @@ struct Node
     // without making Node ambiguous
 };
  
+
 struct Identifier
 {
-    string identifier;
+    string name;
 };
 
 struct Type : virtual Node {};
@@ -68,7 +69,8 @@ struct ObjectDeclaration : Declaration
     shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
-struct Program : Sequence<Declaration>
+struct Program : Node,
+                 Sequence<Declaration>
 {
 };
 
@@ -119,7 +121,7 @@ struct Void : Type {};
 
 struct Bool : Type {};
 
-struct Numeric : Type // TODO rename Numeric to Numeric, latter is more concise
+struct Numeric : Type 
 {
     shared_ptr<Expression> width;  // Bits, not bytes
 };
@@ -132,26 +134,29 @@ struct Unsigned : Integral {};
 
 struct Floating : Numeric {}; // Note width determines float vs double 
 
-struct Holder : UserType
+struct Record : UserType
 {
     Sequence<Declaration> members;
     
     // Where eg struct foo; is used we should create seperate nodes for
     // the incomplete and complete types. This is so that mutually 
     // referencing structs don't create a loop in the tree.
+    // TODO use weak_ptr for access to structs
     bool incomplete; 
 };
 
-struct Union : Holder {};
+struct Union : Record {};
 
-struct InheritanceHolder : Holder
+struct Enum : Record {};
+
+struct InheritanceRecord : Record // TODO InheritanceRecord
 {
     Sequence<Declaration> bases; // these have empty identifier and NULL initialiser
 };
 
-struct Struct : InheritanceHolder {};
+struct Struct : InheritanceRecord {};
 
-struct Class : InheritanceHolder {};
+struct Class : InheritanceRecord {};
 
 struct Array : Type
 {
@@ -159,15 +164,13 @@ struct Array : Type
     shared_ptr<Expression> size; // NULL if undefined
 };
 
-struct Enum : Holder {};
-
 //////////////////////////// Expressions ////////////////////////////
 
 // TODO consider making this an object, STATIC and void * type
 struct Label : Identifier,
                Expression {}; 
 
-struct Compound : Expression 
+struct Compound : Expression
 {
     Sequence<Statement> statements;
 };                   
