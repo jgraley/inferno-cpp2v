@@ -1,12 +1,7 @@
-struct ms
-{
-    int a;
-};
 
-ms x;
+int a;
 
 int main()
 {
-    x.a = 9;
-    return 0;
+    return ::a;
 }
