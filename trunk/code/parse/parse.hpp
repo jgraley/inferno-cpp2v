@@ -140,6 +140,26 @@ private:
         RCHold<Node, CXXScopeTy *> hold_scope;
         IdentifierTracker ident_track;
         shared_ptr<Node> global_scope;
+                
+        OwningStmtResult ToStmt( shared_ptr<Statement> s )
+        {
+            return OwningStmtResult( *this, hold_stmt.ToRaw( s ) );
+        }
+        
+        OwningExprResult ToExpr( shared_ptr<Expression> e )
+        {
+            return OwningExprResult( *this, hold_expr.ToRaw( e ) );
+        }
+        
+        shared_ptr<Statement> FromClang( const StmtArg &s )
+        {
+            return hold_stmt.FromRaw( s.get() );
+        }
+
+        shared_ptr<Expression> FromClang( const ExprArg &e )
+        {
+            return hold_expr.FromRaw( e.get() );
+        }
         
         // Turn a clang::CXXScopeSpec into a pointer to the corresponding scope node.
         // We have to deal with all the ways of it baing invalid, then just use hold_scope.
@@ -170,6 +190,11 @@ private:
             return 0;
         }
         
+        virtual DeclTy *isTemplateName( clang::IdentifierInfo &II, clang::Scope *S, const clang::CXXScopeSpec *SS = 0 )
+        {
+            return 0; // TODO templates
+        }
+
         // Just added to get it to build TODO implement properly
         virtual bool isCurrentClassName(const clang::IdentifierInfo& II, clang::Scope *S, const clang::CXXScopeSpec *SS) 
         { 
@@ -485,7 +510,7 @@ private:
             return hold_decl.ToRaw( p );
         }
 
-        virtual void AddInitializerToDecl(DeclTy *Dcl, ExprTy *Init) 
+        virtual void AddInitializerToDecl(DeclTy *Dcl, ExprArg Init) 
         {
             shared_ptr<Declaration> d = hold_decl.FromRaw( Dcl );            
             
@@ -494,10 +519,8 @@ private:
                 
             shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast<ObjectDeclaration>(d);
             ASSERT( od ); // Only objects can be initialised
-            
-            shared_ptr<Expression> e = hold_expr.FromRaw( Init );
-            
-            od->initialiser = e;            
+                        
+            od->initialiser = FromClang( Init );            
         }
 
         // Clang tends to parse parameters and function bodies in seperate
@@ -540,23 +563,22 @@ private:
             return hold_decl.ToRaw( p );     
         }
         
-        virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtTy *Body) 
+        virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtArg Body) 
         {
             TRACE();
             shared_ptr<ObjectDeclaration> fd( dynamic_pointer_cast<ObjectDeclaration>( hold_decl.FromRaw(Decl) ) );
             ASSERT(fd);
-            shared_ptr<Expression> e( dynamic_pointer_cast<Expression>( hold_stmt.FromRaw(Body) ) );
+            shared_ptr<Expression> e( dynamic_pointer_cast<Expression>( FromClang( Body ) ) );
             ASSERT(e); // function body must be a scope or 0
             fd->initialiser = e;
             inferno_scope_stack.pop(); // we dont use these - we use the clang-managed compound statement instead (passed in via Body)
             return Decl;
         }    
         
-        virtual StmtResult ActOnExprStmt(ExprTy *Expr) 
+        virtual OwningStmtResult ActOnExprStmt(ExprArg Expr) 
         {
-            shared_ptr<Expression> e = hold_expr.FromRaw(Expr);
-            //TRACE("aoes %p\n", es.get() );
-            return hold_stmt.ToRaw( e );
+            shared_ptr<Expression> e = FromClang(Expr);
+            return ToStmt( e );
         }
 
         virtual StmtResult ActOnReturnStmt( clang::SourceLocation ReturnLoc,
@@ -728,23 +750,25 @@ private:
                 PushStmt( s, pc->sub );                      
         }
 
-        virtual StmtResult ActOnCompoundStmt(clang::SourceLocation L, clang::SourceLocation R,
-                                             StmtTy **Elts, unsigned NumElts,
+        virtual OwningStmtResult ActOnCompoundStmt(clang::SourceLocation L, clang::SourceLocation R,
+                                             MultiStmtArg Elts,
                                              bool isStmtExpr) 
         {
+            // TODO helper fn for MultiStmtArg, like FromClang. Maybe.
             shared_ptr<Compound> s(new Compound);
 
-            for( int i=0; i<NumElts; i++ )
-                PushStmt( s, Elts[i] );
+            for( int i=0; i<Elts.size(); i++ )
+                PushStmt( s, Elts.get()[i] );
                 
-            return hold_stmt.ToRaw( s );
+            return ToStmt( s );
         }
         
-        virtual StmtResult ActOnDeclStmt(DeclTy *Decl, clang::SourceLocation StartLoc,
-                                         clang::SourceLocation EndLoc) 
+        virtual OwningStmtResult ActOnDeclStmt(DeclTy *Decl, clang::SourceLocation StartLoc,
+                                               clang::SourceLocation EndLoc) 
         {
             shared_ptr<Declaration> d( hold_decl.FromRaw(Decl) );
-            return hold_stmt.ToRaw( d );
+            
+            return ToStmt( d );
         }
         
         virtual StmtResult ActOnLabelStmt(clang::SourceLocation IdentLoc, clang::IdentifierInfo *II,
@@ -857,29 +881,29 @@ private:
 
         /// ActOnCaseStmt - Note that this handles the GNU 'case 1 ... 4' extension,
         /// which can specify an RHS value.
-        virtual StmtResult ActOnCaseStmt(clang::SourceLocation CaseLoc, ExprTy *LHSVal,
-                                         clang::SourceLocation DotDotDotLoc, ExprTy *RHSVal,
-                                         clang::SourceLocation ColonLoc, StmtTy *SubStmt) 
+        virtual OwningStmtResult ActOnCaseStmt(clang::SourceLocation CaseLoc, ExprArg LHSVal,
+                                               clang::SourceLocation DotDotDotLoc, ExprArg RHSVal,
+                                               clang::SourceLocation ColonLoc, StmtArg SubStmt) 
         {
             TRACE();
             shared_ptr<ParseCase> c( new ParseCase );
-            if( RHSVal )
-                c->value_hi = hold_expr.FromRaw( RHSVal ); 
+            if( RHSVal.get() )
+                c->value_hi = FromClang( RHSVal ); 
             else
-                c->value_hi = hold_expr.FromRaw( LHSVal );
-            c->value_lo = hold_expr.FromRaw( LHSVal );
-            c->sub = SubStmt;
-            return hold_stmt.ToRaw( c );
+                c->value_hi = FromClang( LHSVal );
+            c->value_lo = FromClang( LHSVal );
+            c->sub = SubStmt.get(); // TODO store the counted_ptr, not the raw void *
+            return ToStmt( c );
         }
         
-        virtual StmtResult ActOnDefaultStmt(clang::SourceLocation DefaultLoc,
-                                            clang::SourceLocation ColonLoc, StmtTy *SubStmt,
-                                            clang::Scope *CurScope)
+        virtual OwningStmtResult ActOnDefaultStmt(clang::SourceLocation DefaultLoc,
+                                                  clang::SourceLocation ColonLoc, StmtArg SubStmt,
+                                                  clang::Scope *CurScope)
         {
             TRACE();
             shared_ptr<ParseDefault> d( new ParseDefault );
-            d->sub = SubStmt;
-            return hold_stmt.ToRaw( d );
+            d->sub = SubStmt.get();
+            return ToStmt( d );
         }
                 
         virtual StmtResult ActOnContinueStmt(clang::SourceLocation ContinueLoc,
@@ -952,8 +976,9 @@ private:
 
         virtual DeclTy *ActOnTag(clang::Scope *S, unsigned TagType, TagKind TK,
                                  clang::SourceLocation KWLoc, const clang::CXXScopeSpec &SS,
-                                 clang::IdentifierInfo *Name,
-                                 clang::SourceLocation NameLoc, clang::AttributeList *Attr) 
+                                 clang::IdentifierInfo *Name, clang::SourceLocation NameLoc, 
+                                 clang::AttributeList *Attr,
+                                 MultiTemplateParamsArg TemplateParameterLists) 
         {
             TRACE("Tag type %d\n", TagType);
             // TagType is an instance of DeclSpec::TST, indicating what kind of tag this
@@ -1041,7 +1066,8 @@ private:
             decl_to_insert = h; 
         }
         
-        virtual ExprResult ActOnMemberReferenceExpr(ExprTy *Base, clang::SourceLocation OpLoc,
+        virtual ExprResult ActOnMemberReferenceExpr(clang::Scope *S, ExprTy *Base, 
+                                                    clang::SourceLocation OpLoc,
                                                     clang::tok::TokenKind OpKind,
                                                     clang::SourceLocation MemberLoc,
                                                     clang::IdentifierInfo &Member) 
@@ -1101,11 +1127,11 @@ private:
             return hold_expr.ToRaw( c );                       
         }
         
-        virtual StmtResult ActOnNullStmt(clang::SourceLocation SemiLoc) 
+        virtual OwningStmtResult ActOnNullStmt(clang::SourceLocation SemiLoc) 
         {
             TRACE();
             shared_ptr<Nop> n(new Nop);
-            return hold_stmt.ToRaw( n );                       
+            return ToStmt( n );
         }
                 
         virtual ExprResult ActOnCharacterConstant(const clang::Token &tok) 
@@ -1315,14 +1341,14 @@ private:
         // Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC 
         // extensions. These all assert out immediately.
         
-  virtual DeclTy *ActOnFileScopeAsmDecl(clang::SourceLocation Loc, ExprTy *AsmString) {
+  virtual DeclTy *ActOnFileScopeAsmDecl(clang::SourceLocation Loc, ExprArg AsmString) {
     ASSERT(!"Unimplemented action");
     return 0;
   }
 
-  virtual DeclTy *ActOnField(clang::Scope *S, clang::SourceLocation DeclStart,
+  virtual DeclTy *ActOnField(clang::Scope *S, DeclTy *TagD, clang::SourceLocation DeclStart,
                              clang::Declarator &D, ExprTy *BitfieldWidth) {
-    ASSERT(!"Unimplemented action");
+    ASSERT(!"Unimplemented action"); // TODO is this C-not-C++ or ObjC?
     return 0;
   }
 
@@ -1423,10 +1449,58 @@ private:
   /// CXXScopeSpec that was passed to ActOnCXXEnterDeclaratorScope as well.
   /// Used to indicate that names should revert to being looked up in the
   /// defining scope.
-  virtual void ActOnCXXExitDeclaratorScope(const clang::CXXScopeSpec &SS) {
+  virtual void ActOnCXXExitDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS) {
     ASSERT(!"Unimplemented action");
   }
 
+  virtual DeclTy *ActOnExceptionDeclarator(clang::Scope *S, clang::Declarator &D) {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+
+  virtual OwningStmtResult ActOnCXXCatchBlock(clang::SourceLocation CatchLoc,
+                                              DeclTy *ExceptionDecl,
+                                              StmtArg HandlerBlock) {
+    ASSERT(!"Unimplemented action");
+    return StmtEmpty();
+  }
+
+  virtual OwningStmtResult ActOnCXXTryBlock(clang::SourceLocation TryLoc,
+                                            StmtArg TryBlock,
+                                            MultiStmtArg Handlers) {
+    ASSERT(!"Unimplemented action");
+    return StmtEmpty();
+  }
+ /// ActOnUsingDirective - This is called when using-directive is parsed.
+  virtual DeclTy *ActOnUsingDirective(clang::Scope *CurScope,
+                                      clang::SourceLocation UsingLoc,
+                                      clang::SourceLocation NamespcLoc,
+                                      const clang::CXXScopeSpec &SS,
+                                      clang::SourceLocation IdentLoc,
+                                      clang::IdentifierInfo *NamespcName,
+                                      clang::AttributeList *AttrList)
+  {
+    ASSERT(!"Unimplemented action");
+    return 0;
+  }
+  
+  /// ActOnParamUnparsedDefaultArgument - We've seen a default
+  /// argument for a function parameter, but we can't parse it yet
+  /// because we're inside a class definition. Note that this default
+  /// argument will be parsed later.
+  virtual void ActOnParamUnparsedDefaultArgument(DeclTy *param, 
+                                                 clang::SourceLocation EqualLoc) 
+  { 
+      ASSERT(!"Unimplemented action"); 
+  }
+
+  /// ActOnParamDefaultArgumentError - Parsing or semantic analysis of
+  /// the default argument for the parameter param failed.
+  virtual void ActOnParamDefaultArgumentError(DeclTy *param)
+  {
+      ASSERT(!"Unimplemented action");
+   }
+  
  };
 };   
 

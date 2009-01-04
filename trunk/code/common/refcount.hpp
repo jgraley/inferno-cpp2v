@@ -20,8 +20,10 @@ class RCHold
 // of new/malloc to an shared_ptr and then convert to a raw ptr using ToRaw() if required,
 // otherwise the required extra ref will not be created.
 //
-// TODO: Template the class on the shared_ptr target *and* the raw type. And lose
-// the specialise/dynamic_cast
+// TODO: (done)
+// TODO: Consider supporting the new DeleteX() virtuals in the clang action interface,
+//       but most likely don't bother since we'll tear down anyway.
+
 public:
     RCHold() :
         id( ((unsigned)this % 255+1) << 24 ) // 8-bit hash of this pointer, never zero, placed in top 8 bits
