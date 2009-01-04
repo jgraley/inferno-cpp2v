@@ -6,6 +6,9 @@
 #include "common/pass.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
+#include "helpers/walk.hpp"
+#include "helpers/misc.hpp"
+#include "helpers/scope.hpp"
 
 // TODO indent back to previous level at end of string
 #define ERROR_UNKNOWN(V) \
@@ -31,8 +34,9 @@ public:
 #include "operator_text.inc"
     }
     
-    void operator()( shared_ptr<Program> program )       
+    void operator()( shared_ptr<Program> prog )       
     {
+        program = prog;
         string s = RenderSequence( *program, ";\n", true );
         if( ReadArgs::outfile.empty() )
         {
@@ -45,10 +49,12 @@ public:
             fputs( s.c_str(), fp );
             fclose( fp );
         }    
+        program = shared_ptr<Program>();
     }
 
 private:
     vector<string> operator_text;
+    shared_ptr<Program> program;
     
     string RenderIdentifier( shared_ptr<Identifier> id )
     {
@@ -63,6 +69,30 @@ private:
             TRACE();
         }
         return ids;
+    }
+
+    string RenderScope( shared_ptr<Identifier> id )
+    {
+        shared_ptr<Node> scope = GetScope( program, id );
+        if( scope == program )
+            return "::"; 
+        else if( shared_ptr<Enum> e = dynamic_pointer_cast<Enum>( scope ) ) // <- for enum
+            return RenderScopedIdentifier( e, true );    // omit scope for the enum itself   
+        else if( shared_ptr<Record> r = dynamic_pointer_cast<Record>( scope ) ) // <- for class, struct, union
+            return RenderScopedIdentifier( r ) + "::";       
+        else if( dynamic_pointer_cast<Procedure>( scope ) ||  // <- this is for params
+                 dynamic_pointer_cast<Compound>( scope ) )    // <- this is for locals in body
+            return string(); 
+        else
+            return ERROR_UNSUPPORTED( scope );
+    }        
+    
+    string RenderScopedIdentifier( shared_ptr<Identifier> id, bool parent_only=false )
+    {
+        if( parent_only )
+            return RenderScope( id );
+        else
+            return RenderScope( id ) + RenderIdentifier( id );
     }
     
     string RenderIntegralType( shared_ptr<Integral> type, string object=string() )
@@ -207,7 +237,7 @@ private:
                    "&&" + RenderIdentifier( l ) + // label-as-variable (GCC extension)
                    after;
         else if( shared_ptr<Object> v = dynamic_pointer_cast< Object >(expression) )
-            return RenderIdentifier( v );
+            return RenderScopedIdentifier( v );
         else if( shared_ptr<IntegralConstant> ic = dynamic_pointer_cast< IntegralConstant >(expression) )
             return string(ic->value.toString(10)) + 
                    (ic->value.isUnsigned() ? "U" : "") + 
@@ -267,6 +297,10 @@ private:
                    RenderExpression( a->base, true ) + "." +
                    RenderIdentifier( a->member ) +
                    after;
+            // TODO: this should use RenderScopedIdentifier for the member, since it could have a 
+            // C++ scope specified (eg o.c::m) but cannot do this until members are set properly
+            // in parser, which in turn requires a TypeOfExpression cvapbability in the helpers.     
+                   
         else if( shared_ptr<Compound> c = dynamic_pointer_cast< Compound >(expression) )
             return before + 
                    "{\n" + 

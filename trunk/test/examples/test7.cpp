@@ -1,14 +1,12 @@
-struct b 
-{ 
-    static int x(); 
+struct ms
+{
+    int a;
 };
 
+ms x;
 
-int i;
- 
- 
 int main()
 {
-    b::x();
-    return 0;   
+    x.a = 9;
+    return 0;
 }

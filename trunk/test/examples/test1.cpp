@@ -11,6 +11,7 @@ struct foo
 int func( unsigned a, char b )
 {
     bool ss = true;
+    unsigned g=a;
     if(ss)
         return 5+a*2+b;
     else

@@ -1,0 +1,66 @@
+#ifndef SCOPE_HPP
+#define SCOPE_HPP
+
+#include "tree/tree.hpp"
+
+//
+// Handy helper to get the node that is the "scope" of the supplied node - ie basically the
+// parent in the tree. We have to do searches for this, since the tree does not contain 
+// back-pointers.
+//
+inline shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> id )
+{
+    TRACE("Trying program (global)\n" );
+    FOREACH( shared_ptr<Declaration> d, *program )
+    {            
+        if( id == GetIdentifier( d ) )
+        {
+            return program;
+        }
+    }
+
+	Walk<Record> walkr(program);
+	FOREACH( shared_ptr<Record> r, walkr )
+	{
+	    TRACE("Trying record %s\n", r->name.c_str() );
+	    FOREACH( shared_ptr<Declaration> d, r->members )
+	    {            
+	        TRACE("Trying member \"%s\" \"%s\"\n", GetIdentifier( d )->name.c_str(), id->name.c_str() );
+	        if( id == GetIdentifier( d ) ) 
+	        {
+	            return r;
+	        }
+	    }
+	}
+	
+	Walk<Compound> walkc(program);
+	FOREACH( shared_ptr<Compound> c, walkc )
+	{
+	    Walk<Declaration> walks(c);
+	    FOREACH( shared_ptr<Declaration> d, walks )
+	    {            
+	        if( id == GetIdentifier( d ) )
+	        {
+	            return c;
+	        }
+	    }
+	}
+	
+	Walk<Procedure> walkp(program);
+	FOREACH( shared_ptr<Procedure> p, walkp )
+	{
+	    FOREACH( shared_ptr<Declaration> d, p->parameters )
+	    {            
+	        if( id == GetIdentifier( d ) )
+	        {
+	            return p;
+	        }
+	    }
+	}
+	
+	ASSERT(0); // every identifier should have a scope - if this fails, we've missed out a kind of scope
+	           // Note: if Walk is not automated yet, then it may have missed something
+	return shared_ptr<Node>();
+}
+
+#endif

@@ -19,10 +19,12 @@ int main( int argc, char *argv[] )
     Pass *parse = &p;
     Pass *render = &r;
     (*parse)( program );
-//    (*render)( program );
+    (*render)( program );
 
-    Walk<Node> w(program);
-    for( int i=0; i<w.size(); i++ )
-        printf("%s\n", typeid(*w[i]).name() );
-
+/*    Walk<Node> w(program);    
+    FOREACH( shared_ptr<Node> n, w )
+    {
+        printf("%s\n", typeid(*n).name() );
+    } 
+*/
 }

@@ -13,6 +13,18 @@
 template<typename ELEMENT>
 struct Sequence : deque< shared_ptr<ELEMENT> > {};                   
 
+// TODO:
+//
+// Subroutine body should be under Subroutine Node, not done as an init (inits to be lowered 
+// out; also hierarchically everything to do with a subroutine should be under Subroutine)
+//
+// Compound statement to be a Statement not an Expression.
+//
+// Use Declaration for UserType declarations as well as objects. Declaration points 
+// to identifier, which now means "named program element; maybe object or type"
+//
+
+
 //////////////////////////// Underlying Base Nodes ////////////////////////////
 
 struct Node
@@ -23,7 +35,7 @@ struct Node
 };
  
 
-struct Identifier
+struct Identifier : virtual Node
 {
     string name;
 };
@@ -88,8 +100,9 @@ struct Typedef : UserType
     shared_ptr<Type> type;
 }; 
 
-// Subroutine like in assembler, no params or return.
-// The type refers to the interface as seen by caller
+// Subroutine like in Basic, no params or return.
+// The type refers to the interface as seen by caller - you need
+// an & before toy have a "function pointer"
 struct Subroutine : Type {};
 
 // Like in pascal etc, params but no return value
@@ -98,6 +111,7 @@ struct Procedure : Subroutine
     Sequence<ObjectDeclaration> parameters;
 };
 
+// Like in C, Pascal; params and a single return value
 struct Function : Procedure
 {
     shared_ptr<Type> return_type;
