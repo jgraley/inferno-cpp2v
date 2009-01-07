@@ -13,6 +13,7 @@ IdentifierTracker::IdentifierTracker( shared_ptr<Node> g ) :
     ts->parent = shared_ptr<TNode>(); 
     ts->II = NULL;
     ts->node = g;
+    tnodes.push_back( ts );
     current = ts;
 }
 
@@ -134,8 +135,11 @@ int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNod
     cs = ToString( start );
     ASSERT( ident );
     ips = ToString( ident->parent );
-    ASSERT( II );
-    ASSERT( ident->II );
+    ASSERT( II ); // identifier being searched must have name
+     
+    if( !(ident->II) )
+        return NOMATCH; // not all tnodes have a name eg global, which will never match here
+        
     TRACE("Match %p(%s) %s %s%p(%s) ",
           II, II->getName(), 
           cs.c_str(),
@@ -187,14 +191,16 @@ shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, cla
     if( iscope )
     {
         // A C++ style scope was supplied (iscope::II) - search in here and don't recurse
+        TRACE("%p %p %p\n", iscope.get(), global.get(), tnodes[0]->node.get() );
         start = Find( iscope );
+        ASSERT(start);
         recurse = false;
-        TRACE();
     }    
     else
     {
         // No C++ scope, so use the current scope and recurse through parents
         start = current;
+        ASSERT(start);
         recurse = true;
     }
         

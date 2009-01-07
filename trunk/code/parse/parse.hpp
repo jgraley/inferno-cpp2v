@@ -1500,7 +1500,11 @@ private:
   {
       ASSERT(!"Unimplemented action");
    }
-  
+ 
+  virtual void ActOnEnumStartDefinition(clang::Scope *S, DeclTy *EnumDecl) 
+  {
+     ASSERT(!"Unimplemented action");
+  }  
  };
 };   
 
