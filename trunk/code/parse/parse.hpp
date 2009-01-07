@@ -443,7 +443,21 @@ private:
             else
             {                
                 shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
-                od->object = CreateObjectNode( S, D );        
+                // First see if we already have this object in the current scope
+                shared_ptr<Node> n = ident_track.TryGet( D.getIdentifier(), S );
+                TRACE("Looking for %s, result %p\n", D.getIdentifier()->getName(), n.get() );
+                if( 0 && n ) //TODO doesn'rt find when it should and finds when it shouldnt - see trace
+                {
+                    // we do, so this is a "re-declaration" eg struct S { static int a }; int S::a;
+                    // so just hook up to the existing one  
+                    od->object = dynamic_pointer_cast<Object>( n );
+                    ASSERT( od->object && "found the name, but not an object - maybe a typedef?");
+                }
+                else
+                {
+                    // Create a new one
+                    od->object = CreateObjectNode( S, D );        
+                }
                 od->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
                 TRACE("aod %s %p %p\n", od->object->name.c_str(), od->object.get(), od.get() );
                 d = od;
@@ -1336,6 +1350,27 @@ private:
             return hold_scope.ToRaw( global_scope );
         }
 
+        /// ActOnCXXEnterDeclaratorScope - Called when a C++ scope specifier (global
+        /// scope or nested-name-specifier) is parsed, part of a declarator-id.
+        /// After this method is called, according to [C++ 3.4.3p3], names should be
+        /// looked up in the declarator-id's scope, until the declarator is parsed and
+        /// ActOnCXXExitDeclaratorScope is called.
+        /// The 'SS' should be a non-empty valid CXXScopeSpec.
+        virtual void ActOnCXXEnterDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS) 
+        {
+            shared_ptr<Node> n = hold_scope.FromRaw( SS.getScopeRep() );  // TODO use ConvertScope function, and check for NULL
+            ident_track.PushScope( S, n );
+        }
+    
+        /// ActOnCXXExitDeclaratorScope - Called when a declarator that previously
+        /// invoked ActOnCXXEnterDeclaratorScope(), is finished. 'SS' is the same
+        /// CXXScopeSpec that was passed to ActOnCXXEnterDeclaratorScope as well.
+        /// Used to indicate that names should revert to being looked up in the
+        /// defining scope.
+        virtual void ActOnCXXExitDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS) 
+        {
+            ident_track.PopScope( S );
+        }
 
         //--------------------------------------------- unimplemented actions -----------------------------------------------     
         // Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC 
@@ -1434,25 +1469,6 @@ private:
     return true;
   }
   
-  /// ActOnCXXEnterDeclaratorScope - Called when a C++ scope specifier (global
-  /// scope or nested-name-specifier) is parsed, part of a declarator-id.
-  /// After this method is called, according to [C++ 3.4.3p3], names should be
-  /// looked up in the declarator-id's scope, until the declarator is parsed and
-  /// ActOnCXXExitDeclaratorScope is called.
-  /// The 'SS' should be a non-empty valid CXXScopeSpec.
-  virtual void ActOnCXXEnterDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS) {
-    ASSERT(!"Unimplemented action");
-  }
-
-  /// ActOnCXXExitDeclaratorScope - Called when a declarator that previously
-  /// invoked ActOnCXXEnterDeclaratorScope(), is finished. 'SS' is the same
-  /// CXXScopeSpec that was passed to ActOnCXXEnterDeclaratorScope as well.
-  /// Used to indicate that names should revert to being looked up in the
-  /// defining scope.
-  virtual void ActOnCXXExitDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS) {
-    ASSERT(!"Unimplemented action");
-  }
-
   virtual DeclTy *ActOnExceptionDeclarator(clang::Scope *S, clang::Declarator &D) {
     ASSERT(!"Unimplemented action");
     return 0;

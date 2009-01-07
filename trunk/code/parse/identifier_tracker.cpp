@@ -28,6 +28,27 @@ shared_ptr<IdentifierTracker::TNode> IdentifierTracker::Find( shared_ptr<Node> n
     return shared_ptr<TNode>();
 }
 
+void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<TNode> ts )
+{
+    ts->cs = S;
+    ts->parent = current; 
+    
+    TRACE("push %s %p\n", ToString( ts ).c_str(), S );
+    current = ts;    
+}
+
+void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<Node> n )
+{
+    shared_ptr<TNode> ts;
+    ts = Find( n );
+    ASSERT( ts );
+    ASSERT( ts->parent == current ); // TODO I think the PopScope won't work properly if this isn't true
+                                     // but what if the found scope is more than 1 level deep?
+                                     // Perhaps push repeatedly and hope we get the right number of ActOnPopScope()?
+    
+    PushScope( S, ts );    
+}
+
 void IdentifierTracker::NewScope( clang::Scope *S, const clang::CXXScopeSpec *SS )
 {
     // See if we already know about the "next_record" specified during parse.
@@ -35,22 +56,14 @@ void IdentifierTracker::NewScope( clang::Scope *S, const clang::CXXScopeSpec *SS
     shared_ptr<TNode> ts;
     if( next_record )
     {
-        ts = Find( next_record );
-        ASSERT( ts );
-        current = ts;
-        current->cs = S;
-        TRACE("found %s %p\n", ToString(ts).c_str(), S );
+        PushScope( S, next_record );
         return;        
     }
 
     // We were not warned about the new scope, so just make a new anonymous one.
     ts = shared_ptr<TNode>( new TNode );    
-    ts->cs = S;
-    ts->parent = current; 
     ts->II = NULL;
-    
-    TRACE("new %s %p\n", ToString( ts ).c_str(), S );
-    current = ts;
+    PushScope( S, ts );
 }
 
 void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> rcp, clang::Scope *S, const clang::CXXScopeSpec *SS ) 
