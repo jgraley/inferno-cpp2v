@@ -2,12 +2,12 @@
 struct S
 {
     int a;
-//    static int b;
+    static int b;
 };
 
 int a;
 S x;
-//int S::b;
+int S::b;
 
 int main()
 {
@@ -20,6 +20,6 @@ int main()
     ::x.a=13;
     int a=3;
     ::a=7;
-  //  ::S::b=19;
-    return ::a + 2*a + 3*x.a + 4*::x.a;// - 2*::S::b;
+    ::S::b=19;
+    return ::a + 2*a + 3*x.a + 4*::x.a - 2*::S::b;
 }

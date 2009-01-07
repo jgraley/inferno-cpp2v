@@ -50,6 +50,7 @@ class IdentifierTracker
     // Enter a new scope - clang doesn't tell us when to do this, so we deduce from
     // calls to Add.
     shared_ptr<TNode> Find( shared_ptr<Node> node );
+    void PushScope( clang::Scope *S, shared_ptr<TNode> ts );
     void NewScope( clang::Scope *S, const clang::CXXScopeSpec *SS );
     string ToString( shared_ptr<TNode> ts );
     bool IsIdentical( shared_ptr<TNode> current, shared_ptr<TNode> ident );
@@ -62,8 +63,11 @@ public:
     
     /// Associate supplied node with supplied identifier and scope. Will remain 
     /// until the scope is popped. S must be current scope due to implementation.
-    void Add( clang::IdentifierInfo *II, shared_ptr<Node> rcp, clang::Scope *S, const clang::CXXScopeSpec *SS );  
+    void Add( clang::IdentifierInfo *II, shared_ptr<Node> rcp, clang::Scope *S, const clang::CXXScopeSpec *SS );   // TODO These SS params not used - get rid
   
+    /// Push a scope based on supplied Inferno tree Node
+    void PushScope( clang::Scope *S, shared_ptr<Node> n );
+
     /// ActOnPopScope - When a scope is popped, if any typedefs are now 
     /// out-of-scope, they are removed from the clang::IdentifierInfo::FETokenInfo field.
     virtual void PopScope(clang::Scope *S);
