@@ -32,6 +32,7 @@ class IdentifierTracker
     {
         shared_ptr<TNode> parent;
         shared_ptr<Node> node;
+        shared_ptr<Declaration> decl;
         clang::Scope *cs; // Note: this is the *corresponding* scope, not the containing scope.
                           // Eg given struct A { int B; }; then A->cs is the struct scope and B->cs is NULL
         clang::IdentifierInfo *II;
@@ -63,7 +64,7 @@ public:
     
     /// Associate supplied node with supplied identifier and scope. Will remain 
     /// until the scope is popped. S must be current scope due to implementation.
-    void Add( clang::IdentifierInfo *II, shared_ptr<Node> rcp, clang::Scope *S, const clang::CXXScopeSpec *SS );   // TODO These SS params not used - get rid
+    void Add( clang::IdentifierInfo *II, shared_ptr<Node> node, shared_ptr<Declaration> decl, clang::Scope *S, const clang::CXXScopeSpec *SS );   // TODO These SS params not used - get rid
   
     /// Push a scope based on supplied Inferno tree Node
     void PushScope( clang::Scope *S, shared_ptr<Node> n );
@@ -74,10 +75,13 @@ public:
   
     // Extract the shared_ptr for the identifier. Where the identifier is differently declared
     // in nested scopes, we get the one that applies currently (which is the innermost one)  
-    shared_ptr<Node> Get( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope = shared_ptr<Node>() );                                         
+    // Optionally: Can specify a C++ scope, which must match exactly (NULL, falls back to current scope)
+    //             Can ask for the corresponding decl node for the found node
+    //             Can turn off recursion so only a direct match allowed
+    shared_ptr<Node> Get( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope = shared_ptr<Node>(), shared_ptr<Declaration> *decl = NULL, bool recurse = true );                                         
   
     // Version that just results NULL if identifier has not been added yet
-    shared_ptr<Node> TryGet( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope = shared_ptr<Node>() );      
+    shared_ptr<Node> TryGet( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope = shared_ptr<Node>(), shared_ptr<Declaration> *decl = NULL, bool recurse = true );      
     
     // Indicate that the next Add() call will have the supplied node as parent.
     // Omit to clear (eg after the struct)
