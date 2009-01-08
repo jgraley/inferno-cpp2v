@@ -430,10 +430,28 @@ private:
             return l;
         }
         
-        shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D, bool *issue )
+        shared_ptr<ObjectDeclaration> FindExistingDeclaration( clang::Scope *S, clang::Declarator &D )
         {
-            ASSERT( issue );
-            *issue = true;
+            // See if we already have this object in the current scope, or specified scope if Declarator has one
+            shared_ptr<Node> cxxs = FromCXXScope( &D.getCXXScopeSpec() );
+            shared_ptr<Declaration> found_d;
+            
+            // Use C++ scope if non-NULL; do not recurse (=precise match only)
+            shared_ptr<Node> found_n = ident_track.TryGet( D.getIdentifier(), S, cxxs, &found_d, false ); 
+            TRACE("Looked for %s, result %p %p (%p)\n", D.getIdentifier()->getName(), found_n.get(), found_d.get(), cxxs.get() );
+            if( !found_n )
+                return shared_ptr<ObjectDeclaration>();
+            
+            // we do, so this is a "re-declaration" eg struct S { static int a }; int S::a;
+            // so just hook up to the existing one  
+            shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast<ObjectDeclaration>(found_d);
+            ASSERT( od && "found the name, but not an object - maybe a typedef?");
+            TRACE("aod %s %p %p\n", od->object->name.c_str(), od->object.get(), od.get() );
+            return od;
+        }
+        
+        shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D )
+        {
             const clang::DeclSpec &DS = D.getDeclSpec();
             shared_ptr<Declaration> d;
             if( DS.getStorageClassSpec() == clang::DeclSpec::SCS_typedef )
@@ -444,34 +462,12 @@ private:
             }    
             else
             {                
-                // TODO move the find-existing-decl stuff out of here into ActOnDeclarator 
-                // First see if we already have this object in the current scope
-                shared_ptr<Node> cxxs = FromCXXScope( &D.getCXXScopeSpec() );
-                shared_ptr<Declaration> found_d;
-                shared_ptr<Node> found_n = ident_track.TryGet( D.getIdentifier(), S, cxxs, &found_d, false ); 
-                TRACE("Looked for %s, result %p %p (%p)\n", D.getIdentifier()->getName(), found_n.get(), found_d.get(), cxxs.get() );
-                if( found_n ) 
-                {
-                    // we do, so this is a "re-declaration" eg struct S { static int a }; int S::a;
-                    // so just hook up to the existing one  
-                    //od->object = dynamic_pointer_cast<Object>( found_n );
-                    //ASSERT( od->object && "found the name, but not an object - maybe a typedef?");
-                    shared_ptr<ObjectDeclaration>  od = dynamic_pointer_cast<ObjectDeclaration>(found_d);
-                    ASSERT( od && "found the name, but not an object - maybe a typedef?");
-                    TRACE("aod %s %p %p\n", od->object->name.c_str(), od->object.get(), od.get() );
-                    d = od;
-                    *issue = false; // already been added to the inferno tree once, no need to do this again.
-                }
-                else
-                {
-                    ASSERT( !cxxs ); // If there's a C++ scope, should always find existing decl (cannot make new decl directly into a C++ scope from outside)
-                    shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
-                    // Create a new one
-                    od->object = CreateObjectNode( S, D, od );        
-                    od->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
-                    TRACE("aod %s %p %p\n", od->object->name.c_str(), od->object.get(), od.get() );
-                    d = od;
-                }
+                shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
+                // Create a new one
+                od->object = CreateObjectNode( S, D, od );        
+                od->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
+                TRACE("aod %s %p %p\n", od->object->name.c_str(), od->object.get(), od.get() );
+                d = od;
             }
             
             // Default the access specifier
@@ -517,13 +513,16 @@ private:
                 return 0;
             }
  
-            bool issue;
-            shared_ptr<Declaration> d = CreateDelcaration( S, D, &issue );            
-
-            if( issue )
-                return IssueDeclaration( S, d );
+            shared_ptr<Declaration> d = FindExistingDeclaration( S, D ); // decl exists already?
+            if( d )
+            {
+                return hold_decl.ToRaw( d ); // just return it
+            }
             else
-                return hold_decl.ToRaw( d );
+            {
+                d = CreateDelcaration( S, D );     // make a new one  
+                return IssueDeclaration( S, d );   // add it to the tree and return it
+            }
         }
         
         /// ActOnParamDeclarator - This callback is invoked when a parameter
@@ -983,9 +982,7 @@ private:
         {
             const clang::DeclSpec &DS = D.getDeclSpec();
             TRACE("Member %p\n", Init);
-            bool issue;
-            shared_ptr<Declaration> d = CreateDelcaration( S, D, &issue );
-            ASSERT( issue && "not expecting to find this decl already in the tree");
+            shared_ptr<Declaration> d = CreateDelcaration( S, D );
             shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast<ObjectDeclaration>(d);
       
             if( BitfieldWidth )
