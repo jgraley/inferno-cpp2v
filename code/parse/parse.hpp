@@ -367,7 +367,7 @@ private:
             }
         }
         
-        shared_ptr<Object> CreateObjectNode( clang::Scope *S, clang::Declarator &D )
+        shared_ptr<Object> CreateObjectNode( clang::Scope *S, clang::Declarator &D, shared_ptr<Declaration> d )
         { 
             shared_ptr<Object> o(new Object());
             clang::IdentifierInfo *ID = D.getIdentifier();
@@ -375,7 +375,7 @@ private:
             if(ID)
             {
                 o->name = ID->getName();
-                ident_track.Add( ID, o, S, NULL );     
+                ident_track.Add( ID, o, d, S, NULL );     
                 TRACE("object %s\n", o->name.c_str());
             }
             else
@@ -414,7 +414,7 @@ private:
             if(ID)
             {
                 t->name = ID->getName();
-                ident_track.Add( ID, t, S, NULL ); 
+                ident_track.Add( ID, t, t, S, NULL ); 
             }
             t->type = CreateTypeNode( D );
  
@@ -430,8 +430,10 @@ private:
             return l;
         }
         
-        shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D )
+        shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D, bool *issue )
         {
+            ASSERT( issue );
+            *issue = true;
             const clang::DeclSpec &DS = D.getDeclSpec();
             shared_ptr<Declaration> d;
             if( DS.getStorageClassSpec() == clang::DeclSpec::SCS_typedef )
@@ -442,25 +444,34 @@ private:
             }    
             else
             {                
-                shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
+                // TODO move the find-existing-decl stuff out of here into ActOnDeclarator 
                 // First see if we already have this object in the current scope
-                shared_ptr<Node> n = ident_track.TryGet( D.getIdentifier(), S );
-                TRACE("Looking for %s, result %p\n", D.getIdentifier()->getName(), n.get() );
-                if( 0 && n ) //TODO doesn'rt find when it should and finds when it shouldnt - see trace
+                shared_ptr<Node> cxxs = ConvertScope( &D.getCXXScopeSpec() );
+                shared_ptr<Declaration> found_d;
+                shared_ptr<Node> found_n = ident_track.TryGet( D.getIdentifier(), S, cxxs, &found_d, false ); 
+                TRACE("Looked for %s, result %p %p\n", D.getIdentifier()->getName(), found_n.get(), found_d.get() );
+                if( found_n ) 
                 {
                     // we do, so this is a "re-declaration" eg struct S { static int a }; int S::a;
                     // so just hook up to the existing one  
-                    od->object = dynamic_pointer_cast<Object>( n );
-                    ASSERT( od->object && "found the name, but not an object - maybe a typedef?");
+                    //od->object = dynamic_pointer_cast<Object>( found_n );
+                    //ASSERT( od->object && "found the name, but not an object - maybe a typedef?");
+                    shared_ptr<ObjectDeclaration>  od = dynamic_pointer_cast<ObjectDeclaration>(found_d);
+                    ASSERT( od && "found the name, but not an object - maybe a typedef?");
+                    TRACE("aod %s %p %p\n", od->object->name.c_str(), od->object.get(), od.get() );
+                    d = od;
+                    *issue = false; // already been added to the inferno tree once, no need to do this again.
                 }
                 else
                 {
+                    ASSERT( !cxxs ); // If there's a C++ scope, should always find existing decl (cannot make new decl directly into a C++ scope from outside)
+                    shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
                     // Create a new one
-                    od->object = CreateObjectNode( S, D );        
+                    od->object = CreateObjectNode( S, D, od );        
+                    od->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
+                    TRACE("aod %s %p %p\n", od->object->name.c_str(), od->object.get(), od.get() );
+                    d = od;
                 }
-                od->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
-                TRACE("aod %s %p %p\n", od->object->name.c_str(), od->object.get(), od.get() );
-                d = od;
             }
             
             // Default the access specifier
@@ -496,6 +507,7 @@ private:
         
         virtual DeclTy *ActOnDeclarator( clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup )
         {
+            TRACE();
             // TODO the spurious char __builtin_va_list; line comes from the target info.
             // Create an inferno target info customised for Inferno that doesn't do this. 
             if( strcmp(D.getIdentifier()->getName(), "__builtin_va_list")==0 )
@@ -503,9 +515,13 @@ private:
                 return 0;
             }
  
-            shared_ptr<Declaration> d = CreateDelcaration( S, D );            
+            bool issue;
+            shared_ptr<Declaration> d = CreateDelcaration( S, D, &issue );            
 
-            return IssueDeclaration( S, d );
+            if( issue )
+                return IssueDeclaration( S, d );
+            else
+                return hold_decl.ToRaw( d );
         }
         
         /// ActOnParamDeclarator - This callback is invoked when a parameter
@@ -515,7 +531,7 @@ private:
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D) 
         {
             shared_ptr<ParseParameterDeclaration> p(new ParseParameterDeclaration);
-            p->object = CreateObjectNode( S, D );
+            p->object = CreateObjectNode( S, D, p );
             p->access = Declaration::PUBLIC;        
             p->is_virtual = false;
             p->initialiser = shared_ptr<Expression>(); // might fill in later if init
@@ -552,7 +568,7 @@ private:
                 shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( fp->parameters[i] );                
                 ASSERT(ppd);
                 if( ppd->clang_identifier )
-                    ident_track.Add( ppd->clang_identifier, ppd->object, FnBodyScope, NULL );
+                    ident_track.Add( ppd->clang_identifier, ppd->object, ppd, FnBodyScope, NULL );
             }
         }
 
@@ -965,7 +981,9 @@ private:
         {
             const clang::DeclSpec &DS = D.getDeclSpec();
             TRACE("Member %p\n", Init);
-            shared_ptr<Declaration> d = CreateDelcaration( S, D );
+            bool issue;
+            shared_ptr<Declaration> d = CreateDelcaration( S, D, &issue );
+            ASSERT( issue && "not expecting to find this decl already in the tree");
             shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast<ObjectDeclaration>(d);
       
             if( BitfieldWidth )
@@ -1020,7 +1038,7 @@ private:
             if(Name)
             {
                 h->name = Name->getName();
-                ident_track.Add(Name, h, S, &SS); 
+                ident_track.Add(Name, h, h, S, &SS); 
             }
             else
             {
@@ -1240,7 +1258,7 @@ private:
                 ic->value = i;
                 od->initialiser = ic;
             }
-            ident_track.Add(Id, o, S, NULL); 
+            ident_track.Add(Id, o, od, S, NULL); 
             return hold_decl.ToRaw( od );
         }
         
@@ -1358,6 +1376,7 @@ private:
         /// The 'SS' should be a non-empty valid CXXScopeSpec.
         virtual void ActOnCXXEnterDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS) 
         {
+            TRACE();
             shared_ptr<Node> n = hold_scope.FromRaw( SS.getScopeRep() );  // TODO use ConvertScope function, and check for NULL
             ident_track.PushScope( S, n );
         }
@@ -1369,6 +1388,7 @@ private:
         /// defining scope.
         virtual void ActOnCXXExitDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS) 
         {
+            TRACE();
             ident_track.PopScope( S );
         }
 

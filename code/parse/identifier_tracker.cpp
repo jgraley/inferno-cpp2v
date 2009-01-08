@@ -13,6 +13,7 @@ IdentifierTracker::IdentifierTracker( shared_ptr<Node> g ) :
     ts->parent = shared_ptr<TNode>(); 
     ts->II = NULL;
     ts->node = g;
+    ts->decl = shared_ptr<Declaration>(); 
     tnodes.push_back( ts );
     current = ts;
 }
@@ -66,7 +67,7 @@ void IdentifierTracker::NewScope( clang::Scope *S, const clang::CXXScopeSpec *SS
     PushScope( S, ts );
 }
 
-void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> rcp, clang::Scope *S, const clang::CXXScopeSpec *SS ) 
+void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> node, shared_ptr<Declaration> decl, clang::Scope *S, const clang::CXXScopeSpec *SS ) 
 {
     S->AddDecl(II); // if scope has no decls, clang will not invoke ActOnPopScope()
  
@@ -79,12 +80,13 @@ void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> rcp, cl
     // Make the TNode for this identifier and fill in    
     shared_ptr<TNode> i( new TNode );    
     i->II = II;
-    i->node = rcp;
+    i->node = node;
+    i->decl = decl;
     i->parent = current;  
     i->cs = NULL;
     tnodes.push_back( i );
       
-    TRACE("added %s (rcp=%p) at %s\n", ToString( i ).c_str(), rcp.get(), ToString( current ).c_str() );    
+    TRACE("added %s (rcp=%p) at %s\n", ToString( i ).c_str(), node.get(), ToString( current ).c_str() );    
 }
 
 // Dump the current scope and move back to the parent
@@ -186,39 +188,37 @@ int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNod
 }
 
 
-shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope )
+shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope, shared_ptr<Declaration> *decl, bool recurse )
 {
-    shared_ptr<Node> n = TryGet( II, S, iscope );
+    shared_ptr<Node> n = TryGet( II, S, iscope, decl, recurse );
     ASSERT(n.get() && "This decl didn't get pushed??"); // could remove this
     return n;
 }
 
 
-shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope )
+shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope, shared_ptr<Declaration> *decl, bool recurse )
 {
     TRACE();
-    
+       
     // Choose the required identifier via a proximity search
     shared_ptr<TNode> start;
-    bool recurse;
     if( iscope )
     {
         // A C++ style scope was supplied (iscope::II) - search in here and don't recurse
         TRACE("%p %p %p\n", iscope.get(), global.get(), tnodes[0]->node.get() );
         start = Find( iscope );
         ASSERT(start);
-        recurse = false;
+        recurse = false; // Never recurse with a C++ scope - they are exact specifications
     }    
     else
     {
         // No C++ scope, so use the current scope and recurse through parents
         start = current;
         ASSERT(start);
-        recurse = true;
     }
         
     int best_distance=NOMATCH;
-    shared_ptr<Node> best_node;
+    shared_ptr<TNode> best_tnode;
     for( int i=0; i<tnodes.size(); i++ )
     {
         
@@ -226,11 +226,22 @@ shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, cla
         if( distance < best_distance )
         {
             best_distance = distance;
-            best_node = tnodes[i]->node;
+            best_tnode = tnodes[i];            
         }
     }
  
-    return best_node;
+    if( best_tnode )
+    {
+        if( decl )
+            *decl = best_tnode->decl;
+        return best_tnode->node;
+    }
+    else
+    {
+        if( decl )
+            *decl = shared_ptr<Declaration>();
+        return shared_ptr<Node>();
+    }
 }
 
 

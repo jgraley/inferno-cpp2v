@@ -77,7 +77,7 @@ union ms
 
 ms x;
 
-unsigned f()
+unsigned df()
 {
     x.a = 9;
 }

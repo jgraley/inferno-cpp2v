@@ -87,9 +87,10 @@ private:
             return ERROR_UNSUPPORTED( scope );
     }        
     
-    string RenderScopedIdentifier( shared_ptr<Identifier> id, bool parent_only=false )
+    string RenderScopedIdentifier( shared_ptr<Identifier> id, bool skip=false )
     {
-        if( parent_only )
+        TRACE();
+        if( skip )
             return RenderScope( id );
         else
             return RenderScope( id ) + RenderIdentifier( id );
@@ -380,10 +381,12 @@ private:
                 break;
             }
             
+            string name = RenderIdentifier(od->object);
+            
             if(showtype)
-                s += RenderType( od->object->type, RenderIdentifier(od->object) );
+                s += RenderType( od->object->type, name );
             else
-                s += RenderIdentifier(od->object);
+                s += name;
                 
             if(od->initialiser)
             {
