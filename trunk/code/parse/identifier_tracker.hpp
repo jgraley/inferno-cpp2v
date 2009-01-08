@@ -69,6 +69,10 @@ public:
     /// Push a scope based on supplied Inferno tree Node
     void PushScope( clang::Scope *S, shared_ptr<Node> n );
 
+    /// Let identifier tracker know we saw a scope. We must do this before calling other functions so we
+    /// catch all the scope changes that are not communicated to us any other way.
+    void SeenScope( clang::Scope *S );
+
     /// ActOnPopScope - When a scope is popped, if any typedefs are now 
     /// out-of-scope, they are removed from the clang::IdentifierInfo::FETokenInfo field.
     virtual void PopScope(clang::Scope *S);

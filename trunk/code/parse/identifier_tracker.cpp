@@ -15,6 +15,7 @@ IdentifierTracker::IdentifierTracker( shared_ptr<Node> g ) :
     ts->node = g;
     ts->decl = shared_ptr<Declaration>(); 
     tnodes.push_back( ts );
+    TRACE("Global tnode t%p\n", ts.get() );
     current = ts;
 }
 
@@ -67,26 +68,35 @@ void IdentifierTracker::NewScope( clang::Scope *S, const clang::CXXScopeSpec *SS
     PushScope( S, ts );
 }
 
-void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> node, shared_ptr<Declaration> decl, clang::Scope *S, const clang::CXXScopeSpec *SS ) 
+void IdentifierTracker::SeenScope( clang::Scope *S )
 {
-    S->AddDecl(II); // if scope has no decls, clang will not invoke ActOnPopScope()
  
     // Detect a change of scope and create a new scope if required. Do not do anything for
     // global scope (=no parent) - in that case, we leave the current scope as NULL
     ASSERT(S);
     if( S->getParent() && (!current || current->cs != S) )
-        NewScope( S, SS );
-        
+    {
+        clang::IdentifierInfo *fake_id = (clang::IdentifierInfo *)0xbad1dbad;    
+        S->AddDecl(fake_id); // if scope has no decls, clang will not invoke ActOnPopScope()
+        NewScope( S, NULL );
+    }
+}
+
+
+void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> node, shared_ptr<Declaration> decl, clang::Scope *S, const clang::CXXScopeSpec *SS ) 
+{
+    SeenScope( S );
+    
     // Make the TNode for this identifier and fill in    
     shared_ptr<TNode> i( new TNode );    
     i->II = II;
     i->node = node;
     i->decl = decl;
     i->parent = current;  
-    i->cs = NULL;
+    i->cs = NULL; // Remember cs is the clang scope *owned* by i
     tnodes.push_back( i );
       
-    TRACE("added %s (rcp=%p) at %s\n", ToString( i ).c_str(), node.get(), ToString( current ).c_str() );    
+    TRACE("added %s (%p) at %s t%p\n", ToString( i ).c_str(), node.get(), ToString( current ).c_str(), current.get() );    
 }
 
 // Dump the current scope and move back to the parent
@@ -119,7 +129,7 @@ string IdentifierTracker::ToString( shared_ptr<TNode> ts )
         else
         {
             char c[100];
-            sprintf( c, "%p", ts.get() );
+            sprintf( c, "t%p", ts.get() );
             s = string(c) + s;
         }
         s = "::" + s;
@@ -168,6 +178,7 @@ int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNod
     
     shared_ptr<TNode> cur_it = start; 
     shared_ptr<TNode> id_it = ident->parent;
+    TRACE("t%p t%p t%p ", current.get(), start.get(), id_it.get() );
     int d = 0;
     
     // Try stepping out of the starting scope, one scope at a time,

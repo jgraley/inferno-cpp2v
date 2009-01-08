@@ -449,7 +449,7 @@ private:
                 shared_ptr<Node> cxxs = ConvertScope( &D.getCXXScopeSpec() );
                 shared_ptr<Declaration> found_d;
                 shared_ptr<Node> found_n = ident_track.TryGet( D.getIdentifier(), S, cxxs, &found_d, false ); 
-                TRACE("Looked for %s, result %p %p\n", D.getIdentifier()->getName(), found_n.get(), found_d.get() );
+                TRACE("Looked for %s, result %p %p (%p)\n", D.getIdentifier()->getName(), found_n.get(), found_d.get(), cxxs.get() );
                 if( found_n ) 
                 {
                     // we do, so this is a "re-declaration" eg struct S { static int a }; int S::a;
@@ -507,6 +507,8 @@ private:
         
         virtual DeclTy *ActOnDeclarator( clang::Scope *S, clang::Declarator &D, DeclTy *LastInGroup )
         {
+            ident_track.SeenScope( S );
+        
             TRACE();
             // TODO the spurious char __builtin_va_list; line comes from the target info.
             // Create an inferno target info customised for Inferno that doesn't do this. 
