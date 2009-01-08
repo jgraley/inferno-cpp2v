@@ -163,7 +163,7 @@ private:
         
         // Turn a clang::CXXScopeSpec into a pointer to the corresponding scope node.
         // We have to deal with all the ways of it baing invalid, then just use hold_scope.
-        shared_ptr<Node> ConvertScope( const clang::CXXScopeSpec *SS )
+        shared_ptr<Node> FromCXXScope( const clang::CXXScopeSpec *SS )
         {
             if( !SS )
                 return shared_ptr<Node>();
@@ -179,7 +179,7 @@ private:
         
         clang::Action::TypeTy *isTypeName( clang::IdentifierInfo &II, clang::Scope *S, const clang::CXXScopeSpec *SS) 
         {
-            shared_ptr<Node> n = ident_track.TryGet( &II, S, ConvertScope( SS ) );                              
+            shared_ptr<Node> n = ident_track.TryGet( &II, S, FromCXXScope( SS ) );                              
             if(n)
             {
                 shared_ptr<Type> t = dynamic_pointer_cast<UserType>( n );
@@ -375,7 +375,7 @@ private:
             if(ID)
             {
                 o->name = ID->getName();
-                ident_track.Add( ID, o, d, S, NULL );     
+                ident_track.Add( ID, o, d, S );     
                 TRACE("object %s\n", o->name.c_str());
             }
             else
@@ -414,7 +414,7 @@ private:
             if(ID)
             {
                 t->name = ID->getName();
-                ident_track.Add( ID, t, t, S, NULL ); 
+                ident_track.Add( ID, t, t, S ); 
             }
             t->type = CreateTypeNode( D );
  
@@ -446,7 +446,7 @@ private:
             {                
                 // TODO move the find-existing-decl stuff out of here into ActOnDeclarator 
                 // First see if we already have this object in the current scope
-                shared_ptr<Node> cxxs = ConvertScope( &D.getCXXScopeSpec() );
+                shared_ptr<Node> cxxs = FromCXXScope( &D.getCXXScopeSpec() );
                 shared_ptr<Declaration> found_d;
                 shared_ptr<Node> found_n = ident_track.TryGet( D.getIdentifier(), S, cxxs, &found_d, false ); 
                 TRACE("Looked for %s, result %p %p (%p)\n", D.getIdentifier()->getName(), found_n.get(), found_d.get(), cxxs.get() );
@@ -570,7 +570,7 @@ private:
                 shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( fp->parameters[i] );                
                 ASSERT(ppd);
                 if( ppd->clang_identifier )
-                    ident_track.Add( ppd->clang_identifier, ppd->object, ppd, FnBodyScope, NULL );
+                    ident_track.Add( ppd->clang_identifier, ppd->object, ppd, FnBodyScope );
             }
         }
 
@@ -629,7 +629,7 @@ private:
                                                 bool HasTrailingLParen,
                                                 const clang::CXXScopeSpec *SS = 0 ) 
         {
-            shared_ptr<Node> n = ident_track.Get( &II, S, ConvertScope( SS ) );
+            shared_ptr<Node> n = ident_track.Get( &II, S, FromCXXScope( SS ) );
             TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
             shared_ptr<Object> o = dynamic_pointer_cast<Object>( n );
             ASSERT( o );
@@ -1014,6 +1014,8 @@ private:
                                  clang::AttributeList *Attr,
                                  MultiTemplateParamsArg TemplateParameterLists) 
         {
+            ASSERT( !FromCXXScope(&SS) && "We're not doing anything with the C++ scope"); // TODO do something with the C++ scope
+        
             TRACE("Tag type %d\n", TagType);
             // TagType is an instance of DeclSpec::TST, indicating what kind of tag this
             // is (struct/union/enum/class).
@@ -1040,7 +1042,7 @@ private:
             if(Name)
             {
                 h->name = Name->getName();
-                ident_track.Add(Name, h, h, S, &SS); 
+                ident_track.Add(Name, h, h, S); 
             }
             else
             {
@@ -1260,7 +1262,7 @@ private:
                 ic->value = i;
                 od->initialiser = ic;
             }
-            ident_track.Add(Id, o, od, S, NULL); 
+            ident_track.Add(Id, o, od, S); 
             return hold_decl.ToRaw( od );
         }
         
@@ -1357,7 +1359,7 @@ private:
                                                         clang::SourceLocation CCLoc,
                                                         clang::IdentifierInfo &II) 
         {
-            shared_ptr<Node> n( ident_track.Get( &II, S, ConvertScope( &SS ) ) );
+            shared_ptr<Node> n( ident_track.Get( &II, S, FromCXXScope( &SS ) ) );
             
             return hold_scope.ToRaw( n );
         }
@@ -1379,7 +1381,7 @@ private:
         virtual void ActOnCXXEnterDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS) 
         {
             TRACE();
-            shared_ptr<Node> n = hold_scope.FromRaw( SS.getScopeRep() );  // TODO use ConvertScope function, and check for NULL
+            shared_ptr<Node> n = FromCXXScope( &SS );  // TODO use FromCXXScope function, and check for NULL
             ident_track.PushScope( S, n );
         }
     

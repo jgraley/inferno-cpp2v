@@ -39,6 +39,17 @@ void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<TNode> ts )
     current = ts;    
 }
 
+// Dump the current scope and move back to the parent
+void IdentifierTracker::PopScope(clang::Scope *S) 
+{
+    TRACE("pop %s %p %p\n", ToString(current).c_str(), current->cs, S );
+    if( current && current->cs == S ) // do not pop if we never pushed because didnt get an Add() for this scope
+    {
+        current = current->parent;
+    }
+    TRACE("done pop %s %p\n", ToString(current).c_str(), S );
+}
+
 void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<Node> n )
 {
     shared_ptr<TNode> ts;
@@ -51,26 +62,25 @@ void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<Node> n )
     PushScope( S, ts );    
 }
 
-void IdentifierTracker::NewScope( clang::Scope *S, const clang::CXXScopeSpec *SS )
+void IdentifierTracker::NewScope( clang::Scope *S )
 {
     // See if we already know about the "next_record" specified during parse.
     // If so, make this tnode be the parent. 
-    shared_ptr<TNode> ts;
     if( next_record )
     {
         PushScope( S, next_record );
-        return;        
     }
-
-    // We were not warned about the new scope, so just make a new anonymous one.
-    ts = shared_ptr<TNode>( new TNode );    
-    ts->II = NULL;
-    PushScope( S, ts );
+    else
+    {
+        // We were not warned about the new scope, so just make a new anonymous one.
+        shared_ptr<TNode> ts = shared_ptr<TNode>( new TNode );    
+        ts->II = NULL;
+        PushScope( S, ts );
+    }
 }
 
 void IdentifierTracker::SeenScope( clang::Scope *S )
 {
- 
     // Detect a change of scope and create a new scope if required. Do not do anything for
     // global scope (=no parent) - in that case, we leave the current scope as NULL
     ASSERT(S);
@@ -78,12 +88,12 @@ void IdentifierTracker::SeenScope( clang::Scope *S )
     {
         clang::IdentifierInfo *fake_id = (clang::IdentifierInfo *)0xbad1dbad;    
         S->AddDecl(fake_id); // if scope has no decls, clang will not invoke ActOnPopScope()
-        NewScope( S, NULL );
+        NewScope( S );
     }
 }
 
 
-void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> node, shared_ptr<Declaration> decl, clang::Scope *S, const clang::CXXScopeSpec *SS ) 
+void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> node, shared_ptr<Declaration> decl, clang::Scope *S ) 
 {
     SeenScope( S );
     
@@ -99,16 +109,6 @@ void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> node, s
     TRACE("added %s (%p) at %s t%p\n", ToString( i ).c_str(), node.get(), ToString( current ).c_str(), current.get() );    
 }
 
-// Dump the current scope and move back to the parent
-void IdentifierTracker::PopScope(clang::Scope *S) 
-{
-    TRACE("pop %s %p %p\n", ToString(current).c_str(), current->cs, S );
-    if( current && current->cs == S ) // do not pop if we never pushed because didnt get an Add() for this scope
-    {
-        current = current->parent;
-    }
-    TRACE("done pop %s %p\n", ToString(current).c_str(), S );
-}
 
 // Just for debug; make a pretty string of the scope
 string IdentifierTracker::ToString( shared_ptr<TNode> ts )

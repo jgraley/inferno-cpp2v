@@ -52,7 +52,7 @@ class IdentifierTracker
     // calls to Add.
     shared_ptr<TNode> Find( shared_ptr<Node> node );
     void PushScope( clang::Scope *S, shared_ptr<TNode> ts );
-    void NewScope( clang::Scope *S, const clang::CXXScopeSpec *SS );
+    void NewScope( clang::Scope *S );
     string ToString( shared_ptr<TNode> ts );
     bool IsIdentical( shared_ptr<TNode> current, shared_ptr<TNode> ident );
     int IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNode> current, shared_ptr<TNode> ident, bool recurse );
@@ -64,7 +64,7 @@ public:
     
     /// Associate supplied node with supplied identifier and scope. Will remain 
     /// until the scope is popped. S must be current scope due to implementation.
-    void Add( clang::IdentifierInfo *II, shared_ptr<Node> node, shared_ptr<Declaration> decl, clang::Scope *S, const clang::CXXScopeSpec *SS );   // TODO These SS params not used - get rid
+    void Add( clang::IdentifierInfo *II, shared_ptr<Node> node, shared_ptr<Declaration> decl, clang::Scope *S );   // TODO These SS params not used - get rid
   
     /// Push a scope based on supplied Inferno tree Node
     void PushScope( clang::Scope *S, shared_ptr<Node> n );
