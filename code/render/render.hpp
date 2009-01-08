@@ -364,7 +364,7 @@ private:
             switch( od->object->storage )
             {
             case Object::STATIC:
-                s += "static ";
+                s += "static "; // TODO if in a Record, re-render at global with any init to satisfy linker
                 break;
             case Object::EXTERN:
                 s += "extern ";
@@ -381,6 +381,7 @@ private:
                 break;
             }
             
+            // TODO use RenderScopedIdentifier() if not presently in parent scope
             string name = RenderIdentifier(od->object);
             
             if(showtype)
