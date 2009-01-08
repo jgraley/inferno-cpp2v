@@ -11,8 +11,8 @@ S x;
 //int S::b;
 void S::f()
 {
-    int c;
-    c=0;
+    int a;
+    a=0;
 }
 
 
