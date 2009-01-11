@@ -6,6 +6,12 @@ std::string ReadArgs::infile;
 std::string ReadArgs::outfile;
 bool ReadArgs::trace;
 
+void ReadArgs::Usage()
+{
+    fprintf(stderr, "Usage:\ninferno [-t] -i <infile> [-o outfile]\n");
+    exit(1);
+}
+
 void ReadArgs::Read( int argc, char *argv[] )
 { 
     int i=1;
@@ -26,9 +32,12 @@ void ReadArgs::Read( int argc, char *argv[] )
         }
         else 
         {
-            fprintf(stderr, "Usage:\n%s [-t] -i <infile>\n", argv[0]);
-            exit(1);
+            Usage();
         }
         i++;    
     }    
+    
+    // infile is always required
+    if( infile.empty() )
+        Usage();
 }

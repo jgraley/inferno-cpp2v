@@ -20,11 +20,4 @@ int main( int argc, char *argv[] )
     Pass *render = &r;
     (*parse)( program );
     (*render)( program );
-
-/*    Walk<Node> w(program);    
-    FOREACH( shared_ptr<Node> n, w )
-    {
-        printf("%s\n", typeid(*n).name() );
-    } 
-*/
 }

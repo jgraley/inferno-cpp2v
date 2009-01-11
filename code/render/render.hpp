@@ -185,15 +185,19 @@ private:
 
     string RenderType( shared_ptr<Type> type, string object=string() )
     {
+        string sobject;
+        if( !object.empty() )
+            sobject = " " + object;
+            
         TRACE();
         if( shared_ptr<Integral> i = dynamic_pointer_cast< Integral >(type) )
             return RenderIntegralType( i, object );
         if( shared_ptr<Floating> f = dynamic_pointer_cast< Floating >(type) )
-            return RenderFloatingType( f ) + " " + object;
+            return RenderFloatingType( f ) + sobject;
         else if( dynamic_pointer_cast< Void >(type) )
-            return "void " + object;
+            return "void" + sobject;
         else if( dynamic_pointer_cast< Bool >(type) )
-            return "bool " + object;
+            return "bool" + sobject;
         else if( shared_ptr<Constructor> c = dynamic_pointer_cast< Constructor >(type) )
             return object + "(" + RenderSequence(c->parameters, ", ", false) + ")";
         else if( shared_ptr<Destructor> f = dynamic_pointer_cast< Destructor >(type) )
@@ -207,19 +211,19 @@ private:
         else if( shared_ptr<Array> a = dynamic_pointer_cast< Array >(type) )
             return RenderType( a->element, "(" + object + "[" + RenderExpression(a->size) + "])" );
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
-            return t->name + " " + object;
+            return t->name + sobject;
 #if 0 // Should we include the word "class" etc when referencing holders as types?
        else if( shared_ptr<Struct> ss = dynamic_pointer_cast< Struct >(type) )
-            return "struct " + ss->name + " " + object;
+            return "struct " + ss->name + sobject;
         else if( shared_ptr<Class> c = dynamic_pointer_cast< Class >(type) )
-            return "class " + c->name + " " + object;
+            return "class " + c->name + sobject;
         else if( shared_ptr<Union> u = dynamic_pointer_cast< Union >(type) )
-            return "union " + u->name + " " + object;
+            return "union " + u->name + sobject;
         else if( shared_ptr<Enum> e = dynamic_pointer_cast< Enum >(type) )
-            return "enum " + e->name + " " + object;
+            return "enum " + e->name + sobject;
 #else
         else if( shared_ptr<UserType> ut = dynamic_pointer_cast< UserType >(type) )
-            return ut->name + " " + object;
+            return ut->name + sobject;
 #endif
         else
             return ERROR_UNSUPPORTED(type);
@@ -306,8 +310,7 @@ private:
         else if( shared_ptr<Invoke> in = dynamic_pointer_cast< Invoke >(expression) )
         {
             if( dynamic_pointer_cast<Constructor>(in->member->type) )
-            
-                return before + 
+                return before +  // invoking costructors as found in init lists and locals
                        RenderExpression( in->base, true ) + "(" +
                        RenderSequence( in->arguments, ", ", false ) + ")" +
                        after;
@@ -318,6 +321,15 @@ private:
                        RenderSequence( in->arguments, ", ", false ) + ")" +
                        after;
         }
+        else if( shared_ptr<New> n = dynamic_pointer_cast< New >(expression) )
+            return before +
+                   "new " + RenderType( n->type, "" ) + "(" +
+                   RenderSequence( n->arguments, ", ", false ) + ")" +
+                   after;
+        else if( shared_ptr<Delete> n = dynamic_pointer_cast< Delete >(expression) )
+            return before +
+                   "delete " + RenderExpression( n->pointer, true ) +
+                   after;
         else if( shared_ptr<Subscript> su = dynamic_pointer_cast< Subscript >(expression) )
             return before + 
                    RenderExpression( su->base, true ) + "[" +

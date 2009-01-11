@@ -236,6 +236,17 @@ struct Invoke : Expression
     Sequence<Expression> arguments;
 };
 
+struct New : Expression
+{
+    shared_ptr<Type> type; 
+    Sequence<Expression> arguments;
+};
+
+struct Delete : Expression
+{
+    shared_ptr<Expression> pointer;
+};
+
 struct NumericConstant : Expression {};
 
 struct IntegralConstant : NumericConstant

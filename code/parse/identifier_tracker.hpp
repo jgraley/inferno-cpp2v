@@ -82,10 +82,11 @@ public:
     // Optionally: Can specify a C++ scope, which must match exactly (NULL, falls back to current scope)
     //             Can ask for the corresponding decl node for the found node
     //             Can turn off recursion so only a direct match allowed
-    shared_ptr<Node> Get( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope = shared_ptr<Node>(), shared_ptr<Declaration> *decl = NULL, bool recurse = true );                                         
+    shared_ptr<Node> Get( const clang::IdentifierInfo *II, shared_ptr<Node> iscope = shared_ptr<Node>(), shared_ptr<Declaration> *decl = NULL, bool recurse = true );                                         
   
     // Version that just results NULL if identifier has not been added yet
-    shared_ptr<Node> TryGet( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope = shared_ptr<Node>(), shared_ptr<Declaration> *decl = NULL, bool recurse = true );      
+    // TODO lose clang::Scope param as apparently not used!
+    shared_ptr<Node> TryGet( const clang::IdentifierInfo *II, shared_ptr<Node> iscope = shared_ptr<Node>(), shared_ptr<Declaration> *decl = NULL, bool recurse = true );      
     
     // Indicate that the next Add() call will have the supplied node as parent.
     // Omit to clear (eg after the struct)
