@@ -37,7 +37,10 @@ public:
     void operator()( shared_ptr<Program> prog )       
     {
         program = prog;
-        string s = RenderSequence( *program, ";\n", true );
+        AutoPush< shared_ptr<Node> > cs( scope_stack, program );
+        string s = RenderSequence( *program, ";\n", true ); // gets the .hpp stuff directly
+        s += deferred_decls; // these could go in a .cpp file
+        
         if( ReadArgs::outfile.empty() )
         {
             puts( s.c_str() );
@@ -55,9 +58,12 @@ public:
 private:
     vector<string> operator_text;
     shared_ptr<Program> program;
+    string deferred_decls;
+    stack< shared_ptr<Node> > scope_stack;
     
     string RenderIdentifier( shared_ptr<Identifier> id )
     {
+        // TODO detect Constructor/Destructor and force identifier to empty string if so
         string ids;
         if( id )
         {
@@ -74,6 +80,9 @@ private:
     string RenderScope( shared_ptr<Identifier> id )
     {
         shared_ptr<Node> scope = GetScope( program, id );
+        TRACE("%p %p %p\n", program.get(), scope.get(), scope_stack.top().get() );
+        if( scope == scope_stack.top() )
+            return string(); // local scope
         if( scope == program )
             return "::"; 
         else if( shared_ptr<Enum> e = dynamic_pointer_cast<Enum>( scope ) ) // <- for enum
@@ -89,11 +98,13 @@ private:
     
     string RenderScopedIdentifier( shared_ptr<Identifier> id, bool skip=false )
     {
-        TRACE();
+        string s;
         if( skip )
-            return RenderScope( id );
+            s = RenderScope( id );
         else
-            return RenderScope( id ) + RenderIdentifier( id );
+            s = RenderScope( id ) + RenderIdentifier( id );
+        TRACE("Render scoped identifier %s\n", s.c_str() );
+        return s;
     }
     
     string RenderIntegralType( shared_ptr<Integral> type, string object=string() )
@@ -183,6 +194,10 @@ private:
             return "void " + object;
         else if( dynamic_pointer_cast< Bool >(type) )
             return "bool " + object;
+        else if( shared_ptr<Constructor> c = dynamic_pointer_cast< Constructor >(type) )
+            return object + "(" + RenderSequence(c->parameters, ", ", false) + ")";
+        else if( shared_ptr<Destructor> f = dynamic_pointer_cast< Destructor >(type) )
+            return object + "()";
         else if( shared_ptr<Function> f = dynamic_pointer_cast< Function >(type) )
             return RenderType( f->return_type, "(" + object + ")(" + RenderSequence(f->parameters, ", ", false) + ")" );
         else if( shared_ptr<Pointer> p = dynamic_pointer_cast< Pointer >(type) )
@@ -288,6 +303,21 @@ private:
                    RenderExpression( o->function, true ) + "(" +
                    RenderSequence( o->arguments, ", ", false ) + ")" +
                    after;
+        else if( shared_ptr<Invoke> in = dynamic_pointer_cast< Invoke >(expression) )
+        {
+            if( dynamic_pointer_cast<Constructor>(in->member->type) )
+            
+                return before + 
+                       RenderExpression( in->base, true ) + "(" +
+                       RenderSequence( in->arguments, ", ", false ) + ")" +
+                       after;
+            else
+                return before + 
+                       RenderExpression( in->base, true ) + "." +
+                       RenderIdentifier( in->member ) + "(" +
+                       RenderSequence( in->arguments, ", ", false ) + ")" +
+                       after;
+        }
         else if( shared_ptr<Subscript> su = dynamic_pointer_cast< Subscript >(expression) )
             return before + 
                    RenderExpression( su->base, true ) + "[" +
@@ -303,11 +333,14 @@ private:
             // in parser, which in turn requires a TypeOfExpression cvapbability in the helpers.     
                    
         else if( shared_ptr<Compound> c = dynamic_pointer_cast< Compound >(expression) )
+        {
+            AutoPush< shared_ptr<Node> > cs( scope_stack, c );
             return before + 
                    "{\n" + 
                    RenderSequence(c->statements, ";\n", true) +
                    "}\n" +
                    after;
+        }
         else if( shared_ptr<Cast> c = dynamic_pointer_cast< Cast >(expression) )
             return before + 
                    "(" + RenderType( c->type, "" ) + ")" +
@@ -345,22 +378,13 @@ private:
         }        
     }
     
-    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, Declaration::Access *access = NULL, bool showtype = true )
+    string RenderObjectDeclaration( shared_ptr<ObjectDeclaration> od, string sep, bool showtype = true, 
+                                    bool showstorage = true, bool showinit = true, bool showscope = false )
     {
-        TRACE();
         string s;
         
-        if( access && declaration->access != *access )
+        if( showstorage )
         {
-            s += RenderAccess( declaration->access ) + ":\n";
-            *access = declaration->access;
-        }
-         
-        if( declaration->is_virtual )
-            s+= "virtual "; 
-                                
-        if( shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast< ObjectDeclaration >(declaration) )
-        {                
             switch( od->object->storage )
             {
             case Object::STATIC:
@@ -380,54 +404,114 @@ private:
                 s += ERROR_UNKNOWN("storage class");
                 break;
             }
-            
-            // TODO use RenderScopedIdentifier() if not presently in parent scope
-            string name = RenderIdentifier(od->object);
-            
-            if(showtype)
-                s += RenderType( od->object->type, name );
+        }
+        
+        
+        string name;
+        shared_ptr<Constructor> con = dynamic_pointer_cast<Constructor>(od->object->type);
+        shared_ptr<Destructor> de = dynamic_pointer_cast<Destructor>(od->object->type);
+        if( con || de )
+        {
+            shared_ptr<Record> rec = dynamic_pointer_cast<Record>( GetScope( program, od->object ) );
+            ASSERT( rec );
+            name = (de ? "~" : "") + RenderIdentifier(rec); 
+        }
+        else
+        {
+            name = RenderIdentifier(od->object);
+        }
+        
+        if( showscope )
+            name = RenderScope(od->object) + name;           
+                        
+        if(showtype)
+            s += RenderType( od->object->type, name );
+        else
+            s = name;
+        
+        if(od->initialiser && showinit)
+        {
+            AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, od->object ) );
+            if( shared_ptr<Constructor> c = dynamic_pointer_cast<Constructor>(od->object->type) )
+                if( !c->initialisers.empty() )
+                {
+                    s += " : ";
+                    s += RenderSequence( c->initialisers, ", ", false, Declaration::PUBLIC, true );                
+                }
+            bool function_definition = !!dynamic_pointer_cast<Compound>(od->initialiser);
+            if( function_definition )
+                s += "\n";
             else
-                s += name;
-                
-            if(od->initialiser)
+                s += " = ";
+            s += RenderExpression(od->initialiser);
+            if( !function_definition )
+                s += sep;
+        }            
+        else
+        {
+            s += sep;
+        }    
+        return s;
+    }
+    
+    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, Declaration::Access *access = NULL, bool showtype = true )
+    {
+        TRACE();
+        string s;
+        
+        if( access && declaration->access != *access )
+        {
+            s += RenderAccess( declaration->access ) + ":\n";
+            *access = declaration->access;
+        }
+         
+        if( declaration->is_virtual )
+            s+= "virtual "; 
+                                
+        if( shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast< ObjectDeclaration >(declaration) )
+        {                
+            bool isfunc = !!dynamic_pointer_cast<Subroutine>( od->object->type );
+            if( dynamic_pointer_cast<Record>( scope_stack.top() ) &&
+                (od->object->storage==Object::STATIC || isfunc) )
             {
-                bool function_definition = !!dynamic_pointer_cast<Compound>(od->initialiser);
-                if( function_definition )
-                    s += "\n";
-                else
-                    s += " = ";
-                s += RenderExpression(od->initialiser);
-                if( !function_definition )
-                    s += sep;
+                // Static things in records (ie static member objects and static emmber functions)
+                // get split into a part that goes into the record (main line of rendering) and
+                // a part that goes seperately (deferred_decls gets appended at the very end)
+                s += RenderObjectDeclaration( od, sep, showtype, true, false, false );
+                {
+                    AutoPush< shared_ptr<Node> > cs( scope_stack, program );
+                    deferred_decls += string("\n") + RenderObjectDeclaration( od, sep, showtype, false, true, true );
+                }
             }
             else
             {
-                s += sep;
-            }    
+                // Otherwise, render everything directly using the default settings
+                s += RenderObjectDeclaration( od, sep, showtype, true, true, false );
+            }
         }
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
             s += "typedef " + RenderType( t->type, t->name ) + sep;
-        else if( shared_ptr<Record> h = dynamic_pointer_cast< Record >(declaration) )
+        else if( shared_ptr<Record> r = dynamic_pointer_cast< Record >(declaration) )
         {
             Declaration::Access a;
             bool showtype=true;
             string sep2=";\n";
-            if( dynamic_pointer_cast< Class >(h) )
+            if( dynamic_pointer_cast< Class >(r) )
             {
                 s += "class";
                 a = Declaration::PRIVATE;
             }
-            else if( dynamic_pointer_cast< Struct >(h) )
+            else if( dynamic_pointer_cast< Struct >(r) )
             {
                 s += "struct";
                 a = Declaration::PUBLIC;
             }
-            else if( dynamic_pointer_cast< Union >(h) )
+            else if( dynamic_pointer_cast< Union >(r) )
             {
                 s += "union";
                 a = Declaration::PUBLIC;
             }
-            else if( dynamic_pointer_cast< Enum >(h) )
+            else if( dynamic_pointer_cast< Enum >(r) )
             {
                 s += "enum";
                 a = Declaration::PUBLIC;
@@ -437,32 +521,33 @@ private:
             else
                 return ERROR_UNSUPPORTED(declaration);
 
-            s += " " + h->name;
+            s += " " + r->name;
             
-            if( shared_ptr<InheritanceRecord> ih = dynamic_pointer_cast< InheritanceRecord >(declaration) )
+            if( shared_ptr<InheritanceRecord> ir = dynamic_pointer_cast< InheritanceRecord >(declaration) )
             {
-                if( !ih->bases.empty() )
+                if( !ir->bases.empty() )
                 {
                     s += " : ";
-                    for( int i=0; i<ih->bases.size(); i++ )
+                    for( int i=0; i<ir->bases.size(); i++ )
                     {   
                         if( i>0 )
                             s += ", ";
-                        shared_ptr<InheritanceRecord> bih = dynamic_pointer_cast< InheritanceRecord >(ih->bases[i]);    
+                        shared_ptr<InheritanceRecord> bih = dynamic_pointer_cast< InheritanceRecord >(ir->bases[i]);    
                         ASSERT( bih );
                         s += RenderAccess( bih->access ) + " " + bih->name;
                     }
                 }
             }
             
-            if( !h->incomplete )
+            if( !r->incomplete )
             {
+                 AutoPush< shared_ptr<Node> > cs( scope_stack, r );
                  s += "\n{\n" +
-                      RenderSequence( h->members, sep2, true, a, showtype ) +
+                      RenderSequence( r->members, sep2, true, a, showtype ) +
                       "}";
             }
             
-            s += ";\n\n";
+            s += ";\n";
         }
         else
             s += ERROR_UNSUPPORTED(declaration);

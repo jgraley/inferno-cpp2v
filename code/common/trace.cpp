@@ -31,9 +31,15 @@ void Tracer::operator()(const char *fmt, ...)
     if( !(ReadArgs::trace || (flags & FORCE)) )
         return;
     
+    if( continuation && (flags & FORCE) ) 
+    {
+        printf("\n");
+        continuation = false;
+    }
+    
     va_list vl;
     va_start( vl, fmt );
-    if( !continuation )
+    if( !continuation ) 
         printf( "    %s:%d in %s()\n", file, line, function);
     vprintf( fmt, vl );
     va_end( vl );
@@ -44,7 +50,7 @@ void Tracer::operator()(const char *fmt, ...)
 void boost::assertion_failed(char const * expr, char const * function, char const * file, long line)
 {
     Tracer( file, line, function, Tracer::FORCE )( "Assertion failed: %s\n\n", expr );
-    fflush( stderr ); // might help if the crash kills buffered output
+    fflush( stdout ); // might help if the crash kills buffered output
 
     // The C library provides abort(), but I'm not getting a stack dump under cygwin
     (*(int*)-1)++; 

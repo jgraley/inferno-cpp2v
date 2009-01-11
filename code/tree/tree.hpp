@@ -117,7 +117,10 @@ struct Function : Procedure
     shared_ptr<Type> return_type;
 };
 
-struct Constructor : Procedure {};
+struct Constructor : Procedure 
+{
+    Sequence<Statement> initialisers;
+};
 
 struct Destructor : Subroutine {};
 
@@ -189,11 +192,6 @@ struct Compound : Expression
     Sequence<Statement> statements;
 };                   
 
-struct InitCompound : Compound
-{
-    Sequence<Statement>  initialisers;
-};                   
-
 struct Operator : Expression
 {
     Sequence<Expression> operands;
@@ -228,6 +226,13 @@ struct Aggregate : Expression
 struct Call : Expression
 {
     shared_ptr<Expression> function;
+    Sequence<Expression> arguments;
+};
+
+struct Invoke : Expression
+{
+    shared_ptr<Expression> base;
+    shared_ptr<Object> member;
     Sequence<Expression> arguments;
 };
 

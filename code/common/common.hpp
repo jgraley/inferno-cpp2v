@@ -1,9 +1,12 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
+#include "trace.hpp"
+
 #include <assert.h>
 #include <stdio.h>
 #include <vector>
+#include <stack>
 using namespace std;
 
 #include <boost/shared_ptr.hpp>
@@ -24,6 +27,24 @@ using namespace boost;
 
 #define COUNTOF( array ) ( sizeof( array )/sizeof( array[0] ) )
 
-#include "trace.hpp"
+// Does a push then pops again in destructor
+template< typename T >
+class AutoPush
+{
+public:
+    AutoPush( stack<T> &s, const T &t ) : st(s)
+    {
+        st.push(t);
+        check_t = t;
+    }
+    ~AutoPush()
+    {
+        ASSERT( st.top() == check_t );
+        st.pop();
+    }
+private:
+    std::stack<T> &st;
+    T check_t; // just for checking
+};
 
 #endif
