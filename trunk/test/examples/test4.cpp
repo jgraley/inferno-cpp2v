@@ -24,10 +24,9 @@ class Sub : public Test, public Other
 {
 };
 
-// Not yet supported in clang
-//void Test::g()
-//{
-//}
+void Test::g()
+{
+}
 
 enum GGFF
 {

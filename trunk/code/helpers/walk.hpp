@@ -51,8 +51,6 @@ public:
             Visit( o->type );
         else if( shared_ptr< Record > r = dynamic_pointer_cast< Record >( p ) )
             Visit( r->members );
-        else if( shared_ptr< InitCompound > ic = dynamic_pointer_cast< InitCompound >( p ) )
-            Visit( ic->initialisers );
         else if( shared_ptr< Compound > c = dynamic_pointer_cast< Compound >( p ) )
             Visit( c->statements );
         else if( shared_ptr< Operator > o = dynamic_pointer_cast< Operator >( p ) )

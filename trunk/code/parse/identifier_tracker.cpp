@@ -24,41 +24,46 @@ shared_ptr<IdentifierTracker::TNode> IdentifierTracker::Find( shared_ptr<Node> n
     ASSERT( node );
     shared_ptr<TNode> found;
     for( int i=0; i<tnodes.size(); i++ )
+    {
+        //TRACE("%d of %d t%p\n", i, tnodes.size(), tnodes[i].get() );
         if( tnodes[i]->node == node )
             return tnodes[i];
-        
+    }
+    
     return shared_ptr<TNode>();
 }
 
 void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<TNode> ts )
 {
+    // If scope has no decls, clang will not invoke ActOnPopScope()
+    // so we set a non-NULL rubbish value in there whenever we push, in order
+    // to be sure of getting a corresponding pop
+    clang::IdentifierInfo *fake_id = (clang::IdentifierInfo *)0xbad1dbad;    
+    S->AddDecl(fake_id); 
     ts->cs = S;
-    ts->parent = current; 
+    ASSERT( ts->parent == current ); 
     
-    TRACE("push %s %p\n", ToString( ts ).c_str(), S );
+    TRACE("push %s s%p\n", ToString( ts ).c_str(), S );
     current = ts;    
 }
 
 // Dump the current scope and move back to the parent
 void IdentifierTracker::PopScope(clang::Scope *S) 
 {
-    TRACE("pop %s %p %p\n", ToString(current).c_str(), current->cs, S );
+    TRACE("pop %s s%p s%p\n", ToString(current).c_str(), current->cs, S );
     if( current && current->cs == S ) // do not pop if we never pushed because didnt get an Add() for this scope
     {
         current = current->parent;
     }
-    TRACE("done pop %s %p\n", ToString(current).c_str(), S );
+    TRACE("done pop %s s%p\n", ToString(current).c_str(), S );
 }
 
 void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<Node> n )
 {
     shared_ptr<TNode> ts;
     ts = Find( n );
+    TRACE("Found t%p\n", ts.get() );
     ASSERT( ts );
-    ASSERT( ts->parent == current ); // TODO I think the PopScope won't work properly if this isn't true
-                                     // but what if the found scope is more than 1 level deep?
-                                     // Perhaps push repeatedly and hope we get the right number of ActOnPopScope()?
-    
     PushScope( S, ts );    
 }
 
@@ -66,15 +71,21 @@ void IdentifierTracker::NewScope( clang::Scope *S )
 {
     // See if we already know about the "next_record" specified during parse.
     // If so, make this tnode be the parent. 
-    if( next_record )
+    if( !next_record.empty() && (S->getFlags() & clang::Scope::CXXClassScope) ) // Only use next_record if scope is actually a Record
     {
-        PushScope( S, next_record );
+        TRACE("got next_record; \n");
+        ASSERT( next_record.top() ); // probably tried to create more than one scope for this record
+        PushScope( S, next_record.top() );
+        next_record.pop();
+        next_record.push( shared_ptr<Node>() );   // Remove since we've used it and shouldn't use it again     
     }
     else
     {
         // We were not warned about the new scope, so just make a new anonymous one.
+        TRACE("no next_record; \n");
         shared_ptr<TNode> ts = shared_ptr<TNode>( new TNode );    
         ts->II = NULL;
+        ts->parent = current;
         PushScope( S, ts );
     }
 }
@@ -86,8 +97,7 @@ void IdentifierTracker::SeenScope( clang::Scope *S )
     ASSERT(S);
     if( S->getParent() && (!current || current->cs != S) )
     {
-        clang::IdentifierInfo *fake_id = (clang::IdentifierInfo *)0xbad1dbad;    
-        S->AddDecl(fake_id); // if scope has no decls, clang will not invoke ActOnPopScope()
+        TRACE("Seen new clang::Scope s%p; \n", S);
         NewScope( S );
     }
 }
@@ -106,7 +116,7 @@ void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> node, s
     i->cs = NULL; // Remember cs is the clang scope *owned* by i
     tnodes.push_back( i );
       
-    TRACE("added %s (%p) at %s t%p\n", ToString( i ).c_str(), node.get(), ToString( current ).c_str(), current.get() );    
+    TRACE("added t%p %s (%p) at %s t%p\n", i.get(), ToString( i ).c_str(), node.get(), ToString( current ).c_str(), current.get() );    
 }
 
 
@@ -117,23 +127,26 @@ string IdentifierTracker::ToString( shared_ptr<TNode> ts )
         return string("<nil>");
 
     string s;
+    int i=0;
     while( ts )
     {        
         if( ts->node == global )
             break;
-            
+        string ss;    
         if( ts->II )
         {
-            s = string(ts->II->getName()) + s;
+            ss = string(ts->II->getName()) + s;
         }
         else
         {
             char c[100];
             sprintf( c, "t%p", ts.get() );
-            s = string(c) + s;
+            ss = string(c) + s;
         }
-        s = "::" + s;
+        s = "::" + ss;
         ts = ts->parent;        
+        i++;
+        ASSERT( i<=tnodes.size() && "TNode loop detected!!!!!!!!! OH NO!!!!!1\n" );            
     }
     
     if( s.empty() )
@@ -202,7 +215,7 @@ int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNod
 shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope, shared_ptr<Declaration> *decl, bool recurse )
 {
     shared_ptr<Node> n = TryGet( II, S, iscope, decl, recurse );
-    ASSERT(n.get() && "This decl didn't get pushed??"); // could remove this
+    ASSERT(n.get() && "This decl didn't get pushed??"); 
     return n;
 }
 
@@ -256,7 +269,7 @@ shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, cla
 }
 
 
-// Untested
+/* Untested
 shared_ptr<Node> IdentifierTracker::FindMemberNode( const clang::IdentifierInfo *II, shared_ptr<Node> record )
 {
     // Find the tnode for the record, based on the supplied node
@@ -276,3 +289,4 @@ shared_ptr<Node> IdentifierTracker::FindMemberNode( const clang::IdentifierInfo 
     return shared_ptr<Node>();
 }
 
+*/

@@ -46,7 +46,7 @@ class IdentifierTracker
     
     // Parser can "warn" us that the next clang::Scope we see will correspond to
     // the supplied node (a Record node in fact).
-    shared_ptr<Node> next_record;
+    stack< shared_ptr<Node> > next_record;
 
     // Enter a new scope - clang doesn't tell us when to do this, so we deduce from
     // calls to Add.
@@ -91,12 +91,21 @@ public:
     // Omit to clear (eg after the struct)
     void SetNextRecord( shared_ptr<Node> n = shared_ptr<Node>() )
     {
-        TRACE("next scope is %p\n", n.get() );
-        next_record = n;
+        TRACE("next record is %p\n", n.get() );
+        
+        if( n )
+            next_record.push(n);
+        else
+        {
+            ASSERT( !next_record.empty() );
+            next_record.pop();
+        }
     }                             
     
-    // Find supplied identifier in supplied record, return the object node within said record or NULL
-    shared_ptr<Node> FindMemberNode( const clang::IdentifierInfo *II, shared_ptr<Node> record );
+    shared_ptr<Node> GetCurrent()
+    {
+        return current->node;
+    }
 };
 
 #endif

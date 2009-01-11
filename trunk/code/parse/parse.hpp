@@ -195,10 +195,17 @@ private:
             return 0; // TODO templates
         }
 
-        // Just added to get it to build TODO implement properly
         virtual bool isCurrentClassName(const clang::IdentifierInfo& II, clang::Scope *S, const clang::CXXScopeSpec *SS) 
-        { 
-            return false;  //TODO
+        {             
+            ident_track.SeenScope( S );
+            
+            shared_ptr<Node> cur = ident_track.GetCurrent();
+            if( !dynamic_pointer_cast<Record>(cur) )
+                return false; // not even in a record
+            
+            shared_ptr<Node> cxxs = FromCXXScope( SS );
+            shared_ptr<Node> n = ident_track.TryGet( &II, S, cxxs );    
+            return n == cur;
         }
 
         virtual void ActOnPopScope(clang::SourceLocation Loc, clang::Scope *S)
@@ -309,22 +316,47 @@ private:
                 const clang::DeclaratorChunk &chunk = D.getTypeObject(depth);
                 switch( chunk.Kind )
                 {
-                case clang::DeclaratorChunk::Function:
+                    case clang::DeclaratorChunk::Function:
                     {
                         const clang::DeclaratorChunk::FunctionTypeInfo &fchunk = chunk.Fun; 
-                        shared_ptr<Function> f(new Function);
-                        for( int i=0; i<fchunk.NumArgs; i++ )
+                        switch( D.getKind() )
                         {
-                            shared_ptr<Declaration> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
-                            shared_ptr<ObjectDeclaration> vd = dynamic_pointer_cast<ObjectDeclaration>(d); // TODO just push the declarators, no need for dynamic cast?
-                            f->parameters.push_back( vd );
+                            case clang::Declarator::DK_Normal:
+                            {
+                                shared_ptr<Function> f(new Function);
+                                for( int i=0; i<fchunk.NumArgs; i++ )
+                                {
+                                    shared_ptr<Declaration> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
+                                    shared_ptr<ObjectDeclaration> vd = dynamic_pointer_cast<ObjectDeclaration>(d); // TODO just push the declarators, no need for dynamic cast?
+                                    f->parameters.push_back( vd );
+                                }
+                                TRACE("function returning...\n");
+                                f->return_type = CreateTypeNode( D, depth+1 );                        
+                                return f;
+                            }
+                            case clang::Declarator::DK_Constructor:
+                            {
+                                shared_ptr<Constructor> c(new Constructor);
+                                for( int i=0; i<fchunk.NumArgs; i++ )
+                                {
+                                    shared_ptr<Declaration> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
+                                    shared_ptr<ObjectDeclaration> vd = dynamic_pointer_cast<ObjectDeclaration>(d); // TODO just push the declarators, no need for dynamic cast?
+                                    c->parameters.push_back( vd );
+                                }
+                                return c;
+                            }
+                            case clang::Declarator::DK_Destructor:
+                            {
+                                shared_ptr<Destructor> d(new Destructor);
+                                return d;
+                            }
+                            default:
+                            ASSERT("Unknown function kind\n");
+                            break;
                         }
-                        TRACE("function returning...\n");
-                        f->return_type = CreateTypeNode( D, depth+1 );                        
-                        return f;
                     }
                     
-                case clang::DeclaratorChunk::Pointer:
+                    case clang::DeclaratorChunk::Pointer:
                     {
                         // TODO attributes
                         TRACE("pointer to...\n");
@@ -334,7 +366,7 @@ private:
                         return p;
                     }
                     
-                case clang::DeclaratorChunk::Reference:
+                    case clang::DeclaratorChunk::Reference:
                     {
                         // TODO attributes
                         TRACE("reference to...\n");
@@ -345,7 +377,7 @@ private:
                         return r;
                     }
                     
-                case clang::DeclaratorChunk::Array:
+                    case clang::DeclaratorChunk::Array:
                     {
                         // TODO attributes
                         const clang::DeclaratorChunk::ArrayTypeInfo &achunk = chunk.Arr; 
@@ -360,7 +392,7 @@ private:
                         return a;
                     }
                     
-                default:
+                    default:
                     ASSERT(!"Unknown type chunk");                     
                     break;
                 }
@@ -440,7 +472,10 @@ private:
             shared_ptr<Node> found_n = ident_track.TryGet( D.getIdentifier(), S, cxxs, &found_d, false ); 
             TRACE("Looked for %s, result %p %p (%p)\n", D.getIdentifier()->getName(), found_n.get(), found_d.get(), cxxs.get() );
             if( !found_n )
+            {
+                ASSERT( !cxxs );
                 return shared_ptr<ObjectDeclaration>();
+            }
             
             // we do, so this is a "re-declaration" eg struct S { static int a }; int S::a;
             // so just hook up to the existing one  
@@ -483,7 +518,7 @@ private:
         {
             // Did we leave a decl lying around to insert later? If so, pack it together with
             // the current decl, for insertion into the code sequence.
-            TRACE("Scope flags %x\n", S->getFlags() );
+            TRACE("Scope flags %x ", S->getFlags() );
             if( decl_to_insert )
             {                
                 shared_ptr<ParseTwin> pt( new ParseTwin );
@@ -492,11 +527,13 @@ private:
                 inferno_scope_stack.top()->push_back( decl_to_insert );
                 inferno_scope_stack.top()->push_back( d );
                 decl_to_insert = shared_ptr<Declaration>(); // don't need to generate it again
+                TRACE("inserted decl\n" );
                 return hold_decl.ToRaw( pt );
             }
             else
             {
                 inferno_scope_stack.top()->push_back( d );
+                TRACE("no insert\n" );
                 return hold_decl.ToRaw( d ); 
             }            
         }
@@ -560,13 +597,14 @@ private:
         // puts all the params back in the current scope assuming:
         // 1. They have been added to the Function node correctly and
         // 2. The pass-specific extension ParseParameterDeclaration has been used
-        void AddParamsToScope( shared_ptr<Function> fp, clang::Scope *FnBodyScope )
+        void AddParamsToScope( shared_ptr<Procedure> pp, clang::Scope *FnBodyScope )
         {
-            ASSERT(fp);
-            for( int i=0; i<fp->parameters.size(); i++ )
+            ASSERT(pp);
+            
+            for( int i=0; i<pp->parameters.size(); i++ )
             {
                 TRACE();
-                shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( fp->parameters[i] );                
+                shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( pp->parameters[i] );                
                 ASSERT(ppd);
                 if( ppd->clang_identifier )
                     ident_track.Add( ppd->clang_identifier, ppd->object, ppd, FnBodyScope );
@@ -587,9 +625,13 @@ private:
             TRACE();
             shared_ptr<ObjectDeclaration> p = dynamic_pointer_cast<ObjectDeclaration>(hold_decl.FromRaw(D));
             ASSERT(p);
-            shared_ptr<Function> fp = dynamic_pointer_cast<Function>( p->object->type );
-            AddParamsToScope( fp, FnBodyScope );
+    
+            if( shared_ptr<Procedure> pp = dynamic_pointer_cast<Procedure>( p->object->type ) )
+                AddParamsToScope( pp, FnBodyScope );
+    
             inferno_scope_stack.push( new Sequence<Declaration> ); 
+            
+            TRACE();
             
             return hold_decl.ToRaw( p );     
         }
@@ -745,11 +787,23 @@ private:
                                          clang::SourceLocation *CommaLocs,
                                          clang::SourceLocation RParenLoc) 
         {
-            shared_ptr<Call> c(new Call);
-            c->function = hold_expr.FromRaw(Fn);
-            for(int i=0; i<NumArgs; i++ )
-                c->arguments.push_back( hold_expr.FromRaw(Args[i]) );
-            return hold_expr.ToRaw( c );
+            if( shared_ptr<Access> a = dynamic_pointer_cast<Access>(hold_expr.FromRaw(Fn)) )
+            {
+                shared_ptr<Invoke> in(new Invoke);
+                in->base = a->base;
+                in->member = a->member;
+                for(int i=0; i<NumArgs; i++ )
+                    in->arguments.push_back( hold_expr.FromRaw(Args[i]) );
+                return hold_expr.ToRaw( in );
+            }
+            else
+            {
+                shared_ptr<Call> c(new Call);
+                c->function = hold_expr.FromRaw(Fn);
+                for(int i=0; i<NumArgs; i++ )
+                    c->arguments.push_back( hold_expr.FromRaw(Args[i]) );
+                return hold_expr.ToRaw( c );
+            }
         }
         
         // Not sure if this one has been tested!!
@@ -1048,6 +1102,7 @@ private:
                 static int ac=0;
                 sprintf( an, "__anon%d", ac++ );
                 h->name = an;
+                ident_track.Add(NULL, h, h, S); 
             }
             
             h->access = Declaration::PUBLIC; // must make all holder type decls public since clang doesnt seem to give us an AS
@@ -1080,8 +1135,7 @@ private:
             shared_ptr<Record> h = dynamic_pointer_cast<Record>(d);
             h->incomplete = false;
             
-            if( h->name[0] != '_' ) // Do not enter the scope for anonymous names TODO deal with anons better
-                ident_track.SetNextRecord( h );
+            ident_track.SetNextRecord( h );
                 
             inferno_scope_stack.push( &(h->members) );      // decls for members will go on this scope      
         }
@@ -1392,7 +1446,65 @@ private:
             TRACE();
             ident_track.PopScope( S );
         }
+        
+        shared_ptr<Object> GetConstructor( shared_ptr<Type> t )
+        {
+            if( shared_ptr<Typedef> td = dynamic_pointer_cast<Typedef>(t) )
+            {
+                return GetConstructor( td->type );
+            }
+            else if( shared_ptr<Record> r = dynamic_pointer_cast<Record>(t) )
+            {
+                FOREACH( shared_ptr<Declaration> d, r->members )
+                {
+                    shared_ptr<ObjectDeclaration> od( dynamic_pointer_cast<ObjectDeclaration>(d) );
+                    if( !od )
+                        continue;
+                    if( dynamic_pointer_cast<Constructor>(od->object->type) )
+                        return od->object;
+                }
+                ASSERT(!"missing constructor");
+                return shared_ptr<Object>();
+            }
+            else 
+            {
+                ASSERT(!"initialisers for PODs not yet implemented"); // TODO
+                return shared_ptr<Object>();
+            }            
+        }
 
+        virtual MemInitResult ActOnMemInitializer( DeclTy *ConstructorDecl,
+                                                   clang::Scope *S,
+                                                   clang::IdentifierInfo *MemberOrBase,
+                                                   clang::SourceLocation IdLoc,
+                                                   clang::SourceLocation LParenLoc,
+                                                   ExprTy **Args, unsigned NumArgs,
+                                                   clang::SourceLocation *CommaLocs,
+                                                   clang::SourceLocation RParenLoc ) 
+        {
+            // Get the constructor whose init list we're adding to
+            shared_ptr<Declaration> d( hold_decl.FromRaw( ConstructorDecl ) );
+            shared_ptr<ObjectDeclaration> od( dynamic_pointer_cast<ObjectDeclaration>(d) );
+            ASSERT(od);
+            shared_ptr<Type> t = od->object->type;
+            shared_ptr<Constructor> co( dynamic_pointer_cast<Constructor>(t) );
+            ASSERT(co);
+            
+            // Get (or make) the constructor we're invoking
+            shared_ptr<Node> n = ident_track.Get( MemberOrBase, S );
+            shared_ptr<Object> o( dynamic_pointer_cast<Object>(n) );
+            shared_ptr<Object> cm = GetConstructor( o->type );
+            
+            // Build a call to the constructor
+            shared_ptr<Invoke> in(new Invoke);
+            in->base = o;
+            in->member = cm;
+            for(int i=0; i<NumArgs; i++ )
+                in->arguments.push_back( hold_expr.FromRaw(Args[i]) );
+            co->initialisers.push_back( in );
+            return 0;
+        }
+        
         //--------------------------------------------- unimplemented actions -----------------------------------------------     
         // Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC 
         // extensions. These all assert out immediately.
@@ -1476,18 +1588,6 @@ private:
                                                       ExprTy *AssignExprVal) {
     ASSERT(!"Unimplemented action");
     return 0;
-  }
-
-  virtual MemInitResult ActOnMemInitializer(DeclTy *ConstructorDecl,
-                                            clang::Scope *S,
-                                            clang::IdentifierInfo *MemberOrBase,
-                                            clang::SourceLocation IdLoc,
-                                            clang::SourceLocation LParenLoc,
-                                            ExprTy **Args, unsigned NumArgs,
-                                            clang::SourceLocation *CommaLocs,
-                                            clang::SourceLocation RParenLoc) {
-    ASSERT(!"Unimplemented action");
-    return true;
   }
   
   virtual DeclTy *ActOnExceptionDeclarator(clang::Scope *S, clang::Declarator &D) {
