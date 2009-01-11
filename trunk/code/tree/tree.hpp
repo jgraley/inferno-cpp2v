@@ -239,12 +239,16 @@ struct Invoke : Expression
 struct New : Expression
 {
     shared_ptr<Type> type; 
-    Sequence<Expression> arguments;
+    Sequence<Expression> placement_arguments;
+    Sequence<Expression> constructor_arguments;
+    bool global; // true if ::new was used
 };
 
 struct Delete : Expression
 {
     shared_ptr<Expression> pointer;
+    bool array; // true if delete[] was used
+    bool global; // true if ::Delete was used
 };
 
 struct NumericConstant : Expression {};

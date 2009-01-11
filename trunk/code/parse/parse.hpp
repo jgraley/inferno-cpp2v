@@ -799,16 +799,14 @@ private:
                 shared_ptr<Invoke> in(new Invoke);
                 in->base = a->base;
                 in->member = a->member;
-                for(int i=0; i<NumArgs; i++ )
-                    in->arguments.push_back( hold_expr.FromRaw(Args[i]) );
+                CollectArgs( &(in->arguments), Args, NumArgs );
                 return hold_expr.ToRaw( in );
             }
             else
             {
                 shared_ptr<Call> c(new Call);
                 c->function = hold_expr.FromRaw(Fn);
-                for(int i=0; i<NumArgs; i++ )
-                    c->arguments.push_back( hold_expr.FromRaw(Args[i]) );
+                CollectArgs( &(c->arguments), Args, NumArgs );
                 return hold_expr.ToRaw( c );
             }
         }
@@ -1506,11 +1504,16 @@ private:
             shared_ptr<Invoke> in(new Invoke);
             in->base = o;
             in->member = cm;
-            for(int i=0; i<NumArgs; i++ )
-                in->arguments.push_back( hold_expr.FromRaw(Args[i]) );
+            CollectArgs( &(in->arguments), Args, NumArgs );
             co->initialisers.push_back( in );
             return 0;
         }
+        
+        void CollectArgs( Sequence<Expression> *ps, ExprTy **Args, unsigned NumArgs )
+        {
+            for(int i=0; i<NumArgs; i++ )
+                ps->push_back( hold_expr.FromRaw(Args[i]) );
+        } 
         
         /// ActOnCXXNew - Parsed a C++ 'new' expression. UseGlobal is true if the
         /// new was qualified (::new). In a full new like
@@ -1527,9 +1530,11 @@ private:
                                         clang::SourceLocation ConstructorRParen ) 
         {
             shared_ptr<New> n( new New );
-            n->type = CreateTypeNode( D, 0 );
-            for(int i=0; i<NumConsArgs; i++ )
-                n->arguments.push_back( hold_expr.FromRaw(ConstructorArgs[i]) );
+            n->type = CreateTypeNode( D );
+            CollectArgs( &(n->placement_arguments), PlacementArgs, NumPlaceArgs );
+            CollectArgs( &(n->constructor_arguments), ConstructorArgs, NumConsArgs );
+            n->global = UseGlobal;
+            // TODO cant figure out meaning of ParenTypeId
             
             return hold_expr.ToRaw( n );         
         }
@@ -1540,9 +1545,10 @@ private:
         virtual ExprResult ActOnCXXDelete( clang::SourceLocation StartLoc, bool UseGlobal,
                                            bool ArrayForm, ExprTy *Operand ) 
         {
-            shared_ptr<Delete> d( new Delete );
-            
+            shared_ptr<Delete> d( new Delete );            
             d->pointer = hold_expr.FromRaw( Operand );
+            d->array = ArrayForm;
+            d->global = UseGlobal;
             
             return hold_expr.ToRaw( d ); 
         }
