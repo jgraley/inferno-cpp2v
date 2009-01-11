@@ -462,7 +462,7 @@ private:
             return l;
         }
         
-        shared_ptr<ObjectDeclaration> FindExistingDeclaration( clang::Scope *S, clang::Declarator &D )
+        shared_ptr<Declaration> FindExistingDeclaration( clang::Scope *S, clang::Declarator &D )
         {
             // See if we already have this object in the current scope, or specified scope if Declarator has one
             shared_ptr<Node> cxxs = FromCXXScope( &D.getCXXScopeSpec() );
@@ -478,7 +478,14 @@ private:
             }
             
             // we do, so this is a "re-declaration" eg struct S { static int a }; int S::a;
-            // so just hook up to the existing one  
+            // so just hook up to the existing one 
+            return found_d; 
+        }
+        
+        shared_ptr<ObjectDeclaration> FindExistingObjectDeclaration( clang::Scope *S, clang::Declarator &D )
+        {
+            // Get a declaration and see if its an object declaration
+            shared_ptr<Declaration> found_d = FindExistingDeclaration( S, D );           
             shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast<ObjectDeclaration>(found_d);
             ASSERT( od && "found the name, but not an object - maybe a typedef?");
             TRACE("aod %s %p %p\n", od->object->name.c_str(), od->object.get(), od.get() );
@@ -1503,6 +1510,41 @@ private:
                 in->arguments.push_back( hold_expr.FromRaw(Args[i]) );
             co->initialisers.push_back( in );
             return 0;
+        }
+        
+        /// ActOnCXXNew - Parsed a C++ 'new' expression. UseGlobal is true if the
+        /// new was qualified (::new). In a full new like
+        /// @code new (p1, p2) type(c1, c2) @endcode
+        /// the p1 and p2 expressions will be in PlacementArgs and the c1 and c2
+        /// expressions in ConstructorArgs. The type is passed as a declarator.
+        virtual ExprResult ActOnCXXNew( clang::SourceLocation StartLoc, bool UseGlobal,
+                                        clang::SourceLocation PlacementLParen,
+                                        ExprTy **PlacementArgs, unsigned NumPlaceArgs,
+                                        clang::SourceLocation PlacementRParen,
+                                        bool ParenTypeId, clang::Declarator &D,
+                                        clang::SourceLocation ConstructorLParen,
+                                        ExprTy **ConstructorArgs, unsigned NumConsArgs,
+                                        clang::SourceLocation ConstructorRParen ) 
+        {
+            shared_ptr<New> n( new New );
+            n->type = CreateTypeNode( D, 0 );
+            for(int i=0; i<NumConsArgs; i++ )
+                n->arguments.push_back( hold_expr.FromRaw(ConstructorArgs[i]) );
+            
+            return hold_expr.ToRaw( n );         
+        }
+        
+        /// ActOnCXXDelete - Parsed a C++ 'delete' expression. UseGlobal is true if
+        /// the delete was qualified (::delete). ArrayForm is true if the array form
+        /// was used (delete[]).
+        virtual ExprResult ActOnCXXDelete( clang::SourceLocation StartLoc, bool UseGlobal,
+                                           bool ArrayForm, ExprTy *Operand ) 
+        {
+            shared_ptr<Delete> d( new Delete );
+            
+            d->pointer = hold_expr.FromRaw( Operand );
+            
+            return hold_expr.ToRaw( d ); 
         }
         
         //--------------------------------------------- unimplemented actions -----------------------------------------------     

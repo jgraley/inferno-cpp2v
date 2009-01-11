@@ -41,5 +41,9 @@ int main()
 {
     X x; 
     x.foo();   
+    
+    X *px = new X;
+    delete px;
+    
     return x.i;
 }
