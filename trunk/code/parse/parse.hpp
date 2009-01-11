@@ -179,7 +179,7 @@ private:
         
         clang::Action::TypeTy *isTypeName( clang::IdentifierInfo &II, clang::Scope *S, const clang::CXXScopeSpec *SS) 
         {
-            shared_ptr<Node> n = ident_track.TryGet( &II, S, FromCXXScope( SS ) );                              
+            shared_ptr<Node> n = ident_track.TryGet( &II, FromCXXScope( SS ) );                              
             if(n)
             {
                 shared_ptr<Type> t = dynamic_pointer_cast<UserType>( n );
@@ -204,7 +204,7 @@ private:
                 return false; // not even in a record
             
             shared_ptr<Node> cxxs = FromCXXScope( SS );
-            shared_ptr<Node> n = ident_track.TryGet( &II, S, cxxs );    
+            shared_ptr<Node> n = ident_track.TryGet( &II, cxxs );    
             return n == cur;
         }
 
@@ -469,7 +469,7 @@ private:
             shared_ptr<Declaration> found_d;
             
             // Use C++ scope if non-NULL; do not recurse (=precise match only)
-            shared_ptr<Node> found_n = ident_track.TryGet( D.getIdentifier(), S, cxxs, &found_d, false ); 
+            shared_ptr<Node> found_n = ident_track.TryGet( D.getIdentifier(), cxxs, &found_d, false ); 
             TRACE("Looked for %s, result %p %p (%p)\n", D.getIdentifier()->getName(), found_n.get(), found_d.get(), cxxs.get() );
             if( !found_n )
             {
@@ -677,7 +677,7 @@ private:
                                                 bool HasTrailingLParen,
                                                 const clang::CXXScopeSpec *SS = 0 ) 
         {
-            shared_ptr<Node> n = ident_track.Get( &II, S, FromCXXScope( SS ) );
+            shared_ptr<Node> n = ident_track.Get( &II, FromCXXScope( SS ) );
             TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
             shared_ptr<Object> o = dynamic_pointer_cast<Object>( n );
             ASSERT( o );
@@ -1417,7 +1417,7 @@ private:
                                                         clang::SourceLocation CCLoc,
                                                         clang::IdentifierInfo &II) 
         {
-            shared_ptr<Node> n( ident_track.Get( &II, S, FromCXXScope( &SS ) ) );
+            shared_ptr<Node> n( ident_track.Get( &II, FromCXXScope( &SS ) ) );
             
             return hold_scope.ToRaw( n );
         }
@@ -1498,7 +1498,7 @@ private:
             ASSERT(co);
             
             // Get (or make) the constructor we're invoking
-            shared_ptr<Node> n = ident_track.Get( MemberOrBase, S );
+            shared_ptr<Node> n = ident_track.Get( MemberOrBase );
             shared_ptr<Object> o( dynamic_pointer_cast<Object>(n) );
             shared_ptr<Object> cm = GetConstructor( o->type );
             

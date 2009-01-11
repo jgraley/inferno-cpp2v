@@ -85,7 +85,6 @@ public:
     shared_ptr<Node> Get( const clang::IdentifierInfo *II, shared_ptr<Node> iscope = shared_ptr<Node>(), shared_ptr<Declaration> *decl = NULL, bool recurse = true );                                         
   
     // Version that just results NULL if identifier has not been added yet
-    // TODO lose clang::Scope param as apparently not used!
     shared_ptr<Node> TryGet( const clang::IdentifierInfo *II, shared_ptr<Node> iscope = shared_ptr<Node>(), shared_ptr<Declaration> *decl = NULL, bool recurse = true );      
     
     // Indicate that the next Add() call will have the supplied node as parent.

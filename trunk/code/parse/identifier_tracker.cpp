@@ -212,15 +212,15 @@ int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNod
 }
 
 
-shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope, shared_ptr<Declaration> *decl, bool recurse )
+shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *II, shared_ptr<Node> iscope, shared_ptr<Declaration> *decl, bool recurse )
 {
-    shared_ptr<Node> n = TryGet( II, S, iscope, decl, recurse );
+    shared_ptr<Node> n = TryGet( II, iscope, decl, recurse );
     ASSERT(n.get() && "This decl didn't get pushed??"); 
     return n;
 }
 
 
-shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, clang::Scope *S, shared_ptr<Node> iscope, shared_ptr<Declaration> *decl, bool recurse )
+shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, shared_ptr<Node> iscope, shared_ptr<Declaration> *decl, bool recurse )
 {
     TRACE();
        
