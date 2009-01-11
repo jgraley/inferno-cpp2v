@@ -42,8 +42,10 @@ int main()
     X x; 
     x.foo();   
     
-    X *px = new X;
+    X *px = new X(7);
     delete px;
     
+    X *pax = ::new X[66];
+    ::delete[] pax;
     return x.i;
 }

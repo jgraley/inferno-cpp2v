@@ -209,7 +209,7 @@ private:
         else if( shared_ptr<Reference> r = dynamic_pointer_cast< Reference >(type) )
             return RenderType( r->destination, "(&" + object + ")" );
         else if( shared_ptr<Array> a = dynamic_pointer_cast< Array >(type) )
-            return RenderType( a->element, "(" + object + "[" + RenderExpression(a->size) + "])" );
+            return RenderType( a->element, object.empty() ? "[" + RenderExpression(a->size) + "]" : "(" + object + "[" + RenderExpression(a->size) + "])" );
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
             return t->name + sobject;
 #if 0 // Should we include the word "class" etc when referencing holders as types?
@@ -323,12 +323,16 @@ private:
         }
         else if( shared_ptr<New> n = dynamic_pointer_cast< New >(expression) )
             return before +
-                   "new " + RenderType( n->type, "" ) + "(" +
-                   RenderSequence( n->arguments, ", ", false ) + ")" +
+                   (n->global ? "::" : "") +
+                   "new(" + RenderSequence( n->placement_arguments, ", ", false ) + ") " +
+                   RenderType( n->type, "" ) + 
+                   (n->constructor_arguments.empty() ? "" : "(" + RenderSequence( n->constructor_arguments, ", ", false ) + ")" ) +
                    after;
-        else if( shared_ptr<Delete> n = dynamic_pointer_cast< Delete >(expression) )
+        else if( shared_ptr<Delete> d = dynamic_pointer_cast< Delete >(expression) )
             return before +
-                   "delete " + RenderExpression( n->pointer, true ) +
+                   (d->global ? "::" : "") +
+                   "delete" + (d->array ? "[]" : "") +
+                   " " + RenderExpression( d->pointer, true ) +
                    after;
         else if( shared_ptr<Subscript> su = dynamic_pointer_cast< Subscript >(expression) )
             return before + 
