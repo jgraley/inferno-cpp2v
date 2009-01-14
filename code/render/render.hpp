@@ -339,7 +339,7 @@ private:
                    RenderExpression( su->base, true ) + "[" +
                    RenderExpression( su->index, false ) + "]" +
                    after;
-        else if( shared_ptr<Access> a = dynamic_pointer_cast< Access >(expression) )
+        else if( shared_ptr<Lookup> a = dynamic_pointer_cast< Lookup >(expression) )
             return before + 
                    RenderExpression( a->base, true ) + "." +
                    RenderIdentifier( a->member ) +

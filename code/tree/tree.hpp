@@ -277,7 +277,7 @@ struct Subscript : Expression
     shared_ptr<Expression> index;
 };
 
-struct Access : Expression
+struct Lookup : Expression  // picking a member from a record eg "base.member"
 {
     shared_ptr<Expression> base; 
     shared_ptr<Object> member;    

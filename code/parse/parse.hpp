@@ -492,7 +492,7 @@ private:
             return od;
         }
         
-        shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D )
+        shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D, Declaration::Access a = Declaration::PUBLIC )
         {
             const clang::DeclSpec &DS = D.getDeclSpec();
             shared_ptr<Declaration> d;
@@ -512,8 +512,7 @@ private:
                 d = od;
             }
             
-            // Default the access specifier
-            d->access = Declaration::PUBLIC; 
+            d->access = a;
             d->is_virtual = DS.isVirtualSpecified();
             
             return d;
@@ -794,7 +793,7 @@ private:
                                          clang::SourceLocation *CommaLocs,
                                          clang::SourceLocation RParenLoc) 
         {
-            if( shared_ptr<Access> a = dynamic_pointer_cast<Access>(hold_expr.FromRaw(Fn)) )
+            if( shared_ptr<Lookup> a = dynamic_pointer_cast<Lookup>(hold_expr.FromRaw(Fn)) )
             {
                 shared_ptr<Invoke> in(new Invoke);
                 in->base = a->base;
@@ -1041,7 +1040,7 @@ private:
         {
             const clang::DeclSpec &DS = D.getDeclSpec();
             TRACE("Member %p\n", Init);
-            shared_ptr<Declaration> d = CreateDelcaration( S, D );
+            shared_ptr<Declaration> d = CreateDelcaration( S, D, ConvertAccess( AS ) );
             shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast<ObjectDeclaration>(d);
       
             if( BitfieldWidth )
@@ -1058,9 +1057,6 @@ private:
                 od->initialiser = hold_expr.FromRaw( Init );
             }
                        
-            d->access = ConvertAccess( AS );           
-            d->is_virtual = DS.isVirtualSpecified();
-                        
             return IssueDeclaration( S, d );
         }
 
@@ -1165,7 +1161,7 @@ private:
                                                     clang::IdentifierInfo &Member) 
         {
             TRACE("kind %d\n", OpKind);
-            shared_ptr<Access> a( new Access );
+            shared_ptr<Lookup> a( new Lookup );
             if( OpKind == clang::tok::arrow )  // Base->Member
             {
                 shared_ptr<Prefix> p( new Prefix );
