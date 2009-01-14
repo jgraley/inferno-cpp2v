@@ -1,0 +1,37 @@
+
+Notes on choice of intermediate classes for main node kinds
+
+Major node types on the left; followed by the required members. These are
+the things contained in or pointed to by the node, not its interfaces.
+
+Name is string or "" if anonymous.
+Access is public|protected|private.
+Virtual is pure flag and virtual flag. 
+Storage is static, member etc enum.
+
+Base             Access  Virtual           Type
+Object     Name  Access           Storage  Type  Init
+
+Function   Name  Access  Virtual  Storage        Body, Params, Return
+Constructor      Access                          Body, Inits, Params
+Destructor       Access  Virtual                 Body
+
+EnumConst  Name                                  Value
+
+Label      Name   
+
+Typedef    Name  Access                    Type
+IRecord    Name  Access                          Members, Incomplete, Bases
+Enum       Name  Access                          Members 
+
+
+Declaration
+  Access
+  Name
+
+Physical : Declaration
+  Virtual
+  Storage
+
+Note: maybe merge Virtual and Storage into default|static|virtual|pure
+No common treatment for Type.
