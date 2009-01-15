@@ -451,7 +451,7 @@ private:
         else
             s = name;
         
-        if(od->initialiser && showinit)
+        if(od->object->initialiser && showinit)
         {
             AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, od->object ) );
             if( shared_ptr<Constructor> c = dynamic_pointer_cast<Constructor>(od->object->type) )
@@ -460,12 +460,12 @@ private:
                     s += " : ";
                     s += RenderSequence( c->initialisers, ", ", false, Declaration::PUBLIC, true );                
                 }
-            bool function_definition = !!dynamic_pointer_cast<Compound>(od->initialiser);
+            bool function_definition = !!dynamic_pointer_cast<Compound>(od->object->initialiser);
             if( function_definition )
                 s += "\n";
             else
                 s += " = ";
-            s += RenderExpression(od->initialiser);
+            s += RenderExpression(od->object->initialiser);
             if( !function_definition )
                 s += sep;
         }            
