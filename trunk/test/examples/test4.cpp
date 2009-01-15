@@ -20,7 +20,7 @@ class Other
 {
 };
 
-class Sub : public Test, public Other
+class Sub : public Test, virtual private Other
 {
 };
 

@@ -14,12 +14,13 @@ Object     Name  Access                 Storage  Type  Init
 Function   Name  Access  Virtual  Pure  Storage        Body, Params, Return
 Constructor      Access                          Body, Inits, Params
 Destructor       Access  Virtual  Pure           Body
+Init                                             Object, Params
 
 EnumConst  Name                                  Value
 
 Label      Name   
 
-Typedef    Name  Access                    Type
+Typedef    Name  Access                          Type
 IRecord    Name  Access                          Members, Incomplete, Bases
 Enum       Name  Access                          Members 
 

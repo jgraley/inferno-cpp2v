@@ -394,34 +394,40 @@ private:
         }        
     }
     
+    string RenderStorage( Physical::Storage st )
+    {
+        switch( st )
+        {
+        case Physical::STATIC:
+            return "static "; 
+            break;
+        case Physical::EXTERN:
+            return "extern ";
+            break;
+        case Physical::AUTO:
+            return "auto ";
+            break;
+        case Physical::VIRTUAL:
+        case Physical::PURE:
+            return "virtual ";
+            break;
+        case Physical::DEFAULT:
+        case Physical::SYMBOL:
+            return "";
+            break;
+        default:
+            return ERROR_UNKNOWN("storage class");
+            break;
+        }
+    }
+    
     string RenderObjectDeclaration( shared_ptr<ObjectDeclaration> od, string sep, bool showtype = true, 
                                     bool showstorage = true, bool showinit = true, bool showscope = false )
     {
         string s;
         
         if( showstorage )
-        {
-            switch( od->object->storage )
-            {
-            case Object::STATIC:
-                s += "static "; // TODO if in a Record, re-render at global with any init to satisfy linker
-                break;
-            case Object::EXTERN:
-                s += "extern ";
-                break;
-            case Object::AUTO:
-                s += "auto ";
-                break;
-            case Object::DEFAULT:
-            case Object::MEMBER:
-            case Object::SYMBOL:
-                break;
-            default:
-                s += ERROR_UNKNOWN("storage class");
-                break;
-            }
-        }
-        
+            s += RenderStorage(od->object->storage);
         
         string name;
         shared_ptr<Constructor> con = dynamic_pointer_cast<Constructor>(od->object->type);
@@ -480,15 +486,12 @@ private:
             s += RenderAccess( declaration->access ) + ":\n";
             *access = declaration->access;
         }
-         
-        if( declaration->is_virtual )
-            s+= "virtual "; 
-                                
+                                         
         if( shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast< ObjectDeclaration >(declaration) )
         {                
             bool isfunc = !!dynamic_pointer_cast<Subroutine>( od->object->type );
             if( dynamic_pointer_cast<Record>( scope_stack.top() ) &&
-                (od->object->storage==Object::STATIC || isfunc) )
+                (od->object->storage==Physical::STATIC || isfunc) )
             {
                 // Static things in records (ie static member objects and static emmber functions)
                 // get split into a part that goes into the record (main line of rendering) and
@@ -548,9 +551,9 @@ private:
                     {   
                         if( i>0 )
                             s += ", ";
-                        shared_ptr<InheritanceRecord> bih = dynamic_pointer_cast< InheritanceRecord >(ir->bases[i]);    
-                        ASSERT( bih );
-                        s += RenderAccess( bih->access ) + " " + bih->name;
+                        shared_ptr<Base> b = ir->bases[i];    
+                        ASSERT( b );
+                        s += RenderAccess(b->access) + " " + RenderStorage(b->storage) + b->record->name;
                     }
                 }
             }
