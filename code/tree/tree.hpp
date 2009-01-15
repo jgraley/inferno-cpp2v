@@ -54,26 +54,42 @@ struct Declaration : Statement
         PRIVATE,
         PROTECTED
     } access;
-    bool is_virtual;
 };
 
-// Note that an object can be a function instance (ie the target
-// of a function pointer) as well as a class instance or variable.
-// If it is a function, its value is the function implementation.
-struct Object : Identifier,
-                Expression
+struct Program : Node,
+                 Sequence<Declaration>
+{
+};
+
+//////////////////////////// Declarations /////////////////////
+
+struct Physical
 {
     enum Storage
     {
         DEFAULT, 
         STATIC,
         EXTERN,
-        MEMBER,
         AUTO,
-        SYMBOL // constant so no storage required
+        SYMBOL, // constant so no storage required
+        VIRTUAL, // implies MEMBER
+        PURE // implies VIRTUAL
     } storage;
+};
+
+struct Object : Identifier,
+                Expression,
+                Physical
+{
     shared_ptr<Type> type;
 };
+
+struct InheritanceRecord;
+struct Base : Declaration,
+              Physical
+{
+    shared_ptr<InheritanceRecord> record;
+};              
 
 struct ObjectDeclaration : Declaration
 {
@@ -81,10 +97,6 @@ struct ObjectDeclaration : Declaration
     shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
-struct Program : Node,
-                 Sequence<Declaration>
-{
-};
 
 //////////////////////////// Types ////////////////////////////
 
@@ -168,7 +180,7 @@ struct Enum : Record {};
 
 struct InheritanceRecord : Record // TODO InheritanceRecord
 {
-    Sequence<Declaration> bases; // these have empty identifier and NULL initialiser
+    Sequence<Base> bases; // these have empty identifier and NULL initialiser
 };
 
 struct Struct : InheritanceRecord {};

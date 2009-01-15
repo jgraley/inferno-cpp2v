@@ -132,7 +132,7 @@ private:
         
         stack< Sequence<Declaration> * > inferno_scope_stack;
         RCHold<Declaration, DeclTy *> hold_decl;
-        RCHold<Declaration, DeclTy *> hold_base;
+        RCHold<Base, DeclTy *> hold_base;
         RCHold<Expression, ExprTy *> hold_expr;
         RCHold<Statement, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
@@ -418,16 +418,19 @@ private:
             switch( DS.getStorageClassSpec() )
             {
             case clang::DeclSpec::SCS_unspecified:
-                o->storage = Object::DEFAULT;
+                if( DS.isVirtualSpecified() )
+                    o->storage = Physical::VIRTUAL;
+                else
+                    o->storage = Physical::DEFAULT;
                 break;
             case clang::DeclSpec::SCS_static:
-                o->storage = Object::STATIC;
+                o->storage = Physical::STATIC;
                 break;
             case clang::DeclSpec::SCS_extern:
-                o->storage = Object::EXTERN;
+                o->storage = Physical::EXTERN;
                 break;
             case clang::DeclSpec::SCS_auto:
-                o->storage = Object::AUTO;
+                o->storage = Physical::AUTO;
                 break;
             default:
                 ASSERT(!"Unsupported storage class");
@@ -513,7 +516,6 @@ private:
             }
             
             d->access = a;
-            d->is_virtual = DS.isVirtualSpecified();
             
             return d;
         }
@@ -577,7 +579,6 @@ private:
             shared_ptr<ParseParameterDeclaration> p(new ParseParameterDeclaration);
             p->object = CreateObjectNode( S, D, p );
             p->access = Declaration::PUBLIC;        
-            p->is_virtual = false;
             p->initialiser = shared_ptr<Expression>(); // might fill in later if init
             p->clang_identifier = D.getIdentifier(); // allow us to re-register the object
             TRACE("aopd %s %p %p\n", 0, p->object.get(), p.get() );
@@ -1107,7 +1108,6 @@ private:
             }
             
             h->access = Declaration::PUBLIC; // must make all holder type decls public since clang doesnt seem to give us an AS
-            h->is_virtual = false;
             h->incomplete = true;
             
             //TODO should we do something with TagKind? Maybe needed for render.
@@ -1281,11 +1281,10 @@ private:
         {
             shared_ptr<Object> o(new Object());
             o->name = Id->getName();
-            o->storage = Object::SYMBOL;
+            o->storage = Physical::SYMBOL;
             o->type = CreateIntegralType( 32, false );
             shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
             od->access = Declaration::PUBLIC;
-            od->is_virtual = false;
             od->object = o;
             if( Val )
             {
@@ -1376,14 +1375,17 @@ private:
                                               clang::SourceLocation BaseLoc) 
         {
             shared_ptr<Type> t( hold_type.FromRaw( basetype ) );
-            shared_ptr<InheritanceRecord> ih( dynamic_pointer_cast<InheritanceRecord>(t) );
-            ASSERT( ih );
+            shared_ptr<InheritanceRecord> ir( dynamic_pointer_cast<InheritanceRecord>(t) );
+            ASSERT( ir );
             shared_ptr<Declaration> d = hold_decl.FromRaw( classdecl );
             shared_ptr<Record> r = dynamic_pointer_cast<Record>( d );
             ASSERT( r );
-            ih->access = ConvertAccess( Access, r );           
-            ih->is_virtual = Virtual;
-            return hold_base.ToRaw( ih );
+            
+            shared_ptr<Base> base( new Base );
+            base->record = ir;
+            base->storage = Virtual ? Physical::VIRTUAL : Physical::DEFAULT;
+            base->access = ConvertAccess( Access, r );       
+            return hold_base.ToRaw( base );
         }
         
         virtual void ActOnBaseSpecifiers(DeclTy *ClassDecl, BaseTy **Bases, 
