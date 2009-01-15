@@ -42,13 +42,13 @@ public:
         if( shared_ptr< Sequence<Statement> > ss = dynamic_pointer_cast< Sequence<Statement> >( p ) )
             Visit( *ss );            
         else if( shared_ptr< ObjectDeclaration > od = dynamic_pointer_cast< ObjectDeclaration >( p ) )
-        {
             Visit( od->object );
-            if( od->initialiser )
-                Visit( od->initialiser );
-        }
         else if( shared_ptr< Object > o = dynamic_pointer_cast< Object >( p ) )
+        {
             Visit( o->type );
+            if( o->initialiser )
+                Visit( o->initialiser );
+        }
         else if( shared_ptr< Record > r = dynamic_pointer_cast< Record >( p ) )
             Visit( r->members );
         else if( shared_ptr< Compound > c = dynamic_pointer_cast< Compound >( p ) )

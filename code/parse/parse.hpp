@@ -399,7 +399,7 @@ private:
             }
         }
         
-        shared_ptr<Object> CreateObjectNode( clang::Scope *S, clang::Declarator &D, shared_ptr<Declaration> d )
+        shared_ptr<Object> CreateObjectNode( clang::Scope *S, clang::Declarator &D, shared_ptr<Declaration> d, shared_ptr<Expression> init = shared_ptr<Expression>() )
         { 
             shared_ptr<Object> o(new Object());
             clang::IdentifierInfo *ID = D.getIdentifier();
@@ -438,6 +438,8 @@ private:
             }
             
             o->type = CreateTypeNode( D );
+            
+            o->initialiser = init;
             
             return o;
         }
@@ -510,7 +512,6 @@ private:
                 shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
                 // Create a new one
                 od->object = CreateObjectNode( S, D, od );        
-                od->initialiser = shared_ptr<Expression>(); // might fill in later if initialised
                 TRACE("aod %s %p %p\n", od->object->name.c_str(), od->object.get(), od.get() );
                 d = od;
             }
@@ -579,7 +580,6 @@ private:
             shared_ptr<ParseParameterDeclaration> p(new ParseParameterDeclaration);
             p->object = CreateObjectNode( S, D, p );
             p->access = Declaration::PUBLIC;        
-            p->initialiser = shared_ptr<Expression>(); // might fill in later if init
             p->clang_identifier = D.getIdentifier(); // allow us to re-register the object
             TRACE("aopd %s %p %p\n", 0, p->object.get(), p.get() );
             return hold_decl.ToRaw( p );
@@ -595,7 +595,7 @@ private:
             shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast<ObjectDeclaration>(d);
             ASSERT( od ); // Only objects can be initialised
                         
-            od->initialiser = FromClang( Init );            
+            od->object->initialiser = FromClang( Init );            
         }
 
         // Clang tends to parse parameters and function bodies in seperate
@@ -650,7 +650,7 @@ private:
             ASSERT(fd);
             shared_ptr<Expression> e( dynamic_pointer_cast<Expression>( FromClang( Body ) ) );
             ASSERT(e); // function body must be a scope or 0
-            fd->initialiser = e;
+            fd->object->initialiser = e;
             inferno_scope_stack.pop(); // we dont use these - we use the clang-managed compound statement instead (passed in via Body)
             return Decl;
         }    
@@ -1055,7 +1055,7 @@ private:
             if( Init )
             {  
                 ASSERT( od ); // Only objects may be initialised
-                od->initialiser = hold_expr.FromRaw( Init );
+                od->object->initialiser = hold_expr.FromRaw( Init );
             }
                        
             return IssueDeclaration( S, d );
@@ -1288,7 +1288,7 @@ private:
             od->object = o;
             if( Val )
             {
-                od->initialiser = hold_expr.FromRaw( Val );
+                od->object->initialiser = hold_expr.FromRaw( Val );
             }
             else if( LastEnumConstant )
             {                 
@@ -1296,14 +1296,14 @@ private:
                 shared_ptr<ObjectDeclaration> lastod( dynamic_pointer_cast<ObjectDeclaration>(lastd) );
                 ASSERT(lastod && "unexpected kind of declaration inside an enum");
                 shared_ptr<Infix> inf( new Infix );
-                inf->operands.push_back(lastod->initialiser);
+                inf->operands.push_back(lastod->object->initialiser);
                 llvm::APSInt i(32, false);
                 i = 1;
                 shared_ptr<IntegralConstant> ic( new IntegralConstant );
                 ic->value = i;
                 inf->operands.push_back(ic);
                 inf->kind = clang::tok::plus;
-                od->initialiser = inf;
+                od->object->initialiser = inf;
             }
             else
             {
@@ -1311,7 +1311,7 @@ private:
                 i = 0;
                 shared_ptr<IntegralConstant> ic( new IntegralConstant );
                 ic->value = i;
-                od->initialiser = ic;
+                od->object->initialiser = ic;
             }
             ident_track.Add(Id, o, od, S); 
             return hold_decl.ToRaw( od );

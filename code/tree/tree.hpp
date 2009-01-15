@@ -82,6 +82,7 @@ struct Object : Identifier,
                 Physical
 {
     shared_ptr<Type> type;
+    shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
 struct InheritanceRecord;
@@ -94,7 +95,6 @@ struct Base : Declaration,
 struct ObjectDeclaration : Declaration
 {
     shared_ptr<Object> object; 
-    shared_ptr<Expression> initialiser; // NULL if uninitialised
 };
 
 
