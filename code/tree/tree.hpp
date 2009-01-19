@@ -44,9 +44,9 @@ struct Type : virtual Node {};
 
 struct Statement : virtual Node {};
 
-struct Expression : Statement {};
+struct Expression : virtual Statement {};
 
-struct Declaration : Statement
+struct Declaration : virtual Statement
 {   
     enum Access
     {
@@ -78,6 +78,7 @@ struct Physical
 };
 
 struct Object : Identifier,
+//                Declaration, // TODO reinstate and fill in properly + support in RenderDeclaration
                 Expression,
                 Physical
 {
