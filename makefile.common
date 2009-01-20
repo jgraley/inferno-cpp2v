@@ -9,11 +9,14 @@ MAKE ?= make
 # No path needed when include file is in same directory
 OPTIONS += -I.
 
-# Warnings are not allowed, and we add some warnings for common mistakes that are not
-# enabled by default.
-OPTIONS += -Wreturn-type -Werror
+# Warn if return is missing
+OPTIONS += -Wreturn-type
 
-# JSG I need this to get the boost includes in a cygwin setup
+# Treat all warnings as errors by making the build abort 
+OPTIONS += -Werror
+
+# JSG I need this to get the boost includes in a cygwin setup. This also
+# fixes the boost verison.
 OPTIONS += -I/usr/include/boost-1_33_1 
 
 # We supply an ASSERT handler in common/trace.cpp
