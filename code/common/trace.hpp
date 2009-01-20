@@ -42,6 +42,11 @@ private:
 // it can get in the way
 
 #define TRACE Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION )
-#define ASSERT BOOST_ASSERT
+
+// Use BOOST_ASSERT, but be sure to place an abort() in line, so that we
+// don't get "missing return" errors if there's no return after ASSERT(0).
+// On some systems, abort() won't cause a stack dump, so we do somehting
+// nasty in our boost::assertion_failed() implmentation in trace.cpp
+#define ASSERT(CONDITION) do { BOOST_ASSERT(CONDITION); if(!(CONDITION)) abort(); } while(0)
 
 #endif

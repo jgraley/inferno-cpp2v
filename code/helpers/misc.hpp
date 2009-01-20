@@ -9,7 +9,7 @@
 inline shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
 {
     if( shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast< ObjectDeclaration >(d) )
-        return od->object; // ObjectDeclaration points to the obejct (old-school object declaration)
+        return od->object; // ObjectDeclaration points to the object (old-school object declaration)
     else if( shared_ptr<UserType> ut = dynamic_pointer_cast< UserType >(d) )
         return ut; // UserType declares itself
     else if( shared_ptr<Object> o = dynamic_pointer_cast< Object >(d) )

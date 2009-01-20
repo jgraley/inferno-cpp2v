@@ -6,15 +6,20 @@ ICC ?= g++
 AR ?= ar
 MAKE ?= make
 
-# For inferno
-# TODO make missing return statements an error!!!!!
+# No path needed when include file is in same directory
 OPTIONS += -I.
 
-# For boost
-# JSG I need this to get the boost includes in a cygwin setup
-OPTIONS += -I/usr/include/boost-1_33_1 -DBOOST_ENABLE_ASSERT_HANDLER
+# Warnings are not allowed, and we add some warnings for common mistakes that are not
+# enabled by default.
+OPTIONS += -Wreturn-type -Werror
 
-# For llvm/clang
+# JSG I need this to get the boost includes in a cygwin setup
+OPTIONS += -I/usr/include/boost-1_33_1 
+
+# We supply an ASSERT handler in common/trace.cpp
+OPTIONS += -DBOOST_ENABLE_ASSERT_HANDLER
+
+# For including llvm/clang header files
 BUILD = Debug
 LLVM = $(LEVEL)/llvm
 CLANG = $(LLVM)/tools/clang
