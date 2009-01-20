@@ -288,5 +288,4 @@ shared_ptr<Node> IdentifierTracker::FindMemberNode( const clang::IdentifierInfo 
         
     return shared_ptr<Node>();
 }
-
 */

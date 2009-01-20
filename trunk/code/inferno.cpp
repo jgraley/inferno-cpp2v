@@ -33,7 +33,7 @@ int main( int argc, char *argv[] )
            (int)(Node *)&o - oi );    
   */  
   
-    Walk<Procedure> w(program);
+//    Walk<Procedure> w(program);
     
     (*render)( program );
 }

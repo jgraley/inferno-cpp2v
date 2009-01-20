@@ -736,7 +736,8 @@ private:
 
                 shared_ptr<FloatingConstant> fc( new FloatingConstant( rv ) );
                 return fc;
-            }         
+            }
+            ASSERT(!"this sort of literal is not supported");         
         }
         
         virtual ExprResult ActOnNumericConstant(const clang::Token &tok) 
