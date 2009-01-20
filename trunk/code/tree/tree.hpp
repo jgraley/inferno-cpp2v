@@ -6,7 +6,7 @@
 #include "clang/Basic/TokenKinds.h"
 #include "llvm/ADT/APSInt.h"
 #include "llvm/ADT/APFloat.h"
-
+#include "common/magic.hpp"
 #include <string>
 #include <deque>
 
@@ -27,7 +27,7 @@ struct Sequence : deque< shared_ptr<ELEMENT> > {};
 
 //////////////////////////// Underlying Base Nodes ////////////////////////////
 
-struct Node
+struct Node : Magic
 {               
     virtual ~Node(){}  // be a virtual hierarchy
     // Node must be inherited virtually, to allow MI diamonds 
