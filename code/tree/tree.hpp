@@ -121,7 +121,7 @@ struct Subroutine : Type {};
 // Like in pascal etc, params but no return value
 struct Procedure : Subroutine
 {
-    Sequence<ObjectDeclaration> parameters;
+    Sequence<Object> parameters;
 };
 
 // Like in C, Pascal; params and a single return value

@@ -14,7 +14,6 @@ Instance   Name  Access                 Storage  Type  Init
 Function   Name  Access  Virtual  Pure  Storage        Body, Params, Return
 Constructor      Access                          Body, Inits, Params
 Destructor       Access  Virtual  Pure           Body
-Init                                             Object, Params
 
 EnumConst  Name                                  Value
 
@@ -37,3 +36,6 @@ Note: maybe merge Virtual and Storage into default|static|virtual|pure
 No common treatment for Type.
 
 Note: Instance is what used to be called Object
+
+Note: Use Invoke (=Call combined with Lookup) for initialisers in all
+cases since we want to specify which constructor explicitly.

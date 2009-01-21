@@ -19,7 +19,7 @@
     string( "\n" );
 
 #define ERROR_UNSUPPORTED(P) \
-    ERROR_UNKNOWN( typeid(*P).name() );
+    ERROR_UNKNOWN( P ? typeid(*P).name() : "<NULL>" );
 
 
 class Render : public Pass
@@ -305,28 +305,28 @@ private:
         else if( shared_ptr<Call> o = dynamic_pointer_cast< Call >(expression) )
             return before + 
                    RenderExpression( o->function, true ) + "(" +
-                   RenderSequence( o->arguments, ", ", false ) + ")" +
+                   RenderOperandSequence( o->arguments, ", ", false ) + ")" +
                    after;
         else if( shared_ptr<Invoke> in = dynamic_pointer_cast< Invoke >(expression) )
         {
             if( dynamic_pointer_cast<Constructor>(in->member->type) )
                 return before +  // invoking costructors as found in init lists and locals
                        RenderExpression( in->base, true ) + "(" +
-                       RenderSequence( in->arguments, ", ", false ) + ")" +
+                       RenderOperandSequence( in->arguments, ", ", false ) + ")" +
                        after;
             else
                 return before + 
                        RenderExpression( in->base, true ) + "." +
                        RenderIdentifier( in->member ) + "(" +
-                       RenderSequence( in->arguments, ", ", false ) + ")" +
+                       RenderOperandSequence( in->arguments, ", ", false ) + ")" +
                        after;
         }
         else if( shared_ptr<New> n = dynamic_pointer_cast< New >(expression) )
             return before +
                    (n->global ? "::" : "") +
-                   "new(" + RenderSequence( n->placement_arguments, ", ", false ) + ") " +
+                   "new(" + RenderOperandSequence( n->placement_arguments, ", ", false ) + ") " +
                    RenderType( n->type, "" ) + 
-                   (n->constructor_arguments.empty() ? "" : "(" + RenderSequence( n->constructor_arguments, ", ", false ) + ")" ) +
+                   (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( n->constructor_arguments, ", ", false ) + ")" ) +
                    after;
         else if( shared_ptr<Delete> d = dynamic_pointer_cast< Delete >(expression) )
             return before +
@@ -364,7 +364,7 @@ private:
                    after;
         else if( shared_ptr<Aggregate> ao = dynamic_pointer_cast< Aggregate >(expression) )
             return before + 
-                   "{ " + RenderSequence( ao->elements, ", ", false ) + " }" +
+                   "{ " + RenderOperandSequence( ao->elements, ", ", false ) + " }" +
                    after;
         else if( shared_ptr<String> ss = dynamic_pointer_cast< String >(expression) )
             return before + 
@@ -426,6 +426,8 @@ private:
     {
         string s;
         
+        ASSERT(o->type);
+        
         if( showstorage )
             s += RenderStorage(o->storage);
         
@@ -446,12 +448,12 @@ private:
         if( showscope )
             name = RenderScope(o) + name;           
                         
-        if(showtype)
+        if( showtype )
             s += RenderType( o->type, name );
         else
             s = name;
         
-        if(o->initialiser && showinit)
+        if( o->initialiser && showinit )
         {
             AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, o ) );
             if( shared_ptr<Constructor> c = dynamic_pointer_cast<Constructor>(o->type) )
@@ -481,9 +483,6 @@ private:
         TRACE();
         string s;
         
-        if( shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast< ObjectDeclaration >(declaration) )
-            return RenderDeclaration( od->object, sep, access, showtype );
-
         if( access && declaration->access != *access )
         {
             s += RenderAccess( declaration->access ) + ":\n";
@@ -653,12 +652,29 @@ private:
             TRACE("%d %p\n", i, &i);
             string sep = (seperate_last || i+1<spe.size()) ? separator : "";
             shared_ptr<ELEMENT> pe = spe[i];                        
-            if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(pe) )
-                s += RenderExpression( e ) + sep;
-            else if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
+            if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
                 s += RenderDeclaration( d, sep, &init_access, showtype );
             else if( shared_ptr<Statement> st = dynamic_pointer_cast< Statement >(pe) )
                 s += RenderStatement( st, sep ); 
+            else
+                s += ERROR_UNSUPPORTED(pe);
+        }
+        return s;
+    }
+
+    string RenderOperandSequence( Sequence<Expression> spe, 
+                                  string separator, 
+                                  bool seperate_last )
+    {
+        TRACE();
+        string s;
+        for( int i=0; i<spe.size(); i++ )
+        {
+            TRACE("%d %p\n", i, &i);
+            string sep = (seperate_last || i+1<spe.size()) ? separator : "";
+            shared_ptr<Expression> pe = spe[i];                        
+            if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(pe) )
+                s += RenderExpression( e ) + sep;
             else
                 s += ERROR_UNSUPPORTED(pe);
         }
