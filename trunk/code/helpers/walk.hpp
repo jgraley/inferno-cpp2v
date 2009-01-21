@@ -45,11 +45,6 @@ public:
             Visit( *sd );           
         if( shared_ptr< Sequence<Statement> > ss = dynamic_pointer_cast< Sequence<Statement> >( p ) )
             Visit( *ss );            
-        else if( shared_ptr< ObjectDeclaration > od = dynamic_pointer_cast< ObjectDeclaration >( p ) ) 
-        {
-            shared_ptr<Object> &o = od->object;
-            Visit( o );
-        }
         else if( shared_ptr< Object > o = dynamic_pointer_cast< Object >( p ) )
         {
             Visit( o->type );
