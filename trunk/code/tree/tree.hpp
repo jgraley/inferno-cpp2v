@@ -78,7 +78,7 @@ struct Physical
 };
 
 struct Object : Identifier,
-//                Declaration, // TODO reinstate and fill in properly + support in RenderDeclaration
+                Declaration, // TODO reinstate and fill in properly + support in RenderDeclaration
                 Expression,
                 Physical
 {

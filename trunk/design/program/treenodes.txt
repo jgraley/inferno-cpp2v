@@ -9,7 +9,7 @@ Access is public|protected|private.
 Storage is static, member etc enum.
 
 Base             Access  Virtual                 Type
-Object     Name  Access                 Storage  Type  Init
+Instance   Name  Access                 Storage  Type  Init
 
 Function   Name  Access  Virtual  Pure  Storage        Body, Params, Return
 Constructor      Access                          Body, Inits, Params
@@ -35,3 +35,5 @@ Physical : Declaration
 
 Note: maybe merge Virtual and Storage into default|static|virtual|pure
 No common treatment for Type.
+
+Note: Instance is what used to be called Object
