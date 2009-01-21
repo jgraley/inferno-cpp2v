@@ -421,51 +421,51 @@ private:
         }
     }
     
-    string RenderObjectDeclaration( shared_ptr<ObjectDeclaration> od, string sep, bool showtype = true, 
-                                    bool showstorage = true, bool showinit = true, bool showscope = false )
+    string RenderObject( shared_ptr<Object> o, string sep, bool showtype = true, 
+                         bool showstorage = true, bool showinit = true, bool showscope = false )
     {
         string s;
         
         if( showstorage )
-            s += RenderStorage(od->object->storage);
+            s += RenderStorage(o->storage);
         
         string name;
-        shared_ptr<Constructor> con = dynamic_pointer_cast<Constructor>(od->object->type);
-        shared_ptr<Destructor> de = dynamic_pointer_cast<Destructor>(od->object->type);
+        shared_ptr<Constructor> con = dynamic_pointer_cast<Constructor>(o->type);
+        shared_ptr<Destructor> de = dynamic_pointer_cast<Destructor>(o->type);
         if( con || de )
         {
-            shared_ptr<Record> rec = dynamic_pointer_cast<Record>( GetScope( program, od->object ) );
+            shared_ptr<Record> rec = dynamic_pointer_cast<Record>( GetScope( program, o ) );
             ASSERT( rec );
             name = (de ? "~" : "") + RenderIdentifier(rec); 
         }
         else
         {
-            name = RenderIdentifier(od->object);
+            name = RenderIdentifier(o);
         }
         
         if( showscope )
-            name = RenderScope(od->object) + name;           
+            name = RenderScope(o) + name;           
                         
         if(showtype)
-            s += RenderType( od->object->type, name );
+            s += RenderType( o->type, name );
         else
             s = name;
         
-        if(od->object->initialiser && showinit)
+        if(o->initialiser && showinit)
         {
-            AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, od->object ) );
-            if( shared_ptr<Constructor> c = dynamic_pointer_cast<Constructor>(od->object->type) )
+            AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, o ) );
+            if( shared_ptr<Constructor> c = dynamic_pointer_cast<Constructor>(o->type) )
                 if( !c->initialisers.empty() )
                 {
                     s += " : ";
                     s += RenderSequence( c->initialisers, ", ", false, Declaration::PUBLIC, true );                
                 }
-            bool function_definition = !!dynamic_pointer_cast<Compound>(od->object->initialiser);
+            bool function_definition = !!dynamic_pointer_cast<Compound>(o->initialiser);
             if( function_definition )
                 s += "\n";
             else
                 s += " = ";
-            s += RenderExpression(od->object->initialiser);
+            s += RenderExpression(o->initialiser);
             if( !function_definition )
                 s += sep;
         }            
@@ -481,31 +481,34 @@ private:
         TRACE();
         string s;
         
+        if( shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast< ObjectDeclaration >(declaration) )
+            return RenderDeclaration( od->object, sep, access, showtype );
+
         if( access && declaration->access != *access )
         {
             s += RenderAccess( declaration->access ) + ":\n";
             *access = declaration->access;
         }
                                          
-        if( shared_ptr<ObjectDeclaration> od = dynamic_pointer_cast< ObjectDeclaration >(declaration) )
+        if( shared_ptr<Object> o = dynamic_pointer_cast< Object >(declaration) )
         {                
-            bool isfunc = !!dynamic_pointer_cast<Subroutine>( od->object->type );
+            bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
             if( dynamic_pointer_cast<Record>( scope_stack.top() ) &&
-                (od->object->storage==Physical::STATIC || isfunc) )
+                (o->storage==Physical::STATIC || isfunc) )
             {
                 // Static things in records (ie static member objects and static emmber functions)
                 // get split into a part that goes into the record (main line of rendering) and
                 // a part that goes seperately (deferred_decls gets appended at the very end)
-                s += RenderObjectDeclaration( od, sep, showtype, true, false, false );
+                s += RenderObject( o, sep, showtype, true, false, false );
                 {
                     AutoPush< shared_ptr<Node> > cs( scope_stack, program );
-                    deferred_decls += string("\n") + RenderObjectDeclaration( od, sep, showtype, false, true, true );
+                    deferred_decls += string("\n") + RenderObject( o, sep, showtype, false, true, true );
                 }
             }
             else
             {
                 // Otherwise, render everything directly using the default settings
-                s += RenderObjectDeclaration( od, sep, showtype, true, true, false );
+                s += RenderObject( o, sep, showtype, true, true, false );
             }
         }
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
@@ -650,7 +653,9 @@ private:
             TRACE("%d %p\n", i, &i);
             string sep = (seperate_last || i+1<spe.size()) ? separator : "";
             shared_ptr<ELEMENT> pe = spe[i];                        
-            if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
+            if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(pe) )
+                s += RenderExpression( e ) + sep;
+            else if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
                 s += RenderDeclaration( d, sep, &init_access, showtype );
             else if( shared_ptr<Statement> st = dynamic_pointer_cast< Statement >(pe) )
                 s += RenderStatement( st, sep ); 

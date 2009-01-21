@@ -399,7 +399,11 @@ private:
             }
         }
         
-        shared_ptr<Object> CreateObjectNode( clang::Scope *S, clang::Declarator &D, shared_ptr<Declaration> d, shared_ptr<Expression> init = shared_ptr<Expression>() )
+        shared_ptr<Object> CreateObjectNode( clang::Scope *S, 
+                                             clang::Declarator &D, 
+                                             shared_ptr<Declaration> d, 
+                                             Declaration::Access access,
+                                             shared_ptr<Expression> init = shared_ptr<Expression>() )
         { 
             shared_ptr<Object> o(new Object());
             clang::IdentifierInfo *ID = D.getIdentifier();
@@ -438,7 +442,7 @@ private:
             }
             
             o->type = CreateTypeNode( D );
-            
+            o->access = access;
             o->initialiser = init;
             
             return o;
@@ -511,7 +515,7 @@ private:
             {                
                 shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
                 // Create a new one
-                od->object = CreateObjectNode( S, D, od );        
+                od->object = CreateObjectNode( S, D, od, a );        
                 TRACE("aod %s %p %p\n", od->object->name.c_str(), od->object.get(), od.get() );
                 d = od;
             }
@@ -578,8 +582,7 @@ private:
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D) 
         {
             shared_ptr<ParseParameterDeclaration> p(new ParseParameterDeclaration);
-            p->object = CreateObjectNode( S, D, p );
-            p->access = Declaration::PUBLIC;        
+            p->object = CreateObjectNode( S, D, p, Declaration::PUBLIC );
             p->clang_identifier = D.getIdentifier(); // allow us to re-register the object
             TRACE("aopd %s %p %p\n", 0, p->object.get(), p.get() );
             return hold_decl.ToRaw( p );
@@ -1181,6 +1184,7 @@ private:
         
             shared_ptr<Object> o( new Object );
             o->name = Member.getName(); // Only the name is filled in TODO fill in (possibly in a pass)
+            o->access = Declaration::PUBLIC;
             a->member = o;    
             return hold_expr.ToRaw( a );
         }
@@ -1284,8 +1288,8 @@ private:
             o->name = Id->getName();
             o->storage = Physical::SYMBOL;
             o->type = CreateIntegralType( 32, false );
+            o->access = Declaration::PUBLIC;
             shared_ptr<ObjectDeclaration> od(new ObjectDeclaration);
-            od->access = Declaration::PUBLIC;
             od->object = o;
             if( Val )
             {
