@@ -93,12 +93,6 @@ struct Base : Declaration,
     shared_ptr<InheritanceRecord> record;
 };              
 
-struct ObjectDeclaration : Declaration
-{
-    shared_ptr<Object> object; 
-};
-
-
 //////////////////////////// Types ////////////////////////////
 
 // A type that the user has created, and hence has a name. 
