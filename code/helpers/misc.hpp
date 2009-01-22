@@ -3,16 +3,13 @@
 
 #include <tree/tree.hpp>
 
-// A possible weakness in the present tree is that the route from a Declaration
-// to its identifier varies depending on whether an object or type is being
-// declared 
+// sort of depracated - there's no particular reason to use this
 inline shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
 {
-    if( shared_ptr<UserType> ut = dynamic_pointer_cast< UserType >(d) )
-        return ut; // UserType declares itself
-    else if( shared_ptr<Object> o = dynamic_pointer_cast< Object >(d) )
-        return o; // Object declares itself (new-school object declaration)
-    ASSERT(0 && "Unknown kind of Declaration");
+    if( shared_ptr<Identifier> i = dynamic_pointer_cast< Identifier >(d) )
+        return i; 
+        
+    ASSERT(0 && "Declaration is anonymous");
 }
 
 #endif

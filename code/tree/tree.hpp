@@ -35,11 +35,6 @@ struct Node : Magic
 };
  
 
-struct Identifier : virtual Node
-{
-    string name;
-};
-
 struct Type : virtual Node {};
 
 struct Statement : virtual Node {};
@@ -54,6 +49,11 @@ struct Declaration : virtual Statement
         PRIVATE,
         PROTECTED
     } access;
+};
+
+struct Identifier : Declaration
+{
+    string name;
 };
 
 struct Program : Node,
@@ -77,10 +77,9 @@ struct Physical
     } storage;
 };
 
-struct Object : Identifier,
-                Declaration, // TODO reinstate and fill in properly + support in RenderDeclaration
-                Expression,
-                Physical
+struct Instance : Identifier,
+                  Expression,
+                  Physical
 {
     shared_ptr<Type> type;
     shared_ptr<Expression> initialiser; // NULL if uninitialised
@@ -99,8 +98,7 @@ struct Base : Declaration,
 // These can be linked directly from a Sequence<> to indicate 
 // their declaration (no seperate declaration node required).
 struct UserType : Type,
-                  Identifier,
-                  Declaration {};
+                  Identifier {};
 
 struct Typedef : UserType
 {
@@ -115,7 +113,7 @@ struct Subroutine : Type {};
 // Like in pascal etc, params but no return value
 struct Procedure : Subroutine
 {
-    Sequence<Object> parameters;
+    Sequence<Instance> parameters;
 };
 
 // Like in C, Pascal; params and a single return value
@@ -239,7 +237,7 @@ struct Call : Expression
 struct Invoke : Expression
 {
     shared_ptr<Expression> base;
-    shared_ptr<Object> member;
+    shared_ptr<Instance> member;
     Sequence<Expression> arguments;
 };
 
@@ -287,7 +285,7 @@ struct Subscript : Expression
 struct Lookup : Expression  // picking a member from a record eg "base.member"
 {
     shared_ptr<Expression> base; 
-    shared_ptr<Object> member;    
+    shared_ptr<Instance> member;    
 };
 
 struct Cast : Expression
