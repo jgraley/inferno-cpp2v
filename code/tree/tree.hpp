@@ -195,6 +195,10 @@ struct Array : Type
 struct Label : Identifier,
                Expression {}; 
 
+// The result of a Compound, if viewed as an Operand, is the
+// code itself (imagine a generic byte code) not the result of
+// execution. You have to do Call or Invoke on it to get 
+// the execution result.
 struct Compound : Expression
 {
     Sequence<Statement> statements;
