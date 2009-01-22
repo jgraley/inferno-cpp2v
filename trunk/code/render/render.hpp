@@ -209,7 +209,7 @@ private:
         else if( shared_ptr<Reference> r = dynamic_pointer_cast< Reference >(type) )
             return RenderType( r->destination, "(&" + object + ")" );
         else if( shared_ptr<Array> a = dynamic_pointer_cast< Array >(type) )
-            return RenderType( a->element, object.empty() ? "[" + RenderExpression(a->size) + "]" : "(" + object + "[" + RenderExpression(a->size) + "])" );
+            return RenderType( a->element, object.empty() ? "[" + RenderOperand(a->size) + "]" : "(" + object + "[" + RenderOperand(a->size) + "])" );
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
             return t->name + sobject;
 #if 0 // Should we include the word "class" etc when referencing holders as types?
@@ -243,7 +243,7 @@ private:
         return o;
     }
 
-    string RenderExpression( shared_ptr<Expression> expression, bool bracketize_operator=false )
+    string RenderOperand( shared_ptr<Operand> expression, bool bracketize_operator=false )
     {
         TRACE("%p\n", expression.get());
         
@@ -275,19 +275,19 @@ private:
         }           
         else if( shared_ptr<Infix> o = dynamic_pointer_cast< Infix >(expression) )
             return before + 
-                   RenderExpression( o->operands[0], true ) +
+                   RenderOperand( o->operands[0], true ) +
                    operator_text[o->kind] + 
-                   RenderExpression( o->operands[1], true ) +
+                   RenderOperand( o->operands[1], true ) +
                    after;
         else if( shared_ptr<Postfix> o = dynamic_pointer_cast< Postfix >(expression) )
             return before + 
-                   RenderExpression( o->operands[0], true ) + 
+                   RenderOperand( o->operands[0], true ) + 
                    operator_text[o->kind] +
                    after;
         else if( shared_ptr<Prefix> o = dynamic_pointer_cast< Prefix >(expression) )
             return before + 
                    operator_text[o->kind] + 
-                   RenderExpression( o->operands[0], true ) +
+                   RenderOperand( o->operands[0], true ) +
                    (operator_text[o->kind][operator_text[o->kind].size()-1]=='(' ? ")" : "") + // if the token is "x(", add ")"
                    after;
         else if( shared_ptr<PrefixOnType> pot = dynamic_pointer_cast< PrefixOnType >(expression) )
@@ -298,25 +298,25 @@ private:
                    after;
         else if( shared_ptr<ConditionalOperator> o = dynamic_pointer_cast< ConditionalOperator >(expression) )
             return before + 
-                   RenderExpression( o->condition, true ) + "?" +
-                   RenderExpression( o->if_true, true ) + ":" +
-                   RenderExpression( o->if_false, true ) +
+                   RenderOperand( o->condition, true ) + "?" +
+                   RenderOperand( o->if_true, true ) + ":" +
+                   RenderOperand( o->if_false, true ) +
                    after;
         else if( shared_ptr<Call> o = dynamic_pointer_cast< Call >(expression) )
             return before + 
-                   RenderExpression( o->function, true ) + "(" +
+                   RenderOperand( o->function, true ) + "(" +
                    RenderOperandSequence( o->arguments, ", ", false ) + ")" +
                    after;
         else if( shared_ptr<Invoke> in = dynamic_pointer_cast< Invoke >(expression) )
         {
             if( dynamic_pointer_cast<Constructor>(in->member->type) )
                 return before +  // invoking costructors as found in init lists and locals
-                       RenderExpression( in->base, true ) + "(" +
+                       RenderOperand( in->base, true ) + "(" +
                        RenderOperandSequence( in->arguments, ", ", false ) + ")" +
                        after;
             else
                 return before + 
-                       RenderExpression( in->base, true ) + "." +
+                       RenderOperand( in->base, true ) + "." +
                        RenderIdentifier( in->member ) + "(" +
                        RenderOperandSequence( in->arguments, ", ", false ) + ")" +
                        after;
@@ -332,16 +332,16 @@ private:
             return before +
                    (d->global ? "::" : "") +
                    "delete" + (d->array ? "[]" : "") +
-                   " " + RenderExpression( d->pointer, true ) +
+                   " " + RenderOperand( d->pointer, true ) +
                    after;
         else if( shared_ptr<Subscript> su = dynamic_pointer_cast< Subscript >(expression) )
             return before + 
-                   RenderExpression( su->base, true ) + "[" +
-                   RenderExpression( su->index, false ) + "]" +
+                   RenderOperand( su->base, true ) + "[" +
+                   RenderOperand( su->index, false ) + "]" +
                    after;
         else if( shared_ptr<Lookup> a = dynamic_pointer_cast< Lookup >(expression) )
             return before + 
-                   RenderExpression( a->base, true ) + "." +
+                   RenderOperand( a->base, true ) + "." +
                    RenderIdentifier( a->member ) +
                    after;
             // TODO: this should use RenderScopedIdentifier for the member, since it could have a 
@@ -360,7 +360,7 @@ private:
         else if( shared_ptr<Cast> c = dynamic_pointer_cast< Cast >(expression) )
             return before + 
                    "(" + RenderType( c->type, "" ) + ")" +
-                   RenderExpression( c->operand, false ) + 
+                   RenderOperand( c->operand, false ) + 
                    after;
         else if( shared_ptr<Aggregate> ao = dynamic_pointer_cast< Aggregate >(expression) )
             return before + 
@@ -467,7 +467,7 @@ private:
                 s += "\n";
             else
                 s += " = ";
-            s += RenderExpression(o->initialiser);
+            s += RenderOperand(o->initialiser);
             if( !function_definition )
                 s += sep;
         }            
@@ -585,11 +585,11 @@ private:
         else if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(statement) )
             return RenderDeclaration( d, sep );
         else if( shared_ptr<Compound> c = dynamic_pointer_cast< Compound >(statement) ) // Never put ; after a scope - you'd get {blah};
-            return RenderExpression(c);
+            return RenderOperand(c);
         else if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(statement) )
-            return RenderExpression(e) + sep;
+            return RenderOperand(e) + sep;
         else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(statement) )
-            return "return " + RenderExpression(es->return_value) + sep;
+            return "return " + RenderOperand(es->return_value) + sep;
         else if( shared_ptr<LabelTarget> l = dynamic_pointer_cast<LabelTarget>(statement) )
             return RenderIdentifier(l->label) + ":\n"; // no ; after a label
         else if( shared_ptr<Goto> g = dynamic_pointer_cast<Goto>(statement) )
@@ -597,12 +597,12 @@ private:
             if( shared_ptr<Label> l = dynamic_pointer_cast< Label >(g->destination) )
                 return "goto " + RenderIdentifier(l) + sep;  // regular goto
             else
-                return "goto *" + RenderExpression(g->destination) + sep; // goto-a-variable (GCC extension)
+                return "goto *" + RenderOperand(g->destination) + sep; // goto-a-variable (GCC extension)
         }
         else if( shared_ptr<If> i = dynamic_pointer_cast<If>(statement) )
         {
             string s;
-            s += "if( " + RenderExpression(i->condition) + " )\n"
+            s += "if( " + RenderOperand(i->condition) + " )\n"
                  "{\n" + // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
                  RenderStatement(i->body, ";\n") +
                  "}\n";
@@ -612,20 +612,20 @@ private:
             return s;
         } 
         else if( shared_ptr<While> w = dynamic_pointer_cast<While>(statement) )
-            return "while( " + RenderExpression(w->condition) + " )\n" +
+            return "while( " + RenderOperand(w->condition) + " )\n" +
                    RenderStatement(w->body, ";\n");
         else if( shared_ptr<Do> d = dynamic_pointer_cast<Do>(statement) )
             return "do\n" +
                    RenderStatement(d->body, ";\n") +
-                   "while( " + RenderExpression(d->condition) + " )" + sep;
+                   "while( " + RenderOperand(d->condition) + " )" + sep;
         else if( shared_ptr<For> f = dynamic_pointer_cast<For>(statement) )
-            return "for( " + RenderStatement(f->initialisation, "") + "; " + RenderExpression(f->condition) + "; "+ RenderStatement(f->increment, "") + " )\n" +
+            return "for( " + RenderStatement(f->initialisation, "") + "; " + RenderOperand(f->condition) + "; "+ RenderStatement(f->increment, "") + " )\n" +
                    RenderStatement(f->body, ";\n");
         else if( shared_ptr<Switch> s = dynamic_pointer_cast<Switch>(statement) )
-            return "switch( " + RenderExpression(s->condition) + " )\n" +
+            return "switch( " + RenderOperand(s->condition) + " )\n" +
                    RenderStatement(s->body, ";\n");
         else if( shared_ptr<Case> c = dynamic_pointer_cast<Case>(statement) )
-            return "case " + RenderExpression(c->value_lo) + " ... " + RenderExpression(c->value_hi) + ":\n";
+            return "case " + RenderOperand(c->value_lo) + " ... " + RenderOperand(c->value_hi) + ":\n";
         else if( dynamic_pointer_cast<Default>(statement) )
             return "default:\n";
         else if( dynamic_pointer_cast<Continue>(statement) )
@@ -662,7 +662,7 @@ private:
         return s;
     }
 
-    string RenderOperandSequence( Sequence<Expression> spe, 
+    string RenderOperandSequence( Sequence<Operand> spe, 
                                   string separator, 
                                   bool seperate_last )
     {
@@ -672,11 +672,8 @@ private:
         {
             TRACE("%d %p\n", i, &i);
             string sep = (seperate_last || i+1<spe.size()) ? separator : "";
-            shared_ptr<Expression> pe = spe[i];                        
-            if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(pe) )
-                s += RenderExpression( e ) + sep;
-            else
-                s += ERROR_UNSUPPORTED(pe);
+            shared_ptr<Operand> pe = spe[i];                        
+            s += RenderOperand( pe ) + sep;
         }
         return s;
     }
