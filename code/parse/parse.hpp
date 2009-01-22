@@ -133,7 +133,7 @@ private:
         stack< Sequence<Declaration> * > inferno_scope_stack;
         RCHold<Declaration, DeclTy *> hold_decl;
         RCHold<Base, DeclTy *> hold_base;
-        RCHold<Expression, ExprTy *> hold_expr;
+        RCHold<Operand, ExprTy *> hold_expr;
         RCHold<Statement, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
         RCHold<Label, void *> hold_label;
@@ -146,7 +146,7 @@ private:
             return OwningStmtResult( *this, hold_stmt.ToRaw( s ) );
         }
         
-        OwningExprResult ToExpr( shared_ptr<Expression> e )
+        OwningExprResult ToExpr( shared_ptr<Operand> e )
         {
             return OwningExprResult( *this, hold_expr.ToRaw( e ) );
         }
@@ -156,7 +156,7 @@ private:
             return hold_stmt.FromRaw( s.get() );
         }
 
-        shared_ptr<Expression> FromClang( const ExprArg &e )
+        shared_ptr<Operand> FromClang( const ExprArg &e )
         {
             return hold_expr.FromRaw( e.get() );
         }
@@ -662,14 +662,23 @@ private:
         
         virtual OwningStmtResult ActOnExprStmt(ExprArg Expr) 
         {
-            shared_ptr<Expression> e = FromClang(Expr);
-            return ToStmt( e );
+            if( shared_ptr<Expression> e = dynamic_pointer_cast<Expression>( FromClang(Expr) ) )
+            {
+                return ToStmt( e );
+            }
+            else
+            {
+                // Operands that are not Expressions have no side effects and so
+                // they do nothing as Statements
+                shared_ptr<Nop> n(new Nop);
+                return ToStmt( n );
+            }                       
         }
 
         virtual StmtResult ActOnReturnStmt( clang::SourceLocation ReturnLoc,
                                             ExprTy *RetValExp ) 
         {           
-            shared_ptr<Expression> e = hold_expr.FromRaw(RetValExp);
+            shared_ptr<Operand> e = hold_expr.FromRaw(RetValExp);
             shared_ptr<Return> r(new Return);
             r->return_value = e;
             TRACE("aors %p\n", r.get() );
@@ -1255,7 +1264,7 @@ private:
             shared_ptr<Aggregate> ao(new Aggregate);
             for(int i=0; i<NumInit; i++)
             {
-                shared_ptr<Expression> e = hold_expr.FromRaw( InitList[i] );
+                shared_ptr<Operand> e = hold_expr.FromRaw( InitList[i] );
                 ao->elements.push_back( e );
             }
             return hold_expr.ToRaw( ao );                                 
@@ -1514,7 +1523,7 @@ private:
             return 0;
         }
         
-        void CollectArgs( Sequence<Expression> *ps, ExprTy **Args, unsigned NumArgs )
+        void CollectArgs( Sequence<Operand> *ps, ExprTy **Args, unsigned NumArgs )
         {
             for(int i=0; i<NumArgs; i++ )
                 ps->push_back( hold_expr.FromRaw(Args[i]) );

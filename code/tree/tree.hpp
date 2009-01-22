@@ -39,9 +39,12 @@ struct Type : virtual Node {};
 
 struct Statement : virtual Node {};
 
-struct Expression : virtual Statement {};
+struct Operand : virtual Node {};
 
-struct Declaration : virtual Statement
+struct Expression : Statement,
+                    Operand {};
+
+struct Declaration : Statement
 {   
     enum Access
     {
@@ -78,11 +81,11 @@ struct Physical
 };
 
 struct Instance : Identifier,
-                  Expression,
+                  Operand,
                   Physical
 {
     shared_ptr<Type> type;
-    shared_ptr<Expression> initialiser; // NULL if uninitialised
+    shared_ptr<Operand> initialiser; // NULL if uninitialised
 };
 
 struct InheritanceRecord;
@@ -145,7 +148,7 @@ struct Bool : Type {};
 
 struct Numeric : Type 
 {
-    shared_ptr<Expression> width;  // Bits, not bytes
+    shared_ptr<Operand> width;  // Bits, not bytes
 };
 
 struct Integral : Numeric {};
@@ -183,7 +186,7 @@ struct Class : InheritanceRecord {};
 struct Array : Type
 {
     shared_ptr<Type> element;
-    shared_ptr<Expression> size; // NULL if undefined
+    shared_ptr<Operand> size; // NULL if undefined
 };
 
 //////////////////////////// Expressions ////////////////////////////
@@ -199,7 +202,7 @@ struct Compound : Expression
 
 struct Operator : Expression
 {
-    Sequence<Expression> operands;
+    Sequence<Operand> operands;
     clang::tok::TokenKind kind;
 };
 
@@ -218,40 +221,40 @@ struct PrefixOnType : Expression
 
 struct ConditionalOperator : Expression // eg ?:
 {
-    shared_ptr<Expression> condition;
-    shared_ptr<Expression> if_true;
-    shared_ptr<Expression> if_false;
+    shared_ptr<Operand> condition;
+    shared_ptr<Operand> if_true;
+    shared_ptr<Operand> if_false;
 };
 
 struct Aggregate : Expression
 {
-    Sequence<Expression> elements;
+    Sequence<Operand> elements;
 };
 
 struct Call : Expression
 {
-    shared_ptr<Expression> function;
-    Sequence<Expression> arguments;
+    shared_ptr<Operand> function;
+    Sequence<Operand> arguments;
 };
 
 struct Invoke : Expression
 {
-    shared_ptr<Expression> base;
+    shared_ptr<Operand> base;
     shared_ptr<Instance> member;
-    Sequence<Expression> arguments;
+    Sequence<Operand> arguments;
 };
 
 struct New : Expression
 {
     shared_ptr<Type> type; 
-    Sequence<Expression> placement_arguments;
-    Sequence<Expression> constructor_arguments;
+    Sequence<Operand> placement_arguments;
+    Sequence<Operand> constructor_arguments;
     bool global; // true if ::new was used
 };
 
 struct Delete : Expression
 {
-    shared_ptr<Expression> pointer;
+    shared_ptr<Operand> pointer;
     bool array; // true if delete[] was used
     bool global; // true if ::Delete was used
 };
@@ -278,19 +281,19 @@ struct This : Expression {};
 
 struct Subscript : Expression
 {
-    shared_ptr<Expression> base;
-    shared_ptr<Expression> index;
+    shared_ptr<Operand> base;
+    shared_ptr<Operand> index;
 };
 
 struct Lookup : Expression  // picking a member from a record eg "base.member"
 {
-    shared_ptr<Expression> base; 
+    shared_ptr<Operand> base; 
     shared_ptr<Instance> member;    
 };
 
 struct Cast : Expression
 {
-    shared_ptr<Expression> operand;
+    shared_ptr<Operand> operand;
     shared_ptr<Type> type;        
 };
 
@@ -298,7 +301,7 @@ struct Cast : Expression
 
 struct Return : Statement
 {
-    shared_ptr<Expression> return_value;
+    shared_ptr<Operand> return_value;
 };
 
 struct LabelTarget : Statement
@@ -310,12 +313,12 @@ struct Goto : Statement
 {
     // Dest is an expression for goto-a-variable support.
     // Ordinary gotos will have Label here.
-    shared_ptr<Expression> destination;
+    shared_ptr<Operand> destination;
 };
 
 struct If : Statement
 {
-    shared_ptr<Expression> condition;
+    shared_ptr<Operand> condition;
     shared_ptr<Statement> body;
     shared_ptr<Statement> else_body; // can be NULL if no else clause
 };
@@ -327,25 +330,25 @@ struct Loop : Statement
 
 struct While : Loop
 {
-    shared_ptr<Expression> condition;
+    shared_ptr<Operand> condition;
 };
 
 struct Do : Loop // a do..while() construct 
 {
-    shared_ptr<Expression> condition;
+    shared_ptr<Operand> condition;
 };
 
 struct For : Loop
 {
     // Any of these can be NULL if absent. NULL condition evaluates true.
     shared_ptr<Statement> initialisation;
-    shared_ptr<Expression> condition;
+    shared_ptr<Operand> condition;
     shared_ptr<Statement> increment;    
 };
 
 struct Switch : Statement
 {
-    shared_ptr<Expression> condition;
+    shared_ptr<Operand> condition;
     shared_ptr<Statement> body;
 };
 
@@ -355,8 +358,8 @@ struct Case : SwitchTarget
 {
     // support gcc extension of case x..y:
     // in other cases, value_lo==value_hi
-    shared_ptr<Expression> value_lo; // inclusive
-    shared_ptr<Expression> value_hi; // inclusive
+    shared_ptr<Operand> value_lo; // inclusive
+    shared_ptr<Operand> value_hi; // inclusive
 };
 
 struct Default : SwitchTarget {};
