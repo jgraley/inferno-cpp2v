@@ -102,7 +102,7 @@ private:
     private:   
         // Extend the tree so we can store function parameter decls during prototype parse
         // and read them back at the start of function body, which is a seperate scope.
-        struct ParseParameterDeclaration : Object
+        struct ParseParameterDeclaration : Instance
         {
             clang::IdentifierInfo *clang_identifier;
         };
@@ -327,7 +327,7 @@ private:
                                 for( int i=0; i<fchunk.NumArgs; i++ )
                                 {
                                     shared_ptr<Declaration> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
-                                    shared_ptr<Object> o = dynamic_pointer_cast<Object>(d); // TODO just push the declarators, no need for dynamic cast?
+                                    shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(d); // TODO just push the declarators, no need for dynamic cast?
                                     f->parameters.push_back( o );
                                 }
                                 TRACE("function returning...\n");
@@ -340,7 +340,7 @@ private:
                                 for( int i=0; i<fchunk.NumArgs; i++ )
                                 {
                                     shared_ptr<Declaration> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
-                                    shared_ptr<Object> o = dynamic_pointer_cast<Object>(d); // TODO just push the declarators, no need for dynamic cast?
+                                    shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(d); // TODO just push the declarators, no need for dynamic cast?
                                     c->parameters.push_back( o );
                                 }
                                 return c;
@@ -399,12 +399,12 @@ private:
             }
         }
         
-        shared_ptr<Object> CreateObjectNode( clang::Scope *S, 
+        shared_ptr<Instance> CreateObjectNode( clang::Scope *S, 
                                              clang::Declarator &D, 
                                              Declaration::Access access,
                                              shared_ptr<Expression> init = shared_ptr<Expression>() )
         { 
-            shared_ptr<Object> o(new Object());
+            shared_ptr<Instance> o(new Instance());
             clang::IdentifierInfo *ID = D.getIdentifier();
             const clang::DeclSpec &DS = D.getDeclSpec();
             if(ID)
@@ -490,11 +490,11 @@ private:
             return found_d; 
         }
         
-        shared_ptr<Object> FindExistingObject( clang::Scope *S, clang::Declarator &D )
+        shared_ptr<Instance> FindExistingObject( clang::Scope *S, clang::Declarator &D )
         {
             // Get a declaration and see if its an object declaration
             shared_ptr<Declaration> found_d = FindExistingDeclaration( S, D );           
-            shared_ptr<Object> o = dynamic_pointer_cast<Object>(found_d);
+            shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(found_d);
             ASSERT( o && "found the name, but not an object - maybe a typedef?");
             TRACE("aod %s %p\n", o->name.c_str(), o.get() );
             return o;
@@ -512,7 +512,7 @@ private:
             }    
             else
             {                
-                shared_ptr<Object> o = CreateObjectNode( S, D, a );        
+                shared_ptr<Instance> o = CreateObjectNode( S, D, a );        
                 TRACE("%s %p\n", o->name.c_str(), o.get() );       
                 d = o;
             }
@@ -579,7 +579,7 @@ private:
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D) 
         {
             shared_ptr<ParseParameterDeclaration> p(new ParseParameterDeclaration);
-            shared_ptr<Object> o = CreateObjectNode( S, D, Declaration::PUBLIC );
+            shared_ptr<Instance> o = CreateObjectNode( S, D, Declaration::PUBLIC );
             p->type = o->type;
             p->access = o->access;
             p->name = o->name;
@@ -597,7 +597,7 @@ private:
             if( shared_ptr<ParseTwin> pt = dynamic_pointer_cast<ParseTwin>(d) )
                 d = pt->d2;
                 
-            shared_ptr<Object> o = dynamic_pointer_cast<Object>(d);
+            shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(d);
             ASSERT( o ); // Only objects can be initialised
                         
             o->initialiser = FromClang( Init );            
@@ -605,7 +605,7 @@ private:
 
         // Clang tends to parse parameters and function bodies in seperate
         // scopes so when we see them being used we don't recognise them
-        // and cannot link back to the correct Object node. This function
+        // and cannot link back to the correct Instance node. This function
         // puts all the params back in the current scope assuming:
         // 1. They have been added to the Function node correctly and
         // 2. The pass-specific extension ParseParameterDeclaration has been used
@@ -635,7 +635,7 @@ private:
         virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, DeclTy *D) 
         {
             TRACE();
-            shared_ptr<Object> o = dynamic_pointer_cast<Object>(hold_decl.FromRaw(D));
+            shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(hold_decl.FromRaw(D));
             ASSERT(o);
     
             if( shared_ptr<Procedure> pp = dynamic_pointer_cast<Procedure>( o->type ) )
@@ -651,7 +651,7 @@ private:
         virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtArg Body) 
         {
             TRACE();
-            shared_ptr<Object> o( dynamic_pointer_cast<Object>( hold_decl.FromRaw(Decl) ) );
+            shared_ptr<Instance> o( dynamic_pointer_cast<Instance>( hold_decl.FromRaw(Decl) ) );
             ASSERT(o);
             shared_ptr<Expression> e( dynamic_pointer_cast<Expression>( FromClang( Body ) ) );
             ASSERT(e); // function body must be a scope or 0
@@ -684,7 +684,7 @@ private:
         {
             shared_ptr<Node> n = ident_track.Get( &II, FromCXXScope( SS ) );
             TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
-            shared_ptr<Object> o = dynamic_pointer_cast<Object>( n );
+            shared_ptr<Instance> o = dynamic_pointer_cast<Instance>( n );
             ASSERT( o );
             return hold_expr.ToRaw( o );            
         }                                   
@@ -1048,7 +1048,7 @@ private:
             const clang::DeclSpec &DS = D.getDeclSpec();
             TRACE("Member %p\n", Init);
             shared_ptr<Declaration> d = CreateDelcaration( S, D, ConvertAccess( AS ) );
-            shared_ptr<Object> o = dynamic_pointer_cast<Object>(d);
+            shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(d);
       
             if( BitfieldWidth )
             {
@@ -1184,7 +1184,7 @@ private:
                 ASSERT(!"Unknown token accessing member");
             }            
         
-            shared_ptr<Object> o( new Object );
+            shared_ptr<Instance> o( new Instance );
             o->name = Member.getName(); // Only the name is filled in TODO fill in (possibly in a pass)
             o->access = Declaration::PUBLIC;
             a->member = o;    
@@ -1286,7 +1286,7 @@ private:
                                           clang::SourceLocation IdLoc, clang::IdentifierInfo *Id,
                                           clang::SourceLocation EqualLoc, ExprTy *Val) 
         {
-            shared_ptr<Object> o(new Object());
+            shared_ptr<Instance> o(new Instance());
             o->name = Id->getName();
             o->storage = Physical::SYMBOL;
             o->type = CreateIntegralType( 32, false );
@@ -1298,7 +1298,7 @@ private:
             else if( LastEnumConstant )
             {                 
                 shared_ptr<Declaration> lastd( hold_decl.FromRaw( LastEnumConstant ) );
-                shared_ptr<Object> lasto( dynamic_pointer_cast<Object>(lastd) );
+                shared_ptr<Instance> lasto( dynamic_pointer_cast<Instance>(lastd) );
                 ASSERT(lasto && "unexpected kind of declaration inside an enum");
                 shared_ptr<Infix> inf( new Infix );
                 inf->operands.push_back(lasto->initialiser);
@@ -1455,7 +1455,7 @@ private:
             ident_track.PopScope( S );
         }
         
-        shared_ptr<Object> GetConstructor( shared_ptr<Type> t )
+        shared_ptr<Instance> GetConstructor( shared_ptr<Type> t )
         {
             if( shared_ptr<Typedef> td = dynamic_pointer_cast<Typedef>(t) )
             {
@@ -1465,19 +1465,19 @@ private:
             {
                 FOREACH( shared_ptr<Declaration> d, r->members )
                 {
-                    shared_ptr<Object> o( dynamic_pointer_cast<Object>(d) );
+                    shared_ptr<Instance> o( dynamic_pointer_cast<Instance>(d) );
                     if( !o )
                         continue;
                     if( dynamic_pointer_cast<Constructor>(o->type) )
                         return o;
                 }
                 ASSERT(!"missing constructor");
-                return shared_ptr<Object>();
+                return shared_ptr<Instance>();
             }
             else 
             {
                 ASSERT(!"initialisers for PODs not yet implemented"); // TODO
-                return shared_ptr<Object>();
+                return shared_ptr<Instance>();
             }            
         }
 
@@ -1492,8 +1492,8 @@ private:
         {            
             // Get (or make) the constructor we're invoking
             shared_ptr<Node> n = ident_track.Get( MemberOrBase );
-            shared_ptr<Object> om( dynamic_pointer_cast<Object>(n) );
-            shared_ptr<Object> cm = GetConstructor( om->type );
+            shared_ptr<Instance> om( dynamic_pointer_cast<Instance>(n) );
+            shared_ptr<Instance> cm = GetConstructor( om->type );
             
             // Build a call to the constructor
             shared_ptr<Invoke> in(new Invoke);
@@ -1503,7 +1503,7 @@ private:
             
             // Get the constructor whose init list we're adding to
             shared_ptr<Declaration> d( hold_decl.FromRaw( ConstructorDecl ) );
-            shared_ptr<Object> o( dynamic_pointer_cast<Object>(d) );
+            shared_ptr<Instance> o( dynamic_pointer_cast<Instance>(d) );
             ASSERT(o);
             shared_ptr<Type> t = o->type;
             shared_ptr<Constructor> co( dynamic_pointer_cast<Constructor>(t) );

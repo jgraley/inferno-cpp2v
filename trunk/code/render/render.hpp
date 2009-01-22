@@ -256,7 +256,7 @@ private:
             return before + 
                    "&&" + RenderIdentifier( l ) + // label-as-variable (GCC extension)
                    after;
-        else if( shared_ptr<Object> v = dynamic_pointer_cast< Object >(expression) )
+        else if( shared_ptr<Instance> v = dynamic_pointer_cast< Instance >(expression) )
             return RenderScopedIdentifier( v );
         else if( shared_ptr<IntegralConstant> ic = dynamic_pointer_cast< IntegralConstant >(expression) )
             return string(ic->value.toString(10)) + 
@@ -421,7 +421,7 @@ private:
         }
     }
     
-    string RenderObject( shared_ptr<Object> o, string sep, bool showtype = true, 
+    string RenderObject( shared_ptr<Instance> o, string sep, bool showtype = true, 
                          bool showstorage = true, bool showinit = true, bool showscope = false )
     {
         string s;
@@ -489,7 +489,7 @@ private:
             *access = declaration->access;
         }
                                          
-        if( shared_ptr<Object> o = dynamic_pointer_cast< Object >(declaration) )
+        if( shared_ptr<Instance> o = dynamic_pointer_cast< Instance >(declaration) )
         {                
             bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
             if( dynamic_pointer_cast<Record>( scope_stack.top() ) &&
