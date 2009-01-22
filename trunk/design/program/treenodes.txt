@@ -25,9 +25,16 @@ Enum       Name  Access                          Members
 
 
 Note: maybe merge Virtual and Storage into default|static|virtual|pure
-No common treatment for Type.
+No common treatment for Type. DONE
 
 Note: Instance is what used to be called Object
 
-Note: Use Invoke (=Call combined with Lookup) for initialisers in all
-cases since we want to specify which constructor explicitly.
+TODO: Use Invoke (=Call combined with Lookup) for initialisers in all
+cases since we want to specify which constructor explicitly. Do this at
+top of init Compound. I believe this is unambiguous etc.
+
+TODO: rename Expression to eg SEExpression and Operand to Expression
+for better intuitiveness and correct use of word expression. SE stands
+for side effect.
+
+TODO: get the enums out of nodes so fewwer :: in code
