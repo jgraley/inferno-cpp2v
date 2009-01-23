@@ -421,6 +421,20 @@ private:
         }
     }
     
+    void ExtractInits( const Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
+    {
+        FOREACH( shared_ptr<Statement> s, body )
+        {
+            if( shared_ptr<Invoke> in = dynamic_pointer_cast< Invoke >(s) )
+                if( dynamic_pointer_cast<Constructor>(in->member->type) )
+                {
+                    inits.push_back(s);
+                    continue;
+                }
+            remainder.push_back(s);    
+        }
+    }
+    
     string RenderObject( shared_ptr<Instance> o, string sep, bool showtype = true, 
                          bool showstorage = true, bool showinit = true, bool showscope = false )
     {
@@ -456,19 +470,32 @@ private:
         if( o->initialiser && showinit )
         {
             AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, o ) );
+                        
+            shared_ptr<Operand> op = o->initialiser;            
             if( shared_ptr<Constructor> c = dynamic_pointer_cast<Constructor>(o->type) )
-                if( !c->initialisers.empty() )
+            {                                 
+                Sequence<Statement> inits;
+                Sequence<Statement> remainder;
+                ExtractInits( dynamic_pointer_cast<Compound>(o->initialiser)->statements, inits, remainder );
+                if( !inits.empty() )
                 {
                     s += " : ";
-                    s += RenderSequence( c->initialisers, ", ", false, Declaration::PUBLIC, true );                
+                    s += RenderSequence( inits, ", ", false, Declaration::PUBLIC, true );                
                 }
-            bool function_definition = !!dynamic_pointer_cast<Compound>(o->initialiser);
-            if( function_definition )
+                
+                shared_ptr<Compound> r( new Compound );
+                r->statements = remainder;
+                op = r;                
+            }
+
+            if( dynamic_pointer_cast<Subroutine>(o->type) )
                 s += "\n";
             else
                 s += " = ";
-            s += RenderOperand(o->initialiser);
-            if( !function_definition )
+            
+            s += RenderOperand(op);
+            
+            if( !dynamic_pointer_cast<Subroutine>(o->type) )
                 s += sep;
         }            
         else
