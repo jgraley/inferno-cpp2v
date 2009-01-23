@@ -31,6 +31,7 @@
 #include "common/pass.hpp"
 #include "common/trace.hpp"
 #include "common/type_info.hpp"
+#include "helpers/misc.hpp"
 
 #include "identifier_tracker.hpp"
 
@@ -643,8 +644,6 @@ private:
     
             inferno_scope_stack.push( new Sequence<Declaration> ); 
             
-            TRACE();
-            
             return hold_decl.ToRaw( o );     
         }
         
@@ -653,9 +652,18 @@ private:
             TRACE();
             shared_ptr<Instance> o( dynamic_pointer_cast<Instance>( hold_decl.FromRaw(Decl) ) );
             ASSERT(o);
-            shared_ptr<Expression> e( dynamic_pointer_cast<Expression>( FromClang( Body ) ) );
-            ASSERT(e); // function body must be a scope or 0
-            o->initialiser = e;
+            shared_ptr<Compound> cb( dynamic_pointer_cast<Compound>( FromClang( Body ) ) );
+            ASSERT(cb); // function body must be a scope or 0
+            
+            if( !o->initialiser )
+                o->initialiser = cb;
+            else if( shared_ptr<Compound> c = dynamic_pointer_cast<Compound>( o->initialiser ) )
+                c->statements = c->statements + cb->statements;
+            else
+                ASSERT(!"wrong thing in function instance");
+
+            TRACE("finish fn %s with %d statements %d total\n", o->name.c_str(), cb->statements.size(), (dynamic_pointer_cast<Compound>(o->initialiser))->statements.size() );
+                
             inferno_scope_stack.pop(); // we dont use these - we use the clang-managed compound statement instead (passed in via Body)
             return Decl;
         }    
@@ -1514,12 +1522,22 @@ private:
             shared_ptr<Declaration> d( hold_decl.FromRaw( ConstructorDecl ) );
             shared_ptr<Instance> o( dynamic_pointer_cast<Instance>(d) );
             ASSERT(o);
-            shared_ptr<Type> t = o->type;
-            shared_ptr<Constructor> co( dynamic_pointer_cast<Constructor>(t) );
-            ASSERT(co);            
+            shared_ptr<Compound> c;
+            if( o->initialiser )
+            {
+                c = dynamic_pointer_cast<Compound>(o->initialiser);
+                ASSERT(c);       
+                TRACE();
+            }
+            else
+            {
+                c = shared_ptr<Compound>( new Compound );
+                o->initialiser = c;
+                TRACE();
+            }
             
             // Add it
-            co->initialisers.push_back( in );
+            c->statements.push_back( in );
             return 0;
         }
         

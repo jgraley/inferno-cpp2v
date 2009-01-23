@@ -125,10 +125,9 @@ struct Function : Procedure
     shared_ptr<Type> return_type;
 };
 
-struct Constructor : Procedure 
-{
-    Sequence<Statement> initialisers;
-};
+// The init list is just 0 or more Invoke( member, c'tor, params ) 
+// in the body
+struct Constructor : Procedure {};
 
 struct Destructor : Subroutine {};
 
