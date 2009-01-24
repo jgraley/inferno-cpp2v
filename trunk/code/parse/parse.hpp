@@ -32,6 +32,7 @@
 #include "common/trace.hpp"
 #include "common/type_info.hpp"
 #include "helpers/misc.hpp"
+#include "helpers/typeof.hpp"
 
 #include "identifier_tracker.hpp"
 
@@ -1185,6 +1186,8 @@ private:
         {
             TRACE("kind %d\n", OpKind);
             shared_ptr<Lookup> a( new Lookup );
+            
+            // Turn -> into * and .
             if( OpKind == clang::tok::arrow )  // Base->Member
             {
                 shared_ptr<Prefix> p( new Prefix );
@@ -1201,10 +1204,15 @@ private:
                 ASSERT(!"Unknown token accessing member");
             }            
         
-            shared_ptr<Instance> o( new Instance );
-            o->name = Member.getName(); // Only the name is filled in TODO fill in (possibly in a pass)
-            o->access = Declaration::PUBLIC;
-            a->member = o;    
+            // Find the specified member in the record implied by the expression on the left of .
+            shared_ptr<Type> tbase = TypeOf().Get(a->base);
+            shared_ptr<Record> rbase = dynamic_pointer_cast<Record>(tbase);
+            ASSERT( rbase && "thing on left of ./-> is not a record/record ptr" );
+            
+            a->member = FindMemberByName( rbase, string(Member.getName()) );
+
+            ASSERT(a->member && "in r.m or (&r)->m, could not find m in r");        
+            
             return hold_expr.ToRaw( a );
         }
                 

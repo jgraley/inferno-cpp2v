@@ -216,7 +216,7 @@ struct Postfix : Operator {}; // 1 operand
 struct Infix : Operator {}; // 2 operands
 
 // for eg sizeof(int) where the operand is a type
-struct PrefixOnType : Expression
+struct PrefixOnType : Expression // TODO inherit from Aggregate for the operands?
 {
     shared_ptr<Type> operand;
     clang::tok::TokenKind kind;
@@ -231,16 +231,16 @@ struct ConditionalOperator : Expression // eg ?:
 
 struct Aggregate : Expression
 {
-    Sequence<Operand> elements;
+    Sequence<Operand> elements; //TODO call these operands and use as base for Call and Operator
 };
 
-struct Call : Expression
+struct Call : Expression // TODO inherit from Aggregate?
 {
     shared_ptr<Operand> function;
     Sequence<Operand> arguments;
 };
 
-struct Invoke : Expression
+struct Invoke : Expression // TODO inherit from Call?
 {
     shared_ptr<Operand> base;
     shared_ptr<Instance> member;
@@ -282,13 +282,13 @@ struct String : Expression
 
 struct This : Expression {};
 
-struct Subscript : Expression
+struct Subscript : Expression // TODO could be an Operator?
 {
     shared_ptr<Operand> base;
     shared_ptr<Operand> index;
 };
 
-struct Lookup : Expression  // picking a member from a record eg "base.member"
+struct Lookup : Expression  // picking a member from a record eg "base.member" TODO could be an Operator?
 {
     shared_ptr<Operand> base; 
     shared_ptr<Instance> member;    
