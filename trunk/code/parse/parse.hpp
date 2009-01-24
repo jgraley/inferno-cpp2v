@@ -1299,11 +1299,12 @@ private:
                                           clang::SourceLocation IdLoc, clang::IdentifierInfo *Id,
                                           clang::SourceLocation EqualLoc, ExprTy *Val) 
         {
+            int enumbits = TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified];
             shared_ptr<Instance> o(new Instance());
             o->name = Id->getName();
             o->storage = STATIC;
             o->constant = true; // static const member does not consume storage!!
-            o->type = CreateIntegralType( 32, false );
+            o->type = CreateIntegralType( enumbits, false );
             o->access = PUBLIC;
             if( Val )
             {
@@ -1316,7 +1317,7 @@ private:
                 ASSERT(lasto && "unexpected kind of declaration inside an enum");
                 shared_ptr<Infix> inf( new Infix );
                 inf->operands.push_back(lasto->initialiser);
-                llvm::APSInt i(32, false);
+                llvm::APSInt i(enumbits, false);
                 i = 1;
                 shared_ptr<IntegralConstant> ic( new IntegralConstant );
                 ic->value = i;
@@ -1326,7 +1327,7 @@ private:
             }
             else
             {
-                llvm::APSInt i(32, false);
+                llvm::APSInt i(enumbits, false);
                 i = 0;
                 shared_ptr<IntegralConstant> ic( new IntegralConstant );
                 ic->value = i;
