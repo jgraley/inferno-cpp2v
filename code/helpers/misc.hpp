@@ -22,4 +22,24 @@ Sequence<T> operator+( Sequence<T> &s1, Sequence<T> &s2 )
     return sr;    
 }
 
+shared_ptr<Instance> FindMemberByName( shared_ptr<Record> r, string name )
+{
+    TRACE("Record \"%s\" has %d members\n", r->name.c_str(), r->members.size() );
+    
+    // Try the instance members (objects and functions) for a name match
+    FOREACH( shared_ptr<Declaration> d, r->members )
+        if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>(d) )
+            if( i->name == name )
+                return i;
+                
+    // Try recursing through the base classes, if there are any
+    if( shared_ptr<InheritanceRecord> ir = dynamic_pointer_cast<InheritanceRecord>( r ) )
+        FOREACH( shared_ptr<Base> b, ir->bases )
+            if( shared_ptr<Instance> i = FindMemberByName( b->record, name ) )
+                return i;
+                
+    // We failed. Hang our head in shame.                
+    return shared_ptr<Instance>();
+}                
+
 #endif
