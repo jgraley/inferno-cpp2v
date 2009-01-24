@@ -424,7 +424,7 @@ private:
         }
     }
     
-    string RenderObject( shared_ptr<Instance> o, string sep, bool showtype = true, 
+    string RendreInstance( shared_ptr<Instance> o, string sep, bool showtype = true, 
                          bool showstorage = true, bool showinit = true, bool showscope = false )
     {
         string s;
@@ -492,6 +492,14 @@ private:
         return s;
     }
     
+    bool ShouldSplitInstance( shared_ptr<Instance> o )
+    {
+        bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
+        return dynamic_pointer_cast<Record>( scope_stack.top() ) &&
+                   ( (o->storage==STATIC && !o->constant) ||
+                     isfunc );
+    }
+    
     string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, Access *access = NULL, bool showtype = true )
     {
         TRACE();
@@ -505,23 +513,21 @@ private:
                                          
         if( shared_ptr<Instance> o = dynamic_pointer_cast< Instance >(declaration) )
         {                
-            bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
-            if( dynamic_pointer_cast<Record>( scope_stack.top() ) &&
-                ((o->storage==STATIC && !o->constant) || isfunc) )
+            if( ShouldSplitInstance(o) )
             {
                 // Non-const static objects and functions in records 
                 // get split into a part that goes into the record (main line of rendering) and
                 // a part that goes seperately (deferred_decls gets appended at the very end)
-                s += RenderObject( o, sep, showtype, showtype, false, false );
+                s += RendreInstance( o, sep, showtype, showtype, false, false );
                 {
                     AutoPush< shared_ptr<Node> > cs( scope_stack, program );
-                    deferred_decls += string("\n") + RenderObject( o, sep, showtype, false, true, true );
+                    deferred_decls += string("\n") + RendreInstance( o, sep, showtype, false, true, true );
                 }
             }
             else
             {
                 // Otherwise, render everything directly using the default settings
-                s += RenderObject( o, sep, showtype, showtype, true, false );
+                s += RendreInstance( o, sep, showtype, showtype, true, false );
             }
         }
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
