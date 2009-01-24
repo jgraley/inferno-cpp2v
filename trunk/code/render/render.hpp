@@ -303,23 +303,17 @@ private:
                    RenderOperand( o->if_false, true ) +
                    after;
         else if( shared_ptr<Call> o = dynamic_pointer_cast< Call >(expression) )
-            return before + 
-                   RenderOperand( o->function, true ) + "(" +
-                   RenderOperandSequence( o->arguments, ", ", false ) + ")" +
-                   after;
-        else if( shared_ptr<Invoke> in = dynamic_pointer_cast< Invoke >(expression) )
         {
-            if( dynamic_pointer_cast<Constructor>(in->member->type) )
+            if( shared_ptr<Operand> base = IsConstructorCall( o ) )
                 return before +  // invoking costructors as found in init lists and locals
-                       RenderOperand( in->base, true ) + "(" +
-                       RenderOperandSequence( in->arguments, ", ", false ) + ")" +
+                       RenderOperand( base, true ) + "(" +
+                       RenderOperandSequence( o->operands, ", ", false ) + ")" +
                        after;
-            else
+            else            
                 return before + 
-                       RenderOperand( in->base, true ) + "." +
-                       RenderIdentifier( in->member ) + "(" +
-                       RenderOperandSequence( in->arguments, ", ", false ) + ")" +
-                       after;
+                   RenderOperand( o->function, true ) + "(" +
+                   RenderOperandSequence( o->operands, ", ", false ) + ")" +
+                   after;
         }
         else if( shared_ptr<New> n = dynamic_pointer_cast< New >(expression) )
             return before +
@@ -364,7 +358,7 @@ private:
                    after;
         else if( shared_ptr<Aggregate> ao = dynamic_pointer_cast< Aggregate >(expression) )
             return before + 
-                   "{ " + RenderOperandSequence( ao->elements, ", ", false ) + " }" +
+                   "{ " + RenderOperandSequence( ao->operands, ", ", false ) + " }" +
                    after;
         else if( shared_ptr<String> ss = dynamic_pointer_cast< String >(expression) )
             return before + 
@@ -379,39 +373,33 @@ private:
         TRACE("ok\n");
     }
     
-    string RenderAccess( Declaration::Access access )
+    string RenderAccess( Access access )
     {
         switch( access )
         {
-            case Declaration::PUBLIC:
+            case PUBLIC:
                 return "public";
-            case Declaration::PRIVATE:
+            case PRIVATE:
                 return "private";
-            case Declaration::PROTECTED:
+            case PROTECTED:
                 return "protected";
             default:
                 return ERROR_UNKNOWN("access spec"); 
         }        
     }
     
-    string RenderStorage( Physical::Storage st )
+    string RenderStorage( Storage st )
     {
         switch( st )
         {
-        case Physical::STATIC:
+        case STATIC:
             return "static "; 
             break;
-        case Physical::EXTERN:
-            return "extern ";
-            break;
-        case Physical::AUTO:
-            return "auto ";
-            break;
-        case Physical::VIRTUAL:
-       // case Physical::PURE:
+        case VIRTUAL:
+       // case PURE:
             return "virtual ";
             break;
-        case Physical::DEFAULT:
+        case DEFAULT:
             return "";
             break;
         default:
@@ -424,12 +412,14 @@ private:
     {
         FOREACH( shared_ptr<Statement> s, body )
         {
-            if( shared_ptr<Invoke> in = dynamic_pointer_cast< Invoke >(s) )
-                if( dynamic_pointer_cast<Constructor>(in->member->type) )
+            if( shared_ptr<Call> o = dynamic_pointer_cast< Call >(s) )
+            {
+                if( IsConstructorCall( o ) )
                 {
                     inits.push_back(s);
                     continue;
                 }
+            }
             remainder.push_back(s);    
         }
     }
@@ -442,7 +432,11 @@ private:
         ASSERT(o->type);
         
         if( showstorage )
+        {
+            if( o->constant )
+                s += "const ";
             s += RenderStorage(o->storage);
+        }
         
         string name;
         shared_ptr<Constructor> con = dynamic_pointer_cast<Constructor>(o->type);
@@ -479,7 +473,7 @@ private:
                 if( !inits.empty() )
                 {
                     s += " : ";
-                    s += RenderSequence( inits, ", ", false, Declaration::PUBLIC, true );                
+                    s += RenderSequence( inits, ", ", false, PUBLIC, true );                
                 }
                 
                 shared_ptr<Compound> r( new Compound );
@@ -498,7 +492,7 @@ private:
         return s;
     }
     
-    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, Declaration::Access *access = NULL, bool showtype = true )
+    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, Access *access = NULL, bool showtype = true )
     {
         TRACE();
         string s;
@@ -513,10 +507,9 @@ private:
         {                
             bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
             if( dynamic_pointer_cast<Record>( scope_stack.top() ) &&
-                !dynamic_pointer_cast<Enum>( scope_stack.top() ) &&
-                (o->storage==Physical::STATIC || isfunc) )
+                ((o->storage==STATIC && !o->constant) || isfunc) )
             {
-                // Static things in records (ie static member objects and static emmber functions)
+                // Non-const static objects and functions in records 
                 // get split into a part that goes into the record (main line of rendering) and
                 // a part that goes seperately (deferred_decls gets appended at the very end)
                 s += RenderObject( o, sep, showtype, showtype, false, false );
@@ -535,28 +528,28 @@ private:
             s += "typedef " + RenderType( t->type, t->name ) + sep;
         else if( shared_ptr<Record> r = dynamic_pointer_cast< Record >(declaration) )
         {
-            Declaration::Access a;
+            Access a;
             bool showtype=true;
             string sep2=";\n";
             if( dynamic_pointer_cast< Class >(r) )
             {
                 s += "class";
-                a = Declaration::PRIVATE;
+                a = PRIVATE;
             }
             else if( dynamic_pointer_cast< Struct >(r) )
             {
                 s += "struct";
-                a = Declaration::PUBLIC;
+                a = PUBLIC;
             }
             else if( dynamic_pointer_cast< Union >(r) )
             {
                 s += "union";
-                a = Declaration::PUBLIC;
+                a = PUBLIC;
             }
             else if( dynamic_pointer_cast< Enum >(r) )
             {
                 s += "enum";
-                a = Declaration::PUBLIC;
+                a = PUBLIC;
                 sep2 = ",\n";
                 showtype = false;
             }
@@ -663,7 +656,7 @@ private:
     string RenderSequence( Sequence<ELEMENT> spe, 
                            string separator, 
                            bool seperate_last, 
-                           Declaration::Access init_access = Declaration::PUBLIC,
+                           Access init_access = PUBLIC,
                            bool showtype=true )
     {
         TRACE();

@@ -33,7 +33,6 @@ struct Node : Magic
     // Node must be inherited virtually, to allow MI diamonds 
     // without making Node ambiguous
 };
- 
 
 struct Type : virtual Node {};
 
@@ -44,19 +43,16 @@ struct Operand : virtual Node {};
 struct Expression : Statement,
                     Operand {};
 
+enum Access
+{
+    PUBLIC,
+    PRIVATE,
+    PROTECTED
+};
+    
 struct Declaration : Statement
 {   
-    enum Access
-    {
-        PUBLIC,
-        PRIVATE,
-        PROTECTED
-    } access;
-};
-
-struct Identifier : Declaration
-{
-    string name;
+    Access access;
 };
 
 struct Program : Node,
@@ -66,20 +62,26 @@ struct Program : Node,
 
 //////////////////////////// Declarations /////////////////////
 
-struct Physical
+struct Identifier : Declaration
 {
-    enum Storage
-    {
-        DEFAULT, 
-        STATIC,
-        EXTERN,
-        AUTO,
-        VIRTUAL // implies MEMBER
-        //PURE // implies VIRTUAL
-    } storage;
-    // TODO bool constant;
+    string name;
 };
 
+enum Storage
+{
+    STATIC,
+    DEFAULT, 
+    VIRTUAL // implies MEMBER
+    //PURE // implies VIRTUAL TODO implment in parse and render
+};
+
+struct Physical
+{
+    Storage storage;
+    bool constant; // TODO all functions to be const (otherwise would imply self-modifiying code). See idempotent
+};
+
+// can be an object or a function. In case of function, type is a type under Subroutine
 struct Instance : Identifier,
                   Operand,
                   Physical
@@ -110,8 +112,11 @@ struct Typedef : UserType
 
 // Subroutine like in Basic, no params or return.
 // The type refers to the interface as seen by caller - you need
-// an & before toy have a "function pointer"
-struct Subroutine : Type {};
+// an & before to have a "function pointer"
+struct Subroutine : Type 
+{
+    // TODO add bool idempotent; here for member functions with "cost" at the end of the decl.
+};
 
 // Like in pascal etc, params but no return value
 struct Procedure : Subroutine
@@ -203,9 +208,13 @@ struct Compound : Expression
     Sequence<Statement> statements;
 };                   
 
-struct Operator : Expression
+struct Aggregate : Expression
 {
-    Sequence<Operand> operands;
+    Sequence<Operand> operands; 
+};
+
+struct Operator : Aggregate
+{
     clang::tok::TokenKind kind;
 };
 
@@ -216,7 +225,7 @@ struct Postfix : Operator {}; // 1 operand
 struct Infix : Operator {}; // 2 operands
 
 // for eg sizeof(int) where the operand is a type
-struct PrefixOnType : Expression // TODO inherit from Aggregate for the operands?
+struct PrefixOnType : Expression 
 {
     shared_ptr<Type> operand;
     clang::tok::TokenKind kind;
@@ -229,22 +238,9 @@ struct ConditionalOperator : Expression // eg ?:
     shared_ptr<Operand> if_false;
 };
 
-struct Aggregate : Expression
-{
-    Sequence<Operand> elements; //TODO call these operands and use as base for Call and Operator
-};
-
-struct Call : Expression // TODO inherit from Aggregate?
+struct Call : Aggregate 
 {
     shared_ptr<Operand> function;
-    Sequence<Operand> arguments;
-};
-
-struct Invoke : Expression // TODO inherit from Call?
-{
-    shared_ptr<Operand> base;
-    shared_ptr<Instance> member;
-    Sequence<Operand> arguments;
 };
 
 struct New : Expression
@@ -259,7 +255,7 @@ struct Delete : Expression
 {
     shared_ptr<Operand> pointer;
     bool array; // true if delete[] was used
-    bool global; // true if ::Delete was used
+    bool global; // true if ::delete was used
 };
 
 struct NumericConstant : Expression {};
@@ -288,7 +284,7 @@ struct Subscript : Expression // TODO could be an Operator?
     shared_ptr<Operand> index;
 };
 
-struct Lookup : Expression  // picking a member from a record eg "base.member" TODO could be an Operator?
+struct Lookup : Expression  
 {
     shared_ptr<Operand> base; 
     shared_ptr<Instance> member;    

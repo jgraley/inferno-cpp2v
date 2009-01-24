@@ -27,6 +27,7 @@ using namespace boost;
 
 #define COUNTOF( array ) ( sizeof( array )/sizeof( array[0] ) )
 
+
 // Does a push then pops again in destructor
 template< typename T >
 class AutoPush

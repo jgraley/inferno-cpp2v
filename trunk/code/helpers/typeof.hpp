@@ -1,3 +1,5 @@
+#ifndef TYPEOF_HPP
+#define TYPEOF_HPP
 
 #include "tree/tree.hpp"
 
@@ -39,3 +41,4 @@ public:
     }
 };
 
+#endif
