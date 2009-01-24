@@ -75,8 +75,8 @@ struct Physical
         EXTERN,
         AUTO,
         SYMBOL, // constant so no storage required
-        VIRTUAL, // implies MEMBER
-        PURE // implies VIRTUAL
+        VIRTUAL // implies MEMBER
+        //PURE // implies VIRTUAL
     } storage;
 };
 

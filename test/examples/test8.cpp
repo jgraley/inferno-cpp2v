@@ -36,7 +36,17 @@ public:
     {
     }
 };
+/*
+struct P 
+{
+    virtual void f()=0;
+};
 
+struct Q : P
+{
+    virtual void f() {}
+};
+*/
 int main()
 {
     X x; 

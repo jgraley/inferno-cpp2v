@@ -408,7 +408,7 @@ private:
             return "auto ";
             break;
         case Physical::VIRTUAL:
-        case Physical::PURE:
+       // case Physical::PURE:
             return "virtual ";
             break;
         case Physical::DEFAULT:
@@ -470,13 +470,13 @@ private:
         if( o->initialiser && showinit )
         {
             AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, o ) );
-                        
-            shared_ptr<Operand> op = o->initialiser;            
-            if( shared_ptr<Constructor> c = dynamic_pointer_cast<Constructor>(o->type) )
+            
+            shared_ptr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser);                
+            if( comp )
             {                                 
                 Sequence<Statement> inits;
                 Sequence<Statement> remainder;
-                ExtractInits( dynamic_pointer_cast<Compound>(o->initialiser)->statements, inits, remainder );
+                ExtractInits( comp->statements, inits, remainder );
                 if( !inits.empty() )
                 {
                     s += " : ";
@@ -485,18 +485,12 @@ private:
                 
                 shared_ptr<Compound> r( new Compound );
                 r->statements = remainder;
-                op = r;                
+                s += "\n" + RenderOperand(r);
             }
-
-            if( dynamic_pointer_cast<Subroutine>(o->type) )
-                s += "\n";
             else
-                s += " = ";
-            
-            s += RenderOperand(op);
-            
-            if( !dynamic_pointer_cast<Subroutine>(o->type) )
-                s += sep;
+            {
+                s += " = " + RenderOperand(o->initialiser) + sep;
+            }
         }            
         else
         {
