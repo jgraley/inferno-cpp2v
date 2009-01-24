@@ -412,7 +412,6 @@ private:
             return "virtual ";
             break;
         case Physical::DEFAULT:
-        case Physical::SYMBOL:
             return "";
             break;
         default:
@@ -514,12 +513,13 @@ private:
         {                
             bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
             if( dynamic_pointer_cast<Record>( scope_stack.top() ) &&
+                !dynamic_pointer_cast<Enum>( scope_stack.top() ) &&
                 (o->storage==Physical::STATIC || isfunc) )
             {
                 // Static things in records (ie static member objects and static emmber functions)
                 // get split into a part that goes into the record (main line of rendering) and
                 // a part that goes seperately (deferred_decls gets appended at the very end)
-                s += RenderObject( o, sep, showtype, true, false, false );
+                s += RenderObject( o, sep, showtype, showtype, false, false );
                 {
                     AutoPush< shared_ptr<Node> > cs( scope_stack, program );
                     deferred_decls += string("\n") + RenderObject( o, sep, showtype, false, true, true );
@@ -528,7 +528,7 @@ private:
             else
             {
                 // Otherwise, render everything directly using the default settings
-                s += RenderObject( o, sep, showtype, true, true, false );
+                s += RenderObject( o, sep, showtype, showtype, true, false );
             }
         }
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )

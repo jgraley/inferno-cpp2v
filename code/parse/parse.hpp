@@ -1305,7 +1305,7 @@ private:
         {
             shared_ptr<Instance> o(new Instance());
             o->name = Id->getName();
-            o->storage = Physical::SYMBOL;
+            o->storage = Physical::STATIC;
             o->type = CreateIntegralType( 32, false );
             o->access = Declaration::PUBLIC;
             if( Val )

@@ -74,10 +74,10 @@ struct Physical
         STATIC,
         EXTERN,
         AUTO,
-        SYMBOL, // constant so no storage required
         VIRTUAL // implies MEMBER
         //PURE // implies VIRTUAL
     } storage;
+    // TODO bool constant;
 };
 
 struct Instance : Identifier,
