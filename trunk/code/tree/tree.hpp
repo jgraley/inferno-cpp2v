@@ -13,18 +13,6 @@
 template<typename ELEMENT>
 struct Sequence : deque< shared_ptr<ELEMENT> > {};                   
 
-// TODO:
-//
-// Subroutine body should be under Subroutine Node, not done as an init (inits to be lowered 
-// out; also hierarchically everything to do with a subroutine should be under Subroutine)
-//
-// Compound statement to be a Statement not an Expression.
-//
-// Use Declaration for UserType declarations as well as objects. Declaration points 
-// to identifier, which now means "named program element; maybe object or type"
-//
-
-
 //////////////////////////// Underlying Base Nodes ////////////////////////////
 
 struct Node : Magic
@@ -97,25 +85,14 @@ struct Base : Declaration,
     shared_ptr<InheritanceRecord> record;
 };              
 
-//////////////////////////// Types ////////////////////////////
-
-// A type that the user has created, and hence has a name. 
-// These can be linked directly from a Sequence<> to indicate 
-// their declaration (no seperate declaration node required).
-struct UserType : Type,
-                  Identifier {};
-
-struct Typedef : UserType
-{
-    shared_ptr<Type> type;
-}; 
+//////////////////////////// Anonymous Types ////////////////////////////
 
 // Subroutine like in Basic, no params or return.
 // The type refers to the interface as seen by caller - you need
 // an & before to have a "function pointer"
 struct Subroutine : Type 
 {
-    // TODO add bool idempotent; here for member functions with "cost" at the end of the decl.
+    // TODO add bool idempotent; here for member functions with "const" at the end of the decl.
 };
 
 // Like in pascal etc, params but no return value
@@ -162,6 +139,19 @@ struct Signed : Integral {};
 struct Unsigned : Integral {};
 
 struct Floating : Numeric {}; // Note width determines float vs double 
+
+//////////////////////////// User-defined Types ////////////////////////////
+
+// A type that the user has created, and hence has a name. 
+// These can be linked directly from a Sequence<> to indicate 
+// their declaration (no seperate declaration node required).
+struct UserType : Type,
+                  Identifier {};
+
+struct Typedef : UserType
+{
+    shared_ptr<Type> type;
+}; 
 
 struct Record : UserType
 {
