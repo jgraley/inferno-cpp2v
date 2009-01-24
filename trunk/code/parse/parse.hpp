@@ -1077,7 +1077,7 @@ private:
             
             if( Init )
             {  
-                ASSERT( o && "only objects may have initialisers"); 
+                ASSERT( o && "only instances may have initialisers"); 
                 o->initialiser = hold_expr.FromRaw( Init );
             }
                        
