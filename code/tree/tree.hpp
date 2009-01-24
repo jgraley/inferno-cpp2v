@@ -59,7 +59,7 @@ enum Storage
 {
     STATIC,
     DEFAULT, 
-    VIRTUAL // implies MEMBER
+    VIRTUAL // implies DEFAULT
     //PURE // implies VIRTUAL TODO implment in parse and render
 };
 
