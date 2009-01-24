@@ -47,6 +47,9 @@ struct Q : P
     virtual void f() {}
 };
 */
+
+const int ggg=0;
+
 int main()
 {
     X x; 

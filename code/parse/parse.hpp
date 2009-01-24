@@ -403,7 +403,7 @@ private:
         
         shared_ptr<Instance> CreateObjectNode( clang::Scope *S, 
                                              clang::Declarator &D, 
-                                             Declaration::Access access,
+                                             Access access,
                                              shared_ptr<Expression> init = shared_ptr<Expression>() )
         { 
             shared_ptr<Instance> o(new Instance());
@@ -423,25 +423,23 @@ private:
             switch( DS.getStorageClassSpec() )
             {
             case clang::DeclSpec::SCS_unspecified:
+            case clang::DeclSpec::SCS_extern:// linking will be done "automatically" so no need to remember "extern" in the tree
                 if( DS.isVirtualSpecified() )
-                    o->storage = Physical::VIRTUAL;
+                    o->storage = VIRTUAL;
                 else
-                    o->storage = Physical::DEFAULT;
+                    o->storage = DEFAULT;
                 break;
             case clang::DeclSpec::SCS_static:
-                o->storage = Physical::STATIC;
-                break;
-            case clang::DeclSpec::SCS_extern:
-                o->storage = Physical::EXTERN;
+                o->storage = STATIC;
                 break;
             case clang::DeclSpec::SCS_auto:
-                o->storage = Physical::AUTO;
+                o->storage = DEFAULT;
                 break;
             default:
                 ASSERT(!"Unsupported storage class");
                 break;
             }
-            
+            o->constant = !!(DS.getTypeQualifiers() & clang::DeclSpec::TQ_const);
             o->type = CreateTypeNode( D );
             o->access = access;
             o->initialiser = init;
@@ -502,7 +500,7 @@ private:
             return o;
         }
         
-        shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D, Declaration::Access a = Declaration::PUBLIC )
+        shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D, Access a = PUBLIC )
         {
             const clang::DeclSpec &DS = D.getDeclSpec();
             shared_ptr<Declaration> d;
@@ -581,11 +579,12 @@ private:
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D) 
         {
             shared_ptr<ParseParameterDeclaration> p(new ParseParameterDeclaration);
-            shared_ptr<Instance> o = CreateObjectNode( S, D, Declaration::PUBLIC );
+            shared_ptr<Instance> o = CreateObjectNode( S, D, PUBLIC );
             p->type = o->type;
             p->access = o->access;
             p->name = o->name;
             p->storage = o->storage;
+            p->constant = o->constant;
             p->initialiser = o->initialiser;
             p->clang_identifier = D.getIdentifier(); // allow us to re-register the object
             TRACE("%p\n", p.get() );
@@ -818,21 +817,10 @@ private:
                                          clang::SourceLocation *CommaLocs,
                                          clang::SourceLocation RParenLoc) 
         {
-            if( shared_ptr<Lookup> a = dynamic_pointer_cast<Lookup>(hold_expr.FromRaw(Fn)) )
-            {
-                shared_ptr<Invoke> in(new Invoke);
-                in->base = a->base;
-                in->member = a->member;
-                CollectArgs( &(in->arguments), Args, NumArgs );
-                return hold_expr.ToRaw( in );
-            }
-            else
-            {
-                shared_ptr<Call> c(new Call);
-                c->function = hold_expr.FromRaw(Fn);
-                CollectArgs( &(c->arguments), Args, NumArgs );
-                return hold_expr.ToRaw( c );
-            }
+            shared_ptr<Call> c(new Call);
+            c->function = hold_expr.FromRaw(Fn);
+            CollectArgs( &(c->operands), Args, NumArgs );
+            return hold_expr.ToRaw( c );
         }
         
         // Not sure if this one has been tested!!
@@ -1031,30 +1019,30 @@ private:
             return hold_stmt.ToRaw( shared_ptr<Break>( new Break ) );
         }
         
-        Declaration::Access ConvertAccess( clang::AccessSpecifier AS, shared_ptr<Record> rec = shared_ptr<Record>() )
+        Access ConvertAccess( clang::AccessSpecifier AS, shared_ptr<Record> rec = shared_ptr<Record>() )
         {
             switch( AS )
             {
                 case clang::AS_public:
-                    return Declaration::PUBLIC;
+                    return PUBLIC;
                     break;
                 case clang::AS_protected:
-                    return Declaration::PROTECTED;
+                    return PROTECTED;
                     break;
                 case clang::AS_private:
-                    return Declaration::PRIVATE;
+                    return PRIVATE;
                     break;
                 case clang::AS_none:
                     ASSERT( rec && "no access specifier and record not supplied so cannot deduce");
                     // members are never AS_none because clang deals. Bases can be AS_none, so we supply the enclosing record type
                     if( dynamic_pointer_cast<Class>(rec) )
-                        return Declaration::PRIVATE;
+                        return PRIVATE;
                     else 
-                        return Declaration::PUBLIC;
+                        return PUBLIC;
                     break;
                 default:
                     ASSERT(!"Invalid access specfier");
-                    return Declaration::PUBLIC;
+                    return PUBLIC;
                     break;
             }
         }
@@ -1131,7 +1119,7 @@ private:
                 ident_track.Add(NULL, h, h, S); 
             }
             
-            h->access = Declaration::PUBLIC; // must make all holder type decls public since clang doesnt seem to give us an AS
+            h->access = PUBLIC; // must make all holder type decls public since clang doesnt seem to give us an AS
             h->incomplete = true;
             
             //TODO should we do something with TagKind? Maybe needed for render.
@@ -1276,12 +1264,12 @@ private:
                                          clang::SourceLocation RParenLoc) 
         {
             ASSERT( !Designators.hasAnyDesignators() && "Designators in init lists unsupported" ); 
-        
+         
             shared_ptr<Aggregate> ao(new Aggregate);
             for(int i=0; i<NumInit; i++)
             {
                 shared_ptr<Operand> e = hold_expr.FromRaw( InitList[i] );
-                ao->elements.push_back( e );
+                ao->operands.push_back( e );
             }
             return hold_expr.ToRaw( ao );                                 
         }
@@ -1313,9 +1301,10 @@ private:
         {
             shared_ptr<Instance> o(new Instance());
             o->name = Id->getName();
-            o->storage = Physical::STATIC;
+            o->storage = STATIC;
+            o->constant = true; // static const member does not consume storage!!
             o->type = CreateIntegralType( 32, false );
-            o->access = Declaration::PUBLIC;
+            o->access = PUBLIC;
             if( Val )
             {
                 o->initialiser = hold_expr.FromRaw( Val );
@@ -1413,7 +1402,8 @@ private:
             
             shared_ptr<Base> base( new Base );
             base->record = ir;
-            base->storage = Virtual ? Physical::VIRTUAL : Physical::DEFAULT;
+            base->storage = Virtual ? VIRTUAL : DEFAULT;
+            base->constant = false; 
             base->access = ConvertAccess( Access, r );       
             return hold_base.ToRaw( base );
         }
@@ -1520,32 +1510,36 @@ private:
             shared_ptr<Instance> om( dynamic_pointer_cast<Instance>(n) );
             shared_ptr<Instance> cm = GetConstructor( om->type );
             
-            // Build a call to the constructor
-            shared_ptr<Invoke> in(new Invoke);
-            in->base = om;
-            in->member = cm;
-            CollectArgs( &(in->arguments), Args, NumArgs );
+            // Build a lookup to the constructor, using the speiciifed subobject and the matching constructor
+            shared_ptr<Lookup> lu(new Lookup);
+            lu->base = om;
+            lu->member = cm;            
+            
+            // Build a call to the constructor with supplied args
+            shared_ptr<Call> call(new Call);
+            call->function = lu;
+            CollectArgs( &(call->operands), Args, NumArgs );
             
             // Get the constructor whose init list we're adding to
             shared_ptr<Declaration> d( hold_decl.FromRaw( ConstructorDecl ) );
             shared_ptr<Instance> o( dynamic_pointer_cast<Instance>(d) );
             ASSERT(o);
-            shared_ptr<Compound> c;
+            shared_ptr<Compound> comp;
             if( o->initialiser )
             {
-                c = dynamic_pointer_cast<Compound>(o->initialiser);
-                ASSERT(c);       
+                comp = dynamic_pointer_cast<Compound>(o->initialiser);
+                ASSERT(comp);       
                 TRACE();
             }
             else
             {
-                c = shared_ptr<Compound>( new Compound );
-                o->initialiser = c;
+                comp = shared_ptr<Compound>( new Compound );
+                o->initialiser = comp;
                 TRACE();
             }
             
             // Add it
-            c->statements.push_back( in );
+            comp->statements.push_back( call );
             return 0;
         }
         
