@@ -424,7 +424,7 @@ private:
         }
     }
     
-    string RendreInstance( shared_ptr<Instance> o, string sep, bool showtype = true, 
+    string RenderInstance( shared_ptr<Instance> o, string sep, bool showtype = true, 
                          bool showstorage = true, bool showinit = true, bool showscope = false )
     {
         string s;
@@ -492,6 +492,9 @@ private:
         return s;
     }
     
+    // Non-const static objects and functions in records 
+    // get split into a part that goes into the record (main line of rendering) and
+    // a part that goes seperately (deferred_decls gets appended at the very end)
     bool ShouldSplitInstance( shared_ptr<Instance> o )
     {
         bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
@@ -515,19 +518,16 @@ private:
         {                
             if( ShouldSplitInstance(o) )
             {
-                // Non-const static objects and functions in records 
-                // get split into a part that goes into the record (main line of rendering) and
-                // a part that goes seperately (deferred_decls gets appended at the very end)
-                s += RendreInstance( o, sep, showtype, showtype, false, false );
+                s += RenderInstance( o, sep, showtype, showtype, false, false );
                 {
                     AutoPush< shared_ptr<Node> > cs( scope_stack, program );
-                    deferred_decls += string("\n") + RendreInstance( o, sep, showtype, false, true, true );
+                    deferred_decls += string("\n") + RenderInstance( o, sep, showtype, false, true, true );
                 }
             }
             else
             {
                 // Otherwise, render everything directly using the default settings
-                s += RendreInstance( o, sep, showtype, showtype, true, false );
+                s += RenderInstance( o, sep, showtype, showtype, true, false );
             }
         }
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
@@ -562,30 +562,33 @@ private:
             else
                 return ERROR_UNSUPPORTED(declaration);
 
+            // Name of the record
             s += " " + r->name;
-            
-            if( shared_ptr<InheritanceRecord> ir = dynamic_pointer_cast< InheritanceRecord >(declaration) )
-            {
-                if( !ir->bases.empty() )
-                {
-                    s += " : ";
-                    for( int i=0; i<ir->bases.size(); i++ )
-                    {   
-                        if( i>0 )
-                            s += ", ";
-                        shared_ptr<Base> b = ir->bases[i];    
-                        ASSERT( b );
-                        s += RenderAccess(b->access) + " " + RenderStorage(b->storage) + b->record->name;
-                    }
-                }
-            }
             
             if( !r->incomplete )
             {
-                 AutoPush< shared_ptr<Node> > cs( scope_stack, r );
-                 s += "\n{\n" +
-                      RenderSequence( r->members, sep2, true, a, showtype ) +
-                      "}";
+                // Base classes
+                if( shared_ptr<InheritanceRecord> ir = dynamic_pointer_cast< InheritanceRecord >(declaration) )
+                {
+                    if( !ir->bases.empty() )
+                    {
+                        s += " : ";
+                        for( int i=0; i<ir->bases.size(); i++ )
+                        {   
+                            if( i>0 )
+                                s += ", ";
+                            shared_ptr<Base> b = ir->bases[i];    
+                            ASSERT( b );
+                            s += RenderAccess(b->access) + " " + RenderStorage(b->storage) + b->record->name;
+                        }
+                    }
+                }
+                
+                // Contents
+                AutoPush< shared_ptr<Node> > cs( scope_stack, r );
+                s += "\n{\n" +
+                     RenderSequence( r->members, sep2, true, a, showtype ) +
+                     "}";
             }
             
             s += ";\n";
