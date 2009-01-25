@@ -53,7 +53,7 @@ public:
         clang::TextDiagnosticPrinter diag_printer( errstream );
         clang::Diagnostic diags( &diag_printer ); 
         clang::LangOptions opts;
-        opts.CPlusPlus = 1; // TODO set based on input file extension
+        opts.CPlusPlus = 1; // Note: always assume input is C++, even if file ends in .c
         clang::TargetInfo* ptarget = clang::TargetInfo::CreateTargetInfo(INFERNO_TRIPLE);
         ASSERT(ptarget);
         clang::SourceManager sm;
@@ -112,15 +112,15 @@ private:
         // Extend tree so we can insert sub statements at the same level as the label
         struct ParseLabelTarget : LabelTarget
         {
-            StmtTy *sub;
+            shared_ptr<Statement> sub;
         };
         struct ParseCase : Case
         {
-            StmtTy *sub;
+            shared_ptr<Statement> sub;
         };
         struct ParseDefault : Default
         {
-            StmtTy *sub;
+            shared_ptr<Statement> sub;
         };
         struct ParseTwin : Declaration
         {
@@ -251,6 +251,16 @@ private:
             return f;
         }
         
+        void FillParameters( shared_ptr<Procedure> p, const clang::DeclaratorChunk::FunctionTypeInfo &fchunk )
+        {
+            for( int i=0; i<fchunk.NumArgs; i++ )
+            {
+                shared_ptr<Declaration> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
+                shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(d); // TODO just push the declarators, no need for dynamic cast?
+                p->parameters.push_back( o );
+            }            
+        }
+        
         shared_ptr<Type> CreateTypeNode( clang::Declarator &D, int depth=0 )
         {
             ASSERT( depth>=0 );
@@ -326,25 +336,14 @@ private:
                             case clang::Declarator::DK_Normal:
                             {
                                 shared_ptr<Function> f(new Function);
-                                for( int i=0; i<fchunk.NumArgs; i++ )
-                                {
-                                    shared_ptr<Declaration> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
-                                    shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(d); // TODO just push the declarators, no need for dynamic cast?
-                                    f->parameters.push_back( o );
-                                }
-                                TRACE("function returning...\n");
+                                FillParameters( f, fchunk );
                                 f->return_type = CreateTypeNode( D, depth+1 );                        
                                 return f;
                             }
                             case clang::Declarator::DK_Constructor:
                             {
                                 shared_ptr<Constructor> c(new Constructor);
-                                for( int i=0; i<fchunk.NumArgs; i++ )
-                                {
-                                    shared_ptr<Declaration> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
-                                    shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(d); // TODO just push the declarators, no need for dynamic cast?
-                                    c->parameters.push_back( o );
-                                }
+                                FillParameters( c, fchunk );
                                 return c;
                             }
                             case clang::Declarator::DK_Destructor:
@@ -412,7 +411,7 @@ private:
             if(ID)
             {
                 o->name = ID->getName();
-                ident_track.Add( ID, o, o, S );     
+                ident_track.Add( ID, o, S );     
                 TRACE("object %s\n", o->name.c_str());
             }
             else
@@ -454,7 +453,7 @@ private:
             if(ID)
             {
                 t->name = ID->getName();
-                ident_track.Add( ID, t, t, S ); 
+                ident_track.Add( ID, t, S ); 
             }
             t->type = CreateTypeNode( D );
  
@@ -474,19 +473,18 @@ private:
         {
             // See if we already have this object in the current scope, or specified scope if Declarator has one
             shared_ptr<Node> cxxs = FromCXXScope( &D.getCXXScopeSpec() );
-            shared_ptr<Declaration> found_d;
             
             // Use C++ scope if non-NULL; do not recurse (=precise match only)
-            shared_ptr<Node> found_n = ident_track.TryGet( D.getIdentifier(), cxxs, &found_d, false ); 
-            TRACE("Looked for %s, result %p %p (%p)\n", D.getIdentifier()->getName(), found_n.get(), found_d.get(), cxxs.get() );
+            shared_ptr<Node> found_n = ident_track.TryGet( D.getIdentifier(), cxxs, false ); 
+            TRACE("Looked for %s, result %p (%p)\n", D.getIdentifier()->getName(), found_n.get(), cxxs.get() );
             if( !found_n )
             {
                 ASSERT( !cxxs );
                 return shared_ptr<Declaration>();
             }
             
-            // we do, so this is a "re-declaration" eg struct S { static int a }; int S::a;
-            // so just hook up to the existing one 
+            shared_ptr<Declaration> found_d = dynamic_pointer_cast<Declaration>( found_n );
+            // If the found match is not a declaration, cast will fail and we'll return NULL for "not found"
             return found_d; 
         }
         
@@ -620,7 +618,7 @@ private:
                 shared_ptr<ParseParameterDeclaration> ppd = dynamic_pointer_cast<ParseParameterDeclaration>( pp->parameters[i] );                
                 ASSERT(ppd);
                 if( ppd->clang_identifier )
-                    ident_track.Add( ppd->clang_identifier, ppd, ppd, FnBodyScope );
+                    ident_track.Add( ppd->clang_identifier, ppd, FnBodyScope );
             }
         }
 
@@ -830,14 +828,12 @@ private:
             return hold_type.ToRaw( t );
         }
         
-        void PushStmt( shared_ptr<Compound> s, StmtTy *stmt )
+        void PushStmt( shared_ptr<Compound> s, shared_ptr<Statement> st )
         {
-            shared_ptr<Statement> st = hold_stmt.FromRaw(stmt);
-            
             if( shared_ptr<ParseTwin> pt = dynamic_pointer_cast<ParseTwin>( st ) )    
             {
-                PushStmt( s, hold_stmt.ToRaw( pt->d1 ) );
-                PushStmt( s, hold_stmt.ToRaw( pt->d2 ) );
+                PushStmt( s, pt->d1 );
+                PushStmt( s, pt->d2 );
                 return;
             }
             
@@ -853,14 +849,14 @@ private:
         }
 
         virtual OwningStmtResult ActOnCompoundStmt(clang::SourceLocation L, clang::SourceLocation R,
-                                             MultiStmtArg Elts,
-                                             bool isStmtExpr) 
+                                                   MultiStmtArg Elts,
+                                                   bool isStmtExpr) 
         {
             // TODO helper fn for MultiStmtArg, like FromClang. Maybe.
             shared_ptr<Compound> s(new Compound);
 
             for( int i=0; i<Elts.size(); i++ )
-                PushStmt( s, Elts.get()[i] );
+                PushStmt( s, hold_stmt.FromRaw( Elts.get()[i] ) );
                 
             return ToStmt( s );
         }
@@ -881,7 +877,7 @@ private:
             
             shared_ptr<ParseLabelTarget> l( new ParseLabelTarget );
             l->label = hold_label.FromRaw( II->getFETokenInfo<void *>() );
-            l->sub = SubStmt;
+            l->sub = hold_stmt.FromRaw( SubStmt );
             return hold_stmt.ToRaw( l );
         }
         
@@ -994,7 +990,7 @@ private:
             else
                 c->value_hi = FromClang( LHSVal );
             c->value_lo = FromClang( LHSVal );
-            c->sub = SubStmt.get(); // TODO store the counted_ptr, not the raw void *
+            c->sub = FromClang( SubStmt ); 
             return ToStmt( c );
         }
         
@@ -1004,7 +1000,7 @@ private:
         {
             TRACE();
             shared_ptr<ParseDefault> d( new ParseDefault );
-            d->sub = SubStmt.get();
+            d->sub = FromClang( SubStmt );
             return ToStmt( d );
         }
                 
@@ -1107,7 +1103,7 @@ private:
             if(Name)
             {
                 h->name = Name->getName();
-                ident_track.Add(Name, h, h, S); 
+                ident_track.Add(Name, h, S); 
             }
             else
             {
@@ -1116,7 +1112,7 @@ private:
                 static int ac=0;
                 sprintf( an, "__anon%d", ac++ );
                 h->name = an;
-                ident_track.Add(NULL, h, h, S); 
+                ident_track.Add(NULL, h, S); 
             }
             
             h->access = PUBLIC; // must make all holder type decls public since clang doesnt seem to give us an AS
@@ -1333,7 +1329,7 @@ private:
                 ic->value = i;
                 o->initialiser = ic;
             }
-            ident_track.Add(Id, o, o, S); 
+            ident_track.Add(Id, o, S); 
             return hold_decl.ToRaw( o );
         }
         
@@ -1350,7 +1346,7 @@ private:
 
         /// ParsedFreeStandingDeclSpec - This method is invoked when a declspec with
         /// no declarator (e.g. "struct foo;") is parsed.
-        // JSG likely bug with C++ integratikon in clang means it parses the struct
+        // JSG likely bug with C++ integration in clang means it parses the struct
         // including stuff in {} and then detects the ; as meaning free standing.
         virtual DeclTy *ParsedFreeStandingDeclSpec(clang::Scope *S, clang::DeclSpec &DS) 
         {
@@ -1456,7 +1452,8 @@ private:
         virtual void ActOnCXXEnterDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS) 
         {
             TRACE();
-            shared_ptr<Node> n = FromCXXScope( &SS );  // TODO use FromCXXScope function, and check for NULL
+            shared_ptr<Node> n = FromCXXScope( &SS );
+            ASSERT(n); 
             ident_track.PushScope( S, n );
         }
     
