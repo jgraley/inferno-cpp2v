@@ -13,7 +13,6 @@ IdentifierTracker::IdentifierTracker( shared_ptr<Node> g ) :
     ts->parent = shared_ptr<TNode>(); 
     ts->II = NULL;
     ts->node = g;
-    ts->decl = shared_ptr<Declaration>(); 
     tnodes.push_back( ts );
     TRACE("Global tnode t%p\n", ts.get() );
     current = ts;
@@ -103,7 +102,7 @@ void IdentifierTracker::SeenScope( clang::Scope *S )
 }
 
 
-void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> node, shared_ptr<Declaration> decl, clang::Scope *S ) 
+void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> node, clang::Scope *S ) 
 {
     SeenScope( S );
     
@@ -111,7 +110,6 @@ void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> node, s
     shared_ptr<TNode> i( new TNode );    
     i->II = II;
     i->node = node;
-    i->decl = decl;
     i->parent = current;  
     i->cs = NULL; // Remember cs is the clang scope *owned* by i
     tnodes.push_back( i );
@@ -212,15 +210,15 @@ int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNod
 }
 
 
-shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *II, shared_ptr<Node> iscope, shared_ptr<Declaration> *decl, bool recurse )
+shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *II, shared_ptr<Node> iscope, bool recurse )
 {
-    shared_ptr<Node> n = TryGet( II, iscope, decl, recurse );
+    shared_ptr<Node> n = TryGet( II, iscope, recurse );
     ASSERT(n.get() && "This decl didn't get pushed??"); 
     return n;
 }
 
 
-shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, shared_ptr<Node> iscope, shared_ptr<Declaration> *decl, bool recurse )
+shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, shared_ptr<Node> iscope, bool recurse )
 {
     TRACE();
        
@@ -255,17 +253,9 @@ shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, sha
     }
  
     if( best_tnode )
-    {
-        if( decl )
-            *decl = best_tnode->decl;
         return best_tnode->node;
-    }
     else
-    {
-        if( decl )
-            *decl = shared_ptr<Declaration>();
         return shared_ptr<Node>();
-    }
 }
 
 

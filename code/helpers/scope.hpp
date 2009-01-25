@@ -14,9 +14,7 @@ inline shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identi
     FOREACH( shared_ptr<Declaration> d, *program )
     {            
         if( id == GetIdentifier( d ) )
-        {
             return program;
-        }
     }
 
 	Walk<Record> walkr(program);
@@ -25,24 +23,19 @@ inline shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identi
 	    TRACE("Trying record %s\n", r->name.c_str() );
 	    FOREACH( shared_ptr<Declaration> d, r->members )
 	    {            
-	        TRACE("Trying member \"%s\" \"%s\"\n", GetIdentifier( d )->name.c_str(), id->name.c_str() );
 	        if( id == GetIdentifier( d ) ) 
-	        {
 	            return r;
-	        }
 	    }
 	}
 	
 	Walk<Compound> walkc(program);
 	FOREACH( shared_ptr<Compound> c, walkc )
 	{
-	    Walk<Declaration> walks(c);
+	    Walk<Declaration> walks(c); // TODO possible bug - this search should not recurse into sub scopes
 	    FOREACH( shared_ptr<Declaration> d, walks )
 	    {            
 	        if( id == GetIdentifier( d ) )
-	        {
 	            return c;
-	        }
 	    }
 	}
 	
@@ -52,9 +45,7 @@ inline shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identi
 	    FOREACH( shared_ptr<Declaration> d, p->parameters )
 	    {            
 	        if( id == GetIdentifier( d ) )
-	        {
 	            return p;
-	        }
 	    }
 	}
 	

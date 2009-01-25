@@ -7,10 +7,7 @@
 // sort of depracated - there's no particular reason to use this
 inline shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
 {
-    if( shared_ptr<Identifier> i = dynamic_pointer_cast< Identifier >(d) )
-        return i; 
-        
-    ASSERT(0 && "Declaration is anonymous");
+    return dynamic_pointer_cast< Identifier >(d);
 }
 
 // concatenate sequences by adding them, like strings etc
@@ -23,6 +20,7 @@ Sequence<T> operator+( Sequence<T> &s1, Sequence<T> &s2 )
     return sr;    
 }
 
+// Hunt through a record and its bases to find the named member
 shared_ptr<Instance> FindMemberByName( shared_ptr<Record> r, string name )
 {
     TRACE("Record \"%s\" has %d members\n", r->name.c_str(), r->members.size() );

@@ -63,7 +63,6 @@ private:
     
     string RenderIdentifier( shared_ptr<Identifier> id )
     {
-        // TODO detect Constructor/Destructor and force identifier to empty string if so
         string ids;
         if( id )
         {

@@ -7,8 +7,8 @@
     Example usage:
     
     Walk<Record> w(program, false);
-    for( int i=0; i<w.size(); i++ )
-        printf("%s\n", typeid(*w[i]).name() );
+    FOREACH( shared_ptr<Record> r, w )
+        printf("%s\n", typeid(*r).name() );
 */
 
 template< class FIND >
