@@ -5,6 +5,7 @@
 #include "render/render.hpp"
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
+#include "helpers/search_replace.hpp"
 
 int main( int argc, char *argv[] )
 {
@@ -13,27 +14,9 @@ int main( int argc, char *argv[] )
 
     shared_ptr<Program> program(new Program);  
 
-    Parse p(ReadArgs::infile);    
+    Parse p(ReadArgs::infile);        
+    p( program );
+    
     Render r;
-    
-    Pass *parse = &p;
-    Pass *render = &r;
-    (*parse)( program );
-    
-/*    Object o;    
-    int oi=(int)&o;
-    printf("Ob=%p Id=%p Decl=%p Ex=%p Phy=%p StDecl=%p StEx=%p N=%p\n",
-           0,
-           (int)(Identifier *)&o - oi,
-           (int)(Declaration *)&o - oi,
-           (int)(Expression *)&o - oi,
-           (int)(Physical *)&o - oi,
-           (int)(Statement *)(Declaration *)&o - oi,
-           (int)(Statement *)(Expression *)&o - oi,
-           (int)(Node *)&o - oi );    
-  */  
-  
-//    Walk<Procedure> w(program);
-    
-    (*render)( program );
+    r( program );
 }
