@@ -1,0 +1,44 @@
+
+Search and replace design notes. Various levels of functionality and notes follow: 
+
+
+EXACT MATCH
+    Search pattern no wild cards matches subtree. 
+    Require tree walker, must be co-routine style (state-out and explicitise recursion) .
+    Probably want to automate traversal across node class members using default 
+    assignment operator hack.
+
+WILDCARD BASED ON PROPERTY
+    Allow properties to match anyhting in search, preserve actual in replace.
+    Properties (=enums, bools, strings, LLVM ints etc) should be wrapped 
+    with a class that has a bool for is_wild and a pointer that can join 
+    pattern in replace to corresponding pattern in search.
+    
+WILDCARD BASED ON NODE CLASS
+    Allow wildcarding of nodes by specifying an intermediate in search tree
+    Preserve actual in replace. Replace node should have pointer as above
+    (so in fact Node base class should have this pointer, and there should be
+    a pure wildcard interface)
+
+WILDCARD BASED ON CONTEXT
+    Allow the target type of the shared_ptr<> to a node to restrict search. Only
+    applies to the root of a search pattern, since context of other nodes 
+    established by the search pattern itself
+
+DUPLICATE WILDCARDS
+    Allow a wildacrded node to have multiple refs, require that they match for a match
+    Also allow nodes in replace pattern to be duplicated, preserving topology around eg 
+    instances. 
+
+REFACTOR
+    Bring properties out into a seperate subtree, one property per node. Then 
+    WILDCARD BASED ON NODE CLASS can be used to implement WILDCARD BASED ON PROPERTY
+    since the pattern can include the intermediate Property node for wildcarded properties.
+
+REFACTOR
+    Reduce the need for WILDCARD BASED ON CONTEXT by building extra physical nodes into
+    the tree than show the context explitily. For example, declarations could require
+    a seperate Declaration node (rather than just an intermediate to eg Instance) so 
+    that Declaration node may be placed in search pattern to restrict to declarations.
+    May still require way of specifiying NOT Declaration for eg use as Operand.
+
