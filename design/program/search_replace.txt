@@ -26,7 +26,7 @@ WILDCARD BASED ON CONTEXT
     established by the search pattern itself
 
 DUPLICATE WILDCARDS
-    Allow a wildacrded node to have multiple refs, require that they match for a match
+    Allow a wildcarded node to have multiple refs, require that they match for a match
     Also allow nodes in replace pattern to be duplicated, preserving topology around eg 
     instances. 
 
@@ -42,3 +42,8 @@ REFACTOR
     that Declaration node may be placed in search pattern to restrict to declarations.
     May still require way of specifiying NOT Declaration for eg use as Operand.
 
+GENERAL NOTE on DUPLICATES
+    Duplicates (=node has >1 ref, eg UserType, Identifier) may be difficult to 
+    replace if found via one ref other refs may be left pointing to unmodified
+    original, which may not be what is desired. May need to do search for refs
+    or use back-pointers (which must be weak_ptr< shared_ptr<Me> >)
