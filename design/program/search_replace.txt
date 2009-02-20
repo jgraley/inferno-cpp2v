@@ -83,3 +83,19 @@ Use explicit context enum to differentiate between usage and declaration.
 Note: Preserve multi-ref nodes when substitute pointers are used. Do this even if
 the multiref node is not wildcarded. Conversely, nodes in replace pattern that
 do not have substitute pointers are always to be newly created.
+
+---SOFT NODES---
+
+Nodes to have virtual IsMatch() which uses dynamic compatibility check to do wildcarded
+search match. Note this does *not* recurse. Soft nodes use custom algorithm.
+
+Nodes to have virtual GetSubstitute() which returns NULL or a pointer to another node
+that should be subsituted on replace. Hard nodes allow this to be set via SetSubstitute();
+soft nodes constrct a new node as required.
+
+2-hop substitution: in the usual hard node case, the search/replace engine sets the 
+substitutes in the search pattern according to the found match. The user initialises 
+the substitutes in the replace pattern nodes to point to corresponding nodes in the
+search pattern as required. During replace, substitution is attempted repeatedly until 
+GetSubstitute() returns NULL. In this case, a replace node will be substiuted by a 
+search node, then the search node will be substituted by the matching tree node.
