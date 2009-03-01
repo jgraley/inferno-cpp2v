@@ -97,5 +97,37 @@ soft nodes constrct a new node as required.
 substitutes in the search pattern according to the found match. The user initialises 
 the substitutes in the replace pattern nodes to point to corresponding nodes in the
 search pattern as required. During replace, substitution is attempted repeatedly until 
-GetSubstitute() returns NULL. In this case, a replace node will be substiuted by a 
+GetSubstitute() returns NULL. In this case, a replace node will be substituted by a 
 search node, then the search node will be substituted by the matching tree node.
+
+---WALKER---
+
+Automated walk over members, using overloaded operator=. Implement to generate a Sequence<>
+rather than callbacks. See ../prototype/nodestuff.cpp
+
+---SNIPPETS---
+
+#define NODE_FUNCTIONS(C) \
+    virtual bool IsDynamicCompatible( shared_ptr<Node> c ) { return !!dynamic_cast<C *>(n); } \
+    virtual Sequence<Node> GetMembers() { ...stuff... }
+//todo try a template
+
+struct Node
+{
+    virtual bool IsMatch( shared_ptr<Node> c ) { return false; }
+    virtual bool IsDynamicCompatible( shared_ptr<Node> c ) = 0;
+    virtual shared_ptr<Node> GetSubstitute() { return shared_ptr<Node>(); }
+    virtual Sequence<Node> GetMembers() = 0; 
+    virtual ~Node() {} // allow shared_ptr<> to destruct
+};
+
+struct Hard : Node
+{
+    NODE_FUNCTIONS(Hard)
+    virtual bool IsMatch( shared_ptr<Node> c ) { return IsDynamicCompatible(c); }
+    virtual shared_ptr<Node> GetSubstitute() { return substitute; }
+    void SetSubstitute( shared_ptr<Node> s ) { substitute=s; }
+    mutable shared_ptr<Node> substitute;
+};
+
+ 
