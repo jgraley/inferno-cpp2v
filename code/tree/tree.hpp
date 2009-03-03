@@ -22,13 +22,19 @@ struct Node : Magic
     // without making Node ambiguous
 };
 
-struct Hard : Node
-{
-};
+struct Hard : Node {};
 
-struct Soft : Node
-{
-};
+struct Soft : Node {};
+
+//////////////////////////// Properties ///////////////////////////////
+// TODO seperate source file
+
+struct Property : Hard {};
+
+struct Access : Property { virtual void foo()=0; };
+struct Public : Access {virtual void foo(){}};
+struct Private : Access {virtual void foo(){}};
+struct Protected : Access {virtual void foo(){}};
 
 //////////////////////////// Underlying Program Nodes ////////////////////////////
 
@@ -40,17 +46,10 @@ struct Operand : virtual Hard {};
 
 struct Expression : Statement,
                     Operand {};
-
-enum Access
-{
-    PUBLIC,
-    PRIVATE,
-    PROTECTED
-};
     
 struct Declaration : Statement
 {   
-    Access access;
+    shared_ptr<Access> access;
 };
 
 struct Program : Hard,
