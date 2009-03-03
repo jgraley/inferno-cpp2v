@@ -504,7 +504,7 @@ private:
         TRACE();
         string s;
         
-        if( access && typeid(*(declaration->access)) != typeid(**access) )
+        if( access && *(declaration->access) != **access )
         {
             s += RenderAccess( declaration->access ) + ":\n";
             *access = declaration->access;

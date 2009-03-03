@@ -20,6 +20,15 @@ struct Node : Magic
     virtual ~Node(){}  // be a virtual hierarchy
     // Node must be inherited virtually, to allow MI diamonds 
     // without making Node ambiguous
+    
+    virtual bool operator==( const Node &other )
+    {
+        return typeid( *this ) == typeid( other );
+    }
+    virtual bool operator!=( const Node &other )
+    {
+        return !(*this==other);
+    }
 };
 
 struct Hard : Node {};
