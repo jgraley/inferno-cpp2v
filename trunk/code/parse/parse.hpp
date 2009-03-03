@@ -401,10 +401,13 @@ private:
         }
         
         shared_ptr<Instance> CreateObjectNode( clang::Scope *S, 
-                                             clang::Declarator &D, 
-                                             Access access,
-                                             shared_ptr<Expression> init = shared_ptr<Expression>() )
+                                               clang::Declarator &D, 
+                                               shared_ptr<Access> access = shared_ptr<Access>(),
+                                               shared_ptr<Expression> init = shared_ptr<Expression>() )
         { 
+            if(!access)
+                access = shared_ptr<Public>(new Public);
+                
             shared_ptr<Instance> o(new Instance());
             clang::IdentifierInfo *ID = D.getIdentifier();
             const clang::DeclSpec &DS = D.getDeclSpec();
@@ -498,8 +501,11 @@ private:
             return o;
         }
         
-        shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D, Access a = PUBLIC )
+        shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D, shared_ptr<Access> a = shared_ptr<Access>() )
         {
+            if(!a)
+                a = shared_ptr<Public>(new Public);
+        
             const clang::DeclSpec &DS = D.getDeclSpec();
             shared_ptr<Declaration> d;
             if( DS.getStorageClassSpec() == clang::DeclSpec::SCS_typedef )
@@ -577,7 +583,7 @@ private:
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D) 
         {
             shared_ptr<ParseParameterDeclaration> p(new ParseParameterDeclaration);
-            shared_ptr<Instance> o = CreateObjectNode( S, D, PUBLIC );
+            shared_ptr<Instance> o = CreateObjectNode( S, D );
             p->type = o->type;
             p->access = o->access;
             p->name = o->name;
@@ -1015,30 +1021,30 @@ private:
             return hold_stmt.ToRaw( shared_ptr<Break>( new Break ) );
         }
         
-        Access ConvertAccess( clang::AccessSpecifier AS, shared_ptr<Record> rec = shared_ptr<Record>() )
+        shared_ptr<Access> ConvertAccess( clang::AccessSpecifier AS, shared_ptr<Record> rec = shared_ptr<Record>() )
         {
             switch( AS )
             {
                 case clang::AS_public:
-                    return PUBLIC;
+                    return shared_ptr<Public>(new Public);
                     break;
                 case clang::AS_protected:
-                    return PROTECTED;
+                    return shared_ptr<Protected>(new Protected);
                     break;
                 case clang::AS_private:
-                    return PRIVATE;
+                    return shared_ptr<Private>(new Private);
                     break;
                 case clang::AS_none:
                     ASSERT( rec && "no access specifier and record not supplied so cannot deduce");
                     // members are never AS_none because clang deals. Bases can be AS_none, so we supply the enclosing record type
                     if( dynamic_pointer_cast<Class>(rec) )
-                        return PRIVATE;
+                        return shared_ptr<Private>(new Private);
                     else 
-                        return PUBLIC;
+                        return shared_ptr<Public>(new Public);
                     break;
                 default:
                     ASSERT(!"Invalid access specfier");
-                    return PUBLIC;
+                    return shared_ptr<Public>(new Public);
                     break;
             }
         }
@@ -1115,7 +1121,7 @@ private:
                 ident_track.Add(NULL, h, S); 
             }
             
-            h->access = PUBLIC; // must make all holder type decls public since clang doesnt seem to give us an AS
+            h->access = shared_ptr<Public>(new Public); // must make all holder type decls public since clang doesnt seem to give us an AS
             h->incomplete = true;
             
             //TODO should we do something with TagKind? Maybe needed for render.
@@ -1301,7 +1307,7 @@ private:
             o->storage = STATIC;
             o->constant = true; // static const member does not consume storage!!
             o->type = CreateIntegralType( enumbits, false );
-            o->access = PUBLIC;
+            o->access = shared_ptr<Public>(new Public);
             if( Val )
             {
                 o->initialiser = hold_expr.FromRaw( Val );

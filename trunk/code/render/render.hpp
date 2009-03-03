@@ -372,19 +372,16 @@ private:
         TRACE("ok\n");
     }
     
-    string RenderAccess( Access access )
+    string RenderAccess( shared_ptr<Access> access )
     {
-        switch( access )
-        {
-            case PUBLIC:
-                return "public";
-            case PRIVATE:
-                return "private";
-            case PROTECTED:
-                return "protected";
-            default:
-                return ERROR_UNKNOWN("access spec"); 
-        }        
+        if( dynamic_pointer_cast<Public>( access ) )
+            return "public";
+        else if( dynamic_pointer_cast<Private>( access ) )
+            return "private";
+        else if( dynamic_pointer_cast<Protected>( access ) )
+            return "protected";
+        else
+            return ERROR_UNKNOWN("access spec"); 
     }
     
     string RenderStorage( Storage st )
@@ -472,7 +469,7 @@ private:
                 if( !inits.empty() )
                 {
                     s += " : ";
-                    s += RenderSequence( inits, ", ", false, PUBLIC, true );                
+                    s += RenderSequence( inits, ", ", false, shared_ptr<Public>(new Public), true );                
                 }
                 
                 shared_ptr<Compound> r( new Compound );
@@ -502,12 +499,12 @@ private:
                      isfunc );
     }
     
-    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, Access *access = NULL, bool showtype = true )
+    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, shared_ptr<Access> *access = NULL, bool showtype = true )
     {
         TRACE();
         string s;
         
-        if( access && declaration->access != *access )
+        if( access && typeid(*(declaration->access)) != typeid(**access) )
         {
             s += RenderAccess( declaration->access ) + ":\n";
             *access = declaration->access;
@@ -533,28 +530,28 @@ private:
             s += "typedef " + RenderType( t->type, t->name ) + sep;
         else if( shared_ptr<Record> r = dynamic_pointer_cast< Record >(declaration) )
         {
-            Access a;
+            shared_ptr<Access> a;
             bool showtype=true;
             string sep2=";\n";
             if( dynamic_pointer_cast< Class >(r) )
             {
                 s += "class";
-                a = PRIVATE;
+                a = shared_ptr<Private>(new Private);
             }
             else if( dynamic_pointer_cast< Struct >(r) )
             {
                 s += "struct";
-                a = PUBLIC;
+                a = shared_ptr<Public>(new Public);
             }
             else if( dynamic_pointer_cast< Union >(r) )
             {
                 s += "union";
-                a = PUBLIC;
+                a = shared_ptr<Public>(new Public);
             }
             else if( dynamic_pointer_cast< Enum >(r) )
             {
                 s += "enum";
-                a = PUBLIC;
+                a = shared_ptr<Public>(new Public);
                 sep2 = ",\n";
                 showtype = false;
             }
@@ -664,9 +661,12 @@ private:
     string RenderSequence( Sequence<ELEMENT> spe, 
                            string separator, 
                            bool seperate_last, 
-                           Access init_access = PUBLIC,
+                           shared_ptr<Access> init_access = shared_ptr<Access>(),
                            bool showtype=true )
     {
+        if( !init_access )
+            init_access = shared_ptr<Public>(new Public);
+            
         TRACE();
         string s;
         for( int i=0; i<spe.size(); i++ )
