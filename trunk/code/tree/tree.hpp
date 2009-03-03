@@ -22,11 +22,19 @@ struct Node : Magic
     // without making Node ambiguous
 };
 
-struct Type : virtual Node {};
+struct Hard : Node
+{
+};
 
-struct Statement : virtual Node {};
+struct Soft : Node
+{
+};
 
-struct Operand : virtual Node {};
+struct Type : virtual Hard {};
+
+struct Statement : virtual Hard {};
+
+struct Operand : virtual Hard {};
 
 struct Expression : Statement,
                     Operand {};
@@ -43,7 +51,7 @@ struct Declaration : Statement
     Access access;
 };
 
-struct Program : Node,
+struct Program : Hard,
                  Sequence<Declaration>
 {
 };
