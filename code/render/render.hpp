@@ -384,24 +384,16 @@ private:
             return ERROR_UNKNOWN("access spec"); 
     }
     
-    string RenderStorage( Storage st )
+    string RenderStorage( shared_ptr<Storage> st )
     {
-        switch( st )
-        {
-        case STATIC:
+        if( dynamic_pointer_cast<Static>( st ) )
             return "static "; 
-            break;
-        case VIRTUAL:
-       // case PURE:
+        else if( dynamic_pointer_cast<Virtual>( st ) )
             return "virtual ";
-            break;
-        case DEFAULT:
+        else if( dynamic_pointer_cast<NonStatic>( st ) )
             return "";
-            break;
-        default:
+        else
             return ERROR_UNKNOWN("storage class");
-            break;
-        }
     }
     
     void ExtractInits( const Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
@@ -495,7 +487,7 @@ private:
     {
         bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
         return dynamic_pointer_cast<Record>( scope_stack.top() ) &&
-                   ( (o->storage==STATIC && dynamic_pointer_cast<NonConst>(o->constant)) ||
+                   ( (dynamic_pointer_cast<Static>(o->storage) && dynamic_pointer_cast<NonConst>(o->constant)) ||
                      isfunc );
     }
     

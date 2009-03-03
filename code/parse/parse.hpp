@@ -427,15 +427,15 @@ private:
             case clang::DeclSpec::SCS_unspecified:
             case clang::DeclSpec::SCS_extern:// linking will be done "automatically" so no need to remember "extern" in the tree
                 if( DS.isVirtualSpecified() )
-                    o->storage = VIRTUAL;
+                    o->storage = shared_new<Virtual>();
                 else
-                    o->storage = DEFAULT;
+                    o->storage = shared_new<NonStatic>();
                 break;
             case clang::DeclSpec::SCS_static:
-                o->storage = STATIC;
+                o->storage = shared_new<Static>();
                 break;
             case clang::DeclSpec::SCS_auto:
-                o->storage = DEFAULT;
+                o->storage = shared_new<NonStatic>();
                 break;
             default:
                 ASSERT(!"Unsupported storage class");
@@ -1307,7 +1307,7 @@ private:
             int enumbits = TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified];
             shared_ptr<Instance> o(new Instance());
             o->name = Id->getName();
-            o->storage = STATIC;
+            o->storage = shared_new<Static>();
             o->constant = shared_new<Const>(); // static const member does not consume storage!!
             o->type = CreateIntegralType( enumbits, false );
             o->access = shared_ptr<Public>(new Public);
@@ -1395,7 +1395,7 @@ private:
         
         virtual BaseResult ActOnBaseSpecifier(DeclTy *classdecl, 
                                               clang::SourceRange SpecifierRange,
-                                              bool Virtual, clang::AccessSpecifier Access,
+                                              bool Virt, clang::AccessSpecifier Access,
                                               TypeTy *basetype, 
                                               clang::SourceLocation BaseLoc) 
         {
@@ -1408,7 +1408,10 @@ private:
             
             shared_ptr<Base> base( new Base );
             base->record = ir;
-            base->storage = Virtual ? VIRTUAL : DEFAULT;
+            if( Virt )
+                base->storage = shared_new<Virtual>();
+            else    
+                base->storage = shared_new<NonStatic>();
             base->constant = shared_new<NonConst>(); 
             base->access = ConvertAccess( Access, r );       
             return hold_base.ToRaw( base );
