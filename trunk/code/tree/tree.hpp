@@ -49,6 +49,13 @@ struct AnyConst : Property {};
 struct Const : AnyConst {};
 struct NonConst : AnyConst {};
 
+struct Storage : Property {};
+struct Static : Storage {};
+struct NonStatic : Storage {};
+struct Virtual : NonStatic {};
+//struct Pure : Virtual {}
+
+
 //////////////////////////// Underlying Program Nodes ////////////////////////////
 
 struct Type : virtual Hard {};
@@ -77,17 +84,9 @@ struct Identifier : Declaration
     string name;
 };
 
-enum Storage
-{
-    STATIC,
-    DEFAULT, 
-    VIRTUAL // implies DEFAULT
-    //PURE // implies VIRTUAL TODO implment in parse and render
-};
-
 struct Physical
 {
-    Storage storage;
+    shared_ptr<Storage> storage;
     shared_ptr<AnyConst> constant; // TODO all functions to be const (otherwise would imply self-modifiying code). See idempotent
 };
 
