@@ -429,7 +429,7 @@ private:
         
         if( showstorage )
         {
-            if( o->constant )
+            if( dynamic_pointer_cast<Const>(o->constant) )
                 s += "const ";
             s += RenderStorage(o->storage);
         }
@@ -495,7 +495,7 @@ private:
     {
         bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
         return dynamic_pointer_cast<Record>( scope_stack.top() ) &&
-                   ( (o->storage==STATIC && !o->constant) ||
+                   ( (o->storage==STATIC && dynamic_pointer_cast<NonConst>(o->constant)) ||
                      isfunc );
     }
     

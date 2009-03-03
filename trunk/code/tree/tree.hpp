@@ -40,10 +40,14 @@ struct Soft : Node {};
 
 struct Property : Hard {};
 
-struct Access : Property { virtual void foo()=0; };
-struct Public : Access {virtual void foo(){}};
-struct Private : Access {virtual void foo(){}};
-struct Protected : Access {virtual void foo(){}};
+struct Access : Property {};
+struct Public : Access {};
+struct Private : Access {};
+struct Protected : Access {};
+
+struct AnyConst : Property {};
+struct Const : AnyConst {};
+struct NonConst : AnyConst {};
 
 //////////////////////////// Underlying Program Nodes ////////////////////////////
 
@@ -84,7 +88,7 @@ enum Storage
 struct Physical
 {
     Storage storage;
-    bool constant; // TODO all functions to be const (otherwise would imply self-modifiying code). See idempotent
+    shared_ptr<AnyConst> constant; // TODO all functions to be const (otherwise would imply self-modifiying code). See idempotent
 };
 
 // can be an object or a function. In case of function, type is a type under Subroutine

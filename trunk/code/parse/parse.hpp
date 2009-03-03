@@ -441,7 +441,10 @@ private:
                 ASSERT(!"Unsupported storage class");
                 break;
             }
-            o->constant = !!(DS.getTypeQualifiers() & clang::DeclSpec::TQ_const);
+            if( DS.getTypeQualifiers() & clang::DeclSpec::TQ_const )
+                o->constant = shared_new<Const>();
+            else
+                o->constant = shared_new<NonConst>();
             o->type = CreateTypeNode( D );
             o->access = access;
             o->initialiser = init;
@@ -1305,7 +1308,7 @@ private:
             shared_ptr<Instance> o(new Instance());
             o->name = Id->getName();
             o->storage = STATIC;
-            o->constant = true; // static const member does not consume storage!!
+            o->constant = shared_new<Const>(); // static const member does not consume storage!!
             o->type = CreateIntegralType( enumbits, false );
             o->access = shared_ptr<Public>(new Public);
             if( Val )
@@ -1406,7 +1409,7 @@ private:
             shared_ptr<Base> base( new Base );
             base->record = ir;
             base->storage = Virtual ? VIRTUAL : DEFAULT;
-            base->constant = false; 
+            base->constant = shared_new<NonConst>(); 
             base->access = ConvertAccess( Access, r );       
             return hold_base.ToRaw( base );
         }

@@ -61,4 +61,10 @@ private:
     vector< shared_ptr< NODE > > hold_list;  // TODO does this need to be a vector?
 };
 
+template<class C>
+inline shared_ptr<C> shared_new() 
+{ 
+    return shared_ptr<C>(new C); 
+}
+
 #endif
