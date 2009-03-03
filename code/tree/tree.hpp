@@ -13,7 +13,7 @@
 template<typename ELEMENT>
 struct Sequence : deque< shared_ptr<ELEMENT> > {};                   
 
-//////////////////////////// Underlying Base Nodes ////////////////////////////
+//////////////////////////// Node Models ////////////////////////////
 
 struct Node : Magic
 {               
@@ -29,6 +29,8 @@ struct Hard : Node
 struct Soft : Node
 {
 };
+
+//////////////////////////// Underlying Program Nodes ////////////////////////////
 
 struct Type : virtual Hard {};
 
