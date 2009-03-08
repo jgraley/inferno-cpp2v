@@ -60,6 +60,14 @@ private:
     shared_ptr<Program> program;
     string deferred_decls;
     stack< shared_ptr<Node> > scope_stack;
+
+    string RenderStandardProperty( shared_ptr<StandardProperty> sp )
+    {
+        if( shared_ptr<String> ss = dynamic_pointer_cast< String >(sp) )
+            return "\"" + Sanitise( ss->value ) + "\"";                     
+        else
+            return ERROR_UNSUPPORTED( sp );
+    }
     
     string RenderIdentifier( shared_ptr<Identifier> id )
     {
@@ -359,9 +367,9 @@ private:
             return before + 
                    "{ " + RenderOperandSequence( ao->operands, ", ", false ) + " }" +
                    after;
-        else if( shared_ptr<String> ss = dynamic_pointer_cast< String >(expression) )
+        else if( shared_ptr<Literal> l = dynamic_pointer_cast< Literal >(expression) )
             return before + 
-                   "\"" + Sanitise( ss->value ) + "\"" + 
+                   RenderStandardProperty( l->value ) +
                    after;
         else if( dynamic_pointer_cast< This >(expression) )
             return before + 
@@ -372,7 +380,7 @@ private:
         TRACE("ok\n");
     }
     
-    string RenderAccess( shared_ptr<Access> access )
+    string RenderAccess( shared_ptr<AccessSpec> access )
     {
         if( dynamic_pointer_cast<Public>( access ) )
             return "public";
@@ -384,7 +392,7 @@ private:
             return ERROR_UNKNOWN("access spec"); 
     }
     
-    string RenderStorage( shared_ptr<Storage> st )
+    string RenderStorage( shared_ptr<StorageClass> st )
     {
         if( dynamic_pointer_cast<Static>( st ) )
             return "static "; 
@@ -491,7 +499,7 @@ private:
                      isfunc );
     }
     
-    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, shared_ptr<Access> *access = NULL, bool showtype = true )
+    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, shared_ptr<AccessSpec> *access = NULL, bool showtype = true )
     {
         TRACE();
         string s;
@@ -522,7 +530,7 @@ private:
             s += "typedef " + RenderType( t->type, t->name ) + sep;
         else if( shared_ptr<Record> r = dynamic_pointer_cast< Record >(declaration) )
         {
-            shared_ptr<Access> a;
+            shared_ptr<AccessSpec> a;
             bool showtype=true;
             string sep2=";\n";
             if( dynamic_pointer_cast< Class >(r) )
@@ -653,7 +661,7 @@ private:
     string RenderSequence( Sequence<ELEMENT> spe, 
                            string separator, 
                            bool seperate_last, 
-                           shared_ptr<Access> init_access = shared_ptr<Access>(),
+                           shared_ptr<AccessSpec> init_access = shared_ptr<AccessSpec>(),
                            bool showtype=true )
     {
         if( !init_access )
