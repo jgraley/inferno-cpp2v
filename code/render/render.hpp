@@ -61,10 +61,25 @@ private:
     string deferred_decls;
     stack< shared_ptr<Node> > scope_stack;
 
-    string RenderStandardProperty( shared_ptr<StandardProperty> sp )
+    string RenderProperty( shared_ptr<FundamentalProperty> sp )
     {
         if( shared_ptr<String> ss = dynamic_pointer_cast< String >(sp) )
             return "\"" + Sanitise( ss->value ) + "\"";                     
+        else if( shared_ptr<Integer> ic = dynamic_pointer_cast< Integer >(sp) )
+            return string(ic->value.toString(10)) + 
+                   (ic->value.isUnsigned() ? "U" : "") + 
+                   (ic->value.getBitWidth()>TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
+                   (ic->value.getBitWidth()>TypeInfo::integral_bits[clang::DeclSpec::TSW_long] ? "L" : ""); 
+                   // note, assuming longlong bigger than long, so second L appends first to get LL
+        else if( shared_ptr<Float> fc = dynamic_pointer_cast< Float >(sp) )
+        {
+            char hs[256];
+            // generate hex float since it can be exact
+            fc->value.convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
+            return string(hs) + 
+                   (&(fc->value.getSemantics())==TypeInfo::floating_semantics[clang::DeclSpec::TSW_short] ? "F" : "") +
+                   (&(fc->value.getSemantics())==TypeInfo::floating_semantics[clang::DeclSpec::TSW_long] ? "L" : ""); 
+        }           
         else
             return ERROR_UNSUPPORTED( sp );
     }
@@ -118,8 +133,10 @@ private:
     {
         bool ds;
         unsigned width;       
-        shared_ptr<IntegralConstant> ic = dynamic_pointer_cast<IntegralConstant>( type->width );
-        ASSERT(ic && "width must be constant integral"); 
+        shared_ptr<Literal> l = dynamic_pointer_cast<Literal>( type->width );
+        ASSERT(l && "width must be a literal"); 
+        shared_ptr<Integer> ic = dynamic_pointer_cast<Integer>( l->value );
+        ASSERT(ic && "width must be integer"); 
         if(ic)
             width = ic->value.getLimitedValue();
                   
@@ -172,8 +189,10 @@ private:
     {
         string s;
         unsigned base_width;       
-        shared_ptr<IntegralConstant> ic = dynamic_pointer_cast<IntegralConstant>( type->width );
-        ASSERT(ic && "width must be constant integral"); 
+        shared_ptr<Literal> l = dynamic_pointer_cast<Literal>( type->width );
+        ASSERT(l && "width must be literal"); 
+        shared_ptr<Integer> ic = dynamic_pointer_cast<Integer>( l->value );
+        ASSERT(ic && "width must be integer"); 
         if(ic)
             base_width = ic->value.getLimitedValue();
     
@@ -265,21 +284,6 @@ private:
                    after;
         else if( shared_ptr<Instance> v = dynamic_pointer_cast< Instance >(expression) )
             return RenderScopedIdentifier( v );
-        else if( shared_ptr<IntegralConstant> ic = dynamic_pointer_cast< IntegralConstant >(expression) )
-            return string(ic->value.toString(10)) + 
-                   (ic->value.isUnsigned() ? "U" : "") + 
-                   (ic->value.getBitWidth()>TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
-                   (ic->value.getBitWidth()>TypeInfo::integral_bits[clang::DeclSpec::TSW_long] ? "L" : ""); 
-                   // note, assuming longlong bigger than long, so second L appends first to get LL
-        else if( shared_ptr<FloatingConstant> fc = dynamic_pointer_cast< FloatingConstant >(expression) )
-        {
-            char hs[256];
-            // generate hex float since it can be exact
-            fc->value.convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
-            return string(hs) + 
-                   (&(fc->value.getSemantics())==TypeInfo::floating_semantics[clang::DeclSpec::TSW_short] ? "F" : "") +
-                   (&(fc->value.getSemantics())==TypeInfo::floating_semantics[clang::DeclSpec::TSW_long] ? "L" : ""); 
-        }           
         else if( shared_ptr<Infix> o = dynamic_pointer_cast< Infix >(expression) )
             return before + 
                    RenderOperand( o->operands[0], true ) +
@@ -369,7 +373,7 @@ private:
                    after;
         else if( shared_ptr<Literal> l = dynamic_pointer_cast< Literal >(expression) )
             return before + 
-                   RenderStandardProperty( l->value ) +
+                   RenderProperty( l->value ) +
                    after;
         else if( dynamic_pointer_cast< This >(expression) )
             return before + 
