@@ -55,12 +55,27 @@ struct NonStatic : StorageClass {};
 struct Virtual : NonStatic {};
 //struct Pure : Virtual {}
 
-struct StandardProperty : Property {};
+struct FundamentalProperty : Property {};
 
-struct AnyString : StandardProperty {};
+struct AnyString : FundamentalProperty {};
 struct String : AnyString
 {
     string value;
+};
+
+struct AnyNumber : FundamentalProperty {};
+
+struct AnyInteger : AnyNumber {};
+struct Integer : AnyInteger
+{
+    llvm::APSInt value; // APSint can be signed or unsigned
+};
+
+struct AnyFloat : AnyNumber {};
+struct Float : AnyFloat
+{
+    Float( llvm::APFloat v ) : value(v) {};
+    llvm::APFloat value; 
 };
 
 
@@ -277,22 +292,10 @@ struct Delete : Expression
     bool global; // true if ::delete was used
 };
 
-struct NumericConstant : Expression {};
-
-struct IntegralConstant : NumericConstant
-{
-    llvm::APSInt value; // APSint can be signed or unsigned
-};
-
-struct FloatingConstant : NumericConstant
-{
-    FloatingConstant( llvm::APFloat v ) : value(v) {};
-    llvm::APFloat value; 
-};
-
 struct Literal : Expression
 {
-    shared_ptr<StandardProperty> value;
+    // Use properties to express value, to avoid duplication
+    shared_ptr<FundamentalProperty> value;
 };
 
 struct This : Expression {};

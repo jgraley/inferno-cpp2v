@@ -239,15 +239,20 @@ private:
             else
                 i = shared_ptr<Unsigned>( new Unsigned );
             
-            i->width = CreateNumericConstant(bits);
-                        
+            shared_ptr<Literal> l( new Literal );            
+            l->value = CreateNumericConstant(bits);
+            
+            i->width = l;           
             return i;
         }
         
         shared_ptr<Floating> CreateFloatingType( unsigned bits )
         {
-            shared_ptr<Floating> f( shared_ptr<Floating>( new Floating ) );
-            f->width = CreateNumericConstant(bits);
+            shared_ptr<Literal> l( new Literal );            
+            l->value = CreateNumericConstant(bits);
+
+            shared_ptr<Floating> f( new Floating );
+            f->width = l;
             return f;
         }
         
@@ -713,16 +718,29 @@ private:
             return hold_expr.ToRaw( o );            
         }                                   
         
-        shared_ptr<NumericConstant> CreateNumericConstant( unsigned value )        
+        shared_ptr<AnyNumber> CreateNumericConstant( unsigned value, int bits=-1 )        
         {
-            llvm::APSInt rv(TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified], true);
+            if( bits == -1 )
+                bits = TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified];
+            llvm::APSInt rv( bits, true );
             rv = value;
-            shared_ptr<IntegralConstant> nc( new IntegralConstant );
+            shared_ptr<Integer> nc( new Integer );
             nc->value = rv;
             return nc;            
         }
         
-        shared_ptr<NumericConstant> CreateNumericConstant(const clang::Token &tok)
+        shared_ptr<AnyNumber> CreateNumericConstant( int value, int bits=-1 )        
+        {
+            if( bits == -1 )
+                bits = TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified];
+            llvm::APSInt rv( bits, false );
+            rv = value;
+            shared_ptr<Integer> nc( new Integer );
+            nc->value = rv;
+            return nc;            
+        }
+        
+        shared_ptr<AnyNumber> CreateNumericConstant(const clang::Token &tok)
         {
             llvm::SmallString<512> int_buffer;
             int_buffer.resize(tok.getLength());
@@ -748,7 +766,7 @@ private:
                 bool err = literal.GetIntegerValue(rv);
                 
                 ASSERT( !err && "numeric literal too big for its own type" );
-                shared_ptr<IntegralConstant> nc( new IntegralConstant );
+                shared_ptr<Integer> nc( new Integer );
                 nc->value = rv;
                 return nc;
             }
@@ -763,7 +781,7 @@ private:
                     semantics = TypeInfo::floating_semantics[clang::DeclSpec::TSW_unspecified];
                 llvm::APFloat rv( literal.GetFloatValue( *semantics ) );
 
-                shared_ptr<FloatingConstant> fc( new FloatingConstant( rv ) );
+                shared_ptr<Float> fc( new Float( rv ) );
                 return fc;
             }
             ASSERT(!"this sort of literal is not supported");         
@@ -771,9 +789,9 @@ private:
         
         virtual ExprResult ActOnNumericConstant(const clang::Token &tok) 
         { 
-            shared_ptr<NumericConstant> nc(new NumericConstant);
-            nc = CreateNumericConstant( tok );
-            return hold_expr.ToRaw( nc );            
+            shared_ptr<Literal> l(new Literal);
+            l->value = CreateNumericConstant( tok );
+            return hold_expr.ToRaw( l );            
         } 
   
         virtual ExprResult ActOnBinOp(clang::Scope *S,
@@ -1223,11 +1241,11 @@ private:
         virtual ExprResult ActOnCXXBoolLiteral(clang::SourceLocation OpLoc,
                                                clang::tok::TokenKind Kind) //TODO not working - get node has no info
         {
-            shared_ptr<IntegralConstant> ic(new IntegralConstant);
+            shared_ptr<Literal> ic(new Literal);
             TRACE("true/false tk %d %d %d\n", Kind, clang::tok::kw_true, clang::tok::kw_false );
             
-            llvm::APInt t = llvm::APInt( 1, (Kind == clang::tok::kw_true) );            
-            ic->value = llvm::APSInt( t, true );
+            int v = (Kind == clang::tok::kw_true);            
+            ic->value = CreateNumericConstant( v );
             return hold_expr.ToRaw( ic );                       
         }
 
@@ -1256,11 +1274,14 @@ private:
             if (literal.hadError())
                 return ExprResult(true);
                 
-            shared_ptr<IntegralConstant> nc( new IntegralConstant );
+            shared_ptr<Integer> nc( new Integer );
             llvm::APSInt rv(TypeInfo::char_bits, !TypeInfo::char_default_signed);
             rv = literal.getValue();
             nc->value = rv;   
-            return hold_expr.ToRaw( nc );
+            
+            shared_ptr<Literal> l( new Literal );
+            l->value = nc;
+            return hold_expr.ToRaw( l );
         }
         
         virtual ExprResult ActOnInitList(clang::SourceLocation LParenLoc,
@@ -1325,21 +1346,17 @@ private:
                 ASSERT(lasto && "unexpected kind of declaration inside an enum");
                 shared_ptr<Infix> inf( new Infix );
                 inf->operands.push_back(lasto->initialiser);
-                llvm::APSInt i(enumbits, false);
-                i = 1;
-                shared_ptr<IntegralConstant> ic( new IntegralConstant );
-                ic->value = i;
-                inf->operands.push_back(ic);
+                shared_ptr<Literal> l( new Literal );
+                l->value = CreateNumericConstant( 1, enumbits );
+                inf->operands.push_back(l);
                 inf->kind = clang::tok::plus;
                 o->initialiser = inf;
             }
             else
             {
-                llvm::APSInt i(enumbits, false);
-                i = 0;
-                shared_ptr<IntegralConstant> ic( new IntegralConstant );
-                ic->value = i;
-                o->initialiser = ic;
+                shared_ptr<Literal> l( new Literal );
+                l->value = CreateNumericConstant( 0, enumbits );
+                o->initialiser = l;
             }
             ident_track.Add(Id, o, S); 
             return hold_decl.ToRaw( o );
