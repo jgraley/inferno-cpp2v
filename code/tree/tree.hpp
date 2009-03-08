@@ -40,20 +40,28 @@ struct Soft : Node {};
 
 struct Property : Hard {};
 
-struct Access : Property {};
-struct Public : Access {};
-struct Private : Access {};
-struct Protected : Access {};
+struct AccessSpec : Property {};
+struct Public : AccessSpec {};
+struct Private : AccessSpec {};
+struct Protected : AccessSpec {};
 
 struct AnyConst : Property {};
 struct Const : AnyConst {};
 struct NonConst : AnyConst {};
 
-struct Storage : Property {};
-struct Static : Storage {};
-struct NonStatic : Storage {};
+struct StorageClass : Property {};
+struct Static : StorageClass {};
+struct NonStatic : StorageClass {};
 struct Virtual : NonStatic {};
 //struct Pure : Virtual {}
+
+struct StandardProperty : Property {};
+
+struct AnyString : StandardProperty {};
+struct String : AnyString
+{
+    string value;
+};
 
 
 //////////////////////////// Underlying Program Nodes ////////////////////////////
@@ -69,7 +77,7 @@ struct Expression : Statement,
     
 struct Declaration : Statement
 {   
-    shared_ptr<Access> access;
+    shared_ptr<AccessSpec> access;
 };
 
 struct Program : Hard,
@@ -86,7 +94,7 @@ struct Identifier : Declaration
 
 struct Physical
 {
-    shared_ptr<Storage> storage;
+    shared_ptr<StorageClass> storage;
     shared_ptr<AnyConst> constant; // TODO all functions to be const (otherwise would imply self-modifiying code). See idempotent
 };
 
@@ -282,9 +290,9 @@ struct FloatingConstant : NumericConstant
     llvm::APFloat value; 
 };
 
-struct String : Expression
+struct Literal : Expression
 {
-    string value;
+    shared_ptr<StandardProperty> value;
 };
 
 struct This : Expression {};

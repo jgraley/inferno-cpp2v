@@ -402,7 +402,7 @@ private:
         
         shared_ptr<Instance> CreateObjectNode( clang::Scope *S, 
                                                clang::Declarator &D, 
-                                               shared_ptr<Access> access = shared_ptr<Access>(),
+                                               shared_ptr<AccessSpec> access = shared_ptr<AccessSpec>(),
                                                shared_ptr<Expression> init = shared_ptr<Expression>() )
         { 
             if(!access)
@@ -504,7 +504,7 @@ private:
             return o;
         }
         
-        shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D, shared_ptr<Access> a = shared_ptr<Access>() )
+        shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D, shared_ptr<AccessSpec> a = shared_ptr<AccessSpec>() )
         {
             if(!a)
                 a = shared_ptr<Public>(new Public);
@@ -1024,7 +1024,7 @@ private:
             return hold_stmt.ToRaw( shared_ptr<Break>( new Break ) );
         }
         
-        shared_ptr<Access> ConvertAccess( clang::AccessSpecifier AS, shared_ptr<Record> rec = shared_ptr<Record>() )
+        shared_ptr<AccessSpec> ConvertAccess( clang::AccessSpecifier AS, shared_ptr<Record> rec = shared_ptr<Record>() )
         {
             switch( AS )
             {
@@ -1283,14 +1283,17 @@ private:
         /// fragments (e.g. "foo" "bar" L"baz"). 
         virtual ExprResult ActOnStringLiteral(const clang::Token *Toks, unsigned NumToks) 
         {
-            shared_ptr<String> s(new String);
             clang::StringLiteralParser literal(Toks, NumToks, preprocessor, target_info);
             if (literal.hadError)
                 return ExprResult(true);
                 
-            s->value = literal.GetString();    
+            shared_ptr<String> s(new String);
+            s->value = literal.GetString();  
 
-            return hold_expr.ToRaw( s );                                 
+            shared_ptr<Literal> l(new Literal);
+            l->value = s;  
+
+            return hold_expr.ToRaw( l );                                 
         }
         
         /// ActOnCXXThis - Parse the C++ 'this' pointer.
@@ -1395,7 +1398,7 @@ private:
         
         virtual BaseResult ActOnBaseSpecifier(DeclTy *classdecl, 
                                               clang::SourceRange SpecifierRange,
-                                              bool Virt, clang::AccessSpecifier Access,
+                                              bool Virt, clang::AccessSpecifier AccessSpec,
                                               TypeTy *basetype, 
                                               clang::SourceLocation BaseLoc) 
         {
@@ -1413,7 +1416,7 @@ private:
             else    
                 base->storage = shared_new<NonStatic>();
             base->constant = shared_new<NonConst>(); 
-            base->access = ConvertAccess( Access, r );       
+            base->access = ConvertAccess( AccessSpec, r );       
             return hold_base.ToRaw( base );
         }
         
