@@ -431,16 +431,18 @@ private:
             {
             case clang::DeclSpec::SCS_unspecified:
             case clang::DeclSpec::SCS_extern:// linking will be done "automatically" so no need to remember "extern" in the tree
+            case clang::DeclSpec::SCS_auto:
+            {
+                shared_ptr<NonStatic> ns = shared_new<NonStatic>();
+                o->storage = ns;
                 if( DS.isVirtualSpecified() )
-                    o->storage = shared_new<Virtual>();
+                    ns->virt = shared_new<Virtual>();
                 else
-                    o->storage = shared_new<NonStatic>();
+                    ns->virt = shared_new<NonVirtual>();
                 break;
+            }
             case clang::DeclSpec::SCS_static:
                 o->storage = shared_new<Static>();
-                break;
-            case clang::DeclSpec::SCS_auto:
-                o->storage = shared_new<NonStatic>();
                 break;
             default:
                 ASSERT(!"Unsupported storage class");
@@ -1428,11 +1430,11 @@ private:
             
             shared_ptr<Base> base( new Base );
             base->record = ir;
-            if( Virt )
+          /*  if( Virt )
                 base->storage = shared_new<Virtual>();
             else    
                 base->storage = shared_new<NonStatic>();
-            base->constant = shared_new<NonConst>(); 
+            base->constant = shared_new<NonConst>(); */
             base->access = ConvertAccess( AccessSpec, r );       
             return hold_base.ToRaw( base );
         }

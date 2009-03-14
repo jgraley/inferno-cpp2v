@@ -49,11 +49,19 @@ struct AnyConst : Property {};
 struct Const : AnyConst {};
 struct NonConst : AnyConst {};
 
+struct AnyVirtual : Property {};
+struct Virtual : AnyVirtual 
+{
+    // TODO pure
+};
+struct NonVirtual : AnyVirtual {};
+
 struct StorageClass : Property {};
 struct Static : StorageClass {};
-struct NonStatic : StorageClass {};
-struct Virtual : NonStatic {};
-//struct Pure : Virtual {}
+struct NonStatic : StorageClass 
+{
+    shared_ptr<AnyVirtual> virt;
+};
 
 struct FundamentalProperty : Property {};
 
@@ -123,10 +131,11 @@ struct Instance : Identifier,
 };
 
 struct InheritanceRecord;
-struct Base : Declaration,
-              Physical
+struct Base : Declaration
 {
     shared_ptr<InheritanceRecord> record;
+    // TODO virtual inheritance, treat seperately from virtual members
+    // since different thing.
 };              
 
 //////////////////////////// Anonymous Types ////////////////////////////

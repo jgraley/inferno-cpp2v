@@ -400,10 +400,16 @@ private:
     {
         if( dynamic_pointer_cast<Static>( st ) )
             return "static "; 
-        else if( dynamic_pointer_cast<Virtual>( st ) )
-            return "virtual ";
-        else if( dynamic_pointer_cast<NonStatic>( st ) )
-            return "";
+        else if( shared_ptr<NonStatic> ns = dynamic_pointer_cast<NonStatic>( st ) )
+        {
+            shared_ptr<AnyVirtual> v = ns->virt;
+            if( dynamic_pointer_cast<Virtual>( v ) )
+                return "virtual ";
+            else if( dynamic_pointer_cast<NonVirtual>( v ) )
+                return "";
+            else
+                return ERROR_UNKNOWN("virtualness");    
+        }
         else
             return ERROR_UNKNOWN("storage class");
     }
@@ -579,7 +585,7 @@ private:
                                 s += ", ";
                             shared_ptr<Base> b = ir->bases[i];    
                             ASSERT( b );
-                            s += RenderAccess(b->access) + " " + RenderStorage(b->storage) + b->record->name;
+                            s += RenderAccess(b->access) + " " /*+ RenderStorage(b->storage)*/ + b->record->name;
                         }
                     }
                 }
