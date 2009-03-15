@@ -1,6 +1,6 @@
 UNARY(amp                   , "&",   BitwiseAnd )
 BINARY(ampamp               , "&&",  LocicalAnd )
-BINARY(ampequal             , "&=",  BitwiseAnd )
+ASSIGN(ampequal             , "&=",  BitwiseAnd )
 BINARY(star                 , "*",   Multiply )
 UNARY(star                  , "*",   Dereference )
 ASSIGN(starequal            , "*=",  Multiply )

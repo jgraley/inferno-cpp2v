@@ -86,6 +86,9 @@ struct Float : AnyFloat
     llvm::APFloat value; 
 };
 
+struct AnyAssignment : Property {};
+struct Assignment : AnyAssignment {};
+struct NonAssignment : AnyAssignment {};
 
 //////////////////////////// Underlying Program Nodes ////////////////////////////
 
@@ -265,7 +268,10 @@ struct Prefix : Operator {};  // 1 operand (eg "++i" or "sizeof(i)")
 
 struct Postfix : Operator {}; // 1 operand
 
-struct Infix : Operator {}; // 2 operands
+struct Binary : Operator 
+{
+    shared_ptr<AnyAssignment> assign;
+};
 
 // for eg sizeof(int) where the operand is a type
 struct PrefixOnType : Expression 
@@ -278,6 +284,14 @@ struct SizeOf : Prefix {};
 struct SizeOfType : PrefixOnType {};
 struct AlignOf : Prefix {};
 struct AlignOfType : PrefixOnType {};
+
+#define UNARY(TOK, TEXT, NODE) struct NODE : Binary {};
+#define BINARY(TOK, TEXT, NODE) struct NODE : Binary {};
+#define ASSIGN(TOK, TEXT, NODE) 
+#include "helpers/operator_text.inc"
+
+// Assign is an exceptional case since it has an ASSIGN form but not a BINARY form
+struct Assign : Binary {};
 
 struct ConditionalOperator : Expression // eg ?:
 {
