@@ -274,6 +274,11 @@ struct PrefixOnType : Expression
     clang::tok::TokenKind kind;
 };
 
+struct SizeOf : Prefix {};
+struct SizeOfType : PrefixOnType {};
+struct AlignOf : Prefix {};
+struct AlignOfType : PrefixOnType {};
+
 struct ConditionalOperator : Expression // eg ?:
 {
     shared_ptr<Operand> condition;

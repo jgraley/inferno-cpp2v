@@ -30,7 +30,9 @@ public:
         operator_text.resize( clang::tok::NUM_TOKENS );
         for(int i=0; i<clang::tok::NUM_TOKENS; i++ )
             operator_text[i] = "\n#error Token not defined in operator_text\n";
-#define OPERATOR(TOK, TEXT) operator_text[clang::tok::TOK] = TEXT;
+#define UNARY(TOK, TEXT, NODE) operator_text[clang::tok::TOK] = TEXT;
+#define BINARY(TOK, TEXT, NODE) operator_text[clang::tok::TOK] = TEXT;
+#define ASSIGN(TOK, TEXT, NODE) operator_text[clang::tok::TOK] = TEXT;
 #include "helpers/operator_text.inc"
     }
     
@@ -284,6 +286,22 @@ private:
                    after;
         else if( shared_ptr<Instance> v = dynamic_pointer_cast< Instance >(expression) )
             return RenderScopedIdentifier( v );
+        else if( shared_ptr<SizeOfType> pot = dynamic_pointer_cast< SizeOfType >(expression) )
+            return before + 
+                   "sizeof(" + RenderType( pot->operand, "" ) + ")" + 
+                   after;
+        else if( shared_ptr<AlignOfType> pot = dynamic_pointer_cast< AlignOfType >(expression) )
+            return before + 
+                   "alignof(" + RenderType( pot->operand, "" ) + ")" + 
+                   after;
+        else if( shared_ptr<SizeOf> pot = dynamic_pointer_cast< SizeOf >(expression) )
+            return before + 
+                   "sizeof(" + RenderOperand( pot->operands[0], false ) + ")" + 
+                   after;
+        else if( shared_ptr<AlignOf> pot = dynamic_pointer_cast< AlignOf >(expression) )
+            return before + 
+                   "alignof(" + RenderOperand( pot->operands[0], false ) + ")" + 
+                   after;
         else if( shared_ptr<Infix> o = dynamic_pointer_cast< Infix >(expression) )
             return before + 
                    RenderOperand( o->operands[0], true ) +
