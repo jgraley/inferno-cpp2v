@@ -801,8 +801,17 @@ private:
                                       ExprTy *LHS, ExprTy *RHS) 
         {
             TRACE(); 
-            shared_ptr<Infix> o(new Infix);
-            o->kind = Kind;
+            shared_ptr<Operator> o;
+            shared_ptr<Binary> ob = shared_ptr<Binary>();            
+            switch( Kind )
+            {
+#define UNARY(TOK, TEXT, NODE)
+#define BINARY(TOK, TEXT, NODE) case clang::tok::TOK: ob=shared_ptr<NODE>(new NODE); ob->assign=shared_ptr<NonAssignment>( new NonAssignment ); break;
+#define ASSIGN(TOK, TEXT, NODE) case clang::tok::TOK: ob=shared_ptr<NODE>(new NODE); ob->assign=shared_ptr<Assignment>( new Assignment ); break;
+#include "helpers/operator_text.inc"
+            }
+            if( ob )
+                o = ob;
             o->operands.push_back( hold_expr.FromRaw(LHS) );
             o->operands.push_back( hold_expr.FromRaw(RHS) );
             return hold_expr.ToRaw( o );            
@@ -1346,12 +1355,11 @@ private:
                 shared_ptr<Declaration> lastd( hold_decl.FromRaw( LastEnumConstant ) );
                 shared_ptr<Instance> lasto( dynamic_pointer_cast<Instance>(lastd) );
                 ASSERT(lasto && "unexpected kind of declaration inside an enum");
-                shared_ptr<Infix> inf( new Infix );
+                shared_ptr<Add> inf( new Add );
                 inf->operands.push_back(lasto->initialiser);
                 shared_ptr<Literal> l( new Literal );
                 l->value = CreateNumericConstant( 1, enumbits );
                 inf->operands.push_back(l);
-                inf->kind = clang::tok::plus;
                 o->initialiser = inf;
             }
             else
