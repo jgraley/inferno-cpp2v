@@ -31,7 +31,7 @@ public:
         for(int i=0; i<clang::tok::NUM_TOKENS; i++ )
             operator_text[i] = "\n#error Token not defined in operator_text\n";
 #define OPERATOR(TOK, TEXT) operator_text[clang::tok::TOK] = TEXT;
-#include "operator_text.inc"
+#include "helpers/operator_text.inc"
     }
     
     void operator()( shared_ptr<Program> prog )       
