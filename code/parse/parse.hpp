@@ -1400,15 +1400,21 @@ private:
         {
             if( isType )
             {
-                shared_ptr<PrefixOnType> pot(new PrefixOnType);
-                pot->kind = isSizeof ? clang::tok::kw_sizeof : clang::tok::kw_alignof;
+                shared_ptr<PrefixOnType> pot;
+                if( isSizeof )
+                    pot = shared_ptr<SizeOfType>(new SizeOfType);
+                else 
+                    pot = shared_ptr<AlignOfType>(new AlignOfType);
                 pot->operand = hold_type.FromRaw(TyOrEx);
                 return hold_expr.ToRaw( pot );                       
             }
             else
             {
-                shared_ptr<Prefix> p(new Prefix);
-                p->kind = isSizeof ? clang::tok::kw_sizeof : clang::tok::kw_alignof;
+                shared_ptr<Prefix> p;
+                if( isSizeof )
+                    p = shared_ptr<SizeOf>(new SizeOf);
+                else
+                    p = shared_ptr<AlignOf>(new AlignOf);
                 p->operands.push_back( hold_expr.FromRaw(TyOrEx) );
                 return hold_expr.ToRaw( p );                       
             }
