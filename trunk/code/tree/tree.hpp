@@ -274,7 +274,7 @@ struct Comparison : Operator {};
 #define PREFIX(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE {};
 #define POSTFIX(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE {};
 #define BINARY(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE {};
-#include "helpers/operator_text.inc"
+#include "operator_text.inc"
 
 struct SizeOf : Operator {};
 struct AlignOf : Operator {};

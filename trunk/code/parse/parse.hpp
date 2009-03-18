@@ -806,7 +806,7 @@ private:
             {            
 #define BINARY(TOK, TEXT, NODE, ASS, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); o->assign=shared_ptr<ASS>( new ASS ); break;
 #define ALTBIN(TOK, NODE, ASS) BINARY(TOK, "", NODE, ASS, 0)
-#include "helpers/operator_text.inc"
+#include "tree/operator_text.inc"
             }
             ASSERT( o );
             o->operands.push_back( hold_expr.FromRaw(LHS) );
@@ -822,7 +822,7 @@ private:
             switch( Kind )
             {
 #define POSTFIX(TOK, TEXT, NODE, ASS, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); o->assign=shared_ptr<ASS>( new ASS ); break;
-#include "helpers/operator_text.inc"
+#include "tree/operator_text.inc"
             }
             ASSERT( o );
             o->operands.push_back( hold_expr.FromRaw(Input) );
@@ -837,7 +837,7 @@ private:
             switch( Kind )
             {
 #define PREFIX(TOK, TEXT, NODE, ASS, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); o->assign=shared_ptr<ASS>( new ASS ); break;
-#include "helpers/operator_text.inc"
+#include "tree/operator_text.inc"
             }
             ASSERT( o );
             o->operands.push_back( hold_expr.FromRaw(Input) );
