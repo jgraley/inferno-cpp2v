@@ -1413,28 +1413,17 @@ private:
            ActOnSizeOfAlignOfExpr( clang::SourceLocation OpLoc, bool isSizeof, bool isType,
                                    void *TyOrEx, const clang::SourceRange &ArgRange) 
         {
-            if( isType )
-            {
-                shared_ptr<UnaryOnType> pot;
-                if( isSizeof )
-                    pot = shared_ptr<SizeOfType>(new SizeOfType);
-                else 
-                    pot = shared_ptr<AlignOfType>(new AlignOfType);
-                pot->operand = hold_type.FromRaw(TyOrEx);
-                return hold_expr.ToRaw( pot );                       
-            }
+            shared_ptr<Operator> p;
+            if( isSizeof )
+                p = shared_ptr<SizeOf>(new SizeOf);
             else
-            {
-                shared_ptr<Operator> p;
-                if( isSizeof )
-                    p = shared_ptr<SizeOf>(new SizeOf);
-                else
-                    p = shared_ptr<AlignOf>(new AlignOf);
+                p = shared_ptr<AlignOf>(new AlignOf);
+            if( isType )
+                p->operands.push_back( hold_type.FromRaw(TyOrEx) );                   
+            else
                 p->operands.push_back( hold_expr.FromRaw(TyOrEx) );
-                return hold_expr.ToRaw( p );                       
-            }
+            return hold_expr.ToRaw( p );                       
         }
-
         
         virtual BaseResult ActOnBaseSpecifier(DeclTy *classdecl, 
                                               clang::SourceRange SpecifierRange,

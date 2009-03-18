@@ -92,11 +92,11 @@ struct NonAssignment : AnyAssignment {};
 
 //////////////////////////// Underlying Program Nodes ////////////////////////////
 
-struct Type : virtual Hard {};
-
 struct Statement : virtual Hard {};
 
 struct Operand : virtual Hard {};
+
+struct Type : virtual Operand {};
 
 struct Expression : Statement,
                     Operand {};
@@ -264,16 +264,8 @@ struct Operator : Aggregate
     shared_ptr<AnyAssignment> assign; // write result back to left
 };
 
-// for eg sizeof(int) where the operand is a type
-struct UnaryOnType : Operator 
-{
-    shared_ptr<Type> operand;
-};
-
 struct SizeOf : Operator {};
-struct SizeOfType : UnaryOnType {};
 struct AlignOf : Operator {};
-struct AlignOfType : UnaryOnType {};
 
 #define PREFIX(TOK, TEXT, NODE, ASS) struct NODE : Operator {};
 #define POSTFIX(TOK, TEXT, NODE, ASS) struct NODE : Operator {};
