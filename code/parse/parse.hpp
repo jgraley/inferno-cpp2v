@@ -803,9 +803,9 @@ private:
             TRACE(); 
             shared_ptr<Operator> o = shared_ptr<Operator>();            
             switch( Kind )
-            {
+            {            
 #define BINARY(TOK, TEXT, NODE, ASS, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); o->assign=shared_ptr<ASS>( new ASS ); break;
-#define ALTBIN(TOK, TEXT, NODE, ASS, BASE) BINARY(TOK, TEXT, NODE, ASS, BASE)
+#define ALTBIN(TOK, NODE, ASS) BINARY(TOK, "", NODE, ASS, 0)
 #include "helpers/operator_text.inc"
             }
             ASSERT( o );
