@@ -1,19 +1,37 @@
-UNARY(amp                   , "&",   AddressOf )
+#ifndef PREFIX
+#define PREFIX(TOK, TEXT, NODE)
+#endif
+
+#ifndef POSTFIX
+#define POSTFIX(TOK, TEXT, NODE)
+#endif
+
+#ifndef BINARY
+#define BINARY(TOK, TEXT, NODE)
+#endif
+
+#ifndef ASSIGN
+#define ASSIGN(TOK, TEXT, NODE)
+#endif
+
+PREFIX(amp                  , "&",   AddressOf )
 BINARY(amp                  , "&",   BitwiseAnd )
 BINARY(ampamp               , "&&",  LocicalAnd )
 ASSIGN(ampequal             , "&=",  BitwiseAnd )
 BINARY(star                 , "*",   Multiply )
-UNARY(star                  , "*",   Dereference )
+PREFIX(star                 , "*",   Dereference )
 ASSIGN(starequal            , "*=",  Multiply )
 BINARY(plus                 , "+",   Add )
-UNARY(plusplus              , "++",  Increment )
+PREFIX(plusplus             , "++",  PreIncrement )
+POSTFIX(plusplus            , "++",  PostIncrement )
 ASSIGN(plusequal            , "+=",  Add )
-UNARY(minus                 , "-",   Negate )
+PREFIX(minus                , "-",   Negate )
 BINARY(minus                , "-",   Subtract )
-UNARY(minusminus            , "--",  Dectement )
+PREFIX(minusminus           , "--",  PreDecrement )
+POSTFIX(minusminus          , "--",  PostDecrement )
 ASSIGN(minusequal           , "-=",  Subtract )
-UNARY(tilde                 , "~",   BitwiseNot )
-UNARY(exclaim               , "!",   LogicalNot )
+PREFIX(tilde                , "~",   BitwiseNot )
+PREFIX(exclaim              , "!",   LogicalNot )
 BINARY(exclaimequal         , "!=",  NotEqual )
 BINARY(slash                , "/",   Divide )
 ASSIGN(slashequal           , "/=",  Divide )
@@ -36,6 +54,7 @@ ASSIGN(equal                , "=",   Assign )
 BINARY(equalequal           , "==",  Equal )
 BINARY(comma                , ",",   Comma ) 
 
-#undef UNARY
+#undef PREFIX
+#undef POSTFIX
 #undef BINARY
 #undef ASSIGN

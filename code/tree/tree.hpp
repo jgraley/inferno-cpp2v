@@ -90,10 +90,6 @@ struct AnyAssignment : Property {};
 struct Assignment : AnyAssignment {};
 struct NonAssignment : AnyAssignment {};
 
-struct Orientation : Property {};
-struct Prefix : Orientation {};
-struct Postfix : Orientation {};
-
 //////////////////////////// Underlying Program Nodes ////////////////////////////
 
 struct Type : virtual Hard {};
@@ -269,13 +265,12 @@ struct Operator : Expression
 
 struct Unary : Operator 
 {
-    shared_ptr<Orientation> orientation; // pre or post eg with ++
     shared_ptr<Operand> operand;     
 };
 
 struct Binary : Operator 
 {
-    shared_ptr<AnyAssignment> assign;
+    shared_ptr<AnyAssignment> assign; // write result back to left
     shared_ptr<Operand> left;     
     shared_ptr<Operand> right;     
 };
@@ -291,9 +286,9 @@ struct SizeOfType : UnaryOnType {};
 struct AlignOf : Unary {};
 struct AlignOfType : UnaryOnType {};
 
-#define UNARY(TOK, TEXT, NODE) struct NODE : Unary {};
+#define PREFIX(TOK, TEXT, NODE) struct NODE : Unary {};
+#define POSTFIX(TOK, TEXT, NODE) struct NODE : Unary {};
 #define BINARY(TOK, TEXT, NODE) struct NODE : Binary {};
-#define ASSIGN(TOK, TEXT, NODE)
 #include "helpers/operator_text.inc"
 
 // Assign is an exceptional case since it has an ASSIGN form but not a BINARY form
