@@ -308,13 +308,16 @@ private:
            ((dynamic_pointer_cast<Assignment>(no->assign)) ? TEXT "=" : TEXT) +\
            RenderOperand( no->right, true ) +\
            after;
-#define UNARY(TOK, TEXT, NODE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
+#define PREFIX(TOK, TEXT, NODE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
-           ((dynamic_pointer_cast<Prefix>(no->orientation)) ? TEXT : "") +\
+           TEXT +\
            RenderOperand( no->operand, true ) +\
-           ((dynamic_pointer_cast<Postfix>(no->orientation)) ? TEXT : "") +\
            after;
-#define ASSIGN(TOK, TEXT, NODE)  
+#define POSTFIX(TOK, TEXT, NODE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
+    return before +\
+           RenderOperand( no->operand, true ) +\
+           TEXT +\
+           after;
 #include "helpers/operator_text.inc"                   
         else if( shared_ptr<Assign> no = dynamic_pointer_cast<Assign>(expression) ) \
             return before +\
