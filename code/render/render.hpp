@@ -306,7 +306,7 @@ private:
            RenderOperand( no->operands[0], true ) +\
            TEXT +\
            after;
-#include "helpers/operator_text.inc"                   
+#include "tree/operator_text.inc"                   
         else if( shared_ptr<ConditionalOperator> o = dynamic_pointer_cast< ConditionalOperator >(expression) )
             return before + 
                    RenderOperand( o->condition, true ) + "?" +
