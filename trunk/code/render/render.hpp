@@ -272,20 +272,16 @@ private:
         
         if( !expression )
             return string();            
+        else if( shared_ptr<Type> t = dynamic_pointer_cast< Type >(expression) )
+            return before + 
+                   RenderType( t, "" ) + // type as operand eg sizeof, casts, templates
+                   after;
         else if( shared_ptr<Label> l = dynamic_pointer_cast< Label >(expression) )
             return before + 
                    "&&" + RenderIdentifier( l ) + // label-as-variable (GCC extension)
                    after;
         else if( shared_ptr<Instance> v = dynamic_pointer_cast< Instance >(expression) )
             return RenderScopedIdentifier( v );
-        else if( shared_ptr<SizeOfType> pot = dynamic_pointer_cast< SizeOfType >(expression) )
-            return before + 
-                   "sizeof(" + RenderType( pot->operand, "" ) + ")" + 
-                   after;
-        else if( shared_ptr<AlignOfType> pot = dynamic_pointer_cast< AlignOfType >(expression) )
-            return before + 
-                   "alignof(" + RenderType( pot->operand, "" ) + ")" + 
-                   after;
         else if( shared_ptr<SizeOf> pot = dynamic_pointer_cast< SizeOf >(expression) )
             return before + 
                    "sizeof(" + RenderOperand( pot->operands[0], false ) + ")" + 
