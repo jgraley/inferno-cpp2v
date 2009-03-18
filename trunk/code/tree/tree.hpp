@@ -90,6 +90,10 @@ struct AnyAssignment : Property {};
 struct Assignment : AnyAssignment {};
 struct NonAssignment : AnyAssignment {};
 
+struct Orientation : Property {};
+struct Prefix : Orientation {};
+struct Postfix : Orientation {};
+
 //////////////////////////// Underlying Program Nodes ////////////////////////////
 
 struct Type : virtual Hard {};
@@ -264,9 +268,10 @@ struct Operator : Aggregate
     clang::tok::TokenKind kind;
 };
 
-struct Prefix : Operator {};  // 1 operand (eg "++i" or "sizeof(i)")
-
-struct Postfix : Operator {}; // 1 operand
+struct Unary : Operator 
+{
+    shared_ptr<Orientation> orientation; // pre or post eg with ++
+};
 
 struct Binary : Operator 
 {
@@ -280,14 +285,14 @@ struct PrefixOnType : Expression
     clang::tok::TokenKind kind;
 };
 
-struct SizeOf : Prefix {};
+struct SizeOf : Operator {};
 struct SizeOfType : PrefixOnType {};
-struct AlignOf : Prefix {};
+struct AlignOf : Operator {};
 struct AlignOfType : PrefixOnType {};
 
-#define UNARY(TOK, TEXT, NODE) struct NODE : Binary {};
+#define UNARY(TOK, TEXT, NODE) struct NODE : Unary {};
 #define BINARY(TOK, TEXT, NODE) struct NODE : Binary {};
-#define ASSIGN(TOK, TEXT, NODE) 
+#define ASSIGN(TOK, TEXT, NODE)
 #include "helpers/operator_text.inc"
 
 // Assign is an exceptional case since it has an ASSIGN form but not a BINARY form

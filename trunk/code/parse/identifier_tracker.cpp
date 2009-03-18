@@ -176,20 +176,13 @@ int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNod
     if( !(ident->II) )
         return NOMATCH; // not all tnodes have a name eg global, which will never match here
         
-    TRACE("Match %p(%s) %s %s%p(%s) ",
-          II, II->getName(), 
-          cs.c_str(),
-          ips.c_str(), ident->II, ident->II->getName() );
-
     if( II != ident->II )
     {
-        TRACE("NOMATCH name\n");
         return NOMATCH; // different strings
     }
     
     shared_ptr<TNode> cur_it = start; 
     shared_ptr<TNode> id_it = ident->parent;
-    TRACE("t%p t%p t%p ", current.get(), start.get(), id_it.get() );
     int d = 0;
     
     // Try stepping out of the starting scope, one scope at a time,
@@ -198,14 +191,12 @@ int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNod
     {
         if( cur_it == NULL || !recurse )
         {
-            TRACE("NOMATCH scope\n");
             return NOMATCH; 
         }
         cur_it = cur_it->parent;
         d++;
     }
     
-    TRACE("%d\n", d);
     return d;
 }
 

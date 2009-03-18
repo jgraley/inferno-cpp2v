@@ -11,25 +11,21 @@ public:
         if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>(o) ) // object or funciton instance
             return i->type; 
             
-        else if( shared_ptr<Operator> op = dynamic_pointer_cast<Operator>(o) ) // operator
+        else if( shared_ptr<Unary> ou = dynamic_pointer_cast<Unary>(o) ) // operator
         {
             // Get the types of all the operands to the operator first
-            Sequence<Type> optypes;
-            FOREACH( shared_ptr<Operand> o, op->operands )
-                optypes.push_back( Get(o) );
-                
+            shared_ptr<Type> optype = Get(ou->operands[0]);
+                           
             // then handle based on the kind of operator
-            switch( op->kind )
+            if( dynamic_pointer_cast<Dereference>(ou) )
             {
-            case clang::tok::star:
-                {
-                    shared_ptr<Pointer> o2 = dynamic_pointer_cast<Pointer>( optypes[0] );
-                    ASSERT( o2 && "dereferenciung non-pointer" );
-                    return o2->destination;
-                }
-                
-            default:
-                 ASSERT(!"Unknown operator, please add");         
+                shared_ptr<Pointer> o2 = dynamic_pointer_cast<Pointer>( optype );
+                ASSERT( o2 && "dereferenciung non-pointer" );
+                return o2->destination;
+            }
+            else
+            {
+                ASSERT(!"Unknown operator, please add");         
             }
         }
         

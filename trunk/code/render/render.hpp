@@ -308,7 +308,12 @@ private:
            ((dynamic_pointer_cast<Assignment>(no->assign)) ? TEXT "=" : TEXT) +\
            RenderOperand( no->operands[1], true ) +\
            after;
-#define UNARY(TOK, TEXT, NODE) 
+#define UNARY(TOK, TEXT, NODE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
+    return before +\
+           ((dynamic_pointer_cast<Prefix>(no->orientation)) ? TEXT : "") +\
+           RenderOperand( no->operands[0], true ) +\
+           ((dynamic_pointer_cast<Postfix>(no->orientation)) ? TEXT : "") +\
+           after;
 #define ASSIGN(TOK, TEXT, NODE)  
 #include "helpers/operator_text.inc"                   
         else if( shared_ptr<Assign> no = dynamic_pointer_cast<Assign>(expression) ) \
@@ -316,17 +321,6 @@ private:
                    RenderOperand( no->operands[0], true ) +\
                    "=" +\
                    RenderOperand( no->operands[1], true ) +\
-                   after;
-        else if( shared_ptr<Postfix> o = dynamic_pointer_cast< Postfix >(expression) )
-            return before + 
-                   RenderOperand( o->operands[0], true ) + 
-                   operator_text[o->kind] +
-                   after;
-        else if( shared_ptr<Prefix> o = dynamic_pointer_cast< Prefix >(expression) )
-            return before + 
-                   operator_text[o->kind] + 
-                   RenderOperand( o->operands[0], true ) +
-                   (operator_text[o->kind][operator_text[o->kind].size()-1]=='(' ? ")" : "") + // if the token is "x(", add ")"
                    after;
         else if( shared_ptr<PrefixOnType> pot = dynamic_pointer_cast< PrefixOnType >(expression) )
             return before + 
