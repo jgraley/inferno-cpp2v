@@ -264,13 +264,20 @@ struct Operator : Aggregate
     shared_ptr<AnyAssignment> assign; // write result back to left
 };
 
+struct Boolean : Operator {};
+struct Bitwise : Boolean {};
+struct Logical : Boolean {};
+struct Arithmetic : Operator {};
+struct Shift : Operator {};
+struct Comparison : Operator {};
+
+#define PREFIX(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE {};
+#define POSTFIX(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE {};
+#define BINARY(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE {};
+#include "helpers/operator_text.inc"
+
 struct SizeOf : Operator {};
 struct AlignOf : Operator {};
-
-#define PREFIX(TOK, TEXT, NODE, ASS) struct NODE : Operator {};
-#define POSTFIX(TOK, TEXT, NODE, ASS) struct NODE : Operator {};
-#define BINARY(TOK, TEXT, NODE, ASS) struct NODE : Operator {};
-#include "helpers/operator_text.inc"
 
 struct ConditionalOperator : Expression // eg ?:
 {
