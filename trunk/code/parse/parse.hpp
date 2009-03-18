@@ -810,8 +810,8 @@ private:
 #include "helpers/operator_text.inc"
             }
             ASSERT( ob );
-            ob->operands.push_back( hold_expr.FromRaw(LHS) );
-            ob->operands.push_back( hold_expr.FromRaw(RHS) );
+            ob->left = hold_expr.FromRaw(LHS);
+            ob->right = hold_expr.FromRaw(RHS);
             return hold_expr.ToRaw( ob );            
         }                     
 
@@ -835,7 +835,7 @@ private:
         {
             shared_ptr<Unary> o = CreateUnaryOperator( Kind );
             o->orientation = shared_ptr<Postfix>( new Postfix );
-            o->operands.push_back( hold_expr.FromRaw(Input) );
+            o->operand = hold_expr.FromRaw(Input);
             return hold_expr.ToRaw( o );            
         }                     
 
@@ -844,7 +844,7 @@ private:
         {
             shared_ptr<Unary> o = CreateUnaryOperator( Kind );
             o->orientation = shared_ptr<Prefix>( new Prefix );
-            o->operands.push_back( hold_expr.FromRaw(Input) );
+            o->operand = hold_expr.FromRaw(Input);
             return hold_expr.ToRaw( o );                                 
         }                     
 
@@ -1226,7 +1226,7 @@ private:
             {            
                 shared_ptr<Dereference> ou( new Dereference );
                 ou->orientation = shared_ptr<Prefix>( new Prefix );
-                ou->operands.push_back( hold_expr.FromRaw( Base ) );
+                ou->operand = hold_expr.FromRaw( Base );
                 a->base = ou;
             }
             else if( OpKind == clang::tok::period ) // Base.Member
@@ -1368,10 +1368,10 @@ private:
                 shared_ptr<Instance> lasto( dynamic_pointer_cast<Instance>(lastd) );
                 ASSERT(lasto && "unexpected kind of declaration inside an enum");
                 shared_ptr<Add> inf( new Add );
-                inf->operands.push_back(lasto->initialiser);
+                inf->left = lasto->initialiser;
                 shared_ptr<Literal> l( new Literal );
                 l->value = CreateNumericConstant( 1, enumbits );
-                inf->operands.push_back(l);
+                inf->right = l;
                 o->initialiser = inf;
             }
             else
@@ -1420,7 +1420,7 @@ private:
         {
             if( isType )
             {
-                shared_ptr<PrefixOnType> pot;
+                shared_ptr<UnaryOnType> pot;
                 if( isSizeof )
                     pot = shared_ptr<SizeOfType>(new SizeOfType);
                 else 
@@ -1430,12 +1430,12 @@ private:
             }
             else
             {
-                shared_ptr<Operator> p;
+                shared_ptr<Unary> p;
                 if( isSizeof )
                     p = shared_ptr<SizeOf>(new SizeOf);
                 else
                     p = shared_ptr<AlignOf>(new AlignOf);
-                p->operands.push_back( hold_expr.FromRaw(TyOrEx) );
+                p->operand = hold_expr.FromRaw(TyOrEx);
                 return hold_expr.ToRaw( p );                       
             }
         }

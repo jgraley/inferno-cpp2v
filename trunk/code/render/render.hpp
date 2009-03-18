@@ -296,37 +296,31 @@ private:
                    after;
         else if( shared_ptr<SizeOf> pot = dynamic_pointer_cast< SizeOf >(expression) )
             return before + 
-                   "sizeof(" + RenderOperand( pot->operands[0], false ) + ")" + 
+                   "sizeof(" + RenderOperand( pot->operand, false ) + ")" + 
                    after;
         else if( shared_ptr<AlignOf> pot = dynamic_pointer_cast< AlignOf >(expression) )
             return before + 
-                   "alignof(" + RenderOperand( pot->operands[0], false ) + ")" + 
+                   "alignof(" + RenderOperand( pot->operand, false ) + ")" + 
                    after;
 #define BINARY(TOK, TEXT, NODE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
-           RenderOperand( no->operands[0], true ) +\
+           RenderOperand( no->left, true ) +\
            ((dynamic_pointer_cast<Assignment>(no->assign)) ? TEXT "=" : TEXT) +\
-           RenderOperand( no->operands[1], true ) +\
+           RenderOperand( no->right, true ) +\
            after;
 #define UNARY(TOK, TEXT, NODE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
            ((dynamic_pointer_cast<Prefix>(no->orientation)) ? TEXT : "") +\
-           RenderOperand( no->operands[0], true ) +\
+           RenderOperand( no->operand, true ) +\
            ((dynamic_pointer_cast<Postfix>(no->orientation)) ? TEXT : "") +\
            after;
 #define ASSIGN(TOK, TEXT, NODE)  
 #include "helpers/operator_text.inc"                   
         else if( shared_ptr<Assign> no = dynamic_pointer_cast<Assign>(expression) ) \
             return before +\
-                   RenderOperand( no->operands[0], true ) +\
+                   RenderOperand( no->left, true ) +\
                    "=" +\
-                   RenderOperand( no->operands[1], true ) +\
-                   after;
-        else if( shared_ptr<PrefixOnType> pot = dynamic_pointer_cast< PrefixOnType >(expression) )
-            return before + 
-                   operator_text[pot->kind] + 
-                   RenderType( pot->operand, "" ) +
-                   (operator_text[pot->kind][operator_text[pot->kind].size()-1]=='(' ? ")" : "") + // if the token is "x(", add ")"
+                   RenderOperand( no->right, true ) +\
                    after;
         else if( shared_ptr<ConditionalOperator> o = dynamic_pointer_cast< ConditionalOperator >(expression) )
             return before + 
