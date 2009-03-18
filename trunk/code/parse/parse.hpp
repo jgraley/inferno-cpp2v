@@ -809,8 +809,8 @@ private:
 #include "helpers/operator_text.inc"
             }
             ASSERT( ob );
-            ob->left = hold_expr.FromRaw(LHS);
-            ob->right = hold_expr.FromRaw(RHS);
+            ob->operands.push_back( hold_expr.FromRaw(LHS) );
+            ob->operands.push_back( hold_expr.FromRaw(RHS) );
             return hold_expr.ToRaw( ob );            
         }                     
 
@@ -825,7 +825,7 @@ private:
 #include "helpers/operator_text.inc"
             }
             ASSERT( ou );
-            ou->operand = hold_expr.FromRaw(Input);
+            ou->operands.push_back( hold_expr.FromRaw(Input) );
             return hold_expr.ToRaw( ou );            
         }                     
 
@@ -840,7 +840,7 @@ private:
 #include "helpers/operator_text.inc"
             }
             ASSERT( ou );
-            ou->operand = hold_expr.FromRaw(Input);
+            ou->operands.push_back( hold_expr.FromRaw(Input) );
             return hold_expr.ToRaw( ou );            
         }                     
 
@@ -1221,7 +1221,7 @@ private:
             if( OpKind == clang::tok::arrow )  // Base->Member
             {            
                 shared_ptr<Dereference> ou( new Dereference );
-                ou->operand = hold_expr.FromRaw( Base );
+                ou->operands.push_back( hold_expr.FromRaw( Base ) );
                 a->base = ou;
             }
             else if( OpKind == clang::tok::period ) // Base.Member
@@ -1363,10 +1363,10 @@ private:
                 shared_ptr<Instance> lasto( dynamic_pointer_cast<Instance>(lastd) );
                 ASSERT(lasto && "unexpected kind of declaration inside an enum");
                 shared_ptr<Add> inf( new Add );
-                inf->left = lasto->initialiser;
+                inf->operands.push_back( lasto->initialiser );
                 shared_ptr<Literal> l( new Literal );
                 l->value = CreateNumericConstant( 1, enumbits );
-                inf->right = l;
+                inf->operands.push_back( l );
                 o->initialiser = inf;
             }
             else
@@ -1430,7 +1430,7 @@ private:
                     p = shared_ptr<SizeOf>(new SizeOf);
                 else
                     p = shared_ptr<AlignOf>(new AlignOf);
-                p->operand = hold_expr.FromRaw(TyOrEx);
+                p->operands.push_back( hold_expr.FromRaw(TyOrEx) );
                 return hold_expr.ToRaw( p );                       
             }
         }

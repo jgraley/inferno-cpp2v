@@ -259,20 +259,20 @@ struct Aggregate : Expression
     Sequence<Operand> operands; 
 };
 
-struct Operator : Expression
+struct Operator : Aggregate
 {
 };
 
 struct Unary : Operator 
 {
-    shared_ptr<Operand> operand;     
+//    shared_ptr<Operand> operand;     
 };
 
 struct Binary : Operator 
 {
     shared_ptr<AnyAssignment> assign; // write result back to left
-    shared_ptr<Operand> left;     
-    shared_ptr<Operand> right;     
+//    shared_ptr<Operand> left;     
+//    shared_ptr<Operand> right;     
 };
 
 // for eg sizeof(int) where the operand is a type
