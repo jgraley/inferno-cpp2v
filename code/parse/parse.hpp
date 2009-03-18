@@ -801,7 +801,6 @@ private:
                                       ExprTy *LHS, ExprTy *RHS) 
         {
             TRACE(); 
-            shared_ptr<Operator> o;
             shared_ptr<Binary> ob = shared_ptr<Binary>();            
             switch( Kind )
             {
@@ -810,18 +809,32 @@ private:
 #define ASSIGN(TOK, TEXT, NODE) case clang::tok::TOK: ob=shared_ptr<NODE>(new NODE); ob->assign=shared_ptr<Assignment>( new Assignment ); break;
 #include "helpers/operator_text.inc"
             }
-            if( ob )
-                o = ob;
-            o->operands.push_back( hold_expr.FromRaw(LHS) );
-            o->operands.push_back( hold_expr.FromRaw(RHS) );
-            return hold_expr.ToRaw( o );            
+            ASSERT( ob );
+            ob->operands.push_back( hold_expr.FromRaw(LHS) );
+            ob->operands.push_back( hold_expr.FromRaw(RHS) );
+            return hold_expr.ToRaw( ob );            
         }                     
+
+        shared_ptr<Unary> CreateUnaryOperator( clang::tok::TokenKind Kind )
+        {   
+            shared_ptr<Unary> ou = shared_ptr<Unary>();            
+            
+            switch( Kind )
+            {
+#define UNARY(TOK, TEXT, NODE) case  clang::tok::TOK: ou=shared_ptr<NODE>(new NODE); TRACE("%s\n", TEXT); break;
+#define BINARY(TOK, TEXT, NODE) 
+#define ASSIGN(TOK, TEXT, NODE) 
+#include "helpers/operator_text.inc"
+            }
+            ASSERT( ou );
+            return ou;
+        }
 
         virtual ExprResult ActOnPostfixUnaryOp(clang::Scope *S, clang::SourceLocation OpLoc, 
                                                clang::tok::TokenKind Kind, ExprTy *Input) 
         {
-            shared_ptr<Postfix> o(new Postfix);
-            o->kind = Kind;
+            shared_ptr<Unary> o = CreateUnaryOperator( Kind );
+            o->orientation = shared_ptr<Postfix>( new Postfix );
             o->operands.push_back( hold_expr.FromRaw(Input) );
             return hold_expr.ToRaw( o );            
         }                     
@@ -829,11 +842,10 @@ private:
         virtual ExprResult ActOnUnaryOp( clang::Scope *S, clang::SourceLocation OpLoc, 
                                          clang::tok::TokenKind Kind, ExprTy *Input) 
         {
-            TRACE();
-            shared_ptr<Prefix> o(new Prefix);
-            o->kind = Kind;
+            shared_ptr<Unary> o = CreateUnaryOperator( Kind );
+            o->orientation = shared_ptr<Prefix>( new Prefix );
             o->operands.push_back( hold_expr.FromRaw(Input) );
-            return hold_expr.ToRaw( o );                        
+            return hold_expr.ToRaw( o );                                 
         }                     
 
        virtual ExprResult ActOnConditionalOp(clang::SourceLocation QuestionLoc, 
@@ -1211,11 +1223,11 @@ private:
             
             // Turn -> into * and .
             if( OpKind == clang::tok::arrow )  // Base->Member
-            {
-                shared_ptr<Prefix> p( new Prefix );
-                p->operands.push_back( hold_expr.FromRaw( Base ) );
-                p->kind = clang::tok::star;
-                a->base = p;
+            {            
+                shared_ptr<Dereference> ou( new Dereference );
+                ou->orientation = shared_ptr<Prefix>( new Prefix );
+                ou->operands.push_back( hold_expr.FromRaw( Base ) );
+                a->base = ou;
             }
             else if( OpKind == clang::tok::period ) // Base.Member
             {
@@ -1418,7 +1430,7 @@ private:
             }
             else
             {
-                shared_ptr<Prefix> p;
+                shared_ptr<Operator> p;
                 if( isSizeof )
                     p = shared_ptr<SizeOf>(new SizeOf);
                 else
