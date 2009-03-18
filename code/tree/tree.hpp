@@ -263,32 +263,33 @@ struct Aggregate : Expression
     Sequence<Operand> operands; 
 };
 
-struct Operator : Aggregate
+struct Operator : Expression
 {
-    clang::tok::TokenKind kind;
 };
 
 struct Unary : Operator 
 {
     shared_ptr<Orientation> orientation; // pre or post eg with ++
+    shared_ptr<Operand> operand;     
 };
 
 struct Binary : Operator 
 {
     shared_ptr<AnyAssignment> assign;
+    shared_ptr<Operand> left;     
+    shared_ptr<Operand> right;     
 };
 
 // for eg sizeof(int) where the operand is a type
-struct PrefixOnType : Expression 
+struct UnaryOnType : Expression 
 {
     shared_ptr<Type> operand;
-    clang::tok::TokenKind kind;
 };
 
-struct SizeOf : Operator {};
-struct SizeOfType : PrefixOnType {};
-struct AlignOf : Operator {};
-struct AlignOfType : PrefixOnType {};
+struct SizeOf : Unary {};
+struct SizeOfType : UnaryOnType {};
+struct AlignOf : Unary {};
+struct AlignOfType : UnaryOnType {};
 
 #define UNARY(TOK, TEXT, NODE) struct NODE : Unary {};
 #define BINARY(TOK, TEXT, NODE) struct NODE : Binary {};

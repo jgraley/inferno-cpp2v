@@ -14,7 +14,7 @@ public:
         else if( shared_ptr<Unary> ou = dynamic_pointer_cast<Unary>(o) ) // operator
         {
             // Get the types of all the operands to the operator first
-            shared_ptr<Type> optype = Get(ou->operands[0]);
+            shared_ptr<Type> optype = Get(ou->operand);
                            
             // then handle based on the kind of operator
             if( dynamic_pointer_cast<Dereference>(ou) )
