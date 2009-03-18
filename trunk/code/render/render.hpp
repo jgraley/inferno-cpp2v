@@ -27,13 +27,6 @@ class Render : public Pass
 public:
     Render()
     {        
-        operator_text.resize( clang::tok::NUM_TOKENS );
-        for(int i=0; i<clang::tok::NUM_TOKENS; i++ )
-            operator_text[i] = "\n#error Token not defined in operator_text\n";
-#define UNARY(TOK, TEXT, NODE) operator_text[clang::tok::TOK] = TEXT;
-#define BINARY(TOK, TEXT, NODE) operator_text[clang::tok::TOK] = TEXT;
-#define ASSIGN(TOK, TEXT, NODE) operator_text[clang::tok::TOK] = TEXT;
-#include "helpers/operator_text.inc"
     }
     
     void operator()( shared_ptr<Program> prog )       
@@ -58,7 +51,6 @@ public:
     }
 
 private:
-    vector<string> operator_text;
     shared_ptr<Program> program;
     string deferred_decls;
     stack< shared_ptr<Node> > scope_stack;
@@ -302,29 +294,23 @@ private:
             return before + 
                    "alignof(" + RenderOperand( pot->operands[0], false ) + ")" + 
                    after;
-#define BINARY(TOK, TEXT, NODE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
+#define BINARY(TOK, TEXT, NODE, ASS) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
            RenderOperand( no->operands[0], true ) +\
            ((dynamic_pointer_cast<Assignment>(no->assign)) ? TEXT "=" : TEXT) +\
            RenderOperand( no->operands[1], true ) +\
            after;
-#define PREFIX(TOK, TEXT, NODE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
+#define PREFIX(TOK, TEXT, NODE, ASS) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
            TEXT +\
            RenderOperand( no->operands[0], true ) +\
            after;
-#define POSTFIX(TOK, TEXT, NODE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
+#define POSTFIX(TOK, TEXT, NODE, ASS) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
            RenderOperand( no->operands[0], true ) +\
            TEXT +\
            after;
 #include "helpers/operator_text.inc"                   
-        else if( shared_ptr<Assign> no = dynamic_pointer_cast<Assign>(expression) ) \
-            return before +\
-                   RenderOperand( no->operands[0], true ) +\
-                   "=" +\
-                   RenderOperand( no->operands[1], true ) +\
-                   after;
         else if( shared_ptr<ConditionalOperator> o = dynamic_pointer_cast< ConditionalOperator >(expression) )
             return before + 
                    RenderOperand( o->condition, true ) + "?" +

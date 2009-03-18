@@ -261,38 +261,24 @@ struct Aggregate : Expression
 
 struct Operator : Aggregate
 {
-};
-
-struct Unary : Operator 
-{
-//    shared_ptr<Operand> operand;     
-};
-
-struct Binary : Operator 
-{
     shared_ptr<AnyAssignment> assign; // write result back to left
-//    shared_ptr<Operand> left;     
-//    shared_ptr<Operand> right;     
 };
 
 // for eg sizeof(int) where the operand is a type
-struct UnaryOnType : Expression 
+struct UnaryOnType : Operator 
 {
     shared_ptr<Type> operand;
 };
 
-struct SizeOf : Unary {};
+struct SizeOf : Operator {};
 struct SizeOfType : UnaryOnType {};
-struct AlignOf : Unary {};
+struct AlignOf : Operator {};
 struct AlignOfType : UnaryOnType {};
 
-#define PREFIX(TOK, TEXT, NODE) struct NODE : Unary {};
-#define POSTFIX(TOK, TEXT, NODE) struct NODE : Unary {};
-#define BINARY(TOK, TEXT, NODE) struct NODE : Binary {};
+#define PREFIX(TOK, TEXT, NODE, ASS) struct NODE : Operator {};
+#define POSTFIX(TOK, TEXT, NODE, ASS) struct NODE : Operator {};
+#define BINARY(TOK, TEXT, NODE, ASS) struct NODE : Operator {};
 #include "helpers/operator_text.inc"
-
-// Assign is an exceptional case since it has an ASSIGN form but not a BINARY form
-struct Assign : Binary {};
 
 struct ConditionalOperator : Expression // eg ?:
 {
