@@ -290,18 +290,18 @@ private:
             return before + 
                    "alignof(" + RenderOperand( pot->operands[0], false ) + ")" + 
                    after;
-#define BINARY(TOK, TEXT, NODE, ASS) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
+#define BINARY(TOK, TEXT, NODE, ASS, BASE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
            RenderOperand( no->operands[0], true ) +\
            ((dynamic_pointer_cast<Assignment>(no->assign)) ? TEXT "=" : TEXT) +\
            RenderOperand( no->operands[1], true ) +\
            after;
-#define PREFIX(TOK, TEXT, NODE, ASS) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
+#define PREFIX(TOK, TEXT, NODE, ASS, BASE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
            TEXT +\
            RenderOperand( no->operands[0], true ) +\
            after;
-#define POSTFIX(TOK, TEXT, NODE, ASS) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
+#define POSTFIX(TOK, TEXT, NODE, ASS, BASE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
            RenderOperand( no->operands[0], true ) +\
            TEXT +\
