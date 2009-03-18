@@ -54,13 +54,8 @@ public:
             Visit( r->members );
         else if( shared_ptr< Compound > c = dynamic_pointer_cast< Compound >( p ) )
             Visit( c->statements );
-        else if( shared_ptr< Unary > o = dynamic_pointer_cast< Unary >( p ) )
-            Visit( o->operand );
-        else if( shared_ptr< Binary > o = dynamic_pointer_cast< Binary >( p ) )
-        {
-            Visit( o->left );
-            Visit( o->right );
-        }
+        else if( shared_ptr< Operator > o = dynamic_pointer_cast< Operator >( p ) )
+            Visit( o->operands );
         else if( shared_ptr< Procedure > pr = dynamic_pointer_cast< Procedure >( p ) )
             Visit( pr->parameters );
         else if( shared_ptr< For > f = dynamic_pointer_cast< For >( p ) )

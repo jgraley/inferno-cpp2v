@@ -296,34 +296,34 @@ private:
                    after;
         else if( shared_ptr<SizeOf> pot = dynamic_pointer_cast< SizeOf >(expression) )
             return before + 
-                   "sizeof(" + RenderOperand( pot->operand, false ) + ")" + 
+                   "sizeof(" + RenderOperand( pot->operands[0], false ) + ")" + 
                    after;
         else if( shared_ptr<AlignOf> pot = dynamic_pointer_cast< AlignOf >(expression) )
             return before + 
-                   "alignof(" + RenderOperand( pot->operand, false ) + ")" + 
+                   "alignof(" + RenderOperand( pot->operands[0], false ) + ")" + 
                    after;
 #define BINARY(TOK, TEXT, NODE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
-           RenderOperand( no->left, true ) +\
+           RenderOperand( no->operands[0], true ) +\
            ((dynamic_pointer_cast<Assignment>(no->assign)) ? TEXT "=" : TEXT) +\
-           RenderOperand( no->right, true ) +\
+           RenderOperand( no->operands[1], true ) +\
            after;
 #define PREFIX(TOK, TEXT, NODE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
            TEXT +\
-           RenderOperand( no->operand, true ) +\
+           RenderOperand( no->operands[0], true ) +\
            after;
 #define POSTFIX(TOK, TEXT, NODE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
-           RenderOperand( no->operand, true ) +\
+           RenderOperand( no->operands[0], true ) +\
            TEXT +\
            after;
 #include "helpers/operator_text.inc"                   
         else if( shared_ptr<Assign> no = dynamic_pointer_cast<Assign>(expression) ) \
             return before +\
-                   RenderOperand( no->left, true ) +\
+                   RenderOperand( no->operands[0], true ) +\
                    "=" +\
-                   RenderOperand( no->right, true ) +\
+                   RenderOperand( no->operands[1], true ) +\
                    after;
         else if( shared_ptr<ConditionalOperator> o = dynamic_pointer_cast< ConditionalOperator >(expression) )
             return before + 
