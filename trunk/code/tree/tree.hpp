@@ -40,29 +40,7 @@ struct Soft : Node {};
 
 struct Property : Hard {};
 
-struct AccessSpec : Property {};
-struct Public : AccessSpec {};
-struct Private : AccessSpec {};
-struct Protected : AccessSpec {};
-
-struct AnyConst : Property {};
-struct Const : AnyConst {};
-struct NonConst : AnyConst {};
-
-struct AnyVirtual : Property {};
-struct Virtual : AnyVirtual 
-{
-    // TODO pure
-};
-struct NonVirtual : AnyVirtual {};
-
-struct StorageClass : Property {};
-struct Static : StorageClass {};
-struct NonStatic : StorageClass 
-{
-    shared_ptr<AnyVirtual> virt;
-};
-
+// Means can be used as a literal
 struct FundamentalProperty : Property {};
 
 struct AnyString : FundamentalProperty {};
@@ -86,10 +64,6 @@ struct Float : AnyFloat
     llvm::APFloat value; 
 };
 
-struct AnyAssignment : Property {};
-struct Assignment : AnyAssignment {};
-struct NonAssignment : AnyAssignment {};
-
 //////////////////////////// Underlying Program Nodes ////////////////////////////
 
 struct Statement : virtual Hard {};
@@ -101,6 +75,11 @@ struct Type : virtual Operand {};
 struct Expression : Statement,
                     Operand {};
     
+struct AccessSpec : Property {};
+struct Public : AccessSpec {};
+struct Private : AccessSpec {};
+struct Protected : AccessSpec {};
+
 struct Declaration : Statement
 {   
     shared_ptr<AccessSpec> access;
@@ -117,6 +96,24 @@ struct Identifier : Declaration
 {
     string name;
 };
+
+struct AnyVirtual : Property {};
+struct Virtual : AnyVirtual 
+{
+    // TODO pure
+};
+struct NonVirtual : AnyVirtual {};
+
+struct StorageClass : Property {};
+struct Static : StorageClass {};
+struct NonStatic : StorageClass 
+{
+    shared_ptr<AnyVirtual> virt;
+};
+
+struct AnyConst : Property {};
+struct Const : AnyConst {};
+struct NonConst : AnyConst {};
 
 struct Physical
 {
@@ -259,6 +256,10 @@ struct Aggregate : Expression
     Sequence<Operand> operands; 
 };
 
+struct AnyAssignment : Property {};
+struct Assignment : AnyAssignment {};
+struct NonAssignment : AnyAssignment {};
+
 struct Operator : Aggregate
 {
     shared_ptr<AnyAssignment> assign; // write result back to left
@@ -274,7 +275,7 @@ struct Comparison : Operator {};
 #define PREFIX(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE {};
 #define POSTFIX(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE {};
 #define BINARY(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE {};
-#include "operator_text.inc"
+#include "operator_info.inc"
 
 struct SizeOf : Operator {};
 struct AlignOf : Operator {};
@@ -291,19 +292,27 @@ struct Call : Aggregate
     shared_ptr<Operand> function;
 };
 
+struct AnyGlobalNew : Property {};
+struct GlobalNew : AnyGlobalNew {}; // ::new/::delete was used
+struct NonGlobalNew : AnyGlobalNew {}; // new/delete, no ::
+
+struct AnyArrayNew : Property {};
+struct ArrayNew : AnyArrayNew {}; // delete[]
+struct NonArrayNew : AnyArrayNew {}; 
+
 struct New : Expression
 {
     shared_ptr<Type> type; 
     Sequence<Operand> placement_arguments;
     Sequence<Operand> constructor_arguments;
-    bool global; // true if ::new was used
+    shared_ptr<AnyGlobalNew> global;
 };
 
 struct Delete : Expression
 {
     shared_ptr<Operand> pointer;
-    bool array; // true if delete[] was used
-    bool global; // true if ::delete was used
+    shared_ptr<AnyArrayNew> array;
+    shared_ptr<AnyGlobalNew> global;
 };
 
 struct Literal : Expression

@@ -806,7 +806,7 @@ private:
             {            
 #define BINARY(TOK, TEXT, NODE, ASS, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); o->assign=shared_ptr<ASS>( new ASS ); break;
 #define ALTBIN(TOK, NODE, ASS) BINARY(TOK, "", NODE, ASS, 0)
-#include "tree/operator_text.inc"
+#include "tree/operator_info.inc"
             }
             ASSERT( o );
             o->operands.push_back( hold_expr.FromRaw(LHS) );
@@ -822,7 +822,7 @@ private:
             switch( Kind )
             {
 #define POSTFIX(TOK, TEXT, NODE, ASS, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); o->assign=shared_ptr<ASS>( new ASS ); break;
-#include "tree/operator_text.inc"
+#include "tree/operator_info.inc"
             }
             ASSERT( o );
             o->operands.push_back( hold_expr.FromRaw(Input) );
@@ -837,7 +837,7 @@ private:
             switch( Kind )
             {
 #define PREFIX(TOK, TEXT, NODE, ASS, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); o->assign=shared_ptr<ASS>( new ASS ); break;
-#include "tree/operator_text.inc"
+#include "tree/operator_info.inc"
             }
             ASSERT( o );
             o->operands.push_back( hold_expr.FromRaw(Input) );
@@ -1609,7 +1609,11 @@ private:
             n->type = CreateTypeNode( D );
             CollectArgs( &(n->placement_arguments), PlacementArgs, NumPlaceArgs );
             CollectArgs( &(n->constructor_arguments), ConstructorArgs, NumConsArgs );
-            n->global = UseGlobal;
+
+            if( UseGlobal )
+                n->global = shared_ptr<GlobalNew>( new GlobalNew );
+            else
+                n->global = shared_ptr<NonGlobalNew>( new NonGlobalNew );
             // TODO cant figure out meaning of ParenTypeId
             
             return hold_expr.ToRaw( n );         
@@ -1623,8 +1627,16 @@ private:
         {
             shared_ptr<Delete> d( new Delete );            
             d->pointer = hold_expr.FromRaw( Operand );
-            d->array = ArrayForm;
-            d->global = UseGlobal;
+            
+            if( ArrayForm )
+                d->array = shared_ptr<ArrayNew>( new ArrayNew );
+            else
+                d->array = shared_ptr<NonArrayNew>( new NonArrayNew );
+                
+            if( UseGlobal )
+                d->global = shared_ptr<GlobalNew>( new GlobalNew );
+            else
+                d->global = shared_ptr<NonGlobalNew>( new NonGlobalNew );
             
             return hold_expr.ToRaw( d ); 
         }
