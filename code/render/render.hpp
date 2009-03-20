@@ -306,7 +306,7 @@ private:
            RenderOperand( no->operands[0], true ) +\
            TEXT +\
            after;
-#include "tree/operator_text.inc"                   
+#include "tree/operator_info.inc"                   
         else if( shared_ptr<ConditionalOperator> o = dynamic_pointer_cast< ConditionalOperator >(expression) )
             return before + 
                    RenderOperand( o->condition, true ) + "?" +
@@ -328,15 +328,16 @@ private:
         }
         else if( shared_ptr<New> n = dynamic_pointer_cast< New >(expression) )
             return before +
-                   (n->global ? "::" : "") +
+                   (dynamic_pointer_cast<GlobalNew>(n->global) ? "::" : "") +
                    "new(" + RenderOperandSequence( n->placement_arguments, ", ", false ) + ") " +
                    RenderType( n->type, "" ) + 
                    (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( n->constructor_arguments, ", ", false ) + ")" ) +
                    after;
         else if( shared_ptr<Delete> d = dynamic_pointer_cast< Delete >(expression) )
             return before +
-                   (d->global ? "::" : "") +
-                   "delete" + (d->array ? "[]" : "") +
+                   (dynamic_pointer_cast<GlobalNew>(d->global) ? "::" : "") +
+                   "delete" + 
+                   (dynamic_pointer_cast<ArrayNew>(d->array) ? "[]" : "") +
                    " " + RenderOperand( d->pointer, true ) +
                    after;
         else if( shared_ptr<Subscript> su = dynamic_pointer_cast< Subscript >(expression) )
