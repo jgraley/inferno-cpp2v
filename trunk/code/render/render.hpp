@@ -572,7 +572,7 @@ private:
             // Name of the record
             s += " " + r->name;
             
-            if( !r->incomplete )
+            if( dynamic_pointer_cast<Complete>(r->complete) )
             {
                 // Base classes
                 if( shared_ptr<InheritanceRecord> ir = dynamic_pointer_cast< InheritanceRecord >(declaration) )
