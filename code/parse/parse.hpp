@@ -1162,7 +1162,7 @@ private:
             }
             
             h->access = shared_ptr<Public>(new Public); // must make all holder type decls public since clang doesnt seem to give us an AS
-            h->incomplete = true;
+            h->complete = shared_new<Incomplete>();
             
             //TODO should we do something with TagKind? Maybe needed for render.
             //TODO use the attibutes
@@ -1188,7 +1188,7 @@ private:
             // we already created. No need to return anything.
             shared_ptr<Declaration> d = hold_decl.FromRaw( TagDecl );
             shared_ptr<Record> h = dynamic_pointer_cast<Record>(d);
-            h->incomplete = false;
+            h->complete = shared_new<Complete>();
             
             ident_track.SetNextRecord( h );
                 
@@ -1387,7 +1387,7 @@ private:
             ASSERT( e && "expected the declaration to be an enum");
             for( int i=0; i<NumElements; i++ )
                e->members.push_back( hold_decl.FromRaw( Elements[i] ) );
-            e->incomplete = false;   
+            e->complete = shared_new<Complete>();
         }
 
         /// ParsedFreeStandingDeclSpec - This method is invoked when a declspec with

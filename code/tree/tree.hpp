@@ -31,14 +31,10 @@ struct Node : Magic
     }
 };
 
-struct Hard : Node {};
-
-struct Soft : Node {};
-
 //////////////////////////// Properties ///////////////////////////////
 // TODO seperate source file
 
-struct Property : Hard {};
+struct Property : Node {};
 
 // Means can be used as a literal
 struct FundamentalProperty : Property {};
@@ -66,9 +62,9 @@ struct Float : AnyFloat
 
 //////////////////////////// Underlying Program Nodes ////////////////////////////
 
-struct Statement : virtual Hard {};
+struct Statement : virtual Node {};
 
-struct Operand : virtual Hard {};
+struct Operand : virtual Node {};
 
 struct Type : virtual Operand {};
 
@@ -85,7 +81,7 @@ struct Declaration : Statement
     shared_ptr<AccessSpec> access;
 };
 
-struct Program : Hard,
+struct Program : Node,
                  Sequence<Declaration>
 {
 };
@@ -206,15 +202,19 @@ struct Typedef : UserType
     shared_ptr<Type> type;
 }; 
 
+struct AnyComplete : Property {};
+struct Complete : AnyComplete {};
+struct Incomplete : AnyComplete {};
+
 struct Record : UserType
 {
     Sequence<Declaration> members;
     
     // Where eg struct foo; is used we should create seperate nodes for
     // the incomplete and complete types. This is so that mutually 
-    // referencing structs don't create a loop in the tree.
-    // TODO use weak_ptr for access to structs
-    bool incomplete; 
+    // referencing structs don't create a loop in the tree
+    // (but we could use weak_ptr<> for such refs?).
+    shared_ptr<AnyComplete> complete; 
 };
 
 struct Union : Record {};
