@@ -9,11 +9,21 @@
 #include "common/magic.hpp"
 #include <string>
 #include <deque>
+#include "common/itemise_members.hpp"
 
 template<typename ELEMENT>
-struct Sequence : deque< shared_ptr<ELEMENT> > {};                   
+struct Sequence : Itemiser::Itemisable< deque< shared_ptr<ELEMENT> > > {};                   
 
-//////////////////////////// Node Models ////////////////////////////
+template<typename ELEMENT>
+struct SharedPtr : Itemiser::Itemisable< shared_ptr<ELEMENT> > 
+{
+    template< typename OTHER >
+    SharedPtr( const shared_ptr<OTHER> &o ) : 
+        Itemiser::Itemisable< shared_ptr<ELEMENT> >( shared_ptr<ELEMENT>(o) ) {}
+    SharedPtr() {}
+};           
+
+//////////////////////////// Node Model ////////////////////////////
 
 struct Node : Magic
 {               
@@ -78,7 +88,7 @@ struct Protected : AccessSpec {};
 
 struct Declaration : Statement
 {   
-    shared_ptr<AccessSpec> access;
+    SharedPtr<AccessSpec> access;
 };
 
 struct Program : Node,
@@ -104,7 +114,7 @@ struct StorageClass : Property {};
 struct Static : StorageClass {};
 struct NonStatic : StorageClass 
 {
-    shared_ptr<AnyVirtual> virt;
+    SharedPtr<AnyVirtual> virt;
 };
 
 struct AnyConst : Property {};
@@ -113,8 +123,8 @@ struct NonConst : AnyConst {};
 
 struct Physical
 {
-    shared_ptr<StorageClass> storage;
-    shared_ptr<AnyConst> constant; // TODO all functions to be const (otherwise would imply self-modifiying code). See idempotent
+    SharedPtr<StorageClass> storage;
+    SharedPtr<AnyConst> constant; // TODO all functions to be const (otherwise would imply self-modifiying code). See idempotent
 };
 
 // can be an object or a function. In case of function, type is a type under Subroutine
@@ -122,14 +132,14 @@ struct Instance : Identifier,
                   Operand,
                   Physical
 {
-    shared_ptr<Type> type;
-    shared_ptr<Operand> initialiser; // NULL if uninitialised
+    SharedPtr<Type> type;
+    SharedPtr<Operand> initialiser; // NULL if uninitialised
 };
 
 struct InheritanceRecord;
 struct Base : Declaration
 {
-    shared_ptr<InheritanceRecord> record;
+    SharedPtr<InheritanceRecord> record;
     // TODO virtual inheritance, treat seperately from virtual members
     // since different thing.
 };              
@@ -153,7 +163,7 @@ struct Procedure : Subroutine
 // Like in C, Pascal; params and a single return value
 struct Function : Procedure
 {
-    shared_ptr<Type> return_type;
+    SharedPtr<Type> return_type;
 };
 
 // The init list is just 0 or more Invoke( member, c'tor, params ) 
@@ -164,12 +174,12 @@ struct Destructor : Subroutine {};
 
 struct Pointer : Type
 {
-    shared_ptr<Type> destination;
+    SharedPtr<Type> destination;
 };
 
 struct Reference : Type // TODO could ref derive from ptr?
 {
-    shared_ptr<Type> destination;
+    SharedPtr<Type> destination;
 };
 
 struct Void : Type {};
@@ -178,7 +188,7 @@ struct Bool : Type {};
 
 struct Numeric : Type 
 {
-    shared_ptr<Operand> width;  // Bits, not bytes
+    SharedPtr<Operand> width;  // Bits, not bytes
 };
 
 struct Integral : Numeric {};
@@ -199,7 +209,7 @@ struct UserType : Type,
 
 struct Typedef : UserType
 {
-    shared_ptr<Type> type;
+    SharedPtr<Type> type;
 }; 
 
 struct AnyComplete : Property {};
@@ -214,7 +224,7 @@ struct Record : UserType
     // the incomplete and complete types. This is so that mutually 
     // referencing structs don't create a loop in the tree
     // (but we could use weak_ptr<> for such refs?).
-    shared_ptr<AnyComplete> complete; 
+    SharedPtr<AnyComplete> complete; 
 };
 
 struct Union : Record {};
@@ -232,8 +242,8 @@ struct Class : InheritanceRecord {};
 
 struct Array : Type
 {
-    shared_ptr<Type> element;
-    shared_ptr<Operand> size; // NULL if undefined
+    SharedPtr<Type> element;
+    SharedPtr<Operand> size; // NULL if undefined
 };
 
 //////////////////////////// Expressions ////////////////////////////
@@ -262,7 +272,7 @@ struct NonAssignment : AnyAssignment {};
 
 struct Operator : Aggregate
 {
-    shared_ptr<AnyAssignment> assign; // write result back to left
+    SharedPtr<AnyAssignment> assign; // write result back to left
 };
 
 struct Boolean : Operator {};
@@ -282,14 +292,14 @@ struct AlignOf : Operator {};
 
 struct ConditionalOperator : Expression // eg ?:
 {
-    shared_ptr<Operand> condition;
-    shared_ptr<Operand> if_true;
-    shared_ptr<Operand> if_false;
+    SharedPtr<Operand> condition;
+    SharedPtr<Operand> if_true;
+    SharedPtr<Operand> if_false;
 };
 
 struct Call : Aggregate 
 {
-    shared_ptr<Operand> function;
+    SharedPtr<Operand> function;
 };
 
 struct AnyGlobalNew : Property {};
@@ -302,98 +312,98 @@ struct NonArrayNew : AnyArrayNew {};
 
 struct New : Expression
 {
-    shared_ptr<Type> type; 
+    SharedPtr<Type> type; 
     Sequence<Operand> placement_arguments;
     Sequence<Operand> constructor_arguments;
-    shared_ptr<AnyGlobalNew> global;
+    SharedPtr<AnyGlobalNew> global;
 };
 
 struct Delete : Expression
 {
-    shared_ptr<Operand> pointer;
-    shared_ptr<AnyArrayNew> array;
-    shared_ptr<AnyGlobalNew> global;
+    SharedPtr<Operand> pointer;
+    SharedPtr<AnyArrayNew> array;
+    SharedPtr<AnyGlobalNew> global;
 };
 
 struct Literal : Expression
 {
     // Use properties to express value, to avoid duplication
-    shared_ptr<FundamentalProperty> value;
+    SharedPtr<FundamentalProperty> value;
 };
 
 struct This : Expression {};
 
 struct Subscript : Expression // TODO could be an Operator?
 {
-    shared_ptr<Operand> base;
-    shared_ptr<Operand> index;
+    SharedPtr<Operand> base;
+    SharedPtr<Operand> index;
 };
 
 struct Lookup : Expression  
 {
-    shared_ptr<Operand> base; 
-    shared_ptr<Instance> member;    
+    SharedPtr<Operand> base; 
+    SharedPtr<Instance> member;    
 };
 
 struct Cast : Expression
 {
-    shared_ptr<Operand> operand;
-    shared_ptr<Type> type;        
+    SharedPtr<Operand> operand;
+    SharedPtr<Type> type;        
 };
 
 //////////////////////////// Statements ////////////////////////////
 
 struct Return : Statement
 {
-    shared_ptr<Operand> return_value;
+    SharedPtr<Operand> return_value;
 };
 
 struct LabelTarget : Statement
 {
-    shared_ptr<Label> label; // TODO these should be function scope
+    SharedPtr<Label> label; // TODO these should be function scope
 };
 
 struct Goto : Statement
 {
     // Dest is an expression for goto-a-variable support.
     // Ordinary gotos will have Label here.
-    shared_ptr<Operand> destination;
+    SharedPtr<Operand> destination;
 };
 
 struct If : Statement
 {
-    shared_ptr<Operand> condition;
-    shared_ptr<Statement> body;
-    shared_ptr<Statement> else_body; // can be NULL if no else clause
+    SharedPtr<Operand> condition;
+    SharedPtr<Statement> body;
+    SharedPtr<Statement> else_body; // can be NULL if no else clause
 };
 
 struct Loop : Statement
 {
-    shared_ptr<Statement> body;
+    SharedPtr<Statement> body;
 };
 
 struct While : Loop
 {
-    shared_ptr<Operand> condition;
+    SharedPtr<Operand> condition;
 };
 
 struct Do : Loop // a do..while() construct 
 {
-    shared_ptr<Operand> condition;
+    SharedPtr<Operand> condition;
 };
 
 struct For : Loop
 {
     // Any of these can be NULL if absent. NULL condition evaluates true.
-    shared_ptr<Statement> initialisation;
-    shared_ptr<Operand> condition;
-    shared_ptr<Statement> increment;    
+    SharedPtr<Statement> initialisation;
+    SharedPtr<Operand> condition;
+    SharedPtr<Statement> increment;    
 };
 
 struct Switch : Statement
 {
-    shared_ptr<Operand> condition;
-    shared_ptr<Statement> body;
+    SharedPtr<Operand> condition;
+    SharedPtr<Statement> body;
 };
 
 struct SwitchTarget : Statement {};
@@ -402,8 +412,8 @@ struct Case : SwitchTarget
 {
     // support gcc extension of case x..y:
     // in other cases, value_lo==value_hi
-    shared_ptr<Operand> value_lo; // inclusive
-    shared_ptr<Operand> value_hi; // inclusive
+    SharedPtr<Operand> value_lo; // inclusive
+    SharedPtr<Operand> value_hi; // inclusive
 };
 
 struct Default : SwitchTarget {};

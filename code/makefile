@@ -1,10 +1,10 @@
 LEVEL=..
 include ../makefile.common
 
-INFERNO_MODULES = inferno
+INFERNO_MODULES += common/refcount common/read_args common/trace common/type_info common/itemise_members
 INFERNO_MODULES += tree/tree 
-INFERNO_MODULES += common/refcount common/read_args common/trace common/type_info
 INFERNO_MODULES += parse/identifier_tracker 
+INFERNO_MODULES = inferno
 
 $(INFERNO_MODULES:%=build/%.o) : build/%.o : %.cpp */*.hpp */*.inc $(DEPS)
 	mkdir -p $(dir $@)

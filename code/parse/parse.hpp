@@ -239,8 +239,9 @@ private:
             else
                 i = shared_ptr<Unsigned>( new Unsigned );
             
-            shared_ptr<Literal> l( new Literal );            
-            l->value = CreateNumericConstant(bits);
+            shared_ptr<Literal> l( new Literal );   
+            shared_ptr<AnyNumber> pp = CreateNumericConstant(bits);
+            l->value = pp;
             
             i->width = l;           
             return i;
