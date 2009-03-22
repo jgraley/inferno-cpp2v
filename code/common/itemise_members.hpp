@@ -23,18 +23,20 @@ public:
     public:
         Itemisable<M> &operator=( const Itemisable<M> &other )
         {
-            if( (unsigned)&other >= (unsigned)big_area &&
-                (unsigned)&other < (unsigned)(big_area+sizeof(big_area)) )
+            //printf( "*%x=*%x big_area=%x\n", (unsigned)this, (unsigned)&other, (unsigned)big_area );
+            
+            if( (unsigned)this >= (unsigned)dstart &&
+                (unsigned)this < (unsigned)dend )
             {
-                unsigned ofs = (unsigned)&other - (unsigned)big_area;
-                Itemiser *i = (Itemiser *)((char *)this - ofs);
-                ItemisableBase *wb = (ItemisableBase *)(i->bp + ofs);
-                i->v.push_back( wb );
+                unsigned ofs = (unsigned)this - (unsigned)dstart;
+                ItemisableBase *wb = (ItemisableBase *)(bp + ofs);
+                v.push_back( wb );
             }
             else
             {
                 *(M*)this = *(M*)&other;
             }
+            //printf("done\n");
             return *this;
         }
         Itemisable<M> &operator=( const M &other )
@@ -52,83 +54,31 @@ public:
     };
 
     template< class C >
-    static vector< Itemiser::ItemisableBase * > Itemise( C *p )
+    static vector< Itemiser::ItemisableBase * > Itemise( const C *p )
     {
-        Itemiser i; 
-        i.bp = (char *)p; 
-        *(C*)&i = *(C*)big_area; 
-        return i.v;     
+        static C d;
+        static C s; 
+        bp = (char *)p; 
+        dstart = (char *)&d;
+        dend = dstart + sizeof(C);
+        v.clear();
+        
+        // This is the assignment that will be detected
+        d = s;
+        
+        return v;     
     }
 
-    char *bp;
-    vector<ItemisableBase *> v;
+    static char *bp;
+    static char *dstart;
+    static char *dend;
+    static vector<ItemisableBase *> v;
 };
 
-#define ITEMISE_FUNCTIONS() \
+#define ITEMISE_FUNCTION \
     virtual vector< Itemiser::ItemisableBase * > Itemise() const  \
     { \
         return Itemiser::Itemise( this ); \
     } 
-
-
-/*
-
-#define DYNAMIC_MATCH_FUNCTION(C) \
-    virtual bool DynamicMatch( Node *n ) const \
-    { \
-        return !!dynamic_cast<C *>(n); \
-    }
-
-#define NODE_FUNCTIONS(C) WALK_MEMBERS_FUNCTION(C) DYNAMIC_MATCH_FUNCTION(C)
-
-class Int
-{
-    int i;
-};
-
-class Char
-{
-    char i;
-};
-
-struct Node
-{
-    virtual ~Node()
-    {
-    }
-};
-
-struct Statement : Node
-{
-    NODE_FUNCTIONS(Statement);
-};
-
-struct Expression : Statement
-{
-    NODE_FUNCTIONS(Expression);
-    Itemisable<Int> a;
-    Itemisable<Int> b;
-    Itemisable<Char> kjhl;
-    Itemisable<Int> c;
-};
-
-class myob : public Itemiser
-{
-    virtual void OnWalkMember( ItemisableBase *w )
-    {
-        printf("owm %p\n", dynamic_cast< Itemisable<Int> *>(w));
-    }
-};
-
-int main()
-{
-    Statement s;
-    Expression e;
-    printf("%d %d\n", e.DynamicMatch(&s), s.DynamicMatch(&e) );
-    myob oo;
-    Statement *spe = &e;
-    spe->WalkMembers(&oo);
-}
-*/
 
 #endif

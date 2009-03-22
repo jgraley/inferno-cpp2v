@@ -1,3 +1,7 @@
 #include "common/itemise_members.hpp"
 
-char big_area[1024];
+char *Itemiser::bp;
+char *Itemiser::dstart;
+char *Itemiser::dend;
+vector<Itemiser::ItemisableBase *> Itemiser::v;
+

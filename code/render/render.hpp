@@ -612,7 +612,8 @@ private:
         TRACE();
         if( !statement )
             return sep;            
-        else if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(statement) )
+        //printf( "%s %d things\n", typeid(*statement).name(), statement->Itemise().size() );
+        if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(statement) )
             return RenderDeclaration( d, sep );
         else if( shared_ptr<Compound> c = dynamic_pointer_cast< Compound >(statement) ) // Never put ; after a scope - you'd get {blah};
             return RenderOperand(c);
