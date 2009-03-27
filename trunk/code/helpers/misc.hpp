@@ -23,13 +23,14 @@ Sequence<T> operator+( Sequence<T> &s1, Sequence<T> &s2 )
 // Hunt through a record and its bases to find the named member
 shared_ptr<Instance> FindMemberByName( shared_ptr<Record> r, string name )
 {
-    TRACE("Record \"%s\" has %d members\n", r->name.c_str(), r->members.size() );
+    TRACE("Record has %d members\n", r->members.size() );
     
     // Try the instance members (objects and functions) for a name match
     FOREACH( shared_ptr<Declaration> d, r->members )
         if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>(d) )
-            if( i->name == name )
-                return i;
+            if( shared_ptr<String> sss = dynamic_pointer_cast<String>(i->name) )
+                if( sss->value == name )
+                    return i;
                 
     // Try recursing through the base classes, if there are any
     if( shared_ptr<InheritanceRecord> ir = dynamic_pointer_cast<InheritanceRecord>( r ) )

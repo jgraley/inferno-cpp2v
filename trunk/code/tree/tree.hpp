@@ -111,7 +111,7 @@ struct Program : Node,
 struct Identifier : Declaration
 {
     NODE_FUNCTIONS
-    string name;
+    SharedPtr<AnyString> name;
 };
 
 struct AnyVirtual : Property { NODE_FUNCTIONS };
