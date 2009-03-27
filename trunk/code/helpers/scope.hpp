@@ -17,7 +17,7 @@ inline shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identi
             return program;
     }
 
-	Walk<Record> walkr(program);
+	Flattener<Record> walkr(program);
 	FOREACH( shared_ptr<Record> r, walkr )
 	{
 	    FOREACH( shared_ptr<Declaration> d, r->members )
@@ -27,10 +27,10 @@ inline shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identi
 	    }
 	}
 	
-	Walk<Compound> walkc(program);
+	Flattener<Compound> walkc(program);
 	FOREACH( shared_ptr<Compound> c, walkc )
 	{
-	    Walk<Declaration> walks(c); // TODO possible bug - this search should not recurse into sub scopes
+	    Flattener<Declaration> walks(c); // TODO possible bug - this search should not recurse into sub scopes
 	    FOREACH( shared_ptr<Declaration> d, walks )
 	    {            
 	        if( id == GetIdentifier( d ) )
@@ -38,7 +38,7 @@ inline shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identi
 	    }
 	}
 	
-	Walk<Procedure> walkp(program);
+	Flattener<Procedure> walkp(program);
 	FOREACH( shared_ptr<Procedure> p, walkp )
 	{
 	    FOREACH( shared_ptr<Declaration> d, p->parameters )
@@ -49,7 +49,7 @@ inline shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identi
 	}
 	
 	ASSERT(0); // every identifier should have a scope - if this fails, we've missed out a kind of scope
-	           // Note: if Walk is not automated yet, then it may have missed something
+	           // Note: if Flattener is not automated yet, then it may have missed something
 	return shared_ptr<Node>();
 }
 

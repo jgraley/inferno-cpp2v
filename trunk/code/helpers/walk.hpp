@@ -6,19 +6,19 @@
 /*
     Example usage:
     
-    Walk<Record> w(program, false);
+    Flattener<Record> w(program, false);
     FOREACH( shared_ptr<Record> r, w )
         printf("%s\n", typeid(*r).name() );
 */
 
 template< class FIND >
-class Walk : public Sequence< FIND >
+class Flattener : public Sequence< FIND >
 {
 public:
-    Walk( shared_ptr<Node> root, bool r = true ) :
+    Flattener( shared_ptr<Node> root, bool r = true ) :
         recurse(r)
     {
-        TRACE("Walk\n");
+        TRACE("Flattener\n");
         Visit( root );
     }
     
