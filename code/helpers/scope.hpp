@@ -20,7 +20,6 @@ inline shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identi
 	Walk<Record> walkr(program);
 	FOREACH( shared_ptr<Record> r, walkr )
 	{
-	    TRACE("Trying record %s\n", r->name.c_str() );
 	    FOREACH( shared_ptr<Declaration> d, r->members )
 	    {            
 	        if( id == GetIdentifier( d ) ) 

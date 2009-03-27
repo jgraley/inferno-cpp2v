@@ -81,9 +81,13 @@ private:
     string RenderIdentifier( shared_ptr<Identifier> id )
     {
         string ids;
-        if( id )
+        if( id && id->name )
         {
-            ids = id->name;
+            if( shared_ptr<String> sss = dynamic_pointer_cast<String>( id->name ) )
+                ids = sss->value;
+            else
+                ids = ERROR_UNSUPPORTED( (id->name) );
+
             TRACE( "%s\n", ids.c_str() );
         }
         else
@@ -231,19 +235,19 @@ private:
         else if( shared_ptr<Array> a = dynamic_pointer_cast< Array >(type) )
             return RenderType( a->element, object.empty() ? "[" + RenderOperand(a->size) + "]" : "(" + object + "[" + RenderOperand(a->size) + "])" );
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
-            return t->name + sobject;
+            return RenderIdentifier(t) + sobject;
 #if 0 // Should we include the word "class" etc when referencing holders as types?
        else if( shared_ptr<Struct> ss = dynamic_pointer_cast< Struct >(type) )
-            return "struct " + ss->name + sobject;
+            return "struct " + RenderIdentifier(ss) + sobject;
         else if( shared_ptr<Class> c = dynamic_pointer_cast< Class >(type) )
-            return "class " + c->name + sobject;
+            return "class " + RenderIdentifier(c) + sobject;
         else if( shared_ptr<Union> u = dynamic_pointer_cast< Union >(type) )
-            return "union " + u->name + sobject;
+            return "union " + RenderIdentifier(u) + sobject;
         else if( shared_ptr<Enum> e = dynamic_pointer_cast< Enum >(type) )
-            return "enum " + e->name + sobject;
+            return "enum " + RenderIdentifier(e) + sobject;
 #else
         else if( shared_ptr<UserType> ut = dynamic_pointer_cast< UserType >(type) )
-            return ut->name + sobject;
+            return RenderIdentifier(ut) + sobject;
 #endif
         else
             return ERROR_UNSUPPORTED(type);
@@ -538,7 +542,7 @@ private:
             }
         }
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
-            s += "typedef " + RenderType( t->type, t->name ) + sep;
+            s += "typedef " + RenderType( t->type, RenderIdentifier(t) ) + sep;
         else if( shared_ptr<Record> r = dynamic_pointer_cast< Record >(declaration) )
         {
             shared_ptr<AccessSpec> a;
@@ -570,7 +574,7 @@ private:
                 return ERROR_UNSUPPORTED(declaration);
 
             // Name of the record
-            s += " " + r->name;
+            s += " " + RenderIdentifier(r);
             
             if( dynamic_pointer_cast<Complete>(r->complete) )
             {
@@ -586,7 +590,7 @@ private:
                                 s += ", ";
                             shared_ptr<Base> b = ir->bases[i];    
                             ASSERT( b );
-                            s += RenderAccess(b->access) + " " /*+ RenderStorage(b->storage)*/ + b->record->name;
+                            s += RenderAccess(b->access) + " " /*+ RenderStorage(b->storage)*/ + RenderIdentifier(b->record);
                         }
                     }
                 }

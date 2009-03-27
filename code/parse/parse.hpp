@@ -419,12 +419,12 @@ private:
             const clang::DeclSpec &DS = D.getDeclSpec();
             if(ID)
             {
-                o->name = ID->getName();
+                o->name = CreateString(ID);
                 ident_track.Add( ID, o, S );     
-                TRACE("object %s\n", o->name.c_str());
             }
             else
             {
+                o->name = shared_ptr<AnyString>();
                 TRACE();
             }
 
@@ -466,7 +466,7 @@ private:
             clang::IdentifierInfo *ID = D.getIdentifier();
             if(ID)
             {
-                t->name = ID->getName();
+                t->name = CreateString(ID);
                 ident_track.Add( ID, t, S ); 
             }
             t->type = CreateTypeNode( D );
@@ -478,7 +478,7 @@ private:
         shared_ptr<Label> CreateLabelNode( clang::IdentifierInfo *ID )
         { 
             shared_ptr<Label> l(new Label);            
-            l->name = ID->getName();
+            l->name = CreateString(ID);
             TRACE("%s %p %p\n", ID->getName(), l.get(), ID );            
             return l;
         }
@@ -508,7 +508,6 @@ private:
             shared_ptr<Declaration> found_d = FindExistingDeclaration( S, D );           
             shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(found_d);
             ASSERT( o && "found the name, but not an object - maybe a typedef?");
-            TRACE("aod %s %p\n", o->name.c_str(), o.get() );
             return o;
         }
         
@@ -528,7 +527,6 @@ private:
             else
             {                
                 shared_ptr<Instance> o = CreateObjectNode( S, D, a );        
-                TRACE("%s %p\n", o->name.c_str(), o.get() );       
                 d = o;
             }
             
@@ -677,7 +675,7 @@ private:
             else
                 ASSERT(!"wrong thing in function instance");
 
-            TRACE("finish fn %s with %d statements %d total\n", o->name.c_str(), cb->statements.size(), (dynamic_pointer_cast<Compound>(o->initialiser))->statements.size() );
+            TRACE("finish fn %d statements %d total\n", cb->statements.size(), (dynamic_pointer_cast<Compound>(o->initialiser))->statements.size() );
                 
             inferno_scope_stack.pop(); // we dont use these - we use the clang-managed compound statement instead (passed in via Body)
             return Decl;
@@ -1149,7 +1147,7 @@ private:
             
             if(Name)
             {
-                h->name = Name->getName();
+                h->name = CreateString(Name);
                 ident_track.Add(Name, h, S); 
             }
             else
@@ -1158,7 +1156,7 @@ private:
                 char an[20];
                 static int ac=0;
                 sprintf( an, "__anon%d", ac++ );
-                h->name = an;
+                h->name = CreateString(an);
                 ident_track.Add(NULL, h, S); 
             }
             
@@ -1318,6 +1316,18 @@ private:
             }
             return hold_expr.ToRaw( ao );                                 
         }
+        
+        shared_ptr<AnyString> CreateString( const char *s )
+        {
+            shared_ptr<String> st( new String );
+            st->value = s;
+            return st;
+        }
+        
+        shared_ptr<AnyString> CreateString( clang::IdentifierInfo *Id )
+        {
+            return CreateString( Id->getName() );
+        }
 
         /// ActOnStringLiteral - The specified tokens were lexed as pasted string
         /// fragments (e.g. "foo" "bar" L"baz"). 
@@ -1327,11 +1337,8 @@ private:
             if (literal.hadError)
                 return ExprResult(true);
                 
-            shared_ptr<String> s(new String);
-            s->value = literal.GetString();  
-
             shared_ptr<Literal> l(new Literal);
-            l->value = s;  
+            l->value = CreateString( literal.GetString() );  
 
             return hold_expr.ToRaw( l );                                 
         }
@@ -1349,7 +1356,7 @@ private:
         {
             int enumbits = TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified];
             shared_ptr<Instance> o(new Instance());
-            o->name = Id->getName();
+            o->name = CreateString(Id);
             o->storage = shared_new<Static>();
             o->constant = shared_new<Const>(); // static const member does not consume storage!!
             o->type = CreateIntegralType( enumbits, false );
