@@ -4,6 +4,140 @@
 #include "tree/tree.hpp"
 
 /*
+class Walk
+{
+    enum Position
+    {
+        BEFORE,
+        CHILDREN,
+        AFTER
+    };
+    struct Frame
+    {
+        shared_ptr<Node> node;
+        Position position;
+        vector< Itemiser::ItemisableBase * > members;
+        int member_index;
+        int sequence_index;
+    };
+    stack< Frame > state;
+
+    void Push( shared_ptr<Node> n )
+    {
+        Frame f;
+        f.node = n;
+        f.position = BEFORE;
+        f.members = n->Itemise();
+        f.member_index = 0;
+        f.sequence_index = 0;
+        state.push( f );
+    }        
+
+    void Pop()
+    {
+        state.pop();
+    }
+
+    void AdvanceMember( const Frame &f )
+    {
+        ASSERT( f.member_index < f.members.size() )
+        if( f.member_index == f.members.size()-1 )                            
+        {
+            f.position = AFTER;
+            f.member_index = 0;
+        }
+        else
+        {
+            f.member_index++;
+        }
+    }
+
+    void AdvanceSequence( const Frame &f, const Sequence *seq )
+    {
+        ASSERT( f.sequence_index < seq->size() )
+        if( f.sequence_index == seq->size()-1 )                            
+        {
+            AdvanceMember( f );
+            f.sequence_index = 0;
+        }
+        else
+        {
+            f.sequence_index++;
+        }
+    }
+
+public:
+    Walk( shared_ptr<Node> root )
+    {
+        Push( root );
+    }        
+        
+    shared_ptr<Node> Get()
+    {
+        if( stack.empty() )
+            return shared_ptr<Node>(); // all done TODO could cause infinite loop, maybe should be an error
+            
+        Frame f = stack.top();
+        switch( f.position )
+        {
+            case BEFORE:
+            case AFTER:
+                return f.node;
+            case CHILDREN:
+                if( Sequence *seq = dynamic_cast<Sequence *>(f.members[f.member_index]) )                
+                    return (*seq)[f.sequence_index];
+                else if( dynamic_cast<SharedPtr *>(f.members[f.member_index]) )         
+                    return f.members[f.member_index];
+                else
+                    ASSERT(!"got something from itemise that isnt a sequence or a shared pointer");               
+            default:
+                ASSERT(!"corrupted state");
+        }
+    }
+
+    void Advance()
+    {
+        if( stack.empty() )
+            return;
+            
+        Frame &f = stack.top();
+        switch( f.position )
+        {
+            case BEFORE:
+                f.position = CHILDREN;
+                break;
+                
+            case CHILDREN:
+                if( Sequence *seq = dynamic_cast<Sequence *>(f.members[f.member_index]) )                
+                    AdvanceSequence( f, seq );
+                else if( dynamic_cast<SharedPtr *>(f.members[f.member_index]) )         
+                    AdvanceMember( f );
+                else
+                    ASSERT(!"got something from itemise that isnt a sequence or a shared pointer");
+                shared_ptr<Node> n = Get();
+                if( n ) // pointers can be NULL in which case we don't recurse
+                    Push( n );
+                break;
+                
+            case AFTER:
+                Pop();
+                Advance();                
+                break;
+                
+            default:
+                ASSERT(!"corrupted state");
+        }        
+    }    
+};
+
+*/
+
+
+
+
+
+
+/*
     Example usage:
     
     Flattener<Record> w(program, false);
