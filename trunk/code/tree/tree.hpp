@@ -12,14 +12,14 @@
 #include "common/itemise_members.hpp"
 
 template<typename ELEMENT>
-struct Sequence : Itemiser::Itemisable< deque< shared_ptr<ELEMENT> > > {};                   
+struct Sequence : Itemiser::Itemisable, deque< shared_ptr<ELEMENT> > {};
 
 template<typename ELEMENT>
-struct SharedPtr : Itemiser::Itemisable< shared_ptr<ELEMENT> > 
+struct SharedPtr : Itemiser::Itemisable, shared_ptr<ELEMENT> 
 {
     template< typename OTHER >
     SharedPtr( const shared_ptr<OTHER> &o ) : 
-        Itemiser::Itemisable< shared_ptr<ELEMENT> >( shared_ptr<ELEMENT>(o) ) {}
+        shared_ptr<ELEMENT>(o) {}
     SharedPtr() {}
 };           
 

@@ -11,50 +11,25 @@ extern char big_area[1024];
 class Itemiser
 {
 public:
-    class ItemisableBase
+    class Itemisable
     {
     public:
-        virtual ~ItemisableBase() {}
-    };
-    
-    template<class M>
-    class Itemisable : public M, public ItemisableBase
-    {
-    public:
-        Itemisable<M> &operator=( const Itemisable<M> &other )
+        virtual ~Itemisable() {}
+        Itemisable &operator=( const Itemisable &other )
         {
-            //printf( "*%x=*%x big_area=%x\n", (unsigned)this, (unsigned)&other, (unsigned)big_area );
-            
             if( (unsigned)this >= (unsigned)dstart &&
                 (unsigned)this < (unsigned)dend )
             {
                 unsigned ofs = (unsigned)this - (unsigned)dstart;
-                ItemisableBase *wb = (ItemisableBase *)(bp + ofs);
+                Itemisable *wb = (Itemisable *)(bp + ofs);
                 v.push_back( wb );
             }
-            else
-            {
-                *(M*)this = *(M*)&other;
-            }
-            //printf("done\n");
             return *this;
-        }
-        Itemisable<M> &operator=( const M &other )
-        {
-            *(M*)this = other;
-            return *this;
-        }
-        Itemisable()
-        {
-        }
-        Itemisable( const M &other ) :
-            M( other )
-        {
         }
     };
-
+    
     template< class C >
-    static vector< Itemiser::ItemisableBase * > Itemise( const C *p )
+    static vector< Itemiser::Itemisable * > Itemise( const C *p )
     {
         static C d;
         static C s; 
@@ -72,11 +47,11 @@ public:
     static char *bp;
     static char *dstart;
     static char *dend;
-    static vector<ItemisableBase *> v;
+    static vector<Itemisable *> v;
 };
 
 #define ITEMISE_FUNCTION \
-    virtual vector< Itemiser::ItemisableBase * > Itemise() const  \
+    virtual vector< Itemiser::Itemisable * > Itemise() const  \
     { \
         return Itemiser::Itemise( this ); \
     } 
