@@ -1,14 +1,14 @@
 // Just a junk program, doesnt do anything
 
-/*
+
 int g;
 char *i;
 
 typedef int mytype;
 mytype vv;
-*/
+
 int fp(int);
-/*
+
 int f(int &i, char longidentifier)
 {
    static signed char x=9;
@@ -96,4 +96,3 @@ protected:
     int a;
 };
 
-*/
