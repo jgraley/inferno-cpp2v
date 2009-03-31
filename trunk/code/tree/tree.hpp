@@ -11,12 +11,39 @@
 #include <deque>
 #include "common/itemise_members.hpp"
 
-template<typename ELEMENT>
-struct Sequence : Itemiser::Itemisable, deque< shared_ptr<ELEMENT> > {};
+struct Node;
+
+struct GenericSequence : Itemiser::Itemisable
+{
+    virtual shared_ptr<Node> Get(int i) = 0;
+    virtual int size() const = 0;
+};
 
 template<typename ELEMENT>
-struct SharedPtr : Itemiser::Itemisable, shared_ptr<ELEMENT> 
+struct Sequence : GenericSequence, deque< shared_ptr<ELEMENT> > 
 {
+    virtual shared_ptr<Node> Get(int i)
+    {
+        return (shared_ptr<Node>)(*(deque< shared_ptr<ELEMENT> > *)this)[i];
+    }
+    virtual int size() const
+    {
+        return ((deque< shared_ptr<ELEMENT> > *)this)->size();
+    }
+};
+
+struct GenericPointer : Itemiser::Itemisable
+{
+    virtual shared_ptr<Node> Get() = 0;
+};
+
+template<typename ELEMENT>
+struct SharedPtr : GenericPointer, shared_ptr<ELEMENT> 
+{
+    virtual shared_ptr<Node> Get()
+    {
+        return (shared_ptr<Node>)*(shared_ptr<ELEMENT> *)this;
+    }
     template< typename OTHER >
     SharedPtr( const shared_ptr<OTHER> &o ) : 
         shared_ptr<ELEMENT>(o) {}
@@ -248,6 +275,7 @@ struct Record : UserType
     // the incomplete and complete types. This is so that mutually 
     // referencing structs don't create a loop in the tree
     // (but we could use weak_ptr<> for such refs?).
+    // TODO masked issue: classes can contain pointers to themselves
     SharedPtr<AnyComplete> complete; 
 };
 

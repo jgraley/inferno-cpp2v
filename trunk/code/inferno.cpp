@@ -17,6 +17,22 @@ int main( int argc, char *argv[] )
     Parse p(ReadArgs::infile);        
     p( program );
         
+/*    Walk w( program );
+    int count=0;
+    while(!w.Done())
+    {
+        shared_ptr<Node> n = w.Get();
+        for( int i=0; i<w.Depth(); i++ )
+            printf(" ");
+        if(n)
+            printf("%s", typeid(*n).name());
+        else
+            printf("null");
+        w.Advance(); 
+        printf("\n");
+        count++;
+    }   
+  */      
     Render r;
     r( program );
 }
