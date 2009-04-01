@@ -184,9 +184,9 @@ private:
             shared_ptr<Node> n = ident_track.TryGet( &II, FromCXXScope( SS ) );                              
             if(n)
             {
-                shared_ptr<Type> t = dynamic_pointer_cast<UserType>( n );
+                shared_ptr<UserType> t = dynamic_pointer_cast<UserType>( n );
                 if(t)
-                    return hold_type.ToRaw(t);
+                    return hold_type.ToRaw(t->identifier);
             }
             
             return 0;
@@ -322,7 +322,7 @@ private:
                         TRACE("struct/union/class/enum\n");
                         // Disgustingly, clang casts the DeclTy returned from ActOnTag() to 
                         // a TypeTy. 
-                        return dynamic_pointer_cast<Record>( hold_decl.FromRaw( DS.getTypeRep() ) );
+                        return dynamic_pointer_cast<Record>( hold_decl.FromRaw( DS.getTypeRep() ) )->identifier;
                         break;
                     default:                    
                         ASSERT(!"unsupported type");
@@ -406,6 +406,34 @@ private:
             }
         }
         
+        shared_ptr<AnyInstanceIdentifier> CreateInstanceIdentifier( clang::IdentifierInfo *ID )
+        {
+            shared_ptr<InstanceIdentifier> ii( new InstanceIdentifier );
+            ii->value = ID->getName();
+            return ii;
+        }
+        
+        shared_ptr<AnyTypeIdentifier> CreateTypeIdentifier( clang::IdentifierInfo *ID )
+        {
+            shared_ptr<TypeIdentifier> ti( new TypeIdentifier );
+            ti->value = ID->getName();
+            return ti;
+        }
+        
+        shared_ptr<AnyTypeIdentifier> CreateTypeIdentifier( string s )
+        {
+            shared_ptr<TypeIdentifier> ti( new TypeIdentifier );
+            ti->value = s;
+            return ti;
+        }
+        
+        shared_ptr<AnyLabelIdentifier> CreateLabelIdentifier( clang::IdentifierInfo *ID )
+        {
+            shared_ptr<LabelIdentifier> li( new LabelIdentifier );
+            li->value = ID->getName();
+            return li;
+        }
+        
         shared_ptr<Instance> CreateObjectNode( clang::Scope *S, 
                                                clang::Declarator &D, 
                                                shared_ptr<AccessSpec> access = shared_ptr<AccessSpec>(),
@@ -416,15 +444,15 @@ private:
                 
             shared_ptr<Instance> o(new Instance());
             clang::IdentifierInfo *ID = D.getIdentifier();
-            const clang::DeclSpec &DS = D.getDeclSpec();
+            const clang::DeclSpec &DS = D.getDeclSpec();            
             if(ID)
             {
-                o->name = CreateString(ID);
+                o->identifier = CreateInstanceIdentifier(ID);
                 ident_track.Add( ID, o, S );     
             }
             else
             {
-                o->name = shared_ptr<AnyString>();
+                o->identifier = shared_ptr<AnyInstanceIdentifier>();
                 TRACE();
             }
 
@@ -466,7 +494,7 @@ private:
             clang::IdentifierInfo *ID = D.getIdentifier();
             if(ID)
             {
-                t->name = CreateString(ID);
+                t->identifier = CreateTypeIdentifier(ID);
                 ident_track.Add( ID, t, S ); 
             }
             t->type = CreateTypeNode( D );
@@ -478,7 +506,7 @@ private:
         shared_ptr<Label> CreateLabelNode( clang::IdentifierInfo *ID )
         { 
             shared_ptr<Label> l(new Label);            
-            l->name = CreateString(ID);
+            l->identifier = CreateLabelIdentifier(ID);
             TRACE("%s %p %p\n", ID->getName(), l.get(), ID );            
             return l;
         }
@@ -595,7 +623,7 @@ private:
             shared_ptr<Instance> o = CreateObjectNode( S, D );
             p->type = o->type;
             p->access = o->access;
-            p->name = o->name;
+            p->identifier = o->identifier;
             p->storage = o->storage;
             p->constant = o->constant;
             p->initialiser = o->initialiser;
@@ -716,7 +744,7 @@ private:
             TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
             shared_ptr<Instance> o = dynamic_pointer_cast<Instance>( n );
             ASSERT( o );
-            return hold_expr.ToRaw( o );            
+            return hold_expr.ToRaw( o->identifier );            
         }                                   
         
         shared_ptr<AnyNumber> CreateNumericConstant( unsigned value, int bits=-1 )        
@@ -934,7 +962,7 @@ private:
                 LabelII->setFETokenInfo( hold_label.ToRaw( CreateLabelNode( LabelII ) ) );
 
             shared_ptr<Goto> g( new Goto );
-            g->destination = hold_label.FromRaw( LabelII->getFETokenInfo<void *>() );
+            g->destination = hold_label.FromRaw( LabelII->getFETokenInfo<void *>() )->identifier;
             return hold_stmt.ToRaw( g );
         }
         
@@ -953,7 +981,7 @@ private:
             if( !(LabelII->getFETokenInfo<void *>()) )                        
                 LabelII->setFETokenInfo( hold_label.ToRaw( CreateLabelNode( LabelII ) ) );
 
-            return hold_expr.ToRaw( hold_label.FromRaw( LabelII->getFETokenInfo<void *>() ) );
+            return hold_expr.ToRaw( hold_label.FromRaw( LabelII->getFETokenInfo<void *>() )->identifier );
         }
         
         virtual StmtResult ActOnIfStmt(clang::SourceLocation IfLoc, ExprTy *CondVal,
@@ -1147,7 +1175,7 @@ private:
             
             if(Name)
             {
-                h->name = CreateString(Name);
+                h->identifier = CreateTypeIdentifier(Name);
                 ident_track.Add(Name, h, S); 
             }
             else
@@ -1156,7 +1184,7 @@ private:
                 char an[20];
                 static int ac=0;
                 sprintf( an, "__anon%d", ac++ );
-                h->name = CreateString(an);
+                h->identifier = CreateTypeIdentifier(an);
                 ident_track.Add(NULL, h, S); 
             }
             
@@ -1237,7 +1265,7 @@ private:
             shared_ptr<Record> rbase = dynamic_pointer_cast<Record>(tbase);
             ASSERT( rbase && "thing on left of ./-> is not a record/record ptr" );
             
-            a->member = FindMemberByName( rbase, string(Member.getName()) );
+            a->member = FindMemberByName( rbase, string(Member.getName()) )->identifier;
 
             ASSERT(a->member && "in r.m or (&r)->m, could not find m in r");        
             
@@ -1356,7 +1384,7 @@ private:
         {
             int enumbits = TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified];
             shared_ptr<Instance> o(new Instance());
-            o->name = CreateString(Id);
+            o->identifier = CreateInstanceIdentifier(Id);
             o->storage = shared_new<Static>();
             o->constant = shared_new<Const>(); // static const member does not consume storage!!
             o->type = CreateIntegralType( enumbits, false );
@@ -1558,12 +1586,13 @@ private:
             // Get (or make) the constructor we're invoking
             shared_ptr<Node> n = ident_track.Get( MemberOrBase );
             shared_ptr<Instance> om( dynamic_pointer_cast<Instance>(n) );
+            ASSERT( om );
             shared_ptr<Instance> cm = GetConstructor( om->type );
             
             // Build a lookup to the constructor, using the speiciifed subobject and the matching constructor
             shared_ptr<Lookup> lu(new Lookup);
-            lu->base = om;
-            lu->member = cm;            
+            lu->base = om->identifier;
+            lu->member = cm->identifier;            
             
             // Build a call to the constructor with supplied args
             shared_ptr<Call> call(new Call);

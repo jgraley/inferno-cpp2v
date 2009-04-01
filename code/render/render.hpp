@@ -81,12 +81,17 @@ private:
     string RenderIdentifier( shared_ptr<Identifier> id )
     {
         string ids;
-        if( id && id->name )
+        if( id )
         {
-            if( shared_ptr<String> sss = dynamic_pointer_cast<String>( id->name ) )
-                ids = sss->value;
+            // TODO maybe just try casting to String
+            if( shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>( id ) )
+                ids = ii->value;
+            else if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>( id ) )
+                ids = ti->value;
+            else if( shared_ptr<LabelIdentifier> li = dynamic_pointer_cast<LabelIdentifier>( id ) )
+                ids = li->value;
             else
-                ids = ERROR_UNSUPPORTED( (id->name) );
+                ids = ERROR_UNSUPPORTED( (id) );
 
             TRACE( "%s\n", ids.c_str() );
         }
@@ -106,9 +111,9 @@ private:
         if( scope == program )
             return "::"; 
         else if( shared_ptr<Enum> e = dynamic_pointer_cast<Enum>( scope ) ) // <- for enum
-            return RenderScopedIdentifier( e, true );    // omit scope for the enum itself   
+            return RenderScopedIdentifier( e->identifier, true );    // omit scope for the enum itself   
         else if( shared_ptr<Record> r = dynamic_pointer_cast<Record>( scope ) ) // <- for class, struct, union
-            return RenderScopedIdentifier( r ) + "::";       
+            return RenderScopedIdentifier( r->identifier ) + "::";       
         else if( dynamic_pointer_cast<Procedure>( scope ) ||  // <- this is for params
                  dynamic_pointer_cast<Compound>( scope ) )    // <- this is for locals in body
             return string(); 
@@ -235,19 +240,19 @@ private:
         else if( shared_ptr<Array> a = dynamic_pointer_cast< Array >(type) )
             return RenderType( a->element, object.empty() ? "[" + RenderOperand(a->size) + "]" : "(" + object + "[" + RenderOperand(a->size) + "])" );
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
-            return RenderIdentifier(t) + sobject;
+            return RenderIdentifier(t->identifier) + sobject;
 #if 0 // Should we include the word "class" etc when referencing holders as types?
        else if( shared_ptr<Struct> ss = dynamic_pointer_cast< Struct >(type) )
-            return "struct " + RenderIdentifier(ss) + sobject;
+            return "struct " + RenderIdentifier(ss->identifier) + sobject;
         else if( shared_ptr<Class> c = dynamic_pointer_cast< Class >(type) )
-            return "class " + RenderIdentifier(c) + sobject;
+            return "class " + RenderIdentifier(c->identifier) + sobject;
         else if( shared_ptr<Union> u = dynamic_pointer_cast< Union >(type) )
-            return "union " + RenderIdentifier(u) + sobject;
+            return "union " + RenderIdentifier(u->identifier) + sobject;
         else if( shared_ptr<Enum> e = dynamic_pointer_cast< Enum >(type) )
-            return "enum " + RenderIdentifier(e) + sobject;
+            return "enum " + RenderIdentifier(e->identifier) + sobject;
 #else
         else if( shared_ptr<UserType> ut = dynamic_pointer_cast< UserType >(type) )
-            return RenderIdentifier(ut) + sobject;
+            return RenderIdentifier(ut->identifier) + sobject;
 #endif
         else
             return ERROR_UNSUPPORTED(type);
@@ -282,10 +287,10 @@ private:
                    after;
         else if( shared_ptr<Label> l = dynamic_pointer_cast< Label >(expression) )
             return before + 
-                   "&&" + RenderIdentifier( l ) + // label-as-variable (GCC extension)
+                   "&&" + RenderIdentifier( l->identifier ) + // label-as-variable (GCC extension)
                    after;
         else if( shared_ptr<Instance> v = dynamic_pointer_cast< Instance >(expression) )
-            return RenderScopedIdentifier( v );
+            return RenderScopedIdentifier( v->identifier );
         else if( shared_ptr<SizeOf> pot = dynamic_pointer_cast< SizeOf >(expression) )
             return before + 
                    "sizeof(" + RenderOperand( pot->operands[0], false ) + ")" + 
@@ -454,17 +459,17 @@ private:
         shared_ptr<Destructor> de = dynamic_pointer_cast<Destructor>(o->type);
         if( con || de )
         {
-            shared_ptr<Record> rec = dynamic_pointer_cast<Record>( GetScope( program, o ) );
+            shared_ptr<Record> rec = dynamic_pointer_cast<Record>( GetScope( program, o->identifier ) );
             ASSERT( rec );
-            name = (de ? "~" : "") + RenderIdentifier(rec); 
+            name = (de ? "~" : "") + RenderIdentifier(rec->identifier); 
         }
         else
         {
-            name = RenderIdentifier(o);
+            name = RenderIdentifier(o->identifier);
         }
         
         if( showscope )
-            name = RenderScope(o) + name;           
+            name = RenderScope(o->identifier) + name;           
                         
         if( showtype )
             s += RenderType( o->type, name );
@@ -473,7 +478,7 @@ private:
         
         if( o->initialiser && showinit )
         {
-            AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, o ) );
+            AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, o->identifier ) );
             
             shared_ptr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser);                
             if( comp )
@@ -542,7 +547,7 @@ private:
             }
         }
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
-            s += "typedef " + RenderType( t->type, RenderIdentifier(t) ) + sep;
+            s += "typedef " + RenderType( t->type, RenderIdentifier(t->identifier) ) + sep;
         else if( shared_ptr<Record> r = dynamic_pointer_cast< Record >(declaration) )
         {
             shared_ptr<AccessSpec> a;
@@ -574,7 +579,7 @@ private:
                 return ERROR_UNSUPPORTED(declaration);
 
             // Name of the record
-            s += " " + RenderIdentifier(r);
+            s += " " + RenderIdentifier(r->identifier);
             
             if( dynamic_pointer_cast<Complete>(r->complete) )
             {
@@ -590,7 +595,7 @@ private:
                                 s += ", ";
                             shared_ptr<Base> b = ir->bases[i];    
                             ASSERT( b );
-                            s += RenderAccess(b->access) + " " /*+ RenderStorage(b->storage)*/ + RenderIdentifier(b->record);
+                            s += RenderAccess(b->access) + " " /*+ RenderStorage(b->storage)*/ + RenderIdentifier(b->record->identifier);
                         }
                     }
                 }
@@ -626,11 +631,11 @@ private:
         else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(statement) )
             return "return " + RenderOperand(es->return_value) + sep;
         else if( shared_ptr<LabelTarget> l = dynamic_pointer_cast<LabelTarget>(statement) )
-            return RenderIdentifier(l->label) + ":\n"; // no ; after a label
+            return RenderIdentifier(l->label->identifier) + ":\n"; // no ; after a label
         else if( shared_ptr<Goto> g = dynamic_pointer_cast<Goto>(statement) )
         {
             if( shared_ptr<Label> l = dynamic_pointer_cast< Label >(g->destination) )
-                return "goto " + RenderIdentifier(l) + sep;  // regular goto
+                return "goto " + RenderIdentifier(l->identifier) + sep;  // regular goto
             else
                 return "goto *" + RenderOperand(g->destination) + sep; // goto-a-variable (GCC extension)
         }

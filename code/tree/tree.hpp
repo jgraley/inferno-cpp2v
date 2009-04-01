@@ -135,11 +135,22 @@ struct Program : Node,
 
 //////////////////////////// Declarations /////////////////////
 
-struct Identifier : Declaration
-{
-    NODE_FUNCTIONS
-    SharedPtr<AnyString> name;
-};
+struct Identifier : virtual Node { NODE_FUNCTIONS };
+
+struct AnyInstanceIdentifier : Identifier,
+                               Operand { NODE_FUNCTIONS };
+struct InstanceIdentifier : AnyInstanceIdentifier, 
+                            String { NODE_FUNCTIONS };
+
+struct AnyTypeIdentifier : Identifier,
+                           Type { NODE_FUNCTIONS };
+struct TypeIdentifier : AnyTypeIdentifier,
+                        String { NODE_FUNCTIONS };
+
+struct AnyLabelIdentifier : Identifier,
+                            Expression { NODE_FUNCTIONS };
+struct LabelIdentifier : AnyLabelIdentifier,
+                         String { NODE_FUNCTIONS };
 
 struct AnyVirtual : Property { NODE_FUNCTIONS };
 struct Virtual : AnyVirtual 
@@ -169,11 +180,11 @@ struct Physical
 };
 
 // can be an object or a function. In case of function, type is a type under Subroutine
-struct Instance : Identifier,
-                  Operand,
+struct Instance : Declaration,
                   Physical
 {
     NODE_FUNCTIONS
+    SharedPtr<AnyInstanceIdentifier> identifier;
     SharedPtr<Type> type;
     SharedPtr<Operand> initialiser; // NULL if uninitialised
 };
@@ -253,8 +264,11 @@ struct Floating : Numeric { NODE_FUNCTIONS }; // Note width determines float vs 
 // A type that the user has created, and hence has a name. 
 // These can be linked directly from a Sequence<> to indicate 
 // their declaration (no seperate declaration node required).
-struct UserType : Type,
-                  Identifier { NODE_FUNCTIONS };
+struct UserType : Declaration 
+{ 
+    NODE_FUNCTIONS
+    SharedPtr<AnyTypeIdentifier> identifier;
+};
 
 struct Typedef : UserType
 {
@@ -303,8 +317,11 @@ struct Array : Type
 //////////////////////////// Expressions ////////////////////////////
 
 // TODO consider making this an object, STATIC and void * type
-struct Label : Identifier,
-               Expression { NODE_FUNCTIONS }; 
+struct Label : Declaration
+{
+    NODE_FUNCTIONS
+    SharedPtr<AnyLabelIdentifier> identifier;
+}; 
 
 // The result of a Compound, if viewed as an Operand, is the
 // code itself (imagine a generic byte code) not the result of
@@ -406,7 +423,7 @@ struct Lookup : Expression
 {
     NODE_FUNCTIONS
     SharedPtr<Operand> base; 
-    SharedPtr<Instance> member;    
+    SharedPtr<AnyInstanceIdentifier> member;    
 };
 
 struct Cast : Expression

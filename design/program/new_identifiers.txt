@@ -1,0 +1,42 @@
+
+New identifiers scheme
+
+Aim is to avoid loops, to prevent errors with shared_ptr<> failing to deallocate and prevents
+walks from recursing infinitely. 
+
+General idea is to make only the identifier be the thing that is referenced multiple times. This way, 
+we don't need weak_ptr<> or hybrid strong/weak pointers or loop-breaking in walker or extra nodes for 
+declarations and/or usages. Tree becomes acyclic directed graph. Hopefully can also get rid of awkward
+Operator node.
+
+Consequently we do not have a path from use cases to declaration contents, but this is basically unavoidable 
+given the aims. The identifier nodes in question to be distinct node classes for instances, user types and 
+labels so that they may be pointed-to directly at usages.
+
+Tree changes:
+- Added new node hierarchy or Identifier (base), AnyXIdentifier (for wildcards) and XIdentifier (for identifiers). 
+  X can be Instance, Type or Label. AnyXIdentifier derives from Operand, Type or Expression repectively. 
+  XIdentifier derives from String to contain the actual name string.
+
+- Declarations no longer derive from old Identifier node. Instead, Instance, UserType and Label contain pointers
+  to the corresponding AnyXIdentifier
+
+- Use cases that explicitly go to an identifier (eg right hand side of .) contain pointers to AnyXIdentifier
+
+- STILL TODO Let the words Instance, UserType and Label refer to the XIdentifier nodes, and use eg XDeclaration
+  for the decls, so things are more easily understood.
+
+- STILL TODO Operand node to be removed, assuming not needed any more. All usages to become Expression. Previous
+  ambiguity with Statement->Instance no longer applies; it is always a declaration. For usage, use 
+  InstanceIdentifier. Clean up any remaining awkwardness around here.
+
+Integration tactics so far:
+
+Parser fills in new declaratio nodes in new way. Identifer tracking always done via the declaration nodes
+so ident_track.cpp doesn't need to change. For usages, get the declaration from ident_track then get the 
+identifier from that.
+
+Renderer uses identifiers in the RenderIdentifier/Scope/ScopedIdentifier and the supporting 
+GetScope/GetIdentifier helpers.
+
+
