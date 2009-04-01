@@ -4,10 +4,16 @@
 #include <tree/tree.hpp>
 #include <helpers/typeof.hpp>
 
-// sort of depracated - there's no particular reason to use this
 inline shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
 {
-    return dynamic_pointer_cast< Identifier >(d);
+    if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
+        return i->identifier;
+    else if( shared_ptr<UserType> t = dynamic_pointer_cast<UserType>( d ) )
+        return t->identifier;
+    else if( shared_ptr<Label> l = dynamic_pointer_cast<Label>( d ) )
+        return l->identifier;
+    else
+        ASSERT(0);
 }
 
 // concatenate sequences by adding them, like strings etc
@@ -28,7 +34,7 @@ shared_ptr<Instance> FindMemberByName( shared_ptr<Record> r, string name )
     // Try the instance members (objects and functions) for a name match
     FOREACH( shared_ptr<Declaration> d, r->members )
         if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>(d) )
-            if( shared_ptr<String> sss = dynamic_pointer_cast<String>(i->name) )
+            if( shared_ptr<String> sss = dynamic_pointer_cast<String>(i->identifier) )
                 if( sss->value == name )
                     return i;
                 
