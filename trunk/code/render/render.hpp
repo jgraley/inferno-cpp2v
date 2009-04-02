@@ -241,19 +241,8 @@ private:
             return RenderType( a->element, object.empty() ? "[" + RenderOperand(a->size) + "]" : "(" + object + "[" + RenderOperand(a->size) + "])" );
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
             return RenderIdentifier(t->identifier) + sobject;
-#if 0 // Should we include the word "class" etc when referencing holders as types?
-       else if( shared_ptr<Struct> ss = dynamic_pointer_cast< Struct >(type) )
-            return "struct " + RenderIdentifier(ss->identifier) + sobject;
-        else if( shared_ptr<Class> c = dynamic_pointer_cast< Class >(type) )
-            return "class " + RenderIdentifier(c->identifier) + sobject;
-        else if( shared_ptr<Union> u = dynamic_pointer_cast< Union >(type) )
-            return "union " + RenderIdentifier(u->identifier) + sobject;
-        else if( shared_ptr<Enum> e = dynamic_pointer_cast< Enum >(type) )
-            return "enum " + RenderIdentifier(e->identifier) + sobject;
-#else
-        else if( shared_ptr<UserType> ut = dynamic_pointer_cast< UserType >(type) )
-            return RenderIdentifier(ut->identifier) + sobject;
-#endif
+        else if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast< TypeIdentifier >(type) )
+            return RenderIdentifier(ti) + sobject;
         else
             return ERROR_UNSUPPORTED(type);
     }
@@ -324,7 +313,7 @@ private:
                    after;
         else if( shared_ptr<Call> o = dynamic_pointer_cast< Call >(expression) )
         {
-            if( shared_ptr<Operand> base = IsConstructorCall( o ) )
+            if( shared_ptr<Operand> base = IsConstructorCall( program, o ) )
                 return before +  // invoking costructors as found in init lists and locals
                        RenderOperand( base, true ) + "(" +
                        RenderOperandSequence( o->operands, ", ", false ) + ")" +
@@ -430,7 +419,7 @@ private:
         {
             if( shared_ptr<Call> o = dynamic_pointer_cast< Call >(s) )
             {
-                if( IsConstructorCall( o ) )
+                if( IsConstructorCall( program, o ) )
                 {
                     inits.push_back(s);
                     continue;

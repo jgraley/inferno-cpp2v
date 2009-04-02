@@ -1,10 +1,9 @@
 #ifndef MISC_HPP
 #define MISC_HPP
 
-#include <tree/tree.hpp>
-#include <helpers/typeof.hpp>
+#include "tree/tree.hpp"
 
-inline shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
+shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
 {
     if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
         return i->identifier;
@@ -47,16 +46,5 @@ shared_ptr<Instance> FindMemberByName( shared_ptr<Record> r, string name )
     // We failed. Hang our head in shame.                
     return shared_ptr<Instance>();
 }                
-
-// Is this call really a constructor call? If so return the object being
-// constructoed. Otherwise, return NULL
-shared_ptr<Operand> IsConstructorCall( shared_ptr<Call> call )
-{
-    shared_ptr<Lookup> lf = dynamic_pointer_cast<Lookup>(call->function);            
-    if( lf && dynamic_pointer_cast<Constructor>( TypeOf().Get( lf->member ) ) )
-        return lf->base;
-    else
-        return shared_ptr<Operand>();
-}
 
 #endif
