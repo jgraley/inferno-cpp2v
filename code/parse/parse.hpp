@@ -90,7 +90,8 @@ private:
             preprocessor(pp),
             target_info(T),
             ident_track( p ),
-            global_scope( p )
+            global_scope( p ),
+            program( p )
         {
             inferno_scope_stack.push( &*p );
         }
@@ -142,6 +143,7 @@ private:
         RCHold<Node, CXXScopeTy *> hold_scope;
         IdentifierTracker ident_track;
         shared_ptr<Node> global_scope;
+        shared_ptr<Program> program;
                 
         OwningStmtResult ToStmt( shared_ptr<Statement> s )
         {
@@ -1261,8 +1263,10 @@ private:
             }            
         
             // Find the specified member in the record implied by the expression on the left of .
-            shared_ptr<Type> tbase = TypeOf().Get(a->base);
-            shared_ptr<Record> rbase = dynamic_pointer_cast<Record>(tbase);
+            shared_ptr<Type> tbase = TypeOf().Get(program, a->base);
+            shared_ptr<TypeIdentifier> tibase = dynamic_pointer_cast<TypeIdentifier>(tbase);
+            ASSERT( tibase );
+            shared_ptr<Record> rbase = GetRecordDeclaration(program, tibase);
             ASSERT( rbase && "thing on left of ./-> is not a record/record ptr" );
             
             a->member = FindMemberByName( rbase, string(Member.getName()) )->identifier;
