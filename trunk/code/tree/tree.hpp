@@ -172,8 +172,8 @@ struct NonConst : AnyConst { NODE_FUNCTIONS };
 struct Physical
 {
     NODE_FUNCTIONS
-    SharedPtr<StorageClass> storage;
     SharedPtr<AnyConst> constant; // TODO all functions to be const (otherwise would imply self-modifiying code). See idempotent
+    SharedPtr<StorageClass> storage;
 };
 
 // can be an object or a function. In case of function, type is a type under Subroutine
@@ -181,8 +181,8 @@ struct Instance : Declaration,
                   Physical
 {
     NODE_FUNCTIONS
-    SharedPtr<AnyInstanceIdentifier> identifier;
     SharedPtr<Type> type;
+    SharedPtr<AnyInstanceIdentifier> identifier;
     SharedPtr<Expression> initialiser; // NULL if uninitialised
 };
 
