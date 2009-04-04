@@ -10,7 +10,7 @@
 class TypeOf
 {
 public:
-    shared_ptr<Type> Get( shared_ptr<Program> program, shared_ptr<Operand> o )
+    shared_ptr<Type> Get( shared_ptr<Program> program, shared_ptr<Expression> o )
     {
         ASSERT(o);
         
@@ -24,7 +24,7 @@ public:
         {
             // Get the types of all the operands to the operator first
             Sequence<Type> optypes;
-            FOREACH( shared_ptr<Operand> o, op->operands )
+            FOREACH( shared_ptr<Expression> o, op->operands )
                 optypes.push_back( Get(program, o) );
                 
             // then handle based on the kind of operator
@@ -52,17 +52,17 @@ public:
 
 // Is this call really a constructor call? If so return the object being
 // constructoed. Otherwise, return NULL
-shared_ptr<Operand> IsConstructorCall( shared_ptr<Program> program, shared_ptr<Call> call )
+shared_ptr<Expression> IsConstructorCall( shared_ptr<Program> program, shared_ptr<Call> call )
 {
     shared_ptr<Lookup> lf = dynamic_pointer_cast<Lookup>(call->function);            
     if(!lf)
-        return shared_ptr<Operand>();
+        return shared_ptr<Expression>();
         
     ASSERT(lf->member);
     if( dynamic_pointer_cast<Constructor>( TypeOf().Get( program, lf->member ) ) )
         return lf->base;
     else
-        return shared_ptr<Operand>();
+        return shared_ptr<Expression>();
 }
 
 #endif
