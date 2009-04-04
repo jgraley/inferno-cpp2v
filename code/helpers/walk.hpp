@@ -187,4 +187,29 @@ private:
     bool recurse;
 };
 
+void WalkAndPrint( shared_ptr<Program> program )
+{
+    Walk w( program );
+    int count=0;
+    while(!w.Done())
+    {
+        shared_ptr<Node> n = w.Get();
+        for( int i=0; i<w.Depth(); i++ )
+            printf("    ");
+        if(!n)
+            printf("null");
+        else if(shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(n) )
+            printf("%s", ii->value.c_str());
+        else if(shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(n) )
+            printf("type %s", ti->value.c_str());
+        else if(shared_ptr<LabelIdentifier> li = dynamic_pointer_cast<LabelIdentifier>(n) )
+            printf("%s:", li->value.c_str());
+        else
+            printf("%s", typeid(*n).name());
+        w.Advance(); 
+        printf("\n");
+        count++;
+    }   
+}
+
 #endif
