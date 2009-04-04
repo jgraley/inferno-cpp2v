@@ -274,12 +274,12 @@ private:
             return before + 
                    RenderType( t, "" ) + // type as operand eg sizeof, casts, templates
                    after;
-        else if( shared_ptr<Label> l = dynamic_pointer_cast< Label >(expression) )
+        else if( shared_ptr<LabelIdentifier> li = dynamic_pointer_cast< LabelIdentifier >(expression) )
             return before + 
-                   "&&" + RenderIdentifier( l->identifier ) + // label-as-variable (GCC extension)
+                   "&&" + RenderIdentifier( li ) + // label-as-variable (GCC extension)
                    after;
-        else if( shared_ptr<Instance> v = dynamic_pointer_cast< Instance >(expression) )
-            return RenderScopedIdentifier( v->identifier );
+        else if( shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast< InstanceIdentifier >(expression) )
+            return RenderScopedIdentifier( ii );
         else if( shared_ptr<SizeOf> pot = dynamic_pointer_cast< SizeOf >(expression) )
             return before + 
                    "sizeof(" + RenderOperand( pot->operands[0], false ) + ")" + 
@@ -584,7 +584,7 @@ private:
                                 s += ", ";
                             shared_ptr<Base> b = ir->bases[i];    
                             ASSERT( b );
-                            s += RenderAccess(b->access) + " " /*+ RenderStorage(b->storage)*/ + RenderIdentifier(b->record->identifier);
+                            s += RenderAccess(b->access) + " " /*+ RenderStorage(b->storage)*/ + RenderIdentifier(b->record);
                         }
                     }
                 }

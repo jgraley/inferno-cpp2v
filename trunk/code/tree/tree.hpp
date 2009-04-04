@@ -75,7 +75,7 @@ struct Node : Magic
 //////////////////////////// Properties ///////////////////////////////
 // TODO seperate source file
 
-struct Property : Node { NODE_FUNCTIONS };
+struct Property : virtual Node { NODE_FUNCTIONS };
 
 // Means can be used as a literal
 struct FundamentalProperty : Property { NODE_FUNCTIONS };
@@ -193,7 +193,7 @@ struct InheritanceRecord;
 struct Base : Declaration
 {
     NODE_FUNCTIONS
-    SharedPtr<InheritanceRecord> record;
+    SharedPtr<TypeIdentifier> record; // must refer to InheritanceRecord
     // TODO virtual inheritance, treat seperately from virtual members
     // since different thing.
 };              
