@@ -261,7 +261,7 @@ private:
         return o;
     }
 
-    string RenderOperand( shared_ptr<Operand> expression, bool bracketize_operator=false )
+    string RenderOperand( shared_ptr<Expression> expression, bool bracketize_operator=false )
     {
         TRACE("%p\n", expression.get());
         
@@ -313,7 +313,7 @@ private:
                    after;
         else if( shared_ptr<Call> o = dynamic_pointer_cast< Call >(expression) )
         {
-            if( shared_ptr<Operand> base = IsConstructorCall( program, o ) )
+            if( shared_ptr<Expression> base = IsConstructorCall( program, o ) )
                 return before +  // invoking costructors as found in init lists and locals
                        RenderOperand( base, true ) + "(" +
                        RenderOperandSequence( o->operands, ", ", false ) + ")" +
@@ -694,7 +694,7 @@ private:
         return s;
     }
 
-    string RenderOperandSequence( Sequence<Operand> spe, 
+    string RenderOperandSequence( Sequence<Expression> spe, 
                                   string separator, 
                                   bool seperate_last )
     {
@@ -704,7 +704,7 @@ private:
         {
             TRACE("%d %p\n", i, &i);
             string sep = (seperate_last || i+1<spe.size()) ? separator : "";
-            shared_ptr<Operand> pe = spe[i];                        
+            shared_ptr<Expression> pe = spe[i];                        
             s += RenderOperand( pe ) + sep;
         }
         return s;

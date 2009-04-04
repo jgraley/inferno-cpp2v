@@ -15,7 +15,7 @@ labels so that they may be pointed-to directly at usages.
 
 Tree changes:
 - Added new node hierarchy or Identifier (base), AnyXIdentifier (for wildcards) and XIdentifier (for identifiers). 
-  X can be Instance, Type or Label. AnyXIdentifier derives from Operand, Type or Expression repectively. 
+  X can be Instance, Type or Label. AnyXIdentifier derives from Expression, Type or Expression repectively. 
   XIdentifier derives from String to contain the actual name string.
 
 - Declarations no longer derive from old Identifier node. Instead, Instance, UserType and Label contain pointers
@@ -25,10 +25,13 @@ Tree changes:
 
 - STILL TODO Let the words Instance, UserType and Label refer to the XIdentifier nodes, and use eg XDeclaration
   for the decls, so things are more easily understood.
+  NO! the decl nodes have big hierarchies under them eg UserType->Record->InheritanceRecord->Class
+  wheras the ident nodes do not. So leave as is.
 
-- STILL TODO Operand node to be removed, assuming not needed any more. All usages to become Expression. Previous
+- STILL TODO Expression node to be removed, assuming not needed any more. All usages to become Expression. Previous
   ambiguity with Statement->Instance no longer applies; it is always a declaration. For usage, use 
   InstanceIdentifier. Clean up any remaining awkwardness around here.
+  DONE
 
 Integration tactics so far:
 

@@ -109,13 +109,10 @@ struct Float : AnyFloat
 
 struct Statement : virtual Node { NODE_FUNCTIONS };
 
-struct Operand : virtual Node { NODE_FUNCTIONS };
-
-struct Type : virtual Operand { NODE_FUNCTIONS };
-
-struct Expression : Statement,
-                    Operand { NODE_FUNCTIONS };
+struct Expression : Statement { NODE_FUNCTIONS };
     
+struct Type : virtual Expression { NODE_FUNCTIONS };
+
 struct AccessSpec : Property { NODE_FUNCTIONS };
 struct Public : AccessSpec { NODE_FUNCTIONS };
 struct Private : AccessSpec { NODE_FUNCTIONS };
@@ -138,7 +135,7 @@ struct Program : Node,
 struct Identifier : virtual Node { NODE_FUNCTIONS };
 
 struct AnyInstanceIdentifier : Identifier,
-                               Operand { NODE_FUNCTIONS };
+                               Expression { NODE_FUNCTIONS };
 struct InstanceIdentifier : AnyInstanceIdentifier, 
                             String { NODE_FUNCTIONS };
 
@@ -186,7 +183,7 @@ struct Instance : Declaration,
     NODE_FUNCTIONS
     SharedPtr<AnyInstanceIdentifier> identifier;
     SharedPtr<Type> type;
-    SharedPtr<Operand> initialiser; // NULL if uninitialised
+    SharedPtr<Expression> initialiser; // NULL if uninitialised
 };
 
 struct InheritanceRecord;
@@ -248,7 +245,7 @@ struct Bool : Type { NODE_FUNCTIONS };
 struct Numeric : Type 
 {
     NODE_FUNCTIONS
-    SharedPtr<Operand> width;  // Bits, not bytes
+    SharedPtr<Expression> width;  // Bits, not bytes
 };
 
 struct Integral : Numeric { NODE_FUNCTIONS };
@@ -311,7 +308,7 @@ struct Array : Type
 {
     NODE_FUNCTIONS
     SharedPtr<Type> element;
-    SharedPtr<Operand> size; // NULL if undefined
+    SharedPtr<Expression> size; // NULL if undefined
 };
 
 //////////////////////////// Expressions ////////////////////////////
@@ -323,10 +320,9 @@ struct Label : Declaration
     SharedPtr<AnyLabelIdentifier> identifier;
 }; 
 
-// The result of a Compound, if viewed as an Operand, is the
+// The result of a Compound, if viewed as an Expression, is the
 // code itself (imagine a generic byte code) not the result of
-// execution. You have to do Call or Invoke on it to get 
-// the execution result.
+// execution. You have to Call it to get the execution result.
 struct Compound : Expression
 {
     NODE_FUNCTIONS
@@ -336,7 +332,7 @@ struct Compound : Expression
 struct Aggregate : Expression
 {
     NODE_FUNCTIONS
-    Sequence<Operand> operands; 
+    Sequence<Expression> operands; 
 };
 
 struct AnyAssignment : Property { NODE_FUNCTIONS };
@@ -367,15 +363,15 @@ struct AlignOf : Operator { NODE_FUNCTIONS };
 struct ConditionalOperator : Expression // eg ?:
 {
     NODE_FUNCTIONS
-    SharedPtr<Operand> condition;
-    SharedPtr<Operand> if_true;
-    SharedPtr<Operand> if_false;
+    SharedPtr<Expression> condition;
+    SharedPtr<Expression> if_true;
+    SharedPtr<Expression> if_false;
 };
 
 struct Call : Aggregate 
 {
     NODE_FUNCTIONS
-    SharedPtr<Operand> function;
+    SharedPtr<Expression> function;
 };
 
 struct AnyGlobalNew : Property { NODE_FUNCTIONS };
@@ -390,15 +386,15 @@ struct New : Expression
 {
     NODE_FUNCTIONS
     SharedPtr<Type> type; 
-    Sequence<Operand> placement_arguments;
-    Sequence<Operand> constructor_arguments;
+    Sequence<Expression> placement_arguments;
+    Sequence<Expression> constructor_arguments;
     SharedPtr<AnyGlobalNew> global;
 };
 
 struct Delete : Expression
 {
     NODE_FUNCTIONS
-    SharedPtr<Operand> pointer;
+    SharedPtr<Expression> pointer;
     SharedPtr<AnyArrayNew> array;
     SharedPtr<AnyGlobalNew> global;
 };
@@ -415,21 +411,21 @@ struct This : Expression { NODE_FUNCTIONS };
 struct Subscript : Expression // TODO could be an Operator?
 {
     NODE_FUNCTIONS
-    SharedPtr<Operand> base;
-    SharedPtr<Operand> index;
+    SharedPtr<Expression> base;
+    SharedPtr<Expression> index;
 };
 
 struct Lookup : Expression  
 {
     NODE_FUNCTIONS
-    SharedPtr<Operand> base; 
+    SharedPtr<Expression> base; 
     SharedPtr<AnyInstanceIdentifier> member;    
 };
 
 struct Cast : Expression
 {
     NODE_FUNCTIONS
-    SharedPtr<Operand> operand;
+    SharedPtr<Expression> operand;
     SharedPtr<Type> type;        
 };
 
@@ -438,7 +434,7 @@ struct Cast : Expression
 struct Return : Statement
 {
     NODE_FUNCTIONS
-    SharedPtr<Operand> return_value;
+    SharedPtr<Expression> return_value;
 };
 
 struct LabelTarget : Statement
@@ -452,13 +448,13 @@ struct Goto : Statement
     NODE_FUNCTIONS
     // Dest is an expression for goto-a-variable support.
     // Ordinary gotos will have Label here.
-    SharedPtr<Operand> destination;
+    SharedPtr<Expression> destination;
 };
 
 struct If : Statement
 {
     NODE_FUNCTIONS
-    SharedPtr<Operand> condition;
+    SharedPtr<Expression> condition;
     SharedPtr<Statement> body;
     SharedPtr<Statement> else_body; // can be NULL if no else clause
 };
@@ -472,13 +468,13 @@ struct Loop : Statement
 struct While : Loop
 {
     NODE_FUNCTIONS
-    SharedPtr<Operand> condition;
+    SharedPtr<Expression> condition;
 };
 
 struct Do : Loop // a do..while() construct 
 {
     NODE_FUNCTIONS
-    SharedPtr<Operand> condition;
+    SharedPtr<Expression> condition;
 };
 
 struct For : Loop
@@ -486,14 +482,14 @@ struct For : Loop
     NODE_FUNCTIONS
     // Any of these can be NULL if absent. NULL condition evaluates true.
     SharedPtr<Statement> initialisation;
-    SharedPtr<Operand> condition;
+    SharedPtr<Expression> condition;
     SharedPtr<Statement> increment;    
 };
 
 struct Switch : Statement
 {
     NODE_FUNCTIONS
-    SharedPtr<Operand> condition;
+    SharedPtr<Expression> condition;
     SharedPtr<Statement> body;
 };
 
@@ -504,8 +500,8 @@ struct Case : SwitchTarget
     NODE_FUNCTIONS
     // support gcc extension of case x..y:
     // in other cases, value_lo==value_hi
-    SharedPtr<Operand> value_lo; // inclusive
-    SharedPtr<Operand> value_hi; // inclusive
+    SharedPtr<Expression> value_lo; // inclusive
+    SharedPtr<Expression> value_hi; // inclusive
 };
 
 struct Default : SwitchTarget { NODE_FUNCTIONS };

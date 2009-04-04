@@ -136,7 +136,7 @@ private:
         stack< Sequence<Declaration> * > inferno_scope_stack;
         RCHold<Declaration, DeclTy *> hold_decl;
         RCHold<Base, DeclTy *> hold_base;
-        RCHold<Operand, ExprTy *> hold_expr;
+        RCHold<Expression, ExprTy *> hold_expr;
         RCHold<Statement, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
         RCHold<Label, void *> hold_label;
@@ -153,7 +153,7 @@ private:
             return OwningStmtResult( *this, hold_stmt.ToRaw( s ) );
         }
         
-        OwningExprResult ToExpr( shared_ptr<Operand> e )
+        OwningExprResult ToExpr( shared_ptr<Expression> e )
         {
             return OwningExprResult( *this, hold_expr.ToRaw( e ) );
         }
@@ -163,7 +163,7 @@ private:
             return hold_stmt.FromRaw( s.get() );
         }
 
-        shared_ptr<Operand> FromClang( const ExprArg &e )
+        shared_ptr<Expression> FromClang( const ExprArg &e )
         {
             return hold_expr.FromRaw( e.get() );
         }
@@ -737,7 +737,7 @@ private:
         virtual StmtResult ActOnReturnStmt( clang::SourceLocation ReturnLoc,
                                             ExprTy *RetValExp ) 
         {           
-            shared_ptr<Operand> e = hold_expr.FromRaw(RetValExp);
+            shared_ptr<Expression> e = hold_expr.FromRaw(RetValExp);
             shared_ptr<Return> r(new Return);
             r->return_value = e;
             TRACE("aors %p\n", r.get() );
@@ -1354,7 +1354,7 @@ private:
             shared_ptr<Aggregate> ao(new Aggregate);
             for(int i=0; i<NumInit; i++)
             {
-                shared_ptr<Operand> e = hold_expr.FromRaw( InitList[i] );
+                shared_ptr<Expression> e = hold_expr.FromRaw( InitList[i] );
                 ao->operands.push_back( e );
             }
             return hold_expr.ToRaw( ao );                                 
@@ -1632,7 +1632,7 @@ private:
             return 0;
         }
         
-        void CollectArgs( Sequence<Operand> *ps, ExprTy **Args, unsigned NumArgs )
+        void CollectArgs( Sequence<Expression> *ps, ExprTy **Args, unsigned NumArgs )
         {
             for(int i=0; i<NumArgs; i++ )
                 ps->push_back( hold_expr.FromRaw(Args[i]) );
@@ -1670,10 +1670,10 @@ private:
         /// the delete was qualified (::delete). ArrayForm is true if the array form
         /// was used (delete[]).
         virtual ExprResult ActOnCXXDelete( clang::SourceLocation StartLoc, bool UseGlobal,
-                                           bool ArrayForm, ExprTy *Operand ) 
+                                           bool ArrayForm, ExprTy *Expression ) 
         {
             shared_ptr<Delete> d( new Delete );            
-            d->pointer = hold_expr.FromRaw( Operand );
+            d->pointer = hold_expr.FromRaw( Expression );
             
             if( ArrayForm )
                 d->array = shared_ptr<ArrayNew>( new ArrayNew );
