@@ -91,7 +91,7 @@ private:
             target_info(T),
             ident_track( p ),
             global_scope( p ),
-            program( p )
+            all_decls( new Program )
         {
             inferno_scope_stack.push( &*p );
         }
@@ -143,7 +143,10 @@ private:
         RCHold<Node, CXXScopeTy *> hold_scope;
         IdentifierTracker ident_track;
         shared_ptr<Node> global_scope;
-        shared_ptr<Program> program;
+        shared_ptr<Program> all_decls; // not the actual program, just a flattening of the decls
+                                       // we maintain this because decls don't always make it 
+                                       // into the tree by the time we need them, thanks to the
+                                       // way clang works. Decls go in here immediately.
                 
         OwningStmtResult ToStmt( shared_ptr<Statement> s )
         {
@@ -408,10 +411,13 @@ private:
             }
         }
         
-        shared_ptr<AnyInstanceIdentifier> CreateInstanceIdentifier( clang::IdentifierInfo *ID )
+        shared_ptr<AnyInstanceIdentifier> CreateInstanceIdentifier( clang::IdentifierInfo *ID = 0 )
         {
             shared_ptr<InstanceIdentifier> ii( new InstanceIdentifier );
-            ii->value = ID->getName();
+            if(ID)
+                ii->value = ID->getName();
+            else
+                ii->value = string();
             return ii;
         }
         
@@ -445,6 +451,7 @@ private:
                 access = shared_ptr<Public>(new Public);
                 
             shared_ptr<Instance> o(new Instance());
+            all_decls->push_back(o);
             clang::IdentifierInfo *ID = D.getIdentifier();
             const clang::DeclSpec &DS = D.getDeclSpec();            
             if(ID)
@@ -454,8 +461,7 @@ private:
             }
             else
             {
-                o->identifier = shared_ptr<AnyInstanceIdentifier>();
-                TRACE();
+                o->identifier = CreateInstanceIdentifier();
             }
 
             switch( DS.getStorageClassSpec() )
@@ -493,6 +499,7 @@ private:
         shared_ptr<Typedef> CreateTypedefNode( clang::Scope *S, clang::Declarator &D )
         { 
             shared_ptr<Typedef> t(new Typedef);
+            all_decls->push_back(t);            
             clang::IdentifierInfo *ID = D.getIdentifier();
             if(ID)
             {
@@ -508,6 +515,7 @@ private:
         shared_ptr<Label> CreateLabelNode( clang::IdentifierInfo *ID )
         { 
             shared_ptr<Label> l(new Label);            
+            all_decls->push_back(l);
             l->identifier = CreateLabelIdentifier(ID);
             TRACE("%s %p %p\n", ID->getName(), l.get(), ID );            
             return l;
@@ -1174,6 +1182,7 @@ private:
                     ASSERT(!"Unknown type spec type");            
                     break;        
             }
+            all_decls->push_back(h);
             
             if(Name)
             {
@@ -1228,6 +1237,8 @@ private:
         /// completed parsing, when on C++.
         virtual void ActOnFinishCXXClassDef(DeclTy *TagDecl) 
         {
+            TRACE();
+        
             inferno_scope_stack.pop(); // class scope is complete
             ident_track.SetNextRecord();
 
@@ -1263,13 +1274,13 @@ private:
             }            
         
             // Find the specified member in the record implied by the expression on the left of .
-            shared_ptr<Type> tbase = TypeOf().Get(program, a->base);
+            shared_ptr<Type> tbase = TypeOf().Get( all_decls, a->base );
             shared_ptr<TypeIdentifier> tibase = dynamic_pointer_cast<TypeIdentifier>(tbase);
             ASSERT( tibase );
-            shared_ptr<Record> rbase = GetRecordDeclaration(program, tibase);
+            shared_ptr<Record> rbase = GetRecordDeclaration(all_decls, tibase);
             ASSERT( rbase && "thing on left of ./-> is not a record/record ptr" );
             
-            a->member = FindMemberByName( rbase, string(Member.getName()) )->identifier;
+            a->member = FindMemberByName( all_decls, rbase, string(Member.getName()) )->identifier;
 
             ASSERT(a->member && "in r.m or (&r)->m, could not find m in r");        
             
@@ -1388,6 +1399,7 @@ private:
         {
             int enumbits = TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified];
             shared_ptr<Instance> o(new Instance());
+            all_decls->push_back(o);
             o->identifier = CreateInstanceIdentifier(Id);
             o->storage = shared_new<Static>();
             o->constant = shared_new<Const>(); // static const member does not consume storage!!
@@ -1472,14 +1484,14 @@ private:
                                               clang::SourceLocation BaseLoc) 
         {
             shared_ptr<Type> t( hold_type.FromRaw( basetype ) );
-            shared_ptr<InheritanceRecord> ir( dynamic_pointer_cast<InheritanceRecord>(t) );
-            ASSERT( ir );
+            shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(t);
+            ASSERT( ti );
             shared_ptr<Declaration> d = hold_decl.FromRaw( classdecl );
             shared_ptr<Record> r = dynamic_pointer_cast<Record>( d );
             ASSERT( r );
             
             shared_ptr<Base> base( new Base );
-            base->record = ir;
+            base->record = ti;
           /*  if( Virt )
                 base->storage = shared_new<Virtual>();
             else    
@@ -1554,28 +1566,20 @@ private:
         
         shared_ptr<Instance> GetConstructor( shared_ptr<Type> t )
         {
-            if( shared_ptr<Typedef> td = dynamic_pointer_cast<Typedef>(t) )
+            shared_ptr<TypeIdentifier> id = dynamic_pointer_cast<TypeIdentifier>(t);
+            ASSERT(id);
+            shared_ptr<Record> r = GetRecordDeclaration( all_decls, id );
+
+            FOREACH( shared_ptr<Declaration> d, r->members )
             {
-                return GetConstructor( td->type );
+                shared_ptr<Instance> o( dynamic_pointer_cast<Instance>(d) );
+                if( !o )
+                    continue;
+                if( dynamic_pointer_cast<Constructor>(o->type) )
+                    return o;
             }
-            else if( shared_ptr<Record> r = dynamic_pointer_cast<Record>(t) )
-            {
-                FOREACH( shared_ptr<Declaration> d, r->members )
-                {
-                    shared_ptr<Instance> o( dynamic_pointer_cast<Instance>(d) );
-                    if( !o )
-                        continue;
-                    if( dynamic_pointer_cast<Constructor>(o->type) )
-                        return o;
-                }
-                ASSERT(!"missing constructor");
-                return shared_ptr<Instance>();
-            }
-            else 
-            {
-                ASSERT(!"initialisers for PODs not yet implemented"); // TODO
-                return shared_ptr<Instance>();
-            }            
+            ASSERT(!"missing constructor");
+            return shared_ptr<Instance>();
         }
 
         virtual MemInitResult ActOnMemInitializer( DeclTy *ConstructorDecl,
@@ -1592,6 +1596,8 @@ private:
             shared_ptr<Instance> om( dynamic_pointer_cast<Instance>(n) );
             ASSERT( om );
             shared_ptr<Instance> cm = GetConstructor( om->type );
+            ASSERT( cm );
+            ASSERT( cm->identifier );
             
             // Build a lookup to the constructor, using the speiciifed subobject and the matching constructor
             shared_ptr<Lookup> lu(new Lookup);
