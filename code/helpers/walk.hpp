@@ -75,7 +75,10 @@ class Walk
 public:
     Walk( shared_ptr<Node> root )
     {
-        Push( root );
+        Frame f;
+        f.children.push_back( root );
+        f.index = 0;
+        state.push( f );
     }        
         
     bool Done()
