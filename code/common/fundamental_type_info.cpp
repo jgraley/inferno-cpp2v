@@ -1,4 +1,4 @@
-#include "type_info.hpp"
+#include "fundamental_type_info.hpp"
 #include "llvm/ADT/APFloat.h"
 
 //

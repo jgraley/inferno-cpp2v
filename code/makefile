@@ -1,7 +1,7 @@
 LEVEL=..
 include ../makefile.common
 
-INFERNO_MODULES = common/refcount common/read_args common/trace common/type_info common/itemise_members
+INFERNO_MODULES = common/refcount common/read_args common/trace common/fundamental_type_info common/itemise_members
 INFERNO_MODULES += tree/tree 
 INFERNO_MODULES += parse/identifier_tracker 
 INFERNO_MODULES += inferno
