@@ -20,6 +20,14 @@ int main( int argc, char *argv[] )
  
     //WalkAndPrint(program);       
          
-    Render r;
-    r( program );
+    if(ReadArgs::graph)
+    {
+        Graph g;
+        g( program );
+    }
+    else
+    {
+        Render r;
+        r( program );
+    }    
 }
