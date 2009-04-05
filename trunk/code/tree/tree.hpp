@@ -175,7 +175,7 @@ struct Instance : Declaration,
     NODE_FUNCTIONS
     SharedPtr<Type> type;
     SharedPtr<AnyInstanceIdentifier> identifier;
-    SharedPtr<Expression> initialiser; // NULL if uninitialised
+    SharedPtr<Statement> initialiser; // NULL if uninitialised
 };
 
 struct InheritanceRecord;
@@ -315,7 +315,7 @@ struct Label : Declaration
 // The result of a Compound, if viewed as an Expression, is the
 // code itself (imagine a generic byte code) not the result of
 // execution. You have to Call it to get the execution result.
-struct Compound : Expression
+struct Compound : Statement
 {
     NODE_FUNCTIONS
     Sequence<Statement> statements;

@@ -1415,7 +1415,8 @@ private:
                 shared_ptr<Instance> lasto( dynamic_pointer_cast<Instance>(lastd) );
                 ASSERT(lasto && "unexpected kind of declaration inside an enum");
                 shared_ptr<Add> inf( new Add );
-                inf->operands.push_back( lasto->initialiser );
+                shared_ptr<Expression> ei = dynamic_pointer_cast<Expression>( lasto->initialiser );
+                inf->operands.push_back( ei );
                 shared_ptr<Literal> l( new Literal );
                 l->value = CreateNumericConstant( 1, enumbits );
                 inf->operands.push_back( l );

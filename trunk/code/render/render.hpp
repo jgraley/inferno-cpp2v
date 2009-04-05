@@ -353,15 +353,6 @@ private:
             // C++ scope specified (eg o.c::m) but cannot do this until members are set properly
             // in parser, which in turn requires a TypeOfExpression cvapbability in the helpers.     
                    
-        else if( shared_ptr<Compound> c = dynamic_pointer_cast< Compound >(expression) )
-        {
-            AutoPush< shared_ptr<Node> > cs( scope_stack, c );
-            return before + 
-                   "{\n" + 
-                   RenderSequence(c->statements, ";\n", true) +
-                   "}\n" +
-                   after;
-        }
         else if( shared_ptr<Cast> c = dynamic_pointer_cast< Cast >(expression) )
             return before + 
                    "(" + RenderType( c->type, "" ) + ")" +
@@ -484,11 +475,12 @@ private:
                 
                 shared_ptr<Compound> r( new Compound );
                 r->statements = remainder;
-                s += "\n" + RenderOperand(r);
+                s += "\n" + RenderStatement(r, "");
             }
             else
             {
-                s += " = " + RenderOperand(o->initialiser) + sep;
+                shared_ptr<Expression> ei = dynamic_pointer_cast<Expression>( o->initialiser );
+                s += " = " + RenderOperand(ei) + sep;
             }
         }            
         else
@@ -614,8 +606,13 @@ private:
         //printf( "%s %d things\n", typeid(*statement).name(), statement->Itemise().size() );
         if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(statement) )
             return RenderDeclaration( d, sep );
-        else if( shared_ptr<Compound> c = dynamic_pointer_cast< Compound >(statement) ) // Never put ; after a scope - you'd get {blah};
-            return RenderOperand(c);
+        else if( shared_ptr<Compound> c = dynamic_pointer_cast< Compound >(statement) )
+        {
+            AutoPush< shared_ptr<Node> > cs( scope_stack, c );
+            return "{\n" + 
+                   RenderSequence(c->statements, ";\n", true) +
+                   "}\n";
+        }
         else if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(statement) )
             return RenderOperand(e) + sep;
         else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(statement) )
