@@ -4,6 +4,7 @@
 
 std::string ReadArgs::infile;
 std::string ReadArgs::outfile;
+bool ReadArgs::graph;
 bool ReadArgs::trace;
 
 void ReadArgs::Usage()
@@ -29,6 +30,10 @@ void ReadArgs::Read( int argc, char *argv[] )
         else if( argv[i]==std::string("-t") )
         {
             trace = true;
+        }
+        else if( argv[i]==std::string("-g") )
+        {
+            graph = true;
         }
         else 
         {

@@ -244,21 +244,14 @@ private:
             else
                 i = shared_ptr<Unsigned>( new Unsigned );
             
-            shared_ptr<Literal> l( new Literal );   
-            shared_ptr<AnyNumber> pp = CreateNumericConstant(bits);
-            l->value = pp;
-            
-            i->width = l;           
+            i->width = CreateNumericConstant(bits);           
             return i;
         }
         
         shared_ptr<Floating> CreateFloatingType( unsigned bits )
         {
-            shared_ptr<Literal> l( new Literal );            
-            l->value = CreateNumericConstant(bits);
-
             shared_ptr<Floating> f( new Floating );
-            f->width = l;
+            f->width = CreateNumericConstant(bits);      
             return f;
         }
         
@@ -757,7 +750,7 @@ private:
             return hold_expr.ToRaw( o->identifier );            
         }                                   
         
-        shared_ptr<AnyNumber> CreateNumericConstant( unsigned value, int bits=-1 )        
+        shared_ptr<AnyInteger> CreateNumericConstant( unsigned value, int bits=-1 )        
         {
             if( bits == -1 )
                 bits = TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified];
@@ -768,7 +761,7 @@ private:
             return nc;            
         }
         
-        shared_ptr<AnyNumber> CreateNumericConstant( int value, int bits=-1 )        
+        shared_ptr<AnyInteger> CreateNumericConstant( int value, int bits=-1 )        
         {
             if( bits == -1 )
                 bits = TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified];
@@ -1140,7 +1133,12 @@ private:
                 ASSERT( o && "only objects may be bitfields" );
                 shared_ptr<Numeric> n( dynamic_pointer_cast<Numeric>( o->type ) );
                 ASSERT( n && "cannot specify width of non-numeric type" );
-                n->width = hold_expr.FromRaw(BitfieldWidth);
+                shared_ptr<Expression> ee = hold_expr.FromRaw(BitfieldWidth);
+                shared_ptr<Literal> ll = dynamic_pointer_cast<Literal>(ee);
+                ASSERT(ll && "bitfield width must be literal, not expression"); // TODO evaluate
+                shared_ptr<Integer> ii = dynamic_pointer_cast<Integer>(ll->value);
+                ASSERT(ll && "bitfield width must be integer");
+                n->width = ii;
             }
             
             if( Init )

@@ -237,7 +237,7 @@ struct Bool : Type { NODE_FUNCTIONS };
 struct Numeric : Type 
 {
     NODE_FUNCTIONS
-    SharedPtr<Expression> width;  // Bits, not bytes
+    SharedPtr<AnyInteger> width;  // Bits, not bytes
 };
 
 struct Integral : Numeric { NODE_FUNCTIONS };

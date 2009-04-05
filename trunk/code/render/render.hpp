@@ -137,12 +137,9 @@ private:
     {
         bool ds;
         unsigned width;       
-        shared_ptr<Literal> l = dynamic_pointer_cast<Literal>( type->width );
-        ASSERT(l && "width must be a literal"); 
-        shared_ptr<Integer> ic = dynamic_pointer_cast<Integer>( l->value );
+        shared_ptr<Integer> ic = dynamic_pointer_cast<Integer>( type->width );
         ASSERT(ic && "width must be integer"); 
-        if(ic)
-            width = ic->value.getLimitedValue();
+        width = ic->value.getLimitedValue();
                   
         TRACE("width %d\n", width);          
                           
@@ -193,12 +190,9 @@ private:
     {
         string s;
         unsigned base_width;       
-        shared_ptr<Literal> l = dynamic_pointer_cast<Literal>( type->width );
-        ASSERT(l && "width must be literal"); 
-        shared_ptr<Integer> ic = dynamic_pointer_cast<Integer>( l->value );
+        shared_ptr<Integer> ic = dynamic_pointer_cast<Integer>( type->width );
         ASSERT(ic && "width must be integer"); 
-        if(ic)
-            base_width = ic->value.getLimitedValue();
+        base_width = ic->value.getLimitedValue();
     
         // Fix the width
         if( base_width == TypeInfo::float_bits )
