@@ -2,6 +2,7 @@
 #define INFERNO_TYPE_INFO_HPP
 
 #include <typeinfo>
+#include <string>
 #include "trace.hpp"
 
 /* to use:
@@ -106,9 +107,12 @@ public:
         return rhs>*this;
     }
 
-    inline const char* name() const
+    inline string name() const
     {
-        return typeid( *pt ).name(); // TODO clean up output
+        const char *s = typeid( *pt ).name();
+        while( s[0]>='0' && s[0]<='9' )
+           s++;
+        return s;
     }
 };
 

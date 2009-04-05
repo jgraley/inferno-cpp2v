@@ -3,6 +3,7 @@
 #include "common/refcount.hpp"
 #include "parse/parse.hpp"  
 #include "render/render.hpp"
+#include "render/graph.hpp"
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/search_replace.hpp"
@@ -19,6 +20,6 @@ int main( int argc, char *argv[] )
  
     //WalkAndPrint(program);       
          
-    Render r;
+    Graph r;
     r( program );
 }
