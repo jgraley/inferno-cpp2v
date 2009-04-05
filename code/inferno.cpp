@@ -20,6 +20,6 @@ int main( int argc, char *argv[] )
  
     //WalkAndPrint(program);       
          
-    Graph r;
+    Render r;
     r( program );
 }
