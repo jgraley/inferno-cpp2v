@@ -6,6 +6,7 @@
 #include "common/pass.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
+#include "common/fundamental_type_info.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/misc.hpp"
 #include "helpers/scope.hpp"
@@ -513,7 +514,7 @@ private:
         TRACE();
         string s;
         
-        if( access && *(declaration->access) != **access )
+        if( access && ITypeInfo(declaration->access) != ITypeInfo(*access) )
         {
             s += RenderAccess( declaration->access ) + ":\n";
             *access = declaration->access;

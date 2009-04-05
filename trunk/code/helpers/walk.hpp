@@ -187,9 +187,14 @@ private:
     bool recurse;
 };
 
+#define IET(I) if( ITypeInfo(n) I ITypeInfo(pp) ) printf(" " #I);
+
 void WalkAndPrint( shared_ptr<Program> program )
 {
     Walk w( program );
+    
+    shared_ptr<Record> pp( new Record );
+    
     int count=0;
     while(!w.Done())
     {
@@ -206,6 +211,17 @@ void WalkAndPrint( shared_ptr<Program> program )
             printf("%s:", li->value.c_str());
         else
             printf("%s", typeid(*n).name());
+        
+        if(n)
+        {    
+            IET(==) 
+            IET(!=)
+            IET(>)
+            IET(<)
+            IET(>=)
+            IET(<=)
+        }
+            
         w.Advance(); 
         printf("\n");
         count++;

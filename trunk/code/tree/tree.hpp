@@ -10,6 +10,7 @@
 #include <string>
 #include <deque>
 #include "common/itemise_members.hpp"
+#include "common/inferno_type_info.hpp"
 
 struct Node;
 
@@ -50,26 +51,17 @@ struct SharedPtr : GenericPointer, shared_ptr<ELEMENT>
     SharedPtr() {}
 };           
 
-#define NODE_FUNCTIONS ITEMISE_FUNCTION
+#define NODE_FUNCTIONS ITEMISE_FUNCTION ITYPE_INFO_FUNCTION
 
 //////////////////////////// Node Model ////////////////////////////
 
-struct Node : Magic
+struct Node : Magic, ITypeInfo::TypeBase
 {            
     NODE_FUNCTIONS
    
     virtual ~Node(){}  // be a virtual hierarchy
     // Node must be inherited virtually, to allow MI diamonds 
-    // without making Node ambiguous
-    
-    virtual bool operator==( const Node &other )
-    {
-        return typeid( *this ) == typeid( other );
-    }
-    virtual bool operator!=( const Node &other )
-    {
-        return !(*this==other);
-    }
+    // without making Node ambiguous  
 };
 
 //////////////////////////// Properties ///////////////////////////////

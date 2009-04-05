@@ -1,6 +1,6 @@
 
-#ifndef TYPE_INFO_HPP
-#define TYPE_INFO_HPP
+#ifndef FUNDAMENTAL_TYPE_INFO_HPP
+#define FUNDAMENTAL_TYPE_INFO_HPP
 
 #include "llvm/ADT/APFloat.h"
 
