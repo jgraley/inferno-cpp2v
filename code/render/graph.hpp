@@ -96,7 +96,7 @@ public:
         else
         {
             *bold = false;
-            return ITypeInfo(sp).name();
+            return TypeInfo(sp).name();
         }
     }
     

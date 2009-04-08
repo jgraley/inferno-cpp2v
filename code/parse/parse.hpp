@@ -30,7 +30,7 @@
 #include "common/refcount.hpp"
 #include "common/pass.hpp"
 #include "common/trace.hpp"
-#include "common/fundamental_type_info.hpp"
+#include "common/type_db.hpp"
 #include "helpers/misc.hpp"
 #include "helpers/typeof.hpp"
 
@@ -281,14 +281,14 @@ private:
                     case clang::DeclSpec::TST_int:
                     case clang::DeclSpec::TST_unspecified:
                         TRACE("int based %d %d\n", DS.getTypeSpecWidth(), DS.getTypeSpecSign() );
-                        return CreateIntegralType( TypeInfo::integral_bits[DS.getTypeSpecWidth()], 
-                                                   TypeInfo::int_default_signed,
+                        return CreateIntegralType( TypeDb::integral_bits[DS.getTypeSpecWidth()], 
+                                                   TypeDb::int_default_signed,
                                                    DS.getTypeSpecSign() );
                         break;
                     case clang::DeclSpec::TST_char:
                         TRACE("char based %d %d\n", DS.getTypeSpecWidth(), DS.getTypeSpecSign() );
-                        return CreateIntegralType( TypeInfo::char_bits, 
-                                                   TypeInfo::char_default_signed,
+                        return CreateIntegralType( TypeDb::char_bits, 
+                                                   TypeDb::char_default_signed,
                                                    DS.getTypeSpecSign() );
                         break;
                     case clang::DeclSpec::TST_void:
@@ -301,13 +301,13 @@ private:
                         break;
                     case clang::DeclSpec::TST_float:
                         TRACE("float based %d %d\n", DS.getTypeSpecWidth(), DS.getTypeSpecSign() );
-                        return CreateFloatingType( TypeInfo::float_bits );
+                        return CreateFloatingType( TypeDb::float_bits );
                         break;
                     case clang::DeclSpec::TST_double:
                         TRACE("double based %d %d\n", DS.getTypeSpecWidth(), DS.getTypeSpecSign() );
                         return CreateFloatingType( DS.getTypeSpecWidth()==clang::DeclSpec::TSW_long ?
-                                                   TypeInfo::long_double_bits :
-                                                   TypeInfo::double_bits );
+                                                   TypeDb::long_double_bits :
+                                                   TypeDb::double_bits );
                         break;
                     case clang::DeclSpec::TST_typedef:
                         TRACE("typedef\n");
@@ -753,7 +753,7 @@ private:
         shared_ptr<AnyInteger> CreateNumericConstant( unsigned value, int bits=-1 )        
         {
             if( bits == -1 )
-                bits = TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified];
+                bits = TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified];
             llvm::APSInt rv( bits, true );
             rv = value;
             shared_ptr<Integer> nc( new Integer );
@@ -764,7 +764,7 @@ private:
         shared_ptr<AnyInteger> CreateNumericConstant( int value, int bits=-1 )        
         {
             if( bits == -1 )
-                bits = TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified];
+                bits = TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified];
             llvm::APSInt rv( bits, false );
             rv = value;
             shared_ptr<Integer> nc( new Integer );
@@ -788,11 +788,11 @@ private:
             {
                 int bits;
                 if( literal.isLong )
-                    bits = TypeInfo::integral_bits[clang::DeclSpec::TSW_long];
+                    bits = TypeDb::integral_bits[clang::DeclSpec::TSW_long];
                 else if( literal.isLongLong )
-                    bits = TypeInfo::integral_bits[clang::DeclSpec::TSW_longlong];
+                    bits = TypeDb::integral_bits[clang::DeclSpec::TSW_longlong];
                 else
-                    bits = TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified];
+                    bits = TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified];
                     
                 llvm::APSInt rv(bits, literal.isUnsigned);
                 bool err = literal.GetIntegerValue(rv);
@@ -806,11 +806,11 @@ private:
             {
                 const llvm::fltSemantics *semantics;
                 if( literal.isLong )
-                    semantics = TypeInfo::floating_semantics[clang::DeclSpec::TSW_long];
+                    semantics = TypeDb::floating_semantics[clang::DeclSpec::TSW_long];
                 else if( literal.isFloat )
-                    semantics = TypeInfo::floating_semantics[clang::DeclSpec::TSW_short];
+                    semantics = TypeDb::floating_semantics[clang::DeclSpec::TSW_short];
                 else
-                    semantics = TypeInfo::floating_semantics[clang::DeclSpec::TSW_unspecified];
+                    semantics = TypeDb::floating_semantics[clang::DeclSpec::TSW_unspecified];
                 llvm::APFloat rv( literal.GetFloatValue( *semantics ) );
 
                 shared_ptr<Float> fc( new Float( rv ) );
@@ -836,7 +836,7 @@ private:
             {            
 #define BINARY(TOK, TEXT, NODE, ASS, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); o->assign=shared_ptr<ASS>( new ASS ); break;
 #define ALTBIN(TOK, NODE, ASS) BINARY(TOK, "", NODE, ASS, 0)
-#include "tree/operator_info.inc"
+#include "tree/operator_db.inc"
             }
             ASSERT( o );
             o->operands.push_back( hold_expr.FromRaw(LHS) );
@@ -852,7 +852,7 @@ private:
             switch( Kind )
             {
 #define POSTFIX(TOK, TEXT, NODE, ASS, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); o->assign=shared_ptr<ASS>( new ASS ); break;
-#include "tree/operator_info.inc"
+#include "tree/operator_db.inc"
             }
             ASSERT( o );
             o->operands.push_back( hold_expr.FromRaw(Input) );
@@ -867,7 +867,7 @@ private:
             switch( Kind )
             {
 #define PREFIX(TOK, TEXT, NODE, ASS, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); o->assign=shared_ptr<ASS>( new ASS ); break;
-#include "tree/operator_info.inc"
+#include "tree/operator_db.inc"
             }
             ASSERT( o );
             o->operands.push_back( hold_expr.FromRaw(Input) );
@@ -1333,7 +1333,7 @@ private:
                 return ExprResult(true);
                 
             shared_ptr<Integer> nc( new Integer );
-            llvm::APSInt rv(TypeInfo::char_bits, !TypeInfo::char_default_signed);
+            llvm::APSInt rv(TypeDb::char_bits, !TypeDb::char_default_signed);
             rv = literal.getValue();
             nc->value = rv;   
             
@@ -1395,7 +1395,7 @@ private:
                                           clang::SourceLocation IdLoc, clang::IdentifierInfo *Id,
                                           clang::SourceLocation EqualLoc, ExprTy *Val) 
         {
-            int enumbits = TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified];
+            int enumbits = TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified];
             shared_ptr<Instance> o(new Instance());
             all_decls->push_back(o);
             o->identifier = CreateInstanceIdentifier(Id);

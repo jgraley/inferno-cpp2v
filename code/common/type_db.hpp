@@ -1,10 +1,10 @@
 
-#ifndef FUNDAMENTAL_TYPE_INFO_HPP
-#define FUNDAMENTAL_TYPE_INFO_HPP
+#ifndef TYPE_DB_HPP
+#define TYPE_DB_HPP
 
 #include "llvm/ADT/APFloat.h"
 
-struct TypeInfo
+struct TypeDb
 {
     static const int char_bits;
     static const bool int_default_signed;

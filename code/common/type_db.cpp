@@ -1,4 +1,4 @@
-#include "fundamental_type_info.hpp"
+#include "type_db.hpp"
 #include "llvm/ADT/APFloat.h"
 
 //
@@ -9,13 +9,13 @@
 
 #define IS_SIGNED( T ) ((T)-1 < (T)0)
 
-const int TypeInfo::char_bits = sizeof( char ) * 8;
+const int TypeDb::char_bits = sizeof( char ) * 8;
 
-const bool TypeInfo::int_default_signed = IS_SIGNED(int);
+const bool TypeDb::int_default_signed = IS_SIGNED(int);
 
-const bool TypeInfo::char_default_signed = IS_SIGNED(char);
+const bool TypeDb::char_default_signed = IS_SIGNED(char);
 
-const unsigned TypeInfo::integral_bits[] =
+const unsigned TypeDb::integral_bits[] =
 {
     sizeof( int ) * 8,
     sizeof( short ) * 8,
@@ -23,7 +23,7 @@ const unsigned TypeInfo::integral_bits[] =
     sizeof( long long ) * 8
 };
 
-const llvm::fltSemantics *(TypeInfo::floating_semantics[]) =
+const llvm::fltSemantics *(TypeDb::floating_semantics[]) =
 {
     &llvm::APFloat::IEEEdouble,
     &llvm::APFloat::IEEEsingle, // pretend float == short double
@@ -31,8 +31,8 @@ const llvm::fltSemantics *(TypeInfo::floating_semantics[]) =
     NULL
 };
 
-const int TypeInfo::float_bits = sizeof( float ) * 8;
+const int TypeDb::float_bits = sizeof( float ) * 8;
 
-const int TypeInfo::double_bits = sizeof( double ) * 8;
+const int TypeDb::double_bits = sizeof( double ) * 8;
 
-const int TypeInfo::long_double_bits = sizeof( long double ) * 8;
+const int TypeDb::long_double_bits = sizeof( long double ) * 8;

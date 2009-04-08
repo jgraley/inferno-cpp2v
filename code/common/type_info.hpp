@@ -1,5 +1,5 @@
-#ifndef INFERNO_TYPE_INFO_HPP
-#define INFERNO_TYPE_INFO_HPP
+#ifndef TYPE_INFO_HPP
+#define TYPE_INFO_HPP
 
 #include <typeinfo>
 #include <string>
@@ -9,7 +9,7 @@
 
 Put ITYPE_INFO_FUNCTION inside each class that will be used. Create a typeinfo using
 
-ITypeInfo(X) where X is an object, pointer or shared_ptr
+TypeInfo(X) where X is an object, pointer or shared_ptr
 
 Provides name() and a full set of inequalities based on the set model, as follows:
 
@@ -34,12 +34,12 @@ return false.
 
 
 #define ITYPE_INFO_FUNCTION \
-    virtual bool IsDynamicMatch( const ITypeInfo::TypeBase *source ) const \
+    virtual bool IsDynamicMatch( const TypeInfo::TypeBase *source ) const \
     { \
-        return ITypeInfo::IsDynamicMatch( this, source ); \
+        return TypeInfo::IsDynamicMatch( this, source ); \
     }
 
-class ITypeInfo 
+class TypeInfo 
 {
 public:
     struct TypeBase
@@ -59,50 +59,50 @@ public:
         return !!dynamic_cast<const DEST *>(source); 
     }
 
-    ITypeInfo( const TypeBase *p ) :
+    TypeInfo( const TypeBase *p ) :
         pt( p )
     {
         ASSERT(pt);
     }
     
-    ITypeInfo( shared_ptr<TypeBase> p ) :
+    TypeInfo( shared_ptr<TypeBase> p ) :
         pt( p.get() )
     {
         ASSERT(pt);
     }
     
-    ITypeInfo( const TypeBase &p ) :
+    TypeInfo( const TypeBase &p ) :
         pt( &p )
     {
         ASSERT(pt);
     }
        
-    inline bool operator==(const ITypeInfo& rhs) const
+    inline bool operator==(const TypeInfo& rhs) const
     {
         return typeid( *pt ) == typeid( *(rhs.pt) );
     }
     
-    inline bool operator!=(const ITypeInfo& rhs) const
+    inline bool operator!=(const TypeInfo& rhs) const
     {
         return !(*this==rhs);
     }
     
-    inline bool operator>=(const ITypeInfo& rhs) const
+    inline bool operator>=(const TypeInfo& rhs) const
     {
         return pt->IsDynamicMatch( rhs.pt );
     }
 
-    inline bool operator>(const ITypeInfo& rhs) const
+    inline bool operator>(const TypeInfo& rhs) const
     {
         return (*this>=rhs) && (*this!=rhs);
     }
 
-    inline bool operator<=(const ITypeInfo& rhs) const
+    inline bool operator<=(const TypeInfo& rhs) const
     {
         return rhs>=*this;
     }
 
-    inline bool operator<(const ITypeInfo& rhs) const
+    inline bool operator<(const TypeInfo& rhs) const
     {
         return rhs>*this;
     }
