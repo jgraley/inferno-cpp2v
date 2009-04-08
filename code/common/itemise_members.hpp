@@ -28,14 +28,14 @@ public:
         }
     };
     
-    template< class C >
-    static vector< Itemiser::Itemisable * > Itemise( const C *p )
+    template< class ITEMISE_TYPE >
+    static vector< Itemiser::Itemisable * > Itemise( const ITEMISE_TYPE *itemise_architype )
     {
-        static C d;
-        static C s; 
-        bp = (char *)p; 
+        static ITEMISE_TYPE d;
+        static ITEMISE_TYPE s; 
+        bp = (char *)itemise_architype; 
         dstart = (char *)&d;
-        dend = dstart + sizeof(C);
+        dend = dstart + sizeof(d);
         v.clear();
         
         // This is the assignment that will be detected

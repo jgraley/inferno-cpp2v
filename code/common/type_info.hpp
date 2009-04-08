@@ -34,9 +34,9 @@ return false.
 
 
 #define ITYPE_INFO_FUNCTION \
-    virtual bool IsDynamicMatch( const TypeInfo::TypeBase *source ) const \
+    virtual bool IsDynamicMatch( const TypeInfo::TypeBase *source_architype ) const \
     { \
-        return TypeInfo::IsDynamicMatch( this, source ); \
+        return TypeInfo::IsDynamicMatch( this, source_architype ); \
     }
 
 class TypeInfo 
@@ -49,37 +49,37 @@ public:
     };
 
 private:
-    const TypeBase * const pt;
+    const TypeBase * const architype;
     
 public:
-    template< class DEST >    
-    static inline bool IsDynamicMatch( const DEST *dest, const TypeBase *source ) 
+    template< class TARGET_TYPE >    
+    static inline bool IsDynamicMatch( const TARGET_TYPE *target_architype, const TypeBase *source_architype ) 
     { 
-        (void)dest; // don't care about value; just want the type
-        return !!dynamic_cast<const DEST *>(source); 
+        (void)target_architype; // don't care about value of architypes; just want the type
+        return !!dynamic_cast<const TARGET_TYPE *>(source_architype); 
     }
 
     TypeInfo( const TypeBase *p ) :
-        pt( p )
+        architype( p )
     {
-        ASSERT(pt);
+        ASSERT(architype);
     }
     
     TypeInfo( shared_ptr<TypeBase> p ) :
-        pt( p.get() )
+        architype( p.get() )
     {
-        ASSERT(pt);
+        ASSERT(architype);
     }
     
     TypeInfo( const TypeBase &p ) :
-        pt( &p )
+        architype( &p )
     {
-        ASSERT(pt);
+        ASSERT(architype);
     }
        
     inline bool operator==(const TypeInfo& rhs) const
     {
-        return typeid( *pt ) == typeid( *(rhs.pt) );
+        return typeid( *architype ) == typeid( *(rhs.architype) );
     }
     
     inline bool operator!=(const TypeInfo& rhs) const
@@ -89,7 +89,7 @@ public:
     
     inline bool operator>=(const TypeInfo& rhs) const
     {
-        return pt->IsDynamicMatch( rhs.pt );
+        return architype->IsDynamicMatch( rhs.architype );
     }
 
     inline bool operator>(const TypeInfo& rhs) const
@@ -109,7 +109,7 @@ public:
 
     inline string name() const
     {
-        const char *s = typeid( *pt ).name();
+        const char *s = typeid( *architype ).name();
         while( s[0]>='0' && s[0]<='9' )
            s++;
         return s;
