@@ -14,7 +14,7 @@
 
 struct Node;
 
-struct GenericSequence : Itemiser::Itemisable
+struct GenericSequence : Itemiser::Element
 {
     virtual shared_ptr<Node> Get(int i) = 0;
     virtual int size() const = 0;
@@ -33,7 +33,7 @@ struct Sequence : GenericSequence, deque< shared_ptr<ELEMENT> >
     }
 };
 
-struct GenericPointer : Itemiser::Itemisable
+struct GenericPointer : Itemiser::Element
 {
     virtual shared_ptr<Node> Get() = 0;
 };
@@ -55,7 +55,7 @@ struct SharedPtr : GenericPointer, shared_ptr<ELEMENT>
 
 //////////////////////////// Node Model ////////////////////////////
 
-struct Node : Magic, TypeInfo::TypeBase
+struct Node : Magic, TypeInfo::TypeBase, Itemiser
 {            
     NODE_FUNCTIONS
    

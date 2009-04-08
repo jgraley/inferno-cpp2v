@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <vector>
+#include "common.hpp"
+
 using namespace std;
 
 
@@ -11,17 +13,17 @@ extern char big_area[1024];
 class Itemiser
 {
 public:
-    class Itemisable
+    class Element
     {
     public:
-        virtual ~Itemisable() {}
-        Itemisable &operator=( const Itemisable &other )
+        virtual ~Element() {}
+        Element &operator=( const Element &other )
         {
             if( (unsigned)this >= (unsigned)dstart &&
                 (unsigned)this < (unsigned)dend )
             {
                 unsigned ofs = (unsigned)this - (unsigned)dstart;
-                Itemisable *wb = (Itemisable *)(bp + ofs);
+                Element *wb = (Element *)(bp + ofs);
                 v.push_back( wb );
             }
             return *this;
@@ -29,11 +31,13 @@ public:
     };
     
     template< class ITEMISE_TYPE >
-    static vector< Itemiser::Itemisable * > Itemise( const ITEMISE_TYPE *itemise_architype )
+    inline static vector< Itemiser::Element * > ItemiseConcrete( const ITEMISE_TYPE *itemise_architype,
+                                                                 const Itemiser *itemise_object )
     {
+        (void)itemise_architype; // don't care about value of architypes; just want the type
         static ITEMISE_TYPE d;
         static ITEMISE_TYPE s; 
-        bp = (char *)itemise_architype; 
+        bp = (const char *)dynamic_cast<const ITEMISE_TYPE *>(itemise_object); 
         dstart = (char *)&d;
         dend = dstart + sizeof(d);
         v.clear();
@@ -44,16 +48,38 @@ public:
         return v;     
     }
 
-    static char *bp;
-    static char *dstart;
-    static char *dend;
-    static vector<Itemisable *> v;
+    static const char *bp;
+    static const char *dstart;
+    static const char *dend;
+    static vector<Element *> v;
+    
+    static vector< Itemiser::Element * > Itemise( shared_ptr<Itemiser> itemise_object, 
+                                                  shared_ptr<Itemiser> limit_class_architype )
+    {
+        return Itemise( itemise_object.get(), limit_class_architype.get() );
+    }                                                  
+
+    static vector< Itemiser::Element * > Itemise( shared_ptr<Itemiser> itemise_object )
+    {
+        return Itemise( itemise_object.get() );
+    }                                                  
+
+    static vector< Itemiser::Element * > Itemise( const Itemiser *itemise_object, 
+                                                  const Itemiser *limit_class_architype = 0 )
+    {
+        if( limit_class_architype )
+            return limit_class_architype->ItemiseVirtual( itemise_object ); // Only itemise members of itemise_object that are in the superclass of limit_class_architype
+        else
+            return itemise_object->ItemiseVirtual( itemise_object );        // Itemise all members of itemise_object
+    }    
+    
+    virtual vector< Itemiser::Element * > ItemiseVirtual(const Itemiser *itemise_object) const = 0;
 };
 
 #define ITEMISE_FUNCTION \
-    virtual vector< Itemiser::Itemisable * > Itemise() const  \
+    virtual vector< Itemiser::Element * > ItemiseVirtual( const Itemiser *itemise_object ) const  \
     { \
-        return Itemiser::Itemise( this ); \
+        return Itemiser::ItemiseConcrete( this, itemise_object ); \
     } 
 
 #endif

@@ -34,9 +34,9 @@ return false.
 
 
 #define ITYPE_INFO_FUNCTION \
-    virtual bool IsDynamicMatch( const TypeInfo::TypeBase *source_architype ) const \
+    virtual bool IsDynamicMatchVirtual( const TypeInfo::TypeBase *source_architype ) const \
     { \
-        return TypeInfo::IsDynamicMatch( this, source_architype ); \
+        return TypeInfo::IsDynamicMatchConcrete( this, source_architype ); \
     }
 
 class TypeInfo 
@@ -53,7 +53,7 @@ private:
     
 public:
     template< class TARGET_TYPE >    
-    static inline bool IsDynamicMatch( const TARGET_TYPE *target_architype, const TypeBase *source_architype ) 
+    static inline bool IsDynamicMatchConcrete( const TARGET_TYPE *target_architype, const TypeBase *source_architype ) 
     { 
         (void)target_architype; // don't care about value of architypes; just want the type
         return !!dynamic_cast<const TARGET_TYPE *>(source_architype); 
@@ -89,7 +89,7 @@ public:
     
     inline bool operator>=(const TypeInfo& rhs) const
     {
-        return architype->IsDynamicMatch( rhs.architype );
+        return architype->IsDynamicMatchVirtual( rhs.architype );
     }
 
     inline bool operator>(const TypeInfo& rhs) const

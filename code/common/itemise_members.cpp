@@ -1,7 +1,7 @@
 #include "common/itemise_members.hpp"
 
-char *Itemiser::bp;
-char *Itemiser::dstart;
-char *Itemiser::dend;
-vector<Itemiser::Itemisable *> Itemiser::v;
+const char *Itemiser::bp;
+const char *Itemiser::dstart;
+const char *Itemiser::dend;
+vector<Itemiser::Element *> Itemiser::v;
 
