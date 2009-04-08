@@ -10,7 +10,7 @@
 #include <string>
 #include <deque>
 #include "common/itemise_members.hpp"
-#include "common/inferno_type_info.hpp"
+#include "common/type_info.hpp"
 
 struct Node;
 
@@ -55,7 +55,7 @@ struct SharedPtr : GenericPointer, shared_ptr<ELEMENT>
 
 //////////////////////////// Node Model ////////////////////////////
 
-struct Node : Magic, ITypeInfo::TypeBase
+struct Node : Magic, TypeInfo::TypeBase
 {            
     NODE_FUNCTIONS
    
@@ -347,7 +347,7 @@ struct Comparison : Operator { NODE_FUNCTIONS };
 #define PREFIX(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE { NODE_FUNCTIONS };
 #define POSTFIX(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE { NODE_FUNCTIONS };
 #define BINARY(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE { NODE_FUNCTIONS };
-#include "operator_info.inc"
+#include "operator_db.inc"
 
 struct SizeOf : Operator { NODE_FUNCTIONS };
 struct AlignOf : Operator { NODE_FUNCTIONS };

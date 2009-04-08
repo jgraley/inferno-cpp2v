@@ -190,7 +190,7 @@ private:
     bool recurse;
 };
 
-#define IET(I) if( ITypeInfo(n) I ITypeInfo(pp) ) printf(" " #I);
+#define IET(I) if( TypeInfo(n) I TypeInfo(pp) ) printf(" " #I);
 
 void WalkAndPrint( shared_ptr<Program> program )
 {

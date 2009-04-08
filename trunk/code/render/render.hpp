@@ -6,7 +6,7 @@
 #include "common/pass.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
-#include "common/fundamental_type_info.hpp"
+#include "common/type_db.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/misc.hpp"
 #include "helpers/scope.hpp"
@@ -63,8 +63,8 @@ private:
         else if( shared_ptr<Integer> ic = dynamic_pointer_cast< Integer >(sp) )
             return string(ic->value.toString(10)) + 
                    (ic->value.isUnsigned() ? "U" : "") + 
-                   (ic->value.getBitWidth()>TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
-                   (ic->value.getBitWidth()>TypeInfo::integral_bits[clang::DeclSpec::TSW_long] ? "L" : ""); 
+                   (ic->value.getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
+                   (ic->value.getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_long] ? "L" : ""); 
                    // note, assuming longlong bigger than long, so second L appends first to get LL
         else if( shared_ptr<Float> fc = dynamic_pointer_cast< Float >(sp) )
         {
@@ -72,8 +72,8 @@ private:
             // generate hex float since it can be exact
             fc->value.convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
             return string(hs) + 
-                   (&(fc->value.getSemantics())==TypeInfo::floating_semantics[clang::DeclSpec::TSW_short] ? "F" : "") +
-                   (&(fc->value.getSemantics())==TypeInfo::floating_semantics[clang::DeclSpec::TSW_long] ? "L" : ""); 
+                   (&(fc->value.getSemantics())==TypeDb::floating_semantics[clang::DeclSpec::TSW_short] ? "F" : "") +
+                   (&(fc->value.getSemantics())==TypeDb::floating_semantics[clang::DeclSpec::TSW_long] ? "L" : ""); 
         }           
         else
             return ERROR_UNSUPPORTED( sp );
@@ -143,10 +143,10 @@ private:
                   
         TRACE("width %d\n", width);          
                           
-        if( width == TypeInfo::char_bits )
-            ds = TypeInfo::char_default_signed;
+        if( width == TypeDb::char_bits )
+            ds = TypeDb::char_default_signed;
         else
-            ds = TypeInfo::int_default_signed;
+            ds = TypeDb::int_default_signed;
         
         // Produce signed or unsigned if required
         // Note: literal strings can be converted to char * but not unsigned char * or signed char * 
@@ -158,15 +158,15 @@ private:
 
         // Fix the width
         bool bitfield = false;
-        if( width == TypeInfo::char_bits )
+        if( width == TypeDb::char_bits )
             s += "char";
-        else if( width == TypeInfo::integral_bits[clang::DeclSpec::TSW_unspecified] )
+        else if( width == TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] )
             s += "int";
-        else if( width == TypeInfo::integral_bits[clang::DeclSpec::TSW_short] )
+        else if( width == TypeDb::integral_bits[clang::DeclSpec::TSW_short] )
             s += "short";
-        else if( width == TypeInfo::integral_bits[clang::DeclSpec::TSW_long] )
+        else if( width == TypeDb::integral_bits[clang::DeclSpec::TSW_long] )
             s += "long";
-        else if( width == TypeInfo::integral_bits[clang::DeclSpec::TSW_longlong] )
+        else if( width == TypeDb::integral_bits[clang::DeclSpec::TSW_longlong] )
             s += "long long";
         else    // unmatched defaults to int for bitfields
         {
@@ -195,11 +195,11 @@ private:
         base_width = ic->value.getLimitedValue();
     
         // Fix the width
-        if( base_width == TypeInfo::float_bits )
+        if( base_width == TypeDb::float_bits )
             s += "float";
-        else if( base_width == TypeInfo::double_bits )
+        else if( base_width == TypeDb::double_bits )
             s += "double";
-        else if( base_width == TypeInfo::long_double_bits )
+        else if( base_width == TypeDb::long_double_bits )
             s += "long double";
         else    
             ASSERT( !"no builtin floating type has required bit width"); // TODO drop in a bit vector
@@ -299,7 +299,7 @@ private:
            RenderOperand( no->operands[0], true ) +\
            TEXT +\
            after;
-#include "tree/operator_info.inc"                   
+#include "tree/operator_db.inc"                   
         else if( shared_ptr<ConditionalOperator> o = dynamic_pointer_cast< ConditionalOperator >(expression) )
             return before + 
                    RenderOperand( o->condition, true ) + "?" +
@@ -500,7 +500,7 @@ private:
         TRACE();
         string s;
         
-        if( access && ITypeInfo(declaration->access) != ITypeInfo(*access) )
+        if( access && TypeInfo(declaration->access) != TypeInfo(*access) )
         {
             s += RenderAccess( declaration->access ) + ":\n";
             *access = declaration->access;
