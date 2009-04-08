@@ -45,7 +45,7 @@ class Walk
     { 
         Frame f;
 
-        vector< Itemiser::Itemisable * > members = n->Itemise();
+        vector< Itemiser::Element * > members = Itemiser::Itemise(n);
         for( int i=0; i<members.size(); i++ )
         {
             if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )                

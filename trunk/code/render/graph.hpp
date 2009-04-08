@@ -127,7 +127,7 @@ public:
         s += Id(n) + " [\n";
         s += "label = \"<fixed> " + Name(n, &bold);
 
-        vector< Itemiser::Itemisable * > members = n->Itemise();
+        vector< Itemiser::Element * > members = Itemiser::Itemise(n);
         for( int i=0; i<members.size(); i++ )
         {
             if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )                
@@ -155,7 +155,7 @@ public:
     string DoNodeLinks( shared_ptr<Node> n )
     {    
         string s;
-        vector< Itemiser::Itemisable * > members = n->Itemise();
+        vector< Itemiser::Element * > members = Itemiser::Itemise(n);
         for( int i=0; i<members.size(); i++ )
         {
             if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )                
