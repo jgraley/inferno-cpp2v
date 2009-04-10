@@ -11,6 +11,7 @@
 #include <deque>
 #include "common/itemise_members.hpp"
 #include "common/type_info.hpp"
+#include "common/copy.hpp"
 
 struct Node;
 
@@ -51,11 +52,14 @@ struct SharedPtr : GenericPointer, shared_ptr<ELEMENT>
     SharedPtr() {}
 };           
 
-#define NODE_FUNCTIONS ITEMISE_FUNCTION ITYPE_INFO_FUNCTION
+#define NODE_FUNCTIONS ITEMISE_FUNCTION ITYPE_INFO_FUNCTION COPY_FUNCTION
 
 //////////////////////////// Node Model ////////////////////////////
 
-struct Node : Magic, TypeInfo::TypeBase, Itemiser
+struct Node : Magic, 
+              TypeInfo::TypeBase, 
+              Itemiser,
+              Copier
 {            
     NODE_FUNCTIONS
    
@@ -161,7 +165,7 @@ struct AnyConst : Property { NODE_FUNCTIONS };
 struct Const : AnyConst { NODE_FUNCTIONS };
 struct NonConst : AnyConst { NODE_FUNCTIONS };
 
-struct Physical
+struct Physical : virtual Node
 {
     NODE_FUNCTIONS
     SharedPtr<AnyConst> constant; // TODO all functions to be const (otherwise would imply self-modifiying code). See idempotent
