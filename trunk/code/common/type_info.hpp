@@ -33,7 +33,7 @@ return false.
 */
 
 
-#define ITYPE_INFO_FUNCTION \
+#define TYPE_INFO_FUNCTION \
     virtual bool IsDynamicMatchVirtual( const TypeInfo::TypeBase *source_architype ) const \
     { \
         return TypeInfo::IsDynamicMatchConcrete( this, source_architype ); \
@@ -44,7 +44,7 @@ class TypeInfo
 public:
     struct TypeBase
     {   
-        ITYPE_INFO_FUNCTION
+        TYPE_INFO_FUNCTION
         virtual ~TypeBase() {}
     };
 
