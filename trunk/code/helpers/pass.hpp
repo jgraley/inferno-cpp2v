@@ -2,7 +2,7 @@
 #define PASS_HPP
 
 #include "tree/tree.hpp"
-#include "refcount.hpp"
+#include "common/refcount.hpp"
 
 class Pass
 {
