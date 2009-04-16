@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <vector>
-#include "common.hpp"
+#include "common/common.hpp"
 
 using namespace std;
 

@@ -3,7 +3,7 @@
 
 #include "tree/tree.hpp"
 #include "common/refcount.hpp"
-#include "common/pass.hpp"
+#include "helpers/pass.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
 

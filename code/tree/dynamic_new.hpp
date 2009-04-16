@@ -1,7 +1,7 @@
 #ifndef DYNAMIC_NEW_HPP
 #define DYNAMIC_NEW_HPP
 
-#include "common.hpp"
+#include "common/common.hpp"
 
 class DynamicNew
 {

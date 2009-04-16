@@ -9,9 +9,9 @@
 #include "common/magic.hpp"
 #include <string>
 #include <deque>
-#include "common/itemise_members.hpp"
-#include "common/type_info.hpp"
-#include "common/dynamic_new.hpp"
+#include "itemise_members.hpp"
+#include "type_info.hpp"
+#include "dynamic_new.hpp"
 
 struct Node;
 

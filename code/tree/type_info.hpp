@@ -3,7 +3,7 @@
 
 #include <typeinfo>
 #include <string>
-#include "trace.hpp"
+#include "common/trace.hpp"
 
 /* to use:
 
