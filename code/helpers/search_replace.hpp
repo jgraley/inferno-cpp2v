@@ -8,8 +8,8 @@
 
 class SearchReplace
 {
-    shared_ptr<Declaration> search;
-    shared_ptr<Declaration> replace;
+    shared_ptr<Node> search;
+    shared_ptr<Node> replace;
 
     shared_ptr<AnyString> CreateString( const char *s )
     {
@@ -18,6 +18,8 @@ class SearchReplace
         return st;
     }
 
+    static bool IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern );
+    
 public:
     SearchReplace()
     {  
@@ -28,15 +30,10 @@ public:
         FOREACH( shared_ptr<Declaration> d, *pattern )
             if( shared_ptr<Record> sr = dynamic_pointer_cast<Record>(d) )
             {
-/*                if( sr->name == CreateString("SEARCH") )
-                    search = sr->members[0];
-                else if( sr->name == CreateString("REPLACE") )
-                    replace = sr->members[0];
-                else
-                    ASSERT( !"Only \"struct SEARCH\" or \"struct REPLACE\" at top level");
-                ASSERT( sr->members.size()==1 && "only one item in SEARCH and REPLACE structs");           
-*/            }
+            }
         ASSERT(search);
         ASSERT(replace);    
     }
+
+    static void Test();
 };

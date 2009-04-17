@@ -58,7 +58,8 @@ then
 fi
 
 echo Transform... 
-$inferno -i $infile -o $outfile
+# Always do self-test
+$inferno -s -i $infile -o $outfile
 ires=$?
 
 if test $ires -eq 0

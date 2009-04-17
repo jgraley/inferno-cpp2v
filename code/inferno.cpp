@@ -8,18 +8,24 @@
 #include "helpers/walk.hpp"
 #include "helpers/search_replace.hpp"
 
+void SelfTest();
+
 int main( int argc, char *argv[] )
 {
     // Check the command line arguments 
     ReadArgs::Read( argc, argv );
 
+    if( ReadArgs::selftest )
+        SelfTest();
+
+    if( ReadArgs::infile.empty() )
+        return 0;
+
     shared_ptr<Program> program(new Program);  
 
     Parse p(ReadArgs::infile);        
     p( program );
- 
-    //WalkAndPrint(program);       
-         
+          
     if(ReadArgs::graph)
     {
         Graph g;
@@ -30,4 +36,11 @@ int main( int argc, char *argv[] )
         Render r;
         r( program );
     }    
+    
+    return 0;
+}
+
+void SelfTest()
+{
+    SearchReplace::Test();
 }

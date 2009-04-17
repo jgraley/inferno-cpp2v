@@ -17,6 +17,7 @@ public:
     static void Usage();
     static void Read( int argc, char *argv[] );
     static bool trace;
+    static bool selftest;
 };
 
 #endif
