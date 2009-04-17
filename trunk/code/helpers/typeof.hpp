@@ -48,21 +48,21 @@ public:
             ASSERT(!"Unknown expression, please add");             
         }
     }
-};
 
-// Is this call really a constructor call? If so return the object being
-// constructoed. Otherwise, return NULL
-shared_ptr<Expression> IsConstructorCall( shared_ptr<Program> program, shared_ptr<Call> call )
-{
-    shared_ptr<Lookup> lf = dynamic_pointer_cast<Lookup>(call->function);            
-    if(!lf)
-        return shared_ptr<Expression>();
-        
-    ASSERT(lf->member);
-    if( dynamic_pointer_cast<Constructor>( TypeOf().Get( program, lf->member ) ) )
-        return lf->base;
-    else
-        return shared_ptr<Expression>();
-}
+    // Is this call really a constructor call? If so return the object being
+    // constructoed. Otherwise, return NULL
+    static shared_ptr<Expression> IsConstructorCall( shared_ptr<Program> program, shared_ptr<Call> call )
+    {
+        shared_ptr<Lookup> lf = dynamic_pointer_cast<Lookup>(call->function);            
+        if(!lf)
+            return shared_ptr<Expression>();
+            
+        ASSERT(lf->member);
+        if( dynamic_pointer_cast<Constructor>( TypeOf().Get( program, lf->member ) ) )
+            return lf->base;
+        else
+            return shared_ptr<Expression>();
+    }
+};
 
 #endif

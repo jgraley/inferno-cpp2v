@@ -188,47 +188,47 @@ public:
     
 private:
     bool recurse;
-};
 
 #define IET(I) if( TypeInfo(n) I TypeInfo(pp) ) printf(" " #I);
 
-void WalkAndPrint( shared_ptr<Program> program )
-{
-    Walk w( program );
-    
-    shared_ptr<Record> pp( new Record );
-    
-    int count=0;
-    while(!w.Done())
+    static void WalkAndPrint( shared_ptr<Program> program )
     {
-        shared_ptr<Node> n = w.Get();
-        for( int i=0; i<w.Depth(); i++ )
-            printf("    ");
-        if(!n)
-            printf("null");
-        else if(shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(n) )
-            printf("%s", ii->value.c_str());
-        else if(shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(n) )
-            printf("type %s", ti->value.c_str());
-        else if(shared_ptr<LabelIdentifier> li = dynamic_pointer_cast<LabelIdentifier>(n) )
-            printf("%s:", li->value.c_str());
-        else
-            printf("%s", typeid(*n).name());
+        Walk w( program );
         
-        if(n)
-        {    
-            IET(==) 
-            IET(!=)
-            IET(>)
-            IET(<)
-            IET(>=)
-            IET(<=)
-        }
+        shared_ptr<Record> pp( new Record );
+        
+        int count=0;
+        while(!w.Done())
+        {
+            shared_ptr<Node> n = w.Get();
+            for( int i=0; i<w.Depth(); i++ )
+                printf("    ");
+            if(!n)
+                printf("null");
+            else if(shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(n) )
+                printf("%s", ii->value.c_str());
+            else if(shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(n) )
+                printf("type %s", ti->value.c_str());
+            else if(shared_ptr<LabelIdentifier> li = dynamic_pointer_cast<LabelIdentifier>(n) )
+                printf("%s:", li->value.c_str());
+            else
+                printf("%s", typeid(*n).name());
             
-        w.Advance(); 
-        printf("\n");
-        count++;
-    }   
-}
+            if(n)
+            {    
+                IET(==) 
+                IET(!=)
+                IET(>)
+                IET(<)
+                IET(>=)
+                IET(<=)
+            }
+                
+            w.Advance(); 
+            printf("\n");
+            count++;
+        }   
+    }
+};
 
 #endif
