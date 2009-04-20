@@ -85,10 +85,14 @@ struct String : AnyString
 
 struct AnyNumber : FundamentalProperty { NODE_FUNCTIONS };
 
+#define INTEGER_DEFAULT_WIDTH 32
+
 struct AnyInteger : AnyNumber { NODE_FUNCTIONS };
 struct Integer : AnyInteger
 {
     NODE_FUNCTIONS
+    Integer( int i ) : value(INTEGER_DEFAULT_WIDTH) { value = i; }
+    Integer() : value(INTEGER_DEFAULT_WIDTH) { value = 0; }
     llvm::APSInt value; // APSint can be signed or unsigned
 };
 

@@ -220,7 +220,7 @@ private:
             ident_track.PopScope(S);
         }
           
-        shared_ptr<Integral> CreateIntegralType( unsigned bits, 
+        shared_ptr<Integral> CreateIntegralType( int bits, 
                                                  bool default_signed, 
                                                  clang::DeclSpec::TSS type_spec_signed = clang::DeclSpec::TSS_unspecified )
         {
@@ -750,25 +750,9 @@ private:
             return hold_expr.ToRaw( o->identifier );            
         }                                   
         
-        shared_ptr<AnyInteger> CreateNumericConstant( unsigned value, int bits=-1 )        
+        shared_ptr<AnyInteger> CreateNumericConstant( int value )        
         {
-            if( bits == -1 )
-                bits = TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified];
-            llvm::APSInt rv( bits, true );
-            rv = value;
-            shared_ptr<Integer> nc( new Integer );
-            nc->value = rv;
-            return nc;            
-        }
-        
-        shared_ptr<AnyInteger> CreateNumericConstant( int value, int bits=-1 )        
-        {
-            if( bits == -1 )
-                bits = TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified];
-            llvm::APSInt rv( bits, false );
-            rv = value;
-            shared_ptr<Integer> nc( new Integer );
-            nc->value = rv;
+            shared_ptr<Integer> nc( new Integer(value) );
             return nc;            
         }
         
@@ -1395,13 +1379,12 @@ private:
                                           clang::SourceLocation IdLoc, clang::IdentifierInfo *Id,
                                           clang::SourceLocation EqualLoc, ExprTy *Val) 
         {
-            int enumbits = TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified];
             shared_ptr<Instance> o(new Instance());
             all_decls->push_back(o);
             o->identifier = CreateInstanceIdentifier(Id);
             o->storage = shared_new<Static>();
             o->constant = shared_new<Const>(); // static const member does not consume storage!!
-            o->type = CreateIntegralType( enumbits, false );
+            o->type = CreateIntegralType( TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified], false );
             o->access = shared_ptr<Public>(new Public);
             if( Val )
             {
@@ -1416,14 +1399,14 @@ private:
                 shared_ptr<Expression> ei = dynamic_pointer_cast<Expression>( lasto->initialiser );
                 inf->operands.push_back( ei );
                 shared_ptr<Literal> l( new Literal );
-                l->value = CreateNumericConstant( 1, enumbits );
+                l->value = CreateNumericConstant( 1 );
                 inf->operands.push_back( l );
                 o->initialiser = inf;
             }
             else
             {
                 shared_ptr<Literal> l( new Literal );
-                l->value = CreateNumericConstant( 0, enumbits );
+                l->value = CreateNumericConstant( 0 );
                 o->initialiser = l;
             }
             ident_track.Add(Id, o, S); 
