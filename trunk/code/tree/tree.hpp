@@ -11,7 +11,7 @@
 #include <deque>
 #include "itemise_members.hpp"
 #include "type_info.hpp"
-#include "dynamic_new.hpp"
+#include "duplicate.hpp"
 
 struct Node;
 
@@ -52,14 +52,14 @@ struct SharedPtr : GenericPointer, shared_ptr<ELEMENT>
     SharedPtr() {}
 };           
 
-#define NODE_FUNCTIONS ITEMISE_FUNCTION TYPE_INFO_FUNCTION DYNAMIC_NEW_FUNCTION
+#define NODE_FUNCTIONS ITEMISE_FUNCTION TYPE_INFO_FUNCTION DUPLICATE_FUNCTION
 
 //////////////////////////// Node Model ////////////////////////////
 
 struct Node : Magic, 
               TypeInfo::TypeBase, 
               Itemiser,
-              DynamicNew
+              Duplicator
 {            
     NODE_FUNCTIONS
    
