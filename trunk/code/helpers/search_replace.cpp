@@ -2,6 +2,10 @@
 
 bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern )
 {
+    ASSERT( !!pattern ); // Disallow NULL pattern for now, could change this if required
+    if( !x )
+        return false; // NULL target allowed; never matches since pattern is not allwed to be NULL
+
     // Is node correct class?
     if( !(TypeInfo(pattern) >= TypeInfo(x)) ) // Note >= is "non-strict superset" i.e. search is superclass of x or same class
     {
@@ -72,6 +76,21 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
         }
     }       
     return true;
+}
+
+
+shared_ptr<Node> SearchReplace::Search( shared_ptr<Node> program, shared_ptr<Node> pattern )
+{
+    Walk w( program );
+    while(!w.Done())
+    {
+        shared_ptr<Node> x = w.Get();
+        if( IsMatchPattern( x, pattern ) )
+            return x;                            
+        w.Advance(); 
+    }    
+    
+    return shared_ptr<Node>();
 }
 
 

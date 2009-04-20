@@ -228,7 +228,7 @@ struct Pointer : Type
     SharedPtr<Type> destination;
 };
 
-struct Reference : Type // TODO could ref derive from ptr?
+struct Reference : Type
 {
     NODE_FUNCTIONS
     SharedPtr<Type> destination;

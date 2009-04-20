@@ -26,6 +26,15 @@ int main( int argc, char *argv[] )
     Parse p(ReadArgs::infile);        
     p( program );
           
+/*    llvm::APSInt apsint( 32, true );    
+    shared_ptr<Integer> i( new Integer );
+    shared_ptr<Integral> v( new Integral );
+    apsint = 16;
+    i->value = apsint;
+    v->width = i;
+    bool found = !!SearchReplace::Search( program, v );       
+    printf(found?"YES!!!!\n":"NO!!!!!!\n");
+  */        
     if(ReadArgs::graph)
     {
         Graph g;
