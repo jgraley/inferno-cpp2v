@@ -17,10 +17,11 @@ class SearchReplace
         st->value = s;
         return st;
     }
-
-    static bool IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern );
     
 public:
+    static bool IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern );
+    static shared_ptr<Node> Search( shared_ptr<Node> program, shared_ptr<Node> pattern );
+
     SearchReplace()
     {  
         shared_ptr<Program> pattern(new Program);  

@@ -87,6 +87,9 @@ rules by causing combinational loops. Note that this is distinct from the
 situation before local contexts were introduced, where a function could run for
 as long as it wanted and possibly indeterminately.
 
+TODO turn early returns into assign-to-local and goto end. Real return
+comes at end. Invariant is no early returns.
+
 The steps within this phase follow:
 
 ----------------------------------------------------------------------------
