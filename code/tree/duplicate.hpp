@@ -6,21 +6,21 @@
 class Duplicator
 {
 public:
-    static shared_ptr<Duplicator> Duplicate( shared_ptr<Duplicator> architype )
+    static shared_ptr<Duplicator> Duplicate( shared_ptr<Duplicator> source )
     {
-        return Duplicate( architype.get() );
+        return Duplicate( source.get() );
     }
     
-    static shared_ptr<Duplicator> Duplicate( const Duplicator *architype )
+    static shared_ptr<Duplicator> Duplicate( const Duplicator *source )
     {
-        return architype->DuplicateVirtual();
+        return source->DuplicateVirtual();
     }
     
     template< class TYPE >
-    inline static shared_ptr<Duplicator> DuplicateConcrete( const TYPE *architype )
+    inline static shared_ptr<Duplicator> DuplicateConcrete( const TYPE *source )
     {
-        (void)architype; // don't care about value of architypes; just want the type
-        return shared_ptr<TYPE>(new TYPE);
+        shared_ptr<TYPE> p(new TYPE);
+        return p;
     }    
 
     virtual shared_ptr<Duplicator> DuplicateVirtual() const = 0;
