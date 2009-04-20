@@ -20,6 +20,7 @@ public:
     inline static shared_ptr<Duplicator> DuplicateConcrete( const TYPE *source )
     {
         shared_ptr<TYPE> p(new TYPE);
+        *p = *source;
         return p;
     }    
 
