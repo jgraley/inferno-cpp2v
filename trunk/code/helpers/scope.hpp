@@ -48,8 +48,9 @@ inline shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identi
 	    }
 	}
 	
-	ASSERT(0); // every identifier should have a scope - if this fails, we've missed out a kind of scope
-	           // Note: if Flattener is not automated yet, then it may have missed something
+	ASSERT(!"Could not find scope for identifier"); 
+	// every identifier should have a scope - if this fails, we've missed out a kind of scope
+	// Note: if Flattener is not automated yet, then it may have missed something
 	return shared_ptr<Node>();
 }
 

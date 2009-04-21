@@ -15,9 +15,44 @@
 
 struct Node;
 
+struct GenericPointer : Itemiser::Element
+{
+    virtual shared_ptr<Node> Get() = 0;
+    virtual void Set( shared_ptr<Node> n ) = 0;
+};
+
+template<typename ELEMENT>
+struct SharedPtr : GenericPointer, shared_ptr<ELEMENT> 
+{
+    virtual shared_ptr<Node> Get()
+    {
+        return (shared_ptr<Node>)*(shared_ptr<ELEMENT> *)this;
+    }
+    virtual void Set( shared_ptr<Node> n )
+    {
+        if( !n )
+        {
+            *(shared_ptr<ELEMENT> *)this = shared_ptr<ELEMENT>(); // handle NULL explicitly since dyn cast uses NULL to indicate wrong type   
+        }
+        else
+        {
+            shared_ptr<ELEMENT> pe = dynamic_pointer_cast<ELEMENT>(n);
+            if( !pe )
+                TRACE("Type was %s\n", TypeInfo(n).name().c_str() );
+            ASSERT( pe && "Tried to push_back() wrong type of node via GenericSequence" );
+            *(shared_ptr<ELEMENT> *)this = pe;        
+        }
+    }
+    template< typename OTHER >
+    SharedPtr( const shared_ptr<OTHER> &o ) : 
+        shared_ptr<ELEMENT>(o) {}
+    SharedPtr() {}
+};           
+
 struct GenericSequence : Itemiser::Element
 {
     virtual shared_ptr<Node> Get(int i) = 0;
+    virtual void Set( int i, shared_ptr<Node> n ) = 0;
     virtual int size() const = 0;
 };
 
@@ -28,29 +63,20 @@ struct Sequence : GenericSequence, deque< shared_ptr<ELEMENT> >
     {
         return (shared_ptr<Node>)(*(deque< shared_ptr<ELEMENT> > *)this)[i];
     }
+    virtual void Set( int i, shared_ptr<Node> n )
+    {
+        ASSERT( n ); // never put NULL into a Sequence
+        shared_ptr<ELEMENT> pe = dynamic_pointer_cast<ELEMENT>(n);
+        if( !pe )
+            TRACE("Type was %s\n", TypeInfo(n).name().c_str() );
+        ASSERT( pe && "Tried to push_back() wrong type of node via GenericSequence" );
+        (*(deque< shared_ptr<ELEMENT> > *)this)[i] = pe; 
+    }
     virtual int size() const
     {
         return ((deque< shared_ptr<ELEMENT> > *)this)->size();
     }
 };
-
-struct GenericPointer : Itemiser::Element
-{
-    virtual shared_ptr<Node> Get() = 0;
-};
-
-template<typename ELEMENT>
-struct SharedPtr : GenericPointer, shared_ptr<ELEMENT> 
-{
-    virtual shared_ptr<Node> Get()
-    {
-        return (shared_ptr<Node>)*(shared_ptr<ELEMENT> *)this;
-    }
-    template< typename OTHER >
-    SharedPtr( const shared_ptr<OTHER> &o ) : 
-        shared_ptr<ELEMENT>(o) {}
-    SharedPtr() {}
-};           
 
 #define NODE_FUNCTIONS ITEMISE_FUNCTION TYPE_INFO_FUNCTION DUPLICATE_FUNCTION
 

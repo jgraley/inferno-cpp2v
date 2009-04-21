@@ -17,65 +17,65 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
         shared_ptr<String> x_str = dynamic_pointer_cast<String>(x);
         ASSERT( x_str );
         return x_str->value == pattern_str->value;
-    }
-    
-    if( shared_ptr<Integer> pattern_int = dynamic_pointer_cast<Integer>(pattern) )
+    }    
+    else if( shared_ptr<Integer> pattern_int = dynamic_pointer_cast<Integer>(pattern) )
     {
         shared_ptr<Integer> x_int = dynamic_pointer_cast<Integer>(x);
         ASSERT( x_int );
         TRACE("%s %s\n", x_int->value.toString(10).c_str(), pattern_int->value.toString(10).c_str() );
         return x_int->value == pattern_int->value;
-    }
-    
-    if( shared_ptr<Float> pattern_flt = dynamic_pointer_cast<Float>(pattern) )
+    }    
+    else if( shared_ptr<Float> pattern_flt = dynamic_pointer_cast<Float>(pattern) )
     {
         shared_ptr<Float> x_flt = dynamic_pointer_cast<Float>(x);
         ASSERT( x_flt );
         return x_flt->value.bitwiseIsEqual( pattern_flt->value );
     }
-    
-    vector< Itemiser::Element * > pattern_memb = Itemiser::Itemise( pattern.get() ); 
-    vector< Itemiser::Element * > x_memb = Itemiser::Itemise( x.get(),           // The thing we're itemising
-                                                              pattern.get() );   // Just get the members corresponding to pattern's class
-    ASSERT( pattern_memb.size() == x_memb.size() );
-    
-    for( int i=0; i<pattern_memb.size(); i++ )
+    else // node is standard pattern, so recurse children (or we have a match)
     {
-        ASSERT( pattern_memb[i] && "itemise returned null element");
-        ASSERT( x_memb[i] && "itemise returned null element");
+        vector< Itemiser::Element * > pattern_memb = Itemiser::Itemise( pattern.get() ); 
+        vector< Itemiser::Element * > x_memb = Itemiser::Itemise( x.get(),           // The thing we're itemising
+                                                                  pattern.get() );   // Just get the members corresponding to pattern's class
+        ASSERT( pattern_memb.size() == x_memb.size() );
         
-        if( GenericSequence *pattern_seq = dynamic_cast<GenericSequence *>(pattern_memb[i]) )                
+        for( int i=0; i<pattern_memb.size(); i++ )
         {
-            GenericSequence *x_seq = dynamic_cast<GenericSequence *>(x_memb[i]);
-            ASSERT( x_seq && "itemise for target didn't match itemise for pattern");
+            ASSERT( pattern_memb[i] && "itemise returned null element");
+            ASSERT( x_memb[i] && "itemise returned null element");
             
-            if( x_seq->size() != pattern_seq->size() )
-                return false;
-            
-            for( int j=0; j<pattern_seq->size(); j++ )
+            if( GenericSequence *pattern_seq = dynamic_cast<GenericSequence *>(pattern_memb[i]) )                
             {
-                bool match = IsMatchPattern( x_seq->Get(j), pattern_seq->Get(j) );
-                if( !match )
-                    return false;
-            }
-        }            
-        else if( GenericPointer *pattern_ptr = dynamic_cast<GenericPointer *>(pattern_memb[i]) )         
-        {
-            GenericPointer *x_ptr = dynamic_cast<GenericPointer *>(x_memb[i]);
-            ASSERT( x_ptr && "itemise for target didn't match itemise for pattern");
-            if( !!x_ptr->Get() != !!pattern_ptr->Get() )
-                return false;
+                GenericSequence *x_seq = dynamic_cast<GenericSequence *>(x_memb[i]);
+                ASSERT( x_seq && "itemise for target didn't match itemise for pattern");
                 
-            bool match = IsMatchPattern( x_ptr->Get(), pattern_ptr->Get() );
-            if( !match )
-                return false;                     
-        }
-        else
-        {
-            ASSERT(!"got something from itemise that isnt a sequence or a shared pointer");               
-        }
-    }       
-    return true;
+                if( x_seq->size() != pattern_seq->size() )
+                    return false;
+                
+                for( int j=0; j<pattern_seq->size(); j++ )
+                {
+                    bool match = IsMatchPattern( x_seq->Get(j), pattern_seq->Get(j) );
+                    if( !match )
+                        return false;
+                }
+            }            
+            else if( GenericPointer *pattern_ptr = dynamic_cast<GenericPointer *>(pattern_memb[i]) )         
+            {
+                GenericPointer *x_ptr = dynamic_cast<GenericPointer *>(x_memb[i]);
+                ASSERT( x_ptr && "itemise for target didn't match itemise for pattern");
+                if( !!x_ptr->Get() != !!pattern_ptr->Get() )
+                    return false;
+                    
+                bool match = IsMatchPattern( x_ptr->Get(), pattern_ptr->Get() );
+                if( !match )
+                    return false;                     
+            }
+            else
+            {
+                ASSERT(!"got something from itemise that isnt a sequence or a shared pointer");               
+            }
+        }       
+        return true;
+    }
 }
 
 
@@ -93,6 +93,53 @@ shared_ptr<Node> SearchReplace::Search( shared_ptr<Node> program, shared_ptr<Nod
     return shared_ptr<Node>();
 }
 
+shared_ptr<Node> SearchReplace::Replace( shared_ptr<Node> target, shared_ptr<Node> pattern )
+{
+    // TODO implement me 
+    return shared_ptr<Node>();
+}
+
+shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
+{
+    ASSERT( source );
+    shared_ptr<Duplicator> dup_dest = Duplicator::Duplicate( source );
+    shared_ptr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
+    ASSERT(dest);
+    
+    vector< Itemiser::Element * > source_memb = Itemiser::Itemise( source.get() ); 
+    vector< Itemiser::Element * > dest_memb = Itemiser::Itemise( dest.get() );
+    ASSERT( source_memb.size() == dest_memb.size() ); // required to be same actual type
+    
+    for( int i=0; i<source_memb.size(); i++ )
+    {
+        ASSERT( source_memb[i] && "itemise returned null element" );
+        ASSERT( dest_memb[i] && "itemise returned null element" );
+        
+        if( GenericSequence *source_seq = dynamic_cast<GenericSequence *>(source_memb[i]) )                
+        {
+            GenericSequence *dest_seq = dynamic_cast<GenericSequence *>(dest_memb[i]);
+            ASSERT( dest_seq && "itemise for dest didn't match itemise for source");
+            
+            for( int j=0; j<source_seq->size(); j++ )
+                dest_seq->Set( j, DuplicateSubtree( source_seq->Get(j) ) );
+        }            
+        else if( GenericPointer *source_ptr = dynamic_cast<GenericPointer *>(source_memb[i]) )         
+        {
+            GenericPointer *dest_ptr = dynamic_cast<GenericPointer *>(dest_memb[i]);
+            ASSERT( dest_ptr && "itemise for target didn't match itemise for source");
+            if( source_ptr->Get() )
+                dest_ptr->Set( DuplicateSubtree( source_ptr->Get() ) );
+            else
+                dest_ptr->Set( shared_ptr<Node>() );
+        }
+        else
+        {
+            ASSERT(!"got something from itemise that isnt a sequence or a shared pointer");               
+        }
+    }       
+
+    return dest;
+}
 
 void SearchReplace::Test()
 {
