@@ -25,13 +25,7 @@ int main( int argc, char *argv[] )
 
     Parse p(ReadArgs::infile);        
     p( program );
-          
-    shared_ptr<Integer> i( new Integer(16) );
-    shared_ptr<Integral> v( new Integral );
-    v->width = i;
-    bool found = !!SearchReplace::Search( program, v );       
-    printf(found?"YES!!!!\n":"NO!!!!!!\n");
-          
+                    
     if(ReadArgs::graph)
     {
         Graph g;

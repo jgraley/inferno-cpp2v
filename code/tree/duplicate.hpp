@@ -8,11 +8,13 @@ class Duplicator
 public:
     static shared_ptr<Duplicator> Duplicate( shared_ptr<Duplicator> source )
     {
+        ASSERT( source );
         return Duplicate( source.get() );
     }
     
     static shared_ptr<Duplicator> Duplicate( const Duplicator *source )
     {
+        ASSERT( source );
         return source->DuplicateVirtual();
     }
     
