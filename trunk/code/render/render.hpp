@@ -30,9 +30,12 @@ public:
     {        
     }
     
-    void operator()( shared_ptr<Program> prog )       
+    void operator()( shared_ptr<Node> p )       
     {
-        program = prog;
+        // Parse can only work on a whole program
+        program = dynamic_pointer_cast<Program>(p);
+        ASSERT( program );
+    
         AutoPush< shared_ptr<Node> > cs( scope_stack, program );
         string s = RenderSequence( *program, ";\n", true ); // gets the .hpp stuff directly
         s += deferred_decls; // these could go in a .cpp file

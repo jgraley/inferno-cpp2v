@@ -11,7 +11,7 @@
 class Graph : public Pass
 {
 public:
-    void operator()( shared_ptr<Program> program )       
+    void operator()( shared_ptr<Node> program )       
     {
         string s;
         s += "digraph g {\n"; // g is name of graph
