@@ -7,12 +7,13 @@ class Walk
 {
     struct Frame
     {
-        vector< shared_ptr<Node> > children;
+        vector< GenericPointer * > children;
         int index;
     };
     
     stack< Frame > state;
-
+    SharedPtr<Node> root;
+    
     bool IsValid()
     {
         if( state.empty() )
@@ -51,11 +52,11 @@ class Walk
             if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )                
             {
                 for( int j=0; j<seq->size(); j++ )
-                    f.children.push_back( seq->Get(j) );
+                    f.children.push_back( &(seq->Member(j)) );
             }            
             else if( GenericPointer *ptr = dynamic_cast<GenericPointer *>(members[i]) )         
             {
-                f.children.push_back( ptr->Get() );
+                f.children.push_back( ptr );
             }
             else
             {
@@ -73,10 +74,11 @@ class Walk
     }
 
 public:
-    Walk( shared_ptr<Node> root )
+    Walk( shared_ptr<Node> r ) :
+        root( r ) 
     {
         Frame f;
-        f.children.push_back( root );
+        f.children.push_back( &root );
         f.index = 0;
         state.push( f );
     }        
@@ -91,15 +93,25 @@ public:
         return state.size();
     }
         
-    shared_ptr<Node> Get()
+    GenericPointer *GetGeneric()
     {
-        if( state.empty() )
-            return shared_ptr<Node>(); // all done TODO could cause infinite loop, maybe should be an error
-        
+        ASSERT( !state.empty() );        
         ASSERT( IsValid() );
             
         Frame f = state.top();
+        ASSERT( f.index < f.children.size() );
+        TRACE("\n" );
         return f.children[f.index];
+    }
+
+    shared_ptr<Node> Get()
+    {
+        TRACE("\n" );
+        GenericPointer *gp = GetGeneric();
+        TRACE("%p\n", gp );
+        TRACE("%p\n", gp->Get().get() );
+        ASSERT( gp );
+        return gp->Get();
     }
 
     void Advance()

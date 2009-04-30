@@ -16,12 +16,14 @@ public:
         
         if( shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(o) ) // object or funciton instance
         {        
+            TRACE("\n");
             shared_ptr<Instance> i = GetDeclaration(program, ii);
             return i->type; 
         }
             
         else if( shared_ptr<Operator> op = dynamic_pointer_cast<Operator>(o) ) // operator
         {
+            TRACE("\n");
             // Get the types of all the operands to the operator first
             Sequence<Type> optypes;
             FOREACH( shared_ptr<Expression> o, op->operands )
@@ -41,10 +43,14 @@ public:
         }
         
         else if( shared_ptr<Lookup> l = dynamic_pointer_cast<Lookup>(o) ) // a.b; just return type of b
+        {
+            TRACE("\n");
            return Get( program, l->member );
-           
+        }
+                   
         else 
         {
+            TRACE("\n");
             ASSERT(!"Unknown expression, please add");             
         }
     }
