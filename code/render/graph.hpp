@@ -163,7 +163,7 @@ public:
                 for( int j=0; j<seq->size(); j++ )
                     s += DoLink( n, SeqField(i, j), seq->Element(j).Get() );
             }            
-            else if( GenericPointer *ptr = dynamic_cast<GenericPointer *>(members[i]) )         
+            else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )         
             {
                 if( ptr->Get() )
                     s += DoLink( n, "fixed", ptr->Get() );

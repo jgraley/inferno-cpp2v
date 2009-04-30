@@ -42,7 +42,7 @@ void Walk::Push( shared_ptr<Node> n )
             for( int j=0; j<seq->size(); j++ )
                 f.children.push_back( &(seq->Element(j)) );
         }            
-        else if( GenericPointer *ptr = dynamic_cast<GenericPointer *>(members[i]) )         
+        else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )         
         {
             f.children.push_back( ptr );
         }
@@ -80,7 +80,7 @@ int Walk::Depth()
     return state.size();
 }
     
-GenericPointer *Walk::GetGeneric()
+GenericSharedPtr *Walk::GetGeneric()
 {
     ASSERT( !state.empty() );        
     ASSERT( IsValid() );
@@ -92,7 +92,7 @@ GenericPointer *Walk::GetGeneric()
 
 shared_ptr<Node> Walk::Get()
 {
-    GenericPointer *gp = GetGeneric();
+    GenericSharedPtr *gp = GetGeneric();
     ASSERT( gp );
     return gp->Get();
 }
