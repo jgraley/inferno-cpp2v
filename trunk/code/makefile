@@ -3,7 +3,7 @@ include ../makefile.common
 
 INFERNO_MODULES = common/refcount common/read_args common/trace 
 INFERNO_MODULES += tree/tree tree/type_db tree/itemise_members
-INFERNO_MODULES += helpers/misc helpers/search_replace 
+INFERNO_MODULES += helpers/scope helpers/misc helpers/typeof helpers/walk helpers/search_replace 
 INFERNO_MODULES += parse/identifier_tracker 
 INFERNO_MODULES += inferno
 
