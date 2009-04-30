@@ -1245,27 +1245,34 @@ private:
                 shared_ptr<Dereference> ou( new Dereference );
                 ou->operands.push_back( hold_expr.FromRaw( Base ) );
                 a->base = ou;
+            TRACE("\n");
             }
             else if( OpKind == clang::tok::period ) // Base.Member
             {
                 a->base = hold_expr.FromRaw( Base );
+            TRACE("\n");
             }
             else
             {
                 ASSERT(!"Unknown token accessing member");
+            TRACE("\n");
             }            
         
             // Find the specified member in the record implied by the expression on the left of .
             shared_ptr<Type> tbase = TypeOf().Get( all_decls, a->base );
             shared_ptr<TypeIdentifier> tibase = dynamic_pointer_cast<TypeIdentifier>(tbase);
             ASSERT( tibase );
+            TRACE("\n");
             shared_ptr<Record> rbase = GetRecordDeclaration(all_decls, tibase);
             ASSERT( rbase && "thing on left of ./-> is not a record/record ptr" );
+            TRACE("\n");
             
             a->member = FindMemberByName( all_decls, rbase, string(Member.getName()) )->identifier;
 
+            TRACE("\n");
             ASSERT(a->member && "in r.m or (&r)->m, could not find m in r");        
             
+            TRACE("\n");
             return hold_expr.ToRaw( a );
         }
                 

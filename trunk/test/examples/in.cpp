@@ -79,9 +79,9 @@ ms x;
 
 unsigned df()
 {
-    x.a = 9;
+    x.a;
 }
-
+/*
 class ccc
 {
     ms asasas;
@@ -95,4 +95,4 @@ public:
 protected:
     int a;
 };
-
+*/
