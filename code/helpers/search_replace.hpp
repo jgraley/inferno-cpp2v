@@ -20,9 +20,10 @@ class SearchReplace
     
 public:
     static bool IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern );
-    static shared_ptr<Node> Search( shared_ptr<Node> program, shared_ptr<Node> pattern );
+    static GenericPointer *Search( shared_ptr<Node> program, shared_ptr<Node> pattern );
     static shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x );
-    static shared_ptr<Node> Replace( shared_ptr<Node> target, shared_ptr<Node> pattern );
+    static void Replace( GenericPointer *target, shared_ptr<Node> pattern );
+    static void DoSearchReplace( shared_ptr<Node> program, shared_ptr<Node> search_pattern, shared_ptr<Node> replace_pattern );
 
     SearchReplace()
     {  
