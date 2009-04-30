@@ -9,6 +9,18 @@
 #include "walk.hpp"
 #include "pass.hpp"
 
+
+struct KeySet
+{
+    // Some node in the search pattern 
+    shared_ptr<Node> key;
+    
+    // Other nodes in search pattern that must match key
+    // Nodes in replace pattern that will be substituted as key
+    set< shared_ptr<Node> > matches;
+};
+
+
 class SearchReplace : Pass
 {  
 public:
