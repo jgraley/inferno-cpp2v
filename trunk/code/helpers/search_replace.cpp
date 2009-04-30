@@ -96,6 +96,7 @@ GenericSharedPtr *SearchReplace::Search( shared_ptr<Node> program )
     return NULL;
 }
 
+
 shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
 {
     ASSERT( source );
@@ -138,10 +139,13 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
     return dest;
 }
 
+
 void SearchReplace::Replace( GenericSharedPtr *target )
 {
+    ASSERT( !!replace_pattern );
     target->Set( DuplicateSubtree( replace_pattern ) );
 }
+
 
 void SearchReplace::operator()( shared_ptr<Node> program )
 {
@@ -266,5 +270,3 @@ void SearchReplace::Test()
         ASSERT( SearchReplace::IsMatchPattern( d, l ) == false );
     }
 }
-
-
