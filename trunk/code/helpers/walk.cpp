@@ -40,7 +40,7 @@ void Walk::Push( shared_ptr<Node> n )
         if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )                
         {
             for( int j=0; j<seq->size(); j++ )
-                f.children.push_back( &(seq->Member(j)) );
+                f.children.push_back( &(seq->Element(j)) );
         }            
         else if( GenericPointer *ptr = dynamic_cast<GenericPointer *>(members[i]) )         
         {

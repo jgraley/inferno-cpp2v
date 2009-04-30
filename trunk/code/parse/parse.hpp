@@ -1108,7 +1108,7 @@ private:
                                                  ExprTy *Init, DeclTy *LastInGroup) 
         {
             const clang::DeclSpec &DS = D.getDeclSpec();
-            TRACE("Member %p\n", Init);
+            TRACE("Element %p\n", Init);
             shared_ptr<Declaration> d = CreateDelcaration( S, D, ConvertAccess( AS ) );
             shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(d);
       

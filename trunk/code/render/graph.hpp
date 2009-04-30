@@ -161,7 +161,7 @@ public:
             if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )                
             {
                 for( int j=0; j<seq->size(); j++ )
-                    s += DoLink( n, SeqField(i, j), seq->Get(j) );
+                    s += DoLink( n, SeqField(i, j), seq->Element(j).Get() );
             }            
             else if( GenericPointer *ptr = dynamic_cast<GenericPointer *>(members[i]) )         
             {

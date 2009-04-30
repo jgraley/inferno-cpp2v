@@ -6,9 +6,12 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
     if( !x )
         return false; // NULL target allowed; never matches since pattern is not allwed to be NULL
 
+    TRACE("%s >= %s??\n", TypeInfo(pattern).name().c_str(), TypeInfo(x).name().c_str() );
+
     // Is node correct class?
-    if( !(TypeInfo(pattern) >= TypeInfo(x)) ) // Note >= is "non-strict superset" i.e. search is superclass of x or same class
+    if( !(TypeInfo(pattern) >= TypeInfo(x)) ) // Note >= is "non-strict superset" i.e. pattern is superclass of x or same class
     {
+        TRACE("lol no!\n" );
         return false;
     }
 
@@ -53,7 +56,7 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
                 
                 for( int j=0; j<pattern_seq->size(); j++ )
                 {
-                    bool match = IsMatchPattern( x_seq->Get(j), pattern_seq->Get(j) );
+                    bool match = IsMatchPattern( x_seq->Element(j).Get(), pattern_seq->Element(j).Get() );
                     if( !match )
                         return false;
                 }
@@ -79,24 +82,18 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
 }
 
 
-shared_ptr<Node> SearchReplace::Search( shared_ptr<Node> program, shared_ptr<Node> pattern )
+GenericPointer *SearchReplace::Search( shared_ptr<Node> program, shared_ptr<Node> pattern )
 {
     Walk w( program );
     while(!w.Done())
     {
         shared_ptr<Node> x = w.Get();
         if( IsMatchPattern( x, pattern ) )
-            return x;                            
+            return w.GetGeneric();                            
         w.Advance(); 
     }    
     
-    return shared_ptr<Node>();
-}
-
-shared_ptr<Node> SearchReplace::Replace( shared_ptr<Node> target, shared_ptr<Node> pattern )
-{
-    // TODO implement me 
-    return shared_ptr<Node>();
+    return NULL;
 }
 
 shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
@@ -121,7 +118,7 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
             ASSERT( dest_seq && "itemise for dest didn't match itemise for source");
             
             for( int j=0; j<source_seq->size(); j++ )
-                dest_seq->Set( j, DuplicateSubtree( source_seq->Get(j) ) );
+                dest_seq->Element(j).Set( DuplicateSubtree( source_seq->Element(j).Get() ) );
         }            
         else if( GenericPointer *source_ptr = dynamic_cast<GenericPointer *>(source_memb[i]) )         
         {
@@ -140,6 +137,24 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
 
     return dest;
 }
+
+void SearchReplace::Replace( GenericPointer *target, shared_ptr<Node> pattern )
+{
+    target->Set( DuplicateSubtree( pattern ) );
+}
+
+void SearchReplace::DoSearchReplace( shared_ptr<Node> program, shared_ptr<Node> search_pattern, shared_ptr<Node> replace_pattern )
+{
+    while(1)
+    {
+        GenericPointer *gp = Search( program, search_pattern );        
+        if( gp )
+            Replace( gp, replace_pattern );
+        else
+            break;
+    }
+}
+
 
 void SearchReplace::Test()
 {

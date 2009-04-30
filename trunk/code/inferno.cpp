@@ -25,7 +25,7 @@ int main( int argc, char *argv[] )
 
     Parse p(ReadArgs::infile);        
     p( program );
-                    
+                                        
     if(ReadArgs::graph)
     {
         Graph g;
