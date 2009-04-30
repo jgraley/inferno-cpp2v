@@ -82,13 +82,13 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
 }
 
 
-GenericSharedPtr *SearchReplace::Search( shared_ptr<Node> program, shared_ptr<Node> pattern )
+GenericSharedPtr *SearchReplace::Search( shared_ptr<Node> program )
 {
     Walk w( program );
     while(!w.Done())
     {
         shared_ptr<Node> x = w.Get();
-        if( IsMatchPattern( x, pattern ) )
+        if( IsMatchPattern( x, search_pattern ) )
             return w.GetGeneric();                            
         w.Advance(); 
     }    
@@ -138,18 +138,18 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
     return dest;
 }
 
-void SearchReplace::Replace( GenericSharedPtr *target, shared_ptr<Node> pattern )
+void SearchReplace::Replace( GenericSharedPtr *target )
 {
-    target->Set( DuplicateSubtree( pattern ) );
+    target->Set( DuplicateSubtree( replace_pattern ) );
 }
 
-void SearchReplace::DoSearchReplace( shared_ptr<Node> program, shared_ptr<Node> search_pattern, shared_ptr<Node> replace_pattern )
+void SearchReplace::operator()( shared_ptr<Node> program )
 {
     while(1)
     {
-        GenericSharedPtr *gp = Search( program, search_pattern );        
+        GenericSharedPtr *gp = Search( program );        
         if( gp )
-            Replace( gp, replace_pattern );
+            Replace( gp );
         else
             break;
     }

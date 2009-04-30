@@ -1,43 +1,36 @@
+#ifndef SEARCH_REPLACE_HPP
+#define SEARCH_REPLACE_HPP
 
 #include "tree/tree.hpp"
 #include "common/refcount.hpp"
 #include "parse/parse.hpp"  
 #include "render/render.hpp"
 #include "common/read_args.hpp"
-#include "helpers/walk.hpp"
+#include "walk.hpp"
+#include "pass.hpp"
 
-class SearchReplace
-{
-    shared_ptr<Node> search;
-    shared_ptr<Node> replace;
-
-    shared_ptr<AnyString> CreateString( const char *s )
-    {
-        shared_ptr<String> st( new String );
-        st->value = s;
-        return st;
-    }
-    
+class SearchReplace : Pass
+{  
 public:
-    static bool IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern );
-    static GenericSharedPtr *Search( shared_ptr<Node> program, shared_ptr<Node> pattern );
-    static shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x );
-    static void Replace( GenericSharedPtr *target, shared_ptr<Node> pattern );
-    static void DoSearchReplace( shared_ptr<Node> program, shared_ptr<Node> search_pattern, shared_ptr<Node> replace_pattern );
-
-    SearchReplace()
+    SearchReplace( shared_ptr<Node> sp, shared_ptr<Node> rp=shared_ptr<Node>() ) :
+        search_pattern( sp ),
+        replace_pattern( rp )
     {  
-        shared_ptr<Program> pattern(new Program);  
-    
-        Parse p("prototype/search_replace/simple.cpp"); // TODO sort out paths   
-        p( pattern );
-        FOREACH( shared_ptr<Declaration> d, *pattern )
-            if( shared_ptr<Record> sr = dynamic_pointer_cast<Record>(d) )
-            {
-            }
-        ASSERT(search);
-        ASSERT(replace);    
+        ASSERT( !!sp );
     }
+
+    static bool IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern );
+    GenericSharedPtr *Search( shared_ptr<Node> program );
+    static shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x );
+    void operator()( shared_ptr<Node> program );
 
     static void Test();
+
+private:
+    shared_ptr<Node> search_pattern;
+    shared_ptr<Node> replace_pattern;
+
+    void Replace( GenericSharedPtr *target );    
 };
+
+#endif

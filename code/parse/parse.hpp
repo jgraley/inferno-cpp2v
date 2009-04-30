@@ -46,8 +46,12 @@ public:
     {
     }
     
-    void operator()( shared_ptr<Program> program )
+    void operator()( shared_ptr<Node> p )
     {        
+        // Parse can only work on a whole program
+        shared_ptr<Program> program = dynamic_pointer_cast<Program>(p);
+        ASSERT( program );
+        
         clang::FileManager fm; 
         llvm::raw_stderr_ostream errstream; // goes to stderr
         clang::TextDiagnosticPrinter diag_printer( errstream );
