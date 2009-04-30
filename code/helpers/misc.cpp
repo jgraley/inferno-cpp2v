@@ -45,19 +45,14 @@ shared_ptr<Record> GetRecordDeclaration( shared_ptr<Program> program, shared_ptr
 
 shared_ptr<Instance> GetDeclaration( shared_ptr<Program> program, shared_ptr<InstanceIdentifier> id )
 {
-            TRACE("\n");
     Walk w( program );
-            TRACE("\n");
     while(!w.Done())
     {
-            TRACE("\n");
         shared_ptr<Node> n = w.Get();
-                    TRACE("\n");
 
         if( shared_ptr<Instance> d = dynamic_pointer_cast<Instance>(n) )
             if( id == GetIdentifier( d ) ) 
 	            return d;
-            TRACE("\n");
 
 	    w.Advance();
 	}

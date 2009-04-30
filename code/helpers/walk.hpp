@@ -14,121 +14,19 @@ class Walk
     stack< Frame > state;
     SharedPtr<Node> root;
     
-    bool IsValid()
-    {
-        if( state.empty() )
-            return true;
-    
-        Frame &f = state.top();
-
-        return f.index < f.children.size();                      
-    }
-
-    void Iterate()
-    {
-        Frame &f = state.top();
-        if( state.empty() )
-            return;
-
-        if( f.index == f.children.size() )
-        {
-            Pop();
-            if( state.empty() )
-                return;
-            Iterate();
-            return;
-        }
-
-        f.index++;                
-    }
-
-    void Push( shared_ptr<Node> n )
-    { 
-        Frame f;
-
-        vector< Itemiser::Element * > members = Itemiser::Itemise(n);
-        for( int i=0; i<members.size(); i++ )
-        {
-            if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )                
-            {
-                for( int j=0; j<seq->size(); j++ )
-                    f.children.push_back( &(seq->Member(j)) );
-            }            
-            else if( GenericPointer *ptr = dynamic_cast<GenericPointer *>(members[i]) )         
-            {
-                f.children.push_back( ptr );
-            }
-            else
-            {
-                ASSERT(!"got something from itemise that isnt a sequence or a shared pointer");               
-            }
-        }
-
-        f.index = 0;
-        state.push( f );
-    }        
-
-    void Pop()
-    {
-        state.pop();
-    }
+    bool IsValid();
+    void Iterate();
+    void Push( shared_ptr<Node> n );
+    void Pop();
 
 public:
-    Walk( shared_ptr<Node> r ) :
-        root( r ) 
-    {
-        Frame f;
-        f.children.push_back( &root );
-        f.index = 0;
-        state.push( f );
-    }        
-        
-    bool Done()
-    {
-        return state.empty();
-    }    
-    
-    int Depth()
-    {
-        return state.size();
-    }
-        
-    GenericPointer *GetGeneric()
-    {
-        ASSERT( !state.empty() );        
-        ASSERT( IsValid() );
-            
-        Frame f = state.top();
-        ASSERT( f.index < f.children.size() );
-        TRACE("\n" );
-        return f.children[f.index];
-    }
-
-    shared_ptr<Node> Get()
-    {
-        TRACE("\n" );
-        GenericPointer *gp = GetGeneric();
-        TRACE("%p\n", gp );
-        TRACE("%p\n", gp->Get().get() );
-        ASSERT( gp );
-        return gp->Get();
-    }
-
-    void Advance()
-    {
-        if( IsValid() && Get() )
-            Push( Get() );
-        else
-            Iterate();
-                    
-        while( !IsValid() )
-            Iterate();        
-    }
+    Walk( shared_ptr<Node> r );        
+    bool Done();
+    int Depth();
+    GenericPointer *GetGeneric();
+    shared_ptr<Node> Get();
+    void Advance();
 };
-
-
-
-
 
 
 
