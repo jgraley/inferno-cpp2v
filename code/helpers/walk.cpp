@@ -97,6 +97,34 @@ shared_ptr<Node> Walk::Get()
     return gp->Get();
 }
 
+string Walk::Path()
+{
+    string s;
+    stack< Frame > ps = state; // std::stack doesn't have [] so copy the whole thing and go backwards
+    while( !ps.empty() )
+    {
+        Frame f = ps.top();
+        ps.pop();
+        
+        // node type
+        GenericSharedPtr *child = f.children[f.index];
+        ASSERT( child );
+        if( !!child->Get() )
+            s = TypeInfo(*(child->Get())).name() + s;
+        else
+            s = string("NULL") + s;
+
+        // member/element number
+        if( !ps.empty() ) // bottom level index always 0, don't print
+        {
+            char a[100];
+            sprintf(a, ":%d ", f.index);
+            s = string(a) + s; // going backwards so prepend
+        }
+    }
+    return s;
+}
+
 void Walk::Advance()
 {
     if( IsValid() && Get() )

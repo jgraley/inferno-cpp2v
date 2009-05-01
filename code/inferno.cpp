@@ -7,6 +7,7 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/search_replace.hpp"
+#include "helpers/validate.hpp"
 
 void SelfTest();
 
@@ -25,6 +26,8 @@ int main( int argc, char *argv[] )
 
     Parse p(ReadArgs::infile);        
     p( program );
+              
+    //Validate()(program);                
                     
   /*  shared_ptr<Node> sp( new Bool );                    
     shared_ptr<Node> rp( new Void );                    
