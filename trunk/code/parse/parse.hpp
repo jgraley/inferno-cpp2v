@@ -397,7 +397,7 @@ private:
                         if( achunk.NumElts )
                             a->size = hold_expr.FromRaw( achunk.NumElts ); // number of elements was specified
                         else
-                            a->size = shared_ptr<Expression>();    // number of elements was not specified eg int a[];
+                            a->size = shared_new<Uninitialised>();    // number of elements was not specified eg int a[];
                         return a;
                     }
                     
@@ -441,8 +441,7 @@ private:
         
         shared_ptr<Instance> CreateObjectNode( clang::Scope *S, 
                                                clang::Declarator &D, 
-                                               shared_ptr<AccessSpec> access = shared_ptr<AccessSpec>(),
-                                               shared_ptr<Expression> init = shared_ptr<Expression>() )
+                                               shared_ptr<AccessSpec> access = shared_ptr<AccessSpec>() )
         { 
             if(!access)
                 access = shared_ptr<Public>(new Public);
@@ -488,7 +487,7 @@ private:
                 o->constant = shared_new<NonConst>();
             o->type = CreateTypeNode( D );
             o->access = access;
-            o->initialiser = init;
+            o->initialiser = shared_new<Uninitialised>();
             
             return o;
         }
@@ -513,6 +512,7 @@ private:
         { 
             shared_ptr<Label> l(new Label);            
             all_decls->push_back(l);
+            l->access = shared_new<Public>();
             l->identifier = CreateLabelIdentifier(ID);
             TRACE("%s %p %p\n", ID->getName(), l.get(), ID );            
             return l;
@@ -703,7 +703,7 @@ private:
             shared_ptr<Compound> cb( dynamic_pointer_cast<Compound>( FromClang( Body ) ) );
             ASSERT(cb); // function body must be a scope or 0
             
-            if( !o->initialiser )
+            if( dynamic_pointer_cast<Uninitialised>( o->initialiser ) )
                 o->initialiser = cb;
             else if( shared_ptr<Compound> c = dynamic_pointer_cast<Compound>( o->initialiser ) )
                 c->statements = c->statements + cb->statements;
@@ -759,7 +759,14 @@ private:
             shared_ptr<Integer> nc( new Integer(value) );
             return nc;            
         }
-        
+
+        shared_ptr<Literal> CreateLiteral( int value )        
+        {
+            shared_ptr<Literal> l( new Literal );
+            l->value = CreateNumericConstant( value );
+            return l;
+        }
+         
         shared_ptr<AnyNumber> CreateNumericConstant(const clang::Token &tok)
         {
             llvm::SmallString<512> int_buffer;
@@ -984,6 +991,8 @@ private:
             i->body = hold_stmt.FromRaw( ThenVal );
             if( ElseVal )
                 i->else_body = hold_stmt.FromRaw( ElseVal );
+            else
+                i->else_body = shared_new<Nop>(); // empty else clause
             return hold_stmt.ToRaw( i );
         }
         
@@ -1013,11 +1022,20 @@ private:
             shared_ptr<For> f( new For );
             if( First )
                 f->initialisation = hold_stmt.FromRaw( First );
+            else
+                f->initialisation = shared_new<Nop>();
+                
             if( Second )
                 f->condition = hold_expr.FromRaw( Second );
+            else
+                f->condition = CreateLiteral(1);    
+                
             StmtTy *third = (StmtTy *)Third; // Third is really a statement, the Actions API is wrong
             if( third )
                 f->increment = hold_stmt.FromRaw( third );
+            else    
+                f->increment = shared_new<Nop>();
+                
             f->body = hold_stmt.FromRaw( Body );
             return hold_stmt.ToRaw( f );
         }
@@ -1247,6 +1265,7 @@ private:
             if( OpKind == clang::tok::arrow )  // Base->Member
             {            
                 shared_ptr<Dereference> ou( new Dereference );
+                ou->assign = shared_new<NonAssignment>();                
                 ou->operands.push_back( hold_expr.FromRaw( Base ) );
                 a->base = ou;
             }
@@ -1400,7 +1419,8 @@ private:
                 shared_ptr<Instance> lasto( dynamic_pointer_cast<Instance>(lastd) );
                 ASSERT(lasto && "unexpected kind of declaration inside an enum");
                 shared_ptr<Add> inf( new Add );
-                shared_ptr<Expression> ei = dynamic_pointer_cast<Expression>( lasto->initialiser );
+                inf->assign = shared_new<NonAssignment>();
+                shared_ptr<Expression> ei = lasto->identifier;
                 inf->operands.push_back( ei );
                 shared_ptr<Literal> l( new Literal );
                 l->value = CreateNumericConstant( 1 );
@@ -1456,6 +1476,8 @@ private:
                 p = shared_ptr<SizeOf>(new SizeOf);
             else
                 p = shared_ptr<AlignOf>(new AlignOf);
+
+            p->assign = shared_new<NonAssignment>();
             if( isType )
                 p->operands.push_back( hold_type.FromRaw(TyOrEx) );                   
             else
@@ -1595,18 +1617,13 @@ private:
             call->function = lu;
             CollectArgs( &(call->operands), Args, NumArgs );
             
-            // Get the constructor whose init list we're adding to
+            // Get the constructor whose init list we're adding to (may need to start a
+            // new compound statement)
             shared_ptr<Declaration> d( hold_decl.FromRaw( ConstructorDecl ) );
             shared_ptr<Instance> o( dynamic_pointer_cast<Instance>(d) );
             ASSERT(o);
-            shared_ptr<Compound> comp;
-            if( o->initialiser )
-            {
-                comp = dynamic_pointer_cast<Compound>(o->initialiser);
-                ASSERT(comp);       
-                TRACE();
-            }
-            else
+            shared_ptr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser);
+            if( !comp )
             {
                 comp = shared_ptr<Compound>( new Compound );
                 o->initialiser = comp;

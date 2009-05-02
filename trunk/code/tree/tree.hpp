@@ -67,9 +67,15 @@ struct Float : AnyFloat
     llvm::APFloat value; 
 };
 
+// TODO bool properties, for true, false bool literals and default condition
+// in for
+
 //////////////////////////// Underlying Program Nodes ////////////////////////////
 
-struct Statement : virtual Node { NODE_FUNCTIONS };
+// Initialiser for an instance (variable or function)
+struct Initialiser : virtual Node { NODE_FUNCTIONS };
+
+struct Statement : Initialiser { NODE_FUNCTIONS };
 
 struct Expression : Statement { NODE_FUNCTIONS };
     
@@ -145,8 +151,10 @@ struct Instance : Declaration,
     NODE_FUNCTIONS
     SharedPtr<Type> type;
     SharedPtr<AnyInstanceIdentifier> identifier;
-    SharedPtr<Statement> initialiser; // NULL if uninitialised
+    SharedPtr<Initialiser> initialiser; // NULL if uninitialised
 };
+
+struct Uninitialised : Initialiser { NODE_FUNCTIONS };
 
 struct InheritanceRecord;
 struct Base : Declaration
@@ -244,11 +252,7 @@ struct Record : UserType
     NODE_FUNCTIONS
     Sequence<Declaration> members;
     
-    // Where eg struct foo; is used we should create seperate nodes for
-    // the incomplete and complete types. This is so that mutually 
-    // referencing structs don't create a loop in the tree
-    // (but we could use weak_ptr<> for such refs?).
-    // TODO masked issue: classes can contain pointers to themselves
+    // TODO get rid; always refer to complete version
     SharedPtr<AnyComplete> complete; 
 };
 
@@ -270,7 +274,7 @@ struct Array : Type
 {
     NODE_FUNCTIONS
     SharedPtr<Type> element;
-    SharedPtr<Expression> size; // NULL if undefined
+    SharedPtr<Initialiser> size; // Uninitialised if not given eg []
 };
 
 //////////////////////////// Expressions ////////////////////////////
@@ -281,15 +285,6 @@ struct Label : Declaration
     NODE_FUNCTIONS
     SharedPtr<AnyLabelIdentifier> identifier;
 }; 
-
-// The result of a Compound, if viewed as an Expression, is the
-// code itself (imagine a generic byte code) not the result of
-// execution. You have to Call it to get the execution result.
-struct Compound : Statement
-{
-    NODE_FUNCTIONS
-    Sequence<Statement> statements;
-};                   
 
 struct Aggregate : Expression
 {
@@ -393,6 +388,12 @@ struct Cast : Expression
 
 //////////////////////////// Statements ////////////////////////////
 
+struct Compound : Statement
+{
+    NODE_FUNCTIONS
+    Sequence<Statement> statements;
+};                   
+
 struct Return : Statement
 {
     NODE_FUNCTIONS
@@ -418,7 +419,7 @@ struct If : Statement
     NODE_FUNCTIONS
     SharedPtr<Expression> condition;
     SharedPtr<Statement> body;
-    SharedPtr<Statement> else_body; // can be NULL if no else clause
+    SharedPtr<Statement> else_body; // can be Nop if no else clause
 };
 
 struct Loop : Statement

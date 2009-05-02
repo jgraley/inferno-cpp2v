@@ -27,7 +27,7 @@ int main( int argc, char *argv[] )
     Parse p(ReadArgs::infile);        
     p( program );
               
-    //Validate()(program);                
+    Validate()(program);                
                     
   /*  shared_ptr<Node> sp( new Bool );                    
     shared_ptr<Node> rp( new Void );                    

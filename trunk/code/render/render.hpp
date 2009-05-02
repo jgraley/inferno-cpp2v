@@ -259,14 +259,14 @@ private:
         return o;
     }
 
-    string RenderOperand( shared_ptr<Expression> expression, bool bracketize_operator=false )
+    string RenderOperand( shared_ptr<Initialiser> expression, bool bracketize_operator=false )
     {
         TRACE("%p\n", expression.get());
         
         string before = bracketize_operator ? "(" : "";
         string after = bracketize_operator ? ")" : "";
         
-        if( !expression )
+        if( dynamic_pointer_cast< Uninitialised >(expression) )
             return string();            
         else if( shared_ptr<Type> t = dynamic_pointer_cast< Type >(expression) )
             return before + 
@@ -453,37 +453,41 @@ private:
             s += RenderType( o->type, name );
         else
             s = name;
-        
-        if( o->initialiser && showinit )
+          
+        if( !showinit || dynamic_pointer_cast<Uninitialised>(o->initialiser) )
         {
-            AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, o->identifier ) );
-            
-            shared_ptr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser);                
-            if( comp )
-            {                                 
-                Sequence<Statement> inits;
-                Sequence<Statement> remainder;
-                ExtractInits( comp->statements, inits, remainder );
-                if( !inits.empty() )
-                {
-                    s += " : ";
-                    s += RenderSequence( inits, ", ", false, shared_ptr<Public>(new Public), true );                
-                }
-                
-                shared_ptr<Compound> r( new Compound );
-                r->statements = remainder;
-                s += "\n" + RenderStatement(r, "");
-            }
-            else
-            {
-                shared_ptr<Expression> ei = dynamic_pointer_cast<Expression>( o->initialiser );
-                s += " = " + RenderOperand(ei) + sep;
-            }
-        }            
-        else
-        {
+            // Dont render any initialiser
             s += sep;
         }    
+        else if( shared_ptr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser) )
+        {                                 
+            // Render code as initialiser list followed by statements in {}
+            AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, o->identifier ) );
+
+            Sequence<Statement> inits;
+            Sequence<Statement> remainder;
+            ExtractInits( comp->statements, inits, remainder );
+            if( !inits.empty() )
+            {
+                s += " : ";
+                s += RenderSequence( inits, ", ", false, shared_ptr<Public>(new Public), true );                
+            }
+            
+            shared_ptr<Compound> r( new Compound );
+            r->statements = remainder;
+            s += "\n" + RenderStatement(r, "");
+        }
+        else if( shared_ptr<Expression> ei = dynamic_pointer_cast<Expression>( o->initialiser ) )
+        {
+            // Render expression with an assignment
+            AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, o->identifier ) );
+            s += " = " + RenderOperand(ei) + sep;
+        }
+        else
+        {
+            s += ERROR_UNSUPPORTED(o->initialiser);            
+        }
+
         return s;
     }
     
@@ -630,7 +634,7 @@ private:
                  "{\n" + // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
                  RenderStatement(i->body, ";\n") +
                  "}\n";
-            if( i->else_body )  // else is optional
+            if( !dynamic_pointer_cast<Nop>(i->else_body) )  // Nop means no else clause
                 s += "else\n" +
                      RenderStatement(i->else_body, ";\n");
             return s;
