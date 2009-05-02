@@ -31,7 +31,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Program> program, shared_ptr<Expression
         }
         else
         {
-             ASSERT(!"Unknown operator, please add");         
+             ASSERTFAIL("Unknown operator, please add");         
         }
     }
     
@@ -42,7 +42,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Program> program, shared_ptr<Expression
                
     else 
     {
-        ASSERT(!"Unknown expression, please add");             
+        ASSERTFAIL("Unknown expression, please add");             
     }
 }
 

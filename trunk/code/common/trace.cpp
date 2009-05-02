@@ -80,6 +80,7 @@ void Tracer::EndContinuation()
     }   
 }
 
+// Make BOOST_ASSERT work (we don't use them but other code might)
 void boost::assertion_failed(char const * expr, char const * function, char const * file, long line)
 {
     Tracer::EndContinuation();

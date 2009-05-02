@@ -8,6 +8,7 @@
 #include <vector>
 #include <stack>
 using namespace std;
+#include <stdarg.h>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
@@ -24,11 +25,13 @@ using namespace boost;
             else \
                 for( M=(C)[__i-1]; !__d; __d=true ) 
   
-
+// How many members in an array
 #define COUNTOF( array ) ( sizeof( array )/sizeof( array[0] ) )
 
+// sprintf into a std::string
+string SSPrintf(const char *fmt, ...);
 
-// Does a push then pops again in destructor
+// Pushes element t of type T onto stack s, then pops again in destructor
 template< typename T >
 class AutoPush
 {
@@ -37,12 +40,13 @@ public:
     {
         st.push(t);
         check_t = t;
-    }
+    }    
     ~AutoPush()
     {
         ASSERT( st.top() == check_t );
         st.pop();
     }
+    
 private:
     std::stack<T> &st;
     T check_t; // just for checking
