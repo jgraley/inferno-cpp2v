@@ -25,7 +25,7 @@ public:
     int Depth();
     GenericSharedPtr *GetGeneric();
     shared_ptr<Node> Get();
-    string Path();
+    string GetPathString();
     void Advance();
 };
 

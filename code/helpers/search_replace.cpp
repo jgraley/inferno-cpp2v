@@ -74,7 +74,7 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
             }
             else
             {
-                ASSERT(!"got something from itemise that isnt a sequence or a shared pointer");               
+                ASSERTFAIL("got something from itemise that isnt a sequence or a shared pointer");               
             }
         }       
         return true;
@@ -132,7 +132,7 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
         }
         else
         {
-            ASSERT(!"got something from itemise that isnt a sequence or a shared pointer");               
+            ASSERTFAIL("got something from itemise that isnt a sequence or a shared pointer");               
         }
     }       
 

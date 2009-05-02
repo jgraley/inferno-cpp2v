@@ -51,16 +51,11 @@ private:
 
 #define TRACE Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION )
 
-// Use BOOST_ASSERT, but be sure to place an abort() in line, so that we
-// don't get "missing return" errors if there's no return after ASSERT(0).
-// On some systems, abort() won't cause a stack dump, so we do somehting
-// nasty in our boost::assertion_failed() implmentation in trace.cpp
-#define ASSERT(CONDITION) do { BOOST_ASSERT(CONDITION); if(!(CONDITION)) abort(); } while(0)
-
-
 // New assert uses functor. Can be used as ASSERT(cond); or ASSERT(cond)(printf args);
-// but ASSERF(0) won't produce an abort() so we'll get return value warnings. Maybe
-// do a subclass AlwaysDieTracer whose destructor is inline and abort()s every time?
-#define ASSERTF(CONDITION) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (CONDITION)?Tracer::DISABLE:(Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
+#define ASSERT(CONDITION) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (CONDITION)?Tracer::DISABLE:(Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
+
+// This one does an abort() in-line so you don't get "missing return" warning (which
+// we make an error). You can supply a message but no printf() formatting or arguments or std::string.
+#define ASSERTFAIL(MESSAGE) do { Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
 
 #endif

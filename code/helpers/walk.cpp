@@ -48,7 +48,7 @@ void Walk::Push( shared_ptr<Node> n )
         }
         else
         {
-            ASSERT(!"got something from itemise that isnt a sequence or a shared pointer");               
+            ASSERTFAIL("got something from itemise that isnt a sequence or a shared pointer");               
         }
     }
 
@@ -97,7 +97,7 @@ shared_ptr<Node> Walk::Get()
     return gp->Get();
 }
 
-string Walk::Path()
+string Walk::GetPathString()
 {
     string s;
     stack< Frame > ps = state; // std::stack doesn't have [] so copy the whole thing and go backwards
@@ -116,11 +116,7 @@ string Walk::Path()
 
         // member/element number
         if( !ps.empty() ) // bottom level index always 0, don't print
-        {
-            char a[100];
-            sprintf(a, ":%d ", f.index);
-            s = string(a) + s; // going backwards so prepend
-        }
+            s = SSPrintf(":%d ", f.index) + s; // going backwards so prepend
     }
     return s;
 }

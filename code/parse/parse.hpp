@@ -327,7 +327,7 @@ private:
                         return dynamic_pointer_cast<Record>( hold_decl.FromRaw( DS.getTypeRep() ) )->identifier;
                         break;
                     default:                    
-                        ASSERT(!"unsupported type");
+                        ASSERTFAIL("unsupported type");
                         break;
                 }
             }
@@ -402,7 +402,7 @@ private:
                     }
                     
                     default:
-                    ASSERT(!"Unknown type chunk");                     
+                    ASSERTFAIL("Unknown type chunk");                     
                     break;
                 }
             }
@@ -479,7 +479,7 @@ private:
                 o->storage = shared_new<Static>();
                 break;
             default:
-                ASSERT(!"Unsupported storage class");
+                ASSERTFAIL("Unsupported storage class");
                 break;
             }
             if( DS.getTypeQualifiers() & clang::DeclSpec::TQ_const )
@@ -708,7 +708,7 @@ private:
             else if( shared_ptr<Compound> c = dynamic_pointer_cast<Compound>( o->initialiser ) )
                 c->statements = c->statements + cb->statements;
             else
-                ASSERT(!"wrong thing in function instance");
+                ASSERTFAIL("wrong thing in function instance");
 
             TRACE("finish fn %d statements %d total\n", cb->statements.size(), (dynamic_pointer_cast<Compound>(o->initialiser))->statements.size() );
                 
@@ -804,7 +804,7 @@ private:
                 shared_ptr<Float> fc( new Float( rv ) );
                 return fc;
             }
-            ASSERT(!"this sort of literal is not supported");         
+            ASSERTFAIL("this sort of literal is not supported");         
         }
         
         virtual ExprResult ActOnNumericConstant(const clang::Token &tok) 
@@ -1101,7 +1101,7 @@ private:
                         return shared_ptr<Public>(new Public);
                     break;
                 default:
-                    ASSERT(!"Invalid access specfier");
+                    ASSERTFAIL("Invalid access specfier");
                     return shared_ptr<Public>(new Public);
                     break;
             }
@@ -1165,7 +1165,7 @@ private:
                     h = shared_ptr<Enum>(new Enum);
                     break;
                 default:
-                    ASSERT(!"Unknown type spec type");            
+                    ASSERTFAIL("Unknown type spec type");            
                     break;        
             }
             all_decls->push_back(h);
@@ -1256,7 +1256,7 @@ private:
             }
             else
             {
-                ASSERT(!"Unknown token accessing member");
+                ASSERTFAIL("Unknown token accessing member");
             }            
         
             // Find the specified member in the record implied by the expression on the left of .
@@ -1564,7 +1564,7 @@ private:
                 if( dynamic_pointer_cast<Constructor>(o->type) )
                     return o;
             }
-            ASSERT(!"missing constructor");
+            ASSERTFAIL("missing constructor");
             return shared_ptr<Instance>();
         }
 
@@ -1679,13 +1679,13 @@ private:
         // extensions. These all assert out immediately.
         
   virtual DeclTy *ActOnFileScopeAsmDecl(clang::SourceLocation Loc, ExprArg AsmString) {
-    ASSERT(!"Unimplemented action");
+    ASSERTFAIL("Unimplemented action");
     return 0;
   }
 
   virtual DeclTy *ActOnField(clang::Scope *S, DeclTy *TagD, clang::SourceLocation DeclStart,
                              clang::Declarator &D, ExprTy *BitfieldWidth) {
-    ASSERT(!"Unimplemented action"); // TODO is this C-not-C++ or ObjC?
+    ASSERTFAIL("Unimplemented action"); // TODO is this C-not-C++ or ObjC?
     return 0;
   }
 
@@ -1701,26 +1701,26 @@ private:
                                   unsigned NumClobbers,
                                   ExprTy **Clobbers,
                                   clang::SourceLocation RParenLoc) {
-    ASSERT(!"Unimplemented action"); 
+    ASSERTFAIL("Unimplemented action"); 
     return 0;
   }
 
   virtual ExprResult ActOnPredefinedExpr(clang::SourceLocation Loc,
                                          clang::tok::TokenKind Kind) {
-    ASSERT(!"Unimplemented action");
+    ASSERTFAIL("Unimplemented action");
     return 0;
   }
 
   virtual ExprResult ActOnCompoundLiteral(clang::SourceLocation LParen, TypeTy *Ty,
                                           clang::SourceLocation RParen, ExprTy *Op) {
-    ASSERT(!"Unimplemented action");
+    ASSERTFAIL("Unimplemented action");
     return 0;
   }
 
   virtual DeclTy *ActOnStartNamespaceDef(clang::Scope *S, clang::SourceLocation IdentLoc,
                                         clang::IdentifierInfo *Ident,
                                         clang::SourceLocation LBrace) {
-    ASSERT(!"Unimplemented action");
+    ASSERTFAIL("Unimplemented action");
     return 0;
   }
 
@@ -1729,13 +1729,13 @@ private:
                                        clang::SourceLocation RAngleBracketLoc,
                                        clang::SourceLocation LParenLoc, ExprTy *Op,
                                        clang::SourceLocation RParenLoc) {
-    ASSERT(!"Unimplemented action");
+    ASSERTFAIL("Unimplemented action");
     return 0;
   }
 
   virtual ExprResult ActOnCXXThrow(clang::SourceLocation OpLoc,
                                    ExprTy *Op = 0) {
-    ASSERT(!"Unimplemented action");
+    ASSERTFAIL("Unimplemented action");
     return 0;
   }
 
@@ -1746,7 +1746,7 @@ private:
                                                unsigned NumExprs,
                                                clang::SourceLocation *CommaLocs,
                                                clang::SourceLocation RParenLoc) {
-    ASSERT(!"Unimplemented action");
+    ASSERTFAIL("Unimplemented action");
     return 0;
   }
 
@@ -1755,26 +1755,26 @@ private:
                                                       clang::Declarator &D,
                                                       clang::SourceLocation EqualLoc,
                                                       ExprTy *AssignExprVal) {
-    ASSERT(!"Unimplemented action");
+    ASSERTFAIL("Unimplemented action");
     return 0;
   }
   
   virtual DeclTy *ActOnExceptionDeclarator(clang::Scope *S, clang::Declarator &D) {
-    ASSERT(!"Unimplemented action");
+    ASSERTFAIL("Unimplemented action");
     return 0;
   }
 
   virtual OwningStmtResult ActOnCXXCatchBlock(clang::SourceLocation CatchLoc,
                                               DeclTy *ExceptionDecl,
                                               StmtArg HandlerBlock) {
-    ASSERT(!"Unimplemented action");
+    ASSERTFAIL("Unimplemented action");
     return StmtEmpty();
   }
 
   virtual OwningStmtResult ActOnCXXTryBlock(clang::SourceLocation TryLoc,
                                             StmtArg TryBlock,
                                             MultiStmtArg Handlers) {
-    ASSERT(!"Unimplemented action");
+    ASSERTFAIL("Unimplemented action");
     return StmtEmpty();
   }
  /// ActOnUsingDirective - This is called when using-directive is parsed.
@@ -1786,7 +1786,7 @@ private:
                                       clang::IdentifierInfo *NamespcName,
                                       clang::AttributeList *AttrList)
   {
-    ASSERT(!"Unimplemented action");
+    ASSERTFAIL("Unimplemented action");
     return 0;
   }
   
@@ -1797,19 +1797,19 @@ private:
   virtual void ActOnParamUnparsedDefaultArgument(DeclTy *param, 
                                                  clang::SourceLocation EqualLoc) 
   { 
-      ASSERT(!"Unimplemented action"); 
+      ASSERTFAIL("Unimplemented action"); 
   }
 
   /// ActOnParamDefaultArgumentError - Parsing or semantic analysis of
   /// the default argument for the parameter param failed.
   virtual void ActOnParamDefaultArgumentError(DeclTy *param)
   {
-      ASSERT(!"Unimplemented action");
+      ASSERTFAIL("Unimplemented action");
    }
  
   virtual void ActOnEnumStartDefinition(clang::Scope *S, DeclTy *EnumDecl) 
   {
-     ASSERT(!"Unimplemented action");
+     ASSERTFAIL("Unimplemented action");
   }  
  };
 };   

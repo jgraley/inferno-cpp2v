@@ -14,7 +14,7 @@ public:
             shared_ptr<Node> x = w.Get();
             
             // NULL pointers not allowed in program tree (though they are allowed in search/replace patterns)
-            ASSERTF( !!x )("Found NULL pointer in tree at ")( w.Path() );
+            ASSERT( x )("Found NULL pointer in tree at ")( w.GetPathString() );
             w.Advance(); 
         }            
     }

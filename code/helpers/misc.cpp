@@ -13,7 +13,7 @@ shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
     else if( shared_ptr<Label> l = dynamic_pointer_cast<Label>( d ) )
         return l->identifier;
     else
-        ASSERT(0);
+        ASSERTFAIL();
 }
 
 shared_ptr<UserType> GetDeclaration( shared_ptr<Program> program, shared_ptr<TypeIdentifier> id )
@@ -24,7 +24,7 @@ shared_ptr<UserType> GetDeclaration( shared_ptr<Program> program, shared_ptr<Typ
         if( id == GetIdentifier( d ) ) 
 	        return d;
 	}
-	ASSERT(0);
+	ASSERTFAIL();
 }
 
 // Look for a record, skipping over typedefs. Returns NULL if not a record.
@@ -56,7 +56,7 @@ shared_ptr<Instance> GetDeclaration( shared_ptr<Program> program, shared_ptr<Ins
 
 	    w.Advance();
 	}
-	ASSERT(!"did not find instance declaration for identifier");
+	ASSERTFAIL("did not find instance declaration for identifier");
 }
 
 // Hunt through a record and its bases to find the named member
