@@ -9,28 +9,24 @@
 #include "walk.hpp"
 #include "pass.hpp"
 
-
-struct KeySet
+struct MatchSet : public set< shared_ptr<Node> > 
 {
-    // Some node in the search pattern 
-    shared_ptr<Node> key;
-    
-    // Other nodes in search pattern that must match key
-    // Nodes in replace pattern that will be substituted as key
-    set< shared_ptr<Node> > matches;
+private: 
+    // This is filled in by the search and replace engine
+    mutable shared_ptr<Node> key;
+
+    friend class SearchReplace;
 };
 
 
 class SearchReplace : Pass
 {  
 public:
-    SearchReplace( shared_ptr<Node> sp, shared_ptr<Node> rp=shared_ptr<Node>() ) :
-        search_pattern( sp ),
-        replace_pattern( rp )
-    {  
-        ASSERT( !!sp );
-    }
-
+    SearchReplace( shared_ptr<Node> sp, 
+                   shared_ptr<Node> rp=shared_ptr<Node>(),
+                   const set<MatchSet> *m = NULL );    
+    ~SearchReplace();
+    
     static bool IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern );
     GenericSharedPtr *Search( shared_ptr<Node> program );
     static shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x );
@@ -41,8 +37,12 @@ public:
 private:
     shared_ptr<Node> search_pattern;
     shared_ptr<Node> replace_pattern;
-
+    const set<MatchSet> *matches;
+    bool our_matches;
+    
     void Replace( GenericSharedPtr *target );    
+    const MatchSet *FindMatchSet( shared_ptr<Node> node );
+    void ClearKeys(); 
 };
 
 #endif
