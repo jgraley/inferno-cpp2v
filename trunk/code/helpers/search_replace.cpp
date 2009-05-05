@@ -1,5 +1,29 @@
 #include "search_replace.hpp"
 
+
+SearchReplace::SearchReplace( shared_ptr<Node> sp, 
+               shared_ptr<Node> rp,
+               const set<MatchSet> *m ) :
+    search_pattern( sp ),
+    replace_pattern( rp ),
+    matches( m )
+{  
+    our_matches = !matches;
+    if( our_matches )    
+        matches = new set<MatchSet>;
+    
+    ASSERT( sp );
+    ASSERT( matches );        
+}
+
+
+SearchReplace::~SearchReplace()
+{
+    if( our_matches )    
+        delete matches;
+}
+
+
 bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern )
 {
     ASSERT( !!pattern ); // Disallow NULL pattern for now, could change this if required
@@ -88,6 +112,7 @@ GenericSharedPtr *SearchReplace::Search( shared_ptr<Node> program )
     while(!w.Done())
     {
         shared_ptr<Node> x = w.Get();
+        ClearKeys();
         if( IsMatchPattern( x, search_pattern ) )
             return w.GetGeneric();                            
         w.Advance(); 
@@ -158,6 +183,32 @@ void SearchReplace::operator()( shared_ptr<Node> program )
             break;
     }
 }
+
+
+const MatchSet *SearchReplace::FindMatchSet( shared_ptr<Node> node )
+{
+    for( set<MatchSet>::iterator msi = matches->begin();
+         msi != matches->end();
+         msi++ )
+    {
+        MatchSet::iterator ni = msi->find( node );
+        if( ni != msi->end() )
+            return &*msi;
+    }
+    return 0;
+}
+
+
+void SearchReplace::ClearKeys()
+{
+    for( set<MatchSet>::iterator msi = matches->begin();
+         msi != matches->end();
+         msi++ )
+    {
+        msi->key = shared_ptr<Node>();
+    }
+}
+
 
 
 void SearchReplace::Test()
