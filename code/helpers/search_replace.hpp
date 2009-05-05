@@ -22,14 +22,15 @@ private:
 class SearchReplace : Pass
 {  
 public:
-    SearchReplace( shared_ptr<Node> sp, 
+    SearchReplace( shared_ptr<Node> sp=shared_ptr<Node>(), 
                    shared_ptr<Node> rp=shared_ptr<Node>(),
                    const set<MatchSet> *m = NULL );    
     ~SearchReplace();
     
-    static bool IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern );
+    bool IsInteriorMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern ); // only look inside node (type, value)
+    bool IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern ); // look at node and children
     GenericSharedPtr *Search( shared_ptr<Node> program );
-    static shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x );
+    shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x );
     void operator()( shared_ptr<Node> program );
 
     static void Test();
