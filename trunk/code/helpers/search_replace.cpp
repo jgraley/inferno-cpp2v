@@ -12,7 +12,6 @@ SearchReplace::SearchReplace( shared_ptr<Node> sp,
     if( our_matches )    
         matches = new set<MatchSet>;
     
-    ASSERT( sp );
     ASSERT( matches );        
 }
 
@@ -24,7 +23,7 @@ SearchReplace::~SearchReplace()
 }
 
 
-bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern )
+bool SearchReplace::IsInteriorMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern )
 {
     ASSERT( !!pattern ); // Disallow NULL pattern for now, could change this if required
     if( !x )
@@ -43,66 +42,97 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
     {
         shared_ptr<String> x_str = dynamic_pointer_cast<String>(x);
         ASSERT( x_str );
-        return x_str->value == pattern_str->value;
+        if( x_str->value != pattern_str->value )
+            return false;
     }    
     else if( shared_ptr<Integer> pattern_int = dynamic_pointer_cast<Integer>(pattern) )
     {
         shared_ptr<Integer> x_int = dynamic_pointer_cast<Integer>(x);
         ASSERT( x_int );
         TRACE("%s %s\n", x_int->value.toString(10).c_str(), pattern_int->value.toString(10).c_str() );
-        return x_int->value == pattern_int->value;
+        if( x_int->value != pattern_int->value )
+            return false;
     }    
     else if( shared_ptr<Float> pattern_flt = dynamic_pointer_cast<Float>(pattern) )
     {
         shared_ptr<Float> x_flt = dynamic_pointer_cast<Float>(x);
         ASSERT( x_flt );
-        return x_flt->value.bitwiseIsEqual( pattern_flt->value );
+        if( !x_flt->value.bitwiseIsEqual( pattern_flt->value ) )
+            return false;
     }
-    else // node is standard pattern, so recurse children (or we have a match)
+    return true;
+}    
+
+
+bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern )
+{
+    ASSERT( !!pattern ); // Disallow NULL pattern for now, could change this if required
+    
+    if( !IsInteriorMatchPattern( x, pattern ) )
+        return false;
+    
+    // recurse children (or we have a match)
+    vector< Itemiser::Element * > pattern_memb = Itemiser::Itemise( pattern.get() ); 
+    vector< Itemiser::Element * > x_memb = Itemiser::Itemise( x.get(),           // The thing we're itemising
+                                                              pattern.get() );   // Just get the members corresponding to pattern's class
+    ASSERT( pattern_memb.size() == x_memb.size() );
+    
+    for( int i=0; i<pattern_memb.size(); i++ )
     {
-        vector< Itemiser::Element * > pattern_memb = Itemiser::Itemise( pattern.get() ); 
-        vector< Itemiser::Element * > x_memb = Itemiser::Itemise( x.get(),           // The thing we're itemising
-                                                                  pattern.get() );   // Just get the members corresponding to pattern's class
-        ASSERT( pattern_memb.size() == x_memb.size() );
+        ASSERT( pattern_memb[i] && "itemise returned null element");
+        ASSERT( x_memb[i] && "itemise returned null element");
         
-        for( int i=0; i<pattern_memb.size(); i++ )
+        if( GenericSequence *pattern_seq = dynamic_cast<GenericSequence *>(pattern_memb[i]) )                
         {
-            ASSERT( pattern_memb[i] && "itemise returned null element");
-            ASSERT( x_memb[i] && "itemise returned null element");
+            GenericSequence *x_seq = dynamic_cast<GenericSequence *>(x_memb[i]);
+            ASSERT( x_seq && "itemise for target didn't match itemise for pattern");
             
-            if( GenericSequence *pattern_seq = dynamic_cast<GenericSequence *>(pattern_memb[i]) )                
+            if( x_seq->size() != pattern_seq->size() )
+                return false;
+            
+            for( int j=0; j<pattern_seq->size(); j++ )
             {
-                GenericSequence *x_seq = dynamic_cast<GenericSequence *>(x_memb[i]);
-                ASSERT( x_seq && "itemise for target didn't match itemise for pattern");
-                
-                if( x_seq->size() != pattern_seq->size() )
-                    return false;
-                
-                for( int j=0; j<pattern_seq->size(); j++ )
-                {
-                    bool match = IsMatchPattern( x_seq->Element(j).Get(), pattern_seq->Element(j).Get() );
-                    if( !match )
-                        return false;
-                }
-            }            
-            else if( GenericSharedPtr *pattern_ptr = dynamic_cast<GenericSharedPtr *>(pattern_memb[i]) )         
-            {
-                GenericSharedPtr *x_ptr = dynamic_cast<GenericSharedPtr *>(x_memb[i]);
-                ASSERT( x_ptr && "itemise for target didn't match itemise for pattern");
-                if( !!x_ptr->Get() != !!pattern_ptr->Get() )
-                    return false;
-                    
-                bool match = IsMatchPattern( x_ptr->Get(), pattern_ptr->Get() );
+                bool match = IsMatchPattern( x_seq->Element(j).Get(), pattern_seq->Element(j).Get() );
                 if( !match )
-                    return false;                     
+                    return false;
             }
-            else
-            {
-                ASSERTFAIL("got something from itemise that isnt a sequence or a shared pointer");               
-            }
-        }       
-        return true;
-    }
+        }            
+        else if( GenericSharedPtr *pattern_ptr = dynamic_cast<GenericSharedPtr *>(pattern_memb[i]) )         
+        {
+            GenericSharedPtr *x_ptr = dynamic_cast<GenericSharedPtr *>(x_memb[i]);
+            ASSERT( x_ptr && "itemise for target didn't match itemise for pattern");
+            if( !!x_ptr->Get() != !!pattern_ptr->Get() )
+                return false;
+                
+            bool match = IsMatchPattern( x_ptr->Get(), pattern_ptr->Get() );
+            if( !match )
+                return false;                     
+        }
+        else
+        {
+            ASSERTFAIL("got something from itemise that isnt a sequence or a shared pointer");               
+        }
+    }       
+   
+    // If we got here, the node matched the search pattern. Now apply match sets
+    const MatchSet *m = FindMatchSet( pattern );
+    if( m )
+    {
+        // It's in a match set!!
+        if( m->key )
+        {
+            // This match set has already been keyed!!
+            if( !IsInteriorMatchPattern( x, m->key ) )
+                return false;            
+        }
+        else
+        {
+            // Not keyed yet, so key it now!!!
+            m->key = x;
+        }
+    }    
+    
+    return true;
 }
 
 
@@ -124,15 +154,34 @@ GenericSharedPtr *SearchReplace::Search( shared_ptr<Node> program )
 
 shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
 {
+    // Check match set
+    shared_ptr<Node> substitute; // source after substitution
+    const MatchSet *m = FindMatchSet( source );
+    if( m )
+    {
+        // It's in a match set, so substitute the key
+        ASSERT( m->key )("Match set in replace pattern but did not key to search pattern");
+        substitute = m->key;       
+    }
+    
+    // Make the destination node based on substitute
     ASSERT( source );
-    shared_ptr<Duplicator> dup_dest = Duplicator::Duplicate( source );
+    shared_ptr<Duplicator> dup_dest = Duplicator::Duplicate( substitute );
     shared_ptr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
     ASSERT(dest);
     
-    vector< Itemiser::Element * > source_memb = Itemiser::Itemise( source.get() ); 
-    vector< Itemiser::Element * > dest_memb = Itemiser::Itemise( dest.get() );
-    ASSERT( source_memb.size() == dest_memb.size() ); // required to be same actual type
+    // Itemeise EVERYTHING
+    vector< Itemiser::Element * > source_memb = Itemiser::Itemise( source.get() ); // from pattern
+    vector< Itemiser::Element * > substitute_memb;
+    if( substitute )
+        substitute_memb = Itemiser::Itemise( substitute.get() ); // from pattern or input tree
+    vector< Itemiser::Element * > dest_memb = Itemiser::Itemise( dest.get() ); // goes to output tree
     
+    ASSERT( source_memb.size() == dest_memb.size() ); // required to be same substitute type
+    if( substitute )
+        ASSERT( substitute_memb.size() == source_memb.size() ); // required to be same substitute type    
+        
+    // Fill in the children based on NULL source meaning "use substitute"
     for( int i=0; i<source_memb.size(); i++ )
     {
         ASSERT( source_memb[i] && "itemise returned null element" );
@@ -142,18 +191,46 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
         {
             GenericSequence *dest_seq = dynamic_cast<GenericSequence *>(dest_memb[i]);
             ASSERT( dest_seq && "itemise for dest didn't match itemise for source");
-            
+            ASSERT( source_seq->size() == dest_seq->size() );
+
+            GenericSequence *substitute_seq;
+            if( substitute )
+            {            
+                substitute_seq = dynamic_cast<GenericSequence *>(substitute_memb[i]);
+                ASSERT( substitute_seq && "itemise for dest didn't match itemise for source");
+                ASSERT( source_seq->size() == source_seq->size() );
+            }
+                
             for( int j=0; j<source_seq->size(); j++ )
-                dest_seq->Element(j).Set( DuplicateSubtree( source_seq->Element(j).Get() ) );
+            {
+                if( source_seq->Element(j).Get() )
+                    dest_seq->Element(j).Set( DuplicateSubtree( source_seq->Element(j).Get() ) );
+                else
+                {
+                    ASSERT( substitute )("NULL in replace pattern only allowed for keyed matches");
+                    dest_seq->Element(j).Set( DuplicateSubtree( substitute_seq->Element(j).Get() ) );
+                }                
+            }
         }            
         else if( GenericSharedPtr *source_ptr = dynamic_cast<GenericSharedPtr *>(source_memb[i]) )         
         {
             GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]);
             ASSERT( dest_ptr && "itemise for target didn't match itemise for source");
+            
+            GenericSharedPtr *substitute_ptr;
+            if( substitute )
+            {
+                substitute_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]);
+                ASSERT( substitute_ptr && "itemise for target didn't match itemise for source");
+            }
+            
             if( source_ptr->Get() )
                 dest_ptr->Set( DuplicateSubtree( source_ptr->Get() ) );
             else
-                dest_ptr->Set( shared_ptr<Node>() );
+            {
+                ASSERT( substitute )("NULL in replace pattern only allowed for keyed matches");
+                dest_ptr->Set( DuplicateSubtree( substitute_ptr->Get() ) );
+            }
         }
         else
         {
@@ -213,30 +290,32 @@ void SearchReplace::ClearKeys()
 
 void SearchReplace::Test()
 {
+    SearchReplace sr;
+    
     {
         // single node with topological wildcarding
         shared_ptr<Void> v(new Void);
-        ASSERT( SearchReplace::IsMatchPattern( v, v ) == true );
+        ASSERT( sr.IsMatchPattern( v, v ) == true );
         shared_ptr<Bool> b(new Bool);
-        ASSERT( SearchReplace::IsMatchPattern( v, b ) == false );
-        ASSERT( SearchReplace::IsMatchPattern( b, v ) == false );
+        ASSERT( sr.IsMatchPattern( v, b ) == false );
+        ASSERT( sr.IsMatchPattern( b, v ) == false );
         shared_ptr<Type> t(new Type);
-        ASSERT( SearchReplace::IsMatchPattern( v, t ) == true );
-        ASSERT( SearchReplace::IsMatchPattern( t, v ) == false );
-        ASSERT( SearchReplace::IsMatchPattern( b, t ) == true );
-        ASSERT( SearchReplace::IsMatchPattern( t, b ) == false );
+        ASSERT( sr.IsMatchPattern( v, t ) == true );
+        ASSERT( sr.IsMatchPattern( t, v ) == false );
+        ASSERT( sr.IsMatchPattern( b, t ) == true );
+        ASSERT( sr.IsMatchPattern( t, b ) == false );
         
         // node points directly to another with TC
         shared_ptr<Pointer> p1(new Pointer);
         p1->destination = v;
-        ASSERT( SearchReplace::IsMatchPattern( p1, b ) == false );
-        ASSERT( SearchReplace::IsMatchPattern( p1, p1 ) == true );
+        ASSERT( sr.IsMatchPattern( p1, b ) == false );
+        ASSERT( sr.IsMatchPattern( p1, p1 ) == true );
         shared_ptr<Pointer> p2(new Pointer);
         p2->destination = b;
-        ASSERT( SearchReplace::IsMatchPattern( p1, p2 ) == false );
+        ASSERT( sr.IsMatchPattern( p1, p2 ) == false );
         p2->destination = t;
-        ASSERT( SearchReplace::IsMatchPattern( p1, p2 ) == true );
-        ASSERT( SearchReplace::IsMatchPattern( p2, p1 ) == false );
+        ASSERT( sr.IsMatchPattern( p1, p2 ) == true );
+        ASSERT( sr.IsMatchPattern( p2, p1 ) == false );
     }
     
     {
@@ -245,8 +324,8 @@ void SearchReplace::Test()
         shared_ptr<String> s2( new String );
         s1->value = "here";
         s2->value = "there";
-        ASSERT( SearchReplace::IsMatchPattern( s1, s1 ) == true );
-        ASSERT( SearchReplace::IsMatchPattern( s1, s2 ) == false );        
+        ASSERT( sr.IsMatchPattern( s1, s1 ) == true );
+        ASSERT( sr.IsMatchPattern( s1, s2 ) == false );        
     }    
     
     {
@@ -259,31 +338,31 @@ void SearchReplace::Test()
         apsint = 5;
         i2->value = apsint;
         TRACE("  %s %s\n", i1->value.toString(10).c_str(), i2->value.toString(10).c_str() );
-        ASSERT( SearchReplace::IsMatchPattern( i1, i1 ) == true );
-        ASSERT( SearchReplace::IsMatchPattern( i1, i2 ) == false );        
+        ASSERT( sr.IsMatchPattern( i1, i1 ) == true );
+        ASSERT( sr.IsMatchPattern( i1, i2 ) == false );        
     }    
     
     {
         // node with sequence, check lengths 
         shared_ptr<Compound> c1( new Compound );
-        ASSERT( SearchReplace::IsMatchPattern( c1, c1 ) == true );
+        ASSERT( sr.IsMatchPattern( c1, c1 ) == true );
         shared_ptr<Nop> n1( new Nop );
         c1->statements.push_back( n1 );
-        ASSERT( SearchReplace::IsMatchPattern( c1, c1 ) == true );
+        ASSERT( sr.IsMatchPattern( c1, c1 ) == true );
         shared_ptr<Nop> n2( new Nop );
         c1->statements.push_back( n2 );
-        ASSERT( SearchReplace::IsMatchPattern( c1, c1 ) == true );
+        ASSERT( sr.IsMatchPattern( c1, c1 ) == true );
         shared_ptr<Compound> c2( new Compound );
-        ASSERT( SearchReplace::IsMatchPattern( c1, c2 ) == false );
+        ASSERT( sr.IsMatchPattern( c1, c2 ) == false );
         shared_ptr<Nop> n3( new Nop );
         c2->statements.push_back( n3 );
-        ASSERT( SearchReplace::IsMatchPattern( c1, c2 ) == false );
+        ASSERT( sr.IsMatchPattern( c1, c2 ) == false );
         shared_ptr<Nop> n4( new Nop );
         c2->statements.push_back( n4 );
-        ASSERT( SearchReplace::IsMatchPattern( c1, c2 ) == true );        
+        ASSERT( sr.IsMatchPattern( c1, c2 ) == true );        
         shared_ptr<Nop> n5( new Nop );
         c2->statements.push_back( n5 );
-        ASSERT( SearchReplace::IsMatchPattern( c1, c2 ) == false );        
+        ASSERT( sr.IsMatchPattern( c1, c2 ) == false );        
     }
 
     {
@@ -294,8 +373,8 @@ void SearchReplace::Test()
         shared_ptr<Compound> c2( new Compound );
         shared_ptr<Statement> s( new Statement );
         c2->statements.push_back( s );
-        ASSERT( SearchReplace::IsMatchPattern( c1, c2 ) == true );
-        ASSERT( SearchReplace::IsMatchPattern( c2, c1 ) == false );
+        ASSERT( sr.IsMatchPattern( c1, c2 ) == true );
+        ASSERT( sr.IsMatchPattern( c2, c1 ) == false );
     }
     
     {        
@@ -309,15 +388,15 @@ void SearchReplace::Test()
         shared_ptr<Declaration> d( new Declaration );
         shared_ptr<Public> p2( new Public );
         d->access = p2;
-        ASSERT( SearchReplace::IsMatchPattern( l, d ) == true );
-        ASSERT( SearchReplace::IsMatchPattern( d, l ) == false );
+        ASSERT( sr.IsMatchPattern( l, d ) == true );
+        ASSERT( sr.IsMatchPattern( d, l ) == false );
         shared_ptr<Private> p3( new Private );
         d->access = p3;
-        ASSERT( SearchReplace::IsMatchPattern( l, d ) == false );
-        ASSERT( SearchReplace::IsMatchPattern( d, l ) == false );
+        ASSERT( sr.IsMatchPattern( l, d ) == false );
+        ASSERT( sr.IsMatchPattern( d, l ) == false );
         shared_ptr<AccessSpec> p4( new AccessSpec );
         d->access = p4;
-        ASSERT( SearchReplace::IsMatchPattern( l, d ) == true );
-        ASSERT( SearchReplace::IsMatchPattern( d, l ) == false );
+        ASSERT( sr.IsMatchPattern( l, d ) == true );
+        ASSERT( sr.IsMatchPattern( d, l ) == false );
     }
 }
