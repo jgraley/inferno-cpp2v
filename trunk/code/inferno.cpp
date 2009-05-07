@@ -29,10 +29,37 @@ int main( int argc, char *argv[] )
               
     Validate()(program);                
                     
-  /*  shared_ptr<Node> sp( new Bool );                    
-    shared_ptr<Node> rp( new Void );                    
-    SearchReplace(sp, rp)(program);                    
-    */                
+    {
+        shared_ptr<Dereference> sd( new Dereference );     
+        shared_ptr<Add> sa( new Add );
+        sd->operands.push_back( sa );
+        shared_ptr<AnyInstanceIdentifier> sar( new AnyInstanceIdentifier );
+        sa->operands.push_back( sar );
+        shared_ptr<Expression> se( new Expression );
+        sa->operands.push_back( se );
+        TRACE("%p\n", SearchReplace(sd).Search(program) );
+    
+        shared_ptr<Subscript> rs( new Subscript );
+        shared_ptr<AnyInstanceIdentifier> rar( new AnyInstanceIdentifier );
+        rs->base = rar;
+        shared_ptr<Expression> re( new Expression );
+        rs->index = re;
+                       
+        MatchSet mar;
+        mar.insert( sar );
+        mar.insert( rar );
+        MatchSet me;
+        me.insert( se );
+        me.insert( re );            
+        set<MatchSet> sm;
+        sm.insert( mar );
+        sm.insert( me );
+                       
+        SearchReplace(sd, rs, &sm)(program);                            
+    }
+                 
+    Validate()(program);                
+
     if(ReadArgs::graph)
     {
         Graph g;
