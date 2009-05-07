@@ -84,7 +84,7 @@ public:
         else if( shared_ptr<LabelIdentifier> li = dynamic_pointer_cast<LabelIdentifier>(sp) )
             return li->value + ":";                     
         else if( shared_ptr<String> ss = dynamic_pointer_cast< String >(sp) )
-            return "\"" + ss->value + "\"";                     // todo sanitise this
+            return "\\\"" + ss->value + "\\\"";                     // todo sanitise this
         else if( shared_ptr<Integer> ic = dynamic_pointer_cast< Integer >(sp) )
             return string(ic->value.toString(10)); 
         else if( shared_ptr<Float> fc = dynamic_pointer_cast< Float >(sp) )
