@@ -1,6 +1,11 @@
-char *p = "jhf";
-
 int a[] = { 2, 3, 4 };
+
+void f()
+{
+    *(a+1);
+}
+/*
+char *p = "jhf";
 
 struct foo
 {
@@ -33,7 +38,7 @@ int main()
     5.6f;
     7.7l;
     y += 'z';
-    y -= p[2];
+    y -= p[2];    
     {
         float z;
         z = 5;
@@ -44,3 +49,4 @@ int main()
     y += kk;
     return (unsigned char)y;
 }
+*/

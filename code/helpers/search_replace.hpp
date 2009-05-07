@@ -41,6 +41,8 @@ private:
     const set<MatchSet> *matches;
     bool our_matches;
     
+    void ClearPtrs( shared_ptr<Node> dest );
+    void DuplicateMembersOverNullOnly( shared_ptr<Node> dest, shared_ptr<Node> source );
     void Replace( GenericSharedPtr *target );    
     const MatchSet *FindMatchSet( shared_ptr<Node> node );
     void ClearKeys(); 

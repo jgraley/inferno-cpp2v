@@ -25,11 +25,12 @@ SearchReplace::~SearchReplace()
 
 bool SearchReplace::IsInteriorMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern )
 {
+    TRACE();
     ASSERT( !!pattern ); // Disallow NULL pattern for now, could change this if required
     if( !x )
         return false; // NULL target allowed; never matches since pattern is not allwed to be NULL
 
-    TRACE("%s >= %s??\n", TypeInfo(pattern).name().c_str(), TypeInfo(x).name().c_str() );
+    TRACE("Is %s >= %s? ", TypeInfo(pattern).name().c_str(), TypeInfo(x).name().c_str() );
 
     // Is node correct class?
     if( !(TypeInfo(pattern) >= TypeInfo(x)) ) // Note >= is "non-strict superset" i.e. pattern is superclass of x or same class
@@ -43,7 +44,10 @@ bool SearchReplace::IsInteriorMatchPattern( shared_ptr<Node> x, shared_ptr<Node>
         shared_ptr<String> x_str = dynamic_pointer_cast<String>(x);
         ASSERT( x_str );
         if( x_str->value != pattern_str->value )
+        {
+            TRACE("Strings differ\n");
             return false;
+        }
     }    
     else if( shared_ptr<Integer> pattern_int = dynamic_pointer_cast<Integer>(pattern) )
     {
@@ -51,15 +55,22 @@ bool SearchReplace::IsInteriorMatchPattern( shared_ptr<Node> x, shared_ptr<Node>
         ASSERT( x_int );
         TRACE("%s %s\n", x_int->value.toString(10).c_str(), pattern_int->value.toString(10).c_str() );
         if( x_int->value != pattern_int->value )
+        {
+            TRACE("Integers differ\n");
             return false;
+        }
     }    
     else if( shared_ptr<Float> pattern_flt = dynamic_pointer_cast<Float>(pattern) )
     {
         shared_ptr<Float> x_flt = dynamic_pointer_cast<Float>(x);
         ASSERT( x_flt );
         if( !x_flt->value.bitwiseIsEqual( pattern_flt->value ) )
+        {
+            TRACE("Floats differ\n");
             return false;
+        }
     }
+    TRACE("yes!!\n");
     return true;
 }    
 
@@ -86,33 +97,40 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
         {
             GenericSequence *x_seq = dynamic_cast<GenericSequence *>(x_memb[i]);
             ASSERT( x_seq && "itemise for target didn't match itemise for pattern");
-            
+            TRACE("Member %d is Sequence, target %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
             if( x_seq->size() != pattern_seq->size() )
                 return false;
             
             for( int j=0; j<pattern_seq->size(); j++ )
             {
+                TRACE("Elt %d target ptr=%p pattern ptr=%p\n", j, x_seq->Element(j).Get().get(), pattern_seq->Element(j).Get().get());
+                if( !pattern_seq->Element(j).Get() )
+                    continue; // NULL is a wildcard in search patterns
+                TRACE();
                 bool match = IsMatchPattern( x_seq->Element(j).Get(), pattern_seq->Element(j).Get() );
                 if( !match )
-                    return false;
+                    return false;                    
             }
         }            
         else if( GenericSharedPtr *pattern_ptr = dynamic_cast<GenericSharedPtr *>(pattern_memb[i]) )         
         {
             GenericSharedPtr *x_ptr = dynamic_cast<GenericSharedPtr *>(x_memb[i]);
             ASSERT( x_ptr && "itemise for target didn't match itemise for pattern");
-            if( !!x_ptr->Get() != !!pattern_ptr->Get() )
-                return false;
-                
-            bool match = IsMatchPattern( x_ptr->Get(), pattern_ptr->Get() );
-            if( !match )
-                return false;                     
+            TRACE("Member %d is SharedPtr, pattern ptr=%p\n", i, pattern_ptr->Get().get());
+            if( pattern_ptr->Get() ) // NULL is a wildcard in search patterns  
+            {                   
+                bool match = IsMatchPattern( x_ptr->Get(), pattern_ptr->Get() );
+                if( !match )
+                    return false;                     
+            }
         }
         else
         {
             ASSERTFAIL("got something from itemise that isnt a sequence or a shared pointer");               
         }
     }       
+   
+    TRACE("Matches search pattern\n");
    
     // If we got here, the node matched the search pattern. Now apply match sets
     const MatchSet *m = FindMatchSet( pattern );
@@ -152,37 +170,35 @@ GenericSharedPtr *SearchReplace::Search( shared_ptr<Node> program )
 }
 
 
-shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
+void SearchReplace::ClearPtrs( shared_ptr<Node> dest )
 {
-    // Check match set
-    shared_ptr<Node> substitute; // source after substitution
-    const MatchSet *m = FindMatchSet( source );
-    if( m )
+    vector< Itemiser::Element * > dest_memb = Itemiser::Itemise( dest.get() );
+    for( int i=0; i<dest_memb.size(); i++ )
     {
-        // It's in a match set, so substitute the key
-        ASSERT( m->key )("Match set in replace pattern but did not key to search pattern");
-        substitute = m->key;       
-    }
-    
-    // Make the destination node based on substitute
-    ASSERT( source );
-    shared_ptr<Duplicator> dup_dest = Duplicator::Duplicate( substitute );
-    shared_ptr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
-    ASSERT(dest);
-    
-    // Itemeise EVERYTHING
-    vector< Itemiser::Element * > source_memb = Itemiser::Itemise( source.get() ); // from pattern
-    vector< Itemiser::Element * > substitute_memb;
-    if( substitute )
-        substitute_memb = Itemiser::Itemise( substitute.get() ); // from pattern or input tree
-    vector< Itemiser::Element * > dest_memb = Itemiser::Itemise( dest.get() ); // goes to output tree
-    
-    ASSERT( source_memb.size() == dest_memb.size() ); // required to be same substitute type
-    if( substitute )
-        ASSERT( substitute_memb.size() == source_memb.size() ); // required to be same substitute type    
-        
+        if( GenericSequence *dest_seq = dynamic_cast<GenericSequence *>(dest_memb[i]) )                
+        {
+            for( int j=0; j<dest_seq->size(); j++ )
+                dest_seq->Element(j).Set( shared_ptr<Node>() );
+        }            
+        else if( GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]) )         
+        {
+            dest_ptr->Set( shared_ptr<Node>() );
+        }
+    }       
+}
+
+
+void SearchReplace::DuplicateMembersOverNullOnly( shared_ptr<Node> dest, shared_ptr<Node> source )
+{
+    ASSERT( TypeInfo(source) >= TypeInfo(dest) )("source must be a non-strict subclass of destination, so that it does not have more members");
+
+    vector< Itemiser::Element * > source_memb = Itemiser::Itemise( source.get() ); 
+    vector< Itemiser::Element * > dest_memb = Itemiser::Itemise( dest.get(),       // The thing we're itemising
+                                                                 source.get() );   // Just get the members corresponding to source's class
+    ASSERT( source_memb.size() == dest_memb.size() );
+
     // Fill in the children based on NULL source meaning "use substitute"
-    for( int i=0; i<source_memb.size(); i++ )
+    for( int i=0; i<dest_memb.size(); i++ )
     {
         ASSERT( source_memb[i] && "itemise returned null element" );
         ASSERT( dest_memb[i] && "itemise returned null element" );
@@ -193,50 +209,56 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
             ASSERT( dest_seq && "itemise for dest didn't match itemise for source");
             ASSERT( source_seq->size() == dest_seq->size() );
 
-            GenericSequence *substitute_seq;
-            if( substitute )
-            {            
-                substitute_seq = dynamic_cast<GenericSequence *>(substitute_memb[i]);
-                ASSERT( substitute_seq && "itemise for dest didn't match itemise for source");
-                ASSERT( source_seq->size() == source_seq->size() );
-            }
-                
             for( int j=0; j<source_seq->size(); j++ )
             {
-                if( source_seq->Element(j).Get() )
+                if( !dest_seq->Element(j).Get() ) // Only over NULL!!!
                     dest_seq->Element(j).Set( DuplicateSubtree( source_seq->Element(j).Get() ) );
-                else
-                {
-                    ASSERT( substitute )("NULL in replace pattern only allowed for keyed matches");
-                    dest_seq->Element(j).Set( DuplicateSubtree( substitute_seq->Element(j).Get() ) );
-                }                
             }
         }            
         else if( GenericSharedPtr *source_ptr = dynamic_cast<GenericSharedPtr *>(source_memb[i]) )         
         {
             GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]);
             ASSERT( dest_ptr && "itemise for target didn't match itemise for source");
-            
-            GenericSharedPtr *substitute_ptr;
-            if( substitute )
-            {
-                substitute_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]);
-                ASSERT( substitute_ptr && "itemise for target didn't match itemise for source");
-            }
-            
-            if( source_ptr->Get() )
+                        
+            if( !dest_ptr->Get() ) // Only over NULL!!!1
                 dest_ptr->Set( DuplicateSubtree( source_ptr->Get() ) );
-            else
-            {
-                ASSERT( substitute )("NULL in replace pattern only allowed for keyed matches");
-                dest_ptr->Set( DuplicateSubtree( substitute_ptr->Get() ) );
-            }
         }
         else
         {
             ASSERTFAIL("got something from itemise that isnt a sequence or a shared pointer");               
         }
-    }       
+    }        
+}
+
+
+shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
+{
+    // Check match set
+    shared_ptr<Node> substitute; // source after substitution
+    const MatchSet *m = FindMatchSet( source );
+    if( m )
+    {
+        // It's in a match set, so substitute the key
+        ASSERT( m->key )("Match set in replace pattern but did not key to search pattern");
+        substitute = m->key;       
+        ASSERT( TypeInfo(source) >= TypeInfo(substitute) )("source must be a non-strict subclass of substitute, so that it does not have more members");
+    }
+    
+    // Make the destination node based on substitute if found, otherwise the source
+    ASSERT( source );
+    shared_ptr<Duplicator> dup_dest = Duplicator::Duplicate( substitute?substitute:source );
+    shared_ptr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
+    ASSERT(dest);
+    
+    // Make all members in the dest NULL
+    ClearPtrs( dest );
+    
+    // Copy the source over, including any NULLs in the source
+    DuplicateMembersOverNullOnly( dest, source );
+    
+    // If found substitute, copy substitute members *only* over members NULL in the source
+    if( substitute )
+        DuplicateMembersOverNullOnly( dest, substitute );
 
     return dest;
 }
