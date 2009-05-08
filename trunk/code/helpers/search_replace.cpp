@@ -188,7 +188,7 @@ void SearchReplace::ClearPtrs( shared_ptr<Node> dest )
 }
 
 
-void SearchReplace::DuplicateMembersOverNullOnly( shared_ptr<Node> dest, shared_ptr<Node> source )
+void SearchReplace::OverlayMembers( shared_ptr<Node> dest, shared_ptr<Node> source )
 {
     ASSERT( TypeInfo(source) >= TypeInfo(dest) )("source must be a non-strict subclass of destination, so that it does not have more members");
 
@@ -244,6 +244,14 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
         ASSERT( TypeInfo(source) >= TypeInfo(substitute) )("source must be a non-strict subclass of substitute, so that it does not have more members");
     }
     
+    if( substitute && dynamic_pointer_cast<Identifier>( substitute ) )
+    {
+        // Substitute is an identifier, so preserve its uniqueness by just linking 
+        // in the same node. Don't do any more - we wouldn't want to change the
+        // identifier in the tree even if it had members, lol!
+        return substitute;
+    }
+
     // Make the destination node based on substitute if found, otherwise the source
     ASSERT( source );
     shared_ptr<Duplicator> dup_dest = Duplicator::Duplicate( substitute?substitute:source );
@@ -253,12 +261,14 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
     // Make all members in the dest NULL
     ClearPtrs( dest );
     
-    // Copy the source over, including any NULLs in the source
-    DuplicateMembersOverNullOnly( dest, source );
+    // Copy the source over, including any NULLs in the source. If source is superclass
+    // of dest (i.e. has possibly fewer members) the missing ones will remain NULL and
+    // will come from substitute node.
+    OverlayMembers( dest, source );
     
     // If found substitute, copy substitute members *only* over members NULL in the source
     if( substitute )
-        DuplicateMembersOverNullOnly( dest, substitute );
+        OverlayMembers( dest, substitute );
 
     return dest;
 }
