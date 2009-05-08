@@ -4,7 +4,7 @@ void f()
 {
     *(a+1);
 }
-/*
+
 char *p = "jhf";
 
 struct foo
@@ -49,4 +49,3 @@ int main()
     y += kk;
     return (unsigned char)y;
 }
-*/
