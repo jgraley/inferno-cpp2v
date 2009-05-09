@@ -47,13 +47,13 @@ int main( int argc, char *argv[] )
         shared_ptr<Expression> re( new Expression );
         rs->index = re;
                        
-        MatchSet mar;
+        SearchReplace::MatchSet mar;
         mar.insert( sseot );
         mar.insert( rar );
-        MatchSet me;
+        SearchReplace::MatchSet me;
         me.insert( se );
         me.insert( re );            
-        set<MatchSet> sm;
+        set<SearchReplace::MatchSet> sm;
         sm.insert( mar );
         sm.insert( me );
                        
