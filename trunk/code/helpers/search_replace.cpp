@@ -1,9 +1,9 @@
 #include "search_replace.hpp"
 
-
+// Constructor remembers search pattern, replace apttern and any suppleid match sets as required
 SearchReplace::SearchReplace( shared_ptr<Node> sp, 
-               shared_ptr<Node> rp,
-               const set<MatchSet> *m ) :
+                              shared_ptr<Node> rp,
+                              const set<MatchSet> *m ) :
     search_pattern( sp ),
     replace_pattern( rp ),
     matches( m )
@@ -16,6 +16,7 @@ SearchReplace::SearchReplace( shared_ptr<Node> sp,
 }
 
 
+// Destructor tries not to leak memory lol
 SearchReplace::~SearchReplace()
 {
     if( our_matches )    
@@ -23,6 +24,8 @@ SearchReplace::~SearchReplace()
 }
 
 
+// Helper for IsMatchPattern that does the testing for the present node, including 
+// superclass wildcarding and data member checking on Property nodes.
 bool SearchReplace::IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pattern )
 {
     TRACE();
@@ -73,6 +76,8 @@ bool SearchReplace::IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pa
 }    
 
 
+// Helper for IsMatchPattern that does the actual match testing work for the children and recurses.
+// Also checks for soft matches.
 bool SearchReplace::IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pattern )
 {
     ASSERT( !!pattern ); // Disallow NULL pattern for now, could change this if required
@@ -136,6 +141,9 @@ bool SearchReplace::IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pa
 }
 
 
+// Try to match a pattern with the inferno rules: soft patterns allowed to
+// determine own match result, match sets restrict to same actual node. Also
+// keys the match sets as matches are found.
 bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern )
 {
     ASSERT( !!pattern ); // Disallow NULL pattern for now, could change this if required
@@ -167,6 +175,8 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
 }
 
 
+// Search supplied program for a match to the configured search pattern.
+// If found, return double pointer to assist replace algorithm.
 GenericSharedPtr *SearchReplace::Search( shared_ptr<Node> program )
 {
     Walk w( program );
@@ -183,6 +193,7 @@ GenericSharedPtr *SearchReplace::Search( shared_ptr<Node> program )
 }
 
 
+// Clear all pointer members in supplied dest to NULL
 void SearchReplace::ClearPtrs( shared_ptr<Node> dest )
 {
     vector< Itemiser::Element * > dest_memb = Itemiser::Itemise( dest.get() );
@@ -201,7 +212,10 @@ void SearchReplace::ClearPtrs( shared_ptr<Node> dest )
 }
 
 
-void SearchReplace::OverlayMembers( shared_ptr<Node> dest, shared_ptr<Node> source, bool in_substitution )
+// Helper for DuplicateSubtree, fills in children of dest node from source node when source node child
+// is non-NULL. This means we can call this multiple times with different sources and get a priority 
+// scheme.
+void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source, bool under_substitution )
 {
     ASSERT( TypeInfo(source) >= TypeInfo(dest) )("source must be a non-strict subclass of destination, so that it does not have more members");
 
@@ -210,7 +224,6 @@ void SearchReplace::OverlayMembers( shared_ptr<Node> dest, shared_ptr<Node> sour
                                                                  source.get() );   // Just get the members corresponding to source's class
     ASSERT( source_memb.size() == dest_memb.size() );
 
-    // Fill in the children based on NULL source meaning "use substitute"
     for( int i=0; i<dest_memb.size(); i++ )
     {
         ASSERT( source_memb[i] && "itemise returned null element" );
@@ -225,7 +238,7 @@ void SearchReplace::OverlayMembers( shared_ptr<Node> dest, shared_ptr<Node> sour
             for( int j=0; j<source_seq->size(); j++ )
             {
                 if( !dest_seq->Element(j).Get() ) // Only over NULL!!!
-                    dest_seq->Element(j).Set( DuplicateSubtree( source_seq->Element(j).Get(), in_substitution ) );
+                    dest_seq->Element(j).Set( DuplicateSubtree( source_seq->Element(j).Get(), under_substitution ) );
             }
         }            
         else if( GenericSharedPtr *source_ptr = dynamic_cast<GenericSharedPtr *>(source_memb[i]) )         
@@ -234,7 +247,7 @@ void SearchReplace::OverlayMembers( shared_ptr<Node> dest, shared_ptr<Node> sour
             ASSERT( dest_ptr && "itemise for target didn't match itemise for source");
                         
             if( !dest_ptr->Get() ) // Only over NULL!!!1
-                dest_ptr->Set( DuplicateSubtree( source_ptr->Get(), in_substitution ) );
+                dest_ptr->Set( DuplicateSubtree( source_ptr->Get(), under_substitution ) );
         }
         else
         {
@@ -244,23 +257,27 @@ void SearchReplace::OverlayMembers( shared_ptr<Node> dest, shared_ptr<Node> sour
 }
 
 
-shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool in_substitution )
+// Duplicate an entire subtree, following the rules for inferno search and replace.
+// We recurse through the subtree, using Duplcator to create the new nodes. We support 
+// substitution based on configured match sets, and we do not suplicate identifiers when 
+// substituting.
+shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool under_substitution )
 {
     // Check match set
-    shared_ptr<Node> substitute; // source after substitution
+    shared_ptr<Node> local_substitute; // source after substitution
     const MatchSet *m = FindMatchSet( source );
     if( m )
     {
-        // It's in a match set, so substitute the key
+        // It's in a match set, so local_substitute the key
         ASSERT( m->key )("Match set in replace pattern but did not key to search pattern");
-        substitute = m->key;       
-        ASSERT( TypeInfo(source) >= TypeInfo(substitute) )("source must be a non-strict subclass of substitute, so that it does not have more members");
-        in_substitution = true;
+        local_substitute = m->key;       
+        ASSERT( TypeInfo(source) >= TypeInfo(local_substitute) )("source must be a non-strict subclass of local_substitute, so that it does not have more members");
+        under_substitution = true;
     }
     
-    shared_ptr<Node> to_duplicate = substitute ? substitute : source;
+    shared_ptr<Node> to_duplicate = local_substitute ? local_substitute : source;
     
-    if( in_substitution && dynamic_pointer_cast<Identifier>( to_duplicate ) )
+    if( under_substitution && dynamic_pointer_cast<Identifier>( to_duplicate ) )
     {
         // Substitute is an identifier, so preserve its uniqueness by just linking 
         // in the same node. Don't do any more - we wouldn't want to change the
@@ -268,7 +285,7 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool 
         return to_duplicate;
     }
 
-    // Make the destination node based on substitute if found, otherwise the source
+    // Make the destination node based on local_substitute if found, otherwise the source
     ASSERT( source );
     shared_ptr<Duplicator> dup_dest = Duplicator::Duplicate( to_duplicate );
     shared_ptr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
@@ -279,24 +296,30 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool 
     
     // Copy the source over, including any NULLs in the source. If source is superclass
     // of dest (i.e. has possibly fewer members) the missing ones will remain NULL and
-    // will come from substitute node.
-    OverlayMembers( dest, source, in_substitution );
+    // will come from local_substitute node.
+    OverlayPtrs( dest, source, under_substitution );
     
-    // If found substitute, copy substitute members *only* over members NULL in the source
-    if( substitute )
-        OverlayMembers( dest, substitute, true );
+    // If found local_substitute, copy local_substitute members *only* over members NULL in the source
+    if( local_substitute )
+        OverlayPtrs( dest, local_substitute, true );
 
     return dest;
 }
 
 
+// Perform the configures replacement at the supplied target. 
+// Note target is a double pointer, since we wish to enact the
+// replacement by changing a SharedPtr somewhere.
 void SearchReplace::Replace( GenericSharedPtr *target )
 {
-    ASSERT( !!replace_pattern );
+    ASSERT( replace_pattern );
     target->Set( DuplicateSubtree( replace_pattern ) );
 }
 
 
+// Perform search and replace on supplied program based
+// on current patterns and match sets. Does search and replace
+// operations repeatedly until there are no more matches.
 void SearchReplace::operator()( shared_ptr<Program> p )
 {
     program = p;
@@ -312,7 +335,8 @@ void SearchReplace::operator()( shared_ptr<Program> p )
 }
 
 
-const MatchSet *SearchReplace::FindMatchSet( shared_ptr<Node> node )
+// Find a match set containing the supplied node
+const SearchReplace::MatchSet *SearchReplace::FindMatchSet( shared_ptr<Node> node )
 {
     for( set<MatchSet>::iterator msi = matches->begin();
          msi != matches->end();
@@ -326,6 +350,7 @@ const MatchSet *SearchReplace::FindMatchSet( shared_ptr<Node> node )
 }
 
 
+// Reset the keys in all the matchsets 
 void SearchReplace::ClearKeys()
 {
     for( set<MatchSet>::iterator msi = matches->begin();
@@ -335,7 +360,6 @@ void SearchReplace::ClearKeys()
         msi->key = shared_ptr<Node>();
     }
 }
-
 
 
 void SearchReplace::Test()
