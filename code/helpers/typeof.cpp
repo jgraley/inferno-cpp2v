@@ -25,9 +25,18 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Program> program, shared_ptr<Expression
         // then handle based on the kind of operator
         if( dynamic_pointer_cast<Dereference>(op) )
         {
-            shared_ptr<Pointer> o2 = dynamic_pointer_cast<Pointer>( optypes[0] );
-            ASSERT( o2 && "dereferenciung non-pointer" );
-            return o2->destination;
+            if( shared_ptr<Pointer> o2 = dynamic_pointer_cast<Pointer>( optypes[0] ) )
+                return o2->destination;
+            else if( shared_ptr<Array> o2 = dynamic_pointer_cast<Array>( optypes[0] ) )
+                return o2->element;
+            else 
+                ASSERTFAIL( "dereferenciung non-pointer" );
+        }
+        else if( dynamic_pointer_cast<AddressOf>(op) )
+        {
+            shared_ptr<Pointer> p( new Pointer );
+            p->destination = optypes[0];
+            return p;
         }
         else
         {

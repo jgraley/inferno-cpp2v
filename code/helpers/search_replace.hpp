@@ -27,11 +27,14 @@ public:
                    const set<MatchSet> *m = NULL );    
     ~SearchReplace();
     
-    bool IsInteriorMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern ); // only look inside node (type, value)
+    void operator()( shared_ptr<Program> p );
+
     bool IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern ); // look at node and children
-    GenericSharedPtr *Search( shared_ptr<Node> program );
-    shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x );
-    void operator()( shared_ptr<Node> program );
+    shared_ptr<Program> GetProgram() const { ASSERT(program); return program; } 
+    struct SoftSearchPattern : virtual Node
+    {
+        virtual bool IsMatchPattern( SearchReplace *sr, shared_ptr<Node> x ) = 0; 
+    };
 
     static void Test();
 
@@ -40,43 +43,19 @@ private:
     shared_ptr<Node> replace_pattern;
     const set<MatchSet> *matches;
     bool our_matches;
+    shared_ptr<Program> program;
     
+    bool IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pattern ); // only look inside node (type, value)
+    bool IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pattern ); // look at node and children
+    GenericSharedPtr *Search( shared_ptr<Node> program );
     void ClearPtrs( shared_ptr<Node> dest );
-    void OverlayMembers( shared_ptr<Node> dest, shared_ptr<Node> source );
+    void OverlayMembers( shared_ptr<Node> dest, shared_ptr<Node> source, bool in_substitution );
+    shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x, bool in_substitution=false );
     void Replace( GenericSharedPtr *target );    
     const MatchSet *FindMatchSet( shared_ptr<Node> node );
     void ClearKeys(); 
 };
 
-/*
-struct SoftSearchPattern : virtual Node
-{
-    virutal bool IsMatchPattern( SearchReplace *sr, shared_ptr<Node> x ) = 0; 
-};
 
 
-struct WildExpressonOfType : Expression
-{
-    NODE_FUNCTIONS;
-    SharedPtr<Type> type_pattern;
-    
-    virutal bool IsMatchPattern( SearchReplace *sr, shared_ptr<Node> x )
-    {
-        if( shared_ptr<Expression> xe = dynamic_pointer_cast<Expression>(x) )
-        {
-            // Find out the type of the candidate expression
-            shared_ptr<Type> xt = TypeOf().Get( program, xe );
-            ASSERT(xt);
-            
-            // Punt it back into the search/replace engine
-            return sr->IsMatchPattern( xt, type_pattern );
-        }
-        else
-        {
-            // not even an expression lol that aint going to match
-            return false;
-        }        
-    }     
-};
-*/
 #endif

@@ -7,6 +7,7 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/search_replace.hpp"
+#include "helpers/soft_patterns.hpp"
 #include "helpers/validate.hpp"
 
 void SelfTest();
@@ -33,20 +34,21 @@ int main( int argc, char *argv[] )
         shared_ptr<Dereference> sd( new Dereference );     
         shared_ptr<Add> sa( new Add );
         sd->operands.push_back( sa );
-        shared_ptr<AnyInstanceIdentifier> sar( new AnyInstanceIdentifier );
-        sa->operands.push_back( sar );
+        shared_ptr<SoftExpressonOfType> sseot( new SoftExpressonOfType );
+        sa->operands.push_back( sseot );
+        shared_ptr<Array> sar( new Array );
+        sseot->type_pattern = sar;        
         shared_ptr<Expression> se( new Expression );
         sa->operands.push_back( se );
-        TRACE("%p\n", SearchReplace(sd).Search(program) );
     
         shared_ptr<Subscript> rs( new Subscript );
-        shared_ptr<AnyInstanceIdentifier> rar( new AnyInstanceIdentifier );
+        shared_ptr<Expression> rar( new Expression );
         rs->base = rar;
         shared_ptr<Expression> re( new Expression );
         rs->index = re;
                        
         MatchSet mar;
-        mar.insert( sar );
+        mar.insert( sseot );
         mar.insert( rar );
         MatchSet me;
         me.insert( se );
