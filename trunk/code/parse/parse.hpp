@@ -46,10 +46,8 @@ public:
     {
     }
     
-    void operator()( shared_ptr<Node> p )
+    void operator()( shared_ptr<Program> program )
     {        
-        // Parse can only work on a whole program
-        shared_ptr<Program> program = dynamic_pointer_cast<Program>(p);
         ASSERT( program );
         
         clang::FileManager fm; 

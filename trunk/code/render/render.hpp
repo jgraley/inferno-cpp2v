@@ -30,7 +30,7 @@ public:
     {        
     }
     
-    void operator()( shared_ptr<Node> p )       
+    void operator()( shared_ptr<Program> p )       
     {
         // Parse can only work on a whole program
         program = dynamic_pointer_cast<Program>(p);

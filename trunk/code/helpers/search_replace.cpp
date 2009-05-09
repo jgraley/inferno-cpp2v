@@ -23,16 +23,14 @@ SearchReplace::~SearchReplace()
 }
 
 
-bool SearchReplace::IsInteriorMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern )
+bool SearchReplace::IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pattern )
 {
     TRACE();
-    ASSERT( !!pattern ); // Disallow NULL pattern for now, could change this if required
-    if( !x )
-        return false; // NULL target allowed; never matches since pattern is not allwed to be NULL
-
-    TRACE("Is %s >= %s? ", TypeInfo(pattern).name().c_str(), TypeInfo(x).name().c_str() );
+    ASSERT( pattern ); // Disallow NULL pattern for now, could change this if required
+    ASSERT( x ); // No NULL in tree
 
     // Is node correct class?
+    TRACE("Is %s >= %s? ", TypeInfo(pattern).name().c_str(), TypeInfo(x).name().c_str() );
     if( !(TypeInfo(pattern) >= TypeInfo(x)) ) // Note >= is "non-strict superset" i.e. pattern is superclass of x or same class
     {
         TRACE("lol no!\n" );
@@ -75,11 +73,14 @@ bool SearchReplace::IsInteriorMatchPattern( shared_ptr<Node> x, shared_ptr<Node>
 }    
 
 
-bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern )
+bool SearchReplace::IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pattern )
 {
     ASSERT( !!pattern ); // Disallow NULL pattern for now, could change this if required
     
-    if( !IsInteriorMatchPattern( x, pattern ) )
+    if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
+        return ssp->IsMatchPattern( this, x );
+
+    if( !IsMatchPatternLocal( x, pattern ) )
         return false;
     
     // recurse children (or we have a match)
@@ -131,7 +132,17 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
     }       
    
     TRACE("Matches search pattern\n");
-   
+    return true;
+}
+
+
+bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern )
+{
+    ASSERT( !!pattern ); // Disallow NULL pattern for now, could change this if required
+    
+    if( !IsMatchPatternNoKey( x, pattern ) )
+        return false;
+    
     // If we got here, the node matched the search pattern. Now apply match sets
     const MatchSet *m = FindMatchSet( pattern );
     if( m )
@@ -140,7 +151,9 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
         if( m->key )
         {
             // This match set has already been keyed!!
-            if( !IsInteriorMatchPattern( x, m->key ) )
+            // No need to recurse, since we already did IsMatchPatternNoKey() and passed - we
+            // only need to restrict the search based on the current node, not its children.
+            if( !IsMatchPatternLocal( x, m->key ) )
                 return false;            
         }
         else
@@ -188,7 +201,7 @@ void SearchReplace::ClearPtrs( shared_ptr<Node> dest )
 }
 
 
-void SearchReplace::OverlayMembers( shared_ptr<Node> dest, shared_ptr<Node> source )
+void SearchReplace::OverlayMembers( shared_ptr<Node> dest, shared_ptr<Node> source, bool in_substitution )
 {
     ASSERT( TypeInfo(source) >= TypeInfo(dest) )("source must be a non-strict subclass of destination, so that it does not have more members");
 
@@ -212,7 +225,7 @@ void SearchReplace::OverlayMembers( shared_ptr<Node> dest, shared_ptr<Node> sour
             for( int j=0; j<source_seq->size(); j++ )
             {
                 if( !dest_seq->Element(j).Get() ) // Only over NULL!!!
-                    dest_seq->Element(j).Set( DuplicateSubtree( source_seq->Element(j).Get() ) );
+                    dest_seq->Element(j).Set( DuplicateSubtree( source_seq->Element(j).Get(), in_substitution ) );
             }
         }            
         else if( GenericSharedPtr *source_ptr = dynamic_cast<GenericSharedPtr *>(source_memb[i]) )         
@@ -221,7 +234,7 @@ void SearchReplace::OverlayMembers( shared_ptr<Node> dest, shared_ptr<Node> sour
             ASSERT( dest_ptr && "itemise for target didn't match itemise for source");
                         
             if( !dest_ptr->Get() ) // Only over NULL!!!1
-                dest_ptr->Set( DuplicateSubtree( source_ptr->Get() ) );
+                dest_ptr->Set( DuplicateSubtree( source_ptr->Get(), in_substitution ) );
         }
         else
         {
@@ -231,7 +244,7 @@ void SearchReplace::OverlayMembers( shared_ptr<Node> dest, shared_ptr<Node> sour
 }
 
 
-shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
+shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool in_substitution )
 {
     // Check match set
     shared_ptr<Node> substitute; // source after substitution
@@ -242,19 +255,22 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
         ASSERT( m->key )("Match set in replace pattern but did not key to search pattern");
         substitute = m->key;       
         ASSERT( TypeInfo(source) >= TypeInfo(substitute) )("source must be a non-strict subclass of substitute, so that it does not have more members");
+        in_substitution = true;
     }
     
-    if( substitute && dynamic_pointer_cast<Identifier>( substitute ) )
+    shared_ptr<Node> to_duplicate = substitute ? substitute : source;
+    
+    if( in_substitution && dynamic_pointer_cast<Identifier>( to_duplicate ) )
     {
         // Substitute is an identifier, so preserve its uniqueness by just linking 
         // in the same node. Don't do any more - we wouldn't want to change the
         // identifier in the tree even if it had members, lol!
-        return substitute;
+        return to_duplicate;
     }
 
     // Make the destination node based on substitute if found, otherwise the source
     ASSERT( source );
-    shared_ptr<Duplicator> dup_dest = Duplicator::Duplicate( substitute?substitute:source );
+    shared_ptr<Duplicator> dup_dest = Duplicator::Duplicate( to_duplicate );
     shared_ptr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
     ASSERT(dest);
     
@@ -264,11 +280,11 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source )
     // Copy the source over, including any NULLs in the source. If source is superclass
     // of dest (i.e. has possibly fewer members) the missing ones will remain NULL and
     // will come from substitute node.
-    OverlayMembers( dest, source );
+    OverlayMembers( dest, source, in_substitution );
     
     // If found substitute, copy substitute members *only* over members NULL in the source
     if( substitute )
-        OverlayMembers( dest, substitute );
+        OverlayMembers( dest, substitute, true );
 
     return dest;
 }
@@ -281,8 +297,9 @@ void SearchReplace::Replace( GenericSharedPtr *target )
 }
 
 
-void SearchReplace::operator()( shared_ptr<Node> program )
+void SearchReplace::operator()( shared_ptr<Program> p )
 {
+    program = p;
     while(1)
     {
         GenericSharedPtr *gp = Search( program );        
@@ -291,6 +308,7 @@ void SearchReplace::operator()( shared_ptr<Node> program )
         else
             break;
     }
+    program = shared_ptr<Program>();
 }
 
 
