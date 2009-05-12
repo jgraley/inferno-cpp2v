@@ -5,7 +5,7 @@
 #include "typeof.hpp"
 
 
-shared_ptr<Type> TypeOf::Get( shared_ptr<Program> program, shared_ptr<Expression> o )
+shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
 {
     ASSERT(o);
     
@@ -20,7 +20,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Program> program, shared_ptr<Expression
         // Get the types of all the operands to the operator first
         Sequence<Type> optypes;
         FOREACH( shared_ptr<Expression> o, op->operands )
-            optypes.push_back( Get(program, o) );
+            optypes.push_back( Get(o) );
             
         // then handle based on the kind of operator
         if( dynamic_pointer_cast<Dereference>(op) )
@@ -46,7 +46,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Program> program, shared_ptr<Expression
     
     else if( shared_ptr<Lookup> l = dynamic_pointer_cast<Lookup>(o) ) // a.b; just return type of b
     {
-        return Get( program, l->member );
+        return Get( l->member );
     }
                
     else 
@@ -57,14 +57,14 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Program> program, shared_ptr<Expression
 
 // Is this call really a constructor call? If so return the object being
 // constructoed. Otherwise, return NULL
-shared_ptr<Expression> TypeOf::IsConstructorCall( shared_ptr<Program> program, shared_ptr<Call> call )
+shared_ptr<Expression> TypeOf::IsConstructorCall( shared_ptr<Call> call )
 {
     shared_ptr<Lookup> lf = dynamic_pointer_cast<Lookup>(call->function);            
     if(!lf)
         return shared_ptr<Expression>();
         
     ASSERT(lf->member);
-    if( dynamic_pointer_cast<Constructor>( TypeOf().Get( program, lf->member ) ) )
+    if( dynamic_pointer_cast<Constructor>( Get( lf->member ) ) )
         return lf->base;
     else
         return shared_ptr<Expression>();

@@ -307,7 +307,7 @@ private:
                    after;
         else if( shared_ptr<Call> o = dynamic_pointer_cast< Call >(expression) )
         {
-            if( shared_ptr<Expression> base = TypeOf::IsConstructorCall( program, o ) )
+            if( shared_ptr<Expression> base = TypeOf(program).IsConstructorCall( o ) )
                 return before +  // invoking costructors as found in init lists and locals
                        RenderOperand( base, true ) + "(" +
                        RenderOperandSequence( o->operands, ", ", false ) + ")" +
@@ -404,7 +404,7 @@ private:
         {
             if( shared_ptr<Call> o = dynamic_pointer_cast< Call >(s) )
             {
-                if( TypeOf::IsConstructorCall( program, o ) )
+                if( TypeOf(program).IsConstructorCall( o ) )
                 {
                     inits.push_back(s);
                     continue;
