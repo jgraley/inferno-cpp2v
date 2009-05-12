@@ -1,4 +1,4 @@
-int a;
+short a;
 int i = sizeof(a)+sizeof(int);
 
 int main()
@@ -53,6 +53,7 @@ int main()
         break;
     }
     
+    y ^= i; // factor in global i
     return (unsigned char)y;
 }
 

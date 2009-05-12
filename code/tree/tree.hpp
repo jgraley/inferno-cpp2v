@@ -79,7 +79,7 @@ struct Statement : Initialiser { NODE_FUNCTIONS };
 
 struct Expression : Statement { NODE_FUNCTIONS };
     
-struct Type : virtual Expression { NODE_FUNCTIONS };
+struct Type : virtual Node { NODE_FUNCTIONS };
 
 struct AccessSpec : Property { NODE_FUNCTIONS };
 struct Public : AccessSpec { NODE_FUNCTIONS };
@@ -314,8 +314,14 @@ struct Comparison : Operator { NODE_FUNCTIONS };
 #define BINARY(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE { NODE_FUNCTIONS };
 #include "operator_db.inc"
 
-struct SizeOf : Operator { NODE_FUNCTIONS };
-struct AlignOf : Operator { NODE_FUNCTIONS };
+struct TypeOperator : Expression
+{
+    NODE_FUNCTIONS
+    Sequence<Type> operands; 
+};
+
+struct SizeOf : TypeOperator { NODE_FUNCTIONS };
+struct AlignOf : TypeOperator { NODE_FUNCTIONS };
 
 struct ConditionalOperator : Expression // eg ?:
 {

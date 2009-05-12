@@ -268,10 +268,6 @@ private:
         
         if( dynamic_pointer_cast< Uninitialised >(expression) )
             return string();            
-        else if( shared_ptr<Type> t = dynamic_pointer_cast< Type >(expression) )
-            return before + 
-                   RenderType( t, "" ) + // type as operand eg sizeof, casts, templates
-                   after;
         else if( shared_ptr<LabelIdentifier> li = dynamic_pointer_cast< LabelIdentifier >(expression) )
             return before + 
                    "&&" + RenderIdentifier( li ) + // label-as-variable (GCC extension)
@@ -280,11 +276,11 @@ private:
             return RenderScopedIdentifier( ii );
         else if( shared_ptr<SizeOf> pot = dynamic_pointer_cast< SizeOf >(expression) )
             return before + 
-                   "sizeof(" + RenderOperand( pot->operands[0], false ) + ")" + 
+                   "sizeof(" + RenderType( pot->operands[0], "" ) + ")" + 
                    after;
         else if( shared_ptr<AlignOf> pot = dynamic_pointer_cast< AlignOf >(expression) )
             return before + 
-                   "alignof(" + RenderOperand( pot->operands[0], false ) + ")" + 
+                   "alignof(" + RenderType( pot->operands[0], "" ) + ")" + 
                    after;
 #define BINARY(TOK, TEXT, NODE, ASS, BASE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
