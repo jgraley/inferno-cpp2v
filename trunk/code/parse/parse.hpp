@@ -1469,17 +1469,16 @@ private:
            ActOnSizeOfAlignOfExpr( clang::SourceLocation OpLoc, bool isSizeof, bool isType,
                                    void *TyOrEx, const clang::SourceRange &ArgRange) 
         {
-            shared_ptr<Operator> p;
+            shared_ptr<TypeOperator> p;
             if( isSizeof )
                 p = shared_ptr<SizeOf>(new SizeOf);
             else
                 p = shared_ptr<AlignOf>(new AlignOf);
 
-            p->assign = shared_new<NonAssignment>();
             if( isType )
                 p->operands.push_back( hold_type.FromRaw(TyOrEx) );                   
             else
-                p->operands.push_back( hold_expr.FromRaw(TyOrEx) );
+                p->operands.push_back( TypeOf().Get( all_decls, hold_expr.FromRaw(TyOrEx) ) );
             return hold_expr.ToRaw( p );                       
         }
         
