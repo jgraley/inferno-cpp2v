@@ -10,11 +10,19 @@
 class TypeOf
 {
 public:
-    shared_ptr<Type> Get( shared_ptr<Program> program, shared_ptr<Expression> o );
+    TypeOf( shared_ptr<Program> p ) : 
+        program( p )
+    {
+    }
+    
+    shared_ptr<Type> Get( shared_ptr<Expression> o );
     
     // Is this call really a constructor call? If so return the object being
     // constructoed. Otherwise, return NULL
-    static shared_ptr<Expression> IsConstructorCall( shared_ptr<Program> program, shared_ptr<Call> call );
+    shared_ptr<Expression> IsConstructorCall( shared_ptr<Call> call );
+
+private:
+    shared_ptr<Program> program;
 };
 
 #endif

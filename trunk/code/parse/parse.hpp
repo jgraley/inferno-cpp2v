@@ -1277,7 +1277,7 @@ private:
             }            
         
             // Find the specified member in the record implied by the expression on the left of .
-            shared_ptr<Type> tbase = TypeOf().Get( all_decls, a->base );
+            shared_ptr<Type> tbase = TypeOf( all_decls ).Get( a->base );
             shared_ptr<TypeIdentifier> tibase = dynamic_pointer_cast<TypeIdentifier>(tbase);
             ASSERT( tibase );            
             shared_ptr<Record> rbase = GetRecordDeclaration(all_decls, tibase);
@@ -1478,7 +1478,7 @@ private:
             if( isType )
                 p->operands.push_back( hold_type.FromRaw(TyOrEx) );                   
             else
-                p->operands.push_back( TypeOf().Get( all_decls, hold_expr.FromRaw(TyOrEx) ) );
+                p->operands.push_back( TypeOf( all_decls ).Get( hold_expr.FromRaw(TyOrEx) ) );
             return hold_expr.ToRaw( p );                       
         }
         
