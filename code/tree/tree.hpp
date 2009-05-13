@@ -18,6 +18,16 @@
 
 //////////////////////////// Node Model ////////////////////////////
 
+// Base class for all tree nodes and nodes in search/replace 
+// patterns etc. Convention is to use "struct" for derived
+// node classes so that everything is public (inferno tree nodes
+// are more like records in a database, they have only minimal 
+// functionality). Also, all derived structs should contain the
+// NODE_FUNCTIONS macro which expands to a few virtual functions
+// required for common ("bounced") functionality. Where multiple
+// inheritance dimaonds arise, Node should be derived virtually
+// (we always want the set-restricting model of inheritance in
+// the inferno tree node hierarchy).
 struct Node : Magic, 
               TypeInfo::TypeBase, 
               Itemiser,
@@ -33,23 +43,46 @@ struct Node : Magic,
 //////////////////////////// Properties ///////////////////////////////
 // TODO seperate source file
 
+// Nodes can be property nodes or topological nodes. Topological nodes
+// represent parts of the program, and property nodes represent 
+// ancilliary data (strings, numbers, enums). Property is the base
+// class for property nodes (there is no base class for Topological 
+// nodes, topological is assumed if not derivng from Property). 
+// Enums are actually implemented by choosing one of a choice of
+// empty node, not using enum. Each kind of property has an intermediate
+// which can represent any value of the property - they have Any in 
+// their name if there isn't a suitable language-specific name.
 struct Property : virtual Node { NODE_FUNCTIONS };
 
-// Means can be used as a literal
+// Means a property that can be used as a literal in a program, so
+// that we do not need to duplicate literals and proeprties.
 struct FundamentalProperty : Property { NODE_FUNCTIONS };
 
+// Intermediate property node that represents a string of any value.
 struct AnyString : FundamentalProperty { NODE_FUNCTIONS };
+
+// A string with a particular value as specified. value must be filled
+// in.
 struct String : AnyString
 {
     NODE_FUNCTIONS
     string value;
 };
 
+// Intermediate property node that represents a number (anything you
+// can do +, - etc on) of any value.
 struct AnyNumber : FundamentalProperty { NODE_FUNCTIONS };
 
 #define INTEGER_DEFAULT_WIDTH 32
 
+// Intermediate property node that represents an integer number of any
+// value (signed or unsigned).
 struct AnyInteger : AnyNumber { NODE_FUNCTIONS };
+
+// Property node for an integer number. We use LLVM's class for this, 
+// so that we can deal with any size of number (so this can be used for
+// large bit vectors). The LLVM object also stores the signedness. The
+// value must always be filled in.
 struct Integer : AnyInteger
 {
     NODE_FUNCTIONS
@@ -58,7 +91,13 @@ struct Integer : AnyInteger
     llvm::APSInt value; // APSint can be signed or unsigned
 };
 
+// Intermediate property node that represents a floating point number of any
+// value.
 struct AnyFloat : AnyNumber { NODE_FUNCTIONS };
+
+// Property node for an floating point number. We use LLVM's class for this, 
+// so that we can deal with any representation convention. The value must 
+// always be filled in.
 struct Float : AnyFloat
 {
     NODE_FUNCTIONS
@@ -72,26 +111,50 @@ struct Float : AnyFloat
 
 //////////////////////////// Underlying Program Nodes ////////////////////////////
 
-// Initialiser for an instance (variable or function)
+// This intermediate is used for an initial value for for a variable/object in
+// which case it will be an Expression, or for the implementation of a function
+// in which case it will be a Statement. For an uninititialised variable/object
+// or a function declaration, it will be Uninitialised.
 struct Initialiser : virtual Node { NODE_FUNCTIONS };
+struct Uninitialised : Initialiser { NODE_FUNCTIONS }; // an uninitialised Instance.
 
+// Represents a statement as found inside a function definition. Basically anything 
+// that ends with a ; inside a function body, as well as labels (which we consider as 
+// statements in their own right).
 struct Statement : Initialiser { NODE_FUNCTIONS };
 
+// An expression that computes a result value. Can be used anywhere a statement 
+// can, per C syntax rules.
 struct Expression : Statement { NODE_FUNCTIONS };
-    
+
+// Any abstract data type including fundamentals, structs, function prototypes
+// and user-named types. 
 struct Type : virtual Node { NODE_FUNCTIONS };
 
+// Property for C++ access speficiers public, protected and private. AccessSpec
+// represents any access spec, the subsequent empty nodes specify particular
+// access specs. Access specs are just validity-checking sugar, but Inferno may 
+// use them to limit the ports created for independently converted modules.
 struct AccessSpec : Property { NODE_FUNCTIONS };
 struct Public : AccessSpec { NODE_FUNCTIONS };
 struct Private : AccessSpec { NODE_FUNCTIONS };
 struct Protected : AccessSpec { NODE_FUNCTIONS };
 
+// A declaration specifies the creation of a type or an object from a type. 
+// We specify an access spec for all declarations and choose a default when
+// the user cannot specify. Declaration can appear where statements can and
+// also inside structs etc and at top level.
 struct Declaration : Statement
 {   
     NODE_FUNCTIONS
     SharedPtr<AccessSpec> access;
 };
 
+// The top level of a program is considered a sequence of declarations.
+// main() would typically be a function instance somewhere in this sequence.
+// TODO decide whether to allow/encourage making Sequence/SharedPtr be
+// a base class - seems to work OK in sear/replace etc since itemise 
+// doesn't differentiate.
 struct Program : Node,
                  Sequence<Declaration>
 {
@@ -100,23 +163,46 @@ struct Program : Node,
 
 //////////////////////////// Declarations /////////////////////
 
+// An Identifier is a name given to a user-defined entity within 
+// the program (variable/object/function, user-defined type or
+// label). In the inferno tree, these are fully scope resolved
+// and are maintained as unique nodes so that the declaration
+// and all usages all point to the same node, this preserving
+// identity via topology. We store a string, but it isn't strictly 
+// needed and there's no need to uniquify it (it's really just 
+// a hint for users examining the output).
+// TODO make sure renderer really is uniquifying where needed
 struct Identifier : virtual Node { NODE_FUNCTIONS };
 
+// Identifier for an instance (variable or object or function)
+// that can be any instance.
 struct AnyInstanceIdentifier : Identifier,
                                Expression { NODE_FUNCTIONS };
+                               
+// Identifier for a specific instance that has been declared
+// somewhere.                               
 struct InstanceIdentifier : AnyInstanceIdentifier, 
                             String { NODE_FUNCTIONS };
 
+// Identifier for a user defined type that can be any type.
 struct AnyTypeIdentifier : Identifier,
                            Type { NODE_FUNCTIONS };
+                           
+// Identifier for a specific user defined type that has been 
+// declared somewhere.
 struct TypeIdentifier : AnyTypeIdentifier,
                         String { NODE_FUNCTIONS };
 
+// Identifier for a label that can be any label. 
 struct AnyLabelIdentifier : Identifier,
                             Expression { NODE_FUNCTIONS };
+
+// Identifier for a specific label that has been declared somewhere.
 struct LabelIdentifier : AnyLabelIdentifier,
                          String { NODE_FUNCTIONS };
 
+// Property for whether a member function has been declared as virtual.
+// We will add pure as an option here too. 
 struct AnyVirtual : Property { NODE_FUNCTIONS };
 struct Virtual : AnyVirtual 
 {
@@ -125,6 +211,11 @@ struct Virtual : AnyVirtual
 };
 struct NonVirtual : AnyVirtual { NODE_FUNCTIONS };
 
+// Property for a storage class which can apply to any instance (variable,
+// object or function) and indicates physical locaiton, allocation strategy 
+// and lifecycle model. Presently we allow static and non-static, where non
+// -static must also indicate virtual-ness. In the future there will probably
+// be static, member and auto (TODO)
 struct StorageClass : Property { NODE_FUNCTIONS };
 struct Static : StorageClass { NODE_FUNCTIONS };
 struct NonStatic : StorageClass 
@@ -133,10 +224,14 @@ struct NonStatic : StorageClass
     SharedPtr<AnyVirtual> virt;
 };
 
+// Property that indicates whether some variable or object is constant.
 struct AnyConst : Property { NODE_FUNCTIONS };
 struct Const : AnyConst { NODE_FUNCTIONS };
-struct NonConst : AnyConst { NODE_FUNCTIONS };
+struct NonConst : AnyConst { NODE_FUNCTIONS }; // TODO call this Mutable?
 
+// Intermediate for anything that consumes space and/or has state. Slightly 
+// wooly concept but it gathers the properties that cover allocation of space 
+// and read-only/read-write rules.
 struct Physical : virtual Node
 {
     NODE_FUNCTIONS
@@ -144,7 +239,16 @@ struct Physical : virtual Node
     SharedPtr<StorageClass> storage;
 };
 
-// can be an object or a function. In case of function, type is a type under Subroutine
+// Node represents a variable/object or a function. In case of function, type is a 
+// type under Subroutine and initialiser is a Statement (or Uninitialised for a function
+// declaration). For a variable/object, type is basically anything else, and if there is
+// an initialiser, it is an Expression. We allow init here for variaous reasons including
+// - it can be hard to know where to put stand-alone init for statics
+// - C++ constructors tie init to declaration
+// - Fits in with single-static-assignment style
+// The instance node is a declaration and goes into a declaration scope. It points
+// to an InstanceIdentifier, and all usages of the instance actually point to the
+// InstanceIdentifier.
 struct Instance : Declaration,
                   Physical
 {
@@ -154,8 +258,8 @@ struct Instance : Declaration,
     SharedPtr<Initialiser> initialiser; // NULL if uninitialised
 };
 
-struct Uninitialised : Initialiser { NODE_FUNCTIONS };
-
+// Node for a base class within a class declaration, specifies another class from 
+// which to inherit
 struct InheritanceRecord;
 struct Base : Declaration
 {
@@ -168,85 +272,120 @@ struct Base : Declaration
 //////////////////////////// Anonymous Types ////////////////////////////
 
 // Subroutine like in Basic, no params or return.
-// The type refers to the interface as seen by caller - you need
-// an & before to have a "function pointer"
+// Types under Subroutine refer to a function's interface as seen by 
+// caller and as used in eg function pointers (which is simply Pointer to
+// the function type). To actually have a function, with a body, you need
+// an Instance with type filled in to something derived from Subroutine.
 struct Subroutine : Type 
 {
     NODE_FUNCTIONS
     // TODO add bool idempotent; here for member functions with "const" at the end of the decl.
 };
 
-// Like in pascal etc, params but no return value
+// A procedure like in pascal etc, params but no return value. Parameters are generated as 
+// a sequence of automatic variable/object declarations (ie Instances).
 struct Procedure : Subroutine
 {
     NODE_FUNCTIONS
     Sequence<Instance> parameters;
 };
 
-// Like in C, Pascal; params and a single return value
+// A function like in C, Pascal; params and a single return value of the specified type.
 struct Function : Procedure
 {
     NODE_FUNCTIONS
     SharedPtr<Type> return_type;
 };
 
-// The init list is just 0 or more Invoke( member, c'tor, params ) 
+// A C++ constructor. The init list is just zero or more calls to constructors 
 // in the body
 struct Constructor : Procedure { NODE_FUNCTIONS };
 
+// A C++ destructor
 struct Destructor : Subroutine { NODE_FUNCTIONS };
 
+// This is the type of an array that contains the specified number of elements
+// of the specified type.
+struct Array : Type
+{
+    NODE_FUNCTIONS
+    SharedPtr<Type> element;
+    SharedPtr<Initialiser> size; // Uninitialised if not given eg []
+};
+
+// A pointer to objects of some type, as specified.
 struct Pointer : Type
 {
     NODE_FUNCTIONS
     SharedPtr<Type> destination;
 };
 
+// A C++ reference to objects of some type, as specified.
 struct Reference : Type
 {
     NODE_FUNCTIONS
     SharedPtr<Type> destination;
 };
 
+// The pseudo-type void, disallowed in some circumstances as per C.
 struct Void : Type { NODE_FUNCTIONS };
 
+// Boolean type. We support bool seperately from 1-bit ints, at least for now.
 struct Bool : Type { NODE_FUNCTIONS };
 
+// Intermediate for any type that represents a number that you can eg add and 
+// subtract. Bit width is given here, number must fit into that many bits - 
+// this should probably move into Integral and something else should be done to 
+// qualify floats TODO.
 struct Numeric : Type 
 {
     NODE_FUNCTIONS
     SharedPtr<AnyInteger> width;  // Bits, not bytes
 };
 
+// Type represents an integral (singed or unsigned) type.
 struct Integral : Numeric { NODE_FUNCTIONS };
 
+// Type of a signed integer number.
 struct Signed : Integral { NODE_FUNCTIONS };
 
+// Type of an unsigned integer number.
 struct Unsigned : Integral { NODE_FUNCTIONS };
 
+// Type of a floating point number.
 struct Floating : Numeric { NODE_FUNCTIONS }; // Note width determines float vs double 
 
 //////////////////////////// User-defined Types ////////////////////////////
 
-// A type that the user has created, and hence has a name. 
-// These can be linked directly from a Sequence<> to indicate 
-// their declaration (no seperate declaration node required).
+// Intermediate declaration of a user defined type of any kind (struct, typedef etc).
+// The user type node is a declaration and goes into a declaration scope. It points
+// to a TypeIdentifier, and all usages of the type actually point to the
+// TypeIdentifier.
 struct UserType : Declaration 
 { 
     NODE_FUNCTIONS
     SharedPtr<AnyTypeIdentifier> identifier;
 };
 
+// Represents a typedef. Typedef is to the specified type.
 struct Typedef : UserType
 {
     NODE_FUNCTIONS
     SharedPtr<Type> type;
 }; 
 
+// Property nodes for indicating whether a record has been forward declared
+// (incomplete) or fully declared (complete). TODO we should now be able to 
+// drop incomplete records and always use the complete version, so don't
+// need this.
 struct AnyComplete : Property { NODE_FUNCTIONS };
 struct Complete : AnyComplete { NODE_FUNCTIONS };
 struct Incomplete : AnyComplete { NODE_FUNCTIONS };
 
+// Intermediate for declaration of a record. record is generic for struct, class, union or
+// enum. We list the memebrs here as declaraions (which will be member 
+// or static) can can be variables/objects in all cases and additionally
+// function instances in struct/class. Record completeness of declaration too.
 struct Record : UserType
 {
     NODE_FUNCTIONS
@@ -256,29 +395,31 @@ struct Record : UserType
     SharedPtr<AnyComplete> complete; 
 };
 
+// A union, as per Record.
 struct Union : Record { NODE_FUNCTIONS };
 
+// An Enum, as per record. We regard enumerations as static const
+// variables, initialised as per the given value.
 struct Enum : Record { NODE_FUNCTIONS };
 
+// A record that can inherit from other records and be inherited from. 
+// We add in a list of base class declarations.
 struct InheritanceRecord : Record // TODO InheritanceRecord
 {
     NODE_FUNCTIONS
-    Sequence<Base> bases; // these have empty identifier and NULL initialiser
+    Sequence<Base> bases;
 };
 
+// Struct and class as per InheritanceRecord
 struct Struct : InheritanceRecord { NODE_FUNCTIONS };
-
 struct Class : InheritanceRecord { NODE_FUNCTIONS };
-
-struct Array : Type
-{
-    NODE_FUNCTIONS
-    SharedPtr<Type> element;
-    SharedPtr<Initialiser> size; // Uninitialised if not given eg []
-};
 
 //////////////////////////// Expressions ////////////////////////////
 
+// Declaration of a label for switch, goto etc.
+// The label node is a declaration and goes into a statement scope. It points
+// to a LabelIdentifier, and all usages of the type actually point to the
+// LabelIdentifier.
 // TODO consider making this an object, STATIC and void * type
 struct Label : Declaration
 {
