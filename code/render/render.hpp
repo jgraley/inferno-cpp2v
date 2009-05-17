@@ -59,7 +59,7 @@ private:
     string deferred_decls;
     stack< shared_ptr<Node> > scope_stack;
 
-    string RenderProperty( shared_ptr<FundamentalProperty> sp )
+    string RenderLiteral( shared_ptr<Literal> sp )
     {
         if( shared_ptr<String> ss = dynamic_pointer_cast< String >(sp) )
             return "\"" + Sanitise( ss->value ) + "\"";                     
@@ -91,7 +91,7 @@ private:
         string ids;
         if( id )
         {
-            // TODO maybe just try casting to String
+            // TODO maybe just try casting to Named
             if( shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>( id ) )
                 ids = ii->value;
             else if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>( id ) )
@@ -361,7 +361,7 @@ private:
                    after;
         else if( shared_ptr<Literal> l = dynamic_pointer_cast< Literal >(expression) )
             return before + 
-                   RenderProperty( l->value ) +
+                   RenderLiteral( l ) +
                    after;
         else if( dynamic_pointer_cast< This >(expression) )
             return before + 

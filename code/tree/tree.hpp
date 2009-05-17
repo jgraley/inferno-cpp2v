@@ -40,8 +40,7 @@ struct Node : Magic,
     // without making Node ambiguous  
 };
 
-//////////////////////////// Properties ///////////////////////////////
-// TODO seperate source file
+//////////////////////////// Underlying Node Types ////////////////////////////
 
 // Nodes can be property nodes or topological nodes. Topological nodes
 // represent parts of the program, and property nodes represent 
@@ -53,67 +52,6 @@ struct Node : Magic,
 // which can represent any value of the property - they have Any in 
 // their name if there isn't a suitable language-specific name.
 struct Property : virtual Node { NODE_FUNCTIONS };
-
-// Means a property that can be used as a literal in a program, so
-// that we do not need to duplicate literals and proeprties.
-struct FundamentalProperty : Property { NODE_FUNCTIONS };
-
-// Intermediate property node that represents a string of any value.
-struct AnyString : FundamentalProperty { NODE_FUNCTIONS };
-
-// A string with a particular value as specified. value must be filled
-// in.
-struct String : AnyString
-{
-    NODE_FUNCTIONS
-    string value;
-};
-
-// Intermediate property node that represents a number (anything you
-// can do +, - etc on) of any value.
-struct AnyNumber : FundamentalProperty { NODE_FUNCTIONS };
-
-#define INTEGER_DEFAULT_WIDTH 32
-
-// Intermediate property node that represents an integer number of any
-// value (signed or unsigned).
-struct AnyInteger : AnyNumber { NODE_FUNCTIONS };
-
-// Property node for an integer number. We use LLVM's class for this, 
-// so that we can deal with any size of number (so this can be used for
-// large bit vectors). The LLVM object also stores the signedness. The
-// value must always be filled in.
-struct Integer : AnyInteger
-{
-    NODE_FUNCTIONS
-    Integer( int i ) : value(INTEGER_DEFAULT_WIDTH) { value = i; }
-    Integer() : value(INTEGER_DEFAULT_WIDTH) { value = 0; }
-    llvm::APSInt value; // APSint can be signed or unsigned
-};
-
-// Intermediate property node that represents a floating point number of any
-// value.
-struct AnyFloat : AnyNumber { NODE_FUNCTIONS };
-
-// Property node for an floating point number. We use LLVM's class for this, 
-// so that we can deal with any representation convention. The value must 
-// always be filled in.
-struct Float : AnyFloat
-{
-    NODE_FUNCTIONS
-    Float() : value((float)0) {};
-    Float( llvm::APFloat v ) : value(v) {};
-    llvm::APFloat value; 
-};
-
-// Intermediate property node that represents any boolean value.
-struct AnyBoolean : FundamentalProperty { NODE_FUNCTIONS };
-
-// Property node for boolean values true and false
-struct True : AnyBoolean { NODE_FUNCTIONS };
-struct False : AnyBoolean { NODE_FUNCTIONS };
-
-//////////////////////////// Underlying Program Nodes ////////////////////////////
 
 // This intermediate is used for an initial value for for a variable/object in
 // which case it will be an Expression, or for the implementation of a function
@@ -165,6 +103,72 @@ struct Program : Node,
     NODE_FUNCTIONS
 };
 
+//////////////////////////// Literals ///////////////////////////////
+// TODO seperate source file
+
+// Means a property that can be used as a literal in a program, so
+// that we do not need to duplicate literals and proeprties.
+struct Literal : Expression,
+                 Property
+{
+    NODE_FUNCTIONS
+};
+
+// Intermediate property node that represents a string of any value.
+struct AnyString : Literal { NODE_FUNCTIONS };
+
+// A string with a particular value as specified. value must be filled
+// in.
+struct String : AnyString
+{
+    NODE_FUNCTIONS
+    string value;
+};
+
+// Intermediate property node that represents a number (anything you
+// can do +, - etc on) of any value.
+struct AnyNumber : Literal { NODE_FUNCTIONS };
+
+#define INTEGER_DEFAULT_WIDTH 32
+
+// Intermediate property node that represents an integer number of any
+// value (signed or unsigned).
+struct AnyInteger : AnyNumber { NODE_FUNCTIONS };
+
+// Property node for an integer number. We use LLVM's class for this, 
+// so that we can deal with any size of number (so this can be used for
+// large bit vectors). The LLVM object also stores the signedness. The
+// value must always be filled in.
+struct Integer : AnyInteger
+{
+    NODE_FUNCTIONS
+    Integer( int i ) : value(INTEGER_DEFAULT_WIDTH) { value = i; }
+    Integer() : value(INTEGER_DEFAULT_WIDTH) { value = 0; }
+    llvm::APSInt value; // APSint can be signed or unsigned
+};
+
+// Intermediate property node that represents a floating point number of any
+// value.
+struct AnyFloat : AnyNumber { NODE_FUNCTIONS };
+
+// Property node for an floating point number. We use LLVM's class for this, 
+// so that we can deal with any representation convention. The value must 
+// always be filled in.
+struct Float : AnyFloat
+{
+    NODE_FUNCTIONS
+    Float() : value((float)0) {};
+    Float( llvm::APFloat v ) : value(v) {};
+    llvm::APFloat value; 
+};
+
+// Intermediate property node that represents any boolean value.
+struct AnyBoolean : Literal { NODE_FUNCTIONS };
+
+// Property node for boolean values true and false
+struct True : AnyBoolean { NODE_FUNCTIONS };
+struct False : AnyBoolean { NODE_FUNCTIONS };
+
 //////////////////////////// Declarations /////////////////////
 
 // An Identifier is a name given to a user-defined entity within 
@@ -185,8 +189,12 @@ struct AnyInstanceIdentifier : Identifier,
                                
 // Identifier for a specific instance that has been declared
 // somewhere.                               
-struct InstanceIdentifier : AnyInstanceIdentifier, 
-                            String { NODE_FUNCTIONS };
+struct InstanceIdentifier : AnyInstanceIdentifier
+{
+    NODE_FUNCTIONS
+    string value;
+};
+                            
 
 // Identifier for a user defined type that can be any type.
 struct AnyTypeIdentifier : Identifier,
@@ -194,16 +202,23 @@ struct AnyTypeIdentifier : Identifier,
                            
 // Identifier for a specific user defined type that has been 
 // declared somewhere.
-struct TypeIdentifier : AnyTypeIdentifier,
-                        String { NODE_FUNCTIONS };
+struct TypeIdentifier : AnyTypeIdentifier
+{
+    NODE_FUNCTIONS
+    string value;
+};
+                        
 
 // Identifier for a label that can be any label. 
 struct AnyLabelIdentifier : Identifier,
                             Expression { NODE_FUNCTIONS };
 
 // Identifier for a specific label that has been declared somewhere.
-struct LabelIdentifier : AnyLabelIdentifier,
-                         String { NODE_FUNCTIONS };
+struct LabelIdentifier : AnyLabelIdentifier
+{
+    NODE_FUNCTIONS
+    string value;
+};
 
 // Property for whether a member function has been declared as virtual.
 // We will add pure as an option here too. 
@@ -505,13 +520,6 @@ struct Delete : Expression
     SharedPtr<Expression> pointer;
     SharedPtr<AnyArrayNew> array;
     SharedPtr<AnyGlobalNew> global;
-};
-
-struct Literal : Expression
-{
-    NODE_FUNCTIONS
-    // Use properties to express value, to avoid duplication
-    SharedPtr<FundamentalProperty> value;
 };
 
 struct This : Expression { NODE_FUNCTIONS };

@@ -67,7 +67,7 @@ shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<R
     // Try the instance members (objects and functions) for a name match
     FOREACH( shared_ptr<Declaration> d, r->members )
         if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>(d) )
-            if( shared_ptr<String> sss = dynamic_pointer_cast<String>(i->identifier) )
+            if( shared_ptr<InstanceIdentifier> sss = dynamic_pointer_cast<InstanceIdentifier>(i->identifier) )
                 if( sss->value == name )
                     return i;
                 
