@@ -410,30 +410,30 @@ private:
         {
             shared_ptr<InstanceIdentifier> ii( new InstanceIdentifier );
             if(ID)
-                ii->value = ID->getName();
+                ii->name = ID->getName();
             else
-                ii->value = string();
+                ii->name = string();
             return ii;
         }
         
         shared_ptr<AnyTypeIdentifier> CreateTypeIdentifier( clang::IdentifierInfo *ID )
         {
             shared_ptr<TypeIdentifier> ti( new TypeIdentifier );
-            ti->value = ID->getName();
+            ti->name = ID->getName();
             return ti;
         }
         
         shared_ptr<AnyTypeIdentifier> CreateTypeIdentifier( string s )
         {
             shared_ptr<TypeIdentifier> ti( new TypeIdentifier );
-            ti->value = s;
+            ti->name = s;
             return ti;
         }
         
         shared_ptr<AnyLabelIdentifier> CreateLabelIdentifier( clang::IdentifierInfo *ID )
         {
             shared_ptr<LabelIdentifier> li( new LabelIdentifier );
-            li->value = ID->getName();
+            li->name = ID->getName();
             return li;
         }
         

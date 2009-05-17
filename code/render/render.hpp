@@ -92,12 +92,8 @@ private:
         if( id )
         {
             // TODO maybe just try casting to Named
-            if( shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>( id ) )
-                ids = ii->value;
-            else if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>( id ) )
-                ids = ti->value;
-            else if( shared_ptr<LabelIdentifier> li = dynamic_pointer_cast<LabelIdentifier>( id ) )
-                ids = li->value;
+            if( shared_ptr<Named> ii = dynamic_pointer_cast<Named>( id ) )
+                ids = ii->name;
             else
                 ids = ERROR_UNSUPPORTED( (id) );
 

@@ -457,7 +457,7 @@ void SearchReplace::Test()
         shared_ptr<Public> p1( new Public );
         l->access = p1;
         shared_ptr<LabelIdentifier> li( new LabelIdentifier );
-        li->value = "mylabel";
+        li->name = "mylabel";
         l->identifier = li;
         shared_ptr<Declaration> d( new Declaration );
         shared_ptr<Public> p2( new Public );
