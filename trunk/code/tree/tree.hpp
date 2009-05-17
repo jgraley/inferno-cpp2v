@@ -106,8 +106,12 @@ struct Float : AnyFloat
     llvm::APFloat value; 
 };
 
-// TODO bool properties, for true, false bool literals and default condition
-// in for
+// Intermediate property node that represents any boolean value.
+struct AnyBoolean : FundamentalProperty { NODE_FUNCTIONS };
+
+// Property node for boolean values true and false
+struct True : AnyBoolean { NODE_FUNCTIONS };
+struct False : AnyBoolean { NODE_FUNCTIONS };
 
 //////////////////////////// Underlying Program Nodes ////////////////////////////
 
@@ -331,6 +335,7 @@ struct Reference : Type
 struct Void : Type { NODE_FUNCTIONS };
 
 // Boolean type. We support bool seperately from 1-bit ints, at least for now.
+// (note that (bool)2==true but (int:1)2==0)
 struct Bool : Type { NODE_FUNCTIONS };
 
 // Intermediate for any type that represents a number that you can eg add and 
@@ -443,9 +448,8 @@ struct Operator : Aggregate
     SharedPtr<AnyAssignment> assign; // write result back to left
 };
 
-struct Boolean : Operator { NODE_FUNCTIONS };
-struct Bitwise : Boolean { NODE_FUNCTIONS };
-struct Logical : Boolean { NODE_FUNCTIONS };
+struct Bitwise : Operator { NODE_FUNCTIONS };
+struct Logical : Operator { NODE_FUNCTIONS };
 struct Arithmetic : Operator { NODE_FUNCTIONS };
 struct Shift : Operator { NODE_FUNCTIONS };
 struct Comparison : Operator { NODE_FUNCTIONS };

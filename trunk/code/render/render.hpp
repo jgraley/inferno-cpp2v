@@ -78,6 +78,10 @@ private:
                    (&(fc->value.getSemantics())==TypeDb::floating_semantics[clang::DeclSpec::TSW_short] ? "F" : "") +
                    (&(fc->value.getSemantics())==TypeDb::floating_semantics[clang::DeclSpec::TSW_long] ? "L" : ""); 
         }           
+        else if( dynamic_pointer_cast< True >(sp) )
+            return string("true");
+        else if( dynamic_pointer_cast< False >(sp) )
+            return string("false");
         else
             return ERROR_UNSUPPORTED( sp );
     }
