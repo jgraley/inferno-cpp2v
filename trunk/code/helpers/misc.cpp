@@ -68,7 +68,7 @@ shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<R
     FOREACH( shared_ptr<Declaration> d, r->members )
         if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>(d) )
             if( shared_ptr<InstanceIdentifier> sss = dynamic_pointer_cast<InstanceIdentifier>(i->identifier) )
-                if( sss->value == name )
+                if( sss->name == name )
                     return i;
                 
     // Try recursing through the base classes, if there are any

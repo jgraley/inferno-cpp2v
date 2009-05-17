@@ -77,12 +77,8 @@ public:
     string Name( shared_ptr<Node> sp, bool *bold )    
     {
         *bold=true;
-        if( shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(sp) )
-            return ii->value;                     
-        else if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(sp) )
-            return ti->value;                     
-        else if( shared_ptr<LabelIdentifier> li = dynamic_pointer_cast<LabelIdentifier>(sp) )
-            return li->value + ":";                     
+        if( shared_ptr<Named> ii = dynamic_pointer_cast<Named>(sp) )
+            return ii->name;                     
         else if( shared_ptr<String> ss = dynamic_pointer_cast< String >(sp) )
             return "\\\"" + ss->value + "\\\"";                     // todo sanitise this
         else if( shared_ptr<Integer> ic = dynamic_pointer_cast< Integer >(sp) )
@@ -102,12 +98,12 @@ public:
     
     string Colour( shared_ptr<Node> n )
     {
-        if( dynamic_pointer_cast<Type>(n) )
-            return "skyblue";                     
-        else if( dynamic_pointer_cast<Instance>(n) )
-            return "orange";                     
-        else if( dynamic_pointer_cast<UserType>(n) )
+        if( dynamic_pointer_cast<Declaration>(n) )
             return "cyan";                     
+        else if( dynamic_pointer_cast<Type>(n) )
+            return "skyblue";                     
+        else if( dynamic_pointer_cast<Literal>(n) )
+            return "orange";                     
         else if( dynamic_pointer_cast<Label>(n) )
             return "purple";                     
         else if( dynamic_pointer_cast<Expression>(n) )

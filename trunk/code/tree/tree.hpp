@@ -182,6 +182,18 @@ struct False : AnyBoolean { NODE_FUNCTIONS };
 // TODO make sure renderer really is uniquifying where needed
 struct Identifier : virtual Node { NODE_FUNCTIONS };
 
+// Stores a name found in the program, eg identifier names.
+// This is for unquoted strings, as opposed to String. Strictly,
+// Inferno doesn't need to keep this data, but it helps
+// to make renders and graphs clearer. This could use
+// something like stack<string> if it makes manufacturing 
+// names for new objects easier.
+struct Named : virtual Property
+{ 
+    string name;
+    NODE_FUNCTIONS 
+};
+
 // Identifier for an instance (variable or object or function)
 // that can be any instance.
 struct AnyInstanceIdentifier : Identifier,
@@ -189,11 +201,8 @@ struct AnyInstanceIdentifier : Identifier,
                                
 // Identifier for a specific instance that has been declared
 // somewhere.                               
-struct InstanceIdentifier : AnyInstanceIdentifier
-{
-    NODE_FUNCTIONS
-    string value;
-};
+struct InstanceIdentifier : AnyInstanceIdentifier,
+                            Named { NODE_FUNCTIONS };
                             
 
 // Identifier for a user defined type that can be any type.
@@ -202,23 +211,17 @@ struct AnyTypeIdentifier : Identifier,
                            
 // Identifier for a specific user defined type that has been 
 // declared somewhere.
-struct TypeIdentifier : AnyTypeIdentifier
-{
-    NODE_FUNCTIONS
-    string value;
-};
-                        
+struct TypeIdentifier : AnyTypeIdentifier,
+                        Named { NODE_FUNCTIONS };
+                      
 
 // Identifier for a label that can be any label. 
 struct AnyLabelIdentifier : Identifier,
                             Expression { NODE_FUNCTIONS };
 
 // Identifier for a specific label that has been declared somewhere.
-struct LabelIdentifier : AnyLabelIdentifier
-{
-    NODE_FUNCTIONS
-    string value;
-};
+struct LabelIdentifier : AnyLabelIdentifier,
+                         Named { NODE_FUNCTIONS };
 
 // Property for whether a member function has been declared as virtual.
 // We will add pure as an option here too. 
