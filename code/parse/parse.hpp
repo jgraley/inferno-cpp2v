@@ -1026,8 +1026,12 @@ private:
             if( Second )
                 f->condition = hold_expr.FromRaw( Second );
             else
-                f->condition = CreateLiteral(1);    
-                
+            {
+                shared_ptr<Literal> ic(new Literal);
+                f->condition = ic;
+                ic->value = shared_new<True>();    
+            }
+            
             StmtTy *third = (StmtTy *)Third; // Third is really a statement, the Actions API is wrong
             if( third )
                 f->increment = hold_stmt.FromRaw( third );
@@ -1307,8 +1311,10 @@ private:
             shared_ptr<Literal> ic(new Literal);
             TRACE("true/false tk %d %d %d\n", Kind, clang::tok::kw_true, clang::tok::kw_false );
             
-            int v = (Kind == clang::tok::kw_true);            
-            ic->value = CreateNumericConstant( v );
+            if(Kind == clang::tok::kw_true)          
+                ic->value = shared_new<True>();
+            else
+                ic->value = shared_new<False>();
             return hold_expr.ToRaw( ic );                       
         }
 
