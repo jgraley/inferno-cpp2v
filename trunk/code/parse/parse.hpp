@@ -760,9 +760,7 @@ private:
 
         shared_ptr<Literal> CreateLiteral( int value )        
         {
-            shared_ptr<Literal> l( new Literal );
-            l->value = CreateNumericConstant( value );
-            return l;
+            return CreateNumericConstant( value );;
         }
          
         shared_ptr<AnyNumber> CreateNumericConstant(const clang::Token &tok)
@@ -814,9 +812,7 @@ private:
         
         virtual ExprResult ActOnNumericConstant(const clang::Token &tok) 
         { 
-            shared_ptr<Literal> l(new Literal);
-            l->value = CreateNumericConstant( tok );
-            return hold_expr.ToRaw( l );            
+            return hold_expr.ToRaw( CreateNumericConstant( tok ) );            
         } 
   
         virtual ExprResult ActOnBinOp(clang::Scope *S,
@@ -1025,13 +1021,9 @@ private:
                 
             if( Second )
                 f->condition = hold_expr.FromRaw( Second );
-            else
-            {
-                shared_ptr<Literal> ic(new Literal);
-                f->condition = ic;
-                ic->value = shared_new<True>();    
-            }
-            
+            else        
+                f->condition = shared_new<True>();
+                            
             StmtTy *third = (StmtTy *)Third; // Third is really a statement, the Actions API is wrong
             if( third )
                 f->increment = hold_stmt.FromRaw( third );
@@ -1144,7 +1136,7 @@ private:
                 shared_ptr<Expression> ee = hold_expr.FromRaw(BitfieldWidth);
                 shared_ptr<Literal> ll = dynamic_pointer_cast<Literal>(ee);
                 ASSERT(ll && "bitfield width must be literal, not expression"); // TODO evaluate
-                shared_ptr<Integer> ii = dynamic_pointer_cast<Integer>(ll->value);
+                shared_ptr<Integer> ii = dynamic_pointer_cast<Integer>(ll);
                 ASSERT(ll && "bitfield width must be integer");
                 n->width = ii;
             }
@@ -1308,13 +1300,13 @@ private:
         virtual ExprResult ActOnCXXBoolLiteral(clang::SourceLocation OpLoc,
                                                clang::tok::TokenKind Kind) //TODO not working - get node has no info
         {
-            shared_ptr<Literal> ic(new Literal);
+            shared_ptr<Literal> ic;
             TRACE("true/false tk %d %d %d\n", Kind, clang::tok::kw_true, clang::tok::kw_false );
             
             if(Kind == clang::tok::kw_true)          
-                ic->value = shared_new<True>();
+                ic = shared_new<True>();
             else
-                ic->value = shared_new<False>();
+                ic = shared_new<False>();
             return hold_expr.ToRaw( ic );                       
         }
 
@@ -1348,9 +1340,7 @@ private:
             rv = literal.getValue();
             nc->value = rv;   
             
-            shared_ptr<Literal> l( new Literal );
-            l->value = nc;
-            return hold_expr.ToRaw( l );
+            return hold_expr.ToRaw( nc );
         }
         
         virtual ExprResult ActOnInitList(clang::SourceLocation LParenLoc,
@@ -1389,10 +1379,7 @@ private:
             if (literal.hadError)
                 return ExprResult(true);
                 
-            shared_ptr<Literal> l(new Literal);
-            l->value = CreateString( literal.GetString() );  
-
-            return hold_expr.ToRaw( l );                                 
+            return hold_expr.ToRaw( CreateString( literal.GetString() ) );                                 
         }
         
         /// ActOnCXXThis - Parse the C++ 'this' pointer.
@@ -1426,16 +1413,12 @@ private:
                 inf->assign = shared_new<NonAssignment>();
                 shared_ptr<Expression> ei = lasto->identifier;
                 inf->operands.push_back( ei );
-                shared_ptr<Literal> l( new Literal );
-                l->value = CreateNumericConstant( 1 );
-                inf->operands.push_back( l );
+                inf->operands.push_back( CreateNumericConstant( 1 ) );
                 o->initialiser = inf;
             }
             else
             {
-                shared_ptr<Literal> l( new Literal );
-                l->value = CreateNumericConstant( 0 );
-                o->initialiser = l;
+                o->initialiser = CreateNumericConstant( 0 );
             }
             ident_track.Add(Id, o, S); 
             return hold_decl.ToRaw( o );
