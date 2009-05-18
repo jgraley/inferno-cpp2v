@@ -9,7 +9,7 @@ mytype vv;
 
 int fp(int);
 
-int f(int &i, char longidentifier)
+static int f(int &i, char longidentifier)
 {
    static signed char x=9;
    auto unsigned char y=4;
