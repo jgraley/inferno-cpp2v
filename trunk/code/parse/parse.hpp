@@ -445,7 +445,7 @@ private:
             const clang::DeclSpec &DS = D.getDeclSpec();            
 
             if(!access)
-                access = shared_ptr<Public>(new Public);
+                access = shared_ptr<Private>(new Private);
                 
             if( !storage )
             {
@@ -564,7 +564,7 @@ private:
         shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D, shared_ptr<AccessSpec> a = shared_ptr<AccessSpec>() )
         {
             if(!a)
-                a = shared_ptr<Public>(new Public);
+                a = shared_ptr<Private>(new Private);
         
             const clang::DeclSpec &DS = D.getDeclSpec();
             shared_ptr<Declaration> d;
