@@ -75,9 +75,10 @@ struct Type : virtual Node { NODE_FUNCTIONS };
 
 // Property for C++ access speficiers public, protected and private. AccessSpec
 // represents any access spec, the subsequent empty nodes specify particular
-// access specs. Access specs are just validity-checking sugar, but Inferno may 
-// use them to limit the ports created for independently converted modules.
-// TODO default consistently when not in a record
+// access specs. Inferno uses access specs for all declarations. Declarations
+// in classes are as specified, function parameters and external declarations
+// are public, all others private. It is anticipated that the access spec will
+// control generated high-level interfaces.
 struct AccessSpec : Property { NODE_FUNCTIONS };
 struct Public : AccessSpec { NODE_FUNCTIONS };
 struct Private : AccessSpec { NODE_FUNCTIONS };
@@ -105,7 +106,6 @@ struct Program : Node,
 };
 
 //////////////////////////// Literals ///////////////////////////////
-// TODO seperate source file
 
 // Means a property that can be used as a literal in a program, so
 // that we do not need to duplicate literals and proeprties.

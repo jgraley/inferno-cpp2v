@@ -444,9 +444,6 @@ private:
         { 
             const clang::DeclSpec &DS = D.getDeclSpec();            
 
-            if(!access)
-                access = shared_ptr<Private>(new Private);
-                
             if( !storage )
             {
                 clang::DeclSpec::SCS scs = DS.getStorageClassSpec();
@@ -456,9 +453,7 @@ private:
                 {
                     if( S->getFlags() & clang::Scope::FnScope ) // in a function
                         storage = shared_new<Auto>();
-                    if( !(S->getFlags() & clang::Scope::CXXClassScope) ) // NOT in a class, ie global scope?
-                        storage = shared_new<Static>();               
-                    else
+                    if( S->getFlags() & clang::Scope::CXXClassScope ) // record scope
                     {
                         shared_ptr<Member> ns = shared_new<Member>();
                         storage = ns;
@@ -467,12 +462,22 @@ private:
                         else
                             ns->virt = shared_new<NonVirtual>();
                     }
+                    else
+                    {
+                        storage = shared_new<Static>();               
+                        if( !access )
+                            access = shared_ptr<Public>(new Public); // unspecified at top level implies "extern", which we call public
+                    }
                     break;
                 }
                 case clang::DeclSpec::SCS_auto:
                     storage = shared_new<Auto>();
                     break;
                 case clang::DeclSpec::SCS_extern:// linking will be done "automatically" so no need to remember "extern" in the tree
+                    storage = shared_new<Static>();
+                    if( !access )
+                        access = shared_ptr<Public>(new Public); // we call extern public
+                    break;
                 case clang::DeclSpec::SCS_static:
                     storage = shared_new<Static>();
                     break;
@@ -482,6 +487,9 @@ private:
                 }
             }
 
+            if(!access)
+                access = shared_ptr<Private>(new Private); // Most scopes are private unless specified otherwise
+                
             shared_ptr<Instance> o(new Instance());
             all_decls->push_back(o);
 
@@ -500,15 +508,17 @@ private:
             else
                 o->constant = shared_new<NonConst>();
             o->type = CreateTypeNode( D );
-            o->access = access;
             o->storage = storage;
+            o->access = access;
             o->initialiser = shared_new<Uninitialised>();
             
             return o;
         }
 
-        shared_ptr<Typedef> CreateTypedefNode( clang::Scope *S, clang::Declarator &D )
+        shared_ptr<Typedef> CreateTypedefNode( clang::Scope *S, clang::Declarator &D, shared_ptr<AccessSpec> access = shared_ptr<AccessSpec>() )
         { 
+            if(!access)
+                access = shared_ptr<Private>(new Private);
             shared_ptr<Typedef> t(new Typedef);
             all_decls->push_back(t);            
             clang::IdentifierInfo *ID = D.getIdentifier();
@@ -518,6 +528,7 @@ private:
                 ident_track.Add( ID, t, S ); 
             }
             t->type = CreateTypeNode( D );
+            t->access = access;
  
             TRACE("%s %p %p\n", ID->getName(), t.get(), ID );            
             return t;
@@ -562,15 +573,12 @@ private:
         }
         
         shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D, shared_ptr<AccessSpec> a = shared_ptr<AccessSpec>() )
-        {
-            if(!a)
-                a = shared_ptr<Private>(new Private);
-        
+        {        
             const clang::DeclSpec &DS = D.getDeclSpec();
             shared_ptr<Declaration> d;
             if( DS.getStorageClassSpec() == clang::DeclSpec::SCS_typedef )
             {
-                shared_ptr<Typedef> t = CreateTypedefNode( S, D );                
+                shared_ptr<Typedef> t = CreateTypedefNode( S, D, a );                
                 TRACE();
                 d = t;
             }    
@@ -579,9 +587,7 @@ private:
                 shared_ptr<Instance> o = CreateInstanceNode( S, D, a );        
                 d = o;
             }
-            
-            d->access = a;
-            
+                        
             return d;
         }
         

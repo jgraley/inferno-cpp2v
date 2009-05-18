@@ -4,12 +4,15 @@
 #include "tree/tree.hpp"
 #include "common/refcount.hpp"
 #include "helpers/pass.hpp"
+#include "helpers/typeof.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
 #include "tree/type_db.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/misc.hpp"
 #include "helpers/scope.hpp"
+
+#include "clang/Parse/DeclSpec.h"
 
 // TODO indent back to previous level at end of string
 #define ERROR_UNKNOWN(V) \

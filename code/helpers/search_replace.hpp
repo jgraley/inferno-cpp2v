@@ -3,11 +3,13 @@
 
 #include "tree/tree.hpp"
 #include "common/refcount.hpp"
-#include "parse/parse.hpp"  
+#include "common/common.hpp"
+//#include "parse/parse.hpp"  
 #include "render/render.hpp"
 #include "common/read_args.hpp"
 #include "walk.hpp"
 #include "pass.hpp"
+#include <set>
 
 // In-tree search and replace utility. To use, you make a search pattern and a 
 // replace pattern, each in the form of a subtree. You pass these into the 
