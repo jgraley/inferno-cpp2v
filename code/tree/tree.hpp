@@ -77,6 +77,7 @@ struct Type : virtual Node { NODE_FUNCTIONS };
 // represents any access spec, the subsequent empty nodes specify particular
 // access specs. Access specs are just validity-checking sugar, but Inferno may 
 // use them to limit the ports created for independently converted modules.
+// TODO default consistently when not in a record
 struct AccessSpec : Property { NODE_FUNCTIONS };
 struct Public : AccessSpec { NODE_FUNCTIONS };
 struct Private : AccessSpec { NODE_FUNCTIONS };
@@ -235,16 +236,16 @@ struct NonVirtual : AnyVirtual { NODE_FUNCTIONS };
 
 // Property for a storage class which can apply to any instance (variable,
 // object or function) and indicates physical locaiton, allocation strategy 
-// and lifecycle model. Presently we allow static and non-static, where non
-// -static must also indicate virtual-ness. In the future there will probably
-// be static, member and auto (TODO)
+// and lifecycle model. Presently we allow static, member (=non-static member)
+// and auto (= non-static local). Member must also indicate virtual-ness.
 struct StorageClass : Property { NODE_FUNCTIONS };
 struct Static : StorageClass { NODE_FUNCTIONS };
-struct NonStatic : StorageClass 
+struct Member : StorageClass // non-static
 {
     NODE_FUNCTIONS
     SharedPtr<AnyVirtual> virt;
 };
+struct Auto : StorageClass { NODE_FUNCTIONS };
 
 // Property that indicates whether some variable or object is constant.
 struct AnyConst : Property { NODE_FUNCTIONS };
