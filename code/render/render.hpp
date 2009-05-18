@@ -78,8 +78,8 @@ private:
             // generate hex float since it can be exact
             fc->value.convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
             return string(hs) + 
-                   (&(fc->value.getSemantics())==TypeDb::floating_semantics[clang::DeclSpec::TSW_short] ? "F" : "") +
-                   (&(fc->value.getSemantics())==TypeDb::floating_semantics[clang::DeclSpec::TSW_long] ? "L" : ""); 
+                   (&(fc->value.getSemantics())==TypeDb::float_semantics ? "F" : "") +
+                   (&(fc->value.getSemantics())==TypeDb::long_double_semantics ? "L" : ""); 
         }           
         else if( dynamic_pointer_cast< True >(sp) )
             return string("true");
@@ -195,20 +195,17 @@ private:
     string RenderFloatingType( shared_ptr<Floating> type )
     {
         string s;
-        unsigned base_width;       
-        shared_ptr<Integer> ic = dynamic_pointer_cast<Integer>( type->width );
-        ASSERT(ic && "width must be integer"); 
-        base_width = ic->value.getLimitedValue();
+        shared_ptr<FloatSemantics> sem = dynamic_pointer_cast<FloatSemantics>(type->semantics);
+        ASSERT(sem);
     
-        // Fix the width
-        if( base_width == TypeDb::float_bits )
+        if( sem->value == TypeDb::float_semantics )
             s += "float";
-        else if( base_width == TypeDb::double_bits )
+        else if( sem->value == TypeDb::double_semantics )
             s += "double";
-        else if( base_width == TypeDb::long_double_bits )
+        else if( sem->value == TypeDb::long_double_semantics )
             s += "long double";
         else    
-            ASSERT( !"no builtin floating type has required bit width"); // TODO drop in a bit vector
+            ASSERT( !"no builtin floating type has required semantics"); // TODO drop in a bit vector
         
         return s;              
     }

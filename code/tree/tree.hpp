@@ -154,7 +154,7 @@ struct AnyFloat : AnyNumber { NODE_FUNCTIONS };
 
 // Property node for an floating point number. We use LLVM's class for this, 
 // so that we can deal with any representation convention. The value must 
-// always be filled in.
+// always be filled in. To determine the type, use llvm::getSemantics()
 struct Float : AnyFloat
 {
     NODE_FUNCTIONS
@@ -230,7 +230,7 @@ struct AnyVirtual : Property { NODE_FUNCTIONS };
 struct Virtual : AnyVirtual 
 {
     NODE_FUNCTIONS
-    // TODO pure
+    // TODO pure when supported by clang
 };
 struct NonVirtual : AnyVirtual { NODE_FUNCTIONS };
 
@@ -238,6 +238,8 @@ struct NonVirtual : AnyVirtual { NODE_FUNCTIONS };
 // object or function) and indicates physical locaiton, allocation strategy 
 // and lifecycle model. Presently we allow static, member (=non-static member)
 // and auto (= non-static local). Member must also indicate virtual-ness.
+// Note that top-level static -> Static and Private. 
+// Top-level extern -> Static and Public.
 struct StorageClass : Property { NODE_FUNCTIONS };
 struct Static : StorageClass { NODE_FUNCTIONS };
 struct Member : StorageClass // non-static
@@ -250,7 +252,8 @@ struct Auto : StorageClass { NODE_FUNCTIONS };
 // Property that indicates whether some variable or object is constant.
 struct AnyConst : Property { NODE_FUNCTIONS };
 struct Const : AnyConst { NODE_FUNCTIONS };
-struct NonConst : AnyConst { NODE_FUNCTIONS }; // TODO call this Mutable?
+struct NonConst : AnyConst { NODE_FUNCTIONS }; 
+// TODO add mutable when supported by clang
 
 // Intermediate for anything that consumes space and/or has state. Slightly 
 // wooly concept but it gathers the properties that cover allocation of space 
@@ -258,7 +261,7 @@ struct NonConst : AnyConst { NODE_FUNCTIONS }; // TODO call this Mutable?
 struct Physical : virtual Node
 {
     NODE_FUNCTIONS
-    SharedPtr<AnyConst> constant; // TODO all functions to be const (otherwise would imply self-modifiying code). See idempotent
+    SharedPtr<AnyConst> constant; 
     SharedPtr<StorageClass> storage;
 };
 
@@ -302,7 +305,6 @@ struct Base : Declaration
 struct Subroutine : Type 
 {
     NODE_FUNCTIONS
-    // TODO add bool idempotent; here for member functions with "const" at the end of the decl.
 };
 
 // A procedure like in pascal etc, params but no return value. Parameters are generated as 
@@ -358,26 +360,38 @@ struct Void : Type { NODE_FUNCTIONS };
 struct Bool : Type { NODE_FUNCTIONS };
 
 // Intermediate for any type that represents a number that you can eg add and 
-// subtract. Bit width is given here, number must fit into that many bits - 
-// this should probably move into Integral and something else should be done to 
-// qualify floats TODO.
-struct Numeric : Type 
+// subtract. 
+struct Numeric : Type { NODE_FUNCTIONS };
+
+// Type represents an integral (singed or unsigned) type. The total number of
+// bits (including sign) is given
+struct Integral : Numeric
 {
     NODE_FUNCTIONS
     SharedPtr<AnyInteger> width;  // Bits, not bytes
 };
 
-// Type represents an integral (singed or unsigned) type.
-struct Integral : Numeric { NODE_FUNCTIONS };
-
-// Type of a signed integer number.
+// Type of a signed integer number (2's complement).
 struct Signed : Integral { NODE_FUNCTIONS };
 
 // Type of an unsigned integer number.
 struct Unsigned : Integral { NODE_FUNCTIONS };
 
+// Property for the details of floating point behaviour
+// implying representation size and implementation.
+struct AnyFloatSemantics : Property { NODE_FUNCTIONS };
+struct FloatSemantics : AnyFloatSemantics
+{
+    NODE_FUNCTIONS
+    const llvm::fltSemantics *value;
+};    
+
 // Type of a floating point number.
-struct Floating : Numeric { NODE_FUNCTIONS }; // Note width determines float vs double 
+struct Floating : Numeric 
+{ 
+    NODE_FUNCTIONS
+    SharedPtr<AnyFloatSemantics> semantics;
+}; 
 
 //////////////////////////// User-defined Types ////////////////////////////
 
@@ -428,7 +442,7 @@ struct Enum : Record { NODE_FUNCTIONS };
 
 // A record that can inherit from other records and be inherited from. 
 // We add in a list of base class declarations.
-struct InheritanceRecord : Record // TODO InheritanceRecord
+struct InheritanceRecord : Record
 {
     NODE_FUNCTIONS
     Sequence<Base> bases;

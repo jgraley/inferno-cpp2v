@@ -1,5 +1,5 @@
 
-int factorial( int n )
+static int factorial( int n )
 {
     if( n==0 )
         return 1;
