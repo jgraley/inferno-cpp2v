@@ -470,7 +470,7 @@ private:
             if( !inits.empty() )
             {
                 s += " : ";
-                s += RenderSequence( inits, ", ", false, shared_ptr<Public>(new Public), true );                
+                s += RenderSequence( inits, ", ", false, shared_ptr<Public>(), true );                
             }
             
             shared_ptr<Compound> r( new Compound );
@@ -507,7 +507,8 @@ private:
         TRACE();
         string s;
         
-        if( access && TypeInfo(declaration->access) != TypeInfo(*access) )
+        if( access && // pointer must be supplied
+             TypeInfo(declaration->access) != TypeInfo(*access) ) // access spec must have changed
         {
             s += RenderAccess( declaration->access ) + ":\n";
             *access = declaration->access;
@@ -673,9 +674,6 @@ private:
                            shared_ptr<AccessSpec> init_access = shared_ptr<AccessSpec>(),
                            bool showtype=true )
     {
-        if( !init_access )
-            init_access = shared_ptr<Public>(new Public);
-            
         TRACE();
         string s;
         for( int i=0; i<spe.size(); i++ )
@@ -684,7 +682,7 @@ private:
             string sep = (seperate_last || i+1<spe.size()) ? separator : "";
             shared_ptr<ELEMENT> pe = spe[i];                        
             if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
-                s += RenderDeclaration( d, sep, &init_access, showtype );
+                s += RenderDeclaration( d, sep, init_access ? &init_access : NULL, showtype );
             else if( shared_ptr<Statement> st = dynamic_pointer_cast< Statement >(pe) )
                 s += RenderStatement( st, sep ); 
             else
