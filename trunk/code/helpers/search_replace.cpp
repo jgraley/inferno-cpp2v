@@ -71,6 +71,16 @@ bool SearchReplace::IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pa
             return false;
         }
     }
+    else if( shared_ptr<FloatSemantics> pattern_sem = dynamic_pointer_cast<FloatSemantics>(pattern) )
+    {
+        shared_ptr<FloatSemantics> x_sem = dynamic_pointer_cast<FloatSemantics>(x);
+        ASSERT( x_sem );
+        if( x_sem->value != pattern_sem->value )
+        {
+            TRACE("Float semantics differ\n");
+            return false;
+        }
+    }
     TRACE("yes!!\n");
     return true;
 }    

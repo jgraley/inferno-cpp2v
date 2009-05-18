@@ -89,6 +89,10 @@ public:
             fc->value.convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
             return string(hs); 
         }           
+        else if( shared_ptr<FloatSemantics> fs = dynamic_pointer_cast< FloatSemantics >(sp) )
+        {
+            return SSPrintf("@%p", fs->value );
+        }           
         else
         {
             *bold = false;

@@ -2,7 +2,7 @@
 #include "llvm/ADT/APFloat.h"
 
 //
-// Initialise all the sizes and signednesses according to the 
+// Initialise all the sizes and signednesses of integrals according to the 
 // current compiler - this is good for testing if the same 
 // compiler is used to compile generated output.
 //
@@ -10,11 +10,8 @@
 #define IS_SIGNED( T ) ((T)-1 < (T)0)
 
 const int TypeDb::char_bits = sizeof( char ) * 8;
-
 const bool TypeDb::int_default_signed = IS_SIGNED(int);
-
 const bool TypeDb::char_default_signed = IS_SIGNED(char);
-
 const unsigned TypeDb::integral_bits[] =
 {
     sizeof( int ) * 8,
@@ -23,16 +20,9 @@ const unsigned TypeDb::integral_bits[] =
     sizeof( long long ) * 8
 };
 
-const llvm::fltSemantics *(TypeDb::floating_semantics[]) =
-{
-    &llvm::APFloat::IEEEdouble,
-    &llvm::APFloat::IEEEsingle, // pretend float == short double
-    &llvm::APFloat::IEEEquad,
-    NULL
-};
-
-const int TypeDb::float_bits = sizeof( float ) * 8;
-
-const int TypeDb::double_bits = sizeof( double ) * 8;
-
-const int TypeDb::long_double_bits = sizeof( long double ) * 8;
+//
+// Use IEEE standards for floats since reflection is too hard
+//
+const llvm::fltSemantics * const TypeDb::float_semantics = &llvm::APFloat::IEEEsingle;
+const llvm::fltSemantics * const TypeDb::double_semantics = &llvm::APFloat::IEEEdouble;
+const llvm::fltSemantics * const TypeDb::long_double_semantics = &llvm::APFloat::IEEEquad;

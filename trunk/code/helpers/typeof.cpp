@@ -40,7 +40,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
         }
         else
         {
-             ASSERTFAIL("Unknown operator, please add");         
+            ASSERTFAIL("Unknown operator, please add");         
         }
     }
     

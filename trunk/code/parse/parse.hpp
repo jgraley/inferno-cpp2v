@@ -250,10 +250,12 @@ private:
             return i;
         }
         
-        shared_ptr<Floating> CreateFloatingType( unsigned bits )
+        shared_ptr<Floating> CreateFloatingType( const llvm::fltSemantics *s )
         {
+            shared_ptr<FloatSemantics> sem( new FloatSemantics );
+            sem->value = s;
             shared_ptr<Floating> f( new Floating );
-            f->width = CreateNumericConstant(bits);      
+            f->semantics = sem;      
             return f;
         }
         
@@ -303,13 +305,13 @@ private:
                         break;
                     case clang::DeclSpec::TST_float:
                         TRACE("float based %d %d\n", DS.getTypeSpecWidth(), DS.getTypeSpecSign() );
-                        return CreateFloatingType( TypeDb::float_bits );
+                        return CreateFloatingType( TypeDb::float_semantics );
                         break;
                     case clang::DeclSpec::TST_double:
                         TRACE("double based %d %d\n", DS.getTypeSpecWidth(), DS.getTypeSpecSign() );
                         return CreateFloatingType( DS.getTypeSpecWidth()==clang::DeclSpec::TSW_long ?
-                                                   TypeDb::long_double_bits :
-                                                   TypeDb::double_bits );
+                                                   TypeDb::long_double_semantics :
+                                                   TypeDb::double_semantics );
                         break;
                     case clang::DeclSpec::TST_typedef:
                         TRACE("typedef\n");
@@ -820,11 +822,11 @@ private:
             {
                 const llvm::fltSemantics *semantics;
                 if( literal.isLong )
-                    semantics = TypeDb::floating_semantics[clang::DeclSpec::TSW_long];
+                    semantics = TypeDb::long_double_semantics;
                 else if( literal.isFloat )
-                    semantics = TypeDb::floating_semantics[clang::DeclSpec::TSW_short];
+                    semantics = TypeDb::float_semantics;
                 else
-                    semantics = TypeDb::floating_semantics[clang::DeclSpec::TSW_unspecified];
+                    semantics = TypeDb::double_semantics;
                 llvm::APFloat rv( literal.GetFloatValue( *semantics ) );
 
                 shared_ptr<Float> fc( new Float( rv ) );
@@ -1154,7 +1156,7 @@ private:
             if( BitfieldWidth )
             {
                 ASSERT( o && "only objects may be bitfields" );
-                shared_ptr<Numeric> n( dynamic_pointer_cast<Numeric>( o->type ) );
+                shared_ptr<Integral> n( dynamic_pointer_cast<Integral>( o->type ) );
                 ASSERT( n && "cannot specify width of non-numeric type" );
                 shared_ptr<Expression> ee = hold_expr.FromRaw(BitfieldWidth);
                 shared_ptr<Literal> ll = dynamic_pointer_cast<Literal>(ee);
