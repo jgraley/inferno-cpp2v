@@ -382,9 +382,13 @@ private:
     
     string RenderStorage( shared_ptr<StorageClass> st )
     {
-        if( dynamic_pointer_cast<Static>( st ) )
+        if( dynamic_pointer_cast<Program>( scope_stack.top() ) )
+            return ""; // at top-level scope, everything is set to static, but don't actually output the word
+        else if( dynamic_pointer_cast<Static>( st ) )
             return "static "; 
-        else if( shared_ptr<NonStatic> ns = dynamic_pointer_cast<NonStatic>( st ) )
+        else if( dynamic_pointer_cast<Auto>( st ) )
+            return "auto "; 
+        else if( shared_ptr<Member> ns = dynamic_pointer_cast<Member>( st ) )
         {
             shared_ptr<AnyVirtual> v = ns->virt;
             if( dynamic_pointer_cast<Virtual>( v ) )

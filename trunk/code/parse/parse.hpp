@@ -437,17 +437,55 @@ private:
             return li;
         }
         
-        shared_ptr<Instance> CreateObjectNode( clang::Scope *S, 
-                                               clang::Declarator &D, 
-                                               shared_ptr<AccessSpec> access = shared_ptr<AccessSpec>() )
+        shared_ptr<Instance> CreateInstanceNode( clang::Scope *S, 
+                                                 clang::Declarator &D, 
+                                                 shared_ptr<AccessSpec> access = shared_ptr<AccessSpec>(),
+                                                 shared_ptr<StorageClass> storage = shared_ptr<StorageClass>() )
         { 
+            const clang::DeclSpec &DS = D.getDeclSpec();            
+
             if(!access)
                 access = shared_ptr<Public>(new Public);
                 
+            if( !storage )
+            {
+                clang::DeclSpec::SCS scs = DS.getStorageClassSpec();
+                switch( scs )
+                {
+                case clang::DeclSpec::SCS_unspecified:
+                {
+                    if( S->getFlags() & clang::Scope::FnScope ) // in a function
+                        storage = shared_new<Auto>();
+                    if( !(S->getFlags() & clang::Scope::CXXClassScope) ) // NOT in a class, ie global scope?
+                        storage = shared_new<Static>();               
+                    else
+                    {
+                        shared_ptr<Member> ns = shared_new<Member>();
+                        storage = ns;
+                        if( DS.isVirtualSpecified() )
+                            ns->virt = shared_new<Virtual>();
+                        else
+                            ns->virt = shared_new<NonVirtual>();
+                    }
+                    break;
+                }
+                case clang::DeclSpec::SCS_auto:
+                    storage = shared_new<Auto>();
+                    break;
+                case clang::DeclSpec::SCS_extern:// linking will be done "automatically" so no need to remember "extern" in the tree
+                case clang::DeclSpec::SCS_static:
+                    storage = shared_new<Static>();
+                    break;
+                default:
+                    ASSERTFAIL("Unsupported storage class");
+                    break;
+                }
+            }
+
             shared_ptr<Instance> o(new Instance());
             all_decls->push_back(o);
+
             clang::IdentifierInfo *ID = D.getIdentifier();
-            const clang::DeclSpec &DS = D.getDeclSpec();            
             if(ID)
             {
                 o->identifier = CreateInstanceIdentifier(ID);
@@ -456,35 +494,14 @@ private:
             else
             {
                 o->identifier = CreateInstanceIdentifier();
-            }
-
-            switch( DS.getStorageClassSpec() )
-            {
-            case clang::DeclSpec::SCS_unspecified:
-            case clang::DeclSpec::SCS_extern:// linking will be done "automatically" so no need to remember "extern" in the tree
-            case clang::DeclSpec::SCS_auto:
-            {
-                shared_ptr<NonStatic> ns = shared_new<NonStatic>();
-                o->storage = ns;
-                if( DS.isVirtualSpecified() )
-                    ns->virt = shared_new<Virtual>();
-                else
-                    ns->virt = shared_new<NonVirtual>();
-                break;
-            }
-            case clang::DeclSpec::SCS_static:
-                o->storage = shared_new<Static>();
-                break;
-            default:
-                ASSERTFAIL("Unsupported storage class");
-                break;
-            }
+            }            
             if( DS.getTypeQualifiers() & clang::DeclSpec::TQ_const )
                 o->constant = shared_new<Const>();
             else
                 o->constant = shared_new<NonConst>();
             o->type = CreateTypeNode( D );
             o->access = access;
+            o->storage = storage;
             o->initialiser = shared_new<Uninitialised>();
             
             return o;
@@ -559,7 +576,7 @@ private:
             }    
             else
             {                
-                shared_ptr<Instance> o = CreateObjectNode( S, D, a );        
+                shared_ptr<Instance> o = CreateInstanceNode( S, D, a );        
                 d = o;
             }
             
@@ -625,7 +642,7 @@ private:
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D) 
         {
             shared_ptr<ParseParameterDeclaration> p(new ParseParameterDeclaration);
-            shared_ptr<Instance> o = CreateObjectNode( S, D );
+            shared_ptr<Instance> o = CreateInstanceNode( S, D, shared_new<Public>(), shared_new<Auto>() );
             p->type = o->type;
             p->access = o->access;
             p->identifier = o->identifier;
