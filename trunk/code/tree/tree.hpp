@@ -465,6 +465,11 @@ struct Label : Declaration
     SharedPtr<AnyLabelIdentifier> identifier;
 }; 
 
+// Aggregate is used to combine a number of values for initialising
+// a record or an array. It should really derive from Initialiser
+// since it can only be used as an initialiser and TypeOf would 
+// have a hard time with it. But it's hard to do in parser due to
+// the clang integration model in parser TODO do it anyway.
 struct Aggregate : Expression
 {
     NODE_FUNCTIONS
@@ -475,9 +480,10 @@ struct AnyAssignment : Property { NODE_FUNCTIONS };
 struct Assignment : AnyAssignment { NODE_FUNCTIONS };
 struct NonAssignment : AnyAssignment { NODE_FUNCTIONS };
 
-struct Operator : Aggregate
+struct Operator : Expression
 {
     NODE_FUNCTIONS
+    Sequence<Expression> operands; 
     SharedPtr<AnyAssignment> assign; // write result back to left
 };
 
@@ -509,10 +515,11 @@ struct ConditionalOperator : Expression // eg ?:
     SharedPtr<Expression> if_false;
 };
 
-struct Call : Aggregate 
+struct Call : Expression 
 {
     NODE_FUNCTIONS
     SharedPtr<Expression> function;
+    Sequence<Expression> arguments;
 };
 
 struct AnyGlobalNew : Property { NODE_FUNCTIONS };
