@@ -16,6 +16,8 @@
 
 #define NODE_FUNCTIONS ITEMISE_FUNCTION TYPE_INFO_FUNCTION DUPLICATE_FUNCTION
 
+//TODO all these in a namespace perhaps?
+
 //////////////////////////// Node Model ////////////////////////////
 
 // Base class for all tree nodes and nodes in search/replace 
@@ -476,10 +478,17 @@ struct Aggregate : Expression
     Sequence<Expression> operands; 
 };
 
+// Property to indicate whether an operator is an assignment operator
+// or not TODO get rid of this and just make assignmant operators 
+// be differnt nodes. This is clunky and of little benefit since
+// we'll rarely validly wildcard it.
 struct AnyAssignment : Property { NODE_FUNCTIONS };
 struct Assignment : AnyAssignment { NODE_FUNCTIONS };
 struct NonAssignment : AnyAssignment { NODE_FUNCTIONS };
 
+// Intermediate for an operator with operands and an indication
+// of whether it's an assignment operator. TODO maybe fix the number
+// of operands for binop and unop categories instead of Sequence.
 struct Operator : Expression
 {
     NODE_FUNCTIONS
@@ -487,27 +496,37 @@ struct Operator : Expression
     SharedPtr<AnyAssignment> assign; // write result back to left
 };
 
+// Intermendiate categories of operators. TODO not sure if this
+// is the right categorisation scheme.
 struct Bitwise : Operator { NODE_FUNCTIONS };
 struct Logical : Operator { NODE_FUNCTIONS };
 struct Arithmetic : Operator { NODE_FUNCTIONS };
 struct Shift : Operator { NODE_FUNCTIONS };
 struct Comparison : Operator { NODE_FUNCTIONS };
 
+// Use an include file to generate nodes for all the actual operatos based on
+// contents of operator_db.inc
 #define PREFIX(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE { NODE_FUNCTIONS };
 #define POSTFIX(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE { NODE_FUNCTIONS };
 #define BINARY(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE { NODE_FUNCTIONS };
 #include "operator_db.inc"
 
+// Operator that operates on data types as parameters. Where either is allowed
+// we prefer the type one, since it's more concise in the tree.
 struct TypeOperator : Expression
 {
     NODE_FUNCTIONS
     Sequence<Type> operands; 
 };
 
+// sizeof() a type
 struct SizeOf : TypeOperator { NODE_FUNCTIONS };
+
+// alignof() a type
 struct AlignOf : TypeOperator { NODE_FUNCTIONS };
 
-struct ConditionalOperator : Expression // eg ?:
+// The conditional ?: operator as in condition ? if_true : if_false
+struct ConditionalOperator : Expression 
 {
     NODE_FUNCTIONS
     SharedPtr<Expression> condition;
@@ -515,6 +534,7 @@ struct ConditionalOperator : Expression // eg ?:
     SharedPtr<Expression> if_false;
 };
 
+// A funciton call to specified function passing in specified arguments
 struct Call : Expression 
 {
     NODE_FUNCTIONS
@@ -522,14 +542,19 @@ struct Call : Expression
     Sequence<Expression> arguments;
 };
 
+// Property indicating whether a new/delete is global ie has :: in
+// front of it. Not actually sure what that means TODO find out
 struct AnyGlobalNew : Property { NODE_FUNCTIONS };
 struct GlobalNew : AnyGlobalNew { NODE_FUNCTIONS }; // ::new/::delete was used
 struct NonGlobalNew : AnyGlobalNew { NODE_FUNCTIONS }; // new/delete, no ::
 
+// Property indicating whether a delete should delete an array
 struct AnyArrayNew : Property { NODE_FUNCTIONS };
 struct ArrayNew : AnyArrayNew { NODE_FUNCTIONS }; // delete[]
 struct NonArrayNew : AnyArrayNew { NODE_FUNCTIONS }; 
 
+// Node for the C++ new operator, gives all the syntactical elements
+// required for allocation and initialisation
 struct New : Expression
 {
     NODE_FUNCTIONS
@@ -539,6 +564,7 @@ struct New : Expression
     SharedPtr<AnyGlobalNew> global;
 };
 
+// Node for C++ delete operator
 struct Delete : Expression
 {
     NODE_FUNCTIONS
@@ -547,15 +573,20 @@ struct Delete : Expression
     SharedPtr<AnyGlobalNew> global;
 };
 
+// Node for C++ this
 struct This : Expression { NODE_FUNCTIONS };
 
-struct Subscript : Expression // TODO could be an Operator?
+// Node for indexing into an array as in base[index]
+struct Subscript : Expression 
 {
     NODE_FUNCTIONS
     SharedPtr<Expression> base;
     SharedPtr<Expression> index;
 };
 
+// Node for accessing an element in a record as in base.member
+// Note that the parser breaks down a->b into (*a).b which may
+// be detected using a search pattern if desired.
 struct Lookup : Expression  
 {
     NODE_FUNCTIONS
@@ -563,6 +594,8 @@ struct Lookup : Expression
     SharedPtr<AnyInstanceIdentifier> member;    
 };
 
+// Node for a c-style cast. C++ casts are not in here yet
+// and C casts will be harmonised into whatever system I use for that.
 struct Cast : Expression
 {
     NODE_FUNCTIONS
@@ -572,24 +605,30 @@ struct Cast : Expression
 
 //////////////////////////// Statements ////////////////////////////
 
+// Bunch of statements inside {} or begin/end
 struct Compound : Statement
 {
     NODE_FUNCTIONS
     Sequence<Statement> statements;
 };                   
 
+// The return statement of a function TODO not sure about return without 
+// a paremeter, might generate NULL ptr which would be invalid.
 struct Return : Statement
 {
     NODE_FUNCTIONS
     SharedPtr<Expression> return_value;
 };
 
+// A label as it appears in code, followed by a :
 struct LabelTarget : Statement
 {
     NODE_FUNCTIONS
     SharedPtr<Label> label; // TODO these should be function scope
 };
 
+// A goto statement, inferno tree supports goto-a-variable because
+// it is expected to be useful during sequential lowering (state-out)
 struct Goto : Statement
 {
     NODE_FUNCTIONS
@@ -598,6 +637,7 @@ struct Goto : Statement
     SharedPtr<Expression> destination;
 };
 
+// If statement
 struct If : Statement
 {
     NODE_FUNCTIONS
@@ -606,33 +646,40 @@ struct If : Statement
     SharedPtr<Statement> else_body; // can be Nop if no else clause
 };
 
+// Intermediate for any loop, commonising the body
 struct Loop : Statement
 {
     NODE_FUNCTIONS
     SharedPtr<Statement> body;
 };
 
+// While loop
 struct While : Loop
 {
     NODE_FUNCTIONS
     SharedPtr<Expression> condition;
 };
 
+// Do loop (first iteration always runs)
 struct Do : Loop // a do..while() construct 
 {
     NODE_FUNCTIONS
     SharedPtr<Expression> condition;
 };
 
+// For loop. 
 struct For : Loop
 {
     NODE_FUNCTIONS
-    // Any of these can be NULL if absent. NULL condition evaluates true.
-    SharedPtr<Statement> initialisation;
-    SharedPtr<Expression> condition;
-    SharedPtr<Statement> increment;    
+    SharedPtr<Statement> initialisation; // Nop if absent
+    SharedPtr<Expression> condition;     // True if absent
+    SharedPtr<Statement> increment;      // Nop if absent
 };
 
+// Switch statement. Body is just a statement scope - case labels
+// and breaks are dropped into the sequence at the corresponding 
+// positions. This caters for fall-throughs etc. Really just a 
+// Compound with a goto-a-variable at the top with some mapping.
 struct Switch : Statement
 {
     NODE_FUNCTIONS
@@ -640,8 +687,11 @@ struct Switch : Statement
     SharedPtr<Statement> body;
 };
 
+// Intermediate for labels in a switch statement.
 struct SwitchTarget : Statement { NODE_FUNCTIONS };
 
+// Case label, supporting range extension in case useful
+// for optimisation
 struct Case : SwitchTarget 
 {
     NODE_FUNCTIONS
@@ -651,12 +701,16 @@ struct Case : SwitchTarget
     SharedPtr<Expression> value_hi; // inclusive
 };
 
+// Default label in a switch statement
 struct Default : SwitchTarget { NODE_FUNCTIONS };
 
+// Continue (to innermost Loop)
 struct Continue : Statement { NODE_FUNCTIONS };
 
+// Break (from innermost Switch or Loop)
 struct Break : Statement { NODE_FUNCTIONS };
 
+// Do nuffink
 struct Nop : Statement { NODE_FUNCTIONS };
 
 #endif
