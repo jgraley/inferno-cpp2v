@@ -453,9 +453,9 @@ private:
                 {
                 case clang::DeclSpec::SCS_unspecified:
                 {
-                    if( S->getFlags() & clang::Scope::FnScope ) // in a function
+                    if( S->getFlags() & (clang::Scope::FnScope | clang::Scope::ControlScope) ) // in code
                         storage = shared_new<Auto>();
-                    if( S->getFlags() & clang::Scope::CXXClassScope ) // record scope
+                    else if( S->getFlags() & clang::Scope::CXXClassScope ) // record scope
                     {
                         shared_ptr<Member> ns = shared_new<Member>();
                         storage = ns;
