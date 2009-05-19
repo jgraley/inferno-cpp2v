@@ -310,12 +310,12 @@ private:
             if( shared_ptr<Expression> base = TypeOf(program).IsConstructorCall( o ) )
                 return before +  // invoking costructors as found in init lists and locals
                        RenderOperand( base, true ) + "(" +
-                       RenderOperandSequence( o->operands, ", ", false ) + ")" +
+                       RenderOperandSequence( o->arguments, ", ", false ) + ")" +
                        after;
             else            
                 return before + 
                    RenderOperand( o->function, true ) + "(" +
-                   RenderOperandSequence( o->operands, ", ", false ) + ")" +
+                   RenderOperandSequence( o->arguments, ", ", false ) + ")" +
                    after;
         }
         else if( shared_ptr<New> n = dynamic_pointer_cast< New >(expression) )

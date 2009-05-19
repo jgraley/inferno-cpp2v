@@ -907,7 +907,7 @@ private:
         {
             shared_ptr<Call> c(new Call);
             c->function = hold_expr.FromRaw(Fn);
-            CollectArgs( &(c->operands), Args, NumArgs );
+            CollectArgs( &(c->arguments), Args, NumArgs );
             return hold_expr.ToRaw( c );
         }
         
@@ -1626,7 +1626,7 @@ private:
             // Build a call to the constructor with supplied args
             shared_ptr<Call> call(new Call);
             call->function = lu;
-            CollectArgs( &(call->operands), Args, NumArgs );
+            CollectArgs( &(call->arguments), Args, NumArgs );
             
             // Get the constructor whose init list we're adding to (may need to start a
             // new compound statement)
