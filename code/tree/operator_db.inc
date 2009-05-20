@@ -1,60 +1,61 @@
+// Not a header file - this should be included wherever a list of info about 
+// all the operators is required - if any of INFIX, PREFIX, POSTFIX are defined
+// they are invoked for each operator with pertinent info in the parameters 
+
+// save typing by defining any macros not yet defined
 #ifndef PREFIX
-#define PREFIX(TOK, TEXT, NODE, ASS, BASE)
+#define PREFIX(TOK, TEXT, NODE, BASE)
 #endif
-
 #ifndef POSTFIX
-#define POSTFIX(TOK, TEXT, NODE, ASS, BASE)
+#define POSTFIX(TOK, TEXT, NODE, BASE)
+#endif
+#ifndef INFIX
+#define INFIX(TOK, TEXT, NODE, BASE)
 #endif
 
-#ifndef BINARY
-#define BINARY(TOK, TEXT, NODE, ASS, BASE)
-#endif
+/*
+Syntax  Clang enum           Text   Inferno node          Intermediate          */
+PREFIX(amp                 , "&",   AddressOf,            Operator )
+INFIX(amp                  , "&",   BitwiseAnd,           Bitwise )
+INFIX(ampamp               , "&&",  LocicalAnd,           Logical )
+INFIX(ampequal             , "&=",  AssignmentBitwiseAnd, AssignmentOperator )
+INFIX(star                 , "*",   Multiply,             Arithmetic )
+PREFIX(star                , "*",   Dereference,          Operator )
+INFIX(starequal            , "*=",  AssignmentMultiply,   AssignmentOperator )
+INFIX(plus                 , "+",   Add,                  Arithmetic )
+PREFIX(plusplus            , "++",  PreIncrement,         AssignmentOperator )
+POSTFIX(plusplus           , "++",  PostIncrement,        AssignmentOperator )
+INFIX(plusequal            , "+=",  AssignmentAdd,        AssignmentOperator )
+PREFIX(minus               , "-",   Negate,               Arithmetic )
+INFIX(minus                , "-",   Subtract,             Arithmetic )
+PREFIX(minusminus          , "--",  PreDecrement,         AssignmentOperator )
+POSTFIX(minusminus         , "--",  PostDecrement,        AssignmentOperator )
+INFIX(minusequal           , "-=",  AssignmentSubtract,   AssignmentOperator )
+PREFIX(tilde               , "~",   BitwiseNot,           Bitwise )
+PREFIX(exclaim             , "!",   LogicalNot,           Bitwise )
+INFIX(exclaimequal         , "!=",  NotEqual,             Comparison )
+INFIX(slash                , "/",   Divide,               Arithmetic )
+INFIX(slashequal           , "/=",  AssignmentDivide,     AssignmentOperator )
+INFIX(percent              , "%",   Modulo,               Arithmetic )
+INFIX(percentequal         , "%=",  AssignmentModulo,     AssignmentOperator )
+INFIX(less                 , "<",   Less,                 Comparison )
+INFIX(lessless             , "<<",  ShiftLeft,            Shift )
+INFIX(lessequal            , "<=",  LessOrEqual,          Comparison )
+INFIX(lesslessequal        , "<<=", AssignmentShiftLeft,  AssignmentOperator )
+INFIX(greater              , ">",   Greater,              Comparison )
+INFIX(greatergreater       , ">>",  ShiftRight,           Shift )
+INFIX(greaterequal         , ">=",  GreaterOrEqual,       Comparison )
+INFIX(greatergreaterequal  , ">>=", AssignmentShiftRight, AssignmentOperator )
+INFIX(caret                , "^",   Eor,                  Bitwise )
+INFIX(caretequal           , "^=",  AssignmentEor,        AssignmentOperator )
+INFIX(pipe                 , "|",   BitwiseOr,            Bitwise )
+INFIX(pipepipe             , "||",  LogicalOr,            Logical )
+INFIX(pipeequal            , "|=",  AssignmentBitwiseOr,  AssignmentOperator )
+INFIX(equal                , "=",   Assign,               Operator )
+INFIX(equalequal           , "==",  Equal,                Comparison )
+INFIX(comma                , ",",   Comma,                Operator ) 
 
-#ifndef ALTBIN
-#define ALTBIN(TOK, NODE, ASS)
-#endif
-
-PREFIX(amp                  , "&",   AddressOf, NonAssignment, Operator )
-BINARY(amp                  , "&",   BitwiseAnd, NonAssignment, Bitwise )
-BINARY(ampamp               , "&&",  LocicalAnd, NonAssignment, Logical )
-ALTBIN(ampequal             ,        BitwiseAnd, Assignment )
-BINARY(star                 , "*",   Multiply, NonAssignment, Arithmetic )
-PREFIX(star                 , "*",   Dereference, NonAssignment, Operator )
-ALTBIN(starequal            ,        Multiply, Assignment )
-BINARY(plus                 , "+",   Add, NonAssignment, Arithmetic )
-PREFIX(plusplus             , "++",  PreIncrement, Assignment, Arithmetic )
-POSTFIX(plusplus            , "++",  PostIncrement, Assignment, Arithmetic )
-ALTBIN(plusequal            ,        Add, Assignment )
-PREFIX(minus                , "-",   Negate, NonAssignment, Arithmetic )
-BINARY(minus                , "-",   Subtract, NonAssignment, Arithmetic )
-PREFIX(minusminus           , "--",  PreDecrement, Assignment, Arithmetic )
-POSTFIX(minusminus          , "--",  PostDecrement, Assignment, Arithmetic )
-ALTBIN(minusequal           ,        Subtract, Assignment )
-PREFIX(tilde                , "~",   BitwiseNot, NonAssignment, Bitwise )
-PREFIX(exclaim              , "!",   LogicalNot, NonAssignment, Bitwise )
-BINARY(exclaimequal         , "!=",  NotEqual, NonAssignment, Comparison )
-BINARY(slash                , "/",   Divide, NonAssignment, Arithmetic )
-ALTBIN(slashequal           ,        Divide, Assignment )
-BINARY(percent              , "%",   Modulo, NonAssignment, Arithmetic )
-ALTBIN(percentequal         ,        Modulo, Assignment )
-BINARY(less                 , "<",   Less, NonAssignment, Comparison )
-BINARY(lessless             , "<<",  ShiftLeft, NonAssignment, Shift )
-BINARY(lessequal            , "<=",  LessOrEqual, NonAssignment, Comparison )
-ALTBIN(lesslessequal        ,        ShiftLeft, Assignment )
-BINARY(greater              , ">",   Greater, NonAssignment, Comparison )
-BINARY(greatergreater       , ">>",  ShiftRight, NonAssignment, Shift )
-BINARY(greaterequal         , ">=",  GreaterOrEqual, NonAssignment, Comparison )
-ALTBIN(greatergreaterequal  ,        ShiftRight, Assignment )
-BINARY(caret                , "^",   Eor, NonAssignment, Bitwise )
-ALTBIN(caretequal           ,        Eor, Assignment )
-BINARY(pipe                 , "|",   BitwiseOr, NonAssignment, Bitwise )
-BINARY(pipepipe             , "||",  LogicalOr, NonAssignment, Logical )
-ALTBIN(pipeequal            ,        BitwiseOr, Assignment )
-BINARY(equal                , "",    Assign, Assignment, Operator )
-BINARY(equalequal           , "==",  Equal, NonAssignment, Comparison )
-BINARY(comma                , ",",   Comma, NonAssignment, Operator ) 
-
+// save typing by undefining macros
 #undef PREFIX
 #undef POSTFIX
-#undef BINARY
-#undef ALTBIN
+#undef INFIX
