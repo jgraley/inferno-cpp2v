@@ -478,14 +478,6 @@ struct Aggregate : Expression
     Sequence<Expression> operands; 
 };
 
-// Property to indicate whether an operator is an assignment operator
-// or not TODO get rid of this and just make assignmant operators 
-// be differnt nodes. This is clunky and of little benefit since
-// we'll rarely validly wildcard it.
-struct AnyAssignment : Property { NODE_FUNCTIONS };
-struct Assignment : AnyAssignment { NODE_FUNCTIONS };
-struct NonAssignment : AnyAssignment { NODE_FUNCTIONS };
-
 // Intermediate for an operator with operands and an indication
 // of whether it's an assignment operator. TODO maybe fix the number
 // of operands for binop and unop categories instead of Sequence.
@@ -493,7 +485,6 @@ struct Operator : Expression
 {
     NODE_FUNCTIONS
     Sequence<Expression> operands; 
-    SharedPtr<AnyAssignment> assign; // write result back to left
 };
 
 // Intermendiate categories of operators. TODO not sure if this
@@ -503,12 +494,13 @@ struct Logical : Operator { NODE_FUNCTIONS };
 struct Arithmetic : Operator { NODE_FUNCTIONS };
 struct Shift : Operator { NODE_FUNCTIONS };
 struct Comparison : Operator { NODE_FUNCTIONS };
+struct AssignmentOperator : Operator { NODE_FUNCTIONS };
 
 // Use an include file to generate nodes for all the actual operatos based on
 // contents of operator_db.inc
-#define PREFIX(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE { NODE_FUNCTIONS };
-#define POSTFIX(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE { NODE_FUNCTIONS };
-#define BINARY(TOK, TEXT, NODE, ASS, BASE) struct NODE : BASE { NODE_FUNCTIONS };
+#define PREFIX(TOK, TEXT, NODE, BASE) struct NODE : BASE { NODE_FUNCTIONS };
+#define POSTFIX(TOK, TEXT, NODE, BASE) struct NODE : BASE { NODE_FUNCTIONS };
+#define INFIX(TOK, TEXT, NODE, BASE) struct NODE : BASE { NODE_FUNCTIONS };
 #include "operator_db.inc"
 
 // Operator that operates on data types as parameters. Where either is allowed

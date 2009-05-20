@@ -848,8 +848,7 @@ private:
             shared_ptr<Operator> o = shared_ptr<Operator>();            
             switch( Kind )
             {            
-#define BINARY(TOK, TEXT, NODE, ASS, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); o->assign=shared_ptr<ASS>( new ASS ); break;
-#define ALTBIN(TOK, NODE, ASS) BINARY(TOK, "", NODE, ASS, 0)
+#define INFIX(TOK, TEXT, NODE, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); break;
 #include "tree/operator_db.inc"
             }
             ASSERT( o );
@@ -865,7 +864,7 @@ private:
             
             switch( Kind )
             {
-#define POSTFIX(TOK, TEXT, NODE, ASS, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); o->assign=shared_ptr<ASS>( new ASS ); break;
+#define POSTFIX(TOK, TEXT, NODE, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); break;
 #include "tree/operator_db.inc"
             }
             ASSERT( o );
@@ -880,7 +879,7 @@ private:
             
             switch( Kind )
             {
-#define PREFIX(TOK, TEXT, NODE, ASS, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); o->assign=shared_ptr<ASS>( new ASS ); break;
+#define PREFIX(TOK, TEXT, NODE, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); break;
 #include "tree/operator_db.inc"
             }
             ASSERT( o );
@@ -1284,7 +1283,6 @@ private:
             if( OpKind == clang::tok::arrow )  // Base->Member
             {            
                 shared_ptr<Dereference> ou( new Dereference );
-                ou->assign = shared_new<NonAssignment>();                
                 ou->operands.push_back( hold_expr.FromRaw( Base ) );
                 a->base = ou;
             }
@@ -1435,7 +1433,6 @@ private:
                 shared_ptr<Instance> lasto( dynamic_pointer_cast<Instance>(lastd) );
                 ASSERT(lasto && "unexpected kind of declaration inside an enum");
                 shared_ptr<Add> inf( new Add );
-                inf->assign = shared_new<NonAssignment>();
                 shared_ptr<Expression> ei = lasto->identifier;
                 inf->operands.push_back( ei );
                 inf->operands.push_back( CreateNumericConstant( 1 ) );
