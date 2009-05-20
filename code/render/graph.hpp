@@ -103,21 +103,21 @@ public:
     string Colour( shared_ptr<Node> n )
     {
         if( dynamic_pointer_cast<Declaration>(n) )
-            return "cyan";                     
+            return "chocolate1";                     
         else if( dynamic_pointer_cast<Type>(n) )
-            return "skyblue";                     
+            return "plum";                     
         else if( dynamic_pointer_cast<Literal>(n) )
-            return "orange";                     
-        else if( dynamic_pointer_cast<Label>(n) )
-            return "purple";                     
+            return "cyan";                     
         else if( dynamic_pointer_cast<Expression>(n) )
-            return "yellow";                     
+            return "seagreen1";                     
         else if( dynamic_pointer_cast<Statement>(n) )
-            return "green";                     
+            return "gold";                     
         else if( dynamic_pointer_cast<Property>(n) )
-            return "white";                     
+            return "khaki";                     
+        else if( dynamic_pointer_cast<Program>(n) )
+            return "lemonchiffon4";                     
         else
-            return "grey";                     
+            return "white";                     
     }
     
     string DoNode( shared_ptr<Node> n )
