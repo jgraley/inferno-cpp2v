@@ -113,7 +113,7 @@ private:
         };
         
         // Extend tree so we can insert sub statements at the same level as the label
-        struct ParseLabelTarget : LabelTarget
+        struct ParseLabel : Label
         {
             shared_ptr<Statement> sub;
         };
@@ -141,7 +141,7 @@ private:
         RCHold<Expression, ExprTy *> hold_expr;
         RCHold<Statement, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
-        RCHold<Label, void *> hold_label;
+        RCHold<LabelIdentifier, void *> hold_label_identifier;
         RCHold<Node, CXXScopeTy *> hold_scope;
         IdentifierTracker ident_track;
         shared_ptr<Node> global_scope;
@@ -432,7 +432,7 @@ private:
             return ti;
         }
         
-        shared_ptr<AnyLabelIdentifier> CreateLabelIdentifier( clang::IdentifierInfo *ID )
+        shared_ptr<LabelIdentifier> CreateLabelIdentifier( clang::IdentifierInfo *ID )
         {
             shared_ptr<LabelIdentifier> li( new LabelIdentifier );
             li->name = ID->getName();
@@ -535,7 +535,7 @@ private:
             TRACE("%s %p %p\n", ID->getName(), t.get(), ID );            
             return t;
         }
-
+/*
         shared_ptr<Label> CreateLabelNode( clang::IdentifierInfo *ID )
         { 
             shared_ptr<Label> l(new Label);            
@@ -545,7 +545,7 @@ private:
             TRACE("%s %p %p\n", ID->getName(), l.get(), ID );            
             return l;
         }
-        
+*/        
         shared_ptr<Declaration> FindExistingDeclaration( clang::Scope *S, clang::Declarator &D )
         {
             // See if we already have this object in the current scope, or specified scope if Declarator has one
@@ -929,7 +929,7 @@ private:
             s->statements.push_back( st );
                 
             // Flatten the "sub" statements of labels etc
-            if( shared_ptr<ParseLabelTarget> plm = dynamic_pointer_cast<ParseLabelTarget>( st ) )
+            if( shared_ptr<ParseLabel> plm = dynamic_pointer_cast<ParseLabel>( st ) )
                 PushStmt( s, plm->sub );   
             else if( shared_ptr<ParseCase> pc = dynamic_pointer_cast<ParseCase>( st ) )
                 PushStmt( s, pc->sub );   
@@ -958,14 +958,21 @@ private:
             return ToStmt( d );
         }
         
+        // Create a label identifier if there isn't already one with the same name (TODO scopes?)
+        shared_ptr<LabelIdentifier> MaybeCreateLabelIdentifier( clang::IdentifierInfo *II )
+        {          
+            if( !(II->getFETokenInfo<void *>()) )                        
+                II->setFETokenInfo( hold_label_identifier.ToRaw( CreateLabelIdentifier( II ) ) );
+            
+            return hold_label_identifier.FromRaw( II->getFETokenInfo<void *>() );            
+        }
+        
         virtual StmtResult ActOnLabelStmt(clang::SourceLocation IdentLoc, clang::IdentifierInfo *II,
                                           clang::SourceLocation ColonLoc, StmtTy *SubStmt) 
         {
-            if( !(II->getFETokenInfo<void *>()) )                        
-                II->setFETokenInfo( hold_label.ToRaw( CreateLabelNode( II ) ) );
-            
-            shared_ptr<ParseLabelTarget> l( new ParseLabelTarget );
-            l->label = hold_label.FromRaw( II->getFETokenInfo<void *>() );
+            shared_ptr<ParseLabel> l( new ParseLabel );
+            l->access = shared_new<Private>();
+            l->identifier = MaybeCreateLabelIdentifier(II);
             l->sub = hold_stmt.FromRaw( SubStmt );
             return hold_stmt.ToRaw( l );
         }
@@ -974,11 +981,8 @@ private:
                                          clang::SourceLocation LabelLoc,
                                          clang::IdentifierInfo *LabelII) 
         {
-            if( !(LabelII->getFETokenInfo<void *>()) )                        
-                LabelII->setFETokenInfo( hold_label.ToRaw( CreateLabelNode( LabelII ) ) );
-
             shared_ptr<Goto> g( new Goto );
-            g->destination = hold_label.FromRaw( LabelII->getFETokenInfo<void *>() )->identifier;
+            g->destination = MaybeCreateLabelIdentifier(LabelII);
             return hold_stmt.ToRaw( g );
         }
         
@@ -994,10 +998,8 @@ private:
         virtual ExprResult ActOnAddrLabel(clang::SourceLocation OpLoc, clang::SourceLocation LabLoc,
                                           clang::IdentifierInfo *LabelII)  // "&&foo"
         {                                 
-            if( !(LabelII->getFETokenInfo<void *>()) )                        
-                LabelII->setFETokenInfo( hold_label.ToRaw( CreateLabelNode( LabelII ) ) );
-
-            return hold_expr.ToRaw( hold_label.FromRaw( LabelII->getFETokenInfo<void *>() )->identifier );
+            // TODO doesn't && meaning label-as-variable conflict with C++0x right-reference thingy?
+            return hold_expr.ToRaw( MaybeCreateLabelIdentifier(LabelII) );
         }
         
         virtual StmtResult ActOnIfStmt(clang::SourceLocation IfLoc, ExprTy *CondVal,

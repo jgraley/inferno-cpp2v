@@ -226,6 +226,11 @@ struct AnyLabelIdentifier : Identifier,
 struct LabelIdentifier : AnyLabelIdentifier,
                          Named { NODE_FUNCTIONS };
 
+// General note about identifiers: in a valid program tree, there should
+// be *one* Declaration node that points to the identifier and serves to 
+// delcare it. There should be 0 or more "users" that point to the
+// identifier. 
+
 // Property for whether a member function has been declared as virtual.
 // We will add pure as an option here too. 
 struct AnyVirtual : Property { NODE_FUNCTIONS };
@@ -457,10 +462,9 @@ struct Class : InheritanceRecord { NODE_FUNCTIONS };
 //////////////////////////// Expressions ////////////////////////////
 
 // Declaration of a label for switch, goto etc.
-// The label node is a declaration and goes into a statement scope. It points
-// to a LabelIdentifier, and all usages of the type actually point to the
-// LabelIdentifier.
-// TODO consider making this an object, STATIC and void * type
+// This node represents a label such as mylabel: 
+// It serves to declare the label; the identifier should be 
+// used for references.
 struct Label : Declaration
 {
     NODE_FUNCTIONS
@@ -610,13 +614,6 @@ struct Return : Statement
 {
     NODE_FUNCTIONS
     SharedPtr<Expression> return_value;
-};
-
-// A label as it appears in code, followed by a :
-struct LabelTarget : Statement
-{
-    NODE_FUNCTIONS
-    SharedPtr<Label> label; // TODO these should be function scope
 };
 
 // A goto statement, inferno tree supports goto-a-variable because
