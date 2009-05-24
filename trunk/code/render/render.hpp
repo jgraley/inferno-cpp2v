@@ -593,6 +593,8 @@ private:
             
             s += ";\n";
         }
+        else if( shared_ptr<Label> l = dynamic_pointer_cast<Label>(declaration) )
+            return RenderIdentifier(l->identifier) + ":\n"; // no ; after a label        
         else
             s += ERROR_UNSUPPORTED(declaration);
             
@@ -619,12 +621,10 @@ private:
             return RenderOperand(e) + sep;
         else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(statement) )
             return "return " + RenderOperand(es->return_value) + sep;
-        else if( shared_ptr<LabelTarget> l = dynamic_pointer_cast<LabelTarget>(statement) )
-            return RenderIdentifier(l->label->identifier) + ":\n"; // no ; after a label
         else if( shared_ptr<Goto> g = dynamic_pointer_cast<Goto>(statement) )
         {
-            if( shared_ptr<Label> l = dynamic_pointer_cast< Label >(g->destination) )
-                return "goto " + RenderIdentifier(l->identifier) + sep;  // regular goto
+            if( shared_ptr<LabelIdentifier> li = dynamic_pointer_cast< LabelIdentifier >(g->destination) )
+                return "goto " + RenderIdentifier(li) + sep;  // regular goto
             else
                 return "goto *" + RenderOperand(g->destination) + sep; // goto-a-variable (GCC extension)
         }
