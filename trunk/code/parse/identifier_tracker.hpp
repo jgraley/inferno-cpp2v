@@ -8,7 +8,6 @@
 // Semantic.
 class DeclSpec;
 class ObjCDeclSpec;
-class clang::Declarator;
 class AttributeList;
 struct FieldDeclarator;
 // Parse.

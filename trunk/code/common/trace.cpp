@@ -2,6 +2,7 @@
 #include <boost/assert.hpp>
 #include <stdarg.h>
 #include "read_args.hpp"
+#include <string.h>
 
 bool Tracer::continuation = false;
 

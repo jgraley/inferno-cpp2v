@@ -365,7 +365,6 @@ private:
                    after;
         else
             return ERROR_UNSUPPORTED(expression);
-        TRACE("ok\n");
     }
     
     string RenderAccess( shared_ptr<AccessSpec> access )
