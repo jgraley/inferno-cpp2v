@@ -16,13 +16,16 @@ CLANG_URL ?= http://llvm.org/svn/llvm-project/cfe/trunk
 # Check out llvm and clang 
 #
 # Patches:
-#  Remove PlistDiagnostics.cpp that we don't need and doesn't seem to compile
+# - Remove PlistDiagnostics.cpp that we don't need and doesn't seem to compile
+# - Remove -no-rtti from clang parser makefile - we do use RTTI and G++ 4.3.3 doesn't 
+#   like linking an RTTI subclass of a non-RTTI base class.
 get_libs : makefile
 	rm -rf llvm
 	svn checkout --revision $(LLVM_REVISION) $(LLVM_URL) llvm
 	cd llvm; ./configure
 	cd llvm/tools; svn checkout --revision $(CLANG_REVISION) $(CLANG_URL) clang
 	rm llvm/tools/clang/lib/Driver/PlistDiagnostics.cpp
+	./kill_no_rtti.sh llvm/tools/clang/lib/*/Makefile
 								
 #
 # Compile llvm and clang sources

@@ -1,6 +1,7 @@
 
 #include "read_args.hpp"
 #include <string>
+#include <stdlib.h>
 
 std::string ReadArgs::infile;
 std::string ReadArgs::outfile;
