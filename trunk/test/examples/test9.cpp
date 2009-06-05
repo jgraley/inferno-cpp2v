@@ -20,3 +20,15 @@ int main()
     x += *(s.a2 + 4); 
     return x;
 }
+
+struct Ohnoes;
+
+struct Recurse
+{
+	Ohnoes *p;
+} fg;
+
+struct Ohnoes
+{
+	Recurse *p;
+} gf;

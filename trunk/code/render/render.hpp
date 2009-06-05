@@ -11,6 +11,7 @@
 #include "helpers/walk.hpp"
 #include "helpers/misc.hpp"
 #include "helpers/scope.hpp"
+#include "sort_decls.hpp"
 
 #include "clang/Parse/DeclSpec.h"
 
@@ -38,9 +39,10 @@ public:
         // Parse can only work on a whole program
         program = dynamic_pointer_cast<Program>(p);
         ASSERT( program );
-    
         AutoPush< shared_ptr<Node> > cs( scope_stack, program );
-        string s = RenderSequence( *program, ";\n", true ); // gets the .hpp stuff directly
+              
+        string s = RenderDeclarationCollection( *program, ";\n", true ); // gets the .hpp stuff directly
+    
         s += deferred_decls; // these could go in a .cpp file
         
         if( ReadArgs::outfile.empty() )
@@ -501,7 +503,8 @@ private:
                      isfunc );
     }
     
-    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, shared_ptr<AccessSpec> *access = NULL, bool showtype = true )
+    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, shared_ptr<AccessSpec> *access = NULL, 
+                              bool showtype = true, bool force_incomplete = false )
     {
         TRACE();
         string s;
@@ -564,7 +567,7 @@ private:
             // Name of the record
             s += " " + RenderIdentifier(r->identifier);
             
-            if( dynamic_pointer_cast<Complete>(r->complete) )
+            if( dynamic_pointer_cast<Complete>(r->complete) && !force_incomplete )
             {
                 // Base classes
                 if( shared_ptr<InheritanceRecord> ir = dynamic_pointer_cast< InheritanceRecord >(declaration) )
@@ -586,7 +589,7 @@ private:
                 // Contents
                 AutoPush< shared_ptr<Node> > cs( scope_stack, r );
                 s += "\n{\n" +
-                     RenderSequence( r->members, sep2, true, a, showtype ) +
+                     RenderDeclarationCollection( r->members, sep2, true, a, showtype ) +
                      "}";
             }
             
@@ -689,7 +692,7 @@ private:
         }
         return s;
     }
-
+    
     string RenderOperandSequence( Sequence<Expression> spe, 
                                   string separator, 
                                   bool seperate_last )
@@ -704,6 +707,32 @@ private:
             s += RenderOperand( pe ) + sep;
         }
         return s;
+    }
+    
+    string RenderDeclarationCollection( Sequence<Declaration> sd, 
+			                            string separator, 
+			                            bool seperate_last, 
+			                            shared_ptr<AccessSpec> init_access = shared_ptr<AccessSpec>(),
+			                            bool showtype=true )
+    {
+        TRACE();
+        
+        
+        // Uncomment one of these to stress the sorter
+        //sd = ReverseDecls( sd );
+        //sd = JumbleDecls( sd );
+        
+        Sequence<Declaration> sorted = SortDecls( sd, false );          
+        
+        string s;
+        // Emit an incomplete for each record
+        for( int i=0; i<sorted.size(); i++ )
+            if( shared_ptr<Record> r = dynamic_pointer_cast<Record>(sorted[i]) ) // is a record
+                if( !dynamic_pointer_cast<Enum>(r) ) // but not an enum 
+                    s += RenderDeclaration( r, separator, init_access ? &init_access : NULL, showtype, true );
+        
+        s += RenderSequence( sorted, separator, seperate_last, init_access, showtype );
+        return s;        
     }
 };
 

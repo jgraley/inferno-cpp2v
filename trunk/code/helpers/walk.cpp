@@ -12,7 +12,7 @@ bool Walk::IsValid()
     return f.index < f.children.size();                      
 }
 
-void Walk::Iterate()
+void Walk::AdvanceOver()
 {
     Frame &f = state.top();
     if( state.empty() )
@@ -23,7 +23,7 @@ void Walk::Iterate()
         Pop();
         if( state.empty() )
             return;
-        Iterate();
+        AdvanceOver();
         return;
     }
 
@@ -126,9 +126,9 @@ void Walk::Advance()
     if( IsValid() && Get() )
         Push( Get() );
     else
-        Iterate();
+        AdvanceOver();
                 
     while( !IsValid() )
-        Iterate();        
+        AdvanceOver();        
 }
 

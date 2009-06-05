@@ -15,7 +15,7 @@ using namespace std;
 using namespace boost;
 
 // TODO use BOOST_FOREACH when cygwin boost gets past rev 1.33
-// For now, use my rubbish version
+// For now, use my rubbish version. Use as in FOREACH( i, container ) {}
 #define FOREACH(M, C) \
     if( int __i=1 ) \
         for( bool __d = true; \

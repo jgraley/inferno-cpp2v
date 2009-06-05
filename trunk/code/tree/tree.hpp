@@ -345,19 +345,19 @@ struct Array : Type
     SharedPtr<Initialiser> size; // Uninitialised if not given eg []
 };
 
-// A pointer to objects of some type, as specified.
-struct Pointer : Type
+// Intermediate for indirect access to some type as specified
+// (basically, pointers and references)
+struct Indirection : Type
 {
     NODE_FUNCTIONS
-    SharedPtr<Type> destination;
+    SharedPtr<Type> destination;	
 };
 
-// A C++ reference to objects of some type, as specified.
-struct Reference : Type
-{
-    NODE_FUNCTIONS
-    SharedPtr<Type> destination;
-};
+// A C/C++ pointer
+struct Pointer : Indirection { NODE_FUNCTIONS };
+
+// A C++ reference
+struct Reference : Indirection { NODE_FUNCTIONS };
 
 // The pseudo-type void, disallowed in some circumstances as per C.
 struct Void : Type { NODE_FUNCTIONS };
