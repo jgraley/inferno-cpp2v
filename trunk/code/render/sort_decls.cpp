@@ -73,7 +73,7 @@ Sequence<Declaration> SortDecls( Sequence<Declaration> c, bool ignore_indirectio
 		    if( !a_has_deps )
 		        break;
 		}
-		ASSERT( ai != c.end() )("failed to find a decl to add without dependency issues");
+		ASSERT( ai != c.end() );//("failed to find a decl to add without dependencies");
 		s.push_back(*ai);
 		c.erase(ai);
 		//TRACE("%d %d\n", s.size(), c.size() );
