@@ -15,7 +15,6 @@ class Walk
     SharedPtr<Node> root;
     
     bool IsValid();
-    void Iterate();
     void Push( shared_ptr<Node> n );
     void Pop();
 
@@ -26,6 +25,7 @@ public:
     GenericSharedPtr *GetGeneric();
     shared_ptr<Node> Get();
     string GetPathString();
+    void AdvanceOver(); 
     void Advance();
 };
 
