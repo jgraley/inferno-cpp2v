@@ -722,7 +722,7 @@ private:
         //sd = ReverseDecls( sd );
         //sd = JumbleDecls( sd );
         
-        Sequence<Declaration> sorted = SortDecls( sd, false );          
+        Sequence<Declaration> sorted = SortDecls( sd, true );          
         
         string s;
         // Emit an incomplete for each record
