@@ -4,7 +4,7 @@
 int array[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 int *p;
 
-struct 
+static struct 
 {
     int a2[6];
 } s;
@@ -26,9 +26,11 @@ struct Ohnoes;
 struct Recurse
 {
 	Ohnoes *p;
-} fg;
+};
 
 struct Ohnoes
 {
 	Recurse *p;
-} gf;
+};
+
+typedef int v4si __attribute__ ((vector_size (16)));

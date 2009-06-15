@@ -1,4 +1,4 @@
-struct { int m1; } o1;
+static struct { int m1; } o1;
 struct s4 { int m4; };
 //struct s4 o4; TODO inferno generates a seperate "s4" identifier node for this, which is totally wrong, it should find the existing one! 
 s4 o5;

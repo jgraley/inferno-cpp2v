@@ -203,8 +203,9 @@ int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNod
 
 shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *II, shared_ptr<Node> iscope, bool recurse )
 {
+    ASSERT(II);
     shared_ptr<Node> n = TryGet( II, iscope, recurse );
-    ASSERT(n.get() && "This decl didn't get pushed??"); 
+    ASSERT(n.get())("Decl not found : ")(II->getName()); 
     return n;
 }
 
@@ -212,7 +213,8 @@ shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *II, shared
 shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, shared_ptr<Node> iscope, bool recurse )
 {
     TRACE();
-       
+    ASSERT(II);
+    
     // Choose the required identifier via a proximity search
     shared_ptr<TNode> start;
     if( iscope )

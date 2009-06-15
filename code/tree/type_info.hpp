@@ -20,7 +20,7 @@ Provides name() and a full set of inequalities based on the set model, as follow
 <= non-strict subclass
 < strict subclass
 
-Explaination
+Explanation
 
 Inheritance has a set-theory interpretation in which each class is a set
 and subclasses are subsets. MI implies overlap between the superclasses.
@@ -32,19 +32,12 @@ be disjoint or partially overlapping, in which case all inequalities
 return false.
 */
 
-
-#define TYPE_INFO_FUNCTION \
-    virtual bool IsDynamicMatchVirtual( const TypeInfo::TypeBase *source_architype ) const \
-    { \
-        return TypeInfo::IsDynamicMatchConcrete( this, source_architype ); \
-    }
-
 class TypeInfo 
 {
 public:
     struct TypeBase
     {   
-        TYPE_INFO_FUNCTION
+    	virtual bool IsDynamicMatchVirtual( const TypeInfo::TypeBase *source_architype ) const = 0;
         virtual ~TypeBase() {}
     };
 
@@ -53,7 +46,7 @@ private:
     
 public:
     template< class TARGET_TYPE >    
-    static inline bool IsDynamicMatchConcrete( const TARGET_TYPE *target_architype, const TypeBase *source_architype ) 
+    static inline bool IsDynamicMatchStatic( const TARGET_TYPE *target_architype, const TypeBase *source_architype ) 
     { 
         (void)target_architype; // don't care about value of architypes; just want the type
         return !!dynamic_cast<const TARGET_TYPE *>(source_architype); 
@@ -115,6 +108,14 @@ public:
         return s;
     }
 };
+
+#define TYPE_INFO_FUNCTION \
+	private: friend class TypeInfo; \
+    virtual bool IsDynamicMatchVirtual( const TypeInfo::TypeBase *source_architype ) const \
+    { \
+        return TypeInfo::IsDynamicMatchStatic( this, source_architype ); \
+    } \
+    public:
 
 #endif
 

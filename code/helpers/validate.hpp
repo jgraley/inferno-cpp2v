@@ -15,7 +15,7 @@ public:
             
             // NULL pointers not allowed in program tree (though they are allowed in search/replace patterns)
             ASSERT( x )("Found NULL pointer in tree at ")( w.GetPathString() );
-            w.Advance(); 
+            w.AdvanceInto(); 
         }            
     }
 };

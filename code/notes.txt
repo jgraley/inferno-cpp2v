@@ -2,6 +2,8 @@
 Building LLVM/Clang
 -------------------
 
+NOTE: this knowledge is now built into the makefile, just go "make get_libs; make"
+
 LLVM directory hierarchy should be rooted in same directory as inferno-synth so you can have
 > ls
 inferno-synth/
@@ -30,5 +32,46 @@ Other issues
 
 CygWin problems running svn on command line
 Symptom: gives "app failed" dialogs on Vista, apparently silent fail on XP
-Reason: svn depends on libaprutil, which depends on libexpat0. But the latter dependency is missing
-Fix: install libexpat0 using cygwin tool ("libexpat0" under "libs")
+Reason: svn depends on libaprutil, which depends on libexpat0. But the latter 
+dependency is missing Fix: install libexpat0 using cygwin tool 
+("libexpat0" under "libs")
+
+
+General notes:
+
+SF is down or inaccessible atm. Changes so far:
+ - parser no longer generates duplicate Record nodes when it encounters forward (incomplete) decls
+ - tree no longer contains AnyComplete nodes, incompletes not stored any more
+ - slight tree reorg of Physical and Declaration, getting rid of diamond
+ - used Map instead of local nodes in parser
+ - renaming in bounders: duplicate->clone; concrete->static
+ - New eclipse 3.5 project in trunk/eclipse directory doesn't pull in llvm/clang/prototypes
+ 
+To do:
+ - Create Collection template like Sequence but unordered. 
+ - Support in bounce classes and search+replace. 
+ - Support in graph plotter, make node internals clearer
+ - Use for top level and records. Add a collection of decls to compound 
+   statements and put decls there. Maybe do not derive Declaration from 
+   Statement?
+ - Use for commutative idempotent operators
+ - Consider ways of specifying required size of Collection and Sequence, eg
+   template parameter?
+ - NOTE the above relaxes rules about implicit constructor call ordering. To 
+   fix this we would generate them explicitly in the parser, but not a 
+   priority for now  
+   
+ - Records to become types (ie anonymous). Parser to autogenerate Typedef where
+   names required.
+ - Renderer to reduce typedef(record) to named record to deal with loops
+ - Also consider loops between pure typedefs, which would require wrapping
+   with a new struct.
+      
+ - Make arrays be value objects, not auto-pointer, and put in &(myarray[0]) at
+   all usages to simulate auto-pointer behaviour
+ - Allow vector_size property to create an array node. Use std::map to remember 
+   which ones are really vectors and don't modify usages
+ - Get renderer to force vector operations to be legal by generating vector op
+   via pointer casts. Optionally use vectors directly where allowed.
+ 
+ 

@@ -6,15 +6,9 @@
 #include "clang/Basic/TokenKinds.h"
 #include "llvm/ADT/APSInt.h"
 #include "llvm/ADT/APFloat.h"
-#include "common/magic.hpp"
 #include <string>
 #include <deque>
-#include "itemise_members.hpp"
-#include "type_info.hpp"
-#include "duplicate.hpp"
 #include "generics.hpp"
-
-#define NODE_FUNCTIONS ITEMISE_FUNCTION TYPE_INFO_FUNCTION DUPLICATE_FUNCTION
 
 //TODO all these in a namespace perhaps?
 
@@ -30,10 +24,7 @@
 // inheritance dimaonds arise, Node should be derived virtually
 // (we always want the set-restricting model of inheritance in
 // the inferno tree node hierarchy).
-struct Node : Magic, 
-              TypeInfo::TypeBase, 
-              Itemiser,
-              Duplicator
+struct Node : NodeBases
 {            
     NODE_FUNCTIONS
    
@@ -75,26 +66,11 @@ struct Expression : Statement { NODE_FUNCTIONS };
 // and user-named types. 
 struct Type : virtual Node { NODE_FUNCTIONS };
 
-// Property for C++ access speficiers public, protected and private. AccessSpec
-// represents any access spec, the subsequent empty nodes specify particular
-// access specs. Inferno uses access specs for all declarations. Declarations
-// in classes are as specified, function parameters and external declarations
-// are public, all others private. It is anticipated that the access spec will
-// control generated high-level interfaces.
-struct AccessSpec : Property { NODE_FUNCTIONS };
-struct Public : AccessSpec { NODE_FUNCTIONS };
-struct Private : AccessSpec { NODE_FUNCTIONS };
-struct Protected : AccessSpec { NODE_FUNCTIONS };
-
 // A declaration specifies the creation of a type or an object from a type. 
 // We specify an access spec for all declarations and choose a default when
 // the user cannot specify. Declaration can appear where statements can and
 // also inside structs etc and at top level.
-struct Declaration : Statement
-{   
-    NODE_FUNCTIONS
-    SharedPtr<AccessSpec> access;
-};
+struct Declaration : Statement { NODE_FUNCTIONS };
 
 // The top level of a program is considered a sequence of declarations.
 // main() would typically be a function instance somewhere in this sequence.
@@ -241,8 +217,29 @@ struct Virtual : AnyVirtual
 };
 struct NonVirtual : AnyVirtual { NODE_FUNCTIONS };
 
+// Property for C++ access speficiers public, protected and private. AccessSpec
+// represents any access spec, the subsequent empty nodes specify particular
+// access specs. Inferno uses access specs for all declarations. Declarations
+// in classes are as specified, function parameters and external declarations
+// are public, all others private. It is anticipated that the access spec will
+// control generated high-level interfaces. Note that we only specify access
+// for physical things like instances. Abstract stuff like typedefs is always 
+// considered public.
+struct AccessSpec : Property { NODE_FUNCTIONS };
+struct Public : AccessSpec { NODE_FUNCTIONS };
+struct Private : AccessSpec { NODE_FUNCTIONS };
+struct Protected : AccessSpec { NODE_FUNCTIONS };
+
+// Intermediate for anything that consumes space and/or has state. Slightly 
+// wooly concept.
+struct Physical : Declaration
+{
+    NODE_FUNCTIONS
+    SharedPtr<AccessSpec> access;
+};
+
 // Property for a storage class which can apply to any instance (variable,
-// object or function) and indicates physical locaiton, allocation strategy 
+// object or function) and indicates physical location, allocation strategy 
 // and lifecycle model. Presently we allow static, member (=non-static member)
 // and auto (= non-static local). Member must also indicate virtual-ness.
 // Note that top-level static -> Static and Private. 
@@ -256,21 +253,11 @@ struct Member : StorageClass // non-static
 };
 struct Auto : StorageClass { NODE_FUNCTIONS };
 
-// Property that indicates whether some variable or object is constant.
-struct AnyConst : Property { NODE_FUNCTIONS };
-struct Const : AnyConst { NODE_FUNCTIONS };
-struct NonConst : AnyConst { NODE_FUNCTIONS }; 
+// Property that indicates whether some variable or object is constancy.
+struct Constancy : Property { NODE_FUNCTIONS };
+struct Const : Constancy { NODE_FUNCTIONS };
+struct NonConst : Constancy { NODE_FUNCTIONS }; 
 // TODO add mutable when supported by clang
-
-// Intermediate for anything that consumes space and/or has state. Slightly 
-// wooly concept but it gathers the properties that cover allocation of space 
-// and read-only/read-write rules.
-struct Physical : virtual Node
-{
-    NODE_FUNCTIONS
-    SharedPtr<AnyConst> constant; 
-    SharedPtr<StorageClass> storage;
-};
 
 // Node represents a variable/object or a function. In case of function, type is a 
 // type under Subroutine and initialiser is a Statement (or Uninitialised for a function
@@ -282,10 +269,11 @@ struct Physical : virtual Node
 // The instance node is a declaration and goes into a declaration scope. It points
 // to an InstanceIdentifier, and all usages of the instance actually point to the
 // InstanceIdentifier.
-struct Instance : Declaration,
-                  Physical
+struct Instance : Physical
 {
     NODE_FUNCTIONS
+    SharedPtr<StorageClass> storage;
+    SharedPtr<Constancy> constancy; 
     SharedPtr<Type> type;
     SharedPtr<AnyInstanceIdentifier> identifier;
     SharedPtr<Initialiser> initialiser; // NULL if uninitialised
@@ -294,12 +282,10 @@ struct Instance : Declaration,
 // Node for a base class within a class declaration, specifies another class from 
 // which to inherit
 struct InheritanceRecord;
-struct Base : Declaration
+struct Base : Physical 
 {
     NODE_FUNCTIONS
     SharedPtr<TypeIdentifier> record; // must refer to InheritanceRecord
-    // TODO virtual inheritance, treat seperately from virtual members
-    // since different thing.
 };              
 
 //////////////////////////// Anonymous Types ////////////////////////////
@@ -419,14 +405,6 @@ struct Typedef : UserType
     SharedPtr<Type> type;
 }; 
 
-// Property nodes for indicating whether a record has been forward declared
-// (incomplete) or fully declared (complete). TODO we should now be able to 
-// drop incomplete records and always use the complete version, so don't
-// need this.
-struct AnyComplete : Property { NODE_FUNCTIONS };
-struct Complete : AnyComplete { NODE_FUNCTIONS };
-struct Incomplete : AnyComplete { NODE_FUNCTIONS };
-
 // Intermediate for declaration of a record. record is generic for struct, class, union or
 // enum. We list the memebrs here as declaraions (which will be member 
 // or static) can can be variables/objects in all cases and additionally
@@ -435,9 +413,6 @@ struct Record : UserType
 {
     NODE_FUNCTIONS
     Sequence<Declaration> members;
-    
-    // TODO get rid; always refer to complete version
-    SharedPtr<AnyComplete> complete; 
 };
 
 // A union, as per Record.
@@ -452,7 +427,7 @@ struct Enum : Record { NODE_FUNCTIONS };
 struct InheritanceRecord : Record
 {
     NODE_FUNCTIONS
-    Sequence<Base> bases;
+    Sequence<Base> bases; // TODO just chuck them into Record::members?
 };
 
 // Struct and class as per InheritanceRecord
@@ -465,7 +440,7 @@ struct Class : InheritanceRecord { NODE_FUNCTIONS };
 // This node represents a label such as mylabel: 
 // It serves to declare the label; the identifier should be 
 // used for references.
-struct Label : Declaration
+struct Label : Declaration // TODO be a Statement TODO commonize with Case and Default
 {
     NODE_FUNCTIONS
     SharedPtr<AnyLabelIdentifier> identifier;
@@ -688,7 +663,7 @@ struct Case : SwitchTarget
     // in other cases, value_lo==value_hi
     SharedPtr<Expression> value_lo; // inclusive
     SharedPtr<Expression> value_hi; // inclusive
-};
+}; 
 
 // Default label in a switch statement
 struct Default : SwitchTarget { NODE_FUNCTIONS };

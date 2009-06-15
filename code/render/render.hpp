@@ -369,16 +369,16 @@ private:
             return ERROR_UNSUPPORTED(expression);
     }
     
-    string RenderAccess( shared_ptr<AccessSpec> access )
+    string RenderAccess( shared_ptr<AccessSpec> current_access )
     {
-        if( dynamic_pointer_cast<Public>( access ) )
+        if( dynamic_pointer_cast<Public>( current_access ) )
             return "public";
-        else if( dynamic_pointer_cast<Private>( access ) )
+        else if( dynamic_pointer_cast<Private>( current_access ) )
             return "private";
-        else if( dynamic_pointer_cast<Protected>( access ) )
+        else if( dynamic_pointer_cast<Protected>( current_access ) )
             return "protected";
         else
-            return ERROR_UNKNOWN("access spec"); 
+            return ERROR_UNKNOWN("current_access spec"); 
     }
     
     string RenderStorage( shared_ptr<StorageClass> st )
@@ -403,7 +403,7 @@ private:
             return ERROR_UNKNOWN("storage class");
     }
     
-    void ExtractInits( const Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
+    void ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
     {
         FOREACH( shared_ptr<Statement> s, body )
         {
@@ -428,7 +428,7 @@ private:
         
         if( showstorage )
         {
-            if( dynamic_pointer_cast<Const>(o->constant) )
+            if( dynamic_pointer_cast<Const>(o->constancy) )
                 s += "const ";
             s += RenderStorage(o->storage);
         }
@@ -499,21 +499,27 @@ private:
     {
         bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
         return dynamic_pointer_cast<Record>( scope_stack.top() ) &&
-                   ( (dynamic_pointer_cast<Static>(o->storage) && dynamic_pointer_cast<NonConst>(o->constant)) ||
+                   ( (dynamic_pointer_cast<Static>(o->storage) && dynamic_pointer_cast<NonConst>(o->constancy)) ||
                      isfunc );
     }
     
-    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, shared_ptr<AccessSpec> *access = NULL, 
+    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, shared_ptr<AccessSpec> *current_access = NULL, 
                               bool showtype = true, bool force_incomplete = false )
     {
         TRACE();
         string s;
         
-        if( access && // pointer must be supplied
-             TypeInfo(declaration->access) != TypeInfo(*access) ) // access spec must have changed
+        // Decide access spec for this declaration (explicit if physical, otherwise force to Public)
+        shared_ptr<AccessSpec> this_access = shared_new<Public>();        
+        if( shared_ptr<Physical> ph = dynamic_pointer_cast<Physical>(declaration) )
+            this_access = ph->access;
+                
+        // Now decide whether we actually need to render an access spec (ie has it changed?)
+        if( current_access && // NULL means dont ever render access specs
+            TypeInfo(this_access) != TypeInfo(*current_access) ) // current_access spec must have changed
         {
-            s += RenderAccess( declaration->access ) + ":\n";
-            *access = declaration->access;
+            s += RenderAccess( this_access ) + ":\n";
+            *current_access = this_access;
         }
                                          
         if( shared_ptr<Instance> o = dynamic_pointer_cast< Instance >(declaration) )
@@ -533,7 +539,9 @@ private:
             }
         }
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
+        {
             s += "typedef " + RenderType( t->type, RenderIdentifier(t->identifier) ) + sep;
+        }
         else if( shared_ptr<Record> r = dynamic_pointer_cast< Record >(declaration) )
         {
             shared_ptr<AccessSpec> a;
@@ -567,7 +575,7 @@ private:
             // Name of the record
             s += " " + RenderIdentifier(r->identifier);
             
-            if( dynamic_pointer_cast<Complete>(r->complete) && !force_incomplete )
+            if( !force_incomplete )
             {
                 // Base classes
                 if( shared_ptr<InheritanceRecord> ir = dynamic_pointer_cast< InheritanceRecord >(declaration) )
