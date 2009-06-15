@@ -79,4 +79,6 @@ int main( int argc, char *argv[] )
 void SelfTest()
 {
     SearchReplace::Test();
+    CommonTest();
+    GenericsTest();
 }

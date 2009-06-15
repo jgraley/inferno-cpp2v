@@ -13,7 +13,7 @@ SearchReplace::SearchReplace( shared_ptr<Node> sp,
         matches = new set<MatchSet>;
     
     ASSERT( matches );        
-}
+} 
 
 
 // Destructor tries not to leak memory lol
@@ -119,11 +119,13 @@ bool SearchReplace::IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pa
             
             for( int j=0; j<pattern_seq->size(); j++ )
             {
-                TRACE("Elt %d target ptr=%p pattern ptr=%p\n", j, x_seq->Element(j).Get().get(), pattern_seq->Element(j).Get().get());
-                if( !pattern_seq->Element(j).Get() )
+                TRACE("Elt %d target ptr=%p pattern ptr=%p\n", j,
+                		                                       (*x_seq)[j].Get().get(),
+                		                                       (*pattern_seq)[j].Get().get());
+                if( !(*pattern_seq)[j].Get() )
                     continue; // NULL is a wildcard in search patterns
                 TRACE();
-                bool match = IsMatchPattern( x_seq->Element(j).Get(), pattern_seq->Element(j).Get() );
+                bool match = IsMatchPattern( (*x_seq)[j].Get(), (*pattern_seq)[j].Get() );
                 if( !match )
                     return false;                    
             }
@@ -196,7 +198,7 @@ GenericSharedPtr *SearchReplace::Search( shared_ptr<Node> program )
         ClearKeys();
         if( IsMatchPattern( x, search_pattern ) )
             return w.GetGeneric();                            
-        w.Advance(); 
+        w.AdvanceInto(); 
     }    
     
     return NULL;
@@ -212,7 +214,7 @@ void SearchReplace::ClearPtrs( shared_ptr<Node> dest )
         if( GenericSequence *dest_seq = dynamic_cast<GenericSequence *>(dest_memb[i]) )                
         {
             for( int j=0; j<dest_seq->size(); j++ )
-                dest_seq->Element(j).Set( shared_ptr<Node>() );
+                (*dest_seq)[j].Set( shared_ptr<Node>() );
         }            
         else if( GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]) )         
         {
@@ -247,8 +249,8 @@ void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source,
 
             for( int j=0; j<source_seq->size(); j++ )
             {
-                if( !dest_seq->Element(j).Get() ) // Only over NULL!!!
-                    dest_seq->Element(j).Set( DuplicateSubtree( source_seq->Element(j).Get(), under_substitution ) );
+                if( !(*dest_seq)[j].Get() ) // Only over NULL!!!
+                    (*dest_seq)[j].Set( DuplicateSubtree( (*source_seq)[j].Get(), under_substitution ) );
             }
         }            
         else if( GenericSharedPtr *source_ptr = dynamic_cast<GenericSharedPtr *>(source_memb[i]) )         
@@ -297,7 +299,7 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool 
 
     // Make the destination node based on local_substitute if found, otherwise the source
     ASSERT( source );
-    shared_ptr<Duplicator> dup_dest = Duplicator::Duplicate( to_duplicate );
+    shared_ptr<Cloner> dup_dest = Cloner::Clone( to_duplicate );
     shared_ptr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
     ASSERT(dest);
     
@@ -463,6 +465,7 @@ void SearchReplace::Test()
     
     {        
         // topological with extra member in terget node
+        /* gone obsolete with tree changes
         shared_ptr<Label> l( new Label );
         shared_ptr<Public> p1( new Public );
         l->access = p1;
@@ -482,5 +485,6 @@ void SearchReplace::Test()
         d->access = p4;
         ASSERT( sr.IsMatchPattern( l, d ) == true );
         ASSERT( sr.IsMatchPattern( d, l ) == false );
+        */
     }
 }

@@ -75,7 +75,7 @@ public:
     /// out-of-scope, they are removed from the clang::IdentifierInfo::FETokenInfo field.
     virtual void PopScope(clang::Scope *S);
   
-    // Extract the shared_ptr for the identifier. Where the identifier is differently declared
+    // Extract the Declaration for the clang::Identifier. Where the identifier is differently declared
     // in nested scopes, we get the one that applies currently (which is the innermost one)  
     // Optionally: Can specify a C++ scope, which must match exactly (NULL, falls back to current scope)
     //             Can ask for the corresponding decl node for the found node

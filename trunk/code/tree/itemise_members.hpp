@@ -7,8 +7,11 @@
 
 using namespace std;
 
-
-extern char big_area[1024];
+// Note about multiple inheritance:
+// If Itemiser::Element is at the base of a diamond, itemiser will see it twice,
+// *even if* virtual inheritance is used. This may be a compiler big in which case the above
+// is true only for GCC4.3. Anyway, if we see it twice it will have the same address,
+// so we de-duplicate during itemise algorithm.
 
 class Itemiser
 {
@@ -24,6 +27,9 @@ public:
             {
                 unsigned ofs = (unsigned)this - (unsigned)dstart;
                 Element *wb = (Element *)(bp + ofs);
+                FOREACH( Element *x, v )
+                    if( x==wb )
+                    	return *this; // don't insert if in there already, see above
                 v.push_back( wb );
             }
             return *this;
@@ -31,7 +37,7 @@ public:
     };
     
     template< class ITEMISE_TYPE >
-    inline static vector< Itemiser::Element * > ItemiseConcrete( const ITEMISE_TYPE *itemise_architype,
+    inline static vector< Itemiser::Element * > ItemiseStatic( const ITEMISE_TYPE *itemise_architype,
                                                                  const Itemiser *itemise_object )
     {
         (void)itemise_architype; // don't care about value of architypes; just want the type
@@ -77,9 +83,11 @@ public:
 };
 
 #define ITEMISE_FUNCTION \
+	private: friend class Itemiser; \
     virtual vector< Itemiser::Element * > ItemiseVirtual( const Itemiser *itemise_object ) const  \
     { \
-        return Itemiser::ItemiseConcrete( this, itemise_object ); \
-    } 
+        return Itemiser::ItemiseStatic( this, itemise_object ); \
+    } \
+    public:
 
 #endif

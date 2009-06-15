@@ -5,7 +5,7 @@ void f()
     *(a+1);
 }
 
-char *p = "jhf";
+const char *p = "jhf";
 
 struct foo
 {

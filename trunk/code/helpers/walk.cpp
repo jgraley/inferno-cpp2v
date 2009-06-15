@@ -40,7 +40,7 @@ void Walk::Push( shared_ptr<Node> n )
         if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )                
         {
             for( int j=0; j<seq->size(); j++ )
-                f.children.push_back( &(seq->Element(j)) );
+                f.children.push_back( &( (*seq)[j] ) );
         }            
         else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )         
         {
@@ -121,7 +121,7 @@ string Walk::GetPathString()
     return s;
 }
 
-void Walk::Advance()
+void Walk::AdvanceInto()
 {
     if( IsValid() && Get() )
         Push( Get() );

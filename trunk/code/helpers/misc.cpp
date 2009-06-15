@@ -19,8 +19,12 @@ shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
 shared_ptr<UserType> GetDeclaration( shared_ptr<Program> program, shared_ptr<TypeIdentifier> id )
 {
 	Flattener<UserType> walkr(program);
+	TRACE("GetDeclaration %d\n", walkr.size());
+	ASSERT( (deque< SharedPtr<UserType> >::iterator)(walkr.begin()) !=
+			(deque< SharedPtr<UserType> >::iterator)(walkr.end()) );
 	FOREACH( shared_ptr<UserType> d, walkr )
 	{
+		TRACE("trying id of %d\n", walkr.size());
         if( id == GetIdentifier( d ) ) 
 	        return d;
 	}
@@ -54,7 +58,7 @@ shared_ptr<Instance> GetDeclaration( shared_ptr<Program> program, shared_ptr<Ins
             if( id == GetIdentifier( d ) ) 
 	            return d;
 
-	    w.Advance();
+	    w.AdvanceInto();
 	}
 	ASSERTFAIL("did not find instance declaration for identifier");
 }

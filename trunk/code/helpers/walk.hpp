@@ -26,7 +26,7 @@ public:
     shared_ptr<Node> Get();
     string GetPathString();
     void AdvanceOver(); 
-    void Advance();
+    void AdvanceInto();
 };
 
 
@@ -51,7 +51,7 @@ public:
             shared_ptr<Node> x = w.Get();
             if( shared_ptr<FIND> f = dynamic_pointer_cast< FIND >( x ) )
                 Sequence< FIND >::push_back( f );
-            w.Advance(); 
+            w.AdvanceInto(); 
         }    
     }
 };

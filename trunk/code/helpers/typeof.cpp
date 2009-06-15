@@ -9,7 +9,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
 {
     ASSERT(o);
     
-    if( shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(o) ) // object or funciton instance
+    if( shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(o) ) // object or function instance
     {        
         shared_ptr<Instance> i = GetDeclaration(program, ii);
         return i->type; 
@@ -56,7 +56,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
 }
 
 // Is this call really a constructor call? If so return the object being
-// constructoed. Otherwise, return NULL
+// constructed. Otherwise, return NULL
 shared_ptr<Expression> TypeOf::IsConstructorCall( shared_ptr<Call> call )
 {
     shared_ptr<Lookup> lf = dynamic_pointer_cast<Lookup>(call->function);            

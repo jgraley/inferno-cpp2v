@@ -30,7 +30,7 @@ public:
                 shared_ptr<Node> n = w.Get();
                 if( n )
                     s += DoNode(n);                            
-                w.Advance(); 
+                w.AdvanceInto(); 
             }
         }
         
@@ -41,7 +41,7 @@ public:
                 shared_ptr<Node> n = w.Get();
                 if( n )
                     s += DoNodeLinks(n);                            
-                w.Advance(); 
+                w.AdvanceInto(); 
             }
         }
         
@@ -158,10 +158,12 @@ public:
         vector< Itemiser::Element * > members = Itemiser::Itemise(n);
         for( int i=0; i<members.size(); i++ )
         {
-            if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )                
+            TRACE("Size %d i=%d\n", members.size(), i );
+
+        	if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )
             {
                 for( int j=0; j<seq->size(); j++ )
-                    s += DoLink( n, SeqField(i, j), seq->Element(j).Get() );
+                    s += DoLink( n, SeqField(i, j), (*seq)[j].Get() );
             }            
             else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )         
             {

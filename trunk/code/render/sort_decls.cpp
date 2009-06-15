@@ -37,7 +37,7 @@ bool IsDependOn( shared_ptr<Declaration> a, shared_ptr<Declaration> b, bool igno
         if( wa.Get() == shared_ptr<Node>(ib) ) // If we see b in *any* other cotext under a's type, there's dep.
             return true;                
                         
-        wa.Advance();
+        wa.AdvanceInto();
     }
     
     // Recurse though members of records since Inferno doesn't require scope to be remembered - so
