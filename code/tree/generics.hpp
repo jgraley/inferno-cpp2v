@@ -20,11 +20,11 @@ struct GenericSharedPtr : Itemiser::Element
 
 struct GenericContainer : virtual Itemiser::Element
 {
-	class iterator
+	struct iterator
 	{
 		// TODO const iterator and const versions of begin(), end()
 		virtual iterator &operator++(int) = 0;
-		virtual GenericSharedPtr &operator*() = 0;
+		virtual const GenericSharedPtr &operator*() = 0;
 	};
     virtual const iterator &begin() = 0;
     virtual const iterator &end() = 0;
@@ -92,7 +92,7 @@ struct Container : virtual GenericContainer, STLCONTAINER
 		    STLContainer::iterator::operator++(0);
 		    return *this;
 		}
-		virtual typename STLContainer::value_type &operator*()
+		virtual const typename STLContainer::value_type &operator*()
 		{
 			return STLContainer::iterator::operator*();
 		}
