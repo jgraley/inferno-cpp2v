@@ -825,7 +825,7 @@ private:
             shared_ptr<Operator> o = shared_ptr<Operator>();
             switch( Kind )
             {
-#define INFIX(TOK, TEXT, NODE, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); break;
+#define INFIX(TOK, TEXT, NODE, BASE, CAT) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); break;
 #include "tree/operator_db.inc"
             }
             ASSERT( o );
@@ -841,7 +841,7 @@ private:
 
             switch( Kind )
             {
-#define POSTFIX(TOK, TEXT, NODE, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); break;
+#define POSTFIX(TOK, TEXT, NODE, BASE, CAT) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); break;
 #include "tree/operator_db.inc"
             }
             ASSERT( o );
@@ -856,7 +856,7 @@ private:
 
             switch( Kind )
             {
-#define PREFIX(TOK, TEXT, NODE, BASE) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); break;
+#define PREFIX(TOK, TEXT, NODE, BASE, CAT) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); break;
 #include "tree/operator_db.inc"
             }
             ASSERT( o );

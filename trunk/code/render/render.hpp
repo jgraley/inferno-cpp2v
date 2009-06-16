@@ -284,18 +284,18 @@ private:
             return before + 
                    "alignof(" + RenderType( pot->operands[0], "" ) + ")" + 
                    after;
-#define INFIX(TOK, TEXT, NODE, BASE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
+#define INFIX(TOK, TEXT, NODE, BASE, CAT) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
            RenderOperand( no->operands[0], true ) +\
            TEXT +\
            RenderOperand( no->operands[1], true ) +\
            after;
-#define PREFIX(TOK, TEXT, NODE, BASE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
+#define PREFIX(TOK, TEXT, NODE, BASE, CAT) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
            TEXT +\
            RenderOperand( no->operands[0], true ) +\
            after;
-#define POSTFIX(TOK, TEXT, NODE, BASE) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
+#define POSTFIX(TOK, TEXT, NODE, BASE, CAT) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
     return before +\
            RenderOperand( no->operands[0], true ) +\
            TEXT +\

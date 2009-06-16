@@ -5,7 +5,7 @@
 #include "common/refcount.hpp"
 #include "common/common.hpp"
 //#include "parse/parse.hpp"  
-#include "render/render.hpp"
+#include "render/render.hpp" // TODO remove this silly dependency
 #include "common/read_args.hpp"
 #include "walk.hpp"
 #include "pass.hpp"
