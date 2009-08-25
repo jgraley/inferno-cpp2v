@@ -249,6 +249,26 @@ void f()
 }
 
 ----------------------------------------------------------------------------
+Lower references
+
+Implement references using pointers
+
+Invariant: no references
+
+Note: do this after lowering NULL because the pointers that we will generate 
+for refs don't need to support it. This is why this step is not part of the 
+cplusplus phase.
+
+@todo maybe we can turn pointers into refs instead of refs into pointers.
+
+Example output:
+
+void f( A *r ) // used to be f( A &r )
+{
+    r->Thang(); // used to be r.Thang();
+}
+
+----------------------------------------------------------------------------
 Lower pointer arithmetic
 
 Associate every pointer with an int, which begins at zero, and is then
@@ -277,27 +297,7 @@ void f()
 
 
 ----------------------------------------------------------------------------
-Lower references
-
-Implement references using pointers
-
-Invariant: no references
-
-Note: do this after lowering NULL and pointer arithmetic because the pointers
-that we will generate for refs don't need to support either of these things. 
-This is why this step is not part of the cplusplus phase.
-
-@todo maybe we can turn pointers into refs instead of refs into pointers.
-
-Example output:
-
-void f( A *r ) // used to be f( A &r )
-{
-    r->Thang(); // used to be r.Thang();
-}
-
-----------------------------------------------------------------------------
-Memberise locals
+Memberise autos
 
 Add a stack pointer for each member function in each class. It should be an 
 integer member variable big enough to represent the max recursion depth. Add
@@ -305,7 +305,7 @@ code to increment the stack pointer on entry and decrement on leaving the
 corresponding function. Add code to initialise the stack pointers to the 
 constructor function.
 
-For each local variable, move the variable to be a private class member 
+For each automatic variable, move the variable to be a private class member 
 (uniquified for the function it came from), and make it an array. Update 
 every access in the function to index the array using the function's stack 
 pointer.
@@ -360,7 +360,7 @@ class A
 ----------------------------------------------------------------------------
 Add class-level dereferencing layer
 
-For each class C add deref functionas as follows: for each object A whose address 
+For each class C add deref functions as follows: for each object A whose address 
 gets taken within C's member functions, add functions to C that forward 
 dereferenced function calls to A. So if objects a and b of class D have a function 
 footle( int x ) and we take the address of either a or b in any member function
@@ -653,7 +653,7 @@ wiring follows the object structure (imagine a small helper class with
 objects dotted around everywhere - we wouldn't want to impose a routing
 over all those objects). This also avoids differentiating the implementation
 of module instances (modulo use of dyn id primative) so no need to 
-brance module definitions. The "shift left and insert" operation 
+branch module definitions. The "shift left and insert" operation 
 disappears into wiring in HDL.
 
 Note: run-time behaviour can of course overflow the bit vector. Just have

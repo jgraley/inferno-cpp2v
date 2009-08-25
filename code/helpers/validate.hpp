@@ -20,4 +20,10 @@ public:
     }
 };
 
+// TODO
+// - NODE_FUNCTIONS must be present in all nodes
+// - no local nodes
+// - Identifiers to have exactly one decl ref and many usage refs
+
+
 #endif
