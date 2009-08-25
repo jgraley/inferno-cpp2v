@@ -1,342 +1,337 @@
-{\rtf1\ansi\ansicpg1252\deff0\deflang2057{\fonttbl{\f0\fnil\fcharset0 Courier New;}{\f1\fswiss\fcharset0 Arial;}}
-{\*\generator Msftedit 5.41.21.2507;}\viewkind4\uc1\pard\f0\fs20 (C) Copyright 2006 John Graley\par
-Available under the terms of the BSD license. \par
-\par
-Protocol phase - steps relating to communication between objects\par
-\par
-Functrinos going between objects are still unacceptable for state-out.\par
-TODO why? We\par
-therefore need to go quite low-level in this phase in terms of describing a\par
-protocol that makes the program structure look like the ends of some\par
-well-defined wires from the perspective of an object. \par
-\par
-We begin by introducing the Transaction Level Modelling concept of a channel for\par
-each functrino. Over a few steps, the channels are modified to avoid making\par
-calls into objects (instead they use SystemC's channel->module wakeup scheme)\par
-and split up into finer, more role-specific channels.\par
-\par
-We add an acknowledgement for each functrino. This is to be understood as a\par
-low-level ack that serves protocol functions: flow control and data validity\par
-marshaling. The reader may object that we have divided function calls twice\par
-now: first into call-functrino/return-functrino, then into \par
-call-request/call-ack/return-request/return-ack. But this is no different to\par
-ARM's AXI bus spec, that has avalid/aready/rvalid/rready for a read transaction.\par
-\par
-Finally, we actually insert SystemC's version of wires, the sc_signal<x>\par
-pre-defined channel. In the interests of proper correctness, we also choose now\par
-to add a notional time delay, called a "minor delay" in order to prevent objects\par
-from trying to do impossible things like toggling a wire twice simultaneously.\par
-\par
-The steps within this phase follow:\par
-\par
-----------------------------------------------------------------------------\par
-Add channels\par
-\par
-Create a new "channel" (in the SystemC TLM sense) for each sub-transaction. The\par
-channel should forward the functrino calls. The idea is that we turn functrinos\par
-into channels and then progressively modify the channels' implementation towards\par
-being like wires.\par
-\par
-Invariant: we have a presence, in the form of a channel, between communicating \par
-pairs of objects.\par
-\par
-Note: the channel implementation we create will not be stated out but instead\par
-will be converted to wires (=signals) by the protocol step(s). It will mostly \par
-be boiler-plate code.\par
-\par
-Note: changes caller and callee but trivially. Code in objects doesn't really \par
-change - just calls functrinos through the channel implementation instead of \par
-directly.\par
-\par
-Example test render (channel for functrino k(char c)):\par
-\par
-// Note: the channel implementation is just for test rendering; it doesn't \par
-// get fed into later stages.\par
-class Channel_k : public sc_interface\par
-\{\par
-    void do_functrino( char c )\par
-    \{\par
-        dest.k( c );\par
-    \}    \par
-\};\par
-\par
-----------------------------------------------------------------------------\par
-Passivate\par
-\par
-Modify the channels. Provide each with passive (call-in) 2-phase interfaces for\par
-both caller and callee. All functrinos go into the channel and the channel kicks\par
-(wakes up) the callee using an event and the callee then collects the fuctrino\par
-parameters from the channel. \par
-\par
-The passive call model is an essential step since the function call model\par
-produced in the sequential phase (state-out) will only be able to handle\par
-function calls within objects. In this phase, therefore, we must eliminate calls\par
-between objects completely. This phase removes calls that go into objects,\par
-and calls coming out of objects will be broken down into primatives that\par
-correspond to driving or polling inter-object wires.\par
-\par
-Invariant: objects do not receive incoming functrinos\par
-\par
-Note: after this step, a functrino is still used to initiate a sub-transaction,\par
-but the recipient gets an event and does a "get data" type call on the channel\par
-to get the data. We therefore rely on SystemC to convey events into objects.\par
-\par
-Note: the call into the channel to get the params is not a functrino since \par
-it goes to a communications primitive (the channel) and not an object.\par
-\par
-Note: the event mechanism should be counted, so that 2 events cause 2 wakes.\par
-This eliminates the risk of dropped events due to racing.\par
-\par
-Note: only change functrino recipients\par
-\par
-Example test render (channel for functrino k(char c)):\par
-\par
-// Note: the channel implementation is just for test rendering; it doesn't \par
-// get fed into later stages.\par
-class Channel_k : public sc_interface\par
-\{\par
-    char param_c;\par
-    \par
-    void do_functrino( char c )\par
-    \{\par
-        param_c = c;\par
-        @todo event the connected destination port\par
-    \}\par
-    \par
-    void get_data( char &c )\par
-    \{\par
-        return c;\par
-    \}\par
-\};\par
-\par
-do_functrino() replaces f_data() (for call-functrinos) or f_return() (for\par
-return-functrinos). \par
-\par
-----------------------------------------------------------------------------\par
-Make functrinos rendez-vous\par
-\par
-For each channel, add an "ack" channel which goes the in the other direction\par
-and has no data (same passive model). The recipient should ack immediately after\par
-receiving the event and the originator should wait for the ack.\par
-\par
-The ack serves two purposes: (1) marshaling of interactions to ensure that\par
-events are not sent too rapidly for the recipient to handle them and (2) to\par
-ensure that there is a well defined period of time for the recipient to read the\par
-accompanying data.\par
-\par
-This model is a rendez-vous model. The rendez-vous takes place for a finite\par
-period of time beginning at receipt of the request and ending when the ack is\par
-sent. A single request-ack cycle is a sub-transaction and the accompanying data\par
-is valid for the recipient during this period.\par
-\par
-It is expected that the request-ack period should be much shorter than the\par
-call-return delay in a real system.\par
-\par
-Invariant: now all transactions rendez-vous meaning the data doesn't have to \par
-be stored externally between origination and receipt.\par
-\par
-Note: Now there are 4 events: call, call ack, return, return ack. Call ack \par
-and return events could be merged but we will regard that as an optional future\par
-optimisation.\par
-\par
-Note: transactions now 4-phase; sub-transactions now 2-phase\par
-\par
-Note: arrange for the "ack" to clear the stored data, or mark it as\par
-unavailable for testing, to ensure we only consult the data when it is actually\par
-available. Also ensure another request is not sent before the ack from the\par
-previous one.\par
-\par
-Example test render (channel for functrino k(char c)):\par
-\par
-// Note: this is all just for test rendering; it doesn't get fed into later\par
-// stages.\par
-class Request_k : public sc_interface\par
-\{\par
-    char param_c;\par
-    \par
-    void do_request( char c )\par
-    \{\par
-        param_c = c;\par
-        @todo event the connected destination port\par
-    \}\par
-    \par
-    void get_data( char &c )\par
-    \{\par
-        return c;\par
-    \}\par
-\};\par
-\par
-channel Ack_k : public sc_interface\par
-\{\par
-    void do_ack()\par
-    \{\par
-        event the source port\par
-    \}\par
-\};\par
-\par
-Sender code goes:\par
-    ...\par
-    request_k.do_request('a');\par
-    wait( ack_k );\par
-    ...\par
-    \par
-Recipient event handler code goes:\par
-    case K:\par
-        c = request_k.get_data();\par
-        ack_k.do_ack(); // Ack immediately\par
-        ...do whatever is implied by functrino k...\par
-\par
-----------------------------------------------------------------------------\par
-Split out data and event channels\par
-\par
-The outgoing request channels should be split into 2 channels: an event-only\par
-channel to signal the event and data-only channels for the data. This step\par
-simply makes the channel structure look more similar to what will be achieved\par
-using wires. In particular we go from having request channels and ack channels\par
-to having event channels and data channels.\par
-\par
-Invariant: can now treat event channels and data channels separately\par
-\par
-Note: the ack channel is already an event-only channel\par
-\par
-Note: if >1 param, create multiple separate data channels one for each param.\par
-\par
-Example test render (channel for functrino k(char c)):\par
-\par
-// Note: this is all just for test rendering; it doesn't get fed into later\par
-// stages.\par
-class Data_k : public sc_interface\par
-\{\par
-    char param_c;\par
-    \par
-    void set_data( char c )\par
-    \{\par
-        param_c = c;\par
-    \}\par
-    \par
-    void get_data( char &c )\par
-    \{\par
-        return c;\par
-    \}\par
-\};\par
-\par
-class Request_k : public sc_interface\par
-\{    \par
-    void do_request()\par
-    \{     \par
-        @todo event the connected destination port\par
-    \}\par
-\};\par
-\par
-Sender code goes:\par
-    ...\par
-    data_k.SetData('a');\par
-    request_k.do_request();\par
-    wait( ack_k );\par
-    ...\par
-    \par
-Recipient event handler code goes:\par
-    case K:\par
-        c = data_k.get_data();\par
-        ack_k.do_ack(); // Ack immediately\par
-        ...do whatever is implied by functrino k...\par
-\par
-----------------------------------------------------------------------------\par
-Introduce minor delay\par
-\par
-Introduce a primitive called delay() which generates an event to the current\par
-thread then waits for it. This is called a minor delay.\par
-\par
-At present, we do not actually use these anywhere; the significance of this step\par
-is that we have added our first sequential/timing construct apart from the\par
-natural execution sequence of software. We have to do this in the structural\par
-phase because the wire-based protocol cannot be correctly described without it.\par
-\par
-Invariant: can now express minor delays\par
-\par
-Note: when we add protocols, we need to be able to avoid combinational loops\par
-so we use this primitive to break them. \par
-\par
-todo: get rid of this step because it doesn't actually do anythin, but preserve \par
-the description of minor delays.\par
-\par
-Example test render for delay():\par
-\par
-delay()\par
-\{\par
-    @todo event current thread\par
-    wait( delay_event );\par
-\}\par
-\par
-----------------------------------------------------------------------------\par
-Move to signals\par
-\par
-The event-only channels become sc_signal<bool> backed by a member variable. \par
-An event is generated by toggling the value: 1 goes to 0; 0 goes to 1. Reset \par
-value is 0. The data-only channels become sc_signal<x> where x is the data \par
-type used. Multiple data items (eg multiple parameters) should be merged into\par
-a single struct. Add a single delay() to the originator algorithm just after \par
-the transaction. \par
-\par
-Invariant: All communication is via sc_signal\par
-\par
-Note: No need for backing members on data channels because the algorithm will\par
-block during the transaction so the supplied data can't change. \par
-\par
-Note: since we are now dealing with wires (which is what signals really are),\par
-we need to avoid combinational loops (which are viewed as part of the behaviour\par
-of wires). We do this by adding a minor delay so that no two transactions\par
-can occur simultaneously (though the ack can be simultaneous).\par
-\par
-The protocol allows ack to be derived combinationally from the request\par
-line, i.e. with no delay. A delay is required after the transaction, so that\par
-the next transaction does not occur simulataniously. In an earlier design,\par
-the delay was required to be between request and ack but this prevents us \par
-from implementing guaranteed instant ack by simply connecting ack line to\par
-request line (which then allows synth tools to remove the ack wire and\par
-maybe also the request wire). For clarification, if both request and ack \par
-toggle in the same clock cycle, then they correspond to the same transaction\par
-and the data lines are valid for that transaction at the time of the toggle.\par
-\par
-Note: we use toggling for our pulse model because: (a) using logic 1 for a\par
-pulse requires that we measure clock cycles as with AXI protocol ready and\par
-valid lines and (b) doing a complete 0-1-0 pulse would require 2 minor \par
-delays which is >= 2 clock cycles.\par
-\par
-Example for a functrino k(char, int):\par
-\par
-Channels Data_k, Request_k and Ack_k are replaced by\par
-struct data_k_type \{ char p1; int p2; \};\par
-sc_signal<data_k_type> data_k;\par
-sc_signal<bool> request_k, ack_k;\par
-\par
-Sender code goes:\par
-    ...\par
-    data_k.p1 = 'a';\par
-    data_k.p2 = 42;\par
-    request_k = !request_k;\par
-    wait( ack_k );\par
-    delay();\par
-    ...\par
-\par
-Recipient event handler code goes:\par
-\par
-    case K:\par
-        c = data_k.c;\par
-        i = data_k.i\par
-        ack_k = !ack_k; \par
-        ...do whatever is implied by functrino k...\par
-\par
-Wait function implemented thus:\par
-\par
-wait( sc_signal<bool> s )\par
-\{\par
-    bool os = s;\par
-    while(os == s) \par
-    \{\par
-    \}\par
-\}\par
-\par
-\f1\par
+(C) Copyright 2006 John Graley
+Available under the terms of the BSD license. 
+
+Protocol phase - steps relating to communication between objects
+
+Functrinos going between objects are still unacceptable for state-out.
+TODO why? We
+therefore need to go quite low-level in this phase in terms of describing a
+protocol that makes the program structure look like the ends of some
+well-defined wires from the perspective of an object. 
+
+We begin by introducing the Transaction Level Modelling concept of a channel for
+each functrino. Over a few steps, the channels are modified to avoid making
+calls into objects (instead they use SystemC's channel->module wakeup scheme)
+and split up into finer, more role-specific channels.
+
+We add an acknowledgement for each functrino. This is to be understood as a
+low-level ack that serves protocol functions: flow control and data validity
+marshaling. The reader may object that we have divided function calls twice
+now: first into call-functrino/return-functrino, then into 
+call-request/call-ack/return-request/return-ack. But this is no different to
+ARM's AXI bus spec, that has avalid/aready/rvalid/rready for a read transaction.
+
+Finally, we actually insert SystemC's version of wires, the sc_signal<x>
+pre-defined channel. In the interests of proper correctness, we also choose now
+to add a notional time delay, called a "minor delay" in order to prevent objects
+from trying to do impossible things like toggling a wire twice simultaneously.
+
+The steps within this phase follow:
+
+----------------------------------------------------------------------------
+Add channels
+
+Create a new "channel" (in the SystemC TLM sense) for each sub-transaction. The
+channel should forward the functrino calls. The idea is that we turn functrinos
+into channels and then progressively modify the channels' implementation towards
+being like wires.
+
+Invariant: we have a presence, in the form of a channel, between communicating 
+pairs of objects.
+
+Note: the channel implementation we create will not be stated out but instead
+will be converted to wires (=signals) by the protocol step(s). It will mostly 
+be boiler-plate code.
+
+Note: changes caller and callee but trivially. Code in objects doesn't really 
+change - just calls functrinos through the channel implementation instead of 
+directly.
+
+Example test render (channel for functrino k(char c)):
+
+// Note: the channel implementation is just for test rendering; it doesn't 
+// get fed into later stages.
+class Channel_k : public sc_interface
+{
+    void do_functrino( char c )
+    {
+        dest.k( c );
+    }    
+};
+
+----------------------------------------------------------------------------
+Passivate
+
+Modify the channels. Provide each with passive (call-in) 2-phase interfaces for
+both caller and callee. All functrinos go into the channel and the channel kicks
+(wakes up) the callee using an event and the callee then collects the fuctrino
+parameters from the channel. 
+
+The passive call model is an essential step since the function call model
+produced in the sequential phase (state-out) will only be able to handle
+function calls within objects. In this phase, therefore, we must eliminate calls
+between objects completely. This phase removes calls that go into objects,
+and calls coming out of objects will be broken down into primatives that
+correspond to driving or polling inter-object wires.
+
+Invariant: objects do not receive incoming functrinos
+
+Note: after this step, a functrino is still used to initiate a sub-transaction,
+but the recipient gets an event and does a "get data" type call on the channel
+to get the data. We therefore rely on SystemC to convey events into objects.
+
+Note: the call into the channel to get the params is not a functrino since 
+it goes to a communications primitive (the channel) and not an object.
+
+Note: the event mechanism should be counted, so that 2 events cause 2 wakes.
+This eliminates the risk of dropped events due to racing.
+
+Note: only change functrino recipients
+
+Example test render (channel for functrino k(char c)):
+
+// Note: the channel implementation is just for test rendering; it doesn't 
+// get fed into later stages.
+class Channel_k : public sc_interface
+{
+    char param_c;
+    
+    void do_functrino( char c )
+    {
+        param_c = c;
+        @todo event the connected destination port
+    }
+    
+    void get_data( char &c )
+    {
+        return c;
+    }
+};
+
+do_functrino() replaces f_data() (for call-functrinos) or f_return() (for
+return-functrinos). 
+
+----------------------------------------------------------------------------
+Make functrinos rendez-vous
+
+For each channel, add an "ack" channel which goes the in the other direction
+and has no data (same passive model). The recipient should ack immediately after
+receiving the event and the originator should wait for the ack.
+
+The ack serves two purposes: (1) marshaling of interactions to ensure that
+events are not sent too rapidly for the recipient to handle them and (2) to
+ensure that there is a well defined period of time for the recipient to read the
+accompanying data.
+
+This model is a rendez-vous model. The rendez-vous takes place for a finite
+period of time beginning at receipt of the request and ending when the ack is
+sent. A single request-ack cycle is a sub-transaction and the accompanying data
+is valid for the recipient during this period.
+
+It is expected that the request-ack period should be much shorter than the
+call-return delay in a real system.
+
+Invariant: now all transactions rendez-vous meaning the data doesn't have to 
+be stored externally between origination and receipt.
+
+Note: Now there are 4 events: call, call ack, return, return ack. Call ack 
+and return events could be merged but we will regard that as an optional future
+optimisation.
+
+Note: transactions now 4-phase; sub-transactions now 2-phase
+
+Note: arrange for the "ack" to clear the stored data, or mark it as
+unavailable for testing, to ensure we only consult the data when it is actually
+available. Also ensure another request is not sent before the ack from the
+previous one.
+
+Example test render (channel for functrino k(char c)):
+
+// Note: this is all just for test rendering; it doesn't get fed into later
+// stages.
+class Request_k : public sc_interface
+{
+    char param_c;
+    
+    void do_request( char c )
+    {
+        param_c = c;
+        @todo event the connected destination port
+    }
+    
+    void get_data( char &c )
+    {
+        return c;
+    }
+};
+
+channel Ack_k : public sc_interface
+{
+    void do_ack()
+    {
+        event the source port
+    }
+};
+
+Sender code goes:
+    ...
+    request_k.do_request('a');
+    wait( ack_k );
+    ...
+    
+Recipient event handler code goes:
+    case K:
+        c = request_k.get_data();
+        ack_k.do_ack(); // Ack immediately
+        ...do whatever is implied by functrino k...
+
+----------------------------------------------------------------------------
+Split out data and event channels
+
+The outgoing request channels should be split into 2 channels: an event-only
+channel to signal the event and data-only channels for the data. This step
+simply makes the channel structure look more similar to what will be achieved
+using wires. In particular we go from having request channels and ack channels
+to having event channels and data channels.
+
+Invariant: can now treat event channels and data channels separately
+
+Note: the ack channel is already an event-only channel
+
+Note: if >1 param, create multiple separate data channels one for each param.
+
+Example test render (channel for functrino k(char c)):
+
+// Note: this is all just for test rendering; it doesn't get fed into later
+// stages.
+class Data_k : public sc_interface
+{
+    char param_c;
+    
+    void set_data( char c )
+    {
+        param_c = c;
+    }
+    
+    void get_data( char &c )
+    {
+        return c;
+    }
+};
+
+class Request_k : public sc_interface
+{    
+    void do_request()
+    {     
+        @todo event the connected destination port
+    }
+};
+
+Sender code goes:
+    ...
+    data_k.SetData('a');
+    request_k.do_request();
+    wait( ack_k );
+    ...
+    
+Recipient event handler code goes:
+    case K:
+        c = data_k.get_data();
+        ack_k.do_ack(); // Ack immediately
+        ...do whatever is implied by functrino k...
+
+----------------------------------------------------------------------------
+Introduce minor delay
+
+Introduce a primitive called delay() which generates an event to the current
+thread then waits for it. This is called a minor delay.
+
+At present, we do not actually use these anywhere; the significance of this step
+is that we have added our first sequential/timing construct apart from the
+natural execution sequence of software. We have to do this in the structural
+phase because the wire-based protocol cannot be correctly described without it.
+
+Invariant: can now express minor delays
+
+Note: when we add protocols, we need to be able to avoid combinational loops
+so we use this primitive to break them. 
+
+todo: get rid of this step because it doesn't actually do anythin, but preserve 
+the description of minor delays.
+
+Example test render for delay():
+
+delay()
+{
+    @todo event current thread
+    wait( delay_event );
 }
- 
+
+----------------------------------------------------------------------------
+Move to signals
+
+The event-only channels become sc_signal<bool> backed by a member variable. 
+An event is generated by toggling the value: 1 goes to 0; 0 goes to 1. Reset 
+value is 0. The data-only channels become sc_signal<x> where x is the data 
+type used. Multiple data items (eg multiple parameters) should be merged into
+a single struct. Add a single delay() to the originator algorithm just after 
+the transaction. 
+
+Invariant: All communication is via sc_signal
+
+Note: No need for backing members on data channels because the algorithm will
+block during the transaction so the supplied data can't change. 
+
+Note: since we are now dealing with wires (which is what signals really are),
+we need to avoid combinational loops (which are viewed as part of the behaviour
+of wires). We do this by adding a minor delay so that no two transactions
+can occur simultaneously (though the ack can be simultaneous).
+
+The protocol allows ack to be derived combinationally from the request
+line, i.e. with no delay. A delay is required after the transaction, so that
+the next transaction does not occur simulataniously. In an earlier design,
+the delay was required to be between request and ack but this prevents us 
+from implementing guaranteed instant ack by simply connecting ack line to
+request line (which then allows synth tools to remove the ack wire and
+maybe also the request wire). For clarification, if both request and ack 
+toggle in the same clock cycle, then they correspond to the same transaction
+and the data lines are valid for that transaction at the time of the toggle.
+
+Note: we use toggling for our pulse model because: (a) using logic 1 for a
+pulse requires that we measure clock cycles as with AXI protocol ready and
+valid lines and (b) doing a complete 0-1-0 pulse would require 2 minor 
+delays which is >= 2 clock cycles.
+
+Example for a functrino k(char, int):
+
+Channels Data_k, Request_k and Ack_k are replaced by
+struct data_k_type { char p1; int p2; };
+sc_signal<data_k_type> data_k;
+sc_signal<bool> request_k, ack_k;
+
+Sender code goes:
+    ...
+    data_k.p1 = 'a';
+    data_k.p2 = 42;
+    request_k = !request_k;
+    wait( ack_k );
+    delay();
+    ...
+
+Recipient event handler code goes:
+
+    case K:
+        c = data_k.c;
+        i = data_k.i
+        ack_k = !ack_k; 
+        ...do whatever is implied by functrino k...
+
+Wait function implemented thus:
+
+wait( sc_signal<bool> s )
+{
+    bool os = s;
+    while(os == s) 
+    {
+    }
+}
