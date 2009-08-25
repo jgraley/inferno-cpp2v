@@ -16,6 +16,8 @@ using namespace std;
 #include <boost/foreach.hpp>
 using namespace boost;
 
+#include "foreach.hpp"
+/*
 // TODO use BOOST_FOREACH when cygwin boost gets past rev 1.33
 // For now, use my rubbish version. Use as in FOREACH( i, container ) {}
 template<class IT>
@@ -31,7 +33,7 @@ struct ZR : IT
 	         __i++ ) \
 	        if( (__d=false) ) {} else \
 	            for( M=*__i; !__d; __d=true )
-  
+  */
 // How many members in an array
 #define COUNTOF( array ) ( sizeof( array )/sizeof( array[0] ) )
 
