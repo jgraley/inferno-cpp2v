@@ -19,7 +19,7 @@ using namespace boost;
 #include "foreach.hpp"
 /*
 // TODO use BOOST_FOREACH when cygwin boost gets past rev 1.33
-// For now, use my rubbish version. Use as in FOREACH( i, container ) {}
+// For now, use my rubbish version. Use as in FOREACH( iterator i, container ) {}
 template<class IT>
 struct ZR : IT
 {
