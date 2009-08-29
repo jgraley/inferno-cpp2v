@@ -10,7 +10,7 @@
 #include <deque>
 #include "generics.hpp"
 
-//TODO all these in a namespace perhaps?
+//TODO all these in a name space perhaps?
 
 //////////////////////////// Node Model ////////////////////////////
 
@@ -21,7 +21,7 @@
 // functionality). Also, all derived structs should contain the
 // NODE_FUNCTIONS macro which expands to a few virtual functions
 // required for common ("bounced") functionality. Where multiple
-// inheritance dimaonds arise, Node should be derived virtually
+// inheritance diamonds arise, Node should be derived virtually
 // (we always want the set-restricting model of inheritance in
 // the inferno tree node hierarchy).
 struct Node : NodeBases
@@ -37,9 +37,9 @@ struct Node : NodeBases
 
 // Nodes can be property nodes or topological nodes. Topological nodes
 // represent parts of the program, and property nodes represent 
-// ancilliary data (strings, numbers, enums). Property is the base
+// ancillary data (strings, numbers, enums). Property is the base
 // class for property nodes (there is no base class for Topological 
-// nodes, topological is assumed if not derivng from Property). 
+// nodes, topological is assumed if not deriving from Property).
 // Enums are actually implemented by choosing one of a choice of
 // empty node, not using enum. Each kind of property has an intermediate
 // which can represent any value of the property - they have Any in 
@@ -48,7 +48,7 @@ struct Property : virtual Node { NODE_FUNCTIONS };
 
 // This intermediate is used for an initial value for for a variable/object in
 // which case it will be an Expression, or for the implementation of a function
-// in which case it will be a Statement. For an uninititialised variable/object
+// in which case it will be a Statement. For an uninitialised variable/object
 // or a function declaration, it will be Uninitialised.
 struct Initialiser : virtual Node { NODE_FUNCTIONS };
 struct Uninitialised : Initialiser { NODE_FUNCTIONS }; // an uninitialised Instance.
@@ -217,13 +217,13 @@ struct Virtual : AnyVirtual
 };
 struct NonVirtual : AnyVirtual { NODE_FUNCTIONS };
 
-// Property for C++ access speficiers public, protected and private. AccessSpec
+// Property for C++ access specifiers public, protected and private. AccessSpec
 // represents any access spec, the subsequent empty nodes specify particular
 // access specs. Inferno uses access specs for all declarations. Declarations
 // in classes are as specified, function parameters and external declarations
 // are public, all others private. It is anticipated that the access spec will
 // control generated high-level interfaces. Note that we only specify access
-// for physical things like instances. Abstract stuff like typedefs is always 
+// for physical things like instances. Abstract stuff like typedefs are always
 // considered public.
 struct AccessSpec : Property { NODE_FUNCTIONS };
 struct Public : AccessSpec { NODE_FUNCTIONS };
@@ -240,7 +240,7 @@ struct Physical : Declaration
 
 // Property for a storage class which can apply to any instance (variable,
 // object or function) and indicates physical location, allocation strategy 
-// and lifecycle model. Presently we allow static, member (=non-static member)
+// and life-cycle model. Presently we allow static, member (=non-static member)
 // and auto (= non-static local). Member must also indicate virtual-ness.
 // Note that top-level static -> Static and Private. 
 // Top-level extern -> Static and Public.
@@ -262,7 +262,7 @@ struct NonConst : Constancy { NODE_FUNCTIONS };
 // Node represents a variable/object or a function. In case of function, type is a 
 // type under Subroutine and initialiser is a Statement (or Uninitialised for a function
 // declaration). For a variable/object, type is basically anything else, and if there is
-// an initialiser, it is an Expression. We allow init here for variaous reasons including
+// an initialiser, it is an Expression. We allow init here for various reasons including
 // - it can be hard to know where to put stand-alone init for statics
 // - C++ constructors tie init to declaration
 // - Fits in with single-static-assignment style
@@ -281,7 +281,6 @@ struct Instance : Physical
 
 // Node for a base class within a class declaration, specifies another class from 
 // which to inherit
-struct InheritanceRecord;
 struct Base : Physical 
 {
     NODE_FUNCTIONS
@@ -348,7 +347,7 @@ struct Reference : Indirection { NODE_FUNCTIONS };
 // The pseudo-type void, disallowed in some circumstances as per C.
 struct Void : Type { NODE_FUNCTIONS };
 
-// Boolean type. We support bool seperately from 1-bit ints, at least for now.
+// Boolean type. We support bool separately from 1-bit ints, at least for now.
 // (note that (bool)2==true but (int:1)2==0)
 struct Bool : Type { NODE_FUNCTIONS };
 
@@ -406,9 +405,9 @@ struct Typedef : UserType
 }; 
 
 // Intermediate for declaration of a record. record is generic for struct, class, union or
-// enum. We list the memebrs here as declaraions (which will be member 
+// enum. We list the members here as declarations (which will be member
 // or static) can can be variables/objects in all cases and additionally
-// function instances in struct/class. Record completeness of declaration too.
+// function instances in struct/class.
 struct Record : UserType
 {
     NODE_FUNCTIONS
@@ -457,8 +456,7 @@ struct Aggregate : Expression
     Sequence<Expression> operands; 
 };
 
-// Intermediate for an operator with operands and an indication
-// of whether it's an assignment operator. TODO maybe fix the number
+// Intermediate for an operator with operands. TODO maybe fix the number
 // of operands for binop and unop categories instead of Sequence.
 struct Operator : Expression
 {
@@ -467,7 +465,7 @@ struct Operator : Expression
 };
 
 // Intermediate categories of operators. We categorise based on
-// tree topology, and commutative is considered topologically
+// topology, and commutative is considered topologically
 // distinct from non-commutative.
 struct Unop : Operator { NODE_FUNCTIONS };
 struct Binop : Operator { NODE_FUNCTIONS };
@@ -483,7 +481,7 @@ struct AssignmentOperator : Operator { NODE_FUNCTIONS };
 #include "operator_db.inc"
 
 // Operator that operates on data types as parameters. Where either is allowed
-// we prefer the type one, since it's more concise in the tree.
+// we prefer the type one, since it's more concise.
 struct TypeOperator : Expression
 {
     NODE_FUNCTIONS
@@ -497,6 +495,7 @@ struct SizeOf : TypeOperator { NODE_FUNCTIONS };
 struct AlignOf : TypeOperator { NODE_FUNCTIONS };
 
 // The conditional ?: operator as in condition ? if_true : if_false
+// TODO Ternop?
 struct ConditionalOperator : Expression 
 {
     NODE_FUNCTIONS
@@ -505,7 +504,9 @@ struct ConditionalOperator : Expression
     SharedPtr<Expression> if_false;
 };
 
-// A funciton call to specified function passing in specified arguments
+// A function call to specified function passing in specified arguments
+// Function is an expression to allow eg function pointer dereference. Normal
+// calls have function -> some InstanceIdentifier for a Subroutine Instance
 struct Call : Expression 
 {
     NODE_FUNCTIONS
@@ -544,7 +545,7 @@ struct Delete : Expression
     SharedPtr<AnyGlobalNew> global;
 };
 
-// Node for C++ this
+// Node for C++ this pointer
 struct This : Expression { NODE_FUNCTIONS };
 
 // Node for indexing into an array as in base[index]
@@ -566,7 +567,7 @@ struct Lookup : Expression
 };
 
 // Node for a c-style cast. C++ casts are not in here yet
-// and C casts will be harmonised into whatever system I use for that.
+// and C casts will be harmonised into whatever scheme I use for that.
 struct Cast : Expression
 {
     NODE_FUNCTIONS
@@ -584,7 +585,7 @@ struct Compound : Statement
 };                   
 
 // The return statement of a function TODO not sure about return without 
-// a paremeter, might generate NULL ptr which would be invalid.
+// a parameter.
 struct Return : Statement
 {
     NODE_FUNCTIONS
@@ -643,7 +644,7 @@ struct For : Loop
 // Switch statement. Body is just a statement scope - case labels
 // and breaks are dropped into the sequence at the corresponding 
 // positions. This caters for fall-throughs etc. Really just a 
-// Compound with a goto-a-variable at the top with some mapping.
+// Compound with a goto-a-variable at the top and some mapping.
 struct Switch : Statement
 {
     NODE_FUNCTIONS

@@ -15,7 +15,7 @@ string SSPrintf(const char *fmt, ...)
 
 void CommonTest()
 {
-	// Test the FOREACH macro in case it's out dodgy home made one
+	// Test the FOREACH macro in case it's our dodgy home made one
 	deque<int> d;
 	deque<int> *pd = &d;
 	d.push_back(100);

@@ -63,7 +63,7 @@ Sequence<Declaration> SortDecls( Sequence<Declaration> c, bool ignore_indirectio
 	{
 		Sequence<Declaration>::iterator ai;
 		
-		for( ai = c.begin(); ai != c.end(); ai++ )		
+		for( ai = c.begin(); ai != c.end(); ++ai )
 		{
 			bool a_has_deps=false;
 			FOREACH( shared_ptr<Declaration> b, c )
@@ -96,7 +96,7 @@ Sequence<Declaration> JumbleDecls( Sequence<Declaration> c )
 		// depends on it. This is the latest position we can insert the new element.
 		Sequence<Declaration>::iterator i;
 		int n = rand() % (s.size()+1);
-		for( i = s.begin(); i != s.end(); i++ )		
+		for( i = s.begin(); i != s.end(); ++i )
    	    {
    	    	if( n-- == 0 )
    	    	{
