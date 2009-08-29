@@ -13,7 +13,6 @@ using namespace std;
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
-#include <boost/foreach.hpp>
 using namespace boost;
 
 // TODO use BOOST_FOREACH when cygwin boost gets past rev 1.33
