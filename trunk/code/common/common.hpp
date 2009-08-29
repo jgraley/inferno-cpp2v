@@ -17,7 +17,7 @@ using namespace boost;
 
 // TODO use BOOST_FOREACH when cygwin boost gets past rev 1.33
 // For now, use my rubbish version.
-#define USE_BOOST_FOREACH 1
+#define USE_BOOST_FOREACH 0
 
 #if USE_BOOST_FOREACH
 
