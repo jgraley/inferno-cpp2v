@@ -213,8 +213,8 @@ void SearchReplace::ClearPtrs( shared_ptr<Node> dest )
     {
         if( GenericSequence *dest_seq = dynamic_cast<GenericSequence *>(dest_memb[i]) )                
         {
-            for( int j=0; j<dest_seq->size(); j++ )
-                (*dest_seq)[j].Set( shared_ptr<Node>() );
+            FOREACH( GenericSharedPtr &p, *dest_seq )
+                p.Set( shared_ptr<Node>() );
         }            
         else if( GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]) )         
         {
@@ -464,8 +464,8 @@ void SearchReplace::Test()
     }
     
     {        
-        // topological with extra member in terget node
-        /* gone obsolete with tree changes
+        // topological with extra member in target node
+        /* gone obsolete with tree changes TODO un-obsolete
         shared_ptr<Label> l( new Label );
         shared_ptr<Public> p1( new Public );
         l->access = p1;
