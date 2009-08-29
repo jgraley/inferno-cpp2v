@@ -30,6 +30,7 @@ int main( int argc, char *argv[] )
               
     Validate()(program);                
                     
+    // TODO move this out of main()
     {
         shared_ptr<Dereference> sd( new Dereference );     
         shared_ptr<Add> sa( new Add );

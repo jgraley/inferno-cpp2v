@@ -162,8 +162,9 @@ public:
 
         	if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )
             {
-                for( int j=0; j<seq->size(); j++ )
-                    s += DoLink( n, SeqField(i, j), (*seq)[j].Get() );
+                int j=0;
+        		FOREACH( GenericSharedPtr &p, *seq ) //for( int j=0; j<seq->size(); j++ )
+                    s += DoLink( n, SeqField(i, j++), p.Get() );
             }            
             else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )         
             {

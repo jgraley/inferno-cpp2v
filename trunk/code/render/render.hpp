@@ -734,8 +734,8 @@ private:
         
         string s;
         // Emit an incomplete for each record
-        for( int i=0; i<sorted.size(); i++ )
-            if( shared_ptr<Record> r = dynamic_pointer_cast<Record>(sorted[i]) ) // is a record
+        FOREACH( SharedPtr<Declaration> pd, sorted ) //for( int i=0; i<sorted.size(); i++ )
+            if( shared_ptr<Record> r = dynamic_pointer_cast<Record>(pd) ) // is a record
                 if( !dynamic_pointer_cast<Enum>(r) ) // but not an enum 
                     s += RenderDeclaration( r, separator, init_access ? &init_access : NULL, showtype, true );
         
