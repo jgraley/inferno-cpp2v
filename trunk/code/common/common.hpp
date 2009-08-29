@@ -16,10 +16,18 @@ using namespace std;
 #include <boost/foreach.hpp>
 using namespace boost;
 
-#include "foreach.hpp"
-/*
 // TODO use BOOST_FOREACH when cygwin boost gets past rev 1.33
-// For now, use my rubbish version. Use as in FOREACH( iterator i, container ) {}
+// For now, use my rubbish version.
+#define USE_BOOST_FOREACH 0
+
+#if USE_BOOST_FOREACH
+
+#include <boost/foreach.hpp>
+#define FOREACH BOOST_FOREACH
+
+#else
+
+// Use as in FOREACH( iterator i, container ) {}
 template<class IT>
 struct ZR : IT
 {
@@ -30,10 +38,12 @@ struct ZR : IT
 	if( ZR<typeof((C).begin())> __i=(C).begin() ) {} else \
 	    for( bool __d = true; \
 	         __d && __i!=(C).end(); \
-	         __i++ ) \
+	         ++__i ) \
 	        if( (__d=false) ) {} else \
 	            for( M=*__i; !__d; __d=true )
-  */
+#endif
+
+
 // How many members in an array
 #define COUNTOF( array ) ( sizeof( array )/sizeof( array[0] ) )
 
