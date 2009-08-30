@@ -94,7 +94,7 @@ shared_ptr<Node> Walk::Get()
 {
     GenericSharedPtr *gp = GetGeneric();
     ASSERT( gp );
-    return gp->Get();
+    return *gp;
 }
 
 string Walk::GetPathString()
@@ -109,8 +109,8 @@ string Walk::GetPathString()
         // node type
         GenericSharedPtr *child = f.children[f.index];
         ASSERT( child );
-        if( !!child->Get() )
-            s = TypeInfo(*(child->Get())).name() + s;
+        if( *child )
+            s = TypeInfo(*(child->get())).name() + s;
         else
             s = string("NULL") + s;
 

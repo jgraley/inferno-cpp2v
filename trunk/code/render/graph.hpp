@@ -165,12 +165,12 @@ public:
             {
                 int j=0;
         		FOREACH( GenericSharedPtr &p, *seq ) //for( int j=0; j<seq->size(); j++ )
-                    s += DoLink( n, SeqField(i, j++), p.Get() );
+                    s += DoLink( n, SeqField(i, j++), p );
             }            
             else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )         
             {
-                if( ptr->Get() )
-                    s += DoLink( n, "fixed", ptr->Get() );
+                if( *ptr )
+                    s += DoLink( n, "fixed", *ptr );
             }
             else
             {
