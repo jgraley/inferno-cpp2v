@@ -1,7 +1,8 @@
-#ifndef GENERICS_HPP
-#define GENERICS_HPP
+#ifndef TREE_GENERICS_HPP
+#define TREE_GENERICS_HPP
 
 #include "common/refcount.hpp"
+#include "common/containers.hpp"
 #include <deque>
 #include <set>
 #include <iterator>
@@ -23,51 +24,7 @@ struct GenericSharedPtr : Itemiser::Element
     virtual void Set( shared_ptr<Node> n ) = 0;
 };
 
-struct GenericContainer : virtual Itemiser::Element
-{
-	struct iterator_base
-	{
-		// TODO const iterator and const versions of begin(), end()
-		virtual shared_ptr<iterator_base> Clone() const = 0; // Make another copy of the present iterator
-		virtual iterator_base &operator++() = 0;
-		virtual GenericSharedPtr &operator*() = 0;
-		virtual bool operator==( const iterator_base &ib ) = 0;
-	};
-	class iterator
-	{
-	public:
-		typedef forward_iterator_tag iterator_category;
-		typedef GenericSharedPtr value_type;
-		typedef int difference_type;
-		typedef value_type *pointer;
-		typedef value_type &reference;
-		iterator( const iterator_base &ib ) :
-			pib( ib.Clone() ) {}
-		iterator( const iterator &i ) :
-			pib( i.pib->Clone() ) {}
-		iterator &operator++()
-		{
-			pib->operator++();
-			return *this;
-		}
-		value_type &operator*()
-		{
-			return pib->operator*();
-		}
-		bool operator==( const iterator &i )
-		{
-			return pib->operator==( *(i.pib) );
-		}
-
-	private:
-		shared_ptr<iterator_base> pib;
-	};
-	typedef iterator const_iterator; // TODO const iterators properly
-    virtual const iterator_base &begin() = 0;
-    virtual const iterator_base &end() = 0;
-    virtual int size() const = 0;
-    virtual void clear() = 0;
-};
+typedef ContainerBase<Itemiser::Element, GenericSharedPtr> GenericContainer;
 
 
 struct GenericSequence : virtual GenericContainer
@@ -118,67 +75,8 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
     }
 };           
 
-template<typename STLCONTAINER>
-struct Container : virtual GenericContainer, STLCONTAINER
-{
-	typedef STLCONTAINER STLContainer;
-
-	struct iterator : public STLContainer::iterator, public GenericContainer::iterator_base
-	{
-		virtual shared_ptr<iterator_base> Clone() const
-		{
-			shared_ptr<iterator> ni( new iterator );
-			*ni = *this;
-			return ni;
-		}
-
-		virtual iterator &operator++()
-		{
-		    STLContainer::iterator::operator++();
-		    return *this;
-		}
-
-		virtual typename STLContainer::value_type &operator*()
-		{
-			return STLContainer::iterator::operator*();
-		}
-
-		virtual bool operator==( const iterator_base &ib )
-		{
-			if( const iterator *pi = dynamic_cast<const iterator *>(&ib) )
-				return *pi == *this;
-			else
-				return false; // comparing iterators of different types; must be from different containers
-		}
-	};
-
-	typedef iterator const_iterator;
-
-    // Covarient style only works with refs and pointers, so force begin/end to return refs safely
-    iterator my_begin, my_end;
-
-    virtual const iterator &begin()
-    {
-    	my_begin.STLContainer::iterator::operator=( STLContainer::begin() );
-    	return my_begin;
-    }
-    virtual const iterator &end()
-    {
-    	my_end.STLContainer::iterator::operator=( STLContainer::end() );
-    	return my_end;
-    }
-    virtual int size() const
-    {
-        return STLContainer::size();
-    }
-    virtual void clear()
-    {
-    	return STLContainer::clear();
-    }
-};
-
 template<typename ELEMENT>
-struct Sequence : virtual GenericSequence, virtual Container< deque< SharedPtr<ELEMENT> > >
+struct Sequence : virtual GenericSequence, virtual Container< Itemiser::Element, GenericSharedPtr, deque< SharedPtr<ELEMENT> > >
 {
 	typedef deque< SharedPtr<ELEMENT> > STLSequence;
     virtual typename STLSequence::value_type &operator[]( int i )
@@ -188,7 +86,7 @@ struct Sequence : virtual GenericSequence, virtual Container< deque< SharedPtr<E
 };
 
 template<typename ELEMENT>
-struct Collection : GenericCollection, Container< set< SharedPtr<ELEMENT> > >
+struct Collection : GenericCollection, Container< Itemiser::Element, GenericSharedPtr, set< SharedPtr<ELEMENT> > >
 {
 	typedef set< SharedPtr<ELEMENT> > STLCollection;
 	virtual void insert( const GenericSharedPtr &gx )

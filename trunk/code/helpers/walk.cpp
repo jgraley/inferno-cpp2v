@@ -37,9 +37,9 @@ void Walk::Push( shared_ptr<Node> n )
     vector< Itemiser::Element * > members = Itemiser::Itemise(n);
     for( int i=0; i<members.size(); i++ )
     {
-        if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )                
+        if( GenericContainer *con = dynamic_cast<GenericSequence *>(members[i]) )
         {
-        	FOREACH( GenericSharedPtr &n, *seq )
+        	FOREACH( GenericSharedPtr &n, *con )
                 f.children.push_back( &n );
         }            
         else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )         
