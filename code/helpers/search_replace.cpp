@@ -120,12 +120,12 @@ bool SearchReplace::IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pa
             for( int j=0; j<pattern_seq->size(); j++ )
             {
                 TRACE("Elt %d target ptr=%p pattern ptr=%p\n", j,
-                		                                       (*x_seq)[j].Get().get(),
-                		                                       (*pattern_seq)[j].Get().get());
-                if( !(*pattern_seq)[j].Get() )
+                		                                       (*x_seq)[j].get(),
+                		                                       (*pattern_seq)[j].get());
+                if( !(*pattern_seq)[j] )
                     continue; // NULL is a wildcard in search patterns
                 TRACE();
-                bool match = IsMatchPattern( (*x_seq)[j].Get(), (*pattern_seq)[j].Get() );
+                bool match = IsMatchPattern( (*x_seq)[j], (*pattern_seq)[j] );
                 if( !match )
                     return false;                    
             }
@@ -134,10 +134,11 @@ bool SearchReplace::IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pa
         {
             GenericSharedPtr *x_ptr = dynamic_cast<GenericSharedPtr *>(x_memb[i]);
             ASSERT( x_ptr && "itemise for target didn't match itemise for pattern");
-            TRACE("Member %d is SharedPtr, pattern ptr=%p\n", i, pattern_ptr->Get().get());
-            if( pattern_ptr->Get() ) // NULL is a wildcard in search patterns  
+            TRACE("Member %d is SharedPtr, pattern ptr=%p\n", i, pattern_ptr->get());
+            if( *pattern_ptr ) // NULL is a wildcard in search patterns
             {                   
-                bool match = IsMatchPattern( x_ptr->Get(), pattern_ptr->Get() );
+            	shared_ptr<Node> n = *pattern_ptr;
+                bool match = IsMatchPattern( *x_ptr, *pattern_ptr );
                 if( !match )
                     return false;                     
             }
@@ -214,11 +215,11 @@ void SearchReplace::ClearPtrs( shared_ptr<Node> dest )
         if( GenericSequence *dest_seq = dynamic_cast<GenericSequence *>(dest_memb[i]) )                
         {
             FOREACH( GenericSharedPtr &p, *dest_seq )
-                p.Set( shared_ptr<Node>() );
+                p = shared_ptr<Node>();
         }            
         else if( GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]) )         
         {
-            dest_ptr->Set( shared_ptr<Node>() );
+            *dest_ptr = shared_ptr<Node>();
         }
     }       
 }
@@ -249,8 +250,8 @@ void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source,
 
             for( int j=0; j<source_seq->size(); j++ )
             {
-                if( !(*dest_seq)[j].Get() ) // Only over NULL!!!
-                    (*dest_seq)[j].Set( DuplicateSubtree( (*source_seq)[j].Get(), under_substitution ) );
+                if( !(*dest_seq)[j] ) // Only over NULL!!!
+                    (*dest_seq)[j] = DuplicateSubtree( (*source_seq)[j], under_substitution );
             }
         }            
         else if( GenericSharedPtr *source_ptr = dynamic_cast<GenericSharedPtr *>(source_memb[i]) )         
@@ -258,8 +259,8 @@ void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source,
             GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]);
             ASSERT( dest_ptr && "itemise for target didn't match itemise for source");
                         
-            if( !dest_ptr->Get() ) // Only over NULL!!!1
-                dest_ptr->Set( DuplicateSubtree( source_ptr->Get(), under_substitution ) );
+            if( !*dest_ptr ) // Only over NULL!!!1
+                *dest_ptr = DuplicateSubtree( *source_ptr, under_substitution );
         }
         else
         {
@@ -319,13 +320,13 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool 
 }
 
 
-// Perform the configures replacement at the supplied target. 
+// Perform the configured replacement at the supplied target.
 // Note target is a double pointer, since we wish to enact the
 // replacement by changing a SharedPtr somewhere.
 void SearchReplace::Replace( GenericSharedPtr *target )
 {
     ASSERT( replace_pattern );
-    target->Set( DuplicateSubtree( replace_pattern ) );
+    *target = DuplicateSubtree( replace_pattern );
 }
 
 
