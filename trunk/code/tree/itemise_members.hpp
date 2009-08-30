@@ -9,7 +9,7 @@ using namespace std;
 
 // Note about multiple inheritance:
 // If Itemiser::Element is at the base of a diamond, itemiser will see it twice,
-// *even if* virtual inheritance is used. This may be a compiler big in which case the above
+// *even if* virtual inheritance is used. This may be a compiler bug in which case the above
 // is true only for GCC4.3. Anyway, if we see it twice it will have the same address,
 // so we de-duplicate during itemise algorithm.
 
@@ -38,7 +38,7 @@ public:
     
     template< class ITEMISE_TYPE >
     inline static vector< Itemiser::Element * > ItemiseStatic( const ITEMISE_TYPE *itemise_architype,
-                                                                 const Itemiser *itemise_object )
+                                                               const Itemiser *itemise_object )
     {
         (void)itemise_architype; // don't care about value of architypes; just want the type
         static ITEMISE_TYPE d;

@@ -72,10 +72,13 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
     	return !!*(const shared_ptr<ELEMENT> *)this;
     }
 
+    SharedPtr() {}
     template< typename OTHER >
     SharedPtr( const shared_ptr<OTHER> &o ) : 
-        shared_ptr<ELEMENT>(o) {}
-    SharedPtr() {}
+        shared_ptr<ELEMENT>( dynamic_pointer_cast<ELEMENT>(o) )
+    {
+    	ASSERT( *this )("Tried to convert shared_ptr<> to wrong sort of SharedPtr<>");
+    }
     SharedPtr( const GenericSharedPtr &g ) :
     	shared_ptr<ELEMENT>( dynamic_pointer_cast<ELEMENT>(g.GetNodePtr()) )
     {
@@ -90,6 +93,8 @@ typedef STLContainerBase<Itemiser::Element, GenericSharedPtr> GenericContainer;
 struct GenericSequence : virtual GenericContainer
 {
     virtual GenericSharedPtr &operator[]( int i ) = 0;
+    virtual void push_back( const GenericSharedPtr &gx ) = 0;
+	virtual void push_back( const shared_ptr<Node> &gx ) = 0;
 };
 
 template<typename ELEMENT>
@@ -100,10 +105,22 @@ struct Sequence : virtual GenericSequence, virtual Container< Itemiser::Element,
     {
     	return RawSequence::operator[](i);
     }
+	virtual void push_back( const GenericSharedPtr &gx )
+	{
+		typename RawSequence::value_type sx(gx);
+		RawSequence::push_back( sx );
+	}
+	virtual void push_back( const shared_ptr<Node> &gx )
+	{
+		typename RawSequence::value_type sx(gx);
+		RawSequence::push_back( sx );
+	}
 };
 
 struct GenericCollection : virtual GenericContainer
 {
+	// TOOD for these to work in practice, may need to make them more like
+	// push_back() in Sequence<>
 	virtual void insert( const GenericSharedPtr &gx ) = 0;
 	virtual void erase( const GenericSharedPtr &gx ) = 0;
 	virtual bool IsExist( const GenericSharedPtr &gx ) = 0;
