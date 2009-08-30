@@ -11,32 +11,12 @@
 #include "clone.hpp"
 #include "common/magic.hpp"
 
-// TODO refactor:
-// Seperate this file into the "pure" generics (basically GenericContainer and Container templated
-// on the base member type) and the "inferno" generics (everything else, instancing the above templates
-// with GenericSharedPtr). Former goes in common/generics.hpp, latter goes in tree/containers.hpp
-
 struct Node;
 
 struct GenericSharedPtr : Itemiser::Element
 {
     virtual shared_ptr<Node> Get() const = 0;
     virtual void Set( shared_ptr<Node> n ) = 0;
-};
-
-typedef ContainerBase<Itemiser::Element, GenericSharedPtr> GenericContainer;
-
-
-struct GenericSequence : virtual GenericContainer
-{
-    virtual GenericSharedPtr &operator[]( int i ) = 0;
-};
-
-struct GenericCollection : virtual GenericContainer
-{
-	virtual void insert( const GenericSharedPtr &gx ) = 0;
-	virtual void erase( const GenericSharedPtr &gx ) = 0;
-	virtual bool IsExist( const GenericSharedPtr &gx ) = 0;
 };
 
 template<typename ELEMENT>
@@ -74,6 +54,21 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
     	ASSERT( *this )("Tried to convert GenericSharedPtr to wrong sort of SharedPtr<>");
     }
 };           
+
+typedef STLContainerBase<Itemiser::Element, GenericSharedPtr> GenericContainer;
+
+
+struct GenericSequence : virtual GenericContainer
+{
+    virtual GenericSharedPtr &operator[]( int i ) = 0;
+};
+
+struct GenericCollection : virtual GenericContainer
+{
+	virtual void insert( const GenericSharedPtr &gx ) = 0;
+	virtual void erase( const GenericSharedPtr &gx ) = 0;
+	virtual bool IsExist( const GenericSharedPtr &gx ) = 0;
+};
 
 template<typename ELEMENT>
 struct Sequence : virtual GenericSequence, virtual Container< Itemiser::Element, GenericSharedPtr, deque< SharedPtr<ELEMENT> > >

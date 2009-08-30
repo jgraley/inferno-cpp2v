@@ -18,7 +18,7 @@
 // be a base (or compatible type) for the elements of all sub-containers.
 //
 template< class SUB_BASE, typename VALUE_TYPE >
-class ContainerBase : public virtual SUB_BASE
+class STLContainerBase : public virtual SUB_BASE
 {
 protected:
 	// Abstract base class for the iterators in sub-containers. This is just to get
@@ -85,14 +85,12 @@ public:
 // as the stl container class eg std::list<blah>
 //
 template<class SUB_BASE, typename VALUE_TYPE, class STLCONTAINER>
-struct Container : virtual ContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
+struct Container : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
 {
-	typedef STLCONTAINER STLContainer;
-	typedef ContainerBase<SUB_BASE, VALUE_TYPE> Base;
-
-	struct iterator : public STLContainer::iterator, public Base::iterator_base
+	struct iterator : public STLCONTAINER::iterator,
+	                  public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base
 	{
-		virtual shared_ptr<typename Base::iterator_base> Clone() const
+		virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
 		{
 			shared_ptr<iterator> ni( new iterator );
 			*ni = *this;
@@ -101,16 +99,16 @@ struct Container : virtual ContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
 
 		virtual iterator &operator++()
 		{
-		    STLContainer::iterator::operator++();
+			STLCONTAINER::iterator::operator++();
 		    return *this;
 		}
 
-		virtual typename STLContainer::value_type &operator*()
+		virtual typename STLCONTAINER::value_type &operator*()
 		{
-			return STLContainer::iterator::operator*();
+			return STLCONTAINER::iterator::operator*();
 		}
 
-		virtual bool operator==( const typename Base::iterator_base &ib )
+		virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib )
 		{
 			if( const iterator *pi = dynamic_cast<const iterator *>(&ib) )
 				return *pi == *this;
@@ -133,21 +131,21 @@ struct Container : virtual ContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
 
     virtual const iterator &begin()
     {
-    	my_begin.STLContainer::iterator::operator=( STLContainer::begin() );
+    	my_begin.STLCONTAINER::iterator::operator=( STLCONTAINER::begin() );
     	return my_begin;
     }
     virtual const iterator &end()
     {
-    	my_end.STLContainer::iterator::operator=( STLContainer::end() );
+    	my_end.STLCONTAINER::iterator::operator=( STLCONTAINER::end() );
     	return my_end;
     }
     virtual int size() const
     {
-        return STLContainer::size();
+        return STLCONTAINER::size();
     }
     virtual void clear()
     {
-    	return STLContainer::clear();
+    	return STLCONTAINER::clear();
     }
 };
 
