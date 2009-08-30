@@ -100,6 +100,7 @@ public:
         }
     }
     
+    // Colours are GraphVis colours as listed at http://www.graphviz.org/doc/info/colors.html
     string Colour( shared_ptr<Node> n )
     {
         if( dynamic_pointer_cast<Declaration>(n) )
