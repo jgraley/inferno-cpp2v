@@ -38,6 +38,8 @@ int main( int argc, char *argv[] )
         shared_ptr<SoftExpressonOfType> sseot( new SoftExpressonOfType );
         sa->operands.push_back( sseot );
         shared_ptr<Array> sar( new Array );
+//           sar->element = SharedPtr<Type>();
+//           sar->size = SharedPtr<Initialiser>();                
         sseot->type_pattern = sar;        
         shared_ptr<Expression> se( new Expression );
         sa->operands.push_back( se );
