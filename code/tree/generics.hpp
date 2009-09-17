@@ -11,6 +11,19 @@
 #include "clone.hpp"
 #include "common/magic.hpp"
 
+// Covariant NULL pointer bug
+//
+// JSG: There's an unfortunate bug in GCC 3.4.4 on cygwin whereby a covariant return thunk
+// for a pointer goes wrong when the pointer is NULL. We can end up dereferencing a NULL (or offset-from-NULL) 
+// pointer inside the thunk itself which is opaque code, not a lot of fun overall.
+//
+// It seems to be OK on GCC4 on Linux, and c++/20746 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=20746) seems to have a fix, 
+// but I think it only applies to GCC4 (4.0.2 and 4.1). 
+//
+// So I've just hacked covariant returns to not be covariant whenever I get a problem (just returns same as 
+// base class, is this "isovariant"?)
+//
+
 // Shared pointer wrapper with generic support
 
 struct Node;
@@ -46,9 +59,11 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
         return n;
     }
 
-    virtual ELEMENT *get()
+    virtual Node *get() // TODO should return ELEMENT, hacked due to covariant NULL pointer bug, see comment at top of file
     {
-    	return shared_ptr<ELEMENT>::get();
+    	ELEMENT *e = shared_ptr<ELEMENT>::get();
+    	TRACE("sp::get() returns %p\n", e );
+    	return e;
     }
 
     virtual void SetNodePtr( shared_ptr<Node> n )
@@ -77,12 +92,16 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
     SharedPtr( const shared_ptr<OTHER> &o ) : 
         shared_ptr<ELEMENT>( dynamic_pointer_cast<ELEMENT>(o) )
     {
-    	ASSERT( *this )("Tried to convert shared_ptr<> to wrong sort of SharedPtr<>");
+        // TODO support NULL pointers as input!
+    	if( o )
+    	    ASSERT( *this )("Tried to convert shared_ptr<> to wrong sort of SharedPtr<>");
     }
     SharedPtr( const GenericSharedPtr &g ) :
     	shared_ptr<ELEMENT>( dynamic_pointer_cast<ELEMENT>(g.GetNodePtr()) )
     {
-    	ASSERT( *this )("Tried to convert GenericSharedPtr to wrong sort of SharedPtr<>");
+        // TODO support NULL pointers as input!
+    	if( g )
+    	    ASSERT( *this )("Tried to convert GenericSharedPtr to wrong sort of SharedPtr<>");
     }
 };           
 
