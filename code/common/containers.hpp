@@ -30,6 +30,7 @@ protected:
 		virtual iterator_base &operator++() = 0;
 		virtual VALUE_TYPE &operator*() = 0; // GenericSharedPtr
 		virtual bool operator==( const iterator_base &ib ) = 0;
+		virtual void Overwrite( VALUE_TYPE &v ) = 0;
 	};
 
 public:
@@ -66,6 +67,11 @@ public:
 			return pib->operator==( *(i.pib) );
 		}
 
+		virtual void Overwrite( VALUE_TYPE &v )
+		{
+		    pib->Overwrite( v );
+		}
+		
 	private:
 		shared_ptr<iterator_base> pib;
 	};
@@ -114,6 +120,14 @@ struct Container : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
 				return *pi == *this;
 			else
 				return false; // comparing iterators of different types; must be from different containers
+		}
+		
+		virtual void Overwrite( VALUE_TYPE &v )
+		{
+		    // JSG this is the canonical behaviour for Overwrite(). But when a container doesn't allow
+		    // non-const access to elements (eg because it uses them for internal ordering) we will
+		    // do a delete()/insert() cycle. Thus, Overwrite() should not be assumed O(1)
+		    **this = v;
 		}
 	};
 
