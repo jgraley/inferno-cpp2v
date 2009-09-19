@@ -163,6 +163,50 @@ struct Container : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
     }
 };
 
+//
+// Iterator that points to a single object, no container required.
+// We do not support looping/incrementing or FOREACH (which requires a
+// container) but we do permit compare, deref and Overwrite()
+//
+template<class SUB_BASE, typename VALUE_TYPE>
+struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base
+{
+    VALUE_TYPE * const element;
 
+    PointIterator( VALUE_TYPE &i ) :
+        element(&i)
+    {        
+    }
+
+	virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
+	{
+		shared_ptr<PointIterator> ni( new PointIterator );
+		ni->element = element;
+		return ni;
+	}
+
+	virtual PointIterator &operator++()
+	{
+		ASSERTFAIL("Increment not allowed on point iterator");
+	}
+
+	virtual VALUE_TYPE &operator*()
+	{
+		return *element;
+	}
+
+	virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib )
+	{
+		if( const PointIterator *pi = dynamic_cast<const PointIterator *>(&ib) )
+			return pi->element == element;
+		else
+			return false; // comparing iterators of different types; must be from different containers
+	}
+	
+	virtual void Overwrite( VALUE_TYPE &v )
+	{
+	    *element = v;
+	}
+};
 
 #endif /* GENERICS_HPP */
