@@ -100,37 +100,31 @@ public:
 
 
 //
-// Template for containers that derive from ContainerBase.
-// Params as for ContainerBase except we now have to fill in STLCONTAINER
+// Abstract template for containers that will be use any STL container as
+// the actual implementation.
+// Params as for ContainerBase except we now have to fill in CONTAINER_IMPL
 // as the stl container class eg std::list<blah>
 //
-template<class SUB_BASE, typename VALUE_TYPE, class STLCONTAINER>
-struct Container : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
+template<class SUB_BASE, typename VALUE_TYPE, class CONTAINER_IMPL>
+struct STLContainer : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, CONTAINER_IMPL
 {
-	struct iterator : public STLCONTAINER::iterator,
+	struct iterator : public CONTAINER_IMPL::iterator,
 	                  public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base
 	{
-		virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
-		{
-			shared_ptr<iterator> ni( new iterator );
-			*ni = *this;
-			return ni;
-		}
-
 		virtual iterator &operator++()
 		{
-			STLCONTAINER::iterator::operator++();
+			CONTAINER_IMPL::iterator::operator++();
 		    return *this;
 		}
 
-		virtual const typename STLCONTAINER::value_type &operator*() const
+		virtual const typename CONTAINER_IMPL::value_type &operator*() const
 		{
-			return STLCONTAINER::iterator::operator*();
+			return CONTAINER_IMPL::iterator::operator*();
 		}
 
-		virtual const typename STLCONTAINER::value_type *operator->() const
+		virtual const typename CONTAINER_IMPL::value_type *operator->() const
 		{
-			return STLCONTAINER::iterator::operator->();
+			return CONTAINER_IMPL::iterator::operator->();
 		}
 
 		virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib ) const
@@ -138,23 +132,48 @@ struct Container : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
 		    TRACE();
             // JSG apparently there's no operator== in std::deque::iterator, which is odd since iterators 
             // are supposed to be Equality Comparable. So we just cast the types really carefully and use ==
-		    const typename STLCONTAINER::iterator *pi;
-			if( pi = dynamic_cast<const typename STLCONTAINER::iterator *>(&ib) )
-				return *(const typename STLCONTAINER::iterator *)this == *pi; 
+		    const typename CONTAINER_IMPL::iterator *pi;
+			if( pi = dynamic_cast<const typename CONTAINER_IMPL::iterator *>(&ib) )
+				return *(const typename CONTAINER_IMPL::iterator *)this == *pi; 
 			else
 				return false; // comparing iterators of different types; must be from different containers
-		}
-		
-		virtual void Overwrite( const VALUE_TYPE *v ) const
-		{
-		    // JSG this is the canonical behaviour for Overwrite(). But when a container doesn't allow
-		    // non-const access to elements (eg because it uses them for internal ordering) we will
-		    // do a delete()/insert() cycle. Thus, Overwrite() should not be assumed O(1)
-		    STLCONTAINER::iterator::operator*() = *v;
 		}
 	};
 
 	typedef iterator const_iterator;
+
+    virtual int size() const
+    {
+        return CONTAINER_IMPL::size();
+    }
+    virtual void clear()
+    {
+    	return CONTAINER_IMPL::clear();
+    }
+};
+
+//
+// Template for containers that use ordered STL containers as implementation
+// (basically vector, deque etc). Instantiate as per STLContainer.
+//
+template<class SUB_BASE, typename VALUE_TYPE, class CONTAINER_IMPL>
+struct STLSequence : virtual STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
+{
+	struct iterator : public STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>::iterator
+    {
+		virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
+		{
+			shared_ptr<iterator> ni( new iterator );
+			*ni = *this;
+			return ni;
+		}
+    	virtual void Overwrite( const VALUE_TYPE *v ) const
+		{
+		    // JSG Overwrite() just writes through the pointer got from dereferencing the iterator,
+		    // because in Sequences (ordererd containers) elements may be modified.
+		    CONTAINER_IMPL::iterator::operator*() = *v;
+		}
+	};
 
     // Covarient style only works with refs and pointers, so force begin/end to return refs safely
 	// This complies with STL's thread safety model. To quote SGI,
@@ -168,21 +187,56 @@ struct Container : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
 
     virtual const iterator &begin()
     {
-    	my_begin.STLCONTAINER::iterator::operator=( STLCONTAINER::begin() );
+    	my_begin.CONTAINER_IMPL::iterator::operator=( CONTAINER_IMPL::begin() );
     	return my_begin;
     }
     virtual const iterator &end()
     {
-    	my_end.STLCONTAINER::iterator::operator=( STLCONTAINER::end() );
+    	my_end.CONTAINER_IMPL::iterator::operator=( CONTAINER_IMPL::end() );
     	return my_end;
     }
-    virtual int size() const
+};
+
+//
+// Template for containers that use unordered STL containers as implementation
+// (basically associative containers). Instantiate as per STLContainer.
+//
+template<class SUB_BASE, typename VALUE_TYPE, class CONTAINER_IMPL>
+struct STLCollection : virtual STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
+{
+	struct iterator : public STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>::iterator
     {
-        return STLCONTAINER::size();
+		virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
+		{
+			shared_ptr<iterator> ni( new iterator );
+			*ni = *this;
+			return ni;
+		}
+    	virtual void Overwrite( const VALUE_TYPE *v ) const
+		{
+		    // Collections (unordered containers) do not allow elements to be modified
+		    // because the internal data structure depends on element values. So we 
+		    // erase the old element and insert the new one; thus, Overwrite() should not be assumed O(1)
+		    ((CONTAINER_IMPL *)owner)->erase( *this );
+		    pair<typename CONTAINER_IMPL::iterator, bool> result = ((CONTAINER_IMPL *)owner)->insert( *v );
+		    ASSERT( result.second ); // insert must succeed (see SGI docs)
+		    *(typename CONTAINER_IMPL::iterator *)this = result.first; // become an iterator for the newly inserted element
+		}
+        STLCollection<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL> *owner;
+	};
+
+    iterator my_begin, my_end;
+    virtual const iterator &begin()
+    {
+    	my_begin.CONTAINER_IMPL::iterator::operator=( CONTAINER_IMPL::begin() );
+    	my_begin.owner = this;
+    	return my_begin;
     }
-    virtual void clear()
+    virtual const iterator &end()
     {
-    	return STLCONTAINER::clear();
+    	my_end.CONTAINER_IMPL::iterator::operator=( CONTAINER_IMPL::end() );
+    	my_end.owner = this;
+    	return my_end;
     }
 };
 

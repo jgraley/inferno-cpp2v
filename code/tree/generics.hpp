@@ -119,7 +119,7 @@ struct GenericSequence : virtual GenericContainer
 };
 
 template<typename ELEMENT>
-struct Sequence : virtual GenericSequence, virtual Container< Itemiser::Element, GenericSharedPtr, deque< SharedPtr<ELEMENT> > >
+struct Sequence : virtual GenericSequence, virtual STLSequence< Itemiser::Element, GenericSharedPtr, deque< SharedPtr<ELEMENT> > >
 {
 	typedef deque< SharedPtr<ELEMENT> > RawSequence;
     virtual typename RawSequence::value_type &operator[]( int i )
@@ -148,7 +148,7 @@ struct GenericCollection : virtual GenericContainer
 };
 
 template<typename ELEMENT>
-struct Collection : GenericCollection, Container< Itemiser::Element, GenericSharedPtr, set< SharedPtr<ELEMENT> > >
+struct Collection : GenericCollection, STLCollection< Itemiser::Element, GenericSharedPtr, set< SharedPtr<ELEMENT> > >
 {
 	typedef set< SharedPtr<ELEMENT> > RawCollection;
 	virtual void insert( const GenericSharedPtr &gx )
