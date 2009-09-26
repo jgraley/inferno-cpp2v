@@ -123,12 +123,12 @@ struct Container : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
 		    return *this;
 		}
 
-		virtual typename STLCONTAINER::value_type &operator*() const
+		virtual const typename STLCONTAINER::value_type &operator*() const
 		{
 			return STLCONTAINER::iterator::operator*();
 		}
 
-		virtual typename STLCONTAINER::value_type *operator->() const
+		virtual const typename STLCONTAINER::value_type *operator->() const
 		{
 			return STLCONTAINER::iterator::operator->();
 		}
@@ -136,9 +136,11 @@ struct Container : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
 		virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib ) const
 		{
 		    TRACE();
+            // JSG apparently there's no operator== in std::deque::iterator, which is odd since iterators 
+            // are supposed to be Equality Comparable. So we just cast the types really carefully and use ==
 		    const typename STLCONTAINER::iterator *pi;
 			if( pi = dynamic_cast<const typename STLCONTAINER::iterator *>(&ib) )
-				return *(const typename STLCONTAINER::iterator *)this == *pi;
+				return *(const typename STLCONTAINER::iterator *)this == *pi; 
 			else
 				return false; // comparing iterators of different types; must be from different containers
 		}
@@ -148,7 +150,7 @@ struct Container : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
 		    // JSG this is the canonical behaviour for Overwrite(). But when a container doesn't allow
 		    // non-const access to elements (eg because it uses them for internal ordering) we will
 		    // do a delete()/insert() cycle. Thus, Overwrite() should not be assumed O(1)
-		    **this = *v;
+		    STLCONTAINER::iterator::operator*() = *v;
 		}
 	};
 
