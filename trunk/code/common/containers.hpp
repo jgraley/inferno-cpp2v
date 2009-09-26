@@ -28,10 +28,10 @@ public:
 		// TODO const iterator and const versions of begin(), end()
 		virtual shared_ptr<iterator_base> Clone() const = 0; // Make another copy of the present iterator
 		virtual iterator_base &operator++() = 0;
-		const virtual VALUE_TYPE &operator*() = 0; 
-		const virtual VALUE_TYPE *operator->() = 0; 
-		virtual bool operator==( const iterator_base &ib ) = 0;
-		virtual void Overwrite( const VALUE_TYPE *v ) = 0;
+		const virtual VALUE_TYPE &operator*() const = 0; 
+		const virtual VALUE_TYPE *operator->() const = 0; 
+		virtual bool operator==( const iterator_base &ib ) const = 0;
+		virtual void Overwrite( const VALUE_TYPE *v ) const = 0;
 	};
 
 public:
@@ -61,27 +61,27 @@ public:
 			return *this;
 		}
 
-		const value_type &operator*()
+		const value_type &operator*() const 
 		{
 			return pib->operator*();
 		}
 
-		const value_type *operator->()
+		const value_type *operator->() const
 		{
 			return pib->operator->();
 		}
 
-		bool operator==( const iterator &i )
+		bool operator==( const iterator &i ) const
 		{
 			return pib->operator==( *(i.pib) );
 		}
 
-		bool operator!=( const iterator &i )
+		bool operator!=( const iterator &i ) const
 		{
 			return !operator==( i );
 		}
 
-		void Overwrite( const VALUE_TYPE *v )
+		void Overwrite( const VALUE_TYPE *v ) const
 		{
 		    pib->Overwrite( v );
 		}
@@ -123,25 +123,27 @@ struct Container : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
 		    return *this;
 		}
 
-		virtual typename STLCONTAINER::value_type &operator*()
+		virtual typename STLCONTAINER::value_type &operator*() const
 		{
 			return STLCONTAINER::iterator::operator*();
 		}
 
-		virtual typename STLCONTAINER::value_type *operator->()
+		virtual typename STLCONTAINER::value_type *operator->() const
 		{
 			return STLCONTAINER::iterator::operator->();
 		}
 
-		virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib )
+		virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib ) const
 		{
-			if( const iterator *pi = dynamic_cast<const iterator *>(&ib) )
-				return *pi == *this;
+		    TRACE();
+		    const typename STLCONTAINER::iterator *pi;
+			if( pi = dynamic_cast<const typename STLCONTAINER::iterator *>(&ib) )
+				return *(const typename STLCONTAINER::iterator *)this == *pi;
 			else
 				return false; // comparing iterators of different types; must be from different containers
 		}
 		
-		virtual void Overwrite( const VALUE_TYPE *v )
+		virtual void Overwrite( const VALUE_TYPE *v ) const
 		{
 		    // JSG this is the canonical behaviour for Overwrite(). But when a container doesn't allow
 		    // non-const access to elements (eg because it uses them for internal ordering) we will
@@ -211,19 +213,19 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
 		ASSERTFAIL("Increment not allowed on point iterator");
 	}
 
-	virtual VALUE_TYPE &operator*()
+	virtual VALUE_TYPE &operator*() const
 	{
 	    ASSERT(element)("Tried to dereference NULL PointIterator");
 		return *element;
 	}
 
-	virtual VALUE_TYPE *operator->()
+	virtual VALUE_TYPE *operator->() const
 	{
 	    ASSERT(element)("Tried to dereference NULL PointIterator");
 		return element;
 	}
 
-	virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib )
+	virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib ) const
 	{
 		if( const PointIterator *pi = dynamic_cast<const PointIterator *>(&ib) )
 			return pi->element == element;
@@ -231,7 +233,7 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
 			return false; // comparing iterators of different types; must be from different containers
 	}
 	
-	virtual void Overwrite( const VALUE_TYPE *v )
+	virtual void Overwrite( const VALUE_TYPE *v ) const
 	{
 	    *element = *v;
 	}
