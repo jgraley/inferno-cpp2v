@@ -164,7 +164,7 @@ public:
         	if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )
             {
                 int j=0;
-        		FOREACH( GenericSharedPtr &p, *seq ) //for( int j=0; j<seq->size(); j++ )
+        		FOREACH( const GenericSharedPtr &p, *seq ) //for( int j=0; j<seq->size(); j++ )
                     s += DoLink( n, SeqField(i, j++), p );
             }            
             else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )         

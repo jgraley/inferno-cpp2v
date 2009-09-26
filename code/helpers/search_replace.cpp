@@ -188,18 +188,15 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
 
 // Search supplied program for a match to the configured search pattern.
 // If found, return double pointer to assist replace algorithm.
-bool SearchReplace::Search( shared_ptr<Node> program, GenericContainer::iterator &gp )
+bool SearchReplace::Search( shared_ptr<Node> program, GenericContainer::iterator &it )
 {
     Walk w( program );
     while(!w.Done())
     {
-        shared_ptr<Node> x = w.Get();
+        it = w.GetIterator(); // get an iterator for current position in tree, so we can change it                    
         ClearKeys();
-        if( IsMatchPattern( x, search_pattern ) )
-        {
-            gp = w.GetGeneric();                            
+        if( IsMatchPattern( *it, search_pattern ) )
             return true;
-        }
         w.AdvanceInto(); 
     }    
     
@@ -215,8 +212,12 @@ void SearchReplace::ClearPtrs( shared_ptr<Node> dest )
     {
         if( GenericSequence *dest_seq = dynamic_cast<GenericSequence *>(dest_memb[i]) )                
         {
-            FOREACH( GenericSharedPtr &p, *dest_seq )
-                p = shared_ptr<Node>();
+//            FOREACH( GenericSharedPtr &p, *dest_seq )
+        	for( GenericContainer::iterator i=dest_seq->begin(); i!=dest_seq->end(); ++i )
+            {
+                SharedPtr<Node> p;
+                i.Overwrite( &p ); // TODO using Overwrite() to support unordered - but does this fuction even make sense forn unordered?
+            }
         }            
         else if( GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]) )         
         {
@@ -262,7 +263,7 @@ void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source,
             if( source_seq->size() )
             {
             	dest_seq->clear();
-				FOREACH( GenericSharedPtr &p, *source_seq ) //for( int j=0; j<source_seq->size(); j++ )
+				FOREACH( const GenericSharedPtr &p, *source_seq ) //for( int j=0; j<source_seq->size(); j++ )
 				{
 					ASSERT( p ); // present simplified scheme disallows NULL, see above
 					dest_seq->push_back( DuplicateSubtree( p, under_substitution ) );
@@ -353,12 +354,12 @@ void SearchReplace::Replace( GenericContainer::iterator target )
 void SearchReplace::operator()( shared_ptr<Program> p )
 {
     program = p;
+    GenericContainer::iterator it;
     while(1)
     {
-        GenericContainer::iterator gp;
-        bool found = Search( program, gp );        
+        bool found = Search( program, it );        
         if( found )
-            Replace( gp );
+            Replace( it );
         else
             break;
     }

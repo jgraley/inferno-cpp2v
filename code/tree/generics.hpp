@@ -33,7 +33,7 @@ struct GenericSharedPtr : Itemiser::Element
     virtual shared_ptr<Node> GetNodePtr() const = 0;
     virtual void SetNodePtr( shared_ptr<Node> n ) = 0;
     virtual operator bool() const = 0; // for testing against NULL
-    virtual Node *get() = 0; // As per shared_ptr<>, ie gets the actual C pointer
+    virtual Node *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
 
     // Nice operators, make less typing, make you happy. Yay!
     operator shared_ptr<Node>() const
@@ -59,7 +59,7 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
         return n;
     }
 
-    virtual Node *get() // TODO should return ELEMENT, hacked due to covariant NULL pointer bug, see comment at top of file
+    virtual Node *get() const // TODO should return ELEMENT, hacked due to covariant NULL pointer bug, see comment at top of file
     {
     	ELEMENT *e = shared_ptr<ELEMENT>::get();
     	TRACE("sp::get() returns %p\n", e );

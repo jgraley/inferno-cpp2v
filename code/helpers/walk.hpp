@@ -22,7 +22,7 @@ public:
     Walk( shared_ptr<Node> r );        
     bool Done();
     int Depth();
-    GenericContainer::iterator GetGeneric();
+    GenericContainer::iterator GetIterator();
     shared_ptr<Node> Get();
     string GetPathString();
     void AdvanceOver(); 
