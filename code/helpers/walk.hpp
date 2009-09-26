@@ -7,7 +7,7 @@ class Walk
 {
     struct Frame
     {
-        vector< GenericSharedPtr * > children;
+        vector< GenericContainer::iterator > children;
         int index;
     };
     
@@ -22,7 +22,7 @@ public:
     Walk( shared_ptr<Node> r );        
     bool Done();
     int Depth();
-    GenericSharedPtr *GetGeneric();
+    GenericContainer::iterator GetGeneric();
     shared_ptr<Node> Get();
     string GetPathString();
     void AdvanceOver(); 

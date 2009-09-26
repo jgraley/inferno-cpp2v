@@ -188,7 +188,7 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
 
 // Search supplied program for a match to the configured search pattern.
 // If found, return double pointer to assist replace algorithm.
-GenericSharedPtr *SearchReplace::Search( shared_ptr<Node> program )
+bool SearchReplace::Search( shared_ptr<Node> program, GenericContainer::iterator &gp )
 {
     Walk w( program );
     while(!w.Done())
@@ -196,11 +196,14 @@ GenericSharedPtr *SearchReplace::Search( shared_ptr<Node> program )
         shared_ptr<Node> x = w.Get();
         ClearKeys();
         if( IsMatchPattern( x, search_pattern ) )
-            return w.GetGeneric();                            
+        {
+            gp = w.GetGeneric();                            
+            return true;
+        }
         w.AdvanceInto(); 
     }    
     
-    return NULL;
+    return false;
 }
 
 
@@ -336,10 +339,11 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool 
 // Perform the configured replacement at the supplied target.
 // Note target is a double pointer, since we wish to enact the
 // replacement by changing a SharedPtr somewhere.
-void SearchReplace::Replace( GenericSharedPtr *target )
+void SearchReplace::Replace( GenericContainer::iterator target )
 {
     ASSERT( replace_pattern );
-    *target = DuplicateSubtree( replace_pattern );
+    SharedPtr<Node> nn( DuplicateSubtree( replace_pattern ) );
+    target.Overwrite( &nn );
 }
 
 
@@ -351,8 +355,9 @@ void SearchReplace::operator()( shared_ptr<Program> p )
     program = p;
     while(1)
     {
-        GenericSharedPtr *gp = Search( program );        
-        if( gp )
+        GenericContainer::iterator gp;
+        bool found = Search( program, gp );        
+        if( found )
             Replace( gp );
         else
             break;
