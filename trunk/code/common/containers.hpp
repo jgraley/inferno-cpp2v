@@ -28,8 +28,8 @@ public:
 		// TODO const iterator and const versions of begin(), end()
 		virtual shared_ptr<iterator_base> Clone() const = 0; // Make another copy of the present iterator
 		virtual iterator_base &operator++() = 0;
-		virtual VALUE_TYPE &operator*() = 0; 
-		virtual VALUE_TYPE *operator->() = 0; 
+		const virtual VALUE_TYPE &operator*() = 0; 
+		const virtual VALUE_TYPE *operator->() = 0; 
 		virtual bool operator==( const iterator_base &ib ) = 0;
 		virtual void Overwrite( const VALUE_TYPE *v ) = 0;
 	};
@@ -61,12 +61,12 @@ public:
 			return *this;
 		}
 
-		value_type &operator*()
+		const value_type &operator*()
 		{
 			return pib->operator*();
 		}
 
-		value_type *operator->()
+		const value_type *operator->()
 		{
 			return pib->operator->();
 		}

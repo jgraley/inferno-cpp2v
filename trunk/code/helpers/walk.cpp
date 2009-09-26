@@ -83,7 +83,7 @@ int Walk::Depth()
     return state.size();
 }
     
-GenericContainer::iterator Walk::GetGeneric()
+GenericContainer::iterator Walk::GetIterator()
 {
     ASSERT( !state.empty() );        
     ASSERT( IsValid() );
@@ -95,8 +95,7 @@ GenericContainer::iterator Walk::GetGeneric()
 
 shared_ptr<Node> Walk::Get()
 {
-    GenericContainer::iterator gp = GetGeneric();
-    return *gp;
+    return *GetIterator();
 }
 
 string Walk::GetPathString()
