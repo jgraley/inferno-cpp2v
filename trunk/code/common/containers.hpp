@@ -20,7 +20,7 @@
 template< class SUB_BASE, typename VALUE_TYPE >
 class STLContainerBase : public virtual SUB_BASE
 {
-protected:
+public:
 	// Abstract base class for the iterators in sub-containers. This is just to get
 	// virtual calls - this is not the generic iterator.
 	struct iterator_base
@@ -28,7 +28,8 @@ protected:
 		// TODO const iterator and const versions of begin(), end()
 		virtual shared_ptr<iterator_base> Clone() const = 0; // Make another copy of the present iterator
 		virtual iterator_base &operator++() = 0;
-		virtual VALUE_TYPE &operator*() = 0; // GenericSharedPtr
+		virtual VALUE_TYPE &operator*() = 0; 
+		virtual VALUE_TYPE *operator->() = 0; 
 		virtual bool operator==( const iterator_base &ib ) = 0;
 		virtual void Overwrite( VALUE_TYPE &v ) = 0;
 	};
@@ -44,6 +45,9 @@ public:
 		typedef int difference_type;
 		typedef value_type *pointer;
 		typedef value_type &reference;
+
+		iterator() :
+			pib( shared_ptr<iterator_base>() ) {}
 
 		iterator( const iterator_base &ib ) :
 			pib( ib.Clone() ) {}
@@ -62,16 +66,30 @@ public:
 			return pib->operator*();
 		}
 
+		value_type *operator->()
+		{
+			return pib->operator->();
+		}
+
 		bool operator==( const iterator &i )
 		{
 			return pib->operator==( *(i.pib) );
 		}
 
-		virtual void Overwrite( VALUE_TYPE &v )
+		bool operator!=( const iterator &i )
+		{
+			return !operator==( i );
+		}
+
+		void Overwrite( VALUE_TYPE &v )
 		{
 		    pib->Overwrite( v );
 		}
-		
+		void Overwrite( VALUE_TYPE *v )
+		{
+		    pib->Overwrite( *v );
+		}
+				
 	private:
 		shared_ptr<iterator_base> pib;
 	};
@@ -112,6 +130,11 @@ struct Container : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
 		virtual typename STLCONTAINER::value_type &operator*()
 		{
 			return STLCONTAINER::iterator::operator*();
+		}
+
+		virtual typename STLCONTAINER::value_type *operator->()
+		{
+			return STLCONTAINER::iterator::operator->();
 		}
 
 		virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib )
@@ -166,22 +189,24 @@ struct Container : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, STLCONTAINER
 //
 // Iterator that points to a single object, no container required.
 // We do not support looping/incrementing or FOREACH (which requires a
-// container) but we do permit compare, deref and Overwrite()
+// container) but we do permit compare, deref and Overwrite(). This lets
+// STLContainerBase::iterator be used generically even when objects are
+// not in containers.
 //
 template<class SUB_BASE, typename VALUE_TYPE>
 struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base
 {
     VALUE_TYPE * const element;
 
-    PointIterator( VALUE_TYPE &i ) :
-        element(&i)
-    {        
+    PointIterator( VALUE_TYPE *i ) :
+        element(i)
+    {      
+        ASSERT(i); // We don't support NULL  
     }
 
 	virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
 	{
-		shared_ptr<PointIterator> ni( new PointIterator );
-		ni->element = element;
+		shared_ptr<PointIterator> ni( new PointIterator(element) );
 		return ni;
 	}
 
@@ -192,7 +217,14 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
 
 	virtual VALUE_TYPE &operator*()
 	{
+	    ASSERT(element)("Tried to dereference NULL PointIterator");
 		return *element;
+	}
+
+	virtual VALUE_TYPE *operator->()
+	{
+	    ASSERT(element)("Tried to dereference NULL PointIterator");
+		return element;
 	}
 
 	virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib )

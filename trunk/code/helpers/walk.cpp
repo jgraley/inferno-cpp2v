@@ -39,12 +39,13 @@ void Walk::Push( shared_ptr<Node> n )
     {
         if( GenericContainer *con = dynamic_cast<GenericSequence *>(members[i]) )
         {
-        	FOREACH( GenericSharedPtr &n, *con )
-                f.children.push_back( &n );
+        	//FOREACH( GenericSharedPtr &n, *con )
+        	for( GenericContainer::iterator i=con->begin(); i!=con->end(); ++i )
+                f.children.push_back( i );
         }            
         else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )         
         {
-            f.children.push_back( ptr );
+            f.children.push_back( GenericPointIterator(ptr) );
         }
         else
         {
@@ -65,7 +66,9 @@ Walk::Walk( shared_ptr<Node> r ) :
     root( r ) 
 {
     Frame f;
-    f.children.push_back( &root );
+    GenericSharedPtr *gsp = &root;
+    GenericPointIterator gpi(gsp);
+    f.children.push_back( gpi );
     f.index = 0;
     state.push( f );
 }        
@@ -80,7 +83,7 @@ int Walk::Depth()
     return state.size();
 }
     
-GenericSharedPtr *Walk::GetGeneric()
+GenericContainer::iterator Walk::GetGeneric()
 {
     ASSERT( !state.empty() );        
     ASSERT( IsValid() );
@@ -92,8 +95,7 @@ GenericSharedPtr *Walk::GetGeneric()
 
 shared_ptr<Node> Walk::Get()
 {
-    GenericSharedPtr *gp = GetGeneric();
-    ASSERT( gp );
+    GenericContainer::iterator gp = GetGeneric();
     return *gp;
 }
 
@@ -107,8 +109,7 @@ string Walk::GetPathString()
         ps.pop();
         
         // node type
-        GenericSharedPtr *child = f.children[f.index];
-        ASSERT( child );
+        GenericContainer::iterator child = f.children[f.index];
         if( *child )
             s = TypeInfo(*(child->get())).name() + s;
         else

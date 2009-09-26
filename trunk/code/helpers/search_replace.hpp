@@ -90,11 +90,11 @@ private:
     
     bool IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pattern ); // only look inside node (type, value)
     bool IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pattern ); // look at node and children
-    GenericSharedPtr *Search( shared_ptr<Node> program );
+    bool Search( shared_ptr<Node> program, GenericContainer::iterator &gp );
     void ClearPtrs( shared_ptr<Node> dest );
     void OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source, bool under_substitution );
     shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x, bool under_substitution=false );
-    void Replace( GenericSharedPtr *target );    
+    void Replace( GenericContainer::iterator target );    
     const MatchSet *FindMatchSet( shared_ptr<Node> node );
     void ClearKeys(); 
 };

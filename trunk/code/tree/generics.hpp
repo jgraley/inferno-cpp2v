@@ -109,6 +109,8 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
 
 typedef STLContainerBase<Itemiser::Element, GenericSharedPtr> GenericContainer;
 
+typedef PointIterator<Itemiser::Element, GenericSharedPtr> GenericPointIterator;
+
 struct GenericSequence : virtual GenericContainer
 {
     virtual GenericSharedPtr &operator[]( int i ) = 0;
