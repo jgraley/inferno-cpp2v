@@ -75,10 +75,10 @@ struct Declaration : Statement { NODE_FUNCTIONS };
 // The top level of a program is considered a sequence of declarations.
 // main() would typically be a function instance somewhere in this sequence.
 // TODO decide whether to allow/encourage making Sequence/SharedPtr be
-// a base class - seems to work OK in sear/replace etc since itemise 
+// a base class - seems to work OK in search/replace etc since itemise
 // doesn't differentiate.
 struct Program : Node,
-                 Sequence<Declaration>
+                 Collection<Declaration>
 {
     NODE_FUNCTIONS
 };
@@ -86,7 +86,7 @@ struct Program : Node,
 //////////////////////////// Literals ///////////////////////////////
 
 // Means a property that can be used as a literal in a program, so
-// that we do not need to duplicate literals and proeprties.
+// that we do not need to duplicate literals and properties.
 struct Literal : Expression,
                  Property
 {
@@ -411,7 +411,7 @@ struct Typedef : UserType
 struct Record : UserType
 {
     NODE_FUNCTIONS
-    Sequence<Declaration> members;
+    Collection<Declaration> members;
 };
 
 // A union, as per Record.

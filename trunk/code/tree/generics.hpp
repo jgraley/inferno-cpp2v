@@ -157,7 +157,17 @@ struct Collection : GenericCollection, STLCollection< Itemiser::Element, Generic
 		typename RawCollection::value_type sx(gx);
 		RawCollection::insert( sx );
 	}
+	virtual void insert( const shared_ptr<Node> &gx )
+	{
+		typename RawCollection::value_type sx(gx);
+		RawCollection::insert( sx );
+	}
 	virtual void erase( const GenericSharedPtr &gx )
+	{
+		typename RawCollection::value_type sx(gx);
+		RawCollection::erase( sx );
+	}
+	virtual void erase( const shared_ptr<Node> &gx )
 	{
 		typename RawCollection::value_type sx(gx);
 		RawCollection::erase( sx );

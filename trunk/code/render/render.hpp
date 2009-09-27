@@ -717,7 +717,7 @@ private:
         return s;
     }
     
-    string RenderDeclarationCollection( Sequence<Declaration> sd,
+    string RenderDeclarationCollection( GenericContainer &sd,
 			                            string separator, 
 			                            bool seperate_last, 
 			                            shared_ptr<AccessSpec> init_access = shared_ptr<AccessSpec>(),
