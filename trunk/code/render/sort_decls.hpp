@@ -13,7 +13,7 @@ bool IsDependOn( shared_ptr<Declaration> a, shared_ptr<Declaration> b, bool igno
 // Sort some declarations into an order that will compile successfully.
 // Optionally ignore pointers and references to records: they can be cyclic and so cannot be sorted
 // on. Set to "true" if incomplete declarations for all records have already been emitted. 
-Sequence<Declaration> SortDecls( Sequence<Declaration> c, bool ignore_indirection_to_record );
+Sequence<Declaration> SortDecls( GenericContainer &c, bool ignore_indirection_to_record );
 
 // Mix them up randomly!!
 Sequence<Declaration> JumbleDecls( Sequence<Declaration> c );

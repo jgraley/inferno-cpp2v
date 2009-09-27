@@ -118,6 +118,7 @@ struct GenericSequence : virtual GenericContainer
 	virtual void push_back( const shared_ptr<Node> &gx ) = 0;
 };
 
+
 template<typename ELEMENT>
 struct Sequence : virtual GenericSequence, virtual STLSequence< Itemiser::Element, GenericSharedPtr, deque< SharedPtr<ELEMENT> > >
 {

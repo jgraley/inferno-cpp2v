@@ -53,7 +53,7 @@ bool IsDependOn( shared_ptr<Declaration> a, shared_ptr<Declaration> b, bool igno
 }
 
 
-Sequence<Declaration> SortDecls( Sequence<Declaration> c, bool ignore_indirection_to_record )
+Sequence<Declaration> SortDecls( GenericContainer &c, bool ignore_indirection_to_record )
 {
 	Sequence<Declaration> s;
     int ocs = c.size();
@@ -61,14 +61,15 @@ Sequence<Declaration> SortDecls( Sequence<Declaration> c, bool ignore_indirectio
 	// Go on 'till all the decls in the collection are used up
 	while( !c.empty() )
 	{
-		Sequence<Declaration>::iterator ai;
+		GenericContainer::iterator ai;
 		
 		for( ai = c.begin(); ai != c.end(); ++ai )
 		{
 			bool a_has_deps=false;
-			FOREACH( shared_ptr<Declaration> b, c )
+			FOREACH( const SharedPtr<Declaration> &b, c )
 		    {
-		    	a_has_deps |= IsDependOn( *ai, b, ignore_indirection_to_record );
+		        SharedPtr<Declaration> aid = dynamic_cast< const SharedPtr<Declaration> & >(*ai); 
+		    	a_has_deps |= IsDependOn( aid, b, ignore_indirection_to_record );
 		    }
 		    if( !a_has_deps )
 		        break;
