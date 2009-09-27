@@ -717,7 +717,7 @@ private:
         return s;
     }
     
-    string RenderDeclarationCollection( Sequence<Declaration> &sd, 
+    string RenderDeclarationCollection( Sequence<Declaration> sd,
 			                            string separator, 
 			                            bool seperate_last, 
 			                            shared_ptr<AccessSpec> init_access = shared_ptr<AccessSpec>(),
@@ -729,7 +729,7 @@ private:
         //sd = ReverseDecls( sd );
         //sd = JumbleDecls( sd );
         
-        Sequence<Declaration> sorted = sd;//SortDecls( sd, true );          
+        Sequence<Declaration> sorted = SortDecls( sd, true );
         
         string s;
         // Emit an incomplete for each record
@@ -739,6 +739,7 @@ private:
                     s += RenderDeclaration( r, separator, init_access ? &init_access : NULL, showtype, true );
         
         s += RenderSequence( sorted, separator, seperate_last, init_access, showtype );
+        TRACE();
         return s;        
     }
 };

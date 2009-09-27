@@ -130,7 +130,6 @@ struct STLContainer : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, CONTAINER_
 
 		virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib ) const
 		{
-		    TRACE();
             // JSG apparently there's no operator== in std::deque::iterator, which is odd since iterators 
             // are supposed to be Equality Comparable. So we just cast the types really carefully and use ==
 		    const typename CONTAINER_IMPL::iterator *pi;

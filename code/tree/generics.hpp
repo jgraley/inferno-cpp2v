@@ -62,7 +62,7 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
     virtual Node *get() const // TODO should return ELEMENT, hacked due to covariant NULL pointer bug, see comment at top of file
     {
     	ELEMENT *e = shared_ptr<ELEMENT>::get();
-    	TRACE("sp::get() returns %p\n", e );
+    	//TRACE("sp::get() returns %p\n", e );
     	return e;
     }
 
