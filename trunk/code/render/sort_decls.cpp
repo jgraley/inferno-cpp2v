@@ -58,15 +58,20 @@ Sequence<Declaration> SortDecls( GenericContainer &c, bool ignore_indirection_to
 	Sequence<Declaration> s;
     int ocs = c.size();
     
+    // Our algorithm will modify the source container, so make a copy of it
+    Collection<Declaration> cc;
+    GenericContainer::iterator ai;
+    for( ai = c.begin(); ai != c.end(); ++ai )
+    	cc.insert( *ai );
+
 	// Go on 'till all the decls in the collection are used up
-	while( !c.empty() )
+	while( !cc.empty() )
 	{
-		GenericContainer::iterator ai;
-		
-		for( ai = c.begin(); ai != c.end(); ++ai )
+		Collection<Declaration>::iterator ai;
+		for( ai = cc.begin(); ai != cc.end(); ++ai )
 		{
 			bool a_has_deps=false;
-			FOREACH( const SharedPtr<Declaration> &b, c )
+			FOREACH( const SharedPtr<Declaration> &b, cc )
 		    {
 		        SharedPtr<Declaration> aid = dynamic_cast< const SharedPtr<Declaration> & >(*ai); 
 		    	a_has_deps |= IsDependOn( aid, b, ignore_indirection_to_record );
@@ -74,13 +79,12 @@ Sequence<Declaration> SortDecls( GenericContainer &c, bool ignore_indirection_to
 		    if( !a_has_deps )
 		        break;
 		}
-		ASSERT( ai != c.end() );//("failed to find a decl to add without dependencies");
+		ASSERT( ai != cc.end() );//("failed to find a decl to add without dependencies");
 		s.push_back(*ai);
-		c.erase(ai);
+		cc.erase(*ai);
 		//TRACE("%d %d\n", s.size(), c.size() );
 	}
-	
-	
+
 	ASSERT( s.size() == ocs );
 	return s;
 }
