@@ -125,7 +125,7 @@ private:
         clang::Preprocessor &preprocessor;
         clang::TargetInfo &target_info;
 
-        stack< Sequence<Declaration> * > inferno_scope_stack;
+        stack< Collection<Declaration> * > inferno_scope_stack;
         RCHold<Declaration, DeclTy *> hold_decl;
         RCHold<Base, DeclTy *> hold_base;
         RCHold<Expression, ExprTy *> hold_expr;
@@ -483,7 +483,7 @@ private:
                 access = shared_ptr<Private>(new Private); // Most scopes are private unless specified otherwise
 
             shared_ptr<Instance> o(new Instance());
-            all_decls->push_back(o);
+            all_decls->insert(o);
 
             clang::IdentifierInfo *ID = D.getIdentifier();
             if(ID)
@@ -510,7 +510,7 @@ private:
         shared_ptr<Typedef> CreateTypedefNode( clang::Scope *S, clang::Declarator &D )
         {
             shared_ptr<Typedef> t(new Typedef);
-            all_decls->push_back(t);
+            all_decls->insert(t);
             clang::IdentifierInfo *ID = D.getIdentifier();
             if(ID)
             {
@@ -591,13 +591,13 @@ private:
             TRACE("Scope flags %x ", S->getFlags() );
             if( decl_to_insert )
             {
-                inferno_scope_stack.top()->push_back( decl_to_insert );
+                inferno_scope_stack.top()->insert( decl_to_insert );
                 backing_paired_decl[d] = decl_to_insert;
                 decl_to_insert = shared_ptr<Declaration>(); // don't need to generate it again
                 TRACE("inserted decl\n" );
             }
 
-            inferno_scope_stack.top()->push_back( d );
+            inferno_scope_stack.top()->insert( d );
             TRACE("no insert\n" );
             return hold_decl.ToRaw( d );
         }
@@ -690,7 +690,7 @@ private:
             if( shared_ptr<Procedure> pp = dynamic_pointer_cast<Procedure>( o->type ) )
                 AddParamsToScope( pp, FnBodyScope );
 
-            inferno_scope_stack.push( new Sequence<Declaration> );
+            inferno_scope_stack.push( new Collection<Declaration> );
 
             return hold_decl.ToRaw( o );
         }
@@ -1213,7 +1213,7 @@ private:
                     ASSERTFAIL("Unknown type spec type");
                     break;
             }
-            all_decls->push_back(h);
+            all_decls->insert(h);
 
             if(Name)
             {
@@ -1422,7 +1422,7 @@ private:
                                           clang::SourceLocation EqualLoc, ExprTy *Val)
         {
             shared_ptr<Instance> o(new Instance());
-            all_decls->push_back(o);
+            all_decls->insert(o);
             o->identifier = CreateInstanceIdentifier(Id);
             o->storage = shared_new<Static>();
             o->constancy = shared_new<Const>(); // static const member does not consume storage!!
@@ -1458,7 +1458,7 @@ private:
             shared_ptr<Enum> e( dynamic_pointer_cast<Enum>(d) );
             ASSERT( e && "expected the declaration to be an enum");
             for( int i=0; i<NumElements; i++ )
-               e->members.push_back( hold_decl.FromRaw( Elements[i] ) );
+               e->members.insert( hold_decl.FromRaw( Elements[i] ) );
         }
 
         /// ParsedFreeStandingDeclSpec - This method is invoked when a declspec with
@@ -1479,12 +1479,13 @@ private:
 
             // See if the declaration is already there (due to forwarding using
             // incomplete struct). If so, do not add it again
-            Sequence<Declaration> &sd = *(inferno_scope_stack.top());
-            for( int i=0; i<sd.size(); i++ )
-                if( shared_ptr<Declaration>(sd[i]) == d )
+            Collection<Declaration> &sd = *(inferno_scope_stack.top());
+            //for( int i=0; i<sd.size(); i++ )
+            FOREACH( const SharedPtr<Declaration> &p, sd )
+                if( shared_ptr<Declaration>(p) == d )
                     return hold_decl.ToRaw( d );
 
-            inferno_scope_stack.top()->push_back( d );
+            inferno_scope_stack.top()->insert( d );
             return hold_decl.ToRaw( d );
         }
 

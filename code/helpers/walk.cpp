@@ -37,7 +37,7 @@ void Walk::Push( shared_ptr<Node> n )
     vector< Itemiser::Element * > members = Itemiser::Itemise(n);
     for( int i=0; i<members.size(); i++ )
     {
-        if( GenericContainer *con = dynamic_cast<GenericSequence *>(members[i]) )
+        if( GenericContainer *con = dynamic_cast<GenericContainer *>(members[i]) )
         {
         	//FOREACH( GenericSharedPtr &n, *con )
         	for( GenericContainer::iterator i=con->begin(); i!=con->end(); ++i )
@@ -49,7 +49,7 @@ void Walk::Push( shared_ptr<Node> n )
         }
         else
         {
-            ASSERTFAIL("got something from itemise that isnt a sequence or a shared pointer");               
+            ASSERTFAIL("got something from itemise that isnt a container or a shared pointer");
         }
     }
 
