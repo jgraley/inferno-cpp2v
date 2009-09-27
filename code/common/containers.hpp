@@ -86,7 +86,6 @@ public:
 		    pib->Overwrite( v );
 		}
 				
-	private:
 		shared_ptr<iterator_base> pib;
 	};
 	typedef iterator const_iterator; // TODO const iterators properly
@@ -94,6 +93,8 @@ public:
 	// These direct calls to the container are designed to support co-variance.
 	virtual const iterator_base &begin() = 0;
     virtual const iterator_base &end() = 0;
+    virtual void erase( typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator it ) = 0;
+    virtual bool empty() const = 0;
     virtual int size() const = 0;
     virtual void clear() = 0;
 };
@@ -142,6 +143,16 @@ struct STLContainer : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, CONTAINER_
 
 	typedef iterator const_iterator;
 
+    virtual void erase( typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator it )
+    {
+        iterator *cit = dynamic_cast<iterator *>( it.pib.get() );
+        ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator
+        CONTAINER_IMPL::erase( *(typename CONTAINER_IMPL::iterator *)cit );
+    }
+    virtual bool empty() const
+    {
+        return CONTAINER_IMPL::empty();
+    }
     virtual int size() const
     {
         return CONTAINER_IMPL::size();

@@ -717,20 +717,19 @@ private:
         return s;
     }
     
-    string RenderDeclarationCollection( Sequence<Declaration> sd, 
+    string RenderDeclarationCollection( Sequence<Declaration> &sd, 
 			                            string separator, 
 			                            bool seperate_last, 
 			                            shared_ptr<AccessSpec> init_access = shared_ptr<AccessSpec>(),
 			                            bool showtype=true )
     {
-        TRACE();
-        
+        TRACE();        
         
         // Uncomment one of these to stress the sorter
         //sd = ReverseDecls( sd );
         //sd = JumbleDecls( sd );
         
-        Sequence<Declaration> sorted = SortDecls( sd, true );          
+        Sequence<Declaration> sorted = sd;//SortDecls( sd, true );          
         
         string s;
         // Emit an incomplete for each record
