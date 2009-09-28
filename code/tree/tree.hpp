@@ -445,6 +445,25 @@ struct Label : Declaration // TODO be a Statement TODO commonize with Case and D
     SharedPtr<AnyLabelIdentifier> identifier;
 }; 
 
+// Element of an initialiser in {} brackets
+struct InitElement : Node
+{
+	SharedPtr<Expression> value;
+};
+
+// Element of an initialiser that specifies a record field name
+struct RecordInitElement : InitElement
+{
+	SharedPtr<Expression> value;
+};
+
+// Element of an initialiser that specifies a range of array indices
+struct ArrayInitElement : InitElement
+{
+	SharedPtr<Integer> min;
+	SharedPtr<Integer> max; // inclusive
+};
+
 // Aggregate is used to combine a number of values for initialising
 // a record or an array. It should really derive from Initialiser
 // since it can only be used as an initialiser and TypeOf would 

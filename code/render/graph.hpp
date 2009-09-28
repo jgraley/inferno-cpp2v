@@ -67,7 +67,7 @@ public:
         return s;
     }    
     
-    string SeqField( int i, int j )
+    string SeqField( int i, int j=0 )
     {
         char s[20];
         sprintf( s, "%c%d", 'a'+i, j );
@@ -140,6 +140,8 @@ public:
                     s += " | <" + SeqField( i, j ) + "> " + string(c) + ".";
                 }
             }            
+            else
+            	s += " | <" + SeqField( i ) + "> ";
         }
                 
         s += "\"\n";
@@ -161,20 +163,25 @@ public:
         {
             TRACE("Size %d i=%d\n", members.size(), i );
 
-        	if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )
+        	if( GenericCollection *col = dynamic_cast<GenericCollection *>(members[i]) )
+            {
+        		FOREACH( const GenericSharedPtr &p, *col )
+                    s += DoLink( n, SeqField(i), p );
+            }
+        	else if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )
             {
                 int j=0;
-        		FOREACH( const GenericSharedPtr &p, *seq ) //for( int j=0; j<seq->size(); j++ )
+        		FOREACH( const GenericSharedPtr &p, *seq )
                     s += DoLink( n, SeqField(i, j++), p );
             }            
             else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )         
             {
                 if( *ptr )
-                    s += DoLink( n, "fixed", *ptr );
+                    s += DoLink( n, SeqField(i), *ptr );
             }
             else
             {
-                ASSERT(!"got something from itemise that isnt a sequence or a shared pointer");               
+                ASSERT(!"got something from itemise that isnt a sequence, collection or a shared pointer");
             }
         }        
         return s;
