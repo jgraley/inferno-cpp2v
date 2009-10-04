@@ -7,14 +7,14 @@ void f()
 
 const char *p = "jhf";
 
+struct Foo
+{
+    int h : 6;
+    unsigned i : 7;
+};
+
 void ff()
 {
-    struct Foo
-    {
-        int h : 6;
-        unsigned i : 7;
-    };
-
     Foo x = { 1, 2 }; // (struct Foo){ .h=1, .i=2 }
 
     x = (struct Foo){ 1, 2 };
@@ -56,4 +56,13 @@ int main()
     y += kk;
     return (unsigned char)y;
 }
+
+struct S0 { int a; };
+struct S1 { int b; };
+void f0()
+{
+    struct S0 s0;
+    struct S1 { int c; } s1; // local one superceedes    
+}
+
 
