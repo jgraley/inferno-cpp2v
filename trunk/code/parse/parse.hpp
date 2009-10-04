@@ -116,6 +116,12 @@ private:
         map< shared_ptr<SwitchTarget>, shared_ptr<Statement> > backing_targets;
         Map< shared_ptr<Declaration>, shared_ptr<Declaration> > backing_paired_decl;
 
+        // Members of records go in an unordered collection, but when parsing
+        // we might need the order, eg for C-style initialisers or auto-generated
+        // constructor calls.
+        map< Collection<Declaration> *, Sequence<Declaration> > backing_ordering;
+
+
         // In AdtOnTag, when we see a record decl, we store it here and generate it
         // at the next IssueDeclaration, called from ActOnDeclaration. This allows
         // a seperate decl for records, since we so not support anon ones, and only
@@ -533,7 +539,7 @@ private:
             return l;
         }
 */
-        shared_ptr<Declaration> FindExistingDeclaration( const clang::CXXScopeSpec &SS, clang::IdentifierInfo *ID )
+        shared_ptr<Declaration> FindExistingDeclaration( const clang::CXXScopeSpec &SS, clang::IdentifierInfo *ID, bool recurse )
         {
         	if( !ID )
         	    return shared_ptr<Declaration>(); // No name specified => doesn't match anything
@@ -543,7 +549,7 @@ private:
             shared_ptr<Node> cxxs = FromCXXScope( &SS );
 
             // Use C++ scope if non-NULL; do not recurse (=precise match only)
-            shared_ptr<Node> found_n = ident_track.TryGet( ID, cxxs, false );
+            shared_ptr<Node> found_n = ident_track.TryGet( ID, cxxs, recurse );
             TRACE("Looked for %s, result %p (%p)\n", ID->getName(), found_n.get(), cxxs.get() );
             if( !found_n )
             {
@@ -558,9 +564,9 @@ private:
         }
 
         // Alternative parameters
-        shared_ptr<Declaration> FindExistingDeclaration( clang::Declarator &D )
+        shared_ptr<Declaration> FindExistingDeclaration( clang::Declarator &D, bool recurse )
         {
-        	return FindExistingDeclaration( D.getCXXScopeSpec(), D.getIdentifier() );
+        	return FindExistingDeclaration( D.getCXXScopeSpec(), D.getIdentifier(), recurse );
         }
 
         shared_ptr<Declaration> CreateDelcaration( clang::Scope *S, clang::Declarator &D, shared_ptr<AccessSpec> a = shared_ptr<AccessSpec>() )
@@ -592,12 +598,14 @@ private:
             if( decl_to_insert )
             {
                 inferno_scope_stack.top()->insert( decl_to_insert );
+                backing_ordering[inferno_scope_stack.top()].push_back( decl_to_insert );
                 backing_paired_decl[d] = decl_to_insert;
                 decl_to_insert = shared_ptr<Declaration>(); // don't need to generate it again
                 TRACE("inserted decl\n" );
             }
 
             inferno_scope_stack.top()->insert( d );
+            backing_ordering[inferno_scope_stack.top()].push_back( d );
             TRACE("no insert\n" );
             return hold_decl.ToRaw( d );
         }
@@ -614,7 +622,7 @@ private:
                 return 0;
             }
 
-            shared_ptr<Declaration> d = FindExistingDeclaration( D ); // decl exists already?
+            shared_ptr<Declaration> d = FindExistingDeclaration( D, false ); // decl exists already?
             if( d )
             {
                 return hold_decl.ToRaw( d ); // just return it
@@ -642,13 +650,19 @@ private:
         {
             shared_ptr<Declaration> d = hold_decl.FromRaw( Dcl );
 
-       //     if( shared_ptr<ParseTwin> pt = dynamic_pointer_cast<ParseTwin>(d) )
-       //         d = pt->d2;
-
             shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(d);
             ASSERT( o ); // Only objects can be initialised
 
             o->initialiser = FromClang( Init );
+
+            // At this point, when we have the instance (and hence the type) and the initialiser
+            // we can detect when an array initialiser has been inserted for a record instance and
+            // change it.
+            TRACE("%p\n", o->type.get() );
+            if( shared_ptr<ArrayInitialiser> ai = dynamic_pointer_cast<ArrayInitialiser>(o->initialiser) )
+                if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(o->type) )
+                	if( shared_ptr<Record> r = GetRecordDeclaration(all_decls, ti) )
+                		o->initialiser = CreateRecordInitFromArrayInit( ai, r );
         }
 
         // Clang tends to parse parameters and function bodies in seperate
@@ -1184,7 +1198,7 @@ private:
             // is (struct/union/enum/class).
 
             // See if record has already been declared ie in a forward incomplete way
-            if( shared_ptr<Declaration> ed = FindExistingDeclaration( SS, Name ) )
+            if( shared_ptr<Declaration> ed = FindExistingDeclaration( SS, Name, false ) ) // TODO
             {
             	 // Identifier already exists, so just go back to the old one
             	 // Note: members will be filled in later, so nothing to do here
@@ -1237,7 +1251,7 @@ private:
             if( (clang::DeclSpec::TST)TagType == clang::DeclSpec::TST_enum )
                 decl_to_insert = h;
 
-            TRACE("done tag\n");
+            TRACE("done tag %p\n", h.get());
 
             return hold_decl.ToRaw( h );
         }
@@ -1377,15 +1391,62 @@ private:
                                          clang::SourceLocation RParenLoc)
         {
             ASSERT( !Designators.hasAnyDesignators() && "Designators in init lists unsupported" );
-
-            shared_ptr<Aggregate> ao(new Aggregate);
+            // Assume initialiser is for an Array, and create an ArrayInitialiser node
+            // even if it's really a struct init. We'll come along later and replace with a
+            // RecordInitialiser when we can see what the struct is.
+            shared_ptr<ArrayInitialiser> ao(new ArrayInitialiser);
             for(int i=0; i<NumInit; i++)
             {
                 shared_ptr<Expression> e = hold_expr.FromRaw( InitList[i] );
-                ao->operands.push_back( e );
+                ao->elements.push_back( e );
             }
             return hold_expr.ToRaw( ao );
         }
+
+        // Create a RecordInitialiser using the elements of the supplied ArrayInitialiser and matching
+        // them against the members of the supplied record. Records are stored using an unordered
+        // collection for the members, so we have to use the ordered backing map. Array inits are ordered.
+        shared_ptr<RecordInitialiser> CreateRecordInitFromArrayInit( shared_ptr<ArrayInitialiser> ai,
+        		                                                     shared_ptr<Record> r )
+        {
+        	// Make new record initialiser and fill in the type
+        	shared_ptr<RecordInitialiser> ri( new RecordInitialiser );
+        	ri->type = r->identifier;
+
+        	// Get a reference to the ordered list of members for this record from a backing list
+        	Sequence<Declaration> &sd = backing_ordering[&r->members];
+        	TRACE("%p %p\n", &r->members, r.get());
+
+        	// Go over the entire record, keeping track of where we are in the init
+        	int init_index=0;
+        	FOREACH( SharedPtr<Declaration> d, sd )
+        	{
+        		TRACE();
+        		// We only care about instances...
+        		if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
+        		{
+        			// ...and not function instances
+        			if( !dynamic_pointer_cast<Subroutine>( i->type ) )
+        			{
+        				TRACE();
+        				// Get value out of array init and put it in record init together with member instance id
+        				shared_ptr<Expression> v = ai->elements[init_index];
+        				shared_ptr<MemberInitialiser> mi( new MemberInitialiser );
+        				mi->id = i->identifier;
+        				mi->value = v;
+        				ri->members.insert( mi );
+
+        				init_index++;
+        			}
+        		}
+        	}
+        	//ASSERT( init_index == ai->elements.size() );
+        	//ASSERT( init_index == ri->members.size() );
+
+        	return ri;
+        }
+
+
 
         shared_ptr<AnyString> CreateString( const char *s )
         {
@@ -1480,12 +1541,12 @@ private:
             // See if the declaration is already there (due to forwarding using
             // incomplete struct). If so, do not add it again
             Collection<Declaration> &sd = *(inferno_scope_stack.top());
-            //for( int i=0; i<sd.size(); i++ )
-            FOREACH( const SharedPtr<Declaration> &p, sd )
+            FOREACH( const SharedPtr<Declaration> &p, sd ) // TODO find()?
                 if( shared_ptr<Declaration>(p) == d )
                     return hold_decl.ToRaw( d );
 
             inferno_scope_stack.top()->insert( d );
+            backing_ordering[inferno_scope_stack.top()].push_back( d );
             return hold_decl.ToRaw( d );
         }
 
@@ -1712,6 +1773,23 @@ private:
             return hold_expr.ToRaw( d );
         }
 
+        virtual ExprResult ActOnCompoundLiteral(clang::SourceLocation LParen, TypeTy *Ty,
+                                                clang::SourceLocation RParen, ExprTy *Op)
+        {
+            shared_ptr<Type> t = hold_type.FromRaw( Ty );
+      	    shared_ptr<Expression> e = hold_expr.FromRaw( Op );
+
+      	    TRACE("%p\n", t.get() );
+
+            if( shared_ptr<ArrayInitialiser> ai = dynamic_pointer_cast<ArrayInitialiser>(e) )
+                if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(t) )
+                	if( shared_ptr<Record> r = GetRecordDeclaration(all_decls, ti) )
+                		e = CreateRecordInitFromArrayInit( ai, r );
+
+            return hold_expr.ToRaw( e );
+        }
+
+
         //--------------------------------------------- unimplemented actions -----------------------------------------------
         // Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC
         // extensions. These all assert out immediately.
@@ -1749,11 +1827,6 @@ private:
     return 0;
   }
 
-  virtual ExprResult ActOnCompoundLiteral(clang::SourceLocation LParen, TypeTy *Ty,
-                                          clang::SourceLocation RParen, ExprTy *Op) {
-    ASSERTFAIL("Unimplemented action");
-    return 0;
-  }
 
   virtual DeclTy *ActOnStartNamespaceDef(clang::Scope *S, clang::SourceLocation IdentLoc,
                                         clang::IdentifierInfo *Ident,
