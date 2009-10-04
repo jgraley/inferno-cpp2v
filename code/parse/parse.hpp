@@ -1193,67 +1193,81 @@ private:
 
             ident_track.SeenScope( S );
 
-            TRACE("Tag type %d\n", TagType);
+            TRACE("Tag type %d, kind %d\n", TagType, (int)TK);
             // TagType is an instance of DeclSpec::TST, indicating what kind of tag this
             // is (struct/union/enum/class).
 
-            // See if record has already been declared ie in a forward incomplete way
-            if( shared_ptr<Declaration> ed = FindExistingDeclaration( SS, Name, false ) ) // TODO
+            // Proceed based on the context around the tag
+            if( TK == clang::Action::TK_Reference )
             {
-            	 // Identifier already exists, so just go back to the old one
-            	 // Note: members will be filled in later, so nothing to do here
-            	 // even if the is the "complete" version of the record.
-            	 shared_ptr<Record> er = dynamic_pointer_cast<Record>(ed);
-            	 ASSERT(er)("\"%s\" used for record and something else", Name->getName());
-            	 return hold_decl.ToRaw( er );
+            	// Tag is a reference, that is a usage rather than a definition. We therefore
+            	// expect to be able to find a previous definition/declaration for it. Recurse
+            	// the search through enclosing scopes until we find it.
+                shared_ptr<Declaration> ed = FindExistingDeclaration( SS, Name, true );
+                ASSERT(ed)("Cannot find declaration of \"%s\"", Name->getName());
+
+            	shared_ptr<Record> er = dynamic_pointer_cast<Record>(ed);
+            	ASSERT(er)("\"%s\" used for record and something else", Name->getName());
+            	return hold_decl.ToRaw( er );// TODO why not just return ed?
             }
 
-            shared_ptr<Record> h;
-            switch( (clang::DeclSpec::TST)TagType )
-            {
-                case clang::DeclSpec::TST_union:
-                    h = shared_ptr<Union>(new Union);
-                    break;
-                case clang::DeclSpec::TST_struct:
-                    h = shared_ptr<Struct>(new Struct);
-                    break;
-                case clang::DeclSpec::TST_class:
-                    h = shared_ptr<Class>(new Class);
-                    break;
-                case clang::DeclSpec::TST_enum:
-                    h = shared_ptr<Enum>(new Enum);
-                    break;
-                default:
-                    ASSERTFAIL("Unknown type spec type");
-                    break;
-            }
-            all_decls->insert(h);
+			// Tag is a definition or declaration. Create if it doesn't already
+            // exist, *but* don't recurse into enclosing scopes.
+			if( shared_ptr<Declaration> ed = FindExistingDeclaration( SS, Name, false ) )
+			{
+				// Note: members will be filled in later, so nothing to do here
+				// even if the is the "complete" version of the record.
+				shared_ptr<Record> er = dynamic_pointer_cast<Record>(ed);
+				ASSERT(er)("\"%s\" used for record and something else", Name->getName());
+				return hold_decl.ToRaw( er );// TODO why not just return ed?
+			}
 
-            if(Name)
-            {
-                h->identifier = CreateTypeIdentifier(Name);
-                ident_track.Add(Name, h, S);
-            }
-            else
-            {
-                // TODO make a general-lurpose anon name generator
-                char an[20];
-                static int ac=0;
-                sprintf( an, "__anon%d", ac++ );
-                h->identifier = CreateTypeIdentifier(an);
-                ident_track.Add(NULL, h, S);
-            }
+			shared_ptr<Record> h;
+			switch( (clang::DeclSpec::TST)TagType )
+			{
+				case clang::DeclSpec::TST_union:
+					h = shared_ptr<Union>(new Union);
+					break;
+				case clang::DeclSpec::TST_struct:
+					h = shared_ptr<Struct>(new Struct);
+					break;
+				case clang::DeclSpec::TST_class:
+					h = shared_ptr<Class>(new Class);
+					break;
+				case clang::DeclSpec::TST_enum:
+					h = shared_ptr<Enum>(new Enum);
+					break;
+				default:
+					ASSERTFAIL("Unknown type spec type");
+					break;
+			}
+			all_decls->insert(h);
 
-            //TODO should we do something with TagKind? Maybe needed for render.
-            //TODO use the attibutes
+			if(Name)
+			{
+				h->identifier = CreateTypeIdentifier(Name);
+				ident_track.Add(Name, h, S);
+			}
+			else
+			{
+				// TODO make a general-lurpose anon name generator
+				char an[20];
+				static int ac=0;
+				sprintf( an, "__anon%d", ac++ );
+				h->identifier = CreateTypeIdentifier(an);
+				ident_track.Add(NULL, h, S);
+			}
 
-            // struct/class/union pushed by ActOnFinishCXXClassDef()
-            if( (clang::DeclSpec::TST)TagType == clang::DeclSpec::TST_enum )
-                decl_to_insert = h;
+			//TODO should we do something with TagKind? Maybe needed for render.
+			//TODO use the attibutes
 
-            TRACE("done tag %p\n", h.get());
+			// struct/class/union pushed by ActOnFinishCXXClassDef()
+			if( (clang::DeclSpec::TST)TagType == clang::DeclSpec::TST_enum )
+				decl_to_insert = h;
 
-            return hold_decl.ToRaw( h );
+			TRACE("done tag %p\n", h.get());
+
+			return hold_decl.ToRaw( h );
         }
 
 
@@ -1268,6 +1282,10 @@ private:
             // we already created. No need to return anything.
             shared_ptr<Declaration> d = hold_decl.FromRaw( TagDecl );
             shared_ptr<Record> h = dynamic_pointer_cast<Record>(d);
+
+            // We're about to populate the Record; if it has been populated already
+            // then something's wrong
+            ASSERT( h->members.empty() )("Record has already been defined");
 
             ident_track.SetNextRecord( h );
 
