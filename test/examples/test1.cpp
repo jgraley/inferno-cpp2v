@@ -7,11 +7,18 @@ void f()
 
 const char *p = "jhf";
 
-struct foo
+void ff()
 {
-    int h : 6;
-    unsigned i : 7;
-};
+    struct Foo
+    {
+        int h : 6;
+        unsigned i : 7;
+    };
+
+    Foo x = { 1, 2 }; // (struct Foo){ .h=1, .i=2 }
+
+    x = (struct Foo){ 1, 2 };
+}
 
 int func( unsigned a, char b )
 {
@@ -49,3 +56,4 @@ int main()
     y += kk;
     return (unsigned char)y;
 }
+

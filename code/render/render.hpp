@@ -63,6 +63,9 @@ private:
     shared_ptr<Program> program;
     string deferred_decls;
     stack< shared_ptr<Node> > scope_stack;
+    // Remember the orders of collections when we sort them. Mirrors the same
+    // map in the parser.
+    map< Collection<Declaration> *, Sequence<Declaration> > backing_ordering;
 
     string RenderLiteral( shared_ptr<Literal> sp )
     {
@@ -353,9 +356,13 @@ private:
                    "(" + RenderType( c->type, "" ) + ")" +
                    RenderOperand( c->operand, false ) + 
                    after;
-        else if( shared_ptr<Aggregate> ao = dynamic_pointer_cast< Aggregate >(expression) )
+        else if( shared_ptr<ArrayInitialiser> ao = dynamic_pointer_cast< ArrayInitialiser >(expression) )
             return before + 
-                   "{ " + RenderOperandSequence( ao->operands, ", ", false ) + " }" +
+                   "{ " + RenderOperandSequence( ao->elements, ", ", false ) + " }" +
+                   after;
+        else if( shared_ptr<RecordInitialiser> ro = dynamic_pointer_cast< RecordInitialiser >(expression) )
+            return before +
+                   RenderRecordInitialiser( ro ) +
                    after;
         else if( shared_ptr<Literal> l = dynamic_pointer_cast< Literal >(expression) )
             return before + 
@@ -369,6 +376,50 @@ private:
             return ERROR_UNSUPPORTED(expression);
     }
     
+    string RenderRecordInitialiser( shared_ptr<RecordInitialiser> ro )
+    {
+    	string s;
+
+    	s += "(" + RenderType( ro->type, "" ) + ")";
+    	s += "{ ";
+
+    	// Get the record
+    	shared_ptr<TypeIdentifier> id = dynamic_pointer_cast<TypeIdentifier>(ro->type);
+    	ASSERT(id);
+    	shared_ptr<Record> r = GetRecordDeclaration(program, id);
+
+    	// Get a reference to the ordered list of members for this record from a backing list
+    	Sequence<Declaration> &sd = backing_ordering[&r->members];
+
+    	bool first = true;
+    	FOREACH( SharedPtr<Declaration> d, sd )
+    	{
+    		// We only care about instances...
+    		if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
+    		{
+    			// ...and not function instances
+    			if( !dynamic_pointer_cast<Subroutine>( i->type ) )
+    			{
+    				// search init for matching member (TODO could avoid O(n^2)
+    				// if RecordInitialiser used some kind of map
+    				FOREACH( SharedPtr<MemberInitialiser> mi, ro->members )
+    		        {
+    			        if( i->identifier == mi->id )
+    			        {
+    			        	if( !first )
+    			        		s += ", ";
+    			        	s += RenderOperand( mi->value );
+    			        	first = false;
+    			        }
+    		        }
+    			}
+    		}
+    	}
+
+    	s += " }";
+        return s;
+    }
+
     string RenderAccess( shared_ptr<AccessSpec> current_access )
     {
         if( dynamic_pointer_cast<Public>( current_access ) )
@@ -717,7 +768,7 @@ private:
         return s;
     }
     
-    string RenderDeclarationCollection( GenericContainer &sd,
+    string RenderDeclarationCollection( Collection<Declaration> &sd,
 			                            string separator, 
 			                            bool seperate_last, 
 			                            shared_ptr<AccessSpec> init_access = shared_ptr<AccessSpec>(),
@@ -730,6 +781,7 @@ private:
         //sd = JumbleDecls( sd );
         
         Sequence<Declaration> sorted = SortDecls( sd, true );
+        backing_ordering[&sd] = sorted;
         
         string s;
         // Emit an incomplete for each record
