@@ -1206,9 +1206,7 @@ private:
                 shared_ptr<Declaration> ed = FindExistingDeclaration( SS, Name, true );
                 ASSERT(ed)("Cannot find declaration of \"%s\"", Name->getName());
 
-            	shared_ptr<Record> er = dynamic_pointer_cast<Record>(ed);
-            	ASSERT(er)("\"%s\" used for record and something else", Name->getName());
-            	return hold_decl.ToRaw( er );// TODO why not just return ed?
+            	return hold_decl.ToRaw( ed );
             }
 
 			// Tag is a definition or declaration. Create if it doesn't already
@@ -1216,10 +1214,8 @@ private:
 			if( shared_ptr<Declaration> ed = FindExistingDeclaration( SS, Name, false ) )
 			{
 				// Note: members will be filled in later, so nothing to do here
-				// even if the is the "complete" version of the record.
-				shared_ptr<Record> er = dynamic_pointer_cast<Record>(ed);
-				ASSERT(er)("\"%s\" used for record and something else", Name->getName());
-				return hold_decl.ToRaw( er );// TODO why not just return ed?
+				// even if the is the "complete" version of the record (=definition).
+				return hold_decl.ToRaw( ed );
 			}
 
 			shared_ptr<Record> h;
