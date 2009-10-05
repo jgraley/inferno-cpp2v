@@ -264,6 +264,31 @@ private:
         return o;
     }
 
+    string RenderOperator( shared_ptr<Operator> op, Sequence<Expression> &operands )
+    {
+    	ASSERT(op);
+        if( shared_ptr<ConditionalOperator> o = dynamic_pointer_cast< ConditionalOperator >(op) )
+            return RenderOperand( operands[0], true ) + "?" +
+                   RenderOperand( operands[1], true ) + ":" +
+                   RenderOperand( operands[2], true );
+#define INFIX(TOK, TEXT, NODE, BASE, CAT) \
+    	else if( dynamic_pointer_cast<NODE>(op) ) \
+			return RenderOperand( operands[0], true ) +\
+				   TEXT +\
+				   RenderOperand( operands[1], true );
+#define PREFIX(TOK, TEXT, NODE, BASE, CAT) \
+    	else if( dynamic_pointer_cast<NODE>(op) ) \
+			return TEXT +\
+				   RenderOperand( operands[0], true );
+#define POSTFIX(TOK, TEXT, NODE, BASE, CAT) \
+    	else if( dynamic_pointer_cast<NODE>(op) ) \
+			return RenderOperand( operands[0], true ) +\
+				   TEXT;
+#include "tree/operator_db.inc"
+    	else
+    		return ERROR_UNSUPPORTED(op);
+    }
+
     string RenderOperand( shared_ptr<Initialiser> expression, bool bracketize_operator=false )
     {
         TRACE("%p\n", expression.get());
@@ -287,29 +312,20 @@ private:
             return before + 
                    "alignof(" + RenderType( pot->operands[0], "" ) + ")" + 
                    after;
-#define INFIX(TOK, TEXT, NODE, BASE, CAT) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
-    return before +\
-           RenderOperand( no->operands[0], true ) +\
-           TEXT +\
-           RenderOperand( no->operands[1], true ) +\
-           after;
-#define PREFIX(TOK, TEXT, NODE, BASE, CAT) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
-    return before +\
-           TEXT +\
-           RenderOperand( no->operands[0], true ) +\
-           after;
-#define POSTFIX(TOK, TEXT, NODE, BASE, CAT) else if( shared_ptr<NODE> no = dynamic_pointer_cast<NODE>(expression) ) \
-    return before +\
-           RenderOperand( no->operands[0], true ) +\
-           TEXT +\
-           after;
-#include "tree/operator_db.inc"                   
-        else if( shared_ptr<ConditionalOperator> o = dynamic_pointer_cast< ConditionalOperator >(expression) )
-            return before + 
-                   RenderOperand( o->condition, true ) + "?" +
-                   RenderOperand( o->if_true, true ) + ":" +
-                   RenderOperand( o->if_false, true ) +
+        else if( shared_ptr<NonCommutativeOperator> nco = dynamic_pointer_cast< NonCommutativeOperator >(expression) )
+            return before +
+                   RenderOperator( nco, nco->operands ) +
                    after;
+        else if( shared_ptr<CommutativeOperator> co = dynamic_pointer_cast< CommutativeOperator >(expression) )
+        {
+        	Sequence<Expression> seq_operands;
+        	// Operands are in collection, so move them to a container
+            FOREACH( SharedPtr<Expression> o, co->operands )
+          	    seq_operands.push_back( o );
+            return before +
+                   RenderOperator( co, seq_operands ) +
+                   after;
+        }
         else if( shared_ptr<Call> o = dynamic_pointer_cast< Call >(expression) )
         {
             if( shared_ptr<Expression> base = TypeOf(program).IsConstructorCall( o ) )

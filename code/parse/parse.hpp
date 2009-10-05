@@ -839,23 +839,40 @@ private:
             shared_ptr<Operator> o = shared_ptr<Operator>();
             switch( Kind )
             {
-#define INFIX(TOK, TEXT, NODE, BASE, CAT) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); break;
+#define INFIX(TOK, TEXT, NODE, BASE, CAT) \
+	        case clang::tok::TOK: \
+                o=shared_ptr<NODE>(new NODE);\
+                break;
 #include "tree/operator_db.inc"
             }
             ASSERT( o );
-            o->operands.push_back( hold_expr.FromRaw(LHS) );
-            o->operands.push_back( hold_expr.FromRaw(RHS) );
+            if( shared_ptr<NonCommutativeOperator> nco = dynamic_pointer_cast< NonCommutativeOperator >(o) )
+            {
+            	nco->operands.push_back( hold_expr.FromRaw(LHS) );
+                nco->operands.push_back( hold_expr.FromRaw(RHS) );
+            }
+            else if( shared_ptr<CommutativeOperator> co = dynamic_pointer_cast< CommutativeOperator >(o) )
+            {
+               	co->operands.insert( hold_expr.FromRaw(LHS) );
+                co->operands.insert( hold_expr.FromRaw(RHS) );
+            }
+            else
+            	ASSERTFAIL("Binop was apparently neither Commutative nor NonCommutative");
+
             return hold_expr.ToRaw( o );
         }
 
         virtual ExprResult ActOnPostfixUnaryOp(clang::Scope *S, clang::SourceLocation OpLoc,
                                                clang::tok::TokenKind Kind, ExprTy *Input)
         {
-            shared_ptr<Operator> o = shared_ptr<Operator>();
+            shared_ptr<NonCommutativeOperator> o = shared_ptr<NonCommutativeOperator>();
 
             switch( Kind )
             {
-#define POSTFIX(TOK, TEXT, NODE, BASE, CAT) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); break;
+#define POSTFIX(TOK, TEXT, NODE, BASE, CAT) \
+	        case clang::tok::TOK: \
+	            o=shared_ptr<NODE>(new NODE); \
+	            break;
 #include "tree/operator_db.inc"
             }
             ASSERT( o );
@@ -866,11 +883,14 @@ private:
         virtual ExprResult ActOnUnaryOp( clang::Scope *S, clang::SourceLocation OpLoc,
                                          clang::tok::TokenKind Kind, ExprTy *Input)
         {
-            shared_ptr<Operator> o = shared_ptr<Operator>();
+            shared_ptr<NonCommutativeOperator> o = shared_ptr<NonCommutativeOperator>();
 
             switch( Kind )
             {
-#define PREFIX(TOK, TEXT, NODE, BASE, CAT) case clang::tok::TOK: o=shared_ptr<NODE>(new NODE); break;
+#define PREFIX(TOK, TEXT, NODE, BASE, CAT) \
+	        case clang::tok::TOK:\
+                o=shared_ptr<NODE>(new NODE); \
+                break;
 #include "tree/operator_db.inc"
             }
             ASSERT( o );
@@ -882,12 +902,12 @@ private:
                                              clang::SourceLocation ColonLoc,
                                              ExprTy *Cond, ExprTy *LHS, ExprTy *RHS)
         {
-            shared_ptr<ConditionalOperator> o(new ConditionalOperator);
-            o->condition = hold_expr.FromRaw(Cond);
+            shared_ptr<ConditionalOperator> co(new ConditionalOperator);
+            co->operands.push_back( hold_expr.FromRaw(Cond) );
             ASSERT(LHS && "gnu extension not supported");
-            o->if_true = hold_expr.FromRaw(LHS);
-            o->if_false = hold_expr.FromRaw(RHS);
-            return hold_expr.ToRaw( o );
+            co->operands.push_back( hold_expr.FromRaw(LHS) );
+            co->operands.push_back( hold_expr.FromRaw(RHS) );
+            return hold_expr.ToRaw( co );
         }
 
         virtual ExprResult ActOnCallExpr(clang::Scope *S, ExprTy *Fn, clang::SourceLocation LParenLoc,
@@ -1514,8 +1534,8 @@ private:
                 ASSERT(lasto && "unexpected kind of declaration inside an enum");
                 shared_ptr<Add> inf( new Add );
                 shared_ptr<Expression> ei = lasto->identifier;
-                inf->operands.push_back( ei );
-                inf->operands.push_back( CreateNumericConstant( 1 ) );
+                inf->operands.insert( ei );
+                inf->operands.insert( CreateNumericConstant( 1 ) );
                 o->initialiser = inf;
             }
             else
