@@ -15,33 +15,22 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
         return i->type; 
     }
         
-    else if( shared_ptr<Operator> op = dynamic_pointer_cast<Operator>(o) ) // operator
+    else if( shared_ptr<NonCommutativeOperator> op = dynamic_pointer_cast<NonCommutativeOperator>(o) ) // operator
     {
         // Get the types of all the operands to the operator first
         Sequence<Type> optypes;
         FOREACH( shared_ptr<Expression> o, op->operands )
             optypes.push_back( Get(o) );
-            
-        // then handle based on the kind of operator
-        if( dynamic_pointer_cast<Dereference>(op) )
-        {
-            if( shared_ptr<Pointer> o2 = dynamic_pointer_cast<Pointer>( optypes[0] ) )
-                return o2->destination;
-            else if( shared_ptr<Array> o2 = dynamic_pointer_cast<Array>( optypes[0] ) )
-                return o2->element;
-            else 
-                ASSERTFAIL( "dereferenciung non-pointer" );
-        }
-        else if( dynamic_pointer_cast<AddressOf>(op) )
-        {
-            shared_ptr<Pointer> p( new Pointer );
-            p->destination = optypes[0];
-            return p;
-        }
-        else
-        {
-            ASSERTFAIL("Unknown operator, please add");         
-        }
+        return Get( op, optypes );
+    }
+
+    else if( shared_ptr<CommutativeOperator> op = dynamic_pointer_cast<CommutativeOperator>(o) ) // operator
+    {
+        // Get the types of all the operands to the operator first
+        Sequence<Type> optypes;
+        FOREACH( shared_ptr<Expression> o, op->operands )
+            optypes.push_back( Get(o) );
+        return Get( op, optypes );
     }
     
     else if( shared_ptr<Lookup> l = dynamic_pointer_cast<Lookup>(o) ) // a.b; just return type of b
@@ -52,6 +41,32 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
     else 
     {
         ASSERTFAIL("Unknown expression, please add");             
+    }
+}
+
+// Just discover the type of operators, where the types of the operands have already been determined
+// Note we alwayts get a Sequence, even when the operator is commutative
+shared_ptr<Type> TypeOf::Get( shared_ptr<Operator> op, Sequence<Type> &optypes )
+{
+    // then handle based on the kind of operator
+    if( dynamic_pointer_cast<Dereference>(op) )
+    {
+        if( shared_ptr<Pointer> o2 = dynamic_pointer_cast<Pointer>( optypes[0] ) )
+            return o2->destination;
+        else if( shared_ptr<Array> o2 = dynamic_pointer_cast<Array>( optypes[0] ) )
+            return o2->element;
+        else
+            ASSERTFAIL( "dereferenciung non-pointer" );
+    }
+    else if( dynamic_pointer_cast<AddressOf>(op) )
+    {
+        shared_ptr<Pointer> p( new Pointer );
+        p->destination = optypes[0];
+        return p;
+    }
+    else
+    {
+        ASSERTFAIL("Unknown operator, please add");
     }
 }
 

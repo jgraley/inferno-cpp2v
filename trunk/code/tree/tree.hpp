@@ -473,17 +473,28 @@ struct RecordInitialiser : Expression
 struct Operator : Expression
 {
 	NODE_FUNCTIONS
+};
+
+struct NonCommutativeOperator : Operator
+{
+	NODE_FUNCTIONS
 	Sequence<Expression> operands;
+};
+
+struct CommutativeOperator : Operator
+{
+	NODE_FUNCTIONS
+	Collection<Expression> operands;
 };
 
 // Intermediate categories of operators. We categorise based on
 // topology, and commutative is considered topologically
 // distinct from non-commutative.
-struct Unop : Operator { NODE_FUNCTIONS };
-struct Binop : Operator { NODE_FUNCTIONS };
-struct Ternop : Operator { NODE_FUNCTIONS };
-struct CommutativeBinop : Operator { NODE_FUNCTIONS };
-struct AssignmentOperator : Operator { NODE_FUNCTIONS };
+struct Unop : NonCommutativeOperator { NODE_FUNCTIONS };
+struct Binop : NonCommutativeOperator { NODE_FUNCTIONS };
+struct Ternop : NonCommutativeOperator { NODE_FUNCTIONS };
+struct CommutativeBinop : CommutativeOperator { NODE_FUNCTIONS };
+struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 
 // Use an include file to generate nodes for all the actual operators based on
 // contents of operator_db.inc
@@ -506,14 +517,10 @@ struct SizeOf : TypeOperator { NODE_FUNCTIONS };
 // alignof() a type
 struct AlignOf : TypeOperator { NODE_FUNCTIONS };
 
-// The conditional ?: operator as in condition ? if_true : if_false
-// TODO Ternop?
-struct ConditionalOperator : Expression 
+// The conditional ?: operator as in operands[0] ? operands[1] : operands[2]
+struct ConditionalOperator : Ternop
 {
     NODE_FUNCTIONS
-    SharedPtr<Expression> condition;
-    SharedPtr<Expression> if_true;
-    SharedPtr<Expression> if_false;
 };
 
 // A function call to specified function passing in specified arguments

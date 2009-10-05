@@ -16,9 +16,10 @@ public:
     }
     
     shared_ptr<Type> Get( shared_ptr<Expression> o );
+    shared_ptr<Type> Get( shared_ptr<Operator> op, Sequence<Type> &optypes );
     
     // Is this call really a constructor call? If so return the object being
-    // constructoed. Otherwise, return NULL
+    // constructed. Otherwise, return NULL
     shared_ptr<Expression> IsConstructorCall( shared_ptr<Call> call );
 
 private:
