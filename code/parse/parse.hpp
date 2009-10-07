@@ -95,7 +95,7 @@ private:
             global_scope( p ),
             all_decls( new Program )
         {
-            inferno_scope_stack.push( &(p->members) );
+            inferno_scope_stack.push( p );
         }
 
         ~InfernoAction()
@@ -119,10 +119,10 @@ private:
         // Members of records go in an unordered collection, but when parsing
         // we might need the order, eg for C-style initialisers or auto-generated
         // constructor calls.
-        map< Collection<Declaration> *, Sequence<Declaration> > backing_ordering;
+        map< shared_ptr<Scope>, Sequence<Declaration> > backing_ordering;
 
 
-        // In AdtOnTag, when we see a record decl, we store it here and generate it
+        // In ActOnTag, when we see a record decl, we store it here and generate it
         // at the next IssueDeclaration, called from ActOnDeclaration. This allows
         // a seperate decl for records, since we so not support anon ones, and only
         // allow one thing to be decl'd at a time.
@@ -131,7 +131,7 @@ private:
         clang::Preprocessor &preprocessor;
         clang::TargetInfo &target_info;
 
-        stack< Collection<Declaration> * > inferno_scope_stack;
+        stack< shared_ptr<Scope> > inferno_scope_stack;
         RCHold<Declaration, DeclTy *> hold_decl;
         RCHold<Base, DeclTy *> hold_base;
         RCHold<Expression, ExprTy *> hold_expr;
@@ -597,14 +597,14 @@ private:
             TRACE("Scope flags %x ", S->getFlags() );
             if( decl_to_insert )
             {
-                inferno_scope_stack.top()->insert( decl_to_insert );
+                inferno_scope_stack.top()->members.insert( decl_to_insert );
                 backing_ordering[inferno_scope_stack.top()].push_back( decl_to_insert );
                 backing_paired_decl[d] = decl_to_insert;
                 decl_to_insert = shared_ptr<Declaration>(); // don't need to generate it again
                 TRACE("inserted decl\n" );
             }
 
-            inferno_scope_stack.top()->insert( d );
+            inferno_scope_stack.top()->members.insert( d );
             backing_ordering[inferno_scope_stack.top()].push_back( d );
             TRACE("no insert\n" );
             return hold_decl.ToRaw( d );
@@ -704,7 +704,7 @@ private:
             if( shared_ptr<Procedure> pp = dynamic_pointer_cast<Procedure>( o->type ) )
                 AddParamsToScope( pp, FnBodyScope );
 
-            inferno_scope_stack.push( new Collection<Declaration> );
+            inferno_scope_stack.push( shared_ptr<Scope>(new Scope) );
 
             return hold_decl.ToRaw( o );
         }
@@ -1305,7 +1305,7 @@ private:
 
             ident_track.SetNextRecord( h );
 
-            inferno_scope_stack.push( &(h->members) );      // decls for members will go on this scope
+            inferno_scope_stack.push( h );      // decls for members will go on this scope
         }
 
         /// ActOnFinishCXXClassDef - This is called when a class/struct/union has
@@ -1448,7 +1448,7 @@ private:
         	ri->type = r->identifier;
 
         	// Get a reference to the ordered list of members for this record from a backing list
-        	Sequence<Declaration> &sd = backing_ordering[&r->members];
+        	Sequence<Declaration> &sd = backing_ordering[r];
         	TRACE("%p %p\n", &r->members, r.get());
 
         	// Go over the entire record, keeping track of where we are in the init
@@ -1574,12 +1574,12 @@ private:
 
             // See if the declaration is already there (due to forwarding using
             // incomplete struct). If so, do not add it again
-            Collection<Declaration> &sd = *(inferno_scope_stack.top());
+            Collection<Declaration> &sd = inferno_scope_stack.top()->members;
             FOREACH( const SharedPtr<Declaration> &p, sd ) // TODO find()?
                 if( shared_ptr<Declaration>(p) == d )
                     return hold_decl.ToRaw( d );
 
-            inferno_scope_stack.top()->insert( d );
+            inferno_scope_stack.top()->members.insert( d );
             backing_ordering[inferno_scope_stack.top()].push_back( d );
             return hold_decl.ToRaw( d );
         }
