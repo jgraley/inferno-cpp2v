@@ -10,7 +10,7 @@
 shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> id )
 {
     TRACE("Trying program (global)\n" );
-    FOREACH( shared_ptr<Declaration> d, (*program) )
+    FOREACH( shared_ptr<Declaration> d, program->members )
     {            
         if( id == GetIdentifier( d ) )
             return program;
