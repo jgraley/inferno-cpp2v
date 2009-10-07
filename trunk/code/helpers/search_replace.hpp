@@ -90,6 +90,8 @@ private:
     
     bool IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pattern ); // only look inside node (type, value)
     bool IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pattern ); // look at node and children
+    bool IsMatchPattern( GenericSequence &x, GenericSequence &pattern ); // match for Sequences
+    bool IsMatchPattern( GenericCollection &x, GenericCollection &pattern ); // match for Collections
     bool Search( shared_ptr<Node> program, GenericContainer::iterator &gp );
     void ClearPtrs( shared_ptr<Node> dest );
     void OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source, bool under_substitution );

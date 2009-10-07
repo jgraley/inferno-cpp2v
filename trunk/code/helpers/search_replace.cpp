@@ -118,30 +118,28 @@ bool SearchReplace::IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pa
             GenericSequence *x_seq = dynamic_cast<GenericSequence *>(x_memb[i]);
             ASSERT( x_seq && "itemise for target didn't match itemise for pattern");
             TRACE("Member %d is Sequence, target %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
-
-            // presently if the number of elements differ that's a mismatch
-            if( x_seq->size() != pattern_seq->size() )
+            if( !IsMatchPattern( *x_seq, *pattern_seq ) )
                 return false;
-            
-            for( int j=0; j<pattern_seq->size(); j++ )
-            {
-                TRACE("Elt %d target=%p pattern=%p\n", j, (*x_seq)[j].get(), (*pattern_seq)[j].get() );
-                if( !IsMatchPattern( (*x_seq)[j], (*pattern_seq)[j] ) )
-                    return false;                    
-            }
+        }
+        else if( GenericCollection *pattern_col = dynamic_cast<GenericCollection *>(pattern_memb[i]) )
+        {
+        	GenericCollection *x_col = dynamic_cast<GenericCollection *>(x_memb[i]);
+            ASSERT( x_col && "itemise for target didn't match itemise for pattern");
+            TRACE("Member %d is Collection, target %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
+            if( !IsMatchPattern( *x_col, *pattern_col ) )
+                return false;
         }            
         else if( GenericSharedPtr *pattern_ptr = dynamic_cast<GenericSharedPtr *>(pattern_memb[i]) )         
         {
             GenericSharedPtr *x_ptr = dynamic_cast<GenericSharedPtr *>(x_memb[i]);
             ASSERT( x_ptr && "itemise for target didn't match itemise for pattern");
             TRACE("Member %d is SharedPtr, pattern ptr=%p\n", i, pattern_ptr->get());
-			shared_ptr<Node> n = *pattern_ptr;
 			if( !IsMatchPattern( *x_ptr, *pattern_ptr ) )
 				return false;
         }
         else
         {
-            ASSERTFAIL("got something from itemise that isnt a sequence or a shared pointer");               
+            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a SharedPtr");
         }
     }       
    
@@ -149,6 +147,25 @@ bool SearchReplace::IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pa
     return true;
 }
 
+bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern )
+{
+    // presently if the number of elements differ that's a mismatch
+    if( x.size() != pattern.size() )
+        return false;
+
+    for( int j=0; j<pattern.size(); j++ )
+    {
+        TRACE("Elt %d target=%p pattern=%p\n", j, x[j].get(), pattern[j].get() );
+        if( !IsMatchPattern( x[j], pattern[j] ) )
+            return false;
+    }
+    return true;
+}
+
+bool SearchReplace::IsMatchPattern( GenericCollection &x, GenericCollection &pattern )
+{
+	return true;
+}
 
 // Try to match a pattern with the inferno rules: soft patterns allowed to
 // determine own match result, match sets restrict to same actual node. Also

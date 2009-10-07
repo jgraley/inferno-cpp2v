@@ -72,13 +72,18 @@ struct Type : virtual Node { NODE_FUNCTIONS };
 // also inside structs etc and at top level.
 struct Declaration : Statement { NODE_FUNCTIONS };
 
-// The top level of a program is considered a collection of declarations.
-// main() would typically be a function instance somewhere in this sequence.
-struct Program : Node
+// A scope is any space in a program where declarations may appear. Declarations
+// in the collection are associated with the scope node but unordered. Scopes
+// are used for name resolution during parse.
+struct Scope : virtual Node
 {
     NODE_FUNCTIONS
     Collection<Declaration> members;
 };
+
+// The top level of a program is considered a collection of declarations.
+// main() would typically be a function instance somewhere in this collection.
+struct Program : Scope { NODE_FUNCTIONS };
 
 //////////////////////////// Literals ///////////////////////////////
 
@@ -243,7 +248,7 @@ struct Physical : Declaration
 // Top-level extern -> Static and Public.
 struct StorageClass : Property { NODE_FUNCTIONS };
 struct Static : StorageClass { NODE_FUNCTIONS };
-struct Member : StorageClass // non-static
+struct Member : StorageClass // non-static TODO confusing name
 {
     NODE_FUNCTIONS
     SharedPtr<AnyVirtual> virt;
@@ -405,10 +410,10 @@ struct Typedef : UserType
 // enum. We list the members here as declarations (which will be member
 // or static) can can be variables/objects in all cases and additionally
 // function instances in struct/class.
-struct Record : UserType
+struct Record : UserType,
+                Scope
 {
     NODE_FUNCTIONS
-    Collection<Declaration> members;
 };
 
 // A union, as per Record.
@@ -423,7 +428,7 @@ struct Enum : Record { NODE_FUNCTIONS };
 struct InheritanceRecord : Record
 {
     NODE_FUNCTIONS
-    Sequence<Base> bases; // TODO just chuck them into Record::members?
+    Sequence<Base> bases; // TODO just chuck them into Record::members? TODO Collection?
 };
 
 // Struct and class as per InheritanceRecord
@@ -593,8 +598,11 @@ struct Cast : Expression
 
 //////////////////////////// Statements ////////////////////////////
 
-// Bunch of statements inside {} or begin/end
-struct Compound : Statement
+// Bunch of statements inside {} or begin/end. Note that local declarations
+// can go in the members of the Scope or in the statements (since Declaration
+// derives from Statement)
+struct Compound : Statement,
+                  Scope
 {
     NODE_FUNCTIONS
     Sequence<Statement> statements;
