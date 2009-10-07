@@ -32,7 +32,7 @@
 //   to the corresponding search and replace pattern nodes.
 //
 // - NULL shared_ptr in replace pattern under a substituted node means
-//  fill this in from substitute too (otherwise use what is specified).
+//   fill this in from substitute too (otherwise use what is specified).
 //
 // - Identifiers (any node derived from Identifier) are kept unique
 //   during replace by pointing directly to the identifier in the 
@@ -101,7 +101,5 @@ private:
     const MatchSet *FindMatchSet( shared_ptr<Node> node );
     void ClearKeys(); 
 };
-
-
 
 #endif

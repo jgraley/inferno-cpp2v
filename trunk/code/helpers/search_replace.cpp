@@ -153,10 +153,10 @@ bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern
     if( x.size() != pattern.size() )
         return false;
 
-    for( int j=0; j<pattern.size(); j++ )
+    for( int i=0; i<pattern.size(); i++ )
     {
-        TRACE("Elt %d target=%p pattern=%p\n", j, x[j].get(), pattern[j].get() );
-        if( !IsMatchPattern( x[j], pattern[j] ) )
+        TRACE("Elt %d target=%p pattern=%p\n", i, x[i].get(), pattern[i].get() );
+        if( !IsMatchPattern( x[i], pattern[i] ) )
             return false;
     }
     return true;
@@ -164,17 +164,21 @@ bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern
 
 bool SearchReplace::IsMatchPattern( GenericCollection &x, GenericCollection &pattern )
 {
-    // presently if the number of elements differ that's a mismatch
-    if( x.size() != pattern.size() )
-        return false;
-
     // We'll need a copy since we'll be erasing elements
     Collection<Node> xcopy;
     FOREACH( const GenericSharedPtr &xe, x )
         xcopy.insert( xe );
 
+    bool star=false;
+
     FOREACH( const GenericSharedPtr &pe, pattern )
     {
+        if( !pe ) // NULL in pattern collection?
+        {
+            star=true; // remember for later and skip to next pattern 
+            continue; 
+        }
+        
     	// Look for a single element of x that matches the present element of the pattern
     	bool found = false;
     	FOREACH( const GenericSharedPtr &xe, xcopy )
@@ -190,8 +194,8 @@ bool SearchReplace::IsMatchPattern( GenericCollection &x, GenericCollection &pat
     		return false; // present pattern element had no match
     }
 
-    if( !xcopy.empty() )
-    	return false; // there were elements left over so don't match TODO disable when * spotted
+    if( !xcopy.empty() && !star )
+    	return false; // there were elements left over and no star to match them against
 
 	return true;
 }

@@ -1640,7 +1640,7 @@ private:
 
             for( int i=0; i<NumBases; i++ )
             {
-                ih->bases.push_back( hold_base.FromRaw( Bases[i] ) );
+                ih->bases.insert( hold_base.FromRaw( Bases[i] ) );
             }
         }
 

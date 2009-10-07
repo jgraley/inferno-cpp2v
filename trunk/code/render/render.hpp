@@ -650,11 +650,12 @@ private:
                     if( !ir->bases.empty() )
                     {
                         s += " : ";
-                        for( int i=0; i<ir->bases.size(); i++ )
+                        bool first=true;
+                        FOREACH( SharedPtr<Base> b, ir->bases )
                         {   
-                            if( i>0 )
+                            if( !first )
                                 s += ", ";
-                            shared_ptr<Base> b = ir->bases[i];    
+                            first=false;
                             ASSERT( b );
                             s += RenderAccess(b->access) + " " /*+ RenderStorage(b->storage)*/ + RenderIdentifier(b->record);
                         }
