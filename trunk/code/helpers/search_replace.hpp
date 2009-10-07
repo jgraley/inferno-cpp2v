@@ -54,7 +54,8 @@ public:
     // of shared pointers but don't worry about key, pass to SearchReplace constructor. 
     class MatchSet : public set< shared_ptr<Node> > 
     { 
-        mutable shared_ptr<Node> key;    // This is filled in by the search and replace engine
+        mutable shared_ptr<Node> key_x;    // This is filled in by the search and replace engine
+        mutable shared_ptr<Node> key_pattern;    // This is filled in by the search and replace engine
         friend class SearchReplace;
     };
 

@@ -164,7 +164,35 @@ bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern
 
 bool SearchReplace::IsMatchPattern( GenericCollection &x, GenericCollection &pattern )
 {
-	// TODO funky algorithm for matching Containers: should be order-independent
+    // presently if the number of elements differ that's a mismatch
+    if( x.size() != pattern.size() )
+        return false;
+
+    // We'll need a copy since we'll be erasing elements
+    Collection<Node> xcopy;
+    FOREACH( const GenericSharedPtr &xe, x )
+        xcopy.insert( xe );
+
+    FOREACH( const GenericSharedPtr &pe, pattern )
+    {
+    	// Look for a single element of x that matches the present element of the pattern
+    	bool found = false;
+    	FOREACH( const GenericSharedPtr &xe, xcopy )
+    	{
+    	    if( IsMatchPattern( xe, pe ) )
+    	    {
+    	    	found = true;
+    	    	xcopy.erase( xe );
+    	    	break;
+    	    }
+    	}
+    	if( !found )
+    		return false; // present pattern element had no match
+    }
+
+    if( !xcopy.empty() )
+    	return false; // there were elements left over so don't match TODO disable when * spotted
+
 	return true;
 }
 
@@ -185,18 +213,20 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
     if( m )
     {
         // It's in a match set!!
-        if( m->key )
+        if( !(m->key_x) || (m->key_pattern == pattern) )
+        {
+            // Not keyed yet OR seeing the same pattern node we already keyed to (ie
+        	// we are repeating part of the search), so key it now!!!
+            m->key_x = x;
+            m->key_pattern = pattern;
+        }
+        else
         {
             // This match set has already been keyed!!
             // No need to recurse, since we already did IsMatchPatternNoKey() and passed - we
             // only need to restrict the search based on the current node, not its children.
-            if( !IsMatchPatternLocal( x, m->key ) )
+            if( !IsMatchPatternLocal( x, m->key_x ) )
                 return false;            
-        }
-        else
-        {
-            // Not keyed yet, so key it now!!!
-            m->key = x;
         }
     }    
     
@@ -331,9 +361,9 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool 
     {
         // It's in a match set, so substitute the key. Simplest to recurse for this. We will
     	// still overlay any non-NULL members of the source pattern node onto the result (see below)
-        ASSERT( match->key )("Match set in replace pattern but did not key to search pattern");
-        ASSERT( TypeInfo(source) >= TypeInfo(match->key) )("source must be a non-strict subclass of local_substitute, so that it does not have more members");
-        dest = DuplicateSubtree( match->key, true );
+        ASSERT( match->key_x )("Match set in replace pattern but did not key to search pattern");
+        ASSERT( TypeInfo(source) >= TypeInfo(match->key_x) )("source must be a non-strict subclass of local_substitute, so that it does not have more members");
+        dest = DuplicateSubtree( match->key_x, true );
     }
     else
     {
@@ -407,7 +437,8 @@ void SearchReplace::ClearKeys()
          msi != matches->end();
          msi++ )
     {
-        msi->key = shared_ptr<Node>();
+        msi->key_x = shared_ptr<Node>();
+        msi->key_pattern = shared_ptr<Node>();
     }
 }
 
