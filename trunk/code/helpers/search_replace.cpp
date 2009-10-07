@@ -164,6 +164,7 @@ bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern
 
 bool SearchReplace::IsMatchPattern( GenericCollection &x, GenericCollection &pattern )
 {
+	// TODO funky algorithm for matching Containers: should be order-independent
 	return true;
 }
 
