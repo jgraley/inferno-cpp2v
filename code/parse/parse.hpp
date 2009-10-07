@@ -704,6 +704,12 @@ private:
             if( shared_ptr<Procedure> pp = dynamic_pointer_cast<Procedure>( o->type ) )
                 AddParamsToScope( pp, FnBodyScope );
 
+            // This is just a junk scope because we will not use scopes collected
+            // via the inferno_scope_stack mechanism within functions; instead, they
+            // will appear among the Statements managed by clang and passed into
+            // ActOnFinishFunctionBody() as a hierarchy of Compounds.
+            // If we tried to do this ourselves we'd lose the nested compound
+            // statement hierarchy.
             inferno_scope_stack.push( shared_ptr<Scope>(new Scope) );
 
             return hold_decl.ToRaw( o );

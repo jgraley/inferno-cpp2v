@@ -62,7 +62,7 @@ public:
     
     /// Associate supplied node with supplied identifier and scope. Will remain 
     /// until the scope is popped. S must be current scope due to implementation.
-    void Add( clang::IdentifierInfo *II, shared_ptr<Node> node, clang::Scope *S );   // TODO These SS params not used - get rid
+    void Add( clang::IdentifierInfo *II, shared_ptr<Node> node, clang::Scope *S );
   
     /// Push a scope based on supplied Inferno tree Node
     void PushScope( clang::Scope *S, shared_ptr<Node> n );
