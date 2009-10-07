@@ -95,7 +95,7 @@ private:
             global_scope( p ),
             all_decls( new Program )
         {
-            inferno_scope_stack.push( &*p );
+            inferno_scope_stack.push( &(p->members) );
         }
 
         ~InfernoAction()
@@ -489,7 +489,7 @@ private:
                 access = shared_ptr<Private>(new Private); // Most scopes are private unless specified otherwise
 
             shared_ptr<Instance> o(new Instance());
-            all_decls->insert(o);
+            all_decls->members.insert(o);
 
             clang::IdentifierInfo *ID = D.getIdentifier();
             if(ID)
@@ -516,7 +516,7 @@ private:
         shared_ptr<Typedef> CreateTypedefNode( clang::Scope *S, clang::Declarator &D )
         {
             shared_ptr<Typedef> t(new Typedef);
-            all_decls->insert(t);
+            all_decls->members.insert(t);
             clang::IdentifierInfo *ID = D.getIdentifier();
             if(ID)
             {
@@ -532,7 +532,7 @@ private:
         shared_ptr<Label> CreateLabelNode( clang::IdentifierInfo *ID )
         {
             shared_ptr<Label> l(new Label);
-            all_decls->push_back(l);
+            all_decls->members.insert(l);
             l->access = shared_new<Public>();
             l->identifier = CreateLabelIdentifier(ID);
             TRACE("%s %p %p\n", ID->getName(), l.get(), ID );
@@ -1257,7 +1257,7 @@ private:
 					ASSERTFAIL("Unknown type spec type");
 					break;
 			}
-			all_decls->insert(h);
+			all_decls->members.insert(h);
 
 			if(Name)
 			{
@@ -1517,7 +1517,7 @@ private:
                                           clang::SourceLocation EqualLoc, ExprTy *Val)
         {
             shared_ptr<Instance> o(new Instance());
-            all_decls->insert(o);
+            all_decls->members.insert(o);
             o->identifier = CreateInstanceIdentifier(Id);
             o->storage = shared_new<Static>();
             o->constancy = shared_new<Const>(); // static const member does not consume storage!!

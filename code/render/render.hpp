@@ -41,7 +41,7 @@ public:
         ASSERT( program );
         AutoPush< shared_ptr<Node> > cs( scope_stack, program );
               
-        string s = RenderDeclarationCollection( *program, ";\n", true ); // gets the .hpp stuff directly
+        string s = RenderDeclarationCollection( program->members, ";\n", true ); // gets the .hpp stuff directly
     
         s += deferred_decls; // these could go in a .cpp file
         

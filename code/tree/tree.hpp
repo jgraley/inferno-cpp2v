@@ -72,15 +72,12 @@ struct Type : virtual Node { NODE_FUNCTIONS };
 // also inside structs etc and at top level.
 struct Declaration : Statement { NODE_FUNCTIONS };
 
-// The top level of a program is considered a sequence of declarations.
+// The top level of a program is considered a collection of declarations.
 // main() would typically be a function instance somewhere in this sequence.
-// TODO decide whether to allow/encourage making Sequence/SharedPtr be
-// a base class - seems to work OK in search/replace etc since itemise
-// doesn't differentiate.
-struct Program : Node,
-                 Collection<Declaration>
+struct Program : Node
 {
     NODE_FUNCTIONS
+    Collection<Declaration> members;
 };
 
 //////////////////////////// Literals ///////////////////////////////
