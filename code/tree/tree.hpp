@@ -428,7 +428,7 @@ struct Enum : Record { NODE_FUNCTIONS };
 struct InheritanceRecord : Record
 {
     NODE_FUNCTIONS
-    Sequence<Base> bases; // TODO just chuck them into Record::members? TODO Collection?
+    Collection<Base> bases; // TODO just chuck them into Record::members? TODO Collection?
 };
 
 // Struct and class as per InheritanceRecord
