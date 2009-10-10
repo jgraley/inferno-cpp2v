@@ -381,7 +381,7 @@ void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source,
         }
         else
         {
-            ASSERTFAIL("got something from itemise that isnt a sequence or a shared pointer");               
+            ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
         }
     }        
 }
