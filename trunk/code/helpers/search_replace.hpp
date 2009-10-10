@@ -14,7 +14,7 @@
 // In-tree search and replace utility. To use, you make a search pattern and a 
 // replace pattern, each in the form of a subtree. You pass these into the 
 // constructor and you now have a pass object (functor) that will apply the 
-// implied trasformation on programs passed to it.
+// implied transformation on programs passed to it.
 // 
 // Additional functionality as follows:
 // - Intermediate tree nodes like Numeric or Expression can be placed
@@ -31,8 +31,9 @@
 //   found during matching by creating a MatchSet and inserting pointers 
 //   to the corresponding search and replace pattern nodes.
 //
-// - NULL shared_ptr in replace pattern under a substituted node means
-//   fill this in from substitute too (otherwise use what is specified).
+// - NULL shared_ptr (or empty container) in replace pattern under a
+//   substituted node means fill this in from substitute too (otherwise
+//   use what is specified).
 //
 // - Identifiers (any node derived from Identifier) are kept unique
 //   during replace by pointing directly to the identifier in the 
@@ -42,8 +43,13 @@
 //   matching rules by implementing a virtual IsMatchPattern() function.
 //   Ready made soft nodes are documented in soft_patterns.hpp
 //
-// - TODO multi-node wildcards for * in sequences, arbitrary depth
-//   and arbitrary depth with restricted intermediates (the Stuff node).
+// - Sequence/Container support: sequences require matching ordering
+//   and containers do not (only the presence of the matching elements).
+//
+// - Multi-node wildcards like * in sequences and containers (Star node).
+//
+// - TODO Recursive wildcards, arbitrary depth and arbitrary depth with
+//   restricted intermediates (the Stuff node).
 //
 // - TODO slave search/replace so that a second SR can happen for each match
 //   of the first one, and can borrow its match sets.
