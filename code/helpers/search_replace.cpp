@@ -363,7 +363,7 @@ void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source,
         {
             GenericSequence *dest_seq = dynamic_cast<GenericSequence *>(dest_memb[i]);
             ASSERT( dest_seq && "itemise for dest didn't match itemise for source");
-
+            DuplicateSequence( dest_seq, source_seq, under_substitution );
         }            
         else if( GenericCollection *source_col = dynamic_cast<GenericCollection *>(source_memb[i]) )
         {
@@ -403,7 +403,9 @@ void SearchReplace::DuplicateSequence( GenericSequence *dest, GenericSequence *s
 		shared_ptr<Node> pp( p );
 		if( dynamic_pointer_cast<Star>(pp) )
 		{
-			//
+			// Seen a Star wildcard in replace pattern. It must be keyed to something, and that
+			// thing must be a SubSequence. Find it then expand the emements one by one directly
+			// into the destination Sequence.
 			const MatchSet *match = FindMatchSet( pp );
 			ASSERT( match )( "Star in replace pattern must be in a match set");
 			ASSERT( match->key_x )( "match set did not get keyed successfully");
@@ -437,7 +439,10 @@ void SearchReplace::DuplicateCollection( GenericCollection *dest, GenericCollect
 		shared_ptr<Node> pp( p );
 		if( dynamic_pointer_cast<Star>(pp) )
 		{
-			const MatchSet *match = FindMatchSet( pp );
+			// Seen a Star wildcard in replace pattern. It must be keyed to something, and that
+			// thing must be a SubCollection. Find it then expand the emements one by one directly
+			// into the destination Collection.
+            const MatchSet *match = FindMatchSet( pp );
 			ASSERT( match )( "Star in replace pattern must be keyed for substitution");
 			ASSERT( match->key_x )( "match set did not get keyed successfully");
 			shared_ptr<Node> n = DuplicateSubtree( match->key_x, true );
