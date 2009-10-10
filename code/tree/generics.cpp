@@ -21,3 +21,4 @@ void GenericsTest()
         TRACE("element at %p\n", i[e]);
     ASSERT( i.size() == 1 )("%d elements\n", i.size());
 }
+

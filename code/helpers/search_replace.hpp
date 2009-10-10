@@ -59,6 +59,12 @@ public:
         friend class SearchReplace;
     };
 
+    // The * wildcard can match more than one node of any type in a container
+    // In a Sequence, only a contiguous subsequence of 0 or more elements will match
+    // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
+    // Only one Star is allowed in a Collection
+    struct Star : Node { NODE_FUNCTIONS };
+
     // Constructor and destructor. Search and replace patterns and match sets are 
     // specified here, so that we have a fully confiugured functor.
     SearchReplace( shared_ptr<Node> sp=shared_ptr<Node>(), 
@@ -91,15 +97,28 @@ private:
     
     bool IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pattern ); // only look inside node (type, value)
     bool IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pattern ); // look at node and children
-    bool IsMatchPattern( GenericSequence &x, GenericSequence &pattern ); // match for Sequences
+    bool IsMatchPattern( GenericSequence &x, GenericSequence &pattern, int xstart=0, int pstart=0 ); // match for Sequences
     bool IsMatchPattern( GenericCollection &x, GenericCollection &pattern ); // match for Collections
     bool Search( shared_ptr<Node> program, GenericContainer::iterator &gp );
     void ClearPtrs( shared_ptr<Node> dest );
     void OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source, bool under_substitution );
+    void DuplicateSequence( GenericSequence *dest, GenericSequence *source, bool under_substitution );
+    void DuplicateCollection( GenericCollection *dest, GenericCollection *source, bool under_substitution );
     shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x, bool under_substitution=false );
     void Replace( GenericContainer::iterator target );    
     const MatchSet *FindMatchSet( shared_ptr<Node> node );
     void ClearKeys(); 
+    bool UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node> pattern );
+    struct SubCollection : Star,
+                           Collection<Node>
+    {
+    	NODE_FUNCTIONS
+    };
+    struct SubSequence : Star,
+                         Sequence<Node>
+    {
+    	NODE_FUNCTIONS
+    };
 };
 
 #endif

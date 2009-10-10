@@ -147,55 +147,130 @@ bool SearchReplace::IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pa
     return true;
 }
 
-bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern )
+// xstart and pstart are the indexes into the sequence where we will begin checking for a match.
+// It is assumed that elements before these have already been matched and may be ignored.
+bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern, int xstart, int pstart )
 {
-    // presently if the number of elements differ that's a mismatch
-    if( x.size() != pattern.size() )
-        return false;
+	// Attempt to match all the elements between start and the end of the sequence; stop
+	// if either pattern or subject runs out.
+	int xi=xstart;
+	int pi=pstart;
+	while( pi < pattern.size() && xi < x.size() )
+	{
+		// Get the next element of the pattern
+		shared_ptr<Node> pe( pattern[pi] );
+		pi++;
+	    if( !pe || dynamic_pointer_cast<Star>(pe) )
+	    {
+			// We have a Star type wildcard that can match multiple elements. At present,
+			// NULL is interpreted as a Star (but cannot go in a match set). Remember where
+	    	// we are - this is the beginning of the subsequence that potentially matches the Star.
+	    	int xi_begin_star = xi;
 
-    for( int i=0; i<pattern.size(); i++ )
-    {
-        TRACE("Elt %d target=%p pattern=%p\n", i, x[i].get(), pattern[i].get() );
-        if( !IsMatchPattern( x[i], pattern[i] ) )
-            return false;
-    }
-    return true;
+	    	// Star always matches at the end of a sequence, so we only bother checking when there
+	    	// are more elements left
+	    	if( pi < pattern.size() )
+	    	{
+	    		// Star not at end so there is more stuff to match; ensure not another star
+	    		ASSERT( !dynamic_pointer_cast<Star>(shared_ptr<Node>(pattern[pi])) )
+	    		      ( "Not allowed to have two neighbouring Star elements in search pattern Sequence");
+
+	    		// Try out different numbers of elements to match the Star, counting up from zero
+				while( xi < x.size() )
+				{
+					// Recursively attempt to match the remaining elements *after* the present star.
+					if( IsMatchPattern( x, pattern, xi, pi ) )
+					{
+						break;
+					}
+					xi++;
+				}
+				// We got to the end of the subject Sequence, there's no way to match the >0 elements
+				// we know are still in the pattern.
+				if( xi == x.size() )
+					return false;
+	    	}
+
+			// Star matched [xi_begin_star, xi) i.e. xi-xi_begin_star elements
+		    // Now make a copy of the elements that matched the star and apply match sets
+		    if( pe )
+		    {
+		    	// Copy the matched subsequence into a SubSequence node for the benefit of match sets
+			    shared_ptr<SubSequence> xcopy( new SubSequence );
+				for( int i=xi_begin_star; i<xi; i++ )
+					xcopy->push_back( x[i] );
+
+				// Apply match sets to this Star and matched SubSequence
+		    	if( !UpdateAndCheckMatchSets( xcopy, pe ) )
+		        	return false;
+		    }
+	    }
+	    else // not a Star so match singly...
+	    {
+			// Look for a single element of x that matches the present element of the pattern
+			shared_ptr<Node> xe( x[xi] );
+			if( IsMatchPattern( xe, pe ) )
+			{
+				xi++;
+			}
+			else
+			{
+				return false;
+			}
+	    }
+	}
+
+    // If we finished the job and pattern and subject are still aligned, then it was a match
+    return xi==x.size() && pi==pattern.size();
 }
 
 bool SearchReplace::IsMatchPattern( GenericCollection &x, GenericCollection &pattern )
 {
     // We'll need a copy since we'll be erasing elements
-    Collection<Node> xcopy;
+    shared_ptr<SubCollection> xcopy( new SubCollection );
     FOREACH( const GenericSharedPtr &xe, x )
-        xcopy.insert( xe );
+        xcopy->insert( xe );
 
-    bool star=false;
+    shared_ptr<Star> star;
+    bool seen_star = false;
 
-    FOREACH( const GenericSharedPtr &pe, pattern )
+    FOREACH( const GenericSharedPtr &gpe, pattern )
     {
-        if( !pe ) // NULL in pattern collection?
+    	shared_ptr<Node> pe( gpe );
+        if( !pe || dynamic_pointer_cast<Star>(pe) ) // NULL in pattern collection?
         {
-            star=true; // remember for later and skip to next pattern 
-            continue; 
+        	ASSERT(!seen_star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
+            star = dynamic_pointer_cast<Star>(pe); // remember for later and skip to next pattern
+            seen_star = true;
         }
-        
-    	// Look for a single element of x that matches the present element of the pattern
-    	bool found = false;
-    	FOREACH( const GenericSharedPtr &xe, xcopy )
-    	{
-    	    if( IsMatchPattern( xe, pe ) )
-    	    {
-    	    	found = true;
-    	    	xcopy.erase( xe );
-    	    	break;
-    	    }
-    	}
-    	if( !found )
-    		return false; // present pattern element had no match
+	    else // not a Star so match singly...
+	    {
+			// Look for a single element of x that matches the present element of the pattern
+			bool found = false;
+			FOREACH( const GenericSharedPtr &xe, *xcopy )
+			{
+				if( IsMatchPattern( xe, pe ) )
+				{
+					found = true;
+					xcopy->erase( xe );
+					break;
+				}
+			}
+			if( !found )
+				return false; // present pattern element had no match
+	    }
     }
 
-    if( !xcopy.empty() && !star )
+    // Now handle the star if there was one; all the non-star matches have been erased from
+    // the collectionleaving only the star matches.
+
+    if( !xcopy->empty() && !seen_star )
     	return false; // there were elements left over and no star to match them against
+
+    // If we got here, the node matched the search pattern. Now apply match sets
+    if( seen_star && star )
+        if( !UpdateAndCheckMatchSets( xcopy, star ) )
+        	return false;
 
 	return true;
 }
@@ -213,26 +288,8 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
         return false;
     
     // If we got here, the node matched the search pattern. Now apply match sets
-    const MatchSet *m = FindMatchSet( pattern );
-    if( m )
-    {
-        // It's in a match set!!
-        if( !(m->key_x) || (m->key_pattern == pattern) )
-        {
-            // Not keyed yet OR seeing the same pattern node we already keyed to (ie
-        	// we are repeating part of the search), so key it now!!!
-            m->key_x = x;
-            m->key_pattern = pattern;
-        }
-        else
-        {
-            // This match set has already been keyed!!
-            // No need to recurse, since we already did IsMatchPatternNoKey() and passed - we
-            // only need to restrict the search based on the current node, not its children.
-            if( !IsMatchPatternLocal( x, m->key_x ) )
-                return false;            
-        }
-    }    
+    if( !UpdateAndCheckMatchSets( x, pattern ) )
+    	return false;
     
     return true;
 }
@@ -306,22 +363,14 @@ void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source,
         {
             GenericSequence *dest_seq = dynamic_cast<GenericSequence *>(dest_memb[i]);
             ASSERT( dest_seq && "itemise for dest didn't match itemise for source");
-            ASSERT( source_seq->size() == dest_seq->size() );
 
-            // For now, an empty sequence in the source pattern = leave destination alone (so
-            // you get the match-key sequence or nothing at all) and non-empty just splats over
-            // the whole sequence (and no elements are allowed to be NULL).
-            // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
-            if( source_seq->size() )
-            {
-            	dest_seq->clear();
-				FOREACH( const GenericSharedPtr &p, *source_seq ) //for( int j=0; j<source_seq->size(); j++ )
-				{
-					ASSERT( p ); // present simplified scheme disallows NULL, see above
-					dest_seq->push_back( DuplicateSubtree( p, under_substitution ) );
-				}
-            }
         }            
+        else if( GenericCollection *source_col = dynamic_cast<GenericCollection *>(source_memb[i]) )
+        {
+        	GenericCollection *dest_col = dynamic_cast<GenericCollection *>(dest_memb[i]);
+            ASSERT( dest_col && "itemise for dest didn't match itemise for source");
+            DuplicateCollection( dest_col, source_col, under_substitution );
+         }
         else if( GenericSharedPtr *source_ptr = dynamic_cast<GenericSharedPtr *>(source_memb[i]) )         
         {
             GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]);
@@ -335,6 +384,75 @@ void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source,
             ASSERTFAIL("got something from itemise that isnt a sequence or a shared pointer");               
         }
     }        
+}
+
+void SearchReplace::DuplicateSequence( GenericSequence *dest, GenericSequence *source, bool under_substitution )
+{
+    // For now, an empty sequence in the source pattern = leave destination alone (so
+    // you get the match-key sequence or nothing at all) and non-empty just splats over
+    // the whole sequence (and no elements are allowed to be NULL).
+    // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
+    if( source->size() )
+    {
+    	dest->clear();
+    }
+
+	FOREACH( const GenericSharedPtr &p, *source )
+	{
+		ASSERT( p ); // present simplified scheme disallows NULL, see above
+		shared_ptr<Node> pp( p );
+		if( dynamic_pointer_cast<Star>(pp) )
+		{
+			//
+			const MatchSet *match = FindMatchSet( pp );
+			ASSERT( match )( "Star in replace pattern must be in a match set");
+			ASSERT( match->key_x )( "match set did not get keyed successfully");
+			shared_ptr<Node> n = DuplicateSubtree( match->key_x, true );
+			shared_ptr<SubSequence> ss = dynamic_pointer_cast<SubSequence>(n);
+			ASSERT( ss )( "Star keyed to wrong thing, expected SubSequence");
+			FOREACH( const GenericSharedPtr &xx, *ss )
+				dest->push_back( xx );
+		}
+		else
+		{
+			ASSERT( p ); // present simplified scheme disallows NULL, see above
+			shared_ptr<Node> n = DuplicateSubtree( p, under_substitution );
+			dest->push_back( n );
+		}
+	}
+}
+
+void SearchReplace::DuplicateCollection( GenericCollection *dest, GenericCollection *source, bool under_substitution )
+{
+    // For now, an empty sequence in the source pattern = leave destination alone (so
+    // you get the match-key sequence or nothing at all) and non-empty just splats over
+    // the whole sequence (and no elements are allowed to be NULL).
+    // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
+    if( source->size() )
+     	dest->clear();
+
+	FOREACH( const GenericSharedPtr &p, *source )
+	{
+		ASSERT( p ); // present simplified scheme disallows NULL, see above
+		shared_ptr<Node> pp( p );
+		if( dynamic_pointer_cast<Star>(pp) )
+		{
+			const MatchSet *match = FindMatchSet( pp );
+			ASSERT( match )( "Star in replace pattern must be keyed for substitution");
+			ASSERT( match->key_x )( "match set did not get keyed successfully");
+			shared_ptr<Node> n = DuplicateSubtree( match->key_x, true );
+			shared_ptr<SubCollection> sc = dynamic_pointer_cast<SubCollection>(n);
+			ASSERT( sc )( "Star keyed to wrong thing, expected SubCollection");
+			FOREACH( const GenericSharedPtr &xx, *sc )
+				dest->insert( xx );
+		}
+		else
+		{
+			ASSERT( p ); // present simplified scheme disallows NULL, see above
+			SharedPtr<Node> n = DuplicateSubtree( p, under_substitution );
+			dest->insert( n );
+		}
+	}
 }
 
 
@@ -444,6 +562,38 @@ void SearchReplace::ClearKeys()
         msi->key_x = shared_ptr<Node>();
         msi->key_pattern = shared_ptr<Node>();
     }
+}
+
+
+// During search, once two nodes are known to match, use this function to
+// 1. Key it into a match set of required and
+// 2. Detect whether a match set required two parts of the search tree to match and
+// reject if they don't.
+bool SearchReplace::UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node> pattern )
+{
+	const MatchSet *m = FindMatchSet( pattern );
+	if( m )
+	{
+		// It's in a match set!!
+		if( !(m->key_pattern) || (m->key_pattern == pattern) )
+		{
+			// Not keyed yet OR seeing the same pattern node we already keyed to (ie
+			// we are repeating part of the search), so key it now!!!
+			m->key_pattern = pattern;
+			m->key_x = x;
+		}
+		else
+		{
+			// This match set has already been keyed! This means there is more than one
+			// entry in the match set pointing to the search pattern. We will require
+			// that they match each other for the search as a whole to match.
+			// In this call both pattern and subject are in the input program tree, and
+			// match sets must not point to the input program, so we won't hit a match set.
+			if( !IsMatchPattern( x, m->key_x ) )
+				return false;
+		}
+	}
+	return true;
 }
 
 
