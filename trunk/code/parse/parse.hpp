@@ -1709,7 +1709,6 @@ private:
                     return o;
             }
             ASSERTFAIL("missing constructor");
-            return shared_ptr<Instance>();
         }
 
         virtual MemInitResult ActOnMemInitializer( DeclTy *ConstructorDecl,
