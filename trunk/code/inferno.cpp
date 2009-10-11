@@ -9,6 +9,7 @@
 #include "helpers/search_replace.hpp"
 #include "helpers/soft_patterns.hpp"
 #include "helpers/validate.hpp"
+#include "steps/split_instance_declarations.hpp"
 
 void SelfTest();
 
@@ -29,41 +30,12 @@ int main( int argc, char *argv[] )
     p( program );
               
     Validate()(program);                
-                    
-    // TODO move this out of main()
+
+    if( ReadArgs::quitafter > 0 )
     {
-        shared_ptr<Dereference> sd( new Dereference );     
-        shared_ptr<Subtract> sa( new Subtract );
-        sd->operands.push_back( sa );
-        shared_ptr<SoftExpressonOfType> sseot( new SoftExpressonOfType );
-        sa->operands.push_back( sseot );
-        shared_ptr<Array> sar( new Array );
-//           sar->element = SharedPtr<Type>();
-//           sar->size = SharedPtr<Initialiser>();                
-        sseot->type_pattern = sar;        
-        shared_ptr<Expression> se( new Expression );
-        sa->operands.push_back( se );
-    
-        shared_ptr<Subscript> rs( new Subscript );
-        shared_ptr<Expression> rar( new Expression );
-        rs->base = rar;
-        shared_ptr<Expression> re( new Expression );
-        rs->index = re;
-                       
-        SearchReplace::MatchSet mar;
-        mar.insert( sseot );
-        mar.insert( rar );
-        SearchReplace::MatchSet me;
-        me.insert( se );
-        me.insert( re );            
-        set<SearchReplace::MatchSet> sm;
-        sm.insert( mar );
-        sm.insert( me );
-                       
-        SearchReplace(sd, rs, &sm)(program);                            
+        SplitInstanceDeclarations()(program);
+        Validate()(program);
     }
-                 
-    Validate()(program);                
 
     if(ReadArgs::graph)
     {

@@ -41,8 +41,15 @@ struct GenericSharedPtr : Itemiser::Element
     	return GetNodePtr();
     }
 
+    GenericSharedPtr &operator=( const GenericSharedPtr &n )
+    {
+    	*(Itemiser::Element *)this = *(Itemiser::Element *)&n; // so assign gets to itemiser
+    	SetNodePtr( n.GetNodePtr() );
+    	return *this;
+    }
     GenericSharedPtr &operator=( shared_ptr<Node> n )
     {
+    	TRACE();
     	SetNodePtr( n );
     	return *this;
     }
