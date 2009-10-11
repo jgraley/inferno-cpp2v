@@ -68,14 +68,23 @@ public:
     // The * wildcard can match more than one node of any type in a container
     // In a Sequence, only a contiguous subsequence of 0 or more elements will match
     // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
-    // Only one Star is allowed in a Collection
-    struct Star : Node { NODE_FUNCTIONS };
+    // Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
+    // in the collection. TODO if the type is narrower, restrict any matches!!
+private:
+    struct StarBase : virtual Node { NODE_FUNCTIONS };
+public:
+    template<class VALUE_TYPE>
+    struct Star : private StarBase,
+                  VALUE_TYPE { NODE_FUNCTIONS };
 
     // Constructor and destructor. Search and replace patterns and match sets are 
     // specified here, so that we have a fully confiugured functor.
     SearchReplace( shared_ptr<Node> sp=shared_ptr<Node>(), 
                    shared_ptr<Node> rp=shared_ptr<Node>(),
                    const set<MatchSet> *m = NULL );    
+    void Configure( shared_ptr<Node> sp=shared_ptr<Node>(),
+                    shared_ptr<Node> rp=shared_ptr<Node>(),
+                    const set<MatchSet> *m = NULL );
     ~SearchReplace();
     
     // Do the actual search and replace (functor style; implements Pass interface).
@@ -115,12 +124,13 @@ private:
     const MatchSet *FindMatchSet( shared_ptr<Node> node );
     void ClearKeys(); 
     bool UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node> pattern );
-    struct SubCollection : Star,
+
+    struct SubCollection : Node,
                            Collection<Node>
     {
     	NODE_FUNCTIONS
     };
-    struct SubSequence : Star,
+    struct SubSequence : Node,
                          Sequence<Node>
     {
     	NODE_FUNCTIONS

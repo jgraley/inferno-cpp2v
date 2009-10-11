@@ -8,6 +8,7 @@ std::string ReadArgs::outfile;
 bool ReadArgs::graph;
 bool ReadArgs::trace;
 bool ReadArgs::selftest;
+unsigned ReadArgs::quitafter;
 
 void ReadArgs::Usage()
 {
@@ -22,6 +23,7 @@ void ReadArgs::Read( int argc, char *argv[] )
     trace = false;
     graph = false;
     selftest = false;
+    quitafter = 0xffffffff;
     while( i<argc )
     {
         if( argv[i]==std::string("-i") && argc>i+1 )
@@ -43,6 +45,10 @@ void ReadArgs::Read( int argc, char *argv[] )
         else if( argv[i]==std::string("-s") )
         {
             selftest = true;
+        }
+        else if( argv[i]==std::string("-q") )
+        {
+        	quitafter = strtoul( argv[++i], NULL, 10 );
         }
         else 
         {

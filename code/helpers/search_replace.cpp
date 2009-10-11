@@ -1,16 +1,29 @@
 #include "search_replace.hpp"
 
-// Constructor remembers search pattern, replace apttern and any suppleid match sets as required
+// Constructor remembers search pattern, replace pattern and any supplied match sets as required
 SearchReplace::SearchReplace( shared_ptr<Node> sp, 
                               shared_ptr<Node> rp,
-                              const set<MatchSet> *m ) :
-    search_pattern( sp ),
-    replace_pattern( rp ),
-    matches( m )
+                              const set<MatchSet> *m )
+{
+	our_matches = false;
+	Configure( sp, rp, m );
+    ASSERT( matches );
+}
+
+void SearchReplace::Configure( shared_ptr<Node> sp,
+                               shared_ptr<Node> rp,
+                               const set<MatchSet> *m )
 {  
-    our_matches = !matches;
+    search_pattern = sp;
+    replace_pattern = rp;
+
+    if( our_matches )
+        delete matches;
+    our_matches = !m;
     if( our_matches )    
         matches = new set<MatchSet>;
+    else
+    	matches = m;
     
     ASSERT( matches );        
 } 
@@ -155,13 +168,15 @@ bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern
 	// if either pattern or subject runs out.
 	int xi=xstart;
 	int pi=pstart;
-	while( pi < pattern.size() && xi < x.size() )
+	while( pi < pattern.size() )
 	{
+		TRACE("pattern at %d; x at %d\n", pi, xi );
 		// Get the next element of the pattern
 		shared_ptr<Node> pe( pattern[pi] );
 		pi++;
-	    if( !pe || dynamic_pointer_cast<Star>(pe) )
+	    if( !pe || dynamic_pointer_cast<StarBase>(pe) )
 	    {
+	    	TRACE("Star (pe is %d)\n", (int)!!pe);
 			// We have a Star type wildcard that can match multiple elements. At present,
 			// NULL is interpreted as a Star (but cannot go in a match set). Remember where
 	    	// we are - this is the beginning of the subsequence that potentially matches the Star.
@@ -169,10 +184,15 @@ bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern
 
 	    	// Star always matches at the end of a sequence, so we only bother checking when there
 	    	// are more elements left
-	    	if( pi < pattern.size() )
+	    	if( pi == pattern.size() )
 	    	{
+	    		xi = x.size(); // match all remaining members of x; jump to end
+	    	}
+	    	else
+	    	{
+	    		TRACE("Pattern continues after star\n");
 	    		// Star not at end so there is more stuff to match; ensure not another star
-	    		ASSERT( !dynamic_pointer_cast<Star>(shared_ptr<Node>(pattern[pi])) )
+	    		ASSERT( !dynamic_pointer_cast<StarBase>(shared_ptr<Node>(pattern[pi])) )
 	    		      ( "Not allowed to have two neighbouring Star elements in search pattern Sequence");
 
 	    		// Try out different numbers of elements to match the Star, counting up from zero
@@ -188,13 +208,17 @@ bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern
 				// We got to the end of the subject Sequence, there's no way to match the >0 elements
 				// we know are still in the pattern.
 				if( xi == x.size() )
+				{
+					TRACE("Ran out of candidate\n");
 					return false;
+				}
 	    	}
 
 			// Star matched [xi_begin_star, xi) i.e. xi-xi_begin_star elements
 		    // Now make a copy of the elements that matched the star and apply match sets
 		    if( pe )
 		    {
+		    	TRACE("Copying matched star for match set\n");
 		    	// Copy the matched subsequence into a SubSequence node for the benefit of match sets
 			    shared_ptr<SubSequence> xcopy( new SubSequence );
 				for( int i=xi_begin_star; i<xi; i++ )
@@ -202,25 +226,31 @@ bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern
 
 				// Apply match sets to this Star and matched SubSequence
 		    	if( !UpdateAndCheckMatchSets( xcopy, pe ) )
+		    	{
+		    		TRACE("Mat set disallows because keyed already and key differs\n");
 		        	return false;
+		    	}
 		    }
 	    }
 	    else // not a Star so match singly...
 	    {
-			// Look for a single element of x that matches the present element of the pattern
-			shared_ptr<Node> xe( x[xi] );
-			if( IsMatchPattern( xe, pe ) )
+	    	TRACE("Not a star\n");
+			// If there is one more element in x, see if it matches the pattern
+			//shared_ptr<Node> xe( x[xi] );
+			if( xi < x.size() && IsMatchPattern( x[xi], pe ) )
 			{
 				xi++;
 			}
 			else
 			{
+				TRACE("Element mismatched\n");
 				return false;
 			}
 	    }
 	}
 
     // If we finished the job and pattern and subject are still aligned, then it was a match
+	TRACE("Finished; pattern got to %d out of %d; x got to %d out of %x\n", xi, x.size(), pi, pattern.size() );
     return xi==x.size() && pi==pattern.size();
 }
 
@@ -231,16 +261,16 @@ bool SearchReplace::IsMatchPattern( GenericCollection &x, GenericCollection &pat
     FOREACH( const GenericSharedPtr &xe, x )
         xcopy->insert( xe );
 
-    shared_ptr<Star> star;
+    shared_ptr<StarBase> star;
     bool seen_star = false;
 
     FOREACH( const GenericSharedPtr &gpe, pattern )
     {
     	shared_ptr<Node> pe( gpe );
-        if( !pe || dynamic_pointer_cast<Star>(pe) ) // NULL in pattern collection?
+        if( !pe || dynamic_pointer_cast<StarBase>(pe) ) // NULL in pattern collection?
         {
         	ASSERT(!seen_star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
-            star = dynamic_pointer_cast<Star>(pe); // remember for later and skip to next pattern
+            star = dynamic_pointer_cast<StarBase>(pe); // remember for later and skip to next pattern
             seen_star = true;
         }
 	    else // not a Star so match singly...
@@ -375,7 +405,8 @@ void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source,
         {
             GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]);
             ASSERT( dest_ptr && "itemise for target didn't match itemise for source");
-                        
+
+            TRACE("overlaying shared_ptr, %d\n", (int)!!source_ptr );
             if( *source_ptr ) // Masked: where source is NULL, do not overwrite
                 *dest_ptr = DuplicateSubtree( *source_ptr, under_substitution );
         }
@@ -392,16 +423,15 @@ void SearchReplace::DuplicateSequence( GenericSequence *dest, GenericSequence *s
     // you get the match-key sequence or nothing at all) and non-empty just splats over
     // the whole sequence (and no elements are allowed to be NULL).
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
-    if( source->size() )
-    {
-    	dest->clear();
-    }
+    //if( source->size() )
+    dest->clear();
 
+    TRACE("duplicating sequence size %d\n", source->size() );
 	FOREACH( const GenericSharedPtr &p, *source )
 	{
 		ASSERT( p ); // present simplified scheme disallows NULL, see above
 		shared_ptr<Node> pp( p );
-		if( dynamic_pointer_cast<Star>(pp) )
+		if( dynamic_pointer_cast<StarBase>(pp) )
 		{
 			// Seen a Star wildcard in replace pattern. It must be keyed to something, and that
 			// thing must be a SubSequence. Find it then expand the emements one by one directly
@@ -412,11 +442,13 @@ void SearchReplace::DuplicateSequence( GenericSequence *dest, GenericSequence *s
 			shared_ptr<Node> n = DuplicateSubtree( match->key_x, true );
 			shared_ptr<SubSequence> ss = dynamic_pointer_cast<SubSequence>(n);
 			ASSERT( ss )( "Star keyed to wrong thing, expected SubSequence");
+			TRACE("star seen; inserting subsequence length %d\n", ss->size() );
 			FOREACH( const GenericSharedPtr &xx, *ss )
 				dest->push_back( xx );
 		}
 		else
 		{
+			TRACE("non-star element, inserting directly\n");
 			ASSERT( p ); // present simplified scheme disallows NULL, see above
 			shared_ptr<Node> n = DuplicateSubtree( p, under_substitution );
 			dest->push_back( n );
@@ -430,14 +462,16 @@ void SearchReplace::DuplicateCollection( GenericCollection *dest, GenericCollect
     // you get the match-key sequence or nothing at all) and non-empty just splats over
     // the whole sequence (and no elements are allowed to be NULL).
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
-    if( source->size() )
-     	dest->clear();
+    //if( source->size() )
+    dest->clear();
+
+    TRACE("duplicating collection size %d\n", source->size() );
 
 	FOREACH( const GenericSharedPtr &p, *source )
 	{
 		ASSERT( p ); // present simplified scheme disallows NULL, see above
 		shared_ptr<Node> pp( p );
-		if( dynamic_pointer_cast<Star>(pp) )
+		if( dynamic_pointer_cast<StarBase>(pp) )
 		{
 			// Seen a Star wildcard in replace pattern. It must be keyed to something, and that
 			// thing must be a SubCollection. Find it then expand the emements one by one directly
@@ -448,11 +482,13 @@ void SearchReplace::DuplicateCollection( GenericCollection *dest, GenericCollect
 			shared_ptr<Node> n = DuplicateSubtree( match->key_x, true );
 			shared_ptr<SubCollection> sc = dynamic_pointer_cast<SubCollection>(n);
 			ASSERT( sc )( "Star keyed to wrong thing, expected SubCollection");
+			TRACE("star seen; inserting subcollection length %d\n", sc->size() );
 			FOREACH( const GenericSharedPtr &xx, *sc )
 				dest->insert( xx );
 		}
 		else
 		{
+			TRACE("non-star element, inserting directly\n");
 			ASSERT( p ); // present simplified scheme disallows NULL, see above
 			SharedPtr<Node> n = DuplicateSubtree( p, under_substitution );
 			dest->insert( n );
@@ -469,12 +505,14 @@ void SearchReplace::DuplicateCollection( GenericCollection *dest, GenericCollect
 // and get the two OverlayPtrs during unwind.
 shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool under_substitution )
 {
+	TRACE("Duplicating, us=%d\n", (int)under_substitution);
 	// Do not duplicate identifiers if they are being substituted from the original tree.
 	if( under_substitution && dynamic_pointer_cast<Identifier>( source ) )
 	{
 		// Substitute is an identifier, so preserve its uniqueness by just returning
 		// the same node. Don't do any more - we wouldn't want to change the
 		// identifier in the tree even if it had members, lol!
+		TRACE("Not duplicating identifiers when under substitution\n");
 		return source;
 	}
 
@@ -486,6 +524,7 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool 
 
     if( match )
     {
+    	TRACE("substituting because faund in match set\n");
         // It's in a match set, so substitute the key. Simplest to recurse for this. We will
     	// still overlay any non-NULL members of the source pattern node onto the result (see below)
         ASSERT( match->key_x )("Match set in replace pattern but did not key to search pattern");
@@ -494,6 +533,7 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool 
     }
     else
     {
+    	TRACE("duplicating node\n");
 		// Make the new node (destination node)
 		shared_ptr<Cloner> dup_dest = Cloner::Clone( source );
 		dest = dynamic_pointer_cast<Node>( dup_dest );
@@ -511,7 +551,7 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool 
     return dest;
 }
 
-
+#include "render/graph.hpp"
 // Perform the configured replacement at the supplied target.
 // Note target is a double pointer, since we wish to enact the
 // replacement by changing a SharedPtr somewhere.
@@ -520,6 +560,7 @@ void SearchReplace::Replace( GenericContainer::iterator target )
     ASSERT( replace_pattern );
     SharedPtr<Node> nn( DuplicateSubtree( replace_pattern ) );
     target.Overwrite( &nn );
+    TRACE("*target=%p nn=%p\n", target->get(), nn.get() );
 }
 
 
@@ -534,7 +575,10 @@ void SearchReplace::operator()( shared_ptr<Program> p )
     {
         bool found = Search( program, it );        
         if( found )
+        {
+        	TRACE("Search successful, now replacing\n");
             Replace( it );
+        }
         else
             break;
     }
