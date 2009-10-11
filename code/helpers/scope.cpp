@@ -7,6 +7,7 @@
 // parent in the tree. We have to do searches for this, since the tree does not contain 
 // back-pointers.
 //
+// TODO return Scope node (means adding Procedure as a Scope)
 shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> id )
 {
     TRACE("Trying program (global)\n" );
