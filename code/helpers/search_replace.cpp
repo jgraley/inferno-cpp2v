@@ -524,11 +524,11 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool 
 
     if( match )
     {
-    	TRACE("substituting because faund in match set\n");
+    	TRACE("substituting because found in match set\n");
         // It's in a match set, so substitute the key. Simplest to recurse for this. We will
     	// still overlay any non-NULL members of the source pattern node onto the result (see below)
         ASSERT( match->key_x )("Match set in replace pattern but did not key to search pattern");
-        ASSERT( TypeInfo(source) >= TypeInfo(match->key_x) )("source must be a non-strict subclass of local_substitute, so that it does not have more members");
+        ASSERT( TypeInfo(source) >= TypeInfo(match->key_x) )("source must be a non-strict superclass of local_substitute, so that it does not have more members");
         dest = DuplicateSubtree( match->key_x, true );
     }
     else
