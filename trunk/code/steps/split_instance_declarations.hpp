@@ -3,13 +3,17 @@
 
 #include "helpers/search_replace.hpp"
 
-class SplitInstanceDeclarations : public SearchReplace
+class SplitInstanceDeclarations : public Pass
 {
 public:
 	SplitInstanceDeclarations();
+	virtual void operator()( shared_ptr<Program> );
 
 private:
-	set<MatchSet> sms;
+	set<SearchReplace::MatchSet> sms0;
+	set<SearchReplace::MatchSet> sms1;
+	SearchReplace sr0;
+	SearchReplace sr1;
 };
 
 #endif

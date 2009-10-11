@@ -177,6 +177,9 @@ struct Named : virtual Property
 
 // Identifier for an instance (variable or object or function)
 // that can be any instance.
+// TODO instead of AnyX -> X, use X -> SpecificX since more compatible
+// with topologised enums and nodes that point to these must use
+// the unspecific (Any) variant so they work in search patterns.
 struct AnyInstanceIdentifier : Identifier,
                                Expression { NODE_FUNCTIONS };
                                
@@ -279,7 +282,7 @@ struct Instance : Physical,
     SharedPtr<StorageClass> storage;
     SharedPtr<Constancy> constancy; 
     SharedPtr<Type> type;
-    SharedPtr<InstanceIdentifier> identifier;
+    SharedPtr<AnyInstanceIdentifier> identifier;
     SharedPtr<Initialiser> initialiser; // NULL if uninitialised
 };
 
@@ -461,7 +464,7 @@ struct ArrayInitialiser : Expression
 struct MemberInitialiser : Node
 {
 	NODE_FUNCTIONS
-	SharedPtr<InstanceIdentifier> id;
+	SharedPtr<AnyInstanceIdentifier> id;
 	SharedPtr<Expression> value;
 };
 
