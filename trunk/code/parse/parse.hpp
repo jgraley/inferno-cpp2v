@@ -121,7 +121,6 @@ private:
         // constructor calls.
         map< shared_ptr<Scope>, Sequence<Declaration> > backing_ordering;
 
-
         // In ActOnTag, when we see a record decl, we store it here and generate it
         // at the next IssueDeclaration, called from ActOnDeclaration. This allows
         // a seperate decl for records, since we so not support anon ones, and only
@@ -165,6 +164,12 @@ private:
         {
             return hold_expr.FromRaw( e.get() );
         }
+
+        struct DeclarationAsStatement : Statement
+        {
+        	NODE_FUNCTIONS
+        	SharedPtr<Declaration> d;
+        };
 
         // Turn a clang::CXXScopeSpec into a pointer to the corresponding scope node.
         // We have to deal with all the ways of it baing invalid, then just use hold_scope.
@@ -449,9 +454,8 @@ private:
                 {
                 case clang::DeclSpec::SCS_unspecified:
                 {
-                    if( S->getFlags() & (clang::Scope::FnScope | clang::Scope::ControlScope) ) // in code
-                        storage = shared_new<Auto>();
-                    else if( S->getFlags() & clang::Scope::CXXClassScope ) // record scope
+                	TRACE("scope flags 0x%x\n", S->getFlags());
+                    if( S->getFlags() & clang::Scope::CXXClassScope ) // record scope
                     {
                         shared_ptr<Member> ns = shared_new<Member>();
                         storage = ns;
@@ -460,7 +464,11 @@ private:
                         else
                             ns->virt = shared_new<NonVirtual>();
                     }
-                    else
+                    else if( S->getFnParent() ) // in code
+                    {
+                    	storage = shared_new<Auto>();
+                    }
+                    else // top level
                     {
                         storage = shared_new<Static>();
                         if( !access )
@@ -738,6 +746,7 @@ private:
 
         virtual OwningStmtResult ActOnExprStmt(ExprArg Expr)
         {
+        	// TODO most of this is now unnecessary
             if( shared_ptr<Expression> e = dynamic_pointer_cast<Expression>( FromClang(Expr) ) )
             {
                 return ToStmt( e );
@@ -947,13 +956,22 @@ private:
             {
                 if( backing_paired_decl.IsExist(d) )
                 {
-                    ASSERT( backing_paired_decl[d] );
-                    PushStmt( s, backing_paired_decl[d] );
+                	shared_ptr<Declaration> bd = backing_paired_decl[d];
+                    ASSERT( bd );
+
+                    if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>(bd) )
+                    	PushStmt( s, i ); // Instances can have inits that require being in order, so append as a statement
+                    else
+                    	s->members.insert( bd );
+
                     backing_paired_decl.erase(d);
                 }
             }
 
-            s->statements.push_back( st );
+            if( shared_ptr<DeclarationAsStatement> das = dynamic_pointer_cast<DeclarationAsStatement>(st) )
+            	s->members.insert( das->d );
+            else
+            	s->statements.push_back( st );
 
             // Flatten the "sub" statements of labels etc
             if( shared_ptr<Label> l = dynamic_pointer_cast<Label>( st ) )
@@ -987,8 +1005,20 @@ private:
                                                clang::SourceLocation EndLoc)
         {
             shared_ptr<Declaration> d( hold_decl.FromRaw(Decl) );
-
-            return ToStmt( d );
+            // Basically we are being asked to turn a Declaration, which has already been parsed,
+            // into a Statement. Instances are already both Declarations and Statements, so that's
+            // OK. In other cases, we have to package up the Declaration in a special kind of
+            // Statement node and pass it through that way. We will unpack later.
+            if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>(d) )
+            {
+            	return ToStmt( i );
+            }
+            else
+            {
+            	shared_ptr<DeclarationAsStatement> das( new DeclarationAsStatement );
+            	das->d = d;
+            	return ToStmt( das );
+            }
         }
 
         // Create a label identifier if there isn't already one with the same name (TODO scopes?)
@@ -1188,7 +1218,7 @@ private:
 
             if( BitfieldWidth )
             {
-                ASSERT( o && "only objects may be bitfields" );
+                ASSERT( o && "only Instances may be bitfields" );
                 shared_ptr<Integral> n( dynamic_pointer_cast<Integral>( o->type ) );
                 ASSERT( n && "cannot specify width of non-numeric type" );
                 shared_ptr<Expression> ee = hold_expr.FromRaw(BitfieldWidth);
@@ -1201,7 +1231,7 @@ private:
 
             if( Init )
             {
-                ASSERT( o && "only instances may have initialisers");
+                ASSERT( o && "only Instances may have initialisers");
                 o->initialiser = hold_expr.FromRaw( Init );
             }
 
@@ -1486,8 +1516,6 @@ private:
         	return ri;
         }
 
-
-
         shared_ptr<AnyString> CreateString( const char *s )
         {
             shared_ptr<String> st( new String );
@@ -1564,8 +1592,6 @@ private:
 
         /// ParsedFreeStandingDeclSpec - This method is invoked when a declspec with
         /// no declarator (e.g. "struct foo;") is parsed.
-        // JSG likely bug with C++ integration in clang means it parses the struct
-        // including stuff in {} and then detects the ; as meaning free standing.
         virtual DeclTy *ParsedFreeStandingDeclSpec(clang::Scope *S, clang::DeclSpec &DS)
         {
             TRACE();

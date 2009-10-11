@@ -70,7 +70,7 @@ struct Type : virtual Node { NODE_FUNCTIONS };
 // We specify an access spec for all declarations and choose a default when
 // the user cannot specify. Declaration can appear where statements can and
 // also inside structs etc and at top level.
-struct Declaration : Statement { NODE_FUNCTIONS };
+struct Declaration : virtual Node { NODE_FUNCTIONS };
 
 // A scope is any space in a program where declarations may appear. Declarations
 // in the collection are associated with the scope node but unordered. Scopes
@@ -248,7 +248,7 @@ struct Physical : Declaration
 // Top-level extern -> Static and Public.
 struct StorageClass : Property { NODE_FUNCTIONS };
 struct Static : StorageClass { NODE_FUNCTIONS };
-struct Member : StorageClass // non-static TODO confusing name
+struct Member : StorageClass
 {
     NODE_FUNCTIONS
     SharedPtr<AnyVirtual> virt;
@@ -268,16 +268,18 @@ struct NonConst : Constancy { NODE_FUNCTIONS };
 // - it can be hard to know where to put stand-alone init for statics
 // - C++ constructors tie init to declaration
 // - Fits in with single-static-assignment style
-// The instance node is a declaration and goes into a declaration scope. It points
+// The instance node can go into a Declaration Collection or a Statement Sequence.
+// THe latter case is used where initialisaiton/construction demands ordering. It points
 // to an InstanceIdentifier, and all usages of the instance actually point to the
 // InstanceIdentifier.
-struct Instance : Physical
+struct Instance : Physical,
+                  Statement
 {
     NODE_FUNCTIONS
     SharedPtr<StorageClass> storage;
     SharedPtr<Constancy> constancy; 
     SharedPtr<Type> type;
-    SharedPtr<AnyInstanceIdentifier> identifier;
+    SharedPtr<InstanceIdentifier> identifier;
     SharedPtr<Initialiser> initialiser; // NULL if uninitialised
 };
 
@@ -441,7 +443,8 @@ struct Class : InheritanceRecord { NODE_FUNCTIONS };
 // This node represents a label such as mylabel: 
 // It serves to declare the label; the identifier should be 
 // used for references.
-struct Label : Declaration // TODO be a Statement TODO commonize with Case and Default
+struct Label : Declaration, // TODO be a Statement TODO commonize with Case and Default
+               Statement
 {
     NODE_FUNCTIONS
     SharedPtr<AnyLabelIdentifier> identifier;
@@ -458,7 +461,7 @@ struct ArrayInitialiser : Expression
 struct MemberInitialiser : Node
 {
 	NODE_FUNCTIONS
-	SharedPtr<AnyInstanceIdentifier> id;
+	SharedPtr<InstanceIdentifier> id;
 	SharedPtr<Expression> value;
 };
 

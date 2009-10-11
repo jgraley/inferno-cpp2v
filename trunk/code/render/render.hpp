@@ -65,7 +65,7 @@ private:
     stack< shared_ptr<Node> > scope_stack;
     // Remember the orders of collections when we sort them. Mirrors the same
     // map in the parser.
-    map< Collection<Declaration> *, Sequence<Declaration> > backing_ordering;
+    Map< Collection<Declaration> *, Sequence<Declaration> > backing_ordering;
 
     string RenderLiteral( shared_ptr<Literal> sp )
     {
@@ -405,8 +405,9 @@ private:
     	shared_ptr<Record> r = GetRecordDeclaration(program, id);
 
     	// Get a reference to the ordered list of members for this record from a backing list
+    	ASSERT( backing_ordering.IsExist( &r->members ) );
     	Sequence<Declaration> &sd = backing_ordering[&r->members];
-
+    	ASSERT( sd.size() == r->members.size() );
     	bool first = true;
     	FOREACH( SharedPtr<Declaration> d, sd )
     	{
@@ -529,7 +530,7 @@ private:
         }    
         else if( shared_ptr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser) )
         {                                 
-            // Render code as initialiser list followed by statements in {}
+            // Render initialiser list then let RenderStatement() do the rest
             AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, o->identifier ) );
 
             Sequence<Statement> inits;
@@ -542,6 +543,7 @@ private:
             }
             
             shared_ptr<Compound> r( new Compound );
+            r->members = comp->members;
             r->statements = remainder;
             s += "\n" + RenderStatement(r, "");
         }
@@ -691,9 +693,10 @@ private:
         else if( shared_ptr<Compound> c = dynamic_pointer_cast< Compound >(statement) )
         {
             AutoPush< shared_ptr<Node> > cs( scope_stack, c );
-            return "{\n" + 
-                   RenderSequence(c->statements, ";\n", true) +
-                   "}\n";
+            string s = "{\n";
+            s += RenderDeclarationCollection( c->members, ";\n", true ); // Must do this first to populate backing list
+            s += RenderSequence( c->statements, ";\n", true );
+            return s + "}\n";
         }
         else if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(statement) )
             return RenderOperand(e) + sep;
