@@ -136,7 +136,7 @@ private:
         RCHold<Expression, ExprTy *> hold_expr;
         RCHold<Statement, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
-        RCHold<SpecificLabelIdentifier, void *> hold_label_identifier;
+        RCHold<LabelIdentifier, void *> hold_label_identifier;
         RCHold<Node, CXXScopeTy *> hold_scope;
         IdentifierTracker ident_track;
         shared_ptr<Node> global_scope;
@@ -433,7 +433,7 @@ private:
             return ti;
         }
 
-        shared_ptr<SpecificLabelIdentifier> CreateLabelIdentifier( clang::IdentifierInfo *ID ) // TODO return LabelIdentifier
+        shared_ptr<LabelIdentifier> CreateLabelIdentifier( clang::IdentifierInfo *ID )
         {
             shared_ptr<SpecificLabelIdentifier> li( new SpecificLabelIdentifier );
             li->name = ID->getName();
@@ -1022,7 +1022,7 @@ private:
         }
 
         // Create a label identifier if there isn't already one with the same name (TODO scopes?)
-        shared_ptr<SpecificLabelIdentifier> MaybeCreateLabelIdentifier( clang::IdentifierInfo *II )
+        shared_ptr<LabelIdentifier> MaybeCreateLabelIdentifier( clang::IdentifierInfo *II )
         {
             if( !(II->getFETokenInfo<void *>()) )
                 II->setFETokenInfo( hold_label_identifier.ToRaw( CreateLabelIdentifier( II ) ) );
