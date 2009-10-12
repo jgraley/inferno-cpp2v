@@ -79,22 +79,22 @@ public:
         return s;
     }
     
-    string Name( shared_ptr<Node> sp, bool *bold )    
+    string Name( shared_ptr<Node> sp, bool *bold )   // TODO put stringize capabilities into the Property nodes as virtual methods
     {
         *bold=true;
-        if( shared_ptr<Named> ii = dynamic_pointer_cast<Named>(sp) )
+        if( shared_ptr<SpecificName> ii = dynamic_pointer_cast<SpecificName>(sp) )
             return ii->name;                     
-        else if( shared_ptr<String> ss = dynamic_pointer_cast< String >(sp) )
-            return "\\\"" + ss->value + "\\\"";                     // todo sanitise this
-        else if( shared_ptr<Integer> ic = dynamic_pointer_cast< Integer >(sp) )
+        else if( shared_ptr<SpecificString> ss = dynamic_pointer_cast< SpecificString >(sp) )
+            return "\\\"" + ss->value + "\\\"";                     // TODO sanitise the string
+        else if( shared_ptr<SpecificInteger> ic = dynamic_pointer_cast< SpecificInteger >(sp) )
             return string(ic->value.toString(10)); 
-        else if( shared_ptr<Float> fc = dynamic_pointer_cast< Float >(sp) )
+        else if( shared_ptr<SpecificFloat> fc = dynamic_pointer_cast< SpecificFloat >(sp) )
         {
             char hs[256];
             fc->value.convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
             return string(hs); 
         }           
-        else if( shared_ptr<FloatSemantics> fs = dynamic_pointer_cast< FloatSemantics >(sp) )
+        else if( shared_ptr<SpecificFloatSemantics> fs = dynamic_pointer_cast< SpecificFloatSemantics >(sp) )
         {
             return SSPrintf("@%p", fs->value );
         }           

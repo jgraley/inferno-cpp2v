@@ -16,7 +16,7 @@ shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
         ASSERTFAIL();
 }
 
-shared_ptr<UserType> GetDeclaration( shared_ptr<Program> program, shared_ptr<TypeIdentifier> id )
+shared_ptr<UserType> GetDeclaration( shared_ptr<Program> program, shared_ptr<SpecificTypeIdentifier> id )
 {
 	Flattener<UserType> walkr(program);
 	TRACE("GetDeclaration %d\n", walkr.size());
@@ -32,12 +32,12 @@ shared_ptr<UserType> GetDeclaration( shared_ptr<Program> program, shared_ptr<Typ
 }
 
 // Look for a record, skipping over typedefs. Returns NULL if not a record.
-shared_ptr<Record> GetRecordDeclaration( shared_ptr<Program> program, shared_ptr<TypeIdentifier> id )
+shared_ptr<Record> GetRecordDeclaration( shared_ptr<Program> program, shared_ptr<SpecificTypeIdentifier> id )
 {
 	shared_ptr<UserType> ut = GetDeclaration( program, id );
 	while( shared_ptr<Typedef> td = dynamic_pointer_cast<Typedef>(ut) )
 	{
-	    shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(td->type);
+	    shared_ptr<SpecificTypeIdentifier> ti = dynamic_pointer_cast<SpecificTypeIdentifier>(td->type);
 	    if(ti)
 	        ut = GetDeclaration(program, ti);
 	    else
@@ -47,7 +47,7 @@ shared_ptr<Record> GetRecordDeclaration( shared_ptr<Program> program, shared_ptr
 	return r;
 }
 
-shared_ptr<Instance> GetDeclaration( shared_ptr<Program> program, shared_ptr<InstanceIdentifier> id )
+shared_ptr<Instance> GetDeclaration( shared_ptr<Program> program, shared_ptr<SpecificInstanceIdentifier> id )
 {
     Walk w( program );
     while(!w.Done())
@@ -71,7 +71,7 @@ shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<R
     // Try the instance members (objects and functions) for a name match
     FOREACH( shared_ptr<Declaration> d, r->members )
         if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>(d) )
-            if( shared_ptr<InstanceIdentifier> sss = dynamic_pointer_cast<InstanceIdentifier>(i->identifier) )
+            if( shared_ptr<SpecificInstanceIdentifier> sss = dynamic_pointer_cast<SpecificInstanceIdentifier>(i->identifier) )
                 if( sss->name == name )
                     return i;
                 

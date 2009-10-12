@@ -35,7 +35,7 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
 	{ // Do initialised ones by leaving an assign behind
 		shared_ptr<Compound> sc( new Compound );
 		 shared_ptr<Instance> si( new Instance );
-		  si->identifier = shared_new<AnyInstanceIdentifier>();  // Only acting on initialised Instances
+		  si->identifier = shared_new<InstanceIdentifier>();  // Only acting on initialised Instances
 		  si->initialiser = shared_new<Expression>();  // Only acting on initialised Instances
 		 shared_ptr< SearchReplace::Star<Declaration> > ss( new SearchReplace::Star<Declaration> );
 		 sc->members.insert( ss );
@@ -51,7 +51,7 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
 		 rc->members.insert( rs );
 		 rc->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
 		  shared_ptr<Assign> ra( new Assign );
-		   ra->operands.push_back( shared_new<AnyInstanceIdentifier>() );
+		   ra->operands.push_back( shared_new<InstanceIdentifier>() );
 		   ra->operands.push_back( shared_new<Expression>() );
 		 rc->statements.push_back( ra );
 		 rc->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );

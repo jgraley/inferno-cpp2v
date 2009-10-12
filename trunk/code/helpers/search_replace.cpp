@@ -53,9 +53,9 @@ bool SearchReplace::IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pa
         return false;
     }
 
-    if( shared_ptr<String> pattern_str = dynamic_pointer_cast<String>(pattern) )
+    if( shared_ptr<SpecificString> pattern_str = dynamic_pointer_cast<SpecificString>(pattern) )
     {
-        shared_ptr<String> x_str = dynamic_pointer_cast<String>(x);
+        shared_ptr<SpecificString> x_str = dynamic_pointer_cast<SpecificString>(x);
         ASSERT( x_str );
         if( x_str->value != pattern_str->value )
         {
@@ -63,9 +63,9 @@ bool SearchReplace::IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pa
             return false;
         }
     }    
-    else if( shared_ptr<Integer> pattern_int = dynamic_pointer_cast<Integer>(pattern) )
+    else if( shared_ptr<SpecificInteger> pattern_int = dynamic_pointer_cast<SpecificInteger>(pattern) )
     {
-        shared_ptr<Integer> x_int = dynamic_pointer_cast<Integer>(x);
+        shared_ptr<SpecificInteger> x_int = dynamic_pointer_cast<SpecificInteger>(x);
         ASSERT( x_int );
         TRACE("%s %s\n", x_int->value.toString(10).c_str(), pattern_int->value.toString(10).c_str() );
         if( x_int->value != pattern_int->value )
@@ -74,9 +74,9 @@ bool SearchReplace::IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pa
             return false;
         }
     }    
-    else if( shared_ptr<Float> pattern_flt = dynamic_pointer_cast<Float>(pattern) )
+    else if( shared_ptr<SpecificFloat> pattern_flt = dynamic_pointer_cast<SpecificFloat>(pattern) )
     {
-        shared_ptr<Float> x_flt = dynamic_pointer_cast<Float>(x);
+        shared_ptr<SpecificFloat> x_flt = dynamic_pointer_cast<SpecificFloat>(x);
         ASSERT( x_flt );
         if( !x_flt->value.bitwiseIsEqual( pattern_flt->value ) )
         {
@@ -84,9 +84,9 @@ bool SearchReplace::IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pa
             return false;
         }
     }
-    else if( shared_ptr<FloatSemantics> pattern_sem = dynamic_pointer_cast<FloatSemantics>(pattern) )
+    else if( shared_ptr<SpecificFloatSemantics> pattern_sem = dynamic_pointer_cast<SpecificFloatSemantics>(pattern) )
     {
-        shared_ptr<FloatSemantics> x_sem = dynamic_pointer_cast<FloatSemantics>(x);
+        shared_ptr<SpecificFloatSemantics> x_sem = dynamic_pointer_cast<SpecificFloatSemantics>(x);
         ASSERT( x_sem );
         if( x_sem->value != pattern_sem->value )
         {
@@ -419,11 +419,8 @@ void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source,
 
 void SearchReplace::DuplicateSequence( GenericSequence *dest, GenericSequence *source, bool under_substitution )
 {
-    // For now, an empty sequence in the source pattern = leave destination alone (so
-    // you get the match-key sequence or nothing at all) and non-empty just splats over
-    // the whole sequence (and no elements are allowed to be NULL).
+    // For now, always overwrite the dest
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
-    //if( source->size() )
     dest->clear();
 
     TRACE("duplicating sequence size %d\n", source->size() );
@@ -458,11 +455,8 @@ void SearchReplace::DuplicateSequence( GenericSequence *dest, GenericSequence *s
 
 void SearchReplace::DuplicateCollection( GenericCollection *dest, GenericCollection *source, bool under_substitution )
 {
-    // For now, an empty sequence in the source pattern = leave destination alone (so
-    // you get the match-key sequence or nothing at all) and non-empty just splats over
-    // the whole sequence (and no elements are allowed to be NULL).
+    // For now, always overwrite the dest
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
-    //if( source->size() )
     dest->clear();
 
     TRACE("duplicating collection size %d\n", source->size() );
@@ -528,7 +522,9 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool 
         // It's in a match set, so substitute the key. Simplest to recurse for this. We will
     	// still overlay any non-NULL members of the source pattern node onto the result (see below)
         ASSERT( match->key_x )("Match set in replace pattern but did not key to search pattern");
-        ASSERT( TypeInfo(source) >= TypeInfo(match->key_x) )("source must be a non-strict superclass of local_substitute, so that it does not have more members");
+        ASSERT( TypeInfo(source) >= TypeInfo(match->key_x) )
+              ("source must be a non-strict superclass of local_substitute, so that it does not have more members (match set probably not all the same types)");
+              //TODO simply require that every member of a match set has the exact same type
         dest = DuplicateSubtree( match->key_x, true );
     }
     else
@@ -654,7 +650,7 @@ void SearchReplace::Test()
         // single node with topological wildcarding
         shared_ptr<Void> v(new Void);
         ASSERT( sr.IsMatchPattern( v, v ) == true );
-        shared_ptr<Bool> b(new Bool);
+        shared_ptr<Boolean> b(new Boolean);
         ASSERT( sr.IsMatchPattern( v, b ) == false );
         ASSERT( sr.IsMatchPattern( b, v ) == false );
         shared_ptr<Type> t(new Type);
@@ -678,8 +674,8 @@ void SearchReplace::Test()
     
     {
         // string property
-        shared_ptr<String> s1( new String );
-        shared_ptr<String> s2( new String );
+        shared_ptr<SpecificString> s1( new SpecificString );
+        shared_ptr<SpecificString> s2( new SpecificString );
         s1->value = "here";
         s2->value = "there";
         ASSERT( sr.IsMatchPattern( s1, s1 ) == true );
@@ -689,8 +685,8 @@ void SearchReplace::Test()
     {
         // int property
         llvm::APSInt apsint( 32, true );
-        shared_ptr<Integer> i1( new Integer );
-        shared_ptr<Integer> i2( new Integer );
+        shared_ptr<SpecificInteger> i1( new SpecificInteger );
+        shared_ptr<SpecificInteger> i2( new SpecificInteger );
         apsint = 3;
         i1->value = apsint;
         apsint = 5;
