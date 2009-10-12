@@ -69,15 +69,15 @@ private:
 
     string RenderLiteral( shared_ptr<Literal> sp )
     {
-        if( shared_ptr<String> ss = dynamic_pointer_cast< String >(sp) )
+        if( shared_ptr<SpecificString> ss = dynamic_pointer_cast< SpecificString >(sp) )
             return "\"" + Sanitise( ss->value ) + "\"";                     
-        else if( shared_ptr<Integer> ic = dynamic_pointer_cast< Integer >(sp) )
+        else if( shared_ptr<SpecificInteger> ic = dynamic_pointer_cast< SpecificInteger >(sp) )
             return string(ic->value.toString(10)) + 
                    (ic->value.isUnsigned() ? "U" : "") + 
                    (ic->value.getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
                    (ic->value.getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_long] ? "L" : ""); 
                    // note, assuming longlong bigger than long, so second L appends first to get LL
-        else if( shared_ptr<Float> fc = dynamic_pointer_cast< Float >(sp) )
+        else if( shared_ptr<SpecificFloat> fc = dynamic_pointer_cast< SpecificFloat >(sp) )
         {
             char hs[256];
             // generate hex float since it can be exact
@@ -100,7 +100,7 @@ private:
         if( id )
         {
             // TODO maybe just try casting to Named
-            if( shared_ptr<Named> ii = dynamic_pointer_cast<Named>( id ) )
+            if( shared_ptr<SpecificName> ii = dynamic_pointer_cast<SpecificName>( id ) )
                 ids = ii->name;
             else
                 ids = ERROR_UNSUPPORTED( (id) );
@@ -148,7 +148,7 @@ private:
     {
         bool ds;
         unsigned width;       
-        shared_ptr<Integer> ic = dynamic_pointer_cast<Integer>( type->width );
+        shared_ptr<SpecificInteger> ic = dynamic_pointer_cast<SpecificInteger>( type->width );
         ASSERT(ic && "width must be integer"); 
         width = ic->value.getLimitedValue();
                   
@@ -200,7 +200,7 @@ private:
     string RenderFloatingType( shared_ptr<Floating> type )
     {
         string s;
-        shared_ptr<FloatSemantics> sem = dynamic_pointer_cast<FloatSemantics>(type->semantics);
+        shared_ptr<SpecificFloatSemantics> sem = dynamic_pointer_cast<SpecificFloatSemantics>(type->semantics);
         ASSERT(sem);
     
         if( sem->value == TypeDb::float_semantics )
@@ -228,7 +228,7 @@ private:
             return RenderFloatingType( f ) + sobject;
         else if( dynamic_pointer_cast< Void >(type) )
             return "void" + sobject;
-        else if( dynamic_pointer_cast< Bool >(type) )
+        else if( dynamic_pointer_cast< Boolean >(type) )
             return "bool" + sobject;
         else if( shared_ptr<Constructor> c = dynamic_pointer_cast< Constructor >(type) )
             return object + "(" + RenderSequence(c->parameters, ", ", false) + ")";
@@ -244,7 +244,7 @@ private:
             return RenderType( a->element, object.empty() ? "[" + RenderOperand(a->size) + "]" : "(" + object + "[" + RenderOperand(a->size) + "])" );
         else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
             return RenderIdentifier(t->identifier) + sobject;
-        else if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast< TypeIdentifier >(type) )
+        else if( shared_ptr<SpecificTypeIdentifier> ti = dynamic_pointer_cast< SpecificTypeIdentifier >(type) )
             return RenderIdentifier(ti) + sobject;
         else
             return ERROR_UNSUPPORTED(type);
@@ -298,11 +298,11 @@ private:
         
         if( dynamic_pointer_cast< Uninitialised >(expression) )
             return string();            
-        else if( shared_ptr<LabelIdentifier> li = dynamic_pointer_cast< LabelIdentifier >(expression) )
+        else if( shared_ptr<SpecificLabelIdentifier> li = dynamic_pointer_cast< SpecificLabelIdentifier >(expression) )
             return before + 
                    "&&" + RenderIdentifier( li ) + // label-as-variable (GCC extension)
                    after;
-        else if( shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast< InstanceIdentifier >(expression) )
+        else if( shared_ptr<SpecificInstanceIdentifier> ii = dynamic_pointer_cast< SpecificInstanceIdentifier >(expression) )
             return RenderScopedIdentifier( ii );
         else if( shared_ptr<SizeOf> pot = dynamic_pointer_cast< SizeOf >(expression) )
             return before + 
@@ -341,16 +341,16 @@ private:
         }
         else if( shared_ptr<New> n = dynamic_pointer_cast< New >(expression) )
             return before +
-                   (dynamic_pointer_cast<GlobalNew>(n->global) ? "::" : "") +
+                   (dynamic_pointer_cast<Global>(n->global) ? "::" : "") +
                    "new(" + RenderOperandSequence( n->placement_arguments, ", ", false ) + ") " +
                    RenderType( n->type, "" ) + 
                    (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( n->constructor_arguments, ", ", false ) + ")" ) +
                    after;
         else if( shared_ptr<Delete> d = dynamic_pointer_cast< Delete >(expression) )
             return before +
-                   (dynamic_pointer_cast<GlobalNew>(d->global) ? "::" : "") +
+                   (dynamic_pointer_cast<Global>(d->global) ? "::" : "") +
                    "delete" + 
-                   (dynamic_pointer_cast<ArrayNew>(d->array) ? "[]" : "") +
+                   (dynamic_pointer_cast<DeleteArray>(d->array) ? "[]" : "") +
                    " " + RenderOperand( d->pointer, true ) +
                    after;
         else if( shared_ptr<Subscript> su = dynamic_pointer_cast< Subscript >(expression) )
@@ -400,7 +400,7 @@ private:
     	s += "{ ";
 
     	// Get the record
-    	shared_ptr<TypeIdentifier> id = dynamic_pointer_cast<TypeIdentifier>(ro->type);
+    	shared_ptr<SpecificTypeIdentifier> id = dynamic_pointer_cast<SpecificTypeIdentifier>(ro->type);
     	ASSERT(id);
     	shared_ptr<Record> r = GetRecordDeclaration(program, id);
 
@@ -459,7 +459,7 @@ private:
             return "auto "; 
         else if( shared_ptr<Member> ns = dynamic_pointer_cast<Member>( st ) )
         {
-            shared_ptr<AnyVirtual> v = ns->virt;
+            shared_ptr<Virtuality> v = ns->virt;
             if( dynamic_pointer_cast<Virtual>( v ) )
                 return "virtual ";
             else if( dynamic_pointer_cast<NonVirtual>( v ) )
@@ -704,7 +704,7 @@ private:
             return "return " + RenderOperand(es->return_value) + sep;
         else if( shared_ptr<Goto> g = dynamic_pointer_cast<Goto>(statement) )
         {
-            if( shared_ptr<LabelIdentifier> li = dynamic_pointer_cast< LabelIdentifier >(g->destination) )
+            if( shared_ptr<SpecificLabelIdentifier> li = dynamic_pointer_cast< SpecificLabelIdentifier >(g->destination) )
                 return "goto " + RenderIdentifier(li) + sep;  // regular goto
             else
                 return "goto *" + RenderOperand(g->destination) + sep; // goto-a-variable (GCC extension)

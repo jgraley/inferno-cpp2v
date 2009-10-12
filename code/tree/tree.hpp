@@ -35,15 +35,14 @@ struct Node : NodeBases
 
 //////////////////////////// Underlying Node Types ////////////////////////////
 
-// Nodes can be property nodes or topological nodes. Topological nodes
-// represent parts of the program, and property nodes represent 
-// ancillary data (strings, numbers, enums). Property is the base
-// class for property nodes (there is no base class for Topological 
-// nodes, topological is assumed if not deriving from Property).
-// Enums are actually implemented by choosing one of a choice of
-// empty node, not using enum. Each kind of property has an intermediate
-// which can represent any value of the property - they have Any in 
-// their name if there isn't a suitable language-specific name.
+// Property is the base class for property nodes. Each kind of property has an
+// intermediate which can represent any value of the property. Enum-like and
+// bool-like are implemented by choosing one of a choice of empty nodes derived
+// from the intermediate. Other properties that cannot be represented this way
+// have a Specific<Foo> node that actually contains the datatype (eg int, string
+// etc). The intermediates should be the target of SharedPtrs and may be used in
+// search patterns. The actual tree nodes for a program should always be the leaf
+// node type.
 struct Property : virtual Node { NODE_FUNCTIONS };
 
 // This intermediate is used for an initial value for for a variable/object in
@@ -96,11 +95,11 @@ struct Literal : Expression,
 };
 
 // Intermediate property node that represents a string of any value.
-struct AnyString : Literal { NODE_FUNCTIONS };
+struct String : Literal { NODE_FUNCTIONS };
 
-// A string with a particular value as specified. value must be filled
+// A string with a particular value as specified. Value must be filled
 // in.
-struct String : AnyString
+struct SpecificString : String
 {
     NODE_FUNCTIONS
     string value;
@@ -108,47 +107,49 @@ struct String : AnyString
 
 // Intermediate property node that represents a number (anything you
 // can do +, - etc on) of any value.
-struct AnyNumber : Literal { NODE_FUNCTIONS };
+struct Number : Literal { NODE_FUNCTIONS };
 
 #define INTEGER_DEFAULT_WIDTH 32
 
 // Intermediate property node that represents an integer number of any
 // value (signed or unsigned).
-struct AnyInteger : AnyNumber { NODE_FUNCTIONS };
+struct Integer : Number { NODE_FUNCTIONS };
 
 // Property node for an integer number. We use LLVM's class for this, 
 // so that we can deal with any size of number (so this can be used for
 // large bit vectors). The LLVM object also stores the signedness. The
 // value must always be filled in.
-struct Integer : AnyInteger
+struct SpecificInteger : Integer
 {
     NODE_FUNCTIONS
-    Integer( int i ) : value(INTEGER_DEFAULT_WIDTH) { value = i; }
-    Integer() : value(INTEGER_DEFAULT_WIDTH) { value = 0; }
+    SpecificInteger( int i ) : value(INTEGER_DEFAULT_WIDTH) { value = i; }
+    SpecificInteger() : value(INTEGER_DEFAULT_WIDTH) { value = 0; }
     llvm::APSInt value; // APSint can be signed or unsigned
 };
 
 // Intermediate property node that represents a floating point number of any
 // value.
-struct AnyFloat : AnyNumber { NODE_FUNCTIONS };
+struct Float : Number { NODE_FUNCTIONS };
 
 // Property node for an floating point number. We use LLVM's class for this, 
 // so that we can deal with any representation convention. The value must 
 // always be filled in. To determine the type, use llvm::getSemantics()
-struct Float : AnyFloat
+struct SpecificFloat : Float
 {
     NODE_FUNCTIONS
-    Float() : value((float)0) {};
-    Float( llvm::APFloat v ) : value(v) {};
+    SpecificFloat() : value((float)0) {};
+    SpecificFloat( llvm::APFloat v ) : value(v) {};
     llvm::APFloat value; 
 };
 
 // Intermediate property node that represents any boolean value.
-struct AnyBoolean : Literal { NODE_FUNCTIONS };
+// Note: Bool here is considered a noun, and in general Property/Literal
+// intermediates are named using nouns. C.f. the Type node Boolean
+struct Bool : Literal { NODE_FUNCTIONS };
 
 // Property node for boolean values true and false
-struct True : AnyBoolean { NODE_FUNCTIONS };
-struct False : AnyBoolean { NODE_FUNCTIONS };
+struct True : Bool { NODE_FUNCTIONS };
+struct False : Bool { NODE_FUNCTIONS };
 
 //////////////////////////// Declarations /////////////////////
 
@@ -161,7 +162,7 @@ struct False : AnyBoolean { NODE_FUNCTIONS };
 // needed and there's no need to uniquify it (it's really just 
 // a hint for users examining the output).
 // TODO make sure renderer really is uniquifying where needed
-struct Identifier : virtual Node { NODE_FUNCTIONS };
+struct Identifier : virtual Property { NODE_FUNCTIONS };
 
 // Stores a name found in the program, eg identifier names.
 // This is for unquoted strings, as opposed to String. Strictly,
@@ -169,7 +170,7 @@ struct Identifier : virtual Node { NODE_FUNCTIONS };
 // to make renders and graphs clearer. This could use
 // something like stack<string> if it makes manufacturing 
 // names for new objects easier.
-struct Named : virtual Property
+struct SpecificName : virtual Property
 { 
     string name;
     NODE_FUNCTIONS 
@@ -177,50 +178,47 @@ struct Named : virtual Property
 
 // Identifier for an instance (variable or object or function)
 // that can be any instance.
-// TODO instead of AnyX -> X, use X -> SpecificX since more compatible
-// with topologised enums and nodes that point to these must use
-// the unspecific (Any) variant so they work in search patterns.
-struct AnyInstanceIdentifier : Identifier,
-                               Expression { NODE_FUNCTIONS };
+struct InstanceIdentifier : Identifier,
+                            Expression { NODE_FUNCTIONS };
                                
 // Identifier for a specific instance that has been declared
 // somewhere.                               
-struct InstanceIdentifier : AnyInstanceIdentifier,
-                            Named { NODE_FUNCTIONS };
+struct SpecificInstanceIdentifier : InstanceIdentifier,
+                                    SpecificName { NODE_FUNCTIONS };
                             
 
 // Identifier for a user defined type that can be any type.
-struct AnyTypeIdentifier : Identifier,
-                           Type { NODE_FUNCTIONS };
+struct TypeIdentifier : Identifier,
+                        Type { NODE_FUNCTIONS };
                            
 // Identifier for a specific user defined type that has been 
 // declared somewhere.
-struct TypeIdentifier : AnyTypeIdentifier,
-                        Named { NODE_FUNCTIONS };
+struct SpecificTypeIdentifier : TypeIdentifier,
+                                SpecificName { NODE_FUNCTIONS };
                       
 
 // Identifier for a label that can be any label. 
-struct AnyLabelIdentifier : Identifier,
-                            Expression { NODE_FUNCTIONS };
+struct LabelIdentifier : Identifier,
+                         Expression { NODE_FUNCTIONS };
 
 // Identifier for a specific label that has been declared somewhere.
-struct LabelIdentifier : AnyLabelIdentifier,
-                         Named { NODE_FUNCTIONS };
+struct SpecificLabelIdentifier : LabelIdentifier,
+                         SpecificName { NODE_FUNCTIONS };
 
 // General note about identifiers: in a valid program tree, there should
 // be *one* Declaration node that points to the identifier and serves to 
-// delcare it. There should be 0 or more "users" that point to the
+// declare it. There should be 0 or more "users" that point to the
 // identifier. 
 
 // Property for whether a member function has been declared as virtual.
 // We will add pure as an option here too. 
-struct AnyVirtual : Property { NODE_FUNCTIONS };
-struct Virtual : AnyVirtual 
+struct Virtuality : Property { NODE_FUNCTIONS };
+struct Virtual : Virtuality
 {
     NODE_FUNCTIONS
     // TODO pure when supported by clang
 };
-struct NonVirtual : AnyVirtual { NODE_FUNCTIONS };
+struct NonVirtual : Virtuality { NODE_FUNCTIONS };
 
 // Property for C++ access specifiers public, protected and private. AccessSpec
 // represents any access spec, the subsequent empty nodes specify particular
@@ -254,7 +252,7 @@ struct Static : StorageClass { NODE_FUNCTIONS };
 struct Member : StorageClass
 {
     NODE_FUNCTIONS
-    SharedPtr<AnyVirtual> virt;
+    SharedPtr<Virtuality> virt;
 };
 struct Auto : StorageClass { NODE_FUNCTIONS };
 
@@ -282,7 +280,7 @@ struct Instance : Physical,
     SharedPtr<StorageClass> storage;
     SharedPtr<Constancy> constancy; 
     SharedPtr<Type> type;
-    SharedPtr<AnyInstanceIdentifier> identifier;
+    SharedPtr<InstanceIdentifier> identifier;
     SharedPtr<Initialiser> initialiser; // NULL if uninitialised
 };
 
@@ -291,7 +289,7 @@ struct Instance : Physical,
 struct Base : Physical 
 {
     NODE_FUNCTIONS
-    SharedPtr<TypeIdentifier> record; // must refer to InheritanceRecord
+    SharedPtr<SpecificTypeIdentifier> record; // must refer to InheritanceRecord TODO should not be Specific
 };              
 
 //////////////////////////// Anonymous Types ////////////////////////////
@@ -356,7 +354,9 @@ struct Void : Type { NODE_FUNCTIONS };
 
 // Boolean type. We support bool separately from 1-bit ints, at least for now.
 // (note that (bool)2==true but (int:1)2==0)
-struct Bool : Type { NODE_FUNCTIONS };
+// Note: Boolean here is considered an adjective, and in general Type
+// nodes are named using adjectives. C.f. the Property/Literal intermediate Bool
+struct Boolean : Type { NODE_FUNCTIONS };
 
 // Intermediate for any type that represents a number that you can eg add and 
 // subtract. 
@@ -367,7 +367,7 @@ struct Numeric : Type { NODE_FUNCTIONS };
 struct Integral : Numeric
 {
     NODE_FUNCTIONS
-    SharedPtr<AnyInteger> width;  // Bits, not bytes
+    SharedPtr<Integer> width;  // Bits, not bytes
 };
 
 // Type of a signed integer number (2's complement).
@@ -378,8 +378,8 @@ struct Unsigned : Integral { NODE_FUNCTIONS };
 
 // Property for the details of floating point behaviour
 // implying representation size and implementation.
-struct AnyFloatSemantics : Property { NODE_FUNCTIONS };
-struct FloatSemantics : AnyFloatSemantics
+struct FloatSemantics : Property { NODE_FUNCTIONS };
+struct SpecificFloatSemantics : FloatSemantics
 {
     NODE_FUNCTIONS
     const llvm::fltSemantics *value;
@@ -389,7 +389,7 @@ struct FloatSemantics : AnyFloatSemantics
 struct Floating : Numeric 
 { 
     NODE_FUNCTIONS
-    SharedPtr<AnyFloatSemantics> semantics;
+    SharedPtr<FloatSemantics> semantics;
 }; 
 
 //////////////////////////// User-defined Types ////////////////////////////
@@ -401,7 +401,7 @@ struct Floating : Numeric
 struct UserType : Declaration 
 { 
     NODE_FUNCTIONS
-    SharedPtr<AnyTypeIdentifier> identifier;
+    SharedPtr<TypeIdentifier> identifier;
 };
 
 // Represents a typedef. Typedef is to the specified type.
@@ -450,7 +450,7 @@ struct Label : Declaration, // TODO be a Statement TODO commonize with Case and 
                Statement
 {
     NODE_FUNCTIONS
-    SharedPtr<AnyLabelIdentifier> identifier;
+    SharedPtr<LabelIdentifier> identifier;
 }; 
 
 // Initialiser for an array
@@ -464,7 +464,7 @@ struct ArrayInitialiser : Expression
 struct MemberInitialiser : Node
 {
 	NODE_FUNCTIONS
-	SharedPtr<AnyInstanceIdentifier> id;
+	SharedPtr<InstanceIdentifier> id;
 	SharedPtr<Expression> value;
 };
 
@@ -472,7 +472,7 @@ struct MemberInitialiser : Node
 struct RecordInitialiser : Expression
 {
 	NODE_FUNCTIONS
-	SharedPtr<AnyTypeIdentifier> type;
+	SharedPtr<TypeIdentifier> type;
 	Collection<MemberInitialiser> members;
 };
 
@@ -543,14 +543,15 @@ struct Call : Expression
 
 // Property indicating whether a new/delete is global ie has :: in
 // front of it. Not actually sure what that means TODO find out
-struct AnyGlobalNew : Property { NODE_FUNCTIONS };
-struct GlobalNew : AnyGlobalNew { NODE_FUNCTIONS }; // ::new/::delete was used
-struct NonGlobalNew : AnyGlobalNew { NODE_FUNCTIONS }; // new/delete, no ::
+struct Globality : Property { NODE_FUNCTIONS };
+struct Global : Globality { NODE_FUNCTIONS }; // ::new/::delete was used
+struct NonGlobal : Globality { NODE_FUNCTIONS }; // new/delete, no ::
 
-// Property indicating whether a delete should delete an array
-struct AnyArrayNew : Property { NODE_FUNCTIONS };
-struct ArrayNew : AnyArrayNew { NODE_FUNCTIONS }; // delete[]
-struct NonArrayNew : AnyArrayNew { NODE_FUNCTIONS }; 
+// Property indicating whether a delete should delete an array.
+// Apologies for the tenuous grammar.
+struct DeleteArrayness : Property { NODE_FUNCTIONS };
+struct DeleteArray : DeleteArrayness { NODE_FUNCTIONS }; // delete[]
+struct DeleteNonArray : DeleteArrayness { NODE_FUNCTIONS }; // delete, no []
 
 // Node for the C++ new operator, gives all the syntactical elements
 // required for allocation and initialisation
@@ -560,7 +561,7 @@ struct New : Expression
     SharedPtr<Type> type; 
     Sequence<Expression> placement_arguments;
     Sequence<Expression> constructor_arguments;
-    SharedPtr<AnyGlobalNew> global;
+    SharedPtr<Globality> global;
 };
 
 // Node for C++ delete operator
@@ -568,8 +569,8 @@ struct Delete : Expression
 {
     NODE_FUNCTIONS
     SharedPtr<Expression> pointer;
-    SharedPtr<AnyArrayNew> array;
-    SharedPtr<AnyGlobalNew> global;
+    SharedPtr<DeleteArrayness> array;
+    SharedPtr<Globality> global;
 };
 
 // Node for C++ this pointer
@@ -590,7 +591,7 @@ struct Lookup : Expression
 {
     NODE_FUNCTIONS
     SharedPtr<Expression> base; 
-    SharedPtr<AnyInstanceIdentifier> member;    
+    SharedPtr<InstanceIdentifier> member;
 };
 
 // Node for a c-style cast. C++ casts are not in here yet

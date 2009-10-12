@@ -136,7 +136,7 @@ private:
         RCHold<Expression, ExprTy *> hold_expr;
         RCHold<Statement, StmtTy *> hold_stmt;
         RCHold<Type, TypeTy *> hold_type;
-        RCHold<LabelIdentifier, void *> hold_label_identifier;
+        RCHold<SpecificLabelIdentifier, void *> hold_label_identifier;
         RCHold<Node, CXXScopeTy *> hold_scope;
         IdentifierTracker ident_track;
         shared_ptr<Node> global_scope;
@@ -253,7 +253,7 @@ private:
 
         shared_ptr<Floating> CreateFloatingType( const llvm::fltSemantics *s )
         {
-            shared_ptr<FloatSemantics> sem( new FloatSemantics );
+            shared_ptr<SpecificFloatSemantics> sem( new SpecificFloatSemantics );
             sem->value = s;
             shared_ptr<Floating> f( new Floating );
             f->semantics = sem;
@@ -302,7 +302,7 @@ private:
                         break;
                     case clang::DeclSpec::TST_bool:
                         TRACE("bool based %d %d\n", DS.getTypeSpecWidth(), DS.getTypeSpecSign() );
-                        return shared_ptr<Type>(new Bool());
+                        return shared_ptr<Type>(new Boolean());
                         break;
                     case clang::DeclSpec::TST_float:
                         TRACE("float based %d %d\n", DS.getTypeSpecWidth(), DS.getTypeSpecSign() );
@@ -409,9 +409,9 @@ private:
             }
         }
 
-        shared_ptr<AnyInstanceIdentifier> CreateInstanceIdentifier( clang::IdentifierInfo *ID = 0 )
+        shared_ptr<InstanceIdentifier> CreateInstanceIdentifier( clang::IdentifierInfo *ID = 0 )
         {
-            shared_ptr<InstanceIdentifier> ii( new InstanceIdentifier );
+            shared_ptr<SpecificInstanceIdentifier> ii( new SpecificInstanceIdentifier );
             if(ID)
                 ii->name = ID->getName();
             else
@@ -419,23 +419,23 @@ private:
             return ii;
         }
 
-        shared_ptr<AnyTypeIdentifier> CreateTypeIdentifier( clang::IdentifierInfo *ID )
+        shared_ptr<TypeIdentifier> CreateTypeIdentifier( clang::IdentifierInfo *ID )
         {
-            shared_ptr<TypeIdentifier> ti( new TypeIdentifier );
+            shared_ptr<SpecificTypeIdentifier> ti( new SpecificTypeIdentifier );
             ti->name = ID->getName();
             return ti;
         }
 
-        shared_ptr<AnyTypeIdentifier> CreateTypeIdentifier( string s )
+        shared_ptr<TypeIdentifier> CreateTypeIdentifier( string s )
         {
-            shared_ptr<TypeIdentifier> ti( new TypeIdentifier );
+            shared_ptr<SpecificTypeIdentifier> ti( new SpecificTypeIdentifier );
             ti->name = s;
             return ti;
         }
 
-        shared_ptr<LabelIdentifier> CreateLabelIdentifier( clang::IdentifierInfo *ID )
+        shared_ptr<SpecificLabelIdentifier> CreateLabelIdentifier( clang::IdentifierInfo *ID ) // TODO return LabelIdentifier
         {
-            shared_ptr<LabelIdentifier> li( new LabelIdentifier );
+            shared_ptr<SpecificLabelIdentifier> li( new SpecificLabelIdentifier );
             li->name = ID->getName();
             return li;
         }
@@ -668,7 +668,7 @@ private:
             // change it.
             TRACE("%p\n", o->type.get() );
             if( shared_ptr<ArrayInitialiser> ai = dynamic_pointer_cast<ArrayInitialiser>(o->initialiser) )
-                if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(o->type) )
+                if( shared_ptr<SpecificTypeIdentifier> ti = dynamic_pointer_cast<SpecificTypeIdentifier>(o->type) )
                 	if( shared_ptr<Record> r = GetRecordDeclaration(all_decls, ti) )
                 		o->initialiser = CreateRecordInitFromArrayInit( ai, r );
         }
@@ -783,18 +783,18 @@ private:
             return hold_expr.ToRaw( o->identifier );
         }
 
-        shared_ptr<AnyInteger> CreateNumericConstant( int value )
+        shared_ptr<Integer> CreateNumericConstant( int value )
         {
-            shared_ptr<Integer> nc( new Integer(value) );
+            shared_ptr<SpecificInteger> nc( new SpecificInteger(value) );
             return nc;
         }
 
         shared_ptr<Literal> CreateLiteral( int value )
         {
-            return CreateNumericConstant( value );;
+            return CreateNumericConstant( value );
         }
 
-        shared_ptr<AnyNumber> CreateNumericConstant(const clang::Token &tok)
+        shared_ptr<Number> CreateNumericConstant(const clang::Token &tok)
         {
             llvm::SmallString<512> int_buffer;
             int_buffer.resize(tok.getLength());
@@ -820,7 +820,7 @@ private:
                 bool err = literal.GetIntegerValue(rv);
 
                 ASSERT( !err && "numeric literal too big for its own type" );
-                shared_ptr<Integer> nc( new Integer );
+                shared_ptr<SpecificInteger> nc( new SpecificInteger );
                 nc->value = rv;
                 return nc;
             }
@@ -835,7 +835,7 @@ private:
                     semantics = TypeDb::double_semantics;
                 llvm::APFloat rv( literal.GetFloatValue( *semantics ) );
 
-                shared_ptr<Float> fc( new Float( rv ) );
+                shared_ptr<SpecificFloat> fc( new SpecificFloat( rv ) );
                 return fc;
             }
             ASSERTFAIL("this sort of literal is not supported");
@@ -1022,7 +1022,7 @@ private:
         }
 
         // Create a label identifier if there isn't already one with the same name (TODO scopes?)
-        shared_ptr<LabelIdentifier> MaybeCreateLabelIdentifier( clang::IdentifierInfo *II )
+        shared_ptr<SpecificLabelIdentifier> MaybeCreateLabelIdentifier( clang::IdentifierInfo *II )
         {
             if( !(II->getFETokenInfo<void *>()) )
                 II->setFETokenInfo( hold_label_identifier.ToRaw( CreateLabelIdentifier( II ) ) );
@@ -1224,7 +1224,7 @@ private:
                 shared_ptr<Expression> ee = hold_expr.FromRaw(BitfieldWidth);
                 shared_ptr<Literal> ll = dynamic_pointer_cast<Literal>(ee);
                 ASSERT(ll && "bitfield width must be literal, not expression"); // TODO evaluate
-                shared_ptr<Integer> ii = dynamic_pointer_cast<Integer>(ll);
+                shared_ptr<SpecificInteger> ii = dynamic_pointer_cast<SpecificInteger>(ll);
                 ASSERT(ll && "bitfield width must be integer");
                 n->width = ii;
             }
@@ -1386,7 +1386,7 @@ private:
 
             // Find the specified member in the record implied by the expression on the left of .
             shared_ptr<Type> tbase = TypeOf( all_decls ).Get( a->base );
-            shared_ptr<TypeIdentifier> tibase = dynamic_pointer_cast<TypeIdentifier>(tbase);
+            shared_ptr<SpecificTypeIdentifier> tibase = dynamic_pointer_cast<SpecificTypeIdentifier>(tbase);
             ASSERT( tibase );
             shared_ptr<Record> rbase = GetRecordDeclaration(all_decls, tibase);
             ASSERT( rbase && "thing on left of ./-> is not a record/record ptr" );
@@ -1447,7 +1447,7 @@ private:
             if (literal.hadError())
                 return ExprResult(true);
 
-            shared_ptr<Integer> nc( new Integer );
+            shared_ptr<SpecificInteger> nc( new SpecificInteger );
             llvm::APSInt rv(TypeDb::char_bits, !TypeDb::char_default_signed);
             rv = literal.getValue();
             nc->value = rv;
@@ -1516,14 +1516,14 @@ private:
         	return ri;
         }
 
-        shared_ptr<AnyString> CreateString( const char *s )
+        shared_ptr<String> CreateString( const char *s )
         {
-            shared_ptr<String> st( new String );
+            shared_ptr<SpecificString> st( new SpecificString );
             st->value = s;
             return st;
         }
 
-        shared_ptr<AnyString> CreateString( clang::IdentifierInfo *Id )
+        shared_ptr<String> CreateString( clang::IdentifierInfo *Id )
         {
             return CreateString( Id->getName() );
         }
@@ -1640,7 +1640,7 @@ private:
                                               clang::SourceLocation BaseLoc)
         {
             shared_ptr<Type> t( hold_type.FromRaw( basetype ) );
-            shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(t);
+            shared_ptr<SpecificTypeIdentifier> ti = dynamic_pointer_cast<SpecificTypeIdentifier>(t);
             ASSERT( ti );
             shared_ptr<Declaration> d = hold_decl.FromRaw( classdecl );
             shared_ptr<Record> r = dynamic_pointer_cast<Record>( d );
@@ -1722,7 +1722,7 @@ private:
 
         shared_ptr<Instance> GetConstructor( shared_ptr<Type> t )
         {
-            shared_ptr<TypeIdentifier> id = dynamic_pointer_cast<TypeIdentifier>(t);
+            shared_ptr<SpecificTypeIdentifier> id = dynamic_pointer_cast<SpecificTypeIdentifier>(t);
             ASSERT(id);
             shared_ptr<Record> r = GetRecordDeclaration( all_decls, id );
 
@@ -1808,9 +1808,10 @@ private:
             CollectArgs( &(n->constructor_arguments), ConstructorArgs, NumConsArgs );
 
             if( UseGlobal )
-                n->global = shared_ptr<GlobalNew>( new GlobalNew );
+                n->global = shared_ptr<Global>( new Global );
             else
-                n->global = shared_ptr<NonGlobalNew>( new NonGlobalNew );
+                n->global = shared_ptr<NonGlobal>( new NonGlobal );
+
             // TODO cant figure out meaning of ParenTypeId
 
             return hold_expr.ToRaw( n );
@@ -1826,14 +1827,14 @@ private:
             d->pointer = hold_expr.FromRaw( Expression );
 
             if( ArrayForm )
-                d->array = shared_ptr<ArrayNew>( new ArrayNew );
+                d->array = shared_ptr<DeleteArray>( new DeleteArray );
             else
-                d->array = shared_ptr<NonArrayNew>( new NonArrayNew );
+                d->array = shared_ptr<DeleteNonArray>( new DeleteNonArray );
 
             if( UseGlobal )
-                d->global = shared_ptr<GlobalNew>( new GlobalNew );
+                d->global = shared_ptr<Global>( new Global );
             else
-                d->global = shared_ptr<NonGlobalNew>( new NonGlobalNew );
+                d->global = shared_ptr<NonGlobal>( new NonGlobal );
 
             return hold_expr.ToRaw( d );
         }
@@ -1846,8 +1847,11 @@ private:
 
       	    TRACE("%p\n", t.get() );
 
+            // At this point, when we have the instance (and hence the type) and the initialiser
+            // we can detect when an array initialiser has been inserted for a record instance and
+            // change it.
             if( shared_ptr<ArrayInitialiser> ai = dynamic_pointer_cast<ArrayInitialiser>(e) )
-                if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(t) )
+                if( shared_ptr<SpecificTypeIdentifier> ti = dynamic_pointer_cast<SpecificTypeIdentifier>(t) )
                 	if( shared_ptr<Record> r = GetRecordDeclaration(all_decls, ti) )
                 		e = CreateRecordInitFromArrayInit( ai, r );
 
