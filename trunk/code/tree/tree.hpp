@@ -306,10 +306,10 @@ struct Subroutine : Type
 
 // A procedure like in pascal etc, params but no return value. Parameters are generated as 
 // a sequence of automatic variable/object declarations (ie Instances).
-struct Procedure : Subroutine
+struct Procedure : Subroutine,
+                   Scope
 {
     NODE_FUNCTIONS
-    Sequence<Instance> parameters;
 };
 
 // A function like in C, Pascal; params and a single return value of the specified type.
@@ -446,41 +446,33 @@ struct Class : InheritanceRecord { NODE_FUNCTIONS };
 // This node represents a label such as mylabel: 
 // It serves to declare the label; the identifier should be 
 // used for references.
-struct Label : Declaration, // TODO be a Statement TODO commonize with Case and Default
+struct Label : Declaration, // TODO be a Statement TODO commonize with Case and Default TODO move if not an Expression
                Statement
 {
     NODE_FUNCTIONS
     SharedPtr<LabelIdentifier> identifier;
 }; 
 
-// Initialiser for an array
-struct ArrayInitialiser : Expression
-{
-    NODE_FUNCTIONS
-    Sequence<Expression> elements;
-};
-
-// Initialiser for one member of a Record. Basically a key-value pair.
-struct MemberInitialiser : Node
-{
-	NODE_FUNCTIONS
-	SharedPtr<InstanceIdentifier> id;
-	SharedPtr<Expression> value;
-};
-
-// Initialiser for a record
-struct RecordInitialiser : Expression
-{
-	NODE_FUNCTIONS
-	SharedPtr<TypeIdentifier> type;
-	Collection<MemberInitialiser> members;
-};
-
 // Intermediate for an operator with operands. TODO maybe fix the number
 // of operands for binop and unop categories instead of Sequence.
 struct Operator : Expression
 {
 	NODE_FUNCTIONS
+};
+
+// Initialiser for one member of a Record. Basically a key-value pair.
+struct MapOperand : Node
+{
+	NODE_FUNCTIONS
+	SharedPtr<InstanceIdentifier> id; // TODO identifier
+	SharedPtr<Expression> value;
+};
+
+// Initialiser for one member of a Record. Basically a key-value pair.
+struct MapOperator : Operator
+{
+	NODE_FUNCTIONS
+	Collection<MapOperand> operands;
 };
 
 struct NonCommutativeOperator : Operator
@@ -513,7 +505,7 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 
 // Operator that operates on data types as parameters. Where either is allowed
 // we prefer the type one, since it's more concise.
-struct TypeOperator : Expression
+struct TypeOperator : Expression // TODO derive from Operator
 {
     NODE_FUNCTIONS
     SharedPtr<Type> operand;
@@ -533,12 +525,12 @@ struct ConditionalOperator : Ternop
 
 // A function call to specified function passing in specified arguments
 // Function is an expression to allow eg function pointer dereference. Normal
-// calls have function -> some InstanceIdentifier for a Subroutine Instance
-struct Call : Expression 
+// calls have function -> some InstanceIdentifier for a Subroutine Instance.
+//
+struct Call : MapOperator
 {
     NODE_FUNCTIONS
     SharedPtr<Expression> function;
-    Sequence<Expression> arguments;
 };
 
 // Property indicating whether a new/delete is global ie has :: in
@@ -565,7 +557,7 @@ struct New : Expression
 };
 
 // Node for C++ delete operator
-struct Delete : Expression
+struct Delete : Expression // TODO Statement surely?
 {
     NODE_FUNCTIONS
     SharedPtr<Expression> pointer;
@@ -601,6 +593,20 @@ struct Cast : Expression
     NODE_FUNCTIONS
     SharedPtr<Expression> operand;
     SharedPtr<Type> type;        
+};
+
+// Initialiser for an array
+struct ArrayLiteral : Expression // TODO derive from Operator
+{
+    NODE_FUNCTIONS
+    Sequence<Expression> elements;
+};
+
+// Initialiser for a record
+struct RecordLiteral : MapOperator
+{
+	NODE_FUNCTIONS
+	SharedPtr<TypeIdentifier> type;
 };
 
 //////////////////////////// Statements ////////////////////////////

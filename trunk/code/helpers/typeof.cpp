@@ -33,6 +33,15 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
         return Get( op, optypes );
     }
     
+    else if( shared_ptr<Call> c = dynamic_pointer_cast<Call>(o) )
+    {
+        shared_ptr<Type> t = Get(c->function); // get type of the function itself
+        if( shared_ptr<Function> f = dynamic_pointer_cast<Function>(t) )
+        	return f->return_type;
+        else
+        	return shared_new<Void>();
+
+    }
     else if( shared_ptr<Lookup> l = dynamic_pointer_cast<Lookup>(o) ) // a.b; just return type of b
     {
         return Get( l->member );
@@ -40,7 +49,8 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
                
     else 
     {
-        ASSERTFAIL("Unknown expression, please add");             
+        ASSERT(0)("Unknown expression %s, please add to TypeOf class", typeid(*o).name());
+        ASSERTFAIL("");
     }
 }
 
@@ -66,7 +76,8 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Operator> op, Sequence<Type> &optypes )
     }
     else
     {
-        ASSERTFAIL("Unknown operator, please add");
+        ASSERT(0)("Unknown operator %s, please add to TypeOf class", typeid(*op).name());
+        ASSERTFAIL("");
     }
 }
 

@@ -107,7 +107,7 @@ private:
     private:
         // Parameters are parsed outside function scope, so we defer entering them
         // into the ident_track until we're in the function. This stores the clang identifiers.
-        map< shared_ptr<Instance>, clang::IdentifierInfo * > backing_params;
+        map< shared_ptr<Declaration>, clang::IdentifierInfo * > backing_params;
 
         // The statement after a label is parsed as a sub-construct under the label which
         // is not how the inferno tree does it. Remember that relationship here and
@@ -119,7 +119,7 @@ private:
         // Members of records go in an unordered collection, but when parsing
         // we might need the order, eg for C-style initialisers or auto-generated
         // constructor calls.
-        map< shared_ptr<Scope>, Sequence<Declaration> > backing_ordering;
+        Map< shared_ptr<Scope>, Sequence<Declaration> > backing_ordering;
 
         // In ActOnTag, when we see a record decl, we store it here and generate it
         // at the next IssueDeclaration, called from ActOnDeclaration. This allows
@@ -262,11 +262,14 @@ private:
 
         void FillParameters( shared_ptr<Procedure> p, const clang::DeclaratorChunk::FunctionTypeInfo &fchunk )
         {
+        	backing_ordering[p].clear(); // ensure at least an empty sequence is in the map
             for( int i=0; i<fchunk.NumArgs; i++ )
             {
                 shared_ptr<Declaration> d = hold_decl.FromRaw( fchunk.ArgInfo[i].Param );
-                shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(d); // TODO just push the declarators, no need for dynamic cast?
-                p->parameters.push_back( o );
+                shared_ptr<Instance> inst = dynamic_pointer_cast<Instance>(d);
+                ASSERT( inst );
+                backing_ordering[p].push_back( inst );
+                p->members.insert( inst );
             }
         }
 
@@ -666,11 +669,10 @@ private:
             // At this point, when we have the instance (and hence the type) and the initialiser
             // we can detect when an array initialiser has been inserted for a record instance and
             // change it.
-            TRACE("%p\n", o->type.get() );
-            if( shared_ptr<ArrayInitialiser> ai = dynamic_pointer_cast<ArrayInitialiser>(o->initialiser) )
+            if( shared_ptr<ArrayLiteral> ai = dynamic_pointer_cast<ArrayLiteral>(o->initialiser) )
                 if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(o->type) )
                 	if( shared_ptr<Record> r = GetRecordDeclaration(all_decls, ti) )
-                		o->initialiser = CreateRecordInitFromArrayInit( ai, r );
+                		o->initialiser = CreateRecordLiteralFromArrayLiteral( ai, r );
         }
 
         // Clang tends to parse parameters and function bodies in seperate
@@ -683,7 +685,7 @@ private:
         {
             ASSERT(pp);
 
-            FOREACH(shared_ptr<Instance> param, pp->parameters )
+            FOREACH(shared_ptr<Declaration> param, pp->members )
             {
                 TRACE();
                 clang::IdentifierInfo *paramII = backing_params[param];
@@ -694,7 +696,7 @@ private:
             }
         }
 
-        // JSG this is like the defailt in Actions, except it passes the parent of the function
+        // JSG this is like the default in Actions, except it passes the parent of the function
         // body to ActOnDeclarator, since the function decl itself is not inside its own body.
         virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D)
         {
@@ -925,14 +927,29 @@ private:
             return hold_expr.ToRaw( co );
         }
 
+        shared_ptr<Call> CreateCall( Sequence<Expression> &args, shared_ptr<Expression> function )
+        {
+            // Make the Call node and fill in the called function
+             shared_ptr<Call> c(new Call);
+             c->function = function;
+
+             // If Procedure or Function, fill in the args map based on the supplied args and original function type
+             shared_ptr<Type> t = TypeOf(all_decls).Get(function);
+             if( shared_ptr<Procedure> p = dynamic_pointer_cast<Procedure>(t) )
+                 PopulateMapOperator( (shared_ptr<MapOperator>&)c, args, (shared_ptr<Scope>&)p ); // TODO lose casts
+
+             return c;
+        }
+
         virtual ExprResult ActOnCallExpr(clang::Scope *S, ExprTy *Fn, clang::SourceLocation LParenLoc,
                                          ExprTy **Args, unsigned NumArgs,
                                          clang::SourceLocation *CommaLocs,
                                          clang::SourceLocation RParenLoc)
         {
-            shared_ptr<Call> c(new Call);
-            c->function = hold_expr.FromRaw(Fn);
-            CollectArgs( &(c->arguments), Args, NumArgs );
+        	// Get the args in a Sequence
+            Sequence<Expression> args;
+            CollectArgs( &args, Args, NumArgs );
+            shared_ptr<Call> c = CreateCall( args, hold_expr.FromRaw(Fn) );
             return hold_expr.ToRaw( c );
         }
 
@@ -1464,7 +1481,7 @@ private:
             // Assume initialiser is for an Array, and create an ArrayInitialiser node
             // even if it's really a struct init. We'll come along later and replace with a
             // RecordInitialiser when we can see what the struct is.
-            shared_ptr<ArrayInitialiser> ao(new ArrayInitialiser);
+            shared_ptr<ArrayLiteral> ao(new ArrayLiteral);
             for(int i=0; i<NumInit; i++)
             {
                 shared_ptr<Expression> e = hold_expr.FromRaw( InitList[i] );
@@ -1476,20 +1493,33 @@ private:
         // Create a RecordInitialiser using the elements of the supplied ArrayInitialiser and matching
         // them against the members of the supplied record. Records are stored using an unordered
         // collection for the members, so we have to use the ordered backing map. Array inits are ordered.
-        shared_ptr<RecordInitialiser> CreateRecordInitFromArrayInit( shared_ptr<ArrayInitialiser> ai,
-        		                                                     shared_ptr<Record> r )
+        shared_ptr<RecordLiteral> CreateRecordLiteralFromArrayLiteral( shared_ptr<ArrayLiteral> ai,
+        		                                                       shared_ptr<Record> r )
         {
         	// Make new record initialiser and fill in the type
-        	shared_ptr<RecordInitialiser> ri( new RecordInitialiser );
+        	shared_ptr<RecordLiteral> ri( new RecordLiteral );
         	ri->type = r->identifier;
 
-        	// Get a reference to the ordered list of members for this record from a backing list
-        	Sequence<Declaration> &sd = backing_ordering[r];
-        	TRACE("%p %p\n", &r->members, r.get());
+        	// Fill in the RecordLiteral operands collection with pairs that relate operands to their member ids
+        	shared_ptr<Scope> s = r;
+        	PopulateMapOperator( (shared_ptr<MapOperator> &)ri, ai->elements, s );
 
-        	// Go over the entire record, keeping track of where we are in the init
-        	int init_index=0;
-        	FOREACH( SharedPtr<Declaration> d, sd )
+        	return ri;
+        }
+
+        // Populate a map operator using elements from a sequence of expressions
+        void PopulateMapOperator( shared_ptr<MapOperator> &mapop, // MapOperands corresponding to the elements of ai go in here
+        		                  Sequence<Expression> &seq, // Operands to insert, ordered as per the input program
+        	                      shared_ptr<Scope> &scope ) // Original Scope that established ordering, must be in backing_ordering
+        {
+          	// Get a reference to the ordered list of members for this scope from a backing list
+        	ASSERT( backing_ordering.IsExist(scope) )("Supplied scope did not make it into the backing ordering list");
+        	Sequence<Declaration> &scope_ordered = backing_ordering[scope];
+        	TRACE("%p %p\n", &scope->members, scope.get());
+
+        	// Go over the entire scope, keeping track of where we are in the Sequence
+        	int seq_index=0; // TODO rename
+        	FOREACH( SharedPtr<Declaration> d, scope_ordered )
         	{
         		TRACE();
         		// We only care about instances...
@@ -1500,20 +1530,17 @@ private:
         			{
         				TRACE();
         				// Get value out of array init and put it in record init together with member instance id
-        				shared_ptr<Expression> v = ai->elements[init_index];
-        				shared_ptr<MemberInitialiser> mi( new MemberInitialiser );
+        				shared_ptr<Expression> v = seq[seq_index];
+        				shared_ptr<MapOperand> mi( new MapOperand );
         				mi->id = i->identifier;
         				mi->value = v;
-        				ri->members.insert( mi );
+        				mapop->operands.insert( mi );
 
-        				init_index++;
+        				seq_index++;
         			}
         		}
         	}
-        	//ASSERT( init_index == ai->elements.size() );
-        	//ASSERT( init_index == ri->members.size() );
-
-        	return ri;
+        	ASSERT( seq_index == seq.size() );
         }
 
         shared_ptr<String> CreateString( const char *s )
@@ -1760,9 +1787,9 @@ private:
             lu->member = cm->identifier;
 
             // Build a call to the constructor with supplied args
-            shared_ptr<Call> call(new Call);
-            call->function = lu;
-            CollectArgs( &(call->arguments), Args, NumArgs );
+            Sequence<Expression> args;
+            CollectArgs( &args, Args, NumArgs );
+            shared_ptr<Call> call = CreateCall( args, lu );
 
             // Get the constructor whose init list we're adding to (may need to start a
             // new compound statement)
@@ -1850,10 +1877,10 @@ private:
             // At this point, when we have the instance (and hence the type) and the initialiser
             // we can detect when an array initialiser has been inserted for a record instance and
             // change it.
-            if( shared_ptr<ArrayInitialiser> ai = dynamic_pointer_cast<ArrayInitialiser>(e) )
+            if( shared_ptr<ArrayLiteral> ai = dynamic_pointer_cast<ArrayLiteral>(e) )
                 if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(t) )
                 	if( shared_ptr<Record> r = GetRecordDeclaration(all_decls, ti) )
-                		e = CreateRecordInitFromArrayInit( ai, r );
+                		e = CreateRecordLiteralFromArrayLiteral( ai, r );
 
             return hold_expr.ToRaw( e );
         }

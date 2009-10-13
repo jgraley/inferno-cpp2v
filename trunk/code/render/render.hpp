@@ -41,7 +41,7 @@ public:
         ASSERT( program );
         AutoPush< shared_ptr<Node> > cs( scope_stack, program );
               
-        string s = RenderDeclarationCollection( program->members, ";\n", true ); // gets the .hpp stuff directly
+        string s = RenderDeclarationCollection( program, ";\n", true ); // gets the .hpp stuff directly
     
         s += deferred_decls; // these could go in a .cpp file
         
@@ -65,7 +65,7 @@ private:
     stack< shared_ptr<Node> > scope_stack;
     // Remember the orders of collections when we sort them. Mirrors the same
     // map in the parser.
-    Map< Collection<Declaration> *, Sequence<Declaration> > backing_ordering;
+    Map< shared_ptr<Scope>, Sequence<Declaration> > backing_ordering;
 
     string RenderLiteral( shared_ptr<Literal> sp )
     {
@@ -231,11 +231,11 @@ private:
         else if( dynamic_pointer_cast< Boolean >(type) )
             return "bool" + sobject;
         else if( shared_ptr<Constructor> c = dynamic_pointer_cast< Constructor >(type) )
-            return object + "(" + RenderSequence(c->parameters, ", ", false) + ")";
+            return object + "(" + RenderDeclarationCollection(c, ", ", false) + ")";
         else if( shared_ptr<Destructor> f = dynamic_pointer_cast< Destructor >(type) )
             return object + "()";
         else if( shared_ptr<Function> f = dynamic_pointer_cast< Function >(type) )
-            return RenderType( f->return_type, "(" + object + ")(" + RenderSequence(f->parameters, ", ", false) + ")" );
+            return RenderType( f->return_type, "(" + object + ")(" + RenderDeclarationCollection(f, ", ", false) + ")" );
         else if( shared_ptr<Pointer> p = dynamic_pointer_cast< Pointer >(type) )
             return RenderType( p->destination, "(*" + object + ")" );
         else if( shared_ptr<Reference> r = dynamic_pointer_cast< Reference >(type) )
@@ -289,6 +289,29 @@ private:
     		return ERROR_UNSUPPORTED(op);
     }
 
+    string RenderCall( shared_ptr<Call> call )
+    {
+    	string s;
+
+    	// Render the expression that resolves to the function name unless this is
+    	// a constructor call in which case just the name of the thing being constructed.
+        if( shared_ptr<Expression> base = TypeOf(program).IsConstructorCall( call ) )
+            s += RenderOperand( base, true );
+        else
+        	s += RenderOperand( call->function, true );
+
+        s += "(";
+
+        // If Procedure or Function, generate some arguments, resolving the order using the original function type
+        shared_ptr<Type> fntype = TypeOf(program).Get( call->function );
+        ASSERT( fntype );
+        if( shared_ptr<Procedure> proc = dynamic_pointer_cast<Procedure>(fntype) )
+            s += RenderMapInOrder( call, proc/*, ", ", false */);
+
+        s += ")";
+        return s;
+    }
+
     string RenderOperand( shared_ptr<Initialiser> expression, bool bracketize_operator=false )
     {
         TRACE("%p\n", expression.get());
@@ -326,19 +349,10 @@ private:
                    RenderOperator( co, seq_operands ) +
                    after;
         }
-        else if( shared_ptr<Call> o = dynamic_pointer_cast< Call >(expression) )
-        {
-            if( shared_ptr<Expression> base = TypeOf(program).IsConstructorCall( o ) )
-                return before +  // invoking costructors as found in init lists and locals
-                       RenderOperand( base, true ) + "(" +
-                       RenderOperandSequence( o->arguments, ", ", false ) + ")" +
-                       after;
-            else            
-                return before + 
-                   RenderOperand( o->function, true ) + "(" +
-                   RenderOperandSequence( o->arguments, ", ", false ) + ")" +
+        else if( shared_ptr<Call> c = dynamic_pointer_cast< Call >(expression) )
+            return before +
+                   RenderCall( c ) +
                    after;
-        }
         else if( shared_ptr<New> n = dynamic_pointer_cast< New >(expression) )
             return before +
                    (dynamic_pointer_cast<Global>(n->global) ? "::" : "") +
@@ -372,11 +386,11 @@ private:
                    "(" + RenderType( c->type, "" ) + ")" +
                    RenderOperand( c->operand, false ) + 
                    after;
-        else if( shared_ptr<ArrayInitialiser> ao = dynamic_pointer_cast< ArrayInitialiser >(expression) )
+        else if( shared_ptr<ArrayLiteral> ao = dynamic_pointer_cast< ArrayLiteral >(expression) )
             return before + 
                    "{ " + RenderOperandSequence( ao->elements, ", ", false ) + " }" +
                    after;
-        else if( shared_ptr<RecordInitialiser> ro = dynamic_pointer_cast< RecordInitialiser >(expression) )
+        else if( shared_ptr<RecordLiteral> ro = dynamic_pointer_cast< RecordLiteral >(expression) )
             return before +
                    RenderRecordInitialiser( ro ) +
                    after;
@@ -392,21 +406,29 @@ private:
             return ERROR_UNSUPPORTED(expression);
     }
     
-    string RenderRecordInitialiser( shared_ptr<RecordInitialiser> ro )
+    string RenderRecordInitialiser( shared_ptr<RecordLiteral> ro ) // TODO rename
     {
     	string s;
-
-    	s += "(" + RenderType( ro->type, "" ) + ")";
-    	s += "{ ";
 
     	// Get the record
     	shared_ptr<TypeIdentifier> id = dynamic_pointer_cast<TypeIdentifier>(ro->type);
     	ASSERT(id);
     	shared_ptr<Record> r = GetRecordDeclaration(program, id);
 
+    	s += "(" + RenderType( ro->type, "" ) + ")";
+    	s += "{ ";
+        s += RenderMapInOrder( ro, r );
+    	s += " }";
+        return s;
+    }
+
+    string RenderMapInOrder( shared_ptr<MapOperator> ro, shared_ptr<Scope> r ) // TODO rename and accept sep and last params
+    {
+    	string s;
+
     	// Get a reference to the ordered list of members for this record from a backing list
-    	ASSERT( backing_ordering.IsExist( &r->members ) );
-    	Sequence<Declaration> &sd = backing_ordering[&r->members];
+    	ASSERT( backing_ordering.IsExist( r ) );
+    	Sequence<Declaration> &sd = backing_ordering[r];
     	ASSERT( sd.size() == r->members.size() );
     	bool first = true;
     	FOREACH( SharedPtr<Declaration> d, sd )
@@ -417,9 +439,8 @@ private:
     			// ...and not function instances
     			if( !dynamic_pointer_cast<Subroutine>( i->type ) )
     			{
-    				// search init for matching member (TODO could avoid O(n^2)
-    				// if RecordInitialiser used some kind of map
-    				FOREACH( SharedPtr<MemberInitialiser> mi, ro->members )
+    				// search init for matching member (TODO could avoid O(n^2) by exploiting the map)
+    				FOREACH( SharedPtr<MapOperand> mi, ro->operands )
     		        {
     			        if( i->identifier == mi->id )
     			        {
@@ -432,8 +453,6 @@ private:
     			}
     		}
     	}
-
-    	s += " }";
         return s;
     }
 
@@ -667,7 +686,7 @@ private:
                 // Contents
                 AutoPush< shared_ptr<Node> > cs( scope_stack, r );
                 s += "\n{\n" +
-                     RenderDeclarationCollection( r->members, sep2, true, a, showtype ) +
+                     RenderDeclarationCollection( r, sep2, true, a, showtype ) +
                      "}";
             }
             
@@ -694,7 +713,7 @@ private:
         {
             AutoPush< shared_ptr<Node> > cs( scope_stack, c );
             string s = "{\n";
-            s += RenderDeclarationCollection( c->members, ";\n", true ); // Must do this first to populate backing list
+            s += RenderDeclarationCollection( c, ";\n", true ); // Must do this first to populate backing list
             s += RenderSequence( c->statements, ";\n", true );
             return s + "}\n";
         }
@@ -788,11 +807,11 @@ private:
         return s;
     }
     
-    string RenderDeclarationCollection( Collection<Declaration> &sd,
+    string RenderDeclarationCollection( shared_ptr<Scope> sd,
 			                            string separator, 
 			                            bool seperate_last, 
 			                            shared_ptr<AccessSpec> init_access = shared_ptr<AccessSpec>(),
-			                            bool showtype=true )
+			                            bool showtype=true ) // TODO rename but look out there's already a RenderScope
     {
         TRACE();        
         
@@ -800,8 +819,8 @@ private:
         //sd = ReverseDecls( sd );
         //sd = JumbleDecls( sd );
         
-        Sequence<Declaration> sorted = SortDecls( sd, true );
-        backing_ordering[&sd] = sorted;
+        Sequence<Declaration> sorted = SortDecls( sd->members, true );
+        backing_ordering[sd] = sorted;
         
         string s;
         // Emit an incomplete for each record
