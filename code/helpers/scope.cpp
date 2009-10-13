@@ -41,7 +41,7 @@ shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> i
 	Flattener<Procedure> walkp(program);
 	FOREACH( shared_ptr<Procedure> p, walkp )
 	{
-	    FOREACH( shared_ptr<Declaration> d, p->parameters )
+	    FOREACH( shared_ptr<Declaration> d, p->members )
 	    {            
 	        if( id == GetIdentifier( d ) )
 	            return p;
