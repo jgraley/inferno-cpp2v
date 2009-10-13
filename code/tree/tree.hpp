@@ -537,6 +537,7 @@ struct Call : MapOperator
 // front of it. This differentiates when placement args are given as follows:
 // Global: must be one placement arg, it is address to construct at
 // NonGlobal: all placement args go to a corresponding operator new which returns address to construct at
+// TODO bring these in line with Call etc
 struct Globality : Property { NODE_FUNCTIONS };
 struct Global : Globality { NODE_FUNCTIONS }; // ::new/::delete was used
 struct NonGlobal : Globality { NODE_FUNCTIONS }; // new/delete, no ::

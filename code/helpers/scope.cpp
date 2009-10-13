@@ -8,7 +8,7 @@
 // back-pointers.
 //
 // TODO return Scope node (means adding Procedure as a Scope)
-shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> id )
+shared_ptr<Scope> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> id )
 {
     TRACE("Trying program (global)\n" );
     FOREACH( shared_ptr<Declaration> d, program->members )
@@ -31,6 +31,7 @@ shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> i
 	FOREACH( shared_ptr<Compound> c, walkc )
 	{
 	    Flattener<Declaration> walks(c); // TODO possible bug - this search should not recurse into sub scopes
+	                                     // TODO also should ensure we are checking members AND statements
 	    FOREACH( shared_ptr<Declaration> d, walks )
 	    {            
 	        if( id == GetIdentifier( d ) )
@@ -51,5 +52,5 @@ shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> i
 	ASSERTFAIL("Could not find scope for identifier"); 
 	// every identifier should have a scope - if this fails, we've missed out a kind of scope
 	// Note: if Flattener is not automated yet, then it may have missed something
-	return shared_ptr<Node>();
+	return shared_ptr<Scope>();
 }

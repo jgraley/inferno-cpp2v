@@ -8,6 +8,6 @@
 // parent in the tree. We have to do searches for this, since the tree does not contain 
 // back-pointers.
 //
-shared_ptr<Node> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> id );
+shared_ptr<Scope> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> id );
 
 #endif
