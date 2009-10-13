@@ -936,7 +936,7 @@ private:
              // If Procedure or Function, fill in the args map based on the supplied args and original function type
              shared_ptr<Type> t = TypeOf(all_decls).Get(function);
              if( shared_ptr<Procedure> p = dynamic_pointer_cast<Procedure>(t) )
-                 PopulateMapOperator( (shared_ptr<MapOperator>&)c, args, (shared_ptr<Scope>&)p ); // TODO lose casts
+                 PopulateMapOperator( c, args, p );
 
              return c;
         }
@@ -1502,15 +1502,15 @@ private:
 
         	// Fill in the RecordLiteral operands collection with pairs that relate operands to their member ids
         	shared_ptr<Scope> s = r;
-        	PopulateMapOperator( (shared_ptr<MapOperator> &)ri, ai->elements, s );
+        	PopulateMapOperator( ri, ai->elements, s );
 
         	return ri;
         }
 
         // Populate a map operator using elements from a sequence of expressions
-        void PopulateMapOperator( shared_ptr<MapOperator> &mapop, // MapOperands corresponding to the elements of ai go in here
+        void PopulateMapOperator( shared_ptr<MapOperator> mapop, // MapOperands corresponding to the elements of ai go in here
         		                  Sequence<Expression> &seq, // Operands to insert, ordered as per the input program
-        	                      shared_ptr<Scope> &scope ) // Original Scope that established ordering, must be in backing_ordering
+        	                      shared_ptr<Scope> scope ) // Original Scope that established ordering, must be in backing_ordering
         {
           	// Get a reference to the ordered list of members for this scope from a backing list
         	ASSERT( backing_ordering.IsExist(scope) )("Supplied scope did not make it into the backing ordering list");
