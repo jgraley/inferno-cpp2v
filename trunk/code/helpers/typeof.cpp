@@ -35,7 +35,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
     
     else if( shared_ptr<Call> c = dynamic_pointer_cast<Call>(o) )
     {
-        shared_ptr<Type> t = Get(c->function); // get type of the function itself
+        shared_ptr<Type> t = Get(c->callee); // get type of the function itself
         ASSERT( dynamic_pointer_cast<Subroutine>(t) )( "Trying to call something that is not a kind of Subroutine");
         if( shared_ptr<Function> f = dynamic_pointer_cast<Function>(t) )
         	return f->return_type;
@@ -86,7 +86,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Operator> op, Sequence<Type> &optypes )
 // constructed. Otherwise, return NULL
 shared_ptr<Expression> TypeOf::IsConstructorCall( shared_ptr<Call> call )
 {
-    shared_ptr<Lookup> lf = dynamic_pointer_cast<Lookup>(call->function);            
+    shared_ptr<Lookup> lf = dynamic_pointer_cast<Lookup>(call->callee);
     if(!lf)
         return shared_ptr<Expression>();
         

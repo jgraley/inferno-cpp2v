@@ -96,6 +96,7 @@ private:
             all_decls( new Program )
         {
             inferno_scope_stack.push( p );
+            backing_ordering[inferno_scope_stack.top()].clear();
         }
 
         ~InfernoAction()
@@ -927,14 +928,14 @@ private:
             return hold_expr.ToRaw( co );
         }
 
-        shared_ptr<Call> CreateCall( Sequence<Expression> &args, shared_ptr<Expression> function )
+        shared_ptr<Call> CreateCall( Sequence<Expression> &args, shared_ptr<Expression> callee )
         {
             // Make the Call node and fill in the called function
              shared_ptr<Call> c(new Call);
-             c->function = function;
+             c->callee = callee;
 
              // If Procedure or Function, fill in the args map based on the supplied args and original function type
-             shared_ptr<Type> t = TypeOf(all_decls).Get(function);
+             shared_ptr<Type> t = TypeOf(all_decls).Get(callee);
              if( shared_ptr<Procedure> p = dynamic_pointer_cast<Procedure>(t) )
                  PopulateMapOperator( c, args, p );
 
@@ -1359,6 +1360,7 @@ private:
             ident_track.SetNextRecord( h );
 
             inferno_scope_stack.push( h );      // decls for members will go on this scope
+            backing_ordering[inferno_scope_stack.top()].clear();
         }
 
         /// ActOnFinishCXXClassDef - This is called when a class/struct/union has
@@ -1532,7 +1534,7 @@ private:
         				// Get value out of array init and put it in record init together with member instance id
         				shared_ptr<Expression> v = seq[seq_index];
         				shared_ptr<MapOperand> mi( new MapOperand );
-        				mi->id = i->identifier;
+        				mi->identifier = i->identifier;
         				mi->value = v;
         				mapop->operands.insert( mi );
 

@@ -298,14 +298,14 @@ private:
         if( shared_ptr<Expression> base = TypeOf(program).IsConstructorCall( call ) )
             s += RenderOperand( base, true );
         else
-        	s += RenderOperand( call->function, true );
+        	s += RenderOperand( call->callee, true );
 
         s += "(";
 
         // If Procedure or Function, generate some arguments, resolving the order using the original function type
-        shared_ptr<Type> fntype = TypeOf(program).Get( call->function );
-        ASSERT( fntype );
-        if( shared_ptr<Procedure> proc = dynamic_pointer_cast<Procedure>(fntype) )
+        shared_ptr<Type> ctype = TypeOf(program).Get( call->callee );
+        ASSERT( ctype );
+        if( shared_ptr<Procedure> proc = dynamic_pointer_cast<Procedure>(ctype) )
             s += RenderMapInOrder( call, proc, ", ", false );
 
         s += ")";
@@ -447,7 +447,7 @@ private:
     				// search init for matching member (TODO could avoid O(n^2) by exploiting the map)
     				FOREACH( SharedPtr<MapOperand> mi, ro->operands )
     		        {
-    			        if( i->identifier == mi->id )
+    			        if( i->identifier == mi->identifier )
     			        {
     			        	if( !first )
     			        		s += separator;
