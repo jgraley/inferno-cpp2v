@@ -464,7 +464,7 @@ struct Operator : Expression
 struct MapOperand : Node
 {
 	NODE_FUNCTIONS
-	SharedPtr<InstanceIdentifier> id; // TODO identifier
+	SharedPtr<InstanceIdentifier> identifier;
 	SharedPtr<Expression> value;
 };
 
@@ -505,14 +505,14 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 
 // Operator that operates on data types as parameters. Where either is allowed
 // we prefer the type one, since it's more concise.
-struct TypeOperator : Expression // TODO derive from Operator
+struct TypeOperator : Operator // TODO derive from Operator
 {
     NODE_FUNCTIONS
     SharedPtr<Type> operand;
 };
 
 // sizeof() a type
-struct SizeOf : TypeOperator { NODE_FUNCTIONS };
+struct SizeOf : TypeOperator { NODE_FUNCTIONS }; // TODO provide normal Unop versions of this since using TypeOf is causing multiple pointers to the same type node
 
 // alignof() a type
 struct AlignOf : TypeOperator { NODE_FUNCTIONS };
@@ -530,7 +530,7 @@ struct ConditionalOperator : Ternop
 struct Call : MapOperator
 {
     NODE_FUNCTIONS
-    SharedPtr<Expression> function; // TODO rename to "destination" or something
+    SharedPtr<Expression> callee;
 };
 
 // Property indicating whether a new/delete is global ie has :: in
@@ -598,7 +598,7 @@ struct Cast : Expression
 };
 
 // Initialiser for an array
-struct ArrayLiteral : Expression // TODO derive from Operator
+struct ArrayLiteral : Operator
 {
     NODE_FUNCTIONS
     Sequence<Expression> elements;
