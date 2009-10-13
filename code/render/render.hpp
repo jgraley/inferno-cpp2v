@@ -114,7 +114,7 @@ private:
         return ids;
     }
 
-    string RenderScope( shared_ptr<Identifier> id )
+    string RenderScopePrefix( shared_ptr<Identifier> id )
     {
         shared_ptr<Scope> scope = GetScope( program, id );
         TRACE("%p %p %p\n", program.get(), scope.get(), scope_stack.top().get() );
@@ -123,7 +123,7 @@ private:
         else if( scope == program )
             return "::"; 
         else if( shared_ptr<Enum> e = dynamic_pointer_cast<Enum>( scope ) ) // <- for enum
-            return RenderScopedIdentifier( e->identifier, true );    // omit scope for the enum itself   
+            return RenderScopePrefix( e->identifier );    // omit scope for the enum itself
         else if( shared_ptr<Record> r = dynamic_pointer_cast<Record>( scope ) ) // <- for class, struct, union
             return RenderScopedIdentifier( r->identifier ) + "::";       
         else if( dynamic_pointer_cast<Procedure>( scope ) ||  // <- this is for params
@@ -133,13 +133,9 @@ private:
             return ERROR_UNSUPPORTED( scope );
     }        
     
-    string RenderScopedIdentifier( shared_ptr<Identifier> id, bool skip=false )
+    string RenderScopedIdentifier( shared_ptr<Identifier> id )
     {
-        string s;
-        if( skip )
-            s = RenderScope( id );
-        else
-            s = RenderScope( id ) + RenderIdentifier( id );
+        string s = RenderScopePrefix( id ) + RenderIdentifier( id );
         TRACE("Render scoped identifier %s\n", s.c_str() );
         return s;
     }
@@ -325,7 +321,7 @@ private:
             return before + 
                    "&&" + RenderIdentifier( li ) + // label-as-variable (GCC extension)
                    after;
-        else if( shared_ptr<SpecificInstanceIdentifier> ii = dynamic_pointer_cast< SpecificInstanceIdentifier >(expression) )
+        else if( shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast< InstanceIdentifier >(expression) )
             return RenderScopedIdentifier( ii );
         else if( shared_ptr<SizeOf> pot = dynamic_pointer_cast< SizeOf >(expression) )
             return before + 
@@ -375,13 +371,8 @@ private:
         else if( shared_ptr<Lookup> a = dynamic_pointer_cast< Lookup >(expression) )
             return before + 
                    RenderOperand( a->base, true ) + "." +
-                   RenderIdentifier( a->member ) +
+                   RenderScopedIdentifier( a->member ) +
                    after;
-            // TODO: this should use RenderScopedIdentifier for the member, since it could have a 
-            // C++ scope specified (eg o.c::m) but cannot do this until members are set properly
-            // in parser, which in turn requires a TypeOfExpression cvapbability in the helpers.
-            // Note: this capability now exists
-                   
         else if( shared_ptr<Cast> c = dynamic_pointer_cast< Cast >(expression) )
             return before + 
                    "(" + RenderType( c->type, "" ) + ")" +
@@ -528,21 +519,24 @@ private:
         }
         
         string name;
+
+        if( showscope )
+            name = RenderScopePrefix(o->identifier);
+
         shared_ptr<Constructor> con = dynamic_pointer_cast<Constructor>(o->type);
         shared_ptr<Destructor> de = dynamic_pointer_cast<Destructor>(o->type);
         if( con || de )
         {
             shared_ptr<Record> rec = dynamic_pointer_cast<Record>( GetScope( program, o->identifier ) );
             ASSERT( rec );
-            name = (de ? "~" : "") + RenderIdentifier(rec->identifier); 
+            name += (de ? "~" : "");
+            name += RenderIdentifier(rec->identifier);
         }
         else
         {
-            name = RenderIdentifier(o->identifier);
+            name += RenderIdentifier(o->identifier);
         }
         
-        if( showscope )
-            name = RenderScope(o->identifier) + name;           
                         
         if( showtype )
             s += RenderType( o->type, name );
@@ -551,13 +545,13 @@ private:
           
         if( !showinit || dynamic_pointer_cast<Uninitialised>(o->initialiser) )
         {
-            // Dont render any initialiser
+            // Don't render any initialiser
             s += sep;
         }    
         else if( shared_ptr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser) )
         {                                 
             // Render initialiser list then let RenderStatement() do the rest
-            AutoPush< shared_ptr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) ); // TODO instead of GetScope, maybe just o?
+            AutoPush< shared_ptr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) );
 
             Sequence<Statement> inits;
             Sequence<Statement> remainder;

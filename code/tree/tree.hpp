@@ -454,13 +454,14 @@ struct Label : Declaration, // TODO be a Statement TODO commonize with Case and 
 }; 
 
 // Intermediate for an operator with operands. TODO maybe fix the number
-// of operands for binop and unop categories instead of Sequence.
+// of operands for binop and unop categories.
 struct Operator : Expression
 {
 	NODE_FUNCTIONS
 };
 
-// Initialiser for one member of a Record. Basically a key-value pair.
+// Associates an instance with an expression. Basically a
+// key-value pair of identifier and value. Use in Maps.
 struct MapOperand : Node
 {
 	NODE_FUNCTIONS
@@ -468,7 +469,8 @@ struct MapOperand : Node
 	SharedPtr<Expression> value;
 };
 
-// Initialiser for one member of a Record. Basically a key-value pair.
+// Operator that maps a multiplicity of instances to expressions
+// via their identifiers.
 struct MapOperator : Operator
 {
 	NODE_FUNCTIONS
@@ -505,7 +507,7 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 
 // Operator that operates on data types as parameters. Where either is allowed
 // we prefer the type one, since it's more concise.
-struct TypeOperator : Operator // TODO derive from Operator
+struct TypeOperator : Operator
 {
     NODE_FUNCTIONS
     SharedPtr<Type> operand;
@@ -525,8 +527,9 @@ struct ConditionalOperator : Ternop
 
 // A function call to specified function passing in specified arguments
 // Function is an expression to allow eg function pointer dereference. Normal
-// calls have function -> some InstanceIdentifier for a Subroutine Instance.
-//
+// calls have callee -> some InstanceIdentifier for a Subroutine Instance.
+// Arguments passed via MapOperator - mapped to the parameters in the callee
+// type (if it's a Procedure).
 struct Call : MapOperator
 {
     NODE_FUNCTIONS
@@ -598,14 +601,15 @@ struct Cast : Expression
     SharedPtr<Type> type;        
 };
 
-// Initialiser for an array
+// Initialiser for an array just lists the elements in order
 struct ArrayLiteral : Operator
 {
     NODE_FUNCTIONS
     Sequence<Expression> elements;
 };
 
-// Initialiser for a record
+// Initialiser for a record uses a map to associate elements with
+// corresponding record members. We also give the record type explicitly.
 struct RecordLiteral : MapOperator
 {
 	NODE_FUNCTIONS

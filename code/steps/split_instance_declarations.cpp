@@ -129,11 +129,30 @@ Call
  callee=SEOT
   proc
    members
-   *
+    instance
+     ident1
+     type2
+    *
  operands
   operand
-   ident
-   expr
+   ident1
+   expr3
+  *
+
+Call
+ callee=SEOT
+  proc
+   members
+    instance
+     ident1
+     type2
+    *
+ operands
+  operand
+   ident1
+   cast
+    type2
+    expr3
   *
 
 
