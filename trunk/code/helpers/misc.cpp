@@ -47,7 +47,7 @@ shared_ptr<Record> GetRecordDeclaration( shared_ptr<Program> program, shared_ptr
 	return r;
 }
 
-shared_ptr<Instance> GetDeclaration( shared_ptr<Program> program, shared_ptr<SpecificInstanceIdentifier> id )
+shared_ptr<Instance> GetDeclaration( shared_ptr<Program> program, shared_ptr<InstanceIdentifier> id )
 {
     Walk w( program );
     while(!w.Done())
