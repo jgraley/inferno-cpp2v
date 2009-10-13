@@ -39,7 +39,7 @@ public:
         // Parse can only work on a whole program
         program = dynamic_pointer_cast<Program>(p);
         ASSERT( program );
-        AutoPush< shared_ptr<Node> > cs( scope_stack, program );
+        AutoPush< shared_ptr<Scope> > cs( scope_stack, program );
               
         string s = RenderDeclarationCollection( program, ";\n", true ); // gets the .hpp stuff directly
     
@@ -62,7 +62,7 @@ public:
 private:
     shared_ptr<Program> program;
     string deferred_decls;
-    stack< shared_ptr<Node> > scope_stack;
+    stack< shared_ptr<Scope> > scope_stack;
     // Remember the orders of collections when we sort them. Mirrors the same
     // map in the parser.
     Map< shared_ptr<Scope>, Sequence<Declaration> > backing_ordering;
@@ -116,11 +116,11 @@ private:
 
     string RenderScope( shared_ptr<Identifier> id )
     {
-        shared_ptr<Node> scope = GetScope( program, id );
+        shared_ptr<Scope> scope = GetScope( program, id );
         TRACE("%p %p %p\n", program.get(), scope.get(), scope_stack.top().get() );
         if( scope == scope_stack.top() )
             return string(); // local scope
-        if( scope == program )
+        else if( scope == program )
             return "::"; 
         else if( shared_ptr<Enum> e = dynamic_pointer_cast<Enum>( scope ) ) // <- for enum
             return RenderScopedIdentifier( e->identifier, true );    // omit scope for the enum itself   
@@ -557,7 +557,7 @@ private:
         else if( shared_ptr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser) )
         {                                 
             // Render initialiser list then let RenderStatement() do the rest
-            AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, o->identifier ) );
+            AutoPush< shared_ptr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) ); // TODO instead of GetScope, maybe just o?
 
             Sequence<Statement> inits;
             Sequence<Statement> remainder;
@@ -576,7 +576,7 @@ private:
         else if( shared_ptr<Expression> ei = dynamic_pointer_cast<Expression>( o->initialiser ) )
         {
             // Render expression with an assignment
-            AutoPush< shared_ptr<Node> > cs( scope_stack, GetScope( program, o->identifier ) );
+            AutoPush< shared_ptr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) );
             s += " = " + RenderOperand(ei) + sep;
         }
         else
@@ -623,7 +623,7 @@ private:
             {
                 s += RenderInstance( o, sep, showtype, showtype, false, false );
                 {
-                    AutoPush< shared_ptr<Node> > cs( scope_stack, program );
+                    AutoPush< shared_ptr<Scope> > cs( scope_stack, program );
                     deferred_decls += string("\n") + RenderInstance( o, sep, showtype, false, true, true );
                 }
             }
@@ -691,7 +691,7 @@ private:
                 }
                 
                 // Contents
-                AutoPush< shared_ptr<Node> > cs( scope_stack, r );
+                AutoPush< shared_ptr<Scope> > cs( scope_stack, r );
                 s += "\n{\n" +
                      RenderDeclarationCollection( r, sep2, true, a, showtype ) +
                      "}";
@@ -718,7 +718,7 @@ private:
             return RenderDeclaration( d, sep );
         else if( shared_ptr<Compound> c = dynamic_pointer_cast< Compound >(statement) )
         {
-            AutoPush< shared_ptr<Node> > cs( scope_stack, c );
+            AutoPush< shared_ptr<Scope> > cs( scope_stack, c );
             string s = "{\n";
             s += RenderDeclarationCollection( c, ";\n", true ); // Must do this first to populate backing list
             s += RenderSequence( c->statements, ";\n", true );

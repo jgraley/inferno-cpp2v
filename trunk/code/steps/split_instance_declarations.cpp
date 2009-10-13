@@ -119,4 +119,27 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Program> program )
 
         SearchReplace(sd, rs, &sm)(program);
     }
+
+
+
+
+
+
+Call
+ callee=SEOT
+  proc
+   members
+   *
+ operands
+  operand
+   ident
+   expr
+  *
+
+
+
+
+
+
+
                  */
