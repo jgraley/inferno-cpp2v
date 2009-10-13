@@ -668,7 +668,7 @@ private:
             // change it.
             TRACE("%p\n", o->type.get() );
             if( shared_ptr<ArrayInitialiser> ai = dynamic_pointer_cast<ArrayInitialiser>(o->initialiser) )
-                if( shared_ptr<SpecificTypeIdentifier> ti = dynamic_pointer_cast<SpecificTypeIdentifier>(o->type) )
+                if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(o->type) )
                 	if( shared_ptr<Record> r = GetRecordDeclaration(all_decls, ti) )
                 		o->initialiser = CreateRecordInitFromArrayInit( ai, r );
         }
@@ -1386,7 +1386,7 @@ private:
 
             // Find the specified member in the record implied by the expression on the left of .
             shared_ptr<Type> tbase = TypeOf( all_decls ).Get( a->base );
-            shared_ptr<SpecificTypeIdentifier> tibase = dynamic_pointer_cast<SpecificTypeIdentifier>(tbase);
+            shared_ptr<TypeIdentifier> tibase = dynamic_pointer_cast<TypeIdentifier>(tbase);
             ASSERT( tibase );
             shared_ptr<Record> rbase = GetRecordDeclaration(all_decls, tibase);
             ASSERT( rbase && "thing on left of ./-> is not a record/record ptr" );
@@ -1627,9 +1627,9 @@ private:
                 p = shared_ptr<AlignOf>(new AlignOf);
 
             if( isType )
-                p->operands.push_back( hold_type.FromRaw(TyOrEx) );
+                p->operand = hold_type.FromRaw(TyOrEx);
             else
-                p->operands.push_back( TypeOf( all_decls ).Get( hold_expr.FromRaw(TyOrEx) ) );
+                p->operand = TypeOf( all_decls ).Get( hold_expr.FromRaw(TyOrEx) );
             return hold_expr.ToRaw( p );
         }
 
@@ -1722,7 +1722,7 @@ private:
 
         shared_ptr<Instance> GetConstructor( shared_ptr<Type> t )
         {
-            shared_ptr<SpecificTypeIdentifier> id = dynamic_pointer_cast<SpecificTypeIdentifier>(t);
+            shared_ptr<TypeIdentifier> id = dynamic_pointer_cast<TypeIdentifier>(t);
             ASSERT(id);
             shared_ptr<Record> r = GetRecordDeclaration( all_decls, id );
 
@@ -1851,7 +1851,7 @@ private:
             // we can detect when an array initialiser has been inserted for a record instance and
             // change it.
             if( shared_ptr<ArrayInitialiser> ai = dynamic_pointer_cast<ArrayInitialiser>(e) )
-                if( shared_ptr<SpecificTypeIdentifier> ti = dynamic_pointer_cast<SpecificTypeIdentifier>(t) )
+                if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(t) )
                 	if( shared_ptr<Record> r = GetRecordDeclaration(all_decls, ti) )
                 		e = CreateRecordInitFromArrayInit( ai, r );
 

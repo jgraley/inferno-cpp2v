@@ -306,11 +306,11 @@ private:
             return RenderScopedIdentifier( ii );
         else if( shared_ptr<SizeOf> pot = dynamic_pointer_cast< SizeOf >(expression) )
             return before + 
-                   "sizeof(" + RenderType( pot->operands[0], "" ) + ")" + 
+                   "sizeof(" + RenderType( pot->operand, "" ) + ")" +
                    after;
         else if( shared_ptr<AlignOf> pot = dynamic_pointer_cast< AlignOf >(expression) )
             return before + 
-                   "alignof(" + RenderType( pot->operands[0], "" ) + ")" + 
+                   "alignof(" + RenderType( pot->operand, "" ) + ")" +
                    after;
         else if( shared_ptr<NonCommutativeOperator> nco = dynamic_pointer_cast< NonCommutativeOperator >(expression) )
             return before +
@@ -400,7 +400,7 @@ private:
     	s += "{ ";
 
     	// Get the record
-    	shared_ptr<SpecificTypeIdentifier> id = dynamic_pointer_cast<SpecificTypeIdentifier>(ro->type);
+    	shared_ptr<TypeIdentifier> id = dynamic_pointer_cast<TypeIdentifier>(ro->type);
     	ASSERT(id);
     	shared_ptr<Record> r = GetRecordDeclaration(program, id);
 
