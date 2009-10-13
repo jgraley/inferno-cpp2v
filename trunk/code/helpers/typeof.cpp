@@ -29,13 +29,14 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
         // Get the types of all the operands to the operator first
         Sequence<Type> optypes;
         FOREACH( shared_ptr<Expression> o, op->operands )
-            optypes.push_back( Get(o) );
+                 optypes.push_back( Get(o) );
         return Get( op, optypes );
     }
     
     else if( shared_ptr<Call> c = dynamic_pointer_cast<Call>(o) )
     {
         shared_ptr<Type> t = Get(c->function); // get type of the function itself
+        ASSERT( dynamic_pointer_cast<Subroutine>(t) )( "Trying to call something that is not a kind of Subroutine");
         if( shared_ptr<Function> f = dynamic_pointer_cast<Function>(t) )
         	return f->return_type;
         else

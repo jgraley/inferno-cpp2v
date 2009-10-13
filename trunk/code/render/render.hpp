@@ -306,7 +306,7 @@ private:
         shared_ptr<Type> fntype = TypeOf(program).Get( call->function );
         ASSERT( fntype );
         if( shared_ptr<Procedure> proc = dynamic_pointer_cast<Procedure>(fntype) )
-            s += RenderMapInOrder( call, proc/*, ", ", false */);
+            s += RenderMapInOrder( call, proc, ", ", false );
 
         s += ")";
         return s;
@@ -379,7 +379,8 @@ private:
                    after;
             // TODO: this should use RenderScopedIdentifier for the member, since it could have a 
             // C++ scope specified (eg o.c::m) but cannot do this until members are set properly
-            // in parser, which in turn requires a TypeOfExpression cvapbability in the helpers.     
+            // in parser, which in turn requires a TypeOfExpression cvapbability in the helpers.
+            // Note: this capability now exists
                    
         else if( shared_ptr<Cast> c = dynamic_pointer_cast< Cast >(expression) )
             return before + 
@@ -392,7 +393,7 @@ private:
                    after;
         else if( shared_ptr<RecordLiteral> ro = dynamic_pointer_cast< RecordLiteral >(expression) )
             return before +
-                   RenderRecordInitialiser( ro ) +
+                   RenderRecordLiteral( ro ) +
                    after;
         else if( shared_ptr<Literal> l = dynamic_pointer_cast< Literal >(expression) )
             return before + 
@@ -406,7 +407,7 @@ private:
             return ERROR_UNSUPPORTED(expression);
     }
     
-    string RenderRecordInitialiser( shared_ptr<RecordLiteral> ro ) // TODO rename
+    string RenderRecordLiteral( shared_ptr<RecordLiteral> ro )
     {
     	string s;
 
@@ -415,14 +416,18 @@ private:
     	ASSERT(id);
     	shared_ptr<Record> r = GetRecordDeclaration(program, id);
 
-    	s += "(" + RenderType( ro->type, "" ) + ")";
-    	s += "{ ";
-        s += RenderMapInOrder( ro, r );
+    	s += "(";
+    	s += RenderType( ro->type, "" );
+    	s += "){ ";
+        s += RenderMapInOrder( ro, r, ", ", false );
     	s += " }";
         return s;
     }
 
-    string RenderMapInOrder( shared_ptr<MapOperator> ro, shared_ptr<Scope> r ) // TODO rename and accept sep and last params
+    string RenderMapInOrder( shared_ptr<MapOperator> ro,
+    		                 shared_ptr<Scope> r,
+                             string separator,
+                             bool separate_last )
     {
     	string s;
 
@@ -445,13 +450,15 @@ private:
     			        if( i->identifier == mi->id )
     			        {
     			        	if( !first )
-    			        		s += ", ";
+    			        		s += separator;
     			        	s += RenderOperand( mi->value );
     			        	first = false;
     			        }
     		        }
     			}
     		}
+    		if( separate_last )
+    			s += separator;
     	}
         return s;
     }
@@ -582,7 +589,7 @@ private:
     
     // Non-const static objects and functions in records 
     // get split into a part that goes into the record (main line of rendering) and
-    // a part that goes seperately (deferred_decls gets appended at the very end)
+    // a part that goes separately (deferred_decls gets appended at the very end)
     bool ShouldSplitInstance( shared_ptr<Instance> o )
     {
         bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
@@ -770,7 +777,7 @@ private:
     template< class ELEMENT >
     string RenderSequence( Sequence<ELEMENT> spe, 
                            string separator, 
-                           bool seperate_last, 
+                           bool separate_last,
                            shared_ptr<AccessSpec> init_access = shared_ptr<AccessSpec>(),
                            bool showtype=true )
     {
@@ -779,7 +786,7 @@ private:
         for( int i=0; i<spe.size(); i++ )
         {
             TRACE("%d %p\n", i, &i);
-            string sep = (seperate_last || i+1<spe.size()) ? separator : "";
+            string sep = (separate_last || i+1<spe.size()) ? separator : "";
             shared_ptr<ELEMENT> pe = spe[i];                        
             if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
                 s += RenderDeclaration( d, sep, init_access ? &init_access : NULL, showtype );
@@ -793,14 +800,14 @@ private:
     
     string RenderOperandSequence( Sequence<Expression> spe, 
                                   string separator, 
-                                  bool seperate_last )
+                                  bool separate_last )
     {
         TRACE();
         string s;
         for( int i=0; i<spe.size(); i++ )
         {
             TRACE("%d %p\n", i, &i);
-            string sep = (seperate_last || i+1<spe.size()) ? separator : "";
+            string sep = (separate_last || i+1<spe.size()) ? separator : "";
             shared_ptr<Expression> pe = spe[i];                        
             s += RenderOperand( pe ) + sep;
         }
@@ -809,9 +816,9 @@ private:
     
     string RenderDeclarationCollection( shared_ptr<Scope> sd,
 			                            string separator, 
-			                            bool seperate_last, 
+			                            bool separate_last,
 			                            shared_ptr<AccessSpec> init_access = shared_ptr<AccessSpec>(),
-			                            bool showtype=true ) // TODO rename but look out there's already a RenderScope
+			                            bool showtype=true )
     {
         TRACE();        
         
@@ -829,7 +836,7 @@ private:
                 if( !dynamic_pointer_cast<Enum>(r) ) // but not an enum 
                     s += RenderDeclaration( r, separator, init_access ? &init_access : NULL, showtype, true );
         
-        s += RenderSequence( sorted, separator, seperate_last, init_access, showtype );
+        s += RenderSequence( sorted, separator, separate_last, init_access, showtype );
         TRACE();
         return s;        
     }
