@@ -277,7 +277,7 @@ struct Instance : Physical,
                   Statement
 {
     NODE_FUNCTIONS
-    SharedPtr<StorageClass> storage;
+    SharedPtr<StorageClass> storage; // TODO move to Physical so Base has one
     SharedPtr<Constancy> constancy; 
     SharedPtr<Type> type;
     SharedPtr<InstanceIdentifier> identifier;
@@ -289,7 +289,7 @@ struct Instance : Physical,
 struct Base : Physical 
 {
     NODE_FUNCTIONS
-    SharedPtr<SpecificTypeIdentifier> record; // must refer to InheritanceRecord TODO should not be Specific
+    SharedPtr<TypeIdentifier> record; // must refer to InheritanceRecord
 };              
 
 //////////////////////////// Anonymous Types ////////////////////////////
@@ -516,7 +516,7 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 struct TypeOperator : Expression
 {
     NODE_FUNCTIONS
-    Sequence<Type> operands; 
+    SharedPtr<Type> operand;
 };
 
 // sizeof() a type
