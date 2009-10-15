@@ -16,5 +16,16 @@ private:
 	SearchReplace sr1;
 };
 
+class MergeInstanceDeclarations : public Pass
+{
+public:
+	MergeInstanceDeclarations();
+	virtual void operator()( shared_ptr<Program> );
+
+private:
+	set<SearchReplace::MatchSet> sms1;
+	SearchReplace sr1;
+};
+
 #endif
 

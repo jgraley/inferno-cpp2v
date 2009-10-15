@@ -53,6 +53,17 @@ bool SearchReplace::IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pa
         return false;
     }
 
+    if( shared_ptr<SpecificName> pattern_id = dynamic_pointer_cast<SpecificName>(pattern) )
+    {
+        shared_ptr<SpecificName> x_id = dynamic_pointer_cast<SpecificName>(x);
+        ASSERT( x_id );
+        if( x_id != pattern_id ) // With identifiers, use the actual node address, not the name,
+        	                       // in case different identifiers have the same name
+        {
+            TRACE("Identifiers differ\n");
+            return false;
+        }
+    }
     if( shared_ptr<SpecificString> pattern_str = dynamic_pointer_cast<SpecificString>(pattern) )
     {
         shared_ptr<SpecificString> x_str = dynamic_pointer_cast<SpecificString>(x);
