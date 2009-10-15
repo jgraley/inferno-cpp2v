@@ -82,6 +82,8 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Program> program )
 MergeInstanceDeclarations::MergeInstanceDeclarations()
 {
 	{
+		// This is the hard kind of search pattern where Stars exist in two
+		// separate containers and have a match set linking them together
 		shared_ptr<Compound> rc( new Compound );
    	     shared_ptr<Instance> ri( new Instance );
 		  ri->identifier = shared_new<InstanceIdentifier>();
