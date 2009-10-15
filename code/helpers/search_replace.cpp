@@ -53,9 +53,9 @@ bool SearchReplace::IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pa
         return false;
     }
 
-    if( shared_ptr<SpecificName> pattern_id = dynamic_pointer_cast<SpecificName>(pattern) )
+    if( shared_ptr<SpecificIdentifier> pattern_id = dynamic_pointer_cast<SpecificIdentifier>(pattern) )
     {
-        shared_ptr<SpecificName> x_id = dynamic_pointer_cast<SpecificName>(x);
+      shared_ptr<SpecificIdentifier> x_id = dynamic_pointer_cast<SpecificIdentifier>(x);
         ASSERT( x_id );
         if( x_id != pattern_id ) // With identifiers, use the actual node address, not the name,
         	                       // in case different identifiers have the same name

@@ -82,7 +82,7 @@ public:
     string Name( shared_ptr<Node> sp, bool *bold )   // TODO put stringize capabilities into the Property nodes as virtual methods
     {
         *bold=true;
-        if( shared_ptr<SpecificName> ii = dynamic_pointer_cast<SpecificName>(sp) )
+        if( shared_ptr<SpecificIdentifier> ii = dynamic_pointer_cast<SpecificIdentifier>(sp) )
             return ii->name;                     
         else if( shared_ptr<SpecificString> ss = dynamic_pointer_cast< SpecificString >(sp) )
             return "\\\"" + ss->value + "\\\"";                     // TODO sanitise the string

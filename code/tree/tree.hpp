@@ -170,7 +170,7 @@ struct Identifier : virtual Property { NODE_FUNCTIONS };
 // to make renders and graphs clearer. This could use
 // something like stack<string> if it makes manufacturing 
 // names for new objects easier.
-struct SpecificName : virtual Property
+struct SpecificIdentifier : virtual Property
 { 
     string name;
     NODE_FUNCTIONS 
@@ -184,7 +184,7 @@ struct InstanceIdentifier : Identifier,
 // Identifier for a specific instance that has been declared
 // somewhere.                               
 struct SpecificInstanceIdentifier : InstanceIdentifier,
-                                    SpecificName { NODE_FUNCTIONS };
+                                    SpecificIdentifier { NODE_FUNCTIONS };
                             
 
 // Identifier for a user defined type that can be any type.
@@ -194,7 +194,7 @@ struct TypeIdentifier : Identifier,
 // Identifier for a specific user defined type that has been 
 // declared somewhere.
 struct SpecificTypeIdentifier : TypeIdentifier,
-                                SpecificName { NODE_FUNCTIONS };
+                                SpecificIdentifier { NODE_FUNCTIONS };
                       
 
 // Identifier for a label that can be any label. 
@@ -203,7 +203,7 @@ struct LabelIdentifier : Identifier,
 
 // Identifier for a specific label that has been declared somewhere.
 struct SpecificLabelIdentifier : LabelIdentifier,
-                         SpecificName { NODE_FUNCTIONS };
+                         SpecificIdentifier { NODE_FUNCTIONS };
 
 // General note about identifiers: in a valid program tree, there should
 // be *one* Declaration node that points to the identifier and serves to 
