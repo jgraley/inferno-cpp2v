@@ -1,10 +1,14 @@
 
 int main()
 {
-    int b;
-    b = 8;
     int a;
-    a = 9;
+
+    int b;
+    b = 2;
+    int c;
+    c = 3;
+    int d;
+    d = 4;
     return 0;
 }
 
