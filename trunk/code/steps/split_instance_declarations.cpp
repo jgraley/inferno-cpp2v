@@ -79,6 +79,57 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Program> program )
 	sr1( program );
 }
 
+MergeInstanceDeclarations::MergeInstanceDeclarations()
+{
+	{
+		shared_ptr<Compound> rc( new Compound );
+   	     shared_ptr<Instance> ri( new Instance );
+		  ri->identifier = shared_new<InstanceIdentifier>();
+          ri->initialiser = shared_new<Uninitialised>();
+ 		 rc->members.insert( ri ); // Instance in unordered decls part
+		 shared_ptr< SearchReplace::Star<Declaration> > rs( new SearchReplace::Star<Declaration> );
+		 rc->members.insert( rs );
+		 rc->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+		  shared_ptr<Assign> ra( new Assign );
+		   ra->operands.push_back( shared_new<InstanceIdentifier>() );
+		   ra->operands.push_back( shared_new<Expression>() );
+		 rc->statements.push_back( ra );
+		 rc->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+
+		shared_ptr<Compound> sc( new Compound );
+		 shared_ptr< SearchReplace::Star<Declaration> > ss( new SearchReplace::Star<Declaration> );
+		 sc->members.insert( ss );
+		 sc->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+		  shared_ptr<Instance> si( new Instance );
+		   si->identifier = shared_new<InstanceIdentifier>();
+		   si->initialiser = shared_new<Expression>();  // Only acting on initialised Instances
+		 sc->statements.push_back( si ); // Instance is in the ordered statements part
+		 sc->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+
+		SearchReplace::MatchSet ms0;
+		ms0.insert( si ); ms0.insert( ri ); sms1.insert( ms0 ); // Instance
+		SearchReplace::MatchSet ms1;
+		ms1.insert( ss ); ms1.insert( rs ); sms1.insert( ms1 ); // * in members
+		SearchReplace::MatchSet ms2;
+		ms2.insert( sc->statements[0] ); ms2.insert( rc->statements[0] ); sms1.insert( ms2 ); // 1st * in statements
+		SearchReplace::MatchSet ms3;
+		ms3.insert( sc->statements[2] ); ms3.insert( rc->statements[2] ); sms1.insert( ms3 ); // last * in statements
+		SearchReplace::MatchSet ms4;
+		ms4.insert( si->identifier ); ms4.insert( ri->identifier );
+		ms4.insert( ra->operands[0] ); sms1.insert( ms4 ); // id of instance
+		SearchReplace::MatchSet ms5;
+		ms5.insert( si->initialiser ); ms5.insert( ra->operands[1] ); sms1.insert( ms5 ); // init expression
+
+		sr1.Configure(rc, sc, &sms1);
+	}
+}
+
+void MergeInstanceDeclarations::operator()( shared_ptr<Program> program )
+{
+	//sr0( program );
+	sr1( program );
+}
+
 
 
 

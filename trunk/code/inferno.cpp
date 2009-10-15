@@ -31,9 +31,15 @@ int main( int argc, char *argv[] )
               
     Validate()(program);                
 
-    if( ReadArgs::quitafter > 0 )
+    if( ReadArgs::quitafter-- > 0 )
     {
         SplitInstanceDeclarations()(program);
+        Validate()(program);
+    }
+
+    if( ReadArgs::quitafter-- > 0 )
+    {
+        MergeInstanceDeclarations()(program);
         Validate()(program);
     }
 
