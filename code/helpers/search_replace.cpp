@@ -1,5 +1,121 @@
 #include "search_replace.hpp"
 
+/*
+ * Crazy onion searching algorithm
+ *
+ * The search code as of typing this comment is buggy - if there are two containers A and B
+ * in the search pattern, where a is reached first during a walk, and an element a' of A is tied
+ * to an element b' of B by a match set, then the search algorithm will fail to detect
+ * certain matches.
+ *
+ * Problem arises because the matching algorithm will try the first candidate for a'
+ * and key the match set to it. It will correctly retry different elements of B until
+ * it finds a matching b', but if there is none, it will not go back and try another a'.
+ *
+ * Consequently, a match where a' has to be a later element of A because of the extra
+ * constraint of the match set, will never be found.
+ *
+ * The solution requires some redesigning, and this comment tries to describe the planned
+ * new design. It is somewhat onion-like in that it has many layers. The following rubbish
+ * ascii-art shows the structure. Each box is a group of functions which may recurse among
+ * themselves, and can call functions in contained boxes but not out to surrounding boxes.
+ * Thus the overall function call hierarchy goes from outside to in. I've tried to draw
+ * the important data flows: arrows pointing in are call arguments and arrows pointing out are
+ * return values (or "out" arguments via refs or pointers).
+ *
+ *  +----------------------------------------------------------------------------------------------------------+
+ *  | Top layer runs Search, when successful it replaces                                                       |
+ *  | then repeats, if not we're all done                                                                      |
+ *  |                                                                                                          |
+ *  |  +--------------------------------------------------------------------------------------^-------------+  |
+ *  |  | Search layer, walks program tree calling Compare     Starting node                   |             |  |
+ *  |  |  +---------------------------------------------------- | --------------------------- ^ ---------+  |  |
+ *  |  |  | Compare layer tries different choices for the       |                             |          |  |  |
+ *  |  |  | decisions, recurses through the stack of decisions  |         Choice increments   |          |  |  |
+ *  |  |  | and calls DecidedCompare for each combination       |                   |         |          |  |  |
+ *  |  |  |  +------------------------------------------------- | ----------- ^ --- | ------- ^ ------+  |  |  |
+ *  |  |  |  | DecidedCompare calls MatchlessDecidedCompare     |             |     |         |       |  |  |  |
+ *  |  |  |  | and then restricts according to the match set    |             |     |      >(And)     |  |  |  |
+ *  |  |  |  |  +---------------------------------------------- v --- ^ ----- | --- v ------- ^ ---+  |  |  |  |
+ *  |  |  |  |  | MatchlessDecidedCompare layer recurses              |       |               |    |  |  |  |  |
+ *  |  |  |  |  | the search pattern checking for matches;       Match set   New choice      Is    |  |  |  |  |
+ *  |  |  |  |  | as it goes it records new decisions and        mappings    iterators     Match?  |  |  |  |  |
+ *  |  |  |  |  | tree nodes that map to match set nodes           |                               |  |  |  |  |
+ *  |  |  |  |  +------------------------------------------------- | ------------------------------+  |  |  |  |
+ *  |  |  |  +---------------------------------------------------- | ---------------------------------+  |  |  |
+ *  |  |  +------------------------------------------------------- | ------------------------------------+  |  |
+ *  |  +---------------------------------------------------------- | ---------------------------------------+  |
+ *  |                                                              |                                           |
+ *  |  +---------------------------------------------------------- v ---------------------------------------+  |
+ *  |  | Replace recurses through replace pattern                                                           |  |
+ *  |  +----------------------------------------------------------------------------------------------------+  |
+ *  |                                                                                                          |
+ *  +----------------------------------------------------------------------------------------------------------+
+ *
+ * Top and Search layers are as one would expect, searching, replacing and lazily restarting the search after
+ * each success.
+ *
+ * The Compare layer represents a generic subtree compare function, supporting all the special features of
+ * inferno search and replace like match sets, wildcards etc. Match set associations are returned for the
+ * benefit of the replace. This layer fills in all the choices and calls the DecidedCompare layer.
+ *
+ * DecidedCompare layer simply invokes the MatchlessDecidedCompare layer using the search pattern
+ * and then checks the match set mappings for mismatches. This requires further calls to
+ * MatchlessDecidedCompare, but these calls are comparing tree to tree so there will be no decisions.
+ *
+ * MatchlessDecidedCompare performs a conventional recursive comparison, using the supplied choices.
+ *
+ * Each layer appears stateless to the layer that calls it. That is to say, the functions are idempotent.
+ * For this reason we do not need to segregate them into separate classes. They will all be "const" members
+ * of the SearchReplace class and will not modify class members (like the search pattern and match sets).
+ *
+ * Match sets are as documented elsewhere. Instead of "hidden" mutable key elements, there will be a backing
+ * map linking tree nodes to search pattern nodes in the match set. This will be an output of
+ * MatchlessDecidedCompare and will be used by DecidedCompare and the Replace algorithm.
+ *
+ * A decision is a construct in the search pattern whereby there are (potentially) multiple choices
+ * for how to map the search pattern to the tree.
+ * They include:
+ * 1. the index (or iterator) of the first Sequence element to appear after a star
+ *    (equivalent to the size of the star's subsequence)
+ * 2. the iterator for any element in a collection except the last one, or any if a star is present
+ *    (if no star, there is still a choice of relative ordering)
+ * 3. the position of the root of the search/replace patterns in the program tree
+ * 4. the walking done by a recursive star (or "stuff") node
+ *
+ * Of these, 3 may be ignored since this decision is independent of match sets and may be done at a higher level, as
+ * shown in the diagram. 4. relates to an unimplemented feature, I will not worry about this at the moment. This
+ * leaves 1 and 2 as the decisions to consider. Each may be represented using a GenericIterator and constrained
+ * by a "begin" (inclusive) and an "end" (exclusive). Beginning and end may be a subrange of the container's
+ * full range.
+ *
+ * As we walk the search pattern, we will always encounter the same decisions in the same order (at least
+ * until we stop due to mismatch). Consequently they may be stored in an ordered container like a vector
+ * or a stack and each choice will always take the same index. Such a structure may be passed as an input
+ * and an output by Compare, through DecidedCompare and to/from MatchlessDecidedCompare. By simply adopting
+ * the convention that a non-existent or uninitialised choice is equivalent to choosing "begin" we can allow
+ * MatchlessDecidedCompare to lazily fill in actual "begin" iterators.
+ *
+ * The begin and end constraints may be restricted in a way that depends on earlier choices. A choice
+ * that is out of range is considered a mismatch. Each run of MatchlessDecidedCompare should return the
+ * number of decisions that it reached (and hence applied the choices) before stopping due to mismatch. The
+ * Compare layer may then choose not to bother exploring the decisions that did not get exercised.
+ *
+ * It is expected that the Compare layer will actually implement a loop construct to loop through the
+ * legal choices of a particular decision. The first call (from the Search layer) would begin iterating
+ * through the first decision, and the function would recurse to itself in order to loop through the other
+ * decisions, but only when the DecidedCompare layer actually got that far through before stopping due to
+ * mismatch.
+ *
+ * This technique of a loop containing a self-recursion should hopefully avoid the need to state-out the
+ * decision exploring algorithm.
+ *
+ * Note that separating the match set checking is not strictly required, and may not happen in an
+ * initial first-strike implementation. It does however make eg "Not" soft-nodes easier to implement
+ * and makes things generally tidier. It may  be slower, but it's not clear how much slower for
+ * practical search patterns.
+ */
+
 // Constructor remembers search pattern, replace pattern and any supplied match sets as required
 SearchReplace::SearchReplace( shared_ptr<Node> sp, 
                               shared_ptr<Node> rp,
