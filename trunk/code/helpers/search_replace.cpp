@@ -114,6 +114,9 @@
  * initial first-strike implementation. It does however make eg "Not" soft-nodes easier to implement
  * and makes things generally tidier. It may  be slower, but it's not clear how much slower for
  * practical search patterns.
+ *
+ * Note: from looking at STL docs, it seems like std::vector is the container to use for the decision
+ * stacks, since we want some mixture of stack-like and array-like access.
  */
 
 // Constructor remembers search pattern, replace pattern and any supplied match sets as required
