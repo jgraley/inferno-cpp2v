@@ -151,7 +151,7 @@ struct GenericCollection : virtual GenericContainer
 	// TOOD for these to work in practice, may need to make them more like
 	// push_back() in Sequence<>
 	virtual void insert( const GenericSharedPtr &gx ) = 0;
-	virtual void erase( const GenericSharedPtr &gx ) = 0;
+	virtual int erase( const GenericSharedPtr &gx ) = 0;
 	virtual bool IsExist( const GenericSharedPtr &gx ) = 0;
 };
 
@@ -169,15 +169,15 @@ struct Collection : GenericCollection, STLCollection< Itemiser::Element, Generic
 		typename RawCollection::value_type sx(gx);
 		RawCollection::insert( sx );
 	}
-	virtual void erase( const GenericSharedPtr &gx )
+	virtual int erase( const GenericSharedPtr &gx )
 	{
 		typename RawCollection::value_type sx(gx);
-		RawCollection::erase( sx );
+		return RawCollection::erase( sx );
 	}
-	virtual void erase( const shared_ptr<Node> &gx )
+	virtual int erase( const shared_ptr<Node> &gx )
 	{
 		typename RawCollection::value_type sx(gx);
-		RawCollection::erase( sx );
+		return RawCollection::erase( sx );
 	}
 	virtual bool IsExist( const GenericSharedPtr &gx )
 	{

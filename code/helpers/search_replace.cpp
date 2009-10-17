@@ -400,6 +400,15 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 }
 
 
+/*			// Look for a single element of x that matches the present element of the pattern
+			bool found = false;
+			FOREACH( const GenericSharedPtr &xe, *xcopy )
+			{
+			}
+			if( !found )
+				return NOT_FOUND; // present pattern element had no match
+*/
+
 SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
 		                                             GenericCollection &pattern,
 		                      		                 Conjecture *conj,
@@ -410,11 +419,14 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
     FOREACH( const GenericSharedPtr &xe, x )
         xcopy->insert( xe );
 
+
     shared_ptr<StarBase> star;
     bool seen_star = false;
 
-    FOREACH( const GenericSharedPtr &gpe, pattern )
+    //FOREACH( const GenericSharedPtr &gpe, pattern )
+    for( GenericCollection::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
     {
+    	const GenericSharedPtr &gpe = *pit;
     	shared_ptr<Node> pe( gpe );
         if( !pe || dynamic_pointer_cast<StarBase>(pe) ) // NULL in pattern collection?
         {
@@ -424,19 +436,39 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
         }
 	    else // not a Star so match singly...
 	    {
-			// Look for a single element of x that matches the present element of the pattern
-			bool found = false;
-			FOREACH( const GenericSharedPtr &xe, *xcopy )
-			{
-				if( DecidedCompare( xe, pe, conj, decisions_count ) == FOUND )
-				{
-					found = true;
-					xcopy->erase( xe );
-					break;
-				}
-			}
-			if( !found )
-				return NOT_FOUND; // present pattern element had no match
+	    	GenericContainer::iterator xit;
+
+	    	// Detect whether there's a decision here: get from the Conjecture if not
+	    	// already there otherwise add it.
+	    	//if( seen_star || i+1 < pattern.size() )
+	    	{
+	    		if( conj->size() == *decisions_count ) // this decision missing from conjecture?
+	    		{
+	    			ASSERT( conj->size() >= *decisions_count );
+	    			conj->push_back( xit = x.begin() );
+	    		}
+	    		else
+	    		{
+	    			xit = (*conj)[*decisions_count];
+	    		}
+	    		if( xit == x.end() )
+	    			return CHOICE_END;
+	    		(*decisions_count)++;
+	    	}
+
+	    	// Remove the chosen element from the tree collection. If it is not there (ret val==0)
+	    	// then the present chosen iterator has been chosen before and the choices are conflicting.
+	    	// Let's just return NOT_FOUND so we do not stop trying further choices (xit+1 may be legal).
+	    	if( xcopy->erase( *xit ) == 0 )
+	    		return NOT_FOUND;
+
+	    	const GenericSharedPtr &gxe = *xit;
+	    	shared_ptr<Node> xe( gxe );
+	    	Result r = DecidedCompare( xe, pe, conj, decisions_count );
+			if( r != FOUND )
+			    return r;
+
+
 	    }
     }
 
@@ -467,8 +499,9 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 		return FOUND;
     
     // Does the search pattern match?
-    if( !MatchlessDecidedCompare( x, pattern, conj, decisions_count ) )
-        return NOT_FOUND;
+    Result r = MatchlessDecidedCompare( x, pattern, conj, decisions_count );
+	if( r != FOUND )
+        return r;
     
     // If we got here, the node matched the search pattern. Now apply match sets
     if( !UpdateAndCheckMatchSets( x, pattern ) )
@@ -513,9 +546,10 @@ bool SearchReplace::Search( shared_ptr<Node> program, GenericContainer::iterator
     Walk w( program );
     while(!w.Done())
     {
-        it = w.GetIterator(); // get an iterator for current position in tree, so we can change it                    
-        ClearKeys();
-        if( Compare( *it, search_pattern ) )
+        it = w.GetIterator(); // get an iterator for current position in tree, so we can change it
+        ClearKeys(); // TODO move to DecidedCompare() layer
+        Result r = Compare( *it, search_pattern );
+        if( r == FOUND )
             return true;
         w.AdvanceInto(); 
     }    
@@ -937,3 +971,5 @@ void SearchReplace::Test()
         */
     }
 }
+
+

@@ -8,11 +8,11 @@ std::string ReadArgs::outfile;
 bool ReadArgs::graph;
 bool ReadArgs::trace;
 bool ReadArgs::selftest;
-unsigned ReadArgs::quitafter;
+int ReadArgs::quitafter;
 
 void ReadArgs::Usage()
 {
-    fprintf(stderr, "Usage:\ninferno [-t] [-s] [-g] [-i <infile>] [-o <outfile>]\n"
+    fprintf(stderr, "Usage:\ninferno [-t] [-s] [-g] [-q <n>] [-i <infile>] [-o <outfile>]\n"
                     "One of -i or -s required\n" );
     exit(1);
 }
@@ -23,7 +23,7 @@ void ReadArgs::Read( int argc, char *argv[] )
     trace = false;
     graph = false;
     selftest = false;
-    quitafter = 0xffffffff;
+    quitafter = 0x7fffffff;
     while( i<argc )
     {
         if( argv[i]==std::string("-i") && argc>i+1 )

@@ -18,7 +18,7 @@ public:
     static void Read( int argc, char *argv[] );
     static bool trace;
     static bool selftest;
-    static unsigned quitafter;
+    static int quitafter;
 };
 
 #endif
