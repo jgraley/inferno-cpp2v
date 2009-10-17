@@ -10,7 +10,7 @@ struct SoftExpressonOfType : Expression,
     NODE_FUNCTIONS;
     SharedPtr<Type> type_pattern;
         
-    virtual bool DecidedCompare( const SearchReplace *sr, shared_ptr<Node> x ) const;
+    virtual SearchReplace::Result DecidedCompare( const SearchReplace *sr, shared_ptr<Node> x ) const;
 };
 
 #endif

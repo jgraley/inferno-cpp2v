@@ -73,6 +73,7 @@ public:
 private:
     struct StarBase : virtual Node { NODE_FUNCTIONS };
 public:
+    enum Result { NOT_FOUND, FOUND, CHOICE_END };
     template<class VALUE_TYPE>
     struct Star : private StarBase,
                   VALUE_TYPE { NODE_FUNCTIONS };
@@ -93,34 +94,69 @@ public:
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
     // back into the general search algorithm.
-    bool DecidedCompare( shared_ptr<Node> x, shared_ptr<Node> pattern ) const; // look at node and children
     shared_ptr<Program> GetProgram() const { ASSERT(program); return program; } 
     struct SoftSearchPattern : virtual Node
     {
-        virtual bool DecidedCompare( const SearchReplace *sr, shared_ptr<Node> x ) const = 0;
+        virtual SearchReplace::Result DecidedCompare( const SearchReplace *sr, shared_ptr<Node> x ) const = 0;
     };
 
     // Some self-testing
     static void Test();
         
 private:
+    struct Choice : GenericContainer::iterator {};
+    struct Conjecture : vector<Choice> {};
+
     shared_ptr<Node> search_pattern;
     shared_ptr<Node> replace_pattern;
     const set<MatchSet> *matches;
     bool our_matches;
     shared_ptr<Program> program;
     
-    bool LocalCompare( shared_ptr<Node> x, shared_ptr<Node> pattern ) const; // only look inside node (type, value)
-    bool MatchlessDecidedCompare( shared_ptr<Node> x, shared_ptr<Node> pattern ) const; // look at node and children
-    bool DecidedCompare( GenericSequence &x, GenericSequence &pattern, int xstart=0, int pstart=0 ) const; // match for Sequences
-    bool DecidedCompare( GenericCollection &x, GenericCollection &pattern ) const; // match for Collections
-    bool Search( shared_ptr<Node> program, GenericContainer::iterator &gp ) const;
+    // LocalCompare ring
+    bool LocalCompare( shared_ptr<Node> x,
+    		           shared_ptr<Node> pattern ) const;
+
+    // MatchlessDecidedCompare and DecidedCompare rings TODO separate as per design
+    Result MatchlessDecidedCompare( shared_ptr<Node> x,
+    		                        shared_ptr<Node> pattern,
+    		    		            Conjecture *conj,
+    		    		            int *decisions_count ) const;
+    Result DecidedCompare( GenericSequence &x,
+    		               GenericSequence &pattern,
+    		               Conjecture *conj,
+    		               int *decisions_count,
+    		               int xstart=0,
+    		               int pstart=0 ) const;
+    Result DecidedCompare( GenericCollection &x,
+    		               GenericCollection &pattern,
+    		               Conjecture *conj,
+    		               int *decisions_count ) const;
+public:
+    Result DecidedCompare( shared_ptr<Node> x,
+    		               shared_ptr<Node> pattern,
+    		               Conjecture *conj = NULL, // TODO instead of Conjecture * and int, why not Conjecture::iterator?
+    		               int *decisions_count = 0 ) const;
+private:
+    // Compare ring
+    Result Compare( shared_ptr<Node> x,
+    		        shared_ptr<Node> pattern,
+    		        Conjecture conj=Conjecture(),
+    		        int threshold=0 ) const;
+
+    // Search ring
+    bool Search( shared_ptr<Node> program,
+    		     GenericContainer::iterator &gp ) const;
+
+    // Replace stuff
     void ClearPtrs( shared_ptr<Node> dest );
     void OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source, bool under_substitution );
     void DuplicateSequence( GenericSequence *dest, GenericSequence *source, bool under_substitution );
     void DuplicateCollection( GenericCollection *dest, GenericCollection *source, bool under_substitution );
     shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x, bool under_substitution=false );
-    void Replace( GenericContainer::iterator target );    
+    void Replace( GenericContainer::iterator target );
+
+    // Helpers
     const MatchSet *FindMatchSet( shared_ptr<Node> node ) const;
     void ClearKeys() const;
     bool UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node> pattern ) const;

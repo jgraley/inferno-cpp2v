@@ -1,6 +1,6 @@
 #include "soft_patterns.hpp"
 
-bool SoftExpressonOfType::DecidedCompare( const SearchReplace *sr, shared_ptr<Node> x ) const
+SearchReplace::Result SoftExpressonOfType::DecidedCompare( const SearchReplace *sr, shared_ptr<Node> x ) const
 {
 	if( shared_ptr<Expression> xe = dynamic_pointer_cast<Expression>(x) )
 	{
@@ -15,6 +15,6 @@ bool SoftExpressonOfType::DecidedCompare( const SearchReplace *sr, shared_ptr<No
 	else
 	{
 	    // not even an expression lol that aint going to match
-	    return false;
+	    return SearchReplace::NOT_FOUND;
 	}        
 }     
