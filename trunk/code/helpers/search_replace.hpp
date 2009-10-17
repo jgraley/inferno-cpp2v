@@ -104,7 +104,7 @@ public:
     static void Test();
         
 private:
-    struct Choice : GenericContainer::iterator {};
+    typedef GenericContainer::iterator Choice;
     struct Conjecture : vector<Choice> {};
 
     shared_ptr<Node> search_pattern;
