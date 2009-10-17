@@ -414,7 +414,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
 		                      		                 Conjecture *conj,
 		                      		                 int *decisions_count ) const
 {
-    // MAke a copy of the elements in the tree. As we go though the pattern, we'll erase them from
+    // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
 	// after decisions.
     shared_ptr<SubCollection> xremaining( new SubCollection );
@@ -424,11 +424,11 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
     shared_ptr<StarBase> star;
     bool seen_star = false;
 
-    //FOREACH( const GenericSharedPtr &gpe, pattern )
     for( GenericCollection::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
     {
     	shared_ptr<StarBase> maybe_star = dynamic_pointer_cast<StarBase>( shared_ptr<Node>(*pit) );
-        if( maybe_star || !(*pit) ) // NULL in pattern collection?
+
+        if( maybe_star || !(*pit) ) // Star or NULL in pattern collection?
         {
         	ASSERT(!seen_star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
             star = maybe_star; // remember for later and skip to next pattern
@@ -438,24 +438,31 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
 	    {
 	    	GenericContainer::iterator xit;
 
-	    	// Detect whether there's a decision here: get from the Conjecture if not
-	    	// already there otherwise add it.
-	    	//if( seen_star || i+1 < pattern.size() ) // TODO don't do a decision for final element when no star:
-	    	                                          // instead just use the last element in xremaining
+	    	// If theres no star and we're at the last element in the pattern then we have no choice but to
+	    	// associate it with the remaining element of the tree collection (and there must be exactly one)
+	    	GenericCollection::iterator pit_next = pit;
+	    	++pit_next;
+	    	if( !seen_star && pit_next == pattern.end() )
 	    	{
-	    		if( conj->size() == *decisions_count ) // this decision missing from conjecture?
-	    		{
-	    			ASSERT( conj->size() >= *decisions_count );
-	    			conj->push_back( xit = x.begin() );
-	    		}
-	    		else
-	    		{
-	    			xit = (*conj)[*decisions_count];
-	    		}
-	    		if( xit == x.end() )
-	    			return CHOICE_END;
-	    		(*decisions_count)++;
+	    		if( xremaining->size() != 1 )
+	    			return NOT_FOUND;
+		    	return DecidedCompare( *xit, *pit, conj, decisions_count );
 	    	}
+
+	    	// Now we know we have a decision to make; see if it needs to be added to the present Conjecture
+			if( conj->size() == *decisions_count ) // this decision missing from conjecture?
+			{
+				ASSERT( conj->size() >= *decisions_count ); // consistency check
+				conj->push_back( x.begin() ); // append this decision, initialised to begin()
+			}
+
+			// Adopt the current decision based on Conjecture
+			xit = (*conj)[*decisions_count]; // Get present decision
+			(*decisions_count)++;
+
+			// Check the decision obeys bounds
+			if( xit == x.end() )
+				return CHOICE_END;
 
 	    	// Remove the chosen element from the tree collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.
