@@ -40,7 +40,7 @@
 //   program tree rather than duplicating (only when substituting).
 //
 // - Soft search pattern nodes may be created which can support custom
-//   matching rules by implementing a virtual IsMatchPattern() function.
+//   matching rules by implementing a virtual DecidedCompare() function.
 //   Ready made soft nodes are documented in soft_patterns.hpp
 //
 // - Sequence/Container support: sequences require matching ordering
@@ -91,13 +91,13 @@ public:
     void operator()( shared_ptr<Program> p );
 
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
-    // is required. Call GetProgram() if program root needed; call IsMatchPattern() to recurse 
+    // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
     // back into the general search algorithm.
-    bool IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern ); // look at node and children
+    bool DecidedCompare( shared_ptr<Node> x, shared_ptr<Node> pattern ) const; // look at node and children
     shared_ptr<Program> GetProgram() const { ASSERT(program); return program; } 
     struct SoftSearchPattern : virtual Node
     {
-        virtual bool IsMatchPattern( SearchReplace *sr, shared_ptr<Node> x ) = 0; 
+        virtual bool DecidedCompare( const SearchReplace *sr, shared_ptr<Node> x ) const = 0;
     };
 
     // Some self-testing
@@ -110,20 +110,20 @@ private:
     bool our_matches;
     shared_ptr<Program> program;
     
-    bool IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pattern ); // only look inside node (type, value)
-    bool IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pattern ); // look at node and children
-    bool IsMatchPattern( GenericSequence &x, GenericSequence &pattern, int xstart=0, int pstart=0 ); // match for Sequences
-    bool IsMatchPattern( GenericCollection &x, GenericCollection &pattern ); // match for Collections
-    bool Search( shared_ptr<Node> program, GenericContainer::iterator &gp );
+    bool LocalCompare( shared_ptr<Node> x, shared_ptr<Node> pattern ) const; // only look inside node (type, value)
+    bool MatchlessDecidedCompare( shared_ptr<Node> x, shared_ptr<Node> pattern ) const; // look at node and children
+    bool DecidedCompare( GenericSequence &x, GenericSequence &pattern, int xstart=0, int pstart=0 ) const; // match for Sequences
+    bool DecidedCompare( GenericCollection &x, GenericCollection &pattern ) const; // match for Collections
+    bool Search( shared_ptr<Node> program, GenericContainer::iterator &gp ) const;
     void ClearPtrs( shared_ptr<Node> dest );
     void OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source, bool under_substitution );
     void DuplicateSequence( GenericSequence *dest, GenericSequence *source, bool under_substitution );
     void DuplicateCollection( GenericCollection *dest, GenericCollection *source, bool under_substitution );
     shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x, bool under_substitution=false );
     void Replace( GenericContainer::iterator target );    
-    const MatchSet *FindMatchSet( shared_ptr<Node> node );
-    void ClearKeys(); 
-    bool UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node> pattern );
+    const MatchSet *FindMatchSet( shared_ptr<Node> node ) const;
+    void ClearKeys() const;
+    bool UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node> pattern ) const;
 
     struct SubCollection : Node,
                            Collection<Node>
