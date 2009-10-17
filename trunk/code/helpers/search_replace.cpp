@@ -34,10 +34,10 @@
  *  |  |  | decisions, recurses through the stack of decisions  |         Choice increments   |          |  |  |
  *  |  |  | and calls DecidedCompare for each combination       |                   |         |          |  |  |
  *  |  |  |  +------------------------------------------------- | ----------- ^ --- | ------- ^ ------+  |  |  |
- *  |  |  |  | DecidedCompare calls DecidedCompare     |             |     |         |       |  |  |  |
+ *  |  |  |  | DecidedCompare calls MatchlessDecidedCompare     |             |     |         |       |  |  |  |
  *  |  |  |  | and then restricts according to the match set    |             |     |      >(And)     |  |  |  |
  *  |  |  |  |  +---------------------------------------------- v --- ^ ----- | --- v ------- ^ ---+  |  |  |  |
- *  |  |  |  |  | DecidedCompare layer recurses              |       |               |    |  |  |  |  |
+ *  |  |  |  |  | MatchlessDecidedCompare layer recurses              |       |               |    |  |  |  |  |
  *  |  |  |  |  | the search pattern checking for matches.       Match set   New decisions    |    |  |  |  |  |
  *  |  |  |  |  | Decisions are made according to choices        mappings                  >(And)  |  |  |  |  |
  *  |  |  |  |  | passed in from Compare layer. Any choices        |       Current node       |    |  |  |  |  |
@@ -123,6 +123,8 @@
  *
  * Note: from looking at STL docs, it seems like std::vector is the container to use for the decision
  * stacks, since we want some mixture of stack-like and array-like access.
+ *
+ * Note: Conjecture will be the word for a vector of choices as described here.
  */
 
 // Constructor remembers search pattern, replace pattern and any supplied match sets as required
@@ -237,7 +239,10 @@ bool SearchReplace::LocalCompare( shared_ptr<Node> x, shared_ptr<Node> pattern )
 
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-bool SearchReplace::MatchlessDecidedCompare( shared_ptr<Node> x, shared_ptr<Node> pattern ) const
+SearchReplace::Result SearchReplace::MatchlessDecidedCompare( shared_ptr<Node> x,
+		                                                      shared_ptr<Node> pattern,
+		 		                      		                  Conjecture *conj,
+		 		                      		                  int *decisions_count ) const
 {
     ASSERT( !!pattern ); // Disallow NULL pattern for now, could change this if required
     
@@ -247,7 +252,7 @@ bool SearchReplace::MatchlessDecidedCompare( shared_ptr<Node> x, shared_ptr<Node
 
     // Check whether the present node matches
     if( !LocalCompare( x, pattern ) )
-        return false;
+        return NOT_FOUND;
     
     // Recurse through the children. Note that the itemiser internally does a
     // dynamic_cast onto the type of pattern, and itemises over that type. x must
@@ -256,7 +261,7 @@ bool SearchReplace::MatchlessDecidedCompare( shared_ptr<Node> x, shared_ptr<Node
     vector< Itemiser::Element * > x_memb = Itemiser::Itemise( x.get(),           // The thing we're itemising
                                                               pattern.get() );   // Just get the members corresponding to pattern's class
     ASSERT( pattern_memb.size() == x_memb.size() );
-    
+    Result r = FOUND;
     for( int i=0; i<pattern_memb.size(); i++ )
     {
         ASSERT( pattern_memb[i] && "itemise returned null element");
@@ -267,38 +272,42 @@ bool SearchReplace::MatchlessDecidedCompare( shared_ptr<Node> x, shared_ptr<Node
             GenericSequence *x_seq = dynamic_cast<GenericSequence *>(x_memb[i]);
             ASSERT( x_seq && "itemise for target didn't match itemise for pattern");
             TRACE("Member %d is Sequence, target %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
-            if( !DecidedCompare( *x_seq, *pattern_seq ) )
-                return false;
+            r = DecidedCompare( *x_seq, *pattern_seq, conj, decisions_count );
         }
         else if( GenericCollection *pattern_col = dynamic_cast<GenericCollection *>(pattern_memb[i]) )
         {
         	GenericCollection *x_col = dynamic_cast<GenericCollection *>(x_memb[i]);
             ASSERT( x_col && "itemise for target didn't match itemise for pattern");
             TRACE("Member %d is Collection, target %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
-            if( !DecidedCompare( *x_col, *pattern_col ) )
-                return false;
+            r = DecidedCompare( *x_col, *pattern_col, conj, decisions_count );
         }            
         else if( GenericSharedPtr *pattern_ptr = dynamic_cast<GenericSharedPtr *>(pattern_memb[i]) )         
         {
             GenericSharedPtr *x_ptr = dynamic_cast<GenericSharedPtr *>(x_memb[i]);
             ASSERT( x_ptr && "itemise for target didn't match itemise for pattern");
             TRACE("Member %d is SharedPtr, pattern ptr=%p\n", i, pattern_ptr->get());
-			if( !DecidedCompare( *x_ptr, *pattern_ptr ) )
-				return false;
+			r = DecidedCompare( *x_ptr, *pattern_ptr, conj, decisions_count );
         }
         else
         {
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a SharedPtr");
         }
+
+        if( r != FOUND )
+			break;
     }       
    
-    TRACE("Matches search pattern\n");
-    return true;
+    return r;
 }
 
 // xstart and pstart are the indexes into the sequence where we will begin checking for a match.
 // It is assumed that elements before these have already been matched and may be ignored.
-bool SearchReplace::DecidedCompare( GenericSequence &x, GenericSequence &pattern, int xstart, int pstart ) const
+SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
+		                                             GenericSequence &pattern,
+		                      		                 Conjecture *conj,
+		                      		                 int *decisions_count,
+		                      		                 int xstart,
+		                      		                 int pstart ) const
 {
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
@@ -335,7 +344,7 @@ bool SearchReplace::DecidedCompare( GenericSequence &x, GenericSequence &pattern
 				while( xi < x.size() )
 				{
 					// Recursively attempt to match the remaining elements *after* the present star.
-					if( DecidedCompare( x, pattern, xi, pi ) )
+					if( DecidedCompare( x, pattern, conj, decisions_count, xi, pi ) == FOUND )
 					{
 						break;
 					}
@@ -346,7 +355,7 @@ bool SearchReplace::DecidedCompare( GenericSequence &x, GenericSequence &pattern
 				if( xi == x.size() )
 				{
 					TRACE("Ran out of candidate\n");
-					return false;
+					return NOT_FOUND;
 				}
 	    	}
 
@@ -364,7 +373,7 @@ bool SearchReplace::DecidedCompare( GenericSequence &x, GenericSequence &pattern
 		    	if( !UpdateAndCheckMatchSets( xcopy, pe ) )
 		    	{
 		    		TRACE("Mat set disallows because keyed already and key differs\n");
-		        	return false;
+		        	return NOT_FOUND;
 		    	}
 		    }
 	    }
@@ -373,24 +382,28 @@ bool SearchReplace::DecidedCompare( GenericSequence &x, GenericSequence &pattern
 	    	TRACE("Not a star\n");
 			// If there is one more element in x, see if it matches the pattern
 			//shared_ptr<Node> xe( x[xi] );
-			if( xi < x.size() && DecidedCompare( x[xi], pe ) )
+			if( xi < x.size() && DecidedCompare( x[xi], pe, conj, decisions_count ) == FOUND )
 			{
 				xi++;
 			}
 			else
 			{
 				TRACE("Element mismatched\n");
-				return false;
+				return NOT_FOUND;
 			}
 	    }
 	}
 
     // If we finished the job and pattern and subject are still aligned, then it was a match
 	TRACE("Finished; pattern got to %d out of %d; x got to %d out of %x\n", xi, x.size(), pi, pattern.size() );
-    return xi==x.size() && pi==pattern.size();
+    return (xi==x.size() && pi==pattern.size()) ? FOUND : NOT_FOUND;
 }
 
-bool SearchReplace::DecidedCompare( GenericCollection &x, GenericCollection &pattern ) const
+
+SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
+		                                             GenericCollection &pattern,
+		                      		                 Conjecture *conj,
+		                      		                 int *decisions_count ) const
 {
     // We'll need a copy since we'll be erasing elements
     shared_ptr<SubCollection> xcopy( new SubCollection );
@@ -415,7 +428,7 @@ bool SearchReplace::DecidedCompare( GenericCollection &x, GenericCollection &pat
 			bool found = false;
 			FOREACH( const GenericSharedPtr &xe, *xcopy )
 			{
-				if( DecidedCompare( xe, pe ) )
+				if( DecidedCompare( xe, pe, conj, decisions_count ) == FOUND )
 				{
 					found = true;
 					xcopy->erase( xe );
@@ -423,41 +436,73 @@ bool SearchReplace::DecidedCompare( GenericCollection &x, GenericCollection &pat
 				}
 			}
 			if( !found )
-				return false; // present pattern element had no match
+				return NOT_FOUND; // present pattern element had no match
 	    }
     }
 
     // Now handle the star if there was one; all the non-star matches have been erased from
-    // the collectionleaving only the star matches.
+    // the collection, leaving only the star matches.
 
     if( !xcopy->empty() && !seen_star )
-    	return false; // there were elements left over and no star to match them against
+    	return NOT_FOUND; // there were elements left over and no star to match them against
 
     // If we got here, the node matched the search pattern. Now apply match sets
     if( seen_star && star )
         if( !UpdateAndCheckMatchSets( xcopy, star ) )
-        	return false;
+        	return NOT_FOUND;
 
-	return true;
+	return FOUND;
 }
+
 
 // Try to match a pattern with the inferno rules: soft patterns allowed to
 // determine own match result, match sets restrict to same actual node. Also
 // keys the match sets as matches are found.
-bool SearchReplace::DecidedCompare( shared_ptr<Node> x, shared_ptr<Node> pattern ) const
+SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
+		                                             shared_ptr<Node> pattern,
+		                      		                 Conjecture *conj,
+		                      		                 int *decisions_count ) const
 {
 	if( !pattern )    // NULL matches anything in search patterns (just to save typing)
-		return true;
+		return FOUND;
     
     // Does the search pattern match?
-    if( !MatchlessDecidedCompare( x, pattern ) )
-        return false;
+    if( !MatchlessDecidedCompare( x, pattern, conj, decisions_count ) )
+        return NOT_FOUND;
     
     // If we got here, the node matched the search pattern. Now apply match sets
     if( !UpdateAndCheckMatchSets( x, pattern ) )
-    	return false;
+    	return NOT_FOUND;
     
-    return true;
+    return FOUND;
+}
+
+
+SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
+		                                      shared_ptr<Node> pattern,
+		                                      Conjecture conj,
+		                                      int threshold ) const
+{
+	int decisions_count = 0;
+	Result r = DecidedCompare( x, pattern, &conj, &decisions_count );
+
+	if( r==FOUND || r==CHOICE_END )
+        return r;
+
+	if( decisions_count <= threshold )
+		return NOT_FOUND; // we're not allowed to change decisions below the threshold and
+	                      // there are no decisions above the threshold to change, so we've run out of ideas.
+	for(;;)
+	{
+		r = Compare( x, pattern, conj, threshold+1 );
+		if( r==CHOICE_END )
+			break;
+		if( r==FOUND )
+			return FOUND;
+		++conj[threshold];
+    }
+
+	return NOT_FOUND;
 }
 
 
@@ -470,7 +515,7 @@ bool SearchReplace::Search( shared_ptr<Node> program, GenericContainer::iterator
     {
         it = w.GetIterator(); // get an iterator for current position in tree, so we can change it                    
         ClearKeys();
-        if( DecidedCompare( *it, search_pattern ) )
+        if( Compare( *it, search_pattern ) )
             return true;
         w.AdvanceInto(); 
     }    
@@ -785,27 +830,27 @@ void SearchReplace::Test()
     {
         // single node with topological wildcarding
         shared_ptr<Void> v(new Void);
-        ASSERT( sr.DecidedCompare( v, v ) == true );
+        ASSERT( sr.DecidedCompare( v, v ) == FOUND );
         shared_ptr<Boolean> b(new Boolean);
-        ASSERT( sr.DecidedCompare( v, b ) == false );
-        ASSERT( sr.DecidedCompare( b, v ) == false );
+        ASSERT( sr.DecidedCompare( v, b ) == NOT_FOUND );
+        ASSERT( sr.DecidedCompare( b, v ) == NOT_FOUND );
         shared_ptr<Type> t(new Type);
-        ASSERT( sr.DecidedCompare( v, t ) == true );
-        ASSERT( sr.DecidedCompare( t, v ) == false );
-        ASSERT( sr.DecidedCompare( b, t ) == true );
-        ASSERT( sr.DecidedCompare( t, b ) == false );
+        ASSERT( sr.DecidedCompare( v, t ) == FOUND );
+        ASSERT( sr.DecidedCompare( t, v ) == NOT_FOUND );
+        ASSERT( sr.DecidedCompare( b, t ) == FOUND );
+        ASSERT( sr.DecidedCompare( t, b ) == NOT_FOUND );
         
         // node points directly to another with TC
         shared_ptr<Pointer> p1(new Pointer);
         p1->destination = v;
-        ASSERT( sr.DecidedCompare( p1, b ) == false );
-        ASSERT( sr.DecidedCompare( p1, p1 ) == true );
+        ASSERT( sr.DecidedCompare( p1, b ) == NOT_FOUND );
+        ASSERT( sr.DecidedCompare( p1, p1 ) == FOUND );
         shared_ptr<Pointer> p2(new Pointer);
         p2->destination = b;
-        ASSERT( sr.DecidedCompare( p1, p2 ) == false );
+        ASSERT( sr.DecidedCompare( p1, p2 ) == NOT_FOUND );
         p2->destination = t;
-        ASSERT( sr.DecidedCompare( p1, p2 ) == true );
-        ASSERT( sr.DecidedCompare( p2, p1 ) == false );
+        ASSERT( sr.DecidedCompare( p1, p2 ) == FOUND );
+        ASSERT( sr.DecidedCompare( p2, p1 ) == NOT_FOUND );
     }
     
     {
@@ -814,8 +859,8 @@ void SearchReplace::Test()
         shared_ptr<SpecificString> s2( new SpecificString );
         s1->value = "here";
         s2->value = "there";
-        ASSERT( sr.DecidedCompare( s1, s1 ) == true );
-        ASSERT( sr.DecidedCompare( s1, s2 ) == false );
+        ASSERT( sr.DecidedCompare( s1, s1 ) == FOUND );
+        ASSERT( sr.DecidedCompare( s1, s2 ) == NOT_FOUND );
     }    
     
     {
@@ -828,31 +873,31 @@ void SearchReplace::Test()
         apsint = 5;
         i2->value = apsint;
         TRACE("  %s %s\n", i1->value.toString(10).c_str(), i2->value.toString(10).c_str() );
-        ASSERT( sr.DecidedCompare( i1, i1 ) == true );
-        ASSERT( sr.DecidedCompare( i1, i2 ) == false );
+        ASSERT( sr.DecidedCompare( i1, i1 ) == FOUND );
+        ASSERT( sr.DecidedCompare( i1, i2 ) == NOT_FOUND );
     }    
     
     {
         // node with sequence, check lengths 
         shared_ptr<Compound> c1( new Compound );
-        ASSERT( sr.DecidedCompare( c1, c1 ) == true );
+        ASSERT( sr.DecidedCompare( c1, c1 ) == FOUND );
         shared_ptr<Nop> n1( new Nop );
         c1->statements.push_back( n1 );
-        ASSERT( sr.DecidedCompare( c1, c1 ) == true );
+        ASSERT( sr.DecidedCompare( c1, c1 ) == FOUND );
         shared_ptr<Nop> n2( new Nop );
         c1->statements.push_back( n2 );
-        ASSERT( sr.DecidedCompare( c1, c1 ) == true );
+        ASSERT( sr.DecidedCompare( c1, c1 ) == FOUND );
         shared_ptr<Compound> c2( new Compound );
-        ASSERT( sr.DecidedCompare( c1, c2 ) == false );
+        ASSERT( sr.DecidedCompare( c1, c2 ) == NOT_FOUND );
         shared_ptr<Nop> n3( new Nop );
         c2->statements.push_back( n3 );
-        ASSERT( sr.DecidedCompare( c1, c2 ) == false );
+        ASSERT( sr.DecidedCompare( c1, c2 ) == NOT_FOUND );
         shared_ptr<Nop> n4( new Nop );
         c2->statements.push_back( n4 );
-        ASSERT( sr.DecidedCompare( c1, c2 ) == true );
+        ASSERT( sr.DecidedCompare( c1, c2 ) == FOUND );
         shared_ptr<Nop> n5( new Nop );
         c2->statements.push_back( n5 );
-        ASSERT( sr.DecidedCompare( c1, c2 ) == false );
+        ASSERT( sr.DecidedCompare( c1, c2 ) == NOT_FOUND );
     }
 
     {
@@ -863,8 +908,8 @@ void SearchReplace::Test()
         shared_ptr<Compound> c2( new Compound );
         shared_ptr<Statement> s( new Statement );
         c2->statements.push_back( s );
-        ASSERT( sr.DecidedCompare( c1, c2 ) == true );
-        ASSERT( sr.DecidedCompare( c2, c1 ) == false );
+        ASSERT( sr.DecidedCompare( c1, c2 ) == FOUND );
+        ASSERT( sr.DecidedCompare( c2, c1 ) == NOT_FOUND );
     }
     
     {        
