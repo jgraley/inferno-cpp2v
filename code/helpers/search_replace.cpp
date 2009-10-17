@@ -365,12 +365,12 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 		    {
 		    	TRACE("Copying matched star for match set\n");
 		    	// Copy the matched subsequence into a SubSequence node for the benefit of match sets
-			    shared_ptr<SubSequence> xcopy( new SubSequence );
+			    shared_ptr<SubSequence> xremaining( new SubSequence );
 				for( int i=xi_begin_star; i<xi; i++ )
-					xcopy->push_back( x[i] );
+					xremaining->push_back( x[i] );
 
 				// Apply match sets to this Star and matched SubSequence
-		    	if( !UpdateAndCheckMatchSets( xcopy, pe ) )
+		    	if( !UpdateAndCheckMatchSets( xremaining, pe ) )
 		    	{
 		    		TRACE("Mat set disallows because keyed already and key differs\n");
 		        	return NOT_FOUND;
@@ -402,7 +402,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 
 /*			// Look for a single element of x that matches the present element of the pattern
 			bool found = false;
-			FOREACH( const GenericSharedPtr &xe, *xcopy )
+			FOREACH( const GenericSharedPtr &xe, *xremaining )
 			{
 			}
 			if( !found )
@@ -414,11 +414,12 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
 		                      		                 Conjecture *conj,
 		                      		                 int *decisions_count ) const
 {
-    // We'll need a copy since we'll be erasing elements
-    shared_ptr<SubCollection> xcopy( new SubCollection );
+    // MAke a copy of the elements in the tree. As we go though the pattern, we'll erase them from
+	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
+	// after decisions.
+    shared_ptr<SubCollection> xremaining( new SubCollection );
     FOREACH( const GenericSharedPtr &xe, x )
-        xcopy->insert( xe );
-
+        xremaining->insert( xe );
 
     shared_ptr<StarBase> star;
     bool seen_star = false;
@@ -426,12 +427,11 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
     //FOREACH( const GenericSharedPtr &gpe, pattern )
     for( GenericCollection::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
     {
-    	const GenericSharedPtr &gpe = *pit;
-    	shared_ptr<Node> pe( gpe );
-        if( !pe || dynamic_pointer_cast<StarBase>(pe) ) // NULL in pattern collection?
+    	shared_ptr<StarBase> maybe_star = dynamic_pointer_cast<StarBase>( shared_ptr<Node>(*pit) );
+        if( maybe_star || !(*pit) ) // NULL in pattern collection?
         {
         	ASSERT(!seen_star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
-            star = dynamic_pointer_cast<StarBase>(pe); // remember for later and skip to next pattern
+            star = maybe_star; // remember for later and skip to next pattern
             seen_star = true;
         }
 	    else // not a Star so match singly...
@@ -440,7 +440,8 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
 
 	    	// Detect whether there's a decision here: get from the Conjecture if not
 	    	// already there otherwise add it.
-	    	//if( seen_star || i+1 < pattern.size() )
+	    	//if( seen_star || i+1 < pattern.size() ) // TODO don't do a decision for final element when no star:
+	    	                                          // instead just use the last element in xremaining
 	    	{
 	    		if( conj->size() == *decisions_count ) // this decision missing from conjecture?
 	    		{
@@ -458,29 +459,26 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
 
 	    	// Remove the chosen element from the tree collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.
-	    	// Let's just return NOT_FOUND so we do not stop trying further choices (xit+1 may be legal).
-	    	if( xcopy->erase( *xit ) == 0 )
+	    	// We'll just return NOT_FOUND so we do not stop trying further choices (xit+1 may be legal).
+	    	if( xremaining->erase( *xit ) == 0 )
 	    		return NOT_FOUND;
 
-	    	const GenericSharedPtr &gxe = *xit;
-	    	shared_ptr<Node> xe( gxe );
-	    	Result r = DecidedCompare( xe, pe, conj, decisions_count );
+	    	// Recurse into comparison function for the chosen node
+	    	Result r = DecidedCompare( *xit, *pit, conj, decisions_count );
 			if( r != FOUND )
 			    return r;
-
-
 	    }
     }
 
     // Now handle the star if there was one; all the non-star matches have been erased from
     // the collection, leaving only the star matches.
 
-    if( !xcopy->empty() && !seen_star )
+    if( !xremaining->empty() && !seen_star )
     	return NOT_FOUND; // there were elements left over and no star to match them against
 
     // If we got here, the node matched the search pattern. Now apply match sets
     if( seen_star && star )
-        if( !UpdateAndCheckMatchSets( xcopy, star ) )
+        if( !UpdateAndCheckMatchSets( xremaining, star ) )
         	return NOT_FOUND;
 
 	return FOUND;
