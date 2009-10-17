@@ -1,6 +1,6 @@
 #include "soft_patterns.hpp"
 
-bool SoftExpressonOfType::IsMatchPattern( SearchReplace *sr, shared_ptr<Node> x )
+bool SoftExpressonOfType::DecidedCompare( const SearchReplace *sr, shared_ptr<Node> x ) const
 {
 	if( shared_ptr<Expression> xe = dynamic_pointer_cast<Expression>(x) )
 	{
@@ -10,7 +10,7 @@ bool SoftExpressonOfType::IsMatchPattern( SearchReplace *sr, shared_ptr<Node> x 
 	    ASSERT(xt);
 	    
 	    // Punt it back into the search/replace engine
-	    return sr->IsMatchPattern( xt, type_pattern );
+	    return sr->DecidedCompare( xt, type_pattern );
 	}
 	else
 	{

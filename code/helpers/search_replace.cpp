@@ -34,13 +34,19 @@
  *  |  |  | decisions, recurses through the stack of decisions  |         Choice increments   |          |  |  |
  *  |  |  | and calls DecidedCompare for each combination       |                   |         |          |  |  |
  *  |  |  |  +------------------------------------------------- | ----------- ^ --- | ------- ^ ------+  |  |  |
- *  |  |  |  | DecidedCompare calls MatchlessDecidedCompare     |             |     |         |       |  |  |  |
+ *  |  |  |  | DecidedCompare calls DecidedCompare     |             |     |         |       |  |  |  |
  *  |  |  |  | and then restricts according to the match set    |             |     |      >(And)     |  |  |  |
  *  |  |  |  |  +---------------------------------------------- v --- ^ ----- | --- v ------- ^ ---+  |  |  |  |
- *  |  |  |  |  | MatchlessDecidedCompare layer recurses              |       |               |    |  |  |  |  |
- *  |  |  |  |  | the search pattern checking for matches;       Match set   New choice      Is    |  |  |  |  |
- *  |  |  |  |  | as it goes it records new decisions and        mappings    iterators     Match?  |  |  |  |  |
- *  |  |  |  |  | tree nodes that map to match set nodes           |                               |  |  |  |  |
+ *  |  |  |  |  | DecidedCompare layer recurses              |       |               |    |  |  |  |  |
+ *  |  |  |  |  | the search pattern checking for matches.       Match set   New decisions    |    |  |  |  |  |
+ *  |  |  |  |  | Decisions are made according to choices        mappings                  >(And)  |  |  |  |  |
+ *  |  |  |  |  | passed in from Compare layer. Any choices        |       Current node       |    |  |  |  |  |
+ *  |  |  |  |  | not present in the supplied decision stack       |             |            |    |  |  |  |  |
+ *  |  |  |  |  | are defaulted to the first option and appended   |  +----------v------------^-+  |  |  |  |  |
+ *  |  |  |  |  | to the vector. This layer also remembers the     |  | LocalCompare   Is match?|  |  |  |  |  |
+ *  |  |  |  |  | mapping of nodes in the search pattern to        |  | compares just           |  |  |  |  |  |
+ *  |  |  |  |  | corresponding nodes in the program tree and      |  | a single node           |  |  |  |  |  |
+ *  |  |  |  |  | returns this mapping to DeicdedCompare.          |  +-------------------------+  |  |  |  |  |
  *  |  |  |  |  +------------------------------------------------- | ------------------------------+  |  |  |  |
  *  |  |  |  +---------------------------------------------------- | ---------------------------------+  |  |  |
  *  |  |  +------------------------------------------------------- | ------------------------------------+  |  |
@@ -59,11 +65,11 @@
  * inferno search and replace like match sets, wildcards etc. Match set associations are returned for the
  * benefit of the replace. This layer fills in all the choices and calls the DecidedCompare layer.
  *
- * DecidedCompare layer simply invokes the MatchlessDecidedCompare layer using the search pattern
+ * DecidedCompare layer simply invokes the DecidedCompare layer using the search pattern
  * and then checks the match set mappings for mismatches. This requires further calls to
- * MatchlessDecidedCompare, but these calls are comparing tree to tree so there will be no decisions.
+ * DecidedCompare, but these calls are comparing tree to tree so there will be no decisions.
  *
- * MatchlessDecidedCompare performs a conventional recursive comparison, using the supplied choices.
+ * DecidedCompare performs a conventional recursive comparison, using the supplied choices.
  *
  * Each layer appears stateless to the layer that calls it. That is to say, the functions are idempotent.
  * For this reason we do not need to segregate them into separate classes. They will all be "const" members
@@ -71,7 +77,7 @@
  *
  * Match sets are as documented elsewhere. Instead of "hidden" mutable key elements, there will be a backing
  * map linking tree nodes to search pattern nodes in the match set. This will be an output of
- * MatchlessDecidedCompare and will be used by DecidedCompare and the Replace algorithm.
+ * DecidedCompare and will be used by DecidedCompare and the Replace algorithm.
  *
  * A decision is a construct in the search pattern whereby there are (potentially) multiple choices
  * for how to map the search pattern to the tree.
@@ -92,12 +98,12 @@
  * As we walk the search pattern, we will always encounter the same decisions in the same order (at least
  * until we stop due to mismatch). Consequently they may be stored in an ordered container like a vector
  * or a stack and each choice will always take the same index. Such a structure may be passed as an input
- * and an output by Compare, through DecidedCompare and to/from MatchlessDecidedCompare. By simply adopting
+ * and an output by Compare, through DecidedCompare and to/from DecidedCompare. By simply adopting
  * the convention that a non-existent or uninitialised choice is equivalent to choosing "begin" we can allow
- * MatchlessDecidedCompare to lazily fill in actual "begin" iterators.
+ * DecidedCompare to lazily fill in actual "begin" iterators.
  *
  * The begin and end constraints may be restricted in a way that depends on earlier choices. A choice
- * that is out of range is considered a mismatch. Each run of MatchlessDecidedCompare should return the
+ * that is out of range is considered a mismatch. Each run of DecidedCompare should return the
  * number of decisions that it reached (and hence applied the choices) before stopping due to mismatch. The
  * Compare layer may then choose not to bother exploring the decisions that did not get exercised.
  *
@@ -156,9 +162,9 @@ SearchReplace::~SearchReplace()
 }
 
 
-// Helper for IsMatchPattern that does the testing for the present node, including 
+// Helper for DecidedCompare that does the testing for the present node, including
 // superclass wildcarding and data member checking on Property nodes.
-bool SearchReplace::IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pattern )
+bool SearchReplace::LocalCompare( shared_ptr<Node> x, shared_ptr<Node> pattern ) const
 {
     TRACE();
     ASSERT( pattern ); // Disallow NULL pattern for now, could change this if required
@@ -229,18 +235,18 @@ bool SearchReplace::IsMatchPatternLocal( shared_ptr<Node> x, shared_ptr<Node> pa
 }    
 
 
-// Helper for IsMatchPattern that does the actual match testing work for the children and recurses.
+// Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-bool SearchReplace::IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pattern )
+bool SearchReplace::MatchlessDecidedCompare( shared_ptr<Node> x, shared_ptr<Node> pattern ) const
 {
     ASSERT( !!pattern ); // Disallow NULL pattern for now, could change this if required
     
     // Hand over to any soft search functionality in the search pattern node
     if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
-        return ssp->IsMatchPattern( this, x );
+        return ssp->DecidedCompare( this, x );
 
     // Check whether the present node matches
-    if( !IsMatchPatternLocal( x, pattern ) )
+    if( !LocalCompare( x, pattern ) )
         return false;
     
     // Recurse through the children. Note that the itemiser internally does a
@@ -261,7 +267,7 @@ bool SearchReplace::IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pa
             GenericSequence *x_seq = dynamic_cast<GenericSequence *>(x_memb[i]);
             ASSERT( x_seq && "itemise for target didn't match itemise for pattern");
             TRACE("Member %d is Sequence, target %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
-            if( !IsMatchPattern( *x_seq, *pattern_seq ) )
+            if( !DecidedCompare( *x_seq, *pattern_seq ) )
                 return false;
         }
         else if( GenericCollection *pattern_col = dynamic_cast<GenericCollection *>(pattern_memb[i]) )
@@ -269,7 +275,7 @@ bool SearchReplace::IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pa
         	GenericCollection *x_col = dynamic_cast<GenericCollection *>(x_memb[i]);
             ASSERT( x_col && "itemise for target didn't match itemise for pattern");
             TRACE("Member %d is Collection, target %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
-            if( !IsMatchPattern( *x_col, *pattern_col ) )
+            if( !DecidedCompare( *x_col, *pattern_col ) )
                 return false;
         }            
         else if( GenericSharedPtr *pattern_ptr = dynamic_cast<GenericSharedPtr *>(pattern_memb[i]) )         
@@ -277,7 +283,7 @@ bool SearchReplace::IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pa
             GenericSharedPtr *x_ptr = dynamic_cast<GenericSharedPtr *>(x_memb[i]);
             ASSERT( x_ptr && "itemise for target didn't match itemise for pattern");
             TRACE("Member %d is SharedPtr, pattern ptr=%p\n", i, pattern_ptr->get());
-			if( !IsMatchPattern( *x_ptr, *pattern_ptr ) )
+			if( !DecidedCompare( *x_ptr, *pattern_ptr ) )
 				return false;
         }
         else
@@ -292,7 +298,7 @@ bool SearchReplace::IsMatchPatternNoKey( shared_ptr<Node> x, shared_ptr<Node> pa
 
 // xstart and pstart are the indexes into the sequence where we will begin checking for a match.
 // It is assumed that elements before these have already been matched and may be ignored.
-bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern, int xstart, int pstart )
+bool SearchReplace::DecidedCompare( GenericSequence &x, GenericSequence &pattern, int xstart, int pstart ) const
 {
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
@@ -329,7 +335,7 @@ bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern
 				while( xi < x.size() )
 				{
 					// Recursively attempt to match the remaining elements *after* the present star.
-					if( IsMatchPattern( x, pattern, xi, pi ) )
+					if( DecidedCompare( x, pattern, xi, pi ) )
 					{
 						break;
 					}
@@ -367,7 +373,7 @@ bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern
 	    	TRACE("Not a star\n");
 			// If there is one more element in x, see if it matches the pattern
 			//shared_ptr<Node> xe( x[xi] );
-			if( xi < x.size() && IsMatchPattern( x[xi], pe ) )
+			if( xi < x.size() && DecidedCompare( x[xi], pe ) )
 			{
 				xi++;
 			}
@@ -384,7 +390,7 @@ bool SearchReplace::IsMatchPattern( GenericSequence &x, GenericSequence &pattern
     return xi==x.size() && pi==pattern.size();
 }
 
-bool SearchReplace::IsMatchPattern( GenericCollection &x, GenericCollection &pattern )
+bool SearchReplace::DecidedCompare( GenericCollection &x, GenericCollection &pattern ) const
 {
     // We'll need a copy since we'll be erasing elements
     shared_ptr<SubCollection> xcopy( new SubCollection );
@@ -409,7 +415,7 @@ bool SearchReplace::IsMatchPattern( GenericCollection &x, GenericCollection &pat
 			bool found = false;
 			FOREACH( const GenericSharedPtr &xe, *xcopy )
 			{
-				if( IsMatchPattern( xe, pe ) )
+				if( DecidedCompare( xe, pe ) )
 				{
 					found = true;
 					xcopy->erase( xe );
@@ -438,13 +444,13 @@ bool SearchReplace::IsMatchPattern( GenericCollection &x, GenericCollection &pat
 // Try to match a pattern with the inferno rules: soft patterns allowed to
 // determine own match result, match sets restrict to same actual node. Also
 // keys the match sets as matches are found.
-bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern )
+bool SearchReplace::DecidedCompare( shared_ptr<Node> x, shared_ptr<Node> pattern ) const
 {
 	if( !pattern )    // NULL matches anything in search patterns (just to save typing)
 		return true;
     
     // Does the search pattern match?
-    if( !IsMatchPatternNoKey( x, pattern ) )
+    if( !MatchlessDecidedCompare( x, pattern ) )
         return false;
     
     // If we got here, the node matched the search pattern. Now apply match sets
@@ -457,14 +463,14 @@ bool SearchReplace::IsMatchPattern( shared_ptr<Node> x, shared_ptr<Node> pattern
 
 // Search supplied program for a match to the configured search pattern.
 // If found, return double pointer to assist replace algorithm.
-bool SearchReplace::Search( shared_ptr<Node> program, GenericContainer::iterator &it )
+bool SearchReplace::Search( shared_ptr<Node> program, GenericContainer::iterator &it ) const
 {
     Walk w( program );
     while(!w.Done())
     {
         it = w.GetIterator(); // get an iterator for current position in tree, so we can change it                    
         ClearKeys();
-        if( IsMatchPattern( *it, search_pattern ) )
+        if( DecidedCompare( *it, search_pattern ) )
             return true;
         w.AdvanceInto(); 
     }    
@@ -713,7 +719,7 @@ void SearchReplace::operator()( shared_ptr<Program> p )
 
 
 // Find a match set containing the supplied node
-const SearchReplace::MatchSet *SearchReplace::FindMatchSet( shared_ptr<Node> node )
+const SearchReplace::MatchSet *SearchReplace::FindMatchSet( shared_ptr<Node> node ) const
 {
     for( set<MatchSet>::iterator msi = matches->begin();
          msi != matches->end();
@@ -728,7 +734,7 @@ const SearchReplace::MatchSet *SearchReplace::FindMatchSet( shared_ptr<Node> nod
 
 
 // Reset the keys in all the matchsets 
-void SearchReplace::ClearKeys()
+void SearchReplace::ClearKeys() const
 {
     for( set<MatchSet>::iterator msi = matches->begin();
          msi != matches->end();
@@ -744,7 +750,7 @@ void SearchReplace::ClearKeys()
 // 1. Key it into a match set of required and
 // 2. Detect whether a match set required two parts of the search tree to match and
 // reject if they don't.
-bool SearchReplace::UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node> pattern )
+bool SearchReplace::UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node> pattern ) const
 {
 	const MatchSet *m = FindMatchSet( pattern );
 	if( m )
@@ -764,7 +770,7 @@ bool SearchReplace::UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node
 			// that they match each other for the search as a whole to match.
 			// In this call both pattern and subject are in the input program tree, and
 			// match sets must not point to the input program, so we won't hit a match set.
-			if( !IsMatchPattern( x, m->key_x ) )
+			if( !DecidedCompare( x, m->key_x ) )
 				return false;
 		}
 	}
@@ -779,27 +785,27 @@ void SearchReplace::Test()
     {
         // single node with topological wildcarding
         shared_ptr<Void> v(new Void);
-        ASSERT( sr.IsMatchPattern( v, v ) == true );
+        ASSERT( sr.DecidedCompare( v, v ) == true );
         shared_ptr<Boolean> b(new Boolean);
-        ASSERT( sr.IsMatchPattern( v, b ) == false );
-        ASSERT( sr.IsMatchPattern( b, v ) == false );
+        ASSERT( sr.DecidedCompare( v, b ) == false );
+        ASSERT( sr.DecidedCompare( b, v ) == false );
         shared_ptr<Type> t(new Type);
-        ASSERT( sr.IsMatchPattern( v, t ) == true );
-        ASSERT( sr.IsMatchPattern( t, v ) == false );
-        ASSERT( sr.IsMatchPattern( b, t ) == true );
-        ASSERT( sr.IsMatchPattern( t, b ) == false );
+        ASSERT( sr.DecidedCompare( v, t ) == true );
+        ASSERT( sr.DecidedCompare( t, v ) == false );
+        ASSERT( sr.DecidedCompare( b, t ) == true );
+        ASSERT( sr.DecidedCompare( t, b ) == false );
         
         // node points directly to another with TC
         shared_ptr<Pointer> p1(new Pointer);
         p1->destination = v;
-        ASSERT( sr.IsMatchPattern( p1, b ) == false );
-        ASSERT( sr.IsMatchPattern( p1, p1 ) == true );
+        ASSERT( sr.DecidedCompare( p1, b ) == false );
+        ASSERT( sr.DecidedCompare( p1, p1 ) == true );
         shared_ptr<Pointer> p2(new Pointer);
         p2->destination = b;
-        ASSERT( sr.IsMatchPattern( p1, p2 ) == false );
+        ASSERT( sr.DecidedCompare( p1, p2 ) == false );
         p2->destination = t;
-        ASSERT( sr.IsMatchPattern( p1, p2 ) == true );
-        ASSERT( sr.IsMatchPattern( p2, p1 ) == false );
+        ASSERT( sr.DecidedCompare( p1, p2 ) == true );
+        ASSERT( sr.DecidedCompare( p2, p1 ) == false );
     }
     
     {
@@ -808,8 +814,8 @@ void SearchReplace::Test()
         shared_ptr<SpecificString> s2( new SpecificString );
         s1->value = "here";
         s2->value = "there";
-        ASSERT( sr.IsMatchPattern( s1, s1 ) == true );
-        ASSERT( sr.IsMatchPattern( s1, s2 ) == false );        
+        ASSERT( sr.DecidedCompare( s1, s1 ) == true );
+        ASSERT( sr.DecidedCompare( s1, s2 ) == false );
     }    
     
     {
@@ -822,31 +828,31 @@ void SearchReplace::Test()
         apsint = 5;
         i2->value = apsint;
         TRACE("  %s %s\n", i1->value.toString(10).c_str(), i2->value.toString(10).c_str() );
-        ASSERT( sr.IsMatchPattern( i1, i1 ) == true );
-        ASSERT( sr.IsMatchPattern( i1, i2 ) == false );        
+        ASSERT( sr.DecidedCompare( i1, i1 ) == true );
+        ASSERT( sr.DecidedCompare( i1, i2 ) == false );
     }    
     
     {
         // node with sequence, check lengths 
         shared_ptr<Compound> c1( new Compound );
-        ASSERT( sr.IsMatchPattern( c1, c1 ) == true );
+        ASSERT( sr.DecidedCompare( c1, c1 ) == true );
         shared_ptr<Nop> n1( new Nop );
         c1->statements.push_back( n1 );
-        ASSERT( sr.IsMatchPattern( c1, c1 ) == true );
+        ASSERT( sr.DecidedCompare( c1, c1 ) == true );
         shared_ptr<Nop> n2( new Nop );
         c1->statements.push_back( n2 );
-        ASSERT( sr.IsMatchPattern( c1, c1 ) == true );
+        ASSERT( sr.DecidedCompare( c1, c1 ) == true );
         shared_ptr<Compound> c2( new Compound );
-        ASSERT( sr.IsMatchPattern( c1, c2 ) == false );
+        ASSERT( sr.DecidedCompare( c1, c2 ) == false );
         shared_ptr<Nop> n3( new Nop );
         c2->statements.push_back( n3 );
-        ASSERT( sr.IsMatchPattern( c1, c2 ) == false );
+        ASSERT( sr.DecidedCompare( c1, c2 ) == false );
         shared_ptr<Nop> n4( new Nop );
         c2->statements.push_back( n4 );
-        ASSERT( sr.IsMatchPattern( c1, c2 ) == true );        
+        ASSERT( sr.DecidedCompare( c1, c2 ) == true );
         shared_ptr<Nop> n5( new Nop );
         c2->statements.push_back( n5 );
-        ASSERT( sr.IsMatchPattern( c1, c2 ) == false );        
+        ASSERT( sr.DecidedCompare( c1, c2 ) == false );
     }
 
     {
@@ -857,8 +863,8 @@ void SearchReplace::Test()
         shared_ptr<Compound> c2( new Compound );
         shared_ptr<Statement> s( new Statement );
         c2->statements.push_back( s );
-        ASSERT( sr.IsMatchPattern( c1, c2 ) == true );
-        ASSERT( sr.IsMatchPattern( c2, c1 ) == false );
+        ASSERT( sr.DecidedCompare( c1, c2 ) == true );
+        ASSERT( sr.DecidedCompare( c2, c1 ) == false );
     }
     
     {        
@@ -873,16 +879,16 @@ void SearchReplace::Test()
         shared_ptr<Declaration> d( new Declaration );
         shared_ptr<Public> p2( new Public );
         d->access = p2;
-        ASSERT( sr.IsMatchPattern( l, d ) == true );
-        ASSERT( sr.IsMatchPattern( d, l ) == false );
+        ASSERT( sr.DecidedCompare( l, d ) == true );
+        ASSERT( sr.DecidedCompare( d, l ) == false );
         shared_ptr<Private> p3( new Private );
         d->access = p3;
-        ASSERT( sr.IsMatchPattern( l, d ) == false );
-        ASSERT( sr.IsMatchPattern( d, l ) == false );
+        ASSERT( sr.DecidedCompare( l, d ) == false );
+        ASSERT( sr.DecidedCompare( d, l ) == false );
         shared_ptr<AccessSpec> p4( new AccessSpec );
         d->access = p4;
-        ASSERT( sr.IsMatchPattern( l, d ) == true );
-        ASSERT( sr.IsMatchPattern( d, l ) == false );
+        ASSERT( sr.DecidedCompare( l, d ) == true );
+        ASSERT( sr.DecidedCompare( d, l ) == false );
         */
     }
 }
