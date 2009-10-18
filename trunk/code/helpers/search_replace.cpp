@@ -303,70 +303,63 @@ SearchReplace::Result SearchReplace::MatchlessDecidedCompare( shared_ptr<Node> x
 // It is assumed that elements before these have already been matched and may be ignored.
 SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 		                                             GenericSequence &pattern,
-		                      		                 Conjecture &conj,
-		                      		                 GenericContainer::iterator xstart,
-		                      		                 GenericContainer::iterator pstart,
-		                      		                 bool first ) const
+		                      		                 Conjecture &conj ) const
 {
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
-	GenericContainer::iterator xi, pi;
-	if( first )
-	{
-		xi = x.begin();
-	    pi = pattern.begin();
-	}
-	else
-	{
-		xi = xstart;
-	    pi = pstart;
-	}
-	while( pi != pattern.end() )
+	GenericContainer::iterator xit = x.begin();
+	GenericContainer::iterator pit = pattern.begin();
+
+	while( pit != pattern.end() )
 	{
 		// Get the next element of the pattern
-		shared_ptr<Node> pe( *pi );
-		++pi;
+		shared_ptr<Node> pe( *pit );
+		++pit;
 	    if( !pe || dynamic_pointer_cast<StarBase>(pe) )
 	    {
 	    	TRACE("Star (pe is %d)\n", (int)!!pe);
 			// We have a Star type wildcard that can match multiple elements. At present,
-			// NULL is interpreted as a Star (but cannot go in a match set). Remember where
-	    	// we are - this is the beginning of the subsequence that potentially matches the Star.
-	    	GenericContainer::iterator xi_begin_star = xi;
+			// NULL is interpreted as a Star (but cannot go in a match set).
+
+	    	// Remember where we are - this is the beginning of the subsequence that
+	    	// potentially matches the Star.
+    	    GenericContainer::iterator xit_begin_star = xit;
 
 	    	// Star always matches at the end of a sequence, so we only bother checking when there
 	    	// are more elements left
-	    	if( pi == pattern.end() )
+	    	if( pit == pattern.end() )
 	    	{
-	    		xi = x.end(); // match all remaining members of x; jump to end
+	    		xit = x.end(); // match all remaining members of x; jump to end
 	    	}
 	    	else
 	    	{
 	    		TRACE("Pattern continues after star\n");
+
 	    		// Star not at end so there is more stuff to match; ensure not another star
-	    		ASSERT( !dynamic_pointer_cast<StarBase>(shared_ptr<Node>(*pi)) )
+	    		ASSERT( !dynamic_pointer_cast<StarBase>(shared_ptr<Node>(*pit)) )
 	    		      ( "Not allowed to have two neighbouring Star elements in search pattern Sequence");
 
-		    	// We have to decide which node in the tree to match, so use the present conjecture
-		    	xi = conj.HandleDecision( xi, x.end() );
+		    	// Decide how many elements the current * should match, using conjecture. Jump forward
+	    		// that many elements, to the element after the star
+		    	xit = conj.HandleDecision( xit_begin_star, x.end() );
 
-		    	// We got to the end of the subject Sequence, there's no way to match the >0 elements
+		    	// If we got to the end of the subject Sequence, there's no way to match the >0 elements
 				// we know are still in the pattern.
-				if( xi == x.end() )
+				if( xit == x.end() )
 				{
 					TRACE("Ran out of candidate\n");
 					return NOT_FOUND;
 				}
             }
 
-			// Star matched [xi_begin_star, xi) i.e. xi-xi_begin_star elements
+			// Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
 		    // Now make a copy of the elements that matched the star and apply match sets
 		    if( pe )
 		    {
 		    	TRACE("Copying matched star for match set\n");
 		    	// Copy the matched subsequence into a SubSequence node for the benefit of match sets
 			    shared_ptr<SubSequence> xsub( new SubSequence );
-				for( GenericContainer::iterator i=xi_begin_star; i != xi; ++i )
+				for( GenericContainer::iterator i=xit_begin_star; i != xit; ++i )
 				{
 					TRACE("pushing to star match\n");
 					xsub->push_back( *i );
@@ -384,10 +377,10 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 	    {
 	    	TRACE("Not a star\n");
 			// If there is one more element in x, see if it matches the pattern
-			//shared_ptr<Node> xe( x[xi] );
-			if( xi != x.end() && DecidedCompare( *xi, pe, conj ) == FOUND )
+			//shared_ptr<Node> xe( x[xit] );
+			if( xit != x.end() && DecidedCompare( *xit, pe, conj ) == FOUND )
 			{
-				++xi;
+				++xit;
 			}
 			else
 			{
@@ -398,7 +391,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 	}
 
     // If we finished the job and pattern and subject are still aligned, then it was a match
-    return (xi==x.end() && pi==pattern.end()) ? FOUND : NOT_FOUND;
+    return (xit==x.end() && pit==pattern.end()) ? FOUND : NOT_FOUND;
 }
 
 
@@ -452,6 +445,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
     	return NOT_FOUND; // there were elements left over and no star to match them against
 
     // If we got here, the node matched the search pattern. Now apply match sets
+    TRACE("seen_star %d  star %d\n", seen_star, !!star );
     if( seen_star && star )
         if( !UpdateAndCheckMatchSets( xremaining, star ) )
         	return NOT_FOUND;
@@ -485,16 +479,19 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 
 SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 		                                      shared_ptr<Node> pattern,
+		                      		          bool enable_match_set,
 		                                      Conjecture &conj,
 		                                      int threshold ) const
 {
 	// Reset the decision count to zero and begin a
 	conj.Reset();
+    if( enable_match_set )
+    	ClearKeys(); // TODO move to DecidedCompare() layer
 	Result r = DecidedCompare( x, pattern, conj );
 
 	while( conj.ShouldTryMore( r, threshold ) )
 	{
-		r = Compare( x, pattern, conj, threshold+1 );
+		r = Compare( x, pattern, enable_match_set, conj, threshold+1 );
 		if( conj.ShouldTryMore( r, threshold ) )
 			++conj[threshold];
 	}
@@ -503,12 +500,13 @@ SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 
 
 SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
-		                                      shared_ptr<Node> pattern ) const
+		                                      shared_ptr<Node> pattern,
+		                      		          bool enable_match_set ) const
 {
 	// Create the conjecture object we will use for this compre, and then go
 	// into the recursive compare function
 	Conjecture conj;
-	return Compare( x, pattern, conj, 0 );
+	return Compare( x, pattern, enable_match_set, conj, 0 );
 }
 
 
@@ -520,7 +518,6 @@ bool SearchReplace::Search( shared_ptr<Node> program, GenericContainer::iterator
     while(!w.Done())
     {
         it = w.GetIterator(); // get an iterator for current position in tree, so we can change it
-        ClearKeys(); // TODO move to DecidedCompare() layer
         Result r = Compare( *it, search_pattern );
         if( r == FOUND )
             return true;
@@ -574,6 +571,7 @@ void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source,
     // duplicates to the destination.
     for( int i=0; i<dest_memb.size(); i++ )
     {
+    	TRACE("Overlaying member %d\n", i );
         ASSERT( source_memb[i] && "itemise returned null element" );
         ASSERT( dest_memb[i] && "itemise returned null element" );
         
@@ -588,7 +586,7 @@ void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source,
         	GenericCollection *dest_col = dynamic_cast<GenericCollection *>(dest_memb[i]);
             ASSERT( dest_col && "itemise for dest didn't match itemise for source");
             DuplicateCollection( dest_col, source_col, under_substitution );
-         }
+        }
         else if( GenericSharedPtr *source_ptr = dynamic_cast<GenericSharedPtr *>(source_memb[i]) )         
         {
             GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]);
@@ -660,7 +658,7 @@ void SearchReplace::DuplicateCollection( GenericCollection *dest, GenericCollect
 			// into the destination Collection.
             const MatchSet *match = FindMatchSet( pp );
 			ASSERT( match )( "Star in replace pattern must be keyed for substitution");
-			ASSERT( match->key_x )( "match set did not get keyed successfully");
+			ASSERT( match->key_x )( "match set did not get keyed");
 			shared_ptr<Node> n = DuplicateSubtree( match->key_x, true );
 			shared_ptr<SubCollection> sc = dynamic_pointer_cast<SubCollection>(n);
 			ASSERT( sc )( "Star keyed to wrong thing, expected SubCollection");
@@ -687,7 +685,7 @@ void SearchReplace::DuplicateCollection( GenericCollection *dest, GenericCollect
 // and get the two OverlayPtrs during unwind.
 shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool under_substitution )
 {
-	TRACE("Duplicating, us=%d\n", (int)under_substitution);
+	TRACE("Duplicating, under_substitution=%d\n", (int)under_substitution);
 	// Do not duplicate identifiers if they are being substituted from the original tree.
 	if( under_substitution && dynamic_pointer_cast<Identifier>( source ) )
 	{
@@ -717,7 +715,7 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, bool 
     }
     else
     {
-    	TRACE("duplicating node\n");
+    	TRACE("duplicating supplied node\n");
 		// Make the new node (destination node)
 		shared_ptr<Cloner> dup_dest = Cloner::Clone( source );
 		dest = dynamic_pointer_cast<Node>( dup_dest );
@@ -757,9 +755,10 @@ void SearchReplace::operator()( shared_ptr<Program> p )
     GenericContainer::iterator it;
     while(1)
     {
-        bool found = Search( program, it );        
+        bool found = Search( program, it );
         if( found )
         {
+            CheckMatchSetsKeyed();
         	TRACE("Search successful, now replacing\n");
             Replace( it );
         }
@@ -785,6 +784,25 @@ const SearchReplace::MatchSet *SearchReplace::FindMatchSet( shared_ptr<Node> nod
 }
 
 
+void SearchReplace::CheckMatchSetsKeyed() const
+{
+	int unkeyed=0;
+	set<MatchSet>::iterator msi;
+	int i;
+    for( msi = matches->begin(), i=0;
+         msi != matches->end();
+         msi++, i++ )
+    {
+    	if( !(msi->key_x && msi->key_pattern) )
+    	{
+    		unkeyed++;
+    		TRACE("%d not keyed\n", i);
+    	}
+    }
+    ASSERT( unkeyed==0 )("Detected %d unkeyed match sets after successful search", unkeyed);
+}
+
+
 // Reset the keys in all the matchsets 
 void SearchReplace::ClearKeys() const
 {
@@ -804,12 +822,15 @@ void SearchReplace::ClearKeys() const
 // reject if they don't.
 bool SearchReplace::UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node> pattern ) const
 {
+	TRACE("Receiving node to key\n");
 	const MatchSet *m = FindMatchSet( pattern );
 	if( m )
 	{
+		TRACE("In ms\n");
 		// It's in a match set!!
 		if( !(m->key_pattern) || (m->key_pattern == pattern) )
 		{
+			TRACE("Keying\n");
 			// Not keyed yet OR seeing the same pattern node we already keyed to (ie
 			// we are repeating part of the search), so key it now!!!
 			m->key_pattern = pattern;
@@ -822,7 +843,7 @@ bool SearchReplace::UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node
 			// that they match each other for the search as a whole to match.
 			// In this call both pattern and subject are in the input program tree, and
 			// match sets must not point to the input program, so we won't hit a match set.
-			if( !Compare( x, m->key_x ) )
+			if( !Compare( x, m->key_x, false ) )
 				return false;
 		}
 	}
