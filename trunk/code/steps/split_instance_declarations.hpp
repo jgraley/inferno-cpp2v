@@ -27,5 +27,16 @@ private:
 	SearchReplace sr1;
 };
 
+class HackUpIfs : public Pass
+{
+public:
+	HackUpIfs();
+	virtual void operator()( shared_ptr<Program> );
+
+private:
+	set<SearchReplace::MatchSet> sms1;
+	SearchReplace sr1;
+};
+
 #endif
 

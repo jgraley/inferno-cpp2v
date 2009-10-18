@@ -73,7 +73,9 @@ public:
 private:
     struct StarBase : virtual Node { NODE_FUNCTIONS };
 public:
-    enum Result { NOT_FOUND, FOUND, CHOICE_END };
+    enum Result { NOT_FOUND = (int)false,
+    	          FOUND     = (int)true };
+
     template<class VALUE_TYPE>
     struct Star : private StarBase,
                   VALUE_TYPE { NODE_FUNCTIONS };
@@ -91,22 +93,32 @@ public:
     // Do the actual search and replace (functor style; implements Pass interface).
     void operator()( shared_ptr<Program> p );
 
+    typedef GenericContainer::iterator Choice;
+    class Conjecture : public vector<Choice>
+    {
+    private:
+    	int decisions_count;
+    public:
+    	void Reset() { decisions_count = 0; }
+    	bool ShouldTryMore( Result r, int threshold );
+    	Choice HandleDecision( Choice begin, Choice end );
+    };
+
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
     // back into the general search algorithm.
     shared_ptr<Program> GetProgram() const { ASSERT(program); return program; } 
     struct SoftSearchPattern : virtual Node
     {
-        virtual SearchReplace::Result DecidedCompare( const SearchReplace *sr, shared_ptr<Node> x ) const = 0;
+        virtual SearchReplace::Result DecidedCompare( const SearchReplace *sr,
+        		                                      shared_ptr<Node> x,
+        		                                      Conjecture &conj ) const = 0;
     };
 
     // Some self-testing
     static void Test();
         
 private:
-    typedef GenericContainer::iterator Choice;
-    struct Conjecture : vector<Choice> {};
-
     shared_ptr<Node> search_pattern;
     shared_ptr<Node> replace_pattern;
     const set<MatchSet> *matches;
@@ -120,29 +132,27 @@ private:
     // MatchlessDecidedCompare and DecidedCompare rings TODO separate as per design
     Result MatchlessDecidedCompare( shared_ptr<Node> x,
     		                        shared_ptr<Node> pattern,
-    		    		            Conjecture *conj,
-    		    		            int *decisions_count ) const;
+    		    		            Conjecture &conj ) const;
     Result DecidedCompare( GenericSequence &x,
     		               GenericSequence &pattern,
-    		               Conjecture *conj,
-    		               int *decisions_count,
+    		               Conjecture &conj,
     		               int xstart=0,
     		               int pstart=0 ) const;
     Result DecidedCompare( GenericCollection &x,
     		               GenericCollection &pattern,
-    		               Conjecture *conj,
-    		               int *decisions_count ) const;
+    		               Conjecture &conj ) const;
 public:
     Result DecidedCompare( shared_ptr<Node> x,
     		               shared_ptr<Node> pattern,
-    		               Conjecture *conj = NULL, // TODO instead of Conjecture * and int, why not Conjecture::iterator?
-    		               int *decisions_count = 0 ) const;
+    		               Conjecture &conj ) const;
 private:
     // Compare ring
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
-    		        Conjecture conj=Conjecture(),
-    		        int threshold=0 ) const;
+    		        Conjecture &conj,
+    		        int threshold ) const;
+    Result Compare( shared_ptr<Node> x,
+    		        shared_ptr<Node> pattern ) const;
 
     // Search ring
     bool Search( shared_ptr<Node> program,
