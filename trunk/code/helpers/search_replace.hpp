@@ -64,6 +64,9 @@ public:
         mutable shared_ptr<Node> key_pattern;    // This is filled in by the search and replace engine
         friend class SearchReplace;
     };
+    typedef set<MatchSet> MatchKeys;
+    MatchKeys *matches;
+
 
     // The * wildcard can match more than one node of any type in a container
     // In a Sequence, only a contiguous subsequence of 0 or more elements will match
@@ -112,6 +115,7 @@ public:
     {
         virtual SearchReplace::Result DecidedCompare( const SearchReplace *sr,
         		                                      shared_ptr<Node> x,
+        		                                      MatchKeys *match_keys,
         		                                      Conjecture &conj ) const = 0;
     };
 
@@ -121,8 +125,6 @@ public:
 private:
     shared_ptr<Node> search_pattern;
     shared_ptr<Node> replace_pattern;
-    typedef set<MatchSet> MatchKeys;
-    MatchKeys *matches;
     bool our_matches;
     shared_ptr<Program> program;
     
@@ -133,13 +135,16 @@ private:
     // DecidedCompare ring
     Result DecidedCompare( GenericSequence &x,
     		               GenericSequence &pattern,
+    		               MatchKeys *match_keys,
     		               Conjecture &conj ) const;
     Result DecidedCompare( GenericCollection &x,
     		               GenericCollection &pattern,
+    		               MatchKeys *match_keys,
     		               Conjecture &conj ) const;
 public:
     Result DecidedCompare( shared_ptr<Node> x,
     		               shared_ptr<Node> pattern,
+    		               MatchKeys *match_keys,
     		               Conjecture &conj ) const;
 private:
     // Compare ring
