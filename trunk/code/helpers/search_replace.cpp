@@ -858,7 +858,7 @@ bool SearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
     	return false; // stop trying if we found a match
 
     if( decisions_count <= threshold ) // we've made all the decisions we can OR
-        return false;                   // our last decision went out of bounds
+        return false;                  // our last decision went out of bounds
 
     return true;
 }
@@ -880,11 +880,13 @@ SearchReplace::Choice SearchReplace::Conjecture::HandleDecision( SearchReplace::
 	// Check the decision obeys bounds
 	if( c == end )
 	{
+		// throw away the bad iterator; will force initialisation to begin() next time
 		TRACE("Decision %d hit end\n", decisions_count );
-		resize( decisions_count ); // throw away the bad iterator; will force initialisation to begin() next time
+		resize( decisions_count );
 	}
 	else
 	{
+		// That decision is OK, so move to the next one
 		TRACE("Decision %d OK\n", decisions_count );
 
 		bool seen_c=false;
