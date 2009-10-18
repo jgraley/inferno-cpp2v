@@ -130,7 +130,7 @@
 // Constructor remembers search pattern, replace pattern and any supplied match sets as required
 SearchReplace::SearchReplace( shared_ptr<Node> sp, 
                               shared_ptr<Node> rp,
-                              const set<MatchSet> *m )
+                              set<MatchSet> *m )
 {
 	our_matches = false;
 	Configure( sp, rp, m );
@@ -139,7 +139,7 @@ SearchReplace::SearchReplace( shared_ptr<Node> sp,
 
 void SearchReplace::Configure( shared_ptr<Node> sp,
                                shared_ptr<Node> rp,
-                               const set<MatchSet> *m )
+                               set<MatchSet> *m )
 {  
     search_pattern = sp;
     replace_pattern = rp;
@@ -239,12 +239,13 @@ bool SearchReplace::LocalCompare( shared_ptr<Node> x, shared_ptr<Node> pattern )
 
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-SearchReplace::Result SearchReplace::MatchlessDecidedCompare( shared_ptr<Node> x,
-		                                                      shared_ptr<Node> pattern,
-		 		                      		                  Conjecture &conj ) const
+SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
+		                                             shared_ptr<Node> pattern,
+		 		                                     Conjecture &conj ) const
 {
-    ASSERT( !!pattern ); // Disallow NULL pattern for now, could change this if required
-    
+	if( !pattern )    // NULL matches anything in search patterns (just to save typing)
+		return FOUND;
+
     // Hand over to any soft search functionality in the search pattern node
     if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
         return ssp->DecidedCompare( this, x, conj );
@@ -260,9 +261,9 @@ SearchReplace::Result SearchReplace::MatchlessDecidedCompare( shared_ptr<Node> x
     vector< Itemiser::Element * > x_memb = Itemiser::Itemise( x.get(),           // The thing we're itemising
                                                               pattern.get() );   // Just get the members corresponding to pattern's class
     ASSERT( pattern_memb.size() == x_memb.size() );
-    Result r = FOUND;
     for( int i=0; i<pattern_memb.size(); i++ )
     {
+        Result r;
         ASSERT( pattern_memb[i] && "itemise returned null element");
         ASSERT( x_memb[i] && "itemise returned null element");
         
@@ -293,10 +294,14 @@ SearchReplace::Result SearchReplace::MatchlessDecidedCompare( shared_ptr<Node> x
         }
 
         if( r != FOUND )
-			break;
+			return NOT_FOUND;
     }       
    
-    return r;
+    // If we got here, the node matched the search pattern. Now apply match sets
+    if( !UpdateAndCheckMatchSets( x, pattern ) )
+    	return NOT_FOUND;
+
+    return FOUND;
 }
 
 // xstart and pstart are the indexes into the sequence where we will begin checking for a match.
@@ -454,44 +459,21 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
 }
 
 
-// Try to match a pattern with the inferno rules: soft patterns allowed to
-// determine own match result, match sets restrict to same actual node. Also
-// keys the match sets as matches are found.
-SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
-		                                             shared_ptr<Node> pattern,
-		                      		                 Conjecture &conj ) const
-{
-	if( !pattern )    // NULL matches anything in search patterns (just to save typing)
-		return FOUND;
-    
-    // Does the search pattern match?
-    Result r = MatchlessDecidedCompare( x, pattern, conj );
-	if( r != FOUND )
-        return r;
-    
-    // If we got here, the node matched the search pattern. Now apply match sets
-    if( !UpdateAndCheckMatchSets( x, pattern ) )
-    	return NOT_FOUND;
-    
-    return FOUND;
-}
-
-
 SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 		                                      shared_ptr<Node> pattern,
-		                      		          bool enable_match_set,
+		                                      MatchKeys *match_keys,
 		                                      Conjecture &conj,
 		                                      int threshold ) const
 {
 	// Reset the decision count to zero and begin a
 	conj.Reset();
-    if( enable_match_set )
+    if( match_keys )
     	ClearKeys(); // TODO move to DecidedCompare() layer
 	Result r = DecidedCompare( x, pattern, conj );
 
 	while( conj.ShouldTryMore( r, threshold ) )
 	{
-		r = Compare( x, pattern, enable_match_set, conj, threshold+1 );
+		r = Compare( x, pattern, match_keys, conj, threshold+1 );
 		if( conj.ShouldTryMore( r, threshold ) )
 			++conj[threshold];
 	}
@@ -501,12 +483,12 @@ SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 
 SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 		                                      shared_ptr<Node> pattern,
-		                      		          bool enable_match_set ) const
+		                                      MatchKeys *match_keys ) const
 {
 	// Create the conjecture object we will use for this compre, and then go
 	// into the recursive compare function
 	Conjecture conj;
-	return Compare( x, pattern, enable_match_set, conj, 0 );
+	return Compare( x, pattern, match_keys, conj, 0 );
 }
 
 
@@ -518,7 +500,7 @@ bool SearchReplace::Search( shared_ptr<Node> program, GenericContainer::iterator
     while(!w.Done())
     {
         it = w.GetIterator(); // get an iterator for current position in tree, so we can change it
-        Result r = Compare( *it, search_pattern );
+        Result r = Compare( *it, search_pattern, matches );
         if( r == FOUND )
             return true;
         w.AdvanceInto(); 
@@ -910,27 +892,27 @@ void SearchReplace::Test()
     {
         // single node with topological wildcarding
         shared_ptr<Void> v(new Void);
-        ASSERT( sr.Compare( v, v ) == FOUND );
+        ASSERT( sr.Compare( v, v, NULL ) == FOUND );
         shared_ptr<Boolean> b(new Boolean);
-        ASSERT( sr.Compare( v, b ) == NOT_FOUND );
-        ASSERT( sr.Compare( b, v ) == NOT_FOUND );
+        ASSERT( sr.Compare( v, b, NULL ) == NOT_FOUND );
+        ASSERT( sr.Compare( b, v, NULL ) == NOT_FOUND );
         shared_ptr<Type> t(new Type);
-        ASSERT( sr.Compare( v, t ) == FOUND );
-        ASSERT( sr.Compare( t, v ) == NOT_FOUND );
-        ASSERT( sr.Compare( b, t ) == FOUND );
-        ASSERT( sr.Compare( t, b ) == NOT_FOUND );
+        ASSERT( sr.Compare( v, t, NULL ) == FOUND );
+        ASSERT( sr.Compare( t, v, NULL ) == NOT_FOUND );
+        ASSERT( sr.Compare( b, t, NULL ) == FOUND );
+        ASSERT( sr.Compare( t, b, NULL ) == NOT_FOUND );
         
         // node points directly to another with TC
         shared_ptr<Pointer> p1(new Pointer);
         p1->destination = v;
-        ASSERT( sr.Compare( p1, b ) == NOT_FOUND );
-        ASSERT( sr.Compare( p1, p1 ) == FOUND );
+        ASSERT( sr.Compare( p1, b, NULL ) == NOT_FOUND );
+        ASSERT( sr.Compare( p1, p1, NULL ) == FOUND );
         shared_ptr<Pointer> p2(new Pointer);
         p2->destination = b;
-        ASSERT( sr.Compare( p1, p2 ) == NOT_FOUND );
+        ASSERT( sr.Compare( p1, p2, NULL ) == NOT_FOUND );
         p2->destination = t;
-        ASSERT( sr.Compare( p1, p2 ) == FOUND );
-        ASSERT( sr.Compare( p2, p1 ) == NOT_FOUND );
+        ASSERT( sr.Compare( p1, p2, NULL ) == FOUND );
+        ASSERT( sr.Compare( p2, p1, NULL ) == NOT_FOUND );
     }
     
     {
@@ -939,8 +921,8 @@ void SearchReplace::Test()
         shared_ptr<SpecificString> s2( new SpecificString );
         s1->value = "here";
         s2->value = "there";
-        ASSERT( sr.Compare( s1, s1 ) == FOUND );
-        ASSERT( sr.Compare( s1, s2 ) == NOT_FOUND );
+        ASSERT( sr.Compare( s1, s1, NULL ) == FOUND );
+        ASSERT( sr.Compare( s1, s2, NULL ) == NOT_FOUND );
     }    
     
     {
@@ -953,31 +935,31 @@ void SearchReplace::Test()
         apsint = 5;
         i2->value = apsint;
         TRACE("  %s %s\n", i1->value.toString(10).c_str(), i2->value.toString(10).c_str() );
-        ASSERT( sr.Compare( i1, i1 ) == FOUND );
-        ASSERT( sr.Compare( i1, i2 ) == NOT_FOUND );
+        ASSERT( sr.Compare( i1, i1, NULL ) == FOUND );
+        ASSERT( sr.Compare( i1, i2, NULL ) == NOT_FOUND );
     }    
     
     {
         // node with sequence, check lengths 
         shared_ptr<Compound> c1( new Compound );
-        ASSERT( sr.Compare( c1, c1 ) == FOUND );
+        ASSERT( sr.Compare( c1, c1, NULL ) == FOUND );
         shared_ptr<Nop> n1( new Nop );
         c1->statements.push_back( n1 );
-        ASSERT( sr.Compare( c1, c1 ) == FOUND );
+        ASSERT( sr.Compare( c1, c1, NULL ) == FOUND );
         shared_ptr<Nop> n2( new Nop );
         c1->statements.push_back( n2 );
-        ASSERT( sr.Compare( c1, c1 ) == FOUND );
+        ASSERT( sr.Compare( c1, c1, NULL ) == FOUND );
         shared_ptr<Compound> c2( new Compound );
-        ASSERT( sr.Compare( c1, c2 ) == NOT_FOUND );
+        ASSERT( sr.Compare( c1, c2, NULL ) == NOT_FOUND );
         shared_ptr<Nop> n3( new Nop );
         c2->statements.push_back( n3 );
-        ASSERT( sr.Compare( c1, c2 ) == NOT_FOUND );
+        ASSERT( sr.Compare( c1, c2, NULL ) == NOT_FOUND );
         shared_ptr<Nop> n4( new Nop );
         c2->statements.push_back( n4 );
-        ASSERT( sr.Compare( c1, c2 ) == FOUND );
+        ASSERT( sr.Compare( c1, c2, NULL ) == FOUND );
         shared_ptr<Nop> n5( new Nop );
         c2->statements.push_back( n5 );
-        ASSERT( sr.Compare( c1, c2 ) == NOT_FOUND );
+        ASSERT( sr.Compare( c1, c2, NULL ) == NOT_FOUND );
     }
 
     {
@@ -988,8 +970,8 @@ void SearchReplace::Test()
         shared_ptr<Compound> c2( new Compound );
         shared_ptr<Statement> s( new Statement );
         c2->statements.push_back( s );
-        ASSERT( sr.Compare( c1, c2 ) == FOUND );
-        ASSERT( sr.Compare( c2, c1 ) == NOT_FOUND );
+        ASSERT( sr.Compare( c1, c2, NULL ) == FOUND );
+        ASSERT( sr.Compare( c2, c1, NULL ) == NOT_FOUND );
     }
     
     {        
