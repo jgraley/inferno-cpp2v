@@ -467,13 +467,16 @@ SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 		                                      Conjecture &conj,
 		                                      int threshold ) const
 {
-	conj.Reset();
+	// Do a compare with the current conjecture.
     if( match_keys )
     	match_keys->ClearKeys();
+	conj.PrepareForDecidedCompare();
 	Result r = DecidedCompare( x, pattern, match_keys, conj );
 	if( r==FOUND && match_keys )
 		match_keys->CheckMatchSetsKeyed();
 
+	// Try different choices for the decisions at the current level. Recurse
+	// so that other decisions may be modified.
 	while( conj.ShouldTryMore( r, threshold ) )
 	{
 		r = Compare( x, pattern, match_keys, conj, threshold+1 );
@@ -843,9 +846,9 @@ bool SearchReplace::MatchKeys::UpdateAndRestrict( shared_ptr<Node> x,
 	return true;
 }
 
-void SearchReplace::Conjecture::Reset()
+void SearchReplace::Conjecture::PrepareForDecidedCompare()
 {
-	TRACE("Decision reset\n");
+	TRACE("Decision prepare\n");
 	decisions_count = 0;
 }
 

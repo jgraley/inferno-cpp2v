@@ -114,7 +114,7 @@ public:
     private:
     	int decisions_count;
     public:
-    	void Reset();
+    	void PrepareForDecidedCompare();
     	bool ShouldTryMore( Result r, int threshold );
     	Choice HandleDecision( Choice begin, Choice end );
     };
