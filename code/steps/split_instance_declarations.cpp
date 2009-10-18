@@ -76,7 +76,7 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
 void SplitInstanceDeclarations::operator()( shared_ptr<Program> program )
 {
 	sr0( program );
-	sr1( program );
+	//sr1( program );
 }
 
 MergeInstanceDeclarations::MergeInstanceDeclarations()
@@ -128,7 +128,54 @@ MergeInstanceDeclarations::MergeInstanceDeclarations()
 
 void MergeInstanceDeclarations::operator()( shared_ptr<Program> program )
 {
-	//sr0( program );
+	sr1( program );
+}
+
+HackUpIfs::HackUpIfs()
+{
+	{
+		shared_ptr<If> sif( new If );
+		  shared_ptr<Expression> stest( new Expression );
+		  sif->condition = stest;
+		  shared_ptr<Compound> scthen( new Compound );
+		  sif->body = scthen;
+		    scthen->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+		    scthen->statements.push_back( shared_new< Statement >() );
+		    scthen->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+		  shared_ptr<Compound> scelse( new Compound );
+		  sif->else_body = scelse;
+		    scelse->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+		    scelse->statements.push_back( shared_new< Statement >() );
+		    scelse->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+
+		shared_ptr<If> rif( new If );
+		  shared_ptr<Expression> rtest( new Expression );
+		  rif->condition = rtest;
+		  shared_ptr<Compound> rcthen( new Compound );
+		  rif->body = rcthen;
+			rcthen->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+			rcthen->statements.push_back( shared_new< Statement >() );
+			rcthen->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+		  shared_ptr<Compound> rcelse( new Compound );
+		  rif->else_body = shared_new< Nop >();
+
+		SearchReplace::MatchSet ms0;
+		ms0.insert( scthen->statements[1] ); ms0.insert( scelse->statements[1] ); ms0.insert( rcthen->statements[1] ); sms1.insert( ms0 ); // statement of interest
+		SearchReplace::MatchSet ms1;
+		ms1.insert( stest ); ms1.insert( rtest ); sms1.insert( ms1 ); // condition
+		SearchReplace::MatchSet ms2;
+		ms2.insert( scthen->statements[0] ); ms2.insert( rcthen->statements[0] ); sms1.insert( ms2 ); // 1st * in statements
+		SearchReplace::MatchSet ms3;
+		ms3.insert( scthen->statements[2] ); ms3.insert( rcthen->statements[2] ); sms1.insert( ms3 ); // 1st * in statements
+
+		TRACE("mid %p %d\n", rif->condition.get(), (int)!!rif->condition );
+
+		sr1.Configure(sif, rif, &sms1);
+	}
+}
+
+void HackUpIfs::operator()( shared_ptr<Program> program )
+{
 	sr1( program );
 }
 
