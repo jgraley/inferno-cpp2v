@@ -135,10 +135,7 @@ private:
     		    		            Conjecture &conj ) const;
     Result DecidedCompare( GenericSequence &x,
     		               GenericSequence &pattern,
-    		               Conjecture &conj,
-    		               GenericContainer::iterator xstart = GenericContainer::iterator(),
-    		               GenericContainer::iterator pstart = GenericContainer::iterator(),
-    		               bool first=true ) const;
+    		               Conjecture &conj ) const;
     Result DecidedCompare( GenericCollection &x,
     		               GenericCollection &pattern,
     		               Conjecture &conj ) const;
@@ -150,10 +147,12 @@ private:
     // Compare ring
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
+    		        bool enable_match_set,
     		        Conjecture &conj,
     		        int threshold ) const;
     Result Compare( shared_ptr<Node> x,
-    		        shared_ptr<Node> pattern ) const;
+    		        shared_ptr<Node> pattern,
+    		        bool enable_match_set = true ) const;
 
     // Search ring
     bool Search( shared_ptr<Node> program,
@@ -169,6 +168,7 @@ private:
 
     // Helpers
     const MatchSet *FindMatchSet( shared_ptr<Node> node ) const;
+    void CheckMatchSetsKeyed() const;
     void ClearKeys() const;
     bool UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node> pattern ) const;
 
