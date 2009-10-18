@@ -1,4 +1,3 @@
-
 void f()
 {
 // Excite the multiple choices bug with sequences. Use with hacked 
@@ -15,7 +14,7 @@ void f()
 }
 
 
-
+/*
 
 int main()
 {
@@ -38,4 +37,4 @@ int main()
     g = 7;
     return 0;
 }
-
+*/

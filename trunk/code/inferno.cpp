@@ -39,7 +39,7 @@ int main( int argc, char *argv[] )
 
     if( ReadArgs::quitafter-- > 0 )
     {
-        HackUpIfs()(program);
+    	MergeInstanceDeclarations()(program);
         Validate()(program);
     }
 

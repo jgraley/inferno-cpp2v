@@ -304,58 +304,60 @@ SearchReplace::Result SearchReplace::MatchlessDecidedCompare( shared_ptr<Node> x
 SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 		                                             GenericSequence &pattern,
 		                      		                 Conjecture &conj,
-		                      		                 int xstart,
-		                      		                 int pstart ) const
+		                      		                 GenericContainer::iterator xstart,
+		                      		                 GenericContainer::iterator pstart,
+		                      		                 bool first ) const
 {
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
-	int xi=xstart;
-	int pi=pstart;
-	while( pi < pattern.size() )
+	GenericContainer::iterator xi, pi;
+	if( first )
 	{
-		TRACE("pattern at %d; x at %d\n", pi, xi );
+		xi = x.begin();
+	    pi = pattern.begin();
+	}
+	else
+	{
+		xi = xstart;
+	    pi = pstart;
+	}
+	while( pi != pattern.end() )
+	{
 		// Get the next element of the pattern
-		shared_ptr<Node> pe( pattern[pi] );
-		pi++;
+		shared_ptr<Node> pe( *pi );
+		++pi;
 	    if( !pe || dynamic_pointer_cast<StarBase>(pe) )
 	    {
 	    	TRACE("Star (pe is %d)\n", (int)!!pe);
 			// We have a Star type wildcard that can match multiple elements. At present,
 			// NULL is interpreted as a Star (but cannot go in a match set). Remember where
 	    	// we are - this is the beginning of the subsequence that potentially matches the Star.
-	    	int xi_begin_star = xi;
+	    	GenericContainer::iterator xi_begin_star = xi;
 
 	    	// Star always matches at the end of a sequence, so we only bother checking when there
 	    	// are more elements left
-	    	if( pi == pattern.size() )
+	    	if( pi == pattern.end() )
 	    	{
-	    		xi = x.size(); // match all remaining members of x; jump to end
+	    		xi = x.end(); // match all remaining members of x; jump to end
 	    	}
 	    	else
 	    	{
 	    		TRACE("Pattern continues after star\n");
 	    		// Star not at end so there is more stuff to match; ensure not another star
-	    		ASSERT( !dynamic_pointer_cast<StarBase>(shared_ptr<Node>(pattern[pi])) )
+	    		ASSERT( !dynamic_pointer_cast<StarBase>(shared_ptr<Node>(*pi)) )
 	    		      ( "Not allowed to have two neighbouring Star elements in search pattern Sequence");
 
-	    		// Try out different numbers of elements to match the Star, counting up from zero
-				while( xi < x.size() )
-				{
-					// Recursively attempt to match the remaining elements *after* the present star.
-					if( DecidedCompare( x, pattern, conj, xi, pi ) == FOUND )
-					{
-						break;
-					}
-					xi++;
-				}
-				// We got to the end of the subject Sequence, there's no way to match the >0 elements
+		    	// We have to decide which node in the tree to match, so use the present conjecture
+		    	xi = conj.HandleDecision( xi, x.end() );
+
+		    	// We got to the end of the subject Sequence, there's no way to match the >0 elements
 				// we know are still in the pattern.
-				if( xi == x.size() )
+				if( xi == x.end() )
 				{
 					TRACE("Ran out of candidate\n");
 					return NOT_FOUND;
 				}
-	    	}
+            }
 
 			// Star matched [xi_begin_star, xi) i.e. xi-xi_begin_star elements
 		    // Now make a copy of the elements that matched the star and apply match sets
@@ -363,12 +365,15 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 		    {
 		    	TRACE("Copying matched star for match set\n");
 		    	// Copy the matched subsequence into a SubSequence node for the benefit of match sets
-			    shared_ptr<SubSequence> xremaining( new SubSequence );
-				for( int i=xi_begin_star; i<xi; i++ )
-					xremaining->push_back( x[i] );
+			    shared_ptr<SubSequence> xsub( new SubSequence );
+				for( GenericContainer::iterator i=xi_begin_star; i != xi; ++i )
+				{
+					TRACE("pushing to star match\n");
+					xsub->push_back( *i );
+				}
 
 				// Apply match sets to this Star and matched SubSequence
-		    	if( !UpdateAndCheckMatchSets( xremaining, pe ) )
+		    	if( !UpdateAndCheckMatchSets( xsub, pe ) )
 		    	{
 		    		TRACE("Mat set disallows because keyed already and key differs\n");
 		        	return NOT_FOUND;
@@ -380,9 +385,9 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 	    	TRACE("Not a star\n");
 			// If there is one more element in x, see if it matches the pattern
 			//shared_ptr<Node> xe( x[xi] );
-			if( xi < x.size() && DecidedCompare( x[xi], pe, conj ) == FOUND )
+			if( xi != x.end() && DecidedCompare( *xi, pe, conj ) == FOUND )
 			{
-				xi++;
+				++xi;
 			}
 			else
 			{
@@ -393,8 +398,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 	}
 
     // If we finished the job and pattern and subject are still aligned, then it was a match
-	TRACE("Finished; pattern got to %d out of %d; x got to %d out of %x\n", xi, x.size(), pi, pattern.size() );
-    return (xi==x.size() && pi==pattern.size()) ? FOUND : NOT_FOUND;
+    return (xi==x.end() && pi==pattern.end()) ? FOUND : NOT_FOUND;
 }
 
 
@@ -491,7 +495,8 @@ SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 	while( conj.ShouldTryMore( r, threshold ) )
 	{
 		r = Compare( x, pattern, conj, threshold+1 );
-		++conj[threshold];
+		if( conj.ShouldTryMore( r, threshold ) )
+			++conj[threshold];
 	}
 	return r;
 }
@@ -824,6 +829,12 @@ bool SearchReplace::UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node
 	return true;
 }
 
+void SearchReplace::Conjecture::Reset()
+{
+	TRACE("Decision reset\n");
+	decisions_count = 0;
+}
+
 bool SearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
 {
     if( r == FOUND )
@@ -835,13 +846,15 @@ bool SearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
     return true;
 }
 
-SearchReplace::Choice SearchReplace::Conjecture::HandleDecision( SearchReplace::Choice begin, SearchReplace::Choice end )
+SearchReplace::Choice SearchReplace::Conjecture::HandleDecision( SearchReplace::Choice begin,
+		                                                         SearchReplace::Choice end )
 {
 	// Now we know we have a decision to make; see if it needs to be added to the present Conjecture
 	if( size() == decisions_count ) // this decision missing from conjecture?
 	{
 		ASSERT( size() >= decisions_count ); // consistency check
 		push_back( begin ); // append this decision, initialised to begin
+		TRACE("Decision %d appending begin\n", decisions_count );
 	}
 
 	// Adopt the current decision based on Conjecture
@@ -850,11 +863,20 @@ SearchReplace::Choice SearchReplace::Conjecture::HandleDecision( SearchReplace::
 	// Check the decision obeys bounds
 	if( c == end )
 	{
-		TRACE("hit end, dec count is %d not incrementing\n", decisions_count );
-		return c;
+		TRACE("Decision %d hit end\n", decisions_count );
+		resize( decisions_count ); // throw away the bad iterator; will force initialisation to begin() next time
 	}
+	else
+	{
+		TRACE("Decision %d OK\n", decisions_count );
 
-    decisions_count++;
+		bool seen_c=false;
+		for( Choice i = begin; i != end; ++i )
+			seen_c |= (i==c);
+		ASSERT( seen_c )("Decision #%d: c not in x or x.end(), seems to have overshot!!!!", decisions_count);
+
+		decisions_count++;
+	}
 
     return c;
 }
