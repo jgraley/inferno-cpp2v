@@ -64,9 +64,15 @@ public:
         mutable shared_ptr<Node> key_pattern;    // This is filled in by the search and replace engine
         friend class SearchReplace;
     };
-    typedef set<MatchSet> MatchKeys;
+    //typedef set<MatchSet> MatchKeys;
+    struct MatchKeys : set<MatchSet>
+    {
+    	MatchKeys( set<MatchSet> &s ) :
+    		set<MatchSet>(s)
+    	{
+    	}
+    };
     MatchKeys *matches;
-
 
     // The * wildcard can match more than one node of any type in a container
     // In a Sequence, only a contiguous subsequence of 0 or more elements will match
@@ -155,19 +161,20 @@ private:
     		        int threshold ) const;
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
-    		        MatchKeys *match_keys ) const;
+    		        MatchKeys *match_keys = NULL ) const;
 
     // Search ring
     bool Search( shared_ptr<Node> program,
-    		     GenericContainer::iterator &gp ) const;
+    		     GenericContainer::iterator &gp,
+    		     MatchKeys *match_keys = NULL ) const;
 
     // Replace stuff
     void ClearPtrs( shared_ptr<Node> dest );
-    void OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source, bool under_substitution );
-    void DuplicateSequence( GenericSequence *dest, GenericSequence *source, bool under_substitution );
-    void DuplicateCollection( GenericCollection *dest, GenericCollection *source, bool under_substitution );
-    shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x, bool under_substitution=false );
-    void Replace( GenericContainer::iterator target );
+    void OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source, MatchKeys *match_keys, bool under_substitution );
+    void DuplicateSequence( GenericSequence *dest, GenericSequence *source, MatchKeys *match_keys, bool under_substitution );
+    void DuplicateCollection( GenericCollection *dest, GenericCollection *source, MatchKeys *match_keys, bool under_substitution );
+    shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x, MatchKeys *match_keys, bool under_substitution=false );
+    void Replace( GenericContainer::iterator target, MatchKeys *match_keys );
 
     // Helpers
     const MatchSet *FindMatchSet( shared_ptr<Node> node ) const;
