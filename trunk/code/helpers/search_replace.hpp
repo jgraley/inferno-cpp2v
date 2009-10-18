@@ -84,10 +84,10 @@ public:
     // specified here, so that we have a fully confiugured functor.
     SearchReplace( shared_ptr<Node> sp=shared_ptr<Node>(), 
                    shared_ptr<Node> rp=shared_ptr<Node>(),
-                   const set<MatchSet> *m = NULL );    
+                   set<MatchSet> *m = NULL );
     void Configure( shared_ptr<Node> sp=shared_ptr<Node>(),
                     shared_ptr<Node> rp=shared_ptr<Node>(),
-                    const set<MatchSet> *m = NULL );
+                    set<MatchSet> *m = NULL );
     ~SearchReplace();
     
     // Do the actual search and replace (functor style; implements Pass interface).
@@ -121,7 +121,8 @@ public:
 private:
     shared_ptr<Node> search_pattern;
     shared_ptr<Node> replace_pattern;
-    const set<MatchSet> *matches;
+    typedef set<MatchSet> MatchKeys;
+    MatchKeys *matches;
     bool our_matches;
     shared_ptr<Program> program;
     
@@ -129,10 +130,7 @@ private:
     bool LocalCompare( shared_ptr<Node> x,
     		           shared_ptr<Node> pattern ) const;
 
-    // MatchlessDecidedCompare and DecidedCompare rings TODO separate as per design
-    Result MatchlessDecidedCompare( shared_ptr<Node> x,
-    		                        shared_ptr<Node> pattern,
-    		    		            Conjecture &conj ) const;
+    // DecidedCompare ring
     Result DecidedCompare( GenericSequence &x,
     		               GenericSequence &pattern,
     		               Conjecture &conj ) const;
@@ -147,12 +145,12 @@ private:
     // Compare ring
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
-    		        bool enable_match_set,
+    		        MatchKeys *match_keys,
     		        Conjecture &conj,
     		        int threshold ) const;
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
-    		        bool enable_match_set = true ) const;
+    		        MatchKeys *match_keys ) const;
 
     // Search ring
     bool Search( shared_ptr<Node> program,
