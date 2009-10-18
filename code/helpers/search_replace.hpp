@@ -71,6 +71,12 @@ public:
     		set<MatchSet>(s)
     	{
     	}
+        const MatchSet *FindMatchSet( shared_ptr<Node> node );
+        bool UpdateAndRestrict( shared_ptr<Node> x,
+        		                shared_ptr<Node> pattern,
+                                const SearchReplace *sr );
+        void CheckMatchSetsKeyed();
+        void ClearKeys();
     };
     MatchKeys *matches;
 
@@ -175,12 +181,6 @@ private:
     void DuplicateCollection( GenericCollection *dest, GenericCollection *source, MatchKeys *match_keys, bool under_substitution );
     shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x, MatchKeys *match_keys, bool under_substitution=false );
     void Replace( GenericContainer::iterator target, MatchKeys *match_keys );
-
-    // Helpers
-    const MatchSet *FindMatchSet( shared_ptr<Node> node ) const;
-    void CheckMatchSetsKeyed() const;
-    void ClearKeys() const;
-    bool UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node> pattern ) const;
 
     struct SubCollection : Node,
                            Collection<Node>
