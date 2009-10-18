@@ -241,14 +241,15 @@ bool SearchReplace::LocalCompare( shared_ptr<Node> x, shared_ptr<Node> pattern )
 // Also checks for soft matches.
 SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 		                                             shared_ptr<Node> pattern,
-		 		                                     Conjecture &conj ) const
+		                                             MatchKeys *match_keys,
+		                                             Conjecture &conj ) const
 {
 	if( !pattern )    // NULL matches anything in search patterns (just to save typing)
 		return FOUND;
 
     // Hand over to any soft search functionality in the search pattern node
     if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
-        return ssp->DecidedCompare( this, x, conj );
+        return ssp->DecidedCompare( this, x, match_keys, conj );
 
     // Check whether the present node matches
     if( !LocalCompare( x, pattern ) )
@@ -272,21 +273,21 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
             GenericSequence *x_seq = dynamic_cast<GenericSequence *>(x_memb[i]);
             ASSERT( x_seq && "itemise for target didn't match itemise for pattern");
             TRACE("Member %d is Sequence, target %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
-            r = DecidedCompare( *x_seq, *pattern_seq, conj );
+            r = DecidedCompare( *x_seq, *pattern_seq, match_keys, conj );
         }
         else if( GenericCollection *pattern_col = dynamic_cast<GenericCollection *>(pattern_memb[i]) )
         {
         	GenericCollection *x_col = dynamic_cast<GenericCollection *>(x_memb[i]);
             ASSERT( x_col && "itemise for target didn't match itemise for pattern");
             TRACE("Member %d is Collection, target %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
-            r = DecidedCompare( *x_col, *pattern_col, conj );
+            r = DecidedCompare( *x_col, *pattern_col, match_keys, conj );
         }            
         else if( GenericSharedPtr *pattern_ptr = dynamic_cast<GenericSharedPtr *>(pattern_memb[i]) )         
         {
             GenericSharedPtr *x_ptr = dynamic_cast<GenericSharedPtr *>(x_memb[i]);
             ASSERT( x_ptr && "itemise for target didn't match itemise for pattern");
             TRACE("Member %d is SharedPtr, pattern ptr=%p\n", i, pattern_ptr->get());
-			r = DecidedCompare( *x_ptr, *pattern_ptr, conj );
+			r = DecidedCompare( *x_ptr, *pattern_ptr, match_keys, conj );
         }
         else
         {
@@ -298,17 +299,20 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
     }       
    
     // If we got here, the node matched the search pattern. Now apply match sets
-    if( !UpdateAndCheckMatchSets( x, pattern ) )
-    	return NOT_FOUND;
+    if( match_keys )
+        if( !UpdateAndCheckMatchSets( x, pattern ) )
+    	    return NOT_FOUND;
 
     return FOUND;
 }
+
 
 // xstart and pstart are the indexes into the sequence where we will begin checking for a match.
 // It is assumed that elements before these have already been matched and may be ignored.
 SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 		                                             GenericSequence &pattern,
-		                      		                 Conjecture &conj ) const
+		                                             MatchKeys *match_keys,
+		                                             Conjecture &conj ) const
 {
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
@@ -363,6 +367,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 		    {
 		    	TRACE("Copying matched star for match set\n");
 		    	// Copy the matched subsequence into a SubSequence node for the benefit of match sets
+		    	// TODO is there some stl algorithm for this?
 			    shared_ptr<SubSequence> xsub( new SubSequence );
 				for( GenericContainer::iterator i=xit_begin_star; i != xit; ++i )
 				{
@@ -371,11 +376,9 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 				}
 
 				// Apply match sets to this Star and matched SubSequence
-		    	if( !UpdateAndCheckMatchSets( xsub, pe ) )
-		    	{
-		    		TRACE("Mat set disallows because keyed already and key differs\n");
-		        	return NOT_FOUND;
-		    	}
+		    	if( match_keys )
+		    		if( !UpdateAndCheckMatchSets( xsub, pe ) )
+		        	    return NOT_FOUND;
 		    }
 	    }
 	    else // not a Star so match singly...
@@ -383,7 +386,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 	    	TRACE("Not a star\n");
 			// If there is one more element in x, see if it matches the pattern
 			//shared_ptr<Node> xe( x[xit] );
-			if( xit != x.end() && DecidedCompare( *xit, pe, conj ) == FOUND )
+			if( xit != x.end() && DecidedCompare( *xit, pe, match_keys, conj ) == FOUND )
 			{
 				++xit;
 			}
@@ -402,11 +405,13 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 
 SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
 		                                             GenericCollection &pattern,
-		                      		                 Conjecture &conj ) const
+		                                             MatchKeys *match_keys,
+		                                             Conjecture &conj ) const
 {
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
 	// after decisions.
+	// TODO is there some stl algorithm for this?
     shared_ptr<SubCollection> xremaining( new SubCollection );
     FOREACH( const GenericSharedPtr &xe, x )
         xremaining->insert( xe );
@@ -438,7 +443,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
 	    		return NOT_FOUND;
 
 	    	// Recurse into comparison function for the chosen node
-			if( !DecidedCompare( *xit, *pit, conj ) )
+			if( !DecidedCompare( *xit, *pit, match_keys, conj ) )
 			    return NOT_FOUND;
 	    }
     }
@@ -451,7 +456,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
 
     // If we got here, the node matched the search pattern. Now apply match sets
     TRACE("seen_star %d  star %d\n", seen_star, !!star );
-    if( seen_star && star )
+    if( match_keys && seen_star && star )
         if( !UpdateAndCheckMatchSets( xremaining, star ) )
         	return NOT_FOUND;
 
@@ -469,7 +474,7 @@ SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 	conj.Reset();
     if( match_keys )
     	ClearKeys(); // TODO move to DecidedCompare() layer
-	Result r = DecidedCompare( x, pattern, conj );
+	Result r = DecidedCompare( x, pattern, match_keys, conj );
 
 	while( conj.ShouldTryMore( r, threshold ) )
 	{

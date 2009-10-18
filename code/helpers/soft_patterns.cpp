@@ -2,6 +2,7 @@
 
 SearchReplace::Result SoftExpressonOfType::DecidedCompare( const SearchReplace *sr,
 		                                                   shared_ptr<Node> x,
+		                                                   SearchReplace::MatchKeys *match_keys,
 		                                                   SearchReplace::Conjecture &conj ) const
 {
 	if( shared_ptr<Expression> xe = dynamic_pointer_cast<Expression>(x) )
@@ -12,7 +13,7 @@ SearchReplace::Result SoftExpressonOfType::DecidedCompare( const SearchReplace *
 	    ASSERT(xt);
 	    
 	    // Punt it back into the search/replace engine
-	    return sr->DecidedCompare( xt, type_pattern, conj );
+	    return sr->DecidedCompare( xt, type_pattern, match_keys, conj );
 	}
 	else
 	{
