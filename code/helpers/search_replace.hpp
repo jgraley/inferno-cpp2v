@@ -99,7 +99,7 @@ public:
     private:
     	int decisions_count;
     public:
-    	void Reset() { decisions_count = 0; }
+    	void Reset();
     	bool ShouldTryMore( Result r, int threshold );
     	Choice HandleDecision( Choice begin, Choice end );
     };
@@ -136,8 +136,9 @@ private:
     Result DecidedCompare( GenericSequence &x,
     		               GenericSequence &pattern,
     		               Conjecture &conj,
-    		               int xstart=0,
-    		               int pstart=0 ) const;
+    		               GenericContainer::iterator xstart = GenericContainer::iterator(),
+    		               GenericContainer::iterator pstart = GenericContainer::iterator(),
+    		               bool first=true ) const;
     Result DecidedCompare( GenericCollection &x,
     		               GenericCollection &pattern,
     		               Conjecture &conj ) const;
