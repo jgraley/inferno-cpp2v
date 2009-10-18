@@ -297,7 +297,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
    
     // If we got here, the node matched the search pattern. Now apply match sets
     if( match_keys )
-        if( !UpdateAndCheckMatchSets( x, pattern ) )
+        if( !match_keys->UpdateAndRestrict( x, pattern, this ) )
     	    return NOT_FOUND;
 
     return FOUND;
@@ -374,7 +374,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 
 				// Apply match sets to this Star and matched SubSequence
 		    	if( match_keys )
-		    		if( !UpdateAndCheckMatchSets( xsub, pe ) )
+		    		if( !match_keys->UpdateAndRestrict( xsub, pe, this ) )
 		        	    return NOT_FOUND;
 		    }
 	    }
@@ -454,7 +454,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
     // If we got here, the node matched the search pattern. Now apply match sets
     TRACE("seen_star %d  star %d\n", seen_star, !!star );
     if( match_keys && seen_star && star )
-        if( !UpdateAndCheckMatchSets( xremaining, star ) )
+        if( !match_keys->UpdateAndRestrict( xremaining, star, this ) )
         	return NOT_FOUND;
 
 	return FOUND;
@@ -467,11 +467,12 @@ SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 		                                      Conjecture &conj,
 		                                      int threshold ) const
 {
-	// Reset the decision count to zero and begin a
 	conj.Reset();
     if( match_keys )
-    	ClearKeys(); // TODO move to DecidedCompare() layer
+    	match_keys->ClearKeys();
 	Result r = DecidedCompare( x, pattern, match_keys, conj );
+	if( r==FOUND && match_keys )
+		match_keys->CheckMatchSetsKeyed();
 
 	while( conj.ShouldTryMore( r, threshold ) )
 	{
@@ -487,12 +488,10 @@ SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 		                                      shared_ptr<Node> pattern,
 		                                      MatchKeys *match_keys ) const
 {
-	// Create the conjecture object we will use for this compre, and then go
+	// Create the conjecture object we will use for this compare, and then go
 	// into the recursive compare function
 	Conjecture conj;
 	Result r = Compare( x, pattern, match_keys, conj, 0 );
-	if( r==FOUND && match_keys )
-		CheckMatchSetsKeyed();
 	return r;
 }
 
@@ -608,7 +607,7 @@ void SearchReplace::DuplicateSequence( GenericSequence *dest, GenericSequence *s
 			// thing must be a SubSequence. Find it then expand the emements one by one directly
 			// into the destination Sequence.
 			ASSERT( match_keys );
-			const MatchSet *match = FindMatchSet( pp );
+			const MatchSet *match = match_keys->FindMatchSet( pp );
 			ASSERT( match )( "Star in replace pattern must be in a match set");
 			ASSERT( match->key_x )( "match set did not get keyed successfully");
 			shared_ptr<Node> n = DuplicateSubtree( match->key_x, match_keys, true );
@@ -646,7 +645,7 @@ void SearchReplace::DuplicateCollection( GenericCollection *dest, GenericCollect
 			// thing must be a SubCollection. Find it then expand the emements one by one directly
 			// into the destination Collection.
 			ASSERT( match_keys );
-            const MatchSet *match = FindMatchSet( pp );
+            const MatchSet *match = match_keys->FindMatchSet( pp );
 			ASSERT( match )( "Star in replace pattern must be keyed for substitution");
 			ASSERT( match->key_x )( "match set did not get keyed");
 			shared_ptr<Node> n = DuplicateSubtree( match->key_x, match_keys, true );
@@ -692,7 +691,7 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, Match
 	// substitute the match set's key node instead of the supplied source node.
     const MatchSet *match = NULL;
     if( match_keys )
-    	match = FindMatchSet( source );
+    	match = match_keys->FindMatchSet( source );
 
     if( match )
     {
@@ -761,10 +760,10 @@ void SearchReplace::operator()( shared_ptr<Program> p )
 
 
 // Find a match set containing the supplied node
-const SearchReplace::MatchSet *SearchReplace::FindMatchSet( shared_ptr<Node> node ) const
+const SearchReplace::MatchSet *SearchReplace::MatchKeys::FindMatchSet( shared_ptr<Node> node )
 {
-    for( set<MatchSet>::iterator msi = matches->begin();
-         msi != matches->end();
+    for( set<MatchSet>::iterator msi = begin();
+         msi != end();
          msi++ )
     {
         MatchSet::iterator ni = msi->find( node );
@@ -775,13 +774,13 @@ const SearchReplace::MatchSet *SearchReplace::FindMatchSet( shared_ptr<Node> nod
 }
 
 
-void SearchReplace::CheckMatchSetsKeyed() const
+void SearchReplace::MatchKeys::CheckMatchSetsKeyed()
 {
 	int unkeyed=0;
 	set<MatchSet>::iterator msi;
 	int i;
-    for( msi = matches->begin(), i=0;
-         msi != matches->end();
+    for( msi = begin(), i=0;
+         msi != end();
          msi++, i++ )
     {
     	if( !(msi->key_x && msi->key_pattern) )
@@ -790,15 +789,15 @@ void SearchReplace::CheckMatchSetsKeyed() const
     		TRACE("%d not keyed\n", i);
     	}
     }
-    ASSERT( unkeyed==0 )("Detected %d unkeyed match sets after successful search", unkeyed);
+    ASSERT( unkeyed==0 )("Detected %d unkeyed match sets", unkeyed);
 }
 
 
 // Reset the keys in all the matchsets 
-void SearchReplace::ClearKeys() const
+void SearchReplace::MatchKeys::ClearKeys()
 {
-    for( set<MatchSet>::iterator msi = matches->begin();
-         msi != matches->end();
+    for( set<MatchSet>::iterator msi = begin();
+         msi != end();
          msi++ )
     {
         msi->key_x = shared_ptr<Node>();
@@ -811,7 +810,9 @@ void SearchReplace::ClearKeys() const
 // 1. Key it into a match set of required and
 // 2. Detect whether a match set required two parts of the search tree to match and
 // reject if they don't.
-bool SearchReplace::UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node> pattern ) const
+bool SearchReplace::MatchKeys::UpdateAndRestrict( shared_ptr<Node> x,
+		                                          shared_ptr<Node> pattern,
+		                                          const SearchReplace *sr )
 {
 	TRACE("Receiving node to key\n");
 	const MatchSet *m = FindMatchSet( pattern );
@@ -819,9 +820,10 @@ bool SearchReplace::UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node
 	{
 		TRACE("In ms\n");
 		// It's in a match set!!
-		if( !(m->key_pattern) || (m->key_pattern == pattern) )
+		if( !(m->key_pattern) )
 		{
 			TRACE("Keying\n");
+			ASSERT( m->key_pattern != pattern )("we already keyed to this node yet are seeing it again");
 			// Not keyed yet OR seeing the same pattern node we already keyed to (ie
 			// we are repeating part of the search), so key it now!!!
 			m->key_pattern = pattern;
@@ -834,7 +836,7 @@ bool SearchReplace::UpdateAndCheckMatchSets( shared_ptr<Node> x, shared_ptr<Node
 			// that they match each other for the search as a whole to match.
 			// In this call both pattern and subject are in the input program tree, and
 			// match sets must not point to the input program, so we won't hit a match set.
-			if( !Compare( x, m->key_x ) )
+			if( !sr->Compare( x, m->key_x ) )
 				return false;
 		}
 	}
