@@ -245,56 +245,63 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 	if( !pattern )    // NULL matches anything in search patterns (just to save typing)
 		return FOUND;
 
-    // Hand over to any soft search functionality in the search pattern node
     if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
-        return ssp->DecidedCompare( this, x, match_keys, conj, context_flags );
-
-    // Check whether the present node matches
-    if( !LocalCompare( x, pattern ) )
-        return NOT_FOUND;
-    
-    // Recurse through the children. Note that the itemiser internally does a
-    // dynamic_cast onto the type of pattern, and itemises over that type. x must
-    // be dynamic_castable to pattern's type.
-    vector< Itemiser::Element * > pattern_memb = Itemiser::Itemise( pattern.get() ); 
-    vector< Itemiser::Element * > x_memb = Itemiser::Itemise( x.get(),           // The thing we're itemising
-                                                              pattern.get() );   // Just get the members corresponding to pattern's class
-    ASSERT( pattern_memb.size() == x_memb.size() );
-    for( int i=0; i<pattern_memb.size(); i++ )
     {
-        Result r;
-        ASSERT( pattern_memb[i] && "itemise returned null element");
-        ASSERT( x_memb[i] && "itemise returned null element");
-        
-        if( GenericSequence *pattern_seq = dynamic_cast<GenericSequence *>(pattern_memb[i]) )                
-        {
-            GenericSequence *x_seq = dynamic_cast<GenericSequence *>(x_memb[i]);
-            ASSERT( x_seq && "itemise for target didn't match itemise for pattern");
-            TRACE("Member %d is Sequence, target %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
-            r = DecidedCompare( *x_seq, *pattern_seq, match_keys, conj, context_flags );
-        }
-        else if( GenericCollection *pattern_col = dynamic_cast<GenericCollection *>(pattern_memb[i]) )
-        {
-        	GenericCollection *x_col = dynamic_cast<GenericCollection *>(x_memb[i]);
-            ASSERT( x_col && "itemise for target didn't match itemise for pattern");
-            TRACE("Member %d is Collection, target %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
-            r = DecidedCompare( *x_col, *pattern_col, match_keys, conj, context_flags );
-        }            
-        else if( GenericSharedPtr *pattern_ptr = dynamic_cast<GenericSharedPtr *>(pattern_memb[i]) )         
-        {
-            GenericSharedPtr *x_ptr = dynamic_cast<GenericSharedPtr *>(x_memb[i]);
-            ASSERT( x_ptr && "itemise for target didn't match itemise for pattern");
-            TRACE("Member %d is SharedPtr, pattern ptr=%p\n", i, pattern_ptr->get());
-			r = DecidedCompare( *x_ptr, *pattern_ptr, match_keys, conj, context_flags );
-        }
-        else
-        {
-            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a SharedPtr");
-        }
-
-        if( r != FOUND )
+    	// Hand over to any soft search functionality in the search pattern node
+    	Result r = ssp->DecidedCompare( this, x, match_keys, conj, context_flags );
+    	if( r != FOUND )
+    		return NOT_FOUND;
+    }
+    else
+    {
+    	// Not a soft node, so handle explicitly
+		// Check whether the present node matches
+		if( !LocalCompare( x, pattern ) )
 			return NOT_FOUND;
-    }       
+
+		// Recurse through the children. Note that the itemiser internally does a
+		// dynamic_cast onto the type of pattern, and itemises over that type. x must
+		// be dynamic_castable to pattern's type.
+		vector< Itemiser::Element * > pattern_memb = Itemiser::Itemise( pattern.get() );
+		vector< Itemiser::Element * > x_memb = Itemiser::Itemise( x.get(),           // The thing we're itemising
+																  pattern.get() );   // Just get the members corresponding to pattern's class
+		ASSERT( pattern_memb.size() == x_memb.size() );
+		for( int i=0; i<pattern_memb.size(); i++ )
+		{
+			Result r;
+			ASSERT( pattern_memb[i] && "itemise returned null element");
+			ASSERT( x_memb[i] && "itemise returned null element");
+
+			if( GenericSequence *pattern_seq = dynamic_cast<GenericSequence *>(pattern_memb[i]) )
+			{
+				GenericSequence *x_seq = dynamic_cast<GenericSequence *>(x_memb[i]);
+				ASSERT( x_seq && "itemise for target didn't match itemise for pattern");
+				TRACE("Member %d is Sequence, target %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
+				r = DecidedCompare( *x_seq, *pattern_seq, match_keys, conj, context_flags );
+			}
+			else if( GenericCollection *pattern_col = dynamic_cast<GenericCollection *>(pattern_memb[i]) )
+			{
+				GenericCollection *x_col = dynamic_cast<GenericCollection *>(x_memb[i]);
+				ASSERT( x_col && "itemise for target didn't match itemise for pattern");
+				TRACE("Member %d is Collection, target %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
+				r = DecidedCompare( *x_col, *pattern_col, match_keys, conj, context_flags );
+			}
+			else if( GenericSharedPtr *pattern_ptr = dynamic_cast<GenericSharedPtr *>(pattern_memb[i]) )
+			{
+				GenericSharedPtr *x_ptr = dynamic_cast<GenericSharedPtr *>(x_memb[i]);
+				ASSERT( x_ptr && "itemise for target didn't match itemise for pattern");
+				TRACE("Member %d is SharedPtr, pattern ptr=%p\n", i, pattern_ptr->get());
+				r = DecidedCompare( *x_ptr, *pattern_ptr, match_keys, conj, context_flags );
+			}
+			else
+			{
+				ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a SharedPtr");
+			}
+
+			if( r != FOUND )
+				return NOT_FOUND;
+		}
+    }
    
     // If we got here, the node matched the search pattern. Now apply match sets
     if( match_keys )
