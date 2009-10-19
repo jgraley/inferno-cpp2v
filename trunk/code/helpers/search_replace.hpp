@@ -56,27 +56,39 @@
 class SearchReplace : Pass
 {  
 public:
+    enum Result { NOT_FOUND = (int)false,
+    	          FOUND     = (int)true };
+
+    // Abnormal context - set this flag when calling DecidedCompare for a subtree x when
+    // a result of NOT_FOUND might not necessarily result in you returning NOT_FOUND as
+    // with IsNot, IsAny etc. The effect is that match sets will not key within the subtree
+    // because we can't be sure that the keyed-to node actually matched. Restrictions due to
+    // match sets still work though. Consequently, match sets may include nodes in abnormal
+    // contexts, but must always contain >=1 node in a "normal" (not abnormal) context.
+    static const unsigned ABNORMAL_CONTEXT = 1;
+
     // Match set - if required, construct a set of these, fill in the set
     // of shared pointers but don't worry about key, pass to SearchReplace constructor. 
     class MatchSet : public set< shared_ptr<Node> > 
     { 
         mutable shared_ptr<Node> key_x;    // This is filled in by the search and replace engine
-        mutable shared_ptr<Node> key_pattern;    // This is filled in by the search and replace engine
         friend class SearchReplace;
     };
-    //typedef set<MatchSet> MatchKeys;
     struct MatchKeys : set<MatchSet>
     {
+    	enum Pass { KEYING, RESTRICTING } pass;
     	MatchKeys( set<MatchSet> &s ) :
     		set<MatchSet>(s)
     	{
     	}
         const MatchSet *FindMatchSet( shared_ptr<Node> node );
-        bool UpdateAndRestrict( shared_ptr<Node> x,
-        		                shared_ptr<Node> pattern,
-                                const SearchReplace *sr );
+        Result UpdateAndRestrict( shared_ptr<Node> x,
+        		                  shared_ptr<Node> pattern,
+                                  const SearchReplace *sr,
+                                  unsigned context_flags );
         void CheckMatchSetsKeyed();
         void ClearKeys();
+        void SetPass( Pass p ) { pass = p; }
     };
     MatchKeys *matches;
 
@@ -88,9 +100,6 @@ public:
 private:
     struct StarBase : virtual Node { NODE_FUNCTIONS };
 public:
-    enum Result { NOT_FOUND = (int)false,
-    	          FOUND     = (int)true };
-
     template<class VALUE_TYPE>
     struct Star : private StarBase,
                   VALUE_TYPE { NODE_FUNCTIONS };
@@ -128,7 +137,8 @@ public:
         virtual SearchReplace::Result DecidedCompare( const SearchReplace *sr,
         		                                      shared_ptr<Node> x,
         		                                      MatchKeys *match_keys,
-        		                                      Conjecture &conj ) const = 0;
+        		                                      Conjecture &conj,
+        		                                      unsigned context_flags ) const = 0;
     };
 
     // Some self-testing
@@ -148,17 +158,26 @@ private:
     Result DecidedCompare( GenericSequence &x,
     		               GenericSequence &pattern,
     		               MatchKeys *match_keys,
-    		               Conjecture &conj ) const;
+    		               Conjecture &conj,
+    		               unsigned context_flags ) const;
     Result DecidedCompare( GenericCollection &x,
     		               GenericCollection &pattern,
     		               MatchKeys *match_keys,
-    		               Conjecture &conj ) const;
+    		               Conjecture &conj,
+    		               unsigned context_flags ) const;
 public:
     Result DecidedCompare( shared_ptr<Node> x,
     		               shared_ptr<Node> pattern,
     		               MatchKeys *match_keys,
-    		               Conjecture &conj ) const;
+    		               Conjecture &conj,
+    		               unsigned context_flags ) const;
 private:
+    // MatchingDecidedCompare ring
+    Result MatchingDecidedCompare( shared_ptr<Node> x,
+    		                       shared_ptr<Node> pattern,
+    		                       MatchKeys *match_keys,
+    		                       Conjecture &conj ) const;
+
     // Compare ring
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
