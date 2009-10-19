@@ -3,7 +3,8 @@
 SearchReplace::Result SoftExpressonOfType::DecidedCompare( const SearchReplace *sr,
 		                                                   shared_ptr<Node> x,
 		                                                   SearchReplace::MatchKeys *match_keys,
-		                                                   SearchReplace::Conjecture &conj ) const
+		                                                   SearchReplace::Conjecture &conj,
+		                                                   unsigned context_flags ) const
 {
 	if( shared_ptr<Expression> xe = dynamic_pointer_cast<Expression>(x) )
 	{
@@ -13,11 +14,13 @@ SearchReplace::Result SoftExpressonOfType::DecidedCompare( const SearchReplace *
 	    ASSERT(xt);
 	    
 	    // Punt it back into the search/replace engine
-	    return sr->DecidedCompare( xt, type_pattern, match_keys, conj );
+	    return sr->DecidedCompare( xt, type_pattern, match_keys, conj, context_flags );
 	}
 	else
 	{
-	    // not even an expression lol that aint going to match
+	    // not even an expression lol that aint going to match (means this node must be in a wider
+		// context eg Node or Statement, and the tree contained something other than Expression - so
+		// we're restricting to Expressions in addition to checking the type)
 	    return SearchReplace::NOT_FOUND;
 	}        
 }     

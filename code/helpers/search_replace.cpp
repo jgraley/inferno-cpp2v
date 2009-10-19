@@ -239,14 +239,15 @@ bool SearchReplace::LocalCompare( shared_ptr<Node> x, shared_ptr<Node> pattern )
 SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 		                                             shared_ptr<Node> pattern,
 		                                             MatchKeys *match_keys,
-		                                             Conjecture &conj ) const
+		                                             Conjecture &conj,
+		                      		                 unsigned context_flags ) const
 {
 	if( !pattern )    // NULL matches anything in search patterns (just to save typing)
 		return FOUND;
 
     // Hand over to any soft search functionality in the search pattern node
     if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
-        return ssp->DecidedCompare( this, x, match_keys, conj );
+        return ssp->DecidedCompare( this, x, match_keys, conj, context_flags );
 
     // Check whether the present node matches
     if( !LocalCompare( x, pattern ) )
@@ -270,21 +271,21 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
             GenericSequence *x_seq = dynamic_cast<GenericSequence *>(x_memb[i]);
             ASSERT( x_seq && "itemise for target didn't match itemise for pattern");
             TRACE("Member %d is Sequence, target %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
-            r = DecidedCompare( *x_seq, *pattern_seq, match_keys, conj );
+            r = DecidedCompare( *x_seq, *pattern_seq, match_keys, conj, context_flags );
         }
         else if( GenericCollection *pattern_col = dynamic_cast<GenericCollection *>(pattern_memb[i]) )
         {
         	GenericCollection *x_col = dynamic_cast<GenericCollection *>(x_memb[i]);
             ASSERT( x_col && "itemise for target didn't match itemise for pattern");
             TRACE("Member %d is Collection, target %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
-            r = DecidedCompare( *x_col, *pattern_col, match_keys, conj );
+            r = DecidedCompare( *x_col, *pattern_col, match_keys, conj, context_flags );
         }            
         else if( GenericSharedPtr *pattern_ptr = dynamic_cast<GenericSharedPtr *>(pattern_memb[i]) )         
         {
             GenericSharedPtr *x_ptr = dynamic_cast<GenericSharedPtr *>(x_memb[i]);
             ASSERT( x_ptr && "itemise for target didn't match itemise for pattern");
             TRACE("Member %d is SharedPtr, pattern ptr=%p\n", i, pattern_ptr->get());
-			r = DecidedCompare( *x_ptr, *pattern_ptr, match_keys, conj );
+			r = DecidedCompare( *x_ptr, *pattern_ptr, match_keys, conj, context_flags );
         }
         else
         {
@@ -297,8 +298,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
    
     // If we got here, the node matched the search pattern. Now apply match sets
     if( match_keys )
-        if( !match_keys->UpdateAndRestrict( x, pattern, this ) )
-    	    return NOT_FOUND;
+        return match_keys->UpdateAndRestrict( x, pattern, this, context_flags );
 
     return FOUND;
 }
@@ -309,7 +309,8 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 		                                             GenericSequence &pattern,
 		                                             MatchKeys *match_keys,
-		                                             Conjecture &conj ) const
+		                                             Conjecture &conj,
+		                      		                 unsigned context_flags ) const
 {
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
@@ -374,7 +375,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 
 				// Apply match sets to this Star and matched SubSequence
 		    	if( match_keys )
-		    		if( !match_keys->UpdateAndRestrict( xsub, pe, this ) )
+		    		if( !match_keys->UpdateAndRestrict( xsub, pe, this, context_flags ) )
 		        	    return NOT_FOUND;
 		    }
 	    }
@@ -383,7 +384,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 	    	TRACE("Not a star\n");
 			// If there is one more element in x, see if it matches the pattern
 			//shared_ptr<Node> xe( x[xit] );
-			if( xit != x.end() && DecidedCompare( *xit, pe, match_keys, conj ) == FOUND )
+			if( xit != x.end() && DecidedCompare( *xit, pe, match_keys, conj, context_flags ) == FOUND )
 			{
 				++xit;
 			}
@@ -403,7 +404,8 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
 		                                             GenericCollection &pattern,
 		                                             MatchKeys *match_keys,
-		                                             Conjecture &conj ) const
+		                                             Conjecture &conj,
+		                      		                 unsigned context_flags ) const
 {
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
@@ -440,7 +442,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
 	    		return NOT_FOUND;
 
 	    	// Recurse into comparison function for the chosen node
-			if( !DecidedCompare( *xit, *pit, match_keys, conj ) )
+			if( !DecidedCompare( *xit, *pit, match_keys, conj, context_flags ) )
 			    return NOT_FOUND;
 	    }
     }
@@ -454,10 +456,41 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
     // If we got here, the node matched the search pattern. Now apply match sets
     TRACE("seen_star %d  star %d\n", seen_star, !!star );
     if( match_keys && seen_star && star )
-        if( !match_keys->UpdateAndRestrict( xremaining, star, this ) )
+        if( !match_keys->UpdateAndRestrict( xremaining, star, this, context_flags ) )
         	return NOT_FOUND;
 
 	return FOUND;
+}
+
+
+SearchReplace::Result SearchReplace::MatchingDecidedCompare( shared_ptr<Node> x,
+		                                                     shared_ptr<Node> pattern,
+		                                                     MatchKeys *match_keys,
+		                                                     Conjecture &conj ) const
+{
+    static const unsigned DEFAULT_CONTEXT_FLAGS = 0;
+    if( match_keys )
+    {
+        // Clear down the keys in preperation for a new match set run
+    	match_keys->ClearKeys();
+
+    	// Do a two-pass matching process: first get the keys...
+        match_keys->SetPass( MatchKeys::KEYING );
+        Result r = DecidedCompare( x, pattern, match_keys, conj, DEFAULT_CONTEXT_FLAGS );
+	    if( r != FOUND )
+	    	return r;	    // Save time by giving up if no match found
+	    match_keys->CheckMatchSetsKeyed();
+
+	    // Now restrict the search according to the match sets
+        match_keys->SetPass( MatchKeys::RESTRICTING );
+        r = DecidedCompare( x, pattern, match_keys, conj, DEFAULT_CONTEXT_FLAGS );
+        return r;
+    }
+    else
+    {
+    	// No match set, so just call straight through this layer
+    	return DecidedCompare( x, pattern, NULL, conj, DEFAULT_CONTEXT_FLAGS );
+    }
 }
 
 
@@ -468,12 +501,8 @@ SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 		                                      int threshold ) const
 {
 	// Do a compare with the current conjecture.
-    if( match_keys )
-    	match_keys->ClearKeys();
 	conj.PrepareForDecidedCompare();
-	Result r = DecidedCompare( x, pattern, match_keys, conj );
-	if( r==FOUND && match_keys )
-		match_keys->CheckMatchSetsKeyed();
+	Result r = MatchingDecidedCompare( x, pattern, match_keys, conj );
 
 	// Try different choices for the decisions at the current level. Recurse
 	// so that other decisions may be modified.
@@ -765,7 +794,9 @@ void SearchReplace::operator()( shared_ptr<Program> p )
 // Find a match set containing the supplied node
 const SearchReplace::MatchSet *SearchReplace::MatchKeys::FindMatchSet( shared_ptr<Node> node )
 {
-    for( set<MatchSet>::iterator msi = begin();
+	ASSERT( this );
+
+	for( set<MatchSet>::iterator msi = begin();
          msi != end();
          msi++ )
     {
@@ -779,6 +810,8 @@ const SearchReplace::MatchSet *SearchReplace::MatchKeys::FindMatchSet( shared_pt
 
 void SearchReplace::MatchKeys::CheckMatchSetsKeyed()
 {
+	ASSERT( this );
+
 	int unkeyed=0;
 	set<MatchSet>::iterator msi;
 	int i;
@@ -786,7 +819,7 @@ void SearchReplace::MatchKeys::CheckMatchSetsKeyed()
          msi != end();
          msi++, i++ )
     {
-    	if( !(msi->key_x && msi->key_pattern) )
+    	if( !(msi->key_x) )
     	{
     		unkeyed++;
     		TRACE("%d not keyed\n", i);
@@ -799,12 +832,13 @@ void SearchReplace::MatchKeys::CheckMatchSetsKeyed()
 // Reset the keys in all the matchsets 
 void SearchReplace::MatchKeys::ClearKeys()
 {
-    for( set<MatchSet>::iterator msi = begin();
+	ASSERT( this );
+
+	for( set<MatchSet>::iterator msi = begin();
          msi != end();
          msi++ )
     {
         msi->key_x = shared_ptr<Node>();
-        msi->key_pattern = shared_ptr<Node>();
     }
 }
 
@@ -813,48 +847,55 @@ void SearchReplace::MatchKeys::ClearKeys()
 // 1. Key it into a match set of required and
 // 2. Detect whether a match set required two parts of the search tree to match and
 // reject if they don't.
-bool SearchReplace::MatchKeys::UpdateAndRestrict( shared_ptr<Node> x,
-		                                          shared_ptr<Node> pattern,
-		                                          const SearchReplace *sr )
+SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( shared_ptr<Node> x,
+		                                                           shared_ptr<Node> pattern,
+		                                                           const SearchReplace *sr,
+		                                                           unsigned context_flags )
 {
+	ASSERT( this );
+
 	TRACE("Receiving node to key\n");
 	const MatchSet *m = FindMatchSet( pattern );
 	if( m )
 	{
 		TRACE("In ms\n");
 		// It's in a match set!!
-		if( !(m->key_pattern) )
+		if( pass==KEYING && !(m->key_x) && !(context_flags & SearchReplace::ABNORMAL_CONTEXT) )
 		{
+			// We are keying and we didn't already key this node, so key it now UNLESS we are in an
+			// abnormal context, in which case this particular member of the match set is not suitable
+			// for keying (basically, because we might eb in a subtree that ultimately will not match,
+			// but a special soft node like MatchNot or MatchOr might then decide to report a match.
 			TRACE("Keying\n");
-			ASSERT( m->key_pattern != pattern )("we already keyed to this node yet are seeing it again");
-			// Not keyed yet OR seeing the same pattern node we already keyed to (ie
-			// we are repeating part of the search), so key it now!!!
-			m->key_pattern = pattern;
 			m->key_x = x;
+			return FOUND; // always match when keying (could restrict here too as a slight optimisation, but KISS for now)
 		}
-		else
+
+		if( pass==RESTRICTING )
 		{
-			// This match set has already been keyed! This means there is more than one
-			// entry in the match set pointing to the search pattern. We will require
-			// that they match each other for the search as a whole to match.
-			// In this call both pattern and subject are in the input program tree, and
-			// match sets must not point to the input program, so we won't hit a match set.
-			if( !sr->Compare( x, m->key_x ) )
-				return false;
+			// We are restricting the search, and this node has been keyed, so compare the present tree node
+			// with the tree node stored for the match set. This comparison should not match any match sets
+			// (it does not include stuff from any search or replace pattern) so do not allow match sets.
+			ASSERT( m->key_x ); // should have been caught by CheckMatchSetsKeyed()
+			return sr->Compare( x, m->key_x, NULL );
 		}
 	}
-	return true;
+	return FOUND;
 }
 
 void SearchReplace::Conjecture::PrepareForDecidedCompare()
 {
+	ASSERT( this );
+
 	TRACE("Decision prepare\n");
 	decisions_count = 0;
 }
 
 bool SearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
 {
-    if( r == FOUND )
+	ASSERT( this );
+
+	if( r == FOUND )
     	return false; // stop trying if we found a match
 
     if( decisions_count <= threshold ) // we've made all the decisions we can OR
@@ -866,6 +907,8 @@ bool SearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
 SearchReplace::Choice SearchReplace::Conjecture::HandleDecision( SearchReplace::Choice begin,
 		                                                         SearchReplace::Choice end )
 {
+	ASSERT( this );
+
 	// Now we know we have a decision to make; see if it needs to be added to the present Conjecture
 	if( size() == decisions_count ) // this decision missing from conjecture?
 	{

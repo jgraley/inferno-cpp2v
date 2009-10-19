@@ -13,7 +13,8 @@ struct SoftExpressonOfType : Expression,
     virtual SearchReplace::Result DecidedCompare( const SearchReplace *sr,
     		                                      shared_ptr<Node> x,
     		                                      SearchReplace::MatchKeys *match_keys,
-    		                                      SearchReplace::Conjecture &conj ) const;
+    		                                      SearchReplace::Conjecture &conj,
+    		                                      unsigned context_flags ) const;
 };
 
 #endif

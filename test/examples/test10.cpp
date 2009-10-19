@@ -14,7 +14,6 @@ void f()
 }
 
 
-/*
 
 int main()
 {
@@ -37,4 +36,4 @@ int main()
     g = 7;
     return 0;
 }
-*/
+
