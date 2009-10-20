@@ -19,6 +19,8 @@ private:
     {
     	if( match_keys && match_keys->pass == SearchReplace::MatchKeys::KEYING )
     	{
+    		// Don't do a subtree search while keying - we'll only end up keying the wrong thing
+    		// or terminating with NOT_FOUND prematurely
     		return SearchReplace::FOUND;
     	}
     	else
