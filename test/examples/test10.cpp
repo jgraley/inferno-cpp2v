@@ -1,7 +1,6 @@
 void f()
 {
-// Excite the multiple choices bug with sequences. Use with hacked 
-// MergeInstanceDeclarations 
+// Excite the multiple choices bug with sequences. Use with HackUpIfs step
     if(0)
     {
         continue; // First sequence match finds this, it gets keyed

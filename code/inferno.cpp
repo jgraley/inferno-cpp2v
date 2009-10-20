@@ -10,6 +10,7 @@
 #include "helpers/soft_patterns.hpp"
 #include "helpers/validate.hpp"
 #include "steps/split_instance_declarations.hpp"
+#include "steps/generate_implicit_casts.hpp"
 
 void SelfTest();
 
@@ -39,13 +40,7 @@ int main( int argc, char *argv[] )
 
     if( ReadArgs::quitafter-- > 0 )
     {
-    	MergeInstanceDeclarations()(program);
-        Validate()(program);
-    }
-
-    if( ReadArgs::quitafter-- > 0 )
-    {
-    	HackUpIfs()(program);
+    	GenerateImplicitCasts()(program);
         Validate()(program);
     }
 

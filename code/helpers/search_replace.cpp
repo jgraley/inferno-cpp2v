@@ -245,6 +245,8 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 	if( !pattern )    // NULL matches anything in search patterns (just to save typing)
 		return FOUND;
 
+
+
     if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
     {
     	// Hand over to any soft search functionality in the search pattern node
@@ -527,6 +529,7 @@ SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 		                                      shared_ptr<Node> pattern,
 		                                      MatchKeys *match_keys ) const
 {
+	TRACE("Comparing x=%s with pattern=%s, match keys at %p\n", typeid(*x).name(), typeid(*pattern).name(), match_keys );
 	// Create the conjecture object we will use for this compare, and then go
 	// into the recursive compare function
 	Conjecture conj;
@@ -783,6 +786,7 @@ void SearchReplace::operator()( shared_ptr<Program> p )
 {
     program = p;
     GenericContainer::iterator it;
+    int i=0;
     while(1)
     {
         bool found = Search( program, it, matches );
@@ -793,8 +797,11 @@ void SearchReplace::operator()( shared_ptr<Program> p )
         }
         else
             break;
+        if( i==100 )
+        	break;
+        i++;
     }
-    program = shared_ptr<Program>();
+    program = shared_ptr<Program>(); // TODO why?
 }
 
 
@@ -865,7 +872,7 @@ SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( shared_ptr<No
 	const MatchSet *m = FindMatchSet( pattern );
 	if( m )
 	{
-		TRACE("In ms\n");
+		TRACE("In ms pass %d\n", (int)pass);
 		// It's in a match set!!
 		if( pass==KEYING && !(m->key_x) && !(context_flags & SearchReplace::ABNORMAL_CONTEXT) )
 		{
