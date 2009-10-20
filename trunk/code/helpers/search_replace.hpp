@@ -59,14 +59,6 @@ public:
     enum Result { NOT_FOUND = (int)false,
     	          FOUND     = (int)true };
 
-    // Abnormal context - set this flag when calling DecidedCompare for a subtree when
-    // a result of NOT_FOUND might not necessarily result in you returning NOT_FOUND as
-    // with IsNot, IsAny etc. The effect is that match sets will not key within the subtree
-    // because we can't be sure that the keyed subtree actually matched. Restrictions due to
-    // match sets still work though. Consequently, match sets may include nodes in abnormal
-    // contexts, but must always contain >=1 node in a "normal" (not abnormal) context.
-    static const unsigned ABNORMAL_CONTEXT = 1;
-
     // Match set - if required, construct a set of these, fill in the set
     // of shared pointers but don't worry about key, pass to SearchReplace constructor. 
     class MatchSet : public set< shared_ptr<Node> > 

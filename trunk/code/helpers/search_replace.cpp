@@ -874,7 +874,7 @@ SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( shared_ptr<No
 	{
 		TRACE("In ms pass %d\n", (int)pass);
 		// It's in a match set!!
-		if( pass==KEYING && !(m->key_x) && !(context_flags & SearchReplace::ABNORMAL_CONTEXT) )
+		if( pass==KEYING && !(m->key_x) )
 		{
 			// We are keying and we didn't already key this node, so key it now UNLESS we are in an
 			// abnormal context, in which case this particular member of the match set is not suitable
