@@ -43,11 +43,29 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
         	return shared_new<Void>();
 
     }
+
     else if( shared_ptr<Lookup> l = dynamic_pointer_cast<Lookup>(o) ) // a.b; just return type of b
     {
         return Get( l->member );
     }
                
+    else if( shared_ptr<SpecificInteger> si = dynamic_pointer_cast<SpecificInteger>(o) )
+    {
+    	// Get the info from Clang, and make an Inferno type for it
+    	shared_ptr<Integral> it;
+        if( si->value.isSigned() )
+        	it = shared_new<Signed>();
+        else
+        	it = shared_new<Unsigned>();
+        it->width = shared_ptr<SpecificInteger>( new SpecificInteger( si->value.getBitWidth() ) );
+        return it;
+    }
+
+    else if( shared_ptr<Cast> c = dynamic_pointer_cast<Cast>(o) )
+    {
+        return c->type;
+    }
+
     else 
     {
         ASSERT(0)("Unknown expression %s, please add to TypeOf class", typeid(*o).name());

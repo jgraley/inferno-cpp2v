@@ -462,7 +462,7 @@ struct Operator : Expression
 
 // Associates an instance with an expression. Basically a
 // key-value pair of identifier and value. Use in Maps.
-struct MapOperand : Node
+struct MapOperand : virtual Node
 {
 	NODE_FUNCTIONS
 	SharedPtr<InstanceIdentifier> identifier;
