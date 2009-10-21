@@ -11,7 +11,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
     
     if( shared_ptr<SpecificInstanceIdentifier> ii = dynamic_pointer_cast<SpecificInstanceIdentifier>(o) ) // object or function instance
     {        
-        shared_ptr<Instance> i = GetDeclaration(program, ii);
+        shared_ptr<Instance> i = GetDeclaration(program, shared_ptr<InstanceIdentifier>(ii));
         return i->type; 
     }
         

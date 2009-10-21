@@ -61,10 +61,9 @@ public:
 
     // Match set - if required, construct a set of these, fill in the set
     // of shared pointers but don't worry about key, pass to SearchReplace constructor. 
-    class MatchSet : public set< shared_ptr<Node> > 
+    struct MatchSet : public set< shared_ptr<Node> > 
     { 
         mutable shared_ptr<Node> key_x;    // This is filled in by the search and replace engine
-        friend class SearchReplace;
     };
     struct MatchKeys : set<MatchSet>
     {
