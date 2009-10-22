@@ -3,6 +3,7 @@
 #include <string>
 #include <stdlib.h>
 
+std::string ReadArgs::exename;
 std::string ReadArgs::infile;
 std::string ReadArgs::outfile;
 bool ReadArgs::graph;
@@ -12,14 +13,25 @@ int ReadArgs::quitafter;
 
 void ReadArgs::Usage()
 {
-    fprintf(stderr, "Usage:\ninferno [-t] [-s] [-g] [-q <n>] [-i <infile>] [-o <outfile>]\n"
-                    "One of -i or -s required\n" );
+    fprintf(stderr, "Usage:\n"
+    		        "%s [-i <infile>] [-o <outfile>] [-t] [-s] [-g] [-q <n>] \n"
+    		        "\n"
+    		        "-i <infile>  Read input program (C/C++) from <infile>.\n"
+    		        "-o <outfile> Write output program to <outfile>. C/C++ by default. Writes to stdout if omitted.\n"
+    		        "-t           Turn on tracing internals (very verbose).\n"
+    		        "-s           Run self-tests.\n"
+    		        "-g           Set output format to be a GraphViz-compatible graph description.\n"
+	                "-q <n>       Stop after <n> steps. <n> may be 0 to exercise just parser and renderer.\n"
+                    "\n"
+    		        "One of -i or -s required; all others are optional.\n",
+    		        exename.c_str() );
     exit(1);
 }
 
 void ReadArgs::Read( int argc, char *argv[] )
 { 
     int i=1;
+	exename = argv[0];
     trace = false;
     graph = false;
     selftest = false;
