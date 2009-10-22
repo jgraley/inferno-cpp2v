@@ -3,7 +3,7 @@
 
 //
 // Initialise all the sizes and signednesses of integrals according to the 
-// current compiler - this is good for testing if the same 
+// current compiler - this is good for testing, when the same
 // compiler is used to compile generated output.
 //
 
