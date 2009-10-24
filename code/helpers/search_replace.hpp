@@ -59,11 +59,23 @@ public:
     enum Result { NOT_FOUND = (int)false,
     	          FOUND     = (int)true };
 
+    typedef GenericContainer::iterator Choice;
+    class Conjecture : public vector<Choice>
+    {
+    private:
+    	int decisions_count;
+    public:
+    	void PrepareForDecidedCompare();
+    	bool ShouldTryMore( Result r, int threshold );
+    	Choice HandleDecision( Choice begin, Choice end );
+    };
+
     // Match set - if required, construct a set of these, fill in the set
     // of shared pointers but don't worry about key, pass to SearchReplace constructor. 
     struct MatchSet : public set< shared_ptr<Node> > 
-    { 
+    {
         mutable shared_ptr<Node> key_x;    // This is filled in by the search and replace engine
+        shared_ptr<Node> GetKey() const { ASSERT(key_x); return key_x; }
     };
     struct MatchKeys : set<MatchSet>
     {
@@ -107,17 +119,6 @@ public:
     
     // Do the actual search and replace (functor style; implements Pass interface).
     void operator()( shared_ptr<Program> p );
-
-    typedef GenericContainer::iterator Choice;
-    class Conjecture : public vector<Choice>
-    {
-    private:
-    	int decisions_count;
-    public:
-    	void PrepareForDecidedCompare();
-    	bool ShouldTryMore( Result r, int threshold );
-    	Choice HandleDecision( Choice begin, Choice end );
-    };
 
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
@@ -218,3 +219,4 @@ private:
 };
 
 #endif
+
