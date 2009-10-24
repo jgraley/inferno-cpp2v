@@ -116,12 +116,18 @@ public:
     // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
     // Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
     // in the collection. TODO if the type is narrower, restrict any matches!!
-private:
     struct StarBase : virtual Node { NODE_FUNCTIONS };
-public:
     template<class VALUE_TYPE>
-    struct Star : private StarBase,
-                  VALUE_TYPE { NODE_FUNCTIONS };
+    struct Star : StarBase, VALUE_TYPE { NODE_FUNCTIONS };
+
+    // The Stuff wildcard can match a
+    struct StuffBase : virtual Node
+    {
+    	NODE_FUNCTIONS;
+    	SharedPtr<Node> terminus;
+    };
+    template<class VALUE_TYPE>
+    struct Stuff : StuffBase, VALUE_TYPE {	NODE_FUNCTIONS };
 
     // Constructor and destructor. Search and replace patterns and match sets are 
     // specified here, so that we have a fully confiugured functor.
@@ -170,6 +176,11 @@ private:
     		               unsigned context_flags ) const;
     Result DecidedCompare( GenericCollection &x,
     		               GenericCollection &pattern,
+    		               MatchKeys *match_keys,
+    		               Conjecture &conj,
+    		               unsigned context_flags ) const;
+    Result DecidedCompare( shared_ptr<Node> x,
+    		               shared_ptr<StuffBase> stuff_pattern,
     		               MatchKeys *match_keys,
     		               Conjecture &conj,
     		               unsigned context_flags ) const;

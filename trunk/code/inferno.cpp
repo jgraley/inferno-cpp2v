@@ -44,6 +44,12 @@ int main( int argc, char *argv[] )
         Validate()(program);
     }
 
+    if( --ReadArgs::quitafter >= 0 )
+    {
+    	HackUpIfs()(program);
+        Validate()(program);
+    }
+
     if(ReadArgs::graph)
     {
         Graph g;

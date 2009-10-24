@@ -68,7 +68,7 @@ Walk::Walk( shared_ptr<Node> r ) :
     Frame f;
     GenericSharedPtr *gsp = &root;
     GenericPointIterator gpi(gsp);
-    f.children.push_back( gpi );
+    f.children.push_back( gpi ); // TODO this makes the point iterator for the top level be invalid
     f.index = 0;
     state.push( f );
 }        

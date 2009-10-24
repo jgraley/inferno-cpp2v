@@ -139,34 +139,25 @@ HackUpIfs::HackUpIfs()
 		  sif->condition = stest;
 		  shared_ptr<Compound> scthen( new Compound );
 		  sif->body = scthen;
-		    scthen->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
-		    scthen->statements.push_back( shared_new< Statement >() );
-		    scthen->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+		    shared_ptr< SearchReplace::Stuff<Statement> > ssthen( new SearchReplace::Stuff<Statement> );
+		    scthen->statements.push_back( ssthen );
+		    ssthen->terminus = shared_new< Statement >();
 		  shared_ptr<Compound> scelse( new Compound );
 		  sif->else_body = scelse;
-		    scelse->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
-		    scelse->statements.push_back( shared_new< Statement >() );
-		    scelse->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+		    shared_ptr< SearchReplace::Stuff<Statement> > sselse( new SearchReplace::Stuff<Statement> );
+		    scelse->statements.push_back( sselse );
+		    sselse->terminus = shared_new< Statement >();
 
 		shared_ptr<If> rif( new If );
 		  shared_ptr<Expression> rtest( new Expression );
 		  rif->condition = rtest;
-		  shared_ptr<Compound> rcthen( new Compound );
-		  rif->body = rcthen;
-			rcthen->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
-			rcthen->statements.push_back( shared_new< Statement >() );
-			rcthen->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
-		  shared_ptr<Compound> rcelse( new Compound );
+		  rif->body = shared_new< Nop >();
 		  rif->else_body = shared_new< Nop >();
 
 		SearchReplace::MatchSet ms0;
-		ms0.insert( scthen->statements[1] ); ms0.insert( scelse->statements[1] ); ms0.insert( rcthen->statements[1] ); sms1.insert( ms0 ); // statement of interest
+		ms0.insert( ssthen->terminus ); ms0.insert( sselse->terminus ); sms1.insert( ms0 ); // statement of interest
 		SearchReplace::MatchSet ms1;
 		ms1.insert( stest ); ms1.insert( rtest ); sms1.insert( ms1 ); // condition
-		SearchReplace::MatchSet ms2;
-		ms2.insert( scthen->statements[0] ); ms2.insert( rcthen->statements[0] ); sms1.insert( ms2 ); // 1st * in statements
-		SearchReplace::MatchSet ms3;
-		ms3.insert( scthen->statements[2] ); ms3.insert( rcthen->statements[2] ); sms1.insert( ms3 ); // 1st * in statements
 
 		TRACE("mid %p %d\n", rif->condition.get(), (int)!!rif->condition );
 
@@ -175,6 +166,32 @@ HackUpIfs::HackUpIfs()
 }
 
 void HackUpIfs::operator()( shared_ptr<Program> program )
+{
+	sr1( program );
+}
+
+
+CrazyNine::CrazyNine()
+{
+	// Replaces entire records with 9 if it has a 9 in it
+	{
+		shared_ptr<Record> s_record( new Record );
+		  shared_ptr< SearchReplace::Stuff<Declaration> > s_stuff( new SearchReplace::Stuff<Declaration> );
+		  s_record->members.insert( s_stuff );
+		  s_record->members.insert( shared_new< SearchReplace::Star<Declaration> >() );
+		    shared_ptr<SpecificInteger> s_nine( new SpecificInteger(9) );
+		    s_stuff->terminus = s_nine;
+
+        shared_ptr<Union> r_union( new Union );
+          shared_ptr<SpecificTypeIdentifier> r_union_name( new SpecificTypeIdentifier );
+          r_union->identifier = r_union_name;
+            r_union_name->name = string("nine"); // In the end, there can be only nine!!!1
+
+		sr1.Configure(s_record, r_union, &sms1);
+	}
+}
+
+void CrazyNine::operator()( shared_ptr<Program> program )
 {
 	sr1( program );
 }
