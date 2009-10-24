@@ -53,36 +53,42 @@ public:
 			pib( ib.Clone() ) {}
 
 		iterator( const iterator &i ) :
-			pib( i.pib->Clone() ) {}
+			pib( i.pib ? i.pib->Clone() : shared_ptr<iterator_base>() ) {} // Only clone if the other iterator has been initialised
 
 		iterator &operator++()
 		{
+			ASSERT(pib)("Attempt to increment uninitialised iterator");
 			pib->operator++();
 			return *this;
 		}
 
 		const value_type &operator*() const 
 		{
+			ASSERT(pib)("Attempt to dereference uninitialised iterator");
 			return pib->operator*();
 		}
 
 		const value_type *operator->() const
 		{
+			ASSERT(pib)("Attempt to dereference uninitialised iterator");
 			return pib->operator->();
 		}
 
 		bool operator==( const iterator &i ) const
 		{
+			ASSERT(pib)("Attempt to compare uninitialised iterator");
 			return pib->operator==( *(i.pib) );
 		}
 
 		bool operator!=( const iterator &i ) const
 		{
+			ASSERT(pib)("Attempt to compare uninitialised iterator");
 			return !operator==( i );
 		}
 
 		void Overwrite( const VALUE_TYPE *v ) const
 		{
+			ASSERT(pib)("Attempt to Overwrite through uninitialised iterator");
 		    pib->Overwrite( v );
 		}
 				
@@ -266,6 +272,11 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
         element(i)
     {      
         ASSERT(i); // We don't support NULL  
+    }
+
+    PointIterator( VALUE_TYPE &i ) :
+        element(&i)
+    {
     }
 
 	virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const

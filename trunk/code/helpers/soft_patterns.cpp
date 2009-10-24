@@ -24,19 +24,3 @@ SearchReplace::Result SoftExpressonOfType::DecidedCompare( const SearchReplace *
 	    return SearchReplace::NOT_FOUND;
 	}        
 }     
-/*
- *     // Key for a match set, viewed as an STL-type range.
-    struct Key
-    {
-    	bool keyed; // begin and end only valid if this is true
-    	Choice begin;
-    	Choice end;
-    }
-    // Match set - if required, construct a set of these, fill in the set
-    // of shared pointers but don't worry about key, pass to SearchReplace constructor.
-    struct MatchSet : public set< shared_ptr<Node> >
-    {
-        mutable Key key_x;    // This is filled in by the search and replace engine
-    };
- *
- */

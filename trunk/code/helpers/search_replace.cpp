@@ -830,7 +830,7 @@ void SearchReplace::MatchKeys::CheckMatchSetsKeyed()
          msi != end();
          msi++, i++ )
     {
-    	if( !(msi->key_x) )
+    	if( !(msi->key_x.keyed) )
     	{
     		unkeyed++;
     		TRACE("%d not keyed\n", i);
@@ -849,7 +849,7 @@ void SearchReplace::MatchKeys::ClearKeys()
          msi != end();
          msi++ )
     {
-        msi->key_x = shared_ptr<Node>();
+        msi->key_x.keyed = false;
     }
 }
 
@@ -871,14 +871,11 @@ SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( shared_ptr<No
 	{
 		TRACE("In ms pass %d\n", (int)pass);
 		// It's in a match set!!
-		if( pass==KEYING && !(m->key_x) )
+		if( pass==KEYING && !(m->key_x.keyed) )
 		{
-			// We are keying and we didn't already key this node, so key it now UNLESS we are in an
-			// abnormal context, in which case this particular member of the match set is not suitable
-			// for keying (basically, because we might eb in a subtree that ultimately will not match,
-			// but a special soft node like MatchNot or MatchOr might then decide to report a match.
-			TRACE("Keying\n");
-			m->key_x = x;
+			m->key_x.surrogate_pointer = x; // Need a SharedPtr that will stick around, ie not a local, because GenericPointIterator keeps a pointer to it, not a copy
+			m->key_x.begin = GenericPointIterator( &(m->key_x.surrogate_pointer) );
+			m->key_x.keyed = true;
 			return FOUND; // always match when keying (could restrict here too as a slight optimisation, but KISS for now)
 		}
 
@@ -887,8 +884,8 @@ SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( shared_ptr<No
 			// We are restricting the search, and this node has been keyed, so compare the present tree node
 			// with the tree node stored for the match set. This comparison should not match any match sets
 			// (it does not include stuff from any search or replace pattern) so do not allow match sets.
-			ASSERT( m->key_x ); // should have been caught by CheckMatchSetsKeyed()
-			return sr->Compare( x, m->key_x, NULL );
+			ASSERT( m->key_x.keyed ); // should have been caught by CheckMatchSetsKeyed()
+			return sr->Compare( x, *(m->key_x.begin), NULL );
 		}
 	}
 	return FOUND;
