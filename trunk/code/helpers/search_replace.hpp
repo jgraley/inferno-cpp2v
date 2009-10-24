@@ -84,7 +84,8 @@ public:
     struct MatchSet : public set< shared_ptr<Node> >
     {
          mutable Key key_x;    // This is filled in by the search and replace engine
-         shared_ptr<Node> GetKey() const { ASSERT(key_x.keyed); return *(key_x.begin); }
+         GenericContainer::iterator GetKeyBegin() const { ASSERT(key_x.keyed); return key_x.begin; }
+         GenericContainer::iterator GetKeyEnd() const { ASSERT(key_x.keyed); return key_x.end; }
     };
     struct MatchKeys : set<MatchSet>
     {
@@ -98,6 +99,12 @@ public:
         		                  shared_ptr<Node> pattern,
                                   const SearchReplace *sr,
                                   unsigned context_flags );
+        Result UpdateAndRestrict( GenericPointIterator x_begin,
+        		                  GenericPointIterator x_end,
+        		                  shared_ptr<Node> pattern,
+        		                  const SearchReplace *sr,
+        		                  unsigned context_flags,
+        		                  shared_ptr<Node> *x ); // internal use only
         void CheckMatchSetsKeyed();
         void ClearKeys();
         void SetPass( Pass p ) { pass = p; }

@@ -266,12 +266,17 @@ struct STLCollection : virtual STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL
 template<class SUB_BASE, typename VALUE_TYPE>
 struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base
 {
-    VALUE_TYPE * const element;
+    VALUE_TYPE * element;
+
+    PointIterator() :
+        element(NULL) // means end-of-range
+    {
+    }
 
     PointIterator( VALUE_TYPE *i ) :
         element(i)
     {      
-        ASSERT(i); // We don't support NULL  
+        ASSERT(i); // We don't allow NULL as input because it means end-of-range
     }
 
     PointIterator( VALUE_TYPE &i ) :
@@ -281,13 +286,14 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
 
 	virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
 	{
-		shared_ptr<PointIterator> ni( new PointIterator(element) );
+		shared_ptr<PointIterator> ni( new PointIterator(*this) );
 		return ni;
 	}
 
 	virtual PointIterator &operator++()
 	{
-		ASSERTFAIL("Increment not allowed on point iterator");
+		element = NULL; // ie if we increment, we get to the end of the range
+		return *this;
 	}
 
 	virtual VALUE_TYPE &operator*() const
