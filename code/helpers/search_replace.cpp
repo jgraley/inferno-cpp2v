@@ -651,7 +651,7 @@ void SearchReplace::Overlay( GenericSequence *dest, GenericSequence *source, Mat
 			ASSERT( match_keys );
 			const MatchSet *match = match_keys->FindMatchSet( pp );
 			ASSERT( match )( "Star in replace pattern must be in a match set");
-			shared_ptr<Node> n = DuplicateSubtree( match->GetKey(), match_keys, true );
+			shared_ptr<Node> n = DuplicateSubtree( *(match->GetKeyBegin()), match_keys, true );
 			shared_ptr<SubSequence> ss = dynamic_pointer_cast<SubSequence>(n);
 			ASSERT( ss )( "Star keyed to wrong thing, expected SubSequence");
 			TRACE("star seen; inserting subsequence length %d\n", ss->size() );
@@ -688,7 +688,7 @@ void SearchReplace::Overlay( GenericCollection *dest, GenericCollection *source,
 			ASSERT( match_keys );
             const MatchSet *match = match_keys->FindMatchSet( pp );
 			ASSERT( match )( "Star in replace pattern must be keyed for substitution");
-			shared_ptr<Node> n = DuplicateSubtree( match->GetKey(), match_keys, true );
+			shared_ptr<Node> n = DuplicateSubtree( *(match->GetKeyBegin()), match_keys, true );
 			shared_ptr<SubCollection> sc = dynamic_pointer_cast<SubCollection>(n);
 			ASSERT( sc )( "Star keyed to wrong thing, expected SubCollection");
 			TRACE("star seen; inserting subcollection length %d\n", sc->size() );
@@ -738,10 +738,11 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, Match
     	TRACE("substituting because found in match set\n");
         // It's in a match set, so substitute the key. Simplest to recurse for this. We will
     	// still overlay any non-NULL members of the source pattern node onto the result (see below)
-        ASSERT( TypeInfo(source) >= TypeInfo(match->GetKey()) )
+    	SharedPtr<Node> key = *(match->GetKeyBegin());
+        ASSERT( TypeInfo(source) >= TypeInfo( key ) )
               ("source must be a non-strict superclass of local_substitute, so that it does not have more members (match set probably not all the same types)");
               //TODO simply require that every member of a match set has the exact same type
-        dest = DuplicateSubtree( match->GetKey(), match_keys, true );
+        dest = DuplicateSubtree( key, match_keys, true );
     }
     else
     {
@@ -864,6 +865,22 @@ SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( shared_ptr<No
 		                                                           unsigned context_flags )
 {
 	ASSERT( this );
+	return UpdateAndRestrict( GenericPointIterator(),
+			                  GenericPointIterator(),
+			                  pattern,
+			                  sr,
+			                  context_flags,
+			                  &x );
+}
+
+SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( GenericPointIterator x_begin,
+		                                                           GenericPointIterator x_end,
+		                                                           shared_ptr<Node> pattern,
+		                                                           const SearchReplace *sr,
+		                                                           unsigned context_flags,
+		                                                           shared_ptr<Node> *x )
+{
+	ASSERT( this );
 
 	TRACE("Receiving node to key\n");
 	const MatchSet *m = FindMatchSet( pattern );
@@ -873,9 +890,19 @@ SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( shared_ptr<No
 		// It's in a match set!!
 		if( pass==KEYING && !(m->key_x.keyed) )
 		{
-			m->key_x.surrogate_pointer = x; // Need a SharedPtr that will stick around, ie not a local, because GenericPointIterator keeps a pointer to it, not a copy
-			m->key_x.begin = GenericPointIterator( &(m->key_x.surrogate_pointer) );
+			if( x ) // single node version (old school)
+			{
+				m->key_x.surrogate_pointer = *x; // Need a SharedPtr that will stick around, ie not a local, because GenericPointIterator keeps a pointer to it, not a copy
+				m->key_x.begin = GenericPointIterator( &(m->key_x.surrogate_pointer) );
+				m->key_x.end = GenericPointIterator();
+			}
+			else // range version (nu-skool)
+			{
+				m->key_x.begin = x_begin;
+				m->key_x.end = x_end;
+			}
 			m->key_x.keyed = true;
+
 			return FOUND; // always match when keying (could restrict here too as a slight optimisation, but KISS for now)
 		}
 
@@ -885,7 +912,10 @@ SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( shared_ptr<No
 			// with the tree node stored for the match set. This comparison should not match any match sets
 			// (it does not include stuff from any search or replace pattern) so do not allow match sets.
 			ASSERT( m->key_x.keyed ); // should have been caught by CheckMatchSetsKeyed()
-			return sr->Compare( x, *(m->key_x.begin), NULL );
+			if( x )
+				return sr->Compare( *x, *(m->key_x.begin), NULL );
+			else
+				return sr->Compare( *x_begin, *(m->key_x.begin), NULL );
 		}
 	}
 	return FOUND;
