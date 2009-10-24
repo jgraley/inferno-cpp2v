@@ -467,6 +467,53 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
 }
 
 
+// Helper for DecidedCompare that does the actual match testing work for the children and recurses.
+// Also checks for soft matches.
+SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
+		                                             shared_ptr<StuffBase> stuff_pattern,
+		                                             MatchKeys *match_keys,
+		                                             Conjecture &conj,
+		                      		                 unsigned context_flags ) const
+{
+	ASSERT( stuff_pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
+
+	GenericCountingIterator start(0), end(0);
+	{ // just count the nodes seen during the walk, to get an "end" iterator
+		Walk w( x );
+		while(!w.Done())
+		{
+			w.AdvanceInto();
+			++end;
+		}
+	}
+	TRACE("Stuff at %p; counting %d nodes underneath\n", stuff_pattern.get(), end.GetCount());
+
+    // Get decision from conjecture
+	GenericContainer::iterator thistime = conj.HandleDecision( start, end );
+	TRACE("Conjecture asks for number %d\n", thistime.GetCount());
+	if( thistime == (GenericContainer::iterator)end )
+		return NOT_FOUND; // ran out of choices
+
+    // Walk that many places into the subtree
+	Walk w( x );
+	GenericContainer::iterator cur = start;
+	while( !(cur == thistime) )
+	{
+		ASSERT( !w.Done() );
+		w.AdvanceInto();
+		++cur;
+	}
+	ASSERT( cur==thistime );
+
+	// Try out comparison at this position
+	ASSERT( !(cur == (GenericContainer::iterator)end) );
+	GenericContainer::iterator it = w.GetIterator(); // get an iterator for current position in tree, so we can change it
+	Result r = DecidedCompare( *it, stuff_pattern->terminus, match_keys, conj, context_flags );
+	TRACE("Result was %d\n", r);
+	return r;
+}
+
+
 SearchReplace::Result SearchReplace::MatchingDecidedCompare( shared_ptr<Node> x,
 		                                                     shared_ptr<Node> pattern,
 		                                                     MatchKeys *match_keys,
@@ -479,15 +526,19 @@ SearchReplace::Result SearchReplace::MatchingDecidedCompare( shared_ptr<Node> x,
     	match_keys->ClearKeys();
 
     	// Do a two-pass matching process: first get the keys...
+       	TRACE("doing KEYING pass....\n");
         match_keys->SetPass( MatchKeys::KEYING );
         Result r = DecidedCompare( x, pattern, match_keys, conj, DEFAULT_CONTEXT_FLAGS );
+        TRACE("KEYING pass result %d\n", r );
 	    if( r != FOUND )
 	    	return r;	    // Save time by giving up if no match found
 	    match_keys->CheckMatchSetsKeyed();
 
 	    // Now restrict the search according to the match sets
+    	TRACE("doing RESTRICTING pass....\n");
         match_keys->SetPass( MatchKeys::RESTRICTING );
         r = DecidedCompare( x, pattern, match_keys, conj, DEFAULT_CONTEXT_FLAGS );
+        TRACE("RESTRICTING pass result %d\n", r );
         return r;
     }
     else
@@ -495,30 +546,6 @@ SearchReplace::Result SearchReplace::MatchingDecidedCompare( shared_ptr<Node> x,
     	// No match set, so just call straight through this layer
     	return DecidedCompare( x, pattern, NULL, conj, DEFAULT_CONTEXT_FLAGS );
     }
-}
-
-
-// Helper for DecidedCompare that does the actual match testing work for the children and recurses.
-// Also checks for soft matches.
-SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
-		                                             shared_ptr<StuffBase> stuff_pattern,
-		                                             MatchKeys *match_keys,
-		                                             Conjecture &conj,
-		                      		                 unsigned context_flags ) const
-{
-	GenericContainer::iterator it;
-	Walk w( x );
-    while(!w.Done()) // TODO this search is really a Decision
-    {
-        it = w.GetIterator(); // get an iterator for current position in tree, so we can change it
-        ASSERT( stuff_pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
-        Result r = DecidedCompare( *it, stuff_pattern->terminus, match_keys, conj, context_flags );
-        if( r == FOUND )
-            return FOUND;
-        w.AdvanceInto();
-    }
-
-    return NOT_FOUND;
 }
 
 
@@ -1036,6 +1063,9 @@ SearchReplace::Choice SearchReplace::Conjecture::HandleDecision( SearchReplace::
 	if( c == end )
 	{
 		// throw away the bad iterator; will force initialisation to begin() next time
+		// NOTE: we will still return end in this case, i.e. an invlaid iterator. This tells
+		// the caller to please not try to do any matching with this decision, but fall out
+		// with NOT_FOUND.
 		TRACE("Decision %d hit end\n", decisions_count );
 		resize( decisions_count );
 	}
