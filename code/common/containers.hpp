@@ -337,7 +337,6 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
 	{
 		return true; // shouldn't matter what we return here
 	}
-
 };
 
 #endif /* GENERICS_HPP */

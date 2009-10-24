@@ -19,7 +19,7 @@ class Walk
     void Pop();
 
 public:
-    Walk( shared_ptr<Node> r );        
+    Walk( shared_ptr<Node> r );
     bool Done();
     int Depth();
     GenericContainer::iterator GetIterator();

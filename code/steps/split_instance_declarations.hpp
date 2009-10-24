@@ -38,5 +38,16 @@ private:
 	SearchReplace sr1;
 };
 
+class CrazyNine : public Pass
+{
+public:
+	CrazyNine();
+	virtual void operator()( shared_ptr<Program> );
+
+private:
+	set<SearchReplace::MatchSet> sms1;
+	SearchReplace sr1;
+};
+
 #endif
 

@@ -245,14 +245,17 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 	if( !pattern )    // NULL matches anything in search patterns (just to save typing)
 		return FOUND;
 
-
-
     if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
     {
     	// Hand over to any soft search functionality in the search pattern node
     	Result r = ssp->DecidedCompare( this, x, match_keys, conj, context_flags );
     	if( r != FOUND )
     		return NOT_FOUND;
+    }
+    else if( shared_ptr<StuffBase> stuff_pattern = dynamic_pointer_cast<StuffBase>(pattern) )
+    {
+    	// Invoke stuff node compare
+    	return DecidedCompare( x, stuff_pattern, match_keys, conj, context_flags );
     }
     else
     {
@@ -495,6 +498,30 @@ SearchReplace::Result SearchReplace::MatchingDecidedCompare( shared_ptr<Node> x,
 }
 
 
+// Helper for DecidedCompare that does the actual match testing work for the children and recurses.
+// Also checks for soft matches.
+SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
+		                                             shared_ptr<StuffBase> stuff_pattern,
+		                                             MatchKeys *match_keys,
+		                                             Conjecture &conj,
+		                      		                 unsigned context_flags ) const
+{
+	GenericContainer::iterator it;
+	Walk w( x );
+    while(!w.Done()) // TODO this search is really a Decision
+    {
+        it = w.GetIterator(); // get an iterator for current position in tree, so we can change it
+        ASSERT( stuff_pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
+        Result r = DecidedCompare( *it, stuff_pattern->terminus, match_keys, conj, context_flags );
+        if( r == FOUND )
+            return FOUND;
+        w.AdvanceInto();
+    }
+
+    return NOT_FOUND;
+}
+
+
 SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 		                                      shared_ptr<Node> pattern,
 		                                      MatchKeys *match_keys,
@@ -571,7 +598,6 @@ SearchReplace::Result SearchReplace::Compare( GenericContainer::iterator x_begin
 
 	return FOUND;
 }
-
 
 
 // Search supplied program for a match to the configured search pattern.
