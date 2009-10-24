@@ -33,6 +33,7 @@ public:
 		virtual bool operator==( const iterator_base &ib ) const = 0;
 		virtual void Overwrite( const VALUE_TYPE *v ) const = 0;
 		virtual const bool IsOrdered() const = 0;
+		virtual const int GetCount() const { ASSERTFAIL("Only on CountingIterator"); }
 	};
 
 public:
@@ -96,6 +97,11 @@ public:
 		const bool IsOrdered() const
 		{
 			return pib->IsOrdered();
+		}
+
+		const int GetCount() const
+		{
+			return pib->GetCount();
 		}
 
 		shared_ptr<iterator_base> pib;
@@ -336,6 +342,67 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
 	virtual const bool IsOrdered() const
 	{
 		return true; // shouldn't matter what we return here
+	}
+};
+
+// TODO can we avoid the need for these template parameters?
+template<class SUB_BASE, typename VALUE_TYPE>
+struct CountingIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base
+{
+    int element;
+
+    CountingIterator() :
+        element(0)
+    {
+    }
+
+    CountingIterator( int i ) :
+        element(i)
+    {
+    }
+
+	virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
+	{
+		shared_ptr<CountingIterator> ni( new CountingIterator(*this) );
+		return ni;
+	}
+
+	virtual CountingIterator &operator++()
+	{
+		element++;
+		return *this;
+	}
+
+	virtual VALUE_TYPE &operator*() const
+	{
+	    ASSERTFAIL("Cannot dereference CountingIterator, use GetCount instead");
+	}
+
+	const virtual VALUE_TYPE *operator->() const
+	{
+		ASSERTFAIL("Cannot dereference CountingIterator, use GetCount instead");
+	}
+
+	virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib ) const
+	{
+		const CountingIterator *pi = dynamic_cast<const CountingIterator *>(&ib);
+		ASSERT(pi)("Comparing counting iterators of different type");
+		return pi->element == element;
+	}
+
+	virtual void Overwrite( const VALUE_TYPE *v ) const
+	{
+	    ASSERTFAIL("Cannot Overwrite through CountingIterator");
+	}
+
+	virtual const bool IsOrdered() const
+	{
+		return true; // counting iterator counts 1, 2, 3, like that, so seems to be ordered
+	}
+
+	const int GetCount() const
+	{
+		return element;
 	}
 };
 

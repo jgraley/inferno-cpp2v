@@ -68,7 +68,7 @@ Walk::Walk( shared_ptr<Node> r ) :
     Frame f;
     GenericSharedPtr *gsp = &root;
     GenericPointIterator gpi(gsp);
-    f.children.push_back( gpi ); // TODO this makes the point iterator for the top level be invalid
+    f.children.push_back( gpi ); // TODO BUG this makes the point iterator for the top level be invalid
     f.index = 0;
     state.push( f );
 }        
@@ -85,7 +85,7 @@ int Walk::Depth()
     
 GenericContainer::iterator Walk::GetIterator()
 {
-    ASSERT( !state.empty() );        
+    ASSERT( !Done() )("Already advanced over everything; reached end of walk");
     ASSERT( IsValid() );
         
     Frame f = state.top();
