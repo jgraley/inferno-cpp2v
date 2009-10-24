@@ -95,16 +95,16 @@ public:
     	{
     	}
         const MatchSet *FindMatchSet( shared_ptr<Node> node );
-        Result UpdateAndRestrict( shared_ptr<Node> x,
-        		                  shared_ptr<Node> pattern,
-                                  const SearchReplace *sr,
-                                  unsigned context_flags );
-        Result UpdateAndRestrict( GenericContainer::iterator x_begin,
-        		                  GenericContainer::iterator x_end,
-        		                  shared_ptr<Node> pattern,
-        		                  const SearchReplace *sr,
-        		                  unsigned context_flags,
-        		                  shared_ptr<Node> *x=NULL ); // internal use only
+        Result KeyAndRestrict( shared_ptr<Node> x,
+        		               shared_ptr<Node> pattern,
+                               const SearchReplace *sr,
+                               unsigned context_flags );
+        Result KeyAndRestrict( GenericContainer::iterator x_begin,
+        		               GenericContainer::iterator x_end,
+        		               shared_ptr<Node> pattern,
+        		               const SearchReplace *sr,
+        		               unsigned context_flags,
+        		               shared_ptr<Node> *x=NULL ); // internal use only
         void CheckMatchSetsKeyed();
         void ClearKeys();
         void SetPass( Pass p ) { pass = p; }

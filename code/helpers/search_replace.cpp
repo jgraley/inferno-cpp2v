@@ -307,7 +307,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
    
     // If we got here, the node matched the search pattern. Now apply match sets
     if( match_keys )
-        return match_keys->UpdateAndRestrict( x, pattern, this, context_flags );
+        return match_keys->KeyAndRestrict( x, pattern, this, context_flags );
 
     return FOUND;
 }
@@ -373,9 +373,9 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 		    // Now make a copy of the elements that matched the star and apply match sets
 		    if( pe )
 		    {
-				// Apply match sets to this Star and matched SubSequence
+				// Apply match sets to this Star and matched range
 				if( match_keys )
-		    		if( !match_keys->UpdateAndRestrict( xit_begin_star, xit, pe, this, context_flags ) )
+		    		if( !match_keys->KeyAndRestrict( xit_begin_star, xit, pe, this, context_flags ) )
 		        	    return NOT_FOUND;
 		    }
 	    }
@@ -457,7 +457,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
     // If we got here, the node matched the search pattern. Now apply match sets
     TRACE("seen_star %d  star %d\n", seen_star, !!star );
     if( match_keys && seen_star && star )
-        if( !match_keys->UpdateAndRestrict( xremaining, star, this, context_flags ) )
+        if( !match_keys->KeyAndRestrict( xremaining, star, this, context_flags ) )
         	return NOT_FOUND;
 
 	return FOUND;
@@ -889,88 +889,83 @@ void SearchReplace::MatchKeys::ClearKeys()
 // 1. Key it into a match set of required and
 // 2. Detect whether a match set required two parts of the search tree to match and
 // reject if they don't.
-SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( shared_ptr<Node> x,
-		                                                           shared_ptr<Node> pattern,
-		                                                           const SearchReplace *sr,
-		                                                           unsigned context_flags )
+SearchReplace::Result SearchReplace::MatchKeys::KeyAndRestrict( shared_ptr<Node> x,
+		                                                        shared_ptr<Node> pattern,
+		                                                        const SearchReplace *sr,
+		                                                        unsigned context_flags )
 {
 	ASSERT( this );
-	return UpdateAndRestrict( GenericContainer::iterator(),
-			                  GenericContainer::iterator(),
-			                  pattern,
-			                  sr,
-			                  context_flags,
-			                  &x );
+	return KeyAndRestrict( GenericContainer::iterator(),
+			               GenericContainer::iterator(),
+			               pattern,
+			               sr,
+			               context_flags,
+			               &x );
 }
 
-SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( GenericContainer::iterator x_begin,
-		                                                           GenericContainer::iterator x_end,
-		                                                           shared_ptr<Node> pattern,
-		                                                           const SearchReplace *sr,
-		                                                           unsigned context_flags,
-		                                                           shared_ptr<Node> *x )
+SearchReplace::Result SearchReplace::MatchKeys::KeyAndRestrict( GenericContainer::iterator x_begin,
+		                                                        GenericContainer::iterator x_end,
+		                                                        shared_ptr<Node> pattern,
+		                                                        const SearchReplace *sr,
+		                                                        unsigned context_flags,
+		                                                        shared_ptr<Node> *x )
 {
 	ASSERT( this );
 
+	// Find a match set for this node. If the node is not in a match set then there's
+	// nothing for us to do, so return without restricting the search.
 	TRACE("Receiving node to key\n");
 	const MatchSet *m = FindMatchSet( pattern );
-	if( m )
+	if( !m )
+		return FOUND;
+
+	// If x was supplied then a range wasn't, so deduce the range from x
+	if( x )
 	{
-		TRACE("In ms pass %d\n", (int)pass);
-		// It's in a match set!!
-		if( pass==KEYING && !(m->key_x.keyed) )
+		if( shared_ptr< GenericContainer > x_container = dynamic_pointer_cast< GenericContainer >(*x) ) // hack for unordered stars
 		{
-			if( !x ) // range version (nu-skool)
-			{
-				m->key_x.begin = x_begin;
-				m->key_x.end = x_end;
-				TRACE("%p\n", (*x_begin).GetNodePtr().get() );
-			}
-			else if( shared_ptr<SubCollection> xsc = dynamic_pointer_cast<SubCollection>(*x) ) // hack for unordered stars
-			{
-				m->key_x.surrogate_pointer = xsc; // Need a SharedPtr that will stick around, ie not a local, because GenericPointIterator keeps a pointer to it, not a copy
-				m->key_x.begin = xsc->begin();
-				m->key_x.end = xsc->end();
-				if( !xsc->empty() )
-					TRACE("%p\n", (*(m->key_x.begin)).GetNodePtr().get() );
-			}
-			else // single node version (old school)
-			{
-				m->key_x.surrogate_pointer = *x; // Need a SharedPtr that will stick around, ie not a local, because GenericPointIterator keeps a pointer to it, not a copy
-				m->key_x.begin = GenericPointIterator( &(m->key_x.surrogate_pointer) );
-				m->key_x.end = GenericPointIterator();
-				TRACE("%p\n", (*(m->key_x.begin)).GetNodePtr().get() );
-			}
-			m->key_x.keyed = true;
-
-			return FOUND; // always match when keying (could restrict here too as a slight optimisation, but KISS for now)
+			// The node we saw was also a container, so remember a range spanning the whole container
+			// NOTE this means you shouldn't derive a node directly from a container unless you
+			// will not add any members, since this will ignore them.
+			x_begin = x_container->begin();
+			x_end = x_container->end();
 		}
-
-		if( pass==RESTRICTING )
+		else  // single node version (old school)
 		{
-			// We are restricting the search, and this node has been keyed, so compare the present tree node
-			// with the tree node stored for the match set. This comparison should not match any match sets
-			// (it does not include stuff from any search or replace pattern) so do not allow match sets.
-			// Since collections (which require decisions) can exist within the tree, we must allow iteration
-			// through choices, and since the number of decisions seen may vary, we must start a new conjecture.
-			// Therefore, we recurse back to Compare().
-			ASSERT( m->key_x.keyed ); // should have been caught by CheckMatchSetsKeyed()
-			if( !x )
-				return sr->Compare( x_begin, x_end, m->key_x.begin, m->key_x.end, NULL );
-			else if( shared_ptr<SubCollection> xsc = dynamic_pointer_cast<SubCollection>(*x) ) // hack for unordered stars
-			{
-				x_begin = xsc->begin();
-				x_end = xsc->end();
-				return sr->Compare( x_begin, x_end, m->key_x.begin, m->key_x.end, NULL );
-			}
-			else
-			{
-				x_begin = GenericPointIterator( &(m->key_x.surrogate_pointer) );
-				x_end = GenericPointIterator();
-				return sr->Compare( x_begin, x_end, m->key_x.begin, m->key_x.end, NULL );
-			}
+			// For other nodes, just set up a range of a single element, that being the node
+			// We use the surrogate pointer in the knowledge that it will be pointed to the same node as x
+			// if there's a match during keying
+			x_begin = GenericPointIterator( &(m->key_x.surrogate_pointer) );
+			x_end = GenericPointIterator();
 		}
 	}
+
+	// If we're keying and we haven't keyed this node so far, key it now
+	TRACE("In ms pass %d\n", (int)pass);
+	if( pass==KEYING && !(m->key_x.keyed) )
+	{
+		if( x )
+			m->key_x.surrogate_pointer = *x; // Need a SharedPtr that will stick around, ie not a local, because GenericPointIterator keeps a pointer to it, not a copy
+		m->key_x.begin = x_begin;
+		m->key_x.end = x_end;
+		m->key_x.keyed = true;
+
+		return FOUND; // always match when keying (could restrict here too as a slight optimisation, but KISS for now)
+	}
+
+	// If we're restricting, compare the supplied range with the one we keyed
+	if( pass==RESTRICTING )
+	{
+		// We are restricting the search, and this node has been keyed, so compare the present tree node
+		// with the tree node stored for the match set. This comparison should not match any match sets
+		// (it does not include stuff from any search or replace pattern) so do not allow match sets.
+		// Since collections (which require decisions) can exist within the tree, we must allow iteration
+		// through choices, and since the number of decisions seen may vary, we must start a new conjecture.
+		// Therefore, we recurse back to Compare().
+		ASSERT( m->key_x.keyed ); // should have been caught by CheckMatchSetsKeyed()
+		return sr->Compare( x_begin, x_end, m->key_x.begin, m->key_x.end, NULL );
+	}
+
 	return FOUND;
 }
 
