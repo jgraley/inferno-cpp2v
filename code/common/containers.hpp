@@ -32,6 +32,7 @@ public:
 		const virtual VALUE_TYPE *operator->() const = 0; 
 		virtual bool operator==( const iterator_base &ib ) const = 0;
 		virtual void Overwrite( const VALUE_TYPE *v ) const = 0;
+		virtual const bool IsOrdered() const = 0;
 	};
 
 public:
@@ -92,6 +93,11 @@ public:
 		    pib->Overwrite( v );
 		}
 				
+		const bool IsOrdered() const
+		{
+			return pib->IsOrdered();
+		}
+
 		shared_ptr<iterator_base> pib;
 	};
 	typedef iterator const_iterator; // TODO const iterators properly
@@ -188,6 +194,10 @@ struct STLSequence : virtual STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
 		    // because in Sequences (ordererd containers) elements may be modified.
 		    CONTAINER_IMPL::iterator::operator*() = *v;
 		}
+    	virtual const bool IsOrdered() const
+    	{
+    		return true; // yes, Sequences are ordered
+    	}
 	};
 
     // Covarient style only works with refs and pointers, so force begin/end to return refs safely
@@ -237,6 +247,10 @@ struct STLCollection : virtual STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL
 		    ASSERT( result.second ); // insert must succeed (see SGI docs)
 		    *(typename CONTAINER_IMPL::iterator *)this = result.first; // become an iterator for the newly inserted element
 		}
+    	virtual const bool IsOrdered() const
+    	{
+    		return false; // no, Collections are not ordered
+    	}
         STLCollection<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL> *owner;
 	};
 
@@ -318,6 +332,12 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
 	{
 	    *element = *v;
 	}
+
+	virtual const bool IsOrdered() const
+	{
+		return true; // shouldn't matter what we return here
+	}
+
 };
 
 #endif /* GENERICS_HPP */

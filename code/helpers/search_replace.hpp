@@ -195,6 +195,11 @@ private:
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
     		        MatchKeys *match_keys = NULL ) const;
+    Result Compare( GenericContainer::iterator x_begin,
+                    GenericContainer::iterator x_end,
+                    GenericContainer::iterator pattern_begin,
+                    GenericContainer::iterator pattern_end,
+    		        MatchKeys *match_keys = NULL ) const;
 
     // Search ring
     bool Search( shared_ptr<Node> program,

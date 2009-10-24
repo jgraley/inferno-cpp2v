@@ -529,6 +529,50 @@ SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 	return r;
 }
 
+SearchReplace::Result SearchReplace::Compare( GenericContainer::iterator x_begin,
+                                              GenericContainer::iterator x_end,
+                                              GenericContainer::iterator pattern_begin,
+                                              GenericContainer::iterator pattern_end,
+                              		          MatchKeys *match_keys ) const
+{
+	ASSERT( x_begin.IsOrdered() == pattern_begin.IsOrdered() ); // consistency
+	// TODO pass the ranges all the way through into the DecidedCompare(Container) functions
+	// instead of all this rubbish.
+	if( x_begin.IsOrdered() )
+	{
+		// Ordered range (=subsequence). Loop though both subsequences together, comparing
+		// one at a time. TODO if there are match sets joining them, this will FAIL
+		GenericContainer::iterator xit, pit;
+		for( xit=x_begin, pit=pattern_begin; xit != x_end && pit != pattern_end; ++xit, ++pit )
+			if( !Compare( *xit, *pit, match_keys ) )
+				return NOT_FOUND;
+
+        if( xit != x_end || pit != pattern_end )
+    	    return NOT_FOUND; // differing length
+	}
+	else
+	{
+		// Unordered range (=subcollection). Can't just loop though, instead we put them in a
+		// node that holds a collection and pass that in.
+		shared_ptr<SubCollection> xsc( new SubCollection );
+		shared_ptr<SubCollection> psc( new SubCollection );
+		GenericContainer::iterator xit, pit;
+		for( xit=x_begin, pit=pattern_begin; xit != x_end && pit != pattern_end; ++xit, ++pit )
+		{
+			xsc->insert( *xit );
+			psc->insert( *pit );
+		}
+
+        if( xit != x_end || pit != pattern_end )
+    	    return NOT_FOUND; // differing length
+
+		return Compare( xsc, psc, match_keys );
+	}
+
+	return FOUND;
+}
+
+
 
 // Search supplied program for a match to the configured search pattern.
 // If found, return double pointer to assist replace algorithm.
@@ -624,6 +668,7 @@ void SearchReplace::Overlay( shared_ptr<Node> dest, shared_ptr<Node> source, Mat
     }        
 }
 
+
 void SearchReplace::Overlay( GenericSequence *dest, GenericSequence *source, MatchKeys *match_keys, bool under_substitution )
 {
     // For now, always overwrite the dest
@@ -656,6 +701,7 @@ void SearchReplace::Overlay( GenericSequence *dest, GenericSequence *source, Mat
 	}
 }
 
+
 void SearchReplace::Overlay( GenericCollection *dest, GenericCollection *source, MatchKeys *match_keys, bool under_substitution )
 {
     // For now, always overwrite the dest
@@ -676,17 +722,8 @@ void SearchReplace::Overlay( GenericCollection *dest, GenericCollection *source,
 			ASSERT( match_keys );
             const MatchSet *match = match_keys->FindMatchSet( pp );
 			ASSERT( match )( "Star in replace pattern must be keyed for substitution");
-#if 0
-			shared_ptr<Node> n = DuplicateSubtree( *(match->GetKeyBegin()), match_keys, true );
-			shared_ptr<SubCollection> sc = dynamic_pointer_cast<SubCollection>(n);
-			ASSERT( sc )( "Star keyed to wrong thing, expected SubCollection");
-			TRACE("star seen; inserting subcollection length %d\n", sc->size() );
-			FOREACH( const GenericSharedPtr &xx, *sc )
-				dest->insert( xx );
-#else
 			for( GenericContainer::iterator xit = match->GetKeyBegin(); xit != match->GetKeyEnd(); ++xit )
 				dest->insert( DuplicateSubtree( *xit, match_keys, true ) );
-#endif
 		}
 		else
 		{
@@ -914,13 +951,24 @@ SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( GenericContai
 			// We are restricting the search, and this node has been keyed, so compare the present tree node
 			// with the tree node stored for the match set. This comparison should not match any match sets
 			// (it does not include stuff from any search or replace pattern) so do not allow match sets.
+			// Since collections (which require decisions) can exist within the tree, we must allow iteration
+			// through choices, and since the number of decisions seen may vary, we must start a new conjecture.
+			// Therefore, we recurse back to Compare().
 			ASSERT( m->key_x.keyed ); // should have been caught by CheckMatchSetsKeyed()
 			if( !x )
-				return sr->Compare( *x_begin, *(m->key_x.begin), NULL );
+				return sr->Compare( x_begin, x_end, m->key_x.begin, m->key_x.end, NULL );
 			else if( shared_ptr<SubCollection> xsc = dynamic_pointer_cast<SubCollection>(*x) ) // hack for unordered stars
-				return sr->Compare( *x, m->key_x.surrogate_pointer, NULL ); // dreadful hack
+			{
+				x_begin = xsc->begin();
+				x_end = xsc->end();
+				return sr->Compare( x_begin, x_end, m->key_x.begin, m->key_x.end, NULL );
+			}
 			else
-				return sr->Compare( *x, *(m->key_x.begin), NULL );
+			{
+				x_begin = GenericPointIterator( &(m->key_x.surrogate_pointer) );
+				x_end = GenericPointIterator();
+				return sr->Compare( x_begin, x_end, m->key_x.begin, m->key_x.end, NULL );
+			}
 		}
 	}
 	return FOUND;
