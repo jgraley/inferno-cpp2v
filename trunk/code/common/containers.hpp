@@ -138,11 +138,10 @@ struct STLContainer : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, CONTAINER_
 		{
             // JSG apparently there's no operator== in std::deque::iterator, which is odd since iterators 
             // are supposed to be Equality Comparable. So we just cast the types really carefully and use ==
-		    const typename CONTAINER_IMPL::iterator *pi;
-			if( pi = dynamic_cast<const typename CONTAINER_IMPL::iterator *>(&ib) )
-				return *(const typename CONTAINER_IMPL::iterator *)this == *pi; 
-			else
-				return false; // comparing iterators of different types; must be from different containers
+		    const typename CONTAINER_IMPL::iterator *pi = dynamic_cast<const typename CONTAINER_IMPL::iterator *>(&ib);
+		    ASSERT(pi)("Comparing iterators of different type");
+			return *(const typename CONTAINER_IMPL::iterator *)this == *pi;
+//		    return CONTAINER_IMPL::iterator::operator==( *this, *pi );
 		}
 	};
 
@@ -310,10 +309,9 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
 
 	virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib ) const
 	{
-		if( const PointIterator *pi = dynamic_cast<const PointIterator *>(&ib) )
-			return pi->element == element;
-		else
-			return false; // comparing iterators of different types; must be from different containers
+		const PointIterator *pi = dynamic_cast<const PointIterator *>(&ib);
+		ASSERT(pi)("Comparing point iterators of different type");
+		return pi->element == element;
 	}
 	
 	virtual void Overwrite( const VALUE_TYPE *v ) const

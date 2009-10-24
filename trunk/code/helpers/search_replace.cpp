@@ -326,7 +326,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 	GenericContainer::iterator xit = x.begin();
 	GenericContainer::iterator pit = pattern.begin();
 
-	while( pit != pattern.end() )
+	while( pit != pattern.end() && xit != x.end() )
 	{
 		// Get the next element of the pattern
 		shared_ptr<Node> pe( *pit );
@@ -339,7 +339,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 
 	    	// Remember where we are - this is the beginning of the subsequence that
 	    	// potentially matches the Star.
-    	    GenericContainer::iterator xit_begin_star = xit;
+	    	GenericContainer::iterator xit_begin_star = xit;
 
 	    	// Star always matches at the end of a sequence, so we only bother checking when there
 	    	// are more elements left
@@ -366,25 +366,16 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 					TRACE("Ran out of candidate\n");
 					return NOT_FOUND;
 				}
+		    	TRACE("%p\n", (*xit).GetNodePtr().get() );
             }
 
 			// Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
 		    // Now make a copy of the elements that matched the star and apply match sets
 		    if( pe )
 		    {
-		    	TRACE("Copying matched star for match set\n");
-		    	// Copy the matched subsequence into a SubSequence node for the benefit of match sets
-		    	// TODO is there some stl algorithm for this?
-			    shared_ptr<SubSequence> xsub( new SubSequence );
-				for( GenericContainer::iterator i=xit_begin_star; i != xit; ++i )
-				{
-					TRACE("pushing to star match\n");
-					xsub->push_back( *i );
-				}
-
 				// Apply match sets to this Star and matched SubSequence
-		    	if( match_keys )
-		    		if( !match_keys->UpdateAndRestrict( xsub, pe, this, context_flags ) )
+				if( match_keys )
+		    		if( !match_keys->UpdateAndRestrict( xit_begin_star, xit, pe, this, context_flags ) )
 		        	    return NOT_FOUND;
 		    }
 	    }
@@ -434,6 +425,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
         if( maybe_star || !(*pit) ) // Star or NULL in pattern collection?
         {
         	ASSERT(!seen_star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
+        	// TODO remove this restriction - I might want to match one star and leave another unmatched.
             star = maybe_star; // remember for later and skip to next pattern
             seen_star = true;
         }
@@ -651,12 +643,8 @@ void SearchReplace::Overlay( GenericSequence *dest, GenericSequence *source, Mat
 			ASSERT( match_keys );
 			const MatchSet *match = match_keys->FindMatchSet( pp );
 			ASSERT( match )( "Star in replace pattern must be in a match set");
-			shared_ptr<Node> n = DuplicateSubtree( *(match->GetKeyBegin()), match_keys, true );
-			shared_ptr<SubSequence> ss = dynamic_pointer_cast<SubSequence>(n);
-			ASSERT( ss )( "Star keyed to wrong thing, expected SubSequence");
-			TRACE("star seen; inserting subsequence length %d\n", ss->size() );
-			FOREACH( const GenericSharedPtr &xx, *ss )
-				dest->push_back( xx );
+			for( GenericContainer::iterator xit = match->GetKeyBegin(); xit != match->GetKeyEnd(); ++xit )
+				dest->push_back( DuplicateSubtree( *xit, match_keys, true ) );
 		}
 		else
 		{
@@ -688,18 +676,23 @@ void SearchReplace::Overlay( GenericCollection *dest, GenericCollection *source,
 			ASSERT( match_keys );
             const MatchSet *match = match_keys->FindMatchSet( pp );
 			ASSERT( match )( "Star in replace pattern must be keyed for substitution");
+#if 0
 			shared_ptr<Node> n = DuplicateSubtree( *(match->GetKeyBegin()), match_keys, true );
 			shared_ptr<SubCollection> sc = dynamic_pointer_cast<SubCollection>(n);
 			ASSERT( sc )( "Star keyed to wrong thing, expected SubCollection");
 			TRACE("star seen; inserting subcollection length %d\n", sc->size() );
 			FOREACH( const GenericSharedPtr &xx, *sc )
 				dest->insert( xx );
+#else
+			for( GenericContainer::iterator xit = match->GetKeyBegin(); xit != match->GetKeyEnd(); ++xit )
+				dest->insert( DuplicateSubtree( *xit, match_keys, true ) );
+#endif
 		}
 		else
 		{
 			TRACE("non-star element, inserting directly\n");
 			ASSERT( p ); // present simplified scheme disallows NULL, see above
-			SharedPtr<Node> n = DuplicateSubtree( p, match_keys, under_substitution );
+			shared_ptr<Node> n = DuplicateSubtree( p, match_keys, under_substitution );
 			dest->insert( n );
 		}
 	}
@@ -865,16 +858,16 @@ SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( shared_ptr<No
 		                                                           unsigned context_flags )
 {
 	ASSERT( this );
-	return UpdateAndRestrict( GenericPointIterator(),
-			                  GenericPointIterator(),
+	return UpdateAndRestrict( GenericContainer::iterator(),
+			                  GenericContainer::iterator(),
 			                  pattern,
 			                  sr,
 			                  context_flags,
 			                  &x );
 }
 
-SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( GenericPointIterator x_begin,
-		                                                           GenericPointIterator x_end,
+SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( GenericContainer::iterator x_begin,
+		                                                           GenericContainer::iterator x_end,
 		                                                           shared_ptr<Node> pattern,
 		                                                           const SearchReplace *sr,
 		                                                           unsigned context_flags,
@@ -890,16 +883,26 @@ SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( GenericPointI
 		// It's in a match set!!
 		if( pass==KEYING && !(m->key_x.keyed) )
 		{
-			if( x ) // single node version (old school)
+			if( !x ) // range version (nu-skool)
+			{
+				m->key_x.begin = x_begin;
+				m->key_x.end = x_end;
+				TRACE("%p\n", (*x_begin).GetNodePtr().get() );
+			}
+			else if( shared_ptr<SubCollection> xsc = dynamic_pointer_cast<SubCollection>(*x) ) // hack for unordered stars
+			{
+				m->key_x.surrogate_pointer = xsc; // Need a SharedPtr that will stick around, ie not a local, because GenericPointIterator keeps a pointer to it, not a copy
+				m->key_x.begin = xsc->begin();
+				m->key_x.end = xsc->end();
+				if( !xsc->empty() )
+					TRACE("%p\n", (*(m->key_x.begin)).GetNodePtr().get() );
+			}
+			else // single node version (old school)
 			{
 				m->key_x.surrogate_pointer = *x; // Need a SharedPtr that will stick around, ie not a local, because GenericPointIterator keeps a pointer to it, not a copy
 				m->key_x.begin = GenericPointIterator( &(m->key_x.surrogate_pointer) );
 				m->key_x.end = GenericPointIterator();
-			}
-			else // range version (nu-skool)
-			{
-				m->key_x.begin = x_begin;
-				m->key_x.end = x_end;
+				TRACE("%p\n", (*(m->key_x.begin)).GetNodePtr().get() );
 			}
 			m->key_x.keyed = true;
 
@@ -912,10 +915,12 @@ SearchReplace::Result SearchReplace::MatchKeys::UpdateAndRestrict( GenericPointI
 			// with the tree node stored for the match set. This comparison should not match any match sets
 			// (it does not include stuff from any search or replace pattern) so do not allow match sets.
 			ASSERT( m->key_x.keyed ); // should have been caught by CheckMatchSetsKeyed()
-			if( x )
-				return sr->Compare( *x, *(m->key_x.begin), NULL );
-			else
+			if( !x )
 				return sr->Compare( *x_begin, *(m->key_x.begin), NULL );
+			else if( shared_ptr<SubCollection> xsc = dynamic_pointer_cast<SubCollection>(*x) ) // hack for unordered stars
+				return sr->Compare( *x, m->key_x.surrogate_pointer, NULL ); // dreadful hack
+			else
+				return sr->Compare( *x, *(m->key_x.begin), NULL );
 		}
 	}
 	return FOUND;

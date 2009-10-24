@@ -151,7 +151,9 @@ struct GenericCollection : virtual GenericContainer
 	// TOOD for these to work in practice, may need to make them more like
 	// push_back() in Sequence<>
 	virtual void insert( const GenericSharedPtr &gx ) = 0;
+	virtual void insert( const shared_ptr<Node> &gx ) = 0;
 	virtual int erase( const GenericSharedPtr &gx ) = 0;
+	virtual int erase( const shared_ptr<Node> &gx ) = 0;
 	virtual bool IsExist( const GenericSharedPtr &gx ) = 0;
 };
 
