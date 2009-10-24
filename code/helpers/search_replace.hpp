@@ -99,12 +99,12 @@ public:
         		                  shared_ptr<Node> pattern,
                                   const SearchReplace *sr,
                                   unsigned context_flags );
-        Result UpdateAndRestrict( GenericPointIterator x_begin,
-        		                  GenericPointIterator x_end,
+        Result UpdateAndRestrict( GenericContainer::iterator x_begin,
+        		                  GenericContainer::iterator x_end,
         		                  shared_ptr<Node> pattern,
         		                  const SearchReplace *sr,
         		                  unsigned context_flags,
-        		                  shared_ptr<Node> *x ); // internal use only
+        		                  shared_ptr<Node> *x=NULL ); // internal use only
         void CheckMatchSetsKeyed();
         void ClearKeys();
         void SetPass( Pass p ) { pass = p; }
@@ -221,14 +221,10 @@ private:
     void Replace( GenericContainer::iterator target,
     		      MatchKeys *match_keys );
 
-    // Internal node classes
+    // Internal node classes; need this because the sub-collection matching a star
+    // is not generally contiguous, and therefore not a range.
     struct SubCollection : Node,
                            Collection<Node>
-    {
-    	NODE_FUNCTIONS
-    };
-    struct SubSequence : Node,
-                         Sequence<Node>
     {
     	NODE_FUNCTIONS
     };
