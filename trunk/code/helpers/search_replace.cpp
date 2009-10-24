@@ -646,13 +646,12 @@ void SearchReplace::Overlay( GenericSequence *dest, GenericSequence *source, Mat
 		if( dynamic_pointer_cast<StarBase>(pp) )
 		{
 			// Seen a Star wildcard in replace pattern. It must be keyed to something, and that
-			// thing must be a SubSequence. Find it then expand the emements one by one directly
+			// thing must be a SubSequence. Find it then expand the elements one by one directly
 			// into the destination Sequence.
 			ASSERT( match_keys );
 			const MatchSet *match = match_keys->FindMatchSet( pp );
 			ASSERT( match )( "Star in replace pattern must be in a match set");
-			ASSERT( match->key_x )( "match set did not get keyed successfully");
-			shared_ptr<Node> n = DuplicateSubtree( match->key_x, match_keys, true );
+			shared_ptr<Node> n = DuplicateSubtree( match->GetKey(), match_keys, true );
 			shared_ptr<SubSequence> ss = dynamic_pointer_cast<SubSequence>(n);
 			ASSERT( ss )( "Star keyed to wrong thing, expected SubSequence");
 			TRACE("star seen; inserting subsequence length %d\n", ss->size() );
@@ -689,8 +688,7 @@ void SearchReplace::Overlay( GenericCollection *dest, GenericCollection *source,
 			ASSERT( match_keys );
             const MatchSet *match = match_keys->FindMatchSet( pp );
 			ASSERT( match )( "Star in replace pattern must be keyed for substitution");
-			ASSERT( match->key_x )( "match set did not get keyed");
-			shared_ptr<Node> n = DuplicateSubtree( match->key_x, match_keys, true );
+			shared_ptr<Node> n = DuplicateSubtree( match->GetKey(), match_keys, true );
 			shared_ptr<SubCollection> sc = dynamic_pointer_cast<SubCollection>(n);
 			ASSERT( sc )( "Star keyed to wrong thing, expected SubCollection");
 			TRACE("star seen; inserting subcollection length %d\n", sc->size() );
@@ -740,11 +738,10 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, Match
     	TRACE("substituting because found in match set\n");
         // It's in a match set, so substitute the key. Simplest to recurse for this. We will
     	// still overlay any non-NULL members of the source pattern node onto the result (see below)
-        ASSERT( match->key_x )("Match set in replace pattern but did not key to search pattern");
-        ASSERT( TypeInfo(source) >= TypeInfo(match->key_x) )
+        ASSERT( TypeInfo(source) >= TypeInfo(match->GetKey()) )
               ("source must be a non-strict superclass of local_substitute, so that it does not have more members (match set probably not all the same types)");
               //TODO simply require that every member of a match set has the exact same type
-        dest = DuplicateSubtree( match->key_x, match_keys, true );
+        dest = DuplicateSubtree( match->GetKey(), match_keys, true );
     }
     else
     {
