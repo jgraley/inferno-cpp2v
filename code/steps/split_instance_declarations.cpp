@@ -141,7 +141,7 @@ HackUpIfs::HackUpIfs()
 		  sif->body = scthen;
 		    shared_ptr< SearchReplace::Stuff<Statement> > ssthen( new SearchReplace::Stuff<Statement> );
 		    scthen->statements.push_back( ssthen );
-		    ssthen->terminus = shared_new< Statement >();
+		    ssthen->terminus = shared_new< Expression >();
 		  shared_ptr<Compound> scelse( new Compound );
 		  sif->else_body = scelse;
 		    shared_ptr< SearchReplace::Stuff<Statement> > sselse( new SearchReplace::Stuff<Statement> );
@@ -155,7 +155,7 @@ HackUpIfs::HackUpIfs()
 		  rif->else_body = shared_new< Nop >();
 
 		SearchReplace::MatchSet ms0;
-		ms0.insert( ssthen->terminus ); ms0.insert( sselse->terminus ); sms1.insert( ms0 ); // statement of interest
+		ms0.insert( ssthen ); ms0.insert( sselse ); sms1.insert( ms0 ); // statement of interest
 		SearchReplace::MatchSet ms1;
 		ms1.insert( stest ); ms1.insert( rtest ); sms1.insert( ms1 ); // condition
 

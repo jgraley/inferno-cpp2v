@@ -477,7 +477,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 {
 	ASSERT( stuff_pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
-	GenericCountingIterator start(0), end(0);
+	GenericCountingIterator begin(0), end(0);
 	{ // just count the nodes seen during the walk, to get an "end" iterator
 		Walk w( x );
 		while(!w.Done())
@@ -489,14 +489,14 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 	TRACE("Stuff at %p; counting %d nodes underneath\n", stuff_pattern.get(), end.GetCount());
 
     // Get decision from conjecture
-	GenericContainer::iterator thistime = conj.HandleDecision( start, end );
+	GenericContainer::iterator thistime = conj.HandleDecision( begin, end );
 	TRACE("Conjecture asks for number %d\n", thistime.GetCount());
 	if( thistime == (GenericContainer::iterator)end )
 		return NOT_FOUND; // ran out of choices
 
     // Walk that many places into the subtree
 	Walk w( x );
-	GenericContainer::iterator cur = start;
+	GenericContainer::iterator cur = begin;
 	while( !(cur == thistime) )
 	{
 		ASSERT( !w.Done() );
@@ -510,6 +510,15 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 	GenericContainer::iterator it = w.GetIterator(); // get an iterator for current position in tree, so we can change it
 	Result r = DecidedCompare( *it, stuff_pattern->terminus, match_keys, conj, context_flags );
 	TRACE("Result was %d\n", r);
+
+    // If we got this far, do the match sets
+    if( match_keys && r )
+        r = match_keys->KeyAndRestrict( (GenericContainer::iterator)begin,
+        		                        thistime,
+        		                        stuff_pattern,
+        		                        this,
+        		                        context_flags );
+
 	return r;
 }
 
@@ -818,6 +827,7 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, Match
 
     if( match )
     {
+    	ASSERT( !under_substitution );
     	TRACE("substituting because found in match set\n");
         // It's in a match set, so substitute the key. Simplest to recurse for this. We will
     	// still overlay any non-NULL members of the source pattern node onto the result (see below)
@@ -967,16 +977,18 @@ SearchReplace::Result SearchReplace::MatchKeys::KeyAndRestrict( GenericContainer
 
 	// Find a match set for this node. If the node is not in a match set then there's
 	// nothing for us to do, so return without restricting the search.
-	TRACE("Receiving node to key\n");
 	const MatchSet *m = FindMatchSet( pattern );
 	if( !m )
 		return FOUND;
+
+	TRACE("MATCH: ");
 
 	// If x was supplied then a range wasn't, so deduce the range from x
 	if( x )
 	{
 		if( shared_ptr< GenericContainer > x_container = dynamic_pointer_cast< GenericContainer >(*x) ) // hack for unordered stars
 		{
+			TRACE("Receiving container ");
 			// The node we saw was also a container, so remember a range spanning the whole container
 			// NOTE this means you shouldn't derive a node directly from a container unless you
 			// will not add any members, since this will ignore them.
@@ -985,6 +997,7 @@ SearchReplace::Result SearchReplace::MatchKeys::KeyAndRestrict( GenericContainer
 		}
 		else  // single node version (old school)
 		{
+			TRACE("Receiving node ");
 			// For other nodes, just set up a range of a single element, that being the node
 			// We use the surrogate pointer in the knowledge that it will be pointed to the same node as x
 			// if there's a match during keying
@@ -992,11 +1005,16 @@ SearchReplace::Result SearchReplace::MatchKeys::KeyAndRestrict( GenericContainer
 			x_end = GenericPointIterator();
 		}
 	}
+	else
+	{
+		TRACE("Receiving range ");
+	}
 
 	// If we're keying and we haven't keyed this node so far, key it now
-	TRACE("In ms pass %d\n", (int)pass);
+	TRACE("in pass %d ", (int)pass);
 	if( pass==KEYING && !(m->key_x.keyed) )
 	{
+		TRACE("keying...\n");
 		if( x )
 			m->key_x.surrogate_pointer = *x; // Need a SharedPtr that will stick around, ie not a local, because GenericPointIterator keeps a pointer to it, not a copy
 		m->key_x.begin = x_begin;
@@ -1009,16 +1027,20 @@ SearchReplace::Result SearchReplace::MatchKeys::KeyAndRestrict( GenericContainer
 	// If we're restricting, compare the supplied range with the one we keyed
 	if( pass==RESTRICTING )
 	{
-		// We are restricting the search, and this node has been keyed, so compare the present tree node
+		TRACE("restricting ");
+	    // We are restricting the search, and this node has been keyed, so compare the present tree node
 		// with the tree node stored for the match set. This comparison should not match any match sets
 		// (it does not include stuff from any search or replace pattern) so do not allow match sets.
 		// Since collections (which require decisions) can exist within the tree, we must allow iteration
 		// through choices, and since the number of decisions seen may vary, we must start a new conjecture.
 		// Therefore, we recurse back to Compare().
 		ASSERT( m->key_x.keyed ); // should have been caught by CheckMatchSetsKeyed()
-		return sr->Compare( x_begin, x_end, m->key_x.begin, m->key_x.end, NULL );
+		Result r = sr->Compare( x_begin, x_end, m->key_x.begin, m->key_x.end, NULL );
+		TRACE("result %d\n", r);
+		return r;
 	}
 
+	TRACE("\n");
 	return FOUND;
 }
 
