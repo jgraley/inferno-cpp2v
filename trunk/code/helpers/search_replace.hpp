@@ -186,18 +186,18 @@ private:
 
     // Replace ring
     void ClearPtrs( shared_ptr<Node> dest );
-    void OverlayPtrs( shared_ptr<Node> dest,
-    		          shared_ptr<Node> source,
-    		          MatchKeys *match_keys,
-    		          bool under_substitution );
-    void DuplicateSequence( GenericSequence *dest,
-    		                GenericSequence *source,
-    		                MatchKeys *match_keys,
-    		                bool under_substitution );
-    void DuplicateCollection( GenericCollection *dest,
-    	      	              GenericCollection *source,
-    	      	              MatchKeys *match_keys,
-    	      	              bool under_substitution );
+    void Overlay( shared_ptr<Node> dest,
+    		      shared_ptr<Node> source,
+    		      MatchKeys *match_keys,
+    		      bool under_substitution );
+    void Overlay( GenericSequence *dest,
+    		      GenericSequence *source,
+    		      MatchKeys *match_keys,
+    		      bool under_substitution );
+    void Overlay( GenericCollection *dest,
+    	          GenericCollection *source,
+    	          MatchKeys *match_keys,
+    	          bool under_substitution );
     shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x,
     		                           MatchKeys *match_keys,
     		                           bool under_substitution=false );

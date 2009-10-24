@@ -50,7 +50,7 @@ GenerateImplicitCasts::GenerateImplicitCasts()
 	SearchReplace::MatchSet ms_call;
 	ms_call.insert( s_call );
 	ms_call.insert( r_call );
-	sms0.insert( ms_call );
+	sms0.insert( ms_call ); // note: alternatively we could just match the <x>_other_args
 
 	SearchReplace::MatchSet ms_ident;
 	ms_ident.insert( s_param->identifier );

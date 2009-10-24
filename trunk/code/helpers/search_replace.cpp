@@ -583,7 +583,7 @@ void SearchReplace::ClearPtrs( shared_ptr<Node> dest )
 // Helper for DuplicateSubtree, fills in children of dest node from source node when source node child
 // is non-NULL. This means we can call this multiple times with different sources and get a priority 
 // scheme.
-void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source, MatchKeys *match_keys, bool under_substitution )
+void SearchReplace::Overlay( shared_ptr<Node> dest, shared_ptr<Node> source, MatchKeys *match_keys, bool under_substitution )
 {
     ASSERT( TypeInfo(source) >= TypeInfo(dest) )("source must be a non-strict subclass of destination, so that it does not have more members");
 
@@ -608,22 +608,22 @@ void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source,
         {
             GenericSequence *dest_seq = dynamic_cast<GenericSequence *>(dest_memb[i]);
             ASSERT( dest_seq && "itemise for dest didn't match itemise for source");
-            DuplicateSequence( dest_seq, source_seq, match_keys, under_substitution );
+            Overlay( dest_seq, source_seq, match_keys, under_substitution );
         }            
         else if( GenericCollection *source_col = dynamic_cast<GenericCollection *>(source_memb[i]) )
         {
         	GenericCollection *dest_col = dynamic_cast<GenericCollection *>(dest_memb[i]);
             ASSERT( dest_col && "itemise for dest didn't match itemise for source");
-            DuplicateCollection( dest_col, source_col, match_keys, under_substitution );
+            Overlay( dest_col, source_col, match_keys, under_substitution );
         }
         else if( GenericSharedPtr *source_ptr = dynamic_cast<GenericSharedPtr *>(source_memb[i]) )         
         {
             GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]);
             ASSERT( dest_ptr && "itemise for target didn't match itemise for source");
-            if( !under_substitution )
-            	ASSERT( *source_ptr || *dest_ptr )("Found NULL in replace pattern without a match set to substitute it");
             if( *source_ptr ) // Masked: where source is NULL, do not overwrite
                 *dest_ptr = DuplicateSubtree( *source_ptr, match_keys, under_substitution );
+            if( !under_substitution )
+            	ASSERT( *dest_ptr )("Found NULL in replace pattern without a match set to substitute it");
         }
         else
         {
@@ -632,7 +632,7 @@ void SearchReplace::OverlayPtrs( shared_ptr<Node> dest, shared_ptr<Node> source,
     }        
 }
 
-void SearchReplace::DuplicateSequence( GenericSequence *dest, GenericSequence *source, MatchKeys *match_keys, bool under_substitution )
+void SearchReplace::Overlay( GenericSequence *dest, GenericSequence *source, MatchKeys *match_keys, bool under_substitution )
 {
     // For now, always overwrite the dest
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
@@ -669,7 +669,7 @@ void SearchReplace::DuplicateSequence( GenericSequence *dest, GenericSequence *s
 	}
 }
 
-void SearchReplace::DuplicateCollection( GenericCollection *dest, GenericCollection *source, MatchKeys *match_keys, bool under_substitution )
+void SearchReplace::Overlay( GenericCollection *dest, GenericCollection *source, MatchKeys *match_keys, bool under_substitution )
 {
     // For now, always overwrite the dest
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
@@ -761,7 +761,7 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source, Match
     // Copy the source over, except for any NULLs in the source. If source is superclass
     // of destination (i.e. has possibly fewer members) the missing ones will be left alone.
     ASSERT( dest );
-    OverlayPtrs( dest, source, match_keys, under_substitution );
+    Overlay( dest, source, match_keys, under_substitution );
 
     return dest;
 }

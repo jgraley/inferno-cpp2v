@@ -39,9 +39,14 @@ done
 echo
 echo ------------------------------------------
 
+echo -n "Tests Run: "
+date
+echo
+
 if test $failed -eq 0
 then
- echo ALL TESTS PASSED
+ echo "ALL TESTS PASSED"
 else
- echo SOME TESTS FAILED
+ echo "SOME TESTS FAILED"
 fi
+
