@@ -70,12 +70,21 @@ public:
     	Choice HandleDecision( Choice begin, Choice end );
     };
 
-    // Match set - if required, construct a set of these, fill in the set
-    // of shared pointers but don't worry about key, pass to SearchReplace constructor. 
-    struct MatchSet : public set< shared_ptr<Node> > 
+    // Key for a match set, viewed as an STL-type range.
+    struct Key
     {
-        mutable shared_ptr<Node> key_x;    // This is filled in by the search and replace engine
-        shared_ptr<Node> GetKey() const { ASSERT(key_x); return key_x; }
+     	bool keyed; // begin and end only valid if this is true
+     	SharedPtr<Node> surrogate_pointer;
+     	Choice begin; // inclusive
+    	Choice end;   // exclusive
+    };
+
+    // Match set - if required, construct a set of these, fill in the set
+    // of shared pointers but don't worry about key, pass to SearchReplace constructor.
+    struct MatchSet : public set< shared_ptr<Node> >
+    {
+         mutable Key key_x;    // This is filled in by the search and replace engine
+         shared_ptr<Node> GetKey() const { ASSERT(key_x.keyed); return *(key_x.begin); }
     };
     struct MatchKeys : set<MatchSet>
     {
