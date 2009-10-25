@@ -70,11 +70,10 @@ public:
     {
     	NODE_FUNCTIONS;
     	SharedPtr<Node> terminus;
+    	SharedPtr<Node> restrictor;
     };
     template<class VALUE_TYPE>
     struct Stuff : StuffBase, VALUE_TYPE {	NODE_FUNCTIONS };
-
-
 
     enum Result { NOT_FOUND = (int)false,
     	          FOUND     = (int)true };

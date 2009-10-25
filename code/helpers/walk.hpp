@@ -17,6 +17,7 @@ class Walk
     bool IsValid();
     void Push( shared_ptr<Node> n );
     void Pop();
+    void PoppingIncrement();
 
 public:
     Walk( shared_ptr<Node> r );

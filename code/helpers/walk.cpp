@@ -4,7 +4,7 @@
 
 bool Walk::IsValid()
 {
-    if( state.empty() )
+    if( Done() )
         return true;
 
     Frame &f = state.top();
@@ -12,18 +12,18 @@ bool Walk::IsValid()
     return f.index < f.children.size();                      
 }
 
-void Walk::AdvanceOver()
+void Walk::PoppingIncrement()
 {
     Frame &f = state.top();
-    if( state.empty() )
+    if( Done() )
         return;
 
-    if( f.index == f.children.size() )
+    if( !IsValid() )
     {
         Pop();
-        if( state.empty() )
+        if( Done() )
             return;
-        AdvanceOver();
+        PoppingIncrement();
         return;
     }
 
@@ -66,9 +66,8 @@ Walk::Walk( shared_ptr<Node> r ) :
     root( r ) 
 {
     Frame f;
-    GenericSharedPtr *gsp = &root;
-    GenericPointIterator gpi(gsp);
-    f.children.push_back( gpi ); // TODO BUG this makes the point iterator for the top level be invalid
+    GenericPointIterator gpi(root);
+    f.children.push_back( gpi );
     f.index = 0;
     state.push( f );
 }        
@@ -126,9 +125,17 @@ void Walk::AdvanceInto()
     if( IsValid() && Get() )
         Push( Get() );
     else
-        AdvanceOver();
+        PoppingIncrement();
                 
     while( !IsValid() )
-        AdvanceOver();        
+        PoppingIncrement();
+}
+
+void Walk::AdvanceOver()
+{
+	PoppingIncrement();
+
+	while( !IsValid() )
+        PoppingIncrement();
 }
 

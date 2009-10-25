@@ -7,16 +7,16 @@ int S::b = 9;
 int main()
 {
     if(0)
-    {   
+       
 
             9;
 
 
-    }
+    
     else
     {
-
-            9;
+{        struct foo { void func() { 9; } };
+ }           
 
 
     }
