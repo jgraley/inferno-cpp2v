@@ -73,7 +73,6 @@ public:
     // Key for a match set
     struct Key
     {
-     	bool keyed; // begin and end only valid if this is true
      	SharedPtr<Node> root;
     };
 
@@ -81,7 +80,7 @@ public:
     // of shared pointers but don't worry about key, pass to SearchReplace constructor.
     struct MatchSet : public set< shared_ptr<Node> >
     {
-         mutable Key key;    // This is filled in by the search and replace engine
+         mutable shared_ptr<Key> key;    // This is filled in by the search and replace engine
     };
     struct MatchKeys : set<MatchSet>
     {
