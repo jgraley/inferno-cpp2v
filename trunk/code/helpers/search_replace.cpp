@@ -485,7 +485,11 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 		Walk w( x );
 		while(!w.Done())
 		{
-			w.AdvanceInto();
+			shared_ptr<Node> element = *(w.GetIterator());
+			if( !stuff_pattern->restrictor || TypeInfo(element) <= TypeInfo(stuff_pattern->restrictor) )
+				w.AdvanceInto();
+			else
+				w.AdvanceOver();
 			++end;
 		}
 	}
@@ -503,7 +507,11 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 	while( !(cur == thistime) )
 	{
 		ASSERT( !w.Done() );
-		w.AdvanceInto();
+		shared_ptr<Node> element = *(w.GetIterator());
+		if( !stuff_pattern->restrictor || TypeInfo(element) <= TypeInfo(stuff_pattern->restrictor) )
+			w.AdvanceInto();
+		else
+			w.AdvanceOver();
 		++cur;
 	}
 	ASSERT( cur==thistime );
@@ -801,7 +809,7 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 				TypeInfo(stuff_key->terminus).name().c_str(), stuff_key->terminus.get() );
 		if( source == stuff_key->terminus )
 	    {
-			TRACE( "Leaving substitution to duplciate terminus\n" );
+			TRACE( "Leaving substitution to duplicate terminus replace pattern\n" );
 		    return DuplicateSubtree( replace_stuff->terminus, match_keys, shared_ptr<Key>() );
 	    }
 	}
@@ -838,7 +846,7 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     		// for use when we hit terminus.
     		shared_ptr<StuffKey> stuff_key = dynamic_pointer_cast<StuffKey>(match->key);
     		stuff_key->replace_stuff = replace_stuff;
-    	    return DuplicateSubtree( match->key->root, match_keys, match->key );
+    	    dest = DuplicateSubtree( match->key->root, match_keys, match->key );
     	}
     	else
     	{
@@ -851,6 +859,10 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 				  ( "replace pattern %s must be a non-strict superclass of substitute %s, so that its members are a subset",
 					TypeInfo(source).name().c_str(), TypeInfo(match->key->root).name().c_str() );
 				  //TODO simply require that every member of a match set has the exact same type
+
+			// Copy the source over,  except for any NULLs in the source. If source is superclass
+		    // of destination (i.e. has possibly fewer members) the missing ones will be left alone.
+		    Overlay( dest, source, match_keys, current_key );
     	}
     }
     else
@@ -863,13 +875,12 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 
 		// Make all members in the destination be NULL
 		ClearPtrs( dest );
+
+		// Copy the source over, not allowing any NULLs this time
+		Overlay( dest, source, match_keys, current_key );
     }
     
-    // Copy the source over, except for any NULLs in the source. If source is superclass
-    // of destination (i.e. has possibly fewer members) the missing ones will be left alone.
     ASSERT( dest );
-    Overlay( dest, source, match_keys, current_key );
-
     return dest;
 }
 

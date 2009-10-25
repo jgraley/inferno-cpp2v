@@ -140,10 +140,12 @@ HackUpIfs::HackUpIfs()
 	      shared_ptr< SearchReplace::Stuff<Statement> > ssthen( new SearchReplace::Stuff<Statement> );
 		  sif->body = ssthen;
 		    ssthen->terminus = shared_new< Expression >();
+		    ssthen->restrictor = shared_new< Expression >();
 		  shared_ptr<Compound> scelse( new Compound );
   	      shared_ptr< SearchReplace::Stuff<Statement> > sselse( new SearchReplace::Stuff<Statement> );
 		  sif->else_body = sselse;
 		    sselse->terminus = shared_new< Statement >();
+		    sselse->restrictor = shared_new< Statement >();
 
         shared_ptr< SearchReplace::Stuff<Statement> > rs( new SearchReplace::Stuff<Statement> );
           shared_ptr<PostIncrement> rpi( new PostIncrement );
@@ -151,9 +153,9 @@ HackUpIfs::HackUpIfs()
             rpi->operands.push_back( shared_new< Expression >() );
 
   		SearchReplace::MatchSet ms0;
-  		ms0.insert( ssthen ); ms0.insert( sselse ); ms0.insert( rs ); sms1.insert( ms0 ); // statement of interest
+  		ms0.insert( ssthen ); ms0.insert( rs ); sms1.insert( ms0 ); // statement of interest
 		SearchReplace::MatchSet ms1;
-		ms1.insert( ssthen->terminus ); ms1.insert( rpi->operands[0] ); sms1.insert( ms1 ); // statement of interest
+		ms1.insert( ssthen->terminus ); ms1.insert( sselse->terminus ); ms1.insert( rpi->operands[0] ); sms1.insert( ms1 ); // statement of interest
 
 		sr1.Configure(sif, rs, &sms1);
 	}
