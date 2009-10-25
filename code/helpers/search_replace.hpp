@@ -70,22 +70,18 @@ public:
     	Choice HandleDecision( Choice begin, Choice end );
     };
 
-    // Key for a match set, viewed as an STL-type range.
+    // Key for a match set
     struct Key
     {
      	bool keyed; // begin and end only valid if this is true
-     	SharedPtr<Node> surrogate_pointer;
-     	Choice begin; // inclusive
-    	Choice end;   // exclusive
+     	SharedPtr<Node> root;
     };
 
     // Match set - if required, construct a set of these, fill in the set
     // of shared pointers but don't worry about key, pass to SearchReplace constructor.
     struct MatchSet : public set< shared_ptr<Node> >
     {
-         mutable Key key_x;    // This is filled in by the search and replace engine
-         GenericContainer::iterator GetKeyBegin() const { ASSERT(key_x.keyed); return key_x.begin; }
-         GenericContainer::iterator GetKeyEnd() const { ASSERT(key_x.keyed); return key_x.end; }
+         mutable Key key;    // This is filled in by the search and replace engine
     };
     struct MatchKeys : set<MatchSet>
     {
@@ -99,12 +95,6 @@ public:
         		               shared_ptr<Node> pattern,
                                const SearchReplace *sr,
                                unsigned context_flags );
-        Result KeyAndRestrict( GenericContainer::iterator x_begin,
-        		               GenericContainer::iterator x_end,
-        		               shared_ptr<Node> pattern,
-        		               const SearchReplace *sr,
-        		               unsigned context_flags,
-        		               shared_ptr<Node> *x=NULL ); // internal use only
         void CheckMatchSetsKeyed();
         void ClearKeys();
         void SetPass( Pass p ) { pass = p; }
@@ -237,8 +227,12 @@ private:
     void Replace( GenericContainer::iterator target,
     		      MatchKeys *match_keys );
 
-    // Internal node classes; need this because the sub-collection matching a star
-    // is not generally contiguous, and therefore not a range.
+    // Internal node classes
+    struct SubSequence : Node,
+                         Sequence<Node>
+    {
+    	NODE_FUNCTIONS
+    };
     struct SubCollection : Node,
                            Collection<Node>
     {

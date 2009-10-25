@@ -101,14 +101,14 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
     {
         // TODO support NULL pointers as input!
     	if( o )
-    	    ASSERT( *this )("Tried to convert shared_ptr<> to wrong sort of SharedPtr<>");
+    	    ASSERT( *this )("Cannot convert shared_ptr<%s> to SharedPtr<%s>", typeid(OTHER).name(), typeid(ELEMENT).name() );
     }
     SharedPtr( const GenericSharedPtr &g ) :
     	shared_ptr<ELEMENT>( dynamic_pointer_cast<ELEMENT>(g.GetNodePtr()) )
     {
         // TODO support NULL pointers as input!
     	if( g )
-    	    ASSERT( *this )("Tried to convert GenericSharedPtr to wrong sort of SharedPtr<>");
+    	    ASSERT( *this )("Cannot convert GenericSharedPtr that points to a %s to SharedPtr<%s>", typeid(*(g.GetNodePtr())).name(), typeid(ELEMENT).name());
     }
 };           
 
