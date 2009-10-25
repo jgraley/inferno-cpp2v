@@ -48,7 +48,7 @@
 //
 // - Multi-node wildcards like * in sequences and containers (Star node).
 //
-// - TODO Recursive wildcards, arbitrary depth and arbitrary depth with
+// - Recursive wildcards, arbitrary depth and arbitrary depth with
 //   restricted intermediates (the Stuff node).
 //
 // - TODO slave search/replace so that a second SR can happen for each match
@@ -60,17 +60,17 @@ public:
     // In a Sequence, only a contiguous subsequence of 0 or more elements will match
     // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
     // Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
-    // in the collection. TODO if the type is narrower, restrict any matches!!
+    // in the collection.
     struct StarBase : virtual Node { NODE_FUNCTIONS };
     template<class VALUE_TYPE>
     struct Star : StarBase, VALUE_TYPE { NODE_FUNCTIONS };
 
-    // The Stuff wildcard can match a
+    // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
     struct StuffBase : virtual Node
     {
     	NODE_FUNCTIONS;
-    	SharedPtr<Node> terminus;
-    	SharedPtr<Node> restrictor;
+    	SharedPtr<Node> restrictor; // Restricts the intermediate nodes in the truncated subtree
+    	SharedPtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
     };
     template<class VALUE_TYPE>
     struct Stuff : StuffBase, VALUE_TYPE {	NODE_FUNCTIONS };
