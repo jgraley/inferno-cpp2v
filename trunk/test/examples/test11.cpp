@@ -4,7 +4,7 @@ struct S { static int b; };
 int S::b = 9;
 
 // try to trigger multiple choice bug for stuff nodes when used with HackUpIfs
-int main()
+int ma()
 {
     if(0)
        
@@ -15,7 +15,7 @@ int main()
     
     else
     {
-{        struct foo { void func() { 9; } };
+{       
  }           
 
 
