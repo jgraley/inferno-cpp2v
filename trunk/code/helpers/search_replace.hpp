@@ -56,6 +56,26 @@
 class SearchReplace : Pass
 {  
 public:
+    // The * wildcard can match more than one node of any type in a container
+    // In a Sequence, only a contiguous subsequence of 0 or more elements will match
+    // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
+    // Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
+    // in the collection. TODO if the type is narrower, restrict any matches!!
+    struct StarBase : virtual Node { NODE_FUNCTIONS };
+    template<class VALUE_TYPE>
+    struct Star : StarBase, VALUE_TYPE { NODE_FUNCTIONS };
+
+    // The Stuff wildcard can match a
+    struct StuffBase : virtual Node
+    {
+    	NODE_FUNCTIONS;
+    	SharedPtr<Node> terminus;
+    };
+    template<class VALUE_TYPE>
+    struct Stuff : StuffBase, VALUE_TYPE {	NODE_FUNCTIONS };
+
+
+
     enum Result { NOT_FOUND = (int)false,
     	          FOUND     = (int)true };
 
@@ -70,10 +90,19 @@ public:
     	Choice HandleDecision( Choice begin, Choice end );
     };
 
-    // Key for a match set
+    // Base class for match set keys; this deals with individual node matches, and also with stars
+    // by means of pointing "root" at a SubCollection or SubSequence
     struct Key
     {
-     	SharedPtr<Node> root;
+    	virtual ~Key(){}  // be a virtual hierarchy
+    	SharedPtr<Node> root; // Tree node at matched pattern; root of any replace subtree
+    };
+
+    struct StuffKey : Key
+    {
+     	SharedPtr<StuffBase> search_stuff;
+     	SharedPtr<StuffBase> replace_stuff;
+     	SharedPtr<Node> terminus;
     };
 
     // Match set - if required, construct a set of these, fill in the set
@@ -94,29 +123,16 @@ public:
         		               shared_ptr<Node> pattern,
                                const SearchReplace *sr,
                                unsigned context_flags );
+        Result KeyAndRestrict( shared_ptr<Key> key,
+        		               shared_ptr<Node> pattern,
+                               const SearchReplace *sr,
+                               unsigned context_flags );
         void CheckMatchSetsKeyed();
         void ClearKeys();
         void SetPass( Pass p ) { pass = p; }
     };
     MatchKeys *matches;
 
-    // The * wildcard can match more than one node of any type in a container
-    // In a Sequence, only a contiguous subsequence of 0 or more elements will match
-    // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
-    // Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
-    // in the collection. TODO if the type is narrower, restrict any matches!!
-    struct StarBase : virtual Node { NODE_FUNCTIONS };
-    template<class VALUE_TYPE>
-    struct Star : StarBase, VALUE_TYPE { NODE_FUNCTIONS };
-
-    // The Stuff wildcard can match a
-    struct StuffBase : virtual Node
-    {
-    	NODE_FUNCTIONS;
-    	SharedPtr<Node> terminus;
-    };
-    template<class VALUE_TYPE>
-    struct Stuff : StuffBase, VALUE_TYPE {	NODE_FUNCTIONS };
 
     // Constructor and destructor. Search and replace patterns and match sets are 
     // specified here, so that we have a fully confiugured functor.
@@ -195,11 +211,6 @@ private:
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
     		        MatchKeys *match_keys = NULL ) const;
-    Result Compare( GenericContainer::iterator x_begin,
-                    GenericContainer::iterator x_end,
-                    GenericContainer::iterator pattern_begin,
-                    GenericContainer::iterator pattern_end,
-    		        MatchKeys *match_keys = NULL ) const;
 
     // Search ring
     bool Search( shared_ptr<Node> program,
@@ -211,18 +222,18 @@ private:
     void Overlay( shared_ptr<Node> dest,
     		      shared_ptr<Node> source,
     		      MatchKeys *match_keys,
-    		      bool under_substitution );
+    		      shared_ptr<Key> current_key ); // under substitution if not NULL
     void Overlay( GenericSequence *dest,
     		      GenericSequence *source,
     		      MatchKeys *match_keys,
-    		      bool under_substitution );
+    		      shared_ptr<Key> current_key );
     void Overlay( GenericCollection *dest,
     	          GenericCollection *source,
     	          MatchKeys *match_keys,
-    	          bool under_substitution );
+    	          shared_ptr<Key> current_key );
     shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x,
     		                           MatchKeys *match_keys,
-    		                           bool under_substitution=false );
+    		                           shared_ptr<Key> current_key=shared_ptr<Key>() );
     void Replace( GenericContainer::iterator target,
     		      MatchKeys *match_keys );
 

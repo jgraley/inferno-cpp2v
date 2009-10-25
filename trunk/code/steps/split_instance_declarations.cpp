@@ -137,31 +137,25 @@ HackUpIfs::HackUpIfs()
 		shared_ptr<If> sif( new If );
 		  shared_ptr<Expression> stest( new Expression );
 		  sif->condition = stest;
-		  shared_ptr<Compound> scthen( new Compound );
-		  sif->body = scthen;
-		    shared_ptr< SearchReplace::Stuff<Statement> > ssthen( new SearchReplace::Stuff<Statement> );
-		    scthen->statements.push_back( ssthen );
+	      shared_ptr< SearchReplace::Stuff<Statement> > ssthen( new SearchReplace::Stuff<Statement> );
+		  sif->body = ssthen;
 		    ssthen->terminus = shared_new< Expression >();
 		  shared_ptr<Compound> scelse( new Compound );
-		  sif->else_body = scelse;
-		    shared_ptr< SearchReplace::Stuff<Statement> > sselse( new SearchReplace::Stuff<Statement> );
-		    scelse->statements.push_back( sselse );
+  	      shared_ptr< SearchReplace::Stuff<Statement> > sselse( new SearchReplace::Stuff<Statement> );
+		  sif->else_body = sselse;
 		    sselse->terminus = shared_new< Statement >();
 
-		shared_ptr<If> rif( new If );
-		  shared_ptr<Expression> rtest( new Expression );
-		  rif->condition = rtest;
-		  rif->body = shared_new< Nop >();
-		  rif->else_body = shared_new< Nop >();
+        shared_ptr< SearchReplace::Stuff<Statement> > rs( new SearchReplace::Stuff<Statement> );
+          shared_ptr<PostIncrement> rpi( new PostIncrement );
+          rs->terminus = rpi;
+            rpi->operands.push_back( shared_new< Expression >() );
 
-		SearchReplace::MatchSet ms0;
-		ms0.insert( ssthen ); ms0.insert( sselse ); sms1.insert( ms0 ); // statement of interest
+  		SearchReplace::MatchSet ms0;
+  		ms0.insert( ssthen ); ms0.insert( sselse ); ms0.insert( rs ); sms1.insert( ms0 ); // statement of interest
 		SearchReplace::MatchSet ms1;
-		ms1.insert( stest ); ms1.insert( rtest ); sms1.insert( ms1 ); // condition
+		ms1.insert( ssthen->terminus ); ms1.insert( rpi->operands[0] ); sms1.insert( ms1 ); // statement of interest
 
-		TRACE("mid %p %d\n", rif->condition.get(), (int)!!rif->condition );
-
-		sr1.Configure(sif, rif, &sms1);
+		sr1.Configure(sif, rs, &sms1);
 	}
 }
 
