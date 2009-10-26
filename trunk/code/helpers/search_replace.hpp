@@ -53,7 +53,7 @@
 //
 // - TODO slave search/replace so that a second SR can happen for each match
 //   of the first one, and can borrow its match sets.
-class SearchReplace : Pass
+class RootedSearchReplace : Pass
 {  
 public:
     // The * wildcard can match more than one node of any type in a container
@@ -105,7 +105,7 @@ public:
     };
 
     // Match set - if required, construct a set of these, fill in the set
-    // of shared pointers but don't worry about key, pass to SearchReplace constructor.
+    // of shared pointers but don't worry about key, pass to RootedSearchReplace constructor.
     struct MatchSet : public set< shared_ptr<Node> >
     {
          mutable shared_ptr<Key> key;    // This is filled in by the search and replace engine
@@ -120,11 +120,11 @@ public:
         const MatchSet *FindMatchSet( shared_ptr<Node> node );
         Result KeyAndRestrict( shared_ptr<Node> x,
         		               shared_ptr<Node> pattern,
-                               const SearchReplace *sr,
+                               const RootedSearchReplace *sr,
                                unsigned context_flags );
         Result KeyAndRestrict( shared_ptr<Key> key,
         		               shared_ptr<Node> pattern,
-                               const SearchReplace *sr,
+                               const RootedSearchReplace *sr,
                                unsigned context_flags );
         void CheckMatchSetsKeyed();
         void ClearKeys();
@@ -135,13 +135,13 @@ public:
 
     // Constructor and destructor. Search and replace patterns and match sets are 
     // specified here, so that we have a fully confiugured functor.
-    SearchReplace( shared_ptr<Node> sp=shared_ptr<Node>(), 
+    RootedSearchReplace( shared_ptr<Node> sp=shared_ptr<Node>(),
                    shared_ptr<Node> rp=shared_ptr<Node>(),
                    set<MatchSet> *m = NULL );
     void Configure( shared_ptr<Node> sp=shared_ptr<Node>(),
                     shared_ptr<Node> rp=shared_ptr<Node>(),
                     set<MatchSet> *m = NULL );
-    ~SearchReplace();
+    ~RootedSearchReplace();
     
     // Do the actual search and replace (functor style; implements Pass interface).
     void operator()( shared_ptr<Program> p );
@@ -152,7 +152,7 @@ public:
     shared_ptr<Program> GetProgram() const { ASSERT(program); return program; } 
     struct SoftSearchPattern : virtual Node
     {
-        virtual SearchReplace::Result DecidedCompare( const SearchReplace *sr,
+        virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
         		                                      shared_ptr<Node> x,
         		                                      MatchKeys *match_keys,
         		                                      Conjecture &conj,
@@ -211,11 +211,6 @@ private:
     		        shared_ptr<Node> pattern,
     		        MatchKeys *match_keys = NULL ) const;
 
-    // Search ring
-    bool Search( shared_ptr<Node> program,
-    		     GenericContainer::iterator &gp,
-    		     MatchKeys *match_keys = NULL ) const;
-
     // Replace ring
     void ClearPtrs( shared_ptr<Node> dest );
     void Overlay( shared_ptr<Node> dest,
@@ -247,6 +242,18 @@ private:
     {
     	NODE_FUNCTIONS
     };
+};
+
+
+class SearchReplace : public RootedSearchReplace
+{
+public:
+    SearchReplace( shared_ptr<Node> sp=shared_ptr<Node>(),
+                   shared_ptr<Node> rp=shared_ptr<Node>(),
+                   set<MatchSet> *m = NULL );
+    void Configure( shared_ptr<Node> sp=shared_ptr<Node>(),
+                    shared_ptr<Node> rp=shared_ptr<Node>(),
+                    set<MatchSet> *m = NULL );
 };
 
 #endif
