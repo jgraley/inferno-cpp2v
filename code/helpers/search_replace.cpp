@@ -73,7 +73,7 @@
  *
  * Each layer appears stateless to the layer that calls it. That is to say, the functions are idempotent.
  * For this reason we do not need to segregate them into separate classes. They will all be "const" members
- * of the SearchReplace class and will not modify class members (like the search pattern and match sets).
+ * of the RootedSearchReplace class and will not modify class members (like the search pattern and match sets).
  *
  * Match sets are as documented elsewhere. Instead of "hidden" mutable key elements, there will be a backing
  * map linking tree nodes to search pattern nodes in the match set. This will be an output of
@@ -128,7 +128,7 @@
  */
 
 // Constructor remembers search pattern, replace pattern and any supplied match sets as required
-SearchReplace::SearchReplace( shared_ptr<Node> sp, 
+RootedSearchReplace::RootedSearchReplace( shared_ptr<Node> sp,
                               shared_ptr<Node> rp,
                               set<MatchSet> *m )
 {
@@ -136,7 +136,7 @@ SearchReplace::SearchReplace( shared_ptr<Node> sp,
 	Configure( sp, rp, m );
 }
 
-void SearchReplace::Configure( shared_ptr<Node> sp,
+void RootedSearchReplace::Configure( shared_ptr<Node> sp,
                                shared_ptr<Node> rp,
                                set<MatchSet> *m )
 {  
@@ -154,7 +154,7 @@ void SearchReplace::Configure( shared_ptr<Node> sp,
 
 
 // Destructor tries not to leak memory lol
-SearchReplace::~SearchReplace()
+RootedSearchReplace::~RootedSearchReplace()
 {
     if( our_matches )    
         delete matches;
@@ -163,7 +163,7 @@ SearchReplace::~SearchReplace()
 
 // Helper for DecidedCompare that does the testing for the present node, including
 // superclass wildcarding and data member checking on Property nodes.
-bool SearchReplace::LocalCompare( shared_ptr<Node> x, shared_ptr<Node> pattern ) const
+bool RootedSearchReplace::LocalCompare( shared_ptr<Node> x, shared_ptr<Node> pattern ) const
 {
     TRACE();
     ASSERT( pattern ); // Disallow NULL pattern for now, could change this if required
@@ -236,7 +236,7 @@ bool SearchReplace::LocalCompare( shared_ptr<Node> x, shared_ptr<Node> pattern )
 
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
+RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
 		                                             shared_ptr<Node> pattern,
 		                                             MatchKeys *match_keys,
 		                                             Conjecture &conj,
@@ -318,7 +318,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 
 // xstart and pstart are the indexes into the sequence where we will begin checking for a match.
 // It is assumed that elements before these have already been matched and may be ignored.
-SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
+RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( GenericSequence &x,
 		                                             GenericSequence &pattern,
 		                                             MatchKeys *match_keys,
 		                                             Conjecture &conj,
@@ -407,7 +407,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericSequence &x,
 }
 
 
-SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
+RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( GenericCollection &x,
 		                                             GenericCollection &pattern,
 		                                             MatchKeys *match_keys,
 		                                             Conjecture &conj,
@@ -472,7 +472,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( GenericCollection &x,
 
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
+RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
 		                                             shared_ptr<StuffBase> stuff_pattern,
 		                                             MatchKeys *match_keys,
 		                                             Conjecture &conj,
@@ -537,7 +537,7 @@ SearchReplace::Result SearchReplace::DecidedCompare( shared_ptr<Node> x,
 }
 
 
-SearchReplace::Result SearchReplace::MatchingDecidedCompare( shared_ptr<Node> x,
+RootedSearchReplace::Result RootedSearchReplace::MatchingDecidedCompare( shared_ptr<Node> x,
 		                                                     shared_ptr<Node> pattern,
 		                                                     MatchKeys *match_keys,
 		                                                     Conjecture &conj ) const
@@ -572,7 +572,7 @@ SearchReplace::Result SearchReplace::MatchingDecidedCompare( shared_ptr<Node> x,
 }
 
 
-SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
+RootedSearchReplace::Result RootedSearchReplace::Compare( shared_ptr<Node> x,
 		                                      shared_ptr<Node> pattern,
 		                                      MatchKeys *match_keys,
 		                                      Conjecture &conj,
@@ -594,7 +594,7 @@ SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 }
 
 
-SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
+RootedSearchReplace::Result RootedSearchReplace::Compare( shared_ptr<Node> x,
 		                                      shared_ptr<Node> pattern,
 		                                      MatchKeys *match_keys ) const
 {
@@ -607,28 +607,8 @@ SearchReplace::Result SearchReplace::Compare( shared_ptr<Node> x,
 }
 
 
-// Search supplied program for a match to the configured search pattern.
-// If found, return double pointer to assist replace algorithm.
-bool SearchReplace::Search( shared_ptr<Node> program,
-		                    GenericContainer::iterator &it,
-		                    MatchKeys *match_keys ) const
-{
-    Walk w( program );
-    while(!w.Done())
-    {
-        it = w.GetIterator(); // get an iterator for current position in tree, so we can change it
-        Result r = Compare( *it, search_pattern, match_keys );
-        if( r == FOUND )
-            return true;
-        w.AdvanceInto(); 
-    }    
-    
-    return false;
-}
-
-
 // Clear all pointer members in supplied dest to NULL
-void SearchReplace::ClearPtrs( shared_ptr<Node> dest )
+void RootedSearchReplace::ClearPtrs( shared_ptr<Node> dest )
 {
     vector< Itemiser::Element * > dest_memb = Itemiser::Itemise( dest.get() );
     for( int i=0; i<dest_memb.size(); i++ )
@@ -652,10 +632,10 @@ void SearchReplace::ClearPtrs( shared_ptr<Node> dest )
 // Helper for DuplicateSubtree, fills in children of dest node from source node when source node child
 // is non-NULL. This means we can call this multiple times with different sources and get a priority 
 // scheme.
-void SearchReplace::Overlay( shared_ptr<Node> dest,
-		                     shared_ptr<Node> source,
-		                     MatchKeys *match_keys,
-		                     shared_ptr<Key> current_key )
+void RootedSearchReplace::Overlay( shared_ptr<Node> dest,
+		                           shared_ptr<Node> source,
+		                           MatchKeys *match_keys,
+		                           shared_ptr<Key> current_key )
 {
     ASSERT( TypeInfo(source) >= TypeInfo(dest) )("source must be a non-strict subclass of destination, so that it does not have more members");
 
@@ -705,7 +685,7 @@ void SearchReplace::Overlay( shared_ptr<Node> dest,
 }
 
 
-void SearchReplace::Overlay( GenericSequence *dest,
+void RootedSearchReplace::Overlay( GenericSequence *dest,
 		                     GenericSequence *source,
 		                     MatchKeys *match_keys,
 		                     shared_ptr<Key> current_key )
@@ -745,7 +725,7 @@ void SearchReplace::Overlay( GenericSequence *dest,
 }
 
 
-void SearchReplace::Overlay( GenericCollection *dest,
+void RootedSearchReplace::Overlay( GenericCollection *dest,
 		                     GenericCollection *source,
 		                     MatchKeys *match_keys,
 		                     shared_ptr<Key> current_key )
@@ -792,7 +772,7 @@ void SearchReplace::Overlay( GenericCollection *dest,
 // substituting.
 // TODO possible refactor: when we detect a match set match, maybe recurse back into DuplicateSubtree
 // and get the two OverlayPtrs during unwind.
-shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source,
+shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 		                                          MatchKeys *match_keys,
 		                                          shared_ptr<Key> current_key )
 {
@@ -888,7 +868,7 @@ shared_ptr<Node> SearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 // Perform the configured replacement at the supplied target.
 // Note target is a double pointer, since we wish to enact the
 // replacement by changing a SharedPtr somewhere.
-void SearchReplace::Replace( GenericContainer::iterator target, MatchKeys *match_keys )
+void RootedSearchReplace::Replace( GenericContainer::iterator target, MatchKeys *match_keys )
 {
     ASSERT( replace_pattern );
     SharedPtr<Node> nn( DuplicateSubtree( replace_pattern, match_keys ) );
@@ -900,31 +880,37 @@ void SearchReplace::Replace( GenericContainer::iterator target, MatchKeys *match
 // Perform search and replace on supplied program based
 // on current patterns and match sets. Does search and replace
 // operations repeatedly until there are no more matches.
-void SearchReplace::operator()( shared_ptr<Program> p )
+void RootedSearchReplace::operator()( shared_ptr<Program> p )
 {
-    program = p;
-    GenericContainer::iterator it;
+	program = p;
+	SharedPtr<Node> prog(p);
     int i=0;
     while(1)
     {
-        bool found = Search( program, it, matches );
-        if( found )
+    	GenericPointIterator pit( prog );
+    	TRACE("Begin search\n");
+    	Result r = Compare( *pit, search_pattern, matches );
+        if( r == FOUND )
         {
         	TRACE("Search successful, now replacing\n");
-            Replace( it, matches );
+            Replace( pit, matches );
+           	TRACE("Done replace\n");
+            // TODO operator() should take a ref to the shared_ptr<Program> and just change it directly
+            shared_ptr<Program> pp = dynamic_pointer_cast<Program>(prog);
+            ASSERT(pp)("Replace changed root Program node into something else!");
+            *p = *pp; // Egregiously copy over the contents of the program node
         }
         else
             break;
-        if( i==100 )
-        	break;
+       	ASSERT(i<100)("Too many hits");
         i++;
     }
-    program = shared_ptr<Program>(); // TODO why?
+    program = shared_ptr<Program>(); // just to avoid us relying on the program outside of a search+replace pass
 }
 
 
 // Find a match set containing the supplied node
-const SearchReplace::MatchSet *SearchReplace::MatchKeys::FindMatchSet( shared_ptr<Node> node )
+const RootedSearchReplace::MatchSet *RootedSearchReplace::MatchKeys::FindMatchSet( shared_ptr<Node> node )
 {
 	ASSERT( this );
 
@@ -940,7 +926,7 @@ const SearchReplace::MatchSet *SearchReplace::MatchKeys::FindMatchSet( shared_pt
 }
 
 
-void SearchReplace::MatchKeys::CheckMatchSetsKeyed()
+void RootedSearchReplace::MatchKeys::CheckMatchSetsKeyed()
 {
 	ASSERT( this );
 
@@ -962,7 +948,7 @@ void SearchReplace::MatchKeys::CheckMatchSetsKeyed()
 
 
 // Reset the keys in all the matchsets 
-void SearchReplace::MatchKeys::ClearKeys()
+void RootedSearchReplace::MatchKeys::ClearKeys()
 {
 	ASSERT( this );
 
@@ -979,9 +965,9 @@ void SearchReplace::MatchKeys::ClearKeys()
 // 1. Key it into a match set of required and
 // 2. Detect whether a match set required two parts of the search tree to match and
 // reject if they don't.
-SearchReplace::Result SearchReplace::MatchKeys::KeyAndRestrict( shared_ptr<Node> x,
+RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shared_ptr<Node> x,
 		                                                        shared_ptr<Node> pattern,
-		                                                        const SearchReplace *sr,
+		                                                        const RootedSearchReplace *sr,
 		                                                        unsigned context_flags )
 {
 	shared_ptr<Key> key( new Key );
@@ -989,9 +975,9 @@ SearchReplace::Result SearchReplace::MatchKeys::KeyAndRestrict( shared_ptr<Node>
 	return KeyAndRestrict( key, pattern, sr, context_flags );
 }
 
-SearchReplace::Result SearchReplace::MatchKeys::KeyAndRestrict( shared_ptr<Key> key,
+RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shared_ptr<Key> key,
 		                                                        shared_ptr<Node> pattern,
-		                                                        const SearchReplace *sr,
+		                                                        const RootedSearchReplace *sr,
 		                                                        unsigned context_flags )
 {
 	ASSERT( this );
@@ -1033,7 +1019,7 @@ SearchReplace::Result SearchReplace::MatchKeys::KeyAndRestrict( shared_ptr<Key> 
 	return FOUND;
 }
 
-void SearchReplace::Conjecture::PrepareForDecidedCompare()
+void RootedSearchReplace::Conjecture::PrepareForDecidedCompare()
 {
 	ASSERT( this );
 
@@ -1041,7 +1027,7 @@ void SearchReplace::Conjecture::PrepareForDecidedCompare()
 	decisions_count = 0;
 }
 
-bool SearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
+bool RootedSearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
 {
 	ASSERT( this );
 
@@ -1054,8 +1040,8 @@ bool SearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
     return true;
 }
 
-SearchReplace::Choice SearchReplace::Conjecture::HandleDecision( SearchReplace::Choice begin,
-		                                                         SearchReplace::Choice end )
+RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( RootedSearchReplace::Choice begin,
+		                                                         RootedSearchReplace::Choice end )
 {
 	ASSERT( this );
 
@@ -1068,7 +1054,7 @@ SearchReplace::Choice SearchReplace::Conjecture::HandleDecision( SearchReplace::
 	}
 
 	// Adopt the current decision based on Conjecture
-	SearchReplace::Choice c = (*this)[decisions_count]; // Get present decision
+	RootedSearchReplace::Choice c = (*this)[decisions_count]; // Get present decision
 
 	// Check the decision obeys bounds
 	if( c == end )
@@ -1097,9 +1083,35 @@ SearchReplace::Choice SearchReplace::Conjecture::HandleDecision( SearchReplace::
 }
 
 
-void SearchReplace::Test()
+SearchReplace::SearchReplace( shared_ptr<Node> sp,
+                              shared_ptr<Node> rp,
+                              set<MatchSet> *m ) :
+    RootedSearchReplace( sp, rp, m )
 {
-    SearchReplace sr;
+}
+
+
+void SearchReplace::Configure( shared_ptr<Node> sp,
+                               shared_ptr<Node> rp,
+                               set<MatchSet> *m )
+{
+	shared_ptr< Stuff<Scope> > search_root( new Stuff<Scope> );
+	search_root->terminus = sp;
+	shared_ptr< Stuff<Scope> > replace_root( new Stuff<Scope> );
+	replace_root->terminus = rp;
+
+	MatchSet root_match;
+	root_match.insert( search_root );
+	root_match.insert( replace_root );
+	m->insert( root_match ); // TODO don't modify in place!
+
+    RootedSearchReplace::Configure( search_root, replace_root, m );
+}
+
+
+void RootedSearchReplace::Test()
+{
+    RootedSearchReplace sr;
     
     {
         // single node with topological wildcarding

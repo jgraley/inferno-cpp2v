@@ -1,10 +1,10 @@
 #include "soft_patterns.hpp"
 
-SearchReplace::Result SoftExpressonOfType::DecidedCompare( const SearchReplace *sr,
-		                                                   shared_ptr<Node> x,
-		                                                   SearchReplace::MatchKeys *match_keys,
-		                                                   SearchReplace::Conjecture &conj,
-		                                                   unsigned context_flags ) const
+RootedSearchReplace::Result SoftExpressonOfType::DecidedCompare( const RootedSearchReplace *sr,
+		                                                         shared_ptr<Node> x,
+		                                                         RootedSearchReplace::MatchKeys *match_keys,
+		                                                         RootedSearchReplace::Conjecture &conj,
+		                                                         unsigned context_flags ) const
 {
 	if( shared_ptr<Expression> xe = dynamic_pointer_cast<Expression>(x) )
 	{
@@ -21,6 +21,6 @@ SearchReplace::Result SoftExpressonOfType::DecidedCompare( const SearchReplace *
 	    // not even an expression lol that aint going to match (means this node must be in a wider
 		// context eg Node or Statement, and the tree contained something other than Expression - so
 		// we're restricting to Expressions in addition to checking the type)
-	    return SearchReplace::NOT_FOUND;
+	    return RootedSearchReplace::NOT_FOUND;
 	}        
 }     
