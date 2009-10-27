@@ -117,6 +117,9 @@ public:
     		set<MatchSet>(s)
     	{
     	}
+    	MatchKeys()
+    	{
+    	}
         const MatchSet *FindMatchSet( shared_ptr<Node> node );
         Result KeyAndRestrict( shared_ptr<Node> x,
         		               shared_ptr<Node> pattern,
@@ -162,11 +165,12 @@ public:
     // Some self-testing
     static void Test();
         
-private:
     shared_ptr<Node> search_pattern;
     shared_ptr<Node> replace_pattern;
     bool our_matches;
     shared_ptr<Program> program;
+
+private:
     
     // LocalCompare ring
     bool LocalCompare( shared_ptr<Node> x,
@@ -207,9 +211,11 @@ private:
     		        MatchKeys *match_keys,
     		        Conjecture &conj,
     		        int threshold ) const;
+public:
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
     		        MatchKeys *match_keys = NULL ) const;
+private:
 
     // Replace ring
     void ClearPtrs( shared_ptr<Node> dest );

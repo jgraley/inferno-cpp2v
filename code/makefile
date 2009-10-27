@@ -6,7 +6,7 @@ INFERNO_MODULES += tree/tree tree/generics tree/type_db tree/itemise_members
 INFERNO_MODULES += helpers/scope helpers/misc helpers/typeof helpers/walk helpers/search_replace helpers/soft_patterns
 INFERNO_MODULES += parse/identifier_tracker 
 INFERNO_MODULES += render/sort_decls 
-INFERNO_MODULES += steps/split_instance_declarations steps/generate_implicit_casts 
+INFERNO_MODULES += steps/split_instance_declarations steps/generate_implicit_casts steps/generate_stacks
 INFERNO_MODULES += inferno
 
 $(INFERNO_MODULES:%=build/%.o) : build/%.o : %.cpp */*.hpp */*.inc $(DEPS)

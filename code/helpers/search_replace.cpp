@@ -137,8 +137,8 @@ RootedSearchReplace::RootedSearchReplace( shared_ptr<Node> sp,
 }
 
 void RootedSearchReplace::Configure( shared_ptr<Node> sp,
-                               shared_ptr<Node> rp,
-                               set<MatchSet> *m )
+                                     shared_ptr<Node> rp,
+                                     set<MatchSet> *m )
 {  
     search_pattern = sp;
     replace_pattern = rp;
@@ -156,7 +156,7 @@ void RootedSearchReplace::Configure( shared_ptr<Node> sp,
 // Destructor tries not to leak memory lol
 RootedSearchReplace::~RootedSearchReplace()
 {
-    if( our_matches )    
+    if( our_matches )
         delete matches;
 }
 
@@ -782,16 +782,19 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     // Are we substituting a stuff node?
 	if( shared_ptr<StuffKey> stuff_key = dynamic_pointer_cast<StuffKey>(current_key) )
 	{
-		shared_ptr<StuffBase> replace_stuff = stuff_key->replace_stuff;
-		ASSERT( replace_stuff );
-		TRACE( "Substituting stuff: source=%s:%p, term=%s:%p\n",
-				TypeInfo(source).name().c_str(), source.get(),
-				TypeInfo(stuff_key->terminus).name().c_str(), stuff_key->terminus.get() );
-		if( source == stuff_key->terminus )
-	    {
-			TRACE( "Leaving substitution to duplicate terminus replace pattern\n" );
-		    return DuplicateSubtree( replace_stuff->terminus, match_keys, shared_ptr<Key>() );
-	    }
+		if( stuff_key->terminus ) // NULL terminus in replace just means "substitute everything"
+		{
+			shared_ptr<StuffBase> replace_stuff = stuff_key->replace_stuff;
+			ASSERT( replace_stuff );
+			TRACE( "Substituting stuff: source=%s:%p, term=%s:%p\n",
+					TypeInfo(source).name().c_str(), source.get(),
+					TypeInfo(stuff_key->terminus).name().c_str(), stuff_key->terminus.get() );
+			if( source == stuff_key->terminus )
+			{
+				TRACE( "Leaving substitution to duplicate terminus replace pattern\n" );
+				return DuplicateSubtree( replace_stuff->terminus, match_keys, shared_ptr<Key>() );
+			}
+		}
 	}
 
 	// Do not duplicate identifiers if they are being substituted from the original tree.
@@ -993,7 +996,7 @@ RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shar
 	TRACE("in pass %d ", (int)pass);
 	if( pass==KEYING && !(match->key) )
 	{
-		TRACE("keying...\n");
+		TRACE("keying... match set %p key ptr %p new value %p\n", &match, &(match->key), key.get());
 		match->key = key;
 
 		return FOUND; // always match when keying (could restrict here too as a slight optimisation, but KISS for now)

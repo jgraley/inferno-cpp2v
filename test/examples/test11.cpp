@@ -1,4 +1,4 @@
-
+/*
 // basic trigger for crazynine
 struct S { static int b; };
 int S::b = 9;
@@ -21,4 +21,7 @@ int ma()
 
     }
 }
+*/
+
+int a;
 
