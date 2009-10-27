@@ -11,6 +11,7 @@
 #include "helpers/validate.hpp"
 #include "steps/split_instance_declarations.hpp"
 #include "steps/generate_implicit_casts.hpp"
+#include "steps/generate_stacks.hpp"
 
 void SelfTest();
 
@@ -32,7 +33,7 @@ int main( int argc, char *argv[] )
               
     Validate()(program);                
 
-    if( --ReadArgs::quitafter >= 0 )
+ /*   if( --ReadArgs::quitafter >= 0 )
     {
         SplitInstanceDeclarations()(program);
         Validate()(program);
@@ -43,10 +44,10 @@ int main( int argc, char *argv[] )
     	GenerateImplicitCasts()(program);
         Validate()(program);
     }
-
+*/
     if( --ReadArgs::quitafter >= 0 )
     {
-    	HackUpIfs()(program);
+    	GenerateStacks()(program);
         Validate()(program);
     }
 

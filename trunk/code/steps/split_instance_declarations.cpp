@@ -76,7 +76,7 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
 void SplitInstanceDeclarations::operator()( shared_ptr<Program> program )
 {
 	sr0( program );
-	//sr1( program );
+	sr1( program );
 }
 
 MergeInstanceDeclarations::MergeInstanceDeclarations()
