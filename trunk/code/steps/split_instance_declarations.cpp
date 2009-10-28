@@ -1,8 +1,5 @@
 #include "split_instance_declarations.hpp"
 
-SplitInstanceDeclarations::SplitInstanceDeclarations()
-{
-}
 
 void SplitInstanceDeclarations::operator()( shared_ptr<Program> program )
 {
@@ -84,9 +81,6 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Program> program )
 	sr1( program );
 }
 
-MergeInstanceDeclarations::MergeInstanceDeclarations()
-{
-}
 
 void MergeInstanceDeclarations::operator()( shared_ptr<Program> program )
 {
@@ -138,9 +132,6 @@ void MergeInstanceDeclarations::operator()( shared_ptr<Program> program )
 	sr1( program );
 }
 
-HackUpIfs::HackUpIfs()
-{
-}
 
 void HackUpIfs::operator()( shared_ptr<Program> program )
 {
@@ -175,10 +166,6 @@ void HackUpIfs::operator()( shared_ptr<Program> program )
 	sr1( program );
 }
 
-
-CrazyNine::CrazyNine()
-{
-}
 
 void CrazyNine::operator()( shared_ptr<Program> program )
 {

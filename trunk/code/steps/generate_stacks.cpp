@@ -11,14 +11,10 @@
 #include "common/refcount.hpp"
 #include "helpers/soft_patterns.hpp"
 
-GenerateStacks::GenerateStacks()
-{
-}
-
 
 void GenerateStacks::operator()( shared_ptr<Program> program )
 {
-	SearchReplace sr0;
+	set<SearchReplace::MatchSet *> sms;
 
 	shared_ptr<Instance> s_instance( new Instance );
 	shared_ptr<InstanceIdentifier> s_identifier( new InstanceIdentifier );
@@ -26,13 +22,11 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 
 	SearchReplace::MatchSet ms_identifier;
 	ms_identifier.insert( s_identifier );
+	sms.insert( &ms_identifier );
 
-	set<SearchReplace::MatchSet *> s;
-	s.insert( &ms_identifier );
+	SearchReplace sr0( s_identifier, shared_ptr<Node>(), sms );
+	sr0( program );
 
-	sr0.Configure( s_identifier, shared_ptr<Node>(), s );
-
-	sr0( program );//.Compare( program, sr0.search_pattern, &(sr0.matches) );
 	for( set<SearchReplace::MatchSet *>::iterator msi = sr0.matches.begin();
          msi != sr0.matches.end();
          msi++ )

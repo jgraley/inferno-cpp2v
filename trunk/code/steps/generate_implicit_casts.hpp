@@ -13,7 +13,6 @@
 class GenerateImplicitCasts
 {
 public:
-	GenerateImplicitCasts();
 	virtual void operator()( shared_ptr<Program> );
 };
 
