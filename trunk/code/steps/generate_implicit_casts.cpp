@@ -13,7 +13,14 @@
 
 GenerateImplicitCasts::GenerateImplicitCasts()
 {
-    shared_ptr<Call> s_call( new Call );
+}
+
+void GenerateImplicitCasts::operator()( shared_ptr<Program> program )
+{
+	set<SearchReplace::MatchSet *> sms0;
+	SearchReplace sr0;
+
+	shared_ptr<Call> s_call( new Call );
       shared_ptr<SoftExpressonOfType> s_callee( new SoftExpressonOfType );
 	  s_call->callee = s_callee;
 	    shared_ptr<Procedure> s_proc( new Procedure );
@@ -50,34 +57,30 @@ GenerateImplicitCasts::GenerateImplicitCasts()
 	SearchReplace::MatchSet ms_call;
 	ms_call.insert( s_call );
 	ms_call.insert( r_call );
-	sms0.insert( ms_call ); // note: alternatively we could just match the <x>_other_args
+	sms0.insert( &ms_call ); // note: alternatively we could just match the <x>_other_args
 
 	SearchReplace::MatchSet ms_ident;
 	ms_ident.insert( s_param->identifier );
 	ms_ident.insert( s_arg->identifier );
 	ms_ident.insert( r_arg->identifier );
-	sms0.insert( ms_ident );
+	sms0.insert( &ms_ident );
 
 	SearchReplace::MatchSet ms_type;
 	ms_type.insert( s_param->type );
 	ms_type.insert( s_arg_type->pattern );
 	ms_type.insert( r_cast->type );
-	sms0.insert( ms_type );
+	sms0.insert( &ms_type );
 
 	SearchReplace::MatchSet ms_value;
 	ms_value.insert( s_arg->value );
 	ms_value.insert( r_cast->operand );
-	sms0.insert( ms_value );
+	sms0.insert( &ms_value );
 
 	SearchReplace::MatchSet ms_other_args;
 	ms_other_args.insert( s_other_args );
 	ms_other_args.insert( r_other_args );
-	sms0.insert( ms_other_args );
+	sms0.insert( &ms_other_args );
 
-	sr0.Configure(s_call, r_call, &sms0);
-}
-
-void GenerateImplicitCasts::operator()( shared_ptr<Program> program )
-{
+	sr0.Configure(s_call, r_call, sms0);
 	sr0( program );
 }

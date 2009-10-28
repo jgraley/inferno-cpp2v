@@ -2,6 +2,15 @@
 
 SplitInstanceDeclarations::SplitInstanceDeclarations()
 {
+}
+
+void SplitInstanceDeclarations::operator()( shared_ptr<Program> program )
+{
+	set<SearchReplace::MatchSet *> sms0;
+	set<SearchReplace::MatchSet *> sms1;
+	SearchReplace sr0;
+	SearchReplace sr1;
+
 	{ // Do uninitialised ones
 		shared_ptr<Compound> sc( new Compound );
 		 shared_ptr<Instance> si( new Instance );
@@ -22,15 +31,15 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
 		 rc->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
 
 		SearchReplace::MatchSet ms0;
-		ms0.insert( si ); ms0.insert( ri ); sms0.insert( ms0 );
+		ms0.insert( si ); ms0.insert( ri ); sms0.insert( &ms0 );
 		SearchReplace::MatchSet ms1;
-		ms1.insert( ss ); ms1.insert( rs ); sms0.insert( ms1 );
+		ms1.insert( ss ); ms1.insert( rs ); sms0.insert( &ms1 );
 		SearchReplace::MatchSet ms2;
-		ms2.insert( sc->statements[0] ); ms2.insert( rc->statements[0] ); sms0.insert( ms2 );
+		ms2.insert( sc->statements[0] ); ms2.insert( rc->statements[0] ); sms0.insert( &ms2 );
 		SearchReplace::MatchSet ms3;
-		ms3.insert( sc->statements[2] ); ms3.insert( rc->statements[1] ); sms0.insert( ms3 );
+		ms3.insert( sc->statements[2] ); ms3.insert( rc->statements[1] ); sms0.insert( &ms3 );
 
-		sr0.Configure(sc, rc, &sms0);
+		sr0.Configure(sc, rc, sms0);
 	}
 	{ // Do initialised ones by leaving an assign behind
 		shared_ptr<Compound> sc( new Compound );
@@ -57,30 +66,32 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
 		 rc->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
 
 		SearchReplace::MatchSet ms0;
-		ms0.insert( si ); ms0.insert( ri ); sms1.insert( ms0 );
+		ms0.insert( si ); ms0.insert( ri ); sms1.insert( &ms0 );
 		SearchReplace::MatchSet ms1;
-		ms1.insert( ss ); ms1.insert( rs ); sms1.insert( ms1 );
+		ms1.insert( ss ); ms1.insert( rs ); sms1.insert( &ms1 );
 		SearchReplace::MatchSet ms2;
-		ms2.insert( sc->statements[0] ); ms2.insert( rc->statements[0] ); sms1.insert( ms2 );
+		ms2.insert( sc->statements[0] ); ms2.insert( rc->statements[0] ); sms1.insert( &ms2 );
 		SearchReplace::MatchSet ms3;
-		ms3.insert( sc->statements[2] ); ms3.insert( rc->statements[2] ); sms1.insert( ms3 );
+		ms3.insert( sc->statements[2] ); ms3.insert( rc->statements[2] ); sms1.insert( &ms3 );
 		SearchReplace::MatchSet ms4;
-		ms4.insert( si->identifier ); ms4.insert( ra->operands[0] ); sms1.insert( ms4 );
+		ms4.insert( si->identifier ); ms4.insert( ra->operands[0] ); sms1.insert( &ms4 );
 		SearchReplace::MatchSet ms5;
-		ms5.insert( si->initialiser ); ms5.insert( ra->operands[1] ); sms1.insert( ms5 );
+		ms5.insert( si->initialiser ); ms5.insert( ra->operands[1] ); sms1.insert( &ms5 );
 
-		sr1.Configure(sc, rc, &sms1);
+		sr1.Configure(sc, rc, sms1);
 	}
-}
-
-void SplitInstanceDeclarations::operator()( shared_ptr<Program> program )
-{
 	sr0( program );
 	sr1( program );
 }
 
 MergeInstanceDeclarations::MergeInstanceDeclarations()
 {
+}
+
+void MergeInstanceDeclarations::operator()( shared_ptr<Program> program )
+{
+	set<SearchReplace::MatchSet *> sms1;
+	SearchReplace sr1;
 	{
 		// This is the hard kind of search pattern where Stars exist in two
 		// separate containers and have a match set linking them together
@@ -109,30 +120,32 @@ MergeInstanceDeclarations::MergeInstanceDeclarations()
 		 sc->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
 
 		SearchReplace::MatchSet ms0;
-		ms0.insert( si ); ms0.insert( ri ); sms1.insert( ms0 ); // Instance
+		ms0.insert( si ); ms0.insert( ri ); sms1.insert( &ms0 ); // Instance
 		SearchReplace::MatchSet ms1;
-		ms1.insert( ss ); ms1.insert( rs ); sms1.insert( ms1 ); // * in members
+		ms1.insert( ss ); ms1.insert( rs ); sms1.insert( &ms1 ); // * in members
 		SearchReplace::MatchSet ms2;
-		ms2.insert( sc->statements[0] ); ms2.insert( rc->statements[0] ); sms1.insert( ms2 ); // 1st * in statements
+		ms2.insert( sc->statements[0] ); ms2.insert( rc->statements[0] ); sms1.insert( &ms2 ); // 1st * in statements
 		SearchReplace::MatchSet ms3;
-		ms3.insert( sc->statements[2] ); ms3.insert( rc->statements[2] ); sms1.insert( ms3 ); // last * in statements
+		ms3.insert( sc->statements[2] ); ms3.insert( rc->statements[2] ); sms1.insert( &ms3 ); // last * in statements
 		SearchReplace::MatchSet ms4;
 		ms4.insert( si->identifier ); ms4.insert( ri->identifier );
-		ms4.insert( ra->operands[0] ); sms1.insert( ms4 ); // id of instance
+		ms4.insert( ra->operands[0] ); sms1.insert( &ms4 ); // id of instance
 		SearchReplace::MatchSet ms5;
-		ms5.insert( si->initialiser ); ms5.insert( ra->operands[1] ); sms1.insert( ms5 ); // init expression
+		ms5.insert( si->initialiser ); ms5.insert( ra->operands[1] ); sms1.insert( &ms5 ); // init expression
 
-		sr1.Configure(rc, sc, &sms1);
+		sr1.Configure(rc, sc, sms1);
 	}
-}
-
-void MergeInstanceDeclarations::operator()( shared_ptr<Program> program )
-{
 	sr1( program );
 }
 
 HackUpIfs::HackUpIfs()
 {
+}
+
+void HackUpIfs::operator()( shared_ptr<Program> program )
+{
+	set<SearchReplace::MatchSet *> sms1;
+	SearchReplace sr1;
 	{
 		shared_ptr<If> sif( new If );
 		  shared_ptr<Expression> stest( new Expression );
@@ -153,22 +166,23 @@ HackUpIfs::HackUpIfs()
             rpi->operands.push_back( shared_new< Expression >() );
 
   		SearchReplace::MatchSet ms0;
-  		ms0.insert( ssthen ); ms0.insert( rs ); sms1.insert( ms0 ); // statement of interest
+  		ms0.insert( ssthen ); ms0.insert( rs ); sms1.insert( &ms0 ); // statement of interest
 		SearchReplace::MatchSet ms1;
-		ms1.insert( ssthen->terminus ); ms1.insert( sselse->terminus ); ms1.insert( rpi->operands[0] ); sms1.insert( ms1 ); // statement of interest
+		ms1.insert( ssthen->terminus ); ms1.insert( sselse->terminus ); ms1.insert( rpi->operands[0] ); sms1.insert( &ms1 ); // statement of interest
 
-		sr1.Configure(sif, rs, &sms1);
+		sr1.Configure(sif, rs, sms1);
 	}
-}
-
-void HackUpIfs::operator()( shared_ptr<Program> program )
-{
 	sr1( program );
 }
 
 
 CrazyNine::CrazyNine()
 {
+}
+
+void CrazyNine::operator()( shared_ptr<Program> program )
+{
+	SearchReplace sr1;
 	// Replaces entire records with 9 if it has a 9 in it
 	{
 		shared_ptr<Record> s_record( new Record );
@@ -183,12 +197,8 @@ CrazyNine::CrazyNine()
           r_union->identifier = r_union_name;
             r_union_name->name = string("nine"); // In the end, there can be only nine!!!1
 
-		sr1.Configure(s_record, r_union, &sms1);
+		sr1.Configure(s_record, r_union);
 	}
-}
-
-void CrazyNine::operator()( shared_ptr<Program> program )
-{
 	sr1( program );
 }
 
