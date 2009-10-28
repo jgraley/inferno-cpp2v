@@ -165,11 +165,10 @@ public:
     // Some self-testing
     static void Test();
         
+private:
     shared_ptr<Node> search_pattern;
     shared_ptr<Node> replace_pattern;
     shared_ptr<Program> program;
-
-private:
     
     // LocalCompare ring
     bool LocalCompare( shared_ptr<Node> x,
@@ -210,11 +209,9 @@ private:
     		        MatchKeys *match_keys,
     		        Conjecture &conj,
     		        int threshold ) const;
-public:
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
     		        MatchKeys *match_keys = NULL ) const;
-private:
 
     // Replace ring
     void ClearPtrs( shared_ptr<Node> dest );
@@ -233,8 +230,6 @@ private:
     shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x,
     		                           MatchKeys *match_keys,
     		                           shared_ptr<Key> current_key=shared_ptr<Key>() );
-    void Replace( GenericContainer::iterator target,
-    		      MatchKeys *match_keys );
 
     // Internal node classes
     struct SubSequence : Node,

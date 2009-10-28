@@ -32,7 +32,7 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 
 	sr0.Configure( s_identifier, shared_ptr<Node>(), s );
 
-	sr0.Compare( program, sr0.search_pattern, &(sr0.matches) );
+	sr0( program );//.Compare( program, sr0.search_pattern, &(sr0.matches) );
 	for( set<SearchReplace::MatchSet *>::iterator msi = sr0.matches.begin();
          msi != sr0.matches.end();
          msi++ )

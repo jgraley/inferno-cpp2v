@@ -856,17 +856,7 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     return dest;
 }
 
-#include "render/graph.hpp"
-// Perform the configured replacement at the supplied target.
-// Note target is a double pointer, since we wish to enact the
-// replacement by changing a SharedPtr somewhere.
-void RootedSearchReplace::Replace( GenericContainer::iterator target, MatchKeys *match_keys )
-{
-    ASSERT( replace_pattern );
-    SharedPtr<Node> nn( DuplicateSubtree( replace_pattern, match_keys ) );
-    target.Overwrite( &nn );
-    TRACE("*target=%p nn=%p\n", target->get(), nn.get() );
-}
+#include "render/graph.hpp" // TODO get rid
 
 
 // Perform search and replace on supplied program based
@@ -882,11 +872,14 @@ void RootedSearchReplace::operator()( shared_ptr<Program> p )
     	GenericPointIterator pit( prog );
     	TRACE("Begin search\n");
     	Result r = Compare( *pit, search_pattern, &matches );
-        if( r == FOUND )
+        if( r == FOUND && replace_pattern )
         {
         	TRACE("Search successful, now replacing\n");
-            Replace( pit, &matches );
+            ASSERT( replace_pattern );
+            SharedPtr<Node> nn( DuplicateSubtree( replace_pattern, &matches ) );
+            pit.Overwrite( &nn );
            	TRACE("Done replace\n");
+
             // TODO operator() should take a ref to the shared_ptr<Program> and just change it directly
             shared_ptr<Program> pp = dynamic_pointer_cast<Program>(prog);
             ASSERT(pp)("Replace changed root Program node into something else!");
