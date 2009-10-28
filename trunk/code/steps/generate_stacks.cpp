@@ -24,16 +24,7 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	ms_identifier.insert( s_identifier );
 	sms.insert( &ms_identifier );
 
-	SearchReplace sr0( s_identifier, shared_ptr<Node>(), sms );
-	sr0( program );
+	SearchReplace( s_identifier, shared_ptr<Node>(), sms )( program );
 
-	for( set<SearchReplace::MatchSet *>::iterator msi = sr0.matches.begin();
-         msi != sr0.matches.end();
-         msi++ )
-    {
-		TRACE("in S&R's match keys: %p %p %p\n", *msi, &((*msi)->key), (*msi)->key.get() );
-	}
-	TRACE("In our ms_identifier %p %p %p\n", &ms_identifier, &(ms_identifier.key), ms_identifier.key.get() );
-
-	//ASSERT( ms_identifier.key );
+	ASSERT( ms_identifier.key );
 }
