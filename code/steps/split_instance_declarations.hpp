@@ -8,12 +8,6 @@ class SplitInstanceDeclarations : public Pass
 public:
 	SplitInstanceDeclarations();
 	virtual void operator()( shared_ptr<Program> );
-
-private:
-	set<SearchReplace::MatchSet> sms0;
-	set<SearchReplace::MatchSet> sms1;
-	SearchReplace sr0;
-	SearchReplace sr1;
 };
 
 class MergeInstanceDeclarations : public Pass
@@ -21,10 +15,6 @@ class MergeInstanceDeclarations : public Pass
 public:
 	MergeInstanceDeclarations();
 	virtual void operator()( shared_ptr<Program> );
-
-private:
-	set<SearchReplace::MatchSet> sms1;
-	SearchReplace sr1;
 };
 
 class HackUpIfs : public Pass
@@ -32,10 +22,6 @@ class HackUpIfs : public Pass
 public:
 	HackUpIfs();
 	virtual void operator()( shared_ptr<Program> );
-
-private:
-	set<SearchReplace::MatchSet> sms1;
-	SearchReplace sr1;
 };
 
 class CrazyNine : public Pass
@@ -43,10 +29,6 @@ class CrazyNine : public Pass
 public:
 	CrazyNine();
 	virtual void operator()( shared_ptr<Program> );
-
-private:
-	set<SearchReplace::MatchSet> sms1;
-	SearchReplace sr1;
 };
 
 #endif

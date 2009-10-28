@@ -15,9 +15,6 @@ class GenerateImplicitCasts
 public:
 	GenerateImplicitCasts();
 	virtual void operator()( shared_ptr<Program> );
-private:
-	set<SearchReplace::MatchSet> sms0;
-	SearchReplace sr0;
 };
 
 #endif /* GENERATE_IMPLICIT_CASTS_HPP */

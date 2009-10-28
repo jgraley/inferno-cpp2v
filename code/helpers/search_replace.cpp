@@ -129,35 +129,26 @@
 
 // Constructor remembers search pattern, replace pattern and any supplied match sets as required
 RootedSearchReplace::RootedSearchReplace( shared_ptr<Node> sp,
-                              shared_ptr<Node> rp,
-                              set<MatchSet> *m )
+                                          shared_ptr<Node> rp,
+                                          set<MatchSet *> m )
 {
-	our_matches = false;
 	Configure( sp, rp, m );
 }
 
+
 void RootedSearchReplace::Configure( shared_ptr<Node> sp,
                                      shared_ptr<Node> rp,
-                                     set<MatchSet> *m )
-{  
+                                     set<MatchSet *> m )
+{
     search_pattern = sp;
     replace_pattern = rp;
-
-    if( our_matches )
-        delete matches;
-    our_matches = !!m;
-    if( !m )
-        matches = NULL;
-    else
-    	matches = new MatchKeys(*m);
+    matches = MatchKeys( m ); // Convert from set< MAtchSet *> to subclass MatchKeys
 } 
 
 
 // Destructor tries not to leak memory lol
 RootedSearchReplace::~RootedSearchReplace()
 {
-    if( our_matches )
-        delete matches;
 }
 
 
@@ -773,8 +764,8 @@ void RootedSearchReplace::Overlay( GenericCollection *dest,
 // TODO possible refactor: when we detect a match set match, maybe recurse back into DuplicateSubtree
 // and get the two OverlayPtrs during unwind.
 shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
-		                                          MatchKeys *match_keys,
-		                                          shared_ptr<Key> current_key )
+		                                                MatchKeys *match_keys,
+		                                                shared_ptr<Key> current_key )
 {
 	TRACE("Duplicating, under_substitution=%p\n", current_key.get());
 
@@ -782,18 +773,16 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     // Are we substituting a stuff node?
 	if( shared_ptr<StuffKey> stuff_key = dynamic_pointer_cast<StuffKey>(current_key) )
 	{
-		if( stuff_key->terminus ) // NULL terminus in replace just means "substitute everything"
+		shared_ptr<StuffBase> replace_stuff = stuff_key->replace_stuff;
+		ASSERT( replace_stuff );
+		if( replace_stuff->terminus &&      // There is a terminus in replace pattern
+			source == stuff_key->terminus ) // and the present node is the terminus in the source pattern
 		{
-			shared_ptr<StuffBase> replace_stuff = stuff_key->replace_stuff;
-			ASSERT( replace_stuff );
 			TRACE( "Substituting stuff: source=%s:%p, term=%s:%p\n",
 					TypeInfo(source).name().c_str(), source.get(),
 					TypeInfo(stuff_key->terminus).name().c_str(), stuff_key->terminus.get() );
-			if( source == stuff_key->terminus )
-			{
-				TRACE( "Leaving substitution to duplicate terminus replace pattern\n" );
-				return DuplicateSubtree( replace_stuff->terminus, match_keys, shared_ptr<Key>() );
-			}
+			TRACE( "Leaving substitution to duplicate terminus replace pattern\n" );
+			return DuplicateSubtree( replace_stuff->terminus, match_keys, shared_ptr<Key>() );
 		}
 	}
 
@@ -892,11 +881,11 @@ void RootedSearchReplace::operator()( shared_ptr<Program> p )
     {
     	GenericPointIterator pit( prog );
     	TRACE("Begin search\n");
-    	Result r = Compare( *pit, search_pattern, matches );
+    	Result r = Compare( *pit, search_pattern, &matches );
         if( r == FOUND )
         {
         	TRACE("Search successful, now replacing\n");
-            Replace( pit, matches );
+            Replace( pit, &matches );
            	TRACE("Done replace\n");
             // TODO operator() should take a ref to the shared_ptr<Program> and just change it directly
             shared_ptr<Program> pp = dynamic_pointer_cast<Program>(prog);
@@ -917,13 +906,13 @@ const RootedSearchReplace::MatchSet *RootedSearchReplace::MatchKeys::FindMatchSe
 {
 	ASSERT( this );
 
-	for( set<MatchSet>::iterator msi = begin();
+	for( set<MatchSet *>::iterator msi = begin();
          msi != end();
          msi++ )
     {
-        MatchSet::iterator ni = msi->find( node );
-        if( ni != msi->end() )
-            return &*msi;
+        MatchSet::iterator ni = (*msi)->find( node );
+        if( ni != (*msi)->end() )
+            return *msi;
     }
     return 0;
 }
@@ -934,13 +923,13 @@ void RootedSearchReplace::MatchKeys::CheckMatchSetsKeyed()
 	ASSERT( this );
 
 	int unkeyed=0;
-	set<MatchSet>::iterator msi;
+	set<MatchSet *>::iterator msi;
 	int i;
     for( msi = begin(), i=0;
          msi != end();
          msi++, i++ )
     {
-    	if( !(msi->key) )
+    	if( !((*msi)->key) )
     	{
     		unkeyed++;
     		TRACE("%d not keyed\n", i);
@@ -955,11 +944,11 @@ void RootedSearchReplace::MatchKeys::ClearKeys()
 {
 	ASSERT( this );
 
-	for( set<MatchSet>::iterator msi = begin();
+	for( set<MatchSet *>::iterator msi = begin();
          msi != end();
          msi++ )
     {
-        msi->key = shared_ptr<Key>();
+        (*msi)->key = shared_ptr<Key>();
     }
 }
 
@@ -1088,7 +1077,7 @@ RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( Roo
 
 SearchReplace::SearchReplace( shared_ptr<Node> sp,
                               shared_ptr<Node> rp,
-                              set<MatchSet> *m ) :
+                              set<MatchSet *> m ) :
     RootedSearchReplace( sp, rp, m )
 {
 }
@@ -1096,19 +1085,35 @@ SearchReplace::SearchReplace( shared_ptr<Node> sp,
 
 void SearchReplace::Configure( shared_ptr<Node> sp,
                                shared_ptr<Node> rp,
-                               set<MatchSet> *m )
+                               set<MatchSet *> m )
 {
+	// Make a non-rooted search and replace (ie where the base of the search pattern
+	// does not have to be the root of the whole program tree).
+	// Insert a Stuff node as root of the search pattern
+	ASSERT( sp );
 	shared_ptr< Stuff<Scope> > search_root( new Stuff<Scope> );
 	search_root->terminus = sp;
-	shared_ptr< Stuff<Scope> > replace_root( new Stuff<Scope> );
-	replace_root->terminus = rp;
 
-	MatchSet root_match;
-	root_match.insert( search_root );
-	root_match.insert( replace_root );
-	m->insert( root_match ); // TODO don't modify in place!
+	if( rp ) // Is there also a replace pattern?
+	{
+		// Insert a Stuff node as root of the replace pattern
+		shared_ptr< Stuff<Scope> > replace_root( new Stuff<Scope> );
+	    replace_root->terminus = rp;
 
-    RootedSearchReplace::Configure( search_root, replace_root, m );
+	    // Key them together
+	    root_match.clear();
+	    root_match.insert( search_root );
+	    root_match.insert( replace_root );
+	    m.insert( &root_match );
+
+	    // Configure the rooted implementation with new patterns and match sets
+	    RootedSearchReplace::Configure( search_root, replace_root, m );
+	}
+	else
+	{
+	    // Configure the rooted implementation with new pattern
+        RootedSearchReplace::Configure( search_root, rp, m );
+	}
 }
 
 

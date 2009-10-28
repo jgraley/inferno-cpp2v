@@ -110,11 +110,11 @@ public:
     {
          mutable shared_ptr<Key> key;    // This is filled in by the search and replace engine
     };
-    struct MatchKeys : set<MatchSet>
+    struct MatchKeys : set<MatchSet *>
     {
     	enum Pass { KEYING, RESTRICTING } pass;
-    	MatchKeys( set<MatchSet> &s ) :
-    		set<MatchSet>(s)
+    	MatchKeys( set<MatchSet *> &s ) :
+    		set<MatchSet *>(s)
     	{
     	}
     	MatchKeys()
@@ -133,17 +133,17 @@ public:
         void ClearKeys();
         void SetPass( Pass p ) { pass = p; }
     };
-    MatchKeys *matches;
+    MatchKeys matches;
 
 
     // Constructor and destructor. Search and replace patterns and match sets are 
     // specified here, so that we have a fully confiugured functor.
     RootedSearchReplace( shared_ptr<Node> sp=shared_ptr<Node>(),
                    shared_ptr<Node> rp=shared_ptr<Node>(),
-                   set<MatchSet> *m = NULL );
+                   set<MatchSet *> m = set<MatchSet *>() );
     void Configure( shared_ptr<Node> sp=shared_ptr<Node>(),
                     shared_ptr<Node> rp=shared_ptr<Node>(),
-                    set<MatchSet> *m = NULL );
+                    set<MatchSet *> m = set<MatchSet *>() );
     ~RootedSearchReplace();
     
     // Do the actual search and replace (functor style; implements Pass interface).
@@ -167,7 +167,6 @@ public:
         
     shared_ptr<Node> search_pattern;
     shared_ptr<Node> replace_pattern;
-    bool our_matches;
     shared_ptr<Program> program;
 
 private:
@@ -254,12 +253,14 @@ private:
 class SearchReplace : public RootedSearchReplace
 {
 public:
-    SearchReplace( shared_ptr<Node> sp=shared_ptr<Node>(),
-                   shared_ptr<Node> rp=shared_ptr<Node>(),
-                   set<MatchSet> *m = NULL );
-    void Configure( shared_ptr<Node> sp=shared_ptr<Node>(),
-                    shared_ptr<Node> rp=shared_ptr<Node>(),
-                    set<MatchSet> *m = NULL );
+    SearchReplace( shared_ptr<Node> sp = shared_ptr<Node>(),
+                   shared_ptr<Node> rp = shared_ptr<Node>(),
+                   set<MatchSet *> m = set<MatchSet *>() );
+    void Configure( shared_ptr<Node> sp = shared_ptr<Node>(),
+                    shared_ptr<Node> rp = shared_ptr<Node>(),
+                    set<MatchSet *> m = set<MatchSet *>() );
+private:
+	MatchSet root_match;
 };
 
 #endif
