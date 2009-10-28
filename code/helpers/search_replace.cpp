@@ -1070,9 +1070,9 @@ RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( Roo
 
 SearchReplace::SearchReplace( shared_ptr<Node> sp,
                               shared_ptr<Node> rp,
-                              set<MatchSet *> m ) :
-    RootedSearchReplace( sp, rp, m )
+                              set<MatchSet *> m )
 {
+	Configure( sp, rp, m );
 }
 
 
