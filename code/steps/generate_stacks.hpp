@@ -13,7 +13,6 @@
 class GenerateStacks
 {
 public:
-	GenerateStacks();
 	virtual void operator()( shared_ptr<Program> );
 };
 

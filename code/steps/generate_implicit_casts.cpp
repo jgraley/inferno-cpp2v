@@ -11,10 +11,6 @@
 #include "common/refcount.hpp"
 #include "helpers/soft_patterns.hpp"
 
-GenerateImplicitCasts::GenerateImplicitCasts()
-{
-}
-
 void GenerateImplicitCasts::operator()( shared_ptr<Program> program )
 {
 	set<SearchReplace::MatchSet *> sms0;
