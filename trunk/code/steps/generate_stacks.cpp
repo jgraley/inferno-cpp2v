@@ -31,7 +31,8 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	shared_ptr<Compound> r_comp( new Compound );
 	shared_ptr<Instance> r_instance( new Instance );
 	r_comp->members.insert( r_instance );
-	shared_ptr<InstanceIdentifier> r_identifier( new SpecificInstanceIdentifier("my_new_var") );
+	shared_ptr<SoftMakeIdentifier> r_identifier( new SoftMakeIdentifier("%s_stack") );
+	r_identifier->source = shared_new<Identifier>();
 	r_instance->identifier = r_identifier;
     r_instance->storage = shared_new<Static>(); // TODO Member
     shared_ptr<Array> r_array( new Array );
@@ -43,11 +44,12 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	shared_ptr<Unsigned> r_index_type( new Unsigned );
 	r_index->type = r_index_type;
 	r_index_type->width = shared_ptr<SpecificInteger>( new SpecificInteger(32) );
-	shared_ptr<InstanceIdentifier> r_index_identifier( new SpecificInstanceIdentifier("my_new_index") );
+	shared_ptr<SoftMakeIdentifier> r_index_identifier( new SoftMakeIdentifier("%s_stack_index") );
+	r_index_identifier->source = shared_new<Identifier>();
 	r_index->identifier = r_index_identifier;
 	r_index->storage = shared_new<Static>(); // TODO Member
 	r_index->constancy = shared_new<NonConst>();
-	r_index->initialiser = shared_ptr<SpecificInteger>( new SpecificInteger(0) );
+	r_index->initialiser = shared_ptr<SpecificInteger>( new SpecificInteger(-1) );
 	r_index->access = shared_new<Private>();
     shared_ptr< SearchReplace::Star<Declaration> > r_other_decls( new SearchReplace::Star<Declaration> );
     r_comp->members.insert( r_other_decls );
@@ -84,9 +86,25 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	ms_other_statements.insert( r_comp->statements[1] );
 	sms.insert( &ms_other_statements );
 
+	SearchReplace::MatchSet ms_identifier;
+	ms_identifier.insert( s_identifier );
+	ms_identifier.insert( r_identifier->source );
+	ms_identifier.insert( r_index_identifier->source );
+    sms.insert( &ms_identifier );
+
+	// Slightly hacky - since replace match sets are not yet two-pass
+	// at the time of writing, we use the same node in all locations, and
+	// therefore only that one node need appear in match set. This ensures
+	// we can always key regardless of which location we see first while
+	// walking the replace pattern.
+	SearchReplace::MatchSet ms_new_index_identifier;
+	ms_new_index_identifier.insert( r_index_identifier );
+	sms.insert( &ms_new_index_identifier );
+
 	ASSERT( SearchReplace( s_comp, r_comp, sms ).SingleSearchReplace( program ) );
 
-	ASSERT( ms_instance.key );
+	// Deal with appearances of the identifier
+/*	ASSERT( ms_instance.key );
 	shared_ptr<Instance> s_found_instance = dynamic_pointer_cast<Instance>(ms_instance.key->root);
     ASSERT( s_found_instance );
 
@@ -95,4 +113,6 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
     r_sub->index = r_index_identifier;
 
     SearchReplace( s_found_instance->identifier, r_sub )( program );
+*/
+    // TODO insert dec before return statements
 }
