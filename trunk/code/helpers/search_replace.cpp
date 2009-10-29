@@ -320,7 +320,7 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( GenericSequence
 	GenericContainer::iterator xit = x.begin();
 	GenericContainer::iterator pit = pattern.begin();
 
-	while( pit != pattern.end() && xit != x.end() )
+	while( pit != pattern.end() )
 	{
 		// Get the next element of the pattern
 		shared_ptr<Node> pe( *pit );
@@ -394,6 +394,7 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( GenericSequence
 	}
 
     // If we finished the job and pattern and subject are still aligned, then it was a match
+	TRACE("Finishing compare sequence %d %d\n", xit==x.end(), pit==pattern.end() );
     return (xit==x.end() && pit==pattern.end()) ? FOUND : NOT_FOUND;
 }
 
@@ -417,6 +418,10 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( GenericCollecti
 
     for( GenericCollection::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
     {
+    	TRACE("Collection compare %d remain out of %d; looking at %s in pattern\n",
+    			xremaining->size(),
+    			pattern.size(),
+    			TypeInfo( SharedPtr<Node>(*pit) ).name().c_str() );
     	shared_ptr<StarBase> maybe_star = dynamic_pointer_cast<StarBase>( shared_ptr<Node>(*pit) );
 
         if( maybe_star || !(*pit) ) // Star or NULL in pattern collection?
@@ -452,7 +457,7 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( GenericCollecti
     	return NOT_FOUND; // there were elements left over and no star to match them against
 
     // If we got here, the node matched the search pattern. Now apply match sets
-    TRACE("seen_star %d  star %d\n", seen_star, !!star );
+    TRACE("seen_star %d  star %p\n", seen_star, star.get() );
     if( match_keys && seen_star && star )
         if( !match_keys->KeyAndRestrict( xremaining, star, this, context_flags ) )
         	return NOT_FOUND;
@@ -786,16 +791,6 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 		}
 	}
 
-	// Do not duplicate identifiers if they are being substituted from the original tree.
-	if( current_key && dynamic_pointer_cast<Identifier>( source ) )
-	{
-		// Substitute is an identifier, so preserve its uniqueness by just returning
-		// the same node. Don't do any more - we wouldn't want to change the
-		// identifier in the tree even if it had members, lol!
-		TRACE("Not duplicating identifiers when under substitution\n");
-		return source;
-	}
-
 	shared_ptr<Node> dest;
 
     // Check match sets for a match to the source of our duplication. If one is found, we
@@ -839,6 +834,16 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     }
     else
     {
+    	// Do not duplicate specific identifiers. We always
+    	if( dynamic_pointer_cast<SpecificIdentifier>( source ) )
+    	{
+    		// Substitute is an identifier, so preserve its uniqueness by just returning
+    		// the same node. Don't do any more - we wouldn't want to change the
+    		// identifier in the tree even if it had members, lol!
+    		TRACE("Not duplicating identifiers when under substitution\n");
+    		return source;
+    	}
+
     	TRACE("duplicating supplied node\n");
 		// Make the new node (destination node)
 		shared_ptr<Cloner> dup_dest = Cloner::Clone( source );
@@ -859,38 +864,47 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 #include "render/graph.hpp" // TODO get rid
 
 
+RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr<Program> p )
+{
+	program = p;
+
+	SharedPtr<Node> prog(p);
+	GenericPointIterator pit( prog );
+	TRACE("Begin search\n");
+	Result r = Compare( *pit, search_pattern, &matches );
+    if( r == FOUND && replace_pattern )
+    {
+    	TRACE("Search successful, now replacing\n");
+        ASSERT( replace_pattern );
+        SharedPtr<Node> nn( DuplicateSubtree( replace_pattern, &matches ) );
+        pit.Overwrite( &nn );
+       	TRACE("Done replace\n");
+
+        // TODO operator() should take a ref to the shared_ptr<Program> and just change it directly
+        shared_ptr<Program> pp = dynamic_pointer_cast<Program>(prog);
+        ASSERT(pp)("Replace changed root Program node into something else!");
+        *p = *pp; // Egregiously copy over the contents of the program node
+    }
+
+    program = shared_ptr<Program>(); // just to avoid us relying on the program outside of a search+replace pass
+    return r;
+}
+
 // Perform search and replace on supplied program based
 // on current patterns and match sets. Does search and replace
 // operations repeatedly until there are no more matches.
 void RootedSearchReplace::operator()( shared_ptr<Program> p )
 {
-	program = p;
-	SharedPtr<Node> prog(p);
     int i=0;
     while(1)
     {
-    	GenericPointIterator pit( prog );
     	TRACE("Begin search\n");
-    	Result r = Compare( *pit, search_pattern, &matches );
-        if( r == FOUND && replace_pattern )
-        {
-        	TRACE("Search successful, now replacing\n");
-            ASSERT( replace_pattern );
-            SharedPtr<Node> nn( DuplicateSubtree( replace_pattern, &matches ) );
-            pit.Overwrite( &nn );
-           	TRACE("Done replace\n");
-
-            // TODO operator() should take a ref to the shared_ptr<Program> and just change it directly
-            shared_ptr<Program> pp = dynamic_pointer_cast<Program>(prog);
-            ASSERT(pp)("Replace changed root Program node into something else!");
-            *p = *pp; // Egregiously copy over the contents of the program node
-        }
-        else
+    	Result r = SingleSearchReplace( p );
+        if( r != FOUND )
             break;
        	ASSERT(i<100)("Too many hits");
         i++;
     }
-    program = shared_ptr<Program>(); // just to avoid us relying on the program outside of a search+replace pass
 }
 
 
@@ -966,7 +980,6 @@ RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shar
 		                                                        unsigned context_flags )
 {
 	ASSERT( this );
-
 	// Find a match set for this node. If the node is not in a match set then there's
 	// nothing for us to do, so return without restricting the search.
 	const MatchSet *match = FindMatchSet( pattern );
@@ -1080,10 +1093,12 @@ void SearchReplace::Configure( shared_ptr<Node> sp,
                                shared_ptr<Node> rp,
                                set<MatchSet *> m )
 {
+	if( !sp )
+		return;
+
 	// Make a non-rooted search and replace (ie where the base of the search pattern
 	// does not have to be the root of the whole program tree).
 	// Insert a Stuff node as root of the search pattern
-	ASSERT( sp );
 	shared_ptr< Stuff<Scope> > search_root( new Stuff<Scope> );
 	search_root->terminus = sp;
 

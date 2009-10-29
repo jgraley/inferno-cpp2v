@@ -3,12 +3,10 @@
 
 void SplitInstanceDeclarations::operator()( shared_ptr<Program> program )
 {
-	set<SearchReplace::MatchSet *> sms0;
-	set<SearchReplace::MatchSet *> sms1;
-	SearchReplace sr0;
-	SearchReplace sr1;
-
 	{ // Do uninitialised ones
+		SearchReplace sr0;
+		set<SearchReplace::MatchSet *> sms0;
+
 		shared_ptr<Compound> sc( new Compound );
 		 shared_ptr<Instance> si( new Instance );
 		  si->initialiser = shared_new<Uninitialised>();  // Only acting on uninitialised Instances
@@ -37,8 +35,13 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Program> program )
 		ms3.insert( sc->statements[2] ); ms3.insert( rc->statements[1] ); sms0.insert( &ms3 );
 
 		sr0.Configure(sc, rc, sms0);
+		sr0( program );
+
 	}
 	{ // Do initialised ones by leaving an assign behind
+		SearchReplace sr1;
+		set<SearchReplace::MatchSet *> sms1;
+
 		shared_ptr<Compound> sc( new Compound );
 		 shared_ptr<Instance> si( new Instance );
 		  si->identifier = shared_new<InstanceIdentifier>();  // Only acting on initialised Instances
@@ -76,9 +79,8 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Program> program )
 		ms5.insert( si->initialiser ); ms5.insert( ra->operands[1] ); sms1.insert( &ms5 );
 
 		sr1.Configure(sc, rc, sms1);
+		sr1( program );
 	}
-	sr0( program );
-	sr1( program );
 }
 
 
