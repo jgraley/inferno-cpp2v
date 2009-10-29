@@ -3,6 +3,7 @@
 
 void SplitInstanceDeclarations::operator()( shared_ptr<Program> program )
 {
+    // TODO only split for Auto variables - for others, take the whole lot including init into the members colelction
 	{ // Do uninitialised ones
 		SearchReplace sr0;
 		set<SearchReplace::MatchSet *> sms0;

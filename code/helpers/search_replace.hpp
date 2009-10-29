@@ -162,6 +162,11 @@ public:
         		                                      Conjecture &conj,
         		                                      unsigned context_flags ) const = 0;
     };
+    struct SoftReplacePattern : virtual Node
+    {
+        virtual shared_ptr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
+        		                                   MatchKeys *match_keys ) = 0;
+    };
 
     // Some self-testing
     static void Test();
@@ -215,22 +220,24 @@ private:
     		        MatchKeys *match_keys = NULL ) const;
 
     // Replace ring
-    void ClearPtrs( shared_ptr<Node> dest );
+    void ClearPtrs( shared_ptr<Node> dest ) const;
     void Overlay( shared_ptr<Node> dest,
     		      shared_ptr<Node> source,
     		      MatchKeys *match_keys,
-    		      shared_ptr<Key> current_key ); // under substitution if not NULL
+    		      shared_ptr<Key> current_key ) const; // under substitution if not NULL
     void Overlay( GenericSequence *dest,
     		      GenericSequence *source,
     		      MatchKeys *match_keys,
-    		      shared_ptr<Key> current_key );
+    		      shared_ptr<Key> current_key ) const;
     void Overlay( GenericCollection *dest,
     	          GenericCollection *source,
     	          MatchKeys *match_keys,
-    	          shared_ptr<Key> current_key );
+    	          shared_ptr<Key> current_key ) const;
+public:
     shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x,
     		                           MatchKeys *match_keys,
-    		                           shared_ptr<Key> current_key=shared_ptr<Key>() );
+    		                           shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
+private:
 
     // Internal node classes
     struct SubSequence : Node,

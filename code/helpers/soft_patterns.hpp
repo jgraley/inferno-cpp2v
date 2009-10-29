@@ -48,4 +48,27 @@ private:
     		                                            unsigned context_flags ) const;
 };
 
+// Make an identifer based on an existing one. New identfier is named using
+// sprintf( format, source->name )
+// You must key the source identifier to somehting in the search pattern (so it
+// will get substitued to the real Specific identifier found in the tree) and
+// you may substitute the SoftMakeIdentifier in the replace pattern if you need
+// to specifiy it in more than one place. Note that SoftMakeIdentifier is stateless
+// and cannot therefore keep track of uniqueness - you'll get a new one each time
+// and must rely on a replace match set to get multiple reference to the same
+// new identifier. Rule is: ONE of these per new identifier.
+struct SoftMakeIdentifier : InstanceIdentifier, // TODO other kinds of identifier
+                            RootedSearchReplace::SoftReplacePattern
+{
+	SoftMakeIdentifier( string s ) : format(s) {}
+	SoftMakeIdentifier() : format("___UNNAMED___") {}
+	NODE_FUNCTIONS
+	string format;
+	SharedPtr<Identifier> source;
+private:
+    virtual shared_ptr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
+    		                                   RootedSearchReplace::MatchKeys *match_keys );
+};
+
+
 #endif

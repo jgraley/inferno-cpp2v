@@ -551,7 +551,6 @@ RootedSearchReplace::Result RootedSearchReplace::MatchingDecidedCompare( shared_
         TRACE("KEYING pass result %d\n", r );
 	    if( r != FOUND )
 	    	return r;	    // Save time by giving up if no match found
-	    match_keys->CheckMatchSetsKeyed();
 
 	    // Now restrict the search according to the match sets
     	TRACE("doing RESTRICTING pass....\n");
@@ -604,7 +603,7 @@ RootedSearchReplace::Result RootedSearchReplace::Compare( shared_ptr<Node> x,
 
 
 // Clear all pointer members in supplied dest to NULL
-void RootedSearchReplace::ClearPtrs( shared_ptr<Node> dest )
+void RootedSearchReplace::ClearPtrs( shared_ptr<Node> dest ) const
 {
     vector< Itemiser::Element * > dest_memb = Itemiser::Itemise( dest.get() );
     for( int i=0; i<dest_memb.size(); i++ )
@@ -631,7 +630,7 @@ void RootedSearchReplace::ClearPtrs( shared_ptr<Node> dest )
 void RootedSearchReplace::Overlay( shared_ptr<Node> dest,
 		                           shared_ptr<Node> source,
 		                           MatchKeys *match_keys,
-		                           shared_ptr<Key> current_key )
+		                           shared_ptr<Key> current_key ) const
 {
     ASSERT( TypeInfo(source) >= TypeInfo(dest) )("source must be a non-strict subclass of destination, so that it does not have more members");
 
@@ -684,7 +683,7 @@ void RootedSearchReplace::Overlay( shared_ptr<Node> dest,
 void RootedSearchReplace::Overlay( GenericSequence *dest,
 		                     GenericSequence *source,
 		                     MatchKeys *match_keys,
-		                     shared_ptr<Key> current_key )
+		                     shared_ptr<Key> current_key ) const
 {
     // For now, always overwrite the dest
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
@@ -724,7 +723,7 @@ void RootedSearchReplace::Overlay( GenericSequence *dest,
 void RootedSearchReplace::Overlay( GenericCollection *dest,
 		                     GenericCollection *source,
 		                     MatchKeys *match_keys,
-		                     shared_ptr<Key> current_key )
+		                     shared_ptr<Key> current_key ) const
 {
     // For now, always overwrite the dest
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
@@ -770,10 +769,9 @@ void RootedSearchReplace::Overlay( GenericCollection *dest,
 // and get the two OverlayPtrs during unwind.
 shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 		                                                MatchKeys *match_keys,
-		                                                shared_ptr<Key> current_key )
+		                                                shared_ptr<Key> current_key ) const
 {
 	TRACE("Duplicating, under_substitution=%p\n", current_key.get());
-
 
     // Are we substituting a stuff node?
 	if( shared_ptr<StuffKey> stuff_key = dynamic_pointer_cast<StuffKey>(current_key) )
@@ -799,9 +797,9 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     if( match_keys )
     	match = match_keys->FindMatchSet( source );
 
-    if( match )
+    if( match && match->key ) // Only substitute for match sets already keyed
     {
-    	ASSERT( !current_key )("Should not find a match except in patterns"); // We'll never find a match when we're under substitution, because the
+    	ASSERT( !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
     	                                                                      // source is actually a match key already, so not in any match sets
 		// It's in a match set, so substitute the key. Simplest to recurse for this. We will
 		// still overlay any non-NULL members of the replace pattern node onto the result (see below)
@@ -821,20 +819,42 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     		// pattern can be overlayed over the substituted key.
 			dest = DuplicateSubtree( match->key->root, match_keys, match->key );
 
-			// Overlaying requires type compatibility - check for this
-			ASSERT( TypeInfo(source) >= TypeInfo(match->key->root) )
-				  ( "replace pattern %s must be a non-strict superclass of substitute %s, so that its members are a subset",
-					TypeInfo(source).name().c_str(), TypeInfo(match->key->root).name().c_str() );
-				  //TODO simply require that every member of a match set has the exact same type
+			// Do NOT overlay soft patterns - they must self-terminate TODO inelegant?
+			if( !dynamic_pointer_cast<SoftReplacePattern>( source ) )
+			{
+				// Overlaying requires type compatibility - check for this
+				ASSERT( TypeInfo(source) >= TypeInfo(match->key->root) )
+					  ( "replace pattern %s must be a non-strict superclass of substitute %s, so that its members are a subset",
+						TypeInfo(source).name().c_str(), TypeInfo(match->key->root).name().c_str() );
+					  //TODO simply require that every member of a match set has the exact same type
 
-			// Copy the source over,  except for any NULLs in the source. If source is superclass
-		    // of destination (i.e. has possibly fewer members) the missing ones will be left alone.
-		    Overlay( dest, source, match_keys, current_key );
+				// Copy the source over,  except for any NULLs in the source. If source is superclass
+				// of destination (i.e. has possibly fewer members) the missing ones will be left alone.
+				Overlay( dest, source, match_keys, current_key );
+			}
     	}
     }
     else
     {
-    	// Do not duplicate specific identifiers. We always
+       	// Allow a soft replace pattern to act
+		if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
+		{
+			// Substitute is an identifier, so preserve its uniqueness by just returning
+			// the same node. Don't do any more - we wouldn't want to change the
+			// identifier in the tree even if it had members, lol!
+			TRACE("Invoke soft replace pattern %s\n", TypeInfo(srp).name().c_str() );
+			ASSERT( !current_key )( "Found soft replace pattern while under substitution\n" );
+			shared_ptr<Node> newsource = srp->DuplicateSubtree( this, match_keys );
+			ASSERT( newsource );
+
+			// Allow this to key a match set if required
+			// TODO do a proper 2-pass thing like with searching, and have a new function like
+			// MatchKeys::KeyAndDuplicate() or something
+			match_keys->KeyAndRestrict( newsource, source, this, 0 );
+			source = newsource;
+		}
+
+    	// Do not duplicate specific identifiers.
     	if( dynamic_pointer_cast<SpecificIdentifier>( source ) )
     	{
     		// Substitute is an identifier, so preserve its uniqueness by just returning
@@ -844,7 +864,7 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     		return source;
     	}
 
-    	TRACE("duplicating supplied node\n");
+     	TRACE("duplicating supplied node\n");
 		// Make the new node (destination node)
 		shared_ptr<Cloner> dup_dest = Cloner::Clone( source );
 		dest = dynamic_pointer_cast<Node>( dup_dest );
@@ -872,10 +892,14 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
 	GenericPointIterator pit( prog );
 	TRACE("Begin search\n");
 	Result r = Compare( *pit, search_pattern, &matches );
-    if( r == FOUND && replace_pattern )
+	if( r != FOUND )
+		return r;
+
+    if( replace_pattern )
     {
     	TRACE("Search successful, now replacing\n");
         ASSERT( replace_pattern );
+        matches.SetPass( MatchKeys::KEYING );
         SharedPtr<Node> nn( DuplicateSubtree( replace_pattern, &matches ) );
         pit.Overwrite( &nn );
        	TRACE("Done replace\n");
@@ -885,9 +909,10 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
         ASSERT(pp)("Replace changed root Program node into something else!");
         *p = *pp; // Egregiously copy over the contents of the program node
     }
+    matches.CheckMatchSetsKeyed();
 
     program = shared_ptr<Program>(); // just to avoid us relying on the program outside of a search+replace pass
-    return r;
+    return FOUND;
 }
 
 // Perform search and replace on supplied program based
@@ -912,16 +937,19 @@ void RootedSearchReplace::operator()( shared_ptr<Program> p )
 const RootedSearchReplace::MatchSet *RootedSearchReplace::MatchKeys::FindMatchSet( shared_ptr<Node> node )
 {
 	ASSERT( this );
-
+	MatchSet *found = NULL;
 	for( set<MatchSet *>::iterator msi = begin();
          msi != end();
          msi++ )
     {
         MatchSet::iterator ni = (*msi)->find( node );
         if( ni != (*msi)->end() )
-            return *msi;
+        {
+        	ASSERT( !found )("Found more than one match set for a node - please merge the match sets");
+        	found = *msi;
+        }
     }
-    return 0;
+    return found;
 }
 
 
@@ -975,9 +1003,9 @@ RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shar
 }
 
 RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shared_ptr<Key> key,
-		                                                        shared_ptr<Node> pattern,
-		                                                        const RootedSearchReplace *sr,
-		                                                        unsigned context_flags )
+		                                                                    shared_ptr<Node> pattern,
+		                                                                    const RootedSearchReplace *sr,
+		                                                                    unsigned context_flags )
 {
 	ASSERT( this );
 	// Find a match set for this node. If the node is not in a match set then there's
