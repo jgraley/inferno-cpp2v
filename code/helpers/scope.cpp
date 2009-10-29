@@ -48,8 +48,12 @@ shared_ptr<Scope> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> 
 	            return p;
 	    }
 	}
+
 	
-	ASSERTFAIL("Could not find scope for identifier"); 
+	if( shared_ptr<SpecificIdentifier> sid = dynamic_pointer_cast<SpecificIdentifier>( id ) )
+		ASSERT(0)("type %s name is %s\n", TypeInfo(id).name().c_str(), sid->name.c_str() );
+	else
+		ASSERT(0)("non-specific type %s - should not be doing GetScope() on these\n", TypeInfo(id).name().c_str() );
 	// every identifier should have a scope - if this fails, we've missed out a kind of scope
 	// Note: if Flattener is not automated yet, then it may have missed something
 	return shared_ptr<Scope>();

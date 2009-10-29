@@ -172,6 +172,8 @@ struct Identifier : virtual Property { NODE_FUNCTIONS };
 // names for new objects easier.
 struct SpecificIdentifier : virtual Property
 { 
+	SpecificIdentifier() {}
+	SpecificIdentifier( string s ) : name(s) {}
     string name;
     NODE_FUNCTIONS 
 };
@@ -184,7 +186,12 @@ struct InstanceIdentifier : Identifier,
 // Identifier for a specific instance that has been declared
 // somewhere.                               
 struct SpecificInstanceIdentifier : InstanceIdentifier,
-                                    SpecificIdentifier { NODE_FUNCTIONS };
+                                    SpecificIdentifier
+{
+	SpecificInstanceIdentifier() {}
+	SpecificInstanceIdentifier( string s ) : SpecificIdentifier(s) {}
+    NODE_FUNCTIONS
+};
                             
 
 // Identifier for a user defined type that can be any type.
@@ -194,8 +201,12 @@ struct TypeIdentifier : Identifier,
 // Identifier for a specific user defined type that has been 
 // declared somewhere.
 struct SpecificTypeIdentifier : TypeIdentifier,
-                                SpecificIdentifier { NODE_FUNCTIONS };
-                      
+                                SpecificIdentifier
+{
+	SpecificTypeIdentifier() {}
+	SpecificTypeIdentifier( string s ) : SpecificIdentifier(s) {}
+    NODE_FUNCTIONS
+};
 
 // Identifier for a label that can be any label. 
 struct LabelIdentifier : Identifier,
@@ -203,7 +214,12 @@ struct LabelIdentifier : Identifier,
 
 // Identifier for a specific label that has been declared somewhere.
 struct SpecificLabelIdentifier : LabelIdentifier,
-                         SpecificIdentifier { NODE_FUNCTIONS };
+                                 SpecificIdentifier
+{
+	SpecificLabelIdentifier() {}
+	SpecificLabelIdentifier( string s ) : SpecificIdentifier(s) {}
+    NODE_FUNCTIONS
+};
 
 // General note about identifiers: in a valid program tree, there should
 // be *one* Declaration node that points to the identifier and serves to 

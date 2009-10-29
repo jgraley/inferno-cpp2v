@@ -22,6 +22,10 @@ int ma()
     }
 }
 */
-
-int a;
+void func3()
+{
+    int a;
+    int b;
+    a=b+9+99;
+}
 

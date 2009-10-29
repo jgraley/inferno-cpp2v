@@ -147,6 +147,7 @@ public:
     ~RootedSearchReplace();
     
     // Do the actual search and replace (functor style; implements Pass interface).
+    Result SingleSearchReplace( shared_ptr<Program> p );
     void operator()( shared_ptr<Program> p );
 
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate

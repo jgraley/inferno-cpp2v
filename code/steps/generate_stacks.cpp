@@ -14,17 +14,85 @@
 
 void GenerateStacks::operator()( shared_ptr<Program> program )
 {
+	TRACE();
 	set<SearchReplace::MatchSet *> sms;
 
+	shared_ptr<Compound> s_comp( new Compound );
 	shared_ptr<Instance> s_instance( new Instance );
+	s_comp->members.insert( s_instance );
 	shared_ptr<InstanceIdentifier> s_identifier( new InstanceIdentifier );
 	s_instance->identifier = s_identifier;
+    s_instance->storage = shared_new<Auto>();
+    s_instance->type = shared_new<Type>();
+    shared_ptr< SearchReplace::Star<Declaration> > s_other_decls( new SearchReplace::Star<Declaration> );
+    s_comp->members.insert( s_other_decls );
+	s_comp->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
 
-	SearchReplace::MatchSet ms_identifier;
-	ms_identifier.insert( s_identifier );
-	sms.insert( &ms_identifier );
+	shared_ptr<Compound> r_comp( new Compound );
+	shared_ptr<Instance> r_instance( new Instance );
+	r_comp->members.insert( r_instance );
+	shared_ptr<InstanceIdentifier> r_identifier( new SpecificInstanceIdentifier("my_new_var") );
+	r_instance->identifier = r_identifier;
+    r_instance->storage = shared_new<Static>(); // TODO Member
+    shared_ptr<Array> r_array( new Array );
+    r_instance->type = r_array;
+    r_array->element = shared_new<Type>();
+    r_array->size = shared_ptr<SpecificInteger>( new SpecificInteger(10) );
+	shared_ptr<Instance> r_index( new Instance );
+	r_comp->members.insert( r_index );
+	shared_ptr<Unsigned> r_index_type( new Unsigned );
+	r_index->type = r_index_type;
+	r_index_type->width = shared_ptr<SpecificInteger>( new SpecificInteger(32) );
+	shared_ptr<InstanceIdentifier> r_index_identifier( new SpecificInstanceIdentifier("my_new_index") );
+	r_index->identifier = r_index_identifier;
+	r_index->storage = shared_new<Static>(); // TODO Member
+	r_index->constancy = shared_new<NonConst>();
+	r_index->initialiser = shared_ptr<SpecificInteger>( new SpecificInteger(0) );
+	r_index->access = shared_new<Private>();
+    shared_ptr< SearchReplace::Star<Declaration> > r_other_decls( new SearchReplace::Star<Declaration> );
+    r_comp->members.insert( r_other_decls );
+    shared_ptr<PostIncrement> r_inc( new PostIncrement );
+    r_comp->statements.push_back( r_inc );
+    r_inc->operands.push_back( r_index_identifier );
+    r_comp->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+    shared_ptr<PostDecrement> r_dec( new PostDecrement );
+    r_comp->statements.push_back( r_dec );
+    r_dec->operands.push_back( r_index_identifier );
 
-	SearchReplace( s_identifier, shared_ptr<Node>(), sms )( program );
+	SearchReplace::MatchSet ms_comp;
+	ms_comp.insert( s_comp );
+	ms_comp.insert( r_comp );
+	sms.insert( &ms_comp );
 
-	ASSERT( ms_identifier.key );
+	SearchReplace::MatchSet ms_instance;
+	ms_instance.insert( s_instance );
+	ms_instance.insert( r_instance );
+	sms.insert( &ms_instance );
+
+	SearchReplace::MatchSet ms_type;
+	ms_type.insert( s_instance->type );
+	ms_type.insert( r_array->element );
+	sms.insert( &ms_type );
+
+	SearchReplace::MatchSet ms_other_decls;
+	ms_other_decls.insert( s_other_decls );
+	ms_other_decls.insert( r_other_decls );
+	sms.insert( &ms_other_decls );
+
+	SearchReplace::MatchSet ms_other_statements;
+	ms_other_statements.insert( s_comp->statements[0] );
+	ms_other_statements.insert( r_comp->statements[1] );
+	sms.insert( &ms_other_statements );
+
+	ASSERT( SearchReplace( s_comp, r_comp, sms ).SingleSearchReplace( program ) );
+
+	ASSERT( ms_instance.key );
+	shared_ptr<Instance> s_found_instance = dynamic_pointer_cast<Instance>(ms_instance.key->root);
+    ASSERT( s_found_instance );
+
+    shared_ptr<Subscript> r_sub( new Subscript );
+    r_sub->base = r_identifier;
+    r_sub->index = r_index_identifier;
+
+    SearchReplace( s_found_instance->identifier, r_sub )( program );
 }
