@@ -775,7 +775,8 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 {
 	TRACE("Duplicating, under_substitution=%p\n", current_key.get());
 
-    // Are we substituting a stuff node?
+    // Are we substituting a stuff node? If so, see if we reached the terminus, and if
+	// so come out of substitution.
 	if( shared_ptr<StuffKey> stuff_key = dynamic_pointer_cast<StuffKey>(current_key) )
 	{
 		shared_ptr<StuffBase> replace_stuff = stuff_key->replace_stuff;
@@ -787,7 +788,7 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 					TypeInfo(source).name().c_str(), source.get(),
 					TypeInfo(stuff_key->terminus).name().c_str(), stuff_key->terminus.get() );
 			TRACE( "Leaving substitution to duplicate terminus replace pattern\n" );
-			return DuplicateSubtree( replace_stuff->terminus, match_keys, shared_ptr<Key>() );
+			return DuplicateSubtree( replace_stuff->terminus, match_keys, shared_ptr<Key>() ); // not in substitution any more
 		}
 	}
 
@@ -852,10 +853,7 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 			ASSERT( newsource );
 
 			// Allow this to key a match set if required
-			// TODO do a proper 2-pass thing like with searching, and have a new function like
-			// MatchKeys::KeyAndDuplicate() or something
-			match_keys->KeyAndRestrict( newsource, source, this, 0 );
-			source = newsource;
+			return match_keys->KeyAndDuplicate( newsource, source, this );
 		}
 
     	// Do not duplicate specific identifiers.
@@ -992,10 +990,7 @@ void RootedSearchReplace::MatchKeys::ClearKeys()
 }
 
 
-// During search, once two nodes are known to match, use this function to
-// 1. Key it into a match set of required and
-// 2. Detect whether a match set required two parts of the search tree to match and
-// reject if they don't.
+
 RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shared_ptr<Node> x,
 		                                                        shared_ptr<Node> pattern,
 		                                                        const RootedSearchReplace *sr,
@@ -1047,6 +1042,50 @@ RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shar
 
 	TRACE("\n");
 	return FOUND;
+}
+
+shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndDuplicate( shared_ptr<Node> x,
+                                                                  shared_ptr<Node> pattern,
+                                                                  const RootedSearchReplace *sr )
+{
+	shared_ptr<Key> key( new Key );
+	key->root = x;
+	return KeyAndDuplicate( key, pattern, sr );
+}
+
+shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndDuplicate( shared_ptr<Key> key,
+		                                                          shared_ptr<Node> pattern,
+		                                                          const RootedSearchReplace *sr )
+{
+	ASSERT( this );
+	// Find a match set for this node. If the node is not in a match set then there's
+	// nothing for us to do, so return without restricting the search.
+	const MatchSet *match = FindMatchSet( pattern );
+	if( !match )
+		return key->root;
+	TRACE("MATCH: ");
+
+	// If we're keying and we haven't keyed this node so far, key it now
+	TRACE("in pass %d ", (int)pass);
+	if( pass==KEYING && !(match->key) )
+	{
+		TRACE("keying... match set %p key ptr %p new value %p\n", &match, &(match->key), key.get());
+		match->key = key;
+
+		return key->root;
+	}
+
+	// If we're duplicating, duplicate the pattern found in the match set key
+	if( pass==DUPLICATING )
+	{
+		TRACE("duplicating ");
+		ASSERT( match->key );
+		Result r = sr->Compare( key->root, match->key->root, NULL );
+		return sr->DuplicateSubtree( match->key->root, this, match->key ); // Enter substitution
+		// TODO overlay the pattern here?
+	}
+
+	return key->root;
 }
 
 void RootedSearchReplace::Conjecture::PrepareForDecidedCompare()
