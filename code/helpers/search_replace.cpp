@@ -493,7 +493,7 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
 
     // Get decision from conjecture
 	GenericContainer::iterator thistime = conj.HandleDecision( begin, end );
-	TRACE("Conjecture asks for number %d\n", thistime.GetCount());
+	TRACE("Conjecture asks for number %d\n", thistime.GetCount()); // TODO BUG seems to ask for 0 twice investigate
 	if( thistime == (GenericContainer::iterator)end )
 		return NOT_FOUND; // ran out of choices
 
@@ -670,7 +670,9 @@ void RootedSearchReplace::Overlay( shared_ptr<Node> dest,
             if( *source_ptr ) // Masked: where source is NULL, do not overwrite
                 *dest_ptr = DuplicateSubtree( *source_ptr, match_keys, current_key );
             if( !current_key )
-            	ASSERT( *dest_ptr )("Found NULL in replace pattern without a match set to substitute it");
+            	ASSERT( *dest_ptr )("Found NULL in replace pattern (%s overlaying %s) without a match set to substitute it",
+            			            TypeInfo(source).name().c_str(),
+            			            TypeInfo(source).name().c_str() );
         }
         else
         {
@@ -819,7 +821,7 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     		// pattern can be overlayed over the substituted key.
 			dest = DuplicateSubtree( match->key->root, match_keys, match->key );
 
-			// Do NOT overlay soft patterns - they must self-terminate TODO inelegant?
+			// Do NOT overlay soft patterns TODO inelegant?
 			if( !dynamic_pointer_cast<SoftReplacePattern>( source ) )
 			{
 				// Overlaying requires type compatibility - check for this
@@ -836,6 +838,8 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     }
     else
     {
+    	ASSERT( !dynamic_pointer_cast<StuffBase>(source) )("Stuff nodes in replace pattern must be keyed\n");
+
        	// Allow a soft replace pattern to act
 		if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
 		{
