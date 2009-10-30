@@ -820,7 +820,7 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     	{
     		// For other nodes, we duplicate and then fall through to overlay - so any non-NULL children in the replace
     		// pattern can be overlayed over the substituted key.
-			dest = DuplicateSubtree( match->key->root, match_keys, match->key );
+    		dest = DuplicateSubtree( match->key->root, match_keys, match->key );
 
 			// Do NOT overlay soft patterns TODO inelegant?
 			if( !dynamic_pointer_cast<SoftReplacePattern>( source ) )
@@ -896,10 +896,10 @@ shared_ptr<Node> RootedSearchReplace::MatchingDuplicateSubtree( shared_ptr<Node>
         TRACE("replace KEYING pass\n" );
 
 	    // Now restrict the search according to the match sets
-    	TRACE("doing replace DUPLICATING pass....\n");
-        match_keys->SetPass( MatchKeys::DUPLICATING );
+    	TRACE("doing replace SUBSTITUTING pass....\n");
+        match_keys->SetPass( MatchKeys::SUBSTITUTING );
         shared_ptr<Node> r = DuplicateSubtree( source, match_keys );
-        TRACE("replace DUPLICATING pass\n" );
+        TRACE("replace SUBSTITUTING pass\n" );
         return r;
     }
     else
@@ -1103,9 +1103,9 @@ shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndDuplicate( shared_ptr<Key
 	}
 
 	// If we're duplicating, duplicate the pattern found in the match set key
-	if( pass==DUPLICATING )
+	if( pass==SUBSTITUTING )
 	{
-		TRACE("duplicating ");
+		TRACE("substituting ");
 		ASSERT( match->key );
 		Result r = sr->Compare( key->root, match->key->root, NULL );
 		return sr->DuplicateSubtree( match->key->root, this, match->key ); // Enter substitution
