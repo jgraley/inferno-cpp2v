@@ -19,7 +19,13 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 		TRACE();
 		set<SearchReplace::MatchSet *> sms;
 
+		shared_ptr<Instance> s_fi( new Instance );
+		shared_ptr<Subroutine> s_func( new Subroutine );
+		s_fi->type = s_func;
+		shared_ptr< SearchReplace::Stuff<Statement> > s_stuff( new SearchReplace::Stuff<Statement> );
+		s_fi->initialiser = s_stuff;
 		shared_ptr<Compound> s_comp( new Compound );
+		s_stuff->terminus = s_comp;
 		shared_ptr<Instance> s_instance( new Instance );
 		s_comp->members.insert( s_instance );
 		shared_ptr<InstanceIdentifier> s_identifier( new InstanceIdentifier );
@@ -30,7 +36,11 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 		s_comp->members.insert( s_other_decls );
 		s_comp->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
 
+		shared_ptr<Instance> r_fi( new Instance );
+		shared_ptr< SearchReplace::Stuff<Statement> > r_stuff( new SearchReplace::Stuff<Statement> );
+		r_fi->initialiser = r_stuff;
 		shared_ptr<Compound> r_comp( new Compound );
+		r_stuff->terminus = r_comp;
 		shared_ptr<Instance> r_instance( new Instance );
 		r_comp->members.insert( r_instance );
 		shared_ptr<SoftMakeIdentifier> r_identifier( new SoftMakeIdentifier("%s_stack") );
@@ -51,7 +61,7 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 		r_index->identifier = r_index_identifier;
 		r_index->storage = shared_new<Static>(); // TODO Member
 		r_index->constancy = shared_new<NonConst>();
-		r_index->initialiser = shared_ptr<SpecificInteger>( new SpecificInteger(-1) );
+		r_index->initialiser = shared_ptr<SpecificInteger>( new SpecificInteger(0) );
 		r_index->access = shared_new<Private>();
 		shared_ptr< SearchReplace::Star<Declaration> > r_other_decls( new SearchReplace::Star<Declaration> );
 		r_comp->members.insert( r_other_decls );
@@ -63,10 +73,15 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 		r_comp->statements.push_back( r_dec );
 		r_dec->operands.push_back( r_index_identifier );
 
-		SearchReplace::MatchSet ms_comp;
-		ms_comp.insert( s_comp );
-		ms_comp.insert( r_comp );
-		sms.insert( &ms_comp );
+		SearchReplace::MatchSet ms_stuff;
+		ms_stuff.insert( s_stuff );
+		ms_stuff.insert( r_stuff );
+		sms.insert( &ms_stuff );
+
+		SearchReplace::MatchSet ms_fi;
+		ms_fi.insert( s_fi );
+		ms_fi.insert( r_fi );
+		sms.insert( &ms_fi );
 
 		SearchReplace::MatchSet ms_instance;
 		ms_instance.insert( s_instance );
@@ -106,7 +121,7 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 		ms_new_index_identifier.insert( r_index_identifier );
 		sms.insert( &ms_new_index_identifier );
 
-		bool found = SearchReplace( s_comp, r_comp, sms ).SingleSearchReplace( program );
+		bool found = SearchReplace( s_fi, r_fi, sms ).SingleSearchReplace( program );
 		if( !found )
 			break;
 
