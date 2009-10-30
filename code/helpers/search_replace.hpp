@@ -112,7 +112,7 @@ public:
     };
     struct MatchKeys : set<MatchSet *>
     {
-    	enum Pass { KEYING, RESTRICTING, DUPLICATING } pass;
+    	enum Pass { KEYING, RESTRICTING, SUBSTITUTING } pass;
     	MatchKeys( set<MatchSet *> &s ) :
     		set<MatchSet *>(s)
     	{
