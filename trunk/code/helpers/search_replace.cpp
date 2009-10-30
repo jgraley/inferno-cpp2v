@@ -883,6 +883,33 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     return dest;
 }
 
+
+shared_ptr<Node> RootedSearchReplace::MatchingDuplicateSubtree( shared_ptr<Node> source,
+		                                                        MatchKeys *match_keys ) const
+{
+    if( match_keys )
+    {
+     	// Do a two-pass matching process: first get the keys...
+       	TRACE("doing replace KEYING pass....\n");
+        match_keys->SetPass( MatchKeys::KEYING );
+        (void)DuplicateSubtree( source, match_keys );
+        TRACE("replace KEYING pass\n" );
+
+	    // Now restrict the search according to the match sets
+    	TRACE("doing replace DUPLICATING pass....\n");
+        match_keys->SetPass( MatchKeys::DUPLICATING );
+        shared_ptr<Node> r = DuplicateSubtree( source, match_keys );
+        TRACE("replace DUPLICATING pass\n" );
+        return r;
+    }
+    else
+    {
+    	// No match set, so just call straight through this layer
+    	return DuplicateSubtree( source, NULL );
+    }
+}
+
+
 #include "render/graph.hpp" // TODO get rid
 
 
@@ -902,7 +929,7 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
     	TRACE("Search successful, now replacing\n");
         ASSERT( replace_pattern );
         matches.SetPass( MatchKeys::KEYING );
-        SharedPtr<Node> nn( DuplicateSubtree( replace_pattern, &matches ) );
+        SharedPtr<Node> nn( MatchingDuplicateSubtree( replace_pattern, &matches ) );
         pit.Overwrite( &nn );
        	TRACE("Done replace\n");
 

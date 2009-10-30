@@ -245,6 +245,8 @@ public:
     		                           shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
 private:
 
+    shared_ptr<Node> MatchingDuplicateSubtree( shared_ptr<Node> x,
+    		                                   MatchKeys *match_keys ) const;
     // Internal node classes
     struct SubSequence : Node,
                          Sequence<Node>
