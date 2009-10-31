@@ -33,15 +33,15 @@ int main( int argc, char *argv[] )
               
     Validate()(program);                
 
-   if( --ReadArgs::quitafter >= 0 )
+    if( --ReadArgs::quitafter >= 0 )
     {
-        SplitInstanceDeclarations()(program);
+    	GenerateImplicitCasts()(program);
         Validate()(program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
-    	GenerateImplicitCasts()(program);
+        SplitInstanceDeclarations()(program);
         Validate()(program);
     }
 

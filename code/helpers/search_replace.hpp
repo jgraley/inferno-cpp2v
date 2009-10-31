@@ -51,7 +51,7 @@
 // - Recursive wildcards, arbitrary depth and arbitrary depth with
 //   restricted intermediates (the Stuff node).
 //
-// - TODO slave search/replace so that a second SR can happen for each match
+// - Slave search/replace so that a second SR can happen for each match
 //   of the first one, and can borrow its match sets.
 class RootedSearchReplace : Pass
 {  
@@ -82,8 +82,8 @@ public:
     class Conjecture : public vector<Choice>
     {
     private:
-    	int decisions_count;
     public:
+    	int decision_index;
     	void PrepareForDecidedCompare();
     	bool ShouldTryMore( Result r, int threshold );
     	Choice HandleDecision( Choice begin, Choice end );
@@ -117,6 +117,7 @@ public:
     	{
     	}
         const MatchSet *FindMatchSet( shared_ptr<Node> node, const set<MatchSet *> &matches );
+        void Trace( const set<MatchSet *> &matches ) const;
         Result KeyAndRestrict( shared_ptr<Node> x,
         		               shared_ptr<Node> pattern,
                                const RootedSearchReplace *sr,
@@ -139,11 +140,13 @@ public:
     // Constructor and destructor. Search and replace patterns and match sets are 
     // specified here, so that we have a fully confiugured functor.
     RootedSearchReplace( shared_ptr<Node> sp=shared_ptr<Node>(),
-                   shared_ptr<Node> rp=shared_ptr<Node>(),
-                   set<MatchSet *> m = set<MatchSet *>() );
+                         shared_ptr<Node> rp=shared_ptr<Node>(),
+                         set<MatchSet *> m = set<MatchSet *>(),
+                         RootedSearchReplace *slave = 0 );
     void Configure( shared_ptr<Node> sp=shared_ptr<Node>(),
                     shared_ptr<Node> rp=shared_ptr<Node>(),
-                    set<MatchSet *> m = set<MatchSet *>() );
+                    set<MatchSet *> m = set<MatchSet *>(),
+                    RootedSearchReplace *slave = 0 );
     ~RootedSearchReplace();
     
     // implementation ring: Do the actual search and replace
@@ -184,6 +187,7 @@ public:
 private:
     shared_ptr<Node> search_pattern;
     shared_ptr<Node> replace_pattern;
+    RootedSearchReplace *slave;
     shared_ptr<Program> program;
     
     // LocalCompare ring
@@ -270,10 +274,12 @@ class SearchReplace : public RootedSearchReplace
 public:
     SearchReplace( shared_ptr<Node> sp = shared_ptr<Node>(),
                    shared_ptr<Node> rp = shared_ptr<Node>(),
-                   set<MatchSet *> m = set<MatchSet *>() );
+                   set<MatchSet *> m = set<MatchSet *>(),
+                   RootedSearchReplace *slave = 0 );
     void Configure( shared_ptr<Node> sp = shared_ptr<Node>(),
                     shared_ptr<Node> rp = shared_ptr<Node>(),
-                    set<MatchSet *> m = set<MatchSet *>() );
+                    set<MatchSet *> m = set<MatchSet *>(),
+                    RootedSearchReplace *slave = 0 );
 private:
 	MatchSet root_match;
 };

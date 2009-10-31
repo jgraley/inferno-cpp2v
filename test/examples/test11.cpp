@@ -21,7 +21,7 @@ int ma()
 
     }
 }
-*/
+*//*
 void func3()
 {
     int a;
@@ -32,4 +32,10 @@ void func3()
         c=999;
     }
 }
+*/
+
+void add( unsigned char a, int  b)
+{
+    add(2, 3);
+} 
 

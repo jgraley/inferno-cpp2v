@@ -130,19 +130,35 @@
 // Constructor remembers search pattern, replace pattern and any supplied match sets as required
 RootedSearchReplace::RootedSearchReplace( shared_ptr<Node> sp,
                                           shared_ptr<Node> rp,
-                                          set<MatchSet *> m )
+                                          set<MatchSet *> m,
+                                          RootedSearchReplace *s )
 {
-	Configure( sp, rp, m );
+	Configure( sp, rp, m, s );
 }
 
 
 void RootedSearchReplace::Configure( shared_ptr<Node> sp,
                                      shared_ptr<Node> rp,
-                                     set<MatchSet *> m )
+                                     set<MatchSet *> m,
+                                     RootedSearchReplace *s )
 {
     search_pattern = sp;
     replace_pattern = rp;
-    matches = m; // Convert from set< MatchSet *> to subclass MatchKeys
+    matches = m;
+    slave = s;
+
+    // If we have a slave, copy its match sets into ours so we have a full set
+    // of all the match sets - this will be used across the board. Note that
+    // the non-rooted SearchReplace adds a new match set.
+    if( s )
+	{
+		for( set<MatchSet *>::iterator msi = slave->matches.begin();
+             msi != slave->matches.end();
+             msi++ )
+		    matches.insert( *msi );
+		slave->matches = matches;
+		TRACE("Merging match sets, I have %d slave has %d\n", matches.size(), slave->matches.size() );
+	}
 } 
 
 
@@ -170,12 +186,14 @@ bool RootedSearchReplace::LocalCompare( shared_ptr<Node> x, shared_ptr<Node> pat
 
     if( shared_ptr<SpecificIdentifier> pattern_id = dynamic_pointer_cast<SpecificIdentifier>(pattern) )
     {
-      shared_ptr<SpecificIdentifier> x_id = dynamic_pointer_cast<SpecificIdentifier>(x);
+        shared_ptr<SpecificIdentifier> x_id = dynamic_pointer_cast<SpecificIdentifier>(x);
         ASSERT( x_id );
+        TRACE("SpecificIdentifiers %s @ %p and %s @ %p\n",
+        	  x_id->name.c_str(), x_id.get(),
+        	  pattern_id->name.c_str(), pattern_id.get() );
         if( x_id != pattern_id ) // With identifiers, use the actual node address, not the name,
         	                       // in case different identifiers have the same name
         {
-            TRACE("Identifiers differ\n");
             return false;
         }
     }
@@ -546,6 +564,7 @@ RootedSearchReplace::Result RootedSearchReplace::MatchingDecidedCompare( shared_
         // Do a two-pass matching process: first get the keys...
        	TRACE("doing KEYING pass....\n");
         match_keys->SetPass( MatchKeys::KEYING );
+    	conj.PrepareForDecidedCompare();
         Result r = DecidedCompare( x, pattern, match_keys, conj, DEFAULT_CONTEXT_FLAGS );
         TRACE("KEYING pass result %d\n", r );
 	    if( r != FOUND )
@@ -557,6 +576,7 @@ RootedSearchReplace::Result RootedSearchReplace::MatchingDecidedCompare( shared_
 	    // Now restrict the search according to the match sets
     	TRACE("doing RESTRICTING pass....\n");
         match_keys->SetPass( MatchKeys::RESTRICTING );
+    	conj.PrepareForDecidedCompare();
         r = DecidedCompare( x, pattern, match_keys, conj, DEFAULT_CONTEXT_FLAGS );
         TRACE("RESTRICTING pass result %d\n", r );
 	    if( r != FOUND )
@@ -572,6 +592,7 @@ RootedSearchReplace::Result RootedSearchReplace::MatchingDecidedCompare( shared_
     else
     {
     	// No match set, so just call straight through this layer
+    	conj.PrepareForDecidedCompare();
     	return DecidedCompare( x, pattern, NULL, conj, DEFAULT_CONTEXT_FLAGS );
     }
 }
@@ -583,8 +604,10 @@ RootedSearchReplace::Result RootedSearchReplace::Compare( shared_ptr<Node> x,
 		                                      Conjecture &conj,
 		                                      int threshold ) const
 {
+	if( match_keys )
+		TRACE("Trying decision for %d\n", threshold);
+
 	// Do a compare with the current conjecture.
-	conj.PrepareForDecidedCompare();
 	Result r = MatchingDecidedCompare( x, pattern, match_keys, conj );
 
 	// Try different choices for the decisions at the current level. Recurse
@@ -593,8 +616,21 @@ RootedSearchReplace::Result RootedSearchReplace::Compare( shared_ptr<Node> x,
 	{
 		r = Compare( x, pattern, match_keys, conj, threshold+1 );
 		if( conj.ShouldTryMore( r, threshold ) )
+		{
+			if( match_keys )
+				TRACE("Decision %d out of %d incrementing\n", threshold, conj.decision_index);
 			++conj[threshold];
+		}
+		else
+		{
+			if( match_keys )
+				TRACE("Decision %d out of %d not incrementing\n", threshold, conj.decision_index);
+		}
 	}
+
+	if( match_keys )
+		TRACE("Finished decision for %d\n", threshold);
+
 	return r;
 }
 
@@ -652,6 +688,8 @@ void RootedSearchReplace::Overlay( shared_ptr<Node> dest,
                                                                  source.get() );   // Just get the members corresponding to source's class
     ASSERT( source_memb.size() == dest_memb.size() );
 
+    TRACE("Overlaying %d members %s over %s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
+
     // Loop over all the members of source (which can be a subset of dest)
     // and for non-NULL members, duplicate them by recursing and write the
     // duplicates to the destination.
@@ -675,20 +713,20 @@ void RootedSearchReplace::Overlay( shared_ptr<Node> dest,
         }
         else if( GenericSharedPtr *source_ptr = dynamic_cast<GenericSharedPtr *>(source_memb[i]) )         
         {
+        	TRACE();
             GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]);
             ASSERT( dest_ptr && "itemise for target didn't match itemise for source");
             if( *source_ptr ) // Masked: where source is NULL, do not overwrite
                 *dest_ptr = DuplicateSubtree( *source_ptr, match_keys, current_key );
             if( !current_key )
-            	ASSERT( *dest_ptr )("Found NULL in replace pattern (%s overlaying %s) without a match set to substitute it",
-            			            TypeInfo(source).name().c_str(),
-            			            TypeInfo(source).name().c_str() );
+            	ASSERT( *dest_ptr )("Found NULL in replace pattern without a match set to substitute it");
         }
         else
         {
             ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
         }
     }        
+    TRACE();
 }
 
 
@@ -761,7 +799,7 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 		                                                MatchKeys *match_keys,
 		                                                shared_ptr<Key> current_key ) const
 {
-	TRACE("Duplicating, under_substitution=%p\n", current_key.get());
+	TRACE("Duplicating %s under_substitution=%p\n", TypeInfo(source).name().c_str(), current_key.get());
 
     // Are we substituting a stuff node? If so, see if we reached the terminus, and if
 	// so come out of substitution.
@@ -787,24 +825,23 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
                                                                              // source is actually a match key already, so not in any match sets
     if( dest )
     {
+    	TRACE("Substituted, got %s (source is %s)\n", TypeInfo(dest).name().c_str(), TypeInfo(source).name().c_str());
+
 		// Do NOT overlay soft patterns TODO inelegant?
 		if( !dynamic_pointer_cast<SoftReplacePattern>( source ) &&
 			!dynamic_pointer_cast<StarBase>( source ) &&
 			!dynamic_pointer_cast<StuffBase>( source ) )
 		{
-			// Overlaying requires type compatibility - check for this
-			ASSERT( TypeInfo(source) >= TypeInfo(dest) )
-				  ( "replace pattern %s must be a non-strict superclass of substitute %s, so that its members are a subset",
-					TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str() );
-				  //TODO simply require that every member of a match set has the exact same type
-    	}
+   	    }
 		else
 		{
+			TRACE();
 			return dest;
 		}
     }
     else
     {
+    	TRACE("Did not substitute  (source is %s)\n", TypeInfo(source).name().c_str());
     	ASSERT( !dynamic_pointer_cast<StuffBase>(source) )("Stuff nodes in replace pattern must be keyed\n");
 
        	// Allow a soft replace pattern to act
@@ -846,11 +883,18 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 		ClearPtrs( dest );
     }
     
+	// Overlaying requires type compatibility - check for this
+	ASSERT( TypeInfo(source) >= TypeInfo(dest) )
+		  ( "replace pattern %s must be a non-strict superclass of substitute %s, so that its members are a subset",
+			TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str() );
+	TRACE();
 	// Copy the source over,  except for any NULLs in the source. If source is superclass
 	// of destination (i.e. has possibly fewer members) the missing ones will be left alone.
 	Overlay( dest, source, match_keys, current_key );
 
     ASSERT( dest );
+    TRACE();
+
     return dest;
 }
 
@@ -913,6 +957,13 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
         *p = *pp; // Egregiously copy over the contents of the program node
     }
 
+    if( slave )
+    {
+    	TRACE("Invoking slave with %d keys...\n", match_keys.size());
+    	match_keys.Trace( matches );
+    	slave->RepeatingSearchReplace( p, base_sp, slave->search_pattern, slave->replace_pattern, match_keys );
+    }
+
     program = shared_ptr<Program>(); // just to avoid us relying on the program outside of a search+replace pass
     return FOUND;
 }
@@ -972,10 +1023,27 @@ const RootedSearchReplace::MatchSet *RootedSearchReplace::MatchKeys::FindMatchSe
 }
 
 
+void RootedSearchReplace::MatchKeys::Trace( const set<MatchSet *> &matches ) const
+{
+	for( set<MatchSet *>::iterator msi = matches.begin();
+		 msi != matches.end();
+		 msi++ )
+	{
+		TRACE("MatchSet @ %p\n", *msi );
+	}
+	for( const_iterator mki = begin();
+		 mki != end();
+		 mki++ )
+	{
+		TRACE("MatchSet [@%p]=%p\n", (*mki).first, (*mki).second.get() );
+	}
+}
+
+
 RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shared_ptr<Node> x,
-		                                                        shared_ptr<Node> pattern,
-		                                                        const RootedSearchReplace *sr,
-		                                                        unsigned context_flags )
+		                                                                    shared_ptr<Node> pattern,
+		                                                                    const RootedSearchReplace *sr,
+		                                                                    unsigned context_flags )
 {
 	shared_ptr<Key> key( new Key );
 	key->root = x;
@@ -999,7 +1067,11 @@ RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shar
 	TRACE("in pass %d ", (int)pass);
 	if( pass==KEYING && !(operator[](match)) )
 	{
-		TRACE("keying... match set %p key ptr %p new value %p\n", &match, &(operator[](match)), key.get());
+		TRACE("keying... match set %p key ptr %p new value %p, presently %d keys out of %d match sets\n",
+				match, operator[](match).get(), key.get(),
+				size(), sr->matches.size() );
+        Trace( sr->matches );
+
 		operator[](match) = key;
 
 		return FOUND; // always match when keying (could restrict here too as a slight optimisation, but KISS for now)
@@ -1016,7 +1088,11 @@ RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shar
 		// through choices, and since the number of decisions seen may vary, we must start a new conjecture.
 		// Therefore, we recurse back to Compare().
 		ASSERT( operator[](match) ); // should have been caught by CheckMatchSetsKeyed()
-		Result r = sr->Compare( key->root, operator[](match)->root, NULL );
+		Result r;
+		if( key->root != operator[](match)->root )
+			r = sr->Compare( key->root, operator[](match)->root, NULL );
+		else
+			r = FOUND;
 		TRACE("result %d\n", r);
 		return r;
 	}
@@ -1056,7 +1132,9 @@ shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndSubstitute( shared_ptr<Ke
 	TRACE("in pass %d ", (int)pass);
 	if( pass==KEYING && key && !operator[](match) )
 	{
-		TRACE("keying... match set %p key ptr %p new value %p\n", &match, &(operator[](match)), key.get());
+		TRACE("keying... match set %p key ptr %p new value %p, presently %d keys out of %d match sets\n",
+				&match, &(operator[](match)), key.get(),
+				size(), sr->matches.size() );
 		operator[](match) = key;
 
 		return key->root;
@@ -1088,7 +1166,7 @@ void RootedSearchReplace::Conjecture::PrepareForDecidedCompare()
 	ASSERT( this );
 
 	TRACE("Decision prepare\n");
-	decisions_count = 0;
+	decision_index = 0;
 }
 
 bool RootedSearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
@@ -1098,27 +1176,27 @@ bool RootedSearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
 	if( r == FOUND )
     	return false; // stop trying if we found a match
 
-    if( decisions_count <= threshold ) // we've made all the decisions we can OR
-        return false;                  // our last decision went out of bounds
+    if( size() <= threshold ) // we've made all the decisions we can OR
+        return false;         // our last decision went out of bounds
 
     return true;
 }
 
 RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( RootedSearchReplace::Choice begin,
-		                                                         RootedSearchReplace::Choice end )
+		                                                                     RootedSearchReplace::Choice end )
 {
 	ASSERT( this );
 
 	// Now we know we have a decision to make; see if it needs to be added to the present Conjecture
-	if( size() == decisions_count ) // this decision missing from conjecture?
+	if( size() == decision_index ) // this decision missing from conjecture?
 	{
-		ASSERT( size() >= decisions_count ); // consistency check
+		ASSERT( size() >= decision_index ); // consistency check
 		push_back( begin ); // append this decision, initialised to begin
-		TRACE("Decision %d appending begin\n", decisions_count );
+		TRACE("Decision %d appending begin\n", decision_index );
 	}
 
 	// Adopt the current decision based on Conjecture
-	RootedSearchReplace::Choice c = (*this)[decisions_count]; // Get present decision
+	RootedSearchReplace::Choice c = (*this)[decision_index]; // Get present decision
 
 	// Check the decision obeys bounds
 	if( c == end )
@@ -1127,20 +1205,20 @@ RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( Roo
 		// NOTE: we will still return end in this case, i.e. an invlaid iterator. This tells
 		// the caller to please not try to do any matching with this decision, but fall out
 		// with NOT_FOUND.
-		TRACE("Decision %d hit end\n", decisions_count );
-		resize( decisions_count );
+		TRACE("Decision %d hit end\n", decision_index );
+		resize( decision_index );
 	}
 	else
 	{
 		// That decision is OK, so move to the next one
-		TRACE("Decision %d OK\n", decisions_count );
+		TRACE("Decision %d OK\n", decision_index );
 
 		bool seen_c=false;
 		for( Choice i = begin; i != end; ++i )
 			seen_c |= (i==c);
-		ASSERT( seen_c )("Decision #%d: c not in x or x.end(), seems to have overshot!!!!", decisions_count);
+		ASSERT( seen_c )("Decision #%d: c not in x or x.end(), seems to have overshot!!!!", decision_index);
 
-		decisions_count++;
+		decision_index++;
 	}
 
     return c;
@@ -1149,15 +1227,17 @@ RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( Roo
 
 SearchReplace::SearchReplace( shared_ptr<Node> sp,
                               shared_ptr<Node> rp,
-                              set<MatchSet *> m )
+                              set<MatchSet *> m,
+                              RootedSearchReplace *s )
 {
-	Configure( sp, rp, m );
+	Configure( sp, rp, m, s );
 }
 
 
 void SearchReplace::Configure( shared_ptr<Node> sp,
                                shared_ptr<Node> rp,
-                               set<MatchSet *> m )
+                               set<MatchSet *> m,
+                               RootedSearchReplace *s )
 {
 	if( !sp )
 		return;
@@ -1181,12 +1261,12 @@ void SearchReplace::Configure( shared_ptr<Node> sp,
 	    m.insert( &root_match );
 
 	    // Configure the rooted implementation with new patterns and match sets
-	    RootedSearchReplace::Configure( search_root, replace_root, m );
+	    RootedSearchReplace::Configure( search_root, replace_root, m, s );
 	}
 	else
 	{
 	    // Configure the rooted implementation with new pattern
-        RootedSearchReplace::Configure( search_root, rp, m );
+        RootedSearchReplace::Configure( search_root, rp, m, s );
 	}
 }
 
