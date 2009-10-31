@@ -541,23 +541,33 @@ RootedSearchReplace::Result RootedSearchReplace::MatchingDecidedCompare( shared_
     static const unsigned DEFAULT_CONTEXT_FLAGS = 0;
     if( match_keys )
     {
-        // Clear down the keys in preperation for a new match set run
-    	match_keys->ClearKeys();
+        MatchKeys original_match_keys = *match_keys; // deep copy here
 
-    	// Do a two-pass matching process: first get the keys...
+        // Do a two-pass matching process: first get the keys...
        	TRACE("doing KEYING pass....\n");
         match_keys->SetPass( MatchKeys::KEYING );
         Result r = DecidedCompare( x, pattern, match_keys, conj, DEFAULT_CONTEXT_FLAGS );
         TRACE("KEYING pass result %d\n", r );
 	    if( r != FOUND )
-	    	return r;	    // Save time by giving up if no match found
+	    {
+	    	*match_keys = original_match_keys; // revert match keys since we failed
+	    	return NOT_FOUND;                  // Save time by giving up if no match found
+	    }
 
 	    // Now restrict the search according to the match sets
     	TRACE("doing RESTRICTING pass....\n");
         match_keys->SetPass( MatchKeys::RESTRICTING );
         r = DecidedCompare( x, pattern, match_keys, conj, DEFAULT_CONTEXT_FLAGS );
         TRACE("RESTRICTING pass result %d\n", r );
-        return r;
+	    if( r != FOUND )
+	    {
+	    	*match_keys = original_match_keys; // revert match keys since we failed
+	    	return NOT_FOUND;	               // Save time by giving up if no match found
+	    }
+
+	    // Do not revert match keys if we were successful - keep them for replace
+	    // and any slave search and replace operations we might do.
+	    return FOUND;
     }
     else
     {
@@ -874,52 +884,70 @@ shared_ptr<Node> RootedSearchReplace::MatchingDuplicateSubtree( shared_ptr<Node>
 #include "render/graph.hpp" // TODO get rid
 
 
-RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr<Program> p )
+RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr<Program> p,
+		                                                              shared_ptr<Node> base,
+		                                                              shared_ptr<Node> search_pattern,
+		                                                              shared_ptr<Node> replace_pattern,
+		                                                              MatchKeys match_keys ) // Pass by value is intentional - changes should not propogate back to caller
 {
 	program = p;
 
-	MatchKeys mk;
-	SharedPtr<Node> prog(p);
-	GenericPointIterator pit( prog );
+	SharedPtr<Node> base_sp(base);
+	GenericPointIterator base_it( base_sp );
 	TRACE("Begin search\n");
-	Result r = Compare( *pit, search_pattern, &mk );
+	Result r = Compare( *base_it, search_pattern, &match_keys );
 	if( r != FOUND )
-		return r;
+		return NOT_FOUND;
 
     if( replace_pattern )
     {
     	TRACE("Search successful, now replacing\n");
         ASSERT( replace_pattern );
-        SharedPtr<Node> nn( MatchingDuplicateSubtree( replace_pattern, &mk ) );
-        pit.Overwrite( &nn );
+        SharedPtr<Node> nn( MatchingDuplicateSubtree( replace_pattern, &match_keys ) );
+        base_it.Overwrite( &nn );
        	TRACE("Done replace\n");
 
         // TODO operator() should take a ref to the shared_ptr<Program> and just change it directly
-        shared_ptr<Program> pp = dynamic_pointer_cast<Program>(prog);
-        ASSERT(pp)("Replace changed root Program node into something else!");
+        shared_ptr<Program> pp = dynamic_pointer_cast<Program>(base_sp);
+        ASSERT(pp)("root node is not program, don't know how to change it");
         *p = *pp; // Egregiously copy over the contents of the program node
     }
-    mk.CheckMatchSetsKeyed();
 
     program = shared_ptr<Program>(); // just to avoid us relying on the program outside of a search+replace pass
     return FOUND;
 }
 
+
 // Perform search and replace on supplied program based
-// on current patterns and match sets. Does search and replace
-// operations repeatedly until there are no more matches.
-void RootedSearchReplace::operator()( shared_ptr<Program> p )
+// on supplied patterns and match sets. Does search and replace
+// operations repeatedly until there are no more matches. Returns how
+// many hits we got.
+int RootedSearchReplace::RepeatingSearchReplace( shared_ptr<Program> p,
+	                                             shared_ptr<Node> base,
+	                                             shared_ptr<Node> search_pattern,
+	                                             shared_ptr<Node> replace_pattern,
+	                                             MatchKeys match_keys ) // Pass by value is intentional - changes should not propogate back to caller
 {
     int i=0;
-    while(1)
+    while(i<10)
     {
-    	TRACE("Begin search\n");
-    	Result r = SingleSearchReplace( p );
+    	Result r = SingleSearchReplace( p,
+    			                        base,
+    			                        search_pattern,
+    			                        replace_pattern,
+    			                        match_keys );
         if( r != FOUND )
             break;
-       	ASSERT(i<100)("Too many hits");
+       	//ASSERT(i<100)("Too many hits");
         i++;
     }
+    return i;
+}
+
+// Do a search and replace based on patterns stored in our members
+void RootedSearchReplace::operator()( shared_ptr<Program> p )
+{// if no replace pattern, call single one
+	(void)RepeatingSearchReplace( p, p, search_pattern, replace_pattern );
 }
 
 
@@ -942,37 +970,6 @@ const RootedSearchReplace::MatchSet *RootedSearchReplace::MatchKeys::FindMatchSe
     }
     return found;
 }
-
-
-void RootedSearchReplace::MatchKeys::CheckMatchSetsKeyed()
-{
-	ASSERT( this );
-
-	int unkeyed=0;
-	MatchKeys::iterator mki;
-	int i;
-    for( mki = begin(), i=0;
-         mki != end();
-         mki++, i++ )
-    {
-    	if( !((*mki).second) )
-    	{
-    		unkeyed++;
-    		TRACE("%d not keyed\n", i);
-    	}
-    }
-    ASSERT( unkeyed==0 )("Detected %d unkeyed match sets", unkeyed);
-}
-
-
-// Reset the keys in all the matchsets 
-void RootedSearchReplace::MatchKeys::ClearKeys()
-{
-	ASSERT( this );
-
-	clear();
-}
-
 
 
 RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shared_ptr<Node> x,
@@ -1026,7 +1023,8 @@ RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shar
 
 	TRACE("\n");
 	return FOUND;
-	// TODO make the Map< const
+	// TODO make the Map< const MatchSet *, shared_ptr<Key> > be a member not a base class
+	// because all the operator[](...) in here are giving me a headache
 }
 
 shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndSubstitute( shared_ptr<Node> x,
