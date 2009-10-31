@@ -56,10 +56,11 @@ Tracer &Tracer::operator()(const char *fmt, ...)
     if( (flags & DISABLE) || !(ReadArgs::trace || (flags & FORCE)) )
         return *this;
 
+    int auto_variable;
     va_list vl;
     va_start( vl, fmt );
     if( !continuation ) 
-        printf( "    %s:%d in %s()\n", file, line, function);
+        printf( "    %s:%d in %s() sp %p\n", file, line, function, &auto_variable);
     vprintf( fmt, vl );
     va_end( vl );
     
