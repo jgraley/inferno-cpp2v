@@ -757,7 +757,8 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 	// so come out of substitution.
 	if( shared_ptr<StuffKey> stuff_key = dynamic_pointer_cast<StuffKey>(current_key) )
 	{
-		shared_ptr<StuffBase> replace_stuff = stuff_key->replace_stuff;
+		ASSERT( stuff_key->replace_pattern );
+		shared_ptr<StuffBase> replace_stuff = dynamic_pointer_cast<StuffBase>( stuff_key->replace_pattern );
 		ASSERT( replace_stuff );
 		if( replace_stuff->terminus &&      // There is a terminus in replace pattern
 			source == stuff_key->terminus ) // and the present node is the terminus in the source pattern
@@ -770,51 +771,29 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 		}
 	}
 
-	shared_ptr<Node> dest;
+	shared_ptr<Node> dest = shared_ptr<Node>();
+	dest = match_keys->KeyAndSubstitute( shared_ptr<Key>(), source, this );
+    ASSERT( !dest || !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
+                                                                             // source is actually a match key already, so not in any match sets
 
-    // Check match sets for a match to the source of our duplication. If one is found, we
-	// substitute the match set's key node instead of the supplied source node.
-    const MatchSet *match = NULL;
-    if( match_keys )
-    	match = match_keys->FindMatchSet( source );
 
-    if( match && match->key ) // Only substitute for match sets already keyed
+    if( dest )
     {
-    	ASSERT( !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
-    	                                                                      // source is actually a match key already, so not in any match sets
-		// It's in a match set, so substitute the key. Simplest to recurse for this. We will
-		// still overlay any non-NULL members of the replace pattern node onto the result (see below)
-    	TRACE("substituting because found in match set\n");
-
-    	if( shared_ptr<StuffBase> replace_stuff = dynamic_pointer_cast<StuffBase>(source) )
-    	{
-    		// If it's a stuff node, do NOT overlay the replace pattern - instead store it in the stuff key
-    		// for use when we hit terminus.
-    		shared_ptr<StuffKey> stuff_key = dynamic_pointer_cast<StuffKey>(match->key);
-    		stuff_key->replace_stuff = replace_stuff;
-    	    dest = DuplicateSubtree( match->key->root, match_keys, match->key );
+		// Do NOT overlay soft patterns TODO inelegant?
+		if( !dynamic_pointer_cast<SoftReplacePattern>( source ) &&
+			!dynamic_pointer_cast<StarBase>( source ) &&
+			!dynamic_pointer_cast<StuffBase>( source ) )
+		{
+			// Overlaying requires type compatibility - check for this
+			ASSERT( TypeInfo(source) >= TypeInfo(dest) )
+				  ( "replace pattern %s must be a non-strict superclass of substitute %s, so that its members are a subset",
+					TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str() );
+				  //TODO simply require that every member of a match set has the exact same type
     	}
-    	else
-    	{
-    		// For other nodes, we duplicate and then fall through to overlay - so any non-NULL children in the replace
-    		// pattern can be overlayed over the substituted key.
-    		dest = DuplicateSubtree( match->key->root, match_keys, match->key );
-
-			// Do NOT overlay soft patterns TODO inelegant?
-			if( !dynamic_pointer_cast<SoftReplacePattern>( source ) &&
-				!dynamic_pointer_cast<StarBase>( source ) )
-			{
-				// Overlaying requires type compatibility - check for this
-				ASSERT( TypeInfo(source) >= TypeInfo(match->key->root) )
-					  ( "replace pattern %s must be a non-strict superclass of substitute %s, so that its members are a subset",
-						TypeInfo(source).name().c_str(), TypeInfo(match->key->root).name().c_str() );
-					  //TODO simply require that every member of a match set has the exact same type
-
-				// Copy the source over,  except for any NULLs in the source. If source is superclass
-				// of destination (i.e. has possibly fewer members) the missing ones will be left alone.
-				Overlay( dest, source, match_keys, current_key );
-			}
-    	}
+		else
+		{
+			return dest;
+		}
     }
     else
     {
@@ -832,7 +811,11 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 			ASSERT( newsource );
 
 			// Allow this to key a match set if required
-			return match_keys->KeyAndSubstitute( newsource, source, this );
+			shared_ptr<Node> subs = match_keys->KeyAndSubstitute( newsource, source, this );
+			if( subs )
+				return subs;
+			else
+				return newsource;
 		}
 
     	// Do not duplicate specific identifiers.
@@ -853,11 +836,12 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 
 		// Make all members in the destination be NULL
 		ClearPtrs( dest );
-
-		// Copy the source over, not allowing any NULLs this time
-		Overlay( dest, source, match_keys, current_key );
     }
     
+	// Copy the source over,  except for any NULLs in the source. If source is superclass
+	// of destination (i.e. has possibly fewer members) the missing ones will be left alone.
+	Overlay( dest, source, match_keys, current_key );
+
     ASSERT( dest );
     return dest;
 }
@@ -1059,16 +1043,20 @@ shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndSubstitute( shared_ptr<No
 	return KeyAndSubstitute( key, pattern, sr );
 }
 
+// Note return is NULL in all cases unless we substituted in which case it is the result of the
+// substitution, duplicated for our convenience. Always check the return value for NULL.
 shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be NULL meaning we are not allowed to key the node
 		                                                           shared_ptr<Node> pattern,
 		                                                           const RootedSearchReplace *sr )
 {
 	ASSERT( this );
+	ASSERT( !key || key->root != pattern ); // just a general usage check
+
 	// Find a match set for this node. If the node is not in a match set then there's
 	// nothing for us to do, so return without restricting the search.
 	const MatchSet *match = FindMatchSet( pattern );
 	if( !match )
-		return pattern;
+		return shared_ptr<Node>();
 	TRACE("MATCH: ");
 
 	// If we're keying and we haven't keyed this node so far, key it now
@@ -1081,16 +1069,25 @@ shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndSubstitute( shared_ptr<Ke
 		return key->root;
 	}
 
-	// If we're duplicating, duplicate the pattern found in the match set key
-	if( pass==SUBSTITUTING )
+	if( match->key )
 	{
+		// Always substitute
 		TRACE("substituting ");
 		ASSERT( match->key );
-		return sr->DuplicateSubtree( match->key->root, this, match->key ); // Enter substitution
-		// TODO overlay the pattern here?
+		match->key->replace_pattern = pattern; // Only fill this in while substituting under the node
+		shared_ptr<Node> subs = sr->DuplicateSubtree( match->key->root, this, match->key ); // Enter substitution
+		match->key->replace_pattern = shared_ptr<Node>();
+		return subs;
 	}
 
-	return pattern; // TODO this only happens during keying, could return NULL or something
+    ASSERT( pass!=SUBSTITUTING ); // during substitution pass we should have all match sets keyed
+    // In KEYING and this match set not keyed yet (because it will be keyed by another node
+    // in the replace pattern). We've got to produce something - don't want to supply the pattern
+    // or key without duplication because that breaks rules about using stuff directly, but don't
+    // want to call DuplicateSubtree etc because it might recurse endlessly or have other unwanted
+    // side-effects. Since this is the KEYING pass the generated tree will get thrown away so
+    // just produce a nondescript Node.
+    return shared_ptr<Node>();
 }
 
 void RootedSearchReplace::Conjecture::PrepareForDecidedCompare()
