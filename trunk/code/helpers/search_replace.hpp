@@ -129,12 +129,12 @@ public:
         		               shared_ptr<Node> pattern,
                                const RootedSearchReplace *sr,
                                unsigned context_flags );
-        shared_ptr<Node> KeyAndDuplicate( shared_ptr<Node> x, // source after soft nodes etc
-        		                          shared_ptr<Node> pattern, // source
-                                          const RootedSearchReplace *sr );
-        shared_ptr<Node> KeyAndDuplicate( shared_ptr<Key> key,
-        		                          shared_ptr<Node> pattern,
-                                          const RootedSearchReplace *sr );
+        shared_ptr<Node> KeyAndSubstitute( shared_ptr<Node> x, // source after soft nodes etc
+        		                           shared_ptr<Node> pattern, // source
+                                           const RootedSearchReplace *sr );
+        shared_ptr<Node> KeyAndSubstitute( shared_ptr<Key> key,
+        		                           shared_ptr<Node> pattern,
+                                           const RootedSearchReplace *sr );
         void CheckMatchSetsKeyed();
         void ClearKeys();
         void SetPass( Pass p ) { pass = p; }
