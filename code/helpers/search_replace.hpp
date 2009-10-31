@@ -95,12 +95,12 @@ public:
     {
     	virtual ~Key(){}  // be a virtual hierarchy
     	SharedPtr<Node> root; // Tree node at matched pattern; root of any replace subtree
+    	SharedPtr<Node> replace_pattern; // Tree node at matched pattern; root of any replace subtree
     };
 
     struct StuffKey : Key
     {
-     	SharedPtr<StuffBase> search_stuff;
-     	SharedPtr<StuffBase> replace_stuff;
+     	SharedPtr<StuffBase> search_stuff; // TODO add search_pattern to Key base class and lose this (as with replace_pattern)
      	SharedPtr<Node> terminus;
     };
 
