@@ -108,19 +108,15 @@ public:
     // of shared pointers but don't worry about key, pass to RootedSearchReplace constructor.
     struct MatchSet : public set< shared_ptr<Node> >
     {
-         mutable shared_ptr<Key> key;    // This is filled in by the search and replace engine
+         //mutable shared_ptr<Key> key;    // This is filled in by the search and replace engine
     };
-    struct MatchKeys : set<MatchSet *>
+    struct MatchKeys : Map< const MatchSet *, shared_ptr<Key> >
     {
     	enum Pass { KEYING, RESTRICTING, SUBSTITUTING } pass;
-    	MatchKeys( set<MatchSet *> &s ) :
-    		set<MatchSet *>(s)
-    	{
-    	}
     	MatchKeys()
     	{
     	}
-        const MatchSet *FindMatchSet( shared_ptr<Node> node );
+        const MatchSet *FindMatchSet( shared_ptr<Node> node, const set<MatchSet *> &matches );
         Result KeyAndRestrict( shared_ptr<Node> x,
         		               shared_ptr<Node> pattern,
                                const RootedSearchReplace *sr,
@@ -139,8 +135,8 @@ public:
         void ClearKeys();
         void SetPass( Pass p ) { pass = p; }
     };
-    MatchKeys matches;
 
+    set<MatchSet *> matches;
 
     // Constructor and destructor. Search and replace patterns and match sets are 
     // specified here, so that we have a fully confiugured functor.

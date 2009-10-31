@@ -142,7 +142,7 @@ void RootedSearchReplace::Configure( shared_ptr<Node> sp,
 {
     search_pattern = sp;
     replace_pattern = rp;
-    matches = MatchKeys( m ); // Convert from set< MAtchSet *> to subclass MatchKeys
+    matches = m; // Convert from set< MatchSet *> to subclass MatchKeys
 } 
 
 
@@ -775,8 +775,6 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 	dest = match_keys->KeyAndSubstitute( shared_ptr<Key>(), source, this );
     ASSERT( !dest || !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
                                                                              // source is actually a match key already, so not in any match sets
-
-
     if( dest )
     {
 		// Do NOT overlay soft patterns TODO inelegant?
@@ -880,10 +878,11 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
 {
 	program = p;
 
+	MatchKeys mk;
 	SharedPtr<Node> prog(p);
 	GenericPointIterator pit( prog );
 	TRACE("Begin search\n");
-	Result r = Compare( *pit, search_pattern, &matches );
+	Result r = Compare( *pit, search_pattern, &mk );
 	if( r != FOUND )
 		return r;
 
@@ -891,8 +890,7 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
     {
     	TRACE("Search successful, now replacing\n");
         ASSERT( replace_pattern );
-        matches.SetPass( MatchKeys::KEYING );
-        SharedPtr<Node> nn( MatchingDuplicateSubtree( replace_pattern, &matches ) );
+        SharedPtr<Node> nn( MatchingDuplicateSubtree( replace_pattern, &mk ) );
         pit.Overwrite( &nn );
        	TRACE("Done replace\n");
 
@@ -901,7 +899,7 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
         ASSERT(pp)("Replace changed root Program node into something else!");
         *p = *pp; // Egregiously copy over the contents of the program node
     }
-    matches.CheckMatchSetsKeyed();
+    mk.CheckMatchSetsKeyed();
 
     program = shared_ptr<Program>(); // just to avoid us relying on the program outside of a search+replace pass
     return FOUND;
@@ -926,12 +924,13 @@ void RootedSearchReplace::operator()( shared_ptr<Program> p )
 
 
 // Find a match set containing the supplied node
-const RootedSearchReplace::MatchSet *RootedSearchReplace::MatchKeys::FindMatchSet( shared_ptr<Node> node )
+const RootedSearchReplace::MatchSet *RootedSearchReplace::MatchKeys::FindMatchSet( shared_ptr<Node> node,
+		                                                                           const set<MatchSet *> &matches )
 {
 	ASSERT( this );
-	MatchSet *found = NULL;
-	for( set<MatchSet *>::iterator msi = begin();
-         msi != end();
+	const MatchSet *found = NULL;
+	for( set<MatchSet *>::iterator msi = matches.begin();
+         msi != matches.end();
          msi++ )
     {
         MatchSet::iterator ni = (*msi)->find( node );
@@ -950,13 +949,13 @@ void RootedSearchReplace::MatchKeys::CheckMatchSetsKeyed()
 	ASSERT( this );
 
 	int unkeyed=0;
-	set<MatchSet *>::iterator msi;
+	MatchKeys::iterator mki;
 	int i;
-    for( msi = begin(), i=0;
-         msi != end();
-         msi++, i++ )
+    for( mki = begin(), i=0;
+         mki != end();
+         mki++, i++ )
     {
-    	if( !((*msi)->key) )
+    	if( !((*mki).second) )
     	{
     		unkeyed++;
     		TRACE("%d not keyed\n", i);
@@ -971,12 +970,7 @@ void RootedSearchReplace::MatchKeys::ClearKeys()
 {
 	ASSERT( this );
 
-	for( set<MatchSet *>::iterator msi = begin();
-         msi != end();
-         msi++ )
-    {
-        (*msi)->key = shared_ptr<Key>();
-    }
+	clear();
 }
 
 
@@ -999,17 +993,17 @@ RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shar
 	ASSERT( this );
 	// Find a match set for this node. If the node is not in a match set then there's
 	// nothing for us to do, so return without restricting the search.
-	const MatchSet *match = FindMatchSet( pattern );
+	const MatchSet *match = FindMatchSet( pattern, sr->matches );
 	if( !match )
 		return FOUND;
 	TRACE("MATCH: ");
 
 	// If we're keying and we haven't keyed this node so far, key it now
 	TRACE("in pass %d ", (int)pass);
-	if( pass==KEYING && !(match->key) )
+	if( pass==KEYING && !(operator[](match)) )
 	{
-		TRACE("keying... match set %p key ptr %p new value %p\n", &match, &(match->key), key.get());
-		match->key = key;
+		TRACE("keying... match set %p key ptr %p new value %p\n", &match, &(operator[](match)), key.get());
+		operator[](match) = key;
 
 		return FOUND; // always match when keying (could restrict here too as a slight optimisation, but KISS for now)
 	}
@@ -1024,14 +1018,15 @@ RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shar
 		// Since collections (which require decisions) can exist within the tree, we must allow iteration
 		// through choices, and since the number of decisions seen may vary, we must start a new conjecture.
 		// Therefore, we recurse back to Compare().
-		ASSERT( match->key ); // should have been caught by CheckMatchSetsKeyed()
-		Result r = sr->Compare( key->root, match->key->root, NULL );
+		ASSERT( operator[](match) ); // should have been caught by CheckMatchSetsKeyed()
+		Result r = sr->Compare( key->root, operator[](match)->root, NULL );
 		TRACE("result %d\n", r);
 		return r;
 	}
 
 	TRACE("\n");
 	return FOUND;
+	// TODO make the Map< const
 }
 
 shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndSubstitute( shared_ptr<Node> x,
@@ -1054,29 +1049,29 @@ shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndSubstitute( shared_ptr<Ke
 
 	// Find a match set for this node. If the node is not in a match set then there's
 	// nothing for us to do, so return without restricting the search.
-	const MatchSet *match = FindMatchSet( pattern );
+	const MatchSet *match = FindMatchSet( pattern, sr->matches );
 	if( !match )
 		return shared_ptr<Node>();
 	TRACE("MATCH: ");
 
 	// If we're keying and we haven't keyed this node so far, key it now
 	TRACE("in pass %d ", (int)pass);
-	if( pass==KEYING && key && !(match->key) )
+	if( pass==KEYING && key && !operator[](match) )
 	{
-		TRACE("keying... match set %p key ptr %p new value %p\n", &match, &(match->key), key.get());
-		match->key = key;
+		TRACE("keying... match set %p key ptr %p new value %p\n", &match, &(operator[](match)), key.get());
+		operator[](match) = key;
 
 		return key->root;
 	}
 
-	if( match->key )
+	if( operator[](match) )
 	{
 		// Always substitute
 		TRACE("substituting ");
-		ASSERT( match->key );
-		match->key->replace_pattern = pattern; // Only fill this in while substituting under the node
-		shared_ptr<Node> subs = sr->DuplicateSubtree( match->key->root, this, match->key ); // Enter substitution
-		match->key->replace_pattern = shared_ptr<Node>();
+		ASSERT( operator[](match) );
+		operator[](match)->replace_pattern = pattern; // Only fill this in while substituting under the node
+		shared_ptr<Node> subs = sr->DuplicateSubtree( operator[](match)->root, this, operator[](match) ); // Enter substitution
+		operator[](match)->replace_pattern = shared_ptr<Node>();
 		return subs;
 	}
 

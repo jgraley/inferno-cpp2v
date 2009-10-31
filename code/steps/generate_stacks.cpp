@@ -14,7 +14,7 @@
 
 void GenerateStacks::operator()( shared_ptr<Program> program )
 {
-	while(1)
+	//while(1)
 	{
 		TRACE();
 		set<SearchReplace::MatchSet *> sms;
@@ -121,7 +121,7 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 		ms_new_index_identifier.insert( r_index_identifier );
 		sms.insert( &ms_new_index_identifier );
 
-		bool found = SearchReplace( s_fi, r_fi, sms ).SingleSearchReplace( program );
+/*		bool found = SearchReplace( s_fi, r_fi, sms ).SingleSearchReplace( program );
 		if( !found )
 			break;
 
@@ -140,7 +140,7 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 		r_sub->base = s_new_identifier;
 		r_sub->index = s_new_index_identifier;
 
-		SearchReplace( s_found_instance->identifier, r_sub )( program );
+		SearchReplace( s_found_instance->identifier, r_sub )( program );*/
 	}
     // TODO insert dec before return statements
 }
