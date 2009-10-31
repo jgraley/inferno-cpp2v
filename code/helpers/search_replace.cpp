@@ -683,9 +683,9 @@ void RootedSearchReplace::Overlay( shared_ptr<Node> dest,
 
 
 void RootedSearchReplace::Overlay( GenericSequence *dest,
-		                     GenericSequence *source,
-		                     MatchKeys *match_keys,
-		                     shared_ptr<Key> current_key ) const
+		                           GenericSequence *source,
+		                           MatchKeys *match_keys,
+		                           shared_ptr<Key> current_key ) const
 {
     // For now, always overwrite the dest
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
@@ -695,27 +695,16 @@ void RootedSearchReplace::Overlay( GenericSequence *dest,
 	FOREACH( const GenericSharedPtr &p, *source )
 	{
 		ASSERT( p ); // present simplified scheme disallows NULL, see above
-		shared_ptr<Node> pp( p );
-		if( dynamic_pointer_cast<StarBase>(pp) )
+		shared_ptr<Node> n = DuplicateSubtree( p, match_keys, current_key );
+		if( shared_ptr<SubSequence> ss = dynamic_pointer_cast<SubSequence>(n) )
 		{
-			// Seen a Star wildcard in replace pattern. It must be keyed to something, and that
-			// thing must be a SubSequence. Find it then expand the elements one by one directly
-			// into the destination Sequence.
-			ASSERT( match_keys );
-			const MatchSet *match = match_keys->FindMatchSet( pp );
-			ASSERT( match )( "Star in replace pattern must be in a match set");
-			shared_ptr<Node> n = DuplicateSubtree( match->key->root, match_keys, match->key );
-   			shared_ptr<SubSequence> ss = dynamic_pointer_cast<SubSequence>(n);
-   			ASSERT( ss )( "Star keyed to wrong thing, expected SubSequence");
-   			TRACE("star seen; inserting subsequence length %d\n", ss->size() );
-   			FOREACH( const GenericSharedPtr &xx, *ss )
-   				dest->push_back( xx );
+			TRACE("Expanding SubSequence length %d\n", ss->size() );
+		    FOREACH( const GenericSharedPtr &xx, *ss )
+			    dest->push_back( xx );
    		}
 		else
 		{
-			TRACE("non-star element, inserting directly\n");
-			ASSERT( p ); // present simplified scheme disallows NULL, see above
-			shared_ptr<Node> n = DuplicateSubtree( p, match_keys, current_key );
+			TRACE("Normal element, inserting directly\n");
 			dest->push_back( n );
 		}
 	}
@@ -723,9 +712,9 @@ void RootedSearchReplace::Overlay( GenericSequence *dest,
 
 
 void RootedSearchReplace::Overlay( GenericCollection *dest,
-		                     GenericCollection *source,
-		                     MatchKeys *match_keys,
-		                     shared_ptr<Key> current_key ) const
+   		                           GenericCollection *source,
+		                           MatchKeys *match_keys,
+		                           shared_ptr<Key> current_key ) const
 {
     // For now, always overwrite the dest
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
@@ -736,27 +725,16 @@ void RootedSearchReplace::Overlay( GenericCollection *dest,
 	FOREACH( const GenericSharedPtr &p, *source )
 	{
 		ASSERT( p ); // present simplified scheme disallows NULL, see above
-		shared_ptr<Node> pp( p );
-		if( dynamic_pointer_cast<StarBase>(pp) )
+		shared_ptr<Node> n = DuplicateSubtree( p, match_keys, current_key );
+		if( shared_ptr<SubCollection> sc = dynamic_pointer_cast<SubCollection>(n) )
 		{
-			// Seen a Star wildcard in replace pattern. It must be keyed to something, and that
-			// thing must be a SubCollection. Find it then expand the elements one by one directly
-			// into the destination Collection.
-			ASSERT( match_keys );
-            const MatchSet *match = match_keys->FindMatchSet( pp );
-			ASSERT( match )( "Star in replace pattern must be keyed for substitution");
-			shared_ptr<Node> n = DuplicateSubtree( match->key->root, match_keys, match->key );
-   			shared_ptr<SubCollection> sc = dynamic_pointer_cast<SubCollection>(n);
-   			ASSERT( sc )( "Star keyed to wrong thing, expected SubCollection");
-   			TRACE("star seen; inserting subcollection length %d\n", sc->size() );
-   			FOREACH( const GenericSharedPtr &xx, *sc )
-   				dest->insert( xx );
+			TRACE("Expanding SubCollection length %d\n", sc->size() );
+			FOREACH( const GenericSharedPtr &xx, *sc )
+				dest->insert( xx );
 		}
 		else
 		{
-			TRACE("non-star element, inserting directly\n");
-			ASSERT( p ); // present simplified scheme disallows NULL, see above
-			shared_ptr<Node> n = DuplicateSubtree( p, match_keys, current_key );
+			TRACE("Normal element, inserting directly\n");
 			dest->insert( n );
 		}
 	}
@@ -823,7 +801,8 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     		dest = DuplicateSubtree( match->key->root, match_keys, match->key );
 
 			// Do NOT overlay soft patterns TODO inelegant?
-			if( !dynamic_pointer_cast<SoftReplacePattern>( source ) )
+			if( !dynamic_pointer_cast<SoftReplacePattern>( source ) &&
+				!dynamic_pointer_cast<StarBase>( source ) )
 			{
 				// Overlaying requires type compatibility - check for this
 				ASSERT( TypeInfo(source) >= TypeInfo(match->key->root) )
@@ -853,7 +832,7 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 			ASSERT( newsource );
 
 			// Allow this to key a match set if required
-			return match_keys->KeyAndDuplicate( newsource, source, this );
+			return match_keys->KeyAndSubstitute( newsource, source, this );
 		}
 
     	// Do not duplicate specific identifiers.
@@ -1071,30 +1050,30 @@ RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shar
 	return FOUND;
 }
 
-shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndDuplicate( shared_ptr<Node> x,
-                                                                  shared_ptr<Node> pattern,
-                                                                  const RootedSearchReplace *sr )
+shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndSubstitute( shared_ptr<Node> x,
+                                                                   shared_ptr<Node> pattern,
+                                                                   const RootedSearchReplace *sr )
 {
 	shared_ptr<Key> key( new Key );
 	key->root = x;
-	return KeyAndDuplicate( key, pattern, sr );
+	return KeyAndSubstitute( key, pattern, sr );
 }
 
-shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndDuplicate( shared_ptr<Key> key,
-		                                                          shared_ptr<Node> pattern,
-		                                                          const RootedSearchReplace *sr )
+shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be NULL meaning we are not allowed to key the node
+		                                                           shared_ptr<Node> pattern,
+		                                                           const RootedSearchReplace *sr )
 {
 	ASSERT( this );
 	// Find a match set for this node. If the node is not in a match set then there's
 	// nothing for us to do, so return without restricting the search.
 	const MatchSet *match = FindMatchSet( pattern );
 	if( !match )
-		return key->root;
+		return pattern;
 	TRACE("MATCH: ");
 
 	// If we're keying and we haven't keyed this node so far, key it now
 	TRACE("in pass %d ", (int)pass);
-	if( pass==KEYING && !(match->key) )
+	if( pass==KEYING && key && !(match->key) )
 	{
 		TRACE("keying... match set %p key ptr %p new value %p\n", &match, &(match->key), key.get());
 		match->key = key;
@@ -1107,12 +1086,11 @@ shared_ptr<Node> RootedSearchReplace::MatchKeys::KeyAndDuplicate( shared_ptr<Key
 	{
 		TRACE("substituting ");
 		ASSERT( match->key );
-		Result r = sr->Compare( key->root, match->key->root, NULL );
 		return sr->DuplicateSubtree( match->key->root, this, match->key ); // Enter substitution
 		// TODO overlay the pattern here?
 	}
 
-	return key->root;
+	return pattern; // TODO this only happens during keying, could return NULL or something
 }
 
 void RootedSearchReplace::Conjecture::PrepareForDecidedCompare()
