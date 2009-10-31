@@ -131,8 +131,6 @@ public:
         shared_ptr<Node> KeyAndSubstitute( shared_ptr<Key> key,
         		                           shared_ptr<Node> pattern,
                                            const RootedSearchReplace *sr );
-        void CheckMatchSetsKeyed();
-        void ClearKeys();
         void SetPass( Pass p ) { pass = p; }
     };
 
@@ -148,8 +146,18 @@ public:
                     set<MatchSet *> m = set<MatchSet *>() );
     ~RootedSearchReplace();
     
-    // Do the actual search and replace (functor style; implements Pass interface).
-    Result SingleSearchReplace( shared_ptr<Program> p );
+    // implementation ring: Do the actual search and replace
+    Result SingleSearchReplace( shared_ptr<Program> p,
+    		                    shared_ptr<Node> base,
+                                shared_ptr<Node> search_pattern,
+                                shared_ptr<Node> replace_pattern,
+                                MatchKeys match_keys = MatchKeys() );
+    int RepeatingSearchReplace( shared_ptr<Program> p,
+    	                        shared_ptr<Node> base,
+                                shared_ptr<Node> search_pattern,
+                                shared_ptr<Node> replace_pattern,
+                                MatchKeys match_keys = MatchKeys() );
+    // Functor style interface for RepeatingSearchReplace; implements Pass interface.
     void operator()( shared_ptr<Program> p );
 
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
