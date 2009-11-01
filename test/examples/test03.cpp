@@ -11,7 +11,8 @@ int main()
            y = 11;
     } 
     
-    for( int as=0; as<3; as++ )
+    int as;
+    for( as=0; as<3; as++ )
         y++;
     
     {
