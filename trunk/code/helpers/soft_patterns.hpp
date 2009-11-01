@@ -25,7 +25,7 @@ private:
     	}
     	else
     	{
-    		SearchReplace::Result r = sr->DecidedCompare( x, pattern, keys, conj, context_flags );
+    		SearchReplace::Result r = sr->DecidedCompare( x, shared_ptr<Node>(pattern), keys, conj, context_flags );
 			TRACE("SoftNot got %d, returning the opposite!\n", (int)r);
     		if( r==RootedSearchReplace::NOT_FOUND )
 				return RootedSearchReplace::FOUND;
@@ -53,7 +53,7 @@ private:
     	for( it = patterns.begin();
     		 it != patterns.end();
     		 ++it )
-    	    if( !sr->DecidedCompare( x, *it, keys, conj, context_flags ) )
+    	    if( !sr->DecidedCompare( x, shared_ptr<Node>(*it), keys, conj, context_flags ) )
     	    	return RootedSearchReplace::NOT_FOUND;
 
         return RootedSearchReplace::FOUND;
