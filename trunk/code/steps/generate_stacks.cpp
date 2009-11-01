@@ -65,11 +65,11 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	r_comp->members.insert( r_other_decls );
 	shared_ptr<PostIncrement> r_inc( new PostIncrement );
 	r_comp->statements.push_back( r_inc );
-	r_inc->operands.push_back( r_index_identifier );
+	r_inc->operands.push_back( shared_new<InstanceIdentifier>() );
 	r_comp->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
 	shared_ptr<PostDecrement> r_dec( new PostDecrement );
 	r_comp->statements.push_back( r_dec );
-	r_dec->operands.push_back( r_index_identifier );
+	r_dec->operands.push_back( shared_new<InstanceIdentifier>() );
 
 	shared_ptr<Identifier> ss_identifier( new Identifier );
 
@@ -114,12 +114,6 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	ms_identifier.insert( ss_identifier );
 	sms.insert( &ms_identifier );
 
-	// Slightly hacky - since replace match sets are not yet two-pass
-	// at the time of writing, we use the same node in all locations, and
-	// therefore only that one node need appear in match set. This ensures
-	// we can always key regardless of which location we see first while
-	// walking the replace pattern. TODO should not need to do this anymore,
-	// replace IS two pass now.
 	SearchReplace::MatchSet ms_new_identifier;
 	ms_new_identifier.insert( r_identifier );
 	ms_new_identifier.insert( sr_sub->base );
@@ -127,6 +121,8 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 
 	SearchReplace::MatchSet ms_new_index_identifier;
 	ms_new_index_identifier.insert( r_index_identifier );
+	ms_new_index_identifier.insert( r_inc->operands[0] );
+	ms_new_index_identifier.insert( r_dec->operands[0] );
 	ms_new_index_identifier.insert( sr_sub->index );
 	sms.insert( &ms_new_index_identifier );
 
