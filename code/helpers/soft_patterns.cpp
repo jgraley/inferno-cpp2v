@@ -14,7 +14,7 @@ RootedSearchReplace::Result SoftExpressonOfType::DecidedCompare( const RootedSea
 	    ASSERT(xt);
 	    
 	    // Punt it back into the search/replace engine
-	    return sr->DecidedCompare( xt, type_pattern, keys, conj, context_flags );
+	    return sr->DecidedCompare( xt, shared_ptr<Node>(type_pattern), keys, conj, context_flags );
 	}
 	else
 	{

@@ -395,7 +395,7 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( GenericSequence
 		    		ss->push_back( *it );
 				// Apply match sets to this Star and matched range
 				if( keys )
-		    		if( !keys->KeyAndRestrict( ss, pe, this, context_flags ) )
+		    		if( !keys->KeyAndRestrict( shared_ptr<Node>(ss), pe, this, context_flags ) )
 		        	    return NOT_FOUND;
 		    }
 	    }
@@ -482,7 +482,7 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( GenericCollecti
     // If we got here, the node matched the search pattern. Now apply match sets
     TRACE("seen_star %d  star %p\n", seen_star, star.get() );
     if( keys && seen_star && star )
-        if( !keys->KeyAndRestrict( xremaining, star, this, context_flags ) )
+        if( !keys->KeyAndRestrict( shared_ptr<Node>(xremaining), star, this, context_flags ) )
         	return NOT_FOUND;
 
 	return FOUND;
@@ -547,10 +547,10 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
     	shared_ptr<StuffKey> key( new StuffKey );
     	key->root = x;
     	key->terminus = term_candidate;
-        r = keys->KeyAndRestrict( key,
-        		                        stuff_pattern,
-        		                        this,
-        		                        context_flags );
+        r = keys->KeyAndRestrict( shared_ptr<Key>(key),
+        		                  stuff_pattern,
+        		                  this,
+        		                  context_flags );
     }
 	return r;
 }
