@@ -126,8 +126,10 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	ms_new_index_identifier.insert( sr_sub->index );
 	sms.insert( &ms_new_index_identifier );
 
+	vector<RootedSearchReplace *> vs;
 	SearchReplace slave( ss_identifier, sr_sub );
-	SearchReplace( s_fi, r_fi, sms, &slave )( program );
+	vs.push_back( &slave );
+	SearchReplace( s_fi, r_fi, sms, vs )( program );
 
 	// TODO insert dec before return statements
 }

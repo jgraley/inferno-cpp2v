@@ -131,7 +131,7 @@
 RootedSearchReplace::RootedSearchReplace( shared_ptr<Node> sp,
                                           shared_ptr<Node> rp,
                                           set<MatchSet *> m,
-                                          RootedSearchReplace *s )
+                                          vector<RootedSearchReplace *> s )
 {
 	Configure( sp, rp, m, s );
 }
@@ -140,24 +140,29 @@ RootedSearchReplace::RootedSearchReplace( shared_ptr<Node> sp,
 void RootedSearchReplace::Configure( shared_ptr<Node> sp,
                                      shared_ptr<Node> rp,
                                      set<MatchSet *> m,
-                                     RootedSearchReplace *s )
+                                     vector<RootedSearchReplace *> s )
 {
     search_pattern = sp;
     replace_pattern = rp;
     matches = m;
-    slave = s;
+    slaves = s;
 
     // If we have a slave, copy its match sets into ours so we have a full set
     // of all the match sets - this will be used across the board. Note that
     // the non-rooted SearchReplace adds a new match set.
-    if( s )
+    FOREACH( RootedSearchReplace *slave, slaves )
 	{
 		for( set<MatchSet *>::iterator msi = slave->matches.begin();
              msi != slave->matches.end();
              msi++ )
 		    matches.insert( *msi );
-		slave->matches = matches;
-		TRACE("Merging match sets, I have %d slave has %d\n", matches.size(), slave->matches.size() );
+	}
+
+	TRACE("Merged match sets, I have %d\n", matches.size() );
+
+    FOREACH( RootedSearchReplace *slave, slaves )
+    {
+    	slave->matches = matches;
 	}
 } 
 
@@ -957,10 +962,9 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
         *p = *pp; // Egregiously copy over the contents of the program node
     }
 
-    if( slave )
+    FOREACH( RootedSearchReplace *slave, slaves )
     {
-    	TRACE("Invoking slave with %d keys...\n", match_keys.size());
-    	match_keys.Trace( matches );
+    	//match_keys.Trace( matches );
     	slave->RepeatingSearchReplace( p, base_sp, slave->search_pattern, slave->replace_pattern, match_keys );
     }
 
@@ -1070,7 +1074,7 @@ RootedSearchReplace::Result RootedSearchReplace::MatchKeys::KeyAndRestrict( shar
 		TRACE("keying... match set %p key ptr %p new value %p, presently %d keys out of %d match sets\n",
 				match, operator[](match).get(), key.get(),
 				size(), sr->matches.size() );
-        Trace( sr->matches );
+        //Trace( sr->matches );
 
 		operator[](match) = key;
 
@@ -1228,7 +1232,7 @@ RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( Roo
 SearchReplace::SearchReplace( shared_ptr<Node> sp,
                               shared_ptr<Node> rp,
                               set<MatchSet *> m,
-                              RootedSearchReplace *s )
+                              vector<RootedSearchReplace *> s )
 {
 	Configure( sp, rp, m, s );
 }
@@ -1237,7 +1241,7 @@ SearchReplace::SearchReplace( shared_ptr<Node> sp,
 void SearchReplace::Configure( shared_ptr<Node> sp,
                                shared_ptr<Node> rp,
                                set<MatchSet *> m,
-                               RootedSearchReplace *s )
+                               vector<RootedSearchReplace *> s )
 {
 	if( !sp )
 		return;
