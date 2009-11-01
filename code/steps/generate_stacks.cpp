@@ -20,37 +20,33 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	shared_ptr<Instance> s_fi( new Instance );
 	shared_ptr<Subroutine> s_func( new Subroutine );
 	s_fi->type = s_func;
+    shared_ptr<Compound> s_top_comp( new Compound );
+	s_fi->initialiser = s_top_comp;
+	shared_ptr< SearchReplace::Star<Declaration> > s_top_decls( new SearchReplace::Star<Declaration> );
+	s_top_comp->members.insert( s_top_decls );
+	shared_ptr< SearchReplace::Star<Statement> > s_top_pre( new SearchReplace::Star<Statement> );
+	s_top_comp->statements.push_back( s_top_pre );
 	shared_ptr< SearchReplace::Stuff<Statement> > s_stuff( new SearchReplace::Stuff<Statement> );
-	s_fi->initialiser = s_stuff;
-	shared_ptr<Compound> s_comp( new Compound );
-	s_stuff->terminus = s_comp;
+	s_top_comp->statements.push_back( s_stuff );
+	shared_ptr< SearchReplace::Star<Statement> > s_top_post( new SearchReplace::Star<Statement> );
+	s_top_comp->statements.push_back( s_top_post );
+
 	shared_ptr<Instance> s_instance( new Instance );
-	s_comp->members.insert( s_instance );
+	s_stuff->terminus = s_instance;
 	shared_ptr<InstanceIdentifier> s_identifier( new InstanceIdentifier );
 	s_instance->identifier = s_identifier;
 	s_instance->storage = shared_new<Auto>();
 	s_instance->type = shared_new<Type>();
-	shared_ptr< SearchReplace::Star<Declaration> > s_other_decls( new SearchReplace::Star<Declaration> );
-	s_comp->members.insert( s_other_decls );
-	s_comp->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+
 
 	shared_ptr<Instance> r_fi( new Instance );
-	shared_ptr< SearchReplace::Stuff<Statement> > r_stuff( new SearchReplace::Stuff<Statement> );
-	r_fi->initialiser = r_stuff;
-	shared_ptr<Compound> r_comp( new Compound );
-	r_stuff->terminus = r_comp;
-	shared_ptr<Instance> r_instance( new Instance );
-	r_comp->members.insert( r_instance );
-	shared_ptr<SoftMakeIdentifier> r_identifier( new SoftMakeIdentifier("%s_stack") );
-	r_identifier->source = shared_new<Identifier>();
-	r_instance->identifier = r_identifier;
-	r_instance->storage = shared_new<Static>(); // TODO Member
-	shared_ptr<Array> r_array( new Array );
-	r_instance->type = r_array;
-	r_array->element = shared_new<Type>();
-	r_array->size = shared_ptr<SpecificInteger>( new SpecificInteger(10) );
+    shared_ptr<Compound> r_top_comp( new Compound );
+	r_fi->initialiser = r_top_comp;
+	// top-level decls
+	shared_ptr< SearchReplace::Star<Declaration> > r_top_decls( new SearchReplace::Star<Declaration> );
+	r_top_comp->members.insert( r_top_decls );
 	shared_ptr<Instance> r_index( new Instance );
-	r_comp->members.insert( r_index );
+	r_top_comp->members.insert( r_index );
 	shared_ptr<Unsigned> r_index_type( new Unsigned );
 	r_index->type = r_index_type;
 	r_index_type->width = shared_ptr<SpecificInteger>( new SpecificInteger(32) );
@@ -61,14 +57,30 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	r_index->constancy = shared_new<NonConst>();
 	r_index->initialiser = shared_ptr<SpecificInteger>( new SpecificInteger(0) );
 	r_index->access = shared_new<Private>();
-	shared_ptr< SearchReplace::Star<Declaration> > r_other_decls( new SearchReplace::Star<Declaration> );
-	r_comp->members.insert( r_other_decls );
+	// top-level statements
 	shared_ptr<PostIncrement> r_inc( new PostIncrement );
-	r_comp->statements.push_back( r_inc );
+	r_top_comp->statements.push_back( r_inc );
 	r_inc->operands.push_back( shared_new<InstanceIdentifier>() );
-	r_comp->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
+	shared_ptr< SearchReplace::Star<Statement> > r_top_pre( new SearchReplace::Star<Statement> );
+	r_top_comp->statements.push_back( r_top_pre );
+	shared_ptr< SearchReplace::Stuff<Statement> > r_stuff( new SearchReplace::Stuff<Statement> );
+	r_top_comp->statements.push_back( r_stuff );
+	shared_ptr< SearchReplace::Star<Statement> > r_top_post( new SearchReplace::Star<Statement> );
+	r_top_comp->statements.push_back( r_top_post );
+
+	// under "stuff"
+	shared_ptr<Instance> r_instance( new Instance );
+	r_stuff->terminus = r_instance;
+	shared_ptr<SoftMakeIdentifier> r_identifier( new SoftMakeIdentifier("%s_stack") );
+	r_identifier->source = shared_new<Identifier>();
+	r_instance->identifier = r_identifier;
+	r_instance->storage = shared_new<Static>(); // TODO Member
+	shared_ptr<Array> r_array( new Array );
+	r_instance->type = r_array;
+	r_array->element = shared_new<Type>();
+	r_array->size = shared_ptr<SpecificInteger>( new SpecificInteger(10) );
 	shared_ptr<PostDecrement> r_dec( new PostDecrement );
-	r_comp->statements.push_back( r_dec );
+	r_top_comp->statements.push_back( r_dec );
 	r_dec->operands.push_back( shared_new<InstanceIdentifier>() );
 
 	shared_ptr<Identifier> ss_identifier( new Identifier );
@@ -77,10 +89,25 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	sr_sub->base = shared_new<InstanceIdentifier>();
 	sr_sub->index = shared_new<InstanceIdentifier>();
 
+	SearchReplace::MatchSet ms_top_decls;
+	ms_top_decls.insert( s_top_decls );
+	ms_top_decls.insert( r_top_decls );
+	sms.insert( &ms_top_decls );
+
+	SearchReplace::MatchSet ms_top_pre;
+	ms_top_pre.insert( s_top_pre );
+	ms_top_pre.insert( r_top_pre );
+	sms.insert( &ms_top_pre );
+
 	SearchReplace::MatchSet ms_stuff;
 	ms_stuff.insert( s_stuff );
 	ms_stuff.insert( r_stuff );
 	sms.insert( &ms_stuff );
+
+	SearchReplace::MatchSet ms_top_post;
+	ms_top_post.insert( s_top_post );
+	ms_top_post.insert( r_top_post );
+	sms.insert( &ms_top_post );
 
 	SearchReplace::MatchSet ms_fi;
 	ms_fi.insert( s_fi );
@@ -96,16 +123,6 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	ms_type.insert( s_instance->type );
 	ms_type.insert( r_array->element );
 	sms.insert( &ms_type );
-
-	SearchReplace::MatchSet ms_other_decls;
-	ms_other_decls.insert( s_other_decls );
-	ms_other_decls.insert( r_other_decls );
-	sms.insert( &ms_other_decls );
-
-	SearchReplace::MatchSet ms_other_statements;
-	ms_other_statements.insert( s_comp->statements[0] );
-	ms_other_statements.insert( r_comp->statements[1] );
-	sms.insert( &ms_other_statements );
 
 	SearchReplace::MatchSet ms_identifier;
 	ms_identifier.insert( s_identifier );

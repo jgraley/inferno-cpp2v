@@ -35,6 +35,32 @@ private:
     }
 };
 
+template<class VALUE_TYPE>
+struct SoftAnd : VALUE_TYPE,
+                 RootedSearchReplace::SoftSearchPattern
+{
+    NODE_FUNCTIONS
+    mutable Sequence<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
+private:
+    virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
+    		                                            shared_ptr<Node> x,
+    		                                            RootedSearchReplace::MatchKeys *match_keys,
+    		                                            RootedSearchReplace::Conjecture &conj,
+    		                                            unsigned context_flags ) const
+    {
+    	typedef GenericContainer::iterator iter; // TODO clean up this loop
+    	iter it;
+    	for( it = patterns.begin();
+    		 it != patterns.end();
+    		 ++it )
+    	    if( !sr->DecidedCompare( x, *it, match_keys, conj, context_flags ) )
+    	    	return RootedSearchReplace::NOT_FOUND;
+
+        return RootedSearchReplace::FOUND;
+    }
+};
+
+
 struct SoftExpressonOfType : Expression,
                              RootedSearchReplace::SoftSearchPattern
 {
