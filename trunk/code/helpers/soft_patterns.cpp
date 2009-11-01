@@ -2,7 +2,7 @@
 
 RootedSearchReplace::Result SoftExpressonOfType::DecidedCompare( const RootedSearchReplace *sr,
 		                                                         shared_ptr<Node> x,
-		                                                         RootedSearchReplace::MatchKeys *match_keys,
+		                                                         RootedSearchReplace::CouplingKeys *keys,
 		                                                         RootedSearchReplace::Conjecture &conj,
 		                                                         unsigned context_flags ) const
 {
@@ -14,7 +14,7 @@ RootedSearchReplace::Result SoftExpressonOfType::DecidedCompare( const RootedSea
 	    ASSERT(xt);
 	    
 	    // Punt it back into the search/replace engine
-	    return sr->DecidedCompare( xt, type_pattern, match_keys, conj, context_flags );
+	    return sr->DecidedCompare( xt, type_pattern, keys, conj, context_flags );
 	}
 	else
 	{
@@ -27,7 +27,7 @@ RootedSearchReplace::Result SoftExpressonOfType::DecidedCompare( const RootedSea
 
 
 shared_ptr<Node> SoftMakeIdentifier::DuplicateSubtree( const RootedSearchReplace *sr,
-		                                               RootedSearchReplace::MatchKeys *match_keys )
+		                                               RootedSearchReplace::CouplingKeys *keys )
 {
 	string newname;
 	if( source )
@@ -35,7 +35,7 @@ shared_ptr<Node> SoftMakeIdentifier::DuplicateSubtree( const RootedSearchReplace
 		TRACE("Begin SoftMakeIdentifier recurse\n");
 		// We have a child identifier - let replace algorithm run in the expectation it will
 		// get subsitituted with a SpecificIdentifier from the original program tree
-	    shared_ptr<Node> n = sr->DuplicateSubtree( shared_ptr<Node>(source), match_keys );
+	    shared_ptr<Node> n = sr->DuplicateSubtree( shared_ptr<Node>(source), keys );
 		TRACE("End SoftMakeIdentifier recurse\n");
 	    ASSERT( n );
 	    shared_ptr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>( n );

@@ -15,7 +15,7 @@
 void GenerateStacks::operator()( shared_ptr<Program> program )
 {
 	TRACE();
-	set<SearchReplace::MatchSet *> sms;
+	set<SearchReplace::Coupling *> sms;
 
 	shared_ptr<Instance> s_fi( new Instance );
 	shared_ptr<Subroutine> s_func( new Subroutine );
@@ -89,54 +89,54 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	sr_sub->base = shared_new<InstanceIdentifier>();
 	sr_sub->index = shared_new<InstanceIdentifier>();
 
-	SearchReplace::MatchSet ms_top_decls;
+	SearchReplace::Coupling ms_top_decls;
 	ms_top_decls.insert( s_top_decls );
 	ms_top_decls.insert( r_top_decls );
 	sms.insert( &ms_top_decls );
 
-	SearchReplace::MatchSet ms_top_pre;
+	SearchReplace::Coupling ms_top_pre;
 	ms_top_pre.insert( s_top_pre );
 	ms_top_pre.insert( r_top_pre );
 	sms.insert( &ms_top_pre );
 
-	SearchReplace::MatchSet ms_stuff;
+	SearchReplace::Coupling ms_stuff;
 	ms_stuff.insert( s_stuff );
 	ms_stuff.insert( r_stuff );
 	sms.insert( &ms_stuff );
 
-	SearchReplace::MatchSet ms_top_post;
+	SearchReplace::Coupling ms_top_post;
 	ms_top_post.insert( s_top_post );
 	ms_top_post.insert( r_top_post );
 	sms.insert( &ms_top_post );
 
-	SearchReplace::MatchSet ms_fi;
+	SearchReplace::Coupling ms_fi;
 	ms_fi.insert( s_fi );
 	ms_fi.insert( r_fi );
 	sms.insert( &ms_fi );
 
-	SearchReplace::MatchSet ms_instance;
+	SearchReplace::Coupling ms_instance;
 	ms_instance.insert( s_instance );
 	ms_instance.insert( r_instance );
 	sms.insert( &ms_instance );
 
-	SearchReplace::MatchSet ms_type;
+	SearchReplace::Coupling ms_type;
 	ms_type.insert( s_instance->type );
 	ms_type.insert( r_array->element );
 	sms.insert( &ms_type );
 
-	SearchReplace::MatchSet ms_identifier;
+	SearchReplace::Coupling ms_identifier;
 	ms_identifier.insert( s_identifier );
 	ms_identifier.insert( r_identifier->source );
 	ms_identifier.insert( r_index_identifier->source );
 	ms_identifier.insert( ss_identifier );
 	sms.insert( &ms_identifier );
 
-	SearchReplace::MatchSet ms_new_identifier;
+	SearchReplace::Coupling ms_new_identifier;
 	ms_new_identifier.insert( r_identifier );
 	ms_new_identifier.insert( sr_sub->base );
 	sms.insert( &ms_new_identifier );
 
-	SearchReplace::MatchSet ms_new_index_identifier;
+	SearchReplace::Coupling ms_new_index_identifier;
 	ms_new_index_identifier.insert( r_index_identifier );
 	ms_new_index_identifier.insert( r_inc->operands[0] );
 	ms_new_index_identifier.insert( r_dec->operands[0] );

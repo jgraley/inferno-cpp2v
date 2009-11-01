@@ -13,11 +13,11 @@ struct SoftNot : VALUE_TYPE,
 private:
     virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
     		                                            shared_ptr<Node> x,
-    		                                            RootedSearchReplace::MatchKeys *match_keys,
+    		                                            RootedSearchReplace::CouplingKeys *keys,
     		                                            RootedSearchReplace::Conjecture &conj,
     		                                            unsigned context_flags ) const
     {
-    	if( match_keys && match_keys->pass == RootedSearchReplace::MatchKeys::KEYING )
+    	if( keys && keys->pass == RootedSearchReplace::CouplingKeys::KEYING )
     	{
     		// Don't do a subtree search while keying - we'll only end up keying the wrong thing
     		// or terminating with NOT_FOUND prematurely
@@ -25,7 +25,7 @@ private:
     	}
     	else
     	{
-    		SearchReplace::Result r = sr->DecidedCompare( x, pattern, match_keys, conj, context_flags );
+    		SearchReplace::Result r = sr->DecidedCompare( x, pattern, keys, conj, context_flags );
 			TRACE("SoftNot got %d, returning the opposite!\n", (int)r);
     		if( r==RootedSearchReplace::NOT_FOUND )
 				return RootedSearchReplace::FOUND;
@@ -44,7 +44,7 @@ struct SoftAnd : VALUE_TYPE,
 private:
     virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
     		                                            shared_ptr<Node> x,
-    		                                            RootedSearchReplace::MatchKeys *match_keys,
+    		                                            RootedSearchReplace::CouplingKeys *keys,
     		                                            RootedSearchReplace::Conjecture &conj,
     		                                            unsigned context_flags ) const
     {
@@ -53,7 +53,7 @@ private:
     	for( it = patterns.begin();
     		 it != patterns.end();
     		 ++it )
-    	    if( !sr->DecidedCompare( x, *it, match_keys, conj, context_flags ) )
+    	    if( !sr->DecidedCompare( x, *it, keys, conj, context_flags ) )
     	    	return RootedSearchReplace::NOT_FOUND;
 
         return RootedSearchReplace::FOUND;
@@ -69,7 +69,7 @@ struct SoftExpressonOfType : Expression,
 private:
     virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
     		                                            shared_ptr<Node> x,
-    		                                            RootedSearchReplace::MatchKeys *match_keys,
+    		                                            RootedSearchReplace::CouplingKeys *keys,
     		                                            RootedSearchReplace::Conjecture &conj,
     		                                            unsigned context_flags ) const;
 };
@@ -93,7 +93,7 @@ struct SoftMakeIdentifier : InstanceIdentifier, // TODO other kinds of identifie
 	SharedPtr<Identifier> source;
 private:
     virtual shared_ptr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
-    		                                   RootedSearchReplace::MatchKeys *match_keys );
+    		                                   RootedSearchReplace::CouplingKeys *keys );
 };
 
 

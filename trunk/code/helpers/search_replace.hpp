@@ -24,11 +24,11 @@
 // - A NULL shared_ptr is also a wildcard for anything.
 //
 // - Multiple nodes in the search pattern can be forced to match the same 
-//   program node if a MatchSet is created that points to these nodes, and
+//   program node if a Coupling is created that points to these nodes, and
 //   passed to the constructor.
 //
 // - Nodes in the replace pattern may be substituted by program nodes
-//   found during matching by creating a MatchSet and inserting pointers 
+//   found during matching by creating a Coupling and inserting pointers
 //   to the corresponding search and replace pattern nodes.
 //
 // - NULL shared_ptr (or empty container) in replace pattern under a
@@ -106,18 +106,18 @@ public:
 
     // Match set - if required, construct a set of these, fill in the set
     // of shared pointers but don't worry about key, pass to RootedSearchReplace constructor.
-    struct MatchSet : public set< shared_ptr<Node> >
+    struct Coupling : public set< shared_ptr<Node> >
     {
          //mutable shared_ptr<Key> key;    // This is filled in by the search and replace engine
     };
-    struct MatchKeys : Map< const MatchSet *, shared_ptr<Key> >
+    struct CouplingKeys : Map< const Coupling *, shared_ptr<Key> >
     {
     	enum Pass { KEYING, RESTRICTING, SUBSTITUTING } pass;
-    	MatchKeys()
+    	CouplingKeys()
     	{
     	}
-        const MatchSet *FindMatchSet( shared_ptr<Node> node, const set<MatchSet *> &matches );
-        void Trace( const set<MatchSet *> &matches ) const;
+        const Coupling *FindCoupling( shared_ptr<Node> node, const set<Coupling *> &matches );
+        void Trace( const set<Coupling *> &matches ) const;
         Result KeyAndRestrict( shared_ptr<Node> x,
         		               shared_ptr<Node> pattern,
                                const RootedSearchReplace *sr,
@@ -135,17 +135,17 @@ public:
         void SetPass( Pass p ) { pass = p; }
     };
 
-    set<MatchSet *> matches;
+    set<Coupling *> matches;
 
     // Constructor and destructor. Search and replace patterns and match sets are 
     // specified here, so that we have a fully confiugured functor.
     RootedSearchReplace( shared_ptr<Node> sp=shared_ptr<Node>(),
                          shared_ptr<Node> rp=shared_ptr<Node>(),
-                         set<MatchSet *> m = set<MatchSet *>(),
+                         set<Coupling *> m = set<Coupling *>(),
                          vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
     void Configure( shared_ptr<Node> sp=shared_ptr<Node>(),
                     shared_ptr<Node> rp=shared_ptr<Node>(),
-                    set<MatchSet *> m = set<MatchSet *>(),
+                    set<Coupling *> m = set<Coupling *>(),
                     vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
     ~RootedSearchReplace();
     
@@ -154,12 +154,12 @@ public:
     		                    shared_ptr<Node> base,
                                 shared_ptr<Node> search_pattern,
                                 shared_ptr<Node> replace_pattern,
-                                MatchKeys match_keys = MatchKeys() );
+                                CouplingKeys match_keys = CouplingKeys() );
     int RepeatingSearchReplace( shared_ptr<Program> p,
     	                        shared_ptr<Node> base,
                                 shared_ptr<Node> search_pattern,
                                 shared_ptr<Node> replace_pattern,
-                                MatchKeys match_keys = MatchKeys() );
+                                CouplingKeys match_keys = CouplingKeys() );
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.
     void operator()( shared_ptr<Program> p );
 
@@ -171,14 +171,14 @@ public:
     {
         virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
         		                                      shared_ptr<Node> x,
-        		                                      MatchKeys *match_keys,
+        		                                      CouplingKeys *match_keys,
         		                                      Conjecture &conj,
         		                                      unsigned context_flags ) const = 0;
     };
     struct SoftReplacePattern : virtual Node
     {
         virtual shared_ptr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
-        		                                   MatchKeys *match_keys ) = 0;
+        		                                   CouplingKeys *match_keys ) = 0;
     };
 
     // Some self-testing
@@ -197,64 +197,64 @@ private:
     // DecidedCompare ring
     Result DecidedCompare( GenericSequence &x,
     		               GenericSequence &pattern,
-    		               MatchKeys *match_keys,
+    		               CouplingKeys *match_keys,
     		               Conjecture &conj,
     		               unsigned context_flags ) const;
     Result DecidedCompare( GenericCollection &x,
     		               GenericCollection &pattern,
-    		               MatchKeys *match_keys,
+    		               CouplingKeys *match_keys,
     		               Conjecture &conj,
     		               unsigned context_flags ) const;
     Result DecidedCompare( shared_ptr<Node> x,
     		               shared_ptr<StuffBase> stuff_pattern,
-    		               MatchKeys *match_keys,
+    		               CouplingKeys *match_keys,
     		               Conjecture &conj,
     		               unsigned context_flags ) const;
 public:
     Result DecidedCompare( shared_ptr<Node> x,
     		               shared_ptr<Node> pattern,
-    		               MatchKeys *match_keys,
+    		               CouplingKeys *match_keys,
     		               Conjecture &conj,
     		               unsigned context_flags ) const;
 private:
     // MatchingDecidedCompare ring
     Result MatchingDecidedCompare( shared_ptr<Node> x,
     		                       shared_ptr<Node> pattern,
-    		                       MatchKeys *match_keys,
+    		                       CouplingKeys *match_keys,
     		                       Conjecture &conj ) const;
 
     // Compare ring
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
-    		        MatchKeys *match_keys,
+    		        CouplingKeys *match_keys,
     		        Conjecture &conj,
     		        int threshold ) const;
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
-    		        MatchKeys *match_keys = NULL ) const;
+    		        CouplingKeys *match_keys = NULL ) const;
 
     // Replace ring
     void ClearPtrs( shared_ptr<Node> dest ) const;
     void Overlay( shared_ptr<Node> dest,
     		      shared_ptr<Node> source,
-    		      MatchKeys *match_keys,
+    		      CouplingKeys *match_keys,
     		      shared_ptr<Key> current_key ) const; // under substitution if not NULL
     void Overlay( GenericSequence *dest,
     		      GenericSequence *source,
-    		      MatchKeys *match_keys,
+    		      CouplingKeys *match_keys,
     		      shared_ptr<Key> current_key ) const;
     void Overlay( GenericCollection *dest,
     	          GenericCollection *source,
-    	          MatchKeys *match_keys,
+    	          CouplingKeys *match_keys,
     	          shared_ptr<Key> current_key ) const;
 public:
     shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x,
-    		                           MatchKeys *match_keys,
+    		                           CouplingKeys *match_keys,
     		                           shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
 private:
 
     shared_ptr<Node> MatchingDuplicateSubtree( shared_ptr<Node> x,
-    		                                   MatchKeys *match_keys ) const;
+    		                                   CouplingKeys *match_keys ) const;
     // Internal node classes
     struct SubSequence : Node,
                          Sequence<Node>
@@ -274,14 +274,14 @@ class SearchReplace : public RootedSearchReplace
 public:
     SearchReplace( shared_ptr<Node> sp = shared_ptr<Node>(),
                    shared_ptr<Node> rp = shared_ptr<Node>(),
-                   set<MatchSet *> m = set<MatchSet *>(),
+                   set<Coupling *> m = set<Coupling *>(),
                    vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
     void Configure( shared_ptr<Node> sp = shared_ptr<Node>(),
                     shared_ptr<Node> rp = shared_ptr<Node>(),
-                    set<MatchSet *> m = set<MatchSet *>(),
+                    set<Coupling *> m = set<Coupling *>(),
                     vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
 private:
-	MatchSet root_match;
+	Coupling root_match;
 };
 
 #endif
