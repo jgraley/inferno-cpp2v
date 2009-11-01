@@ -142,11 +142,11 @@ public:
     RootedSearchReplace( shared_ptr<Node> sp=shared_ptr<Node>(),
                          shared_ptr<Node> rp=shared_ptr<Node>(),
                          set<MatchSet *> m = set<MatchSet *>(),
-                         RootedSearchReplace *slave = 0 );
+                         vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
     void Configure( shared_ptr<Node> sp=shared_ptr<Node>(),
                     shared_ptr<Node> rp=shared_ptr<Node>(),
                     set<MatchSet *> m = set<MatchSet *>(),
-                    RootedSearchReplace *slave = 0 );
+                    vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
     ~RootedSearchReplace();
     
     // implementation ring: Do the actual search and replace
@@ -187,7 +187,7 @@ public:
 private:
     shared_ptr<Node> search_pattern;
     shared_ptr<Node> replace_pattern;
-    RootedSearchReplace *slave;
+    vector<RootedSearchReplace *> slaves;
     shared_ptr<Program> program;
     
     // LocalCompare ring
@@ -275,11 +275,11 @@ public:
     SearchReplace( shared_ptr<Node> sp = shared_ptr<Node>(),
                    shared_ptr<Node> rp = shared_ptr<Node>(),
                    set<MatchSet *> m = set<MatchSet *>(),
-                   RootedSearchReplace *slave = 0 );
+                   vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
     void Configure( shared_ptr<Node> sp = shared_ptr<Node>(),
                     shared_ptr<Node> rp = shared_ptr<Node>(),
                     set<MatchSet *> m = set<MatchSet *>(),
-                    RootedSearchReplace *slave = 0 );
+                    vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
 private:
 	MatchSet root_match;
 };

@@ -66,9 +66,8 @@ struct Expression : Statement { NODE_FUNCTIONS };
 struct Type : virtual Node { NODE_FUNCTIONS };
 
 // A declaration specifies the creation of a type or an object from a type. 
-// We specify an access spec for all declarations and choose a default when
-// the user cannot specify. Declaration can appear where statements can and
-// also inside structs etc and at top level.
+// Declaration can appear where statements can and also inside structs etc
+// and at top level.
 struct Declaration : virtual Node { NODE_FUNCTIONS };
 
 // A scope is any space in a program where declarations may appear. Declarations
@@ -323,7 +322,7 @@ struct Subroutine : Type
 // A procedure like in pascal etc, params but no return value. Parameters are generated as 
 // a sequence of automatic variable/object declarations (ie Instances).
 struct Procedure : Subroutine,
-                   Scope
+                   Scope // For the parameters
 {
     NODE_FUNCTIONS
 };
@@ -432,7 +431,7 @@ struct Typedef : UserType
 // or static) can can be variables/objects in all cases and additionally
 // function instances in struct/class.
 struct Record : UserType,
-                Scope
+                Scope // Member declarations go in here
 {
     NODE_FUNCTIONS
 };
@@ -638,10 +637,10 @@ struct RecordLiteral : MapOperator
 // can go in the members of the Scope or in the statements (since Declaration
 // derives from Statement)
 struct Compound : Statement,
-                  Scope
+                  Scope  // Local declarations go in here (preferably)
 {
     NODE_FUNCTIONS
-    Sequence<Statement> statements;
+    Sequence<Statement> statements; // Can contain local declarations and code
 };                   
 
 // The return statement of a function TODO not sure about return without 
