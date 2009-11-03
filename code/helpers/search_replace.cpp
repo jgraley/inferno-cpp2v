@@ -1190,12 +1190,12 @@ RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( Roo
 		                                                                     RootedSearchReplace::Choice end )
 {
 	ASSERT( this );
+	ASSERT( size() >= decision_index ); // consistency check
 
 	// Now we know we have a decision to make; see if it needs to be added to the present Conjecture
 	if( size() == decision_index ) // this decision missing from conjecture?
 	{
-		ASSERT( size() >= decision_index ); // consistency check
-		push_back( begin ); // append this decision, initialised to begin
+		push_back( begin ); // append this decision, initialised to the first choice
 		TRACE("Decision %d appending begin\n", decision_index );
 	}
 
@@ -1203,10 +1203,10 @@ RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( Roo
 	RootedSearchReplace::Choice c = (*this)[decision_index]; // Get present decision
 
 	// Check the decision obeys bounds
-	if( c == end )
+	if( c == end ) // gone off the end?
 	{
 		// throw away the bad iterator; will force initialisation to begin() next time
-		// NOTE: we will still return end in this case, i.e. an invlaid iterator. This tells
+		// NOTE: we will still return end in this case, i.e. an invalid iterator. This tells
 		// the caller to please not try to do any matching with this decision, but fall out
 		// with NOT_FOUND.
 		TRACE("Decision %d hit end\n", decision_index );
@@ -1217,10 +1217,10 @@ RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( Roo
 		// That decision is OK, so move to the next one
 		TRACE("Decision %d OK\n", decision_index );
 
-		bool seen_c=false;
-		for( Choice i = begin; i != end; ++i )
-			seen_c |= (i==c);
-		ASSERT( seen_c )("Decision #%d: c not in x or x.end(), seems to have overshot!!!!", decision_index);
+//		bool seen_c=false;
+//		for( Choice i = begin; i != end; ++i )
+//			seen_c |= (i==c);
+//		ASSERT( seen_c )("Decision #%d: c not in x or x.end(), seems to have overshot!!!!", decision_index);
 
 		decision_index++;
 	}
