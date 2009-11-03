@@ -1065,10 +1065,9 @@ RootedSearchReplace::Result RootedSearchReplace::CouplingKeys::KeyAndRestrict( s
 	const Coupling *coupling = FindCoupling( pattern, sr->matches );
 	if( !coupling )
 		return FOUND;
-	TRACE("MATCH: ");
 
 	// If we're keying and we haven't keyed this node so far, key it now
-	TRACE("in pass %d ", (int)pass);
+	TRACE("MATCH: in pass %d\n", (int)pass);
 	if( pass==KEYING && !(operator[](coupling)) )
 	{
 		TRACE("keying... match set %p key ptr %p new value %p, presently %d keys out of %d match sets\n",
@@ -1081,28 +1080,21 @@ RootedSearchReplace::Result RootedSearchReplace::CouplingKeys::KeyAndRestrict( s
 		return FOUND; // always match when keying (could restrict here too as a slight optimisation, but KISS for now)
 	}
 
-	// If we're restricting, compare the supplied range with the one we keyed
-	if( pass==RESTRICTING )
-	{
-		TRACE("restricting ");
-	    // We are restricting the search, and this node has been keyed, so compare the present tree node
-		// with the tree node stored for the match set. This comparison should not match any match sets
-		// (it does not include stuff from any search or replace pattern) so do not allow match sets.
-		// Since collections (which require decisions) can exist within the tree, we must allow iteration
-		// through choices, and since the number of decisions seen may vary, we must start a new conjecture.
-		// Therefore, we recurse back to Compare().
-		ASSERT( operator[](coupling) ); // should have been caught by CheckMatchSetsKeyed()
-		Result r;
-		if( key->root != operator[](coupling)->root )
-			r = sr->Compare( key->root, operator[](coupling)->root, NULL );
-		else
-			r = FOUND;
-		TRACE("result %d\n", r);
-		return r;
-	}
-
-	TRACE("\n");
-	return FOUND;
+    // Always restrict
+	// We are restricting the search, and this node has been keyed, so compare the present tree node
+	// with the tree node stored for the match set. This comparison should not match any match sets
+	// (it does not include stuff from any search or replace pattern) so do not allow match sets.
+	// Since collections (which require decisions) can exist within the tree, we must allow iteration
+	// through choices, and since the number of decisions seen may vary, we must start a new conjecture.
+	// Therefore, we recurse back to Compare().
+	ASSERT( operator[](coupling) ); // should have been caught by CheckMatchSetsKeyed()
+	Result r;
+	if( key->root != operator[](coupling)->root )
+		r = sr->Compare( key->root, operator[](coupling)->root, NULL );
+	else
+		r = FOUND;
+	TRACE("result %d\n", r);
+	return r;
 	// TODO make the Map< const Coupling *, shared_ptr<Key> > be a member not a base class
 	// because all the operator[](...) in here are giving me a headache
 }
@@ -1217,10 +1209,10 @@ RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( Roo
 		// That decision is OK, so move to the next one
 		TRACE("Decision %d OK\n", decision_index );
 
-//		bool seen_c=false;
-//		for( Choice i = begin; i != end; ++i )
-//			seen_c |= (i==c);
-//		ASSERT( seen_c )("Decision #%d: c not in x or x.end(), seems to have overshot!!!!", decision_index);
+		bool seen_c=false;
+		for( Choice i = begin; i != end; ++i )
+			seen_c |= (i==c);
+		ASSERT( seen_c )("Decision #%d: c not in x or x.end(), seems to have overshot!!!!", decision_index);
 
 		decision_index++;
 	}
