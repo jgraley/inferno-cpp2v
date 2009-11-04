@@ -13,14 +13,16 @@ class Walk
     
     stack< Frame > state;
     SharedPtr<Node> root;
+    SharedPtr<Node> restrictor;
     
-    bool IsValid();
+    bool IsAtEndOfCollection();
+    void BypassInvalid();
     void Push( shared_ptr<Node> n );
     void Pop();
     void PoppingIncrement();
 
 public:
-    Walk( shared_ptr<Node> r );
+    Walk( shared_ptr<Node> root, shared_ptr<Node> restrictor=shared_ptr<Node>() );
     bool Done();
     int Depth();
     GenericContainer::iterator GetIterator();

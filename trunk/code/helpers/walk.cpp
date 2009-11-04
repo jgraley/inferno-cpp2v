@@ -2,32 +2,28 @@
 #include "tree/tree.hpp"
 #include "walk.hpp"
 
-bool Walk::IsValid()
+bool Walk::IsAtEndOfCollection()
 {
-    if( Done() )
-        return true;
+	ASSERT( !Done() );
 
     Frame &f = state.top();
 
-    return f.index < f.children.size();                      
+    return f.index == f.children.size();
+}
+
+void Walk::BypassInvalid()
+{
+	while( !Done() && IsAtEndOfCollection() )
+        PoppingIncrement();
 }
 
 void Walk::PoppingIncrement()
 {
-    Frame &f = state.top();
-    if( Done() )
-        return;
+	while( !Done() && IsAtEndOfCollection() )
+ 		Pop();
 
-    if( !IsValid() )
-    {
-        Pop();
-        if( Done() )
-            return;
-        PoppingIncrement();
-        return;
-    }
-
-    f.index++;                
+    if( !Done() )
+		state.top().index++;
 }
 
 void Walk::Push( shared_ptr<Node> n )
@@ -49,7 +45,7 @@ void Walk::Push( shared_ptr<Node> n )
         }
         else
         {
-            ASSERTFAIL("got something from itemise that isnt a container or a shared pointer");
+            ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
         }
     }
 
@@ -62,8 +58,9 @@ void Walk::Pop()
     state.pop();
 }
 
-Walk::Walk( shared_ptr<Node> r ) :
-    root( r ) 
+Walk::Walk( shared_ptr<Node> r, shared_ptr<Node> res ) :
+    root( r ),
+    restrictor( res )
 {
     Frame f;
     GenericPointIterator gpi(root);
@@ -85,7 +82,7 @@ int Walk::Depth()
 GenericContainer::iterator Walk::GetIterator()
 {
     ASSERT( !Done() )("Already advanced over everything; reached end of walk");
-    ASSERT( IsValid() );
+    ASSERT( !IsAtEndOfCollection() );
         
     Frame f = state.top();
     ASSERT( f.index < f.children.size() );
@@ -122,20 +119,28 @@ string Walk::GetPathString()
 
 void Walk::AdvanceInto()
 {
-    if( IsValid() && Get() )
+	ASSERT( !Done() );
+	ASSERT( !IsAtEndOfCollection() );
+	shared_ptr<Node> element = Get(); // look at current node
+    if( element &&                                                    // must be non-NULL
+    	(!restrictor || TypeInfo(element) <= TypeInfo(restrictor) ) ) // and pass the restriction
+    {
+    	// Step into
         Push( Get() );
+        BypassInvalid();
+    }
     else
-        PoppingIncrement();
-                
-    while( !IsValid() )
-        PoppingIncrement();
+    {
+    	// If we can't step into then step over
+    	AdvanceOver();
+    }
 }
 
 void Walk::AdvanceOver()
 {
+	ASSERT( !Done() );
+	ASSERT( !IsAtEndOfCollection() );
 	PoppingIncrement();
-
-	while( !IsValid() )
-        PoppingIncrement();
+	BypassInvalid();
 }
 
