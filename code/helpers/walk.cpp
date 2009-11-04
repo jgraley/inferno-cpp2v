@@ -2,11 +2,11 @@
 #include "tree/tree.hpp"
 #include "walk.hpp"
 
-bool Walk::IsAtEndOfCollection()
+bool Walk::IsAtEndOfCollection() const
 {
 	ASSERT( !Done() );
 
-    Frame &f = state.top();
+    const Frame &f = state.top();
 
     return f.index == f.children.size();
 }
@@ -59,27 +59,38 @@ void Walk::Pop()
 }
 
 Walk::Walk( shared_ptr<Node> r, shared_ptr<Node> res ) :
-    root( r ),
+    root( new SharedPtr<Node>(r) ),
     restrictor( res )
 {
-    Frame f;
-    GenericPointIterator gpi(root);
-    f.children.push_back( gpi );
-    f.index = 0;
-    state.push( f );
+	if( *root ) // if root is NULL, leave the state empty so Done() always returns true
+	{
+        Frame f;
+        GenericPointIterator gpi(&*root);
+        f.children.push_back( gpi );
+        f.index = 0;
+        state.push( f );
+	}
 }        
-    
-bool Walk::Done()
+
+Walk::Walk( const Walk & other ) :
+	root( other.root ),
+	restrictor( other.restrictor ),
+	state( other.state )
+{
+
+}
+
+bool Walk::Done() const
 {
     return state.empty();
 }    
 
-int Walk::Depth()
+int Walk::Depth() const
 {
     return state.size();
 }
     
-GenericContainer::iterator Walk::GetIterator()
+GenericContainer::iterator Walk::GetIterator() const
 {
     ASSERT( !Done() )("Already advanced over everything; reached end of walk");
     ASSERT( !IsAtEndOfCollection() );
@@ -89,12 +100,12 @@ GenericContainer::iterator Walk::GetIterator()
     return f.children[f.index];
 }
 
-shared_ptr<Node> Walk::Get()
+shared_ptr<Node> Walk::Get() const
 {
     return *GetIterator();
 }
 
-string Walk::GetPathString()
+string Walk::GetPathString() const
 {
     string s;
     stack< Frame > ps = state; // std::stack doesn't have [] so copy the whole thing and go backwards

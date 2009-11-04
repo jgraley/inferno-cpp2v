@@ -57,6 +57,13 @@ public:
 		iterator( const iterator &i ) :
 			pib( i.pib ? i.pib->Clone() : shared_ptr<iterator_base>() ) {} // Only clone if the other iterator has been initialised
 
+		iterator &operator=( const iterator &i )
+		{
+			ASSERT( &i != this );
+			pib = i.pib ? i.pib->Clone() : shared_ptr<iterator_base>();
+			return *this;
+		}
+
 		iterator &operator++()
 		{
 			ASSERT(pib)("Attempt to increment uninitialised iterator");
@@ -292,15 +299,15 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
     {
     }
 
+    PointIterator( const PointIterator &other ) :
+        element(other.element)
+    {
+    }
+
     PointIterator( VALUE_TYPE *i ) :
         element(i)
     {      
         ASSERT(i); // We don't allow NULL as input because it means end-of-range
-    }
-
-    PointIterator( VALUE_TYPE &i ) :
-        element(&i)
-    {
     }
 
 	virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
@@ -330,7 +337,7 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
 	virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib ) const
 	{
 		const PointIterator *pi = dynamic_cast<const PointIterator *>(&ib);
-		ASSERT(pi)("Comparing point iterators of different type");
+		ASSERT(pi)("Comparing point iterator with something else %s", typeid(ib).name());
 		return pi->element == element;
 	}
 	
@@ -386,7 +393,7 @@ struct CountingIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterato
 	virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib ) const
 	{
 		const CountingIterator *pi = dynamic_cast<const CountingIterator *>(&ib);
-		ASSERT(pi)("Comparing counting iterators of different type");
+		ASSERT(pi)("Comparing counting iterator with something else %s", typeid(ib).name());
 		return pi->element == element;
 	}
 

@@ -11,23 +11,25 @@ class Walk
         int index;
     };
     
-    stack< Frame > state;
-    SharedPtr<Node> root;
+    shared_ptr< SharedPtr<Node> > root;
     SharedPtr<Node> restrictor;
+    stack< Frame > state;
     
-    bool IsAtEndOfCollection();
+    bool IsAtEndOfCollection() const;
     void BypassInvalid();
     void Push( shared_ptr<Node> n );
     void Pop();
     void PoppingIncrement();
 
 public:
-    Walk( shared_ptr<Node> root, shared_ptr<Node> restrictor=shared_ptr<Node>() );
-    bool Done();
-    int Depth();
-    GenericContainer::iterator GetIterator();
-    shared_ptr<Node> Get();
-    string GetPathString();
+    Walk( shared_ptr<Node> root=shared_ptr<Node>(), // NULL root gets us a walk stuck on Done()
+          shared_ptr<Node> restrictor=shared_ptr<Node>() );
+    Walk( const Walk & other );
+    bool Done() const;
+    int Depth() const;
+    GenericContainer::iterator GetIterator() const;
+    shared_ptr<Node> Get() const;
+    string GetPathString() const;
     void AdvanceOver(); 
     void AdvanceInto();
 };
@@ -58,5 +60,60 @@ public:
         }    
     }
 };
+
+
+struct WalkingIterator : public STLContainerBase<Itemiser::Element, GenericSharedPtr>::iterator_base,
+                         Walk
+{
+	WalkingIterator( shared_ptr<Node> root = shared_ptr<Node>(), // NULL root gets us an "end" iterator
+			         shared_ptr<Node> restrictor = shared_ptr<Node>() ) :
+		Walk( root, restrictor )
+    {
+    }
+
+	virtual shared_ptr<STLContainerBase<Itemiser::Element, GenericSharedPtr>::iterator_base> Clone() const
+	{
+		shared_ptr<WalkingIterator> ni( new WalkingIterator(*this) );
+		return ni;
+	}
+
+	virtual WalkingIterator &operator++()
+	{
+		AdvanceInto();
+		return *this;
+	}
+
+	virtual const GenericSharedPtr &operator*() const
+	{
+	    return *GetIterator();
+	}
+
+	const virtual GenericSharedPtr *operator->() const
+	{
+		return &*GetIterator();
+	}
+
+	virtual bool operator==( const STLContainerBase<Itemiser::Element, GenericSharedPtr>::iterator_base &ib ) const
+	{
+		const WalkingIterator *pi = dynamic_cast<const WalkingIterator *>(&ib);
+		ASSERT(pi)("Comparing walking iterator with something else %s", typeid(ib).name());
+		if( pi->Done() || Done() )
+			return pi->Done() && Done();
+		//ASSERTFAIL("Comparison must be with end");
+		return pi->Get() == Get();
+	}
+
+	virtual void Overwrite( const GenericSharedPtr *v ) const
+	{
+		GetIterator().Overwrite( v );
+	}
+
+	virtual const bool IsOrdered() const
+	{
+		return true; // walk walks tree in order generally
+	}
+};
+
+
 
 #endif
