@@ -83,8 +83,10 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
         {
             shared_ptr<ELEMENT> pe = dynamic_pointer_cast<ELEMENT>(n);
             if( !pe )
-                TRACE("Type was %s; I am %s\n", TypeInfo(n).name().c_str(), typeid(ELEMENT).name() );
-            ASSERT( pe && "Tried to Set() wrong type of node via GenericSharedPtr" );
+                TRACE( );
+            ASSERT( pe )
+                  ("Tried to Set() wrong type of node via GenericSharedPtr\nType was %s; I am %s\n",
+            	   TypeInfo(n).name().c_str(), typeid(ELEMENT).name() );
             *(shared_ptr<ELEMENT> *)this = pe;        
         }
     }
