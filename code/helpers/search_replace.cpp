@@ -501,14 +501,10 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
 
 	GenericCountingIterator begin(0), end(0);
 	{ // just count the nodes seen during the walk, to get an "end" iterator
-		Walk w( x );
+		Walk w( x, stuff_pattern->restrictor );
 		while(!w.Done())
 		{
-			shared_ptr<Node> element = *(w.GetIterator());
-			if( !stuff_pattern->restrictor || TypeInfo(element) <= TypeInfo(stuff_pattern->restrictor) )
-				w.AdvanceInto();
-			else
-				w.AdvanceOver();
+			w.AdvanceInto();
 			++end;
 		}
 	}
@@ -521,16 +517,12 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
 		return NOT_FOUND; // ran out of choices
 
     // Walk that many places into the subtree
-	Walk w( x );
+	Walk w( x, stuff_pattern->restrictor );
 	GenericContainer::iterator cur = begin;
 	while( !(cur == thistime) )
 	{
 		ASSERT( !w.Done() );
-		shared_ptr<Node> element = *(w.GetIterator());
-		if( !stuff_pattern->restrictor || TypeInfo(element) <= TypeInfo(stuff_pattern->restrictor) )
-			w.AdvanceInto();
-		else
-			w.AdvanceOver();
+		w.AdvanceInto();
 		++cur;
 	}
 	ASSERT( cur==thistime );
