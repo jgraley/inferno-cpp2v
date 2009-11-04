@@ -509,8 +509,9 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
 		return NOT_FOUND; // ran out of choices
 
 	// Try out comparison at this position
+    TRACE("%s@%d\n", typeid(*stuff_pattern).name(), conj.decision_index );
 	Result r = DecidedCompare( *thistime, stuff_pattern->terminus, keys, conj, context_flags );
-	TRACE("Result was %d\n", r);
+	TRACE("%s@%d DC result was %d\n", typeid(*stuff_pattern).name(), conj.decision_index, r);
 
     // If we got this far, do the match sets
     if( keys && r )
@@ -522,6 +523,7 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
         		                  stuff_pattern,
         		                  this,
         		                  context_flags );
+    	TRACE("%s@%d K&R result was %d\n", typeid(*stuff_pattern).name(), conj.decision_index, r);
     }
 	return r;
 }
@@ -913,30 +915,30 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
 	program = p;
 
 	SharedPtr<Node> base_sp(base);
-	GenericPointIterator base_it( &base_sp );
-	TRACE("Begin search\n");
-	Result r = Compare( *base_it, search_pattern, &keys );
+	TRACE("%p Begin search\n", this);
+	keys.Trace( matches );
+	Result r = Compare( base_sp, search_pattern, &keys );
 	if( r != FOUND )
 		return NOT_FOUND;
 
     if( replace_pattern )
     {
-    	TRACE("Search successful, now replacing\n");
+    	TRACE("%p Search successful, now replacing\n", this);
         ASSERT( replace_pattern );
         SharedPtr<Node> nn( MatchingDuplicateSubtree( replace_pattern, &keys ) );
-        base_it.Overwrite( &nn );
-       	TRACE("Done replace\n");
 
         // TODO operator() should take a ref to the shared_ptr<Program> and just change it directly
-        shared_ptr<Program> pp = dynamic_pointer_cast<Program>(base_sp);
+        shared_ptr<Program> pp = dynamic_pointer_cast<Program>(nn);
         ASSERT(pp)("root node is not program, don't know how to change it");
         *p = *pp; // Egregiously copy over the contents of the program node
     }
 
+    int i=0;
     FOREACH( RootedSearchReplace *slave, slaves )
     {
-    	//keys.Trace( matches );
-    	slave->RepeatingSearchReplace( p, base_sp, slave->search_pattern, slave->replace_pattern, keys );
+    	TRACE("%p Running slave\n", this);
+    	int num = slave->RepeatingSearchReplace( p, base_sp, slave->search_pattern, slave->replace_pattern, keys );
+    	TRACE("%p slave %d got %d hits\n", this, i++, num);
     }
 
     program = shared_ptr<Program>(); // just to avoid us relying on the program outside of a search+replace pass
@@ -952,21 +954,23 @@ int RootedSearchReplace::RepeatingSearchReplace( shared_ptr<Program> p,
 	                                             shared_ptr<Node> base,
 	                                             shared_ptr<Node> search_pattern,
 	                                             shared_ptr<Node> replace_pattern,
-	                                             CouplingKeys keys ) // Pass by value is intentional - changes should not propogate back to caller
+	                                             CouplingKeys keys ) // Pass by value is intentional - changes should not propagate back to caller
 {
     int i=0;
-    while(i<10)
+    while(i<20)
     {
     	Result r = SingleSearchReplace( p,
     			                        base,
     			                        search_pattern,
     			                        replace_pattern,
     			                        keys );
-        if( r != FOUND )
+    	TRACE("%p result %d", this, r);
+    	if( r != FOUND )
             break;
        	//ASSERT(i<100)("Too many hits");
         i++;
     }
+    TRACE("%p exiting", this);
     return i;
 }
 

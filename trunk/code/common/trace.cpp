@@ -60,7 +60,7 @@ Tracer &Tracer::operator()(const char *fmt, ...)
     va_list vl;
     va_start( vl, fmt );
     if( !continuation ) 
-        printf( "    %s:%d in %s() sp %p\n", file, line, function, &auto_variable);
+        printf( "    %s:%d in %s() sp %p", file, line, function, &auto_variable);
     vprintf( fmt, vl );
     va_end( vl );
     

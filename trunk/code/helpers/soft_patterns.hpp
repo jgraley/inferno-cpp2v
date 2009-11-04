@@ -40,7 +40,7 @@ struct SoftAnd : VALUE_TYPE,
                  RootedSearchReplace::SoftSearchPattern
 {
     NODE_FUNCTIONS
-    mutable Sequence<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
+    mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
 private:
     virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
     		                                            shared_ptr<Node> x,
@@ -50,11 +50,16 @@ private:
     {
     	typedef GenericContainer::iterator iter; // TODO clean up this loop
     	iter it;
-    	for( it = patterns.begin();
+    	int i;
+    	for( it = patterns.begin(), i = 0;
     		 it != patterns.end();
-    		 ++it )
-    	    if( !sr->DecidedCompare( x, shared_ptr<Node>(*it), keys, conj, context_flags ) )
+    		 ++it, ++i )
+    	{
+    		RootedSearchReplace::Result r = sr->DecidedCompare( x, shared_ptr<Node>(*it), keys, conj, context_flags );
+    		TRACE("AND[%d] got %d\n", i, r);
+    	    if( !r )
     	    	return RootedSearchReplace::NOT_FOUND;
+    	}
 
         return RootedSearchReplace::FOUND;
     }
