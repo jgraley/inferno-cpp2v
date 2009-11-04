@@ -24,7 +24,9 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	cs_instance->storage = shared_new<Auto>();
 
     // Master search - look for functions satisfying the construct limitation and get
+	shared_ptr< SearchReplace::Stuff<Scope> > sm_root( new SearchReplace::Stuff<Scope> );
 	shared_ptr<Instance> s_fi( new Instance );
+	sm_root->terminus = s_fi;
 	s_fi->identifier = shared_new<InstanceIdentifier>();
 	shared_ptr<Subroutine> s_func( new Subroutine );
 	s_fi->type = s_func;
@@ -39,7 +41,9 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	s_top_comp->statements.push_back( s_top_pre );
 
 	// Master replace - insert index varaible, inc and dec into function at top level
+	shared_ptr< SearchReplace::Stuff<Scope> > rm_root( new SearchReplace::Stuff<Scope> );
 	shared_ptr<Instance> r_fi( new Instance );
+	rm_root->terminus = r_fi;
     shared_ptr<Compound> r_top_comp( new Compound );
 	r_fi->initialiser = r_top_comp;
 	// top-level decls
@@ -68,8 +72,9 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	r_dec->operands.push_back( shared_new<InstanceIdentifier>() );
 
 
-
+	shared_ptr< SearchReplace::Stuff<Scope> > s_root( new SearchReplace::Stuff<Scope> );
 	shared_ptr< SearchReplace::Stuff<Statement> > s_stuff( new SearchReplace::Stuff<Statement> );
+	s_root->terminus = s_stuff;
 	shared_ptr<Instance> s_instance( new Instance );
 	s_stuff->terminus = s_instance;
 	shared_ptr<InstanceIdentifier> s_identifier( new InstanceIdentifier );
@@ -79,8 +84,9 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 
 
 
-	// under "stuff"
+	shared_ptr< SearchReplace::Stuff<Scope> > r_root( new SearchReplace::Stuff<Scope> );
 	shared_ptr< SearchReplace::Stuff<Statement> > r_stuff( new SearchReplace::Stuff<Statement> );
+	r_root->terminus = r_stuff;
 	shared_ptr<Instance> r_instance( new Instance );
 	r_stuff->terminus = r_instance;
 	shared_ptr<SoftMakeIdentifier> r_identifier( new SoftMakeIdentifier("%s_stack") );
@@ -103,13 +109,23 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	ms_top_decls.insert( r_top_decls );
 	sms.insert( &ms_top_decls );
 
+	SearchReplace::Coupling ms_mroots;
+	ms_mroots.insert( sm_root );
+	ms_mroots.insert( rm_root );
+	sms.insert( &ms_mroots );
+
+	SearchReplace::Coupling ms_roots;
+	ms_roots.insert( s_root );
+	ms_roots.insert( r_root );
+	sms.insert( &ms_roots );
+
 	SearchReplace::Coupling ms_top_pre;
 	ms_top_pre.insert( s_top_pre );
 	ms_top_pre.insert( r_top_pre );
 	sms.insert( &ms_top_pre );
 
 	SearchReplace::Coupling ms_stuff;
-	ms_stuff.insert( s_top_comp );
+	//ms_stuff.insert( s_top_comp );
 	ms_stuff.insert( s_stuff );
 	ms_stuff.insert( r_stuff );
 	sms.insert( &ms_stuff );
@@ -155,10 +171,10 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	vector<RootedSearchReplace *> vs;
 	SearchReplace slave( ss_identifier, sr_sub );
 	vs.push_back( &slave );
-	SearchReplace mid( s_instance, r_instance, sms, vs );
+	RootedSearchReplace mid( s_root, r_root, sms );
 	vector<RootedSearchReplace *> vs2;
 	vs2.push_back( &mid );
-	SearchReplace( s_fi, r_fi, sms, vs2 )( program );
+	RootedSearchReplace( sm_root, rm_root, sms, vs2 )( program );
 
 	// TODO insert dec before return statements
 }

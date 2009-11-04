@@ -1,4 +1,4 @@
-
+/*
 // basic trigger for crazynine
 struct S { static int b; };
 int S::b = 9;
@@ -21,21 +21,21 @@ int ma()
 
     }
 }
-
-void func3()
+*/
+void fa()
 {
     int a;
-    int b;
+/*    int b;
     a=b+9+99;
     {
         int c;
         c=999;
-    }
+    }*/
 }
 
 
-void add( unsigned char a, int  b)
+void fb()
 {
-    func3();
+    int b;
 } 
 
