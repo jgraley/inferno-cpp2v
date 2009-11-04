@@ -52,21 +52,21 @@ public:
 			pib( shared_ptr<iterator_base>() ) {}
 
 		iterator( const iterator_base &ib ) :
-			pib( ib.Clone() ) {}
+			pib( ib.Clone() ) {} // Deep copy because from unmanaged source
 
 		iterator( const iterator &i ) :
-			pib( i.pib ? i.pib->Clone() : shared_ptr<iterator_base>() ) {} // Only clone if the other iterator has been initialised
+			pib( i.pib ) {} // Shallow copy
 
 		iterator &operator=( const iterator &i )
 		{
-			ASSERT( &i != this );
-			pib = i.pib ? i.pib->Clone() : shared_ptr<iterator_base>();
+			pib = i.pib; // Shallow copy
 			return *this;
 		}
 
 		iterator &operator++()
 		{
 			ASSERT(pib)("Attempt to increment uninitialised iterator");
+			EnsureUnique();
 			pib->operator++();
 			return *this;
 		}
@@ -109,6 +109,23 @@ public:
 		const int GetCount() const
 		{
 			return pib->GetCount();
+		}
+
+		iterator_base *GetUnderlyingIterator()
+		{
+			if( pib )
+				return pib.get();
+			else
+				return NULL;
+		}
+	private:
+		void EnsureUnique()
+		{
+			// Call this before modifying the underlying iterator - Performs a deep copy
+			// if required to make sure there are no other refs.
+			if( pib && !pib.unique() )
+				pib = pib->Clone();
+			ASSERT( !pib || pib.unique() );
 		}
 
 		shared_ptr<iterator_base> pib;
@@ -168,7 +185,7 @@ struct STLContainer : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, CONTAINER_
 
     virtual void erase( typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator it )
     {
-        iterator *cit = dynamic_cast<iterator *>( it.pib.get() );
+        iterator *cit = dynamic_cast<iterator *>( it.GetUnderlyingIterator() );
         ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator
         CONTAINER_IMPL::erase( *(typename CONTAINER_IMPL::iterator *)cit );
     }
