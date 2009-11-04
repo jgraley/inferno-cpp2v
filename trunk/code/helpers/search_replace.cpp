@@ -499,38 +499,17 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
 {
 	ASSERT( stuff_pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
-	GenericCountingIterator begin(0), end(0);
-	{ // just count the nodes seen during the walk, to get an "end" iterator
-		Walk w( x, stuff_pattern->restrictor );
-		while(!w.Done())
-		{
-			w.AdvanceInto();
-			++end;
-		}
-	}
-	TRACE("Stuff at %p; counting %d nodes underneath\n", stuff_pattern.get(), end.GetCount());
+	// Define beginning and end
+	WalkingIterator wbegin( x, stuff_pattern->restrictor );
+	WalkingIterator wend;
 
-    // Get decision from conjecture
-	GenericContainer::iterator thistime = conj.HandleDecision( begin, end );
-	TRACE("Conjecture asks for number %d\n", thistime.GetCount()); // TODO BUG seems to ask for 0 twice investigate
-	if( thistime == (GenericContainer::iterator)end )
+	// Get decision from conjecture
+	GenericContainer::iterator thistime = conj.HandleDecision( wbegin, wend );
+	if( thistime == (GenericContainer::iterator)wend )
 		return NOT_FOUND; // ran out of choices
 
-    // Walk that many places into the subtree
-	Walk w( x, stuff_pattern->restrictor );
-	GenericContainer::iterator cur = begin;
-	while( !(cur == thistime) )
-	{
-		ASSERT( !w.Done() );
-		w.AdvanceInto();
-		++cur;
-	}
-	ASSERT( cur==thistime );
-
 	// Try out comparison at this position
-	ASSERT( !(cur == (GenericContainer::iterator)end) );
-	shared_ptr<Node> term_candidate = *(w.GetIterator()); // get an iterator for current position in tree, so we can change it
-	Result r = DecidedCompare( term_candidate, stuff_pattern->terminus, keys, conj, context_flags );
+	Result r = DecidedCompare( *thistime, stuff_pattern->terminus, keys, conj, context_flags );
 	TRACE("Result was %d\n", r);
 
     // If we got this far, do the match sets
@@ -538,7 +517,7 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
     {
     	shared_ptr<StuffKey> key( new StuffKey );
     	key->root = x;
-    	key->terminus = term_candidate;
+    	key->terminus = *thistime;
         r = keys->KeyAndRestrict( shared_ptr<Key>(key),
         		                  stuff_pattern,
         		                  this,
@@ -934,7 +913,7 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
 	program = p;
 
 	SharedPtr<Node> base_sp(base);
-	GenericPointIterator base_it( base_sp );
+	GenericPointIterator base_it( &base_sp );
 	TRACE("Begin search\n");
 	Result r = Compare( *base_it, search_pattern, &keys );
 	if( r != FOUND )
@@ -1201,11 +1180,15 @@ RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( Roo
 		// That decision is OK, so move to the next one
 		TRACE("Decision %d OK\n", decision_index );
 
-		bool seen_c=false;
+/* JSG this is slow!
+ 		bool seen_c=false;
 		for( Choice i = begin; i != end; ++i )
+		{
+			TRACE("%p == %p?\n", (*i).get(), (*c).get() );
 			seen_c |= (i==c);
+		}
 		ASSERT( seen_c )("Decision #%d: c not in x or x.end(), seems to have overshot!!!!", decision_index);
-
+*/
 		decision_index++;
 	}
 
