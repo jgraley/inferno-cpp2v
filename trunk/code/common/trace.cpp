@@ -2,10 +2,10 @@
 #include <boost/assert.hpp>
 #include <stdarg.h>
 #include "read_args.hpp"
-#include "stack_track.hpp"
+//#include "stack_track.hpp"
 #include <string.h>
 
-static StackTrack stack_track;
+//static StackTrack stack_track;
 
 bool Tracer::continuation = false;
 
