@@ -11,7 +11,7 @@ shared_ptr<UserType> GetDeclaration( shared_ptr<Program> program, shared_ptr<Typ
 // Look for a record, skipping over typedefs. Returns NULL if not a record.
 shared_ptr<Record> GetRecordDeclaration( shared_ptr<Program> program, shared_ptr<TypeIdentifier> id );
 
-shared_ptr<Instance> GetDeclaration( shared_ptr<Program> program, shared_ptr<InstanceIdentifier> id ); // TODO InstanceIdentifier not Specific
+shared_ptr<Instance> GetDeclaration( shared_ptr<Program> program, shared_ptr<InstanceIdentifier> id ); 
 
 // Hunt through a record and its bases to find the named member
 shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<Record> r, string name );

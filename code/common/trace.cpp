@@ -2,7 +2,10 @@
 #include <boost/assert.hpp>
 #include <stdarg.h>
 #include "read_args.hpp"
+#include "stack_track.hpp"
 #include <string.h>
+
+static StackTrack stack_track;
 
 bool Tracer::continuation = false;
 
@@ -41,11 +44,15 @@ Tracer::~Tracer()
 
 Tracer &Tracer::operator()()
 {
-    if( (flags & DISABLE) || !(ReadArgs::trace || (flags & FORCE)) )
+    bool tracing = ReadArgs::trace && (!ReadArgs::quitenable || ReadArgs::quitafter==0); // if quitafter is enabled, only trace final pass
+    if( (flags & DISABLE) || !(tracing || (flags & FORCE)) )
         return *this;
  
     EndContinuation();
 
+    //int spaces = stack_track.GetIndent();
+    //for( int i=0; i<spaces; i++ )
+    //    printf(" ");
     printf( "    %s:%d in %s()\n", file, line, function);
     
     return *this;
@@ -53,14 +60,20 @@ Tracer &Tracer::operator()()
 
 Tracer &Tracer::operator()(const char *fmt, ...)
 {
-    if( (flags & DISABLE) || !(ReadArgs::trace || (flags & FORCE)) )
+    bool tracing = ReadArgs::trace && (!ReadArgs::quitenable || ReadArgs::quitafter==0); // if quitafter is enabled, only trace final pass
+    if( (flags & DISABLE) || !(tracing || (flags & FORCE)) )
         return *this;
 
     int auto_variable;
     va_list vl;
     va_start( vl, fmt );
     if( !continuation ) 
-        printf( "    %s:%d in %s() sp %p", file, line, function, &auto_variable);
+    {
+      //  int spaces = stack_track.GetIndent();
+        //for( int i=0; i<spaces; i++ )
+       //     printf(" ");
+        printf( "    %s:%d in %s() sp %p\n", file, line, function, &auto_variable);
+    }
     vprintf( fmt, vl );
     va_end( vl );
     

@@ -17,33 +17,29 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	TRACE();
 	set<SearchReplace::Coupling *> sms;
 
-	// Construct limitation - restrict search to functions that contain automatic variables
-	shared_ptr< SearchReplace::Stuff<Statement> > cs_stuff( new SearchReplace::Stuff<Statement> );
-	shared_ptr<Instance> cs_instance( new Instance );
-	cs_stuff->terminus = cs_instance;
-	cs_instance->storage = shared_new<Auto>();
-
     // Master search - look for functions satisfying the construct limitation and get
-	shared_ptr< SearchReplace::Stuff<Scope> > sm_root( new SearchReplace::Stuff<Scope> );
 	shared_ptr<Instance> s_fi( new Instance );
-	sm_root->terminus = s_fi;
 	s_fi->identifier = shared_new<InstanceIdentifier>();
 	shared_ptr<Subroutine> s_func( new Subroutine );
 	s_fi->type = s_func;
     shared_ptr< SoftAnd<Initialiser> > s_and( new SoftAnd<Initialiser> );
     shared_ptr<Compound> s_top_comp( new Compound );
     s_and->patterns.insert( s_top_comp );
-    s_and->patterns.insert( cs_stuff );
 	s_fi->initialiser = s_and;
 	shared_ptr< SearchReplace::Star<Declaration> > s_top_decls( new SearchReplace::Star<Declaration> );
 	s_top_comp->members.insert( s_top_decls );
 	shared_ptr< SearchReplace::Star<Statement> > s_top_pre( new SearchReplace::Star<Statement> );
 	s_top_comp->statements.push_back( s_top_pre );
 
+	// Construct limitation - restrict search to functions that contain automatic variables
+	shared_ptr< SearchReplace::Stuff<Statement> > cs_stuff( new SearchReplace::Stuff<Statement> );
+	shared_ptr<Instance> cs_instance( new Instance );
+	cs_stuff->terminus = cs_instance;
+	cs_instance->storage = shared_new<Auto>();
+    s_and->patterns.insert( cs_stuff );
+
 	// Master replace - insert index varaible, inc and dec into function at top level
-	shared_ptr< SearchReplace::Stuff<Scope> > rm_root( new SearchReplace::Stuff<Scope> );
 	shared_ptr<Instance> r_fi( new Instance );
-	rm_root->terminus = r_fi;
     shared_ptr<Compound> r_top_comp( new Compound );
 	r_fi->initialiser = r_top_comp;
 	// top-level decls
@@ -72,9 +68,10 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	r_dec->operands.push_back( shared_new<InstanceIdentifier>() );
 
 
-	shared_ptr< SearchReplace::Stuff<Scope> > s_root( new SearchReplace::Stuff<Scope> );
+	shared_ptr<Instance> s_fi2( new Instance );
+	s_fi2->identifier = shared_new<InstanceIdentifier>();
 	shared_ptr< SearchReplace::Stuff<Statement> > s_stuff( new SearchReplace::Stuff<Statement> );
-	s_root->terminus = s_stuff;
+	s_fi2->initialiser = s_stuff;
 	shared_ptr<Instance> s_instance( new Instance );
 	s_stuff->terminus = s_instance;
 	shared_ptr<InstanceIdentifier> s_identifier( new InstanceIdentifier );
@@ -84,9 +81,9 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 
 
 
-	shared_ptr< SearchReplace::Stuff<Scope> > r_root( new SearchReplace::Stuff<Scope> );
+	shared_ptr<Instance> r_fi2( new Instance );
 	shared_ptr< SearchReplace::Stuff<Statement> > r_stuff( new SearchReplace::Stuff<Statement> );
-	r_root->terminus = r_stuff;
+	r_fi2->initialiser = r_stuff;
 	shared_ptr<Instance> r_instance( new Instance );
 	r_stuff->terminus = r_instance;
 	shared_ptr<SoftMakeIdentifier> r_identifier( new SoftMakeIdentifier("%s_stack") );
@@ -104,20 +101,60 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	sr_sub->base = shared_new<InstanceIdentifier>();
 	sr_sub->index = shared_new<InstanceIdentifier>();
 
+	shared_ptr<Instance> s_fi3( new Instance );
+	s_fi3->identifier = shared_new<InstanceIdentifier>();
+	shared_ptr< SearchReplace::Stuff<Statement> > s_stuff3( new SearchReplace::Stuff<Statement> );
+	s_fi3->initialiser = s_stuff3;
+	shared_ptr< SoftAnd<Statement> > s_and3( new SoftAnd<Statement> );
+	s_stuff3->terminus = s_and3;
+	shared_ptr<Compound> s_ret_comp( new Compound );
+	s_and3->patterns.insert( s_ret_comp );
+	shared_ptr< SearchReplace::Star<Declaration> > s_ret_decls( new SearchReplace::Star<Declaration> );
+	s_ret_comp->members.insert( s_ret_decls );	
+	shared_ptr< SearchReplace::Star<Statement> > s_ret_pre( new SearchReplace::Star<Statement> );
+	s_ret_comp->statements.push_back( s_ret_pre );
+	shared_ptr<Return> s_return( new Return );
+	s_ret_comp->statements.push_back( s_return );
+	shared_ptr< SearchReplace::Star<Statement> > s_ret_post( new SearchReplace::Star<Statement> );
+	s_ret_comp->statements.push_back( s_ret_post );
+    shared_ptr< SoftNot<Statement> > s_not3( new SoftNot<Statement> );    
+    s_and3->patterns.insert( s_not3 );
+	
+	shared_ptr<Compound> sn_ret_comp( new Compound );
+    s_not3->pattern = sn_ret_comp;
+	shared_ptr< SearchReplace::Star<Declaration> > sn_ret_decls( new SearchReplace::Star<Declaration> );
+	sn_ret_comp->members.insert( sn_ret_decls );	
+	shared_ptr< SearchReplace::Star<Statement> > sn_ret_pre( new SearchReplace::Star<Statement> );
+	sn_ret_comp->statements.push_back( sn_ret_pre );
+	shared_ptr<PostDecrement> sn_ret_dec( new PostDecrement );
+	sn_ret_dec->operands.push_back( shared_new<InstanceIdentifier>() );
+	sn_ret_comp->statements.push_back( sn_ret_dec );
+	shared_ptr<Return> sn_return( new Return );
+	sn_ret_comp->statements.push_back( sn_return );
+	shared_ptr< SearchReplace::Star<Statement> > sn_ret_post( new SearchReplace::Star<Statement> );
+	sn_ret_comp->statements.push_back( sn_ret_post );
+
+	shared_ptr<Instance> r_fi3( new Instance );
+	shared_ptr< SearchReplace::Stuff<Statement> > r_stuff3( new SearchReplace::Stuff<Statement> );
+	r_fi3->initialiser = r_stuff3;
+	shared_ptr<Compound> r_ret_comp( new Compound );
+	r_stuff3->terminus = r_ret_comp;
+	shared_ptr< SearchReplace::Star<Declaration> > r_ret_decls( new SearchReplace::Star<Declaration> );
+	r_ret_comp->members.insert( r_ret_decls );	
+	shared_ptr< SearchReplace::Star<Statement> > r_ret_pre( new SearchReplace::Star<Statement> );
+	r_ret_comp->statements.push_back( r_ret_pre );
+	shared_ptr<PostDecrement> r_ret_dec( new PostDecrement );
+	r_ret_comp->statements.push_back( r_ret_dec );
+	r_ret_dec->operands.push_back( shared_new<InstanceIdentifier>() );
+	shared_ptr<Return> r_return( new Return );
+	r_ret_comp->statements.push_back( r_return );
+	shared_ptr< SearchReplace::Star<Statement> > r_ret_post( new SearchReplace::Star<Statement> );
+	r_ret_comp->statements.push_back( r_ret_post );
+
 	SearchReplace::Coupling ms_top_decls;
 	ms_top_decls.insert( s_top_decls );
 	ms_top_decls.insert( r_top_decls );
 	sms.insert( &ms_top_decls );
-
-	SearchReplace::Coupling ms_mroots;
-	ms_mroots.insert( sm_root );
-	ms_mroots.insert( rm_root );
-	sms.insert( &ms_mroots );
-
-	SearchReplace::Coupling ms_roots;
-	ms_roots.insert( s_root );
-	ms_roots.insert( r_root );
-	sms.insert( &ms_roots );
 
 	SearchReplace::Coupling ms_top_pre;
 	ms_top_pre.insert( s_top_pre );
@@ -135,6 +172,11 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	ms_fi.insert( r_fi );
 	sms.insert( &ms_fi );
 
+	SearchReplace::Coupling ms_fi2;
+	ms_fi2.insert( s_fi2 );
+	ms_fi2.insert( r_fi2 );
+	sms.insert( &ms_fi2 );
+
 	SearchReplace::Coupling ms_instance;
 	ms_instance.insert( s_instance );
 	ms_instance.insert( r_instance );
@@ -151,10 +193,12 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	ms_identifier.insert( ss_identifier );
 	sms.insert( &ms_identifier );
 
-	SearchReplace::Coupling ms_index_identifier;
-	ms_index_identifier.insert( s_fi->identifier );
-	ms_index_identifier.insert( r_index_identifier->source );
-	sms.insert( &ms_index_identifier );
+	SearchReplace::Coupling ms_function_identifier;
+	ms_function_identifier.insert( s_fi->identifier );
+	ms_function_identifier.insert( r_index_identifier->source );
+	ms_function_identifier.insert( s_fi2->identifier );
+	ms_function_identifier.insert( s_fi3->identifier );
+	sms.insert( &ms_function_identifier );
 
 	SearchReplace::Coupling ms_new_identifier;
 	ms_new_identifier.insert( r_identifier );
@@ -166,15 +210,50 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	ms_new_index_identifier.insert( r_inc->operands[0] );
 	ms_new_index_identifier.insert( r_dec->operands[0] );
 	ms_new_index_identifier.insert( sr_sub->index );
+	ms_new_index_identifier.insert( r_ret_dec->operands[0] );
+	ms_new_index_identifier.insert( sn_ret_dec->operands[0] );
 	sms.insert( &ms_new_index_identifier );
+
+	SearchReplace::Coupling ms_fi3;
+	ms_fi3.insert( s_fi3 );
+	ms_fi3.insert( r_fi3 );
+	sms.insert( &ms_fi3 );
+
+	SearchReplace::Coupling ms_stuff3;
+	ms_stuff3.insert( s_stuff3 );
+	ms_stuff3.insert( r_stuff3 );
+	sms.insert( &ms_stuff3 );
+
+	SearchReplace::Coupling ms_ret_decls;
+	ms_ret_decls.insert( s_ret_decls );
+	ms_ret_decls.insert( r_ret_decls );
+	sms.insert( &ms_ret_decls );
+
+	SearchReplace::Coupling ms_ret_pre;
+	ms_ret_pre.insert( s_ret_pre );
+	ms_ret_pre.insert( r_ret_pre );
+	sms.insert( &ms_ret_pre );
+
+	SearchReplace::Coupling ms_return;
+	ms_return.insert( s_return );
+	//ms_return.insert( sn_return );
+	ms_return.insert( r_return );
+	sms.insert( &ms_return );
+
+	SearchReplace::Coupling ms_ret_post;
+	ms_ret_post.insert( s_ret_post );
+	ms_ret_post.insert( sn_ret_post ); // make sure the ns and s are talking about the same return if there's more than one
+	ms_ret_post.insert( r_ret_post );
+	sms.insert( &ms_ret_post );
+
 
 	vector<RootedSearchReplace *> vs;
 	SearchReplace slave( ss_identifier, sr_sub );
 	vs.push_back( &slave );
-	RootedSearchReplace mid( s_root, r_root, sms );
+	SearchReplace mid( s_fi2, r_fi2, sms, vs );
+	SearchReplace ret( s_fi3, r_fi3 );
 	vector<RootedSearchReplace *> vs2;
 	vs2.push_back( &mid );
-	RootedSearchReplace( sm_root, rm_root, sms, vs2 )( program );
-
-	// TODO insert dec before return statements
+	vs2.push_back( &ret );
+	SearchReplace( s_fi, r_fi, sms, vs2 )( program );
 }

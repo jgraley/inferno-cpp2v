@@ -26,6 +26,32 @@ RootedSearchReplace::Result SoftExpressonOfType::DecidedCompare( const RootedSea
 }     
 
 
+RootedSearchReplace::Result SoftIdentifierOfInstance::DecidedCompare( const RootedSearchReplace *sr,
+		                                                              shared_ptr<Node> x,
+		                                                              RootedSearchReplace::CouplingKeys *keys,
+		                                                              RootedSearchReplace::Conjecture &conj,
+		                                                              unsigned context_flags ) const
+{
+	if( shared_ptr<InstanceIdentifier> xid = dynamic_pointer_cast<InstanceIdentifier>(x) )
+	{
+	    // Find out the type of the candidate expression	
+	    shared_ptr<Instance> xi = GetDeclaration( sr->GetProgram(), xid );
+	    TRACE("GetDeclaration(%s) is %s\n", TypeInfo(xid).name().c_str(), TypeInfo(xi).name().c_str() );
+	    ASSERT(xi);
+	    
+	    // Punt it back into the search/replace engine
+	    return sr->DecidedCompare( xi, shared_ptr<Node>(decl_pattern), keys, conj, context_flags );
+	}
+	else
+	{
+	    // not even an instance identifier lol that aint going to match (means this node must be in a wider
+		// context eg Node or Statement, and the tree contained something other than Expression - so
+		// we're restricting to IsntanceIdentifiers in addition to checking the type)
+	    return RootedSearchReplace::NOT_FOUND;
+	}        
+}     
+
+
 shared_ptr<Node> SoftMakeIdentifier::DuplicateSubtree( const RootedSearchReplace *sr,
 		                                               RootedSearchReplace::CouplingKeys *keys )
 {

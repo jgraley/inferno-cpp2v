@@ -270,6 +270,7 @@ struct Member : StorageClass
     SharedPtr<Virtuality> virt;
 };
 struct Auto : StorageClass { NODE_FUNCTIONS };
+struct Temp : StorageClass { NODE_FUNCTIONS }; // like Auto but cannot recurse
 
 // Property that indicates whether some variable or object is constancy.
 struct Constancy : Property { NODE_FUNCTIONS };
@@ -643,12 +644,12 @@ struct Compound : Statement,
     Sequence<Statement> statements; // Can contain local declarations and code
 };                   
 
-// The return statement of a function TODO not sure about return without 
-// a parameter.
+// The return statement of a function; return_value is an Expression
+// giving the return value or Uninitialised if none is present. 
 struct Return : Statement
 {
     NODE_FUNCTIONS
-    SharedPtr<Expression> return_value;
+    SharedPtr<Initialiser> return_value;
 };
 
 // A goto statement, inferno tree supports goto-a-variable because

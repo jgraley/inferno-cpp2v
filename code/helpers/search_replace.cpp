@@ -534,28 +534,37 @@ RootedSearchReplace::Result RootedSearchReplace::MatchingDecidedCompare( shared_
 		                                                     CouplingKeys *keys,
 		                                                     Conjecture &conj ) const
 {
+    Result r;
     static const unsigned DEFAULT_CONTEXT_FLAGS = 0;
     if( keys )
     {
         CouplingKeys original_match_keys = *keys; // deep copy here
 
-        // Do a two-pass matching process: first get the keys...
-       	TRACE("doing KEYING pass....\n");
-        keys->SetPass( CouplingKeys::KEYING );
-    	conj.PrepareForDecidedCompare();
-        Result r = DecidedCompare( x, pattern, keys, conj, DEFAULT_CONTEXT_FLAGS );
-        TRACE("KEYING pass result %d\n", r );
-	    if( r != FOUND )
-	    {
-	    	*keys = original_match_keys; // revert match keys since we failed
-	    	return NOT_FOUND;                  // Save time by giving up if no match found
-	    }
-
+        // Only key if the keys are already set to KEYING (which is 
+        // the inital value). Keys could be RESTRICTING if we're under
+        // a SoftNot node, in which case we only want to restrict.
+        if( keys->pass == CouplingKeys::KEYING )
+        {
+            // Do a two-pass matching process: first get the keys...
+           	TRACE("doing KEYING pass....\n");
+            //keys->SetPass( CouplingKeys::KEYING );
+        	conj.PrepareForDecidedCompare();
+            r = DecidedCompare( x, pattern, keys, conj, DEFAULT_CONTEXT_FLAGS );
+            TRACE("KEYING pass result %d\n", r );
+    	    if( r != FOUND )
+    	    {
+    	    	*keys = original_match_keys; // revert match keys since we failed
+    	    	return NOT_FOUND;                  // Save time by giving up if no match found
+    	    }
+        }
+        
 	    // Now restrict the search according to the match sets
     	TRACE("doing RESTRICTING pass....\n");
         keys->SetPass( CouplingKeys::RESTRICTING );
     	conj.PrepareForDecidedCompare();
         r = DecidedCompare( x, pattern, keys, conj, DEFAULT_CONTEXT_FLAGS );
+        keys->SetPass( original_match_keys.pass ); // Put pass back to what it was before we called this function
+                                                   // TODO take pass out of CouplingKeys, make it bool enable_keying and just pass it around diretly
         TRACE("RESTRICTING pass result %d\n", r );
 	    if( r != FOUND )
 	    {
@@ -917,6 +926,7 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
 	SharedPtr<Node> base_sp(base);
 	TRACE("%p Begin search\n", this);
 	keys.Trace( matches );
+	keys.SetPass( CouplingKeys::KEYING );
 	Result r = Compare( base_sp, search_pattern, &keys );
 	if( r != FOUND )
 		return NOT_FOUND;
@@ -1067,7 +1077,7 @@ RootedSearchReplace::Result RootedSearchReplace::CouplingKeys::KeyAndRestrict( s
 	if( key->root != operator[](coupling)->root )
 		r = sr->Compare( key->root, operator[](coupling)->root, NULL );
 	else
-		r = FOUND;
+		r = FOUND; // TODO optimisation being done in wrong place
 	TRACE("result %d\n", r);
 	return r;
 	// TODO make the Map< const Coupling *, shared_ptr<Key> > be a member not a base class
