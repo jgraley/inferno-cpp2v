@@ -113,7 +113,8 @@ public:
     struct CouplingKeys : Map< const Coupling *, shared_ptr<Key> >
     {
     	enum Pass { KEYING, RESTRICTING, SUBSTITUTING } pass;
-    	CouplingKeys()
+    	CouplingKeys() :
+    	    pass( KEYING )
     	{
     	}
         const Coupling *FindCoupling( shared_ptr<Node> node, const set<Coupling *> &matches );
@@ -229,9 +230,11 @@ private:
     		        CouplingKeys *match_keys,
     		        Conjecture &conj,
     		        int threshold ) const;
+public:
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
     		        CouplingKeys *match_keys = NULL ) const;
+private:
 
     // Replace ring
     void ClearPtrs( shared_ptr<Node> dest ) const;

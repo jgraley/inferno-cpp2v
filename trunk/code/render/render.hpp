@@ -474,6 +474,8 @@ private:
             return "static "; 
         else if( dynamic_pointer_cast<Auto>( st ) )
             return "auto "; 
+        else if( dynamic_pointer_cast<Temp>( st ) )
+            return "/*temp*/ "; 
         else if( shared_ptr<Member> ns = dynamic_pointer_cast<Member>( st ) )
         {
             shared_ptr<Virtuality> v = ns->virt;

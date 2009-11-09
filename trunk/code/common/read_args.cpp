@@ -10,6 +10,7 @@ bool ReadArgs::graph;
 bool ReadArgs::trace;
 bool ReadArgs::selftest;
 int ReadArgs::quitafter;
+bool ReadArgs::quitenable;
 
 void ReadArgs::Usage()
 {
@@ -36,6 +37,7 @@ void ReadArgs::Read( int argc, char *argv[] )
     graph = false;
     selftest = false;
     quitafter = 0x7fffffff;
+    quitenable = false;
     while( i<argc )
     {
         if( argv[i]==std::string("-i") && argc>i+1 )
@@ -61,6 +63,7 @@ void ReadArgs::Read( int argc, char *argv[] )
         else if( argv[i]==std::string("-q") )
         {
         	quitafter = strtoul( argv[++i], NULL, 10 );
+        	quitenable = true;
         }
         else 
         {

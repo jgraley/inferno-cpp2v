@@ -25,7 +25,11 @@ private:
     	}
     	else
     	{
-    		SearchReplace::Result r = sr->DecidedCompare( x, shared_ptr<Node>(pattern), keys, conj, context_flags );
+    	    // Do not use the present conjecture since we would mess it up because
+    	    // a. We didn't recurse during KEYING pass and
+    	    // b. Search under not can terminate with NOT_FOUND, but parent search will continue
+    	    // Consequently, we go in at Compare level, which creates a new conjecture. 
+    		SearchReplace::Result r = sr->Compare( x, shared_ptr<Node>(pattern), keys );
 			TRACE("SoftNot got %d, returning the opposite!\n", (int)r);
     		if( r==RootedSearchReplace::NOT_FOUND )
 				return RootedSearchReplace::FOUND;
@@ -71,6 +75,19 @@ struct SoftExpressonOfType : Expression,
 {
     NODE_FUNCTIONS
     SharedPtr<Type> type_pattern;
+private:
+    virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
+    		                                            shared_ptr<Node> x,
+    		                                            RootedSearchReplace::CouplingKeys *keys,
+    		                                            RootedSearchReplace::Conjecture &conj,
+    		                                            unsigned context_flags ) const;
+};
+
+struct SoftIdentifierOfInstance : InstanceIdentifier,
+                                  RootedSearchReplace::SoftSearchPattern
+{
+    NODE_FUNCTIONS
+    SharedPtr<Instance> decl_pattern;
 private:
     virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
     		                                            shared_ptr<Node> x,

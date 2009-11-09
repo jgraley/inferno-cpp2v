@@ -11,6 +11,7 @@
 #include "helpers/validate.hpp"
 #include "steps/split_instance_declarations.hpp"
 #include "steps/generate_implicit_casts.hpp"
+#include "steps/use_temps_for_params_return.hpp"
 #include "steps/generate_stacks.hpp"
 
 void SelfTest();
@@ -42,6 +43,12 @@ int main( int argc, char *argv[] )
     if( --ReadArgs::quitafter >= 0 )
     {
         SplitInstanceDeclarations()(program);
+        Validate()(program);
+    }
+
+    if( --ReadArgs::quitafter >= 0 )
+    {
+        UseTempsForParamsReturn()(program);
         Validate()(program);
     }
 

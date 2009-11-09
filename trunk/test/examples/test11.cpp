@@ -21,21 +21,34 @@ int ma()
 
     }
 }
-*/
+
 void fa()
 {
     int a;
-/*    int b;
+    int b;
     a=b+9+99;
     {
         int c;
         c=999;
-    }*/
+    }
 }
-
+*/
 
 void fb()
 {
-    int b;
+    //int b;
+    //b=0;
+    //b++;
+    //b--;
+    return;
+    int c;
+    c=1;
+    { 
+        return;
+        int d;
+        d=2;
+        d--;
+        return d;
+    }
 } 
 

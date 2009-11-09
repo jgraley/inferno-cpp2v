@@ -766,9 +766,11 @@ private:
         virtual StmtResult ActOnReturnStmt( clang::SourceLocation ReturnLoc,
                                             ExprTy *RetValExp )
         {
-            shared_ptr<Expression> e = hold_expr.FromRaw(RetValExp);
             shared_ptr<Return> r(new Return);
-            r->return_value = e;
+            if( RetValExp )
+                r->return_value = hold_expr.FromRaw(RetValExp);
+            else
+                r->return_value = shared_new<Uninitialised>();
             TRACE("aors %p\n", r.get() );
             return hold_stmt.ToRaw( r );
         }

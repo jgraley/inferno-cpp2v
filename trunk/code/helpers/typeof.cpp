@@ -49,6 +49,20 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
         return Get( l->member );
     }
                
+    else if( shared_ptr<Subscript> su = dynamic_pointer_cast<Subscript>(o) ) // a[i] just return element type of a
+    {
+        shared_ptr<Type> t = Get( su->base ); // type of the thing to the left of []
+        if( shared_ptr<Array> a = dynamic_pointer_cast<Array>(t) )
+            return a->element; 
+        else if( shared_ptr<Pointer> p = dynamic_pointer_cast<Pointer>(t) )
+            return p->destination;
+        else
+        {
+            ASSERT(0)("Incorrect type %s coming before []", typeid(*t).name());
+            ASSERTFAIL("");
+        }            
+    }
+               
     else if( shared_ptr<SpecificInteger> si = dynamic_pointer_cast<SpecificInteger>(o) )
     {
     	// Get the info from Clang, and make an Inferno type for it
