@@ -108,13 +108,10 @@ public:
     // of shared pointers but don't worry about key, pass to RootedSearchReplace constructor.
     struct Coupling : public set< shared_ptr<Node> >
     {
-         //mutable shared_ptr<Key> key;    // This is filled in by the search and replace engine
     };
     struct CouplingKeys : Map< const Coupling *, shared_ptr<Key> >
     {
-    	enum Pass { KEYING, RESTRICTING, SUBSTITUTING } pass;
-    	CouplingKeys() :
-    	    pass( KEYING )
+    	CouplingKeys()
     	{
     	}
         const Coupling *FindCoupling( shared_ptr<Node> node, const set<Coupling *> &matches );
@@ -122,18 +119,19 @@ public:
         Result KeyAndRestrict( shared_ptr<Node> x,
         		               shared_ptr<Node> pattern,
                                const RootedSearchReplace *sr,
-                               unsigned context_flags );
+                               bool can_key );
         Result KeyAndRestrict( shared_ptr<Key> key,
         		               shared_ptr<Node> pattern,
                                const RootedSearchReplace *sr,
-                               unsigned context_flags );
+                               bool can_key );
         shared_ptr<Node> KeyAndSubstitute( shared_ptr<Node> x, // source after soft nodes etc
         		                           shared_ptr<Node> pattern, // source
-                                           const RootedSearchReplace *sr );
+                                           const RootedSearchReplace *sr,
+                                           bool can_key );
         shared_ptr<Node> KeyAndSubstitute( shared_ptr<Key> key,
         		                           shared_ptr<Node> pattern,
-                                           const RootedSearchReplace *sr );
-        void SetPass( Pass p ) { pass = p; }
+                                           const RootedSearchReplace *sr,
+                                           bool can_key );
     };
 
     set<Coupling *> matches;
@@ -173,13 +171,14 @@ public:
         virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
         		                                      shared_ptr<Node> x,
         		                                      CouplingKeys *match_keys,
-        		                                      Conjecture &conj,
-        		                                      unsigned context_flags ) const = 0;
+        		                                      bool can_key,
+        		                                      Conjecture &conj ) const = 0;
     };
     struct SoftReplacePattern : virtual Node
     {
         virtual shared_ptr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
-        		                                   CouplingKeys *match_keys ) = 0;
+        		                                   CouplingKeys *match_keys,
+        		                                   bool can_key ) = 0;
     };
 
     // Some self-testing
@@ -199,63 +198,68 @@ private:
     Result DecidedCompare( GenericSequence &x,
     		               GenericSequence &pattern,
     		               CouplingKeys *match_keys,
-    		               Conjecture &conj,
-    		               unsigned context_flags ) const;
+    		               bool can_key,
+    		               Conjecture &conj ) const;
     Result DecidedCompare( GenericCollection &x,
     		               GenericCollection &pattern,
     		               CouplingKeys *match_keys,
-    		               Conjecture &conj,
-    		               unsigned context_flags ) const;
+    		               bool can_key,
+    		               Conjecture &conj ) const;
     Result DecidedCompare( shared_ptr<Node> x,
     		               shared_ptr<StuffBase> stuff_pattern,
     		               CouplingKeys *match_keys,
-    		               Conjecture &conj,
-    		               unsigned context_flags ) const;
+    		               bool can_key,
+    		               Conjecture &conj ) const;
 public:
     Result DecidedCompare( shared_ptr<Node> x,
     		               shared_ptr<Node> pattern,
     		               CouplingKeys *match_keys,
-    		               Conjecture &conj,
-    		               unsigned context_flags ) const;
+    		               bool can_key,
+    		               Conjecture &conj ) const;
 private:
     // MatchingDecidedCompare ring
     Result MatchingDecidedCompare( shared_ptr<Node> x,
     		                       shared_ptr<Node> pattern,
     		                       CouplingKeys *match_keys,
+    		                       bool can_key,
     		                       Conjecture &conj ) const;
 
     // Compare ring
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
     		        CouplingKeys *match_keys,
+    		        bool can_key,
     		        Conjecture &conj,
     		        int threshold ) const;
 public:
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
-    		        CouplingKeys *match_keys = NULL ) const;
+    		        CouplingKeys *match_keys = NULL,
+    		        bool can_key = false ) const;
 private:
-
     // Replace ring
     void ClearPtrs( shared_ptr<Node> dest ) const;
     void Overlay( shared_ptr<Node> dest,
     		      shared_ptr<Node> source,
     		      CouplingKeys *match_keys,
+    		      bool can_key,
     		      shared_ptr<Key> current_key ) const; // under substitution if not NULL
     void Overlay( GenericSequence *dest,
     		      GenericSequence *source,
     		      CouplingKeys *match_keys,
+    		      bool can_key,
     		      shared_ptr<Key> current_key ) const;
     void Overlay( GenericCollection *dest,
     	          GenericCollection *source,
     	          CouplingKeys *match_keys,
+    	          bool can_key,
     	          shared_ptr<Key> current_key ) const;
 public:
     shared_ptr<Node> DuplicateSubtree( shared_ptr<Node> x,
     		                           CouplingKeys *match_keys,
+    		                           bool can_key,
     		                           shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
 private:
-
     shared_ptr<Node> MatchingDuplicateSubtree( shared_ptr<Node> x,
     		                                   CouplingKeys *match_keys ) const;
     // Internal node classes

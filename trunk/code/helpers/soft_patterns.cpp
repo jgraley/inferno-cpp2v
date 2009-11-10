@@ -3,8 +3,8 @@
 RootedSearchReplace::Result SoftExpressonOfType::DecidedCompare( const RootedSearchReplace *sr,
 		                                                         shared_ptr<Node> x,
 		                                                         RootedSearchReplace::CouplingKeys *keys,
-		                                                         RootedSearchReplace::Conjecture &conj,
-		                                                         unsigned context_flags ) const
+		                                                         bool can_key,
+		                                                         RootedSearchReplace::Conjecture &conj ) const
 {
 	if( shared_ptr<Expression> xe = dynamic_pointer_cast<Expression>(x) )
 	{
@@ -14,7 +14,7 @@ RootedSearchReplace::Result SoftExpressonOfType::DecidedCompare( const RootedSea
 	    ASSERT(xt);
 	    
 	    // Punt it back into the search/replace engine
-	    return sr->DecidedCompare( xt, shared_ptr<Node>(type_pattern), keys, conj, context_flags );
+	    return sr->DecidedCompare( xt, shared_ptr<Node>(type_pattern), keys, can_key, conj );
 	}
 	else
 	{
@@ -29,8 +29,8 @@ RootedSearchReplace::Result SoftExpressonOfType::DecidedCompare( const RootedSea
 RootedSearchReplace::Result SoftIdentifierOfInstance::DecidedCompare( const RootedSearchReplace *sr,
 		                                                              shared_ptr<Node> x,
 		                                                              RootedSearchReplace::CouplingKeys *keys,
-		                                                              RootedSearchReplace::Conjecture &conj,
-		                                                              unsigned context_flags ) const
+		                                                              bool can_key,
+		                                                              RootedSearchReplace::Conjecture &conj ) const
 {
 	if( shared_ptr<InstanceIdentifier> xid = dynamic_pointer_cast<InstanceIdentifier>(x) )
 	{
@@ -40,7 +40,7 @@ RootedSearchReplace::Result SoftIdentifierOfInstance::DecidedCompare( const Root
 	    ASSERT(xi);
 	    
 	    // Punt it back into the search/replace engine
-	    return sr->DecidedCompare( xi, shared_ptr<Node>(decl_pattern), keys, conj, context_flags );
+	    return sr->DecidedCompare( xi, shared_ptr<Node>(decl_pattern), keys, can_key, conj );
 	}
 	else
 	{
@@ -53,7 +53,8 @@ RootedSearchReplace::Result SoftIdentifierOfInstance::DecidedCompare( const Root
 
 
 shared_ptr<Node> SoftMakeIdentifier::DuplicateSubtree( const RootedSearchReplace *sr,
-		                                               RootedSearchReplace::CouplingKeys *keys )
+		                                               RootedSearchReplace::CouplingKeys *keys,
+		                                               bool can_key )
 {
 	string newname;
 	if( source )
@@ -61,7 +62,7 @@ shared_ptr<Node> SoftMakeIdentifier::DuplicateSubtree( const RootedSearchReplace
 		TRACE("Begin SoftMakeIdentifier recurse\n");
 		// We have a child identifier - let replace algorithm run in the expectation it will
 		// get subsitituted with a SpecificIdentifier from the original program tree
-	    shared_ptr<Node> n = sr->DuplicateSubtree( shared_ptr<Node>(source), keys );
+	    shared_ptr<Node> n = sr->DuplicateSubtree( shared_ptr<Node>(source), keys, can_key );
 		TRACE("End SoftMakeIdentifier recurse\n");
 	    ASSERT( n );
 	    shared_ptr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>( n );
