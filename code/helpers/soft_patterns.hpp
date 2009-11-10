@@ -14,10 +14,10 @@ private:
     virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
     		                                            shared_ptr<Node> x,
     		                                            RootedSearchReplace::CouplingKeys *keys,
-    		                                            RootedSearchReplace::Conjecture &conj,
-    		                                            unsigned context_flags ) const
+    		                                            bool can_key,
+    		                                            RootedSearchReplace::Conjecture &conj ) const
     {
-    	if( keys && keys->pass == RootedSearchReplace::CouplingKeys::KEYING )
+    	if( keys && can_key )
     	{
     		// Don't do a subtree search while keying - we'll only end up keying the wrong thing
     		// or terminating with NOT_FOUND prematurely
@@ -29,7 +29,7 @@ private:
     	    // a. We didn't recurse during KEYING pass and
     	    // b. Search under not can terminate with NOT_FOUND, but parent search will continue
     	    // Consequently, we go in at Compare level, which creates a new conjecture. 
-    		SearchReplace::Result r = sr->Compare( x, shared_ptr<Node>(pattern), keys );
+    		SearchReplace::Result r = sr->Compare( x, shared_ptr<Node>(pattern), keys, false );
 			TRACE("SoftNot got %d, returning the opposite!\n", (int)r);
     		if( r==RootedSearchReplace::NOT_FOUND )
 				return RootedSearchReplace::FOUND;
@@ -49,8 +49,8 @@ private:
     virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
     		                                            shared_ptr<Node> x,
     		                                            RootedSearchReplace::CouplingKeys *keys,
-    		                                            RootedSearchReplace::Conjecture &conj,
-    		                                            unsigned context_flags ) const
+    		                                            bool can_key,
+    		                                            RootedSearchReplace::Conjecture &conj ) const
     {
     	typedef GenericContainer::iterator iter; // TODO clean up this loop
     	iter it;
@@ -59,7 +59,7 @@ private:
     		 it != patterns.end();
     		 ++it, ++i )
     	{
-    		RootedSearchReplace::Result r = sr->DecidedCompare( x, shared_ptr<Node>(*it), keys, conj, context_flags );
+    		RootedSearchReplace::Result r = sr->DecidedCompare( x, shared_ptr<Node>(*it), keys, can_key, conj );
     		TRACE("AND[%d] got %d\n", i, r);
     	    if( !r )
     	    	return RootedSearchReplace::NOT_FOUND;
@@ -79,8 +79,8 @@ private:
     virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
     		                                            shared_ptr<Node> x,
     		                                            RootedSearchReplace::CouplingKeys *keys,
-    		                                            RootedSearchReplace::Conjecture &conj,
-    		                                            unsigned context_flags ) const;
+    		                                            bool can_key,
+    		                                            RootedSearchReplace::Conjecture &conj ) const;
 };
 
 struct SoftIdentifierOfInstance : InstanceIdentifier,
@@ -92,8 +92,8 @@ private:
     virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
     		                                            shared_ptr<Node> x,
     		                                            RootedSearchReplace::CouplingKeys *keys,
-    		                                            RootedSearchReplace::Conjecture &conj,
-    		                                            unsigned context_flags ) const;
+    		                                            bool can_key,
+    		                                            RootedSearchReplace::Conjecture &conj ) const;
 };
 
 // Make an identifer based on an existing one. New identfier is named using
@@ -115,7 +115,8 @@ struct SoftMakeIdentifier : InstanceIdentifier, // TODO other kinds of identifie
 	SharedPtr<Identifier> source;
 private:
     virtual shared_ptr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
-    		                                   RootedSearchReplace::CouplingKeys *keys );
+    		                                   RootedSearchReplace::CouplingKeys *keys,
+    		                                   bool can_key );
 };
 
 
