@@ -78,17 +78,6 @@ public:
     enum Result { NOT_FOUND = (int)false,
     	          FOUND     = (int)true };
 
-    typedef GenericContainer::iterator Choice;
-    class Conjecture : public vector<Choice>
-    {
-    private:
-    public:
-    	int decision_index;
-    	void PrepareForDecidedCompare();
-    	bool ShouldTryMore( Result r, int threshold );
-    	Choice HandleDecision( Choice begin, Choice end );
-    };
-
     // Base class for match set keys; this deals with individual node matches, and also with stars
     // by means of pointing "root" at a SubCollection or SubSequence
     struct Key
@@ -133,8 +122,24 @@ public:
                                            const RootedSearchReplace *sr,
                                            bool can_key );
     };
-
     set<Coupling *> matches;
+
+    typedef GenericContainer::iterator Choice;
+    class Conjecture : public vector<Choice>
+    {
+    private:
+    public:
+    	int decision_index;
+    	void PrepareForDecidedCompare();
+    	bool ShouldTryMore( Result r, int threshold );
+    	Choice HandleDecision( Choice begin, Choice end );
+    	RootedSearchReplace::Result Search( shared_ptr<Node> x,
+    			                            shared_ptr<Node> pattern,
+    			                            CouplingKeys *keys,
+    			                            bool can_key,
+    			                            const RootedSearchReplace *sr,
+    			                            int threshold=0 );
+    };
 
     // Constructor and destructor. Search and replace patterns and match sets are 
     // specified here, so that we have a fully confiugured functor.
@@ -224,13 +229,7 @@ private:
     		                       bool can_key,
     		                       Conjecture &conj ) const;
 
-    // Compare ring
-    Result Compare( shared_ptr<Node> x,
-    		        shared_ptr<Node> pattern,
-    		        CouplingKeys *match_keys,
-    		        bool can_key,
-    		        Conjecture &conj,
-    		        int threshold ) const;
+    // Compare ring (now trivial)
 public:
     Result Compare( shared_ptr<Node> x,
     		        shared_ptr<Node> pattern,
