@@ -536,13 +536,12 @@ RootedSearchReplace::Result RootedSearchReplace::MatchingDecidedCompare( shared_
 		                                                     Conjecture &conj ) const
 {
     Result r;
-    static const unsigned DEFAULT_CONTEXT_FLAGS = 0;
     if( keys )
     {
         CouplingKeys original_match_keys = *keys; // deep copy here
 
         // Only key if the keys are already set to KEYING (which is 
-        // the inital value). Keys could be RESTRICTING if we're under
+        // the initial value). Keys could be RESTRICTING if we're under
         // a SoftNot node, in which case we only want to restrict.
         if( can_key )
         {
@@ -585,51 +584,13 @@ RootedSearchReplace::Result RootedSearchReplace::MatchingDecidedCompare( shared_
 RootedSearchReplace::Result RootedSearchReplace::Compare( shared_ptr<Node> x,
 		                                      shared_ptr<Node> pattern,
 		                                      CouplingKeys *keys,
-		                                      bool can_key,
-		                                      Conjecture &conj,
-		                                      int threshold ) const
-{
-	if( keys )
-		TRACE("Trying decision for %d\n", threshold);
-
-	// Do a compare with the current conjecture.
-	Result r = MatchingDecidedCompare( x, pattern, keys, can_key, conj );
-
-	// Try different choices for the decisions at the current level. Recurse
-	// so that other decisions may be modified.
-	while( conj.ShouldTryMore( r, threshold ) )
-	{
-		r = Compare( x, pattern, keys, can_key, conj, threshold+1 );
-		if( conj.ShouldTryMore( r, threshold ) )
-		{
-			if( keys )
-				TRACE("Decision %d out of %d incrementing\n", threshold, conj.decision_index);
-			++conj[threshold];
-		}
-		else
-		{
-			if( keys )
-				TRACE("Decision %d out of %d not incrementing\n", threshold, conj.decision_index);
-		}
-	}
-
-	if( keys )
-		TRACE("Finished decision for %d\n", threshold);
-
-	return r;
-}
-
-
-RootedSearchReplace::Result RootedSearchReplace::Compare( shared_ptr<Node> x,
-		                                      shared_ptr<Node> pattern,
-		                                      CouplingKeys *keys,
 		                                      bool can_key ) const
 {
 	TRACE("Comparing x=%s with pattern=%s, match keys at %p\n", typeid(*x).name(), typeid(*pattern).name(), keys );
 	// Create the conjecture object we will use for this compare, and then go
 	// into the recursive compare function
 	Conjecture conj;
-	Result r = Compare( x, pattern, keys, can_key, conj, 0 );
+	Result r = conj.Search( x, pattern, keys, can_key, this );
 	return r;
 }
 
@@ -1165,6 +1126,45 @@ bool RootedSearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
 
     return true;
 }
+
+
+RootedSearchReplace::Result RootedSearchReplace::Conjecture::Search( shared_ptr<Node> x,
+																	 shared_ptr<Node> pattern,
+																	 RootedSearchReplace::CouplingKeys *keys,
+																	 bool can_key,
+																	 const RootedSearchReplace *sr,
+																	 int threshold )
+{
+	if( keys )
+		TRACE("Trying decision for %d\n", threshold);
+
+	// Do a compare with the current conjecture.
+	RootedSearchReplace::Result r = sr->MatchingDecidedCompare( x, pattern, keys, can_key, *this );
+
+	// Try different choices for the decisions at the current level. Recurse
+	// so that other decisions may be modified.
+	while( ShouldTryMore( r, threshold ) )
+	{
+		r = Search( x, pattern, keys, can_key, sr, threshold+1 );
+		if( ShouldTryMore( r, threshold ) )
+		{
+			if( keys )
+				TRACE("Decision %d out of %d incrementing\n", threshold, decision_index);
+			++(operator[](threshold));
+		}
+		else
+		{
+			if( keys )
+				TRACE("Decision %d out of %d not incrementing\n", threshold, decision_index);
+		}
+	}
+
+	if( keys )
+		TRACE("Finished decision for %d\n", threshold);
+
+	return r;
+}
+
 
 RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( RootedSearchReplace::Choice begin,
 		                                                                     RootedSearchReplace::Choice end )
