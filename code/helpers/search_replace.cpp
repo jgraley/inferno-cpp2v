@@ -1130,36 +1130,39 @@ RootedSearchReplace::Result RootedSearchReplace::Conjecture::Search( shared_ptr<
 																	 const RootedSearchReplace *sr,
 																	 int threshold )
 {
-	RootedSearchReplace::Result r;
 	if( keys )
 		TRACE("Trying decision for %d\n", threshold);
 
-	// Do a compare with the current conjecture.
-	if( !ShouldTryMore( NOT_FOUND, threshold ) )
-		r = sr->MatchingDecidedCompare( x, pattern, keys, can_key, *this );
+    ASSERT( choices.size() >= threshold );
+
+	if( choices.size() == threshold )
+	{
+		// No more decisions to make at this threshold so do a decided compare.
+		// TODO still making unneccesary calls to this
+		RootedSearchReplace::Result r = sr->MatchingDecidedCompare( x, pattern, keys, can_key, *this );
+		// Choices.size() may have changed, but if we're still off the end then we're done;
+		// if not then fall through to the bit that iterates through decisions.
+		if( !ShouldTryMore( r, threshold ) )
+			return r;
+	}
 
 	// Try different choices for the decisions at the current level. Recurse
 	// so that other decisions may be modified.
-	while( ShouldTryMore( r, threshold ) )
+	while(1)
 	{
-		r = Search( x, pattern, keys, can_key, sr, threshold+1 );
-		if( ShouldTryMore( r, threshold ) )
-		{
-			if( keys )
-				TRACE("Decision %d out of %d incrementing\n", threshold, decision_index);
-			++(choices[threshold]);
-		}
-		else
-		{
-			if( keys )
-				TRACE("Decision %d out of %d not incrementing\n", threshold, decision_index);
-		}
+		// Recurse to try different decisions (and eventually the decided compare)
+		ASSERT( choices.size() > threshold );
+		RootedSearchReplace::Result r = Search( x, pattern, keys, can_key, sr, threshold+1 );
+
+		// Are we done at this level?
+		if( !ShouldTryMore( r, threshold ) )
+			return r;
+
+		// No, so iterate the present decision and try again
+		if( keys )
+			TRACE("Decision %d out of %d incrementing\n", threshold, decision_index);
+		++(choices[threshold]);
 	}
-
-	if( keys )
-		TRACE("Finished decision for %d\n", threshold);
-
-	return r;
 }
 
 
