@@ -981,8 +981,8 @@ void RootedSearchReplace::CouplingKeys::Trace( const set<Coupling *> &matches ) 
 	{
 		TRACE("Coupling @ %p\n", *msi );
 	}
-	for( const_iterator mki = begin();
-		 mki != end();
+	for( Map< const Coupling *, shared_ptr<Key> >::const_iterator mki = keys_map.begin();
+		 mki != keys_map.end();
 		 mki++ )
 	{
 		TRACE("Coupling [@%p]=%p\n", (*mki).first, (*mki).second.get() );
@@ -1014,14 +1014,14 @@ RootedSearchReplace::Result RootedSearchReplace::CouplingKeys::KeyAndRestrict( s
 
 	// If we're keying and we haven't keyed this node so far, key it now
 	TRACE("MATCH: can_key=%d\n", (int)can_key);
-	if( can_key && !(operator[](coupling)) )
+	if( can_key && !keys_map[coupling] )
 	{
 		TRACE("keying... match set %p key ptr %p new value %p, presently %d keys out of %d match sets\n",
-				coupling, operator[](coupling).get(), key.get(),
-				size(), sr->matches.size() );
+				coupling, keys_map[coupling].get(), key.get(),
+				keys_map.size(), sr->matches.size() );
         //Trace( sr->matches );
 
-		operator[](coupling) = key;
+		keys_map[coupling] = key;
 
 		return FOUND; // always match when keying (could restrict here too as a slight optimisation, but KISS for now)
 	}
@@ -1033,16 +1033,14 @@ RootedSearchReplace::Result RootedSearchReplace::CouplingKeys::KeyAndRestrict( s
 	// Since collections (which require decisions) can exist within the tree, we must allow iteration
 	// through choices, and since the number of decisions seen may vary, we must start a new conjecture.
 	// Therefore, we recurse back to Compare().
-	ASSERT( operator[](coupling) ); // should have been caught by CheckMatchSetsKeyed()
+	ASSERT( keys_map[coupling] ); // should have been caught by CheckMatchSetsKeyed()
 	Result r;
-	if( key->root != operator[](coupling)->root )
-		r = sr->Compare( key->root, operator[](coupling)->root );
+	if( key->root != keys_map[coupling]->root )
+		r = sr->Compare( key->root, keys_map[coupling]->root );
 	else
 		r = FOUND; // TODO optimisation being done in wrong place
 	TRACE("result %d\n", r);
 	return r;
-	// TODO make the Map< const Coupling *, shared_ptr<Key> > be a member not a base class
-	// because all the operator[](...) in here are giving me a headache
 }
 
 shared_ptr<Node> RootedSearchReplace::CouplingKeys::KeyAndSubstitute( shared_ptr<Node> x,
@@ -1074,25 +1072,25 @@ shared_ptr<Node> RootedSearchReplace::CouplingKeys::KeyAndSubstitute( shared_ptr
 
 	// If we're keying and we haven't keyed this node so far, key it now
 	TRACE("can_key=%d ", (int)can_key);
-	if( can_key && key && !operator[](coupling) )
+	if( can_key && key && !keys_map[coupling] )
 	{
 		TRACE("keying... match set %p key ptr %p new value %p, presently %d keys out of %d match sets\n",
-				&coupling, &(operator[](coupling)), key.get(),
-				size(), sr->matches.size() );
-		operator[](coupling) = key;
+				&coupling, &keys_map[coupling], key.get(),
+				keys_map.size(), sr->matches.size() );
+		keys_map[coupling] = key;
 
 		return key->root;
 	}
 
-	if( operator[](coupling) )
+	if( keys_map[coupling] )
 	{
 		// Always substitute
 		TRACE("substituting ");
-		ASSERT( operator[](coupling) );
-		operator[](coupling)->replace_pattern = pattern; // Only fill this in while substituting under the node
-		shared_ptr<Node> subs = sr->DuplicateSubtree( operator[](coupling)->root, this, can_key, operator[](coupling) ); // Enter substitution
+		ASSERT( keys_map[coupling] );
+		keys_map[coupling]->replace_pattern = pattern; // Only fill this in while substituting under the node
+		shared_ptr<Node> subs = sr->DuplicateSubtree( keys_map[coupling]->root, this, can_key, keys_map[coupling] ); // Enter substitution
 		// TODO can_key should be false in the above?
-		operator[](coupling)->replace_pattern = shared_ptr<Node>();
+		keys_map[coupling]->replace_pattern = shared_ptr<Node>();
 		return subs;
 	}
 
@@ -1121,7 +1119,7 @@ bool RootedSearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
 	if( r == FOUND )
     	return false; // stop trying if we found a match
 
-    if( size() <= threshold ) // we've made all the decisions we can OR
+    if( choices.size() <= threshold ) // we've made all the decisions we can OR
         return false;         // our last decision went out of bounds
 
     return true;
@@ -1150,7 +1148,7 @@ RootedSearchReplace::Result RootedSearchReplace::Conjecture::Search( shared_ptr<
 		{
 			if( keys )
 				TRACE("Decision %d out of %d incrementing\n", threshold, decision_index);
-			++(operator[](threshold));
+			++(choices[threshold]);
 		}
 		else
 		{
@@ -1170,17 +1168,18 @@ RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( Roo
 		                                                                     RootedSearchReplace::Choice end )
 {
 	ASSERT( this );
-	ASSERT( size() >= decision_index ); // consistency check
+    //ASSERT( !(begin==end) ); // This decision has no allowed choices, we should not be called in this case, it's basically Hobson's choice
+	ASSERT( choices.size() >= decision_index ); // consistency check; as we see more decisions, we should be adding them to the conjecture
 
-	// Now we know we have a decision to make; see if it needs to be added to the present Conjecture
-	if( size() == decision_index ) // this decision missing from conjecture?
+	// Now we know we have a new decision to make; see if it needs to be added to the present Conjecture
+	if( choices.size() == decision_index ) // this decision missing from conjecture?
 	{
-		push_back( begin ); // append this decision, initialised to the first choice
+		choices.push_back( begin ); // append this decision, initialised to the first choice
 		TRACE("Decision %d appending begin\n", decision_index );
 	}
 
 	// Adopt the current decision based on Conjecture
-	RootedSearchReplace::Choice c = (*this)[decision_index]; // Get present decision
+	RootedSearchReplace::Choice c = choices[decision_index]; // Get present decision
 
 	// Check the decision obeys bounds
 	if( c == end ) // gone off the end?
@@ -1190,7 +1189,7 @@ RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( Roo
 		// the caller to please not try to do any matching with this decision, but fall out
 		// with NOT_FOUND.
 		TRACE("Decision %d hit end\n", decision_index );
-		resize( decision_index );
+		choices.resize( decision_index );
 	}
 	else
 	{

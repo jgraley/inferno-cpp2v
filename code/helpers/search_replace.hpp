@@ -98,7 +98,7 @@ public:
     struct Coupling : public set< shared_ptr<Node> >
     {
     };
-    struct CouplingKeys : Map< const Coupling *, shared_ptr<Key> >
+    struct CouplingKeys
     {
     	CouplingKeys()
     	{
@@ -121,13 +121,14 @@ public:
         		                           shared_ptr<Node> pattern,
                                            const RootedSearchReplace *sr,
                                            bool can_key );
+    private:
+    	Map< const Coupling *, shared_ptr<Key> > keys_map;
     };
     set<Coupling *> matches;
 
     typedef GenericContainer::iterator Choice;
-    class Conjecture : public vector<Choice>
+    class Conjecture
     {
-    private:
     public:
     	int decision_index;
     	void PrepareForDecidedCompare();
@@ -139,6 +140,8 @@ public:
     			                            bool can_key,
     			                            const RootedSearchReplace *sr,
     			                            int threshold=0 );
+    private:
+    	vector<Choice> choices;
     };
 
     // Constructor and destructor. Search and replace patterns and match sets are 
