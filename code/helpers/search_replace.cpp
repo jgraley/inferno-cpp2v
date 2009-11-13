@@ -1161,22 +1161,25 @@ RootedSearchReplace::Result RootedSearchReplace::Conjecture::Search( shared_ptr<
 }
 
 
-RootedSearchReplace::Choice RootedSearchReplace::Conjecture::HandleDecision( RootedSearchReplace::Choice begin,
-		                                                                     RootedSearchReplace::Choice end )
+GenericContainer::iterator RootedSearchReplace::Conjecture::HandleDecision( GenericContainer::iterator begin,
+		                                                                    GenericContainer::iterator end )
 {
 	ASSERT( this );
-    //ASSERT( !(begin==end) ); // This decision has no allowed choices, we should not be called in this case, it's basically Hobson's choice
 	ASSERT( choices.size() >= decision_index ); // consistency check; as we see more decisions, we should be adding them to the conjecture
+	Choice c;
 
-	// Now we know we have a new decision to make; see if it needs to be added to the present Conjecture
+	// See if this decision needs to be added to the present Conjecture
 	if( choices.size() == decision_index ) // this decision missing from conjecture?
 	{
-		choices.push_back( begin ); // append this decision, initialised to the first choice
+		c = begin; // Choose the first option supplied
+		choices.push_back( c ); // append this decision so we will iterate it later
 		TRACE("Decision %d appending begin\n", decision_index );
 	}
-
-	// Adopt the current decision based on Conjecture
-	RootedSearchReplace::Choice c = choices[decision_index]; // Get present decision
+	else // already know about this decision
+	{
+		// Adopt the current decision based on Conjecture
+	    c = choices[decision_index]; // Get present decision
+	}
 
 	// Check the decision obeys bounds
 	if( c == end ) // gone off the end?
