@@ -93,17 +93,15 @@ public:
      	SharedPtr<Node> terminus;
     };
 
-    // Match set - if required, construct a set of these, fill in the set
-    // of shared pointers but don't worry about key, pass to RootedSearchReplace constructor.
     struct Coupling : public set< shared_ptr<Node> >
     {
     };
-    struct CouplingKeys
+    class CouplingKeys
     {
+    public:
     	CouplingKeys()
     	{
     	}
-        const Coupling *FindCoupling( shared_ptr<Node> node, const set<Coupling *> &matches );
         void Trace( const set<Coupling *> &matches ) const;
         Result KeyAndRestrict( shared_ptr<Node> x,
         		               shared_ptr<Node> pattern,
@@ -122,6 +120,7 @@ public:
                                            const RootedSearchReplace *sr,
                                            bool can_key );
     private:
+        const Coupling *FindCoupling( shared_ptr<Node> node, const set<Coupling *> &matches );
     	Map< const Coupling *, shared_ptr<Key> > keys_map;
     };
     set<Coupling *> matches;
@@ -130,9 +129,7 @@ public:
     class Conjecture
     {
     public:
-    	int decision_index;
     	void PrepareForDecidedCompare();
-    	bool ShouldTryMore( Result r, int threshold );
     	Choice HandleDecision( Choice begin, Choice end );
     	RootedSearchReplace::Result Search( shared_ptr<Node> x,
     			                            shared_ptr<Node> pattern,
@@ -141,6 +138,8 @@ public:
     			                            const RootedSearchReplace *sr,
     			                            int threshold=0 );
     private:
+    	bool ShouldTryMore( Result r, int threshold );
+    	int decision_index;
     	vector<Choice> choices;
     };
 

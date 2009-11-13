@@ -509,9 +509,7 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
 		return NOT_FOUND; // ran out of choices
 
 	// Try out comparison at this position
-    TRACE("%s@%d\n", typeid(*stuff_pattern).name(), conj.decision_index );
 	Result r = DecidedCompare( *thistime, stuff_pattern->terminus, keys, can_key, conj );
-	TRACE("%s@%d DC result was %d\n", typeid(*stuff_pattern).name(), conj.decision_index, r);
 
     // If we got this far, do the match sets
     if( keys && r )
@@ -523,7 +521,6 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
         		                  stuff_pattern,
         		                  this,
         		                  can_key );
-    	TRACE("%s@%d K&R result was %d\n", typeid(*stuff_pattern).name(), conj.decision_index, r);
     }
 	return r;
 }
