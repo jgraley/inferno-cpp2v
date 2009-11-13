@@ -1130,11 +1130,13 @@ RootedSearchReplace::Result RootedSearchReplace::Conjecture::Search( shared_ptr<
 																	 const RootedSearchReplace *sr,
 																	 int threshold )
 {
+	RootedSearchReplace::Result r;
 	if( keys )
 		TRACE("Trying decision for %d\n", threshold);
 
 	// Do a compare with the current conjecture.
-	RootedSearchReplace::Result r = sr->MatchingDecidedCompare( x, pattern, keys, can_key, *this );
+	if( !ShouldTryMore( NOT_FOUND, threshold ) )
+		r = sr->MatchingDecidedCompare( x, pattern, keys, can_key, *this );
 
 	// Try different choices for the decisions at the current level. Recurse
 	// so that other decisions may be modified.
@@ -1208,6 +1210,7 @@ GenericContainer::iterator RootedSearchReplace::Conjecture::HandleDecision( Gene
 		decision_index++;
 	}
 
+	// Return whatever choice we made
     return c;
 }
 
