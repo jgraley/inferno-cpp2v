@@ -125,12 +125,14 @@ public:
     };
     set<Coupling *> matches;
 
-    typedef GenericContainer::iterator Choice;
     class Conjecture
     {
+    private:
+        typedef GenericContainer::iterator Choice;
     public:
     	void PrepareForDecidedCompare();
-    	Choice HandleDecision( Choice begin, Choice end );
+    	GenericContainer::iterator HandleDecision( GenericContainer::iterator begin,
+    			                                   GenericContainer::iterator end );
     	RootedSearchReplace::Result Search( shared_ptr<Node> x,
     			                            shared_ptr<Node> pattern,
     			                            CouplingKeys *keys,
