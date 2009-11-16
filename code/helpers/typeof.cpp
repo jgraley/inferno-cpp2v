@@ -89,9 +89,92 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
 
 // Just discover the type of operators, where the types of the operands have already been determined
 // Note we alwayts get a Sequence, even when the operator is commutative
-shared_ptr<Type> TypeOf::Get( shared_ptr<Operator> op, Sequence<Type> &optypes )
+shared_ptr<Type> TypeOf::Get( shared_ptr<Operator> op, Sequence<Type> optypes )
 {
-    // then handle based on the kind of operator
+	// Replace References with the referee type since we are going to analyse it
+	for( int i=0; i<optypes.size(); i++ )
+		while( shared_ptr<Reference> r = dynamic_pointer_cast<Reference>(optypes[i]) )
+			optypes[i] = r->destination;
+
+#define ARITHMETIC GetStandard( optypes )
+#define BITWISE GetStandard( optypes )
+#define LOGICAL shared_new<Boolean>()
+#define COMPARISON shared_new<Boolean>()
+#define SHIFT optypes[0]
+#define SPECIAL GetSpecial( op, optypes )
+
+    if(0) {}
+#define INFIX(TOK, TEXT, NODE, BASE, CAT) \
+	else if( dynamic_pointer_cast<NODE>(op) ) \
+		return CAT;
+#define PREFIX(TOK, TEXT, NODE, BASE, CAT) \
+	else if( dynamic_pointer_cast<NODE>(op) ) \
+		return CAT;
+#define POSTFIX(TOK, TEXT, NODE, BASE, CAT) \
+	else if( dynamic_pointer_cast<NODE>(op) ) \
+		return CAT;
+#include "tree/operator_db.inc"
+    else
+    {
+        ASSERT(0)("Unknown operator %s (not in operator_db.inc), please add to TypeOf class", typeid(*op).name());
+        ASSERTFAIL("");
+    }
+}
+
+
+shared_ptr<Type> TypeOf::GetStandard( Sequence<Type> &optypes )
+{
+	Sequence<Numeric> nums;
+	for( int i=0; i<optypes.size(); i++ )
+		if( shared_ptr<Numeric> n = dynamic_pointer_cast<Numeric>(optypes[i]) )
+			nums.push_back(n);
+	if( nums.size() == optypes.size() )
+		return GetStandard( nums );
+
+	if( optypes.size() == 2 )
+		ASSERT(0)("Standard operator with %s and %s is unknown usage, please add to TypeOf class", typeid(*optypes[0]).name(), typeid(*optypes[1]).name());
+	else
+		ASSERT(0)("Standard operator with %s is unknown usage, please add to TypeOf class", typeid(*optypes[0]).name());
+    ASSERTFAIL();
+}
+
+
+shared_ptr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
+{
+	int maxscore = -1;
+	int i_max = -1;
+	int i;
+	for( i=0; i<optypes.size(); i++ )
+	{
+		ASSERT( dynamic_pointer_cast<Integral>(optypes[i]) )
+ 	            ("%s is not Floating or Integral, please add to TypeOf class", typeid(*optypes[i]).name() );
+		int score;
+		if( dynamic_pointer_cast<Floating>(optypes[i]) )
+			score = 1000000; // TODO hack LLVM::FloatSemantics to get a bigness measure
+		if( shared_ptr<Integral> intop = dynamic_pointer_cast<Integral>(optypes[i]) )
+		{
+		    shared_ptr<SpecificInteger> width = dynamic_pointer_cast<SpecificInteger>(intop->width);
+		    ASSERT( width )( "Integral size %s is not specific, cannot decide result type", typeid(*(intop->width)).name());
+			score = (int)(width->value.getLimitedValue()) << 1;
+		}
+		if( dynamic_pointer_cast<Unsigned>(optypes[i]) )
+			score++; // TODO merge unsigned so int + unsigned short => unsigned int.
+		if( score > maxscore )
+		{
+			maxscore = score;
+			i_max = i;
+		}
+	}
+	ASSERT( i != -1 )("How is this possible?");
+
+	// TODO round up ints to 32-bit
+	// TODO other bizarre shit from the language spec
+	return optypes[i_max];
+}
+
+
+shared_ptr<Type> TypeOf::GetSpecial( shared_ptr<Operator> op, Sequence<Type> &optypes )
+{
     if( dynamic_pointer_cast<Dereference>(op) )
     {
         if( shared_ptr<Pointer> o2 = dynamic_pointer_cast<Pointer>( optypes[0] ) )
@@ -109,7 +192,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Operator> op, Sequence<Type> &optypes )
     }
     else
     {
-        ASSERT(0)("Unknown operator %s, please add to TypeOf class", typeid(*op).name());
+        ASSERT(0)("Unknown \"SPECIAL\" operator %s, please add to TypeOf class", typeid(*op).name());
         ASSERTFAIL("");
     }
 }
