@@ -137,8 +137,7 @@ public:
     			                            shared_ptr<Node> pattern,
     			                            CouplingKeys *keys,
     			                            bool can_key,
-    			                            const RootedSearchReplace *sr,
-    			                            int threshold=0 );
+    			                            const RootedSearchReplace *sr );
     private:
     	bool ShouldTryMore( Result r, int threshold );
     	int decision_index;

@@ -1127,41 +1127,22 @@ RootedSearchReplace::Result RootedSearchReplace::Conjecture::Search( shared_ptr<
 																	 shared_ptr<Node> pattern,
 																	 RootedSearchReplace::CouplingKeys *keys,
 																	 bool can_key,
-																	 const RootedSearchReplace *sr,
-																	 int threshold )
+																	 const RootedSearchReplace *sr )
 {
-	if( keys )
-		TRACE("Trying decision for %d\n", threshold);
-
-    ASSERT( choices.size() >= threshold );
-
-	if( choices.size() == threshold )
-	{
-		// No more decisions to make at this threshold so do a decided compare.
-		// TODO still making unneccesary calls to this
-		RootedSearchReplace::Result r = sr->MatchingDecidedCompare( x, pattern, keys, can_key, *this );
-		// Choices.size() may have changed, but if we're still off the end then we're done;
-		// if not then fall through to the bit that iterates through decisions.
-		if( !ShouldTryMore( r, threshold ) )
-			return r;
-	}
-
-	// Try different choices for the decisions at the current level. Recurse
-	// so that other decisions may be modified.
+	// Loop through candidate conjectures
 	while(1)
 	{
-		// Recurse to try different decisions (and eventually the decided compare)
-		ASSERT( choices.size() > threshold );
-		RootedSearchReplace::Result r = Search( x, pattern, keys, can_key, sr, threshold+1 );
+		// Try out the current conjecture. This will call HandlDecision() once for each decision;
+		// HandleDecision() will return the current choice for that decision, if absent it will
+		// add the decision and choose the first choice, if the decision reaches the end it
+		// will remove the decision.
+		RootedSearchReplace::Result r = sr->MatchingDecidedCompare( x, pattern, keys, can_key, *this );
 
-		// Are we done at this level?
-		if( !ShouldTryMore( r, threshold ) )
-			return r;
-
-		// No, so iterate the present decision and try again
-		if( keys )
-			TRACE("Decision %d out of %d incrementing\n", threshold, decision_index);
-		++(choices[threshold]);
+		// If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
+		if( r || choices.empty() )
+		    return r;
+		else
+			++(choices.back()); // There are potentially more choices so increment the last decision
 	}
 }
 
