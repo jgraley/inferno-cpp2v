@@ -5,6 +5,7 @@
 #include "helpers/misc.hpp"
 #include "typeof.hpp"
 
+#define INT 0
 
 shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
 {
@@ -89,13 +90,47 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
 }
 
 // Just discover the type of operators, where the types of the operands have already been determined
-// Note we alwayts get a Sequence, even when the operator is commutative
+// Note we always get a Sequence, even when the operator is commutative
 shared_ptr<Type> TypeOf::Get( shared_ptr<Operator> op, Sequence<Type> optypes )
 {
-	// Replace References with the referee type since we are going to analyse it
+	// Lower types that masquerade as other types in preparation for operand analysis
+	// - References go to the referenced type
+	// - Arrays go to pointers
 	for( int i=0; i<optypes.size(); i++ )
+	{
 		while( shared_ptr<Reference> r = dynamic_pointer_cast<Reference>(optypes[i]) )
 			optypes[i] = r->destination;
+		if( shared_ptr<Array> a = dynamic_pointer_cast<Array>(optypes[i]) )
+		{
+			shared_ptr<Pointer> p( new Pointer );
+			p->destination = a->element;
+			optypes[i] = p;
+		}
+		// Check we finished the job
+		ASSERT( !dynamic_pointer_cast<Reference>(optypes[i]) );
+		ASSERT( !dynamic_pointer_cast<Array>(optypes[i]) );
+	}
+
+	// Pointer arithmetic: an add involving a pointer returns that pointer type
+	if( dynamic_pointer_cast<Add>(op) )
+	{
+		for( int i=0; i<optypes.size(); i++ )
+			if( shared_ptr<Pointer> p = dynamic_pointer_cast<Pointer>(optypes[i]) )
+		        return p;
+	}
+
+	// Pointer arithmetic: a subtract involving a pointer returns int
+	if( dynamic_pointer_cast<Subtract>(op) )
+	{
+		for( int i=0; i<optypes.size(); i++ )
+			if( shared_ptr<Pointer> p = dynamic_pointer_cast<Pointer>(optypes[i]) )
+			{
+                shared_ptr<Signed> i = shared_ptr<Signed>( new Signed );
+                shared_ptr<SpecificInteger> nc( new SpecificInteger(TypeDb::integral_bits[INT]) );
+                i->width = nc;
+                return i;
+			}
+	}
 
 #define ARITHMETIC GetStandard( optypes )
 #define BITWISE GetStandard( optypes )
@@ -132,8 +167,6 @@ shared_ptr<Type> TypeOf::GetStandard( Sequence<Type> &optypes )
 	if( nums.size() == optypes.size() )
 		return GetStandard( nums );
 
-	// TODO deal with pointer arithmetic
-
 	if( optypes.size() == 2 )
 		ASSERT(0)("Standard operator with %s and %s is unknown usage, please add to TypeOf class", typeid(*optypes[0]).name(), typeid(*optypes[1]).name());
 	else
@@ -144,43 +177,43 @@ shared_ptr<Type> TypeOf::GetStandard( Sequence<Type> &optypes )
 
 shared_ptr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 {
-	shared_ptr<SpecificInteger> maxwidth( new SpecificInteger(TypeDb::integral_bits[0]) );
-	bool seen_unsigned=false;
+	// Start the width and signedness as per regular "int" since this is the
+	// minimum result type for standard operators
+	shared_ptr<SpecificInteger> maxwidth( new SpecificInteger(TypeDb::integral_bits[INT]) );
+	bool seen_unsigned = TypeDb::int_default_signed;
 
+	// Look at the operands in turn
 	for( int i=0; i<optypes.size(); i++ )
 	{
-		int score;
-
 		// Floats take priority
 		if( dynamic_pointer_cast<Floating>(optypes[i]) )
 			return optypes[i]; // TODO hack LLVM::FloatSemantics to get a bigness measure
 		                       // note that this always prefers the left one
 
+		// Should only have Integrals from here on
 		shared_ptr<Integral> intop = dynamic_pointer_cast<Integral>(optypes[i]);
-        ASSERT( intop )
-                ("%s is not Floating or Integral, please add to TypeOf class", typeid(*intop).name() );
+        ASSERT( intop )("%s is not Floating or Integral, please add to TypeOf class", typeid(*intop).name() );
 
+        // Do a max algorithm on the width
 		shared_ptr<SpecificInteger> width = dynamic_pointer_cast<SpecificInteger>(intop->width);
 		ASSERT( width )( "Integral size %s is not specific, cannot decide result type", typeid(*(intop->width)).name());
-		if( width->value > maxwidth->value )
+		if( width->value >= maxwidth->value )
 			maxwidth = width;
 
+		// Make result unsigned if any inputs are unsigned TODO not quite right, we should
+		// let bigger signed types remain signed
 		if( dynamic_pointer_cast<Unsigned>(optypes[i]) )
-			seen_unsigned = true;
+	    	seen_unsigned = true;
 	}
 
-	// TODO round up ints to 32-bit
-	// TODO other bizarre shit from the language spec
-	shared_ptr<Integral> res;
-
+	// Build the required integral result type
+	shared_ptr<Integral> result;
 	if( seen_unsigned )
-		res = shared_ptr<Integral>( new Unsigned );
+		result = shared_ptr<Integral>( new Unsigned );
 	else
-		res = shared_ptr<Integral>( new Signed );
-
-	res->width = maxwidth;
-
-	return res;
+		result = shared_ptr<Integral>( new Signed );
+	result->width = maxwidth;
+	return result;
 }
 
 

@@ -34,3 +34,9 @@ struct Ohnoes
 };
 
 typedef int v4si __attribute__ ((vector_size (16)));
+
+int *ptrfunc()
+{
+	int i;
+	return (&i)+0;
+}
