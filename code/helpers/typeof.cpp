@@ -1,5 +1,6 @@
 
 #include "tree/tree.hpp"
+#include "tree/type_db.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/misc.hpp"
 #include "typeof.hpp"
@@ -131,6 +132,8 @@ shared_ptr<Type> TypeOf::GetStandard( Sequence<Type> &optypes )
 	if( nums.size() == optypes.size() )
 		return GetStandard( nums );
 
+	// TODO deal with pointer arithmetic
+
 	if( optypes.size() == 2 )
 		ASSERT(0)("Standard operator with %s and %s is unknown usage, please add to TypeOf class", typeid(*optypes[0]).name(), typeid(*optypes[1]).name());
 	else
@@ -141,35 +144,43 @@ shared_ptr<Type> TypeOf::GetStandard( Sequence<Type> &optypes )
 
 shared_ptr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 {
-	int maxscore = -1;
-	int i_max = -1;
-	int i;
-	for( i=0; i<optypes.size(); i++ )
+	shared_ptr<SpecificInteger> maxwidth( new SpecificInteger(TypeDb::integral_bits[0]) );
+	bool seen_unsigned=false;
+
+	for( int i=0; i<optypes.size(); i++ )
 	{
-		ASSERT( dynamic_pointer_cast<Integral>(optypes[i]) )
- 	            ("%s is not Floating or Integral, please add to TypeOf class", typeid(*optypes[i]).name() );
 		int score;
+
+		// Floats take priority
 		if( dynamic_pointer_cast<Floating>(optypes[i]) )
-			score = 1000000; // TODO hack LLVM::FloatSemantics to get a bigness measure
-		if( shared_ptr<Integral> intop = dynamic_pointer_cast<Integral>(optypes[i]) )
-		{
-		    shared_ptr<SpecificInteger> width = dynamic_pointer_cast<SpecificInteger>(intop->width);
-		    ASSERT( width )( "Integral size %s is not specific, cannot decide result type", typeid(*(intop->width)).name());
-			score = (int)(width->value.getLimitedValue()) << 1;
-		}
+			return optypes[i]; // TODO hack LLVM::FloatSemantics to get a bigness measure
+		                       // note that this always prefers the left one
+
+		shared_ptr<Integral> intop = dynamic_pointer_cast<Integral>(optypes[i]);
+        ASSERT( intop )
+                ("%s is not Floating or Integral, please add to TypeOf class", typeid(*intop).name() );
+
+		shared_ptr<SpecificInteger> width = dynamic_pointer_cast<SpecificInteger>(intop->width);
+		ASSERT( width )( "Integral size %s is not specific, cannot decide result type", typeid(*(intop->width)).name());
+		if( width->value > maxwidth->value )
+			maxwidth = width;
+
 		if( dynamic_pointer_cast<Unsigned>(optypes[i]) )
-			score++; // TODO merge unsigned so int + unsigned short => unsigned int.
-		if( score > maxscore )
-		{
-			maxscore = score;
-			i_max = i;
-		}
+			seen_unsigned = true;
 	}
-	ASSERT( i != -1 )("How is this possible?");
 
 	// TODO round up ints to 32-bit
 	// TODO other bizarre shit from the language spec
-	return optypes[i_max];
+	shared_ptr<Integral> res;
+
+	if( seen_unsigned )
+		res = shared_ptr<Integral>( new Unsigned );
+	else
+		res = shared_ptr<Integral>( new Signed );
+
+	res->width = maxwidth;
+
+	return res;
 }
 
 
