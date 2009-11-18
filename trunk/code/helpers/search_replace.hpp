@@ -8,7 +8,7 @@
 #include "render/render.hpp" // TODO remove this silly dependency
 #include "common/read_args.hpp"
 #include "walk.hpp"
-#include "pass.hpp"
+#include "transformation.hpp"
 #include <set>
 
 // In-tree search and replace utility. To use, you make a search pattern and a 
