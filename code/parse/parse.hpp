@@ -28,7 +28,7 @@
 
 #include "tree/tree.hpp"
 #include "common/refcount.hpp"
-#include "helpers/pass.hpp"
+#include "helpers/transformation.hpp"
 #include "common/trace.hpp"
 #include "tree/type_db.hpp"
 #include "helpers/misc.hpp"

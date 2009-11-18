@@ -1,5 +1,5 @@
-#ifndef PASS_HPP
-#define PASS_HPP
+#ifndef TRANSFORMATION_HPP
+#define TRANSFORMATION_HPP
 
 #include "tree/tree.hpp"
 #include "common/refcount.hpp"
