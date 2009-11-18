@@ -38,7 +38,7 @@
 
 #define INFERNO_TRIPLE "arm-linux"
 
-class Parse : public Pass
+class Parse : public Transformation
 {
 public:
     Parse( string i ) :
@@ -46,10 +46,8 @@ public:
     {
     }
 
-    void operator()( shared_ptr<Program> program )
+    void operator()( shared_ptr<Node> context, shared_ptr<Node> root )
     {
-        ASSERT( program );
-
         clang::FileManager fm;
         llvm::raw_stderr_ostream errstream; // goes to stderr
         clang::TextDiagnosticPrinter diag_printer( errstream );
@@ -75,7 +73,7 @@ public:
         pp.EnterMainSourceFile();
 
         clang::IdentifierTable it( opts );
-        InfernoAction actions( program, it, pp, *ptarget );
+        InfernoAction actions( context, root, it, pp, *ptarget );
         clang::Parser parser( pp, actions );
         TRACE("Start parse\n");
         parser.ParseTranslationUnit();
@@ -88,14 +86,16 @@ private:
     class InfernoAction : public clang::Action
     {
     public:
-        InfernoAction(shared_ptr<Program> p, clang::IdentifierTable &IT, clang::Preprocessor &pp, clang::TargetInfo &T) :
+        InfernoAction(shared_ptr<Node> context, shared_ptr<Node> root, clang::IdentifierTable &IT, clang::Preprocessor &pp, clang::TargetInfo &T) :
             preprocessor(pp),
             target_info(T),
-            ident_track( p ),
-            global_scope( p ),
+            ident_track( context ),
+            global_scope( context ),
             all_decls( new Program )
         {
-            inferno_scope_stack.push( p );
+        	shared_ptr<Scope> root_scope = dynamic_pointer_cast<Scope>(root);
+        	ASSERT(root_scope)("Can only parse into a scope");
+            inferno_scope_stack.push( root_scope ); // things will be pushed into here
             backing_ordering[inferno_scope_stack.top()].clear();
         }
 

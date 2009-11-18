@@ -12,7 +12,7 @@
 #include "helpers/soft_patterns.hpp"
 
 
-void GenerateStacks::operator()( shared_ptr<Program> program )
+void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
 {
 	TRACE();
 	set<SearchReplace::Coupling *> sms;
@@ -276,5 +276,5 @@ void GenerateStacks::operator()( shared_ptr<Program> program )
 	vector<RootedSearchReplace *> vs2;
 	vs2.push_back( &mid );
 	vs2.push_back( &ret );
-	SearchReplace( s_fi, r_fi, sms, vs2 )( program );
+	SearchReplace( s_fi, r_fi, sms, vs2 )( context, root );
 }

@@ -30,43 +30,43 @@ int main( int argc, char *argv[] )
     shared_ptr<Program> program(new Program);  
 
     Parse p(ReadArgs::infile);        
-    p( program );
+    p( program, program );
               
     Validate()(program);                
 
     if( --ReadArgs::quitafter >= 0 )
     {
-    	GenerateImplicitCasts()(program);
+    	GenerateImplicitCasts()(program, program);
         Validate()(program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
-        SplitInstanceDeclarations()(program);
+        SplitInstanceDeclarations()(program, program);
         Validate()(program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
-        UseTempsForParamsReturn()(program);
+        UseTempsForParamsReturn()(program, program);
         Validate()(program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
-    	GenerateStacks()(program);
+    	GenerateStacks()(program, program);
         Validate()(program);
     }
 
     if(ReadArgs::graph)
     {
         Graph g;
-        g( program );
+        g( program, program );
     }
     else
     {
         Render r;
-        r( program );
+        r( program, program );
     }    
     
     return 0;

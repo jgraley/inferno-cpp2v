@@ -226,7 +226,7 @@ shared_ptr<Type> TypeOf::GetSpecial( shared_ptr<Operator> op, Sequence<Type> &op
         else if( shared_ptr<Array> o2 = dynamic_pointer_cast<Array>( optypes[0] ) )
             return o2->element;
         else
-            ASSERTFAIL( "dereferenciung non-pointer" );
+            ASSERTFAIL( "dereferencing non-pointer" );
     }
     else if( dynamic_pointer_cast<AddressOf>(op) )
     {

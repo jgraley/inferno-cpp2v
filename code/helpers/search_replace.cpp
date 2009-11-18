@@ -943,9 +943,11 @@ int RootedSearchReplace::RepeatingSearchReplace( shared_ptr<Program> p,
 }
 
 // Do a search and replace based on patterns stored in our members
-void RootedSearchReplace::operator()( shared_ptr<Program> p )
-{// if no replace pattern, call single one
-	(void)RepeatingSearchReplace( p, p, search_pattern, replace_pattern );
+void RootedSearchReplace::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
+{
+	shared_ptr<Program> p = dynamic_pointer_cast<Program>(context);
+	ASSERT(p); // TODO remove this requirement
+	(void)RepeatingSearchReplace( p, root, search_pattern, replace_pattern );
 }
 
 

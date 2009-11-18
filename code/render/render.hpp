@@ -27,17 +27,18 @@
     ERROR_UNKNOWN( P ? typeid(*P).name() : "<NULL>" );
 
 
-class Render : public Pass
+class Render : public Transformation
 {
 public:
     Render()
     {        
     }
     
-    void operator()( shared_ptr<Program> p )       
+    void operator()( shared_ptr<Node> context, shared_ptr<Node> root )
     {
         // Parse can only work on a whole program
-        program = dynamic_pointer_cast<Program>(p);
+    	ASSERT( context == root );
+        program = dynamic_pointer_cast<Program>(root);
         ASSERT( program );
         AutoPush< shared_ptr<Scope> > cs( scope_stack, program );
               

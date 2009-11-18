@@ -12,7 +12,7 @@
 #include "helpers/soft_patterns.hpp"
 
 
-void UseTempsForParamsReturn::operator()( shared_ptr<Program> program )
+void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
 {
 	TRACE();
 	set<SearchReplace::Coupling *> sms;
@@ -99,5 +99,5 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Program> program )
     c6.insert( r_return->return_value );
     sms.insert( &c6 ); 
              
-	SearchReplace( s_comp, r_comp, sms )( program );
+	SearchReplace( s_comp, r_comp, sms )( context, root );
 }

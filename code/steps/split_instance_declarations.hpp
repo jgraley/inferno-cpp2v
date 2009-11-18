@@ -3,28 +3,28 @@
 
 #include "helpers/search_replace.hpp"
 
-class SplitInstanceDeclarations : public Pass
+class SplitInstanceDeclarations : public Transformation
 {
 public:
-	virtual void operator()( shared_ptr<Program> );
+	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> root );
 };
 
-class MergeInstanceDeclarations : public Pass
+class MergeInstanceDeclarations : public Transformation
 {
 public:
-	virtual void operator()( shared_ptr<Program> );
+	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> root );
 };
 
-class HackUpIfs : public Pass
+class HackUpIfs : public Transformation
 {
 public:
-	virtual void operator()( shared_ptr<Program> );
+	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> root );
 };
 
-class CrazyNine : public Pass
+class CrazyNine : public Transformation
 {
 public:
-	virtual void operator()( shared_ptr<Program> );
+	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> root );
 };
 
 #endif
