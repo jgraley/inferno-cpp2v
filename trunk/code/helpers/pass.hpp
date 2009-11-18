@@ -4,15 +4,21 @@
 #include "tree/tree.hpp"
 #include "common/refcount.hpp"
 
-class Pass
+class Transformation
 {
 public:
-    // Apply this pass to the supplied program
-    virtual void operator()( shared_ptr<Program> ) = 0; 
-    
-    // Note: cannot template virtual functions so alternative
-    // entry points for eg functions or classes must be added
-    // explicitly.
+    // Apply this transformation to the supplied subtree
+    virtual void operator()( shared_ptr<Node> context,  // The whole program, so declarations may be searched for
+    		                 shared_ptr<Node> root )    // Root of the subtree we want to modify
+    		                 = 0;
+    void operator()( shared_ptr<Node> root )
+    {
+    	operator()(root, root);
+    }
+    void operator()( shared_ptr<Program> root )
+    {
+    	operator()((shared_ptr<Node>)root);
+    }
 };
 
 #endif

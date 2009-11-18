@@ -10,10 +10,10 @@
 
 #include "helpers/search_replace.hpp"
 
-class UseTempsForParamsReturn
+class UseTempsForParamsReturn : public Transformation
 {
 public:
-	virtual void operator()( shared_ptr<Program> );
+	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> root );
 };
 
 #endif /* USE_TEMPS_FOR_PARAMS_RETURN_HPP */

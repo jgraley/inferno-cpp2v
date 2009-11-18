@@ -10,10 +10,10 @@
 
 #include "helpers/search_replace.hpp"
 
-class GenerateImplicitCasts
+class GenerateImplicitCasts : public Transformation
 {
 public:
-	virtual void operator()( shared_ptr<Program> );
+	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> root );
 };
 
 #endif /* GENERATE_IMPLICIT_CASTS_HPP */

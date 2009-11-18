@@ -8,16 +8,13 @@
 #include "common/read_args.hpp"
 
 
-class Graph : public Pass
+class Graph : public Transformation
 {
 public:
-    void operator()( shared_ptr<Program> program )
+    void operator()( shared_ptr<Node> context, shared_ptr<Node> root )
     {
-    	operator()( (shared_ptr<Node>)program );
-    }
+    	(void)context; // Not needed!!
 
-    void operator()( shared_ptr<Node> program )
-    {
         string s;
         s += "digraph g {\n"; // g is name of graph
         s += "graph [\n";
@@ -29,7 +26,7 @@ public:
         s += "];\n";
         
         {
-            Walk w( program );
+            Walk w( root );
             while(!w.Done())
             {
                 shared_ptr<Node> n = w.Get();
@@ -40,7 +37,7 @@ public:
         }
         
         {
-            Walk w( program );
+            Walk w( root );
             while(!w.Done())
             {
                 shared_ptr<Node> n = w.Get();
