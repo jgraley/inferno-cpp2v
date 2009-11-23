@@ -111,6 +111,12 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Operator> op, Sequence<Type> optypes )
 		ASSERT( !dynamic_pointer_cast<Array>(optypes[i]) );
 	}
 
+	// Assignment operators return their left-hand operand type in all cases
+	if( dynamic_pointer_cast<AssignmentOperator>(op) )
+	{
+		return optypes[0];
+	}
+
 	// Pointer arithmetic: an add involving a pointer returns that pointer type
 	if( dynamic_pointer_cast<Add>(op) )
 	{
@@ -179,8 +185,8 @@ shared_ptr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 {
 	// Start the width and signedness as per regular "int" since this is the
 	// minimum result type for standard operators
-	shared_ptr<SpecificInteger> maxwidth( new SpecificInteger(TypeDb::integral_bits[INT]) );
-	bool seen_unsigned = TypeDb::int_default_signed;
+	shared_ptr<SpecificInteger> maxwidth_signed( new SpecificInteger(TypeDb::integral_bits[INT]) );
+	shared_ptr<SpecificInteger> maxwidth_unsigned;
 
 	// Look at the operands in turn
 	for( int i=0; i<optypes.size(); i++ )
@@ -197,22 +203,33 @@ shared_ptr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
         // Do a max algorithm on the width
 		shared_ptr<SpecificInteger> width = dynamic_pointer_cast<SpecificInteger>(intop->width);
 		ASSERT( width )( "Integral size %s is not specific, cannot decide result type", typeid(*(intop->width)).name());
-		if( width->value >= maxwidth->value )
-			maxwidth = width;
 
-		// Make result unsigned if any inputs are unsigned TODO not quite right, we should
-		// let bigger signed types remain signed
-		if( dynamic_pointer_cast<Unsigned>(optypes[i]) )
-	    	seen_unsigned = true;
+		if( dynamic_pointer_cast<Signed>(optypes[i]) )
+		{
+			if( width->value >= maxwidth_signed->value )
+		    	maxwidth_signed = width;
+		}
+		else if( dynamic_pointer_cast<Unsigned>(optypes[i]) )
+		{
+			if( !maxwidth_unsigned || width->value >= maxwidth_unsigned->value )
+				maxwidth_unsigned = width;
+		}
+		else
+			ASSERT( 0 )("%s is not Signed or Unsigned, please add to TypeOf class", typeid(*intop).name() );
 	}
 
 	// Build the required integral result type
 	shared_ptr<Integral> result;
-	if( seen_unsigned )
+	if( maxwidth_unsigned && maxwidth_unsigned->value >= maxwidth_signed->value )
+	{
 		result = shared_ptr<Integral>( new Unsigned );
+		result->width = maxwidth_unsigned;
+	}
 	else
+	{
 		result = shared_ptr<Integral>( new Signed );
-	result->width = maxwidth;
+		result->width = maxwidth_signed;
+	}
 	return result;
 }
 
