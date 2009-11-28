@@ -251,6 +251,11 @@ shared_ptr<Type> TypeOf::GetSpecial( shared_ptr<Operator> op, Sequence<Type> &op
         p->destination = optypes[0];
         return p;
     }
+    else if( dynamic_pointer_cast<Comma>(op) )
+    {
+        ASSERT( optypes.size() == 2 );
+        return optypes[1];
+    }
     else
     {
         ASSERT(0)("Unknown \"SPECIAL\" operator %s, please add to TypeOf class", typeid(*op).name());

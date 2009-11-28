@@ -6,7 +6,8 @@
 std::string ReadArgs::exename;
 std::string ReadArgs::infile;
 std::string ReadArgs::outfile;
-bool ReadArgs::graph;
+bool ReadArgs::intermediate_graph;
+bool ReadArgs::pattern_graph;
 bool ReadArgs::trace;
 bool ReadArgs::selftest;
 int ReadArgs::quitafter;
@@ -21,7 +22,8 @@ void ReadArgs::Usage()
     		        "-o <outfile> Write output program to <outfile>. C/C++ by default. Writes to stdout if omitted.\n"
     		        "-t           Turn on tracing internals (very verbose).\n"
     		        "-s           Run self-tests.\n"
-    		        "-g           Set output format to be a GraphViz-compatible graph description.\n"
+	                "-gi          Generate Graphviz graphs for output or intermediate if used with -q.\n"
+	                "-gp          Generate Graphviz graphs for search/replace patterns.\n"
 	                "-q <n>       Stop after <n> steps. <n> may be 0 to exercise just parser and renderer.\n"
                     "\n"
     		        "One of -i or -s required; all others are optional.\n",
@@ -34,7 +36,8 @@ void ReadArgs::Read( int argc, char *argv[] )
     int i=1;
 	exename = argv[0];
     trace = false;
-    graph = false;
+    intermediate_graph = false;
+    pattern_graph = false;
     selftest = false;
     quitafter = 0x7fffffff;
     quitenable = false;
@@ -52,9 +55,13 @@ void ReadArgs::Read( int argc, char *argv[] )
         {
             trace = true;
         }
-        else if( argv[i]==std::string("-g") )
+        else if( argv[i]==std::string("-gi") )
         {
-            graph = true;
+        	intermediate_graph = true;
+        }
+        else if( argv[i]==std::string("-gp") )
+        {
+        	pattern_graph = true;
         }
         else if( argv[i]==std::string("-s") )
         {

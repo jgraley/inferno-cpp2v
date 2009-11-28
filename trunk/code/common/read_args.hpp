@@ -14,7 +14,8 @@ public:
     static std::string exename;
     static std::string infile;
     static std::string outfile;
-    static bool graph;
+    static bool intermediate_graph;
+    static bool pattern_graph;
     static void Usage();
     static void Read( int argc, char *argv[] );
     static bool trace;

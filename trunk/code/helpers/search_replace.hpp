@@ -73,7 +73,7 @@ public:
     	SharedPtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
     };
     template<class VALUE_TYPE>
-    struct Stuff : StuffBase, VALUE_TYPE {	NODE_FUNCTIONS };
+    struct Stuff : StuffBase, VALUE_TYPE { NODE_FUNCTIONS };
 
     enum Result { NOT_FOUND = (int)false,
     	          FOUND     = (int)true };
@@ -192,12 +192,12 @@ public:
     // Some self-testing
     static void Test();
         
-private:
     shared_ptr<Node> search_pattern;
     shared_ptr<Node> replace_pattern;
     vector<RootedSearchReplace *> slaves;
     shared_ptr<Program> program;
     
+private:
     // LocalCompare ring
     bool LocalCompare( shared_ptr<Node> x,
     		           shared_ptr<Node> pattern ) const;

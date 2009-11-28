@@ -58,7 +58,7 @@ int main( int argc, char *argv[] )
         Validate()(program);
     }
 
-    if(ReadArgs::graph)
+    if(ReadArgs::intermediate_graph)
     {
         Graph g;
         g( program, program );
