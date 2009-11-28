@@ -4,6 +4,7 @@
 #include "tree/tree.hpp"
 #include "common/refcount.hpp"
 #include "helpers/transformation.hpp"
+#include "helpers/search_replace.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
 
@@ -11,10 +12,32 @@
 class Graph : public Transformation
 {
 public:
+    void operator()( RootedSearchReplace *root )
+    {
+        string s;
+        s += Header();
+        s += Traverse( root, false );
+        s += Traverse( root, true );
+        FOREACH( const RootedSearchReplace::Coupling *pc, root->matches )
+            s += DoCoupling( pc );
+        s += Footer();
+        Disburse( s );
+    }
+
     void operator()( shared_ptr<Node> context, shared_ptr<Node> root )
     {
     	(void)context; // Not needed!!
 
+        string s;
+        s += Header();
+        s += Traverse( root, false );
+        s += Traverse( root, true );
+        s += Footer();
+        Disburse( s );
+    }
+
+    string Header()
+    {
         string s;
         s += "digraph g {\n"; // g is name of graph
         s += "graph [\n";
@@ -22,33 +45,19 @@ public:
         s += "];\n";
         s += "node [\n";
         s += "shape = \"record\"\n"; // nodes can be split into fields
-        s += "style=\"rounded,filled\"\n"; 
         s += "];\n";
-        
-        {
-            Walk w( root );
-            while(!w.Done())
-            {
-                shared_ptr<Node> n = w.Get();
-                if( n )
-                    s += DoNode(n);                            
-                w.AdvanceInto(); 
-            }
-        }
-        
-        {
-            Walk w( root );
-            while(!w.Done())
-            {
-                shared_ptr<Node> n = w.Get();
-                if( n )
-                    s += DoNodeLinks(n);                            
-                w.AdvanceInto(); 
-            }
-        }
-        
+        return s;
+    }
+
+    string Footer()
+    {
+        string s;
         s += "}\n";
-        
+        return s;
+    }
+
+    void Disburse( string s )
+    {
         if( ReadArgs::outfile.empty() )
         {
             puts( s.c_str() );
@@ -56,16 +65,116 @@ public:
         else
         {
             FILE *fp = fopen( ReadArgs::outfile.c_str(), "wt" );
-            ASSERT( fp && "Cannot open output file" );
+            ASSERT( fp && "Cannot open output file " )(ReadArgs::outfile);
             fputs( s.c_str(), fp );
             fclose( fp );
         }    
     }
+
+    string Traverse( shared_ptr<Node> root, bool links_pass )
+    {
+    	string s;
+        Walk w( root );
+        while(!w.Done())
+        {
+            shared_ptr<Node> n = w.Get();
+            if( n )
+                s += links_pass ? DoNodeLinks(n) : DoNode(n);
+            w.AdvanceInto();
+        }
+        return s;
+    }
     
-    string Id( shared_ptr<Node> n )
+    string Traverse( RootedSearchReplace *sr, bool links_pass )
+    {
+    	string s;
+    	s += links_pass ? DoSearchReplaceLinks(sr) : DoSearchReplace(sr);
+		if( sr->search_pattern )
+		    s += Traverse( sr->search_pattern, links_pass );
+		if( sr->replace_pattern )
+		    s += Traverse( sr->replace_pattern, links_pass );
+        for( int j=0; j<sr->slaves.size(); j++ )
+        	s += Traverse( sr->slaves[j], links_pass );
+    	return s;
+    }
+
+	string DoSearchReplace( RootedSearchReplace *sr )
+	{
+		string s;
+		s += Id( sr );
+		s += " [\n";
+
+		s += "label = \"<fixed> RootedSearchReplace | <search> Search | <replace> Replace";
+        for( int j=0; j<sr->slaves.size(); j++ )
+        {
+            char c[20];
+            sprintf(c, "%d", j+1);
+            s += " | <slave" + string(c) + "> Slave " + string(c);
+        }
+		s += "\"\n";
+
+        s += "style=\"filled\"\n";
+        s += "fontsize = \"16\"\n";
+		s += "];\n";
+
+		return s;
+	}
+
+	string DoSearchReplaceLinks( RootedSearchReplace *sr )
+	{
+		string s;
+		if( sr->search_pattern )
+		{
+			s += Id(sr) + ":search -> " + Id(sr->search_pattern.get()) + ":fixed [\n";
+			s += "];\n";
+		}
+		if( sr->replace_pattern )
+		{
+			s += Id(sr) + ":replace -> " + Id(sr->replace_pattern.get()) + ":fixed [\n";
+			s += "];\n";
+		}
+        for( int j=0; j<sr->slaves.size(); j++ )
+        {
+            char c[20];
+            sprintf(c, "%d", j+1);
+			s += Id(sr) + ":slave" + string(c) + " -> " + Id(sr->slaves[j]) + ":fixed [\n";
+			s += "];\n";
+        }
+		return s;
+	}
+
+	string DoCoupling( const RootedSearchReplace::Coupling *pc )
+    {
+		string s;
+		shared_ptr<Node> prev;
+		FOREACH( shared_ptr<Node> n, *pc )
+		{
+			if( prev )
+			{
+		        s += Id(prev.get()) + ":fixed -> " + Id(n.get()) + ":fixed [\n";
+		        s += "dir = \"none\"\n"; // no arrowhead
+		        s += "style = \"dotted\"\n"; // dotted line
+		        s += "constraint = false\n"; // Do not make dest higher rank than source - stops dest being moved to the right
+		        s += "];\n";
+		        // Graphviz 2.20 has a bug where you get "Lost edge" for some edges that have
+		        // constraint = false (apparently ok in 2.18 and as-yet-unreleased 2.22)
+		        // A workaround seems to be to supply another edge going in opposite direction.
+		        s += Id(n.get()) + ":fixed -> " + Id(prev.get()) + ":fixed [\n";
+		        s += "dir = \"none\"\n";
+		        s += "style = \"invis\"\n";
+		        s += "constraint = false\n";
+		        s += "];\n";
+			}
+			prev = n;
+		}
+		return s;
+    }
+
+
+    string Id( void *p )
     {
         char s[20];
-        sprintf(s, "\"%08X\"", (unsigned)(n.get()) );
+        sprintf(s, "\"%08X\"", (unsigned)(p) );
         return s;
     }    
     
@@ -79,7 +188,11 @@ public:
     string Name( shared_ptr<Node> sp, bool *bold )   // TODO put stringize capabilities into the Property nodes as virtual methods
     {
         *bold=true;
-        if( shared_ptr<SpecificIdentifier> ii = dynamic_pointer_cast<SpecificIdentifier>(sp) )
+        if( dynamic_pointer_cast<RootedSearchReplace::StarBase>(sp) )
+            return string("*");
+        else if( dynamic_pointer_cast<RootedSearchReplace::StuffBase>(sp) )
+            return string("o-o-o");
+        else if( shared_ptr<SpecificIdentifier> ii = dynamic_pointer_cast<SpecificIdentifier>(sp) )
             return ii->name;                     
         else if( shared_ptr<SpecificString> ss = dynamic_pointer_cast< SpecificString >(sp) )
             return "\\\"" + ss->value + "\\\"";                     // TODO sanitise the string
@@ -117,7 +230,7 @@ public:
             return "gold";                     
         else if( dynamic_pointer_cast<Property>(n) )
             return "khaki";                     
-        else if( dynamic_pointer_cast<Program>(n) )
+        else if( dynamic_pointer_cast<Scope>(n) )
             return "lemonchiffon4";                     
         else
             return "white";                     
@@ -127,7 +240,7 @@ public:
     {
         string s;
         bool bold;
-        s += Id(n) + " [\n";
+        s += Id(n.get()) + " [\n";
         s += "label = \"<fixed> " + Name(n, &bold);
 
         vector< Itemiser::Element * > members = Itemiser::Itemise(n);
@@ -142,11 +255,20 @@ public:
                     s += " | <" + SeqField( i, j ) + "> " + string(c) + ".";
                 }
             }            
-            else
+            else  if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )
+            {
             	s += " | <" + SeqField( i ) + "> ";
+            	if( !*ptr )
+            		s += "NULL";
+            }
+            else // Collection
+            {
+            	s += " | <" + SeqField( i ) + "> ";
+            }
         }
                 
         s += "\"\n";
+        s += "style=\"filled,rounded\"\n";
         s += "fillcolor=" + Colour(n) + "\n"; 
         if( bold )
             s += "fontsize = \"24\"\n";
@@ -192,7 +314,7 @@ public:
     string DoLink( shared_ptr<Node> from, string field, shared_ptr<Node> to )
     {
         string s;
-        s += Id(from) + ":" + field + " -> " + Id(to) + ":fixed [\n";
+        s += Id(from.get()) + ":" + field + " -> " + Id(to.get()) + ":fixed [\n";
         s += "];\n";
         return s;
     }
