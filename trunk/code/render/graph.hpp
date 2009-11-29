@@ -5,6 +5,7 @@
 #include "common/refcount.hpp"
 #include "helpers/transformation.hpp"
 #include "helpers/search_replace.hpp"
+#include "helpers/soft_patterns.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
 
@@ -39,12 +40,11 @@ public:
     string Header()
     {
         string s;
-        s += "digraph g {\n"; // g is name of graph
+        s += "digraph Inferno {\n"; // g is name of graph
         s += "graph [\n";
         s += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
         s += "];\n";
         s += "node [\n";
-        s += "shape = \"record\"\n"; // nodes can be split into fields
         s += "];\n";
         return s;
     }
@@ -113,7 +113,8 @@ public:
         }
 		s += "\"\n";
 
-        s += "style=\"filled\"\n";
+        s += "shape = \"record\"\n"; // nodes can be split into fields
+        s += "style = \"filled\"\n";
         s += "fontsize = \"16\"\n";
 		s += "];\n";
 
@@ -185,13 +186,30 @@ public:
         return s;
     }
     
-    string Name( shared_ptr<Node> sp, bool *bold )   // TODO put stringize capabilities into the Property nodes as virtual methods
+    string Name( shared_ptr<Node> sp, bool *bold, bool *circle )   // TODO put stringize capabilities into the Property nodes as virtual methods
     {
         *bold=true;
+        *circle=false;
         if( dynamic_pointer_cast<RootedSearchReplace::StarBase>(sp) )
+        {
+            *circle = true;
             return string("*");
+        }
         else if( dynamic_pointer_cast<RootedSearchReplace::StuffBase>(sp) )
-            return string("o-o-o");
+        {
+            *circle = true;
+            return string("#");
+        }
+        else if( dynamic_pointer_cast<SoftNotBase>(sp) )
+        {
+            *circle = true;
+            return string("!");
+        }
+        else if( dynamic_pointer_cast<SoftAndBase>(sp) )
+        {
+            *circle = true;
+            return string("&&"); // note & is a wildcard in dot but not handled prolperly, this becomes "& "
+        }
         else if( shared_ptr<SpecificIdentifier> ii = dynamic_pointer_cast<SpecificIdentifier>(sp) )
             return ii->name;                     
         else if( shared_ptr<SpecificString> ss = dynamic_pointer_cast< SpecificString >(sp) )
@@ -235,41 +253,61 @@ public:
         else
             return "white";                     
     }
+
+
     
     string DoNode( shared_ptr<Node> n )
     {
         string s;
-        bool bold;
+        bool bold, circle;
         s += Id(n.get()) + " [\n";
-        s += "label = \"<fixed> " + Name(n, &bold);
-
-        vector< Itemiser::Element * > members = Itemiser::Itemise(n);
-        for( int i=0; i<members.size(); i++ )
+        string name = Name(n, &bold, &circle);
+        if(circle)
         {
-            if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )                
-            {
-                for( int j=0; j<seq->size(); j++ )
-                {
-                    char c[20];
-                    sprintf(c, "%d", j+1);
-                    s += " | <" + SeqField( i, j ) + "> " + string(c) + ".";
-                }
-            }            
-            else  if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )
-            {
-            	s += " | <" + SeqField( i ) + "> ";
-            	if( !*ptr )
-            		s += "NULL";
-            }
-            else // Collection
-            {
-            	s += " | <" + SeqField( i ) + "> ";
-            }
+            s += "label = \"" + name + "\"\n";
         }
-                
-        s += "\"\n";
-        s += "style=\"filled,rounded\"\n";
-        s += "fillcolor=" + Colour(n) + "\n"; 
+        else
+        {
+            s += "label = \"<fixed> " + name;
+            vector< Itemiser::Element * > members = Itemiser::Itemise(n);
+            for( int i=0; i<members.size(); i++ )
+            {
+                if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )                
+                {
+                    for( int j=0; j<seq->size(); j++ )
+                    {
+                        char c[20];
+                        sprintf(c, "%d", j+1);
+                        s += " | <" + SeqField( i, j ) + "> " + string(c) + ".";
+                    }
+                }            
+                else  if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )
+                {
+                	s += " | <" + SeqField( i ) + "> ";
+                	if( !*ptr )
+                		s += "NULL";
+                }
+                else // Collection
+                {
+                	s += " | <" + SeqField( i ) + "> ";
+                }
+            }      
+            s += "\"\n";
+        }          
+
+        s += "style = \"filled,rounded\"\n";
+        if(circle)
+        {
+            s += "shape = \"circle\"\n";
+            s += "fixedsize = true\n";
+            s += "width = 0.65\n";
+            s += "height = 0.65\n";
+        }
+        else
+        {
+            s += "shape = \"record\"\n"; // nodes can be split into fields
+            s += "fillcolor = " + Colour(n) + "\n"; 
+        }
         if( bold )
             s += "fontsize = \"24\"\n";
         else

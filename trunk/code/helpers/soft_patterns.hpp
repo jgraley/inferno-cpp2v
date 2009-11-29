@@ -4,9 +4,12 @@
 #include "search_replace.hpp"
 #include "typeof.hpp"
 
+struct SoftNotBase {};
+
 template<class VALUE_TYPE>
 struct SoftNot : VALUE_TYPE,
-                 RootedSearchReplace::SoftSearchPattern
+                 RootedSearchReplace::SoftSearchPattern,
+                 SoftNotBase
 {
     NODE_FUNCTIONS
     SharedPtr<VALUE_TYPE> pattern;
@@ -39,9 +42,12 @@ private:
     }
 };
 
+struct SoftAndBase {};
+
 template<class VALUE_TYPE>
 struct SoftAnd : VALUE_TYPE,
-                 RootedSearchReplace::SoftSearchPattern
+                 RootedSearchReplace::SoftSearchPattern,
+                 SoftAndBase
 {
     NODE_FUNCTIONS
     mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
