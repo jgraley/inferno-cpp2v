@@ -173,6 +173,7 @@ struct SpecificIdentifier : virtual Property
 { 
 	SpecificIdentifier() {}
 	SpecificIdentifier( string s ) : name(s) {}
+	//virtual bool IsLocalMatch( const Matcher &candidate ) const
     string name;
     NODE_FUNCTIONS 
 };

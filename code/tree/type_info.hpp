@@ -7,8 +7,8 @@
 
 struct Matcher
 {
-	virtual bool IsSubclass( const Matcher &source_architype ) const = 0;
-	virtual bool IsLocalMatch( const Matcher &candidate ) const
+	virtual bool IsSubclass( const Matcher *source_architype ) const = 0;
+	virtual bool IsLocalMatch( const Matcher *candidate ) const
 	{
 		// Default local matching criterion checks only the type of the candidate. If the
 		// candidate's class is a (non-strict) subclass of this class, we have a match.
@@ -16,17 +16,18 @@ struct Matcher
 	}
     virtual ~Matcher() {}
     template< class TARGET_TYPE >
-    static inline bool IsSubclassStatic( const TARGET_TYPE &target_architype, const Matcher &source_architype )
+    static inline bool IsSubclassStatic( const TARGET_TYPE *target_architype, const Matcher *source_architype )
     {
+        ASSERT( source_architype );
         (void)target_architype; // don't care about value of architypes; just want the type
-        return !!dynamic_cast<const TARGET_TYPE *>(&source_architype);
+        return !!dynamic_cast<const TARGET_TYPE *>(source_architype);
     }
 };
 
 #define TYPE_INFO_FUNCTION \
-    virtual bool IsSubclass( const Matcher &source_architype ) const \
+    virtual bool IsSubclass( const Matcher *source_architype ) const \
     { \
-        return IsSubclassStatic( *this, source_architype ); \
+        return IsSubclassStatic( this, source_architype ); \
     }
 
 
