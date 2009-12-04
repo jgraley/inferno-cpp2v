@@ -608,7 +608,7 @@ private:
                 
         // Now decide whether we actually need to render an access spec (ie has it changed?)
         if( current_access && // NULL means dont ever render access specs
-            TypeInfo(this_access) != TypeInfo(*current_access) ) // current_access spec must have changed
+            typeid(*this_access) != typeid(**current_access) ) // current_access spec must have changed
         {
             s += RenderAccess( this_access ) + ":\n";
             *current_access = this_access;

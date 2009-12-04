@@ -195,7 +195,7 @@ struct Collection : GenericCollection, STLCollection< Itemiser::Element, Generic
 // Mix together the bounce classes for the benefit of the tree
 #define NODE_FUNCTIONS ITEMISE_FUNCTION TYPE_INFO_FUNCTION CLONE_FUNCTION
 struct NodeBases : Magic,
-                   TypeInfo::TypeBase,
+                   Matcher,
                    Itemiser,
                    Cloner
 {

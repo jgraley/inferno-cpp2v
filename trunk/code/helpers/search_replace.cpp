@@ -183,7 +183,7 @@ bool RootedSearchReplace::LocalCompare( shared_ptr<Node> x, shared_ptr<Node> pat
 
     // Is node correct class?
     TRACE("Is %s >= %s? ", TypeInfo(pattern).name().c_str(), TypeInfo(x).name().c_str() );
-    if( !(TypeInfo(pattern) >= TypeInfo(x)) ) // Note >= is "non-strict superset" i.e. pattern is superclass of x or same class
+    if( !pattern->IsLocalMatch(*x) ) // Note >= is "non-strict superset" i.e. pattern is superclass of x or same class
     {
         TRACE("lol no!\n" );
         return false;
@@ -623,7 +623,7 @@ void RootedSearchReplace::Overlay( shared_ptr<Node> dest,
 		                           bool can_key,
 		                           shared_ptr<Key> current_key ) const
 {
-    ASSERT( TypeInfo(source) >= TypeInfo(dest) )("source must be a non-strict subclass of destination, so that it does not have more members");
+    ASSERT( source->IsLocalMatch(*dest) )("source must be a non-strict subclass of destination, so that it does not have more members");
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of source, and itemises over that type. dest must
@@ -832,7 +832,7 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     }
     
 	// Overlaying requires type compatibility - check for this
-	ASSERT( TypeInfo(source) >= TypeInfo(dest) )
+	ASSERT( source->IsLocalMatch(*dest) )
 		  ( "replace pattern %s must be a non-strict superclass of substitute %s, so that its members are a subset",
 			TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str() );
 	TRACE();

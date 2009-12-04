@@ -134,7 +134,7 @@ void Walk::AdvanceInto()
 	ASSERT( !IsAtEndOfCollection() );
 	shared_ptr<Node> element = Get(); // look at current node
     if( element &&                                                    // must be non-NULL
-    	(!restrictor || TypeInfo(element) <= TypeInfo(restrictor) ) ) // and pass the restriction
+    	(!restrictor || restrictor->IsLocalMatch(*element) ) ) // and pass the restriction
     {
     	// Step into
         Push( Get() );
