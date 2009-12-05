@@ -3,38 +3,28 @@
 
 #include "common/common.hpp"
 
+
+// NOTE: Duplicate uses shared_ptr so that it can be overloaded to return
+// the supplied pointer (as done by SpecificIdentifier). Clone is guaranteed
+// to return a new() object.
 class Cloner
 {
 public:
-    static shared_ptr<Cloner> Clone( shared_ptr<Cloner> source )
+    virtual shared_ptr<Cloner> Clone() const = 0;
+    virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p )
     {
-        ASSERT( source );
-        return Clone( source.get() );
+    	return Clone(); // default duplication is to clone, but can be over-ridden
     }
-    
-    static shared_ptr<Cloner> Clone( const Cloner *source )
-    {
-        ASSERT( source );
-        return source->CloneVirtual();
-    }
-    
     template< class TYPE >
     inline static shared_ptr<Cloner> CloneStatic( const TYPE *source )
     {
-        shared_ptr<TYPE> p(new TYPE);
-        *p = *source;
-        return p;
+        return shared_ptr<Cloner>( new TYPE(*source) );
     }    
-
-    virtual shared_ptr<Cloner> CloneVirtual() const = 0;
 };
 
 #define CLONE_FUNCTION \
-	private: friend class Cloner; \
-    virtual shared_ptr<Cloner> CloneVirtual() const  \
+    virtual shared_ptr<Cloner> Clone() const  \
     { \
-        return Cloner::CloneStatic( this ); \
-    } \
-    public:
-
+        return Cloner::CloneStatic(this); \
+    }
 #endif

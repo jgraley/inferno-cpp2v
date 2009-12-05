@@ -16,7 +16,7 @@ struct MyNode : Node
 void GenericsTest()
 {
     shared_ptr<MyNode> n( new MyNode );
-    vector< Itemiser::Element * > i = Itemiser::Itemise( n );
+    vector< Itemiser::Element * > i = n->Itemise();
     for( int e=0; e<i.size(); e++ )
         TRACE("element at %p\n", i[e]);
     ASSERT( i.size() == 1 )("%d elements\n", i.size());

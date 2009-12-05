@@ -6,10 +6,11 @@
 #include <deque>
 #include <set>
 #include <iterator>
-#include "itemise_members.hpp"
+#include "itemise.hpp"
 #include "type_info.hpp"
 #include "clone.hpp"
 #include "common/magic.hpp"
+#include "match.hpp"
 
 // Covariant NULL pointer bug
 //
