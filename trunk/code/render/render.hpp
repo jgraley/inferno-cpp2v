@@ -70,29 +70,7 @@ private:
 
     string RenderLiteral( shared_ptr<Literal> sp )
     {
-        if( shared_ptr<SpecificString> ss = dynamic_pointer_cast< SpecificString >(sp) )
-            return Sanitise( *ss );
-        else if( shared_ptr<SpecificInteger> ic = dynamic_pointer_cast< SpecificInteger >(sp) )
-            return string(((llvm::APSInt)*ic).toString(10)) +
-                   (((llvm::APSInt)*ic).isUnsigned() ? "U" : "") +
-                   (((llvm::APSInt)*ic).getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
-                   (((llvm::APSInt)*ic).getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_long] ? "L" : "");
-                   // note, assuming longlong bigger than long, so second L appends first to get LL
-        else if( shared_ptr<SpecificFloat> fc = dynamic_pointer_cast< SpecificFloat >(sp) )
-        {
-            char hs[256];
-            // generate hex float since it can be exact
-            ((llvm::APFloat)*fc).convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
-            return string(hs) + 
-                   (&(((llvm::APFloat)*fc).getSemantics())==TypeDb::float_semantics ? "F" : "") +
-                   (&(((llvm::APFloat)*fc).getSemantics())==TypeDb::long_double_semantics ? "L" : "");
-        }           
-        else if( dynamic_pointer_cast< True >(sp) )
-            return string("true");
-        else if( dynamic_pointer_cast< False >(sp) )
-            return string("false");
-        else
-            return ERROR_UNSUPPORTED( sp );
+    	return Sanitise( *sp );
     }
     
     string RenderIdentifier( shared_ptr<Identifier> id )
@@ -147,7 +125,7 @@ private:
         unsigned width;       
         shared_ptr<SpecificInteger> ic = dynamic_pointer_cast<SpecificInteger>( type->width );
         ASSERT(ic && "width must be integer"); 
-        width = ((llvm::APSInt)*ic).getLimitedValue();
+        width = ic->getLimitedValue();
                   
         TRACE("width %d\n", width);          
                           
