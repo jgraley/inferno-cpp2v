@@ -173,81 +173,6 @@ RootedSearchReplace::~RootedSearchReplace()
 }
 
 
-// Helper for DecidedCompare that does the testing for the present node, including
-// superclass wildcarding and data member checking on Property nodes.
-bool RootedSearchReplace::LocalCompare( shared_ptr<Node> x, shared_ptr<Node> pattern ) const
-{
-    TRACE();
-    ASSERT( pattern ); // Disallow NULL pattern for now, could change this if required
-    ASSERT( x )("Found NULL in tree"); // No NULL in tree
-
-    // Is node correct class?
-    TRACE("Is %s >= %s? ", TypeInfo(pattern).name().c_str(), TypeInfo(x).name().c_str() );
-    if( !pattern->IsLocalMatch(x.get()) ) // Note >= is "non-strict superset" i.e. pattern is superclass of x or same class
-    {
-        TRACE("lol no!\n" );
-        return false;
-    }
-
-    if( shared_ptr<SpecificIdentifier> pattern_id = dynamic_pointer_cast<SpecificIdentifier>(pattern) )
-    {
-        shared_ptr<SpecificIdentifier> x_id = dynamic_pointer_cast<SpecificIdentifier>(x);
-        ASSERT( x_id );
-        TRACE("SpecificIdentifiers %s @ %p and %s @ %p\n",
-        	  x_id->name.c_str(), x_id.get(),
-        	  pattern_id->name.c_str(), pattern_id.get() );
-        if( x_id != pattern_id ) // With identifiers, use the actual node address, not the name,
-        	                       // in case different identifiers have the same name
-        {
-            return false;
-        }
-    }
-    if( shared_ptr<SpecificString> pattern_str = dynamic_pointer_cast<SpecificString>(pattern) )
-    {
-        shared_ptr<SpecificString> x_str = dynamic_pointer_cast<SpecificString>(x);
-        ASSERT( x_str );
-        if( x_str->value != pattern_str->value )
-        {
-            TRACE("Strings differ\n");
-            return false;
-        }
-    }    
-    else if( shared_ptr<SpecificInteger> pattern_int = dynamic_pointer_cast<SpecificInteger>(pattern) )
-    {
-        shared_ptr<SpecificInteger> x_int = dynamic_pointer_cast<SpecificInteger>(x);
-        ASSERT( x_int );
-        TRACE("%s %s\n", x_int->value.toString(10).c_str(), pattern_int->value.toString(10).c_str() );
-        if( x_int->value != pattern_int->value )
-        {
-            TRACE("Integers differ\n");
-            return false;
-        }
-    }    
-    else if( shared_ptr<SpecificFloat> pattern_flt = dynamic_pointer_cast<SpecificFloat>(pattern) )
-    {
-        shared_ptr<SpecificFloat> x_flt = dynamic_pointer_cast<SpecificFloat>(x);
-        ASSERT( x_flt );
-        if( !x_flt->value.bitwiseIsEqual( pattern_flt->value ) )
-        {
-            TRACE("Floats differ\n");
-            return false;
-        }
-    }
-    else if( shared_ptr<SpecificFloatSemantics> pattern_sem = dynamic_pointer_cast<SpecificFloatSemantics>(pattern) )
-    {
-        shared_ptr<SpecificFloatSemantics> x_sem = dynamic_pointer_cast<SpecificFloatSemantics>(x);
-        ASSERT( x_sem );
-        if( x_sem->value != pattern_sem->value )
-        {
-            TRACE("Float semantics differ\n");
-            return false;
-        }
-    }
-    TRACE("yes!!\n");
-    return true;
-}    
-
-
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
 RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
@@ -275,7 +200,7 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
     {
     	// Not a soft node, so handle explicitly
 		// Check whether the present node matches
-		if( !LocalCompare( x, pattern ) )
+		if( !pattern->IsLocalMatch(x.get()) )
 			return NOT_FOUND;
 
 		// Recurse through the children. Note that the itemiser internally does a
