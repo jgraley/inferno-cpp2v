@@ -14,7 +14,7 @@ public:
 
     ~Magic()
     {
-        ASSERT(magic==0x12343210 && "magic number check failed");    
+        ASSERT(magic==0x12343210)("magic number check failed");
         magic = 0xde1e7ed;
     }    
 };

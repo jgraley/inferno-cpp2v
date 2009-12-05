@@ -86,8 +86,7 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
             if( !pe )
                 TRACE( );
             ASSERT( pe )
-                  ("Tried to Set() wrong type of node via GenericSharedPtr\nType was %s; I am %s\n",
-            	   TypeInfo(n).name().c_str(), typeid(ELEMENT).name() );
+                  ("Tried to Set() wrong type of node via GenericSharedPtr\nType was ")((string)*n)("; I am ")(typeid(ELEMENT).name());
             *(shared_ptr<ELEMENT> *)this = pe;        
         }
     }
@@ -104,14 +103,14 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
     {
         // TODO support NULL pointers as input!
     	if( o )
-    	    ASSERT( *this )("Cannot convert shared_ptr<%s> to SharedPtr<%s>", typeid(OTHER).name(), typeid(ELEMENT).name() );
+    	    ASSERT( *this )("Cannot convert shared_ptr<")(typeid(OTHER).name())("> to SharedPtr<")(typeid(ELEMENT).name())(">");
     }
     SharedPtr( const GenericSharedPtr &g ) :
     	shared_ptr<ELEMENT>( dynamic_pointer_cast<ELEMENT>(g.GetNodePtr()) )
     {
         // TODO support NULL pointers as input!
     	if( g )
-    	    ASSERT( *this )("Cannot convert GenericSharedPtr that points to a %s to SharedPtr<%s>", typeid(*(g.GetNodePtr())).name(), typeid(ELEMENT).name());
+    	    ASSERT( *this )("Cannot convert GenericSharedPtr that points to a ")((string)*(g.GetNodePtr()))(" to SharedPtr<")(typeid(ELEMENT).name())(">");
     }
 };           
 
@@ -196,14 +195,11 @@ struct Collection : GenericCollection, STLCollection< Itemiser::Element, Generic
 // Mix together the bounce classes for the benefit of the tree
 #define NODE_FUNCTIONS ITEMISE_FUNCTION TYPE_INFO_FUNCTION CLONE_FUNCTION
 struct NodeBases : Magic,
+                   Traceable,
                    Matcher,
                    Itemiser,
                    Cloner
 {
-	virtual operator string() const
-	{
-		return TypeInfo(this).name();
-	}
 };
 
 extern void GenericsTest();

@@ -479,9 +479,9 @@ struct SpecificFloatSemantics : FloatSemantics
 	{
 		return SSPrintf("fltSemantics@%p", value );
 	}
-	operator const llvm::fltSemantics *() const
+	operator const llvm::fltSemantics &() const
 	{
-		return value;
+		return *value;
 	}
 private:
     const llvm::fltSemantics *value;

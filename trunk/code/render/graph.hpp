@@ -65,7 +65,7 @@ public:
         else
         {
             FILE *fp = fopen( ReadArgs::outfile.c_str(), "wt" );
-            ASSERT( fp && "Cannot open output file " )(ReadArgs::outfile);
+            ASSERT( fp )( "Cannot open output file " )(ReadArgs::outfile);
             fputs( s.c_str(), fp );
             fclose( fp );
         }    
@@ -349,7 +349,7 @@ public:
             }
             else
             {
-                ASSERT(!"got something from itemise that isnt a sequence, collection or a shared pointer");
+                ASSERT(0)("got something from itemise that isnt a sequence, collection or a shared pointer");
             }
         }        
         return s;

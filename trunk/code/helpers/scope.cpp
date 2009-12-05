@@ -7,7 +7,7 @@
 // parent in the tree. We have to do searches for this, since the tree does not contain 
 // back-pointers.
 //
-// TODO return Scope node (means adding Procedure as a Scope)
+// TODO take id as SpecificIdentifier, not Identifier, so do not need to ASSERT check this
 shared_ptr<Scope> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> id )
 {
     TRACE("Trying program (global)\n" );
@@ -51,9 +51,9 @@ shared_ptr<Scope> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> 
 
 	
 	if( shared_ptr<SpecificIdentifier> sid = dynamic_pointer_cast<SpecificIdentifier>( id ) )
-		ASSERT(0)("type %s name is \n", TypeInfo(id).name().c_str())( *sid );
+		ASSERT(0)("cannot get scope of ")( *sid );
 	else
-		ASSERT(0)("non-specific type %s - should not be doing GetScope() on these\n", TypeInfo(id).name().c_str() );
+		ASSERT(0)("non-specific type ")(*id)(" - should not be doing GetScope() on these" );
 	// every identifier should have a scope - if this fails, we've missed out a kind of scope
 	// Note: if Flattener is not automated yet, then it may have missed something
 	return shared_ptr<Scope>();

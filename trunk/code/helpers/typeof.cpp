@@ -60,7 +60,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
             return p->destination;
         else
         {
-            ASSERT(0)("Incorrect type %s coming before []", typeid(*t).name());
+            ASSERT(0)("Incorrect type ")(*t)(" coming before []");
             ASSERTFAIL("");
         }            
     }
@@ -84,7 +84,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
 
     else 
     {
-        ASSERT(0)("Unknown expression %s, please add to TypeOf class", typeid(*o).name());
+        ASSERT(0)("Unknown expression ")(*o)(", please add to TypeOf class");
         ASSERTFAIL("");
     }
 }
@@ -158,7 +158,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Operator> op, Sequence<Type> optypes )
 #include "tree/operator_db.inc"
     else
     {
-        ASSERT(0)("Unknown operator %s (not in operator_db.inc), please add to TypeOf class", typeid(*op).name());
+        ASSERT(0)("Unknown operator ")(*op)(" (not in operator_db.inc), please add to TypeOf class");
         ASSERTFAIL("");
     }
 }
@@ -174,9 +174,9 @@ shared_ptr<Type> TypeOf::GetStandard( Sequence<Type> &optypes )
 		return GetStandard( nums );
 
 	if( optypes.size() == 2 )
-		ASSERT(0)("Standard operator with %s and %s is unknown usage, please add to TypeOf class", typeid(*optypes[0]).name(), typeid(*optypes[1]).name());
+		ASSERT(0)("Standard operator with operands ")(*optypes[0])(*optypes[1])(" is unknown usage, please add to TypeOf class");
 	else
-		ASSERT(0)("Standard operator with %s is unknown usage, please add to TypeOf class", typeid(*optypes[0]).name());
+		ASSERT(0)("Standard operator with ")(*optypes[0])(" is unknown usage, please add to TypeOf class");
     ASSERTFAIL();
 }
 
@@ -187,23 +187,29 @@ shared_ptr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 	// minimum result type for standard operators
 	shared_ptr<SpecificInteger> maxwidth_signed( new SpecificInteger(TypeDb::integral_bits[INT]) );
 	shared_ptr<SpecificInteger> maxwidth_unsigned;
+	shared_ptr<SpecificFloatSemantics> maxwidth_float;
 
 	// Look at the operands in turn
 	for( int i=0; i<optypes.size(); i++ )
 	{
 		// Floats take priority
-		if( dynamic_pointer_cast<Floating>(optypes[i]) )
-			return optypes[i]; // TODO hack LLVM::FloatSemantics to get a bigness measure
-		                       // note that this always prefers the left one
-		// TODO use static ApFloat::semanticsPrecision() as bigness measure
+		if( shared_ptr<Floating> f = dynamic_pointer_cast<Floating>(optypes[i]) )
+		{
+			shared_ptr<SpecificFloatSemantics> sfs = dynamic_pointer_cast<SpecificFloatSemantics>(f->semantics);
+			ASSERT(sfs)("Floating point type seen with semantics not specific");
+			unsigned int sl = llvm::APFloat::semanticsPrecision( *sfs );
+			unsigned int sr = llvm::APFloat::semanticsPrecision( *maxwidth_float );
+			if( !maxwidth_float || sl > sr )
+				maxwidth_float = sfs;
+		}
 
 		// Should only have Integrals from here on
 		shared_ptr<Integral> intop = dynamic_pointer_cast<Integral>(optypes[i]);
-        ASSERT( intop )("%s is not Floating or Integral, please add to TypeOf class", typeid(*intop).name() );
+        ASSERT( intop )(*optypes[i])(" is not Floating or Integral, please add to TypeOf class" );
 
         // Do a max algorithm on the width
 		shared_ptr<SpecificInteger> width = dynamic_pointer_cast<SpecificInteger>(intop->width);
-		ASSERT( width )( "Integral size %s is not specific, cannot decide result type", typeid(*(intop->width)).name());
+		ASSERT( width )( "Integral size ")(*(intop->width))(" is not specific, cannot decide result type");
 
 		if( dynamic_pointer_cast<Signed>(optypes[i]) )
 		{
@@ -216,7 +222,14 @@ shared_ptr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 				maxwidth_unsigned = width;
 		}
 		else
-			ASSERT( 0 )("%s is not Signed or Unsigned, please add to TypeOf class", typeid(*intop).name() );
+			ASSERT( 0 )(*intop)(" is not Signed or Unsigned, please add to TypeOf class");
+	}
+
+	if( maxwidth_float )
+	{
+		shared_ptr<Floating> result;
+		result->semantics = shared_ptr<SpecificFloatSemantics>( new SpecificFloatSemantics(*maxwidth_float) );
+		return result;
 	}
 
 	// Build the required integral result type
@@ -259,7 +272,7 @@ shared_ptr<Type> TypeOf::GetSpecial( shared_ptr<Operator> op, Sequence<Type> &op
     }
     else
     {
-        ASSERT(0)("Unknown \"SPECIAL\" operator %s, please add to TypeOf class", typeid(*op).name());
+        ASSERT(0)("Unknown \"SPECIAL\" operator ")(*op)(", please add to TypeOf class");
         ASSERTFAIL("");
     }
 }

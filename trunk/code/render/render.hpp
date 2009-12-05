@@ -53,7 +53,7 @@ public:
         else
         {
             FILE *fp = fopen( ReadArgs::outfile.c_str(), "wt" );
-            ASSERT( fp && "Cannot open output file" );
+            ASSERT( fp )( "Cannot open output file" );
             fputs( s.c_str(), fp );
             fclose( fp );
         }    
@@ -124,7 +124,7 @@ private:
         bool ds;
         unsigned width;       
         shared_ptr<SpecificInteger> ic = dynamic_pointer_cast<SpecificInteger>( type->width );
-        ASSERT(ic && "width must be integer"); 
+        ASSERT(ic)("width must be integer");
         width = ic->getLimitedValue();
                   
         TRACE("width %d\n", width);          
@@ -178,14 +178,14 @@ private:
         shared_ptr<SpecificFloatSemantics> sem = dynamic_pointer_cast<SpecificFloatSemantics>(type->semantics);
         ASSERT(sem);
     
-        if( (const llvm::fltSemantics *)*sem == TypeDb::float_semantics )
+        if( &(const llvm::fltSemantics &)*sem == TypeDb::float_semantics )
             s += "float";
-        else if( (const llvm::fltSemantics *)*sem == TypeDb::double_semantics )
+        else if( &(const llvm::fltSemantics &)*sem == TypeDb::double_semantics )
             s += "double";
-        else if( (const llvm::fltSemantics *)*sem == TypeDb::long_double_semantics )
+        else if( &(const llvm::fltSemantics &)*sem == TypeDb::long_double_semantics )
             s += "long double";
         else    
-            ASSERT( !"no builtin floating type has required semantics"); // TODO drop in a bit vector
+            ASSERT(0)("no builtin floating type has required semantics"); // TODO drop in a bit vector
         
         return s;              
     }
