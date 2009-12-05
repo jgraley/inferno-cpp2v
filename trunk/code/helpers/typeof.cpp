@@ -195,6 +195,7 @@ shared_ptr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 		if( dynamic_pointer_cast<Floating>(optypes[i]) )
 			return optypes[i]; // TODO hack LLVM::FloatSemantics to get a bigness measure
 		                       // note that this always prefers the left one
+		// TODO use static ApFloat::semanticsPrecision() as bigness measure
 
 		// Should only have Integrals from here on
 		shared_ptr<Integral> intop = dynamic_pointer_cast<Integral>(optypes[i]);

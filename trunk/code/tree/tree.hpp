@@ -101,6 +101,12 @@ struct String : Literal { NODE_FUNCTIONS };
 struct SpecificString : String
 {
     NODE_FUNCTIONS
+	virtual bool IsLocalMatch( const Matcher *candidate ) const
+	{
+		ASSERT( candidate );
+    	const SpecificString *c = dynamic_cast<const SpecificString *>(candidate);
+    	return c && c->value == value;
+	}
     string value;
 };
 
@@ -123,6 +129,12 @@ struct SpecificInteger : Integer
     NODE_FUNCTIONS
     SpecificInteger( int i ) : value(INTEGER_DEFAULT_WIDTH) { value = i; }
     SpecificInteger() : value(INTEGER_DEFAULT_WIDTH) { value = 0; }
+	virtual bool IsLocalMatch( const Matcher *candidate ) const
+	{
+		ASSERT( candidate );
+    	const SpecificInteger *c = dynamic_cast<const SpecificInteger *>(candidate);
+    	return c && c->value == value;
+	}
     llvm::APSInt value; // APSint can be signed or unsigned
 };
 
@@ -138,6 +150,12 @@ struct SpecificFloat : Float
     NODE_FUNCTIONS
     SpecificFloat() : value((float)0) {};
     SpecificFloat( llvm::APFloat v ) : value(v) {};
+	virtual bool IsLocalMatch( const Matcher *candidate ) const
+	{
+		ASSERT( candidate );
+    	const SpecificFloat *c = dynamic_cast<const SpecificFloat *>(candidate);
+    	return c && value.bitwiseIsEqual( c->value );
+	}
     llvm::APFloat value; 
 };
 
@@ -173,7 +191,11 @@ struct SpecificIdentifier : virtual Property
 { 
 	SpecificIdentifier() {}
 	SpecificIdentifier( string s ) : name(s) {}
-	//virtual bool IsLocalMatch( const Matcher &candidate ) const
+	virtual bool IsLocalMatch( const Matcher *candidate ) const
+	{
+		ASSERT( candidate );
+		return candidate == this;
+	}
     string name;
     NODE_FUNCTIONS 
 };
@@ -399,6 +421,12 @@ struct FloatSemantics : Property { NODE_FUNCTIONS };
 struct SpecificFloatSemantics : FloatSemantics
 {
     NODE_FUNCTIONS
+	virtual bool IsLocalMatch( const Matcher *candidate ) const
+	{
+		ASSERT( candidate );
+    	const SpecificFloatSemantics *c = dynamic_cast<const SpecificFloatSemantics *>(candidate);
+    	return c && c->value == value;
+	}
     const llvm::fltSemantics *value;
 };    
 
