@@ -69,11 +69,11 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
     {
     	// Get the info from Clang, and make an Inferno type for it
     	shared_ptr<Integral> it;
-        if( si->value.isSigned() )
+        if( ((llvm::APSInt)*si).isSigned() )
         	it = shared_new<Signed>();
         else
         	it = shared_new<Unsigned>();
-        it->width = shared_ptr<SpecificInteger>( new SpecificInteger( si->value.getBitWidth() ) );
+        it->width = shared_ptr<SpecificInteger>( new SpecificInteger( ((llvm::APSInt)*si).getBitWidth() ) );
         return it;
     }
 
@@ -207,12 +207,12 @@ shared_ptr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 
 		if( dynamic_pointer_cast<Signed>(optypes[i]) )
 		{
-			if( width->value >= maxwidth_signed->value )
+			if( (llvm::APSInt)*width >= (llvm::APSInt)*maxwidth_signed )
 		    	maxwidth_signed = width;
 		}
 		else if( dynamic_pointer_cast<Unsigned>(optypes[i]) )
 		{
-			if( !maxwidth_unsigned || width->value >= maxwidth_unsigned->value )
+			if( !maxwidth_unsigned || (llvm::APSInt)*width >= (llvm::APSInt)*maxwidth_unsigned )
 				maxwidth_unsigned = width;
 		}
 		else
@@ -221,7 +221,7 @@ shared_ptr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 
 	// Build the required integral result type
 	shared_ptr<Integral> result;
-	if( maxwidth_unsigned && maxwidth_unsigned->value >= maxwidth_signed->value )
+	if( maxwidth_unsigned && (llvm::APSInt)*maxwidth_unsigned >= (llvm::APSInt)*maxwidth_signed )
 	{
 		result = shared_ptr<Integral>( new Unsigned );
 		result->width = maxwidth_unsigned;

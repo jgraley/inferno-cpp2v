@@ -1211,24 +1211,17 @@ void RootedSearchReplace::Test()
     
     {
         // string property
-        shared_ptr<SpecificString> s1( new SpecificString );
-        shared_ptr<SpecificString> s2( new SpecificString );
-        s1->value = "here";
-        s2->value = "there";
+        shared_ptr<SpecificString> s1( new SpecificString("here") );
+        shared_ptr<SpecificString> s2( new SpecificString("there") );
         ASSERT( sr.Compare( s1, s1 ) == FOUND );
         ASSERT( sr.Compare( s1, s2 ) == NOT_FOUND );
     }    
     
     {
         // int property
-        llvm::APSInt apsint( 32, true );
-        shared_ptr<SpecificInteger> i1( new SpecificInteger );
-        shared_ptr<SpecificInteger> i2( new SpecificInteger );
-        apsint = 3;
-        i1->value = apsint;
-        apsint = 5;
-        i2->value = apsint;
-        TRACE("  %s %s\n", i1->value.toString(10).c_str(), i2->value.toString(10).c_str() );
+        shared_ptr<SpecificInteger> i1( new SpecificInteger(3) );
+        shared_ptr<SpecificInteger> i2( new SpecificInteger(5) );
+        TRACE("  %s %s\n", ((llvm::APSInt)*i1).toString(10).c_str(), ((llvm::APSInt)*i2).toString(10).c_str() );
         ASSERT( sr.Compare( i1, i1 ) == FOUND );
         ASSERT( sr.Compare( i1, i2 ) == NOT_FOUND );
     }    

@@ -254,8 +254,8 @@ private:
 
         shared_ptr<Floating> CreateFloatingType( const llvm::fltSemantics *s )
         {
-            shared_ptr<SpecificFloatSemantics> sem( new SpecificFloatSemantics );
-            sem->value = s;
+        	ASSERT(s);
+            shared_ptr<SpecificFloatSemantics> sem( new SpecificFloatSemantics(s) );
             shared_ptr<Floating> f( new Floating );
             f->semantics = sem;
             return f;
@@ -828,8 +828,7 @@ private:
                 bool err = literal.GetIntegerValue(rv);
 
                 ASSERT( !err && "numeric literal too big for its own type" );
-                shared_ptr<SpecificInteger> nc( new SpecificInteger );
-                nc->value = rv;
+                shared_ptr<SpecificInteger> nc( new SpecificInteger(rv) );
                 return nc;
             }
             else if( literal.isFloatingLiteral() )
@@ -1471,10 +1470,9 @@ private:
             if (literal.hadError())
                 return ExprResult(true);
 
-            shared_ptr<SpecificInteger> nc( new SpecificInteger );
             llvm::APSInt rv(TypeDb::char_bits, !TypeDb::char_default_signed);
             rv = literal.getValue();
-            nc->value = rv;
+            shared_ptr<SpecificInteger> nc( new SpecificInteger(rv) );
 
             return hold_expr.ToRaw( nc );
         }
@@ -1552,8 +1550,7 @@ private:
 
         shared_ptr<String> CreateString( const char *s )
         {
-            shared_ptr<SpecificString> st( new SpecificString );
-            st->value = s;
+            shared_ptr<SpecificString> st( new SpecificString(s) );
             return st;
         }
 

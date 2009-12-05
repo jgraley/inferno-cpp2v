@@ -186,6 +186,18 @@ public:
         return s;
     }
     
+    string Sanitise( string s )
+    {
+        string o;
+        for( int i=0; i<s.size(); i++ )
+        {
+            if( s[i] == '\"' )
+            	o += '\\';
+            o += s[i];
+        }
+        return o;
+    }
+
     string Name( shared_ptr<Node> sp, bool *bold, bool *circle )   // TODO put stringize capabilities into the Property nodes as virtual methods
     {
         *bold=true;
@@ -210,24 +222,20 @@ public:
             *circle = true;
             return string("&&"); // note & is a wildcard in dot but not handled prolperly, this becomes "& "
         }
-        else if( shared_ptr<SpecificString> ss = dynamic_pointer_cast< SpecificString >(sp) )
-            return "\\\"" + ss->value + "\\\"";                     // TODO sanitise the string
-        else if( shared_ptr<SpecificInteger> ic = dynamic_pointer_cast< SpecificInteger >(sp) )
-            return string(ic->value.toString(10)); 
+//        else if( shared_ptr<SpecificString> ss = dynamic_pointer_cast< SpecificString >(sp) )
+  //          return "\\\"" + ss->value + "\\\"";                     // TODO sanitise the string
+//        else if( shared_ptr<SpecificInteger> ic = dynamic_pointer_cast< SpecificInteger >(sp) )
+  //          return string(ic->value.toString(10));
         else if( shared_ptr<SpecificFloat> fc = dynamic_pointer_cast< SpecificFloat >(sp) )
         {
             char hs[256];
-            fc->value.convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
+            ((llvm::APFloat)*fc).convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
             return string(hs); 
-        }           
-        else if( shared_ptr<SpecificFloatSemantics> fs = dynamic_pointer_cast< SpecificFloatSemantics >(sp) )
-        {
-            return SSPrintf("@%p", fs->value );
         }           
         else
         {
             *bold = false;
-            return *sp;
+            return Sanitise( *sp );
         }
     }
     
