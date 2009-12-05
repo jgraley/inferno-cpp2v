@@ -275,7 +275,7 @@ public:
         else
         {
             s += "label = \"<fixed> " + name;
-            vector< Itemiser::Element * > members = Itemiser::Itemise(n);
+            vector< Itemiser::Element * > members = n->Itemise();
             for( int i=0; i<members.size(); i++ )
             {
                 if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )                
@@ -326,7 +326,7 @@ public:
     string DoNodeLinks( shared_ptr<Node> n )
     {    
         string s;
-        vector< Itemiser::Element * > members = Itemiser::Itemise(n);
+        vector< Itemiser::Element * > members = n->Itemise();
         for( int i=0; i<members.size(); i++ )
         {
             TRACE("Size %d i=%d\n", members.size(), i );

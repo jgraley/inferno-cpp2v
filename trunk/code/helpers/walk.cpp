@@ -30,7 +30,7 @@ void Walk::Push( shared_ptr<Node> n )
 { 
     Frame f;
 
-    vector< Itemiser::Element * > members = Itemiser::Itemise(n);
+    vector< Itemiser::Element * > members = n->Itemise();
     for( int i=0; i<members.size(); i++ )
     {
         if( GenericContainer *con = dynamic_cast<GenericContainer *>(members[i]) )
@@ -105,7 +105,7 @@ shared_ptr<Node> Walk::Get() const
     return *GetIterator();
 }
 
-string Walk::GetPathString() const
+Walk::operator string() const
 {
     string s;
     stack< Frame > ps = state; // std::stack doesn't have [] so copy the whole thing and go backwards
