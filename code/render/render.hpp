@@ -71,21 +71,21 @@ private:
     string RenderLiteral( shared_ptr<Literal> sp )
     {
         if( shared_ptr<SpecificString> ss = dynamic_pointer_cast< SpecificString >(sp) )
-            return "\"" + Sanitise( ss->value ) + "\"";                     
+            return Sanitise( *ss );
         else if( shared_ptr<SpecificInteger> ic = dynamic_pointer_cast< SpecificInteger >(sp) )
-            return string(ic->value.toString(10)) + 
-                   (ic->value.isUnsigned() ? "U" : "") + 
-                   (ic->value.getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
-                   (ic->value.getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_long] ? "L" : ""); 
+            return string(((llvm::APSInt)*ic).toString(10)) +
+                   (((llvm::APSInt)*ic).isUnsigned() ? "U" : "") +
+                   (((llvm::APSInt)*ic).getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
+                   (((llvm::APSInt)*ic).getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_long] ? "L" : "");
                    // note, assuming longlong bigger than long, so second L appends first to get LL
         else if( shared_ptr<SpecificFloat> fc = dynamic_pointer_cast< SpecificFloat >(sp) )
         {
             char hs[256];
             // generate hex float since it can be exact
-            fc->value.convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
+            ((llvm::APFloat)*fc).convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
             return string(hs) + 
-                   (&(fc->value.getSemantics())==TypeDb::float_semantics ? "F" : "") +
-                   (&(fc->value.getSemantics())==TypeDb::long_double_semantics ? "L" : ""); 
+                   (&(((llvm::APFloat)*fc).getSemantics())==TypeDb::float_semantics ? "F" : "") +
+                   (&(((llvm::APFloat)*fc).getSemantics())==TypeDb::long_double_semantics ? "L" : "");
         }           
         else if( dynamic_pointer_cast< True >(sp) )
             return string("true");
@@ -147,7 +147,7 @@ private:
         unsigned width;       
         shared_ptr<SpecificInteger> ic = dynamic_pointer_cast<SpecificInteger>( type->width );
         ASSERT(ic && "width must be integer"); 
-        width = ic->value.getLimitedValue();
+        width = ((llvm::APSInt)*ic).getLimitedValue();
                   
         TRACE("width %d\n", width);          
                           
@@ -200,11 +200,11 @@ private:
         shared_ptr<SpecificFloatSemantics> sem = dynamic_pointer_cast<SpecificFloatSemantics>(type->semantics);
         ASSERT(sem);
     
-        if( sem->value == TypeDb::float_semantics )
+        if( (const llvm::fltSemantics *)*sem == TypeDb::float_semantics )
             s += "float";
-        else if( sem->value == TypeDb::double_semantics )
+        else if( (const llvm::fltSemantics *)*sem == TypeDb::double_semantics )
             s += "double";
-        else if( sem->value == TypeDb::long_double_semantics )
+        else if( (const llvm::fltSemantics *)*sem == TypeDb::long_double_semantics )
             s += "long double";
         else    
             ASSERT( !"no builtin floating type has required semantics"); // TODO drop in a bit vector
@@ -255,8 +255,10 @@ private:
         for( int i=0; i<s.size(); i++ )
         {
             char c[10];
-            sprintf( c, "\\x%02x", s[i] );
-            o += c;
+            if( s[i] < ' ' )
+            	o += SSPrintf( c, "\\x%02x", s[i] );
+            else
+            	o += s[i];
         }
         return o;
     }

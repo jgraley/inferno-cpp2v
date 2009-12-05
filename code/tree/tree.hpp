@@ -101,12 +101,23 @@ struct String : Literal { NODE_FUNCTIONS };
 struct SpecificString : String
 {
     NODE_FUNCTIONS
+    SpecificString() {}
+    SpecificString( string s ) :
+    	value(s)
+    {
+    }
 	virtual bool IsLocalMatch( const Matcher *candidate ) const
 	{
 		ASSERT( candidate );
     	const SpecificString *c = dynamic_cast<const SpecificString *>(candidate);
     	return c && c->value == value;
 	}
+	virtual operator string() const
+	{
+		// Since this is a string literal, output it quoted
+		return "\"" + value + "\"";
+	}
+private:
     string value;
 };
 
@@ -127,15 +138,25 @@ struct Integer : Number { NODE_FUNCTIONS };
 struct SpecificInteger : Integer
 {
     NODE_FUNCTIONS
-    SpecificInteger( int i ) : value(INTEGER_DEFAULT_WIDTH) { value = i; }
     SpecificInteger() : value(INTEGER_DEFAULT_WIDTH) { value = 0; }
+    SpecificInteger( llvm::APSInt i ) : value(i) {}
+    SpecificInteger( int i ) : value(INTEGER_DEFAULT_WIDTH) { value = i; }
 	virtual bool IsLocalMatch( const Matcher *candidate ) const
 	{
 		ASSERT( candidate );
     	const SpecificInteger *c = dynamic_cast<const SpecificInteger *>(candidate);
     	return c && c->value == value;
 	}
-    llvm::APSInt value; // APSint can be signed or unsigned
+	virtual operator string() const
+	{
+		return string(value.toString(10));
+	}
+	virtual operator llvm::APSInt() const
+	{
+		return value;
+	}
+private:
+	llvm::APSInt value; // APSint can be signed or unsigned
 };
 
 // Intermediate property node that represents a floating point number of any
@@ -156,6 +177,12 @@ struct SpecificFloat : Float
     	const SpecificFloat *c = dynamic_cast<const SpecificFloat *>(candidate);
     	return c && value.bitwiseIsEqual( c->value );
 	}
+	virtual operator llvm::APFloat() const
+	{
+		return value;
+	}
+
+private:
     llvm::APFloat value; 
 };
 
@@ -426,12 +453,26 @@ struct FloatSemantics : Property { NODE_FUNCTIONS };
 struct SpecificFloatSemantics : FloatSemantics
 {
     NODE_FUNCTIONS
+    SpecificFloatSemantics() {} // TODO get rid one clone has been properly virtualised
+    SpecificFloatSemantics( const llvm::fltSemantics *s ) :
+    	value(s)
+    {
+    }
 	virtual bool IsLocalMatch( const Matcher *candidate ) const
 	{
 		ASSERT( candidate );
     	const SpecificFloatSemantics *c = dynamic_cast<const SpecificFloatSemantics *>(candidate);
     	return c && c->value == value;
 	}
+	virtual operator string() const
+	{
+		return SSPrintf("fltSemantics@%p", value );
+	}
+	operator const llvm::fltSemantics *() const
+	{
+		return value;
+	}
+private:
     const llvm::fltSemantics *value;
 };    
 
