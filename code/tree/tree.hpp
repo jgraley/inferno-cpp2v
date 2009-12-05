@@ -103,7 +103,6 @@ struct String : Literal { NODE_FUNCTIONS };
 struct SpecificString : String
 {
     NODE_FUNCTIONS
-    SpecificString() {}
     SpecificString( string s ) :
     	value(s)
     {
@@ -140,7 +139,6 @@ struct Integer : Number { NODE_FUNCTIONS };
 struct SpecificInteger : Integer, llvm::APSInt
 {
     NODE_FUNCTIONS
-    SpecificInteger() : llvm::APSInt(INTEGER_DEFAULT_WIDTH) { *(llvm::APSInt *)this = 0; }
     SpecificInteger( llvm::APSInt i ) : llvm::APSInt(i) {}
     SpecificInteger( int i ) : llvm::APSInt(INTEGER_DEFAULT_WIDTH) { *(llvm::APSInt *)this = i; }
 	virtual bool IsLocalMatch( const Matcher *candidate ) const
@@ -169,7 +167,6 @@ struct Float : Number { NODE_FUNCTIONS };
 struct SpecificFloat : Float, llvm::APFloat
 {
     NODE_FUNCTIONS
-    SpecificFloat() : llvm::APFloat((float)0) {};
     SpecificFloat( llvm::APFloat v ) : llvm::APFloat(v) {};
 	virtual bool IsLocalMatch( const Matcher *candidate ) const
 	{
@@ -229,6 +226,11 @@ struct SpecificIdentifier : virtual Property
     NODE_FUNCTIONS
 	SpecificIdentifier() {}
 	SpecificIdentifier( string s ) : name(s) {}
+    virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p )
+    {
+    	return p; // duplicating specific identifiers just gets the same id, since they are unique.
+    	// This means x.Duplicate() matches x, wheras x.Clone() does not
+    }
 	virtual bool IsLocalMatch( const Matcher *candidate ) const
 	{
 		ASSERT( candidate );
@@ -463,7 +465,6 @@ struct FloatSemantics : Property { NODE_FUNCTIONS };
 struct SpecificFloatSemantics : FloatSemantics
 {
     NODE_FUNCTIONS
-    SpecificFloatSemantics() {} // TODO get rid one clone has been properly virtualised
     SpecificFloatSemantics( const llvm::fltSemantics *s ) :
     	value(s)
     {

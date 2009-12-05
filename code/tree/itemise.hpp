@@ -1,5 +1,5 @@
-#ifndef ITEMISE_MEMBERS_HPP
-#define ITEMISE_MEMBERS_HPP
+#ifndef ITEMISE_HPP
+#define ITEMISE_HPP
 
 #include <stdio.h>
 #include <vector>
@@ -41,8 +41,8 @@ public:
                                                                const Itemiser *itemise_object )
     {
         (void)itemise_architype; // don't care about value of architypes; just want the type
-        static ITEMISE_TYPE d;
-        static ITEMISE_TYPE s; 
+        ITEMISE_TYPE d( *itemise_architype );
+        ITEMISE_TYPE s( *itemise_architype );
         bp = (const char *)dynamic_cast<const ITEMISE_TYPE *>(itemise_object); 
         dstart = (char *)&d;
         dend = dstart + sizeof(d);
@@ -59,35 +59,13 @@ public:
     static const char *dend;
     static vector<Element *> v;
     
-    static vector< Itemiser::Element * > Itemise( shared_ptr<Itemiser> itemise_object, 
-                                                  shared_ptr<Itemiser> limit_class_architype )
-    {
-        return Itemise( itemise_object.get(), limit_class_architype.get() );
-    }                                                  
-
-    static vector< Itemiser::Element * > Itemise( shared_ptr<Itemiser> itemise_object )
-    {
-        return Itemise( itemise_object.get() );
-    }                                                  
-
-    static vector< Itemiser::Element * > Itemise( const Itemiser *itemise_object, 
-                                                  const Itemiser *limit_class_architype = 0 )
-    {
-        if( limit_class_architype )
-            return limit_class_architype->ItemiseVirtual( itemise_object ); // Only itemise members of itemise_object that are in the superclass of limit_class_architype
-        else
-            return itemise_object->ItemiseVirtual( itemise_object );        // Itemise all members of itemise_object
-    }    
-    
-    virtual vector< Itemiser::Element * > ItemiseVirtual(const Itemiser *itemise_object) const = 0;
+    virtual vector< Itemiser::Element * > Itemise(const Itemiser *itemise_object) const = 0;
 };
 
 #define ITEMISE_FUNCTION \
-	private: friend class Itemiser; \
-    virtual vector< Itemiser::Element * > ItemiseVirtual( const Itemiser *itemise_object ) const  \
+    virtual vector< Itemiser::Element * > Itemise( const Itemiser *itemise_object = 0 ) const  \
     { \
-        return Itemiser::ItemiseStatic( this, itemise_object ); \
-    } \
-    public:
+        return Itemiser::ItemiseStatic( this, itemise_object ? itemise_object : this ); \
+    }
 
 #endif
