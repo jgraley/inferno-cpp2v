@@ -9,6 +9,8 @@
 #include <string>
 #include <deque>
 #include "generics.hpp"
+#include "clang/Parse/DeclSpec.h"
+#include "tree/type_db.hpp"
 
 //TODO all these in a name space perhaps?
 
@@ -135,28 +137,26 @@ struct Integer : Number { NODE_FUNCTIONS };
 // so that we can deal with any size of number (so this can be used for
 // large bit vectors). The LLVM object also stores the signedness. The
 // value must always be filled in.
-struct SpecificInteger : Integer
+struct SpecificInteger : Integer, llvm::APSInt
 {
     NODE_FUNCTIONS
-    SpecificInteger() : value(INTEGER_DEFAULT_WIDTH) { value = 0; }
-    SpecificInteger( llvm::APSInt i ) : value(i) {}
-    SpecificInteger( int i ) : value(INTEGER_DEFAULT_WIDTH) { value = i; }
+    SpecificInteger() : llvm::APSInt(INTEGER_DEFAULT_WIDTH) { *(llvm::APSInt *)this = 0; }
+    SpecificInteger( llvm::APSInt i ) : llvm::APSInt(i) {}
+    SpecificInteger( int i ) : llvm::APSInt(INTEGER_DEFAULT_WIDTH) { *(llvm::APSInt *)this = i; }
 	virtual bool IsLocalMatch( const Matcher *candidate ) const
 	{
 		ASSERT( candidate );
     	const SpecificInteger *c = dynamic_cast<const SpecificInteger *>(candidate);
-    	return c && c->value == value;
+    	return c && *(llvm::APSInt *)c == *(llvm::APSInt *)this;
 	}
 	virtual operator string() const
 	{
-		return string(value.toString(10));
+        return string(toString(10)) + // decimal
+               (isUnsigned() ? "U" : "") +
+               (getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
+               (getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_long] ? "L" : "");
+               // note, assuming longlong bigger than long, so second L appends first to get LL
 	}
-	virtual operator llvm::APSInt() const
-	{
-		return value;
-	}
-private:
-	llvm::APSInt value; // APSint can be signed or unsigned
 };
 
 // Intermediate property node that represents a floating point number of any
@@ -166,24 +166,26 @@ struct Float : Number { NODE_FUNCTIONS };
 // Property node for an floating point number. We use LLVM's class for this, 
 // so that we can deal with any representation convention. The value must 
 // always be filled in. To determine the type, use llvm::getSemantics()
-struct SpecificFloat : Float
+struct SpecificFloat : Float, llvm::APFloat
 {
     NODE_FUNCTIONS
-    SpecificFloat() : value((float)0) {};
-    SpecificFloat( llvm::APFloat v ) : value(v) {};
+    SpecificFloat() : llvm::APFloat((float)0) {};
+    SpecificFloat( llvm::APFloat v ) : llvm::APFloat(v) {};
 	virtual bool IsLocalMatch( const Matcher *candidate ) const
 	{
 		ASSERT( candidate );
     	const SpecificFloat *c = dynamic_cast<const SpecificFloat *>(candidate);
-    	return c && value.bitwiseIsEqual( c->value );
+    	return c && bitwiseIsEqual( *c );
 	}
-	virtual operator llvm::APFloat() const
+	virtual operator string() const
 	{
-		return value;
+		char hs[256];
+		// generate hex float since it can be exact
+		convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
+		return string(hs) +
+			   (&getSemantics()==TypeDb::float_semantics ? "F" : "") +
+			   (&getSemantics()==TypeDb::long_double_semantics ? "L" : "");
 	}
-
-private:
-    llvm::APFloat value; 
 };
 
 // Intermediate property node that represents any boolean value.
@@ -192,8 +194,16 @@ private:
 struct Bool : Literal { NODE_FUNCTIONS };
 
 // Property node for boolean values true and false
-struct True : Bool { NODE_FUNCTIONS };
-struct False : Bool { NODE_FUNCTIONS };
+struct True : Bool
+{
+	NODE_FUNCTIONS
+	virtual operator string() const { return "true"; }
+};
+struct False : Bool
+{
+	NODE_FUNCTIONS
+	virtual operator string() const { return "false"; }
+};
 
 //////////////////////////// Declarations /////////////////////
 
