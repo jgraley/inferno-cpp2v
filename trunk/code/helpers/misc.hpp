@@ -14,7 +14,7 @@ shared_ptr<Record> GetRecordDeclaration( shared_ptr<Program> program, shared_ptr
 shared_ptr<Instance> GetDeclaration( shared_ptr<Program> program, shared_ptr<InstanceIdentifier> id ); 
 
 // Hunt through a record and its bases to find the named member
-shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<Record> r, shared_ptr<SpecificInstanceIdentifier> sii );
+shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<Record> r, string name );
 
 // concatenate sequences by adding them, like strings etc
 template<typename T>

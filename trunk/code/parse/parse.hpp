@@ -1414,10 +1414,10 @@ private:
             ASSERT( tibase );
             shared_ptr<Record> rbase = GetRecordDeclaration(all_decls, tibase);
             ASSERT( rbase && "thing on left of ./-> is not a record/record ptr" );
-            shared_ptr<SpecificInstanceIdentifier> sii( new SpecificInstanceIdentifier( string(Member.getName()) ) );
-            a->member = FindMemberByName( all_decls, rbase, sii )->identifier;
+            shared_ptr<Instance> m = FindMemberByName( all_decls, rbase, string(Member.getName()) );
+            ASSERT(m && "in r.m or (&r)->m, could not find m in r");
 
-            ASSERT(a->member && "in r.m or (&r)->m, could not find m in r");
+            a->member = m->identifier;
 
             return hold_expr.ToRaw( a );
         }
