@@ -189,6 +189,7 @@ struct Identifier : virtual Property { NODE_FUNCTIONS };
 // names for new objects easier.
 struct SpecificIdentifier : virtual Property
 { 
+    NODE_FUNCTIONS
 	SpecificIdentifier() {}
 	SpecificIdentifier( string s ) : name(s) {}
 	virtual bool IsLocalMatch( const Matcher *candidate ) const
@@ -196,8 +197,12 @@ struct SpecificIdentifier : virtual Property
 		ASSERT( candidate );
 		return candidate == this;
 	}
-    string name;
-    NODE_FUNCTIONS 
+	virtual operator string() const // this is relied upon to just return the identifier name
+	{
+		return name;
+	}
+private:
+	string name;
 };
 
 // Identifier for an instance (variable or object or function)

@@ -211,7 +211,7 @@ public:
             return string("&&"); // note & is a wildcard in dot but not handled prolperly, this becomes "& "
         }
         else if( shared_ptr<SpecificIdentifier> ii = dynamic_pointer_cast<SpecificIdentifier>(sp) )
-            return ii->name;                     
+            return *ii;
         else if( shared_ptr<SpecificString> ss = dynamic_pointer_cast< SpecificString >(sp) )
             return "\\\"" + ss->value + "\\\"";                     // TODO sanitise the string
         else if( shared_ptr<SpecificInteger> ic = dynamic_pointer_cast< SpecificInteger >(sp) )

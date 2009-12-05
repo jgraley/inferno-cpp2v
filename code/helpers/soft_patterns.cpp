@@ -69,7 +69,7 @@ shared_ptr<Node> SoftMakeIdentifier::DuplicateSubtree( const RootedSearchReplace
 	    ASSERT( si )("trying to make an identifier from %s which should be a kind of SpecificIdentifier", TypeInfo(n).name().c_str());
 	    // Use sprintf to build a new identifier based on the found one. Obviously %s
 	    // becomes the old identifier's name.
-	    newname = SSPrintf(format.c_str(), si->name.c_str());
+	    newname = SSPrintf(format.c_str(), ((string)*si).c_str());
 	}
 	else
 	{
