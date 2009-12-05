@@ -206,9 +206,8 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
 		// Recurse through the children. Note that the itemiser internally does a
 		// dynamic_cast onto the type of pattern, and itemises over that type. x must
 		// be dynamic_castable to pattern's type.
-		vector< Itemiser::Element * > pattern_memb = Itemiser::Itemise( pattern.get() );
-		vector< Itemiser::Element * > x_memb = Itemiser::Itemise( x.get(),           // The thing we're itemising
-																  pattern.get() );   // Just get the members corresponding to pattern's class
+		vector< Itemiser::Element * > pattern_memb = pattern->Itemise();
+		vector< Itemiser::Element * > x_memb = pattern->Itemise( x.get() );   // Get the members of x corresponding to pattern's class
 		ASSERT( pattern_memb.size() == x_memb.size() );
 		for( int i=0; i<pattern_memb.size(); i++ )
 		{
@@ -520,7 +519,7 @@ RootedSearchReplace::Result RootedSearchReplace::Compare( shared_ptr<Node> x,
 // Clear all pointer members in supplied dest to NULL
 void RootedSearchReplace::ClearPtrs( shared_ptr<Node> dest ) const
 {
-    vector< Itemiser::Element * > dest_memb = Itemiser::Itemise( dest.get() );
+    vector< Itemiser::Element * > dest_memb = dest->Itemise();
     for( int i=0; i<dest_memb.size(); i++ )
     {
         if( GenericSequence *dest_seq = dynamic_cast<GenericSequence *>(dest_memb[i]) )                
@@ -553,9 +552,8 @@ void RootedSearchReplace::Overlay( shared_ptr<Node> dest,
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of source, and itemises over that type. dest must
     // be dynamic_castable to source's type.
-    vector< Itemiser::Element * > source_memb = Itemiser::Itemise( source.get() ); 
-    vector< Itemiser::Element * > dest_memb = Itemiser::Itemise( dest.get(),       // The thing we're itemising
-                                                                 source.get() );   // Just get the members corresponding to source's class
+    vector< Itemiser::Element * > source_memb = source->Itemise();
+    vector< Itemiser::Element * > dest_memb = source->Itemise( dest.get() ); // Get the members of dest corresponding to source's class
     ASSERT( source_memb.size() == dest_memb.size() );
 
     TRACE("Overlaying %d members %s over %s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
@@ -736,19 +734,9 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 				return newsource;
 		}
 
-    	// Do not duplicate specific identifiers.
-    	if( dynamic_pointer_cast<SpecificIdentifier>( source ) )
-    	{
-    		// Substitute is an identifier, so preserve its uniqueness by just returning
-    		// the same node. Don't do any more - we wouldn't want to change the
-    		// identifier in the tree even if it had members, lol!
-    		TRACE("Not duplicating identifiers when under substitution\n");
-    		return source;
-    	}
-
-     	TRACE("duplicating supplied node\n");
+    	TRACE("duplicating supplied node\n");
 		// Make the new node (destination node)
-		shared_ptr<Cloner> dup_dest = Cloner::Clone( source );
+		shared_ptr<Cloner> dup_dest = source->Duplicate(source);
 		dest = dynamic_pointer_cast<Node>( dup_dest );
 		ASSERT(dest);
 
