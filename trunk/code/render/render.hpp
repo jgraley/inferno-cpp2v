@@ -102,7 +102,7 @@ private:
         {
             // TODO maybe just try casting to Named
             if( shared_ptr<SpecificIdentifier> ii = dynamic_pointer_cast<SpecificIdentifier>( id ) )
-                ids = ii->name;
+                ids = *ii;
             else
                 ids = ERROR_UNSUPPORTED( (id) );
 

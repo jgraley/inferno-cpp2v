@@ -183,9 +183,8 @@ void CrazyNine::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
 		    s_stuff->terminus = s_nine;
 
         shared_ptr<Union> r_union( new Union );
-          shared_ptr<SpecificTypeIdentifier> r_union_name( new SpecificTypeIdentifier );
+          shared_ptr<SpecificTypeIdentifier> r_union_name( new SpecificTypeIdentifier("nine") );
           r_union->identifier = r_union_name;
-            r_union_name->name = string("nine"); // In the end, there can be only nine!!!1
 
 		sr1.Configure(s_record, r_union);
 	}

@@ -51,7 +51,7 @@ shared_ptr<Scope> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> 
 
 	
 	if( shared_ptr<SpecificIdentifier> sid = dynamic_pointer_cast<SpecificIdentifier>( id ) )
-		ASSERT(0)("type %s name is %s\n", TypeInfo(id).name().c_str(), sid->name.c_str() );
+		ASSERT(0)("type %s name is \n", TypeInfo(id).name().c_str())( *sid );
 	else
 		ASSERT(0)("non-specific type %s - should not be doing GetScope() on these\n", TypeInfo(id).name().c_str() );
 	// every identifier should have a scope - if this fails, we've missed out a kind of scope
