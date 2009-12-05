@@ -199,6 +199,10 @@ struct NodeBases : Magic,
                    Itemiser,
                    Cloner
 {
+	virtual operator string() const
+	{
+		return TypeInfo(this).name();
+	}
 };
 
 extern void GenericsTest();

@@ -1414,8 +1414,8 @@ private:
             ASSERT( tibase );
             shared_ptr<Record> rbase = GetRecordDeclaration(all_decls, tibase);
             ASSERT( rbase && "thing on left of ./-> is not a record/record ptr" );
-
-            a->member = FindMemberByName( all_decls, rbase, string(Member.getName()) )->identifier;
+            shared_ptr<SpecificInstanceIdentifier> sii( new SpecificInstanceIdentifier( string(Member.getName()) ) );
+            a->member = FindMemberByName( all_decls, rbase, sii )->identifier;
 
             ASSERT(a->member && "in r.m or (&r)->m, could not find m in r");
 

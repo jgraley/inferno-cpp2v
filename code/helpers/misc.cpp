@@ -64,7 +64,7 @@ shared_ptr<Instance> GetDeclaration( shared_ptr<Program> program, shared_ptr<Ins
 }
 
 // Hunt through a record and its bases to find the named member
-shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<Record> r, string name )
+shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<Record> r, shared_ptr<SpecificInstanceIdentifier> sii )
 {
     TRACE("Record has %d members\n", r->members.size() );
     
@@ -72,7 +72,7 @@ shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<R
     FOREACH( shared_ptr<Declaration> d, r->members )
         if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>(d) )
             if( shared_ptr<SpecificInstanceIdentifier> sss = dynamic_pointer_cast<SpecificInstanceIdentifier>(i->identifier) )
-                if( (string)*sss == name )
+                if( sii->IsLocalMatch( sss.get() ) )
                     return i;
                 
     // Try recursing through the base classes, if there are any
@@ -82,7 +82,7 @@ shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<R
             shared_ptr<UserType> ut = GetDeclaration( program, b->record );
             shared_ptr<InheritanceRecord> ir = dynamic_pointer_cast<InheritanceRecord>(ut);
             ASSERT(ir);
-            if( shared_ptr<Instance> i = FindMemberByName( program, ir, name ) )
+            if( shared_ptr<Instance> i = FindMemberByName( program, ir, sii ) )
                 return i;
         }
                 
