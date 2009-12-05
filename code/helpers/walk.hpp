@@ -96,7 +96,7 @@ struct WalkingIterator : public STLContainerBase<Itemiser::Element, GenericShare
 	virtual bool operator==( const STLContainerBase<Itemiser::Element, GenericSharedPtr>::iterator_base &ib ) const
 	{
 		const WalkingIterator *pi = dynamic_cast<const WalkingIterator *>(&ib);
-		ASSERT(pi)("Comparing walking iterator with something else %s", typeid(ib).name());
+		ASSERT(pi)("Comparing walking iterator with something else ")(ib);
 		if( pi->Done() || Done() )
 			return pi->Done() && Done();
 		//ASSERTFAIL("Comparison must be with end");

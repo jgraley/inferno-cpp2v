@@ -33,9 +33,9 @@ public:
 
     RAW ToRaw( shared_ptr<NODE> p )
     {
-        ASSERT( p && "Cannot convert NULL pointer to raw" );
+        ASSERT( p )( "Cannot convert NULL pointer to raw" );
         unsigned i = (unsigned)hold_list.size(); // the index of the next push_back()
-        ASSERT( (i & 0xFF000000) == 0 && "gone over maximum number of elements, probably due to infinite loop, if not rejig id" );
+        ASSERT( (i & 0xFF000000) == 0 )( "gone over maximum number of elements, probably due to infinite loop, if not rejig id" );
         i |= id; // embed an id for the current hold object  
         //TRACE("ToRaw 0x%08x\n", i );
         void *vp = reinterpret_cast<void *>( i ); 
@@ -46,10 +46,10 @@ public:
     
     shared_ptr<NODE> FromRaw( RAW p )
     {
-        ASSERT( p != 0 && "this raw value is uninitialised");        
+        ASSERT( p != 0 )( "this raw value is uninitialised");
         unsigned i = reinterpret_cast<unsigned>(p);
         //TRACE("FromRaw 0x%08x (id=0x%08x)\n", i, id );
-        ASSERT( (i & 0xFF000000) == id && "this raw value was stored to a different holder or uninitialised");
+        ASSERT( (i & 0xFF000000) == id )( "this raw value was stored to a different holder or uninitialised");
         i &= 0x00FFFFFF; 
         return hold_list[i];
     }

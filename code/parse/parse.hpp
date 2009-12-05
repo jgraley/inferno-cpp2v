@@ -283,8 +283,8 @@ private:
             {
                 const clang::DeclSpec &DS = D.getDeclSpec();
                 clang::DeclSpec::TST t = DS.getTypeSpecType();
-                ASSERT( DS.getTypeSpecComplex() == clang::DeclSpec::TSC_unspecified &&
-                        "complex types not supported" );
+                ASSERT( DS.getTypeSpecComplex() == clang::DeclSpec::TSC_unspecified )
+                      ( "complex types not supported" );
                 switch( t )
                 {
                     case clang::DeclSpec::TST_int:
@@ -827,7 +827,7 @@ private:
                 llvm::APSInt rv(bits, literal.isUnsigned);
                 bool err = literal.GetIntegerValue(rv);
 
-                ASSERT( !err && "numeric literal too big for its own type" );
+                ASSERT( !err )( "numeric literal too big for its own type" );
                 shared_ptr<SpecificInteger> nc( new SpecificInteger(rv) );
                 return nc;
             }
@@ -926,7 +926,7 @@ private:
         {
             shared_ptr<ConditionalOperator> co(new ConditionalOperator);
             co->operands.push_back( hold_expr.FromRaw(Cond) );
-            ASSERT(LHS && "gnu extension not supported");
+            ASSERT(LHS )( "gnu extension not supported");
             co->operands.push_back( hold_expr.FromRaw(LHS) );
             co->operands.push_back( hold_expr.FromRaw(RHS) );
             return hold_expr.ToRaw( co );
@@ -1156,7 +1156,7 @@ private:
         {
             shared_ptr<Statement> s( hold_stmt.FromRaw( rsw ) );
             shared_ptr<Switch> sw( dynamic_pointer_cast<Switch>(s) );
-            ASSERT(sw && "expecting a switch statement");
+            ASSERT(sw)("expecting a switch statement");
 
             StmtTy *body = (StmtTy *)Body; // Third is really a statement, the Actions API is wrong
             sw->body = hold_stmt.FromRaw( body );
@@ -1215,7 +1215,7 @@ private:
                     return shared_ptr<Private>(new Private);
                     break;
                 case clang::AS_none:
-                    ASSERT( rec && "no access specifier and record not supplied so cannot deduce");
+                    ASSERT( rec )( "no access specifier and record not supplied so cannot deduce");
                     // members are never AS_none because clang deals. Bases can be AS_none, so we supply the enclosing record type
                     if( dynamic_pointer_cast<Class>(rec) )
                         return shared_ptr<Private>(new Private);
@@ -1240,20 +1240,20 @@ private:
 
             if( BitfieldWidth )
             {
-                ASSERT( o && "only Instances may be bitfields" );
+                ASSERT( o )( "only Instances may be bitfields" );
                 shared_ptr<Integral> n( dynamic_pointer_cast<Integral>( o->type ) );
-                ASSERT( n && "cannot specify width of non-numeric type" );
+                ASSERT( n )( "cannot specify width of non-numeric type" );
                 shared_ptr<Expression> ee = hold_expr.FromRaw(BitfieldWidth);
                 shared_ptr<Literal> ll = dynamic_pointer_cast<Literal>(ee);
-                ASSERT(ll && "bitfield width must be literal, not expression"); // TODO evaluate
+                ASSERT(ll )( "bitfield width must be literal, not expression"); // TODO evaluate
                 shared_ptr<SpecificInteger> ii = dynamic_pointer_cast<SpecificInteger>(ll);
-                ASSERT(ll && "bitfield width must be integer");
+                ASSERT(ll )( "bitfield width must be integer");
                 n->width = ii;
             }
 
             if( Init )
             {
-                ASSERT( o && "only Instances may have initialisers");
+                ASSERT( o )( "only Instances may have initialisers");
                 o->initialiser = hold_expr.FromRaw( Init );
             }
 
@@ -1412,9 +1412,9 @@ private:
             shared_ptr<TypeIdentifier> tibase = dynamic_pointer_cast<TypeIdentifier>(tbase);
             ASSERT( tibase );
             shared_ptr<Record> rbase = GetRecordDeclaration(all_decls, tibase);
-            ASSERT( rbase && "thing on left of ./-> is not a record/record ptr" );
+            ASSERT( rbase )( "thing on left of ./-> is not a record/record ptr" );
             shared_ptr<Instance> m = FindMemberByName( all_decls, rbase, string(Member.getName()) );
-            ASSERT(m && "in r.m or (&r)->m, could not find m in r");
+            ASSERT(m)("in r.m or (&r)->m, could not find m in r");
 
             a->member = m->identifier;
 
@@ -1482,7 +1482,7 @@ private:
                                          clang::InitListDesignations &Designators,
                                          clang::SourceLocation RParenLoc)
         {
-            ASSERT( !Designators.hasAnyDesignators() && "Designators in init lists unsupported" );
+            ASSERT( !Designators.hasAnyDesignators() )( "Designators in init lists unsupported" );
             // Assume initialiser is for an Array, and create an ArrayInitialiser node
             // even if it's really a struct init. We'll come along later and replace with a
             // RecordInitialiser when we can see what the struct is.
@@ -1596,7 +1596,7 @@ private:
             {
                 shared_ptr<Declaration> lastd( hold_decl.FromRaw( LastEnumConstant ) );
                 shared_ptr<Instance> lasto( dynamic_pointer_cast<Instance>(lastd) );
-                ASSERT(lasto && "unexpected kind of declaration inside an enum");
+                ASSERT(lasto)( "unexpected kind of declaration inside an enum");
                 shared_ptr<Add> inf( new Add );
                 shared_ptr<Expression> ei = lasto->identifier;
                 inf->operands.insert( ei );
@@ -1616,7 +1616,7 @@ private:
         {
             shared_ptr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
             shared_ptr<Enum> e( dynamic_pointer_cast<Enum>(d) );
-            ASSERT( e && "expected the declaration to be an enum");
+            ASSERT( e )( "expected the declaration to be an enum");
             for( int i=0; i<NumElements; i++ )
                e->members.insert( hold_decl.FromRaw( Elements[i] ) );
         }

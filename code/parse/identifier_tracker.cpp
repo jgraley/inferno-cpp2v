@@ -144,7 +144,7 @@ string IdentifierTracker::ToString( shared_ptr<TNode> ts )
         s = "::" + ss;
         ts = ts->parent;        
         i++;
-        ASSERT( i<=tnodes.size() && "TNode loop detected!!!!!!!!! OH NO!!!!!1\n" );            
+        ASSERT( i<=tnodes.size() )( "TNode loop detected!!!!!!!!! OH NO!!!!!1\n" );
     }
     
     if( s.empty() )

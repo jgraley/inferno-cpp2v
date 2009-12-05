@@ -2,6 +2,7 @@
 #define TRACE_HPP
 
 #include <string>
+#include <typeinfo>
 using namespace std;
 
 /*
@@ -43,6 +44,18 @@ private:
     const char * const function;
     Flags flags;
     static bool continuation;
+};
+
+class Traceable
+{
+public:
+	virtual operator string() const
+	{
+        const char *s = typeid( *this ).name();
+        while( s[0]>='0' && s[0]<='9' )
+           s++;
+        return s;
+	}
 };
 
 #define INFERNO_CURRENT_FUNCTION __func__

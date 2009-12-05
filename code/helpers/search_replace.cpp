@@ -212,27 +212,27 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
 		for( int i=0; i<pattern_memb.size(); i++ )
 		{
 			Result r;
-			ASSERT( pattern_memb[i] && "itemise returned null element");
-			ASSERT( x_memb[i] && "itemise returned null element");
+			ASSERT( pattern_memb[i] )( "itemise returned null element");
+			ASSERT( x_memb[i] )( "itemise returned null element");
 
 			if( GenericSequence *pattern_seq = dynamic_cast<GenericSequence *>(pattern_memb[i]) )
 			{
 				GenericSequence *x_seq = dynamic_cast<GenericSequence *>(x_memb[i]);
-				ASSERT( x_seq && "itemise for target didn't match itemise for pattern");
+				ASSERT( x_seq )( "itemise for target didn't match itemise for pattern");
 				TRACE("Member %d is Sequence, target %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
 				r = DecidedCompare( *x_seq, *pattern_seq, keys, can_key, conj );
 			}
 			else if( GenericCollection *pattern_col = dynamic_cast<GenericCollection *>(pattern_memb[i]) )
 			{
 				GenericCollection *x_col = dynamic_cast<GenericCollection *>(x_memb[i]);
-				ASSERT( x_col && "itemise for target didn't match itemise for pattern");
+				ASSERT( x_col )( "itemise for target didn't match itemise for pattern");
 				TRACE("Member %d is Collection, target %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
 				r = DecidedCompare( *x_col, *pattern_col, keys, can_key, conj );
 			}
 			else if( GenericSharedPtr *pattern_ptr = dynamic_cast<GenericSharedPtr *>(pattern_memb[i]) )
 			{
 				GenericSharedPtr *x_ptr = dynamic_cast<GenericSharedPtr *>(x_memb[i]);
-				ASSERT( x_ptr && "itemise for target didn't match itemise for pattern");
+				ASSERT( x_ptr )( "itemise for target didn't match itemise for pattern");
 				TRACE("Member %d is SharedPtr, pattern ptr=%p\n", i, pattern_ptr->get());
 				r = DecidedCompare( *x_ptr, *pattern_ptr, keys, can_key, conj );
 			}
@@ -564,26 +564,26 @@ void RootedSearchReplace::Overlay( shared_ptr<Node> dest,
     for( int i=0; i<dest_memb.size(); i++ )
     {
     	TRACE("Overlaying member %d\n", i );
-        ASSERT( source_memb[i] && "itemise returned null element" );
-        ASSERT( dest_memb[i] && "itemise returned null element" );
+        ASSERT( source_memb[i] )( "itemise returned null element" );
+        ASSERT( dest_memb[i] )( "itemise returned null element" );
         
         if( GenericSequence *source_seq = dynamic_cast<GenericSequence *>(source_memb[i]) )                
         {
             GenericSequence *dest_seq = dynamic_cast<GenericSequence *>(dest_memb[i]);
-            ASSERT( dest_seq && "itemise for dest didn't match itemise for source");
+            ASSERT( dest_seq )( "itemise for dest didn't match itemise for source");
             Overlay( dest_seq, source_seq, keys, can_key, current_key );
         }            
         else if( GenericCollection *source_col = dynamic_cast<GenericCollection *>(source_memb[i]) )
         {
         	GenericCollection *dest_col = dynamic_cast<GenericCollection *>(dest_memb[i]);
-            ASSERT( dest_col && "itemise for dest didn't match itemise for source");
+            ASSERT( dest_col )( "itemise for dest didn't match itemise for source");
             Overlay( dest_col, source_col, keys, can_key, current_key );
         }
         else if( GenericSharedPtr *source_ptr = dynamic_cast<GenericSharedPtr *>(source_memb[i]) )         
         {
         	TRACE();
             GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]);
-            ASSERT( dest_ptr && "itemise for target didn't match itemise for source");
+            ASSERT( dest_ptr )( "itemise for target didn't match itemise for source");
             if( *source_ptr ) // Masked: where source is NULL, do not overwrite
                 *dest_ptr = DuplicateSubtree( *source_ptr, keys, can_key, current_key );
             if( !current_key )
@@ -746,8 +746,7 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     
 	// Overlaying requires type compatibility - check for this
 	ASSERT( source->IsLocalMatch(dest.get()) )
-		  ( "replace pattern %s must be a non-strict superclass of substitute %s, so that its members are a subset",
-			TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str() );
+		  ( "replace pattern ")(*source)(" must be a non-strict superclass of substitute ")(*dest)(", so that its members are a subset");
 	TRACE();
 	// Copy the source over,  except for any NULLs in the source. If source is superclass
 	// of destination (i.e. has possibly fewer members) the missing ones will be left alone.

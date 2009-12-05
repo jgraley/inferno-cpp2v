@@ -18,12 +18,12 @@
 // be a base (or compatible type) for the elements of all sub-containers.
 //
 template< class SUB_BASE, typename VALUE_TYPE >
-class STLContainerBase : public virtual SUB_BASE
+class STLContainerBase : public Traceable, public virtual SUB_BASE
 {
 public:
 	// Abstract base class for the iterators in sub-containers. This is just to get
 	// virtual calls - this is not the generic iterator.
-	struct iterator_base
+	struct iterator_base : public Traceable
 	{
 		// TODO const iterator and const versions of begin(), end()
 		virtual shared_ptr<iterator_base> Clone() const = 0; // Make another copy of the present iterator
@@ -39,7 +39,7 @@ public:
 public:
 	// Generic iterator, uses boost::shared_ptr<> and Clone() to manage the real iterator
 	// and forwards all the operations using co-variance where possible.
-	class iterator
+	class iterator : public Traceable
 	{
 	public:
 		typedef forward_iterator_tag iterator_category;
@@ -354,7 +354,7 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
 	virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib ) const
 	{
 		const PointIterator *pi = dynamic_cast<const PointIterator *>(&ib);
-		ASSERT(pi)("Comparing point iterator with something else %s", typeid(ib).name());
+		ASSERT(pi)("Comparing point iterator with something else ")(ib);
 		return pi->element == element;
 	}
 	
@@ -410,7 +410,7 @@ struct CountingIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterato
 	virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib ) const
 	{
 		const CountingIterator *pi = dynamic_cast<const CountingIterator *>(&ib);
-		ASSERT(pi)("Comparing counting iterator with something else %s", typeid(ib).name());
+		ASSERT(pi)("Comparing counting iterator with something else ")( ib );
 		return pi->element == element;
 	}
 
