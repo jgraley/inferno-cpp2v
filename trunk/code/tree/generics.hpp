@@ -202,6 +202,28 @@ struct NodeBases : Magic,
 {
 };
 
+//////////////////////////// Node Model ////////////////////////////
+
+// Base class for all tree nodes and nodes in search/replace
+// patterns etc. Convention is to use "struct" for derived
+// node classes so that everything is public (inferno tree nodes
+// are more like records in a database, they have only minimal
+// functionality). Also, all derived structs should contain the
+// NODE_FUNCTIONS macro which expands to a few virtual functions
+// required for common ("bounced") functionality. Where multiple
+// inheritance diamonds arise, Node should be derived virtually
+// (we always want the set-restricting model of inheritance in
+// the inferno tree node hierarchy).
+struct Node : NodeBases
+{
+    NODE_FUNCTIONS
+
+    virtual ~Node(){}  // be a virtual hierarchy
+    // Node must be inherited virtually, to allow MI diamonds
+    // without making Node ambiguous
+};
+
+
 extern void GenericsTest();
 
 
