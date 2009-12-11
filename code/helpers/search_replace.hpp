@@ -157,16 +157,16 @@ public:
     ~RootedSearchReplace();
     
     // implementation ring: Do the actual search and replace
-    Result SingleSearchReplace( shared_ptr<Node> root,
+    Result SingleSearchReplace( shared_ptr<Node> *proot,
                                 shared_ptr<Node> search_pattern,
                                 shared_ptr<Node> replace_pattern,
                                 CouplingKeys match_keys = CouplingKeys() );
-    int RepeatingSearchReplace( shared_ptr<Node> root,
+    int RepeatingSearchReplace( shared_ptr<Node> *proot,
                                 shared_ptr<Node> search_pattern,
                                 shared_ptr<Node> replace_pattern,
                                 CouplingKeys match_keys = CouplingKeys() );
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.
-    void operator()( shared_ptr<Node> context, shared_ptr<Node> root );
+    void operator()( shared_ptr<Node> context, shared_ptr<Node> *proot );
 
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse

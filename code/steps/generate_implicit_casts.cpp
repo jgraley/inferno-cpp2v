@@ -11,7 +11,7 @@
 #include "common/refcount.hpp"
 #include "helpers/soft_patterns.hpp"
 
-void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
+void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
 	set<SearchReplace::Coupling *> sms0;
 	SearchReplace sr0;
@@ -78,5 +78,5 @@ void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Nod
 	sms0.insert( &ms_other_args );
 
 	sr0.Configure(s_call, r_call, sms0);
-	sr0( context, root );
+	sr0( context, proot );
 }
