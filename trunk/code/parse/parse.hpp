@@ -46,9 +46,21 @@ public:
     {
     }
 
-    void operator()( shared_ptr<Node> context, shared_ptr<Node> root )
+    void operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
     {
-        clang::FileManager fm;
+    	// Allow proot to point to a NULL shared_ptr; in this case we will create a Program node and parse into it.
+    	// Otherwise *proot must be a Scope, and we will append whatever we parse into that scope.
+    	ASSERT( proot );
+    	if( !*proot )
+    	{
+    		*proot = shared_ptr<Program>( new Program );
+    	}
+		if( !context )
+		    context = *proot;
+    	shared_ptr<Scope> root_scope = dynamic_pointer_cast<Scope>(*proot);
+    	ASSERT(root_scope)("Can only parse into a scope");
+
+    	clang::FileManager fm;
         llvm::raw_stderr_ostream errstream; // goes to stderr
         clang::TextDiagnosticPrinter diag_printer( errstream );
         clang::Diagnostic diags( &diag_printer );
@@ -73,7 +85,7 @@ public:
         pp.EnterMainSourceFile();
 
         clang::IdentifierTable it( opts );
-        InfernoAction actions( context, root, it, pp, *ptarget );
+        InfernoAction actions( context, root_scope, it, pp, *ptarget );
         clang::Parser parser( pp, actions );
         TRACE("Start parse\n");
         parser.ParseTranslationUnit();
@@ -86,15 +98,15 @@ private:
     class InfernoAction : public clang::Action
     {
     public:
-        InfernoAction(shared_ptr<Node> context, shared_ptr<Node> root, clang::IdentifierTable &IT, clang::Preprocessor &pp, clang::TargetInfo &T) :
+        InfernoAction(shared_ptr<Node> context, shared_ptr<Scope> root_scope, clang::IdentifierTable &IT, clang::Preprocessor &pp, clang::TargetInfo &T) :
             preprocessor(pp),
             target_info(T),
             ident_track( context ),
             global_scope( context ),
-            all_decls( new Program )
+            all_decls( new Program ) // TODO Scope not Program
         {
-        	shared_ptr<Scope> root_scope = dynamic_pointer_cast<Scope>(root);
-        	ASSERT(root_scope)("Can only parse into a scope");
+        	ASSERT( context );
+        	ASSERT( root_scope );
             inferno_scope_stack.push( root_scope ); // things will be pushed into here
             backing_ordering[inferno_scope_stack.top()].clear();
         }

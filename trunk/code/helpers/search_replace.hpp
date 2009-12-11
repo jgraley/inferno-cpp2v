@@ -52,7 +52,6 @@
 //
 // - Slave search/replace so that a second SR can happen for each match
 //   of the first one, and can borrow its match sets.
-struct Program;
 class RootedSearchReplace : Transformation
 {  
 public:
@@ -171,7 +170,7 @@ public:
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
     // back into the general search algorithm.
-    shared_ptr<Node> GetContext() const { ASSERT(context); return context; }
+    shared_ptr<Node> GetContext() const { ASSERT(pcontext&&*pcontext); return *pcontext; }
     struct SoftSearchPattern : virtual Node
     {
         virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
@@ -193,7 +192,7 @@ public:
     shared_ptr<Node> search_pattern;
     shared_ptr<Node> replace_pattern;
     vector<RootedSearchReplace *> slaves;
-    shared_ptr<Node> context;
+    shared_ptr<Node> *pcontext;
     
 private:
     // LocalCompare ring
