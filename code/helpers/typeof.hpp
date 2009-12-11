@@ -10,8 +10,8 @@
 class TypeOf
 {
 public:
-    TypeOf( shared_ptr<Program> p ) : 
-        program( p )
+    TypeOf( shared_ptr<Node> c ) :
+        context( c )
     {
     }
     
@@ -26,7 +26,7 @@ public:
     shared_ptr<Expression> IsConstructorCall( shared_ptr<Call> call );
 
 private:
-    shared_ptr<Program> program;
+    shared_ptr<Node> context;
 };
 
 #endif

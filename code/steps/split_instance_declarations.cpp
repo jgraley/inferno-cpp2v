@@ -1,5 +1,5 @@
 #include "split_instance_declarations.hpp"
-
+#include "tree/tree.hpp"
 
 void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
 {

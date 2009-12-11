@@ -9,7 +9,7 @@ RootedSearchReplace::Result SoftExpressonOfType::DecidedCompare( const RootedSea
 	if( shared_ptr<Expression> xe = dynamic_pointer_cast<Expression>(x) )
 	{
 	    // Find out the type of the candidate expression	
-	    shared_ptr<Type> xt = TypeOf( sr->GetProgram() ).Get( xe );
+	    shared_ptr<Type> xt = TypeOf( sr->GetContext() ).Get( xe );
 	    TRACE("TypeOf(%s) is %s\n", TypeInfo(xe).name().c_str(), TypeInfo(xt).name().c_str() );
 	    ASSERT(xt);
 	    
@@ -35,7 +35,7 @@ RootedSearchReplace::Result SoftIdentifierOfInstance::DecidedCompare( const Root
 	if( shared_ptr<InstanceIdentifier> xid = dynamic_pointer_cast<InstanceIdentifier>(x) )
 	{
 	    // Find out the type of the candidate expression	
-	    shared_ptr<Instance> xi = GetDeclaration( sr->GetProgram(), xid );
+	    shared_ptr<Instance> xi = GetDeclaration( sr->GetContext(), xid );
 	    TRACE("GetDeclaration(%s) is %s\n", TypeInfo(xid).name().c_str(), TypeInfo(xi).name().c_str() );
 	    ASSERT(xi);
 	    

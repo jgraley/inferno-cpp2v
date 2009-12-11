@@ -1,7 +1,6 @@
 #ifndef TRANSFORMATION_HPP
 #define TRANSFORMATION_HPP
 
-#include "tree/tree.hpp"
 #include "common/refcount.hpp"
 
 class Transformation
@@ -14,10 +13,6 @@ public:
     void operator()( shared_ptr<Node> root )
     {
     	operator()(root, root);
-    }
-    void operator()( shared_ptr<Program> root )
-    {
-    	operator()((shared_ptr<Node>)root);
     }
 };
 

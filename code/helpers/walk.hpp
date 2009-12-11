@@ -1,7 +1,7 @@
 #ifndef WALK_HPP
 #define WALK_HPP
 
-#include "tree/tree.hpp"
+#include "tree/generics.hpp"
 
 class Walk
 {

@@ -1,11 +1,10 @@
 #ifndef SEARCH_REPLACE_HPP
 #define SEARCH_REPLACE_HPP
 
-#include "tree/tree.hpp"
 #include "common/refcount.hpp"
 #include "common/common.hpp"
 //#include "parse/parse.hpp"  
-#include "render/render.hpp" // TODO remove this silly dependency
+//#include "render/render.hpp" // TODO remove this silly dependency
 #include "common/read_args.hpp"
 #include "walk.hpp"
 #include "transformation.hpp"
@@ -53,6 +52,7 @@
 //
 // - Slave search/replace so that a second SR can happen for each match
 //   of the first one, and can borrow its match sets.
+struct Program;
 class RootedSearchReplace : Transformation
 {  
 public:
@@ -157,13 +157,11 @@ public:
     ~RootedSearchReplace();
     
     // implementation ring: Do the actual search and replace
-    Result SingleSearchReplace( shared_ptr<Program> p,
-    		                    shared_ptr<Node> base,
+    Result SingleSearchReplace( shared_ptr<Node> root,
                                 shared_ptr<Node> search_pattern,
                                 shared_ptr<Node> replace_pattern,
                                 CouplingKeys match_keys = CouplingKeys() );
-    int RepeatingSearchReplace( shared_ptr<Program> p,
-    	                        shared_ptr<Node> base,
+    int RepeatingSearchReplace( shared_ptr<Node> root,
                                 shared_ptr<Node> search_pattern,
                                 shared_ptr<Node> replace_pattern,
                                 CouplingKeys match_keys = CouplingKeys() );
@@ -173,7 +171,7 @@ public:
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
     // back into the general search algorithm.
-    shared_ptr<Program> GetProgram() const { ASSERT(program); return program; } 
+    shared_ptr<Node> GetContext() const { ASSERT(context); return context; }
     struct SoftSearchPattern : virtual Node
     {
         virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
@@ -195,7 +193,7 @@ public:
     shared_ptr<Node> search_pattern;
     shared_ptr<Node> replace_pattern;
     vector<RootedSearchReplace *> slaves;
-    shared_ptr<Program> program;
+    shared_ptr<Node> context;
     
 private:
     // LocalCompare ring
