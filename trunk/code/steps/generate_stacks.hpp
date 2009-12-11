@@ -13,7 +13,7 @@
 class GenerateStacks : public Transformation
 {
 public:
-	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> root );
+	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> *proot );
 };
 
 #endif /* GENERATE_STACKS_HPP_ */

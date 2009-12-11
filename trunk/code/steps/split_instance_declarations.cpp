@@ -1,7 +1,7 @@
 #include "split_instance_declarations.hpp"
 #include "tree/tree.hpp"
 
-void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
+void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
     // TODO only split for Auto variables - for others, take the whole lot including init into the members colelction
 	{ // Do uninitialised ones
@@ -36,7 +36,7 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 		ms3.insert( sc->statements[2] ); ms3.insert( rc->statements[1] ); sms0.insert( &ms3 );
 
 		sr0.Configure(sc, rc, sms0);
-		sr0( context, root );
+		sr0( context, proot );
 
 	}
 	{ // Do initialised ones by leaving an assign behind
@@ -80,12 +80,12 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 		ms5.insert( si->initialiser ); ms5.insert( ra->operands[1] ); sms1.insert( &ms5 );
 
 		sr1.Configure(sc, rc, sms1);
-		sr1( context, root );
+		sr1( context, proot );
 	}
 }
 
 
-void MergeInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
+void MergeInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
 	set<SearchReplace::Coupling *> sms1;
 	SearchReplace sr1;
@@ -132,11 +132,11 @@ void MergeInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 
 		sr1.Configure(rc, sc, sms1);
 	}
-	sr1( context, root );
+	sr1( context, proot );
 }
 
 
-void HackUpIfs::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
+void HackUpIfs::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
 	set<SearchReplace::Coupling *> sms1;
 	SearchReplace sr1;
@@ -166,11 +166,11 @@ void HackUpIfs::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
 
 		sr1.Configure(sif, rs, sms1);
 	}
-	sr1( context, root );
+	sr1( context, proot );
 }
 
 
-void CrazyNine::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
+void CrazyNine::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
 	SearchReplace sr1;
 	// Replaces entire records with 9 if it has a 9 in it
@@ -188,7 +188,7 @@ void CrazyNine::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
 
 		sr1.Configure(s_record, r_union);
 	}
-	sr1( context, root );
+	sr1( context, proot );
 }
 
 

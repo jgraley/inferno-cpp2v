@@ -660,12 +660,12 @@ shared_ptr<Node> RootedSearchReplace::MatchingDuplicateSubtree( shared_ptr<Node>
 #include "render/graph.hpp" // TODO get rid
 
 
-RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr<Node> root,
+RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr<Node> *proot,
 		                                                              shared_ptr<Node> search_pattern,
 		                                                              shared_ptr<Node> replace_pattern,
 		                                                              CouplingKeys keys ) // Pass by value is intentional - changes should not propogate back to caller
 {
-	SharedPtr<Node> root_sp(root);
+	SharedPtr<Node> root_sp(*proot);
 	TRACE("%p Begin search\n", this);
 	keys.Trace( matches );
 	Result r = Compare( root_sp, search_pattern, &keys, true );
@@ -689,7 +689,7 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
     FOREACH( RootedSearchReplace *slave, slaves )
     {
     	TRACE("%p Running slave\n", this);
-    	int num = slave->RepeatingSearchReplace( root_sp, slave->search_pattern, slave->replace_pattern, keys );
+    	int num = slave->RepeatingSearchReplace( proot, slave->search_pattern, slave->replace_pattern, keys );
     	TRACE("%p slave %d got %d hits\n", this, i++, num);
     }
 
@@ -701,7 +701,7 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
 // on supplied patterns and match sets. Does search and replace
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
-int RootedSearchReplace::RepeatingSearchReplace( shared_ptr<Node> root,
+int RootedSearchReplace::RepeatingSearchReplace( shared_ptr<Node> *proot,
 	                                             shared_ptr<Node> search_pattern,
 	                                             shared_ptr<Node> replace_pattern,
 	                                             CouplingKeys keys ) // Pass by value is intentional - changes should not propagate back to caller
@@ -709,7 +709,7 @@ int RootedSearchReplace::RepeatingSearchReplace( shared_ptr<Node> root,
     int i=0;
     while(i<20) // TODO!!
     {
-    	Result r = SingleSearchReplace( root,
+    	Result r = SingleSearchReplace( proot,
     			                        search_pattern,
     			                        replace_pattern,
     			                        keys );
@@ -724,7 +724,7 @@ int RootedSearchReplace::RepeatingSearchReplace( shared_ptr<Node> root,
 }
 
 // Do a search and replace based on patterns stored in our members
-void RootedSearchReplace::operator()( shared_ptr<Node> c, shared_ptr<Node> root )
+void RootedSearchReplace::operator()( shared_ptr<Node> c, shared_ptr<Node> *proot )
 {
 	if( ReadArgs::pattern_graph && ReadArgs::quitafter == 0 )
 	{
@@ -734,7 +734,7 @@ void RootedSearchReplace::operator()( shared_ptr<Node> c, shared_ptr<Node> root 
 	}
 
 	context = c;
-	(void)RepeatingSearchReplace( root, search_pattern, replace_pattern );
+	(void)RepeatingSearchReplace( proot, search_pattern, replace_pattern );
     context = shared_ptr<Node>(); // just to avoid us relying on the context outside of a search+replace pass
 }
 

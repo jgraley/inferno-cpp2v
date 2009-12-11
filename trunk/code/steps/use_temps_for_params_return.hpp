@@ -13,7 +13,7 @@
 class UseTempsForParamsReturn : public Transformation
 {
 public:
-	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> root );
+	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> *proot );
 };
 
 #endif /* USE_TEMPS_FOR_PARAMS_RETURN_HPP */

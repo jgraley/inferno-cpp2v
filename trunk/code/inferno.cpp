@@ -27,34 +27,35 @@ int main( int argc, char *argv[] )
     if( ReadArgs::infile.empty() )
         return 0;
 
-    shared_ptr<Program> program(new Program);  
+    shared_ptr<Program> pp(new Program);
+    shared_ptr<Node> program = pp;
 
     Parse p(ReadArgs::infile);        
-    p( program, program );
+    p( program, program ); // TODO use in-place interface!!
               
     Validate()(program);                
 
     if( --ReadArgs::quitafter >= 0 )
     {
-    	GenerateImplicitCasts()(program, program);
+    	GenerateImplicitCasts()(program, &program);
         Validate()(program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
-        SplitInstanceDeclarations()(program, program);
+        SplitInstanceDeclarations()(program, &program);
         Validate()(program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
-        UseTempsForParamsReturn()(program, program);
+        UseTempsForParamsReturn()(program, &program);
         Validate()(program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
-    	GenerateStacks()(program, program);
+    	GenerateStacks()(program, &program);
         Validate()(program);
     }
 
