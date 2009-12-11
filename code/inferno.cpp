@@ -27,11 +27,9 @@ int main( int argc, char *argv[] )
     if( ReadArgs::infile.empty() )
         return 0;
 
-    shared_ptr<Program> pp(new Program);
-    shared_ptr<Node> program = pp;
-
-    Parse p(ReadArgs::infile);        
-    p( program, program ); // TODO use in-place interface!!
+    shared_ptr<Node> program = shared_ptr<Node>();
+    Parse p(ReadArgs::infile);
+    p( program, &program );
               
     Validate()(program);                
 

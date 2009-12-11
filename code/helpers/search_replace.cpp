@@ -665,24 +665,16 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
 		                                                              shared_ptr<Node> replace_pattern,
 		                                                              CouplingKeys keys ) // Pass by value is intentional - changes should not propogate back to caller
 {
-	SharedPtr<Node> root_sp(*proot);
 	TRACE("%p Begin search\n", this);
 	keys.Trace( matches );
-	Result r = Compare( root_sp, search_pattern, &keys, true );
+	Result r = Compare( *proot, search_pattern, &keys, true );
 	if( r != FOUND )
 		return NOT_FOUND;
 
     if( replace_pattern )
     {
     	TRACE("%p Search successful, now replacing\n", this);
-        ASSERT( replace_pattern );
-        SharedPtr<Node> nn( MatchingDuplicateSubtree( replace_pattern, &keys ) );
-
-        // TODO operator() should take a ref to the shared_ptr<Program> and just change it directly
-        shared_ptr<Program> p = dynamic_pointer_cast<Program>(root_sp);
-        shared_ptr<Program> pp = dynamic_pointer_cast<Program>(nn);
-        ASSERT(p&&pp)("root node is not program, don't know how to change it");
-        *p = *pp; // Egregiously copy over the contents of the program node
+        *proot = MatchingDuplicateSubtree( replace_pattern, &keys );
     }
 
     int i=0;
@@ -733,9 +725,19 @@ void RootedSearchReplace::operator()( shared_ptr<Node> c, shared_ptr<Node> *proo
         exit(0); // There's nothing - literally NOTHING -left to do
 	}
 
-	context = c;
+	// If the initial root and context are the same node, then arrange for the context
+	// to follow the root node as we modify it (in SingleSearchReplace()). This ensures
+	// new declarations can be found in slave searches. We could get the
+	// same effect by taking the context as a reference, but leave it like this for now.
+	// If *proot is under context, then we're OK as long as proot points to the actual
+	// tree node - then the walk at context will follow the new *proot pointer and get
+	// into the new subtree.
+	if( c == *proot )
+		pcontext = proot;
+	else
+		pcontext = &c;
 	(void)RepeatingSearchReplace( proot, search_pattern, replace_pattern );
-    context = shared_ptr<Node>(); // just to avoid us relying on the context outside of a search+replace pass
+    pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
 }
 
 
