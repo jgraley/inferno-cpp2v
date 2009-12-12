@@ -214,12 +214,12 @@ public:
             *circle = true;
             return string("#");
         }
-        else if( dynamic_pointer_cast<SoftNotBase>(sp) )
+        else if( dynamic_pointer_cast<NotMatchBase>(sp) )
         {
             *circle = true;
             return string("!");
         }
-        else if( dynamic_pointer_cast<SoftAndBase>(sp) )
+        else if( dynamic_pointer_cast<MatchAllBase>(sp) )
         {
             *circle = true;
             return string("&&"); // note & is a wildcard in dot but not handled prolperly, this becomes "& "

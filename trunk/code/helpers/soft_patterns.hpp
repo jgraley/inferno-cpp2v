@@ -6,12 +6,12 @@
 #include "transformation.hpp"
 
 
-struct SoftNotBase {};
+struct NotMatchBase {};
 
 template<class VALUE_TYPE>
-struct SoftNot : VALUE_TYPE,
+struct NotMatch : VALUE_TYPE,
                  RootedSearchReplace::SoftSearchPattern,
-                 SoftNotBase
+                 NotMatchBase
 {
     NODE_FUNCTIONS
     SharedPtr<VALUE_TYPE> pattern;
@@ -44,12 +44,12 @@ private:
     }
 };
 
-struct SoftAndBase {};
+struct MatchAllBase {};
 
 template<class VALUE_TYPE>
-struct SoftAnd : VALUE_TYPE,
+struct MatchAll : VALUE_TYPE,
                  RootedSearchReplace::SoftSearchPattern,
-                 SoftAndBase
+                 MatchAllBase
 {
     NODE_FUNCTIONS
     mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
