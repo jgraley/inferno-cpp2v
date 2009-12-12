@@ -1,55 +1,6 @@
 #include "soft_patterns.hpp"
-
-RootedSearchReplace::Result SoftExpressonOfType::DecidedCompare( const RootedSearchReplace *sr,
-		                                                         shared_ptr<Node> x,
-		                                                         RootedSearchReplace::CouplingKeys *keys,
-		                                                         bool can_key,
-		                                                         RootedSearchReplace::Conjecture &conj ) const
-{
-	if( shared_ptr<Expression> xe = dynamic_pointer_cast<Expression>(x) )
-	{
-	    // Find out the type of the candidate expression	
-	    shared_ptr<Type> xt = TypeOf( sr->GetContext() ).Get( xe );
-	    TRACE("TypeOf(%s) is %s\n", TypeInfo(xe).name().c_str(), TypeInfo(xt).name().c_str() );
-	    ASSERT(xt);
-	    
-	    // Punt it back into the search/replace engine
-	    return sr->DecidedCompare( xt, shared_ptr<Node>(type_pattern), keys, can_key, conj );
-	}
-	else
-	{
-	    // not even an expression lol that aint going to match (means this node must be in a wider
-		// context eg Node or Statement, and the tree contained something other than Expression - so
-		// we're restricting to Expressions in addition to checking the type)
-	    return RootedSearchReplace::NOT_FOUND;
-	}        
-}     
-
-
-RootedSearchReplace::Result SoftIdentifierOfInstance::DecidedCompare( const RootedSearchReplace *sr,
-		                                                              shared_ptr<Node> x,
-		                                                              RootedSearchReplace::CouplingKeys *keys,
-		                                                              bool can_key,
-		                                                              RootedSearchReplace::Conjecture &conj ) const
-{
-	if( shared_ptr<InstanceIdentifier> xid = dynamic_pointer_cast<InstanceIdentifier>(x) )
-	{
-	    // Find out the type of the candidate expression	
-	    shared_ptr<Instance> xi = GetDeclaration( sr->GetContext(), xid );
-	    TRACE("GetDeclaration(%s) is %s\n", TypeInfo(xid).name().c_str(), TypeInfo(xi).name().c_str() );
-	    ASSERT(xi);
-	    
-	    // Punt it back into the search/replace engine
-	    return sr->DecidedCompare( xi, shared_ptr<Node>(decl_pattern), keys, can_key, conj );
-	}
-	else
-	{
-	    // not even an instance identifier lol that aint going to match (means this node must be in a wider
-		// context eg Node or Statement, and the tree contained something other than Expression - so
-		// we're restricting to IsntanceIdentifiers in addition to checking the type)
-	    return RootedSearchReplace::NOT_FOUND;
-	}        
-}     
+#include "helpers/misc.hpp"
+#include "tree/tree.hpp"
 
 
 shared_ptr<Node> SoftMakeIdentifier::DuplicateSubtree( const RootedSearchReplace *sr,
@@ -76,4 +27,26 @@ shared_ptr<Node> SoftMakeIdentifier::DuplicateSubtree( const RootedSearchReplace
 		newname = format;
 	}
 	return shared_ptr<SpecificInstanceIdentifier>( new SpecificInstanceIdentifier( newname ) );
+}
+
+
+RootedSearchReplace::Result TransformToBase::DecidedCompare( const RootedSearchReplace *sr,
+		                                                     shared_ptr<Node> x,
+		                                                     RootedSearchReplace::CouplingKeys *keys,
+		                                                     bool can_key,
+		                                                     RootedSearchReplace::Conjecture &conj ) const
+{
+    // Transform the candidate expression
+    shared_ptr<Node> xt = (*transformation)( sr->GetContext(), x );
+	if( xt )
+	{
+	    // Punt it back into the search/replace engine
+	    return sr->DecidedCompare( xt, shared_ptr<Node>(pattern), keys, can_key, conj );
+	}
+	else
+	{
+	    // Transformation returned NULL, probably because the candidate was of the wrong
+		// type, so just don't match
+	    return RootedSearchReplace::NOT_FOUND;
+	}
 }

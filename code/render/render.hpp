@@ -34,7 +34,7 @@ public:
     {        
     }
     
-    void operator()( shared_ptr<Node> context, shared_ptr<Node> root )
+    shared_ptr<Node> operator()( shared_ptr<Node> context, shared_ptr<Node> root )
     {
         // Parse can only work on a whole program
     	ASSERT( context == root );
@@ -58,6 +58,7 @@ public:
             fclose( fp );
         }    
         program = shared_ptr<Program>();
+        return root; // no change
     }
 
 private:
@@ -272,7 +273,7 @@ private:
 
     	// Render the expression that resolves to the function name unless this is
     	// a constructor call in which case just the name of the thing being constructed.
-        if( shared_ptr<Expression> base = TypeOf(program).IsConstructorCall( call ) )
+        if( shared_ptr<Expression> base = TypeOf().IsConstructorCall( program, call ) )
             s += RenderOperand( base, true );
         else
         	s += RenderOperand( call->callee, true );
@@ -280,7 +281,7 @@ private:
         s += "(";
 
         // If Procedure or Function, generate some arguments, resolving the order using the original function type
-        shared_ptr<Type> ctype = TypeOf(program).Get( call->callee );
+        shared_ptr<Node> ctype = TypeOf()( program, call->callee );
         ASSERT( ctype );
         if( shared_ptr<Procedure> proc = dynamic_pointer_cast<Procedure>(ctype) )
             s += RenderMapInOrder( call, proc, ", ", false );
@@ -477,7 +478,7 @@ private:
         {
             if( shared_ptr<Call> o = dynamic_pointer_cast< Call >(s) )
             {
-                if( TypeOf(program).IsConstructorCall( o ) )
+                if( TypeOf().IsConstructorCall( program, o ) )
                 {
                     inits.push_back(s);
                     continue;

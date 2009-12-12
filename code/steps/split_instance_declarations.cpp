@@ -209,7 +209,7 @@ void CrazyNine::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
         shared_ptr<Array> sar( new Array );
 //           sar->element = SharedPtr<Type>();
 //           sar->size = SharedPtr<Initialiser>();
-        sseot->type_pattern = sar;
+        sseot->pattern = sar;
         shared_ptr<Expression> se( new Expression );
         sa->operands.push_back( se );
 

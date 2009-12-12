@@ -1,8 +1,6 @@
-#ifndef MISC_HPP
-#define MISC_HPP
-
 #include "tree/tree.hpp"
 #include "walk.hpp"
+#include "misc.hpp"
 
 shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
 {
@@ -16,7 +14,19 @@ shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
         ASSERTFAIL();
 }
 
-shared_ptr<UserType> GetDeclaration( shared_ptr<Node> context, shared_ptr<TypeIdentifier> id )
+GetDeclaration SoftIdentifierOfInstance::gd;
+
+shared_ptr<Node> GetDeclaration::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
+{
+	if( shared_ptr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>( root ) )
+		return Get( context, tid );
+	else if( shared_ptr<InstanceIdentifier> iid = dynamic_pointer_cast<InstanceIdentifier>( root ) )
+		return Get( context, iid );
+	else
+		return shared_ptr<Node>();
+}
+
+shared_ptr<UserType> GetDeclaration::Get( shared_ptr<Node> context, shared_ptr<TypeIdentifier> id )
 {
 	Flattener<UserType> walkr(context);
 	TRACE("GetDeclaration %d\n", walkr.size());
@@ -31,23 +41,7 @@ shared_ptr<UserType> GetDeclaration( shared_ptr<Node> context, shared_ptr<TypeId
 	ASSERTFAIL();
 }
 
-// Look for a record, skipping over typedefs. Returns NULL if not a record.
-shared_ptr<Record> GetRecordDeclaration( shared_ptr<Node> context, shared_ptr<TypeIdentifier> id )
-{
-	shared_ptr<UserType> ut = GetDeclaration( context, id );
-	while( shared_ptr<Typedef> td = dynamic_pointer_cast<Typedef>(ut) )
-	{
-	    shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(td->type);
-	    if(ti)
-	        ut = GetDeclaration(context, ti);
-	    else
-	        return shared_ptr<Record>(); // not a record
-	}
-	shared_ptr<Record> r = dynamic_pointer_cast<Record>(ut);
-	return r;
-}
-
-shared_ptr<Instance> GetDeclaration( shared_ptr<Node> context, shared_ptr<InstanceIdentifier> id )
+shared_ptr<Instance> GetDeclaration::Get( shared_ptr<Node> context, shared_ptr<InstanceIdentifier> id )
 {
     Walk w( context );
     while(!w.Done())
@@ -55,13 +49,30 @@ shared_ptr<Instance> GetDeclaration( shared_ptr<Node> context, shared_ptr<Instan
         shared_ptr<Node> n = w.Get();
 
         if( shared_ptr<Instance> d = dynamic_pointer_cast<Instance>(n) )
-            if( id == GetIdentifier( d ) ) 
+            if( id == GetIdentifier( d ) )
 	            return d;
 
 	    w.AdvanceInto();
 	}
 	ASSERTFAIL("did not find instance declaration for identifier");
 }
+
+// Look for a record, skipping over typedefs. Returns NULL if not a record.
+shared_ptr<Record> GetRecordDeclaration( shared_ptr<Node> context, shared_ptr<TypeIdentifier> id )
+{
+	shared_ptr<Node> ut = GetDeclaration()( context, id );
+	while( shared_ptr<Typedef> td = dynamic_pointer_cast<Typedef>(ut) )
+	{
+	    shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(td->type);
+	    if(ti)
+	        ut = GetDeclaration()( context, ti);
+	    else
+	        return shared_ptr<Record>(); // not a record
+	}
+	shared_ptr<Record> r = dynamic_pointer_cast<Record>(ut);
+	return r;
+}
+
 
 // Hunt through a record and its bases to find the named member
 shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<Record> r, string name )
@@ -79,7 +90,7 @@ shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<R
     if( shared_ptr<InheritanceRecord> ir = dynamic_pointer_cast<InheritanceRecord>( r ) )
         FOREACH( shared_ptr<Base> b, ir->bases )
         {
-            shared_ptr<UserType> ut = GetDeclaration( program, b->record );
+            shared_ptr<Node> ut = GetDeclaration()( program, b->record );
             shared_ptr<InheritanceRecord> ir = dynamic_pointer_cast<InheritanceRecord>(ut);
             ASSERT(ir);
             if( shared_ptr<Instance> i = FindMemberByName( program, ir, name ) )
@@ -90,4 +101,3 @@ shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<R
     return shared_ptr<Instance>();
 }                
 
-#endif

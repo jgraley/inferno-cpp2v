@@ -10,6 +10,8 @@
 #include "common/common.hpp"
 #include "common/refcount.hpp"
 #include "helpers/soft_patterns.hpp"
+#include "helpers/typeof.hpp"
+#include "helpers/misc.hpp"
 
 
 void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
@@ -29,7 +31,7 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	s_return->return_value = s_and;
 	shared_ptr<SoftExpressonOfType> s_retval( new SoftExpressonOfType );
 	s_and->patterns.insert( s_retval );
-	s_retval->type_pattern = shared_new<Type>();
+	s_retval->pattern = shared_new<Type>();
 	shared_ptr< SearchReplace::Star<Statement> > s_post( new SearchReplace::Star<Statement> );
 	s_comp->statements.push_back( s_post );
     
@@ -39,7 +41,7 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	shared_ptr< SoftIdentifierOfInstance > cs_id( new SoftIdentifierOfInstance );	
     cs_stuff->terminus = cs_id;
     shared_ptr<Instance> cs_instance( new Instance );
-    cs_id->decl_pattern = cs_instance;
+    cs_id->pattern = cs_instance;
     cs_instance->storage = shared_new<Auto>();
     
     // replace with a new sub-compound, that declares a Temp, intialises it to the return value and returns it
@@ -84,7 +86,7 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
     sms.insert( &c3 ); 
        
     SearchReplace::Coupling c4; // Make the new variable be of the required type, ie whatever the expression evaluates to
-    c4.insert( s_retval->type_pattern );
+    c4.insert( s_retval->pattern );
     c4.insert( r_newvar->type );
     sms.insert( &c4 ); 
 
