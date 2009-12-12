@@ -5,7 +5,6 @@
 #include "walk.hpp"
 #include "transformation.hpp"
 #include "search_replace.hpp"
-#include "soft_patterns.hpp"
 
 shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d );
 
