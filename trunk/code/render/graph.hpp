@@ -200,10 +200,11 @@ public:
         return o;
     }
 
-    string Name( shared_ptr<Node> sp, bool *bold, bool *circle )   // TODO put stringize capabilities into the Property nodes as virtual methods
+    string Name( shared_ptr<Node> sp, bool *bold, bool *circle, bool *diamond )   // TODO put stringize capabilities into the Property nodes as virtual methods
     {
         *bold=true;
         *circle=false;
+        *diamond=false;
         if( dynamic_pointer_cast<RootedSearchReplace::StarBase>(sp) )
         {
             *circle = true;
@@ -224,10 +225,12 @@ public:
             *circle = true;
             return string("&&"); // note & is a wildcard in dot but not handled prolperly, this becomes "& "
         }
-//        else if( shared_ptr<SpecificString> ss = dynamic_pointer_cast< SpecificString >(sp) )
-  //          return "\\\"" + ss->value + "\\\"";                     // TODO sanitise the string
-//        else if( shared_ptr<SpecificInteger> ic = dynamic_pointer_cast< SpecificInteger >(sp) )
-  //          return string(ic->value.toString(10));
+        else if( dynamic_pointer_cast<TransformToBase>(sp) )
+        {
+            *bold = false;
+            *diamond = true;
+            return Sanitise( *sp );
+        }
         else if( shared_ptr<SpecificFloat> fc = dynamic_pointer_cast< SpecificFloat >(sp) )
         {
             char hs[256];
@@ -267,10 +270,10 @@ public:
     string DoNode( shared_ptr<Node> n )
     {
         string s;
-        bool bold, circle;
+        bool bold, circle, diamond;
         s += Id(n.get()) + " [\n";
-        string name = Name(n, &bold, &circle);
-        if(circle)
+        string name = Name(n, &bold, &circle, &diamond);
+        if(circle || diamond)
         {
             s += "label = \"" + name + "\"\n";
         }
@@ -304,7 +307,11 @@ public:
         }          
 
         s += "style = \"filled,rounded\"\n";
-        if(circle)
+        if(diamond)
+        {
+            s += "shape = \"hexagon\"\n";
+        }
+        else if(circle)
         {
             s += "shape = \"circle\"\n";
             s += "fixedsize = true\n";
