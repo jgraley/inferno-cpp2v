@@ -4,6 +4,9 @@
 #include "helpers/walk.hpp"
 #include "helpers/misc.hpp"
 #include "typeof.hpp"
+#include "tree/tree.hpp"
+#include "helpers/walk.hpp"
+#include "helpers/misc.hpp"
 
 #define INT 0
 
@@ -13,7 +16,9 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
     
     if( shared_ptr<SpecificInstanceIdentifier> ii = dynamic_pointer_cast<SpecificInstanceIdentifier>(o) ) // object or function instance
     {        
-        shared_ptr<Instance> i = GetDeclaration(context, shared_ptr<InstanceIdentifier>(ii));
+        shared_ptr<Node> n = GetDeclaration()(context, ii);
+        shared_ptr<Instance> i = dynamic_pointer_cast<Instance>(n);
+        ASSERT(i);
         return i->type; 
     }
         
@@ -279,15 +284,21 @@ shared_ptr<Type> TypeOf::GetSpecial( shared_ptr<Operator> op, Sequence<Type> &op
 
 // Is this call really a constructor call? If so return the object being
 // constructed. Otherwise, return NULL
-shared_ptr<Expression> TypeOf::IsConstructorCall( shared_ptr<Call> call )
+shared_ptr<Expression> TypeOf::IsConstructorCall( shared_ptr<Node> c, shared_ptr<Call> call )
 {
-    shared_ptr<Lookup> lf = dynamic_pointer_cast<Lookup>(call->callee);
-    if(!lf)
-        return shared_ptr<Expression>();
-        
-    ASSERT(lf->member);
-    if( dynamic_pointer_cast<Constructor>( Get( lf->member ) ) )
-        return lf->base;
-    else
-        return shared_ptr<Expression>();
-}
+	context = c;
+	shared_ptr<Expression> e;
+
+    if( shared_ptr<Lookup> lf = dynamic_pointer_cast<Lookup>(call->callee) )
+    {
+		ASSERT(lf->member);
+		if( dynamic_pointer_cast<Constructor>( Get( lf->member ) ) )
+			e = lf->base;
+    }
+
+    context = shared_ptr<Node>();
+    return e;
+ }
+
+TypeOf SoftExpressonOfType::tof;
+

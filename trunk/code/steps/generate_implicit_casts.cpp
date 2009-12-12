@@ -10,6 +10,7 @@
 #include "common/common.hpp"
 #include "common/refcount.hpp"
 #include "helpers/soft_patterns.hpp"
+#include "helpers/typeof.hpp"
 
 void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
@@ -20,7 +21,7 @@ void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Nod
       shared_ptr<SoftExpressonOfType> s_callee( new SoftExpressonOfType );
 	  s_call->callee = s_callee;
 	    shared_ptr<Procedure> s_proc( new Procedure );
-	    s_callee->type_pattern = s_proc;
+	    s_callee->pattern = s_proc;
 	      shared_ptr< Instance > s_param( new Instance );
 	      s_proc->members.insert(s_param);
 	        s_param->identifier = shared_new< InstanceIdentifier >();
@@ -32,9 +33,9 @@ void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Nod
 	    s_arg->identifier = shared_new< InstanceIdentifier >();
 	    shared_ptr<SoftExpressonOfType> s_arg_value( new SoftExpressonOfType );
 	    s_arg->value = s_arg_value;
-	      //s_arg_value->type_pattern = shared_new< Type >();
+	      //s_arg_value->pattern = shared_new< Type >();
 	      shared_ptr< SoftNot<Type> > s_arg_type( new SoftNot<Type> );
-	      s_arg_value->type_pattern = s_arg_type;
+	      s_arg_value->pattern = s_arg_type;
 	        s_arg_type->pattern = shared_new< Type >();
 	  shared_ptr< SearchReplace::Star<MapOperand> > s_other_args( new SearchReplace::Star<MapOperand> );
 	  s_call->operands.insert( s_other_args );

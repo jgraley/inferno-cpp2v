@@ -2,7 +2,9 @@
 #define SOFT_PATTERNS_HPP
 
 #include "search_replace.hpp"
-#include "typeof.hpp"
+#include "tree/tree.hpp"
+#include "transformation.hpp"
+
 
 struct SoftNotBase {};
 
@@ -76,31 +78,31 @@ private:
 };
 
 
-struct SoftExpressonOfType : Expression,
-                             RootedSearchReplace::SoftSearchPattern
+struct TransformToBase : RootedSearchReplace::SoftSearchPattern
 {
     NODE_FUNCTIONS
-    SharedPtr<Type> type_pattern;
+    SharedPtr<Node> pattern;
+    TransformToBase( Transformation *t ) :
+    	transformation(t)
+    {
+    }
+
 private:
     virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
     		                                            shared_ptr<Node> x,
     		                                            RootedSearchReplace::CouplingKeys *keys,
     		                                            bool can_key,
     		                                            RootedSearchReplace::Conjecture &conj ) const;
+    Transformation *transformation;
 };
 
-struct SoftIdentifierOfInstance : InstanceIdentifier,
-                                  RootedSearchReplace::SoftSearchPattern
+template<class VALUE_TYPE>
+struct TransformTo : TransformToBase, VALUE_TYPE
 {
-    NODE_FUNCTIONS
-    SharedPtr<Instance> decl_pattern;
-private:
-    virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
-    		                                            shared_ptr<Node> x,
-    		                                            RootedSearchReplace::CouplingKeys *keys,
-    		                                            bool can_key,
-    		                                            RootedSearchReplace::Conjecture &conj ) const;
+	NODE_FUNCTIONS
+    TransformTo( Transformation *t ) : TransformToBase (t) {}
 };
+
 
 // Make an identifer based on an existing one. New identfier is named using
 // sprintf( format, source->name )
@@ -124,6 +126,5 @@ private:
     		                                   RootedSearchReplace::CouplingKeys *keys,
     		                                   bool can_key );
 };
-
 
 #endif

@@ -25,7 +25,7 @@ public:
         Disburse( s );
     }
 
-    void operator()( shared_ptr<Node> context, shared_ptr<Node> root )
+    shared_ptr<Node> operator()( shared_ptr<Node> context, shared_ptr<Node> root )
     {
     	(void)context; // Not needed!!
 
@@ -35,6 +35,8 @@ public:
         s += Traverse( root, true );
         s += Footer();
         Disburse( s );
+
+        return root; // no change
     }
 
     string Header()

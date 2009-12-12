@@ -2,16 +2,17 @@
 #define TRANSFORMATION_HPP
 
 #include "common/refcount.hpp"
+#include "tree/generics.hpp"
 
 class Transformation
 {
 public:
     // Apply this transformation to tree at root, using context for decls etc.
-	// Out-of-place version, neither context nor tree may be modified. TODO new tree as return value.
-    virtual void operator()( shared_ptr<Node> context,  // The whole program, so declarations may be searched for
-    		                 shared_ptr<Node> root )    // Root of the subtree we want to modify
+	// Out-of-place version, neither context nor tree may be modified.
+    virtual shared_ptr<Node> operator()( shared_ptr<Node> context,  // The whole program, so declarations may be searched for
+    		                             shared_ptr<Node> root )    // Root of the subtree we want to modify
     {
-    	ASSERT(0);
+    	ASSERTFAIL("Out-of-place transformation not overridden");
     }
 
 
@@ -27,7 +28,7 @@ public:
     virtual void operator()( shared_ptr<Node> context,  // The whole program, so declarations may be searched for
     		                 shared_ptr<Node> *proot )    // Root of the subtree we want to modify
     {
-	    ASSERT(0);
+    	ASSERTFAIL("In-place transformation not overridden");
     }
 };
 

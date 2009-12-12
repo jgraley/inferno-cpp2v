@@ -42,7 +42,7 @@ public:
     FOREACH( shared_ptr<Record> r, w )
         printf("%s\n", typeid(*r).name() );
 */
-
+// TODO get rid of this, use WalkingIterator instead (or build this on WalkingIterator)
 template< class FIND >
 class Flattener : public Sequence< FIND >
 {
