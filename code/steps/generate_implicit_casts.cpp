@@ -34,7 +34,7 @@ void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Nod
 	    shared_ptr<SoftExpressonOfType> s_arg_value( new SoftExpressonOfType );
 	    s_arg->value = s_arg_value;
 	      //s_arg_value->pattern = shared_new< Type >();
-	      shared_ptr< SoftNot<Type> > s_arg_type( new SoftNot<Type> );
+	      shared_ptr< NotMatch<Type> > s_arg_type( new NotMatch<Type> );
 	      s_arg_value->pattern = s_arg_type;
 	        s_arg_type->pattern = shared_new< Type >();
 	  shared_ptr< SearchReplace::Star<MapOperand> > s_other_args( new SearchReplace::Star<MapOperand> );

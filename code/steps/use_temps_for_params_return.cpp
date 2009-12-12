@@ -27,7 +27,7 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	s_comp->statements.push_back( s_pre );
 	shared_ptr<Return> s_return( new Return );
 	s_comp->statements.push_back( s_return );	
-	shared_ptr< SoftAnd<Expression> > s_and( new SoftAnd<Expression> );
+	shared_ptr< MatchAll<Expression> > s_and( new MatchAll<Expression> );
 	s_return->return_value = s_and;
 	shared_ptr<SoftExpressonOfType> s_retval( new SoftExpressonOfType );
 	s_and->patterns.insert( s_retval );

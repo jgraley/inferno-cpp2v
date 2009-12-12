@@ -22,7 +22,7 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	s_fi->identifier = shared_new<InstanceIdentifier>();
 	shared_ptr<Subroutine> s_func( new Subroutine );
 	s_fi->type = s_func;
-    shared_ptr< SoftAnd<Initialiser> > s_and( new SoftAnd<Initialiser> );
+    shared_ptr< MatchAll<Initialiser> > s_and( new MatchAll<Initialiser> );
     shared_ptr<Compound> s_top_comp( new Compound );
     s_and->patterns.insert( s_top_comp );
 	s_fi->initialiser = s_and;
@@ -107,7 +107,7 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	s_fi3->identifier = shared_new<InstanceIdentifier>();
 	shared_ptr< SearchReplace::Stuff<Statement> > s_stuff3( new SearchReplace::Stuff<Statement> );
 	s_fi3->initialiser = s_stuff3;
-	shared_ptr< SoftAnd<Statement> > s_and3( new SoftAnd<Statement> );
+	shared_ptr< MatchAll<Statement> > s_and3( new MatchAll<Statement> );
 	s_stuff3->terminus = s_and3;
 	shared_ptr<Compound> s_ret_comp( new Compound );
 	s_and3->patterns.insert( s_ret_comp );
@@ -119,7 +119,7 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	s_ret_comp->statements.push_back( s_return );
 	shared_ptr< SearchReplace::Star<Statement> > s_ret_post( new SearchReplace::Star<Statement> );
 	s_ret_comp->statements.push_back( s_ret_post );
-    shared_ptr< SoftNot<Statement> > s_not3( new SoftNot<Statement> );    
+    shared_ptr< NotMatch<Statement> > s_not3( new NotMatch<Statement> );    
     s_and3->patterns.insert( s_not3 );
 	
     // Restrict the above to not include returns that come after an index decrement
