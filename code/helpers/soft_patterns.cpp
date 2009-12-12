@@ -30,23 +30,3 @@ shared_ptr<Node> SoftMakeIdentifier::DuplicateSubtree( const RootedSearchReplace
 }
 
 
-RootedSearchReplace::Result TransformToBase::DecidedCompare( const RootedSearchReplace *sr,
-		                                                     shared_ptr<Node> x,
-		                                                     RootedSearchReplace::CouplingKeys *keys,
-		                                                     bool can_key,
-		                                                     RootedSearchReplace::Conjecture &conj ) const
-{
-    // Transform the candidate expression
-    shared_ptr<Node> xt = (*transformation)( sr->GetContext(), x );
-	if( xt )
-	{
-	    // Punt it back into the search/replace engine
-	    return sr->DecidedCompare( xt, shared_ptr<Node>(pattern), keys, can_key, conj );
-	}
-	else
-	{
-	    // Transformation returned NULL, probably because the candidate was of the wrong
-		// type, so just don't match
-	    return RootedSearchReplace::NOT_FOUND;
-	}
-}
