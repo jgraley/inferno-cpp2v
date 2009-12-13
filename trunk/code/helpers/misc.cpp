@@ -14,8 +14,6 @@ shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
         ASSERTFAIL();
 }
 
-GetDeclaration SoftIdentifierOfInstance::gd;
-
 shared_ptr<Node> GetDeclaration::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
 {
 	if( shared_ptr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>( root ) )

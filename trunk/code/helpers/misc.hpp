@@ -8,23 +8,16 @@
 
 shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d );
 
-class GetDeclaration : public Transformation
+class GetDeclaration : public Transformation, public TransformTo<InstanceIdentifier>
 {
 public:
+    GetDeclaration() : TransformTo<InstanceIdentifier>( this ) {}
     virtual shared_ptr<Node> operator()( shared_ptr<Node> context, shared_ptr<Node> root );
 private:
 	shared_ptr<UserType> Get( shared_ptr<Node> context, shared_ptr<TypeIdentifier> id );
 	shared_ptr<Instance> Get( shared_ptr<Node> context, shared_ptr<InstanceIdentifier> id );
 };
 
-struct SoftIdentifierOfInstance : TransformTo<InstanceIdentifier>
-{
-private:
-    static GetDeclaration gd;
-public:
-    NODE_FUNCTIONS
-    SoftIdentifierOfInstance() : TransformTo<InstanceIdentifier>( &gd ) {}
-};
 
 // Look for a record, skipping over typedefs. Returns NULL if not a record.
 shared_ptr<Record> GetRecordDeclaration( shared_ptr<Node> context, shared_ptr<TypeIdentifier> id );

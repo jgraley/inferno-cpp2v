@@ -29,7 +29,7 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	s_comp->statements.push_back( s_return );	
 	shared_ptr< MatchAll<Expression> > s_and( new MatchAll<Expression> );
 	s_return->return_value = s_and;
-	shared_ptr<SoftExpressonOfType> s_retval( new SoftExpressonOfType );
+	shared_ptr<TypeOf> s_retval( new TypeOf );
 	s_and->patterns.insert( s_retval );
 	s_retval->pattern = shared_new<Type>();
 	shared_ptr< SearchReplace::Star<Statement> > s_post( new SearchReplace::Star<Statement> );
@@ -38,7 +38,7 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
     // Restrict the search to returns that have an automaitc variable under them
     shared_ptr< SearchReplace::Stuff<Expression> > cs_stuff( new SearchReplace::Stuff<Expression> );
 	s_and->patterns.insert( cs_stuff );
-	shared_ptr< SoftIdentifierOfInstance > cs_id( new SoftIdentifierOfInstance );	
+	shared_ptr< GetDeclaration > cs_id( new GetDeclaration );	
     cs_stuff->terminus = cs_id;
     shared_ptr<Instance> cs_instance( new Instance );
     cs_id->pattern = cs_instance;
