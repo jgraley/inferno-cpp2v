@@ -204,7 +204,7 @@ void CrazyNine::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
         shared_ptr<Dereference> sd( new Dereference );
         shared_ptr<Subtract> sa( new Subtract );
         sd->operands.push_back( sa );
-        shared_ptr<SoftExpressonOfType> sseot( new SoftExpressonOfType );
+        shared_ptr<TypeOf> sseot( new TypeOf );
         sa->operands.push_back( sseot );
         shared_ptr<Array> sar( new Array );
 //           sar->element = SharedPtr<Type>();

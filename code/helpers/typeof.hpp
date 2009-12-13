@@ -6,10 +6,10 @@
 #include "tree/tree.hpp"
 #include "soft_patterns.hpp"
 
-class TypeOf : public Transformation
+class TypeOf : public Transformation, public TransformTo<Expression>
 {
 public:
-    TypeOf()
+    TypeOf() : TransformTo<Expression>( this )
     {
     }
     virtual shared_ptr<Node> operator()( shared_ptr<Node> c, shared_ptr<Node> root )
@@ -36,14 +36,5 @@ private:
     shared_ptr<Node> context;
 };
 
-
-struct SoftExpressonOfType : TransformTo<Expression>
-{
-private:
-    static TypeOf tof;
-public:
-    NODE_FUNCTIONS
-    SoftExpressonOfType() : TransformTo<Expression>( &tof ) {}
-};
 
 #endif

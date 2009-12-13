@@ -18,7 +18,7 @@ void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Nod
 	SearchReplace sr0;
 
 	shared_ptr<Call> s_call( new Call );
-      shared_ptr<SoftExpressonOfType> s_callee( new SoftExpressonOfType );
+      shared_ptr<TypeOf> s_callee( new TypeOf );
 	  s_call->callee = s_callee;
 	    shared_ptr<Procedure> s_proc( new Procedure );
 	    s_callee->pattern = s_proc;
@@ -31,7 +31,7 @@ void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Nod
 	  shared_ptr< MapOperand > s_arg( new MapOperand );
 	  s_call->operands.insert( s_arg );
 	    s_arg->identifier = shared_new< InstanceIdentifier >();
-	    shared_ptr<SoftExpressonOfType> s_arg_value( new SoftExpressonOfType );
+	    shared_ptr<TypeOf> s_arg_value( new TypeOf );
 	    s_arg->value = s_arg_value;
 	      //s_arg_value->pattern = shared_new< Type >();
 	      shared_ptr< NotMatch<Type> > s_arg_type( new NotMatch<Type> );

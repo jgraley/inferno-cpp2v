@@ -306,13 +306,14 @@ public:
             s += "\"\n";
         }          
 
-        s += "style = \"filled,rounded\"\n";
         if(diamond)
         {
+            s += "style = \"filled\"\n";
             s += "shape = \"hexagon\"\n";
         }
         else if(circle)
         {
+            s += "style = \"filled\"\n";
             s += "shape = \"circle\"\n";
             s += "fixedsize = true\n";
             s += "width = 0.65\n";
@@ -320,6 +321,7 @@ public:
         }
         else
         {
+            s += "style = \"filled,rounded\"\n";
             s += "shape = \"record\"\n"; // nodes can be split into fields
             s += "fillcolor = " + Colour(n) + "\n"; 
         }

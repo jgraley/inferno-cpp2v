@@ -298,7 +298,5 @@ shared_ptr<Expression> TypeOf::IsConstructorCall( shared_ptr<Node> c, shared_ptr
 
     context = shared_ptr<Node>();
     return e;
- }
-
-TypeOf SoftExpressonOfType::tof;
+}
 
