@@ -35,14 +35,13 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	shared_ptr< SearchReplace::Star<Statement> > s_post( new SearchReplace::Star<Statement> );
 	s_comp->statements.push_back( s_post );
     
-    // Restrict the search to returns that have an automaitc variable under them
+    // Restrict the search to returns that have an automatic variable under them
     shared_ptr< SearchReplace::Stuff<Expression> > cs_stuff( new SearchReplace::Stuff<Expression> );
 	s_and->patterns.insert( cs_stuff );
 	shared_ptr< GetDeclaration > cs_id( new GetDeclaration );	
     cs_stuff->terminus = cs_id;
-    shared_ptr<Instance> cs_instance( new Instance );
+    shared_ptr<Instance> cs_instance( new Automatic );
     cs_id->pattern = cs_instance;
-    cs_instance->storage = shared_new<Auto>();
     
     // replace with a new sub-compound, that declares a Temp, intialises it to the return value and returns it
 	shared_ptr<Compound> r_comp( new Compound );
@@ -52,8 +51,7 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	r_comp->statements.push_back( r_pre );
 	shared_ptr<Compound> r_sub_comp( new Compound );
 	r_comp->statements.push_back( r_sub_comp );
-	shared_ptr< Instance > r_newvar( new Instance );
-	r_newvar->storage = shared_new<Temp>();
+	shared_ptr< Temporary > r_newvar( new Temporary );
 	r_newvar->type = shared_new<Type>();
 	r_newvar->constancy = shared_new<NonConst>();
 	r_newvar->access = shared_new<Private>();

@@ -462,11 +462,17 @@ private:
         shared_ptr<Instance> CreateInstanceNode( clang::Scope *S,
                                                  clang::Declarator &D,
                                                  shared_ptr<AccessSpec> access = shared_ptr<AccessSpec>(),
-                                                 shared_ptr<StorageClass> storage = shared_ptr<StorageClass>() )
+                                                 bool automatic = false )
         {
             const clang::DeclSpec &DS = D.getDeclSpec();
 
-            if( !storage )
+            shared_ptr<Instance> o;
+
+            if( automatic )
+            {
+            	o = shared_new<Automatic>();
+            }
+            else
             {
                 clang::DeclSpec::SCS scs = DS.getStorageClassSpec();
                 switch( scs )
@@ -476,35 +482,39 @@ private:
                 	TRACE("scope flags 0x%x\n", S->getFlags());
                     if( S->getFlags() & clang::Scope::CXXClassScope ) // record scope
                     {
-                        shared_ptr<Member> ns = shared_new<Member>();
-                        storage = ns;
+                    	shared_ptr<Field> no = shared_new<Field>();
+                    	o = no;
                         if( DS.isVirtualSpecified() )
-                            ns->virt = shared_new<Virtual>();
+                        {
+                            no->virt = shared_new<Virtual>();
+                        }
                         else
-                            ns->virt = shared_new<NonVirtual>();
+                        {
+                            no->virt = shared_new<NonVirtual>();
+                        }
                     }
                     else if( S->getFnParent() ) // in code
                     {
-                    	storage = shared_new<Auto>();
+                    	o = shared_new<Automatic>();
                     }
                     else // top level
                     {
-                        storage = shared_new<Static>();
+                    	o = shared_new<Static>();
                         if( !access )
                             access = shared_ptr<Public>(new Public); // unspecified at top level implies "extern", which we call public
                     }
                     break;
                 }
                 case clang::DeclSpec::SCS_auto:
-                    storage = shared_new<Auto>();
+                	o = shared_new<Automatic>();
                     break;
                 case clang::DeclSpec::SCS_extern:// linking will be done "automatically" so no need to remember "extern" in the tree
-                    storage = shared_new<Static>();
+                	o = shared_new<Static>();
                     if( !access )
                         access = shared_ptr<Public>(new Public); // we call extern public
                     break;
                 case clang::DeclSpec::SCS_static:
-                    storage = shared_new<Static>();
+                	o = shared_new<Static>();
                     break;
                 default:
                     ASSERTFAIL("Unsupported storage class");
@@ -515,7 +525,6 @@ private:
             if(!access)
                 access = shared_ptr<Private>(new Private); // Most scopes are private unless specified otherwise
 
-            shared_ptr<Instance> o(new Instance());
             all_decls->members.insert(o);
 
             clang::IdentifierInfo *ID = D.getIdentifier();
@@ -533,7 +542,6 @@ private:
             else
                 o->constancy = shared_new<NonConst>();
             o->type = CreateTypeNode( D );
-            o->storage = storage;
             o->access = access;
             o->initialiser = shared_new<Uninitialised>();
 
@@ -668,7 +676,7 @@ private:
         virtual DeclTy *ActOnParamDeclarator(clang::Scope *S, clang::Declarator &D)
         {
 
-            shared_ptr<Instance> p = CreateInstanceNode( S, D, shared_new<Public>(), shared_new<Auto>() );
+            shared_ptr<Instance> p = CreateInstanceNode( S, D, shared_new<Public>(), true );
             backing_params[p] = D.getIdentifier(); // allow us to register the object with ident_track once we're in the function body scope
             return hold_decl.ToRaw( p );
         }
@@ -1593,11 +1601,10 @@ private:
                                           clang::SourceLocation IdLoc, clang::IdentifierInfo *Id,
                                           clang::SourceLocation EqualLoc, ExprTy *Val)
         {
-            shared_ptr<Instance> o(new Instance());
+            shared_ptr<Static> o(new Static());
             all_decls->members.insert(o);
             o->identifier = CreateInstanceIdentifier(Id);
-            o->storage = shared_new<Static>();
-            o->constancy = shared_new<Const>(); // static const member does not consume storage!!
+            o->constancy = shared_new<Const>(); // static const member need not consume storage!!
             o->type = CreateIntegralType( TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified], false );
             o->access = shared_ptr<Public>(new Public);
             if( Val )

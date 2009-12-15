@@ -273,9 +273,11 @@ public:
         bool bold, circle, diamond;
         s += Id(n.get()) + " [\n";
         string name = Name(n, &bold, &circle, &diamond);
+        //circle=diamond=false;
         if(circle || diamond)
         {
             s += "label = \"" + name + "\"\n";
+            // TODO causes errors because links go to targets meant for records
         }
         else
         {
@@ -296,7 +298,7 @@ public:
                 {
                 	s += " | <" + SeqField( i ) + "> ";
                 	if( !*ptr )
-                		s += "NULL";
+                		s += "?";
                 }
                 else // Collection
                 {
