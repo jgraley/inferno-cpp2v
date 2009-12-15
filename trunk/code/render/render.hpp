@@ -448,19 +448,19 @@ private:
             return ERROR_UNKNOWN("current_access spec"); 
     }
     
-    string RenderStorage( shared_ptr<StorageClass> st )
+    string RenderStorage( shared_ptr<Instance> st )
     {
         if( dynamic_pointer_cast<Program>( scope_stack.top() ) )
             return ""; // at top-level scope, everything is set to static, but don't actually output the word
         else if( dynamic_pointer_cast<Static>( st ) )
             return "static "; 
-        else if( dynamic_pointer_cast<Auto>( st ) )
+        else if( dynamic_pointer_cast<Automatic>( st ) )
             return "auto "; 
-        else if( dynamic_pointer_cast<Temp>( st ) )
+        else if( dynamic_pointer_cast<Temporary>( st ) )
             return "/*temp*/ "; 
-        else if( shared_ptr<Member> ns = dynamic_pointer_cast<Member>( st ) )
+        else if( shared_ptr<Field> no = dynamic_pointer_cast<Field>( st ) )
         {
-            shared_ptr<Virtuality> v = ns->virt;
+            shared_ptr<Virtuality> v = no->virt;
             if( dynamic_pointer_cast<Virtual>( v ) )
                 return "virtual ";
             else if( dynamic_pointer_cast<NonVirtual>( v ) )
@@ -499,7 +499,7 @@ private:
         {
             if( dynamic_pointer_cast<Const>(o->constancy) )
                 s += "const ";
-            s += RenderStorage(o->storage);
+            s += RenderStorage(o);
         }
         
         string name;
@@ -572,7 +572,7 @@ private:
     {
         bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
         return dynamic_pointer_cast<Record>( scope_stack.top() ) &&
-                   ( (dynamic_pointer_cast<Static>(o->storage) && dynamic_pointer_cast<NonConst>(o->constancy)) ||
+                   ( (dynamic_pointer_cast<Static>(o) && dynamic_pointer_cast<NonConst>(o->constancy)) ||
                      isfunc );
     }
     
@@ -582,10 +582,14 @@ private:
         TRACE();
         string s;
         
-        // Decide access spec for this declaration (explicit if physical, otherwise force to Public)
-        shared_ptr<AccessSpec> this_access = shared_new<Public>();        
-        if( shared_ptr<Physical> ph = dynamic_pointer_cast<Physical>(declaration) )
-            this_access = ph->access;
+        shared_ptr<AccessSpec> this_access;
+        shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(declaration);
+
+        // Decide access spec for this declaration (explicit if instance, otherwise force to Public)
+        if( o )
+            this_access = o->access;
+        else
+        	this_access = shared_new<Public>();
                 
         // Now decide whether we actually need to render an access spec (ie has it changed?)
         if( current_access && // NULL means dont ever render access specs
@@ -595,7 +599,7 @@ private:
             *current_access = this_access;
         }
                                          
-        if( shared_ptr<Instance> o = dynamic_pointer_cast< Instance >(declaration) )
+        if( o )
         {                
             if( ShouldSplitInstance(o) )
             {

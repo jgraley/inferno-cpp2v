@@ -33,9 +33,8 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 
 	// Construct limitation - restrict master search to functions that contain an automatic variable
 	shared_ptr< SearchReplace::Stuff<Statement> > cs_stuff( new SearchReplace::Stuff<Statement> );
-	shared_ptr<Instance> cs_instance( new Instance );
+	shared_ptr<Automatic> cs_instance( new Automatic );
 	cs_stuff->terminus = cs_instance;
-	cs_instance->storage = shared_new<Auto>();
     s_and->patterns.insert( cs_stuff );
 
 	// Master replace - insert index variable, inc and dec into function at top level
@@ -45,7 +44,7 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	// top-level decls
 	shared_ptr< SearchReplace::Star<Declaration> > r_top_decls( new SearchReplace::Star<Declaration> );
 	r_top_comp->members.insert( r_top_decls );
-	shared_ptr<Instance> r_index( new Instance );
+	shared_ptr<Static> r_index( new Static );// TODO Field
 	r_top_comp->members.insert( r_index );
 	shared_ptr<Unsigned> r_index_type( new Unsigned );
 	r_index->type = r_index_type;
@@ -53,7 +52,6 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	shared_ptr<SoftMakeIdentifier> r_index_identifier( new SoftMakeIdentifier("%s_stack_index") );
 	r_index_identifier->source = shared_new<Identifier>();
 	r_index->identifier = r_index_identifier;
-	r_index->storage = shared_new<Static>(); // TODO Member
 	r_index->constancy = shared_new<NonConst>();
 	r_index->initialiser = shared_ptr<SpecificInteger>( new SpecificInteger(0) );
 	r_index->access = shared_new<Private>();
@@ -72,23 +70,27 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	s_fi2->identifier = shared_new<InstanceIdentifier>();
 	shared_ptr< SearchReplace::Stuff<Statement> > s_stuff( new SearchReplace::Stuff<Statement> );
 	s_fi2->initialiser = s_stuff;
-	shared_ptr<Instance> s_instance( new Instance );
+	shared_ptr<Automatic> s_instance( new Automatic );
 	s_stuff->terminus = s_instance;
 	shared_ptr<InstanceIdentifier> s_identifier( new InstanceIdentifier );
 	s_instance->identifier = s_identifier;
-	s_instance->storage = shared_new<Auto>();
+	s_instance->constancy = shared_new<Constancy>();
+	s_instance->access = shared_new<AccessSpec>();
+	s_instance->initialiser = shared_new<Initialiser>();
 	s_instance->type = shared_new<Type>();
 
     // Slave replace to insert as a static array (TODO be a member of enclosing class)
 	shared_ptr<Instance> r_fi2( new Instance );
 	shared_ptr< SearchReplace::Stuff<Statement> > r_stuff( new SearchReplace::Stuff<Statement> );
 	r_fi2->initialiser = r_stuff;
-	shared_ptr<Instance> r_instance( new Instance );
+	shared_ptr<Static> r_instance( new Static ); // TODO Field
+	r_instance->constancy = shared_new<Constancy>();
+	r_instance->access = shared_new<AccessSpec>();
+	r_instance->initialiser = shared_new<Initialiser>();
 	r_stuff->terminus = r_instance;
 	shared_ptr<SoftMakeIdentifier> r_identifier( new SoftMakeIdentifier("%s_stack") );
 	r_identifier->source = shared_new<Identifier>();
 	r_instance->identifier = r_identifier;
-	r_instance->storage = shared_new<Static>(); // TODO Member
 	shared_ptr<Array> r_array( new Array );
 	r_instance->type = r_array;
 	r_array->element = shared_new<Type>();
@@ -187,10 +189,18 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	sms.insert( &ms_fi2 );
 
 	// Couple the automatic variable that will become an array
-	SearchReplace::Coupling ms_instance;
-	ms_instance.insert( s_instance );
-	ms_instance.insert( r_instance );
-	sms.insert( &ms_instance );
+	SearchReplace::Coupling ms_access;
+	ms_access.insert( s_instance->access );
+	ms_access.insert( r_instance->access );
+	sms.insert( &ms_access );
+	SearchReplace::Coupling ms_constancy;
+	ms_constancy.insert( s_instance->constancy );
+	ms_constancy.insert( r_instance->constancy );
+	sms.insert( &ms_constancy );
+	SearchReplace::Coupling ms_init;
+	ms_init.insert( s_instance->initialiser );
+	ms_init.insert( r_instance->initialiser );
+	sms.insert( &ms_init );
 
 	// Couple the type of the auto variable into the element type of the array
 	SearchReplace::Coupling ms_type;

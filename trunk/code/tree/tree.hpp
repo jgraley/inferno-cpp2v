@@ -294,31 +294,7 @@ struct Public : AccessSpec { NODE_FUNCTIONS };
 struct Private : AccessSpec { NODE_FUNCTIONS };
 struct Protected : AccessSpec { NODE_FUNCTIONS };
 
-// Intermediate for anything that consumes space and/or has state. Slightly 
-// wooly concept.
-struct Physical : Declaration
-{
-    NODE_FUNCTIONS
-    SharedPtr<AccessSpec> access;
-};
-
-// Property for a storage class which can apply to any instance (variable,
-// object or function) and indicates physical location, allocation strategy 
-// and life-cycle model. Presently we allow static, member (=non-static member)
-// and auto (= non-static local). Member must also indicate virtual-ness.
-// Note that top-level static -> Static and Private. 
-// Top-level extern -> Static and Public.
-struct StorageClass : Property { NODE_FUNCTIONS };
-struct Static : StorageClass { NODE_FUNCTIONS };
-struct Member : StorageClass
-{
-    NODE_FUNCTIONS
-    SharedPtr<Virtuality> virt;
-};
-struct Auto : StorageClass { NODE_FUNCTIONS };
-struct Temp : StorageClass { NODE_FUNCTIONS }; // like Auto but cannot recurse
-
-// Property that indicates whether some variable or object is constancy.
+// Property that indicates whether some variable or object is constant.
 struct Constancy : Property { NODE_FUNCTIONS };
 struct Const : Constancy { NODE_FUNCTIONS };
 struct NonConst : Constancy { NODE_FUNCTIONS }; 
@@ -335,22 +311,54 @@ struct NonConst : Constancy { NODE_FUNCTIONS };
 // THe latter case is used where initialisaiton/construction demands ordering. It points
 // to an InstanceIdentifier, and all usages of the instance actually point to the
 // InstanceIdentifier.
-struct Instance : Physical,
+struct Instance : Declaration,
                   Statement
 {
     NODE_FUNCTIONS
-    SharedPtr<StorageClass> storage; // TODO move to Physical so Base has one
     SharedPtr<Constancy> constancy; 
+    SharedPtr<AccessSpec> access;
     SharedPtr<Type> type;
     SharedPtr<InstanceIdentifier> identifier;
     SharedPtr<Initialiser> initialiser; // NULL if uninitialised
 };
 
-// Node for a base class within a class declaration, specifies another class from 
-// which to inherit
-struct Base : Physical 
+// A variable or function with one instance across the entire program. This includes extern and
+// static scope for globals, as well as static locals. If a Static is Const, then it may be
+// regarded as a compile-time constant.
+struct Static : Instance
 {
     NODE_FUNCTIONS
+};
+
+// A variable or function with one instance for each object of the containing class, ie
+// non-static members. Functions have a "this" pointer.
+struct Field : Instance
+{
+	SharedPtr<Virtuality> virt;
+    NODE_FUNCTIONS
+};
+
+// A variable with one instance for each *invocation* of a function, ie
+// non-static locals. Safe across recursion.
+struct Automatic : Instance
+{
+    NODE_FUNCTIONS
+};
+
+// A variable with unspecified storage which may be used within a function but is not preserved
+// across recursion or between calls (such a variable could safely be implemented as any of
+// Static, Field or Automatic since it supports only those guarantees common to all).
+struct Temporary : Instance
+{
+    NODE_FUNCTIONS
+};
+
+// Node for a base class within a class declaration, specifies another class from 
+// which to inherit
+struct Base : Declaration
+{
+    NODE_FUNCTIONS
+    SharedPtr<AccessSpec> access;
     SharedPtr<TypeIdentifier> record; // must refer to InheritanceRecord
 };              
 
