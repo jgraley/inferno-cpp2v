@@ -315,27 +315,30 @@ struct Instance : Declaration,
                   Statement
 {
     NODE_FUNCTIONS
-    SharedPtr<Constancy> constancy; 
-    SharedPtr<AccessSpec> access;
     SharedPtr<Type> type;
     SharedPtr<InstanceIdentifier> identifier;
-    SharedPtr<Initialiser> initialiser; // NULL if uninitialised
+    SharedPtr<Initialiser> initialiser;
 };
 
 // A variable or function with one instance across the entire program. This includes extern and
-// static scope for globals, as well as static locals. If a Static is Const, then it may be
-// regarded as a compile-time constant.
+// static scope for globals, as well as static locals. If a Static variable is Const, then it may be
+// regarded as a compile-time constant. A static constant function may be regarded as idempotent.
 struct Static : Instance
 {
     NODE_FUNCTIONS
+    SharedPtr<Constancy> constancy;
 };
 
 // A variable or function with one instance for each object of the containing class, ie
-// non-static members. Functions have a "this" pointer.
+// non-static members. Functions have a "this" pointer. Note that access and constancy
+// are intended to control the generation of read/write lines for modules. This usage of
+// Constancy differs from that in Static, so we do not try to introduce a common intermediate.
 struct Field : Instance
 {
-	SharedPtr<Virtuality> virt;
     NODE_FUNCTIONS
+	SharedPtr<Virtuality> virt;
+    SharedPtr<AccessSpec> access;
+    SharedPtr<Constancy> constancy;
 };
 
 // A variable with one instance for each *invocation* of a function, ie

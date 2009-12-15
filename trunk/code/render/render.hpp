@@ -497,8 +497,12 @@ private:
         
         if( showstorage )
         {
-            if( dynamic_pointer_cast<Const>(o->constancy) )
-                s += "const ";
+       	    if( shared_ptr<Static> st = dynamic_pointer_cast<Static>(o) )
+       		    if( dynamic_pointer_cast<Const>(st->constancy) )
+                    s += "const ";
+    	    if( shared_ptr<Field> f = dynamic_pointer_cast<Field>(o) )
+    		    if( dynamic_pointer_cast<Const>(f->constancy) )
+                    s += "const ";
             s += RenderStorage(o);
         }
         
@@ -571,9 +575,12 @@ private:
     bool ShouldSplitInstance( shared_ptr<Instance> o )
     {
         bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
+        bool is_non_const_static = false;
+        if( shared_ptr<Static> s = dynamic_pointer_cast<Static>(o) )
+        	if( dynamic_pointer_cast<NonConst>(s->constancy) )
+        		is_non_const_static = true;
         return dynamic_pointer_cast<Record>( scope_stack.top() ) &&
-                   ( (dynamic_pointer_cast<Static>(o) && dynamic_pointer_cast<NonConst>(o->constancy)) ||
-                     isfunc );
+                   ( is_non_const_static || isfunc );
     }
     
     string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, shared_ptr<AccessSpec> *current_access = NULL, 
@@ -583,11 +590,10 @@ private:
         string s;
         
         shared_ptr<AccessSpec> this_access;
-        shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(declaration);
 
         // Decide access spec for this declaration (explicit if instance, otherwise force to Public)
-        if( o )
-            this_access = o->access;
+        if( shared_ptr<Field> f = dynamic_pointer_cast<Field>(declaration) )
+            this_access = f->access;
         else
         	this_access = shared_new<Public>();
                 
@@ -599,7 +605,7 @@ private:
             *current_access = this_access;
         }
                                          
-        if( o )
+        if( shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(declaration) )
         {                
             if( ShouldSplitInstance(o) )
             {

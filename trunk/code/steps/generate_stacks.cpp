@@ -54,7 +54,6 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	r_index->identifier = r_index_identifier;
 	r_index->constancy = shared_new<NonConst>();
 	r_index->initialiser = shared_ptr<SpecificInteger>( new SpecificInteger(0) );
-	r_index->access = shared_new<Private>();
 	// top-level statements
 	shared_ptr<PostIncrement> r_inc( new PostIncrement );
 	r_top_comp->statements.push_back( r_inc );
@@ -74,9 +73,7 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	s_stuff->terminus = s_instance;
 	shared_ptr<InstanceIdentifier> s_identifier( new InstanceIdentifier );
 	s_instance->identifier = s_identifier;
-	s_instance->constancy = shared_new<Constancy>();
-	s_instance->access = shared_new<AccessSpec>();
-	s_instance->initialiser = shared_new<Initialiser>();
+	s_instance->initialiser = shared_new<Uninitialised>(); // can't handle initialisers!
 	s_instance->type = shared_new<Type>();
 
     // Slave replace to insert as a static array (TODO be a member of enclosing class)
@@ -84,9 +81,8 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	shared_ptr< SearchReplace::Stuff<Statement> > r_stuff( new SearchReplace::Stuff<Statement> );
 	r_fi2->initialiser = r_stuff;
 	shared_ptr<Static> r_instance( new Static ); // TODO Field
-	r_instance->constancy = shared_new<Constancy>();
-	r_instance->access = shared_new<AccessSpec>();
-	r_instance->initialiser = shared_new<Initialiser>();
+	r_instance->constancy = shared_new<NonConst>();
+	r_instance->initialiser = shared_new<Uninitialised>();
 	r_stuff->terminus = r_instance;
 	shared_ptr<SoftMakeIdentifier> r_identifier( new SoftMakeIdentifier("%s_stack") );
 	r_identifier->source = shared_new<Identifier>();
@@ -187,20 +183,6 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	ms_fi2.insert( s_fi2 );
 	ms_fi2.insert( r_fi2 );
 	sms.insert( &ms_fi2 );
-
-	// Couple the automatic variable that will become an array
-	SearchReplace::Coupling ms_access;
-	ms_access.insert( s_instance->access );
-	ms_access.insert( r_instance->access );
-	sms.insert( &ms_access );
-	SearchReplace::Coupling ms_constancy;
-	ms_constancy.insert( s_instance->constancy );
-	ms_constancy.insert( r_instance->constancy );
-	sms.insert( &ms_constancy );
-	SearchReplace::Coupling ms_init;
-	ms_init.insert( s_instance->initialiser );
-	ms_init.insert( r_instance->initialiser );
-	sms.insert( &ms_init );
 
 	// Couple the type of the auto variable into the element type of the array
 	SearchReplace::Coupling ms_type;
