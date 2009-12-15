@@ -465,6 +465,14 @@ private:
                                                  bool automatic = false )
         {
             const clang::DeclSpec &DS = D.getDeclSpec();
+            if(!access)
+                access = shared_ptr<Private>(new Private); // Most scopes are private unless specified otherwise
+
+            shared_ptr<Constancy> constancy;
+            if( DS.getTypeQualifiers() & clang::DeclSpec::TQ_const )
+                constancy = shared_new<Const>();
+            else
+                constancy = shared_new<NonConst>();
 
             shared_ptr<Instance> o;
 
@@ -492,6 +500,8 @@ private:
                         {
                             no->virt = shared_new<NonVirtual>();
                         }
+                        no->access = access;
+                        no->constancy = constancy;
                     }
                     else if( S->getFnParent() ) // in code
                     {
@@ -499,9 +509,9 @@ private:
                     }
                     else // top level
                     {
-                    	o = shared_new<Static>();
-                        if( !access )
-                            access = shared_ptr<Public>(new Public); // unspecified at top level implies "extern", which we call public
+                    	shared_ptr<Static> no = shared_new<Static>();
+                    	o = no;
+                    	no->constancy = constancy;
                     }
                     break;
                 }
@@ -509,12 +519,18 @@ private:
                 	o = shared_new<Automatic>();
                     break;
                 case clang::DeclSpec::SCS_extern:// linking will be done "automatically" so no need to remember "extern" in the tree
-                	o = shared_new<Static>();
-                    if( !access )
-                        access = shared_ptr<Public>(new Public); // we call extern public
+                	{
+                		shared_ptr<Static> no = shared_new<Static>();
+                	    o = no;
+                	    no->constancy = constancy;
+                	}
                     break;
                 case clang::DeclSpec::SCS_static:
-                	o = shared_new<Static>();
+					{
+						shared_ptr<Static> no = shared_new<Static>();
+						o = no;
+						no->constancy = constancy;
+					}
                     break;
                 default:
                     ASSERTFAIL("Unsupported storage class");
@@ -522,8 +538,6 @@ private:
                 }
             }
 
-            if(!access)
-                access = shared_ptr<Private>(new Private); // Most scopes are private unless specified otherwise
 
             all_decls->members.insert(o);
 
@@ -537,12 +551,7 @@ private:
             {
                 o->identifier = CreateInstanceIdentifier();
             }
-            if( DS.getTypeQualifiers() & clang::DeclSpec::TQ_const )
-                o->constancy = shared_new<Const>();
-            else
-                o->constancy = shared_new<NonConst>();
             o->type = CreateTypeNode( D );
-            o->access = access;
             o->initialiser = shared_new<Uninitialised>();
 
             return o;
@@ -1606,7 +1615,6 @@ private:
             o->identifier = CreateInstanceIdentifier(Id);
             o->constancy = shared_new<Const>(); // static const member need not consume storage!!
             o->type = CreateIntegralType( TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified], false );
-            o->access = shared_ptr<Public>(new Public);
             if( Val )
             {
                 o->initialiser = hold_expr.FromRaw( Val );

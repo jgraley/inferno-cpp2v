@@ -53,8 +53,6 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	r_comp->statements.push_back( r_sub_comp );
 	shared_ptr< Temporary > r_newvar( new Temporary );
 	r_newvar->type = shared_new<Type>();
-	r_newvar->constancy = shared_new<NonConst>();
-	r_newvar->access = shared_new<Private>();
 	r_newvar->identifier = shared_ptr<InstanceIdentifier>( new SoftMakeIdentifier( "temp_retval" ) );
 	r_newvar->initialiser = shared_new<Uninitialised>();
 	r_sub_comp->members.insert( r_newvar );

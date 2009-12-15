@@ -231,6 +231,12 @@ public:
             *diamond = true;
             return Sanitise( *sp );
         }
+        else if( shared_ptr<SoftMakeIdentifier> smi = dynamic_pointer_cast<SoftMakeIdentifier>(sp) )
+        {
+            *bold = false;
+            *diamond = true; // TODO use a different shape
+            return Sanitise( smi->format );
+        }
         else if( shared_ptr<SpecificFloat> fc = dynamic_pointer_cast< SpecificFloat >(sp) )
         {
             char hs[256];
