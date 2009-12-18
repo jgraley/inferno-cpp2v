@@ -45,6 +45,7 @@ public:
         s += "digraph Inferno {\n"; // g is name of graph
         s += "graph [\n";
         s += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
+        s += "fontname = \"arial\"\n"; // get with the 21st century
         s += "];\n";
         s += "node [\n";
         s += "];\n";
@@ -128,13 +129,13 @@ public:
 		string s;
 		if( sr->search_pattern )
 		{
-			s += Id(sr) + ":search -> " + Id(sr->search_pattern.get()) + ":fixed [\n";
-			s += "];\n";
+			s += Id(sr) + ":search -> " + Id(sr->search_pattern.get());
+			s += " [];\n";
 		}
 		if( sr->replace_pattern )
 		{
-			s += Id(sr) + ":replace -> " + Id(sr->replace_pattern.get()) + ":fixed [\n";
-			s += "];\n";
+			s += Id(sr) + ":replace -> " + Id(sr->replace_pattern.get());
+			s += " [];\n";
 		}
         for( int j=0; j<sr->slaves.size(); j++ )
         {
@@ -154,19 +155,29 @@ public:
 		{
 			if( prev )
 			{
-		        s += Id(prev.get()) + ":fixed -> " + Id(n.get()) + ":fixed [\n";
-		        s += "dir = \"none\"\n"; // no arrowhead
-		        s += "style = \"dotted\"\n"; // dotted line
-		        s += "constraint = false\n"; // Do not make dest higher rank than source - stops dest being moved to the right
-		        s += "];\n";
-		        // Graphviz 2.20 has a bug where you get "Lost edge" for some edges that have
-		        // constraint = false (apparently ok in 2.18 and as-yet-unreleased 2.22)
-		        // A workaround seems to be to supply another edge going in opposite direction.
-		        s += Id(n.get()) + ":fixed -> " + Id(prev.get()) + ":fixed [\n";
-		        s += "dir = \"none\"\n";
-		        s += "style = \"invis\"\n";
-		        s += "constraint = false\n";
-		        s += "];\n";
+				string common_atts;
+				common_atts = "dir = \"none\"\n"; // no arrowhead
+		        common_atts += "constraint = false\n"; // Do not make dest higher rank than source - stops dest being moved to the right
+				string atts;
+		        atts = common_atts;
+				string c = Colour(prev);
+		        if(c=="")
+		        	c = Colour(n);
+		        if(c=="")
+		        	c = "grey60";// make it pale
+		        atts += "color = " + c + "\n";
+		        s += DoLink( prev, "", n, atts );
+		        if( ReadArgs::hack_graph )
+		        {
+					// Graphviz 2.20 has a bug where you get "Lost edge" for some edges that have
+					// constraint = false (apparently ok in 2.18 and as-yet-unreleased 2.22)
+					// A workaround seems to be to supply another edge going in opposite direction.
+		        	// HOWEVER: using this can make dot crash, on graphs over a certain size. So
+		        	// the hack is only enabled when -g<x>h is specified
+					atts = common_atts;
+					atts += "style = \"invis\"\n";
+					s += DoLink( n, "", prev, atts );
+		        }
 			}
 			prev = n;
 		}
@@ -200,144 +211,187 @@ public:
         return o;
     }
 
-    string Name( shared_ptr<Node> sp, bool *bold, bool *circle, bool *diamond )   // TODO put stringize capabilities into the Property nodes as virtual methods
+    string Name( shared_ptr<Node> sp, bool *bold, string *shape )   // TODO put stringize capabilities into the Property nodes as virtual methods
     {
         *bold=true;
-        *circle=false;
-        *diamond=false;
         if( dynamic_pointer_cast<RootedSearchReplace::StarBase>(sp) )
         {
-            *circle = true;
+            *shape = "circle";
             return string("*");
         }
         else if( dynamic_pointer_cast<RootedSearchReplace::StuffBase>(sp) )
         {
-            *circle = true;
-            return string("#");
+        	*shape = "circle";
+            return string("#"); // TODO what if there's a restriction: egg?
         }
         else if( dynamic_pointer_cast<NotMatchBase>(sp) )
         {
-            *circle = true;
+        	*shape = "circle";
             return string("!");
         }
         else if( dynamic_pointer_cast<MatchAllBase>(sp) )
         {
-            *circle = true;
-            return string("&&"); // note & is a wildcard in dot but not handled prolperly, this becomes "& "
+        	*shape = "circle";
+            return string("&"); // note & is a wildcard in dot but not handled properly, this becomes "& ". At least some of the time.
         }
         else if( dynamic_pointer_cast<TransformToBase>(sp) )
         {
-            *bold = false;
-            *diamond = true;
-            return Sanitise( *sp );
+            *shape = "hexagon";
+            return *sp;
         }
         else if( shared_ptr<SoftMakeIdentifier> smi = dynamic_pointer_cast<SoftMakeIdentifier>(sp) )
         {
-            *bold = false;
-            *diamond = true; // TODO use a different shape
-            return Sanitise( smi->format );
+            *shape = "parallelogram";
+            return smi->format;
         }
-        else if( shared_ptr<SpecificFloat> fc = dynamic_pointer_cast< SpecificFloat >(sp) )
-        {
-            char hs[256];
-            ((llvm::APFloat)*fc).convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
-            return string(hs); 
-        }           
         else
         {
             *bold = false;
-            return Sanitise( *sp );
+            *shape = "plaintext";//"record";
+            return *sp;
         }
     }
     
     // Colours are GraphVis colours as listed at http://www.graphviz.org/doc/info/colors.html
     string Colour( shared_ptr<Node> n )
     {
-        if( dynamic_pointer_cast<Declaration>(n) )
-            return "chocolate1";                     
+    	if( dynamic_pointer_cast<Identifier>(n) )
+			return "gray60";
+		else if( dynamic_pointer_cast<Declaration>(n) )
+			return "seagreen1";
+		else if( dynamic_pointer_cast<MapOperand>(n) )
+	        return "goldenrod2";
         else if( dynamic_pointer_cast<Type>(n) )
             return "plum";                     
         else if( dynamic_pointer_cast<Literal>(n) )
-            return "cyan";                     
+            return "goldenrod2";
         else if( dynamic_pointer_cast<Expression>(n) )
-            return "seagreen1";                     
-        else if( dynamic_pointer_cast<Statement>(n) )
-            return "gold";                     
+            return "chocolate1";
         else if( dynamic_pointer_cast<Property>(n) )
-            return "khaki";                     
+            return "olivedrab3";
+        else if( dynamic_pointer_cast<Statement>(n) )
+            return "brown1";
+        else if( dynamic_pointer_cast<Initialiser>(n) )
+            return "olivedrab3";
         else if( dynamic_pointer_cast<Scope>(n) )
-            return "lemonchiffon4";                     
+            return "cyan";
         else
-            return "white";                     
+            return "";
+    }
+    
+    string HTMLLabel( string name, shared_ptr<Node> n )
+    {
+        string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
+        s += " <TR>\n";
+        s += "  <TD><FONT POINT-SIZE=\"24.0\">" + name + "</FONT></TD>\n";
+        s += "  <TD></TD>\n";
+        s += " </TR>\n";
+        vector< Itemiser::Element * > members = n->Itemise();
+        for( int i=0; i<members.size(); i++ )
+        {
+            if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )
+            {
+                for( int j=0; j<seq->size(); j++ )
+                {
+                    char c[20];
+                    sprintf(c, "%d", j);
+                    s += " <TR>\n";
+                    s += "  <TD>" + (string)*seq + "[" + string(c) + "]</TD>\n";
+                    s += "  <TD PORT=\"" + SeqField( i, j ) + "\"></TD>\n";
+                    s += " </TR>\n";
+                }
+            }
+            else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )
+            {
+                if( *ptr )
+                {
+                    s += " <TR>\n";
+                	s += "  <TD>" + (string)*ptr + "</TD>\n";
+                	s += "  <TD PORT=\"" + SeqField( i ) + "\"></TD>\n";
+                    s += " </TR>\n";
+               }
+            }
+            else if( GenericCollection *col = dynamic_cast<GenericCollection *>(members[i]) )
+            {
+                s += " <TR>\n";
+                s += "  <TD>" + (string)*col + "{}</TD>\n";
+                s += "  <TD PORT=\"" + SeqField( i ) + "\"></TD>\n";
+                s += " </TR>\n";
+            }
+            else
+            {
+            	ASSERT(0);
+            }
+        }
+        s += "</TABLE>>\n";
+        return s;
     }
 
+    string SimpleLabel( string name, shared_ptr<Node> n )
+    {
+        string s = "\"<fixed> " + name;
+        vector< Itemiser::Element * > members = n->Itemise();
+        for( int i=0; i<members.size(); i++ )
+        {
+            if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )
+            {
+                for( int j=0; j<seq->size(); j++ )
+                {
+                    char c[20];
+                    sprintf(c, "%d", j);
+                    s += " | <" + SeqField( i, j ) + "> ";// [" + string(c) + "]";
+                }
+            }
+            else  if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )
+            {
+            	s += " | <" + SeqField( i ) + "> ";
+            }
+            else // Collection
+            {
+            	s += " | <" + SeqField( i ) + "> ";// \\{\\}";
+            }
+        }
+        s += "\"\n";
+        return s;
+    }
 
-    
     string DoNode( shared_ptr<Node> n )
     {
         string s;
-        bool bold, circle, diamond;
+        bool bold;
+        string shape;
         s += Id(n.get()) + " [\n";
-        string name = Name(n, &bold, &circle, &diamond);
-        //circle=diamond=false;
-        if(circle || diamond)
-        {
-            s += "label = \"" + name + "\"\n";
-            // TODO causes errors because links go to targets meant for records
-        }
-        else
-        {
-            s += "label = \"<fixed> " + name;
-            vector< Itemiser::Element * > members = n->Itemise();
-            for( int i=0; i<members.size(); i++ )
-            {
-                if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )                
-                {
-                    for( int j=0; j<seq->size(); j++ )
-                    {
-                        char c[20];
-                        sprintf(c, "%d", j+1);
-                        s += " | <" + SeqField( i, j ) + "> " + string(c) + ".";
-                    }
-                }            
-                else  if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )
-                {
-                	s += " | <" + SeqField( i ) + "> ";
-                	if( !*ptr )
-                		s += "?";
-                }
-                else // Collection
-                {
-                	s += " | <" + SeqField( i ) + "> ";
-                }
-            }      
-            s += "\"\n";
-        }          
+        string name = Name(n, &bold, &shape);
 
-        if(diamond)
+        s += "shape = \"" + shape + "\"\n";
+        if(shape == "record" || shape == "plaintext")
         {
-            s += "style = \"filled\"\n";
-            s += "shape = \"hexagon\"\n";
-        }
-        else if(circle)
-        {
-            s += "style = \"filled\"\n";
-            s += "shape = \"circle\"\n";
-            s += "fixedsize = true\n";
-            s += "width = 0.65\n";
-            s += "height = 0.65\n";
-        }
-        else
-        {
-            s += "style = \"filled,rounded\"\n";
-            s += "shape = \"record\"\n"; // nodes can be split into fields
-            s += "fillcolor = " + Colour(n) + "\n"; 
-        }
-        if( bold )
-            s += "fontsize = \"24\"\n";
-        else
+            s += "label = " + HTMLLabel( name, n );
+            s += "style = \"rounded,filled\"\n";
             s += "fontsize = \"16\"\n";
-    
+        }          
+        else
+        {
+            s += "label = \"" + name + "\"\n";// TODO causes errors because links go to targets meant for records
+            s += "style = \"filled\"\n";
+
+            if( shape == "circle" )
+            {
+                s += "fixedsize = true\n";
+                s += "width = 0.55\n";
+                s += "height = 0.55\n";
+                s += "fontsize = \"24\"\n";
+            }
+            else
+            {
+            	s += "fontsize = \"20\"\n";
+            }
+        }
+
+        string c = Colour(n);
+        if(c!="")
+        	s += "fillcolor = " + c + "\n";
+
         s += "];\n";
         return s;
     }
@@ -374,11 +428,29 @@ public:
         return s;
     }    
     
-    string DoLink( shared_ptr<Node> from, string field, shared_ptr<Node> to )
+    bool IsRecord( shared_ptr<Node> n )
+    {
+        bool bold;
+        string shape;
+        bool fport, tport;
+        Name( n, &bold, &shape );
+        return shape=="record" || shape=="plaintext";
+    }
+
+    string DoLink( shared_ptr<Node> from, string field, shared_ptr<Node> to, string atts=string() )
     {
         string s;
-        s += Id(from.get()) + ":" + field + " -> " + Id(to.get()) + ":fixed [\n";
-        s += "];\n";
+        s += Id(from.get());
+        if( field != "" && IsRecord(from) )
+        {
+        	s += ":" + field;
+        	atts = "dir = \"both\"\n";
+        	atts = "arrowtail = \"dot\"\n";
+        }
+
+        s += " -> ";
+        s += Id(to.get());
+        s += " ["+atts+"];\n";
         return s;
     }
 };

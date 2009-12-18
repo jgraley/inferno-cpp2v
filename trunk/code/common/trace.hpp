@@ -49,12 +49,15 @@ private:
 class Traceable
 {
 public:
+	string CPPFilt( string s ) const
+	{
+        while( s[0]>='0' && s[0]<='9' )
+           s = s.c_str()+1;
+        return s;
+	}
 	virtual operator string() const
 	{
-        const char *s = typeid( *this ).name();
-        while( s[0]>='0' && s[0]<='9' )
-           s++;
-        return s;
+        return CPPFilt( typeid( *this ).name() );
 	}
 };
 

@@ -11,6 +11,7 @@
 #include "common/refcount.hpp"
 #include "helpers/soft_patterns.hpp"
 
+#define HANDLE_EARLY_RETURNS 1
 
 void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
@@ -100,6 +101,7 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	sr_sub->base = shared_new<InstanceIdentifier>();
 	sr_sub->index = shared_new<InstanceIdentifier>();
 
+#if HANDLE_EARLY_RETURNS
 	// Slave to find early returns in the function
 	shared_ptr<Instance> s_fi3( new Instance );
 	s_fi3->identifier = shared_new<InstanceIdentifier>();
@@ -152,6 +154,7 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	r_ret_comp->statements.push_back( r_return );
 	shared_ptr< SearchReplace::Star<Statement> > r_ret_post( new SearchReplace::Star<Statement> );
 	r_ret_comp->statements.push_back( r_ret_post );
+#endif
 
 	// Couple pre-existing decls in the function's top level
 	SearchReplace::Coupling ms_top_decls;
@@ -202,7 +205,9 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	ms_function_identifier.insert( s_fi->identifier );
 	ms_function_identifier.insert( r_index_identifier->source );
 	ms_function_identifier.insert( s_fi2->identifier );
+#if HANDLE_EARLY_RETURNS
 	ms_function_identifier.insert( s_fi3->identifier );
+#endif
 	sms.insert( &ms_function_identifier );
 
 	// Couple the name of the array into the base of the subscript
@@ -217,10 +222,13 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	ms_new_index_identifier.insert( r_inc->operands[0] );
 	ms_new_index_identifier.insert( r_dec->operands[0] );
 	ms_new_index_identifier.insert( sr_sub->index );
+#if HANDLE_EARLY_RETURNS
 	ms_new_index_identifier.insert( r_ret_dec->operands[0] );
 	ms_new_index_identifier.insert( sn_ret_dec->operands[0] );
+#endif
 	sms.insert( &ms_new_index_identifier );
 
+#if HANDLE_EARLY_RETURNS
 	// Couple the function for dec-before-return slave
 	SearchReplace::Coupling ms_fi3;
 	ms_fi3.insert( s_fi3 );
@@ -258,15 +266,17 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	ms_ret_post.insert( sn_ret_post ); // make sure the ns and s are talking about the same return if there's more than one
 	ms_ret_post.insert( r_ret_post );
 	sms.insert( &ms_ret_post );
-
+#endif
 
 	vector<RootedSearchReplace *> vs;
 	SearchReplace slave( ss_identifier, sr_sub );
 	vs.push_back( &slave );
 	SearchReplace mid( s_fi2, r_fi2, sms, vs );
-	SearchReplace ret( s_fi3, r_fi3 );
 	vector<RootedSearchReplace *> vs2;
 	vs2.push_back( &mid );
+#if HANDLE_EARLY_RETURNS
+	SearchReplace ret( s_fi3, r_fi3 );
 	vs2.push_back( &ret );
+#endif
 	SearchReplace( s_fi, r_fi, sms, vs2 )( context, proot );
 }
