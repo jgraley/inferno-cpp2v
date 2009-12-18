@@ -29,7 +29,7 @@
 
 struct Node;
 
-struct GenericSharedPtr : Itemiser::Element
+struct GenericSharedPtr : Itemiser::Element, Traceable
 {
     virtual shared_ptr<Node> GetNodePtr() const = 0;
     virtual void SetNodePtr( shared_ptr<Node> n ) = 0;
@@ -112,6 +112,10 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
     	if( g )
     	    ASSERT( *this )("Cannot convert GenericSharedPtr that points to a ")((string)*(g.GetNodePtr()))(" to SharedPtr<")(typeid(ELEMENT).name())(">");
     }
+	virtual operator string() const
+	{
+        return CPPFilt( typeid( ELEMENT ).name() );
+	}
 };           
 
 // Inferno tree containers
@@ -146,6 +150,10 @@ struct Sequence : virtual GenericSequence, virtual STLSequence< Itemiser::Elemen
 	{
 		typename RawSequence::value_type sx(gx);
 		RawSequence::push_back( sx );
+	}
+	virtual operator string() const
+	{
+        return CPPFilt( typeid( ELEMENT ).name() );
 	}
 };
 
@@ -189,6 +197,10 @@ struct Collection : GenericCollection, STLCollection< Itemiser::Element, Generic
 		typename RawCollection::value_type sx(gx);
 		typename RawCollection::iterator it = RawCollection::find( sx );
 		return it != RawCollection::end();
+	}
+	virtual operator string() const
+	{
+        return CPPFilt( typeid( ELEMENT ).name() );
 	}
 };
 
