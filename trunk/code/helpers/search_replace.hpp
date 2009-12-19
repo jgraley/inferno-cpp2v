@@ -94,7 +94,15 @@ public:
 
     struct Coupling : public set< shared_ptr<Node> >
     {
+        inline Coupling() {}
+        inline Coupling( const Sequence< Node > &seq )
+        {
+            Sequence< Node > s2 = seq;
+            FOREACH( SharedPtr<Node> v, s2 )
+                insert( v );
+        }
     };
+    
     class CouplingKeys
     {
     public:

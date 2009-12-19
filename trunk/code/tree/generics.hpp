@@ -97,6 +97,10 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
     }
 
     SharedPtr() {}
+    SharedPtr( ELEMENT *o ) : 
+        shared_ptr<ELEMENT>( o )
+    {
+    }
     template< typename OTHER >
     SharedPtr( const shared_ptr<OTHER> &o ) : 
         shared_ptr<ELEMENT>( dynamic_pointer_cast<ELEMENT>(o) )
@@ -171,6 +175,7 @@ struct GenericCollection : virtual GenericContainer
 template<typename ELEMENT>
 struct Collection : GenericCollection, STLCollection< Itemiser::Element, GenericSharedPtr, set< SharedPtr<ELEMENT> > >
 {
+    inline Collection<ELEMENT>() {}
 	typedef set< SharedPtr<ELEMENT> > RawCollection;
 	virtual void insert( const GenericSharedPtr &gx )
 	{
@@ -202,7 +207,34 @@ struct Collection : GenericCollection, STLCollection< Itemiser::Element, Generic
 	{
         return CPPFilt( typeid( ELEMENT ).name() );
 	}
+    inline Collection<ELEMENT>( const Sequence<ELEMENT> &seq )
+    {
+        FOREACH( SharedPtr<ELEMENT> v, seq )
+            insert( v );
+    }	
 };
+
+
+template<class LELEMENT, class RELEMENT>
+inline Sequence<Node> operator,( const SharedPtr<LELEMENT> &l, const SharedPtr<RELEMENT> &r )
+{
+    Sequence<Node> seq;
+    seq.push_back( (const GenericSharedPtr &)l );
+    seq.push_back( (const GenericSharedPtr &)r );
+    return seq;
+}
+
+template<class RELEMENT>
+inline Sequence<Node> operator,( const Sequence<Node> &l, const SharedPtr<RELEMENT> &r )
+{
+    Sequence<Node> seq = l;
+    seq.push_back( (const GenericSharedPtr &)r );
+    return seq;
+}
+
+
+
+//////////////////////////// Node Model ////////////////////////////
 
 // Mix together the bounce classes for the benefit of the tree
 #define NODE_FUNCTIONS ITEMISE_FUNCTION TYPE_INFO_FUNCTION CLONE_FUNCTION
@@ -213,8 +245,6 @@ struct NodeBases : Magic,
                    Cloner
 {
 };
-
-//////////////////////////// Node Model ////////////////////////////
 
 // Base class for all tree nodes and nodes in search/replace
 // patterns etc. Convention is to use "struct" for derived
@@ -235,8 +265,6 @@ struct Node : NodeBases
     // without making Node ambiguous
 };
 
-
 extern void GenericsTest();
-
 
 #endif
