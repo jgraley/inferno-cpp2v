@@ -210,6 +210,7 @@ struct STLContainer : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, CONTAINER_
 template<class SUB_BASE, typename VALUE_TYPE, class CONTAINER_IMPL>
 struct STLSequence : virtual STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
 {
+    inline STLSequence<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>() {}
 	struct iterator : public STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>::iterator
     {
 		virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
@@ -259,6 +260,7 @@ struct STLSequence : virtual STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
 template<class SUB_BASE, typename VALUE_TYPE, class CONTAINER_IMPL>
 struct STLCollection : virtual STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
 {
+    inline STLCollection<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>() {}
 	struct iterator : public STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>::iterator
     {
 		virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
