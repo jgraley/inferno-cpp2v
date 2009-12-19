@@ -20,20 +20,12 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	set<SearchReplace::Coupling *> sms;
 
     // search for return statement in a compound (TODO don't think we need the outer compound)
-	shared_ptr<Compound> s_comp( new Compound );
-	shared_ptr< SearchReplace::Star<Declaration> > s_decls( new SearchReplace::Star<Declaration> );
-	s_comp->members.insert( s_decls );	
-	shared_ptr< SearchReplace::Star<Statement> > s_pre( new SearchReplace::Star<Statement> );
-	s_comp->statements.push_back( s_pre );
 	shared_ptr<Return> s_return( new Return );
-	s_comp->statements.push_back( s_return );	
 	shared_ptr< MatchAll<Expression> > s_and( new MatchAll<Expression> );
 	s_return->return_value = s_and;
 	shared_ptr<TypeOf> s_retval( new TypeOf );
 	s_and->patterns.insert( s_retval );
 	s_retval->pattern = shared_new<Type>();
-	shared_ptr< SearchReplace::Star<Statement> > s_post( new SearchReplace::Star<Statement> );
-	s_comp->statements.push_back( s_post );
     
     // Restrict the search to returns that have an automatic variable under them
     shared_ptr< SearchReplace::Stuff<Expression> > cs_stuff( new SearchReplace::Stuff<Expression> );
@@ -44,13 +36,7 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
     cs_id->pattern = cs_instance;
     
     // replace with a new sub-compound, that declares a Temp, intialises it to the return value and returns it
-	shared_ptr<Compound> r_comp( new Compound );
-	shared_ptr< SearchReplace::Star<Declaration> > r_decls( new SearchReplace::Star<Declaration> );
-	r_comp->members.insert( r_decls );	
-	shared_ptr< SearchReplace::Star<Statement> > r_pre( new SearchReplace::Star<Statement> );
-	r_comp->statements.push_back( r_pre );
 	shared_ptr<Compound> r_sub_comp( new Compound );
-	r_comp->statements.push_back( r_sub_comp );
 	shared_ptr< Temporary > r_newvar( new Temporary );
 	r_newvar->type = shared_new<Type>();
 	r_newvar->identifier = shared_ptr<InstanceIdentifier>( new SoftMakeIdentifier( "temp_retval" ) );
@@ -63,23 +49,6 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	shared_ptr<Return> r_return( new Return );
 	r_sub_comp->statements.push_back( r_return );
 	r_return->return_value = shared_new<InstanceIdentifier>();
-	shared_ptr< SearchReplace::Star<Statement> > r_post( new SearchReplace::Star<Statement> );
-	r_comp->statements.push_back( r_post );
-
-    SearchReplace::Coupling c1;
-    c1.insert( s_decls );
-    c1.insert( r_decls );
-    sms.insert( &c1 ); 
-       
-    SearchReplace::Coupling c2;
-    c2.insert( s_pre );
-    c2.insert( r_pre );
-    sms.insert( &c2 ); 
-       
-    SearchReplace::Coupling c3;
-    c3.insert( s_post );
-    c3.insert( r_post );
-    sms.insert( &c3 ); 
        
     SearchReplace::Coupling c4; // Make the new variable be of the required type, ie whatever the expression evaluates to
     c4.insert( s_retval->pattern );
@@ -97,5 +66,5 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
     c6.insert( r_return->return_value );
     sms.insert( &c6 ); 
              
-	SearchReplace( s_comp, r_comp, sms )( context, proot );
+	SearchReplace( s_return, r_sub_comp, sms )( context, proot );
 }
