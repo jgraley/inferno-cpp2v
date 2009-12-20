@@ -14,7 +14,7 @@
 
 void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
-	set<SearchReplace::Coupling *> sms0;
+	SearchReplace::CouplingSet sms0;
 	SearchReplace sr0;
 
 	SharedPtr<Call> s_call( new Call );

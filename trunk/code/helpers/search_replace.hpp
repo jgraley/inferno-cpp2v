@@ -103,13 +103,15 @@ public:
         }
     };
     
+    typedef set<Coupling *> CouplingSet;
+
     class CouplingKeys
     {
     public:
     	CouplingKeys()
     	{
     	}
-        void Trace( const set<Coupling *> &matches ) const;
+        void Trace( const CouplingSet &couplings ) const;
         Result KeyAndRestrict( shared_ptr<Node> x,
         		               shared_ptr<Node> pattern,
                                const RootedSearchReplace *sr,
@@ -127,10 +129,10 @@ public:
                                            const RootedSearchReplace *sr,
                                            bool can_key );
     private:
-        const Coupling *FindCoupling( shared_ptr<Node> node, const set<Coupling *> &matches );
+        const Coupling *FindCoupling( shared_ptr<Node> node, const CouplingSet &matches );
     	Map< const Coupling *, shared_ptr<Key> > keys_map;
     };
-    set<Coupling *> matches;
+    CouplingSet couplings;
 
     class Conjecture
     {
@@ -155,11 +157,11 @@ public:
     // specified here, so that we have a fully confiugured functor.
     RootedSearchReplace( shared_ptr<Node> sp=shared_ptr<Node>(),
                          shared_ptr<Node> rp=shared_ptr<Node>(),
-                         set<Coupling *> m = set<Coupling *>(),
+                         CouplingSet m = CouplingSet(),
                          vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
     void Configure( shared_ptr<Node> sp=shared_ptr<Node>(),
                     shared_ptr<Node> rp=shared_ptr<Node>(),
-                    set<Coupling *> m = set<Coupling *>(),
+                    CouplingSet m = CouplingSet(),
                     vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
     ~RootedSearchReplace();
     
@@ -288,11 +290,11 @@ class SearchReplace : public RootedSearchReplace
 public:
     SearchReplace( shared_ptr<Node> sp = shared_ptr<Node>(),
                    shared_ptr<Node> rp = shared_ptr<Node>(),
-                   set<Coupling *> m = set<Coupling *>(),
+                   CouplingSet m = CouplingSet(),
                    vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
     void Configure( shared_ptr<Node> sp = shared_ptr<Node>(),
                     shared_ptr<Node> rp = shared_ptr<Node>(),
-                    set<Coupling *> m = set<Coupling *>(),
+                    CouplingSet m = CouplingSet(),
                     vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
 private:
 	Coupling root_match;

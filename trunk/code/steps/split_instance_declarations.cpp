@@ -6,7 +6,7 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
     // TODO only split for Auto variables - for others, take the whole lot including init into the members colelction
 	{ // Do uninitialised ones
 		SearchReplace sr0;
-		set<SearchReplace::Coupling *> sms0;
+		SearchReplace::CouplingSet sms0;
 
 		SharedPtr<Compound> sc( new Compound );
 		 SharedPtr<Instance> si( new Instance );
@@ -41,7 +41,7 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 	}
 	{ // Do initialised ones by leaving an assign behind
 		SearchReplace sr1;
-		set<SearchReplace::Coupling *> sms1;
+		SearchReplace::CouplingSet sms1;
 
 		SharedPtr<Compound> sc( new Compound );
 		 SharedPtr<Instance> si( new Instance );
@@ -87,7 +87,7 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 
 void MergeInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
-	set<SearchReplace::Coupling *> sms1;
+	SearchReplace::CouplingSet sms1;
 	SearchReplace sr1;
 	{
 		// This is the hard kind of search pattern where Stars exist in two
@@ -137,7 +137,7 @@ void MergeInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 
 void HackUpIfs::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
-	set<SearchReplace::Coupling *> sms1;
+	SearchReplace::CouplingSet sms1;
 	SearchReplace sr1;
 	{
 		SharedPtr<If> sif( new If );

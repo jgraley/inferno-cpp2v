@@ -19,7 +19,7 @@ public:
         s += Header();
         s += Traverse( root, false );
         s += Traverse( root, true );
-        FOREACH( const RootedSearchReplace::Coupling *pc, root->matches )
+        FOREACH( const RootedSearchReplace::Coupling *pc, root->couplings )
             s += DoCoupling( pc );
         s += Footer();
         Disburse( s );
