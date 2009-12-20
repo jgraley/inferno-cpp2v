@@ -6,7 +6,6 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
     // TODO only split for Auto variables - for others, take the whole lot including init into the members colelction
 	{ // Do uninitialised ones
 		SearchReplace sr0;
-		SearchReplace::CouplingSet sms0;
 
 		SharedPtr<Compound> sc( new Compound );
 		 SharedPtr<Instance> si( new Instance );
@@ -26,14 +25,11 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 		 rc->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
 		 rc->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
 
-		SearchReplace::Coupling ms0((si, ri));
-		sms0.insert( ms0 );
-		SearchReplace::Coupling ms1((ss, rs));
-		sms0.insert( ms1 );
-		SearchReplace::Coupling ms2((sc->statements[0], rc->statements[0]));
-		sms0.insert( ms2 );
-		SearchReplace::Coupling ms3((sc->statements[2], rc->statements[1]));
-		sms0.insert( ms3 );
+		SearchReplace::CouplingSet sms0((
+			SearchReplace::Coupling((si, ri)),
+			SearchReplace::Coupling((ss, rs)),
+			SearchReplace::Coupling((sc->statements[0], rc->statements[0])),
+			SearchReplace::Coupling((sc->statements[2], rc->statements[1])) ));
 
 		sr0.Configure(sc, rc, sms0);
 		sr0( context, proot );
@@ -41,7 +37,6 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 	}
 	{ // Do initialised ones by leaving an assign behind
 		SearchReplace sr1;
-		SearchReplace::CouplingSet sms1;
 
 		SharedPtr<Compound> sc( new Compound );
 		 SharedPtr<Instance> si( new Instance );
@@ -66,18 +61,13 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 		 rc->statements.push_back( ra );
 		 rc->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
 
-		SearchReplace::Coupling ms0((si, ri));
-		sms1.insert( ms0 );
-		SearchReplace::Coupling ms1((ss, rs));
-		sms1.insert( ms1 );
-		SearchReplace::Coupling ms2((sc->statements[0], rc->statements[0]));
-		sms1.insert( ms2 );
-		SearchReplace::Coupling ms3((sc->statements[2], rc->statements[2]));
-		sms1.insert( ms3 );
-		SearchReplace::Coupling ms4((si->identifier, ra->operands[0]));
-		sms1.insert( ms4 );
-		SearchReplace::Coupling ms5((si->initialiser, ra->operands[1]));
-		sms1.insert( ms5 );
+		SearchReplace::CouplingSet sms1((
+			SearchReplace::Coupling((si, ri)),
+			SearchReplace::Coupling((ss, rs)),
+			SearchReplace::Coupling((sc->statements[0], rc->statements[0])),
+			SearchReplace::Coupling((sc->statements[2], rc->statements[2])),
+			SearchReplace::Coupling((si->identifier, ra->operands[0])),
+			SearchReplace::Coupling((si->initialiser, ra->operands[1])) ));
 
 		sr1.Configure(sc, rc, sms1);
 		sr1( context, proot );
@@ -87,7 +77,6 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 
 void MergeInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
-	SearchReplace::CouplingSet sms1;
 	SearchReplace sr1;
 	{
 		// This is the hard kind of search pattern where Stars exist in two
@@ -116,18 +105,13 @@ void MergeInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 		 sc->statements.push_back( si ); // Instance is in the ordered statements part
 		 sc->statements.push_back( shared_new< SearchReplace::Star<Statement> >() );
 
-		SearchReplace::Coupling ms0((si, ri));
-		sms1.insert( ms0 );
-		SearchReplace::Coupling ms1((ss, rs));
-		sms1.insert( ms1 );
-		SearchReplace::Coupling ms2((sc->statements[0], rc->statements[0]));
-		sms1.insert( ms2 );
-		SearchReplace::Coupling ms3((sc->statements[2], rc->statements[2]));
-		sms1.insert( ms3 );
-		SearchReplace::Coupling ms4((si->identifier, ri->identifier, ra->operands[0]));
-		sms1.insert( ms4 ); // id of instance
-		SearchReplace::Coupling ms5((si->initialiser, ra->operands[1]));
-	    sms1.insert( ms5 ); // init expression
+		SearchReplace::CouplingSet sms1((
+			SearchReplace::Coupling((si, ri)),
+			SearchReplace::Coupling((ss, rs)),
+			SearchReplace::Coupling((sc->statements[0], rc->statements[0])),
+			SearchReplace::Coupling((sc->statements[2], rc->statements[2])),
+			SearchReplace::Coupling((si->identifier, ri->identifier, ra->operands[0])),
+			SearchReplace::Coupling((si->initialiser, ra->operands[1])) ));
 
 		sr1.Configure(rc, sc, sms1);
 	}
@@ -158,10 +142,9 @@ void HackUpIfs::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
           rs->terminus = rpi;
             rpi->operands.push_back( shared_new< Expression >() );
 
-  		SearchReplace::Coupling ms0((ssthen, rs));
-  		sms1.insert( ms0 ); // statement of interest
-		SearchReplace::Coupling ms1((ssthen->terminus, sselse->terminus, rpi->operands[0]));
-		sms1.insert( ms1 ); // statement of interest
+        SearchReplace::CouplingSet sms1((
+            SearchReplace::Coupling((ssthen, rs)),
+            SearchReplace::Coupling((ssthen->terminus, sselse->terminus, rpi->operands[0])) ));
 
 		sr1.Configure(sif, rs, sms1);
 	}

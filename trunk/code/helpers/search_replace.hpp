@@ -395,5 +395,20 @@ struct TransformTo : TransformToBase, VALUE_TYPE
 };
 
 
+inline RootedSearchReplace::CouplingSet operator,( RootedSearchReplace::Coupling l, RootedSearchReplace::Coupling r )
+{
+	RootedSearchReplace::CouplingSet cs;
+    cs.insert( l );
+    cs.insert( r );
+    return cs;
+}
+
+inline RootedSearchReplace::CouplingSet operator,( RootedSearchReplace::CouplingSet l, RootedSearchReplace::Coupling r )
+{
+    l.insert( r );
+    return l;
+}
+
+
 #endif
 
