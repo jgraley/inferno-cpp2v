@@ -17,7 +17,7 @@
 void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
 	TRACE();
-	set<SearchReplace::Coupling *> sms;
+	SearchReplace::CouplingSet sms;
 
     // search for return statement in a compound (TODO don't think we need the outer compound)
 	SharedPtr<Return> s_return( new Return );

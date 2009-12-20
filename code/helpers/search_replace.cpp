@@ -4,7 +4,7 @@
 // Constructor remembers search pattern, replace pattern and any supplied match sets as required
 RootedSearchReplace::RootedSearchReplace( shared_ptr<Node> sp,
                                           shared_ptr<Node> rp,
-                                          set<Coupling *> m,
+                                          CouplingSet m,
                                           vector<RootedSearchReplace *> s )
 {
 	Configure( sp, rp, m, s );
@@ -13,12 +13,12 @@ RootedSearchReplace::RootedSearchReplace( shared_ptr<Node> sp,
 
 void RootedSearchReplace::Configure( shared_ptr<Node> sp,
                                      shared_ptr<Node> rp,
-                                     set<Coupling *> m,
+                                     CouplingSet m,
                                      vector<RootedSearchReplace *> s )
 {
     search_pattern = sp;
     replace_pattern = rp;
-    matches = m;
+    couplings = m;
     slaves = s;
 
     // If we have a slave, copy its match sets into ours so we have a full set
@@ -26,17 +26,17 @@ void RootedSearchReplace::Configure( shared_ptr<Node> sp,
     // the non-rooted SearchReplace adds a new match set.
     FOREACH( RootedSearchReplace *slave, slaves )
 	{
-		for( set<Coupling *>::iterator msi = slave->matches.begin();
-             msi != slave->matches.end();
+		for( CouplingSet::iterator msi = slave->couplings.begin();
+             msi != slave->couplings.end();
              msi++ )
-		    matches.insert( *msi );
+		    couplings.insert( *msi );
 	}
 
-	TRACE("Merged match sets, I have %d\n", matches.size() );
+	TRACE("Merged match sets, I have %d\n", couplings.size() );
 
     FOREACH( RootedSearchReplace *slave, slaves )
     {
-    	slave->matches = matches;
+    	slave->couplings = couplings;
 	}
 } 
 
@@ -666,7 +666,7 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
 		                                                              CouplingKeys keys ) // Pass by value is intentional - changes should not propogate back to caller
 {
 	TRACE("%p Begin search\n", this);
-	keys.Trace( matches );
+	keys.Trace( couplings );
 	Result r = Compare( *proot, search_pattern, &keys, true );
 	if( r != FOUND )
 		return NOT_FOUND;
@@ -743,11 +743,11 @@ void RootedSearchReplace::operator()( shared_ptr<Node> c, shared_ptr<Node> *proo
 
 // Find a match set containing the supplied node
 const RootedSearchReplace::Coupling *RootedSearchReplace::CouplingKeys::FindCoupling( shared_ptr<Node> node,
-		                                                                              const set<Coupling *> &matches )
+		                                                                              const CouplingSet &matches )
 {
 	ASSERT( this );
 	const Coupling *found = NULL;
-	for( set<Coupling *>::iterator msi = matches.begin();
+	for( CouplingSet::iterator msi = matches.begin();
          msi != matches.end();
          msi++ )
     {
@@ -762,10 +762,10 @@ const RootedSearchReplace::Coupling *RootedSearchReplace::CouplingKeys::FindCoup
 }
 
 
-void RootedSearchReplace::CouplingKeys::Trace( const set<Coupling *> &matches ) const
+void RootedSearchReplace::CouplingKeys::Trace( const CouplingSet &couplings ) const
 {
-	for( set<Coupling *>::iterator msi = matches.begin();
-		 msi != matches.end();
+	for( CouplingSet::iterator msi = couplings.begin();
+		 msi != couplings.end();
 		 msi++ )
 	{
 		TRACE("Coupling @ %p\n", *msi );
@@ -797,7 +797,7 @@ RootedSearchReplace::Result RootedSearchReplace::CouplingKeys::KeyAndRestrict( s
 	ASSERT( this );
 	// Find a match set for this node. If the node is not in a match set then there's
 	// nothing for us to do, so return without restricting the search.
-	const Coupling *coupling = FindCoupling( pattern, sr->matches );
+	const Coupling *coupling = FindCoupling( pattern, sr->couplings );
 	if( !coupling )
 		return FOUND;
 
@@ -807,7 +807,7 @@ RootedSearchReplace::Result RootedSearchReplace::CouplingKeys::KeyAndRestrict( s
 	{
 		TRACE("keying... match set %p key ptr %p new value %p, presently %d keys out of %d match sets\n",
 				coupling, keys_map[coupling].get(), key.get(),
-				keys_map.size(), sr->matches.size() );
+				keys_map.size(), sr->couplings.size() );
         //Trace( sr->matches );
 
 		keys_map[coupling] = key;
@@ -854,7 +854,7 @@ shared_ptr<Node> RootedSearchReplace::CouplingKeys::KeyAndSubstitute( shared_ptr
 
 	// Find a match set for this node. If the node is not in a match set then there's
 	// nothing for us to do, so return without restricting the search.
-	const Coupling *coupling = FindCoupling( pattern, sr->matches );
+	const Coupling *coupling = FindCoupling( pattern, sr->couplings );
 	if( !coupling )
 		return shared_ptr<Node>();
 	TRACE("MATCH: ");
@@ -865,7 +865,7 @@ shared_ptr<Node> RootedSearchReplace::CouplingKeys::KeyAndSubstitute( shared_ptr
 	{
 		TRACE("keying... match set %p key ptr %p new value %p, presently %d keys out of %d match sets\n",
 				&coupling, &keys_map[coupling], key.get(),
-				keys_map.size(), sr->matches.size() );
+				keys_map.size(), sr->couplings.size() );
 		keys_map[coupling] = key;
 
 		return key->root;
@@ -993,7 +993,7 @@ GenericContainer::iterator RootedSearchReplace::Conjecture::HandleDecision( Gene
 
 SearchReplace::SearchReplace( shared_ptr<Node> sp,
                               shared_ptr<Node> rp,
-                              set<Coupling *> m,
+                              CouplingSet m,
                               vector<RootedSearchReplace *> s )
 {
 	Configure( sp, rp, m, s );
@@ -1002,7 +1002,7 @@ SearchReplace::SearchReplace( shared_ptr<Node> sp,
 
 void SearchReplace::Configure( shared_ptr<Node> sp,
                                shared_ptr<Node> rp,
-                               set<Coupling *> m,
+                               CouplingSet m,
                                vector<RootedSearchReplace *> s )
 {
 	if( !sp )

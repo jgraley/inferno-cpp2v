@@ -16,7 +16,7 @@
 void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
 	TRACE();
-	set<SearchReplace::Coupling *> sms;
+	SearchReplace::CouplingSet sms;
 
     // Master search - look for functions satisfying the construct limitation and get
 	SharedPtr<Instance> s_fi( new Instance );
