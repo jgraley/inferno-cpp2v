@@ -52,19 +52,19 @@ void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Nod
 	  r_call->operands.insert( r_other_args );
 
 	SearchReplace::Coupling ms_call((s_call, r_call));
-	sms0.insert( &ms_call ); // note: alternatively we could just match the <x>_other_args
+	sms0.insert( ms_call ); // note: alternatively we could just match the <x>_other_args
 
 	SearchReplace::Coupling ms_ident((s_param->identifier, s_arg->identifier, r_arg->identifier));
-	sms0.insert( &ms_ident );
+	sms0.insert( ms_ident );
 
 	SearchReplace::Coupling ms_type((s_param->type, s_arg_type->pattern, r_cast->type));
-	sms0.insert( &ms_type );
+	sms0.insert( ms_type );
 
 	SearchReplace::Coupling ms_value((s_arg->value, r_cast->operand));
-	sms0.insert( &ms_value );
+	sms0.insert( ms_value );
 
 	SearchReplace::Coupling ms_other_args((s_other_args, r_other_args));
-	sms0.insert( &ms_other_args );
+	sms0.insert( ms_other_args );
 
 	sr0.Configure(s_call, r_call, sms0);
 	sr0( context, proot );

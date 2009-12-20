@@ -666,7 +666,6 @@ RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr
 		                                                              CouplingKeys keys ) // Pass by value is intentional - changes should not propogate back to caller
 {
 	TRACE("%p Begin search\n", this);
-	keys.Trace( couplings );
 	Result r = Compare( *proot, search_pattern, &keys, true );
 	if( r != FOUND )
 		return NOT_FOUND;
@@ -742,41 +741,25 @@ void RootedSearchReplace::operator()( shared_ptr<Node> c, shared_ptr<Node> *proo
 
 
 // Find a match set containing the supplied node
-const RootedSearchReplace::Coupling *RootedSearchReplace::CouplingKeys::FindCoupling( shared_ptr<Node> node,
-		                                                                              const CouplingSet &matches )
+RootedSearchReplace::Coupling RootedSearchReplace::CouplingKeys::FindCoupling( shared_ptr<Node> node,
+		                                                                       const CouplingSet &couplings )
 {
 	ASSERT( this );
-	const Coupling *found = NULL;
-	for( CouplingSet::iterator msi = matches.begin();
-         msi != matches.end();
+	Coupling found; // returns an empty coupling if not found
+	for( CouplingSet::iterator msi = couplings.begin();
+         msi != couplings.end();
          msi++ )
     {
-        Coupling::iterator ni = (*msi)->find( node );
-        if( ni != (*msi)->end() )
+        Coupling::iterator ni = msi->find( node );
+        if( ni != msi->end() )
         {
-        	ASSERT( !found )("Found more than one match set for a node - please merge the match sets");
+        	ASSERT( found.empty() )("Found more than one coupling for a node - please merge the couplings");
         	found = *msi;
         }
     }
     return found;
 }
 
-
-void RootedSearchReplace::CouplingKeys::Trace( const CouplingSet &couplings ) const
-{
-	for( CouplingSet::iterator msi = couplings.begin();
-		 msi != couplings.end();
-		 msi++ )
-	{
-		TRACE("Coupling @ %p\n", *msi );
-	}
-	for( Map< const Coupling *, shared_ptr<Key> >::const_iterator mki = keys_map.begin();
-		 mki != keys_map.end();
-		 mki++ )
-	{
-		TRACE("Coupling [@%p]=%p\n", (*mki).first, (*mki).second.get() );
-	}
-}
 
 
 RootedSearchReplace::Result RootedSearchReplace::CouplingKeys::KeyAndRestrict( shared_ptr<Node> x,
@@ -797,18 +780,17 @@ RootedSearchReplace::Result RootedSearchReplace::CouplingKeys::KeyAndRestrict( s
 	ASSERT( this );
 	// Find a match set for this node. If the node is not in a match set then there's
 	// nothing for us to do, so return without restricting the search.
-	const Coupling *coupling = FindCoupling( pattern, sr->couplings );
-	if( !coupling )
+	Coupling coupling = FindCoupling( pattern, sr->couplings );
+	if( coupling.empty() )
 		return FOUND;
 
 	// If we're keying and we haven't keyed this node so far, key it now
 	TRACE("MATCH: can_key=%d\n", (int)can_key);
 	if( can_key && !keys_map[coupling] )
 	{
-		TRACE("keying... match set %p key ptr %p new value %p, presently %d keys out of %d match sets\n",
-				coupling, keys_map[coupling].get(), key.get(),
+		TRACE("keying... key ptr %p new value %p, presently %d keys out of %d couplings\n",
+				keys_map[coupling].get(), key.get(),
 				keys_map.size(), sr->couplings.size() );
-        //Trace( sr->matches );
 
 		keys_map[coupling] = key;
 
@@ -854,8 +836,8 @@ shared_ptr<Node> RootedSearchReplace::CouplingKeys::KeyAndSubstitute( shared_ptr
 
 	// Find a match set for this node. If the node is not in a match set then there's
 	// nothing for us to do, so return without restricting the search.
-	const Coupling *coupling = FindCoupling( pattern, sr->couplings );
-	if( !coupling )
+	Coupling coupling = FindCoupling( pattern, sr->couplings );
+	if( coupling.empty() )
 		return shared_ptr<Node>();
 	TRACE("MATCH: ");
 
@@ -1011,20 +993,18 @@ void SearchReplace::Configure( shared_ptr<Node> sp,
 	// Make a non-rooted search and replace (ie where the base of the search pattern
 	// does not have to be the root of the whole program tree).
 	// Insert a Stuff node as root of the search pattern
-	shared_ptr< Stuff<Scope> > search_root( new Stuff<Scope> );
+	SharedPtr< Stuff<Scope> > search_root( new Stuff<Scope> );
 	search_root->terminus = sp;
 
 	if( rp ) // Is there also a replace pattern?
 	{
 		// Insert a Stuff node as root of the replace pattern
-		shared_ptr< Stuff<Scope> > replace_root( new Stuff<Scope> );
+		SharedPtr< Stuff<Scope> > replace_root( new Stuff<Scope> );
 	    replace_root->terminus = rp;
 
 	    // Key them together
-	    root_match.clear();
-	    root_match.insert( search_root );
-	    root_match.insert( replace_root );
-	    m.insert( &root_match );
+		Coupling root_match(( search_root, replace_root ));
+	    m.insert( root_match );
 
 	    // Configure the rooted implementation with new patterns and match sets
 	    RootedSearchReplace::Configure( search_root, replace_root, m, s );
