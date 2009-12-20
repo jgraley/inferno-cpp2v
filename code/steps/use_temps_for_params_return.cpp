@@ -52,11 +52,11 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
        
     // Make the new variable be of the required type, ie whatever the expression evaluates to   
     SearchReplace::Coupling c4((s_retval->pattern, r_newvar->type)); 
-    sms.insert( &c4 ); 
+    sms.insert( c4 );
     SearchReplace::Coupling c5((s_retval, r_assign->operands[1]));
-    sms.insert( &c5 );        
+    sms.insert( c5 );
     SearchReplace::Coupling c6((r_newvar->identifier, r_assign->operands[0], r_return->return_value));
-    sms.insert( &c6 ); 
+    sms.insert( c6 );
              
 	SearchReplace( s_return, r_sub_comp, sms )( context, proot );
 }

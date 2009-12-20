@@ -19,7 +19,7 @@ public:
         s += Header();
         s += Traverse( root, false );
         s += Traverse( root, true );
-        FOREACH( const RootedSearchReplace::Coupling *pc, root->couplings )
+        FOREACH( const RootedSearchReplace::Coupling &pc, root->couplings )
             s += DoCoupling( pc );
         s += Footer();
         Disburse( s );
@@ -147,11 +147,11 @@ public:
 		return s;
 	}
 
-	string DoCoupling( const RootedSearchReplace::Coupling *pc )
+	string DoCoupling( RootedSearchReplace::Coupling pc )
     {
 		string s;
 		shared_ptr<Node> prev;
-		FOREACH( shared_ptr<Node> n, *pc )
+		FOREACH( shared_ptr<Node> n, pc )
 		{
 			if( prev )
 			{

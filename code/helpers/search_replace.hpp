@@ -103,7 +103,7 @@ public:
         }
     };
     
-    typedef set<Coupling *> CouplingSet;
+    typedef set<Coupling> CouplingSet;
 
     class CouplingKeys
     {
@@ -111,7 +111,6 @@ public:
     	CouplingKeys()
     	{
     	}
-        void Trace( const CouplingSet &couplings ) const;
         Result KeyAndRestrict( shared_ptr<Node> x,
         		               shared_ptr<Node> pattern,
                                const RootedSearchReplace *sr,
@@ -129,8 +128,8 @@ public:
                                            const RootedSearchReplace *sr,
                                            bool can_key );
     private:
-        const Coupling *FindCoupling( shared_ptr<Node> node, const CouplingSet &matches );
-    	Map< const Coupling *, shared_ptr<Key> > keys_map;
+        Coupling FindCoupling( shared_ptr<Node> node, const CouplingSet &couplings );
+    	Map< Coupling, shared_ptr<Key> > keys_map;
     };
     CouplingSet couplings;
 
@@ -296,8 +295,6 @@ public:
                     shared_ptr<Node> rp = shared_ptr<Node>(),
                     CouplingSet m = CouplingSet(),
                     vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
-private:
-	Coupling root_match;
 };
 
 struct NotMatchBase {};
