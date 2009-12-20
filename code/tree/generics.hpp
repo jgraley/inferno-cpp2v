@@ -232,6 +232,14 @@ inline Sequence<Node> operator,( const Sequence<Node> &l, const SharedPtr<RELEME
     return seq;
 }
 
+template<typename ELEMENT>
+struct SharedNew : SharedPtr<ELEMENT>
+{
+	SharedNew() : SharedPtr<ELEMENT>( new ELEMENT )
+	{
+	}
+};
+
 
 
 //////////////////////////// Node Model ////////////////////////////
