@@ -23,12 +23,11 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	SharedPtr< MatchAll<Expression> > s_and( new MatchAll<Expression> );
 	s_return->return_value = s_and;
 	SharedPtr<TypeOf> s_retval( new TypeOf );
-	s_and->patterns.insert( s_retval );
 	s_retval->pattern = SharedNew<Type>();
     
     // Restrict the search to returns that have an automatic variable under them
     SharedPtr< SearchReplace::Stuff<Expression> > cs_stuff( new SearchReplace::Stuff<Expression> );
-	s_and->patterns.insert( cs_stuff );
+	s_and->patterns = ( s_retval, cs_stuff );
 	SharedPtr< GetDeclaration > cs_id( new GetDeclaration );	
     cs_stuff->terminus = cs_id;
     SharedPtr<Instance> cs_instance( new Automatic );
@@ -40,7 +39,7 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	r_newvar->type = SharedNew<Type>();
 	r_newvar->identifier = SharedPtr<InstanceIdentifier>( new SoftMakeIdentifier( "temp_retval" ) );
 	r_newvar->initialiser = SharedNew<Uninitialised>();
-	r_sub_comp->members.insert( r_newvar );
+	r_sub_comp->members = ( r_newvar );
 	SharedPtr<Assign> r_assign( new Assign );
 	r_assign->operands.push_back( SharedNew<InstanceIdentifier>() );
 	r_assign->operands.push_back( SharedNew<Expression>() );

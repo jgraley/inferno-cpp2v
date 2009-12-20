@@ -24,18 +24,17 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	s_fi->type = s_func;
 	SharedNew< MatchAll<Initialiser> > s_and;
 	SharedNew<Compound> s_top_comp;
-    s_and->patterns.insert( s_top_comp );
 	s_fi->initialiser = s_and;
 	SharedNew< SearchReplace::Star<Declaration> > s_top_decls;
-	s_top_comp->members.insert( s_top_decls );
+	s_top_comp->members = ( s_top_decls );
 	SharedNew< SearchReplace::Star<Statement> > s_top_pre;
-	s_top_comp->statements.push_back( s_top_pre );
+	s_top_comp->statements = ( s_top_pre );
 
 	// Construct limitation - restrict master search to functions that contain an automatic variable
 	SharedNew< SearchReplace::Stuff<Statement> > cs_stuff;
 	SharedNew<Automatic> cs_instance;
 	cs_stuff->terminus = cs_instance;
-    s_and->patterns.insert( cs_stuff );
+    s_and->patterns = ( s_top_comp, cs_stuff );
 
 	// Master replace - insert index variable, inc and dec into function at top level
     SharedNew<Instance> r_fi;
@@ -43,9 +42,8 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	r_fi->initialiser = r_top_comp;
 	// top-level decls
 	SharedNew< SearchReplace::Star<Declaration> > r_top_decls;
-	r_top_comp->members.insert( r_top_decls );
 	SharedNew<Static> r_index;// TODO Field
-	r_top_comp->members.insert( r_index );
+	r_top_comp->members = ( r_top_decls, r_index );
 	SharedNew<Unsigned> r_index_type;
 	r_index->type = r_index_type;
 	r_index_type->width = SharedPtr<SpecificInteger>( new SpecificInteger(32) );
@@ -56,13 +54,11 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	r_index->initialiser = SharedPtr<SpecificInteger>( new SpecificInteger(0) );
 	// top-level statements
 	SharedNew<PostIncrement> r_inc;
-	r_top_comp->statements.push_back( r_inc );
-	r_inc->operands.push_back( SharedNew<InstanceIdentifier>() );
+	r_inc->operands = ( SharedNew<InstanceIdentifier>() );
 	SharedNew< SearchReplace::Star<Statement> > r_top_pre;
-	r_top_comp->statements.push_back( r_top_pre );
 	SharedNew<PostDecrement> r_dec;
-	r_top_comp->statements.push_back( r_dec );
-	r_dec->operands.push_back( SharedNew<InstanceIdentifier>() );
+	r_top_comp->statements = ( r_inc, r_top_pre, r_dec );
+	r_dec->operands = ( SharedNew<InstanceIdentifier>() );
 
     // Slave search to find automatic variables within the function
 	SharedNew<Instance> s_fi2;
@@ -109,32 +105,27 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	SharedNew< MatchAll<Statement> > s_and3;
 	s_stuff3->terminus = s_and3;
 	SharedNew<Compound> s_ret_comp;
-	s_and3->patterns.insert( s_ret_comp );
+	s_and3->patterns = ( s_ret_comp );
 	SharedNew< SearchReplace::Star<Declaration> > s_ret_decls;
-	s_ret_comp->members.insert( s_ret_decls );	
+	s_ret_comp->members = ( s_ret_decls );
 	SharedNew< SearchReplace::Star<Statement> > s_ret_pre;
-	s_ret_comp->statements.push_back( s_ret_pre );
 	SharedNew<Return> s_return;
-	s_ret_comp->statements.push_back( s_return );
 	SharedNew< SearchReplace::Star<Statement> > s_ret_post;
-	s_ret_comp->statements.push_back( s_ret_post );
+	s_ret_comp->statements = ( s_ret_pre, s_return, s_ret_post );
 	SharedNew< NotMatch<Statement> > s_not3;
-    s_and3->patterns.insert( s_not3 );
+    s_and3->patterns = ( s_ret_comp, s_not3 );
 	
     // Restrict the above to not include returns that come after an index decrement
     SharedNew<Compound> sn_ret_comp;
     s_not3->pattern = sn_ret_comp;
     SharedNew< SearchReplace::Star<Declaration> > sn_ret_decls;
-	sn_ret_comp->members.insert( sn_ret_decls );	
+	sn_ret_comp->members = ( sn_ret_decls );
 	SharedNew< SearchReplace::Star<Statement> > sn_ret_pre;
-	sn_ret_comp->statements.push_back( sn_ret_pre );
 	SharedNew<PostDecrement> sn_ret_dec;
-	sn_ret_dec->operands.push_back( SharedNew<InstanceIdentifier>() );
-	sn_ret_comp->statements.push_back( sn_ret_dec );
+	sn_ret_dec->operands = ( SharedNew<InstanceIdentifier>() );
 	SharedNew<Return> sn_return;
-	sn_ret_comp->statements.push_back( sn_return );
 	SharedNew< SearchReplace::Star<Statement> > sn_ret_post;
-	sn_ret_comp->statements.push_back( sn_ret_post );
+	sn_ret_comp->statements = ( sn_ret_pre, sn_ret_dec, sn_return, sn_ret_post );
 
 	// Slave replace with a decrement of the stack index coming before the return
 	SharedNew<Instance> r_fi3;
@@ -143,16 +134,13 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	SharedNew<Compound> r_ret_comp;
 	r_stuff3->terminus = r_ret_comp;
 	SharedNew< SearchReplace::Star<Declaration> > r_ret_decls;
-	r_ret_comp->members.insert( r_ret_decls );	
+	r_ret_comp->members = ( r_ret_decls );
 	SharedNew< SearchReplace::Star<Statement> > r_ret_pre;
-	r_ret_comp->statements.push_back( r_ret_pre );
 	SharedNew<PostDecrement> r_ret_dec;
-	r_ret_comp->statements.push_back( r_ret_dec );
-	r_ret_dec->operands.push_back( SharedNew<InstanceIdentifier>() );
+	r_ret_dec->operands = ( SharedNew<InstanceIdentifier>() );
 	SharedNew<Return> r_return;
-	r_ret_comp->statements.push_back( r_return );
 	SharedNew< SearchReplace::Star<Statement> > r_ret_post;
-	r_ret_comp->statements.push_back( r_ret_post );
+	r_ret_comp->statements = ( r_ret_pre, r_ret_dec, r_return, r_ret_post );
 #endif
 
 	SearchReplace::CouplingSet sms((

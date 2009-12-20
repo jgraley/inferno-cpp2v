@@ -141,6 +141,7 @@ template<typename ELEMENT>
 struct Sequence : virtual GenericSequence, virtual STLSequence< Itemiser::Element, GenericSharedPtr, deque< SharedPtr<ELEMENT> > >
 {
 	typedef deque< SharedPtr<ELEMENT> > RawSequence;
+	Sequence() {}
     virtual typename RawSequence::value_type &operator[]( int i )
     {
     	return RawSequence::operator[](i);
@@ -158,6 +159,25 @@ struct Sequence : virtual GenericSequence, virtual STLSequence< Itemiser::Elemen
 	virtual operator string() const
 	{
         return CPPFilt( typeid( ELEMENT ).name() );
+	}
+	Sequence( const Sequence<Node> &cns )
+	{
+		// TODO support const_interator properly and get rid of this const_cast
+		Sequence<Node> *ns = const_cast< Sequence<Node> * >( &cns );
+		for( Sequence<Node>::iterator i=ns->begin();
+		     i != ns->end();
+		     ++i )
+		{
+            typename RawSequence::value_type sx(*i);
+		    RawSequence::push_back( sx );
+		}
+	}
+	Sequence operator=( const SharedPtr<Node> &nx )
+	{
+        typename RawSequence::value_type sx(nx);
+        RawSequence::clear();
+        RawSequence::push_back( sx );
+        return *this;
 	}
 };
 
@@ -207,11 +227,25 @@ struct Collection : GenericCollection, STLCollection< Itemiser::Element, Generic
 	{
         return CPPFilt( typeid( ELEMENT ).name() );
 	}
-    inline Collection<ELEMENT>( const Sequence<ELEMENT> &seq )
-    {
-        FOREACH( SharedPtr<ELEMENT> v, seq )
-            insert( v );
-    }	
+    Collection( const Sequence<Node> &cns )
+	{
+		// TODO support const_interator properly and get rid of this const_cast
+		Sequence<Node> *ns = const_cast< Sequence<Node> * >( &cns );
+		for( Sequence<Node>::iterator i=ns->begin();
+		     i != ns->end();
+		     ++i )
+		{
+            typename RawCollection::value_type sx(*i);
+            RawCollection::insert( sx );
+		}
+	}
+    Collection operator=( const SharedPtr<Node> &nx )
+	{
+        typename RawCollection::value_type sx(nx);
+        RawCollection::clear();
+        RawCollection::insert( sx );
+        return *this;
+	}
 };
 
 
