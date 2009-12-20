@@ -16,38 +16,38 @@ void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Nod
 {
 	SearchReplace sr0;
 
-	SharedPtr<Call> s_call( new Call );
-      SharedPtr<TypeOf> s_callee( new TypeOf );
+	SharedNew<Call> s_call;
+	SharedNew<TypeOf> s_callee;
 	  s_call->callee = s_callee;
-	    SharedPtr<Procedure> s_proc( new Procedure );
+	  SharedNew<Procedure> s_proc;
 	    s_callee->pattern = s_proc;
-	      SharedPtr< Instance > s_param( new Instance );
+	    SharedNew< Instance > s_param;
 	      s_proc->members.insert(s_param);
-	        s_param->identifier = shared_new< InstanceIdentifier >();
-	        s_param->type = shared_new< Type >();
-	      SharedPtr< SearchReplace::Star<Instance> > s_other_params( new SearchReplace::Star<Instance> );
-	      s_proc->members.insert(s_other_params);
-	  SharedPtr< MapOperand > s_arg( new MapOperand );
+	        s_param->identifier = SharedNew< InstanceIdentifier >();
+	        s_param->type = SharedNew< Type >();
+	      SharedNew< SearchReplace::Star<Instance> > s_other_params;
+	     s_proc->members.insert(s_other_params);
+	    SharedNew< MapOperand > s_arg;
 	  s_call->operands.insert( s_arg );
-	    s_arg->identifier = shared_new< InstanceIdentifier >();
-	    SharedPtr<TypeOf> s_arg_value( new TypeOf );
+	    s_arg->identifier = SharedNew< InstanceIdentifier >();
+	    SharedNew<TypeOf> s_arg_value;
 	    s_arg->value = s_arg_value;
-	      //s_arg_value->pattern = shared_new< Type >();
-	      SharedPtr< NotMatch<Type> > s_arg_type( new NotMatch<Type> );
+	      //s_arg_value->pattern = SharedNew< Type >();
+	      SharedNew< NotMatch<Type> > s_arg_type;
 	      s_arg_value->pattern = s_arg_type;
-	        s_arg_type->pattern = shared_new< Type >();
-	  SharedPtr< SearchReplace::Star<MapOperand> > s_other_args( new SearchReplace::Star<MapOperand> );
+	        s_arg_type->pattern = SharedNew< Type >();
+	      SharedNew< SearchReplace::Star<MapOperand> > s_other_args;
 	  s_call->operands.insert( s_other_args );
 
-	SharedPtr<Call> r_call( new Call );
-      SharedPtr< MapOperand > r_arg( new MapOperand );
+	SharedNew<Call> r_call;
+	  SharedNew< MapOperand > r_arg;
 	  r_call->operands.insert( r_arg );
-		r_arg->identifier = shared_new< InstanceIdentifier >();
-		SharedPtr<Cast> r_cast( new Cast );
+		r_arg->identifier = SharedNew< InstanceIdentifier >();
+		SharedNew<Cast> r_cast;
 		r_arg->value = r_cast;
-		  r_cast->operand = shared_new< Expression >();
-		  r_cast->type = shared_new< Type >();
-	  SharedPtr< SearchReplace::Star<MapOperand> > r_other_args( new SearchReplace::Star<MapOperand> );
+		  r_cast->operand = SharedNew< Expression >();
+		  r_cast->type = SharedNew< Type >();
+		  SharedNew< SearchReplace::Star<MapOperand> > r_other_args;
 	  r_call->operands.insert( r_other_args );
 
 	SearchReplace::CouplingSet sms0((

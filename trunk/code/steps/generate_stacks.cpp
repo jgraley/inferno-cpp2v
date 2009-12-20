@@ -18,140 +18,140 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	TRACE();
 
     // Master search - look for functions satisfying the construct limitation and get
-	SharedPtr<Instance> s_fi( new Instance );
-	s_fi->identifier = shared_new<InstanceIdentifier>();
-	SharedPtr<Subroutine> s_func( new Subroutine );
+	SharedNew<Instance> s_fi;
+	s_fi->identifier = SharedNew<InstanceIdentifier>();
+	SharedNew<Subroutine> s_func;
 	s_fi->type = s_func;
-    SharedPtr< MatchAll<Initialiser> > s_and( new MatchAll<Initialiser> );
-    SharedPtr<Compound> s_top_comp( new Compound );
+	SharedNew< MatchAll<Initialiser> > s_and;
+	SharedNew<Compound> s_top_comp;
     s_and->patterns.insert( s_top_comp );
 	s_fi->initialiser = s_and;
-	SharedPtr< SearchReplace::Star<Declaration> > s_top_decls( new SearchReplace::Star<Declaration> );
+	SharedNew< SearchReplace::Star<Declaration> > s_top_decls;
 	s_top_comp->members.insert( s_top_decls );
-	SharedPtr< SearchReplace::Star<Statement> > s_top_pre( new SearchReplace::Star<Statement> );
+	SharedNew< SearchReplace::Star<Statement> > s_top_pre;
 	s_top_comp->statements.push_back( s_top_pre );
 
 	// Construct limitation - restrict master search to functions that contain an automatic variable
-	SharedPtr< SearchReplace::Stuff<Statement> > cs_stuff( new SearchReplace::Stuff<Statement> );
-	SharedPtr<Automatic> cs_instance( new Automatic );
+	SharedNew< SearchReplace::Stuff<Statement> > cs_stuff;
+	SharedNew<Automatic> cs_instance;
 	cs_stuff->terminus = cs_instance;
     s_and->patterns.insert( cs_stuff );
 
 	// Master replace - insert index variable, inc and dec into function at top level
-	SharedPtr<Instance> r_fi( new Instance );
-    SharedPtr<Compound> r_top_comp( new Compound );
+    SharedNew<Instance> r_fi;
+    SharedNew<Compound> r_top_comp;
 	r_fi->initialiser = r_top_comp;
 	// top-level decls
-	SharedPtr< SearchReplace::Star<Declaration> > r_top_decls( new SearchReplace::Star<Declaration> );
+	SharedNew< SearchReplace::Star<Declaration> > r_top_decls;
 	r_top_comp->members.insert( r_top_decls );
-	SharedPtr<Static> r_index( new Static );// TODO Field
+	SharedNew<Static> r_index;// TODO Field
 	r_top_comp->members.insert( r_index );
-	SharedPtr<Unsigned> r_index_type( new Unsigned );
+	SharedNew<Unsigned> r_index_type;
 	r_index->type = r_index_type;
 	r_index_type->width = SharedPtr<SpecificInteger>( new SpecificInteger(32) );
 	SharedPtr<SoftMakeIdentifier> r_index_identifier( new SoftMakeIdentifier("%s_stack_index") );
-	r_index_identifier->source = shared_new<Identifier>();
+	r_index_identifier->source = SharedNew<Identifier>();
 	r_index->identifier = r_index_identifier;
-	r_index->constancy = shared_new<NonConst>();
+	r_index->constancy = SharedNew<NonConst>();
 	r_index->initialiser = SharedPtr<SpecificInteger>( new SpecificInteger(0) );
 	// top-level statements
-	SharedPtr<PostIncrement> r_inc( new PostIncrement );
+	SharedNew<PostIncrement> r_inc;
 	r_top_comp->statements.push_back( r_inc );
-	r_inc->operands.push_back( shared_new<InstanceIdentifier>() );
-	SharedPtr< SearchReplace::Star<Statement> > r_top_pre( new SearchReplace::Star<Statement> );
+	r_inc->operands.push_back( SharedNew<InstanceIdentifier>() );
+	SharedNew< SearchReplace::Star<Statement> > r_top_pre;
 	r_top_comp->statements.push_back( r_top_pre );
-	SharedPtr<PostDecrement> r_dec( new PostDecrement );
+	SharedNew<PostDecrement> r_dec;
 	r_top_comp->statements.push_back( r_dec );
-	r_dec->operands.push_back( shared_new<InstanceIdentifier>() );
+	r_dec->operands.push_back( SharedNew<InstanceIdentifier>() );
 
     // Slave search to find automatic variables within the function
-	SharedPtr<Instance> s_fi2( new Instance );
-	s_fi2->identifier = shared_new<InstanceIdentifier>();
-	SharedPtr< SearchReplace::Stuff<Statement> > s_stuff( new SearchReplace::Stuff<Statement> );
+	SharedNew<Instance> s_fi2;
+	s_fi2->identifier = SharedNew<InstanceIdentifier>();
+	SharedNew< SearchReplace::Stuff<Statement> > s_stuff;
 	s_fi2->initialiser = s_stuff;
-	SharedPtr<Automatic> s_instance( new Automatic );
+	SharedNew<Automatic> s_instance;
 	s_stuff->terminus = s_instance;
-	SharedPtr<InstanceIdentifier> s_identifier( new InstanceIdentifier );
+	SharedNew<InstanceIdentifier> s_identifier;
 	s_instance->identifier = s_identifier;
-	s_instance->initialiser = shared_new<Uninitialised>(); // can't handle initialisers!
-	s_instance->type = shared_new<Type>();
+	s_instance->initialiser = SharedNew<Uninitialised>(); // can't handle initialisers!
+	s_instance->type = SharedNew<Type>();
 
     // Slave replace to insert as a static array (TODO be a member of enclosing class)
-	SharedPtr<Instance> r_fi2( new Instance );
-	SharedPtr< SearchReplace::Stuff<Statement> > r_stuff( new SearchReplace::Stuff<Statement> );
+	SharedNew<Instance> r_fi2;
+	SharedNew< SearchReplace::Stuff<Statement> > r_stuff;
 	r_fi2->initialiser = r_stuff;
-	SharedPtr<Static> r_instance( new Static ); // TODO Field
-	r_instance->constancy = shared_new<NonConst>();
-	r_instance->initialiser = shared_new<Uninitialised>();
+	SharedNew<Static> r_instance; // TODO Field
+	r_instance->constancy = SharedNew<NonConst>();
+	r_instance->initialiser = SharedNew<Uninitialised>();
 	r_stuff->terminus = r_instance;
 	SharedPtr<SoftMakeIdentifier> r_identifier( new SoftMakeIdentifier("%s_stack") );
-	r_identifier->source = shared_new<Identifier>();
+	r_identifier->source = SharedNew<Identifier>();
 	r_instance->identifier = r_identifier;
-	SharedPtr<Array> r_array( new Array );
+	SharedNew<Array> r_array;
 	r_instance->type = r_array;
-	r_array->element = shared_new<Type>();
+	r_array->element = SharedNew<Type>();
 	r_array->size = SharedPtr<SpecificInteger>( new SpecificInteger(10) );
 
 	// Sub-slave to the above, find usages of the automatic variable
-	SharedPtr<Expression> ss_identifier( new Expression );
+	SharedNew<Expression> ss_identifier;
 
 	// Sub-slave replace with a subscript into the array
-	SharedPtr<Subscript> sr_sub( new Subscript );
-	sr_sub->base = shared_new<InstanceIdentifier>();
-	sr_sub->index = shared_new<InstanceIdentifier>();
+	SharedNew<Subscript> sr_sub;
+	sr_sub->base = SharedNew<InstanceIdentifier>();
+	sr_sub->index = SharedNew<InstanceIdentifier>();
 
 #if HANDLE_EARLY_RETURNS
 	// Slave to find early returns in the function
-	SharedPtr<Instance> s_fi3( new Instance );
-	s_fi3->identifier = shared_new<InstanceIdentifier>();
-	SharedPtr< SearchReplace::Stuff<Statement> > s_stuff3( new SearchReplace::Stuff<Statement> );
+	SharedNew<Instance> s_fi3;
+	s_fi3->identifier = SharedNew<InstanceIdentifier>();
+	SharedNew< SearchReplace::Stuff<Statement> > s_stuff3;
 	s_fi3->initialiser = s_stuff3;
-	SharedPtr< MatchAll<Statement> > s_and3( new MatchAll<Statement> );
+	SharedNew< MatchAll<Statement> > s_and3;
 	s_stuff3->terminus = s_and3;
-	SharedPtr<Compound> s_ret_comp( new Compound );
+	SharedNew<Compound> s_ret_comp;
 	s_and3->patterns.insert( s_ret_comp );
-	SharedPtr< SearchReplace::Star<Declaration> > s_ret_decls( new SearchReplace::Star<Declaration> );
+	SharedNew< SearchReplace::Star<Declaration> > s_ret_decls;
 	s_ret_comp->members.insert( s_ret_decls );	
-	SharedPtr< SearchReplace::Star<Statement> > s_ret_pre( new SearchReplace::Star<Statement> );
+	SharedNew< SearchReplace::Star<Statement> > s_ret_pre;
 	s_ret_comp->statements.push_back( s_ret_pre );
-	SharedPtr<Return> s_return( new Return );
+	SharedNew<Return> s_return;
 	s_ret_comp->statements.push_back( s_return );
-	SharedPtr< SearchReplace::Star<Statement> > s_ret_post( new SearchReplace::Star<Statement> );
+	SharedNew< SearchReplace::Star<Statement> > s_ret_post;
 	s_ret_comp->statements.push_back( s_ret_post );
-    SharedPtr< NotMatch<Statement> > s_not3( new NotMatch<Statement> );    
+	SharedNew< NotMatch<Statement> > s_not3;
     s_and3->patterns.insert( s_not3 );
 	
     // Restrict the above to not include returns that come after an index decrement
-	SharedPtr<Compound> sn_ret_comp( new Compound );
+    SharedNew<Compound> sn_ret_comp;
     s_not3->pattern = sn_ret_comp;
-	SharedPtr< SearchReplace::Star<Declaration> > sn_ret_decls( new SearchReplace::Star<Declaration> );
+    SharedNew< SearchReplace::Star<Declaration> > sn_ret_decls;
 	sn_ret_comp->members.insert( sn_ret_decls );	
-	SharedPtr< SearchReplace::Star<Statement> > sn_ret_pre( new SearchReplace::Star<Statement> );
+	SharedNew< SearchReplace::Star<Statement> > sn_ret_pre;
 	sn_ret_comp->statements.push_back( sn_ret_pre );
-	SharedPtr<PostDecrement> sn_ret_dec( new PostDecrement );
-	sn_ret_dec->operands.push_back( shared_new<InstanceIdentifier>() );
+	SharedNew<PostDecrement> sn_ret_dec;
+	sn_ret_dec->operands.push_back( SharedNew<InstanceIdentifier>() );
 	sn_ret_comp->statements.push_back( sn_ret_dec );
-	SharedPtr<Return> sn_return( new Return );
+	SharedNew<Return> sn_return;
 	sn_ret_comp->statements.push_back( sn_return );
-	SharedPtr< SearchReplace::Star<Statement> > sn_ret_post( new SearchReplace::Star<Statement> );
+	SharedNew< SearchReplace::Star<Statement> > sn_ret_post;
 	sn_ret_comp->statements.push_back( sn_ret_post );
 
 	// Slave replace with a decrement of the stack index coming before the return
-	SharedPtr<Instance> r_fi3( new Instance );
-	SharedPtr< SearchReplace::Stuff<Statement> > r_stuff3( new SearchReplace::Stuff<Statement> );
+	SharedNew<Instance> r_fi3;
+	SharedNew< SearchReplace::Stuff<Statement> > r_stuff3;
 	r_fi3->initialiser = r_stuff3;
-	SharedPtr<Compound> r_ret_comp( new Compound );
+	SharedNew<Compound> r_ret_comp;
 	r_stuff3->terminus = r_ret_comp;
-	SharedPtr< SearchReplace::Star<Declaration> > r_ret_decls( new SearchReplace::Star<Declaration> );
+	SharedNew< SearchReplace::Star<Declaration> > r_ret_decls;
 	r_ret_comp->members.insert( r_ret_decls );	
-	SharedPtr< SearchReplace::Star<Statement> > r_ret_pre( new SearchReplace::Star<Statement> );
+	SharedNew< SearchReplace::Star<Statement> > r_ret_pre;
 	r_ret_comp->statements.push_back( r_ret_pre );
-	SharedPtr<PostDecrement> r_ret_dec( new PostDecrement );
+	SharedNew<PostDecrement> r_ret_dec;
 	r_ret_comp->statements.push_back( r_ret_dec );
-	r_ret_dec->operands.push_back( shared_new<InstanceIdentifier>() );
-	SharedPtr<Return> r_return( new Return );
+	r_ret_dec->operands.push_back( SharedNew<InstanceIdentifier>() );
+	SharedNew<Return> r_return;
 	r_ret_comp->statements.push_back( r_return );
-	SharedPtr< SearchReplace::Star<Statement> > r_ret_post( new SearchReplace::Star<Statement> );
+	SharedNew< SearchReplace::Star<Statement> > r_ret_post;
 	r_ret_comp->statements.push_back( r_ret_post );
 #endif
 
