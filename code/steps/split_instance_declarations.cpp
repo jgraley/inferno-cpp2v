@@ -8,22 +8,22 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 		SearchReplace sr0;
 
 		SharedNew<Compound> sc;
-		 SharedNew<Instance> si;
-		  si->initialiser = SharedNew<Uninitialised>();  // Only acting on uninitialised Instances
-		 SharedNew< SearchReplace::Star<Declaration> > ss;
-		 sc->members.insert( ss );
-		 sc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
-		 sc->statements.push_back( si ); // Instance is in the ordered statements part
-		 sc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
+		SharedNew<Instance> si;
+		si->initialiser = SharedNew<Uninitialised>();  // Only acting on uninitialised Instances
+		SharedNew< SearchReplace::Star<Declaration> > ss;
+		sc->members.insert( ss );
+		sc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
+		sc->statements.push_back( si ); // Instance is in the ordered statements part
+		sc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
 
 		SharedNew<Compound> rc;
-		 SharedNew<Instance> ri;
-		 // ri->initialiser = SharedNew<Uninitialised>();
-		 SharedNew< SearchReplace::Star<Declaration> > rs;
-		 rc->members.insert( ri ); // Instance now in unordered decls part
-		 rc->members.insert( rs );
-		 rc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
-		 rc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
+		SharedNew<Instance> ri;
+		// ri->initialiser = SharedNew<Uninitialised>();
+		SharedNew< SearchReplace::Star<Declaration> > rs;
+		rc->members.insert( ri ); // Instance now in unordered decls part
+		rc->members.insert( rs );
+		rc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
+		rc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
 
 		SearchReplace::CouplingSet sms0((
 			SearchReplace::Coupling((si, ri)),
@@ -33,33 +33,32 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 
 		sr0.Configure(sc, rc, sms0);
 		sr0( context, proot );
-
 	}
 	{ // Do initialised ones by leaving an assign behind
 		SearchReplace sr1;
 
 		SharedNew<Compound> sc;
-		 SharedNew<Instance> si;
-		  si->identifier = SharedNew<InstanceIdentifier>();  // Only acting on initialised Instances
-		  si->initialiser = SharedNew<Expression>();  // Only acting on initialised Instances
-		 SharedNew< SearchReplace::Star<Declaration> > ss;
-		 sc->members.insert( ss );
-		 sc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
-		 sc->statements.push_back( si ); // Instance is in the ordered statements part
-		 sc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
+		SharedNew<Instance> si;
+		si->identifier = SharedNew<InstanceIdentifier>();  // Only acting on initialised Instances
+		si->initialiser = SharedNew<Expression>();  // Only acting on initialised Instances
+		SharedNew< SearchReplace::Star<Declaration> > ss;
+		sc->members.insert( ss );
+		sc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
+		sc->statements.push_back( si ); // Instance is in the ordered statements part
+		sc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
 
-		 SharedNew<Compound> rc;
-		 SharedNew<Instance> ri;
-		  ri->initialiser = SharedNew<Uninitialised>();
-		 SharedNew< SearchReplace::Star<Declaration> > rs;
-		 rc->members.insert( ri ); // Instance now in unordered decls part
-		 rc->members.insert( rs );
-		 rc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
-		 SharedNew<Assign> ra;
-		   ra->operands.push_back( SharedNew<InstanceIdentifier>() );
-		   ra->operands.push_back( SharedNew<Expression>() );
-		 rc->statements.push_back( ra );
-		 rc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
+		SharedNew<Compound> rc;
+		SharedNew<Instance> ri;
+		ri->initialiser = SharedNew<Uninitialised>();
+		SharedNew< SearchReplace::Star<Declaration> > rs;
+		rc->members.insert( ri ); // Instance now in unordered decls part
+		rc->members.insert( rs );
+		rc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
+		SharedNew<Assign> ra;
+		ra->operands.push_back( SharedNew<InstanceIdentifier>() );
+		ra->operands.push_back( SharedNew<Expression>() );
+		rc->statements.push_back( ra );
+		rc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
 
 		SearchReplace::CouplingSet sms1((
 			SearchReplace::Coupling((si, ri)),
@@ -82,28 +81,28 @@ void MergeInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 		// This is the hard kind of search pattern where Stars exist in two
 		// separate containers and have a match set linking them together
 		SharedNew<Compound> rc;
-		 SharedNew<Instance> ri;
-		  ri->identifier = SharedNew<InstanceIdentifier>();
-          ri->initialiser = SharedNew<Uninitialised>();
- 		 rc->members.insert( ri ); // Instance in unordered decls part
- 		 SharedNew< SearchReplace::Star<Declaration> > rs;
-		 rc->members.insert( rs );
-		 rc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
-		  SharedNew<Assign> ra;
-		   ra->operands.push_back( SharedNew<InstanceIdentifier>() );
-		   ra->operands.push_back( SharedNew<Expression>() );
-		 rc->statements.push_back( ra );
-		 rc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
+		SharedNew<Instance> ri;
+		ri->identifier = SharedNew<InstanceIdentifier>();
+		ri->initialiser = SharedNew<Uninitialised>();
+		rc->members.insert( ri ); // Instance in unordered decls part
+		SharedNew< SearchReplace::Star<Declaration> > rs;
+		rc->members.insert( rs );
+		rc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
+		SharedNew<Assign> ra;
+		ra->operands.push_back( SharedNew<InstanceIdentifier>() );
+		ra->operands.push_back( SharedNew<Expression>() );
+		rc->statements.push_back( ra );
+		rc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
 
 		SharedNew<Compound> sc;
-		 SharedNew< SearchReplace::Star<Declaration> > ss;
-		 sc->members.insert( ss );
-		 sc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
-	 	  SharedNew<Instance> si;
-		   si->identifier = SharedNew<InstanceIdentifier>();
-		   si->initialiser = SharedNew<Expression>();  // Only acting on initialised Instances
-		 sc->statements.push_back( si ); // Instance is in the ordered statements part
-		 sc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
+		SharedNew< SearchReplace::Star<Declaration> > ss;
+		sc->members.insert( ss );
+		sc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
+		SharedNew<Instance> si;
+		si->identifier = SharedNew<InstanceIdentifier>();
+		si->initialiser = SharedNew<Expression>();  // Only acting on initialised Instances
+		sc->statements.push_back( si ); // Instance is in the ordered statements part
+		sc->statements.push_back( SharedNew< SearchReplace::Star<Statement> >() );
 
 		SearchReplace::CouplingSet sms1((
 			SearchReplace::Coupling((si, ri)),
@@ -125,26 +124,26 @@ void HackUpIfs::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 	SearchReplace sr1;
 	{
 		SharedNew<If> sif;
-		  SharedNew<Expression> stest;
-		  sif->condition = stest;
-		  SharedNew< SearchReplace::Stuff<Statement> > ssthen;
-		  sif->body = ssthen;
-		    ssthen->terminus = SharedNew< Expression >();
-		    ssthen->restrictor = SharedNew< Expression >();
-		  SharedNew<Compound> scelse;
-		  SharedNew< SearchReplace::Stuff<Statement> > sselse;
-		  sif->else_body = sselse;
-		    sselse->terminus = SharedNew< Statement >();
-		    sselse->restrictor = SharedNew< Statement >();
+		SharedNew<Expression> stest;
+		sif->condition = stest;
+		SharedNew< SearchReplace::Stuff<Statement> > ssthen;
+		sif->body = ssthen;
+		ssthen->terminus = SharedNew< Expression >();
+		ssthen->restrictor = SharedNew< Expression >();
+		SharedNew<Compound> scelse;
+		SharedNew< SearchReplace::Stuff<Statement> > sselse;
+		sif->else_body = sselse;
+		sselse->terminus = SharedNew< Statement >();
+		sselse->restrictor = SharedNew< Statement >();
 
 		SharedNew< SearchReplace::Stuff<Statement> > rs;
-		  SharedNew<PostIncrement> rpi;
-          rs->terminus = rpi;
-            rpi->operands.push_back( SharedNew< Expression >() );
+		SharedNew<PostIncrement> rpi;
+		rs->terminus = rpi;
+		rpi->operands.push_back( SharedNew< Expression >() );
 
-        SearchReplace::CouplingSet sms1((
-            SearchReplace::Coupling((ssthen, rs)),
-            SearchReplace::Coupling((ssthen->terminus, sselse->terminus, rpi->operands[0])) ));
+		SearchReplace::CouplingSet sms1((
+			SearchReplace::Coupling((ssthen, rs)),
+			SearchReplace::Coupling((ssthen->terminus, sselse->terminus, rpi->operands[0])) ));
 
 		sr1.Configure(sif, rs, sms1);
 	}
@@ -159,14 +158,14 @@ void CrazyNine::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 	{
 		SharedNew<Record> s_record;
 		SharedNew< SearchReplace::Stuff<Declaration> > s_stuff;
-		  s_record->members.insert( s_stuff );
-		  s_record->members.insert( SharedNew< SearchReplace::Star<Declaration> >() );
-		    shared_ptr<SpecificInteger> s_nine( new SpecificInteger(9) );
-		    s_stuff->terminus = s_nine;
+		s_record->members.insert( s_stuff );
+		s_record->members.insert( SharedNew< SearchReplace::Star<Declaration> >() );
+		shared_ptr<SpecificInteger> s_nine( new SpecificInteger(9) );
+		s_stuff->terminus = s_nine;
 
-        shared_ptr<Union> r_union( new Union );
-          shared_ptr<SpecificTypeIdentifier> r_union_name( new SpecificTypeIdentifier("nine") );
-          r_union->identifier = r_union_name;
+		SharedNew<Union> r_union;
+		shared_ptr<SpecificTypeIdentifier> r_union_name( new SpecificTypeIdentifier("nine") );
+		r_union->identifier = r_union_name;
 
 		sr1.Configure(s_record, r_union);
 	}
