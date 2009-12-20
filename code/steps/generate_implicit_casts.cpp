@@ -14,7 +14,6 @@
 
 void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
-	SearchReplace::CouplingSet sms0;
 	SearchReplace sr0;
 
 	SharedPtr<Call> s_call( new Call );
@@ -51,20 +50,12 @@ void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Nod
 	  SharedPtr< SearchReplace::Star<MapOperand> > r_other_args( new SearchReplace::Star<MapOperand> );
 	  r_call->operands.insert( r_other_args );
 
-	SearchReplace::Coupling ms_call((s_call, r_call));
-	sms0.insert( ms_call ); // note: alternatively we could just match the <x>_other_args
-
-	SearchReplace::Coupling ms_ident((s_param->identifier, s_arg->identifier, r_arg->identifier));
-	sms0.insert( ms_ident );
-
-	SearchReplace::Coupling ms_type((s_param->type, s_arg_type->pattern, r_cast->type));
-	sms0.insert( ms_type );
-
-	SearchReplace::Coupling ms_value((s_arg->value, r_cast->operand));
-	sms0.insert( ms_value );
-
-	SearchReplace::Coupling ms_other_args((s_other_args, r_other_args));
-	sms0.insert( ms_other_args );
+	SearchReplace::CouplingSet sms0((
+	    SearchReplace::Coupling(( s_call, r_call )), // note: alternatively we could just match the <x>_other_args
+        SearchReplace::Coupling(( s_param->identifier, s_arg->identifier, r_arg->identifier )),
+        SearchReplace::Coupling(( s_param->type, s_arg_type->pattern, r_cast->type )),
+        SearchReplace::Coupling(( s_arg->value, r_cast->operand )),
+        SearchReplace::Coupling(( s_other_args, r_other_args )) ));
 
 	sr0.Configure(s_call, r_call, sms0);
 	sr0( context, proot );

@@ -17,7 +17,6 @@
 void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
 	TRACE();
-	SearchReplace::CouplingSet sms;
 
     // search for return statement in a compound (TODO don't think we need the outer compound)
 	SharedPtr<Return> s_return( new Return );
@@ -51,12 +50,10 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	r_return->return_value = shared_new<InstanceIdentifier>();
        
     // Make the new variable be of the required type, ie whatever the expression evaluates to   
-    SearchReplace::Coupling c4((s_retval->pattern, r_newvar->type)); 
-    sms.insert( c4 );
-    SearchReplace::Coupling c5((s_retval, r_assign->operands[1]));
-    sms.insert( c5 );
-    SearchReplace::Coupling c6((r_newvar->identifier, r_assign->operands[0], r_return->return_value));
-    sms.insert( c6 );
+	SearchReplace::CouplingSet sms((
+		SearchReplace::Coupling((s_retval->pattern, r_newvar->type)),
+		SearchReplace::Coupling((s_retval, r_assign->operands[1])),
+		SearchReplace::Coupling((r_newvar->identifier, r_assign->operands[0], r_return->return_value)) ));
              
 	SearchReplace( s_return, r_sub_comp, sms )( context, proot );
 }
