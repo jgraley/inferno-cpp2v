@@ -161,65 +161,42 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	sms.insert( &ms_top_decls );
 
 	// Couple pre-existing statements in the funciton's top level
-	SearchReplace::Coupling ms_top_pre;
-	ms_top_pre.insert( s_top_pre );
-	ms_top_pre.insert( r_top_pre );
+	SearchReplace::Coupling ms_top_pre((s_top_pre, r_top_pre));
 	sms.insert( &ms_top_pre );
 
 	// Couple stuff between the function and the variable to be changed
-	SearchReplace::Coupling ms_stuff;
-	//ms_stuff.insert( s_top_comp );
-	ms_stuff.insert( s_stuff );
-	ms_stuff.insert( r_stuff );
+	SearchReplace::Coupling ms_stuff((s_stuff, r_stuff));
 	sms.insert( &ms_stuff );
 
 	// Couple the original function
-	SearchReplace::Coupling ms_fi;
-	ms_fi.insert( s_fi );
-	ms_fi.insert( r_fi );
+	SearchReplace::Coupling ms_fi((s_fi, r_fi));
 	sms.insert( &ms_fi );
 
 	// Couple the function after master replace
-	SearchReplace::Coupling ms_fi2;
-	ms_fi2.insert( s_fi2 );
-	ms_fi2.insert( r_fi2 );
+	SearchReplace::Coupling ms_fi2((s_fi2, r_fi2));
 	sms.insert( &ms_fi2 );
 
 	// Couple the type of the auto variable into the element type of the array
-	SearchReplace::Coupling ms_type;
-	ms_type.insert( s_instance->type );
-	ms_type.insert( r_array->element );
+	SearchReplace::Coupling ms_type((s_instance->type, r_array->element));
 	sms.insert( &ms_type );
 
 	// Couple the identifier of the auto variable for sub-slave and as source for array's name
-	SearchReplace::Coupling ms_identifier;
-	ms_identifier.insert( s_identifier );
-	ms_identifier.insert( r_identifier->source );
-	ms_identifier.insert( ss_identifier );
+	SearchReplace::Coupling ms_identifier((s_identifier, r_identifier->source, ss_identifier));
 	sms.insert( &ms_identifier );
 
 	// Couple the name of the function into slaves and as source for index variable's name
-	SearchReplace::Coupling ms_function_identifier;
-	ms_function_identifier.insert( s_fi->identifier );
-	ms_function_identifier.insert( r_index_identifier->source );
-	ms_function_identifier.insert( s_fi2->identifier );
+	SearchReplace::Coupling ms_function_identifier((s_fi->identifier, r_index_identifier->source, s_fi2->identifier));
 #if HANDLE_EARLY_RETURNS
 	ms_function_identifier.insert( s_fi3->identifier );
 #endif
 	sms.insert( &ms_function_identifier );
 
 	// Couple the name of the array into the base of the subscript
-	SearchReplace::Coupling ms_new_identifier;
-	ms_new_identifier.insert( r_identifier );
-	ms_new_identifier.insert( sr_sub->base );
+	SearchReplace::Coupling ms_new_identifier((r_identifier, sr_sub->base));
 	sms.insert( &ms_new_identifier );
 
 	// Couple the name of the index variable into the index of the subscript and all the incs and decs
-	SearchReplace::Coupling ms_new_index_identifier;
-	ms_new_index_identifier.insert( r_index_identifier );
-	ms_new_index_identifier.insert( r_inc->operands[0] );
-	ms_new_index_identifier.insert( r_dec->operands[0] );
-	ms_new_index_identifier.insert( sr_sub->index );
+	SearchReplace::Coupling ms_new_index_identifier((r_index_identifier, r_inc->operands[0], r_dec->operands[0], sr_sub->index));
 #if HANDLE_EARLY_RETURNS
 	ms_new_index_identifier.insert( r_ret_dec->operands[0] );
 	ms_new_index_identifier.insert( sn_ret_dec->operands[0] );
@@ -228,41 +205,28 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 
 #if HANDLE_EARLY_RETURNS
 	// Couple the function for dec-before-return slave
-	SearchReplace::Coupling ms_fi3;
-	ms_fi3.insert( s_fi3 );
-	ms_fi3.insert( r_fi3 );
+	SearchReplace::Coupling ms_fi3((s_fi3, r_fi3));
 	sms.insert( &ms_fi3 );
 
 	// Couple stuff between function and compound containing return
-	SearchReplace::Coupling ms_stuff3;
-	ms_stuff3.insert( s_stuff3 );
-	ms_stuff3.insert( r_stuff3 );
+	SearchReplace::Coupling ms_stuff3((s_stuff3, r_stuff3));
 	sms.insert( &ms_stuff3 );
 
 	// Couple decls in compound containing return
-	SearchReplace::Coupling ms_ret_decls;
-	ms_ret_decls.insert( s_ret_decls );
-	ms_ret_decls.insert( r_ret_decls );
+	SearchReplace::Coupling ms_ret_decls((s_ret_decls, r_ret_decls));
 	sms.insert( &ms_ret_decls );
 
 	// Couple statements before return in compound
-	SearchReplace::Coupling ms_ret_pre;
-	ms_ret_pre.insert( s_ret_pre );
-	ms_ret_pre.insert( r_ret_pre );
+	SearchReplace::Coupling ms_ret_pre((s_ret_pre, r_ret_pre));
 	sms.insert( &ms_ret_pre );
 
 	// Couple the return statement
-	SearchReplace::Coupling ms_return;
-	ms_return.insert( s_return );
-	//ms_return.insert( sn_return );
-	ms_return.insert( r_return );
+	SearchReplace::Coupling ms_return((s_return, r_return));
 	sms.insert( &ms_return );
 
 	// Couple statements after return in compound
-	SearchReplace::Coupling ms_ret_post;
-	ms_ret_post.insert( s_ret_post );
-	ms_ret_post.insert( sn_ret_post ); // make sure the ns and s are talking about the same return if there's more than one
-	ms_ret_post.insert( r_ret_post );
+	// make sure the ns and s are talking about the same return if there's more than one
+	SearchReplace::Coupling ms_ret_post((s_ret_post, sn_ret_post, r_ret_post));
 	sms.insert( &ms_ret_post );
 #endif
 
