@@ -13,6 +13,7 @@
 #include "steps/generate_implicit_casts.hpp"
 #include "steps/use_temps_for_params_return.hpp"
 #include "steps/generate_stacks.hpp"
+#include "steps/for_to_while.hpp"
 
 void SelfTest();
 
@@ -32,6 +33,12 @@ int main( int argc, char *argv[] )
     p( program, &program );
               
     Validate()(program);                
+
+    if( --ReadArgs::quitafter >= 0 )
+    {
+    	ForToWhile()(program, &program);
+        Validate()(program);
+    }
 
     if( --ReadArgs::quitafter >= 0 )
     {
