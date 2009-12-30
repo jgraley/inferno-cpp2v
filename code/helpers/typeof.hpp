@@ -9,6 +9,7 @@
 class TypeOf : public Transformation, public TransformTo<Expression>
 {
 public:
+	NODE_FUNCTIONS
     TypeOf() : TransformTo<Expression>( this )
     {
     }
