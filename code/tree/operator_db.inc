@@ -52,7 +52,7 @@ INFIX(caretequal           , "^=",  AssignmentEor,        AssignmentOperator,  B
 INFIX(pipe                 , "|",   BitwiseOr,            CommutativeBinop,    BITWISE )
 INFIX(pipepipe             , "||",  LogicalOr,            Binop,               LOGICAL )
 INFIX(pipeequal            , "|=",  AssignmentBitwiseOr,  AssignmentOperator,  BITWISE )
-INFIX(equal                , "=",   Assign,               Binop,               SPECIAL ) // TODO make this an AssignmentOperator
+INFIX(equal                , "=",   Assign,               AssignmentOperator,  SPECIAL )
 INFIX(equalequal           , "==",  Equal,                CommutativeBinop,    COMPARISON )
 INFIX(comma                , ",",   Comma,                Binop,               SPECIAL ) 
 

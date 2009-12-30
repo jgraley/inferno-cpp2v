@@ -344,11 +344,6 @@ shared_ptr<Type> TypeOf::GetSpecial( shared_ptr<Operator> op, Sequence<Type> &op
         ASSERT( optypes.size() == 2 );
         return optypes[1];
     }
-    else if( dynamic_pointer_cast<Assign>(op) ) // TODO get rid when Assign becomes an AssignmentOperator
-    {
-        ASSERT( optypes.size() == 2 );
-        return optypes[0];
-    }
     else
     {
         ASSERT(0)("Unknown operator ")(*op)(", please add to TypeOf class");
