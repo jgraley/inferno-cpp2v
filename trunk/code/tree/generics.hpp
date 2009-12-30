@@ -279,7 +279,7 @@ struct SharedNew : SharedPtr<ELEMENT>
 //////////////////////////// Node Model ////////////////////////////
 
 // Mix together the bounce classes for the benefit of the tree
-#define NODE_FUNCTIONS ITEMISE_FUNCTION TYPE_INFO_FUNCTION CLONE_FUNCTION
+#define NODE_FUNCTIONS ITEMISE_FUNCTION MATCHER_FUNCTION CLONE_FUNCTION
 struct NodeBases : Magic,
                    Traceable,
                    Matcher,

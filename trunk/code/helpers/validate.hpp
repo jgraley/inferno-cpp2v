@@ -23,10 +23,7 @@ private:
 };
 
 // TODO
-// - NODE_FUNCTIONS must be present in all nodes
 // - All nodes final except in patterns
-// - Identifiers to have exactly one decl ref and many usage refs
-// - Other nodes to have exactly one ref
 // - loop detection (positive check, not just spin forever)
 // - All expressions to be TypeOf()-able
 

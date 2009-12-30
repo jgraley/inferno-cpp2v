@@ -11,7 +11,8 @@ shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d );
 class GetDeclaration : public Transformation, public TransformTo<InstanceIdentifier>
 {
 public:
-    GetDeclaration() : TransformTo<InstanceIdentifier>( this ) {}
+	NODE_FUNCTIONS
+	GetDeclaration() : TransformTo<InstanceIdentifier>( this ) {}
     virtual shared_ptr<Node> operator()( shared_ptr<Node> context, shared_ptr<Node> root );
 private:
 	shared_ptr<UserType> Get( shared_ptr<Node> context, shared_ptr<TypeIdentifier> id );

@@ -24,7 +24,7 @@ struct Matcher
     }
 };
 
-#define TYPE_INFO_FUNCTION \
+#define MATCHER_FUNCTION \
     virtual bool IsSubclass( const Matcher *source_architype ) const \
     { \
         return IsSubclassStatic( this, source_architype ); \

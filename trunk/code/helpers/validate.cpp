@@ -46,6 +46,12 @@ void Validate::operator()( shared_ptr<Node> context,
 					ASSERTFAIL("Got something from itemise that isn't a container or a shared pointer");
 				}
 			}
+
+			// if x is missing it's NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone
+			// of the most specialised base of x that does have NODE_FUNCITONS. Thus x will be a
+			// strict subclass of y, and y will NOT be a non-strict subclass of x.
+			SharedPtr<Node> y = (*x).Clone();
+			ASSERT( typeid(*y)==typeid(*x) )(*x)(" apparently does not contain NODE_FUNCTIONS macro because it Clone()s to ")(*y);
 		}
 
 		w.AdvanceInto();
