@@ -105,6 +105,11 @@ shared_ptr<Node> Walk::Get() const
     return *GetIterator();
 }
 
+void Walk::Set( SharedPtr<Node> n )
+{
+    GetIterator().Overwrite( &n );
+}
+
 Walk::operator string() const
 {
     string s;

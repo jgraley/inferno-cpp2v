@@ -32,36 +32,29 @@ int main( int argc, char *argv[] )
     Parse p(ReadArgs::infile);
     p( program, &program );
               
-    Validate()(program);                
-
     if( --ReadArgs::quitafter >= 0 )
     {
     	ForToWhile()(program, &program);
-        Validate()(program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
     	GenerateImplicitCasts()(program, &program);
-        Validate()(program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
         SplitInstanceDeclarations()(program, &program);
-        Validate()(program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
         UseTempsForParamsReturn()(program, &program);
-        Validate()(program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
     	GenerateStacks()(program, &program);
-        Validate()(program);
     }
 
     if(ReadArgs::intermediate_graph)

@@ -1199,14 +1199,22 @@ private:
                                                clang::SourceLocation ColonLoc, StmtArg SubStmt)
         {
             TRACE();
-            shared_ptr<Case> c( new Case );
+
             if( RHSVal.get() )
-                c->value_hi = FromClang( RHSVal );
+            {
+            	shared_ptr<RangeCase> rc( new RangeCase );
+            	rc->value_lo = FromClang( LHSVal );
+            	rc->value_hi = FromClang( RHSVal );
+            	backing_targets[rc] = FromClang( SubStmt );
+            	return ToStmt( rc );
+            }
             else
-                c->value_hi = FromClang( LHSVal );
-            c->value_lo = FromClang( LHSVal );
-            backing_targets[c] = FromClang( SubStmt );
-            return ToStmt( c );
+            {
+            	shared_ptr<Case> c( new Case );
+                c->value = FromClang( LHSVal );
+                backing_targets[c] = FromClang( SubStmt );
+                return ToStmt( c );
+            }
         }
 
         virtual OwningStmtResult ActOnDefaultStmt(clang::SourceLocation DefaultLoc,
@@ -1687,7 +1695,12 @@ private:
             if( isType )
                 p->operand = hold_type.FromRaw(TyOrEx);
             else
+            {
+            	ASSERT(0)("typeof() only supported on types at the moment");
+            	// THis is wrong because we'll get 2 refs to the type, need to duplicate,
+            	// or maybe add an alternative node and convert in a S&R
                 p->operand = TypeOf()( all_decls, hold_expr.FromRaw(TyOrEx) );
+            }
             return hold_expr.ToRaw( p );
         }
 

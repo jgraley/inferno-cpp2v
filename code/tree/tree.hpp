@@ -793,14 +793,21 @@ struct SwitchTarget : Statement { NODE_FUNCTIONS };
 
 // Case label, supporting range extension in case useful
 // for optimisation
-struct Case : SwitchTarget 
+struct RangeCase : SwitchTarget
 {
     NODE_FUNCTIONS
     // support gcc extension of case x..y:
-    // in other cases, value_lo==value_hi
     SharedPtr<Expression> value_lo; // inclusive
     SharedPtr<Expression> value_hi; // inclusive
 }; 
+
+// Case label, supporting range extension in case useful
+// for optimisation
+struct Case : SwitchTarget
+{
+    NODE_FUNCTIONS
+    SharedPtr<Expression> value;
+};
 
 // Default label in a switch statement
 struct Default : SwitchTarget { NODE_FUNCTIONS };

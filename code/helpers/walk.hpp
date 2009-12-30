@@ -29,6 +29,7 @@ public:
     int Depth() const;
     GenericContainer::iterator GetIterator() const;
     shared_ptr<Node> Get() const;
+    void Set( SharedPtr<Node> n );
     operator string() const;
     void AdvanceOver(); 
     void AdvanceInto();
