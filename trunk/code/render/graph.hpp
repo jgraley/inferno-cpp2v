@@ -205,8 +205,21 @@ public:
         for( int i=0; i<s.size(); i++ )
         {
             if( s[i] == '\"' )
-            	o += '\\';
-            o += s[i];
+            {
+            	o += "\\\"";
+            }
+            else if( s[i] == '<' )
+            {
+            	o += "&lt;";
+            }
+            else if( s[i] == '>' )
+            {
+            	o += "&gt;";
+            }
+            else
+            {
+            	o += s[i];
+            }
         }
         return o;
     }
@@ -283,7 +296,7 @@ public:
     {
         string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
         s += " <TR>\n";
-        s += "  <TD><FONT POINT-SIZE=\"24.0\">" + name + "</FONT></TD>\n";
+        s += "  <TD><FONT POINT-SIZE=\"24.0\">" + Sanitise(name) + "</FONT></TD>\n";
         s += "  <TD></TD>\n";
         s += " </TR>\n";
         vector< Itemiser::Element * > members = n->Itemise();
@@ -296,7 +309,7 @@ public:
                     char c[20];
                     sprintf(c, "%d", j);
                     s += " <TR>\n";
-                    s += "  <TD>" + (string)*seq + "[" + string(c) + "]</TD>\n";
+                    s += "  <TD>" + Sanitise(*seq) + "[" + string(c) + "]</TD>\n";
                     s += "  <TD PORT=\"" + SeqField( i, j ) + "\"></TD>\n";
                     s += " </TR>\n";
                 }
@@ -306,7 +319,7 @@ public:
                 if( *ptr )
                 {
                     s += " <TR>\n";
-                	s += "  <TD>" + (string)*ptr + "</TD>\n";
+                	s += "  <TD>" + Sanitise(*ptr) + "</TD>\n";
                 	s += "  <TD PORT=\"" + SeqField( i ) + "\"></TD>\n";
                     s += " </TR>\n";
                }
@@ -314,7 +327,7 @@ public:
             else if( GenericCollection *col = dynamic_cast<GenericCollection *>(members[i]) )
             {
                 s += " <TR>\n";
-                s += "  <TD>" + (string)*col + "{}</TD>\n";
+                s += "  <TD>" + Sanitise(*col) + "{}</TD>\n";
                 s += "  <TD PORT=\"" + SeqField( i ) + "\"></TD>\n";
                 s += " </TR>\n";
             }
@@ -329,7 +342,7 @@ public:
 
     string SimpleLabel( string name, shared_ptr<Node> n )
     {
-        string s = "\"<fixed> " + name;
+        string s = "\"<fixed> " + Sanitise(name);
         vector< Itemiser::Element * > members = n->Itemise();
         for( int i=0; i<members.size(); i++ )
         {

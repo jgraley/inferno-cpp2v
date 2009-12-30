@@ -6,6 +6,8 @@
 #include "tree/tree.hpp"
 #include "soft_patterns.hpp"
 
+// TODO rename to something like GetType
+
 class TypeOf : public Transformation, public TransformTo<Expression>
 {
 public:

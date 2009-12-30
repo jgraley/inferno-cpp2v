@@ -7,6 +7,7 @@
 
 #include "validate.hpp"
 #include "typeof.hpp"
+#include "misc.hpp"
 #include "tree/tree.hpp"
 
 void Validate::operator()( shared_ptr<Node> context,
@@ -31,9 +32,13 @@ void Validate::operator()( shared_ptr<Node> context,
 			// must be built from final nodes.
 			ASSERT( x->IsFinal() )( "Found intermediate (non-final) node ")(*x)(" at ")(w);
 
-			if( x->IsFinal() )
-				if( shared_ptr<Expression> e = dynamic_pointer_cast<Expression>(x) )
-				    (void)TypeOf()(context, e);
+			// Check that we can successfully call TypeOf on every Expression
+			if( shared_ptr<Expression> e = dynamic_pointer_cast<Expression>(x) )
+			    (void)TypeOf()(context, e);
+
+			// Check that every identifier has a declaration
+			if( shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(x) )
+			    (void)GetDeclaration()(context, ii);
         }
 
 		if( x )
@@ -74,6 +79,10 @@ void Validate::operator()( shared_ptr<Node> context,
 
 		if( x )
 		{
+			// Check incoming pointers rule: Non-identifier nodes should be referenced exactly once
+			// Identifiers should be referenced exactly once by the node that declares them,
+			// and may be referenced zero or more times by other nodes. We skip the
+			// identifier checks for patterns though (TODO decide what the rule becomes in this case)
 			if( dynamic_pointer_cast<Identifier>(x) )
 			{
 				if( !is_pattern )
