@@ -6,6 +6,7 @@
  */
 
 #include "validate.hpp"
+#include "typeof.hpp"
 #include "tree/tree.hpp"
 
 void Validate::operator()( shared_ptr<Node> context,
@@ -21,11 +22,19 @@ void Validate::operator()( shared_ptr<Node> context,
 	{
 		shared_ptr<Node> x = w.Get();
 
-		if( !is_pattern ) // Don't do this check on search/replace patterns
+		if( !is_pattern ) // Don't do these checks on search/replace patterns
 		{
 			// NULL pointers not allowed in program tree (though they are allowed in search/replace patterns)
 			ASSERT( x )("Found NULL pointer in tree at ")( w );
-		}
+
+			// Intermediate nodes are only allowed in search and replace patterns; the trees for programs
+			// must be built from final nodes.
+			ASSERT( x->IsFinal() )( "Found intermediate (non-final) node ")(*x)(" at ")(w);
+
+			if( x->IsFinal() )
+				if( shared_ptr<Expression> e = dynamic_pointer_cast<Expression>(x) )
+				    (void)TypeOf()(context, e);
+        }
 
 		if( x )
 		{
@@ -43,15 +52,14 @@ void Validate::operator()( shared_ptr<Node> context,
 				}
 				else
 				{
-					ASSERTFAIL("Got something from itemise that isn't a container or a shared pointer");
+					ASSERTFAIL("Got something from itemise that isn't a container or a shared pointer at ")(w);
 				}
 			}
 
 			// if x is missing it's NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone
-			// of the most specialised base of x that does have NODE_FUNCITONS. Thus x will be a
-			// strict subclass of y, and y will NOT be a non-strict subclass of x.
+			// of the most specialised base of x that does have NODE_FUNCTIONS.
 			SharedPtr<Node> y = (*x).Clone();
-			ASSERT( typeid(*y)==typeid(*x) )(*x)(" apparently does not contain NODE_FUNCTIONS macro because it Clone()s to ")(*y);
+			ASSERT( typeid(*y)==typeid(*x) )(*x)(" apparently does not contain NODE_FUNCTIONS macro because it Clone()s to ")(*y)(" at ")(w);
 		}
 
 		w.AdvanceInto();
@@ -69,12 +77,12 @@ void Validate::operator()( shared_ptr<Node> context,
 			if( dynamic_pointer_cast<Identifier>(x) )
 			{
 				if( !is_pattern )
-					ASSERT( decl_refs[x] == 1 )("Identifier ")(*x)(" found with %d declaration references\n", decl_refs[x])
-					      ("There must be exactly 1 declaration and zero or more usages");
+					ASSERT( decl_refs[x] == 1 )("Identifier ")(*x)(" found with %d declaration references", decl_refs[x])(" at ")(w2)
+					      ("\nThere must be exactly 1 declaration and zero or more usages");
 			}
 			else
-				ASSERT( total_refs[x] == 1 )("Node ")(*x)(" found with %d references\n", total_refs[x] )
-					  ("There must be exactly 1 reference to nodes (except identifiers)");
+				ASSERT( total_refs[x] == 1 )("Node ")(*x)(" found with %d references", total_refs[x] )(" at ")(w2)
+					  ("\nThere must be exactly 1 reference to nodes (except identifiers)");
 		}
 
 		w2.AdvanceInto();
@@ -98,9 +106,6 @@ void Validate::OnLink( shared_ptr<Node> p, shared_ptr<Node> c )
 		if( c == pl->identifier )
 		    decl_refs[c]++;
 	}
-
-//	if( !(total_refs.IsExist(c)) )
-	//	total_refs[c] = 0;
 
 	total_refs[c]++;
 }

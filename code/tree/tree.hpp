@@ -31,7 +31,7 @@ struct Property : virtual Node { NODE_FUNCTIONS };
 // in which case it will be a Statement. For an uninitialised variable/object
 // or a function declaration, it will be Uninitialised.
 struct Initialiser : virtual Node { NODE_FUNCTIONS };
-struct Uninitialised : Initialiser { NODE_FUNCTIONS }; // an uninitialised Instance.
+struct Uninitialised : Initialiser { NODE_FUNCTIONS_FINAL }; // an uninitialised Instance.
 
 // Represents a statement as found inside a function definition. Basically anything 
 // that ends with a ; inside a function body, as well as labels (which we consider as 
@@ -62,7 +62,7 @@ struct Scope : virtual Node
 
 // The top level of a program is considered a collection of declarations.
 // main() would typically be a function instance somewhere in this collection.
-struct Program : Scope { NODE_FUNCTIONS };
+struct Program : Scope { NODE_FUNCTIONS_FINAL };
 
 //////////////////////////// Literals ///////////////////////////////
 
@@ -81,7 +81,7 @@ struct String : Literal { NODE_FUNCTIONS };
 // in.
 struct SpecificString : String
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SpecificString( string s ) :
     	value(s)
     {
@@ -117,7 +117,7 @@ struct Integer : Number { NODE_FUNCTIONS };
 // value must always be filled in.
 struct SpecificInteger : Integer, llvm::APSInt
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SpecificInteger( llvm::APSInt i ) : llvm::APSInt(i) {}
     SpecificInteger( int i ) : llvm::APSInt(INTEGER_DEFAULT_WIDTH) { *(llvm::APSInt *)this = i; }
 	virtual bool IsLocalMatch( const Matcher *candidate ) const
@@ -145,7 +145,7 @@ struct Float : Number { NODE_FUNCTIONS };
 // always be filled in. To determine the type, use llvm::getSemantics()
 struct SpecificFloat : Float, llvm::APFloat
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SpecificFloat( llvm::APFloat v ) : llvm::APFloat(v) {};
 	virtual bool IsLocalMatch( const Matcher *candidate ) const
 	{
@@ -172,12 +172,12 @@ struct Bool : Literal { NODE_FUNCTIONS };
 // Property node for boolean values true and false
 struct True : Bool
 {
-	NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
 	virtual operator string() const { return "true"; }
 };
 struct False : Bool
 {
-	NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
 	virtual operator string() const { return "false"; }
 };
 
@@ -235,7 +235,7 @@ struct SpecificInstanceIdentifier : InstanceIdentifier,
 {
 	SpecificInstanceIdentifier() {}
 	SpecificInstanceIdentifier( string s ) : SpecificIdentifier(s) {}
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
 };
                             
 
@@ -250,7 +250,7 @@ struct SpecificTypeIdentifier : TypeIdentifier,
 {
 	SpecificTypeIdentifier() {}
 	SpecificTypeIdentifier( string s ) : SpecificIdentifier(s) {}
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
 };
 
 // Identifier for a label that can be any label. 
@@ -263,7 +263,7 @@ struct SpecificLabelIdentifier : LabelIdentifier,
 {
 	SpecificLabelIdentifier() {}
 	SpecificLabelIdentifier( string s ) : SpecificIdentifier(s) {}
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
 };
 
 // General note about identifiers: in a valid program tree, there should
@@ -276,10 +276,10 @@ struct SpecificLabelIdentifier : LabelIdentifier,
 struct Virtuality : Property { NODE_FUNCTIONS };
 struct Virtual : Virtuality
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     // TODO pure when supported by clang
 };
-struct NonVirtual : Virtuality { NODE_FUNCTIONS };
+struct NonVirtual : Virtuality { NODE_FUNCTIONS_FINAL };
 
 // Property for C++ access specifiers public, protected and private. AccessSpec
 // represents any access spec, the subsequent empty nodes specify particular
@@ -290,14 +290,14 @@ struct NonVirtual : Virtuality { NODE_FUNCTIONS };
 // for physical things like instances. Abstract stuff like typedefs are always
 // considered public.
 struct AccessSpec : Property { NODE_FUNCTIONS };
-struct Public : AccessSpec { NODE_FUNCTIONS };
-struct Private : AccessSpec { NODE_FUNCTIONS };
-struct Protected : AccessSpec { NODE_FUNCTIONS };
+struct Public : AccessSpec { NODE_FUNCTIONS_FINAL };
+struct Private : AccessSpec { NODE_FUNCTIONS_FINAL };
+struct Protected : AccessSpec { NODE_FUNCTIONS_FINAL };
 
 // Property that indicates whether some variable or object is constant.
 struct Constancy : Property { NODE_FUNCTIONS };
-struct Const : Constancy { NODE_FUNCTIONS };
-struct NonConst : Constancy { NODE_FUNCTIONS }; 
+struct Const : Constancy { NODE_FUNCTIONS_FINAL };
+struct NonConst : Constancy { NODE_FUNCTIONS_FINAL };
 // TODO add mutable when supported by clang
 
 // Node represents a variable/object or a function. In case of function, type is a 
@@ -325,7 +325,7 @@ struct Instance : Declaration,
 // regarded as a compile-time constant. A static constant function may be regarded as idempotent.
 struct Static : Instance
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Constancy> constancy;
 };
 
@@ -335,7 +335,7 @@ struct Static : Instance
 // Constancy differs from that in Static, so we do not try to introduce a common intermediate.
 struct Field : Instance
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
 	SharedPtr<Virtuality> virt;
     SharedPtr<AccessSpec> access;
     SharedPtr<Constancy> constancy;
@@ -345,7 +345,7 @@ struct Field : Instance
 // non-static locals. Safe across recursion.
 struct Automatic : Instance
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
 };
 
 // A variable with unspecified storage which may be used within a function but is not preserved
@@ -353,14 +353,14 @@ struct Automatic : Instance
 // Static, Field or Automatic since it supports only those guarantees common to all).
 struct Temporary : Instance
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
 };
 
 // Node for a base class within a class declaration, specifies another class from 
 // which to inherit
 struct Base : Declaration
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<AccessSpec> access;
     SharedPtr<TypeIdentifier> record; // must refer to InheritanceRecord
 };              
@@ -388,22 +388,22 @@ struct Procedure : Subroutine,
 // A function like in C, Pascal; params and a single return value of the specified type.
 struct Function : Procedure
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Type> return_type;
 };
 
 // A C++ constructor. The init list is just zero or more calls to constructors 
 // in the body
-struct Constructor : Procedure { NODE_FUNCTIONS };
+struct Constructor : Procedure { NODE_FUNCTIONS_FINAL };
 
 // A C++ destructor
-struct Destructor : Subroutine { NODE_FUNCTIONS };
+struct Destructor : Subroutine { NODE_FUNCTIONS_FINAL };
 
 // This is the type of an array that contains the specified number of elements
 // of the specified type.
 struct Array : Type
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Type> element;
     SharedPtr<Initialiser> size; // Uninitialised if not given eg []
 };
@@ -417,19 +417,19 @@ struct Indirection : Type
 };
 
 // A C/C++ pointer
-struct Pointer : Indirection { NODE_FUNCTIONS };
+struct Pointer : Indirection { NODE_FUNCTIONS_FINAL };
 
 // A C++ reference
-struct Reference : Indirection { NODE_FUNCTIONS };
+struct Reference : Indirection { NODE_FUNCTIONS_FINAL };
 
 // The pseudo-type void, disallowed in some circumstances as per C.
-struct Void : Type { NODE_FUNCTIONS };
+struct Void : Type { NODE_FUNCTIONS_FINAL };
 
 // Boolean type. We support bool separately from 1-bit ints, at least for now.
 // (note that (bool)2==true but (int:1)2==0)
 // Note: Boolean here is considered an adjective, and in general Type
 // nodes are named using adjectives. C.f. the Property/Literal intermediate Bool
-struct Boolean : Type { NODE_FUNCTIONS };
+struct Boolean : Type { NODE_FUNCTIONS_FINAL };
 
 // Intermediate for any type that represents a number that you can eg add and 
 // subtract. 
@@ -444,17 +444,17 @@ struct Integral : Numeric
 };
 
 // Type of a signed integer number (2's complement).
-struct Signed : Integral { NODE_FUNCTIONS };
+struct Signed : Integral { NODE_FUNCTIONS_FINAL };
 
 // Type of an unsigned integer number.
-struct Unsigned : Integral { NODE_FUNCTIONS };
+struct Unsigned : Integral { NODE_FUNCTIONS_FINAL };
 
 // Property for the details of floating point behaviour
 // implying representation size and implementation.
 struct FloatSemantics : Property { NODE_FUNCTIONS };
 struct SpecificFloatSemantics : FloatSemantics
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SpecificFloatSemantics( const llvm::fltSemantics *s ) :
     	value(s)
     {
@@ -480,7 +480,7 @@ private:
 // Type of a floating point number.
 struct Floating : Numeric 
 { 
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<FloatSemantics> semantics;
 }; 
 
@@ -499,7 +499,7 @@ struct UserType : Declaration
 // Represents a typedef. Typedef is to the specified type.
 struct Typedef : UserType
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Type> type;
 }; 
 
@@ -514,11 +514,11 @@ struct Record : UserType,
 };
 
 // A union, as per Record.
-struct Union : Record { NODE_FUNCTIONS };
+struct Union : Record { NODE_FUNCTIONS_FINAL };
 
 // An Enum, as per record. We regard enumerations as static const
 // variables, initialised as per the given value.
-struct Enum : Record { NODE_FUNCTIONS };
+struct Enum : Record { NODE_FUNCTIONS_FINAL };
 
 // A record that can inherit from other records and be inherited from. 
 // We add in a list of base class declarations.
@@ -529,8 +529,8 @@ struct InheritanceRecord : Record
 };
 
 // Struct and class as per InheritanceRecord
-struct Struct : InheritanceRecord { NODE_FUNCTIONS };
-struct Class : InheritanceRecord { NODE_FUNCTIONS };
+struct Struct : InheritanceRecord { NODE_FUNCTIONS_FINAL };
+struct Class : InheritanceRecord { NODE_FUNCTIONS_FINAL };
 
 //////////////////////////// Expressions ////////////////////////////
 
@@ -541,7 +541,7 @@ struct Class : InheritanceRecord { NODE_FUNCTIONS };
 struct Label : Declaration, // TODO be a Statement TODO commonize with Case and Default TODO move if not an Expression
                Statement
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<LabelIdentifier> identifier;
 }; 
 
@@ -556,7 +556,7 @@ struct Operator : Expression
 // key-value pair of identifier and value. Use in Maps.
 struct MapOperand : virtual Node
 {
-	NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
 	SharedPtr<InstanceIdentifier> identifier;
 	SharedPtr<Expression> value;
 };
@@ -592,9 +592,9 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 
 // Use an include file to generate nodes for all the actual operators based on
 // contents of operator_db.inc
-#define PREFIX(TOK, TEXT, NODE, BASE, CAT) struct NODE : BASE { NODE_FUNCTIONS };
-#define POSTFIX(TOK, TEXT, NODE, BASE, CAT) struct NODE : BASE { NODE_FUNCTIONS };
-#define INFIX(TOK, TEXT, NODE, BASE, CAT) struct NODE : BASE { NODE_FUNCTIONS };
+#define PREFIX(TOK, TEXT, NODE, BASE, CAT) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
+#define POSTFIX(TOK, TEXT, NODE, BASE, CAT) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
+#define INFIX(TOK, TEXT, NODE, BASE, CAT) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
 #include "operator_db.inc"
 
 // Operator that operates on data types as parameters. Where either is allowed
@@ -606,15 +606,15 @@ struct TypeOperator : Operator
 };
 
 // sizeof() a type
-struct SizeOf : TypeOperator { NODE_FUNCTIONS }; // TODO provide normal Unop versions of this since using TypeOf is causing multiple pointers to the same type node
+struct SizeOf : TypeOperator { NODE_FUNCTIONS_FINAL }; // TODO provide normal Unop versions of this
 
 // alignof() a type
-struct AlignOf : TypeOperator { NODE_FUNCTIONS };
+struct AlignOf : TypeOperator { NODE_FUNCTIONS_FINAL };
 
 // The conditional ?: operator as in operands[0] ? operands[1] : operands[2]
 struct ConditionalOperator : Ternop
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
 };
 
 // A function call to specified function passing in specified arguments
@@ -624,7 +624,7 @@ struct ConditionalOperator : Ternop
 // type (if it's a Procedure).
 struct Call : MapOperator
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Expression> callee;
 };
 
@@ -634,20 +634,20 @@ struct Call : MapOperator
 // NonGlobal: all placement args go to a corresponding operator new which returns address to construct at
 // TODO bring these in line with Call etc
 struct Globality : Property { NODE_FUNCTIONS };
-struct Global : Globality { NODE_FUNCTIONS }; // ::new/::delete was used
-struct NonGlobal : Globality { NODE_FUNCTIONS }; // new/delete, no ::
+struct Global : Globality { NODE_FUNCTIONS_FINAL }; // ::new/::delete was used
+struct NonGlobal : Globality { NODE_FUNCTIONS_FINAL }; // new/delete, no ::
 
 // Property indicating whether a delete should delete an array.
 // Apologies for the tenuous grammar.
 struct DeleteArrayness : Property { NODE_FUNCTIONS };
-struct DeleteArray : DeleteArrayness { NODE_FUNCTIONS }; // delete[]
-struct DeleteNonArray : DeleteArrayness { NODE_FUNCTIONS }; // delete, no []
+struct DeleteArray : DeleteArrayness { NODE_FUNCTIONS_FINAL }; // delete[]
+struct DeleteNonArray : DeleteArrayness { NODE_FUNCTIONS_FINAL }; // delete, no []
 
 // Node for the C++ new operator, gives all the syntactical elements
 // required for allocation and initialisation
 struct New : Expression
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Type> type; 
     Sequence<Expression> placement_arguments;
     Sequence<Expression> constructor_arguments;
@@ -655,21 +655,21 @@ struct New : Expression
 };
 
 // Node for C++ delete operator
-struct Delete : Expression // TODO Statement surely?
+struct Delete : Expression // TODO Statement surely? (clang forces it to be an Expression)
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Expression> pointer;
     SharedPtr<DeleteArrayness> array;
     SharedPtr<Globality> global;
 };
 
 // Node for C++ this pointer
-struct This : Expression { NODE_FUNCTIONS };
+struct This : Expression { NODE_FUNCTIONS_FINAL };
 
 // Node for indexing into an array as in base[index]
 struct Subscript : Expression 
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Expression> base;
     SharedPtr<Expression> index;
 };
@@ -679,7 +679,7 @@ struct Subscript : Expression
 // be detected using a search pattern if desired.
 struct Lookup : Expression  
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Expression> base; 
     SharedPtr<InstanceIdentifier> member;
 };
@@ -688,7 +688,7 @@ struct Lookup : Expression
 // and C casts will be harmonised into whatever scheme I use for that.
 struct Cast : Expression
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Expression> operand;
     SharedPtr<Type> type;        
 };
@@ -696,7 +696,7 @@ struct Cast : Expression
 // Initialiser for an array just lists the elements in order
 struct ArrayLiteral : Operator
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     Sequence<Expression> elements;
 };
 
@@ -704,7 +704,7 @@ struct ArrayLiteral : Operator
 // corresponding record members. We also give the record type explicitly.
 struct RecordLiteral : MapOperator
 {
-	NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
 	SharedPtr<TypeIdentifier> type;
 };
 
@@ -716,7 +716,7 @@ struct RecordLiteral : MapOperator
 struct Compound : Statement,
                   Scope  // Local declarations go in here (preferably)
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     Sequence<Statement> statements; // Can contain local declarations and code
 };                   
 
@@ -724,7 +724,7 @@ struct Compound : Statement,
 // giving the return value or Uninitialised if none is present. 
 struct Return : Statement
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Initialiser> return_value;
 };
 
@@ -732,7 +732,7 @@ struct Return : Statement
 // it is expected to be useful during sequential lowering (state-out)
 struct Goto : Statement
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     // Dest is an expression for goto-a-variable support.
     // Ordinary gotos will have Label here.
     SharedPtr<Expression> destination;
@@ -741,7 +741,7 @@ struct Goto : Statement
 // If statement
 struct If : Statement
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Expression> condition;
     SharedPtr<Statement> body;
     SharedPtr<Statement> else_body; // can be Nop if no else clause
@@ -757,21 +757,21 @@ struct Loop : Statement
 // While loop
 struct While : Loop
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Expression> condition;
 };
 
 // Do loop (first iteration always runs)
 struct Do : Loop // a do..while() construct 
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Expression> condition;
 };
 
 // For loop. 
 struct For : Loop
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Statement> initialisation; // Nop if absent
     SharedPtr<Expression> condition;     // True if absent
     SharedPtr<Statement> increment;      // Nop if absent
@@ -783,7 +783,7 @@ struct For : Loop
 // Compound with a goto-a-variable at the top and some mapping.
 struct Switch : Statement
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Expression> condition;
     SharedPtr<Statement> body;
 };
@@ -795,7 +795,7 @@ struct SwitchTarget : Statement { NODE_FUNCTIONS };
 // for optimisation
 struct RangeCase : SwitchTarget
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     // support gcc extension of case x..y:
     SharedPtr<Expression> value_lo; // inclusive
     SharedPtr<Expression> value_hi; // inclusive
@@ -805,20 +805,20 @@ struct RangeCase : SwitchTarget
 // for optimisation
 struct Case : SwitchTarget
 {
-    NODE_FUNCTIONS
+	NODE_FUNCTIONS_FINAL
     SharedPtr<Expression> value;
 };
 
 // Default label in a switch statement
-struct Default : SwitchTarget { NODE_FUNCTIONS };
+struct Default : SwitchTarget { NODE_FUNCTIONS_FINAL };
 
 // Continue (to innermost Loop)
-struct Continue : Statement { NODE_FUNCTIONS };
+struct Continue : Statement { NODE_FUNCTIONS_FINAL };
 
 // Break (from innermost Switch or Loop)
-struct Break : Statement { NODE_FUNCTIONS };
+struct Break : Statement { NODE_FUNCTIONS_FINAL };
 
 // Do nuffink
-struct Nop : Statement { NODE_FUNCTIONS };
+struct Nop : Statement { NODE_FUNCTIONS_FINAL };
 
 #endif
