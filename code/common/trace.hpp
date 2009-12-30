@@ -49,16 +49,8 @@ private:
 class Traceable
 {
 public:
-	string CPPFilt( string s ) const
-	{
-        while( s[0]>='0' && s[0]<='9' )
-           s = s.c_str()+1;
-        return s;
-	}
-	virtual operator string() const
-	{
-        return CPPFilt( typeid( *this ).name() );
-	}
+	string CPPFilt( string s ) const;
+	virtual operator string() const;
 };
 
 #define INFERNO_CURRENT_FUNCTION __func__

@@ -2,10 +2,9 @@
 #include <boost/assert.hpp>
 #include <stdarg.h>
 #include "read_args.hpp"
-//#include "stack_track.hpp"
 #include <string.h>
-
-//static StackTrack stack_track;
+#include <cxxabi.h>
+#include <malloc.h>
 
 bool Tracer::continuation = false;
 
@@ -101,4 +100,20 @@ void boost::assertion_failed(char const * expr, char const * function, char cons
     Tracer::EndContinuation();
     Tracer( file, line, function, Tracer::FORCE )( "Assertion failed: %s\n\n", expr );
     InfernoAbort();
+}
+
+string Traceable::CPPFilt( string s ) const
+{
+	int status;
+	char *ps;
+	// Use GCC extension to demangle based on the present ABI
+	ps = abi::__cxa_demangle(s.c_str(), 0, 0, &status);
+    s = ps;
+    free(ps);
+    return s;
+}
+
+Traceable::operator string() const
+{
+    return CPPFilt( typeid( *this ).name() );
 }
