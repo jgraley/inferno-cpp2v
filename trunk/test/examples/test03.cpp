@@ -1,5 +1,5 @@
 short a;
-int i = sizeof(a)+sizeof(int);
+int i = sizeof(char)+sizeof(int);
 
 int main()
 {

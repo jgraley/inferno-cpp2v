@@ -1,5 +1,5 @@
 #include "search_replace.hpp"
-
+#include "validate.hpp"
 
 // Constructor remembers search pattern, replace pattern and any supplied match sets as required
 RootedSearchReplace::RootedSearchReplace( shared_ptr<Node> sp,
@@ -20,6 +20,10 @@ void RootedSearchReplace::Configure( shared_ptr<Node> sp,
     replace_pattern = rp;
     couplings = m;
     slaves = s;
+
+    Validate v(true);
+    v(search_pattern, &search_pattern);
+    v(replace_pattern, &replace_pattern);
 
     // If we have a slave, copy its match sets into ours so we have a full set
     // of all the match sets - this will be used across the board. Note that
@@ -735,7 +739,13 @@ void RootedSearchReplace::operator()( shared_ptr<Node> c, shared_ptr<Node> *proo
 		pcontext = proot;
 	else
 		pcontext = &c;
+
+	// Do the search and replace with before and after vaidation
+	Validate()( *pcontext, proot );
 	(void)RepeatingSearchReplace( proot, search_pattern, replace_pattern );
+	Validate()( *pcontext, proot );
+
+
     pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
 }
 

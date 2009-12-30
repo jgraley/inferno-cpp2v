@@ -749,7 +749,9 @@ private:
             return "switch( " + RenderOperand(s->condition) + " )\n" +
                    RenderStatement(s->body, ";\n");
         else if( shared_ptr<Case> c = dynamic_pointer_cast<Case>(statement) )
-            return "case " + RenderOperand(c->value_lo) + " ... " + RenderOperand(c->value_hi) + ":\n";
+            return "case " + RenderOperand(c->value) + ":\n";
+        else if( shared_ptr<RangeCase> rc = dynamic_pointer_cast<RangeCase>(statement) )
+            return "case " + RenderOperand(rc->value_lo) + " ... " + RenderOperand(rc->value_hi) + ":\n";
         else if( dynamic_pointer_cast<Default>(statement) )
             return "default:\n";
         else if( dynamic_pointer_cast<Continue>(statement) )
