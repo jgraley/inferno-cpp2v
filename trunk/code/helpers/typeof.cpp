@@ -14,6 +14,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
 {
     ASSERT(o);
     
+    // TODO have a seperate function for Literals, and make more things be kinds of Operators
     if( shared_ptr<SpecificInstanceIdentifier> ii = dynamic_pointer_cast<SpecificInstanceIdentifier>(o) ) // object or function instance
     {        
         shared_ptr<Node> n = GetDeclaration()(context, ii);
@@ -21,7 +22,6 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
         ASSERT(i);
         return i->type; 
     }
-        
     else if( shared_ptr<NonCommutativeOperator> op = dynamic_pointer_cast<NonCommutativeOperator>(o) ) // operator
     {
         // Get the types of all the operands to the operator first
@@ -30,7 +30,6 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
             optypes.push_back( Get(o) );
         return Get( op, optypes );
     }
-
     else if( shared_ptr<CommutativeOperator> op = dynamic_pointer_cast<CommutativeOperator>(o) ) // operator
     {
         // Get the types of all the operands to the operator first
@@ -39,7 +38,6 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
                  optypes.push_back( Get(o) );
         return Get( op, optypes );
     }
-    
     else if( shared_ptr<Call> c = dynamic_pointer_cast<Call>(o) )
     {
         shared_ptr<Type> t = Get(c->callee); // get type of the function itself
@@ -50,12 +48,10 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
         	return shared_new<Void>();
 
     }
-
     else if( shared_ptr<Lookup> l = dynamic_pointer_cast<Lookup>(o) ) // a.b; just return type of b
     {
         return Get( l->member );
     }
-               
     else if( shared_ptr<Subscript> su = dynamic_pointer_cast<Subscript>(o) ) // a[i] just return element type of a
     {
         shared_ptr<Type> t = Get( su->base ); // type of the thing to the left of []
@@ -69,7 +65,6 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
             ASSERTFAIL("");
         }            
     }
-               
     else if( shared_ptr<SpecificInteger> si = dynamic_pointer_cast<SpecificInteger>(o) )
     {
     	// Get the info from Clang, and make an Inferno type for it
@@ -81,12 +76,81 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
         it->width = shared_ptr<SpecificInteger>( new SpecificInteger( si->getBitWidth() ) );
         return it;
     }
-
+    else if( shared_ptr<SpecificFloat> f = dynamic_pointer_cast<SpecificFloat>(o) )
+    {
+    	// Get the info from Clang, and make an Inferno type for it
+    	SharedNew<Floating> ft;
+    	ft->semantics = SharedPtr<SpecificFloatSemantics>( new SpecificFloatSemantics(&f->getSemantics()) );
+        return ft;
+    }
     else if( shared_ptr<Cast> c = dynamic_pointer_cast<Cast>(o) )
     {
         return c->type;
     }
-
+    else if( shared_ptr<RecordLiteral> rl = dynamic_pointer_cast<RecordLiteral>(o) )
+    {
+        return rl->type;
+    }
+    else if( shared_ptr<TypeOf> to = dynamic_pointer_cast<TypeOf>(o) )
+    {
+    	shared_ptr<Type> t = dynamic_pointer_cast<Type>(to->pattern); // get the pattern from the TransformTo base class
+    	ASSERT( t );
+        return t;
+    }
+    else if( dynamic_pointer_cast<LabelIdentifier>(o) )
+    {
+        return SharedNew<Type>(); // TODO labels need a type
+    }
+    else if( shared_ptr<ArrayLiteral> al = dynamic_pointer_cast<ArrayLiteral>(o) )
+    {
+    	SharedPtr<Array> a( new Array );
+    	a->element = Get( al->elements[0] );
+    	SharedPtr<SpecificInteger> sz( new SpecificInteger(al->elements.size()) );
+    	a->size = sz;
+        return a;
+    }
+    else if( dynamic_pointer_cast<Bool>(o) )
+    {
+        return SharedNew<Boolean>();
+    }
+    else if( dynamic_pointer_cast<String>(o) )
+    {
+    	SharedPtr<Integral> n;
+    	if( TypeDb::char_default_signed )
+    		n = SharedNew<Signed>();
+    	else
+    		n = SharedNew<Unsigned>();
+    	SharedPtr<SpecificInteger> sz( new SpecificInteger(TypeDb::char_bits) );
+    	n->width = sz;
+    	SharedNew<Pointer> p;
+    	p->destination = n;
+        return p;
+    }
+    else if( dynamic_pointer_cast<SizeOf>(o) || dynamic_pointer_cast<AlignOf>(o))
+    {
+    	SharedPtr<Integral> n;
+    	if( TypeDb::int_default_signed )
+    		n = SharedNew<Signed>();
+    	else
+    		n = SharedNew<Unsigned>();
+    	SharedPtr<SpecificInteger> sz( new SpecificInteger(TypeDb::integral_bits[INT]) );
+    	n->width = sz;
+       return n;
+    }
+    else if( dynamic_pointer_cast<This>(o) )
+    {
+    	ASSERTFAIL(""); // TODO
+    }
+    else if( shared_ptr<New> n = dynamic_pointer_cast<New>(o) )
+    {
+        shared_ptr<Pointer> p( new Pointer );
+        p->destination = n->type;
+        return p;
+    }
+    else if( dynamic_pointer_cast<Delete>(o) )
+    {
+        return SharedNew<Type>();
+    }
     else 
     {
         ASSERT(0)("Unknown expression ")(*o)(", please add to TypeOf class");
@@ -120,6 +184,11 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Operator> op, Sequence<Type> optypes )
 	if( dynamic_pointer_cast<AssignmentOperator>(op) )
 	{
 		return optypes[0];
+	}
+
+	if( dynamic_pointer_cast<ConditionalOperator>(op) )
+	{
+		return optypes[1]; // TODO do this properly, consider cond ? NULL : &x
 	}
 
 	// Pointer arithmetic: an add involving a pointer returns that pointer type
@@ -275,9 +344,14 @@ shared_ptr<Type> TypeOf::GetSpecial( shared_ptr<Operator> op, Sequence<Type> &op
         ASSERT( optypes.size() == 2 );
         return optypes[1];
     }
+    else if( dynamic_pointer_cast<Assign>(op) ) // TODO get rid when Assign becomes an AssignmentOperator
+    {
+        ASSERT( optypes.size() == 2 );
+        return optypes[0];
+    }
     else
     {
-        ASSERT(0)("Unknown \"SPECIAL\" operator ")(*op)(", please add to TypeOf class");
+        ASSERT(0)("Unknown operator ")(*op)(", please add to TypeOf class");
         ASSERTFAIL("");
     }
 }

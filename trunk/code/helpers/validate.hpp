@@ -23,8 +23,6 @@ private:
 };
 
 // TODO
-// - All nodes final except in patterns
-// - loop detection (positive check, not just spin forever)
 // - All expressions to be TypeOf()-able
 
 #endif

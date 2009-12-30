@@ -278,8 +278,12 @@ struct SharedNew : SharedPtr<ELEMENT>
 
 //////////////////////////// Node Model ////////////////////////////
 
+#define FINAL_FUNCTION(F) virtual bool IsFinal() { return (F); }
+
 // Mix together the bounce classes for the benefit of the tree
-#define NODE_FUNCTIONS ITEMISE_FUNCTION MATCHER_FUNCTION CLONE_FUNCTION
+// TODO figure out how to enforce finality in NODE_FUNCTIONS_FINAL
+#define NODE_FUNCTIONS ITEMISE_FUNCTION MATCHER_FUNCTION CLONE_FUNCTION FINAL_FUNCTION(false)
+#define NODE_FUNCTIONS_FINAL ITEMISE_FUNCTION MATCHER_FUNCTION CLONE_FUNCTION FINAL_FUNCTION(true)
 struct NodeBases : Magic,
                    Traceable,
                    Matcher,

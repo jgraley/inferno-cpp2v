@@ -6,7 +6,7 @@ public:
     union { int i; float f; } d;
     virtual char f( int p )
     {
-        Test *tp = this;
+        //Test *tp = this;
         return p+d.i;
     }
 private:
