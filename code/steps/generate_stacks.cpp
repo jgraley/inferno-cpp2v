@@ -85,8 +85,7 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	r_array->size = SharedPtr<SpecificInteger>( new SpecificInteger(10) );
 
 	// Sub-slave replace with a subscript into the array
-	sr_sub->base = SharedNew<InstanceIdentifier>();
-	sr_sub->index = SharedNew<InstanceIdentifier>();
+	sr_sub->operands = ( SharedNew<InstanceIdentifier>(), SharedNew<InstanceIdentifier>() );
 
 #if HANDLE_EARLY_RETURNS
 	// Slave to find early returns in the function
@@ -120,11 +119,11 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 		SearchReplace::Coupling(( s_fi2, r_fi2 )), // Couple the function after master replace
 		SearchReplace::Coupling(( s_instance->type, r_array->element )), // Couple the type of the auto variable into the element type of the array
 		SearchReplace::Coupling(( s_identifier, r_identifier->source, ss_identifier )), // Couple the identifier of the auto variable for sub-slave and as source for array's name
-		SearchReplace::Coupling(( r_identifier, sr_sub->base )), // Couple the name of the array into the base of the subscript
+		SearchReplace::Coupling(( r_identifier, sr_sub->operands[0] )), // Couple the name of the array into the base of the subscript
 
 #if HANDLE_EARLY_RETURNS
 		SearchReplace::Coupling(( s_fi->identifier, r_index_identifier->source, s_fi2->identifier, s_fi3->identifier )),
-		SearchReplace::Coupling(( r_index_identifier, r_inc->operands[0], r_dec->operands[0], sr_sub->index, r_ret_dec->operands[0], sn_ret_dec->operands[0] )),
+		SearchReplace::Coupling(( r_index_identifier, r_inc->operands[0], r_dec->operands[0], sr_sub->operands[1], r_ret_dec->operands[0], sn_ret_dec->operands[0] )),
 		SearchReplace::Coupling(( s_fi3, r_fi3 )), // Couple the function for dec-before-return slave
 		SearchReplace::Coupling(( s_stuff3, r_stuff3 )), // Couple stuff between function and compound containing return
 		SearchReplace::Coupling(( s_ret_decls, r_ret_decls )), // Couple decls in compound containing return

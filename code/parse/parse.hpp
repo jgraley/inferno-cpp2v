@@ -741,7 +741,7 @@ private:
 			// At this point, when we have the instance (and hence the type) and the initialiser
 			// we can detect when an array initialiser has been inserted for a record instance and
 			// change it.
-			if ( shared_ptr<ArrayLiteral> ai = dynamic_pointer_cast<ArrayLiteral>(o->initialiser) )
+			if ( shared_ptr<MakeArray> ai = dynamic_pointer_cast<MakeArray>(o->initialiser) )
 				if ( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(o->type) )
 					if ( shared_ptr<Record> r = GetRecordDeclaration(all_decls, ti) )
 						o->initialiser = CreateRecordLiteralFromArrayLiteral(
@@ -993,7 +993,7 @@ private:
 			clang::SourceLocation ColonLoc,
 			ExprTy *Cond, ExprTy *LHS, ExprTy *RHS)
 	{
-		shared_ptr<ConditionalOperator> co(new ConditionalOperator);
+		shared_ptr<Multiplexor> co(new Multiplexor);
 		co->operands.push_back( hold_expr.FromRaw(Cond) );
 		ASSERT(LHS )( "gnu extension not supported");
 		co->operands.push_back( hold_expr.FromRaw(LHS) );
@@ -1506,8 +1506,8 @@ private:
 			ExprTy *Idx, clang::SourceLocation RLoc)
 	{
 		shared_ptr<Subscript> su( new Subscript );
-		su->base = hold_expr.FromRaw( Base );
-		su->index = hold_expr.FromRaw( Idx );
+		su->operands.push_back( hold_expr.FromRaw( Base ) );
+		su->operands.push_back( hold_expr.FromRaw( Idx ) );
 		return hold_expr.ToRaw( su );
 	}
 
@@ -1567,11 +1567,11 @@ private:
 		// Assume initialiser is for an Array, and create an ArrayInitialiser node
 		// even if it's really a struct init. We'll come along later and replace with a
 		// RecordInitialiser when we can see what the struct is.
-		shared_ptr<ArrayLiteral> ao(new ArrayLiteral);
+		shared_ptr<MakeArray> ao(new MakeArray);
 		for(int i=0; i<NumInit; i++)
 		{
 			shared_ptr<Expression> e = hold_expr.FromRaw( InitList[i] );
-			ao->elements.push_back( e );
+			ao->operands.push_back( e );
 		}
 		return hold_expr.ToRaw( ao );
 	}
@@ -1579,16 +1579,16 @@ private:
 	// Create a RecordInitialiser using the elements of the supplied ArrayInitialiser and matching
 	// them against the members of the supplied record. Records are stored using an unordered
 	// collection for the members, so we have to use the ordered backing map. Array inits are ordered.
-	shared_ptr<RecordLiteral> CreateRecordLiteralFromArrayLiteral( shared_ptr<ArrayLiteral> ai,
+	shared_ptr<MakeRecord> CreateRecordLiteralFromArrayLiteral( shared_ptr<MakeArray> ai,
 			shared_ptr<Record> r )
 	{
 		// Make new record initialiser and fill in the type
-		shared_ptr<RecordLiteral> ri( new RecordLiteral );
+		shared_ptr<MakeRecord> ri( new MakeRecord );
 		ri->type = r->identifier;
 
 		// Fill in the RecordLiteral operands collection with pairs that relate operands to their member ids
 		shared_ptr<Scope> s = r;
-		PopulateMapOperator( ri, ai->elements, s );
+		PopulateMapOperator( ri, ai->operands, s );
 
 		return ri;
 	}
@@ -1966,7 +1966,7 @@ private:
 		// At this point, when we have the instance (and hence the type) and the initialiser
 		// we can detect when an array initialiser has been inserted for a record instance and
 		// change it.
-		if( shared_ptr<ArrayLiteral> ai = dynamic_pointer_cast<ArrayLiteral>(e) )
+		if( shared_ptr<MakeArray> ai = dynamic_pointer_cast<MakeArray>(e) )
 		if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(t) )
 		if( shared_ptr<Record> r = GetRecordDeclaration(all_decls, ti) )
 		e = CreateRecordLiteralFromArrayLiteral( ai, r );

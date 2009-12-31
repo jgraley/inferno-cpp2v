@@ -52,19 +52,6 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
     {
         return Get( l->member );
     }
-    else if( shared_ptr<Subscript> su = dynamic_pointer_cast<Subscript>(o) ) // a[i] just return element type of a
-    {
-        shared_ptr<Type> t = Get( su->base ); // type of the thing to the left of []
-        if( shared_ptr<Array> a = dynamic_pointer_cast<Array>(t) )
-            return a->element; 
-        else if( shared_ptr<Pointer> p = dynamic_pointer_cast<Pointer>(t) )
-            return p->destination;
-        else
-        {
-            ASSERT(0)("Incorrect type ")(*t)(" coming before []");
-            ASSERTFAIL("");
-        }            
-    }
     else if( shared_ptr<SpecificInteger> si = dynamic_pointer_cast<SpecificInteger>(o) )
     {
     	// Get the info from Clang, and make an Inferno type for it
@@ -87,7 +74,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
     {
         return c->type;
     }
-    else if( shared_ptr<RecordLiteral> rl = dynamic_pointer_cast<RecordLiteral>(o) )
+    else if( shared_ptr<MakeRecord> rl = dynamic_pointer_cast<MakeRecord>(o) )
     {
         return rl->type;
     }
@@ -100,14 +87,6 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
     else if( dynamic_pointer_cast<LabelIdentifier>(o) )
     {
         return SharedNew<Type>(); // TODO labels need a type
-    }
-    else if( shared_ptr<ArrayLiteral> al = dynamic_pointer_cast<ArrayLiteral>(o) )
-    {
-    	SharedPtr<Array> a( new Array );
-    	a->element = Get( al->elements[0] );
-    	SharedPtr<SpecificInteger> sz( new SpecificInteger(al->elements.size()) );
-    	a->size = sz;
-        return a;
     }
     else if( dynamic_pointer_cast<Bool>(o) )
     {
@@ -136,10 +115,6 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
     	SharedPtr<SpecificInteger> sz( new SpecificInteger(TypeDb::integral_bits[INT]) );
     	n->width = sz;
        return n;
-    }
-    else if( dynamic_pointer_cast<This>(o) )
-    {
-    	ASSERTFAIL(""); // TODO
     }
     else if( shared_ptr<New> n = dynamic_pointer_cast<New>(o) )
     {
@@ -180,15 +155,19 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Operator> op, Sequence<Type> optypes )
 		ASSERT( !dynamic_pointer_cast<Array>(optypes[i]) );
 	}
 
+    if( shared_ptr<MakeArray> al = dynamic_pointer_cast<MakeArray>(op) )
+    {
+    	SharedPtr<Array> a( new Array );
+    	a->element = optypes[0];
+    	SharedPtr<SpecificInteger> sz( new SpecificInteger(optypes.size()) );
+    	a->size = sz;
+        return a;
+    }
+
 	// Assignment operators return their left-hand operand type in all cases
 	if( dynamic_pointer_cast<AssignmentOperator>(op) )
 	{
 		return optypes[0];
-	}
-
-	if( dynamic_pointer_cast<ConditionalOperator>(op) )
-	{
-		return optypes[1]; // TODO do this properly, consider cond ? NULL : &x
 	}
 
 	// Pointer arithmetic: an add involving a pointer returns that pointer type
@@ -227,6 +206,9 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Operator> op, Sequence<Type> optypes )
 	else if( dynamic_pointer_cast<NODE>(op) ) \
 		return CAT;
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT) \
+	else if( dynamic_pointer_cast<NODE>(op) ) \
+		return CAT;
+#define OTHER(TOK, TEXT, NODE, BASE, CAT) \
 	else if( dynamic_pointer_cast<NODE>(op) ) \
 		return CAT;
 #include "tree/operator_db.inc"
@@ -324,7 +306,7 @@ shared_ptr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 
 shared_ptr<Type> TypeOf::GetSpecial( shared_ptr<Operator> op, Sequence<Type> &optypes )
 {
-    if( dynamic_pointer_cast<Dereference>(op) )
+    if( dynamic_pointer_cast<Dereference>(op) || dynamic_pointer_cast<Subscript>(op) )
     {
         if( shared_ptr<Pointer> o2 = dynamic_pointer_cast<Pointer>( optypes[0] ) )
             return o2->destination;
@@ -343,6 +325,14 @@ shared_ptr<Type> TypeOf::GetSpecial( shared_ptr<Operator> op, Sequence<Type> &op
     {
         ASSERT( optypes.size() == 2 );
         return optypes[1];
+    }
+    else if( dynamic_pointer_cast<Multiplexor>(op) )
+	{
+		return optypes[1]; // TODO do this properly, consider cond ? NULL : &x
+	}
+    else if( dynamic_pointer_cast<This>(op) )
+    {
+    	ASSERTFAIL(""); // TODO
     }
     else
     {
