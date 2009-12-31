@@ -30,7 +30,8 @@ public:
     shared_ptr<Type> GetStandard( Sequence<Type> &optypes );
     shared_ptr<Type> GetStandard( Sequence<Numeric> &optypes );
     shared_ptr<Type> GetSpecial( shared_ptr<Operator> op, Sequence<Type> &optypes );
-    
+    shared_ptr<Type> Get( shared_ptr<Literal> l );
+
     // Is this call really a constructor call? If so return the object being
     // constructed. Otherwise, return NULL
     shared_ptr<Expression> IsConstructorCall( shared_ptr<Node> c, shared_ptr<Call> call );

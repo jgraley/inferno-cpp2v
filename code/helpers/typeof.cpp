@@ -38,6 +38,10 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
                  optypes.push_back( Get(o) );
         return Get( op, optypes );
     }
+    else if( shared_ptr<Literal> l = dynamic_pointer_cast<Literal>(o) ) // operator
+    {
+        return Get( l );
+    }
     else if( shared_ptr<Call> c = dynamic_pointer_cast<Call>(o) )
     {
         shared_ptr<Type> t = Get(c->callee); // get type of the function itself
@@ -46,29 +50,10 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
         	return f->return_type;
         else
         	return shared_new<Void>();
-
     }
     else if( shared_ptr<Lookup> l = dynamic_pointer_cast<Lookup>(o) ) // a.b; just return type of b
     {
         return Get( l->member );
-    }
-    else if( shared_ptr<SpecificInteger> si = dynamic_pointer_cast<SpecificInteger>(o) )
-    {
-    	// Get the info from Clang, and make an Inferno type for it
-    	shared_ptr<Integral> it;
-        if( si->isSigned() )
-        	it = shared_new<Signed>();
-        else
-        	it = shared_new<Unsigned>();
-        it->width = shared_ptr<SpecificInteger>( new SpecificInteger( si->getBitWidth() ) );
-        return it;
-    }
-    else if( shared_ptr<SpecificFloat> f = dynamic_pointer_cast<SpecificFloat>(o) )
-    {
-    	// Get the info from Clang, and make an Inferno type for it
-    	SharedNew<Floating> ft;
-    	ft->semantics = SharedPtr<SpecificFloatSemantics>( new SpecificFloatSemantics(&f->getSemantics()) );
-        return ft;
     }
     else if( shared_ptr<Cast> c = dynamic_pointer_cast<Cast>(o) )
     {
@@ -87,23 +72,6 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
     else if( dynamic_pointer_cast<LabelIdentifier>(o) )
     {
         return SharedNew<Type>(); // TODO labels need a type
-    }
-    else if( dynamic_pointer_cast<Bool>(o) )
-    {
-        return SharedNew<Boolean>();
-    }
-    else if( dynamic_pointer_cast<String>(o) )
-    {
-    	SharedPtr<Integral> n;
-    	if( TypeDb::char_default_signed )
-    		n = SharedNew<Signed>();
-    	else
-    		n = SharedNew<Unsigned>();
-    	SharedPtr<SpecificInteger> sz( new SpecificInteger(TypeDb::char_bits) );
-    	n->width = sz;
-    	SharedNew<Pointer> p;
-    	p->destination = n;
-        return p;
     }
     else if( dynamic_pointer_cast<SizeOf>(o) || dynamic_pointer_cast<AlignOf>(o))
     {
@@ -336,10 +304,55 @@ shared_ptr<Type> TypeOf::GetSpecial( shared_ptr<Operator> op, Sequence<Type> &op
     }
     else
     {
-        ASSERT(0)("Unknown operator ")(*op)(", please add to TypeOf class");
+        ASSERT(0)("Unknown SPECIAL operator ")(*op)(", please add to TypeOf class");
         ASSERTFAIL("");
     }
 }
+
+shared_ptr<Type> TypeOf::Get( shared_ptr<Literal> l )
+{
+    if( shared_ptr<SpecificInteger> si = dynamic_pointer_cast<SpecificInteger>(l) )
+    {
+    	// Get the info from Clang, and make an Inferno type for it
+    	shared_ptr<Integral> it;
+        if( si->isSigned() )
+        	it = shared_new<Signed>();
+        else
+        	it = shared_new<Unsigned>();
+        it->width = shared_ptr<SpecificInteger>( new SpecificInteger( si->getBitWidth() ) );
+        return it;
+    }
+    else if( shared_ptr<SpecificFloat> sf = dynamic_pointer_cast<SpecificFloat>(l) )
+    {
+    	// Get the info from Clang, and make an Inferno type for it
+    	SharedNew<Floating> ft;
+    	ft->semantics = SharedPtr<SpecificFloatSemantics>( new SpecificFloatSemantics(&sf->getSemantics()) );
+        return ft;
+    }
+    else if( dynamic_pointer_cast<Bool>(l) )
+    {
+        return SharedNew<Boolean>();
+    }
+    else if( dynamic_pointer_cast<String>(l) )
+    {
+    	SharedPtr<Integral> n;
+    	if( TypeDb::char_default_signed )
+    		n = SharedNew<Signed>();
+    	else
+    		n = SharedNew<Unsigned>();
+    	SharedPtr<SpecificInteger> sz( new SpecificInteger(TypeDb::char_bits) );
+    	n->width = sz;
+    	SharedNew<Pointer> p;
+    	p->destination = n;
+        return p;
+    }
+    else
+    {
+        ASSERT(0)("Unknown literal ")(*l)(", please add to TypeOf class");
+        ASSERTFAIL("");
+    }
+}
+
 
 // Is this call really a constructor call? If so return the object being
 // constructed. Otherwise, return NULL
