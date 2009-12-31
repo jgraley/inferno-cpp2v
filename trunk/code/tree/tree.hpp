@@ -538,7 +538,7 @@ struct Class : InheritanceRecord { NODE_FUNCTIONS_FINAL };
 // This node represents a label such as mylabel: 
 // It serves to declare the label; the identifier should be 
 // used for references.
-struct Label : Declaration, // TODO be a Statement TODO commonize with Case and Default TODO move if not an Expression
+struct Label : Declaration, //TODO commonize with Case and Default TODO move if not an Expression
                Statement
 {
 	NODE_FUNCTIONS_FINAL
@@ -550,23 +550,6 @@ struct Label : Declaration, // TODO be a Statement TODO commonize with Case and 
 struct Operator : Expression
 {
 	NODE_FUNCTIONS
-};
-
-// Associates an instance with an expression. Basically a
-// key-value pair of identifier and value. Use in Maps.
-struct MapOperand : virtual Node
-{
-	NODE_FUNCTIONS_FINAL
-	SharedPtr<InstanceIdentifier> identifier;
-	SharedPtr<Expression> value;
-};
-
-// Operator that maps a multiplicity of instances to expressions
-// via their identifiers.
-struct MapOperator : Operator
-{
-	NODE_FUNCTIONS
-	Collection<MapOperand> operands;
 };
 
 struct NonCommutativeOperator : Operator
@@ -595,38 +578,8 @@ struct AssignmentOperator : NonCommutativeOperator { NODE_FUNCTIONS };
 #define PREFIX(TOK, TEXT, NODE, BASE, CAT) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
 #define INFIX(TOK, TEXT, NODE, BASE, CAT) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
+#define OTHER(TOK, TEXT, NODE, BASE, CAT) struct NODE : BASE { NODE_FUNCTIONS_FINAL };
 #include "operator_db.inc"
-
-// Operator that operates on data types as parameters. Where either is allowed
-// we prefer the type one, since it's more concise.
-struct TypeOperator : Operator
-{
-    NODE_FUNCTIONS
-    SharedPtr<Type> operand;
-};
-
-// sizeof() a type
-struct SizeOf : TypeOperator { NODE_FUNCTIONS_FINAL }; // TODO provide normal Unop versions of this
-
-// alignof() a type
-struct AlignOf : TypeOperator { NODE_FUNCTIONS_FINAL };
-
-// The conditional ?: operator as in operands[0] ? operands[1] : operands[2]
-struct ConditionalOperator : Ternop
-{
-	NODE_FUNCTIONS_FINAL
-};
-
-// A function call to specified function passing in specified arguments
-// Function is an expression to allow eg function pointer dereference. Normal
-// calls have callee -> some InstanceIdentifier for a Subroutine Instance.
-// Arguments passed via MapOperator - mapped to the parameters in the callee
-// type (if it's a Procedure).
-struct Call : MapOperator
-{
-	NODE_FUNCTIONS_FINAL
-    SharedPtr<Expression> callee;
-};
 
 // Property indicating whether a new/delete is global ie has :: in
 // front of it. This differentiates when placement args are given as follows:
@@ -645,7 +598,7 @@ struct DeleteNonArray : DeleteArrayness { NODE_FUNCTIONS_FINAL }; // delete, no 
 
 // Node for the C++ new operator, gives all the syntactical elements
 // required for allocation and initialisation
-struct New : Expression
+struct New : Operator
 {
 	NODE_FUNCTIONS_FINAL
     SharedPtr<Type> type; 
@@ -655,7 +608,7 @@ struct New : Expression
 };
 
 // Node for C++ delete operator
-struct Delete : Expression // TODO Statement surely? (clang forces it to be an Expression)
+struct Delete : Operator // TODO Statement surely? (clang forces it to be an Expression)
 {
 	NODE_FUNCTIONS_FINAL
     SharedPtr<Expression> pointer;
@@ -663,21 +616,10 @@ struct Delete : Expression // TODO Statement surely? (clang forces it to be an E
     SharedPtr<Globality> global;
 };
 
-// Node for C++ this pointer
-struct This : Expression { NODE_FUNCTIONS_FINAL };
-
-// Node for indexing into an array as in base[index]
-struct Subscript : Expression 
-{
-	NODE_FUNCTIONS_FINAL
-    SharedPtr<Expression> base;
-    SharedPtr<Expression> index;
-};
-
 // Node for accessing an element in a record as in base.member
 // Note that the parser breaks down a->b into (*a).b which may
 // be detected using a search pattern if desired.
-struct Lookup : Expression  
+struct Lookup : Operator
 {
 	NODE_FUNCTIONS_FINAL
     SharedPtr<Expression> base; 
@@ -686,27 +628,62 @@ struct Lookup : Expression
 
 // Node for a c-style cast. C++ casts are not in here yet
 // and C casts will be harmonised into whatever scheme I use for that.
-struct Cast : Expression
+struct Cast : Operator
 {
 	NODE_FUNCTIONS_FINAL
     SharedPtr<Expression> operand;
     SharedPtr<Type> type;        
 };
 
-// Initialiser for an array just lists the elements in order
-struct ArrayLiteral : Operator
+// Associates an Expression with an InstanceIdentifier. Basically a
+// key-value pair of identifier and value. Use in Maps.
+struct MapOperand : virtual Node
 {
 	NODE_FUNCTIONS_FINAL
-    Sequence<Expression> elements;
+	SharedPtr<InstanceIdentifier> identifier;
+	SharedPtr<Expression> value;
+};
+
+// Operator that maps a multiplicity of Instances to Expressions
+// via their InstanceIdentifiers.
+struct MapOperator : Operator
+{
+	NODE_FUNCTIONS
+	Collection<MapOperand> operands;
+};
+
+// A function call to specified function passing in specified arguments
+// Function is an expression to allow eg function pointer dereference. Normal
+// calls have callee -> some InstanceIdentifier for a Subroutine Instance.
+// Arguments passed via MapOperator - mapped to the parameters in the callee
+// type (if it's a Procedure).
+struct Call : MapOperator
+{
+	NODE_FUNCTIONS_FINAL
+    SharedPtr<Expression> callee;
 };
 
 // Initialiser for a record uses a map to associate elements with
 // corresponding record members. We also give the record type explicitly.
-struct RecordLiteral : MapOperator
+struct MakeRecord : MapOperator
 {
 	NODE_FUNCTIONS_FINAL
 	SharedPtr<TypeIdentifier> type;
 };
+
+// Operator that operates on data types as parameters. Where either is allowed
+// we prefer the type one, since it's more concise.
+struct TypeOperator : Operator
+{
+    NODE_FUNCTIONS
+    SharedPtr<Type> operand;
+};
+
+// sizeof() a type
+struct SizeOf : TypeOperator { NODE_FUNCTIONS_FINAL }; // TODO provide normal Unop versions of this
+
+// alignof() a type
+struct AlignOf : TypeOperator { NODE_FUNCTIONS_FINAL };
 
 //////////////////////////// Statements ////////////////////////////
 
