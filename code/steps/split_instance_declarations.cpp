@@ -3,38 +3,11 @@
 
 void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
-    // TODO only split for Auto variables - for others, take the whole lot including init into the members colelction
-	{ // Do uninitialised ones
-		SearchReplace sr0;
-
-		MakeShared<Compound> sc;
-		MakeShared<Instance> si;
-		si->initialiser = MakeShared<Uninitialised>();  // Only acting on uninitialised Instances
-		MakeShared< Star<Declaration> > ss;
-		sc->members = ( ss );
-		sc->statements = ( MakeShared< Star<Statement> >(), si, MakeShared< Star<Statement> >() );
-
-		MakeShared<Compound> rc;
-		MakeShared<Instance> ri;
-		// ri->initialiser = MakeShared<Uninitialised>();
-		MakeShared< Star<Declaration> > rs;
-		rc->members = ( ri, rs ); // Instance now in unordered decls part
-		rc->statements = ( MakeShared< Star<Statement> >(), MakeShared< Star<Statement> >() );
-
-		CouplingSet sms0((
-			Coupling((si, ri)),
-			Coupling((ss, rs)),
-			Coupling((sc->statements[0], rc->statements[0])),
-			Coupling((sc->statements[2], rc->statements[1])) ));
-
-		sr0.Configure(sc, rc, sms0);
-		sr0( context, proot );
-	}
-	{ // Do initialised ones by leaving an assign behind
+	{ // Do initialised local variables by leaving an assign behind
 		SearchReplace sr1;
 
 		MakeShared<Compound> sc;
-		MakeShared<Instance> si;
+		MakeShared<LocalVariable> si;
 		si->identifier = MakeShared<InstanceIdentifier>();  // Only acting on initialised Instances
 		si->initialiser = MakeShared<Expression>();  // Only acting on initialised Instances
 		MakeShared< Star<Declaration> > ss;
@@ -42,7 +15,7 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 		sc->statements = ( MakeShared< Star<Statement> >(), si, MakeShared< Star<Statement> >() );
 
 		MakeShared<Compound> rc;
-		MakeShared<Instance> ri;
+		MakeShared<LocalVariable> ri;
 		ri->initialiser = MakeShared<Uninitialised>();
 		MakeShared< Star<Declaration> > rs;
 		rc->members = ( ri, rs );
@@ -61,6 +34,30 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 		sr1.Configure(sc, rc, sms1);
 		sr1( context, proot );
 	}
+	{ // Do everything else by just moving to the decls collection
+	    SearchReplace sr0;
+
+		MakeShared<Compound> sc;
+		MakeShared<Instance> si;
+		MakeShared< Star<Declaration> > ss;
+		sc->members = ( ss );
+		sc->statements = ( MakeShared< Star<Statement> >(), si, MakeShared< Star<Statement> >() );
+
+		MakeShared<Compound> rc;
+		MakeShared<Instance> ri;
+		MakeShared< Star<Declaration> > rs;
+		rc->members = ( ri, rs ); // Instance now in unordered decls part
+		rc->statements = ( MakeShared< Star<Statement> >(), MakeShared< Star<Statement> >() );
+
+		CouplingSet sms0((
+			Coupling((si, ri)),
+			Coupling((ss, rs)),
+			Coupling((sc->statements[0], rc->statements[0])),
+			Coupling((sc->statements[2], rc->statements[1])) ));
+
+		sr0.Configure(sc, rc, sms0);
+		sr0( context, proot );
+	}
 }
 
 
@@ -69,9 +66,9 @@ void MergeInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 	SearchReplace sr1;
 	{
 		// This is the hard kind of search pattern where Stars exist in two
-		// separate containers and have a match set linking them together
+		// separate containers and have a coupling between them
 		MakeShared<Compound> rc;
-		MakeShared<Instance> ri;
+		MakeShared<LocalVariable> ri;
 		ri->identifier = MakeShared<InstanceIdentifier>();
 		ri->initialiser = MakeShared<Uninitialised>();
 		MakeShared< Star<Declaration> > rs;
@@ -83,7 +80,7 @@ void MergeInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 		MakeShared<Compound> sc;
 		MakeShared< Star<Declaration> > ss;
 		sc->members = ( ss );
-		MakeShared<Instance> si;
+		MakeShared<LocalVariable> si;
 		si->identifier = MakeShared<InstanceIdentifier>();
 		si->initialiser = MakeShared<Expression>();  // Only acting on initialised Instances
 		sc->statements = ( MakeShared< Star<Statement> >(), si, MakeShared< Star<Statement> >() );

@@ -253,19 +253,6 @@ struct SpecificTypeIdentifier : TypeIdentifier,
 	NODE_FUNCTIONS_FINAL
 };
 
-// Identifier for a label that can be any label. 
-struct LabelIdentifier : Identifier,
-                         Expression { NODE_FUNCTIONS };
-
-// Identifier for a specific label that has been declared somewhere.
-struct SpecificLabelIdentifier : LabelIdentifier,
-                                 SpecificIdentifier
-{
-	SpecificLabelIdentifier() {}
-	SpecificLabelIdentifier( string s ) : SpecificIdentifier(s) {}
-	NODE_FUNCTIONS_FINAL
-};
-
 // General note about identifiers: in a valid program tree, there should
 // be *one* Declaration node that points to the identifier and serves to 
 // declare it. There should be 0 or more "users" that point to the
@@ -300,7 +287,7 @@ struct Const : Constancy { NODE_FUNCTIONS_FINAL };
 struct NonConst : Constancy { NODE_FUNCTIONS_FINAL };
 // TODO add mutable when supported by clang
 
-// Node represents a variable/object or a function. In case of function, type is a 
+// Instance represents a variable/object or a function. In case of function, type is a
 // type under Subroutine and initialiser is a Statement (or Uninitialised for a function
 // declaration). For a variable/object, type is basically anything else, and if there is
 // an initialiser, it is an Expression. We allow init here for various reasons including
@@ -315,8 +302,8 @@ struct Instance : Declaration,
                   Statement
 {
     NODE_FUNCTIONS
-    SharedPtr<Type> type;
     SharedPtr<InstanceIdentifier> identifier;
+    SharedPtr<Type> type;
     SharedPtr<Initialiser> initialiser;
 };
 
@@ -341,9 +328,15 @@ struct Field : Instance
     SharedPtr<Constancy> constancy;
 };
 
+// Any variable local to a Compound-statement. Cannot be a function.
+struct LocalVariable : Instance
+{
+	NODE_FUNCTIONS
+};
+
 // A variable with one instance for each *invocation* of a function, ie
 // non-static locals. Safe across recursion.
-struct Automatic : Instance
+struct Automatic : LocalVariable
 {
 	NODE_FUNCTIONS_FINAL
 };
@@ -351,7 +344,7 @@ struct Automatic : Instance
 // A variable with unspecified storage which may be used within a function but is not preserved
 // across recursion or between calls (such a variable could safely be implemented as any of
 // Static, Field or Automatic since it supports only those guarantees common to all).
-struct Temporary : Instance
+struct Temporary : LocalVariable
 {
 	NODE_FUNCTIONS_FINAL
 };
@@ -364,6 +357,30 @@ struct Base : Declaration
     SharedPtr<AccessSpec> access;
     SharedPtr<TypeIdentifier> record; // must refer to InheritanceRecord
 };              
+
+// Identifier for a label that can be any label.
+struct LabelIdentifier : Identifier,
+                         Expression { NODE_FUNCTIONS };
+
+// Identifier for a specific label that has been declared somewhere.
+struct SpecificLabelIdentifier : LabelIdentifier,
+                                 SpecificIdentifier
+{
+	SpecificLabelIdentifier() {}
+	SpecificLabelIdentifier( string s ) : SpecificIdentifier(s) {}
+	NODE_FUNCTIONS_FINAL
+};
+
+// Declaration of a label for switch, goto etc.
+// This node represents a label such as mylabel:
+// It serves to declare the label; the identifier should be
+// used for references.
+struct Label : Declaration, //TODO commonize with Case and Default
+               Statement
+{
+	NODE_FUNCTIONS_FINAL
+    SharedPtr<LabelIdentifier> identifier;
+};
 
 //////////////////////////// Anonymous Types ////////////////////////////
 
@@ -533,17 +550,6 @@ struct Struct : InheritanceRecord { NODE_FUNCTIONS_FINAL };
 struct Class : InheritanceRecord { NODE_FUNCTIONS_FINAL };
 
 //////////////////////////// Expressions ////////////////////////////
-
-// Declaration of a label for switch, goto etc.
-// This node represents a label such as mylabel: 
-// It serves to declare the label; the identifier should be 
-// used for references.
-struct Label : Declaration, //TODO commonize with Case and Default TODO move if not an Expression
-               Statement
-{
-	NODE_FUNCTIONS_FINAL
-    SharedPtr<LabelIdentifier> identifier;
-}; 
 
 // Intermediate for an operator with operands. TODO maybe fix the number
 // of operands for binop and unop categories.

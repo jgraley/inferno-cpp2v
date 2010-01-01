@@ -266,17 +266,21 @@ inline Sequence<Node> operator,( const Sequence<Node> &l, const SharedPtr<RELEME
     return seq;
 }
 
-// TODO rename something like boost's make_shared
+// Handy typing saver for creating objects and SharedPtrs to them.
+// MakeShared<X> may be constructed in the same way as X, but will then
+// masquerade as a SharedPtr<X> where the pointed-to X has been allocated
+// using new. Similar to Boost's make_shared<>() except that being an object
+// with a constructor, rather than a free function, it may be used in a
+// declaration as well as in a function-like way. So both of the following
+// are OK:
+// existing_shared_ptr = MakeShared<X>(10); // as per Boost: construction of temporary looks like function call
+// MakeShared<X> new_shared_ptr(10); // new Inferno form: new_shared_ptr may now be used like a SharedPtr<X>
 template<typename ELEMENT>
 struct MakeShared : SharedPtr<ELEMENT>
 {
-	MakeShared() : SharedPtr<ELEMENT>( new ELEMENT )
-	{
-	}
+	MakeShared() : SharedPtr<ELEMENT>( new ELEMENT ) {}
 	template<typename CP0>
-	MakeShared(const CP0 &cp0) : SharedPtr<ELEMENT>( new ELEMENT(cp0) )
-	{
-	}
+	MakeShared(const CP0 &cp0) : SharedPtr<ELEMENT>( new ELEMENT(cp0) ) {}
 	// Add more params as needed...
 };
 
