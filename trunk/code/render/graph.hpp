@@ -19,7 +19,7 @@ public:
         s += Header();
         s += Traverse( root, false );
         s += Traverse( root, true );
-        FOREACH( const RootedSearchReplace::Coupling &pc, root->couplings )
+        FOREACH( const Coupling &pc, root->couplings )
             s += DoCoupling( pc );
         s += Footer();
         Disburse( s );
@@ -147,7 +147,7 @@ public:
 		return s;
 	}
 
-	string DoCoupling( RootedSearchReplace::Coupling pc )
+	string DoCoupling( Coupling pc )
     {
 		string s;
 		shared_ptr<Node> prev;
@@ -227,12 +227,12 @@ public:
     string Name( shared_ptr<Node> sp, bool *bold, string *shape )   // TODO put stringize capabilities into the Property nodes as virtual methods
     {
         *bold=true;
-        if( dynamic_pointer_cast<RootedSearchReplace::StarBase>(sp) )
+        if( dynamic_pointer_cast<StarBase>(sp) )
         {
             *shape = "circle";
             return string("*");
         }
-        else if( dynamic_pointer_cast<RootedSearchReplace::StuffBase>(sp) )
+        else if( dynamic_pointer_cast<StuffBase>(sp) )
         {
         	*shape = "circle";
             return string("#"); // TODO what if there's a restriction: egg?

@@ -26,7 +26,7 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	s_retval->pattern = SharedNew<Type>();
     
     // Restrict the search to returns that have an automatic variable under them
-    SharedPtr< SearchReplace::Stuff<Expression> > cs_stuff( new SearchReplace::Stuff<Expression> );
+    SharedPtr< Stuff<Expression> > cs_stuff( new Stuff<Expression> );
 	s_and->patterns = ( s_retval, cs_stuff );
 	SharedPtr< GetDeclaration > cs_id( new GetDeclaration );	
     cs_stuff->terminus = cs_id;
@@ -49,10 +49,10 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	r_return->return_value = SharedNew<InstanceIdentifier>();
        
     // Make the new variable be of the required type, ie whatever the expression evaluates to   
-	SearchReplace::CouplingSet sms((
-		SearchReplace::Coupling((s_retval->pattern, r_newvar->type)),
-		SearchReplace::Coupling((s_retval, r_assign->operands[1])),
-		SearchReplace::Coupling((r_newvar->identifier, r_assign->operands[0], r_return->return_value)) ));
+	CouplingSet sms((
+		Coupling((s_retval->pattern, r_newvar->type)),
+		Coupling((s_retval, r_assign->operands[1])),
+		Coupling((r_newvar->identifier, r_assign->operands[0], r_return->return_value)) ));
              
 	SearchReplace( s_return, r_sub_comp, sms )( context, proot );
 }

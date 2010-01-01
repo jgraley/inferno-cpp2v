@@ -266,6 +266,7 @@ inline Sequence<Node> operator,( const Sequence<Node> &l, const SharedPtr<RELEME
     return seq;
 }
 
+// TODO rename something like boost's make_shared
 template<typename ELEMENT>
 struct SharedNew : SharedPtr<ELEMENT>
 {

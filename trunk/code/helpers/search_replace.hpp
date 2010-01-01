@@ -52,85 +52,95 @@
 //
 // - Slave search/replace so that a second SR can happen for each match
 //   of the first one, and can borrow its match sets.
+
+// This just serves to complicate matters - just use bools directly
+enum Result { NOT_FOUND = (int)false,
+			  FOUND     = (int)true };
+
+
+// The * wildcard can match more than one node of any type in a container
+// In a Sequence, only a contiguous subsequence of 0 or more elements will match
+// In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
+// Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
+// in the collection.
+struct StarBase : virtual Node { NODE_FUNCTIONS };
+template<class VALUE_TYPE>
+struct Star : StarBase, VALUE_TYPE { NODE_FUNCTIONS };
+
+// The Stuff wildcard can match a truncated subtree with special powers as listed by the members
+struct StuffBase : virtual Node
+{
+	NODE_FUNCTIONS;
+	SharedPtr<Node> restrictor; // Restricts the intermediate nodes in the truncated subtree
+	SharedPtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
+};
+template<class VALUE_TYPE>
+struct Stuff : StuffBase, VALUE_TYPE { NODE_FUNCTIONS };
+
+
+
+// Base class for match set keys; this deals with individual node matches, and also with stars
+// by means of pointing "root" at a SubCollection or SubSequence
+struct Key
+{
+	virtual ~Key(){}  // be a virtual hierarchy
+	SharedPtr<Node> root; // Tree node at matched pattern; root of any replace subtree
+	SharedPtr<Node> replace_pattern; // Tree node at matched pattern; root of any replace subtree
+};
+
+struct StuffKey : Key
+{
+	SharedPtr<StuffBase> search_stuff; // TODO add search_pattern to Key base class and lose this (as with replace_pattern)
+	SharedPtr<Node> terminus;
+};
+
+struct Coupling : public set< shared_ptr<Node> >
+{
+	inline Coupling() {}
+	inline Coupling( const Sequence< Node > &seq )
+	{
+		Sequence< Node > s2 = seq;
+		FOREACH( SharedPtr<Node> v, s2 )
+			insert( v );
+	}
+};
+
+typedef set<Coupling> CouplingSet;
+
+class RootedSearchReplace;
+class CouplingKeys
+{
+public:
+	CouplingKeys()
+	{
+	}
+	Result KeyAndRestrict( shared_ptr<Node> x,
+						   shared_ptr<Node> pattern,
+						   const RootedSearchReplace *sr,
+						   bool can_key );
+	Result KeyAndRestrict( shared_ptr<Key> key,
+						   shared_ptr<Node> pattern,
+						   const RootedSearchReplace *sr,
+						   bool can_key );
+	shared_ptr<Node> KeyAndSubstitute( shared_ptr<Node> x, // source after soft nodes etc
+									   shared_ptr<Node> pattern, // source
+									   const RootedSearchReplace *sr,
+									   bool can_key );
+	shared_ptr<Node> KeyAndSubstitute( shared_ptr<Key> key,
+									   shared_ptr<Node> pattern,
+									   const RootedSearchReplace *sr,
+									   bool can_key );
+private:
+	Coupling FindCoupling( shared_ptr<Node> node, const CouplingSet &couplings );
+	Map< Coupling, shared_ptr<Key> > keys_map;
+};
+
+
 class RootedSearchReplace : Transformation
 {  
 public:
-    // The * wildcard can match more than one node of any type in a container
-    // In a Sequence, only a contiguous subsequence of 0 or more elements will match
-    // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
-    // Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
-    // in the collection.
-    struct StarBase : virtual Node { NODE_FUNCTIONS };
-    template<class VALUE_TYPE>
-    struct Star : StarBase, VALUE_TYPE { NODE_FUNCTIONS };
 
-    // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
-    struct StuffBase : virtual Node
-    {
-    	NODE_FUNCTIONS;
-    	SharedPtr<Node> restrictor; // Restricts the intermediate nodes in the truncated subtree
-    	SharedPtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
-    };
-    template<class VALUE_TYPE>
-    struct Stuff : StuffBase, VALUE_TYPE { NODE_FUNCTIONS };
 
-    enum Result { NOT_FOUND = (int)false,
-    	          FOUND     = (int)true };
-
-    // Base class for match set keys; this deals with individual node matches, and also with stars
-    // by means of pointing "root" at a SubCollection or SubSequence
-    struct Key
-    {
-    	virtual ~Key(){}  // be a virtual hierarchy
-    	SharedPtr<Node> root; // Tree node at matched pattern; root of any replace subtree
-    	SharedPtr<Node> replace_pattern; // Tree node at matched pattern; root of any replace subtree
-    };
-
-    struct StuffKey : Key
-    {
-     	SharedPtr<StuffBase> search_stuff; // TODO add search_pattern to Key base class and lose this (as with replace_pattern)
-     	SharedPtr<Node> terminus;
-    };
-
-    struct Coupling : public set< shared_ptr<Node> >
-    {
-        inline Coupling() {}
-        inline Coupling( const Sequence< Node > &seq )
-        {
-            Sequence< Node > s2 = seq;
-            FOREACH( SharedPtr<Node> v, s2 )
-                insert( v );
-        }
-    };
-    
-    typedef set<Coupling> CouplingSet;
-
-    class CouplingKeys
-    {
-    public:
-    	CouplingKeys()
-    	{
-    	}
-        Result KeyAndRestrict( shared_ptr<Node> x,
-        		               shared_ptr<Node> pattern,
-                               const RootedSearchReplace *sr,
-                               bool can_key );
-        Result KeyAndRestrict( shared_ptr<Key> key,
-        		               shared_ptr<Node> pattern,
-                               const RootedSearchReplace *sr,
-                               bool can_key );
-        shared_ptr<Node> KeyAndSubstitute( shared_ptr<Node> x, // source after soft nodes etc
-        		                           shared_ptr<Node> pattern, // source
-                                           const RootedSearchReplace *sr,
-                                           bool can_key );
-        shared_ptr<Node> KeyAndSubstitute( shared_ptr<Key> key,
-        		                           shared_ptr<Node> pattern,
-                                           const RootedSearchReplace *sr,
-                                           bool can_key );
-    private:
-        Coupling FindCoupling( shared_ptr<Node> node, const CouplingSet &couplings );
-    	Map< Coupling, shared_ptr<Key> > keys_map;
-    };
     CouplingSet couplings;
 
     class Conjecture
@@ -141,7 +151,7 @@ public:
     	void PrepareForDecidedCompare();
     	GenericContainer::iterator HandleDecision( GenericContainer::iterator begin,
     			                                   GenericContainer::iterator end );
-    	RootedSearchReplace::Result Search( shared_ptr<Node> x,
+    	Result Search( shared_ptr<Node> x,
     			                            shared_ptr<Node> pattern,
     			                            CouplingKeys *keys,
     			                            bool can_key,
@@ -182,7 +192,7 @@ public:
     shared_ptr<Node> GetContext() const { ASSERT(pcontext&&*pcontext); return *pcontext; }
     struct SoftSearchPattern : virtual Node
     {
-        virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
+        virtual Result DecidedCompare( const RootedSearchReplace *sr,
         		                                      shared_ptr<Node> x,
         		                                      CouplingKeys *match_keys,
         		                                      bool can_key,
@@ -307,9 +317,9 @@ struct NotMatch : VALUE_TYPE,
     NODE_FUNCTIONS
     SharedPtr<VALUE_TYPE> pattern;
 private:
-    virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
+    virtual Result DecidedCompare( const RootedSearchReplace *sr,
     		                                            shared_ptr<Node> x,
-    		                                            RootedSearchReplace::CouplingKeys *keys,
+    		                                            CouplingKeys *keys,
     		                                            bool can_key,
     		                                            RootedSearchReplace::Conjecture &conj ) const
     {
@@ -317,7 +327,7 @@ private:
     	{
     		// Don't do a subtree search while keying - we'll only end up keying the wrong thing
     		// or terminating with NOT_FOUND prematurely
-    		return RootedSearchReplace::FOUND;
+    		return FOUND;
     	}
     	else
     	{
@@ -325,12 +335,12 @@ private:
     	    // a. We didn't recurse during KEYING pass and
     	    // b. Search under not can terminate with NOT_FOUND, but parent search will continue
     	    // Consequently, we go in at Compare level, which creates a new conjecture.
-    		SearchReplace::Result r = sr->Compare( x, shared_ptr<Node>(pattern), keys, false );
+    		Result r = sr->Compare( x, shared_ptr<Node>(pattern), keys, false );
 			TRACE("SoftNot got %d, returning the opposite!\n", (int)r);
-    		if( r==RootedSearchReplace::NOT_FOUND )
-				return RootedSearchReplace::FOUND;
+    		if( r==NOT_FOUND )
+				return FOUND;
 			else
-				return RootedSearchReplace::NOT_FOUND;
+				return NOT_FOUND;
     	}
     }
 };
@@ -345,9 +355,9 @@ struct MatchAll : VALUE_TYPE,
     NODE_FUNCTIONS
     mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
 private:
-    virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
+    virtual Result DecidedCompare( const RootedSearchReplace *sr,
     		                                            shared_ptr<Node> x,
-    		                                            RootedSearchReplace::CouplingKeys *keys,
+    		                                            CouplingKeys *keys,
     		                                            bool can_key,
     		                                            RootedSearchReplace::Conjecture &conj ) const
     {
@@ -358,13 +368,13 @@ private:
     		 it != patterns.end();
     		 ++it, ++i )
     	{
-    		RootedSearchReplace::Result r = sr->DecidedCompare( x, shared_ptr<Node>(*it), keys, can_key, conj );
+    		Result r = sr->DecidedCompare( x, shared_ptr<Node>(*it), keys, can_key, conj );
     		TRACE("AND[%d] got %d\n", i, r);
     	    if( !r )
-    	    	return RootedSearchReplace::NOT_FOUND;
+    	    	return NOT_FOUND;
     	}
 
-        return RootedSearchReplace::FOUND;
+        return FOUND;
     }
 };
 
@@ -379,9 +389,9 @@ struct TransformToBase : RootedSearchReplace::SoftSearchPattern
     }
 
 private:
-    virtual RootedSearchReplace::Result DecidedCompare( const RootedSearchReplace *sr,
+    virtual Result DecidedCompare( const RootedSearchReplace *sr,
     		                                            shared_ptr<Node> x,
-    		                                            RootedSearchReplace::CouplingKeys *keys,
+    		                                            CouplingKeys *keys,
     		                                            bool can_key,
     		                                            RootedSearchReplace::Conjecture &conj ) const;
     Transformation *transformation;
@@ -395,15 +405,15 @@ struct TransformTo : TransformToBase, VALUE_TYPE
 };
 
 
-inline RootedSearchReplace::CouplingSet operator,( RootedSearchReplace::Coupling l, RootedSearchReplace::Coupling r )
+inline CouplingSet operator,( Coupling l, Coupling r )
 {
-	RootedSearchReplace::CouplingSet cs;
+	CouplingSet cs;
     cs.insert( l );
     cs.insert( r );
     return cs;
 }
 
-inline RootedSearchReplace::CouplingSet operator,( RootedSearchReplace::CouplingSet l, RootedSearchReplace::Coupling r )
+inline CouplingSet operator,( CouplingSet l, Coupling r )
 {
     l.insert( r );
     return l;

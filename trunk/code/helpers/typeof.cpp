@@ -14,7 +14,6 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
 {
     ASSERT(o);
     
-    // TODO have a seperate function for Literals, and make more things be kinds of Operators
     if( shared_ptr<SpecificInstanceIdentifier> ii = dynamic_pointer_cast<SpecificInstanceIdentifier>(o) ) // object or function instance
     {        
         shared_ptr<Node> n = GetDeclaration()(context, ii);
@@ -38,7 +37,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
                  optypes.push_back( Get(o) );
         return Get( op, optypes );
     }
-    else if( shared_ptr<Literal> l = dynamic_pointer_cast<Literal>(o) ) // operator
+    else if( shared_ptr<Literal> l = dynamic_pointer_cast<Literal>(o) )
     {
         return Get( l );
     }

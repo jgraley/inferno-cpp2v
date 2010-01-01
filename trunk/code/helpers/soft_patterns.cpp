@@ -4,7 +4,7 @@
 
 
 shared_ptr<Node> SoftMakeIdentifier::DuplicateSubtree( const RootedSearchReplace *sr,
-		                                               RootedSearchReplace::CouplingKeys *keys,
+		                                               CouplingKeys *keys,
 		                                               bool can_key )
 {
 	string newname;
