@@ -885,7 +885,7 @@ shared_ptr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may
     return shared_ptr<Node>();
 }
 
-void RootedSearchReplace::Conjecture::PrepareForDecidedCompare()
+void Conjecture::PrepareForDecidedCompare()
 {
 	ASSERT( this );
 
@@ -893,7 +893,7 @@ void RootedSearchReplace::Conjecture::PrepareForDecidedCompare()
 	decision_index = 0;
 }
 
-bool RootedSearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
+bool Conjecture::ShouldTryMore( Result r, int threshold )
 {
 	ASSERT( this );
 
@@ -907,7 +907,7 @@ bool RootedSearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
 }
 
 
-Result RootedSearchReplace::Conjecture::Search( shared_ptr<Node> x,
+Result Conjecture::Search( shared_ptr<Node> x,
 																	 shared_ptr<Node> pattern,
 																	 CouplingKeys *keys,
 																	 bool can_key,
@@ -931,7 +931,7 @@ Result RootedSearchReplace::Conjecture::Search( shared_ptr<Node> x,
 }
 
 
-GenericContainer::iterator RootedSearchReplace::Conjecture::HandleDecision( GenericContainer::iterator begin,
+GenericContainer::iterator Conjecture::HandleDecision( GenericContainer::iterator begin,
 		                                                                    GenericContainer::iterator end )
 {
 	ASSERT( this );
@@ -1030,7 +1030,7 @@ Result TransformToBase::DecidedCompare( const RootedSearchReplace *sr,
 		                                                     shared_ptr<Node> x,
 		                                                     CouplingKeys *keys,
 		                                                     bool can_key,
-		                                                     RootedSearchReplace::Conjecture &conj ) const
+		                                                     Conjecture &conj ) const
 {
     // Transform the candidate expression
     shared_ptr<Node> xt = (*transformation)( sr->GetContext(), x );
