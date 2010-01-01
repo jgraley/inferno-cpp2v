@@ -268,14 +268,17 @@ inline Sequence<Node> operator,( const Sequence<Node> &l, const SharedPtr<RELEME
 
 // TODO rename something like boost's make_shared
 template<typename ELEMENT>
-struct SharedNew : SharedPtr<ELEMENT>
+struct MakeShared : SharedPtr<ELEMENT>
 {
-	SharedNew() : SharedPtr<ELEMENT>( new ELEMENT )
+	MakeShared() : SharedPtr<ELEMENT>( new ELEMENT )
 	{
 	}
+	template<typename CP0>
+	MakeShared(const CP0 &cp0) : SharedPtr<ELEMENT>( new ELEMENT(cp0) )
+	{
+	}
+	// Add more params as needed...
 };
-
-
 
 //////////////////////////// Node Model ////////////////////////////
 

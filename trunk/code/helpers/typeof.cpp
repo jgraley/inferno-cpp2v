@@ -70,15 +70,15 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
     }
     else if( dynamic_pointer_cast<LabelIdentifier>(o) )
     {
-        return SharedNew<Type>(); // TODO labels need a type
+        return MakeShared<Type>(); // TODO labels need a type
     }
     else if( dynamic_pointer_cast<SizeOf>(o) || dynamic_pointer_cast<AlignOf>(o))
     {
     	SharedPtr<Integral> n;
     	if( TypeDb::int_default_signed )
-    		n = SharedNew<Signed>();
+    		n = MakeShared<Signed>();
     	else
-    		n = SharedNew<Unsigned>();
+    		n = MakeShared<Unsigned>();
     	SharedPtr<SpecificInteger> sz( new SpecificInteger(TypeDb::integral_bits[INT]) );
     	n->width = sz;
        return n;
@@ -91,7 +91,7 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Expression> o )
     }
     else if( dynamic_pointer_cast<Delete>(o) )
     {
-        return SharedNew<Type>();
+        return MakeShared<Type>();
     }
     else 
     {
@@ -324,24 +324,24 @@ shared_ptr<Type> TypeOf::Get( shared_ptr<Literal> l )
     else if( shared_ptr<SpecificFloat> sf = dynamic_pointer_cast<SpecificFloat>(l) )
     {
     	// Get the info from Clang, and make an Inferno type for it
-    	SharedNew<Floating> ft;
+    	MakeShared<Floating> ft;
     	ft->semantics = SharedPtr<SpecificFloatSemantics>( new SpecificFloatSemantics(&sf->getSemantics()) );
         return ft;
     }
     else if( dynamic_pointer_cast<Bool>(l) )
     {
-        return SharedNew<Boolean>();
+        return MakeShared<Boolean>();
     }
     else if( dynamic_pointer_cast<String>(l) )
     {
     	SharedPtr<Integral> n;
     	if( TypeDb::char_default_signed )
-    		n = SharedNew<Signed>();
+    		n = MakeShared<Signed>();
     	else
-    		n = SharedNew<Unsigned>();
+    		n = MakeShared<Unsigned>();
     	SharedPtr<SpecificInteger> sz( new SpecificInteger(TypeDb::char_bits) );
     	n->width = sz;
-    	SharedNew<Pointer> p;
+    	MakeShared<Pointer> p;
     	p->destination = n;
         return p;
     }

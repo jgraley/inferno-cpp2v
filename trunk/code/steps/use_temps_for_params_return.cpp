@@ -23,7 +23,7 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
 	SharedPtr< MatchAll<Expression> > s_and( new MatchAll<Expression> );
 	s_return->return_value = s_and;
 	SharedPtr<TypeOf> s_retval( new TypeOf );
-	s_retval->pattern = SharedNew<Type>();
+	s_retval->pattern = MakeShared<Type>();
     
     // Restrict the search to returns that have an automatic variable under them
     SharedPtr< Stuff<Expression> > cs_stuff( new Stuff<Expression> );
@@ -36,17 +36,17 @@ void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<N
     // replace with a new sub-compound, that declares a Temp, intialises it to the return value and returns it
 	SharedPtr<Compound> r_sub_comp( new Compound );
 	SharedPtr< Temporary > r_newvar( new Temporary );
-	r_newvar->type = SharedNew<Type>();
-	r_newvar->identifier = SharedPtr<InstanceIdentifier>( new SoftMakeIdentifier( "temp_retval" ) );
-	r_newvar->initialiser = SharedNew<Uninitialised>();
+	r_newvar->type = MakeShared<Type>();
+	r_newvar->identifier = MakeShared<SoftMakeIdentifier>("temp_retval");
+	r_newvar->initialiser = MakeShared<Uninitialised>();
 	r_sub_comp->members = ( r_newvar );
 	SharedPtr<Assign> r_assign( new Assign );
-	r_assign->operands.push_back( SharedNew<InstanceIdentifier>() );
-	r_assign->operands.push_back( SharedNew<Expression>() );
+	r_assign->operands.push_back( MakeShared<InstanceIdentifier>() );
+	r_assign->operands.push_back( MakeShared<Expression>() );
 	r_sub_comp->statements.push_back( r_assign );
 	SharedPtr<Return> r_return( new Return );
 	r_sub_comp->statements.push_back( r_return );
-	r_return->return_value = SharedNew<InstanceIdentifier>();
+	r_return->return_value = MakeShared<InstanceIdentifier>();
        
     // Make the new variable be of the required type, ie whatever the expression evaluates to   
 	CouplingSet sms((
