@@ -35,6 +35,8 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	MakeShared<Subscript> sr_sub;
 	MakeShared< NotMatch<Statement> > s_not3;
 	MakeShared< MatchAll<Statement> > s_and3;
+	MakeShared<SoftMakeIdentifier> r_index_identifier("%s_stack_index");
+	MakeShared<SoftMakeIdentifier> r_identifier("%s_stack");
 
     // Master search - look for functions satisfying the construct limitation and get
 	s_fi->identifier = MakeShared<InstanceIdentifier>();
@@ -53,7 +55,6 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	r_top_comp->members = ( r_top_decls, r_index );
 	r_index->type = r_index_type;
 	r_index_type->width = MakeShared<SpecificInteger>(32);
-	MakeShared<SoftMakeIdentifier> r_index_identifier("%s_stack_index");
 	r_index_identifier->source = MakeShared<Identifier>();
 	r_index->identifier = r_index_identifier;
 	r_index->constancy = MakeShared<NonConst>();
@@ -76,7 +77,6 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	r_instance->constancy = MakeShared<NonConst>();
 	r_instance->initialiser = MakeShared<Uninitialised>();
 	r_stuff->terminus = r_instance;
-	MakeShared<SoftMakeIdentifier> r_identifier("%s_stack");
 	r_identifier->source = MakeShared<Identifier>();
 	r_instance->identifier = r_identifier;
 	r_instance->type = r_array;
@@ -129,7 +129,7 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 		Coupling(( s_ret_pre, r_ret_pre )), // Couple statements before return in compound
 		Coupling(( s_return, r_return )), // Couple the return statement
 		Coupling(( s_ret_post, sn_ret_post, r_ret_post )) ));// Couple statements after return in compound
-                                                                          // make sure the ns and s are talking about the same return if there's more than one
+                                                             // make sure the ns and s are talking about the same return if there's more than one
 #else
     	Coupling(( s_fi->identifier, r_index_identifier->source, s_fi2->identifier )),
         Coupling(( r_index_identifier, r_inc->operands[0], r_dec->operands[0], sr_sub->index )) )); // Couple the name of the index variable into the index of the subscript and all the incs and decs

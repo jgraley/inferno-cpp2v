@@ -484,7 +484,7 @@ private:
         }
     }
     
-    string RenderInstance( shared_ptr<Instance> o, string sep, bool showtype = true, 
+    string RenderInstance( shared_ptr<Instance> o, string sep, bool showtype = true,
                            bool showstorage = true, bool showinit = true, bool showscope = false )
     {
         string s;
