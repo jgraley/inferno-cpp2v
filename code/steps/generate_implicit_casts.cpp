@@ -16,35 +16,35 @@ void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Nod
 {
 	SearchReplace sr0;
 
-	SharedNew<Call> s_call;
-	SharedNew<TypeOf> s_callee;
+	MakeShared<Call> s_call;
+	MakeShared<TypeOf> s_callee;
 	s_call->callee = s_callee;
-	SharedNew<Procedure> s_proc;
+	MakeShared<Procedure> s_proc;
 	s_callee->pattern = s_proc;
-	SharedNew< Instance > s_param;
-	s_param->identifier = SharedNew< InstanceIdentifier >();
-	s_param->type = SharedNew< Type >();
-	SharedNew< Star<Instance> > s_other_params;
+	MakeShared< Instance > s_param;
+	s_param->identifier = MakeShared< InstanceIdentifier >();
+	s_param->type = MakeShared< Type >();
+	MakeShared< Star<Instance> > s_other_params;
 	s_proc->members = (s_param, s_other_params);
-	SharedNew< MapOperand > s_arg;
-	s_arg->identifier = SharedNew< InstanceIdentifier >();
-	SharedNew<TypeOf> s_arg_value;
+	MakeShared< MapOperand > s_arg;
+	s_arg->identifier = MakeShared< InstanceIdentifier >();
+	MakeShared<TypeOf> s_arg_value;
 	s_arg->value = s_arg_value;
-	//s_arg_value->pattern = SharedNew< Type >();
-	SharedNew< NotMatch<Type> > s_arg_type;
+	//s_arg_value->pattern = MakeShared< Type >();
+	MakeShared< NotMatch<Type> > s_arg_type;
 	s_arg_value->pattern = s_arg_type;
-	s_arg_type->pattern = SharedNew< Type >();
-	SharedNew< Star<MapOperand> > s_other_args;
+	s_arg_type->pattern = MakeShared< Type >();
+	MakeShared< Star<MapOperand> > s_other_args;
 	s_call->operands = ( s_arg, s_other_args );
 
-	SharedNew<Call> r_call;
-	SharedNew< MapOperand > r_arg;
-	r_arg->identifier = SharedNew< InstanceIdentifier >();
-	SharedNew<Cast> r_cast;
+	MakeShared<Call> r_call;
+	MakeShared< MapOperand > r_arg;
+	r_arg->identifier = MakeShared< InstanceIdentifier >();
+	MakeShared<Cast> r_cast;
 	r_arg->value = r_cast;
-	r_cast->operand = SharedNew< Expression >();
-	r_cast->type = SharedNew< Type >();
-	SharedNew< Star<MapOperand> > r_other_args;
+	r_cast->operand = MakeShared< Expression >();
+	r_cast->type = MakeShared< Type >();
+	MakeShared< Star<MapOperand> > r_other_args;
 	r_call->operands = ( r_arg, r_other_args );
 
 	CouplingSet sms0((

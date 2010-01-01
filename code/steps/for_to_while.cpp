@@ -13,11 +13,11 @@
 
 void ForToWhile::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
-    SharedNew<For> s_for;
-    SharedNew<Statement> s_body, s_init, s_inc, r_forbody, r_init, r_inc;
-    SharedNew<Expression> s_cond, r_cond;
-    SharedNew<While> r_while;
-    SharedNew<Compound> r_outer, r_body;
+    MakeShared<For> s_for;
+    MakeShared<Statement> s_body, s_init, s_inc, r_forbody, r_init, r_inc;
+    MakeShared<Expression> s_cond, r_cond;
+    MakeShared<While> r_while;
+    MakeShared<Compound> r_outer, r_body;
     
     s_for->body = s_body;
     s_for->initialisation = s_init;
