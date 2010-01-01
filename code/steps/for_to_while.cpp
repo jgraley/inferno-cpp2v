@@ -29,11 +29,11 @@ void ForToWhile::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
     r_while->condition = r_cond;
     r_body->statements = (r_forbody, r_inc);
     
-	SearchReplace::CouplingSet couplings((
-		SearchReplace::Coupling(( s_body, r_forbody )), 
-		SearchReplace::Coupling(( s_init, r_init )), 
-		SearchReplace::Coupling(( s_cond, r_cond )), 
-		SearchReplace::Coupling(( s_inc, r_inc )) ));		    
+	CouplingSet couplings((
+		Coupling(( s_body, r_forbody )),
+		Coupling(( s_init, r_init )),
+		Coupling(( s_cond, r_cond )),
+		Coupling(( s_inc, r_inc )) ));
     
    	SearchReplace( s_for, r_outer, couplings )( context, proot );
 }

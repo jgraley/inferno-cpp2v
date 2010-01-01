@@ -20,9 +20,9 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	SharedNew<Subroutine> s_func;
 	SharedNew< MatchAll<Initialiser> > s_and;
 	SharedNew<Compound> s_top_comp, r_top_comp, s_ret_comp, sn_ret_comp, r_ret_comp;
-	SharedNew< SearchReplace::Star<Declaration> > s_top_decls, r_top_decls, s_ret_decls, sn_ret_decls, r_ret_decls;
-	SharedNew< SearchReplace::Star<Statement> > s_top_pre, r_top_pre, s_ret_pre, s_ret_post, sn_ret_pre, sn_ret_post, r_ret_pre, r_ret_post;
-	SharedNew< SearchReplace::Stuff<Statement> > cs_stuff, s_stuff, r_stuff, s_stuff3, r_stuff3;
+	SharedNew< Star<Declaration> > s_top_decls, r_top_decls, s_ret_decls, sn_ret_decls, r_ret_decls;
+	SharedNew< Star<Statement> > s_top_pre, r_top_pre, s_ret_pre, s_ret_post, sn_ret_pre, sn_ret_post, r_ret_pre, r_ret_post;
+	SharedNew< Stuff<Statement> > cs_stuff, s_stuff, r_stuff, s_stuff3, r_stuff3;
 	SharedNew<Automatic> cs_instance, s_instance;
 	SharedNew<Static> r_index, r_instance; // TODO Field
 	SharedNew<Unsigned> r_index_type;
@@ -111,29 +111,29 @@ void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *pro
 	r_ret_comp->statements = ( r_ret_pre, r_ret_dec, r_return, r_ret_post );
 #endif
 
-	SearchReplace::CouplingSet sms((
-		SearchReplace::Coupling(( s_top_decls, r_top_decls )), // Couple pre-existing decls in the function's top level
-		SearchReplace::Coupling(( s_top_pre, r_top_pre )), // Couple pre-existing statements in the funciton's top level
-		SearchReplace::Coupling(( s_stuff, r_stuff )), // Couple stuff between the function and the variable to be changed
-		SearchReplace::Coupling(( s_fi, r_fi )), // Couple the original function
-		SearchReplace::Coupling(( s_fi2, r_fi2 )), // Couple the function after master replace
-		SearchReplace::Coupling(( s_instance->type, r_array->element )), // Couple the type of the auto variable into the element type of the array
-		SearchReplace::Coupling(( s_identifier, r_identifier->source, ss_identifier )), // Couple the identifier of the auto variable for sub-slave and as source for array's name
-		SearchReplace::Coupling(( r_identifier, sr_sub->operands[0] )), // Couple the name of the array into the base of the subscript
+	CouplingSet sms((
+		Coupling(( s_top_decls, r_top_decls )), // Couple pre-existing decls in the function's top level
+		Coupling(( s_top_pre, r_top_pre )), // Couple pre-existing statements in the funciton's top level
+		Coupling(( s_stuff, r_stuff )), // Couple stuff between the function and the variable to be changed
+		Coupling(( s_fi, r_fi )), // Couple the original function
+		Coupling(( s_fi2, r_fi2 )), // Couple the function after master replace
+		Coupling(( s_instance->type, r_array->element )), // Couple the type of the auto variable into the element type of the array
+		Coupling(( s_identifier, r_identifier->source, ss_identifier )), // Couple the identifier of the auto variable for sub-slave and as source for array's name
+		Coupling(( r_identifier, sr_sub->operands[0] )), // Couple the name of the array into the base of the subscript
 
 #if HANDLE_EARLY_RETURNS
-		SearchReplace::Coupling(( s_fi->identifier, r_index_identifier->source, s_fi2->identifier, s_fi3->identifier )),
-		SearchReplace::Coupling(( r_index_identifier, r_inc->operands[0], r_dec->operands[0], sr_sub->operands[1], r_ret_dec->operands[0], sn_ret_dec->operands[0] )),
-		SearchReplace::Coupling(( s_fi3, r_fi3 )), // Couple the function for dec-before-return slave
-		SearchReplace::Coupling(( s_stuff3, r_stuff3 )), // Couple stuff between function and compound containing return
-		SearchReplace::Coupling(( s_ret_decls, r_ret_decls )), // Couple decls in compound containing return
-		SearchReplace::Coupling(( s_ret_pre, r_ret_pre )), // Couple statements before return in compound
-		SearchReplace::Coupling(( s_return, r_return )), // Couple the return statement
-		SearchReplace::Coupling(( s_ret_post, sn_ret_post, r_ret_post )) ));// Couple statements after return in compound
+		Coupling(( s_fi->identifier, r_index_identifier->source, s_fi2->identifier, s_fi3->identifier )),
+		Coupling(( r_index_identifier, r_inc->operands[0], r_dec->operands[0], sr_sub->operands[1], r_ret_dec->operands[0], sn_ret_dec->operands[0] )),
+		Coupling(( s_fi3, r_fi3 )), // Couple the function for dec-before-return slave
+		Coupling(( s_stuff3, r_stuff3 )), // Couple stuff between function and compound containing return
+		Coupling(( s_ret_decls, r_ret_decls )), // Couple decls in compound containing return
+		Coupling(( s_ret_pre, r_ret_pre )), // Couple statements before return in compound
+		Coupling(( s_return, r_return )), // Couple the return statement
+		Coupling(( s_ret_post, sn_ret_post, r_ret_post )) ));// Couple statements after return in compound
                                                                           // make sure the ns and s are talking about the same return if there's more than one
 #else
-    	SearchReplace::Coupling(( s_fi->identifier, r_index_identifier->source, s_fi2->identifier )),
-        SearchReplace::Coupling(( r_index_identifier, r_inc->operands[0], r_dec->operands[0], sr_sub->index )) )); // Couple the name of the index variable into the index of the subscript and all the incs and decs
+    	Coupling(( s_fi->identifier, r_index_identifier->source, s_fi2->identifier )),
+        Coupling(( r_index_identifier, r_inc->operands[0], r_dec->operands[0], sr_sub->index )) )); // Couple the name of the index variable into the index of the subscript and all the incs and decs
 #endif
 
 	vector<RootedSearchReplace *> vs;

@@ -26,7 +26,7 @@ struct SoftMakeIdentifier : InstanceIdentifier, // TODO other kinds of identifie
 	SharedPtr<Identifier> source;
 private:
     virtual shared_ptr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
-    		                                   RootedSearchReplace::CouplingKeys *keys,
+    		                                   CouplingKeys *keys,
     		                                   bool can_key );
 };
 

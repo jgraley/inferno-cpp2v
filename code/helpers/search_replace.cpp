@@ -53,7 +53,7 @@ RootedSearchReplace::~RootedSearchReplace()
 
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
+Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
 		                                             shared_ptr<Node> pattern,
 		                                             CouplingKeys *keys,
 		                                             bool can_key,
@@ -134,7 +134,7 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
 
 // xstart and pstart are the indexes into the sequence where we will begin checking for a match.
 // It is assumed that elements before these have already been matched and may be ignored.
-RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( GenericSequence &x,
+Result RootedSearchReplace::DecidedCompare( GenericSequence &x,
 		                                             GenericSequence &pattern,
 		                                             CouplingKeys *keys,
 		                                             bool can_key,
@@ -224,7 +224,7 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( GenericSequence
 }
 
 
-RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( GenericCollection &x,
+Result RootedSearchReplace::DecidedCompare( GenericCollection &x,
 		                                             GenericCollection &pattern,
 		                                             CouplingKeys *keys,
 		                                             bool can_key,
@@ -293,7 +293,7 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( GenericCollecti
 
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
+Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
 		                                             shared_ptr<StuffBase> stuff_pattern,
 		                                             CouplingKeys *keys,
 		                                             bool can_key,
@@ -328,7 +328,7 @@ RootedSearchReplace::Result RootedSearchReplace::DecidedCompare( shared_ptr<Node
 }
 
 
-RootedSearchReplace::Result RootedSearchReplace::MatchingDecidedCompare( shared_ptr<Node> x,
+Result RootedSearchReplace::MatchingDecidedCompare( shared_ptr<Node> x,
 		                                                     shared_ptr<Node> pattern,
 		                                                     CouplingKeys *keys,
 		                                                     bool can_key,
@@ -380,7 +380,7 @@ RootedSearchReplace::Result RootedSearchReplace::MatchingDecidedCompare( shared_
 }
 
 
-RootedSearchReplace::Result RootedSearchReplace::Compare( shared_ptr<Node> x,
+Result RootedSearchReplace::Compare( shared_ptr<Node> x,
 		                                      shared_ptr<Node> pattern,
 		                                      CouplingKeys *keys,
 		                                      bool can_key ) const
@@ -664,7 +664,7 @@ shared_ptr<Node> RootedSearchReplace::MatchingDuplicateSubtree( shared_ptr<Node>
 #include "render/graph.hpp" // TODO get rid
 
 
-RootedSearchReplace::Result RootedSearchReplace::SingleSearchReplace( shared_ptr<Node> *proot,
+Result RootedSearchReplace::SingleSearchReplace( shared_ptr<Node> *proot,
 		                                                              shared_ptr<Node> search_pattern,
 		                                                              shared_ptr<Node> replace_pattern,
 		                                                              CouplingKeys keys ) // Pass by value is intentional - changes should not propogate back to caller
@@ -751,7 +751,7 @@ void RootedSearchReplace::operator()( shared_ptr<Node> c, shared_ptr<Node> *proo
 
 
 // Find a match set containing the supplied node
-RootedSearchReplace::Coupling RootedSearchReplace::CouplingKeys::FindCoupling( shared_ptr<Node> node,
+Coupling CouplingKeys::FindCoupling( shared_ptr<Node> node,
 		                                                                       const CouplingSet &couplings )
 {
 	ASSERT( this );
@@ -772,7 +772,7 @@ RootedSearchReplace::Coupling RootedSearchReplace::CouplingKeys::FindCoupling( s
 
 
 
-RootedSearchReplace::Result RootedSearchReplace::CouplingKeys::KeyAndRestrict( shared_ptr<Node> x,
+Result CouplingKeys::KeyAndRestrict( shared_ptr<Node> x,
 		                                                                    shared_ptr<Node> pattern,
 		                                                                    const RootedSearchReplace *sr,
 		                                                                    bool can_key )
@@ -782,7 +782,7 @@ RootedSearchReplace::Result RootedSearchReplace::CouplingKeys::KeyAndRestrict( s
 	return KeyAndRestrict( key, pattern, sr, can_key );
 }
 
-RootedSearchReplace::Result RootedSearchReplace::CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
+Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
 		                                                                    shared_ptr<Node> pattern,
 		                                                                    const RootedSearchReplace *sr,
 		                                                                    bool can_key )
@@ -824,7 +824,7 @@ RootedSearchReplace::Result RootedSearchReplace::CouplingKeys::KeyAndRestrict( s
 	return r;
 }
 
-shared_ptr<Node> RootedSearchReplace::CouplingKeys::KeyAndSubstitute( shared_ptr<Node> x,
+shared_ptr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Node> x,
                                                                    shared_ptr<Node> pattern,
                                                                    const RootedSearchReplace *sr,
                                                                    bool can_key )
@@ -836,7 +836,7 @@ shared_ptr<Node> RootedSearchReplace::CouplingKeys::KeyAndSubstitute( shared_ptr
 
 // Note return is NULL in all cases unless we substituted in which case it is the result of the
 // substitution, duplicated for our convenience. Always check the return value for NULL.
-shared_ptr<Node> RootedSearchReplace::CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be NULL meaning we are not allowed to key the node
+shared_ptr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be NULL meaning we are not allowed to key the node
 		                                                           shared_ptr<Node> pattern,
 		                                                           const RootedSearchReplace *sr,
 		                                                           bool can_key )
@@ -907,9 +907,9 @@ bool RootedSearchReplace::Conjecture::ShouldTryMore( Result r, int threshold )
 }
 
 
-RootedSearchReplace::Result RootedSearchReplace::Conjecture::Search( shared_ptr<Node> x,
+Result RootedSearchReplace::Conjecture::Search( shared_ptr<Node> x,
 																	 shared_ptr<Node> pattern,
-																	 RootedSearchReplace::CouplingKeys *keys,
+																	 CouplingKeys *keys,
 																	 bool can_key,
 																	 const RootedSearchReplace *sr )
 {
@@ -920,7 +920,7 @@ RootedSearchReplace::Result RootedSearchReplace::Conjecture::Search( shared_ptr<
 		// HandleDecision() will return the current choice for that decision, if absent it will
 		// add the decision and choose the first choice, if the decision reaches the end it
 		// will remove the decision.
-		RootedSearchReplace::Result r = sr->MatchingDecidedCompare( x, pattern, keys, can_key, *this );
+		Result r = sr->MatchingDecidedCompare( x, pattern, keys, can_key, *this );
 
 		// If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
 		if( r || choices.empty() )
@@ -1026,9 +1026,9 @@ void SearchReplace::Configure( shared_ptr<Node> sp,
 	}
 }
 
-RootedSearchReplace::Result TransformToBase::DecidedCompare( const RootedSearchReplace *sr,
+Result TransformToBase::DecidedCompare( const RootedSearchReplace *sr,
 		                                                     shared_ptr<Node> x,
-		                                                     RootedSearchReplace::CouplingKeys *keys,
+		                                                     CouplingKeys *keys,
 		                                                     bool can_key,
 		                                                     RootedSearchReplace::Conjecture &conj ) const
 {
@@ -1043,7 +1043,7 @@ RootedSearchReplace::Result TransformToBase::DecidedCompare( const RootedSearchR
 	{
 	    // Transformation returned NULL, probably because the candidate was of the wrong
 		// type, so just don't match
-	    return RootedSearchReplace::NOT_FOUND;
+	    return NOT_FOUND;
 	}
 }
 

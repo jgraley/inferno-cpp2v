@@ -10,22 +10,22 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 		SharedNew<Compound> sc;
 		SharedNew<Instance> si;
 		si->initialiser = SharedNew<Uninitialised>();  // Only acting on uninitialised Instances
-		SharedNew< SearchReplace::Star<Declaration> > ss;
+		SharedNew< Star<Declaration> > ss;
 		sc->members = ( ss );
-		sc->statements = ( SharedNew< SearchReplace::Star<Statement> >(), si, SharedNew< SearchReplace::Star<Statement> >() );
+		sc->statements = ( SharedNew< Star<Statement> >(), si, SharedNew< Star<Statement> >() );
 
 		SharedNew<Compound> rc;
 		SharedNew<Instance> ri;
 		// ri->initialiser = SharedNew<Uninitialised>();
-		SharedNew< SearchReplace::Star<Declaration> > rs;
+		SharedNew< Star<Declaration> > rs;
 		rc->members = ( ri, rs ); // Instance now in unordered decls part
-		rc->statements = ( SharedNew< SearchReplace::Star<Statement> >(), SharedNew< SearchReplace::Star<Statement> >() );
+		rc->statements = ( SharedNew< Star<Statement> >(), SharedNew< Star<Statement> >() );
 
-		SearchReplace::CouplingSet sms0((
-			SearchReplace::Coupling((si, ri)),
-			SearchReplace::Coupling((ss, rs)),
-			SearchReplace::Coupling((sc->statements[0], rc->statements[0])),
-			SearchReplace::Coupling((sc->statements[2], rc->statements[1])) ));
+		CouplingSet sms0((
+			Coupling((si, ri)),
+			Coupling((ss, rs)),
+			Coupling((sc->statements[0], rc->statements[0])),
+			Coupling((sc->statements[2], rc->statements[1])) ));
 
 		sr0.Configure(sc, rc, sms0);
 		sr0( context, proot );
@@ -37,26 +37,26 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 		SharedNew<Instance> si;
 		si->identifier = SharedNew<InstanceIdentifier>();  // Only acting on initialised Instances
 		si->initialiser = SharedNew<Expression>();  // Only acting on initialised Instances
-		SharedNew< SearchReplace::Star<Declaration> > ss;
+		SharedNew< Star<Declaration> > ss;
 		sc->members = ( ss );
-		sc->statements = ( SharedNew< SearchReplace::Star<Statement> >(), si, SharedNew< SearchReplace::Star<Statement> >() );
+		sc->statements = ( SharedNew< Star<Statement> >(), si, SharedNew< Star<Statement> >() );
 
 		SharedNew<Compound> rc;
 		SharedNew<Instance> ri;
 		ri->initialiser = SharedNew<Uninitialised>();
-		SharedNew< SearchReplace::Star<Declaration> > rs;
+		SharedNew< Star<Declaration> > rs;
 		rc->members = ( ri, rs );
 		SharedNew<Assign> ra;
 		ra->operands = ( SharedNew<InstanceIdentifier>(), SharedNew<Expression>() );
-		rc->statements = ( SharedNew< SearchReplace::Star<Statement> >(), ra, SharedNew< SearchReplace::Star<Statement> >() );
+		rc->statements = ( SharedNew< Star<Statement> >(), ra, SharedNew< Star<Statement> >() );
 
-		SearchReplace::CouplingSet sms1((
-			SearchReplace::Coupling((si, ri)),
-			SearchReplace::Coupling((ss, rs)),
-			SearchReplace::Coupling((sc->statements[0], rc->statements[0])),
-			SearchReplace::Coupling((sc->statements[2], rc->statements[2])),
-			SearchReplace::Coupling((si->identifier, ra->operands[0])),
-			SearchReplace::Coupling((si->initialiser, ra->operands[1])) ));
+		CouplingSet sms1((
+			Coupling((si, ri)),
+			Coupling((ss, rs)),
+			Coupling((sc->statements[0], rc->statements[0])),
+			Coupling((sc->statements[2], rc->statements[2])),
+			Coupling((si->identifier, ra->operands[0])),
+			Coupling((si->initialiser, ra->operands[1])) ));
 
 		sr1.Configure(sc, rc, sms1);
 		sr1( context, proot );
@@ -74,27 +74,27 @@ void MergeInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 		SharedNew<Instance> ri;
 		ri->identifier = SharedNew<InstanceIdentifier>();
 		ri->initialiser = SharedNew<Uninitialised>();
-		SharedNew< SearchReplace::Star<Declaration> > rs;
+		SharedNew< Star<Declaration> > rs;
 		rc->members = ( ri, rs );
 		SharedNew<Assign> ra;
 		ra->operands = (SharedNew<InstanceIdentifier>(), SharedNew<Expression>() );
-		rc->statements = (SharedNew< SearchReplace::Star<Statement> >(), ra, SharedNew< SearchReplace::Star<Statement> >() );
+		rc->statements = (SharedNew< Star<Statement> >(), ra, SharedNew< Star<Statement> >() );
 
 		SharedNew<Compound> sc;
-		SharedNew< SearchReplace::Star<Declaration> > ss;
+		SharedNew< Star<Declaration> > ss;
 		sc->members = ( ss );
 		SharedNew<Instance> si;
 		si->identifier = SharedNew<InstanceIdentifier>();
 		si->initialiser = SharedNew<Expression>();  // Only acting on initialised Instances
-		sc->statements = ( SharedNew< SearchReplace::Star<Statement> >(), si, SharedNew< SearchReplace::Star<Statement> >() );
+		sc->statements = ( SharedNew< Star<Statement> >(), si, SharedNew< Star<Statement> >() );
 
-		SearchReplace::CouplingSet sms1((
-			SearchReplace::Coupling((si, ri)),
-			SearchReplace::Coupling((ss, rs)),
-			SearchReplace::Coupling((sc->statements[0], rc->statements[0])),
-			SearchReplace::Coupling((sc->statements[2], rc->statements[2])),
-			SearchReplace::Coupling((si->identifier, ri->identifier, ra->operands[0])),
-			SearchReplace::Coupling((si->initialiser, ra->operands[1])) ));
+		CouplingSet sms1((
+			Coupling((si, ri)),
+			Coupling((ss, rs)),
+			Coupling((sc->statements[0], rc->statements[0])),
+			Coupling((sc->statements[2], rc->statements[2])),
+			Coupling((si->identifier, ri->identifier, ra->operands[0])),
+			Coupling((si->initialiser, ra->operands[1])) ));
 
 		sr1.Configure(rc, sc, sms1);
 	}
@@ -104,30 +104,30 @@ void MergeInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 
 void HackUpIfs::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 {
-	SearchReplace::CouplingSet sms1;
+	CouplingSet sms1;
 	SearchReplace sr1;
 	{
 		SharedNew<If> sif;
 		SharedNew<Expression> stest;
 		sif->condition = stest;
-		SharedNew< SearchReplace::Stuff<Statement> > ssthen;
+		SharedNew< Stuff<Statement> > ssthen;
 		sif->body = ssthen;
 		ssthen->terminus = SharedNew< Expression >();
 		ssthen->restrictor = SharedNew< Expression >();
 		SharedNew<Compound> scelse;
-		SharedNew< SearchReplace::Stuff<Statement> > sselse;
+		SharedNew< Stuff<Statement> > sselse;
 		sif->else_body = sselse;
 		sselse->terminus = SharedNew< Statement >();
 		sselse->restrictor = SharedNew< Statement >();
 
-		SharedNew< SearchReplace::Stuff<Statement> > rs;
+		SharedNew< Stuff<Statement> > rs;
 		SharedNew<PostIncrement> rpi;
 		rs->terminus = rpi;
 		rpi->operands.push_back( SharedNew< Expression >() );
 
-		SearchReplace::CouplingSet sms1((
-			SearchReplace::Coupling((ssthen, rs)),
-			SearchReplace::Coupling((ssthen->terminus, sselse->terminus, rpi->operands[0])) ));
+		CouplingSet sms1((
+			Coupling((ssthen, rs)),
+			Coupling((ssthen->terminus, sselse->terminus, rpi->operands[0])) ));
 
 		sr1.Configure(sif, rs, sms1);
 	}
@@ -141,8 +141,8 @@ void CrazyNine::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 	// Replaces entire records with 9 if it has a 9 in it
 	{
 		SharedNew<Record> s_record;
-		SharedNew< SearchReplace::Stuff<Declaration> > s_stuff;
-		s_record->members = ( s_stuff, SharedNew< SearchReplace::Star<Declaration> >() );
+		SharedNew< Stuff<Declaration> > s_stuff;
+		s_record->members = ( s_stuff, SharedNew< Star<Declaration> >() );
 		shared_ptr<SpecificInteger> s_nine( new SpecificInteger(9) );
 		s_stuff->terminus = s_nine;
 
@@ -183,13 +183,13 @@ void CrazyNine::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
         shared_ptr<Expression> re( new Expression );
         rs->index = re;
 
-        SearchReplace::Coupling mar;
+        Coupling mar;
         mar = ( sseot );
         mar = ( rar );
-        SearchReplace::Coupling me;
+        Coupling me;
         me = ( se );
         me = ( re );
-        set<SearchReplace::Coupling> sm;
+        set<Coupling> sm;
         sm = ( mar );
         sm = ( me );
 
