@@ -135,32 +135,30 @@ private:
 	Map< Coupling, shared_ptr<Key> > keys_map;
 };
 
+class Conjecture
+{
+private:
+    typedef GenericContainer::iterator Choice;
+public:
+	void PrepareForDecidedCompare();
+	GenericContainer::iterator HandleDecision( GenericContainer::iterator begin,
+			                                   GenericContainer::iterator end );
+	Result Search( shared_ptr<Node> x,
+				   shared_ptr<Node> pattern,
+				   CouplingKeys *keys,
+				   bool can_key,
+				   const RootedSearchReplace *sr );
+private:
+	bool ShouldTryMore( Result r, int threshold );
+	int decision_index;
+	vector<Choice> choices;
+};
+
 
 class RootedSearchReplace : Transformation
 {  
 public:
-
-
     CouplingSet couplings;
-
-    class Conjecture
-    {
-    private:
-        typedef GenericContainer::iterator Choice;
-    public:
-    	void PrepareForDecidedCompare();
-    	GenericContainer::iterator HandleDecision( GenericContainer::iterator begin,
-    			                                   GenericContainer::iterator end );
-    	Result Search( shared_ptr<Node> x,
-    			                            shared_ptr<Node> pattern,
-    			                            CouplingKeys *keys,
-    			                            bool can_key,
-    			                            const RootedSearchReplace *sr );
-    private:
-    	bool ShouldTryMore( Result r, int threshold );
-    	int decision_index;
-    	vector<Choice> choices;
-    };
 
     // Constructor and destructor. Search and replace patterns and match sets are 
     // specified here, so that we have a fully confiugured functor.
@@ -242,6 +240,7 @@ public:
     		               Conjecture &conj ) const;
 private:
     // MatchingDecidedCompare ring
+    friend class Conjecture;
     Result MatchingDecidedCompare( shared_ptr<Node> x,
     		                       shared_ptr<Node> pattern,
     		                       CouplingKeys *match_keys,
@@ -321,7 +320,7 @@ private:
     		                                            shared_ptr<Node> x,
     		                                            CouplingKeys *keys,
     		                                            bool can_key,
-    		                                            RootedSearchReplace::Conjecture &conj ) const
+    		                                            Conjecture &conj ) const
     {
     	if( keys && can_key )
     	{
@@ -359,7 +358,7 @@ private:
     		                                            shared_ptr<Node> x,
     		                                            CouplingKeys *keys,
     		                                            bool can_key,
-    		                                            RootedSearchReplace::Conjecture &conj ) const
+    		                                            Conjecture &conj ) const
     {
     	typedef GenericContainer::iterator iter; // TODO clean up this loop
     	iter it;
@@ -393,7 +392,7 @@ private:
     		                                            shared_ptr<Node> x,
     		                                            CouplingKeys *keys,
     		                                            bool can_key,
-    		                                            RootedSearchReplace::Conjecture &conj ) const;
+    		                                            Conjecture &conj ) const;
     Transformation *transformation;
 };
 
