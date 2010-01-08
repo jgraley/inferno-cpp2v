@@ -163,20 +163,29 @@ Note: Strictly an optimisation, but the invariant helps to clarify.
 Create global object
 
 Enclose everything at global scope and all statics (base level and in classes)
-with a single class that has a single instance. Rename statics based on 
-compilation unit name or class name to avoid name conflicts.
+with a single class that has a single instance. 
 
 Invariant: everything is in a class/object.
 
 Example output:
 
-class
+class global
 {
 public:
-    int temp_input; // int temp from source file input.c
-    int temp_output; // int temp from source file output.c
+    int temp; // int temp from source file input.c
     ...
-} global;
+    int main(); // The original main function
+};
+
+Note: Do not instance the class. Hack the renderer to detect that 
+there is no main(), and generate something like the following boilerplate 
+at top level:
+
+int main()
+{
+    static global g;
+    return g.main();
+}
 
 ----------------------------------------------------------------------------
 Use get()/set()
