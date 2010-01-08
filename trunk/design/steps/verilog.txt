@@ -44,6 +44,33 @@ using pseudo-latches, and so we do this before outputting the final Verilog.
 The steps in this phase follow...
 
 ----------------------------------------------------------------------------
+Implement structs, unions and arrays
+
+Recursively convert all data structures made up of structs, unions and 
+arrays into SystemC bit vectors according to:
+
+- structs become bit vectors of the total cumulative size, accesses to
+members use the correct bit range and operations as whole operate on the
+whole bit vector.
+
+- unions become bit vectors of the length of the largest item, accesses to
+members can use any legal bit range and operations as whole operate on the
+whole bit vector.
+
+- arrays become bit vectors of the element size times the number of elements.
+Accesses as per structs.
+
+In the case of nested structures, the bit range operators should be merged. 
+Apply this step to registers within objects, and to ports and signals that
+go between objects (inter-object calls with structs among the parameters
+must be addressed).
+
+Note: we must do all three in this step because we need to be able to 
+support any nested combination.
+
+todo: example code
+
+----------------------------------------------------------------------------
 Lower types
 
 Convert fundamental types into SystemC bit vectors. Signed typed become sc_int<>
@@ -133,7 +160,7 @@ the same module definition may be used for all objects.
 
 Note: at present, this step appears to be an optimisation. But it is important
 to be clear that C++ requires functions to be in a class's public interface 
-before member objects can call them, wheras Verilog modules can keep connections
+before member objects can call them, whereas Verilog modules can keep connections
 to sub-modules completely internal.
 
 todo: consider using a designation approach rather than examining usage in order

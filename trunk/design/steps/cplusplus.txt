@@ -180,6 +180,10 @@ a VTable-like construct that maps vcall ids onto actual functions.
 @todo this step can probably be separated into (a) duplicating inherited 
 member functions and (b) getting rid of the actual inheritance.
 
+Note: A reasonable alternative approach would be to allow the base class to
+be a data member of the derived class, and insert forwarding thunks (so that
+pointers to the derived class do not need to be converted to base class pointers)
+
 Example output:
 
 class B // : public A    used to derive from A
@@ -200,7 +204,7 @@ To get the same effect as multiple servers in one object, the user
 must define a class that contains multiple member classes.
 
 ----------------------------------------------------------------------------
-Implement assignment and copy constructor
+Implement default assignment and copy constructor
 
 If there is no assignment operator defined for the class, implement one
 as overloaded operator= that does the same thing as the default assignment
@@ -225,7 +229,7 @@ class foo
 };
 
 ----------------------------------------------------------------------------
-Make constructors/destructors explicit
+Explicitise constructors and destructors
 
 All constructors, copy constructors and destructors get turned into regular
 member functions and we add explicit calls to them in the code. Need to treat
@@ -254,13 +258,18 @@ Note: No need to worry about assignment, I don't think.
 Note: Inline constructors/destructors should remain inline through 
 explicitisation.
 
+Note: from this step on, we would like the absence of a copy constructor to 
+mean "do nothing" rather than the usual "do a memcpy", because any required
+functionality will now be in the regular member function for the copy constructor. 
+Maybe something should be added to the tree to indicate this explicitly.
+
 Copy constructor example output:
 
 void f( A const &a ); // Used to be pass-by-value here but A is non-trivial
 object. 
 {
     A local_a; // we permit C++ to construct the object - but there's no 
-               // C++ constructor so it just allocates the mem
+               // C++ constructor so it just allocates the memory.
     local_a.Construct( a ); // a goes into copy constructor by reference. 
         
     ...blah...
@@ -272,10 +281,10 @@ new/delete example output:
 
 void f()
 {
-    A *ptr_a = new A; // the new used to have parameters. There's no 
-                      // C++ constructor so it just allocates the mem
+    A *ptr_a = new A; // The new maybe used to have parameters. There's no 
+                      // C++ constructor so it just allocates the memory
 
-    ptr_a->Construct( ...blah... ); // now params go into construct call
+    ptr_a->Construct( ...blah... ); // The params now go into construct call
     
     ...blah...
     
@@ -303,6 +312,39 @@ end of the block
     
     done:    
 }
+
+-----------------------------------------------------------------------------
+Detect overloaded operators
+
+Search for cases of overloadable operators being used on non-POD objects
+and replace with calls to the corresponding operator overload.
+
+Invariant: operators only applied to POD data
+
+Note: include assignment in this; even though C can assign structs, we take 
+the apporach of doing this via an auto-generated operator=, see step
+"Implement default assignment and copy constructor"
+
+Example output:
+
+    object_x.operator=( object_y );    // was just object_x = object_y
+
+
+-----------------------------------------------------------------------------
+Standardise operator overloads
+
+Convert operators, including operator= and cast operators into regular functions.
+Use operator_db.inc if possible to get textual names for the functions.
+
+Invariant: no overloaded operators
+
+Example output:
+
+class A
+{
+    A &OperatorAssign( const A &other );    // was: A &operator=( const A &other )
+};
+
 
 -----------------------------------------------------------------------------
 Expand inlines
