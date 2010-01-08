@@ -176,6 +176,46 @@ big_result big_function( which w, big_params bp )
 }
 
 ----------------------------------------------------------------------------
+Lower break and continue
+
+Replace break and continue with goto statements to a label determined from 
+the scope. 
+
+Invariant: no break or continue
+
+Note: run this before loop lowerings since break/continue rules for loops
+can be broken by loop lowerings.
+
+Note: leave "standard" breaks in switch statements alone - ie breaks just
+before a case, default or the end of the block.
+
+Note: If tree intermediates for statements were created for "invisible to 
+break" and "invisible to for" this can be done easily using restricted stuff nodes.
+
+Example output:
+
+while(a)
+{
+    ...
+    if( x )
+        break;
+    ...
+}
+
+becomes
+
+{
+	while(a) // while is NOT "invisible" to break, hence label inserted immediately after
+	{ // compound statements are "invisible" to break
+	    ...
+	    if( x ) // the if is "invisible" to break
+	        goto LABEL;
+	    ...
+	}
+	LABEL:
+}
+
+----------------------------------------------------------------------------
 Lower "for" loop
 
 Convert for loops into while loops as follows:
@@ -193,9 +233,6 @@ becomes
     } 
 }
 
-break and continue should be left in place since the semantics are the same
-in while() loops.
-
 Note: consider leaving combable for loops in place. Such loops must be combable
 in the Verilog sense and must not contain any labels, gotos or other non-combable
 constructs.
@@ -212,11 +249,11 @@ while(x) {...}
 becomes
 
 {
-    CONTINUE:
-    if( !x ) goto BREAK;
-    {...} // break becomes goto BREAK, continue becomes goto CONTINUE
-    goto CONTINUE;
-    BREAK: 
+    WHILE:
+    if( !x ) goto STOP;
+    {...} 
+    goto WHILE;
+    STOP: 
 }
        
 do {...} while(x)
@@ -225,16 +262,14 @@ becomes
 
 {
     DO:
-    {...} // break becomes goto BREAK, continue becomes goto CONTINUE
-    CONTINUE:
+    {...} 
     if( x ) goto DO;
-    BREAK: 
 }
 
 Invariant: no while or do-while loops
 
 ----------------------------------------------------------------------------
-Lower "switch" construct
+Normalise "switch" construct
 
 Switch statements should be left intact except for cases that
 (a) contain a label or other uncombable construct or
@@ -263,31 +298,33 @@ switch(a)
 
 becomes
 
-switch(a)
 {
-    case 0:
-        ```
-        break;
-    case 1:
-        ...
-        goto CASE_2;
-        break; // break after goto just to make it clear 
-               // we now break at the end of *every* case
-    case 2:
-        goto CASE_2;
-        break;
-    case 3:
-        goto CASE_3;
-        break;
+	switch(a)
+	{
+	    case 0:
+	        ```
+	        break;
+	    case 1:
+	        ...
+	        goto CASE_2;
+	        break; // break after goto just to make it clear 
+	               // we now break at the end of *every* case
+	    case 2:
+	        goto CASE_2;
+	        break;
+	    case 3:
+	        goto CASE_3;
+	        break;
+	}
+	goto BREAK;
+	CASE_2:
+	    ,,,
+	    goto BREAK;
+	CASE_3:
+	    '''
+	    goto BREAK;
+	BREAK:
 }
-goto BREAK;
-CASE_2:
-    ,,,
-    goto BREAK;
-CASE_3:
-    '''
-    goto BREAK;
-BREAK:
 
 Note: "default" to be handled just like any other case.
 
@@ -302,10 +339,10 @@ Invariant: no uncombable content in switch cases *and* every case is
 terminated by a break
 
 ----------------------------------------------------------------------------
-Lower "if" construct
+Normalise "if" construct
 
 Only lower if statements when there is a label in the "then" or "else" code 
-blocks. Lower such ifs as follows:
+blocks, or otherwise uncombable. Lower such ifs as follows:
 
 if(x) {...} else {,,,}
 
@@ -360,8 +397,7 @@ each goto. Initialise to eg INIT_STATE at start of the function (regardless of
 recursion depth).
 
 Note: assert this at each label as a double check since we have a little
-redundancy at this point. Treat assert as a primitive (and use the "standard"
-kind of assert as in assert.h).
+redundancy at this point. Treat ASSERT as a primitive (like the inferno assert).
 
 Note: the state variable should be explicitly stacked.
 
@@ -380,23 +416,29 @@ void f()
     
     // FOO: becomes...
     FOO:
-    assert( locals[stack_pointer].state==STATE_FOO );
+    ASSERT( locals[stack_pointer].state==STATE_FOO );
 }
 
 ----------------------------------------------------------------------------
-Remove scopes
+Expand compound statements
 
-Scoped blocks (surrounded by {}) should now be completely redundant. Get rid of
+Compound statements (surrounded by {}) should now be mostly redundant. Get rid of
 them.
 
 Note: was part of memberise locals, but that got moved up into the data phase.
 
-@todo we can't remove all scopes - we want to keep scopes on constructs that
+@todo we can't remove all compounds - we want to keep compounds on constructs that
 have not been lowered (because they will be combed-out by Verilog) and indeed
-the "else clauses" step actually adds scopes. So need a criterion for deciding
-which scopes to remove. Maybe the invariant should be no scopes around labels?
+the "else clauses" step actually adds compounds. So need a criterion for deciding
+which compounds to remove. Maybe the invariant should be no compounds around labels?
+Alternatively, maybe we just remove the free-standing ones, keeping ones tied
+to if, switch, for etc - which would be the ones we chose to keep. 
 
-Invariant: No scopes (apart from overall function scope)
+Note: also consider local data - could we benefit from knowing its scope? This
+step would tend to throw the info away.
+
+
+Invariant: No compound statements (apart from overall function scope)
 
 ----------------------------------------------------------------------------
 Lower parameters and return value
@@ -414,6 +456,8 @@ Note: addition of locals for params is OK since that's what they are. It
 seems unfortunate to do this for the return value, but without inlining
 part of the function there's no way we can avoid it. Compilers do so when
 ABIs specify eg return value in R0.
+
+Note: I think we could just use temps.
 
 Invariant: no parameters or return values
 

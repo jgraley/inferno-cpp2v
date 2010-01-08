@@ -87,6 +87,17 @@ The steps in this phase follow...
 
 
 ----------------------------------------------------------------------------
+Generate explicit casts
+
+Detect cases where a cast is inferred, ie parameters to function calls, 
+assignments, standard operator conversions etc and add explicit casts.
+
+Invariant: no implicit casts
+
+Note: this is to make other steps easier - also, Verilog has different rules
+so its safer to be explicit.
+
+----------------------------------------------------------------------------
 Staticise heap
 
 Explicitly implement new/delete to allocate objects from pools implemented as 
@@ -111,9 +122,7 @@ and its members, to increase locality.
 
 Note: Q: do we not want to use a template over allocated type for this? 
 A: No we don't because we can generate code and repeated patterns such as 
-this are easy. Code generation is like templates but a bazillion
-times more powerful and a gazillion times more readable. Templates would 
-be useful if we were trying to use inversion, but we aren't.
+this are easy. 
 
 Note: The required size of the pool depends on run-time considerations. 
 If known, it may be hinted by the programmer. Otherwise it must be determined
@@ -149,10 +158,10 @@ private:
 
 
 ----------------------------------------------------------------------------
-Eliminate this->
+Eliminate this->x
 
-Remove dereferences through the "this" pointer or any const pointer known 
-equal to "this".
+Remove dereferences that go directly through the "this" pointer. Maybe 
+extend to expressions provably equal to "this".
 
 Invariant: All known accesses to something in the same module do not use
 pointers.
@@ -188,15 +197,22 @@ int main()
 }
 
 ----------------------------------------------------------------------------
-Use get()/set()
+Encapsulate data members
 
 Generate a set and a get function for each public member of a class. Make 
 the set/get functions public and make the data member private. Use these 
 functions for all direct (non-pointer) accesses between objects. Internal
 usage may be left alone.
 
+Note: actually, to get *all* iunter-object accesses, I think we need to modify
+all pointer/reference dereferencing operations, since we can't be sure whether
+the pointer always points to "this" object. So this step may remove
+pointer -> data member, replacing with pointer -> member function.
+
 Invariant: every inter-object interaction is a function call; all data members
 private.
+
+Possible stronger invariant: no pointer -> data member constructs
 
 Note: trivial get/set functions are considered bad style since they're no better
 than just making the member public. We only do this for the invariant which
@@ -293,6 +309,16 @@ is true iff the relative locations of separate data items (including arrays)
 are undefined. We rely on the assumption that the SW is written to not assume
 otherwise. 
 
+Note: the array style [] operator is now strictly only for indexing into an 
+array, not for use with general pointers.
+
+Note: there is a problem with comparisons on pointers which is that they
+are supposed to work on pointers to seperately allocated objects (result
+is undefined but consistent). This is undecided at present. It would mean 
+that STL type data structures might only work on objects all from the same 
+array. new'd objects of the same type should meet this requirement.
+
+
 Example declaration and usage:
 
 void f()
@@ -306,7 +332,7 @@ void f()
 
 
 ----------------------------------------------------------------------------
-Memberise autos
+Memberise automatics
 
 Add a stack pointer for each member function in each class. It should be an 
 integer member variable big enough to represent the max recursion depth. Add
