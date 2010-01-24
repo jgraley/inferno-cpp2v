@@ -2,16 +2,5 @@
 (C) Copyright 2006 John Graley
 Available under the terms of the BSD license. 
 
-This document lists the phases in the inferno project. More 
-details on the purposes of the phases (and the transformation steps 
-they are made up of) may be found in the correspondingly named text file.
-
-Phases are taken in the following order:
-
-
-C++		   See cplusplus.txt
-Structural	See structural.txt
-Data		   See data.txt
-Protocol    See protocol.txt
-Sequential	See sequential.txt
-Verilog	   See verilog.txt
+Inferno's transformation takes place in a number of steps, which are broadly categorised 
+into phases. Phases typically proceed in order, one after the other, and s
