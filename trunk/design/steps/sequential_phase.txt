@@ -457,8 +457,6 @@ seems unfortunate to do this for the return value, but without inlining
 part of the function there's no way we can avoid it. Compilers do so when
 ABIs specify eg return value in R0.
 
-Note: I think we could just use temps.
-
 Invariant: no parameters or return values
 
 todo: example code
@@ -568,6 +566,11 @@ state variable.
 Invariant: context is released between each combable block
 
 Note: we are taking advantage of the fact that SC_THREAD loops infinitely 
+
+Note: removes the redundancy of the state variable
+
+Note: could split this into a step that converts goto to goto-a-variable (where the
+variable is the state variable) and then onto a switch.
 
 Example:
 
@@ -681,29 +684,3 @@ Invariant: no persistent implicit context
 Note: this is really a pattern reduction: SC_CTHREAD{ ...; wait(); } becomes
 SC_METHOD{ ...; }. If any functions don't match the pattern we have an error.
 
-----------------------------------------------------------------------------
-Implement structs, unions and arrays
-
-Recursively convert all data structures made up of structs, unions and 
-arrays into SystemC bit vectors according to:
-
-- structs become bit vectors of the total cumulative size, accesses to
-members use the correct bit range and operations as whole operate on the
-whole bit vector.
-
-- unions become bit vectors of the length of the largest item, accesses to
-members can use any legal bit range and operations as whole operate on the
-whole bit vector.
-
-- arrays become bit vectors of the element size times the number of elements.
-Accesses as per structs.
-
-In the case of nested structures, the bit range operators should be merged. 
-Apply this step to registers within objects, and to ports and signals that
-go between objects (inter-object calls with structs among the parameters
-must be addressed).
-
-Note: we must do all three in this step because we need to be able to 
-support any nested combination.
-
-todo: example code

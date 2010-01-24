@@ -24,8 +24,7 @@ get_libs : makefile
 	svn checkout --revision $(LLVM_REVISION) $(LLVM_URL) llvm
 	cd llvm; ./configure
 	cd llvm/tools; svn checkout --revision $(CLANG_REVISION) $(CLANG_URL) clang
-	rm llvm/tools/clang/lib/Driver/PlistDiagnostics.cpp
-	./kill_no_rtti.sh llvm/tools/clang/lib/*/Makefile
+	cd patches; ./apply.sh
 								
 #
 # Compile llvm and clang sources
@@ -36,7 +35,7 @@ ENABLE_OPTIMIZED ?= 0
 LLVM_BUILD ?= Debug
 LLVM_CLANG_LIBS =  libclangDriver.a libclangParse.a libclangLex.a libclangBasic.a   
 LLVM_CLANG_LIBS += libLLVMBitWriter.a libLLVMBitReader.a libLLVMSupport.a libLLVMSystem.a 	
-LLVM_CLANG_OPTIONS := ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED)
+LLVM_CLANG_OPTIONS := ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED) CXXFLAGS="-include cstdio -include stdint.h"
 
 libLLVMBit%.a : makefile
 	cd llvm/lib/Bitcode/$(@:libLLVMBit%.a=%); $(MAKE) $(LLVM_CLANG_OPTIONS)	
