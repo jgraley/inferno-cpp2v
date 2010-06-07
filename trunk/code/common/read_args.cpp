@@ -2,6 +2,7 @@
 #include "read_args.hpp"
 #include <string>
 #include <stdlib.h>
+#include <stdio.h>
 
 std::string ReadArgs::exename;
 std::string ReadArgs::infile;
