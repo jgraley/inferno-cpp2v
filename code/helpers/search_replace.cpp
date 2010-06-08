@@ -185,7 +185,6 @@ Result RootedSearchReplace::DecidedCompare( GenericSequence &x,
 					TRACE("Ran out of candidate\n");
 					return NOT_FOUND;
 				}
-		    	TRACE("%p\n", (*xit).GetNodePtr().get() );
             }
 
 			// Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
@@ -319,6 +318,7 @@ Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
     	shared_ptr<StuffKey> key( new StuffKey );
     	key->root = x;
     	key->terminus = *thistime;
+    	//SharedPtr<Node> = GenericSharedPtr
         r = keys->KeyAndRestrict( shared_ptr<Key>(key),
         		                  stuff_pattern,
         		                  this,

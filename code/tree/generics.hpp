@@ -31,35 +31,20 @@ struct Node;
 
 struct GenericSharedPtr : Itemiser::Element, Traceable
 {
-    virtual shared_ptr<Node> GetNodePtr() const = 0;
-    virtual void SetNodePtr( shared_ptr<Node> n ) = 0;
+    // Convert to and from shared_ptr<Node>
+	virtual operator shared_ptr<Node>() const = 0;
+    virtual GenericSharedPtr &operator=( shared_ptr<Node> n ) = 0;
+
     virtual operator bool() const = 0; // for testing against NULL
     virtual Node *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
-
-    // Nice operators, make less typing, make you happy. Yay!
-    operator shared_ptr<Node>() const
-    {
-    	return GetNodePtr();
-    }
-
-    GenericSharedPtr &operator=( const GenericSharedPtr &n )
-    {
-    	*(Itemiser::Element *)this = *(Itemiser::Element *)&n; // so assign gets to itemiser
-    	SetNodePtr( n.GetNodePtr() );
-    	return *this;
-    }
-    GenericSharedPtr &operator=( shared_ptr<Node> n )
-    {
-    	TRACE();
-    	SetNodePtr( n );
-    	return *this;
-    }
+    virtual operator string() const = 0; // for debugging
 };
+
 
 template<typename ELEMENT>
 struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT> 
 {
-    virtual shared_ptr<Node> GetNodePtr() const
+	virtual operator shared_ptr<Node>() const
     {
         const shared_ptr<ELEMENT> *p = (const shared_ptr<ELEMENT> *)this;
         ASSERT(p);
@@ -74,21 +59,37 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
     	return e;
     }
 
-    virtual void SetNodePtr( shared_ptr<Node> n )
+    template< typename OTHER >
+    SharedPtr<ELEMENT> &operator=( shared_ptr<OTHER> n )
     {
         if( !n )
         {
-            *(shared_ptr<ELEMENT> *)this = shared_ptr<ELEMENT>(); // handle NULL explicitly since dyn cast uses NULL to indicate wrong type   
+            *(shared_ptr<ELEMENT> *)this = shared_ptr<ELEMENT>(); // handle NULL explicitly since dyn cast uses NULL to indicate wrong type
         }
         else
         {
             shared_ptr<ELEMENT> pe = dynamic_pointer_cast<ELEMENT>(n);
-            if( !pe )
-                TRACE( );
             ASSERT( pe )
                   ("Tried to Set() wrong type of node via GenericSharedPtr\nType was ")((string)*n)("; I am ")(typeid(ELEMENT).name());
-            *(shared_ptr<ELEMENT> *)this = pe;        
+            *(shared_ptr<ELEMENT> *)this = pe;
         }
+        return *this;
+    }
+
+    virtual SharedPtr<ELEMENT> &operator=( shared_ptr<Node> n )
+    {
+    	return operator=<Node>( n );
+    }
+
+    template< typename OTHER >
+    SharedPtr<ELEMENT> &operator=( SharedPtr<OTHER> n )
+    {
+    	return operator=( shared_ptr<OTHER>(n) );
+    }
+
+    SharedPtr<ELEMENT> &operator=( const GenericSharedPtr &n )
+    {
+    	return operator=( shared_ptr<Node>(n) );
     }
 
     virtual operator bool() const
@@ -105,16 +106,14 @@ struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT>
     SharedPtr( const shared_ptr<OTHER> &o ) : 
         shared_ptr<ELEMENT>( dynamic_pointer_cast<ELEMENT>(o) )
     {
-        // TODO support NULL pointers as input!
     	if( o )
     	    ASSERT( *this )("Cannot convert shared_ptr<")(typeid(OTHER).name())("> to SharedPtr<")(typeid(ELEMENT).name())(">");
     }
     SharedPtr( const GenericSharedPtr &g ) :
-    	shared_ptr<ELEMENT>( dynamic_pointer_cast<ELEMENT>(g.GetNodePtr()) )
+    	shared_ptr<ELEMENT>( dynamic_pointer_cast<ELEMENT>(shared_ptr<Node>(g)) )
     {
-        // TODO support NULL pointers as input!
     	if( g )
-    	    ASSERT( *this )("Cannot convert GenericSharedPtr that points to a ")((string)*(g.GetNodePtr()))(" to SharedPtr<")(typeid(ELEMENT).name())(">");
+    	    ASSERT( *this )("Cannot convert GenericSharedPtr that points to a ")((string)*(shared_ptr<Node>(g)))(" to SharedPtr<")(typeid(ELEMENT).name())(">");
     }
 	virtual operator string() const
 	{

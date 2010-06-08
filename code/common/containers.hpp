@@ -223,7 +223,7 @@ struct STLSequence : virtual STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
 		{
 		    // JSG Overwrite() just writes through the pointer got from dereferencing the iterator,
 		    // because in Sequences (ordererd containers) elements may be modified.
-		    CONTAINER_IMPL::iterator::operator*() = *v;
+		    CONTAINER_IMPL::iterator::operator*() = typename CONTAINER_IMPL::value_type(*v);
 		}
     	virtual const bool IsOrdered() const
     	{
