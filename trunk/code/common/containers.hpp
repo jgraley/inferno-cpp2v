@@ -16,23 +16,23 @@ namespace OOStd {
 // Template for a base class for STL containers with forward iterators.
 // Supports direct calls and iterators.
 //
-// The base container will be derived from SUB_BASE. VALUE_TYPE should
+// The base container will be derived from SUB_BASE. VALUE_INTERFACE should
 // be a base (or compatible type) for the elements of all sub-containers.
 //
-template< class SUB_BASE, typename VALUE_TYPE >
+template< class SUB_BASE, typename VALUE_INTERFACE >
 class ContainerInterface : public Traceable, public virtual SUB_BASE
 {
 public:
-	// Abstract base class for the iterators in containers.
+	// Abstract base class for the implementation-specific iterators in containers.
 	struct iterator_interface : public Traceable
 	{
 		// TODO const iterator and const versions of begin(), end()
 		virtual shared_ptr<iterator_interface> Clone() const = 0; // Make another copy of the present iterator
 		virtual iterator_interface &operator++() = 0;
-		const virtual VALUE_TYPE &operator*() const = 0; 
-		const virtual VALUE_TYPE *operator->() const = 0; 
+		const virtual VALUE_INTERFACE &operator*() const = 0;
+		const virtual VALUE_INTERFACE *operator->() const = 0;
 		virtual bool operator==( const iterator_interface &ib ) const = 0;
-		virtual void Overwrite( const VALUE_TYPE *v ) const = 0;
+		virtual void Overwrite( const VALUE_INTERFACE *v ) const = 0;
 		virtual const bool IsOrdered() const = 0;
 		virtual const int GetCount() const { ASSERTFAIL("Only on CountingIterator"); }
 	};
@@ -46,7 +46,7 @@ public:
 	{
 	public:
 		typedef forward_iterator_tag iterator_category;
-		typedef VALUE_TYPE value_type;
+		typedef VALUE_INTERFACE value_type;
 		typedef int difference_type;
 		typedef value_type *pointer;
 		typedef value_type &reference;
@@ -98,7 +98,7 @@ public:
 			return !operator==( i );
 		}
 
-		void Overwrite( const VALUE_TYPE *v ) const
+		void Overwrite( const VALUE_INTERFACE *v ) const
 		{
 			ASSERT(pib)("Attempt to Overwrite through uninitialised iterator");
 		    pib->Overwrite( v );
@@ -138,20 +138,29 @@ public:
 	// These direct calls to the container are designed to support co-variance.
 	virtual const iterator_interface &begin() = 0;
     virtual const iterator_interface &end() = 0;
-    virtual void erase( typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator it ) = 0;
+    virtual void erase( typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator it ) = 0;
     virtual bool empty() const = 0;
     virtual int size() const = 0;
     virtual void clear() = 0;
 };
-/*
-template< class SUB_BASE, typename VALUE_TYPE >
-struct SequenceInterface : virtual ContainerInterface<SUB_BASE, VALUE_TYPE>
+
+
+template< class SUB_BASE, typename VALUE_INTERFACE >
+struct SequenceInterface : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>
 {
-    virtual SharedPtrInterface &operator[]( int i ) = 0;
-    virtual void push_back( const SharedPtrInterface &gx ) = 0;
-	virtual void push_back( const shared_ptr<Node> &gx ) = 0;
+    virtual VALUE_INTERFACE &operator[]( int i ) = 0;
+    virtual void push_back( const VALUE_INTERFACE &gx ) = 0;
 };
-*/
+
+
+template< class SUB_BASE, typename VALUE_INTERFACE >
+struct CollectionInterface : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>
+{
+	virtual void insert( const VALUE_INTERFACE &gx ) = 0;
+	virtual int erase( const VALUE_INTERFACE &gx ) = 0;
+	virtual bool IsExist( const VALUE_INTERFACE &gx ) = 0;
+};
+
 
 //
 // Abstract template for containers that will be use any STL container as
@@ -159,11 +168,11 @@ struct SequenceInterface : virtual ContainerInterface<SUB_BASE, VALUE_TYPE>
 // Params as for ContainerInterface except we now have to fill in CONTAINER_IMPL
 // as the stl container class eg std::list<blah>
 //
-template<class SUB_BASE, typename VALUE_TYPE, class CONTAINER_IMPL>
-struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_TYPE>, CONTAINER_IMPL
+template<class SUB_BASE, typename VALUE_INTERFACE, class CONTAINER_IMPL>
+struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, CONTAINER_IMPL
 {
 	struct iterator : public CONTAINER_IMPL::iterator,
-	                  public ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface
+	                  public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface
 	{
 		virtual iterator &operator++()
 		{
@@ -181,7 +190,7 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_TYPE>, CONTA
 			return CONTAINER_IMPL::iterator::operator->();
 		}
 
-		virtual bool operator==( const typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface &ib ) const
+		virtual bool operator==( const typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface &ib ) const
 		{
             // JSG apparently there's no operator== in std::deque::iterator, which is odd since iterators 
             // are supposed to be Equality Comparable. So we just cast the types really carefully and use ==
@@ -194,7 +203,7 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_TYPE>, CONTA
 
 	typedef iterator const_iterator;
 
-    virtual void erase( typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator it )
+    virtual void erase( typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator it )
     {
         iterator *cit = dynamic_cast<iterator *>( it.GetUnderlyingIterator() );
         ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator
@@ -219,19 +228,19 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_TYPE>, CONTA
 // Template for containers that use ordered STL containers as implementation
 // (basically vector, deque etc). Instantiate as per ContainerCommon.
 //
-template<class SUB_BASE, typename VALUE_TYPE, class CONTAINER_IMPL>
-struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
+template<class SUB_BASE, typename VALUE_INTERFACE, class CONTAINER_IMPL>
+struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>, virtual SequenceInterface<SUB_BASE, VALUE_INTERFACE>
 {
-    inline Sequence<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>() {}
-	struct iterator : public ContainerCommon<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>::iterator
+    inline Sequence<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>() {}
+	struct iterator : public ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator
     {
-		virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface> Clone() const
+		virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
 		{
 			shared_ptr<iterator> ni( new iterator );
 			*ni = *this;
 			return ni;
 		}
-    	virtual void Overwrite( const VALUE_TYPE *v ) const
+    	virtual void Overwrite( const VALUE_INTERFACE *v ) const
 		{
 		    // JSG Overwrite() just writes through the pointer got from dereferencing the iterator,
 		    // because in Sequences (ordererd containers) elements may be modified.
@@ -243,7 +252,17 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
     	}
 	};
 
-    // Covarient style only works with refs and pointers, so force begin/end to return refs safely
+    virtual typename CONTAINER_IMPL::value_type &operator[]( int i )
+    {
+    	return CONTAINER_IMPL::operator[](i);
+    }
+	virtual void push_back( const VALUE_INTERFACE &gx )
+	{
+		typename CONTAINER_IMPL::value_type sx(gx);
+		CONTAINER_IMPL::push_back( sx );
+	}
+
+	// Covarient style only works with refs and pointers, so force begin/end to return refs safely
 	// This complies with STL's thread safety model. To quote SGI,
 	// "The SGI implementation of STL is thread-safe only in the sense that simultaneous accesses
 	// to distinct containers are safe, and simultaneous read accesses to to shared containers are
@@ -263,25 +282,41 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
     	my_end.CONTAINER_IMPL::iterator::operator=( CONTAINER_IMPL::end() );
     	return my_end;
     }
+	Sequence( const SequenceInterface<SUB_BASE, VALUE_INTERFACE> &cns )
+	{
+		// TODO support const_interator properly and get rid of this const_cast
+		SequenceInterface<SUB_BASE, VALUE_INTERFACE> *ns = const_cast< SequenceInterface<SUB_BASE, VALUE_INTERFACE> * >( &cns );
+		for( typename SequenceInterface<SUB_BASE, VALUE_INTERFACE>::iterator i=ns->begin();
+		     i != ns->end();
+		     ++i )
+		{
+            CONTAINER_IMPL::push_back( *i );
+		}
+	}
+	Sequence( const VALUE_INTERFACE &nx )
+	{
+		CONTAINER_IMPL::push_back( nx );
+	}
 };
+
 
 //
 // Template for containers that use unordered STL containers as implementation
 // (basically associative containers). Instantiate as per ContainerCommon.
 //
-template<class SUB_BASE, typename VALUE_TYPE, class CONTAINER_IMPL>
-struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
+template<class SUB_BASE, typename VALUE_INTERFACE, class CONTAINER_IMPL>
+struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>, virtual CollectionInterface<SUB_BASE, VALUE_INTERFACE>
 {
-    inline Collection<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>() {}
-	struct iterator : public ContainerCommon<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>::iterator
+    inline Collection<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>() {}
+	struct iterator : public ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator
     {
-		virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface> Clone() const
+		virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
 		{
 			shared_ptr<iterator> ni( new iterator );
 			*ni = *this;
 			return ni;
 		}
-    	virtual void Overwrite( const VALUE_TYPE *v ) const
+    	virtual void Overwrite( const VALUE_INTERFACE *v ) const
 		{
 		    // Collections (unordered containers) do not allow elements to be modified
 		    // because the internal data structure depends on element values. So we 
@@ -295,10 +330,27 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL
     	{
     		return false; // no, Collections are not ordered
     	}
-        Collection<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL> *owner;
+        Collection<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL> *owner;
 	};
 
-    iterator my_begin, my_end;
+	virtual void insert( const VALUE_INTERFACE &gx )
+	{
+		typename CONTAINER_IMPL::value_type sx(gx);
+		CONTAINER_IMPL::insert( sx );
+	}
+	virtual int erase( const VALUE_INTERFACE &gx )
+	{
+		typename CONTAINER_IMPL::value_type sx(gx);
+		return CONTAINER_IMPL::erase( sx );
+	}
+	virtual bool IsExist( const VALUE_INTERFACE &gx )
+	{
+		typename CONTAINER_IMPL::value_type sx(gx);
+		typename CONTAINER_IMPL::iterator it = CONTAINER_IMPL::find( sx );
+		return it != CONTAINER_IMPL::end();
+	}
+
+	iterator my_begin, my_end;
     virtual const iterator &begin()
     {
     	my_begin.CONTAINER_IMPL::iterator::operator=( CONTAINER_IMPL::begin() );
@@ -311,6 +363,21 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL
     	my_end.owner = this;
     	return my_end;
     }
+    Collection( const ContainerInterface<SUB_BASE, VALUE_INTERFACE> &cns )
+	{
+		// TODO support const_interator properly and get rid of this const_cast
+    	ContainerInterface<SUB_BASE, VALUE_INTERFACE> *ns = const_cast< ContainerInterface<SUB_BASE, VALUE_INTERFACE> * >( &cns );
+		for( typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator i=ns->begin();
+		     i != ns->end();
+		     ++i )
+		{
+            CONTAINER_IMPL::insert( *i );
+		}
+	}
+    Collection( const VALUE_INTERFACE &nx )
+	{
+        CONTAINER_IMPL::insert( nx );
+	}
 };
 
 //
@@ -320,10 +387,10 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL
 // ContainerInterface::iterator be used generically even when objects are
 // not in containers.
 //
-template<class SUB_BASE, typename VALUE_TYPE>
-struct PointIterator : public ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface
+template<class SUB_BASE, typename VALUE_INTERFACE>
+struct PointIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface
 {
-    VALUE_TYPE * element;
+    VALUE_INTERFACE * element;
 
     PointIterator() :
         element(NULL) // means end-of-range
@@ -335,13 +402,13 @@ struct PointIterator : public ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator
     {
     }
 
-    PointIterator( VALUE_TYPE *i ) :
+    PointIterator( VALUE_INTERFACE *i ) :
         element(i)
     {      
         ASSERT(i); // We don't allow NULL as input because it means end-of-range
     }
 
-	virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface> Clone() const
+	virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
 	{
 		shared_ptr<PointIterator> ni( new PointIterator(*this) );
 		return ni;
@@ -353,26 +420,26 @@ struct PointIterator : public ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator
 		return *this;
 	}
 
-	virtual VALUE_TYPE &operator*() const
+	virtual VALUE_INTERFACE &operator*() const
 	{
 	    ASSERT(element)("Tried to dereference NULL PointIterator");
 		return *element;
 	}
 
-	virtual VALUE_TYPE *operator->() const
+	virtual VALUE_INTERFACE *operator->() const
 	{
 	    ASSERT(element)("Tried to dereference NULL PointIterator");
 		return element;
 	}
 
-	virtual bool operator==( const typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface &ib ) const
+	virtual bool operator==( const typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface &ib ) const
 	{
 		const PointIterator *pi = dynamic_cast<const PointIterator *>(&ib);
 		ASSERT(pi)("Comparing point iterator with something else ")(ib);
 		return pi->element == element;
 	}
 	
-	virtual void Overwrite( const VALUE_TYPE *v ) const
+	virtual void Overwrite( const VALUE_INTERFACE *v ) const
 	{
 	    *element = *v;
 	}
@@ -384,8 +451,8 @@ struct PointIterator : public ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator
 };
 
 // TODO can we avoid the need for these template parameters?
-template<class SUB_BASE, typename VALUE_TYPE>
-struct CountingIterator : public ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface
+template<class SUB_BASE, typename VALUE_INTERFACE>
+struct CountingIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface
 {
     int element;
 
@@ -399,7 +466,7 @@ struct CountingIterator : public ContainerInterface<SUB_BASE, VALUE_TYPE>::itera
     {
     }
 
-	virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface> Clone() const
+	virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
 	{
 		shared_ptr<CountingIterator> ni( new CountingIterator(*this) );
 		return ni;
@@ -411,24 +478,24 @@ struct CountingIterator : public ContainerInterface<SUB_BASE, VALUE_TYPE>::itera
 		return *this;
 	}
 
-	virtual VALUE_TYPE &operator*() const
+	virtual VALUE_INTERFACE &operator*() const
 	{
 	    ASSERTFAIL("Cannot dereference CountingIterator, use GetCount instead");
 	}
 
-	const virtual VALUE_TYPE *operator->() const
+	const virtual VALUE_INTERFACE *operator->() const
 	{
 		ASSERTFAIL("Cannot dereference CountingIterator, use GetCount instead");
 	}
 
-	virtual bool operator==( const typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface &ib ) const
+	virtual bool operator==( const typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface &ib ) const
 	{
 		const CountingIterator *pi = dynamic_cast<const CountingIterator *>(&ib);
 		ASSERT(pi)("Comparing counting iterator with something else ")( ib );
 		return pi->element == element;
 	}
 
-	virtual void Overwrite( const VALUE_TYPE *v ) const
+	virtual void Overwrite( const VALUE_INTERFACE *v ) const
 	{
 	    ASSERTFAIL("Cannot Overwrite through CountingIterator");
 	}
