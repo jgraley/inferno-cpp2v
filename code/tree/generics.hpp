@@ -39,132 +39,74 @@ public:
 
 
 // Inferno tree containers
-// TODO move contents of SequenceInterface etc into OOStd so not defined here.
-
+// TODO deprecate use of sshared_ptr everywhere in Inferno, then remove the functions
+// here like push_back( const shared_ptr<Node> ), then maybe make SequenceInterface and
+// CollectionInterface be typedefs
 typedef OOStd::ContainerInterface<Itemiser::Element, SharedPtrInterface> ContainerInterface;
 
 typedef OOStd::PointIterator<Itemiser::Element, SharedPtrInterface> PointIterator;
 typedef OOStd::CountingIterator<Itemiser::Element, SharedPtrInterface> CountingIterator;
 
-struct SequenceInterface : virtual ContainerInterface
+struct SequenceInterface : virtual OOStd::SequenceInterface< Itemiser::Element, SharedPtrInterface >
 {
-    virtual SharedPtrInterface &operator[]( int i ) = 0;
-    virtual void push_back( const SharedPtrInterface &gx ) = 0;
 	virtual void push_back( const shared_ptr<Node> &gx ) = 0;
 };
 
+struct CollectionInterface : virtual OOStd::CollectionInterface< Itemiser::Element, SharedPtrInterface >
+{
+	virtual void insert( const shared_ptr<Node> &gx ) = 0;
+	virtual int erase( const shared_ptr<Node> &gx ) = 0;
+};
 
 template<typename ELEMENT>
 struct Sequence : virtual SequenceInterface, virtual OOStd::Sequence< Itemiser::Element, SharedPtrInterface, deque< SharedPtr<ELEMENT> > >
 {
-	typedef deque< SharedPtr<ELEMENT> > RawSequence;
-	Sequence() {}
-    virtual typename RawSequence::value_type &operator[]( int i )
-    {
-    	return RawSequence::operator[](i);
-    }
-	virtual void push_back( const SharedPtrInterface &gx )
-	{
-		typename RawSequence::value_type sx(gx);
-		RawSequence::push_back( sx );
-	}
+	typedef deque< SharedPtr<ELEMENT> > Impl;
+
+	inline Sequence() {}
+	inline Sequence( const SequenceInterface &cns ) :
+		OOStd::Sequence< Itemiser::Element, SharedPtrInterface, Impl >( cns ) {}
+	inline Sequence( const SharedPtrInterface &nx ) :
+	    OOStd::Sequence< Itemiser::Element, SharedPtrInterface, Impl >( nx ) {}
+
 	virtual void push_back( const shared_ptr<Node> &gx )
 	{
-		typename RawSequence::value_type sx(gx);
-		RawSequence::push_back( sx );
+		Impl::push_back( gx );
 	}
+
 	virtual operator string() const
 	{
         return CPPFilt( typeid( ELEMENT ).name() );
 	}
-	Sequence( const Sequence<Node> &cns )
-	{
-		// TODO support const_interator properly and get rid of this const_cast
-		Sequence<Node> *ns = const_cast< Sequence<Node> * >( &cns );
-		for( Sequence<Node>::iterator i=ns->begin();
-		     i != ns->end();
-		     ++i )
-		{
-            typename RawSequence::value_type sx(*i);
-		    RawSequence::push_back( sx );
-		}
-	}
-	Sequence operator=( const SharedPtr<Node> &nx )
-	{
-        typename RawSequence::value_type sx(nx);
-        RawSequence::clear();
-        RawSequence::push_back( sx );
-        return *this;
-	}
 };
 
-struct CollectionInterface : virtual ContainerInterface
-{
-	// TOOD for these to work in practice, may need to make them more like
-	// push_back() in Sequence<>
-	virtual void insert( const SharedPtrInterface &gx ) = 0;
-	virtual void insert( const shared_ptr<Node> &gx ) = 0;
-	virtual int erase( const SharedPtrInterface &gx ) = 0;
-	virtual int erase( const shared_ptr<Node> &gx ) = 0;
-	virtual bool IsExist( const SharedPtrInterface &gx ) = 0;
-};
 
 template<typename ELEMENT>
 struct Collection : CollectionInterface, OOStd::Collection< Itemiser::Element, SharedPtrInterface, set< SharedPtr<ELEMENT> > >
 {
-    inline Collection<ELEMENT>() {}
-	typedef set< SharedPtr<ELEMENT> > RawCollection;
-	virtual void insert( const SharedPtrInterface &gx )
+ 	typedef set< SharedPtr<ELEMENT> > Impl;
+
+ 	inline Collection<ELEMENT>() {}
+    inline Collection( const ContainerInterface &cns ) :
+    	OOStd::Collection< Itemiser::Element, SharedPtrInterface, Impl >( cns ) {}
+    inline Collection( const SharedPtrInterface &nx ) :
+    	OOStd::Collection< Itemiser::Element, SharedPtrInterface, Impl >( nx ) {}
+
+    virtual void insert( const shared_ptr<Node> &gx )
 	{
-		typename RawCollection::value_type sx(gx);
-		RawCollection::insert( sx );
-	}
-	virtual void insert( const shared_ptr<Node> &gx )
-	{
-		typename RawCollection::value_type sx(gx);
-		RawCollection::insert( sx );
-	}
-	virtual int erase( const SharedPtrInterface &gx )
-	{
-		typename RawCollection::value_type sx(gx);
-		return RawCollection::erase( sx );
+		Impl::insert( gx );
 	}
 	virtual int erase( const shared_ptr<Node> &gx )
 	{
-		typename RawCollection::value_type sx(gx);
-		return RawCollection::erase( sx );
-	}
-	virtual bool IsExist( const SharedPtrInterface &gx )
-	{
-		typename RawCollection::value_type sx(gx);
-		typename RawCollection::iterator it = RawCollection::find( sx );
-		return it != RawCollection::end();
+		return Impl::erase( gx );
 	}
 	virtual operator string() const
 	{
         return CPPFilt( typeid( ELEMENT ).name() );
 	}
-    Collection( const Sequence<Node> &cns )
-	{
-		// TODO support const_interator properly and get rid of this const_cast
-		Sequence<Node> *ns = const_cast< Sequence<Node> * >( &cns );
-		for( Sequence<Node>::iterator i=ns->begin();
-		     i != ns->end();
-		     ++i )
-		{
-            typename RawCollection::value_type sx(*i);
-            RawCollection::insert( sx );
-		}
-	}
-    Collection operator=( const SharedPtr<Node> &nx )
-	{
-        typename RawCollection::value_type sx(nx);
-        RawCollection::clear();
-        RawCollection::insert( sx );
-        return *this;
-	}
 };
 
+// Assmebling sequences using operator,
 
 template<class LELEMENT, class RELEMENT>
 inline Sequence<Node> operator,( const SharedPtr<LELEMENT> &l, const SharedPtr<RELEMENT> &r )
