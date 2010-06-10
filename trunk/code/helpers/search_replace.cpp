@@ -93,23 +93,23 @@ Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
 			ASSERT( pattern_memb[i] )( "itemise returned null element");
 			ASSERT( x_memb[i] )( "itemise returned null element");
 
-			if( GenericSequence *pattern_seq = dynamic_cast<GenericSequence *>(pattern_memb[i]) )
+			if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(pattern_memb[i]) )
 			{
-				GenericSequence *x_seq = dynamic_cast<GenericSequence *>(x_memb[i]);
+				SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
 				ASSERT( x_seq )( "itemise for target didn't match itemise for pattern");
 				TRACE("Member %d is Sequence, target %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
 				r = DecidedCompare( *x_seq, *pattern_seq, keys, can_key, conj );
 			}
-			else if( GenericCollection *pattern_col = dynamic_cast<GenericCollection *>(pattern_memb[i]) )
+			else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
 			{
-				GenericCollection *x_col = dynamic_cast<GenericCollection *>(x_memb[i]);
+				CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
 				ASSERT( x_col )( "itemise for target didn't match itemise for pattern");
 				TRACE("Member %d is Collection, target %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
 				r = DecidedCompare( *x_col, *pattern_col, keys, can_key, conj );
 			}
-			else if( GenericSharedPtr *pattern_ptr = dynamic_cast<GenericSharedPtr *>(pattern_memb[i]) )
+			else if( SharedPtrInterface *pattern_ptr = dynamic_cast<SharedPtrInterface *>(pattern_memb[i]) )
 			{
-				GenericSharedPtr *x_ptr = dynamic_cast<GenericSharedPtr *>(x_memb[i]);
+				SharedPtrInterface *x_ptr = dynamic_cast<SharedPtrInterface *>(x_memb[i]);
 				ASSERT( x_ptr )( "itemise for target didn't match itemise for pattern");
 				TRACE("Member %d is SharedPtr, pattern ptr=%p\n", i, pattern_ptr->get());
 				r = DecidedCompare( *x_ptr, *pattern_ptr, keys, can_key, conj );
@@ -134,16 +134,16 @@ Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
 
 // xstart and pstart are the indexes into the sequence where we will begin checking for a match.
 // It is assumed that elements before these have already been matched and may be ignored.
-Result RootedSearchReplace::DecidedCompare( GenericSequence &x,
-		                                             GenericSequence &pattern,
+Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
+		                                             SequenceInterface &pattern,
 		                                             CouplingKeys *keys,
 		                                             bool can_key,
 		                                             Conjecture &conj ) const
 {
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
-	GenericContainer::iterator xit = x.begin();
-	GenericContainer::iterator pit = pattern.begin();
+	ContainerInterface::iterator xit = x.begin();
+	ContainerInterface::iterator pit = pattern.begin();
 
 	while( pit != pattern.end() )
 	{
@@ -158,7 +158,7 @@ Result RootedSearchReplace::DecidedCompare( GenericSequence &x,
 
 	    	// Remember where we are - this is the beginning of the subsequence that
 	    	// potentially matches the Star.
-	    	GenericContainer::iterator xit_begin_star = xit;
+	    	ContainerInterface::iterator xit_begin_star = xit;
 
 	    	// Star always matches at the end of a sequence, so we only bother checking when there
 	    	// are more elements left
@@ -192,7 +192,7 @@ Result RootedSearchReplace::DecidedCompare( GenericSequence &x,
 		    if( pe )
 		    {
 		    	shared_ptr<SubSequence> ss( new SubSequence);
-		    	for( GenericContainer::iterator it=xit_begin_star; it != xit; ++it )
+		    	for( ContainerInterface::iterator it=xit_begin_star; it != xit; ++it )
 		    		ss->push_back( *it );
 				// Apply match sets to this Star and matched range
 				if( keys )
@@ -223,8 +223,8 @@ Result RootedSearchReplace::DecidedCompare( GenericSequence &x,
 }
 
 
-Result RootedSearchReplace::DecidedCompare( GenericCollection &x,
-		                                             GenericCollection &pattern,
+Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
+		                                             CollectionInterface &pattern,
 		                                             CouplingKeys *keys,
 		                                             bool can_key,
 		                                             Conjecture &conj ) const
@@ -234,13 +234,13 @@ Result RootedSearchReplace::DecidedCompare( GenericCollection &x,
 	// after decisions.
 	// TODO is there some stl algorithm for this?
     shared_ptr<SubCollection> xremaining( new SubCollection );
-    FOREACH( const GenericSharedPtr &xe, x )
+    FOREACH( const SharedPtrInterface &xe, x )
         xremaining->insert( xe );
 
     shared_ptr<StarBase> star;
     bool seen_star = false;
 
-    for( GenericCollection::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
+    for( CollectionInterface::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
     {
     	TRACE("Collection compare %d remain out of %d; looking at %s in pattern\n",
     			xremaining->size(),
@@ -258,7 +258,7 @@ Result RootedSearchReplace::DecidedCompare( GenericCollection &x,
 	    else // not a Star so match singly...
 	    {
 	    	// We have to decide which node in the tree to match, so use the present conjecture
-	    	GenericContainer::iterator xit = conj.HandleDecision( x.begin(), x.end() );
+	    	ContainerInterface::iterator xit = conj.HandleDecision( x.begin(), x.end() );
 			if( xit == x.end() )
 				return NOT_FOUND;
 
@@ -305,8 +305,8 @@ Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
 	WalkingIterator wend;
 
 	// Get decision from conjecture
-	GenericContainer::iterator thistime = conj.HandleDecision( wbegin, wend );
-	if( thistime == (GenericContainer::iterator)wend )
+	ContainerInterface::iterator thistime = conj.HandleDecision( wbegin, wend );
+	if( thistime == (ContainerInterface::iterator)wend )
 		return NOT_FOUND; // ran out of choices
 
 	// Try out comparison at this position
@@ -318,7 +318,7 @@ Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
     	shared_ptr<StuffKey> key( new StuffKey );
     	key->root = x;
     	key->terminus = *thistime;
-    	//SharedPtr<Node> = GenericSharedPtr
+    	//SharedPtr<Node> = SharedPtrInterface
         r = keys->KeyAndRestrict( shared_ptr<Key>(key),
         		                  stuff_pattern,
         		                  this,
@@ -400,15 +400,15 @@ void RootedSearchReplace::ClearPtrs( shared_ptr<Node> dest ) const
     vector< Itemiser::Element * > dest_memb = dest->Itemise();
     for( int i=0; i<dest_memb.size(); i++ )
     {
-        if( GenericSequence *dest_seq = dynamic_cast<GenericSequence *>(dest_memb[i]) )                
+        if( SequenceInterface *dest_seq = dynamic_cast<SequenceInterface *>(dest_memb[i]) )                
         {
-        	for( GenericContainer::iterator i=dest_seq->begin(); i!=dest_seq->end(); ++i )
+        	for( ContainerInterface::iterator i=dest_seq->begin(); i!=dest_seq->end(); ++i )
             {
                 SharedPtr<Node> p;
                 i.Overwrite( &p ); // TODO using Overwrite() to support unordered - but does this fuction even make sense forn unordered?
             }
         }            
-        else if( GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]) )         
+        else if( SharedPtrInterface *dest_ptr = dynamic_cast<SharedPtrInterface *>(dest_memb[i]) )         
         {
             *dest_ptr = shared_ptr<Node>();
         }
@@ -445,22 +445,22 @@ void RootedSearchReplace::Overlay( shared_ptr<Node> dest,
         ASSERT( source_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
         
-        if( GenericSequence *source_seq = dynamic_cast<GenericSequence *>(source_memb[i]) )                
+        if( SequenceInterface *source_seq = dynamic_cast<SequenceInterface *>(source_memb[i]) )                
         {
-            GenericSequence *dest_seq = dynamic_cast<GenericSequence *>(dest_memb[i]);
+            SequenceInterface *dest_seq = dynamic_cast<SequenceInterface *>(dest_memb[i]);
             ASSERT( dest_seq )( "itemise for dest didn't match itemise for source");
             Overlay( dest_seq, source_seq, keys, can_key, current_key );
         }            
-        else if( GenericCollection *source_col = dynamic_cast<GenericCollection *>(source_memb[i]) )
+        else if( CollectionInterface *source_col = dynamic_cast<CollectionInterface *>(source_memb[i]) )
         {
-        	GenericCollection *dest_col = dynamic_cast<GenericCollection *>(dest_memb[i]);
+        	CollectionInterface *dest_col = dynamic_cast<CollectionInterface *>(dest_memb[i]);
             ASSERT( dest_col )( "itemise for dest didn't match itemise for source");
             Overlay( dest_col, source_col, keys, can_key, current_key );
         }
-        else if( GenericSharedPtr *source_ptr = dynamic_cast<GenericSharedPtr *>(source_memb[i]) )         
+        else if( SharedPtrInterface *source_ptr = dynamic_cast<SharedPtrInterface *>(source_memb[i]) )         
         {
         	TRACE();
-            GenericSharedPtr *dest_ptr = dynamic_cast<GenericSharedPtr *>(dest_memb[i]);
+            SharedPtrInterface *dest_ptr = dynamic_cast<SharedPtrInterface *>(dest_memb[i]);
             ASSERT( dest_ptr )( "itemise for target didn't match itemise for source");
             if( *source_ptr ) // Masked: where source is NULL, do not overwrite
                 *dest_ptr = DuplicateSubtree( *source_ptr, keys, can_key, current_key );
@@ -476,8 +476,8 @@ void RootedSearchReplace::Overlay( shared_ptr<Node> dest,
 }
 
 
-void RootedSearchReplace::Overlay( GenericSequence *dest,
-		                           GenericSequence *source,
+void RootedSearchReplace::Overlay( SequenceInterface *dest,
+		                           SequenceInterface *source,
 		                           CouplingKeys *keys,
 		                           bool can_key,
 		                           shared_ptr<Key> current_key ) const
@@ -487,14 +487,14 @@ void RootedSearchReplace::Overlay( GenericSequence *dest,
     dest->clear();
 
     TRACE("duplicating sequence size %d\n", source->size() );
-	FOREACH( const GenericSharedPtr &p, *source )
+	FOREACH( const SharedPtrInterface &p, *source )
 	{
 		ASSERT( p ); // present simplified scheme disallows NULL, see above
 		shared_ptr<Node> n = DuplicateSubtree( p, keys, can_key, current_key );
 		if( shared_ptr<SubSequence> ss = dynamic_pointer_cast<SubSequence>(n) )
 		{
 			TRACE("Expanding SubSequence length %d\n", ss->size() );
-		    FOREACH( const GenericSharedPtr &xx, *ss )
+		    FOREACH( const SharedPtrInterface &xx, *ss )
 			    dest->push_back( xx );
    		}
 		else
@@ -506,8 +506,8 @@ void RootedSearchReplace::Overlay( GenericSequence *dest,
 }
 
 
-void RootedSearchReplace::Overlay( GenericCollection *dest,
-   		                           GenericCollection *source,
+void RootedSearchReplace::Overlay( CollectionInterface *dest,
+   		                           CollectionInterface *source,
 		                           CouplingKeys *keys,
 		                           bool can_key,
 		                           shared_ptr<Key> current_key ) const
@@ -518,14 +518,14 @@ void RootedSearchReplace::Overlay( GenericCollection *dest,
 
     TRACE("duplicating collection size %d\n", source->size() );
 
-	FOREACH( const GenericSharedPtr &p, *source )
+	FOREACH( const SharedPtrInterface &p, *source )
 	{
 		ASSERT( p ); // present simplified scheme disallows NULL, see above
 		shared_ptr<Node> n = DuplicateSubtree( p, keys, can_key, current_key );
 		if( shared_ptr<SubCollection> sc = dynamic_pointer_cast<SubCollection>(n) )
 		{
 			TRACE("Expanding SubCollection length %d\n", sc->size() );
-			FOREACH( const GenericSharedPtr &xx, *sc )
+			FOREACH( const SharedPtrInterface &xx, *sc )
 				dest->insert( xx );
 		}
 		else
@@ -931,8 +931,8 @@ Result Conjecture::Search( shared_ptr<Node> x,
 }
 
 
-GenericContainer::iterator Conjecture::HandleDecision( GenericContainer::iterator begin,
-		                                                                    GenericContainer::iterator end )
+ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::iterator begin,
+		                                                                    ContainerInterface::iterator end )
 {
 	ASSERT( this );
 	ASSERT( choices.size() >= decision_index ); // consistency check; as we see more decisions, we should be adding them to the conjecture

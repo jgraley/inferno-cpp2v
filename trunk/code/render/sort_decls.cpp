@@ -53,14 +53,14 @@ bool IsDependOn( shared_ptr<Declaration> a, shared_ptr<Declaration> b, bool igno
 }
 
 
-Sequence<Declaration> SortDecls( GenericContainer &c, bool ignore_indirection_to_record )
+Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_to_record )
 {
 	Sequence<Declaration> s;
     int ocs = c.size();
     
     // Our algorithm will modify the source container, so make a copy of it
     Collection<Declaration> cc;
-    GenericContainer::iterator ai;
+    ContainerInterface::iterator ai;
     for( ai = c.begin(); ai != c.end(); ++ai )
     	cc.insert( *ai );
 

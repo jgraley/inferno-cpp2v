@@ -42,7 +42,7 @@
 //   matching rules by implementing a virtual DecidedCompare() function.
 //   Ready made soft nodes are documented in soft_patterns.hpp
 //
-// - Sequence/Container support: sequences require matching ordering
+// - Sequence/ContainerCommon support: sequences require matching ordering
 //   and containers do not (only the presence of the matching elements).
 //
 // - Multi-node wildcards like * in sequences and containers (Star node).
@@ -138,11 +138,11 @@ private:
 class Conjecture
 {
 private:
-    typedef GenericContainer::iterator Choice;
+    typedef ContainerInterface::iterator Choice;
 public:
 	void PrepareForDecidedCompare();
-	GenericContainer::iterator HandleDecision( GenericContainer::iterator begin,
-			                                   GenericContainer::iterator end );
+	ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
+			                                   ContainerInterface::iterator end );
 	Result Search( shared_ptr<Node> x,
 				   shared_ptr<Node> pattern,
 				   CouplingKeys *keys,
@@ -217,13 +217,13 @@ private:
     		           shared_ptr<Node> pattern ) const;
 
     // DecidedCompare ring
-    Result DecidedCompare( GenericSequence &x,
-    		               GenericSequence &pattern,
+    Result DecidedCompare( SequenceInterface &x,
+    		               SequenceInterface &pattern,
     		               CouplingKeys *match_keys,
     		               bool can_key,
     		               Conjecture &conj ) const;
-    Result DecidedCompare( GenericCollection &x,
-    		               GenericCollection &pattern,
+    Result DecidedCompare( CollectionInterface &x,
+    		               CollectionInterface &pattern,
     		               CouplingKeys *match_keys,
     		               bool can_key,
     		               Conjecture &conj ) const;
@@ -261,13 +261,13 @@ private:
     		      CouplingKeys *match_keys,
     		      bool can_key,
     		      shared_ptr<Key> current_key ) const; // under substitution if not NULL
-    void Overlay( GenericSequence *dest,
-    		      GenericSequence *source,
+    void Overlay( SequenceInterface *dest,
+    		      SequenceInterface *source,
     		      CouplingKeys *match_keys,
     		      bool can_key,
     		      shared_ptr<Key> current_key ) const;
-    void Overlay( GenericCollection *dest,
-    	          GenericCollection *source,
+    void Overlay( CollectionInterface *dest,
+    	          CollectionInterface *source,
     	          CouplingKeys *match_keys,
     	          bool can_key,
     	          shared_ptr<Key> current_key ) const;
@@ -360,7 +360,7 @@ private:
     		                                            bool can_key,
     		                                            Conjecture &conj ) const
     {
-    	typedef GenericContainer::iterator iter; // TODO clean up this loop
+    	typedef ContainerInterface::iterator iter; // TODO clean up this loop
     	iter it;
     	int i;
     	for( it = patterns.begin(), i = 0;

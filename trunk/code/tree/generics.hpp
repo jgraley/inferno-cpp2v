@@ -1,7 +1,8 @@
 #ifndef TREE_GENERICS_HPP
 #define TREE_GENERICS_HPP
 
-#include "common/refcount.hpp"
+#include "common/common.hpp"
+#include "common/shared_ptr.hpp"
 #include "common/containers.hpp"
 #include <deque>
 #include <set>
@@ -12,132 +13,49 @@
 #include "common/magic.hpp"
 #include "match.hpp"
 
-// Covariant NULL pointer bug
-//
-// JSG: There's an unfortunate bug in GCC 3.4.4 on cygwin whereby a covariant return thunk
-// for a pointer goes wrong when the pointer is NULL. We can end up dereferencing a NULL (or offset-from-NULL) 
-// pointer inside the thunk itself which is opaque code, not a lot of fun overall.
-//
-// It seems to be OK on GCC4 on Linux, and c++/20746 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=20746) seems to have a fix, 
-// but I think it only applies to GCC4 (4.0.2 and 4.1). 
-//
-// So I've just hacked covariant returns to not be covariant whenever I get a problem (just returns same as 
-// base class, is this "isovariant"?)
-//
 
-// Shared pointer wrapper with generic support
+// Inferno tree shared pointers
 
 struct Node;
 
-struct GenericSharedPtr : Itemiser::Element, Traceable
-{
-    // Convert to and from shared_ptr<Node>
-	virtual operator shared_ptr<Node>() const = 0;
-    virtual GenericSharedPtr &operator=( shared_ptr<Node> n ) = 0;
-
-    virtual operator bool() const = 0; // for testing against NULL
-    virtual Node *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
-    virtual operator string() const = 0; // for debugging
-};
+typedef OOStd::SharedPtrInterface<Itemiser::Element, Node> SharedPtrInterface;
 
 
 template<typename ELEMENT>
-struct SharedPtr : GenericSharedPtr, shared_ptr<ELEMENT> 
+class SharedPtr : public OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>
 {
-	virtual operator shared_ptr<Node>() const
-    {
-        const shared_ptr<ELEMENT> *p = (const shared_ptr<ELEMENT> *)this;
-        ASSERT(p);
-        shared_ptr<Node> n = (shared_ptr<Node>)*p;
-        return n;
-    }
+public:
+	SharedPtr() : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>() {}
+	SharedPtr( ELEMENT *o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
+	SharedPtr( const SharedPtrInterface &g ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(g) {}
+	template< typename OTHER >
+	SharedPtr( const shared_ptr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
 
-    virtual Node *get() const // TODO should return ELEMENT, hacked due to covariant NULL pointer bug, see comment at top of file
-    {
-    	ELEMENT *e = shared_ptr<ELEMENT>::get();
-    	//TRACE("sp::get() returns %p\n", e );
-    	return e;
-    }
-
-    template< typename OTHER >
-    SharedPtr<ELEMENT> &operator=( shared_ptr<OTHER> n )
-    {
-        if( !n )
-        {
-            *(shared_ptr<ELEMENT> *)this = shared_ptr<ELEMENT>(); // handle NULL explicitly since dyn cast uses NULL to indicate wrong type
-        }
-        else
-        {
-            shared_ptr<ELEMENT> pe = dynamic_pointer_cast<ELEMENT>(n);
-            ASSERT( pe )
-                  ("Tried to Set() wrong type of node via GenericSharedPtr\nType was ")((string)*n)("; I am ")(typeid(ELEMENT).name());
-            *(shared_ptr<ELEMENT> *)this = pe;
-        }
-        return *this;
-    }
-
-    virtual SharedPtr<ELEMENT> &operator=( shared_ptr<Node> n )
-    {
-    	return operator=<Node>( n );
-    }
-
-    template< typename OTHER >
-    SharedPtr<ELEMENT> &operator=( SharedPtr<OTHER> n )
-    {
-    	return operator=( shared_ptr<OTHER>(n) );
-    }
-
-    SharedPtr<ELEMENT> &operator=( const GenericSharedPtr &n )
-    {
-    	return operator=( shared_ptr<Node>(n) );
-    }
-
-    virtual operator bool() const
-    {
-    	return !!*(const shared_ptr<ELEMENT> *)this;
-    }
-
-    SharedPtr() {}
-    SharedPtr( ELEMENT *o ) : 
-        shared_ptr<ELEMENT>( o )
-    {
-    }
-    template< typename OTHER >
-    SharedPtr( const shared_ptr<OTHER> &o ) : 
-        shared_ptr<ELEMENT>( dynamic_pointer_cast<ELEMENT>(o) )
-    {
-    	if( o )
-    	    ASSERT( *this )("Cannot convert shared_ptr<")(typeid(OTHER).name())("> to SharedPtr<")(typeid(ELEMENT).name())(">");
-    }
-    SharedPtr( const GenericSharedPtr &g ) :
-    	shared_ptr<ELEMENT>( dynamic_pointer_cast<ELEMENT>(shared_ptr<Node>(g)) )
-    {
-    	if( g )
-    	    ASSERT( *this )("Cannot convert GenericSharedPtr that points to a ")((string)*(shared_ptr<Node>(g)))(" to SharedPtr<")(typeid(ELEMENT).name())(">");
-    }
 	virtual operator string() const
 	{
-        return CPPFilt( typeid( ELEMENT ).name() );
+        return Traceable::CPPFilt( typeid( ELEMENT ).name() );
 	}
-};           
+};
+
 
 // Inferno tree containers
+// TODO move contents of SequenceInterface etc into OOStd so not defined here.
 
-typedef STLContainerBase<Itemiser::Element, GenericSharedPtr> GenericContainer;
+typedef OOStd::ContainerInterface<Itemiser::Element, SharedPtrInterface> ContainerInterface;
 
-typedef PointIterator<Itemiser::Element, GenericSharedPtr> GenericPointIterator;
-typedef CountingIterator<Itemiser::Element, GenericSharedPtr> GenericCountingIterator;
+typedef OOStd::PointIterator<Itemiser::Element, SharedPtrInterface> PointIterator;
+typedef OOStd::CountingIterator<Itemiser::Element, SharedPtrInterface> CountingIterator;
 
-struct GenericSequence : virtual GenericContainer
+struct SequenceInterface : virtual ContainerInterface
 {
-    virtual GenericSharedPtr &operator[]( int i ) = 0;
-    virtual void push_back( const GenericSharedPtr &gx ) = 0;
+    virtual SharedPtrInterface &operator[]( int i ) = 0;
+    virtual void push_back( const SharedPtrInterface &gx ) = 0;
 	virtual void push_back( const shared_ptr<Node> &gx ) = 0;
 };
 
 
 template<typename ELEMENT>
-struct Sequence : virtual GenericSequence, virtual STLSequence< Itemiser::Element, GenericSharedPtr, deque< SharedPtr<ELEMENT> > >
+struct Sequence : virtual SequenceInterface, virtual OOStd::Sequence< Itemiser::Element, SharedPtrInterface, deque< SharedPtr<ELEMENT> > >
 {
 	typedef deque< SharedPtr<ELEMENT> > RawSequence;
 	Sequence() {}
@@ -145,7 +63,7 @@ struct Sequence : virtual GenericSequence, virtual STLSequence< Itemiser::Elemen
     {
     	return RawSequence::operator[](i);
     }
-	virtual void push_back( const GenericSharedPtr &gx )
+	virtual void push_back( const SharedPtrInterface &gx )
 	{
 		typename RawSequence::value_type sx(gx);
 		RawSequence::push_back( sx );
@@ -180,23 +98,23 @@ struct Sequence : virtual GenericSequence, virtual STLSequence< Itemiser::Elemen
 	}
 };
 
-struct GenericCollection : virtual GenericContainer
+struct CollectionInterface : virtual ContainerInterface
 {
 	// TOOD for these to work in practice, may need to make them more like
 	// push_back() in Sequence<>
-	virtual void insert( const GenericSharedPtr &gx ) = 0;
+	virtual void insert( const SharedPtrInterface &gx ) = 0;
 	virtual void insert( const shared_ptr<Node> &gx ) = 0;
-	virtual int erase( const GenericSharedPtr &gx ) = 0;
+	virtual int erase( const SharedPtrInterface &gx ) = 0;
 	virtual int erase( const shared_ptr<Node> &gx ) = 0;
-	virtual bool IsExist( const GenericSharedPtr &gx ) = 0;
+	virtual bool IsExist( const SharedPtrInterface &gx ) = 0;
 };
 
 template<typename ELEMENT>
-struct Collection : GenericCollection, STLCollection< Itemiser::Element, GenericSharedPtr, set< SharedPtr<ELEMENT> > >
+struct Collection : CollectionInterface, OOStd::Collection< Itemiser::Element, SharedPtrInterface, set< SharedPtr<ELEMENT> > >
 {
     inline Collection<ELEMENT>() {}
 	typedef set< SharedPtr<ELEMENT> > RawCollection;
-	virtual void insert( const GenericSharedPtr &gx )
+	virtual void insert( const SharedPtrInterface &gx )
 	{
 		typename RawCollection::value_type sx(gx);
 		RawCollection::insert( sx );
@@ -206,7 +124,7 @@ struct Collection : GenericCollection, STLCollection< Itemiser::Element, Generic
 		typename RawCollection::value_type sx(gx);
 		RawCollection::insert( sx );
 	}
-	virtual int erase( const GenericSharedPtr &gx )
+	virtual int erase( const SharedPtrInterface &gx )
 	{
 		typename RawCollection::value_type sx(gx);
 		return RawCollection::erase( sx );
@@ -216,7 +134,7 @@ struct Collection : GenericCollection, STLCollection< Itemiser::Element, Generic
 		typename RawCollection::value_type sx(gx);
 		return RawCollection::erase( sx );
 	}
-	virtual bool IsExist( const GenericSharedPtr &gx )
+	virtual bool IsExist( const SharedPtrInterface &gx )
 	{
 		typename RawCollection::value_type sx(gx);
 		typename RawCollection::iterator it = RawCollection::find( sx );
@@ -252,8 +170,8 @@ template<class LELEMENT, class RELEMENT>
 inline Sequence<Node> operator,( const SharedPtr<LELEMENT> &l, const SharedPtr<RELEMENT> &r )
 {
     Sequence<Node> seq;
-    seq.push_back( (const GenericSharedPtr &)l );
-    seq.push_back( (const GenericSharedPtr &)r );
+    seq.push_back( (const SharedPtrInterface &)l );
+    seq.push_back( (const SharedPtrInterface &)r );
     return seq;
 }
 
@@ -261,7 +179,7 @@ template<class RELEMENT>
 inline Sequence<Node> operator,( const Sequence<Node> &l, const SharedPtr<RELEMENT> &r )
 {
     Sequence<Node> seq = l;
-    seq.push_back( (const GenericSharedPtr &)r );
+    seq.push_back( (const SharedPtrInterface &)r );
     return seq;
 }
 

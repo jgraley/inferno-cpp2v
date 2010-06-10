@@ -33,15 +33,15 @@ void Walk::Push( shared_ptr<Node> n )
     vector< Itemiser::Element * > members = n->Itemise();
     for( int i=0; i<members.size(); i++ )
     {
-        if( GenericContainer *con = dynamic_cast<GenericContainer *>(members[i]) )
+        if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(members[i]) )
         {
-        	//FOREACH( GenericSharedPtr &n, *con )
-        	for( GenericContainer::iterator i=con->begin(); i!=con->end(); ++i )
+        	//FOREACH( SharedPtrInterface &n, *con )
+        	for( ContainerInterface::iterator i=con->begin(); i!=con->end(); ++i )
                 f.children.push_back( i );
         }            
-        else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )         
+        else if( SharedPtrInterface *ptr = dynamic_cast<SharedPtrInterface *>(members[i]) )         
         {
-            f.children.push_back( GenericPointIterator(ptr) );
+            f.children.push_back( PointIterator(ptr) );
         }
         else
         {
@@ -65,7 +65,7 @@ Walk::Walk( shared_ptr<Node> r, shared_ptr<Node> res ) :
 	if( *root ) // if root is NULL, leave the state empty so Done() always returns true
 	{
         Frame f;
-        GenericPointIterator gpi(&*root);
+        PointIterator gpi(&*root);
         f.children.push_back( gpi );
         f.index = 0;
         state.push( f );
@@ -90,7 +90,7 @@ int Walk::Depth() const
     return state.size();
 }
     
-GenericContainer::iterator Walk::GetIterator() const
+ContainerInterface::iterator Walk::GetIterator() const
 {
     ASSERT( !Done() )("Already advanced over everything; reached end of walk");
     ASSERT( !IsAtEndOfCollection() );
@@ -120,7 +120,7 @@ Walk::operator string() const
         ps.pop();
         
         // node type
-        GenericContainer::iterator child = f.children[f.index];
+        ContainerInterface::iterator child = f.children[f.index];
         if( *child )
             s = TypeInfo(*(child->get())).name() + s;
         else

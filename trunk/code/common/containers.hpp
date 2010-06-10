@@ -10,6 +10,8 @@
 
 #include "common.hpp"
 
+namespace OOStd {
+
 //
 // Template for a base class for STL containers with forward iterators.
 // Supports direct calls and iterators.
@@ -18,27 +20,28 @@
 // be a base (or compatible type) for the elements of all sub-containers.
 //
 template< class SUB_BASE, typename VALUE_TYPE >
-class STLContainerBase : public Traceable, public virtual SUB_BASE
+class ContainerInterface : public Traceable, public virtual SUB_BASE
 {
 public:
-	// Abstract base class for the iterators in sub-containers. This is just to get
-	// virtual calls - this is not the generic iterator.
-	struct iterator_base : public Traceable
+	// Abstract base class for the iterators in containers.
+	struct iterator_interface : public Traceable
 	{
 		// TODO const iterator and const versions of begin(), end()
-		virtual shared_ptr<iterator_base> Clone() const = 0; // Make another copy of the present iterator
-		virtual iterator_base &operator++() = 0;
+		virtual shared_ptr<iterator_interface> Clone() const = 0; // Make another copy of the present iterator
+		virtual iterator_interface &operator++() = 0;
 		const virtual VALUE_TYPE &operator*() const = 0; 
 		const virtual VALUE_TYPE *operator->() const = 0; 
-		virtual bool operator==( const iterator_base &ib ) const = 0;
+		virtual bool operator==( const iterator_interface &ib ) const = 0;
 		virtual void Overwrite( const VALUE_TYPE *v ) const = 0;
 		virtual const bool IsOrdered() const = 0;
 		virtual const int GetCount() const { ASSERTFAIL("Only on CountingIterator"); }
 	};
 
 public:
-	// Generic iterator, uses boost::shared_ptr<> and Clone() to manage the real iterator
-	// and forwards all the operations using co-variance where possible.
+	// Wrapper for iterator_interface, uses boost::shared_ptr<> and Clone() to manage the real iterator
+	// and forwards all the operations using co-variance where possible. These can be passed around
+	// by value, and have copy-on-write semantics, so big iterators will actually get optimised
+	// (in your face, Stepanov!)
 	class iterator : public Traceable
 	{
 	public:
@@ -49,9 +52,9 @@ public:
 		typedef value_type &reference;
 
 		iterator() :
-			pib( shared_ptr<iterator_base>() ) {}
+			pib( shared_ptr<iterator_interface>() ) {}
 
-		iterator( const iterator_base &ib ) :
+		iterator( const iterator_interface &ib ) :
 			pib( ib.Clone() ) {} // Deep copy because from unmanaged source
 
 		iterator( const iterator &i ) :
@@ -111,7 +114,7 @@ public:
 			return pib->GetCount();
 		}
 
-		iterator_base *GetUnderlyingIterator()
+		iterator_interface *GetUnderlyingIterator()
 		{
 			if( pib )
 				return pib.get();
@@ -128,31 +131,39 @@ public:
 			ASSERT( !pib || pib.unique() );
 		}
 
-		shared_ptr<iterator_base> pib;
+		shared_ptr<iterator_interface> pib;
 	};
 	typedef iterator const_iterator; // TODO const iterators properly
 
 	// These direct calls to the container are designed to support co-variance.
-	virtual const iterator_base &begin() = 0;
-    virtual const iterator_base &end() = 0;
-    virtual void erase( typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator it ) = 0;
+	virtual const iterator_interface &begin() = 0;
+    virtual const iterator_interface &end() = 0;
+    virtual void erase( typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator it ) = 0;
     virtual bool empty() const = 0;
     virtual int size() const = 0;
     virtual void clear() = 0;
 };
-
+/*
+template< class SUB_BASE, typename VALUE_TYPE >
+struct SequenceInterface : virtual ContainerInterface<SUB_BASE, VALUE_TYPE>
+{
+    virtual SharedPtrInterface &operator[]( int i ) = 0;
+    virtual void push_back( const SharedPtrInterface &gx ) = 0;
+	virtual void push_back( const shared_ptr<Node> &gx ) = 0;
+};
+*/
 
 //
 // Abstract template for containers that will be use any STL container as
 // the actual implementation.
-// Params as for ContainerBase except we now have to fill in CONTAINER_IMPL
+// Params as for ContainerInterface except we now have to fill in CONTAINER_IMPL
 // as the stl container class eg std::list<blah>
 //
 template<class SUB_BASE, typename VALUE_TYPE, class CONTAINER_IMPL>
-struct STLContainer : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, CONTAINER_IMPL
+struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_TYPE>, CONTAINER_IMPL
 {
 	struct iterator : public CONTAINER_IMPL::iterator,
-	                  public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base
+	                  public ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface
 	{
 		virtual iterator &operator++()
 		{
@@ -170,7 +181,7 @@ struct STLContainer : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, CONTAINER_
 			return CONTAINER_IMPL::iterator::operator->();
 		}
 
-		virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib ) const
+		virtual bool operator==( const typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface &ib ) const
 		{
             // JSG apparently there's no operator== in std::deque::iterator, which is odd since iterators 
             // are supposed to be Equality Comparable. So we just cast the types really carefully and use ==
@@ -183,7 +194,7 @@ struct STLContainer : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, CONTAINER_
 
 	typedef iterator const_iterator;
 
-    virtual void erase( typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator it )
+    virtual void erase( typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator it )
     {
         iterator *cit = dynamic_cast<iterator *>( it.GetUnderlyingIterator() );
         ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator
@@ -203,17 +214,18 @@ struct STLContainer : virtual STLContainerBase<SUB_BASE, VALUE_TYPE>, CONTAINER_
     }
 };
 
+
 //
 // Template for containers that use ordered STL containers as implementation
-// (basically vector, deque etc). Instantiate as per STLContainer.
+// (basically vector, deque etc). Instantiate as per ContainerCommon.
 //
 template<class SUB_BASE, typename VALUE_TYPE, class CONTAINER_IMPL>
-struct STLSequence : virtual STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
+struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
 {
-    inline STLSequence<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>() {}
-	struct iterator : public STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>::iterator
+    inline Sequence<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>() {}
+	struct iterator : public ContainerCommon<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>::iterator
     {
-		virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
+		virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface> Clone() const
 		{
 			shared_ptr<iterator> ni( new iterator );
 			*ni = *this;
@@ -255,15 +267,15 @@ struct STLSequence : virtual STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
 
 //
 // Template for containers that use unordered STL containers as implementation
-// (basically associative containers). Instantiate as per STLContainer.
+// (basically associative containers). Instantiate as per ContainerCommon.
 //
 template<class SUB_BASE, typename VALUE_TYPE, class CONTAINER_IMPL>
-struct STLCollection : virtual STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
+struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>
 {
-    inline STLCollection<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>() {}
-	struct iterator : public STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>::iterator
+    inline Collection<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>() {}
+	struct iterator : public ContainerCommon<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL>::iterator
     {
-		virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
+		virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface> Clone() const
 		{
 			shared_ptr<iterator> ni( new iterator );
 			*ni = *this;
@@ -283,7 +295,7 @@ struct STLCollection : virtual STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL
     	{
     		return false; // no, Collections are not ordered
     	}
-        STLCollection<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL> *owner;
+        Collection<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL> *owner;
 	};
 
     iterator my_begin, my_end;
@@ -305,11 +317,11 @@ struct STLCollection : virtual STLContainer<SUB_BASE, VALUE_TYPE, CONTAINER_IMPL
 // Iterator that points to a single object, no container required.
 // We do not support looping/incrementing or FOREACH (which requires a
 // container) but we do permit compare, deref and Overwrite(). This lets
-// STLContainerBase::iterator be used generically even when objects are
+// ContainerInterface::iterator be used generically even when objects are
 // not in containers.
 //
 template<class SUB_BASE, typename VALUE_TYPE>
-struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base
+struct PointIterator : public ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface
 {
     VALUE_TYPE * element;
 
@@ -329,7 +341,7 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
         ASSERT(i); // We don't allow NULL as input because it means end-of-range
     }
 
-	virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
+	virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface> Clone() const
 	{
 		shared_ptr<PointIterator> ni( new PointIterator(*this) );
 		return ni;
@@ -353,7 +365,7 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
 		return element;
 	}
 
-	virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib ) const
+	virtual bool operator==( const typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface &ib ) const
 	{
 		const PointIterator *pi = dynamic_cast<const PointIterator *>(&ib);
 		ASSERT(pi)("Comparing point iterator with something else ")(ib);
@@ -373,7 +385,7 @@ struct PointIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_b
 
 // TODO can we avoid the need for these template parameters?
 template<class SUB_BASE, typename VALUE_TYPE>
-struct CountingIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base
+struct CountingIterator : public ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface
 {
     int element;
 
@@ -387,7 +399,7 @@ struct CountingIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterato
     {
     }
 
-	virtual shared_ptr<typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base> Clone() const
+	virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface> Clone() const
 	{
 		shared_ptr<CountingIterator> ni( new CountingIterator(*this) );
 		return ni;
@@ -409,7 +421,7 @@ struct CountingIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterato
 		ASSERTFAIL("Cannot dereference CountingIterator, use GetCount instead");
 	}
 
-	virtual bool operator==( const typename STLContainerBase<SUB_BASE, VALUE_TYPE>::iterator_base &ib ) const
+	virtual bool operator==( const typename ContainerInterface<SUB_BASE, VALUE_TYPE>::iterator_interface &ib ) const
 	{
 		const CountingIterator *pi = dynamic_cast<const CountingIterator *>(&ib);
 		ASSERT(pi)("Comparing counting iterator with something else ")( ib );
@@ -431,5 +443,7 @@ struct CountingIterator : public STLContainerBase<SUB_BASE, VALUE_TYPE>::iterato
 		return element;
 	}
 };
+
+}; // namespace
 
 #endif /* GENERICS_HPP */

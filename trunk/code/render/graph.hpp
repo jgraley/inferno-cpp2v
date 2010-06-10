@@ -302,7 +302,7 @@ public:
         vector< Itemiser::Element * > members = n->Itemise();
         for( int i=0; i<members.size(); i++ )
         {
-            if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )
+            if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
             {
                 for( int j=0; j<seq->size(); j++ )
                 {
@@ -314,7 +314,7 @@ public:
                     s += " </TR>\n";
                 }
             }
-            else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )
+            else if( SharedPtrInterface *ptr = dynamic_cast<SharedPtrInterface *>(members[i]) )
             {
                 if( *ptr )
                 {
@@ -324,7 +324,7 @@ public:
                     s += " </TR>\n";
                }
             }
-            else if( GenericCollection *col = dynamic_cast<GenericCollection *>(members[i]) )
+            else if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
             {
                 s += " <TR>\n";
                 s += "  <TD>" + Sanitise(*col) + "{}</TD>\n";
@@ -346,7 +346,7 @@ public:
         vector< Itemiser::Element * > members = n->Itemise();
         for( int i=0; i<members.size(); i++ )
         {
-            if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )
+            if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
             {
                 for( int j=0; j<seq->size(); j++ )
                 {
@@ -355,7 +355,7 @@ public:
                     s += " | <" + SeqField( i, j ) + "> ";// [" + string(c) + "]";
                 }
             }
-            else  if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )
+            else  if( SharedPtrInterface *ptr = dynamic_cast<SharedPtrInterface *>(members[i]) )
             {
             	s += " | <" + SeqField( i ) + "> ";
             }
@@ -417,18 +417,18 @@ public:
         {
             TRACE("Size %d i=%d\n", members.size(), i );
 
-        	if( GenericCollection *col = dynamic_cast<GenericCollection *>(members[i]) )
+        	if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
             {
-        		FOREACH( const GenericSharedPtr &p, *col )
+        		FOREACH( const SharedPtrInterface &p, *col )
                     s += DoLink( n, SeqField(i), p );
             }
-        	else if( GenericSequence *seq = dynamic_cast<GenericSequence *>(members[i]) )
+        	else if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
             {
                 int j=0;
-        		FOREACH( const GenericSharedPtr &p, *seq )
+        		FOREACH( const SharedPtrInterface &p, *seq )
                     s += DoLink( n, SeqField(i, j++), p );
             }            
-            else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )         
+            else if( SharedPtrInterface *ptr = dynamic_cast<SharedPtrInterface *>(members[i]) )         
             {
                 if( *ptr )
                     s += DoLink( n, SeqField(i), *ptr );
