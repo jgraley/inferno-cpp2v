@@ -46,12 +46,12 @@ void Validate::operator()( shared_ptr<Node> context,
 			vector< Itemiser::Element * > members = x->Itemise();
 			for( int i=0; i<members.size(); i++ )
 			{
-				if( GenericContainer *con = dynamic_cast<GenericContainer *>(members[i]) )
+				if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(members[i]) )
 				{
-					for( GenericContainer::iterator i=con->begin(); i!=con->end(); ++i )
+					for( ContainerInterface::iterator i=con->begin(); i!=con->end(); ++i )
 						OnLink( x, *i );
 				}
-				else if( GenericSharedPtr *ptr = dynamic_cast<GenericSharedPtr *>(members[i]) )
+				else if( SharedPtrInterface *ptr = dynamic_cast<SharedPtrInterface *>(members[i]) )
 				{
 					OnLink( x, *ptr );
 				}

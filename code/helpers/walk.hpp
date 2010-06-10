@@ -7,7 +7,7 @@ class Walk
 {
     struct Frame
     {
-        vector< GenericContainer::iterator > children;
+        vector< ContainerInterface::iterator > children;
         int index;
     };
     
@@ -27,7 +27,7 @@ public:
     Walk( const Walk & other );
     bool Done() const;
     int Depth() const;
-    GenericContainer::iterator GetIterator() const;
+    ContainerInterface::iterator GetIterator() const;
     shared_ptr<Node> Get() const;
     void Set( SharedPtr<Node> n );
     operator string() const;
@@ -55,7 +55,7 @@ public:
         while(!w.Done())
         {
             shared_ptr<Node> x = w.Get();
-            if( shared_ptr<FIND> f = dynamic_pointer_cast< FIND >( x ) )
+            if( SharedPtr<FIND> f = dynamic_pointer_cast< FIND >( x ) )
                 Sequence< FIND >::push_back( f );
             w.AdvanceInto(); 
         }    
@@ -63,7 +63,7 @@ public:
 };
 
 
-struct WalkingIterator : public STLContainerBase<Itemiser::Element, GenericSharedPtr>::iterator_base,
+struct WalkingIterator : public ContainerInterface::iterator_interface,
                          Walk
 {
 	WalkingIterator( shared_ptr<Node> root = shared_ptr<Node>(), // NULL root gets us an "end" iterator
@@ -72,7 +72,7 @@ struct WalkingIterator : public STLContainerBase<Itemiser::Element, GenericShare
     {
     }
 
-	virtual shared_ptr<STLContainerBase<Itemiser::Element, GenericSharedPtr>::iterator_base> Clone() const
+	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
 	{
 		shared_ptr<WalkingIterator> ni( new WalkingIterator(*this) );
 		return ni;
@@ -84,17 +84,17 @@ struct WalkingIterator : public STLContainerBase<Itemiser::Element, GenericShare
 		return *this;
 	}
 
-	virtual const GenericSharedPtr &operator*() const
+	virtual const SharedPtrInterface &operator*() const
 	{
 	    return *GetIterator();
 	}
 
-	const virtual GenericSharedPtr *operator->() const
+	const virtual SharedPtrInterface *operator->() const
 	{
 		return &*GetIterator();
 	}
 
-	virtual bool operator==( const STLContainerBase<Itemiser::Element, GenericSharedPtr>::iterator_base &ib ) const
+	virtual bool operator==( const ContainerInterface::iterator_interface &ib ) const
 	{
 		const WalkingIterator *pi = dynamic_cast<const WalkingIterator *>(&ib);
 		ASSERT(pi)("Comparing walking iterator with something else ")(ib);
@@ -104,7 +104,7 @@ struct WalkingIterator : public STLContainerBase<Itemiser::Element, GenericShare
 		return pi->Get() == Get();
 	}
 
-	virtual void Overwrite( const GenericSharedPtr *v ) const
+	virtual void Overwrite( const SharedPtrInterface *v ) const
 	{
 		GetIterator().Overwrite( v );
 	}
