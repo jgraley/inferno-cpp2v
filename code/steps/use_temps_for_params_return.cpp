@@ -14,7 +14,7 @@
 #include "helpers/misc.hpp"
 
 
-void UseTempsForParamsReturn::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
+void UseTempsForParamsReturn::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
 {
 	TRACE();
 

@@ -1,7 +1,7 @@
 #include "split_instance_declarations.hpp"
 #include "tree/tree.hpp"
 
-void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
+void SplitInstanceDeclarations::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
 {
 	{ // Do initialised local variables by leaving an assign behind
 		SearchReplace sr1;
@@ -61,7 +61,7 @@ void SplitInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 }
 
 
-void MergeInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
+void MergeInstanceDeclarations::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
 {
 	SearchReplace sr1;
 	{
@@ -99,7 +99,7 @@ void MergeInstanceDeclarations::operator()( shared_ptr<Node> context, shared_ptr
 }
 
 
-void HackUpIfs::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
+void HackUpIfs::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
 {
 	CouplingSet sms1;
 	SearchReplace sr1;
@@ -132,7 +132,7 @@ void HackUpIfs::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 }
 
 
-void CrazyNine::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
+void CrazyNine::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
 {
 	SearchReplace sr1;
 	// Replaces entire records with 9 if it has a 9 in it
@@ -140,11 +140,11 @@ void CrazyNine::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
 		MakeShared<Record> s_record;
 		MakeShared< Stuff<Declaration> > s_stuff;
 		s_record->members = ( s_stuff, MakeShared< Star<Declaration> >() );
-		shared_ptr<SpecificInteger> s_nine( new SpecificInteger(9) );
+		SharedPtr<SpecificInteger> s_nine( new SpecificInteger(9) );
 		s_stuff->terminus = s_nine;
 
 		MakeShared<Union> r_union;
-		shared_ptr<SpecificTypeIdentifier> r_union_name( new SpecificTypeIdentifier("nine") );
+		SharedPtr<SpecificTypeIdentifier> r_union_name( new SpecificTypeIdentifier("nine") );
 		r_union->identifier = r_union_name;
 
 		sr1.Configure(s_record, r_union);
@@ -162,22 +162,22 @@ void CrazyNine::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
  * A rather hacked up and bit-rotted searc/replace turning *(array+i) into array[i]
     // TODO move this out of main()
     {
-        shared_ptr<Dereference> sd( new Dereference );
-        shared_ptr<Subtract> sa( new Subtract );
+        SharedPtr<Dereference> sd( new Dereference );
+        SharedPtr<Subtract> sa( new Subtract );
         sd->operands.push_back( sa );
-        shared_ptr<TypeOf> sseot( new TypeOf );
+        SharedPtr<TypeOf> sseot( new TypeOf );
         sa->operands.push_back( sseot );
-        shared_ptr<Array> sar( new Array );
+        SharedPtr<Array> sar( new Array );
 //           sar->element = SharedPtr<Type>();
 //           sar->size = SharedPtr<Initialiser>();
         sseot->pattern = sar;
-        shared_ptr<Expression> se( new Expression );
+        SharedPtr<Expression> se( new Expression );
         sa->operands.push_back( se );
 
-        shared_ptr<Subscript> rs( new Subscript );
-        shared_ptr<Expression> rar( new Expression );
+        SharedPtr<Subscript> rs( new Subscript );
+        SharedPtr<Expression> rar( new Expression );
         rs->base = rar;
-        shared_ptr<Expression> re( new Expression );
+        SharedPtr<Expression> re( new Expression );
         rs->index = re;
 
         Coupling mar;

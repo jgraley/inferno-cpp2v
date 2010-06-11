@@ -12,7 +12,7 @@
 #include "helpers/soft_patterns.hpp"
 #include "helpers/typeof.hpp"
 
-void GenerateImplicitCasts::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
+void GenerateImplicitCasts::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
 {
 	SearchReplace sr0;
 

@@ -13,7 +13,7 @@
 class GenerateImplicitCasts : public Transformation
 {
 public:
-	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> *proot );
+	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
 };
 
 #endif /* GENERATE_IMPLICIT_CASTS_HPP */
