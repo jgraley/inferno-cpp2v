@@ -6,25 +6,25 @@
 class SplitInstanceDeclarations : public Transformation
 {
 public:
-	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> *proot );
+	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
 };
 
 class MergeInstanceDeclarations : public Transformation
 {
 public:
-	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> *proot );
+	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
 };
 
 class HackUpIfs : public Transformation
 {
 public:
-	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> *proot );
+	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
 };
 
 class CrazyNine : public Transformation
 {
 public:
-	virtual void operator()( shared_ptr<Node> context, shared_ptr<Node> *proot );
+	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
 };
 
 #endif

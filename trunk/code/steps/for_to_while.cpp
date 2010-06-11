@@ -11,7 +11,7 @@
 #include "common/refcount.hpp"
 #include "helpers/soft_patterns.hpp"
 
-void ForToWhile::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
+void ForToWhile::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
 {
     MakeShared<For> s_for;
     MakeShared<Statement> s_body, s_init, s_inc, r_forbody, r_init, r_inc;

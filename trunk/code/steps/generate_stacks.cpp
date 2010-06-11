@@ -13,7 +13,7 @@
 
 #define HANDLE_EARLY_RETURNS 1
 
-void GenerateStacks::operator()( shared_ptr<Node> context, shared_ptr<Node> *proot )
+void GenerateStacks::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
 {
 	TRACE();
 	MakeShared<Instance> s_fi, r_fi, s_fi2, r_fi2, s_fi3, r_fi3;

@@ -108,7 +108,6 @@ struct Collection : CollectionInterface, OOStd::Collection< Itemiser::Element, S
 
 // Assmebling sequences using operator,
 
-//template<class LELEMENT, class RELEMENT>
 inline Sequence<Node> operator,( const SharedPtrInterface &l, const SharedPtrInterface &r )
 {
     Sequence<Node> seq;
@@ -117,7 +116,6 @@ inline Sequence<Node> operator,( const SharedPtrInterface &l, const SharedPtrInt
     return seq;
 }
 
-//template<class RELEMENT>
 inline Sequence<Node> operator,( const SequenceInterface &l, const SharedPtrInterface &r )
 {
     Sequence<Node> seq = l;
