@@ -10,7 +10,7 @@
 
 #include "helpers/search_replace.hpp"
 
-class UseTempsForParamsReturn : public Transformation
+class UseTempsForParamsReturn : public InPlaceTransformation
 {
 public:
 	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );

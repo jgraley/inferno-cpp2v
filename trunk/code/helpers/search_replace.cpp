@@ -719,7 +719,7 @@ int RootedSearchReplace::RepeatingSearchReplace( shared_ptr<Node> *proot,
 }
 
 // Do a search and replace based on patterns stored in our members
-void RootedSearchReplace::operator()( shared_ptr<Node> c, shared_ptr<Node> *proot )
+void RootedSearchReplace::operator()( SharedPtr<Node> c, SharedPtr<Node> *proot )
 {
 	if( ReadArgs::pattern_graph && ReadArgs::quitafter == 0 )
 	{

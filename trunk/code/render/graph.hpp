@@ -10,7 +10,7 @@
 #include "common/read_args.hpp"
 
 
-class Graph : public Transformation
+class Graph : public OutOfPlaceTransformation
 {
 public:
     void operator()( RootedSearchReplace *root )
@@ -25,7 +25,7 @@ public:
         Disburse( s );
     }
 
-    shared_ptr<Node> operator()( shared_ptr<Node> context, shared_ptr<Node> root )
+    SharedPtr<Node> operator()( SharedPtr<Node> context, SharedPtr<Node> root )
     {
     	(void)context; // Not needed!!
 

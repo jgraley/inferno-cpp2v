@@ -14,14 +14,15 @@ given the aims. The identifier nodes in question to be distinct node classes for
 labels so that they may be pointed-to directly at usages.
 
 Tree changes:
-- Added new node hierarchy or Identifier (base), AnyXIdentifier (for wildcards) and XIdentifier (for identifiers). 
-  X can be Instance, Type or Label. AnyXIdentifier derives from Expression, Type or Expression repectively. 
+- Added new node hierarchy or Identifier (base), XIdentifier (for wildcards) and SpecificXIdentifier (for 
+  identifiers of spcific things). 
+  X can be Instance, Type or Label. XIdentifier derives from Expression, Type or Expression repectively. 
   XIdentifier derives from String to contain the actual name string.
 
 - Declarations no longer derive from old Identifier node. Instead, Instance, UserType and Label contain pointers
-  to the corresponding AnyXIdentifier
+  to the corresponding XIdentifier
 
-- Use cases that explicitly go to an identifier (eg right hand side of .) contain pointers to AnyXIdentifier
+- Use cases that explicitly go to an identifier (eg right hand side of .) contain pointers to XIdentifier
 
 - STILL TODO Let the words Instance, UserType and Label refer to the XIdentifier nodes, and use eg XDeclaration
   for the decls, so things are more easily understood.

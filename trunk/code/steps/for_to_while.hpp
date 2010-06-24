@@ -10,7 +10,7 @@
 
 #include "helpers/search_replace.hpp"
 
-class ForToWhile : public Transformation
+class ForToWhile : public InPlaceTransformation
 {
 public:
 	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );

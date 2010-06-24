@@ -38,7 +38,7 @@
 
 #define INFERNO_TRIPLE "arm-linux"
 
-class Parse: public Transformation
+class Parse: public InPlaceTransformation
 {
 public:
 	Parse(string i) :
@@ -46,14 +46,14 @@ public:
 	{
 	}
 
-	void operator()(shared_ptr<Node> context, shared_ptr<Node> *proot)
+	void operator()(SharedPtr<Node> context, SharedPtr<Node> *proot)
 	{
 		// Allow proot to point to a NULL shared_ptr; in this case we will create a Program node and parse into it.
 		// Otherwise *proot must be a Scope, and we will append whatever we parse into that scope.
 		ASSERT( proot );
 		if (!*proot)
 		{
-			*proot = shared_ptr<Program> (new Program);
+			*proot = SharedPtr<Program> (new Program);
 		}
 		if (!context)
 			context = *proot;
