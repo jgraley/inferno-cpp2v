@@ -14,23 +14,23 @@ shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
         ASSERTFAIL();
 }
 
-shared_ptr<Node> GetDeclaration::operator()( shared_ptr<Node> context, shared_ptr<Node> root )
+SharedPtr<Node> GetDeclaration::operator()( SharedPtr<Node> context, SharedPtr<Node> root )
 {
-	if( shared_ptr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>( root ) )
+	if( SharedPtr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>( root ) )
 		return Get( context, tid );
-	else if( shared_ptr<InstanceIdentifier> iid = dynamic_pointer_cast<InstanceIdentifier>( root ) )
+	else if( SharedPtr<InstanceIdentifier> iid = dynamic_pointer_cast<InstanceIdentifier>( root ) )
 		return Get( context, iid );
 	else
-		return shared_ptr<Node>();
+		return SharedPtr<Node>();
 }
 
-shared_ptr<UserType> GetDeclaration::Get( shared_ptr<Node> context, shared_ptr<TypeIdentifier> id )
+SharedPtr<UserType> GetDeclaration::Get( SharedPtr<Node> context, SharedPtr<TypeIdentifier> id )
 {
 	Flattener<UserType> walkr(context);
 	TRACE("GetDeclaration %d\n", walkr.size());
 	ASSERT( (deque< SharedPtr<UserType> >::iterator)(walkr.begin()) !=
 			(deque< SharedPtr<UserType> >::iterator)(walkr.end()) );
-	FOREACH( shared_ptr<UserType> d, walkr )
+	FOREACH( SharedPtr<UserType> d, walkr )
 	{
 		TRACE("trying id of %d\n", walkr.size());
         if( id == GetIdentifier( d ) ) 
@@ -39,14 +39,14 @@ shared_ptr<UserType> GetDeclaration::Get( shared_ptr<Node> context, shared_ptr<T
 	ASSERTFAIL();
 }
 
-shared_ptr<Instance> GetDeclaration::Get( shared_ptr<Node> context, shared_ptr<InstanceIdentifier> id )
+SharedPtr<Instance> GetDeclaration::Get( SharedPtr<Node> context, SharedPtr<InstanceIdentifier> id )
 {
     Walk w( context );
     while(!w.Done())
     {
-        shared_ptr<Node> n = w.Get();
+        SharedPtr<Node> n = w.Get();
 
-        if( shared_ptr<Instance> d = dynamic_pointer_cast<Instance>(n) )
+        if( SharedPtr<Instance> d = dynamic_pointer_cast<Instance>(n) )
             if( id == GetIdentifier( d ) )
 	            return d;
 

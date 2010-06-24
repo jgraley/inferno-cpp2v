@@ -4,7 +4,7 @@
 #include "walk.hpp"
 #include "transformation.hpp"
 
-class Validate : public Transformation
+class Validate : public InPlaceTransformation
 {
 public:
 	Validate( bool p=false ) :
@@ -12,14 +12,14 @@ public:
 	{
 	}
 
-	virtual void operator()( shared_ptr<Node> context,
-	    		             shared_ptr<Node> *proot );
+	virtual void operator()( SharedPtr<Node> context,
+	    		             SharedPtr<Node> *proot );
 private:
-	void OnLink( shared_ptr<Node> p, shared_ptr<Node> c );
+	void OnLink( SharedPtr<Node> p, SharedPtr<Node> c );
 
 	bool is_pattern;
-	Map< shared_ptr<Node>, unsigned > decl_refs;
-	Map< shared_ptr<Node>, unsigned > total_refs;
+	Map< SharedPtr<Node>, unsigned > decl_refs;
+	Map< SharedPtr<Node>, unsigned > total_refs;
 };
 
 // TODO

@@ -3,25 +3,25 @@
 
 #include "helpers/search_replace.hpp"
 
-class SplitInstanceDeclarations : public Transformation
+class SplitInstanceDeclarations : public InPlaceTransformation
 {
 public:
 	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
 };
 
-class MergeInstanceDeclarations : public Transformation
+class MergeInstanceDeclarations : public InPlaceTransformation
 {
 public:
 	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
 };
 
-class HackUpIfs : public Transformation
+class HackUpIfs : public InPlaceTransformation
 {
 public:
 	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
 };
 
-class CrazyNine : public Transformation
+class CrazyNine : public InPlaceTransformation
 {
 public:
 	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );

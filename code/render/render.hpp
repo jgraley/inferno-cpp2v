@@ -27,16 +27,16 @@
     ERROR_UNKNOWN( P ? typeid(*P).name() : "<NULL>" );
 
 
-class Render : public Transformation
+class Render : public OutOfPlaceTransformation
 {
 public:
     Render()
     {        
     }
     
-    shared_ptr<Node> operator()( shared_ptr<Node> context, shared_ptr<Node> root )
+    SharedPtr<Node> operator()( SharedPtr<Node> context, SharedPtr<Node> root )
     {
-        // Parse can only work on a whole program
+        // Render can only work on a whole program
     	ASSERT( context == root );
         program = dynamic_pointer_cast<Program>(root);
         ASSERT( program );

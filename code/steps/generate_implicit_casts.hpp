@@ -10,7 +10,7 @@
 
 #include "helpers/search_replace.hpp"
 
-class GenerateImplicitCasts : public Transformation
+class GenerateImplicitCasts : public InPlaceTransformation
 {
 public:
 	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );

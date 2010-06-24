@@ -10,8 +10,8 @@
 #include "misc.hpp"
 #include "tree/tree.hpp"
 
-void Validate::operator()( shared_ptr<Node> context,
-						   shared_ptr<Node> *proot )
+void Validate::operator()( SharedPtr<Node> context,
+						   SharedPtr<Node> *proot )
 {
 	(void)context;
 
@@ -21,7 +21,7 @@ void Validate::operator()( shared_ptr<Node> context,
 	Walk w( *proot );
 	while(!w.Done())
 	{
-		shared_ptr<Node> x = w.Get();
+		SharedPtr<Node> x = w.Get();
 
 		if( !is_pattern ) // Don't do these checks on search/replace patterns
 		{
@@ -33,11 +33,11 @@ void Validate::operator()( shared_ptr<Node> context,
 			ASSERT( x->IsFinal() )( "Found intermediate (non-final) node ")(*x)(" at ")(w);
 
 			// Check that we can successfully call TypeOf on every Expression
-			if( shared_ptr<Expression> e = dynamic_pointer_cast<Expression>(x) )
+			if( SharedPtr<Expression> e = dynamic_pointer_cast<Expression>(x) )
 			    (void)TypeOf()(context, e);
 
 			// Check that every identifier has a declaration
-			if( shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(x) )
+			if( SharedPtr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(x) )
 			    (void)GetDeclaration()(context, ii);
         }
 
@@ -98,19 +98,19 @@ void Validate::operator()( shared_ptr<Node> context,
 	}
 }
 
-void Validate::OnLink( shared_ptr<Node> p, shared_ptr<Node> c )
+void Validate::OnLink( SharedPtr<Node> p, SharedPtr<Node> c )
 {
-	if( shared_ptr<Instance> pi = dynamic_pointer_cast<Instance>(p) )
+	if( SharedPtr<Instance> pi = dynamic_pointer_cast<Instance>(p) )
 	{
 		if( c == pi->identifier )
 		    decl_refs[c]++;
 	}
-	else if( shared_ptr<UserType> pu = dynamic_pointer_cast<UserType>(p) )
+	else if( SharedPtr<UserType> pu = dynamic_pointer_cast<UserType>(p) )
 	{
 		if( c == pu->identifier )
 		    decl_refs[c]++;
 	}
-	else if( shared_ptr<Label> pl = dynamic_pointer_cast<Label>(p) )
+	else if( SharedPtr<Label> pl = dynamic_pointer_cast<Label>(p) )
 	{
 		if( c == pl->identifier )
 		    decl_refs[c]++;
