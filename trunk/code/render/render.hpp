@@ -30,6 +30,7 @@
 class Render : public OutOfPlaceTransformation
 {
 public:
+	using Transformation::operator();
     Render()
     {        
     }

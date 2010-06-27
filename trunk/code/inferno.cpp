@@ -34,38 +34,36 @@ int main( int argc, char *argv[] )
               
     if( --ReadArgs::quitafter >= 0 )
     {
-    	ForToWhile()(program, &program);
+    	ForToWhile()(&program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
-    	GenerateImplicitCasts()(program, &program);
+    	GenerateImplicitCasts()(&program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
-        SplitInstanceDeclarations()(program, &program);
+        SplitInstanceDeclarations()(&program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
-        UseTempsForParamsReturn()(program, &program);
+        UseTempsForParamsReturn()(&program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
     {
-    	GenerateStacks()(program, &program);
+    	GenerateStacks()(&program);
     }
 
     if(ReadArgs::intermediate_graph)
     {
-        Graph g;
-        g( program, program );
+        Graph()( &program );
     }
     else
     {
-        Render r;
-        r( program, program );
+        Render()(&program );
     }    
     
     return 0;
