@@ -8,7 +8,7 @@
 // Does declaration of a depend on (ie use) declaration of b?
 // Set ignore_ptr_ref_record to make function ignore the case where a's type contains a pointer or 
 // reference to b
-bool IsDependOn( shared_ptr<Declaration> a, shared_ptr<Declaration> b, bool ignore_indirection_to_record=false );
+bool IsDependOn( SharedPtr<Declaration> a, SharedPtr<Declaration> b, bool ignore_indirection_to_record=false );
 
 // Sort some declarations into an order that will compile successfully.
 // Optionally ignore pointers and references to records: they can be cyclic and so cannot be sorted
