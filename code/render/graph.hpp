@@ -13,6 +13,7 @@
 class Graph : public OutOfPlaceTransformation
 {
 public:
+	using Transformation::operator();
     void operator()( RootedSearchReplace *root )
     {
         string s;

@@ -13,6 +13,7 @@
 class UseTempsForParamsReturn : public InPlaceTransformation
 {
 public:
+	using Transformation::operator();
 	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
 };
 

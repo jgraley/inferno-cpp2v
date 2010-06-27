@@ -41,6 +41,7 @@
 class Parse: public InPlaceTransformation
 {
 public:
+	using Transformation::operator();
 	Parse(string i) :
 		infile(i)
 	{
