@@ -41,7 +41,7 @@ public:
     	ASSERT( context == root );
         program = dynamic_pointer_cast<Program>(root);
         ASSERT( program );
-        AutoPush< shared_ptr<Scope> > cs( scope_stack, program );
+        AutoPush< SharedPtr<Scope> > cs( scope_stack, program );
               
         string s = RenderDeclarationCollection( program, ";\n", true ); // gets the .hpp stuff directly
     
@@ -58,30 +58,30 @@ public:
             fputs( s.c_str(), fp );
             fclose( fp );
         }    
-        program = shared_ptr<Program>();
+        program = SharedPtr<Program>();
         return root; // no change
     }
 
 private:
-    shared_ptr<Program> program;
+    SharedPtr<Program> program;
     string deferred_decls;
-    stack< shared_ptr<Scope> > scope_stack;
+    stack< SharedPtr<Scope> > scope_stack;
     // Remember the orders of collections when we sort them. Mirrors the same
     // map in the parser.
-    Map< shared_ptr<Scope>, Sequence<Declaration> > backing_ordering;
+    Map< SharedPtr<Scope>, Sequence<Declaration> > backing_ordering;
 
-    string RenderLiteral( shared_ptr<Literal> sp )
+    string RenderLiteral( SharedPtr<Literal> sp )
     {
     	return Sanitise( *sp );
     }
     
-    string RenderIdentifier( shared_ptr<Identifier> id )
+    string RenderIdentifier( SharedPtr<Identifier> id )
     {
         string ids;
         if( id )
         {
             // TODO maybe just try casting to Named
-            if( shared_ptr<SpecificIdentifier> ii = dynamic_pointer_cast<SpecificIdentifier>( id ) )
+            if( SharedPtr<SpecificIdentifier> ii = dynamic_pointer_cast<SpecificIdentifier>( id ) )
                 ids = *ii;
             else
                 ids = ERROR_UNSUPPORTED( (id) );
@@ -95,17 +95,17 @@ private:
         return ids;
     }
 
-    string RenderScopePrefix( shared_ptr<Identifier> id )
+    string RenderScopePrefix( SharedPtr<Identifier> id )
     {
-        shared_ptr<Scope> scope = GetScope( program, id );
+        SharedPtr<Scope> scope = GetScope( program, id );
         TRACE("%p %p %p\n", program.get(), scope.get(), scope_stack.top().get() );
         if( scope == scope_stack.top() )
             return string(); // local scope
         else if( scope == program )
             return "::"; 
-        else if( shared_ptr<Enum> e = dynamic_pointer_cast<Enum>( scope ) ) // <- for enum
+        else if( SharedPtr<Enum> e = dynamic_pointer_cast<Enum>( scope ) ) // <- for enum
             return RenderScopePrefix( e->identifier );    // omit scope for the enum itself
-        else if( shared_ptr<Record> r = dynamic_pointer_cast<Record>( scope ) ) // <- for class, struct, union
+        else if( SharedPtr<Record> r = dynamic_pointer_cast<Record>( scope ) ) // <- for class, struct, union
             return RenderScopedIdentifier( r->identifier ) + "::";       
         else if( dynamic_pointer_cast<Procedure>( scope ) ||  // <- this is for params
                  dynamic_pointer_cast<Compound>( scope ) )    // <- this is for locals in body
@@ -114,18 +114,18 @@ private:
             return ERROR_UNSUPPORTED( scope );
     }        
     
-    string RenderScopedIdentifier( shared_ptr<Identifier> id )
+    string RenderScopedIdentifier( SharedPtr<Identifier> id )
     {
         string s = RenderScopePrefix( id ) + RenderIdentifier( id );
         TRACE("Render scoped identifier %s\n", s.c_str() );
         return s;
     }
     
-    string RenderIntegralType( shared_ptr<Integral> type, string object=string() )
+    string RenderIntegralType( SharedPtr<Integral> type, string object=string() )
     {
         bool ds;
         unsigned width;       
-        shared_ptr<SpecificInteger> ic = dynamic_pointer_cast<SpecificInteger>( type->width );
+        SharedPtr<SpecificInteger> ic = dynamic_pointer_cast<SpecificInteger>( type->width );
         ASSERT(ic)("width must be integer");
         width = ic->getLimitedValue();
                   
@@ -174,10 +174,10 @@ private:
         return s;              
     }
 
-    string RenderFloatingType( shared_ptr<Floating> type )
+    string RenderFloatingType( SharedPtr<Floating> type )
     {
         string s;
-        shared_ptr<SpecificFloatSemantics> sem = dynamic_pointer_cast<SpecificFloatSemantics>(type->semantics);
+        SharedPtr<SpecificFloatSemantics> sem = dynamic_pointer_cast<SpecificFloatSemantics>(type->semantics);
         ASSERT(sem);
     
         if( &(const llvm::fltSemantics &)*sem == TypeDb::float_semantics )
@@ -192,36 +192,36 @@ private:
         return s;              
     }
 
-    string RenderType( shared_ptr<Type> type, string object=string() )
+    string RenderType( SharedPtr<Type> type, string object=string() )
     {
         string sobject;
         if( !object.empty() )
             sobject = " " + object;
             
         TRACE();
-        if( shared_ptr<Integral> i = dynamic_pointer_cast< Integral >(type) )
+        if( SharedPtr<Integral> i = dynamic_pointer_cast< Integral >(type) )
             return RenderIntegralType( i, object );
-        if( shared_ptr<Floating> f = dynamic_pointer_cast< Floating >(type) )
+        if( SharedPtr<Floating> f = dynamic_pointer_cast< Floating >(type) )
             return RenderFloatingType( f ) + sobject;
         else if( dynamic_pointer_cast< Void >(type) )
             return "void" + sobject;
         else if( dynamic_pointer_cast< Boolean >(type) )
             return "bool" + sobject;
-        else if( shared_ptr<Constructor> c = dynamic_pointer_cast< Constructor >(type) )
+        else if( SharedPtr<Constructor> c = dynamic_pointer_cast< Constructor >(type) )
             return object + "(" + RenderDeclarationCollection(c, ", ", false) + ")";
-        else if( shared_ptr<Destructor> f = dynamic_pointer_cast< Destructor >(type) )
+        else if( SharedPtr<Destructor> f = dynamic_pointer_cast< Destructor >(type) )
             return object + "()";
-        else if( shared_ptr<Function> f = dynamic_pointer_cast< Function >(type) )
+        else if( SharedPtr<Function> f = dynamic_pointer_cast< Function >(type) )
             return RenderType( f->return_type, "(" + object + ")(" + RenderDeclarationCollection(f, ", ", false) + ")" );
-        else if( shared_ptr<Pointer> p = dynamic_pointer_cast< Pointer >(type) )
+        else if( SharedPtr<Pointer> p = dynamic_pointer_cast< Pointer >(type) )
             return RenderType( p->destination, "(*" + object + ")" );
-        else if( shared_ptr<Reference> r = dynamic_pointer_cast< Reference >(type) )
+        else if( SharedPtr<Reference> r = dynamic_pointer_cast< Reference >(type) )
             return RenderType( r->destination, "(&" + object + ")" );
-        else if( shared_ptr<Array> a = dynamic_pointer_cast< Array >(type) )
+        else if( SharedPtr<Array> a = dynamic_pointer_cast< Array >(type) )
             return RenderType( a->element, object.empty() ? "[" + RenderExpression(a->size) + "]" : "(" + object + "[" + RenderExpression(a->size) + "])" );
-        else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
+        else if( SharedPtr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
             return RenderIdentifier(t->identifier) + sobject;
-        else if( shared_ptr<SpecificTypeIdentifier> ti = dynamic_pointer_cast< SpecificTypeIdentifier >(type) )
+        else if( SharedPtr<SpecificTypeIdentifier> ti = dynamic_pointer_cast< SpecificTypeIdentifier >(type) )
             return RenderIdentifier(ti) + sobject;
         else
             return ERROR_UNSUPPORTED(type);
@@ -243,7 +243,7 @@ private:
         return o;
     }
 
-    string RenderOperator( shared_ptr<Operator> op, Sequence<Expression> &operands )
+    string RenderOperator( SharedPtr<Operator> op, Sequence<Expression> &operands )
     {
     	ASSERT(op);
         if( dynamic_pointer_cast< MakeArray >(op) )
@@ -273,13 +273,13 @@ private:
     		return ERROR_UNSUPPORTED(op);
     }
 
-    string RenderCall( shared_ptr<Call> call )
+    string RenderCall( SharedPtr<Call> call )
     {
     	string s;
 
     	// Render the expression that resolves to the function name unless this is
     	// a constructor call in which case just the name of the thing being constructed.
-        if( shared_ptr<Expression> base = TypeOf().IsConstructorCall( program, call ) )
+        if( SharedPtr<Expression> base = TypeOf().IsConstructorCall( program, call ) )
             s += RenderExpression( base, true );
         else
         	s += RenderExpression( call->callee, true );
@@ -287,16 +287,16 @@ private:
         s += "(";
 
         // If Procedure or Function, generate some arguments, resolving the order using the original function type
-        shared_ptr<Node> ctype = TypeOf()( program, call->callee );
+        SharedPtr<Node> ctype = TypeOf()( program, call->callee );
         ASSERT( ctype );
-        if( shared_ptr<Procedure> proc = dynamic_pointer_cast<Procedure>(ctype) )
+        if( SharedPtr<Procedure> proc = dynamic_pointer_cast<Procedure>(ctype) )
             s += RenderMapInOrder( call, proc, ", ", false );
 
         s += ")";
         return s;
     }
 
-    string RenderExpression( shared_ptr<Initialiser> expression, bool bracketize_operator=false )
+    string RenderExpression( SharedPtr<Initialiser> expression, bool bracketize_operator=false )
     {
         TRACE("%p\n", expression.get());
         
@@ -305,25 +305,25 @@ private:
         
         if( dynamic_pointer_cast< Uninitialised >(expression) )
             return string();            
-        else if( shared_ptr<SpecificLabelIdentifier> li = dynamic_pointer_cast< SpecificLabelIdentifier >(expression) )
+        else if( SharedPtr<SpecificLabelIdentifier> li = dynamic_pointer_cast< SpecificLabelIdentifier >(expression) )
             return before + 
                    "&&" + RenderIdentifier( li ) + // label-as-variable (GCC extension)
                    after;
-        else if( shared_ptr<InstanceIdentifier> ii = dynamic_pointer_cast< InstanceIdentifier >(expression) )
+        else if( SharedPtr<InstanceIdentifier> ii = dynamic_pointer_cast< InstanceIdentifier >(expression) )
             return RenderScopedIdentifier( ii );
-        else if( shared_ptr<SizeOf> pot = dynamic_pointer_cast< SizeOf >(expression) )
+        else if( SharedPtr<SizeOf> pot = dynamic_pointer_cast< SizeOf >(expression) )
             return before + 
                    "sizeof(" + RenderType( pot->operand, "" ) + ")" +
                    after;
-        else if( shared_ptr<AlignOf> pot = dynamic_pointer_cast< AlignOf >(expression) )
+        else if( SharedPtr<AlignOf> pot = dynamic_pointer_cast< AlignOf >(expression) )
             return before + 
                    "alignof(" + RenderType( pot->operand, "" ) + ")" +
                    after;
-        else if( shared_ptr<NonCommutativeOperator> nco = dynamic_pointer_cast< NonCommutativeOperator >(expression) )
+        else if( SharedPtr<NonCommutativeOperator> nco = dynamic_pointer_cast< NonCommutativeOperator >(expression) )
             return before +
                    RenderOperator( nco, nco->operands ) +
                    after;
-        else if( shared_ptr<CommutativeOperator> co = dynamic_pointer_cast< CommutativeOperator >(expression) )
+        else if( SharedPtr<CommutativeOperator> co = dynamic_pointer_cast< CommutativeOperator >(expression) )
         {
         	Sequence<Expression> seq_operands;
         	// Operands are in collection, so move them to a container
@@ -333,39 +333,39 @@ private:
                    RenderOperator( co, seq_operands ) +
                    after;
         }
-        else if( shared_ptr<Call> c = dynamic_pointer_cast< Call >(expression) )
+        else if( SharedPtr<Call> c = dynamic_pointer_cast< Call >(expression) )
             return before +
                    RenderCall( c ) +
                    after;
-        else if( shared_ptr<New> n = dynamic_pointer_cast< New >(expression) )
+        else if( SharedPtr<New> n = dynamic_pointer_cast< New >(expression) )
             return before +
                    (dynamic_pointer_cast<Global>(n->global) ? "::" : "") +
                    "new(" + RenderOperandSequence( n->placement_arguments, ", ", false ) + ") " +
                    RenderType( n->type, "" ) + 
                    (n->constructor_arguments.empty() ? "" : "(" + RenderOperandSequence( n->constructor_arguments, ", ", false ) + ")" ) +
                    after;
-        else if( shared_ptr<Delete> d = dynamic_pointer_cast< Delete >(expression) )
+        else if( SharedPtr<Delete> d = dynamic_pointer_cast< Delete >(expression) )
             return before +
                    (dynamic_pointer_cast<Global>(d->global) ? "::" : "") +
                    "delete" + 
                    (dynamic_pointer_cast<DeleteArray>(d->array) ? "[]" : "") +
                    " " + RenderExpression( d->pointer, true ) +
                    after;
-        else if( shared_ptr<Lookup> a = dynamic_pointer_cast< Lookup >(expression) )
+        else if( SharedPtr<Lookup> a = dynamic_pointer_cast< Lookup >(expression) )
             return before + 
                    RenderExpression( a->base, true ) + "." +
                    RenderScopedIdentifier( a->member ) +
                    after;
-        else if( shared_ptr<Cast> c = dynamic_pointer_cast< Cast >(expression) )
+        else if( SharedPtr<Cast> c = dynamic_pointer_cast< Cast >(expression) )
             return before + 
                    "(" + RenderType( c->type, "" ) + ")" +
                    RenderExpression( c->operand, false ) +
                    after;
-        else if( shared_ptr<MakeRecord> ro = dynamic_pointer_cast< MakeRecord >(expression) )
+        else if( SharedPtr<MakeRecord> ro = dynamic_pointer_cast< MakeRecord >(expression) )
             return before +
                    RenderMakeRecord( ro ) +
                    after;
-        else if( shared_ptr<Literal> l = dynamic_pointer_cast< Literal >(expression) )
+        else if( SharedPtr<Literal> l = dynamic_pointer_cast< Literal >(expression) )
             return before + 
                    RenderLiteral( l ) +
                    after;
@@ -377,14 +377,14 @@ private:
             return ERROR_UNSUPPORTED(expression);
     }
     
-    string RenderMakeRecord( shared_ptr<MakeRecord> ro )
+    string RenderMakeRecord( SharedPtr<MakeRecord> ro )
     {
     	string s;
 
     	// Get the record
-    	shared_ptr<TypeIdentifier> id = dynamic_pointer_cast<TypeIdentifier>(ro->type);
+    	SharedPtr<TypeIdentifier> id = dynamic_pointer_cast<TypeIdentifier>(ro->type);
     	ASSERT(id);
-    	shared_ptr<Record> r = GetRecordDeclaration(program, id);
+    	SharedPtr<Record> r = GetRecordDeclaration(program, id);
 
     	s += "(";
     	s += RenderType( ro->type, "" );
@@ -394,8 +394,8 @@ private:
         return s;
     }
 
-    string RenderMapInOrder( shared_ptr<MapOperator> ro,
-    		                 shared_ptr<Scope> r,
+    string RenderMapInOrder( SharedPtr<MapOperator> ro,
+    		                 SharedPtr<Scope> r,
                              string separator,
                              bool separate_last )
     {
@@ -409,7 +409,7 @@ private:
     	FOREACH( SharedPtr<Declaration> d, sd )
     	{
     		// We only care about instances...
-    		if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
+    		if( SharedPtr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
     		{
     			// ...and not function instances
     			if( !dynamic_pointer_cast<Subroutine>( i->type ) )
@@ -433,7 +433,7 @@ private:
         return s;
     }
 
-    string RenderAccess( shared_ptr<AccessSpec> current_access )
+    string RenderAccess( SharedPtr<AccessSpec> current_access )
     {
         if( dynamic_pointer_cast<Public>( current_access ) )
             return "public";
@@ -445,7 +445,7 @@ private:
             return ERROR_UNKNOWN("current_access spec"); 
     }
     
-    string RenderStorage( shared_ptr<Instance> st )
+    string RenderStorage( SharedPtr<Instance> st )
     {
         if( dynamic_pointer_cast<Program>( scope_stack.top() ) )
             return ""; // at top-level scope, everything is set to static, but don't actually output the word
@@ -455,9 +455,9 @@ private:
             return "auto "; 
         else if( dynamic_pointer_cast<Temporary>( st ) )
             return "/*temp*/ "; 
-        else if( shared_ptr<Field> no = dynamic_pointer_cast<Field>( st ) )
+        else if( SharedPtr<Field> no = dynamic_pointer_cast<Field>( st ) )
         {
-            shared_ptr<Virtuality> v = no->virt;
+            SharedPtr<Virtuality> v = no->virt;
             if( dynamic_pointer_cast<Virtual>( v ) )
                 return "virtual ";
             else if( dynamic_pointer_cast<NonVirtual>( v ) )
@@ -471,9 +471,9 @@ private:
     
     void ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits, Sequence<Statement> &remainder )
     {
-        FOREACH( shared_ptr<Statement> s, body )
+        FOREACH( SharedPtr<Statement> s, body )
         {
-            if( shared_ptr<Call> o = dynamic_pointer_cast< Call >(s) )
+            if( SharedPtr<Call> o = dynamic_pointer_cast< Call >(s) )
             {
                 if( TypeOf().IsConstructorCall( program, o ) )
                 {
@@ -485,7 +485,7 @@ private:
         }
     }
     
-    string RenderInstance( shared_ptr<Instance> o, string sep, bool showtype = true,
+    string RenderInstance( SharedPtr<Instance> o, string sep, bool showtype = true,
                            bool showstorage = true, bool showinit = true, bool showscope = false )
     {
         string s;
@@ -494,10 +494,10 @@ private:
         
         if( showstorage )
         {
-       	    if( shared_ptr<Static> st = dynamic_pointer_cast<Static>(o) )
+       	    if( SharedPtr<Static> st = dynamic_pointer_cast<Static>(o) )
        		    if( dynamic_pointer_cast<Const>(st->constancy) )
                     s += "const ";
-    	    if( shared_ptr<Field> f = dynamic_pointer_cast<Field>(o) )
+    	    if( SharedPtr<Field> f = dynamic_pointer_cast<Field>(o) )
     		    if( dynamic_pointer_cast<Const>(f->constancy) )
                     s += "const ";
             s += RenderStorage(o);
@@ -508,11 +508,11 @@ private:
         if( showscope )
             name = RenderScopePrefix(o->identifier);
 
-        shared_ptr<Constructor> con = dynamic_pointer_cast<Constructor>(o->type);
-        shared_ptr<Destructor> de = dynamic_pointer_cast<Destructor>(o->type);
+        SharedPtr<Constructor> con = dynamic_pointer_cast<Constructor>(o->type);
+        SharedPtr<Destructor> de = dynamic_pointer_cast<Destructor>(o->type);
         if( con || de )
         {
-            shared_ptr<Record> rec = dynamic_pointer_cast<Record>( GetScope( program, o->identifier ) );
+            SharedPtr<Record> rec = dynamic_pointer_cast<Record>( GetScope( program, o->identifier ) );
             ASSERT( rec );
             name += (de ? "~" : "");
             name += RenderIdentifier(rec->identifier);
@@ -533,10 +533,10 @@ private:
             // Don't render any initialiser
             s += sep;
         }    
-        else if( shared_ptr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser) )
+        else if( SharedPtr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser) )
         {                                 
             // Render initialiser list then let RenderStatement() do the rest
-            AutoPush< shared_ptr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) );
+            AutoPush< SharedPtr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) );
 
             Sequence<Statement> inits;
             Sequence<Statement> remainder;
@@ -544,18 +544,18 @@ private:
             if( !inits.empty() )
             {
                 s += " : ";
-                s += RenderSequence( inits, ", ", false, shared_ptr<Public>(), true );                
+                s += RenderSequence( inits, ", ", false, SharedPtr<Public>(), true );
             }
             
-            shared_ptr<Compound> r( new Compound );
+            SharedPtr<Compound> r( new Compound );
             r->members = comp->members;
             r->statements = remainder;
             s += "\n" + RenderStatement(r, "");
         }
-        else if( shared_ptr<Expression> ei = dynamic_pointer_cast<Expression>( o->initialiser ) )
+        else if( SharedPtr<Expression> ei = dynamic_pointer_cast<Expression>( o->initialiser ) )
         {
             // Render expression with an assignment
-            AutoPush< shared_ptr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) );
+            AutoPush< SharedPtr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) );
             s += " = " + RenderExpression(ei) + sep;
         }
         else
@@ -569,27 +569,27 @@ private:
     // Non-const static objects and functions in records 
     // get split into a part that goes into the record (main line of rendering) and
     // a part that goes separately (deferred_decls gets appended at the very end)
-    bool ShouldSplitInstance( shared_ptr<Instance> o )
+    bool ShouldSplitInstance( SharedPtr<Instance> o )
     {
         bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
         bool is_non_const_static = false;
-        if( shared_ptr<Static> s = dynamic_pointer_cast<Static>(o) )
+        if( SharedPtr<Static> s = dynamic_pointer_cast<Static>(o) )
         	if( dynamic_pointer_cast<NonConst>(s->constancy) )
         		is_non_const_static = true;
         return dynamic_pointer_cast<Record>( scope_stack.top() ) &&
                    ( is_non_const_static || isfunc );
     }
     
-    string RenderDeclaration( shared_ptr<Declaration> declaration, string sep, shared_ptr<AccessSpec> *current_access = NULL, 
+    string RenderDeclaration( SharedPtr<Declaration> declaration, string sep, SharedPtr<AccessSpec> *current_access = NULL,
                               bool showtype = true, bool force_incomplete = false )
     {
         TRACE();
         string s;
         
-        shared_ptr<AccessSpec> this_access;
+        SharedPtr<AccessSpec> this_access;
 
         // Decide access spec for this declaration (explicit if instance, otherwise force to Public)
-        if( shared_ptr<Field> f = dynamic_pointer_cast<Field>(declaration) )
+        if( SharedPtr<Field> f = dynamic_pointer_cast<Field>(declaration) )
             this_access = f->access;
         else
         	this_access = shared_new<Public>();
@@ -602,13 +602,13 @@ private:
             *current_access = this_access;
         }
                                          
-        if( shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(declaration) )
+        if( SharedPtr<Instance> o = dynamic_pointer_cast<Instance>(declaration) )
         {                
             if( ShouldSplitInstance(o) )
             {
                 s += RenderInstance( o, sep, showtype, showtype, false, false );
                 {
-                    AutoPush< shared_ptr<Scope> > cs( scope_stack, program );
+                    AutoPush< SharedPtr<Scope> > cs( scope_stack, program );
                     deferred_decls += string("\n") + RenderInstance( o, sep, showtype, false, true, true );
                 }
             }
@@ -618,34 +618,34 @@ private:
                 s += RenderInstance( o, sep, showtype, showtype, true, false );
             }
         }
-        else if( shared_ptr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
+        else if( SharedPtr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
         {
             s += "typedef " + RenderType( t->type, RenderIdentifier(t->identifier) ) + sep;
         }
-        else if( shared_ptr<Record> r = dynamic_pointer_cast< Record >(declaration) )
+        else if( SharedPtr<Record> r = dynamic_pointer_cast< Record >(declaration) )
         {
-            shared_ptr<AccessSpec> a;
+            SharedPtr<AccessSpec> a;
             bool showtype=true;
             string sep2=";\n";
             if( dynamic_pointer_cast< Class >(r) )
             {
                 s += "class";
-                a = shared_ptr<Private>(new Private);
+                a = SharedPtr<Private>(new Private);
             }
             else if( dynamic_pointer_cast< Struct >(r) )
             {
                 s += "struct";
-                a = shared_ptr<Public>(new Public);
+                a = SharedPtr<Public>(new Public);
             }
             else if( dynamic_pointer_cast< Union >(r) )
             {
                 s += "union";
-                a = shared_ptr<Public>(new Public);
+                a = SharedPtr<Public>(new Public);
             }
             else if( dynamic_pointer_cast< Enum >(r) )
             {
                 s += "enum";
-                a = shared_ptr<Public>(new Public);
+                a = SharedPtr<Public>(new Public);
                 sep2 = ",\n";
                 showtype = false;
             }
@@ -658,7 +658,7 @@ private:
             if( !force_incomplete )
             {
                 // Base classes
-                if( shared_ptr<InheritanceRecord> ir = dynamic_pointer_cast< InheritanceRecord >(declaration) )
+                if( SharedPtr<InheritanceRecord> ir = dynamic_pointer_cast< InheritanceRecord >(declaration) )
                 {
                     if( !ir->bases.empty() )
                     {
@@ -676,7 +676,7 @@ private:
                 }
                 
                 // Contents
-                AutoPush< shared_ptr<Scope> > cs( scope_stack, r );
+                AutoPush< SharedPtr<Scope> > cs( scope_stack, r );
                 s += "\n{\n" +
                      RenderDeclarationCollection( r, sep2, true, a, showtype ) +
                      "}";
@@ -684,7 +684,7 @@ private:
             
             s += ";\n";
         }
-        else if( shared_ptr<Label> l = dynamic_pointer_cast<Label>(declaration) )
+        else if( SharedPtr<Label> l = dynamic_pointer_cast<Label>(declaration) )
             return RenderIdentifier(l->identifier) + ":\n"; // no ; after a label        
         else
             s += ERROR_UNSUPPORTED(declaration);
@@ -693,34 +693,34 @@ private:
         return s;    
     }
 
-    string RenderStatement( shared_ptr<Statement> statement, string sep )
+    string RenderStatement( SharedPtr<Statement> statement, string sep )
     {
         TRACE();
         if( !statement )
             return sep;            
         //printf( "%s %d things\n", typeid(*statement).name(), statement->Itemise().size() );
-        if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(statement) )
+        if( SharedPtr<Declaration> d = dynamic_pointer_cast< Declaration >(statement) )
             return RenderDeclaration( d, sep );
-        else if( shared_ptr<Compound> c = dynamic_pointer_cast< Compound >(statement) )
+        else if( SharedPtr<Compound> c = dynamic_pointer_cast< Compound >(statement) )
         {
-            AutoPush< shared_ptr<Scope> > cs( scope_stack, c );
+            AutoPush< SharedPtr<Scope> > cs( scope_stack, c );
             string s = "{\n";
             s += RenderDeclarationCollection( c, ";\n", true ); // Must do this first to populate backing list
             s += RenderSequence( c->statements, ";\n", true );
             return s + "}\n";
         }
-        else if( shared_ptr<Expression> e = dynamic_pointer_cast< Expression >(statement) )
+        else if( SharedPtr<Expression> e = dynamic_pointer_cast< Expression >(statement) )
             return RenderExpression(e) + sep;
-        else if( shared_ptr<Return> es = dynamic_pointer_cast<Return>(statement) )
+        else if( SharedPtr<Return> es = dynamic_pointer_cast<Return>(statement) )
             return "return " + RenderExpression(es->return_value) + sep;
-        else if( shared_ptr<Goto> g = dynamic_pointer_cast<Goto>(statement) )
+        else if( SharedPtr<Goto> g = dynamic_pointer_cast<Goto>(statement) )
         {
-            if( shared_ptr<SpecificLabelIdentifier> li = dynamic_pointer_cast< SpecificLabelIdentifier >(g->destination) )
+            if( SharedPtr<SpecificLabelIdentifier> li = dynamic_pointer_cast< SpecificLabelIdentifier >(g->destination) )
                 return "goto " + RenderIdentifier(li) + sep;  // regular goto
             else
                 return "goto *" + RenderExpression(g->destination) + sep; // goto-a-variable (GCC extension)
         }
-        else if( shared_ptr<If> i = dynamic_pointer_cast<If>(statement) )
+        else if( SharedPtr<If> i = dynamic_pointer_cast<If>(statement) )
         {
             string s;
             s += "if( " + RenderExpression(i->condition) + " )\n"
@@ -732,22 +732,22 @@ private:
                      RenderStatement(i->else_body, ";\n");
             return s;
         } 
-        else if( shared_ptr<While> w = dynamic_pointer_cast<While>(statement) )
+        else if( SharedPtr<While> w = dynamic_pointer_cast<While>(statement) )
             return "while( " + RenderExpression(w->condition) + " )\n" +
                    RenderStatement(w->body, ";\n");
-        else if( shared_ptr<Do> d = dynamic_pointer_cast<Do>(statement) )
+        else if( SharedPtr<Do> d = dynamic_pointer_cast<Do>(statement) )
             return "do\n" +
                    RenderStatement(d->body, ";\n") +
                    "while( " + RenderExpression(d->condition) + " )" + sep;
-        else if( shared_ptr<For> f = dynamic_pointer_cast<For>(statement) )
+        else if( SharedPtr<For> f = dynamic_pointer_cast<For>(statement) )
             return "for( " + RenderStatement(f->initialisation, "") + "; " + RenderExpression(f->condition) + "; "+ RenderStatement(f->increment, "") + " )\n" +
                    RenderStatement(f->body, ";\n");
-        else if( shared_ptr<Switch> s = dynamic_pointer_cast<Switch>(statement) )
+        else if( SharedPtr<Switch> s = dynamic_pointer_cast<Switch>(statement) )
             return "switch( " + RenderExpression(s->condition) + " )\n" +
                    RenderStatement(s->body, ";\n");
-        else if( shared_ptr<Case> c = dynamic_pointer_cast<Case>(statement) )
+        else if( SharedPtr<Case> c = dynamic_pointer_cast<Case>(statement) )
             return "case " + RenderExpression(c->value) + ":\n";
-        else if( shared_ptr<RangeCase> rc = dynamic_pointer_cast<RangeCase>(statement) )
+        else if( SharedPtr<RangeCase> rc = dynamic_pointer_cast<RangeCase>(statement) )
             return "case " + RenderExpression(rc->value_lo) + " ... " + RenderExpression(rc->value_hi) + ":\n";
         else if( dynamic_pointer_cast<Default>(statement) )
             return "default:\n";
@@ -765,7 +765,7 @@ private:
     string RenderSequence( Sequence<ELEMENT> spe, 
                            string separator, 
                            bool separate_last,
-                           shared_ptr<AccessSpec> init_access = shared_ptr<AccessSpec>(),
+                           SharedPtr<AccessSpec> init_access = SharedPtr<AccessSpec>(),
                            bool showtype=true )
     {
         TRACE();
@@ -774,10 +774,10 @@ private:
         {
             TRACE("%d %p\n", i, &i);
             string sep = (separate_last || i+1<spe.size()) ? separator : "";
-            shared_ptr<ELEMENT> pe = spe[i];                        
-            if( shared_ptr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
+            SharedPtr<ELEMENT> pe = spe[i];
+            if( SharedPtr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
                 s += RenderDeclaration( d, sep, init_access ? &init_access : NULL, showtype );
-            else if( shared_ptr<Statement> st = dynamic_pointer_cast< Statement >(pe) )
+            else if( SharedPtr<Statement> st = dynamic_pointer_cast< Statement >(pe) )
                 s += RenderStatement( st, sep ); 
             else
                 s += ERROR_UNSUPPORTED(pe);
@@ -795,16 +795,16 @@ private:
         {
             TRACE("%d %p\n", i, &i);
             string sep = (separate_last || i+1<spe.size()) ? separator : "";
-            shared_ptr<Expression> pe = spe[i];                        
+            SharedPtr<Expression> pe = spe[i];
             s += RenderExpression( pe ) + sep;
         }
         return s;
     }
     
-    string RenderDeclarationCollection( shared_ptr<Scope> sd,
+    string RenderDeclarationCollection( SharedPtr<Scope> sd,
 			                            string separator, 
 			                            bool separate_last,
-			                            shared_ptr<AccessSpec> init_access = shared_ptr<AccessSpec>(),
+			                            SharedPtr<AccessSpec> init_access = SharedPtr<AccessSpec>(),
 			                            bool showtype=true )
     {
         TRACE();        
@@ -819,7 +819,7 @@ private:
         string s;
         // Emit an incomplete for each record
         FOREACH( SharedPtr<Declaration> pd, sorted ) //for( int i=0; i<sorted.size(); i++ )
-            if( shared_ptr<Record> r = dynamic_pointer_cast<Record>(pd) ) // is a record
+            if( SharedPtr<Record> r = dynamic_pointer_cast<Record>(pd) ) // is a record
                 if( !dynamic_pointer_cast<Enum>(r) ) // but not an enum 
                     s += RenderDeclaration( r, separator, init_access ? &init_access : NULL, showtype, true );
         

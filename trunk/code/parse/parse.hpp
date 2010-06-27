@@ -49,7 +49,7 @@ public:
 
 	void operator()(SharedPtr<Node> context, SharedPtr<Node> *proot)
 	{
-		// Allow proot to point to a NULL shared_ptr; in this case we will create a Program node and parse into it.
+		// Allow proot to point to a NULL SharedPtr; in this case we will create a Program node and parse into it.
 		// Otherwise *proot must be a Scope, and we will append whatever we parse into that scope.
 		ASSERT( proot );
 		if (!*proot)
@@ -58,7 +58,7 @@ public:
 		}
 		if (!context)
 			context = *proot;
-		shared_ptr<Scope> root_scope = dynamic_pointer_cast<Scope> (*proot);
+		SharedPtr<Scope> root_scope = dynamic_pointer_cast<Scope> (*proot);
 		ASSERT(root_scope)("Can only parse into a scope");
 
 		clang::FileManager fm;
@@ -100,7 +100,7 @@ private:
 	class InfernoAction: public clang::Action
 	{
 	public:
-		InfernoAction(shared_ptr<Node> context, shared_ptr<Scope> root_scope,
+		InfernoAction(SharedPtr<Node> context, SharedPtr<Scope> root_scope,
 				clang::IdentifierTable &IT, clang::Preprocessor &pp,
 				clang::TargetInfo &T) :
 			preprocessor(pp), target_info(T), ident_track(context),
@@ -121,31 +121,31 @@ private:
 	private:
 		// Parameters are parsed outside function scope, so we defer entering them
 		// into the ident_track until we're in the function. This stores the clang identifiers.
-		map<shared_ptr<Declaration> , clang::IdentifierInfo *> backing_params;
+		map<SharedPtr<Declaration> , clang::IdentifierInfo *> backing_params;
 
 		// The statement after a label is parsed as a sub-construct under the label which
 		// is not how the inferno tree does it. Remember that relationship here and
 		// generate the extra nodes when rendering a compound statement.
-		map<shared_ptr<Label> , shared_ptr<Statement> > backing_labels;
-		map<shared_ptr<SwitchTarget> , shared_ptr<Statement> > backing_targets;
-		Map<shared_ptr<Declaration> , shared_ptr<Declaration> >
+		map<SharedPtr<Label> , SharedPtr<Statement> > backing_labels;
+		map<SharedPtr<SwitchTarget> , SharedPtr<Statement> > backing_targets;
+		Map<SharedPtr<Declaration> , SharedPtr<Declaration> >
 				backing_paired_decl;
 
 		// Members of records go in an unordered collection, but when parsing
 		// we might need the order, eg for C-style initialisers or auto-generated
 		// constructor calls.
-		Map<shared_ptr<Scope> , Sequence<Declaration> > backing_ordering;
+		Map<SharedPtr<Scope> , Sequence<Declaration> > backing_ordering;
 
 		// In ActOnTag, when we see a record decl, we store it here and generate it
 		// at the next IssueDeclaration, called from ActOnDeclaration. This allows
 		// a seperate decl for records, since we so not support anon ones, and only
 		// allow one thing to be decl'd at a time.
-		shared_ptr<Declaration> decl_to_insert;
+		SharedPtr<Declaration> decl_to_insert;
 
 		clang::Preprocessor &preprocessor;
 		clang::TargetInfo &target_info;
 
-		stack<shared_ptr<Scope> > inferno_scope_stack;
+		stack<SharedPtr<Scope> > inferno_scope_stack;
 		RCHold<Declaration, DeclTy *> hold_decl;
 		RCHold<Base, DeclTy *> hold_base;
 		RCHold<Expression, ExprTy *> hold_expr;
@@ -154,28 +154,28 @@ private:
 		RCHold<LabelIdentifier, void *> hold_label_identifier;
 		RCHold<Node, CXXScopeTy *> hold_scope;
 		IdentifierTracker ident_track;
-		shared_ptr<Node> global_scope;
-		shared_ptr<Program> all_decls; // not the actual program, just a flattening of the decls
+		SharedPtr<Node> global_scope;
+		SharedPtr<Program> all_decls; // not the actual program, just a flattening of the decls
 		// we maintain this because decls don't always make it
 		// into the tree by the time we need them, thanks to the
 		// way clang works. Decls go in here immediately.
 
-		OwningStmtResult ToStmt(shared_ptr<Statement> s)
+		OwningStmtResult ToStmt(SharedPtr<Statement> s)
 		{
 			return OwningStmtResult(*this, hold_stmt.ToRaw(s));
 		}
 
-		OwningExprResult ToExpr(shared_ptr<Expression> e)
+		OwningExprResult ToExpr(SharedPtr<Expression> e)
 		{
 			return OwningExprResult(*this, hold_expr.ToRaw(e));
 		}
 
-		shared_ptr<Statement> FromClang(const StmtArg &s)
+		SharedPtr<Statement> FromClang(const StmtArg &s)
 		{
 			return hold_stmt.FromRaw(s.get());
 		}
 
-		shared_ptr<Expression> FromClang(const ExprArg &e)
+		SharedPtr<Expression> FromClang(const ExprArg &e)
 		{
 			return hold_expr.FromRaw(e.get());
 		}
@@ -188,16 +188,16 @@ private:
 
 		// Turn a clang::CXXScopeSpec into a pointer to the corresponding scope node.
 		// We have to deal with all the ways of it baing invalid, then just use hold_scope.
-		shared_ptr<Node> FromCXXScope(const clang::CXXScopeSpec *SS)
+		SharedPtr<Node> FromCXXScope(const clang::CXXScopeSpec *SS)
 		{
 			if (!SS)
-				return shared_ptr<Node> ();
+				return SharedPtr<Node> ();
 
 			if (SS->isEmpty())
-				return shared_ptr<Node> ();
+				return SharedPtr<Node> ();
 
 			if (!SS->isSet())
-				return shared_ptr<Node> ();
+				return SharedPtr<Node> ();
 
 			return hold_scope.FromRaw(SS->getScopeRep());
 		}
@@ -205,10 +205,10 @@ private:
 		clang::Action::TypeTy *isTypeName(clang::IdentifierInfo &II,
 				clang::Scope *S, const clang::CXXScopeSpec *SS)
 		{
-			shared_ptr<Node> n = ident_track.TryGet(&II, FromCXXScope(SS));
+			SharedPtr<Node> n = ident_track.TryGet(&II, FromCXXScope(SS));
 			if (n)
 			{
-				shared_ptr<UserType> t = dynamic_pointer_cast<UserType> (n);
+				SharedPtr<UserType> t = dynamic_pointer_cast<UserType> (n);
 				if (t)
 					return hold_type.ToRaw(t->identifier);
 			}
@@ -227,12 +227,12 @@ private:
 		{
 			ident_track.SeenScope(S);
 
-			shared_ptr<Node> cur = ident_track.GetCurrent();
+			SharedPtr<Node> cur = ident_track.GetCurrent();
 			if (!dynamic_pointer_cast<Record> (cur))
 				return false; // not even in a record
 
-			shared_ptr<Node> cxxs = FromCXXScope(SS);
-			shared_ptr<Node> n = ident_track.TryGet(&II, cxxs);
+			SharedPtr<Node> cxxs = FromCXXScope(SS);
+			SharedPtr<Node> n = ident_track.TryGet(&II, cxxs);
 			return n == cur;
 		}
 
@@ -241,11 +241,11 @@ private:
 			ident_track.PopScope(S);
 		}
 
-		shared_ptr<Integral> CreateIntegralType(int bits, bool default_signed,
+		SharedPtr<Integral> CreateIntegralType(int bits, bool default_signed,
 				clang::DeclSpec::TSS type_spec_signed =
 						clang::DeclSpec::TSS_unspecified)
 		{
-			shared_ptr<Integral> i;
+			SharedPtr<Integral> i;
 			bool sign;
 			switch (type_spec_signed)
 			{
@@ -261,40 +261,40 @@ private:
 			}
 
 			if (sign)
-				i = shared_ptr<Signed> (new Signed);
+				i = SharedPtr<Signed> (new Signed);
 			else
-				i = shared_ptr<Unsigned> (new Unsigned);
+				i = SharedPtr<Unsigned> (new Unsigned);
 
 			i->width = CreateNumericConstant(bits);
 			return i;
 		}
 
-		shared_ptr<Floating> CreateFloatingType(const llvm::fltSemantics *s)
+		SharedPtr<Floating> CreateFloatingType(const llvm::fltSemantics *s)
 		{
 			ASSERT(s);
-			shared_ptr<SpecificFloatSemantics> sem(
+			SharedPtr<SpecificFloatSemantics> sem(
 					new SpecificFloatSemantics(s));
-			shared_ptr<Floating> f(new Floating);
+			SharedPtr<Floating> f(new Floating);
 			f->semantics = sem;
 			return f;
 		}
 
-		void FillParameters(shared_ptr<Procedure> p,
+		void FillParameters(SharedPtr<Procedure> p,
 				const clang::DeclaratorChunk::FunctionTypeInfo &fchunk)
 		{
 			backing_ordering[p].clear(); // ensure at least an empty sequence is in the map
 			for (int i = 0; i < fchunk.NumArgs; i++)
 			{
-				shared_ptr<Declaration> d = hold_decl.FromRaw(
+				SharedPtr<Declaration> d = hold_decl.FromRaw(
 						fchunk.ArgInfo[i].Param);
-				shared_ptr<Instance> inst = dynamic_pointer_cast<Instance> (d);
+				SharedPtr<Instance> inst = dynamic_pointer_cast<Instance> (d);
 				ASSERT( inst );
 				backing_ordering[p].push_back(inst);
 				p->members.insert(inst);
 			}
 		}
 
-		shared_ptr<Type> CreateTypeNode(clang::Declarator &D, int depth = 0)
+		SharedPtr<Type> CreateTypeNode(clang::Declarator &D, int depth = 0)
 		{
 			ASSERT( depth>=0 );
 			ASSERT( depth<=D.getNumTypeObjects() );
@@ -324,12 +324,12 @@ private:
 				case clang::DeclSpec::TST_void:
 					TRACE("void based %d %d\n", DS.getTypeSpecWidth(),
 							DS.getTypeSpecSign());
-					return shared_ptr<Type> (new Void());
+					return SharedPtr<Type> (new Void());
 					break;
 				case clang::DeclSpec::TST_bool:
 					TRACE("bool based %d %d\n", DS.getTypeSpecWidth(),
 							DS.getTypeSpecSign());
-					return shared_ptr<Type> (new Boolean());
+					return SharedPtr<Type> (new Boolean());
 					break;
 				case clang::DeclSpec::TST_float:
 					TRACE("float based %d %d\n", DS.getTypeSpecWidth(),
@@ -376,20 +376,20 @@ private:
 					{
 					case clang::Declarator::DK_Normal:
 					{
-						shared_ptr<Function> f(new Function);
+						SharedPtr<Function> f(new Function);
 						FillParameters(f, fchunk);
 						f->return_type = CreateTypeNode(D, depth + 1);
 						return f;
 					}
 					case clang::Declarator::DK_Constructor:
 					{
-						shared_ptr<Constructor> c(new Constructor);
+						SharedPtr<Constructor> c(new Constructor);
 						FillParameters(c, fchunk);
 						return c;
 					}
 					case clang::Declarator::DK_Destructor:
 					{
-						shared_ptr<Destructor> d(new Destructor);
+						SharedPtr<Destructor> d(new Destructor);
 						return d;
 					}
 					default:
@@ -404,7 +404,7 @@ private:
 					TRACE("pointer to...\n");
 					const clang::DeclaratorChunk::PointerTypeInfo &pchunk =
 							chunk.Ptr;
-					shared_ptr<Pointer> p(new Pointer);
+					SharedPtr<Pointer> p(new Pointer);
 					p->destination = CreateTypeNode(D, depth + 1);
 					return p;
 				}
@@ -415,7 +415,7 @@ private:
 					TRACE("reference to...\n");
 					const clang::DeclaratorChunk::ReferenceTypeInfo &rchunk =
 							chunk.Ref;
-					shared_ptr<Reference> r(new Reference);
+					SharedPtr<Reference> r(new Reference);
 					ASSERT(r);
 					r->destination = CreateTypeNode(D, depth + 1);
 					return r;
@@ -427,7 +427,7 @@ private:
 					const clang::DeclaratorChunk::ArrayTypeInfo &achunk =
 							chunk.Arr;
 					TRACE("array [%d] of...\n", achunk.NumElts);
-					shared_ptr<Array> a(new Array);
+					SharedPtr<Array> a(new Array);
 					ASSERT(a);
 					a->element = CreateTypeNode(D, depth + 1);
 					if (achunk.NumElts)
@@ -445,63 +445,63 @@ private:
 			}
 		}
 
-		shared_ptr<InstanceIdentifier> CreateInstanceIdentifier(
+		SharedPtr<InstanceIdentifier> CreateInstanceIdentifier(
 				clang::IdentifierInfo *ID = 0)
 		{
 			if (ID)
 			{
-				shared_ptr<SpecificInstanceIdentifier> ii(
+				SharedPtr<SpecificInstanceIdentifier> ii(
 						new SpecificInstanceIdentifier(ID->getName()));
 				return ii;
 			}
 			else
 			{
-				shared_ptr<SpecificInstanceIdentifier> ii(
+				SharedPtr<SpecificInstanceIdentifier> ii(
 						new SpecificInstanceIdentifier);
 				return ii;
 			}
 		}
 
-		shared_ptr<TypeIdentifier> CreateTypeIdentifier(
+		SharedPtr<TypeIdentifier> CreateTypeIdentifier(
 				clang::IdentifierInfo *ID)
 		{
 			ASSERT( ID );
-			shared_ptr<SpecificTypeIdentifier> ti(new SpecificTypeIdentifier(
+			SharedPtr<SpecificTypeIdentifier> ti(new SpecificTypeIdentifier(
 					ID->getName()));
 			return ti;
 		}
 
-		shared_ptr<TypeIdentifier> CreateTypeIdentifier(string s)
+		SharedPtr<TypeIdentifier> CreateTypeIdentifier(string s)
 		{
-			shared_ptr<SpecificTypeIdentifier>
+			SharedPtr<SpecificTypeIdentifier>
 					ti(new SpecificTypeIdentifier(s));
 			return ti;
 		}
 
-		shared_ptr<LabelIdentifier> CreateLabelIdentifier(
+		SharedPtr<LabelIdentifier> CreateLabelIdentifier(
 				clang::IdentifierInfo *ID)
 		{
 			ASSERT( ID );
-			shared_ptr<SpecificLabelIdentifier> li(new SpecificLabelIdentifier(
+			SharedPtr<SpecificLabelIdentifier> li(new SpecificLabelIdentifier(
 					ID->getName()));
 			return li;
 		}
 
-		shared_ptr<Instance> CreateInstanceNode(clang::Scope *S,
-				clang::Declarator &D, shared_ptr<AccessSpec> access =
-						shared_ptr<AccessSpec> (), bool automatic = false)
+		SharedPtr<Instance> CreateInstanceNode(clang::Scope *S,
+				clang::Declarator &D, SharedPtr<AccessSpec> access =
+						SharedPtr<AccessSpec> (), bool automatic = false)
 		{
 			const clang::DeclSpec &DS = D.getDeclSpec();
 			if (!access)
-				access = shared_ptr<Private> (new Private); // Most scopes are private unless specified otherwise
+				access = SharedPtr<Private> (new Private); // Most scopes are private unless specified otherwise
 
-			shared_ptr<Constancy> constancy;
+			SharedPtr<Constancy> constancy;
 			if (DS.getTypeQualifiers() & clang::DeclSpec::TQ_const)
 				constancy = shared_new<Const> ();
 			else
 				constancy = shared_new<NonConst> ();
 
-			shared_ptr<Instance> o;
+			SharedPtr<Instance> o;
 
 			if (automatic)
 			{
@@ -517,7 +517,7 @@ private:
 					TRACE("scope flags 0x%x\n", S->getFlags());
 					if (S->getFlags() & clang::Scope::CXXClassScope) // record scope
 					{
-						shared_ptr<Field> no = shared_new<Field> ();
+						SharedPtr<Field> no = shared_new<Field> ();
 						o = no;
 						if (DS.isVirtualSpecified())
 						{
@@ -536,7 +536,7 @@ private:
 					}
 					else // top level
 					{
-						shared_ptr<Static> no = shared_new<Static> ();
+						SharedPtr<Static> no = shared_new<Static> ();
 						o = no;
 						no->constancy = constancy;
 					}
@@ -547,14 +547,14 @@ private:
 					break;
 				case clang::DeclSpec::SCS_extern:// linking will be done "automatically" so no need to remember "extern" in the tree
 				{
-					shared_ptr<Static> no = shared_new<Static> ();
+					SharedPtr<Static> no = shared_new<Static> ();
 					o = no;
 					no->constancy = constancy;
 				}
 					break;
 				case clang::DeclSpec::SCS_static:
 				{
-					shared_ptr<Static> no = shared_new<Static> ();
+					SharedPtr<Static> no = shared_new<Static> ();
 					o = no;
 					no->constancy = constancy;
 				}
@@ -584,10 +584,10 @@ private:
 			return o;
 		}
 
-		shared_ptr<Typedef> CreateTypedefNode(clang::Scope *S,
+		SharedPtr<Typedef> CreateTypedefNode(clang::Scope *S,
 				clang::Declarator &D)
 		{
-			shared_ptr<Typedef> t(new Typedef);
+			SharedPtr<Typedef> t(new Typedef);
 			all_decls->members.insert(t);
 			clang::IdentifierInfo *ID = D.getIdentifier();
 			if (ID)
@@ -601,9 +601,9 @@ private:
 			return t;
 		}
 		/*
-		 shared_ptr<Label> CreateLabelNode( clang::IdentifierInfo *ID )
+		 SharedPtr<Label> CreateLabelNode( clang::IdentifierInfo *ID )
 		 {
-		 shared_ptr<Label> l(new Label);
+		 SharedPtr<Label> l(new Label);
 		 all_decls->members.insert(l);
 		 l->access = shared_new<Public>();
 		 l->identifier = CreateLabelIdentifier(ID);
@@ -611,57 +611,57 @@ private:
 		 return l;
 		 }
 		 */
-		shared_ptr<Declaration> FindExistingDeclaration(
+		SharedPtr<Declaration> FindExistingDeclaration(
 				const clang::CXXScopeSpec &SS, clang::IdentifierInfo *ID,
 				bool recurse)
 		{
 			if (!ID)
-				return shared_ptr<Declaration> (); // No name specified => doesn't match anything
+				return SharedPtr<Declaration> (); // No name specified => doesn't match anything
 
 			// See if we already have this record in the current scope, or specified scope
 			// if Declarator has one
-			shared_ptr<Node> cxxs = FromCXXScope(&SS);
+			SharedPtr<Node> cxxs = FromCXXScope(&SS);
 
 			// Use C++ scope if non-NULL; do not recurse (=precise match only)
-			shared_ptr<Node> found_n = ident_track.TryGet(ID, cxxs, recurse);
+			SharedPtr<Node> found_n = ident_track.TryGet(ID, cxxs, recurse);
 			TRACE("Looked for %s, result %p (%p)\n", ID->getName(),
 					found_n.get(), cxxs.get());
 			if (!found_n)
 			{
 				// Nothing was found with the supplied name
 				ASSERT( !cxxs ); // If C++ scope was given explicitly, require successful find
-				return shared_ptr<Declaration> ();
+				return SharedPtr<Declaration> ();
 			}
 
-			shared_ptr<Declaration> found_d =
+			SharedPtr<Declaration> found_d =
 					dynamic_pointer_cast<Declaration> (found_n);
 			// If the found match is not a declaration, cast will fail and we'll return NULL for "not found"
 			return found_d;
 		}
 
 		// Alternative parameters
-		shared_ptr<Declaration> FindExistingDeclaration(clang::Declarator &D,
+		SharedPtr<Declaration> FindExistingDeclaration(clang::Declarator &D,
 				bool recurse)
 		{
 			return FindExistingDeclaration(D.getCXXScopeSpec(),
 					D.getIdentifier(), recurse);
 		}
 
-		shared_ptr<Declaration> CreateDelcaration(clang::Scope *S,
-				clang::Declarator &D, shared_ptr<AccessSpec> a = shared_ptr<
+		SharedPtr<Declaration> CreateDelcaration(clang::Scope *S,
+				clang::Declarator &D, SharedPtr<AccessSpec> a = SharedPtr<
 						AccessSpec> ())
 		{
 			const clang::DeclSpec &DS = D.getDeclSpec();
-			shared_ptr<Declaration> d;
+			SharedPtr<Declaration> d;
 			if (DS.getStorageClassSpec() == clang::DeclSpec::SCS_typedef)
 			{
-				shared_ptr<Typedef> t = CreateTypedefNode(S, D);
+				SharedPtr<Typedef> t = CreateTypedefNode(S, D);
 				TRACE();
 				d = t;
 			}
 			else
 			{
-				shared_ptr<Instance> o = CreateInstanceNode(S, D, a);
+				SharedPtr<Instance> o = CreateInstanceNode(S, D, a);
 				d = o;
 			}
 
@@ -670,7 +670,7 @@ private:
 
 		// Does 1 thing:
 		// 1. Inserts a stored decl if there is one in decl_to_insert
-		DeclTy *IssueDeclaration(clang::Scope *S, shared_ptr<Declaration> d)
+		DeclTy *IssueDeclaration(clang::Scope *S, SharedPtr<Declaration> d)
 		{
 			// Did we leave a decl lying around to insert later? If so, pack it together with
 			// the current decl, for insertion into the code sequence.
@@ -681,7 +681,7 @@ private:
 				backing_ordering[inferno_scope_stack.top()].push_back(
 						decl_to_insert);
 				backing_paired_decl[d] = decl_to_insert;
-				decl_to_insert = shared_ptr<Declaration> (); // don't need to generate it again
+				decl_to_insert = SharedPtr<Declaration> (); // don't need to generate it again
 				TRACE("inserted decl\n");
 			}
 
@@ -704,7 +704,7 @@ private:
 				return 0;
 			}
 
-			shared_ptr<Declaration> d = FindExistingDeclaration(D, false); // decl exists already?
+			SharedPtr<Declaration> d = FindExistingDeclaration(D, false); // decl exists already?
 			if (d)
 			{
 				return hold_decl.ToRaw(d); // just return it
@@ -724,7 +724,7 @@ private:
 				clang::Declarator &D)
 		{
 
-			shared_ptr<Instance> p = CreateInstanceNode(S, D,
+			SharedPtr<Instance> p = CreateInstanceNode(S, D,
 					shared_new<Public> (), true);
 			backing_params[p] = D.getIdentifier(); // allow us to register the object with ident_track once we're in the function body scope
 			return hold_decl.ToRaw(p);
@@ -732,9 +732,9 @@ private:
 
 		virtual void AddInitializerToDecl(DeclTy *Dcl, ExprArg Init)
 		{
-			shared_ptr<Declaration> d = hold_decl.FromRaw(Dcl);
+			SharedPtr<Declaration> d = hold_decl.FromRaw(Dcl);
 
-			shared_ptr<Instance> o = dynamic_pointer_cast<Instance> (d);
+			SharedPtr<Instance> o = dynamic_pointer_cast<Instance> (d);
 			ASSERT( o ); // Only objects can be initialised
 
 			o->initialiser = FromClang(Init);
@@ -742,9 +742,9 @@ private:
 			// At this point, when we have the instance (and hence the type) and the initialiser
 			// we can detect when an array initialiser has been inserted for a record instance and
 			// change it.
-			if ( shared_ptr<MakeArray> ai = dynamic_pointer_cast<MakeArray>(o->initialiser) )
-				if ( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(o->type) )
-					if ( shared_ptr<Record> r = GetRecordDeclaration(all_decls, ti) )
+			if ( SharedPtr<MakeArray> ai = dynamic_pointer_cast<MakeArray>(o->initialiser) )
+				if ( SharedPtr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(o->type) )
+					if ( SharedPtr<Record> r = GetRecordDeclaration(all_decls, ti) )
 						o->initialiser = CreateRecordLiteralFromArrayLiteral(
 								ai, r);
 		}
@@ -755,12 +755,12 @@ private:
 		// puts all the params back in the current scope assuming:
 		// 1. They have been added to the Function node correctly and
 		// 2. They feature in the backing list for params
-		void AddParamsToScope(shared_ptr<Procedure> pp,
+		void AddParamsToScope(SharedPtr<Procedure> pp,
 				clang::Scope *FnBodyScope)
 		{
 			ASSERT(pp);
 
-			FOREACH(shared_ptr<Declaration> param, pp->members )
+			FOREACH(SharedPtr<Declaration> param, pp->members )
 {			TRACE();
 			clang::IdentifierInfo *paramII = backing_params[param];
 			backing_params.erase( param );
@@ -782,10 +782,10 @@ private:
 	virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, DeclTy *D)
 	{
 		TRACE();
-		shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(hold_decl.FromRaw(D));
+		SharedPtr<Instance> o = dynamic_pointer_cast<Instance>(hold_decl.FromRaw(D));
 		ASSERT(o);
 
-		if( shared_ptr<Procedure> pp = dynamic_pointer_cast<Procedure>( o->type ) )
+		if( SharedPtr<Procedure> pp = dynamic_pointer_cast<Procedure>( o->type ) )
 		AddParamsToScope( pp, FnBodyScope );
 
 		// This is just a junk scope because we will not use scopes collected
@@ -794,7 +794,7 @@ private:
 		// ActOnFinishFunctionBody() as a hierarchy of Compounds.
 		// If we tried to do this ourselves we'd lose the nested compound
 		// statement hierarchy.
-		inferno_scope_stack.push( shared_ptr<Scope>(new Scope) );
+		inferno_scope_stack.push( SharedPtr<Scope>(new Scope) );
 
 		return hold_decl.ToRaw( o );
 	}
@@ -802,14 +802,14 @@ private:
 	virtual DeclTy *ActOnFinishFunctionBody(DeclTy *Decl, StmtArg Body)
 	{
 		TRACE();
-		shared_ptr<Instance> o( dynamic_pointer_cast<Instance>( hold_decl.FromRaw(Decl) ) );
+		SharedPtr<Instance> o( dynamic_pointer_cast<Instance>( hold_decl.FromRaw(Decl) ) );
 		ASSERT(o);
-		shared_ptr<Compound> cb( dynamic_pointer_cast<Compound>( FromClang( Body ) ) );
+		SharedPtr<Compound> cb( dynamic_pointer_cast<Compound>( FromClang( Body ) ) );
 		ASSERT(cb); // function body must be a scope or 0
 
 		if( dynamic_pointer_cast<Uninitialised>( o->initialiser ) )
 		o->initialiser = cb;
-		else if( shared_ptr<Compound> c = dynamic_pointer_cast<Compound>( o->initialiser ) )
+		else if( SharedPtr<Compound> c = dynamic_pointer_cast<Compound>( o->initialiser ) )
 		c->statements = c->statements + cb->statements;
 		else
 		ASSERTFAIL("wrong thing in function instance");
@@ -823,7 +823,7 @@ private:
 	virtual OwningStmtResult ActOnExprStmt(ExprArg Expr)
 	{
 		// TODO most of this is now unnecessary
-		if( shared_ptr<Expression> e = dynamic_pointer_cast<Expression>( FromClang(Expr) ) )
+		if( SharedPtr<Expression> e = dynamic_pointer_cast<Expression>( FromClang(Expr) ) )
 		{
 			return ToStmt( e );
 		}
@@ -831,7 +831,7 @@ private:
 		{
 			// Operands that are not Expressions have no side effects and so
 			// they do nothing as Statements
-			shared_ptr<Nop> n(new Nop);
+			SharedPtr<Nop> n(new Nop);
 			return ToStmt( n );
 		}
 	}
@@ -839,7 +839,7 @@ private:
 	virtual StmtResult ActOnReturnStmt( clang::SourceLocation ReturnLoc,
 			ExprTy *RetValExp )
 	{
-		shared_ptr<Return> r(new Return);
+		SharedPtr<Return> r(new Return);
 		if( RetValExp )
 		r->return_value = hold_expr.FromRaw(RetValExp);
 		else
@@ -854,25 +854,25 @@ private:
 			bool HasTrailingLParen,
 			const clang::CXXScopeSpec *SS = 0 )
 	{
-		shared_ptr<Node> n = ident_track.Get( &II, FromCXXScope( SS ) );
+		SharedPtr<Node> n = ident_track.Get( &II, FromCXXScope( SS ) );
 		TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
-		shared_ptr<Instance> o = dynamic_pointer_cast<Instance>( n );
+		SharedPtr<Instance> o = dynamic_pointer_cast<Instance>( n );
 		ASSERT( o );
 		return hold_expr.ToRaw( o->identifier );
 	}
 
-	shared_ptr<Integer> CreateNumericConstant( int value )
+	SharedPtr<Integer> CreateNumericConstant( int value )
 	{
-		shared_ptr<SpecificInteger> nc( new SpecificInteger(value) );
+		SharedPtr<SpecificInteger> nc( new SpecificInteger(value) );
 		return nc;
 	}
 
-	shared_ptr<Literal> CreateLiteral( int value )
+	SharedPtr<Literal> CreateLiteral( int value )
 	{
 		return CreateNumericConstant( value );
 	}
 
-	shared_ptr<Number> CreateNumericConstant(const clang::Token &tok)
+	SharedPtr<Number> CreateNumericConstant(const clang::Token &tok)
 	{
 		llvm::SmallString<512> int_buffer;
 		int_buffer.resize(tok.getLength());
@@ -898,7 +898,7 @@ private:
 			bool err = literal.GetIntegerValue(rv);
 
 			ASSERT( !err )( "numeric literal too big for its own type" );
-			shared_ptr<SpecificInteger> nc( new SpecificInteger(rv) );
+			SharedPtr<SpecificInteger> nc( new SpecificInteger(rv) );
 			return nc;
 		}
 		else if( literal.isFloatingLiteral() )
@@ -912,7 +912,7 @@ private:
 			semantics = TypeDb::double_semantics;
 			llvm::APFloat rv( literal.GetFloatValue( *semantics ) );
 
-			shared_ptr<SpecificFloat> fc( new SpecificFloat( rv ) );
+			SharedPtr<SpecificFloat> fc( new SpecificFloat( rv ) );
 			return fc;
 		}
 		ASSERTFAIL("this sort of literal is not supported");
@@ -928,22 +928,22 @@ private:
 			ExprTy *LHS, ExprTy *RHS)
 	{
 		TRACE();
-		shared_ptr<Operator> o = shared_ptr<Operator>();
+		SharedPtr<Operator> o = SharedPtr<Operator>();
 		switch( Kind )
 		{
 #define INFIX(TOK, TEXT, NODE, BASE, CAT) \
 	        case clang::tok::TOK: \
-                o=shared_ptr<NODE>(new NODE);\
+                o=SharedPtr<NODE>(new NODE);\
                 break;
 #include "tree/operator_db.inc"
 		}
 		ASSERT( o );
-		if( shared_ptr<NonCommutativeOperator> nco = dynamic_pointer_cast< NonCommutativeOperator >(o) )
+		if( SharedPtr<NonCommutativeOperator> nco = dynamic_pointer_cast< NonCommutativeOperator >(o) )
 		{
 			nco->operands.push_back( hold_expr.FromRaw(LHS) );
 			nco->operands.push_back( hold_expr.FromRaw(RHS) );
 		}
-		else if( shared_ptr<CommutativeOperator> co = dynamic_pointer_cast< CommutativeOperator >(o) )
+		else if( SharedPtr<CommutativeOperator> co = dynamic_pointer_cast< CommutativeOperator >(o) )
 		{
 			co->operands.insert( hold_expr.FromRaw(LHS) );
 			co->operands.insert( hold_expr.FromRaw(RHS) );
@@ -957,13 +957,13 @@ private:
 	virtual ExprResult ActOnPostfixUnaryOp(clang::Scope *S, clang::SourceLocation OpLoc,
 			clang::tok::TokenKind Kind, ExprTy *Input)
 	{
-		shared_ptr<NonCommutativeOperator> o = shared_ptr<NonCommutativeOperator>();
+		SharedPtr<NonCommutativeOperator> o = SharedPtr<NonCommutativeOperator>();
 
 		switch( Kind )
 		{
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT) \
 	        case clang::tok::TOK: \
-	            o=shared_ptr<NODE>(new NODE); \
+	            o=SharedPtr<NODE>(new NODE); \
 	            break;
 #include "tree/operator_db.inc"
 		}
@@ -975,13 +975,13 @@ private:
 	virtual ExprResult ActOnUnaryOp( clang::Scope *S, clang::SourceLocation OpLoc,
 			clang::tok::TokenKind Kind, ExprTy *Input)
 	{
-		shared_ptr<NonCommutativeOperator> o = shared_ptr<NonCommutativeOperator>();
+		SharedPtr<NonCommutativeOperator> o = SharedPtr<NonCommutativeOperator>();
 
 		switch( Kind )
 		{
 #define PREFIX(TOK, TEXT, NODE, BASE, CAT) \
 	        case clang::tok::TOK:\
-                o=shared_ptr<NODE>(new NODE); \
+                o=SharedPtr<NODE>(new NODE); \
                 break;
 #include "tree/operator_db.inc"
 		}
@@ -994,7 +994,7 @@ private:
 			clang::SourceLocation ColonLoc,
 			ExprTy *Cond, ExprTy *LHS, ExprTy *RHS)
 	{
-		shared_ptr<Multiplexor> co(new Multiplexor);
+		SharedPtr<Multiplexor> co(new Multiplexor);
 		co->operands.push_back( hold_expr.FromRaw(Cond) );
 		ASSERT(LHS )( "gnu extension not supported");
 		co->operands.push_back( hold_expr.FromRaw(LHS) );
@@ -1002,15 +1002,15 @@ private:
 		return hold_expr.ToRaw( co );
 	}
 
-	shared_ptr<Call> CreateCall( Sequence<Expression> &args, shared_ptr<Expression> callee )
+	SharedPtr<Call> CreateCall( Sequence<Expression> &args, SharedPtr<Expression> callee )
 	{
 		// Make the Call node and fill in the called function
-		shared_ptr<Call> c(new Call);
+		SharedPtr<Call> c(new Call);
 		c->callee = callee;
 
 		// If Procedure or Function, fill in the args map based on the supplied args and original function type
-		shared_ptr<Node> t = TypeOf()(all_decls, callee);
-		if( shared_ptr<Procedure> p = dynamic_pointer_cast<Procedure>(t) )
+		SharedPtr<Node> t = TypeOf()(all_decls, callee);
+		if( SharedPtr<Procedure> p = dynamic_pointer_cast<Procedure>(t) )
 		PopulateMapOperator( c, args, p );
 
 		return c;
@@ -1024,34 +1024,34 @@ private:
 		// Get the args in a Sequence
 		Sequence<Expression> args;
 		CollectArgs( &args, Args, NumArgs );
-		shared_ptr<Call> c = CreateCall( args, hold_expr.FromRaw(Fn) );
+		SharedPtr<Call> c = CreateCall( args, hold_expr.FromRaw(Fn) );
 		return hold_expr.ToRaw( c );
 	}
 
 	// Not sure if this one has been tested!!
 	virtual TypeResult ActOnTypeName(clang::Scope *S, clang::Declarator &D)
 	{
-		shared_ptr<Type> t = CreateTypeNode( D );
+		SharedPtr<Type> t = CreateTypeNode( D );
 		return hold_type.ToRaw( t );
 	}
 
-	void PushStmt( shared_ptr<Compound> s, shared_ptr<Statement> st )
+	void PushStmt( SharedPtr<Compound> s, SharedPtr<Statement> st )
 	{
-		/* if( shared_ptr<ParseTwin> pt = dynamic_pointer_cast<ParseTwin>( st ) )
+		/* if( SharedPtr<ParseTwin> pt = dynamic_pointer_cast<ParseTwin>( st ) )
 		 {
 		 PushStmt( s, pt->d1 );
 		 PushStmt( s, pt->d2 );
 		 return;
 		 }
 		 */
-		if( shared_ptr<Declaration> d = dynamic_pointer_cast<Declaration>( st ) )
+		if( SharedPtr<Declaration> d = dynamic_pointer_cast<Declaration>( st ) )
 		{
 			if( backing_paired_decl.IsExist(d) )
 			{
-				shared_ptr<Declaration> bd = backing_paired_decl[d];
+				SharedPtr<Declaration> bd = backing_paired_decl[d];
 				ASSERT( bd );
 
-				if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>(bd) )
+				if( SharedPtr<Instance> i = dynamic_pointer_cast<Instance>(bd) )
 				PushStmt( s, i ); // Instances can have inits that require being in order, so append as a statement
 
 				else
@@ -1061,19 +1061,19 @@ private:
 			}
 		}
 
-		if( shared_ptr<DeclarationAsStatement> das = dynamic_pointer_cast<DeclarationAsStatement>(st) )
+		if( SharedPtr<DeclarationAsStatement> das = dynamic_pointer_cast<DeclarationAsStatement>(st) )
 		s->members.insert( das->d );
 		else
 		s->statements.push_back( st );
 
 		// Flatten the "sub" statements of labels etc
-		if( shared_ptr<Label> l = dynamic_pointer_cast<Label>( st ) )
+		if( SharedPtr<Label> l = dynamic_pointer_cast<Label>( st ) )
 		{
 			ASSERT( backing_labels[l] );
 			PushStmt( s, backing_labels[l] );
 			backing_labels.erase(l);
 		}
-		else if( shared_ptr<SwitchTarget> t = dynamic_pointer_cast<SwitchTarget>( st ) )
+		else if( SharedPtr<SwitchTarget> t = dynamic_pointer_cast<SwitchTarget>( st ) )
 		{
 			ASSERT( backing_targets[t] );
 			PushStmt( s, backing_targets[t] );
@@ -1086,7 +1086,7 @@ private:
 			bool isStmtExpr)
 	{
 		// TODO helper fn for MultiStmtArg, like FromClang. Maybe.
-		shared_ptr<Compound> s(new Compound);
+		SharedPtr<Compound> s(new Compound);
 
 		for( int i=0; i<Elts.size(); i++ )
 		PushStmt( s, hold_stmt.FromRaw( Elts.get()[i] ) );
@@ -1097,25 +1097,25 @@ private:
 	virtual OwningStmtResult ActOnDeclStmt(DeclTy *Decl, clang::SourceLocation StartLoc,
 			clang::SourceLocation EndLoc)
 	{
-		shared_ptr<Declaration> d( hold_decl.FromRaw(Decl) );
+		SharedPtr<Declaration> d( hold_decl.FromRaw(Decl) );
 		// Basically we are being asked to turn a Declaration, which has already been parsed,
 		// into a Statement. Instances are already both Declarations and Statements, so that's
 		// OK. In other cases, we have to package up the Declaration in a special kind of
 		// Statement node and pass it through that way. We will unpack later.
-		if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>(d) )
+		if( SharedPtr<Instance> i = dynamic_pointer_cast<Instance>(d) )
 		{
 			return ToStmt( i );
 		}
 		else
 		{
-			shared_ptr<DeclarationAsStatement> das( new DeclarationAsStatement );
+			SharedPtr<DeclarationAsStatement> das( new DeclarationAsStatement );
 			das->d = d;
 			return ToStmt( das );
 		}
 	}
 
 	// Create a label identifier if there isn't already one with the same name (TODO scopes?)
-	shared_ptr<LabelIdentifier> MaybeCreateLabelIdentifier( clang::IdentifierInfo *II )
+	SharedPtr<LabelIdentifier> MaybeCreateLabelIdentifier( clang::IdentifierInfo *II )
 	{
 		if( !(II->getFETokenInfo<void *>()) )
 		II->setFETokenInfo( hold_label_identifier.ToRaw( CreateLabelIdentifier( II ) ) );
@@ -1126,7 +1126,7 @@ private:
 	virtual StmtResult ActOnLabelStmt(clang::SourceLocation IdentLoc, clang::IdentifierInfo *II,
 			clang::SourceLocation ColonLoc, StmtTy *SubStmt)
 	{
-		shared_ptr<Label> l( new Label );
+		SharedPtr<Label> l( new Label );
 		l->identifier = MaybeCreateLabelIdentifier(II);
 		backing_labels[l] = hold_stmt.FromRaw( SubStmt );
 		return hold_stmt.ToRaw( l );
@@ -1136,7 +1136,7 @@ private:
 			clang::SourceLocation LabelLoc,
 			clang::IdentifierInfo *LabelII)
 	{
-		shared_ptr<Goto> g( new Goto );
+		SharedPtr<Goto> g( new Goto );
 		g->destination = MaybeCreateLabelIdentifier(LabelII);
 		return hold_stmt.ToRaw( g );
 	}
@@ -1145,7 +1145,7 @@ private:
 			clang::SourceLocation StarLoc,
 			ExprTy *DestExp)
 	{
-		shared_ptr<Goto> g( new Goto );
+		SharedPtr<Goto> g( new Goto );
 		g->destination = hold_expr.FromRaw( DestExp );
 		return hold_stmt.ToRaw( g );
 	}
@@ -1162,7 +1162,7 @@ private:
 			StmtTy *ThenVal, clang::SourceLocation ElseLoc,
 			StmtTy *ElseVal)
 	{
-		shared_ptr<If> i( new If );
+		SharedPtr<If> i( new If );
 		i->condition = hold_expr.FromRaw( CondVal );
 		i->body = hold_stmt.FromRaw( ThenVal );
 		if( ElseVal )
@@ -1175,7 +1175,7 @@ private:
 	virtual StmtResult ActOnWhileStmt(clang::SourceLocation WhileLoc, ExprTy *Cond,
 			StmtTy *Body)
 	{
-		shared_ptr<While> w( new While );
+		SharedPtr<While> w( new While );
 		w->condition = hold_expr.FromRaw( Cond );
 		w->body = hold_stmt.FromRaw( Body );
 		return hold_stmt.ToRaw( w );
@@ -1184,7 +1184,7 @@ private:
 	virtual StmtResult ActOnDoStmt(clang::SourceLocation DoLoc, StmtTy *Body,
 			clang::SourceLocation WhileLoc, ExprTy *Cond)
 	{
-		shared_ptr<Do> d( new Do );
+		SharedPtr<Do> d( new Do );
 		d->body = hold_stmt.FromRaw( Body );
 		d->condition = hold_expr.FromRaw( Cond );
 		return hold_stmt.ToRaw( d );
@@ -1195,7 +1195,7 @@ private:
 			StmtTy *First, ExprTy *Second, ExprTy *Third,
 			clang::SourceLocation RParenLoc, StmtTy *Body)
 	{
-		shared_ptr<For> f( new For );
+		SharedPtr<For> f( new For );
 		if( First )
 		f->initialisation = hold_stmt.FromRaw( First );
 		else
@@ -1218,7 +1218,7 @@ private:
 
 	virtual StmtResult ActOnStartOfSwitchStmt(ExprTy *Cond)
 	{
-		shared_ptr<Switch> s( new Switch );
+		SharedPtr<Switch> s( new Switch );
 		s->condition = hold_expr.FromRaw( Cond );
 		return hold_stmt.ToRaw( s );
 	}
@@ -1226,8 +1226,8 @@ private:
 	virtual StmtResult ActOnFinishSwitchStmt(clang::SourceLocation SwitchLoc,
 			StmtTy *rsw, ExprTy *Body)
 	{
-		shared_ptr<Statement> s( hold_stmt.FromRaw( rsw ) );
-		shared_ptr<Switch> sw( dynamic_pointer_cast<Switch>(s) );
+		SharedPtr<Statement> s( hold_stmt.FromRaw( rsw ) );
+		SharedPtr<Switch> sw( dynamic_pointer_cast<Switch>(s) );
 		ASSERT(sw)("expecting a switch statement");
 
 		StmtTy *body = (StmtTy *)Body; // Third is really a statement, the Actions API is wrong
@@ -1245,7 +1245,7 @@ private:
 
 		if( RHSVal.get() )
 		{
-			shared_ptr<RangeCase> rc( new RangeCase );
+			SharedPtr<RangeCase> rc( new RangeCase );
 			rc->value_lo = FromClang( LHSVal );
 			rc->value_hi = FromClang( RHSVal );
 			backing_targets[rc] = FromClang( SubStmt );
@@ -1253,7 +1253,7 @@ private:
 		}
 		else
 		{
-			shared_ptr<Case> c( new Case );
+			SharedPtr<Case> c( new Case );
 			c->value = FromClang( LHSVal );
 			backing_targets[c] = FromClang( SubStmt );
 			return ToStmt( c );
@@ -1265,7 +1265,7 @@ private:
 			clang::Scope *CurScope)
 	{
 		TRACE();
-		shared_ptr<Default> d( new Default );
+		SharedPtr<Default> d( new Default );
 		backing_targets[d] = FromClang( SubStmt );
 		return ToStmt( d );
 	}
@@ -1273,38 +1273,38 @@ private:
 	virtual StmtResult ActOnContinueStmt(clang::SourceLocation ContinueLoc,
 			clang::Scope *CurScope)
 	{
-		return hold_stmt.ToRaw( shared_ptr<Continue>( new Continue ) );
+		return hold_stmt.ToRaw( SharedPtr<Continue>( new Continue ) );
 	}
 
 	virtual StmtResult ActOnBreakStmt(clang::SourceLocation GotoLoc, clang::Scope *CurScope)
 	{
-		return hold_stmt.ToRaw( shared_ptr<Break>( new Break ) );
+		return hold_stmt.ToRaw( SharedPtr<Break>( new Break ) );
 	}
 
-	shared_ptr<AccessSpec> ConvertAccess( clang::AccessSpecifier AS, shared_ptr<Record> rec = shared_ptr<Record>() )
+	SharedPtr<AccessSpec> ConvertAccess( clang::AccessSpecifier AS, SharedPtr<Record> rec = SharedPtr<Record>() )
 	{
 		switch( AS )
 		{
 			case clang::AS_public:
-			return shared_ptr<Public>(new Public);
+			return SharedPtr<Public>(new Public);
 			break;
 			case clang::AS_protected:
-			return shared_ptr<Protected>(new Protected);
+			return SharedPtr<Protected>(new Protected);
 			break;
 			case clang::AS_private:
-			return shared_ptr<Private>(new Private);
+			return SharedPtr<Private>(new Private);
 			break;
 			case clang::AS_none:
 			ASSERT( rec )( "no access specifier and record not supplied so cannot deduce");
 			// members are never AS_none because clang deals. Bases can be AS_none, so we supply the enclosing record type
 			if( dynamic_pointer_cast<Class>(rec) )
-			return shared_ptr<Private>(new Private);
+			return SharedPtr<Private>(new Private);
 			else
-			return shared_ptr<Public>(new Public);
+			return SharedPtr<Public>(new Public);
 			break;
 			default:
 			ASSERTFAIL("Invalid access specfier");
-			return shared_ptr<Public>(new Public);
+			return SharedPtr<Public>(new Public);
 			break;
 		}
 	}
@@ -1315,18 +1315,18 @@ private:
 	{
 		const clang::DeclSpec &DS = D.getDeclSpec();
 		TRACE("Element %p\n", Init);
-		shared_ptr<Declaration> d = CreateDelcaration( S, D, ConvertAccess( AS ) );
-		shared_ptr<Instance> o = dynamic_pointer_cast<Instance>(d);
+		SharedPtr<Declaration> d = CreateDelcaration( S, D, ConvertAccess( AS ) );
+		SharedPtr<Instance> o = dynamic_pointer_cast<Instance>(d);
 
 		if( BitfieldWidth )
 		{
 			ASSERT( o )( "only Instances may be bitfields" );
-			shared_ptr<Integral> n( dynamic_pointer_cast<Integral>( o->type ) );
+			SharedPtr<Integral> n( dynamic_pointer_cast<Integral>( o->type ) );
 			ASSERT( n )( "cannot specify width of non-numeric type" );
-			shared_ptr<Expression> ee = hold_expr.FromRaw(BitfieldWidth);
-			shared_ptr<Literal> ll = dynamic_pointer_cast<Literal>(ee);
+			SharedPtr<Expression> ee = hold_expr.FromRaw(BitfieldWidth);
+			SharedPtr<Literal> ll = dynamic_pointer_cast<Literal>(ee);
 			ASSERT(ll )( "bitfield width must be literal, not expression"); // TODO evaluate
-			shared_ptr<SpecificInteger> ii = dynamic_pointer_cast<SpecificInteger>(ll);
+			SharedPtr<SpecificInteger> ii = dynamic_pointer_cast<SpecificInteger>(ll);
 			ASSERT(ll )( "bitfield width must be integer");
 			n->width = ii;
 		}
@@ -1361,7 +1361,7 @@ private:
 			// Tag is a reference, that is a usage rather than a definition. We therefore
 			// expect to be able to find a previous definition/declaration for it. Recurse
 			// the search through enclosing scopes until we find it.
-			shared_ptr<Declaration> ed = FindExistingDeclaration( SS, Name, true );
+			SharedPtr<Declaration> ed = FindExistingDeclaration( SS, Name, true );
 			ASSERT(ed)("Cannot find declaration of \"%s\"", Name->getName());
 
 			return hold_decl.ToRaw( ed );
@@ -1369,27 +1369,27 @@ private:
 
 		// Tag is a definition or declaration. Create if it doesn't already
 		// exist, *but* don't recurse into enclosing scopes.
-		if( shared_ptr<Declaration> ed = FindExistingDeclaration( SS, Name, false ) )
+		if( SharedPtr<Declaration> ed = FindExistingDeclaration( SS, Name, false ) )
 		{
 			// Note: members will be filled in later, so nothing to do here
 			// even if the is the "complete" version of the record (=definition).
 			return hold_decl.ToRaw( ed );
 		}
 
-		shared_ptr<Record> h;
+		SharedPtr<Record> h;
 		switch( (clang::DeclSpec::TST)TagType )
 		{
 			case clang::DeclSpec::TST_union:
-			h = shared_ptr<Union>(new Union);
+			h = SharedPtr<Union>(new Union);
 			break;
 			case clang::DeclSpec::TST_struct:
-			h = shared_ptr<Struct>(new Struct);
+			h = SharedPtr<Struct>(new Struct);
 			break;
 			case clang::DeclSpec::TST_class:
-			h = shared_ptr<Class>(new Class);
+			h = SharedPtr<Class>(new Class);
 			break;
 			case clang::DeclSpec::TST_enum:
-			h = shared_ptr<Enum>(new Enum);
+			h = SharedPtr<Enum>(new Enum);
 			break;
 			default:
 			ASSERTFAIL("Unknown type spec type");
@@ -1433,8 +1433,8 @@ private:
 
 		// Just populate the members container for the Record node
 		// we already created. No need to return anything.
-		shared_ptr<Declaration> d = hold_decl.FromRaw( TagDecl );
-		shared_ptr<Record> h = dynamic_pointer_cast<Record>(d);
+		SharedPtr<Declaration> d = hold_decl.FromRaw( TagDecl );
+		SharedPtr<Record> h = dynamic_pointer_cast<Record>(d);
 
 		// We're about to populate the Record; if it has been populated already
 		// then something's wrong
@@ -1456,8 +1456,8 @@ private:
 		ident_track.SetNextRecord();
 
 		// TODO are structs etc definable in functions? If so, this will put the decl outside the function
-		shared_ptr<Declaration> d = hold_decl.FromRaw( TagDecl );
-		shared_ptr<Record> h = dynamic_pointer_cast<Record>(d);
+		SharedPtr<Declaration> d = hold_decl.FromRaw( TagDecl );
+		SharedPtr<Record> h = dynamic_pointer_cast<Record>(d);
 		decl_to_insert = h;
 	}
 
@@ -1468,13 +1468,13 @@ private:
 			clang::IdentifierInfo &Member)
 	{
 		TRACE("kind %d\n", OpKind);
-		shared_ptr<Lookup> a( new Lookup );
+		SharedPtr<Lookup> a( new Lookup );
 
 		// Turn -> into * and .
 		if( OpKind == clang::tok::arrow ) // Base->Member
 
 		{
-			shared_ptr<Dereference> ou( new Dereference );
+			SharedPtr<Dereference> ou( new Dereference );
 			ou->operands.push_back( hold_expr.FromRaw( Base ) );
 			a->base = ou;
 		}
@@ -1489,12 +1489,12 @@ private:
 		}
 
 		// Find the specified member in the record implied by the expression on the left of .
-		shared_ptr<Node> tbase = TypeOf()( all_decls, a->base );
-		shared_ptr<TypeIdentifier> tibase = dynamic_pointer_cast<TypeIdentifier>(tbase);
+		SharedPtr<Node> tbase = TypeOf()( all_decls, a->base );
+		SharedPtr<TypeIdentifier> tibase = dynamic_pointer_cast<TypeIdentifier>(tbase);
 		ASSERT( tibase );
-		shared_ptr<Record> rbase = GetRecordDeclaration(all_decls, tibase);
+		SharedPtr<Record> rbase = GetRecordDeclaration(all_decls, tibase);
 		ASSERT( rbase )( "thing on left of ./-> is not a record/record ptr" );
-		shared_ptr<Instance> m = FindMemberByName( all_decls, rbase, string(Member.getName()) );
+		SharedPtr<Instance> m = FindMemberByName( all_decls, rbase, string(Member.getName()) );
 		ASSERT(m)("in r.m or (&r)->m, could not find m in r");
 
 		a->member = m->identifier;
@@ -1506,7 +1506,7 @@ private:
 			ExprTy *Base, clang::SourceLocation LLoc,
 			ExprTy *Idx, clang::SourceLocation RLoc)
 	{
-		shared_ptr<Subscript> su( new Subscript );
+		SharedPtr<Subscript> su( new Subscript );
 		su->operands.push_back( hold_expr.FromRaw( Base ) );
 		su->operands.push_back( hold_expr.FromRaw( Idx ) );
 		return hold_expr.ToRaw( su );
@@ -1517,7 +1517,7 @@ private:
 			clang::tok::TokenKind Kind) //TODO not working - get node has no info
 
 	{
-		shared_ptr<Literal> ic;
+		SharedPtr<Literal> ic;
 		TRACE("true/false tk %d %d %d\n", Kind, clang::tok::kw_true, clang::tok::kw_false );
 
 		if(Kind == clang::tok::kw_true)
@@ -1530,7 +1530,7 @@ private:
 	virtual ExprResult ActOnCastExpr(clang::SourceLocation LParenLoc, TypeTy *Ty,
 			clang::SourceLocation RParenLoc, ExprTy *Op)
 	{
-		shared_ptr<Cast> c(new Cast);
+		SharedPtr<Cast> c(new Cast);
 		c->operand = hold_expr.FromRaw( Op );
 		c->type = hold_type.FromRaw( Ty );
 		return hold_expr.ToRaw( c );
@@ -1539,7 +1539,7 @@ private:
 	virtual OwningStmtResult ActOnNullStmt(clang::SourceLocation SemiLoc)
 	{
 		TRACE();
-		shared_ptr<Nop> n(new Nop);
+		SharedPtr<Nop> n(new Nop);
 		return ToStmt( n );
 	}
 
@@ -1554,7 +1554,7 @@ private:
 
 		llvm::APSInt rv(TypeDb::char_bits, !TypeDb::char_default_signed);
 		rv = literal.getValue();
-		shared_ptr<SpecificInteger> nc( new SpecificInteger(rv) );
+		SharedPtr<SpecificInteger> nc( new SpecificInteger(rv) );
 
 		return hold_expr.ToRaw( nc );
 	}
@@ -1568,10 +1568,10 @@ private:
 		// Assume initialiser is for an Array, and create an ArrayInitialiser node
 		// even if it's really a struct init. We'll come along later and replace with a
 		// RecordInitialiser when we can see what the struct is.
-		shared_ptr<MakeArray> ao(new MakeArray);
+		SharedPtr<MakeArray> ao(new MakeArray);
 		for(int i=0; i<NumInit; i++)
 		{
-			shared_ptr<Expression> e = hold_expr.FromRaw( InitList[i] );
+			SharedPtr<Expression> e = hold_expr.FromRaw( InitList[i] );
 			ao->operands.push_back( e );
 		}
 		return hold_expr.ToRaw( ao );
@@ -1580,24 +1580,24 @@ private:
 	// Create a RecordInitialiser using the elements of the supplied ArrayInitialiser and matching
 	// them against the members of the supplied record. Records are stored using an unordered
 	// collection for the members, so we have to use the ordered backing map. Array inits are ordered.
-	shared_ptr<MakeRecord> CreateRecordLiteralFromArrayLiteral( shared_ptr<MakeArray> ai,
-			shared_ptr<Record> r )
+	SharedPtr<MakeRecord> CreateRecordLiteralFromArrayLiteral( SharedPtr<MakeArray> ai,
+			SharedPtr<Record> r )
 	{
 		// Make new record initialiser and fill in the type
-		shared_ptr<MakeRecord> ri( new MakeRecord );
+		SharedPtr<MakeRecord> ri( new MakeRecord );
 		ri->type = r->identifier;
 
 		// Fill in the RecordLiteral operands collection with pairs that relate operands to their member ids
-		shared_ptr<Scope> s = r;
+		SharedPtr<Scope> s = r;
 		PopulateMapOperator( ri, ai->operands, s );
 
 		return ri;
 	}
 
 	// Populate a map operator using elements from a sequence of expressions
-	void PopulateMapOperator( shared_ptr<MapOperator> mapop, // MapOperands corresponding to the elements of ai go in here
+	void PopulateMapOperator( SharedPtr<MapOperator> mapop, // MapOperands corresponding to the elements of ai go in here
 			Sequence<Expression> &seq, // Operands to insert, ordered as per the input program
-			shared_ptr<Scope> scope ) // Original Scope that established ordering, must be in backing_ordering
+			SharedPtr<Scope> scope ) // Original Scope that established ordering, must be in backing_ordering
 
 	{
 		// Get a reference to the ordered list of members for this scope from a backing list
@@ -1611,15 +1611,15 @@ private:
 		{
 			TRACE();
 			// We only care about instances...
-			if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
+			if( SharedPtr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
 			{
 				// ...and not function instances
 				if( !dynamic_pointer_cast<Subroutine>( i->type ) )
 				{
 					TRACE();
 					// Get value out of array init and put it in record init together with member instance id
-					shared_ptr<Expression> v = seq[seq_index];
-					shared_ptr<MapOperand> mi( new MapOperand );
+					SharedPtr<Expression> v = seq[seq_index];
+					SharedPtr<MapOperand> mi( new MapOperand );
 					mi->identifier = i->identifier;
 					mi->value = v;
 					mapop->operands.insert( mi );
@@ -1631,13 +1631,13 @@ private:
 		ASSERT( seq_index == seq.size() );
 	}
 
-	shared_ptr<String> CreateString( const char *s )
+	SharedPtr<String> CreateString( const char *s )
 	{
-		shared_ptr<SpecificString> st( new SpecificString(s) );
+		SharedPtr<SpecificString> st( new SpecificString(s) );
 		return st;
 	}
 
-	shared_ptr<String> CreateString( clang::IdentifierInfo *Id )
+	SharedPtr<String> CreateString( clang::IdentifierInfo *Id )
 	{
 		return CreateString( Id->getName() );
 	}
@@ -1656,7 +1656,7 @@ private:
 	/// ActOnCXXThis - Parse the C++ 'this' pointer.
 	virtual ExprResult ActOnCXXThis(clang::SourceLocation ThisLoc)
 	{
-		return hold_expr.ToRaw( shared_ptr<This>( new This ) );
+		return hold_expr.ToRaw( SharedPtr<This>( new This ) );
 	}
 
 	virtual DeclTy *ActOnEnumConstant(clang::Scope *S, DeclTy *EnumDecl,
@@ -1664,7 +1664,7 @@ private:
 			clang::SourceLocation IdLoc, clang::IdentifierInfo *Id,
 			clang::SourceLocation EqualLoc, ExprTy *Val)
 	{
-		shared_ptr<Static> o(new Static());
+		SharedPtr<Static> o(new Static());
 		all_decls->members.insert(o);
 		o->identifier = CreateInstanceIdentifier(Id);
 		o->constancy = shared_new<Const>(); // static const member need not consume storage!!
@@ -1675,11 +1675,11 @@ private:
 		}
 		else if( LastEnumConstant )
 		{
-			shared_ptr<Declaration> lastd( hold_decl.FromRaw( LastEnumConstant ) );
-			shared_ptr<Instance> lasto( dynamic_pointer_cast<Instance>(lastd) );
+			SharedPtr<Declaration> lastd( hold_decl.FromRaw( LastEnumConstant ) );
+			SharedPtr<Instance> lasto( dynamic_pointer_cast<Instance>(lastd) );
 			ASSERT(lasto)( "unexpected kind of declaration inside an enum");
-			shared_ptr<Add> inf( new Add );
-			shared_ptr<Expression> ei = lasto->identifier;
+			SharedPtr<Add> inf( new Add );
+			SharedPtr<Expression> ei = lasto->identifier;
 			inf->operands.insert( ei );
 			inf->operands.insert( CreateNumericConstant( 1 ) );
 			o->initialiser = inf;
@@ -1695,8 +1695,8 @@ private:
 	virtual void ActOnEnumBody(clang::SourceLocation EnumLoc, DeclTy *EnumDecl,
 			DeclTy **Elements, unsigned NumElements)
 	{
-		shared_ptr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
-		shared_ptr<Enum> e( dynamic_pointer_cast<Enum>(d) );
+		SharedPtr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
+		SharedPtr<Enum> e( dynamic_pointer_cast<Enum>(d) );
 		ASSERT( e )( "expected the declaration to be an enum");
 		for( int i=0; i<NumElements; i++ )
 		e->members.insert( hold_decl.FromRaw( Elements[i] ) );
@@ -1707,20 +1707,20 @@ private:
 	virtual DeclTy *ParsedFreeStandingDeclSpec(clang::Scope *S, clang::DeclSpec &DS)
 	{
 		TRACE();
-		shared_ptr<Declaration> d( hold_decl.FromRaw( DS.getTypeRep() ) );
-		shared_ptr<Record> h( dynamic_pointer_cast<Record>( d ) );
+		SharedPtr<Declaration> d( hold_decl.FromRaw( DS.getTypeRep() ) );
+		SharedPtr<Record> h( dynamic_pointer_cast<Record>( d ) );
 		ASSERT( h );
 		if( decl_to_insert )
 		{
 			d = decl_to_insert;
-			decl_to_insert = shared_ptr<Declaration>();
+			decl_to_insert = SharedPtr<Declaration>();
 		}
 
 		// See if the declaration is already there (due to forwarding using
 		// incomplete struct). If so, do not add it again
 		Collection<Declaration> &sd = inferno_scope_stack.top()->members;
 		FOREACH( const SharedPtr<Declaration> &p, sd ) // TODO find()?
-		if( shared_ptr<Declaration>(p) == d )
+		if( SharedPtr<Declaration>(p) == d )
 		return hold_decl.ToRaw( d );
 
 		inferno_scope_stack.top()->members.insert( d );
@@ -1732,11 +1732,11 @@ private:
 	ActOnSizeOfAlignOfExpr( clang::SourceLocation OpLoc, bool isSizeof, bool isType,
 			void *TyOrEx, const clang::SourceRange &ArgRange)
 	{
-		shared_ptr<TypeOperator> p;
+		SharedPtr<TypeOperator> p;
 		if( isSizeof )
-		p = shared_ptr<SizeOf>(new SizeOf);
+		p = SharedPtr<SizeOf>(new SizeOf);
 		else
-		p = shared_ptr<AlignOf>(new AlignOf);
+		p = SharedPtr<AlignOf>(new AlignOf);
 
 		if( isType )
 		p->operand = hold_type.FromRaw(TyOrEx);
@@ -1756,14 +1756,14 @@ private:
 			TypeTy *basetype,
 			clang::SourceLocation BaseLoc)
 	{
-		shared_ptr<Type> t( hold_type.FromRaw( basetype ) );
-		shared_ptr<SpecificTypeIdentifier> ti = dynamic_pointer_cast<SpecificTypeIdentifier>(t);
+		SharedPtr<Type> t( hold_type.FromRaw( basetype ) );
+		SharedPtr<SpecificTypeIdentifier> ti = dynamic_pointer_cast<SpecificTypeIdentifier>(t);
 		ASSERT( ti );
-		shared_ptr<Declaration> d = hold_decl.FromRaw( classdecl );
-		shared_ptr<Record> r = dynamic_pointer_cast<Record>( d );
+		SharedPtr<Declaration> d = hold_decl.FromRaw( classdecl );
+		SharedPtr<Record> r = dynamic_pointer_cast<Record>( d );
 		ASSERT( r );
 
-		shared_ptr<Base> base( new Base );
+		SharedPtr<Base> base( new Base );
 		base->record = ti;
 		/*  if( Virt )
 		 base->storage = shared_new<Virtual>();
@@ -1777,8 +1777,8 @@ private:
 	virtual void ActOnBaseSpecifiers(DeclTy *ClassDecl, BaseTy **Bases,
 			unsigned NumBases)
 	{
-		shared_ptr<Declaration> cd( hold_decl.FromRaw( ClassDecl ) );
-		shared_ptr<InheritanceRecord> ih( dynamic_pointer_cast<InheritanceRecord>(cd) );
+		SharedPtr<Declaration> cd( hold_decl.FromRaw( ClassDecl ) );
+		SharedPtr<InheritanceRecord> ih( dynamic_pointer_cast<InheritanceRecord>(cd) );
 		ASSERT( ih );
 
 		for( int i=0; i<NumBases; i++ )
@@ -1799,7 +1799,7 @@ private:
 			clang::SourceLocation CCLoc,
 			clang::IdentifierInfo &II)
 	{
-		shared_ptr<Node> n( ident_track.Get( &II, FromCXXScope( &SS ) ) );
+		SharedPtr<Node> n( ident_track.Get( &II, FromCXXScope( &SS ) ) );
 
 		return hold_scope.ToRaw( n );
 	}
@@ -1821,7 +1821,7 @@ private:
 	virtual void ActOnCXXEnterDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS)
 	{
 		TRACE();
-		shared_ptr<Node> n = FromCXXScope( &SS );
+		SharedPtr<Node> n = FromCXXScope( &SS );
 		ASSERT(n);
 		ident_track.PushScope( S, n );
 	}
@@ -1837,15 +1837,15 @@ private:
 		ident_track.PopScope( S );
 	}
 
-	shared_ptr<Instance> GetConstructor( shared_ptr<Type> t )
+	SharedPtr<Instance> GetConstructor( SharedPtr<Type> t )
 	{
-		shared_ptr<TypeIdentifier> id = dynamic_pointer_cast<TypeIdentifier>(t);
+		SharedPtr<TypeIdentifier> id = dynamic_pointer_cast<TypeIdentifier>(t);
 		ASSERT(id);
-		shared_ptr<Record> r = GetRecordDeclaration( all_decls, id );
+		SharedPtr<Record> r = GetRecordDeclaration( all_decls, id );
 
-		FOREACH( shared_ptr<Declaration> d, r->members )
+		FOREACH( SharedPtr<Declaration> d, r->members )
 		{
-			shared_ptr<Instance> o( dynamic_pointer_cast<Instance>(d) );
+			SharedPtr<Instance> o( dynamic_pointer_cast<Instance>(d) );
 			if( !o )
 			continue;
 			if( dynamic_pointer_cast<Constructor>(o->type) )
@@ -1864,32 +1864,32 @@ private:
 			clang::SourceLocation RParenLoc )
 	{
 		// Get (or make) the constructor we're invoking
-		shared_ptr<Node> n = ident_track.Get( MemberOrBase );
-		shared_ptr<Instance> om( dynamic_pointer_cast<Instance>(n) );
+		SharedPtr<Node> n = ident_track.Get( MemberOrBase );
+		SharedPtr<Instance> om( dynamic_pointer_cast<Instance>(n) );
 		ASSERT( om );
-		shared_ptr<Instance> cm = GetConstructor( om->type );
+		SharedPtr<Instance> cm = GetConstructor( om->type );
 		ASSERT( cm );
 		ASSERT( cm->identifier );
 
 		// Build a lookup to the constructor, using the speiciifed subobject and the matching constructor
-		shared_ptr<Lookup> lu(new Lookup);
+		SharedPtr<Lookup> lu(new Lookup);
 		lu->base = om->identifier;
 		lu->member = cm->identifier;
 
 		// Build a call to the constructor with supplied args
 		Sequence<Expression> args;
 		CollectArgs( &args, Args, NumArgs );
-		shared_ptr<Call> call = CreateCall( args, lu );
+		SharedPtr<Call> call = CreateCall( args, lu );
 
 		// Get the constructor whose init list we're adding to (may need to start a
 		// new compound statement)
-		shared_ptr<Declaration> d( hold_decl.FromRaw( ConstructorDecl ) );
-		shared_ptr<Instance> o( dynamic_pointer_cast<Instance>(d) );
+		SharedPtr<Declaration> d( hold_decl.FromRaw( ConstructorDecl ) );
+		SharedPtr<Instance> o( dynamic_pointer_cast<Instance>(d) );
 		ASSERT(o);
-		shared_ptr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser);
+		SharedPtr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser);
 		if( !comp )
 		{
-			comp = shared_ptr<Compound>( new Compound );
+			comp = SharedPtr<Compound>( new Compound );
 			o->initialiser = comp;
 			TRACE();
 		}
@@ -1919,15 +1919,15 @@ private:
 			ExprTy **ConstructorArgs, unsigned NumConsArgs,
 			clang::SourceLocation ConstructorRParen )
 	{
-		shared_ptr<New> n( new New );
+		SharedPtr<New> n( new New );
 		n->type = CreateTypeNode( D );
 		CollectArgs( &(n->placement_arguments), PlacementArgs, NumPlaceArgs );
 		CollectArgs( &(n->constructor_arguments), ConstructorArgs, NumConsArgs );
 
 		if( UseGlobal )
-		n->global = shared_ptr<Global>( new Global );
+		n->global = SharedPtr<Global>( new Global );
 		else
-		n->global = shared_ptr<NonGlobal>( new NonGlobal );
+		n->global = SharedPtr<NonGlobal>( new NonGlobal );
 
 		// TODO cant figure out meaning of ParenTypeId
 
@@ -1940,18 +1940,18 @@ private:
 	virtual ExprResult ActOnCXXDelete( clang::SourceLocation StartLoc, bool UseGlobal,
 			bool ArrayForm, ExprTy *Expression )
 	{
-		shared_ptr<Delete> d( new Delete );
+		SharedPtr<Delete> d( new Delete );
 		d->pointer = hold_expr.FromRaw( Expression );
 
 		if( ArrayForm )
-		d->array = shared_ptr<DeleteArray>( new DeleteArray );
+		d->array = SharedPtr<DeleteArray>( new DeleteArray );
 		else
-		d->array = shared_ptr<DeleteNonArray>( new DeleteNonArray );
+		d->array = SharedPtr<DeleteNonArray>( new DeleteNonArray );
 
 		if( UseGlobal )
-		d->global = shared_ptr<Global>( new Global );
+		d->global = SharedPtr<Global>( new Global );
 		else
-		d->global = shared_ptr<NonGlobal>( new NonGlobal );
+		d->global = SharedPtr<NonGlobal>( new NonGlobal );
 
 		return hold_expr.ToRaw( d );
 	}
@@ -1959,17 +1959,17 @@ private:
 	virtual ExprResult ActOnCompoundLiteral(clang::SourceLocation LParen, TypeTy *Ty,
 			clang::SourceLocation RParen, ExprTy *Op)
 	{
-		shared_ptr<Type> t = hold_type.FromRaw( Ty );
-		shared_ptr<Expression> e = hold_expr.FromRaw( Op );
+		SharedPtr<Type> t = hold_type.FromRaw( Ty );
+		SharedPtr<Expression> e = hold_expr.FromRaw( Op );
 
 		TRACE("%p\n", t.get() );
 
 		// At this point, when we have the instance (and hence the type) and the initialiser
 		// we can detect when an array initialiser has been inserted for a record instance and
 		// change it.
-		if( shared_ptr<MakeArray> ai = dynamic_pointer_cast<MakeArray>(e) )
-		if( shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(t) )
-		if( shared_ptr<Record> r = GetRecordDeclaration(all_decls, ti) )
+		if( SharedPtr<MakeArray> ai = dynamic_pointer_cast<MakeArray>(e) )
+		if( SharedPtr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(t) )
+		if( SharedPtr<Record> r = GetRecordDeclaration(all_decls, ti) )
 		e = CreateRecordLiteralFromArrayLiteral( ai, r );
 
 		return hold_expr.ToRaw( e );

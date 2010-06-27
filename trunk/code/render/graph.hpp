@@ -75,13 +75,13 @@ public:
         }    
     }
 
-    string Traverse( shared_ptr<Node> root, bool links_pass )
+    string Traverse( SharedPtr<Node> root, bool links_pass )
     {
     	string s;
         Walk w( root );
         while(!w.Done())
         {
-            shared_ptr<Node> n = w.Get();
+            SharedPtr<Node> n = w.Get();
             if( n )
                 s += links_pass ? DoNodeLinks(n) : DoNode(n);
             w.AdvanceInto();
@@ -151,8 +151,8 @@ public:
 	string DoCoupling( Coupling pc )
     {
 		string s;
-		shared_ptr<Node> prev;
-		FOREACH( shared_ptr<Node> n, pc )
+		SharedPtr<Node> prev;
+		FOREACH( SharedPtr<Node> n, pc )
 		{
 			if( prev )
 			{
@@ -225,7 +225,7 @@ public:
         return o;
     }
 
-    string Name( shared_ptr<Node> sp, bool *bold, string *shape )   // TODO put stringize capabilities into the Property nodes as virtual methods
+    string Name( SharedPtr<Node> sp, bool *bold, string *shape )   // TODO put stringize capabilities into the Property nodes as virtual methods
     {
         *bold=true;
         if( dynamic_pointer_cast<StarBase>(sp) )
@@ -253,7 +253,7 @@ public:
             *shape = "hexagon";
             return *sp;
         }
-        else if( shared_ptr<SoftMakeIdentifier> smi = dynamic_pointer_cast<SoftMakeIdentifier>(sp) )
+        else if( SharedPtr<SoftMakeIdentifier> smi = dynamic_pointer_cast<SoftMakeIdentifier>(sp) )
         {
             *shape = "parallelogram";
             return smi->format;
@@ -267,7 +267,7 @@ public:
     }
     
     // Colours are GraphVis colours as listed at http://www.graphviz.org/doc/info/colors.html
-    string Colour( shared_ptr<Node> n )
+    string Colour( SharedPtr<Node> n )
     {
     	if( dynamic_pointer_cast<Identifier>(n) )
 			return "gray60";
@@ -293,7 +293,7 @@ public:
             return "";
     }
     
-    string HTMLLabel( string name, shared_ptr<Node> n )
+    string HTMLLabel( string name, SharedPtr<Node> n )
     {
         string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
         s += " <TR>\n";
@@ -341,7 +341,7 @@ public:
         return s;
     }
 
-    string SimpleLabel( string name, shared_ptr<Node> n )
+    string SimpleLabel( string name, SharedPtr<Node> n )
     {
         string s = "\"<fixed> " + Sanitise(name);
         vector< Itemiser::Element * > members = n->Itemise();
@@ -369,7 +369,7 @@ public:
         return s;
     }
 
-    string DoNode( shared_ptr<Node> n )
+    string DoNode( SharedPtr<Node> n )
     {
         string s;
         bool bold;
@@ -410,7 +410,7 @@ public:
         return s;
     }
     
-    string DoNodeLinks( shared_ptr<Node> n )
+    string DoNodeLinks( SharedPtr<Node> n )
     {    
         string s;
         vector< Itemiser::Element * > members = n->Itemise();
@@ -442,7 +442,7 @@ public:
         return s;
     }    
     
-    bool IsRecord( shared_ptr<Node> n )
+    bool IsRecord( SharedPtr<Node> n )
     {
         bool bold;
         string shape;
@@ -451,7 +451,7 @@ public:
         return shape=="record" || shape=="plaintext";
     }
 
-    string DoLink( shared_ptr<Node> from, string field, shared_ptr<Node> to, string atts=string() )
+    string DoLink( SharedPtr<Node> from, string field, SharedPtr<Node> to, string atts=string() )
     {
         string s;
         s += Id(from.get());
