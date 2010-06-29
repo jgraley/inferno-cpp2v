@@ -2,7 +2,6 @@
 #define RENDER_HPP
 
 #include "tree/tree.hpp"
-#include "common/refcount.hpp"
 #include "helpers/transformation.hpp"
 #include "helpers/typeof.hpp"
 #include "common/trace.hpp"

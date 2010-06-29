@@ -8,7 +8,6 @@
 #include "steps/for_to_while.hpp"
 #include "tree/tree.hpp"
 #include "common/common.hpp"
-#include "common/refcount.hpp"
 #include "helpers/soft_patterns.hpp"
 
 void ForToWhile::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )

@@ -2,7 +2,6 @@
 #define GRAPH_HPP
 
 #include "tree/tree.hpp"
-#include "common/refcount.hpp"
 #include "helpers/transformation.hpp"
 #include "helpers/search_replace.hpp"
 #include "helpers/soft_patterns.hpp"

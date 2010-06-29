@@ -2,8 +2,8 @@
 #include "validate.hpp"
 
 // Constructor remembers search pattern, replace pattern and any supplied match sets as required
-RootedSearchReplace::RootedSearchReplace( shared_ptr<Node> sp,
-                                          shared_ptr<Node> rp,
+RootedSearchReplace::RootedSearchReplace( SharedPtr<Node> sp,
+                                          SharedPtr<Node> rp,
                                           CouplingSet m,
                                           vector<RootedSearchReplace *> s )
 {
@@ -11,8 +11,8 @@ RootedSearchReplace::RootedSearchReplace( shared_ptr<Node> sp,
 }
 
 
-void RootedSearchReplace::Configure( shared_ptr<Node> sp,
-                                     shared_ptr<Node> rp,
+void RootedSearchReplace::Configure( SharedPtr<Node> sp,
+                                     SharedPtr<Node> rp,
                                      CouplingSet m,
                                      vector<RootedSearchReplace *> s )
 {
@@ -53,8 +53,8 @@ RootedSearchReplace::~RootedSearchReplace()
 
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
-		                                             shared_ptr<Node> pattern,
+Result RootedSearchReplace::DecidedCompare( SharedPtr<Node> x,
+		                                             SharedPtr<Node> pattern,
 		                                             CouplingKeys *keys,
 		                                             bool can_key,
 		                                             Conjecture &conj ) const
@@ -62,14 +62,14 @@ Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
 	if( !pattern )    // NULL matches anything in search patterns (just to save typing)
 		return FOUND;
 
-    if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
+    if( SharedPtr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
     {
     	// Hand over to any soft search functionality in the search pattern node
     	Result r = ssp->DecidedCompare( this, x, keys, can_key, conj );
     	if( r != FOUND )
     		return NOT_FOUND;
     }
-    else if( shared_ptr<StuffBase> stuff_pattern = dynamic_pointer_cast<StuffBase>(pattern) )
+    else if( SharedPtr<StuffBase> stuff_pattern = dynamic_pointer_cast<StuffBase>(pattern) )
     {
     	// Invoke stuff node compare
     	return DecidedCompare( x, stuff_pattern, keys, can_key, conj );
@@ -112,7 +112,7 @@ Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
 				SharedPtrInterface *x_ptr = dynamic_cast<SharedPtrInterface *>(x_memb[i]);
 				ASSERT( x_ptr )( "itemise for target didn't match itemise for pattern");
 				TRACE("Member %d is SharedPtr, pattern ptr=%p\n", i, pattern_ptr->get());
-				r = DecidedCompare( *x_ptr, *pattern_ptr, keys, can_key, conj );
+				r = DecidedCompare( *x_ptr, SharedPtr<Node>(*pattern_ptr), keys, can_key, conj );
 			}
 			else
 			{
@@ -148,7 +148,7 @@ Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
 	while( pit != pattern.end() )
 	{
 		// Get the next element of the pattern
-		shared_ptr<Node> pe( *pit );
+		SharedPtr<Node> pe( *pit );
 		++pit;
 	    if( !pe || dynamic_pointer_cast<StarBase>(pe) )
 	    {
@@ -171,7 +171,7 @@ Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
 	    		TRACE("Pattern continues after star\n");
 
 	    		// Star not at end so there is more stuff to match; ensure not another star
-	    		ASSERT( !dynamic_pointer_cast<StarBase>(shared_ptr<Node>(*pit)) )
+	    		ASSERT( !dynamic_pointer_cast<StarBase>(SharedPtr<Node>(*pit)) )
 	    		      ( "Not allowed to have two neighbouring Star elements in search pattern Sequence");
 
 		    	// Decide how many elements the current * should match, using conjecture. Jump forward
@@ -191,12 +191,12 @@ Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
 		    // Now make a copy of the elements that matched the star and apply match sets
 		    if( pe )
 		    {
-		    	shared_ptr<SubSequence> ss( new SubSequence);
+		    	SharedPtr<SubSequence> ss( new SubSequence);
 		    	for( ContainerInterface::iterator it=xit_begin_star; it != xit; ++it )
 		    		ss->push_back( *it );
 				// Apply match sets to this Star and matched range
 				if( keys )
-		    		if( !keys->KeyAndRestrict( shared_ptr<Node>(ss), pe, this, can_key ) )
+		    		if( !keys->KeyAndRestrict( SharedPtr<Node>(ss), pe, this, can_key ) )
 		        	    return NOT_FOUND;
 		    }
 	    }
@@ -204,7 +204,7 @@ Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
 	    {
 	    	TRACE("Not a star\n");
 			// If there is one more element in x, see if it matches the pattern
-			//shared_ptr<Node> xe( x[xit] );
+			//SharedPtr<Node> xe( x[xit] );
 			if( xit != x.end() && DecidedCompare( *xit, pe, keys, can_key, conj ) == FOUND )
 			{
 				++xit;
@@ -233,11 +233,11 @@ Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
 	// after decisions.
 	// TODO is there some stl algorithm for this?
-    shared_ptr<SubCollection> xremaining( new SubCollection );
+    SharedPtr<SubCollection> xremaining( new SubCollection );
     FOREACH( const SharedPtrInterface &xe, x )
         xremaining->insert( xe );
 
-    shared_ptr<StarBase> star;
+    SharedPtr<StarBase> star;
     bool seen_star = false;
 
     for( CollectionInterface::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
@@ -246,7 +246,7 @@ Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
     			xremaining->size(),
     			pattern.size(),
     			TypeInfo( SharedPtr<Node>(*pit) ).name().c_str() );
-    	shared_ptr<StarBase> maybe_star = dynamic_pointer_cast<StarBase>( shared_ptr<Node>(*pit) );
+    	SharedPtr<StarBase> maybe_star = dynamic_pointer_cast<StarBase>( SharedPtr<Node>(*pit) );
 
         if( maybe_star || !(*pit) ) // Star or NULL in pattern collection?
         {
@@ -269,7 +269,7 @@ Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
 	    		return NOT_FOUND;
 
 	    	// Recurse into comparison function for the chosen node
-			if( !DecidedCompare( *xit, *pit, keys, can_key, conj ) )
+			if( !DecidedCompare( *xit, SharedPtr<Node>(*pit), keys, can_key, conj ) )
 			    return NOT_FOUND;
 	    }
     }
@@ -283,7 +283,7 @@ Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
     // If we got here, the node matched the search pattern. Now apply match sets
     TRACE("seen_star %d  star %p\n", seen_star, star.get() );
     if( keys && seen_star && star )
-        if( !keys->KeyAndRestrict( shared_ptr<Node>(xremaining), star, this, can_key ) )
+        if( !keys->KeyAndRestrict( SharedPtr<Node>(xremaining), star, this, can_key ) )
         	return NOT_FOUND;
 
 	return FOUND;
@@ -292,8 +292,8 @@ Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
 
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
-		                                             shared_ptr<StuffBase> stuff_pattern,
+Result RootedSearchReplace::DecidedCompare( SharedPtr<Node> x,
+		                                             SharedPtr<StuffBase> stuff_pattern,
 		                                             CouplingKeys *keys,
 		                                             bool can_key,
 		                                             Conjecture &conj ) const
@@ -319,7 +319,7 @@ Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
     	key->root = x;
     	key->terminus = *thistime;
     	//SharedPtr<Node> = SharedPtrInterface
-        r = keys->KeyAndRestrict( shared_ptr<Key>(key),
+        r = keys->KeyAndRestrict( KeyPtr(key),
         		                  stuff_pattern,
         		                  this,
         		                  can_key );
@@ -328,8 +328,8 @@ Result RootedSearchReplace::DecidedCompare( shared_ptr<Node> x,
 }
 
 
-Result RootedSearchReplace::MatchingDecidedCompare( shared_ptr<Node> x,
-		                                                     shared_ptr<Node> pattern,
+Result RootedSearchReplace::MatchingDecidedCompare( SharedPtr<Node> x,
+		                                                     SharedPtr<Node> pattern,
 		                                                     CouplingKeys *keys,
 		                                                     bool can_key,
 		                                                     Conjecture &conj ) const
@@ -380,8 +380,8 @@ Result RootedSearchReplace::MatchingDecidedCompare( shared_ptr<Node> x,
 }
 
 
-Result RootedSearchReplace::Compare( shared_ptr<Node> x,
-		                                      shared_ptr<Node> pattern,
+Result RootedSearchReplace::Compare( SharedPtr<Node> x,
+		                                      SharedPtr<Node> pattern,
 		                                      CouplingKeys *keys,
 		                                      bool can_key ) const
 {
@@ -395,7 +395,7 @@ Result RootedSearchReplace::Compare( shared_ptr<Node> x,
 
 
 // Clear all pointer members in supplied dest to NULL
-void RootedSearchReplace::ClearPtrs( shared_ptr<Node> dest ) const
+void RootedSearchReplace::ClearPtrs( SharedPtr<Node> dest ) const
 {
     vector< Itemiser::Element * > dest_memb = dest->Itemise();
     for( int i=0; i<dest_memb.size(); i++ )
@@ -410,7 +410,7 @@ void RootedSearchReplace::ClearPtrs( shared_ptr<Node> dest ) const
         }            
         else if( SharedPtrInterface *dest_ptr = dynamic_cast<SharedPtrInterface *>(dest_memb[i]) )         
         {
-            *dest_ptr = shared_ptr<Node>();
+            *dest_ptr = SharedPtr<Node>();
         }
     }       
 }
@@ -419,11 +419,11 @@ void RootedSearchReplace::ClearPtrs( shared_ptr<Node> dest ) const
 // Helper for DuplicateSubtree, fills in children of dest node from source node when source node child
 // is non-NULL. This means we can call this multiple times with different sources and get a priority 
 // scheme.
-void RootedSearchReplace::Overlay( shared_ptr<Node> dest,
-		                           shared_ptr<Node> source,
+void RootedSearchReplace::Overlay( SharedPtr<Node> dest,
+		                           SharedPtr<Node> source,
 		                           CouplingKeys *keys,
 		                           bool can_key,
-		                           shared_ptr<Key> current_key ) const
+		                           KeyPtr current_key ) const
 {
     ASSERT( source->IsLocalMatch(dest.get()) )("source must be a non-strict subclass of destination, so that it does not have more members");
 
@@ -480,7 +480,7 @@ void RootedSearchReplace::Overlay( SequenceInterface *dest,
 		                           SequenceInterface *source,
 		                           CouplingKeys *keys,
 		                           bool can_key,
-		                           shared_ptr<Key> current_key ) const
+		                           KeyPtr current_key ) const
 {
     // For now, always overwrite the dest
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
@@ -490,8 +490,8 @@ void RootedSearchReplace::Overlay( SequenceInterface *dest,
 	FOREACH( const SharedPtrInterface &p, *source )
 	{
 		ASSERT( p ); // present simplified scheme disallows NULL, see above
-		shared_ptr<Node> n = DuplicateSubtree( p, keys, can_key, current_key );
-		if( shared_ptr<SubSequence> ss = dynamic_pointer_cast<SubSequence>(n) )
+		SharedPtr<Node> n = DuplicateSubtree( p, keys, can_key, current_key );
+		if( SharedPtr<SubSequence> ss = dynamic_pointer_cast<SubSequence>(n) )
 		{
 			TRACE("Expanding SubSequence length %d\n", ss->size() );
 		    FOREACH( const SharedPtrInterface &xx, *ss )
@@ -510,7 +510,7 @@ void RootedSearchReplace::Overlay( CollectionInterface *dest,
    		                           CollectionInterface *source,
 		                           CouplingKeys *keys,
 		                           bool can_key,
-		                           shared_ptr<Key> current_key ) const
+		                           KeyPtr current_key ) const
 {
     // For now, always overwrite the dest
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
@@ -521,8 +521,8 @@ void RootedSearchReplace::Overlay( CollectionInterface *dest,
 	FOREACH( const SharedPtrInterface &p, *source )
 	{
 		ASSERT( p ); // present simplified scheme disallows NULL, see above
-		shared_ptr<Node> n = DuplicateSubtree( p, keys, can_key, current_key );
-		if( shared_ptr<SubCollection> sc = dynamic_pointer_cast<SubCollection>(n) )
+		SharedPtr<Node> n = DuplicateSubtree( p, keys, can_key, current_key );
+		if( SharedPtr<SubCollection> sc = dynamic_pointer_cast<SubCollection>(n) )
 		{
 			TRACE("Expanding SubCollection length %d\n", sc->size() );
 			FOREACH( const SharedPtrInterface &xx, *sc )
@@ -543,10 +543,10 @@ void RootedSearchReplace::Overlay( CollectionInterface *dest,
 // substituting.
 // TODO possible refactor: when we detect a match set match, maybe recurse back into DuplicateSubtree
 // and get the two OverlayPtrs during unwind.
-shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
+SharedPtr<Node> RootedSearchReplace::DuplicateSubtree( SharedPtr<Node> source,
 		                                                CouplingKeys *keys,
 		                                                bool can_key,
-		                                                shared_ptr<Key> current_key ) const
+		                                                KeyPtr current_key ) const
 {
 	TRACE("Duplicating %s under_substitution=%p\n", TypeInfo(source).name().c_str(), current_key.get());
 
@@ -555,7 +555,7 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 	if( shared_ptr<StuffKey> stuff_key = dynamic_pointer_cast<StuffKey>(current_key) )
 	{
 		ASSERT( stuff_key->replace_pattern );
-		shared_ptr<StuffBase> replace_stuff = dynamic_pointer_cast<StuffBase>( stuff_key->replace_pattern );
+		SharedPtr<StuffBase> replace_stuff = dynamic_pointer_cast<StuffBase>( stuff_key->replace_pattern );
 		ASSERT( replace_stuff );
 		if( replace_stuff->terminus &&      // There is a terminus in replace pattern
 			source == stuff_key->terminus ) // and the present node is the terminus in the source pattern
@@ -564,12 +564,12 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 					TypeInfo(source).name().c_str(), source.get(),
 					TypeInfo(stuff_key->terminus).name().c_str(), stuff_key->terminus.get() );
 			TRACE( "Leaving substitution to duplicate terminus replace pattern\n" );
-			return DuplicateSubtree( replace_stuff->terminus, keys, can_key, shared_ptr<Key>() ); // not in substitution any more
+			return DuplicateSubtree( replace_stuff->terminus, keys, can_key, KeyPtr() ); // not in substitution any more
 		}
 	}
 
-	shared_ptr<Node> dest = shared_ptr<Node>();
-	dest = keys->KeyAndSubstitute( shared_ptr<Key>(), source, this, can_key );
+	SharedPtr<Node> dest = SharedPtr<Node>();
+	dest = keys->KeyAndSubstitute( KeyPtr(), source, this, can_key );
     ASSERT( !dest || !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
                                                                              // source is actually a match key already, so not in any match sets
     if( dest )
@@ -594,18 +594,18 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
     	ASSERT( !dynamic_pointer_cast<StuffBase>(source) )("Stuff nodes in replace pattern must be keyed\n");
 
        	// Allow a soft replace pattern to act
-		if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
+		if( SharedPtr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
 		{
 			// Substitute is an identifier, so preserve its uniqueness by just returning
 			// the same node. Don't do any more - we wouldn't want to change the
 			// identifier in the tree even if it had members, lol!
 			TRACE("Invoke soft replace pattern %s\n", TypeInfo(srp).name().c_str() );
 			ASSERT( !current_key )( "Found soft replace pattern while under substitution\n" );
-			shared_ptr<Node> newsource = srp->DuplicateSubtree( this, keys, can_key );
+			SharedPtr<Node> newsource = srp->DuplicateSubtree( this, keys, can_key );
 			ASSERT( newsource );
 
 			// Allow this to key a match set if required
-			shared_ptr<Node> subs = keys->KeyAndSubstitute( newsource, source, this, can_key );
+			SharedPtr<Node> subs = keys->KeyAndSubstitute( newsource, source, this, can_key );
 			if( subs )
 				return subs;
 			else
@@ -637,7 +637,7 @@ shared_ptr<Node> RootedSearchReplace::DuplicateSubtree( shared_ptr<Node> source,
 }
 
 
-shared_ptr<Node> RootedSearchReplace::MatchingDuplicateSubtree( shared_ptr<Node> source,
+SharedPtr<Node> RootedSearchReplace::MatchingDuplicateSubtree( SharedPtr<Node> source,
 		                                                        CouplingKeys *keys ) const
 {
     if( keys )
@@ -649,7 +649,7 @@ shared_ptr<Node> RootedSearchReplace::MatchingDuplicateSubtree( shared_ptr<Node>
 
 	    // Now restrict the search according to the match sets
     	TRACE("doing replace SUBSTITUTING pass....\n");
-        shared_ptr<Node> r = DuplicateSubtree( source, keys, false );
+        SharedPtr<Node> r = DuplicateSubtree( source, keys, false );
         TRACE("replace SUBSTITUTING pass\n" );
         return r;
     }
@@ -664,9 +664,9 @@ shared_ptr<Node> RootedSearchReplace::MatchingDuplicateSubtree( shared_ptr<Node>
 #include "render/graph.hpp" // TODO get rid
 
 
-Result RootedSearchReplace::SingleSearchReplace( shared_ptr<Node> *proot,
-		                                                              shared_ptr<Node> search_pattern,
-		                                                              shared_ptr<Node> replace_pattern,
+Result RootedSearchReplace::SingleSearchReplace( SharedPtr<Node> *proot,
+		                                                              SharedPtr<Node> search_pattern,
+		                                                              SharedPtr<Node> replace_pattern,
 		                                                              CouplingKeys keys ) // Pass by value is intentional - changes should not propogate back to caller
 {
 	TRACE("%p Begin search\n", this);
@@ -696,9 +696,9 @@ Result RootedSearchReplace::SingleSearchReplace( shared_ptr<Node> *proot,
 // on supplied patterns and match sets. Does search and replace
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
-int RootedSearchReplace::RepeatingSearchReplace( shared_ptr<Node> *proot,
-	                                             shared_ptr<Node> search_pattern,
-	                                             shared_ptr<Node> replace_pattern,
+int RootedSearchReplace::RepeatingSearchReplace( SharedPtr<Node> *proot,
+	                                             SharedPtr<Node> search_pattern,
+	                                             SharedPtr<Node> replace_pattern,
 	                                             CouplingKeys keys ) // Pass by value is intentional - changes should not propagate back to caller
 {
     int i=0;
@@ -751,7 +751,7 @@ void RootedSearchReplace::operator()( SharedPtr<Node> c, SharedPtr<Node> *proot 
 
 
 // Find a match set containing the supplied node
-Coupling CouplingKeys::FindCoupling( shared_ptr<Node> node,
+Coupling CouplingKeys::FindCoupling( SharedPtr<Node> node,
 		                                                                       const CouplingSet &couplings )
 {
 	ASSERT( this );
@@ -772,18 +772,18 @@ Coupling CouplingKeys::FindCoupling( shared_ptr<Node> node,
 
 
 
-Result CouplingKeys::KeyAndRestrict( shared_ptr<Node> x,
-		                                                                    shared_ptr<Node> pattern,
+Result CouplingKeys::KeyAndRestrict( SharedPtr<Node> x,
+		                                                                    SharedPtr<Node> pattern,
 		                                                                    const RootedSearchReplace *sr,
 		                                                                    bool can_key )
 {
-	shared_ptr<Key> key( new Key );
+	KeyPtr key( new Key );
 	key->root = x;
 	return KeyAndRestrict( key, pattern, sr, can_key );
 }
 
-Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
-		                                                                    shared_ptr<Node> pattern,
+Result CouplingKeys::KeyAndRestrict( KeyPtr key,
+		                                                                    SharedPtr<Node> pattern,
 		                                                                    const RootedSearchReplace *sr,
 		                                                                    bool can_key )
 {
@@ -824,20 +824,20 @@ Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
 	return r;
 }
 
-shared_ptr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Node> x,
-                                                                   shared_ptr<Node> pattern,
+SharedPtr<Node> CouplingKeys::KeyAndSubstitute( SharedPtr<Node> x,
+                                                                   SharedPtr<Node> pattern,
                                                                    const RootedSearchReplace *sr,
                                                                    bool can_key )
 {
-	shared_ptr<Key> key( new Key );
+	KeyPtr key( new Key );
 	key->root = x;
 	return KeyAndSubstitute( key, pattern, sr, can_key );
 }
 
 // Note return is NULL in all cases unless we substituted in which case it is the result of the
 // substitution, duplicated for our convenience. Always check the return value for NULL.
-shared_ptr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be NULL meaning we are not allowed to key the node
-		                                                           shared_ptr<Node> pattern,
+SharedPtr<Node> CouplingKeys::KeyAndSubstitute( KeyPtr key, // key may be NULL meaning we are not allowed to key the node
+		                                                           SharedPtr<Node> pattern,
 		                                                           const RootedSearchReplace *sr,
 		                                                           bool can_key )
 {
@@ -848,7 +848,7 @@ shared_ptr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may
 	// nothing for us to do, so return without restricting the search.
 	Coupling coupling = FindCoupling( pattern, sr->couplings );
 	if( coupling.empty() )
-		return shared_ptr<Node>();
+		return SharedPtr<Node>();
 	TRACE("MATCH: ");
 
 	// If we're keying and we haven't keyed this node so far, key it now
@@ -869,9 +869,9 @@ shared_ptr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may
 		TRACE("substituting ");
 		ASSERT( keys_map[coupling] );
 		keys_map[coupling]->replace_pattern = pattern; // Only fill this in while substituting under the node
-		shared_ptr<Node> subs = sr->DuplicateSubtree( keys_map[coupling]->root, this, can_key, keys_map[coupling] ); // Enter substitution
+		SharedPtr<Node> subs = sr->DuplicateSubtree( keys_map[coupling]->root, this, can_key, keys_map[coupling] ); // Enter substitution
 		// TODO can_key should be false in the above?
-		keys_map[coupling]->replace_pattern = shared_ptr<Node>();
+		keys_map[coupling]->replace_pattern = SharedPtr<Node>();
 		return subs;
 	}
 
@@ -882,7 +882,7 @@ shared_ptr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may
     // want to call DuplicateSubtree etc because it might recurse endlessly or have other unwanted
     // side-effects. Since this is the KEYING pass the generated tree will get thrown away so
     // just produce a nondescript Node.
-    return shared_ptr<Node>();
+    return SharedPtr<Node>();
 }
 
 void Conjecture::PrepareForDecidedCompare()
@@ -907,8 +907,8 @@ bool Conjecture::ShouldTryMore( Result r, int threshold )
 }
 
 
-Result Conjecture::Search( shared_ptr<Node> x,
-																	 shared_ptr<Node> pattern,
+Result Conjecture::Search( SharedPtr<Node> x,
+																	 SharedPtr<Node> pattern,
 																	 CouplingKeys *keys,
 																	 bool can_key,
 																	 const RootedSearchReplace *sr )
@@ -983,8 +983,8 @@ ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::ite
 }
 
 
-SearchReplace::SearchReplace( shared_ptr<Node> sp,
-                              shared_ptr<Node> rp,
+SearchReplace::SearchReplace( SharedPtr<Node> sp,
+                              SharedPtr<Node> rp,
                               CouplingSet m,
                               vector<RootedSearchReplace *> s )
 {
@@ -992,8 +992,8 @@ SearchReplace::SearchReplace( shared_ptr<Node> sp,
 }
 
 
-void SearchReplace::Configure( shared_ptr<Node> sp,
-                               shared_ptr<Node> rp,
+void SearchReplace::Configure( SharedPtr<Node> sp,
+                               SharedPtr<Node> rp,
                                CouplingSet m,
                                vector<RootedSearchReplace *> s )
 {
@@ -1027,17 +1027,17 @@ void SearchReplace::Configure( shared_ptr<Node> sp,
 }
 
 Result TransformToBase::DecidedCompare( const RootedSearchReplace *sr,
-		                                                     shared_ptr<Node> x,
+		                                                     SharedPtr<Node> x,
 		                                                     CouplingKeys *keys,
 		                                                     bool can_key,
 		                                                     Conjecture &conj ) const
 {
     // Transform the candidate expression
-    shared_ptr<Node> xt = (*transformation)( sr->GetContext(), x );
+    SharedPtr<Node> xt = (*transformation)( sr->GetContext(), x );
 	if( xt )
 	{
 	    // Punt it back into the search/replace engine
-	    return sr->DecidedCompare( xt, shared_ptr<Node>(pattern), keys, can_key, conj );
+	    return sr->DecidedCompare( xt, SharedPtr<Node>(pattern), keys, can_key, conj );
 	}
 	else
 	{
@@ -1054,23 +1054,23 @@ void RootedSearchReplace::Test()
     
     {
         // single node with topological wildcarding
-        shared_ptr<Void> v(new Void);
+        SharedPtr<Void> v(new Void);
         ASSERT( sr.Compare( v, v ) == FOUND );
-        shared_ptr<Boolean> b(new Boolean);
+        SharedPtr<Boolean> b(new Boolean);
         ASSERT( sr.Compare( v, b ) == NOT_FOUND );
         ASSERT( sr.Compare( b, v ) == NOT_FOUND );
-        shared_ptr<Type> t(new Type);
+        SharedPtr<Type> t(new Type);
         ASSERT( sr.Compare( v, t ) == FOUND );
         ASSERT( sr.Compare( t, v ) == NOT_FOUND );
         ASSERT( sr.Compare( b, t ) == FOUND );
         ASSERT( sr.Compare( t, b ) == NOT_FOUND );
         
         // node points directly to another with TC
-        shared_ptr<Pointer> p1(new Pointer);
+        SharedPtr<Pointer> p1(new Pointer);
         p1->destination = v;
         ASSERT( sr.Compare( p1, b ) == NOT_FOUND );
         ASSERT( sr.Compare( p1, p1 ) == FOUND );
-        shared_ptr<Pointer> p2(new Pointer);
+        SharedPtr<Pointer> p2(new Pointer);
         p2->destination = b;
         ASSERT( sr.Compare( p1, p2 ) == NOT_FOUND );
         p2->destination = t;
@@ -1080,16 +1080,16 @@ void RootedSearchReplace::Test()
     
     {
         // string property
-        shared_ptr<SpecificString> s1( new SpecificString("here") );
-        shared_ptr<SpecificString> s2( new SpecificString("there") );
+        SharedPtr<SpecificString> s1( new SpecificString("here") );
+        SharedPtr<SpecificString> s2( new SpecificString("there") );
         ASSERT( sr.Compare( s1, s1 ) == FOUND );
         ASSERT( sr.Compare( s1, s2 ) == NOT_FOUND );
     }    
     
     {
         // int property
-        shared_ptr<SpecificInteger> i1( new SpecificInteger(3) );
-        shared_ptr<SpecificInteger> i2( new SpecificInteger(5) );
+        SharedPtr<SpecificInteger> i1( new SpecificInteger(3) );
+        SharedPtr<SpecificInteger> i2( new SpecificInteger(5) );
         TRACE("  %s %s\n", ((llvm::APSInt)*i1).toString(10).c_str(), ((llvm::APSInt)*i2).toString(10).c_str() );
         ASSERT( sr.Compare( i1, i1 ) == FOUND );
         ASSERT( sr.Compare( i1, i2 ) == NOT_FOUND );
@@ -1097,34 +1097,34 @@ void RootedSearchReplace::Test()
     
     {
         // node with sequence, check lengths 
-        shared_ptr<Compound> c1( new Compound );
+        SharedPtr<Compound> c1( new Compound );
         ASSERT( sr.Compare( c1, c1 ) == FOUND );
-        shared_ptr<Nop> n1( new Nop );
+        SharedPtr<Nop> n1( new Nop );
         c1->statements.push_back( n1 );
         ASSERT( sr.Compare( c1, c1 ) == FOUND );
-        shared_ptr<Nop> n2( new Nop );
+        SharedPtr<Nop> n2( new Nop );
         c1->statements.push_back( n2 );
         ASSERT( sr.Compare( c1, c1 ) == FOUND );
-        shared_ptr<Compound> c2( new Compound );
+        SharedPtr<Compound> c2( new Compound );
         ASSERT( sr.Compare( c1, c2 ) == NOT_FOUND );
-        shared_ptr<Nop> n3( new Nop );
+        SharedPtr<Nop> n3( new Nop );
         c2->statements.push_back( n3 );
         ASSERT( sr.Compare( c1, c2 ) == NOT_FOUND );
-        shared_ptr<Nop> n4( new Nop );
+        SharedPtr<Nop> n4( new Nop );
         c2->statements.push_back( n4 );
         ASSERT( sr.Compare( c1, c2 ) == FOUND );
-        shared_ptr<Nop> n5( new Nop );
+        SharedPtr<Nop> n5( new Nop );
         c2->statements.push_back( n5 );
         ASSERT( sr.Compare( c1, c2 ) == NOT_FOUND );
     }
 
     {
         // node with sequence, TW 
-        shared_ptr<Compound> c1( new Compound );
-        shared_ptr<Nop> n1( new Nop );
+        SharedPtr<Compound> c1( new Compound );
+        SharedPtr<Nop> n1( new Nop );
         c1->statements.push_back( n1 );
-        shared_ptr<Compound> c2( new Compound );
-        shared_ptr<Statement> s( new Statement );
+        SharedPtr<Compound> c2( new Compound );
+        SharedPtr<Statement> s( new Statement );
         c2->statements.push_back( s );
         ASSERT( sr.Compare( c1, c2 ) == FOUND );
         ASSERT( sr.Compare( c2, c1 ) == NOT_FOUND );
@@ -1133,22 +1133,22 @@ void RootedSearchReplace::Test()
     {        
         // topological with extra member in target node
         /* gone obsolete with tree changes TODO un-obsolete
-        shared_ptr<Label> l( new Label );
-        shared_ptr<Public> p1( new Public );
+        SharedPtr<Label> l( new Label );
+        SharedPtr<Public> p1( new Public );
         l->access = p1;
-        shared_ptr<LabelIdentifier> li( new LabelIdentifier );
+        SharedPtr<LabelIdentifier> li( new LabelIdentifier );
         li->name = "mylabel";
         l->identifier = li;
-        shared_ptr<Declaration> d( new Declaration );
-        shared_ptr<Public> p2( new Public );
+        SharedPtr<Declaration> d( new Declaration );
+        SharedPtr<Public> p2( new Public );
         d->access = p2;
         ASSERT( sr.Compare( l, d ) == true );
         ASSERT( sr.Compare( d, l ) == false );
-        shared_ptr<Private> p3( new Private );
+        SharedPtr<Private> p3( new Private );
         d->access = p3;
         ASSERT( sr.Compare( l, d ) == false );
         ASSERT( sr.Compare( d, l ) == false );
-        shared_ptr<AccessSpec> p4( new AccessSpec );
+        SharedPtr<AccessSpec> p4( new AccessSpec );
         d->access = p4;
         ASSERT( sr.Compare( l, d ) == true );
         ASSERT( sr.Compare( d, l ) == false );

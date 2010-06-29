@@ -2,7 +2,7 @@
 #define IDENTIFIER_TRACKER
 
 #include "clang/Parse/Action.h"
-#include "common/refcount.hpp"
+#include "rc_hold.hpp"
 #include "tree/tree.hpp"
 
 // Semantic.
@@ -27,6 +27,7 @@ class IdentifierTracker
     // F has no identifier info, since it's name is not relevent to scopes (anonymous scope)
     // All should have valid node pointers (TODO fill in for compound statements)
     // C, F, S should have clang scope cs filled in.      
+	// TODO use Scope and Identifier instead of Node everywhere
     struct TNode
     {
         shared_ptr<TNode> parent;

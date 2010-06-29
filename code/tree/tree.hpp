@@ -1,7 +1,6 @@
 #ifndef TREE_HPP
 #define TREE_HPP
 
-#include "common/refcount.hpp"
 #include "clang/Basic/SourceLocation.h"
 #include "clang/Basic/TokenKinds.h"
 #include "llvm/ADT/APSInt.h"

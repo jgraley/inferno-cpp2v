@@ -36,7 +36,6 @@ struct SharedPtrInterface : virtual SUB_BASE, public Traceable
 {
     // Convert to and from shared_ptr<VALUE_INTERFACE>
 	virtual operator shared_ptr<VALUE_INTERFACE>() const = 0;
-    virtual SharedPtrInterface &operator=( shared_ptr<VALUE_INTERFACE> n ) = 0;
 
     virtual operator bool() const = 0; // for testing against NULL
     virtual VALUE_INTERFACE *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
@@ -46,22 +45,20 @@ struct SharedPtrInterface : virtual SUB_BASE, public Traceable
 template<typename SUB_BASE, typename VALUE_INTERFACE, typename VALUE_TYPE>
 struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared_ptr<VALUE_TYPE>
 {
-    SharedPtr() {}
+    inline SharedPtr() {}
 
-    SharedPtr( VALUE_TYPE *o ) :
+    inline SharedPtr( VALUE_TYPE *o ) :
         shared_ptr<VALUE_TYPE>( o )
     {
     }
 
     template< typename OTHER >
-    SharedPtr( const shared_ptr<OTHER> &o ) :
-        shared_ptr<VALUE_TYPE>( dynamic_pointer_cast<VALUE_TYPE>(o) )
+    inline SharedPtr( const shared_ptr<OTHER> &o ) :
+        shared_ptr<VALUE_TYPE>( o )
     {
-    	if( o )
-    	    ASSERT( *this )("Cannot convert shared_ptr<")(typeid(OTHER).name())("> to SharedPtr<")(typeid(VALUE_TYPE).name())(">");
     }
 
-    SharedPtr( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g ) :
+    inline SharedPtr( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g ) :
     	shared_ptr<VALUE_TYPE>( dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(g)) )
     {
     	if( g )
@@ -71,9 +68,7 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
     virtual operator shared_ptr<VALUE_INTERFACE>() const
     {
         const shared_ptr<VALUE_TYPE> *p = (const shared_ptr<VALUE_TYPE> *)this;
-        ASSERT(p);
-        shared_ptr<VALUE_INTERFACE> n = (shared_ptr<VALUE_INTERFACE>)*p;
-        return n;
+        return *p;
     }
 
     virtual VALUE_INTERFACE *get() const // TODO should return VALUE_TYPE, hacked due to covariant NULL pointer bug, see comment at top of file
@@ -83,37 +78,23 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
     	return e;
     }
 
-    template< typename OTHER >
-    SharedPtr &operator=( shared_ptr<OTHER> n )
-    {
-        if( !n )
-        {
-            *(shared_ptr<VALUE_TYPE> *)this = shared_ptr<VALUE_TYPE>(); // handle NULL explicitly since dyn cast uses NULL to indicate wrong type
-        }
-        else
-        {
-            shared_ptr<VALUE_TYPE> pe = dynamic_pointer_cast<VALUE_TYPE>(n);
-            ASSERT( pe )
-                  ("Tried to Set() wrong type of node via GenericSharedPtr\nType was ")((string)*n)("; I am ")(typeid(VALUE_TYPE).name());
-            *(shared_ptr<VALUE_TYPE> *)this = pe;
-        }
-        return *this;
-    }
-
     virtual SharedPtr &operator=( shared_ptr<VALUE_INTERFACE> n )
     {
-    	return operator=<VALUE_INTERFACE>( n );
+    	(void)operator=<VALUE_INTERFACE>( n );
+    	return *this;
     }
 
     template< typename OTHER >
-    SharedPtr &operator=( SharedPtr<SUB_BASE, VALUE_INTERFACE, OTHER> n )
+    inline SharedPtr &operator=( SharedPtr<SUB_BASE, VALUE_INTERFACE, OTHER> n )
     {
-    	return operator=( shared_ptr<OTHER>(n) );
+    	(void)operator=( shared_ptr<OTHER>(n) );
+    	return *this;
     }
 
-    SharedPtr &operator=( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &n )
+    inline SharedPtr &operator=( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &n )
     {
-    	return operator=( shared_ptr<VALUE_INTERFACE>(n) );
+    	(void)operator=( shared_ptr<VALUE_INTERFACE>(n) );
+    	return *this;
     }
 
     virtual operator bool() const
