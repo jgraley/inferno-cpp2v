@@ -8,7 +8,6 @@
 #include "steps/generate_stacks.hpp"
 #include "tree/tree.hpp"
 #include "common/common.hpp"
-#include "common/refcount.hpp"
 #include "helpers/soft_patterns.hpp"
 
 #define HANDLE_EARLY_RETURNS 1

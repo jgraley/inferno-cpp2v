@@ -32,7 +32,7 @@ template<typename T>
 Sequence<T> operator+( Sequence<T> &s1, Sequence<T> &s2 )
 {
     Sequence<T> sr=s1;
-    FOREACH( shared_ptr<T> t, s2 )
+    FOREACH( SharedPtr<T> t, s2 )
         sr.push_back(t);
     return sr;    
 }

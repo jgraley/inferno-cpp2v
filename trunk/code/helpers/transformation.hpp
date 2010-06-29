@@ -1,7 +1,6 @@
 #ifndef TRANSFORMATION_HPP
 #define TRANSFORMATION_HPP
 
-#include "common/refcount.hpp"
 #include "tree/generics.hpp"
 
 class Transformation

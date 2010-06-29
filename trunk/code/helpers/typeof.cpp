@@ -48,7 +48,7 @@ SharedPtr<Type> TypeOf::Get( SharedPtr<Expression> o )
         if( SharedPtr<Function> f = dynamic_pointer_cast<Function>(t) )
         	return f->return_type;
         else
-        	return shared_new<Void>();
+        	return MakeShared<Void>();
     }
     else if( SharedPtr<Lookup> l = dynamic_pointer_cast<Lookup>(o) ) // a.b; just return type of b
     {

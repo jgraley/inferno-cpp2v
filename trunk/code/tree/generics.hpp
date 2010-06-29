@@ -18,6 +18,8 @@
 
 struct Node;
 
+// TODO SharedPtr -> TreePtr since we only use it for tree nodes
+// TODO optimise SharedPtr, it seems to be somewhat slower than shared_ptr!!!
 typedef OOStd::SharedPtrInterface<Itemiser::Element, Node> SharedPtrInterface;
 
 
@@ -25,11 +27,11 @@ template<typename ELEMENT>
 class SharedPtr : public OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>
 {
 public:
-	SharedPtr() : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>() {}
-	SharedPtr( ELEMENT *o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
-	SharedPtr( const SharedPtrInterface &g ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(g) {}
+	inline SharedPtr() : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>() {}
+	inline SharedPtr( ELEMENT *o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
+	inline SharedPtr( const SharedPtrInterface &g ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(g) {}
 	template< typename OTHER >
-	SharedPtr( const shared_ptr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
+	inline SharedPtr( const shared_ptr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
 
 	virtual operator string() const
 	{
@@ -39,9 +41,7 @@ public:
 
 
 // Inferno tree containers
-// TODO deprecate use of sshared_ptr everywhere in Inferno, then remove the functions
-// here like push_back( const shared_ptr<Node> ), then maybe make SequenceInterface and
-// CollectionInterface be typedefs
+// TODO maybe make SequenceInterface and CollectionInterface be typedefs
 typedef OOStd::ContainerInterface<Itemiser::Element, SharedPtrInterface> ContainerInterface;
 
 typedef OOStd::PointIterator<Itemiser::Element, SharedPtrInterface> PointIterator;
@@ -49,13 +49,10 @@ typedef OOStd::CountingIterator<Itemiser::Element, SharedPtrInterface> CountingI
 
 struct SequenceInterface : virtual OOStd::SequenceInterface< Itemiser::Element, SharedPtrInterface >
 {
-	virtual void push_back( const shared_ptr<Node> &gx ) = 0;
 };
 
 struct CollectionInterface : virtual OOStd::CollectionInterface< Itemiser::Element, SharedPtrInterface >
 {
-	virtual void insert( const shared_ptr<Node> &gx ) = 0;
-	virtual int erase( const shared_ptr<Node> &gx ) = 0;
 };
 
 template<typename ELEMENT>
@@ -68,11 +65,6 @@ struct Sequence : virtual SequenceInterface, virtual OOStd::Sequence< Itemiser::
 		OOStd::Sequence< Itemiser::Element, SharedPtrInterface, Impl >( cns ) {}
 	inline Sequence( const SharedPtrInterface &nx ) :
 	    OOStd::Sequence< Itemiser::Element, SharedPtrInterface, Impl >( nx ) {}
-
-	virtual void push_back( const shared_ptr<Node> &gx )
-	{
-		Impl::push_back( gx );
-	}
 
 	virtual operator string() const
 	{
@@ -92,14 +84,6 @@ struct Collection : CollectionInterface, OOStd::Collection< Itemiser::Element, S
     inline Collection( const SharedPtrInterface &nx ) :
     	OOStd::Collection< Itemiser::Element, SharedPtrInterface, Impl >( nx ) {}
 
-    virtual void insert( const shared_ptr<Node> &gx )
-	{
-		Impl::insert( gx );
-	}
-	virtual int erase( const shared_ptr<Node> &gx )
-	{
-		return Impl::erase( gx );
-	}
 	virtual operator string() const
 	{
         return CPPFilt( typeid( ELEMENT ).name() );
@@ -139,6 +123,15 @@ struct MakeShared : SharedPtr<ELEMENT>
 	template<typename CP0>
 	MakeShared(const CP0 &cp0) : SharedPtr<ELEMENT>( new ELEMENT(cp0) ) {}
 	// Add more params as needed...
+};
+
+// TODO obsolete? try deleting
+template<typename ELEMENT>
+struct shared_new : SharedPtr<ELEMENT>
+{
+	shared_new() : SharedPtr<ELEMENT>( new ELEMENT )
+	{
+	}
 };
 
 //////////////////////////// Node Model ////////////////////////////

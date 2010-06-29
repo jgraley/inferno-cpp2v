@@ -27,13 +27,13 @@
 #include "clang/Lex/LiteralSupport.h"
 
 #include "tree/tree.hpp"
-#include "common/refcount.hpp"
 #include "helpers/transformation.hpp"
 #include "common/trace.hpp"
 #include "tree/type_db.hpp"
 #include "helpers/misc.hpp"
 #include "helpers/typeof.hpp"
 
+#include "rc_hold.hpp"
 #include "identifier_tracker.hpp"
 
 #define INFERNO_TRIPLE "arm-linux"

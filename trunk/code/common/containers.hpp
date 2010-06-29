@@ -19,6 +19,11 @@ namespace OOStd {
 // The base container will be derived from SUB_BASE. VALUE_INTERFACE should
 // be a base (or compatible type) for the elements of all sub-containers.
 //
+
+// TODO rename more like STL namings, so Collection -> SimpleAssociativeContainer
+// but we will still say Collection in the Inferno layer. Thus the inferno layer
+// maps STL concepts onto Inferno concepts as required
+
 template< class SUB_BASE, typename VALUE_INTERFACE >
 class ContainerInterface : public Traceable, public virtual SUB_BASE
 {
@@ -262,7 +267,7 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 		CONTAINER_IMPL::push_back( sx );
 	}
 
-	// Covarient style only works with refs and pointers, so force begin/end to return refs safely
+	// Covariant style only works with refs and pointers, so force begin/end to return refs safely
 	// This complies with STL's thread safety model. To quote SGI,
 	// "The SGI implementation of STL is thread-safe only in the sense that simultaneous accesses
 	// to distinct containers are safe, and simultaneous read accesses to to shared containers are
