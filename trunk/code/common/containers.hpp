@@ -226,6 +226,10 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
     {
     	return CONTAINER_IMPL::clear();
     }
+	virtual operator string() const
+	{
+        return Traceable::CPPFilt( typeid( typename CONTAINER_IMPL::value_type ).name() );
+	}
 };
 
 
