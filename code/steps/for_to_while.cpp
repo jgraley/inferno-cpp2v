@@ -10,7 +10,7 @@
 #include "common/common.hpp"
 #include "helpers/soft_patterns.hpp"
 
-void ForToWhile::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
+void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
     MakeShared<For> s_for;
     MakeShared<Statement> s_body, s_init, s_inc, r_forbody, r_init, r_inc;

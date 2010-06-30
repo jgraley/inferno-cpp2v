@@ -15,29 +15,29 @@ public:
     TypeOf() : TransformTo<Expression>( this )
     {
     }
-    virtual SharedPtr<Node> operator()( SharedPtr<Node> c, SharedPtr<Node> root )
+    virtual TreePtr<Node> operator()( TreePtr<Node> c, TreePtr<Node> root )
     {
     	context = c;
-    	SharedPtr<Expression> e = dynamic_pointer_cast<Expression>(root);
-    	SharedPtr<Node> n;
+    	TreePtr<Expression> e = dynamic_pointer_cast<Expression>(root);
+    	TreePtr<Node> n;
     	if( e ) // if the tree at root is not an expression, return NULL
     		n = Get( e );
-    	context = SharedPtr<Node>();
+    	context = TreePtr<Node>();
     	return n;
     }
-    SharedPtr<Type> Get( SharedPtr<Expression> o );
-    SharedPtr<Type> Get( SharedPtr<Operator> op, Sequence<Type> optypes );
-    SharedPtr<Type> GetStandard( Sequence<Type> &optypes );
-    SharedPtr<Type> GetStandard( Sequence<Numeric> &optypes );
-    SharedPtr<Type> GetSpecial( SharedPtr<Operator> op, Sequence<Type> &optypes );
-    SharedPtr<Type> GetLiteral( SharedPtr<Literal> l );
+    TreePtr<Type> Get( TreePtr<Expression> o );
+    TreePtr<Type> Get( TreePtr<Operator> op, Sequence<Type> optypes );
+    TreePtr<Type> GetStandard( Sequence<Type> &optypes );
+    TreePtr<Type> GetStandard( Sequence<Numeric> &optypes );
+    TreePtr<Type> GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes );
+    TreePtr<Type> GetLiteral( TreePtr<Literal> l );
 
     // Is this call really a constructor call? If so return the object being
     // constructed. Otherwise, return NULL
-    SharedPtr<Expression> IsConstructorCall( SharedPtr<Node> c, SharedPtr<Call> call );
+    TreePtr<Expression> IsConstructorCall( TreePtr<Node> c, TreePtr<Call> call );
 
 private:
-    SharedPtr<Node> context;
+    TreePtr<Node> context;
 };
 
 

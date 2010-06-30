@@ -7,28 +7,28 @@ class SplitInstanceDeclarations : public InPlaceTransformation
 {
 public:
 	using Transformation::operator();
-	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
+	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
 };
 
 class MergeInstanceDeclarations : public InPlaceTransformation
 {
 public:
 	using Transformation::operator();
-	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
+	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
 };
 
 class HackUpIfs : public InPlaceTransformation
 {
 public:
 	using Transformation::operator();
-	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
+	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
 };
 
 class CrazyNine : public InPlaceTransformation
 {
 public:
 	using Transformation::operator();
-	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
+	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
 };
 
 #endif

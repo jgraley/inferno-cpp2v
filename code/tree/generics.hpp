@@ -20,73 +20,73 @@ struct Node;
 
 // TODO SharedPtr -> TreePtr since we only use it for tree nodes
 // TODO optimise SharedPtr, it seems to be somewhat slower than shared_ptr!!!
-typedef OOStd::SharedPtrInterface<Itemiser::Element, Node> SharedPtrInterface;
-
+typedef OOStd::SharedPtrInterface<Itemiser::Element, Node> TreePtrInterface;
 
 template<typename ELEMENT>
-class SharedPtr : public OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>
+class TreePtr : public OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>
 {
 public:
-	inline SharedPtr() : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>() {}
-	inline SharedPtr( ELEMENT *o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
-	inline SharedPtr( const SharedPtrInterface &g ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(g) {}
+	inline TreePtr() : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>() {}
+	inline TreePtr( ELEMENT *o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
+	inline TreePtr( const TreePtrInterface &g ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(g) {}
+    inline TreePtr( const OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT> &g ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(g) {}
 	template< typename OTHER >
-	inline SharedPtr( const shared_ptr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
-
-	virtual operator string() const
-	{
-        return Traceable::CPPFilt( typeid( ELEMENT ).name() );
-	}
+	inline TreePtr( const shared_ptr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
 };
+
+template<typename ELEMENT>
+inline TreePtr<ELEMENT> DynamicTreePtrCast( const TreePtrInterface &g )
+{
+	return OOStd::DynamicPointerCast<Itemiser::Element, Node, ELEMENT>(g);
+}
 
 
 // Inferno tree containers
-// TODO maybe make SequenceInterface and CollectionInterface be typedefs
-typedef OOStd::ContainerInterface<Itemiser::Element, SharedPtrInterface> ContainerInterface;
-typedef OOStd::PointIterator<Itemiser::Element, SharedPtrInterface> PointIterator;
-typedef OOStd::CountingIterator<Itemiser::Element, SharedPtrInterface> CountingIterator;
-typedef OOStd::SequenceInterface<Itemiser::Element, SharedPtrInterface> SequenceInterface;
-typedef OOStd::CollectionInterface<Itemiser::Element, SharedPtrInterface> CollectionInterface;
+typedef OOStd::ContainerInterface<Itemiser::Element, TreePtrInterface> ContainerInterface;
+typedef OOStd::PointIterator<Itemiser::Element, TreePtrInterface> PointIterator;
+typedef OOStd::CountingIterator<Itemiser::Element, TreePtrInterface> CountingIterator;
+typedef OOStd::SequenceInterface<Itemiser::Element, TreePtrInterface> SequenceInterface;
+typedef OOStd::CollectionInterface<Itemiser::Element, TreePtrInterface> CollectionInterface;
 
 template<typename ELEMENT>
-struct Sequence : virtual OOStd::Sequence< Itemiser::Element, SharedPtrInterface, deque< SharedPtr<ELEMENT> > >
+struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, deque< TreePtr<ELEMENT> > >
 {
-	typedef deque< SharedPtr<ELEMENT> > Impl;
+	typedef deque< TreePtr<ELEMENT> > Impl;
 
 	inline Sequence() {}
 	inline Sequence( const SequenceInterface &cns ) :
-		OOStd::Sequence< Itemiser::Element, SharedPtrInterface, Impl >( cns ) {}
-	inline Sequence( const SharedPtrInterface &nx ) :
-	    OOStd::Sequence< Itemiser::Element, SharedPtrInterface, Impl >( nx ) {}
+		OOStd::Sequence< Itemiser::Element, TreePtrInterface, Impl >( cns ) {}
+	inline Sequence( const TreePtrInterface &nx ) :
+	    OOStd::Sequence< Itemiser::Element, TreePtrInterface, Impl >( nx ) {}
 };
 
 
 template<typename ELEMENT>
-struct Collection : virtual OOStd::Collection< Itemiser::Element, SharedPtrInterface, set< SharedPtr<ELEMENT> > >
+struct Collection : virtual OOStd::Collection< Itemiser::Element, TreePtrInterface, set< TreePtr<ELEMENT> > >
 {
- 	typedef set< SharedPtr<ELEMENT> > Impl;
+ 	typedef set< TreePtr<ELEMENT> > Impl;
 
  	inline Collection<ELEMENT>() {}
     inline Collection( const ContainerInterface &cns ) :
-    	OOStd::Collection< Itemiser::Element, SharedPtrInterface, Impl >( cns ) {}
-    inline Collection( const SharedPtrInterface &nx ) :
-    	OOStd::Collection< Itemiser::Element, SharedPtrInterface, Impl >( nx ) {}
+    	OOStd::Collection< Itemiser::Element, TreePtrInterface, Impl >( cns ) {}
+    inline Collection( const TreePtrInterface &nx ) :
+    	OOStd::Collection< Itemiser::Element, TreePtrInterface, Impl >( nx ) {}
 };
 
 // Assmebling sequences using operator,
 
-inline Sequence<Node> operator,( const SharedPtrInterface &l, const SharedPtrInterface &r )
+inline Sequence<Node> operator,( const TreePtrInterface &l, const TreePtrInterface &r )
 {
     Sequence<Node> seq;
-    seq.push_back( (const SharedPtrInterface &)l );
-    seq.push_back( (const SharedPtrInterface &)r );
+    seq.push_back( l );
+    seq.push_back( r );
     return seq;
 }
 
-inline Sequence<Node> operator,( const SequenceInterface &l, const SharedPtrInterface &r )
+inline Sequence<Node> operator,( const SequenceInterface &l, const TreePtrInterface &r )
 {
-    Sequence<Node> seq = l;
-    seq.push_back( (const SharedPtrInterface &)r );
+    Sequence<Node> seq(l);
+    seq.push_back( r );
     return seq;
 }
 
@@ -100,19 +100,19 @@ inline Sequence<Node> operator,( const SequenceInterface &l, const SharedPtrInte
 // existing_shared_ptr = MakeShared<X>(10); // as per Boost: construction of temporary looks like function call
 // MakeShared<X> new_shared_ptr(10); // new Inferno form: new_shared_ptr may now be used like a SharedPtr<X>
 template<typename ELEMENT>
-struct MakeShared : SharedPtr<ELEMENT>
+struct MakeShared : TreePtr<ELEMENT>
 {
-	MakeShared() : SharedPtr<ELEMENT>( new ELEMENT ) {}
+	MakeShared() : TreePtr<ELEMENT>( new ELEMENT ) {}
 	template<typename CP0>
-	MakeShared(const CP0 &cp0) : SharedPtr<ELEMENT>( new ELEMENT(cp0) ) {}
+	MakeShared(const CP0 &cp0) : TreePtr<ELEMENT>( new ELEMENT(cp0) ) {}
 	// Add more params as needed...
 };
 
 // TODO obsolete? try deleting
 template<typename ELEMENT>
-struct shared_new : SharedPtr<ELEMENT>
+struct shared_new : TreePtr<ELEMENT>
 {
-	shared_new() : SharedPtr<ELEMENT>( new ELEMENT )
+	shared_new() : TreePtr<ELEMENT>( new ELEMENT )
 	{
 	}
 };

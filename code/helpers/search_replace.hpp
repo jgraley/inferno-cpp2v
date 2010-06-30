@@ -70,8 +70,8 @@ struct Star : StarBase, VALUE_TYPE { NODE_FUNCTIONS };
 struct StuffBase : virtual Node
 {
 	NODE_FUNCTIONS;
-	SharedPtr<Node> restrictor; // Restricts the intermediate nodes in the truncated subtree
-	SharedPtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
+	TreePtr<Node> restrictor; // Restricts the intermediate nodes in the truncated subtree
+	TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
 };
 template<class VALUE_TYPE>
 struct Stuff : StuffBase, VALUE_TYPE { NODE_FUNCTIONS };
@@ -83,25 +83,23 @@ struct Stuff : StuffBase, VALUE_TYPE { NODE_FUNCTIONS };
 struct Key
 {
 	virtual ~Key(){}  // be a virtual hierarchy
-	SharedPtr<Node> root; // Tree node at matched pattern; root of any replace subtree
-	SharedPtr<Node> replace_pattern; // Tree node at matched pattern; root of any replace subtree
+	TreePtr<Node> root; // Tree node at matched pattern; root of any replace subtree
+	TreePtr<Node> replace_pattern; // Tree node at matched pattern; root of any replace subtree
 };
 
 struct StuffKey : Key
 {
-	SharedPtr<StuffBase> search_stuff; // TODO add search_pattern to Key base class and lose this (as with replace_pattern)
-	SharedPtr<Node> terminus;
+	TreePtr<StuffBase> search_stuff; // TODO add search_pattern to Key base class and lose this (as with replace_pattern)
+	TreePtr<Node> terminus;
 };
 
-typedef shared_ptr <Key> KeyPtr; // TODO expand this out; we will rename SharedPtr to TreePtr to alleviate confusion
-
-struct Coupling : public set< SharedPtr<Node> >
+struct Coupling : public set< TreePtr<Node> >
 {
 	inline Coupling() {}
 	inline Coupling( const Sequence< Node > &seq )
 	{
 		Sequence< Node > s2 = seq;
-		FOREACH( SharedPtr<Node> v, s2 )
+		FOREACH( TreePtr<Node> v, s2 )
 			insert( v );
 	}
 };
@@ -115,25 +113,25 @@ public:
 	CouplingKeys()
 	{
 	}
-	Result KeyAndRestrict( SharedPtr<Node> x,
-						   SharedPtr<Node> pattern,
+	Result KeyAndRestrict( TreePtr<Node> x,
+						   TreePtr<Node> pattern,
 						   const RootedSearchReplace *sr,
 						   bool can_key );
-	Result KeyAndRestrict( KeyPtr key,
-						   SharedPtr<Node> pattern,
+	Result KeyAndRestrict( shared_ptr<Key> key,
+						   TreePtr<Node> pattern,
 						   const RootedSearchReplace *sr,
 						   bool can_key );
-	SharedPtr<Node> KeyAndSubstitute( SharedPtr<Node> x, // source after soft nodes etc
-									   SharedPtr<Node> pattern, // source
+	TreePtr<Node> KeyAndSubstitute( TreePtr<Node> x, // source after soft nodes etc
+									   TreePtr<Node> pattern, // source
 									   const RootedSearchReplace *sr,
 									   bool can_key );
-	SharedPtr<Node> KeyAndSubstitute( KeyPtr key,
-									   SharedPtr<Node> pattern,
+	TreePtr<Node> KeyAndSubstitute( shared_ptr<Key> key,
+									   TreePtr<Node> pattern,
 									   const RootedSearchReplace *sr,
 									   bool can_key );
 private:
-	Coupling FindCoupling( SharedPtr<Node> node, const CouplingSet &couplings );
-	Map< Coupling, KeyPtr > keys_map;
+	Coupling FindCoupling( TreePtr<Node> node, const CouplingSet &couplings );
+	Map< Coupling, shared_ptr<Key> > keys_map;
 };
 
 class Conjecture
@@ -144,8 +142,8 @@ public:
 	void PrepareForDecidedCompare();
 	ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
 			                                   ContainerInterface::iterator end );
-	Result Search( SharedPtr<Node> x,
-				   SharedPtr<Node> pattern,
+	Result Search( TreePtr<Node> x,
+				   TreePtr<Node> pattern,
 				   CouplingKeys *keys,
 				   bool can_key,
 				   const RootedSearchReplace *sr );
@@ -163,43 +161,43 @@ public:
 
     // Constructor and destructor. Search and replace patterns and match sets are 
     // specified here, so that we have a fully confiugured functor.
-    RootedSearchReplace( SharedPtr<Node> sp=SharedPtr<Node>(),
-                         SharedPtr<Node> rp=SharedPtr<Node>(),
+    RootedSearchReplace( TreePtr<Node> sp=TreePtr<Node>(),
+                         TreePtr<Node> rp=TreePtr<Node>(),
                          CouplingSet m = CouplingSet(),
                          vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
-    void Configure( SharedPtr<Node> sp=SharedPtr<Node>(),
-                    SharedPtr<Node> rp=SharedPtr<Node>(),
+    void Configure( TreePtr<Node> sp=TreePtr<Node>(),
+                    TreePtr<Node> rp=TreePtr<Node>(),
                     CouplingSet m = CouplingSet(),
                     vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
     ~RootedSearchReplace();
     
     // implementation ring: Do the actual search and replace
-    Result SingleSearchReplace( SharedPtr<Node> *proot,
-                                SharedPtr<Node> search_pattern,
-                                SharedPtr<Node> replace_pattern,
+    Result SingleSearchReplace( TreePtr<Node> *proot,
+                                TreePtr<Node> search_pattern,
+                                TreePtr<Node> replace_pattern,
                                 CouplingKeys match_keys = CouplingKeys() );
-    int RepeatingSearchReplace( SharedPtr<Node> *proot,
-                                SharedPtr<Node> search_pattern,
-                                SharedPtr<Node> replace_pattern,
+    int RepeatingSearchReplace( TreePtr<Node> *proot,
+                                TreePtr<Node> search_pattern,
+                                TreePtr<Node> replace_pattern,
                                 CouplingKeys match_keys = CouplingKeys() );
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.
-    void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
+    void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
 
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
     // back into the general search algorithm.
-    SharedPtr<Node> GetContext() const { ASSERT(pcontext&&*pcontext); return *pcontext; }
+    TreePtr<Node> GetContext() const { ASSERT(pcontext&&*pcontext); return *pcontext; }
     struct SoftSearchPattern : virtual Node
     {
         virtual Result DecidedCompare( const RootedSearchReplace *sr,
-        		                                      SharedPtr<Node> x,
+        		                                      TreePtr<Node> x,
         		                                      CouplingKeys *match_keys,
         		                                      bool can_key,
         		                                      Conjecture &conj ) const = 0;
     };
     struct SoftReplacePattern : virtual Node
     {
-        virtual SharedPtr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
+        virtual TreePtr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
         		                                   CouplingKeys *match_keys,
         		                                   bool can_key ) = 0;
     };
@@ -207,15 +205,15 @@ public:
     // Some self-testing
     static void Test();
         
-    SharedPtr<Node> search_pattern;
-    SharedPtr<Node> replace_pattern;
+    TreePtr<Node> search_pattern;
+    TreePtr<Node> replace_pattern;
     vector<RootedSearchReplace *> slaves;
-    SharedPtr<Node> *pcontext;
+    TreePtr<Node> *pcontext;
     
 private:
     // LocalCompare ring
-    bool LocalCompare( SharedPtr<Node> x,
-    		           SharedPtr<Node> pattern ) const;
+    bool LocalCompare( TreePtr<Node> x,
+    		           TreePtr<Node> pattern ) const;
 
     // DecidedCompare ring
     Result DecidedCompare( SequenceInterface &x,
@@ -228,57 +226,57 @@ private:
     		               CouplingKeys *match_keys,
     		               bool can_key,
     		               Conjecture &conj ) const;
-    Result DecidedCompare( SharedPtr<Node> x,
-    		               SharedPtr<StuffBase> stuff_pattern,
+    Result DecidedCompare( TreePtr<Node> x,
+    		               TreePtr<StuffBase> stuff_pattern,
     		               CouplingKeys *match_keys,
     		               bool can_key,
     		               Conjecture &conj ) const;
 public:
-    Result DecidedCompare( SharedPtr<Node> x,
-    		               SharedPtr<Node> pattern,
+    Result DecidedCompare( TreePtr<Node> x,
+    		               TreePtr<Node> pattern,
     		               CouplingKeys *match_keys,
     		               bool can_key,
     		               Conjecture &conj ) const;
 private:
     // MatchingDecidedCompare ring
     friend class Conjecture;
-    Result MatchingDecidedCompare( SharedPtr<Node> x,
-    		                       SharedPtr<Node> pattern,
+    Result MatchingDecidedCompare( TreePtr<Node> x,
+    		                       TreePtr<Node> pattern,
     		                       CouplingKeys *match_keys,
     		                       bool can_key,
     		                       Conjecture &conj ) const;
 
     // Compare ring (now trivial)
 public:
-    Result Compare( SharedPtr<Node> x,
-    		        SharedPtr<Node> pattern,
+    Result Compare( TreePtr<Node> x,
+    		        TreePtr<Node> pattern,
     		        CouplingKeys *match_keys = NULL,
     		        bool can_key = false ) const;
 private:
     // Replace ring
-    void ClearPtrs( SharedPtr<Node> dest ) const;
-    void Overlay( SharedPtr<Node> dest,
-    		      SharedPtr<Node> source,
+    void ClearPtrs( TreePtr<Node> dest ) const;
+    void Overlay( TreePtr<Node> dest,
+    		      TreePtr<Node> source,
     		      CouplingKeys *match_keys,
     		      bool can_key,
-    		      KeyPtr current_key ) const; // under substitution if not NULL
+    		      shared_ptr<Key> current_key ) const; // under substitution if not NULL
     void Overlay( SequenceInterface *dest,
     		      SequenceInterface *source,
     		      CouplingKeys *match_keys,
     		      bool can_key,
-    		      KeyPtr current_key ) const;
+    		      shared_ptr<Key> current_key ) const;
     void Overlay( CollectionInterface *dest,
     	          CollectionInterface *source,
     	          CouplingKeys *match_keys,
     	          bool can_key,
-    	          KeyPtr current_key ) const;
+    	          shared_ptr<Key> current_key ) const;
 public:
-    SharedPtr<Node> DuplicateSubtree( SharedPtr<Node> x,
+    TreePtr<Node> DuplicateSubtree( TreePtr<Node> x,
     		                           CouplingKeys *match_keys,
     		                           bool can_key,
-    		                           KeyPtr current_key=KeyPtr() ) const;
+    		                           shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
 private:
-    SharedPtr<Node> MatchingDuplicateSubtree( SharedPtr<Node> x,
+    TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x,
     		                                   CouplingKeys *match_keys ) const;
     // Internal node classes
     struct SubSequence : Node,
@@ -297,12 +295,12 @@ private:
 class SearchReplace : public RootedSearchReplace
 {
 public:
-    SearchReplace( SharedPtr<Node> sp = SharedPtr<Node>(),
-                   SharedPtr<Node> rp = SharedPtr<Node>(),
+    SearchReplace( TreePtr<Node> sp = TreePtr<Node>(),
+                   TreePtr<Node> rp = TreePtr<Node>(),
                    CouplingSet m = CouplingSet(),
                    vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
-    void Configure( SharedPtr<Node> sp = SharedPtr<Node>(),
-                    SharedPtr<Node> rp = SharedPtr<Node>(),
+    void Configure( TreePtr<Node> sp = TreePtr<Node>(),
+                    TreePtr<Node> rp = TreePtr<Node>(),
                     CouplingSet m = CouplingSet(),
                     vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
 };
@@ -315,10 +313,10 @@ struct NotMatch : VALUE_TYPE,
                  NotMatchBase
 {
     NODE_FUNCTIONS
-    SharedPtr<VALUE_TYPE> pattern;
+    TreePtr<VALUE_TYPE> pattern;
 private:
     virtual Result DecidedCompare( const RootedSearchReplace *sr,
-    		                                            SharedPtr<Node> x,
+    		                                            TreePtr<Node> x,
     		                                            CouplingKeys *keys,
     		                                            bool can_key,
     		                                            Conjecture &conj ) const
@@ -335,7 +333,7 @@ private:
     	    // a. We didn't recurse during KEYING pass and
     	    // b. Search under not can terminate with NOT_FOUND, but parent search will continue
     	    // Consequently, we go in at Compare level, which creates a new conjecture.
-    		Result r = sr->Compare( x, SharedPtr<Node>(pattern), keys, false );
+    		Result r = sr->Compare( x, TreePtr<Node>(pattern), keys, false );
 			TRACE("SoftNot got %d, returning the opposite!\n", (int)r);
     		if( r==NOT_FOUND )
 				return FOUND;
@@ -356,7 +354,7 @@ struct MatchAll : VALUE_TYPE,
     mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
 private:
     virtual Result DecidedCompare( const RootedSearchReplace *sr,
-    		                                            SharedPtr<Node> x,
+    		                                            TreePtr<Node> x,
     		                                            CouplingKeys *keys,
     		                                            bool can_key,
     		                                            Conjecture &conj ) const
@@ -368,7 +366,7 @@ private:
     		 it != patterns.end();
     		 ++it, ++i )
     	{
-    		Result r = sr->DecidedCompare( x, SharedPtr<Node>(*it), keys, can_key, conj );
+    		Result r = sr->DecidedCompare( x, TreePtr<Node>(*it), keys, can_key, conj );
     		TRACE("AND[%d] got %d\n", i, r);
     	    if( !r )
     	    	return NOT_FOUND;
@@ -382,7 +380,7 @@ private:
 struct TransformToBase : RootedSearchReplace::SoftSearchPattern
 {
     NODE_FUNCTIONS
-    SharedPtr<Node> pattern;
+    TreePtr<Node> pattern;
     TransformToBase( Transformation *t ) :
     	transformation(t)
     {
@@ -390,7 +388,7 @@ struct TransformToBase : RootedSearchReplace::SoftSearchPattern
 
 private:
     virtual Result DecidedCompare( const RootedSearchReplace *sr,
-    		                                            SharedPtr<Node> x,
+    		                                            TreePtr<Node> x,
     		                                            CouplingKeys *keys,
     		                                            bool can_key,
     		                                            Conjecture &conj ) const;

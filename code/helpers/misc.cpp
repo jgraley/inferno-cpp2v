@@ -14,23 +14,23 @@ shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
         ASSERTFAIL();
 }
 
-SharedPtr<Node> GetDeclaration::operator()( SharedPtr<Node> context, SharedPtr<Node> root )
+TreePtr<Node> GetDeclaration::operator()( TreePtr<Node> context, TreePtr<Node> root )
 {
-	if( SharedPtr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>( root ) )
+	if( TreePtr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>( root ) )
 		return Get( context, tid );
-	else if( SharedPtr<InstanceIdentifier> iid = dynamic_pointer_cast<InstanceIdentifier>( root ) )
+	else if( TreePtr<InstanceIdentifier> iid = dynamic_pointer_cast<InstanceIdentifier>( root ) )
 		return Get( context, iid );
 	else
-		return SharedPtr<Node>();
+		return TreePtr<Node>();
 }
 
-SharedPtr<UserType> GetDeclaration::Get( SharedPtr<Node> context, SharedPtr<TypeIdentifier> id )
+TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdentifier> id )
 {
 	Flattener<UserType> walkr(context);
 	TRACE("GetDeclaration %d\n", walkr.size());
-	ASSERT( (deque< SharedPtr<UserType> >::iterator)(walkr.begin()) !=
-			(deque< SharedPtr<UserType> >::iterator)(walkr.end()) );
-	FOREACH( SharedPtr<UserType> d, walkr )
+	ASSERT( (deque< TreePtr<UserType> >::iterator)(walkr.begin()) !=
+			(deque< TreePtr<UserType> >::iterator)(walkr.end()) );
+	FOREACH( TreePtr<UserType> d, walkr )
 	{
 		TRACE("trying id of %d\n", walkr.size());
         if( id == GetIdentifier( d ) ) 
@@ -39,14 +39,14 @@ SharedPtr<UserType> GetDeclaration::Get( SharedPtr<Node> context, SharedPtr<Type
 	ASSERTFAIL();
 }
 
-SharedPtr<Instance> GetDeclaration::Get( SharedPtr<Node> context, SharedPtr<InstanceIdentifier> id )
+TreePtr<Instance> GetDeclaration::Get( TreePtr<Node> context, TreePtr<InstanceIdentifier> id )
 {
     Walk w( context );
     while(!w.Done())
     {
-        SharedPtr<Node> n = w.Get();
+        TreePtr<Node> n = w.Get();
 
-        if( SharedPtr<Instance> d = dynamic_pointer_cast<Instance>(n) )
+        if( TreePtr<Instance> d = dynamic_pointer_cast<Instance>(n) )
             if( id == GetIdentifier( d ) )
 	            return d;
 

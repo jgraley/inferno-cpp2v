@@ -23,9 +23,9 @@ struct SoftMakeIdentifier : InstanceIdentifier, // TODO other kinds of identifie
 	SoftMakeIdentifier() : format("___UNNAMED___") {}
 	NODE_FUNCTIONS
 	string format;
-	SharedPtr<Identifier> source;
+	TreePtr<Identifier> source;
 private:
-    virtual SharedPtr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
+    virtual TreePtr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
     		                                   CouplingKeys *keys,
     		                                   bool can_key );
 };

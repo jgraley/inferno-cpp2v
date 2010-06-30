@@ -14,7 +14,7 @@ class ForToWhile : public InPlaceTransformation
 {
 public:
 	using Transformation::operator();
-	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
+	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
 };
 
 #endif 

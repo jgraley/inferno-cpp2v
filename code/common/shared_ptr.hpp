@@ -28,19 +28,26 @@
 
 namespace OOStd {
 
+template<typename SUB_BASE, typename VALUE_INTERFACE, typename VALUE_TYPE>
+struct SharedPtr;
+
 // An interface for our SharedPtr object. This interface works regardless of pointed-to
 // type; it also masquerades as a SharedPtr to the VALUE_INTERFACE type, which should be the
 // base class of the pointed-to things.
 template<typename SUB_BASE, typename VALUE_INTERFACE>
 struct SharedPtrInterface : virtual SUB_BASE, public Traceable
 {
-    // Convert to and from shared_ptr<VALUE_INTERFACE>
+    // Convert to and from shared_ptr<VALUE_INTERFACE> and SharedPtr<VALUE_INTERFACE>
 	virtual operator shared_ptr<VALUE_INTERFACE>() const = 0;
+	virtual operator SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_INTERFACE>() const = 0;
 
     virtual operator bool() const = 0; // for testing against NULL
     virtual VALUE_INTERFACE *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
 };
 
+template<typename SUB_BASE, typename VALUE_INTERFACE, typename VALUE_TYPE>
+inline SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>
+    DynamicPointerCast( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g );
 
 template<typename SUB_BASE, typename VALUE_INTERFACE, typename VALUE_TYPE>
 struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared_ptr<VALUE_TYPE>
@@ -58,18 +65,25 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
     {
     }
 
-    inline SharedPtr( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g ) :
-    	shared_ptr<VALUE_TYPE>( dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(g)) )
+    // TODO an explicit function should be called to get this dynamic cast.
+    inline SharedPtr( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g )
     {
-    	if( g )
-    	    ASSERT( *this )("Cannot convert GenericSharedPtr that points to a ")((string)*(shared_ptr<VALUE_INTERFACE>(g)))(" to SharedPtr<")(typeid(VALUE_TYPE).name())(">");
+    	*this = DynamicPointerCast<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>(g);
     }
 
     virtual operator shared_ptr<VALUE_INTERFACE>() const
     {
+    	// TODO don't like having p as a pointer
         const shared_ptr<VALUE_TYPE> *p = (const shared_ptr<VALUE_TYPE> *)this;
         return *p;
     }
+
+	virtual operator SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_INTERFACE>() const
+	{
+        const shared_ptr<VALUE_TYPE> p1 = *(const shared_ptr<VALUE_TYPE> *)this;
+        return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_INTERFACE>( p1 );
+	}
+
 
     virtual VALUE_INTERFACE *get() const // TODO should return VALUE_TYPE, hacked due to covariant NULL pointer bug, see comment at top of file
     {
@@ -101,7 +115,31 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
     {
     	return !!*(const shared_ptr<VALUE_TYPE> *)this;
     }
+
+	virtual operator string() const // TODO move to OOStd::SharedPtr
+	{
+        return Traceable::CPPFilt( typeid( VALUE_TYPE ).name() );
+	}
 };
+
+// template<class T, class U> shared_ptr<T> dynamic_pointer_cast(shared_ptr<U> const & r)
+
+
+template<typename SUB_BASE, typename VALUE_INTERFACE, typename VALUE_TYPE>
+inline SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>
+    DynamicPointerCast( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g )
+{
+	if( g )
+	{
+		shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(g));
+		ASSERT( v )("Cannot convert GenericSharedPtr that points to a ")((string)*(shared_ptr<VALUE_INTERFACE>(g)))(" to SharedPtr<")(typeid(VALUE_TYPE).name())(">");
+		return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>(v);
+	}
+	else
+	{
+		return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>();
+	}
+}
 
 }
 

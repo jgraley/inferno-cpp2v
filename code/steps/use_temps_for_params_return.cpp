@@ -13,37 +13,37 @@
 #include "helpers/misc.hpp"
 
 
-void UseTempsForParamsReturn::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
+void UseTempsForParamsReturn::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
 	TRACE();
 
     // search for return statement in a compound (TODO don't think we need the outer compound)
-	SharedPtr<Return> s_return( new Return );
-	SharedPtr< MatchAll<Expression> > s_and( new MatchAll<Expression> );
+	TreePtr<Return> s_return( new Return );
+	TreePtr< MatchAll<Expression> > s_and( new MatchAll<Expression> );
 	s_return->return_value = s_and;
-	SharedPtr<TypeOf> s_retval( new TypeOf );
+	TreePtr<TypeOf> s_retval( new TypeOf );
 	s_retval->pattern = MakeShared<Type>();
     
     // Restrict the search to returns that have an automatic variable under them
-    SharedPtr< Stuff<Expression> > cs_stuff( new Stuff<Expression> );
+    TreePtr< Stuff<Expression> > cs_stuff( new Stuff<Expression> );
 	s_and->patterns = ( s_retval, cs_stuff );
-	SharedPtr< GetDeclaration > cs_id( new GetDeclaration );	
+	TreePtr< GetDeclaration > cs_id( new GetDeclaration );
     cs_stuff->terminus = cs_id;
-    SharedPtr<Instance> cs_instance( new Automatic );
+    TreePtr<Instance> cs_instance( new Automatic );
     cs_id->pattern = cs_instance;
     
     // replace with a new sub-compound, that declares a Temp, intialises it to the return value and returns it
-	SharedPtr<Compound> r_sub_comp( new Compound );
-	SharedPtr< Temporary > r_newvar( new Temporary );
+	TreePtr<Compound> r_sub_comp( new Compound );
+	TreePtr< Temporary > r_newvar( new Temporary );
 	r_newvar->type = MakeShared<Type>();
 	r_newvar->identifier = MakeShared<SoftMakeIdentifier>("temp_retval");
 	r_newvar->initialiser = MakeShared<Uninitialised>();
 	r_sub_comp->members = ( r_newvar );
-	SharedPtr<Assign> r_assign( new Assign );
+	TreePtr<Assign> r_assign( new Assign );
 	r_assign->operands.push_back( MakeShared<InstanceIdentifier>() );
 	r_assign->operands.push_back( MakeShared<Expression>() );
 	r_sub_comp->statements.push_back( r_assign );
-	SharedPtr<Return> r_return( new Return );
+	TreePtr<Return> r_return( new Return );
 	r_sub_comp->statements.push_back( r_return );
 	r_return->return_value = MakeShared<InstanceIdentifier>();
        
