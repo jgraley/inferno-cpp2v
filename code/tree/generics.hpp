@@ -43,20 +43,13 @@ public:
 // Inferno tree containers
 // TODO maybe make SequenceInterface and CollectionInterface be typedefs
 typedef OOStd::ContainerInterface<Itemiser::Element, SharedPtrInterface> ContainerInterface;
-
 typedef OOStd::PointIterator<Itemiser::Element, SharedPtrInterface> PointIterator;
 typedef OOStd::CountingIterator<Itemiser::Element, SharedPtrInterface> CountingIterator;
-
-struct SequenceInterface : virtual OOStd::SequenceInterface< Itemiser::Element, SharedPtrInterface >
-{
-};
-
-struct CollectionInterface : virtual OOStd::CollectionInterface< Itemiser::Element, SharedPtrInterface >
-{
-};
+typedef OOStd::SequenceInterface<Itemiser::Element, SharedPtrInterface> SequenceInterface;
+typedef OOStd::CollectionInterface<Itemiser::Element, SharedPtrInterface> CollectionInterface;
 
 template<typename ELEMENT>
-struct Sequence : virtual SequenceInterface, virtual OOStd::Sequence< Itemiser::Element, SharedPtrInterface, deque< SharedPtr<ELEMENT> > >
+struct Sequence : virtual OOStd::Sequence< Itemiser::Element, SharedPtrInterface, deque< SharedPtr<ELEMENT> > >
 {
 	typedef deque< SharedPtr<ELEMENT> > Impl;
 
@@ -65,16 +58,11 @@ struct Sequence : virtual SequenceInterface, virtual OOStd::Sequence< Itemiser::
 		OOStd::Sequence< Itemiser::Element, SharedPtrInterface, Impl >( cns ) {}
 	inline Sequence( const SharedPtrInterface &nx ) :
 	    OOStd::Sequence< Itemiser::Element, SharedPtrInterface, Impl >( nx ) {}
-
-	virtual operator string() const
-	{
-        return CPPFilt( typeid( ELEMENT ).name() );
-	}
 };
 
 
 template<typename ELEMENT>
-struct Collection : CollectionInterface, OOStd::Collection< Itemiser::Element, SharedPtrInterface, set< SharedPtr<ELEMENT> > >
+struct Collection : virtual OOStd::Collection< Itemiser::Element, SharedPtrInterface, set< SharedPtr<ELEMENT> > >
 {
  	typedef set< SharedPtr<ELEMENT> > Impl;
 
@@ -83,11 +71,6 @@ struct Collection : CollectionInterface, OOStd::Collection< Itemiser::Element, S
     	OOStd::Collection< Itemiser::Element, SharedPtrInterface, Impl >( cns ) {}
     inline Collection( const SharedPtrInterface &nx ) :
     	OOStd::Collection< Itemiser::Element, SharedPtrInterface, Impl >( nx ) {}
-
-	virtual operator string() const
-	{
-        return CPPFilt( typeid( ELEMENT ).name() );
-	}
 };
 
 // Assmebling sequences using operator,
