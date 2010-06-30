@@ -13,10 +13,10 @@ class GetDeclaration : public OutOfPlaceTransformation, public TransformTo<Insta
 public:
 	NODE_FUNCTIONS
 	GetDeclaration() : TransformTo<InstanceIdentifier>( this ) {}
-    virtual SharedPtr<Node> operator()( SharedPtr<Node> context, SharedPtr<Node> root );
+    virtual TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root );
 private:
-	SharedPtr<UserType> Get( SharedPtr<Node> context, SharedPtr<TypeIdentifier> id );
-	SharedPtr<Instance> Get( SharedPtr<Node> context, SharedPtr<InstanceIdentifier> id );
+	TreePtr<UserType> Get( TreePtr<Node> context, TreePtr<TypeIdentifier> id );
+	TreePtr<Instance> Get( TreePtr<Node> context, TreePtr<InstanceIdentifier> id );
 };
 
 
@@ -32,7 +32,7 @@ template<typename T>
 Sequence<T> operator+( Sequence<T> &s1, Sequence<T> &s2 )
 {
     Sequence<T> sr=s1;
-    FOREACH( SharedPtr<T> t, s2 )
+    FOREACH( TreePtr<T> t, s2 )
         sr.push_back(t);
     return sr;    
 }

@@ -10,8 +10,8 @@
 #include "misc.hpp"
 #include "tree/tree.hpp"
 
-void Validate::operator()( SharedPtr<Node> context,
-						   SharedPtr<Node> *proot )
+void Validate::operator()( TreePtr<Node> context,
+						   TreePtr<Node> *proot )
 {
 	(void)context;
 
@@ -21,7 +21,7 @@ void Validate::operator()( SharedPtr<Node> context,
 	Walk w( *proot );
 	while(!w.Done())
 	{
-		SharedPtr<Node> x = w.Get();
+		TreePtr<Node> x = w.Get();
 
 		if( !is_pattern ) // Don't do these checks on search/replace patterns
 		{
@@ -33,11 +33,11 @@ void Validate::operator()( SharedPtr<Node> context,
 			ASSERT( x->IsFinal() )( "Found intermediate (non-final) node ")(*x)(" at ")(w);
 
 			// Check that we can successfully call TypeOf on every Expression
-			if( SharedPtr<Expression> e = dynamic_pointer_cast<Expression>(x) )
+			if( TreePtr<Expression> e = dynamic_pointer_cast<Expression>(x) )
 			    (void)TypeOf()(context, e);
 
 			// Check that every identifier has a declaration
-			if( SharedPtr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(x) )
+			if( TreePtr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(x) )
 			    (void)GetDeclaration()(context, ii);
         }
 
@@ -51,7 +51,7 @@ void Validate::operator()( SharedPtr<Node> context,
 					for( ContainerInterface::iterator i=con->begin(); i!=con->end(); ++i )
 						OnLink( x, *i );
 				}
-				else if( SharedPtrInterface *ptr = dynamic_cast<SharedPtrInterface *>(members[i]) )
+				else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
 				{
 					OnLink( x, *ptr );
 				}
@@ -63,7 +63,7 @@ void Validate::operator()( SharedPtr<Node> context,
 
 			// if x is missing it's NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone
 			// of the most specialised base of x that does have NODE_FUNCTIONS.
-			SharedPtr<Node> y = dynamic_pointer_cast<Node>((*x).Clone());
+			TreePtr<Node> y = dynamic_pointer_cast<Node>((*x).Clone());
 			ASSERT( typeid(*y)==typeid(*x) )(*x)(" apparently does not contain NODE_FUNCTIONS macro because it Clone()s to ")(*y)(" at ")(w);
 		}
 
@@ -75,7 +75,7 @@ void Validate::operator()( SharedPtr<Node> context,
 		w2.AdvanceInto(); // Skip the proot node, since we don't know what references we expect it to have
 	while(!w2.Done())
 	{
-		SharedPtr<Node> x = w2.Get();
+		TreePtr<Node> x = w2.Get();
 
 		if( x )
 		{
@@ -98,19 +98,19 @@ void Validate::operator()( SharedPtr<Node> context,
 	}
 }
 
-void Validate::OnLink( SharedPtr<Node> p, SharedPtr<Node> c )
+void Validate::OnLink( TreePtr<Node> p, TreePtr<Node> c )
 {
-	if( SharedPtr<Instance> pi = dynamic_pointer_cast<Instance>(p) )
+	if( TreePtr<Instance> pi = dynamic_pointer_cast<Instance>(p) )
 	{
 		if( c == pi->identifier )
 		    decl_refs[c]++;
 	}
-	else if( SharedPtr<UserType> pu = dynamic_pointer_cast<UserType>(p) )
+	else if( TreePtr<UserType> pu = dynamic_pointer_cast<UserType>(p) )
 	{
 		if( c == pu->identifier )
 		    decl_refs[c]++;
 	}
-	else if( SharedPtr<Label> pl = dynamic_pointer_cast<Label>(p) )
+	else if( TreePtr<Label> pl = dynamic_pointer_cast<Label>(p) )
 	{
 		if( c == pl->identifier )
 		    decl_refs[c]++;

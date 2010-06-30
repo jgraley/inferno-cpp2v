@@ -14,7 +14,7 @@ class UseTempsForParamsReturn : public InPlaceTransformation
 {
 public:
 	using Transformation::operator();
-	virtual void operator()( SharedPtr<Node> context, SharedPtr<Node> *proot );
+	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
 };
 
 #endif /* USE_TEMPS_FOR_PARAMS_RETURN_HPP */

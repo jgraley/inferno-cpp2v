@@ -35,11 +35,11 @@ void Walk::Push( shared_ptr<Node> n )
     {
         if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(members[i]) )
         {
-        	//FOREACH( SharedPtrInterface &n, *con )
+        	//FOREACH( TreePtrInterface &n, *con )
         	for( ContainerInterface::iterator i=con->begin(); i!=con->end(); ++i )
                 f.children.push_back( i );
         }            
-        else if( SharedPtrInterface *ptr = dynamic_cast<SharedPtrInterface *>(members[i]) )         
+        else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
         {
             f.children.push_back( PointIterator(ptr) );
         }
@@ -59,7 +59,7 @@ void Walk::Pop()
 }
 
 Walk::Walk( shared_ptr<Node> r, shared_ptr<Node> res ) :
-    root( new SharedPtr<Node>(r) ),
+    root( new TreePtr<Node>(r) ),
     restrictor( res )
 {
 	if( *root ) // if root is NULL, leave the state empty so Done() always returns true
@@ -105,7 +105,7 @@ shared_ptr<Node> Walk::Get() const
     return *GetIterator();
 }
 
-void Walk::Set( SharedPtr<Node> n )
+void Walk::Set( TreePtr<Node> n )
 {
     GetIterator().Overwrite( &n );
 }

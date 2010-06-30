@@ -301,9 +301,9 @@ struct Instance : Declaration,
                   Statement
 {
     NODE_FUNCTIONS
-    SharedPtr<InstanceIdentifier> identifier;
-    SharedPtr<Type> type;
-    SharedPtr<Initialiser> initialiser;
+    TreePtr<InstanceIdentifier> identifier;
+    TreePtr<Type> type;
+    TreePtr<Initialiser> initialiser;
 };
 
 // A variable or function with one instance across the entire program. This includes extern and
@@ -312,7 +312,7 @@ struct Instance : Declaration,
 struct Static : Instance
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Constancy> constancy;
+    TreePtr<Constancy> constancy;
 };
 
 // A variable or function with one instance for each object of the containing class, ie
@@ -322,9 +322,9 @@ struct Static : Instance
 struct Field : Instance
 {
 	NODE_FUNCTIONS_FINAL
-	SharedPtr<Virtuality> virt;
-    SharedPtr<AccessSpec> access;
-    SharedPtr<Constancy> constancy;
+	TreePtr<Virtuality> virt;
+    TreePtr<AccessSpec> access;
+    TreePtr<Constancy> constancy;
 };
 
 // Any variable local to a Compound-statement. Cannot be a function.
@@ -353,8 +353,8 @@ struct Temporary : LocalVariable
 struct Base : Declaration
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<AccessSpec> access;
-    SharedPtr<TypeIdentifier> record; // must refer to InheritanceRecord
+    TreePtr<AccessSpec> access;
+    TreePtr<TypeIdentifier> record; // must refer to InheritanceRecord
 };              
 
 // Identifier for a label that can be any label.
@@ -378,7 +378,7 @@ struct Label : Declaration, //TODO commonize with Case and Default
                Statement
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<LabelIdentifier> identifier;
+    TreePtr<LabelIdentifier> identifier;
 };
 
 //////////////////////////// Anonymous Types ////////////////////////////
@@ -405,7 +405,7 @@ struct Procedure : Subroutine,
 struct Function : Procedure
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Type> return_type;
+    TreePtr<Type> return_type;
 };
 
 // A C++ constructor. The init list is just zero or more calls to constructors 
@@ -420,8 +420,8 @@ struct Destructor : Subroutine { NODE_FUNCTIONS_FINAL };
 struct Array : Type
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Type> element;
-    SharedPtr<Initialiser> size; // Uninitialised if not given eg []
+    TreePtr<Type> element;
+    TreePtr<Initialiser> size; // Uninitialised if not given eg []
 };
 
 // Intermediate for indirect access to some type as specified
@@ -429,7 +429,7 @@ struct Array : Type
 struct Indirection : Type
 {
     NODE_FUNCTIONS
-    SharedPtr<Type> destination;	
+    TreePtr<Type> destination;
 };
 
 // A C/C++ pointer
@@ -456,7 +456,7 @@ struct Numeric : Type { NODE_FUNCTIONS };
 struct Integral : Numeric
 {
     NODE_FUNCTIONS
-    SharedPtr<Integer> width;  // Bits, not bytes
+    TreePtr<Integer> width;  // Bits, not bytes
 };
 
 // Type of a signed integer number (2's complement).
@@ -497,7 +497,7 @@ private:
 struct Floating : Numeric 
 { 
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<FloatSemantics> semantics;
+    TreePtr<FloatSemantics> semantics;
 }; 
 
 //////////////////////////// User-defined Types ////////////////////////////
@@ -509,14 +509,14 @@ struct Floating : Numeric
 struct UserType : Declaration 
 { 
     NODE_FUNCTIONS
-    SharedPtr<TypeIdentifier> identifier;
+    TreePtr<TypeIdentifier> identifier;
 };
 
 // Represents a typedef. Typedef is to the specified type.
 struct Typedef : UserType
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Type> type;
+    TreePtr<Type> type;
 }; 
 
 // Intermediate for declaration of a record. record is generic for struct, class, union or
@@ -606,19 +606,19 @@ struct DeleteNonArray : DeleteArrayness { NODE_FUNCTIONS_FINAL }; // delete, no 
 struct New : Operator
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Type> type; 
+    TreePtr<Type> type;
     Sequence<Expression> placement_arguments;
     Sequence<Expression> constructor_arguments;
-    SharedPtr<Globality> global;
+    TreePtr<Globality> global;
 };
 
 // Node for C++ delete operator
 struct Delete : Operator // TODO Statement surely? (clang forces it to be an Expression)
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Expression> pointer;
-    SharedPtr<DeleteArrayness> array;
-    SharedPtr<Globality> global;
+    TreePtr<Expression> pointer;
+    TreePtr<DeleteArrayness> array;
+    TreePtr<Globality> global;
 };
 
 // Node for accessing an element in a record as in base.member
@@ -627,8 +627,8 @@ struct Delete : Operator // TODO Statement surely? (clang forces it to be an Exp
 struct Lookup : Operator
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Expression> base; 
-    SharedPtr<InstanceIdentifier> member;
+    TreePtr<Expression> base;
+    TreePtr<InstanceIdentifier> member;
 };
 
 // Node for a c-style cast. C++ casts are not in here yet
@@ -636,8 +636,8 @@ struct Lookup : Operator
 struct Cast : Operator
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Expression> operand;
-    SharedPtr<Type> type;        
+    TreePtr<Expression> operand;
+    TreePtr<Type> type;
 };
 
 // Associates an Expression with an InstanceIdentifier. Basically a
@@ -645,8 +645,8 @@ struct Cast : Operator
 struct MapOperand : virtual Node
 {
 	NODE_FUNCTIONS_FINAL
-	SharedPtr<InstanceIdentifier> identifier;
-	SharedPtr<Expression> value;
+	TreePtr<InstanceIdentifier> identifier;
+	TreePtr<Expression> value;
 };
 
 // Operator that maps a multiplicity of Instances to Expressions
@@ -665,7 +665,7 @@ struct MapOperator : Operator
 struct Call : MapOperator
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Expression> callee;
+    TreePtr<Expression> callee;
 };
 
 // Initialiser for a record uses a map to associate elements with
@@ -673,7 +673,7 @@ struct Call : MapOperator
 struct MakeRecord : MapOperator
 {
 	NODE_FUNCTIONS_FINAL
-	SharedPtr<TypeIdentifier> type;
+	TreePtr<TypeIdentifier> type;
 };
 
 // Operator that operates on data types as parameters. Where either is allowed
@@ -681,7 +681,7 @@ struct MakeRecord : MapOperator
 struct TypeOperator : Operator
 {
     NODE_FUNCTIONS
-    SharedPtr<Type> operand;
+    TreePtr<Type> operand;
 };
 
 // sizeof() a type
@@ -707,7 +707,7 @@ struct Compound : Statement,
 struct Return : Statement
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Initialiser> return_value;
+    TreePtr<Initialiser> return_value;
 };
 
 // A goto statement, inferno tree supports goto-a-variable because
@@ -717,46 +717,46 @@ struct Goto : Statement
 	NODE_FUNCTIONS_FINAL
     // Dest is an expression for goto-a-variable support.
     // Ordinary gotos will have Label here.
-    SharedPtr<Expression> destination;
+    TreePtr<Expression> destination;
 };
 
 // If statement
 struct If : Statement
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Expression> condition;
-    SharedPtr<Statement> body;
-    SharedPtr<Statement> else_body; // can be Nop if no else clause
+    TreePtr<Expression> condition;
+    TreePtr<Statement> body;
+    TreePtr<Statement> else_body; // can be Nop if no else clause
 };
 
 // Intermediate for any loop, commonising the body
 struct Loop : Statement
 {
     NODE_FUNCTIONS
-    SharedPtr<Statement> body;
+    TreePtr<Statement> body;
 };
 
 // While loop
 struct While : Loop
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Expression> condition;
+    TreePtr<Expression> condition;
 };
 
 // Do loop (first iteration always runs)
 struct Do : Loop // a do..while() construct 
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Expression> condition;
+    TreePtr<Expression> condition;
 };
 
 // For loop. 
 struct For : Loop
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Statement> initialisation; // Nop if absent
-    SharedPtr<Expression> condition;     // True if absent
-    SharedPtr<Statement> increment;      // Nop if absent
+    TreePtr<Statement> initialisation; // Nop if absent
+    TreePtr<Expression> condition;     // True if absent
+    TreePtr<Statement> increment;      // Nop if absent
 };
 
 // Switch statement. Body is just a statement scope - case labels
@@ -766,8 +766,8 @@ struct For : Loop
 struct Switch : Statement
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Expression> condition;
-    SharedPtr<Statement> body;
+    TreePtr<Expression> condition;
+    TreePtr<Statement> body;
 };
 
 // Intermediate for labels in a switch statement.
@@ -779,8 +779,8 @@ struct RangeCase : SwitchTarget
 {
 	NODE_FUNCTIONS_FINAL
     // support gcc extension of case x..y:
-    SharedPtr<Expression> value_lo; // inclusive
-    SharedPtr<Expression> value_hi; // inclusive
+    TreePtr<Expression> value_lo; // inclusive
+    TreePtr<Expression> value_hi; // inclusive
 }; 
 
 // Case label, supporting range extension in case useful
@@ -788,7 +788,7 @@ struct RangeCase : SwitchTarget
 struct Case : SwitchTarget
 {
 	NODE_FUNCTIONS_FINAL
-    SharedPtr<Expression> value;
+    TreePtr<Expression> value;
 };
 
 // Default label in a switch statement

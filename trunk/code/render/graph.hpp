@@ -25,7 +25,7 @@ public:
         Disburse( s );
     }
 
-    SharedPtr<Node> operator()( SharedPtr<Node> context, SharedPtr<Node> root )
+    TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root )
     {
     	(void)context; // Not needed!!
 
@@ -74,13 +74,13 @@ public:
         }    
     }
 
-    string Traverse( SharedPtr<Node> root, bool links_pass )
+    string Traverse( TreePtr<Node> root, bool links_pass )
     {
     	string s;
         Walk w( root );
         while(!w.Done())
         {
-            SharedPtr<Node> n = w.Get();
+            TreePtr<Node> n = w.Get();
             if( n )
                 s += links_pass ? DoNodeLinks(n) : DoNode(n);
             w.AdvanceInto();
@@ -150,8 +150,8 @@ public:
 	string DoCoupling( Coupling pc )
     {
 		string s;
-		SharedPtr<Node> prev;
-		FOREACH( SharedPtr<Node> n, pc )
+		TreePtr<Node> prev;
+		FOREACH( TreePtr<Node> n, pc )
 		{
 			if( prev )
 			{
@@ -224,7 +224,7 @@ public:
         return o;
     }
 
-    string Name( SharedPtr<Node> sp, bool *bold, string *shape )   // TODO put stringize capabilities into the Property nodes as virtual methods
+    string Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put stringize capabilities into the Property nodes as virtual methods
     {
         *bold=true;
         if( dynamic_pointer_cast<StarBase>(sp) )
@@ -252,7 +252,7 @@ public:
             *shape = "hexagon";
             return *sp;
         }
-        else if( SharedPtr<SoftMakeIdentifier> smi = dynamic_pointer_cast<SoftMakeIdentifier>(sp) )
+        else if( TreePtr<SoftMakeIdentifier> smi = dynamic_pointer_cast<SoftMakeIdentifier>(sp) )
         {
             *shape = "parallelogram";
             return smi->format;
@@ -266,7 +266,7 @@ public:
     }
     
     // Colours are GraphVis colours as listed at http://www.graphviz.org/doc/info/colors.html
-    string Colour( SharedPtr<Node> n )
+    string Colour( TreePtr<Node> n )
     {
     	if( dynamic_pointer_cast<Identifier>(n) )
 			return "gray60";
@@ -292,7 +292,7 @@ public:
             return "";
     }
     
-    string HTMLLabel( string name, SharedPtr<Node> n )
+    string HTMLLabel( string name, TreePtr<Node> n )
     {
         string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
         s += " <TR>\n";
@@ -314,7 +314,7 @@ public:
                     s += " </TR>\n";
                 }
             }
-            else if( SharedPtrInterface *ptr = dynamic_cast<SharedPtrInterface *>(members[i]) )
+            else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
             {
                 if( *ptr )
                 {
@@ -340,7 +340,7 @@ public:
         return s;
     }
 
-    string SimpleLabel( string name, SharedPtr<Node> n )
+    string SimpleLabel( string name, TreePtr<Node> n )
     {
         string s = "\"<fixed> " + Sanitise(name);
         vector< Itemiser::Element * > members = n->Itemise();
@@ -355,7 +355,7 @@ public:
                     s += " | <" + SeqField( i, j ) + "> ";// [" + string(c) + "]";
                 }
             }
-            else  if( SharedPtrInterface *ptr = dynamic_cast<SharedPtrInterface *>(members[i]) )
+            else  if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
             {
             	s += " | <" + SeqField( i ) + "> ";
             }
@@ -368,7 +368,7 @@ public:
         return s;
     }
 
-    string DoNode( SharedPtr<Node> n )
+    string DoNode( TreePtr<Node> n )
     {
         string s;
         bool bold;
@@ -409,7 +409,7 @@ public:
         return s;
     }
     
-    string DoNodeLinks( SharedPtr<Node> n )
+    string DoNodeLinks( TreePtr<Node> n )
     {    
         string s;
         vector< Itemiser::Element * > members = n->Itemise();
@@ -419,16 +419,16 @@ public:
 
         	if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
             {
-        		FOREACH( const SharedPtrInterface &p, *col )
+        		FOREACH( const TreePtrInterface &p, *col )
                     s += DoLink( n, SeqField(i), p );
             }
         	else if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
             {
                 int j=0;
-        		FOREACH( const SharedPtrInterface &p, *seq )
+        		FOREACH( const TreePtrInterface &p, *seq )
                     s += DoLink( n, SeqField(i, j++), p );
             }            
-            else if( SharedPtrInterface *ptr = dynamic_cast<SharedPtrInterface *>(members[i]) )         
+            else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
             {
                 if( *ptr )
                     s += DoLink( n, SeqField(i), *ptr );
@@ -441,7 +441,7 @@ public:
         return s;
     }    
     
-    bool IsRecord( SharedPtr<Node> n )
+    bool IsRecord( TreePtr<Node> n )
     {
         bool bold;
         string shape;
@@ -450,7 +450,7 @@ public:
         return shape=="record" || shape=="plaintext";
     }
 
-    string DoLink( SharedPtr<Node> from, string field, SharedPtr<Node> to, string atts=string() )
+    string DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string atts=string() )
     {
         string s;
         s += Id(from.get());

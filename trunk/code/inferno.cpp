@@ -27,7 +27,7 @@ int main( int argc, char *argv[] )
     if( ReadArgs::infile.empty() )
         return 0;
 
-    SharedPtr<Node> program = SharedPtr<Node>();
+    TreePtr<Node> program = TreePtr<Node>();
     Parse p(ReadArgs::infile);
     p( program, &program );
               

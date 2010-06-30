@@ -1,7 +1,7 @@
 #include "split_instance_declarations.hpp"
 #include "tree/tree.hpp"
 
-void SplitInstanceDeclarations::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
+void SplitInstanceDeclarations::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
 	{ // Do initialised local variables by leaving an assign behind
 		SearchReplace sr1;
@@ -61,7 +61,7 @@ void SplitInstanceDeclarations::operator()( SharedPtr<Node> context, SharedPtr<N
 }
 
 
-void MergeInstanceDeclarations::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
+void MergeInstanceDeclarations::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
 	SearchReplace sr1;
 	{
@@ -99,7 +99,7 @@ void MergeInstanceDeclarations::operator()( SharedPtr<Node> context, SharedPtr<N
 }
 
 
-void HackUpIfs::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
+void HackUpIfs::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
 	CouplingSet sms1;
 	SearchReplace sr1;
@@ -132,7 +132,7 @@ void HackUpIfs::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
 }
 
 
-void CrazyNine::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
+void CrazyNine::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
 	SearchReplace sr1;
 	// Replaces entire records with 9 if it has a 9 in it
@@ -140,11 +140,11 @@ void CrazyNine::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
 		MakeShared<Record> s_record;
 		MakeShared< Stuff<Declaration> > s_stuff;
 		s_record->members = ( s_stuff, MakeShared< Star<Declaration> >() );
-		SharedPtr<SpecificInteger> s_nine( new SpecificInteger(9) );
+		TreePtr<SpecificInteger> s_nine( new SpecificInteger(9) );
 		s_stuff->terminus = s_nine;
 
 		MakeShared<Union> r_union;
-		SharedPtr<SpecificTypeIdentifier> r_union_name( new SpecificTypeIdentifier("nine") );
+		TreePtr<SpecificTypeIdentifier> r_union_name( new SpecificTypeIdentifier("nine") );
 		r_union->identifier = r_union_name;
 
 		sr1.Configure(s_record, r_union);
@@ -162,22 +162,22 @@ void CrazyNine::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
  * A rather hacked up and bit-rotted searc/replace turning *(array+i) into array[i]
     // TODO move this out of main()
     {
-        SharedPtr<Dereference> sd( new Dereference );
-        SharedPtr<Subtract> sa( new Subtract );
+        TreePtr<Dereference> sd( new Dereference );
+        TreePtr<Subtract> sa( new Subtract );
         sd->operands.push_back( sa );
-        SharedPtr<TypeOf> sseot( new TypeOf );
+        TreePtr<TypeOf> sseot( new TypeOf );
         sa->operands.push_back( sseot );
-        SharedPtr<Array> sar( new Array );
-//           sar->element = SharedPtr<Type>();
-//           sar->size = SharedPtr<Initialiser>();
+        TreePtr<Array> sar( new Array );
+//           sar->element = TreePtr<Type>();
+//           sar->size = TreePtr<Initialiser>();
         sseot->pattern = sar;
-        SharedPtr<Expression> se( new Expression );
+        TreePtr<Expression> se( new Expression );
         sa->operands.push_back( se );
 
-        SharedPtr<Subscript> rs( new Subscript );
-        SharedPtr<Expression> rar( new Expression );
+        TreePtr<Subscript> rs( new Subscript );
+        TreePtr<Expression> rar( new Expression );
         rs->base = rar;
-        SharedPtr<Expression> re( new Expression );
+        TreePtr<Expression> re( new Expression );
         rs->index = re;
 
         Coupling mar;

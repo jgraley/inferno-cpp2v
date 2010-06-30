@@ -12,14 +12,14 @@ public:
 	{
 	}
 
-	virtual void operator()( SharedPtr<Node> context,
-	    		             SharedPtr<Node> *proot );
+	virtual void operator()( TreePtr<Node> context,
+	    		             TreePtr<Node> *proot );
 private:
-	void OnLink( SharedPtr<Node> p, SharedPtr<Node> c );
+	void OnLink( TreePtr<Node> p, TreePtr<Node> c );
 
 	bool is_pattern;
-	Map< SharedPtr<Node>, unsigned > decl_refs;
-	Map< SharedPtr<Node>, unsigned > total_refs;
+	Map< TreePtr<Node>, unsigned > decl_refs;
+	Map< TreePtr<Node>, unsigned > total_refs;
 };
 
 // TODO

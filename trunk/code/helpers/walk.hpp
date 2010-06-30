@@ -11,8 +11,8 @@ class Walk
         int index;
     };
     
-    shared_ptr< SharedPtr<Node> > root;
-    SharedPtr<Node> restrictor;
+    shared_ptr< TreePtr<Node> > root;
+    TreePtr<Node> restrictor;
     stack< Frame > state;
     
     bool IsAtEndOfCollection() const;
@@ -29,7 +29,7 @@ public:
     int Depth() const;
     ContainerInterface::iterator GetIterator() const;
     shared_ptr<Node> Get() const;
-    void Set( SharedPtr<Node> n );
+    void Set( TreePtr<Node> n );
     operator string() const;
     void AdvanceOver(); 
     void AdvanceInto();
@@ -55,7 +55,7 @@ public:
         while(!w.Done())
         {
             shared_ptr<Node> x = w.Get();
-            if( SharedPtr<FIND> f = dynamic_pointer_cast< FIND >( x ) )
+            if( TreePtr<FIND> f = dynamic_pointer_cast< FIND >( x ) )
                 Sequence< FIND >::push_back( f );
             w.AdvanceInto(); 
         }    
@@ -84,12 +84,12 @@ struct WalkingIterator : public ContainerInterface::iterator_interface,
 		return *this;
 	}
 
-	virtual const SharedPtrInterface &operator*() const
+	virtual const TreePtrInterface &operator*() const
 	{
 	    return *GetIterator();
 	}
 
-	const virtual SharedPtrInterface *operator->() const
+	const virtual TreePtrInterface *operator->() const
 	{
 		return &*GetIterator();
 	}
@@ -104,7 +104,7 @@ struct WalkingIterator : public ContainerInterface::iterator_interface,
 		return pi->Get() == Get();
 	}
 
-	virtual void Overwrite( const SharedPtrInterface *v ) const
+	virtual void Overwrite( const TreePtrInterface *v ) const
 	{
 		GetIterator().Overwrite( v );
 	}

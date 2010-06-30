@@ -3,12 +3,12 @@
 #include "helpers/misc.hpp"
 
 
-bool IsDependOn( SharedPtr<Declaration> a, SharedPtr<Declaration> b, bool ignore_indirection_to_record )
+bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_indirection_to_record )
 {
 	if( a == b )
 	    return false;
 	
-    const SharedPtr<Record> recb = dynamic_pointer_cast<Record>(b); // 2 unrelated uses
+    const TreePtr<Record> recb = dynamic_pointer_cast<Record>(b); // 2 unrelated uses
 	
 	// Only ignore pointers and refs if we're checking dependency on a record; typedefs
 	// still apply (since you can't forward declare a typedef).
@@ -16,7 +16,7 @@ bool IsDependOn( SharedPtr<Declaration> a, SharedPtr<Declaration> b, bool ignore
 
     // Actually, we really want to see whether declaration a depends on the identifier of b
     // since the rest of b is irrelevent (apart from the above).
-    SharedPtr<Identifier> ib = GetIdentifier( b );
+    TreePtr<Identifier> ib = GetIdentifier( b );
     ASSERT(ib);
           
     Walk wa( a );
@@ -24,7 +24,7 @@ bool IsDependOn( SharedPtr<Declaration> a, SharedPtr<Declaration> b, bool ignore
     {
     	if( ignore_indirection ) // are we to ignore pointers/refs?
     	{
-    		if( SharedPtr<Indirection> inda = dynamic_pointer_cast<Indirection>(wa.Get()) ) // is a a pointer or ref?
+    		if( TreePtr<Indirection> inda = dynamic_pointer_cast<Indirection>(wa.Get()) ) // is a a pointer or ref?
     		{
     			if( dynamic_pointer_cast<Identifier>(inda->destination) == ib ) // does it depend on b?
     	        {
@@ -34,7 +34,7 @@ bool IsDependOn( SharedPtr<Declaration> a, SharedPtr<Declaration> b, bool ignore
     		}
     	}
     	
-        if( wa.Get() == SharedPtr<Node>(ib) ) // If we see b in *any* other cotext under a's type, there's dep.
+        if( wa.Get() == TreePtr<Node>(ib) ) // If we see b in *any* other cotext under a's type, there's dep.
             return true;                
                         
         wa.AdvanceInto();
@@ -44,7 +44,7 @@ bool IsDependOn( SharedPtr<Declaration> a, SharedPtr<Declaration> b, bool ignore
     // the dependency might be on something buried in the record.
     if( recb )
     {
-    	FOREACH( SharedPtr<Declaration> memberb, recb->members )
+    	FOREACH( TreePtr<Declaration> memberb, recb->members )
     	    if( IsDependOn( a, memberb, ignore_indirection_to_record ) )
     	        return true;
     }
@@ -71,9 +71,9 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
 		for( ai = cc.begin(); ai != cc.end(); ++ai )
 		{
 			bool a_has_deps=false;
-			FOREACH( const SharedPtr<Declaration> &b, cc )
+			FOREACH( const TreePtr<Declaration> &b, cc )
 		    {
-		        SharedPtr<Declaration> aid = dynamic_cast< const SharedPtr<Declaration> & >(*ai); 
+		        TreePtr<Declaration> aid = dynamic_cast< const TreePtr<Declaration> & >(*ai);
 		    	a_has_deps |= IsDependOn( aid, b, ignore_indirection_to_record );
 		    }
 		    if( !a_has_deps )
@@ -95,7 +95,7 @@ Sequence<Declaration> JumbleDecls( Sequence<Declaration> c )
 	srand(99);
 	
 	Sequence<Declaration> s;
-	FOREACH( SharedPtr<Declaration> to_insert, c ) // we will insert each element from the collection
+	FOREACH( TreePtr<Declaration> to_insert, c ) // we will insert each element from the collection
 	{
 		// Idea is to insert each new element just before the first exiting element that
 		// depends on it. This is the latest position we can insert the new element.
@@ -123,7 +123,7 @@ Sequence<Declaration> JumbleDecls( Sequence<Declaration> c )
 Sequence<Declaration> ReverseDecls( Sequence<Declaration> c )
 {
 	Sequence<Declaration> s;
-	FOREACH( SharedPtr<Declaration> to_insert, c ) // we will insert each element from the collection
+	FOREACH( TreePtr<Declaration> to_insert, c ) // we will insert each element from the collection
 	{
    	    // Insert the element. If we didn't find a dependency, we'll be off the end of
    	    // the sequence and hopefully insert() will actually push_back()

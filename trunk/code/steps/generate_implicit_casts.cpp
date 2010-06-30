@@ -11,7 +11,7 @@
 #include "helpers/soft_patterns.hpp"
 #include "helpers/typeof.hpp"
 
-void GenerateImplicitCasts::operator()( SharedPtr<Node> context, SharedPtr<Node> *proot )
+void GenerateImplicitCasts::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
 	SearchReplace sr0;
 
