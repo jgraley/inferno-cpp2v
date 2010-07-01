@@ -8,19 +8,19 @@
 // back-pointers.
 //
 // TODO take id as SpecificIdentifier, not Identifier, so do not need to ASSERT check this
-shared_ptr<Scope> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> id )
+TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 {
     TRACE("Trying program (global)\n" );
-    FOREACH( shared_ptr<Declaration> d, program->members )
+    FOREACH( TreePtr<Declaration> d, program->members )
     {            
         if( id == GetIdentifier( d ) )
             return program;
     }
 
 	Flattener<Record> walkr(program);
-	FOREACH( shared_ptr<Record> r, walkr )
+	FOREACH( TreePtr<Record> r, walkr )
 	{
-	    FOREACH( shared_ptr<Declaration> d, r->members )
+	    FOREACH( TreePtr<Declaration> d, r->members )
 	    {            
 	        if( id == GetIdentifier( d ) ) 
 	            return r;
@@ -28,11 +28,11 @@ shared_ptr<Scope> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> 
 	}
 	
 	Flattener<Compound> walkc(program);
-	FOREACH( shared_ptr<Compound> c, walkc )
+	FOREACH( TreePtr<Compound> c, walkc )
 	{
 	    Flattener<Declaration> walks(c); // TODO possible bug - this search should not recurse into sub scopes
 	                                     // TODO also should ensure we are checking members AND statements
-	    FOREACH( shared_ptr<Declaration> d, walks )
+	    FOREACH( TreePtr<Declaration> d, walks )
 	    {            
 	        if( id == GetIdentifier( d ) )
 	            return c;
@@ -40,9 +40,9 @@ shared_ptr<Scope> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> 
 	}
 	
 	Flattener<Procedure> walkp(program);
-	FOREACH( shared_ptr<Procedure> p, walkp )
+	FOREACH( TreePtr<Procedure> p, walkp )
 	{
-	    FOREACH( shared_ptr<Declaration> d, p->members )
+	    FOREACH( TreePtr<Declaration> d, p->members )
 	    {            
 	        if( id == GetIdentifier( d ) )
 	            return p;
@@ -50,11 +50,11 @@ shared_ptr<Scope> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> 
 	}
 
 	
-	if( shared_ptr<SpecificIdentifier> sid = dynamic_pointer_cast<SpecificIdentifier>( id ) )
+	if( TreePtr<SpecificIdentifier> sid = dynamic_pointer_cast<SpecificIdentifier>( id ) )
 		ASSERT(0)("cannot get scope of ")( *sid );
 	else
 		ASSERT(0)("non-specific type ")(*id)(" - should not be doing GetScope() on these" );
 	// every identifier should have a scope - if this fails, we've missed out a kind of scope
 	// Note: if Flattener is not automated yet, then it may have missed something
-	return shared_ptr<Scope>();
+	return TreePtr<Scope>();
 }

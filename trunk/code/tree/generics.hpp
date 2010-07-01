@@ -18,7 +18,7 @@
 
 struct Node;
 
-// TODO SharedPtr -> TreePtr since we only use it for tree nodes
+// TODO ELEMENT->VALUE_TYPE for consistency with OOStd
 // TODO optimise SharedPtr, it seems to be somewhat slower than shared_ptr!!!
 typedef OOStd::SharedPtrInterface<Itemiser::Element, Node> TreePtrInterface;
 

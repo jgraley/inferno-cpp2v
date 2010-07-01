@@ -6,7 +6,7 @@
 #include "transformation.hpp"
 #include "search_replace.hpp"
 
-shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d );
+TreePtr<Identifier> GetIdentifier( TreePtr<Declaration> d );
 
 class GetDeclaration : public OutOfPlaceTransformation, public TransformTo<InstanceIdentifier>
 {
@@ -21,10 +21,10 @@ private:
 
 
 // Look for a record, skipping over typedefs. Returns NULL if not a record.
-shared_ptr<Record> GetRecordDeclaration( shared_ptr<Node> context, shared_ptr<TypeIdentifier> id );
+TreePtr<Record> GetRecordDeclaration( TreePtr<Node> context, TreePtr<TypeIdentifier> id );
 
 // Hunt through a record and its bases to find the named member
-shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<Record> r, string name );
+TreePtr<Instance> FindMemberByName( TreePtr<Program> program, TreePtr<Record> r, string name );
 
 // concatenate sequences by adding them, like strings etc
 // TODO move to common/

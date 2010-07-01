@@ -2,16 +2,16 @@
 #include "walk.hpp"
 #include "misc.hpp"
 
-shared_ptr<Identifier> GetIdentifier( shared_ptr<Declaration> d )
+TreePtr<Identifier> GetIdentifier( TreePtr<Declaration> d )
 {
-    if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
+    if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
         return i->identifier;
-    else if( shared_ptr<UserType> t = dynamic_pointer_cast<UserType>( d ) )
+    else if( TreePtr<UserType> t = dynamic_pointer_cast<UserType>( d ) )
         return t->identifier;
-    else if( shared_ptr<Label> l = dynamic_pointer_cast<Label>( d ) )
+    else if( TreePtr<Label> l = dynamic_pointer_cast<Label>( d ) )
         return l->identifier;
     else
-        ASSERTFAIL();
+        return TreePtr<Identifier>(); // was a declaration without an identifier, ie a base class
 }
 
 TreePtr<Node> GetDeclaration::operator()( TreePtr<Node> context, TreePtr<Node> root )
@@ -56,46 +56,46 @@ TreePtr<Instance> GetDeclaration::Get( TreePtr<Node> context, TreePtr<InstanceId
 }
 
 // Look for a record, skipping over typedefs. Returns NULL if not a record.
-shared_ptr<Record> GetRecordDeclaration( shared_ptr<Node> context, shared_ptr<TypeIdentifier> id )
+TreePtr<Record> GetRecordDeclaration( TreePtr<Node> context, TreePtr<TypeIdentifier> id )
 {
-	shared_ptr<Node> ut = GetDeclaration()( context, id );
-	while( shared_ptr<Typedef> td = dynamic_pointer_cast<Typedef>(ut) )
+	TreePtr<Node> ut = GetDeclaration()( context, id );
+	while( TreePtr<Typedef> td = dynamic_pointer_cast<Typedef>(ut) )
 	{
-	    shared_ptr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(td->type);
+	    TreePtr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(td->type);
 	    if(ti)
 	        ut = GetDeclaration()( context, ti);
 	    else
-	        return shared_ptr<Record>(); // not a record
+	        return TreePtr<Record>(); // not a record
 	}
-	shared_ptr<Record> r = dynamic_pointer_cast<Record>(ut);
+	TreePtr<Record> r = dynamic_pointer_cast<Record>(ut);
 	return r;
 }
 
 
 // Hunt through a record and its bases to find the named member
-shared_ptr<Instance> FindMemberByName( shared_ptr<Program> program, shared_ptr<Record> r, string name )
+TreePtr<Instance> FindMemberByName( TreePtr<Program> program, TreePtr<Record> r, string name )
 {
     TRACE("Record has %d members\n", r->members.size() );
     
     // Try the instance members (objects and functions) for a name match
-    FOREACH( shared_ptr<Declaration> d, r->members )
-        if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>(d) )
-            if( shared_ptr<SpecificInstanceIdentifier> sss = dynamic_pointer_cast<SpecificInstanceIdentifier>(i->identifier) )
+    FOREACH( TreePtr<Declaration> d, r->members )
+        if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>(d) )
+            if( TreePtr<SpecificInstanceIdentifier> sss = dynamic_pointer_cast<SpecificInstanceIdentifier>(i->identifier) )
                 if( (string)*sss == name )
                     return i;
                 
     // Try recursing through the base classes, if there are any
-    if( shared_ptr<InheritanceRecord> ir = dynamic_pointer_cast<InheritanceRecord>( r ) )
-        FOREACH( shared_ptr<Base> b, ir->bases )
+    if( TreePtr<InheritanceRecord> ir = dynamic_pointer_cast<InheritanceRecord>( r ) )
+        FOREACH( TreePtr<Base> b, ir->bases )
         {
-            shared_ptr<Node> ut = GetDeclaration()( program, b->record );
-            shared_ptr<InheritanceRecord> ir = dynamic_pointer_cast<InheritanceRecord>(ut);
+            TreePtr<Node> ut = GetDeclaration()( program, b->record );
+            TreePtr<InheritanceRecord> ir = dynamic_pointer_cast<InheritanceRecord>(ut);
             ASSERT(ir);
-            if( shared_ptr<Instance> i = FindMemberByName( program, ir, name ) )
+            if( TreePtr<Instance> i = FindMemberByName( program, ir, name ) )
                 return i;
         }
                 
     // We failed. Hang our head in shame.                
-    return shared_ptr<Instance>();
+    return TreePtr<Instance>();
 }                
 
