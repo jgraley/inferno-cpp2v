@@ -8,7 +8,6 @@
 // parent in the tree. We have to do searches for this, since the tree does not contain 
 // back-pointers.
 //
-// TODO use TreePtr
-shared_ptr<Scope> GetScope( shared_ptr<Program> program, shared_ptr<Identifier> id );
+TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id );
 
 #endif

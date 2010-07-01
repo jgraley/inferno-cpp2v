@@ -153,6 +153,7 @@ public:
 template< class SUB_BASE, typename VALUE_INTERFACE >
 struct SequenceInterface : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>
 {
+	// TODO forward declare Sequence and add cast-to-Sequence<VALUE_INTERFACE> in here as with SharedPtr
     virtual VALUE_INTERFACE &operator[]( int i ) = 0;
     virtual void push_back( const VALUE_INTERFACE &gx ) = 0;
 };

@@ -68,6 +68,9 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
     // TODO an explicit function should be called to get this dynamic cast.
     inline SharedPtr( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g )
     {
+    	// TODO try putting ASSERT(0) in here or make it private and use the backtraces to see the callers
+    	// (since compiler messages not always sufficient) and make the calls to
+    	// DynamicPointerCast explicit
     	*this = DynamicPointerCast<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>(g);
     }
 
@@ -121,8 +124,6 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
         return Traceable::CPPFilt( typeid( VALUE_TYPE ).name() );
 	}
 };
-
-// template<class T, class U> shared_ptr<T> dynamic_pointer_cast(shared_ptr<U> const & r)
 
 
 template<typename SUB_BASE, typename VALUE_INTERFACE, typename VALUE_TYPE>
