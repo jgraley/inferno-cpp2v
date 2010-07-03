@@ -65,12 +65,19 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
     {
     }
 
+    template< typename OTHER >
+    inline SharedPtr( const SharedPtr<SUB_BASE, VALUE_INTERFACE, OTHER> &o ) :
+        shared_ptr<VALUE_TYPE>( (shared_ptr<OTHER>)(o) )
+    {
+    }
+
     // TODO an explicit function should be called to get this dynamic cast.
     inline SharedPtr( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g )
     {
-    	// TODO try putting ASSERT(0) in here or make it private and use the backtraces to see the callers
+    	// TODO try putting ASSERT(0) in here and use the backtraces to see the callers
     	// (since compiler messages not always sufficient) and make the calls to
     	// DynamicPointerCast explicit
+    	//ASSERT(0);
     	*this = DynamicPointerCast<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>(g);
     }
 

@@ -271,6 +271,12 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 		typename CONTAINER_IMPL::value_type sx(gx);
 		CONTAINER_IMPL::push_back( sx );
 	}
+	template<typename OTHER>
+	inline void push_back( const OTHER &gx )
+	{
+		typename CONTAINER_IMPL::value_type sx(gx);
+		CONTAINER_IMPL::push_back( sx );
+	}
 
 	// Covariant style only works with refs and pointers, so force begin/end to return refs safely
 	// This complies with STL's thread safety model. To quote SGI,
@@ -300,7 +306,7 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 		     i != ns->end();
 		     ++i )
 		{
-            CONTAINER_IMPL::push_back( *i );
+            CONTAINER_IMPL::push_back( (typename CONTAINER_IMPL::value_type)*i );
 		}
 	}
 	Sequence( const VALUE_INTERFACE &nx )
@@ -344,6 +350,12 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER
 	};
 
 	virtual void insert( const VALUE_INTERFACE &gx )
+	{
+		typename CONTAINER_IMPL::value_type sx(gx);
+		CONTAINER_IMPL::insert( sx );
+	}
+	template<typename OTHER>
+	inline void insert( const OTHER &gx )
 	{
 		typename CONTAINER_IMPL::value_type sx(gx);
 		CONTAINER_IMPL::insert( sx );

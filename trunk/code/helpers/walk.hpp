@@ -62,7 +62,7 @@ public:
     }
 };
 
-
+// TODO provide a container for this iterator so we can use FOREACH and to be more consistent
 struct WalkingIterator : public ContainerInterface::iterator_interface,
                          Walk
 {
