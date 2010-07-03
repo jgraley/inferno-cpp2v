@@ -46,10 +46,6 @@ struct SharedPtrInterface : virtual SUB_BASE, public Traceable
 };
 
 template<typename SUB_BASE, typename VALUE_INTERFACE, typename VALUE_TYPE>
-inline SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>
-    DynamicPointerCast( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g );
-
-template<typename SUB_BASE, typename VALUE_INTERFACE, typename VALUE_TYPE>
 struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared_ptr<VALUE_TYPE>
 {
     inline SharedPtr() {}
@@ -78,7 +74,7 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
     	// (since compiler messages not always sufficient) and make the calls to
     	// DynamicPointerCast explicit
     	//ASSERT(0);
-    	*this = DynamicPointerCast<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>(g);
+    	*this = DynamicCast(g);
     }
 
     virtual operator shared_ptr<VALUE_INTERFACE>() const
@@ -130,25 +126,23 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
 	{
         return Traceable::CPPFilt( typeid( VALUE_TYPE ).name() );
 	}
+
+	static inline SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>
+	    DynamicCast( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g )
+	{
+		if( g )
+		{
+			shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(g));
+			ASSERT( v )("Cannot convert GenericSharedPtr that points to a ")((string)*(shared_ptr<VALUE_INTERFACE>(g)))(" to SharedPtr<")(typeid(VALUE_TYPE).name())(">");
+			return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>(v);
+		}
+		else
+		{
+			return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>();
+		}
+	}
 };
 
-
-template<typename SUB_BASE, typename VALUE_INTERFACE, typename VALUE_TYPE>
-inline SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>
-    DynamicPointerCast( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g )
-{
-	if( g )
-	{
-		shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(g));
-		ASSERT( v )("Cannot convert GenericSharedPtr that points to a ")((string)*(shared_ptr<VALUE_INTERFACE>(g)))(" to SharedPtr<")(typeid(VALUE_TYPE).name())(">");
-		return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>(v);
-	}
-	else
-	{
-		return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>();
-	}
-}
-
-}
+}; // namespace
 
 #endif /* SHARED_PTR_HPP */

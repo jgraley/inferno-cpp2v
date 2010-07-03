@@ -35,13 +35,12 @@ public:
 	inline TreePtr( const shared_ptr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
 	template< typename OTHER >
 	inline TreePtr( const TreePtr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
+	static inline TreePtr<ELEMENT> DynamicCast( const TreePtrInterface &g )
+	{
+		return OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>::DynamicCast(g);
+	}
 };
 
-template<typename ELEMENT>
-inline TreePtr<ELEMENT> DynamicTreePtrCast( const TreePtrInterface &g )
-{
-	return OOStd::DynamicPointerCast<Itemiser::Element, Node, ELEMENT>(g);
-}
 
 
 // Inferno tree containers
