@@ -270,7 +270,7 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
     }
 	virtual void push_back( const VALUE_INTERFACE &gx )
 	{
-		typename CONTAINER_IMPL::value_type sx(gx);
+		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::DynamicCast(gx) );
 		CONTAINER_IMPL::push_back( sx );
 	}
 	template<typename OTHER>
@@ -372,7 +372,7 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER
 
 	virtual void insert( const VALUE_INTERFACE &gx )
 	{
-		typename CONTAINER_IMPL::value_type sx(gx);
+		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::DynamicCast(gx) );
 		CONTAINER_IMPL::insert( sx );
 	}
 	template<typename OTHER>
@@ -383,7 +383,7 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER
 	}
 	virtual int erase( const VALUE_INTERFACE &gx )
 	{
-		typename CONTAINER_IMPL::value_type sx(gx);
+		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::DynamicCast(gx) );
 		return CONTAINER_IMPL::erase( sx );
 	}
 	virtual bool IsExist( const VALUE_INTERFACE &gx )
