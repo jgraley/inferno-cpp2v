@@ -244,6 +244,8 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
     inline Sequence<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>() {}
 	struct iterator : public ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator
     {
+		inline iterator( typename CONTAINER_IMPL::iterator &i ) : CONTAINER_IMPL::iterator(i) {}
+		inline iterator() {}
 		virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
 		{
 			shared_ptr<iterator> ni( new iterator );
@@ -313,6 +315,23 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 	{
 		CONTAINER_IMPL::push_back( nx );
 	}
+	template<typename L, typename R>
+	inline Sequence( const pair<L, R> &p )
+	{
+		*this = Sequence<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>( p.first );
+		Sequence<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL> t( p.second );
+
+		for( typename Sequence<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator i=t.begin();
+		     i != t.end();
+		     ++i )
+		{
+            CONTAINER_IMPL::push_back( *i );
+		}
+	}
+	inline Sequence( const typename CONTAINER_IMPL::value_type &v )
+	{
+		push_back( v );
+	}
 };
 
 
@@ -326,6 +345,8 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER
     inline Collection<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>() {}
 	struct iterator : public ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator
     {
+		inline iterator( typename CONTAINER_IMPL::iterator &i ) : CONTAINER_IMPL::iterator(i) {}
+		inline iterator() {}
 		virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
 		{
 			shared_ptr<iterator> ni( new iterator );
@@ -399,6 +420,23 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER
     Collection( const VALUE_INTERFACE &nx )
 	{
         CONTAINER_IMPL::insert( nx );
+	}
+	template<typename L, typename R>
+	inline Collection( const pair<L, R> &p )
+	{
+		*this = Collection<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>( p.first );
+		Collection<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL> t( p.second );
+
+		for( typename Collection<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator i=t.begin();
+		     i != t.end();
+		     ++i )
+		{
+            CONTAINER_IMPL::insert( *i );
+		}
+	}
+	inline Collection( const typename CONTAINER_IMPL::value_type &v )
+	{
+		insert( v );
 	}
 };
 
@@ -532,6 +570,12 @@ struct CountingIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::
 		return element;
 	}
 };
+
+template<typename L, typename R>
+inline pair<L,R> operator,( const L &l, const R &r )
+{
+    return pair<L,R>(l,r);
+}
 
 }; // namespace
 

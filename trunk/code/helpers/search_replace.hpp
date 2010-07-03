@@ -96,11 +96,25 @@ struct StuffKey : Key
 struct Coupling : public set< TreePtr<Node> >
 {
 	inline Coupling() {}
-	inline Coupling( const Sequence< Node > &seq )
+/*	inline Coupling( const Sequence< Node > &seq )
 	{
 		Sequence< Node > s2 = seq;
 		FOREACH( TreePtr<Node> v, s2 )
 			insert( v );
+	}*/
+	template<typename L, typename R>
+	inline Coupling( pair<L, R> p )
+	{
+		Coupling l( p.first );
+		FOREACH( TreePtr<Node> v, l )
+			insert( v );
+		Coupling r( p.second );
+		FOREACH( TreePtr<Node> v, r )
+			insert( v );
+	}
+	inline Coupling( TreePtr<Node> n )
+	{
+		insert( n );
 	}
 };
 
