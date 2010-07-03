@@ -57,10 +57,12 @@ struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, 
 	typedef deque< TreePtr<ELEMENT> > Impl;
 
 	inline Sequence() {}
-	inline Sequence( const SequenceInterface &cns ) :
-		OOStd::Sequence< Itemiser::Element, TreePtrInterface, Impl >( cns ) {}
-	inline Sequence( const TreePtrInterface &nx ) :
-	    OOStd::Sequence< Itemiser::Element, TreePtrInterface, Impl >( nx ) {}
+	template<typename L, typename R>
+	inline Sequence( const pair<L, R> &p ) :
+		OOStd::Sequence< Itemiser::Element, TreePtrInterface, Impl >( p ) {}
+	template< typename OTHER >
+	inline Sequence( const TreePtr<OTHER> &v ) :
+		OOStd::Sequence< Itemiser::Element, TreePtrInterface, Impl >( v ) {}
 };
 
 
@@ -70,36 +72,13 @@ struct Collection : virtual OOStd::Collection< Itemiser::Element, TreePtrInterfa
  	typedef set< TreePtr<ELEMENT> > Impl;
 
  	inline Collection<ELEMENT>() {}
-    inline Collection( const ContainerInterface &cns ) :
-    	OOStd::Collection< Itemiser::Element, TreePtrInterface, Impl >( cns ) {}
-    inline Collection( const TreePtrInterface &nx ) :
-    	OOStd::Collection< Itemiser::Element, TreePtrInterface, Impl >( nx ) {}
+	template<typename L, typename R>
+	inline Collection( const pair<L, R> &p ) :
+		OOStd::Collection< Itemiser::Element, TreePtrInterface, Impl >( p ) {}
+	template< typename OTHER >
+	inline Collection( const TreePtr<OTHER> &v ) :
+		OOStd::Collection< Itemiser::Element, TreePtrInterface, Impl >( v ) {}
 };
-
-// Assmebling sequences using operator,
-template<typename L, typename R>
-inline Sequence<Node> operator,( const TreePtr<L> &l, const TreePtr<R> &r )
-{
-    Sequence<Node> seq;
-    seq.push_back( l );
-    seq.push_back( r );
-    return seq;
-}
-template<typename L, typename R>
-inline Sequence<L> operator,( const Sequence<L> &l, const TreePtr<R> &r )
-{
-    Sequence<L> seq(l);
-    seq.push_back( r );
-    return seq;
-}
-
-/*
-template<typename L, typename R>
-inline pair<L,R> operator,( const L &l, const R &r )
-{
-    return pair<L,R>(l,r);
-}
-*/
 
 // Handy typing saver for creating objects and SharedPtrs to them.
 // MakeShared<X> may be constructed in the same way as X, but will then
