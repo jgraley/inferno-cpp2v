@@ -18,6 +18,9 @@ OPTIONS += -Werror
 # Do not wrap messages (for Eclipse) 
 OPTIONS += -fmessage-length=0 
 
+# Be faster
+OPTIONS += -O2
+
 # JSG I need this to get the boost includes in a cygwin setup. This also
 # fixes the boost verison.
 OPTIONS += -I/usr/include/boost-1_33_1 

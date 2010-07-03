@@ -29,9 +29,12 @@ public:
 	inline TreePtr() : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>() {}
 	inline TreePtr( ELEMENT *o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
 	inline TreePtr( const TreePtrInterface &g ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(g) {}
-    inline TreePtr( const OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT> &g ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(g) {}
+    inline operator TreePtr<Node>() const { return OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>::operator OOStd::SharedPtr<Itemiser::Element, Node, Node>(); }
+	inline TreePtr( const OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT> &g ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(g) {}
 	template< typename OTHER >
 	inline TreePtr( const shared_ptr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
+	template< typename OTHER >
+	inline TreePtr( const TreePtr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
 };
 
 template<typename ELEMENT>
@@ -74,21 +77,29 @@ struct Collection : virtual OOStd::Collection< Itemiser::Element, TreePtrInterfa
 };
 
 // Assmebling sequences using operator,
-
-inline Sequence<Node> operator,( const TreePtrInterface &l, const TreePtrInterface &r )
+template<typename L, typename R>
+inline Sequence<Node> operator,( const TreePtr<L> &l, const TreePtr<R> &r )
 {
     Sequence<Node> seq;
     seq.push_back( l );
     seq.push_back( r );
     return seq;
 }
-
-inline Sequence<Node> operator,( const SequenceInterface &l, const TreePtrInterface &r )
+template<typename L, typename R>
+inline Sequence<L> operator,( const Sequence<L> &l, const TreePtr<R> &r )
 {
-    Sequence<Node> seq(l);
+    Sequence<L> seq(l);
     seq.push_back( r );
     return seq;
 }
+
+/*
+template<typename L, typename R>
+inline pair<L,R> operator,( const L &l, const R &r )
+{
+    return pair<L,R>(l,r);
+}
+*/
 
 // Handy typing saver for creating objects and SharedPtrs to them.
 // MakeShared<X> may be constructed in the same way as X, but will then

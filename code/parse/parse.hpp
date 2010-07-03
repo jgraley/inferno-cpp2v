@@ -1743,9 +1743,9 @@ private:
 		else
 		{
 			ASSERT(0)("typeof() only supported on types at the moment");
-			// THis is wrong because we'll get 2 refs to the type, need to duplicate,
+			// TODO THis is wrong because we'll get 2 refs to the type, need to duplicate,
 			// or maybe add an alternative node and convert in a S&R
-			p->operand = TypeOf()( all_decls, hold_expr.FromRaw(TyOrEx) );
+			p->operand = DynamicTreePtrCast<Type>( TypeOf()( all_decls, hold_expr.FromRaw(TyOrEx) ) );
 		}
 		return hold_expr.ToRaw( p );
 	}
