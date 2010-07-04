@@ -2,8 +2,6 @@
 #define SEARCH_REPLACE_HPP
 
 #include "common/common.hpp"
-//#include "parse/parse.hpp"  
-//#include "render/render.hpp" // TODO remove this silly dependency
 #include "common/read_args.hpp"
 #include "walk.hpp"
 #include "transformation.hpp"
@@ -89,7 +87,6 @@ struct Key
 
 struct StuffKey : Key
 {
-	TreePtr<StuffBase> search_stuff; // TODO add search_pattern to Key base class and lose this (as with replace_pattern)
 	TreePtr<Node> terminus;
 };
 
@@ -373,19 +370,12 @@ private:
     		                                            bool can_key,
     		                                            Conjecture &conj ) const
     {
-    	typedef ContainerInterface::iterator iter; // TODO clean up this loop
-    	iter it;
-    	int i;
-    	for( it = patterns.begin(), i = 0;
-    		 it != patterns.end();
-    		 ++it, ++i )
+    	FOREACH( const TreePtr<VALUE_TYPE> i, patterns )
     	{
-    		Result r = sr->DecidedCompare( x, TreePtr<Node>(*it), keys, can_key, conj );
-    		TRACE("AND[%d] got %d\n", i, r);
+    		Result r = sr->DecidedCompare( x, TreePtr<Node>(i), keys, can_key, conj );
     	    if( !r )
     	    	return NOT_FOUND;
     	}
-
         return FOUND;
     }
 };
