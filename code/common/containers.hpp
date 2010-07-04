@@ -20,10 +20,6 @@ namespace OOStd {
 // be a base (or compatible type) for the elements of all sub-containers.
 //
 
-// TODO rename more like STL namings, so Collection -> SimpleAssociativeContainer
-// but we will still say Collection in the Inferno layer. Thus the inferno layer
-// maps STL concepts onto Inferno concepts as required
-
 template< class SUB_BASE, typename VALUE_INTERFACE >
 class ContainerInterface : public Traceable, public virtual SUB_BASE
 {
@@ -153,14 +149,13 @@ public:
 template< class SUB_BASE, typename VALUE_INTERFACE >
 struct SequenceInterface : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>
 {
-	// TODO forward declare Sequence and add cast-to-Sequence<VALUE_INTERFACE> in here as with SharedPtr
     virtual VALUE_INTERFACE &operator[]( int i ) = 0;
     virtual void push_back( const VALUE_INTERFACE &gx ) = 0;
 };
 
 
 template< class SUB_BASE, typename VALUE_INTERFACE >
-struct CollectionInterface : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>
+struct SimpleAssociativeContainerInterface : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>
 {
 	virtual void insert( const VALUE_INTERFACE &gx ) = 0;
 	virtual int erase( const VALUE_INTERFACE &gx ) = 0;
@@ -342,9 +337,9 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 // (basically associative containers). Instantiate as per ContainerCommon.
 //
 template<class SUB_BASE, typename VALUE_INTERFACE, class CONTAINER_IMPL>
-struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>, virtual CollectionInterface<SUB_BASE, VALUE_INTERFACE>
+struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>, virtual SimpleAssociativeContainerInterface<SUB_BASE, VALUE_INTERFACE>
 {
-    inline Collection<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>() {}
+    inline SimpleAssociativeContainer<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>() {}
 	struct iterator : public ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator
     {
 		inline iterator( typename CONTAINER_IMPL::iterator &i ) : CONTAINER_IMPL::iterator(i) {}
@@ -357,7 +352,7 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER
 		}
     	virtual void Overwrite( const VALUE_INTERFACE *v ) const
 		{
-		    // Collections (unordered containers) do not allow elements to be modified
+		    // SimpleAssociativeContainers (unordered containers) do not allow elements to be modified
 		    // because the internal data structure depends on element values. So we 
 		    // erase the old element and insert the new one; thus, Overwrite() should not be assumed O(1)
     		typename CONTAINER_IMPL::value_type s( CONTAINER_IMPL::value_type::DynamicCast(*v) );
@@ -368,9 +363,9 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER
 		}
     	virtual const bool IsOrdered() const
     	{
-    		return false; // no, Collections are not ordered
+    		return false; // no, SimpleAssociativeContainers are not ordered
     	}
-        Collection<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL> *owner;
+        SimpleAssociativeContainer<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL> *owner;
 	};
 
 	virtual void insert( const VALUE_INTERFACE &gx )
@@ -409,7 +404,7 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER
     	my_end.owner = this;
     	return my_end;
     }
-    Collection( const ContainerInterface<SUB_BASE, VALUE_INTERFACE> &cns )
+    SimpleAssociativeContainer( const ContainerInterface<SUB_BASE, VALUE_INTERFACE> &cns )
 	{
 		// TODO support const_interator properly and get rid of this const_cast
     	ContainerInterface<SUB_BASE, VALUE_INTERFACE> *ns = const_cast< ContainerInterface<SUB_BASE, VALUE_INTERFACE> * >( &cns );
@@ -420,25 +415,25 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER
             CONTAINER_IMPL::insert( *i );
 		}
 	}
-    Collection( const VALUE_INTERFACE &nx )
+    SimpleAssociativeContainer( const VALUE_INTERFACE &nx )
 	{
 		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::DynamicCast(nx) );
         CONTAINER_IMPL::insert( sx );
 	}
 	template<typename L, typename R>
-	inline Collection( const pair<L, R> &p )
+	inline SimpleAssociativeContainer( const pair<L, R> &p )
 	{
-		*this = Collection<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>( p.first );
-		Collection<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL> t( p.second );
+		*this = SimpleAssociativeContainer<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>( p.first );
+		SimpleAssociativeContainer<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL> t( p.second );
 
-		for( typename Collection<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator i=t.begin();
+		for( typename SimpleAssociativeContainer<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator i=t.begin();
 		     i != t.end();
 		     ++i )
 		{
             CONTAINER_IMPL::insert( *i );
 		}
 	}
-	inline Collection( const typename CONTAINER_IMPL::value_type &v )
+	inline SimpleAssociativeContainer( const typename CONTAINER_IMPL::value_type &v )
 	{
 		insert( v );
 	}
@@ -575,6 +570,7 @@ struct CountingIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::
 	}
 };
 
+// Allow operator, to be used to create pairs. TODO use boost::tuple instead?
 template<typename L, typename R>
 inline pair<L,R> operator,( const L &l, const R &r )
 {

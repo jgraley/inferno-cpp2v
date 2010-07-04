@@ -18,26 +18,25 @@
 
 struct Node;
 
-// TODO ELEMENT->VALUE_TYPE for consistency with OOStd
 // TODO optimise SharedPtr, it seems to be somewhat slower than shared_ptr!!!
 typedef OOStd::SharedPtrInterface<Itemiser::Element, Node> TreePtrInterface;
 
-template<typename ELEMENT>
-class TreePtr : public OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>
+template<typename VALUE_TYPE>
+class TreePtr : public OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>
 {
 public:
-	inline TreePtr() : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>() {}
-	inline TreePtr( ELEMENT *o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
-	inline TreePtr( const TreePtrInterface &g ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(g) {}
-    inline operator TreePtr<Node>() const { return OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>::operator OOStd::SharedPtr<Itemiser::Element, Node, Node>(); }
-	inline TreePtr( const OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT> &g ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(g) {}
+	inline TreePtr() : OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>() {}
+	inline TreePtr( VALUE_TYPE *o ) : OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>(o) {}
+	inline TreePtr( const TreePtrInterface &g ) : OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>(g) {}
+    inline operator TreePtr<Node>() const { return OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>::operator OOStd::SharedPtr<Itemiser::Element, Node, Node>(); }
+	inline TreePtr( const OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE> &g ) : OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>(g) {}
 	template< typename OTHER >
-	inline TreePtr( const shared_ptr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
+	inline TreePtr( const shared_ptr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>(o) {}
 	template< typename OTHER >
-	inline TreePtr( const TreePtr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>(o) {}
-	static inline TreePtr<ELEMENT> DynamicCast( const TreePtrInterface &g )
+	inline TreePtr( const TreePtr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>(o) {}
+	static inline TreePtr<VALUE_TYPE> DynamicCast( const TreePtrInterface &g )
 	{
-		return OOStd::SharedPtr<Itemiser::Element, Node, ELEMENT>::DynamicCast(g);
+		return OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>::DynamicCast(g);
 	}
 };
 
@@ -48,12 +47,12 @@ typedef OOStd::ContainerInterface<Itemiser::Element, TreePtrInterface> Container
 typedef OOStd::PointIterator<Itemiser::Element, TreePtrInterface> PointIterator;
 typedef OOStd::CountingIterator<Itemiser::Element, TreePtrInterface> CountingIterator;
 typedef OOStd::SequenceInterface<Itemiser::Element, TreePtrInterface> SequenceInterface;
-typedef OOStd::CollectionInterface<Itemiser::Element, TreePtrInterface> CollectionInterface;
+typedef OOStd::SimpleAssociativeContainerInterface<Itemiser::Element, TreePtrInterface> CollectionInterface;
 
-template<typename ELEMENT>
-struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, deque< TreePtr<ELEMENT> > >
+template<typename VALUE_TYPE>
+struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, deque< TreePtr<VALUE_TYPE> > >
 {
-	typedef deque< TreePtr<ELEMENT> > Impl;
+	typedef deque< TreePtr<VALUE_TYPE> > Impl;
 
 	inline Sequence() {}
 	template<typename L, typename R>
@@ -65,18 +64,18 @@ struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, 
 };
 
 
-template<typename ELEMENT>
-struct Collection : virtual OOStd::Collection< Itemiser::Element, TreePtrInterface, set< TreePtr<ELEMENT> > >
+template<typename VALUE_TYPE>
+struct Collection : virtual OOStd::SimpleAssociativeContainer< Itemiser::Element, TreePtrInterface, set< TreePtr<VALUE_TYPE> > >
 {
- 	typedef set< TreePtr<ELEMENT> > Impl;
+ 	typedef set< TreePtr<VALUE_TYPE> > Impl;
 
- 	inline Collection<ELEMENT>() {}
+ 	inline Collection<VALUE_TYPE>() {}
 	template<typename L, typename R>
 	inline Collection( const pair<L, R> &p ) :
-		OOStd::Collection< Itemiser::Element, TreePtrInterface, Impl >( p ) {}
+		OOStd::SimpleAssociativeContainer< Itemiser::Element, TreePtrInterface, Impl >( p ) {}
 	template< typename OTHER >
 	inline Collection( const TreePtr<OTHER> &v ) :
-		OOStd::Collection< Itemiser::Element, TreePtrInterface, Impl >( v ) {}
+		OOStd::SimpleAssociativeContainer< Itemiser::Element, TreePtrInterface, Impl >( v ) {}
 };
 
 // Handy typing saver for creating objects and SharedPtrs to them.
@@ -88,12 +87,12 @@ struct Collection : virtual OOStd::Collection< Itemiser::Element, TreePtrInterfa
 // are OK:
 // existing_shared_ptr = MakeTreePtr<X>(10); // as per Boost: construction of temporary looks like function call
 // MakeTreePtr<X> new_shared_ptr(10); // new Inferno form: new_shared_ptr may now be used like a SharedPtr<X>
-template<typename ELEMENT>
-struct MakeTreePtr : TreePtr<ELEMENT>
+template<typename VALUE_TYPE>
+struct MakeTreePtr : TreePtr<VALUE_TYPE>
 {
-	MakeTreePtr() : TreePtr<ELEMENT>( new ELEMENT ) {}
+	MakeTreePtr() : TreePtr<VALUE_TYPE>( new VALUE_TYPE ) {}
 	template<typename CP0>
-	MakeTreePtr(const CP0 &cp0) : TreePtr<ELEMENT>( new ELEMENT(cp0) ) {}
+	MakeTreePtr(const CP0 &cp0) : TreePtr<VALUE_TYPE>( new VALUE_TYPE(cp0) ) {}
 	// Add more params as needed...
 };
 
