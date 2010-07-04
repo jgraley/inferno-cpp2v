@@ -67,16 +67,6 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
     {
     }
 
-    // TODO an explicit function should be called to get this dynamic cast.
-    inline SharedPtr( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g )
-    {
-    	// TODO try putting ASSERT(0) in here and use the backtraces to see the callers
-    	// (since compiler messages not always sufficient) and make the calls to
-    	// DynamicPointerCast explicit
-    	//ASSERT(0);
-    	*this = DynamicCast(g);
-    }
-
     virtual operator shared_ptr<VALUE_INTERFACE>() const
     {
     	// TODO don't like having p as a pointer
