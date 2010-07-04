@@ -50,7 +50,7 @@
 //   restricted intermediates (the Stuff node).
 //
 // - Slave search/replace so that a second SR can happen for each match
-//   of the first one, and can borrow its match sets.
+//   of the first one, and can borrow its couplings.
 
 // This just serves to complicate matters - just use bools directly
 enum Result { NOT_FOUND = (int)false,
@@ -173,7 +173,7 @@ class RootedSearchReplace : InPlaceTransformation
 public:
     CouplingSet couplings;
 
-    // Constructor and destructor. Search and replace patterns and match sets are 
+    // Constructor and destructor. Search and replace patterns and couplings are
     // specified here, so that we have a fully confiugured functor.
     RootedSearchReplace( TreePtr<Node> sp=TreePtr<Node>(),
                          TreePtr<Node> rp=TreePtr<Node>(),

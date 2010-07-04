@@ -69,9 +69,8 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
 
     virtual operator shared_ptr<VALUE_INTERFACE>() const
     {
-    	// TODO don't like having p as a pointer
-        const shared_ptr<VALUE_TYPE> *p = (const shared_ptr<VALUE_TYPE> *)this;
-        return *p;
+        const shared_ptr<VALUE_TYPE> p = (const shared_ptr<VALUE_TYPE>)*this;
+        return p;
     }
 
 	virtual operator SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_INTERFACE>() const
@@ -112,7 +111,7 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
     	return !!*(const shared_ptr<VALUE_TYPE> *)this;
     }
 
-	virtual operator string() const // TODO move to OOStd::SharedPtr
+	virtual operator string() const
 	{
         return Traceable::CPPFilt( typeid( VALUE_TYPE ).name() );
 	}

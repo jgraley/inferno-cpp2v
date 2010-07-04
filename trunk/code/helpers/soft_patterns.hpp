@@ -14,7 +14,7 @@
 // you may substitute the SoftMakeIdentifier in the replace pattern if you need
 // to specify it in more than one place. Note that SoftMakeIdentifier is stateless
 // and cannot therefore keep track of uniqueness - you'll get a new one each time
-// and must rely on a replace match set to get multiple reference to the same
+// and must rely on a replace coupling to get multiple reference to the same
 // new identifier. Rule is: ONE of these per new identifier.
 struct SoftMakeIdentifier : InstanceIdentifier, // TODO other kinds of identifier
                             RootedSearchReplace::SoftReplacePattern

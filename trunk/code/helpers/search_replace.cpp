@@ -1,7 +1,8 @@
 #include "search_replace.hpp"
 #include "validate.hpp"
+#include "render/graph.hpp" //  for graphing patterns
 
-// Constructor remembers search pattern, replace pattern and any supplied match sets as required
+// Constructor remembers search pattern, replace pattern and any supplied couplings as required
 RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
                                           TreePtr<Node> rp,
                                           CouplingSet m,
@@ -25,9 +26,9 @@ void RootedSearchReplace::Configure( TreePtr<Node> sp,
     v(search_pattern, &search_pattern);
     v(replace_pattern, &replace_pattern);
 
-    // If we have a slave, copy its match sets into ours so we have a full set
-    // of all the match sets - this will be used across the board. Note that
-    // the non-rooted SearchReplace adds a new match set.
+    // If we have a slave, copy its couplings into ours so we have a full set
+    // of all the couplings - this will be used across the board. Note that
+    // the non-rooted SearchReplace adds a new coupling.
     FOREACH( RootedSearchReplace *slave, slaves )
 	{
 		for( CouplingSet::iterator msi = slave->couplings.begin();
@@ -36,7 +37,7 @@ void RootedSearchReplace::Configure( TreePtr<Node> sp,
 		    couplings.insert( *msi );
 	}
 
-	TRACE("Merged match sets, I have %d\n", couplings.size() );
+	TRACE("Merged couplings, I have %d\n", couplings.size() );
 
     FOREACH( RootedSearchReplace *slave, slaves )
     {
@@ -124,7 +125,7 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
 		}
     }
    
-    // If we got here, the node matched the search pattern. Now apply match sets
+    // If we got here, the node matched the search pattern. Now apply couplings
     if( keys )
         return keys->KeyAndRestrict( x, pattern, this, can_key );
 
@@ -154,7 +155,7 @@ Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
 	    {
 	    	TRACE("Star (pe is %d)\n", (int)!!pe);
 			// We have a Star type wildcard that can match multiple elements. At present,
-			// NULL is interpreted as a Star (but cannot go in a match set).
+			// NULL is interpreted as a Star (but cannot go in a coupling).
 
 	    	// Remember where we are - this is the beginning of the subsequence that
 	    	// potentially matches the Star.
@@ -188,13 +189,13 @@ Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
             }
 
 			// Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
-		    // Now make a copy of the elements that matched the star and apply match sets
+		    // Now make a copy of the elements that matched the star and apply couplings
 		    if( pe )
 		    {
 		    	TreePtr<SubSequence> ss( new SubSequence);
 		    	for( ContainerInterface::iterator it=xit_begin_star; it != xit; ++it )
 		    		ss->push_back( *it );
-				// Apply match sets to this Star and matched range
+				// Apply couplings to this Star and matched range
 				if( keys )
 		    		if( !keys->KeyAndRestrict( TreePtr<Node>(ss), pe, this, can_key ) )
 		        	    return NOT_FOUND;
@@ -280,7 +281,7 @@ Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
     if( !xremaining->empty() && !seen_star )
     	return NOT_FOUND; // there were elements left over and no star to match them against
 
-    // If we got here, the node matched the search pattern. Now apply match sets
+    // If we got here, the node matched the search pattern. Now apply couplings
     TRACE("seen_star %d  star %p\n", seen_star, star.get() );
     if( keys && seen_star && star )
         if( !keys->KeyAndRestrict( TreePtr<Node>(xremaining), star, this, can_key ) )
@@ -312,7 +313,7 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
 	// Try out comparison at this position
 	Result r = DecidedCompare( *thistime, stuff_pattern->terminus, keys, can_key, conj );
 
-    // If we got this far, do the match sets
+    // If we got this far, do the couplings
     if( keys && r )
     {
     	shared_ptr<StuffKey> key( new StuffKey );
@@ -356,7 +357,7 @@ Result RootedSearchReplace::MatchingDecidedCompare( TreePtr<Node> x,
     	    }
         }
         
-	    // Now restrict the search according to the match sets
+	    // Now restrict the search according to the couplings
     	TRACE("doing RESTRICTING pass....\n");
     	conj.PrepareForDecidedCompare();
         r = DecidedCompare( x, pattern, keys, false, conj );
@@ -373,7 +374,7 @@ Result RootedSearchReplace::MatchingDecidedCompare( TreePtr<Node> x,
     }
     else
     {
-    	// No match set, so just call straight through this layer
+    	// No coupling, so just call straight through this layer
     	conj.PrepareForDecidedCompare();
     	return DecidedCompare( x, pattern, NULL, false, conj );
     }
@@ -457,7 +458,7 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
             if( *source_ptr ) // Masked: where source is NULL, do not overwrite
                 *dest_ptr = DuplicateSubtree( *source_ptr, keys, can_key, current_key );
             if( !current_key )
-            	ASSERT( *dest_ptr )("Found NULL in replace pattern without a match set to substitute it");
+            	ASSERT( *dest_ptr )("Found NULL in replace pattern without a coupling to substitute it");
         }
         else
         {
@@ -563,7 +564,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 	TreePtr<Node> dest = TreePtr<Node>();
 	dest = keys->KeyAndSubstitute( shared_ptr<Key>(), source, this, can_key );
     ASSERT( !dest || !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
-                                                                             // source is actually a match key already, so not in any match sets
+                                                                             // source is actually a match key already, so not in any couplings
     if( dest )
     {
     	TRACE("Substituted, got %s (source is %s)\n", TypeInfo(dest).name().c_str(), TypeInfo(source).name().c_str());
@@ -596,7 +597,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 			TreePtr<Node> newsource = srp->DuplicateSubtree( this, keys, can_key );
 			ASSERT( newsource );
 
-			// Allow this to key a match set if required
+			// Allow this to key a coupling if required
 			TreePtr<Node> subs = keys->KeyAndSubstitute( newsource, source, this, can_key );
 			if( subs )
 				return subs;
@@ -639,7 +640,7 @@ TreePtr<Node> RootedSearchReplace::MatchingDuplicateSubtree( TreePtr<Node> sourc
         (void)DuplicateSubtree( source, keys, true );
         TRACE("replace KEYING pass\n" );
 
-	    // Now restrict the search according to the match sets
+	    // Now restrict the search according to the couplings
     	TRACE("doing replace SUBSTITUTING pass....\n");
         TreePtr<Node> r = DuplicateSubtree( source, keys, false );
         TRACE("replace SUBSTITUTING pass\n" );
@@ -647,13 +648,10 @@ TreePtr<Node> RootedSearchReplace::MatchingDuplicateSubtree( TreePtr<Node> sourc
     }
     else
     {
-    	// No match set, so just call straight through this layer
+    	// No coupling, so just call straight through this layer
     	return DuplicateSubtree( source, NULL, false );
     }
 }
-
-
-#include "render/graph.hpp" // TODO get rid
 
 
 Result RootedSearchReplace::SingleSearchReplace( TreePtr<Node> *proot,
@@ -685,7 +683,7 @@ Result RootedSearchReplace::SingleSearchReplace( TreePtr<Node> *proot,
 
 
 // Perform search and replace on supplied program based
-// on supplied patterns and match sets. Does search and replace
+// on supplied patterns and couplings. Does search and replace
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
 int RootedSearchReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
@@ -742,7 +740,7 @@ void RootedSearchReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 }
 
 
-// Find a match set containing the supplied node
+// Find a coupling containing the supplied node
 Coupling CouplingKeys::FindCoupling( TreePtr<Node> node,
 		                                                                       const CouplingSet &couplings )
 {
@@ -780,7 +778,7 @@ Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
 		                                                                    bool can_key )
 {
 	ASSERT( this );
-	// Find a match set for this node. If the node is not in a match set then there's
+	// Find a coupling for this node. If the node is not in a coupling then there's
 	// nothing for us to do, so return without restricting the search.
 	Coupling coupling = FindCoupling( pattern, sr->couplings );
 	if( coupling.empty() )
@@ -801,8 +799,8 @@ Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
 
     // Always restrict
 	// We are restricting the search, and this node has been keyed, so compare the present tree node
-	// with the tree node stored for the match set. This comparison should not match any match sets
-	// (it does not include stuff from any search or replace pattern) so do not allow match sets.
+	// with the tree node stored for the coupling. This comparison should not match any couplings
+	// (it does not include stuff from any search or replace pattern) so do not allow couplings.
 	// Since collections (which require decisions) can exist within the tree, we must allow iteration
 	// through choices, and since the number of decisions seen may vary, we must start a new conjecture.
 	// Therefore, we recurse back to Compare().
@@ -836,7 +834,7 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 	ASSERT( this );
 	ASSERT( !key || key->root != pattern ); // just a general usage check
 
-	// Find a match set for this node. If the node is not in a match set then there's
+	// Find a coupling for this node. If the node is not in a coupling then there's
 	// nothing for us to do, so return without restricting the search.
 	Coupling coupling = FindCoupling( pattern, sr->couplings );
 	if( coupling.empty() )
@@ -847,7 +845,7 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 	TRACE("can_key=%d ", (int)can_key);
 	if( can_key && key && !keys_map[coupling] )
 	{
-		TRACE("keying... match set %p key ptr %p new value %p, presently %d keys out of %d match sets\n",
+		TRACE("keying... coupling %p key ptr %p new value %p, presently %d keys out of %d couplings\n",
 				&coupling, &keys_map[coupling], key.get(),
 				keys_map.size(), sr->couplings.size() );
 		keys_map[coupling] = key;
@@ -867,8 +865,8 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 		return subs;
 	}
 
-    ASSERT( can_key ); // during substitution pass we should have all match sets keyed
-    // In KEYING and this match set not keyed yet (because it will be keyed by another node
+    ASSERT( can_key ); // during substitution pass we should have all couplings keyed
+    // In KEYING and this coupling not keyed yet (because it will be keyed by another node
     // in the replace pattern). We've got to produce something - don't want to supply the pattern
     // or key without duplication because that breaks rules about using stuff directly, but don't
     // want to call DuplicateSubtree etc because it might recurse endlessly or have other unwanted
@@ -1008,7 +1006,7 @@ void SearchReplace::Configure( TreePtr<Node> sp,
 		Coupling root_match(( search_root, replace_root ));
 	    m.insert( root_match );
 
-	    // Configure the rooted implementation with new patterns and match sets
+	    // Configure the rooted implementation with new patterns and couplings
 	    RootedSearchReplace::Configure( search_root, replace_root, m, s );
 	}
 	else
