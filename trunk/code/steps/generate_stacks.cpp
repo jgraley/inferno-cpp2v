@@ -15,30 +15,30 @@
 void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
 	TRACE();
-	MakeShared<Instance> s_fi, r_fi, s_fi2, r_fi2, s_fi3, r_fi3;
-	MakeShared<Subroutine> s_func;
-	MakeShared< MatchAll<Initialiser> > s_and;
-	MakeShared<Compound> s_top_comp, r_top_comp, s_ret_comp, sn_ret_comp, r_ret_comp;
-	MakeShared< Star<Declaration> > s_top_decls, r_top_decls, s_ret_decls, sn_ret_decls, r_ret_decls;
-	MakeShared< Star<Statement> > s_top_pre, r_top_pre, s_ret_pre, s_ret_post, sn_ret_pre, sn_ret_post, r_ret_pre, r_ret_post;
-	MakeShared< Stuff<Statement> > cs_stuff, s_stuff, r_stuff, s_stuff3, r_stuff3;
-	MakeShared<Automatic> cs_instance, s_instance;
-	MakeShared<Static> r_index, r_instance; // TODO Field
-	MakeShared<Unsigned> r_index_type;
-	MakeShared<PostIncrement> r_inc;
-	MakeShared<PostDecrement> r_dec, sn_ret_dec, r_ret_dec;
-	MakeShared<InstanceIdentifier> s_identifier;
-	MakeShared<Array> r_array;
-	MakeShared<Return> s_return, sn_return, r_return;
-	MakeShared<Expression> ss_identifier;
-	MakeShared<Subscript> sr_sub;
-	MakeShared< NotMatch<Statement> > s_not3;
-	MakeShared< MatchAll<Statement> > s_and3;
-	MakeShared<SoftMakeIdentifier> r_index_identifier("%s_stack_index");
-	MakeShared<SoftMakeIdentifier> r_identifier("%s_stack");
+	MakeTreePtr<Instance> s_fi, r_fi, s_fi2, r_fi2, s_fi3, r_fi3;
+	MakeTreePtr<Subroutine> s_func;
+	MakeTreePtr< MatchAll<Initialiser> > s_and;
+	MakeTreePtr<Compound> s_top_comp, r_top_comp, s_ret_comp, sn_ret_comp, r_ret_comp;
+	MakeTreePtr< Star<Declaration> > s_top_decls, r_top_decls, s_ret_decls, sn_ret_decls, r_ret_decls;
+	MakeTreePtr< Star<Statement> > s_top_pre, r_top_pre, s_ret_pre, s_ret_post, sn_ret_pre, sn_ret_post, r_ret_pre, r_ret_post;
+	MakeTreePtr< Stuff<Statement> > cs_stuff, s_stuff, r_stuff, s_stuff3, r_stuff3;
+	MakeTreePtr<Automatic> cs_instance, s_instance;
+	MakeTreePtr<Static> r_index, r_instance; // TODO Field
+	MakeTreePtr<Unsigned> r_index_type;
+	MakeTreePtr<PostIncrement> r_inc;
+	MakeTreePtr<PostDecrement> r_dec, sn_ret_dec, r_ret_dec;
+	MakeTreePtr<InstanceIdentifier> s_identifier;
+	MakeTreePtr<Array> r_array;
+	MakeTreePtr<Return> s_return, sn_return, r_return;
+	MakeTreePtr<Expression> ss_identifier;
+	MakeTreePtr<Subscript> sr_sub;
+	MakeTreePtr< NotMatch<Statement> > s_not3;
+	MakeTreePtr< MatchAll<Statement> > s_and3;
+	MakeTreePtr<SoftMakeIdentifier> r_index_identifier("%s_stack_index");
+	MakeTreePtr<SoftMakeIdentifier> r_identifier("%s_stack");
 
     // Master search - look for functions satisfying the construct limitation and get
-	s_fi->identifier = MakeShared<InstanceIdentifier>();
+	s_fi->identifier = MakeTreePtr<InstanceIdentifier>();
 	s_fi->type = s_func;
 	s_fi->initialiser = s_and;
 	s_top_comp->members = ( s_top_decls );
@@ -53,41 +53,41 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 	// top-level decls
 	r_top_comp->members = ( r_top_decls, r_index );
 	r_index->type = r_index_type;
-	r_index_type->width = MakeShared<SpecificInteger>(32);
-	r_index_identifier->source = MakeShared<Identifier>();
+	r_index_type->width = MakeTreePtr<SpecificInteger>(32);
+	r_index_identifier->source = MakeTreePtr<Identifier>();
 	r_index->identifier = r_index_identifier;
-	r_index->constancy = MakeShared<NonConst>();
-	r_index->initialiser = MakeShared<SpecificInteger>(0);
+	r_index->constancy = MakeTreePtr<NonConst>();
+	r_index->initialiser = MakeTreePtr<SpecificInteger>(0);
 	// top-level statements
-	r_inc->operands = ( MakeShared<InstanceIdentifier>() );
+	r_inc->operands = ( MakeTreePtr<InstanceIdentifier>() );
 	r_top_comp->statements = ( r_inc, r_top_pre, r_dec );
-	r_dec->operands = ( MakeShared<InstanceIdentifier>() );
+	r_dec->operands = ( MakeTreePtr<InstanceIdentifier>() );
 
     // Slave search to find automatic variables within the function
-	s_fi2->identifier = MakeShared<InstanceIdentifier>();
+	s_fi2->identifier = MakeTreePtr<InstanceIdentifier>();
 	s_fi2->initialiser = s_stuff;
 	s_stuff->terminus = s_instance;
 	s_instance->identifier = s_identifier;
-	s_instance->initialiser = MakeShared<Uninitialised>(); // can't handle initialisers!
-	s_instance->type = MakeShared<Type>();
+	s_instance->initialiser = MakeTreePtr<Uninitialised>(); // can't handle initialisers!
+	s_instance->type = MakeTreePtr<Type>();
 
     // Slave replace to insert as a static array (TODO be a member of enclosing class)
 	r_fi2->initialiser = r_stuff;
-	r_instance->constancy = MakeShared<NonConst>();
-	r_instance->initialiser = MakeShared<Uninitialised>();
+	r_instance->constancy = MakeTreePtr<NonConst>();
+	r_instance->initialiser = MakeTreePtr<Uninitialised>();
 	r_stuff->terminus = r_instance;
-	r_identifier->source = MakeShared<Identifier>();
+	r_identifier->source = MakeTreePtr<Identifier>();
 	r_instance->identifier = r_identifier;
 	r_instance->type = r_array;
-	r_array->element = MakeShared<Type>();
-	r_array->size = MakeShared<SpecificInteger>(10);
+	r_array->element = MakeTreePtr<Type>();
+	r_array->size = MakeTreePtr<SpecificInteger>(10);
 
 	// Sub-slave replace with a subscript into the array
-	sr_sub->operands = ( MakeShared<InstanceIdentifier>(), MakeShared<InstanceIdentifier>() );
+	sr_sub->operands = ( MakeTreePtr<InstanceIdentifier>(), MakeTreePtr<InstanceIdentifier>() );
 
 #if HANDLE_EARLY_RETURNS
 	// Slave to find early returns in the function
-	s_fi3->identifier = MakeShared<InstanceIdentifier>();
+	s_fi3->identifier = MakeTreePtr<InstanceIdentifier>();
 	s_fi3->initialiser = s_stuff3;
 	s_stuff3->terminus = s_and3;
 	s_and3->patterns = ( s_ret_comp );
@@ -98,14 +98,14 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     // Restrict the above to not include returns that come after an index decrement
     s_not3->pattern = sn_ret_comp;
 	sn_ret_comp->members = ( sn_ret_decls );
-	sn_ret_dec->operands = ( MakeShared<InstanceIdentifier>() );
+	sn_ret_dec->operands = ( MakeTreePtr<InstanceIdentifier>() );
 	sn_ret_comp->statements = ( sn_ret_pre, sn_ret_dec, sn_return, sn_ret_post );
 
 	// Slave replace with a decrement of the stack index coming before the return
 	r_fi3->initialiser = r_stuff3;
 	r_stuff3->terminus = r_ret_comp;
 	r_ret_comp->members = ( r_ret_decls );
-	r_ret_dec->operands = ( MakeShared<InstanceIdentifier>() );
+	r_ret_dec->operands = ( MakeTreePtr<InstanceIdentifier>() );
 	r_ret_comp->statements = ( r_ret_pre, r_ret_dec, r_return, r_ret_post );
 #endif
 

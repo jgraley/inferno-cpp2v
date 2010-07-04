@@ -433,7 +433,7 @@ private:
 					if (achunk.NumElts)
 						a->size = hold_expr.FromRaw(achunk.NumElts); // number of elements was specified
 					else
-						a->size = shared_new<Uninitialised> (); // number of elements was not specified eg int a[];
+						a->size = MakeTreePtr<Uninitialised> (); // number of elements was not specified eg int a[];
 					return a;
 				}
 
@@ -497,15 +497,15 @@ private:
 
 			TreePtr<Constancy> constancy;
 			if (DS.getTypeQualifiers() & clang::DeclSpec::TQ_const)
-				constancy = shared_new<Const> ();
+				constancy = MakeTreePtr<Const> ();
 			else
-				constancy = shared_new<NonConst> ();
+				constancy = MakeTreePtr<NonConst> ();
 
 			TreePtr<Instance> o;
 
 			if (automatic)
 			{
-				o = shared_new<Automatic> ();
+				o = MakeTreePtr<Automatic> ();
 			}
 			else
 			{
@@ -517,44 +517,44 @@ private:
 					TRACE("scope flags 0x%x\n", S->getFlags());
 					if (S->getFlags() & clang::Scope::CXXClassScope) // record scope
 					{
-						TreePtr<Field> no = shared_new<Field> ();
+						TreePtr<Field> no = MakeTreePtr<Field> ();
 						o = no;
 						if (DS.isVirtualSpecified())
 						{
-							no->virt = shared_new<Virtual> ();
+							no->virt = MakeTreePtr<Virtual> ();
 						}
 						else
 						{
-							no->virt = shared_new<NonVirtual> ();
+							no->virt = MakeTreePtr<NonVirtual> ();
 						}
 						no->access = access;
 						no->constancy = constancy;
 					}
 					else if (S->getFnParent()) // in code
 					{
-						o = shared_new<Automatic> ();
+						o = MakeTreePtr<Automatic> ();
 					}
 					else // top level
 					{
-						TreePtr<Static> no = shared_new<Static> ();
+						TreePtr<Static> no = MakeTreePtr<Static> ();
 						o = no;
 						no->constancy = constancy;
 					}
 					break;
 				}
 				case clang::DeclSpec::SCS_auto:
-					o = shared_new<Automatic> ();
+					o = MakeTreePtr<Automatic> ();
 					break;
 				case clang::DeclSpec::SCS_extern:// linking will be done "automatically" so no need to remember "extern" in the tree
 				{
-					TreePtr<Static> no = shared_new<Static> ();
+					TreePtr<Static> no = MakeTreePtr<Static> ();
 					o = no;
 					no->constancy = constancy;
 				}
 					break;
 				case clang::DeclSpec::SCS_static:
 				{
-					TreePtr<Static> no = shared_new<Static> ();
+					TreePtr<Static> no = MakeTreePtr<Static> ();
 					o = no;
 					no->constancy = constancy;
 				}
@@ -579,7 +579,7 @@ private:
 				o->identifier = CreateInstanceIdentifier();
 			}
 			o->type = CreateTypeNode(D);
-			o->initialiser = shared_new<Uninitialised> ();
+			o->initialiser = MakeTreePtr<Uninitialised> ();
 
 			return o;
 		}
@@ -605,7 +605,7 @@ private:
 		 {
 		 TreePtr<Label> l(new Label);
 		 all_decls->members.insert(l);
-		 l->access = shared_new<Public>();
+		 l->access = MakeTreePtr<Public>();
 		 l->identifier = CreateLabelIdentifier(ID);
 		 TRACE("%s %p %p\n", ID->getName(), l.get(), ID );
 		 return l;
@@ -725,7 +725,7 @@ private:
 		{
 
 			TreePtr<Instance> p = CreateInstanceNode(S, D,
-					shared_new<Public> (), true);
+					MakeTreePtr<Public> (), true);
 			backing_params[p] = D.getIdentifier(); // allow us to register the object with ident_track once we're in the function body scope
 			return hold_decl.ToRaw(p);
 		}
@@ -843,7 +843,7 @@ private:
 		if( RetValExp )
 		r->return_value = hold_expr.FromRaw(RetValExp);
 		else
-		r->return_value = shared_new<Uninitialised>();
+		r->return_value = MakeTreePtr<Uninitialised>();
 		TRACE("aors %p\n", r.get() );
 		return hold_stmt.ToRaw( r );
 	}
@@ -1168,7 +1168,7 @@ private:
 		if( ElseVal )
 		i->else_body = hold_stmt.FromRaw( ElseVal );
 		else
-		i->else_body = shared_new<Nop>(); // empty else clause
+		i->else_body = MakeTreePtr<Nop>(); // empty else clause
 		return hold_stmt.ToRaw( i );
 	}
 
@@ -1199,18 +1199,18 @@ private:
 		if( First )
 		f->initialisation = hold_stmt.FromRaw( First );
 		else
-		f->initialisation = shared_new<Nop>();
+		f->initialisation = MakeTreePtr<Nop>();
 
 		if( Second )
 		f->condition = hold_expr.FromRaw( Second );
 		else
-		f->condition = shared_new<True>();
+		f->condition = MakeTreePtr<True>();
 
 		StmtTy *third = (StmtTy *)Third; // Third is really a statement, the Actions API is wrong
 		if( third )
 		f->increment = hold_stmt.FromRaw( third );
 		else
-		f->increment = shared_new<Nop>();
+		f->increment = MakeTreePtr<Nop>();
 
 		f->body = hold_stmt.FromRaw( Body );
 		return hold_stmt.ToRaw( f );
@@ -1521,9 +1521,9 @@ private:
 		TRACE("true/false tk %d %d %d\n", Kind, clang::tok::kw_true, clang::tok::kw_false );
 
 		if(Kind == clang::tok::kw_true)
-		ic = shared_new<True>();
+		ic = MakeTreePtr<True>();
 		else
-		ic = shared_new<False>();
+		ic = MakeTreePtr<False>();
 		return hold_expr.ToRaw( ic );
 	}
 
@@ -1667,7 +1667,7 @@ private:
 		TreePtr<Static> o(new Static());
 		all_decls->members.insert(o);
 		o->identifier = CreateInstanceIdentifier(Id);
-		o->constancy = shared_new<Const>(); // static const member need not consume storage!!
+		o->constancy = MakeTreePtr<Const>(); // static const member need not consume storage!!
 		o->type = CreateIntegralType( TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified], false );
 		if( Val )
 		{
@@ -1766,10 +1766,10 @@ private:
 		TreePtr<Base> base( new Base );
 		base->record = ti;
 		/*  if( Virt )
-		 base->storage = shared_new<Virtual>();
+		 base->storage = MakeTreePtr<Virtual>();
 		 else
-		 base->storage = shared_new<NonStatic>();
-		 base->constancy = shared_new<NonConst>(); */
+		 base->storage = MakeTreePtr<NonStatic>();
+		 base->constancy = MakeTreePtr<NonConst>(); */
 		base->access = ConvertAccess( AccessSpec, r );
 		return hold_base.ToRaw( base );
 	}

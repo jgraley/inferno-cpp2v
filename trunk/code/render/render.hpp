@@ -591,7 +591,7 @@ private:
         if( TreePtr<Field> f = dynamic_pointer_cast<Field>(declaration) )
             this_access = f->access;
         else
-        	this_access = shared_new<Public>();
+        	this_access = MakeTreePtr<Public>();
                 
         // Now decide whether we actually need to render an access spec (ie has it changed?)
         if( current_access && // NULL means dont ever render access specs
