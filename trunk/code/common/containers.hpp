@@ -256,7 +256,8 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 		{
 		    // JSG Overwrite() just writes through the pointer got from dereferencing the iterator,
 		    // because in Sequences (ordererd containers) elements may be modified.
-		    CONTAINER_IMPL::iterator::operator*() = typename CONTAINER_IMPL::value_type(*v);
+    		typename CONTAINER_IMPL::value_type x( CONTAINER_IMPL::value_type::DynamicCast(*v) );
+		    CONTAINER_IMPL::iterator::operator*() = x;
 		}
     	virtual const bool IsOrdered() const
     	{
@@ -313,7 +314,8 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 	}
 	Sequence( const VALUE_INTERFACE &nx )
 	{
-		CONTAINER_IMPL::push_back( nx );
+		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::DynamicCast(nx) );
+		CONTAINER_IMPL::push_back( sx );
 	}
 	template<typename L, typename R>
 	inline Sequence( const pair<L, R> &p )
@@ -358,8 +360,9 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER
 		    // Collections (unordered containers) do not allow elements to be modified
 		    // because the internal data structure depends on element values. So we 
 		    // erase the old element and insert the new one; thus, Overwrite() should not be assumed O(1)
-		    ((CONTAINER_IMPL *)owner)->erase( *this );
-		    pair<typename CONTAINER_IMPL::iterator, bool> result = ((CONTAINER_IMPL *)owner)->insert( *v );
+    		typename CONTAINER_IMPL::value_type s( CONTAINER_IMPL::value_type::DynamicCast(*v) );
+    		((CONTAINER_IMPL *)owner)->erase( *this );
+		    pair<typename CONTAINER_IMPL::iterator, bool> result = ((CONTAINER_IMPL *)owner)->insert( s );
 		    ASSERT( result.second ); // insert must succeed (see SGI docs)
 		    *(typename CONTAINER_IMPL::iterator *)this = result.first; // become an iterator for the newly inserted element
 		}
@@ -388,7 +391,7 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER
 	}
 	virtual bool IsExist( const VALUE_INTERFACE &gx )
 	{
-		typename CONTAINER_IMPL::value_type sx(gx);
+		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::DynamicCast(gx) );
 		typename CONTAINER_IMPL::iterator it = CONTAINER_IMPL::find( sx );
 		return it != CONTAINER_IMPL::end();
 	}
@@ -419,7 +422,8 @@ struct Collection : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER
 	}
     Collection( const VALUE_INTERFACE &nx )
 	{
-        CONTAINER_IMPL::insert( nx );
+		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::DynamicCast(nx) );
+        CONTAINER_IMPL::insert( sx );
 	}
 	template<typename L, typename R>
 	inline Collection( const pair<L, R> &p )

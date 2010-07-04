@@ -400,7 +400,7 @@ void RootedSearchReplace::ClearPtrs( TreePtr<Node> dest ) const
     vector< Itemiser::Element * > dest_memb = dest->Itemise();
     for( int i=0; i<dest_memb.size(); i++ )
     {
-        if( SequenceInterface *dest_seq = dynamic_cast<SequenceInterface *>(dest_memb[i]) )                
+    /*    if( SequenceInterface *dest_seq = dynamic_cast<SequenceInterface *>(dest_memb[i]) )
         {
         	for( ContainerInterface::iterator i=dest_seq->begin(); i!=dest_seq->end(); ++i )
             {
@@ -408,7 +408,7 @@ void RootedSearchReplace::ClearPtrs( TreePtr<Node> dest ) const
                 i.Overwrite( &p ); // TODO using Overwrite() to support unordered - but does this fuction even make sense forn unordered?
             }
         }            
-        else if( TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]) )
+        else*/ if( TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]) )
         {
             *dest_ptr = TreePtr<Node>();
         }
@@ -539,9 +539,9 @@ void RootedSearchReplace::Overlay( CollectionInterface *dest,
 
 // Duplicate an entire subtree, following the rules for inferno search and replace.
 // We recurse through the subtree, using Duplicator to create the new nodes. We support
-// substitution based on configured match sets, and we do not duplicate identifiers when
+// substitution based on configured couplings, and we do not duplicate identifiers when
 // substituting.
-// TODO possible refactor: when we detect a match set match, maybe recurse back into DuplicateSubtree
+// TODO possible refactor: when we detect a coupling match, maybe recurse back into DuplicateSubtree
 // and get the two OverlayPtrs during unwind.
 TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 		                                                CouplingKeys *keys,
