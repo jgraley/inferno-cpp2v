@@ -6,22 +6,22 @@ void SplitInstanceDeclarations::operator()( TreePtr<Node> context, TreePtr<Node>
 	{ // Do initialised local variables by leaving an assign behind
 		SearchReplace sr1;
 
-		MakeShared<Compound> sc;
-		MakeShared<LocalVariable> si;
-		si->identifier = MakeShared<InstanceIdentifier>();  // Only acting on initialised Instances
-		si->initialiser = MakeShared<Expression>();  // Only acting on initialised Instances
-		MakeShared< Star<Declaration> > ss;
+		MakeTreePtr<Compound> sc;
+		MakeTreePtr<LocalVariable> si;
+		si->identifier = MakeTreePtr<InstanceIdentifier>();  // Only acting on initialised Instances
+		si->initialiser = MakeTreePtr<Expression>();  // Only acting on initialised Instances
+		MakeTreePtr< Star<Declaration> > ss;
 		sc->members = ( ss );
-		sc->statements = ( MakeShared< Star<Statement> >(), si, MakeShared< Star<Statement> >() );
+		sc->statements = ( MakeTreePtr< Star<Statement> >(), si, MakeTreePtr< Star<Statement> >() );
 
-		MakeShared<Compound> rc;
-		MakeShared<LocalVariable> ri;
-		ri->initialiser = MakeShared<Uninitialised>();
-		MakeShared< Star<Declaration> > rs;
+		MakeTreePtr<Compound> rc;
+		MakeTreePtr<LocalVariable> ri;
+		ri->initialiser = MakeTreePtr<Uninitialised>();
+		MakeTreePtr< Star<Declaration> > rs;
 		rc->members = ( ri, rs );
-		MakeShared<Assign> ra;
-		ra->operands = ( MakeShared<InstanceIdentifier>(), MakeShared<Expression>() );
-		rc->statements = ( MakeShared< Star<Statement> >(), ra, MakeShared< Star<Statement> >() );
+		MakeTreePtr<Assign> ra;
+		ra->operands = ( MakeTreePtr<InstanceIdentifier>(), MakeTreePtr<Expression>() );
+		rc->statements = ( MakeTreePtr< Star<Statement> >(), ra, MakeTreePtr< Star<Statement> >() );
 
 		CouplingSet sms1((
 			Coupling((si, ri)),
@@ -37,17 +37,17 @@ void SplitInstanceDeclarations::operator()( TreePtr<Node> context, TreePtr<Node>
 	{ // Do everything else by just moving to the decls collection
 	    SearchReplace sr0;
 
-		MakeShared<Compound> sc;
-		MakeShared<Instance> si;
-		MakeShared< Star<Declaration> > ss;
+		MakeTreePtr<Compound> sc;
+		MakeTreePtr<Instance> si;
+		MakeTreePtr< Star<Declaration> > ss;
 		sc->members = ( ss );
-		sc->statements = ( MakeShared< Star<Statement> >(), si, MakeShared< Star<Statement> >() );
+		sc->statements = ( MakeTreePtr< Star<Statement> >(), si, MakeTreePtr< Star<Statement> >() );
 
-		MakeShared<Compound> rc;
-		MakeShared<Instance> ri;
-		MakeShared< Star<Declaration> > rs;
+		MakeTreePtr<Compound> rc;
+		MakeTreePtr<Instance> ri;
+		MakeTreePtr< Star<Declaration> > rs;
 		rc->members = ( ri, rs ); // Instance now in unordered decls part
-		rc->statements = ( MakeShared< Star<Statement> >(), MakeShared< Star<Statement> >() );
+		rc->statements = ( MakeTreePtr< Star<Statement> >(), MakeTreePtr< Star<Statement> >() );
 
 		CouplingSet sms0((
 			Coupling((si, ri)),
@@ -67,23 +67,23 @@ void MergeInstanceDeclarations::operator()( TreePtr<Node> context, TreePtr<Node>
 	{
 		// This is the hard kind of search pattern where Stars exist in two
 		// separate containers and have a coupling between them
-		MakeShared<Compound> rc;
-		MakeShared<LocalVariable> ri;
-		ri->identifier = MakeShared<InstanceIdentifier>();
-		ri->initialiser = MakeShared<Uninitialised>();
-		MakeShared< Star<Declaration> > rs;
+		MakeTreePtr<Compound> rc;
+		MakeTreePtr<LocalVariable> ri;
+		ri->identifier = MakeTreePtr<InstanceIdentifier>();
+		ri->initialiser = MakeTreePtr<Uninitialised>();
+		MakeTreePtr< Star<Declaration> > rs;
 		rc->members = ( ri, rs );
-		MakeShared<Assign> ra;
-		ra->operands = (MakeShared<InstanceIdentifier>(), MakeShared<Expression>() );
-		rc->statements = (MakeShared< Star<Statement> >(), ra, MakeShared< Star<Statement> >() );
+		MakeTreePtr<Assign> ra;
+		ra->operands = (MakeTreePtr<InstanceIdentifier>(), MakeTreePtr<Expression>() );
+		rc->statements = (MakeTreePtr< Star<Statement> >(), ra, MakeTreePtr< Star<Statement> >() );
 
-		MakeShared<Compound> sc;
-		MakeShared< Star<Declaration> > ss;
+		MakeTreePtr<Compound> sc;
+		MakeTreePtr< Star<Declaration> > ss;
 		sc->members = ( ss );
-		MakeShared<LocalVariable> si;
-		si->identifier = MakeShared<InstanceIdentifier>();
-		si->initialiser = MakeShared<Expression>();  // Only acting on initialised Instances
-		sc->statements = ( MakeShared< Star<Statement> >(), si, MakeShared< Star<Statement> >() );
+		MakeTreePtr<LocalVariable> si;
+		si->identifier = MakeTreePtr<InstanceIdentifier>();
+		si->initialiser = MakeTreePtr<Expression>();  // Only acting on initialised Instances
+		sc->statements = ( MakeTreePtr< Star<Statement> >(), si, MakeTreePtr< Star<Statement> >() );
 
 		CouplingSet sms1((
 			Coupling((si, ri)),
@@ -104,23 +104,23 @@ void HackUpIfs::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 	CouplingSet sms1;
 	SearchReplace sr1;
 	{
-		MakeShared<If> sif;
-		MakeShared<Expression> stest;
+		MakeTreePtr<If> sif;
+		MakeTreePtr<Expression> stest;
 		sif->condition = stest;
-		MakeShared< Stuff<Statement> > ssthen;
+		MakeTreePtr< Stuff<Statement> > ssthen;
 		sif->body = ssthen;
-		ssthen->terminus = MakeShared< Expression >();
-		ssthen->restrictor = MakeShared< Expression >();
-		MakeShared<Compound> scelse;
-		MakeShared< Stuff<Statement> > sselse;
+		ssthen->terminus = MakeTreePtr< Expression >();
+		ssthen->restrictor = MakeTreePtr< Expression >();
+		MakeTreePtr<Compound> scelse;
+		MakeTreePtr< Stuff<Statement> > sselse;
 		sif->else_body = sselse;
-		sselse->terminus = MakeShared< Statement >();
-		sselse->restrictor = MakeShared< Statement >();
+		sselse->terminus = MakeTreePtr< Statement >();
+		sselse->restrictor = MakeTreePtr< Statement >();
 
-		MakeShared< Stuff<Statement> > rs;
-		MakeShared<PostIncrement> rpi;
+		MakeTreePtr< Stuff<Statement> > rs;
+		MakeTreePtr<PostIncrement> rpi;
 		rs->terminus = rpi;
-		rpi->operands.push_back( MakeShared< Expression >() );
+		rpi->operands.push_back( MakeTreePtr< Expression >() );
 
 		CouplingSet sms1((
 			Coupling((ssthen, rs)),
@@ -137,13 +137,13 @@ void CrazyNine::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 	SearchReplace sr1;
 	// Replaces entire records with 9 if it has a 9 in it
 	{
-		MakeShared<Record> s_record;
-		MakeShared< Stuff<Declaration> > s_stuff;
-		s_record->members = ( s_stuff, MakeShared< Star<Declaration> >() );
+		MakeTreePtr<Record> s_record;
+		MakeTreePtr< Stuff<Declaration> > s_stuff;
+		s_record->members = ( s_stuff, MakeTreePtr< Star<Declaration> >() );
 		TreePtr<SpecificInteger> s_nine( new SpecificInteger(9) );
 		s_stuff->terminus = s_nine;
 
-		MakeShared<Union> r_union;
+		MakeTreePtr<Union> r_union;
 		TreePtr<SpecificTypeIdentifier> r_union_name( new SpecificTypeIdentifier("nine") );
 		r_union->identifier = r_union_name;
 

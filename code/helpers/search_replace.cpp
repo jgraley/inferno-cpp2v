@@ -400,15 +400,7 @@ void RootedSearchReplace::ClearPtrs( TreePtr<Node> dest ) const
     vector< Itemiser::Element * > dest_memb = dest->Itemise();
     for( int i=0; i<dest_memb.size(); i++ )
     {
-    /*    if( SequenceInterface *dest_seq = dynamic_cast<SequenceInterface *>(dest_memb[i]) )
-        {
-        	for( ContainerInterface::iterator i=dest_seq->begin(); i!=dest_seq->end(); ++i )
-            {
-                TreePtr<Node> p;
-                i.Overwrite( &p ); // TODO using Overwrite() to support unordered - but does this fuction even make sense forn unordered?
-            }
-        }            
-        else*/ if( TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]) )
+        if( TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]) )
         {
             *dest_ptr = TreePtr<Node>();
         }

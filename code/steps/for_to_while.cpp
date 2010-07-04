@@ -12,11 +12,11 @@
 
 void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
-    MakeShared<For> s_for;
-    MakeShared<Statement> s_body, s_init, s_inc, r_forbody, r_init, r_inc;
-    MakeShared<Expression> s_cond, r_cond;
-    MakeShared<While> r_while;
-    MakeShared<Compound> r_outer, r_body;
+    MakeTreePtr<For> s_for;
+    MakeTreePtr<Statement> s_body, s_init, s_inc, r_forbody, r_init, r_inc;
+    MakeTreePtr<Expression> s_cond, r_cond;
+    MakeTreePtr<While> r_while;
+    MakeTreePtr<Compound> r_outer, r_body;
     
     s_for->body = s_body;
     s_for->initialisation = s_init;

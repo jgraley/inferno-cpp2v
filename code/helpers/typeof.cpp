@@ -48,7 +48,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
         if( TreePtr<Function> f = dynamic_pointer_cast<Function>(t) )
         	return f->return_type;
         else
-        	return MakeShared<Void>();
+        	return MakeTreePtr<Void>();
     }
     else if( TreePtr<Lookup> l = dynamic_pointer_cast<Lookup>(o) ) // a.b; just return type of b
     {
@@ -70,15 +70,15 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     }
     else if( dynamic_pointer_cast<LabelIdentifier>(o) )
     {
-        return MakeShared<Type>(); // TODO labels need a type
+        return MakeTreePtr<Type>(); // TODO labels need a type
     }
     else if( dynamic_pointer_cast<SizeOf>(o) || dynamic_pointer_cast<AlignOf>(o))
     {
     	TreePtr<Integral> n;
     	if( TypeDb::int_default_signed )
-    		n = MakeShared<Signed>();
+    		n = MakeTreePtr<Signed>();
     	else
-    		n = MakeShared<Unsigned>();
+    		n = MakeTreePtr<Unsigned>();
     	TreePtr<SpecificInteger> sz( new SpecificInteger(TypeDb::integral_bits[INT]) );
     	n->width = sz;
        return n;
@@ -91,7 +91,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     }
     else if( dynamic_pointer_cast<Delete>(o) )
     {
-        return MakeShared<Type>();
+        return MakeTreePtr<Type>();
     }
     else 
     {
@@ -160,8 +160,8 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 
 #define ARITHMETIC GetStandard( optypes )
 #define BITWISE GetStandard( optypes )
-#define LOGICAL shared_new<Boolean>()
-#define COMPARISON shared_new<Boolean>()
+#define LOGICAL MakeTreePtr<Boolean>()
+#define COMPARISON MakeTreePtr<Boolean>()
 #define SHIFT optypes[0]
 #define SPECIAL GetSpecial( op, optypes )
 
@@ -315,33 +315,33 @@ TreePtr<Type> TypeOf::GetLiteral( TreePtr<Literal> l )
     	// Get the info from Clang, and make an Inferno type for it
     	TreePtr<Integral> it;
         if( si->isSigned() )
-        	it = shared_new<Signed>();
+        	it = MakeTreePtr<Signed>();
         else
-        	it = shared_new<Unsigned>();
+        	it = MakeTreePtr<Unsigned>();
         it->width = TreePtr<SpecificInteger>( new SpecificInteger( si->getBitWidth() ) );
         return it;
     }
     else if( TreePtr<SpecificFloat> sf = dynamic_pointer_cast<SpecificFloat>(l) )
     {
     	// Get the info from Clang, and make an Inferno type for it
-    	MakeShared<Floating> ft;
+    	MakeTreePtr<Floating> ft;
     	ft->semantics = TreePtr<SpecificFloatSemantics>( new SpecificFloatSemantics(&sf->getSemantics()) );
         return ft;
     }
     else if( dynamic_pointer_cast<Bool>(l) )
     {
-        return MakeShared<Boolean>();
+        return MakeTreePtr<Boolean>();
     }
     else if( dynamic_pointer_cast<String>(l) )
     {
     	TreePtr<Integral> n;
     	if( TypeDb::char_default_signed )
-    		n = MakeShared<Signed>();
+    		n = MakeTreePtr<Signed>();
     	else
-    		n = MakeShared<Unsigned>();
+    		n = MakeTreePtr<Unsigned>();
     	TreePtr<SpecificInteger> sz( new SpecificInteger(TypeDb::char_bits) );
     	n->width = sz;
-    	MakeShared<Pointer> p;
+    	MakeTreePtr<Pointer> p;
     	p->destination = n;
         return p;
     }

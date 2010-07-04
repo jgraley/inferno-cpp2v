@@ -15,35 +15,35 @@ void GenerateImplicitCasts::operator()( TreePtr<Node> context, TreePtr<Node> *pr
 {
 	SearchReplace sr0;
 
-	MakeShared<Call> s_call;
-	MakeShared<TypeOf> s_callee;
+	MakeTreePtr<Call> s_call;
+	MakeTreePtr<TypeOf> s_callee;
 	s_call->callee = s_callee;
-	MakeShared<Procedure> s_proc;
+	MakeTreePtr<Procedure> s_proc;
 	s_callee->pattern = s_proc;
-	MakeShared< Instance > s_param;
-	s_param->identifier = MakeShared< InstanceIdentifier >();
-	s_param->type = MakeShared< Type >();
-	MakeShared< Star<Instance> > s_other_params;
+	MakeTreePtr< Instance > s_param;
+	s_param->identifier = MakeTreePtr< InstanceIdentifier >();
+	s_param->type = MakeTreePtr< Type >();
+	MakeTreePtr< Star<Instance> > s_other_params;
 	s_proc->members = (s_param, s_other_params);
-	MakeShared< MapOperand > s_arg;
-	s_arg->identifier = MakeShared< InstanceIdentifier >();
-	MakeShared<TypeOf> s_arg_value;
+	MakeTreePtr< MapOperand > s_arg;
+	s_arg->identifier = MakeTreePtr< InstanceIdentifier >();
+	MakeTreePtr<TypeOf> s_arg_value;
 	s_arg->value = s_arg_value;
-	//s_arg_value->pattern = MakeShared< Type >();
-	MakeShared< NotMatch<Type> > s_arg_type;
+	//s_arg_value->pattern = MakeTreePtr< Type >();
+	MakeTreePtr< NotMatch<Type> > s_arg_type;
 	s_arg_value->pattern = s_arg_type;
-	s_arg_type->pattern = MakeShared< Type >();
-	MakeShared< Star<MapOperand> > s_other_args;
+	s_arg_type->pattern = MakeTreePtr< Type >();
+	MakeTreePtr< Star<MapOperand> > s_other_args;
 	s_call->operands = ( s_arg, s_other_args );
 
-	MakeShared<Call> r_call;
-	MakeShared< MapOperand > r_arg;
-	r_arg->identifier = MakeShared< InstanceIdentifier >();
-	MakeShared<Cast> r_cast;
+	MakeTreePtr<Call> r_call;
+	MakeTreePtr< MapOperand > r_arg;
+	r_arg->identifier = MakeTreePtr< InstanceIdentifier >();
+	MakeTreePtr<Cast> r_cast;
 	r_arg->value = r_cast;
-	r_cast->operand = MakeShared< Expression >();
-	r_cast->type = MakeShared< Type >();
-	MakeShared< Star<MapOperand> > r_other_args;
+	r_cast->operand = MakeTreePtr< Expression >();
+	r_cast->type = MakeTreePtr< Type >();
+	MakeTreePtr< Star<MapOperand> > r_other_args;
 	r_call->operands = ( r_arg, r_other_args );
 
 	CouplingSet sms0((

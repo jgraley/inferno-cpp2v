@@ -80,30 +80,21 @@ struct Collection : virtual OOStd::Collection< Itemiser::Element, TreePtrInterfa
 };
 
 // Handy typing saver for creating objects and SharedPtrs to them.
-// MakeShared<X> may be constructed in the same way as X, but will then
+// MakeTreePtr<X> may be constructed in the same way as X, but will then
 // masquerade as a SharedPtr<X> where the pointed-to X has been allocated
 // using new. Similar to Boost's make_shared<>() except that being an object
 // with a constructor, rather than a free function, it may be used in a
 // declaration as well as in a function-like way. So both of the following
 // are OK:
-// existing_shared_ptr = MakeShared<X>(10); // as per Boost: construction of temporary looks like function call
-// MakeShared<X> new_shared_ptr(10); // new Inferno form: new_shared_ptr may now be used like a SharedPtr<X>
+// existing_shared_ptr = MakeTreePtr<X>(10); // as per Boost: construction of temporary looks like function call
+// MakeTreePtr<X> new_shared_ptr(10); // new Inferno form: new_shared_ptr may now be used like a SharedPtr<X>
 template<typename ELEMENT>
-struct MakeShared : TreePtr<ELEMENT>
+struct MakeTreePtr : TreePtr<ELEMENT>
 {
-	MakeShared() : TreePtr<ELEMENT>( new ELEMENT ) {}
+	MakeTreePtr() : TreePtr<ELEMENT>( new ELEMENT ) {}
 	template<typename CP0>
-	MakeShared(const CP0 &cp0) : TreePtr<ELEMENT>( new ELEMENT(cp0) ) {}
+	MakeTreePtr(const CP0 &cp0) : TreePtr<ELEMENT>( new ELEMENT(cp0) ) {}
 	// Add more params as needed...
-};
-
-// TODO obsolete? try deleting
-template<typename ELEMENT>
-struct shared_new : TreePtr<ELEMENT>
-{
-	shared_new() : TreePtr<ELEMENT>( new ELEMENT )
-	{
-	}
 };
 
 //////////////////////////// Node Model ////////////////////////////
