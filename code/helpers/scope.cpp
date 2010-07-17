@@ -11,44 +11,31 @@
 TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 {
     TRACE("Trying program (global)\n" );
-    FOREACH( TreePtr<Declaration> d, program->members )
-    {            
-        if( id == GetIdentifier( d ) )
-            return program;
-    }
 
-	Flattener<Record> walkr(program);
-	FOREACH( TreePtr<Record> r, walkr )
+    // Look through the members of all scopes (Program, Records, Procedures, Compounds)
+    WalkContainer walkr(program);
+	FOREACH( TreePtr<Node> n, walkr )
 	{
-	    FOREACH( TreePtr<Declaration> d, r->members )
+    	if( TreePtr<Scope> s = dynamic_pointer_cast<Scope>(n) )
+	    FOREACH( TreePtr<Declaration> d, s->members )
 	    {            
 	        if( id == GetIdentifier( d ) ) 
-	            return r;
+	            return s;
 	    }
 	}
 	
-	Flattener<Compound> walkc(program);
-	FOREACH( TreePtr<Compound> c, walkc )
+	// Special additional processing for Compounds - look for statements that are really Instance Declarations
+	WalkContainer walkc(program);
+	FOREACH( TreePtr<Node> n, walkc )
 	{
-	    Flattener<Declaration> walks(c); // TODO possible bug - this search should not recurse into sub scopes
-	                                     // TODO also should ensure we are checking members AND statements
-	    FOREACH( TreePtr<Declaration> d, walks )
-	    {            
-	        if( id == GetIdentifier( d ) )
-	            return c;
+    	if( TreePtr<Compound> c = dynamic_pointer_cast<Compound>(n) )
+	    FOREACH( TreePtr<Statement> s, c->statements )
+	    {
+	    	if( TreePtr<Instance> d = dynamic_pointer_cast<Instance>(s) )
+				if( id == GetIdentifier( d ) )
+					return c;
 	    }
 	}
-	
-	Flattener<Procedure> walkp(program);
-	FOREACH( TreePtr<Procedure> p, walkp )
-	{
-	    FOREACH( TreePtr<Declaration> d, p->members )
-	    {            
-	        if( id == GetIdentifier( d ) )
-	            return p;
-	    }
-	}
-
 	
 	if( TreePtr<SpecificIdentifier> sid = dynamic_pointer_cast<SpecificIdentifier>( id ) )
 		ASSERT(0)("cannot get scope of ")( *sid );

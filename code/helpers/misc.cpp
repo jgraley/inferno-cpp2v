@@ -26,15 +26,14 @@ TreePtr<Node> GetDeclaration::operator()( TreePtr<Node> context, TreePtr<Node> r
 
 TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdentifier> id )
 {
-	Flattener<UserType> walkr(context);
+	WalkContainer walkr(context);
 	TRACE("GetDeclaration %d\n", walkr.size());
-	ASSERT( (deque< TreePtr<UserType> >::iterator)(walkr.begin()) !=
-			(deque< TreePtr<UserType> >::iterator)(walkr.end()) );
-	FOREACH( TreePtr<UserType> d, walkr )
+	FOREACH( TreePtr<Node> n, walkr )
 	{
 		TRACE("trying id of %d\n", walkr.size());
-        if( id == GetIdentifier( d ) ) 
-	        return d;
+        if( TreePtr<UserType> d = dynamic_pointer_cast<UserType>(n) )
+            if( id == GetIdentifier( d ) )
+	            return d;
 	}
 	ASSERTFAIL();
 }

@@ -140,8 +140,16 @@ public:
 	virtual const iterator_interface &begin() = 0;
     virtual const iterator_interface &end() = 0;
     virtual void erase( typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator it ) = 0;
-    virtual bool empty() const = 0;
-    virtual int size() const = 0;
+    virtual bool empty() const { return size() == 0; }
+    virtual int size() const
+    {
+    	// TODO support const_interator properly and get rid of this const_cast
+    	ContainerInterface *nct = const_cast<ContainerInterface *>(this);
+    	int n=0;
+    	FOREACH( const VALUE_INTERFACE &x, *nct )
+    	    n++;
+    	return n;
+    }
     virtual void clear() = 0;
 };
 

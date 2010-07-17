@@ -301,13 +301,12 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
 {
 	ASSERT( stuff_pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
-	// Define beginning and end
-	WalkingIterator wbegin( x, stuff_pattern->restrictor );
-	WalkingIterator wend;
+	// Define a walk, rooted at this node, restricted as specified in search pattern
+	WalkContainer wx( x, stuff_pattern->restrictor );
 
-	// Get decision from conjecture
-	ContainerInterface::iterator thistime = conj.HandleDecision( wbegin, wend );
-	if( thistime == (ContainerInterface::iterator)wend )
+	// Get decision from conjecture about where we are in the walk
+	ContainerInterface::iterator thistime = conj.HandleDecision( wx.begin(), wx.end() );
+	if( thistime == (ContainerInterface::iterator)(wx.end()) )
 		return NOT_FOUND; // ran out of choices
 
 	// Try out comparison at this position
@@ -922,7 +921,7 @@ Result Conjecture::Search( TreePtr<Node> x,
 
 
 ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::iterator begin,
-		                                                                    ContainerInterface::iterator end )
+		                                                 ContainerInterface::iterator end )
 {
 	ASSERT( this );
 	ASSERT( choices.size() >= decision_index ); // consistency check; as we see more decisions, we should be adding them to the conjecture
