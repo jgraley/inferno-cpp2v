@@ -14,7 +14,7 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 
     // Look through the members of all scopes (Program, Records, Procedures, Compounds)
     WalkContainer walkr(program);
-	FOREACH( TreePtr<Node> n, walkr )
+	FOREACH( const TreePtr<Node> n, walkr )
 	{
     	if( TreePtr<Scope> s = dynamic_pointer_cast<Scope>(n) )
 	    FOREACH( TreePtr<Declaration> d, s->members )
@@ -26,15 +26,15 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 	
 	// Special additional processing for Compounds - look for statements that are really Instance Declarations
 	WalkContainer walkc(program);
-	FOREACH( TreePtr<Node> n, walkc )
+	FOREACH( const TreePtr<Node> n, walkc )
 	{
     	if( TreePtr<Compound> c = dynamic_pointer_cast<Compound>(n) )
-	    FOREACH( TreePtr<Statement> s, c->statements )
-	    {
-	    	if( TreePtr<Instance> d = dynamic_pointer_cast<Instance>(s) )
-				if( id == GetIdentifier( d ) )
-					return c;
-	    }
+			FOREACH( TreePtr<Statement> s, c->statements )
+			{
+				if( TreePtr<Instance> d = dynamic_pointer_cast<Instance>(s) )
+					if( id == GetIdentifier( d ) )
+						return c;
+			}
 	}
 	
 	if( TreePtr<SpecificIdentifier> sid = dynamic_pointer_cast<SpecificIdentifier>( id ) )
