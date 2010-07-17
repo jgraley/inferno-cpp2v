@@ -26,7 +26,7 @@ void Walk::PoppingIncrement()
 		state.top().index++;
 }
 
-void Walk::Push( shared_ptr<Node> n )
+void Walk::Push( TreePtr<Node> n )
 { 
     Frame f;
 
@@ -58,7 +58,7 @@ void Walk::Pop()
     state.pop();
 }
 
-Walk::Walk( shared_ptr<Node> r, shared_ptr<Node> res ) :
+Walk::Walk( TreePtr<Node> r, TreePtr<Node> res ) :
     root( new TreePtr<Node>(r) ),
     restrictor( res )
 {
@@ -77,7 +77,6 @@ Walk::Walk( const Walk & other ) :
 	restrictor( other.restrictor ),
 	state( other.state )
 {
-
 }
 
 bool Walk::Done() const
@@ -100,7 +99,7 @@ ContainerInterface::iterator Walk::GetIterator() const
     return f.children[f.index];
 }
 
-shared_ptr<Node> Walk::Get() const
+TreePtr<Node> Walk::Get() const
 {
     return *GetIterator();
 }
@@ -137,7 +136,7 @@ void Walk::AdvanceInto()
 {
 	ASSERT( !Done() );
 	ASSERT( !IsAtEndOfCollection() );
-	shared_ptr<Node> element = Get(); // look at current node
+	TreePtr<Node> element = Get(); // look at current node
     if( element &&                                                    // must be non-NULL
     	(!restrictor || restrictor->IsLocalMatch(element.get()) ) ) // and pass the restriction
     {
