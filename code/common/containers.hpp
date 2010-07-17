@@ -49,8 +49,8 @@ public:
 		typedef forward_iterator_tag iterator_category;
 		typedef VALUE_INTERFACE value_type;
 		typedef int difference_type;
-		typedef value_type *pointer;
-		typedef value_type &reference;
+		typedef const value_type *pointer;
+		typedef const value_type &reference;
 
 		iterator() :
 			pib( shared_ptr<iterator_interface>() ) {}
@@ -249,6 +249,14 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
     {
 		inline iterator( typename CONTAINER_IMPL::iterator &i ) : CONTAINER_IMPL::iterator(i) {}
 		inline iterator() {}
+		virtual typename CONTAINER_IMPL::value_type &operator*() const
+		{
+			return CONTAINER_IMPL::iterator::operator*();
+		}
+		virtual typename CONTAINER_IMPL::value_type *operator->() const
+		{
+			return CONTAINER_IMPL::iterator::operator->();
+		}
 		virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
 		{
 			shared_ptr<iterator> ni( new iterator );

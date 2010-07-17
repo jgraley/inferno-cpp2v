@@ -43,6 +43,12 @@ public:
 	struct iterator : public ContainerInterface::iterator_interface,
 							 Walk
 	{
+		typedef forward_iterator_tag iterator_category;
+		typedef TreePtrInterface value_type;
+		typedef int difference_type;
+		typedef const value_type *pointer;
+		typedef const value_type &reference;
+
 		iterator( TreePtr<Node> root,
 				  TreePtr<Node> restrictor ) :
 			Walk( root, restrictor )
