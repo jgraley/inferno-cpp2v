@@ -3,19 +3,27 @@
 
 #include "tree/generics.hpp"
 
-
+//
+// Inferno's tree-walking class. This is a stated out depth-first tree walker.
+// A walk object is constructed on a node (possibly with other params) and it acts
+// like an OOStd container whose iterator walks the subtree with sucessive invocations
+// of operator++. A welking loop may be created using FOREACH as with containers.
+//
 class Walk : public ContainerInterface
 {
 public:
+	// The walking iterator does all the real work.
 	class iterator : public ContainerInterface::iterator_interface
 	{
 	public:
+		// Standard types for stl compliance (note that the iterators are implicitly const)
 	    typedef forward_iterator_tag iterator_category;
 		typedef TreePtrInterface value_type;
 		typedef int difference_type;
 		typedef const value_type *pointer;
 		typedef const value_type &reference;
 
+		// Copy constructor and standard iterator operations
 		iterator( const iterator & other );
 		virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;
 		virtual iterator &operator++();
@@ -24,6 +32,7 @@ public:
 		virtual bool operator==( const ContainerInterface::iterator_interface &ib ) const;
 		virtual void Overwrite( pointer v ) const;
         virtual const bool IsOrdered() const;
+        // Some additional operations specific to walk iterators
 	    int Depth() const;
 	    operator string() const;
 	    void AdvanceOver();
@@ -53,9 +62,14 @@ public:
 	    friend class Walk;
     };
 
-	Walk( TreePtr<Node> r,
-		  TreePtr<Node> res = TreePtr<Node>() );
-    virtual const iterator &begin();
+	// Constructor for walk container. The actual container is lightweight - it can be
+	// destructed and the iterators remain valid. A new one may be created with the
+	// same parameters and it will be equivalent.
+	Walk( TreePtr<Node> root, // root of the subtree to walk
+		  TreePtr<Node> restrictor = TreePtr<Node>() ); // optional restrictor; walk skips these and does not recurse under them
+
+	// Standard container ops, note that modification is not allowed through container interface
+	virtual const iterator &begin();
     virtual const iterator &end();
     virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
     virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
@@ -64,7 +78,5 @@ private:
     TreePtr<Node> restrictor;
     iterator my_begin, my_end;
 };
-
-
 
 #endif
