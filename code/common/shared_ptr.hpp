@@ -122,7 +122,6 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
 		if( g )
 		{
 			shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(g));
-			ASSERT( v )("Cannot convert GenericSharedPtr that points to a ")((string)*(shared_ptr<VALUE_INTERFACE>(g)))(" to SharedPtr<")(typeid(VALUE_TYPE).name())(">");
 			return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>(v);
 		}
 		else

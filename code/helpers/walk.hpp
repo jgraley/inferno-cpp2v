@@ -3,57 +3,47 @@
 
 #include "tree/generics.hpp"
 
-class Walk
-{
-    struct Frame
-    {
-        vector< ContainerInterface::iterator > children;
-        int index;
-    };
-    
-    shared_ptr< TreePtr<Node> > root;
-    TreePtr<Node> restrictor;
-    stack< Frame > state;
-    
-    bool IsAtEndOfCollection() const;
-    void BypassInvalid();
-    void Push( TreePtr<Node> n );
-    void Pop();
-    void PoppingIncrement();
 
-public:
-    Walk( TreePtr<Node> root=TreePtr<Node>(), // NULL root gets us a walk stuck on Done()
-          TreePtr<Node> restrictor=TreePtr<Node>() );
-    Walk( const Walk & other );
-    bool Done() const;
-    int Depth() const;
-    ContainerInterface::iterator GetIterator() const;
-    TreePtr<Node> Get() const;
-    void Set( TreePtr<Node> n );
-    operator string() const;
-    void AdvanceOver(); 
-    void AdvanceInto();
-};
-
-
-class WalkContainer : public ContainerInterface
+class Walk : public ContainerInterface
 {
 public:
 
-	struct iterator : public ContainerInterface::iterator_interface,
-							 Walk
+	class iterator : public ContainerInterface::iterator_interface
 	{
-		typedef forward_iterator_tag iterator_category;
+	    struct Frame
+	    {
+	        vector< ContainerInterface::iterator > children;
+	        int index;
+	    };
+
+	    shared_ptr< TreePtr<Node> > root;
+	    TreePtr<Node> restrictor;
+	    stack< Frame > state;
+
+	    bool IsAtEndOfCollection() const;
+	    void BypassInvalid();
+	    void Push( TreePtr<Node> n );
+	    void Pop();
+	    void PoppingIncrement();
+	    bool Done() const;
+	    ContainerInterface::iterator GetIterator() const;
+	    TreePtr<Node> Get() const;
+	    void Set( TreePtr<Node> n );
+
+	public:
+	    iterator( TreePtr<Node> root=TreePtr<Node>(), // NULL root gets us a walk stuck on Done()
+	              TreePtr<Node> restrictor=TreePtr<Node>() );
+	    iterator( const iterator & other );
+	    int Depth() const;
+	    operator string() const;
+	    void AdvanceOver();
+	    void AdvanceInto();
+
+	    typedef forward_iterator_tag iterator_category;
 		typedef TreePtrInterface value_type;
 		typedef int difference_type;
 		typedef const value_type *pointer;
 		typedef const value_type &reference;
-
-		iterator( TreePtr<Node> root,
-				  TreePtr<Node> restrictor ) :
-			Walk( root, restrictor )
-		{
-		}
 
 		virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
 		{
@@ -67,12 +57,12 @@ public:
 			return *this;
 		}
 
-		virtual const TreePtrInterface &operator*() const
+		virtual reference operator*() const
 		{
 			return *GetIterator();
 		}
 
-		const virtual TreePtrInterface *operator->() const
+		virtual pointer operator->() const
 		{
 			return &*GetIterator();
 		}
@@ -86,7 +76,7 @@ public:
 			return pi->Get() == Get();
 		}
 
-		virtual void Overwrite( const TreePtrInterface *v ) const
+		virtual void Overwrite( pointer v ) const
 		{
 			GetIterator().Overwrite( v );
 		}
@@ -97,7 +87,7 @@ public:
 		}
 	};
 
-	WalkContainer( TreePtr<Node> r,
+	Walk( TreePtr<Node> r,
 			       TreePtr<Node> res = TreePtr<Node>() ) :
 		root(r),
 		restrictor(res),

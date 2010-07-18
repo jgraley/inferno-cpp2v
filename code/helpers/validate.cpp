@@ -19,10 +19,8 @@ void Validate::operator()( TreePtr<Node> context,
 	total_refs.clear();
 
 	Walk w( *proot );
-	while(!w.Done())
+	FOREACH( const TreePtr<Node> x, w )
 	{
-		TreePtr<Node> x = w.Get();
-
 		if( !is_pattern ) // Don't do these checks on search/replace patterns
 		{
 			// NULL pointers not allowed in program tree (though they are allowed in search/replace patterns)
@@ -67,15 +65,13 @@ void Validate::operator()( TreePtr<Node> context,
 			ASSERT( typeid(*y)==typeid(*x) )(*x)(" apparently does not contain NODE_FUNCTIONS macro because it Clone()s to ")(*y)(" at ")(w);
 		}
 
-		w.AdvanceInto();
 	}
 
 	Walk w2( *proot );
-	if(!w2.Done())
-		w2.AdvanceInto(); // Skip the proot node, since we don't know what references we expect it to have
-	while(!w2.Done())
+	FOREACH( const TreePtr<Node> x, w2 )
 	{
-		TreePtr<Node> x = w2.Get();
+		if( x == *proot )
+			continue; // Skip the proot node, since we don't know what references we expect it to have
 
 		if( x )
 		{
@@ -93,8 +89,6 @@ void Validate::operator()( TreePtr<Node> context,
 				ASSERT( total_refs[x] == 1 )("Node ")(*x)(" found with %d references", total_refs[x] )(" at ")(w2)
 					  ("\nThere must be exactly 1 reference to nodes (except identifiers)");
 		}
-
-		w2.AdvanceInto();
 	}
 }
 

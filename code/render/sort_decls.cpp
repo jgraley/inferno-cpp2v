@@ -19,12 +19,13 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     TreePtr<Identifier> ib = GetIdentifier( b );
     ASSERT(ib);
           
-    Walk wa( a );
-    while(!wa.Done())
+    Walk w( a );
+    Walk::iterator wa=w.begin();
+    while(!(wa == w.end()))
     {
     	if( ignore_indirection ) // are we to ignore pointers/refs?
     	{
-    		if( TreePtr<Indirection> inda = dynamic_pointer_cast<Indirection>(wa.Get()) ) // is a a pointer or ref?
+    		if( TreePtr<Indirection> inda = TreePtr<Indirection>::DynamicCast(*wa) ) // is a a pointer or ref?
     		{
     			if( dynamic_pointer_cast<Identifier>(inda->destination) == ib ) // does it depend on b?
     	        {
@@ -34,10 +35,10 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     		}
     	}
     	
-        if( wa.Get() == TreePtr<Node>(ib) ) // If we see b in *any* other cotext under a's type, there's dep.
+        if( TreePtr<Node>(*wa) == TreePtr<Node>(ib) ) // If we see b in *any* other context under a's type, there's dep.
             return true;                
-                        
-        wa.AdvanceInto();
+
+        ++wa;
     }
     
     // Recurse though members of records since Inferno doesn't require scope to be remembered - so

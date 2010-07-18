@@ -302,7 +302,7 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
 	ASSERT( stuff_pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
 	// Define a walk, rooted at this node, restricted as specified in search pattern
-	WalkContainer wx( x, stuff_pattern->restrictor );
+	Walk wx( x, stuff_pattern->restrictor );
 
 	// Get decision from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = conj.HandleDecision( wx.begin(), wx.end() );

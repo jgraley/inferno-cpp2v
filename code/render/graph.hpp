@@ -77,13 +77,11 @@ public:
     string Traverse( TreePtr<Node> root, bool links_pass )
     {
     	string s;
-        Walk w( root );
-        while(!w.Done())
+    	Walk w( root );
+    	FOREACH( TreePtr<Node> n, w )
         {
-            TreePtr<Node> n = w.Get();
             if( n )
                 s += links_pass ? DoNodeLinks(n) : DoNode(n);
-            w.AdvanceInto();
         }
         return s;
     }
