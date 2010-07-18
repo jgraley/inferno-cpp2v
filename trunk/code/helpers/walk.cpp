@@ -159,3 +159,64 @@ void Walk::iterator::AdvanceOver()
 	BypassInvalid();
 }
 
+shared_ptr<ContainerInterface::iterator_interface> Walk::iterator::Clone() const
+{
+	shared_ptr<iterator> ni( new iterator(*this) );
+	return ni;
+}
+
+Walk::iterator &Walk::iterator::operator++()
+{
+	AdvanceInto();
+	return *this;
+}
+
+Walk::iterator::reference Walk::iterator::operator*() const
+{
+	return *GetIterator();
+}
+
+Walk::iterator::pointer Walk::iterator::operator->() const
+{
+	return &*GetIterator();
+}
+
+bool Walk::iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
+{
+	const iterator *pi = dynamic_cast<const iterator *>(&ib);
+	ASSERT(pi)("Comparing walking iterator with something else ")(ib);
+	if( pi->Done() || Done() )
+		return pi->Done() && Done();
+	return pi->Get() == Get();
+}
+
+void Walk::iterator::Overwrite( Walk::iterator::pointer v ) const
+{
+	GetIterator().Overwrite( v );
+}
+
+const bool Walk::iterator::IsOrdered() const
+{
+	return true; // walk walks tree in order generally
+}
+
+Walk::Walk( TreePtr<Node> r,
+		    TreePtr<Node> res ) :
+	root(r),
+	restrictor(res),
+	my_begin( iterator( root, restrictor ) ),
+	my_end( iterator( TreePtr<Node>(), restrictor ) )
+{
+}
+
+const Walk::iterator &Walk::begin()
+{
+	my_begin = iterator( root, restrictor );
+	return my_begin;
+}
+
+const Walk::iterator &Walk::end()
+{
+	my_end = iterator( TreePtr<Node>(), restrictor );
+	return my_end;
+}

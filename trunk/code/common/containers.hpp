@@ -46,6 +46,7 @@ public:
 	class iterator : public Traceable
 	{
 	public:
+		// TODO use these in the method decls
 		typedef forward_iterator_tag iterator_category;
 		typedef VALUE_INTERFACE value_type;
 		typedef int difference_type;
@@ -183,6 +184,8 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
 	struct iterator : public CONTAINER_IMPL::iterator,
 	                  public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface
 	{
+		// TODO use types like pointer, reference etc as defined by CONTAINER_IMPL in the method decls
+
 		virtual iterator &operator++()
 		{
 			CONTAINER_IMPL::iterator::operator++();
