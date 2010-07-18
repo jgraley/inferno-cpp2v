@@ -2,7 +2,7 @@
 #include "tree/tree.hpp"
 #include "walk.hpp"
 
-bool Walk::IsAtEndOfCollection() const
+bool Walk::iterator::IsAtEndOfCollection() const
 {
 	ASSERT( !Done() );
 
@@ -11,13 +11,13 @@ bool Walk::IsAtEndOfCollection() const
     return f.index == f.children.size();
 }
 
-void Walk::BypassInvalid()
+void Walk::iterator::BypassInvalid()
 {
 	while( !Done() && IsAtEndOfCollection() )
         PoppingIncrement();
 }
 
-void Walk::PoppingIncrement()
+void Walk::iterator::PoppingIncrement()
 {
 	while( !Done() && IsAtEndOfCollection() )
  		Pop();
@@ -26,7 +26,7 @@ void Walk::PoppingIncrement()
 		state.top().index++;
 }
 
-void Walk::Push( TreePtr<Node> n )
+void Walk::iterator::Push( TreePtr<Node> n )
 { 
     Frame f;
 
@@ -53,12 +53,12 @@ void Walk::Push( TreePtr<Node> n )
     state.push( f );
 }        
 
-void Walk::Pop()
+void Walk::iterator::Pop()
 {
     state.pop();
 }
 
-Walk::Walk( TreePtr<Node> r, TreePtr<Node> res ) :
+Walk::iterator::iterator( TreePtr<Node> r, TreePtr<Node> res ) :
     root( new TreePtr<Node>(r) ),
     restrictor( res )
 {
@@ -72,24 +72,24 @@ Walk::Walk( TreePtr<Node> r, TreePtr<Node> res ) :
 	}
 }        
 
-Walk::Walk( const Walk & other ) :
+Walk::iterator::iterator( const Walk::iterator & other ) :
 	root( other.root ),
 	restrictor( other.restrictor ),
 	state( other.state )
 {
 }
 
-bool Walk::Done() const
+bool Walk::iterator::Done() const
 {
     return state.empty();
 }    
 
-int Walk::Depth() const
+int Walk::iterator::Depth() const
 {
     return state.size();
 }
     
-ContainerInterface::iterator Walk::GetIterator() const
+ContainerInterface::iterator Walk::iterator::GetIterator() const
 {
     ASSERT( !Done() )("Already advanced over everything; reached end of walk");
     ASSERT( !IsAtEndOfCollection() );
@@ -99,17 +99,17 @@ ContainerInterface::iterator Walk::GetIterator() const
     return f.children[f.index];
 }
 
-TreePtr<Node> Walk::Get() const
+TreePtr<Node> Walk::iterator::Get() const
 {
     return *GetIterator();
 }
 
-void Walk::Set( TreePtr<Node> n )
+void Walk::iterator::Set( TreePtr<Node> n )
 {
     GetIterator().Overwrite( &n );
 }
 
-Walk::operator string() const
+Walk::iterator::operator string() const
 {
     string s;
     stack< Frame > ps = state; // std::stack doesn't have [] so copy the whole thing and go backwards
@@ -132,7 +132,7 @@ Walk::operator string() const
     return s;
 }
 
-void Walk::AdvanceInto()
+void Walk::iterator::AdvanceInto()
 {
 	ASSERT( !Done() );
 	ASSERT( !IsAtEndOfCollection() );
@@ -151,7 +151,7 @@ void Walk::AdvanceInto()
     }
 }
 
-void Walk::AdvanceOver()
+void Walk::iterator::AdvanceOver()
 {
 	ASSERT( !Done() );
 	ASSERT( !IsAtEndOfCollection() );

@@ -26,11 +26,9 @@ TreePtr<Node> GetDeclaration::operator()( TreePtr<Node> context, TreePtr<Node> r
 
 TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdentifier> id )
 {
-	WalkContainer walkr(context);
-	TRACE("GetDeclaration %d\n", walkr.size());
-	FOREACH( TreePtr<Node> n, walkr )
+	Walk w(context);
+	FOREACH( TreePtr<Node> n, w )
 	{
-		TRACE("trying id of %d\n", walkr.size());
         if( TreePtr<UserType> d = dynamic_pointer_cast<UserType>(n) )
             if( id == GetIdentifier( d ) )
 	            return d;
@@ -40,16 +38,12 @@ TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdenti
 
 TreePtr<Instance> GetDeclaration::Get( TreePtr<Node> context, TreePtr<InstanceIdentifier> id )
 {
-    Walk w( context );
-    while(!w.Done())
-    {
-        TreePtr<Node> n = w.Get();
-
+	Walk w( context );
+	FOREACH( TreePtr<Node> n, w )
+	{
         if( TreePtr<Instance> d = dynamic_pointer_cast<Instance>(n) )
             if( id == GetIdentifier( d ) )
 	            return d;
-
-	    w.AdvanceInto();
 	}
 	ASSERTFAIL("did not find instance declaration for identifier");
 }
