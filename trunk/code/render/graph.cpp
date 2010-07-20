@@ -467,7 +467,6 @@ bool Graph::IsRecord( TreePtr<Node> n )
 	return shape=="record" || shape=="plaintext";
 }
 
-
 string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string atts )
 {
 	string s;
