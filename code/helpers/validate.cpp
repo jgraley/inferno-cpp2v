@@ -42,14 +42,14 @@ void Validate::operator()( TreePtr<Node> context,
 		if( x )
 		{
 			vector< Itemiser::Element * > members = x->Itemise();
-			for( int i=0; i<members.size(); i++ )
+		    FOREACH( Itemiser::Element *m, members )
 			{
-				if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(members[i]) )
+				if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(m) )
 				{
-					for( ContainerInterface::iterator i=con->begin(); i!=con->end(); ++i )
-						OnLink( x, *i );
+					FOREACH( const TreePtrInterface &tpi, *con )
+						OnLink( x, tpi );
 				}
-				else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
+				else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(m) )
 				{
 					OnLink( x, *ptr );
 				}

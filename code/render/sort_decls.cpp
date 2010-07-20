@@ -61,28 +61,36 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
     
     // Our algorithm will modify the source container, so make a copy of it
     Collection<Declaration> cc;
-    ContainerInterface::iterator ai;
-    for( ai = c.begin(); ai != c.end(); ++ai )
-    	cc.insert( *ai );
+    FOREACH( const TreePtrInterface &a, c )
+    	cc.insert( a );
 
-	// Go on 'till all the decls in the collection are used up
+	// Keep searching our local container of decls (cc) for decls that do not depend
+    // on anything else in the container. Such a decl may be safely rendered before the
+    // rest of the decls, so place it at the end of the sequence we are building up
+    // (s) and remove from the container cc since cc only holds the ones we have still to
+    // place in s. Repeat until we've done all the decls at which point cc is empty.
+    // If no non-dependent decl may be found in cc then it's irredemably circular and
+    // we fail. This looks like O(N^3). Well, that's just a damn shame.
 	while( !cc.empty() )
 	{
-		Collection<Declaration>::iterator ai;
-		for( ai = cc.begin(); ai != cc.end(); ++ai )
+		bool found = false; // just for ASSERT check
+		FOREACH( const TreePtr<Declaration> &a, cc )
 		{
 			bool a_has_deps=false;
 			FOREACH( const TreePtr<Declaration> &b, cc )
 		    {
-		        TreePtr<Declaration> aid = dynamic_cast< const TreePtr<Declaration> & >(*ai);
+		        TreePtr<Declaration> aid = dynamic_cast< const TreePtr<Declaration> & >(a);
 		    	a_has_deps |= IsDependOn( aid, b, ignore_indirection_to_record );
 		    }
 		    if( !a_has_deps )
+		    {
+				s.push_back(a);
+				cc.erase(a);
+				found = true;
 		        break;
+		    }
 		}
-		ASSERT( ai != cc.end() );//("failed to find a decl to add without dependencies");
-		s.push_back(*ai);
-		cc.erase(*ai);
+		ASSERT( found );//("failed to find a decl to add without dependencies");
 		//TRACE("%d %d\n", s.size(), c.size() );
 	}
 

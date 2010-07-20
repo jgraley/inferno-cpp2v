@@ -107,19 +107,19 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 	// Lower types that masquerade as other types in preparation for operand analysis
 	// - References go to the referenced type
 	// - Arrays go to pointers
-	for( int i=0; i<optypes.size(); i++ )
+	FOREACH( TreePtr<Type> &t, optypes )
 	{
-		while( TreePtr<Reference> r = dynamic_pointer_cast<Reference>(optypes[i]) )
-			optypes[i] = r->destination;
-		if( TreePtr<Array> a = dynamic_pointer_cast<Array>(optypes[i]) )
+		while( TreePtr<Reference> r = dynamic_pointer_cast<Reference>(t) )
+			t = r->destination;
+		if( TreePtr<Array> a = dynamic_pointer_cast<Array>(t) )
 		{
 			TreePtr<Pointer> p( new Pointer );
 			p->destination = a->element;
-			optypes[i] = p;
+			t = p;
 		}
 		// Check we finished the job
-		ASSERT( !dynamic_pointer_cast<Reference>(optypes[i]) );
-		ASSERT( !dynamic_pointer_cast<Array>(optypes[i]) );
+		ASSERT( !dynamic_pointer_cast<Reference>(t) );
+		ASSERT( !dynamic_pointer_cast<Array>(t) );
 	}
 
     if( TreePtr<MakeArray> al = dynamic_pointer_cast<MakeArray>(op) )
@@ -137,26 +137,27 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 		return optypes[0];
 	}
 
-	// Pointer arithmetic: an add involving a pointer returns that pointer type
-	if( dynamic_pointer_cast<Add>(op) )
+	// Pointer arithmetic: a subtract involving two pointers returns int
+	// we are not bothering to check that the pointer types are compatible.
+	if( dynamic_pointer_cast<Subtract>(op) )
 	{
-		for( int i=0; i<optypes.size(); i++ )
-			if( TreePtr<Pointer> p = dynamic_pointer_cast<Pointer>(optypes[i]) )
+		if( dynamic_pointer_cast<Pointer>(optypes[0]) && dynamic_pointer_cast<Pointer>(optypes[1]) )
+		{
+			TreePtr<Signed> i = TreePtr<Signed>( new Signed );
+			TreePtr<SpecificInteger> nc( new SpecificInteger(TypeDb::integral_bits[INT]) );
+			i->width = nc;
+			return i;
+		}
+	}
+
+	// Pointer arithmetic: an add or subtract involving a pointer returns that pointer type
+	if( dynamic_pointer_cast<Add>(op) || dynamic_pointer_cast<Subtract>(op) )
+	{
+		FOREACH( TreePtr<Type> t, optypes )
+			if( TreePtr<Pointer> p = dynamic_pointer_cast<Pointer>(t) )
 		        return p;
 	}
 
-	// Pointer arithmetic: a subtract involving a pointer returns int
-	if( dynamic_pointer_cast<Subtract>(op) )
-	{
-		for( int i=0; i<optypes.size(); i++ )
-			if( TreePtr<Pointer> p = dynamic_pointer_cast<Pointer>(optypes[i]) )
-			{
-                TreePtr<Signed> i = TreePtr<Signed>( new Signed );
-                TreePtr<SpecificInteger> nc( new SpecificInteger(TypeDb::integral_bits[INT]) );
-                i->width = nc;
-                return i;
-			}
-	}
 
 #define ARITHMETIC GetStandard( optypes )
 #define BITWISE GetStandard( optypes )

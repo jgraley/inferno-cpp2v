@@ -31,15 +31,16 @@ void Walk::iterator::Push( TreePtr<Node> n )
     Frame f;
 
     vector< Itemiser::Element * > members = n->Itemise();
-    for( int i=0; i<members.size(); i++ )
+    FOREACH( Itemiser::Element *m, members )
     {
-        if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(members[i]) )
+        if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(m) )
         {
-        	//FOREACH( TreePtrInterface &n, *con )
+        	// TODO avoid expanding collections here
+        	//FOREACH( const TreePtrInterface &n, *con ) cannot use FOREACH as we want the iterators
         	for( ContainerInterface::iterator i=con->begin(); i!=con->end(); ++i )
                 f.children.push_back( i );
         }            
-        else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
+        else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(m) )
         {
             f.children.push_back( PointIterator(ptr) );
         }

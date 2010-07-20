@@ -30,12 +30,8 @@ void RootedSearchReplace::Configure( TreePtr<Node> sp,
     // of all the couplings - this will be used across the board. Note that
     // the non-rooted SearchReplace adds a new coupling.
     FOREACH( RootedSearchReplace *slave, slaves )
-	{
-		for( CouplingSet::iterator msi = slave->couplings.begin();
-             msi != slave->couplings.end();
-             msi++ )
-		    couplings.insert( *msi );
-	}
+    	FOREACH( Coupling c, slave->couplings )
+		    couplings.insert( c );
 
 	TRACE("Merged couplings, I have %d\n", couplings.size() );
 
@@ -741,19 +737,17 @@ void RootedSearchReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 
 // Find a coupling containing the supplied node
 Coupling CouplingKeys::FindCoupling( TreePtr<Node> node,
-		                                                                       const CouplingSet &couplings )
+		                             const CouplingSet &couplings )
 {
 	ASSERT( this );
 	Coupling found; // returns an empty coupling if not found
-	for( CouplingSet::iterator msi = couplings.begin();
-         msi != couplings.end();
-         msi++ )
+	FOREACH( Coupling c, couplings )
     {
-        Coupling::iterator ni = msi->find( node );
-        if( ni != msi->end() )
+        Coupling::iterator ni = c.find( node );
+        if( ni != c.end() )
         {
-        	ASSERT( found.empty() )("Found more than one coupling for a node - please merge the couplings");
-        	found = *msi;
+        	ASSERT( found.empty() )("Found more than one coupling for a node - consider merging the couplings");
+        	found = c;
         }
     }
     return found;
