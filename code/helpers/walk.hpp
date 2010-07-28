@@ -51,9 +51,6 @@ public:
 	    void Pop();
 	    void PoppingIncrement();
 	    bool Done() const;
-	    ContainerInterface::iterator GetIterator() const;
-	    TreePtr<Node> Get() const;
-	    void Set( TreePtr<Node> n );
 
 	    shared_ptr< TreePtr<Node> > root;
 	    TreePtr<Node> restrictor;
