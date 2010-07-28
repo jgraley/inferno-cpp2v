@@ -122,6 +122,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 		ASSERT( !dynamic_pointer_cast<Array>(t) );
 	}
 
+	// Turn an array literal into an array
     if( TreePtr<MakeArray> al = dynamic_pointer_cast<MakeArray>(op) )
     {
     	TreePtr<Array> a( new Array );
@@ -157,7 +158,6 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 			if( TreePtr<Pointer> p = dynamic_pointer_cast<Pointer>(t) )
 		        return p;
 	}
-
 
 #define ARITHMETIC GetStandard( optypes )
 #define BITWISE GetStandard( optypes )

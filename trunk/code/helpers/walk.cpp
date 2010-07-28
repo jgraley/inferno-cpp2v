@@ -90,26 +90,6 @@ int Walk::iterator::Depth() const
     return state.size();
 }
     
-ContainerInterface::iterator Walk::iterator::GetIterator() const
-{
-    ASSERT( !Done() )("Already advanced over everything; reached end of walk");
-    ASSERT( !IsAtEndOfCollection() );
-        
-    Frame f = state.top();
-    ASSERT( f.index < f.children.size() );
-    return f.children[f.index];
-}
-
-TreePtr<Node> Walk::iterator::Get() const
-{
-    return *GetIterator();
-}
-
-void Walk::iterator::Set( TreePtr<Node> n )
-{
-    GetIterator().Overwrite( &n );
-}
-
 Walk::iterator::operator string() const
 {
     string s;
@@ -137,12 +117,12 @@ void Walk::iterator::AdvanceInto()
 {
 	ASSERT( !Done() );
 	ASSERT( !IsAtEndOfCollection() );
-	TreePtr<Node> element = Get(); // look at current node
+	TreePtr<Node> element = **this; // look at current node
     if( element &&                                                    // must be non-NULL
     	(!restrictor || restrictor->IsLocalMatch(element.get()) ) ) // and pass the restriction
     {
     	// Step into
-        Push( Get() );
+        Push( **this );
         BypassInvalid();
     }
     else
@@ -174,12 +154,17 @@ Walk::iterator &Walk::iterator::operator++()
 
 Walk::iterator::reference Walk::iterator::operator*() const
 {
-	return *GetIterator();
+    ASSERT( !Done() )("Already advanced over everything; reached end of walk");
+    ASSERT( !IsAtEndOfCollection() );
+
+    Frame f = state.top();
+    ASSERT( f.index < f.children.size() );
+    return *(f.children[f.index]);
 }
 
 Walk::iterator::pointer Walk::iterator::operator->() const
 {
-	return &*GetIterator();
+	return &operator*();
 }
 
 bool Walk::iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
@@ -188,12 +173,17 @@ bool Walk::iterator::operator==( const ContainerInterface::iterator_interface &i
 	ASSERT(pi)("Comparing walking iterator with something else ")(ib);
 	if( pi->Done() || Done() )
 		return pi->Done() && Done();
-	return pi->Get() == Get();
+	return **pi == **this;
 }
 
 void Walk::iterator::Overwrite( Walk::iterator::pointer v ) const
 {
-	GetIterator().Overwrite( v );
+    ASSERT( !Done() )("Already advanced over everything; reached end of walk");
+    ASSERT( !IsAtEndOfCollection() );
+
+    Frame f = state.top();
+    ASSERT( f.index < f.children.size() );
+    f.children[f.index].Overwrite( v );
 }
 
 const bool Walk::iterator::IsOrdered() const
