@@ -33,7 +33,6 @@ public:
 		virtual void Overwrite( pointer v ) const;
         virtual const bool IsOrdered() const;
         // Some additional operations specific to walk iterators
-	    int Depth() const;
 	    operator string() const;
 	    void AdvanceOver();
 	    void AdvanceInto();
@@ -44,12 +43,11 @@ public:
 	        int index;
 	    };
 
-	    iterator( TreePtr<Node> root, TreePtr<Node> restrictor );
-	    bool IsAtEndOfCollection() const;
-	    void BypassInvalid();
+	    iterator( TreePtr<Node> &root, TreePtr<Node> restrictor );
+	    iterator(); // makes "end" iterator
+	    bool IsAtEndOfChildren() const;
+	    void BypassEndOfChildren();
 	    void Push( TreePtr<Node> n );
-	    void Pop();
-	    void PoppingIncrement();
 	    bool Done() const;
 
 	    shared_ptr< TreePtr<Node> > root;

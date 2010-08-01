@@ -2,7 +2,7 @@
 #include "tree/tree.hpp"
 #include "walk.hpp"
 
-bool Walk::iterator::IsAtEndOfCollection() const
+bool Walk::iterator::IsAtEndOfChildren() const
 {
 	ASSERT( !Done() );
 
@@ -11,19 +11,18 @@ bool Walk::iterator::IsAtEndOfCollection() const
     return f.index == f.children.size();
 }
 
-void Walk::iterator::BypassInvalid()
+void Walk::iterator::BypassEndOfChildren()
 {
-	while( !Done() && IsAtEndOfCollection() )
-        PoppingIncrement();
-}
+	ASSERT( !Done() );
+	while( IsAtEndOfChildren() )
+	{
+		state.pop();
 
-void Walk::iterator::PoppingIncrement()
-{
-	while( !Done() && IsAtEndOfCollection() )
- 		Pop();
+	    if( Done() )
+	    	break;
 
-    if( !Done() )
-		state.top().index++;
+	    state.top().index++;
+	}
 }
 
 void Walk::iterator::Push( TreePtr<Node> n )
@@ -54,23 +53,20 @@ void Walk::iterator::Push( TreePtr<Node> n )
     state.push( f );
 }        
 
-void Walk::iterator::Pop()
-{
-    state.pop();
-}
-
-Walk::iterator::iterator( TreePtr<Node> r, TreePtr<Node> res ) :
+Walk::iterator::iterator( TreePtr<Node> &r, TreePtr<Node> res ) :
     root( new TreePtr<Node>(r) ),
     restrictor( res )
 {
-	if( *root ) // if root is NULL, leave the state empty so Done() always returns true
-	{
-        Frame f;
-        PointIterator gpi(&*root);
-        f.children.push_back( gpi );
-        f.index = 0;
-        state.push( f );
-	}
+	Frame f;
+	PointIterator gpi(&*root);
+	f.children.push_back( gpi );
+	f.index = 0;
+	state.push( f );
+}
+
+Walk::iterator::iterator() :
+    root( new TreePtr<Node>() )
+{
 }        
 
 Walk::iterator::iterator( const Walk::iterator & other ) :
@@ -85,11 +81,6 @@ bool Walk::iterator::Done() const
     return state.empty();
 }    
 
-int Walk::iterator::Depth() const
-{
-    return state.size();
-}
-    
 Walk::iterator::operator string() const
 {
     string s;
@@ -116,14 +107,14 @@ Walk::iterator::operator string() const
 void Walk::iterator::AdvanceInto()
 {
 	ASSERT( !Done() );
-	ASSERT( !IsAtEndOfCollection() );
+	ASSERT( !IsAtEndOfChildren() );
 	TreePtr<Node> element = **this; // look at current node
     if( element &&                                                    // must be non-NULL
     	(!restrictor || restrictor->IsLocalMatch(element.get()) ) ) // and pass the restriction
     {
     	// Step into
         Push( **this );
-        BypassInvalid();
+        BypassEndOfChildren();
     }
     else
     {
@@ -135,9 +126,11 @@ void Walk::iterator::AdvanceInto()
 void Walk::iterator::AdvanceOver()
 {
 	ASSERT( !Done() );
-	ASSERT( !IsAtEndOfCollection() );
-	PoppingIncrement();
-	BypassInvalid();
+	ASSERT( !IsAtEndOfChildren() );
+
+	state.top().index++;
+
+	BypassEndOfChildren();
 }
 
 shared_ptr<ContainerInterface::iterator_interface> Walk::iterator::Clone() const
@@ -155,7 +148,7 @@ Walk::iterator &Walk::iterator::operator++()
 Walk::iterator::reference Walk::iterator::operator*() const
 {
     ASSERT( !Done() )("Already advanced over everything; reached end of walk");
-    ASSERT( !IsAtEndOfCollection() );
+    ASSERT( !IsAtEndOfChildren() );
 
     Frame f = state.top();
     ASSERT( f.index < f.children.size() );
@@ -179,7 +172,7 @@ bool Walk::iterator::operator==( const ContainerInterface::iterator_interface &i
 void Walk::iterator::Overwrite( Walk::iterator::pointer v ) const
 {
     ASSERT( !Done() )("Already advanced over everything; reached end of walk");
-    ASSERT( !IsAtEndOfCollection() );
+    ASSERT( !IsAtEndOfChildren() );
 
     Frame f = state.top();
     ASSERT( f.index < f.children.size() );
@@ -196,7 +189,7 @@ Walk::Walk( TreePtr<Node> r,
 	root(r),
 	restrictor(res),
 	my_begin( iterator( root, restrictor ) ),
-	my_end( iterator( TreePtr<Node>(), restrictor ) )
+	my_end( iterator() )
 {
 }
 
@@ -208,6 +201,6 @@ const Walk::iterator &Walk::begin()
 
 const Walk::iterator &Walk::end()
 {
-	my_end = iterator( TreePtr<Node>(), restrictor );
+	my_end = iterator();
 	return my_end;
 }
