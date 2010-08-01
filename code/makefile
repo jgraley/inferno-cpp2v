@@ -17,3 +17,4 @@ build/inferno.a : makefile $(INFERNO_MODULES:%=build/%.o)
 	mkdir -p build
 	$(AR) -r build/inferno.a $(INFERNO_MODULES:%=build/%.o)
 
+ 
