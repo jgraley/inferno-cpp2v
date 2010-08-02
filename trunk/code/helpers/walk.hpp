@@ -48,11 +48,11 @@ public:
 	    bool IsAtEndOfChildren() const;
 	    void BypassEndOfChildren();
 	    void Push( TreePtr<Node> n );
-	    bool Done() const;
 
 	    shared_ptr< TreePtr<Node> > root;
 	    TreePtr<Node> restrictor;
 	    stack< Frame > state;
+	    bool done;
 
 	    friend class Walk;
     };

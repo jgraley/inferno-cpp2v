@@ -4,7 +4,7 @@
 
 bool Walk::iterator::IsAtEndOfChildren() const
 {
-	ASSERT( !Done() );
+	ASSERT( !done );
 
     const Frame &f = state.top();
 
@@ -13,12 +13,13 @@ bool Walk::iterator::IsAtEndOfChildren() const
 
 void Walk::iterator::BypassEndOfChildren()
 {
-	ASSERT( !Done() );
+	ASSERT( !done );
 	while( IsAtEndOfChildren() )
 	{
 		state.pop();
 
-	    if( Done() )
+	    done = state.empty();
+	    if( done )
 	    	break;
 
 	    state.top().index++;
@@ -55,7 +56,8 @@ void Walk::iterator::Push( TreePtr<Node> n )
 
 Walk::iterator::iterator( TreePtr<Node> &r, TreePtr<Node> res ) :
     root( new TreePtr<Node>(r) ),
-    restrictor( res )
+    restrictor( res ),
+    done( false )
 {
 	Frame f;
 	PointIterator gpi(&*root);
@@ -65,21 +67,17 @@ Walk::iterator::iterator( TreePtr<Node> &r, TreePtr<Node> res ) :
 }
 
 Walk::iterator::iterator() :
-    root( new TreePtr<Node>() )
+    done( true )
 {
 }        
 
 Walk::iterator::iterator( const Walk::iterator & other ) :
 	root( other.root ),
 	restrictor( other.restrictor ),
-	state( other.state )
+	state( other.state ),
+	done( other.done )
 {
 }
-
-bool Walk::iterator::Done() const
-{
-    return state.empty();
-}    
 
 Walk::iterator::operator string() const
 {
@@ -106,7 +104,7 @@ Walk::iterator::operator string() const
 
 void Walk::iterator::AdvanceInto()
 {
-	ASSERT( !Done() );
+	ASSERT( !done );
 	ASSERT( !IsAtEndOfChildren() );
 	TreePtr<Node> element = **this; // look at current node
     if( element &&                                                    // must be non-NULL
@@ -125,7 +123,7 @@ void Walk::iterator::AdvanceInto()
 
 void Walk::iterator::AdvanceOver()
 {
-	ASSERT( !Done() );
+	ASSERT( !done );
 	ASSERT( !IsAtEndOfChildren() );
 
 	state.top().index++;
@@ -147,7 +145,7 @@ Walk::iterator &Walk::iterator::operator++()
 
 Walk::iterator::reference Walk::iterator::operator*() const
 {
-    ASSERT( !Done() )("Already advanced over everything; reached end of walk");
+    ASSERT( !done )("Already advanced over everything; reached end of walk");
     ASSERT( !IsAtEndOfChildren() );
 
     Frame f = state.top();
@@ -164,14 +162,14 @@ bool Walk::iterator::operator==( const ContainerInterface::iterator_interface &i
 {
 	const iterator *pi = dynamic_cast<const iterator *>(&ib);
 	ASSERT(pi)("Comparing walking iterator with something else ")(ib);
-	if( pi->Done() || Done() )
-		return pi->Done() && Done();
+	if( pi->done || done )
+		return pi->done && done;
 	return **pi == **this;
 }
 
 void Walk::iterator::Overwrite( Walk::iterator::pointer v ) const
 {
-    ASSERT( !Done() )("Already advanced over everything; reached end of walk");
+    ASSERT( !done )("Already advanced over everything; reached end of walk");
     ASSERT( !IsAtEndOfChildren() );
 
     Frame f = state.top();
