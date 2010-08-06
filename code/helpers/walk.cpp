@@ -6,6 +6,9 @@ bool Walk::iterator::IsAtEndOfChildren() const
 {
 	ASSERT( !done );
 
+	if( state.empty() )
+		return false;
+
     const Frame &f = state.top();
 
     return f.index == f.children.size();
@@ -59,11 +62,6 @@ Walk::iterator::iterator( TreePtr<Node> &r, TreePtr<Node> res ) :
     restrictor( res ),
     done( false )
 {
-	Frame f;
-	PointIterator gpi(&*root);
-	f.children.push_back( gpi );
-	f.index = 0;
-	state.push( f );
 }
 
 Walk::iterator::iterator() :
@@ -126,9 +124,17 @@ void Walk::iterator::AdvanceOver()
 	ASSERT( !done );
 	ASSERT( !IsAtEndOfChildren() );
 
-	state.top().index++;
-
-	BypassEndOfChildren();
+	if( state.empty() )
+	{
+		// At top level there's only one element, so finish the walk
+		done = true;
+	}
+	else
+	{
+		// otherwise, propagate
+	    state.top().index++;
+  	    BypassEndOfChildren();
+	}
 }
 
 shared_ptr<ContainerInterface::iterator_interface> Walk::iterator::Clone() const
@@ -148,9 +154,16 @@ Walk::iterator::reference Walk::iterator::operator*() const
     ASSERT( !done )("Already advanced over everything; reached end of walk");
     ASSERT( !IsAtEndOfChildren() );
 
-    Frame f = state.top();
-    ASSERT( f.index < f.children.size() );
-    return *(f.children[f.index]);
+	if( state.empty() )
+	{
+		return *root;
+	}
+	else
+	{
+        Frame f = state.top();
+        ASSERT( f.index < f.children.size() );
+        return *(f.children[f.index]);
+	}
 }
 
 Walk::iterator::pointer Walk::iterator::operator->() const
@@ -172,9 +185,16 @@ void Walk::iterator::Overwrite( Walk::iterator::pointer v ) const
     ASSERT( !done )("Already advanced over everything; reached end of walk");
     ASSERT( !IsAtEndOfChildren() );
 
-    Frame f = state.top();
-    ASSERT( f.index < f.children.size() );
-    f.children[f.index].Overwrite( v );
+    if( state.empty() )
+    {
+    	*root = *v;
+    }
+    else
+    {
+    	Frame f = state.top();
+        ASSERT( f.index < f.children.size() );
+        f.children[f.index].Overwrite( v );
+    }
 }
 
 const bool Walk::iterator::IsOrdered() const
