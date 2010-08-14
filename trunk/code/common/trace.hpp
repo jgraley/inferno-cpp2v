@@ -3,6 +3,7 @@
 
 #include <string>
 #include <typeinfo>
+#include "read_args.hpp"
 using namespace std;
 
 /*
@@ -57,10 +58,10 @@ public:
 // can be BOOST_CURRENT_FUNCTION if you want full signature but I find
 // it can get in the way
 
-#define TRACE Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION )
+#define TRACE if(ReadArgs::trace) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION )
 
 // New assert uses functor. Can be used as ASSERT(cond); or ASSERT(cond)(printf args);
-#define ASSERT(CONDITION) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (CONDITION)?Tracer::DISABLE:(Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
+#define ASSERT(CONDITION) if(!(CONDITION)) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
 
 // This one does an abort() in-line so you don't get "missing return" warning (which
 // we make an error). You can supply a message but no printf() formatting or arguments or std::string.
