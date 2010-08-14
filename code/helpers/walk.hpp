@@ -38,13 +38,16 @@ public:
 	    iterator( TreePtr<Node> root );
 	    bool IsAtEndOfChildren() const;
 	    void BypassEndOfContainer();
+	    void NormaliseNewMember();
 
         vector< ContainerInterface::iterator > children;
         int index;
-        vector< Itemiser::Element * > members;
+        shared_ptr< vector< Itemiser::Element * > > members;
         vector< Itemiser::Element * >::iterator mit;
+        vector< Itemiser::Element * >::iterator m_end;
         ContainerInterface::iterator cit;
-        ContainerInterface *con;
+        ContainerInterface::iterator c_end;
+        bool empty;
 
 
 	    friend class Traverse;
