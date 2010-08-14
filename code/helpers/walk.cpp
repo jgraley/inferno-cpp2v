@@ -2,30 +2,52 @@
 #include "tree/tree.hpp"
 #include "walk.hpp"
 
-
-
-
-
 bool Traverse::iterator::IsAtEndOfChildren() const
 {
 	ASSERT( index <= children.size() );
     return index == children.size();
 }
 
+void Traverse::iterator::BypassEndOfContainer()
+{
+	while( cit == con->end() )
+	{
+		++mit;
+		if( mit == members.end() )
+			return;
+		if( con = dynamic_cast<ContainerInterface *>(*mit) )
+			cit = con->begin();
+		else
+			break;
+	}
+
+}
 
 Traverse::iterator::iterator( TreePtr<Node> r )
 {
-    vector< Itemiser::Element * > members = r->Itemise();
-    FOREACH( Itemiser::Element *m, members )
+    members = r->Itemise();
+    index = 0;
+
+    mit = members.begin();
+
+	if( mit == members.end() )
+		return;
+    if( con = dynamic_cast<ContainerInterface *>(*mit) )
     {
-        if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(m) )
+    	cit = con->begin();
+    	BypassEndOfContainer();
+    	if( mit == members.end() )
+    		return;
+    }
+
+
+    while(1)
+    {
+    	if( dynamic_cast<ContainerInterface *>(*mit) )
         {
-        	// TODO avoid expanding collections here
-        	//FOREACH( const TreePtrInterface &n, *con ) cannot use FOREACH as we want the iterators
-        	for( ContainerInterface::iterator i=con->begin(); i!=con->end(); ++i )
-                children.push_back( i );
+            children.push_back( cit );
         }
-        else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(m) )
+        else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(*mit) )
         {
             children.push_back( PointIterator(ptr) ); // TODO if the itemise was a member or otherwise persistent, I wouldn't need to use PointIterator
         }
@@ -33,9 +55,35 @@ Traverse::iterator::iterator( TreePtr<Node> r )
         {
             ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
         }
-    }
 
-    index = 0;
+
+        if( con = dynamic_cast<ContainerInterface *>(*mit) )
+        {
+
+        	++cit;
+
+        	BypassEndOfContainer();
+        	if( mit == members.end() )
+        		return;
+        }
+        else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(*mit) )
+        {
+            ++mit;
+            if( mit == members.end() )
+            	return;
+            if( con = dynamic_cast<ContainerInterface *>(*mit) )
+            {
+            	cit = con->begin();
+            	BypassEndOfContainer();
+            	if( mit == members.end() )
+            		return;
+            }
+        }
+        else
+        {
+            ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
+        }
+    }
 }
 
 Traverse::iterator::iterator()

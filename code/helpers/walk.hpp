@@ -3,6 +3,10 @@
 
 #include "tree/generics.hpp"
 
+//
+// Stated out traversal across a node's children. Traverses the members and elements of containers
+// but does not follow any shared_ptrs. Basically an itemise that expands containers.
+//
 class Traverse : public ContainerInterface
 {
 public:
@@ -33,9 +37,15 @@ public:
 	private:
 	    iterator( TreePtr<Node> root );
 	    bool IsAtEndOfChildren() const;
+	    void BypassEndOfContainer();
 
         vector< ContainerInterface::iterator > children;
         int index;
+        vector< Itemiser::Element * > members;
+        vector< Itemiser::Element * >::iterator mit;
+        ContainerInterface::iterator cit;
+        ContainerInterface *con;
+
 
 	    friend class Traverse;
     };
