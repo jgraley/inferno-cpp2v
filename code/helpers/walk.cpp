@@ -2,6 +2,155 @@
 #include "tree/tree.hpp"
 #include "walk.hpp"
 
+
+
+
+
+bool Traverse::iterator::IsAtEndOfChildren() const
+{
+	ASSERT( index <= children.size() );
+    return index == children.size();
+}
+
+
+Traverse::iterator::iterator( TreePtr<Node> r )
+{
+    vector< Itemiser::Element * > members = r->Itemise();
+    FOREACH( Itemiser::Element *m, members )
+    {
+        if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(m) )
+        {
+        	// TODO avoid expanding collections here
+        	//FOREACH( const TreePtrInterface &n, *con ) cannot use FOREACH as we want the iterators
+        	for( ContainerInterface::iterator i=con->begin(); i!=con->end(); ++i )
+                children.push_back( i );
+        }
+        else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(m) )
+        {
+            children.push_back( PointIterator(ptr) ); // TODO if the itemise was a member or otherwise persistent, I wouldn't need to use PointIterator
+        }
+        else
+        {
+            ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
+        }
+    }
+
+    index = 0;
+}
+
+Traverse::iterator::iterator()
+{
+	index = 0; // children.size() will also be 0, so this is at the end
+}
+
+Traverse::iterator::iterator( const Traverse::iterator & other ) :
+	children( other.children ),
+	index( other.index )
+{
+}
+
+Traverse::iterator::operator string() const
+{
+    if (IsAtEndOfChildren())
+    	return string("end");
+
+	// member/element number
+    string s;
+	s = SSPrintf("%d:", index); // going backwards so prepend
+
+    // node type
+	ContainerInterface::iterator child = children[index];
+	if( *child )
+		s += TypeInfo(*(child->get())).name();
+	else
+		s += string("NULL");
+
+    return s;
+}
+
+void Traverse::iterator::Advance()
+{
+	ASSERT( !IsAtEndOfChildren() );
+    index++;
+}
+
+shared_ptr<ContainerInterface::iterator_interface> Traverse::iterator::Clone() const
+{
+	shared_ptr<iterator> ni( new iterator(*this) );
+	return ni;
+}
+
+Traverse::iterator &Traverse::iterator::operator++()
+{
+	Advance();
+	return *this;
+}
+
+Traverse::iterator::reference Traverse::iterator::operator*() const
+{
+    ASSERT( !IsAtEndOfChildren() );
+    return *(children[index]);
+}
+
+Traverse::iterator::pointer Traverse::iterator::operator->() const
+{
+	return &operator*();
+}
+
+bool Traverse::iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
+{
+	const iterator *pi = dynamic_cast<const iterator *>(&ib);
+	ASSERT(pi)("Comparing traversing iterator with something else ")(ib);
+	if( pi->IsAtEndOfChildren() || IsAtEndOfChildren() )
+		return pi->IsAtEndOfChildren() && IsAtEndOfChildren();
+	return **pi == **this; // TODO do not like - too many derefs
+}
+
+void Traverse::iterator::Overwrite( Traverse::iterator::pointer v ) const
+{
+    ASSERT( !IsAtEndOfChildren() );
+    children[index].Overwrite( v );
+}
+
+const bool Traverse::iterator::IsOrdered() const
+{
+	return true; // traverse walks tree in order generally
+}
+
+Traverse::Traverse( TreePtr<Node> r ) :
+	root(r)
+{
+}
+
+const Traverse::iterator &Traverse::begin()
+{
+	my_begin = iterator( root );
+	return my_begin;
+}
+
+const Traverse::iterator &Traverse::end()
+{
+	my_end = iterator();
+	return my_end;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 bool Walk::iterator::IsAtEndOfChildren() const
 {
 	ASSERT( !done );
@@ -9,9 +158,9 @@ bool Walk::iterator::IsAtEndOfChildren() const
 	if( state.empty() )
 		return false;
 
-    const Frame &f = state.top();
+    const Traverse::iterator &ti = state.top();
 
-    return f.index == f.children.size();
+    return ti == Traverse::iterator();
 }
 
 void Walk::iterator::BypassEndOfChildren()
@@ -25,36 +174,13 @@ void Walk::iterator::BypassEndOfChildren()
 	    if( done )
 	    	break;
 
-	    state.top().index++;
+	    ++(state.top());
 	}
 }
 
 void Walk::iterator::Push( TreePtr<Node> n )
 { 
-    Frame f;
-
-    vector< Itemiser::Element * > members = n->Itemise();
-    FOREACH( Itemiser::Element *m, members )
-    {
-        if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(m) )
-        {
-        	// TODO avoid expanding collections here
-        	//FOREACH( const TreePtrInterface &n, *con ) cannot use FOREACH as we want the iterators
-        	for( ContainerInterface::iterator i=con->begin(); i!=con->end(); ++i )
-                f.children.push_back( i );
-        }            
-        else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(m) )
-        {
-            f.children.push_back( PointIterator(ptr) );
-        }
-        else
-        {
-            ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
-        }
-    }
-
-    f.index = 0;
-    state.push( f );
+    state.push( Traverse(n).begin() );
 }        
 
 Walk::iterator::iterator( TreePtr<Node> &r, TreePtr<Node> res ) :
@@ -80,22 +206,11 @@ Walk::iterator::iterator( const Walk::iterator & other ) :
 Walk::iterator::operator string() const
 {
     string s;
-    stack< Frame > ps = state; // std::stack doesn't have [] so copy the whole thing and go backwards
+    stack< Traverse::iterator > ps = state; // std::stack doesn't have [] so copy the whole thing and go backwards
     while( !ps.empty() )
     {
-        Frame f = ps.top();
+        s = string(ps.top()) + string(" ") + s;
         ps.pop();
-        
-        // node type
-        ContainerInterface::iterator child = f.children[f.index];
-        if( *child )
-            s = TypeInfo(*(child->get())).name() + s;
-        else
-            s = string("NULL") + s;
-
-        // member/element number
-        if( !ps.empty() ) // bottom level index always 0, don't print
-            s = SSPrintf(":%d ", f.index) + s; // going backwards so prepend
     }
     return s;
 }
@@ -132,7 +247,7 @@ void Walk::iterator::AdvanceOver()
 	else
 	{
 		// otherwise, propagate
-	    state.top().index++;
+	    ++(state.top());
   	    BypassEndOfChildren();
 	}
 }
@@ -160,9 +275,7 @@ Walk::iterator::reference Walk::iterator::operator*() const
 	}
 	else
 	{
-        Frame f = state.top();
-        ASSERT( f.index < f.children.size() );
-        return *(f.children[f.index]);
+        return *(state.top());
 	}
 }
 
@@ -191,9 +304,7 @@ void Walk::iterator::Overwrite( Walk::iterator::pointer v ) const
     }
     else
     {
-    	Frame f = state.top();
-        ASSERT( f.index < f.children.size() );
-        f.children[f.index].Overwrite( v );
+        state.top().Overwrite( v );
     }
 }
 
