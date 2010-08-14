@@ -4,44 +4,41 @@
 
 bool Traverse::iterator::IsAtEndOfChildren() const
 {
-	ASSERT( index <= children.size() );
-    return index == children.size();
+    return empty || index == children.size();
+}
+
+void Traverse::iterator::NormaliseNewMember()
+{
+	if( mit != m_end )
+		if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(*mit) )
+		{
+			cit = con->begin();
+			c_end = con->end();
+			BypassEndOfContainer();
+		}
 }
 
 void Traverse::iterator::BypassEndOfContainer()
 {
-	while( cit == con->end() )
+	ASSERT( mit != m_end && dynamic_cast<ContainerInterface *>(*mit) ); // this fn requires us to be on a container
+	if( cit == c_end )
 	{
 		++mit;
-		if( mit == members.end() )
-			return;
-		if( con = dynamic_cast<ContainerInterface *>(*mit) )
-			cit = con->begin();
-		else
-			break;
+		NormaliseNewMember();
 	}
-
 }
 
-Traverse::iterator::iterator( TreePtr<Node> r )
+Traverse::iterator::iterator( TreePtr<Node> r ) :
+	empty( false )
 {
-    members = r->Itemise();
+    members = shared_ptr< vector< Itemiser::Element * > >( new vector< Itemiser::Element * >( r->Itemise() ) );
     index = 0;
 
-    mit = members.begin();
+    mit = members->begin();
+    m_end = members->end();
+    NormaliseNewMember();
 
-	if( mit == members.end() )
-		return;
-    if( con = dynamic_cast<ContainerInterface *>(*mit) )
-    {
-    	cit = con->begin();
-    	BypassEndOfContainer();
-    	if( mit == members.end() )
-    		return;
-    }
-
-
-    while(1)
+    while(mit != m_end)
     {
     	if( dynamic_cast<ContainerInterface *>(*mit) )
         {
@@ -57,27 +54,15 @@ Traverse::iterator::iterator( TreePtr<Node> r )
         }
 
 
-        if( con = dynamic_cast<ContainerInterface *>(*mit) )
+        if( dynamic_cast<ContainerInterface *>(*mit) )
         {
-
         	++cit;
-
         	BypassEndOfContainer();
-        	if( mit == members.end() )
-        		return;
         }
-        else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(*mit) )
+        else if( dynamic_cast<TreePtrInterface *>(*mit) )
         {
             ++mit;
-            if( mit == members.end() )
-            	return;
-            if( con = dynamic_cast<ContainerInterface *>(*mit) )
-            {
-            	cit = con->begin();
-            	BypassEndOfContainer();
-            	if( mit == members.end() )
-            		return;
-            }
+            NormaliseNewMember();
         }
         else
         {
@@ -86,14 +71,21 @@ Traverse::iterator::iterator( TreePtr<Node> r )
     }
 }
 
-Traverse::iterator::iterator()
+Traverse::iterator::iterator() :
+	empty( true )
 {
 	index = 0; // children.size() will also be 0, so this is at the end
 }
 
 Traverse::iterator::iterator( const Traverse::iterator & other ) :
 	children( other.children ),
-	index( other.index )
+	index( other.index ),
+    members( other.members ),
+    mit( other.mit ),
+    m_end( other.m_end ),
+    cit( other.cit ),
+    c_end( other.c_end ),
+	empty( other.empty )
 {
 }
 
