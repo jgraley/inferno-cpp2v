@@ -32,16 +32,13 @@ public:
         virtual const bool IsOrdered() const;
         // Some additional operations specific to walk iterators
 	    operator string() const;
-	    void Advance();
 	    iterator(); // makes "end" iterator
 	private:
 	    iterator( TreePtr<Node> root );
-	    bool IsAtEndOfChildren() const;
+	    bool IsAtEnd() const;
 	    void BypassEndOfContainer();
 	    void NormaliseNewMember();
 
-        vector< ContainerInterface::iterator > children;
-        int index;
         shared_ptr< vector< Itemiser::Element * > > members;
         vector< Itemiser::Element * >::iterator mit;
         vector< Itemiser::Element * >::iterator m_end;
