@@ -22,17 +22,17 @@ void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     s_for->initialisation = s_init;
     s_for->condition = s_cond;
     s_for->increment = s_inc;
-    
+
     r_outer->statements = (r_init, r_while);
     r_while->body = r_body;
     r_while->condition = r_cond;
     r_body->statements = (r_forbody, r_inc);
-    
+
 	CouplingSet couplings((
 		Coupling(( s_body, r_forbody )),
 		Coupling(( s_init, r_init )),
 		Coupling(( s_cond, r_cond )),
 		Coupling(( s_inc, r_inc )) ));
-    
+
    	SearchReplace( s_for, r_outer, couplings )( context, proot );
 }

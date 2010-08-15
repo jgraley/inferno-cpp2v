@@ -398,7 +398,7 @@ void RootedSearchReplace::ClearPtrs( TreePtr<Node> dest ) const
     {
         if( TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]) )
         {
-            *dest_ptr = TreePtr<Node>();
+            dest_ptr->set(TreePtr<Node>());
         }
     }       
 }
@@ -422,7 +422,7 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
     vector< Itemiser::Element * > dest_memb = source->Itemise( dest.get() ); // Get the members of dest corresponding to source's class
     ASSERT( source_memb.size() == dest_memb.size() );
 
-    TRACE("Overlaying %d members %s over %s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
+    TRACE("Overlaying %d members source=%s dest=%s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
 
     // Loop over all the members of source (which can be a subset of dest)
     // and for non-NULL members, duplicate them by recursing and write the
@@ -451,7 +451,10 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( dest_ptr )( "itemise for target didn't match itemise for source");
             if( *source_ptr ) // Masked: where source is NULL, do not overwrite
-                *dest_ptr = DuplicateSubtree( *source_ptr, keys, can_key, current_key );
+            {
+            	TreePtr<Node> ndp = DuplicateSubtree( *source_ptr, keys, can_key, current_key );
+                dest_ptr->set(ndp);
+            }
             if( !current_key )
             	ASSERT( *dest_ptr )("Found NULL in replace pattern without a coupling to substitute it");
         }
@@ -459,8 +462,8 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
         {
             ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
         }
-    }        
-    TRACE();
+    }
+    ASSERT( dest );
 }
 
 
@@ -474,7 +477,7 @@ void RootedSearchReplace::Overlay( SequenceInterface *dest,
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
     dest->clear();
 
-    TRACE("duplicating sequence size %d\n", source->size() );
+    TRACE("Overlaying sequence size %d\n", source->size() );
 	FOREACH( const TreePtrInterface &p, *source )
 	{
 		ASSERT( p ); // present simplified scheme disallows NULL, see above
@@ -487,7 +490,7 @@ void RootedSearchReplace::Overlay( SequenceInterface *dest,
    		}
 		else
 		{
-			TRACE("Normal element, inserting directly\n");
+			TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
 			dest->push_back( n );
 		}
 	}
@@ -504,7 +507,7 @@ void RootedSearchReplace::Overlay( CollectionInterface *dest,
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
     dest->clear();
 
-    TRACE("duplicating collection size %d\n", source->size() );
+    TRACE("Overlaying collection size %d\n", source->size() );
 
 	FOREACH( const TreePtrInterface &p, *source )
 	{
@@ -518,7 +521,7 @@ void RootedSearchReplace::Overlay( CollectionInterface *dest,
 		}
 		else
 		{
-			TRACE("Normal element, inserting directly\n");
+			TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
 			dest->insert( n );
 		}
 	}
@@ -552,7 +555,9 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 					TypeInfo(source).name().c_str(), source.get(),
 					TypeInfo(stuff_key->terminus).name().c_str(), stuff_key->terminus.get() );
 			TRACE( "Leaving substitution to duplicate terminus replace pattern\n" );
-			return DuplicateSubtree( replace_stuff->terminus, keys, can_key, shared_ptr<Key>() ); // not in substitution any more
+			TreePtr<Node> dest = DuplicateSubtree( replace_stuff->terminus, keys, can_key, shared_ptr<Key>() ); // not in substitution any more
+			TRACE( "Returning to substitution for rest of stuff\n" );
+			return dest;
 		}
 	}
 
@@ -569,6 +574,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 			!dynamic_pointer_cast<StarBase>( source ) &&
 			!dynamic_pointer_cast<StuffBase>( source ) )
 		{
+			return dest; // TODO  this disables overlaying over substitutions
    	    }
 		else
 		{
@@ -607,7 +613,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 		ASSERT(dest);
 
 		// Make all members in the destination be NULL
-		ClearPtrs( dest );
+		ClearPtrs( dest ); // TODO not sure if need this
     }
     
 	// Overlaying requires type compatibility - check for this
@@ -619,8 +625,18 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 	Overlay( dest, source, keys, can_key, current_key );
 
     ASSERT( dest );
-    TRACE();
-
+/*
+    TRACE("DuplicateSubtree dest={");
+    Walk w(dest);
+    bool first=true;
+    FOREACH( TreePtr<Node> n, w )
+    {
+    	if( !first )
+    		TRACE(", ");
+    	TRACE(TypeInfo(n).name());
+    	first=false;
+    }
+    TRACE("}\n");*/ // TODO put this in as a common utility somewhere
     return dest;
 }
 
@@ -687,7 +703,7 @@ int RootedSearchReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
 	                                             CouplingKeys keys ) // Pass by value is intentional - changes should not propagate back to caller
 {
     int i=0;
-    while(i<20) // TODO!!
+    while(i<1) // TODO!!
     {
     	Result r = SingleSearchReplace( proot,
     			                        search_pattern,
@@ -699,6 +715,7 @@ int RootedSearchReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
        	//ASSERT(i<100)("Too many hits");
         i++;
     }
+
     TRACE("%p exiting", this);
     return i;
 }
@@ -725,11 +742,10 @@ void RootedSearchReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 	else
 		pcontext = &c;
 
-	// Do the search and replace with before and after vaidation
+	// Do the search and replace with before and after validation
 	Validate()( *pcontext, proot );
 	(void)RepeatingSearchReplace( proot, search_pattern, replace_pattern );
 	Validate()( *pcontext, proot );
-
 
     pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
 }
