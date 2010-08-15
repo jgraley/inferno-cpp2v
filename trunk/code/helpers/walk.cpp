@@ -157,22 +157,6 @@ const Traverse::iterator &Traverse::end()
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 bool Walk::iterator::IsAtEndOfChildren() const
 {
 	ASSERT( !done );

@@ -57,7 +57,7 @@ code/build/inferno.a : makefile
 #
 STANDARD_LIBS += -lstdc++
 inferno.exe : makefile code/build/inferno.a $(LLVM_CLANG_LIBS)
-	$(ICC) code/build/inferno.a $(LLVM_CLANG_LIBS:%=$(LLVM)/$(LLVM_BUILD)/lib/%) $(STANDARD_LIBS) -ggdb -o inferno.exe
+	$(ICC) code/build/inferno.a $(LLVM_CLANG_LIBS:%=$(LLVM)/$(LLVM_BUILD)/lib/%) $(STANDARD_LIBS) -ggdb -pg -o inferno.exe
 
 #
 # Run the tests

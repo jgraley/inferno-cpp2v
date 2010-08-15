@@ -46,7 +46,6 @@ public:
         ContainerInterface::iterator c_end;
         bool empty;
 
-
 	    friend class Traverse;
     };
 

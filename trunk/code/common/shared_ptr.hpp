@@ -43,11 +43,17 @@ struct SharedPtrInterface : virtual SUB_BASE, public Traceable
 
     virtual operator bool() const = 0; // for testing against NULL
     virtual VALUE_INTERFACE *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
+    virtual void set( const SharedPtrInterface &o ) = 0; // TODO figure out how to get operator= to work
 };
 
 template<typename SUB_BASE, typename VALUE_INTERFACE, typename VALUE_TYPE>
 struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared_ptr<VALUE_TYPE>
 {
+	virtual void set( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &o )
+	{
+		*this = o;
+	}
+
     inline SharedPtr() {}
 
     inline SharedPtr( VALUE_TYPE *o ) :
@@ -89,7 +95,7 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
 
     virtual SharedPtr &operator=( shared_ptr<VALUE_INTERFACE> n )
     {
-    	(void)operator=<VALUE_INTERFACE>( n );
+    	(void)shared_ptr<VALUE_TYPE>::operator=( dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(n)) );
     	return *this;
     }
 
@@ -130,6 +136,22 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
 		}
 	}
 };
+
+// Similar signature to boost shared_ptr operator==, and we restrict the pointers
+// to having the same subbase and base target
+template< typename SUB_BASE, typename VALUE_INTERFACE, typename X, typename Y >
+inline bool operator==( const SharedPtr<SUB_BASE, VALUE_INTERFACE, X> &x,
+		                const SharedPtr<SUB_BASE, VALUE_INTERFACE, Y> &y)
+{
+	return operator==( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
+}
+
+template< typename SUB_BASE, typename VALUE_INTERFACE, typename X, typename Y >
+inline bool operator!=( const SharedPtr<SUB_BASE, VALUE_INTERFACE, X> &x,
+		                const SharedPtr<SUB_BASE, VALUE_INTERFACE, Y> &y)
+{
+	return operator!=( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
+}
 
 }; // namespace
 

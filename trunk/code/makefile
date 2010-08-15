@@ -11,7 +11,7 @@ INFERNO_MODULES += inferno
 
 $(INFERNO_MODULES:%=build/%.o) : build/%.o : %.cpp */*.hpp */*.inc $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(OPTIONS) $< -o $@ -ggdb
+	$(ICC) -c $(OPTIONS) $< -o $@ -ggdb -pg
 
 build/inferno.a : makefile $(INFERNO_MODULES:%=build/%.o)
 	mkdir -p build
