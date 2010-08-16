@@ -12,6 +12,14 @@
 
 #define HANDLE_EARLY_RETURNS 1
 
+
+struct ThisOne : SoftMakeIdentifier
+{
+	NODE_FUNCTIONS
+	ThisOne( string s ) :
+		SoftMakeIdentifier(s){}
+};
+
 void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
 	TRACE();
@@ -35,7 +43,7 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 	MakeTreePtr< NotMatch<Statement> > s_not3;
 	MakeTreePtr< MatchAll<Statement> > s_and3;
 	MakeTreePtr<SoftMakeIdentifier> r_index_identifier("%s_stack_index");
-	MakeTreePtr<SoftMakeIdentifier> r_identifier("%s_stack");
+	MakeTreePtr<ThisOne> r_identifier("%s_stack");
 
     // Master search - look for functions satisfying the construct limitation and get
 	s_fi->identifier = MakeTreePtr<InstanceIdentifier>();

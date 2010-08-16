@@ -413,6 +413,7 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
 		                           bool can_key,
 		                           shared_ptr<Key> current_key ) const
 {
+	INDENT;
     ASSERT( source->IsLocalMatch(dest.get()) )("source must be a non-strict subclass of destination, so that it does not have more members");
 
     // Itemise the members. Note that the itemiser internally does a
@@ -473,6 +474,7 @@ void RootedSearchReplace::Overlay( SequenceInterface *dest,
 		                           bool can_key,
 		                           shared_ptr<Key> current_key ) const
 {
+	INDENT;
     // For now, always overwrite the dest
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
     dest->clear();
@@ -503,6 +505,7 @@ void RootedSearchReplace::Overlay( CollectionInterface *dest,
 		                           bool can_key,
 		                           shared_ptr<Key> current_key ) const
 {
+	INDENT;
     // For now, always overwrite the dest
     // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
     dest->clear();
@@ -539,21 +542,34 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 		                                                bool can_key,
 		                                                shared_ptr<Key> current_key ) const
 {
+	INDENT;
 	TRACE("Duplicating %s under_substitution=%p\n", TypeInfo(source).name().c_str(), current_key.get());
+	   TRACE("DuplicateSubtree dest={");
+	    Walk w(source);
+	    bool first=true;
+	    FOREACH( TreePtr<Node> n, w )
+	    {
+	    	if( !first )
+	    		TRACE(", ");
+	    	TRACE( n ? TypeInfo(n).name() : "NULL");
+	    	first=false;
+	    }
+	    TRACE("}\n"); // TODO put this in as a common utility somewhere
+
 
     // Are we substituting a stuff node? If so, see if we reached the terminus, and if
 	// so come out of substitution.
 	if( shared_ptr<StuffKey> stuff_key = dynamic_pointer_cast<StuffKey>(current_key) )
 	{
+		TRACE( "Substituting stuff: source=%s:%p, term=%s:%p\n",
+				TypeInfo(source).name().c_str(), source.get(),
+				TypeInfo(stuff_key->terminus).name().c_str(), stuff_key->terminus.get() );
 		ASSERT( stuff_key->replace_pattern );
 		TreePtr<StuffBase> replace_stuff = dynamic_pointer_cast<StuffBase>( stuff_key->replace_pattern );
 		ASSERT( replace_stuff );
 		if( replace_stuff->terminus &&      // There is a terminus in replace pattern
 			source == stuff_key->terminus ) // and the present node is the terminus in the source pattern
 		{
-			TRACE( "Substituting stuff: source=%s:%p, term=%s:%p\n",
-					TypeInfo(source).name().c_str(), source.get(),
-					TypeInfo(stuff_key->terminus).name().c_str(), stuff_key->terminus.get() );
 			TRACE( "Leaving substitution to duplicate terminus replace pattern\n" );
 			TreePtr<Node> dest = DuplicateSubtree( replace_stuff->terminus, keys, can_key, shared_ptr<Key>() ); // not in substitution any more
 			TRACE( "Returning to substitution for rest of stuff\n" );
@@ -574,7 +590,6 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 			!dynamic_pointer_cast<StarBase>( source ) &&
 			!dynamic_pointer_cast<StuffBase>( source ) )
 		{
-			return dest; // TODO  this disables overlaying over substitutions
    	    }
 		else
 		{
@@ -625,18 +640,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 	Overlay( dest, source, keys, can_key, current_key );
 
     ASSERT( dest );
-/*
-    TRACE("DuplicateSubtree dest={");
-    Walk w(dest);
-    bool first=true;
-    FOREACH( TreePtr<Node> n, w )
-    {
-    	if( !first )
-    		TRACE(", ");
-    	TRACE(TypeInfo(n).name());
-    	first=false;
-    }
-    TRACE("}\n");*/ // TODO put this in as a common utility somewhere
+
     return dest;
 }
 
@@ -703,7 +707,7 @@ int RootedSearchReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
 	                                             CouplingKeys keys ) // Pass by value is intentional - changes should not propagate back to caller
 {
     int i=0;
-    while(i<1) // TODO!!
+    while(i<20) // TODO!!
     {
     	Result r = SingleSearchReplace( proot,
     			                        search_pattern,
@@ -840,6 +844,7 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 		                                                           const RootedSearchReplace *sr,
 		                                                           bool can_key )
 {
+	INDENT;
 	ASSERT( this );
 	ASSERT( !key || key->root != pattern ); // just a general usage check
 
@@ -849,6 +854,19 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 	if( coupling.empty() )
 		return TreePtr<Node>();
 	TRACE("MATCH: ");
+	TRACE("coupling={");
+	bool first=true;
+	FOREACH( TreePtr<Node> n, coupling )
+	{
+		if( !first )
+			TRACE(", ");
+		if( pattern == n )
+			TRACE("-->");
+		TRACE(TypeInfo(n).name());
+		first=false;
+	}
+   TRACE("}\n"); // TODO put this in as a common utility somewhere
+
 
 	// If we're keying and we haven't keyed this node so far, key it now
 	TRACE("can_key=%d ", (int)can_key);
@@ -874,7 +892,8 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 		return subs;
 	}
 
-    ASSERT( can_key ); // during substitution pass we should have all couplings keyed
+    ASSERT( can_key ); // during substitutionk pass we should have all couplings keyed
+
     // In KEYING and this coupling not keyed yet (because it will be keyed by another node
     // in the replace pattern). We've got to produce something - don't want to supply the pattern
     // or key without duplication because that breaks rules about using stuff directly, but don't

@@ -39,6 +39,16 @@ public:
     // TODO ostream support?
     static void EndContinuation();
     
+    class Descend
+    {
+    public:
+    	inline Descend() { depth++; }
+    	inline ~Descend() { depth--; }
+    	static void Indent();
+    private:
+        static int depth;
+    };
+
 private:
     const char * const file;
     const int line;
@@ -66,5 +76,7 @@ public:
 // This one does an abort() in-line so you don't get "missing return" warning (which
 // we make an error). You can supply a message but no printf() formatting or arguments or std::string.
 #define ASSERTFAIL(MESSAGE) do { Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
+
+#define INDENT Tracer::Descend indent_
 
 #endif

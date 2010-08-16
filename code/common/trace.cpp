@@ -7,6 +7,13 @@
 #include <malloc.h>
 
 bool Tracer::continuation = false;
+int Tracer::Descend::depth = 0;
+
+void Tracer::Descend::Indent()
+{
+	for( int i=0; i<depth; i++ )
+		printf(" ");
+}
 
 inline void InfernoAbort()
 {
@@ -26,8 +33,11 @@ Tracer::Tracer( const char *f, int l, const char *fu, Flags fl, char const *c ) 
     if( flags & ABORT )
     {
         EndContinuation();
-        printf("\n    Assertion failed: %s\n", c);
-        printf( "    %s:%d in %s()\n", file, line, function);
+        printf("\n");
+        Descend::Indent();
+        printf("----Assertion failed: %s\n", c);
+        Descend::Indent();
+        printf( "----%s:%d in %s()\n", file, line, function);
         continuation = true;
     }
 }
@@ -52,7 +62,8 @@ Tracer &Tracer::operator()()
     //int spaces = stack_track.GetIndent();
     //for( int i=0; i<spaces; i++ )
     //    printf(" ");
-    printf( "    %s:%d in %s()\n", file, line, function);
+    Descend::Indent();
+    printf( "----%s:%d in %s()\n", file, line, function);
     
     return *this;
 }
@@ -71,7 +82,9 @@ Tracer &Tracer::operator()(const char *fmt, ...)
       //  int spaces = stack_track.GetIndent();
         //for( int i=0; i<spaces; i++ )
        //     printf(" ");
-        printf( "    %s:%d in %s() sp %p\n", file, line, function, &auto_variable);
+    	Descend::Indent();
+        printf( "----%s:%d in %s() sp %p\n", file, line, function, &auto_variable);
+        Descend::Indent();
     }
     vprintf( fmt, vl );
     va_end( vl );
@@ -117,3 +130,4 @@ Traceable::operator string() const
 {
     return CPPFilt( typeid( *this ).name() );
 }
+
