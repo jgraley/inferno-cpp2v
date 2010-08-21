@@ -398,7 +398,7 @@ void RootedSearchReplace::ClearPtrs( TreePtr<Node> dest ) const
     {
         if( TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]) )
         {
-            dest_ptr->set(TreePtr<Node>());
+            *dest_ptr = TreePtr<Node>();
         }
     }       
 }
@@ -454,7 +454,7 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
             if( *source_ptr ) // Masked: where source is NULL, do not overwrite
             {
             	TreePtr<Node> ndp = DuplicateSubtree( *source_ptr, keys, can_key, current_key );
-                dest_ptr->set(ndp);
+                *dest_ptr = ndp;
             }
             if( !current_key )
             	ASSERT( *dest_ptr )("Found NULL in replace pattern without a coupling to substitute it");
@@ -544,7 +544,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 {
 	INDENT;
 	TRACE("Duplicating %s under_substitution=%p\n", TypeInfo(source).name().c_str(), current_key.get());
-	   TRACE("DuplicateSubtree dest={");
+/*   TRACE("DuplicateSubtree dest={");
 	    Walk w(source);
 	    bool first=true;
 	    FOREACH( TreePtr<Node> n, w )
@@ -555,7 +555,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 	    	first=false;
 	    }
 	    TRACE("}\n"); // TODO put this in as a common utility somewhere
-
+*/
 
     // Are we substituting a stuff node? If so, see if we reached the terminus, and if
 	// so come out of substitution.
@@ -854,7 +854,7 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 	if( coupling.empty() )
 		return TreePtr<Node>();
 	TRACE("MATCH: ");
-	TRACE("coupling={");
+/*	TRACE("coupling={");
 	bool first=true;
 	FOREACH( TreePtr<Node> n, coupling )
 	{
@@ -865,7 +865,7 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 		TRACE(TypeInfo(n).name());
 		first=false;
 	}
-   TRACE("}\n"); // TODO put this in as a common utility somewhere
+   TRACE("}\n"); */// TODO put this in as a common utility somewhere
 
 
 	// If we're keying and we haven't keyed this node so far, key it now
