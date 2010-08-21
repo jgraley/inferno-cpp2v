@@ -10,7 +10,7 @@ bool Traverse::iterator::IsAtEnd() const
 void Traverse::iterator::NormaliseNewMember()
 {
 	if( !IsAtEnd() )
-		if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(*mit) )
+		if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
 		{
 			cit = con->begin();
 			c_end = con->end();
@@ -20,7 +20,7 @@ void Traverse::iterator::NormaliseNewMember()
 
 void Traverse::iterator::BypassEndOfContainer()
 {
-	ASSERT( !IsAtEnd() && dynamic_cast<ContainerInterface *>(*mit) ); // this fn requires us to be on a container
+	ASSERT( !IsAtEnd() && dynamic_cast<ContainerInterface *>(GetCurrentMember()) ); // this fn requires us to be on a container
 	if( cit == c_end )
 	{
 		++mit;
@@ -29,12 +29,13 @@ void Traverse::iterator::BypassEndOfContainer()
 }
 
 Traverse::iterator::iterator( TreePtr<Node> r ) :
+	root( r ),
 	empty( false )
 {
-    members = shared_ptr< vector< Itemiser::Element * > >( new vector< Itemiser::Element * >( r->Itemise() ) );
+    //members = shared_ptr< vector< int > >( new vector< int >( root->BasicItemise() ) );
 
-    mit = members->begin();
-    m_end = members->end();
+    mit = 0;
+    m_end = root->ItemiseSize();
     NormaliseNewMember();
 }
 
@@ -44,11 +45,11 @@ Traverse::iterator::iterator() :
 }
 
 Traverse::iterator::iterator( const Traverse::iterator & other ) :
-    members( other.members ),
     mit( other.mit ),
     m_end( other.m_end ),
     cit( other.cit ),
     c_end( other.c_end ),
+    root( other.root ),
 	empty( other.empty )
 {
 }
@@ -57,11 +58,11 @@ Traverse::iterator::operator string() const
 {
     if (IsAtEnd())
     	return string("end");
-    else if( dynamic_cast<CollectionInterface *>(*mit) )
+    else if( dynamic_cast<CollectionInterface *>(GetCurrentMember()) )
         return string("{") + TypeInfo(*(cit->get())).name() + "}";
-	else if( dynamic_cast<SequenceInterface *>(*mit) )
+	else if( dynamic_cast<SequenceInterface *>(GetCurrentMember()) )
         return string("[") + TypeInfo(*(cit->get())).name() + "]";
-    else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(*mit) )
+    else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(GetCurrentMember()) )
     {
         if( *ptr )
         	return TypeInfo(*(ptr->get())).name();
@@ -81,12 +82,12 @@ shared_ptr<ContainerInterface::iterator_interface> Traverse::iterator::Clone() c
 Traverse::iterator &Traverse::iterator::operator++()
 {
 	ASSERT( !IsAtEnd() );
-    if( dynamic_cast<ContainerInterface *>(*mit) )
+    if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
     {
     	++cit;
     	BypassEndOfContainer();
     }
-    else if( dynamic_cast<TreePtrInterface *>(*mit) )
+    else if( dynamic_cast<TreePtrInterface *>(GetCurrentMember()) )
     {
         ++mit;
         NormaliseNewMember();
@@ -101,9 +102,9 @@ Traverse::iterator &Traverse::iterator::operator++()
 Traverse::iterator::reference Traverse::iterator::operator*() const
 {
     ASSERT( !IsAtEnd() );
-	if( dynamic_cast<ContainerInterface *>(*mit) )
+	if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
         return *cit;
-    else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(*mit) )
+    else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(GetCurrentMember()) )
         return *ptr;
     else
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
@@ -126,9 +127,9 @@ bool Traverse::iterator::operator==( const ContainerInterface::iterator_interfac
 void Traverse::iterator::Overwrite( Traverse::iterator::pointer v ) const
 {
     ASSERT( !IsAtEnd() );
-	if( dynamic_cast<ContainerInterface *>(*mit) )
+	if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
         cit.Overwrite( v );
-    else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(*mit) )
+    else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(GetCurrentMember()) )
         *ptr = *v;
     else
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");

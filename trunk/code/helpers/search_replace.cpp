@@ -759,6 +759,8 @@ void RootedSearchReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 Coupling CouplingKeys::FindCoupling( TreePtr<Node> node,
 		                             const CouplingSet &couplings )
 {
+	// TODO optimisation: a backing map of TreePtr to Coupling & would optimise
+	// this by a factor of the number of couplings: this and its callees are high on the profile.
 	ASSERT( this );
 	Coupling found; // returns an empty coupling if not found
 	FOREACH( Coupling c, couplings )

@@ -38,13 +38,20 @@ public:
 	    bool IsAtEnd() const;
 	    void BypassEndOfContainer();
 	    void NormaliseNewMember();
+	    inline Itemiser::Element *GetCurrentMember() const
+	    {
+	    	ASSERT( mit != m_end );
+	    	return root->ItemiseIndex( mit );
+	    }
 
-        shared_ptr< vector< Itemiser::Element * > > members;
-        vector< Itemiser::Element * >::iterator mit;
-        vector< Itemiser::Element * >::iterator m_end;
+        // TODO optimisation: get nodes pre-itemised, so we don't have to create, store
+	    // and delete this copy of the itemisation. Cons and destr are high on profile!
+        int mit;
+        int m_end;
         ContainerInterface::iterator cit;
         ContainerInterface::iterator c_end;
-        bool empty;
+        TreePtr<Node> root;
+        bool empty; // TODO use NULL root for empty
 
 	    friend class Traverse;
     };
