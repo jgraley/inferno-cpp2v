@@ -64,7 +64,7 @@ In fact, couplings restrict the entire subtree matched to the coupled nodes to b
 2.5 Notes on tolopogy-oriented tree
 
 In order to maximise the utility of toplogical wildcarding (and its coupling support) the inferno tree has been contrived to express as much information as possible in the node hierarchy and through TreePtrs to other nodes. So for example where a node might naturally contain a boolean (such as the signdness of an integral type) or an enum (such as an access specifier which can be public, private or protected) one of two techniques is used
-- The options are expressed in a set of final nodes as with Signed and Unsigned, making the original node (Intgral) become an intermediate node.
+- The options are expressed in a set of final nodes as with Signed and Unsigned, making the original node (Integral) become an intermediate node.
 - A new hierarchy of nodes is created with a common intermediate and final nodes corresponding to the options, as with Public, Private, Protected all subclasses of AccessSpec
 In fact, this policy leads most nodes to contain only TreePtr, Collection and Sequence. Only a small number of nodes contain other data types such as int, string etc that cnanot be accomodated toplogically. This is termed a toplogically-oriented tree and is a highly consistent canonical form for program elements.
 
@@ -120,12 +120,33 @@ Stuff nodes make be coupled into the replace pattern in order to reproduce the s
 
 Optionally, another member of the Stuff node called restrictor may be filled in (otherwise it defaults to NULL). The restrictor will typically be an intermediate node, with all members left empty or NULL. Whenever the Stuff node is about to recurse through a TreePtr in its search for a terminus match, it will skip any node that is not the same or a sub-class of the restrictor.
 
-Therefore, Stuff will only find terminus that can be reached via a path that meets the restruction. This may be useful when, extending the above example, we wish to avoid matching an If that might be in a function that is declared inline in a class that is declared inside the function of interest. If we wish to exclude such cases, we can set the restrictor to a Statement node. Now an If node (our terminus) can only be found if there is a direct path of nested Statements, which includes Compound, For, While etc but does not include Type nodes, and unwanted If in this case would be within a type subtree.
+Therefore, Stuff will only find a terminus that can be reached via a path that satisfies the restriction. This may be useful when, extending the above example, we wish to avoid matching an If that might be in a function that is declared inline in a class that is declared inside the function of interest. If we wish to exclude such cases, we can set the restrictor to a Statement node. Now an If node (our terminus) can only be found if there is a direct path of nested Statements, which includes Compound, For, While etc but does not include Type nodes. An unwanted If in this case would be within a Type subtree and so not matched as the terminus.
 
 6 Boolean search patterns
+
+Search patterns may be restricted according to boolean rules, as explained below. They must be templated on the pointed-to type.
+
 6.1 NotMatch
+
+NotMatch implements the "not" function (the complement in set theory). The NotMatch node should be placed at the root of the subtree of interest, and the member named pattern should be set to point to the subtree that should not match. 
+
+The pattern can itself include wildcards, so a NotMatch(Integral) would match nay data type other than signed or unsigned integer types.
+
 6.2 MatchAll
+
+MatchAll implements the "and" function (intersection in set theory). The MatchAll node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that should match. 
+
+The "usual semantics" of an Inferno search pattern is an "and" rule (intersection) in the sense that all nodes in the search pattern must have a match in the basence of boolean patterns. Inferno is already running an "and" rule in the usual case of search patterns and therefore the MatchAll node is only needed in specialist cases. One common case is where it is paired with the above MotMatch node in the form MatchAll( X, NotMatch(Y) ). This provides an and-not or but-not type of restriction, which can be useful to prevent degenerate no-change replace cases that would cause the engine not to terminate.
+
 6.3 Notes on keyability of couplings
+
+In the case of the NotMatch node and any future "or"-rule boolean nodes, it will be possible for Inferno to find a match even though some portion of the search pattern did not match. This can cause problems with couplings. Consider a NotMatch node in a search pattern that is coupled to a node in a replace pattern. This will work as expected - the subtree that did not match the NotMatch pattern is subtituted successfully. 
+
+But consider coupling a node within the NotMatch's subtree into the replace pattern. If there was an overall match of the searach pattern, that must mean that some node in the NotMatch pattern did not match. It is possible that the NotMatch pattern is not even of the same layout (topology) as the corresponding subtree in the input program. If this is the case, it is not well defined what node or subtree should be substituted in the replkace pattern.
+
+Inferno search and replace has an implementation concept called keying, which is the process of choosing a particular input program node (key node) that will correspond to a particualar coupling. Each coupling only needs to be keyed once, and once it is keyed, the key-to-coupling relationship remains unchanged until the replace has completed.
+
+Inferno cannot key to nodes underneath NotMatch (or "or" type boolean patterns). Consequently, every coupling that include search pattern nodes must include at least one node that is not under NotMatch (or any "or" type boolean pattern). Inferno will find a keyable node in the coupling and key to it if one exists, otherwise an error will be reported. I belive such an error indicates a fundamentally ill-defined transformation.
 
 7 Transforming search patterns
 7.1 TypeOf
