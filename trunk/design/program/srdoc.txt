@@ -1,0 +1,147 @@
+		Inferno Search and Replace User Guide
+
+1 The SearchReplace class
+
+Inferno uses a search and replace engine for the majority of transformation steps. The generic search and replace implementation may be found in the SearchReplace class and a number of supporting classes. The SearchReplace constructor requires certain data structures that specify search pattern, replace pattern and some other info. Once constructed, a SearchReplace object serves as a tree transforming functor (ie it implements the Transformation interface).
+
+This documentation explains how to set up the correct inputs to the SearchReplace constructor so that it will create the transformation you desire.
+
+1.1 Search and replace patterns as subtrees
+
+The first two parameters to the constructor are, resectively, the search pattern and the replace pattern. Each is a TreePtr to the root of a subtree of nodes. SearchReplace will search for an 
+occurance of the search pattern and replace it with a duplicate of the replace pattern.
+
+1.2 Couplings
+
+The third parameter is a CouplingSet, which is a set of Couplings. Each Coupling is a set of TreePtrs to nodes in the search and/or replace patterns. Broadly speaking, SearchReplace will ensure that each of the TreePtrs in a particular coupling all refer to the same actual node. This will be explained fully in the remainder of this document.
+
+1.3 Termination
+
+The SearchReplace algorithm repeatedly attempts to find a match to the search pattern, and substitutes the replace pattern, until it can no longer find a match to the search pattern. Therefore, it can run forever if for example the replace pattern re-creates a search pattern match. It it the users responsibility to prevent this from occuring.
+
+The reason for this strategy is that in some cases it is reasonable to recreate the search pattern as long as repeated substitutions eventually "converge" to a final tree that has no matches. This convergent policy reflects the Inferno strategy of seeking to eliminate constructs, thereby reducing the expressivity of the dialect. 
+
+2 Tolopogical wildcarding
+
+Inferno nodes are orgnised in an inheritance hierarchy beginning with Node, from which certain intermedates like Statement and Type are derived, and then the final nodes are derived from these intermediates. In many cases there are multiple levels of intermediates between Node and the final Node, and Multiple inheritance is allowed. This hierarchy is best understood in terms of set theory -
+where subclass is synonymous with subset.
+
+The trees for programs are only allowed to consist of final nodes. So Node and the intermediates are not allowed. They are allowed, however, in search and replace patterns as long as they would not end up in the output of the search and replace transformation. 
+
+When an intermediate node is seen in a replace pattern, it serves as a wildcard for any node derived from the one specified. For example, Return and Goto are both derived from Statement, so a Statement node in a search pattern will match Return, Goto and any other node derived from statement. In set theoretic terms, we have restricted the search to the set of statements.
+
+As an example of multiple layers of intermediates, consider that Expression is derived from Statememt, making expressions a subset of statements. This is consistent with the rule in C that an expression may be used in place of a statement, but not the other way around. Consequently, a node of type Statement in a search pattern will match any expression as well as other kinds of statements, however, an Expression node in a search pattern will only match expressions.
+
+Due to Inferno's type-safe tree, it is not possible to specify nonsensically broad intermediates in a search pattern. This is because the TreePtrs used in nodes to point to other nodes are themselves pointers to intermediates, and only identical or more derived (subset) nodes may be pointed to. Therefore the broadest wildcard possible is one whose type is the same as that of the TreePtr that will point to it. Such a pointer is maximally wild and will match on all legal input trees.
+
+Such maximally wild pointers may be considered similar to the use of "?" character in filename wildcarding. Other intermediate topological wildcards could be likened to a value range in certain textual schemes for example /a-z,A-Z/ though it should be noted that the set-theoretic restriction is more expressive than linear range restriction.
+
+2.1 Can populate intermediates members
+
+In the inferno tree, some intermediate nodes have members - these members would appear in all derived classes. Members may be filled in when intermediates are used in a search pattern. These members will be matched as normal and will serve to restrict the search pattern.
+
+For example, giving the node Integral and filling in width with a SpecificInteger of value 32, which we coulod write Integral(width:SpecificInteger(32)), will match 32-bit signed and unsinged data types since Signed and Unsigned both derive from Integral.
+
+Note: to wildcard the width and fix the signedness we would use eg
+Signed(Integer) in other words we use the final for the type (Signed) and fill in thw width with the maximal wildcard, which is Integer in this case.
+
+2.3 NULL in search patterns
+
+In trees for programs, we do not allow NULL (examples of deprecated functionality must be dealt with explicitly, for example with nodes such as Nop and Void).
+
+We do allow NULL in search patterns, where it serves as the maximal wild card. Therefore, Signed(Integer) is the same as Signed(NULL) as a search pattern.
+
+2.4 Restricting with couplings
+
+As soon as we begin supporting wildcards, we also begin to want to require that two or more wildcard matches actually matched the same thing. 
+
+For example suppose we use the wildcard Integral in two places in a search pattern. Each will individually match Signed or Unsigned, giving a total of four matching combinations: SS, SU, US and UU. But suppose we only want to match on SS or UU (perhaps because the two types must be the same for an optimisation to be correct). 
+
+We can achieve this by adding a Coupling to the CouplingSet we supply to SearchReplace's constructor. The coupling we create should contain two TreePtrs, each pointing to one of the Integral nodes we placed in the search pattern. Inferno will now only find a match when the two types are the same. Couplings point to nodes in the search tree, but they act on the nodes found in the input program tree and will check to make sure they are the same as each other. 
+
+In fact, couplings restrict the entire subtree matched to the coupled nodes to be identical to each other - so the two types in the above example would be restricted to have the same width regardless of what is supplied for the width in the search pattern. This limitation simplifies other uses of couplings discussed below.
+
+2.5 Notes on tolopogy-oriented tree
+
+In order to maximise the utility of toplogical wildcarding (and its coupling support) the inferno tree has been contrived to express as much information as possible in the node hierarchy and through TreePtrs to other nodes. So for example where a node might naturally contain a boolean (such as the signdness of an integral type) or an enum (such as an access specifier which can be public, private or protected) one of two techniques is used
+- The options are expressed in a set of final nodes as with Signed and Unsigned, making the original node (Intgral) become an intermediate node.
+- A new hierarchy of nodes is created with a common intermediate and final nodes corresponding to the options, as with Public, Private, Protected all subclasses of AccessSpec
+In fact, this policy leads most nodes to contain only TreePtr, Collection and Sequence. Only a small number of nodes contain other data types such as int, string etc that cnanot be accomodated toplogically. This is termed a toplogically-oriented tree and is a highly consistent canonical form for program elements.
+
+3 Substitution with couplings
+
+When a wildcard has been specified in a search pattern, it is often useful to be able to introduce the program subtree that matched the wildcard into the output program, as a substitute for part of the replace pattern.
+
+We can acheive this using a Coupling that has at least one TreePtr into the search pattern and at least one TreePtr into the replace pattern. Now, whenever the search pattern finds a match, the Coupling will be associated with the subtree of the input program that matched the coupled nodes. SearchReplace will substitute this subtree into the replace pattern. The node in the replace pattern should be a non-strict superclass (ie base) of the coupled search wildcard node, and it's members should be left NULL for simple substitution as described here.
+
+3.1 Overlaying
+
+After duplicating the coupled subtree for substitution, SearchReplace will overlay any replace pattern that is present. Overlaying works recursively and selects the nodes that appear in the output as follows:
+- The first node encountered is always duplciated from coupled subtree
+- Descendant nodes with NULL TreePtrs in the replace pattern are duplciated from coupled subtree
+- Descendant nodes with no TreePtr in the replace pattern because a superclass (base) was specified are duplciated from coupled subtree [1]
+- Descendant nodes that are present and non-NULL are overwritten from the replace pattern
+
+Once a node is overwritten from the replace pattern, its descendants are also taken from the replace pattern exclusively, if not overlayed.
+
+[1] Just to clarify, the nodes in replace patterns that are used for substitution are allowed to be intermediate nodes just like in search patterns. They can even be superclasses of the search pattern nodes to which they are coupled. Superclasses in general may lack some members - using a superclass here is like setting those members to NULL.
+
+4 Star search pattern
+
+The Inferno tree supports one-to-many relationships using containers, of which two types are available: Sequence, which preserves ordering and Collection, which does not. When creating a search pattern it can be useful to be able to match zero or more elements of a container. We can do this using a special node called Star<>, which is templated on the collection's element type. So a container of TreePtrs to Statements can be wildcarded using Star<Statement>.  
+
+Star nodes may be coupled into colelctions in the replace pattern, in order to reproduce all the nodes that were matched by the Star in the search pattern. 
+
+A Star may only be placed in a container, never as ordinary member node of another node.
+
+4.1 In Sequence
+
+A Star node in a Sequence in a search pattern acts like a "*" character in a filename, in other words it can match zero or more elements at the position of the star. It is possible to use * multiple times and at any position in the pattern sequence. But it is not possible to place two stars consecutively. For example the Sequence (Star<Statement>, If, Star<Statement>, For, Star<Statement>) is a search pattern for any Sequence of Statements that contains an If and a For, and which places the If before the For.
+
+4.2 In Collection
+
+A Star in a Collection acts similarly as when in a Sequence. However, since Collections are unordered, the semantics differ slightly. A Collection in a search pattern may only contain zero or one Star node. If a star node is present, it will match all nodes not matched by other (non-Star) elements of the Collection. For example, the Collection (Star<Declaration>, Typedef, Static) will match any Collection of Declarations that include Typedef and Static, and these may appear in any order.
+
+4.3 Note on collection matching
+
+To clarify, Inferno uses a non-ordering-preserving implementation to store all Collections, including ones in search and replace patterns. This means that the order in which elements are specified when constructing a Collection should not affect behaviour. So for example (Static, Typedef, Star<Declaration>) will be equivalent to the above example.
+
+5 Stuff search pattern
+
+Since Inferno search and replace operates on trees rather than linear sequences of tokens, it is often useful to be able to wildcard a subtree. In fact, the maximally wild intermediate node will accomplish this through topological wildcarding, as discussed above. 
+
+But it is useful to be able to explicitly match some part of the subtree, named the terminus, regardless of the path from the root of the subtree to the terminus. This is accomplished using the Stuff<> node. At the base of the subtree we place a Stuff node, templated on the pointed-to type. This node has a member named terminus, which is a TreePtr<Node>, and any Node or subtree of nodes can be referenced from here.
+
+Inferno will search the subtree under the Stuff node for a match to the terminus. If a terminus match is found, the stuff node is considered a match. For example Stuff<Compound> with terminus as If may be given as the body of a function. It will match the terminus to any If node within the body as well as within nested Compund blocks, For or While loop bodies etc.
+
+Stuff nodes make be coupled into the replace pattern in order to reproduce the subtree that Stuff matched to in the output program. When coupling the stuff nodes, it is possible to overlay the terminus with an alternative subtree in order to modify only what is under the terminus. The terminus node itself and any node in the subtree under it may also be coupled into the replace pattern. 
+
+5.1 Restriction
+
+Optionally, another member of the Stuff node called restrictor may be filled in (otherwise it defaults to NULL). The restrictor will typically be an intermediate node, with all members left empty or NULL. Whenever the Stuff node is about to recurse through a TreePtr in its search for a terminus match, it will skip any node that is not the same or a sub-class of the restrictor.
+
+Therefore, Stuff will only find terminus that can be reached via a path that meets the restruction. This may be useful when, extending the above example, we wish to avoid matching an If that might be in a function that is declared inline in a class that is declared inside the function of interest. If we wish to exclude such cases, we can set the restrictor to a Statement node. Now an If node (our terminus) can only be found if there is a direct path of nested Statements, which includes Compound, For, While etc but does not include Type nodes, and unwanted If in this case would be within a type subtree.
+
+6 Boolean search patterns
+6.1 NotMatch
+6.2 MatchAll
+6.3 Notes on keyability of couplings
+
+7 Transforming search patterns
+7.1 TypeOf
+7.2 GetDeclaration
+7.3 Notes on transformation interface
+
+8 Builder replace patterns
+8.1 BuildIdentifier
+8.2 Coupling builders
+
+9 Rooted vs free search and replace
+9.1 Note on implementation
+
+10 Master/slave search and replace
+10.1 Nested
+
+11 Worked example: for to while
+
+12 Worked example: generate stacks
