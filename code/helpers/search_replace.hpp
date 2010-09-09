@@ -60,19 +60,18 @@ enum Result { NOT_FOUND = (int)false,
 // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
 // Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
 // in the collection.
-struct StarBase : virtual Node { NODE_FUNCTIONS };
+struct StarBase : virtual Node {};
 template<class VALUE_TYPE>
-struct Star : StarBase, VALUE_TYPE { NODE_FUNCTIONS };
+struct Star : StarBase, VALUE_TYPE {};
 
 // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
 struct StuffBase : virtual Node
 {
-	NODE_FUNCTIONS;
 	TreePtr<Node> restrictor; // Restricts the intermediate nodes in the truncated subtree
 	TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
 };
 template<class VALUE_TYPE>
-struct Stuff : StuffBase, VALUE_TYPE { NODE_FUNCTIONS };
+struct Stuff : StuffBase, VALUE_TYPE {};
 
 
 
@@ -293,12 +292,10 @@ private:
     struct SubSequence : Node,
                          Sequence<Node>
     {
-    	NODE_FUNCTIONS
     };
     struct SubCollection : Node,
                            Collection<Node>
     {
-    	NODE_FUNCTIONS
     };
 };
 
@@ -323,7 +320,6 @@ struct NotMatch : VALUE_TYPE,
                  RootedSearchReplace::SoftSearchPattern,
                  NotMatchBase
 {
-    NODE_FUNCTIONS
     TreePtr<VALUE_TYPE> pattern;
 private:
     virtual Result DecidedCompare( const RootedSearchReplace *sr,
@@ -361,7 +357,6 @@ struct MatchAll : VALUE_TYPE,
                  RootedSearchReplace::SoftSearchPattern,
                  MatchAllBase
 {
-    NODE_FUNCTIONS
     mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
 private:
     virtual Result DecidedCompare( const RootedSearchReplace *sr,
@@ -383,7 +378,6 @@ private:
 
 struct TransformToBase : RootedSearchReplace::SoftSearchPattern
 {
-    NODE_FUNCTIONS
     TreePtr<Node> pattern;
     TransformToBase( Transformation *t ) :
     	transformation(t)
@@ -402,7 +396,6 @@ private:
 template<class VALUE_TYPE>
 struct TransformTo : TransformToBase, VALUE_TYPE
 {
-	NODE_FUNCTIONS
     TransformTo( Transformation *t ) : TransformToBase (t) {}
 };
 

@@ -37,6 +37,11 @@ void Validate::operator()( TreePtr<Node> context,
 			// Check that every identifier has a declaration
 			if( TreePtr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(x) )
 			    (void)GetDeclaration()(context, ii);
+
+			// if x is missing it's NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone
+			// of the most specialised base of x that does have NODE_FUNCTIONS.
+			TreePtr<Node> y = dynamic_pointer_cast<Node>((*x).Clone());
+			ASSERT( typeid(*y)==typeid(*x) )(*x)(" apparently does not contain NODE_FUNCTIONS macro because it Clone()s to ")(*y)(" at ")(w);
         }
 
 		if( x )
@@ -58,13 +63,7 @@ void Validate::operator()( TreePtr<Node> context,
 					ASSERTFAIL("Got something from itemise that isn't a container or a shared pointer at ")(w);
 				}
 			}
-
-			// if x is missing it's NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone
-			// of the most specialised base of x that does have NODE_FUNCTIONS.
-			TreePtr<Node> y = dynamic_pointer_cast<Node>((*x).Clone());
-			ASSERT( typeid(*y)==typeid(*x) )(*x)(" apparently does not contain NODE_FUNCTIONS macro because it Clone()s to ")(*y)(" at ")(w);
 		}
-
 	}
 
 	Walk w2( *proot );
