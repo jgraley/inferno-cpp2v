@@ -44,8 +44,6 @@ public:
 	    	return root->ItemiseIndex( mit );
 	    }
 
-        // TODO optimisation: get nodes pre-itemised, so we don't have to create, store
-	    // and delete this copy of the itemisation. Cons and destr are high on profile!
         int mit;
         int m_end;
         ContainerInterface::iterator cit;

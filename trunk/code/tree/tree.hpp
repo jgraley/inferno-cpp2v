@@ -783,8 +783,7 @@ struct RangeCase : SwitchTarget
     TreePtr<Expression> value_hi; // inclusive
 }; 
 
-// Case label, supporting range extension in case useful
-// for optimisation
+// Case label
 struct Case : SwitchTarget
 {
 	NODE_FUNCTIONS_FINAL
