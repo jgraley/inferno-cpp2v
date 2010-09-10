@@ -51,15 +51,22 @@ RootedSearchReplace::~RootedSearchReplace()
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
 Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
-		                                             TreePtr<Node> pattern,
-		                                             CouplingKeys *keys,
-		                                             bool can_key,
-		                                             Conjecture &conj ) const
+											TreePtr<Node> pattern,
+											CouplingKeys *keys,
+											bool can_key,
+    										Conjecture &conj ) const
 {
+	ASSERT( x ); // Target must not be NULL
 	if( !pattern )    // NULL matches anything in search patterns (just to save typing)
 		return FOUND;
 
-    if( TreePtr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
+	// Check whether the present node matches. Do this for all nodes: this will be the local
+	// restriction for normal nodes and the pre-restriction for special nodes (based on
+	// how IsLocalMatch() has been overridden.
+	if( !pattern->IsLocalMatch(x.get()) )
+		return NOT_FOUND;
+
+	if( TreePtr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
     {
     	// Hand over to any soft search functionality in the search pattern node
     	Result r = ssp->DecidedCompare( this, x, keys, can_key, conj );
@@ -69,14 +76,12 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
     else if( TreePtr<StuffBase> stuff_pattern = dynamic_pointer_cast<StuffBase>(pattern) )
     {
     	// Invoke stuff node compare
+    	// Check whether the present node matches
     	return DecidedCompare( x, stuff_pattern, keys, can_key, conj );
     }
     else
     {
     	// Not a soft node, so handle explicitly
-		// Check whether the present node matches
-		if( !pattern->IsLocalMatch(x.get()) )
-			return NOT_FOUND;
 
 		// Recurse through the children. Note that the itemiser internally does a
 		// dynamic_cast onto the type of pattern, and itemises over that type. x must
@@ -142,8 +147,13 @@ Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
 	ContainerInterface::iterator xit = x.begin();
 	ContainerInterface::iterator pit = pattern.begin();
 
+	FOREACH( TreePtr<Node> p, x )
+	    ASSERT( p );
+
 	while( pit != pattern.end() )
 	{
+		ASSERT( xit == x.end() || *xit );
+
 		// Get the next element of the pattern
 		TreePtr<Node> pe( *pit );
 		++pit;
@@ -714,6 +724,7 @@ int RootedSearchReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
     			                        replace_pattern,
     			                        keys );
     	TRACE("%p result %d", this, r);
+    	Validate()( *proot, proot );
     	if( r != FOUND )
             break;
        	//ASSERT(i<100)("Too many hits");
@@ -749,7 +760,6 @@ void RootedSearchReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 	// Do the search and replace with before and after validation
 	Validate()( *pcontext, proot );
 	(void)RepeatingSearchReplace( proot, search_pattern, replace_pattern );
-	Validate()( *pcontext, proot );
 
     pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
 }
@@ -1063,6 +1073,8 @@ Result TransformToBase::DecidedCompare( const RootedSearchReplace *sr,
 	{
 	    // Transformation returned NULL, probably because the candidate was of the wrong
 		// type, so just don't match
+		// TODO no need for this, the pre-restriction will take care of wrong type. But maybe
+		// want this for other invalid cases?
 	    return NOT_FOUND;
 	}
 }

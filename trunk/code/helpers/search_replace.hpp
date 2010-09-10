@@ -55,6 +55,12 @@ enum Result { NOT_FOUND = (int)false,
 			  FOUND     = (int)true };
 
 
+#define SPECIAL_MATCHER_FUNCTION \
+	virtual bool IsLocalMatch( const Matcher *candidate ) const \
+    { \
+        return !!dynamic_cast<const VALUE_TYPE *>(candidate); \
+    }
+
 // The * wildcard can match more than one node of any type in a container
 // In a Sequence, only a contiguous subsequence of 0 or more elements will match
 // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
@@ -62,7 +68,7 @@ enum Result { NOT_FOUND = (int)false,
 // in the collection.
 struct StarBase : virtual Node {};
 template<class VALUE_TYPE>
-struct Star : StarBase, VALUE_TYPE {};
+struct Star : StarBase, VALUE_TYPE { SPECIAL_MATCHER_FUNCTION };
 
 // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
 struct StuffBase : virtual Node
@@ -71,7 +77,7 @@ struct StuffBase : virtual Node
 	TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
 };
 template<class VALUE_TYPE>
-struct Stuff : StuffBase, VALUE_TYPE {};
+struct Stuff : StuffBase, VALUE_TYPE { SPECIAL_MATCHER_FUNCTION };
 
 
 
@@ -292,10 +298,12 @@ private:
     struct SubSequence : Node,
                          Sequence<Node>
     {
+    	NODE_FUNCTIONS // Need these for Clone/Duplicate, called during replace
     };
     struct SubCollection : Node,
                            Collection<Node>
     {
+    	NODE_FUNCTIONS
     };
 };
 
@@ -316,10 +324,11 @@ public:
 struct NotMatchBase {};
 
 template<class VALUE_TYPE>
-struct NotMatch : VALUE_TYPE,
+struct NotMatch : virtual VALUE_TYPE,
                  RootedSearchReplace::SoftSearchPattern,
                  NotMatchBase
 {
+	SPECIAL_MATCHER_FUNCTION
     TreePtr<VALUE_TYPE> pattern;
 private:
     virtual Result DecidedCompare( const RootedSearchReplace *sr,
@@ -353,10 +362,11 @@ private:
 struct MatchAllBase {};
 
 template<class VALUE_TYPE>
-struct MatchAll : VALUE_TYPE,
+struct MatchAll : virtual VALUE_TYPE,
                  RootedSearchReplace::SoftSearchPattern,
                  MatchAllBase
 {
+	SPECIAL_MATCHER_FUNCTION
     mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
 private:
     virtual Result DecidedCompare( const RootedSearchReplace *sr,
@@ -396,6 +406,7 @@ private:
 template<class VALUE_TYPE>
 struct TransformTo : TransformToBase, VALUE_TYPE
 {
+	SPECIAL_MATCHER_FUNCTION
     TransformTo( Transformation *t ) : TransformToBase (t) {}
 };
 

@@ -40,8 +40,8 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 	MakeTreePtr<Return> s_return, sn_return, r_return;
 	MakeTreePtr<Expression> ss_identifier;
 	MakeTreePtr<Subscript> sr_sub;
-	MakeTreePtr< NotMatch<Statement> > s_not3;
-	MakeTreePtr< MatchAll<Statement> > s_and3;
+	MakeTreePtr< NotMatch<Node> > s_not3;
+	MakeTreePtr< MatchAll<Node> > s_and3;
 	MakeTreePtr<SoftMakeIdentifier> r_index_identifier("%s_stack_index");
 	MakeTreePtr<ThisOne> r_identifier("%s_stack");
 
