@@ -19,16 +19,17 @@ void Validate::operator()( TreePtr<Node> context,
 	total_refs.clear();
 
 	Walk w( *proot );
-	FOREACH( const TreePtr<Node> x, w )
+	for( Walk::iterator wit = w.begin(); wit != w.end(); ++wit )
 	{
+		const TreePtr<Node> x = *wit;
 		if( !is_pattern ) // Don't do these checks on search/replace patterns
 		{
 			// NULL pointers not allowed in program tree (though they are allowed in search/replace patterns)
-			ASSERT( x )("Found NULL pointer in tree at ")( w );
+			ASSERT( x )("Found NULL pointer in tree at ")( wit );
 
 			// Intermediate nodes are only allowed in search and replace patterns; the trees for programs
 			// must be built from final nodes.
-			ASSERT( x->IsFinal() )( "Found intermediate (non-final) node ")(*x)(" at ")(w);
+			ASSERT( x->IsFinal() )( "Found intermediate (non-final) node ")(*x)(" at ")(wit);
 
 			// Check that we can successfully call TypeOf on every Expression
 			if( TreePtr<Expression> e = dynamic_pointer_cast<Expression>(x) )
@@ -41,7 +42,7 @@ void Validate::operator()( TreePtr<Node> context,
 			// if x is missing it's NODE_FUNCTIONS macro, then the Clone we get (y) will be a clone
 			// of the most specialised base of x that does have NODE_FUNCTIONS.
 			TreePtr<Node> y = dynamic_pointer_cast<Node>((*x).Clone());
-			ASSERT( typeid(*y)==typeid(*x) )(*x)(" apparently does not contain NODE_FUNCTIONS macro because it Clone()s to ")(*y)(" at ")(w);
+			ASSERT( typeid(*y)==typeid(*x) )(*x)(" apparently does not contain NODE_FUNCTIONS macro because it Clone()s to ")(*y)(" at ")(wit);
         }
 
 		if( x )
@@ -60,7 +61,7 @@ void Validate::operator()( TreePtr<Node> context,
 				}
 				else
 				{
-					ASSERTFAIL("Got something from itemise that isn't a container or a shared pointer at ")(w);
+					ASSERTFAIL("Got something from itemise that isn't a container or a shared pointer at ")(wit);
 				}
 			}
 		}

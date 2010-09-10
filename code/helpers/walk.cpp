@@ -59,16 +59,11 @@ Traverse::iterator::operator string() const
     if (IsAtEnd())
     	return string("end");
     else if( dynamic_cast<CollectionInterface *>(GetCurrentMember()) )
-        return string("{") + TypeInfo(*(cit->get())).name() + "}";
+        return string("{") + TypeInfo(cit->get()).name() + string("}");
 	else if( dynamic_cast<SequenceInterface *>(GetCurrentMember()) )
-        return string("[") + TypeInfo(*(cit->get())).name() + "]";
+        return string("[") + TypeInfo(cit->get()).name() + string("]");
     else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(GetCurrentMember()) )
-    {
-        if( *ptr )
-        	return TypeInfo(*(ptr->get())).name();
-        else
-        	return string("NULL");
-    }
+       	return TypeInfo(*(ptr->get())).name();
     else
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
 }

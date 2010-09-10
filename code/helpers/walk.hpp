@@ -28,6 +28,7 @@ public:
 		virtual reference operator*() const;
 		virtual pointer operator->() const;
 		virtual bool operator==( const ContainerInterface::iterator_interface &ib ) const;
+		virtual bool operator!=( const ContainerInterface::iterator_interface &ib ) const { return !operator==(ib); }
 		virtual void Overwrite( pointer v ) const;
         virtual const bool IsOrdered() const;
         // Some additional operations specific to walk iterators
@@ -97,6 +98,7 @@ public:
 		virtual reference operator*() const;
 		virtual pointer operator->() const;
 		virtual bool operator==( const ContainerInterface::iterator_interface &ib ) const;
+		virtual bool operator!=( const ContainerInterface::iterator_interface &ib ) const { return !operator==(ib); }
 		virtual void Overwrite( pointer v ) const;
         virtual const bool IsOrdered() const;
         // Some additional operations specific to walk iterators
