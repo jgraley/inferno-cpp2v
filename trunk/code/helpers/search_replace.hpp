@@ -321,21 +321,23 @@ public:
                     vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
 };
 
-struct NotMatchBase {};
+struct NotMatchBase {}; // needed for graph plotter
 
+// Match if the supplied patterns does not match (NOT)
 template<class VALUE_TYPE>
 struct NotMatch : virtual VALUE_TYPE,
                  RootedSearchReplace::SoftSearchPattern,
                  NotMatchBase
 {
 	SPECIAL_MATCHER_FUNCTION
+	// Pattern is an abnormal context
     TreePtr<VALUE_TYPE> pattern;
 private:
     virtual Result DecidedCompare( const RootedSearchReplace *sr,
-    		                                            TreePtr<Node> x,
-    		                                            CouplingKeys *keys,
-    		                                            bool can_key,
-    		                                            Conjecture &conj ) const
+    		                       TreePtr<Node> x,
+    		                       CouplingKeys *keys,
+    		                       bool can_key,
+    		                       Conjecture &conj ) const
     {
     	if( keys && can_key )
     	{
@@ -361,6 +363,7 @@ private:
 
 struct MatchAllBase {};
 
+// Match all of the supplied patterns (AND)
 template<class VALUE_TYPE>
 struct MatchAll : virtual VALUE_TYPE,
                  RootedSearchReplace::SoftSearchPattern,
@@ -370,10 +373,10 @@ struct MatchAll : virtual VALUE_TYPE,
     mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
 private:
     virtual Result DecidedCompare( const RootedSearchReplace *sr,
-    		                                            TreePtr<Node> x,
-    		                                            CouplingKeys *keys,
-    		                                            bool can_key,
-    		                                            Conjecture &conj ) const
+                                   TreePtr<Node> x,
+                                   CouplingKeys *keys,
+                                   bool can_key,
+                                   Conjecture &conj ) const
     {
     	FOREACH( const TreePtr<VALUE_TYPE> i, patterns )
     	{
@@ -384,6 +387,71 @@ private:
         return FOUND;
     }
 };
+
+struct MatchAnyBase {};
+
+// Match zero or more of the supplied patterns (OR)
+template<class VALUE_TYPE>
+struct MatchAny : virtual VALUE_TYPE,
+                 RootedSearchReplace::SoftSearchPattern,
+                 MatchAnyBase
+{
+	SPECIAL_MATCHER_FUNCTION
+	// Patterns are an abnormal context
+    mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
+private:
+    virtual Result DecidedCompare( const RootedSearchReplace *sr,
+    		                       TreePtr<Node> x,
+    		                       CouplingKeys *keys,
+    		                       bool can_key,
+    		                       Conjecture &conj ) const
+    {
+    	FOREACH( const TreePtr<VALUE_TYPE> i, patterns )
+    	{
+    		Result r = sr->Compare( x, TreePtr<Node>(i), keys, false );
+    	    if( r )
+    	    	return FOUND;
+    	}
+        return NOT_FOUND;
+    }
+};
+
+
+struct MatchNBase {};
+
+// Match exactly N of the supplied patterns.
+template<class VALUE_TYPE, int N>
+struct MatchN : virtual VALUE_TYPE,
+                 RootedSearchReplace::SoftSearchPattern,
+                 MatchNBase
+{
+	SPECIAL_MATCHER_FUNCTION
+	// Patterns are an abnormal context (if you are setting N==patterns.size(), then you want
+	// MatchAll, whose patterns are not abnormal).
+    mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
+private:
+    virtual Result DecidedCompare( const RootedSearchReplace *sr,
+    		                       TreePtr<Node> x,
+    		                       CouplingKeys *keys,
+    		                       bool can_key,
+    		                       Conjecture &conj ) const
+    {
+    	int tot=0;
+    	FOREACH( const TreePtr<VALUE_TYPE> i, patterns )
+    	{
+    		Result r = sr->Compare( x, TreePtr<Node>(i), keys, false );
+    	    if( r )
+    	    	tot++;
+    	    if( tot>N )
+    	    	return NOT_FOUND; // early out
+    	}
+        return (tot==N) ? FOUND : NOT_FOUND;
+    }
+};
+
+// Match one of the supplied patterns (ie XOR)
+template<class VALUE_TYPE>
+struct MatchOne : MatchN<VALUE_TYPE, 1> {};
 
 
 struct TransformToBase : RootedSearchReplace::SoftSearchPattern
