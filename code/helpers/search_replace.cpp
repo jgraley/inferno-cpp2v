@@ -198,6 +198,7 @@ Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
 		    	TreePtr<SubSequence> ss( new SubSequence);
 		    	for( ContainerInterface::iterator it=xit_begin_star; it != xit; ++it ) // TODO FOREACH?
 		    	{
+		    		// Apply prerestriction
 		    		if( !pe->IsLocalMatch( it->get()) )
 		    			return NOT_FOUND;
 		    		ss->push_back( *it );
@@ -288,6 +289,7 @@ Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
     if( !xremaining->empty() && !seen_star )
     	return NOT_FOUND; // there were elements left over and no star to match them against
 
+    // Apply pre-restriction to the star
     if( seen_star && star )
         FOREACH( const TreePtrInterface &xe, *xremaining )
             if( !star->IsLocalMatch( xe.get()) )

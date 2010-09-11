@@ -258,6 +258,16 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		*shape = "circle";
 		return string("&"); // note & is a wildcard in dot but not handled properly, this becomes "& ". At least some of the time.
 	}
+	else if( dynamic_pointer_cast<MatchAnyBase>(sp) )
+	{
+		*shape = "circle";
+		return string("|");
+	}
+	else if( dynamic_pointer_cast<MatchNBase>(sp) )
+	{
+		*shape = "circle";
+		return string("^");
+	}
 	else if( dynamic_pointer_cast<TransformToBase>(sp) )
 	{
 		*shape = "hexagon";
