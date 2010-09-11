@@ -1,6 +1,7 @@
 
 #include "tree/tree.hpp"
 #include "walk.hpp"
+#include "search_replace.hpp"
 
 bool Traverse::iterator::IsAtEnd() const
 {
@@ -185,21 +186,24 @@ void Walk::iterator::Push( TreePtr<Node> n )
     state.push( Traverse(n).begin() );
 }        
 
-Walk::iterator::iterator( TreePtr<Node> &r, TreePtr<Node> res ) :
+Walk::iterator::iterator( TreePtr<Node> &r, const RootedSearchReplace *rc, CouplingKeys *k ) :
     root( new TreePtr<Node>(r) ),
-    restrictor( res ),
+    restriction_comparison( rc ),
+    keys( k ),
     done( false )
 {
 }
 
 Walk::iterator::iterator() :
+	restriction_comparison( NULL ),
     done( true )
 {
 }        
 
 Walk::iterator::iterator( const Walk::iterator & other ) :
 	root( other.root ),
-	restrictor( other.restrictor ),
+	restriction_comparison( other.restriction_comparison ),
+	keys( other.keys ),
 	state( other.state ),
 	done( other.done )
 {
@@ -222,8 +226,18 @@ void Walk::iterator::AdvanceInto()
 	ASSERT( !done );
 	ASSERT( !IsAtEndOfChildren() );
 	TreePtr<Node> element = **this; // look at current node
-    if( element &&                                                    // must be non-NULL
-    	(!restrictor || restrictor->IsLocalMatch(element.get()) ) ) // and pass the restriction
+	bool recurse = false;
+	if( element ) // must be non-NULL
+	{
+		recurse = true;
+		if( restriction_comparison ) // is there a restriction?
+		{
+			if( !restriction_comparison->Compare( element, keys, false ) ) // must pass the restriction
+				recurse = false;
+		}
+	}
+
+    if( recurse )
     {
     	// Step into
         Push( **this );
@@ -316,17 +330,25 @@ const bool Walk::iterator::IsOrdered() const
 }
 
 Walk::Walk( TreePtr<Node> r,
-		    TreePtr<Node> res ) :
+		    TreePtr<Node> res,
+		    const CouplingSet c,
+		    CouplingKeys *k ) :
 	root(r),
-	restrictor(res),
-	my_begin( iterator( root, restrictor ) ),
+	restriction_comparison( res ? (new RootedSearchReplace(res, TreePtr<Node>(), c)) : NULL ), // TODO pass in coupling TODO optimise case of no restriction
+	keys( k ),
+	my_begin( iterator( root, restriction_comparison, k ) ),
 	my_end( iterator() )
 {
 }
 
+Walk::~Walk()
+{
+	delete restriction_comparison;
+}
+
 const Walk::iterator &Walk::begin()
 {
-	my_begin = iterator( root, restrictor );
+	my_begin = iterator( root, restriction_comparison, keys );
 	return my_begin;
 }
 
