@@ -5,6 +5,7 @@
 #include "common/read_args.hpp"
 #include "walk.hpp"
 #include "transformation.hpp"
+#include "coupling.hpp"
 #include <set>
 
 // In-tree search and replace utility. To use, you make a search pattern and a 
@@ -50,9 +51,6 @@
 // - Slave search/replace so that a second SR can happen for each match
 //   of the first one, and can borrow its couplings.
 
-// This just serves to complicate matters - just use bools directly
-enum Result { NOT_FOUND = (int)false,
-			  FOUND     = (int)true };
 
 
 #define SPECIAL_MATCHER_FUNCTION \
@@ -78,76 +76,9 @@ struct StuffBase : virtual Node
 };
 template<class VALUE_TYPE>
 struct Stuff : StuffBase, VALUE_TYPE { SPECIAL_MATCHER_FUNCTION };
-
-
-
-// Base class for coupling keys; this deals with individual node matches, and also with stars
-// by means of pointing "root" at a SubCollection or SubSequence
-struct Key
-{
-	virtual ~Key(){}  // be a virtual hierarchy
-	TreePtr<Node> root; // Tree node at matched pattern; root of any replace subtree
-	TreePtr<Node> replace_pattern; // Tree node at matched pattern; root of any replace subtree
-};
-
 struct StuffKey : Key
 {
 	TreePtr<Node> terminus;
-};
-
-struct Coupling : public set< TreePtr<Node> >
-{
-	inline Coupling() {}
-/*	inline Coupling( const Sequence< Node > &seq )
-	{
-		Sequence< Node > s2 = seq;
-		FOREACH( TreePtr<Node> v, s2 )
-			insert( v );
-	}*/
-	template<typename L, typename R>
-	inline Coupling( pair<L, R> p )
-	{
-		Coupling l( p.first );
-		FOREACH( TreePtr<Node> v, l )
-			insert( v );
-		Coupling r( p.second );
-		FOREACH( TreePtr<Node> v, r )
-			insert( v );
-	}
-	inline Coupling( TreePtr<Node> n )
-	{
-		insert( n );
-	}
-};
-
-typedef set<Coupling> CouplingSet;
-
-class RootedSearchReplace;
-class CouplingKeys
-{
-public:
-	CouplingKeys()
-	{
-	}
-	Result KeyAndRestrict( TreePtr<Node> x,
-						   TreePtr<Node> pattern,
-						   const RootedSearchReplace *sr,
-						   bool can_key );
-	Result KeyAndRestrict( shared_ptr<Key> key,
-						   TreePtr<Node> pattern,
-						   const RootedSearchReplace *sr,
-						   bool can_key );
-	TreePtr<Node> KeyAndSubstitute( TreePtr<Node> x, // source after soft nodes etc
-									   TreePtr<Node> pattern, // source
-									   const RootedSearchReplace *sr,
-									   bool can_key );
-	TreePtr<Node> KeyAndSubstitute( shared_ptr<Key> key,
-									   TreePtr<Node> pattern,
-									   const RootedSearchReplace *sr,
-									   bool can_key );
-private:
-	Coupling FindCoupling( TreePtr<Node> node, const CouplingSet &couplings );
-	Map< Coupling, shared_ptr<Key> > keys_map;
 };
 
 class Conjecture
@@ -173,8 +104,6 @@ private:
 class RootedSearchReplace : InPlaceTransformation
 {  
 public:
-    CouplingSet couplings;
-
     // Constructor and destructor. Search and replace patterns and couplings are
     // specified here, so that we have a fully confiugured functor.
     RootedSearchReplace( TreePtr<Node> sp=TreePtr<Node>(),
@@ -221,6 +150,7 @@ public:
     // Some self-testing
     static void Test();
         
+    CouplingSet couplings;
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;
     vector<RootedSearchReplace *> slaves;
@@ -265,9 +195,8 @@ private:
     // Compare ring (now trivial)
 public:
     Result Compare( TreePtr<Node> x,
-    		        TreePtr<Node> pattern,
-    		        CouplingKeys *match_keys = NULL,
-    		        bool can_key = false ) const;
+      	            CouplingKeys *match_keys = NULL,
+	                bool can_key = false ) const;
 private:
     // Replace ring
     void ClearPtrs( TreePtr<Node> dest ) const;
@@ -351,7 +280,8 @@ private:
     	    // a. We didn't recurse during KEYING pass and
     	    // b. Search under not can terminate with NOT_FOUND, but parent search will continue
     	    // Consequently, we go in at Compare level, which creates a new conjecture.
-    		Result r = sr->Compare( x, TreePtr<Node>(pattern), keys, false );
+    		RootedSearchReplace rsr( pattern );
+    		Result r = rsr.Compare( x, keys, false );
 			TRACE("SoftNot got %d, returning the opposite!\n", (int)r);
     		if( r==NOT_FOUND )
 				return FOUND;
@@ -408,7 +338,8 @@ private:
     {
     	FOREACH( const TreePtr<VALUE_TYPE> i, patterns )
     	{
-    		Result r = sr->Compare( x, TreePtr<Node>(i), keys, false );
+    		RootedSearchReplace rsr( i );
+    		Result r = rsr.Compare( x, keys, false );
     	    if( r )
     	    	return FOUND;
     	}
@@ -439,7 +370,8 @@ private:
     	int tot=0;
     	FOREACH( const TreePtr<VALUE_TYPE> i, patterns )
     	{
-    		Result r = sr->Compare( x, TreePtr<Node>(i), keys, false );
+    		RootedSearchReplace rsr( i );
+    		Result r = rsr.Compare( x, keys, false );
     	    if( r )
     	    	tot++;
     	    if( tot>N )

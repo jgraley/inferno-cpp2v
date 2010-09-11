@@ -233,10 +233,10 @@ Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
 
 
 Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
-		                                             CollectionInterface &pattern,
-		                                             CouplingKeys *keys,
-		                                             bool can_key,
-		                                             Conjecture &conj ) const
+											CollectionInterface &pattern,
+											CouplingKeys *keys,
+											bool can_key,
+											Conjecture &conj ) const
 {
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
@@ -308,15 +308,15 @@ Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
 Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
-		                                             TreePtr<StuffBase> stuff_pattern,
-		                                             CouplingKeys *keys,
-		                                             bool can_key,
-		                                             Conjecture &conj ) const
+										    TreePtr<StuffBase> stuff_pattern,
+										    CouplingKeys *keys,
+										    bool can_key,
+										    Conjecture &conj ) const
 {
 	ASSERT( stuff_pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
 	// Define a walk, rooted at this node, restricted as specified in search pattern
-	Walk wx( x, stuff_pattern->restrictor );
+	Walk wx( x, stuff_pattern->restrictor, couplings, keys );
 
 	// Get decision from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = conj.HandleDecision( wx.begin(), wx.end() );
@@ -395,16 +395,14 @@ Result RootedSearchReplace::MatchingDecidedCompare( TreePtr<Node> x,
 
 
 Result RootedSearchReplace::Compare( TreePtr<Node> x,
-		                                      TreePtr<Node> pattern,
-		                                      CouplingKeys *keys,
-		                                      bool can_key ) const
+									 CouplingKeys *keys,
+								  	 bool can_key ) const
 {
-	TRACE("Comparing x=%s with pattern=%s, match keys at %p\n", typeid(*x).name(), typeid(*pattern).name(), keys );
+	TRACE("Comparing x=%s\n", typeid(*x).name() );
 	// Create the conjecture object we will use for this compare, and then go
 	// into the recursive compare function
 	Conjecture conj;
-	Result r = conj.Search( x, pattern, keys, can_key, this );
-	return r;
+	return conj.Search( x, search_pattern, keys, can_key, this );
 }
 
 
@@ -693,7 +691,7 @@ Result RootedSearchReplace::SingleSearchReplace( TreePtr<Node> *proot,
 		                                                              CouplingKeys keys ) // Pass by value is intentional - changes should not propogate back to caller
 {
 	TRACE("%p Begin search\n", this);
-	Result r = Compare( *proot, search_pattern, &keys, true );
+	Result r = Compare( *proot, &keys, true );
 	if( r != FOUND )
 		return NOT_FOUND;
 
@@ -772,156 +770,6 @@ void RootedSearchReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
     pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
 }
 
-
-// Find a coupling containing the supplied node
-Coupling CouplingKeys::FindCoupling( TreePtr<Node> node,
-		                             const CouplingSet &couplings )
-{
-	// TODO optimisation: a backing map of TreePtr to Coupling & would optimise
-	// this by a factor of the number of couplings: this and its callees are high on the profile.
-	ASSERT( this );
-	Coupling found; // returns an empty coupling if not found
-	FOREACH( Coupling c, couplings )
-    {
-        Coupling::iterator ni = c.find( node );
-        if( ni != c.end() )
-        {
-        	ASSERT( found.empty() )("Found more than one coupling for a node - consider merging the couplings");
-        	found = c;
-        }
-    }
-    return found;
-}
-
-
-
-Result CouplingKeys::KeyAndRestrict( TreePtr<Node> x,
-		                                                                    TreePtr<Node> pattern,
-		                                                                    const RootedSearchReplace *sr,
-		                                                                    bool can_key )
-{
-	shared_ptr<Key> key( new Key );
-	key->root = x;
-	return KeyAndRestrict( key, pattern, sr, can_key );
-}
-
-Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
-		                                                                    TreePtr<Node> pattern,
-		                                                                    const RootedSearchReplace *sr,
-		                                                                    bool can_key )
-{
-	ASSERT( this );
-	// Find a coupling for this node. If the node is not in a coupling then there's
-	// nothing for us to do, so return without restricting the search.
-	Coupling coupling = FindCoupling( pattern, sr->couplings );
-	if( coupling.empty() )
-		return FOUND;
-
-	// If we're keying and we haven't keyed this node so far, key it now
-	TRACE("MATCH: can_key=%d\n", (int)can_key);
-	if( can_key && !keys_map[coupling] )
-	{
-		TRACE("keying... key ptr %p new value %p, presently %d keys out of %d couplings\n",
-				keys_map[coupling].get(), key.get(),
-				keys_map.size(), sr->couplings.size() );
-
-		keys_map[coupling] = key;
-
-		return FOUND; // always match when keying (could restrict here too as a slight optimisation, but KISS for now)
-	}
-
-    // Always restrict
-	// We are restricting the search, and this node has been keyed, so compare the present tree node
-	// with the tree node stored for the coupling. This comparison should not match any couplings
-	// (it does not include stuff from any search or replace pattern) so do not allow couplings.
-	// Since collections (which require decisions) can exist within the tree, we must allow iteration
-	// through choices, and since the number of decisions seen may vary, we must start a new conjecture.
-	// Therefore, we recurse back to Compare().
-	ASSERT( keys_map[coupling] ); // should have been caught by CheckMatchSetsKeyed()
-	Result r;
-	if( key->root != keys_map[coupling]->root )
-		r = sr->Compare( key->root, keys_map[coupling]->root );
-	else
-		r = FOUND; // TODO optimisation being done in wrong place
-	TRACE("result %d\n", r);
-	return r;
-}
-
-TreePtr<Node> CouplingKeys::KeyAndSubstitute( TreePtr<Node> x,
-                                                                   TreePtr<Node> pattern,
-                                                                   const RootedSearchReplace *sr,
-                                                                   bool can_key )
-{
-	shared_ptr<Key> key( new Key );
-	key->root = x;
-	return KeyAndSubstitute( key, pattern, sr, can_key );
-}
-
-// Note return is NULL in all cases unless we substituted in which case it is the result of the
-// substitution, duplicated for our convenience. Always check the return value for NULL.
-TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be NULL meaning we are not allowed to key the node
-		                                                           TreePtr<Node> pattern,
-		                                                           const RootedSearchReplace *sr,
-		                                                           bool can_key )
-{
-	INDENT;
-	ASSERT( this );
-	ASSERT( !key || key->root != pattern ); // just a general usage check
-
-	// Find a coupling for this node. If the node is not in a coupling then there's
-	// nothing for us to do, so return without restricting the search.
-	Coupling coupling = FindCoupling( pattern, sr->couplings );
-	if( coupling.empty() )
-		return TreePtr<Node>();
-	TRACE("MATCH: ");
-/*	TRACE("coupling={");
-	bool first=true;
-	FOREACH( TreePtr<Node> n, coupling )
-	{
-		if( !first )
-			TRACE(", ");
-		if( pattern == n )
-			TRACE("-->");
-		TRACE(TypeInfo(n).name());
-		first=false;
-	}
-   TRACE("}\n"); */// TODO put this in as a common utility somewhere
-
-
-	// If we're keying and we haven't keyed this node so far, key it now
-	TRACE("can_key=%d ", (int)can_key);
-	if( can_key && key && !keys_map[coupling] )
-	{
-		TRACE("keying... coupling %p key ptr %p new value %p, presently %d keys out of %d couplings\n",
-				&coupling, &keys_map[coupling], key.get(),
-				keys_map.size(), sr->couplings.size() );
-		keys_map[coupling] = key;
-
-		return key->root;
-	}
-
-	if( keys_map[coupling] )
-	{
-		// Always substitute
-		TRACE("substituting ");
-		ASSERT( keys_map[coupling] );
-		keys_map[coupling]->replace_pattern = pattern; // Only fill this in while substituting under the node
-		TreePtr<Node> subs = sr->DuplicateSubtree( keys_map[coupling]->root, this, can_key, keys_map[coupling] ); // Enter substitution
-		// TODO can_key should be false in the above?
-		keys_map[coupling]->replace_pattern = TreePtr<Node>();
-		return subs;
-	}
-
-    ASSERT( can_key ); // during substitutionk pass we should have all couplings keyed
-
-    // In KEYING and this coupling not keyed yet (because it will be keyed by another node
-    // in the replace pattern). We've got to produce something - don't want to supply the pattern
-    // or key without duplication because that breaks rules about using stuff directly, but don't
-    // want to call DuplicateSubtree etc because it might recurse endlessly or have other unwanted
-    // side-effects. Since this is the KEYING pass the generated tree will get thrown away so
-    // just produce a nondescript Node.
-    return TreePtr<Node>();
-}
 
 void Conjecture::PrepareForDecidedCompare()
 {
@@ -1090,40 +938,38 @@ Result TransformToBase::DecidedCompare( const RootedSearchReplace *sr,
 
 void RootedSearchReplace::Test()
 {
-    RootedSearchReplace sr;
-    
     {
         // single node with topological wildcarding
         TreePtr<Void> v(new Void);
-        ASSERT( sr.Compare( v, v ) == FOUND );
+        ASSERT( RootedSearchReplace( v ).Compare( v ) == FOUND );
         TreePtr<Boolean> b(new Boolean);
-        ASSERT( sr.Compare( v, b ) == NOT_FOUND );
-        ASSERT( sr.Compare( b, v ) == NOT_FOUND );
+        ASSERT( RootedSearchReplace( b ).Compare( v ) == NOT_FOUND );
+        ASSERT( RootedSearchReplace( v ).Compare( b ) == NOT_FOUND );
         TreePtr<Type> t(new Type);
-        ASSERT( sr.Compare( v, t ) == FOUND );
-        ASSERT( sr.Compare( t, v ) == NOT_FOUND );
-        ASSERT( sr.Compare( b, t ) == FOUND );
-        ASSERT( sr.Compare( t, b ) == NOT_FOUND );
+        ASSERT( RootedSearchReplace( t ).Compare( v ) == FOUND );
+        ASSERT( RootedSearchReplace( v ).Compare( t ) == NOT_FOUND );
+        ASSERT( RootedSearchReplace( t ).Compare( b ) == FOUND );
+        ASSERT( RootedSearchReplace( b ).Compare( t ) == NOT_FOUND );
         
         // node points directly to another with TC
         TreePtr<Pointer> p1(new Pointer);
         p1->destination = v;
-        ASSERT( sr.Compare( p1, b ) == NOT_FOUND );
-        ASSERT( sr.Compare( p1, p1 ) == FOUND );
+        ASSERT( RootedSearchReplace( b ).Compare( p1 ) == NOT_FOUND );
+        ASSERT( RootedSearchReplace( p1 ).Compare( p1 ) == FOUND );
         TreePtr<Pointer> p2(new Pointer);
         p2->destination = b;
-        ASSERT( sr.Compare( p1, p2 ) == NOT_FOUND );
+        ASSERT( RootedSearchReplace( p2 ).Compare( p1 ) == NOT_FOUND );
         p2->destination = t;
-        ASSERT( sr.Compare( p1, p2 ) == FOUND );
-        ASSERT( sr.Compare( p2, p1 ) == NOT_FOUND );
+        ASSERT( RootedSearchReplace( p2 ).Compare( p1 ) == FOUND );
+        ASSERT( RootedSearchReplace( p1 ).Compare( p2 ) == NOT_FOUND );
     }
     
     {
         // string property
         TreePtr<SpecificString> s1( new SpecificString("here") );
         TreePtr<SpecificString> s2( new SpecificString("there") );
-        ASSERT( sr.Compare( s1, s1 ) == FOUND );
-        ASSERT( sr.Compare( s1, s2 ) == NOT_FOUND );
+        ASSERT( RootedSearchReplace( s1 ).Compare( s1 ) == FOUND );
+        ASSERT( RootedSearchReplace( s2 ).Compare( s1 ) == NOT_FOUND );
     }    
     
     {
@@ -1131,31 +977,31 @@ void RootedSearchReplace::Test()
         TreePtr<SpecificInteger> i1( new SpecificInteger(3) );
         TreePtr<SpecificInteger> i2( new SpecificInteger(5) );
         TRACE("  %s %s\n", ((llvm::APSInt)*i1).toString(10).c_str(), ((llvm::APSInt)*i2).toString(10).c_str() );
-        ASSERT( sr.Compare( i1, i1 ) == FOUND );
-        ASSERT( sr.Compare( i1, i2 ) == NOT_FOUND );
+        ASSERT( RootedSearchReplace( i1 ).Compare( i1 ) == FOUND );
+        ASSERT( RootedSearchReplace( i2 ).Compare( i1 ) == NOT_FOUND );
     }    
     
     {
         // node with sequence, check lengths 
         TreePtr<Compound> c1( new Compound );
-        ASSERT( sr.Compare( c1, c1 ) == FOUND );
+        ASSERT( RootedSearchReplace( c1 ).Compare( c1 ) == FOUND );
         TreePtr<Nop> n1( new Nop );
         c1->statements.push_back( n1 );
-        ASSERT( sr.Compare( c1, c1 ) == FOUND );
+        ASSERT( RootedSearchReplace( c1 ).Compare( c1 ) == FOUND );
         TreePtr<Nop> n2( new Nop );
         c1->statements.push_back( n2 );
-        ASSERT( sr.Compare( c1, c1 ) == FOUND );
+        ASSERT( RootedSearchReplace( c1 ).Compare( c1 ) == FOUND );
         TreePtr<Compound> c2( new Compound );
-        ASSERT( sr.Compare( c1, c2 ) == NOT_FOUND );
+        ASSERT( RootedSearchReplace( c2 ).Compare( c1 ) == NOT_FOUND );
         TreePtr<Nop> n3( new Nop );
         c2->statements.push_back( n3 );
-        ASSERT( sr.Compare( c1, c2 ) == NOT_FOUND );
+        ASSERT( RootedSearchReplace( c2 ).Compare( c1 ) == NOT_FOUND );
         TreePtr<Nop> n4( new Nop );
         c2->statements.push_back( n4 );
-        ASSERT( sr.Compare( c1, c2 ) == FOUND );
+        ASSERT( RootedSearchReplace( c2 ).Compare( c1 ) == FOUND );
         TreePtr<Nop> n5( new Nop );
         c2->statements.push_back( n5 );
-        ASSERT( sr.Compare( c1, c2 ) == NOT_FOUND );
+        ASSERT( RootedSearchReplace( c2 ).Compare( c1 ) == NOT_FOUND );
     }
 
     {
@@ -1166,33 +1012,8 @@ void RootedSearchReplace::Test()
         TreePtr<Compound> c2( new Compound );
         TreePtr<Statement> s( new Statement );
         c2->statements.push_back( s );
-        ASSERT( sr.Compare( c1, c2 ) == FOUND );
-        ASSERT( sr.Compare( c2, c1 ) == NOT_FOUND );
-    }
-    
-    {        
-        // topological with extra member in target node
-        /* gone obsolete with tree changes TODO un-obsolete
-        TreePtr<Label> l( new Label );
-        TreePtr<Public> p1( new Public );
-        l->access = p1;
-        TreePtr<LabelIdentifier> li( new LabelIdentifier );
-        li->name = "mylabel";
-        l->identifier = li;
-        TreePtr<Declaration> d( new Declaration );
-        TreePtr<Public> p2( new Public );
-        d->access = p2;
-        ASSERT( sr.Compare( l, d ) == true );
-        ASSERT( sr.Compare( d, l ) == false );
-        TreePtr<Private> p3( new Private );
-        d->access = p3;
-        ASSERT( sr.Compare( l, d ) == false );
-        ASSERT( sr.Compare( d, l ) == false );
-        TreePtr<AccessSpec> p4( new AccessSpec );
-        d->access = p4;
-        ASSERT( sr.Compare( l, d ) == true );
-        ASSERT( sr.Compare( d, l ) == false );
-        */
+        ASSERT( RootedSearchReplace( c2 ).Compare( c1 ) == FOUND );
+        ASSERT( RootedSearchReplace( c1 ).Compare( c2 ) == NOT_FOUND );
     }
 }
 
