@@ -137,18 +137,15 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
 // xstart and pstart are the indexes into the sequence where we will begin checking for a match.
 // It is assumed that elements before these have already been matched and may be ignored.
 Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
-		                                             SequenceInterface &pattern,
-		                                             CouplingKeys *keys,
-		                                             bool can_key,
-		                                             Conjecture &conj ) const
+		                                    SequenceInterface &pattern,
+		                                    CouplingKeys *keys,
+		                                    bool can_key,
+		                                    Conjecture &conj ) const
 {
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
 	ContainerInterface::iterator xit = x.begin();
 	ContainerInterface::iterator pit = pattern.begin();
-
-	FOREACH( TreePtr<Node> p, x )
-	    ASSERT( p );
 
 	while( pit != pattern.end() )
 	{
@@ -199,8 +196,12 @@ Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
 		    if( pe )
 		    {
 		    	TreePtr<SubSequence> ss( new SubSequence);
-		    	for( ContainerInterface::iterator it=xit_begin_star; it != xit; ++it )
+		    	for( ContainerInterface::iterator it=xit_begin_star; it != xit; ++it ) // TODO FOREACH?
+		    	{
+		    		if( !pe->IsLocalMatch( it->get()) )
+		    			return NOT_FOUND;
 		    		ss->push_back( *it );
+		    	}
 				// Apply couplings to this Star and matched range
 				if( keys )
 		    		if( !keys->KeyAndRestrict( TreePtr<Node>(ss), pe, this, can_key ) )
@@ -260,7 +261,7 @@ Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
         	ASSERT(!seen_star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
         	// TODO remove this restriction - I might want to match one star and leave another unmatched.
             star = maybe_star; // remember for later and skip to next pattern
-            seen_star = true;
+            seen_star = true; // TODO do we need?
         }
 	    else // not a Star so match singly...
 	    {
@@ -286,6 +287,11 @@ Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
 
     if( !xremaining->empty() && !seen_star )
     	return NOT_FOUND; // there were elements left over and no star to match them against
+
+    if( seen_star && star )
+        FOREACH( const TreePtrInterface &xe, *xremaining )
+            if( !star->IsLocalMatch( xe.get()) )
+		    	return NOT_FOUND;
 
     // If we got here, the node matched the search pattern. Now apply couplings
     TRACE("seen_star %d  star %p\n", seen_star, star.get() );
