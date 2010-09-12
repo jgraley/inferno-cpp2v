@@ -69,8 +69,7 @@ Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
 
 	if( key->root != keys_map[coupling]->root )
 	{
-		RootedSearchReplace rsr( keys_map[coupling]->root );
-		r = rsr.Compare( key->root );
+		r = sr->Compare( key->root, keys_map[coupling]->root );
 	}
 	else
 		r = FOUND; // TODO optimisation being done in wrong place
