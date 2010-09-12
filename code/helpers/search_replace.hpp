@@ -156,6 +156,9 @@ public:
     vector<RootedSearchReplace *> slaves;
     TreePtr<Node> *pcontext;
     
+    // TODO get rid of mutable by removing a lot of "const"
+    mutable Conjecture conjecture;
+
 private:
     // LocalCompare ring
     bool LocalCompare( TreePtr<Node> x,
