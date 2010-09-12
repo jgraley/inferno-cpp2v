@@ -195,7 +195,8 @@ private:
     // Compare ring (now trivial)
 public:
     Result Compare( TreePtr<Node> x,
-      	            CouplingKeys *match_keys = NULL,
+    		        TreePtr<Node> pattern,
+    		        CouplingKeys *match_keys = NULL,
 	                bool can_key = false ) const;
 private:
     // Replace ring
@@ -280,8 +281,7 @@ private:
     	    // a. We didn't recurse during KEYING pass and
     	    // b. Search under not can terminate with NOT_FOUND, but parent search will continue
     	    // Consequently, we go in at Compare level, which creates a new conjecture.
-    		RootedSearchReplace rsr( pattern );
-    		Result r = rsr.Compare( x, keys, false );
+    		Result r = sr->Compare( x, pattern, keys, false );
 			TRACE("SoftNot got %d, returning the opposite!\n", (int)r);
     		if( r==NOT_FOUND )
 				return FOUND;
@@ -338,8 +338,7 @@ private:
     {
     	FOREACH( const TreePtr<VALUE_TYPE> i, patterns )
     	{
-    		RootedSearchReplace rsr( i );
-    		Result r = rsr.Compare( x, keys, false );
+    		Result r = sr->Compare( x, i, keys, false );
     	    if( r )
     	    	return FOUND;
     	}
@@ -370,8 +369,7 @@ private:
     	int tot=0;
     	FOREACH( const TreePtr<VALUE_TYPE> i, patterns )
     	{
-    		RootedSearchReplace rsr( i );
-    		Result r = rsr.Compare( x, keys, false );
+    		Result r = sr->Compare( x, i, keys, false );
     	    if( r )
     	    	tot++;
     	    if( tot>N )

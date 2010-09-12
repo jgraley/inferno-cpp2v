@@ -110,12 +110,16 @@ public:
 	    void AdvanceInto();
 	    iterator(); // makes "end" iterator
 	private:
-	    iterator( TreePtr<Node> &root, const RootedSearchReplace *rc, CouplingKeys *k );
+	    iterator( TreePtr<Node> &root,
+	    		  TreePtr<Node> restrictor,
+	    		  const RootedSearchReplace *rc,
+	    		  CouplingKeys *k );
 	    bool IsAtEndOfChildren() const;
 	    void BypassEndOfChildren();
 	    void Push( TreePtr<Node> n );
 
 	    shared_ptr< TreePtr<Node> > root;
+	    TreePtr<Node> restrictor;
 		const RootedSearchReplace *restriction_comparison;
 	    CouplingKeys *keys;
 	    stack< Traverse::iterator > state;
@@ -129,9 +133,8 @@ public:
 	// same parameters and it will be equivalent.
 	Walk( TreePtr<Node> root, // root of the subtree to walk
 		  TreePtr<Node> restrictor = TreePtr<Node>(), // optional restrictor; walk skips these and does not recurse under them
-		  CouplingSet c = CouplingSet(),
+		  const RootedSearchReplace *rsr = NULL,
 		  CouplingKeys *k = NULL ); // optional coupling set for coupling into restrictor
-	~Walk();
 
 	// Standard container ops, note that modification is not allowed through container interface
 	virtual const iterator &begin();
@@ -140,7 +143,8 @@ public:
     virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
 private:
     TreePtr<Node> root;
-    RootedSearchReplace *restriction_comparison;
+    TreePtr<Node> restrictor;
+    const RootedSearchReplace *restriction_comparison;
     CouplingKeys *keys;
     iterator my_begin, my_end;
 };
