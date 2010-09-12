@@ -795,10 +795,10 @@ bool Conjecture::ShouldTryMore( Result r, int threshold )
 
 
 Result Conjecture::Search( TreePtr<Node> x,
-																	 TreePtr<Node> pattern,
-																	 CouplingKeys *keys,
-																	 bool can_key,
-																	 const RootedSearchReplace *sr )
+					       TreePtr<Node> pattern,
+					       CouplingKeys *keys,
+						   bool can_key,
+					  	   const RootedSearchReplace *sr )
 {
 	// Loop through candidate conjectures
 	while(1)
