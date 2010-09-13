@@ -51,7 +51,7 @@
 // - Slave search/replace so that a second SR can happen for each match
 //   of the first one, and can borrow its couplings.
 
-
+class Conjecture;
 
 #define SPECIAL_MATCHER_FUNCTION \
 	virtual bool IsLocalMatch( const Matcher *candidate ) const \
@@ -81,24 +81,6 @@ struct StuffKey : Key
 	TreePtr<Node> terminus;
 };
 
-class Conjecture
-{
-private:
-    typedef ContainerInterface::iterator Choice;
-public:
-	void PrepareForDecidedCompare();
-	ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
-			                                   ContainerInterface::iterator end );
-	Result Search( TreePtr<Node> x,
-				   TreePtr<Node> pattern,
-				   CouplingKeys *keys,
-				   bool can_key,
-				   const RootedSearchReplace *sr );
-private:
-	bool ShouldTryMore( Result r, int threshold );
-	int decision_index;
-	vector<Choice> choices;
-};
 
 
 class RootedSearchReplace : InPlaceTransformation
@@ -156,9 +138,6 @@ public:
     vector<RootedSearchReplace *> slaves;
     TreePtr<Node> *pcontext;
     
-    // TODO get rid of mutable by removing a lot of "const"
-    mutable Conjecture conjecture;
-
 private:
     // LocalCompare ring
     bool LocalCompare( TreePtr<Node> x,
