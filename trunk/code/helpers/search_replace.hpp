@@ -22,7 +22,8 @@
 //
 // - Multiple nodes in the search pattern can be forced to match the same 
 //   program node if a Coupling is created that points to these nodes, and
-//   passed to the constructor.
+//   passed to the constructor. Must be >= 1 node in normal (not abnormal)
+//   context.
 //
 // - Nodes in the replace pattern may be substituted by program nodes
 //   found during matching by creating a Coupling and inserting pointers
@@ -43,13 +44,21 @@
 // - Sequence/ContainerCommon support: sequences require matching ordering
 //   and containers do not (only the presence of the matching elements).
 //
-// - Multi-node wildcards like * in sequences and containers (Star node).
+// - Multi-node wildcards like * in sequences and collections (Star node).
 //
 // - Recursive wildcards, arbitrary depth and arbitrary depth with
-//   restricted intermediates (the Stuff node).
+//   restricted intermediates (the Stuff node). Restriction can be a
+//   general tree (in abnormal context)
 //
 // - Slave search/replace so that a second SR can happen for each match
 //   of the first one, and can borrow its couplings.
+//
+// - Boolean rules supported by NotMatch, MAtchAll, MatchAny, MatchN and
+//   MatchOne. For all but MatchAll, pattern is abnormal context.
+//
+// - The base type supplied as template param to all special nodes
+//   acts as a pre-restriction according to usual topological rules.
+//
 
 class Conjecture;
 
