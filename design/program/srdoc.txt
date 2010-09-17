@@ -1,5 +1,8 @@
 		Inferno Search and Replace User Guide
 
+TODO rework couplings, add terms normal and abnormal context, move keying discussion to initial description and mention that Stuff restrictor is abnoirmal context
+TODO or and eor nodes (+fix eor algorithm)
+
 1 The SearchReplace class
 
 Inferno uses a search and replace engine for the majority of transformation steps. The generic search and replace implementation may be found in the SearchReplace class and a number of supporting classes. The SearchReplace constructor requires certain data structures that specify search pattern, replace pattern and some other info. Once constructed, a SearchReplace object serves as a tree transforming functor (ie it implements the Transformation interface).
@@ -70,6 +73,8 @@ The detailed behaviour of all the different kinds of special nodes is given belo
 
 Type-safety means that a tree pointer can only point to non-strict subclasses of the pointer type. Therefore if the base class is of that type, no restriction will be seen when the search runs. Only if a strict subclass is given will a restriction be seen to take effect. This is called a pre-restriction since it seems to apply before the special node's special algorithm runs (which will typically apply some further restriction independently of the pre-restriction under an "and" rule).
 
+As a final note, the pre-restriction is only a class, not a subtree like restrictor and terminus. If you require the the special node to match a subtree, use the MatchAll node documented below. 
+
 2.5 Notes on tolopogy-oriented tree
 
 In order to maximise the utility of toplogical wildcarding (and its coupling support) the inferno tree has been contrived to express as much information as possible in the node hierarchy and through TreePtrs to other nodes. So for example where a node might naturally contain a boolean (such as the signdness of an integral type) or an enum (such as an access specifier which can be public, private or protected) one of two techniques is used
@@ -136,8 +141,6 @@ Therefore, Stuff will only find a terminus that can be reached via a path that s
 Note that the Stuff node restrictior only applies when the stuff node actually recurses. It does not restrict the base of the Stuff node and it does not restrict the terminus. So a Stuff node whose terminus matches the input program at the location of the Stuff node will match regardless of the restrictor. Also, if the Stuff node has recursed into the input program subtree, the terminus can still match nodes that would not match the restrictor.
 
 Compare with the pre-restriction documented above, which applies to all special nodes. This only applies to the root of the input program subtree, as with all other special nodes. In the general case, pre-restriction, restrictor and terminus are all acting to restrict the Stuff node at different places in the input program subtree: pre-restriction at root; termunis at leaf; restrictor at intervening branching (recursing) nodes. 
-
-As a final note, the pre-restriction is only a class, not a subtree like restrictor and terminus. If you require the Stuff node's root to match a subtree, use the MatchAll node documented below. 
 
 6 Boolean search patterns
 
