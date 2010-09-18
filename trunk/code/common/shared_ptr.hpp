@@ -86,7 +86,7 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
 	}
 
 
-    virtual VALUE_INTERFACE *get() const // TODO should return VALUE_TYPE, hacked due to covariant NULL pointer bug, see comment at top of file
+    virtual VALUE_TYPE *get() const // TODO bring laptop up to GCC4 lol
     {
     	VALUE_TYPE *e = shared_ptr<VALUE_TYPE>::get();
     	//TRACE("sp::get() returns %p\n", e );
