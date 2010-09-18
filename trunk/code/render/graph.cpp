@@ -402,8 +402,7 @@ string Graph::DoNode( TreePtr<Node> n )
 {
 	if( TreePtr<RootedSlaveBase> rsb = dynamic_pointer_cast<RootedSlaveBase>(n) )
 	{
-		TreePtr<RootedSlaveBase> rsr = (TreePtr<RootedSlaveBase>)rsb;
-		return DoSearchReplace( rsr.get(), Id( n.get() ), true, rsb->GetThrough() );
+		return DoSearchReplace( rsb.get(), Id( n.get() ), true, rsb->GetThrough() );
 	}
 
 	string s;

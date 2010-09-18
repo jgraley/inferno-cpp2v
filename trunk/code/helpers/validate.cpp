@@ -18,6 +18,38 @@ void Validate::operator()( TreePtr<Node> context,
 	decl_refs.clear();
 	total_refs.clear();
 
+	// Is the proot reachable from context? If not that's probably because we haven't inserted
+	// the subtree at proot into the program tree at context yet.
+	bool connected = false;
+
+	// First walk over the entire context counting incoming links (because
+	// incoming links from other than the subtree of interest still count
+	// when validating link counts).
+	Walk wcon( context );
+	FOREACH( const TreePtr<Node> x, wcon )
+	{
+		if( x )
+		{
+			// TODO use Traverse for this!
+			vector< Itemiser::Element * > members = x->Itemise();
+		    FOREACH( Itemiser::Element *m, members )
+			{
+				if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(m) )
+				{
+					FOREACH( const TreePtrInterface &tpi, *con )
+						OnLink( x, tpi );
+				}
+				else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(m) )
+				{
+					OnLink( x, *ptr );
+				}
+			}
+			if( x == *proot )
+				connected = true;
+		}
+	}
+
+	// Now do the actual validation, only on the specified subtree
 	Walk w( *proot );
 	for( Walk::iterator wit = w.begin(); wit != w.end(); ++wit )
 	{
@@ -45,48 +77,22 @@ void Validate::operator()( TreePtr<Node> context,
 			ASSERT( typeid(*y)==typeid(*x) )(*x)(" apparently does not contain NODE_FUNCTIONS macro because it Clone()s to ")(*y)(" at ")(wit);
         }
 
-		if( x )
+		if( x && x != context && connected ) // Skip the root, since we won't have counted any refs to it
+			                                 // Also, these rules may be broken for disconnected subtrees
 		{
-			vector< Itemiser::Element * > members = x->Itemise();
-		    FOREACH( Itemiser::Element *m, members )
-			{
-				if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(m) )
-				{
-					FOREACH( const TreePtrInterface &tpi, *con )
-						OnLink( x, tpi );
-				}
-				else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(m) )
-				{
-					OnLink( x, *ptr );
-				}
-				else
-				{
-					ASSERTFAIL("Got something from itemise that isn't a container or a shared pointer at ")(wit);
-				}
-			}
-		}
-	}
-
-	Walk w2( *proot );
-	FOREACH( const TreePtr<Node> x, w2 )
-	{
-		if( x == *proot )
-			continue; // Skip the proot node, since we don't know what references we expect it to have
-
-		if( x )
-		{
+			TRACE("%p decl_refs=%d total refs=%d\n", x.get(), decl_refs[x], total_refs[x] );
 			// Check incoming pointers rule: Non-identifier nodes should be referenced exactly once
 			// Identifiers should be referenced exactly once by the node that declares them,
 			// and may be referenced zero or more times by other nodes. We skip the
 			// identifier checks for patterns though (TODO decide what the rule becomes in this case)
 			if( dynamic_pointer_cast<Identifier>(x) )
 			{
-				if( !is_pattern )
-					ASSERT( decl_refs[x] == 1 )("Identifier ")(*x)(" found with %d declaration references", decl_refs[x])(" at ")(w2)
+				if( !is_pattern && connected )
+					ASSERT( decl_refs[x] == 1 )("Identifier ")(*x)(" found with %d declaration references", decl_refs[x])(" at ")(wit)
 					      ("\nThere must be exactly 1 declaration and zero or more usages");
 			}
 			else
-				ASSERT( total_refs[x] == 1 )("Node ")(*x)(" found with %d references", total_refs[x] )(" at ")(w2)
+				ASSERT( total_refs[x] == 1 )("Node ")(*x)(" found with %d references", total_refs[x] )(" at ")(wit)
 					  ("\nThere must be exactly 1 reference to nodes (except identifiers)");
 		}
 	}
@@ -94,6 +100,7 @@ void Validate::operator()( TreePtr<Node> context,
 
 void Validate::OnLink( TreePtr<Node> p, TreePtr<Node> c )
 {
+	TRACE("Ref %p to %p\n", p.get(), c.get() );
 	if( TreePtr<Instance> pi = dynamic_pointer_cast<Instance>(p) )
 	{
 		if( c == pi->identifier )

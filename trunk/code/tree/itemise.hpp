@@ -74,6 +74,10 @@ public:
     inline static vector< Itemiser::Element * > ItemiseStatic( const ITEMISE_TYPE *itemise_architype,
                                                                const Itemiser *itemise_object )
     {
+        // Do a safety check: itemise_object we're itemising must not be same as or derived
+		// from the architype, so that all the architype's members are also in itemise_object.
+        ASSERT( dynamic_cast<const ITEMISE_TYPE *>(itemise_object) );
+
 		// Do the pointer math to get "elements of A in B" type behaviour
 		// This must be done in bounce because we need the architype's type for the dynamic_cast
         vector< int > &vofs = BasicItemiseStatic( itemise_architype );

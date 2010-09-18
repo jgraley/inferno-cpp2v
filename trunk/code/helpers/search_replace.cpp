@@ -432,7 +432,7 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
 		                           shared_ptr<Key> current_key ) const
 {
 	INDENT;
-    ASSERT( source->IsLocalMatch(dest.get()) )("source must be a non-strict subclass of destination, so that it does not have more members");
+    ASSERT( source->IsLocalMatch(dest.get()) )("source must be a non-strict superclass of destination, so that it does not have more members");
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of source, and itemises over that type. dest must
@@ -595,6 +595,16 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 		}
 	}
 
+	if( TreePtr<RootedSlaveBase> rsb = dynamic_pointer_cast<RootedSlaveBase>(source) )
+	{
+		TreePtr<Node> dest =  DuplicateSubtree( rsb->GetThrough(), keys, can_key, current_key );
+		RootedSearchReplace *slave = rsb.get();
+		slave->couplings = couplings;
+    	slave->pcontext = pcontext;
+    	(void)slave->RepeatingSearchReplace( &dest, slave->search_pattern, slave->replace_pattern, *keys );
+		return dest;
+	}
+
 	TreePtr<Node> dest = TreePtr<Node>();
 	dest = keys->KeyAndSubstitute( shared_ptr<Key>(), source, this, can_key );
     ASSERT( !dest || !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
@@ -707,6 +717,7 @@ Result RootedSearchReplace::SingleSearchReplace( TreePtr<Node> *proot,
     FOREACH( RootedSearchReplace *slave, slaves )
     {
     	TRACE("%p Running slave\n", this);
+    	slave->pcontext = pcontext;
     	int num = slave->RepeatingSearchReplace( proot, slave->search_pattern, slave->replace_pattern, keys );
     	TRACE("%p slave %d got %d hits\n", this, i++, num);
     }
@@ -732,7 +743,7 @@ int RootedSearchReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
     			                        replace_pattern,
     			                        keys );
     	TRACE("%p result %d", this, r);
-    	Validate()( *proot, proot );
+    	Validate()( *pcontext, proot );
     	if( r != FOUND )
             break;
        	//ASSERT(i<100)("Too many hits");

@@ -34,11 +34,6 @@ int main( int argc, char *argv[] )
               
     if( --ReadArgs::quitafter >= 0 )
     {
-    	SlaveTest()(&program);
-    }
-
-    if( --ReadArgs::quitafter >= 0 )
-    {
     	ForToWhile()(&program);
     }
 
