@@ -21,7 +21,10 @@ private:
     void Disburse( string s );
     string Traverse( TreePtr<Node> root, bool links_pass );
     string Traverse( RootedSearchReplace *sr, bool links_pass );
-	string DoSearchReplace( RootedSearchReplace *sr );
+	string DoSearchReplace( RootedSearchReplace *sr,
+			                string id,
+			                bool slave = false,
+			                TreePtr<Node> through = TreePtr<Node>() );
 	string DoSearchReplaceLinks( RootedSearchReplace *sr );
 	string DoCoupling( Coupling pc );
     string Id( void *p );

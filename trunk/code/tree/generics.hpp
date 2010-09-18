@@ -93,6 +93,10 @@ struct MakeTreePtr : TreePtr<VALUE_TYPE>
 	MakeTreePtr() : TreePtr<VALUE_TYPE>( new VALUE_TYPE ) {}
 	template<typename CP0>
 	MakeTreePtr(const CP0 &cp0) : TreePtr<VALUE_TYPE>( new VALUE_TYPE(cp0) ) {}
+	template<typename CP0, typename CP1>
+	MakeTreePtr(const CP0 &cp0, const CP1 &cp1) : TreePtr<VALUE_TYPE>( new VALUE_TYPE(cp0, cp1) ) {}
+	template<typename CP0, typename CP1, typename CP2>
+	MakeTreePtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : TreePtr<VALUE_TYPE>( new VALUE_TYPE(cp0, cp1, cp2) ) {}
 	// Add more params as needed...
 };
 
