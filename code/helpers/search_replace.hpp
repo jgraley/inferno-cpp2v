@@ -245,6 +245,32 @@ public:
                     vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
 };
 
+struct RootedSlaveBase : virtual Node,
+                         public RootedSearchReplace
+{
+	RootedSlaveBase( TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+		RootedSearchReplace( sp, rp )
+	{}
+	virtual TreePtr<Node> GetThrough() const = 0;
+};
+template<class VALUE_TYPE>
+struct RootedSlave : RootedSlaveBase, VALUE_TYPE
+{
+	SPECIAL_NODE_FUNCTIONS
+
+	// Slave must be constructed using constructor
+	RootedSlave( TreePtr<VALUE_TYPE> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+		through( t ),
+		RootedSlaveBase( sp, rp )
+	{
+	}
+
+	TreePtr<VALUE_TYPE> through;
+	virtual TreePtr<Node> GetThrough() const
+	{
+		return TreePtr<Node>( through );
+	}
+};
 
 #endif
 

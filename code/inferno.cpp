@@ -13,6 +13,7 @@
 #include "steps/use_temps_for_params_return.hpp"
 #include "steps/generate_stacks.hpp"
 #include "steps/for_to_while.hpp"
+#include "steps/slave_test.hpp"
 
 void SelfTest();
 
@@ -31,6 +32,11 @@ int main( int argc, char *argv[] )
     Parse p(ReadArgs::infile);
     p( program, &program );
               
+    if( --ReadArgs::quitafter >= 0 )
+    {
+    	SlaveTest()(&program);
+    }
+
     if( --ReadArgs::quitafter >= 0 )
     {
     	ForToWhile()(&program);

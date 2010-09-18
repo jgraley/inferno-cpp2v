@@ -96,7 +96,7 @@ string Graph::Traverse( TreePtr<Node> root, bool links_pass )
 string Graph::Traverse( RootedSearchReplace *sr, bool links_pass )
 {
 	string s;
-	s += links_pass ? DoSearchReplaceLinks(sr) : DoSearchReplace(sr);
+	s += links_pass ? DoSearchReplaceLinks(sr) : DoSearchReplace(sr, Id(sr));
 	if( sr->search_pattern )
 		s += Traverse( sr->search_pattern, links_pass );
 	if( sr->replace_pattern )
@@ -107,18 +107,25 @@ string Graph::Traverse( RootedSearchReplace *sr, bool links_pass )
 }
 
 
-string Graph::DoSearchReplace( RootedSearchReplace *sr )
+string Graph::DoSearchReplace( RootedSearchReplace *sr,
+		                       string id,
+		                       bool slave,
+		                       TreePtr<Node> through )
 {
 	string s;
-	s += Id( sr );
+	s += id;
 	s += " [\n";
 
-	s += "label = \"<fixed> RootedSearchReplace | <search> Search | <replace> Replace";
-	for( int j=0; j<sr->slaves.size(); j++ )
+	s += "label = \"<fixed> RootedSearchReplace";
+	if( slave )
+		s += " | <" + SeqField(2) + "> through";
+	s += " | <" + (slave ? SeqField(0) : string("search")) + "> search";
+	s += " | <" + (slave ? SeqField(1) : string("replace")) + "> replace";
+	for( int j=0; j<sr->slaves.size(); j++ ) // TODO obsolete
 	{
 		char c[20];
 		sprintf(c, "%d", j+1);
-		s += " | <slave" + string(c) + "> Slave " + string(c);
+		s += " | <slave" + string(c) + "> slave " + string(c);
 	}
 	s += "\"\n";
 
@@ -374,9 +381,7 @@ string Graph::SimpleLabel( string name, TreePtr<Node> n )
 		{
 			for( int j=0; j<seq->size(); j++ )
 			{
-				char c[20];
-				sprintf(c, "%d", j);
-				s += " | <" + SeqField( i, j ) + "> ";// [" + string(c) + "]";
+				s += " | <" + SeqField( i, j ) + "> ";
 			}
 		}
 		else  if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
@@ -395,6 +400,12 @@ string Graph::SimpleLabel( string name, TreePtr<Node> n )
 
 string Graph::DoNode( TreePtr<Node> n )
 {
+	if( TreePtr<RootedSlaveBase> rsb = dynamic_pointer_cast<RootedSlaveBase>(n) )
+	{
+		TreePtr<RootedSlaveBase> rsr = (TreePtr<RootedSlaveBase>)rsb;
+		return DoSearchReplace( rsr.get(), Id( n.get() ), true, rsb->GetThrough() );
+	}
+
 	string s;
 	bool bold;
 	string shape;
