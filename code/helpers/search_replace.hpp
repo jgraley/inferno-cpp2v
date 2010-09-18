@@ -80,6 +80,7 @@ struct StarBase : virtual Node {};
 template<class VALUE_TYPE>
 struct Star : StarBase, VALUE_TYPE { SPECIAL_NODE_FUNCTIONS };
 
+
 // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
 struct StuffBase : virtual Node
 {
@@ -92,7 +93,6 @@ struct StuffKey : Key
 {
 	TreePtr<Node> terminus;
 };
-
 
 
 class RootedSearchReplace : InPlaceTransformation
@@ -222,7 +222,7 @@ private:
     struct SubSequence : Node,
                          Sequence<Node>
     {
-    	NODE_FUNCTIONS // Need these for Clone/Duplicate, called during replace
+    	NODE_FUNCTIONS // Need these for Clone/Duplicate, called during replace TODO add to SPECIAL_NODE_FUNCTIONS and use that
     };
     struct SubCollection : Node,
                            Collection<Node>
@@ -244,178 +244,6 @@ public:
                     CouplingSet m = CouplingSet(),
                     vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
 };
-
-struct NotMatchBase {}; // needed for graph plotter
-
-// Match if the supplied patterns does not match (NOT)
-template<class VALUE_TYPE>
-struct NotMatch : virtual VALUE_TYPE,
-                 RootedSearchReplace::SoftSearchPattern,
-                 NotMatchBase
-{
-	SPECIAL_NODE_FUNCTIONS
-	// Pattern is an abnormal context
-    TreePtr<VALUE_TYPE> pattern;
-private:
-    virtual Result DecidedCompare( const RootedSearchReplace *sr,
-    		                       TreePtr<Node> x,
-    		                       CouplingKeys *keys,
-    		                       bool can_key,
-    		                       Conjecture &conj ) const
-    {
-    	if( keys && can_key )
-    	{
-    		// Don't do a subtree search while keying - we'll only end up keying the wrong thing
-    		// or terminating with NOT_FOUND prematurely
-    		return FOUND;
-    	}
-    	else
-    	{
-    	    // Do not use the present conjecture since we would mess it up because
-    	    // a. We didn't recurse during KEYING pass and
-    	    // b. Search under not can terminate with NOT_FOUND, but parent search will continue
-    	    // Consequently, we go in at Compare level, which creates a new conjecture.
-    		Result r = sr->Compare( x, pattern, keys, false );
-			TRACE("SoftNot got %d, returning the opposite!\n", (int)r);
-    		if( r==NOT_FOUND )
-				return FOUND;
-			else
-				return NOT_FOUND;
-    	}
-    }
-};
-
-struct MatchAllBase {};
-
-// Match all of the supplied patterns (AND)
-template<class VALUE_TYPE>
-struct MatchAll : virtual VALUE_TYPE,
-                 RootedSearchReplace::SoftSearchPattern,
-                 MatchAllBase
-{
-	SPECIAL_NODE_FUNCTIONS
-    mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
-private:
-    virtual Result DecidedCompare( const RootedSearchReplace *sr,
-                                   TreePtr<Node> x,
-                                   CouplingKeys *keys,
-                                   bool can_key,
-                                   Conjecture &conj ) const
-    {
-    	FOREACH( const TreePtr<VALUE_TYPE> i, patterns )
-    	{
-    		Result r = sr->DecidedCompare( x, TreePtr<Node>(i), keys, can_key, conj );
-    	    if( !r )
-    	    	return NOT_FOUND;
-    	}
-        return FOUND;
-    }
-};
-
-struct MatchAnyBase {};
-
-// Match zero or more of the supplied patterns (OR)
-template<class VALUE_TYPE>
-struct MatchAny : virtual VALUE_TYPE,
-                 RootedSearchReplace::SoftSearchPattern,
-                 MatchAnyBase
-{
-	SPECIAL_NODE_FUNCTIONS
-	// Patterns are an abnormal context
-    mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
-private:
-    virtual Result DecidedCompare( const RootedSearchReplace *sr,
-    		                       TreePtr<Node> x,
-    		                       CouplingKeys *keys,
-    		                       bool can_key,
-    		                       Conjecture &conj ) const
-    {
-    	FOREACH( const TreePtr<VALUE_TYPE> i, patterns )
-    	{
-    		Result r = sr->Compare( x, i, keys, false );
-    	    if( r )
-    	    	return FOUND;
-    	}
-        return NOT_FOUND;
-    }
-};
-
-
-struct MatchNBase {};
-
-// Match exactly N of the supplied patterns.
-template<class VALUE_TYPE, int N>
-struct MatchN : virtual VALUE_TYPE,
-                 RootedSearchReplace::SoftSearchPattern,
-                 MatchNBase
-{
-	SPECIAL_NODE_FUNCTIONS
-	// Patterns are an abnormal context (if you are setting N==patterns.size(), then you want
-	// MatchAll, whose patterns are not abnormal).
-    mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
-private:
-    virtual Result DecidedCompare( const RootedSearchReplace *sr,
-    		                       TreePtr<Node> x,
-    		                       CouplingKeys *keys,
-    		                       bool can_key,
-    		                       Conjecture &conj ) const
-    {
-    	int tot=0;
-    	FOREACH( const TreePtr<VALUE_TYPE> i, patterns )
-    	{
-    		Result r = sr->Compare( x, i, keys, false );
-    	    if( r )
-    	    	tot++;
-    	    if( tot>N )
-    	    	return NOT_FOUND; // early out
-    	}
-        return (tot==N) ? FOUND : NOT_FOUND;
-    }
-};
-
-// Match one of the supplied patterns (ie XOR)
-template<class VALUE_TYPE>
-struct MatchOne : MatchN<VALUE_TYPE, 1> {};
-
-
-struct TransformToBase : RootedSearchReplace::SoftSearchPattern
-{
-    TreePtr<Node> pattern;
-    TransformToBase( Transformation *t ) :
-    	transformation(t)
-    {
-    }
-
-private:
-    virtual Result DecidedCompare( const RootedSearchReplace *sr,
-    		                                            TreePtr<Node> x,
-    		                                            CouplingKeys *keys,
-    		                                            bool can_key,
-    		                                            Conjecture &conj ) const;
-    Transformation *transformation;
-};
-
-template<class VALUE_TYPE>
-struct TransformTo : TransformToBase, VALUE_TYPE
-{
-	SPECIAL_NODE_FUNCTIONS
-    TransformTo( Transformation *t ) : TransformToBase (t) {}
-};
-
-
-inline CouplingSet operator,( Coupling l, Coupling r )
-{
-	CouplingSet cs;
-    cs.insert( l );
-    cs.insert( r );
-    return cs;
-}
-
-inline CouplingSet operator,( CouplingSet l, Coupling r )
-{
-    l.insert( r );
-    return l;
-}
 
 
 #endif

@@ -75,4 +75,20 @@ private:
 	Map< Coupling, shared_ptr<Key> > keys_map;
 };
 
+
+inline CouplingSet operator,( Coupling l, Coupling r )
+{
+	CouplingSet cs;
+    cs.insert( l );
+    cs.insert( r );
+    return cs;
+}
+
+
+inline CouplingSet operator,( CouplingSet l, Coupling r )
+{
+    l.insert( r );
+    return l;
+}
+
 #endif

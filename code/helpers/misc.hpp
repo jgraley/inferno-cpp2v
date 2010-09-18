@@ -4,7 +4,7 @@
 #include "tree/tree.hpp"
 #include "walk.hpp"
 #include "transformation.hpp"
-#include "search_replace.hpp"
+#include "soft_patterns.hpp"
 
 TreePtr<Identifier> GetIdentifier( TreePtr<Declaration> d );
 
