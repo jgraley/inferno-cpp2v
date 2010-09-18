@@ -263,7 +263,7 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		*shape = "circle";
 		return string("|");
 	}
-	else if( dynamic_pointer_cast<MatchNBase>(sp) )
+	else if( dynamic_pointer_cast<MatchOddBase>(sp) )
 	{
 		*shape = "circle";
 		return string("^");
