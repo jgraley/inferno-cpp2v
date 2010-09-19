@@ -401,9 +401,9 @@ string Graph::SimpleLabel( string name, TreePtr<Node> n )
 string Graph::DoNode( TreePtr<Node> n )
 {
 	if( TreePtr<RootedSlaveBase> rsb = dynamic_pointer_cast<RootedSlaveBase>(n) )
-	{
 		return DoSearchReplace( rsb.get(), Id( n.get() ), true, rsb->GetThrough() );
-	}
+	if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(n) )
+		return DoSearchReplace( sb.get(), Id( n.get() ), true, sb->GetThrough() );
 
 	string s;
 	bool bold;

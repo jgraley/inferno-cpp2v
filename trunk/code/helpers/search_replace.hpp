@@ -272,5 +272,32 @@ struct RootedSlave : RootedSlaveBase, VALUE_TYPE
 	}
 };
 
+struct SlaveBase : virtual Node,
+                   public SearchReplace
+{
+	SlaveBase( TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+		SearchReplace( sp, rp )
+	{}
+	virtual TreePtr<Node> GetThrough() const = 0;
+};
+template<class VALUE_TYPE>
+struct Slave : SlaveBase, VALUE_TYPE
+{
+	SPECIAL_NODE_FUNCTIONS
+
+	// Slave must be constructed using constructor
+	Slave( TreePtr<VALUE_TYPE> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+		through( t ),
+		SlaveBase( sp, rp )
+	{
+	}
+
+	TreePtr<VALUE_TYPE> through;
+	virtual TreePtr<Node> GetThrough() const
+	{
+		return TreePtr<Node>( through );
+	}
+};
+
 #endif
 

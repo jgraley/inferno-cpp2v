@@ -40,6 +40,17 @@ void RootedSearchReplace::Configure( TreePtr<Node> sp,
     {
     	slave->couplings = couplings;
 	}
+
+    Walk w( rp );
+    FOREACH( TreePtr<Node> n, w )
+    {
+        if( TreePtr<RootedSlaveBase> rsb = dynamic_pointer_cast<RootedSlaveBase>(n) )
+			FOREACH( Coupling c, couplings )
+				rsb->couplings.insert( c );
+        if( TreePtr<SlaveBase> rsb = dynamic_pointer_cast<SlaveBase>(n) )
+			FOREACH( Coupling c, couplings )
+				rsb->couplings.insert( c );
+    }
 } 
 
 
@@ -597,10 +608,18 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 
 	if( TreePtr<RootedSlaveBase> rsb = dynamic_pointer_cast<RootedSlaveBase>(source) )
 	{
-		TreePtr<Node> dest =  DuplicateSubtree( rsb->GetThrough(), keys, can_key, current_key );
+		TreePtr<Node> dest = DuplicateSubtree( rsb->GetThrough(), keys, can_key, current_key );
 		RootedSearchReplace *slave = rsb.get();
-		slave->couplings = couplings;
     	slave->pcontext = pcontext;
+    	(void)slave->RepeatingSearchReplace( &dest, slave->search_pattern, slave->replace_pattern, *keys );
+		return dest;
+	}
+
+	if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
+	{
+		TreePtr<Node> dest = DuplicateSubtree( sb->GetThrough(), keys, can_key, current_key );
+		SearchReplace *slave = sb.get();
+		slave->pcontext = pcontext;
     	(void)slave->RepeatingSearchReplace( &dest, slave->search_pattern, slave->replace_pattern, *keys );
 		return dest;
 	}
@@ -743,7 +762,6 @@ int RootedSearchReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
     			                        replace_pattern,
     			                        keys );
     	TRACE("%p result %d", this, r);
-    	Validate()( *pcontext, proot );
     	if( r != FOUND )
             break;
        	//ASSERT(i<100)("Too many hits");
@@ -779,6 +797,7 @@ void RootedSearchReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 	// Do the search and replace with before and after validation
 	Validate()( *pcontext, proot );
 	(void)RepeatingSearchReplace( proot, search_pattern, replace_pattern );
+	Validate()( *pcontext, proot );
 
     pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
 }
