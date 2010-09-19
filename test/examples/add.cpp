@@ -7,7 +7,8 @@ int main()
     for( i=0; i<5; i++ )
     {
         tot = tot + i;
-
+        continue;
+        tot *= 2;
     }
     return tot;
 }

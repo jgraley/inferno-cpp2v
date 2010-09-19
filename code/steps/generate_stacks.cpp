@@ -26,26 +26,24 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 	MakeTreePtr<Instance> s_fi, r_fi;
 	MakeTreePtr<Subroutine> s_func;
 	MakeTreePtr< MatchAll<Initialiser> > s_and;
-	MakeTreePtr<Compound> s_top_comp, r_top_comp, s_ret_comp, sn_ret_comp, r_ret_comp;
-	MakeTreePtr< Star<Declaration> > s_top_decls, r_top_decls, s_ret_decls, sn_ret_decls, r_ret_decls;
-	MakeTreePtr< Star<Statement> > s_top_pre, r_top_pre, s_ret_pre, s_ret_post, sn_ret_pre, sn_ret_post, r_ret_pre, r_ret_post;
+	MakeTreePtr<Compound> s_top_comp, r_top_comp, s_ret_comp, r_ret_comp;
+	MakeTreePtr< Star<Declaration> > s_top_decls, r_top_decls, s_ret_decls, r_ret_decls;
+	MakeTreePtr< Star<Statement> > s_top_pre, r_top_pre, s_ret_pre, s_ret_post, r_ret_pre, r_ret_post;
 	MakeTreePtr< Stuff<Statement> > cs_stuff, s_stuff, r_stuff;
 	MakeTreePtr<Automatic> cs_instance, s_instance;
 	MakeTreePtr<Static> r_index, r_instance; // TODO Field
 	MakeTreePtr<Unsigned> r_index_type;
 	MakeTreePtr<PostIncrement> r_inc;
-	MakeTreePtr<PostDecrement> r_dec, sn_ret_dec, r_ret_dec;
+	MakeTreePtr<PostDecrement> r_dec, r_ret_dec;
 	MakeTreePtr<InstanceIdentifier> s_identifier;
 	MakeTreePtr<Array> r_array;
-	MakeTreePtr<Return> s_return, sn_return, r_return;
+	MakeTreePtr<Return> s_return, r_return;
 	MakeTreePtr<Expression> ss_identifier;
 	MakeTreePtr<Subscript> sr_sub;
-	MakeTreePtr< NotMatch<Node> > s_not3;
 	MakeTreePtr< MatchAll<Node> > s_and3;
 	MakeTreePtr<SoftMakeIdentifier> r_index_identifier("%s_stack_index");
 	MakeTreePtr<ThisOne> r_identifier("%s_stack");
-
-
+    MakeTreePtr< GreenGrass<Statement> > s_gg;
 
     // Master search - look for functions satisfying the construct limitation and get
 	s_fi->identifier = MakeTreePtr<InstanceIdentifier>();
@@ -63,7 +61,7 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 	MakeTreePtr< RootedSlave<Statement> > r_mid( r_top_comp, s_stuff, r_slave );
 
 #if HANDLE_EARLY_RETURNS
-	MakeTreePtr< Slave<Statement> > r_slave3( r_mid, s_and3, r_ret_comp );
+	MakeTreePtr< Slave<Statement> > r_slave3( r_mid, s_ret_comp, r_ret_comp );
 	r_fi->initialiser = r_slave3;
 #else
 	r_fi->initialiser = r_mid;
@@ -102,16 +100,9 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 
 #if HANDLE_EARLY_RETURNS
 	// Slave to find early returns in the function
-	s_and3->patterns = ( s_ret_comp );
 	s_ret_comp->members = ( s_ret_decls );
-	s_ret_comp->statements = ( s_ret_pre, s_return, s_ret_post );
-    s_and3->patterns = ( s_ret_comp, s_not3 );
-	
-    // Restrict the above to not include returns that come after an index decrement
-    s_not3->pattern = sn_ret_comp;
-	sn_ret_comp->members = ( sn_ret_decls );
-	sn_ret_dec->operands = ( MakeTreePtr<InstanceIdentifier>() );
-	sn_ret_comp->statements = ( sn_ret_pre, sn_ret_dec, sn_return, sn_ret_post );
+	s_ret_comp->statements = ( s_ret_pre, s_gg, s_ret_post );
+	s_gg->through = s_return;
 
 	// Slave replace with a decrement of the stack index coming before the return
 	r_ret_comp->members = ( r_ret_decls );
@@ -130,11 +121,11 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 
 #if HANDLE_EARLY_RETURNS
 		Coupling(( s_fi->identifier, r_index_identifier->source )),
-		Coupling(( r_index_identifier, r_inc->operands[0], r_dec->operands[0], sr_sub->operands[1], r_ret_dec->operands[0], sn_ret_dec->operands[0] )),
+		Coupling(( r_index_identifier, r_inc->operands[0], r_dec->operands[0], sr_sub->operands[1], r_ret_dec->operands[0] )),
 		Coupling(( s_ret_decls, r_ret_decls )), // Couple decls in compound containing return
 		Coupling(( s_ret_pre, r_ret_pre )), // Couple statements before return in compound
 		Coupling(( s_return, r_return )), // Couple the return statement
-		Coupling(( s_ret_post, sn_ret_post, r_ret_post )) ));// Couple statements after return in compound
+		Coupling(( s_ret_post, r_ret_post )) ));// Couple statements after return in compound
                                                              // make sure the ns and s are talking about the same return if there's more than one
 #else
     	Coupling(( s_fi->identifier, r_index_identifier->source, s_fi2->identifier )),
