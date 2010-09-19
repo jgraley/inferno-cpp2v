@@ -17,13 +17,14 @@ void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr<Expression> s_cond, r_cond;
     MakeTreePtr<While> r_while;
     MakeTreePtr<Compound> r_outer, r_body, sr_block;
+    MakeTreePtr< GreenGrass<Statement> > ss_gg;
     
     MakeTreePtr<Continue> ss_cont, sr_cont;
     MakeTreePtr<Nop> sr_nop;
 
     sr_block->statements = (sr_inc, sr_cont);
-
-    MakeTreePtr< Slave<Statement> > r_slave( r_forbody, ss_cont, sr_block );
+    ss_gg->through = ss_cont;
+    MakeTreePtr< Slave<Statement> > r_slave( r_forbody, ss_gg, sr_block );
 
     s_for->body = s_body;
     s_for->initialisation = s_init;

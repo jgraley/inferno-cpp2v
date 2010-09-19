@@ -270,6 +270,11 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		*shape = "parallelogram";
 		return smi->format;
 	}
+	else if( dynamic_pointer_cast<GreenGrassBase>(sp) )
+	{
+		*shape = "circle";
+		return string("||||");
+	}
 	else
 	{
 		*bold = false;

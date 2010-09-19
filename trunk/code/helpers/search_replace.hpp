@@ -95,6 +95,22 @@ struct StuffKey : Key
 };
 
 
+struct GreenGrassBase : virtual Node
+{
+	virtual TreePtr<Node> GetThrough() const = 0;
+};
+template<class VALUE_TYPE>
+struct GreenGrass : GreenGrassBase, VALUE_TYPE
+{
+	SPECIAL_NODE_FUNCTIONS
+	TreePtr<VALUE_TYPE> through;
+	virtual TreePtr<Node> GetThrough() const
+	{
+		return TreePtr<Node>( through );
+	}
+};
+
+
 class RootedSearchReplace : InPlaceTransformation
 {  
 public:
@@ -146,6 +162,7 @@ public:
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;
     TreePtr<Node> *pcontext;
+    mutable set< TreePtr<Node> > dirty_grass;
     
 private:
     // LocalCompare ring

@@ -25,7 +25,8 @@ void RootedSearchReplace::Configure( TreePtr<Node> sp,
     v(replace_pattern, &replace_pattern);
 
     // Look for slaves. If we find them, copy our couplings into their couplings
-    // Do not just overwrite since there may be implicit Stuff node couplings
+    // Do not just overwrite since there may be implicit Stuff node couplings.
+    // TODO is there a way of unioning sets without doing lots of insert()?
     Walk w( rp );
     FOREACH( TreePtr<Node> n, w )
     {
@@ -76,10 +77,19 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
     	// Check whether the present node matches
     	return DecidedCompare( x, stuff_pattern, keys, can_key, conj );
     }
+    else if( TreePtr<GreenGrassBase> green_pattern = dynamic_pointer_cast<GreenGrassBase>(pattern) )
+    {
+    	// Restrict so that everything in the input program under here must be "green grass"
+    	// ie unmodified by previous replaces in this RepeatingSearchReplace() run.
+    	Walk w( x );
+    	FOREACH( TreePtr<Node> p, w )
+			if( dirty_grass.find( p ) != dirty_grass.end() )
+				return NOT_FOUND;
+    	// Normal matching for the through path
+    	return DecidedCompare( x, green_pattern->GetThrough(), keys, can_key, conj );
+    }
     else
     {
-    	// Not a soft node, so handle explicitly
-
 		// Recurse through the children. Note that the itemiser internally does a
 		// dynamic_cast onto the type of pattern, and itemises over that type. x must
 		// be dynamic_castable to pattern's type.
@@ -661,6 +671,11 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 
 		// Make all members in the destination be NULL
 		ClearPtrs( dest ); // TODO not sure if need this
+
+		// If not substituting a Stuff node, remember this node is dirty for GreenGrass restriction
+		// Also dirty the dest if the source was dirty when we are substituting Stuff
+		if( !current_key || !dynamic_pointer_cast<StuffKey>(current_key) || dirty_grass.find( source ) != dirty_grass.end() )
+		   	dirty_grass.insert( dest );
     }
     
 	// Overlaying requires type compatibility - check for this
@@ -730,6 +745,8 @@ int RootedSearchReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
 	                                             TreePtr<Node> replace_pattern,
 	                                             CouplingKeys keys ) // Pass by value is intentional - changes should not propagate back to caller
 {
+	dirty_grass.clear();
+
     int i=0;
     while(i<20) // TODO!!
     {
