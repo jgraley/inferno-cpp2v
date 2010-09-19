@@ -101,8 +101,6 @@ string Graph::Traverse( RootedSearchReplace *sr, bool links_pass )
 		s += Traverse( sr->search_pattern, links_pass );
 	if( sr->replace_pattern )
 		s += Traverse( sr->replace_pattern, links_pass );
-	for( int j=0; j<sr->slaves.size(); j++ )
-		s += Traverse( sr->slaves[j], links_pass );
 	return s;
 }
 
@@ -121,12 +119,6 @@ string Graph::DoSearchReplace( RootedSearchReplace *sr,
 		s += " | <" + SeqField(2) + "> through";
 	s += " | <" + (slave ? SeqField(0) : string("search")) + "> search";
 	s += " | <" + (slave ? SeqField(1) : string("replace")) + "> replace";
-	for( int j=0; j<sr->slaves.size(); j++ ) // TODO obsolete
-	{
-		char c[20];
-		sprintf(c, "%d", j+1);
-		s += " | <slave" + string(c) + "> slave " + string(c);
-	}
 	s += "\"\n";
 
 	s += "shape = \"record\"\n"; // nodes can be split into fields
@@ -150,13 +142,6 @@ string Graph::DoSearchReplaceLinks( RootedSearchReplace *sr )
 	{
 		s += Id(sr) + ":replace -> " + Id(sr->replace_pattern.get());
 		s += " [];\n";
-	}
-	for( int j=0; j<sr->slaves.size(); j++ )
-	{
-		char c[20];
-		sprintf(c, "%d", j+1);
-		s += Id(sr) + ":slave" + string(c) + " -> " + Id(sr->slaves[j]) + ":fixed [\n";
-		s += "];\n";
 	}
 	return s;
 }

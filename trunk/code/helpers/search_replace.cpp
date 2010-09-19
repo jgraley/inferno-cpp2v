@@ -6,41 +6,26 @@
 // Constructor remembers search pattern, replace pattern and any supplied couplings as required
 RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
                                           TreePtr<Node> rp,
-                                          CouplingSet m,
-                                          vector<RootedSearchReplace *> s )
+                                          CouplingSet m )
 {
-	Configure( sp, rp, m, s );
+	Configure( sp, rp, m );
 }
 
 
 void RootedSearchReplace::Configure( TreePtr<Node> sp,
                                      TreePtr<Node> rp,
-                                     CouplingSet m,
-                                     vector<RootedSearchReplace *> s )
+                                     CouplingSet m )
 {
     search_pattern = sp;
     replace_pattern = rp;
     couplings = m;
-    slaves = s;
 
     Validate v(true);
     v(search_pattern, &search_pattern);
     v(replace_pattern, &replace_pattern);
 
-    // If we have a slave, copy its couplings into ours so we have a full set
-    // of all the couplings - this will be used across the board. Note that
-    // the non-rooted SearchReplace adds a new coupling.
-    FOREACH( RootedSearchReplace *slave, slaves )
-    	FOREACH( Coupling c, slave->couplings )
-		    couplings.insert( c );
-
-	TRACE("Merged couplings, I have %d\n", couplings.size() );
-
-    FOREACH( RootedSearchReplace *slave, slaves )
-    {
-    	slave->couplings = couplings;
-	}
-
+    // Look for slaves. If we find them, copy our couplings into their couplings
+    // Do not just overwrite since there may be implicit Stuff node couplings
     Walk w( rp );
     FOREACH( TreePtr<Node> n, w )
     {
@@ -732,15 +717,6 @@ Result RootedSearchReplace::SingleSearchReplace( TreePtr<Node> *proot,
         *proot = MatchingDuplicateSubtree( replace_pattern, &keys );
     }
 
-    int i=0;
-    FOREACH( RootedSearchReplace *slave, slaves )
-    {
-    	TRACE("%p Running slave\n", this);
-    	slave->pcontext = pcontext;
-    	int num = slave->RepeatingSearchReplace( proot, slave->search_pattern, slave->replace_pattern, keys );
-    	TRACE("%p slave %d got %d hits\n", this, i++, num);
-    }
-
     return FOUND;
 }
 
@@ -805,17 +781,15 @@ void RootedSearchReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 
 SearchReplace::SearchReplace( TreePtr<Node> sp,
                               TreePtr<Node> rp,
-                              CouplingSet m,
-                              vector<RootedSearchReplace *> s )
+                              CouplingSet m )
 {
-	Configure( sp, rp, m, s );
+	Configure( sp, rp, m );
 }
 
 
 void SearchReplace::Configure( TreePtr<Node> sp,
                                TreePtr<Node> rp,
-                               CouplingSet m,
-                               vector<RootedSearchReplace *> s )
+                               CouplingSet m )
 {
 	if( !sp )
 		return;
@@ -837,12 +811,12 @@ void SearchReplace::Configure( TreePtr<Node> sp,
 	    m.insert( root_match );
 
 	    // Configure the rooted implementation with new patterns and couplings
-	    RootedSearchReplace::Configure( search_root, replace_root, m, s );
+	    RootedSearchReplace::Configure( search_root, replace_root, m );
 	}
 	else
 	{
 	    // Configure the rooted implementation with new pattern
-        RootedSearchReplace::Configure( search_root, rp, m, s );
+        RootedSearchReplace::Configure( search_root, rp, m );
 	}
 }
 
