@@ -102,12 +102,10 @@ public:
     // specified here, so that we have a fully confiugured functor.
     RootedSearchReplace( TreePtr<Node> sp=TreePtr<Node>(),
                          TreePtr<Node> rp=TreePtr<Node>(),
-                         CouplingSet m = CouplingSet(),
-                         vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
+                         CouplingSet m = CouplingSet() );
     void Configure( TreePtr<Node> sp=TreePtr<Node>(),
                     TreePtr<Node> rp=TreePtr<Node>(),
-                    CouplingSet m = CouplingSet(),
-                    vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
+                    CouplingSet m = CouplingSet() );
     ~RootedSearchReplace();
     
     // implementation ring: Do the actual search and replace
@@ -147,7 +145,6 @@ public:
     CouplingSet couplings;
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;
-    vector<RootedSearchReplace *> slaves;
     TreePtr<Node> *pcontext;
     
 private:
@@ -237,12 +234,10 @@ class SearchReplace : public RootedSearchReplace
 public:
     SearchReplace( TreePtr<Node> sp = TreePtr<Node>(),
                    TreePtr<Node> rp = TreePtr<Node>(),
-                   CouplingSet m = CouplingSet(),
-                   vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
+                   CouplingSet m = CouplingSet() );
     void Configure( TreePtr<Node> sp = TreePtr<Node>(),
                     TreePtr<Node> rp = TreePtr<Node>(),
-                    CouplingSet m = CouplingSet(),
-                    vector<RootedSearchReplace *> slaves = vector<RootedSearchReplace *>() );
+                    CouplingSet m = CouplingSet() );
 };
 
 struct RootedSlaveBase : virtual Node,
