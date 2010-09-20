@@ -224,15 +224,15 @@ private:
     Result SingleSearchReplace( TreePtr<Node> *proot,
                                 TreePtr<Node> search_pattern,
                                 TreePtr<Node> replace_pattern,
-                                CouplingKeys match_keys = CouplingKeys() );
+                                CouplingKeys match_keys );
 public:
     int RepeatingSearchReplace( TreePtr<Node> *proot,
                                 TreePtr<Node> search_pattern,
                                 TreePtr<Node> replace_pattern,
-                                CouplingKeys match_keys = CouplingKeys() );
+                                CouplingKeys match_keys );
 
-    virtual void KeyedSearchReplace( TreePtr<Node> *proot,
-									 CouplingKeys match_keys = CouplingKeys() );
+    virtual void DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
+						             			CouplingKeys match_keys = CouplingKeys() );
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.
     void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
 private:
@@ -259,8 +259,8 @@ public:
     void Configure( TreePtr<Node> sp = TreePtr<Node>(),
                     TreePtr<Node> rp = TreePtr<Node>(),
                     CouplingSet m = CouplingSet() );
-    virtual void KeyedSearchReplace( TreePtr<Node> *proot,
-									 CouplingKeys match_keys = CouplingKeys() );
+    virtual void DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
+							          		    CouplingKeys match_keys = CouplingKeys() );
 };
 
 struct RootedSlaveBase : virtual Node,
