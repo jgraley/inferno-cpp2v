@@ -114,7 +114,11 @@ string Graph::DoSearchReplace( RootedSearchReplace *sr,
 	s += id;
 	s += " [\n";
 
-	s += "label = \"<fixed> RootedSearchReplace";
+	// TODO use TypeInfo to get the true name
+	if( dynamic_cast<SearchReplace *>(sr) )
+		s += "label = \"<fixed> SearchReplace";
+	else
+	    s += "label = \"<fixed> RootedSearchReplace";
 	if( slave )
 		s += " | <" + SeqField(2) + "> through";
 	s += " | <" + (slave ? SeqField(0) : string("search")) + "> search";
