@@ -606,7 +606,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 		TreePtr<Node> dest = DuplicateSubtree( rsb->GetThrough(), keys, can_key, current_key );
 		RootedSearchReplace *slave = rsb.get();
     	slave->pcontext = pcontext;
-    	(void)slave->KeyedSearchReplace( &dest, *keys );
+    	(void)slave->DefaultRepeatingSearchReplace( &dest, *keys );
 		return dest;
 	}
 
@@ -615,7 +615,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 		TreePtr<Node> dest = DuplicateSubtree( sb->GetThrough(), keys, can_key, current_key );
 		SearchReplace *slave = sb.get();
 		slave->pcontext = pcontext;
-    	(void)slave->KeyedSearchReplace( &dest, *keys );
+    	(void)slave->DefaultRepeatingSearchReplace( &dest, *keys );
 		return dest;
 	}
 
@@ -766,8 +766,8 @@ int RootedSearchReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
 }
 
 
-void RootedSearchReplace::KeyedSearchReplace( TreePtr<Node> *proot,
-											  CouplingKeys keys )
+void RootedSearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
+										            	 CouplingKeys keys )
 {
 	(void)RepeatingSearchReplace( proot, search_pattern, replace_pattern, keys );
 }
@@ -797,7 +797,7 @@ void RootedSearchReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 
 	// Do the search and replace with before and after validation
 	Validate()( *pcontext, proot );
-	KeyedSearchReplace( proot );
+	DefaultRepeatingSearchReplace( proot );
 	Validate()( *pcontext, proot );
 
     pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
@@ -823,8 +823,8 @@ void SearchReplace::Configure( TreePtr<Node> sp,
 }
 
 // Do a search and replace based on patterns stored in our members
-void SearchReplace::KeyedSearchReplace( TreePtr<Node> *proot,
-											  CouplingKeys keys )
+void SearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
+										    	   CouplingKeys keys )
 {
 	// Make a non-rooted search and replace (ie where the base of the search pattern
 	// does not have to be the root of the whole program tree).
