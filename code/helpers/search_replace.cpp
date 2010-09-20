@@ -606,7 +606,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 		TreePtr<Node> dest = DuplicateSubtree( rsb->GetThrough(), keys, can_key, current_key );
 		RootedSearchReplace *slave = rsb.get();
     	slave->pcontext = pcontext;
-    	(void)slave->RepeatingSearchReplace( &dest, slave->search_pattern, slave->replace_pattern, *keys );
+    	(void)slave->KeyedSearchReplace( &dest, *keys );
 		return dest;
 	}
 
@@ -615,7 +615,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 		TreePtr<Node> dest = DuplicateSubtree( sb->GetThrough(), keys, can_key, current_key );
 		SearchReplace *slave = sb.get();
 		slave->pcontext = pcontext;
-    	(void)slave->RepeatingSearchReplace( &dest, slave->search_pattern, slave->replace_pattern, *keys );
+    	(void)slave->KeyedSearchReplace( &dest, *keys );
 		return dest;
 	}
 
@@ -765,6 +765,14 @@ int RootedSearchReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
     return i;
 }
 
+
+void RootedSearchReplace::KeyedSearchReplace( TreePtr<Node> *proot,
+											  CouplingKeys keys )
+{
+	(void)RepeatingSearchReplace( proot, search_pattern, replace_pattern, keys );
+}
+
+
 // Do a search and replace based on patterns stored in our members
 void RootedSearchReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 {
@@ -789,7 +797,7 @@ void RootedSearchReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 
 	// Do the search and replace with before and after validation
 	Validate()( *pcontext, proot );
-	(void)RepeatingSearchReplace( proot, search_pattern, replace_pattern );
+	KeyedSearchReplace( proot );
 	Validate()( *pcontext, proot );
 
     pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
@@ -811,32 +819,41 @@ void SearchReplace::Configure( TreePtr<Node> sp,
 	if( !sp )
 		return;
 
+    RootedSearchReplace::Configure( sp, rp, m );
+}
+
+// Do a search and replace based on patterns stored in our members
+void SearchReplace::KeyedSearchReplace( TreePtr<Node> *proot,
+											  CouplingKeys keys )
+{
 	// Make a non-rooted search and replace (ie where the base of the search pattern
 	// does not have to be the root of the whole program tree).
 	// Insert a Stuff node as root of the search pattern
 	TreePtr< Stuff<Scope> > search_root( new Stuff<Scope> );
-	search_root->terminus = sp;
+	search_root->terminus = search_pattern;
 
-	if( rp ) // Is there also a replace pattern?
+	if( replace_pattern ) // Is there a replace pattern?
 	{
 		// Insert a Stuff node as root of the replace pattern
 		TreePtr< Stuff<Scope> > replace_root( new Stuff<Scope> );
-	    replace_root->terminus = rp;
+	    replace_root->terminus = replace_pattern;
 
 	    // Key them together
 		Coupling root_match(( search_root, replace_root ));
-	    m.insert( root_match );
+	    couplings.insert( root_match );
 
 	    // Configure the rooted implementation with new patterns and couplings
-	    RootedSearchReplace::Configure( search_root, replace_root, m );
+	    (void)RepeatingSearchReplace( proot, search_root, replace_root, keys );
+
+	    // Undo the change to the couplings we made earlier
+	    couplings.erase( root_match );
 	}
 	else
 	{
 	    // Configure the rooted implementation with new pattern
-        RootedSearchReplace::Configure( search_root, rp, m );
+	    (void)RepeatingSearchReplace( proot, search_root, replace_pattern, keys );
 	}
 }
-
 
 void RootedSearchReplace::Test()
 {

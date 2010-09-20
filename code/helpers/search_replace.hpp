@@ -124,18 +124,6 @@ public:
                     CouplingSet m = CouplingSet() );
     ~RootedSearchReplace();
     
-    // implementation ring: Do the actual search and replace
-    Result SingleSearchReplace( TreePtr<Node> *proot,
-                                TreePtr<Node> search_pattern,
-                                TreePtr<Node> replace_pattern,
-                                CouplingKeys match_keys = CouplingKeys() );
-    int RepeatingSearchReplace( TreePtr<Node> *proot,
-                                TreePtr<Node> search_pattern,
-                                TreePtr<Node> replace_pattern,
-                                CouplingKeys match_keys = CouplingKeys() );
-    // Functor style interface for RepeatingSearchReplace; implements Pass interface.
-    void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
-
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
     // back into the general search algorithm.
@@ -232,6 +220,22 @@ public:
 private:
     TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x,
     		                                   CouplingKeys *match_keys ) const;
+    // implementation ring: Do the actual search and replace
+    Result SingleSearchReplace( TreePtr<Node> *proot,
+                                TreePtr<Node> search_pattern,
+                                TreePtr<Node> replace_pattern,
+                                CouplingKeys match_keys = CouplingKeys() );
+public:
+    int RepeatingSearchReplace( TreePtr<Node> *proot,
+                                TreePtr<Node> search_pattern,
+                                TreePtr<Node> replace_pattern,
+                                CouplingKeys match_keys = CouplingKeys() );
+
+    virtual void KeyedSearchReplace( TreePtr<Node> *proot,
+									 CouplingKeys match_keys = CouplingKeys() );
+    // Functor style interface for RepeatingSearchReplace; implements Pass interface.
+    void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+private:
     // Internal node classes
     struct SubSequence : Node,
                          Sequence<Node>
@@ -255,6 +259,8 @@ public:
     void Configure( TreePtr<Node> sp = TreePtr<Node>(),
                     TreePtr<Node> rp = TreePtr<Node>(),
                     CouplingSet m = CouplingSet() );
+    virtual void KeyedSearchReplace( TreePtr<Node> *proot,
+									 CouplingKeys match_keys = CouplingKeys() );
 };
 
 struct RootedSlaveBase : virtual Node,
