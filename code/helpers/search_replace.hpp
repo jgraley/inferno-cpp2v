@@ -263,6 +263,7 @@ public:
 							          		    CouplingKeys match_keys = CouplingKeys() );
 };
 
+// TODO extract common base for slaves, and use in DuplicateSubtree() and maybe elsewhere
 struct RootedSlaveBase : virtual Node,
                          public RootedSearchReplace
 {

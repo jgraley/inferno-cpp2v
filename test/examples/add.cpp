@@ -6,8 +6,15 @@ int main()
     int i;
     for( i=0; i<5; i++ )
     {
-        tot = tot + i;
-        continue;
+    	do
+    	{
+    		continue; // applies to inner loop
+    	} while(0);
+		tot = tot + i;
+        if(1)
+    	{
+            continue; // applies to outer loop
+        }
         tot *= 2;
     }
     return tot;

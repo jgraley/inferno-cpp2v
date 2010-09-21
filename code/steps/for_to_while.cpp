@@ -18,13 +18,20 @@ void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr<While> r_while;
     MakeTreePtr<Compound> r_outer, r_body, sr_block;
     MakeTreePtr< GreenGrass<Statement> > ss_gg;
+    MakeTreePtr< Stuff<Statement> > ss_stuff, sr_stuff;
+    MakeTreePtr< NotMatch<Statement> > ss_not;
+    MakeTreePtr< Loop > ss_loop;
     
     MakeTreePtr<Continue> ss_cont, sr_cont;
     MakeTreePtr<Nop> sr_nop;
 
     sr_block->statements = (sr_inc, sr_cont);
     ss_gg->through = ss_cont;
-    MakeTreePtr< Slave<Statement> > r_slave( r_forbody, ss_gg, sr_block );
+    MakeTreePtr< RootedSlave<Statement> > r_slave( r_forbody, ss_stuff, sr_stuff );
+    ss_stuff->terminus = ss_gg;
+    ss_stuff->restrictor = ss_not;
+    sr_stuff->terminus = sr_block;
+    ss_not->pattern = ss_loop;
 
     s_for->body = s_body;
     s_for->initialisation = s_init;
@@ -41,7 +48,8 @@ void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 		Coupling(( s_body, r_forbody )),
 		Coupling(( s_init, r_init )),
 		Coupling(( s_cond, r_cond )),
-		Coupling(( s_inc, r_inc, sr_inc )) ));
+		Coupling(( s_inc, r_inc, sr_inc )),
+		Coupling(( ss_stuff, sr_stuff )) ));
 
    	SearchReplace( s_for, r_outer, couplings )( context, proot );
 }
