@@ -17,4 +17,11 @@ public:
 	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
 };
 
+class WhileToDo : public InPlaceTransformation
+{
+public:
+	using Transformation::operator();
+	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+};
+
 #endif 

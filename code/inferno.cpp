@@ -39,6 +39,11 @@ int main( int argc, char *argv[] )
 
     if( --ReadArgs::quitafter >= 0 )
     {
+    	WhileToDo()(&program);
+    }
+
+    if( --ReadArgs::quitafter >= 0 )
+    {
     	GenerateImplicitCasts()(&program);
     }
 

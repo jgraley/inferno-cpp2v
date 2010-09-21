@@ -53,3 +53,29 @@ void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 
    	SearchReplace( s_for, r_outer, couplings )( context, proot );
 }
+
+
+void WhileToDo::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+{
+	MakeTreePtr<While> s_while;
+    MakeTreePtr<Statement> s_body, r_body;
+    MakeTreePtr<Expression> s_cond, r_if_cond, r_do_cond;
+    MakeTreePtr<Nop> r_nop;
+    MakeTreePtr<If> r_if;
+    MakeTreePtr<Do> r_do;
+
+    s_while->body = s_body;
+    s_while->condition = s_cond;
+
+    r_if->condition = r_if_cond;
+    r_if->body = r_do;
+    r_if->else_body = r_nop;
+    r_do->condition = r_do_cond;
+    r_do->body = r_body;
+
+    CouplingSet couplings((
+		Coupling(( s_body, r_body )),
+		Coupling(( s_cond, r_if_cond, r_do_cond )) ));
+
+   	SearchReplace( s_while, r_if, couplings )( context, proot );
+}

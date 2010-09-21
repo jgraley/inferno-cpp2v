@@ -13,6 +13,14 @@
 #include "common/read_args.hpp"
 #include "graph.hpp"
 
+// TODO indicate pre-restriction by putting class name over the link. Only when type is not that
+// of the pointer, ie a non-trivial pre-estriction
+// TODO indicate Stuff restrictor by making it come out of the top of the circle (note that it will
+// be used on search, and usually search Stuff is coupled to replace Stuff, which will be below.
+// TODO force ranking to space out graph as
+// Primary: Stuff nodes, SearchReplace
+// Secondary: Normal nodes and special nodes that occupy space
+// Tertiary: RootedSearchReplace and special nodes that do not occupy space
 
 void Graph::operator()( RootedSearchReplace *root )
 {
