@@ -79,3 +79,40 @@ void WhileToDo::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 
    	SearchReplace( s_while, r_if, couplings )( context, proot );
 }
+
+void Cleanup::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+{
+	{ // {x;{a;b;c}y} -> {x;a;b;c;y}
+		MakeTreePtr<Compound> s_inner, s_outer, r_comp;
+		MakeTreePtr< Star<Statement> > s_pre, s_post, s_body, r_pre, r_post, r_body;
+		MakeTreePtr< Star<Declaration> > s_decls, r_decls;
+
+		s_inner->statements = s_body;
+		// Note: leaving s_inner empty meaning no decls allowed TODO fix renderer to uniquise and then merge any decls
+		s_outer->statements = ( s_pre, s_inner, s_post );
+		s_outer->members = ( s_decls );
+		r_comp->statements = ( r_pre, r_body, r_post );
+		r_comp->members = ( r_decls );
+
+		CouplingSet couplings((
+			Coupling(( s_body, r_body )),
+			Coupling(( s_pre, r_pre )),
+			Coupling(( s_post, r_post )),
+			Coupling(( s_decls, r_decls )) ));
+
+		SearchReplace( s_outer, r_comp, couplings )( context, proot );
+	}
+/*	{ // {a} -> a TODO need to restrict parent node to Statement: For, If etc OK; Instance is NOT OK
+		MakeTreePtr<Compound> s_comp;
+		MakeTreePtr< Statement > s_body, r_body;
+
+		s_comp->statements = s_body;
+		// Note: leaving s_comp empty meaning no decls allowed
+
+		CouplingSet couplings;
+		couplings.insert( Coupling(( s_body, r_body )) ); // TODO syntactic sugar for this case
+
+		SearchReplace( s_comp, r_body, couplings )( context, proot );
+	}*/
+}
+

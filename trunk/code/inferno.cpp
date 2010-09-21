@@ -62,6 +62,11 @@ int main( int argc, char *argv[] )
     	GenerateStacks()(&program);
     }
 
+    if( --ReadArgs::quitafter >= 0 )
+    {
+    	Cleanup()(&program);
+    }
+
     if(ReadArgs::intermediate_graph)
     {
         Graph()( &program );
