@@ -524,45 +524,67 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 		name += RenderIdentifier(o->identifier);
 	}
 
-
 	if( showtype )
 		s += RenderType( o->type, name );
 	else
 		s = name;
+
+	bool subroutine = dynamic_pointer_cast<Subroutine>(o->type);
 
 	if( !showinit || dynamic_pointer_cast<Uninitialised>(o->initialiser) )
 	{
 		// Don't render any initialiser
 		s += sep;
 	}
-	else if( TreePtr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser) )
+	else if( subroutine )
 	{
-		// Render initialiser list then let RenderStatement() do the rest
+		// Establish the scope of the function
 		AutoPush< TreePtr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) );
 
+		// Put the contents of the body into a Compound-like form even if there's only one
+		// Statement there - this is because we will wrangle with them later
+		Sequence<Statement> code;
+		Collection<Declaration> members;
+		if( TreePtr<Compound> comp = dynamic_pointer_cast<Compound>(o->initialiser) )
+		{
+			members = comp->members;
+			code = comp->statements;
+		}
+		else if( TreePtr<Statement> st = dynamic_pointer_cast<Statement>(o->initialiser) )
+			code.push_back( st );
+		else
+			s += ERROR_UNSUPPORTED(o->initialiser);
+
+		// Seperate the statements into constructor initialisers and "other stuff"
 		Sequence<Statement> inits;
 		Sequence<Statement> remainder;
-		ExtractInits( comp->statements, inits, remainder );
+		ExtractInits( code, inits, remainder );
+
+		// Render the constructor initialisers if there are any
 		if( !inits.empty() )
 		{
 			s += " : ";
 			s += RenderSequence( inits, ", ", false, TreePtr<Public>(), true );
 		}
 
+		// Render the other stuff as a Compound so we always get {} in all cases
 		TreePtr<Compound> r( new Compound );
-		r->members = comp->members;
+		r->members = members;
 		r->statements = remainder;
 		s += "\n" + RenderStatement(r, "");
-	}
-	else if( TreePtr<Expression> ei = dynamic_pointer_cast<Expression>( o->initialiser ) )
-	{
-		// Render expression with an assignment
-		AutoPush< TreePtr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) );
-		s += " = " + RenderExpression(ei) + sep;
-	}
+    }
 	else
 	{
-		s += ERROR_UNSUPPORTED(o->initialiser);
+		if( TreePtr<Expression> ei = dynamic_pointer_cast<Expression>( o->initialiser ) )
+		{
+			// Render expression with an assignment
+			AutoPush< TreePtr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) );
+			s += " = " + RenderExpression(ei) + sep;
+		}
+		else
+		{
+			s += ERROR_UNSUPPORTED(o->initialiser);
+		}
 	}
 
 	return s;
@@ -729,10 +751,13 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep )
 	else if( TreePtr<If> i = dynamic_pointer_cast<If>(statement) )
 	{
 		string s;
-		s += "if( " + RenderExpression(i->condition) + " )\n"
-			 "{\n" + // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
-			 RenderStatement(i->body, ";\n") +
-			 "}\n";
+		s += "if( " + RenderExpression(i->condition) + " )\n";
+		bool compound = dynamic_pointer_cast<Compound>(i->body);
+		if( !compound )
+			 s += "{\n"; // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
+	    s += RenderStatement(i->body, ";\n");
+		if( !compound )
+			 s += "}\n";
 		if( !dynamic_pointer_cast<Nop>(i->else_body) )  // Nop means no else clause
 			s += "else\n" +
 				 RenderStatement(i->else_body, ";\n");
