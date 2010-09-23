@@ -11,6 +11,14 @@
 #include "render.hpp"
 #include "clang/Parse/DeclSpec.h"
 
+// TODO uniquify identifiers with same name in overlapping (ie nested) scopes. The fact that we
+// already always insert scope resolution operators (scope::) should mean we only nbeed to uniquify
+// based on local scope structure.
+// TODO find a pretty printer thingy
+// TODO maybe reduce () by using a simplified scheme, ie divide operators into "high" and "low"
+// categories and elide on low(high()). Note that a full scheme makes code unreadable if
+// user does not have them memorised. Maybe just encode those priorities that are well known.
+
 // TODO indent back to previous level at end of string
 #define ERROR_UNKNOWN(V) \
     string( "\n#error " ) + \
