@@ -294,7 +294,7 @@ struct NonConst : Constancy { NODE_FUNCTIONS_FINAL };
 // - C++ constructors tie init to declaration
 // - Fits in with single-static-assignment style
 // The instance node can go into a Declaration Collection or a Statement Sequence.
-// THe latter case is used where initialisaiton/construction demands ordering. It points
+// The latter case is used where initialisaiton/construction demands ordering. It points
 // to an InstanceIdentifier, and all usages of the instance actually point to the
 // InstanceIdentifier.
 struct Instance : Declaration,
