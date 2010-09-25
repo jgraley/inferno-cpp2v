@@ -92,3 +92,16 @@ TreePtr<Instance> FindMemberByName( TreePtr<Program> program, TreePtr<Record> r,
     return TreePtr<Instance>();
 }                
 
+
+TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d )
+{
+	if( TreePtr<Instance> di = dynamic_pointer_cast<Instance>(d) )
+		return di->identifier;
+	else if( TreePtr<UserType> dut = dynamic_pointer_cast<UserType>(d) )
+		return dut->identifier;
+	else if( TreePtr<Label> dl = dynamic_pointer_cast<Label>(d) )
+		return dl->identifier;
+	else
+		return TreePtr<Identifier>(); // no identifier, maybe because d is a Base node
+}
+
