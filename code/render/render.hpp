@@ -3,6 +3,7 @@
 
 #include "tree/tree.hpp"
 #include "helpers/transformation.hpp"
+#include "uniquify_identifiers.hpp"
 
 
 class Render : public OutOfPlaceTransformation
@@ -15,6 +16,7 @@ private:
     TreePtr<Program> program;
     string deferred_decls;
     stack< TreePtr<Scope> > scope_stack;
+    UniquifyIdentifiers unique;
     // Remember the orders of collections when we sort them. Mirrors the same
     // map in the parser.
     Map< TreePtr<Scope>, Sequence<Declaration> > backing_ordering;

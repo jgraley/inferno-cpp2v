@@ -47,7 +47,9 @@ struct Type : virtual Node { NODE_FUNCTIONS };
 
 // A declaration specifies the creation of a type or an object from a type. 
 // Declaration can appear where statements can and also inside structs etc
-// and at top level.
+// and at top level. TODO add an intermediate like NamedDeclaration for decls
+// with identifiers. Maybe factor the Identifier pointer into NamedDeclaration
+// or give it a virtual method (covariant) to get the identifier.
 struct Declaration : virtual Node { NODE_FUNCTIONS };
 
 // A scope is any space in a program where declarations may appear. Declarations
@@ -196,9 +198,8 @@ struct Identifier : virtual Property { NODE_FUNCTIONS };
 // Stores a name found in the program, eg identifier names.
 // This is for unquoted strings, as opposed to String. Strictly,
 // Inferno doesn't need to keep this data, but it helps
-// to make renders and graphs clearer. This could use
-// something like stack<string> if it makes manufacturing 
-// names for new objects easier.
+// to make renders and graphs clearer. Inferno will uniquify
+// the name when rendering code.
 struct SpecificIdentifier : virtual Property
 { 
     NODE_FUNCTIONS

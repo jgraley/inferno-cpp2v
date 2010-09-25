@@ -10,6 +10,8 @@
 #include "sort_decls.hpp"
 #include "render.hpp"
 #include "clang/Parse/DeclSpec.h"
+#include "uniquify_identifiers.hpp"
+
 
 // TODO uniquify identifiers with same name in overlapping (ie nested) scopes. The fact that we
 // already always insert scope resolution operators (scope::) should mean we only nbeed to uniquify
@@ -43,6 +45,8 @@ TreePtr<Node> Render::operator()( TreePtr<Node> context, TreePtr<Node> root )
 	program = dynamic_pointer_cast<Program>(root);
 	ASSERT( program );
 	AutoPush< TreePtr<Scope> > cs( scope_stack, program );
+	unique.clear();
+	unique.UniquifyScope( context );
 
 	string s = RenderDeclarationCollection( program, ";\n", true ); // gets the .hpp stuff directly
 
@@ -77,7 +81,7 @@ string Render::RenderIdentifier( TreePtr<Identifier> id )
 	{
 		// TODO maybe just try casting to Named
 		if( TreePtr<SpecificIdentifier> ii = dynamic_pointer_cast<SpecificIdentifier>( id ) )
-			ids = *ii;
+			ids = unique[ii];
 		else
 			ids = ERROR_UNSUPPORTED( (id) );
 

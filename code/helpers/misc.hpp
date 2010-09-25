@@ -37,4 +37,9 @@ Sequence<T> operator+( Sequence<T> &s1, Sequence<T> &s2 )
     return sr;    
 }
 
+// Really, Declaration should point to an Identifier and that would be that, but at present
+// there are differnent kinds of Declaration that point to different kinds of Node.
+// TODO refactor this away
+TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d );
+
 #endif

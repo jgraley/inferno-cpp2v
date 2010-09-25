@@ -1,8 +1,11 @@
 
 int main()
 {
-	static int sss=999;
-    int tot=0;
+	int tot=0;
+	{
+		int tot;
+		tot=10; // let's hope inferno doesn't confuse this with the other top when it tidies away this compound block!!!1lol
+	}
     int i;
     for( i=0; i<5; i++ )
     {
