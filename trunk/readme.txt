@@ -3,7 +3,7 @@ Welcome to the inferno-synth subversion module.
 
 Directories are organised thusly:
 
-inferno-synth/trunk (this directory)
+inferno-cpp2v/trunk (this directory)
     Everything lives in this directory. The idea of the "trunk" subdirectory
     is that branches can go in other subdirectories within inferno-synth/
     In the following, all the paths will be from this directory.
@@ -24,7 +24,29 @@ llvm/
     If you've done "make get_libs", a copy of llvm will go here. Clang goes 
     in llvm/tools/clang/
 
+patches/
+    Patches we applied to llvm and clang by make get_libs after checking
+    them out.
+
+eclipse/
+    Inferno also supports the Eclipse IDE (with CDT C++ tools plugin installed). 
+    There is a "standard makefile" C++ project in inferno-cpp2v/trunk/eclipse 
+    Note that IDE integration is not officially supported for Inferno.
+
 How to build:
+
+On a Debian/Ubuntu system, you need approximately the following apt packages:
+    
+make
+subversion
+patch
+gcc
+g++
+flex
+bison
+libboost-dev
+libbbost-thread-dev
+graphviz    
 
 First you have to get llvm and clang out of the llvm project's subversion
 repository. To do this type
@@ -33,16 +55,14 @@ make get_libs
 
 Now you can build and run the self-tests using
 
-make tests
+make test
 
 It should report "ALL TESTS PASSED". To build without testing just go
 
 make
 
 To run the tests by hand go into test/ and use runtests.sh. Look at the 
-script for usage instructions.
+script for usage instructions. If you want to see a graph, try e.g.
 
-Inferno also supports the Eclipse IDE (with CDT C++ tools plugin installed). 
-There is a "standard makefile" C++ project in inferno-synth/tools (the files 
-all begin with . so use ls -a). Note that this IDE integration is "unofficial"
-at present.
+./inferno.exe -itest/examples/add.cpp -gi | dotty -
+
