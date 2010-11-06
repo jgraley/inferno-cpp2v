@@ -6,8 +6,7 @@ Directories are organised thusly:
 inferno-cpp2v/trunk (this directory)
     Everything lives in this directory. The idea of the "trunk" subdirectory
     is that branches can go in other subdirectories within inferno-synth/
-    In the following, all the paths will be from this directory.
-
+    
 code/
     This contains all the Inferno source code, most of which is organised into 
     further subdirectories under code/
@@ -25,8 +24,7 @@ llvm/
     in llvm/tools/clang/
 
 patches/
-    Patches we applied to llvm and clang by make get_libs after checking
-    them out.
+    Patches applied to the llvm/clang checkout by make get_libs.
 
 eclipse/
     Inferno also supports the Eclipse IDE (with CDT C++ tools plugin installed). 

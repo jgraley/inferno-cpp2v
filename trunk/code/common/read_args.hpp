@@ -17,12 +17,17 @@ public:
     static bool intermediate_graph;
     static bool pattern_graph;
     static bool hack_graph;
-    static void Usage();
-    static void Read( int argc, char *argv[] );
+    void Usage();
+    std::string GetArg();
+    ReadArgs( int argc, char *argv[] );
     static bool trace;
     static int quitafter;
     static bool quitenable;
     static bool selftest;
+private:
+    int curarg;
+    char **argv;
+    int argc;
 };
 
 #endif

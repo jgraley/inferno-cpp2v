@@ -1,5 +1,6 @@
 
 #include "read_args.hpp"
+#include <string.h>
 #include <string>
 #include <stdlib.h>
 #include <stdio.h>
@@ -33,45 +34,65 @@ void ReadArgs::Usage()
     exit(1);
 }
 
-void ReadArgs::Read( int argc, char *argv[] )
-{ 
-	exename = argv[0];
-    for( int i=1; i<argc; i++ )
+std::string ReadArgs::GetArg()
+{
+    if( strlen(argv[curarg]) > 2 )
     {
-    	if( argv[i][0] != '-' || ((std::string)(argv[i])).size()<2 )
+        return std::string( argv[curarg]+2 );
+    }
+    else
+    {
+        curarg++;
+        if(curarg >= argc)
+            Usage();
+        return std::string( argv[curarg] );
+    }    
+}
+
+ReadArgs::ReadArgs( int ac, char *av[] )
+{ 
+    argc = ac;
+    argv = av;
+	exename = argv[0];
+    for( curarg=1; curarg<argc; curarg++ )
+    {
+    	if( argv[curarg][0] != '-' || ((std::string)(argv[curarg])).size()<2 )
     		Usage();
 
-        if( argv[i][1]=='i' )
+        char option = argv[curarg][1];
+        
+        if( option=='i' )
         {
-            infile = argv[i]+2;
+            infile = GetArg();
         }
-        else if( argv[i][1]=='o' )
+        else if( option=='o' )
         {
-            outfile = argv[i]+2;
+            outfile = GetArg();
         }
-        else if( argv[i][1]=='t' )
+        else if( option=='t' )
         {
             trace = true;
         }
-        else if( argv[i][1]=='g' )
+        else if( option=='g' )
         {
-        	if( argv[i][2]=='i' )
+            char option2 = argv[curarg][2];
+        	if( option2=='i' )
         	    intermediate_graph = true;
-        	else if( argv[i][2]=='p' )
+        	else if( option2=='p' )
         		pattern_graph = true;
         	else
         		Usage();
 
-        	if( argv[i][3]=='h' )
+        	if( argv[curarg][3]=='h' )
         		hack_graph = true;
         }
-        else if( argv[i][1]=='s' )
+        else if( option=='s' )
         {
             selftest = true;
         }
-        else if( argv[i][1]=='q' )
+        else if( option=='q' )
         {
-        	quitafter = strtoul( argv[i]+2, NULL, 10 );
+        	quitafter = strtoul( GetArg().c_str(), NULL, 10 );
         	quitenable = true;
         }
         else 
