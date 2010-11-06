@@ -68,7 +68,11 @@ class Conjecture;
         return !!dynamic_cast<const VALUE_TYPE *>(candidate); \
     }
 
-#define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION	SPECIAL_MATCHER_FUNCTION
+#define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION SPECIAL_MATCHER_FUNCTION
+#define aSPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION 
+
+template<class VALUE_TYPE>
+struct Special : virtual Node, VALUE_TYPE { SPECIAL_MATCHER_FUNCTION };
 
 
 // The * wildcard can match more than one node of any type in a container
@@ -78,7 +82,7 @@ class Conjecture;
 // in the collection.
 struct StarBase : virtual Node {};
 template<class VALUE_TYPE>
-struct Star : StarBase, VALUE_TYPE { SPECIAL_NODE_FUNCTIONS };
+struct Star : StarBase, Special<VALUE_TYPE> { aSPECIAL_NODE_FUNCTIONS };
 
 
 // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
@@ -88,7 +92,7 @@ struct StuffBase : virtual Node
 	TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
 };
 template<class VALUE_TYPE>
-struct Stuff : StuffBase, VALUE_TYPE { SPECIAL_NODE_FUNCTIONS };
+struct Stuff : StuffBase, Special<VALUE_TYPE> { aSPECIAL_NODE_FUNCTIONS };
 struct StuffKey : Key
 {
 	TreePtr<Node> terminus;
