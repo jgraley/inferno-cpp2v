@@ -20,7 +20,7 @@ void SelfTest();
 int main( int argc, char *argv[] )
 {
     // Check the command line arguments 
-    ReadArgs::Read( argc, argv );
+    ReadArgs( argc, argv );
 
     if( ReadArgs::selftest )
         SelfTest();
