@@ -29,7 +29,7 @@ void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     ss_gg->through = ss_cont;
     MakeTreePtr< RootedSlave<Statement> > r_slave( r_forbody, ss_stuff, sr_stuff );
     ss_stuff->terminus = ss_gg;
-    ss_stuff->restrictor = ss_not;
+    ss_stuff->recurse_restrictor = ss_not;
     sr_stuff->terminus = sr_block;
     ss_not->pattern = ss_loop;
 

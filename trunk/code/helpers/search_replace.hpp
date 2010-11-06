@@ -84,7 +84,7 @@ struct Star : StarBase, VALUE_TYPE { SPECIAL_NODE_FUNCTIONS };
 // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
 struct StuffBase : virtual Node
 {
-	TreePtr<Node> restrictor; // Restricts the intermediate nodes in the truncated subtree
+	TreePtr<Node> recurse_restrictor; // Restricts the intermediate nodes in the truncated subtree
 	TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
 };
 template<class VALUE_TYPE>
