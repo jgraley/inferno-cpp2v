@@ -9,14 +9,14 @@
 struct NotMatchBase {}; // needed for graph plotter
 
 // Match if the supplied patterns does not match (between you and me, it's just a NOT)
-template<class VALUE_TYPE>
-struct NotMatch : virtual VALUE_TYPE,
+template<class PRE_RESTRICTION>
+struct NotMatch : PRE_RESTRICTION,
                  RootedSearchReplace::SoftSearchPattern,
                  NotMatchBase
 {
 	SPECIAL_NODE_FUNCTIONS
 	// Pattern is an abnormal context
-    TreePtr<VALUE_TYPE> pattern;
+    TreePtr<PRE_RESTRICTION> pattern;
 private:
     virtual Result DecidedCompare( const RootedSearchReplace *sr,
     		                       TreePtr<Node> x,
@@ -49,13 +49,13 @@ private:
 struct MatchAllBase {};
 
 // Match all of the supplied patterns (between you and me, it's an AND)
-template<class VALUE_TYPE>
-struct MatchAll : virtual VALUE_TYPE,
+template<class PRE_RESTRICTION>
+struct MatchAll : PRE_RESTRICTION,
                  RootedSearchReplace::SoftSearchPattern,
                  MatchAllBase
 {
 	SPECIAL_NODE_FUNCTIONS
-    mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
+    mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
     virtual Result DecidedCompare( const RootedSearchReplace *sr,
                                    TreePtr<Node> x,
@@ -63,7 +63,7 @@ private:
                                    bool can_key,
                                    Conjecture &conj ) const
     {
-    	FOREACH( const TreePtr<VALUE_TYPE> i, patterns )
+    	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
     		Result r = sr->DecidedCompare( x, TreePtr<Node>(i), keys, can_key, conj );
     	    if( !r )
@@ -76,14 +76,14 @@ private:
 struct MatchAnyBase {};
 
 // Match zero or more of the supplied patterns (between you and me, it's an OR)
-template<class VALUE_TYPE>
-struct MatchAny : virtual VALUE_TYPE,
+template<class PRE_RESTRICTION>
+struct MatchAny : PRE_RESTRICTION,
                  RootedSearchReplace::SoftSearchPattern,
                  MatchAnyBase
 {
 	SPECIAL_NODE_FUNCTIONS
 	// Patterns are an abnormal context
-    mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
+    mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
     virtual Result DecidedCompare( const RootedSearchReplace *sr,
     		                       TreePtr<Node> x,
@@ -91,7 +91,7 @@ private:
     		                       bool can_key,
     		                       Conjecture &conj ) const
     {
-    	FOREACH( const TreePtr<VALUE_TYPE> i, patterns )
+    	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
     		Result r = sr->Compare( x, i, keys, false );
     	    if( r )
@@ -105,15 +105,15 @@ private:
 struct MatchOddBase {};
 
 // Match an odd number of patterns (between you and me, it's an EOR)
-template<class VALUE_TYPE>
-struct MatchOdd : virtual VALUE_TYPE,
+template<class PRE_RESTRICTION>
+struct MatchOdd : PRE_RESTRICTION,
                   RootedSearchReplace::SoftSearchPattern,
                   MatchOddBase
 {
 	SPECIAL_NODE_FUNCTIONS
 	// Patterns are an abnormal context (if you are setting N==patterns.size(), then you want
 	// MatchAll, whose patterns are not abnormal).
-    mutable Collection<VALUE_TYPE> patterns; // TODO provide const iterators and remove mutable
+    mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
     virtual Result DecidedCompare( const RootedSearchReplace *sr,
     		                       TreePtr<Node> x,
@@ -122,7 +122,7 @@ private:
     		                       Conjecture &conj ) const
     {
     	int tot=0;
-    	FOREACH( const TreePtr<VALUE_TYPE> i, patterns )
+    	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
     		Result r = sr->Compare( x, i, keys, false );
     	    if( r )
@@ -150,10 +150,10 @@ private:
     Transformation *transformation;
 };
 
-template<class VALUE_TYPE>
-struct TransformTo : TransformToBase, VALUE_TYPE
+template<class PRE_RESTRICTION>
+struct TransformTo : TransformToBase, PRE_RESTRICTION
 {
-	SPECIAL_NODE_FUNCTIONS
+	SPECIAL_NODE_FUNCTIONS	
     TransformTo( Transformation *t ) : TransformToBase (t) {}
 };
 

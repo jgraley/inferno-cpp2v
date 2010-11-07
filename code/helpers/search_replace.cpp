@@ -64,7 +64,7 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
 	if( !pattern->IsLocalMatch(x.get()) )
 		return NOT_FOUND;
 
-	if( TreePtr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
+	if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
     {
     	// Hand over to any soft search functionality in the search pattern node
     	Result r = ssp->DecidedCompare( this, x, keys, can_key, conj );
@@ -323,7 +323,7 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
 	ASSERT( stuff_pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
 	// Define a walk, rooted at this node, restricted as specified in search pattern
-	Walk wx( x, stuff_pattern->recurse_restrictor, this, keys );
+	Walk wx( x, stuff_pattern->recurse_restriction, this, keys );
 
 	// Get decision from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = conj.HandleDecision( wx.begin(), wx.end() );
@@ -645,12 +645,11 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
     	ASSERT( !dynamic_pointer_cast<StuffBase>(source) )("Stuff nodes in replace pattern must be keyed\n");
 
        	// Allow a soft replace pattern to act
-		if( TreePtr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
+		if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
 		{
 			// Substitute is an identifier, so preserve its uniqueness by just returning
 			// the same node. Don't do any more - we wouldn't want to change the
 			// identifier in the tree even if it had members, lol!
-			TRACE("Invoke soft replace pattern %s\n", TypeInfo(srp).name().c_str() );
 			ASSERT( !current_key )( "Found soft replace pattern while under substitution\n" );
 			TreePtr<Node> newsource = srp->DuplicateSubtree( this, keys, can_key );
 			ASSERT( newsource );

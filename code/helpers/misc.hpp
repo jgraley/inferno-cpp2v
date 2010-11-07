@@ -11,7 +11,7 @@ TreePtr<Identifier> GetIdentifier( TreePtr<Declaration> d );
 class GetDeclaration : public OutOfPlaceTransformation, public TransformTo<InstanceIdentifier>
 {
 public:
-	NODE_FUNCTIONS
+	SPECIAL_NODE_FUNCTIONS
 	GetDeclaration() : TransformTo<InstanceIdentifier>( this ) {}
     virtual TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root );
 private:
