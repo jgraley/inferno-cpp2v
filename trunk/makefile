@@ -50,7 +50,7 @@ libclang%.a : makefile
 # Compile inferno sources
 #    	
 code/build/inferno.a : makefile
-	cd code; $(MAKE) build/inferno.a
+	cd code; $(MAKE) --jobs=2 build/inferno.a
 
 #
 # Link inferno executable

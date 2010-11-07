@@ -11,7 +11,7 @@
 class TypeOf : public OutOfPlaceTransformation, public TransformTo<Expression>
 {
 public:
-	NODE_FUNCTIONS
+	SPECIAL_NODE_FUNCTIONS
     TypeOf() : TransformTo<Expression>( this )
     {
     }

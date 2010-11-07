@@ -62,18 +62,25 @@
 
 class Conjecture;
 
-#define SPECIAL_MATCHER_FUNCTION \
-	virtual bool IsLocalMatch( const Matcher *candidate ) const \
-    { \
-        return !!dynamic_cast<const VALUE_TYPE *>(candidate); \
-    }
 
-#define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION SPECIAL_MATCHER_FUNCTION
-#define aSPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION 
-
-template<class VALUE_TYPE>
-struct Special : virtual Node, VALUE_TYPE { SPECIAL_MATCHER_FUNCTION };
-
+// --- General note on SPECIAL_NODE_FUNCTIONS and PRE_RESTRICTION ---
+// Special nodes (that is nodes defined here with special S&R behaviour)
+// derive from a normal tree node via templating. This base class is
+// the PRE_RESTRICTION node, and we want it for 2 reasons:
+// 1. To allow normal nodes to point to special nodes, they must
+//    expose a normal interface, which can vary depending on usage
+//    so must be templated.
+// 2. We are able to provide a "free" and-rule restriction on all
+//    special nodes by restricting to non-strict subclasses of the
+//    pre-restrictor.
+// In order to make 2. work, we need to *avoid* overriding IsLocalMatch()
+// or IsSubclass() on special nodes, so that the behaviour of the 
+// PRE_RESTRICTION is preserved wrt comparisons. So all special nodes
+// including speicialisations of TransformTo etc should use 
+// SPECIAL_NODE_FUNCTIONS instead of NODE_FUNCTIONS.
+// Itemise is known required (for eg graph plotting), other bounces
+// are TBD.
+#define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
 
 // The * wildcard can match more than one node of any type in a container
 // In a Sequence, only a contiguous subsequence of 0 or more elements will match
@@ -81,18 +88,18 @@ struct Special : virtual Node, VALUE_TYPE { SPECIAL_MATCHER_FUNCTION };
 // Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
 // in the collection.
 struct StarBase : virtual Node {};
-template<class VALUE_TYPE>
-struct Star : StarBase, Special<VALUE_TYPE> { aSPECIAL_NODE_FUNCTIONS };
+template<class PRE_RESTRICTION>
+struct Star : StarBase, PRE_RESTRICTION { SPECIAL_NODE_FUNCTIONS };
 
 
 // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
 struct StuffBase : virtual Node
 {
-	TreePtr<Node> recurse_restrictor; // Restricts the intermediate nodes in the truncated subtree
+	TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
 	TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
 };
-template<class VALUE_TYPE>
-struct Stuff : StuffBase, Special<VALUE_TYPE> { aSPECIAL_NODE_FUNCTIONS };
+template<class PRE_RESTRICTION>
+struct Stuff : StuffBase, PRE_RESTRICTION { SPECIAL_NODE_FUNCTIONS };
 struct StuffKey : Key
 {
 	TreePtr<Node> terminus;
@@ -103,11 +110,11 @@ struct GreenGrassBase : virtual Node
 {
 	virtual TreePtr<Node> GetThrough() const = 0;
 };
-template<class VALUE_TYPE>
-struct GreenGrass : GreenGrassBase, VALUE_TYPE
+template<class PRE_RESTRICTION>
+struct GreenGrass : GreenGrassBase, PRE_RESTRICTION
 {
 	SPECIAL_NODE_FUNCTIONS
-	TreePtr<VALUE_TYPE> through;
+	TreePtr<PRE_RESTRICTION> through;
 	virtual TreePtr<Node> GetThrough() const
 	{
 		return TreePtr<Node>( through );
@@ -132,7 +139,7 @@ public:
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
     // back into the general search algorithm.
     TreePtr<Node> GetContext() const { ASSERT(pcontext&&*pcontext); return *pcontext; }
-    struct SoftSearchPattern : virtual Node
+    struct SoftSearchPattern
     {
         virtual Result DecidedCompare( const RootedSearchReplace *sr,
         		                                      TreePtr<Node> x,
@@ -140,7 +147,7 @@ public:
         		                                      bool can_key,
         		                                      Conjecture &conj ) const = 0;
     };
-    struct SoftReplacePattern : virtual Node
+    struct SoftReplacePattern
     {
         virtual TreePtr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
         		                                   CouplingKeys *match_keys,
@@ -276,19 +283,19 @@ struct RootedSlaveBase : virtual Node,
 	{}
 	virtual TreePtr<Node> GetThrough() const = 0;
 };
-template<class VALUE_TYPE>
-struct RootedSlave : RootedSlaveBase, VALUE_TYPE
+template<class PRE_RESTRICTION>
+struct RootedSlave : RootedSlaveBase, PRE_RESTRICTION
 {
 	SPECIAL_NODE_FUNCTIONS
 
 	// Slave must be constructed using constructor
-	RootedSlave( TreePtr<VALUE_TYPE> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+	RootedSlave( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
 		through( t ),
 		RootedSlaveBase( sp, rp )
 	{
 	}
 
-	TreePtr<VALUE_TYPE> through;
+	TreePtr<PRE_RESTRICTION> through;
 	virtual TreePtr<Node> GetThrough() const
 	{
 		return TreePtr<Node>( through );
@@ -303,19 +310,19 @@ struct SlaveBase : virtual Node,
 	{}
 	virtual TreePtr<Node> GetThrough() const = 0;
 };
-template<class VALUE_TYPE>
-struct Slave : SlaveBase, VALUE_TYPE
+template<class PRE_RESTRICTION>
+struct Slave : SlaveBase, PRE_RESTRICTION
 {
 	SPECIAL_NODE_FUNCTIONS
 
 	// Slave must be constructed using constructor
-	Slave( TreePtr<VALUE_TYPE> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+	Slave( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
 		through( t ),
 		SlaveBase( sp, rp )
 	{
 	}
 
-	TreePtr<VALUE_TYPE> through;
+	TreePtr<PRE_RESTRICTION> through;
 	virtual TreePtr<Node> GetThrough() const
 	{
 		return TreePtr<Node>( through );

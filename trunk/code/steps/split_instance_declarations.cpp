@@ -110,12 +110,12 @@ void HackUpIfs::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 		MakeTreePtr< Stuff<Statement> > ssthen;
 		sif->body = ssthen;
 		ssthen->terminus = MakeTreePtr< Expression >();
-		ssthen->recurse_restrictor = MakeTreePtr< Expression >();
+		ssthen->recurse_restriction = MakeTreePtr< Expression >();
 		MakeTreePtr<Compound> scelse;
 		MakeTreePtr< Stuff<Statement> > sselse;
 		sif->else_body = sselse;
 		sselse->terminus = MakeTreePtr< Statement >();
-		sselse->recurse_restrictor = MakeTreePtr< Statement >();
+		sselse->recurse_restriction = MakeTreePtr< Statement >();
 
 		MakeTreePtr< Stuff<Statement> > rs;
 		MakeTreePtr<PostIncrement> rpi;
