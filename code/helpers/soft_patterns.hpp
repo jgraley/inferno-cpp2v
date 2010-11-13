@@ -169,18 +169,32 @@ struct TransformTo : TransformToBase, PRE_RESTRICTION
 // new identifier. Rule is: ONE of these per new identifier.
 // TODO rename to BuildIdentifier per the docs; Consider supporting TransformTo
 // in replace and having MAke/BuildIdentifier as a Transformation
-struct SoftMakeIdentifier : InstanceIdentifier, // TODO other kinds of identifier
+struct SoftMakeIdentifier : InstanceIdentifier, 
                             RootedSearchReplace::SoftReplacePattern
 {
-	SoftMakeIdentifier( string s ) : format(s) {}
-	SoftMakeIdentifier() : format("___UNNAMED___") {}
-	NODE_FUNCTIONS
-	string format;
-	TreePtr<Identifier> source;
+    SoftMakeIdentifier( string s ) : format(s) {}
+    SoftMakeIdentifier() : format("___UNNAMED___") {}
+    NODE_FUNCTIONS
+    string format;
+    TreePtr<Identifier> source;
 private:
     virtual TreePtr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
-    		                                   CouplingKeys *keys,
-    		                                   bool can_key );
+                                               CouplingKeys *keys,
+                                               bool can_key );
+};
+
+struct SoftMakeLabelIdentifier : LabelIdentifier,
+                                 RootedSearchReplace::SoftReplacePattern
+{
+    SoftMakeLabelIdentifier( string s ) : format(s) {}
+    SoftMakeLabelIdentifier() : format("___UNNAMED___") {}
+    NODE_FUNCTIONS
+    string format;
+    TreePtr<Identifier> source;
+private:
+    virtual TreePtr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
+                                               CouplingKeys *keys,
+                                               bool can_key );
 };
 
 #endif

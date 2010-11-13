@@ -14,6 +14,7 @@
 #include "steps/generate_stacks.hpp"
 #include "steps/for_to_while.hpp"
 #include "steps/slave_test.hpp"
+#include "steps/lower_control_flow.hpp"
 
 void SelfTest();
 
@@ -39,7 +40,12 @@ int main( int argc, char *argv[] )
 
     if( --ReadArgs::quitafter >= 0 )
     {
-    	WhileToDo()(&program);
+        WhileToDo()(&program);
+    }
+
+    if( --ReadArgs::quitafter >= 0 )
+    {
+        IfToIfGoto()(&program);
     }
 
     if( --ReadArgs::quitafter >= 0 )
