@@ -14,7 +14,7 @@ void Validate::operator()( TreePtr<Node> context,
 						   TreePtr<Node> *proot )
 {
 	(void)context;
-
+    return;
 	decl_refs.clear();
 	total_refs.clear();
 

@@ -44,7 +44,8 @@ flex
 bison
 libboost-dev
 libbbost-thread-dev
-graphviz    
+graphviz   [only if you want to look at pretty pictures] 
+indent     [makes reading inferno C output easier]
 
 First you have to get llvm and clang out of the llvm project's subversion
 repository. To do this type
