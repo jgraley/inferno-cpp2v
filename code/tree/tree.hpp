@@ -730,12 +730,17 @@ struct If : Statement
     TreePtr<Statement> else_body; // can be Nop if no else clause
 };
 
-// Intermediate for any loop, commonising the body
-struct Loop : Statement
+// A "break" statement jumps out of the innermost one of these
+// We specify the body here; the break statement will be within the body
+struct Breakable : Statement 
 {
     NODE_FUNCTIONS
     TreePtr<Statement> body;
 };
+
+// Any loop.
+// A "continue" statement jumps to the bottom of the body.
+struct Loop : Breakable { NODE_FUNCTIONS };
 
 // While loop
 struct While : Loop
@@ -764,11 +769,10 @@ struct For : Loop
 // and breaks are dropped into the sequence at the corresponding 
 // positions. This caters for fall-throughs etc. Really just a 
 // Compound with a goto-a-variable at the top and some mapping.
-struct Switch : Statement
+struct Switch : Breakable
 {
 	NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition;
-    TreePtr<Statement> body;
 };
 
 // Intermediate for labels in a switch statement.
