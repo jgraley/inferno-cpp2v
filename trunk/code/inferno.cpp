@@ -50,6 +50,16 @@ int main( int argc, char *argv[] )
 
     if( --ReadArgs::quitafter >= 0 )
     {
+        BreakToGoto()(&program);
+    }
+
+    if( --ReadArgs::quitafter >= 0 )
+    {
+        DoToIfGoto()(&program);
+    }
+
+    if( --ReadArgs::quitafter >= 0 )
+    {
     	GenerateImplicitCasts()(&program);
     }
 

@@ -722,7 +722,7 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 		s += ";\n";
 	}
 	else if( TreePtr<Label> l = dynamic_pointer_cast<Label>(declaration) )
-		return RenderIdentifier(l->identifier) + ":\n"; // no ; after a label
+		return RenderIdentifier(l->identifier) + ":;\n"; // need ; after a label in case last in compound block
 	else
 		s += ERROR_UNSUPPORTED(declaration);
 
@@ -762,11 +762,11 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep )
 	{
 		string s;
 		s += "if( " + RenderExpression(i->condition) + " )\n";
-		bool compound = dynamic_pointer_cast<Compound>(i->body);
-		if( !compound )
+		bool sub_if = !!dynamic_pointer_cast<If>(i->body);
+		if( sub_if )
 			 s += "{\n"; // Note: braces there to clarify else binding eg if(a) if(b) foo; else how_do_i_bind;
 	    s += RenderStatement(i->body, ";\n");
-		if( !compound )
+		if( sub_if )
 			 s += "}\n";
 		if( !dynamic_pointer_cast<Nop>(i->else_body) )  // Nop means no else clause
 			s += "else\n" +

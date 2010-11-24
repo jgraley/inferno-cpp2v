@@ -604,18 +604,24 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 	if( TreePtr<RootedSlaveBase> rsb = dynamic_pointer_cast<RootedSlaveBase>(source) )
 	{
 		TreePtr<Node> dest = DuplicateSubtree( rsb->GetThrough(), keys, can_key, current_key );
-		RootedSearchReplace *slave = rsb.get();
-    	slave->pcontext = pcontext;
-    	(void)slave->DefaultRepeatingSearchReplace( &dest, *keys );
+		if(!can_key) // do not run slaves until we have all the keys of the master 
+        {
+            RootedSearchReplace *slave = rsb.get();
+    	    slave->pcontext = pcontext;
+    	    (void)slave->DefaultRepeatingSearchReplace( &dest, *keys );
+        }
 		return dest;
 	}
 
 	if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
 	{
 		TreePtr<Node> dest = DuplicateSubtree( sb->GetThrough(), keys, can_key, current_key );
-		SearchReplace *slave = sb.get();
-		slave->pcontext = pcontext;
-    	(void)slave->DefaultRepeatingSearchReplace( &dest, *keys );
+        if(!can_key) // do not run slaves until we have all the keys of the master 
+        {
+		    SearchReplace *slave = sb.get();
+		    slave->pcontext = pcontext;
+    	    (void)slave->DefaultRepeatingSearchReplace( &dest, *keys );
+        }
 		return dest;
 	}
 
@@ -694,6 +700,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 TreePtr<Node> RootedSearchReplace::MatchingDuplicateSubtree( TreePtr<Node> source,
 		                                                        CouplingKeys *keys ) const
 {
+    //TODO can_key should be an enum eg RelpacePass {KEYING, SUBSTITUTING} for clarity
     if( keys )
     {
      	// Do a two-pass matching process: first get the keys...
