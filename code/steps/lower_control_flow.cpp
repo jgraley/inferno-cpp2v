@@ -3,6 +3,9 @@
 #include "tree/tree.hpp"
 #include "common/common.hpp"
 #include "helpers/soft_patterns.hpp"
+#include "helpers/typeof.hpp"
+
+// TOOD go through step impls and use inline decls of leaf nodes, to reduce wordiness
 
 void IfToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
@@ -47,6 +50,139 @@ void IfToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
         Coupling(( r_labelid2, r_labelid2a )) ));
 
     SearchReplace( s_and, r_comp, couplings )( context, proot );
+}
+
+
+void SwitchToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+{
+    MakeTreePtr<Switch> s_switch;
+    MakeTreePtr<Compound> r_comp;
+    MakeTreePtr<Statement> s_body, r_body;
+    MakeTreePtr<Type> s_cond_type, r_cond_type;
+    MakeTreePtr<Automatic> r_decl;
+    MakeTreePtr<SoftMakeIdentifier> r_id("switch_value");
+    TreePtr<TypeOf> s_cond( new TypeOf ); // TODO use MakeTreePtr, confirm this works
+    
+    // Slave for default
+    MakeTreePtr<Compound> ss1_body, sr1_body;
+    MakeTreePtr< Star<Declaration> > ss1_decls, sr1_decls;
+    MakeTreePtr< Star<Statement> > ss1_pre, sr1_pre;
+    MakeTreePtr< Star<Statement> > ss1_post, sr1_post;
+    MakeTreePtr< Default > ss1_default;
+    MakeTreePtr< Label > sr1_label;
+    MakeTreePtr<SoftMakeLabelIdentifier> sr1_labelid("DEFAULT");
+    MakeTreePtr<LabelIdentifier> sr1_labelid_a;
+    MakeTreePtr<Goto> sr1_goto;
+    
+    ss1_body->members = ss1_decls;
+    ss1_body->statements = (ss1_pre, ss1_default, ss1_post);
+    
+    sr1_body->members = sr1_decls;
+    sr1_body->statements = (sr1_goto, sr1_pre, sr1_label, sr1_post);
+    sr1_goto->destination = sr1_labelid_a;
+    sr1_label->identifier = sr1_labelid;
+    
+    MakeTreePtr< RootedSlave<Statement> > r_slave1( r_body, ss1_body, sr1_body );
+
+    // slave for normal case statements (single value)
+    MakeTreePtr<Compound> ss2_body, sr2_body;
+    MakeTreePtr< Star<Declaration> > ss2_decls, sr2_decls;
+    MakeTreePtr< Star<Statement> > ss2_pre, sr2_pre;
+    MakeTreePtr< Star<Statement> > ss2_post, sr2_post;
+    MakeTreePtr< Case > ss2_case;
+    MakeTreePtr< Label > sr2_label;
+    MakeTreePtr<SoftMakeLabelIdentifier> sr2_labelid("CASE");
+    MakeTreePtr<LabelIdentifier> sr2_labelid_a;
+    MakeTreePtr<If> sr2_if;
+    MakeTreePtr<Nop> sr2_nop;
+    MakeTreePtr<Goto> sr2_goto;
+    MakeTreePtr<Equal> sr2_equal;
+    MakeTreePtr<InstanceIdentifier> sr2_id_a;
+    MakeTreePtr<Expression> ss2_exp, sr2_exp;
+    
+    ss2_body->members = ss2_decls;
+    ss2_body->statements = (ss2_pre, ss2_case, ss2_post);
+    ss2_case->value = ss2_exp;
+    
+    sr2_body->members = sr2_decls;
+    sr2_body->statements = (sr2_if, sr2_pre, sr2_label, sr2_post);
+    sr2_if->condition = sr2_equal;
+    sr2_if->body = sr2_goto;
+    sr2_if->else_body = sr2_nop;
+    sr2_equal->operands = (sr2_id_a, sr2_exp);
+    sr2_goto->destination = sr2_labelid_a;
+    sr2_label->identifier = sr2_labelid;
+    
+    MakeTreePtr< RootedSlave<Statement> > r_slave2( r_slave1, ss2_body, sr2_body );
+    
+    // Slave for range cases (GCC extension) eg case 5..7:    
+    MakeTreePtr<Compound> ss3_body, sr3_body;
+    MakeTreePtr< Star<Declaration> > ss3_decls, sr3_decls;
+    MakeTreePtr< Star<Statement> > ss3_pre, sr3_pre;
+    MakeTreePtr< Star<Statement> > ss3_post, sr3_post;
+    MakeTreePtr< RangeCase > ss3_case;
+    MakeTreePtr< Label > sr3_label;
+    MakeTreePtr<SoftMakeLabelIdentifier> sr3_labelid("CASE");
+    MakeTreePtr<LabelIdentifier> sr3_labelid_a;
+    MakeTreePtr<If> sr3_if;
+    MakeTreePtr<Nop> sr3_nop;
+    MakeTreePtr<Goto> sr3_goto;
+    MakeTreePtr<LogicalAnd> sr3_and;
+    MakeTreePtr<GreaterOrEqual> sr3_ge;
+    MakeTreePtr<LessOrEqual> sr3_le;
+    MakeTreePtr<InstanceIdentifier> sr3_id_a, sr3_id_b;
+    MakeTreePtr<Expression> ss3_exp_lo, sr3_exp_lo, ss3_exp_hi, sr3_exp_hi;
+    
+    ss3_body->members = ss3_decls;
+    ss3_body->statements = (ss3_pre, ss3_case, ss3_post);
+    ss3_case->value_lo = ss3_exp_lo;
+    ss3_case->value_hi = ss3_exp_hi;
+    
+    sr3_body->members = sr3_decls;
+    sr3_body->statements = (sr3_if, sr3_pre, sr3_label, sr3_post);
+    sr3_if->condition = sr3_and;
+    sr3_if->body = sr3_goto;
+    sr3_if->else_body = sr3_nop;
+    sr3_and->operands = (sr3_ge, sr3_le);
+    sr3_ge->operands = (sr3_id_a, sr3_exp_lo);
+    sr3_le->operands = (sr3_id_b, sr3_exp_hi);
+    sr3_goto->destination = sr3_labelid_a;
+    sr3_label->identifier = sr3_labelid;
+    
+    MakeTreePtr< RootedSlave<Statement> > r_slave3( r_slave2, ss3_body, sr3_body );
+
+    // Finish up master
+    s_cond->pattern = s_cond_type;
+    s_switch->body = s_body; // will only match when body is a compound
+    s_switch->condition = s_cond;
+    
+    r_decl->identifier = r_id;
+    r_decl->type = r_cond_type;
+    r_decl->initialiser = MakeTreePtr<Expression>();
+    r_comp->statements = (r_decl, r_slave3);
+    
+    CouplingSet couplings(( 
+        Coupling(( s_cond_type, r_cond_type )),
+        Coupling(( s_cond, r_decl->initialiser )),
+        Coupling(( s_body, r_body )),
+	Coupling(( ss1_decls, sr1_decls )),
+	Coupling(( ss1_pre, sr1_pre )),
+	Coupling(( ss1_post, sr1_post )),
+	Coupling(( sr1_labelid, sr1_labelid_a )),
+	Coupling(( ss2_decls, sr2_decls )),
+	Coupling(( ss2_pre, sr2_pre )),
+	Coupling(( ss2_post, sr2_post )),
+	Coupling(( sr2_labelid, sr2_labelid_a )),
+	Coupling(( r_id, sr2_id_a, sr3_id_a, sr3_id_b )),
+	Coupling(( ss2_exp, sr2_exp )),
+	Coupling(( ss3_decls, sr3_decls )),
+	Coupling(( ss3_pre, sr3_pre )),
+	Coupling(( ss3_post, sr3_post )),
+	Coupling(( sr3_labelid, sr3_labelid_a )),
+	Coupling(( ss3_exp_lo, sr3_exp_lo )),
+	Coupling(( ss3_exp_hi, sr3_exp_hi )) ));
+
+    SearchReplace( s_switch, r_comp, couplings )( context, proot );
 }
 
 
