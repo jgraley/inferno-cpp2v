@@ -21,7 +21,7 @@ Syntax  Clang token          Text   Inferno node          Intermediate         C
 
 PREFIX(amp                 , "&",   AddressOf,            Unop,                   SPECIAL )
 INFIX(amp                  , "&",   BitwiseAnd,           CommutativeBinop,       BITWISE )
-INFIX(ampamp               , "&&",  LocicalAnd,           Binop,                  LOGICAL )
+INFIX(ampamp               , "&&",  LogicalAnd,           Binop,                  LOGICAL )
 INFIX(ampequal             , "&=",  AssignmentBitwiseAnd, AssignmentOperator,     BITWISE )
 INFIX(star                 , "*",   Multiply,             CommutativeBinop,       ARITHMETIC )
 PREFIX(star                , "*",   Dereference,          Unop,                   SPECIAL )

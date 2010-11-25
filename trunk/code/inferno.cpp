@@ -35,6 +35,16 @@ int main( int argc, char *argv[] )
               
     if( --ReadArgs::quitafter >= 0 )
     {
+        BreakToGoto()(&program);
+    }
+
+    if( --ReadArgs::quitafter >= 0 )
+    {
+    	SwitchToIfGoto()(&program);
+    }
+
+    if( --ReadArgs::quitafter >= 0 )
+    {
     	ForToWhile()(&program);
     }
 
@@ -46,11 +56,6 @@ int main( int argc, char *argv[] )
     if( --ReadArgs::quitafter >= 0 )
     {
         IfToIfGoto()(&program);
-    }
-
-    if( --ReadArgs::quitafter >= 0 )
-    {
-        BreakToGoto()(&program);
     }
 
     if( --ReadArgs::quitafter >= 0 )

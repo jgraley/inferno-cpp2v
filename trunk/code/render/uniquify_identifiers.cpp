@@ -1,10 +1,11 @@
-
-
 #include "uniquify_identifiers.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/misc.hpp"
 
 #define UID_FORMAT "%s_%u"
+
+//TODO Apparently labels do not scope in subblocks like types and instances, but instead are
+// always function scope (opbvious when you think about it) so uniquify them accordingly.
 
 string VisibleIdentifiers::MakeUniqueName( string b, unsigned n ) // note static
 {

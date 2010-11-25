@@ -10,6 +10,13 @@ public:
     virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
 };
 
+class SwitchToIfGoto : public InPlaceTransformation
+{
+public:
+    using Transformation::operator();
+    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+};
+
 class DoToIfGoto : public InPlaceTransformation
 {
 public:
