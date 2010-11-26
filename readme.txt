@@ -35,10 +35,9 @@ How to build:
 
 On a Debian/Ubuntu system, you need approximately the following apt packages:
     
-make
 subversion
+make
 patch
-gcc
 g++
 flex
 bison
