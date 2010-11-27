@@ -85,7 +85,8 @@ int main( int argc, char *argv[] )
 
     if( --ReadArgs::quitafter >= 0 )
     {
-    	Cleanup()(&program);
+    	for( int i=0; i<3; i++ ) // TODO better way of repeating steps
+            Cleanup()(&program);
     }
 
     if(ReadArgs::intermediate_graph)
