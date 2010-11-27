@@ -169,6 +169,8 @@ struct TransformTo : TransformToBase, PRE_RESTRICTION
 // new identifier. Rule is: ONE of these per new identifier.
 // TODO rename to BuildIdentifier per the docs; Consider supporting TransformTo
 // in replace and having MAke/BuildIdentifier as a Transformation
+// TODO do not duplicate over differnt kinds of identifier
+// TODO allow multiple sources for the printf, use in eg merging successive labels
 struct SoftMakeIdentifier : InstanceIdentifier, 
                             RootedSearchReplace::SoftReplacePattern
 {
