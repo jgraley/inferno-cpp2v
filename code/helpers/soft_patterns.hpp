@@ -133,7 +133,7 @@ private:
 
 struct TransformToBase : RootedSearchReplace::SoftSearchPattern
 {
-    TreePtr<Node> pattern;
+    TreePtr<Node> pattern; // TODO make this type a template parameter
     TransformToBase( Transformation *t ) :
     	transformation(t)
     {
