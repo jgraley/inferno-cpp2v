@@ -16,7 +16,7 @@ S&R supports additional nodes called "special" nodes that are defined by S&R. Sp
 
 1.3 Couplings
 
-The third parameter is a CouplingSet, which is a set of Couplings. Each Coupling is a set of TreePtrs to nodes in the search and/or replace patterns. Broadly speaking, SearchReplace will ensure that each of the TreePtrs in a particular coupling all refer to the same actual node. This will be explained fully in the remainder of this document.
+The third parameter is a CouplingSet, which is a set of Couplings. Each Coupling is a set of TreePtrs to nodes in the search and/or replace patterns. Broadly speaking, SearchReplace will ensure that each of the TreePtrs in a particular coupling all refer to the same actual node. 
 
 1.4 Termination
 
@@ -175,7 +175,7 @@ MatchAny implements the "or" function (union in set theory). The MatchAny node s
 
 MatchOdd implements the "eor" function. The MatchOdd node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that may match. This is probably most useful with 2 patterns, in which case a match is achieved when exactly one of them matches. The subtree under a MatchOdd node in a search pattern is an abnormal context. 
 
-7 Transformer search patterns
+7 TransformTo search patterns
 
 Sometimes, a transformation will appear to be mostly suitable for the search and replace approach, but there may be aspects of the requred matching criteria which cannot be described using the above wildcarding techniques. In such cases, inferno supports the ability to run some user supplied algorithm during the search. The user supplies  the algorithm as an implementation of the OutOfPlaceTransformation and TransformTo<X> interfaces. Objects of the resulting type are Nodes and may be placed in the search pattern as long as the type X must is compatible with the context. TransformTo<> adds a member named "pattern" which is a pointer to any Node.
 
@@ -213,7 +213,7 @@ OutOfPlaceTransformation can indicate failure by returning a NULL pointer. Failu
 11.1 GreenGrass node
 11.2 Reducing patterns
 11.3 "But" pattern
-One common case is where it is paired with the above MotMatch node in the form MatchAll( X, NotMatch(Y) ). This provides an and-not or but-not type of restriction, which can be useful to prevent degenerate no-change replace cases that would cause the engine not to terminate.
+One common case is where MatchAll is paired with MotMatch node in the form MatchAll( X, NotMatch(Y) ). This provides an and-not or but-not type of restriction, which can be useful to prevent degenerate no-change replace cases that would cause the engine not to terminate.
 
 12 Worked examples
 12.1 removing Nop
