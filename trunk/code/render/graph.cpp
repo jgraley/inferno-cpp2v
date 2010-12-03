@@ -277,8 +277,9 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		*shape = "hexagon";
 		return *sp;
 	}
-	else if( TreePtr<SoftMakeIdentifier> smi = dynamic_pointer_cast<SoftMakeIdentifier>(sp) )
+	else if( shared_ptr<BuildIdentifierBase> smi = dynamic_pointer_cast<BuildIdentifierBase>(sp) )
 	{
+	    // TODO indicate whether it's building instance, label or type identifier
 		*shape = "parallelogram";
 		return smi->format;
 	}

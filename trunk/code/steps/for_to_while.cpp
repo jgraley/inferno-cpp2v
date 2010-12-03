@@ -146,7 +146,7 @@ void Cleanup::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) // LIMIT
         MakeTreePtr< Star<Statement> > s_pre, r_pre;
         MakeTreePtr< Star<Statement> > s_post, r_post;
         MakeTreePtr<LabelIdentifier> s_labelid1, s_labelid2, ss_labelid1, ss_labelid2, sr_labelid;
-        MakeTreePtr<SoftMakeLabelIdentifier> r_labelid("MERGED");
+        MakeTreePtr<BuildLabelIdentifier> r_labelid("MERGED");
         MakeTreePtr< MatchAny<LabelIdentifier> > ss_orrule;
         
         ss_stuff->terminus = ss_orrule;
