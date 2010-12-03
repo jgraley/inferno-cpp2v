@@ -1,8 +1,5 @@
 		Inferno Search and Replace User Guide
 
-TODO rework couplings, add terms normal and abnormal context, move keying discussion to initial description and mention that Stuff restrictor is abnormal context
-TODO or and eor nodes
-
 1 The SearchReplace class
 
 Inferno uses a search and replace engine for the majority of transformation steps. The generic search and replace implementation may be found in the SearchReplace class and a number of supporting classes. The SearchReplace constructor requires certain data structures that specify search pattern, replace pattern and some other info. Once constructed, a SearchReplace object serves as a tree transforming functor (ie it implements the Transformation interface).
@@ -57,16 +54,6 @@ In trees for programs, we do not allow NULL (examples of deprecated functionalit
 
 We do allow NULL in search patterns, where it serves as the maximal wild card. Therefore, Signed(Integer) is the same as Signed(NULL) as a search pattern.
 
-2.3 Restricting with couplings
-
-As soon as we begin supporting wildcards, we also begin to want to require that two or more wildcard matches actually matched the same thing. 
-
-For example suppose we use the wildcard Integral in two places in a search pattern. Each will individually match Signed or Unsigned, giving a total of four matching combinations: SS, SU, US and UU. But suppose we only want to match on SS or UU (perhaps because the two types must be the same for an optimisation to be correct). 
-
-We can achieve this by adding a Coupling to the CouplingSet we supply to SearchReplace's constructor. The coupling we create should contain two TreePtrs, each pointing to one of the Integral nodes we placed in the search pattern. Inferno will now only find a match when the two types are the same. Couplings point to nodes in the search tree, but they act on the nodes found in the input program tree and will check to make sure they are the same as each other. 
-
-In fact, couplings restrict the entire subtree matched to the coupled nodes to be identical to each other - so the two types in the above example would be restricted to have the same width regardless of what is supplied for the width in the search pattern. This limitation simplifies other uses of couplings discussed below.
-
 2.4 Pre-restriction on special nodes
 
 The detailed behaviour of all the different kinds of special nodes is given below. When searching, all special nodes support search restriction via the bass class supplied as the first template parameter (recall that special nodes derive themsaelves from the supplied base class). Regardless of what the special node is defined to do, all searches will restrict in the usual sense to program nodes that are non-strict subclasses of the base class. 
@@ -82,13 +69,23 @@ In order to maximise the utility of toplogical wildcarding (and its coupling sup
 - A new hierarchy of nodes is created with a common intermediate and final nodes corresponding to the options, as with Public, Private, Protected all subclasses of AccessSpec
 In fact, this policy leads most nodes to contain only TreePtr, Collection and Sequence. Only a small number of nodes contain other data types such as int, string etc that cnanot be accomodated toplogically. This is termed a toplogically-oriented tree and is a highly consistent canonical form for program elements.
 
-3 Substitution with couplings
+3 Couplings
 
-When a wildcard has been specified in a search pattern, it is often useful to be able to introduce the program subtree that matched the wildcard into the output program, as a substitute for part of the replace pattern.
+When a wildcard has been specified in a search pattern, it is often useful to be able to make use of the actual subtree in the input program that the wildcard matched. We may wish to:
+- restrict the search so that two wildcards in the search pattern must match the same subtree in the input program
+- introduce the subtree that matched a search pattern wildcard into the output program, as a substitute for part of the replace pattern.
+
+3.1 Restricting with couplings
+
+Suppose we use the wildcard Integral in two places in a search pattern. Each will individually match Signed or Unsigned, giving a total of four matching combinations: SS, SU, US and UU. But suppose we only want to match on SS or UU (perhaps because the two types must be the same for an optimisation to be correct). 
+
+We can achieve this by adding a Coupling to the CouplingSet we supply to SearchReplace's constructor. The coupling we create should contain two TreePtrs, each pointing to one of the Integral nodes we placed in the search pattern. Inferno will now only find a match when the two types are the same. Couplings point to nodes in the search tree, but they act on the nodes found in the input program tree and will check to make sure they are the same as each other. 
+
+In fact, couplings restrict the entire subtree matched to the coupled nodes to be identical to each other - so the two types in the above example would be restricted to have the same width regardless of what is supplied for the width in the search pattern. This limitation simplifies other uses of couplings discussed below.
+
+3.2 Coupling into the repace pattern
 
 We can acheive this using a Coupling that has at least one TreePtr into the search pattern and at least one TreePtr into the replace pattern. Now, whenever the search pattern finds a match, the Coupling will be associated with the subtree of the input program that matched the coupled nodes. SearchReplace will substitute this subtree into the replace pattern. The node in the replace pattern should be a non-strict superclass (ie base) of the coupled search wildcard node, and it's members should be left NULL for simple substitution as described here.
-
-3.1 Overlaying
 
 After duplicating the coupled subtree for substitution, SearchReplace will overlay any replace pattern that is present. Overlaying works recursively and selects the nodes that appear in the output as follows:
 - The first node encountered is always duplciated from coupled subtree
@@ -100,13 +97,25 @@ Once a node is overwritten from the replace pattern, its descendants are also ta
 
 [1] Just to clarify, the nodes in replace patterns that are used for substitution are allowed to be intermediate nodes just like in search patterns. They can even be superclasses of the search pattern nodes to which they are coupled. Superclasses in general may lack some members - using a superclass here is like setting those members to NULL.
 
+3.3 Notes on keyability of couplings
+
+Inferno search and replace has an implementation concept called keying, which is the process of choosing a particular input program subtree that will correspond to a particular coupling. Each coupling only needs to be keyed once, and once it is keyed, the key-to-coupling relationship remains unchanged until the replace has completed.
+
+Normally, Inferno search patterns exhibit an implicit "and" rule, in the sense that every node in the search pattern must match a node in the input program tree before a match is considered successful. This would make every node in the search pattern a candidate for keying a coupling. We say such nodes are in a "normal context". But some special nodes permit a match even when some subtree under that node does not match. These subtrees are said to be "abnormal contexts". 
+
+An abnormal context extends throughout the entire subtree under the pattern node that caused it. So a normal context can contain an abnormal context as a subtree, but an abnormal context remains abnormal all the way down to the leaf nodes.
+
+The NotMatch node matches when its supplied subtree does not match, making its subtree pattern an abnormal context. See the documentation for NotMatch for more explaination.
+
+Inferno cannot key to nodes in abnormal contexts. Consequently, every coupling that include search pattern nodes must include at least one node that is in a normal context. Inferno will find a keyable node in the coupling and key to it if one exists, otherwise an error will be reported. I believe such an error indicates a fundamentally ill-defined transformation.
+
 4 Star search pattern
 
-The Inferno tree supports one-to-many relationships using containers, of which two types are available: Sequence, which preserves ordering and Collection, which does not. When creating a search pattern it can be useful to be able to match zero or more elements of a container. We can do this using a special node called Star<>, which is templated on the collection's element type. So a container of TreePtrs to Statements can be wildcarded using Star<Statement>.  
+The Inferno tree supports one-to-many relationships using containers, of which two types are available: Sequence, which preserves ordering and Collection, which does not. When creating a search pattern it can be useful to be able to match zero or more elements of a container. We can do this using a special node called Star<>, which is templated on the collection's element type. So a container of TreePtrs to Statements can be wildcarded using Star<Statement>. If a pre-restiction is given, every container element matched by the Star must satisfy the pre-restriction (ie be a non-strict subclass of the supplied base class).
 
 Star nodes may be coupled into collections in the replace pattern, in order to reproduce all the nodes that were matched by the Star in the search pattern. 
 
-A Star may only be placed in a container, never as ordinary member node of another node.
+A Star may only be placed in a container, never as ordinary member node of another node. 
 
 4.1 In Sequence
 
@@ -120,17 +129,15 @@ A Star in a Collection acts similarly as when in a Sequence. However, since Coll
 
 To clarify, Inferno uses a non-ordering-preserving implementation to store all Collections, including ones in search and replace patterns. This means that the order in which elements are specified when constructing a Collection should not affect behaviour. So for example (Static, Typedef, Star<Declaration>) will be equivalent to the above example.
 
-If a pre-restiction is given, every container element matched by the Star must satisfy the pre-restriction (ie be a non-strict subclass of the supplied base class).
-
 5 Stuff search pattern
 
-Since Inferno search and replace operates on trees rather than linear sequences of tokens, it is often useful to be able to wildcard a subtree. In fact, the maximally wild intermediate node will accomplish this through topological wildcarding, as discussed above. 
+Since Inferno search and replace operates on trees rather than just linear sequences of tokens, it is often useful to be able to wildcard a subtree. In fact, the maximally wild intermediate node will accomplish this through topological wildcarding, as discussed above. 
 
 But it is useful to be able to explicitly match some part of the subtree, named the terminus, regardless of the path from the root of the subtree to the terminus. This is accomplished using the Stuff<> node. At the base of the subtree we place a Stuff node, templated on the pointed-to type. This node has a member named terminus, which is a TreePtr<Node>, and any Node or subtree of nodes can be referenced from here.
 
 Inferno will search the subtree under the Stuff node for a match to the terminus. If a terminus match is found, the stuff node is considered a match. For example Stuff<Compound> with terminus as If may be given as the body of a function. It will match the terminus to any If node within the body as well as within nested Compund blocks, For or While loop bodies etc.
 
-Stuff nodes make be coupled into the replace pattern in order to reproduce the subtree that Stuff matched to in the output program. When coupling the stuff nodes, it is possible to overlay the terminus with an alternative subtree in order to modify only what is under the terminus. The terminus node itself and any node in the subtree under it may also be coupled into the replace pattern. 
+Stuff nodes may be coupled into the replace pattern in order to reproduce the subtree that Stuff matched to in the output program. When coupling the stuff nodes, it is possible to overlay the terminus with an alternative subtree in order to modify only what is under the terminus. The terminus node itself and any node in the subtree under it may also be coupled into the replace pattern. 
 
 5.1 Recurse restriction
 
@@ -142,36 +149,55 @@ Note that the Stuff node recurse_restrictior only applies when the stuff node ac
 
 Compare with the pre-restriction documented above, which applies to all special nodes. This only applies to the root of the input program subtree, as with all other special nodes. In the general case, pre-restriction, recurse_restriction and terminus are all acting to restrict the Stuff node at different places in the input program subtree: pre-restriction at root, terminus at leaf and recurse_restriction at intervening nodes. 
 
+Note that a recurse restriction pattern is an abnormal context.
+
 6 Boolean search patterns
 
 Search patterns may be restricted according to boolean rules, as explained below. They must be templated on the pointed-to type.
 
 6.1 NotMatch
 
-NotMatch implements the "not" function (the complement in set theory). The NotMatch node should be placed at the root of the subtree of interest, and the member named pattern should be set to point to the subtree that should not match. 
+NotMatch implements the "not" function (the complement in set theory). The NotMatch node should be placed at the root of the subtree of interest, and the member named pattern should be set to point to the subtree that should not match. The pattern can itself include wildcards, so a NotMatch(Integral) would match nay data type other than signed or unsigned integer types.
 
-The pattern can itself include wildcards, so a NotMatch(Integral) would match nay data type other than signed or unsigned integer types.
+The subtree under a NotMatch node in a search pattern is an abnormal context, in other words it cannot key a coupling. Consider a NotMatch node in a search pattern that is coupled to a node in a replace pattern. This will work as expected - the subtree that did not match the NotMatch pattern is subtituted successfully. 
+
+But consider coupling a node within the NotMatch's subtree into the replace pattern. If there was an overall match of the search pattern, that must mean that some node in the NotMatch pattern did not match. It is possible that the NotMatch pattern is not even of the same layout (topology) as the corresponding subtree in the input program. If this is the case, it is not well defined what node or subtree should be substituted in the replace pattern.
 
 6.2 MatchAll
 
-MatchAll implements the "and" function (intersection in set theory). The MatchAll node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that should match. 
+MatchAll implements the "and" function (intersection in set theory). The MatchAll node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that should match. MatchAll does *not* create an abnormal context for its pattern subtrees.
 
-The "usual semantics" of an Inferno search pattern is an "and" rule (intersection) in the sense that all nodes in the search pattern must have a match in the basence of boolean patterns. Inferno is already running an "and" rule in the usual case of search patterns and therefore the MatchAll node is only needed in specialist cases. One common case is where it is paired with the above MotMatch node in the form MatchAll( X, NotMatch(Y) ). This provides an and-not or but-not type of restriction, which can be useful to prevent degenerate no-change replace cases that would cause the engine not to terminate.
+6.3 MatchAny
 
-6.3 Notes on keyability of couplings
+MatchAny implements the "or" function (union in set theory). The MatchAny node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that may match. The subtree under a MatchAny node in a search pattern is an abnormal context.
 
-In the case of the NotMatch node and any future "or"-rule boolean nodes, it will be possible for Inferno to find a match even though some portion of the search pattern did not match. This can cause problems with couplings. Consider a NotMatch node in a search pattern that is coupled to a node in a replace pattern. This will work as expected - the subtree that did not match the NotMatch pattern is subtituted successfully. 
+6.4 MatchOdd
 
-But consider coupling a node within the NotMatch's subtree into the replace pattern. If there was an overall match of the searach pattern, that must mean that some node in the NotMatch pattern did not match. It is possible that the NotMatch pattern is not even of the same layout (topology) as the corresponding subtree in the input program. If this is the case, it is not well defined what node or subtree should be substituted in the replkace pattern.
+MatchOdd implements the "eor" function. The MatchOdd node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that may match. This is probably most useful with 2 patterns, in which case a match is achieved when exactly one of them matches. The subtree under a MatchOdd node in a search pattern is an abnormal context. 
 
-Inferno search and replace has an implementation concept called keying, which is the process of choosing a particular input program node (key node) that will correspond to a particualar coupling. Each coupling only needs to be keyed once, and once it is keyed, the key-to-coupling relationship remains unchanged until the replace has completed.
+7 Transformer search patterns
 
-Inferno cannot key to nodes underneath NotMatch (or "or" type boolean patterns). Consequently, every coupling that include search pattern nodes must include at least one node that is not under NotMatch (or any "or" type boolean pattern). Inferno will find a keyable node in the coupling and key to it if one exists, otherwise an error will be reported. I belive such an error indicates a fundamentally ill-defined transformation.
+Sometimes, a transformation will appear to be mostly suitable for the search and replace approach, but there may be aspects of the requred matching criteria which cannot be described using the above wildcarding techniques. In such cases, inferno supports the ability to run some user supplied algorithm during the search. The user supplies  the algorithm as an implementation of the OutOfPlaceTransformation and TransformTo<X> interfaces. Objects of the resulting type are Nodes and may be placed in the search pattern as long as the type X must is compatible with the context. TransformTo<> adds a member named "pattern" which is a pointer to any Node.
 
-7 Transforming search patterns
+When the search engine encounters a Transformer node, it applies the transformation implemented by the Trnasformer node to the current input program subtree (without modifying the original copy) and then proceeds to compare the result of the transformation with the pattern pointed to by the "pattern" member. This allows Inferno to search for a subtree in the input program that matches a pattern *after transformation*.
+
+Transformer nodes support the usual functionality of pre-restriction (via the type X) and the ability to couple both the transformer node itself (keying as the untransformed input program subtree) and the node pointed to be "pattern" (keying as the input program subtree after transformation).
+
 7.1 TypeOf
+
+TypeOf is a Transformer search pattern (it may also be used directly as a utility). It is used in the context of an expression. During a search, the TypeOf algorithm will determine the type of an expression in the subtree, and then compare that with the type pointed to by the "pattern" member (note that types and expressions are represented as subtrees under Type and Expression, respectively). 
+
+Note that if the pattern is maximally wild, then TypeOf will maych any valid expression. However, it can be convenient to couple the Type wildcard with another Type in the search pattern, to restrict for type equivalence, or with a node in the replace pattern, to reproduce the type in the output program.
+
 7.2 GetDeclaration
+
+GetDeclaration is a Transformer search pattern (it may also be used directly as a utility). It is used in the context of an InstanceIdentifier. During a search, the GetDeclaration algorithm will search for the declaration of an identifier in the subtree, and then compare that with the declaration pointed to by the "pattern" member. 
+
 7.3 Notes on transformation interface
+
+The search engine requires the presence of TransformTo<X> interface, which supplies the custom comparison functionality which includes invoking the OutOfPlaceTransformation functor. The OutOfPlaceTransformation interface guarantees not to modify the supplied tree and to return a newly created one; this is essential for search and replace usage.
+
+OutOfPlaceTransformation can indicate failure by returning a NULL pointer. Failure results in a non-match.
 
 8 Builder replace patterns
 8.1 BuildIdentifier
@@ -187,12 +213,15 @@ Inferno cannot key to nodes underneath NotMatch (or "or" type boolean patterns).
 11.1 GreenGrass node
 11.2 Reducing patterns
 11.3 "But" pattern
+One common case is where it is paired with the above MotMatch node in the form MatchAll( X, NotMatch(Y) ). This provides an and-not or but-not type of restriction, which can be useful to prevent degenerate no-change replace cases that would cause the engine not to terminate.
 
-12 Worked example: for to while
+12 Worked examples
+12.1 removing Nop
+12.2 For to While
+12.3 generate stacks
 
-13 Worked example: generate stacks
-14 Notes on pattern building in C++
-14.1 What you need to do
-14.2 Helpful syntactic sugar
-14.3 Style tips
+13 Notes on pattern building in C++
+13.1 What you need to do
+13.2 Helpful syntactic sugar
+13.3 Style tips
 
