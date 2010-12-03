@@ -111,8 +111,6 @@ struct MatchOdd : PRE_RESTRICTION,
                   MatchOddBase
 {
 	SPECIAL_NODE_FUNCTIONS
-	// Patterns are an abnormal context (if you are setting N==patterns.size(), then you want
-	// MatchAll, whose patterns are not abnormal).
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
     virtual Result DecidedCompare( const RootedSearchReplace *sr,
