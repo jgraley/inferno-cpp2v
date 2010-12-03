@@ -36,7 +36,7 @@ void UseTempsForParamsReturn::operator()( TreePtr<Node> context, TreePtr<Node> *
 	TreePtr<Compound> r_sub_comp( new Compound );
 	TreePtr< Temporary > r_newvar( new Temporary );
 	r_newvar->type = MakeTreePtr<Type>();
-	r_newvar->identifier = MakeTreePtr<SoftMakeIdentifier>("temp_retval");
+	r_newvar->identifier = MakeTreePtr<BuildInstanceIdentifier>("temp_retval");
 	r_newvar->initialiser = MakeTreePtr<Uninitialised>();
 	r_sub_comp->members = ( r_newvar );
 	TreePtr<Assign> r_assign( new Assign );

@@ -165,36 +165,49 @@ struct TransformTo : TransformToBase, PRE_RESTRICTION
 // and cannot therefore keep track of uniqueness - you'll get a new one each time
 // and must rely on a replace coupling to get multiple reference to the same
 // new identifier. Rule is: ONE of these per new identifier.
-// TODO rename to BuildIdentifier per the docs; Consider supporting TransformTo
-// in replace and having MAke/BuildIdentifier as a Transformation
-// TODO do not duplicate over differnt kinds of identifier
+
 // TODO allow multiple sources for the printf, use in eg merging successive labels
-struct SoftMakeIdentifier : InstanceIdentifier, 
-                            RootedSearchReplace::SoftReplacePattern
+
+struct BuildIdentifierBase : RootedSearchReplace::SoftReplacePattern
 {
-    SoftMakeIdentifier( string s ) : format(s) {}
-    SoftMakeIdentifier() : format("___UNNAMED___") {}
-    NODE_FUNCTIONS
-    string format;
+    BuildIdentifierBase( string s ) : format(s) {}
     TreePtr<Identifier> source;
-private:
-    virtual TreePtr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
-                                               CouplingKeys *keys,
-                                               bool can_key );
+    string GetNewName( const RootedSearchReplace *sr,
+                       CouplingKeys *keys,
+                       bool can_key );
+    string format;
 };
 
-struct SoftMakeLabelIdentifier : LabelIdentifier,
-                                 RootedSearchReplace::SoftReplacePattern
+struct BuildInstanceIdentifier : InstanceIdentifier,                             
+                                 BuildIdentifierBase
 {
-    SoftMakeLabelIdentifier( string s ) : format(s) {}
-    SoftMakeLabelIdentifier() : format("___UNNAMED___") {}
+    BuildInstanceIdentifier( string s ) : BuildIdentifierBase(s) {}
+    BuildInstanceIdentifier() : BuildIdentifierBase("unnamed") {}
     NODE_FUNCTIONS
-    string format;
-    TreePtr<Identifier> source;
 private:
     virtual TreePtr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
                                                CouplingKeys *keys,
-                                               bool can_key );
+                                               bool can_key )
+    {
+	string newname = GetNewName( sr, keys, can_key );
+	return TreePtr<SpecificInstanceIdentifier>( new SpecificInstanceIdentifier( newname ) );
+    }                                               
+};
+
+struct BuildLabelIdentifier : LabelIdentifier,                             
+                              BuildIdentifierBase
+{
+    BuildLabelIdentifier( string s ) : BuildIdentifierBase(s) {}
+    BuildLabelIdentifier() : BuildIdentifierBase("UNNAMED") {}
+    NODE_FUNCTIONS
+private:
+    virtual TreePtr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
+                                               CouplingKeys *keys,
+                                               bool can_key )
+    {
+	string newname = GetNewName( sr, keys, can_key );
+	return TreePtr<SpecificLabelIdentifier>( new SpecificLabelIdentifier( newname ) );
+    }                                               
 };
 
 #endif

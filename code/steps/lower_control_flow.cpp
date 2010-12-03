@@ -18,7 +18,7 @@ void IfToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr<Nop> sr_nop, r_nop;
     MakeTreePtr<Compound> r_comp;
     MakeTreePtr<LogicalNot> r_not;
-    MakeTreePtr<SoftMakeLabelIdentifier> r_labelid1("BYPASS_THEN"), r_labelid2("BYPASS_ELSE");
+    MakeTreePtr<BuildLabelIdentifier> r_labelid1("BYPASS_THEN"), r_labelid2("BYPASS_ELSE");
     MakeTreePtr<LabelIdentifier> r_labelid1a, r_labelid2a;
     MakeTreePtr<Label> r_label1, r_label2;
     
@@ -60,7 +60,7 @@ void SwitchToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr<Statement> s_body, r_body;
     MakeTreePtr<Type> s_cond_type, r_cond_type;
     MakeTreePtr<Automatic> r_decl;
-    MakeTreePtr<SoftMakeIdentifier> r_id("switch_value");
+    MakeTreePtr<BuildInstanceIdentifier> r_id("switch_value");
     TreePtr<TypeOf> s_cond( new TypeOf ); // TODO use MakeTreePtr, confirm this works
     
     // Slave for default
@@ -70,7 +70,7 @@ void SwitchToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr< Star<Statement> > ss1_post, sr1_post;
     MakeTreePtr< Default > ss1_default;
     MakeTreePtr< Label > sr1_label;
-    MakeTreePtr<SoftMakeLabelIdentifier> sr1_labelid("DEFAULT");
+    MakeTreePtr<BuildLabelIdentifier> sr1_labelid("DEFAULT");
     MakeTreePtr<LabelIdentifier> sr1_labelid_a;
     MakeTreePtr<Goto> sr1_goto;
     
@@ -91,7 +91,7 @@ void SwitchToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr< Star<Statement> > ss2_post, sr2_post;
     MakeTreePtr< Case > ss2_case;
     MakeTreePtr< Label > sr2_label;
-    MakeTreePtr<SoftMakeLabelIdentifier> sr2_labelid("CASE");
+    MakeTreePtr<BuildLabelIdentifier> sr2_labelid("CASE");
     MakeTreePtr<LabelIdentifier> sr2_labelid_a;
     MakeTreePtr<If> sr2_if;
     MakeTreePtr<Nop> sr2_nop;
@@ -122,7 +122,7 @@ void SwitchToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr< Star<Statement> > ss3_post, sr3_post;
     MakeTreePtr< RangeCase > ss3_case;
     MakeTreePtr< Label > sr3_label;
-    MakeTreePtr<SoftMakeLabelIdentifier> sr3_labelid("CASE");
+    MakeTreePtr<BuildLabelIdentifier> sr3_labelid("CASE");
     MakeTreePtr<LabelIdentifier> sr3_labelid_a;
     MakeTreePtr<If> sr3_if;
     MakeTreePtr<Nop> sr3_nop;
@@ -195,7 +195,7 @@ void DoToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr<Goto> r_goto, sr_goto;
     MakeTreePtr<Nop> r_nop;    
     MakeTreePtr<Compound> r_comp;
-    MakeTreePtr<SoftMakeLabelIdentifier> r_labelid("NEXT"), sr_cont_labelid("CONTINUE");
+    MakeTreePtr<BuildLabelIdentifier> r_labelid("NEXT"), sr_cont_labelid("CONTINUE");
     MakeTreePtr<LabelIdentifier> r_labelid_a, sr_cont_labelid_a;
     MakeTreePtr<Label> r_label, r_cont_label;
     MakeTreePtr< Stuff<Statement> > ss_stuff, sr_stuff;
@@ -239,7 +239,7 @@ void BreakToGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr< NotMatch<Statement> > sx_not;
     MakeTreePtr<Break> s_break;
     MakeTreePtr<Goto> r_goto;
-    MakeTreePtr<SoftMakeLabelIdentifier> r_labelid("BREAK");
+    MakeTreePtr<BuildLabelIdentifier> r_labelid("BREAK");
     MakeTreePtr<LabelIdentifier> r_labelid_a;
     MakeTreePtr<Label> r_label;
     MakeTreePtr<Compound> r_comp;
