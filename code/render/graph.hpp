@@ -29,7 +29,7 @@ private:
 	string DoCoupling( Coupling pc );
     string Id( void *p );
     string SeqField( int i, int j=0 );
-    string Sanitise( string s );
+    string Sanitise( string s, bool remove_tp=false );
     string Name( TreePtr<Node> sp, bool *bold, string *shape );   // TODO put stringize capabilities into the Property nodes as virtual methods
     string Colour( TreePtr<Node> n );
     string HTMLLabel( string name, TreePtr<Node> n );
@@ -37,7 +37,7 @@ private:
     string DoNode( TreePtr<Node> n );
     string DoNodeLinks( TreePtr<Node> n );
     bool IsRecord( TreePtr<Node> n );
-    string DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string atts=string() );
+    string DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string atts=string(), const TreePtrInterface *ptr=NULL );
 };
 
 #endif

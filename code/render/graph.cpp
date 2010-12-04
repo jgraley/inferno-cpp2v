@@ -213,9 +213,11 @@ string Graph::SeqField( int i, int j )
 }
 
 
-string Graph::Sanitise( string s )
+string Graph::Sanitise( string s, bool remove_tp )
 {
 	string o;
+	if( remove_tp ) // get rid of TreePtr<>
+	    s = s.substr( 8, s.size()-9 );
 	for( int i=0; i<s.size(); i++ )
 	{
 		if( s[i] == '\"' )
@@ -342,7 +344,7 @@ string Graph::HTMLLabel( string name, TreePtr<Node> n )
 				char c[20];
 				sprintf(c, "%d", j);
 				s += " <TR>\n";
-				s += "  <TD>" + Sanitise(*seq) + "[" + string(c) + "]</TD>\n";
+				s += "  <TD>" + Sanitise(*seq, true) + "[" + string(c) + "]</TD>\n";
 				s += "  <TD PORT=\"" + SeqField( i, j ) + "\"></TD>\n";
 				s += " </TR>\n";
 			}
@@ -360,7 +362,7 @@ string Graph::HTMLLabel( string name, TreePtr<Node> n )
 		else if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
 		{
 			s += " <TR>\n";
-			s += "  <TD>" + Sanitise(*col) + "{}</TD>\n";
+			s += "  <TD>" + Sanitise(*col, true) + "{}</TD>\n";
 			s += "  <TD PORT=\"" + SeqField( i ) + "\"></TD>\n";
 			s += " </TR>\n";
 		}
@@ -459,18 +461,18 @@ string Graph::DoNodeLinks( TreePtr<Node> n )
 		if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
 		{
 			FOREACH( const TreePtrInterface &p, *col )
-				s += DoLink( n, SeqField(i), p );
+				s += DoLink( n, SeqField(i), p, string(), &p );
 		}
 		else if( SequenceInterface *seq = dynamic_cast<SequenceInterface *>(members[i]) )
 		{
 			int j=0;
 			FOREACH( const TreePtrInterface &p, *seq )
-				s += DoLink( n, SeqField(i, j++), p );
+				s += DoLink( n, SeqField(i, j++), p, string(), &p );
 		}
 		else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
 		{
 			if( *ptr )
-				s += DoLink( n, SeqField(i), *ptr );
+				s += DoLink( n, SeqField(i), *ptr, string(), ptr );
 		}
 		else
 		{
@@ -490,7 +492,7 @@ bool Graph::IsRecord( TreePtr<Node> n )
 	return shape=="record" || shape=="plaintext";
 }
 
-string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string atts )
+string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string atts, const TreePtrInterface *ptr )
 {
 	string s;
 	s += Id(from.get());
@@ -499,6 +501,12 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
 		s += ":" + field;
 		atts = "dir = \"both\"\n";
 		atts = "arrowtail = \"dot\"\n";
+		if( ptr )									// is normal tree link
+		    if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(to) )   // is to a special node
+		        if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )          // pre-restrictor is nontrivial
+			{
+			    atts += "label = \"" + (string)**(sbs->GetPreRestrictionArchitype()) + "\"\n";
+			}
 	}
 
 	s += " -> ";

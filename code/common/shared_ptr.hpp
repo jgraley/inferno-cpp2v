@@ -43,6 +43,7 @@ struct SharedPtrInterface : virtual SUB_BASE, public Traceable
 
     virtual operator bool() const = 0; // for testing against NULL
     virtual VALUE_INTERFACE *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
+    virtual VALUE_INTERFACE &operator *() const = 0; 
     virtual SharedPtrInterface &operator=( const SharedPtrInterface &o )
     {
     	(void)SUB_BASE::operator=( o ); // vital for itemiser!
@@ -86,11 +87,16 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
 	}
 
 
-    virtual VALUE_TYPE *get() const // TODO bring laptop up to GCC4 lol
+    virtual VALUE_TYPE *get() const 
     {
     	VALUE_TYPE *e = shared_ptr<VALUE_TYPE>::get();
     	//TRACE("sp::get() returns %p\n", e );
     	return e;
+    }
+
+    virtual VALUE_TYPE &operator *() const 
+    {
+    	return shared_ptr<VALUE_TYPE>::operator *();
     }
 
     virtual SharedPtr &operator=( shared_ptr<VALUE_INTERFACE> n )
