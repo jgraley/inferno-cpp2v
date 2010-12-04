@@ -13,8 +13,6 @@
 
 void GenerateImplicitCasts::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
-	SearchReplace sr0;
-
 	MakeTreePtr<Call> s_call;
 	MakeTreePtr<TypeOf> s_callee;
 	s_call->callee = s_callee;
@@ -53,6 +51,5 @@ void GenerateImplicitCasts::operator()( TreePtr<Node> context, TreePtr<Node> *pr
         Coupling(( s_arg->value, r_cast->operand )),
         Coupling(( s_other_args, r_other_args )) ));
 
-	sr0.Configure(s_call, r_call, sms0);
-	sr0( context, proot );
+	SearchReplace(s_call, r_call, sms0)( context, proot );
 }

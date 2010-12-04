@@ -6,20 +6,11 @@
 // Constructor remembers search pattern, replace pattern and any supplied couplings as required
 RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
                                           TreePtr<Node> rp,
-                                          CouplingSet m )
+                                          CouplingSet m ) :                                          
+    search_pattern( sp ),
+    replace_pattern( rp ),
+    couplings( m )
 {
-	Configure( sp, rp, m );
-}
-
-
-void RootedSearchReplace::Configure( TreePtr<Node> sp,
-                                     TreePtr<Node> rp,
-                                     CouplingSet m )
-{
-    search_pattern = sp;
-    replace_pattern = rp;
-    couplings = m;
-
     Validate v(true);
     v(search_pattern, &search_pattern);
     v(replace_pattern, &replace_pattern);
@@ -812,20 +803,9 @@ void RootedSearchReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 
 SearchReplace::SearchReplace( TreePtr<Node> sp,
                               TreePtr<Node> rp,
-                              CouplingSet m )
+                              CouplingSet m ) :
+    RootedSearchReplace( sp, rp, m )                              
 {
-	Configure( sp, rp, m );
-}
-
-
-void SearchReplace::Configure( TreePtr<Node> sp,
-                               TreePtr<Node> rp,
-                               CouplingSet m )
-{
-	if( !sp )
-		return;
-
-    RootedSearchReplace::Configure( sp, rp, m );
 }
 
 // Do a search and replace based on patterns stored in our members

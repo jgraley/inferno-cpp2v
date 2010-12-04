@@ -92,15 +92,15 @@ void Cleanup::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) // LIMIT
 		s_inner->members = ( s_inner_decls );
 		s_outer->statements = ( s_pre, s_inner, s_post );
 		s_outer->members = ( s_outer_decls );
-		r_comp->statements = ( r_pre, r_body, r_post );
-		r_comp->members = ( r_inner_decls, r_outer_decls );
+		r_comp->statements = ( s_pre, s_body, s_post );
+		r_comp->members = ( s_inner_decls, s_outer_decls );
 
 		CouplingSet couplings((
-			Coupling(( s_body, r_body )),
-			Coupling(( s_pre, r_pre )),
-			Coupling(( s_post, r_post )),
-			Coupling(( s_inner_decls, r_inner_decls )),
-			Coupling(( s_outer_decls, r_outer_decls )) ));
+			Coupling(( s_body )),
+			Coupling(( s_pre )),
+			Coupling(( s_post )),
+			Coupling(( s_inner_decls )),
+			Coupling(( s_outer_decls )) ));
 
 		SearchReplace( s_outer, r_comp, couplings )( context, proot );
 	}
