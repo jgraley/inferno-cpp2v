@@ -85,24 +85,17 @@ void Cleanup::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) // LIMIT
 {
 	{ // {x;{a;b;c}y} -> {x;a;b;c;y}
 		MakeTreePtr<Compound> s_inner, s_outer, r_comp;
-		MakeTreePtr< Star<Statement> > s_pre, s_post, s_body, r_pre, r_post, r_body;
-		MakeTreePtr< Star<Declaration> > s_inner_decls, s_outer_decls, r_inner_decls, r_outer_decls;
+		MakeTreePtr< Star<Statement> > s_pre, s_post, s_body;
+		MakeTreePtr< Star<Declaration> > s_inner_decls, s_outer_decls;
 
-		s_inner->statements = s_body;
+		s_inner->statements = ( s_body );
 		s_inner->members = ( s_inner_decls );
 		s_outer->statements = ( s_pre, s_inner, s_post );
 		s_outer->members = ( s_outer_decls );
 		r_comp->statements = ( s_pre, s_body, s_post );
 		r_comp->members = ( s_inner_decls, s_outer_decls );
 
-		CouplingSet couplings((
-			Coupling(( s_body )),
-			Coupling(( s_pre )),
-			Coupling(( s_post )),
-			Coupling(( s_inner_decls )),
-			Coupling(( s_outer_decls )) ));
-
-		SearchReplace( s_outer, r_comp, couplings )( context, proot );
+		SearchReplace( s_outer, r_comp )( context, proot );
 	}
     { //{a} -> a TODO need to restrict parent node to Statement: For, If etc OK; Instance is NOT OK
         //         TODO OR maybe just fix renderer for that case

@@ -3,10 +3,10 @@
 #include "render/graph.hpp" //  for graphing patterns
 #include "conjecture.hpp"
 
-// Constructor remembers search pattern, replace pattern and any supplied couplings as required
+// Master constructor remembers search pattern, replace pattern and any supplied couplings as required
 RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
                                           TreePtr<Node> rp,
-                                          CouplingSet m ) :                                          
+                                          CouplingSet m ) :                 
     search_pattern( sp ),
     replace_pattern( rp ),
     couplings( m )
@@ -15,20 +15,55 @@ RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
     v(search_pattern, &search_pattern);
     v(replace_pattern, &replace_pattern);
 
+	// Count the number of times we hit each node during a walk.
+	// Where we hit a node more than once, add a coupling for it.
+	// This will detect nodes with multiple refs (which we want 
+	// couplings for) and all nodes thereunder (which I'm not sure
+	// if we want couplgs for or even if should be allowed).
+	// TODO decide.
+	TRACE("doing inferred couplings\n");
+	Map< TreePtr<Node>, int > ms;
+    Walk wsp( sp ), wrp( rp );
+    FOREACH( TreePtr<Node> n, wsp )
+		if( ms.IsExist( n ) )
+			ms[n]++;
+		else
+			ms[n] = 1;
+    FOREACH( TreePtr<Node> n, wrp )
+		if( ms.IsExist( n ) )
+			ms[n]++;
+		else
+			ms[n] = 1;
+    typedef	pair<TreePtr<Node>, int> pair;	
+	FOREACH( pair pp, ms )
+	{
+		TRACE("node ")(*(pp.first))(" count is %d\n", pp.second );
+	    if( pp.second > 1 )
+			couplings.insert( Coupling( pp.first ) );	
+	}
+	
     // Look for slaves. If we find them, copy our couplings into their couplings
     // Do not just overwrite since there may be implicit Stuff node couplings.
     // TODO is there a way of unioning sets without doing lots of insert()?
-    Walk w( rp );
-    FOREACH( TreePtr<Node> n, w )
+    FOREACH( TreePtr<Node> n, wrp )
     {
         if( TreePtr<RootedSlaveBase> rsb = dynamic_pointer_cast<RootedSlaveBase>(n) )
-			FOREACH( Coupling c, couplings )
-				rsb->couplings.insert( c );
-        if( TreePtr<SlaveBase> rsb = dynamic_pointer_cast<SlaveBase>(n) )
-			FOREACH( Coupling c, couplings )
-				rsb->couplings.insert( c );
+		    rsb->couplings = couplings;
+        else if( TreePtr<SlaveBase> rsb = dynamic_pointer_cast<SlaveBase>(n) )
+			rsb->couplings = couplings;
     }
 } 
+
+
+// Slave constructor used by slave wrapper
+RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
+                                          TreePtr<Node> rp,
+                                          int i ) :                                  
+    search_pattern( sp ),
+    replace_pattern( rp )
+{
+	(void)i;
+}
 
 
 // Destructor tries not to leak memory lol
@@ -808,6 +843,13 @@ SearchReplace::SearchReplace( TreePtr<Node> sp,
 {
 }
 
+SearchReplace::SearchReplace( TreePtr<Node> sp,
+                              TreePtr<Node> rp,
+                              int i ) :
+    RootedSearchReplace( sp, rp, i )                              
+{
+}
+
 // Do a search and replace based on patterns stored in our members
 void SearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
 										    	   CouplingKeys keys )
@@ -843,7 +885,7 @@ void SearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
 
 void RootedSearchReplace::Test()
 {
-    RootedSearchReplace sr;
+    RootedSearchReplace sr = RootedSearchReplace( MakeTreePtr<Nop>() );
 
     {
         // single node with topological wildcarding
