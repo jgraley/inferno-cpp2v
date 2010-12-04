@@ -91,8 +91,8 @@ struct Special : SpecialBase, PRE_RESTRICTION
 {
     virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype()
     {
-	// muchos indirection
-	return shared_ptr<TreePtrInterface>( new TreePtr<PRE_RESTRICTION>( new PRE_RESTRICTION ));	
+	    // Esta muchos indirection
+	    return shared_ptr<TreePtrInterface>( new TreePtr<PRE_RESTRICTION>( new PRE_RESTRICTION ));	
     }
 };
 
@@ -142,9 +142,12 @@ class RootedSearchReplace : InPlaceTransformation
 public:
     // Constructor and destructor. Search and replace patterns and couplings are
     // specified here, so that we have a fully confiugured functor.
-    RootedSearchReplace( TreePtr<Node> sp=TreePtr<Node>(),
+    RootedSearchReplace( TreePtr<Node> sp,
                          TreePtr<Node> rp=TreePtr<Node>(),
                          CouplingSet m = CouplingSet() );
+    RootedSearchReplace( TreePtr<Node> sp,
+                         TreePtr<Node> rp,
+                         int ); // for use by slave wrappers
     ~RootedSearchReplace();
     
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
@@ -276,9 +279,12 @@ private:
 class SearchReplace : public RootedSearchReplace
 {
 public:
-    SearchReplace( TreePtr<Node> sp = TreePtr<Node>(),
+    SearchReplace( TreePtr<Node> sp,
                    TreePtr<Node> rp = TreePtr<Node>(),
                    CouplingSet m = CouplingSet() );
+    SearchReplace( TreePtr<Node> sp,
+                   TreePtr<Node> rp,
+                   int ); // for use by slave wrappers
     virtual void DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
 							          		    CouplingKeys match_keys = CouplingKeys() );
 };
@@ -287,8 +293,8 @@ public:
 struct RootedSlaveBase : virtual Node,
                          public RootedSearchReplace
 {
-	RootedSlaveBase( TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
-		RootedSearchReplace( sp, rp )
+	RootedSlaveBase( TreePtr<Node> sp, TreePtr<Node> rp=TreePtr<Node>() ) :
+		RootedSearchReplace( sp, rp, 0 )
 	{}
 	virtual TreePtr<Node> GetThrough() const = 0;
 };
@@ -314,8 +320,8 @@ struct RootedSlave : RootedSlaveBase, Special<PRE_RESTRICTION>
 struct SlaveBase : virtual Node,
                    public SearchReplace
 {
-	SlaveBase( TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
-		SearchReplace( sp, rp )
+	SlaveBase( TreePtr<Node> sp, TreePtr<Node> rp=TreePtr<Node>() ) :
+		SearchReplace( sp, rp, 0 )
 	{}
 	virtual TreePtr<Node> GetThrough() const = 0;
 };
