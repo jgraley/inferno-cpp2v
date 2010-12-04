@@ -82,6 +82,21 @@ class Conjecture;
 // are TBD.
 #define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
 
+struct SpecialBase
+{
+    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() = 0;
+};
+template<class PRE_RESTRICTION>
+struct Special : SpecialBase, PRE_RESTRICTION
+{
+    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype()
+    {
+	// muchos indirection
+	return shared_ptr<TreePtrInterface>( new TreePtr<PRE_RESTRICTION>( new PRE_RESTRICTION ));	
+    }
+};
+
+
 // The * wildcard can match more than one node of any type in a container
 // In a Sequence, only a contiguous subsequence of 0 or more elements will match
 // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
@@ -89,7 +104,7 @@ class Conjecture;
 // in the collection.
 struct StarBase : virtual Node {};
 template<class PRE_RESTRICTION>
-struct Star : StarBase, PRE_RESTRICTION { SPECIAL_NODE_FUNCTIONS };
+struct Star : StarBase, Special<PRE_RESTRICTION> { SPECIAL_NODE_FUNCTIONS };
 
 
 // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
@@ -99,7 +114,7 @@ struct StuffBase : virtual Node
 	TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
 };
 template<class PRE_RESTRICTION>
-struct Stuff : StuffBase, PRE_RESTRICTION { SPECIAL_NODE_FUNCTIONS };
+struct Stuff : StuffBase, Special<PRE_RESTRICTION> { SPECIAL_NODE_FUNCTIONS };
 struct StuffKey : Key
 {
 	TreePtr<Node> terminus;
@@ -111,7 +126,7 @@ struct GreenGrassBase : virtual Node
 	virtual TreePtr<Node> GetThrough() const = 0;
 };
 template<class PRE_RESTRICTION>
-struct GreenGrass : GreenGrassBase, PRE_RESTRICTION
+struct GreenGrass : GreenGrassBase, Special<PRE_RESTRICTION>
 {
 	SPECIAL_NODE_FUNCTIONS
 	TreePtr<PRE_RESTRICTION> through;
@@ -284,7 +299,7 @@ struct RootedSlaveBase : virtual Node,
 	virtual TreePtr<Node> GetThrough() const = 0;
 };
 template<class PRE_RESTRICTION>
-struct RootedSlave : RootedSlaveBase, PRE_RESTRICTION
+struct RootedSlave : RootedSlaveBase, Special<PRE_RESTRICTION>
 {
 	SPECIAL_NODE_FUNCTIONS
 
@@ -311,7 +326,7 @@ struct SlaveBase : virtual Node,
 	virtual TreePtr<Node> GetThrough() const = 0;
 };
 template<class PRE_RESTRICTION>
-struct Slave : SlaveBase, PRE_RESTRICTION
+struct Slave : SlaveBase, Special<PRE_RESTRICTION>
 {
 	SPECIAL_NODE_FUNCTIONS
 

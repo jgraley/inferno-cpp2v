@@ -10,7 +10,7 @@ struct NotMatchBase {}; // needed for graph plotter
 
 // Match if the supplied patterns does not match (between you and me, it's just a NOT)
 template<class PRE_RESTRICTION>
-struct NotMatch : PRE_RESTRICTION,
+struct NotMatch : Special<PRE_RESTRICTION>,
                  RootedSearchReplace::SoftSearchPattern,
                  NotMatchBase
 {
@@ -50,7 +50,7 @@ struct MatchAllBase {};
 
 // Match all of the supplied patterns (between you and me, it's an AND)
 template<class PRE_RESTRICTION>
-struct MatchAll : PRE_RESTRICTION,
+struct MatchAll : Special<PRE_RESTRICTION>,
                  RootedSearchReplace::SoftSearchPattern,
                  MatchAllBase
 {
@@ -77,7 +77,7 @@ struct MatchAnyBase {};
 
 // Match zero or more of the supplied patterns (between you and me, it's an OR)
 template<class PRE_RESTRICTION>
-struct MatchAny : PRE_RESTRICTION,
+struct MatchAny : Special<PRE_RESTRICTION>,
                  RootedSearchReplace::SoftSearchPattern,
                  MatchAnyBase
 {
@@ -106,7 +106,7 @@ struct MatchOddBase {};
 
 // Match an odd number of patterns (between you and me, it's an EOR)
 template<class PRE_RESTRICTION>
-struct MatchOdd : PRE_RESTRICTION,
+struct MatchOdd : Special<PRE_RESTRICTION>,
                   RootedSearchReplace::SoftSearchPattern,
                   MatchOddBase
 {
@@ -149,7 +149,7 @@ private:
 };
 
 template<class PRE_RESTRICTION>
-struct TransformTo : TransformToBase, PRE_RESTRICTION
+struct TransformTo : TransformToBase, Special<PRE_RESTRICTION>
 {
 	SPECIAL_NODE_FUNCTIONS	
     TransformTo( Transformation *t ) : TransformToBase (t) {}
