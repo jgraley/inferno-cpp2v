@@ -145,9 +145,6 @@ public:
     RootedSearchReplace( TreePtr<Node> sp=TreePtr<Node>(),
                          TreePtr<Node> rp=TreePtr<Node>(),
                          CouplingSet m = CouplingSet() );
-    void Configure( TreePtr<Node> sp=TreePtr<Node>(),
-                    TreePtr<Node> rp=TreePtr<Node>(),
-                    CouplingSet m = CouplingSet() );
     ~RootedSearchReplace();
     
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
@@ -282,9 +279,6 @@ public:
     SearchReplace( TreePtr<Node> sp = TreePtr<Node>(),
                    TreePtr<Node> rp = TreePtr<Node>(),
                    CouplingSet m = CouplingSet() );
-    void Configure( TreePtr<Node> sp = TreePtr<Node>(),
-                    TreePtr<Node> rp = TreePtr<Node>(),
-                    CouplingSet m = CouplingSet() );
     virtual void DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
 							          		    CouplingKeys match_keys = CouplingKeys() );
 };
