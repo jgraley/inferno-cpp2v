@@ -15,6 +15,7 @@
 #include "steps/for_to_while.hpp"
 #include "steps/slave_test.hpp"
 #include "steps/lower_control_flow.hpp"
+#include "steps/clean_up.hpp"
 
 void SelfTest();
 

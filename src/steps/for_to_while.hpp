@@ -24,11 +24,4 @@ public:
 	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
 };
 
-class Cleanup : public InPlaceTransformation
-{
-public:
-	using Transformation::operator();
-	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
-};
-
 #endif 
