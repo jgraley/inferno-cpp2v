@@ -1,5 +1,5 @@
 include makefile.common
-.PHONY: all code/build/inferno.a get_libs test
+.PHONY: all src/build/inferno.a get_libs test
 all : inferno.exe
 
 #
@@ -49,15 +49,15 @@ libclang%.a : makefile
 #
 # Compile inferno sources
 #    	
-code/build/inferno.a : makefile
-	cd code; $(MAKE) --jobs=2 build/inferno.a
+src/build/inferno.a : makefile
+	cd src; $(MAKE) --jobs=2 build/inferno.a
 
 #
 # Link inferno executable
 #
 STANDARD_LIBS += -lstdc++
-inferno.exe : makefile code/build/inferno.a $(LLVM_CLANG_LIBS)
-	$(ICC) code/build/inferno.a $(LLVM_CLANG_LIBS:%=$(LLVM)/$(LLVM_BUILD)/lib/%) $(STANDARD_LIBS) -ggdb -pg -o inferno.exe
+inferno.exe : makefile src/build/inferno.a $(LLVM_CLANG_LIBS)
+	$(ICC) src/build/inferno.a $(LLVM_CLANG_LIBS:%=$(LLVM)/$(LLVM_BUILD)/lib/%) $(STANDARD_LIBS) -ggdb -pg -o inferno.exe
 
 #
 # Run the tests
