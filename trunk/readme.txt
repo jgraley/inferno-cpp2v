@@ -7,9 +7,9 @@ inferno-cpp2v/trunk (this directory)
     Everything lives in this directory. The idea of the "trunk" subdirectory
     is that branches can go in other subdirectories within inferno-synth/
     
-code/
+src/
     This contains all the Inferno source code, most of which is organised into 
-    further subdirectories under code/
+    further subdirectories under src/
 
 test/
     This contains all the test harnesses and test input. Test results go in
