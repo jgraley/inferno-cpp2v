@@ -43,6 +43,12 @@ struct Coupling : public set< TreePtr<Node> >
 	{
 		insert( n );
 	}
+	operator set<Coupling>() 
+	{
+		set<Coupling> s;
+		s.insert( *this );
+		return s;
+	}
 };
 
 typedef set<Coupling> CouplingSet;

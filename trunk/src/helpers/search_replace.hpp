@@ -137,7 +137,7 @@ struct GreenGrass : GreenGrassBase, Special<PRE_RESTRICTION>
 };
 
 
-class RootedSearchReplace : InPlaceTransformation
+class RootedSearchReplace : InPlaceTransformation // TODO rename RootedSearchReplace -> MatchReplace
 {  
 public:
     // Constructor and destructor. Search and replace patterns and couplings are

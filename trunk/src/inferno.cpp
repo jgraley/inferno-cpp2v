@@ -86,27 +86,39 @@ int main( int argc, char *argv[] )
 
   	for( int i=0; i<3; i++ ) // TODO better way of repeating steps
 	{
-	    if( i>0 || --ReadArgs::quitafter >= 0 ) // side-effect is deliberate; only dec on first iter
+	    if( i==0 )
+			--ReadArgs::quitafter;
+		if( ReadArgs::quitafter >= 0 ) 
 	    {
 	        CleanupCompoundMulti()(&program);
 		}
-	    if( i>0 || --ReadArgs::quitafter >= 0 )
+	    if( i==0 )
+			--ReadArgs::quitafter;
+	    if( ReadArgs::quitafter >= 0 ) 
 		{
 	        CleanupCompoundSingle()(&program);
 		}
-	    if( i>0 || --ReadArgs::quitafter >= 0 )
+	    if( i==0 )
+			--ReadArgs::quitafter;
+	    if( ReadArgs::quitafter >= 0 ) 
 		{
 	        CleanupNop()(&program);
 		}
-	    if( i>0 || --ReadArgs::quitafter >= 0 )
+	    if( i==0 )
+			--ReadArgs::quitafter;
+	    if( ReadArgs::quitafter >= 0 ) 
 		{
 	        CleanupDuplicateLabels()(&program);
 		}
-	    if( i>0 || --ReadArgs::quitafter >= 0 )
+	    if( i==0 )
+			--ReadArgs::quitafter;
+	    if( ReadArgs::quitafter >= 0 ) 
 		{
 	        CleanupIneffectualGoto()(&program);
 		}
-	    if( i>0 || --ReadArgs::quitafter >= 0 )
+	    if( i==0 )
+			--ReadArgs::quitafter;
+	    if( ReadArgs::quitafter >= 0 ) 
 		{
 	        CleanupUnusedLabels()(&program);
 	    }

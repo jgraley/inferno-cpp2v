@@ -13,8 +13,8 @@
 void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
 	MakeTreePtr<For> s_for;
-    MakeTreePtr<Statement> s_body, s_init, s_inc, r_forbody, r_init, r_inc, sr_inc;
-    MakeTreePtr<Expression> s_cond, r_cond;
+    MakeTreePtr<Statement> forbody, inc, init;
+    MakeTreePtr<Expression> cond;
     MakeTreePtr<While> r_while;
     MakeTreePtr<Compound> r_outer, r_body, sr_block;
     MakeTreePtr< GreenGrass<Statement> > ss_gg;
@@ -25,30 +25,25 @@ void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr<Continue> ss_cont, sr_cont;
     MakeTreePtr<Nop> sr_nop;
 
-    sr_block->statements = (sr_inc, sr_cont);
+    sr_block->statements = (inc, sr_cont);
     ss_gg->through = ss_cont;
-    MakeTreePtr< RootedSlave<Statement> > r_slave( r_forbody, ss_stuff, sr_stuff );
+    MakeTreePtr< RootedSlave<Statement> > r_slave( forbody, ss_stuff, sr_stuff );
     ss_stuff->terminus = ss_gg;
     ss_stuff->recurse_restriction = ss_not;
     sr_stuff->terminus = sr_block;
     ss_not->pattern = ss_loop;
 
-    s_for->body = s_body;
-    s_for->initialisation = s_init;
-    s_for->condition = s_cond;
-    s_for->increment = s_inc;
+    s_for->body = forbody;
+    s_for->initialisation = init;
+    s_for->condition = cond;
+    s_for->increment = inc;
 
-    r_outer->statements = (r_init, r_while);
+    r_outer->statements = (init, r_while);
     r_while->body = r_body;
-    r_while->condition = r_cond;
-    r_body->statements = (r_slave, r_inc);
-
+    r_while->condition = cond;
+    r_body->statements = (r_slave, inc);
 
     CouplingSet couplings((
-		Coupling(( s_body, r_forbody )),
-		Coupling(( s_init, r_init )),
-		Coupling(( s_cond, r_cond )),
-		Coupling(( s_inc, r_inc, sr_inc )),
 		Coupling(( ss_stuff, sr_stuff )) ));
 
    	SearchReplace( s_for, r_outer, couplings )( context, proot );
@@ -58,24 +53,20 @@ void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 void WhileToDo::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
 	MakeTreePtr<While> s_while;
-    MakeTreePtr<Statement> s_body, r_body;
-    MakeTreePtr<Expression> s_cond, r_if_cond, r_do_cond;
+    MakeTreePtr<Statement> body;
+    MakeTreePtr<Expression> cond;
     MakeTreePtr<Nop> r_nop;
     MakeTreePtr<If> r_if;
     MakeTreePtr<Do> r_do;
 
-    s_while->body = s_body;
-    s_while->condition = s_cond;
+    s_while->body = body;
+    s_while->condition = cond;
 
-    r_if->condition = r_if_cond;
+    r_if->condition = cond;
     r_if->body = r_do;
     r_if->else_body = r_nop;
-    r_do->condition = r_do_cond;
-    r_do->body = r_body;
-
-    CouplingSet couplings((
-		Coupling(( s_body, r_body )),
-		Coupling(( s_cond, r_if_cond, r_do_cond )) ));
-
-   	SearchReplace( s_while, r_if, couplings )( context, proot );
+    r_do->condition = cond;
+    r_do->body = body;
+	
+   	SearchReplace( s_while, r_if )( context, proot );
 }

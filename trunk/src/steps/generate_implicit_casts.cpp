@@ -19,37 +19,35 @@ void GenerateImplicitCasts::operator()( TreePtr<Node> context, TreePtr<Node> *pr
 	MakeTreePtr<Procedure> s_proc;
 	s_callee->pattern = s_proc;
 	MakeTreePtr< Instance > s_param;
-	s_param->identifier = MakeTreePtr< InstanceIdentifier >();
-	s_param->type = MakeTreePtr< Type >();
+	MakeTreePtr< InstanceIdentifier > param_id;
+	s_param->identifier = param_id;
+	MakeTreePtr< Type > type;
+	s_param->type = type;
 	MakeTreePtr< Star<Instance> > s_other_params;
 	s_proc->members = (s_param, s_other_params);
 	MakeTreePtr< MapOperand > s_arg;
-	s_arg->identifier = MakeTreePtr< InstanceIdentifier >();
+	s_arg->identifier = param_id;
 	MakeTreePtr<TypeOf> s_arg_value;
 	s_arg->value = s_arg_value;
 	//s_arg_value->pattern = MakeTreePtr< Type >();
 	MakeTreePtr< NotMatch<Type> > s_arg_type;
 	s_arg_value->pattern = s_arg_type;
-	s_arg_type->pattern = MakeTreePtr< Type >();
-	MakeTreePtr< Star<MapOperand> > s_other_args;
-	s_call->operands = ( s_arg, s_other_args );
+	s_arg_type->pattern = type;
+	MakeTreePtr< Star<MapOperand> > other_args;
+	s_call->operands = ( s_arg, other_args );
 
 	MakeTreePtr<Call> r_call;
 	MakeTreePtr< MapOperand > r_arg;
-	r_arg->identifier = MakeTreePtr< InstanceIdentifier >();
+	r_arg->identifier = param_id;
 	MakeTreePtr<Cast> r_cast;
 	r_arg->value = r_cast;
 	r_cast->operand = MakeTreePtr< Expression >();
-	r_cast->type = MakeTreePtr< Type >();
-	MakeTreePtr< Star<MapOperand> > r_other_args;
-	r_call->operands = ( r_arg, r_other_args );
+	r_cast->type = type;
+	r_call->operands = ( r_arg, other_args );
 
 	CouplingSet sms0((
-	    Coupling(( s_call, r_call )), // note: alternatively we could just match the <x>_other_args
-        Coupling(( s_param->identifier, s_arg->identifier, r_arg->identifier )),
-        Coupling(( s_param->type, s_arg_type->pattern, r_cast->type )),
-        Coupling(( s_arg->value, r_cast->operand )),
-        Coupling(( s_other_args, r_other_args )) ));
+	    Coupling(( s_call, r_call )), 
+        Coupling(( s_arg->value, r_cast->operand )) ));
 
 	SearchReplace(s_call, r_call, sms0)( context, proot );
 }

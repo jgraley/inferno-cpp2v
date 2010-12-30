@@ -8,47 +8,39 @@ void SplitInstanceDeclarations::operator()( TreePtr<Node> context, TreePtr<Node>
 		MakeTreePtr<LocalVariable> si;
 		si->identifier = MakeTreePtr<InstanceIdentifier>();  // Only acting on initialised Instances
 		si->initialiser = MakeTreePtr<Expression>();  // Only acting on initialised Instances
-		MakeTreePtr< Star<Declaration> > ss;
-		sc->members = ( ss );
-		sc->statements = ( MakeTreePtr< Star<Statement> >(), si, MakeTreePtr< Star<Statement> >() );
+		MakeTreePtr< Star<Declaration> > decls;
+		sc->members = ( decls );
+		MakeTreePtr< Star<Statement> > pre, post;
+		sc->statements = ( pre, si, post );
 
 		MakeTreePtr<Compound> rc;
 		MakeTreePtr<LocalVariable> ri;
 		ri->initialiser = MakeTreePtr<Uninitialised>();
-		MakeTreePtr< Star<Declaration> > rs;
-		rc->members = ( ri, rs );
+		rc->members = ( ri, decls );
 		MakeTreePtr<Assign> ra;
-		ra->operands = ( MakeTreePtr<InstanceIdentifier>(), MakeTreePtr<Expression>() );
-		rc->statements = ( MakeTreePtr< Star<Statement> >(), ra, MakeTreePtr< Star<Statement> >() );
+		ra->operands = ( si->identifier, si->initialiser );
+		rc->statements = ( pre, ra, post );
 
 		CouplingSet sms1((
-			Coupling((si, ri)),
-			Coupling((ss, rs)),
-			Coupling((sc->statements[0], rc->statements[0])),
-			Coupling((sc->statements[2], rc->statements[2])),
-			Coupling((si->identifier, ra->operands[0])),
-			Coupling((si->initialiser, ra->operands[1])) ));
+			Coupling((si, ri)) ));
 
 		SearchReplace(sc, rc, sms1)( context, proot );
 	}
 	{ // Do everything else by just moving to the decls collection
 		MakeTreePtr<Compound> sc;
 		MakeTreePtr<Instance> si;
-		MakeTreePtr< Star<Declaration> > ss;
-		sc->members = ( ss );
-		sc->statements = ( MakeTreePtr< Star<Statement> >(), si, MakeTreePtr< Star<Statement> >() );
+		MakeTreePtr< Star<Declaration> > decls;
+		sc->members = ( decls );
+		MakeTreePtr< Star<Statement> > pre, post;
+		sc->statements = ( pre, si, post );
 
 		MakeTreePtr<Compound> rc;
 		MakeTreePtr<Instance> ri;
-		MakeTreePtr< Star<Declaration> > rs;
-		rc->members = ( ri, rs ); // Instance now in unordered decls part
-		rc->statements = ( MakeTreePtr< Star<Statement> >(), MakeTreePtr< Star<Statement> >() );
+		rc->members = ( ri, decls ); // Instance now in unordered decls part
+		rc->statements = ( pre, post );
 
 		CouplingSet sms0((
-			Coupling((si, ri)),
-			Coupling((ss, rs)),
-			Coupling((sc->statements[0], rc->statements[0])),
-			Coupling((sc->statements[2], rc->statements[1])) ));
+			Coupling((si, ri)) ));
 
 		SearchReplace(sc, rc, sms0)( context, proot );
 	}
