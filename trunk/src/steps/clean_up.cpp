@@ -11,7 +11,7 @@
 #include "helpers/soft_patterns.hpp"
 
 // Removing superfluous Compund blocks to clean up the code
-void Cleanup::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) // LIMITAION: decls in body not allowed
+void CleanupCompoundMulti::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) // LIMITAION: decls in body not allowed
 {
     { // {x;{a;b;c}y} -> {x;a;b;c;y}
         MakeTreePtr<Compound> s_inner, s_outer, r_comp;
@@ -27,8 +27,14 @@ void Cleanup::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) // LIMIT
 
         SearchReplace( s_outer, r_comp )( context, proot );
     }
+}
+
+
+void CleanupCompoundSingle::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) 
+{
     { //{a} -> a TODO need to restrict parent node to Statement: For, If etc OK; Instance is NOT OK
-        //         TODO OR maybe just fix renderer for that case
+      //         TODO OR maybe just fix renderer for that case
+	  // Note: this hits eg If(x){a;} which the "Multi" version misses 
         MakeTreePtr<Compound> s_comp;
         MakeTreePtr< Statement > s_body, r_body;
 
@@ -40,6 +46,11 @@ void Cleanup::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) // LIMIT
 
         SearchReplace( s_comp, r_body, couplings )( context, proot );
     }
+}
+
+
+void CleanupNop::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) 
+{
     { // remove nop
         MakeTreePtr<Compound> s_comp, r_comp;
         MakeTreePtr<Nop> s_nop;
@@ -60,6 +71,10 @@ void Cleanup::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) // LIMIT
 
         SearchReplace( s_comp, r_comp, couplings )( context, proot );
     }
+}
+
+void CleanupDuplicateLabels::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) 
+{
     { // remove duplicate (sucessive) labels 
         MakeTreePtr<Instance> s_instance, r_instance;
         MakeTreePtr< Stuff<Statement> > s_stuff, r_stuff, ss_stuff, sr_stuff;
@@ -104,6 +119,10 @@ void Cleanup::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) // LIMIT
 
         SearchReplace( s_instance, r_instance, couplings )( context, proot );
     }
+}
+
+void CleanupIneffectualGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) 
+{
     { // remove goto X before X:
         MakeTreePtr<Compound> s_comp, r_comp;
         MakeTreePtr<Goto> s_goto;
@@ -130,6 +149,10 @@ void Cleanup::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) // LIMIT
 
         SearchReplace( s_comp, r_comp, couplings )( context, proot );
     }
+}
+
+void CleanupUnusedLabels::operator()( TreePtr<Node> context, TreePtr<Node> *proot ) 
+{
     { // remove unused labels
         MakeTreePtr<Instance> s_instance, r_instance;
         MakeTreePtr< Stuff<Statement> > s_stuff, sx_stuff, r_stuff;

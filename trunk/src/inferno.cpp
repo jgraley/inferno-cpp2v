@@ -84,11 +84,33 @@ int main( int argc, char *argv[] )
     	GenerateStacks()(&program);
     }
 
-    if( --ReadArgs::quitafter >= 0 )
-    {
-    	for( int i=0; i<3; i++ ) // TODO better way of repeating steps
-            Cleanup()(&program);
-    }
+  	for( int i=0; i<3; i++ ) // TODO better way of repeating steps
+	{
+	    if( i>0 || --ReadArgs::quitafter >= 0 ) // side-effect is deliberate; only dec on first iter
+	    {
+	        CleanupCompoundMulti()(&program);
+		}
+	    if( i>0 || --ReadArgs::quitafter >= 0 )
+		{
+	        CleanupCompoundSingle()(&program);
+		}
+	    if( i>0 || --ReadArgs::quitafter >= 0 )
+		{
+	        CleanupNop()(&program);
+		}
+	    if( i>0 || --ReadArgs::quitafter >= 0 )
+		{
+	        CleanupDuplicateLabels()(&program);
+		}
+	    if( i>0 || --ReadArgs::quitafter >= 0 )
+		{
+	        CleanupIneffectualGoto()(&program);
+		}
+	    if( i>0 || --ReadArgs::quitafter >= 0 )
+		{
+	        CleanupUnusedLabels()(&program);
+	    }
+	}
 
     if(ReadArgs::intermediate_graph)
     {

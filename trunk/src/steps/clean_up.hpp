@@ -10,7 +10,42 @@
 
 #include "helpers/search_replace.hpp"
 
-class Cleanup : public InPlaceTransformation
+class CleanupCompoundMulti : public InPlaceTransformation
+{
+public:
+    using Transformation::operator();
+    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+};
+
+class CleanupCompoundSingle : public InPlaceTransformation
+{
+public:
+    using Transformation::operator();
+    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+};
+
+class CleanupNop : public InPlaceTransformation
+{
+public:
+    using Transformation::operator();
+    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+};
+
+class CleanupDuplicateLabels : public InPlaceTransformation
+{
+public:
+    using Transformation::operator();
+    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+};
+
+class CleanupIneffectualGoto : public InPlaceTransformation
+{
+public:
+    using Transformation::operator();
+    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+};
+
+class CleanupUnusedLabels : public InPlaceTransformation
 {
 public:
     using Transformation::operator();
