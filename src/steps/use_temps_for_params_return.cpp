@@ -22,7 +22,8 @@ void UseTempsForParamsReturn::operator()( TreePtr<Node> context, TreePtr<Node> *
 	TreePtr< MatchAll<Expression> > s_and( new MatchAll<Expression> );
 	s_return->return_value = s_and;
 	TreePtr<TypeOf> s_retval( new TypeOf );
-	s_retval->pattern = MakeTreePtr<Type>();
+	MakeTreePtr<Type> type;
+	s_retval->pattern = type;
     
     // Restrict the search to returns that have an automatic variable under them
     TreePtr< Stuff<Expression> > cs_stuff( new Stuff<Expression> );
@@ -35,23 +36,22 @@ void UseTempsForParamsReturn::operator()( TreePtr<Node> context, TreePtr<Node> *
     // replace with a new sub-compound, that declares a Temp, intialises it to the return value and returns it
 	TreePtr<Compound> r_sub_comp( new Compound );
 	TreePtr< Temporary > r_newvar( new Temporary );
-	r_newvar->type = MakeTreePtr<Type>();
-	r_newvar->identifier = MakeTreePtr<BuildInstanceIdentifier>("temp_retval");
+	r_newvar->type = type;
+	MakeTreePtr<BuildInstanceIdentifier> id("temp_retval");
+	r_newvar->identifier = id;
 	r_newvar->initialiser = MakeTreePtr<Uninitialised>();
 	r_sub_comp->members = ( r_newvar );
 	TreePtr<Assign> r_assign( new Assign );
-	r_assign->operands.push_back( MakeTreePtr<InstanceIdentifier>() );
+	r_assign->operands.push_back( id );
 	r_assign->operands.push_back( MakeTreePtr<Expression>() );
 	r_sub_comp->statements.push_back( r_assign );
 	TreePtr<Return> r_return( new Return );
 	r_sub_comp->statements.push_back( r_return );
-	r_return->return_value = MakeTreePtr<InstanceIdentifier>();
+	r_return->return_value = id;
        
     // Make the new variable be of the required type, ie whatever the expression evaluates to   
 	CouplingSet sms((
-		Coupling((s_retval->pattern, r_newvar->type)),
-		Coupling((s_retval, r_assign->operands[1])),
-		Coupling((r_newvar->identifier, r_assign->operands[0], r_return->return_value)) ));
+		Coupling((s_retval, r_assign->operands[1])) ));
              
 	SearchReplace( s_return, r_sub_comp, sms )( context, proot );
 }

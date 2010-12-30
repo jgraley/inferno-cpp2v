@@ -13,7 +13,9 @@ int main()
     	{
     		continue; // applies to inner loop
     	} while(0);
-		tot = tot + i;
+		{
+			tot = tot + i;
+		}
         if(1)
     	{
             continue; // applies to outer loop

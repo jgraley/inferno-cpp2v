@@ -10,46 +10,38 @@
 void IfToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
     MakeTreePtr< MatchAll<Statement> > s_and;    
-    MakeTreePtr<If> s_if, sr_if, r_if;
-    MakeTreePtr<Statement> s_body, s_else_body, r_body, r_else_body;
-    MakeTreePtr<Expression> s_cond, r_cond;
-    MakeTreePtr< NotMatch<Statement> > sr_not;
-    MakeTreePtr<Goto> sr_goto, r_goto, r_goto_else;
-    MakeTreePtr<Nop> sr_nop, r_nop;
+    MakeTreePtr<If> s_if, l_r_if, r_if;
+    MakeTreePtr<Statement> body, else_body;
+    MakeTreePtr<Expression> cond;
+    MakeTreePtr< NotMatch<Statement> > l_r_not;
+    MakeTreePtr<Goto> l_r_goto, r_goto, r_goto_else;
+    MakeTreePtr<Nop> l_r_nop, r_nop;
     MakeTreePtr<Compound> r_comp;
     MakeTreePtr<LogicalNot> r_not;
     MakeTreePtr<BuildLabelIdentifier> r_labelid1("BYPASS_THEN"), r_labelid2("BYPASS_ELSE");
-    MakeTreePtr<LabelIdentifier> r_labelid1a, r_labelid2a;
     MakeTreePtr<Label> r_label1, r_label2;
     
-    s_and->patterns = (s_if, sr_not);
-    s_if->condition = s_cond;
-    s_if->body = s_body;
-    s_if->else_body = s_else_body;
+    s_and->patterns = (s_if, l_r_not);
+    s_if->condition = cond;
+    s_if->body = body;
+    s_if->else_body = else_body;
     
     // exclude if(x) goto y;
-    sr_not->pattern = sr_if;
-    sr_if->body = sr_goto;
-    sr_if->else_body = sr_nop;
+    l_r_not->pattern = l_r_if;
+    l_r_if->body = l_r_goto;
+    l_r_if->else_body = l_r_nop;
     
-    r_comp->statements = (r_if, r_body, r_goto_else, r_label1, r_else_body, r_label2);
+    r_comp->statements = (r_if, body, r_goto_else, r_label1, else_body, r_label2);
     r_if->condition = r_not;
-    r_not->operands = (r_cond);
+    r_not->operands = (cond);
     r_if->body = r_goto;
     r_if->else_body = r_nop;
     r_goto->destination = r_labelid1;
     r_goto_else->destination = r_labelid2;
-    r_label1->identifier = r_labelid1a;
-    r_label2->identifier = r_labelid2a;
+    r_label1->identifier = r_labelid1;
+    r_label2->identifier = r_labelid2;
     
-    CouplingSet couplings((
-        Coupling(( s_cond, r_cond )),
-        Coupling(( s_body, r_body )),
-        Coupling(( s_else_body, r_else_body )),
-        Coupling(( r_labelid1, r_labelid1a )),
-        Coupling(( r_labelid2, r_labelid2a )) ));
-
-    SearchReplace( s_and, r_comp, couplings )( context, proot );
+    SearchReplace( s_and, r_comp )( context, proot );
 }
 
 
@@ -153,9 +145,8 @@ void SwitchToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     r_decl->initialiser = MakeTreePtr<Expression>();
     r_comp->statements = (r_decl, r_slave3);
     
-    CouplingSet couplings;
-	couplings.insert(  
-        Coupling(( s_cond, r_decl->initialiser )) );
+    CouplingSet couplings((  
+        Coupling(( s_cond, r_decl->initialiser )) ));
 
     SearchReplace( s_switch, r_comp, couplings )( context, proot );
 }
@@ -165,44 +156,39 @@ void DoToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
     MakeTreePtr<Do> s_do;
     MakeTreePtr<If> r_if;
-    MakeTreePtr<Statement> s_body, r_body;
-    MakeTreePtr<Expression> s_cond, r_cond;
-    MakeTreePtr<Goto> r_goto, sr_goto;
+    MakeTreePtr<Statement> body;
+    MakeTreePtr<Expression> cond;
+    MakeTreePtr<Goto> r_goto, l_r_goto;
     MakeTreePtr<Nop> r_nop;    
     MakeTreePtr<Compound> r_comp;
-    MakeTreePtr<BuildLabelIdentifier> r_labelid("NEXT"), sr_cont_labelid("CONTINUE");
-    MakeTreePtr<LabelIdentifier> r_labelid_a, sr_cont_labelid_a;
+    MakeTreePtr<BuildLabelIdentifier> r_labelid("NEXT"), l_r_cont_labelid("CONTINUE");
     MakeTreePtr<Label> r_label, r_cont_label;
-    MakeTreePtr< Stuff<Statement> > ss_stuff, sr_stuff;
-    MakeTreePtr<Continue> ss_cont;
-    MakeTreePtr< NotMatch<Statement> > ss_not;
-    MakeTreePtr< Loop > ss_loop;
+    MakeTreePtr< Stuff<Statement> > l_s_stuff, l_r_stuff;
+    MakeTreePtr<Continue> l_s_cont;
+    MakeTreePtr< NotMatch<Statement> > l_s_not;
+    MakeTreePtr< Loop > l_s_loop;
 
-    ss_not->pattern = ss_loop;
-    ss_stuff->terminus = ss_cont;
-    ss_stuff->recurse_restriction = ss_not;
-    sr_stuff->terminus = sr_goto;
-    sr_goto->destination = sr_cont_labelid_a;
+    l_s_not->pattern = l_s_loop;
+    l_s_stuff->terminus = l_s_cont;
+    l_s_stuff->recurse_restriction = l_s_not;
+    l_r_stuff->terminus = l_r_goto;
+    l_r_goto->destination = l_r_cont_labelid;
     
-    MakeTreePtr< RootedSlave<Statement> > r_slave( r_body, ss_stuff, sr_stuff );
+    MakeTreePtr< RootedSlave<Statement> > r_slave( body, l_s_stuff, l_r_stuff );
     
-    s_do->condition = s_cond;
-    s_do->body = s_body;
+    s_do->condition = cond;
+    s_do->body = body;
     
     r_comp->statements = (r_label, r_slave, r_cont_label, r_if);
     r_label->identifier = r_labelid;
-    r_cont_label->identifier = sr_cont_labelid;
-    r_if->condition = r_cond;
+    r_cont_label->identifier = l_r_cont_labelid;
+    r_if->condition = cond;
     r_if->body = r_goto;
     r_if->else_body = r_nop;
-    r_goto->destination = r_labelid_a;
+    r_goto->destination = r_labelid;
         
     CouplingSet couplings((
-        Coupling(( s_cond, r_cond )),
-        Coupling(( s_body, r_body )),
-        Coupling(( r_labelid, r_labelid_a )),
-        Coupling(( sr_cont_labelid, sr_cont_labelid_a )),
-        Coupling(( ss_stuff, sr_stuff )) ));
+       Coupling(( l_s_stuff, l_r_stuff )) ));
 
     SearchReplace( s_do, r_comp, couplings )( context, proot );
 }
