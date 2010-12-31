@@ -3,6 +3,9 @@
 #include "walk.hpp"
 #include "search_replace.hpp"
 
+
+////////////////////////// Traverse //////////////////////////
+
 bool Traverse::iterator::IsAtEnd() const
 {
     return empty || mit == m_end;
@@ -153,6 +156,8 @@ const Traverse::iterator &Traverse::end()
 	return my_end;
 }
 
+
+////////////////////////// Walk //////////////////////////
 
 bool Walk::iterator::IsAtEndOfChildren() const
 {
@@ -359,3 +364,60 @@ const Walk::iterator &Walk::end()
 	my_end = iterator();
 	return my_end;
 }
+
+////////////////////////// Sweep //////////////////////////
+
+Sweep::iterator::iterator()
+{
+}        
+
+Sweep::iterator::iterator( const Sweep::iterator & other ) :
+    Walk::iterator( other )
+{
+}
+
+Sweep::iterator::iterator( TreePtr<Node> &root,
+                           TreePtr<Node> restrictor,
+                           const RootedSearchReplace *rc,
+                           CouplingKeys *k ) :
+    Walk::iterator( root, restrictor, rc, k )
+{
+}
+ 
+Sweep::Sweep( TreePtr<Node> r,
+              TreePtr<Node> res,
+              const RootedSearchReplace *rsr,
+              CouplingKeys *k ) :
+    root(r),
+    restrictor( res ),
+    restriction_comparison( rsr ),
+    keys( k ),
+    my_begin( iterator( root, restrictor, restriction_comparison, k ) ),
+    my_end( iterator() )
+{
+}
+
+const Sweep::iterator &Sweep::begin()
+{
+    my_begin = iterator( root, restrictor, restriction_comparison, keys );
+    return my_begin;
+}
+
+const Sweep::iterator &Sweep::end()
+{
+    my_end = iterator();
+    return my_end;
+}
+
+void Sweep::iterator::AdvanceInto()
+{
+    TreePtr<Node> element = **this; // look at current node
+    if( element && seen.IsExist( element ) )
+        Walk::iterator::AdvanceOver(); // do not recurse
+    else
+        Walk::iterator::AdvanceInto(); // recurse if walk would
+        
+    if( element )
+        seen.insert( element );    
+}    
+    

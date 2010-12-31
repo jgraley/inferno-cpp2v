@@ -8,6 +8,7 @@
 #include <vector>
 #include <stack>
 #include <map>
+#include <set>
 using namespace std;
 #include <stdarg.h> 
 
@@ -83,6 +84,16 @@ public:
     inline bool IsExist( const KEY &k )
     {
         return map<KEY, DATA>::find( k ) != map<KEY, DATA>::end();
+    }
+};
+
+template< typename KEY >
+class Set : public set<KEY>
+{
+public:
+    inline bool IsExist( const KEY &k )
+    {
+        return set<KEY>::find( k ) != set<KEY>::end();
     }
 };
 
