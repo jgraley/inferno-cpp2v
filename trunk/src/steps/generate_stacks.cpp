@@ -60,9 +60,9 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 	r_index->constancy = MakeTreePtr<NonConst>();
 	r_index->initialiser = MakeTreePtr<SpecificInteger>(0);
 	// top-level statements
-	r_inc->operands = ( MakeTreePtr<InstanceIdentifier>() );
+	r_inc->operands = ( r_index_identifier );
 	r_top_comp->statements = ( r_inc, top_pre, r_dec );
-	r_dec->operands = ( MakeTreePtr<InstanceIdentifier>() );
+	r_dec->operands = ( r_index_identifier );
 
     // Slave search to find automatic variables within the function
 	s_stuff->terminus = s_instance;
@@ -81,14 +81,14 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 	r_array->size = MakeTreePtr<SpecificInteger>(10);
 
 	// Sub-slave replace with a subscript into the array
-	l_r_sub->operands = ( MakeTreePtr<InstanceIdentifier>(), MakeTreePtr<InstanceIdentifier>() );
+	l_r_sub->operands = ( r_identifier, r_index_identifier );
 
 	// Slave to find early returns in the function
 	s_gg->through = ret;
 
 	// Slave replace with a decrement of the stack index coming before the return
 	//r_ret_comp->members = ( r_ret_decls );
-	r_ret_dec->operands = ( MakeTreePtr<InstanceIdentifier>() );
+	r_ret_dec->operands = ( r_index_identifier );
 	r_ret_comp->statements = ( r_ret_dec, ret );
 
 	CouplingSet sms((

@@ -21,13 +21,13 @@ void UseTempsForParamsReturn::operator()( TreePtr<Node> context, TreePtr<Node> *
 	TreePtr<Return> s_return( new Return );
 	TreePtr< MatchAll<Expression> > s_and( new MatchAll<Expression> );
 	s_return->return_value = s_and;
-	TreePtr<TypeOf> s_retval( new TypeOf );
+	TreePtr<TypeOf> retval( new TypeOf );
 	MakeTreePtr<Type> type;
-	s_retval->pattern = type;
+	retval->pattern = type;
     
     // Restrict the search to returns that have an automatic variable under them
     TreePtr< Stuff<Expression> > cs_stuff( new Stuff<Expression> );
-	s_and->patterns = ( s_retval, cs_stuff );
+	s_and->patterns = ( retval, cs_stuff );
 	TreePtr< GetDeclaration > cs_id( new GetDeclaration );
     cs_stuff->terminus = cs_id;
     TreePtr<Instance> cs_instance( new Automatic );
@@ -43,15 +43,11 @@ void UseTempsForParamsReturn::operator()( TreePtr<Node> context, TreePtr<Node> *
 	r_sub_comp->members = ( r_newvar );
 	TreePtr<Assign> r_assign( new Assign );
 	r_assign->operands.push_back( id );
-	r_assign->operands.push_back( MakeTreePtr<Expression>() );
+	r_assign->operands.push_back( retval );
 	r_sub_comp->statements.push_back( r_assign );
 	TreePtr<Return> r_return( new Return );
 	r_sub_comp->statements.push_back( r_return );
 	r_return->return_value = id;
        
-    // Make the new variable be of the required type, ie whatever the expression evaluates to   
-	CouplingSet sms((
-		Coupling((s_retval, r_assign->operands[1])) ));
-             
-	SearchReplace( s_return, r_sub_comp, sms )( context, proot );
+	SearchReplace( s_return, r_sub_comp )( context, proot );
 }

@@ -689,7 +689,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
     
     ASSERT( dest );
     
-    // Don't overlay special nodes
+    // Don't overlay special nodes 
     if( !dynamic_pointer_cast<SpecialBase>( source ) )
     {
         // Overlaying requires type compatibility - check for this

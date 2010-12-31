@@ -41,13 +41,12 @@ void GenerateImplicitCasts::operator()( TreePtr<Node> context, TreePtr<Node> *pr
 	r_arg->identifier = param_id;
 	MakeTreePtr<Cast> r_cast;
 	r_arg->value = r_cast;
-	r_cast->operand = MakeTreePtr< Expression >();
+	r_cast->operand = s_arg->value;
 	r_cast->type = type;
 	r_call->operands = ( r_arg, other_args );
 
 	CouplingSet sms0((
-	    Coupling(( s_call, r_call )), 
-        Coupling(( s_arg->value, r_cast->operand )) ));
+	    Coupling(( s_call, r_call )) ));
 
 	SearchReplace(s_call, r_call, sms0)( context, proot );
 }

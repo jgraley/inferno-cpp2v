@@ -142,13 +142,10 @@ void SwitchToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     
     r_decl->identifier = id;
     r_decl->type = cond_type;
-    r_decl->initialiser = MakeTreePtr<Expression>();
+    r_decl->initialiser = s_cond;
     r_comp->statements = (r_decl, r_slave3);
     
-    CouplingSet couplings((  
-        Coupling(( s_cond, r_decl->initialiser )) ));
-
-    SearchReplace( s_switch, r_comp, couplings )( context, proot );
+    SearchReplace( s_switch, r_comp )( context, proot );
 }
 
 
