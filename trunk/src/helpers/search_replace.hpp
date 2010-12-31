@@ -344,5 +344,14 @@ struct Slave : SlaveBase, Special<PRE_RESTRICTION>
 	}
 };
 
+struct OverlayBase : virtual Node
+{
+};
+
+template<class PRE_RESTRICTION>
+struct Overlay : virtual Special<PRE_RESTRICTION>
+{
+};
+
 #endif
 

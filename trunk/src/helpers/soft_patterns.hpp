@@ -178,7 +178,7 @@ struct BuildIdentifierBase : RootedSearchReplace::SoftReplacePattern
     string format;
 };
 
-struct BuildInstanceIdentifier : InstanceIdentifier,                             
+struct BuildInstanceIdentifier : Special<InstanceIdentifier>,                             
                                  BuildIdentifierBase
 {
     BuildInstanceIdentifier( string s ) : BuildIdentifierBase(s) {}
@@ -194,7 +194,7 @@ private:
     }                                               
 };
 
-struct BuildLabelIdentifier : LabelIdentifier,                             
+struct BuildLabelIdentifier : Special<LabelIdentifier>,                             
                               BuildIdentifierBase
 {
     BuildLabelIdentifier( string s ) : BuildIdentifierBase(s) {}
