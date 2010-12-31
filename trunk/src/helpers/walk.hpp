@@ -109,7 +109,7 @@ public:
 	    void AdvanceOver();
 	    void AdvanceInto();
 	    iterator(); // makes "end" iterator
-	private:
+	protected:
 	    iterator( TreePtr<Node> &root,
 	    		  TreePtr<Node> restrictor,
 	    		  const RootedSearchReplace *rc,
@@ -141,7 +141,44 @@ public:
     virtual const iterator &end();
     virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
     virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
-private:
+protected:
+    TreePtr<Node> root;
+    TreePtr<Node> restrictor;
+    const RootedSearchReplace *restriction_comparison;
+    CouplingKeys *keys;
+    iterator my_begin, my_end;
+};
+
+// Version of walk that only sees a node once for each parent i.e. 
+// a\
+// b-c-d sees c twice but d only once (Walk would see d twice too)
+class Sweep : public ContainerInterface
+{
+public:
+    // The walking iterator does all the real work.
+    class iterator : public Walk::iterator
+    {
+    public:
+        iterator(); // makes "end" iterator
+        iterator( const iterator & other );
+        void AdvanceInto();
+    protected:
+        iterator( TreePtr<Node> &root,
+                  TreePtr<Node> restrictor,
+                  const RootedSearchReplace *rc,
+                  CouplingKeys *k );
+        Set< TreePtr<Node> > seen;
+        friend class Sweep;
+    };
+    Sweep( TreePtr<Node> root, // root of the subtree to walk
+           TreePtr<Node> restrictor = TreePtr<Node>(), // optional restrictor; walk skips these and does not recurse under them
+           const RootedSearchReplace *rsr = NULL,
+           CouplingKeys *k = NULL );
+    virtual const iterator &begin();
+    virtual const iterator &end();
+    virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
+    virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
+protected:
     TreePtr<Node> root;
     TreePtr<Node> restrictor;
     const RootedSearchReplace *restriction_comparison;

@@ -346,11 +346,14 @@ struct Slave : SlaveBase, Special<PRE_RESTRICTION>
 
 struct OverlayBase : virtual Node
 {
+    TreePtr<Node> base;
+    TreePtr<Node> overlay;
 };
 
 template<class PRE_RESTRICTION>
-struct Overlay : virtual Special<PRE_RESTRICTION>
+struct Overlay : OverlayBase, Special<PRE_RESTRICTION>
 {
+    SPECIAL_NODE_FUNCTIONS
 };
 
 #endif

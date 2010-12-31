@@ -23,7 +23,7 @@ RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
 	// TODO decide.
 	TRACE("doing inferred couplings\n");
 	Map< TreePtr<Node>, int > ms;
-    Walk wsp( sp ), wrp( rp );
+    Sweep wsp( sp ), wrp( rp );
     FOREACH( TreePtr<Node> n, wsp )
 		if( ms.IsExist( n ) )
 			ms[n]++;
@@ -105,14 +105,19 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
     }
     else if( TreePtr<GreenGrassBase> green_pattern = dynamic_pointer_cast<GreenGrassBase>(pattern) )
     {
-    	// Restrict so that everything in the input program under here must be "green grass"
-    	// ie unmodified by previous replaces in this RepeatingSearchReplace() run.
-    	Walk w( x );
-    	FOREACH( TreePtr<Node> p, w )
-			if( dirty_grass.find( p ) != dirty_grass.end() )
-				return NOT_FOUND;
-    	// Normal matching for the through path
-    	return DecidedCompare( x, green_pattern->GetThrough(), keys, can_key, conj );
+        // Restrict so that everything in the input program under here must be "green grass"
+        // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
+        Walk w( x );
+        FOREACH( TreePtr<Node> p, w )
+            if( dirty_grass.find( p ) != dirty_grass.end() )
+                return NOT_FOUND;
+        // Normal matching for the through path
+        return DecidedCompare( x, green_pattern->GetThrough(), keys, can_key, conj );
+    }
+    else if( TreePtr<OverlayBase> op = dynamic_pointer_cast<OverlayBase>(pattern) )
+    {
+        // When Overlay node seen duriung search, just forward through the "base" path
+        return DecidedCompare( x, op->base, keys, can_key, conj );
     }
     else
     {
@@ -661,6 +666,14 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
         ASSERT( !current_key )( "Found soft replace pattern while under substitution\n" );
         key = newsource = srp->DuplicateSubtree( this, keys, can_key );
         ASSERT( newsource );
+    }
+
+    if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
+    {
+        // Substitute is an identifier, so preserve its uniqueness by just returning
+        // the same node. Don't do any more - we wouldn't want to change the
+        // identifier in the tree even if it had members, lol!
+        ASSERT( current_key )( "Found soft replace pattern while not under substitution\n" );
     }
 
     // Allow this to key a coupling if required

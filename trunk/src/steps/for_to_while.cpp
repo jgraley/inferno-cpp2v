@@ -10,28 +10,67 @@
 #include "common/common.hpp"
 #include "helpers/soft_patterns.hpp"
 
+#if 0 // this version using "Overlay" node instead of explicit coupling
 void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
 	MakeTreePtr<For> s_for;
     MakeTreePtr<Statement> forbody, inc, init;
     MakeTreePtr<Expression> cond;
     MakeTreePtr<While> r_while;
-    MakeTreePtr<Compound> r_outer, r_body, sr_block;
-    MakeTreePtr< GreenGrass<Statement> > ss_gg;
-    MakeTreePtr< Stuff<Statement> > ss_stuff, sr_stuff;
-    MakeTreePtr< NotMatch<Statement> > ss_not;
-    MakeTreePtr< Loop > ss_loop;
+    MakeTreePtr<Compound> r_outer, r_body, l_r_block;
+    MakeTreePtr< GreenGrass<Statement> > l_s_gg;
+    MakeTreePtr< Stuff<Statement> > l_stuff;
+    MakeTreePtr< Overlay<Statement> > l_overlay;
+    MakeTreePtr< NotMatch<Statement> > l_s_not;
+    MakeTreePtr< Loop > l_s_loop;
     
-    MakeTreePtr<Continue> ss_cont, sr_cont;
-    MakeTreePtr<Nop> sr_nop;
+    MakeTreePtr<Continue> l_s_cont, l_r_cont;
+    MakeTreePtr<Nop> l_r_nop;
 
-    sr_block->statements = (inc, sr_cont);
-    ss_gg->through = ss_cont;
-    MakeTreePtr< RootedSlave<Statement> > r_slave( forbody, ss_stuff, sr_stuff );
-    ss_stuff->terminus = ss_gg;
-    ss_stuff->recurse_restriction = ss_not;
-    sr_stuff->terminus = sr_block;
-    ss_not->pattern = ss_loop;
+    l_r_block->statements = (inc, l_r_cont);
+    l_s_gg->through = l_s_cont;
+    MakeTreePtr< RootedSlave<Statement> > r_slave( forbody, l_stuff, l_stuff );
+    l_stuff->terminus = l_overlay;
+    l_overlay->base = l_s_gg;
+    l_stuff->recurse_restriction = l_s_not;
+    l_overlay->overlay = l_r_block;
+    l_s_not->pattern = l_s_loop;
+
+    s_for->body = forbody;
+    s_for->initialisation = init;
+    s_for->condition = cond;
+    s_for->increment = inc;
+
+    r_outer->statements = (init, r_while);
+    r_while->body = r_body;
+    r_while->condition = cond;
+    r_body->statements = (r_slave, inc);
+
+   	SearchReplace( s_for, r_outer )( context, proot );
+}
+#else
+void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+{
+    MakeTreePtr<For> s_for;
+    MakeTreePtr<Statement> forbody, inc, init;
+    MakeTreePtr<Expression> cond;
+    MakeTreePtr<While> r_while;
+    MakeTreePtr<Compound> r_outer, r_body, l_r_block;
+    MakeTreePtr< GreenGrass<Statement> > l_s_gg;
+    MakeTreePtr< Stuff<Statement> > l_s_stuff, l_r_stuff;
+    MakeTreePtr< NotMatch<Statement> > l_s_not;
+    MakeTreePtr< Loop > l_s_loop;
+    
+    MakeTreePtr<Continue> l_s_cont, l_r_cont;
+    MakeTreePtr<Nop> l_r_nop;
+
+    l_r_block->statements = (inc, l_r_cont);
+    l_s_gg->through = l_s_cont;
+    MakeTreePtr< RootedSlave<Statement> > r_slave( forbody, l_s_stuff, l_r_stuff );
+    l_s_stuff->terminus = l_s_gg;
+    l_s_stuff->recurse_restriction = l_s_not;
+    l_r_stuff->terminus = l_r_block;
+    l_s_not->pattern = l_s_loop;
 
     s_for->body = forbody;
     s_for->initialisation = init;
@@ -44,11 +83,11 @@ void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     r_body->statements = (r_slave, inc);
 
     CouplingSet couplings((
-		Coupling(( ss_stuff, sr_stuff )) ));
+        Coupling(( l_s_stuff, l_r_stuff )) ));
 
-   	SearchReplace( s_for, r_outer, couplings )( context, proot );
+    SearchReplace( s_for, r_outer, couplings )( context, proot );
 }
-
+#endif
 
 void WhileToDo::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
