@@ -594,6 +594,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 {
 	INDENT;
 	TRACE("Duplicating %s under_substitution=%p\n", TypeInfo(source).name().c_str(), current_key.get());
+    TreePtr<Node> dest;
 /*   TRACE("DuplicateSubtree dest={");
 	    Walk w(source);
 	    bool first=true;
@@ -621,7 +622,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 			source == stuff_key->terminus ) // and the present node is the terminus in the source pattern
 		{
 			TRACE( "Leaving substitution to duplicate terminus replace pattern\n" );
-			TreePtr<Node> dest = DuplicateSubtree( replace_stuff->terminus, keys, can_key, shared_ptr<Key>() ); // not in substitution any more
+			dest = DuplicateSubtree( replace_stuff->terminus, keys, can_key, shared_ptr<Key>() ); // not in substitution any more
 			TRACE( "Returning to substitution for rest of stuff\n" );
 			return dest;
 		}
@@ -629,7 +630,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 
 	if( TreePtr<RootedSlaveBase> rsb = dynamic_pointer_cast<RootedSlaveBase>(source) )
 	{
-		TreePtr<Node> dest = DuplicateSubtree( rsb->GetThrough(), keys, can_key, current_key );
+		dest = DuplicateSubtree( rsb->GetThrough(), keys, can_key, current_key );
 		if(!can_key) // do not run slaves until we have all the keys of the master 
         {
             RootedSearchReplace *slave = rsb.get();
@@ -641,7 +642,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 
 	if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
 	{
-		TreePtr<Node> dest = DuplicateSubtree( sb->GetThrough(), keys, can_key, current_key );
+		dest = DuplicateSubtree( sb->GetThrough(), keys, can_key, current_key );
         if(!can_key) // do not run slaves until we have all the keys of the master 
         {
 		    SearchReplace *slave = sb.get();
@@ -649,75 +650,59 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
     	    (void)slave->DefaultRepeatingSearchReplace( &dest, *keys );
         }
 		return dest;
-	}
-
-	TreePtr<Node> dest = TreePtr<Node>();
-	dest = keys->KeyAndSubstitute( shared_ptr<Key>(), source, this, can_key );
-    ASSERT( !dest || !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
-                                                                             // source is actually a match key already, so not in any couplings
-    if( dest )
+	}    
+	
+    TreePtr<Node> newsource=source, key=TreePtr<Node>();
+    if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
     {
-    	TRACE("Substituted, got %s (source is %s)\n", TypeInfo(dest).name().c_str(), TypeInfo(source).name().c_str());
-
-		// Do NOT overlay soft patterns TODO inelegant?
-		if( !dynamic_pointer_cast<SoftReplacePattern>( source ) &&
-			!dynamic_pointer_cast<StarBase>( source ) &&
-			!dynamic_pointer_cast<StuffBase>( source ) )
-		{
-   	    }
-		else
-		{
-			TRACE();
-			return dest;
-		}
+        // Substitute is an identifier, so preserve its uniqueness by just returning
+        // the same node. Don't do any more - we wouldn't want to change the
+        // identifier in the tree even if it had members, lol!
+        ASSERT( !current_key )( "Found soft replace pattern while under substitution\n" );
+        key = newsource = srp->DuplicateSubtree( this, keys, can_key );
+        ASSERT( newsource );
     }
-    else
+
+    // Allow this to key a coupling if required
+    dest = keys->KeyAndSubstitute( key, source, this, can_key );
+    ASSERT( !dest || !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
+
+    if( !dest )
     {
-    	TRACE("Did not substitute  (source is %s)\n", TypeInfo(source).name().c_str());
-    	ASSERT( !dynamic_pointer_cast<StuffBase>(source) )("Stuff nodes in replace pattern must be keyed\n");
-
+        // No coupling to key to, so just make a copy
+    	TRACE("Did not substitute  (source is %s)\n", TypeInfo(newsource).name().c_str());
+        ASSERT( !dynamic_pointer_cast<StuffBase>(newsource) )("Stuff nodes in replace pattern must be keyed\n");
+        ASSERT( !dynamic_pointer_cast<StarBase>(newsource) )("Star nodes in replace pattern must be keyed\n");
+        
        	// Allow a soft replace pattern to act
-		if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
-		{
-			// Substitute is an identifier, so preserve its uniqueness by just returning
-			// the same node. Don't do any more - we wouldn't want to change the
-			// identifier in the tree even if it had members, lol!
-			ASSERT( !current_key )( "Found soft replace pattern while under substitution\n" );
-			TreePtr<Node> newsource = srp->DuplicateSubtree( this, keys, can_key );
-			ASSERT( newsource );
+        TRACE("duplicating supplied node\n");
+        // Make the new node (destination node)
+        shared_ptr<Cloner> dup_dest = newsource->Duplicate(newsource);
+        dest = dynamic_pointer_cast<Node>( dup_dest );
+        ASSERT(dest);
 
-			// Allow this to key a coupling if required
-			TreePtr<Node> subs = keys->KeyAndSubstitute( newsource, source, this, can_key );
-			if( subs )
-				return subs;
-			else
-				return newsource;
-		}
-
-    	TRACE("duplicating supplied node\n");
-		// Make the new node (destination node)
-		shared_ptr<Cloner> dup_dest = source->Duplicate(source);
-		dest = dynamic_pointer_cast<Node>( dup_dest );
-		ASSERT(dest);
-
-		// Make all members in the destination be NULL
-		ClearPtrs( dest ); // TODO not sure if need this
-
-		// If not substituting a Stuff node, remember this node is dirty for GreenGrass restriction
-		// Also dirty the dest if the source was dirty when we are substituting Stuff
-		if( !current_key || !dynamic_pointer_cast<StuffKey>(current_key) || dirty_grass.find( source ) != dirty_grass.end() )
-		   	dirty_grass.insert( dest );
+        // If not substituting a Stuff node, remember this node is dirty for GreenGrass restriction
+        // Also dirty the dest if the source was dirty when we are substituting Stuff
+        if( !current_key || !dynamic_pointer_cast<StuffKey>(current_key) || dirty_grass.find( source ) != dirty_grass.end() )
+            dirty_grass.insert( dest );
     }
     
-	// Overlaying requires type compatibility - check for this
-	ASSERT( source->IsLocalMatch(dest.get()) )
-		  ( "replace pattern ")(*source)(" must be a non-strict superclass of substitute ")(*dest)(", so that its members are a subset");
-	TRACE();
-	// Copy the source over,  except for any NULLs in the source. If source is superclass
-	// of destination (i.e. has possibly fewer members) the missing ones will be left alone.
-	Overlay( dest, source, keys, can_key, current_key );
-
     ASSERT( dest );
+    
+    // Don't overlay special nodes
+    if( !dynamic_pointer_cast<SpecialBase>( source ) )
+    {
+        // Overlaying requires type compatibility - check for this
+	    ASSERT( source->IsLocalMatch(dest.get()) )
+	    	  ( "When overlaying, the replace pattern ")(*source)(" must be a non-strict superclass of substitute ")(*dest)(", so that its members are a subset");
+	    TRACE();
+	    
+        // Copy the source over, except for any NULLs in the source. If source is superclass
+	    // of destination (i.e. has possibly fewer members) the missing ones will be left alone.
+        Overlay( dest, source, keys, can_key, current_key );
+        
+        ASSERT( dest );
+    }        
 
     return dest;
 }
