@@ -10,7 +10,7 @@
 #include "common/common.hpp"
 #include "helpers/soft_patterns.hpp"
 
-#if 0 // this version using "Overlay" node instead of explicit coupling
+#if 1 // this version using "Overlay" node instead of explicit coupling
 void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
 	MakeTreePtr<For> s_for;

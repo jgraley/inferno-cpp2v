@@ -125,7 +125,7 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
 
 	virtual operator string() const
 	{
-        return Traceable::CPPFilt( typeid( VALUE_TYPE ).name() );
+        return Traceable::CPPFilt( typeid( VALUE_TYPE ).name() ); // TODO put in TreePtr<> around the name, buty check this doesnt knacker the graph plotter!
 	}
 
 	static inline SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>
