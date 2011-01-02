@@ -68,7 +68,8 @@ void CleanupDuplicateLabels::operator()( TreePtr<Node> context, TreePtr<Node> *p
 {
     { // remove duplicate (sucessive) labels 
         MakeTreePtr<Instance> s_instance, r_instance;
-        MakeTreePtr< Stuff<Statement> > s_stuff, r_stuff, l_s_stuff, l_r_stuff;
+        MakeTreePtr< Stuff<Statement> > stuff;
+        MakeTreePtr< Overlay<Statement> > overlay;
         MakeTreePtr<Compound> s_comp, r_comp;
         MakeTreePtr<Label> s_label1, s_label2, r_label1; // keep l1 and elide l2
         MakeTreePtr< Star<Declaration> > decls;
@@ -76,30 +77,33 @@ void CleanupDuplicateLabels::operator()( TreePtr<Node> context, TreePtr<Node> *p
         MakeTreePtr<LabelIdentifier> s_labelid1, s_labelid2;
         MakeTreePtr<BuildLabelIdentifier> r_labelid("MERGED");
         MakeTreePtr< MatchAny<LabelIdentifier> > l_s_orrule;
+        MakeTreePtr<InstanceIdentifier> identifier;
+        MakeTreePtr<Subroutine> type;
         
-        l_s_stuff->terminus = l_s_orrule;
         l_s_orrule->patterns = (s_labelid1, s_labelid2);
-        l_r_stuff->terminus = r_labelid;
         
-        MakeTreePtr< RootedSlave<Statement> > r_slave( r_stuff, l_s_stuff, l_r_stuff );
+        MakeTreePtr< Slave<Statement> > r_slave( stuff, l_s_orrule, r_labelid );
         
-        s_instance->initialiser = s_stuff;
-        s_stuff->terminus = s_comp;
+        s_instance->initialiser = stuff;
+        s_instance->identifier = identifier;
+        s_instance->type = type;
         s_comp->members = decls;
         s_comp->statements = (pre, s_label1, s_label2, post);
         s_label1->identifier = s_labelid1;
         s_label2->identifier = s_labelid2;
         
         r_instance->initialiser = r_slave;
-        r_stuff->terminus = r_comp;
+        r_instance->identifier = identifier;
+        r_instance->type = type;
+        stuff->terminus = overlay;           
+        overlay->base = s_comp;
+        overlay->overlay = r_comp;
         r_comp->members = decls;
         r_comp->statements = (pre, r_label1, post);
         r_label1->identifier = r_labelid;
         
-        CouplingSet couplings(( Coupling(( s_instance, r_instance )),
-                                Coupling(( s_stuff, r_stuff )),
-                                Coupling(( s_comp, r_comp )),
-                                Coupling(( l_s_stuff, l_r_stuff )) )); 
+        CouplingSet couplings((
+            Coupling(( s_instance, r_instance )) ));
 
         SearchReplace( s_instance, r_instance, couplings )( context, proot );
     }
@@ -132,7 +136,8 @@ void CleanupUnusedLabels::operator()( TreePtr<Node> context, TreePtr<Node> *proo
 {
     { // remove unused labels
         MakeTreePtr<Instance> s_instance, r_instance;
-        MakeTreePtr< Stuff<Statement> > s_stuff, sx_stuff, r_stuff;
+        MakeTreePtr< Stuff<Statement> > stuff, sx_stuff;
+        MakeTreePtr< Overlay<Statement> > overlay;
         MakeTreePtr<Compound> s_comp, r_comp;
         MakeTreePtr<Label> s_label; // keep l1 and elide l2
         MakeTreePtr< Star<Declaration> > decls;
@@ -143,10 +148,13 @@ void CleanupUnusedLabels::operator()( TreePtr<Node> context, TreePtr<Node> *proo
         MakeTreePtr< NotMatch<Statement> > sx_notrule;
         MakeTreePtr< NotMatch<Node> > sxx_notrule;        
         MakeTreePtr< Label > sxx_label;        
-        
+        MakeTreePtr<InstanceIdentifier> identifier;
+        MakeTreePtr<Subroutine> type;
+
         s_instance->initialiser = s_andrule;
-        s_andrule->patterns = (s_stuff, sx_notrule);
-        s_stuff->terminus = s_comp;
+        s_instance->identifier = identifier;
+        s_instance->type = type;
+        s_andrule->patterns = (stuff, sx_notrule);
         s_comp->members = decls;
         s_comp->statements = (pre, s_label, post);
         s_label->identifier = labelid;
@@ -156,13 +164,17 @@ void CleanupUnusedLabels::operator()( TreePtr<Node> context, TreePtr<Node> *proo
         sxx_notrule->pattern = sxx_label;
         sx_stuff->terminus = labelid;
         
-        r_instance->initialiser = r_stuff;
-        r_stuff->terminus = r_comp;
+        r_instance->initialiser = stuff;
+        r_instance->identifier = identifier;
+        r_instance->type = type;
+        stuff->terminus = overlay;
+        overlay->base = s_comp;
+        overlay->overlay = r_comp;
         r_comp->members = decls;
         r_comp->statements = (pre, post);
-
-        CouplingSet couplings(( Coupling(( s_instance, r_instance )),
-                                Coupling(( s_stuff, r_stuff )) )); 
+        
+        CouplingSet couplings((
+            Coupling(( s_instance, r_instance )) ));
 
         SearchReplace( s_instance, r_instance, couplings )( context, proot );
     }
