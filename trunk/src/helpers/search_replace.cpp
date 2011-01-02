@@ -528,30 +528,49 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
             ASSERT( dest_ptr )( "itemise for target didn't match itemise for source");
             TreePtr<Node> source_child = *source_ptr;
             TreePtr<Node> dest_child = *dest_ptr;
+
+            if( current_key )
+            {
+                ASSERT( !dest_child )("substitution should just be a copy, so dest should be NULL");
+                ASSERT( source_child )("substitution should just be a copy, so source should be non-NULL");
+            }
+            ASSERT( source_child || dest_child )
+                  ("When overlaying ")
+                  (*source)
+                  (" over ")
+                  (*dest)
+                  (", found a member that is NULL in both (one must be non-NULL)\n");
+            
+            // This avoids linking into the replace pattern AND to allow couplings to get 
+            // substituted.
+            if( source_child ) 
+                source_child = DuplicateSubtree( source_child, keys, can_key, current_key );
+            
+            ASSERT( (source_child && source_child->IsFinal()) || (dest_child && dest_child->IsFinal()) )
+                  ("When overlaying ")
+                  (*source)
+                  (" over ")
+                  (*dest)
+                  (", found a member that is intermediate in both (one must be final)\n");
+            
             if( source_child ) // Masked: where source is NULL, do not overwrite
             {
                 // General overlaying policy: if the current child nodes of the source and dest are
                 // compatible with overlying, then overlay them (means recursing into both) otherwise
-                // just duplicate the source (means we only recurse the source).                
-                TreePtr<Node> newsource_child = DuplicateSubtree( source_child, keys, can_key, current_key );
-                if( dest_child && newsource_child->IsLocalMatch(dest_child.get()) ) // overlaying
+                // just duplicate the source (means we only recurse the source).                                
+                if( dest_child && source_child->IsLocalMatch(dest_child.get()) ) // overlaying
                 {
-                    shared_ptr<Cloner> dup_dest = dest_child->Duplicate(dest_child);
-                    TreePtr<Node> newdest_child = dynamic_pointer_cast<Node>( dup_dest );
-                    ClearPtrs( dest_child );
-                    *newdest_child = *dest_child;
-                    dest_child = newdest_child; // TODO could be bringing in nodes from the tree... maybe use DuplicateSubtree?
-
-                    Overlay( dest_child, newsource_child, keys, can_key, current_key );
+                     Overlay( dest_child, source_child, keys, can_key, current_key );
+                     ASSERT( dest_child );
+                     ASSERT( dest_child->IsFinal() );
                 }
                 else // just copying
                 {  
-                    dest_child = newsource_child;
+                    dest_child = source_child;
                     ASSERT( dest_child );
+                    ASSERT( dest_child->IsFinal() );
                 }
             }
-            else if( !current_key )
-            	ASSERT( dest_child )("Found NULL in replace pattern without a coupling to substitute it");
             *dest_ptr = dest_child;
         }
         else
@@ -741,7 +760,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
         shared_ptr<Cloner> dup_dest = newsource->Duplicate(newsource);
         dest = dynamic_pointer_cast<Node>( dup_dest );
         ASSERT(dest);
-        ClearPtrs( dest );
+        ClearPtrs( dest ); // must clear otherwise we get inks into the input program 
 
         // If not substituting a Stuff node, remember this node is dirty for GreenGrass restriction
         // Also dirty the dest if the source was dirty when we are substituting Stuff
@@ -768,7 +787,40 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 
     return dest;
 }
+/*
+TreePtr<Node>  RootedSearchReplace::DuplicateOverlay( TreePtr<Node> dest,
+                                                      TreePtr<Node> source,
+                                                      CouplingKeys *keys,
+                                                      bool can_key,
+                                                      shared_ptr<Key> current_key ) const
+{
+            if( source ) // Masked: where source is NULL, do not overwrite
+            {
+                // General overlaying policy: if the current child nodes of the source and dest are
+                // compatible with overlying, then overlay them (means recursing into both) otherwise
+                // just duplicate the source (means we only recurse the source).                
+                TreePtr<Node> newsource = DuplicateSubtree( source, keys, can_key, current_key );
+                if( dest && newsource->IsLocalMatch(dest.get()) ) // overlaying
+                {
+                    // OK to duplicate because Coupling already took a copy from input free
+                    shared_ptr<Cloner> dup_dest = dest->Duplicate(dest_child);
+                    TreePtr<Node> newdest = dynamic_pointer_cast<Node>( dest );
+ 
+                    Overlay( dest_child, newsource_child, keys, can_key, current_key );
+                }
+                else // just copying
+                {  
+                    dest_child = newsource_child;
+                    ASSERT( dest_child );
+                }
+            }
+            else
+            {
+                return dest;
+            }
+}
 
+*/
 
 TreePtr<Node> RootedSearchReplace::MatchingDuplicateSubtree( TreePtr<Node> source,
 		                                                        CouplingKeys *keys ) const
