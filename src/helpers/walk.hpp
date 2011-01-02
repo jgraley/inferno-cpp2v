@@ -106,8 +106,8 @@ public:
         virtual const bool IsOrdered() const;
         // Some additional operations specific to walk iterators
 	    operator string() const;
-	    void AdvanceOver();
-	    void AdvanceInto();
+	    virtual void AdvanceOver();
+	    virtual void AdvanceInto();
 	    iterator(); // makes "end" iterator
 	protected:
 	    iterator( TreePtr<Node> &root,
@@ -123,7 +123,7 @@ public:
 		const RootedSearchReplace *restriction_comparison;
 	    CouplingKeys *keys;
 	    stack< Traverse::iterator > state;
-	    bool done;
+        bool done;
 
 	    friend class Walk;
     };
@@ -152,6 +152,11 @@ protected:
 // Version of walk that only sees a node once for each parent i.e. 
 // a\
 // b-c-d sees c twice but d only once (Walk would see d twice too)
+//
+// TODO do this as a recursion restriction on Walk - that means cleaning
+// up the recurse restriction interface to be more like an observber pattern
+// with support for multiple observers. The only tricky part is the "keys" 
+// user data item, which should be a member of the client, but isn't.
 class Sweep : public ContainerInterface
 {
 public:
@@ -161,7 +166,17 @@ public:
     public:
         iterator(); // makes "end" iterator
         iterator( const iterator & other );
-        void AdvanceInto();
+        virtual void AdvanceInto();
+        void ContinueAt( const iterator &nb )
+        {
+            // Copy everything *except* the new "seen" structure, so that exclusions will apply across multiple sweeps.
+            root = nb.root;
+            restrictor = nb.restrictor;
+            restriction_comparison = nb.restriction_comparison;
+            keys = nb.keys;
+            state = nb.state;            
+            done = nb.done;            
+        }
     protected:
         iterator( TreePtr<Node> &root,
                   TreePtr<Node> restrictor,

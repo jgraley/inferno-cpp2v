@@ -24,16 +24,29 @@ RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
 	TRACE("doing inferred couplings\n");
 	Map< TreePtr<Node>, int > ms;
     Sweep wsp( sp ), wrp( rp );
-    FOREACH( TreePtr<Node> n, wsp )
-		if( ms.IsExist( n ) )
-			ms[n]++;
-		else
-			ms[n] = 1;
-    FOREACH( TreePtr<Node> n, wrp )
-		if( ms.IsExist( n ) )
-			ms[n]++;
-		else
-			ms[n] = 1;
+    Sweep::iterator i;
+    for( i=(wsp.begin()); i != wsp.end(); ++i )
+    {
+        TreePtr<Node> n = *i;
+        if( n )
+        {
+            if( ms.IsExist( n ) )
+                ms[n]++;
+            else
+                ms[n] = 1;
+        }
+    }
+    for( i.ContinueAt(wrp.begin()); i != wrp.end(); ++i )
+    {
+        TreePtr<Node> n = *i;
+        if( n )
+        {
+            if( ms.IsExist( n ) )
+                ms[n]++;
+            else
+                ms[n] = 1;
+        }
+    }
     typedef	pair<TreePtr<Node>, int> pair;	
 	FOREACH( pair pp, ms )
 	{
@@ -469,7 +482,14 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
 		                           shared_ptr<Key> current_key ) const
 {
 	INDENT;
-    ASSERT( source->IsLocalMatch(dest.get()) )("source must be a non-strict superclass of destination, so that it does not have more members");
+    ASSERT( source );
+    ASSERT( dest );
+    ASSERT( source->IsLocalMatch(dest.get()) )
+    ("source=")
+    (*source)
+    (" must be a non-strict superclass of destination=")
+    (*dest)
+    (", so that it does not have more members");
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of source, and itemises over that type. dest must
@@ -657,7 +677,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 		return dest;
 	}    
 	
-    TreePtr<Node> newsource=source, key=TreePtr<Node>();
+    TreePtr<Node> newsource=source, key=TreePtr<Node>(), overlay=source;
     if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
     {
         // Substitute is an identifier, so preserve its uniqueness by just returning
@@ -673,7 +693,16 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
         // Substitute is an identifier, so preserve its uniqueness by just returning
         // the same node. Don't do any more - we wouldn't want to change the
         // identifier in the tree even if it had members, lol!
-        ASSERT( current_key )( "Found soft replace pattern while not under substitution\n" );
+        ASSERT( !current_key )( "Found overlay pattern while under substitution\n" ); // TODO maybe disallow all special nodes when under substitution?
+        overlay = ob->overlay;
+        if( ob->overlay->IsLocalMatch(ob->base.get()) )
+        {
+            newsource = ob->base;
+        }
+        else
+        {
+            newsource = overlay;
+        }
     }
 
     // Allow this to key a coupling if required
@@ -687,7 +716,6 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
         ASSERT( !dynamic_pointer_cast<StuffBase>(newsource) )("Stuff nodes in replace pattern must be keyed\n");
         ASSERT( !dynamic_pointer_cast<StarBase>(newsource) )("Star nodes in replace pattern must be keyed\n");
         
-       	// Allow a soft replace pattern to act
         TRACE("duplicating supplied node\n");
         // Make the new node (destination node)
         shared_ptr<Cloner> dup_dest = newsource->Duplicate(newsource);
@@ -703,16 +731,16 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
     ASSERT( dest );
     
     // Don't overlay special nodes 
-    if( !dynamic_pointer_cast<SpecialBase>( source ) )
+    if( !dynamic_pointer_cast<SpecialBase>( overlay ) )
     {
         // Overlaying requires type compatibility - check for this
-	    ASSERT( source->IsLocalMatch(dest.get()) )
-	    	  ( "When overlaying, the replace pattern ")(*source)(" must be a non-strict superclass of substitute ")(*dest)(", so that its members are a subset");
+	    ASSERT( overlay->IsLocalMatch(dest.get()) )
+	    	  ( "When overlaying, the replace pattern ")(*overlay)(" must be a non-strict superclass of substitute ")(*dest)(", so that its members are a subset");
 	    TRACE();
 	    
         // Copy the source over, except for any NULLs in the source. If source is superclass
 	    // of destination (i.e. has possibly fewer members) the missing ones will be left alone.
-        Overlay( dest, source, keys, can_key, current_key );
+        Overlay( dest, overlay, keys, can_key, current_key );
         
         ASSERT( dest );
     }        
