@@ -14,10 +14,10 @@
 void GenerateImplicitCasts::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
 	MakeTreePtr<Call> s_call;
-	MakeTreePtr<TypeOf> s_callee;
-	s_call->callee = s_callee;
+	MakeTreePtr<TypeOf> callee;
+	s_call->callee = callee;
 	MakeTreePtr<Procedure> s_proc;
-	s_callee->pattern = s_proc;
+	callee->pattern = s_proc;
 	MakeTreePtr< Instance > s_param;
 	MakeTreePtr< InstanceIdentifier > param_id;
 	s_param->identifier = param_id;
@@ -44,9 +44,7 @@ void GenerateImplicitCasts::operator()( TreePtr<Node> context, TreePtr<Node> *pr
 	r_cast->operand = s_arg->value;
 	r_cast->type = type;
 	r_call->operands = ( r_arg, other_args );
-
-	CouplingSet sms0((
-	    Coupling(( s_call, r_call )) ));
-
-	SearchReplace(s_call, r_call, sms0)( context, proot );
+    r_call->callee = callee;
+    
+	SearchReplace(s_call, r_call)( context, proot );
 }

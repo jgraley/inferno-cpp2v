@@ -526,13 +526,33 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
         	TRACE();
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( dest_ptr )( "itemise for target didn't match itemise for source");
-            if( *source_ptr ) // Masked: where source is NULL, do not overwrite
+            TreePtr<Node> source_child = *source_ptr;
+            TreePtr<Node> dest_child = *dest_ptr;
+            if( source_child ) // Masked: where source is NULL, do not overwrite
             {
-            	TreePtr<Node> ndp = DuplicateSubtree( *source_ptr, keys, can_key, current_key );
-                *dest_ptr = ndp;
+                // General overlaying policy: if the current child nodes of the source and dest are
+                // compatible with overlying, then overlay them (means recursing into both) otherwise
+                // just duplicate the source (means we only recurse the source).                
+                TreePtr<Node> newsource_child = DuplicateSubtree( source_child, keys, can_key, current_key );
+                if( dest_child && newsource_child->IsLocalMatch(dest_child.get()) ) // overlaying
+                {
+                    shared_ptr<Cloner> dup_dest = dest_child->Duplicate(dest_child);
+                    TreePtr<Node> newdest_child = dynamic_pointer_cast<Node>( dup_dest );
+                    ClearPtrs( dest_child );
+                    *newdest_child = *dest_child;
+                    dest_child = newdest_child; // TODO could be bringing in nodes from the tree... maybe use DuplicateSubtree?
+
+                    Overlay( dest_child, newsource_child, keys, can_key, current_key );
+                }
+                else // just copying
+                {  
+                    dest_child = newsource_child;
+                    ASSERT( dest_child );
+                }
             }
-            if( !current_key )
-            	ASSERT( *dest_ptr )("Found NULL in replace pattern without a coupling to substitute it");
+            else if( !current_key )
+            	ASSERT( dest_child )("Found NULL in replace pattern without a coupling to substitute it");
+            *dest_ptr = dest_child;
         }
         else
         {
@@ -721,6 +741,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
         shared_ptr<Cloner> dup_dest = newsource->Duplicate(newsource);
         dest = dynamic_pointer_cast<Node>( dup_dest );
         ASSERT(dest);
+        ClearPtrs( dest );
 
         // If not substituting a Stuff node, remember this node is dirty for GreenGrass restriction
         // Also dirty the dest if the source was dirty when we are substituting Stuff

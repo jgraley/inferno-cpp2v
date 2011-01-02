@@ -13,10 +13,11 @@
 void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
 	TRACE();
-	MakeTreePtr<Instance> s_fi, r_fi;
+	MakeTreePtr<Instance> fi;
+    MakeTreePtr< Overlay<Initialiser> > oinit;
 	MakeTreePtr<Subroutine> s_func;
 	MakeTreePtr< MatchAll<Initialiser> > s_and;
-	MakeTreePtr<Compound> s_top_comp, r_top_comp, r_ret_comp;
+	MakeTreePtr<Compound> s_top_comp, r_top_comp, r_ret_comp, temp;
 	MakeTreePtr< Star<Declaration> > top_decls;
 	MakeTreePtr< Star<Statement> > top_pre;
 	MakeTreePtr< Stuff<Statement> > cs_stuff, s_stuff, r_stuff;
@@ -35,9 +36,10 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr< GreenGrass<Statement> > s_gg;
 
     // Master search - look for functions satisfying the construct limitation and get
-	s_fi->identifier = MakeTreePtr<InstanceIdentifier>();
-	s_fi->type = s_func;
-	s_fi->initialiser = s_and;
+	fi->identifier = MakeTreePtr<InstanceIdentifier>();
+	fi->type = s_func;
+	fi->initialiser = oinit;   
+    oinit->base = s_and;
 	s_top_comp->members = ( top_decls );
 	s_top_comp->statements = ( top_pre );
 
@@ -49,13 +51,14 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 	MakeTreePtr< Slave<Statement> > r_slave( r_stuff, s_identifier, l_r_sub );
 	MakeTreePtr< RootedSlave<Statement> > r_mid( r_top_comp, s_stuff, r_slave );
 	MakeTreePtr< Slave<Statement> > r_slave3( r_mid, s_gg, r_ret_comp );
-	r_fi->initialiser = r_slave3;
+	temp->statements = (r_slave3);
+    oinit->overlay = temp;//r_slave3;
 
 	// top-level decls
 	r_top_comp->members = ( top_decls, r_index );
 	r_index->type = r_index_type;
 	r_index_type->width = MakeTreePtr<SpecificInteger>(32);
-	r_index_identifier->source = s_fi->identifier;
+	r_index_identifier->source = fi->identifier;
 	r_index->identifier = r_index_identifier;
 	r_index->constancy = MakeTreePtr<NonConst>();
 	r_index->initialiser = MakeTreePtr<SpecificInteger>(0);
@@ -92,10 +95,7 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 	r_ret_comp->statements = ( r_ret_dec, ret );
 
 	CouplingSet sms((
-		Coupling(( s_stuff, r_stuff )), // Couple stuff between the function and the variable to be changed
-		Coupling(( s_fi, r_fi )), // Couple the original function
-		Coupling(( r_identifier, l_r_sub->operands[0] )), // Couple the name of the array into the base of the subscript
-		Coupling(( r_index_identifier, r_inc->operands[0], r_dec->operands[0], l_r_sub->operands[1], r_ret_dec->operands[0] )) ));
+		Coupling(( s_stuff, r_stuff )) )); // Couple stuff between the function and the variable to be changed
 		
-	SearchReplace( s_fi, r_fi, sms )( context, proot );
+	SearchReplace( fi, fi, sms )( context, proot );
 }

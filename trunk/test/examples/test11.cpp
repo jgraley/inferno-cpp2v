@@ -36,19 +36,10 @@ void fa()
 
 void fb()
 {
-    //int b;
-    //b=0;
-    //b++;
-    //b--;
-    return;
-    int c;
-    c=1;
-    { 
-        return;
-        int d;
-        d=2;
-        d--;
-        return d;
-    }
+    goto FOO;
+    goto BAR;
+    FOO:;
+    BAR:;
+    ;
 } 
 
