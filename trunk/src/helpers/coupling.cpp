@@ -7,7 +7,6 @@ Coupling CouplingKeys::FindCoupling( TreePtr<Node> node,
 {
 	// TODO optimisation: a backing map of TreePtr to Coupling & would optimise
 	// this by a factor of the number of couplings: this and its callees are high on the profile.
-	ASSERT( this );
 	Coupling found; // returns an empty coupling if not found
 	FOREACH( Coupling c, couplings )
     {
@@ -28,7 +27,10 @@ Result CouplingKeys::KeyAndRestrict( TreePtr<Node> x,
 									 bool can_key )
 {
 	shared_ptr<Key> key( new Key );
-	key->root = x;
+    if( x )
+        key->root = x;
+    else
+        key = shared_ptr<Key>();
 	return KeyAndRestrict( key, pattern, sr, can_key );
 }
 
@@ -83,7 +85,10 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( TreePtr<Node> x,
 											  bool can_key )
 {
 	shared_ptr<Key> key( new Key );
-	key->root = x;
+	if( x )
+        key->root = x;
+    else
+        key = shared_ptr<Key>();
 	return KeyAndSubstitute( key, pattern, sr, can_key );
 }
 
@@ -96,8 +101,16 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 {
 	INDENT;
 	ASSERT( this );
-	ASSERT( !key || key->root != pattern ); // just a general usage check
-
+    ASSERT( pattern );
+    
+    if( key )
+    {
+        ASSERT( key->root );
+        ASSERT( key->root != pattern )
+              ("keyed to ")
+              (*(key->root))
+              (" apparently in the search or replace pattern\n"); // just a general usage check
+    }
 	// Find a coupling for this node. If the node is not in a coupling then there's
 	// nothing for us to do, so return without restricting the search.
 	Coupling coupling = FindCoupling( pattern, sr->couplings );

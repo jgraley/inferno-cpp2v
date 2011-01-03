@@ -76,8 +76,8 @@ public:
 									   TreePtr<Node> pattern,
 									   const RootedSearchReplace *sr,
 									   bool can_key );
+    static Coupling FindCoupling( TreePtr<Node> node, const CouplingSet &couplings );
 private:
-	Coupling FindCoupling( TreePtr<Node> node, const CouplingSet &couplings );
 	Map< Coupling, shared_ptr<Key> > keys_map;
 };
 
