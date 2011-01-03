@@ -160,18 +160,20 @@ void DoToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr<Compound> r_comp;
     MakeTreePtr<BuildLabelIdentifier> r_labelid("NEXT"), l_r_cont_labelid("CONTINUE");
     MakeTreePtr<Label> r_label, r_cont_label;
-    MakeTreePtr< Stuff<Statement> > l_s_stuff, l_r_stuff;
+    MakeTreePtr< Stuff<Statement> > l_stuff;
+    MakeTreePtr< Overlay<Statement> > l_overlay;
     MakeTreePtr<Continue> l_s_cont;
     MakeTreePtr< NotMatch<Statement> > l_s_not;
     MakeTreePtr< Loop > l_s_loop;
 
     l_s_not->pattern = l_s_loop;
-    l_s_stuff->terminus = l_s_cont;
-    l_s_stuff->recurse_restriction = l_s_not;
-    l_r_stuff->terminus = l_r_goto;
+    l_overlay->base = l_s_cont;
+    l_stuff->recurse_restriction = l_s_not;
+    l_overlay->overlay = l_r_goto;
     l_r_goto->destination = l_r_cont_labelid;
     
-    MakeTreePtr< RootedSlave<Statement> > r_slave( body, l_s_stuff, l_r_stuff );
+    MakeTreePtr< RootedSlave<Statement> > r_slave( body, l_stuff, l_stuff );
+    l_stuff->terminus = l_overlay;
     
     s_do->condition = cond;
     s_do->body = body;
@@ -184,12 +186,35 @@ void DoToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     r_if->else_body = r_nop;
     r_goto->destination = r_labelid;
         
-    CouplingSet couplings((
-       Coupling(( l_s_stuff, l_r_stuff )) ));
-
-    SearchReplace( s_do, r_comp, couplings )( context, proot );
+    SearchReplace( s_do, r_comp )( context, proot );
 }
-
+#if 0
+void BreakToGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+{
+    MakeTreePtr<Breakable> breakable, sx_breakable;
+    MakeTreePtr< Stuff<Statement> > stuff;
+    MakeTreePtr< Overlay<Statement> > overlay;
+    MakeTreePtr< NotMatch<Statement> > sx_not;
+    MakeTreePtr<Break> s_break;
+    MakeTreePtr<Goto> r_goto;
+    MakeTreePtr<BuildLabelIdentifier> r_labelid("BREAK");
+    MakeTreePtr<Label> r_label;
+    MakeTreePtr<Compound> r_comp;
+    
+    sx_not->pattern = sx_breakable;
+    stuff->terminus = overlay;
+    overlay->base = s_break;
+    stuff->recurse_restriction = sx_not;
+    overlay->overlay = r_goto;
+    r_goto->destination = r_labelid;
+    breakable->body = stuff;   
+   
+    r_comp->statements = (breakable, r_label);
+    r_label->identifier = r_labelid;
+    
+    SearchReplace( breakable, r_comp )( context, proot );
+}
+#else
 void BreakToGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
     MakeTreePtr<Breakable> s_breakable, sx_breakable, r_breakable;
@@ -218,3 +243,4 @@ void BreakToGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 
     SearchReplace( s_breakable, r_comp, couplings )( context, proot );
 }
+#endif
