@@ -69,10 +69,12 @@ int main( int argc, char *argv[] )
     	GenerateImplicitCasts()(&program);
     }
 
+#if 0
     if( --ReadArgs::quitafter >= 0 )
     {
         SplitInstanceDeclarations()(&program);
     }
+#endif
 
     if( --ReadArgs::quitafter >= 0 )
     {
@@ -92,12 +94,14 @@ int main( int argc, char *argv[] )
 	    {
 	        CleanupCompoundMulti()(&program);
 		}
+#if 0
 	    if( i==0 )
 			--ReadArgs::quitafter;
 	    if( ReadArgs::quitafter >= 0 ) 
 		{
 	        CleanupCompoundSingle()(&program);
 		}
+#endif		
 	    if( i==0 )
 			--ReadArgs::quitafter;
 	    if( ReadArgs::quitafter >= 0 ) 
@@ -116,13 +120,15 @@ int main( int argc, char *argv[] )
 		{
 	        CleanupIneffectualGoto()(&program);
 		}
+#if 0
 	    if( i==0 )
 			--ReadArgs::quitafter;
 	    if( ReadArgs::quitafter >= 0 ) 
 		{
 	        CleanupUnusedLabels()(&program);
 	    }
-	}
+#endif
+    }
 
     if(ReadArgs::intermediate_graph)
     {

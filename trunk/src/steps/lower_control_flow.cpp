@@ -188,7 +188,7 @@ void DoToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
         
     SearchReplace( s_do, r_comp )( context, proot );
 }
-#if 0
+
 void BreakToGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 {
     MakeTreePtr<Breakable> breakable, sx_breakable;
@@ -214,33 +214,3 @@ void BreakToGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     
     SearchReplace( breakable, r_comp )( context, proot );
 }
-#else
-void BreakToGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
-{
-    MakeTreePtr<Breakable> s_breakable, sx_breakable, r_breakable;
-    MakeTreePtr< Stuff<Statement> > s_stuff, r_stuff;
-    MakeTreePtr< NotMatch<Statement> > sx_not;
-    MakeTreePtr<Break> s_break;
-    MakeTreePtr<Goto> r_goto;
-    MakeTreePtr<BuildLabelIdentifier> r_labelid("BREAK");
-    MakeTreePtr<Label> r_label;
-    MakeTreePtr<Compound> r_comp;
-    
-    sx_not->pattern = sx_breakable;
-    s_stuff->terminus = s_break;
-    s_stuff->recurse_restriction = sx_not;
-    r_stuff->terminus = r_goto;
-    r_goto->destination = r_labelid;
-    s_breakable->body = s_stuff;   
-   
-    r_comp->statements = (r_breakable, r_label);
-    r_breakable->body = r_stuff;
-    r_label->identifier = r_labelid;
-    
-    CouplingSet couplings((
-        Coupling(( s_breakable, r_breakable )),
-        Coupling(( s_stuff, r_stuff )) ));
-
-    SearchReplace( s_breakable, r_comp, couplings )( context, proot );
-}
-#endif

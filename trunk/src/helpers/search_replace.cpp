@@ -30,7 +30,7 @@ RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
         TreePtr<Node> n = *i;
         if( n )
         {
-            if( 0&&dynamic_pointer_cast<StuffBase>(n) )
+            if( dynamic_pointer_cast<StuffBase>(n) )
                 ms[n] = 2; // foce couplings at overlay nodes TODO refactor substitution so this is not needed
             else if( ms.IsExist( n ) )
                 ms[n]++;
@@ -740,11 +740,14 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
         if( ob->overlay->IsLocalMatch(ob->base.get()) )
         {
             newsource = ob->base;
+            TRACE("Overlay node: Overlaying ");
         }
         else
         {
+            TRACE("Overlay node: Overwriting ");
             newsource = overlay;
         }
+        TRACE(*overlay)(" over ")(*newsource)("\n");
     }
 
     // Allow this to key a coupling if required
@@ -755,11 +758,9 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
     {
         // No coupling to key to, so just make a copy
     	TRACE("Did not substitute  (source is %s)\n", TypeInfo(newsource).name().c_str());
-        if( dynamic_pointer_cast<StuffBase>(newsource) )
-            return TreePtr<Node>(); // return NULL which is the maximal wild card and hence a trivial overly
-                                    // TODO deal with the terminus, which has already been expanded
-        ASSERT( !dynamic_pointer_cast<StarBase>(newsource) )
-              ("Star nodes in replace pattern must be keyed\n")
+        
+        ASSERT( !dynamic_pointer_cast<SpecialBase>(newsource) )
+              ("Special nodes in replace pattern must be keyed\n")
               ("source=")
               (*source)
               (" newsource=")
@@ -927,7 +928,6 @@ SearchReplace::SearchReplace( TreePtr<Node> sp,
 {
 }
 
-#if 0
 void SearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
                                                    CouplingKeys keys )
 {
@@ -945,8 +945,15 @@ void SearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
         overlay->base = search_pattern;
         overlay->overlay = replace_pattern;
 
+        // Key them together
+        Coupling stuff_match(( stuff ));
+        couplings.insert( stuff_match );
+
         // Configure the rooted implementation with new patterns and couplings
         (void)RepeatingSearchReplace( proot, stuff, stuff, keys );
+
+        // Undo the change to the couplings we made earlier
+        couplings.erase( stuff_match );
     }
     else
     {
@@ -954,40 +961,6 @@ void SearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
         (void)RepeatingSearchReplace( proot, stuff, TreePtr<Node>(), keys );
     }
 }
-#else
-// Do a search and replace based on patterns stored in our members
-void SearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
-										    	   CouplingKeys keys )
-{
-	// Make a non-rooted search and replace (ie where the base of the search pattern
-	// does not have to be the root of the whole program tree).
-	// Insert a Stuff node as root of the search pattern
-	TreePtr< Stuff<Scope> > search_root( new Stuff<Scope> );
-	search_root->terminus = search_pattern;
-
-	if( replace_pattern ) // Is there a replace pattern?
-	{
-		// Insert a Stuff node as root of the replace pattern
-		TreePtr< Stuff<Scope> > replace_root( new Stuff<Scope> );
-	    replace_root->terminus = replace_pattern;
-
-	    // Key them together
-		Coupling root_match(( search_root, replace_root ));
-	    couplings.insert( root_match );
-
-	    // Configure the rooted implementation with new patterns and couplings
-	    (void)RepeatingSearchReplace( proot, search_root, replace_root, keys );
-
-	    // Undo the change to the couplings we made earlier
-	    couplings.erase( root_match );
-	}
-	else
-	{
-	    // Configure the rooted implementation with new pattern
-	    (void)RepeatingSearchReplace( proot, search_root, replace_pattern, keys );
-	}
-}
-#endif
 
 void RootedSearchReplace::Test()
 {
