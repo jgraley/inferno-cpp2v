@@ -102,10 +102,7 @@ void CleanupDuplicateLabels::operator()( TreePtr<Node> context, TreePtr<Node> *p
         r_comp->statements = (pre, r_label1, post);
         r_label1->identifier = r_labelid;
         
-        CouplingSet couplings((
-            Coupling(( s_instance, r_instance )) ));
-
-        SearchReplace( s_instance, r_instance, couplings )( context, proot );
+        SearchReplace( s_instance, r_instance )( context, proot );
     }
 }
 
@@ -173,10 +170,7 @@ void CleanupUnusedLabels::operator()( TreePtr<Node> context, TreePtr<Node> *proo
         r_comp->members = decls;
         r_comp->statements = (pre, post);
         
-        CouplingSet couplings((
-            Coupling(( s_instance, r_instance )) ));
-
-        SearchReplace( s_instance, r_instance, couplings )( context, proot );
+        SearchReplace( s_instance, r_instance )( context, proot );
     }
 }
 
