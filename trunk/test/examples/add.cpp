@@ -16,11 +16,11 @@ int main()
 		{
 			tot = tot + i;
 		}
-        if(1)
+/*        if(1)
     	{
             continue; // applies to outer loop
         }
-        tot *= 2;
+  */      tot *= 2;
     }
     return tot;
 }
