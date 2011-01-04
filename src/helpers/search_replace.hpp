@@ -262,16 +262,16 @@ public:
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.
     void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
 private:
-    // Internal node classes
+    // Internal node classes - NOTE these are not special nodes, and we use them like normal tree nodes
     struct SubSequence : Node,
                          Sequence<Node>
     {
-    	NODE_FUNCTIONS // Need these for Clone/Duplicate, called during replace TODO add to SPECIAL_NODE_FUNCTIONS and use that
+    	NODE_FUNCTIONS_FINAL 
     };
     struct SubCollection : Node,
                            Collection<Node>
     {
-    	NODE_FUNCTIONS
+    	NODE_FUNCTIONS_FINAL
     };
 };
 

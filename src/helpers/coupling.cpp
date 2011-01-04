@@ -27,10 +27,7 @@ Result CouplingKeys::KeyAndRestrict( TreePtr<Node> x,
 									 bool can_key )
 {
 	shared_ptr<Key> key( new Key );
-    if( x )
-        key->root = x;
-    else
-        key = shared_ptr<Key>();
+    key->root = x;
 	return KeyAndRestrict( key, pattern, sr, can_key );
 }
 
@@ -40,6 +37,9 @@ Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
 									 bool can_key )
 {
 	ASSERT( this );
+    ASSERT( key );
+    ASSERT( key->root );
+    ASSERT( key->root->IsFinal() );
 	// Find a coupling for this node. If the node is not in a coupling then there's
 	// nothing for us to do, so return without restricting the search.
 	Coupling coupling = FindCoupling( pattern, sr->couplings );
@@ -50,7 +50,9 @@ Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
 	TRACE("MATCH: can_key=%d\n", (int)can_key);
 	if( can_key && !keys_map[coupling] )
 	{
-		TRACE("keying... key ptr %p new value %p, presently %d keys out of %d couplings\n",
+		TRACE("keying... to ")
+		     (*(key->root))
+		     (" key ptr %p new value %p, presently %d keys out of %d couplings\n",
 				keys_map[coupling].get(), key.get(),
 				keys_map.size(), sr->couplings.size() );
 
@@ -112,12 +114,17 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
               (" apparently in the search or replace pattern\n"); // just a general usage check
     }
 	// Find a coupling for this node. If the node is not in a coupling then there's
-	// nothing for us to do, so return without restricting the search.
-	Coupling coupling = FindCoupling( pattern, sr->couplings );
+	// nothing for us to do, so return without restricting the search.	
+	TRACE("Looking for coupling for ")(*pattern);
+    Coupling coupling = FindCoupling( pattern, sr->couplings );
 	if( coupling.empty() )
+    {
+        TRACE(" not found\n");
 		return TreePtr<Node>();
-	TRACE("MATCH: ");
-/*	TRACE("coupling={");
+    }
+	TRACE(" found ");
+#if 1    
+	TRACE("coupling={");
 	bool first=true;
 	FOREACH( TreePtr<Node> n, coupling )
 	{
@@ -128,8 +135,8 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 		TRACE(TypeInfo(n).name());
 		first=false;
 	}
-   TRACE("}\n"); */// TODO put this in as a common utility somewhere
-
+   TRACE("}\n"); // TODO put this in as a common utility somewhere
+#endif
 
 	// If we're keying and we haven't keyed this node so far, key it now
 	TRACE("can_key=%d ", (int)can_key);

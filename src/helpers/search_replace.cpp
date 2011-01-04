@@ -52,10 +52,12 @@ RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
     typedef	pair<TreePtr<Node>, int> pair;	
 	FOREACH( pair pp, ms )
 	{
-		TRACE("node ")(*(pp.first))(" count is %d\n", pp.second );
 	    if( pp.second > 1 )
 			if( CouplingKeys::FindCoupling( pp.first, couplings ).empty() )
+            {
+                TRACE("Inserting coupling for ")(*(pp.first))(" count is %d\n", pp.second );
                 couplings.insert( Coupling( pp.first ) );	
+            }
 	}
 	
     // Look for slaves. If we find them, copy our couplings into their couplings
@@ -96,10 +98,16 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
 											bool can_key,
     										Conjecture &conj ) const
 {
+    INDENT;
 	ASSERT( x ); // Target must not be NULL
 	if( !pattern )    // NULL matches anything in search patterns (just to save typing)
 		return FOUND;
-
+    TRACE("Comparing x=")
+         (*x)
+         (" with pattern=")
+         (*pattern)
+         ("\n");
+    
 	// Check whether the present node matches. Do this for all nodes: this will be the local
 	// restriction for normal nodes and the pre-restriction for special nodes (based on
 	// how IsLocalMatch() has been overridden.
@@ -152,21 +160,21 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
 			if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(pattern_memb[i]) )
 			{
 				SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
-				ASSERT( x_seq )( "itemise for target didn't match itemise for pattern");
-				TRACE("Member %d is Sequence, target %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
+				ASSERT( x_seq )( "itemise for x didn't match itemise for pattern");
+				TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
 				r = DecidedCompare( *x_seq, *pattern_seq, keys, can_key, conj );
 			}
 			else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
 			{
 				CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
-				ASSERT( x_col )( "itemise for target didn't match itemise for pattern");
-				TRACE("Member %d is Collection, target %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
+				ASSERT( x_col )( "itemise for x didn't match itemise for pattern");
+				TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
 				r = DecidedCompare( *x_col, *pattern_col, keys, can_key, conj );
 			}
 			else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
 			{
 				TreePtrInterface *x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
-				ASSERT( x_ptr )( "itemise for target didn't match itemise for pattern");
+				ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
 				TRACE("Member %d is TreePtr, pattern ptr=%p\n", i, pattern_ptr->get());
 				r = DecidedCompare( *x_ptr, TreePtr<Node>(*pattern_ptr), keys, can_key, conj );
 			}
@@ -196,6 +204,7 @@ Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
 		                                    bool can_key,
 		                                    Conjecture &conj ) const
 {
+    INDENT;
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
 	ContainerInterface::iterator xit = x.begin();
@@ -265,7 +274,11 @@ Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
 	    }
 	    else // not a Star so match singly...
 	    {
-	    	TRACE("Not a star\n");
+	    	TRACE("Not a star, x=")
+	    	     (**xit)
+	    	     (" pattern=")
+	    	     (*pe)
+	    	     ("\n");
 			// If there is one more element in x, see if it matches the pattern
 			//TreePtr<Node> xe( x[xit] );
 			if( xit != x.end() && DecidedCompare( *xit, pe, keys, can_key, conj ) == FOUND )
@@ -292,6 +305,7 @@ Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
 											bool can_key,
 											Conjecture &conj ) const
 {
+    INDENT;
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
 	// after decisions.
@@ -350,11 +364,11 @@ Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
 		    	return NOT_FOUND;
 
     // If we got here, the node matched the search pattern. Now apply couplings
-    TRACE("seen_star %d  star %p\n", seen_star, star.get() );
+    TRACE("seen_star %d star %p size of xremaining %d\n", seen_star, star.get(), xremaining->size() );
     if( keys && seen_star && star )
         if( !keys->KeyAndRestrict( TreePtr<Node>(xremaining), star, this, can_key ) )
         	return NOT_FOUND;
-
+    TRACE("matched\n");
 	return FOUND;
 }
 
@@ -367,6 +381,7 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
 										    bool can_key,
 										    Conjecture &conj ) const
 {
+    INDENT;
 	ASSERT( stuff_pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
 	// Define a walk, rooted at this node, restricted as specified in search pattern
@@ -402,6 +417,7 @@ Result RootedSearchReplace::MatchingDecidedCompare( TreePtr<Node> x,
 		                                                     bool can_key,
 		                                                     Conjecture &conj ) const
 {
+    INDENT;
     Result r;
     if( keys )
     {
@@ -453,6 +469,7 @@ Result RootedSearchReplace::Compare( TreePtr<Node> x,
 									 CouplingKeys *keys,
 								  	 bool can_key ) const
 {
+    INDENT;
 	TRACE("Comparing x=%s\n", typeid(*x).name() );
 	// Create the conjecture object we will use for this compare, and then go
 	// into the recursive compare function
@@ -736,11 +753,13 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
         // the same node. Don't do any more - we wouldn't want to change the
         // identifier in the tree even if it had members, lol!
         ASSERT( !current_key )( "Found overlay pattern while under substitution\n" ); // TODO maybe disallow all special nodes when under substitution?
-        overlay = ob->overlay;
+        // TODO I think we should recurse instead of changing source, so other 
+        // checks can be made eg for other special nodes
+        source = overlay = ob->overlay;
         if( ob->overlay->IsLocalMatch(ob->base.get()) )
         {
-            newsource = ob->base;
             TRACE("Overlay node: Overlaying ");
+            newsource = ob->base;
         }
         else
         {
@@ -757,7 +776,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
     if( !dest )
     {
         // No coupling to key to, so just make a copy
-    	TRACE("Did not substitute  (source is %s)\n", TypeInfo(newsource).name().c_str());
+    	TRACE("Did not substitute (newsource is %s)\n", TypeInfo(newsource).name().c_str());
         
         ASSERT( !dynamic_pointer_cast<SpecialBase>(newsource) )
               ("Special nodes in replace pattern must be keyed\n")
@@ -776,6 +795,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 
         // If not substituting a Stuff node, remember this node is dirty for GreenGrass restriction
         // Also dirty the dest if the source was dirty when we are substituting Stuff
+        // TODO should we use source or newsource here?
         if( !current_key || !dynamic_pointer_cast<StuffKey>(current_key) || dirty_grass.find( source ) != dirty_grass.end() )
             dirty_grass.insert( dest );
     }
@@ -864,9 +884,10 @@ int RootedSearchReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
     			                        search_pattern,
     			                        replace_pattern,
     			                        keys );
-    	TRACE("%p result %d", this, r);
+    	TRACE("%p result %d", this, r);        
     	if( r != FOUND )
             break;
+        Validate()( *pcontext, proot );
        	//ASSERT(i<100)("Too many hits");
         i++;
     }
