@@ -125,7 +125,9 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
     {
     	// Invoke stuff node compare
     	// Check whether the present node matches
-    	return DecidedCompare( x, stuff_pattern, keys, can_key, conj );
+    	bool r = DecidedCompare( x, stuff_pattern, keys, can_key, conj );
+        if( r != FOUND )
+            return NOT_FOUND;
     }
     else if( TreePtr<GreenGrassBase> green_pattern = dynamic_pointer_cast<GreenGrassBase>(pattern) )
     {
@@ -136,12 +138,16 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
             if( dirty_grass.find( p ) != dirty_grass.end() )
                 return NOT_FOUND;
         // Normal matching for the through path
-        return DecidedCompare( x, green_pattern->GetThrough(), keys, can_key, conj );
+        bool r = DecidedCompare( x, green_pattern->GetThrough(), keys, can_key, conj );
+        if( r != FOUND )
+            return NOT_FOUND;
     }
     else if( TreePtr<OverlayBase> op = dynamic_pointer_cast<OverlayBase>(pattern) )
     {
         // When Overlay node seen duriung search, just forward through the "base" path
-        return DecidedCompare( x, op->base, keys, can_key, conj );
+        bool r = DecidedCompare( x, op->base, keys, can_key, conj );
+        if( r != FOUND )
+            return NOT_FOUND;
     }
     else
     {
@@ -519,7 +525,30 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
     ASSERT( source_memb.size() == dest_memb.size() );
 
     TRACE("Overlaying %d members source=%s dest=%s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
-
+   TRACE("Overlay dest={");
+   {    Walk w(dest);
+        bool first=true;
+        FOREACH( TreePtr<Node> n, w )
+        {
+            if( !first )
+                TRACE(", ");
+            TRACE( n ? *n : string("NULL"));
+            first=false;
+        }
+        TRACE("}\n"); // TODO put this in as a common utility somewhere
+   }
+   TRACE("source={");
+   {    Walk w(source);
+        bool first=true;
+        FOREACH( TreePtr<Node> n, w )
+        {
+            if( !first )
+                TRACE(", ");
+            TRACE( n ? *n : string("NULL"));
+            first=false;
+        }
+        TRACE("}\n"); // TODO put this in as a common utility somewhere
+   }
     // Loop over all the members of source (which can be a subset of dest)
     // and for non-NULL members, duplicate them by recursing and write the
     // duplicates to the destination.
@@ -677,20 +706,20 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 		                                                shared_ptr<Key> current_key ) const
 {
 	INDENT;
-	TRACE("Duplicating %s under_substitution=%p\n", TypeInfo(source).name().c_str(), current_key.get());
+	TRACE("Duplicating %s under_substitution=%p\n", ((string)*source).c_str(), current_key.get());
     TreePtr<Node> dest;
-/*   TRACE("DuplicateSubtree dest={");
+   TRACE("DuplicateSubtree source={");
 	    Walk w(source);
 	    bool first=true;
 	    FOREACH( TreePtr<Node> n, w )
 	    {
 	    	if( !first )
 	    		TRACE(", ");
-	    	TRACE( n ? TypeInfo(n).name() : "NULL");
+	    	TRACE( n ? *n : string("NULL"));
 	    	first=false;
 	    }
 	    TRACE("}\n"); // TODO put this in as a common utility somewhere
-*/
+
 
     // Are we substituting a stuff node? If so, see if we reached the terminus, and if
 	// so come out of substitution.
@@ -747,6 +776,10 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
         ASSERT( newsource );
     }
 
+    // Allow this to key a coupling if required
+    dest = keys->KeyAndSubstitute( key, source, this, can_key );
+    ASSERT( !dest || !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
+  
     if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
     {
         // Substitute is an identifier, so preserve its uniqueness by just returning
@@ -755,23 +788,31 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
         ASSERT( !current_key )( "Found overlay pattern while under substitution\n" ); // TODO maybe disallow all special nodes when under substitution?
         // TODO I think we should recurse instead of changing source, so other 
         // checks can be made eg for other special nodes
-        source = overlay = ob->overlay;
+        overlay = ob->overlay;
+
+        // Note that this can effectively throw away the ob->base if either (a) we were coupled
+        // or (b) ob->overlay is not a compatible overly. It's OK because ob->base was used
+        // in the search pattern that must have matched for us to get here in the first place.
         if( ob->overlay->IsLocalMatch(ob->base.get()) )
         {
             TRACE("Overlay node: Overlaying ");
-            newsource = ob->base;
+            newsource = dest ? dest : ob->base;
         }
         else
         {
-            TRACE("Overlay node: Overwriting ");
+            TRACE("Overlay node: Replacing ");
             newsource = overlay;
+            dest = TreePtr<Node>();
         }
         TRACE(*overlay)(" over ")(*newsource)("\n");
-    }
 
-    // Allow this to key a coupling if required
-    dest = keys->KeyAndSubstitute( key, source, this, can_key );
-    ASSERT( !dest || !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
+        // Allow this to key a coupling if required
+        if( !dest )
+        {
+            dest = keys->KeyAndSubstitute( key, overlay, this, can_key );
+            ASSERT( !dest || !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
+        }
+    }
 
     if( !dest )
     {

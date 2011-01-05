@@ -132,14 +132,14 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 			TRACE(", ");
 		if( pattern == n )
 			TRACE("-->");
-		TRACE(TypeInfo(n).name());
+		TRACE(*n);
 		first=false;
 	}
-   TRACE("}\n"); // TODO put this in as a common utility somewhere
+   TRACE("} key ptr=%p\n", keys_map[coupling].get()); // TODO put this in as a common utility somewhere
 #endif
 
 	// If we're keying and we haven't keyed this node so far, key it now
-	TRACE("can_key=%d ", (int)can_key);
+	TRACE("can_key=%d\n", (int)can_key);
 	if( can_key && key && !keys_map[coupling] )
 	{
 		TRACE("keying... coupling %p key ptr %p new value %p, presently %d keys out of %d couplings\n",
