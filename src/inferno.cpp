@@ -69,7 +69,7 @@ int main( int argc, char *argv[] )
     	GenerateImplicitCasts()(&program);
     }
 
-#if 0
+#if 1
     if( --ReadArgs::quitafter >= 0 )
     {
         SplitInstanceDeclarations()(&program);
