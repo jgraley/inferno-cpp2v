@@ -788,29 +788,26 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
         ASSERT( !current_key )( "Found overlay pattern while under substitution\n" ); // TODO maybe disallow all special nodes when under substitution?
         // TODO I think we should recurse instead of changing source, so other 
         // checks can be made eg for other special nodes
-        overlay = ob->overlay;
 
         // Note that this can effectively throw away the ob->base if either (a) we were coupled
         // or (b) ob->overlay is not a compatible overly. It's OK because ob->base was used
         // in the search pattern that must have matched for us to get here in the first place.
         if( ob->overlay->IsLocalMatch(ob->base.get()) )
         {
-            TRACE("Overlay node: Overlaying ");
-            newsource = dest ? dest : ob->base;
+            overlay = ob->overlay;
+        // Allow this to key a coupling if required
+            if( !dest )
+            {
+                dest = keys->KeyAndSubstitute( key, ob->overlay, this, can_key );                                
+                ASSERT( !dest || !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
+                if( dest)
+                    return dest;
+                newsource = ob->base;
+            }
         }
         else
         {
-            TRACE("Overlay node: Replacing ");
-            newsource = overlay;
-            dest = TreePtr<Node>();
-        }
-        TRACE(*overlay)(" over ")(*newsource)("\n");
-
-        // Allow this to key a coupling if required
-        if( !dest )
-        {
-            dest = keys->KeyAndSubstitute( key, overlay, this, can_key );
-            ASSERT( !dest || !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
+            return DuplicateSubtree( ob->overlay, keys, can_key, current_key );
         }
     }
 
