@@ -483,8 +483,6 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
 		s += ":" + field;
 		atts = "dir = \"both\"\n";
         atts = "arrowtail = \"dot\"\n";
-        atts = "tailclip = \"false\"\n";
-        atts = "tailport = \"e\"\n";
       //  atts = "sametail = \"" + field + "\"\n";
 		if( ptr )									// is normal tree link
 		    if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(to) )   // is to a special node
@@ -497,6 +495,13 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
     {
         if( field == "porta0" )
             s+= ":n";
+        else
+            s+= ":e";
+    }
+    else if( dynamic_pointer_cast<OverlayBase>(from) )
+    {
+        if( field == "portb0" )
+            s+= ":s";
         else
             s+= ":e";
     }
