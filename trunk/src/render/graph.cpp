@@ -28,8 +28,6 @@ void Graph::operator()( RootedSearchReplace *root )
 	s += Header();
 	s += Traverse( root, false );
 	s += Traverse( root, true );
-	FOREACH( const Coupling &pc, root->couplings )
-		s += DoCoupling( pc );
 	s += Footer();
 	Disburse( s );
 }
@@ -154,44 +152,6 @@ string Graph::DoSearchReplaceLinks( RootedSearchReplace *sr )
 	{
 		s += Id(sr) + ":replace -> " + Id(sr->replace_pattern.get());
 		s += " [];\n";
-	}
-	return s;
-}
-
-
-string Graph::DoCoupling( Coupling pc )
-{
-	string s;
-	TreePtr<Node> prev;
-	FOREACH( TreePtr<Node> n, pc )
-	{
-		if( prev )
-		{
-			string common_atts;
-			common_atts = "dir = \"none\"\n"; // no arrowhead
-			common_atts += "constraint = false\n"; // Do not make dest higher rank than source - stops dest being moved to the right
-			string atts;
-			atts = common_atts;
-			string c = Colour(prev);
-			if(c=="")
-				c = Colour(n);
-			if(c=="")
-				c = "grey60";// make it pale
-			atts += "color = " + c + "\n";
-			s += DoLink( prev, "", n, atts );
-			if( ReadArgs::hack_graph )
-			{
-				// Graphviz 2.20 has a bug where you get "Lost edge" for some edges that have
-				// constraint = false (apparently ok in 2.18 and as-yet-unreleased 2.22)
-				// A workaround seems to be to supply another edge going in opposite direction.
-				// HOWEVER: using this can make dot crash, on graphs over a certain size. So
-				// the hack is only enabled when -g<x>h is specified
-				atts = common_atts;
-				atts += "style = \"invis\"\n";
-				s += DoLink( n, "", prev, atts );
-			}
-		}
-		prev = n;
 	}
 	return s;
 }

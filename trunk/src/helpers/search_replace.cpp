@@ -53,10 +53,10 @@ RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
 	FOREACH( pair pp, ms )
 	{
 	    if( pp.second > 1 )
-			if( CouplingKeys::FindCoupling( pp.first, couplings ).empty() )
+			if( !couplings.IsExist( pp.first ) )
             {
                 TRACE("Inserting coupling for ")(*(pp.first))(" count is %d\n", pp.second );
-                couplings.insert( Coupling( pp.first ) );	
+                couplings.insert( pp.first );	
             }
 	}
 	

@@ -26,7 +26,6 @@ private:
 			                bool slave = false,
 			                TreePtr<Node> through = TreePtr<Node>() );
 	string DoSearchReplaceLinks( RootedSearchReplace *sr );
-	string DoCoupling( Coupling pc );
     string Id( void *p );
     string SeqField( int i, int j=0 );
     string Sanitise( string s, bool remove_tp=false );
