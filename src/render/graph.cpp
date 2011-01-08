@@ -89,7 +89,8 @@ void Graph::Disburse( string s )
 string Graph::Traverse( TreePtr<Node> root, bool links_pass )
 {
 	string s;
-	Walk w( root );
+    TRACE("Graph plotter traversing intermediate %s pass\n", links_pass ? "links" : "nodes");
+	Stroll w( root );
 	FOREACH( TreePtr<Node> n, w )
 	{
 		if( n )
@@ -102,11 +103,23 @@ string Graph::Traverse( TreePtr<Node> root, bool links_pass )
 string Graph::Traverse( RootedSearchReplace *sr, bool links_pass )
 {
 	string s;
-	s += links_pass ? DoSearchReplaceLinks(sr) : DoSearchReplace(sr, Id(sr));
+    Stroll::iterator i;
+
+    s += links_pass ? DoSearchReplaceLinks(sr) : DoSearchReplace(sr, Id(sr));
 	if( sr->search_pattern )
-		s += Traverse( sr->search_pattern, links_pass );
-	if( sr->replace_pattern )
-		s += Traverse( sr->replace_pattern, links_pass );
+    {
+        TRACE("Graph plotter traversing search pattern %s pass\n", links_pass ? "links" : "nodes");
+        Stroll w( sr->search_pattern );
+        for( i.ContinueAt(w.begin()); i != w.end(); ++i )
+            s += links_pass ? DoNodeLinks(*i) : DoNode(*i);
+    }
+    if( sr->replace_pattern )
+    {
+        TRACE("Graph plotter traversing replace pattern %s pass\n", links_pass ? "links" : "nodes");
+        Stroll w( sr->replace_pattern );
+        for( i.ContinueAt(w.begin()); i != w.end(); ++i )
+            s += links_pass ? DoNodeLinks(*i) : DoNode(*i);
+    }
 	return s;
 }
 

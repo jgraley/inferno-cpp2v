@@ -421,3 +421,84 @@ void Sweep::iterator::AdvanceInto()
         seen.insert( element );    
 }    
     
+////////////////////////// Stroll //////////////////////////
+
+Stroll::iterator::iterator()
+{
+}        
+
+Stroll::iterator::iterator( const Stroll::iterator & other ) :
+    Walk::iterator( other )
+{
+    TRACE("Stroll copy\n");
+    Filter();
+}
+
+Stroll::iterator::iterator( TreePtr<Node> &root,
+                           TreePtr<Node> restrictor,
+                           const RootedSearchReplace *rc,
+                           CouplingKeys *k ) :
+    Walk::iterator( root, restrictor, rc, k )
+{
+    Filter();
+}
+ 
+Stroll::Stroll( TreePtr<Node> r,
+              TreePtr<Node> res,
+              const RootedSearchReplace *rsr,
+              CouplingKeys *k ) :
+    root(r),
+    restrictor( res ),
+    restriction_comparison( rsr ),
+    keys( k ),
+    my_begin( iterator( root, restrictor, restriction_comparison, k ) ),
+    my_end( iterator() )
+{
+}
+
+const Stroll::iterator &Stroll::begin()
+{
+    my_begin = iterator( root, restrictor, restriction_comparison, keys );
+    return my_begin;
+}
+
+const Stroll::iterator &Stroll::end()
+{
+    my_end = iterator();
+    return my_end;
+}
+
+Stroll::iterator &Stroll::iterator::operator++()
+{
+    Walk::iterator::operator++(); 
+    Filter();
+    return *this;
+}
+
+void Stroll::iterator::Filter()
+{
+    while(!done)
+    {
+        TreePtr<Node> element = **this; // look at current node
+        
+        bool ok;
+        { // this block is the "client filter rule", rest of fn is filtering infrastructure
+            ok = element && !seen.IsExist( element );
+            if( ok )
+            {
+                seen.insert( element );    
+                TRACE("Stroll inserting node ")(*element)(" at %p size now %d\n", element.get(), seen.size());        
+            } 
+        }        
+        
+        if( ok )
+        {
+            TRACE("Stroll returning node ")(*element)(" at %p size now %d\n", element.get(), seen.size());
+            return;
+        }
+        
+        if( element )
+            TRACE("Stroll skipping node ")(*element)(" at %p\n", element.get());
+        Walk::iterator::operator++(); // increment once
+    }    
+}
