@@ -54,7 +54,8 @@ string Graph::Header()
 	s += "digraph Inferno {\n"; // g is name of graph
 	s += "graph [\n";
 	s += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
-	s += "fontname = \"arial\"\n"; // get with the 21st century
+    s += "fontname = \"arial\"\n"; // get with the 21st century
+  //  s += "concentrate = \"true\"\n"; 
 	s += "];\n";
 	s += "node [\n";
 	s += "];\n";
@@ -181,7 +182,7 @@ string Graph::Id( void *p )
 string Graph::SeqField( int i, int j )
 {
 	char s[20];
-	sprintf( s, "%c%d", 'a'+i, j );
+	sprintf( s, "port%c%d", 'a'+i, j );
 	return s;
 }
 
@@ -263,6 +264,11 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		*shape = "circle";
 		return string("||||");
 	}
+    else if( dynamic_pointer_cast<OverlayBase>(sp) )
+    {
+        *shape = "circle";
+        return string("+-"); // TODO want greek delta symbol
+    }
 	else
 	{
 		*bold = false;
@@ -335,7 +341,10 @@ string Graph::HTMLLabel( string name, TreePtr<Node> n )
 		else if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
 		{
 			s += " <TR>\n";
-			s += "  <TD>" + Sanitise(*col, true) + "{}</TD>\n";
+			s += "  <TD>" + Sanitise(*col, true) + "{";
+            for( int j=0; j<col->size(); j++ )
+                s += ".";
+            s += "}</TD>\n";
 			s += "  <TD PORT=\"" + SeqField( i ) + "\"></TD>\n";
 			s += " </TR>\n";
 		}
@@ -473,7 +482,10 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
 	{
 		s += ":" + field;
 		atts = "dir = \"both\"\n";
-		atts = "arrowtail = \"dot\"\n";
+        atts = "arrowtail = \"dot\"\n";
+        atts = "tailclip = \"false\"\n";
+        atts = "tailport = \"e\"\n";
+      //  atts = "sametail = \"" + field + "\"\n";
 		if( ptr )									// is normal tree link
 		    if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(to) )   // is to a special node
 		        if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )          // pre-restrictor is nontrivial
@@ -481,6 +493,13 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
 			    atts += "label = \"" + (string)**(sbs->GetPreRestrictionArchitype()) + "\"\n";
 			}
 	}
+    else if( dynamic_pointer_cast<StuffBase>(from) )
+    {
+        if( field == "porta0" )
+            s+= ":n";
+        else
+            s+= ":e";
+    }
 
 	s += " -> ";
 	s += Id(to.get());
