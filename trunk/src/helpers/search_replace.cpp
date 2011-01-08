@@ -525,7 +525,8 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
     ASSERT( source_memb.size() == dest_memb.size() );
 
     TRACE("Overlaying %d members source=%s dest=%s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
-   TRACE("Overlay dest={");
+#if 0
+    TRACE("Overlay dest={");
    {    Walk w(dest);
         bool first=true;
         FOREACH( TreePtr<Node> n, w )
@@ -549,6 +550,7 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
         }
         TRACE("}\n"); // TODO put this in as a common utility somewhere
    }
+#endif   
     // Loop over all the members of source (which can be a subset of dest)
     // and for non-NULL members, duplicate them by recursing and write the
     // duplicates to the destination.
@@ -707,6 +709,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 {
 	INDENT;
  	TRACE("Duplicating %s under_substitution=%p\n", ((string)*source).c_str(), current_key.get());
+#if 0
     TRACE("DuplicateSubtree source={");
 	    Walk w(source);
 	    bool first=true;
@@ -718,7 +721,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 	    	first=false;
 	    }
 	    TRACE("}\n"); // TODO put this in as a common utility somewhere
-
+#endif
     // Under substitution, we should be duplicating a subtree of the input
     // program, which should not contain any special nodes
     ASSERT( !(dynamic_pointer_cast<SpecialBase>(source) && current_key) )
