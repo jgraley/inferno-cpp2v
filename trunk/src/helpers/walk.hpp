@@ -201,4 +201,51 @@ protected:
     iterator my_begin, my_end;
 };
 
+
+class Stroll : public ContainerInterface
+{
+public:
+    // The walking iterator does all the real work.
+    class iterator : public Walk::iterator
+    {
+    public:
+        iterator(); // makes "end" iterator
+        iterator( const iterator & other );        
+        virtual iterator &operator++();
+        void ContinueAt( const iterator &nb )
+        {
+            // Copy everything *except* the new "seen" structure, so that exclusions will apply across multiple sweeps.
+            root = nb.root;
+            restrictor = nb.restrictor;
+            restriction_comparison = nb.restriction_comparison;
+            keys = nb.keys;
+            state = nb.state;            
+            done = nb.done;      
+            Filter();
+        }
+    protected:
+        iterator( TreePtr<Node> &root,
+                  TreePtr<Node> restrictor,
+                  const RootedSearchReplace *rc,
+                  CouplingKeys *k );
+        Set< TreePtr<Node> > seen;
+        void Filter();
+        friend class Stroll;
+    };
+    Stroll( TreePtr<Node> root, // root of the subtree to walk
+            TreePtr<Node> restrictor = TreePtr<Node>(), // optional restrictor; walk skips these and does not recurse under them
+            const RootedSearchReplace *rsr = NULL,
+            CouplingKeys *k = NULL );
+    virtual const iterator &begin();
+    virtual const iterator &end();
+    virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
+    virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
+protected:
+    TreePtr<Node> root;
+    TreePtr<Node> restrictor;
+    const RootedSearchReplace *restriction_comparison;
+    CouplingKeys *keys;
+    iterator my_begin, my_end;
+};
+
 #endif
