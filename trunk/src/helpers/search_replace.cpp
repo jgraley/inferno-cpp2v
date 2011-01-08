@@ -706,9 +706,8 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 		                                                shared_ptr<Key> current_key ) const
 {
 	INDENT;
-	TRACE("Duplicating %s under_substitution=%p\n", ((string)*source).c_str(), current_key.get());
-    TreePtr<Node> dest;
-   TRACE("DuplicateSubtree source={");
+ 	TRACE("Duplicating %s under_substitution=%p\n", ((string)*source).c_str(), current_key.get());
+    TRACE("DuplicateSubtree source={");
 	    Walk w(source);
 	    bool first=true;
 	    FOREACH( TreePtr<Node> n, w )
@@ -720,6 +719,12 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 	    }
 	    TRACE("}\n"); // TODO put this in as a common utility somewhere
 
+    // Under substitution, we should be duplicating a subtree of the input
+    // program, which should not contain any special nodes
+    ASSERT( !(dynamic_pointer_cast<SpecialBase>(source) && current_key) )
+          ("Duplicating special node ")
+          (*source)
+          (" while under substitution\n" );
 
     // Are we substituting a stuff node? If so, see if we reached the terminus, and if
 	// so come out of substitution.
@@ -735,13 +740,17 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 			source == stuff_key->terminus ) // and the present node is the terminus in the source pattern
 		{
 			TRACE( "Leaving substitution to duplicate terminus replace pattern at ")(*(replace_stuff->terminus))("\n" );
-			dest = DuplicateSubtree( replace_stuff->terminus, keys, can_key, shared_ptr<Key>() ); // not in substitution any more
+			TreePtr<Node> term = DuplicateSubtree( replace_stuff->terminus, keys, can_key, shared_ptr<Key>() ); // not in substitution any more
 			TRACE( "Returning to substitution for rest of stuff\n" );
-			return dest;
+			return term;
 		}
 	}
+	
+    // See if the source node is coupled to anything
+    TreePtr<Node> dest = keys->KeyAndSubstitute( TreePtr<Node>(), source, this, can_key );
+    ASSERT( !(dest && current_key) )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
 
-	if( TreePtr<RootedSlaveBase> rsb = dynamic_pointer_cast<RootedSlaveBase>(source) )
+    if( TreePtr<RootedSlaveBase> rsb = dynamic_pointer_cast<RootedSlaveBase>(source) )
 	{
 		dest = DuplicateSubtree( rsb->GetThrough(), keys, can_key, current_key );
 		if(!can_key) // do not run slaves until we have all the keys of the master 
@@ -750,10 +759,8 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
     	    slave->pcontext = pcontext;
     	    (void)slave->DefaultRepeatingSearchReplace( &dest, *keys );
         }
-		return dest;
 	}
-
-	if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
+	else if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
 	{
 		dest = DuplicateSubtree( sb->GetThrough(), keys, can_key, current_key );
         if(!can_key) // do not run slaves until we have all the keys of the master 
@@ -762,86 +769,54 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 		    slave->pcontext = pcontext;
     	    (void)slave->DefaultRepeatingSearchReplace( &dest, *keys );
         }
-		return dest;
 	}    
-	
-    TreePtr<Node> key=TreePtr<Node>(), overlay=source;
-    if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
+	else if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
     {
-        // Substitute is an identifier, so preserve its uniqueness by just returning
-        // the same node. Don't do any more - we wouldn't want to change the
-        // identifier in the tree even if it had members, lol!
-        ASSERT( !current_key )( "Found soft replace pattern while under substitution\n" );
-        key = srp->DuplicateSubtree( this, keys, can_key );
+        // Call the soft pattern impl (TODO don't like calling the function DuplicateSubtree, confusing)
+        dest = srp->DuplicateSubtree( this, keys, can_key );
+        // Allow this to key a coupling 
+        (void)keys->KeyAndSubstitute( dest, source, this, can_key );
     }
-
-    // Allow this to key a coupling if required
-    dest = keys->KeyAndSubstitute( key, source, this, can_key );
-    ASSERT( !dest || !current_key )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
-  
-    if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
+    else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
     {
-        // Substitute is an identifier, so preserve its uniqueness by just returning
-        // the same node. Don't do any more - we wouldn't want to change the
-        // identifier in the tree even if it had members, lol!
-        ASSERT( !current_key )( "Found overlay pattern while under substitution\n" ); // TODO maybe disallow all special nodes when under substitution?
-        // TODO I think we should recurse instead of changing source, so other 
-        // checks can be made eg for other special nodes
-
-        // Note that this can effectively throw away the ob->base if either (a) we were coupled
-        // or (b) ob->overlay is not a compatible overly. It's OK because ob->base was used
-        // in the search pattern that must have matched for us to get here in the first place.
-        overlay = ob->overlay;
-        if( !dest || !ob->overlay->IsLocalMatch(ob->base.get()) )
+        source = ob->overlay;
+        if( !dest || !source->IsLocalMatch(ob->base.get()) )
         {
-            return DuplicateSubtree( overlay, keys, can_key, current_key );
+            // Base not coupled or is not compatible for overlaying, so just duplicate the overlay leg.
+            dest = DuplicateSubtree( source, keys, can_key, current_key );
+        }
+        else
+        {
+            // Base coupled and can be overlayed so overlay. 
+            // TODO what if ob->overlay is another soft node? Should we not always DuplicateSubtree()?
+            ASSERT( !dynamic_pointer_cast<SpecialBase>( source ) );
+            Overlay( dest, source, keys, can_key, current_key );
         }
     }
-
-    if( !dest )
+    else if( !dest )
     {
         // No coupling to key to, so just make a copy
-    	TRACE("Did not substitute (overlay is %s)\n", TypeInfo(overlay).name().c_str());
+    	TRACE("Copying source")(*source)("\n");
         
-        ASSERT( !dynamic_pointer_cast<SpecialBase>(overlay) )
-              ("Special nodes in replace pattern must be keyed\n")
-              ("source=")
-              (*source)
-              (" overlay=")
-              (*overlay)
-              (" dest=NULL\n");
+        ASSERT( !dynamic_pointer_cast<SpecialBase>(source) )
+              ("Special nodes in replace pattern must be coupled (")(*source)(")\n");
         
-        TRACE("duplicating supplied node\n");
         // Make the new node (destination node)
-        shared_ptr<Cloner> dup_dest = overlay->Duplicate(overlay);
+        shared_ptr<Cloner> dup_dest = source->Duplicate(source);
         dest = dynamic_pointer_cast<Node>( dup_dest );
         ASSERT(dest);
-        ClearPtrs( dest ); // must clear otherwise we get inks into the input program 
+ 
+        // Replace all the links in the new node with duplicates of the links in the old node.
+        // To do this we re-use the Overlay function (no point writing 2 very similar functions)
+        ClearPtrs( dest ); 
+        Overlay( dest, source, keys, can_key, current_key );
 
         // If not substituting a Stuff node, remember this node is dirty for GreenGrass restriction
         // Also dirty the dest if the source was dirty when we are substituting Stuff
-        // TODO should we use source or overlay here?
         if( !current_key || !dynamic_pointer_cast<StuffKey>(current_key) || dirty_grass.find( source ) != dirty_grass.end() )
             dirty_grass.insert( dest );
-    }
-    
-    ASSERT( dest );
-    
-    // Don't overlay special nodes 
-    if( !dynamic_pointer_cast<SpecialBase>( overlay ) )
-    {
-        // Overlaying requires type compatibility - check for this
-	    ASSERT( overlay->IsLocalMatch(dest.get()) )
-	    	  ( "When overlaying, the replace pattern ")(*overlay)(" must be a non-strict superclass of substitute ")(*dest)(", so that its members are a subset");
-	    TRACE();
-	    
-        // Copy the source over, except for any NULLs in the source. If source is superclass
-	    // of destination (i.e. has possibly fewer members) the missing ones will be left alone.
-        Overlay( dest, overlay, keys, can_key, current_key );
-        
-        ASSERT( dest );
     }        
-
+    
     return dest;
 }
 
