@@ -81,7 +81,7 @@ template< typename KEY, typename DATA >
 class Map : public map<KEY, DATA>
 {
 public:
-    inline bool IsExist( const KEY &k )
+    inline bool IsExist( const KEY &k ) const 
     {
         return map<KEY, DATA>::find( k ) != map<KEY, DATA>::end();
     }
@@ -91,7 +91,7 @@ template< typename KEY >
 class Set : public set<KEY>
 {
 public:
-    inline bool IsExist( const KEY &k )
+    inline bool IsExist( const KEY &k ) const 
     {
         return set<KEY>::find( k ) != set<KEY>::end();
     }

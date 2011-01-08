@@ -20,38 +20,8 @@ struct Key
 	TreePtr<Node> replace_pattern; // Tree node at matched pattern; root of any replace subtree TODO fix comment
 };
 
-struct Coupling : public set< TreePtr<Node> >
-{
-	inline Coupling() {}
-/*	inline Coupling( const Sequence< Node > &seq )
-	{
-		Sequence< Node > s2 = seq;
-		FOREACH( TreePtr<Node> v, s2 )
-			insert( v );
-	}*/
-	template<typename L, typename R>
-	inline Coupling( pair<L, R> p )
-	{
-		Coupling l( p.first );
-		FOREACH( TreePtr<Node> v, l )
-			insert( v );
-		Coupling r( p.second );
-		FOREACH( TreePtr<Node> v, r )
-			insert( v );
-	}
-	inline Coupling( TreePtr<Node> n )
-	{
-		insert( n );
-	}
-	operator set<Coupling>() 
-	{
-		set<Coupling> s;
-		s.insert( *this );
-		return s;
-	}
-};
-
-typedef set<Coupling> CouplingSet;
+typedef TreePtr<Node> Coupling;
+typedef Set<Coupling> CouplingSet;
 
 class RootedSearchReplace;
 class CouplingKeys
@@ -69,14 +39,13 @@ public:
 						   const RootedSearchReplace *sr,
 						   bool can_key );
 	TreePtr<Node> KeyAndSubstitute( TreePtr<Node> x, // source after soft nodes etc
-									   TreePtr<Node> pattern, // source
-									   const RootedSearchReplace *sr,
-									   bool can_key );
+									TreePtr<Node> pattern, // source
+									const RootedSearchReplace *sr,
+									bool can_key );
 	TreePtr<Node> KeyAndSubstitute( shared_ptr<Key> key,
-									   TreePtr<Node> pattern,
-									   const RootedSearchReplace *sr,
-									   bool can_key );
-    static Coupling FindCoupling( TreePtr<Node> node, const CouplingSet &couplings );
+									TreePtr<Node> pattern,
+									const RootedSearchReplace *sr,
+									bool can_key );
 private:
 	Map< Coupling, shared_ptr<Key> > keys_map;
 };

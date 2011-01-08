@@ -1,26 +1,6 @@
 #include "coupling.hpp"
 #include "search_replace.hpp" // TODO remove the need for this: search side only uses couplings member, replace side calls in but could maybe declare local as per search side?
 
-// Find a coupling containing the supplied node
-Coupling CouplingKeys::FindCoupling( TreePtr<Node> node,
-		                             const CouplingSet &couplings )
-{
-	// TODO optimisation: a backing map of TreePtr to Coupling & would optimise
-	// this by a factor of the number of couplings: this and its callees are high on the profile.
-	Coupling found; // returns an empty coupling if not found
-	FOREACH( Coupling c, couplings )
-    {
-        Coupling::iterator ni = c.find( node );
-        if( ni != c.end() )
-        {
-        	ASSERT( found.empty() )("Found more than one coupling for a node - consider merging the couplings");
-        	found = c;
-        }
-    }
-    return found;
-}
-
-
 Result CouplingKeys::KeyAndRestrict( TreePtr<Node> x,
 									 TreePtr<Node> pattern,
 									 const RootedSearchReplace *sr,
@@ -42,21 +22,20 @@ Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
     ASSERT( key->root->IsFinal() );
 	// Find a coupling for this node. If the node is not in a coupling then there's
 	// nothing for us to do, so return without restricting the search.
-	Coupling coupling = FindCoupling( pattern, sr->couplings );
-	if( coupling.empty() )
+	if( !sr->couplings.IsExist(pattern) )
 		return FOUND;
 
 	// If we're keying and we haven't keyed this node so far, key it now
 	TRACE("MATCH: can_key=%d\n", (int)can_key);
-	if( can_key && !keys_map[coupling] )
+	if( can_key && !keys_map[pattern] )
 	{
 		TRACE("keying... to ")
 		     (*(key->root))
 		     (" key ptr %p new value %p, presently %d keys out of %d couplings\n",
-				keys_map[coupling].get(), key.get(),
+				keys_map[pattern].get(), key.get(),
 				keys_map.size(), sr->couplings.size() );
 
-		keys_map[coupling] = key;
+		keys_map[pattern] = key;
 
 		return FOUND; // always match when keying (could restrict here too as a slight optimisation, but KISS for now)
 	}
@@ -68,12 +47,12 @@ Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
 	// Since collections (which require decisions) can exist within the tree, we must allow iteration
 	// through choices, and since the number of decisions seen may vary, we must start a new conjecture.
 	// Therefore, we recurse back to Compare().
-	ASSERT( keys_map[coupling] ); // should have been caught by CheckMatchSetsKeyed()
+	ASSERT( keys_map[pattern] ); // should have been caught by CheckMatchSetsKeyed()
 	Result r;
 
-	if( key->root != keys_map[coupling]->root )
+	if( key->root != keys_map[pattern]->root )
 	{
-		r = sr->Compare( key->root, keys_map[coupling]->root );
+		r = sr->Compare( key->root, keys_map[pattern]->root );
 	}
 	else
 		r = FOUND; // TODO optimisation being done in wrong place
@@ -116,14 +95,13 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 	// Find a coupling for this node. If the node is not in a coupling then there's
 	// nothing for us to do, so return without restricting the search.	
 	TRACE("Looking for coupling for ")(*pattern);
-    Coupling coupling = FindCoupling( pattern, sr->couplings );
-	if( coupling.empty() )
+    if( !sr->couplings.IsExist(pattern) )
     {
         TRACE(" not found\n");
 		return TreePtr<Node>();
     }
 	TRACE(" found ");
-#if 1    
+#if 0    
 	TRACE("coupling={");
 	bool first=true;
 	FOREACH( TreePtr<Node> n, coupling )
@@ -140,25 +118,25 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 
 	// If we're keying and we haven't keyed this node so far, key it now
 	TRACE("can_key=%d\n", (int)can_key);
-	if( can_key && key && !keys_map[coupling] )
+	if( can_key && key && !keys_map[pattern] )
 	{
 		TRACE("keying... coupling %p key ptr %p new value %p, presently %d keys out of %d couplings\n",
-				&coupling, &keys_map[coupling], key.get(),
+				&pattern, &keys_map[pattern], key.get(),
 				keys_map.size(), sr->couplings.size() );
-		keys_map[coupling] = key;
+		keys_map[pattern] = key;
 
 		return key->root;
 	}
 
-	if( keys_map[coupling] )
+	if( keys_map[pattern] )
 	{
 		// Always substitute
 		TRACE("substituting ");
-		ASSERT( keys_map[coupling] );
-		keys_map[coupling]->replace_pattern = pattern; // Only fill this in while substituting under the node
-		TreePtr<Node> subs = sr->DuplicateSubtree( keys_map[coupling]->root, this, can_key, keys_map[coupling] ); // Enter substitution
+		ASSERT( keys_map[pattern] );
+		keys_map[pattern]->replace_pattern = pattern; // Only fill this in while substituting under the node
+		TreePtr<Node> subs = sr->DuplicateSubtree( keys_map[pattern]->root, this, can_key, keys_map[pattern] ); // Enter substitution
 		// TODO can_key should be false in the above?
-		keys_map[coupling]->replace_pattern = TreePtr<Node>();
+		keys_map[pattern]->replace_pattern = TreePtr<Node>();
 		return subs;
 	}
 
