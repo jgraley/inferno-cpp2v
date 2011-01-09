@@ -21,17 +21,13 @@
 // - A NULL shared_ptr is also a wildcard for anything.
 //
 // - Multiple nodes in the search pattern can be forced to match the same 
-//   program node if a Coupling is created that points to these nodes, and
-//   passed to the constructor. Must be >= 1 node in normal (not abnormal)
+//   program node if a the same node is pointed to by more than one
+//   parent in the search pattern. Must be >= 1 node in normal 
 //   context.
 //
 // - Nodes in the replace pattern may be substituted by program nodes
-//   found during matching by creating a Coupling and inserting pointers
-//   to the corresponding search and replace pattern nodes.
-//
-// - NULL shared_ptr (or empty container) in replace pattern under a
-//   substituted node means fill this in from substitute too (otherwise
-//   use what is specified).
+//   found during matching by allowing the replace pattern to point to 
+//   a node also present in the search patter (in a normal context).
 //
 // - Identifiers (any node derived from Identifier) are kept unique
 //   during replace by pointing directly to the identifier in the 
@@ -50,14 +46,23 @@
 //   restricted intermediates (the Stuff node). Restriction can be a
 //   general tree (in abnormal context)
 //
-// - SlaveSearchReplace search/replace so that a second SR can happen for each match
-//   of the first one, and can borrow its couplings.
+// - SlaveSearchReplace search/replace so that a second SR can happen 
+//   for each match of the first one, and can borrow its couplings.
 //
-// - Boolean rules supported by NotMatch, MAtchAll, MatchAny, MatchN and
-//   MatchOne. For all but MatchAll, pattern is abnormal context.
+// - Boolean rules supported by NotMatch, MAtchAll, MatchAny and
+//   MatchOdd. For all but MatchAll, pattern is abnormal context.
 //
 // - The base type supplied as template param to all special nodes
 //   acts as a pre-restriction according to usual topological rules.
+//
+// - Green grass node only matches nodes that have not already been
+//   replaced, to avoid spinning forever.
+//
+// - Overlay node allows a replace pattern to be overlayed over 
+//   a substituted node. NULL shared_ptr (or empty container) in overly 
+//   means fill this in from the substitute. Intemediate node types
+//   mean fill in those members introduced in derived classes from the
+//   substitute.
 //
 
 class Conjecture;
@@ -157,16 +162,16 @@ public:
     struct SoftSearchPattern
     {
         virtual Result DecidedCompare( const CompareReplace *sr,
-        		                                      TreePtr<Node> x,
-        		                                      CouplingKeys *match_keys,
-        		                                      bool can_key,
-        		                                      Conjecture &conj ) const = 0;
+        		                       TreePtr<Node> x,
+        		                       CouplingKeys *match_keys,
+        		                       bool can_key,
+        		                       Conjecture &conj ) const = 0;
     };
     struct SoftReplacePattern
     {
         virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr,
-        		                                   CouplingKeys *match_keys,
-        		                                   bool can_key ) = 0;
+        		                                CouplingKeys *match_keys,
+        		                                bool can_key ) = 0;
     };
 
     // Some self-testing
@@ -240,9 +245,9 @@ private:
     	          shared_ptr<Key> current_key ) const;
 public:
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> x,
-    		                           CouplingKeys *match_keys,
-    		                           bool can_key,
-    		                           shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
+    		                        CouplingKeys *match_keys,
+    		                        bool can_key,
+    		                        shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
 private:
     TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x,
     		                                   CouplingKeys *match_keys ) const;
