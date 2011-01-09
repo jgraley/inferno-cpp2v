@@ -55,7 +55,7 @@ void SwitchToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr<BuildInstanceIdentifier> id("switch_value");
     TreePtr<TypeOf> s_cond( new TypeOf ); // TODO use MakeTreePtr, confirm this works
     
-    // Slave for default
+    // SlaveSearchReplace for default
     MakeTreePtr<Compound> l1_s_body, l1_r_body;
     MakeTreePtr< Star<Declaration> > l1_decls;
     MakeTreePtr< Star<Statement> > l1_pre, l1_post;
@@ -72,7 +72,7 @@ void SwitchToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     l1_r_goto->destination = l1_r_labelid;
     l1_r_label->identifier = l1_r_labelid;
     
-    MakeTreePtr< RootedSlave<Statement> > r_slave1( body, l1_s_body, l1_r_body );
+    MakeTreePtr< SlaveCompareReplace<Statement> > r_slave1( body, l1_s_body, l1_r_body );
 
     // slave for normal case statements (single value)
     MakeTreePtr<Compound> l2_s_body, l2_r_body;
@@ -100,9 +100,9 @@ void SwitchToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     l2_r_goto->destination = l2_r_labelid;
     l2_r_label->identifier = l2_r_labelid;
     
-    MakeTreePtr< RootedSlave<Statement> > r_slave2( r_slave1, l2_s_body, l2_r_body );
+    MakeTreePtr< SlaveCompareReplace<Statement> > r_slave2( r_slave1, l2_s_body, l2_r_body );
     
-    // Slave for range cases (GCC extension) eg case 5..7:    
+    // SlaveSearchReplace for range cases (GCC extension) eg case 5..7:    
     MakeTreePtr<Compound> l3_s_body, l3_r_body;
     MakeTreePtr< Star<Declaration> > l3_decls;
     MakeTreePtr< Star<Statement> > l3_pre, l3_post;
@@ -133,7 +133,7 @@ void SwitchToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     l3_r_goto->destination = l3_r_labelid;
     l3_r_label->identifier = l3_r_labelid;
     
-    MakeTreePtr< RootedSlave<Statement> > r_slave3( r_slave2, l3_s_body, l3_r_body );
+    MakeTreePtr< SlaveCompareReplace<Statement> > r_slave3( r_slave2, l3_s_body, l3_r_body );
 
     // Finish up master
     s_cond->pattern = cond_type;
@@ -172,7 +172,7 @@ void DoToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     l_overlay->overlay = l_r_goto;
     l_r_goto->destination = l_r_cont_labelid;
     
-    MakeTreePtr< RootedSlave<Statement> > r_slave( body, l_stuff, l_stuff );
+    MakeTreePtr< SlaveCompareReplace<Statement> > r_slave( body, l_stuff, l_stuff );
     l_stuff->terminus = l_overlay;
     
     s_do->condition = cond;

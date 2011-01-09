@@ -2,7 +2,7 @@
 #include "helpers/misc.hpp"
 #include "tree/tree.hpp"
 
-Result TransformToBase::DecidedCompare( const RootedSearchReplace *sr,
+Result TransformToBase::DecidedCompare( const CompareReplace *sr,
 		                                                     TreePtr<Node> x,
 		                                                     CouplingKeys *keys,
 		                                                     bool can_key,
@@ -27,7 +27,7 @@ Result TransformToBase::DecidedCompare( const RootedSearchReplace *sr,
 
 
 
-string BuildIdentifierBase::GetNewName( const RootedSearchReplace *sr,
+string BuildIdentifierBase::GetNewName( const CompareReplace *sr,
                                         CouplingKeys *keys,
                                         bool can_key )
 {

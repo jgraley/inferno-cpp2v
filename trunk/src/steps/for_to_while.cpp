@@ -28,7 +28,7 @@ void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 
     l_r_block->statements = (inc, l_r_cont);
     l_s_gg->through = l_s_cont;
-    MakeTreePtr< RootedSlave<Statement> > r_slave( forbody, l_stuff, l_stuff );
+    MakeTreePtr< SlaveCompareReplace<Statement> > r_slave( forbody, l_stuff, l_stuff );
     l_stuff->terminus = l_overlay;
     l_overlay->base = l_s_gg;
     l_stuff->recurse_restriction = l_s_not;

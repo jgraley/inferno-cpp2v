@@ -13,7 +13,7 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
     TRACE("Trying program (global)\n" );
 
     // Look through the members of all scopes (Program, Records, Procedures, Compounds)
-    Walk walkr(program);
+    Expand walkr(program);
 	FOREACH( const TreePtr<Node> n, walkr )
 	{
     	if( TreePtr<Scope> s = dynamic_pointer_cast<Scope>(n) )
@@ -25,7 +25,7 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 	}
 	
 	// Special additional processing for Compounds - look for statements that are really Instance Declarations
-	Walk walkc(program);
+	Expand walkc(program);
 	FOREACH( const TreePtr<Node> n, walkc )
 	{
     	if( TreePtr<Compound> c = dynamic_pointer_cast<Compound>(n) )

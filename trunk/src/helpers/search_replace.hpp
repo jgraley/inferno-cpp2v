@@ -50,7 +50,7 @@
 //   restricted intermediates (the Stuff node). Restriction can be a
 //   general tree (in abnormal context)
 //
-// - Slave search/replace so that a second SR can happen for each match
+// - SlaveSearchReplace search/replace so that a second SR can happen for each match
 //   of the first one, and can borrow its couplings.
 //
 // - Boolean rules supported by NotMatch, MAtchAll, MatchAny, MatchN and
@@ -137,18 +137,18 @@ struct GreenGrass : GreenGrassBase, Special<PRE_RESTRICTION>
 };
 
 
-class RootedSearchReplace : InPlaceTransformation // TODO rename RootedSearchReplace -> MatchReplace
+class CompareReplace : InPlaceTransformation // TODO rename CompareReplace -> MatchReplace
 {  
 public:
     // Constructor and destructor. Search and replace patterns and couplings are
     // specified here, so that we have a fully confiugured functor.
-    RootedSearchReplace( TreePtr<Node> sp,
+    CompareReplace( TreePtr<Node> sp,
                          TreePtr<Node> rp=TreePtr<Node>(),
                          CouplingSet m = CouplingSet() );
-    RootedSearchReplace( TreePtr<Node> sp,
+    CompareReplace( TreePtr<Node> sp,
                          TreePtr<Node> rp,
                          int ); // for use by slave wrappers
-    ~RootedSearchReplace();
+    ~CompareReplace();
     
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
@@ -156,7 +156,7 @@ public:
     TreePtr<Node> GetContext() const { ASSERT(pcontext&&*pcontext); return *pcontext; }
     struct SoftSearchPattern
     {
-        virtual Result DecidedCompare( const RootedSearchReplace *sr,
+        virtual Result DecidedCompare( const CompareReplace *sr,
         		                                      TreePtr<Node> x,
         		                                      CouplingKeys *match_keys,
         		                                      bool can_key,
@@ -164,7 +164,7 @@ public:
     };
     struct SoftReplacePattern
     {
-        virtual TreePtr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
+        virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr,
         		                                   CouplingKeys *match_keys,
         		                                   bool can_key ) = 0;
     };
@@ -276,7 +276,7 @@ private:
 };
 
 
-class SearchReplace : public RootedSearchReplace
+class SearchReplace : public CompareReplace
 {
 public:
     SearchReplace( TreePtr<Node> sp,
@@ -290,23 +290,23 @@ public:
 };
 
 // TODO extract common base for slaves, and use in DuplicateSubtree() and maybe elsewhere
-struct RootedSlaveBase : virtual Node,
-                         public RootedSearchReplace
+struct SlaveCompareReplaceBase : virtual Node,
+                         public CompareReplace
 {
-	RootedSlaveBase( TreePtr<Node> sp, TreePtr<Node> rp=TreePtr<Node>() ) :
-		RootedSearchReplace( sp, rp, 0 )
+	SlaveCompareReplaceBase( TreePtr<Node> sp, TreePtr<Node> rp=TreePtr<Node>() ) :
+		CompareReplace( sp, rp, 0 )
 	{}
 	virtual TreePtr<Node> GetThrough() const = 0;
 };
 template<class PRE_RESTRICTION>
-struct RootedSlave : RootedSlaveBase, Special<PRE_RESTRICTION>
+struct SlaveCompareReplace : SlaveCompareReplaceBase, Special<PRE_RESTRICTION>
 {
 	SPECIAL_NODE_FUNCTIONS
 
-	// Slave must be constructed using constructor
-	RootedSlave( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+	// SlaveSearchReplace must be constructed using constructor
+	SlaveCompareReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
 		through( t ),
-		RootedSlaveBase( sp, rp )
+		SlaveCompareReplaceBase( sp, rp )
 	{
 	}
 
@@ -317,23 +317,23 @@ struct RootedSlave : RootedSlaveBase, Special<PRE_RESTRICTION>
 	}
 };
 
-struct SlaveBase : virtual Node,
+struct SlaveSearchReplaceBase : virtual Node,
                    public SearchReplace
 {
-	SlaveBase( TreePtr<Node> sp, TreePtr<Node> rp=TreePtr<Node>() ) :
+	SlaveSearchReplaceBase( TreePtr<Node> sp, TreePtr<Node> rp=TreePtr<Node>() ) :
 		SearchReplace( sp, rp, 0 )
 	{}
 	virtual TreePtr<Node> GetThrough() const = 0;
 };
 template<class PRE_RESTRICTION>
-struct Slave : SlaveBase, Special<PRE_RESTRICTION>
+struct SlaveSearchReplace : SlaveSearchReplaceBase, Special<PRE_RESTRICTION>
 {
 	SPECIAL_NODE_FUNCTIONS
 
-	// Slave must be constructed using constructor
-	Slave( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+	// SlaveSearchReplace must be constructed using constructor
+	SlaveSearchReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
 		through( t ),
-		SlaveBase( sp, rp )
+		SlaveSearchReplaceBase( sp, rp )
 	{
 	}
 

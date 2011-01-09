@@ -4,14 +4,14 @@
 #include "search_replace.hpp"
 
 
-////////////////////////// Traverse //////////////////////////
+////////////////////////// Flatten //////////////////////////
 
-bool Traverse::iterator::IsAtEnd() const
+bool Flatten::iterator::IsAtEnd() const
 {
     return empty || mit == m_end;
 }
 
-void Traverse::iterator::NormaliseNewMember()
+void Flatten::iterator::NormaliseNewMember()
 {
 	if( !IsAtEnd() )
 		if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
@@ -22,7 +22,7 @@ void Traverse::iterator::NormaliseNewMember()
 		}
 }
 
-void Traverse::iterator::BypassEndOfContainer()
+void Flatten::iterator::BypassEndOfContainer()
 {
 	ASSERT( !IsAtEnd() && dynamic_cast<ContainerInterface *>(GetCurrentMember()) ); // this fn requires us to be on a container
 	if( cit == c_end )
@@ -32,7 +32,7 @@ void Traverse::iterator::BypassEndOfContainer()
 	}
 }
 
-Traverse::iterator::iterator( TreePtr<Node> r ) :
+Flatten::iterator::iterator( TreePtr<Node> r ) :
 	root( r ),
 	empty( false )
 {
@@ -43,12 +43,12 @@ Traverse::iterator::iterator( TreePtr<Node> r ) :
     NormaliseNewMember();
 }
 
-Traverse::iterator::iterator() :
+Flatten::iterator::iterator() :
 	empty( true )
 {
 }
 
-Traverse::iterator::iterator( const Traverse::iterator & other ) :
+Flatten::iterator::iterator( const Flatten::iterator & other ) :
     mit( other.mit ),
     m_end( other.m_end ),
     cit( other.cit ),
@@ -58,7 +58,7 @@ Traverse::iterator::iterator( const Traverse::iterator & other ) :
 {
 }
 
-Traverse::iterator::operator string() const
+Flatten::iterator::operator string() const
 {
     if (IsAtEnd())
     	return string("end");
@@ -72,13 +72,13 @@ Traverse::iterator::operator string() const
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
 }
 
-shared_ptr<ContainerInterface::iterator_interface> Traverse::iterator::Clone() const
+shared_ptr<ContainerInterface::iterator_interface> Flatten::iterator::Clone() const
 {
 	shared_ptr<iterator> ni( new iterator(*this) );
 	return ni;
 }
 
-Traverse::iterator &Traverse::iterator::operator++()
+Flatten::iterator &Flatten::iterator::operator++()
 {
 	ASSERT( !IsAtEnd() );
     if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
@@ -98,7 +98,7 @@ Traverse::iterator &Traverse::iterator::operator++()
 	return *this;
 }
 
-Traverse::iterator::reference Traverse::iterator::operator*() const
+Flatten::iterator::reference Flatten::iterator::operator*() const
 {
     ASSERT( !IsAtEnd() );
 	if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
@@ -109,12 +109,12 @@ Traverse::iterator::reference Traverse::iterator::operator*() const
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
 }
 
-Traverse::iterator::pointer Traverse::iterator::operator->() const
+Flatten::iterator::pointer Flatten::iterator::operator->() const
 {
 	return &operator*();
 }
 
-bool Traverse::iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
+bool Flatten::iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
 {
 	const iterator *pi = dynamic_cast<const iterator *>(&ib);
 	ASSERT(pi)("Comparing traversing iterator with something else ")(ib);
@@ -123,7 +123,7 @@ bool Traverse::iterator::operator==( const ContainerInterface::iterator_interfac
 	return **pi == **this; // TODO do not like - too many derefs
 }
 
-void Traverse::iterator::Overwrite( Traverse::iterator::pointer v ) const
+void Flatten::iterator::Overwrite( Flatten::iterator::pointer v ) const
 {
     ASSERT( !IsAtEnd() );
 	if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
@@ -134,44 +134,44 @@ void Traverse::iterator::Overwrite( Traverse::iterator::pointer v ) const
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
 }
 
-const bool Traverse::iterator::IsOrdered() const
+const bool Flatten::iterator::IsOrdered() const
 {
 	return true; // traverse walks tree in order generally
 }
 
-Traverse::Traverse( TreePtr<Node> r ) :
+Flatten::Flatten( TreePtr<Node> r ) :
 	root(r)
 {
 }
 
-const Traverse::iterator &Traverse::begin()
+const Flatten::iterator &Flatten::begin()
 {
 	my_begin = iterator( root );
 	return my_begin;
 }
 
-const Traverse::iterator &Traverse::end()
+const Flatten::iterator &Flatten::end()
 {
 	my_end = iterator();
 	return my_end;
 }
 
 
-////////////////////////// Walk //////////////////////////
+////////////////////////// Expand //////////////////////////
 
-bool Walk::iterator::IsAtEndOfChildren() const
+bool Expand::iterator::IsAtEndOfChildren() const
 {
 	ASSERT( !done );
 
 	if( state.empty() )
 		return false;
 
-    const Traverse::iterator &ti = state.top();
+    const Flatten::iterator &ti = state.top();
 
-    return ti == Traverse::iterator();
+    return ti == Flatten::iterator();
 }
 
-void Walk::iterator::BypassEndOfChildren()
+void Expand::iterator::BypassEndOfChildren()
 {
 	ASSERT( !done );
 	while( IsAtEndOfChildren() )
@@ -186,14 +186,14 @@ void Walk::iterator::BypassEndOfChildren()
 	}
 }
 
-void Walk::iterator::Push( TreePtr<Node> n )
+void Expand::iterator::Push( TreePtr<Node> n )
 { 
-    state.push( Traverse(n).begin() );
+    state.push( Flatten(n).begin() );
 }        
 
-Walk::iterator::iterator( TreePtr<Node> &r,
+Expand::iterator::iterator( TreePtr<Node> &r,
 	                   	  TreePtr<Node> res,
-	                   	  const RootedSearchReplace *rc,
+	                   	  const CompareReplace *rc,
 	                   	  CouplingKeys *k ) :
     root( new TreePtr<Node>(r) ),
     restrictor( res ),
@@ -203,13 +203,13 @@ Walk::iterator::iterator( TreePtr<Node> &r,
 {
 }
 
-Walk::iterator::iterator() :
+Expand::iterator::iterator() :
 	restriction_comparison( NULL ),
     done( true )
 {
 }        
 
-Walk::iterator::iterator( const Walk::iterator & other ) :
+Expand::iterator::iterator( const Expand::iterator & other ) :
 	root( other.root ),
 	restrictor( other.restrictor ),
 	restriction_comparison( other.restriction_comparison ),
@@ -219,10 +219,10 @@ Walk::iterator::iterator( const Walk::iterator & other ) :
 {
 }
 
-Walk::iterator::operator string() const
+Expand::iterator::operator string() const
 {
     string s;
-    stack< Traverse::iterator > ps = state; // std::stack doesn't have [] so copy the whole thing and go backwards
+    stack< Flatten::iterator > ps = state; // std::stack doesn't have [] so copy the whole thing and go backwards
     while( !ps.empty() )
     {
         s = string(ps.top()) + string(" ") + s;
@@ -231,7 +231,7 @@ Walk::iterator::operator string() const
     return s;
 }
 
-void Walk::iterator::AdvanceInto()
+void Expand::iterator::AdvanceInto()
 {
 	ASSERT( !done );
 	ASSERT( !IsAtEndOfChildren() );
@@ -261,7 +261,7 @@ void Walk::iterator::AdvanceInto()
     }
 }
 
-void Walk::iterator::AdvanceOver()
+void Expand::iterator::AdvanceOver()
 {
 	ASSERT( !done );
 	ASSERT( !IsAtEndOfChildren() );
@@ -279,19 +279,19 @@ void Walk::iterator::AdvanceOver()
 	}
 }
 
-shared_ptr<ContainerInterface::iterator_interface> Walk::iterator::Clone() const
+shared_ptr<ContainerInterface::iterator_interface> Expand::iterator::Clone() const
 {
 	shared_ptr<iterator> ni( new iterator(*this) );
 	return ni;
 }
 
-Walk::iterator &Walk::iterator::operator++()
+Expand::iterator &Expand::iterator::operator++()
 {
 	AdvanceInto();
 	return *this;
 }
 
-Walk::iterator::reference Walk::iterator::operator*() const
+Expand::iterator::reference Expand::iterator::operator*() const
 {
     ASSERT( !done )("Already advanced over everything; reached end of walk");
     ASSERT( !IsAtEndOfChildren() );
@@ -306,12 +306,12 @@ Walk::iterator::reference Walk::iterator::operator*() const
 	}
 }
 
-Walk::iterator::pointer Walk::iterator::operator->() const
+Expand::iterator::pointer Expand::iterator::operator->() const
 {
 	return &operator*();
 }
 
-bool Walk::iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
+bool Expand::iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
 {
 	const iterator *pi = dynamic_cast<const iterator *>(&ib);
 	ASSERT(pi)("Comparing walking iterator with something else ")(ib);
@@ -320,7 +320,7 @@ bool Walk::iterator::operator==( const ContainerInterface::iterator_interface &i
 	return **pi == **this;
 }
 
-void Walk::iterator::Overwrite( Walk::iterator::pointer v ) const
+void Expand::iterator::Overwrite( Expand::iterator::pointer v ) const
 {
     ASSERT( !done )("Already advanced over everything; reached end of walk");
     ASSERT( !IsAtEndOfChildren() );
@@ -335,14 +335,14 @@ void Walk::iterator::Overwrite( Walk::iterator::pointer v ) const
     }
 }
 
-const bool Walk::iterator::IsOrdered() const
+const bool Expand::iterator::IsOrdered() const
 {
 	return true; // walk walks tree in order generally
 }
 
-Walk::Walk( TreePtr<Node> r,
+Expand::Expand( TreePtr<Node> r,
 		    TreePtr<Node> res,
-		    const RootedSearchReplace *rsr,
+		    const CompareReplace *rsr,
 		    CouplingKeys *k ) :
 	root(r),
 	restrictor( res ),
@@ -353,40 +353,40 @@ Walk::Walk( TreePtr<Node> r,
 {
 }
 
-const Walk::iterator &Walk::begin()
+const Expand::iterator &Expand::begin()
 {
 	my_begin = iterator( root, restrictor, restriction_comparison, keys );
 	return my_begin;
 }
 
-const Walk::iterator &Walk::end()
+const Expand::iterator &Expand::end()
 {
 	my_end = iterator();
 	return my_end;
 }
 
-////////////////////////// Sweep //////////////////////////
+////////////////////////// ParentTraverse //////////////////////////
 
-Sweep::iterator::iterator()
+ParentTraverse::iterator::iterator()
 {
 }        
 
-Sweep::iterator::iterator( const Sweep::iterator & other ) :
-    Walk::iterator( other )
+ParentTraverse::iterator::iterator( const ParentTraverse::iterator & other ) :
+    Expand::iterator( other )
 {
 }
 
-Sweep::iterator::iterator( TreePtr<Node> &root,
+ParentTraverse::iterator::iterator( TreePtr<Node> &root,
                            TreePtr<Node> restrictor,
-                           const RootedSearchReplace *rc,
+                           const CompareReplace *rc,
                            CouplingKeys *k ) :
-    Walk::iterator( root, restrictor, rc, k )
+    Expand::iterator( root, restrictor, rc, k )
 {
 }
  
-Sweep::Sweep( TreePtr<Node> r,
+ParentTraverse::ParentTraverse( TreePtr<Node> r,
               TreePtr<Node> res,
-              const RootedSearchReplace *rsr,
+              const CompareReplace *rsr,
               CouplingKeys *k ) :
     root(r),
     restrictor( res ),
@@ -397,55 +397,55 @@ Sweep::Sweep( TreePtr<Node> r,
 {
 }
 
-const Sweep::iterator &Sweep::begin()
+const ParentTraverse::iterator &ParentTraverse::begin()
 {
     my_begin = iterator( root, restrictor, restriction_comparison, keys );
     return my_begin;
 }
 
-const Sweep::iterator &Sweep::end()
+const ParentTraverse::iterator &ParentTraverse::end()
 {
     my_end = iterator();
     return my_end;
 }
 
-void Sweep::iterator::AdvanceInto()
+void ParentTraverse::iterator::AdvanceInto()
 {
     TreePtr<Node> element = **this; // look at current node
     if( element && seen.IsExist( element ) )
-        Walk::iterator::AdvanceOver(); // do not recurse
+        Expand::iterator::AdvanceOver(); // do not recurse
     else
-        Walk::iterator::AdvanceInto(); // recurse if walk would
+        Expand::iterator::AdvanceInto(); // recurse if walk would
         
     if( element )
         seen.insert( element );    
 }    
     
-////////////////////////// Stroll //////////////////////////
+////////////////////////// Traverse //////////////////////////
 
-Stroll::iterator::iterator()
+Traverse::iterator::iterator()
 {
 }        
 
-Stroll::iterator::iterator( const Stroll::iterator & other ) :
-    Walk::iterator( other )
+Traverse::iterator::iterator( const Traverse::iterator & other ) :
+    Expand::iterator( other )
 {
-    TRACE("Stroll copy\n");
+    TRACE("Traverse copy\n");
     Filter();
 }
 
-Stroll::iterator::iterator( TreePtr<Node> &root,
+Traverse::iterator::iterator( TreePtr<Node> &root,
                            TreePtr<Node> restrictor,
-                           const RootedSearchReplace *rc,
+                           const CompareReplace *rc,
                            CouplingKeys *k ) :
-    Walk::iterator( root, restrictor, rc, k )
+    Expand::iterator( root, restrictor, rc, k )
 {
     Filter();
 }
  
-Stroll::Stroll( TreePtr<Node> r,
+Traverse::Traverse( TreePtr<Node> r,
               TreePtr<Node> res,
-              const RootedSearchReplace *rsr,
+              const CompareReplace *rsr,
               CouplingKeys *k ) :
     root(r),
     restrictor( res ),
@@ -456,26 +456,26 @@ Stroll::Stroll( TreePtr<Node> r,
 {
 }
 
-const Stroll::iterator &Stroll::begin()
+const Traverse::iterator &Traverse::begin()
 {
     my_begin = iterator( root, restrictor, restriction_comparison, keys );
     return my_begin;
 }
 
-const Stroll::iterator &Stroll::end()
+const Traverse::iterator &Traverse::end()
 {
     my_end = iterator();
     return my_end;
 }
 
-Stroll::iterator &Stroll::iterator::operator++()
+Traverse::iterator &Traverse::iterator::operator++()
 {
-    Walk::iterator::operator++(); 
+    Expand::iterator::operator++(); 
     Filter();
     return *this;
 }
 
-void Stroll::iterator::Filter()
+void Traverse::iterator::Filter()
 {
     while(!done)
     {
@@ -487,18 +487,18 @@ void Stroll::iterator::Filter()
             if( ok )
             {
                 seen.insert( element );    
-                TRACE("Stroll inserting node ")(*element)(" at %p size now %d\n", element.get(), seen.size());        
+                TRACE("Traverse inserting node ")(*element)(" at %p size now %d\n", element.get(), seen.size());        
             } 
         }        
         
         if( ok )
         {
-            TRACE("Stroll returning node ")(*element)(" at %p size now %d\n", element.get(), seen.size());
+            TRACE("Traverse returning node ")(*element)(" at %p size now %d\n", element.get(), seen.size());
             return;
         }
         
         if( element )
-            TRACE("Stroll skipping node ")(*element)(" at %p\n", element.get());
-        Walk::iterator::operator++(); // increment once
+            TRACE("Traverse skipping node ")(*element)(" at %p\n", element.get());
+        Expand::iterator::operator++(); // increment once
     }    
 }

@@ -49,9 +49,9 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     s_and->patterns = ( s_top_comp, cs_stuff );
 
     // Master replace - insert index variable, inc and dec into function at top level
-    MakeTreePtr< Slave<Statement> > r_slave( stuff, s_identifier, l_r_sub );
-    MakeTreePtr< RootedSlave<Statement> > r_mid( r_top_comp, stuff, r_slave );
-    MakeTreePtr< Slave<Statement> > r_slave3( r_mid, s_gg, r_ret_comp );
+    MakeTreePtr< SlaveSearchReplace<Statement> > r_slave( stuff, s_identifier, l_r_sub );
+    MakeTreePtr< SlaveCompareReplace<Statement> > r_mid( r_top_comp, stuff, r_slave );
+    MakeTreePtr< SlaveSearchReplace<Statement> > r_slave3( r_mid, s_gg, r_ret_comp );
     temp->statements = (r_slave3);
     oinit->overlay = temp;//r_slave3;
 
@@ -68,14 +68,14 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     r_top_comp->statements = ( r_inc, top_pre, r_dec );
     r_dec->operands = ( r_index_identifier );
 
-    // Slave search to find automatic variables within the function
+    // SlaveSearchReplace search to find automatic variables within the function
     stuff->terminus = overlay;
     overlay->base = s_instance;
     s_instance->identifier = s_identifier;
     s_instance->initialiser = MakeTreePtr<Uninitialised>(); // can't handle initialisers!
     s_instance->type = MakeTreePtr<Type>();
 
-    // Slave replace to insert as a static array (TODO be a member of enclosing class)
+    // SlaveSearchReplace replace to insert as a static array (TODO be a member of enclosing class)
     r_instance->constancy = MakeTreePtr<NonConst>();
     r_instance->initialiser = MakeTreePtr<Uninitialised>();
     overlay->overlay = r_instance;
@@ -88,10 +88,10 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     // Sub-slave replace with a subscript into the array
     l_r_sub->operands = ( r_identifier, r_index_identifier );
 
-    // Slave to find early returns in the function
+    // SlaveSearchReplace to find early returns in the function
     s_gg->through = ret;
 
-    // Slave replace with a decrement of the stack index coming before the return
+    // SlaveSearchReplace replace with a decrement of the stack index coming before the return
     //r_ret_comp->members = ( r_ret_decls );
     r_ret_dec->operands = ( r_index_identifier );
     r_ret_comp->statements = ( r_ret_dec, ret );

@@ -18,7 +18,7 @@ void SlaveTest::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr<Statement> r_body;
     MakeTreePtr<Continue> ss_cont;
     MakeTreePtr<Break> sr_break;
-    MakeTreePtr< RootedSlave<Statement> > r_slave( r_body, ss_cont, sr_break );
+    MakeTreePtr< SlaveCompareReplace<Statement> > r_slave( r_body, ss_cont, sr_break );
     r_comp->statements = ( r_slave );
 
    	SearchReplace( s_for, r_comp )( context, proot );

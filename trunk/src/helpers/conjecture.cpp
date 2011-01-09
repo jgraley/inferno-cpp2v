@@ -28,7 +28,7 @@ Result Conjecture::Search( TreePtr<Node> x,
 					       TreePtr<Node> pattern,
 					       CouplingKeys *keys,
 						   bool can_key,
-					  	   const RootedSearchReplace *sr )
+					  	   const CompareReplace *sr )
 {
 	// Loop through candidate conjectures
 	while(1)
