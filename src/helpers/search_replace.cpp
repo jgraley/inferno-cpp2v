@@ -5,8 +5,8 @@
 
 // Master constructor remembers search pattern, replace pattern and any supplied couplings as required
 CompareReplace::CompareReplace( TreePtr<Node> sp,
-                                          TreePtr<Node> rp,
-                                          CouplingSet m ) :                 
+                                TreePtr<Node> rp,
+                                CouplingSet m ) :                 
     search_pattern( sp ),
     replace_pattern( rp ),
     couplings( m )
@@ -75,8 +75,8 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
 
 // SlaveSearchReplace constructor used by slave wrapper
 CompareReplace::CompareReplace( TreePtr<Node> sp,
-                                          TreePtr<Node> rp,
-                                          int i ) :                                  
+                                TreePtr<Node> rp,
+                                int i ) :                                  
     search_pattern( sp ),
     replace_pattern( rp )
 {
@@ -93,10 +93,10 @@ CompareReplace::~CompareReplace()
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
 Result CompareReplace::DecidedCompare( TreePtr<Node> x,
-											TreePtr<Node> pattern,
-											CouplingKeys *keys,
-											bool can_key,
-    										Conjecture &conj ) const
+									   TreePtr<Node> pattern,
+									   CouplingKeys *keys,
+									   bool can_key,
+    								   Conjecture &conj ) const
 {
     INDENT;
 	ASSERT( x ); // Target must not be NULL
@@ -205,10 +205,10 @@ Result CompareReplace::DecidedCompare( TreePtr<Node> x,
 // xstart and pstart are the indexes into the sequence where we will begin checking for a match.
 // It is assumed that elements before these have already been matched and may be ignored.
 Result CompareReplace::DecidedCompare( SequenceInterface &x,
-		                                    SequenceInterface &pattern,
-		                                    CouplingKeys *keys,
-		                                    bool can_key,
-		                                    Conjecture &conj ) const
+		                               SequenceInterface &pattern,
+		                               CouplingKeys *keys,
+		                               bool can_key,
+		                               Conjecture &conj ) const
 {
     INDENT;
 	// Attempt to match all the elements between start and the end of the sequence; stop
@@ -306,10 +306,10 @@ Result CompareReplace::DecidedCompare( SequenceInterface &x,
 
 
 Result CompareReplace::DecidedCompare( CollectionInterface &x,
-											CollectionInterface &pattern,
-											CouplingKeys *keys,
-											bool can_key,
-											Conjecture &conj ) const
+			              			   CollectionInterface &pattern,
+									   CouplingKeys *keys,
+									   bool can_key,
+									   Conjecture &conj ) const
 {
     INDENT;
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
@@ -382,10 +382,10 @@ Result CompareReplace::DecidedCompare( CollectionInterface &x,
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
 Result CompareReplace::DecidedCompare( TreePtr<Node> x,
-										    TreePtr<StuffBase> stuff_pattern,
-										    CouplingKeys *keys,
-										    bool can_key,
-										    Conjecture &conj ) const
+									   TreePtr<StuffBase> stuff_pattern,
+									   CouplingKeys *keys,
+									   bool can_key,
+									   Conjecture &conj ) const
 {
     INDENT;
 	ASSERT( stuff_pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
@@ -418,10 +418,10 @@ Result CompareReplace::DecidedCompare( TreePtr<Node> x,
 
 
 Result CompareReplace::MatchingDecidedCompare( TreePtr<Node> x,
-		                                                     TreePtr<Node> pattern,
-		                                                     CouplingKeys *keys,
-		                                                     bool can_key,
-		                                                     Conjecture &conj ) const
+		                                       TreePtr<Node> pattern,
+		                                       CouplingKeys *keys,
+		                                       bool can_key,
+		                                       Conjecture &conj ) const
 {
     INDENT;
     Result r;
@@ -471,9 +471,9 @@ Result CompareReplace::MatchingDecidedCompare( TreePtr<Node> x,
 
 
 Result CompareReplace::Compare( TreePtr<Node> x,
-		                             TreePtr<Node> pattern,
-									 CouplingKeys *keys,
-								  	 bool can_key ) const
+		                        TreePtr<Node> pattern,
+								CouplingKeys *keys,
+								bool can_key ) const
 {
     INDENT;
 	TRACE("Comparing x=%s\n", typeid(*x).name() );
@@ -502,10 +502,10 @@ void CompareReplace::ClearPtrs( TreePtr<Node> dest ) const
 // is non-NULL. This means we can call this multiple times with different sources and get a priority 
 // scheme.
 void CompareReplace::Overlay( TreePtr<Node> dest,
-		                           TreePtr<Node> source,
-		                           CouplingKeys *keys,
-		                           bool can_key,
-		                           shared_ptr<Key> current_key ) const
+		                      TreePtr<Node> source,
+		                      CouplingKeys *keys,
+		                      bool can_key,
+		                      shared_ptr<Key> current_key ) const
 {
 	INDENT;
     ASSERT( source );
@@ -634,10 +634,10 @@ void CompareReplace::Overlay( TreePtr<Node> dest,
 
 
 void CompareReplace::Overlay( SequenceInterface *dest,
-		                           SequenceInterface *source,
-		                           CouplingKeys *keys,
-		                           bool can_key,
-		                           shared_ptr<Key> current_key ) const
+		                      SequenceInterface *source,
+		                      CouplingKeys *keys,
+		                      bool can_key,
+		                      shared_ptr<Key> current_key ) const
 {
 	INDENT;
     // For now, always overwrite the dest
@@ -665,10 +665,10 @@ void CompareReplace::Overlay( SequenceInterface *dest,
 
 
 void CompareReplace::Overlay( CollectionInterface *dest,
-   		                           CollectionInterface *source,
-		                           CouplingKeys *keys,
-		                           bool can_key,
-		                           shared_ptr<Key> current_key ) const
+   		                      CollectionInterface *source,
+		                      CouplingKeys *keys,
+		                      bool can_key,
+		                      shared_ptr<Key> current_key ) const
 {
 	INDENT;
     // For now, always overwrite the dest
@@ -703,9 +703,9 @@ void CompareReplace::Overlay( CollectionInterface *dest,
 // TODO possible refactor: when we detect a coupling match, maybe recurse back into DuplicateSubtree
 // and get the two OverlayPtrs during unwind.
 TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
-		                                                CouplingKeys *keys,
-		                                                bool can_key,
-		                                                shared_ptr<Key> current_key ) const
+		                                        CouplingKeys *keys,
+		                                        bool can_key,
+		                                        shared_ptr<Key> current_key ) const
 {
 	INDENT;
  	TRACE("Duplicating %s under_substitution=%p\n", ((string)*source).c_str(), current_key.get());
@@ -825,7 +825,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
 
 
 TreePtr<Node> CompareReplace::MatchingDuplicateSubtree( TreePtr<Node> source,
-		                                                        CouplingKeys *keys ) const
+		                                                CouplingKeys *keys ) const
 {
     //TODO can_key should be an enum eg RelpacePass {KEYING, SUBSTITUTING} for clarity
     if( keys )
@@ -850,9 +850,9 @@ TreePtr<Node> CompareReplace::MatchingDuplicateSubtree( TreePtr<Node> source,
 
 
 Result CompareReplace::SingleSearchReplace( TreePtr<Node> *proot,
-                                          TreePtr<Node> search_pattern,
-                                          TreePtr<Node> replace_pattern,
-                                          CouplingKeys keys ) // Pass by value is intentional - changes should not propogate back to caller
+                                            TreePtr<Node> search_pattern,
+                                            TreePtr<Node> replace_pattern,
+                                            CouplingKeys keys ) // Pass by value is intentional - changes should not propogate back to caller
 {
 	TRACE("%p Begin search\n", this);
 	Result r = Compare( *proot, search_pattern, &keys, true );
@@ -874,9 +874,9 @@ Result CompareReplace::SingleSearchReplace( TreePtr<Node> *proot,
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
 int CompareReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
-	                                             TreePtr<Node> search_pattern,
-	                                             TreePtr<Node> replace_pattern,
-	                                             CouplingKeys keys ) // Pass by value is intentional - changes should not propagate back to caller
+	                                        TreePtr<Node> search_pattern,
+	                                        TreePtr<Node> replace_pattern,
+	                                        CouplingKeys keys ) // Pass by value is intentional - changes should not propagate back to caller
 {
 	dirty_grass.clear();
 
@@ -901,7 +901,7 @@ int CompareReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
 
 
 void CompareReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
-										            	 CouplingKeys keys )
+									             	CouplingKeys keys )
 {
 	(void)RepeatingSearchReplace( proot, search_pattern, replace_pattern, keys );
 }
@@ -945,12 +945,14 @@ SearchReplace::SearchReplace( TreePtr<Node> sp,
 {
 }
 
+
 SearchReplace::SearchReplace( TreePtr<Node> sp,
                               TreePtr<Node> rp,
                               int i ) :
     CompareReplace( sp, rp, i )                              
 {
 }
+
 
 void SearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
                                                    CouplingKeys keys )
@@ -985,6 +987,7 @@ void SearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
         (void)RepeatingSearchReplace( proot, stuff, TreePtr<Node>(), keys );
     }
 }
+
 
 void CompareReplace::Test()
 {
