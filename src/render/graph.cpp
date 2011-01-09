@@ -20,9 +20,9 @@
 // TODO force ranking to space out graph as
 // Primary: Stuff nodes, SearchReplace
 // Secondary: Normal nodes and special nodes that occupy space
-// Tertiary: RootedSearchReplace and special nodes that do not occupy space
+// Tertiary: CompareReplace and special nodes that do not occupy space
 
-void Graph::operator()( RootedSearchReplace *root )
+void Graph::operator()( CompareReplace *root )
 {
 	string s;
 	s += Header();
@@ -91,7 +91,7 @@ string Graph::Traverse( TreePtr<Node> root, bool links_pass )
 {
 	string s;
     TRACE("Graph plotter traversing intermediate %s pass\n", links_pass ? "links" : "nodes");
-	Stroll w( root );
+	::Traverse w( root );
 	FOREACH( TreePtr<Node> n, w )
 	{
 		if( n )
@@ -101,23 +101,23 @@ string Graph::Traverse( TreePtr<Node> root, bool links_pass )
 }
 
 
-string Graph::Traverse( RootedSearchReplace *sr, bool links_pass )
+string Graph::Traverse( CompareReplace *sr, bool links_pass )
 {
 	string s;
-    Stroll::iterator i;
+    Traverse::iterator i;
 
     s += links_pass ? DoSearchReplaceLinks(sr) : DoSearchReplace(sr, Id(sr));
 	if( sr->search_pattern )
     {
         TRACE("Graph plotter traversing search pattern %s pass\n", links_pass ? "links" : "nodes");
-        Stroll w( sr->search_pattern );
+        ::Traverse w( sr->search_pattern );
         for( i.ContinueAt(w.begin()); i != w.end(); ++i )
             s += links_pass ? DoNodeLinks(*i) : DoNode(*i);
     }
     if( sr->replace_pattern )
     {
         TRACE("Graph plotter traversing replace pattern %s pass\n", links_pass ? "links" : "nodes");
-        Stroll w( sr->replace_pattern );
+        ::Traverse w( sr->replace_pattern );
         for( i.ContinueAt(w.begin()); i != w.end(); ++i )
             s += links_pass ? DoNodeLinks(*i) : DoNode(*i);
     }
@@ -125,7 +125,7 @@ string Graph::Traverse( RootedSearchReplace *sr, bool links_pass )
 }
 
 
-string Graph::DoSearchReplace( RootedSearchReplace *sr,
+string Graph::DoSearchReplace( CompareReplace *sr,
 		                       string id,
 		                       bool slave,
 		                       TreePtr<Node> through )
@@ -138,7 +138,7 @@ string Graph::DoSearchReplace( RootedSearchReplace *sr,
 	if( dynamic_cast<SearchReplace *>(sr) )
 		s += "label = \"<fixed> SearchReplace";
 	else
-	    s += "label = \"<fixed> RootedSearchReplace";
+	    s += "label = \"<fixed> CompareReplace";
 	if( slave )
 		s += " | <" + SeqField(2) + "> through";
 	s += " | <" + (slave ? SeqField(0) : string("search")) + "> search";
@@ -154,7 +154,7 @@ string Graph::DoSearchReplace( RootedSearchReplace *sr,
 }
 
 
-string Graph::DoSearchReplaceLinks( RootedSearchReplace *sr )
+string Graph::DoSearchReplaceLinks( CompareReplace *sr )
 {
 	string s;
 	if( sr->search_pattern )
@@ -387,9 +387,9 @@ string Graph::SimpleLabel( string name, TreePtr<Node> n )
 
 string Graph::DoNode( TreePtr<Node> n )
 {
-	if( TreePtr<RootedSlaveBase> rsb = dynamic_pointer_cast<RootedSlaveBase>(n) )
+	if( TreePtr<SlaveCompareReplaceBase> rsb = dynamic_pointer_cast<SlaveCompareReplaceBase>(n) )
 		return DoSearchReplace( rsb.get(), Id( n.get() ), true, rsb->GetThrough() );
-	if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(n) )
+	if( TreePtr<SlaveSearchReplaceBase> sb = dynamic_pointer_cast<SlaveSearchReplaceBase>(n) )
 		return DoSearchReplace( sb.get(), Id( n.get() ), true, sb->GetThrough() );
 
 	string s;

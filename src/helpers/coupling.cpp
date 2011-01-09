@@ -3,7 +3,7 @@
 
 Result CouplingKeys::KeyAndRestrict( TreePtr<Node> x,
 									 TreePtr<Node> pattern,
-									 const RootedSearchReplace *sr,
+									 const CompareReplace *sr,
 									 bool can_key )
 {
 	shared_ptr<Key> key( new Key );
@@ -13,7 +13,7 @@ Result CouplingKeys::KeyAndRestrict( TreePtr<Node> x,
 
 Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
 									 TreePtr<Node> pattern,
-									 const RootedSearchReplace *sr,
+									 const CompareReplace *sr,
 									 bool can_key )
 {
 	ASSERT( this );
@@ -62,7 +62,7 @@ Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
 
 TreePtr<Node> CouplingKeys::KeyAndSubstitute( TreePtr<Node> x,
 											  TreePtr<Node> pattern,
-											  const RootedSearchReplace *sr,
+											  const CompareReplace *sr,
 											  bool can_key )
 {
 	shared_ptr<Key> key( new Key );
@@ -77,7 +77,7 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( TreePtr<Node> x,
 // substitution, duplicated for our convenience. Always check the return value for NULL.
 TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be NULL meaning we are not allowed to key the node
 		                                                           TreePtr<Node> pattern,
-		                                                           const RootedSearchReplace *sr,
+		                                                           const CompareReplace *sr,
 		                                                           bool can_key )
 {
 	INDENT;

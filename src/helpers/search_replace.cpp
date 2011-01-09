@@ -4,7 +4,7 @@
 #include "conjecture.hpp"
 
 // Master constructor remembers search pattern, replace pattern and any supplied couplings as required
-RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
+CompareReplace::CompareReplace( TreePtr<Node> sp,
                                           TreePtr<Node> rp,
                                           CouplingSet m ) :                 
     search_pattern( sp ),
@@ -23,8 +23,8 @@ RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
 	// TODO decide.
 	TRACE("doing inferred couplings\n");
 	Map< TreePtr<Node>, int > ms;
-    Sweep wsp( sp ), wrp( rp );
-    Sweep::iterator i;
+    ParentTraverse wsp( sp ), wrp( rp );
+    ParentTraverse::iterator i;
     for( i=(wsp.begin()); i != wsp.end(); ++i )
     {
         TreePtr<Node> n = *i;
@@ -65,16 +65,16 @@ RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
     // TODO is there a way of unioning sets without doing lots of insert()?
     FOREACH( TreePtr<Node> n, wrp )
     {
-        if( TreePtr<RootedSlaveBase> rsb = dynamic_pointer_cast<RootedSlaveBase>(n) )
+        if( TreePtr<SlaveCompareReplaceBase> rsb = dynamic_pointer_cast<SlaveCompareReplaceBase>(n) )
 		    rsb->couplings = couplings;
-        else if( TreePtr<SlaveBase> rsb = dynamic_pointer_cast<SlaveBase>(n) )
+        else if( TreePtr<SlaveSearchReplaceBase> rsb = dynamic_pointer_cast<SlaveSearchReplaceBase>(n) )
 			rsb->couplings = couplings;
     }
 } 
 
 
-// Slave constructor used by slave wrapper
-RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
+// SlaveSearchReplace constructor used by slave wrapper
+CompareReplace::CompareReplace( TreePtr<Node> sp,
                                           TreePtr<Node> rp,
                                           int i ) :                                  
     search_pattern( sp ),
@@ -85,14 +85,14 @@ RootedSearchReplace::RootedSearchReplace( TreePtr<Node> sp,
 
 
 // Destructor tries not to leak memory lol
-RootedSearchReplace::~RootedSearchReplace()
+CompareReplace::~CompareReplace()
 {
 }
 
 
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
+Result CompareReplace::DecidedCompare( TreePtr<Node> x,
 											TreePtr<Node> pattern,
 											CouplingKeys *keys,
 											bool can_key,
@@ -133,7 +133,7 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
     {
         // Restrict so that everything in the input program under here must be "green grass"
         // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
-        Walk w( x );
+        Expand w( x );
         FOREACH( TreePtr<Node> p, w )
             if( dirty_grass.find( p ) != dirty_grass.end() )
                 return NOT_FOUND;
@@ -204,7 +204,7 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
 
 // xstart and pstart are the indexes into the sequence where we will begin checking for a match.
 // It is assumed that elements before these have already been matched and may be ignored.
-Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
+Result CompareReplace::DecidedCompare( SequenceInterface &x,
 		                                    SequenceInterface &pattern,
 		                                    CouplingKeys *keys,
 		                                    bool can_key,
@@ -305,7 +305,7 @@ Result RootedSearchReplace::DecidedCompare( SequenceInterface &x,
 }
 
 
-Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
+Result CompareReplace::DecidedCompare( CollectionInterface &x,
 											CollectionInterface &pattern,
 											CouplingKeys *keys,
 											bool can_key,
@@ -381,7 +381,7 @@ Result RootedSearchReplace::DecidedCompare( CollectionInterface &x,
 
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
+Result CompareReplace::DecidedCompare( TreePtr<Node> x,
 										    TreePtr<StuffBase> stuff_pattern,
 										    CouplingKeys *keys,
 										    bool can_key,
@@ -391,7 +391,7 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
 	ASSERT( stuff_pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
 	// Define a walk, rooted at this node, restricted as specified in search pattern
-	Walk wx( x, stuff_pattern->recurse_restriction, this, keys );
+	Expand wx( x, stuff_pattern->recurse_restriction, this, keys );
 
 	// Get decision from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = conj.HandleDecision( wx.begin(), wx.end() );
@@ -417,7 +417,7 @@ Result RootedSearchReplace::DecidedCompare( TreePtr<Node> x,
 }
 
 
-Result RootedSearchReplace::MatchingDecidedCompare( TreePtr<Node> x,
+Result CompareReplace::MatchingDecidedCompare( TreePtr<Node> x,
 		                                                     TreePtr<Node> pattern,
 		                                                     CouplingKeys *keys,
 		                                                     bool can_key,
@@ -470,7 +470,7 @@ Result RootedSearchReplace::MatchingDecidedCompare( TreePtr<Node> x,
 }
 
 
-Result RootedSearchReplace::Compare( TreePtr<Node> x,
+Result CompareReplace::Compare( TreePtr<Node> x,
 		                             TreePtr<Node> pattern,
 									 CouplingKeys *keys,
 								  	 bool can_key ) const
@@ -485,7 +485,7 @@ Result RootedSearchReplace::Compare( TreePtr<Node> x,
 
 
 // Clear all pointer members in supplied dest to NULL
-void RootedSearchReplace::ClearPtrs( TreePtr<Node> dest ) const
+void CompareReplace::ClearPtrs( TreePtr<Node> dest ) const
 {
     vector< Itemiser::Element * > dest_memb = dest->Itemise();
     for( int i=0; i<dest_memb.size(); i++ )
@@ -501,7 +501,7 @@ void RootedSearchReplace::ClearPtrs( TreePtr<Node> dest ) const
 // Helper for DuplicateSubtree, fills in children of dest node from source node when source node child
 // is non-NULL. This means we can call this multiple times with different sources and get a priority 
 // scheme.
-void RootedSearchReplace::Overlay( TreePtr<Node> dest,
+void CompareReplace::Overlay( TreePtr<Node> dest,
 		                           TreePtr<Node> source,
 		                           CouplingKeys *keys,
 		                           bool can_key,
@@ -527,7 +527,7 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
     TRACE("Overlaying %d members source=%s dest=%s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
 #if 0
     TRACE("Overlay dest={");
-   {    Walk w(dest);
+   {    Expand w(dest);
         bool first=true;
         FOREACH( TreePtr<Node> n, w )
         {
@@ -539,7 +539,7 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
         TRACE("}\n"); // TODO put this in as a common utility somewhere
    }
    TRACE("source={");
-   {    Walk w(source);
+   {    Expand w(source);
         bool first=true;
         FOREACH( TreePtr<Node> n, w )
         {
@@ -633,7 +633,7 @@ void RootedSearchReplace::Overlay( TreePtr<Node> dest,
 }
 
 
-void RootedSearchReplace::Overlay( SequenceInterface *dest,
+void CompareReplace::Overlay( SequenceInterface *dest,
 		                           SequenceInterface *source,
 		                           CouplingKeys *keys,
 		                           bool can_key,
@@ -664,7 +664,7 @@ void RootedSearchReplace::Overlay( SequenceInterface *dest,
 }
 
 
-void RootedSearchReplace::Overlay( CollectionInterface *dest,
+void CompareReplace::Overlay( CollectionInterface *dest,
    		                           CollectionInterface *source,
 		                           CouplingKeys *keys,
 		                           bool can_key,
@@ -702,7 +702,7 @@ void RootedSearchReplace::Overlay( CollectionInterface *dest,
 // substituting.
 // TODO possible refactor: when we detect a coupling match, maybe recurse back into DuplicateSubtree
 // and get the two OverlayPtrs during unwind.
-TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
+TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
 		                                                CouplingKeys *keys,
 		                                                bool can_key,
 		                                                shared_ptr<Key> current_key ) const
@@ -711,7 +711,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
  	TRACE("Duplicating %s under_substitution=%p\n", ((string)*source).c_str(), current_key.get());
 #if 0
     TRACE("DuplicateSubtree source={");
-	    Walk w(source);
+	    Expand w(source);
 	    bool first=true;
 	    FOREACH( TreePtr<Node> n, w )
 	    {
@@ -753,17 +753,17 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
     TreePtr<Node> dest = keys->KeyAndSubstitute( TreePtr<Node>(), source, this, can_key );
     ASSERT( !(dest && current_key) )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
 
-    if( TreePtr<RootedSlaveBase> rsb = dynamic_pointer_cast<RootedSlaveBase>(source) )
+    if( TreePtr<SlaveCompareReplaceBase> rsb = dynamic_pointer_cast<SlaveCompareReplaceBase>(source) )
 	{
 		dest = DuplicateSubtree( rsb->GetThrough(), keys, can_key, current_key );
 		if(!can_key) // do not run slaves until we have all the keys of the master 
         {
-            RootedSearchReplace *slave = rsb.get();
+            CompareReplace *slave = rsb.get();
     	    slave->pcontext = pcontext;
     	    (void)slave->DefaultRepeatingSearchReplace( &dest, *keys );
         }
 	}
-	else if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
+	else if( TreePtr<SlaveSearchReplaceBase> sb = dynamic_pointer_cast<SlaveSearchReplaceBase>(source) )
 	{
 		dest = DuplicateSubtree( sb->GetThrough(), keys, can_key, current_key );
         if(!can_key) // do not run slaves until we have all the keys of the master 
@@ -824,7 +824,7 @@ TreePtr<Node> RootedSearchReplace::DuplicateSubtree( TreePtr<Node> source,
 }
 
 
-TreePtr<Node> RootedSearchReplace::MatchingDuplicateSubtree( TreePtr<Node> source,
+TreePtr<Node> CompareReplace::MatchingDuplicateSubtree( TreePtr<Node> source,
 		                                                        CouplingKeys *keys ) const
 {
     //TODO can_key should be an enum eg RelpacePass {KEYING, SUBSTITUTING} for clarity
@@ -849,10 +849,10 @@ TreePtr<Node> RootedSearchReplace::MatchingDuplicateSubtree( TreePtr<Node> sourc
 }
 
 
-Result RootedSearchReplace::SingleSearchReplace( TreePtr<Node> *proot,
-		                                                              TreePtr<Node> search_pattern,
-		                                                              TreePtr<Node> replace_pattern,
-		                                                              CouplingKeys keys ) // Pass by value is intentional - changes should not propogate back to caller
+Result CompareReplace::SingleSearchReplace( TreePtr<Node> *proot,
+                                          TreePtr<Node> search_pattern,
+                                          TreePtr<Node> replace_pattern,
+                                          CouplingKeys keys ) // Pass by value is intentional - changes should not propogate back to caller
 {
 	TRACE("%p Begin search\n", this);
 	Result r = Compare( *proot, search_pattern, &keys, true );
@@ -873,7 +873,7 @@ Result RootedSearchReplace::SingleSearchReplace( TreePtr<Node> *proot,
 // on supplied patterns and couplings. Does search and replace
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
-int RootedSearchReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
+int CompareReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
 	                                             TreePtr<Node> search_pattern,
 	                                             TreePtr<Node> replace_pattern,
 	                                             CouplingKeys keys ) // Pass by value is intentional - changes should not propagate back to caller
@@ -900,7 +900,7 @@ int RootedSearchReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
 }
 
 
-void RootedSearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
+void CompareReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
 										            	 CouplingKeys keys )
 {
 	(void)RepeatingSearchReplace( proot, search_pattern, replace_pattern, keys );
@@ -908,7 +908,7 @@ void RootedSearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
 
 
 // Do a search and replace based on patterns stored in our members
-void RootedSearchReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
+void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 {
 	if( ReadArgs::pattern_graph && ReadArgs::quitafter == 0 )
 	{
@@ -941,14 +941,14 @@ void RootedSearchReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 SearchReplace::SearchReplace( TreePtr<Node> sp,
                               TreePtr<Node> rp,
                               CouplingSet m ) :
-    RootedSearchReplace( sp, rp, m )                              
+    CompareReplace( sp, rp, m )                              
 {
 }
 
 SearchReplace::SearchReplace( TreePtr<Node> sp,
                               TreePtr<Node> rp,
                               int i ) :
-    RootedSearchReplace( sp, rp, i )                              
+    CompareReplace( sp, rp, i )                              
 {
 }
 
@@ -986,9 +986,9 @@ void SearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
     }
 }
 
-void RootedSearchReplace::Test()
+void CompareReplace::Test()
 {
-    RootedSearchReplace sr = RootedSearchReplace( MakeTreePtr<Nop>() );
+    CompareReplace sr = CompareReplace( MakeTreePtr<Nop>() );
 
     {
         // single node with topological wildcarding

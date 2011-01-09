@@ -5,7 +5,7 @@
 #include "coupling.hpp"
 #include <vector>
 
-class RootedSearchReplace;
+class CompareReplace;
 
 
 class Conjecture
@@ -20,7 +20,7 @@ public:
 				   TreePtr<Node> pattern,
 				   CouplingKeys *keys,
 				   bool can_key,
-				   const RootedSearchReplace *sr );
+				   const CompareReplace *sr );
 private:
 	bool ShouldTryMore( Result r, int threshold );
 	int decision_index;

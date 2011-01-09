@@ -82,7 +82,7 @@ void CleanupDuplicateLabels::operator()( TreePtr<Node> context, TreePtr<Node> *p
         
         l_s_orrule->patterns = (s_labelid1, s_labelid2);
         
-        MakeTreePtr< Slave<Statement> > r_slave( stuff, l_s_orrule, r_labelid );
+        MakeTreePtr< SlaveSearchReplace<Statement> > r_slave( stuff, l_s_orrule, r_labelid );
         
         s_instance->initialiser = stuff;
         s_instance->identifier = identifier;

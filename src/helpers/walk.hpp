@@ -4,13 +4,13 @@
 #include "tree/generics.hpp"
 #include "coupling.hpp"
 
-class RootedSearchReplace;
+class CompareReplace;
 
 //
 // Stated out traversal across a node's children. Traverses the members and elements of containers
 // but does not follow any shared_ptrs. Basically an itemise that expands containers.
 //
-class Traverse : public ContainerInterface
+class Flatten : public ContainerInterface
 {
 public:
 	// The walking iterator does all the real work.
@@ -55,13 +55,13 @@ public:
         TreePtr<Node> root;
         bool empty; // TODO use NULL root for empty
 
-	    friend class Traverse;
+	    friend class Flatten;
     };
 
 	// Constructor for walk container. The actual container is lightweight - it can be
 	// destructed and the iterators remain valid. A new one may be created with the
 	// same parameters and it will be equivalent.
-	Traverse( TreePtr<Node> root ); // root of the subtree to walk
+	Flatten( TreePtr<Node> root ); // root of the subtree to walk
 
 	// Standard container ops, note that modification is not allowed through container interface
 	virtual const iterator &begin();
@@ -80,7 +80,7 @@ private:
 // like an OOStd container whose iterator walks the subtree with sucessive invocations
 // of operator++. A welking loop may be created using FOREACH as with containers.
 //
-class Walk : public ContainerInterface
+class Expand : public ContainerInterface
 {
 public:
 	// The walking iterator does all the real work.
@@ -112,7 +112,7 @@ public:
 	protected:
 	    iterator( TreePtr<Node> &root,
 	    		  TreePtr<Node> restrictor,
-	    		  const RootedSearchReplace *rc,
+	    		  const CompareReplace *rc,
 	    		  CouplingKeys *k );
 	    bool IsAtEndOfChildren() const;
 	    void BypassEndOfChildren();
@@ -120,20 +120,20 @@ public:
 
 	    shared_ptr< TreePtr<Node> > root;
 	    TreePtr<Node> restrictor;
-		const RootedSearchReplace *restriction_comparison;
+		const CompareReplace *restriction_comparison;
 	    CouplingKeys *keys;
-	    stack< Traverse::iterator > state;
+	    stack< Flatten::iterator > state;
         bool done;
 
-	    friend class Walk;
+	    friend class Expand;
     };
 
 	// Constructor for walk container. The actual container is lightweight - it can be
 	// destructed and the iterators remain valid. A new one may be created with the
 	// same parameters and it will be equivalent.
-	Walk( TreePtr<Node> root, // root of the subtree to walk
+	Expand( TreePtr<Node> root, // root of the subtree to walk
 		  TreePtr<Node> restrictor = TreePtr<Node>(), // optional restrictor; walk skips these and does not recurse under them
-		  const RootedSearchReplace *rsr = NULL,
+		  const CompareReplace *rsr = NULL,
 		  CouplingKeys *k = NULL ); // optional coupling set for coupling into restrictor
 
 	// Standard container ops, note that modification is not allowed through container interface
@@ -144,24 +144,24 @@ public:
 protected:
     TreePtr<Node> root;
     TreePtr<Node> restrictor;
-    const RootedSearchReplace *restriction_comparison;
+    const CompareReplace *restriction_comparison;
     CouplingKeys *keys;
     iterator my_begin, my_end;
 };
 
 // Version of walk that only sees a node once for each parent i.e. 
 // a\
-// b-c-d sees c twice but d only once (Walk would see d twice too)
+// b-c-d sees c twice but d only once (Expand would see d twice too)
 //
-// TODO do this as a recursion restriction on Walk - that means cleaning
+// TODO do this as a recursion restriction on Expand - that means cleaning
 // up the recurse restriction interface to be more like an observber pattern
 // with support for multiple observers. The only tricky part is the "keys" 
 // user data item, which should be a member of the client, but isn't.
-class Sweep : public ContainerInterface
+class ParentTraverse : public ContainerInterface
 {
 public:
     // The walking iterator does all the real work.
-    class iterator : public Walk::iterator
+    class iterator : public Expand::iterator
     {
     public:
         iterator(); // makes "end" iterator
@@ -180,14 +180,14 @@ public:
     protected:
         iterator( TreePtr<Node> &root,
                   TreePtr<Node> restrictor,
-                  const RootedSearchReplace *rc,
+                  const CompareReplace *rc,
                   CouplingKeys *k );
         Set< TreePtr<Node> > seen;
-        friend class Sweep;
+        friend class ParentTraverse;
     };
-    Sweep( TreePtr<Node> root, // root of the subtree to walk
+    ParentTraverse( TreePtr<Node> root, // root of the subtree to walk
            TreePtr<Node> restrictor = TreePtr<Node>(), // optional restrictor; walk skips these and does not recurse under them
-           const RootedSearchReplace *rsr = NULL,
+           const CompareReplace *rsr = NULL,
            CouplingKeys *k = NULL );
     virtual const iterator &begin();
     virtual const iterator &end();
@@ -196,17 +196,17 @@ public:
 protected:
     TreePtr<Node> root;
     TreePtr<Node> restrictor;
-    const RootedSearchReplace *restriction_comparison;
+    const CompareReplace *restriction_comparison;
     CouplingKeys *keys;
     iterator my_begin, my_end;
 };
 
 
-class Stroll : public ContainerInterface
+class Traverse : public ContainerInterface
 {
 public:
     // The walking iterator does all the real work.
-    class iterator : public Walk::iterator
+    class iterator : public Expand::iterator
     {
     public:
         iterator(); // makes "end" iterator
@@ -226,15 +226,15 @@ public:
     protected:
         iterator( TreePtr<Node> &root,
                   TreePtr<Node> restrictor,
-                  const RootedSearchReplace *rc,
+                  const CompareReplace *rc,
                   CouplingKeys *k );
         Set< TreePtr<Node> > seen;
         void Filter();
-        friend class Stroll;
+        friend class Traverse;
     };
-    Stroll( TreePtr<Node> root, // root of the subtree to walk
+    Traverse( TreePtr<Node> root, // root of the subtree to walk
             TreePtr<Node> restrictor = TreePtr<Node>(), // optional restrictor; walk skips these and does not recurse under them
-            const RootedSearchReplace *rsr = NULL,
+            const CompareReplace *rsr = NULL,
             CouplingKeys *k = NULL );
     virtual const iterator &begin();
     virtual const iterator &end();
@@ -243,7 +243,7 @@ public:
 protected:
     TreePtr<Node> root;
     TreePtr<Node> restrictor;
-    const RootedSearchReplace *restriction_comparison;
+    const CompareReplace *restriction_comparison;
     CouplingKeys *keys;
     iterator my_begin, my_end;
 };

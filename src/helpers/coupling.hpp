@@ -23,7 +23,7 @@ struct Key
 typedef TreePtr<Node> Coupling;
 typedef Set<Coupling> CouplingSet;
 
-class RootedSearchReplace;
+class CompareReplace;
 class CouplingKeys
 {
 public:
@@ -32,19 +32,19 @@ public:
 	}
 	Result KeyAndRestrict( TreePtr<Node> x,
 						   TreePtr<Node> pattern,
-						   const RootedSearchReplace *sr,
+						   const CompareReplace *sr,
 						   bool can_key );
 	Result KeyAndRestrict( shared_ptr<Key> key,
 						   TreePtr<Node> pattern,
-						   const RootedSearchReplace *sr,
+						   const CompareReplace *sr,
 						   bool can_key );
 	TreePtr<Node> KeyAndSubstitute( TreePtr<Node> x, // source after soft nodes etc
 									TreePtr<Node> pattern, // source
-									const RootedSearchReplace *sr,
+									const CompareReplace *sr,
 									bool can_key );
 	TreePtr<Node> KeyAndSubstitute( shared_ptr<Key> key,
 									TreePtr<Node> pattern,
-									const RootedSearchReplace *sr,
+									const CompareReplace *sr,
 									bool can_key );
 private:
 	Map< Coupling, shared_ptr<Key> > keys_map;

@@ -11,14 +11,14 @@ struct NotMatchBase {}; // needed for graph plotter
 // Match if the supplied patterns does not match (between you and me, it's just a NOT)
 template<class PRE_RESTRICTION>
 struct NotMatch : Special<PRE_RESTRICTION>,
-                 RootedSearchReplace::SoftSearchPattern,
+                 CompareReplace::SoftSearchPattern,
                  NotMatchBase
 {
 	SPECIAL_NODE_FUNCTIONS
 	// Pattern is an abnormal context
     TreePtr<PRE_RESTRICTION> pattern;
 private:
-    virtual Result DecidedCompare( const RootedSearchReplace *sr,
+    virtual Result DecidedCompare( const CompareReplace *sr,
     		                       TreePtr<Node> x,
     		                       CouplingKeys *keys,
     		                       bool can_key,
@@ -51,13 +51,13 @@ struct MatchAllBase {};
 // Match all of the supplied patterns (between you and me, it's an AND)
 template<class PRE_RESTRICTION>
 struct MatchAll : Special<PRE_RESTRICTION>,
-                 RootedSearchReplace::SoftSearchPattern,
+                 CompareReplace::SoftSearchPattern,
                  MatchAllBase
 {
 	SPECIAL_NODE_FUNCTIONS
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
-    virtual Result DecidedCompare( const RootedSearchReplace *sr,
+    virtual Result DecidedCompare( const CompareReplace *sr,
                                    TreePtr<Node> x,
                                    CouplingKeys *keys,
                                    bool can_key,
@@ -78,14 +78,14 @@ struct MatchAnyBase {};
 // Match zero or more of the supplied patterns (between you and me, it's an OR)
 template<class PRE_RESTRICTION>
 struct MatchAny : Special<PRE_RESTRICTION>,
-                 RootedSearchReplace::SoftSearchPattern,
+                 CompareReplace::SoftSearchPattern,
                  MatchAnyBase
 {
 	SPECIAL_NODE_FUNCTIONS
 	// Patterns are an abnormal context
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
-    virtual Result DecidedCompare( const RootedSearchReplace *sr,
+    virtual Result DecidedCompare( const CompareReplace *sr,
     		                       TreePtr<Node> x,
     		                       CouplingKeys *keys,
     		                       bool can_key,
@@ -107,13 +107,13 @@ struct MatchOddBase {};
 // Match an odd number of patterns (between you and me, it's an EOR)
 template<class PRE_RESTRICTION>
 struct MatchOdd : Special<PRE_RESTRICTION>,
-                  RootedSearchReplace::SoftSearchPattern,
+                  CompareReplace::SoftSearchPattern,
                   MatchOddBase
 {
 	SPECIAL_NODE_FUNCTIONS
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
-    virtual Result DecidedCompare( const RootedSearchReplace *sr,
+    virtual Result DecidedCompare( const CompareReplace *sr,
     		                       TreePtr<Node> x,
     		                       CouplingKeys *keys,
     		                       bool can_key,
@@ -131,7 +131,7 @@ private:
 };
 
 
-struct TransformToBase : RootedSearchReplace::SoftSearchPattern
+struct TransformToBase : CompareReplace::SoftSearchPattern
 {
     TreePtr<Node> pattern; // TODO make this type a template parameter
     TransformToBase( Transformation *t ) :
@@ -140,7 +140,7 @@ struct TransformToBase : RootedSearchReplace::SoftSearchPattern
     }
 
 private:
-    virtual Result DecidedCompare( const RootedSearchReplace *sr,
+    virtual Result DecidedCompare( const CompareReplace *sr,
     		                                            TreePtr<Node> x,
     		                                            CouplingKeys *keys,
     		                                            bool can_key,
@@ -168,11 +168,11 @@ struct TransformTo : TransformToBase, Special<PRE_RESTRICTION>
 
 // TODO allow multiple sources for the printf, use in eg merging successive labels
 
-struct BuildIdentifierBase : RootedSearchReplace::SoftReplacePattern
+struct BuildIdentifierBase : CompareReplace::SoftReplacePattern
 {
     BuildIdentifierBase( string s ) : format(s) {}
     TreePtr<Identifier> source;
-    string GetNewName( const RootedSearchReplace *sr,
+    string GetNewName( const CompareReplace *sr,
                        CouplingKeys *keys,
                        bool can_key );
     string format;
@@ -185,7 +185,7 @@ struct BuildInstanceIdentifier : Special<InstanceIdentifier>,
     BuildInstanceIdentifier() : BuildIdentifierBase("unnamed") {}
     NODE_FUNCTIONS
 private:
-    virtual TreePtr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
+    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr,
                                                CouplingKeys *keys,
                                                bool can_key )
     {
@@ -201,7 +201,7 @@ struct BuildLabelIdentifier : Special<LabelIdentifier>,
     BuildLabelIdentifier() : BuildIdentifierBase("UNNAMED") {}
     NODE_FUNCTIONS
 private:
-    virtual TreePtr<Node> DuplicateSubtree( const RootedSearchReplace *sr,
+    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr,
                                                CouplingKeys *keys,
                                                bool can_key )
     {

@@ -19,8 +19,8 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     TreePtr<Identifier> ib = GetIdentifier( b );
     ASSERT(ib);
           
-    Walk w( a );
-    Walk::iterator wa=w.begin();
+    Expand w( a );
+    Expand::iterator wa=w.begin();
     while(!(wa == w.end()))
     {
     	if( ignore_indirection ) // are we to ignore pointers/refs?
