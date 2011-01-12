@@ -16,7 +16,7 @@ void SplitInstanceDeclarations::operator()( TreePtr<Node> context, TreePtr<Node>
 
 		MakeTreePtr<Compound> rc;
 		MakeTreePtr<LocalVariable> ri;
-        over->base = si;
+        over->search = si;
         over->overlay = ri;
 		ri->initialiser = MakeTreePtr<Uninitialised>();
 		rc->members = ( over, decls );
@@ -37,7 +37,7 @@ void SplitInstanceDeclarations::operator()( TreePtr<Node> context, TreePtr<Node>
 
 		MakeTreePtr<Compound> rc;
 		MakeTreePtr<Instance> ri;
-        over->base = si;
+        over->search = si;
         over->overlay = ri;
 		rc->members = ( over, decls ); // Instance now in unordered decls part
 		rc->statements = ( pre, post );

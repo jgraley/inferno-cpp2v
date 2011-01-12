@@ -351,7 +351,7 @@ struct SlaveSearchReplace : SlaveSearchReplaceBase, Special<PRE_RESTRICTION>
 
 struct OverlayBase : virtual Node
 {
-    TreePtr<Node> base;
+    TreePtr<Node> search;
     TreePtr<Node> overlay;
 };
 
