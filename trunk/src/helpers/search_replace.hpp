@@ -92,7 +92,7 @@ struct SpecialBase
     virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() = 0;
 };
 template<class PRE_RESTRICTION>
-struct Special : SpecialBase, PRE_RESTRICTION
+struct Special : SpecialBase, virtual PRE_RESTRICTION
 {
     virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype()
     {

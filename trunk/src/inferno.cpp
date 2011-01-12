@@ -119,12 +119,14 @@ int main( int argc, char *argv[] )
 	        CleanupIneffectualGoto()(&program);
 		}
 
+#if 0 // problem is just that we automatically make a coupling
 	    if( i==0 )
 			--ReadArgs::quitafter;
 	    if( ReadArgs::quitafter >= 0 ) 
 		{
 	        CleanupUnusedLabels()(&program);
 	    }
+#endif
     }
 
     if(ReadArgs::intermediate_graph)
