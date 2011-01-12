@@ -30,7 +30,7 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
         TreePtr<Node> n = *i;
         if( n )
         {
-            if( dynamic_pointer_cast<StuffBase>(n) )
+            if( dynamic_pointer_cast<OverlayBase>(n) || dynamic_pointer_cast<StuffBase>(n) )
                 ms[n] = 2; // foce couplings at overlay nodes TODO refactor substitution so this is not needed
             else if( ms.IsExist( n ) )
                 ms[n]++;
@@ -593,7 +593,7 @@ void CompareReplace::Overlay( TreePtr<Node> dest,
                   (", found a member that is NULL in both (one must be non-NULL)\n");
             
             // This avoids linking into the replace pattern AND to allow couplings to get 
-            // substituted.
+            // substituted. 
             if( source_child ) 
                 source_child = DuplicateSubtree( source_child, keys, can_key, current_key );
             
@@ -709,7 +709,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
 {
 	INDENT;
  	TRACE("Duplicating %s under_substitution=%p\n", ((string)*source).c_str(), current_key.get());
-#if 0
+#if 1
     TRACE("DuplicateSubtree source={");
 	    Expand w(source);
 	    bool first=true;
@@ -717,7 +717,10 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
 	    {
 	    	if( !first )
 	    		TRACE(", ");
-	    	TRACE( n ? *n : string("NULL"));
+	    	if( n )
+                TRACE( *n )(":%p", n.get());
+            else
+                TRACE("NULL");
 	    	first=false;
 	    }
 	    TRACE("}\n"); // TODO put this in as a common utility somewhere
@@ -775,10 +778,13 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
 	}    
 	else if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
     {
-        // Call the soft pattern impl (TODO don't like calling the function DuplicateSubtree, confusing)
-        dest = srp->DuplicateSubtree( this, keys, can_key );
-        // Allow this to key a coupling 
-        (void)keys->KeyAndSubstitute( dest, source, this, can_key );
+        if( !dest )
+        {
+            // Call the soft pattern impl (TODO don't like calling the function DuplicateSubtree, confusing)
+            dest = srp->DuplicateSubtree( this, keys, can_key );
+            // Allow this to key a coupling 
+            (void)keys->KeyAndSubstitute( dest, source, this, can_key );
+        }
     }
     else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
     {
@@ -796,22 +802,27 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
             Overlay( dest, source, keys, can_key, current_key );
         }
     }
-    else if( !dest )
+    else if( dynamic_pointer_cast<SpecialBase>(source) )
     {
-        // No coupling to key to, so just make a copy
-    	TRACE("Copying source")(*source)("\n");
-        
-        ASSERT( !dynamic_pointer_cast<SpecialBase>(source) )
-              ("Special nodes in replace pattern must be coupled (")(*source)(")\n");
-        
-        // Make the new node (destination node)
-        shared_ptr<Cloner> dup_dest = source->Duplicate(source);
-        dest = dynamic_pointer_cast<Node>( dup_dest );
-        ASSERT(dest);
- 
-        // Replace all the links in the new node with duplicates of the links in the old node.
-        // To do this we re-use the Overlay function (no point writing 2 very similar functions)
-        ClearPtrs( dest ); 
+        ASSERT( dest )
+              ("Special nodes in replace pattern not coupled and does not produce any output (")(*source)(")\n");
+    }
+    else
+    {
+        if( !dest )
+        {
+            // No coupling to key to, so just make a copy
+            TRACE("Copying source ")(*source)("\n");
+            
+            // Make the new node (destination node)
+            shared_ptr<Cloner> dup_dest = source->Duplicate(source);
+            dest = dynamic_pointer_cast<Node>( dup_dest );
+            ASSERT(dest);
+     
+            // Replace all the links in the new node with duplicates of the links in the old node.
+            // To do this we re-use the Overlay function (no point writing 2 very similar functions)
+            ClearPtrs( dest ); 
+        }
         Overlay( dest, source, keys, can_key, current_key );
 
         // If not substituting a Stuff node, remember this node is dirty for GreenGrass restriction
@@ -890,8 +901,8 @@ int CompareReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
     	TRACE("%p result %d", this, r);        
     	if( r != FOUND )
             break;
-        Validate()( *pcontext, proot );
-       	//ASSERT(i<100)("Too many hits");
+       // Validate()( *pcontext, proot );
+       	//ASSERT(i<100)("Too many hits"); JSG validate can fail due to a missing decl, but maybe master puts it in...?
         i++;
     }
 
@@ -932,7 +943,8 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 	// Do the search and replace with before and after validation
 	Validate()( *pcontext, proot );
 	DefaultRepeatingSearchReplace( proot );
-	Validate()( *pcontext, proot );
+    if( !(ReadArgs::intermediate_graph && ReadArgs::quitafter == 0) )
+	    Validate()( *pcontext, proot ); // allow broken tree if we're only looking at a graph of it
 
     pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
 }
@@ -966,14 +978,16 @@ void SearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
     if( replace_pattern ) // Is there a replace pattern?
     {
         // Insert a Stuff node as root of the replace pattern
-        TreePtr< ::Overlay<Scope> > overlay( new ::Overlay<Scope> );
+        TreePtr< ::Overlay<Node> > overlay( new ::Overlay<Node> );
         stuff->terminus = overlay;
         overlay->base = search_pattern;
         overlay->overlay = replace_pattern;
 
         // Key them together
         Coupling stuff_match(( stuff ));
+        Coupling overlay_match(( overlay ));
         couplings.insert( stuff_match );
+        couplings.insert( overlay_match );
 
         // Configure the rooted implementation with new patterns and couplings
         (void)RepeatingSearchReplace( proot, stuff, stuff, keys );
