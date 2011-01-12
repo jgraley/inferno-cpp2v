@@ -40,7 +40,7 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     fi->identifier = MakeTreePtr<InstanceIdentifier>();
     fi->type = s_func;
     fi->initialiser = oinit;   
-    oinit->base = s_and;
+    oinit->search = s_and;
     s_top_comp->members = ( top_decls );
     s_top_comp->statements = ( top_pre );
 
@@ -70,7 +70,7 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
 
     // SlaveSearchReplace search to find automatic variables within the function
     stuff->terminus = overlay;
-    overlay->base = s_instance;
+    overlay->search = s_instance;
     s_instance->identifier = s_identifier;
     s_instance->initialiser = MakeTreePtr<Uninitialised>(); // can't handle initialisers!
     s_instance->type = MakeTreePtr<Type>();

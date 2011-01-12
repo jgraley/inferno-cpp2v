@@ -96,7 +96,7 @@ void CleanupDuplicateLabels::operator()( TreePtr<Node> context, TreePtr<Node> *p
         r_instance->identifier = identifier;
         r_instance->type = type;
         stuff->terminus = overlay;           
-        overlay->base = s_comp;
+        overlay->search = s_comp;
         overlay->overlay = r_comp;
         r_comp->members = decls;
         r_comp->statements = (pre, r_label1, post);
@@ -165,7 +165,7 @@ void CleanupUnusedLabels::operator()( TreePtr<Node> context, TreePtr<Node> *proo
         r_instance->identifier = identifier;
         r_instance->type = type;
         stuff->terminus = overlay;
-        overlay->base = s_comp;
+        overlay->search = s_comp;
         overlay->overlay = r_comp;
         r_comp->members = decls;
         r_comp->statements = (pre, post);
