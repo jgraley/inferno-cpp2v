@@ -119,7 +119,7 @@ int main( int argc, char *argv[] )
 	        CleanupIneffectualGoto()(&program);
 		}
 
-#if 0 // problem is just that we automatically make a coupling
+#if 1 // problem is just that we automatically make a coupling for stuff nodes that only appear in search pattern
 	    if( i==0 )
 			--ReadArgs::quitafter;
 	    if( ReadArgs::quitafter >= 0 ) 

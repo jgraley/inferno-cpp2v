@@ -47,6 +47,8 @@ Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
 	// Since collections (which require decisions) can exist within the tree, we must allow iteration
 	// through choices, and since the number of decisions seen may vary, we must start a new conjecture.
 	// Therefore, we recurse back to Compare().
+	if( !keys_map[pattern] )
+        return FOUND;
 	ASSERT( keys_map[pattern] ); // should have been caught by CheckMatchSetsKeyed()
 	Result r;
 
