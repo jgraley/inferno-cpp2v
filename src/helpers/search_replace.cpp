@@ -736,7 +736,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
         {
             CompareReplace *slave = rsb.get();
     	    slave->pcontext = pcontext;
-    	    (void)slave->DefaultRepeatingSearchReplace( &dest, coupling_keys );
+    	    (void)slave->DefaultRepeatingCompareReplace( &dest, coupling_keys );
         }
 	}
 	else if( TreePtr<SlaveSearchReplaceBase> sb = dynamic_pointer_cast<SlaveSearchReplaceBase>(source) )
@@ -746,7 +746,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
         {
 		    SearchReplace *slave = sb.get();
 		    slave->pcontext = pcontext;
-    	    (void)slave->DefaultRepeatingSearchReplace( &dest, coupling_keys );
+    	    (void)slave->DefaultRepeatingCompareReplace( &dest, coupling_keys );
         }
 	}    
 	else if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
@@ -824,7 +824,7 @@ TreePtr<Node> CompareReplace::MatchingDuplicateSubtree( TreePtr<Node> source ) c
 }
 
 
-Result CompareReplace::SingleSearchReplace( TreePtr<Node> *proot,
+Result CompareReplace::SingleCompareReplace( TreePtr<Node> *proot,
                                             TreePtr<Node> search_pattern,
                                             TreePtr<Node> replace_pattern ) 
 {
@@ -855,7 +855,7 @@ Result CompareReplace::SingleSearchReplace( TreePtr<Node> *proot,
 // on supplied patterns and couplings. Does search and replace
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
-int CompareReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
+int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot,
 	                                        TreePtr<Node> search_pattern,
 	                                        TreePtr<Node> replace_pattern )
 {
@@ -864,7 +864,7 @@ int CompareReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
     int i=0;
     while(i<20) // TODO!!
     {
-    	Result r = SingleSearchReplace( proot,
+    	Result r = SingleCompareReplace( proot,
     			                        search_pattern,
     			                        replace_pattern );
     	TRACE("%p result %d", this, r);        
@@ -880,11 +880,11 @@ int CompareReplace::RepeatingSearchReplace( TreePtr<Node> *proot,
 }
 
 
-void CompareReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
-									             	CouplingKeys keys )
+void CompareReplace::DefaultRepeatingCompareReplace( TreePtr<Node> *proot,
+									                	CouplingKeys keys )
 {
     coupling_keys = keys; 
-	(void)RepeatingSearchReplace( proot, search_pattern, replace_pattern );
+	(void)RepeatingCompareReplace( proot, search_pattern, replace_pattern );
 }
 
 
@@ -912,7 +912,7 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 
 	// Do the search and replace with before and after validation
 	Validate()( *pcontext, proot );
-	DefaultRepeatingSearchReplace( proot );
+	DefaultRepeatingCompareReplace( proot );
     if( !(ReadArgs::intermediate_graph && ReadArgs::quitafter == 0) )
 	    Validate()( *pcontext, proot ); // allow broken tree if we're only looking at a graph of it
 

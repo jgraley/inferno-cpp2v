@@ -237,16 +237,16 @@ public:
 private:
     TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x ) const;
     // implementation ring: Do the actual search and replace
-    Result SingleSearchReplace( TreePtr<Node> *proot,
-                                TreePtr<Node> search_pattern,
-                                TreePtr<Node> replace_pattern );
+    Result SingleCompareReplace( TreePtr<Node> *proot,
+                                 TreePtr<Node> search_pattern,
+                                 TreePtr<Node> replace_pattern );
 public:
-    int RepeatingSearchReplace( TreePtr<Node> *proot,
-                                TreePtr<Node> search_pattern,
-                                TreePtr<Node> replace_pattern );
+    int RepeatingCompareReplace( TreePtr<Node> *proot,
+                                 TreePtr<Node> search_pattern,
+                                 TreePtr<Node> replace_pattern );
 
-    virtual void DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
-						             			CouplingKeys match_keys = CouplingKeys() );
+    virtual void DefaultRepeatingCompareReplace( TreePtr<Node> *proot,
+						             			 CouplingKeys match_keys = CouplingKeys() );
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.
     void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
 private:
