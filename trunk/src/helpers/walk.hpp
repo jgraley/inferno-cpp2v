@@ -112,8 +112,7 @@ public:
 	protected:
 	    iterator( TreePtr<Node> &root,
 	    		  TreePtr<Node> restrictor,
-	    		  const CompareReplace *rc,
-	    		  CouplingKeys *k );
+	    		  const CompareReplace *rc );
 	    bool IsAtEndOfChildren() const;
 	    void BypassEndOfChildren();
 	    void Push( TreePtr<Node> n );
@@ -133,8 +132,7 @@ public:
 	// same parameters and it will be equivalent.
 	Expand( TreePtr<Node> root, // root of the subtree to walk
 		  TreePtr<Node> restrictor = TreePtr<Node>(), // optional restrictor; walk skips these and does not recurse under them
-		  const CompareReplace *rsr = NULL,
-		  CouplingKeys *k = NULL ); // optional coupling set for coupling into restrictor
+		  const CompareReplace *rsr = NULL ); 
 
 	// Standard container ops, note that modification is not allowed through container interface
 	virtual const iterator &begin();
@@ -145,7 +143,6 @@ protected:
     TreePtr<Node> root;
     TreePtr<Node> restrictor;
     const CompareReplace *restriction_comparison;
-    CouplingKeys *keys;
     iterator my_begin, my_end;
 };
 
@@ -173,22 +170,19 @@ public:
             root = nb.root;
             restrictor = nb.restrictor;
             restriction_comparison = nb.restriction_comparison;
-            keys = nb.keys;
             state = nb.state;            
             done = nb.done;            
         }
     protected:
         iterator( TreePtr<Node> &root,
                   TreePtr<Node> restrictor,
-                  const CompareReplace *rc,
-                  CouplingKeys *k );
+                  const CompareReplace *rc );
         Set< TreePtr<Node> > seen;
         friend class ParentTraverse;
     };
     ParentTraverse( TreePtr<Node> root, // root of the subtree to walk
            TreePtr<Node> restrictor = TreePtr<Node>(), // optional restrictor; walk skips these and does not recurse under them
-           const CompareReplace *rsr = NULL,
-           CouplingKeys *k = NULL );
+           const CompareReplace *rsr = NULL );
     virtual const iterator &begin();
     virtual const iterator &end();
     virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
@@ -197,7 +191,6 @@ protected:
     TreePtr<Node> root;
     TreePtr<Node> restrictor;
     const CompareReplace *restriction_comparison;
-    CouplingKeys *keys;
     iterator my_begin, my_end;
 };
 
@@ -218,7 +211,6 @@ public:
             root = nb.root;
             restrictor = nb.restrictor;
             restriction_comparison = nb.restriction_comparison;
-            keys = nb.keys;
             state = nb.state;            
             done = nb.done;      
             Filter();
@@ -226,16 +218,14 @@ public:
     protected:
         iterator( TreePtr<Node> &root,
                   TreePtr<Node> restrictor,
-                  const CompareReplace *rc,
-                  CouplingKeys *k );
+                  const CompareReplace *rc );
         Set< TreePtr<Node> > seen;
         void Filter();
         friend class Traverse;
     };
     Traverse( TreePtr<Node> root, // root of the subtree to walk
             TreePtr<Node> restrictor = TreePtr<Node>(), // optional restrictor; walk skips these and does not recurse under them
-            const CompareReplace *rsr = NULL,
-            CouplingKeys *k = NULL );
+            const CompareReplace *rsr = NULL );
     virtual const iterator &begin();
     virtual const iterator &end();
     virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
@@ -244,7 +234,6 @@ protected:
     TreePtr<Node> root;
     TreePtr<Node> restrictor;
     const CompareReplace *restriction_comparison;
-    CouplingKeys *keys;
     iterator my_begin, my_end;
 };
 

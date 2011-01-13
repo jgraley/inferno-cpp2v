@@ -26,7 +26,6 @@ bool Conjecture::ShouldTryMore( Result r, int threshold )
 
 Result Conjecture::Search( TreePtr<Node> x,
 					       TreePtr<Node> pattern,
-					       CouplingKeys *keys,
 						   bool can_key,
 					  	   const CompareReplace *sr )
 {
@@ -37,7 +36,7 @@ Result Conjecture::Search( TreePtr<Node> x,
 		// HandleDecision() will return the current choice for that decision, if absent it will
 		// add the decision and choose the first choice, if the decision reaches the end it
 		// will remove the decision.
-		Result r = sr->MatchingDecidedCompare( x, pattern, keys, can_key, *this );
+		Result r = sr->MatchingDecidedCompare( x, pattern, can_key, *this );
 
 		// If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
 		if( r || choices.empty() )

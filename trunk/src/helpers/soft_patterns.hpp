@@ -20,11 +20,10 @@ struct NotMatch : Special<PRE_RESTRICTION>,
 private:
     virtual Result DecidedCompare( const CompareReplace *sr,
     		                       TreePtr<Node> x,
-    		                       CouplingKeys *keys,
     		                       bool can_key,
     		                       Conjecture &conj ) const
     {
-    	if( keys && can_key )
+    	if( can_key )
     	{
     		// Don't do a subtree search while keying - we'll only end up keying the wrong thing
     		// or terminating with NOT_FOUND prematurely
@@ -36,7 +35,7 @@ private:
     	    // a. We didn't recurse during KEYING pass and
     	    // b. Search under not can terminate with NOT_FOUND, but parent search will continue
     	    // Consequently, we go in at Compare level, which creates a new conjecture.
-    		Result r = sr->Compare( x, pattern, keys, false );
+    		Result r = sr->Compare( x, pattern, false );
 			TRACE("SoftNot got %d, returning the opposite!\n", (int)r);
     		if( r==NOT_FOUND )
 				return FOUND;
@@ -59,13 +58,12 @@ struct MatchAll : Special<PRE_RESTRICTION>,
 private:
     virtual Result DecidedCompare( const CompareReplace *sr,
                                    TreePtr<Node> x,
-                                   CouplingKeys *keys,
                                    bool can_key,
                                    Conjecture &conj ) const
     {
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
-    		Result r = sr->DecidedCompare( x, TreePtr<Node>(i), keys, can_key, conj );
+    		Result r = sr->DecidedCompare( x, TreePtr<Node>(i), can_key, conj );
     	    if( !r )
     	    	return NOT_FOUND;
     	}
@@ -87,13 +85,12 @@ struct MatchAny : Special<PRE_RESTRICTION>,
 private:
     virtual Result DecidedCompare( const CompareReplace *sr,
     		                       TreePtr<Node> x,
-    		                       CouplingKeys *keys,
     		                       bool can_key,
     		                       Conjecture &conj ) const
     {
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
-    		Result r = sr->Compare( x, i, keys, false );
+    		Result r = sr->Compare( x, i, false );
     	    if( r )
     	    	return FOUND;
     	}
@@ -115,14 +112,13 @@ struct MatchOdd : Special<PRE_RESTRICTION>,
 private:
     virtual Result DecidedCompare( const CompareReplace *sr,
     		                       TreePtr<Node> x,
-    		                       CouplingKeys *keys,
     		                       bool can_key,
     		                       Conjecture &conj ) const
     {
     	int tot=0;
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
-    		Result r = sr->Compare( x, i, keys, false );
+    		Result r = sr->Compare( x, i, false );
     	    if( r )
     	    	tot++;
     	}
@@ -142,7 +138,6 @@ struct TransformToBase : CompareReplace::SoftSearchPattern
 private:
     virtual Result DecidedCompare( const CompareReplace *sr,
     		                                            TreePtr<Node> x,
-    		                                            CouplingKeys *keys,
     		                                            bool can_key,
     		                                            Conjecture &conj ) const;
     Transformation *transformation;
@@ -173,7 +168,6 @@ struct BuildIdentifierBase : CompareReplace::SoftReplacePattern
     BuildIdentifierBase( string s ) : format(s) {}
     TreePtr<Identifier> source;
     string GetNewName( const CompareReplace *sr,
-                       CouplingKeys *keys,
                        bool can_key );
     string format;
 };
@@ -186,10 +180,9 @@ struct BuildInstanceIdentifier : Special<InstanceIdentifier>,
     NODE_FUNCTIONS
 private:
     virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr,
-                                               CouplingKeys *keys,
                                                bool can_key )
     {
-	string newname = GetNewName( sr, keys, can_key );
+	string newname = GetNewName( sr, can_key );
 	return TreePtr<SpecificInstanceIdentifier>( new SpecificInstanceIdentifier( newname ) );
     }                                               
 };
@@ -202,10 +195,9 @@ struct BuildLabelIdentifier : Special<LabelIdentifier>,
     NODE_FUNCTIONS
 private:
     virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr,
-                                               CouplingKeys *keys,
                                                bool can_key )
     {
-	string newname = GetNewName( sr, keys, can_key );
+	string newname = GetNewName( sr, can_key );
 	return TreePtr<SpecificLabelIdentifier>( new SpecificLabelIdentifier( newname ) );
     }                                               
 };
