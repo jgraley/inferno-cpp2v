@@ -149,10 +149,7 @@ public:
     // specified here, so that we have a fully confiugured functor.
     CompareReplace( TreePtr<Node> sp,
                          TreePtr<Node> rp=TreePtr<Node>(),
-                         CouplingSet m = CouplingSet() );
-    CompareReplace( TreePtr<Node> sp,
-                         TreePtr<Node> rp,
-                         int ); // for use by slave wrappers
+                         bool isroot = true );
     ~CompareReplace();
     
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
@@ -286,20 +283,16 @@ class SearchReplace : public CompareReplace
 public:
     SearchReplace( TreePtr<Node> sp,
                    TreePtr<Node> rp = TreePtr<Node>(),
-                   CouplingSet m = CouplingSet() );
-    SearchReplace( TreePtr<Node> sp,
-                   TreePtr<Node> rp,
-                   int ); // for use by slave wrappers
-    virtual void DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
-							          		    CouplingKeys match_keys = CouplingKeys() );
+                   bool isroot = true );
 };
+
 
 // TODO extract common base for slaves, and use in DuplicateSubtree() and maybe elsewhere
 struct SlaveCompareReplaceBase : virtual Node,
                          public CompareReplace
 {
 	SlaveCompareReplaceBase( TreePtr<Node> sp, TreePtr<Node> rp=TreePtr<Node>() ) :
-		CompareReplace( sp, rp, 0 )
+		CompareReplace( sp, rp, false )
 	{}
 	virtual TreePtr<Node> GetThrough() const = 0;
 };
@@ -322,11 +315,12 @@ struct SlaveCompareReplace : SlaveCompareReplaceBase, Special<PRE_RESTRICTION>
 	}
 };
 
+
 struct SlaveSearchReplaceBase : virtual Node,
                    public SearchReplace
 {
 	SlaveSearchReplaceBase( TreePtr<Node> sp, TreePtr<Node> rp=TreePtr<Node>() ) :
-		SearchReplace( sp, rp, 0 )
+		SearchReplace( sp, rp, false )
 	{}
 	virtual TreePtr<Node> GetThrough() const = 0;
 };

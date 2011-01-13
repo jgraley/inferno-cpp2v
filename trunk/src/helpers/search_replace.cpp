@@ -6,82 +6,75 @@
 // Master constructor remembers search pattern, replace pattern and any supplied couplings as required
 CompareReplace::CompareReplace( TreePtr<Node> sp,
                                 TreePtr<Node> rp,
-                                CouplingSet m ) :                 
+                                bool isroot ) :                 
     search_pattern( sp ),
-    replace_pattern( rp ),
-    couplings( m )
+    replace_pattern( rp )
 {
     Validate v(true);
     v(search_pattern, &search_pattern);
     v(replace_pattern, &replace_pattern);
-
-	// Count the number of times we hit each node during a walk.
-	// Where we hit a node more than once, add a coupling for it.
-	// This will detect nodes with multiple refs (which we want 
-	// couplings for) and all nodes thereunder (which I'm not sure
-	// if we want couplgs for or even if should be allowed).
-	// TODO decide.
-	TRACE("doing inferred couplings\n");
-	Map< TreePtr<Node>, int > ms;
-    ParentTraverse wsp( sp ), wrp( rp );
-    ParentTraverse::iterator i;
-    for( i=(wsp.begin()); i != wsp.end(); ++i )
+    
+    if( isroot )
     {
-        TreePtr<Node> n = *i;
-        if( n )
+        // Count the number of times we hit each node during a walk.
+        // Where we hit a node more than once, add a coupling for it.
+        // This will detect nodes with multiple refs (which we want 
+        // couplings for) and all nodes thereunder (which I'm not sure
+        // if we want couplgs for or even if should be allowed).
+        // TODO decide.
+        TRACE("doing inferred couplings\n");
+        Map< TreePtr<Node>, int > ms;
+        ParentTraverse wsp( sp ), wrp( rp );
+        ParentTraverse::iterator i;
+        for( i=(wsp.begin()); i != wsp.end(); ++i )
         {
-            if( dynamic_pointer_cast<OverlayBase>(n) || dynamic_pointer_cast<StuffBase>(n) )
-                ms[n] = 2; // foce couplings at overlay nodes TODO refactor substitution so this is not needed
-            else if( ms.IsExist( n ) )
-                ms[n]++;
-            else
-                ms[n] = 1;
-        }
-    }
-    for( i.ContinueAt(wrp.begin()); i != wrp.end(); ++i )
-    {
-        TreePtr<Node> n = *i;
-        if( n )
-        {
-            if( ms.IsExist( n ) )
-                ms[n]++;
-            else
-                ms[n] = 1;
-        }
-    }
-    typedef	pair<TreePtr<Node>, int> pair;	
-	FOREACH( pair pp, ms )
-	{
-	    if( pp.second > 1 )
-			if( !couplings.IsExist( pp.first ) )
+            TreePtr<Node> n = *i;
+            if( n )
             {
-                TRACE("Inserting coupling for ")(*(pp.first))(" count is %d\n", pp.second );
-                couplings.insert( pp.first );	
+                if( dynamic_pointer_cast<OverlayBase>(n) || dynamic_pointer_cast<StuffBase>(n) )
+                    ms[n] = 2; // foce couplings at overlay nodes TODO refactor substitution so this is not needed
+                else if( ms.IsExist( n ) )
+                    ms[n]++;
+                else
+                    ms[n] = 1;
             }
-	}
-	
-    // Look for slaves. If we find them, copy our couplings into their couplings
-    // Do not just overwrite since there may be implicit Stuff node couplings.
-    // TODO is there a way of unioning sets without doing lots of insert()?
-    FOREACH( TreePtr<Node> n, wrp )
-    {
-        if( TreePtr<SlaveCompareReplaceBase> rsb = dynamic_pointer_cast<SlaveCompareReplaceBase>(n) )
-		    rsb->couplings = couplings;
-        else if( TreePtr<SlaveSearchReplaceBase> rsb = dynamic_pointer_cast<SlaveSearchReplaceBase>(n) )
-			rsb->couplings = couplings;
+        }
+        for( i.ContinueAt(wrp.begin()); i != wrp.end(); ++i )
+        {
+            TreePtr<Node> n = *i;
+            if( n )
+            {
+                if( ms.IsExist( n ) )
+                    ms[n]++;
+                else
+                    ms[n] = 1;
+            }
+        }
+        typedef	pair<TreePtr<Node>, int> pair;	
+        FOREACH( pair pp, ms )
+        {
+            if( pp.second > 1 )
+                if( !couplings.IsExist( pp.first ) )
+                {
+                    TRACE("Inserting coupling for ")(*(pp.first))(" count is %d\n", pp.second );
+                    couplings.insert( pp.first );	
+                }
+        }
+        
+        // Look for slaves. If we find them, copy our couplings into their couplings
+        // Do not just overwrite since there may be implicit Stuff node couplings.
+        // TODO is there a way of unioning sets without doing lots of insert()?
+        FOREACH( TreePtr<Node> n, wrp )
+        {
+            if( TreePtr<SlaveCompareReplaceBase> rsb = dynamic_pointer_cast<SlaveCompareReplaceBase>(n) )
+                FOREACH( Coupling c, couplings )
+                    rsb->couplings.insert( c );
+            else if( TreePtr<SlaveSearchReplaceBase> rsb = dynamic_pointer_cast<SlaveSearchReplaceBase>(n) )
+                FOREACH( Coupling c, couplings )
+                    rsb->couplings.insert( c );
+        }
     }
 } 
-
-
-// SlaveSearchReplace constructor used by slave wrapper
-CompareReplace::CompareReplace( TreePtr<Node> sp,
-                                TreePtr<Node> rp,
-                                int i ) :                                  
-    search_pattern( sp ),
-    replace_pattern( rp )
-{
-	(void)i;
-}
 
 
 // Destructor tries not to leak memory lol
@@ -952,22 +945,8 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 
 SearchReplace::SearchReplace( TreePtr<Node> sp,
                               TreePtr<Node> rp,
-                              CouplingSet m ) :
-    CompareReplace( sp, rp, m )                              
-{
-}
-
-
-SearchReplace::SearchReplace( TreePtr<Node> sp,
-                              TreePtr<Node> rp,
-                              int i ) :
-    CompareReplace( sp, rp, i )                              
-{
-}
-
-
-void SearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
-                                                   CouplingKeys keys )
+                              bool isroot ) :
+    CompareReplace( sp, rp, isroot )                              
 {
     // Make a non-rooted search and replace (ie where the base of the search pattern
     // does not have to be the root of the whole program tree).
@@ -990,16 +969,10 @@ void SearchReplace::DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
         couplings.insert( overlay_match );
 
         // Configure the rooted implementation with new patterns and couplings
-        (void)RepeatingSearchReplace( proot, stuff, stuff, keys );
-
-        // Undo the change to the couplings we made earlier
-        couplings.erase( stuff_match );
+        replace_pattern = stuff;
     }
-    else
-    {
-        // Configure the rooted implementation with new pattern
-        (void)RepeatingSearchReplace( proot, stuff, TreePtr<Node>(), keys );
-    }
+    
+    search_pattern = stuff;
 }
 
 
