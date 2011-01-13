@@ -193,12 +193,10 @@ void Expand::iterator::Push( TreePtr<Node> n )
 
 Expand::iterator::iterator( TreePtr<Node> &r,
 	                   	  TreePtr<Node> res,
-	                   	  const CompareReplace *rc,
-	                   	  CouplingKeys *k ) :
+	                   	  const CompareReplace *rc ) :
     root( new TreePtr<Node>(r) ),
     restrictor( res ),
     restriction_comparison( rc ),
-    keys( k ),
     done( false )
 {
 }
@@ -213,7 +211,6 @@ Expand::iterator::iterator( const Expand::iterator & other ) :
 	root( other.root ),
 	restrictor( other.restrictor ),
 	restriction_comparison( other.restriction_comparison ),
-	keys( other.keys ),
 	state( other.state ),
 	done( other.done )
 {
@@ -243,7 +240,7 @@ void Expand::iterator::AdvanceInto()
 		if( restrictor ) // is there a restriction?
 		{
 			ASSERT( restriction_comparison );
-			if( !restriction_comparison->Compare( element, restrictor, keys, false ) ) // must pass the restriction
+			if( !restriction_comparison->Compare( element, restrictor, false ) ) // must pass the restriction
 				recurse = false;
 		}
 	}
@@ -342,20 +339,18 @@ const bool Expand::iterator::IsOrdered() const
 
 Expand::Expand( TreePtr<Node> r,
 		    TreePtr<Node> res,
-		    const CompareReplace *rsr,
-		    CouplingKeys *k ) :
+		    const CompareReplace *rsr ) :
 	root(r),
 	restrictor( res ),
 	restriction_comparison( rsr ),
-	keys( k ),
-	my_begin( iterator( root, restrictor, restriction_comparison, k ) ),
+	my_begin( iterator( root, restrictor, restriction_comparison ) ),
 	my_end( iterator() )
 {
 }
 
 const Expand::iterator &Expand::begin()
 {
-	my_begin = iterator( root, restrictor, restriction_comparison, keys );
+	my_begin = iterator( root, restrictor, restriction_comparison );
 	return my_begin;
 }
 
@@ -378,28 +373,25 @@ ParentTraverse::iterator::iterator( const ParentTraverse::iterator & other ) :
 
 ParentTraverse::iterator::iterator( TreePtr<Node> &root,
                            TreePtr<Node> restrictor,
-                           const CompareReplace *rc,
-                           CouplingKeys *k ) :
-    Expand::iterator( root, restrictor, rc, k )
+                           const CompareReplace *rc ) :
+    Expand::iterator( root, restrictor, rc )
 {
 }
  
 ParentTraverse::ParentTraverse( TreePtr<Node> r,
               TreePtr<Node> res,
-              const CompareReplace *rsr,
-              CouplingKeys *k ) :
+              const CompareReplace *rsr ) :
     root(r),
     restrictor( res ),
     restriction_comparison( rsr ),
-    keys( k ),
-    my_begin( iterator( root, restrictor, restriction_comparison, k ) ),
+    my_begin( iterator( root, restrictor, restriction_comparison ) ),
     my_end( iterator() )
 {
 }
 
 const ParentTraverse::iterator &ParentTraverse::begin()
 {
-    my_begin = iterator( root, restrictor, restriction_comparison, keys );
+    my_begin = iterator( root, restrictor, restriction_comparison );
     return my_begin;
 }
 
@@ -436,29 +428,26 @@ Traverse::iterator::iterator( const Traverse::iterator & other ) :
 
 Traverse::iterator::iterator( TreePtr<Node> &root,
                            TreePtr<Node> restrictor,
-                           const CompareReplace *rc,
-                           CouplingKeys *k ) :
-    Expand::iterator( root, restrictor, rc, k )
+                           const CompareReplace *rc ) :
+    Expand::iterator( root, restrictor, rc )
 {
     Filter();
 }
  
 Traverse::Traverse( TreePtr<Node> r,
               TreePtr<Node> res,
-              const CompareReplace *rsr,
-              CouplingKeys *k ) :
+              const CompareReplace *rsr ) :
     root(r),
     restrictor( res ),
     restriction_comparison( rsr ),
-    keys( k ),
-    my_begin( iterator( root, restrictor, restriction_comparison, k ) ),
+    my_begin( iterator( root, restrictor, restriction_comparison ) ),
     my_end( iterator() )
 {
 }
 
 const Traverse::iterator &Traverse::begin()
 {
-    my_begin = iterator( root, restrictor, restriction_comparison, keys );
+    my_begin = iterator( root, restrictor, restriction_comparison );
     return my_begin;
 }
 

@@ -160,14 +160,12 @@ public:
     {
         virtual Result DecidedCompare( const CompareReplace *sr,
         		                       TreePtr<Node> x,
-        		                       CouplingKeys *match_keys,
         		                       bool can_key,
         		                       Conjecture &conj ) const = 0;
     };
     struct SoftReplacePattern
     {
         virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr,
-        		                                CouplingKeys *match_keys,
         		                                bool can_key ) = 0;
     };
 
@@ -178,6 +176,7 @@ public:
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;
     TreePtr<Node> *pcontext;
+    mutable CouplingKeys coupling_keys;
     mutable set< TreePtr<Node> > dirty_grass;
     
 private:
@@ -188,23 +187,19 @@ private:
     // DecidedCompare ring
     Result DecidedCompare( SequenceInterface &x,
     		               SequenceInterface &pattern,
-    		               CouplingKeys *match_keys,
     		               bool can_key,
     		               Conjecture &conj ) const;
     Result DecidedCompare( CollectionInterface &x,
     		               CollectionInterface &pattern,
-    		               CouplingKeys *match_keys,
     		               bool can_key,
     		               Conjecture &conj ) const;
     Result DecidedCompare( TreePtr<Node> x,
     		               TreePtr<StuffBase> stuff_pattern,
-    		               CouplingKeys *match_keys,
     		               bool can_key,
     		               Conjecture &conj ) const;
 public:
     Result DecidedCompare( TreePtr<Node> x,
     		               TreePtr<Node> pattern,
-    		               CouplingKeys *match_keys,
     		               bool can_key,
     		               Conjecture &conj ) const;
 private:
@@ -212,7 +207,6 @@ private:
     friend class Conjecture;
     Result MatchingDecidedCompare( TreePtr<Node> x,
     		                       TreePtr<Node> pattern,
-    		                       CouplingKeys *match_keys,
     		                       bool can_key,
     		                       Conjecture &conj ) const;
 
@@ -220,44 +214,36 @@ private:
 public:
     Result Compare( TreePtr<Node> x,
     		        TreePtr<Node> pattern,
-    		        CouplingKeys *match_keys = NULL,
 	                bool can_key = false ) const;
 private:
     // Replace ring
     void ClearPtrs( TreePtr<Node> dest ) const;
     void Overlay( TreePtr<Node> dest,
     		      TreePtr<Node> source,
-    		      CouplingKeys *match_keys,
     		      bool can_key,
     		      shared_ptr<Key> current_key ) const; // under substitution if not NULL
     void Overlay( SequenceInterface *dest,
     		      SequenceInterface *source,
-    		      CouplingKeys *match_keys,
     		      bool can_key,
     		      shared_ptr<Key> current_key ) const;
     void Overlay( CollectionInterface *dest,
     	          CollectionInterface *source,
-    	          CouplingKeys *match_keys,
     	          bool can_key,
     	          shared_ptr<Key> current_key ) const;
 public:
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> x,
-    		                        CouplingKeys *match_keys,
     		                        bool can_key,
     		                        shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
 private:
-    TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x,
-    		                                   CouplingKeys *match_keys ) const;
+    TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x ) const;
     // implementation ring: Do the actual search and replace
     Result SingleSearchReplace( TreePtr<Node> *proot,
                                 TreePtr<Node> search_pattern,
-                                TreePtr<Node> replace_pattern,
-                                CouplingKeys match_keys );
+                                TreePtr<Node> replace_pattern );
 public:
     int RepeatingSearchReplace( TreePtr<Node> *proot,
                                 TreePtr<Node> search_pattern,
-                                TreePtr<Node> replace_pattern,
-                                CouplingKeys match_keys );
+                                TreePtr<Node> replace_pattern );
 
     virtual void DefaultRepeatingSearchReplace( TreePtr<Node> *proot,
 						             			CouplingKeys match_keys = CouplingKeys() );

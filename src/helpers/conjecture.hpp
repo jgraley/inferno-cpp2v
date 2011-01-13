@@ -18,7 +18,6 @@ public:
 			                                     ContainerInterface::iterator end );
 	Result Search( TreePtr<Node> x,
 				   TreePtr<Node> pattern,
-				   CouplingKeys *keys,
 				   bool can_key,
 				   const CompareReplace *sr );
 private:
