@@ -64,6 +64,7 @@ ires=$?
 
 if test $ires -eq 0
 then
+ ../iindent.sh < $outfile
  echo Compile output...
  g++ -c $outfile -o results/"$fb"_out.o
  c2res=$?
