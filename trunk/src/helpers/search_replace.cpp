@@ -61,6 +61,18 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
                     couplings.insert( pp.first );	
                 }
         }
+       
+        // Fill in fields on the stuff nodes
+        Traverse tsp( sp ); 
+        FOREACH( TreePtr<Node> n, tsp )
+        {        
+            if( TreePtr<StuffBase> sb = dynamic_pointer_cast<StuffBase>(n) )
+            {
+                sb->recurse_comparer.couplings = couplings; 
+                sb->recurse_comparer.coupling_keys = coupling_keys; 
+                sb->recurse_comparer.search_pattern = sb->recurse_restriction; // TODO could move into a Stuff node constructor if there was one
+            }
+        }
         
         // Look for slaves. If we find them, copy our couplings into their couplings
         // Do not just overwrite since there may be implicit Stuff node couplings.
@@ -70,7 +82,7 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
             if( TreePtr<SlaveCompareReplaceBase> rsb = dynamic_pointer_cast<SlaveCompareReplaceBase>(n) )
             {
                 FOREACH( Coupling c, couplings )
-                    rsb->couplings.insert( c );
+                    rsb->couplings.insert( c ); 
                 rsb->coupling_keys = coupling_keys; 
             }
 
@@ -380,7 +392,8 @@ Result CompareReplace::DecidedCompare( TreePtr<Node> x,
 	ASSERT( stuff_pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
 	// Define a walk, rooted at this node, restricted as specified in search pattern
-	Expand wx( x, stuff_pattern->recurse_restriction, this );
+    stuff_pattern->recurse_comparer.pcontext = pcontext; // via Filter iface
+	Expand wx( x, stuff_pattern->recurse_restriction, &(stuff_pattern->recurse_comparer) );
 
 	// Get decision from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = conj.HandleDecision( wx.begin(), wx.end() );
