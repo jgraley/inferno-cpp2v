@@ -111,21 +111,6 @@ struct StarBase : virtual Node {};
 template<class PRE_RESTRICTION>
 struct Star : StarBase, Special<PRE_RESTRICTION> { SPECIAL_NODE_FUNCTIONS };
 
-
-// The Stuff wildcard can match a truncated subtree with special powers as listed by the members
-struct StuffBase : virtual Node
-{
-	TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
-	TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
-};
-template<class PRE_RESTRICTION>
-struct Stuff : StuffBase, Special<PRE_RESTRICTION> { SPECIAL_NODE_FUNCTIONS };
-struct StuffKey : Key
-{
-	TreePtr<Node> terminus;
-};
-
-
 struct GreenGrassBase : virtual Node
 {
 	virtual TreePtr<Node> GetThrough() const = 0;
@@ -141,13 +126,14 @@ struct GreenGrass : GreenGrassBase, Special<PRE_RESTRICTION>
 	}
 };
 
+class StuffBase;
 
 class CompareReplace : InPlaceTransformation // TODO rename CompareReplace -> MatchReplace
 {  
 public:
     // Constructor and destructor. Search and replace patterns and couplings are
     // specified here, so that we have a fully confiugured functor.
-    CompareReplace( TreePtr<Node> sp,
+    CompareReplace( TreePtr<Node> sp=TreePtr<Node>(),
                     TreePtr<Node> rp=TreePtr<Node>(),
                     bool isroot = true );
     
@@ -324,6 +310,20 @@ struct SlaveSearchReplace : SlaveSearchReplaceBase, Special<PRE_RESTRICTION>
 	{
 		return TreePtr<Node>( through );
 	}
+};
+
+// The Stuff wildcard can match a truncated subtree with special powers as listed by the members
+struct StuffBase : virtual Node
+{
+    TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
+    TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
+    CompareReplace recurse_comparer; // TODO only need the compare half, maybe split it out?
+};
+template<class PRE_RESTRICTION>
+struct Stuff : StuffBase, Special<PRE_RESTRICTION> { SPECIAL_NODE_FUNCTIONS };
+struct StuffKey : Key
+{
+    TreePtr<Node> terminus;
 };
 
 struct OverlayBase : virtual Node
