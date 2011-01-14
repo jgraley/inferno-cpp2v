@@ -148,9 +148,8 @@ public:
     // Constructor and destructor. Search and replace patterns and couplings are
     // specified here, so that we have a fully confiugured functor.
     CompareReplace( TreePtr<Node> sp,
-                         TreePtr<Node> rp=TreePtr<Node>(),
-                         bool isroot = true );
-    ~CompareReplace();
+                    TreePtr<Node> rp=TreePtr<Node>(),
+                    bool isroot = true );
     
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
@@ -176,7 +175,7 @@ public:
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;
     TreePtr<Node> *pcontext;
-    mutable CouplingKeys coupling_keys;
+    shared_ptr< CouplingKeys > coupling_keys;
     mutable set< TreePtr<Node> > dirty_grass;
     
 private:
@@ -245,8 +244,6 @@ public:
                                  TreePtr<Node> search_pattern,
                                  TreePtr<Node> replace_pattern );
 
-    virtual void DefaultRepeatingCompareReplace( TreePtr<Node> *proot,
-						             			 CouplingKeys match_keys = CouplingKeys() );
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.
     void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
 private:
