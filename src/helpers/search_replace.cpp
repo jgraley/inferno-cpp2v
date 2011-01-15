@@ -7,12 +7,12 @@
 CompareReplace::CompareReplace( TreePtr<Node> sp,
                                 TreePtr<Node> rp,
                                 bool isroot ) :                 
-    search_pattern( sp ),
+    compare_pattern( sp ),
     replace_pattern( rp ),
     coupling_keys( new CouplingKeys )
 {
     Validate v(true);
-    v(search_pattern, &search_pattern);
+    v(compare_pattern, &compare_pattern);
     v(replace_pattern, &replace_pattern);
     
     if( isroot )
@@ -72,7 +72,7 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
                 TRACE("Elaborating Stuff@%p, rr@%p\n", sb.get(), sb->recurse_restriction.get());
                 sb->recurse_comparer.couplings = couplings; 
                 sb->recurse_comparer.coupling_keys = coupling_keys; 
-                sb->recurse_comparer.search_pattern = sb->recurse_restriction; // TODO could move into a Stuff node constructor if there was one
+                sb->recurse_comparer.compare_pattern = sb->recurse_restriction; // TODO could move into a Stuff node constructor if there was one
             }
         }
         Traverse trp( rp ); 
@@ -84,7 +84,7 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
                 TRACE("Elaborating Stuff@%p, rr@%p\n", sb.get(), sb->recurse_restriction.get());
                 sb->recurse_comparer.couplings = couplings; 
                 sb->recurse_comparer.coupling_keys = coupling_keys; 
-                sb->recurse_comparer.search_pattern = sb->recurse_restriction; // TODO could move into a Stuff node constructor if there was one
+                sb->recurse_comparer.compare_pattern = sb->recurse_restriction; // TODO could move into a Stuff node constructor if there was one
             }
         }
         
@@ -410,7 +410,7 @@ Result CompareReplace::DecidedCompare( TreePtr<Node> x,
 	if( stuff_pattern->recurse_restriction )
     {
         TRACE("Comparing ")(*stuff_pattern)("@%p, rr@%p\n", stuff_pattern.get(), stuff_pattern->recurse_restriction.get());
-        ASSERT( stuff_pattern->recurse_comparer.search_pattern );     
+        ASSERT( stuff_pattern->recurse_comparer.compare_pattern );     
         rf = &(stuff_pattern->recurse_comparer);
     }
     
@@ -506,8 +506,8 @@ bool CompareReplace::IsMatch( TreePtr<Node> context,
                               TreePtr<Node> root )
 {
     pcontext = &context;
-    ASSERT( search_pattern );
-    Result r = Compare( root, search_pattern, false );
+    ASSERT( compare_pattern );
+    Result r = Compare( root, compare_pattern, false );
     pcontext = NULL;
     return r == FOUND;
 }
@@ -873,7 +873,7 @@ TreePtr<Node> CompareReplace::MatchingDuplicateSubtree( TreePtr<Node> source ) c
 
 
 Result CompareReplace::SingleCompareReplace( TreePtr<Node> *proot,
-                                            TreePtr<Node> search_pattern,
+                                            TreePtr<Node> compare_pattern,
                                             TreePtr<Node> replace_pattern ) 
 {
 	TRACE("%p Begin search\n", this);
@@ -883,7 +883,7 @@ Result CompareReplace::SingleCompareReplace( TreePtr<Node> *proot,
     // be the case if this is a slave.
     CouplingKeys preserved_keys = *coupling_keys;
     
-	Result r = Compare( *proot, search_pattern, true );
+	Result r = Compare( *proot, compare_pattern, true );
 	if( r != FOUND )
 		return NOT_FOUND;
 
@@ -904,7 +904,7 @@ Result CompareReplace::SingleCompareReplace( TreePtr<Node> *proot,
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
 int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot,
-	                                        TreePtr<Node> search_pattern,
+	                                        TreePtr<Node> compare_pattern,
 	                                        TreePtr<Node> replace_pattern )
 {
 	dirty_grass.clear();
@@ -913,7 +913,7 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot,
     while(i<20) // TODO!!
     {
     	Result r = SingleCompareReplace( proot,
-    			                        search_pattern,
+    			                        compare_pattern,
     			                        replace_pattern );
     	TRACE("%p result %d", this, r);        
     	if( r != FOUND )
@@ -952,7 +952,7 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 
 	// Do the search and replace with before and after validation
 	//Validate()( *pcontext, proot ); TODO re-instate for master only
-    (void)RepeatingCompareReplace( proot, search_pattern, replace_pattern );   
+    (void)RepeatingCompareReplace( proot, compare_pattern, replace_pattern );   
     //if( !(ReadArgs::intermediate_graph && ReadArgs::quitafter == 0) )
 	 //   Validate()( *pcontext, proot ); // allow broken tree if we're only looking at a graph of it
 
@@ -969,14 +969,14 @@ SearchReplace::SearchReplace( TreePtr<Node> sp,
     // does not have to be the root of the whole program tree).
     // Insert a Stuff node as root of the search pattern
     TreePtr< Stuff<Scope> > stuff( new Stuff<Scope> );
-    stuff->terminus = search_pattern;
+    stuff->terminus = compare_pattern;
 
     if( replace_pattern ) // Is there a replace pattern?
     {
         // Insert a Stuff node as root of the replace pattern
         TreePtr< ::Overlay<Node> > overlay( new ::Overlay<Node> );
         stuff->terminus = overlay;
-        overlay->search = search_pattern;
+        overlay->search = compare_pattern;
         overlay->overlay = replace_pattern;
 
         // Key them together
@@ -989,7 +989,7 @@ SearchReplace::SearchReplace( TreePtr<Node> sp,
         replace_pattern = stuff;
     }
     
-    search_pattern = stuff;
+    compare_pattern = stuff;
 }
 
 
