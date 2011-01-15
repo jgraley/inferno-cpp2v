@@ -108,6 +108,7 @@ public:
 	    virtual void AdvanceInto();
 	    iterator(); // makes "end" iterator
 	protected:
+        virtual void DoNodeFilter();
 	    iterator( TreePtr<Node> &root,
                   Filter *out_filter,
 	    		  Filter *recurse_filter );
@@ -215,7 +216,6 @@ public:
         iterator( TreePtr<Node> &root,
                   Filter *recurse_filter );
         Set< TreePtr<Node> > seen;
-        void DoNodeFilter();
         UniqueFilter unique_filter;
         friend class Traverse;
     };
