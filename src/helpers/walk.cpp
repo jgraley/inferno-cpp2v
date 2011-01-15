@@ -1,7 +1,7 @@
 
 #include "tree/tree.hpp"
 #include "walk.hpp"
-#include "search_replace.hpp"
+#include "transformation.hpp"
 
 
 ////////////////////////// Flatten //////////////////////////
@@ -192,25 +192,22 @@ void Expand::iterator::Push( TreePtr<Node> n )
 }        
 
 Expand::iterator::iterator( TreePtr<Node> &r,
-	                   	  TreePtr<Node> res,
-	                   	  const CompareReplace *rc ) :
+	                   	    Filter *rf ) :
     root( new TreePtr<Node>(r) ),
-    restrictor( res ),
-    restriction_comparison( rc ),
+    recurse_filter( rf ),
     done( false )
 {
 }
 
 Expand::iterator::iterator() :
-	restriction_comparison( NULL ),
+	recurse_filter( NULL ),
     done( true )
 {
 }        
 
 Expand::iterator::iterator( const Expand::iterator & other ) :
 	root( other.root ),
-	restrictor( other.restrictor ),
-	restriction_comparison( other.restriction_comparison ),
+	recurse_filter( other.recurse_filter ),
 	state( other.state ),
 	done( other.done )
 {
@@ -237,12 +234,17 @@ void Expand::iterator::AdvanceInto()
 	if( element ) // must be non-NULL
 	{
 		recurse = true;
-		if( restrictor ) // is there a restriction?
+		if( recurse_filter ) // is there a filter on recursion?
 		{
-			ASSERT( restriction_comparison );
-			if( !restriction_comparison->Compare( element, restrictor, false ) ) // must pass the restriction
+            TRACE("Recurse filter @%p, entering...\n", recurse_filter);
+			bool ok = recurse_filter->IsMatch( element ); // must pass the restriction
+			TRACE("Recurse filter @%p, leaving...\n", recurse_filter);
+
+			if( !ok )
 				recurse = false;
 		}
+		else
+            TRACE("No recurse filter\n", recurse_filter);
 	}
 
     if( recurse )
@@ -338,19 +340,17 @@ const bool Expand::iterator::IsOrdered() const
 }
 
 Expand::Expand( TreePtr<Node> r,
-		    TreePtr<Node> res,
-		    const CompareReplace *rsr ) :
+		        Filter *rf ) :
 	root(r),
-	restrictor( res ),
-	restriction_comparison( rsr ),
-	my_begin( iterator( root, restrictor, restriction_comparison ) ),
+	recurse_filter( rf ),
+	my_begin( iterator( root, recurse_filter ) ),
 	my_end( iterator() )
 {
 }
 
 const Expand::iterator &Expand::begin()
 {
-	my_begin = iterator( root, restrictor, restriction_comparison );
+	my_begin = iterator( root, recurse_filter );
 	return my_begin;
 }
 
@@ -372,26 +372,23 @@ ParentTraverse::iterator::iterator( const ParentTraverse::iterator & other ) :
 }
 
 ParentTraverse::iterator::iterator( TreePtr<Node> &root,
-                           TreePtr<Node> restrictor,
-                           const CompareReplace *rc ) :
-    Expand::iterator( root, restrictor, rc )
+                                    Filter *rf ) :
+    Expand::iterator( root, rf )
 {
 }
  
 ParentTraverse::ParentTraverse( TreePtr<Node> r,
-              TreePtr<Node> res,
-              const CompareReplace *rsr ) :
+                                Filter *rf ) :
     root(r),
-    restrictor( res ),
-    restriction_comparison( rsr ),
-    my_begin( iterator( root, restrictor, restriction_comparison ) ),
+    recurse_filter( rf ),
+    my_begin( iterator( root, recurse_filter ) ),
     my_end( iterator() )
 {
 }
 
 const ParentTraverse::iterator &ParentTraverse::begin()
 {
-    my_begin = iterator( root, restrictor, restriction_comparison );
+    my_begin = iterator( root, recurse_filter );
     return my_begin;
 }
 
@@ -423,31 +420,28 @@ Traverse::iterator::iterator( const Traverse::iterator & other ) :
     Expand::iterator( other )
 {
     TRACE("Traverse copy\n");
-    Filter();
+    DoNodeFilter();
 }
 
 Traverse::iterator::iterator( TreePtr<Node> &root,
-                           TreePtr<Node> restrictor,
-                           const CompareReplace *rc ) :
-    Expand::iterator( root, restrictor, rc )
+                              Filter *rf ) :
+    Expand::iterator( root, rf )
 {
-    Filter();
+    DoNodeFilter();
 }
  
 Traverse::Traverse( TreePtr<Node> r,
-              TreePtr<Node> res,
-              const CompareReplace *rsr ) :
+                    Filter *rf ) :
     root(r),
-    restrictor( res ),
-    restriction_comparison( rsr ),
-    my_begin( iterator( root, restrictor, restriction_comparison ) ),
+    recurse_filter( rf ),
+    my_begin( iterator( root, recurse_filter ) ),
     my_end( iterator() )
 {
 }
 
 const Traverse::iterator &Traverse::begin()
 {
-    my_begin = iterator( root, restrictor, restriction_comparison );
+    my_begin = iterator( root, recurse_filter );
     return my_begin;
 }
 
@@ -460,11 +454,11 @@ const Traverse::iterator &Traverse::end()
 Traverse::iterator &Traverse::iterator::operator++()
 {
     Expand::iterator::operator++(); 
-    Filter();
+    DoNodeFilter();
     return *this;
 }
 
-void Traverse::iterator::Filter()
+void Traverse::iterator::DoNodeFilter()
 {
     while(!done)
     {

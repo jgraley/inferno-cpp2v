@@ -128,7 +128,8 @@ struct GreenGrass : GreenGrassBase, Special<PRE_RESTRICTION>
 
 class StuffBase;
 
-class CompareReplace : InPlaceTransformation // TODO rename CompareReplace -> MatchReplace
+class CompareReplace : InPlaceTransformation, 
+                       Filter // TODO extract Compare, and make that the filter
 {  
 public:
     // Constructor and destructor. Search and replace patterns and couplings are
@@ -200,6 +201,8 @@ public:
     Result Compare( TreePtr<Node> x,
     		        TreePtr<Node> pattern,
 	                bool can_key = false ) const;
+    virtual bool IsMatch( TreePtr<Node> context,       
+                          TreePtr<Node> root );
 private:
     // Replace ring
     void ClearPtrs( TreePtr<Node> dest ) const;

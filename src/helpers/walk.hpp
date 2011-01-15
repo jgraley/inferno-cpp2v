@@ -2,9 +2,7 @@
 #define WALK_HPP
 
 #include "tree/generics.hpp"
-#include "coupling.hpp"
-
-class CompareReplace;
+#include "transformation.hpp"
 
 //
 // Stated out traversal across a node's children. Traverses the members and elements of containers
@@ -111,16 +109,13 @@ public:
 	    iterator(); // makes "end" iterator
 	protected:
 	    iterator( TreePtr<Node> &root,
-	    		  TreePtr<Node> restrictor,
-	    		  const CompareReplace *rc );
+	    		  Filter *recurse_filter );
 	    bool IsAtEndOfChildren() const;
 	    void BypassEndOfChildren();
 	    void Push( TreePtr<Node> n );
 
 	    shared_ptr< TreePtr<Node> > root;
-	    TreePtr<Node> restrictor;
-		const CompareReplace *restriction_comparison;
-	    CouplingKeys *keys;
+	    Filter *recurse_filter;
 	    stack< Flatten::iterator > state;
         bool done;
 
@@ -131,8 +126,7 @@ public:
 	// destructed and the iterators remain valid. A new one may be created with the
 	// same parameters and it will be equivalent.
 	Expand( TreePtr<Node> root, // root of the subtree to walk
-		  TreePtr<Node> restrictor = TreePtr<Node>(), // optional restrictor; walk skips these and does not recurse under them
-		  const CompareReplace *rsr = NULL ); 
+		    Filter *recurse_filter = NULL ); 
 
 	// Standard container ops, note that modification is not allowed through container interface
 	virtual const iterator &begin();
@@ -141,8 +135,7 @@ public:
     virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
 protected:
     TreePtr<Node> root;
-    TreePtr<Node> restrictor;
-    const CompareReplace *restriction_comparison;
+    Filter *recurse_filter;
     iterator my_begin, my_end;
 };
 
@@ -168,29 +161,25 @@ public:
         {
             // Copy everything *except* the new "seen" structure, so that exclusions will apply across multiple sweeps.
             root = nb.root;
-            restrictor = nb.restrictor;
-            restriction_comparison = nb.restriction_comparison;
+            recurse_filter = nb.recurse_filter;
             state = nb.state;            
             done = nb.done;            
         }
     protected:
         iterator( TreePtr<Node> &root,
-                  TreePtr<Node> restrictor,
-                  const CompareReplace *rc );
+                  Filter *recurse_filter );
         Set< TreePtr<Node> > seen;
         friend class ParentTraverse;
     };
     ParentTraverse( TreePtr<Node> root, // root of the subtree to walk
-           TreePtr<Node> restrictor = TreePtr<Node>(), // optional restrictor; walk skips these and does not recurse under them
-           const CompareReplace *rsr = NULL );
+                    Filter *recurse_filter = NULL );
     virtual const iterator &begin();
     virtual const iterator &end();
     virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
     virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
 protected:
     TreePtr<Node> root;
-    TreePtr<Node> restrictor;
-    const CompareReplace *restriction_comparison;
+    Filter *recurse_filter;
     iterator my_begin, my_end;
 };
 
@@ -209,31 +198,27 @@ public:
         {
             // Copy everything *except* the new "seen" structure, so that exclusions will apply across multiple sweeps.
             root = nb.root;
-            restrictor = nb.restrictor;
-            restriction_comparison = nb.restriction_comparison;
+            recurse_filter = nb.recurse_filter;
             state = nb.state;            
             done = nb.done;      
-            Filter();
+            DoNodeFilter();
         }
     protected:
         iterator( TreePtr<Node> &root,
-                  TreePtr<Node> restrictor,
-                  const CompareReplace *rc );
+                  Filter *recurse_filter );
         Set< TreePtr<Node> > seen;
-        void Filter();
+        void DoNodeFilter();
         friend class Traverse;
     };
     Traverse( TreePtr<Node> root, // root of the subtree to walk
-            TreePtr<Node> restrictor = TreePtr<Node>(), // optional restrictor; walk skips these and does not recurse under them
-            const CompareReplace *rsr = NULL );
+              Filter *recurse_filter = NULL );
     virtual const iterator &begin();
     virtual const iterator &end();
     virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
     virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
 protected:
     TreePtr<Node> root;
-    TreePtr<Node> restrictor;
-    const CompareReplace *restriction_comparison;
+    Filter *recurse_filter;
     iterator my_begin, my_end;
 };
 
