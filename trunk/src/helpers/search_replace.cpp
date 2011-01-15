@@ -15,7 +15,7 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
     v(compare_pattern, &compare_pattern);
     v(replace_pattern, &replace_pattern);
     
-    if( isroot )
+    if( isroot && sp )
     {
         // Count the number of times we hit each node during a walk.
         // Where we hit a node more than once, add a coupling for it.
@@ -23,13 +23,14 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
         // couplings for) and all nodes thereunder (which I'm not sure
         // if we want couplgs for or even if should be allowed).
         // TODO decide.
-        TRACE("doing inferred couplings\n");
+        TRACE("doing inferred couplings, search pattern ")(*sp)("\n");
         Map< TreePtr<Node>, int > ms;
         ParentTraverse wsp( sp ), wrp( rp );
         ParentTraverse::iterator i;
         for( i=(wsp.begin()); i != wsp.end(); ++i )
         {
             TreePtr<Node> n = *i;
+            TRACE("Got %p\n", n.get());
             if( n )
             {
                 if( dynamic_pointer_cast<OverlayBase>(n) || dynamic_pointer_cast<StuffBase>(n) )
@@ -40,9 +41,11 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
                     ms[n] = 1;
             }
         }
+        TRACE("doing inferred couplings, replace pattern\n");
         for( i.ContinueAt(wrp.begin()); i != wrp.end(); ++i )
         {
             TreePtr<Node> n = *i;
+            TRACE("Got %p\n", n.get());
             if( n )
             {
                 if( ms.IsExist( n ) )
@@ -51,6 +54,7 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
                     ms[n] = 1;
             }
         }
+        TRACE("inserting inferred couplings\n");
         typedef	pair<TreePtr<Node>, int> pair;	
         FOREACH( pair pp, ms )
         {
@@ -414,7 +418,7 @@ Result CompareReplace::DecidedCompare( TreePtr<Node> x,
         rf = &(stuff_pattern->recurse_comparer);
     }
     
-    Expand wx( x, rf );        
+    Expand wx( x, NULL, rf );        
 
 	// Get decision from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = conj.HandleDecision( wx.begin(), wx.end() );

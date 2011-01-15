@@ -192,22 +192,26 @@ void Expand::iterator::Push( TreePtr<Node> n )
 }        
 
 Expand::iterator::iterator( TreePtr<Node> &r,
-	                   	    Filter *rf ) :
+	                   	    Filter *of,
+                            Filter *rf ) :
     root( new TreePtr<Node>(r) ),
+    out_filter( of ),
     recurse_filter( rf ),
     done( false )
 {
 }
 
 Expand::iterator::iterator() :
-	recurse_filter( NULL ),
+    out_filter( NULL ),
+    recurse_filter( NULL ),
     done( true )
 {
 }        
 
 Expand::iterator::iterator( const Expand::iterator & other ) :
 	root( other.root ),
-	recurse_filter( other.recurse_filter ),
+    out_filter( other.out_filter ),
+    recurse_filter( other.recurse_filter ),
 	state( other.state ),
 	done( other.done )
 {
@@ -236,8 +240,8 @@ void Expand::iterator::AdvanceInto()
 		recurse = true;
 		if( recurse_filter ) // is there a filter on recursion?
 		{
-            TRACE("Recurse filter @%p, entering...\n", recurse_filter);
-			bool ok = recurse_filter->IsMatch( element ); // must pass the restriction
+            TRACE("Recurse filter @%p, this@%p, entering...\n", recurse_filter, this);
+			bool ok = recurse_filter->IsMatch( element, element ); // must pass the restriction
 			TRACE("Recurse filter @%p, leaving...\n", recurse_filter);
 
 			if( !ok )
@@ -340,17 +344,19 @@ const bool Expand::iterator::IsOrdered() const
 }
 
 Expand::Expand( TreePtr<Node> r,
-		        Filter *rf ) :
+		        Filter *of,
+                Filter *rf ) :
 	root(r),
-	recurse_filter( rf ),
-	my_begin( iterator( root, recurse_filter ) ),
+    out_filter( of ),
+    recurse_filter( rf ),
+	my_begin( iterator( root, out_filter, recurse_filter ) ),
 	my_end( iterator() )
 {
 }
 
 const Expand::iterator &Expand::begin()
 {
-	my_begin = iterator( root, recurse_filter );
+	my_begin = iterator( root, out_filter, recurse_filter );
 	return my_begin;
 }
 
@@ -360,6 +366,19 @@ const Expand::iterator &Expand::end()
 	return my_end;
 }
 
+////////////////////////// UniqueFilter //////////////////////////
+
+bool UniqueFilter::IsMatch( TreePtr<Node> context,
+                            TreePtr<Node> root )
+{
+    ASSERT( root );
+    (void)context;
+    
+    bool is_seen_before = seen.IsExist( root );
+    seen.insert( root );
+    return !is_seen_before;        
+}
+
 ////////////////////////// ParentTraverse //////////////////////////
 
 ParentTraverse::iterator::iterator()
@@ -367,28 +386,35 @@ ParentTraverse::iterator::iterator()
 }        
 
 ParentTraverse::iterator::iterator( const ParentTraverse::iterator & other ) :
-    Expand::iterator( other )
+    Expand::iterator( other ),
+    unique_filter( other.unique_filter )
 {
+    recurse_filter = &unique_filter; 
 }
 
-ParentTraverse::iterator::iterator( TreePtr<Node> &root,
-                                    Filter *rf ) :
-    Expand::iterator( root, rf )
+ParentTraverse::iterator::iterator &ParentTraverse::iterator::operator=( const ParentTraverse::iterator & other )
+{
+    Expand::iterator::operator=( other ),
+    unique_filter = other.unique_filter;
+    recurse_filter = &unique_filter; 
+    return *this;
+}
+
+ParentTraverse::iterator::iterator( TreePtr<Node> &root ) :
+    Expand::iterator( root, NULL, &unique_filter )
 {
 }
  
-ParentTraverse::ParentTraverse( TreePtr<Node> r,
-                                Filter *rf ) :
+ParentTraverse::ParentTraverse( TreePtr<Node> r ) :
     root(r),
-    recurse_filter( rf ),
-    my_begin( iterator( root, recurse_filter ) ),
+    my_begin( iterator( root ) ),
     my_end( iterator() )
 {
 }
 
 const ParentTraverse::iterator &ParentTraverse::begin()
 {
-    my_begin = iterator( root, recurse_filter );
+    my_begin = iterator( root );
     return my_begin;
 }
 
@@ -397,18 +423,6 @@ const ParentTraverse::iterator &ParentTraverse::end()
     my_end = iterator();
     return my_end;
 }
-
-void ParentTraverse::iterator::AdvanceInto()
-{
-    TreePtr<Node> element = **this; // look at current node
-    if( element && seen.IsExist( element ) )
-        Expand::iterator::AdvanceOver(); // do not recurse
-    else
-        Expand::iterator::AdvanceInto(); // recurse if walk would
-        
-    if( element )
-        seen.insert( element );    
-}    
     
 ////////////////////////// Traverse //////////////////////////
 
@@ -417,31 +431,39 @@ Traverse::iterator::iterator()
 }        
 
 Traverse::iterator::iterator( const Traverse::iterator & other ) :
-    Expand::iterator( other )
+    Expand::iterator( other ),
+    unique_filter( other.unique_filter )
 {
-    TRACE("Traverse copy\n");
     DoNodeFilter();
 }
 
+Traverse::iterator::iterator &Traverse::iterator::operator=( const Traverse::iterator &other )
+{
+    Expand::iterator::operator=( other ),
+    unique_filter = other.unique_filter;
+    out_filter = &unique_filter; 
+    return *this;
+}
+
 Traverse::iterator::iterator( TreePtr<Node> &root,
-                              Filter *rf ) :
-    Expand::iterator( root, rf )
+                              Filter *of ) :
+    Expand::iterator( root, of, NULL )
 {
     DoNodeFilter();
 }
  
 Traverse::Traverse( TreePtr<Node> r,
-                    Filter *rf ) :
+                    Filter *of ) :
     root(r),
-    recurse_filter( rf ),
-    my_begin( iterator( root, recurse_filter ) ),
+    out_filter( of ),
+    my_begin( iterator( root, out_filter ) ),
     my_end( iterator() )
 {
 }
 
 const Traverse::iterator &Traverse::begin()
 {
-    my_begin = iterator( root, recurse_filter );
+    my_begin = iterator( root, out_filter );
     return my_begin;
 }
 
@@ -464,16 +486,12 @@ void Traverse::iterator::DoNodeFilter()
     {
         TreePtr<Node> element = **this; // look at current node
         
-        bool ok;
-        { // this block is the "client filter rule", rest of fn is filtering infrastructure
-            ok = element && !seen.IsExist( element );
-            if( ok )
-            {
-                seen.insert( element );    
-                TRACE("Traverse inserting node ")(*element)(" at %p size now %d\n", element.get(), seen.size());        
-            } 
-        }        
-        
+        // TODO pass NULLs to filter, let it decide what to do
+        bool ok = true;
+        if( out_filter )
+            if( !element || !out_filter->IsMatch( element) ) 
+                ok = false;
+         
         if( ok )
         {
             TRACE("Traverse returning node ")(*element)(" at %p size now %d\n", element.get(), seen.size());
