@@ -199,6 +199,7 @@ Expand::iterator::iterator( TreePtr<Node> &r,
     recurse_filter( rf ),
     done( false )
 {
+    DoNodeFilter();
 }
 
 Expand::iterator::iterator() :
@@ -215,6 +216,7 @@ Expand::iterator::iterator( const Expand::iterator & other ) :
 	state( other.state ),
 	done( other.done )
 {
+    DoNodeFilter();
 }
 
 Expand::iterator::operator string() const
@@ -291,6 +293,7 @@ shared_ptr<ContainerInterface::iterator_interface> Expand::iterator::Clone() con
 Expand::iterator &Expand::iterator::operator++()
 {
 	AdvanceInto();
+    DoNodeFilter();
 	return *this;
 }
 
@@ -343,6 +346,27 @@ const bool Expand::iterator::IsOrdered() const
 	return true; // walk walks tree in order generally
 }
 
+void Expand::iterator::DoNodeFilter()
+{
+    while(!done)
+    {
+        TreePtr<Node> element = **this; // look at current node
+        
+        // TODO pass NULLs to filter, let it decide what to do
+        bool ok = true;
+        if( out_filter )
+            if( !element || !out_filter->IsMatch( element) ) 
+                ok = false;
+         
+        if( ok )
+        {
+            return;
+        }
+        
+        AdvanceInto();
+    }    
+}
+    
 Expand::Expand( TreePtr<Node> r,
 		        Filter *of,
                 Filter *rf ) :
@@ -434,7 +458,6 @@ Traverse::iterator::iterator( const Traverse::iterator & other ) :
     Expand::iterator( other ),
     unique_filter( other.unique_filter )
 {
-    DoNodeFilter();
 }
 
 Traverse::iterator::iterator &Traverse::iterator::operator=( const Traverse::iterator &other )
@@ -449,7 +472,6 @@ Traverse::iterator::iterator( TreePtr<Node> &root,
                               Filter *of ) :
     Expand::iterator( root, of, NULL )
 {
-    DoNodeFilter();
 }
  
 Traverse::Traverse( TreePtr<Node> r,
@@ -476,30 +498,6 @@ const Traverse::iterator &Traverse::end()
 Traverse::iterator &Traverse::iterator::operator++()
 {
     Expand::iterator::operator++(); 
-    DoNodeFilter();
     return *this;
 }
 
-void Traverse::iterator::DoNodeFilter()
-{
-    while(!done)
-    {
-        TreePtr<Node> element = **this; // look at current node
-        
-        // TODO pass NULLs to filter, let it decide what to do
-        bool ok = true;
-        if( out_filter )
-            if( !element || !out_filter->IsMatch( element) ) 
-                ok = false;
-         
-        if( ok )
-        {
-            TRACE("Traverse returning node ")(*element)(" at %p size now %d\n", element.get(), seen.size());
-            return;
-        }
-        
-        if( element )
-            TRACE("Traverse skipping node ")(*element)(" at %p\n", element.get());
-        Expand::iterator::operator++(); // increment once
-    }    
-}
