@@ -66,8 +66,22 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
         Traverse tsp( sp ); 
         FOREACH( TreePtr<Node> n, tsp )
         {        
+            if(n)TRACE("Elaborating ")(*n)("\n");
             if( TreePtr<StuffBase> sb = dynamic_pointer_cast<StuffBase>(n) )
             {
+                TRACE("Elaborating Stuff@%p, rr@%p\n", sb.get(), sb->recurse_restriction.get());
+                sb->recurse_comparer.couplings = couplings; 
+                sb->recurse_comparer.coupling_keys = coupling_keys; 
+                sb->recurse_comparer.search_pattern = sb->recurse_restriction; // TODO could move into a Stuff node constructor if there was one
+            }
+        }
+        Traverse trp( rp ); 
+        FOREACH( TreePtr<Node> n, trp )
+        {        
+            if(n)TRACE("Elaborating ")(*n)("\n");
+            if( TreePtr<StuffBase> sb = dynamic_pointer_cast<StuffBase>(n) )
+            {
+                TRACE("Elaborating Stuff@%p, rr@%p\n", sb.get(), sb->recurse_restriction.get());
                 sb->recurse_comparer.couplings = couplings; 
                 sb->recurse_comparer.coupling_keys = coupling_keys; 
                 sb->recurse_comparer.search_pattern = sb->recurse_restriction; // TODO could move into a Stuff node constructor if there was one
@@ -392,8 +406,15 @@ Result CompareReplace::DecidedCompare( TreePtr<Node> x,
 	ASSERT( stuff_pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
 	// Define a walk, rooted at this node, restricted as specified in search pattern
-    stuff_pattern->recurse_comparer.pcontext = pcontext; // via Filter iface
-	Expand wx( x, stuff_pattern->recurse_restriction, &(stuff_pattern->recurse_comparer) );
+    Filter *rf = NULL;
+	if( stuff_pattern->recurse_restriction )
+    {
+        TRACE("Comparing ")(*stuff_pattern)("@%p, rr@%p\n", stuff_pattern.get(), stuff_pattern->recurse_restriction.get());
+        ASSERT( stuff_pattern->recurse_comparer.search_pattern );     
+        rf = &(stuff_pattern->recurse_comparer);
+    }
+    
+    Expand wx( x, rf );        
 
 	// Get decision from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = conj.HandleDecision( wx.begin(), wx.end() );
@@ -468,11 +489,27 @@ Result CompareReplace::Compare( TreePtr<Node> x,
 								bool can_key ) const
 {
     INDENT;
-	TRACE("Comparing x=%s\n", typeid(*x).name() );
+    ASSERT( x );
+    ASSERT( pattern );
+	TRACE("Comparing x=")(*x);
+    TRACE(" pattern=")(*pattern);
+    TRACE(" can_key=%d context=", (int)can_key);
+    TRACE(**pcontext)(" @%p\n", pcontext);
 	// Create the conjecture object we will use for this compare, and then go
 	// into the recursive compare function
 	Conjecture conj;
 	return conj.Search( x, pattern, can_key, this );
+}
+
+
+bool CompareReplace::IsMatch( TreePtr<Node> context,       
+                              TreePtr<Node> root )
+{
+    pcontext = &context;
+    ASSERT( search_pattern );
+    Result r = Compare( root, search_pattern, false );
+    pcontext = NULL;
+    return r == FOUND;
 }
 
 

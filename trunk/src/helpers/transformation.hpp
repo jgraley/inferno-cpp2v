@@ -56,4 +56,18 @@ public:
     }    		                             
 };
 
+class Filter
+{
+public:
+    // Test the subtree at the supplied root, producing true or false
+    virtual bool IsMatch( TreePtr<Node> context,       // The whole program, so declarations may be searched for
+                          TreePtr<Node> root ) = 0;   // Root of the subtree we want to test
+
+    inline bool IsMatch( TreePtr<Node> root )
+    {
+        return IsMatch( root, root );
+    }
+};
+
+
 #endif
