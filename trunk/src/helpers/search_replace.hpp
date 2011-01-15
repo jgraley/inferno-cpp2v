@@ -159,7 +159,7 @@ public:
     static void Test();
         
     CouplingSet couplings;
-    TreePtr<Node> search_pattern;
+    TreePtr<Node> compare_pattern;
     TreePtr<Node> replace_pattern;
     TreePtr<Node> *pcontext;
     shared_ptr< CouplingKeys > coupling_keys;
@@ -226,11 +226,11 @@ private:
     TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x ) const;
     // implementation ring: Do the actual search and replace
     Result SingleCompareReplace( TreePtr<Node> *proot,
-                                 TreePtr<Node> search_pattern,
+                                 TreePtr<Node> compare_pattern,
                                  TreePtr<Node> replace_pattern );
 public:
     int RepeatingCompareReplace( TreePtr<Node> *proot,
-                                 TreePtr<Node> search_pattern,
+                                 TreePtr<Node> compare_pattern,
                                  TreePtr<Node> replace_pattern );
 
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.

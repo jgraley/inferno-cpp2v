@@ -107,10 +107,10 @@ string Graph::Traverse( CompareReplace *sr, bool links_pass )
     Traverse::iterator i;
 
     s += links_pass ? DoSearchReplaceLinks(sr) : DoSearchReplace(sr, Id(sr));
-	if( sr->search_pattern )
+	if( sr->compare_pattern )
     {
         TRACE("Graph plotter traversing search pattern %s pass\n", links_pass ? "links" : "nodes");
-        ::Traverse w( sr->search_pattern );
+        ::Traverse w( sr->compare_pattern );
         for( i.ContinueAt(w.begin()); i != w.end(); ++i )
             s += links_pass ? DoNodeLinks(*i) : DoNode(*i);
     }
@@ -157,9 +157,9 @@ string Graph::DoSearchReplace( CompareReplace *sr,
 string Graph::DoSearchReplaceLinks( CompareReplace *sr )
 {
 	string s;
-	if( sr->search_pattern )
+	if( sr->compare_pattern )
 	{
-		s += Id(sr) + ":search -> " + Id(sr->search_pattern.get());
+		s += Id(sr) + ":search -> " + Id(sr->compare_pattern.get());
 		s += " [];\n";
 	}
 	if( sr->replace_pattern )
