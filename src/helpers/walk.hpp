@@ -109,13 +109,15 @@ public:
 	    iterator(); // makes "end" iterator
 	protected:
 	    iterator( TreePtr<Node> &root,
+                  Filter *out_filter,
 	    		  Filter *recurse_filter );
 	    bool IsAtEndOfChildren() const;
 	    void BypassEndOfChildren();
 	    void Push( TreePtr<Node> n );
 
 	    shared_ptr< TreePtr<Node> > root;
-	    Filter *recurse_filter;
+        Filter *out_filter;
+        Filter *recurse_filter;
 	    stack< Flatten::iterator > state;
         bool done;
 
@@ -126,6 +128,7 @@ public:
 	// destructed and the iterators remain valid. A new one may be created with the
 	// same parameters and it will be equivalent.
 	Expand( TreePtr<Node> root, // root of the subtree to walk
+            Filter *out_filter = NULL,
 		    Filter *recurse_filter = NULL ); 
 
 	// Standard container ops, note that modification is not allowed through container interface
@@ -135,9 +138,18 @@ public:
     virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
 protected:
     TreePtr<Node> root;
+    Filter *out_filter;
     Filter *recurse_filter;
     iterator my_begin, my_end;
 };
+
+class UniqueFilter : public Filter
+{
+    virtual bool IsMatch( TreePtr<Node> context,
+                          TreePtr<Node> root );
+    Set< TreePtr<Node> > seen;    
+};
+
 
 // Version of walk that only sees a node once for each parent i.e. 
 // a\
@@ -155,31 +167,27 @@ public:
     {
     public:
         iterator(); // makes "end" iterator
-        iterator( const iterator & other );
-        virtual void AdvanceInto();
-        void ContinueAt( const iterator &nb )
+        iterator( const iterator &other );
+        iterator &operator=( const iterator &other );
+        void ContinueAt( const iterator &other )
         {
-            // Copy everything *except* the new "seen" structure, so that exclusions will apply across multiple sweeps.
-            root = nb.root;
-            recurse_filter = nb.recurse_filter;
-            state = nb.state;            
-            done = nb.done;            
+            // Copy everything *except* the uniquifying filter, so that exclusions will apply across multiple sweeps.
+            root = other.root;
+            state = other.state;            
+            done = other.done;            
         }
     protected:
-        iterator( TreePtr<Node> &root,
-                  Filter *recurse_filter );
-        Set< TreePtr<Node> > seen;
+        iterator( TreePtr<Node> &root );
+        UniqueFilter unique_filter;
         friend class ParentTraverse;
     };
-    ParentTraverse( TreePtr<Node> root, // root of the subtree to walk
-                    Filter *recurse_filter = NULL );
+    ParentTraverse( TreePtr<Node> root );
     virtual const iterator &begin();
     virtual const iterator &end();
     virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
     virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
 protected:
     TreePtr<Node> root;
-    Filter *recurse_filter;
     iterator my_begin, my_end;
 };
 
@@ -192,13 +200,13 @@ public:
     {
     public:
         iterator(); // makes "end" iterator
-        iterator( const iterator & other );        
+        iterator( const iterator &other );        
+        iterator &operator=( const iterator &other );
         virtual iterator &operator++();
         void ContinueAt( const iterator &nb )
         {
             // Copy everything *except* the new "seen" structure, so that exclusions will apply across multiple sweeps.
             root = nb.root;
-            recurse_filter = nb.recurse_filter;
             state = nb.state;            
             done = nb.done;      
             DoNodeFilter();
@@ -208,6 +216,7 @@ public:
                   Filter *recurse_filter );
         Set< TreePtr<Node> > seen;
         void DoNodeFilter();
+        UniqueFilter unique_filter;
         friend class Traverse;
     };
     Traverse( TreePtr<Node> root, // root of the subtree to walk
@@ -218,7 +227,7 @@ public:
     virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
 protected:
     TreePtr<Node> root;
-    Filter *recurse_filter;
+    Filter *out_filter;
     iterator my_begin, my_end;
 };
 
