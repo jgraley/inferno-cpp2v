@@ -168,6 +168,7 @@ public:
     {
     public:
         iterator(); // makes "end" iterator
+        ~iterator(); 
         iterator( const iterator &other );
         iterator &operator=( const iterator &other );
         void ContinueAt( const iterator &other )
@@ -179,7 +180,7 @@ public:
         }
     protected:
         iterator( TreePtr<Node> &root );
-        UniqueFilter unique_filter;
+        UniqueFilter *unique_filter;
         friend class ParentTraverse;
     };
     ParentTraverse( TreePtr<Node> root );
@@ -201,9 +202,9 @@ public:
     {
     public:
         iterator(); // makes "end" iterator
+        ~iterator(); // makes "end" iterator
         iterator( const iterator &other );        
         iterator &operator=( const iterator &other );
-        virtual iterator &operator++();
         void ContinueAt( const iterator &nb )
         {
             // Copy everything *except* the new "seen" structure, so that exclusions will apply across multiple sweeps.
@@ -213,21 +214,18 @@ public:
             DoNodeFilter();
         }
     protected:
-        iterator( TreePtr<Node> &root,
-                  Filter *recurse_filter );
+        iterator( TreePtr<Node> &root );
         Set< TreePtr<Node> > seen;
-        UniqueFilter unique_filter;
+        UniqueFilter *unique_filter;
         friend class Traverse;
     };
-    Traverse( TreePtr<Node> root, // root of the subtree to walk
-              Filter *recurse_filter = NULL );
+    Traverse( TreePtr<Node> root );
     virtual const iterator &begin();
     virtual const iterator &end();
     virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
     virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
 protected:
     TreePtr<Node> root;
-    Filter *out_filter;
     iterator my_begin, my_end;
 };
 
