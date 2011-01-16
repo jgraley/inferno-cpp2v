@@ -24,12 +24,20 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
         // if we want couplgs for or even if should be allowed).
         // TODO decide.
         TRACE("doing inferred couplings, search pattern ")(*sp)("\n");
+        
+        // We will store counts of links into nodes here
         Map< TreePtr<Node>, int > ms;
-        ParentTraverse wsp( sp ), wrp( rp );
-        ParentTraverse::iterator i;
-        for( i=(wsp.begin()); i != wsp.end(); ++i )
+        
+        // Make a walker that uniquifies as a recursion filter. So each link
+        // only gets followed once. Ergo, each node appears once for every
+        // incoming link. We want to include search pattern and replace pattern so 
+        // apply the same filter object to both walks.
+        UniqueFilter uf;
+        Expand wsp( sp, NULL, &uf ), wrp( rp, NULL, &uf );
+        
+        Expand::iterator i;
+        FOREACH( TreePtr<Node> n, wsp )
         {
-            TreePtr<Node> n = *i;
             TRACE("Got %p\n", n.get());
             if( n )
             {
@@ -42,9 +50,8 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
             }
         }
         TRACE("doing inferred couplings, replace pattern\n");
-        for( i.ContinueAt(wrp.begin()); i != wrp.end(); ++i )
+        FOREACH( TreePtr<Node> n, wrp )
         {
-            TreePtr<Node> n = *i;
             TRACE("Got %p\n", n.get());
             if( n )
             {
@@ -95,7 +102,8 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
         // Look for slaves. If we find them, copy our couplings into their couplings
         // Do not just overwrite since there may be implicit Stuff node couplings.
         // TODO is there a way of unioning sets without doing lots of insert()?
-        FOREACH( TreePtr<Node> n, wrp )
+        ParentTraverse ss( rp );
+        FOREACH( TreePtr<Node> n, ss )
         {
             if( TreePtr<SlaveCompareReplaceBase> rsb = dynamic_pointer_cast<SlaveCompareReplaceBase>(n) )
             {

@@ -171,13 +171,6 @@ public:
         ~iterator(); 
         iterator( const iterator &other );
         iterator &operator=( const iterator &other );
-        void ContinueAt( const iterator &other )
-        {
-            // Copy everything *except* the uniquifying filter, so that exclusions will apply across multiple sweeps.
-            root = other.root;
-            state = other.state;            
-            done = other.done;            
-        }
     protected:
         iterator( TreePtr<Node> &root );
         UniqueFilter *unique_filter;
@@ -205,14 +198,6 @@ public:
         ~iterator(); // makes "end" iterator
         iterator( const iterator &other );        
         iterator &operator=( const iterator &other );
-        void ContinueAt( const iterator &nb )
-        {
-            // Copy everything *except* the new "seen" structure, so that exclusions will apply across multiple sweeps.
-            root = nb.root;
-            state = nb.state;            
-            done = nb.done;      
-            DoNodeFilter();
-        }
     protected:
         iterator( TreePtr<Node> &root );
         Set< TreePtr<Node> > seen;
