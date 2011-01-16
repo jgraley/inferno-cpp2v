@@ -405,27 +405,33 @@ bool UniqueFilter::IsMatch( TreePtr<Node> context,
 
 ////////////////////////// ParentTraverse //////////////////////////
 
-ParentTraverse::iterator::iterator()
+ParentTraverse::iterator::iterator() :
+    unique_filter( new UniqueFilter )
 {
 }        
 
-ParentTraverse::iterator::iterator( const ParentTraverse::iterator & other ) :
-    Expand::iterator( other ),
-    unique_filter( other.unique_filter )
+ParentTraverse::iterator::~iterator() 
 {
-    recurse_filter = &unique_filter; 
+    delete unique_filter;
+}        
+
+ParentTraverse::iterator::iterator( const ParentTraverse::iterator & other ) :
+    Expand::iterator( other )
+{
+    unique_filter = new UniqueFilter( *(other.unique_filter) );
+    recurse_filter = unique_filter; 
 }
 
 ParentTraverse::iterator::iterator &ParentTraverse::iterator::operator=( const ParentTraverse::iterator & other )
 {
     Expand::iterator::operator=( other ),
-    unique_filter = other.unique_filter;
-    recurse_filter = &unique_filter; 
+    *unique_filter = *(other.unique_filter);
+    recurse_filter = unique_filter; 
     return *this;
 }
 
 ParentTraverse::iterator::iterator( TreePtr<Node> &root ) :
-    Expand::iterator( root, NULL, &unique_filter )
+    Expand::iterator( root, NULL, unique_filter = new UniqueFilter )
 {
 }
  
@@ -450,42 +456,46 @@ const ParentTraverse::iterator &ParentTraverse::end()
     
 ////////////////////////// Traverse //////////////////////////
 
-Traverse::iterator::iterator()
+Traverse::iterator::iterator() :
+    unique_filter( new UniqueFilter )
 {
 }        
 
-Traverse::iterator::iterator( const Traverse::iterator & other ) :
-    Expand::iterator( other ),
-    unique_filter( other.unique_filter )
+Traverse::iterator::~iterator()
 {
+    delete unique_filter;
+}        
+
+Traverse::iterator::iterator( const Traverse::iterator & other ) :
+    Expand::iterator( other )
+{
+    unique_filter = new UniqueFilter( *(other.unique_filter) );
+    out_filter = unique_filter; 
 }
 
 Traverse::iterator::iterator &Traverse::iterator::operator=( const Traverse::iterator &other )
 {
-    Expand::iterator::operator=( other ),
-    unique_filter = other.unique_filter;
-    out_filter = &unique_filter; 
+    Expand::iterator::operator=( other );
+    *unique_filter = *(other.unique_filter);
+    out_filter = unique_filter; 
     return *this;
 }
 
-Traverse::iterator::iterator( TreePtr<Node> &root,
-                              Filter *of ) :
-    Expand::iterator( root, of, NULL )
+Traverse::iterator::iterator( TreePtr<Node> &root ) :
+    Expand::iterator( root, unique_filter = new UniqueFilter, NULL )
 {
 }
  
-Traverse::Traverse( TreePtr<Node> r,
-                    Filter *of ) :
+Traverse::Traverse( TreePtr<Node> r ) :
     root(r),
-    out_filter( of ),
-    my_begin( iterator( root, out_filter ) ),
+    my_begin( iterator( root ) ),
     my_end( iterator() )
 {
 }
 
 const Traverse::iterator &Traverse::begin()
 {
-    my_begin = iterator( root, out_filter );
+    my_begin = iterator( root );
     return my_begin;
 }
 
@@ -494,10 +504,3 @@ const Traverse::iterator &Traverse::end()
     my_end = iterator();
     return my_end;
 }
-
-Traverse::iterator &Traverse::iterator::operator++()
-{
-    Expand::iterator::operator++(); 
-    return *this;
-}
-
