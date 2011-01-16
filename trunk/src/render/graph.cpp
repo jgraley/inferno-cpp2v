@@ -104,21 +104,22 @@ string Graph::Traverse( TreePtr<Node> root, bool links_pass )
 string Graph::Traverse( CompareReplace *sr, bool links_pass )
 {
 	string s;
-    Traverse::iterator i;
+    Expand::iterator i;
 
+    UniqueFilter uf;
     s += links_pass ? DoSearchReplaceLinks(sr) : DoSearchReplace(sr, Id(sr));
 	if( sr->compare_pattern )
     {
         TRACE("Graph plotter traversing search pattern %s pass\n", links_pass ? "links" : "nodes");
-        ::Traverse w( sr->compare_pattern );
-        for( i.ContinueAt(w.begin()); i != w.end(); ++i )
+        Expand w( sr->compare_pattern, &uf );
+        for( i=(w.begin()); i != w.end(); ++i )
             s += links_pass ? DoNodeLinks(*i) : DoNode(*i);
     }
     if( sr->replace_pattern )
     {
         TRACE("Graph plotter traversing replace pattern %s pass\n", links_pass ? "links" : "nodes");
-        ::Traverse w( sr->replace_pattern );
-        for( i.ContinueAt(w.begin()); i != w.end(); ++i )
+        Expand w( sr->replace_pattern, &uf );
+        for( i=(w.begin()); i != w.end(); ++i )
             s += links_pass ? DoNodeLinks(*i) : DoNode(*i);
     }
 	return s;
