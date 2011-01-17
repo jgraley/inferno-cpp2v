@@ -105,18 +105,9 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
         ParentTraverse ss( rp );
         FOREACH( TreePtr<Node> n, ss )
         {
-            if( TreePtr<SlaveCompareReplaceBase> rsb = dynamic_pointer_cast<SlaveCompareReplaceBase>(n) )
+            if( TreePtr<SlaveBase> rsb = dynamic_pointer_cast<SlaveBase>(n) )
             {
-                FOREACH( Coupling c, couplings )
-                    rsb->couplings.insert( c ); 
-                rsb->coupling_keys = coupling_keys; 
-            }
-
-            else if( TreePtr<SlaveSearchReplaceBase> rsb = dynamic_pointer_cast<SlaveSearchReplaceBase>(n) )
-            {
-                FOREACH( Coupling c, couplings )
-                    rsb->couplings.insert( c );
-                rsb->coupling_keys = coupling_keys; 
+                rsb->MergeCouplings( couplings, coupling_keys ); 
             }
         }
     }
@@ -793,22 +784,14 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
     TreePtr<Node> dest = coupling_keys->KeyAndSubstitute( TreePtr<Node>(), source, this, can_key );
     ASSERT( !(dest && current_key) )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
 
-    if( TreePtr<SlaveCompareReplaceBase> scrb = dynamic_pointer_cast<SlaveCompareReplaceBase>(source) )
-	{
-		dest = DuplicateSubtree( scrb->GetThrough(), can_key, current_key );
-		if(!can_key) // do not run slaves until we have all the keys of the master 
-        {
-    	    (*scrb)( *pcontext, &dest );
-        }
-	}
-	else if( TreePtr<SlaveSearchReplaceBase> ssrb = dynamic_pointer_cast<SlaveSearchReplaceBase>(source) )
-	{
-		dest = DuplicateSubtree( ssrb->GetThrough(), can_key, current_key );
+    if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
+    {
+        dest = DuplicateSubtree( sb->GetThrough(), can_key, current_key );
         if(!can_key) // do not run slaves until we have all the keys of the master 
         {
-            (*ssrb)( *pcontext, &dest );
+            (*sb)( *pcontext, &dest );
         }
-	}    
+    } 
 	else if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
     {
         if( !dest )
