@@ -66,69 +66,11 @@
 //
 
 class Conjecture;
-
-
-// --- General note on SPECIAL_NODE_FUNCTIONS and PRE_RESTRICTION ---
-// Special nodes (that is nodes defined here with special S&R behaviour)
-// derive from a normal tree node via templating. This base class is
-// the PRE_RESTRICTION node, and we want it for 2 reasons:
-// 1. To allow normal nodes to point to special nodes, they must
-//    expose a normal interface, which can vary depending on usage
-//    so must be templated.
-// 2. We are able to provide a "free" and-rule restriction on all
-//    special nodes by restricting to non-strict subclasses of the
-//    pre-restrictor.
-// In order to make 2. work, we need to *avoid* overriding IsLocalMatch()
-// or IsSubclass() on special nodes, so that the behaviour of the 
-// PRE_RESTRICTION is preserved wrt comparisons. So all special nodes
-// including speicialisations of TransformTo etc should use 
-// SPECIAL_NODE_FUNCTIONS instead of NODE_FUNCTIONS.
-// Itemise is known required (for eg graph plotting), other bounces
-// are TBD.
-#define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
-
-struct SpecialBase
-{
-    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() = 0;
-};
-template<class PRE_RESTRICTION>
-struct Special : SpecialBase, virtual PRE_RESTRICTION
-{
-    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype()
-    {
-	    // Esta muchos indirection
-	    return shared_ptr<TreePtrInterface>( new TreePtr<PRE_RESTRICTION>( new PRE_RESTRICTION ));	
-    }
-};
-
-
-// The * wildcard can match more than one node of any type in a container
-// In a Sequence, only a contiguous subsequence of 0 or more elements will match
-// In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
-// Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
-// in the collection.
-struct StarBase : virtual Node {};
-template<class PRE_RESTRICTION>
-struct Star : StarBase, Special<PRE_RESTRICTION> { SPECIAL_NODE_FUNCTIONS };
-
-struct GreenGrassBase : virtual Node
-{
-	virtual TreePtr<Node> GetThrough() const = 0;
-};
-template<class PRE_RESTRICTION>
-struct GreenGrass : GreenGrassBase, Special<PRE_RESTRICTION>
-{
-	SPECIAL_NODE_FUNCTIONS
-	TreePtr<PRE_RESTRICTION> through;
-	virtual TreePtr<Node> GetThrough() const
-	{
-		return TreePtr<Node>( through );
-	}
-};
-
+class SpecialBase;
 class StuffBase;
+class StarBase;
 
-class CompareReplace : InPlaceTransformation, 
+class CompareReplace : virtual InPlaceTransformation, 
                        Filter // TODO extract Compare, and make that the filter
 {  
 public:
@@ -259,24 +201,70 @@ public:
 };
 
 
-// TODO extract common base for slaves, and use in DuplicateSubtree() and maybe elsewhere
-struct SlaveCompareReplaceBase : virtual Node,
-                         public CompareReplace
+// --- General note on SPECIAL_NODE_FUNCTIONS and PRE_RESTRICTION ---
+// Special nodes (that is nodes defined here with special S&R behaviour)
+// derive from a normal tree node via templating. This base class is
+// the PRE_RESTRICTION node, and we want it for 2 reasons:
+// 1. To allow normal nodes to point to special nodes, they must
+//    expose a normal interface, which can vary depending on usage
+//    so must be templated.
+// 2. We are able to provide a "free" and-rule restriction on all
+//    special nodes by restricting to non-strict subclasses of the
+//    pre-restrictor.
+// In order to make 2. work, we need to *avoid* overriding IsLocalMatch()
+// or IsSubclass() on special nodes, so that the behaviour of the 
+// PRE_RESTRICTION is preserved wrt comparisons. So all special nodes
+// including speicialisations of TransformTo etc should use 
+// SPECIAL_NODE_FUNCTIONS instead of NODE_FUNCTIONS.
+// Itemise is known required (for eg graph plotting), other bounces
+// are TBD.
+#define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
+struct SpecialBase
 {
-	SlaveCompareReplaceBase( TreePtr<Node> sp, TreePtr<Node> rp=TreePtr<Node>() ) :
-		CompareReplace( sp, rp, false )
-	{}
-	virtual TreePtr<Node> GetThrough() const = 0;
+    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() = 0;
 };
 template<class PRE_RESTRICTION>
-struct SlaveCompareReplace : SlaveCompareReplaceBase, Special<PRE_RESTRICTION>
+struct Special : SpecialBase, virtual PRE_RESTRICTION
+{
+    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype()
+    {
+        // Esta muchos indirection
+        return shared_ptr<TreePtrInterface>( new TreePtr<PRE_RESTRICTION>( new PRE_RESTRICTION ));  
+    }
+};
+
+
+
+
+struct SlaveBase : virtual Node, virtual InPlaceTransformation
+{
+    virtual TreePtr<Node> GetThrough() const = 0;
+    virtual void MergeCouplings( const CouplingSet &cs, shared_ptr<CouplingKeys> ck ) = 0;
+};
+
+template<typename ALGO>
+struct SlaveIntermediate : public SlaveBase, public ALGO                                 
+{
+	SlaveIntermediate( TreePtr<Node> sp, TreePtr<Node> rp ) :
+		ALGO( sp, rp, false )
+	{}
+    virtual void MergeCouplings( const CouplingSet &cs, shared_ptr<CouplingKeys> ck )
+    {
+        FOREACH( Coupling c, cs )
+            ALGO::couplings.insert( c ); 
+        ALGO::coupling_keys = ck; 
+    }
+};
+
+template<typename ALGO, class PRE_RESTRICTION>
+struct Slave : SlaveIntermediate<ALGO>, Special<PRE_RESTRICTION>
 {
 	SPECIAL_NODE_FUNCTIONS
 
 	// SlaveSearchReplace must be constructed using constructor
-	SlaveCompareReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+	Slave( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp, TreePtr<Node> rp ) :
 		through( t ),
-		SlaveCompareReplaceBase( sp, rp )
+		SlaveIntermediate<ALGO>( sp, rp )
 	{
 	}
 
@@ -287,33 +275,49 @@ struct SlaveCompareReplace : SlaveCompareReplaceBase, Special<PRE_RESTRICTION>
 	}
 };
 
-
-struct SlaveSearchReplaceBase : virtual Node,
-                   public SearchReplace
+// Partial specialisation is an arse in C++
+template<class PRE_RESTRICTION>
+struct SlaveCompareReplace : Slave<CompareReplace, PRE_RESTRICTION> 
 {
-	SlaveSearchReplaceBase( TreePtr<Node> sp, TreePtr<Node> rp=TreePtr<Node>() ) :
-		SearchReplace( sp, rp, false )
-	{}
-	virtual TreePtr<Node> GetThrough() const = 0;
+    SlaveCompareReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+        Slave<CompareReplace, PRE_RESTRICTION>( t, sp, rp ) {}
 };
 template<class PRE_RESTRICTION>
-struct SlaveSearchReplace : SlaveSearchReplaceBase, Special<PRE_RESTRICTION>
+struct SlaveSearchReplace : Slave<SearchReplace, PRE_RESTRICTION>
 {
-	SPECIAL_NODE_FUNCTIONS
-
-	// SlaveSearchReplace must be constructed using constructor
-	SlaveSearchReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
-		through( t ),
-		SlaveSearchReplaceBase( sp, rp )
-	{
-	}
-
-	TreePtr<PRE_RESTRICTION> through;
-	virtual TreePtr<Node> GetThrough() const
-	{
-		return TreePtr<Node>( through );
-	}
+    SlaveSearchReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
+        Slave<SearchReplace, PRE_RESTRICTION>( t, sp, rp ) {}
 };
+
+
+
+
+// The * wildcard can match more than one node of any type in a container
+// In a Sequence, only a contiguous subsequence of 0 or more elements will match
+// In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
+// Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
+// in the collection.
+struct StarBase : virtual Node {};
+template<class PRE_RESTRICTION>
+struct Star : StarBase, Special<PRE_RESTRICTION> { SPECIAL_NODE_FUNCTIONS };
+
+struct GreenGrassBase : virtual Node
+{
+    virtual TreePtr<Node> GetThrough() const = 0;
+};
+template<class PRE_RESTRICTION>
+struct GreenGrass : GreenGrassBase, Special<PRE_RESTRICTION>
+{
+    SPECIAL_NODE_FUNCTIONS
+    TreePtr<PRE_RESTRICTION> through;
+    virtual TreePtr<Node> GetThrough() const
+    {
+        return TreePtr<Node>( through );
+    }
+};
+
+
+
 
 // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
 struct StuffBase : virtual Node

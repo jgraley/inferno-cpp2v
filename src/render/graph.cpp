@@ -388,9 +388,9 @@ string Graph::SimpleLabel( string name, TreePtr<Node> n )
 
 string Graph::DoNode( TreePtr<Node> n )
 {
-	if( TreePtr<SlaveCompareReplaceBase> rsb = dynamic_pointer_cast<SlaveCompareReplaceBase>(n) )
+	if( TreePtr< SlaveIntermediate<CompareReplace> > rsb = dynamic_pointer_cast< SlaveIntermediate<CompareReplace> >(n) )
 		return DoSearchReplace( rsb.get(), Id( n.get() ), true, rsb->GetThrough() );
-	if( TreePtr<SlaveSearchReplaceBase> sb = dynamic_pointer_cast<SlaveSearchReplaceBase>(n) )
+    if( TreePtr< SlaveIntermediate<SearchReplace> > sb = dynamic_pointer_cast< SlaveIntermediate<SearchReplace> >(n) )
 		return DoSearchReplace( sb.get(), Id( n.get() ), true, sb->GetThrough() );
 
 	string s;
