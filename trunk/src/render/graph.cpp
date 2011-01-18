@@ -23,11 +23,13 @@
 // Tertiary: CompareReplace and special nodes that do not occupy space
 
 void Graph::operator()( Transformation *root )
-{
-	string s;
+{    
+    string s;
 	s += Header();
-	s += Traverse( root, false );
-	s += Traverse( root, true );
+    unique_filter.Reset();
+	s += Traverse( root, Id(root), false );
+    unique_filter.Reset();
+	s += Traverse( root, Id(root), true );
 	s += Footer();
 	Disburse( s );
 }
@@ -39,7 +41,9 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 
 	string s;
 	s += Header();
+    unique_filter.Reset();
 	s += Traverse( root, false );
+    unique_filter.Reset();
 	s += Traverse( root, true );
 	s += Footer();
 	Disburse( s );
@@ -101,12 +105,20 @@ string Graph::Traverse( TreePtr<Node> root, bool links_pass )
 }
 
 
-string Graph::Traverse( Transformation *sr, bool links_pass )
+string Graph::Traverse( Transformation *sr, string id, bool links_pass )
 {
 	string s;
-    s += links_pass ? DoTransformationLinks(sr, Id(sr)) : DoTransformation(sr, Id(sr));
+    s += links_pass ? DoTransformationLinks(sr, id) : DoTransformation(sr, id);
     
-    UniqueFilter uf;
+    struct : public Filter
+    {
+        virtual bool IsMatch( TreePtr<Node> context,
+                              TreePtr<Node> root )
+        {
+            return !dynamic_cast<Transformation*>(root.get());
+        }
+    } no_tx_filter;
+    
     vector<string> labels;
     vector< TreePtr<Node> > links;
     (void)sr->GetGraphInfo( &labels, &links );
@@ -115,9 +127,10 @@ string Graph::Traverse( Transformation *sr, bool links_pass )
     {
         if( pattern )
         {
-            Expand w( pattern, &uf );
+            TRACE("Expanding transform pattern ")(*pattern)("\n");
+            Expand w( pattern, &unique_filter, &no_tx_filter ); // return each node only once; do not recurse through transformations
             FOREACH( TreePtr<Node> n, w )
-            {
+            {              
                 s += links_pass ? DoNodeLinks(n) : DoNode(n);
             }
         }
@@ -383,7 +396,7 @@ string Graph::SimpleLabel( string name, TreePtr<Node> n )
 string Graph::DoNode( TreePtr<Node> n )
 {
 	if( Transformation *rsb = dynamic_cast<Transformation *>(n.get()) )
-		return DoTransformation( rsb, Id( n.get() ) );
+		return Traverse( rsb, Id( n.get() ), false );
 
 	string s;
 	bool bold;
@@ -428,7 +441,7 @@ string Graph::DoNode( TreePtr<Node> n )
 string Graph::DoNodeLinks( TreePtr<Node> n )
 {
     if( Transformation *rsb = dynamic_cast<Transformation *>(n.get()) )
-        return DoTransformationLinks( rsb, Id( n.get() ) );
+        return Traverse( rsb, Id( n.get() ), true );
 
     string s;
     TRACE("Itemising\n");
