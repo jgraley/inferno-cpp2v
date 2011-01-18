@@ -167,7 +167,7 @@ void DoToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr< Loop > l_s_loop;
 
     l_s_not->pattern = l_s_loop;
-    l_overlay->search = l_s_cont;
+    l_overlay->through = l_s_cont;
     l_stuff->recurse_restriction = l_s_not;
     l_overlay->overlay = l_r_goto;
     l_r_goto->destination = l_r_cont_labelid;
@@ -203,7 +203,7 @@ void BreakToGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     
     sx_not->pattern = sx_breakable;
     stuff->terminus = overlay;
-    overlay->search = s_break;
+    overlay->through = s_break;
     stuff->recurse_restriction = sx_not;
     overlay->overlay = r_goto;
     r_goto->destination = r_labelid;

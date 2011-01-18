@@ -168,7 +168,7 @@ Result CompareReplace::DecidedCompare( TreePtr<Node> x,
     else if( TreePtr<OverlayBase> op = dynamic_pointer_cast<OverlayBase>(pattern) )
     {
         // When Overlay node seen duriung search, just forward through the "base" path
-        bool r = DecidedCompare( x, op->search, can_key, conj );
+        bool r = DecidedCompare( x, op->GetThrough(), can_key, conj );
         if( r != FOUND )
             return NOT_FOUND;
     }
@@ -804,8 +804,8 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
     }
     else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
     {
-        source = ob->overlay;
-        if( !dest || !source->IsLocalMatch(ob->search.get()) )
+        source = ob->GetOverlay();
+        if( !dest || !source->IsLocalMatch(ob->GetThrough().get()) )
         {
             // Base not coupled or is not compatible for overlaying, so just duplicate the overlay leg.
             dest = DuplicateSubtree( source, can_key, current_key );
@@ -971,7 +971,7 @@ SearchReplace::SearchReplace( TreePtr<Node> sp,
         // Insert a Stuff node as root of the replace pattern
         TreePtr< ::Overlay<Node> > overlay( new ::Overlay<Node> );
         stuff->terminus = overlay;
-        overlay->search = compare_pattern;
+        overlay->through = compare_pattern;
         overlay->overlay = replace_pattern;
 
         // Key them together
