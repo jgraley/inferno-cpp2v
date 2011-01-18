@@ -114,6 +114,16 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
 } 
 
 
+string CompareReplace::GetGraphInfo( vector<string> *labels, vector< TreePtr<Node> > *links ) const
+{
+    labels->push_back("compare");
+    links->push_back(compare_pattern);
+    labels->push_back("replace");
+    links->push_back(replace_pattern);
+    return "CompareReplace";
+}
+
+
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
 Result CompareReplace::DecidedCompare( TreePtr<Node> x,
@@ -988,6 +998,22 @@ SearchReplace::SearchReplace( TreePtr<Node> sp,
 }
 
 
+string SearchReplace::GetGraphInfo( vector<string> *labels, vector< TreePtr<Node> > *links ) const
+{
+    // Find the original patterns
+    TreePtr< Stuff<Scope> > stuff = dynamic_pointer_cast< Stuff<Scope> >(compare_pattern);
+    ASSERT( stuff );
+    TreePtr< ::Overlay<Node> > overlay = dynamic_pointer_cast< ::Overlay<Node> >(stuff->terminus);
+    ASSERT( overlay );
+        
+    labels->push_back("search");    
+    links->push_back(overlay->through);
+    labels->push_back("replace");
+    links->push_back(overlay->overlay);
+    return "SearchReplace";
+}
+    
+    
 void CompareReplace::Test()
 {
     CompareReplace sr = CompareReplace( MakeTreePtr<Nop>() );

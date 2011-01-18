@@ -216,7 +216,6 @@ Expand::iterator::iterator( const Expand::iterator & other ) :
 	state( other.state ),
 	done( other.done )
 {
-    DoNodeFilter();
 }
 
 Expand::iterator::operator string() const
@@ -242,15 +241,15 @@ void Expand::iterator::AdvanceInto()
 		recurse = true;
 		if( recurse_filter ) // is there a filter on recursion?
 		{
-            TRACE("Recurse filter @%p, this@%p, entering...\n", recurse_filter, this);
+            //TRACE("Recurse filter @%p, this@%p, entering...\n", recurse_filter, this);
 			bool ok = recurse_filter->IsMatch( element, element ); // must pass the restriction
-			TRACE("Recurse filter @%p, leaving...\n", recurse_filter);
+			//TRACE("Recurse filter @%p, leaving...\n", recurse_filter);
 
 			if( !ok )
 				recurse = false;
 		}
-		else
-            TRACE("No recurse filter\n", recurse_filter);
+		//else
+            //TRACE("No recurse filter\n", recurse_filter);
 	}
 
     if( recurse )
@@ -380,13 +379,11 @@ Expand::Expand( TreePtr<Node> r,
 
 const Expand::iterator &Expand::begin()
 {
-	my_begin = iterator( root, out_filter, recurse_filter );
 	return my_begin;
 }
 
 const Expand::iterator &Expand::end()
 {
-	my_end = iterator();
 	return my_end;
 }
 
@@ -398,9 +395,13 @@ bool UniqueFilter::IsMatch( TreePtr<Node> context,
     ASSERT( root );
     (void)context;
     
-    bool is_seen_before = seen.IsExist( root );
+    //TRACE("Got ")(*root)("\n");
+    
+    if( seen.IsExist( root ) )
+        return false;
+    
     seen.insert( root );
-    return !is_seen_before;        
+    return true;        
 }
 
 ////////////////////////// ParentTraverse //////////////////////////
@@ -444,13 +445,11 @@ ParentTraverse::ParentTraverse( TreePtr<Node> r ) :
 
 const ParentTraverse::iterator &ParentTraverse::begin()
 {
-    my_begin = iterator( root );
     return my_begin;
 }
 
 const ParentTraverse::iterator &ParentTraverse::end()
 {
-    my_end = iterator();
     return my_end;
 }
     
@@ -495,12 +494,10 @@ Traverse::Traverse( TreePtr<Node> r ) :
 
 const Traverse::iterator &Traverse::begin()
 {
-    my_begin = iterator( root );
     return my_begin;
 }
 
 const Traverse::iterator &Traverse::end()
 {
-    my_end = iterator();
     return my_end;
 }

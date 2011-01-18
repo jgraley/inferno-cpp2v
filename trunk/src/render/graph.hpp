@@ -13,19 +13,16 @@ class Graph : public OutOfPlaceTransformation
 {
 public:
 	using Transformation::operator();
-    void operator()( CompareReplace *root ); // Graph the search/replace pattern
+    void operator()( Transformation *root ); // Graph the search/replace pattern
     TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root ); // graph the subtree under root node
 private:
     string Header();
     string Footer();
     void Disburse( string s );
     string Traverse( TreePtr<Node> root, bool links_pass );
-    string Traverse( CompareReplace *sr, bool links_pass );
-	string DoSearchReplace( CompareReplace *sr,
-			                string id,
-			                bool slave = false,
-			                TreePtr<Node> through = TreePtr<Node>() );
-	string DoSearchReplaceLinks( CompareReplace *sr );
+    string Traverse( Transformation *sr, bool links_pass );
+	string DoTransformation( Transformation *sr, string id );
+	string DoTransformationLinks( Transformation *sr, string id );
     string Id( void *p );
     string SeqField( int i, int j=0 );
     string Sanitise( string s, bool remove_tp=false );

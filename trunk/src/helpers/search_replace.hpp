@@ -106,7 +106,9 @@ public:
     TreePtr<Node> *pcontext;
     shared_ptr< CouplingKeys > coupling_keys;
     mutable set< TreePtr<Node> > dirty_grass;
-    
+
+    virtual string GetGraphInfo( vector<string> *labels, vector< TreePtr<Node> > *links ) const;
+
 private:
     // LocalCompare ring
     bool LocalCompare( TreePtr<Node> x,
@@ -198,6 +200,7 @@ public:
     SearchReplace( TreePtr<Node> sp,
                    TreePtr<Node> rp = TreePtr<Node>(),
                    bool isroot = true );
+    virtual string GetGraphInfo( vector<string> *labels, vector< TreePtr<Node> > *links ) const;
 };
 
 
@@ -250,9 +253,17 @@ struct SlaveIntermediate : public SlaveBase, public ALGO
 	{}
     virtual void MergeCouplings( const CouplingSet &cs, shared_ptr<CouplingKeys> ck )
     {
+        // TODO is there a way of unioning sets without doing lots of insert()?
         FOREACH( Coupling c, cs )
             ALGO::couplings.insert( c ); 
         ALGO::coupling_keys = ck; 
+    }
+    virtual string GetGraphInfo( vector<string> *labels, vector< TreePtr<Node> > *links ) const
+    {
+        labels->push_back("through");
+        links->push_back(GetThrough());
+        string bn = ALGO::GetGraphInfo( labels, links );
+        return "Slave" + bn;
     }
 };
 
@@ -328,9 +339,29 @@ struct StuffBase : virtual Node
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
     CompareReplace recurse_comparer; // TODO only need the compare half, maybe split it out?
+    
+    // Do the itemiser by hand since it gets confused by the CompareReplace object
 };
 template<class PRE_RESTRICTION>
-struct Stuff : StuffBase, Special<PRE_RESTRICTION> { SPECIAL_NODE_FUNCTIONS };
+struct Stuff : StuffBase, Special<PRE_RESTRICTION> 
+{
+    virtual vector< Itemiser::Element * > Itemise( const Itemiser *itemise_object = 0 ) const
+    {
+        vector< Itemiser::Element * > v;
+        v.push_back( (Itemiser::Element *)(&recurse_restriction) );
+        v.push_back( (Itemiser::Element *)(&terminus) );
+        TRACE("%p %p\n", v[0], v[1] );
+        return v;
+    }
+    virtual Itemiser::Element *ItemiseIndex( int i ) const  
+    { 
+        return Itemise()[i];
+    } 
+    virtual int ItemiseSize() const  
+    { 
+        return Itemise().size();
+    }
+};
 struct StuffKey : Key
 {
     TreePtr<Node> terminus;
