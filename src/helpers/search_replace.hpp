@@ -296,10 +296,13 @@ struct SlaveSearchReplace : Slave<SearchReplace, PRE_RESTRICTION>
 // In a Sequence, only a contiguous subsequence of 0 or more elements will match
 // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
 // Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
-// in the collection.
+// in the collection. TODO a restrict pattern
 struct StarBase : virtual Node {};
 template<class PRE_RESTRICTION>
 struct Star : StarBase, Special<PRE_RESTRICTION> { SPECIAL_NODE_FUNCTIONS };
+
+
+
 
 struct GreenGrassBase : virtual Node
 {
@@ -333,16 +336,29 @@ struct StuffKey : Key
     TreePtr<Node> terminus;
 };
 
+
+
+
 struct OverlayBase : virtual Node
 {
-    TreePtr<Node> search;
-    TreePtr<Node> overlay;
+    virtual TreePtr<Node> GetThrough() const = 0;
+    virtual TreePtr<Node> GetOverlay() const = 0;    
 };
 
 template<class PRE_RESTRICTION>
 struct Overlay : OverlayBase, Special<PRE_RESTRICTION>
 {
     SPECIAL_NODE_FUNCTIONS
+    TreePtr<PRE_RESTRICTION> through;
+    TreePtr<PRE_RESTRICTION> overlay;
+    virtual TreePtr<Node> GetThrough() const 
+    {
+        return (TreePtr<Node>)through;
+    }
+    virtual TreePtr<Node> GetOverlay() const
+    {
+        return (TreePtr<Node>)overlay;
+    }
 };
 
 #endif
