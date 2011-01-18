@@ -22,7 +22,7 @@
 // Secondary: Normal nodes and special nodes that occupy space
 // Tertiary: CompareReplace and special nodes that do not occupy space
 
-void Graph::operator()( CompareReplace *root )
+void Graph::operator()( Transformation *root )
 {
 	string s;
 	s += Header();
@@ -101,49 +101,46 @@ string Graph::Traverse( TreePtr<Node> root, bool links_pass )
 }
 
 
-string Graph::Traverse( CompareReplace *sr, bool links_pass )
+string Graph::Traverse( Transformation *sr, bool links_pass )
 {
 	string s;
-    Expand::iterator i;
-
+    s += links_pass ? DoTransformationLinks(sr, Id(sr)) : DoTransformation(sr, Id(sr));
+    
     UniqueFilter uf;
-    s += links_pass ? DoSearchReplaceLinks(sr) : DoSearchReplace(sr, Id(sr));
-	if( sr->compare_pattern )
+    vector<string> labels;
+    vector< TreePtr<Node> > links;
+    (void)sr->GetGraphInfo( &labels, &links );
+    
+    FOREACH( TreePtr<Node> pattern, links )
     {
-        TRACE("Graph plotter traversing search pattern %s pass\n", links_pass ? "links" : "nodes");
-        Expand w( sr->compare_pattern, &uf );
-        for( i=(w.begin()); i != w.end(); ++i )
-            s += links_pass ? DoNodeLinks(*i) : DoNode(*i);
-    }
-    if( sr->replace_pattern )
-    {
-        TRACE("Graph plotter traversing replace pattern %s pass\n", links_pass ? "links" : "nodes");
-        Expand w( sr->replace_pattern, &uf );
-        for( i=(w.begin()); i != w.end(); ++i )
-            s += links_pass ? DoNodeLinks(*i) : DoNode(*i);
+        if( pattern )
+        {
+            Expand w( pattern, &uf );
+            FOREACH( TreePtr<Node> n, w )
+            {
+                s += links_pass ? DoNodeLinks(n) : DoNode(n);
+            }
+        }
     }
 	return s;
 }
 
 
-string Graph::DoSearchReplace( CompareReplace *sr,
-		                       string id,
-		                       bool slave,
-		                       TreePtr<Node> through )
+string Graph::DoTransformation( Transformation *sr,
+		                        string id )
 {
-	string s;
+    string name;
+    vector<string> labels;
+    vector< TreePtr<Node> > links;
+    name = sr->GetGraphInfo( &labels, &links );
+        
+    string s;
 	s += id;
 	s += " [\n";
 
-	// TODO use TypeInfo to get the true name
-	if( dynamic_cast<SearchReplace *>(sr) )
-		s += "label = \"<fixed> SearchReplace";
-	else
-	    s += "label = \"<fixed> CompareReplace";
-	if( slave )
-		s += " | <" + SeqField(2) + "> through";
-	s += " | <" + (slave ? SeqField(0) : string("search")) + "> search";
-	s += " | <" + (slave ? SeqField(1) : string("replace")) + "> replace";
+    s += "label = \"<fixed> " + name;
+	for( int i=0; i<labels.size(); i++ )        
+		s += " | <" + labels[i] + "> " + labels[i];
 	s += "\"\n";
 
 	s += "shape = \"record\"\n"; // nodes can be split into fields
@@ -155,20 +152,17 @@ string Graph::DoSearchReplace( CompareReplace *sr,
 }
 
 
-string Graph::DoSearchReplaceLinks( CompareReplace *sr )
+string Graph::DoTransformationLinks( Transformation *sr, string id )
 {
-	string s;
-	if( sr->compare_pattern )
-	{
-		s += Id(sr) + ":search -> " + Id(sr->compare_pattern.get());
-		s += " [];\n";
-	}
-	if( sr->replace_pattern )
-	{
-		s += Id(sr) + ":replace -> " + Id(sr->replace_pattern.get());
-		s += " [];\n";
-	}
-	return s;
+    vector<string> labels;
+    vector< TreePtr<Node> > links;
+    (void)sr->GetGraphInfo( &labels, &links );
+
+    string s;
+    for( int i=0; i<labels.size(); i++ )        
+        s += id + ":" + labels[i] + " -> " + Id(links[i].get()) + " [];\n";
+
+    return s;
 }
 
 
@@ -388,10 +382,8 @@ string Graph::SimpleLabel( string name, TreePtr<Node> n )
 
 string Graph::DoNode( TreePtr<Node> n )
 {
-	if( TreePtr< SlaveIntermediate<CompareReplace> > rsb = dynamic_pointer_cast< SlaveIntermediate<CompareReplace> >(n) )
-		return DoSearchReplace( rsb.get(), Id( n.get() ), true, rsb->GetThrough() );
-    if( TreePtr< SlaveIntermediate<SearchReplace> > sb = dynamic_pointer_cast< SlaveIntermediate<SearchReplace> >(n) )
-		return DoSearchReplace( sb.get(), Id( n.get() ), true, sb->GetThrough() );
+	if( Transformation *rsb = dynamic_cast<Transformation *>(n.get()) )
+		return DoTransformation( rsb, Id( n.get() ) );
 
 	string s;
 	bool bold;
@@ -435,12 +427,15 @@ string Graph::DoNode( TreePtr<Node> n )
 
 string Graph::DoNodeLinks( TreePtr<Node> n )
 {
-	string s;
-	vector< Itemiser::Element * > members = n->Itemise();
-	for( int i=0; i<members.size(); i++ )
-	{
-		TRACE("Size %d i=%d\n", members.size(), i );
+    if( Transformation *rsb = dynamic_cast<Transformation *>(n.get()) )
+        return DoTransformationLinks( rsb, Id( n.get() ) );
 
+    string s;
+    TRACE("Itemising\n");
+	vector< Itemiser::Element * > members = n->Itemise();
+    TRACE("Doing links for ")(*n)(" size is %d\n", members.size() );
+    for( int i=0; i<members.size(); i++ )
+	{
 		if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
 		{
 			FOREACH( const TreePtrInterface &p, *col )
@@ -454,6 +449,7 @@ string Graph::DoNodeLinks( TreePtr<Node> n )
 		}
 		else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
 		{
+        TRACE("TreePtr %d is @%p\n", i, ptr );
 			if( *ptr )
 				s += DoLink( n, SeqField(i), *ptr, string(), ptr );
 		}

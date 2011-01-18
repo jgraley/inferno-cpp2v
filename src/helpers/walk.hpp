@@ -144,7 +144,7 @@ protected:
     iterator my_begin, my_end;
 };
 
-class UniqueFilter : public Filter
+struct UniqueFilter : public Filter
 {
     virtual bool IsMatch( TreePtr<Node> context,
                           TreePtr<Node> root );
