@@ -101,7 +101,6 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
         
         // Look for slaves. If we find them, copy our couplings into their couplings
         // Do not just overwrite since there may be implicit Stuff node couplings.
-        // TODO is there a way of unioning sets without doing lots of insert()?
         ParentTraverse ss( rp );
         FOREACH( TreePtr<Node> n, ss )
         {

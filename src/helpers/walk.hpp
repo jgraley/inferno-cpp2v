@@ -148,6 +148,7 @@ struct UniqueFilter : public Filter
 {
     virtual bool IsMatch( TreePtr<Node> context,
                           TreePtr<Node> root );
+    void Reset() { seen.clear(); }                         
     Set< TreePtr<Node> > seen;    
 };
 

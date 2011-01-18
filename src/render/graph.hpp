@@ -20,7 +20,7 @@ private:
     string Footer();
     void Disburse( string s );
     string Traverse( TreePtr<Node> root, bool links_pass );
-    string Traverse( Transformation *sr, bool links_pass );
+    string Traverse( Transformation *sr, string id, bool links_pass );
 	string DoTransformation( Transformation *sr, string id );
 	string DoTransformationLinks( Transformation *sr, string id );
     string Id( void *p );
@@ -34,6 +34,7 @@ private:
     string DoNodeLinks( TreePtr<Node> n );
     bool IsRecord( TreePtr<Node> n );
     string DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string atts=string(), const TreePtrInterface *ptr=NULL );
+    UniqueFilter unique_filter;
 };
 
 #endif
