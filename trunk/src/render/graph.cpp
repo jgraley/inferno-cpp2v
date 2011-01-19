@@ -395,8 +395,9 @@ string Graph::SimpleLabel( string name, TreePtr<Node> n )
 
 string Graph::DoNode( TreePtr<Node> n )
 {
-	if( Transformation *rsb = dynamic_cast<Transformation *>(n.get()) )
-		return Traverse( rsb, Id( n.get() ), false );
+    if( !dynamic_pointer_cast<TransformToBase>(n) && !dynamic_pointer_cast<BuildIdentifierBase>(n) ) // ignire the fact that these also derive from Transformation
+  	    if( Transformation *rsb = dynamic_cast<Transformation *>(n.get()) )
+		    return Traverse( rsb, Id( n.get() ), false );
 
 	string s;
 	bool bold;
@@ -440,8 +441,9 @@ string Graph::DoNode( TreePtr<Node> n )
 
 string Graph::DoNodeLinks( TreePtr<Node> n )
 {
-    if( Transformation *rsb = dynamic_cast<Transformation *>(n.get()) )
-        return Traverse( rsb, Id( n.get() ), true );
+    if( !dynamic_pointer_cast<TransformToBase>(n) && !dynamic_pointer_cast<BuildIdentifierBase>(n) ) // ignire the fact that these also derive from Transformation
+        if( Transformation *rsb = dynamic_cast<Transformation *>(n.get()) )
+            return Traverse( rsb, Id( n.get() ), true );
 
     string s;
     TRACE("Itemising\n");
