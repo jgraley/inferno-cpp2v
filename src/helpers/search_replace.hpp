@@ -76,9 +76,14 @@ class CompareReplace : virtual InPlaceTransformation,
 public:
     // Constructor and destructor. Search and replace patterns and couplings are
     // specified here, so that we have a fully confiugured functor.
-    CompareReplace( TreePtr<Node> sp=TreePtr<Node>(),
-                    TreePtr<Node> rp=TreePtr<Node>(),
-                    bool isroot = true );
+    CompareReplace( TreePtr<Node> cp = TreePtr<Node>(),
+                    TreePtr<Node> rp = TreePtr<Node>(),
+                    bool im = true );
+                    
+    // Call this to set the patterns after construction. This should not be virtual since
+    // the constructor calls it.
+    void Configure( TreePtr<Node> cp,
+                    TreePtr<Node> rp = TreePtr<Node>() );                 
     
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
@@ -100,6 +105,7 @@ public:
     // Some self-testing
     static void Test();
         
+    bool is_master;
     CouplingSet couplings;
     TreePtr<Node> compare_pattern;
     TreePtr<Node> replace_pattern;
@@ -107,7 +113,8 @@ public:
     shared_ptr< CouplingKeys > coupling_keys;
     mutable set< TreePtr<Node> > dirty_grass;
 
-    virtual string GetGraphInfo( vector<string> *labels, vector< TreePtr<Node> > *links ) const;
+    virtual string GetGraphInfo( vector<string> *labels, 
+                                 vector< TreePtr<Node> > *links ) const;
 
 private:
     // LocalCompare ring
@@ -197,10 +204,17 @@ private:
 class SearchReplace : public CompareReplace
 {
 public:
-    SearchReplace( TreePtr<Node> sp,
+    SearchReplace( TreePtr<Node> sp = TreePtr<Node>(),
                    TreePtr<Node> rp = TreePtr<Node>(),
-                   bool isroot = true );
-    virtual string GetGraphInfo( vector<string> *labels, vector< TreePtr<Node> > *links ) const;
+                   bool im = true );
+                   
+    // Call this to set the patterns after construction. This should not be virtual since
+    // the constructor calls it.
+    void Configure( TreePtr<Node> sp,
+                    TreePtr<Node> rp = TreePtr<Node>() );                 
+                    
+    virtual string GetGraphInfo( vector<string> *labels, 
+                                 vector< TreePtr<Node> > *links ) const;
 };
 
 
