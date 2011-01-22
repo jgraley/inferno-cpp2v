@@ -10,7 +10,7 @@
 #include "common/common.hpp"
 #include "helpers/soft_patterns.hpp"
 
-void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+ForToWhile::ForToWhile()
 {
 	MakeTreePtr<For> s_for;
     MakeTreePtr<Statement> forbody, inc, init;
@@ -45,10 +45,10 @@ void ForToWhile::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     r_while->condition = cond;
     r_body->statements = (r_slave, inc);
 
-   	SearchReplace( s_for, r_outer )( context, proot );
+   	SearchReplace::Configure( s_for, r_outer );
 }
 
-void WhileToDo::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+WhileToDo::WhileToDo()
 {
 	MakeTreePtr<While> s_while;
     MakeTreePtr<Statement> body;
@@ -66,5 +66,5 @@ void WhileToDo::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     r_do->condition = cond;
     r_do->body = body;
 	
-   	SearchReplace( s_while, r_if )( context, proot );
+   	SearchReplace::Configure( s_while, r_if );
 }

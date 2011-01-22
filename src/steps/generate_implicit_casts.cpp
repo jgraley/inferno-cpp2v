@@ -11,7 +11,7 @@
 #include "helpers/soft_patterns.hpp"
 #include "helpers/typeof.hpp"
 
-void GenerateImplicitCasts::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+GenerateImplicitCasts::GenerateImplicitCasts()
 {
 	MakeTreePtr<Call> s_call;
 	MakeTreePtr<TypeOf> callee;
@@ -46,5 +46,5 @@ void GenerateImplicitCasts::operator()( TreePtr<Node> context, TreePtr<Node> *pr
 	r_call->operands = ( r_arg, other_args );
     r_call->callee = callee;
     
-	SearchReplace(s_call, r_call)( context, proot );
+	SearchReplace::Configure(s_call, r_call);
 }

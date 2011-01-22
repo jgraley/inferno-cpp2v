@@ -10,18 +10,16 @@
 
 #include "helpers/search_replace.hpp"
 
-class ForToWhile : public InPlaceTransformation
+class ForToWhile : public SearchReplace
 {
 public:
-	using Transformation::operator();
-	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+	ForToWhile();
 };
 
-class WhileToDo : public InPlaceTransformation
+class WhileToDo : public SearchReplace
 {
 public:
-	using Transformation::operator();
-	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+	WhileToDo();
 };
 
 #endif 

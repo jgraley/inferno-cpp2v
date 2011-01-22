@@ -10,11 +10,10 @@
 
 #include "helpers/search_replace.hpp"
 
-class UseTempsForParamsReturn : public InPlaceTransformation
+class UseTempsForParamsReturn : public SearchReplace
 {
 public:
-	using Transformation::operator();
-	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+	UseTempsForParamsReturn();
 };
 
 #endif /* USE_TEMPS_FOR_PARAMS_RETURN_HPP */

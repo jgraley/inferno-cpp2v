@@ -157,18 +157,18 @@ public:
 private:
     // Replace ring
     void ClearPtrs( TreePtr<Node> dest ) const;
-    void Overlay( TreePtr<Node> dest,
-    		      TreePtr<Node> source,
-    		      bool can_key,
-    		      shared_ptr<Key> current_key ) const; // under substitution if not NULL
-    void Overlay( SequenceInterface *dest,
-    		      SequenceInterface *source,
-    		      bool can_key,
-    		      shared_ptr<Key> current_key ) const;
-    void Overlay( CollectionInterface *dest,
-    	          CollectionInterface *source,
-    	          bool can_key,
-    	          shared_ptr<Key> current_key ) const;
+    void DoOverlay( TreePtr<Node> dest,
+    		        TreePtr<Node> source,
+    		        bool can_key,
+    		        shared_ptr<Key> current_key ) const; // under substitution if not NULL
+    void DoOverlay( SequenceInterface *dest,
+      		        SequenceInterface *source,
+    		        bool can_key,
+    		        shared_ptr<Key> current_key ) const;
+    void DoOverlay( CollectionInterface *dest,
+    	            CollectionInterface *source,
+    	            bool can_key,
+    	            shared_ptr<Key> current_key ) const;
 public:
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> x,
     		                        bool can_key,
@@ -185,7 +185,9 @@ public:
                                  TreePtr<Node> replace_pattern );
 
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.
-    void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+    using Transformation::operator();
+    void operator()( TreePtr<Node> context, 
+                     TreePtr<Node> *proot );
 private:
     // Internal node classes - NOTE these are not special nodes, and we use them like normal tree nodes
     struct SubSequence : Node,

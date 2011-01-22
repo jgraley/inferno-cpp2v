@@ -3,32 +3,16 @@
 
 #include "helpers/search_replace.hpp"
 
-class SplitInstanceDeclarations : public InPlaceTransformation
+class SplitInstanceDeclarations : public SearchReplace
 {
 public:
-	using Transformation::operator();
-	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+    SplitInstanceDeclarations();
 };
 
-class MergeInstanceDeclarations : public InPlaceTransformation
+class MoveInstanceDeclarations : public SearchReplace
 {
 public:
-	using Transformation::operator();
-	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
-};
-
-class HackUpIfs : public InPlaceTransformation
-{
-public:
-	using Transformation::operator();
-	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
-};
-
-class CrazyNine : public InPlaceTransformation
-{
-public:
-	using Transformation::operator();
-	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+    MoveInstanceDeclarations();
 };
 
 #endif

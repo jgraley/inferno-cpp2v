@@ -7,7 +7,8 @@
 #include "common/common.hpp"
 #include "helpers/soft_patterns.hpp"
 
-void SlaveTest::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+// Just an early test for slaves, not a valid transformation
+SlaveTest::SlaveTest()
 {
     MakeTreePtr<For> s_for;
     MakeTreePtr<Statement> s_body;
@@ -21,5 +22,5 @@ void SlaveTest::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     MakeTreePtr< SlaveCompareReplace<Statement> > r_slave( r_body, ss_cont, sr_break );
     r_comp->statements = ( r_slave );
 
-   	SearchReplace( s_for, r_comp )( context, proot );
+   	SearchReplace( s_for, r_comp );
 }

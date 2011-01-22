@@ -3,32 +3,28 @@
 
 #include "helpers/search_replace.hpp"
 
-class IfToIfGoto : public InPlaceTransformation
+class IfToIfGoto : public SearchReplace
 {
 public:
-    using Transformation::operator();
-    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+    IfToIfGoto();
 };
 
-class SwitchToIfGoto : public InPlaceTransformation
+class SwitchToIfGoto : public SearchReplace
 {
 public:
-    using Transformation::operator();
-    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+    SwitchToIfGoto();
 };
 
-class DoToIfGoto : public InPlaceTransformation
+class DoToIfGoto : public SearchReplace
 {
 public:
-    using Transformation::operator();
-    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+    DoToIfGoto();
 };
 
-class BreakToGoto : public InPlaceTransformation
+class BreakToGoto : public SearchReplace
 {
 public:
-    using Transformation::operator();
-    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+    BreakToGoto();
 };
 
 #endif 
