@@ -4,18 +4,27 @@
 #include "conjecture.hpp"
 
 // Master constructor remembers search pattern, replace pattern and any supplied couplings as required
-CompareReplace::CompareReplace( TreePtr<Node> sp,
+CompareReplace::CompareReplace( TreePtr<Node> cp,
                                 TreePtr<Node> rp,
-                                bool isroot ) :                 
-    compare_pattern( sp ),
-    replace_pattern( rp ),
+                                bool im ) :
+    is_master( im ),                                                 
+    compare_pattern( NULL ),
+    replace_pattern( NULL ),
     coupling_keys( new CouplingKeys )
 {
-    Validate v(true);
-    v(compare_pattern, &compare_pattern);
-    v(replace_pattern, &replace_pattern);
+    if( cp )
+        Configure( cp, rp );
+}    
     
-    if( isroot && sp )
+void CompareReplace::Configure( TreePtr<Node> cp,
+                                TreePtr<Node> rp )
+{
+    ASSERT( cp );
+    Validate v(true);        
+    v(cp, &cp);
+    v(rp, &rp);            
+    
+    if( is_master )
     {
         // Count the number of times we hit each node during a walk.
         // Where we hit a node more than once, add a coupling for it.
@@ -23,7 +32,7 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
         // couplings for) and all nodes thereunder (which I'm not sure
         // if we want couplgs for or even if should be allowed).
         // TODO decide.
-        TRACE("doing inferred couplings, search pattern ")(*sp)("\n");
+        TRACE("doing inferred couplings, search pattern ")(*cp)("\n");
         
         // We will store counts of links into nodes here
         Map< TreePtr<Node>, int > ms;
@@ -33,7 +42,7 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
         // incoming link. We want to include search pattern and replace pattern so 
         // apply the same filter object to both walks.
         UniqueFilter uf;
-        Expand wsp( sp, NULL, &uf ), wrp( rp, NULL, &uf );
+        Expand wsp( cp, NULL, &uf ), wrp( rp, NULL, &uf );
         
         Expand::iterator i;
         FOREACH( TreePtr<Node> n, wsp )
@@ -74,7 +83,7 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
         }
        
         // Fill in fields on the stuff nodes
-        Traverse tsp( sp ); 
+        Traverse tsp( cp ); 
         FOREACH( TreePtr<Node> n, tsp )
         {        
             if(n)TRACE("Elaborating ")(*n)("\n");
@@ -110,6 +119,10 @@ CompareReplace::CompareReplace( TreePtr<Node> sp,
             }
         }
     }
+
+    // Finally store the patterns in the object (we are now ready to transform)
+    compare_pattern = cp;
+    replace_pattern = rp;
 } 
 
 
@@ -935,6 +948,10 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot,
 // Do a search and replace based on patterns stored in our members
 void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 {
+    ASSERT( compare_pattern )("CompareReplace (or SearchReplace) object was not configured before invocation.\n"
+                              "Either call Configure() or supply pattern arguments to constructor.\n"
+                              "Thank you for taking the time to read this message.\n");
+    
 	if( ReadArgs::pattern_graph && ReadArgs::quitafter == 0 )
 	{
         Graph g;
@@ -966,34 +983,40 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 
 SearchReplace::SearchReplace( TreePtr<Node> sp,
                               TreePtr<Node> rp,
-                              bool isroot ) :
-    CompareReplace( sp, rp, isroot )                              
+                              bool im ) :
+    CompareReplace( NULL, NULL, im )                              
 {
+    if( sp )
+        Configure( sp, rp );
+}
+
+
+void SearchReplace::Configure( TreePtr<Node> sp,
+                               TreePtr<Node> rp )
+{                    
+    ASSERT( sp ); // a search pattern is required to configure the engine
+        
     // Make a non-rooted search and replace (ie where the base of the search pattern
     // does not have to be the root of the whole program tree).
     // Insert a Stuff node as root of the search pattern
     TreePtr< Stuff<Scope> > stuff( new Stuff<Scope> );
-    stuff->terminus = compare_pattern;
 
-    if( replace_pattern ) // Is there a replace pattern?
+    if( rp ) // Is there a replace pattern?
     {
         // Insert a Stuff node as root of the replace pattern
         TreePtr< ::Overlay<Node> > overlay( new ::Overlay<Node> );
         stuff->terminus = overlay;
-        overlay->through = compare_pattern;
-        overlay->overlay = replace_pattern;
+        overlay->through = sp;
+        overlay->overlay = rp;
 
-        // Key them together
-        Coupling stuff_match(( stuff ));
-        Coupling overlay_match(( overlay ));
-        couplings.insert( stuff_match );
-        couplings.insert( overlay_match );
-
-        // Configure the rooted implementation with new patterns and couplings
-        replace_pattern = stuff;
+        // Configure the rooted implementation (CompareReplace) with new patterns and couplings
+        CompareReplace::Configure( stuff, stuff );
     }
-    
-    compare_pattern = stuff;
+    else
+    {
+        stuff->terminus = sp;
+        CompareReplace::Configure( stuff );
+    }
 }
 
 
