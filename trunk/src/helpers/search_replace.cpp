@@ -10,7 +10,7 @@ CompareReplace::CompareReplace( TreePtr<Node> cp,
     is_master( im ),                                                 
     compare_pattern( NULL ),
     replace_pattern( NULL ),
-    coupling_keys( new CouplingKeys )
+    coupling_keys( new CouplingKeys )   
 {
     if( cp )
         Configure( cp, rp );
@@ -189,7 +189,7 @@ Result CompareReplace::DecidedCompare( TreePtr<Node> x,
     }
     else if( TreePtr<OverlayBase> op = dynamic_pointer_cast<OverlayBase>(pattern) )
     {
-        // When Overlay node seen duriung search, just forward through the "base" path
+        // When DoOverlay node seen duriung search, just forward through the "base" path
         bool r = DecidedCompare( x, op->GetThrough(), can_key, conj );
         if( r != FOUND )
             return NOT_FOUND;
@@ -555,10 +555,10 @@ void CompareReplace::ClearPtrs( TreePtr<Node> dest ) const
 // Helper for DuplicateSubtree, fills in children of dest node from source node when source node child
 // is non-NULL. This means we can call this multiple times with different sources and get a priority 
 // scheme.
-void CompareReplace::Overlay( TreePtr<Node> dest,
-		                      TreePtr<Node> source,
-		                      bool can_key,
-		                      shared_ptr<Key> current_key ) const
+void CompareReplace::DoOverlay( TreePtr<Node> dest,
+		                        TreePtr<Node> source,
+		                        bool can_key,
+		                        shared_ptr<Key> current_key ) const
 {
 	INDENT;
     ASSERT( source );
@@ -579,7 +579,7 @@ void CompareReplace::Overlay( TreePtr<Node> dest,
 
     TRACE("Overlaying %d members source=%s dest=%s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
 #if 0
-    TRACE("Overlay dest={");
+    TRACE("DoOverlay dest={");
    {    Expand w(dest);
         bool first=true;
         FOREACH( TreePtr<Node> n, w )
@@ -617,13 +617,13 @@ void CompareReplace::Overlay( TreePtr<Node> dest,
         {
             SequenceInterface *dest_seq = dynamic_cast<SequenceInterface *>(dest_memb[i]);
             ASSERT( dest_seq )( "itemise for dest didn't match itemise for source");
-            Overlay( dest_seq, source_seq, can_key, current_key );
+            DoOverlay( dest_seq, source_seq, can_key, current_key );
         }            
         else if( CollectionInterface *source_col = dynamic_cast<CollectionInterface *>(source_memb[i]) )
         {
         	CollectionInterface *dest_col = dynamic_cast<CollectionInterface *>(dest_memb[i]);
             ASSERT( dest_col )( "itemise for dest didn't match itemise for source");
-            Overlay( dest_col, source_col, can_key, current_key );
+            DoOverlay( dest_col, source_col, can_key, current_key );
         }
         else if( TreePtrInterface *source_ptr = dynamic_cast<TreePtrInterface *>(source_memb[i]) )
         {
@@ -664,7 +664,7 @@ void CompareReplace::Overlay( TreePtr<Node> dest,
                 // just duplicate the source (means we only recurse the source).                                
                 if( dest_child && source_child->IsLocalMatch(dest_child.get()) ) // overlaying
                 {
-                     Overlay( dest_child, source_child, can_key, current_key );
+                     DoOverlay( dest_child, source_child, can_key, current_key );
                      ASSERT( dest_child );
                      ASSERT( dest_child->IsFinal() );
                 }
@@ -686,10 +686,10 @@ void CompareReplace::Overlay( TreePtr<Node> dest,
 }
 
 
-void CompareReplace::Overlay( SequenceInterface *dest,
-		                      SequenceInterface *source,
-		                      bool can_key,
-		                      shared_ptr<Key> current_key ) const
+void CompareReplace::DoOverlay( SequenceInterface *dest,
+		                        SequenceInterface *source,
+		                        bool can_key,
+		                        shared_ptr<Key> current_key ) const
 {
 	INDENT;
     // For now, always overwrite the dest
@@ -716,10 +716,10 @@ void CompareReplace::Overlay( SequenceInterface *dest,
 }
 
 
-void CompareReplace::Overlay( CollectionInterface *dest,
-   		                      CollectionInterface *source,
-		                      bool can_key,
-		                      shared_ptr<Key> current_key ) const
+void CompareReplace::DoOverlay( CollectionInterface *dest,
+   		                        CollectionInterface *source,
+		                        bool can_key,
+		                        shared_ptr<Key> current_key ) const
 {
 	INDENT;
     // For now, always overwrite the dest
@@ -837,7 +837,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
             // Base coupled and can be overlayed so overlay. 
             // TODO what if ob->overlay is another soft node? Should we not always DuplicateSubtree()?
             ASSERT( !dynamic_pointer_cast<SpecialBase>( source ) );
-            Overlay( dest, source, can_key, current_key );
+            DoOverlay( dest, source, can_key, current_key );
         }
     }
     else if( dynamic_pointer_cast<SpecialBase>(source) )
@@ -858,10 +858,10 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
             ASSERT(dest);
      
             // Replace all the links in the new node with duplicates of the links in the old node.
-            // To do this we re-use the Overlay function (no point writing 2 very similar functions)
+            // To do this we re-use the DoOverlay function (no point writing 2 very similar functions)
             ClearPtrs( dest ); 
         }
-        Overlay( dest, source, can_key, current_key );
+        DoOverlay( dest, source, can_key, current_key );
 
         // If not substituting a Stuff node, remember this node is dirty for GreenGrass restriction
         // Also dirty the dest if the source was dirty when we are substituting Stuff
@@ -1004,7 +1004,7 @@ void SearchReplace::Configure( TreePtr<Node> sp,
     if( rp ) // Is there a replace pattern?
     {
         // Insert a Stuff node as root of the replace pattern
-        TreePtr< ::Overlay<Node> > overlay( new ::Overlay<Node> );
+        TreePtr< Overlay<Node> > overlay( new Overlay<Node> );
         stuff->terminus = overlay;
         overlay->through = sp;
         overlay->overlay = rp;
@@ -1025,7 +1025,7 @@ string SearchReplace::GetGraphInfo( vector<string> *labels, vector< TreePtr<Node
     // Find the original patterns
     TreePtr< Stuff<Scope> > stuff = dynamic_pointer_cast< Stuff<Scope> >(compare_pattern);
     ASSERT( stuff );
-    TreePtr< ::Overlay<Node> > overlay = dynamic_pointer_cast< ::Overlay<Node> >(stuff->terminus);
+    TreePtr< Overlay<Node> > overlay = dynamic_pointer_cast< Overlay<Node> >(stuff->terminus);
     ASSERT( overlay );
         
     labels->push_back("search");    

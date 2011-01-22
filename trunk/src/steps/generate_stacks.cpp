@@ -10,9 +10,8 @@
 #include "common/common.hpp"
 #include "helpers/soft_patterns.hpp"
 
-void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+GenerateStacks::GenerateStacks()
 {
-    TRACE();
     MakeTreePtr<Instance> fi;
     MakeTreePtr< Overlay<Initialiser> > oinit;
     MakeTreePtr<Subroutine> s_func;
@@ -96,5 +95,5 @@ void GenerateStacks::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     r_ret_dec->operands = ( r_index_identifier );
     r_ret_comp->statements = ( r_ret_dec, ret );
 
-    SearchReplace( fi, fi )( context, proot );
+    SearchReplace::Configure( fi, fi );
 }

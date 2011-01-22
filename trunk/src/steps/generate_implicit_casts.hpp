@@ -10,11 +10,10 @@
 
 #include "helpers/search_replace.hpp"
 
-class GenerateImplicitCasts : public InPlaceTransformation
+class GenerateImplicitCasts : public SearchReplace
 {
 public:
-	using Transformation::operator();
-	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+	GenerateImplicitCasts();
 };
 
 #endif /* GENERATE_IMPLICIT_CASTS_HPP */

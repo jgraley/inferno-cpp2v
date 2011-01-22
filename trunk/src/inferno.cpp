@@ -76,6 +76,11 @@ int main( int argc, char *argv[] )
 
     if( --ReadArgs::quitafter >= 0 )
     {
+        MoveInstanceDeclarations()(&program);
+    }
+
+    if( --ReadArgs::quitafter >= 0 )
+    {
         UseTempsForParamsReturn()(&program);
     }
 

@@ -7,11 +7,10 @@
 
 #include "helpers/search_replace.hpp"
 
-class SlaveTest : public InPlaceTransformation
+class SlaveTest : public SearchReplace
 {
 public:
-	using Transformation::operator();
-	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+	SlaveTest();
 };
 
 #endif

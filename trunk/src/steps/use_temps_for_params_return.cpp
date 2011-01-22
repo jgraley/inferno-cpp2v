@@ -13,10 +13,8 @@
 #include "helpers/misc.hpp"
 
 
-void UseTempsForParamsReturn::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+UseTempsForParamsReturn::UseTempsForParamsReturn()
 {
-	TRACE();
-
     // search for return statement in a compound (TODO don't think we need the outer compound)
 	TreePtr<Return> s_return( new Return );
 	TreePtr< MatchAll<Expression> > s_and( new MatchAll<Expression> );
@@ -49,5 +47,5 @@ void UseTempsForParamsReturn::operator()( TreePtr<Node> context, TreePtr<Node> *
 	r_sub_comp->statements.push_back( r_return );
 	r_return->return_value = id;
        
-	SearchReplace( s_return, r_sub_comp )( context, proot );
+	SearchReplace::Configure( s_return, r_sub_comp );
 }

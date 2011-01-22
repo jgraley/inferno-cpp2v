@@ -7,7 +7,7 @@
 
 // TOOD go through step impls and use inline decls of leaf nodes, to reduce wordiness
 
-void IfToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+IfToIfGoto::IfToIfGoto()
 {
     MakeTreePtr< MatchAll<Statement> > s_and;    
     MakeTreePtr<If> s_if, l_r_if, r_if;
@@ -41,11 +41,11 @@ void IfToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     r_label1->identifier = r_labelid1;
     r_label2->identifier = r_labelid2;
     
-    SearchReplace( s_and, r_comp )( context, proot );
+    SearchReplace::Configure( s_and, r_comp );
 }
 
 
-void SwitchToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+SwitchToIfGoto::SwitchToIfGoto()
 {
     MakeTreePtr<Switch> s_switch;
     MakeTreePtr<Compound> r_comp;
@@ -145,11 +145,11 @@ void SwitchToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     r_decl->initialiser = s_cond;
     r_comp->statements = (r_decl, r_slave3);
     
-    SearchReplace( s_switch, r_comp )( context, proot );
+    SearchReplace::Configure( s_switch, r_comp );
 }
 
 
-void DoToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+DoToIfGoto::DoToIfGoto()
 {
     MakeTreePtr<Do> s_do;
     MakeTreePtr<If> r_if;
@@ -186,10 +186,10 @@ void DoToIfGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     r_if->else_body = r_nop;
     r_goto->destination = r_labelid;
         
-    SearchReplace( s_do, r_comp )( context, proot );
+    SearchReplace::Configure( s_do, r_comp );
 }
 
-void BreakToGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
+BreakToGoto::BreakToGoto()
 {
     MakeTreePtr<Breakable> breakable, sx_breakable;
     MakeTreePtr< Stuff<Statement> > stuff;
@@ -212,5 +212,5 @@ void BreakToGoto::operator()( TreePtr<Node> context, TreePtr<Node> *proot )
     r_comp->statements = (breakable, r_label);
     r_label->identifier = r_labelid;
     
-    SearchReplace( breakable, r_comp )( context, proot );
+    SearchReplace::Configure( breakable, r_comp );
 }

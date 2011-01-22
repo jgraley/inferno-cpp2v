@@ -10,46 +10,40 @@
 
 #include "helpers/search_replace.hpp"
 
-class CleanupCompoundMulti : public InPlaceTransformation
-{
+class CleanupCompoundMulti : public SearchReplace
+{    
 public:
-    using Transformation::operator();
-    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+    CleanupCompoundMulti();
 };
 
-class CleanupCompoundSingle : public InPlaceTransformation
+class CleanupCompoundSingle : public SearchReplace
 {
 public:
-    using Transformation::operator();
-    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+    CleanupCompoundSingle();
 };
 
-class CleanupNop : public InPlaceTransformation
+class CleanupNop : public SearchReplace
 {
 public:
-    using Transformation::operator();
-    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+    CleanupNop();
 };
 
-class CleanupDuplicateLabels : public InPlaceTransformation
+class CleanupDuplicateLabels : public SearchReplace
 {
 public:
-    using Transformation::operator();
-    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+    CleanupDuplicateLabels();
 };
 
-class CleanupIneffectualGoto : public InPlaceTransformation
+class CleanupIneffectualGoto : public SearchReplace
 {
 public:
-    using Transformation::operator();
-    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+    CleanupIneffectualGoto();
 };
 
-class CleanupUnusedLabels : public InPlaceTransformation
+class CleanupUnusedLabels : public SearchReplace
 {
 public:
-    using Transformation::operator();
-    virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+    CleanupUnusedLabels();
 };
 
 #endif 

@@ -10,11 +10,10 @@
 
 #include "helpers/search_replace.hpp"
 
-class GenerateStacks : public InPlaceTransformation
+class GenerateStacks : public SearchReplace
 {
 public:
-	using Transformation::operator();
-	virtual void operator()( TreePtr<Node> context, TreePtr<Node> *proot );
+	GenerateStacks();
 };
 
 #endif /* GENERATE_STACKS_HPP_ */
