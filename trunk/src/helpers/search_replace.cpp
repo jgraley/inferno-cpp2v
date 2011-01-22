@@ -889,9 +889,7 @@ TreePtr<Node> CompareReplace::MatchingDuplicateSubtree( TreePtr<Node> source ) c
 }
 
 
-Result CompareReplace::SingleCompareReplace( TreePtr<Node> *proot,
-                                            TreePtr<Node> compare_pattern,
-                                            TreePtr<Node> replace_pattern ) 
+Result CompareReplace::SingleCompareReplace( TreePtr<Node> *proot ) 
 {
 	TRACE("%p Begin search\n", this);
     
@@ -920,18 +918,14 @@ Result CompareReplace::SingleCompareReplace( TreePtr<Node> *proot,
 // on supplied patterns and couplings. Does search and replace
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
-int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot,
-	                                        TreePtr<Node> compare_pattern,
-	                                        TreePtr<Node> replace_pattern )
+int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
 {
 	dirty_grass.clear();
 
     int i=0;
     while(i<20) // TODO!!
     {
-    	Result r = SingleCompareReplace( proot,
-    			                        compare_pattern,
-    			                        replace_pattern );
+    	Result r = SingleCompareReplace( proot );
     	TRACE("%p result %d", this, r);        
     	if( r != FOUND )
             break;
@@ -952,13 +946,6 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
                               "Either call Configure() or supply pattern arguments to constructor.\n"
                               "Thank you for taking the time to read this message.\n");
     
-	if( ReadArgs::pattern_graph && ReadArgs::quitafter == 0 )
-	{
-        Graph g;
-        g( this );
-        exit(0); // There's nothing - literally NOTHING -left to do
-	}
-
 	// If the initial root and context are the same node, then arrange for the context
 	// to follow the root node as we modify it (in SingleSearchReplace()). This ensures
 	// new declarations can be found in slave searches. We could get the
@@ -971,11 +958,14 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 	else
 		pcontext = &c;
 
-	// Do the search and replace with before and after validation
-	//Validate()( *pcontext, proot ); TODO re-instate for master only
-    (void)RepeatingCompareReplace( proot, compare_pattern, replace_pattern );   
-    //if( !(ReadArgs::intermediate_graph && ReadArgs::quitafter == 0) )
-	 //   Validate()( *pcontext, proot ); // allow broken tree if we're only looking at a graph of it
+	if( is_master )
+        Validate()( *pcontext, proot ); 
+        
+        
+    (void)RepeatingCompareReplace( proot );   
+
+    if( is_master )
+        Validate()( *pcontext, proot ); 
 
     pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
 }

@@ -19,127 +19,80 @@
 
 void SelfTest();
 
+
+void build_sequence( vector< shared_ptr<Transformation> > *sequence )
+{
+    ASSERT( sequence );
+    // Build a vector of transformations, in the order that we will run them
+    // (ordered by hand for now, until the suto sequencer is ready)
+    sequence->push_back( shared_ptr<Transformation>( new BreakToGoto ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new SwitchToIfGoto ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new ForToWhile ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new WhileToDo ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new IfToIfGoto ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new DoToIfGoto ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new GenerateImplicitCasts ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new MoveInstanceDeclarations ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new UseTempsForParamsReturn ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) ); 
+    
+    // These clean-up steps run a few times, because they need to clean up after themselves
+    for( int i=0; i<3; i++ )
+    {
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundSingle ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanupNop ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualGoto ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
+    }        
+}
+
+
 int main( int argc, char *argv[] )
 {
     // Check the command line arguments 
     ReadArgs( argc, argv );
 
+    // Do self-tests (unit tests) if requested
     if( ReadArgs::selftest )
         SelfTest();
-
+    
+    // get the transformations, in sequence, in a vector
+    vector< shared_ptr<Transformation> > sequence;
+    build_sequence( &sequence );
+    
+    // If a pattern graph was requested, generate it now
+    if( ReadArgs::pattern_graph != -1 )
+    {
+        ASSERT( ReadArgs::pattern_graph >= 0 )("Negative step number is silly\n");
+        ASSERT( ReadArgs::pattern_graph < sequence.size() )("There are only %d steps at present\n", sequence.size() );
+        Graph()( sequence[ReadArgs::pattern_graph].get() );
+    }        
+    
+    // If there was no input program then there's nothing more to do
     if( ReadArgs::infile.empty() )
         return 0;
 
+    // Parse the input program
     TreePtr<Node> program = TreePtr<Node>();
     Parse p(ReadArgs::infile);
     p( program, &program );
-              
-    if( --ReadArgs::quitafter >= 0 )
+ 
+    // Apply the transformation steps in order, but quit early if requested to
+    FOREACH( shared_ptr<Transformation> t, sequence )
     {
-        BreakToGoto()(&program);
+        if( ReadArgs::quitafter-- == 0 )
+            break;
+        (*t)( &program );
     }
-
-    if( --ReadArgs::quitafter >= 0 )
-    {
-    	SwitchToIfGoto()(&program);
-    }
-
-    if( --ReadArgs::quitafter >= 0 )
-    {
-    	ForToWhile()(&program);
-    }
-
-    if( --ReadArgs::quitafter >= 0 )
-    {
-        WhileToDo()(&program);
-    }
-
-    if( --ReadArgs::quitafter >= 0 )
-    {
-        IfToIfGoto()(&program);
-    }
-
-    if( --ReadArgs::quitafter >= 0 )
-    {
-        DoToIfGoto()(&program);
-    }
-
-    if( --ReadArgs::quitafter >= 0 )
-    {
-    	GenerateImplicitCasts()(&program);
-    }
-
-    if( --ReadArgs::quitafter >= 0 )
-    {
-        SplitInstanceDeclarations()(&program);
-    }
-
-    if( --ReadArgs::quitafter >= 0 )
-    {
-        MoveInstanceDeclarations()(&program);
-    }
-
-    if( --ReadArgs::quitafter >= 0 )
-    {
-        UseTempsForParamsReturn()(&program);
-    }
-
-    if( --ReadArgs::quitafter >= 0 )
-    {
-    	GenerateStacks()(&program);
-    }
-
-  	for( int i=0; i<3; i++ ) // TODO better way of repeating steps
-	{
-	    if( i==0 )
-			--ReadArgs::quitafter;
-		if( ReadArgs::quitafter >= 0 ) 
-	    {
-	        CleanupCompoundMulti()(&program);
-		}
-
-	    if( i==0 )
-			--ReadArgs::quitafter;
-	    if( ReadArgs::quitafter >= 0 ) 
-		{
-	        CleanupCompoundSingle()(&program);
-		}
-		
-	    if( i==0 )
-			--ReadArgs::quitafter;
-	    if( ReadArgs::quitafter >= 0 ) 
-		{
-	        CleanupNop()(&program);
-		}
-	    if( i==0 )
-			--ReadArgs::quitafter;
-	    if( ReadArgs::quitafter >= 0 ) 
-		{
-	        CleanupDuplicateLabels()(&program);
-		}
-	    if( i==0 )
-			--ReadArgs::quitafter;
-	    if( ReadArgs::quitafter >= 0 ) 
-		{
-	        CleanupIneffectualGoto()(&program);
-		}
-
-	    if( i==0 )
-			--ReadArgs::quitafter;
-	    if( ReadArgs::quitafter >= 0 ) 
-		{
-	        CleanupUnusedLabels()(&program);
-	    }
-    }
-
+    
+    // Output either C source code or a graph, as requested
     if(ReadArgs::intermediate_graph)
-    {
-        Graph()( &program );
-    }
-    else
-    {
-        Render()(&program );
-    }    
+        Graph()( &program );    
+    else    
+        Render()(&program );     
     
     return 0;
 }
