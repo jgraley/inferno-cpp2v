@@ -70,7 +70,7 @@ class SpecialBase;
 class StuffBase;
 class StarBase;
 
-class CompareReplace : virtual InPlaceTransformation, 
+class CompareReplace : virtual public InPlaceTransformation, 
                        Filter // TODO extract Compare, and make that the filter
 {  
 public:
@@ -176,14 +176,9 @@ public:
 private:
     TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x ) const;
     // implementation ring: Do the actual search and replace
-    Result SingleCompareReplace( TreePtr<Node> *proot,
-                                 TreePtr<Node> compare_pattern,
-                                 TreePtr<Node> replace_pattern );
+    Result SingleCompareReplace( TreePtr<Node> *proot );
+    int RepeatingCompareReplace( TreePtr<Node> *proot );
 public:
-    int RepeatingCompareReplace( TreePtr<Node> *proot,
-                                 TreePtr<Node> compare_pattern,
-                                 TreePtr<Node> replace_pattern );
-
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.
     using Transformation::operator();
     void operator()( TreePtr<Node> context, 

@@ -15,10 +15,10 @@ public:
     static std::string infile;
     static std::string outfile;
     static bool intermediate_graph;
-    static bool pattern_graph;
+    static int pattern_graph;
     static bool hack_graph;
     void Usage();
-    std::string GetArg();
+    std::string GetArg( int al=1 );
     ReadArgs( int argc, char *argv[] );
     static bool trace;
     static int quitafter;

@@ -9,7 +9,7 @@ std::string ReadArgs::exename;
 std::string ReadArgs::infile;
 std::string ReadArgs::outfile;
 bool ReadArgs::intermediate_graph = false;
-bool ReadArgs::pattern_graph = false;
+int ReadArgs::pattern_graph = -1; // -1 disables
 bool ReadArgs::hack_graph = false;
 bool ReadArgs::trace = false;
 bool ReadArgs::selftest = false;
@@ -25,20 +25,20 @@ void ReadArgs::Usage()
     		        "-o<outfile> Write output program to <outfile>. C/C++ by default. Writes to stdout if omitted.\n"
     		        "-t          Turn on tracing internals (very verbose).\n"
     		        "-s          Run self-tests.\n"
+                    "-q<n>       Stop after <n> steps. <n> may be 0 to exercise just parser and renderer.\n"
 	                "-gi         Generate Graphviz graphs for output or intermediate if used with -q.\n"
-	                "-gp         Generate Graphviz graphs for search/replace patterns.\n"
-	                "-q<n>       Stop after <n> steps. <n> may be 0 to exercise just parser and renderer.\n"
+	                "-gp<n>      Generate Graphviz graphs for transformation step n.\n"
                     "\n"
-    		        "One of -i or -s required; all others are optional.\n",
+    		        "One of -i, -s or -gp required; all others are optional.\n",
     		        exename.c_str() );
     exit(1);
 }
 
-std::string ReadArgs::GetArg()
+std::string ReadArgs::GetArg( int al )
 {
-    if( strlen(argv[curarg]) > 2 )
+    if( strlen(argv[curarg]) > al+1 )
     {
-        return std::string( argv[curarg]+2 );
+        return std::string( argv[curarg]+al+1 );
     }
     else
     {
@@ -79,7 +79,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         	if( option2=='i' )
         	    intermediate_graph = true;
         	else if( option2=='p' )
-        		pattern_graph = true;
+        		pattern_graph = strtoul( GetArg(2).c_str(), NULL, 10 );
         	else
         		Usage();
 
@@ -102,6 +102,6 @@ ReadArgs::ReadArgs( int ac, char *av[] )
     }    
     
     // infile or selftest is always required
-    if( infile.empty() && !selftest )
+    if( infile.empty() && !selftest && pattern_graph==-1 )
         Usage();
 }
