@@ -10,6 +10,8 @@
 
 #include "helpers/search_replace.hpp"
 
+// Replace automatic variables with staks based on arrays and 
+// maintain the stack pointer correctly, supporting recursion.
 class GenerateStacks : public SearchReplace
 {
 public:

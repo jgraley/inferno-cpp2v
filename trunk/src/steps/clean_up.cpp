@@ -14,6 +14,8 @@
 CleanupCompoundMulti::CleanupCompoundMulti() // LIMITAION: decls in body not allowed
 {
      // {x;{a;b;c}y} -> {x;a;b;c;y}
+     // Find a compound block as a statement in another compound block. 
+     // Merge the decls and insert the statements in the correct sequence..
     MakeTreePtr<Compound> s_inner, s_outer, r_comp;
     MakeTreePtr< Star<Statement> > s_pre, s_post, s_body;
     MakeTreePtr< Star<Declaration> > s_inner_decls, s_outer_decls;
@@ -31,6 +33,9 @@ CleanupCompoundMulti::CleanupCompoundMulti() // LIMITAION: decls in body not all
 
 CleanupCompoundSingle::CleanupCompoundSingle() 
 {
+    // Find a compound block with no decls and one statemewnt. Replace
+    // with just the statement
+    //
     //{a} -> a TODO need to restrict parent node to Statement: For, If etc OK; Instance is NOT OK
     //         TODO OR maybe just fix renderer for that case
     // Note: this hits eg If(x){a;} which the "Multi" version misses 
@@ -43,10 +48,10 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     SearchReplace::Configure( s_comp, body );
 }
 
-
 CleanupNop::CleanupNop() 
 {
-    // remove nop
+    // Find compound block with Nop in it, replace has the Nop removed.
+    // Note: Nop is a no-effect statement, sort-of like ; on its own.
     MakeTreePtr<Compound> s_comp, r_comp;
     MakeTreePtr<Nop> s_nop;
     MakeTreePtr< Star<Declaration> > decls;
@@ -63,7 +68,21 @@ CleanupNop::CleanupNop()
 
 CleanupDuplicateLabels::CleanupDuplicateLabels()
 {
-    // remove duplicate (sucessive) labels 
+    // Search for a function that contains a compound block that has 
+    // two labels in succession. Replace the pair of labels with a single
+    // one called MERGED.
+    //
+    // Using a slave, find references to either one of the original labels 
+    // and replace by a reference to the MERGED label.
+    //
+    // Notes:
+    // - The slave must operate over the entire function, not just the 
+    // compound that containes the labels, because labels have function 
+    // scope and the gotos can be anywhere.
+    // - Do not assume the usages of the labels will be gotos. We support
+    // GCCs goto-a-variable extension in which case a label could be 
+    // on the right of an assignment.
+    
     MakeTreePtr<Instance> s_instance, r_instance;
     MakeTreePtr< Stuff<Statement> > stuff;
     MakeTreePtr< Overlay<Statement> > overlay;
@@ -104,7 +123,9 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
 
 CleanupIneffectualGoto::CleanupIneffectualGoto()
 {
-    // remove goto X before X:
+    // Find a compound containing a Goto and a Label where the 
+    // goto goes to the label. Remove the Goto (but not the Label
+    // since there may be other Gotos to it).
     MakeTreePtr<Compound> s_comp, r_comp;
     MakeTreePtr<Goto> s_goto;
     MakeTreePtr<Label> s_label, r_label;
@@ -126,7 +147,15 @@ CleanupIneffectualGoto::CleanupIneffectualGoto()
 
 CleanupUnusedLabels::CleanupUnusedLabels()
 {
-    // remove unused labels
+    // Find a function that contains a compound that contains
+    // a label. Use an and-not rule to exclude any usages of the 
+    // label. Replace the compound with one that does not have the
+    // label. 
+    //
+    // Usages are detected by searching for the label's identifier
+    // using a recurse restriction that prevents recusing through
+    // the Label node, thus excluding the declaration which we want
+    // to ignore.
     MakeTreePtr<Instance> s_instance, r_instance;
     MakeTreePtr< Stuff<Statement> > stuff, sx_stuff;
     MakeTreePtr< Overlay<Statement> > overlay;

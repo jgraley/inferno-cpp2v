@@ -12,6 +12,18 @@
 
 GenerateStacks::GenerateStacks()
 {
+    // Search for a function and require it to have at least one automatic
+    // variable using an and rule. Add a stack index variable (static) to the 
+    // function. Increment at the beginning of the function body and decrement 
+    // at the end. 
+    //
+    // Use a slave to find automatic variables in the function. Replace them
+    // with arrays of the same type. Using another slave, add a decrement of
+    // the stack pointer before any return statements.
+    //
+    // Using a sub-slave of the variable-finding slave, look for usages of 
+    // the variable. Replace with an indexing operation into the array using
+    // the stack index.    
     MakeTreePtr<Instance> fi;
     MakeTreePtr< Overlay<Initialiser> > oinit;
     MakeTreePtr<Subroutine> s_func;

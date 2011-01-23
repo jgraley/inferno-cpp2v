@@ -3,7 +3,9 @@
 
 SplitInstanceDeclarations::SplitInstanceDeclarations()
 {
-	// Do initialised local variables by leaving an assign behind
+	// Match a compound with an ini9tialised decl in the statements. Replace
+    // with an uninitialised decl and an assign. Put the new decl in the 
+    // decls section of the compound.
     MakeTreePtr<Compound> sc;
     MakeTreePtr<LocalVariable> si;
     MakeTreePtr< Overlay<LocalVariable> > over;
@@ -30,20 +32,16 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
 	
 MoveInstanceDeclarations::MoveInstanceDeclarations()
 {	
-	// Do everything else by just moving to the decls collection
+	// Just move the decl to the decls collection
     MakeTreePtr<Compound> sc;
-    MakeTreePtr<LocalVariable> si;
-    MakeTreePtr< Overlay<LocalVariable> > over;
+    MakeTreePtr<LocalVariable> var;
     MakeTreePtr< Star<Declaration> > decls;
     sc->members = ( decls );
     MakeTreePtr< Star<Statement> > pre, post;
-    sc->statements = ( pre, over, post );
+    sc->statements = ( pre, var, post );
 
     MakeTreePtr<Compound> rc;
-    MakeTreePtr<LocalVariable> ri;
-    over->through = si;
-    over->overlay = ri;
-    rc->members = ( over, decls ); // Instance now in unordered decls part
+    rc->members = ( var, decls ); // Instance now in unordered decls part
     rc->statements = ( pre, post );
 
     SearchReplace::Configure(sc, rc);

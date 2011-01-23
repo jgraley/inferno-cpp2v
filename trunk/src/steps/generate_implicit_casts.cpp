@@ -13,6 +13,15 @@
 
 GenerateImplicitCasts::GenerateImplicitCasts()
 {
+    // Find a function call and use TypeOf to get the fucntion's declaration.
+    // Select a single argument. Inforno does arguments via a map (as opposed
+    // to ordering) and we couple the keys to an InstanceIdentifier widcard 
+    // in order to ensure we are always talking about the same argument.
+    //
+    // Restrict the search to argument expressions whose type (TypeOf again)
+    // does not match the type of the param in the declaration. Then we can 
+    // simply insert a cast to the declaration param type at the root of the 
+    // expression.
 	MakeTreePtr<Call> s_call;
 	MakeTreePtr<TypeOf> callee;
 	s_call->callee = callee;
