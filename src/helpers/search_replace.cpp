@@ -126,13 +126,13 @@ void CompareReplace::Configure( TreePtr<Node> cp,
 } 
 
 
-string CompareReplace::GetGraphInfo( vector<string> *labels, vector< TreePtr<Node> > *links ) const
+void CompareReplace::GetGraphInfo( vector<string> *labels, 
+                                   vector< TreePtr<Node> > *links ) const
 {
     labels->push_back("compare");
     links->push_back(compare_pattern);
     labels->push_back("replace");
     links->push_back(replace_pattern);
-    return "CompareReplace";
 }
 
 
@@ -1010,7 +1010,8 @@ void SearchReplace::Configure( TreePtr<Node> sp,
 }
 
 
-string SearchReplace::GetGraphInfo( vector<string> *labels, vector< TreePtr<Node> > *links ) const
+void SearchReplace::GetGraphInfo( vector<string> *labels, 
+                                  vector< TreePtr<Node> > *links ) const
 {
     // Find the original patterns
     TreePtr< Stuff<Scope> > stuff = dynamic_pointer_cast< Stuff<Scope> >(compare_pattern);
@@ -1022,7 +1023,6 @@ string SearchReplace::GetGraphInfo( vector<string> *labels, vector< TreePtr<Node
     links->push_back(overlay->through);
     labels->push_back("replace");
     links->push_back(overlay->overlay);
-    return "SearchReplace";
 }
     
     

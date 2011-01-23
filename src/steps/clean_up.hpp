@@ -10,30 +10,36 @@
 
 #include "helpers/search_replace.hpp"
 
+// Find compound statements inside compund statements and flatten
 class CleanupCompoundMulti : public SearchReplace
 {    
 public:
     CleanupCompoundMulti();
 };
 
+// Find compound blocks with only a single statement, and flatten
 class CleanupCompoundSingle : public SearchReplace
 {
 public:
     CleanupCompoundSingle();
 };
 
+// Get rid of Nops
 class CleanupNop : public SearchReplace
 {
 public:
     CleanupNop();
 };
 
+// Simplify the case where two lables appear together and are therefore 
+// duplicates. Just have one label.
 class CleanupDuplicateLabels : public SearchReplace
 {
 public:
     CleanupDuplicateLabels();
 };
 
+// Find a goto to a lable just before the label, and remove the goto
 class CleanupIneffectualGoto : public SearchReplace
 {
 public:

@@ -10,12 +10,16 @@
 
 #include "helpers/search_replace.hpp"
 
+// Convert for loops into while loops, preserving correct 
+// behaviour of continue, which always means "jump to the 
+// bottom of the body"
 class ForToWhile : public SearchReplace
 {
 public:
 	ForToWhile();
 };
 
+// Convert While loops to Do loops
 class WhileToDo : public SearchReplace
 {
 public:

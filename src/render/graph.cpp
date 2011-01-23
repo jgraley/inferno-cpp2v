@@ -115,7 +115,9 @@ string Graph::Traverse( Transformation *sr, string id, bool links_pass )
         virtual bool IsMatch( TreePtr<Node> context,
                               TreePtr<Node> root )
         {
-            return !dynamic_cast<Transformation*>(root.get());
+            return !( !dynamic_pointer_cast<TransformToBase>(root) && 
+                      !dynamic_pointer_cast<BuildIdentifierBase>(root) && 
+                      dynamic_cast<Transformation*>(root.get()) );
         }
     } no_tx_filter;
     
@@ -141,17 +143,24 @@ string Graph::Traverse( Transformation *sr, string id, bool links_pass )
 
 string Graph::DoTransformation( Transformation *sr,
 		                        string id )
-{
-    string name;
+{    
     vector<string> labels;
     vector< TreePtr<Node> > links;
-    name = sr->GetGraphInfo( &labels, &links );
+    sr->GetGraphInfo( &labels, &links );
+        
+    string name = *sr; 
+    int n;
+    for( n=0; n<name.size(); n++ )
+    {
+        if( name[n] == '<' )        
+            name = name.substr( 0, n );
+    }
         
     string s;
 	s += id;
 	s += " [\n";
 
-    s += "label = \"<fixed> " + name;
+    s += "label = \"<fixed> " + Sanitise( name );
 	for( int i=0; i<labels.size(); i++ )        
 		s += " | <" + labels[i] + "> " + labels[i];
 	s += "\"\n";
@@ -169,7 +178,7 @@ string Graph::DoTransformationLinks( Transformation *sr, string id )
 {
     vector<string> labels;
     vector< TreePtr<Node> > links;
-    (void)sr->GetGraphInfo( &labels, &links );
+    sr->GetGraphInfo( &labels, &links );
 
     string s;
     for( int i=0; i<labels.size(); i++ )        

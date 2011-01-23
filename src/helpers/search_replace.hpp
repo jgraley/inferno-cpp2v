@@ -113,8 +113,8 @@ public:
     shared_ptr< CouplingKeys > coupling_keys;
     mutable set< TreePtr<Node> > dirty_grass;
 
-    virtual string GetGraphInfo( vector<string> *labels, 
-                                 vector< TreePtr<Node> > *links ) const;
+    virtual void GetGraphInfo( vector<string> *labels, 
+                               vector< TreePtr<Node> > *links ) const;
 
 private:
     // LocalCompare ring
@@ -210,8 +210,8 @@ public:
     void Configure( TreePtr<Node> sp,
                     TreePtr<Node> rp = TreePtr<Node>() );                 
                     
-    virtual string GetGraphInfo( vector<string> *labels, 
-                                 vector< TreePtr<Node> > *links ) const;
+    virtual void GetGraphInfo( vector<string> *labels, 
+                               vector< TreePtr<Node> > *links ) const;
 };
 
 
@@ -269,12 +269,12 @@ struct SlaveIntermediate : public SlaveBase, public ALGO
             ALGO::couplings.insert( c ); 
         ALGO::coupling_keys = ck; 
     }
-    virtual string GetGraphInfo( vector<string> *labels, vector< TreePtr<Node> > *links ) const
+    virtual void GetGraphInfo( vector<string> *labels, 
+                               vector< TreePtr<Node> > *links ) const
     {
         labels->push_back("through");
         links->push_back(GetThrough());
-        string bn = ALGO::GetGraphInfo( labels, links );
-        return "Slave" + bn;
+        ALGO::GetGraphInfo( labels, links );
     }
 };
 

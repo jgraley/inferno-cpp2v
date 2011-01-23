@@ -2,8 +2,9 @@
 #define TRANSFORMATION_HPP
 
 #include "tree/generics.hpp"
+#include "common/trace.hpp"
 
-class Transformation
+class Transformation : public Traceable
 {
 public:
     // Apply this transformation to tree at root, using context for decls etc.
@@ -28,9 +29,9 @@ public:
     
     // Provide information for the graph plotter, so it can draw the tx as a node
     // with 0 or more links to TreePtrs
-    virtual string GetGraphInfo( vector<string> *labels, vector< TreePtr<Node> > *links ) const 
+    virtual void GetGraphInfo( vector<string> *labels, 
+                               vector< TreePtr<Node> > *links ) const 
     {
-        return "Transformation";
     }
 };
 

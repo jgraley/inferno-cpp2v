@@ -9,6 +9,11 @@
 
 IfToIfGoto::IfToIfGoto()
 {
+    // Identify a general if statements and build a compuond with the usual
+    // laep-frogging gotos. Since we are converting from a general kind of if
+    // to a more specific kind (the condiitonal goto pattern) we have to 
+    // exclude the conditional goto explicitly using and-not in the search 
+    // pattern. Otherwise we would spin forever expanding them over and over.
     MakeTreePtr< MatchAll<Statement> > s_and;    
     MakeTreePtr<If> s_if, l_r_if, r_if;
     MakeTreePtr<Statement> body, else_body;
@@ -47,6 +52,19 @@ IfToIfGoto::IfToIfGoto()
 
 SwitchToIfGoto::SwitchToIfGoto()
 {
+    // Add a surrounding compound that declares a variable switch_value which 
+    // will hold the value passed to switch. Using slaves, replace case/default 
+    // with ordinary labels and, for each one, add a conditional goto (plain goto
+    // for default) at the top of the funciton. Condition tests switch_value
+    // against the case value or range where GCC's range-case has been used.
+    //
+    // The order in which we do things is important. We insert the gotos and 
+    // conditional gotos at the top of the block, so that they appear in 
+    // reverse order of the order in which we inserted them. We want the 
+    // plain goto that default produces to be at the bottom, so we do it last.
+    //
+    // The order of the conditional gotos that result from cases should not matter
+    // because cases should not overlap. 
     MakeTreePtr<Switch> s_switch;
     MakeTreePtr<Compound> r_comp;
     MakeTreePtr<Statement> body;
@@ -151,6 +169,13 @@ SwitchToIfGoto::SwitchToIfGoto()
 
 DoToIfGoto::DoToIfGoto()
 {
+    // Create a compound block, put the body of the loop in there with a Label
+    // at the top and a conditional goto (if(x) goto y;) at the bottom, using the
+    // same expression as the Do. continue just becomes a Goto directly to the If.
+    //
+    // We prevent the continue transformation from acting on continues in nested 
+    // blocks using the same method as seen in BreakToGoto. 
+    
     MakeTreePtr<Do> s_do;
     MakeTreePtr<If> r_if;
     MakeTreePtr<Statement> body;
@@ -191,6 +216,12 @@ DoToIfGoto::DoToIfGoto()
 
 BreakToGoto::BreakToGoto()
 {
+    // We determine the right block to exit by:
+    // 1. Creating an intermediate node Breakable, which is a base for 
+    //    Switch and Loop (and hence For, While, Do). We search for this.
+    // 2. The Break is reached via a Stuff node whose recurse 
+    //    restriction is set to not recurse through any Breakable
+    //    blocks, so we won't find a Break that is not for us.
     MakeTreePtr<Breakable> breakable, sx_breakable;
     MakeTreePtr< Stuff<Statement> > stuff;
     MakeTreePtr< Overlay<Statement> > overlay;

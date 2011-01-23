@@ -12,6 +12,22 @@
 
 ForToWhile::ForToWhile()
 {
+    // Add new compunds inside and outside the While node, and place the For
+    // node's statements and expressions in the appropriate places.
+    //
+    // Deal with continue by inserting a copy of the increment just before the 
+    // continue, and leave the continue in place. This avoids the need for 
+    // gotos in case that matters. Not ideal if the increment statement 
+    // is huge. 
+    //
+    // Avoid matching continues that don't belong to use by using a recurse 
+    // restriction, like in BreakToGoto.
+    //
+    // We have to use the GreenGrass hack to prevent the slave spinning 
+    // forever. The continue in the slave search pattern has a GreenGrass
+    // node under it indicating that it must be from the input program and
+    // not one we just inserted on an earlier iteration.
+    
 	MakeTreePtr<For> s_for;
     MakeTreePtr<Statement> forbody, inc, init;
     MakeTreePtr<Expression> cond;
@@ -50,6 +66,8 @@ ForToWhile::ForToWhile()
 
 WhileToDo::WhileToDo()
 {
+    // Just need to insert an "if" statement for the case 
+    // where there are 0 iterations.
 	MakeTreePtr<While> s_while;
     MakeTreePtr<Statement> body;
     MakeTreePtr<Expression> cond;
