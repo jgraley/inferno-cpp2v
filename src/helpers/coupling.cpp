@@ -133,7 +133,7 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 	if( keys_map[pattern] )
 	{
 		// Always substitute
-		TRACE("substituting ");
+		TRACE("substituting\n");
 		ASSERT( keys_map[pattern] );
 		keys_map[pattern]->replace_pattern = pattern; // Only fill this in while substituting under the node
 		TreePtr<Node> subs = sr->DuplicateSubtree( keys_map[pattern]->root, can_key, keys_map[pattern] ); // Enter substitution

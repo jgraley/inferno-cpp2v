@@ -74,7 +74,6 @@ Tracer &Tracer::operator()(const char *fmt, ...)
     if( (flags & DISABLE) || !(tracing || (flags & FORCE)) )
         return *this;
 
-    int auto_variable;
     va_list vl;
     va_start( vl, fmt );
     if( !continuation ) 
@@ -83,7 +82,7 @@ Tracer &Tracer::operator()(const char *fmt, ...)
         //for( int i=0; i<spaces; i++ )
        //     printf(" ");
     	Descend::Indent();
-        printf( "----%s:%d in %s() sp %p\n", file, line, function, &auto_variable);
+        printf( "----%s:%d in %s()\n", file, line, function);
         Descend::Indent();
     }
     vprintf( fmt, vl );
