@@ -3,6 +3,8 @@
 #include "render/graph.hpp" //  for graphing patterns
 #include "conjecture.hpp"
 
+//#define STRACE
+
 // Master constructor remembers search pattern, replace pattern and any supplied couplings as required
 CompareReplace::CompareReplace( TreePtr<Node> cp,
                                 TreePtr<Node> rp,
@@ -322,11 +324,6 @@ Result CompareReplace::DecidedCompare( SequenceInterface &x,
 	    }
 	    else // not a Star so match singly...
 	    {
-	    	TRACE("Not a star, x=")
-	    	     (**xit)
-	    	     (" pattern=")
-	    	     (*pe)
-	    	     ("\n");
 			// If there is one more element in x, see if it matches the pattern
 			//TreePtr<Node> xe( x[xit] );
 			if( xit != x.end() && DecidedCompare( *xit, pe, can_key, conj ) == FOUND )
@@ -563,22 +560,7 @@ void CompareReplace::DoOverlay( TreePtr<Node> dest,
 	INDENT;
     ASSERT( source );
     ASSERT( dest );
-    ASSERT( source->IsLocalMatch(dest.get()) )
-    ("source=")
-    (*source)
-    (" must be a non-strict superclass of destination=")
-    (*dest)
-    (", so that it does not have more members");
-
-    // Itemise the members. Note that the itemiser internally does a
-    // dynamic_cast onto the type of source, and itemises over that type. dest must
-    // be dynamic_castable to source's type.
-    vector< Itemiser::Element * > source_memb = source->Itemise();
-    vector< Itemiser::Element * > dest_memb = source->Itemise( dest.get() ); // Get the members of dest corresponding to source's class
-    ASSERT( source_memb.size() == dest_memb.size() );
-
-    TRACE("Overlaying %d members source=%s dest=%s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
-#if 0
+#ifdef STRACE
     TRACE("DoOverlay dest={");
    {    Expand w(dest);
         bool first=true;
@@ -604,6 +586,22 @@ void CompareReplace::DoOverlay( TreePtr<Node> dest,
         TRACE("}\n"); // TODO put this in as a common utility somewhere
    }
 #endif   
+    
+    ASSERT( source->IsLocalMatch(dest.get()) )
+    ("source=")
+    (*source)
+    (" must be a non-strict superclass of destination=")
+    (*dest)
+    (", so that it does not have more members");
+
+    // Itemise the members. Note that the itemiser internally does a
+    // dynamic_cast onto the type of source, and itemises over that type. dest must
+    // be dynamic_castable to source's type.
+    vector< Itemiser::Element * > source_memb = source->Itemise();
+    vector< Itemiser::Element * > dest_memb = source->Itemise( dest.get() ); // Get the members of dest corresponding to source's class
+    ASSERT( source_memb.size() == dest_memb.size() );
+
+    TRACE("Overlaying %d members source=%s dest=%s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
     // Loop over all the members of source (which can be a subset of dest)
     // and for non-NULL members, duplicate them by recursing and write the
     // duplicates to the destination.
@@ -638,25 +636,25 @@ void CompareReplace::DoOverlay( TreePtr<Node> dest,
                 ASSERT( !dest_child )("substitution should just be a copy, so dest should be NULL");
                 ASSERT( source_child )("substitution should just be a copy, so source should be non-NULL");
             }
-            ASSERT( source_child || dest_child )
+/*            ASSERT( source_child || dest_child )
                   ("When overlaying ")
                   (*source)
                   (" over ")
                   (*dest)
                   (", found a member that is NULL in both (one must be non-NULL)\n");
-            
+  */          
             // This avoids linking into the replace pattern AND to allow couplings to get 
             // substituted. 
             if( source_child ) 
                 source_child = DuplicateSubtree( source_child, can_key, current_key );
             
-            ASSERT( (source_child && source_child->IsFinal()) || (dest_child && dest_child->IsFinal()) )
+/*            ASSERT( (source_child && source_child->IsFinal()) || (dest_child && dest_child->IsFinal()) )
                   ("When overlaying ")
                   (*source)
                   (" over ")
                   (*dest)
                   (", found a member that is intermediate in both (one must be final) even after substitution\n");
-            
+  */          
             if( source_child ) // Masked: where source is NULL, do not overwrite
             {
                 // General overlaying policy: if the current child nodes of the source and dest are
@@ -682,6 +680,20 @@ void CompareReplace::DoOverlay( TreePtr<Node> dest,
             ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
         }
     }
+#ifdef STRACE
+    TRACE("DoOverlay result={");
+   {    Expand w(dest);
+        bool first=true;
+        FOREACH( TreePtr<Node> n, w )
+        {
+            if( !first )
+                TRACE(", ");
+            TRACE( n ? *n : string("NULL"));
+            first=false;
+        }
+        TRACE("}\n"); // TODO put this in as a common utility somewhere
+   }
+#endif    
     ASSERT( dest );
 }
 
@@ -759,7 +771,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
 {
 	INDENT;
  	TRACE("Duplicating %s under_substitution=%p\n", ((string)*source).c_str(), current_key.get());
-#if 0
+#ifdef STRACE
     TRACE("DuplicateSubtree source={");
 	    Expand w(source);
 	    bool first=true;
@@ -827,17 +839,20 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
     else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
     {
         source = ob->GetOverlay();
-        if( !dest || !source->IsLocalMatch(ob->GetThrough().get()) )
+        TreePtr<Node> overlay = DuplicateSubtree( source, can_key, current_key );
+        if( !dest || !overlay->IsLocalMatch(ob->GetThrough().get()) )
         {
             // Base not coupled or is not compatible for overlaying, so just duplicate the overlay leg.
-            dest = DuplicateSubtree( source, can_key, current_key );
+            TRACE("Overlay node doing duplicate\n");
+            dest = overlay;
         }
         else
         {
             // Base coupled and can be overlayed so overlay. 
             // TODO what if ob->overlay is another soft node? Should we not always DuplicateSubtree()?
+            TRACE("Overlay node doing overlay\n");
             ASSERT( !dynamic_pointer_cast<SpecialBase>( source ) );
-            DoOverlay( dest, source, can_key, current_key );
+            DoOverlay( dest, overlay, can_key, current_key );
         }
     }
     else if( dynamic_pointer_cast<SpecialBase>(source) )
@@ -922,18 +937,24 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
 {
 	dirty_grass.clear();
 
+    TRACE("begin RCR %p\n", this);
+    Result r=NOT_FOUND;
     int i=0;
-    while(i<20) // TODO!!
+    for(i=0; i<ReadArgs::repetitions; i++) 
     {
-    	Result r = SingleCompareReplace( proot );
-    	TRACE("%p result %d", this, r);        
+    	r = SingleCompareReplace( proot );
+    	TRACE("%p SCR result %d", this, r);        
     	if( r != FOUND )
-            break;
+            break; // when the compare fails, we're done
        // Validate()( *pcontext, proot );
-       	//ASSERT(i<100)("Too many hits"); JSG validate can fail due to a missing decl, but maybe master puts it in...?
-        i++;
     }
-
+    
+    if( r==FOUND )
+    {
+        TRACE("Over %d reps\n",i); 
+        ASSERT(!ReadArgs::rep_error)("Still getting matches after %d repetitions, may be repeating forever.\nTry using -r\n", i);
+    }
+        
     TRACE("%p exiting", this);
     return i;
 }
