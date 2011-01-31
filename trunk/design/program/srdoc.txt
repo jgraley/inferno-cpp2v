@@ -211,20 +211,114 @@ For example, if a replace pattern is to contain a new variable, and that variabl
 Usages of the new variable elsewhere in the replace pattern can just couple directly to the BuildInstanceIdentifier node.
 
 9 CompareReplace
+
+As an alternative to SearchReplace, we can use the CompareReplace class. This has a compare pattern and a replace pattern, supplied as parameters to the constructor or via Configure(). It will compare the supplied input tree with the supplied compare pattern, but only at the root, i.e. it will not walk the supplied input tree searching for a match. The replace pattern will be applied at root, so it will replace the entire supplied tree except where couplings are used (CompareReplace supports couplings and all the special nodes in exactly the same way as SearchReplace does).
+
+Typically, a program tree will begin with the Program node so the compare pattern should match the Program node (which is a kind of Scope). Alternatively, it may be used as a slave, as explained below.
+
 9.1 Note on implementation
 
+The bulk of the implementation of the search and replace algorithm is actually inside CompareReplace, since ComapreReplace solves a conceptually simpler problem. Because CompareReplace supports couplings and special nodes, it is possible to emulate SearchReplace functionality by using a Stuff node and an Overlay node at the root of the patterns. This is exactly what SearchReplace actually does: at configure time, it constructs Stuff<Scope>(Overlay<Node>(through:user's search pattern, overlay:user's replace pattern) ) and supplies this as both compare pattern and replace pattern to ComapreReplace. The Stuff<Scope> is coupled and serves to reproduce the portion of input program outside the matched subtree into the output program. This is meant to be invisible to the user, but could be relevent when debugging.
+
 10 Slave search and replace
+
+It can be useful to build a 1:n relationship between two search and replace patterns. For example, we may wish to perform a transformation on a variable that affects the declaration and all the usages of the variable. In this example, we would want each match to a variable's declaration (the master) to correpond with n matches to usages (the slaves), where n can be zero or more.
+
+This is achieved by constructing the search and replace pattens for the master (the variable declaration in the example) and then placing a special node called SlaveSearchReplace into the master's replace pattern. The SlaveSearchReplace node is filled in with search and replace patterns for the slave (a usage of the variable in the example). For each match that master finds, the slave will operate repeatedly and will perform zero or more replace operations depending on how many matches it finds.
+
+SlaveSearchReplace has three members: through, which simply points to the remainder of the master's replace pattern, and search and replace which specify the slave's behaviour as documented for SearchReplace. You can also use SlaveCompareReplace, which has through, compare and replace members and behaves as per CompareReplace described above.
+
+What makes slaves useful (as opposed to just running the program through the master and then the slave as two seperate transformations) is the ability to restrict what the slave can match based on the context of a particular match in the master. This is achieved in two ways:
+
+1. Nodes in the slave search pattern may be coupled into nodes in the master pattern. Each such coupling must be keyed in the master (that is, it must include a node in a normal context in the master search pattern or a builder node in the master replace pattern). In the example, the variable modified by the master would be coupled into the slave to ensure it finds usages of only the corresponding variable.
+
+2. The slave node is placed within the master replace pattern. The through member is simply used to continue the master pattern below the position of the slave. The slave will only match at (SlaveCompareReplace) or under (SlaveSearchReplace) the position where it is found in the master replace pattern. In the example, the slave pattern could be placed inside the scope containing the variable's declaration, to restrict matches to that scope.
+
+Note: in this example, placing the slave in the scope is not necessary because a coupling of the variable provides the require resatriction (though this might serve as an optimisation). In other cases, such as detection of Break and Continue there is nothing to couple to: then, only the placement method can restrict the slave sufficiently.
+
 10.1 Nested
 
+It is possible to use more than one slave in a pattern, they appear nested (that is as direct or indirect children of each other) and can nest in two distinct ways:
+
+1. A second slave may be placed under the through member of the first. These slaves are conceptually at the same level, and the nesting just defines the order in which they operate: child first. Both slave patterns operate for each match of the master in the prescribed order.
+
+2. A second slave may be placed under the replace pattern of the first. This creates a sub-slave, which has the relationship described above to the first slave (so the first slave now acts as master to the second). The second slave acts for each match of the first. Overall, we get a 1:n:nm type of relationship.
+
+Note: having these two nesting options is confusing: the first style looks too much like the second and can be easily confused when reading graphs, so it's important to look out for this.
+
 11 Spinning protection
-11.1 GreenGrass node
-11.2 Reducing patterns
-11.3 "But" pattern
-One common case is where MatchAll is paired with MotMatch node in the form MatchAll( X, NotMatch(Y) ). This provides an and-not or but-not type of restriction, which can be useful to prevent degenerate no-change replace cases that would cause the engine not to terminate.
+
+As described above, SearchReplace and CompareReplace act repeatedly until no further matches are found. This mans the output program tree of a search and replace operation (that terminates) does not match the search pattern. This is a reliable post-invariant and serves the concept of Inferno as a principally reductive or goal-seeking algorithm. However, it is possible to create patterns that would repeat forever if every replace action creates another match. For this reason, any algorithm that re-tries a subtree that has been affected by a replace could spin forever.
+
+Some search and replace solutions guarantee termination by for example traversing the input program exactly once while looking for matches on the way. These can suffer from missed matches when the replace action creates a match that was not present during the initial traversal. This may be considered correct, but it's usefulness is reduced by the lack of a post-invariant - systems would be difficult to debug when unexpected constructs appear in output programs. 
+
+Some existing solutions permit a choice of traversal modes: depth-first etc. Making this choice correctly (based on your patterns) can ensure compete coverage, but since this choice is a single choice appliked to an entire pattern, it acts to segregate patterns into non-overlapping categories. Such a segragation does not appear to correpsond to anything fundamental (I could be wrong).
+
+As a practical matter, a (buggy) search and replace pattern that spins forever may be frustrating, particularly since spinning may only be observed on certain test vectors. However, debugging this scenario is actually more straightforward than the alternative scenario of debugging a pattern that does not match due to traversal rules and thereby breaks the post-invariant condition (in my opinion). 
+
+Typically, one uses the -rn<x> option to permit repeating some finite number of times before terminating without error. In the resulting output program, the results of many (say 10 to 100) repetitions of the pattern should be obvious (in graphs and c renders piped though iindent.sh, the repeating portion will usually be found further to the right than the remainder of the program). 
+
+There follow some methods for preventing spinning - these must be appled seperately to the master and to any slaves. This is unlikely to be a complate list.
+
+11.1 Reducing patterns
+
+Any replace pattern that strictly reduces the number of nodes in the tree for each hit, must eventually terminate. We and estimate whether a pattern has this property by counting the number of non-special nodes in the search and replace pattern and noting that the replace pattern is indeed smaller. Care must be taken around Overlay nodes, to determine the size change that results. 
+
+Further, it suffices to reduce the number of occurances of any single node type, as long as it is explicitly matched by the search pattern. For example, the ForToWhile transformation acts only when a For node is seen, and produces an output tree not including the For node that was matched. Even though the output trees are typically bigger, the number of For nodes strictly reduces and the transformation will terminate when there are no more For nodes in the program. This will also work with wildcards (intermediates) as long as no node that would match the intermediate appears anywhere in the replace pattern.
+
+These patterns are termed "strictly reductive".
+
+11.2 "But" pattern
+
+Where a pattern converts a general form of a construct to a specific form the reduction is less redily apparent. What is being removed are constructs of the general kind but not the specific kind. For example, converting general usage of If into a restricted for of If(value:Expression, then:Goto, else:Nop) is actually trying to reduce away the if statements that are not in the form shown.
+
+A common solution is to insert MatchAll in the search pattern, with a NotMatch node on the other leg. So when reducing X to Y, the search pattern becomes MatchAll( X, NotMatch(Y) ). This provides an and-not or but-not type of restriction. The search pattern subtree Y will resemble the replace pattern, but must be supplied seperately because a coupling would not make sense here (or be allowed because the subtree under NotMatch is an abnormal context).
+
+11.3 GreenGrass node
+
+Inferno S&R supports a special node called GreenGrass to help in tricky cases of non-termination. It is inserted into a search pattern via its through memeber. The immediate child node will be matched as normal, but only if it is a node from the input program tree. GreenGrass restricts the search to not match the node if it was produced by an earlier iteration of the replace algorithm. The specific rules for GreenGrass are as follows:
+- During the first search in any SearchReplace, ComapreReplace or slave, the GreenGrass node does not restrict at all
+- During sucessive passes, GreenGrass restricts to nodes that reached the program tree via Stuff node substitution. Note this includes the portion outside of the match when SearchReplace is used (see the implementation note by CompareReplace).
+- In cases where one pass creates a new node (that GreenGrass would reject) and then a later pass preserves it via Stuff node substituttion, GreenGrass will still reject it.
+
+Broadly speaking, GreenGrass assumes that Stuff substitution is not really changing the nodes, just moving them around. It filters to nodes from the original input tree that may be been moved around. 
+
+Note: arguably, there should always be a way of ensuring termination that does not require GreenGrass, so I suggest considering alternatives first.
 
 12 Worked examples
+
+Small, medium and large examples of existing steps follow, all apply to C programs.
+
 12.1 removing Nop
+
+CleanupNop uses SearchReplace to eliminate obviously redundant Nops from code. Nop is a do-nothing statement rather like NOP instrucitons in assembly language (except it is not intended to consume processor cycles). The search pattern is a Compound statement with a Star<Declaration> node in the decls. The sequence of statements in the Compound block (an ordered container) contain the following: Star<Statement>, Nop, Star<Statement>. All the Star nodes have no pre-restriction and are maximally wild, so they'll match anything (legal). 
+
+Our search can therefore match a Compound block with any decls, and any statements as long as there is at least one Nop (this transformation only deals with Nops in Compound blocks). The Nop can be anywhere in the sequence of statements: the layout of Star, X, Star resembles *X* in filename globbing.
+
+For replacing, we wish to preserve everything in the compound block except the Nop. And we wish to preserve th statements in the correct order. We  supply a new Compound block in the replace pattern, and fill in its declarations and statements by pointing to the same Star nodes we created in the search pattern. Thus the Star nodes have two parent nodes, and are coupled. The effect of coupling the star nodes is to reproduce whatever they matched (which could be 0 or mode nodes of the appropriate type, complete with any subtrees) in the output program at that position. The two Star<Statement> nodes appear as two statements in sequence under the replace Comound - this ensures that the statements we wish to retain appear in the correct order.
+
+The pattern is strictly reductive: each hit will reduce the number of Nop statements by one, and the transformation will terminate when the program contains no Nop statements. The repeating nature of the Inferno S&R algorithm means we will keep trying until we don't get any hits. This means that a compound block containing many Nop statements will be correctly transformed after multiple hits. On each hit, the Star<Statement> nodes will match different subsequences of the statements in the compound block. For this step (and I believe in general) it does not matter whether the first Nop matched is the one at the top, or bottom or middle of the block.
+
 12.2 For to While
+
+ForToWhile transforms For loops into semantically equivalent While loops. C makes this easy and hard. Easy because the three elements of a For loop are general C constructs that can simply be moved to the appropriate places in the While loop, and hard because of Break and Continue. We do not have to worry about Break here because it has already been handled by another step, but Contiune requires explicit treatment (Continue works in While loops, but has the wrong semantics: the increment would be skipped).
+
+Our master search pattern describes a general For loop. There is a For node, and its expression (the test) is filled in with an Expression node which is a maximal wildcard that will match any expression. Its init condition, increment and body are all maximally wild Statement nodes. Therefore, any For loop will match (Inferno fills absent statements with Nop, which will match).
+
+The master replace pattern begins with a Compound node. This is there to make the pattern simpler, and there are clean-up steps that remove them where they are redundant. It is generally an encouraged style. The compound has only 2 statements: the init statement from the For loop via a coupling, followed by a While node. The While loop's test expression is coupled in from the For loop's test expression. In the body of the While loop we place the For loop body (but see below) followed by the increment from the For loop. This completes the basic transformation - by inspection, you can determine that the constructs from the For loop are in the right places. Again, wheras the two Compound blocks may not be needed in all cases, we create them for convenience and expect cleanup steps to remove them later if possible.
+
+In order to deal with Continue, we insert a SlaveCompareReplace into the master replace pattern, just above where we couple the body of the For loop. Recall that the trhough member is simply there to allow the master replace pattern to continue. During each master replace (in other words, as S&R is building the While loop) the slave will act on the replaced version of the subtree under the through link. This is the body of the original For loop (via coupling).
+
+In this body, we wish to change the behaviour of Continue: we wish to insert a copy of the increment statement just before each continue, to compensate for continue skipping the increment we placed at the end of the body. The positioning of the slave ensures we do not change continues outside of For loops. Were it not for two awkward issues, we would simply use SlaveSearchReplace, search for continue and replace with a compound containing the increment condition (coupled) followed by continue. This is indeed approximately how the slave is laid out, but there are extra nodes to solve the problems:
+
+1. The slave replace pattern contains continue, so the slave would not terminate. We want each continue in the input program (under a For) to be replaced exactly once by the compound of increment and continue. More or fewer replacements would increment too many or too few times. The GreenGrass node ensures we only replace continues that were in the input tree, and not ones that came from our replace pattern.
+
+2. Not all continue statements under a For loop apply to that loop, because there could be nested loops (see the C spec). We cannot just use a SlaveSearchReplace because it would find continues that we don't want to change. The actual pattern used is a stuff node, which can recurse to find a continue (continue is the terminus, via the Overlay node), and it has a recurse restriction filled in with NotMatch and a Loop wildcard. This part of the pattern means "not any kind of Loop" and the Stuff node will therefore not recurse through any loops as it looks for a terminus match. Stuff is followed by an Overlay node, which allows the new Compound to be overlayed over the original Continue.
+
+Note that the SlaveCompareReplace(Stuff(Overlay)) pattern resembles the pattern that SearchReplace generates to emulate search and replace using the CompareRepalce implementation. The difference here is that we needed to add a recurse restriction, and so we wrote that pattern out long-hand. If there was no need for a recurse restriction, we would use SlaveSearchReplace and get a more readable pattern.
+
+Note also that we see a three-way coupling around the Statement node that represents the For loop's increment statement. This works just fine, Inferno is cool about that sort of thing.
+
 12.3 generate stacks
 
 13 Notes on pattern building in C++
