@@ -195,8 +195,20 @@ The search engine requires the presence of TransformTo<X> interface, which suppl
 OutOfPlaceTransformation can indicate failure by returning a NULL pointer. Failure results in a non-match.
 
 8 Builder replace patterns
+
+Similar to TransformTo patterns, described above, it is sometimes desirable to generate subtrees using some algorithm apart from the search and replace, and embed these in the output program tree. This is done using builder nodes. At present, the identifier builder is only kind of builder node. 
+
+In general, builder nodes are able to key a coupling. Therefore, it is possible to create a coupling entirely in a replace pattern, as long as it contains exactly one builder node.
+
 8.1 BuildIdentifier
-8.2 Coupling builders
+
+BuildIdentifier is a builder node that constructs identifiers with new names using a printf format string. At present, InstanceIdentifier can be built using BuildInstanceIdentifier, and LabelIdentifier can be built using BuildLabelIdentifier. 
+
+These special nodes have source and format members. The format is a string and will be the name of the newly built identifier. If the format contains %s, then the name of the identifier node pointed to by source will be substituted in that position (can be any kind of identifier). The source will normally need to be coupled into the search pattern in order to obtain a name from the input program tree. The builder node itself may be coupled in the replace pattern to create multiple references.
+
+For example, if a replace pattern is to contain a new variable, and that variable is the count of times a label was jumped to, we might create the variable instance in the replace pattern, and for its identifier we point to a BuildInstanceIdentifier node. We might set the format to "%s_count" and point the source to the LabelIdentifier of the label whose jumps we are counting. If a label is seen called "EXIT", we will get a variable called "EXIT_count". 
+
+Usages of the new variable elsewhere in the replace pattern can just couple directly to the BuildInstanceIdentifier node.
 
 9 CompareReplace
 9.1 Note on implementation
