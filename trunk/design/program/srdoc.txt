@@ -301,6 +301,20 @@ The pattern is strictly reductive: each hit will reduce the number of Nop statem
 
 12.2 Generate implicit casts
 
+GenerateImplicitCasts adds a C-style cast to every funciton call argument that is not of the same type as the parameter in the function declaration. 
+
+To do this we search for a call to a function (the Call node). Because function calls can be expressions (involving function pointers) the Call node specifies the funciton using an expression. The actual function called is the type of this expression, and it itself contains the types of the parameters. To get the type of the expression, we specify a TypeOf node, which is a kind of TransformTo node, and can determine the type of the expression seen in the input program tree. The type is then compared with the pattern given as the child of TypeOf. Here we specify Procedure, which is the type for a callable entity that has parameters (but not necessarily a return value). Function derives from Procedure.
+
+Note: Inferno stores parameters in an unordered collection, which differs from C source language which relies on parameter ordering. Arguments are then specified in the form of a map, with the key being the parameter's identifier and the value being the argument expression. Inferno does not support maps directly (only sequences and collections) so the tree specification for C builds a map from a collection of nodes called MapOperand which act as key-value pairs. A call is therefore conceptually more like a named parameter call eg foo( param1:arg1, param2:arg2 ...). This type of structure is easy to manipulate in search and replace using couplings. Ordered parameters would be more difficult because it would require an ordinal correspondance (index coupling). However, the reason for doing it this way is not S&R simplicity, but rather a desire not to store redundant information in the tree.
+
+Since we will act on one parameter at a time, we use Star to match the other parameters. The one we are interested in will be an Instance node, since a parameter is a declaration of a variable-like construct. The identifier and type are given maximal wildscards to allow any parameter to match.
+
+In the arguments collection of the search pattern's Call, we again supply a Star for other arguments, and a MapOperand, as explained above, for the argument in question. To ensure the MapOperand corresponds to the same parameter that we picked out of the declaration, we couple the identifier (which is the key of the map) to that of the parameter. We must restrict the search to cases where the types differ, so we use the and-not pattern, by placing TypeOf on the argument expression, and coupling to the parameter type under a Not node. Therefore we will only hit when the argument matches the parameter by identifier, but strictly differs in type.
+
+The replace pattern for this transformation is relatively simple. In the replace pattern's Call, we couple the other args and the expression that chooses the funciton, so that they are the same (when you couple to a TypeOf node, you get the expression; to get the type, couple to its child). We replace the missing argument with a new MapOperand, coupling the identifier to that of the MapOperand in the search pattern. For the expression, we supply a Cast node, which corresponds to a C-style cast. Its type is the type of the parameter in the declaration. The expression is coupled to the the argument expression. This will generate a cast that casts the expression in the original call to the type of the parameter in the funciton's declaration, as required.
+
+Note that we see some three-way couplings around the parameter type and identifier. This works just fine, Inferno is cool about that sort of thing.
+
 12.3 For to While
 
 ForToWhile transforms For loops into semantically equivalent While loops. C makes this easy and hard. Easy because the three elements of a For loop are general C constructs that can simply be moved to the appropriate places in the While loop, and hard because of Break and Continue. We do not have to worry about Break here because it has already been handled by another step, but Contiune requires explicit treatment (Continue works in While loops, but has the wrong semantics: the increment would be skipped).
@@ -318,8 +332,6 @@ In this body, we wish to change the behaviour of Continue: we wish to insert a c
 2. Not all continue statements under a For loop apply to that loop, because there could be nested loops (see the C spec). We cannot just use a SlaveSearchReplace because it would find continues that we don't want to change. The actual pattern used is a stuff node, which can recurse to find a continue (continue is the terminus, via the Overlay node), and it has a recurse restriction filled in with NotMatch and a Loop wildcard. This part of the pattern means "not any kind of Loop" and the Stuff node will therefore not recurse through any loops as it looks for a terminus match. Stuff is followed by an Overlay node, which allows the new Compound to be overlayed over the original Continue.
 
 Note that the SlaveCompareReplace(Stuff(Overlay)) pattern resembles the pattern that SearchReplace generates to emulate search and replace using the CompareRepalce implementation. The difference here is that we needed to add a recurse restriction, and so we wrote that pattern out long-hand. If there was no need for a recurse restriction, we would use SlaveSearchReplace and get a more readable pattern.
-
-Note also that we see a three-way coupling around the Statement node that represents the For loop's increment statement. This works just fine, Inferno is cool about that sort of thing.
 
 12.4 generate stacks
 
