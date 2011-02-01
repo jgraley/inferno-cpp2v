@@ -838,24 +838,31 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
     }
     else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
     {
-        source = ob->GetOverlay();
-        TreePtr<Node> overlay = DuplicateSubtree( source, can_key, current_key );
-        
-        if( !dest || 
-            couplings.IsExist(ob->GetOverlay()) || 
-            !ob->GetOverlay()->IsLocalMatch(ob->GetThrough().get()) )
+        // Decide whether to overlay or overwrite. The decision is made only based on
+        // the pattern (the children of the Overlay node) not the input tree. This is 
+        // to ensure consistent behaviour.
+        // Overlay if: 
+        // (1) the supplied overlay child is a non-strict subclass of the through child and
+        // (2) the overlay child has not been coupled
+        // Together these guarantee that the overlay can overlay the through even if the through 
+        // has been coupled. In the latter case, overlay set<= through set<= through's coupling
+        // and by transitivity, overlay set<= through's coupling.
+        // No such identity would hold of overlay has been coupled, so we never overlay in that case
+        if( ob->GetOverlay()->IsLocalMatch(ob->GetThrough().get()) && !couplings.IsExist(ob->GetOverlay()) )
         {
-            // Base not coupled or is not compatible for overlaying, so just copy the overlay leg.
-            TRACE("Overlay node doing overwrite\n");
-            dest = overlay;
+            // We will be able to overlay safely
+            TRACE("Overlay node doing overlay\n");
+            if( !dest )
+                dest = ob->GetThrough();
+            source = DuplicateSubtree( ob->GetOverlay(), can_key, current_key );
+            ASSERT( !dynamic_pointer_cast<SpecialBase>( source ) );
+            DoOverlay( dest, source, can_key, current_key );
         }
         else
         {
-            // Base coupled and can be overlayed so overlay. 
-            // TODO what if ob->overlay is another soft node? Should we not always DuplicateSubtree()?
-            TRACE("Overlay node doing overlay\n");
-            ASSERT( !dynamic_pointer_cast<SpecialBase>( source ) );
-            DoOverlay( dest, overlay, can_key, current_key );
+            // We cannot guarantee to be able to overlay for all input trees, so just overwrite.
+            TRACE("Overlay node doing overwrite\n");
+            dest = DuplicateSubtree( ob->GetOverlay(), can_key, current_key );
         }
     }
     else if( dynamic_pointer_cast<SpecialBase>(source) )
