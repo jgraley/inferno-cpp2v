@@ -840,10 +840,13 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
     {
         source = ob->GetOverlay();
         TreePtr<Node> overlay = DuplicateSubtree( source, can_key, current_key );
-        if( !dest || !overlay->IsLocalMatch(ob->GetThrough().get()) )
+        
+        if( !dest || 
+            couplings.IsExist(ob->GetOverlay()) || 
+            !ob->GetOverlay()->IsLocalMatch(ob->GetThrough().get()) )
         {
-            // Base not coupled or is not compatible for overlaying, so just duplicate the overlay leg.
-            TRACE("Overlay node doing duplicate\n");
+            // Base not coupled or is not compatible for overlaying, so just copy the overlay leg.
+            TRACE("Overlay node doing overwrite\n");
             dest = overlay;
         }
         else
