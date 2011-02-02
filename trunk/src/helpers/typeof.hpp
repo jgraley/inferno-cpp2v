@@ -8,11 +8,11 @@
 
 // TODO rename to something like GetType
 
-class TypeOf : public OutOfPlaceTransformation, public TransformTo<Expression>
+class TypeOf : public OutOfPlaceTransformation, public TransformOf<Expression>
 {
 public:
 	SPECIAL_NODE_FUNCTIONS
-    TypeOf() : TransformTo<Expression>( this )
+    TypeOf() : TransformOf<Expression>( this )
     {
     }
     virtual TreePtr<Node> operator()( TreePtr<Node> c, TreePtr<Node> root )

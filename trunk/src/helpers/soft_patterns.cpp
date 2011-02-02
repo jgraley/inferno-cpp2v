@@ -2,7 +2,7 @@
 #include "helpers/misc.hpp"
 #include "tree/tree.hpp"
 
-Result TransformToBase::DecidedCompare( const CompareReplace *sr,
+Result TransformOfBase::DecidedCompare( const CompareReplace *sr,
 		                                                     TreePtr<Node> x,
 		                                                     bool can_key,
 		                                                     Conjecture &conj ) const

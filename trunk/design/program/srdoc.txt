@@ -171,9 +171,9 @@ MatchAny implements the "or" function (union in set theory). The MatchAny node s
 
 MatchOdd implements the "eor" function. The MatchOdd node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that may match. This is probably most useful with 2 patterns, in which case a match is achieved when exactly one of them matches. The subtree under a MatchOdd node in a search pattern is an abnormal context. 
 
-7 TransformTo search patterns
+7 TransformOf search patterns
 
-Sometimes, a transformation will appear to be mostly suitable for the search and replace approach, but there may be aspects of the requred matching criteria which cannot be described using the above wildcarding techniques. In such cases, inferno supports the ability to run some user supplied algorithm during the search. The user supplies  the algorithm as an implementation of the OutOfPlaceTransformation and TransformTo<X> interfaces. Objects of the resulting type are Nodes and may be placed in the search pattern as long as the type X must is compatible with the context. TransformTo<> adds a member named "pattern" which is a pointer to any Node.
+Sometimes, a transformation will appear to be mostly suitable for the search and replace approach, but there may be aspects of the requred matching criteria which cannot be described using the above wildcarding techniques. In such cases, inferno supports the ability to run some user supplied algorithm during the search. The user supplies  the algorithm as an implementation of the OutOfPlaceTransformation and TransformOf<X> interfaces. Objects of the resulting type are Nodes and may be placed in the search pattern as long as the type X must is compatible with the context. TransformOf<> adds a member named "pattern" which is a pointer to any Node.
 
 When the search engine encounters a Transformer node, it applies the transformation implemented by the Trnasformer node to the current input program subtree (without modifying the original copy) and then proceeds to compare the result of the transformation with the pattern pointed to by the "pattern" member. This allows Inferno to search for a subtree in the input program that matches a pattern *after transformation*.
 
@@ -191,13 +191,13 @@ GetDeclaration is a Transformer search pattern (it may also be used directly as 
 
 7.3 Notes on transformation interface
 
-The search engine requires the presence of TransformTo<X> interface, which supplies the custom comparison functionality which includes invoking the OutOfPlaceTransformation functor. The OutOfPlaceTransformation interface guarantees not to modify the supplied tree and to return a newly created one; this is essential for search and replace usage.
+The search engine requires the presence of TransformOf<X> interface, which supplies the custom comparison functionality which includes invoking the OutOfPlaceTransformation functor. The OutOfPlaceTransformation interface guarantees not to modify the supplied tree and to return a newly created one; this is essential for search and replace usage.
 
 OutOfPlaceTransformation can indicate failure by returning a NULL pointer. Failure results in a non-match.
 
 8 Builder replace patterns
 
-Similar to TransformTo patterns, described above, it is sometimes desirable to generate subtrees using some algorithm apart from the search and replace, and embed these in the output program tree. This is done using builder nodes. At present, the identifier builder is only kind of builder node. 
+Similar to TransformOf patterns, described above, it is sometimes desirable to generate subtrees using some algorithm apart from the search and replace, and embed these in the output program tree. This is done using builder nodes. At present, the identifier builder is only kind of builder node. 
 
 In general, builder nodes are able to key a coupling. Therefore, it is possible to create a coupling entirely in a replace pattern, as long as it contains exactly one builder node.
 
@@ -269,7 +269,7 @@ Further, it suffices to reduce the number of occurances of any single node type,
 
 These patterns are termed "strictly reductive".
 
-11.2 "But" pattern
+11.2 "but-not" pattern
 
 Where a pattern converts a general form of a construct to a specific form the reduction is less redily apparent. What is being removed are constructs of the general kind but not the specific kind. For example, converting general usage of If into a restricted for of If(value:Expression, then:Goto, else:Nop) is actually trying to reduce away the if statements that are not in the form shown.
 
@@ -304,13 +304,13 @@ The pattern is strictly reductive: each hit will reduce the number of Nop statem
 
 GenerateImplicitCasts adds a C-style cast to every funciton call argument that is not of the same type as the parameter in the function declaration. 
 
-To do this we search for a call to a function (the Call node). Because function calls can be expressions (involving function pointers) the Call node specifies the funciton using an expression. The actual function called is the type of this expression, and it itself contains the types of the parameters. To get the type of the expression, we specify a TypeOf node, which is a kind of TransformTo node, and can determine the type of the expression seen in the input program tree. The type is then compared with the pattern given as the child of TypeOf. Here we specify Procedure, which is the type for a callable entity that has parameters (but not necessarily a return value). Function derives from Procedure.
+To do this we search for a call to a function (the Call node). Because function calls can be expressions (involving function pointers) the Call node specifies the funciton using an expression. The actual function called is the type of this expression, and it itself contains the types of the parameters. To get the type of the expression, we specify a TypeOf node, which is a kind of TransformOf node, and can determine the type of the expression seen in the input program tree. The type is then compared with the pattern given as the child of TypeOf. Here we specify Procedure, which is the type for a callable entity that has parameters (but not necessarily a return value). Function derives from Procedure.
 
 Note: Inferno stores parameters in an unordered collection, which differs from C source language which relies on parameter ordering. Arguments are then specified in the form of a map, with the key being the parameter's identifier and the value being the argument expression. Inferno does not support maps directly (only sequences and collections) so the tree specification for C builds a map from a collection of nodes called MapOperand which act as key-value pairs. A call is therefore conceptually more like a named parameter call eg foo( param1:arg1, param2:arg2 ...). This type of structure is easy to manipulate in search and replace using couplings. Ordered parameters would be more difficult because it would require an ordinal correspondance (index coupling). However, the reason for doing it this way is not S&R simplicity, but rather a desire not to store redundant information in the tree.
 
 Since we will act on one parameter at a time, we use Star to match the other parameters. The one we are interested in will be an Instance node, since a parameter is a declaration of a variable-like construct. The identifier and type are given maximal wildscards to allow any parameter to match.
 
-In the arguments collection of the search pattern's Call, we again supply a Star for other arguments, and a MapOperand, as explained above, for the argument in question. To ensure the MapOperand corresponds to the same parameter that we picked out of the declaration, we couple the identifier (which is the key of the map) to that of the parameter. We must restrict the search to cases where the types differ, so we use the and-not pattern, by placing TypeOf on the argument expression, and coupling to the parameter type under a Not node. Therefore we will only hit when the argument matches the parameter by identifier, but strictly differs in type.
+In the arguments collection of the search pattern's Call, we again supply a Star for other arguments, and a MapOperand, as explained above, for the argument in question. To ensure the MapOperand corresponds to the same parameter that we picked out of the declaration, we couple the identifier (which is the key of the map) to that of the parameter. We must restrict the search to cases where the types differ, so we use the but-not pattern, by placing TypeOf on the argument expression, and coupling to the parameter type under a Not node. Therefore we will only hit when the argument matches the parameter by identifier, but strictly differs in type.
 
 The replace pattern for this transformation is relatively simple. In the replace pattern's Call, we couple the other args and the expression that chooses the funciton, so that they are the same (when you couple to a TypeOf node, you get the expression; to get the type, couple to its child). We replace the missing argument with a new MapOperand, coupling the identifier to that of the MapOperand in the search pattern. For the expression, we supply a Cast node, which corresponds to a C-style cast. Its type is the type of the parameter in the declaration. The expression is coupled to the the argument expression. This will generate a cast that casts the expression in the original call to the type of the parameter in the funciton's declaration, as required.
 
@@ -334,10 +334,62 @@ In this body, we wish to change the behaviour of Continue: we wish to insert a c
 
 Note that the SlaveCompareReplace(Stuff(Overlay)) pattern resembles the pattern that SearchReplace generates to emulate search and replace using the CompareRepalce implementation. The difference here is that we needed to add a recurse restriction, and so we wrote that pattern out long-hand. If there was no need for a recurse restriction, we would use SlaveSearchReplace and get a more readable pattern.
 
-12.4 generate stacks
+12.4 Generate stacks
+
+GenerateStacks is one of the more complex steps, so I'll just describe the strategy, a few salient points and some future directions for this transformation.
+
+We adopt the pessimistic approach that all automatic variables may be subject to recursion (we don't look for non-recursing functions or variables that arenot hot at recursion points). Each is given a stack in the form of an array and a stack index is provided, which is like a stack pointer but is in the form of an index into the aforementioned arrays. We do not check for stack overflow, but this could be added. We arbitrarily make the stacks 10 elements deep - 10 is the number I use as a todo to make the number configurable in future (a #define symbol would not show up in graphs).
+
+The stacks and stack index are all local static variables. In future, these will be members of some containing class, which will improve locality.
+
+A single stack pointer is declared for each funciton. It is incremented at the top and decremented at the bottom. The master searchReplace does this. It must also be decremented before return statements. A slave does this. Another slave detects all the declarations of automatic variables in the function and replaces them with static arrays (stacks). This slave has a sub slave which finds usages of the variable, and inserts an indexing operationg into the array, using the stack index.
+
+Salient points:
+
+The Subroutine Instance at the root of the pattern is coupled, and the part we wish to change is seperated out again using an Overlay node. This is an equally effective alternative to having seperate Instance nodes for search and replace and keying the members that do not change. It might be more tolerant of future changes in the definition of the Instance node.
+
+The search pattern continues through the Overlay node's through pointer. We match a generic Compound so that we can couple into the replace pattern, preserving the function's existing body. We add a MatchAll branch which goes though a Stuff node to an Automatic node. This ensures the master does not spin, adding more and more stack indexes. It also means we do not modify functions that already do not have automatic variables.
+
+The master replace is found by passing through the through pointers of the two first-level slaves. It produces a new compound, inserting a new declaration for the stack index into the decls collection, and placing an increment and decrement of the same variable at the top and bottom of the statements sequence. The identifier of the variable is built from the funciton name and _stack_index to make the output readable.
+
+The first slave to act is the most-nested first-level slave, which is really SlaveCompareReplace. It emulates SearchReplace using Star and Overlay, as seen before. This time, the reason is to allow a sub-slave to be tucked in at the root of the compare, above the Stuff. The OVerlay splits out into a search pattern for an automatic, and a replace pattern that declares an array type. Again, we build the array's identifier from that of the original variable name with _stack appended.
+
+This slave's sub-slave searches for the original variable, and replaces it with a subscript of the new array by the new stack index. This does not hit the declaration, because slaves operate after the pattern under through has been replaced, and the original variable has been replaced with a new one that has a different identifier (it isn't the name that makes identifiers different, just the fact that they are seperate nodes - I believe GCC does it that way too, could be wrong).
+
+Finally, the other first-level slave looks for return and replaces with a compound containing a decrement of the stack index followed by a return. We use GreenGrass to stop this transformation happening again to the the returns we generate (which would spin). This ises the Temp storage class, which is not fully defined and may not be a permenent feature of Inferno. At present it is a variable that makes only those guarantees made by all of Automatic, Static and Member.
+
+Future directions:
+
+The step could probably be cleaned up, for example by taking advantage of the fact that a usage of a local variable must be in or under the compound in which it was declared - this would let all the slaves be SlaveSearchReplace and remove the need for the Stuff/Overlay combination. Maybe the two PostDecrements could be just one, shared PostDecrements (though I think that would be a semantic extension, albeit a simple one).
+
+As for enhancement, detecting non-recursive funcitons is complicated because it is non-local. But we can easily detect leaf functions and do a trivial Automatic to Static (or Member or Temp) conversion (perhaps in a seperate step). This could be extended to detect leaf-scoped varables (ones whose scope has no outgoing calls). Further, we could restrict checks for outgoing calls to areas where the variable is "live" - this would be harder in S&R but might be possible.
+
+Stack overflow detection would simply require boilerplate at the point of increment. It would invoke some kind of intrinsic debug assert node in case of failure. This would be disabled when generating silicon, after extensive debugging with a simulator or on an intermediate render.
 
 13 Notes on pattern building in C++
-13.1 What you need to do
-13.2 Helpful syntactic sugar
-13.3 Style tips
 
+At present, S&R patterns are build by short C routines in the constructors for step classes. We derive step classes from S&R so that the S&R interfaces punch through, and pass the patterns in via Confgure.
+
+13.1 Helpful syntactic sugar
+
+MakeTreePtr<> can simplify the construction of TreePtrs. MakeTreePtr<X> may be constructed in the same way as X, but will then masquerade as a TreePtr<X> where the pointed-to X has been allocated using new. It is similar to Boost's make_shared<>() except that being a class with a constructor, rather than a free function, it may be used as a declaration as well as in a function-like way. One drawback is that if the constructor of X has a large number of parameters, the implementation of MakeTreePtr<> may need to be extended.
+
+Inferno containers (Sequence and Collection) support initialisation directly from TreePtrs of the right type, and from comma-seperated lists of TreePtrs (via operator, overloading). This can avoid the need for repeated calls to insert() or push_back().
+
+13.2 Style tips
+
+When building a Container from TreePtrs using the comma operator, it is good stlye to anclose the entire list in parenthesis. This looks better, and is necessary when the container is being passed to a function, so that the compiler does not assume the commas are there to seperate parameters.
+
+Prefixes may be used with variable names to help clarify at the discression of the programmer. I have used s_ for search pattern nodes and r_ for replace pattern nodes, with no prefix for nodes coupled into both (or c_ could be used here). I prepend l_ for slaves (l is the second letter of "slave, s being used already). I also sometimes insert x into nodes under a NotMatch node, such as with the but-not pattern.
+
+I usually leave numbers and strings that are passed into SpecificX or Builder nodes as magic, possibly with a comment. Any macros, enums etc will be reduced to the raw number in a graph plot anyway.
+
+The order in which pattern nodes are created and conencted together is mostly flexible, since members are mostly assined via direct access, not constructors. It is mostly possible to declare all the nodes and then connect them all together. One exception is the slave nodes, which are actually instances of the SearchReplace engine, and require either to be constructed using a constructor call or via Configure(). I usually use the constructor form to avoid confusion.
+
+There is no need to implement Transformation's functor operator (operator()). By deriving publicly from SearchReplace, your transformation will inherit that operator. Configuring the SearchReplace object at construct time is strongly advised, because (a) Configure may contain slow algorithms in future that should only run once even if the transformation is used many times and (b) the S&R engine my collect information, such as coverage measurements, across multiple transformations.
+
+13.3 Most important tip
+
+It is a very good idea to use graph plots right from the start when developing steps. Look at the graphs for the kinds of input test programs you are interested in. Code up a program resembling the expected output program, and look at that too, side by side. These will give a starting point for what the search and replace patterns will need to look like. As soon as you have a step that compiles, even if incomplete, take a look at the pattern graph and see if it looks right. The graphs are not just for fun, they really help!
+
+Good luck!

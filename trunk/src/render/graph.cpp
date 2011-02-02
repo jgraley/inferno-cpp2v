@@ -115,7 +115,7 @@ string Graph::Traverse( Transformation *sr, string id, bool links_pass )
         virtual bool IsMatch( TreePtr<Node> context,
                               TreePtr<Node> root )
         {
-            return !( !dynamic_pointer_cast<TransformToBase>(root) && 
+            return !( !dynamic_pointer_cast<TransformOfBase>(root) && 
                       !dynamic_pointer_cast<BuildIdentifierBase>(root) && 
                       dynamic_cast<Transformation*>(root.get()) );
         }
@@ -265,7 +265,7 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		*shape = "circle";
 		return string("^");
 	}
-	else if( dynamic_pointer_cast<TransformToBase>(sp) )
+	else if( dynamic_pointer_cast<TransformOfBase>(sp) )
 	{
 		*shape = "hexagon";
 		return *sp;
@@ -404,7 +404,7 @@ string Graph::SimpleLabel( string name, TreePtr<Node> n )
 
 string Graph::DoNode( TreePtr<Node> n )
 {
-    if( !dynamic_pointer_cast<TransformToBase>(n) && !dynamic_pointer_cast<BuildIdentifierBase>(n) ) // ignire the fact that these also derive from Transformation
+    if( !dynamic_pointer_cast<TransformOfBase>(n) && !dynamic_pointer_cast<BuildIdentifierBase>(n) ) // ignire the fact that these also derive from Transformation
   	    if( Transformation *rsb = dynamic_cast<Transformation *>(n.get()) )
 		    return Traverse( rsb, Id( n.get() ), false );
 
@@ -450,7 +450,7 @@ string Graph::DoNode( TreePtr<Node> n )
 
 string Graph::DoNodeLinks( TreePtr<Node> n )
 {
-    if( !dynamic_pointer_cast<TransformToBase>(n) && !dynamic_pointer_cast<BuildIdentifierBase>(n) ) // ignire the fact that these also derive from Transformation
+    if( !dynamic_pointer_cast<TransformOfBase>(n) && !dynamic_pointer_cast<BuildIdentifierBase>(n) ) // ignire the fact that these also derive from Transformation
         if( Transformation *rsb = dynamic_cast<Transformation *>(n.get()) )
             return Traverse( rsb, Id( n.get() ), true );
 
