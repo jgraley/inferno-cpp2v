@@ -104,3 +104,8 @@ void SelfTest()
     GenericsTest();
 }
 
+// TODO reorg dirs: move tree-aware helpers into tree/
+// split out non-tree-aware generics and Node into a new interfaces/ dir and put transformation there too
+// rename helpers/ to something like tools/
+// deal with TransformTo embedded in tree-aware helpers like TypeOf by undoing that and requireing steps to 
+// instance a template. 
