@@ -8,11 +8,11 @@
 
 TreePtr<Identifier> GetIdentifier( TreePtr<Declaration> d );
 
-class GetDeclaration : public OutOfPlaceTransformation, public TransformTo<InstanceIdentifier>
+class GetDeclaration : public OutOfPlaceTransformation, public TransformOf<InstanceIdentifier>
 {
 public:
 	SPECIAL_NODE_FUNCTIONS
-	GetDeclaration() : TransformTo<InstanceIdentifier>( this ) {}
+	GetDeclaration() : TransformOf<InstanceIdentifier>( this ) {}
     virtual TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root );
 private:
 	TreePtr<UserType> Get( TreePtr<Node> context, TreePtr<TypeIdentifier> id );

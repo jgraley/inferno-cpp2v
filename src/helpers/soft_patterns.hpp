@@ -127,10 +127,10 @@ private:
 };
 
 
-struct TransformToBase : CompareReplace::SoftSearchPattern // TODO rename TransformOf, and in docs
+struct TransformOfBase : CompareReplace::SoftSearchPattern 
 {
     TreePtr<Node> pattern; // TODO make this type a template parameter
-    TransformToBase( Transformation *t ) :
+    TransformOfBase( Transformation *t ) :
     	transformation(t)
     {
     }
@@ -144,10 +144,10 @@ private:
 };
 
 template<class PRE_RESTRICTION>
-struct TransformTo : TransformToBase, Special<PRE_RESTRICTION>
+struct TransformOf : TransformOfBase, Special<PRE_RESTRICTION>
 {
 	SPECIAL_NODE_FUNCTIONS	
-    TransformTo( Transformation *t ) : TransformToBase (t) {}
+    TransformOf( Transformation *t ) : TransformOfBase (t) {}
 };
 
 
@@ -162,7 +162,7 @@ struct TransformTo : TransformToBase, Special<PRE_RESTRICTION>
 // new identifier. Rule is: ONE of these per new identifier.
 
 // TODO allow multiple sources for the printf, use in eg merging successive labels
-// TODO do this via a transformation as with TransformTo/TransformOf
+// TODO do this via a transformation as with TransformOf/TransformOf
 struct BuildIdentifierBase : CompareReplace::SoftReplacePattern
 {
     BuildIdentifierBase( string s ) : format(s) {}
