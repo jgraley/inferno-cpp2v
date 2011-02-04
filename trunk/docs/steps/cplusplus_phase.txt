@@ -1,0 +1,397 @@
+(C) Copyright 2006 John Graley
+Available under the terms of the BSD license. 
+
+C++ phase - steps that deal with C++-specific language constructs in a purely
+software-oriented way.
+
+The object of this phase is to get rid of C++ language constructs that would
+complicate later steps without benefit, or which must be lowered early on during
+compilation by the way they are defined.
+
+We aim to end up with an intermediate style that is definitely still a software
+style and could maybe be described as "C with classes", since the object-wise
+grouping of functions and data is definitely considered a benefit to later steps
+in its ability to express structure (see philosophy.txt).
+
+Templates are by definition expanded early in the compilation process (at least
+in terms of the programmer's view of the compilation process) and we reproduce
+that here.
+
+Exceptions would cause problems later on because of the need to unwind function
+calls between objects - the distributed nature of the structural implementation
+means we can only unwind by returning from the called functions, one level at a
+time. Therefore the inter-function unwinding must be dealt with here. The 
+removal of try/throw/catch from within functions is made into a separate step
+because this second step could be moved down into sequential phase easily, maybe
+for an optimisation. We do not do this at present because the exceptions without
+unwind are look a bit silly and will just get in the way.
+
+RTTI is on indefinite hold pending a real incentive for me to learn about them.
+
+Inheritance does 2 things: (1) lets you avoid duplicating funcitons in 
+derived classes and (2) polymorphism. We deal with (1) by duplicating the
+functions by hand, which is not really wasteful since our policy is to duplicate
+functions per *object* anyway and (2) must be supported explicitly, possibly
+with something analogous to a Vtable. I may split the step into 2 halves.
+
+We also turn constructors and destructors into regular member functions. This
+simplifies the data phase and gets rid of tricky passing-nontrivial-objects-by
+-value problem, which complicates matters and is really a C++ issue.
+
+The steps within this phase follow:
+
+----------------------------------------------------------------------------
+Expand templates
+
+Expand all template instantiations. This creates new function definitions 
+and classes
+
+Invariant: no templates
+
+Note: this will make the program bigger, but that's what templates do to
+programs anyway.
+
+Note: they say C++ templates are a Turing-complete language that runs at
+compile time. Run the template meta-program here.
+
+----------------------------------------------------------------------------
+Remove stack unwind
+
+Whenever a function can throw an exception (including by calling another function
+that can throw an exeception) arrange for the function to catch all exceptions 
+and return the exception object. If a return value exists already then combine 
+in a struct. The returned exception object should be a null object if there was 
+no exception. 
+
+Return value should be a struct containing the original return type if there
+was one and the exception datum. The exception member should be named __exception
+and the presence of a structure with a member so named denotes that the function 
+can throw an exception. The original return value should be named __return.
+
+Calls to such functions should be in try blocks and if an exception is returned
+then they should be rethrown.
+
+todo: determine what types are allowed as execption data. If non-trivial objects
+are allowed, check whether this will work (it ought to work just as well as any
+other case of returning a non-trivial object).
+
+Invariant: return is the only path out of a function
+
+Example output:
+
+struct f_return
+{
+   int __return; // function used to be int f();
+   Exception __exception;
+}
+
+f_return f()
+{
+    Exception ex;
+    try
+    {
+        ex = g();
+	  if( ex != NullException )
+	      throw ex;
+        ...work stuff out...
+        f_return ret;
+        ret.__exception = NullException;
+        ret.__return = ...result of our calcualtions...
+        return ret; 
+    }
+    catch( ex )
+    {
+        f_return ret;
+        ret.__exception = ex;
+        return ret; 
+    }
+}
+
+----------------------------------------------------------------------------
+Lower try/throw/catch
+
+Remove try and catch keywords leaving pairs of plain scopes. Insert a goto 
+to skip what used to be the catch block. Convert throw into a goto to the
+beginning of the catch block. Use a local to hold the exception object. 
+
+Invariant: no exceptions
+
+Note: this step could be moved down to state-out if required: the above
+"Remove stack unwind" is the part that has to be done early.
+
+Note: the additional destructor calls implied here get added in the "Make
+constructors/destructors explicit" step further down. This is triggered by the
+gotos.
+
+Example output:
+
+f_return f()
+{
+    Exception ex;
+
+    // Was the try block
+    {
+        ex = g();
+	  if( ex != NullException )
+            goto catch;
+        ...work stuff out...
+        f_return ret;
+        ret.__exception = NullException;
+        ret.__return = ...result of our calcualtions...
+        return ret; 
+    }
+    
+    // Was the catch block
+    catch:
+    {       
+        f_return ret;
+        ret.__exception = ex;
+        return ret; 
+    }
+}
+
+----------------------------------------------------------------------------
+Implement run-time type information
+
+Implement typeof and dynamic_cast as virtual member functions within 
+class hierarchies and modify calls to be member function calls.
+
+Invariant: no RTTI
+
+----------------------------------------------------------------------------
+Expand inheritance
+
+Where class B inherits from class A, copy non-overridden functions from A
+to B. Also copy any functions that are overridden but get called explicitly
+via eg A::f(). 
+
+Invariant: no inheritance; no protected members
+
+Note: Need a strategy for multiple inheritance @todo
+
+Note: Duplicating the functions seems wasteful but it isn't: all the 
+functions get duplicated per-object anyway.
+
+Note: Where inherited functions are copied into the derived class, 
+there should probably be some link back to the declarations in the base class
+so that polymorphic pointers can be bound to the correct function. This could be
+a VTable-like construct that maps vcall ids onto actual functions.
+
+@todo this step can probably be separated into (a) duplicating inherited 
+member functions and (b) getting rid of the actual inheritance.
+
+Note: A reasonable alternative approach would be to allow the base class to
+be a data member of the derived class, and insert forwarding thunks (so that
+pointers to the derived class do not need to be converted to base class pointers)
+
+Example output:
+
+class B // : public A    used to derive from A
+{
+    int f(); // was originally part of B
+    int g(); // G was in A but not B; now added to B    
+    
+    const struct { int vcall_id, (int B::*ptr)() }[] = { 1, &g }; 
+    // This is probably wrong, but demonstrates the idea of allowing a 
+    // caller who knows only of the interface of A to call B::g() 
+    // polymorphically, sort of like a vtable. 
+};
+
+----------------------------------------------------------------------------
+Specify servers - step removed. Now each object contains exactly one
+instance of what used to be a server, and the term server is depracated.
+To get the same effect as multiple servers in one object, the user
+must define a class that contains multiple member classes.
+
+----------------------------------------------------------------------------
+Implement default assignment and copy constructor
+
+If there is no assignment operator defined for the class, implement one
+as overloaded operator= that does the same thing as the default assignment
+operator - ie individually assign each data member. Same for copy 
+constructor.
+
+Invariant: No implicitly generated functions
+
+Example output:
+
+class foo
+{
+    int a;
+    char b;
+    my_other_class c;
+    operator=( class foo &other )
+    {
+	  a = other.a;
+	  b = other.b;
+	  c = other.c;
+    }
+};
+
+----------------------------------------------------------------------------
+Explicitise constructors and destructors
+
+All constructors, copy constructors and destructors get turned into regular
+member functions and we add explicit calls to them in the code. Need to treat
+each kind of scope correctly: static, member, heap, local. If an object is
+passed by value and has a copy constructor, we must turn that into
+pass-by-reference and then insert the copy construct call at the top of the
+function. 
+
+Invariant: Class-level operations all go through a regular member function
+
+Note: this means that some const members will need to be un-consted except
+ones whose initialisation values are known at compile time. Optimisations 
+could include converting member pointers initialised by new() into member 
+objects and detecting when a constructor parameter is always supplied from 
+a const.
+
+Note: destructors must get called at early returns and gotos out of scopes.
+
+Note: getting rid of non-trivial pass-by-value is important for later on - we
+can't make wires for a data transfer that isn't just a straightforward copy 
+(but we are still allowed refs/pointers). Getting rid of all manually coded
+copy constructors ensures this, I think.
+
+Note: No need to worry about assignment, I don't think.
+
+Note: Inline constructors/destructors should remain inline through 
+explicitisation.
+
+Note: from this step on, we would like the absence of a copy constructor to 
+mean "do nothing" rather than the usual "do a memcpy", because any required
+functionality will now be in the regular member function for the copy constructor. 
+Maybe something should be added to the tree to indicate this explicitly.
+
+Copy constructor example output:
+
+void f( A const &a ); // Used to be pass-by-value here but A is non-trivial
+object. 
+{
+    A local_a; // we permit C++ to construct the object - but there's no 
+               // C++ constructor so it just allocates the memory.
+    local_a.Construct( a ); // a goes into copy constructor by reference. 
+        
+    ...blah...
+    
+    local_a.Destruct(); // What goes up must come down
+}
+
+new/delete example output:
+
+void f()
+{
+    A *ptr_a = new A; // The new maybe used to have parameters. There's no 
+                      // C++ constructor so it just allocates the memory
+
+    ptr_a->Construct( ...blah... ); // The params now go into construct call
+    
+    ...blah...
+    
+    ptr_a->Destruct(); // Do this before the delete
+    delete ptr_a; 
+}
+
+Extra destructor due to goto example:
+
+void f()
+{
+    {
+        A a;
+	  a->Construct();
+	  
+	  if( ...foo...)
+	  {
+	      a->Destruct(); // had to add this since goto skips the destruct at the
+end of the block
+	      goto done; // could also be an early return; same applies
+	  }
+	  
+	  a->Destruct();
+    }
+    
+    done:    
+}
+
+-----------------------------------------------------------------------------
+Detect overloaded operators
+
+Search for cases of overloadable operators being used on non-POD objects
+and replace with calls to the corresponding operator overload.
+
+Invariant: operators only applied to POD data
+
+Note: include assignment in this; even though C can assign structs, we take 
+the apporach of doing this via an auto-generated operator=, see step
+"Implement default assignment and copy constructor"
+
+Example output:
+
+    object_x.operator=( object_y );    // was just object_x = object_y
+
+
+-----------------------------------------------------------------------------
+Standardise operator overloads
+
+Convert operators, including operator= and cast operators into regular functions.
+Use operator_db.inc if possible to get textual names for the functions.
+
+Invariant: no overloaded operators
+
+Example output:
+
+class A
+{
+    A &OperatorAssign( const A &other );    // was: A &operator=( const A &other )
+};
+
+
+-----------------------------------------------------------------------------
+Expand inlines
+
+For each call to an inlined function, expand the function at the call point
+in a local scope. Whatever means was used to reach the function when making
+the call (eg pointer or dotted path) should be applied to any member functions
+or member data accessed by the inlined function that comes from the same
+class.
+
+Note: this step should come after template expansion (obviously) and 
+explicitising constructors and destructors (because we don't want to 
+expand inline constructors before exlicitising them).
+
+Note: and protected or private data that the inline needs to access will 
+need to be made public (or in general get the same status as the inline
+function itself).
+
+Note: this step applies equally to calls between classes. This is the only
+case in the whole Inferno schema in which functionality is moved away from 
+data, since the expanded inline code appears in the calling object but the 
+member data it uses remains in the callee object. All data accesses (and
+calls to other non-inlined member functions from the same object must
+be routed through the protocol, making this an expensive game.
+
+Invariant: no inlines
+
+Example:
+
+void f()
+{
+    ...    
+    ptr->g();
+}
+
+inline g()
+{
+    spooge++;
+}
+
+becomes:
+
+void f()
+{
+    ...
+    { 
+        ptr->spooge++;
+    }
+}
+

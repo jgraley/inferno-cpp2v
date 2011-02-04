@@ -1,0 +1,133 @@
+
+Search and replace design notes. Various levels of functionality and notes follow: 
+
+
+EXACT MATCH
+    Search pattern no wild cards matches subtree. 
+    Require tree walker, must be co-routine style (state-out and explicitise recursion) .
+    Probably want to automate traversal across node class members using default 
+    assignment operator hack.
+
+WILDCARD BASED ON PROPERTY
+    Allow properties to match anyhting in search, preserve actual in replace.
+    Properties (=enums, bools, strings, LLVM ints etc) should be wrapped 
+    with a class that has a bool for is_wild and a pointer that can join 
+    pattern in replace to corresponding pattern in search.
+    
+WILDCARD BASED ON NODE CLASS
+    Allow wildcarding of nodes by specifying an intermediate in search tree
+    Preserve actual in replace. Replace node should have pointer as above
+    (so in fact Node base class should have this pointer, and there should be
+    a pure wildcard interface)
+
+WILDCARD BASED ON CONTEXT
+    Allow the target type of the shared_ptr<> to a node to restrict search. Only
+    applies to the root of a search pattern, since context of other nodes 
+    established by the search pattern itself
+
+MULTIREF WILDCARDS
+    Allow a wildcarded node to have multiple refs, require that they match for a match
+    Also allow nodes in replace pattern to be duplicated, preserving topology around eg 
+    instances. 
+    Note: huh?
+
+ANTINODES
+    Allow a node to be speciifed in a search pattern with a bool set to true (probably
+    in the Node base class) which means "match anyhting *but* this kind of node.
+
+REFACTOR
+    Bring properties out into a seperate subtree, one property per node. Then 
+    WILDCARD BASED ON NODE CLASS can be used to implement WILDCARD BASED ON PROPERTY
+    since the pattern can include the intermediate Property node for wildcarded properties.
+
+REFACTOR
+    Reduce the need for WILDCARD BASED ON CONTEXT by building extra physical nodes into
+    the tree than show the context explitily. For example, declarations could require
+    a seperate Declaration node (rather than just an intermediate to eg Instance) so 
+    that Declaration node may be placed in search pattern to restrict to declarations.
+    May still require way of specifiying NOT Declaration for eg use as Operand.
+
+GENERAL NOTE on MULTIREF
+    Duplicates (=node has >1 ref, eg UserType, Identifier) may be difficult to 
+    replace if found via one ref other refs may be left pointing to unmodified
+    original, which may not be what is desired. May need to do search for refs
+    or use back-pointers (which must be weak_ptr< shared_ptr<Me> >)
+
+
+---PLAN---
+
+- Refactor tree to bring out properties into seperate nodes. Split tree.hpp into:
+  - tree/base.hpp for Node class with pure virtuals
+  - tree/main.hpp for "ordinary" nodes (maybe split this further eg types, exprs, statemnts etc)
+  - tree/properties.hpp for property nodes
+Property tree to be eg Node->Property->(Storage->(Static, Default), Number->Value) etc
+
+- Replace shared_ptr<> and Sequence<> with subclasses instrumented for walkability.
+  For example SharedPtr<> and Sequence<>
+  Ensure all nodes are instrumented for walkability and dynamic compatibility check 
+  using macros (Node class implemnts wilcard match based on dynamic compatibility check).
+
+- In property leaf nodes, instrument for walkability and wildcard match explicitly as
+  required.
+
+(tree should now be fully walkable and wildcard-matchable)
+
+- Implement search helper based on subtree match. Search should explicitly accept
+  an enum for context: USAGE or DECL.
+
+- Add "substitute" pointers to nodes and implement replace.
+
+Note: Do NOT add eg Declaration or Usage nodes to tree. Do not support antinodes.
+Use explicit context enum to differentiate between usage and declaration.
+
+Note: Preserve multi-ref nodes when substitute pointers are used. Do this even if
+the multiref node is not wildcarded. Conversely, nodes in replace pattern that
+do not have substitute pointers are always to be newly created.
+
+---SOFT NODES---
+
+Nodes to have virtual IsMatch() which uses dynamic compatibility check to do wildcarded
+search match. Note this does *not* recurse. Soft nodes use custom algorithm.
+
+Nodes to have virtual GetSubstitute() which returns NULL or a pointer to another node
+that should be subsituted on replace. Hard nodes allow this to be set via SetSubstitute();
+soft nodes constrct a new node as required.
+
+2-hop substitution: in the usual hard node case, the search/replace engine sets the 
+substitutes in the search pattern according to the found match. The user initialises 
+the substitutes in the replace pattern nodes to point to corresponding nodes in the
+search pattern as required. During replace, substitution is attempted repeatedly until 
+GetSubstitute() returns NULL. In this case, a replace node will be substituted by a 
+search node, then the search node will be substituted by the matching tree node.
+
+---WALKER---
+
+Automated walk over members, using overloaded operator=. Implement to generate a Sequence<>
+rather than callbacks. See ../prototype/nodestuff.cpp
+
+---SNIPPETS---
+
+#define NODE_FUNCTIONS(C) \
+    virtual bool IsDynamicCompatible( shared_ptr<Node> c ) { return !!dynamic_cast<C *>(n); } \
+    virtual Sequence<Node> GetMembers() { ...stuff... }
+//todo try a template
+
+struct Node
+{
+    virtual bool IsMatch( shared_ptr<Node> c ) { return false; }
+    virtual bool IsDynamicCompatible( shared_ptr<Node> c ) = 0;
+    virtual shared_ptr<Node> GetSubstitute() { return shared_ptr<Node>(); }
+    virtual Sequence<Node> GetMembers() = 0; 
+    virtual ~Node() {} // allow shared_ptr<> to destruct
+};
+
+struct Hard : Node
+{
+    NODE_FUNCTIONS(Hard)
+    virtual bool IsMatch( shared_ptr<Node> c ) { return IsDynamicCompatible(c); }
+    virtual shared_ptr<Node> GetSubstitute() { return substitute; }
+    void SetSubstitute( shared_ptr<Node> s ) { substitute=s; }
+    mutable shared_ptr<Node> substitute;
+};
+
+ 

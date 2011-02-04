@@ -107,5 +107,12 @@ void SelfTest()
 // TODO reorg dirs: move tree-aware helpers into tree/
 // split out non-tree-aware generics and Node into a new interfaces/ dir and put transformation there too
 // rename helpers/ to something like tools/
-// deal with TransformTo embedded in tree-aware helpers like TypeOf by undoing that and requireing steps to 
-// instance a template. 
+// deal with TransformOf embedded in tree-aware helpers like TypeOf by undoing that and requiring steps to 
+// instance a template explicitly.
+// Set dependencies and include paths based on this "diamond" dependency structure
+// Split Compare out of CompareReplace. MAke Filter a functor. Consider merging Filter into tRansformation.
+// Produce base class for builder nodes: TransformTo?
+// Docs for node interface. Improve comments in tree.h
+// Star restriction pattern (eg for dead code elimination want Star(NotMatch(Label)))
+// Consider parent restriction for usages
+// Consider multi-terminus Stuff and multi-root (StarStuff)
