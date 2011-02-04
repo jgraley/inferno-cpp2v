@@ -1,0 +1,391 @@
+		Inferno Search and Replace User Guide
+
+1 The SearchReplace class
+
+Inferno uses a search and replace engine for the majority of transformation steps. The generic search and replace implementation may be found in the SearchReplace class and a number of supporting classes. A SearchReplace object is intialised by supplying a search pattern and a replace pattern, both in the form of trees. Once constructed, a SearchReplace object serves as a tree transforming functor (ie it implements the Transformation interface).
+
+This documentation explains how to set up the correct patterns to the SearchReplace class so that it will create the transformation you require.
+
+1.1 Search and replace patterns as subtrees
+
+The first two parameters to the SearchReplace constructor are, resectively, the search pattern and the replace pattern. Each is a pointer to the root of a subtree of nodes. As with Inferno program trees, branches are allowed to merge, making them strictly speaking acyclic directed graphs, but we call them trees in line with compiler parlance. 
+
+SearchReplace will search for an occurance of the search pattern and replace it with a duplicate of the replace pattern. You may alternatively construct a SearchReplace with no parameters and then pass the search and replace patterns to Configure().
+
+1.2 Special nodes
+
+S&R supports additional nodes called "special" nodes that do not appear in the program representations for any language. They invoke additional S&R functionality when used in search and/or replace patterns. Since Inferno tree pointers are strongly typed (links are pointers to an intermediate type corresponding to the subset of child node types allowed), we allow special nodes to derive from a user-specified type. This type is specified as a template parameter to the special node. Normally, the base type should be the same type as the pointer that will point to the special node, but see pre-restriction under topological wildcarding.
+
+1.3 Termination
+
+The SearchReplace algorithm repeatedly attempts to find a match to the search pattern, and substitutes the replace pattern, until it can no longer find a match to the search pattern. Therefore, it can run forever if for example the replace pattern re-creates a search pattern match. It it the user's responsibility to prevent this from occuring: this is discussed in more detail later.
+
+2 Tolopogical wildcarding
+
+Inferno nodes are orgnised in an inheritance hierarchy beginning with Node, from which certain intermedates like Statement and Type are derived, and then the final nodes are derived from the intermediates. In many cases there are multiple levels of intermediates between Node and the final node type, and multiple inheritance is allowed (with virtual inheritance). This hierarchy is best understood as a Venn diagram, where subclass is synonymous with subset.
+
+The trees for programs are only allowed to consist of final nodes. So Node and the intermediates are not allowed in program trees. They are allowed, however, in search and replace patterns as long as they would not end up in the output of the search and replace transformation. 
+
+When an intermediate node is seen in a search pattern, it serves as a wildcard for any node derived from it. For example, Return and Goto are both derived from Statement, so a Statement node in a search pattern will match Return, Goto and any other node derived from statement. In set theoretic terms, we have restricted the search to the set of statements.
+
+As an example of multiple layers of intermediates, consider that Expression is derived from Statememt, making expressions a subset of statements. This is consistent with the rule in C that an expression may be used in place of a statement, but not the other way around. Consequently, a node of type Statement in a search pattern will match any expression as well as other kinds of statements, but an Expression node in a search pattern will only match expressions.
+
+Due to Inferno's type-safe tree, it is not possible to specify nonsensically broad intermediates in a search pattern. This is because the pointers used in nodes are typically pointers to intermediate node types, and only identical or more derived (subset) nodes may be pointed to. Therefore the broadest wildcard possible is one whose type is the same as that of the pointer that will point to it. Such a pointer is called maximally wild and will match on all type-correct input programs.
+
+Such maximally wild pointers may be considered similar to the use of "?" character in filename wildcarding. Other intermediate topological wildcards could be likened to a value range in certain textual schemes for example /a-z,A-Z/ though it should be noted that topological (set-theoretic) restriction is more concise than linear range restriction.
+
+2.1 Can populate the wild card's members
+
+In the Inferno tree, some intermediate nodes have members: these members appear in all derived classes due to inheritance. Members may be filled in when intermediates are used in a search pattern. These members will be matched as normal and will serve to restrict the search pattern.
+
+For example, giving the node Integral and pointing the width member to a SpecificInteger of value 32 (which we could write Integral(width:SpecificInteger(32))) will match 32-bit signed and unsigned data types since Signed and Unsigned both derive from Integral.
+
+Note: to wildcard the width and fix the signedness we would use eg
+Signed(width:Integer) in other words we use the final node for the type Signed and fill in the width with the maximal wildcard, which is Integer in this case. See tree.hpp for the definitions of these nodes.
+
+2.2 NULL in search patterns
+
+In trees for programs, we do not allow NULL (cases of disabled functionality must be dealt with explicitly, for example with nodes such as Nop and Void).
+
+We do allow NULL in search patterns, where it serves as shorthand for the maximal wild card. Therefore, Signed(width:Integer) is the same as Signed(width:NULL) as a search pattern.
+
+2.4 Pre-restriction on special nodes
+
+When searching, all special nodes support search restriction via the base type supplied as the first template parameter (recall that special nodes derive from the supplied base type). This base type is called the pre-restriction type. Regardless of what the special node is defined to do, all searches will restrict to nodes that are of non-strict subclasses of the pre-restriction type. 
+
+Type-safety means that a tree pointer can only point to non-strict subclasses of the pointer type. Therefore if the pre-restriction type is the same type, no restriction will be seen when the search runs. Only if a strict subclass is given will a restriction be seen to take effect. This is called a pre-restriction since it seems to apply before the special node's special algorithm runs (which will typically apply some further restriction independently of the pre-restriction under an "and" rule).
+
+2.5 Notes on tolopogy-oriented tree
+
+In order to maximise the utility of toplogical wildcarding (and its coupling support) the inferno tree has been contrived to express as much information as possible in the node hierarchy and through pointers to child nodes. So for example where a node might naturally contain a boolean (such as the signdness of an integral type) or an enum (such as an access specifier which can be public, private or protected) one of two techniques is used:
+- the options are expressed in a set of final nodes as with Signed and Unsigned, making the original node (Integral) become an intermediate node or
+- a new hierarchy of nodes is created with a common intermediate and final nodes corresponding to the options, as with Public, Private, Protected which are all subclasses of AccessSpec.
+In fact, this policy leads most nodes to contain only pointer, Collection and Sequence. Only a small number of nodes contain other data types such as int, string etc that cannot be accomodated toplogically. This is termed a toplogically-oriented tree and is a reasonably consistent canonical form for program elements.
+
+3 Couplings
+
+When a wildcard has been specified in a search pattern, it is often useful to be able to make use of the actual subtree in the input program that the wildcard matched. We may wish to:
+- restrict the search so that two wildcards in the search pattern must match the same subtree in the input program and/or
+- introduce the input program subtree that matched a search pattern wildcard into the output program, as a substitute for part of the replace pattern.
+
+3.1 Restricting with couplings
+
+Suppose we use the wildcard Integral in two places in a search pattern. Each will individually match Signed or Unsigned, giving a total of four matching combinations: SS, SU, US and UU. But suppose we only want to match on SS or UU (perhaps because the two types must be the same for an optimisation to be correct). 
+
+We can achieve this by placing only a single copy of the node (in our example, Integral) in the search pattern. Both of the nodes that would point to the Integral nodes now point to this single node, so that it has two parent nodes. This node is said to be coupled, and Inferno will only find a match when the two types in the input program are the same as each other. 
+
+In fact, couplings restrict the entire subtree matched to the coupled nodes to be identical to each other - so the two types in the above example would be restricted to have the same width regardless of what is supplied for the width in the search pattern. 
+
+3.2 Coupling into the replace pattern
+
+We can allow the replace pattern to point to a node that is already part of the search pattern. Now, whenever the search pattern finds a match, the coupled node will be associated with the subtree of the input program that matched the coupled node. SearchReplace will substitute this subtree into the replace pattern. 
+
+3.3 Overlaying
+
+Where a node couples into search and replace pattern, its children do not normally appear in the output. These children only serve to restrict the matches found during search, and during replacement, the matched input program subtree is used for the output tree (instead of the coupled node or its children).
+
+However, it is possible to arrange for some part of the input program subtree to be replaced by nodes provided in the replace pattern. This is done by placing an Overlay node somewhere in the subtree under the coupled node in the search/replace pattern. It has two child pointers: through and overlay. During search, S&R will try to match the subtree pointed to by through. During replace, S&R will substitute the input program subtree that was matched, and then it will "overlay" the subtree pointed to by overlay.
+
+The overlay process is recursive, that is it can overlay a child of the node pointed to by overlay over the equivalent child of the matched input program node. It operates as follows:
+- If through is a non-strict subclass of overlay, and overlay is not coupled, then any pointers that are non-NULL in the overlay are overlaid over the corresponding through, or its coupled seciton of input tree. This process recurses as long as the subclass condition is met.
+- If the overlay node is neither the same nor a base for the input program node or is is coupled, the overlay/coupling overwrites the through/coupling (that is, all members are copied over).
+- Containers (sequences and collections) cannot be NULL and cannot be overlaid, so they always overwrite when they exist in the overlay/coupling.
+
+Note that the condition for overlaying versus overwriting depend only on the patterns provided for overlay and though in the Overlay node, not on the contents of the input program tree.
+
+3.4 Notes on keyability of couplings
+
+Inferno search and replace has an implementation concept called keying, which is the process of choosing a particular input program subtree that will correspond to a particular coupling. Each coupling only needs to be keyed once for each search hit, and once it is keyed, the key-to-coupling relationship remains unchanged until the replace has completed.
+
+Normally, Inferno search patterns exhibit an implicit "and" rule, in the sense that every node in the search pattern must match a node in the input program tree before a match is considered successful. This would make every node in the search pattern a candidate for keying a coupling. We say such nodes are in a "normal context". But some special nodes permit a match even when some subtree under that node does not match. These subtrees are said to be "abnormal contexts". 
+
+An abnormal context extends throughout the entire subtree under the pattern node that caused it. So a normal context can contain an abnormal context as a subtree, but an abnormal context remains abnormal all the way down to the leaf nodes. The NotMatch node matches when its supplied subtree does not match, making its subtree pattern an abnormal context. See the documentation for NotMatch for more explaination.
+
+Inferno cannot key to nodes in abnormal contexts. Consequently, every coupling that include search pattern nodes must include at least one parent that is in a normal context. Inferno will find a keyable node in the coupling and key to it if one exists, otherwise an error will be reported. I believe such an error indicates a fundamentally ill-defined transformation.
+
+4 Star search pattern
+
+The Inferno tree supports one-to-many relationships using containers, of which two types are available: Sequence, which preserves ordering and Collection, which does not. When creating a search pattern it can be useful to be able to match zero or more elements of a container. We can do this using a special node called Star<>, which is templated on the collection's element type. So a container of pointers to Statements can be wildcarded using Star<Statement>. If a pre-restiction is given, every container element matched by the Star must satisfy the pre-restriction (ie be a non-strict subclass of the supplied base class).
+
+Star nodes may be coupled into collections in the replace pattern, in order to reproduce all the nodes that were matched by the Star in the search pattern. 
+
+A Star may only be placed in a container, never as ordinary member node of another node. 
+
+4.1 In Sequence
+
+A Star node in a Sequence in a search pattern acts like a "*" character in a filename, in other words it can match zero or more elements at the position of the star. It is possible to use * multiple times and at any position in the pattern sequence. But it is not possible to place two stars consecutively. For example the Sequence (Star<Statement>, If, Star<Statement>, For, Star<Statement>) is a search pattern for any Sequence of Statements that contains an If and a For, and which places the If before the For.
+
+4.2 In Collection
+
+A Star in a Collection acts similarly as when in a Sequence. However, since Collections are unordered, the semantics differ slightly. A Collection in a search pattern may only contain zero or one Star node. If a star node is present, it will match all nodes not matched by other (non-Star) elements of the Collection. For example, the Collection (Star<Declaration>, Typedef, Static) will match any Collection of Declarations that includes a Typedef and a Static, and these may appear in any order.
+
+4.3 Notes on collection matching
+
+To clarify, Inferno uses a non-order-preserving implementation to store all Collections, including ones in search and replace patterns. This means that the order in which elements are specified when constructing a Collection should not affect behaviour. So for example (Static, Typedef, Star<Declaration>) will be equivalent to the above example.
+
+5 Stuff search pattern
+
+Since Inferno search and replace operates on trees rather than just linear sequences of tokens, it is often useful to be able to wildcard a subtree. In fact, the maximally wild intermediate node will accomplish this through topological wildcarding, as discussed above. 
+
+But it is useful to be able to explicitly match some part of the subtree, named the terminus, regardless of the path from the root of the subtree to the terminus. This is accomplished using the Stuff<> node. At the base of the subtree we place a Stuff node, templated on the pointed-to type. This node has a member named terminus, which is a pointer to a Node, and any Node or subtree of nodes can be referenced from here.
+
+Inferno will search the subtree under the Stuff node for a match to the terminus. If a terminus match is found, the stuff node is considered a match. For example Stuff<Compound> with its terminus as If may be given as the body of a function. It will match the terminus to any If node within the body as well as within nested Compund blocks, For or While loop bodies etc.
+
+Stuff nodes may be coupled into the replace pattern in order to reproduce the subtree that Stuff matched to in the output program. When coupling the stuff nodes, it is possible to overlay the terminus with an alternative subtree in order to modify only what is under the terminus. The terminus node itself and any node in the subtree under it may also be coupled into the replace pattern. 
+
+5.1 Recurse restriction
+
+Optionally, another member of the Stuff node called recurse_restriction may be filled in (otherwise it defaults to NULL). recurse_restriction will typically be a subtree. Whenever the Stuff node is about to recurse through a pointer in its search for a terminus match, it will skip any node that is not a match for the subtree at recurse_restriction.
+
+Therefore, Stuff will only find a terminus that can be reached via a path that satisfies the recursion restriction. This may be useful when, extending the above example, we wish to avoid matching an If that might be in a function that is declared inline in a class that is declared inside the function of interest. If we wish to exclude such cases, we can set recurse_restriction to a Statement node. Now an If node (our terminus) can only be found if there is a direct path of nested Statements, which includes Compound, For, While etc but does not include Type nodes. An unwanted If in this case would be within a Type subtree and so not found as the terminus.
+
+Note that the Stuff node recurse_restrictior only applies when the stuff node actually recurses. It does not restrict the base of the Stuff node and it does not restrict the terminus. So a Stuff node whose terminus matches the input program at the location of the Stuff node will match regardless of recurse_restriction. Also, if the Stuff node has recursed into the input program subtree, the terminus can still match nodes that would not match the restrictor.
+
+Compare with the pre-restriction documented above, which applies to all special nodes. This only applies to the root of the input program subtree, as with all other special nodes. In the general case, pre-restriction, recurse_restriction and terminus are all acting to restrict the Stuff node at different places in the input program subtree: pre-restriction at root, terminus at leaf and recurse_restriction at intervening nodes. 
+
+Note that a recurse restriction pattern is an abnormal context.
+
+6 Boolean search patterns
+
+Search patterns may be restricted according to boolean rules, as explained below. 
+
+6.1 NotMatch
+
+NotMatch implements the "not" function (the complement in set theory). The NotMatch node should be placed at the root of the subtree of interest, and the member named pattern should be set to point to the subtree that should not match. The pattern can itself include wildcards, so a NotMatch(Integral) would match nay data type other than signed or unsigned integer types.
+
+The subtree under a NotMatch node in a search pattern is an abnormal context, in other words it cannot key a coupling. Consider a NotMatch node in a search pattern that is coupled to a node in a replace pattern. This will work as expected - the subtree that did not match the NotMatch pattern is subtituted successfully. 
+
+But consider coupling a node within the NotMatch's subtree into the replace pattern. If there was an overall match of the search pattern, that must mean that some node in the NotMatch pattern did not match. It is possible that the NotMatch pattern is not even of the same layout (topology) as the corresponding subtree in the input program. If this is the case, it is not well defined what node or subtree should be substituted in the replace pattern.
+
+6.2 MatchAll
+
+MatchAll implements the "and" function (intersection in set theory). The MatchAll node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that should match. MatchAll does *not* create an abnormal context for its pattern subtrees.
+
+6.3 MatchAny
+
+MatchAny implements the "or" function (union in set theory). The MatchAny node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that may match. The subtree under a MatchAny node in a search pattern is an abnormal context.
+
+6.4 MatchOdd
+
+MatchOdd implements the "eor" function. The MatchOdd node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that may match. This is probably most useful with 2 patterns, in which case a match is achieved when exactly one of them matches. The subtree under a MatchOdd node in a search pattern is an abnormal context. 
+
+7 TransformOf search patterns
+
+Sometimes, a transformation will appear to be mostly suitable for the search and replace approach, but there may be aspects of the requred matching criteria which cannot be described using the above wildcarding techniques. In such cases, inferno supports the ability to run some user supplied algorithm during the search. The user supplies  the algorithm as an implementation of the OutOfPlaceTransformation and TransformOf<X> interfaces. Objects of the resulting type are Nodes and may be placed in the search pattern as long as the type X must is compatible with the context. TransformOf<> adds a member named "pattern" which is a pointer to any Node.
+
+When the search engine encounters a TransformOf<> node, it applies the transformation implemented by the Transformer node to the current input program subtree (without modifying the original copy) and then proceeds to compare the result of the transformation with the pattern pointed to by the "pattern" member. This allows Inferno to search for a subtree in the input program that matches a pattern *after transformation*.
+
+Transformer nodes support the usual functionality of pre-restriction (via the type X) and the ability to couple both the transformer node itself (keying as the untransformed input program subtree) and the node pointed to by "pattern" (keying as the input program subtree after transformation).
+
+7.1 TypeOf
+
+TypeOf is a TransformOf search pattern (it may also be used directly as a utility). It is used in the context of an expression. During a search, the TypeOf algorithm will determine the type of an expression in the input program subtree, and then compare that with the type pointed to by the "pattern" member (note that types and expressions are represented as subtrees under Type and Expression, respectively). 
+
+Note that if the pattern is maximally wild, then TypeOf will maych any valid expression. However, it can be convenient to couple the Type wildcard with another Type in the search pattern, to restrict for type equivalence, or with a node in the replace pattern, to reproduce the type in the output program.
+
+7.2 GetDeclaration
+
+GetDeclaration is a Transformer search pattern (it may also be used directly as a utility). It is used in the context of an InstanceIdentifier. During a search, the GetDeclaration algorithm will search for the declaration of an identifier in the input program, and then compare that with the declaration pointed to by the "pattern" member. 
+
+7.3 Notes on transformation interface
+
+The search engine requires the presence of TransformOf<X> interface, which supplies the custom comparison functionality which includes invoking the OutOfPlaceTransformation functor. The OutOfPlaceTransformation interface guarantees not to modify the supplied tree and to return a newly created one; this is essential for search and replace usage.
+
+OutOfPlaceTransformation can indicate failure by returning a NULL pointer. Failure results in a non-match.
+
+8 Builder replace patterns
+
+Similar to TransformOf patterns, described above, it is sometimes desirable to generate subtrees using some algorithm apart from the search and replace, and embed these in the output program tree. This is done using builder nodes. At present, the identifier builder is only kind of builder node. 
+
+In general, builder nodes are able to key a coupling. Therefore, it is possible to create a coupling entirely in a replace pattern, as long as it contains exactly one builder node.
+
+8.1 BuildIdentifier
+
+BuildIdentifier is a builder node that constructs identifiers with new names using a printf format string. At present, InstanceIdentifier can be built using BuildInstanceIdentifier, and LabelIdentifier can be built using BuildLabelIdentifier. 
+
+These special nodes have format and source members. The format is a string and will be the name of the newly built identifier. If the format contains %s, then the name of the identifier node pointed to by source will be substituted in that position (can be any kind of identifier). The source will normally need to be coupled into the search pattern in order to obtain a name from the input program tree. The builder node itself may be coupled in the replace pattern to create multiple references.
+
+For example, if a replace pattern is to contain a new variable, and that variable is the count of times a label was jumped to, we might create the variable instance in the replace pattern, and for its identifier we point to a BuildInstanceIdentifier node. We might set the format to "%s_count" and point the source to the LabelIdentifier of the label whose jumps we are counting. If a label is seen called "EXIT", we will get a variable called "EXIT_count". 
+
+Usages of the new variable elsewhere in the replace pattern can just couple directly to the BuildInstanceIdentifier node.
+
+9 CompareReplace
+
+As an alternative to SearchReplace, we can use the CompareReplace class. This has a compare pattern and a replace pattern, supplied as parameters to the constructor or via Configure(). It will compare the supplied input tree with the supplied compare pattern, but only at the root, i.e. it will not walk the supplied input tree searching for a match. The replace pattern will be applied at root, so it will replace the entire supplied tree except where couplings are used (CompareReplace supports couplings and all the special nodes in exactly the same way as SearchReplace does).
+
+Typically, a program tree will begin with the Program node so the compare pattern should match the Program node (which is a kind of Scope). Alternatively, it may be used as a slave, as explained below.
+
+9.1 Note on implementation
+
+The bulk of the implementation of the search and replace algorithm is actually inside CompareReplace, since ComapreReplace solves a conceptually simpler problem. It is possible to emulate SearchReplace functionality by using a Stuff node and an Overlay node at the root of CompareReplace patterns. This is exactly what SearchReplace actually does: at configure time, it constructs Stuff<Scope>(Overlay<Node>(through:user's search pattern, overlay:user's replace pattern) ) and supplies this as both compare pattern and replace pattern to CompareReplace. The Stuff<Scope> is coupled and serves to reproduce the portion of input program outside the matched subtree into the output program. This is meant to be invisible to the user, but could be relevent when debugging.
+
+10 Slave search and replace
+
+It can be useful to build a 1:n relationship between two search and replace patterns. For example, we may wish to perform a transformation on a variable that affects the declaration and all the usages of the variable. In this example, we would want each match to a variable's declaration (the master) to correspond with n matches to usages (the slaves), where n can be zero or more.
+
+This is achieved by constructing the search and replace pattens for the master (the variable declaration in the example) and then placing a special node called SlaveSearchReplace into the master's replace pattern. The SlaveSearchReplace node is filled in with search and replace patterns for the slave (a usage of the variable in the example). For each match that master finds, the slave will operate repeatedly and will perform zero or more replace operations depending on how many matches it finds.
+
+SlaveSearchReplace has three members: through, which simply points to the remainder of the master's replace pattern, and search and replace which specify the slave's behaviour as documented for SearchReplace. You can also use SlaveCompareReplace, which has through, compare and replace members and behaves as per CompareReplace described above.
+
+What makes slaves useful (as opposed to just running the program through the master and then the slave as two seperate transformations) is the ability to restrict what the slave can match based on the context of a particular match in the master. This is achieved in two ways:
+
+1. Nodes in the slave search pattern may be coupled into nodes in the master pattern. Each such coupling must be keyed in the master (that is, it must include a node in a normal context in the master search pattern or a builder node in the master replace pattern). In the example, the variable modified by the master would be coupled into the slave to ensure it only finds usages of the same variable.
+
+2. The slave node is placed within the master replace pattern. The through member is simply used to continue the master pattern below the position of the slave. The slave will only match at (SlaveCompareReplace) or under (SlaveSearchReplace) the position where it is found in the master replace pattern. In the example, the slave pattern could be placed inside the scope containing the variable's declaration, to restrict matches to that scope.
+
+Note: in this example, placing the slave in the scope is not necessary because a coupling of the variable provides the required restriction (though this might serve as an optimisation). In other cases, such as detection of Break and Continue there is nothing to couple to: then, only the placement method can restrict the slave sufficiently.
+
+10.1 Nested
+
+It is possible to use more than one slave in a pattern, they appear nested (that is as direct or indirect children of each other) and can nest in two distinct ways:
+
+1. A second slave may be placed under the through member of the first. These slaves are conceptually at the same level, and the nesting just defines the order in which they operate: child first. Both slave patterns operate for each match of the master in the prescribed order.
+
+2. A second slave may be placed under the replace pattern of the first. This creates a sub-slave, which has the relationship described above to the first slave (so the first slave now acts as master to the second). The second slave acts for each match of the first. Overall, we get a 1:n:nm type of relationship.
+
+Note: having these two nesting options is confusing: the first style looks too much like the second and can be easily confused when reading graphs, so it's important to look out for this.
+
+11 Spinning prevention
+
+As described above, SearchReplace and CompareReplace act repeatedly until no further matches are found. This means the output program tree of a search and replace operation (that terminates) does not match the search pattern. This is a reliable post-invariant and serves the concept of Inferno as a principally reductive or goal-seeking algorithm. However, it is possible to create patterns that would repeat forever if every replace action creates another match. For this reason, any algorithm that re-tries a subtree that has been modified by a replace could spin forever.
+
+Some program transformation approaches guarantee termination by for example traversing the input program exactly once while looking for matches on the way. These can suffer from missed matches when the replace action creates a match that was not present during the initial traversal. 
+
+As a practical matter, a (buggy) search and replace pattern that spins forever may be spotted easily. Debugging this scenario is actually more straightforward than the alternative scenario of debugging a pattern that does not match due to traversal rules and thereby breaks the post-invariant condition. 
+
+Typically, one uses the -rn<x> option to permit repeating some finite number of times before terminating without error. In the resulting output program, the results of many (say 10 to 100) repetitions of the pattern should be obvious (in graphs and c renders piped though iindent.sh, the repeating portion will usually be found further to the right than the remainder of the program). 
+
+There follow some methods for preventing spinning - these must be appled seperately to the master and to any slaves. This is unlikely to be a complete list.
+
+11.1 Reducing patterns
+
+Any replace pattern that strictly reduces the number of nodes in the tree for each hit, must eventually terminate. We can estimate whether a pattern has this property by counting the number of non-special nodes in the search and replace pattern and noting that the replace pattern is indeed smaller. Care must be taken around Overlay nodes, to determine the size change that results. 
+
+Further, it suffices to reduce the number of occurrances of any single node type, as long as it is explicitly matched by the search pattern. For example, the ForToWhile transformation acts only when a For node is seen, and produces an output tree not including the For node that was matched. Even though the output trees are typically bigger, the number of For nodes strictly reduces and the transformation will terminate when there are no more For nodes in the program. 
+
+These patterns are termed "strictly reductive".
+
+11.2 "but-not" pattern
+
+Where a pattern converts a general form of a construct to a specific form the reduction is less redily apparent. What is being removed is any construct of the general kind but not the specific kind. For example, converting general usage of If into a restricted form like If(value:Expression, then:Goto, else:Nop) is actually trying to reduce away the if statements that are not in the form shown.
+
+A common solution is to insert MatchAll in the search pattern, with a NotMatch node on the other leg. So when reducing X to Y, the search pattern becomes MatchAll( X, NotMatch(Y) ). This provides an and-not or but-not type of restriction. The search pattern subtree Y will resemble the replace pattern, but must be supplied seperately because a coupling would not make sense here (or be allowed because the subtree under NotMatch is an abnormal context).
+
+11.3 GreenGrass node
+
+Inferno S&R supports a special node called GreenGrass to help in tricky cases of non-termination. It is inserted into a search pattern via its through memeber. The immediate child node will be matched as normal, but only if it is a node from the input program tree. GreenGrass restricts the search to not match the node if it was produced by an earlier iteration of the replace algorithm. The specific rules for GreenGrass are as follows:
+- During the first search in any SearchReplace, ComapreReplace or slave, the GreenGrass node does not restrict at all
+- During sucessive passes, GreenGrass restricts to nodes that reached the input program tree via Stuff node substitution in the previous pass. Note this includes the portion outside of the match when SearchReplace is used (see the implementation note by CompareReplace).
+- In cases where one pass creates a new node (that GreenGrass would reject) and then a later pass preserves it via Stuff node substituttion, GreenGrass will still reject it.
+
+Broadly speaking, GreenGrass assumes that Stuff substitution is not really changing the nodes, just moving them around. It filters to nodes from the original input tree that may be been moved around. 
+
+12 Worked examples
+
+A small example, two medium examples and one large one follow. 
+
+12.1 removing Nop
+
+CleanupNop uses SearchReplace to eliminate obviously redundant Nops from code. Nop is a do-nothing statement rather like NOP instructions in assembly language (except it is not intended to consume processor cycles). The search pattern is a Compound statement with a Star<Declaration> node in the decls. The sequence of statements in the Compound block (an ordered container) contain the following: Star<Statement>, Nop, Star<Statement>. All the Star nodes have no pre-restriction and are maximally wild, so they'll match anything. 
+
+Our search can therefore match a Compound block with any decls, and any statements as long as there is at least one Nop (this transformation only deals with Nops in Compound blocks). The Nop can be anywhere in the sequence of statements: the layout of Star, X, Star resembles *X* in filename globbing.
+
+For replacing, we wish to preserve everything in the compound block except the Nop. And we wish to preserve the statements in the correct order. We supply a new Compound block in the replace pattern, and fill in its declarations and statements by pointing to the same Star nodes we created in the search pattern. Thus the Star nodes each have two parent nodes, and are coupled. The effect of coupling the star nodes is to reproduce whatever they matched (which could be 0 or mode nodes, complete with any subtrees) in the output program at that position. 
+
+The pattern is strictly reductive: each hit will reduce the number of Nop statements by one, and the transformation will terminate when the program contains no Nop statements. The repeating nature of the Inferno S&R algorithm means we will keep trying until we don't get any hits. This means that a compound block containing many Nop statements will be correctly transformed after multiple hits. On each hit, the Star<Statement> nodes will match different subsequences of the statements in the compound block. For this step (and I believe in general) it does not matter whether the first Nop matched is the one at the top, or bottom or middle of the block.
+
+12.2 Generate implicit casts
+
+GenerateImplicitCasts adds a C-style cast to every funciton call argument that is not of the same type as the parameter in the function declaration. 
+
+To do this we search for a call to a function (the Call node). Because function calls can be expressions (involving function pointers) the Call node specifies the function using an expression. The signature of the function is the type of this expression, and it contains the types of the parameters. To get the type of the expression, we specify a TypeOf node, which is a kind of TransformOf node. The type is then compared with the pattern given as the child of TypeOf. Here we specify Procedure, which is the type for a callable entity that has parameters (but not necessarily a return value). Function derives from Procedure.
+
+Note: Inferno stores parameters in an unordered collection, which differs from C source language which relies on parameter ordering. Arguments to a call are then specified in the form of a map, with the key being the parameter's identifier and the value being the argument expression. Inferno does not support maps directly (only sequences and collections) so the tree specification for C builds a map from a collection of nodes called MapOperand which act as key-value pairs. A call is therefore conceptually more like a named parameter call eg foo( param1:arg1, param2:arg2 ...). This type of structure is easy to manipulate in search and replace using couplings. Ordered parameters would be more difficult because it would require an ordinal correspondance (index coupling). However, the reason for doing it this way is not S&R simplicity, but rather a desire not to store redundant information in the tree.
+
+Since we will act on one parameter at a time, we use Star to match the other parameters. The one we are interested in will be an Instance node, since a parameter is a declaration of a variable-like construct. The identifier and type are given maximal wildscards to allow any parameter to match. In the arguments collection of the search pattern's Call node, we again supply a Star for other arguments, and a MapOperand, as explained above, for the argument in question. To ensure the MapOperand corresponds to the same parameter that we picked out of the declaration, we couple the identifier (which is the key of the map) to that of the parameter. 
+
+We must restrict the search to cases where the types differ, so we use the but-not pattern, by placing TypeOf on the argument expression, and coupling to the parameter type under a Not node. Therefore we will only hit when the argument matches the parameter by identifier, but strictly differs in type.
+
+The replace pattern for this transformation is relatively simple. In the replace pattern's Call, we couple the other args and the expression that chooses the function, so that they are the same (when you couple to a TypeOf node, you get the expression; to get the type, couple to its child). We replace the missing argument with a new MapOperand, coupling the identifier to that of the MapOperand in the search pattern. For the expression, we supply a Cast node, which corresponds to a C-style cast. Its type is the type of the parameter in the declaration. The expression is coupled to the the argument expression. This will generate a cast that casts the expression in the original call to the type of the parameter in the funciton's declaration, as required.
+
+Note that we see some three-way couplings around the parameter type and identifier. This works just fine, Inferno is cool about that sort of thing.
+
+12.3 For to While
+
+ForToWhile transforms For loops into semantically equivalent While loops. C makes this easy and hard. Easy because the three elements of a For loop are general C constructs that can simply be moved to the appropriate places around a While loop; hard because of Break and Continue. We do not have to worry about Break here because it has already been handled by another step, but Contiune requires explicit treatment (Continue works in While loops, but has the wrong semantics: the increment would be skipped).
+
+Our master search pattern describes a general For loop. There is a For node, and its expression (the test) is filled in with an Expression node which is a maximal wildcard that will match any expression. Its init condition, increment and body are all maximally wild Statement nodes. Therefore, any For loop will match (Inferno fills absent statements with Nop, which will match).
+
+The master replace pattern begins with a Compound node. This is there to make the pattern simpler, and there are clean-up steps that remove them where they are redundant. Generous use of Compound blocks is encouraged style. The compound has only 2 statements: the init statement from the For loop via a coupling, followed by a While node. The While loop's test expression is coupled in from the For loop's test expression. In the body of the While loop we place the For loop body (but see below) followed by the increment from the For loop. This completes the basic transformation - by inspection, you can determine that the constructs from the For loop are in the right places. 
+
+In order to deal with Continue, we insert a SlaveCompareReplace into the master replace pattern, just above where we couple the body of the For loop. Recall that the through member is simply there to allow the master replace pattern to continue. During each master replace (in other words, as S&R is building the While loop) the slave will act on the replaced version of the subtree under the through link. This is the body of the original For loop (via coupling).
+
+In this body, we wish to change the behaviour of Continue: we wish to insert a copy of the increment statement just before each continue, to compensate for continue skipping the increment we placed at the end of the body. The positioning of the slave ensures we do not change continues outside of For loops. Were it not for two awkward issues, we would simply use SlaveSearchReplace, search for continue and replace with a compound containing the increment condition (coupled) followed by continue. This is indeed approximately how the slave is laid out, but there are extra nodes to solve the problems:
+
+1. The slave replace pattern contains continue, so the slave would not terminate. We want each continue in the input program (under a For) to be replaced exactly once by the compound of increment and continue. More or fewer replacements would increment too many or too few times. The GreenGrass node ensures we only replace continues that were in the input tree, and not ones that came from our replace pattern.
+
+2. Not all continue statements under a For loop apply to that loop, because there could be nested loops (see the C spec). We cannot just use a SlaveSearchReplace because it would find continues that we don't want to change. The actual pattern used is a stuff node, which can recurse to find a continue (continue is the terminus, via the Overlay node), and it has a recurse restriction filled in with NotMatch and a Loop wildcard. This part of the pattern means "not any kind of Loop" and the Stuff node will therefore not recurse through any loops as it looks for a terminus match. Stuff is followed by an Overlay node, which allows the new Compound to be overlayed over the original Continue.
+
+Note that the SlaveCompareReplace(Stuff(Overlay)) pattern resembles the pattern that SearchReplace generates to emulate search and replace using the CompareRepalce implementation. The difference here is that we needed to add a recurse restriction, and so we wrote that pattern out long-hand. If there was no need for a recurse restriction, we would use SlaveSearchReplace and get a more readable pattern.
+
+12.4 Generate stacks
+
+GenerateStacks is one of the more complex steps, so I'll just describe the strategy, a few salient points and some future directions for this transformation.
+
+We adopt the pessimistic approach that all automatic variables may be subject to recursion (we don't look for non-recursing functions or variables that are not live at recursion points). Each is given a stack in the form of an array and a stack index is provided, which is like a stack pointer but is in the form of an index into the aforementioned arrays. We arbitrarily make the stacks 10 elements deep - 10 is the number I use as a todo to make the number configurable in future (a #define symbol would not show up in graphs).
+
+The stacks and stack index are all local static variables. In future, these will be made members of some containing class, which will improve locality.
+
+A single static stack pointer is declared for each funciton. It is incremented at the top and decremented at the bottom. The master searchReplace does this. It must also be decremented before return statements. A slave does this. Another slave detects all the declarations of automatic variables in the function and replaces them with static arrays (stacks). This slave has a sub slave which finds usages of the variable, and inserts an indexing operation into the array, using the stack index.
+
+Salient points:
+
+The Subroutine Instance at the root of the pattern is coupled, and the part we wish to change is seperated out again using an Overlay node. This is an equally effective alternative to having seperate Instance nodes for search and replace and keying the members that do not change. It might be more tolerant of future changes in the definition of the Instance node.
+
+The search pattern continues through the Overlay node's through pointer. We match a generic Compound so that we can couple into the replace pattern, preserving the function's existing body. We add a MatchAll branch which goes though a Stuff node to an Automatic node. This ensures the master does not spin, adding more and more stack indexes. It also means we do not modify functions that already do not have automatic variables.
+
+The master replace is reached by passing through the through pointers of the two first-level slaves. It produces a new compound, inserting a new declaration for the stack index into the decls collection, and placing an increment and decrement of the same variable at the top and bottom of the statements sequence. The identifier of the variable is built from the function name and _stack_index to make the output readable.
+
+The first slave to act is the most-nested first-level slave, which is a SlaveCompareReplace. It emulates SearchReplace using Star and Overlay, as seen before. This time, the reason is to allow a sub-slave to be tucked in at the root of the replace pattern, above the Stuff. The Overlay splits out into a search pattern for an automatic, and a replace pattern that declares an array type. Again, we build the array's identifier from that of the original variable name with _stack appended.
+
+This slave's sub-slave searches for the original variable, and replaces it with a subscript of the new array by the new stack index. This does not hit the declaration, because slaves operate after the pattern under through has been replaced, and the original variable has been replaced with a new one that has a different identifier (it isn't the name that makes identifiers different, just the fact that they are seperate nodes - I believe GCC does it that way too, could be wrong).
+
+Finally, the other first-level slave looks for return and replaces with a compound containing a decrement of the stack index followed by a return. We use GreenGrass to stop this transformation happening again to the the returns we generate (which would spin). This uses the Temp storage class, which is not fully defined and may not be a permenent feature of Inferno. At present it is a variable that makes only those guarantees made by all of Automatic, Static and Member.
+
+Future directions:
+
+The step could probably be cleaned up, for example by taking advantage of the fact that every usage of a local variable must be in or under the compound in which it was declared - this would let all the slaves be SlaveSearchReplace and remove the need for the Stuff/Overlay combination. 
+
+As for enhancement, detection of non-recursive functions is complicated because it is non-local. But we can easily detect leaf functions and do a trivial Automatic to Static (or Member or Temp) conversion (perhaps in a seperate step). This could be extended to detect leaf-scoped varables (ones whose scope has no outgoing calls). Further, we could restrict checks for outgoing calls to areas where the variable is "live" - this would be harder in S&R but might be possible.
+
+Stack overflow detection would simply require boilerplate code at the point of the increment. It would invoke some kind of intrinsic debug assert node in case of overflow. This would be disabled when generating silicon, after extensive debugging with a simulator or on an intermediate C++ render.
+
+13 Notes on pattern development in C++
+
+At present, S&R patterns are built by short C++ routines in the constructors for step classes. We derive step classes from S&R so that the S&R interfaces are inherited, and pass the patterns in via Configure().
+
+Inferno uses a template type called TreePtr<> to point to child nodes. This is derived from boost::shared_ptr, but supports some extra functionality needed by Inferno.
+
+13.1 Helpful syntactic sugar
+
+MakeTreePtr<> can simplify the construction of TreePtr<> members. MakeTreePtr<X> may be constructed in the same way as X, but will then masquerade as a TreePtr<X> where the pointed-to X has been allocated using new. It is similar to Boost's make_shared<>() except that being a class with a constructor, rather than a free function, it may be used as a declaration as well as in a function-like way. One drawback is that if the constructor of X has a large number of parameters, the implementation of MakeTreePtr<> may need to be extended.
+
+Inferno containers (Sequence and Collection) support initialisation directly from TreePtrs of the right type, and from comma-seperated lists of TreePtrs (via operator, overloading). This can avoid the need for repeated calls to insert() or push_back().
+
+13.2 Style tips
+
+When building a Container from TreePtrs using the comma operator, it is good stlye to enclose the entire list in parentheses. This looks better, and is necessary when the container is being passed to a function, so that the compiler does not assume the commas are there to seperate parameters.
+
+Prefixes may be used with variable names to help clarify at the discretion of the programmer. I have used s_ for search pattern nodes and r_ for replace pattern nodes, with no prefix for nodes coupled into both (or c_ could be used here). I prepend l_ for slaves and sometimes insert x into nodes under a NotMatch node, such as with the but-not pattern.
+
+I usually leave numbers and strings that are passed into SpecificX or Builder nodes as magic, possibly with a comment. Any macros, enums etc will be reduced to the raw number in a graph plot anyway.
+
+The order in which pattern nodes are created and connected together is mostly flexible, since members are mostly assigned via direct member assignment. It is mostly possible to declare all the nodes and then connect them all together. One exception is the slave nodes, which are actually instances of the SearchReplace engine, and require either to be constructed using a constructor call or via Configure(). I usually use the constructor form to avoid confusion.
+
+There is no need to implement Transformation's functor operator (operator()). By deriving publicly from SearchReplace, your transformation will inherit that operator. Configuring the SearchReplace object at construct time is strongly advised, because (a) Configure() may contain slow algorithms in future that should only run once even if the transformation is invoked many times and (b) the S&R engine may collect information, such as coverage measurements, across multiple invocations.
+
+13.3 Most important tip
+
+It is a very good idea to use graph plots right from the start when developing steps. Look at the graphs for the kinds of input test programs you are interested in. Code up a program resembling the expected output program, and look at the graph for that too, side by side. These will give a starting point for what the search and replace patterns will need to look like. As soon as you have a transformation that compiles, even if incomplete, take a look at the pattern graph and see if it looks right. The graphs are not just for fun, they really help!
+
+Good luck!
