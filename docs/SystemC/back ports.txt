@@ -1,0 +1,179 @@
+
+IMPORTANT:
+This document is not part of any released or draft SystemC 
+standard. This material is copyright John Graley 2008 and 
+licensed under the BSD license.
+
+
+Coherent Dynamic Binding
+
+We wish to introduce a form of dynamic binding that balances
+pointer-like behaviour as found in software with unambiguous 
+expression of and compliance with a structural hierarchy as 
+found in RTL/HDL designs.
+
+We can do this by allowing dynamic port->interface binding only
+where a static binding relationship already exists.
+
+Structurally, this means that the new dynamic calls can only 
+follow paths established by existing statically bound calls.
+
+We support 2 cases:
+
+1. A module instance has many ports all bound to the same 
+interface on many module instances. In this case, we support 
+making a dynamically bound call to any of these module 
+instances, and we determine the allowable set as the set 
+of existing statically bound ports.
+
+2. A module instance has an interface that many other module
+instances have bound to. In this case, we support making a
+dynamically bound call to some interface in any of the 
+module instances that are statically bound to us. We 
+determine the allowable set as the set of module instances
+that have actually made a call to our module instance in
+the past.
+
+The dynamic call mechanism must be templated on the interface
+to which the dynamic calls will be made, which may be an 
+ordinary SystemC interface (derived from sc_interface).
+
+We will supply a data type for the dynamic call id. We will
+supply functions to obtain this id. In case 1. above, the id 
+may be obtained directly from a statically bound port. In 
+case 2. we can obtain the id from our interface *during* the
+incoming call.
+
+We then permit an unbound port to be used for dynamic calls
+using a simple syntax extension to sc_port.
+
+
+Dynamic interface id data type template:
+
+sc_dyn_id< TargetInterface > DynId;
+
+where TargetInterface is the interface to which dynamic calls
+will be made and DynId is a dynamic id variable. Data of this 
+type may be stored and copied but no pointer arithmetic, comparisons 
+or NULL value are supported.
+
+
+Getting the dynamic id of an incoming call:
+
+First derive the module from sc_dyn_interface< TargetInterface > 
+instead of sc_interface. In the called function implementation, 
+use DynId = sc_get_incoming_id()
+
+
+Getting the dynamic id of an outgoing call:
+
+Get it from the port you're calling out of, using 
+DynId = MyPort.sc_get_outgoing_id() where MyPort is an instance 
+of sc_port< TargetInterface >
+
+
+Making a dynamically bound call:
+
+MyDynPort( DynId ).Foo(...);
+
+where MyDynPort is an instance of sc_port< TargetInterface > and
+Foo() is the target function. MyDynPort must not be bound statically
+and DynId must have been initialised.
+
+
+Usage rule:
+
+Dynamic ids may be passed between module instances, but may only 
+be used to make a dynamically bound call from the same module
+instance that originally obtained it using sc_get_incoming_id() or
+sc_get_outgoing_id().
+
+
+Usage recommendation:
+
+In the above case 1. it is probably good practice to call 
+sc_get_outgoing_id() near actual calls though the port. This
+makes the styles used for cases 1. and 2. more consistent.
+
+
+Example code:
+
+class InterfaceB : public sc_interface
+{
+    virtual void B();
+    virtual void C();
+};
+
+
+class InterfaceA : sc_dyn_interface< InterfaceB >
+{
+    virtual void A();
+};
+
+
+class ModuleB : public sc_module, public InterfaceB
+{
+public:
+    sc_port<InterfaceA> PortA;
+    SC_CTOR
+    {
+        PortA( instance_a );
+    }
+    void example_get_incoming()
+    {
+        PortA.A(); // Call A() in instance_a through ordinary SystemC port.
+    }
+    void B()
+    {
+        // ... do stuff ...
+    }
+    void C()
+    {
+        printf("Reached dynamically bound target function!!!1\n");
+    }
+} instance_b;
+
+
+class ModuleA : public sc_module, public InterfaceA
+{
+public:
+    sc_port<InterfaceB> PortB;
+    sc_port<InterfaceC> PortC;
+    SC_CTOR
+    {
+        PortB( instance_b );
+        // Leaving PortC unbound because it will be used for dynamic calls.
+    }
+    sc_dyn_id< InterfaceB > remembered_id;
+    void example_get_outgoing()
+    {        
+        PortB.B();                                   // This is the original outgoing call (optional).
+        remembered_id = PortB.sc_get_outgoing_id();  // Get corresponding id from port.
+    }
+    void example_make_dynamic_bound_call()
+    {
+        PortC( remembered_id ).C();
+    }
+    void A()
+    {
+        remembered_id = InterfaceA::sc_get_incoming_id(); // Gets the id of whatever called A().
+        // ... do stuff ...
+    }
+};
+
+
+Possible SystemC implementation for simulation:
+
+sc_dyn_id< I > is simply a pointer (or reference) to interface type I
+
+sc_get_outgoing_id() just returns the port's bound interface pointer
+
+sc_get_incoming_id() implemented via sc_port calling a hidden function
+in sc_dyn_interface that passes over the id before making actual
+interface call. sc_dyn_interface stores this id so it can be recovered
+by sc_get_incoming_id(). Use inlines.
+
+sc_port(id).x() implemented by temporarily binding the port; either
+1. just bind or rebind then return the pointer and let the call go ahead or
+2. return a local sc_port object, bound to id, that will destruct after the 
+call returns. 
