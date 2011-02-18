@@ -23,7 +23,7 @@ GenerateImplicitCasts::GenerateImplicitCasts()
     // simply insert a cast to the declaration param type at the root of the 
     // expression.
 	MakeTreePtr<Call> s_call;
-	MakeTreePtr<TypeOf> callee;
+	MakeTreePtr< TransformOf<Expression> > callee( &TypeOf::instance );
 	s_call->callee = callee;
 	MakeTreePtr<Procedure> s_proc;
 	callee->pattern = s_proc;
@@ -36,7 +36,7 @@ GenerateImplicitCasts::GenerateImplicitCasts()
 	s_proc->members = (s_param, s_other_params);
 	MakeTreePtr< MapOperand > s_arg;
 	s_arg->identifier = param_id;
-	MakeTreePtr<TypeOf> s_arg_value;
+	MakeTreePtr< TransformOf<Expression> > s_arg_value( &TypeOf::instance );
 	s_arg->value = s_arg_value;
 	//s_arg_value->pattern = MakeTreePtr< Type >();
 	MakeTreePtr< NotMatch<Type> > s_arg_type;

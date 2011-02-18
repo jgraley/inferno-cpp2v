@@ -2,19 +2,11 @@
 #define TYPEOF_HPP
 
 #include "transformation.hpp"
-#include "search_replace.hpp"
 #include "tree/tree.hpp"
-#include "soft_patterns.hpp"
 
-// TODO rename to something like GetType
-
-class TypeOf : public OutOfPlaceTransformation, public TransformOf<Expression>
+class TypeOf : public OutOfPlaceTransformation
 {
 public:
-	SPECIAL_NODE_FUNCTIONS
-    TypeOf() : TransformOf<Expression>( this )
-    {
-    }
     virtual TreePtr<Node> operator()( TreePtr<Node> c, TreePtr<Node> root )
     {
     	context = c;
@@ -25,6 +17,7 @@ public:
     	context = TreePtr<Node>();
     	return n;
     }
+    // TODO make these private
     TreePtr<Type> Get( TreePtr<Expression> o );
     TreePtr<Type> Get( TreePtr<Operator> op, Sequence<Type> optypes );
     TreePtr<Type> GetStandard( Sequence<Type> &optypes );
@@ -36,9 +29,9 @@ public:
     // constructed. Otherwise, return NULL
     TreePtr<Expression> IsConstructorCall( TreePtr<Node> c, TreePtr<Call> call );
 
+    static TypeOf instance; 
 private:
     TreePtr<Node> context;
 };
-
 
 #endif

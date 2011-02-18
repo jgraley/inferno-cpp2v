@@ -62,12 +62,6 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     {
         return rl->type;
     }
-    else if( TreePtr<TypeOf> to = dynamic_pointer_cast<TypeOf>(o) )
-    {
-    	TreePtr<Type> t = dynamic_pointer_cast<Type>(to->pattern); // get the pattern from the TransformTo base class
-    	ASSERT( t );
-        return t;
-    }
     else if( dynamic_pointer_cast<LabelIdentifier>(o) )
     {
         return MakeTreePtr<Type>(); // TODO labels need a type
@@ -372,3 +366,4 @@ TreePtr<Expression> TypeOf::IsConstructorCall( TreePtr<Node> c, TreePtr<Call> ca
     return e;
 }
 
+TypeOf TypeOf::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
