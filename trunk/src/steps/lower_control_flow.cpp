@@ -71,7 +71,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     MakeTreePtr<Type> cond_type;
     MakeTreePtr<Automatic> r_decl;
     MakeTreePtr<BuildInstanceIdentifier> id("switch_value");
-    TreePtr<TypeOf> s_cond( new TypeOf ); // TODO use MakeTreePtr, confirm this works
+    MakeTreePtr< TransformOf<Expression> > s_cond( &TypeOf::instance );
     
     // SlaveSearchReplace for default
     MakeTreePtr<Compound> l1_s_body, l1_r_body;

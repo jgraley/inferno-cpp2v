@@ -265,10 +265,10 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		*shape = "circle";
 		return string("^");
 	}
-	else if( dynamic_pointer_cast<TransformOfBase>(sp) )
+	else if( shared_ptr<TransformOfBase> tob = dynamic_pointer_cast<TransformOfBase>(sp) )
 	{
 		*shape = "hexagon";
-		return *sp;
+		return *(tob->transformation);
 	}
 	else if( shared_ptr<BuildIdentifierBase> smi = dynamic_pointer_cast<BuildIdentifierBase>(sp) )
 	{

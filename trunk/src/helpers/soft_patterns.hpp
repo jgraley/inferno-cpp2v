@@ -129,9 +129,11 @@ private:
 
 struct TransformOfBase : CompareReplace::SoftSearchPattern 
 {
-    TreePtr<Node> pattern; // TODO make this type a template parameter
-    TransformOfBase( Transformation *t ) :
-    	transformation(t)
+    TreePtr<Node> pattern; 
+    Transformation *transformation;
+    TransformOfBase( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) :
+    	transformation(t),
+    	pattern(p)
     {
     }
 
@@ -140,14 +142,16 @@ private:
     		                                            TreePtr<Node> x,
     		                                            bool can_key,
     		                                            Conjecture &conj ) const;
-    Transformation *transformation;
 };
 
 template<class PRE_RESTRICTION>
 struct TransformOf : TransformOfBase, Special<PRE_RESTRICTION>
 {
 	SPECIAL_NODE_FUNCTIONS	
-    TransformOf( Transformation *t ) : TransformOfBase (t) {}
+    TransformOf( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) : 
+        TransformOfBase(t, p) 
+    {
+    }
 };
 
 

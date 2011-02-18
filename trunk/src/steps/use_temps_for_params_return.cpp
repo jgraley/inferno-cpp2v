@@ -19,14 +19,14 @@ UseTempsForParamsReturn::UseTempsForParamsReturn()
 	TreePtr<Return> s_return( new Return );
 	TreePtr< MatchAll<Expression> > s_and( new MatchAll<Expression> );
 	s_return->return_value = s_and;
-	TreePtr<TypeOf> retval( new TypeOf );
+    MakeTreePtr< TransformOf<Expression> > retval( &TypeOf::instance );
 	MakeTreePtr<Type> type;
 	retval->pattern = type;
     
     // Restrict the search to returns that have an automatic variable under them
     TreePtr< Stuff<Expression> > cs_stuff( new Stuff<Expression> );
 	s_and->patterns = ( retval, cs_stuff );
-	TreePtr< GetDeclaration > cs_id( new GetDeclaration );
+    MakeTreePtr< TransformOf<InstanceIdentifier> > cs_id( &GetDeclaration::instance );
     cs_stuff->terminus = cs_id;
     TreePtr<Instance> cs_instance( new Automatic );
     cs_id->pattern = cs_instance;

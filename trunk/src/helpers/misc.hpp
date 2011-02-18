@@ -4,23 +4,21 @@
 #include "tree/tree.hpp"
 #include "walk.hpp"
 #include "transformation.hpp"
-#include "soft_patterns.hpp"
 
 TreePtr<Identifier> GetIdentifier( TreePtr<Declaration> d );
 
-class GetDeclaration : public OutOfPlaceTransformation, public TransformOf<InstanceIdentifier>
+class GetDeclaration : public OutOfPlaceTransformation
 {
 public:
-	SPECIAL_NODE_FUNCTIONS
-	GetDeclaration() : TransformOf<InstanceIdentifier>( this ) {}
     virtual TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root );
+    static GetDeclaration instance;
 private:
 	TreePtr<UserType> Get( TreePtr<Node> context, TreePtr<TypeIdentifier> id );
 	TreePtr<Instance> Get( TreePtr<Node> context, TreePtr<InstanceIdentifier> id );
 };
 
-
 // Look for a record, skipping over typedefs. Returns NULL if not a record.
+// TODO make this a Transformation
 TreePtr<Record> GetRecordDeclaration( TreePtr<Node> context, TreePtr<TypeIdentifier> id );
 
 // Hunt through a record and its bases to find the named member
