@@ -2,6 +2,7 @@
 #include "validate.hpp"
 #include "render/graph.hpp" //  for graphing patterns
 #include "conjecture.hpp"
+#include "hit_count.hpp"
 
 //#define STRACE
 
