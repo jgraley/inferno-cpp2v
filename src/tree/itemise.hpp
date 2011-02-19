@@ -13,7 +13,7 @@ using namespace std;
 // is true only for GCC4.3. Anyway, if we see it twice it will have the same address,
 // so we de-duplicate during itemise algorithm.
 
-class Itemiser
+class Itemiser : public virtual Traceable
 {
 public:
     class Element
@@ -74,9 +74,14 @@ public:
     inline static vector< Itemiser::Element * > ItemiseStatic( const ITEMISE_TYPE *itemise_architype,
                                                                const Itemiser *itemise_object )
     {
-        // Do a safety check: itemise_object we're itemising must not be same as or derived
-		// from the architype, so that all the architype's members are also in itemise_object.
-        ASSERT( dynamic_cast<const ITEMISE_TYPE *>(itemise_object) );
+        ASSERT( itemise_architype )("Itemiser got itemise_architype=NULL\n");
+        ASSERT( itemise_object )("Itemiser got itemise_object=NULL\n");
+        
+        // Do a safety check: itemise_object we're itemising must be same as or derived
+		// from the architype, so that all the architype's members are also in itemise_object.        
+        ASSERT( dynamic_cast<const ITEMISE_TYPE *>(itemise_object) )
+              ( "Cannot itemise because itemise_object=")(*itemise_object)
+              ( " is not a nonstrict subclass of itemise_architype=")(*itemise_architype);
 		
 		// Do the pointer math to get "elements of A in B" type behaviour
 		// This must be done in bounce because we need the architype's type for the dynamic_cast
