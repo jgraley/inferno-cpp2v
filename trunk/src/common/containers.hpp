@@ -21,7 +21,7 @@ namespace OOStd {
 //
 
 template< class SUB_BASE, typename VALUE_INTERFACE >
-class ContainerInterface : public Traceable, public virtual SUB_BASE
+class ContainerInterface : public virtual Traceable, public virtual SUB_BASE
 {
 public:
 	// Abstract base class for the implementation-specific iterators in containers.

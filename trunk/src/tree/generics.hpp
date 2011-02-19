@@ -109,7 +109,7 @@ struct MakeTreePtr : TreePtr<VALUE_TYPE>
 #define NODE_FUNCTIONS ITEMISE_FUNCTION MATCHER_FUNCTION CLONE_FUNCTION FINAL_FUNCTION(false)
 #define NODE_FUNCTIONS_FINAL ITEMISE_FUNCTION MATCHER_FUNCTION CLONE_FUNCTION FINAL_FUNCTION(true)
 struct NodeBases : Magic,
-                   Traceable,
+                   virtual Traceable,
                    Matcher,
                    Itemiser,
                    Cloner
