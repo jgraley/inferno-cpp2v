@@ -3,6 +3,7 @@
 
 #include "common/common.hpp"
 #include "tree/generics.hpp"
+#include <inttypes.h>
 
 template<typename NODE, typename RAW>
 class RCHold
@@ -27,7 +28,7 @@ class RCHold
 
 public:
     RCHold() :
-        id( ((unsigned)this % 255+1) << 24 ) // 8-bit hash of this pointer, never zero, placed in top 8 bits
+        id( ((uintptr_t)this % 255+1) << 24 ) // 8-bit hash of this pointer, never zero, placed in top 8 bits
     {
     }
     
@@ -35,7 +36,7 @@ public:
     RAW ToRaw( TreePtr<NODE> p )
     {
         ASSERT( p )( "Cannot convert NULL pointer to raw" );
-        unsigned i = (unsigned)hold_list.size(); // the index of the next push_back()
+        uintptr_t i = (unsigned)hold_list.size(); // the index of the next push_back()
         ASSERT( (i & 0xFF000000) == 0 )( "gone over maximum number of elements, probably due to infinite loop, if not rejig id" );
         i |= id; // embed an id for the current hold object  
         //TRACE("ToRaw 0x%08x\n", i );
@@ -48,7 +49,7 @@ public:
     TreePtr<NODE> FromRaw( RAW p )
     {
         ASSERT( p != 0 )( "this raw value is uninitialised");
-        unsigned i = reinterpret_cast<unsigned>(p);
+        uintptr_t i = reinterpret_cast<uintptr_t>(p);
         //TRACE("FromRaw 0x%08x (id=0x%08x)\n", i, id );
         ASSERT( (i & 0xFF000000) == id )( "this raw value was stored to a different holder or uninitialised");
         i &= 0x00FFFFFF; 

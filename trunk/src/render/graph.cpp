@@ -12,6 +12,7 @@
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
 #include "graph.hpp"
+#include <inttypes.h>
 
 // TODO indicate pre-restriction by putting class name over the link. Only when type is not that
 // of the pointer, ie a non-trivial pre-estriction
@@ -191,7 +192,7 @@ string Graph::DoTransformationLinks( Transformation *sr, string id )
 string Graph::Id( void *p )
 {
 	char s[20];
-	sprintf(s, "\"%08X\"", (unsigned)(p) );
+	sprintf(s, "\"%p\"", p );
 	return s;
 }
 

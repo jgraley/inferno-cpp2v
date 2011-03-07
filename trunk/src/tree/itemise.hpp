@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <vector>
 #include "common/common.hpp"
+#include <inttypes.h>
 
 using namespace std;
 
@@ -22,11 +23,11 @@ public:
         virtual ~Element() {}
         Element &operator=( const Element &other )
         {
-            if( (unsigned)this >= (unsigned)dstart &&
-                (unsigned)this < (unsigned)dend )
+            if( (uintptr_t)this >= (uintptr_t)dstart &&
+                (uintptr_t)this < (uintptr_t)dend )
             {
-                unsigned ofs = (unsigned)this - (unsigned)dstart;
-                FOREACH( int x, v )
+                uintptr_t ofs = (uintptr_t)this - (uintptr_t)dstart;
+                FOREACH( uintptr_t x, v )
                     if( x==ofs )
                     	return *this; // don't insert if in there already, see above
                 v.push_back( ofs );
@@ -37,7 +38,7 @@ public:
     };
     
 	template< class ITEMISE_TYPE >
-	inline static vector< int > ItemiseImpl( const ITEMISE_TYPE *itemise_architype )
+	inline static vector< uintptr_t > ItemiseImpl( const ITEMISE_TYPE *itemise_architype )
 	{
 		TRACE("Static itemise %s ", typeid(*itemise_architype).name() );
 		(void)itemise_architype;
@@ -57,10 +58,10 @@ public:
 
 	template< class ITEMISE_TYPE >
 	// TODO want to use const ref here, but not working with my FOREACH
-	inline static vector< int > &BasicItemiseStatic( const ITEMISE_TYPE *itemise_architype )
+	inline static vector< uintptr_t > &BasicItemiseStatic( const ITEMISE_TYPE *itemise_architype )
 	{
 		// Just a cache on ItemiseImpl()
-		static vector< int > v;
+		static vector< uintptr_t > v;
 		static bool done=false;
 		if(!done)
 		{
@@ -85,11 +86,11 @@ public:
 		
 		// Do the pointer math to get "elements of A in B" type behaviour
 		// This must be done in bounce because we need the architype's type for the dynamic_cast
-        vector< int > &vofs = BasicItemiseStatic( itemise_architype );
+        vector< uintptr_t > &vofs = BasicItemiseStatic( itemise_architype );
 
         const ITEMISE_TYPE *target_object = dynamic_cast<const ITEMISE_TYPE *>(itemise_object);
         vector< Itemiser::Element * > vout;
-        FOREACH( int ofs, vofs )
+        FOREACH( uintptr_t ofs, vofs )
             vout.push_back( (Element *)((const char *)target_object + ofs) );
 
         return vout;
@@ -99,23 +100,23 @@ public:
 	inline static Itemiser::Element *ItemiseIndexStatic( const ITEMISE_TYPE *itemise_object,
 			                                             int i )
 	{
-		vector< int > &v = BasicItemiseStatic( itemise_object );
+		vector< uintptr_t > &v = BasicItemiseStatic( itemise_object );
 		ASSERT( i>=0 );
 		ASSERT( i<v.size() );
-		int ofs = v[i];
+		uintptr_t ofs = v[i];
 		return (Element *)((const char *)itemise_object + ofs);
 	}
 
 	template< class ITEMISE_TYPE >
 	inline static int ItemiseSizeStatic( const ITEMISE_TYPE *itemise_object )
 	{
-		vector< int > &v = BasicItemiseStatic( itemise_object );
+		vector< uintptr_t > &v = BasicItemiseStatic( itemise_object );
 		return v.size();
 	}
 
 	static const char *dstart;
     static const char *dend;
-    static vector<int> v;
+    static vector<uintptr_t> v;
     
     virtual vector< Itemiser::Element * > Itemise(const Itemiser *itemise_object) const = 0;
 };

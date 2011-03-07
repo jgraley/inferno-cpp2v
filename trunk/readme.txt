@@ -42,7 +42,7 @@ g++
 flex
 bison
 libboost-dev
-libbbost-thread-dev
+libboost-thread-dev
 graphviz   [only if you want to look at pretty pictures] 
 indent     [makes reading inferno C output easier]
 
