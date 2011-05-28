@@ -14,11 +14,11 @@ SearchReplace will search for an occurance of the search pattern and replace it 
 
 1.2 Special nodes
 
-S&R supports additional nodes called "special" nodes that do not appear in the program representations for any language. They invoke additional S&R functionality when used in search and/or replace patterns. Since Inferno tree pointers are strongly typed (links are pointers to an intermediate type corresponding to the subset of child node types allowed), we allow special nodes to derive from a user-specified type. This type is specified as a template parameter to the special node. Normally, the base type should be the same type as the pointer that will point to the special node, but see pre-restriction under topological wildcarding.
+S&R supports additional nodes called "special" nodes that do not appear in the program representations for any language. They invoke additional S&R functionality when used in search and/or replace patterns. Since Inferno tree pointers are strongly typed (links are pointers to an intermediate type corresponding to the subset of child node types allowed), special nodes are templated on a user-specified type called the base type. Normally, the base type should be the same type as the pointer that will point to the special node, but see pre-restriction under topological wildcarding.
 
 1.3 Termination
 
-The SearchReplace algorithm repeatedly attempts to find a match to the search pattern, and substitutes the replace pattern, until it can no longer find a match to the search pattern. Therefore, it can run forever if for example the replace pattern re-creates a search pattern match. It it the user's responsibility to prevent this from occuring: this is discussed in more detail later.
+The SearchReplace algorithm repeatedly attempts to find a match to the search pattern, and substitutes the replace pattern, until it can no longer find a match to the search pattern. Therefore, it can run forever if for example the replace pattern re-creates a search pattern match. It is the user's responsibility to prevent this from occuring: this is discussed in more detail later.
 
 2 Tolopogical wildcarding
 
@@ -30,18 +30,17 @@ When an intermediate node is seen in a search pattern, it serves as a wildcard f
 
 As an example of multiple layers of intermediates, consider that Expression is derived from Statememt, making expressions a subset of statements. This is consistent with the rule in C that an expression may be used in place of a statement, but not the other way around. Consequently, a node of type Statement in a search pattern will match any expression as well as other kinds of statements, but an Expression node in a search pattern will only match expressions.
 
-Due to Inferno's type-safe tree, it is not possible to specify nonsensically broad intermediates in a search pattern. This is because the pointers used in nodes are typically pointers to intermediate node types, and only identical or more derived (subset) nodes may be pointed to. Therefore the broadest wildcard possible is one whose type is the same as that of the pointer that will point to it. Such a pointer is called maximally wild and will match on all type-correct input programs.
+Due to Inferno's type-safe tree, it is not possible to specify nonsensically broad intermediates in a search pattern. This is because the pointers used in nodes are typically pointers to intermediate node types, and only identical or more derived (subset) nodes may be pointed to. Therefore the broadest wildcard possible is one whose type is the same as that of the pointer that will point to it. Such a pointer is called maximally wild and will match all input program subtrees.
 
-Such maximally wild pointers may be considered similar to the use of "?" character in filename wildcarding. Other intermediate topological wildcards could be likened to a value range in certain textual schemes for example /a-z,A-Z/ though it should be noted that topological (set-theoretic) restriction is more concise than linear range restriction.
+Maximally wild pointers may be considered similar to the use of "?" character in filename wildcarding. Other intermediate topological wildcards could be likened to a value range in certain textual schemes for example /a-z,A-Z/ though it should be noted that topological (set-theoretic) restriction is more concise than linear range restriction.
 
 2.1 Can populate the wild card's members
 
-In the Inferno tree, some intermediate nodes have members: these members appear in all derived classes due to inheritance. Members may be filled in when intermediates are used in a search pattern. These members will be matched as normal and will serve to restrict the search pattern.
+In the Inferno tree, some intermediate nodes have members: C++ copies these members into derived node classes during inheritance. Members may be filled in when intermediates are used in a search pattern. These members will be matched as normal and will serve to restrict the search pattern.
 
 For example, giving the node Integral and pointing the width member to a SpecificInteger of value 32 (which we could write Integral(width:SpecificInteger(32))) will match 32-bit signed and unsigned data types since Signed and Unsigned both derive from Integral.
 
-Note: to wildcard the width and fix the signedness we would use eg
-Signed(width:Integer) in other words we use the final node for the type Signed and fill in the width with the maximal wildcard, which is Integer in this case. See tree.hpp for the definitions of these nodes.
+Note: to wildcard the width and fix the signedness we would use eg Signed(width:Integer), in other words we use the final node for the type Signed and fill in the width with the maximal wildcard, which is Integer in this case. See tree.hpp for the definitions of these nodes.
 
 2.2 NULL in search patterns
 
@@ -53,42 +52,50 @@ We do allow NULL in search patterns, where it serves as shorthand for the maxima
 
 When searching, all special nodes support search restriction via the base type supplied as the first template parameter (recall that special nodes derive from the supplied base type). This base type is called the pre-restriction type. Regardless of what the special node is defined to do, all searches will restrict to nodes that are of non-strict subclasses of the pre-restriction type. 
 
-Type-safety means that a tree pointer can only point to non-strict subclasses of the pointer type. Therefore if the pre-restriction type is the same type, no restriction will be seen when the search runs. Only if a strict subclass is given will a restriction be seen to take effect. This is called a pre-restriction since it seems to apply before the special node's special algorithm runs (which will typically apply some further restriction independently of the pre-restriction under an "and" rule).
+Type-safety means that a tree pointer can only point to non-strict subclasses of the pointer type. Therefore if the pre-restriction type is the same type, the pre-restriction will be maximally wild and effectively disabled. Only if a strict subclass is given will a restriction be seen to take effect. The term pre-restriction reminds us that it seems to apply before the special node's special algorithm runs (which will typically apply some further restriction independently of the pre-restriction under an "and" rule).
 
 2.5 Notes on tolopogy-oriented tree
 
 In order to maximise the utility of toplogical wildcarding (and its coupling support) the inferno tree has been contrived to express as much information as possible in the node hierarchy and through pointers to child nodes. So for example where a node might naturally contain a boolean (such as the signdness of an integral type) or an enum (such as an access specifier which can be public, private or protected) one of two techniques is used:
-- the options are expressed in a set of final nodes as with Signed and Unsigned, making the original node (Integral) become an intermediate node or
-- a new hierarchy of nodes is created with a common intermediate and final nodes corresponding to the options, as with Public, Private, Protected which are all subclasses of AccessSpec.
+
+- the options for node X are expressed in a set of final nodes derived from X, so that X becomes an intermediate node. This can only be done for one field of node X. For example, consider nodes Signed and Unsigned, which both derive from the original node Integral, and indicate signedness. For a pattern in which an integral type can be signed or unsigned, Integral is the appropriate wildcard. Signed or Unsigned are used when the signedness matters.
+
+- a new hierarchy of nodes under a new intermediate Y is created, and the original node X contains a pointer to Y in place of the original field. This may be applied to any field of any given X. For example Public, Private and Protected are all subclasses of AccessSpec, and the Definition node points to AccessSpec.
+
 In fact, this policy leads most nodes to contain only pointer, Collection and Sequence. Only a small number of nodes contain other data types such as int, string etc that cannot be accomodated toplogically. This is termed a toplogically-oriented tree and is a reasonably consistent canonical form for program elements.
 
 3 Couplings
 
 When a wildcard has been specified in a search pattern, it is often useful to be able to make use of the actual subtree in the input program that the wildcard matched. We may wish to:
+
 - restrict the search so that two wildcards in the search pattern must match the same subtree in the input program and/or
+
 - introduce the input program subtree that matched a search pattern wildcard into the output program, as a substitute for part of the replace pattern.
 
 3.1 Restricting with couplings
 
-Suppose we use the wildcard Integral in two places in a search pattern. Each will individually match Signed or Unsigned, giving a total of four matching combinations: SS, SU, US and UU. But suppose we only want to match on SS or UU (perhaps because the two types must be the same for an optimisation to be correct). 
+Suppose we use the wildcard Integral in two places in a search pattern. Each Integral node will individually match Signed or Unsigned, giving a total of four matching combinations: SS, SU, US and UU. But suppose we only want to match on SS or UU (perhaps because the two types must be the same for an optimisation to be correct). 
 
 We can achieve this by placing only a single copy of the node (in our example, Integral) in the search pattern. Both of the nodes that would point to the Integral nodes now point to this single node, so that it has two parent nodes. This node is said to be coupled, and Inferno will only find a match when the two types in the input program are the same as each other. 
 
-In fact, couplings restrict the entire subtree matched to the coupled nodes to be identical to each other - so the two types in the above example would be restricted to have the same width regardless of what is supplied for the width in the search pattern. 
+In fact, couplings restrict the entire subtree under the coupled nodes to be identical - so the two types in the above example would be restricted to have the same width regardless of what is supplied for the width in the search pattern. 
 
 3.2 Coupling into the replace pattern
 
-We can allow the replace pattern to point to a node that is already part of the search pattern. Now, whenever the search pattern finds a match, the coupled node will be associated with the subtree of the input program that matched the coupled node. SearchReplace will substitute this subtree into the replace pattern. 
+We can allow the replace pattern to point to a node that is already part of the search pattern. Now, whenever we find a match, the coupled node will be associated with the subtree of the input program that matched the coupled node. During the replace operation, SearchReplace will substitute this subtree into the output program tree. 
 
 3.3 Overlaying
 
-Where a node couples into search and replace pattern, its children do not normally appear in the output. These children only serve to restrict the matches found during search, and during replacement, the matched input program subtree is used for the output tree (instead of the coupled node or its children).
+Where a pattern node couples into both the search and the replace patterns, its children do not normally appear in the output program tree. These children only serve to restrict the matches found during search, and during replacement, the matched input program subtree is used for the output tree (instead of the coupled node or its children).
 
 However, it is possible to arrange for some part of the input program subtree to be replaced by nodes provided in the replace pattern. This is done by placing an Overlay node somewhere in the subtree under the coupled node in the search/replace pattern. It has two child pointers: through and overlay. During search, S&R will try to match the subtree pointed to by through. During replace, S&R will substitute the input program subtree that was matched, and then it will "overlay" the subtree pointed to by overlay.
 
 The overlay process is recursive, that is it can overlay a child of the node pointed to by overlay over the equivalent child of the matched input program node. It operates as follows:
-- If through is a non-strict subclass of overlay, and overlay is not coupled, then any pointers that are non-NULL in the overlay are overlaid over the corresponding through, or its coupled seciton of input tree. This process recurses as long as the subclass condition is met.
-- If the overlay node is neither the same nor a base for the input program node or is is coupled, the overlay/coupling overwrites the through/coupling (that is, all members are copied over).
+
+- If through is a non-strict subclass of overlay, and overlay is not coupled, then any pointers that are non-NULL in the overlay are overlaid over the corresponding through, or its coupled section of input tree. This process recurses as long as the subclass condition is met.
+
+- If the overlay node is neither the same nor a base for the input program node or if it is coupled, the overlay/coupling overwrites the through (that is, all members are copied over).
+
 - Containers (sequences and collections) cannot be NULL and cannot be overlaid, so they always overwrite when they exist in the overlay/coupling.
 
 Note that the condition for overlaying versus overwriting depend only on the patterns provided for overlay and though in the Overlay node, not on the contents of the input program tree.
@@ -374,7 +381,7 @@ Inferno containers (Sequence and Collection) support initialisation directly fro
 
 13.2 Style tips
 
-When building a Container from TreePtrs using the comma operator, it is good stlye to enclose the entire list in parentheses. This looks better, and is necessary when the container is being passed to a function, so that the compiler does not assume the commas are there to seperate parameters.
+When building a Container from TreePtrs using the comma operator, it is good style to enclose the entire list in parentheses. This looks better, and is necessary when the container is being passed to a function, so that the compiler does not assume the commas are there to seperate function arguments.
 
 Prefixes may be used with variable names to help clarify at the discretion of the programmer. I have used s_ for search pattern nodes and r_ for replace pattern nodes, with no prefix for nodes coupled into both (or c_ could be used here). I prepend l_ for slaves and sometimes insert x into nodes under a NotMatch node, such as with the but-not pattern.
 
@@ -389,3 +396,4 @@ There is no need to implement Transformation's functor operator (operator()). By
 It is a very good idea to use graph plots right from the start when developing steps. Look at the graphs for the kinds of input test programs you are interested in. Code up a program resembling the expected output program, and look at the graph for that too, side by side. These will give a starting point for what the search and replace patterns will need to look like. As soon as you have a transformation that compiles, even if incomplete, take a look at the pattern graph and see if it looks right. The graphs are not just for fun, they really help!
 
 Good luck!
+
