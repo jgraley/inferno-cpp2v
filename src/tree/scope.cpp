@@ -1,5 +1,5 @@
 #include "scope.hpp"
-#include "walk.hpp"
+#include "node/walk.hpp"
 #include "misc.hpp"
 
 //

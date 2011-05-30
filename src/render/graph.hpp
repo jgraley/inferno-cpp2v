@@ -2,7 +2,7 @@
 #define GRAPH_HPP
 
 #include "tree/tree.hpp"
-#include "helpers/transformation.hpp"
+#include "node/transformation.hpp"
 
 //
 // Generate a GraphViz compatible graph description from a subtree (when used as a

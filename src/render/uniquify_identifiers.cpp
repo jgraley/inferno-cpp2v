@@ -1,6 +1,6 @@
 #include "uniquify_identifiers.hpp"
-#include "helpers/walk.hpp"
-#include "helpers/misc.hpp"
+#include "node/walk.hpp"
+#include "tree/misc.hpp"
 
 #define UID_FORMAT "%s_%u"
 

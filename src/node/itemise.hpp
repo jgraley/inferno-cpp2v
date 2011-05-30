@@ -57,8 +57,7 @@ public:
 	}
 
 	template< class ITEMISE_TYPE >
-	// TODO want to use const ref here, but not working with my FOREACH
-	inline static vector< uintptr_t > &BasicItemiseStatic( const ITEMISE_TYPE *itemise_architype )
+	inline static const vector< uintptr_t > &BasicItemiseStatic( const ITEMISE_TYPE *itemise_architype )
 	{
 		// Just a cache on ItemiseImpl()
 		static vector< uintptr_t > v;
@@ -72,8 +71,8 @@ public:
 	}
 
 	template< class ITEMISE_TYPE >
-    inline static vector< Itemiser::Element * > ItemiseStatic( const ITEMISE_TYPE *itemise_architype,
-                                                               const Itemiser *itemise_object )
+    inline static const vector< Itemiser::Element * > ItemiseStatic( const ITEMISE_TYPE *itemise_architype,
+                                                                     const Itemiser *itemise_object )
     {
         ASSERT( itemise_architype )("Itemiser got itemise_architype=NULL\n");
         ASSERT( itemise_object )("Itemiser got itemise_object=NULL\n");
@@ -86,7 +85,7 @@ public:
 		
 		// Do the pointer math to get "elements of A in B" type behaviour
 		// This must be done in bounce because we need the architype's type for the dynamic_cast
-        vector< uintptr_t > &vofs = BasicItemiseStatic( itemise_architype );
+        const vector< uintptr_t > &vofs = BasicItemiseStatic( itemise_architype );
 
         const ITEMISE_TYPE *target_object = dynamic_cast<const ITEMISE_TYPE *>(itemise_object);
         vector< Itemiser::Element * > vout;
@@ -100,7 +99,7 @@ public:
 	inline static Itemiser::Element *ItemiseIndexStatic( const ITEMISE_TYPE *itemise_object,
 			                                             int i )
 	{
-		vector< uintptr_t > &v = BasicItemiseStatic( itemise_object );
+		const vector< uintptr_t > &v = BasicItemiseStatic( itemise_object );
 		ASSERT( i>=0 );
 		ASSERT( i<v.size() );
 		uintptr_t ofs = v[i];
@@ -110,7 +109,7 @@ public:
 	template< class ITEMISE_TYPE >
 	inline static int ItemiseSizeStatic( const ITEMISE_TYPE *itemise_object )
 	{
-		vector< uintptr_t > &v = BasicItemiseStatic( itemise_object );
+		const vector< uintptr_t > &v = BasicItemiseStatic( itemise_object );
 		return v.size();
 	}
 

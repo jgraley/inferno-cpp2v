@@ -36,7 +36,7 @@ public:
     Tracer &operator()();
     Tracer &operator()(const char *fmt, ...);
     Tracer &operator()(const string &s); // not a printf because of risk of accidental format specifiers
-    // TODO ostream support?
+
     static void EndContinuation();
     
     class Descend

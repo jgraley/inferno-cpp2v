@@ -2,8 +2,8 @@
 #include "steps/lower_control_flow.hpp"
 #include "tree/tree.hpp"
 #include "common/common.hpp"
-#include "helpers/soft_patterns.hpp"
-#include "helpers/typeof.hpp"
+#include "sr/soft_patterns.hpp"
+#include "tree/typeof.hpp"
 
 // TOOD go through step impls and use inline decls of leaf nodes, to reduce wordiness
 

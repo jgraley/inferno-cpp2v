@@ -6,9 +6,9 @@
  */
 
 #include "tree/tree.hpp"
-#include "helpers/transformation.hpp"
-#include "helpers/search_replace.hpp"
-#include "helpers/soft_patterns.hpp"
+#include "node/transformation.hpp"
+#include "sr/search_replace.hpp"
+#include "sr/soft_patterns.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
 #include "graph.hpp"
@@ -351,7 +351,7 @@ string Graph::HTMLLabel( string name, TreePtr<Node> n )
 			if( *ptr )
 			{
 				s += " <TR>\n";
-				s += "  <TD>" + Sanitise(*ptr) + "</TD>\n";
+				s += "  <TD>" + Sanitise(*ptr, true) + "</TD>\n";
 				s += "  <TD PORT=\"" + SeqField( i ) + "\"></TD>\n";
 				s += " </TR>\n";
 		   }

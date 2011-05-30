@@ -1,8 +1,7 @@
 #include "search_replace.hpp"
-#include "validate.hpp"
-#include "render/graph.hpp" //  for graphing patterns
 #include "conjecture.hpp"
-#include "hit_count.hpp"
+#include "tree/tree.hpp"
+#include "common/hit_count.hpp"
 
 //#define STRACE
 
@@ -23,9 +22,6 @@ void CompareReplace::Configure( TreePtr<Node> cp,
                                 TreePtr<Node> rp )
 {
     ASSERT( cp );
-    Validate v(true);        
-    v(cp, &cp);
-    v(rp, &rp);            
     
     if( is_master )
     {
@@ -978,26 +974,19 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
                               "Either call Configure() or supply pattern arguments to constructor.\n"
                               "Thank you for taking the time to read this message.\n");
     
-	// If the initial root and context are the same node, then arrange for the context
-	// to follow the root node as we modify it (in SingleSearchReplace()). This ensures
-	// new declarations can be found in slave searches. We could get the
-	// same effect by taking the context as a reference, but leave it like this for now.
-	// If *proot is under context, then we're OK as long as proot points to the actual
-	// tree node - then the walk at context will follow the new *proot pointer and get
-	// into the new subtree.
-	if( c == *proot )
-		pcontext = proot;
-	else
-		pcontext = &c;
-
-	if( is_master )
-        Validate()( *pcontext, proot ); 
-        
+    // If the initial root and context are the same node, then arrange for the context
+    // to follow the root node as we modify it (in SingleSearchReplace()). This ensures
+    // new declarations can be found in slave searches. We could get the
+    // same effect by taking the context as a reference, but leave it like this for now.
+    // If *proot is under context, then we're OK as long as proot points to the actual
+    // tree node - then the walk at context will follow the new *proot pointer and get
+    // into the new subtree.
+    if( c == *proot )
+	pcontext = proot;
+    else
+	pcontext = &c;
         
     (void)RepeatingCompareReplace( proot );   
-
-    if( is_master )
-        Validate()( *pcontext, proot ); 
 
     pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
 }

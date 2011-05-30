@@ -120,7 +120,7 @@ bool Flatten::iterator::operator==( const ContainerInterface::iterator_interface
 	ASSERT(pi)("Comparing traversing iterator with something else ")(ib);
 	if( pi->IsAtEnd() || IsAtEnd() )
 		return pi->IsAtEnd() && IsAtEnd();
-	return **pi == **this; // TODO do not like - too many derefs
+	return *pi == *this; 
 }
 
 void Flatten::iterator::Overwrite( Flatten::iterator::pointer v ) const

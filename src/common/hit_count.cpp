@@ -1,4 +1,4 @@
-#include "helpers/hit_count.hpp"
+#include "hit_count.hpp"
 
 bool operator<( const HitCount::Category &l, const HitCount::Category &r )
 {

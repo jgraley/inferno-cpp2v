@@ -1,7 +1,7 @@
 #ifndef TRANSFORMATION_HPP
 #define TRANSFORMATION_HPP
 
-#include "tree/generics.hpp"
+#include "node.hpp"
 #include "common/trace.hpp"
 
 class Transformation : public Traceable

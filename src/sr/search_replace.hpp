@@ -3,8 +3,8 @@
 
 #include "common/common.hpp"
 #include "common/read_args.hpp"
-#include "walk.hpp"
-#include "transformation.hpp"
+#include "node/walk.hpp"
+#include "node/transformation.hpp"
 #include "coupling.hpp"
 #include <set>
 

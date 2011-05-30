@@ -1,9 +1,9 @@
 #ifndef MAGIC_HPP
-#define MAGIC_HPP
+#define MAGIC_HPP 
 
 // Magic number checks for memory corruption
 
-class Magic
+class Magic   
 {
     unsigned magic;
 public:

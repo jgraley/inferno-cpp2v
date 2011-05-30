@@ -8,7 +8,7 @@
 #include "steps/generate_stacks.hpp"
 #include "tree/tree.hpp"
 #include "common/common.hpp"
-#include "helpers/soft_patterns.hpp"
+#include "sr/soft_patterns.hpp"
 
 GenerateStacks::GenerateStacks()
 {

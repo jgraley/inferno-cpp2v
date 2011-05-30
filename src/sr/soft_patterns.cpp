@@ -1,5 +1,4 @@
 #include "soft_patterns.hpp"
-#include "helpers/misc.hpp"
 #include "tree/tree.hpp"
 
 Result TransformOfBase::DecidedCompare( const CompareReplace *sr,

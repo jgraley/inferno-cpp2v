@@ -1,0 +1,30 @@
+A dependency analysis based on rev 714, done by eye using grep so could be innaccuracies. Directories are treasted as units except helpers, which is broken up into S&R, a few individual source files and other-helpers which is what is left. The aim is to make S&R and other-helpers mutually un-dependent, and to move the singly-named files into the approriate groups. * indicates a problematic dependency. A new dir hierarchy will result.
+
+common -> <none>
+
+hit_count -> common.hpp
+
+tree -> common, llvm, clang
+
+transformation.cpp -> common, tree
+
+misc.cpp -> tree, transformation.hpp
+
+walk -> tree, transformation.hpp
+
+S&R -> common, tree, render*, validate.hpp*, hit_count.hpp, walk.hpp, transformation.hpp, misc.hpp*
+
+other-helpers -> common, tree, transformation.hpp, walk.hpp, misc.hpp
+
+validate -> tree, transformation.hpp, walk.hpp, misc.hpp, other-helpers
+
+parse -> common, llvm, clang, tree, transformation.hpp, misc.hpp, other-helpers
+
+render -> common, tree, transformation.hpp, S&R, other-helpers, misc.hpp, walk.hpp
+
+steps -> common, tree, S&R, misc.hpp, other-helpers
+
+
+S&R=conjecture.cpp, coupling.cpp, search_replace.cpp, soft_patterns.cpp
+
+
