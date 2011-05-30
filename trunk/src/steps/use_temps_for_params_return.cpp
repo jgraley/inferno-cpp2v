@@ -8,9 +8,9 @@
 #include "steps/use_temps_for_params_return.hpp"
 #include "tree/tree.hpp"
 #include "common/common.hpp"
-#include "helpers/soft_patterns.hpp"
-#include "helpers/typeof.hpp"
-#include "helpers/misc.hpp"
+#include "sr/soft_patterns.hpp"
+#include "tree/typeof.hpp"
+#include "tree/misc.hpp"
 
 
 UseTempsForParamsReturn::UseTempsForParamsReturn()

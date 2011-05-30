@@ -1,11 +1,9 @@
 /*
- * generics.cpp
- *
  *  Created on: 14 Jun 2009
  *      Author: jgraley
  */
 
-#include "tree.hpp"
+#include "node.hpp"
 
 struct MyNode : Node
 {

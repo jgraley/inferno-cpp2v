@@ -1,12 +1,12 @@
 
-#include "tree/tree.hpp"
-#include "tree/type_db.hpp"
-#include "helpers/walk.hpp"
-#include "helpers/misc.hpp"
+#include "tree.hpp"
+#include "type_db.hpp"
+#include "node/walk.hpp"
+#include "misc.hpp"
 #include "typeof.hpp"
-#include "tree/tree.hpp"
-#include "helpers/walk.hpp"
-#include "helpers/misc.hpp"
+
+
+
 
 #define INT 0
 

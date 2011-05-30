@@ -46,7 +46,6 @@ public:
 	class iterator : public Traceable
 	{
 	public:
-		// TODO use these in the method decls
 		typedef forward_iterator_tag iterator_category;
 		typedef VALUE_INTERFACE value_type;
 		typedef int difference_type;
@@ -100,7 +99,7 @@ public:
 			return !operator==( i );
 		}
 
-		void Overwrite( const VALUE_INTERFACE *v ) const
+		void Overwrite( const value_type *v ) const
 		{
 			ASSERT(pib)("Attempt to Overwrite through uninitialised iterator");
 		    pib->Overwrite( v );
@@ -184,8 +183,6 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
 	struct iterator : public CONTAINER_IMPL::iterator,
 	                  public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface
 	{
-		// TODO use types like pointer, reference etc as defined by CONTAINER_IMPL in the method decls
-
 		virtual iterator &operator++()
 		{
 			CONTAINER_IMPL::iterator::operator++();
@@ -528,7 +525,6 @@ struct PointIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::ite
 	}
 };
 
-// TODO can we avoid the need for these template parameters?
 template<class SUB_BASE, typename VALUE_INTERFACE>
 struct CountingIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface
 {
@@ -589,7 +585,7 @@ struct CountingIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::
 	}
 };
 
-// Allow operator, to be used to create pairs. TODO use boost::tuple instead?
+// Allow operator, to be used to create pairs. Also handy for maps.
 template<typename L, typename R>
 inline pair<L,R> operator,( const L &l, const R &r )
 {

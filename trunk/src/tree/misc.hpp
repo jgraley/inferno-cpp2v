@@ -2,8 +2,8 @@
 #define MISC_HPP
 
 #include "tree/tree.hpp"
-#include "walk.hpp"
-#include "transformation.hpp"
+#include "node/walk.hpp"
+#include "node/transformation.hpp"
 
 TreePtr<Identifier> GetIdentifier( TreePtr<Declaration> d );
 

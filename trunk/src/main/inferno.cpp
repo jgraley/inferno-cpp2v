@@ -4,10 +4,10 @@
 #include "render/render.hpp"
 #include "render/graph.hpp"
 #include "common/read_args.hpp"
-#include "helpers/walk.hpp"
-#include "helpers/search_replace.hpp"
-#include "helpers/soft_patterns.hpp"
-#include "helpers/validate.hpp"
+#include "node/walk.hpp"
+#include "sr/search_replace.hpp"
+#include "sr/soft_patterns.hpp"
+#include "tree/validate.hpp"
 #include "steps/split_instance_declarations.hpp"
 #include "steps/generate_implicit_casts.hpp"
 #include "steps/use_temps_for_params_return.hpp"
@@ -24,7 +24,7 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
 {
     ASSERT( sequence );
     // Build a vector of transformations, in the order that we will run them
-    // (ordered by hand for now, until the suto sequencer is ready)
+    // (ordered by hand for now, until the auto sequencer is ready)
     sequence->push_back( shared_ptr<Transformation>( new BreakToGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new SwitchToIfGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new ForToWhile ) ); 
@@ -37,7 +37,7 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     sequence->push_back( shared_ptr<Transformation>( new UseTempsForParamsReturn ) ); 
     sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) ); 
     
-    // These clean-up steps run a few times, because they need to clean up after themselves
+    // These clean-up steps run a few times, because they need to clean up after each other
     for( int i=0; i<3; i++ )
     {
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
@@ -104,15 +104,12 @@ void SelfTest()
     GenericsTest();
 }
 
-// TODO reorg dirs: move tree-aware helpers into tree/
-// split out non-tree-aware generics and Node into a new interfaces/ dir and put transformation there too
-// rename helpers/ to something like tools/
-// deal with TransformOf embedded in tree-aware helpers like TypeOf by undoing that and requiring steps to 
-// instance a template explicitly.
-// Set dependencies and include paths based on this "diamond" dependency structure
-// Split Compare out of CompareReplace. MAke Filter a functor. Consider merging Filter into tRansformation.
-// Produce base class for builder nodes: TransformTo?
-// Docs for node interface. Improve comments in tree.h
-// Star restriction pattern (eg for dead code elimination want Star(NotMatch(Label)))
-// Consider parent restriction for usages
-// Consider multi-terminus Stuff and multi-root (StarStuff)
+// TODO Split Compare out of CompareReplace. 
+// TODO Make Filter a functor. 
+// TODO Consider merging Filter into Transformation.
+// TODO Produce base class for builder nodes: TransformTo?
+// TODO Docs for node interface. 
+// TODO Improve comments in tree.h
+// TODO Star restriction pattern (eg for dead code elimination want Star(NotMatch(Label)))
+// TODO Consider parent restriction for usages - but tricky case: int x, int y=x. Decl for y points to x (as init expr) and y (as ident). Need to specify parent node *and* which TreePtr in the parent is to be excluded.
+// TODO Consider multi-terminus Stuff and multi-root (StarStuff)

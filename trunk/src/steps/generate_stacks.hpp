@@ -8,7 +8,7 @@
 #ifndef GENERATE_STACKS_HPP
 #define GENERATE_STACKS_HPP
 
-#include "helpers/search_replace.hpp"
+#include "sr/search_replace.hpp"
 
 // Replace automatic variables with staks based on arrays and 
 // maintain the stack pointer correctly, supporting recursion.

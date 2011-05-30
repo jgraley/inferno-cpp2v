@@ -1,6 +1,6 @@
 
 #include "sort_decls.hpp"
-#include "helpers/misc.hpp"
+#include "tree/misc.hpp"
 
 
 bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_indirection_to_record )

@@ -5,7 +5,7 @@
 #include "steps/slave_test.hpp"
 #include "tree/tree.hpp"
 #include "common/common.hpp"
-#include "helpers/soft_patterns.hpp"
+#include "sr/soft_patterns.hpp"
 
 // Just an early test for slaves, not a valid transformation
 SlaveTest::SlaveTest()

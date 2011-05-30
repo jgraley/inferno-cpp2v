@@ -16,38 +16,9 @@ using namespace std;
 #include <boost/weak_ptr.hpp>
 using namespace boost;
 
-// TODO use BOOST_FOREACH when cygwin boost gets past rev 1.33
-// For now, use my rubbish version.
-#define USE_BOOST_FOREACH 1
-
-#if USE_BOOST_FOREACH
-
+// JSG we now use boost's FOREACH which means we depend on Boost 1.34 (I think)
 #include <boost/foreach.hpp>
 #define FOREACH BOOST_FOREACH
-
-#else
-
-// Use as in FOREACH( iterator i, container ) {}
-template<class IT>
-struct ZR : IT
-{
-	template<class IT2> ZR( const IT2 &it ) : IT( it ) {}
-	operator bool()	{ return false;	}
-};
-template<typename T>
-typename T::iterator GetIt( T &t )
-{
-	abort();
-}
-#define FOREACH(M, C) \
-	if( ZR<typeof(GetIt(C))> __i=(C).begin() ) {} else \
-	    for( bool __d = true; \
-	         __d && !(__i==(C).end()); \
-	         ++__i ) \
-	        if( (__d=false) ) {} else \
-	            for( M=*__i; !__d; __d=true )
-#endif
-
 
 // How many members in an array
 #define COUNTOF( array ) ( sizeof( array )/sizeof( array[0] ) )

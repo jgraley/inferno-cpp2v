@@ -1,7 +1,7 @@
 #ifndef LOWER_CONTROL_FLOW_HPP
 #define LOWER_CONTROL_FLOW_HPP
 
-#include "helpers/search_replace.hpp"
+#include "sr/search_replace.hpp"
 
 // Lower general if statements into a simplified form of if(x) goto y;
 class IfToIfGoto : public SearchReplace

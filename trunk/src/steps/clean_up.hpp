@@ -8,7 +8,7 @@
 #ifndef CLEAN_UP_HPP
 #define CLEAN_UP_HPP
 
-#include "helpers/search_replace.hpp"
+#include "sr/search_replace.hpp"
 
 // Find compound statements inside compund statements and flatten
 class CleanupCompoundMulti : public SearchReplace

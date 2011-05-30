@@ -8,8 +8,8 @@
 #include "generate_implicit_casts.hpp"
 #include "tree/tree.hpp"
 #include "common/common.hpp"
-#include "helpers/soft_patterns.hpp"
-#include "helpers/typeof.hpp"
+#include "sr/soft_patterns.hpp"
+#include "tree/typeof.hpp"
 
 GenerateImplicitCasts::GenerateImplicitCasts()
 {

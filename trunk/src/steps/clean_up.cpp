@@ -8,7 +8,7 @@
 #include "steps/clean_up.hpp"
 #include "tree/tree.hpp"
 #include "common/common.hpp"
-#include "helpers/soft_patterns.hpp"
+#include "sr/soft_patterns.hpp"
 
 // Removing superfluous Compund blocks to clean up the code
 CleanupCompoundMulti::CleanupCompoundMulti() // LIMITAION: decls in body not allowed

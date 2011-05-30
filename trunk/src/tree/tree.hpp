@@ -7,7 +7,7 @@
 #include "llvm/ADT/APFloat.h"
 #include <string>
 #include <deque>
-#include "generics.hpp"
+#include "node/node.hpp"
 #include "clang/Parse/DeclSpec.h"
 #include "tree/type_db.hpp"
 

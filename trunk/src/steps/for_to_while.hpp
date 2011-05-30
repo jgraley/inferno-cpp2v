@@ -8,7 +8,7 @@
 #ifndef FOR_TO_WHILE_HPP
 #define FOR_TO_WHILE_HPP
 
-#include "helpers/search_replace.hpp"
+#include "sr/search_replace.hpp"
 
 // Convert for loops into while loops, preserving correct 
 // behaviour of continue, which always means "jump to the 

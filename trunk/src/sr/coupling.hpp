@@ -2,8 +2,8 @@
 #define COUPLING_HPP
 
 #include "common/common.hpp"
-#include "tree/generics.hpp"
-#include <set>
+#include "node/node.hpp"
+#include <set> 
 
 // This just serves to complicate matters - just use bools directly
 // TODO also dosen't belong in couplings lol

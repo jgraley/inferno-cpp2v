@@ -1,7 +1,7 @@
 #ifndef WALK_HPP
 #define WALK_HPP
 
-#include "tree/generics.hpp"
+#include "node.hpp"
 #include "transformation.hpp"
 
 //

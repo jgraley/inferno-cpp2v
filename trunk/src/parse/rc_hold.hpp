@@ -2,7 +2,7 @@
 #define RCHOLD_HPP
 
 #include "common/common.hpp"
-#include "tree/generics.hpp"
+#include "node/node.hpp"
 #include <inttypes.h>
 
 template<typename NODE, typename RAW>

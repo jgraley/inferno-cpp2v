@@ -1,5 +1,5 @@
-#include "tree/tree.hpp"
-#include "walk.hpp"
+#include "tree.hpp"
+#include "node/walk.hpp"
 #include "misc.hpp"
 
 TreePtr<Identifier> GetIdentifier( TreePtr<Declaration> d )

@@ -7,7 +7,6 @@
 // NOTE: Duplicate uses shared_ptr so that it can be overloaded to return
 // the supplied pointer (as done by SpecificIdentifier). Clone is guaranteed
 // to return a new() object.
-// TODO maybe use TreePtr
 class Cloner
 {
 public:
