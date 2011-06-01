@@ -1,4 +1,5 @@
-#include "common.hpp"
+#include "standard.hpp"
+#include "trace.hpp"
 #include <stdarg.h>
 
 string SSPrintf(const char *fmt, ...)

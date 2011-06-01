@@ -4,6 +4,7 @@
 #include "render/render.hpp"
 #include "render/graph.hpp"
 #include "common/read_args.hpp"
+#include "common/hit_count.hpp"
 #include "node/walk.hpp"
 #include "sr/search_replace.hpp"
 #include "sr/soft_patterns.hpp"
@@ -18,7 +19,6 @@
 #include "steps/clean_up.hpp"
 
 void SelfTest();
-
 
 void build_sequence( vector< shared_ptr<Transformation> > *sequence )
 {
@@ -81,11 +81,16 @@ int main( int argc, char *argv[] )
     p( program, &program );
  
     // Apply the transformation steps in order, but quit early if requested to
+    int i=0;
     FOREACH( shared_ptr<Transformation> t, sequence )
     {
         if( ReadArgs::quitafter-- == 0 )
             break;
+        fprintf(stderr, "Step %d: %s\n", i, string( *t ).c_str() ); // TODO trace should print to stderr too    
+        TRACE("Step %d: %s\n", i, string( *t ).c_str() ); // TODO trace should print to stderr too
+        HitCount::instance.SetStep(i);
         (*t)( &program );
+        i++;
     }
     
     // Output either C source code or a graph, as requested
@@ -93,6 +98,9 @@ int main( int argc, char *argv[] )
         Graph()( &program );    
     else    
         Render()(&program );     
+        
+    if( ReadArgs::trace_hits )
+        HitCount::instance.Dump();    
     
     return 0;
 }

@@ -1,7 +1,7 @@
 LEVEL=..
 include ../makefile.common
 
-COMMON_MODULES = common/common common/read_args common/trace common/hit_count
+COMMON_MODULES = common/standard common/read_args common/trace common/hit_count
 NODE_MODULES = node/walk node/node node/itemise 
 TREE_MODULES = tree/tree tree/validate tree/scope tree/misc tree/typeof tree/type_db 
 SR_MODULES = sr/search_replace sr/soft_patterns sr/coupling sr/conjecture 
