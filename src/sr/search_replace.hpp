@@ -157,6 +157,10 @@ public:
 private:
     // Replace ring
     void ClearPtrs( TreePtr<Node> dest ) const;
+    TreePtr<Node> DoOverlayOrOverwrite( TreePtr<Node> dest,
+    		                            TreePtr<Node> source,
+    		                            bool can_key,
+    		                            shared_ptr<Key> current_key ) const; 
     void DoOverlay( TreePtr<Node> dest,
     		        TreePtr<Node> source,
     		        bool can_key,
@@ -169,8 +173,14 @@ private:
     	            CollectionInterface *source,
     	            bool can_key,
     	            shared_ptr<Key> current_key ) const;
+    TreePtr<Node> DuplicateNode( TreePtr<Node> source,
+    		                              bool can_key,
+    		                              shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
+    TreePtr<Node> ApplySpecialAndCoupling( TreePtr<Node> source,
+    		                               bool can_key,
+    		                               shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
 public:
-    TreePtr<Node> DuplicateSubtree( TreePtr<Node> x,
+    TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
     		                        bool can_key,
     		                        shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
 private:

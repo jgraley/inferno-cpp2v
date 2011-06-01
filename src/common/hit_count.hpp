@@ -1,5 +1,9 @@
+#ifndef HIT_COUNT_H
+#define HIT_COUNT_H
+
 #include <string>
-#include "common/common.hpp"
+#include <map>
+#include "standard.hpp"
 
 class HitCount
 {
@@ -10,8 +14,7 @@ public:
         string function; // function the HIT is in
         unsigned line;   // line the HIT is on
         unsigned step;   // current step number
-        void *instance;  // "this" pointer of the function, differentiates between master and slaves
-        
+        const void *instance;  // "this" pointer of the function, differentiates between master and slaves        
     };
     
 private:
@@ -20,7 +23,8 @@ private:
     unsigned current_step;
 
 public:    
-    void Hit( string file, string function, unsigned line, void *caller_this )
+    static HitCount instance;
+    void Hit( string file, unsigned line, string function, const void *caller_this )
     {
         Category c;
         c.file = file;
@@ -35,17 +39,7 @@ public:
         counter[c] = count;            
     }
     
-    void Dump()
-    {
-        FOREACH( pc p, counter )
-            printf("#%3d @%p %s:%d in %s: %u\n", 
-                   p.first.step,
-                   p.first.instance,
-                   p.first.file.c_str(),
-                   p.first.line,
-                   p.first.function.c_str(),
-                   p.second );                   
-    }
+    void Dump();
     
     void SetStep( int i )
     {
@@ -56,4 +50,6 @@ public:
 extern bool operator<( const HitCount::Category &l, const HitCount::Category &r );
 
 #define HIT HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, this )
+
+#endif
 

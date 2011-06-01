@@ -50,7 +50,7 @@ void CompareReplace::Configure( TreePtr<Node> cp,
             if( n )
             {
                 if( dynamic_pointer_cast<OverlayBase>(n) || dynamic_pointer_cast<StuffBase>(n) )
-                    ms[n] = 2; // foce couplings at overlay nodes TODO refactor substitution so this is not needed
+                    ms[n] = 2; // force couplings at overlay nodes TODO refactor substitution so this is not needed
                 else if( ms.IsExist( n ) )
                     ms[n]++;
                 else
@@ -545,6 +545,58 @@ void CompareReplace::ClearPtrs( TreePtr<Node> dest ) const
     }       
 }
 
+TreePtr<Node> CompareReplace::DoOverlayOrOverwrite( TreePtr<Node> dest,
+		                                            TreePtr<Node> source,
+		                                            bool can_key,
+		                                            shared_ptr<Key> current_key ) const
+{
+    INDENT;
+    ASSERT( source ); 
+    // Decide whether to overlay or overwrite. The decision is made only based on
+    // the pattern (the children of the Overlay node) not the input tree. This is 
+    // to ensure consistent behaviour.
+    // Overlay if the supplied overlay child is a non-strict subclass of the through child 
+    // otherwise overwrite.
+    // This guarantees that the overlay can overlay the through even if the through 
+    // has been coupled. In the latter case, overlay set<= through set<= through's coupling
+    // and by transitivity, overlay set<= through's coupling.
+    // No such identity would hold of overlay has been coupled, so we never overlay in that case
+    // ALSO do not overlay over NULL dest. 
+    // TODO I think we should not need to DuplicateSubtree
+    // in the overlaying case, the problem seems to be that Special nodes are appearing
+    // in source and must be expanded, but should we not have done that already before 
+    // getting this far, or is this only needed when called from DuplicateSubtree?
+   
+    if( dest )
+        TRACE("dest=")(*dest)(" source=")(*source)("\n");
+    else
+        TRACE("dest=NULL source=")(*source)("\n");    
+   
+    // This is to allow couplings to get substituted. 
+    TreePtr<Node> ssource = ApplySpecialAndCoupling( source, can_key, current_key );
+    TreePtr<Node> esource = ssource ? ssource : source;
+    ASSERT( esource );
+    
+    if( !dest || !(esource->IsLocalMatch(dest.get())) )
+    {
+        // Overwriting
+        if( ssource ) 
+        {
+            // Already created new subtree while applying special node or coupling so nothing more to do
+            return ssource; 
+        }
+        // Start a new subtree
+        dest = DuplicateNode( esource, can_key, current_key );    
+    }    
+        
+    // Now all remaining cases are reduced to an overlay    
+    DoOverlay( dest, esource, can_key, current_key );
+    ASSERT( dest );
+    ASSERT( dest->IsFinal() );
+
+    return dest;
+}
+
 
 // Helper for DuplicateSubtree, fills in children of dest node from source node when source node child
 // is non-NULL. This means we can call this multiple times with different sources and get a priority 
@@ -633,43 +685,14 @@ void CompareReplace::DoOverlay( TreePtr<Node> dest,
                 ASSERT( !dest_child )("substitution should just be a copy, so dest should be NULL");
                 ASSERT( source_child )("substitution should just be a copy, so source should be non-NULL");
             }
-/*            ASSERT( source_child || dest_child )
-                  ("When overlaying ")
-                  (*source)
-                  (" over ")
-                  (*dest)
-                  (", found a member that is NULL in both (one must be non-NULL)\n");
-  */          
-            // This avoids linking into the replace pattern AND to allow couplings to get 
-            // substituted. 
-            if( source_child ) 
-                source_child = DuplicateSubtree( source_child, can_key, current_key );
             
-/*            ASSERT( (source_child && source_child->IsFinal()) || (dest_child && dest_child->IsFinal()) )
-                  ("When overlaying ")
-                  (*source)
-                  (" over ")
-                  (*dest)
-                  (", found a member that is intermediate in both (one must be final) even after substitution\n");
-  */          
-            if( source_child ) // Masked: where source is NULL, do not overwrite
+            if( source_child )
             {
-                // General overlaying policy: if the current child nodes of the source and dest are
-                // compatible with overlying, then overlay them (means recursing into both) otherwise
-                // just duplicate the source (means we only recurse the source).                                
-                if( dest_child && source_child->IsLocalMatch(dest_child.get()) ) // overlaying
-                {
-                     DoOverlay( dest_child, source_child, can_key, current_key );
-                     ASSERT( dest_child );
-                     ASSERT( dest_child->IsFinal() );
-                }
-                else // just copying
-                {  
-                    dest_child = source_child;
-                    ASSERT( dest_child );
-                    ASSERT( dest_child->IsFinal() );
-                }
+                dest_child = DoOverlayOrOverwrite( dest_child, source_child, can_key, current_key );
+                ASSERT( dest_child );
+                ASSERT( dest_child->IsFinal() );
             }
+            
             *dest_ptr = dest_child;
         }
         else
@@ -756,41 +779,38 @@ void CompareReplace::DoOverlay( CollectionInterface *dest,
 }
 
 
-// Duplicate an entire subtree, following the rules for inferno search and replace.
-// We recurse through the subtree, using Duplicator to create the new nodes. We support
-// substitution based on configured couplings, and we do not duplicate identifiers when
-// substituting.
-// TODO possible refactor: when we detect a coupling match, maybe recurse back into DuplicateSubtree
-// and get the two OverlayPtrs during unwind.
-TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
-		                                        bool can_key,
-		                                        shared_ptr<Key> current_key ) const
+TreePtr<Node> CompareReplace::DuplicateNode( TreePtr<Node> source,
+    		                                          bool can_key,
+    		                                          shared_ptr<Key> current_key ) const
 {
-	INDENT;
- 	TRACE("Duplicating %s under_substitution=%p\n", ((string)*source).c_str(), current_key.get());
-#ifdef STRACE
-    TRACE("DuplicateSubtree source={");
-	    Expand w(source);
-	    bool first=true;
-	    FOREACH( TreePtr<Node> n, w )
-	    {
-	    	if( !first )
-	    		TRACE(", ");
-	    	if( n )
-                TRACE( *n )(":%p", n.get());
-            else
-                TRACE("NULL");
-	    	first=false;
-	    }
-	    TRACE("}\n"); // TODO put this in as a common utility somewhere
-#endif
-    // Under substitution, we should be duplicating a subtree of the input
-    // program, which should not contain any special nodes
-    ASSERT( !(dynamic_pointer_cast<SpecialBase>(source) && current_key) )
-          ("Duplicating special node ")
-          (*source)
-          (" while under substitution\n" );
+    INDENT;
 
+    // No coupling to key to, so just make a copy
+    TRACE("Copying source ")(*source)("\n");
+    
+    // Make the new node (destination node)
+    shared_ptr<Cloner> dup_dest = source->Duplicate(source);
+    TreePtr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
+    ASSERT(dest);
+
+    // Replace all the links in the new node with duplicates of the links in the old node.
+    // To do this we re-use the DoOverlay function (no point writing 2 very similar functions)
+    ClearPtrs( dest ); 
+
+    // If not substituting a Stuff node, remember this node is dirty for GreenGrass restriction
+    // Also dirty the dest if the source was dirty when we are substituting Stuff
+    if( !current_key || !dynamic_pointer_cast<StuffKey>(current_key) || dirty_grass.find( source ) != dirty_grass.end() )
+        dirty_grass.insert( dest );
+        
+    return dest;    
+}    		                                          
+
+// If source is special or coupled then the special actions are taken here and the resulting
+// subtree returned. Otherwise, NULL is returned.
+TreePtr<Node> CompareReplace::ApplySpecialAndCoupling( TreePtr<Node> source,
+    		                                           bool can_key,
+    		                                           shared_ptr<Key> current_key ) const
+{
     // Are we substituting a stuff node? If so, see if we reached the terminus, and if
 	// so come out of substitution.
 	if( shared_ptr<StuffKey> stuff_key = dynamic_pointer_cast<StuffKey>(current_key) )
@@ -835,61 +855,76 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
     }
     else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
     {
-        // Decide whether to overlay or overwrite. The decision is made only based on
-        // the pattern (the children of the Overlay node) not the input tree. This is 
-        // to ensure consistent behaviour.
-        // Overlay if: 
-        // (1) the supplied overlay child is a non-strict subclass of the through child and
-        // (2) the overlay child has not been coupled
-        // Together these guarantee that the overlay can overlay the through even if the through 
-        // has been coupled. In the latter case, overlay set<= through set<= through's coupling
-        // and by transitivity, overlay set<= through's coupling.
-        // No such identity would hold of overlay has been coupled, so we never overlay in that case
-        if( ob->GetOverlay()->IsLocalMatch(ob->GetThrough().get()) && !couplings.IsExist(ob->GetOverlay()) )
-        {
-            // We will be able to overlay safely
-            TRACE("Overlay node doing overlay\n");
-            if( !dest )
-                dest = ob->GetThrough();
-            source = DuplicateSubtree( ob->GetOverlay(), can_key, current_key );
-            ASSERT( !dynamic_pointer_cast<SpecialBase>( source ) );
-            DoOverlay( dest, source, can_key, current_key );
-        }
-        else
-        {
-            // We cannot guarantee to be able to overlay for all input trees, so just overwrite.
-            TRACE("Overlay node doing overwrite\n");
-            dest = DuplicateSubtree( ob->GetOverlay(), can_key, current_key );
-        }
+        TRACE("Overlay node through=")(*(ob->GetThrough()))(" overlay=")(*(ob->GetOverlay()))("\n");
+        if( !dest )
+            dest = DuplicateSubtree( ob->GetThrough(), can_key, current_key );
+        else 
+            TRACE("dest=")(*dest)("\n");
+        ASSERT( ob->GetOverlay() );          
+        dest = DoOverlayOrOverwrite( dest, ob->GetOverlay(), can_key, current_key );
+        ASSERT( dest->IsFinal() );
     }
     else if( dynamic_pointer_cast<SpecialBase>(source) )
     {
         ASSERT( dest )
               ("Special nodes in replace pattern not coupled and does not produce any output (")(*source)(")\n");
+        // Do not overlay when a special node is keyed since that would just put the special node back again      
     }
-    else
+    else if( dest )
     {
-        if( !dest )
-        {
-            // No coupling to key to, so just make a copy
-            TRACE("Copying source ")(*source)("\n");
-            
-            // Make the new node (destination node)
-            shared_ptr<Cloner> dup_dest = source->Duplicate(source);
-            dest = dynamic_pointer_cast<Node>( dup_dest );
-            ASSERT(dest);
-     
-            // Replace all the links in the new node with duplicates of the links in the old node.
-            // To do this we re-use the DoOverlay function (no point writing 2 very similar functions)
-            ClearPtrs( dest ); 
-        }
+        // If we're here we keyed a coupling on a normal node. Do Overlay so that eg Overlay nodes
+        // further down can act.
         DoOverlay( dest, source, can_key, current_key );
+    }
+    return dest;
+}
 
-        // If not substituting a Stuff node, remember this node is dirty for GreenGrass restriction
-        // Also dirty the dest if the source was dirty when we are substituting Stuff
-        if( !current_key || !dynamic_pointer_cast<StuffKey>(current_key) || dirty_grass.find( source ) != dirty_grass.end() )
-            dirty_grass.insert( dest );
-    }        
+
+// Duplicate an entire subtree, following the rules for inferno search and replace.
+// We recurse through the subtree, using Duplicator to create the new nodes. We support
+// substitution based on configured couplings, and we do not duplicate identifiers when
+// substituting.
+// TODO possible refactor: when we detect a coupling match, maybe recurse back into DuplicateSubtree
+// and get the two OverlayPtrs during unwind.
+TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
+		                                        bool can_key,
+		                                        shared_ptr<Key> current_key ) const
+{
+	INDENT;
+ 	TRACE("Duplicating %s under_substitution=%p\n", ((string)*source).c_str(), current_key.get());
+#ifdef STRACE
+    TRACE("DuplicateSubtree source={");
+	    Expand w(source);
+	    bool first=true;
+	    FOREACH( TreePtr<Node> n, w )
+	    {
+	    	if( !first )
+	    		TRACE(", ");
+	    	if( n )
+                TRACE( *n )(":%p", n.get());
+            else
+                TRACE("NULL");
+	    	first=false;
+	    }
+	    TRACE("}\n"); // TODO put this in as a common utility somewhere
+#endif
+    // Under substitution, we should be duplicating a subtree of the input
+    // program, which should not contain any special nodes
+    ASSERT( !(dynamic_pointer_cast<SpecialBase>(source) && current_key) )
+          ("Duplicating special node ")
+          (*source)
+          (" while under substitution\n" );
+
+ //   TreePtr<Node> dest = TreePtr<Node>();
+  //  DoOverlayOrOverwrite( dest, source, can_key, current_key );
+
+    TreePtr<Node> dest = ApplySpecialAndCoupling( source, can_key, current_key );
+    
+    if( !dest )
+    {
+        dest = DuplicateNode( source, can_key, current_key );
+        DoOverlay( dest, source, can_key, current_key );                        
+    }
     
     return dest;
 }
@@ -959,10 +994,13 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
     if( r==FOUND )
     {
         TRACE("Over %d reps\n",i); 
-        ASSERT(!ReadArgs::rep_error)("Still getting matches after %d repetitions, may be repeating forever.\nTry using -r\n", i);
+        if(ReadArgs::rep_error)
+            ASSERT(i<ReadArgs::repetitions)
+            ("Still getting matches after %d repetitions, may be repeating forever.\n"
+             "Try using -rn%d to suppress this error\n", i, i);
     }
         
-    TRACE("%p exiting", this);
+    TRACE("%p exiting\n", this);
     return i;
 }
 

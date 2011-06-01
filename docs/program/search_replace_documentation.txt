@@ -92,11 +92,13 @@ However, it is possible to arrange for some part of the input program subtree to
 
 The overlay process is recursive, that is it can overlay a child of the node pointed to by overlay over the equivalent child of the matched input program node. It operates as follows:
 
-- If through is a non-strict subclass of overlay, and overlay is not coupled, then any pointers that are non-NULL in the overlay are overlaid over the corresponding through, or its coupled section of input tree. This process recurses as long as the subclass condition is met.
+- If through is a non-strict subclass of overlay, and overlay is not coupled (if it was, overlay and overwrite would be equivalent anyway), then any pointers that are non-NULL in the overlay are overlaid over the corresponding through, or its coupled section of input tree. This process recurses as long as the subclass condition is met.
 
 - If the overlay node is neither the same nor a base for the input program node or if it is coupled, the overlay/coupling overwrites the through (that is, all members are copied over).
 
 - Containers (sequences and collections) cannot be NULL and cannot be overlaid, so they always overwrite when they exist in the overlay/coupling.
+
+In effect, an Overlay node will begin by applying any couplings that may be present to both patterns, to get a through subtree and overlay subtree. Then, it will start overlaying the overlay subtree over the through subtree, recursively. If at any point in this process, a node is seen in the overlay subtree that cannot be overlayed because it is not type-compatible (so the members do not match up) then the subtree under that point will be simply overwritten and overlaying will continue for other parts of the through subtree. 
 
 Note that the condition for overlaying versus overwriting depend only on the patterns provided for overlay and though in the Overlay node, not on the contents of the input program tree.
 

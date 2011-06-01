@@ -11,6 +11,8 @@ std::string ReadArgs::outfile;
 bool ReadArgs::intermediate_graph = false;
 int ReadArgs::pattern_graph = -1; // -1 disables
 bool ReadArgs::trace = false;
+bool ReadArgs::trace_hits = false;
+int ReadArgs::hits_mask = 0;
 bool ReadArgs::selftest = false;
 int ReadArgs::quitafter = 0x7fffffff; // basically never
 bool ReadArgs::quitenable = false;
@@ -24,7 +26,9 @@ void ReadArgs::Usage()
     		        "\n"
     		        "-i<infile>  Read input program (C/C++) from <infile>.\n"
     		        "-o<outfile> Write output program to <outfile>. C/C++ by default. Writes to stdout if omitted.\n"
-    		        "-t          Turn on tracing internals (very verbose).\n"
+    		        "-t          Turn on tracing internals (very verbose).\n"    		        
+    		        "-th         Dump hit counts at the end of execution.\n"    		        
+    		        "-th<n>      As -th but suppress indices according to set bits of n.\n"
     		        "-s          Run self-tests.\n"
                     "-q<n>       Stop after <n> steps. <n> may be 0 to exercise just parser and renderer.\n"                    
 	                "-gi         Generate Graphviz graphs for output or intermediate if used with -q.\n"
@@ -74,7 +78,17 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         }
         else if( option=='t' )
         {
-            trace = true;
+            char option2 = argv[curarg][2];
+            if( option2=='\0' )
+                trace = true;
+            else if( option2=='h' )
+            {                
+                trace_hits = true;
+                if( strlen(argv[curarg]) > 3 )
+                    hits_mask = strtoul( GetArg(2).c_str(), NULL, 10 );
+            }
+            else
+                Usage();
         }
         else if( option=='g' )
         {
