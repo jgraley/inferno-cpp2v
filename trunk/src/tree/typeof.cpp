@@ -1,7 +1,7 @@
 
 #include "tree.hpp"
 #include "type_db.hpp"
-#include "node/walk.hpp"
+#include "helpers/walk.hpp"
 #include "misc.hpp"
 #include "typeof.hpp"
 

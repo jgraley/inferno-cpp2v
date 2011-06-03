@@ -59,10 +59,10 @@ struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, 
 };
 
 
-template<typename VALUE_TYPE>
-struct Collection : virtual OOStd::SimpleAssociativeContainer< Itemiser::Element, TreePtrInterface, set< TreePtr<VALUE_TYPE> > >
+template<typename VALUE_TYPE> 
+struct Collection : virtual OOStd::SimpleAssociativeContainer< Itemiser::Element, TreePtrInterface, multiset< TreePtr<VALUE_TYPE> > >
 {
- 	typedef set< TreePtr<VALUE_TYPE> > Impl;
+ 	typedef multiset< TreePtr<VALUE_TYPE> > Impl;
 
  	inline Collection<VALUE_TYPE>() {}
 	template<typename L, typename R>

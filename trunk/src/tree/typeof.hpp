@@ -1,8 +1,8 @@
 #ifndef TYPEOF_HPP
 #define TYPEOF_HPP
 
-#include "node/transformation.hpp"
-#include "tree/tree.hpp"
+#include "helpers/transformation.hpp"
+#include "tree.hpp"
 
 class TypeOf : public OutOfPlaceTransformation
 {

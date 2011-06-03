@@ -373,10 +373,8 @@ struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTE
 		    // erase the old element and insert the new one; thus, Overwrite() should not be assumed O(1)
     		typename CONTAINER_IMPL::value_type s( CONTAINER_IMPL::value_type::DynamicCast(*v) );
     		((CONTAINER_IMPL *)owner)->erase( *this );
-		    pair<typename CONTAINER_IMPL::iterator, bool> result = ((CONTAINER_IMPL *)owner)->insert( s );
-		    ASSERT( result.second ); // insert must succeed (see SGI docs)
-		    *(typename CONTAINER_IMPL::iterator *)this = result.first; // become an iterator for the newly inserted element
-		}
+		    *(typename CONTAINER_IMPL::iterator *)this = ((CONTAINER_IMPL *)owner)->insert( s ); // become an iterator for the newly inserted element
+ 		}
     	virtual const bool IsOrdered() const
     	{
     		return false; // no, SimpleAssociativeContainers are not ordered

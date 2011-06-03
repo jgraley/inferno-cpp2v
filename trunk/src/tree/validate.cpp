@@ -8,7 +8,7 @@
 #include "validate.hpp"
 #include "typeof.hpp"
 #include "misc.hpp"
-#include "tree/tree.hpp"
+#include "tree.hpp"
 
 void Validate::operator()( TreePtr<Node> context,
 						   TreePtr<Node> *proot )

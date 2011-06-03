@@ -1,8 +1,8 @@
 #ifndef VALIDATE_HPP
 #define VALIDATE_HPP
 
-#include "node/walk.hpp"
-#include "node/transformation.hpp"
+#include "helpers/walk.hpp"
+#include "helpers/transformation.hpp"
 
 class Validate : public InPlaceTransformation
 {

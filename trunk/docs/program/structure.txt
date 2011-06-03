@@ -1,0 +1,35 @@
+
+Inferno source tree
+-------------------
+
+The source directories under src/ correspond to the segments in Inferno's high-level design. The compile time or "#include" dependencies are given here. 
+
+The following graph has depending above depended-on, and omits dependencies that go "through" segments - the true graph is a transitive closure of this one. Note that the dependency graph is a DAG not a tree, and so it did not make sense to try and reflect it in the directory structure and we use a flat stucture with each directory under src/ copntaining one segment. Clang and LLVM have been added to clarify the relationship. The graph is divided by a dotted line into segments that are aware of the programming language represented by the tree and segments that are not aware of and do not depend on the language in use.
+
+
+                    main                      main is really just a small main() function.
+                      |
+         /------------+------------\          
+         |            |            |      .   parse contains parsing code that works with clang to parse C++  
+      parse         render       steps  .     render contains the C++ generator as well as the graph plotter
+       / |            |          |   |.       steps contains all the inferno transformation steps  
+      /  \-----+------+----------/  .|
+     /         |                  .  |
+  clang's    tree               .   sr        tree defines language-specific tree nodes and related utilities
+  parser     / |              .      |        sr contains the language-independent search-replace tool
+            /  \--------------+------/
+           /              .   |
+      clang, LLVM       .  helpers             helpers contains language-independent utilities for nodes
+       generics       .       |
+                    .        node              node defines the node base class interface 
+                  .           | 
+    language-   .           common             common has general utilities that could be useful in any program
+    dependant . language-
+            .  independent                           
+
+Note: in GCC parlance, parse=front-end, steps=middle-end and render=back-end           
+
+The makefile assumes these dependencies for header inclusion in order to speed up compilation. It should also set include paths based on which segments are allowed to be visible (not yet done at the time of writing).
+
+The graph exposes sub-programs made up of a subset of the segments. The sub-program that transforms general program trees would be made up of: common, node, helpers, sr. The subprogram that transforms C++ programs in source form would additionally include: tree, parse, render. By including steps and main, we get Inferno.
+
