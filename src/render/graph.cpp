@@ -6,7 +6,7 @@
  */
 
 #include "tree/tree.hpp"
-#include "node/transformation.hpp"
+#include "helpers/transformation.hpp"
 #include "sr/search_replace.hpp"
 #include "sr/soft_patterns.hpp"
 #include "common/trace.hpp"

@@ -13,6 +13,7 @@ public:
     virtual shared_ptr<Cloner> Clone() const = 0;
     virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p )
     {
+        ASSERT( p.get() == this ); // unfortunate wrinkle: must always call as PX->Duplicate(PX)
     	return Clone(); // default duplication is to clone, but can be over-ridden
     }
     template< class TYPE >

@@ -5,7 +5,7 @@
 #include "render/graph.hpp"
 #include "common/read_args.hpp"
 #include "common/hit_count.hpp"
-#include "node/walk.hpp"
+#include "helpers/walk.hpp"
 #include "sr/search_replace.hpp"
 #include "sr/soft_patterns.hpp"
 #include "tree/validate.hpp"

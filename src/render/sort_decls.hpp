@@ -3,7 +3,7 @@
 
 #include "common/common.hpp"
 #include "tree/tree.hpp"
-#include "node/walk.hpp"
+#include "helpers/walk.hpp"
 
 // Does declaration of a depend on (ie use) declaration of b?
 // Set ignore_ptr_ref_record to make function ignore the case where a's type contains a pointer or 
