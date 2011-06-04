@@ -77,7 +77,6 @@ string Render::RenderIdentifier( TreePtr<Identifier> id )
 	string ids;
 	if( id )
 	{
-		// TODO maybe just try casting to Named
 		if( TreePtr<SpecificIdentifier> ii = dynamic_pointer_cast<SpecificIdentifier>( id ) )
 			ids = unique[ii];
 		else
@@ -284,7 +283,7 @@ string Render::RenderCall( TreePtr<Call> call )
 
 	// Render the expression that resolves to the function name unless this is
 	// a constructor call in which case just the name of the thing being constructed.
-	if( TreePtr<Expression> base = TypeOf().IsConstructorCall( program, call ) )
+	if( TreePtr<Expression> base = TypeOf::instance.IsConstructorCall( program, call ) )
 		s += RenderExpression( base, true );
 	else
 		s += RenderExpression( call->callee, true );
@@ -292,7 +291,7 @@ string Render::RenderCall( TreePtr<Call> call )
 	s += "(";
 
 	// If Procedure or Function, generate some arguments, resolving the order using the original function type
-	TreePtr<Node> ctype = TypeOf()( program, call->callee );
+	TreePtr<Node> ctype = TypeOf::instance( program, call->callee );
 	ASSERT( ctype );
 	if( TreePtr<Procedure> proc = dynamic_pointer_cast<Procedure>(ctype) )
 		s += RenderMapInOrder( call, proc, ", ", false );
@@ -486,7 +485,7 @@ void Render::ExtractInits( Sequence<Statement> &body, Sequence<Statement> &inits
 	{
 		if( TreePtr<Call> o = dynamic_pointer_cast< Call >(s) )
 		{
-			if( TypeOf().IsConstructorCall( program, o ) )
+			if( TypeOf::instance.IsConstructorCall( program, o ) )
 			{
 				inits.push_back(s);
 				continue;

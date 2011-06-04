@@ -366,4 +366,5 @@ TreePtr<Expression> TypeOf::IsConstructorCall( TreePtr<Node> c, TreePtr<Call> ca
     return e;
 }
 
-TypeOf TypeOf::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
+TypeOf TypeOf::instance; 
+

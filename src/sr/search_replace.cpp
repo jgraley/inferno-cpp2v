@@ -561,12 +561,7 @@ TreePtr<Node> CompareReplace::DoOverlayOrOverwrite( TreePtr<Node> dest,
     // has been coupled. In the latter case, overlay set<= through set<= through's coupling
     // and by transitivity, overlay set<= through's coupling.
     // No such identity would hold of overlay has been coupled, so we never overlay in that case
-    // ALSO do not overlay over NULL dest. 
-    // TODO I think we should not need to DuplicateSubtree
-    // in the overlaying case, the problem seems to be that Special nodes are appearing
-    // in source and must be expanded, but should we not have done that already before 
-    // getting this far, or is this only needed when called from DuplicateSubtree?
-   
+    // ALSO do not overlay over NULL dest.    
     if( dest )
         TRACE("dest=")(*dest)(" source=")(*source)("\n");
     else

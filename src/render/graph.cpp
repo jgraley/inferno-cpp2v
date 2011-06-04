@@ -14,6 +14,16 @@
 #include "graph.hpp"
 #include <inttypes.h>
 
+// Graph Documantation
+//
+// The shapes and contents of the displayed nodes is explained in comments in the function 
+// Graph::Name(), which may be found below. Ordinary tree nodes are always rectangles with
+// soft corners, so this function mainly deals with special nodes as used by Search and Replace.
+// The colours are defined in Graph::Colour, which categorises nodes (all nodes, including Special)
+// by whether they are derived from particular intermediate nodes, which are easily seen in
+// the code of the function.
+
+
 // TODO indicate pre-restriction by putting class name over the link. Only when type is not that
 // of the pointer, ie a non-trivial pre-estriction
 // TODO indicate Stuff restrictor by making it come out of the top of the circle (note that it will
@@ -235,60 +245,107 @@ string Graph::Sanitise( string s, bool remove_tp )
 
 string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put stringize capabilities into the Property nodes as virtual methods
 {
+    // This function does not deal directly with SearchReplace, CompareReplace, SlaveSearchReplace or 
+    // SlaveCompareReplace. These appear in sharp-cornered rectangles, with the name at the top and the
+    // member TreePtr names below. These may be some combination of search, compare, replace and through
+    // and their links are approximately to the right.
 	*bold=true;
 	if( dynamic_pointer_cast<StarBase>(sp) )
 	{
+	    // The Star node appears as a small circle with a * character inside it. * is chosen for its role in 
+	    // filename wildcarding, which is semantically equiviant only when used in a Sequence.
 		*shape = "circle";
 		return string("*");
 	}
-	else if( dynamic_pointer_cast<StuffBase>(sp) )
+	else if( TreePtr<StuffBase> stuff = dynamic_pointer_cast<StuffBase>(sp) )
 	{
-		*shape = "circle";
+	    // The Stuff node appears as a small circle with a # character inside it. The terminus link emerges from the
+	    // right of the circle. If there is a recurse restriction the circle is egg-shaped and the restriction link 
+	    // emerges from the top of the egg shape. # is chosen (as is the name Stuff) for its similarity to * because
+	    // the nodes are both able to wildcard multiple nodes in the tree.
+		if( stuff->recurse_restriction )
+		    *shape = "egg";
+		else
+     	    *shape = "circle";
 		return string("#"); // TODO what if there's a restriction: egg?
 	}
 	else if( dynamic_pointer_cast<NotMatchBase>(sp) )
 	{
+	    // The NotMatch node appears as a small circle with an ! character inside it. The affected subtree is 
+	    // on the right.
+	    // NOTE this and the next few special nodes are the nodes that control the action of the search engine in 
+	    // Inferno search/replace. They are not the nodes that represent the operations in the program being processed.
+	    // Those nodes would appear as rounded rectangles with the name at the top. The nmes may be found in
+	    // src/tree/operator_db.txt  
 		*shape = "circle";
 		return string("!");
 	}
 	else if( dynamic_pointer_cast<MatchAllBase>(sp) )
 	{
+	    // The MatchAll node appears as a small circle with an & character inside it. The affected subtrees are 
+	    // on the right.
 		*shape = "circle";
 		return string("&"); // note & is a wildcard in dot but not handled properly, this becomes "& ". At least some of the time.
 	}
 	else if( dynamic_pointer_cast<MatchAnyBase>(sp) )
 	{
+	    // The MatchAny node appears as a small circle with an | character inside it. The affected subtrees are 
+	    // on the right.
 		*shape = "circle";
 		return string("|");
 	}
 	else if( dynamic_pointer_cast<MatchOddBase>(sp) )
 	{
+	    // The MatchOdd node appears as a small circle with an | character inside it. The affected subtrees are 
+	    // on the right.
 		*shape = "circle";
 		return string("^");
 	}
 	else if( shared_ptr<TransformOfBase> tob = dynamic_pointer_cast<TransformOfBase>(sp) )
 	{
+	    // The TransformOf node appears as a slightly flattened hexagon, with the name of the specified 
+	    // kind of Transformation class inside it.
 		*shape = "hexagon";
 		return *(tob->transformation);
 	}
 	else if( shared_ptr<BuildIdentifierBase> smi = dynamic_pointer_cast<BuildIdentifierBase>(sp) )
 	{
+	    // The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
+	    // the printf format string that controls the name of the generated identifier inside it.
 	    // TODO indicate whether it's building instance, label or type identifier
 		*shape = "parallelogram";
 		return smi->format;
 	}
 	else if( dynamic_pointer_cast<GreenGrassBase>(sp) )
 	{
+	    // The GreenGrass node appears as a small circle containing four vertical line characters,
+	    // like this: ||||. These are meant to represent the blades of grass. It was late and I was
+	    // tired.
 		*shape = "circle";
 		return string("||||");
 	}
     else if( dynamic_pointer_cast<OverlayBase>(sp) )
     {
-        *shape = "circle";
-        return string("+-"); // TODO want greek delta symbol
+        // The Overlay node is shown as a small triangle, with the through link on the right and the overlay link
+        // coming out of the bottom.
+        *shape = "triangle";
+        return string(""); 
     }
 	else
 	{
+	    // All the other nodes are represented as a rectangle with curved corners. At the top of the rectangle, 
+	    // in large font, is the name of the node's type OR the identifier name if the node is a kind of 
+	    // SpecificIdentifier. All TreePtr<>, Sequence<> and Collection<> members are listed below in a 
+	    // smaller font. The name of the pointed-to type is given (not the member's name, Inferno cannot deduce
+	    // this). 
+	    // Collections appear once and are followed by {...} where the number of dots equals the number of 
+	    // elements in the Collection.
+	    // Sequences appear once for each element in the sequence. Each appearance is followed by [i] where
+	    // i is the index, starting from 0.
+	    // All child pointers emerge from *approximately* the right of the corresponding member name. I cannot
+	    // for the life of me get GraphViz to make the lines begin *on* the right edge of the rectangle. They 
+	    // always come from some way in from the right edge, and if they are angled up or down, they can appear
+	    // to be coming from the wrong place.	     
 		*bold = false;
 		*shape = "plaintext";//"record";
 		return *sp;
@@ -427,7 +484,7 @@ string Graph::DoNode( TreePtr<Node> n )
 		s += "label = \"" + name + "\"\n";// TODO causes errors because links go to targets meant for records
 		s += "style = \"filled\"\n";
 
-		if( shape == "circle" )
+		if( shape == "circle" || shape=="triangle" )
 		{
 			s += "fixedsize = true\n";
 			s += "width = 0.55\n";

@@ -65,7 +65,7 @@ void Validate::operator()( TreePtr<Node> context,
 
 			// Check that we can successfully call TypeOf on every Expression
 			if( TreePtr<Expression> e = dynamic_pointer_cast<Expression>(x) )
-			    (void)TypeOf()(context, e);
+			    (void)TypeOf::instance(context, e);
 
 			// Check that every identifier has a declaration
 			if( TreePtr<InstanceIdentifier> ii = dynamic_pointer_cast<InstanceIdentifier>(x) )
