@@ -1009,7 +1009,7 @@ private:
 		c->callee = callee;
 
 		// If Procedure or Function, fill in the args map based on the supplied args and original function type
-		TreePtr<Node> t = TypeOf()(all_decls, callee);
+		TreePtr<Node> t = TypeOf::instance(all_decls, callee);
 		if( TreePtr<Procedure> p = dynamic_pointer_cast<Procedure>(t) )
 		PopulateMapOperator( c, args, p );
 
@@ -1489,7 +1489,7 @@ private:
 		}
 
 		// Find the specified member in the record implied by the expression on the left of .
-		TreePtr<Node> tbase = TypeOf()( all_decls, a->base );
+		TreePtr<Node> tbase = TypeOf::instance( all_decls, a->base );
 		TreePtr<TypeIdentifier> tibase = dynamic_pointer_cast<TypeIdentifier>(tbase);
 		ASSERT( tibase );
 		TreePtr<Record> rbase = GetRecordDeclaration(all_decls, tibase);
@@ -1745,7 +1745,7 @@ private:
 			ASSERT(0)("typeof() only supported on types at the moment");
 			// TODO THis is wrong because we'll get 2 refs to the type, need to duplicate,
 			// or maybe add an alternative node and convert in a S&R
-			p->operand = TreePtr<Type>::DynamicCast( TypeOf()( all_decls, hold_expr.FromRaw(TyOrEx) ) );
+			p->operand = TreePtr<Type>::DynamicCast( TypeOf::instance( all_decls, hold_expr.FromRaw(TyOrEx) ) );
 		}
 		return hold_expr.ToRaw( p );
 	}
