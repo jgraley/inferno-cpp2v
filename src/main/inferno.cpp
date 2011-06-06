@@ -17,6 +17,7 @@
 #include "steps/slave_test.hpp"
 #include "steps/lower_control_flow.hpp"
 #include "steps/clean_up.hpp"
+#include "steps/state_out.hpp"
 
 void SelfTest();
 
@@ -25,17 +26,20 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     ASSERT( sequence );
     // Build a vector of transformations, in the order that we will run them
     // (ordered by hand for now, until the auto sequencer is ready)
+    sequence->push_back( shared_ptr<Transformation>( new GenerateImplicitCasts ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new MoveInstanceDeclarations ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new UseTempsForParamsReturn ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) ); 
     sequence->push_back( shared_ptr<Transformation>( new BreakToGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new SwitchToIfGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new ForToWhile ) ); 
     sequence->push_back( shared_ptr<Transformation>( new WhileToDo ) ); 
     sequence->push_back( shared_ptr<Transformation>( new IfToIfGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new DoToIfGoto ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new GenerateImplicitCasts ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new MoveInstanceDeclarations ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new UseTempsForParamsReturn ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new CompactGotos ) );
+    sequence->push_back( shared_ptr<Transformation>( new CompactGotosFinal ) );
+   // sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) );
     
     // These clean-up steps run a few times, because they need to clean up after each other
     for( int i=0; i<3; i++ )
