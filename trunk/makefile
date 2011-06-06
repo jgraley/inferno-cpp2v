@@ -1,5 +1,5 @@
 include makefile.common
-.PHONY: all src/build/inferno.a get_libs test
+.PHONY: all src/build/inferno.a get_libs test docs
 all : inferno.exe
 
 #
@@ -59,6 +59,14 @@ STANDARD_LIBS += -lstdc++
 inferno.exe : makefile src/build/inferno.a $(LLVM_CLANG_LIBS)
 	$(ICC) src/build/inferno.a $(LLVM_CLANG_LIBS:%=$(LLVM)/$(LLVM_BUILD)/lib/%) $(STANDARD_LIBS) -ggdb -pg -o inferno.exe
 
+#
+# Build the documentation
+#
+docs : makefile src/*/*.?pp
+	doxygen docs/doxygen/Doxy-Inferno
+	@echo Documentation now at:
+	@echo $(PWD)/docs/doxygen/html/index.html
+	
 #
 # Run the tests
 #

@@ -755,7 +755,7 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep )
 		if( TreePtr<SpecificLabelIdentifier> li = dynamic_pointer_cast< SpecificLabelIdentifier >(g->destination) )
 			return "goto " + RenderIdentifier(li) + sep;  // regular goto
 		else
-			return "goto *" + RenderExpression(g->destination) + sep; // goto-a-variable (GCC extension)
+			return "goto *(" + RenderExpression(g->destination) + ")" + sep; // goto-a-variable (GCC extension)
 	}
 	else if( TreePtr<If> i = dynamic_pointer_cast<If>(statement) )
 	{

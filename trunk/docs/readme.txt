@@ -27,10 +27,13 @@ Install Graphviz, build Inferno (using just make in trunk/) and run:
 Looking at the graphs for simple programs and simple steps can be 
 fairly informative about what is going on.
 
-Doxygen [WORK IN PROGRESS]
+Doxygen
 
-Install Doxygen and run the document generation makefile in docs/doxygen/
-to get the generated docs.
+Install Doxygen and run 
+
+    make docs
+
+from trunk/ directory. Documentation is generated as html in trunk/docs/doxygen/html.
 
 Comments in source code
 
