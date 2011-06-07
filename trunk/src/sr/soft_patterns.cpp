@@ -6,6 +6,7 @@ Result TransformOfBase::DecidedCompare( const CompareReplace *sr,
 		                                                     bool can_key,
 		                                                     Conjecture &conj ) const
 {
+    INDENT;
     // Transform the candidate expression
     TreePtr<Node> xt = (*transformation)( sr->GetContext(), x );
 	if( xt )
@@ -25,15 +26,15 @@ Result TransformOfBase::DecidedCompare( const CompareReplace *sr,
 
 
 
-string BuildIdentifierBase::GetNewName( const CompareReplace *sr,
-                                        bool can_key )
+string BuildIdentifierBase::GetNewName( const CompareReplace *sr )
 {
+    INDENT;
     if( source )
     {
-        TRACE("Begin SoftMakeIdentifier recurse\n");
+        TRACE("Begin SoftMakeIdentifier recurse for \"")(format)("\"\n");
         // We have a child identifier - let replace algorithm run in the expectation it will
         // get subsitituted with a SpecificIdentifier from the original program tree
-        TreePtr<Node> n = sr->DuplicateSubtree( TreePtr<Node>(source), can_key );
+        TreePtr<Node> n = sr->DuplicateSubtree( TreePtr<Node>(source) );
         TRACE("End SoftMakeIdentifier recurse\n");
         ASSERT( n );
         TreePtr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>( n );

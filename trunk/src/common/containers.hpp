@@ -137,6 +137,7 @@ public:
 	typedef iterator const_iterator; // TODO const iterators properly
 
 	// These direct calls to the container are designed to support co-variance.
+    virtual void insert( const VALUE_INTERFACE &gx ) = 0;
 	virtual const iterator_interface &begin() = 0;
     virtual const iterator_interface &end() = 0;
     virtual void erase( typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator it ) = 0;
@@ -165,7 +166,6 @@ struct SequenceInterface : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>
 template< class SUB_BASE, typename VALUE_INTERFACE >
 struct SimpleAssociativeContainerInterface : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>
 {
-	virtual void insert( const VALUE_INTERFACE &gx ) = 0;
 	virtual int erase( const VALUE_INTERFACE &gx ) = 0;
 	virtual bool IsExist( const VALUE_INTERFACE &gx ) = 0;
 };
@@ -244,6 +244,7 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
 template<class SUB_BASE, typename VALUE_INTERFACE, class CONTAINER_IMPL>
 struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>, virtual SequenceInterface<SUB_BASE, VALUE_INTERFACE>
 {
+    using typename CONTAINER_IMPL::insert; // due to silly C++ rule where different overloads hide each other
     inline Sequence<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>() {}
 	struct iterator : public ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator
     {
@@ -280,6 +281,10 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
     {
     	return CONTAINER_IMPL::operator[](i);
     }
+	virtual void insert( const VALUE_INTERFACE &gx )
+	{
+		push_back( gx );
+	}
 	virtual void push_back( const VALUE_INTERFACE &gx )
 	{
 		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::DynamicCast(gx) );

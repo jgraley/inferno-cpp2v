@@ -136,13 +136,13 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 		TRACE("substituting\n");
 		ASSERT( keys_map[pattern] );
 		keys_map[pattern]->replace_pattern = pattern; // Only fill this in while substituting under the node
-		TreePtr<Node> subs = sr->DuplicateSubtree( keys_map[pattern]->root, can_key, keys_map[pattern] ); // Enter substitution
+		TreePtr<Node> subs = sr->DuplicateSubtreeSubstitution( keys_map[pattern]->root, keys_map[pattern] ); // Enter substitution
 		// TODO can_key should be false in the above?
 		keys_map[pattern]->replace_pattern = TreePtr<Node>();
 		return subs;
 	}
 
-    ASSERT( can_key ); // during substitution pass we should have all couplings keyed
+   // ASSERT( can_key ); // during substitution pass we should have all couplings keyed
 
     // In KEYING and this coupling not keyed yet (because it will be keyed by another node
     // in the replace pattern). We've got to produce something - don't want to supply the pattern
