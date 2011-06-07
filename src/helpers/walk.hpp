@@ -64,8 +64,9 @@ public:
 	// Standard container ops, note that modification is not allowed through container interface
 	virtual const iterator &begin();
     virtual const iterator &end();
-    virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
-    virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
+    virtual void erase( ContainerInterface::iterator ) { ASSERTFAIL("Cannot modify through walking container"); }
+    virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }    
+    virtual void insert( const TreePtrInterface & ) { ASSERTFAIL("Cannot modify through walking container"); }
 private:
     TreePtr<Node> root;
     iterator my_begin, my_end;
@@ -137,6 +138,7 @@ public:
     virtual const iterator &end();
     virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
     virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
+    virtual void insert( const TreePtrInterface & ) { ASSERTFAIL("Cannot modify through walking container"); }
 protected:
     TreePtr<Node> root;
     Filter *out_filter;
@@ -182,6 +184,7 @@ public:
     virtual const iterator &end();
     virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
     virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
+    virtual void insert( const TreePtrInterface & ) { ASSERTFAIL("Cannot modify through walking container"); }
 protected:
     TreePtr<Node> root;
     iterator my_begin, my_end;
@@ -210,6 +213,7 @@ public:
     virtual const iterator &end();
     virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
     virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
+    virtual void insert( const TreePtrInterface & ) { ASSERTFAIL("Cannot modify through walking container"); }
 protected:
     TreePtr<Node> root;
     iterator my_begin, my_end;

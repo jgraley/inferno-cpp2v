@@ -171,8 +171,7 @@ struct BuildIdentifierBase : CompareReplace::SoftReplacePattern
 {
     BuildIdentifierBase( string s ) : format(s) {}
     TreePtr<Identifier> source;
-    string GetNewName( const CompareReplace *sr,
-                       bool can_key );
+    string GetNewName( const CompareReplace *sr );
     string format;
 };
 
@@ -183,10 +182,9 @@ struct BuildInstanceIdentifier : Special<InstanceIdentifier>,
     BuildInstanceIdentifier() : BuildIdentifierBase("unnamed") {}
     NODE_FUNCTIONS
 private:
-    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr,
-                                               bool can_key )
+    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
     {
-	string newname = GetNewName( sr, can_key );
+	string newname = GetNewName( sr );
 	return TreePtr<SpecificInstanceIdentifier>( new SpecificInstanceIdentifier( newname ) );
     }                                               
 };
@@ -198,10 +196,9 @@ struct BuildLabelIdentifier : Special<LabelIdentifier>,
     BuildLabelIdentifier() : BuildIdentifierBase("UNNAMED") {}
     NODE_FUNCTIONS
 private:
-    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr,
-                                               bool can_key )
+    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
     {
-	string newname = GetNewName( sr, can_key );
+	string newname = GetNewName( sr );
 	return TreePtr<SpecificLabelIdentifier>( new SpecificLabelIdentifier( newname ) );
     }                                               
 };

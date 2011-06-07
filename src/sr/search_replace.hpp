@@ -98,8 +98,7 @@ public:
     };
     struct SoftReplacePattern
     {
-        virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr,
-        		                                bool can_key ) = 0;
+        virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr ) = 0;
     };
 
     // Some self-testing
@@ -158,32 +157,18 @@ private:
     // Replace ring
     void ClearPtrs( TreePtr<Node> dest ) const;
     TreePtr<Node> DoOverlayOrOverwrite( TreePtr<Node> dest,
-    		                            TreePtr<Node> source,
-    		                            bool can_key,
-    		                            shared_ptr<Key> current_key ) const; 
+    		                            TreePtr<Node> source ) const; 
     void DoOverlay( TreePtr<Node> dest,
-    		        TreePtr<Node> source,
-    		        bool can_key,
-    		        shared_ptr<Key> current_key ) const; // under substitution if not NULL
-    void DoOverlay( SequenceInterface *dest,
-      		        SequenceInterface *source,
-    		        bool can_key,
-    		        shared_ptr<Key> current_key ) const;
-    void DoOverlay( CollectionInterface *dest,
-    	            CollectionInterface *source,
-    	            bool can_key,
-    	            shared_ptr<Key> current_key ) const;
+    		        TreePtr<Node> source ) const; // under substitution if not NULL
     TreePtr<Node> DuplicateNode( TreePtr<Node> source,
-    		                              bool can_key,
     		                              shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
-    TreePtr<Node> ApplySpecialAndCoupling( TreePtr<Node> source,
-    		                               bool can_key,
-    		                               shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
+    TreePtr<Node> ApplySpecialAndCoupling( TreePtr<Node> source ) const;
 public:
-    TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
-    		                        bool can_key,
-    		                        shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
+    TreePtr<Node> DuplicateSubtree( TreePtr<Node> source ) const;
+    TreePtr<Node> DuplicateSubtreeSubstitution( TreePtr<Node> source,
+                		                        shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
 private:
+    void KeyReplaceNodes( TreePtr<Node> source ) const;
     TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x ) const;
     // implementation ring: Do the actual search and replace
     Result SingleCompareReplace( TreePtr<Node> *proot );
@@ -371,7 +356,6 @@ struct Stuff : StuffBase, Special<PRE_RESTRICTION>
         vector< Itemiser::Element * > v;
         v.push_back( (Itemiser::Element *)(&recurse_restriction) );
         v.push_back( (Itemiser::Element *)(&terminus) );
-        TRACE("%p %p\n", v[0], v[1] );
         return v;
     }
     virtual Itemiser::Element *ItemiseIndex( int i ) const  

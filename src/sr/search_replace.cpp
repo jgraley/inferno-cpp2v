@@ -546,12 +546,12 @@ void CompareReplace::ClearPtrs( TreePtr<Node> dest ) const
 }
 
 TreePtr<Node> CompareReplace::DoOverlayOrOverwrite( TreePtr<Node> dest,
-		                                            TreePtr<Node> source,
-		                                            bool can_key,
-		                                            shared_ptr<Key> current_key ) const
+		                                            TreePtr<Node> source ) const
 {
     INDENT;
     ASSERT( source ); 
+    ASSERT( dest );
+
     // Decide whether to overlay or overwrite. The decision is made only based on
     // the pattern (the children of the Overlay node) not the input tree. This is 
     // to ensure consistent behaviour.
@@ -562,34 +562,30 @@ TreePtr<Node> CompareReplace::DoOverlayOrOverwrite( TreePtr<Node> dest,
     // and by transitivity, overlay set<= through's coupling.
     // No such identity would hold of overlay has been coupled, so we never overlay in that case
     // ALSO do not overlay over NULL dest.    
-    if( dest )
-        TRACE("dest=")(*dest)(" source=")(*source)("\n");
-    else
-        TRACE("dest=NULL source=")(*source)("\n");    
-   
+
+    TRACE("dest=")(*dest)(" source=")(*source)("\n");
+
     // This is to allow couplings to get substituted. 
-    TreePtr<Node> ssource = ApplySpecialAndCoupling( source, can_key, current_key );
+    TreePtr<Node> ssource = ApplySpecialAndCoupling( source );
     TreePtr<Node> esource = ssource ? ssource : source;
     ASSERT( esource );
     
-    if( !dest || !(esource->IsLocalMatch(dest.get())) )
+    if( esource->IsLocalMatch(dest.get()) )
     {
-        // Overwriting
-        if( ssource ) 
-        {
-            // Already created new subtree while applying special node or coupling so nothing more to do
-            return ssource; 
-        }
-        // Start a new subtree
-        dest = DuplicateNode( esource, can_key, current_key );    
-    }    
-        
-    // Now all remaining cases are reduced to an overlay    
-    DoOverlay( dest, esource, can_key, current_key );
-    ASSERT( dest );
-    ASSERT( dest->IsFinal() );
-
-    return dest;
+        // Overlaying 
+        DoOverlay( dest, esource );
+        return dest;
+    }
+    else if( ssource )
+    {
+        // Overwriting: already created new subtree while applying special node or coupling so nothing more to do
+        return ssource; 
+    }
+    else
+    {
+        // Overwriting, need to make a duplicate of pattern
+        return DuplicateSubtree( source );
+    }   
 }
 
 
@@ -597,9 +593,7 @@ TreePtr<Node> CompareReplace::DoOverlayOrOverwrite( TreePtr<Node> dest,
 // is non-NULL. This means we can call this multiple times with different sources and get a priority 
 // scheme.
 void CompareReplace::DoOverlay( TreePtr<Node> dest,
-		                        TreePtr<Node> source,
-		                        bool can_key,
-		                        shared_ptr<Key> current_key ) const
+		                        TreePtr<Node> source ) const
 {
 	INDENT;
     ASSERT( source );
@@ -655,18 +649,30 @@ void CompareReplace::DoOverlay( TreePtr<Node> dest,
         ASSERT( source_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
         
-        if( SequenceInterface *source_seq = dynamic_cast<SequenceInterface *>(source_memb[i]) )                
+        if( ContainerInterface *source_con = dynamic_cast<ContainerInterface *>(source_memb[i]) )                
         {
-            SequenceInterface *dest_seq = dynamic_cast<SequenceInterface *>(dest_memb[i]);
-            ASSERT( dest_seq )( "itemise for dest didn't match itemise for source");
-            DoOverlay( dest_seq, source_seq, can_key, current_key );
+            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
+            ASSERT( dest_con )( "itemise for dest didn't match itemise for source");
+            dest_con->clear();
+
+            TRACE("Copying container size %d\n", source_con->size() );
+	        FOREACH( const TreePtrInterface &p, *source_con )
+	        {
+		        ASSERT( p ); // present simplified scheme disallows NULL
+		        TreePtr<Node> n = DuplicateSubtree( p );
+		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
+		        {
+			        TRACE("Expanding SubSequence/SubCollection length %d\n", sc->size() );
+		            FOREACH( const TreePtrInterface &xx, *sc )
+			            dest_con->insert( xx );
+           		}
+		        else
+		        {
+			        TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
+			        dest_con->insert( n );
+		        }
+	        }
         }            
-        else if( CollectionInterface *source_col = dynamic_cast<CollectionInterface *>(source_memb[i]) )
-        {
-        	CollectionInterface *dest_col = dynamic_cast<CollectionInterface *>(dest_memb[i]);
-            ASSERT( dest_col )( "itemise for dest didn't match itemise for source");
-            DoOverlay( dest_col, source_col, can_key, current_key );
-        }
         else if( TreePtrInterface *source_ptr = dynamic_cast<TreePtrInterface *>(source_memb[i]) )
         {
         	TRACE();
@@ -674,16 +680,10 @@ void CompareReplace::DoOverlay( TreePtr<Node> dest,
             ASSERT( dest_ptr )( "itemise for target didn't match itemise for source");
             TreePtr<Node> source_child = *source_ptr;
             TreePtr<Node> dest_child = *dest_ptr;
-
-            if( current_key )
-            {
-                ASSERT( !dest_child )("substitution should just be a copy, so dest should be NULL");
-                ASSERT( source_child )("substitution should just be a copy, so source should be non-NULL");
-            }
             
             if( source_child )
             {
-                dest_child = DoOverlayOrOverwrite( dest_child, source_child, can_key, current_key );
+                dest_child = DoOverlayOrOverwrite( dest_child, source_child );
                 ASSERT( dest_child );
                 ASSERT( dest_child->IsFinal() );
             }
@@ -713,69 +713,7 @@ void CompareReplace::DoOverlay( TreePtr<Node> dest,
 }
 
 
-void CompareReplace::DoOverlay( SequenceInterface *dest,
-		                        SequenceInterface *source,
-		                        bool can_key,
-		                        shared_ptr<Key> current_key ) const
-{
-	INDENT;
-    // For now, always overwrite the dest
-    // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
-    dest->clear();
-
-    TRACE("Overlaying sequence size %d\n", source->size() );
-	FOREACH( const TreePtrInterface &p, *source )
-	{
-		ASSERT( p ); // present simplified scheme disallows NULL, see above
-		TreePtr<Node> n = DuplicateSubtree( p, can_key, current_key );
-		if( TreePtr<SubSequence> ss = dynamic_pointer_cast<SubSequence>(n) )
-		{
-			TRACE("Expanding SubSequence length %d\n", ss->size() );
-		    FOREACH( const TreePtrInterface &xx, *ss )
-			    dest->push_back( xx );
-   		}
-		else
-		{
-			TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
-			dest->push_back( n );
-		}
-	}
-}
-
-
-void CompareReplace::DoOverlay( CollectionInterface *dest,
-   		                        CollectionInterface *source,
-		                        bool can_key,
-		                        shared_ptr<Key> current_key ) const
-{
-	INDENT;
-    // For now, always overwrite the dest
-    // TODO smarter semantics for prepend, append etc based on NULLs in the sequence)
-    dest->clear();
-
-    TRACE("Overlaying collection size %d\n", source->size() );
-
-	FOREACH( const TreePtrInterface &p, *source )
-	{
-		ASSERT( p ); // present simplified scheme disallows NULL, see above
-		TreePtr<Node> n = DuplicateSubtree( p, can_key, current_key );
-		if( TreePtr<SubCollection> sc = dynamic_pointer_cast<SubCollection>(n) )
-		{
-			TRACE("Expanding SubCollection length %d\n", sc->size() );
-			FOREACH( const TreePtrInterface &xx, *sc )
-				dest->insert( xx );
-		}
-		else
-		{
-			TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
-			dest->insert( n );
-		}
-	}
-}
-
-
 TreePtr<Node> CompareReplace::DuplicateNode( TreePtr<Node> source,
-    		                                          bool can_key,
     		                                          shared_ptr<Key> current_key ) const
 {
     INDENT;
@@ -788,24 +726,154 @@ TreePtr<Node> CompareReplace::DuplicateNode( TreePtr<Node> source,
     TreePtr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
     ASSERT(dest);
 
-    // Replace all the links in the new node with duplicates of the links in the old node.
-    // To do this we re-use the DoOverlay function (no point writing 2 very similar functions)
-    ClearPtrs( dest ); 
-
     // If not substituting a Stuff node, remember this node is dirty for GreenGrass restriction
     // Also dirty the dest if the source was dirty when we are substituting Stuff
+    // TODO try removing StuffKey clause, so never acts during substitution
+    // TODO move this into callers so this fn doesn't need a current_key parameter
     if( !current_key || !dynamic_pointer_cast<StuffKey>(current_key) || dirty_grass.find( source ) != dirty_grass.end() )
         dirty_grass.insert( dest );
         
     return dest;    
 }    		                                          
 
+
 // If source is special or coupled then the special actions are taken here and the resulting
 // subtree returned. Otherwise, NULL is returned.
-TreePtr<Node> CompareReplace::ApplySpecialAndCoupling( TreePtr<Node> source,
-    		                                           bool can_key,
-    		                                           shared_ptr<Key> current_key ) const
+TreePtr<Node> CompareReplace::ApplySpecialAndCoupling( TreePtr<Node> source ) const
 {
+    INDENT;
+    ASSERT( source );
+    TRACE("trying to key\n");
+    // See if the source node is coupled to anything
+    TreePtr<Node> dest = coupling_keys->KeyAndSubstitute( TreePtr<Node>(), source, this, false );
+    if( dest )
+        {TRACE("keyed ")(*source)(", result was ")(*dest)("\n");}
+    else
+        {TRACE("did not key ")(*source)("\n");}
+        
+    if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
+    {
+        dest = DuplicateSubtree( sb->GetThrough() );
+        (*sb)( *pcontext, &dest );
+    } 
+    else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
+    {
+        TRACE("Overlay node through=")(*(ob->GetThrough()))(" overlay=")(*(ob->GetOverlay()))("\n");
+        if( !dest )
+        {
+            dest = DuplicateSubtree( ob->GetThrough() );
+        }
+        ASSERT( ob->GetOverlay() );          
+        dest = DoOverlayOrOverwrite( dest, ob->GetOverlay() );
+        ASSERT( dest->IsFinal() );
+    }
+    else if( dynamic_pointer_cast<SpecialBase>(source) )
+    {
+        if( !dest )
+        {
+            dest = MakeTreePtr<Node>(); // Node overlays everything, with no effect i.e. is the null overlay
+        }
+    }
+    else if( dest )
+    {
+        // If we're here we keyed a coupling on a normal node. Do Overlay so that eg Overlay nodes
+        // further down can act.
+        DoOverlay( dest, source );
+    }
+    return dest;
+}
+
+
+// Duplicate an entire subtree, following the rules for inferno search and replace.
+// We recurse through the subtree, using Duplicator to create the new nodes. We support
+// substitution based on configured couplings, and we do not duplicate identifiers when
+// substituting.
+// TODO possible refactor: when we detect a coupling match, maybe recurse back into DuplicateSubtree
+// and get the two OverlayPtrs during unwind.
+TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source ) const
+{
+	INDENT;
+
+ 	TRACE("Duplicating %s\n", ((string)*source).c_str());
+
+    TreePtr<Node> dest = ApplySpecialAndCoupling( source );
+    if( dest )
+        return dest; // if this produced a result then we're done
+    
+    // Make a new node
+    dest = DuplicateNode( source );
+
+    // Itemise the members. Note that the itemiser internally does a
+    // dynamic_cast onto the type of source, and itemises over that type. dest must
+    // be dynamic_castable to source's type.
+    vector< Itemiser::Element * > source_memb = source->Itemise();
+    vector< Itemiser::Element * > dest_memb = dest->Itemise(); 
+
+    TRACE("Overlaying %d members source=%s dest=%s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
+    // Loop over all the members of source (which can be a subset of dest)
+    // and for non-NULL members, duplicate them by recursing and write the
+    // duplicates to the destination.
+    for( int i=0; i<dest_memb.size(); i++ )
+    {
+    	TRACE("Overlaying member %d\n", i );
+        ASSERT( source_memb[i] )( "itemise returned null element" );
+        ASSERT( dest_memb[i] )( "itemise returned null element" );
+        
+        if( ContainerInterface *source_con = dynamic_cast<ContainerInterface *>(source_memb[i]) )                
+        {
+            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
+            dest_con->clear();
+
+            TRACE("Copying container size %d\n", source_con->size() );
+	        FOREACH( const TreePtrInterface &p, *source_con )
+	        {
+		        ASSERT( p ); // present simplified scheme disallows NULL
+		        TreePtr<Node> n = DuplicateSubtree( p );
+		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
+		        {
+			        TRACE("Expanding SubSequence/SubCollection length %d\n", sc->size() );
+		            FOREACH( const TreePtrInterface &xx, *sc )
+			            dest_con->insert( xx );
+           		}
+		        else
+		        {
+			        TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
+			        dest_con->insert( n );
+		        }
+	        }
+        }            
+        else if( TreePtrInterface *source_ptr = dynamic_cast<TreePtrInterface *>(source_memb[i]) )
+        {
+            TRACE("Copying single element");
+            TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
+            ASSERT( *source_ptr )("source should be non-NULL");
+            *dest_ptr = DuplicateSubtree( *source_ptr );
+            ASSERT( *dest_ptr );
+            ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            
+        }
+        else
+        {
+            ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
+        }
+    }
+    
+    return dest;
+}
+
+
+TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitution( TreePtr<Node> source,
+		                                                    shared_ptr<Key> current_key ) const
+{
+	INDENT;
+	ASSERT( current_key );
+ 	TRACE("Duplicating %s under_substitution=%p\n", ((string)*source).c_str(), current_key.get());
+    // Under substitution, we should be duplicating a subtree of the input
+    // program, which should not contain any special nodes
+    ASSERT( !(dynamic_pointer_cast<SpecialBase>(source)) )
+          ("Duplicating special node ")
+          (*source)
+          (" while under substitution\n" );
+
     // Are we substituting a stuff node? If so, see if we reached the terminus, and if
 	// so come out of substitution.
 	if( shared_ptr<StuffKey> stuff_key = dynamic_pointer_cast<StuffKey>(current_key) )
@@ -820,122 +888,125 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCoupling( TreePtr<Node> source,
 			source == stuff_key->terminus ) // and the present node is the terminus in the source pattern
 		{
 			TRACE( "Leaving substitution to duplicate terminus replace pattern at ")(*(replace_stuff->terminus))("\n" );
-			TreePtr<Node> term = DuplicateSubtree( replace_stuff->terminus, can_key, shared_ptr<Key>() ); // not in substitution any more
+			TreePtr<Node> term = DuplicateSubtree( replace_stuff->terminus ); // not in substitution any more
 			TRACE( "Returning to substitution for rest of stuff\n" );
 			return term;
 		}
 	}
-	
-    // See if the source node is coupled to anything
-    TreePtr<Node> dest = coupling_keys->KeyAndSubstitute( TreePtr<Node>(), source, this, can_key );
-    ASSERT( !(dest && current_key) )("Should only find a match in patterns"); // We'll never find a match when we're under substitution, because the
+	    
+    // Make a new node
+    TreePtr<Node> dest = DuplicateNode( source, current_key );
 
-    if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
+    // Itemise the members. Note that the itemiser internally does a
+    // dynamic_cast onto the type of source, and itemises over that type. dest must
+    // be dynamic_castable to source's type.
+    vector< Itemiser::Element * > source_memb = source->Itemise();
+    vector< Itemiser::Element * > dest_memb = dest->Itemise(); 
+
+    TRACE("Overlaying %d members source=%s dest=%s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
+    // Loop over all the members of source (which can be a subset of dest)
+    // and for non-NULL members, duplicate them by recursing and write the
+    // duplicates to the destination.
+    for( int i=0; i<dest_memb.size(); i++ )
     {
-        dest = DuplicateSubtree( sb->GetThrough(), can_key, current_key );
-        if(!can_key) // do not run slaves until we have all the keys of the master 
+    	TRACE("Overlaying member %d\n", i );
+        ASSERT( source_memb[i] )( "itemise returned null element" );
+        ASSERT( dest_memb[i] )( "itemise returned null element" );
+        
+        if( ContainerInterface *source_con = dynamic_cast<ContainerInterface *>(source_memb[i]) )                
         {
-            (*sb)( *pcontext, &dest );
-        }
-    } 
-	else if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
-    {
-        if( !dest )
+            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
+            dest_con->clear();
+
+            TRACE("Copying container size %d\n", source_con->size() );
+	        FOREACH( const TreePtrInterface &p, *source_con )
+	        {
+		        ASSERT( p ); // present simplified scheme disallows NULL
+		        TreePtr<Node> n = DuplicateSubtreeSubstitution( p, current_key );
+		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
+		        {
+			        TRACE("Expanding SubSequence/SubCollection length %d\n", sc->size() );
+		            FOREACH( const TreePtrInterface &xx, *sc )
+			            dest_con->insert( xx );
+           		}
+		        else
+		        {
+			        TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
+			        dest_con->insert( n );
+		        }
+	        }
+        }            
+        else if( TreePtrInterface *source_ptr = dynamic_cast<TreePtrInterface *>(source_memb[i]) )
         {
-            // Call the soft pattern impl (TODO don't like calling the function DuplicateSubtree, confusing)
-            dest = srp->DuplicateSubtree( this, can_key );
-            // Allow this to key a coupling 
-            (void)coupling_keys->KeyAndSubstitute( dest, source, this, can_key );
+            TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
+            ASSERT( *source_ptr )("source should be non-NULL");
+            *dest_ptr = DuplicateSubtreeSubstitution( *source_ptr, current_key );
+            ASSERT( *dest_ptr );
+            ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            
+        }
+        else
+        {
+            ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
         }
     }
-    else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
-    {
-        TRACE("Overlay node through=")(*(ob->GetThrough()))(" overlay=")(*(ob->GetOverlay()))("\n");
-        if( !dest )
-            dest = DuplicateSubtree( ob->GetThrough(), can_key, current_key );
-        else 
-            TRACE("dest=")(*dest)("\n");
-        ASSERT( ob->GetOverlay() );          
-        dest = DoOverlayOrOverwrite( dest, ob->GetOverlay(), can_key, current_key );
-        ASSERT( dest->IsFinal() );
-    }
-    else if( dynamic_pointer_cast<SpecialBase>(source) )
-    {
-        ASSERT( dest )
-              ("Special nodes in replace pattern not coupled and does not produce any output (")(*source)(")\n");
-        // Do not overlay when a special node is keyed since that would just put the special node back again      
-    }
-    else if( dest )
-    {
-        // If we're here we keyed a coupling on a normal node. Do Overlay so that eg Overlay nodes
-        // further down can act.
-        DoOverlay( dest, source, can_key, current_key );
-    }
+    
     return dest;
 }
 
 
-// Duplicate an entire subtree, following the rules for inferno search and replace.
-// We recurse through the subtree, using Duplicator to create the new nodes. We support
-// substitution based on configured couplings, and we do not duplicate identifiers when
-// substituting.
-// TODO possible refactor: when we detect a coupling match, maybe recurse back into DuplicateSubtree
-// and get the two OverlayPtrs during unwind.
-TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
-		                                        bool can_key,
-		                                        shared_ptr<Key> current_key ) const
+struct NoSlaveFilter : public Filter
 {
-	INDENT;
- 	TRACE("Duplicating %s under_substitution=%p\n", ((string)*source).c_str(), current_key.get());
-#ifdef STRACE
-    TRACE("DuplicateSubtree source={");
-	    Expand w(source);
-	    bool first=true;
-	    FOREACH( TreePtr<Node> n, w )
-	    {
-	    	if( !first )
-	    		TRACE(", ");
-	    	if( n )
-                TRACE( *n )(":%p", n.get());
-            else
-                TRACE("NULL");
-	    	first=false;
-	    }
-	    TRACE("}\n"); // TODO put this in as a common utility somewhere
-#endif
-    // Under substitution, we should be duplicating a subtree of the input
-    // program, which should not contain any special nodes
-    ASSERT( !(dynamic_pointer_cast<SpecialBase>(source) && current_key) )
-          ("Duplicating special node ")
-          (*source)
-          (" while under substitution\n" );
-
- //   TreePtr<Node> dest = TreePtr<Node>();
-  //  DoOverlayOrOverwrite( dest, source, can_key, current_key );
-
-    TreePtr<Node> dest = ApplySpecialAndCoupling( source, can_key, current_key );
-    
-    if( !dest )
+    virtual bool IsMatch( TreePtr<Node> context,
+                          TreePtr<Node> root )
     {
-        dest = DuplicateNode( source, can_key, current_key );
-        DoOverlay( dest, source, can_key, current_key );                        
-    }
+        return !dynamic_pointer_cast<SlaveBase>(root);
+    }                          
+};
+
+
+// Key for replace by just walking the tree (uniquised walk, not recursing into 
+// the compare, search or replace fields of slaves) activating soft nodes and keying
+// them.
+void CompareReplace::KeyReplaceNodes( TreePtr<Node> source ) const
+{
+    INDENT;
+    TRACE("Walking replace pattern to key the soft nodes\n");
     
-    return dest;
+    NoSlaveFilter nsf;
+    UniqueFilter uf;
+    Expand e(source, &uf, &nsf);// TODO depth first mode so we don't have to reverse!
+    FOREACH( TreePtr<Node> pattern, e )
+	{
+	    TRACE(*pattern)("\n");
+	    if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( pattern ) )
+	    {
+            TRACE("Soft replace pattern not keyed, node at %p\n", pattern.get());
+            // Call the soft pattern impl (TODO don't like calling the function DuplicateSubtree, confusing)
+            TreePtr<Node> key = srp->DuplicateSubtree( this );
+            // Allow this to key a coupling 
+            (void)coupling_keys->KeyAndSubstitute( key, pattern, this, true ); // Just want to key
+	    }
+	    else if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>( pattern ) )
+	    {
+	        // Having used a recurse restriction to stop going into slaves, we of course DO want 
+	        // to go theough the "through" since that is our pattern. Recursion will suffice.
+	        KeyReplaceNodes( sb->GetThrough() ); 	        
+	    }
+    }
 }
 
 
 TreePtr<Node> CompareReplace::MatchingDuplicateSubtree( TreePtr<Node> source ) const
 {
-    //TODO can_key should be an enum eg RelpacePass {KEYING, SUBSTITUTING} for clarity
     // Do a two-pass matching process: first get the keys...
     TRACE("doing replace KEYING pass....\n");
-    (void)DuplicateSubtree( source, true );
+    //(void)DuplicateSubtree( source, true );
+    KeyReplaceNodes( source );
     TRACE("replace KEYING pass\n" );
 
     // Now restrict the search according to the couplings
     TRACE("doing replace SUBSTITUTING pass....\n");
-    TreePtr<Node> r = DuplicateSubtree( source, false );
+    TreePtr<Node> r = DuplicateSubtree( source );
     TRACE("replace SUBSTITUTING pass\n" );
     return r;
 }
@@ -1187,3 +1258,21 @@ void CompareReplace::Test()
         */
     }
 }
+/*
+#ifdef STRACE
+    TRACE("DuplicateSubtree source={");
+	    Expand w(source);
+	    bool first=true;
+	    FOREACH( TreePtr<Node> n, w )
+	    {
+	    	if( !first )
+	    		TRACE(", ");
+	    	if( n )
+                TRACE( *n )(":%p", n.get());
+            else
+                TRACE("NULL");
+	    	first=false;
+	    }
+	    TRACE("}\n"); // TODO put this in as a common utility somewhere
+#endif
+*/
