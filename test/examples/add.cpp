@@ -1,5 +1,5 @@
 
 int main()
 {
-	int tot=0;
+	{int tot=0;}
 }

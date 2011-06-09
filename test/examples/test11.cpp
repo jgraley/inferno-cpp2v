@@ -36,9 +36,9 @@ void fa()
 
 void fb()
 {
-    goto FOO;
+//    goto FOO;
     goto BAR;
-    FOO:;
+//    FOO:;
     BAR:;
     ;
 } 

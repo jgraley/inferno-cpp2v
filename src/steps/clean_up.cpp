@@ -39,13 +39,27 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     //{a} -> a TODO need to restrict parent node to Statement: For, If etc OK; Instance is NOT OK
     //         TODO OR maybe just fix renderer for that case
     // Note: this hits eg If(x){a;} which the "Multi" version misses 
+    MakeTreePtr< MatchAll<Statement> > all;    
+    MakeTreePtr< NotMatch<Statement> > sx_not;
+    MakeTreePtr<Instance> sx_instance;
+    MakeTreePtr< Stuff<Statement> > stuff;
+    MakeTreePtr< Overlay<Statement> > over;   
     MakeTreePtr<Compound> s_comp;
     MakeTreePtr< Statement > body;
+
+    all->patterns = (stuff, sx_not);
+    stuff->terminus = over;
+    sx_not->pattern = sx_instance;
+    sx_instance->initialiser = s_comp;
+    over->through = s_comp;
+    over->overlay = body;
+
+    stuff->one_level = true;
 
     s_comp->statements = body;
     // Note: leaving s_comp empty meaning no decls allowed
 
-    SearchReplace::Configure( s_comp, body );
+    SearchReplace::Configure( all, all );
 }
 
 CleanupNop::CleanupNop() 

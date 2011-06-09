@@ -38,13 +38,13 @@ echo Compile input...
 # (1) we do not use -pedantic because its infuriating and
 # (2) we do not apply either restriction to intermediate output, which may
 # use gcc extensions etc
-g++ -ansi -nostdinc -c $infile -o results/"$fb"_in.o
+g++ -ansi -nostdinc -Wreturn-type -Werror -c $infile -o results/"$fb"_in.o
 c1res=$?
 if test $c1res -ne 0
 then
- # if it doesn't even compile, do nothing
- echo SKIPPED
- exit 0
+ # if it doesn't even compile, do nothing TODO return a failure
+ echo TEST VECTOR $infile REJECTED
+ exit 0 
 fi
 
 echo Link input...
@@ -84,12 +84,12 @@ then
     if test $r1res -eq $r2res
     then
      cmpres=0
-     echo PASSED
+     echo $infile PASSED
      return_code=0
     fi
    fi 
   else
-   echo PASSED COMPILE ONLY
+   echo $infile PASSED COMPILE ONLY
    return_code=0
   fi
  fi

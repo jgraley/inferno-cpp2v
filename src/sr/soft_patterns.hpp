@@ -45,7 +45,10 @@ private:
     }
 };
 
-struct MatchAllBase {};
+struct MatchAllBase : virtual Node
+{
+    virtual CollectionInterface &GetPatterns() = 0;
+};
 
 // Match all of the supplied patterns (between you and me, it's an AND)
 template<class PRE_RESTRICTION>
@@ -69,6 +72,7 @@ private:
     	}
         return FOUND;
     }
+    CollectionInterface &GetPatterns() { return patterns; } // TODO try covariant?
 };
 
 struct MatchAnyBase {};
@@ -180,7 +184,7 @@ struct BuildInstanceIdentifier : Special<InstanceIdentifier>,
 {
     BuildInstanceIdentifier( string s ) : BuildIdentifierBase(s) {}
     BuildInstanceIdentifier() : BuildIdentifierBase("unnamed") {}
-    NODE_FUNCTIONS
+    SPECIAL_NODE_FUNCTIONS
 private:
     virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
     {
@@ -194,7 +198,7 @@ struct BuildLabelIdentifier : Special<LabelIdentifier>,
 {
     BuildLabelIdentifier( string s ) : BuildIdentifierBase(s) {}
     BuildLabelIdentifier() : BuildIdentifierBase("UNNAMED") {}
-    NODE_FUNCTIONS
+    SPECIAL_NODE_FUNCTIONS
 private:
     virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
     {

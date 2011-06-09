@@ -342,10 +342,11 @@ struct GreenGrass : GreenGrassBase, Special<PRE_RESTRICTION>
 // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
 struct StuffBase : virtual Node
 {
+    StuffBase() : one_level(false){}
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
     CompareReplace recurse_comparer; // TODO only need the compare half, maybe split it out?
-    
+    bool one_level;
     // Do the itemiser by hand since it gets confused by the CompareReplace object
 };
 template<class PRE_RESTRICTION>

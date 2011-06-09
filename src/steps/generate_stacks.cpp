@@ -109,3 +109,27 @@ GenerateStacks::GenerateStacks()
 
     SearchReplace::Configure( fi, fi );
 }
+
+
+ExplicitiseReturn::ExplicitiseReturn()
+{
+    MakeTreePtr< Instance > fi;
+    MakeTreePtr<Compound> s_comp, r_comp;        
+    MakeTreePtr< Star<Statement> > pre;
+    MakeTreePtr< Overlay<Statement> > over;
+    MakeTreePtr< NotMatch<Statement> > sx_last;
+    MakeTreePtr<Return> s_return, r_return;
+    
+    fi->type = MakeTreePtr<Subroutine>();
+    fi->initialiser = over;
+    s_comp->statements = (pre, sx_last);
+    over->through = s_comp;
+    sx_last->pattern = s_return;
+    
+    over->overlay = r_comp;
+    r_comp->statements = (pre, sx_last, r_return);
+    r_return->return_value = MakeTreePtr<Uninitialised>();
+    
+    SearchReplace::Configure( fi, fi );
+}    
+

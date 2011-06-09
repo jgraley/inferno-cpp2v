@@ -18,4 +18,10 @@ public:
 	GenerateStacks();
 };
 
+class ExplicitiseReturn : public SearchReplace
+{
+public:
+	ExplicitiseReturn();
+};
+
 #endif /* GENERATE_STACKS_HPP_ */

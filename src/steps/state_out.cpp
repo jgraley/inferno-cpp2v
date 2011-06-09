@@ -55,29 +55,35 @@ CompactGotosFinal::CompactGotosFinal()
 
 AddStateLabelVar::AddStateLabelVar()
 {
-    MakeTreePtr<Compound> s_comp, r_comp, r_compound;
+    MakeTreePtr<Compound> s_comp, r_comp, lr_compound;
     MakeTreePtr< Star<Declaration> > decls;
     MakeTreePtr< Star<Statement> > pre, post;
-    MakeTreePtr<Goto> s_goto, r_goto, sr_goto;
-    MakeTreePtr<Assign> r_assign;
+    MakeTreePtr<Goto> ls_goto, lr_goto, sx_goto;
+    MakeTreePtr<Assign> lr_assign;
     MakeTreePtr<Automatic> state_var;
-    MakeTreePtr< NotMatch<Expression> > sr_not;
+    MakeTreePtr< NotMatch<Expression> > sx_not, lsx_not;
+    MakeTreePtr<Pointer> ptr_type;
     
     s_comp->members = (decls);
-    s_comp->statements = (pre, sr_goto, post); 
-    sr_goto->destination = sr_not;
-    sr_not->pattern = MakeTreePtr<InstanceIdentifier>();
+    s_comp->statements = (pre, sx_goto, post); 
+    sx_goto->destination = sx_not;
+    sx_not->pattern = MakeTreePtr<InstanceIdentifier>();
         
     r_comp->members = (state_var, decls);
-    r_comp->statements = (pre, sr_goto, post); 
-    MakeTreePtr< SlaveSearchReplace<Statement> > r_slave( r_comp, s_goto, r_compound );
-     
-    s_goto->destination = MakeTreePtr<Expression>();
-    
+    r_comp->statements = (pre, sx_goto, post); 
     state_var->identifier = MakeTreePtr< BuildInstanceIdentifier >("state");
-    r_compound->statements = (r_assign, r_goto);
-    r_assign->operands = (state_var->identifier, s_goto->destination);
-    r_goto->destination = state_var->identifier;
+    state_var->type = ptr_type;    
+    state_var->initialiser = MakeTreePtr<Uninitialised>();
+    ptr_type->destination = MakeTreePtr<Void>();
+
+    MakeTreePtr< SlaveSearchReplace<Statement> > r_slave( r_comp, ls_goto, lr_compound );
+     
+    ls_goto->destination = lsx_not;
+    lsx_not->pattern = state_var->identifier; //  MakeTreePtr<InstanceIdentifier>();
+    
+    lr_compound->statements = (lr_assign, lr_goto);
+    lr_assign->operands = (state_var->identifier, ls_goto->destination);
+    lr_goto->destination = state_var->identifier;
 
             
     SearchReplace::Configure( s_comp, r_slave );
