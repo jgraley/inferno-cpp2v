@@ -1,4 +1,5 @@
 #include "search_replace.hpp"
+#include "soft_patterns.hpp"
 #include "conjecture.hpp"
 #include "tree/tree.hpp"
 #include "common/hit_count.hpp"
@@ -158,12 +159,20 @@ Result CompareReplace::DecidedCompare( TreePtr<Node> x,
 	if( !pattern->IsLocalMatch(x.get()) )
 		return NOT_FOUND;
 
+    // TODO I wonder if *this* is the right place to look for keyed couplings: the IsLocalMatch() above
+    // will reduce the number of coupling searches we do, but we will avoid walking
+    // the children or invoking soft functionality. Still need to key at the end though.
+
 	if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
     {
     	// Hand over to any soft search functionality in the search pattern node
     	Result r = ssp->DecidedCompare( this, x, can_key, conj );
     	if( r != FOUND )
     		return NOT_FOUND;
+    }
+    else if( dynamic_pointer_cast<SoftReplacePattern>(pattern) )
+    {
+    	// No further restriction beyond the pre-restriction for these nodes when searching.
     }
     else if( TreePtr<StuffBase> stuff_pattern = dynamic_pointer_cast<StuffBase>(pattern) )
     {
@@ -433,11 +442,17 @@ Result CompareReplace::DecidedCompare( TreePtr<Node> x,
         rf = &(stuff_pattern->recurse_comparer);
     }
     
-    Expand wx( x, NULL, rf );        
-
+    Expand we( x, NULL, rf );       
+    Flatten wf( x );
+    ContainerInterface *pwx;
+    if( stuff_pattern->one_level )
+        pwx = &wf;
+    else
+        pwx = &we; 
+    
 	// Get decision from conjecture about where we are in the walk
-	ContainerInterface::iterator thistime = conj.HandleDecision( wx.begin(), wx.end() );
-	if( thistime == (ContainerInterface::iterator)(wx.end()) )
+	ContainerInterface::iterator thistime = conj.HandleDecision( pwx->begin(), pwx->end() );
+	if( thistime == (ContainerInterface::iterator)(pwx->end()) )
 		return NOT_FOUND; // ran out of choices
 
 	// Try out comparison at this position
@@ -767,10 +782,28 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCoupling( TreePtr<Node> source ) co
         dest = DoOverlayOrOverwrite( dest, ob->GetOverlay() );
         ASSERT( dest->IsFinal() );
     }
+    else if( TreePtr<MatchAllBase> mab = dynamic_pointer_cast<MatchAllBase>(source) )
+    {
+        if( dest )
+        {
+            TRACE("Coupled MatchAll: dest=")(*dest)("\n");
+            FOREACH( TreePtr<Node> source_pattern, mab->GetPatterns() )
+            {                
+                TreePtr<Node> dn = ApplySpecialAndCoupling( source_pattern );
+                DoOverlayOrOverwrite( dest, dn );
+                TRACE("Did MatchAll pattern: sp=")(*source_pattern)(" dn=")(*dn)(" dest=")(*dest)("\n");
+            }
+        }
+        else
+        {
+            TRACE("MAB with no coupling, not handled\n"); // TODO
+        }
+    }
     else if( dynamic_pointer_cast<SpecialBase>(source) )
     {
         if( !dest )
         {
+            TRACE("Acting on special node ")(*source)(" by returning Node, which acts as the null overlay\n");
             dest = MakeTreePtr<Node>(); // Node overlays everything, with no effect i.e. is the null overlay
         }
     }
