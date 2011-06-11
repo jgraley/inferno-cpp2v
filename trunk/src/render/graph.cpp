@@ -267,7 +267,14 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		    *shape = "egg";
 		else
      	    *shape = "circle";
-		return string("#"); // TODO what if there's a restriction: egg?
+		return string("#"); 
+	}
+	else if( dynamic_pointer_cast<AnyNodeBase>(sp) )
+	{
+	    // The AnyNode node appears as a small circle with a ? sign in it. The terminus link emerges from the
+	    // right of the circle. ? implies the tendancy to match exactly one thing.
+   	    *shape = "circle";
+		return string("?"); 
 	}
 	else if( dynamic_pointer_cast<NotMatchBase>(sp) )
 	{

@@ -92,7 +92,7 @@ However, it is possible to arrange for some new subtree to appear under such a c
 
 The overlaying process is recursive, that is it can overlay a child of the node pointed to by overlay over the equivalent child of the matched input program node. Starting with pointers PT = .through and PO = .overlay, the rule is:
 
-- If PO is non-NULL (PT is always non-NULL) and the node at PT is a non-strict subclass of the node at PO, then we overlay, by recursing for PO' = each pointer member of the node at PO, and PT' = the corresponding member of the node at PT. This correspondance is the reason for the subclass requirement. 
+- If PO is non-NULL (PT is always non-NULL) and the node at PT is a non-strict subclass of the node at PO, then we overlay, by recursing for PO' = each pointer member of the node at PO, and PT' = the corresponding member of the node at PT. This correspondence is the reason for the subclass requirement. 
 
 - If PO is NULL or the node at PT is not a non-strict subclass of the node at PO, then we overwrite the subtree at PT with a copy of the subtree at PO. We have now finished this branch and do not need to repeat.
 
@@ -112,7 +112,9 @@ Inferno cannot key to nodes in abnormal contexts. Consequently, every coupling t
 
 4 Star search pattern
 
-The Inferno tree supports one-to-many relationships using containers, of which two types are available: Sequence, which preserves ordering and Collection, which does not. When creating a search pattern it can be useful to be able to match zero or more elements of a container. We can do this using a special node called Star<>, which is templated on the collection's element type. So a container of pointers to Statements can be wildcarded using Star<Statement>. If a pre-restriction is given, every container element matched by the Star must satisfy the pre-restriction (i.e. be a non-strict subclass of the supplied base class).
+The Inferno tree supports one-to-many relationships using containers, of which two types are available: Sequence, which preserves ordering and Collection, which does not. When creating a search pattern it can be useful to be able to match zero or more elements of a container. We can do this using a special node called Star<>, which is templated on the collection's element type. So a container of pointers to Statements can be wildcarded using Star<Statement>. 
+
+If a pre-restriction is given, every container element matched by the Star must satisfy the pre-restriction (i.e. be a non-strict subclass of the supplied base class). Additionally, the pattern member may point to a subtree, which must be matched by every element that the star node matches. This pattern is an abnormal context for coupling.
 
 Star nodes may be coupled into collections in the replace pattern, in order to reproduce all the nodes that were matched by the Star in the search pattern. 
 
@@ -120,11 +122,15 @@ A Star may only be placed in a container, not pointed to directly.
 
 4.1 In Sequence
 
-A Star node in a Sequence in a search pattern acts like a "*" character in a filename, in other words it can match zero or more elements at the position of the star. It is possible to use * multiple times and at any position in the pattern sequence. But it is not possible to place two stars consecutively. For example the Sequence (Star<Statement>, If, Star<Statement>, For, Star<Statement>) is a search pattern for any Sequence of Statements that contains an If and a For, and which places the If before the For.
+A Star node in a Sequence in a search pattern acts like a "*" character in a filename, in other words it can match zero or more elements at the position of the star. It is possible to use * multiple times and at any position in the pattern sequence. But it is not possible to place two stars consecutively (even if they have differing restrictions). 
+
+For example the Sequence (Star<Statement>, If, Star<Statement>, For, Star<Statement>) is a search pattern for any Sequence of Statements that contains an If and a For, and which places the If before the For.
 
 4.2 In Collection
 
-A Star in a Collection acts similarly as when in a Sequence. However, since Collections are unordered, the semantics differ slightly. A Collection in a search pattern may only contain zero or one Star node. If a star node is present, it will match all nodes not matched by other (non-Star) elements of the Collection. For example, the Collection (Star<Declaration>, Typedef, Static) will match any Collection of Declarations that includes a Typedef and a Static, and these may appear in any order.
+A Star in a Collection acts similarly as when in a Sequence. However, since Collections are unordered, the semantics differ slightly. A Collection in a search pattern may only contain zero or one Star node. If a star node is present, it will try to match all nodes not matched by other (non-Star) elements of the Collection. It is not possible to insert multiple Star nodes with different restrictions, though this may be added later.
+
+For example, the Collection (Star<Declaration>, Typedef, Static) will match any Collection of Declarations that includes a Typedef and a Static, and these may appear in any order. 
 
 4.3 Notes on collection matching
 
@@ -136,7 +142,7 @@ Since Inferno search and replace operates on trees rather than just linear seque
 
 But it is useful to be able to explicitly match some part of the subtree, named the terminus, regardless of the path from the root of the subtree to the terminus. This is accomplished using the Stuff<> node. At the base of the subtree we place a Stuff node, templated on the pointed-to type. This node has a member named terminus, which is a pointer to Node, and any node or subtree of nodes can be referenced from here.
 
-Inferno will search the subtree under the Stuff node for a match to the terminus. If a terminus match is found, the stuff node is considered a match. For example Stuff<Compound> with its terminus pointing to If may be given as the body of a function. It will match the terminus to any If node within the body as well as within nested Compund blocks, For or While loop bodies etc.
+Inferno will search the subtree under the Stuff node, including at the position of the Stuff node itself, for a match to the terminus. If a terminus match is found, the stuff node is considered a match. For example Stuff<Compound> with its terminus pointing to If may be given as the body of a function. It will match the terminus to any If node within the body as well as within nested Compund blocks, For or While loop bodies etc.
 
 Stuff nodes may be coupled into the replace pattern in order to reproduce the subtree that Stuff matched to in the output program. When coupling the stuff nodes, it is possible to overlay the terminus with an alternative subtree in order to modify only what is under the terminus. The terminus node itself and any node in the subtree under it may also be coupled into the replace pattern. 
 
@@ -151,6 +157,12 @@ Note that the Stuff node recurse_restrictor only applies when the stuff node act
 Compare with the pre-restriction documented above, which applies to all special nodes. This only applies to the root of the input program subtree, as with all other special nodes. In the general case, pre-restriction, recurse_restriction and terminus are all acting to restrict the Stuff node at different places in the input program subtree: pre-restriction at root, terminus at leaf and recurse_restriction at intervening nodes. 
 
 Note that a recurse restriction pattern is an abnormal context.
+
+5.2 AnyNode pattern
+
+As mentioned above, the Stuff node can match at the root of the input program subtree, i.e. zero levels of recursion. Therefore a pattern of If( Stuff( For(...) ) ) would match a program like If( For(...) ). AnyNode is an alternative to Stuff that matches only on exactly one level of indirection. A pattern like If( AnyNode( For(...) ) will match for example If( While( For(...) ) ) but not If( For(...) ) or If( While( Switch( For(...) ) ) ).
+
+AnyNode supports pre-restriction and has a terminus just like Stuff, but there is no recurse restriction. AnyNode is useful for anti-parenting, see below.
 
 6 Boolean search patterns
 
@@ -273,6 +285,16 @@ These patterns are termed "strictly reductive".
 Where a pattern converts a general form of a construct to a specific form the reduction is less readily apparent. What is being removed is any construct of the general kind but not the specific kind. For example, converting general usage of If into a restricted form like If(value:Expression, then:Goto, else:Nop) is actually trying to reduce away the if statements that are not in the form shown.
 
 A common solution is to insert MatchAll in the search pattern, with a NotMatch node on the other leg. So when reducing X to Y, the search pattern becomes MatchAll( X, NotMatch(Y) ). This provides an and-not or but-not type of restriction. The search pattern subtree Y will resemble the replace pattern, but must be supplied separately because a coupling would not make sense here (or be allowed because the subtree under NotMatch is an abnormal context).
+
+11.2.1 Anti-parenting
+
+As an aside, the but-not pattern is useful for anti-parenting. This is where you want to find occurrences of a node whose parentage is *not* some specific pattern. For example, if you want to differentiate between declarations and usages of a variable, the declarations may be matched easily as Declaration( identifier:my_variable ). But to find usages, we have to allow any other node that might point to an InstanceIdentifier, like Operator, If etc *including* Declaration where the variable is used as the initialiser - obviously a usage.
+
+There are a few ways to do this in Inferno, but the preferred one uses a combination of MatchAll and NotMatch to create an and-not pattern; the undesired parentage is expressed in the NotMatch branch, and the other branch points to the target node via AnyNode in order to match any other parentage. Written down, it looks like 
+
+MatchAll( NotMatch( bad_parent( my_node ) ), AnyNode( my_node ) )
+
+To modify just my_node, insert an Overlay node before it in the AnyNode branch.
 
 11.3 GreenGrass node
 

@@ -27,5 +27,13 @@ public:
     AddStateLabelVar();
 };
 
+// Add a variable for the current state as a label variable, and 
+// use it for the gotos.
+class EnsureSuperLoop : public SearchReplace
+{
+public:
+    EnsureSuperLoop();
+};
+
 
 #endif

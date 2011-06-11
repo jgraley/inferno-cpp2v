@@ -136,6 +136,23 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
 			return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>();
 		}
 	}
+	// For when OOStd itself needs to dyncast, as opposed to the user asking for it.
+	static inline SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>
+	    InferredDynamicCast( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g )
+	{
+		if( g )
+		{
+			shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(g));
+			ASSERT( v )("OOStd inferred dynamic cast has failed: from ")(*g)
+			           (" to type ")(Traceable::CPPFilt( typeid( VALUE_TYPE ).name() ))("\n");
+			return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>(v);
+		}
+		else
+		{
+		    // Null came in, null goes out.
+			return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>();
+		}
+	}
 };
 
 // Similar signature to boost shared_ptr operator==, and we restrict the pointers

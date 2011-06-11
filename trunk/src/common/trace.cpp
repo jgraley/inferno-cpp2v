@@ -114,7 +114,7 @@ void boost::assertion_failed(char const * expr, char const * function, char cons
     InfernoAbort();
 }
 
-string Traceable::CPPFilt( string s ) const
+string Traceable::CPPFilt( string s )
 {
 	int status;
 	char *ps;

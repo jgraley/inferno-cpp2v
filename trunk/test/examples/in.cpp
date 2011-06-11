@@ -80,6 +80,7 @@ ms x;
 unsigned df()
 {
     x.a;
+    return 0;
 }
 /*
 class ccc

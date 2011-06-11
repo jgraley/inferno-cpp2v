@@ -42,19 +42,17 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     MakeTreePtr< MatchAll<Statement> > all;    
     MakeTreePtr< NotMatch<Statement> > sx_not;
     MakeTreePtr<Instance> sx_instance;
-    MakeTreePtr< Stuff<Statement> > stuff;
+    MakeTreePtr< AnyNode<Statement> > node;
     MakeTreePtr< Overlay<Statement> > over;   
     MakeTreePtr<Compound> s_comp;
     MakeTreePtr< Statement > body;
 
-    all->patterns = (stuff, sx_not);
-    stuff->terminus = over;
+    all->patterns = (node, sx_not);
+    node->terminus = over;
     sx_not->pattern = sx_instance;
     sx_instance->initialiser = s_comp;
     over->through = s_comp;
     over->overlay = body;
-
-    stuff->one_level = true;
 
     s_comp->statements = body;
     // Note: leaving s_comp empty meaning no decls allowed
@@ -98,7 +96,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     // on the right of an assignment.
     
     MakeTreePtr<Instance> s_instance, r_instance;
-    MakeTreePtr< Stuff<Statement> > stuff;
+    MakeTreePtr< Stuff<Compound> > stuff;
     MakeTreePtr< Overlay<Statement> > overlay;
     MakeTreePtr<Compound> s_comp, r_comp;
     MakeTreePtr<Label> s_label1, s_label2, r_label1; // keep l1 and elide l2
@@ -112,7 +110,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     
     l_s_orrule->patterns = (s_labelid1, s_labelid2);
     
-    MakeTreePtr< SlaveSearchReplace<Statement> > r_slave( stuff, l_s_orrule, r_labelid );
+    MakeTreePtr< SlaveSearchReplace<Compound> > r_slave( stuff, l_s_orrule, r_labelid );
     
     s_instance->initialiser = stuff;
     s_instance->identifier = identifier;
@@ -171,7 +169,8 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     // the Label node, thus excluding the declaration which we want
     // to ignore.
     MakeTreePtr<Instance> s_instance, r_instance;
-    MakeTreePtr< Stuff<Statement> > stuff, sx_stuff;
+    MakeTreePtr< Stuff<Compound> > stuff;
+    MakeTreePtr< Stuff<Compound> > sx_stuff;
     MakeTreePtr< Overlay<Statement> > overlay;
     MakeTreePtr<Compound> s_comp, r_comp;
     MakeTreePtr<Label> s_label; // keep l1 and elide l2
@@ -179,8 +178,8 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     MakeTreePtr< Star<Statement> > pre, post;
     MakeTreePtr<LabelIdentifier> labelid;
     MakeTreePtr<Goto> sx_goto;
-    MakeTreePtr< MatchAll<Statement> > s_andrule;
-    MakeTreePtr< NotMatch<Statement> > sx_notrule;
+    MakeTreePtr< MatchAll<Compound> > s_andrule;
+    MakeTreePtr< NotMatch<Compound> > sx_notrule;
     MakeTreePtr< NotMatch<Node> > sxx_notrule;        
     MakeTreePtr< Label > sxx_label;        
     MakeTreePtr<InstanceIdentifier> identifier;

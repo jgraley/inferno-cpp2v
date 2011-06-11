@@ -1,11 +1,13 @@
 
 int func( unsigned **a, char *b, int &c )
 {
-    a++;
     *a++;
+    a++;
+    a--;
+    *a--;
     b++;
     c++;
-    return 5+**a*2+b[1]+c;
+    return 5+**a*2+b[0]+c;
 }
 
 int main()

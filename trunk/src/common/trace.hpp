@@ -2,9 +2,9 @@
 #define TRACE_HPP
 
 #include <string>
-#include <typeinfo>
+#include <typeinfo> 
 #include "read_args.hpp"
-#include "hit_count.hpp"
+#include "hit_count.hpp" 
 using namespace std;
 
 /*
@@ -61,7 +61,7 @@ private:
 class Traceable
 {
 public:
-	string CPPFilt( string s ) const;
+	static string CPPFilt( string s );
 	virtual operator string() const;
 };
 

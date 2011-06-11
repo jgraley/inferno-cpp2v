@@ -84,8 +84,12 @@ AddStateLabelVar::AddStateLabelVar()
     lr_compound->statements = (lr_assign, lr_goto);
     lr_assign->operands = (state_var->identifier, ls_goto->destination);
     lr_goto->destination = state_var->identifier;
-
             
     SearchReplace::Configure( s_comp, r_slave );
+}
+
+
+EnsureSuperLoop::EnsureSuperLoop()
+{   
 }
 

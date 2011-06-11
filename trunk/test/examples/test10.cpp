@@ -1,15 +1,18 @@
 void f()
 {
+    while(0)
+    {
 // Excite the multiple choices bug with sequences. Use with HackUpIfs step
-    if(0)
-    {
-        continue; // First sequence match finds this, it gets keyed
-        break; // This is never found...
+        if(0)
+        {
+            continue; // First sequence match finds this, it gets keyed
+            break; // This is never found...
+        }
+        else
+        {
+            break; // ...even though it would match this
+        }    
     }
-    else
-    {
-        break; // ...even though it would match this
-    }    
 }
 
 
