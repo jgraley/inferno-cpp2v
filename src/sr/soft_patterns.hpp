@@ -23,6 +23,7 @@ private:
     		                       bool can_key,
     		                       Conjecture &conj ) const
     {
+        ASSERT( pattern );
     	if( can_key )
     	{
     		// Don't do a subtree search while keying - we'll only end up keying the wrong thing
@@ -66,6 +67,7 @@ private:
     {
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
+    	    ASSERT( i );
     		Result r = sr->DecidedCompare( x, TreePtr<Node>(i), can_key, conj );
     	    if( !r )
     	    	return NOT_FOUND;
@@ -94,6 +96,7 @@ private:
     {
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
+    	    ASSERT( i );
     		Result r = sr->Compare( x, i, false );
     	    if( r )
     	    	return FOUND;
@@ -122,7 +125,8 @@ private:
     	int tot=0;
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
-    		Result r = sr->Compare( x, i, false );
+    	    ASSERT( i );
+    	    Result r = sr->Compare( x, i, false );
     	    if( r )
     	    	tot++;
     	}

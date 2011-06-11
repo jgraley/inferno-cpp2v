@@ -268,7 +268,7 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 		{
 		    // JSG Overwrite() just writes through the pointer got from dereferencing the iterator,
 		    // because in Sequences (ordererd containers) elements may be modified.
-    		typename CONTAINER_IMPL::value_type x( CONTAINER_IMPL::value_type::DynamicCast(*v) );
+    		typename CONTAINER_IMPL::value_type x( CONTAINER_IMPL::value_type::InferredDynamicCast(*v) );
 		    CONTAINER_IMPL::iterator::operator*() = x;
 		}
     	virtual const bool IsOrdered() const
@@ -287,7 +287,7 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 	}
 	virtual void push_back( const VALUE_INTERFACE &gx )
 	{
-		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::DynamicCast(gx) );
+		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(gx) );
 		CONTAINER_IMPL::push_back( sx );
 	}
 	template<typename OTHER>
@@ -330,7 +330,7 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 	}
 	Sequence( const VALUE_INTERFACE &nx )
 	{
-		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::DynamicCast(nx) );
+		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(nx) );
 		CONTAINER_IMPL::push_back( sx );
 	}
 	template<typename L, typename R>
@@ -376,7 +376,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTE
 		    // SimpleAssociativeContainers (unordered containers) do not allow elements to be modified
 		    // because the internal data structure depends on element values. So we 
 		    // erase the old element and insert the new one; thus, Overwrite() should not be assumed O(1)
-    		typename CONTAINER_IMPL::value_type s( CONTAINER_IMPL::value_type::DynamicCast(*v) );
+    		typename CONTAINER_IMPL::value_type s( CONTAINER_IMPL::value_type::InferredDynamicCast(*v) );
     		((CONTAINER_IMPL *)owner)->erase( *this );
 		    *(typename CONTAINER_IMPL::iterator *)this = ((CONTAINER_IMPL *)owner)->insert( s ); // become an iterator for the newly inserted element
  		}
@@ -389,7 +389,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTE
 
 	virtual void insert( const VALUE_INTERFACE &gx )
 	{
-		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::DynamicCast(gx) );
+		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(gx) );
 		CONTAINER_IMPL::insert( sx );
 	}
 	template<typename OTHER>
@@ -400,12 +400,12 @@ struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTE
 	}
 	virtual int erase( const VALUE_INTERFACE &gx )
 	{
-		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::DynamicCast(gx) );
+		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(gx) );
 		return CONTAINER_IMPL::erase( sx );
 	}
 	virtual bool IsExist( const VALUE_INTERFACE &gx )
 	{
-		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::DynamicCast(gx) );
+		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(gx) );
 		typename CONTAINER_IMPL::iterator it = CONTAINER_IMPL::find( sx );
 		return it != CONTAINER_IMPL::end();
 	}
@@ -436,7 +436,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTE
 	}
     SimpleAssociativeContainer( const VALUE_INTERFACE &nx )
 	{
-		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::DynamicCast(nx) );
+		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(nx) );
         CONTAINER_IMPL::insert( sx );
 	}
 	template<typename L, typename R>

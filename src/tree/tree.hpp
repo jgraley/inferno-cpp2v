@@ -26,8 +26,8 @@
 struct Property : virtual Node { NODE_FUNCTIONS };
 
 // This intermediate is used for an initial value for for a variable/object in
-// which case it will be an Expression, or for the implementation of a function
-// in which case it will be a Statement. For an uninitialised variable/object
+// which case it will be an Expression, or for the implementation of a Subroutine
+// in which case it will be a Compound. For an uninitialised variable/object
 // or a function declaration, it will be Uninitialised.
 struct Initialiser : virtual Node { NODE_FUNCTIONS };
 struct Uninitialised : Initialiser { NODE_FUNCTIONS_FINAL }; // an uninitialised Instance.
@@ -35,11 +35,12 @@ struct Uninitialised : Initialiser { NODE_FUNCTIONS_FINAL }; // an uninitialised
 // Represents a statement as found inside a function definition. Basically anything 
 // that ends with a ; inside a function body, as well as labels (which we consider as 
 // statements in their own right).
-struct Statement : Initialiser { NODE_FUNCTIONS };
+struct Statement : virtual Node { NODE_FUNCTIONS };
 
 // An expression that computes a result value. Can be used anywhere a statement 
 // can, per C syntax rules.
-struct Expression : Statement { NODE_FUNCTIONS };
+struct Expression : Statement,
+                    Initialiser { NODE_FUNCTIONS };
 
 // Any abstract data type including fundamentals, structs, function prototypes
 // and user-named types. 
@@ -80,6 +81,8 @@ struct String : Literal { NODE_FUNCTIONS };
 
 // A string with a particular value as specified. Value must be filled
 // in.
+// TODO could be a problem with memory management here or nearby. See
+// comment in test harness in search_replace.cpp.
 struct SpecificString : String
 {
 	NODE_FUNCTIONS_FINAL
@@ -697,7 +700,8 @@ struct AlignOf : TypeOperator { NODE_FUNCTIONS_FINAL };
 // can go in the members of the Scope or in the statements (since Declaration
 // derives from Statement)
 struct Compound : Statement,
-                  Scope  // Local declarations go in here (preferably)
+                  Scope,      // Local declarations go in here (preferably)
+                  Initialiser // Can "initialise" a function (with the body) 
 {
 	NODE_FUNCTIONS_FINAL
     Sequence<Statement> statements; // Can contain local declarations and code

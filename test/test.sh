@@ -44,7 +44,7 @@ if test $c1res -ne 0
 then
  # if it doesn't even compile, do nothing TODO return a failure
  echo TEST VECTOR $infile REJECTED
- exit 0 
+ exit 2
 fi
 
 echo Link input...
@@ -103,3 +103,4 @@ else
 fi
 
 exit $return_code
+

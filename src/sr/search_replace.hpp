@@ -69,9 +69,10 @@ class Conjecture;
 class SpecialBase;
 class StuffBase;
 class StarBase;
+class SearchContainerBase;
 
 class CompareReplace : virtual public InPlaceTransformation, 
-                       Filter // TODO extract Compare, and make that the filter
+                       public Filter // TODO extract Compare, and make that the filter
 {  
 public:
     // Constructor and destructor. Search and replace patterns and couplings are
@@ -130,7 +131,7 @@ private:
     		               bool can_key,
     		               Conjecture &conj ) const;
     Result DecidedCompare( TreePtr<Node> x,
-    		               TreePtr<StuffBase> stuff_pattern,
+    		               TreePtr<SearchContainerBase> pattern,
     		               bool can_key,
     		               Conjecture &conj ) const;
 public:
@@ -194,6 +195,8 @@ private:
 
 
 class SearchReplace : public CompareReplace
+
+
 {
 public:
     SearchReplace( TreePtr<Node> sp = TreePtr<Node>(),
@@ -307,18 +310,27 @@ struct SlaveSearchReplace : Slave<SearchReplace, PRE_RESTRICTION>
 };
 
 
-
-
 // The * wildcard can match more than one node of any type in a container
 // In a Sequence, only a contiguous subsequence of 0 or more elements will match
 // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
 // Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
 // in the collection. TODO a restrict pattern
-struct StarBase : virtual Node {};
+struct StarBase : virtual Node 
+{
+    virtual TreePtr<Node> GetPattern() = 0;
+    Result MatchRange( const CompareReplace *sr,
+                       ContainerInterface &range );
+};
 template<class PRE_RESTRICTION>
-struct Star : StarBase, Special<PRE_RESTRICTION> { SPECIAL_NODE_FUNCTIONS };
-
-
+struct Star : StarBase, Special<PRE_RESTRICTION> 
+{ 
+    SPECIAL_NODE_FUNCTIONS 
+    TreePtr<PRE_RESTRICTION> pattern;
+    virtual TreePtr<Node> GetPattern() 
+    {
+        return pattern;
+    }
+};
 
 
 struct GreenGrassBase : virtual Node
@@ -337,21 +349,32 @@ struct GreenGrass : GreenGrassBase, Special<PRE_RESTRICTION>
 };
 
 
+struct SearchContainerBase : virtual Node
+{
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) = 0;
+    TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
+};
+struct SearchContainerKey : Key // TODO put in SearchContainer
+{
+    TreePtr<Node> terminus;
+};
+
 
 
 // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
-struct StuffBase : virtual Node
+struct StuffBase : virtual Node, 
+                   public SearchContainerBase
 {
     StuffBase() : one_level(false){}
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
-    TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
     CompareReplace recurse_comparer; // TODO only need the compare half, maybe split it out?
     bool one_level;
-    // Do the itemiser by hand since it gets confused by the CompareReplace object
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
 };
 template<class PRE_RESTRICTION>
 struct Stuff : StuffBase, Special<PRE_RESTRICTION> 
 {
+    // Do the itemiser by hand since it gets confused by the CompareReplace object   
     virtual vector< Itemiser::Element * > Itemise( const Itemiser *itemise_object = 0 ) const
     {
         vector< Itemiser::Element * > v;
@@ -368,12 +391,19 @@ struct Stuff : StuffBase, Special<PRE_RESTRICTION>
         return Itemise().size();
     }
 };
-struct StuffKey : Key
+
+
+// The Stuff wildcard can match a truncated subtree with special powers as listed by the members
+struct AnyNodeBase : virtual Node, 
+                     public SearchContainerBase
 {
-    TreePtr<Node> terminus;
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
 };
-
-
+template<class PRE_RESTRICTION>
+struct AnyNode : AnyNodeBase, Special<PRE_RESTRICTION> 
+{
+    SPECIAL_NODE_FUNCTIONS
+};
 
 
 struct OverlayBase : virtual Node

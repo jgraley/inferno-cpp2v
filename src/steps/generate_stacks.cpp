@@ -31,13 +31,14 @@ GenerateStacks::GenerateStacks()
     MakeTreePtr<Compound> s_top_comp, r_top_comp, r_ret_comp, temp;
     MakeTreePtr< Star<Declaration> > top_decls;
     MakeTreePtr< Star<Statement> > top_pre;
-    MakeTreePtr< Stuff<Statement> > cs_stuff, stuff;
+    MakeTreePtr< Stuff<Statement> > stuff;
+    MakeTreePtr< Stuff<Compound> > cs_stuff;
     MakeTreePtr< Overlay<Statement> > overlay;
     MakeTreePtr<Automatic> cs_instance, s_instance;
     MakeTreePtr<Static> r_index, r_instance; // TODO Field
     MakeTreePtr<Unsigned> r_index_type;
     MakeTreePtr<PostIncrement> r_inc;
-    MakeTreePtr<PostDecrement> r_dec, r_ret_dec;
+    MakeTreePtr<PostDecrement> r_ret_dec;
     MakeTreePtr<InstanceIdentifier> s_identifier;
     MakeTreePtr<Array> r_array;
     MakeTreePtr<Return> ret;
@@ -64,7 +65,7 @@ GenerateStacks::GenerateStacks()
     MakeTreePtr< SlaveCompareReplace<Statement> > r_mid( r_top_comp, stuff, r_slave );
     MakeTreePtr< SlaveSearchReplace<Statement> > r_slave3( r_mid, s_gg, r_ret_comp );
     temp->statements = (r_slave3);
-    oinit->overlay = temp;//r_slave3;
+    oinit->overlay = temp;//r_slave3; 
 
     // top-level decls
     r_top_comp->members = ( top_decls, r_index );
@@ -76,8 +77,7 @@ GenerateStacks::GenerateStacks()
     r_index->initialiser = MakeTreePtr<SpecificInteger>(0);
     // top-level statements
     r_inc->operands = ( r_index_identifier );
-    r_top_comp->statements = ( r_inc, top_pre, r_dec );
-    r_dec->operands = ( r_index_identifier );
+    r_top_comp->statements = ( r_inc, top_pre );
 
     // SlaveSearchReplace search to find automatic variables within the function
     stuff->terminus = overlay;
@@ -116,7 +116,7 @@ ExplicitiseReturn::ExplicitiseReturn()
     MakeTreePtr< Instance > fi;
     MakeTreePtr<Compound> s_comp, r_comp;        
     MakeTreePtr< Star<Statement> > pre;
-    MakeTreePtr< Overlay<Statement> > over;
+    MakeTreePtr< Overlay<Compound> > over;
     MakeTreePtr< NotMatch<Statement> > sx_last;
     MakeTreePtr<Return> s_return, r_return;
     
