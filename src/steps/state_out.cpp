@@ -4,6 +4,7 @@
 #include "common/common.hpp"
 #include "sr/soft_patterns.hpp"
 #include "tree/typeof.hpp"
+#include "tree/misc.hpp"
 
 CompactGotos::CompactGotos()
 {
@@ -52,6 +53,55 @@ CompactGotosFinal::CompactGotosFinal()
     
     SearchReplace::Configure( s_comp, r_comp );
 }
+
+
+static TreePtr<Statement> MakeResetAssignmentPattern()
+{
+    MakeTreePtr<Assign> ass;
+    MakeTreePtr< TransformOf<InstanceIdentifier> > decl( &GetDeclaration::instance );
+    decl->pattern = MakeTreePtr<LocalVariable>();
+    ass->operands = (decl, MakeTreePtr<Literal>());    
+    return ass;
+}
+
+
+EnsureBootstrap::EnsureBootstrap()
+{
+    MakeTreePtr<Instance> fn;
+    MakeTreePtr<Subroutine> sub;
+    MakeTreePtr< Overlay<Compound> > over;
+    MakeTreePtr< MatchAll<Compound> > s_all;
+    MakeTreePtr< NotMatch<Compound> > s_not;    
+    MakeTreePtr<Compound> s_body, r_body, sx_body;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, sx_pre, post;
+    MakeTreePtr<Goto> r_goto;
+    MakeTreePtr<Label> r_label;    
+    MakeTreePtr<BuildLabelIdentifier> r_labelid("BOOTSTRAP");
+    MakeTreePtr< NotMatch<Statement> > stop;
+        
+    fn->type = sub;
+    fn->initialiser = over;
+    over->through = s_all;
+    s_all->patterns = (s_not, s_body);
+    s_not->pattern = sx_body;
+    // only exclude if there is a goto; a goto to anywhere will suffice to boot the state machine
+    sx_body->members = (MakeTreePtr< Star<Declaration> >());
+    sx_body->statements = (sx_pre, MakeTreePtr<Goto>(), MakeTreePtr< Star<Statement> >()); 
+    sx_pre->pattern = MakeResetAssignmentPattern();
+    over->overlay = r_body;
+    s_body->members = decls;
+    s_body->statements = (pre, stop, post);
+    pre->pattern = MakeResetAssignmentPattern();    
+    stop->pattern = MakeResetAssignmentPattern();
+    r_label->identifier = r_labelid;
+    r_goto->destination = r_labelid;
+    r_body->members = decls;
+    r_body->statements = (pre, r_goto, r_label, stop, post);    
+
+    SearchReplace::Configure( fn, fn );
+}
+
 
 AddStateLabelVar::AddStateLabelVar()
 {
