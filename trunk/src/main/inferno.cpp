@@ -27,15 +27,17 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     // Build a vector of transformations, in the order that we will run them
     // (ordered by hand for now, until the auto sequencer is ready)
     //sequence->push_back( shared_ptr<Transformation>( new GenerateImplicitCasts ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new MoveInstanceDeclarations ) ); 
-
     sequence->push_back( shared_ptr<Transformation>( new BreakToGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new SwitchToIfGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new ForToWhile ) ); 
     sequence->push_back( shared_ptr<Transformation>( new WhileToDo ) ); 
     sequence->push_back( shared_ptr<Transformation>( new IfToIfGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new DoToIfGoto ) ); 
+
+    sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new MoveInstanceDeclarations ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new ExplicitiseReturn ) );
+    
     sequence->push_back( shared_ptr<Transformation>( new CompactGotos ) );
     sequence->push_back( shared_ptr<Transformation>( new CompactGotosFinal ) );
     for( int i=0; i<2; i++ )
@@ -49,18 +51,22 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     }        
     sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );
     sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) );
-
+    sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
+    sequence->push_back( shared_ptr<Transformation>( new ShareGotos ) );
 /*    
-    sequence->push_back( shared_ptr<Transformation>( new ExplicitiseReturn ) );
     sequence->push_back( shared_ptr<Transformation>( new UseTempsForParamsReturn ) );     
     sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) ); 
         */
     // These clean-up steps run a few times, because they need to clean up after each other
     for( int i=0; i<3; i++ )
     {
+        sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundSingle ) );
         sequence->push_back( shared_ptr<Transformation>( new CleanupNop ) );          
+        sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualGoto ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
     }        
 }
 

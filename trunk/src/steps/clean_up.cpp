@@ -103,7 +103,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     MakeTreePtr< Star<Declaration> > decls;
     MakeTreePtr< Star<Statement> > pre, post;
     MakeTreePtr<LabelIdentifier> s_labelid1, s_labelid2;
-    MakeTreePtr<BuildLabelIdentifier> r_labelid("MERGED");
+    MakeTreePtr<BuildLabelIdentifier> r_labelid("%s_%s", BYPASS_WHEN_IDENTICAL);
     MakeTreePtr< MatchAny<LabelIdentifier> > l_s_orrule;
     MakeTreePtr<InstanceIdentifier> identifier;
     MakeTreePtr<Subroutine> type;
@@ -129,6 +129,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     r_comp->members = decls;
     r_comp->statements = (pre, r_label1, post);
     r_label1->identifier = r_labelid;
+    r_labelid->sources = (s_labelid1, s_labelid2);
     
     SearchReplace::Configure( s_instance, r_instance );
 }
