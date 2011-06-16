@@ -1,23 +1,27 @@
-
-# What I had to do to install systemc-2.2.05jun06.tgz on Ubuntu 10.10 using bash and gcc 4.4.5. Best
+# What I had to do to install systemc-2.2.0.tgz on Ubuntu 10.10 using bash and gcc 4.4.5. Best
 # done by hand, and read the INSTALL guide that comes with SystemC
 
-gunzip systemc-2.2.05jun06.tgz
-tar -xf systemc-2.2.05jun06.tar
-cd systemc-2.2.05jun06_beta
+tar -zxf systemc-2.2.0.tgz
+cd systemc-2.2.0
+
 mkdir objdir
 cd objdir
+
 export CXX=g++
-export CXX=-lpthread # added to get -lpthread on the link line of the examples
+export LIBS=-lpthread # added to get -lpthread on the link line of the examples
 ../configure
+
 gedit ../src/sysc/utils/sc_utils_ids.cpp
 # in gedit, insert the following lines at the top of the file:
-# #include <string.h>
-# #include <cstdlib>
+#include <string.h>
+#include <cstdlib>
+
 make debug # insns say gmake, but not available on ubuntu
 # observe lots of warnings scrolling by
+
 make install
-make check # need to do this otherwise you won't know whether systemc can link
+
+make check # you should to do this check whether systemc can link
 # have to press return once
 
 

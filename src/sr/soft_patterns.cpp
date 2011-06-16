@@ -29,9 +29,11 @@ Result TransformOfBase::DecidedCompare( const CompareReplace *sr,
 string BuildIdentifierBase::GetNewName( const CompareReplace *sr )
 {
     INDENT;
-    if( source )
+    TRACE("Begin SoftMakeIdentifier recurse for \"")(format)("\"\n");
+    vector<string> vs;
+    bool all_same = true;
+    FOREACH( TreePtr<Node> source, sources )
     {
-        TRACE("Begin SoftMakeIdentifier recurse for \"")(format)("\"\n");
         // We have a child identifier - let replace algorithm run in the expectation it will
         // get subsitituted with a SpecificIdentifier from the original program tree
         TreePtr<Node> n = sr->DuplicateSubtree( TreePtr<Node>(source) );
@@ -39,13 +41,29 @@ string BuildIdentifierBase::GetNewName( const CompareReplace *sr )
         ASSERT( n );
         TreePtr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>( n );
         ASSERT( si )("trying to make an identifier from ")(*n)(" which should be a kind of SpecificIdentifier");
-        // Use sprintf to build a new identifier based on the found one. Obviously %s
-        // becomes the old identifier's name.
-        return SSPrintf(format.c_str(), ((string)*si).c_str());
+        string s = *si;
+        if( !vs.empty() )
+            all_same = all_same && (s == vs.back());
+        vs.push_back( s );
     }
-    else
+
+    // Optional functionality: when every identifier has the same name, just return that
+    // name. Handy for "merging" operations.
+    if( (flags & BYPASS_WHEN_IDENTICAL) && all_same )
+        return vs[0];  
+
+    // Use sprintf to build a new identifier based on the found one. Obviously %s
+    // becomes the old identifier's name.
+    switch( vs.size() )
     {
-        return format;
+        case 0:
+            return SSPrintf( format.c_str() );
+        case 1:
+            return SSPrintf( format.c_str(), vs[0].c_str() );
+        case 2:
+            return SSPrintf( format.c_str(), vs[0].c_str(), vs[1].c_str() );
+        default:
+            ASSERTFAIL("Please add more cases to GetNewName()");
     }
 }
 

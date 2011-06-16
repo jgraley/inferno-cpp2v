@@ -1,4 +1,6 @@
-
+// JSG I have disabled this test vector  because it has init lists, which need to be lowered out
+// when constuctors are lowered out in as-yet unwritten steps, before the existing state-out
+// can work. Essentially, init lists are "not allowed" at state-out.
 
 class Y
 {

@@ -5,7 +5,7 @@
 #include "sr/soft_patterns.hpp"
 #include "tree/typeof.hpp"
 #include "tree/misc.hpp"
-
+ 
 CompactGotos::CompactGotos()
 {
     MakeTreePtr< If > s_if;      
@@ -141,5 +141,64 @@ AddStateLabelVar::AddStateLabelVar()
 
 EnsureSuperLoop::EnsureSuperLoop()
 {   
+    MakeTreePtr<Instance> fn;
+    MakeTreePtr<Subroutine> sub;
+    MakeTreePtr< Overlay<Compound> > over;
+    MakeTreePtr< MatchAll<Compound> > s_all;
+    MakeTreePtr< NotMatch<Statement> > sx_not, s_limit;    
+    MakeTreePtr< Stuff<Compound> > sx_stuff;
+    MakeTreePtr< Goto > sx_goto, first_goto;
+    MakeTreePtr<Compound> s_body, r_body, r_loop_body;
+    MakeTreePtr< Star<Statement> > pre, post;    
+    MakeTreePtr< Star<Declaration> > decls;    
+    MakeTreePtr<Do> r_loop;
+        
+    fn->type = sub;
+    fn->initialiser = over;
+    over->through = s_all;
+    s_all->patterns = (sx_stuff, s_body);
+    sx_stuff->terminus = sx_goto;
+    sx_stuff->recurse_restriction = sx_not;
+    sx_not->pattern = MakeTreePtr<Do>();
+    s_body->members = (decls);
+    s_body->statements = (pre, first_goto, post);
+    pre->pattern = s_limit;
+    s_limit->pattern = MakeTreePtr<Goto>();
+    
+    over->overlay = r_body;
+    r_body->members = (decls);
+    r_body->statements = (pre, r_loop);
+    r_loop->body = r_loop_body;
+    r_loop_body->statements = (first_goto, post);
+    r_loop->condition = MakeTreePtr< SpecificInteger >(1);
+
+    SearchReplace::Configure( fn, fn );
 }
+
+ShareGotos::ShareGotos()
+{   
+    MakeTreePtr<Do> loop;
+    MakeTreePtr< Overlay<Compound> > over;
+    MakeTreePtr<Compound> s_body, r_body;
+    MakeTreePtr< Star<Declaration> > decls;    
+    MakeTreePtr< Star<Statement> > pre, post;    
+    MakeTreePtr< Goto > first_goto, r_goto;
+    MakeTreePtr<Label> r_label;    
+    MakeTreePtr<BuildLabelIdentifier> r_labelid("ITERATE");
+                    
+    loop->body = over;
+    loop->condition = MakeTreePtr<SpecificInteger>(1);
+    over->through = s_body;
+    s_body->members = (decls);
+    s_body->statements = (first_goto, pre, first_goto, post);    
+
+    over->overlay = r_body;
+    r_body->members = (decls);
+    r_body->statements = (first_goto, pre, r_goto, post, r_label);    
+    r_label->identifier = r_labelid;
+    r_goto->destination = r_labelid;
+
+    SearchReplace::Configure( loop, loop );
+}
+
 

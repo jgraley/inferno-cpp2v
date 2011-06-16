@@ -175,18 +175,20 @@ struct TransformOf : TransformOfBase, Special<PRE_RESTRICTION>
 
 // TODO allow multiple sources for the printf, use in eg merging successive labels
 // TODO do this via a transformation as with TransformOf/TransformOf
+#define BYPASS_WHEN_IDENTICAL 1
 struct BuildIdentifierBase : CompareReplace::SoftReplacePattern
 {
-    BuildIdentifierBase( string s ) : format(s) {}
-    TreePtr<Identifier> source;
+    BuildIdentifierBase( string s, int f=0 ) : format(s), flags(f) {}
+    Sequence<Identifier> sources;
     string GetNewName( const CompareReplace *sr );
     string format;
+    int flags;
 };
 
 struct BuildInstanceIdentifier : Special<InstanceIdentifier>,                             
                                  BuildIdentifierBase
 {
-    BuildInstanceIdentifier( string s ) : BuildIdentifierBase(s) {}
+    BuildInstanceIdentifier( string s, int f=0 ) : BuildIdentifierBase(s,f) {}
     BuildInstanceIdentifier() : BuildIdentifierBase("unnamed") {}
     SPECIAL_NODE_FUNCTIONS
 private:
@@ -200,7 +202,7 @@ private:
 struct BuildLabelIdentifier : Special<LabelIdentifier>,                             
                               BuildIdentifierBase
 {
-    BuildLabelIdentifier( string s ) : BuildIdentifierBase(s) {}
+    BuildLabelIdentifier( string s, int f=0 ) : BuildIdentifierBase(s,f) {}
     BuildLabelIdentifier() : BuildIdentifierBase("UNNAMED") {}
     SPECIAL_NODE_FUNCTIONS
 private:

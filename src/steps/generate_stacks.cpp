@@ -71,7 +71,7 @@ GenerateStacks::GenerateStacks()
     r_top_comp->members = ( top_decls, r_index );
     r_index->type = r_index_type;
     r_index_type->width = MakeTreePtr<SpecificInteger>(32);
-    r_index_identifier->source = fi->identifier;
+    r_index_identifier->sources = (fi->identifier);
     r_index->identifier = r_index_identifier;
     r_index->constancy = MakeTreePtr<NonConst>();
     r_index->initialiser = MakeTreePtr<SpecificInteger>(0);
@@ -90,7 +90,7 @@ GenerateStacks::GenerateStacks()
     r_instance->constancy = MakeTreePtr<NonConst>();
     r_instance->initialiser = MakeTreePtr<Uninitialised>();
     overlay->overlay = r_instance;
-    r_identifier->source = s_identifier;
+    r_identifier->sources = (s_identifier);
     r_instance->identifier = r_identifier;
     r_instance->type = r_array;
     r_array->element = s_instance->type;

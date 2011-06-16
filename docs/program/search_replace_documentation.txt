@@ -220,9 +220,14 @@ In general, builder nodes are able to key a coupling. Therefore, it is possible 
 
 BuildIdentifier is a builder node that constructs identifiers with new names using a printf format string. At present, InstanceIdentifier can be built using BuildInstanceIdentifier, and LabelIdentifier can be built using BuildLabelIdentifier. 
 
-These special nodes have format and source members. The format is a string and will be the name of the newly built identifier. If the format contains %s, then the name of the identifier node pointed to by source will be substituted in that position (can be any kind of identifier). The source will normally need to be coupled into the search pattern in order to obtain a name from the input program tree. The builder node itself may be coupled in the replace pattern to create multiple references.
+These special nodes have to be initialised with a format string and an optional flags string. Additionally, they contain a member called sources, which is a Sequence of TreePtr<Identifier>. The format is a printf format string for the name of the newly built identifier. Each %s character will be replaced by the name of the node pointed to by the corresponding element of sources (can be any kind of identifier). The sources will normally need to be coupled into the search pattern in order to obtain a name from the input program tree. The builder node itself may be coupled in the replace pattern to create multiple references.
 
-For example, if a replace pattern is to contain a new variable, and that variable is the count of times a label was jumped to, we might create the variable instance in the replace pattern, and for its identifier we point to a BuildInstanceIdentifier node. We might set the format to "%s_count" and point the source to the LabelIdentifier of the label whose jumps we are counting. If a label is seen called "EXIT", we will get a variable called "EXIT_count". 
+For example, if a replace pattern is to contain a new variable, and that variable is the count of times a label was jumped to, we might create the variable instance in the replace pattern, and for its identifier we point to a BuildInstanceIdentifier node. We might set the format to "%s_count" and place a pointer to the LabelIdentifier of the label whose jumps we are counting in the sources sequence. If a label is seen called "EXIT", we will get a variable called "EXIT_count". 
+
+The optional flags field permits the folling changes to behaviour:
+
+BYPASS_WHEN_IDENTICAL: 
+For use when there are 2 or more sources. If the names of the sources are all identical to each other, then this common name will be used for the generated identififer. This can help avoid duplication in merging scenarios.
 
 Usages of the new variable elsewhere in the replace pattern can just couple directly to the BuildInstanceIdentifier node.
 

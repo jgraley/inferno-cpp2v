@@ -31,6 +31,13 @@ eclipse/
     There is a "standard makefile" C++ project in inferno-cpp2v/trunk/eclipse 
     Note that IDE integration is not officially supported for Inferno.
 
+
+How to check out:
+
+Inferno is hosted at Sourceforge in a Subversion repository. You can get it using:
+
+svn co https://inferno-cpp2v.svn.sourceforge.net/svnroot/inferno-cpp2v inferno-cpp2v  
+
 How to build:
 
 On a Debian/Ubuntu system, you need approximately the following apt packages:

@@ -23,7 +23,7 @@ IfToIfGoto::IfToIfGoto()
     MakeTreePtr<Nop> l_r_nop, r_nop;
     MakeTreePtr<Compound> r_comp;
     MakeTreePtr<LogicalNot> r_not;
-    MakeTreePtr<BuildLabelIdentifier> r_labelid1("BYPASS_THEN"), r_labelid2("BYPASS_ELSE");
+    MakeTreePtr<BuildLabelIdentifier> r_labelid1("THEN"), r_labelid2("ELSE");
     MakeTreePtr<Label> r_label1, r_label2;
     
     s_and->patterns = (s_if, l_r_not);

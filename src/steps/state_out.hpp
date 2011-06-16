@@ -42,5 +42,13 @@ public:
     EnsureSuperLoop();
 };
 
+/** If there is an infinite loop with a goto at the top of it, replace any
+    identical gotos elsewhere in the loop body with continues */
+class ShareGotos : public SearchReplace
+{
+public:
+    ShareGotos();
+};
 
 #endif
+
