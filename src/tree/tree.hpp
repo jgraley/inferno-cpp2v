@@ -48,9 +48,7 @@ struct Type : virtual Node { NODE_FUNCTIONS };
 
 // A declaration specifies the creation of a type or an object from a type. 
 // Declaration can appear where statements can and also inside structs etc
-// and at top level. TODO add an intermediate like NamedDeclaration for decls
-// with identifiers. Maybe factor the Identifier pointer into NamedDeclaration
-// or give it a virtual method (covariant) to get the identifier.
+// and at top level.
 struct Declaration : virtual Node { NODE_FUNCTIONS };
 
 // A scope is any space in a program where declarations may appear. Declarations

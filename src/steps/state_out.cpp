@@ -99,7 +99,7 @@ EnsureBootstrap::EnsureBootstrap()
     r_body->members = decls;
     r_body->statements = (pre, r_goto, r_label, stop, post);    
 
-    SearchReplace::Configure( fn, fn );
+    SearchReplace::Configure( fn );
 }
 
 
@@ -172,7 +172,7 @@ EnsureSuperLoop::EnsureSuperLoop()
     r_loop_body->statements = (first_goto, post);
     r_loop->condition = MakeTreePtr< SpecificInteger >(1);
 
-    SearchReplace::Configure( fn, fn );
+    SearchReplace::Configure( fn );
 }
 
 ShareGotos::ShareGotos()
@@ -198,7 +198,92 @@ ShareGotos::ShareGotos()
     r_label->identifier = r_labelid;
     r_goto->destination = r_labelid;
 
-    SearchReplace::Configure( loop, loop );
+    SearchReplace::Configure( loop );
 }
 
+InsertSwitch::InsertSwitch()
+{
+    MakeTreePtr<Instance> fn;
+    MakeTreePtr<InstanceIdentifier> fn_id;
+    MakeTreePtr<Subroutine> sub;
+    MakeTreePtr< Overlay<Compound> > func_over, over, l_over;
+    MakeTreePtr< Overlay<Declaration> > l_func_over;
+    MakeTreePtr< Compound > l_func_comp, s_func_comp, r_func_comp, s_comp, r_comp, r_switch_comp, l_comp, ls_switch_comp, lr_switch_comp;
+    MakeTreePtr< Star<Declaration> > func_decls, decls, l_enum_vals;
+    MakeTreePtr< Star<Statement> > func_pre, func_post, pre, body, post, l_pre, l_post;
+    MakeTreePtr< Stuff<Statement> > stuff, l_stuff; // TODO these are parallel stuffs, which is bad. Use two first-level slaves 
+                                                    // and modify S&R to allow couplings between them. This means running slaves 
+                                                    // in a post-pass and doing existing passes across all same-level slaves
+    MakeTreePtr<Goto> s_first_goto; 
+    MakeTreePtr<Label> break_label, ls_label; 
+    MakeTreePtr<Switch> r_switch, l_switch;     
+    MakeTreePtr<Enum> r_enum, ls_enum, lr_enum;         
+    MakeTreePtr< NotMatch<Statement> > s_prenot, s_postnot;
+    MakeTreePtr<BuildTypeIdentifier> r_enum_id("%sStates");
+    MakeTreePtr<Static> lr_state_decl;    
+    MakeTreePtr<BuildInstanceIdentifier> lr_state_id("STATE_%s");
+    MakeTreePtr<Case> lr_case;
+    MakeTreePtr<Signed> lr_int;
+    MakeTreePtr<BuildContainerSize> lr_count;
+        
+    fn->type = sub;
+    fn->initialiser = func_over;
+    fn->identifier = fn_id;
+    func_over->through = s_func_comp;
+    s_func_comp->members = (func_decls);
+    s_func_comp->statements = (func_pre, stuff, func_post);
+    stuff->terminus = over;
+    over->through = s_comp;
+    s_comp->members = (decls);
+    s_comp->statements = (pre, s_first_goto, body, break_label, post);
+    pre->pattern = s_prenot;
+    s_prenot->pattern = MakeTreePtr<Label>();
+    post->pattern = s_prenot;
+    s_postnot->pattern = MakeTreePtr<Label>();
+    s_first_goto->destination = MakeTreePtr<Expression>();
+    break_label->identifier = MakeTreePtr<LabelIdentifier>();    
+
+    r_func_comp->members = (func_decls, r_enum);
+    r_enum->identifier = r_enum_id;
+    r_enum_id->sources = (fn_id);        
+    r_func_comp->statements = (func_pre, stuff, func_post);
+    over->overlay = r_comp;
+    r_comp->members = (decls);
+    r_comp->statements = (pre, r_switch, break_label, post);    
+    r_switch->body = r_switch_comp;
+    r_switch_comp->statements = (body);
+    r_switch->condition = s_first_goto->destination;
+    
+    MakeTreePtr< SlaveCompareReplace<Compound> > r_slave( r_func_comp, l_func_comp );
+    func_over->overlay = r_slave;
+    l_func_comp->members = (func_decls, l_func_over);
+    l_func_over->through = ls_enum;
+    ls_enum->members = (l_enum_vals);
+    ls_enum->identifier = r_enum_id; // need to match id, not enum itself, because enum's members will change during slave
+    l_func_comp->statements = (func_pre, l_stuff, func_post);
+    l_stuff->terminus = l_comp;
+    l_comp->members = (decls);
+    l_comp->statements = (pre, l_switch, break_label, post);
+    l_switch->body = l_over;
+    l_switch->condition = s_first_goto->destination;
+    l_over->through = ls_switch_comp;
+    ls_switch_comp->statements = (l_pre, ls_label, l_post);
+    ls_label->identifier = MakeTreePtr<LabelIdentifier>();
+    
+    l_func_over->overlay = lr_enum;    
+    lr_enum->members = (l_enum_vals, lr_state_decl);
+    lr_enum->identifier = r_enum_id;
+    lr_state_decl->constancy = MakeTreePtr<Const>();
+    lr_state_decl->identifier = lr_state_id;
+    lr_state_decl->type = lr_int;
+    lr_state_decl->initialiser = lr_count;
+    lr_count->container = l_enum_vals;
+    lr_int->width = MakeTreePtr<SpecificInteger>(32); // TODO should be a common place for getting default types
+    lr_state_id->sources = (ls_label->identifier);
+    l_over->overlay = lr_switch_comp;
+    lr_switch_comp->statements = (l_pre, lr_case, l_post);
+    lr_case->value = lr_state_id;
+
+    SearchReplace::Configure( fn );    
+}
 

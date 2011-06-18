@@ -57,7 +57,7 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     s_comp->statements = body;
     // Note: leaving s_comp empty meaning no decls allowed
 
-    SearchReplace::Configure( all, all );
+    SearchReplace::Configure( all );
 }
 
 CleanupNop::CleanupNop() 

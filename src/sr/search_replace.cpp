@@ -25,6 +25,11 @@ void CompareReplace::Configure( TreePtr<Node> cp,
 {
     ASSERT( cp );
     
+    // If only a search pattern is supplied, make the replace pattern the same
+    // so they couple and then an overlay node can split them apart again.
+    if( !rp )
+        rp = cp;
+        
     if( is_master )
     {
         // Count the number of times we hit each node during a walk.
@@ -257,6 +262,13 @@ Result CompareReplace::DecidedCompare( TreePtr<Node> x,
 
 // xstart and pstart are the indexes into the sequence where we will begin checking for a match.
 // It is assumed that elements before these have already been matched and may be ignored.
+// TODO support SearchContainerBase(ie Stuff nodes) here and below inside the container.
+// Behaviour would be to try the container at each of the nodes matched by the star, and if
+// one match is found we have a hit (ie OR behaviour). I think this results in 3 decisions
+// for sequences as opposed to Star and Stuff, which are one decision each. They are:
+// first: How many elements to match (as with Star)
+// second: Which of the above to try for container match
+// third: Which element of the SearchContainer to try 
 Result CompareReplace::DecidedCompare( SequenceInterface &x,
 		                               SequenceInterface &pattern,
 		                               bool can_key,
@@ -756,7 +768,15 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCoupling( TreePtr<Node> source ) co
     else
         {TRACE("did not key ")(*source)("\n");}
         
-    if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
+    if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
+    {
+        if( !dest )
+        {
+            // Call the soft pattern impl 
+            dest = srp->DuplicateSubtree( this );
+        }
+    }
+    else if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
     {
         dest = DuplicateSubtree( sb->GetThrough() );
         (*sb)( *pcontext, &dest );
@@ -774,26 +794,23 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCoupling( TreePtr<Node> source ) co
     }
     else if( TreePtr<MatchAllBase> mab = dynamic_pointer_cast<MatchAllBase>(source) )
     {
-        //if( dest )
-        {
-            TRACE("Coupled MatchAll: dest=")(*dest)("\n");
-            FOREACH( TreePtr<Node> source_pattern, mab->GetPatterns() )
-            {                
-                TreePtr<Node> dn = ApplySpecialAndCoupling( source_pattern );
-                if(dest)
-                    dest = DoOverlayOrOverwrite( dest, dn );
-                else 
-                    dest = DuplicateSubtree( dn );
-                TRACE("Did MatchAll pattern: sp=")(*source_pattern)(" dn=")(*dn)(" dest=")(*dest)("\n");
-            }
-        }
-        //else
-        {
-       //     TRACE("MAB with no coupling, not handled\n"); // TODO
+        // MatchAll can appear in replace path; if so, treat it like an Overlay node.
+        // This way, NULL or intermediates can appear in any of the legs of the 
+        // MatchAll, as long as they all become populated and final after overlaying
+        // (regardless of order)
+        //TRACE("Coupled MatchAll: dest=")(*dest)("\n");
+        FOREACH( TreePtr<Node> source_pattern, mab->GetPatterns() )
+        {                
+            TreePtr<Node> dn = ApplySpecialAndCoupling( source_pattern );
+            if(dest)
+                dest = DoOverlayOrOverwrite( dest, dn );
+            else 
+                dest = DuplicateSubtree( dn );
+            TRACE("Did MatchAll pattern: sp=")(*source_pattern)(" dn=")(*dn)(" dest=")(*dest)("\n");
         }
     }
     else if( dynamic_pointer_cast<SpecialBase>(source) )
-    {
+    {        
         if( !dest )
         {
             TRACE("Acting on special node ")(*source)(" by returning Node, which acts as the null overlay\n");
@@ -820,11 +837,12 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source ) const
 {
 	INDENT;
 
+    ASSERT( source );
  	TRACE("Duplicating %s\n", ((string)*source).c_str());
 
     TreePtr<Node> dest = ApplySpecialAndCoupling( source );
     if( dest )
-        return dest; // if this produced a result then we're done
+        return dest; // if this produced a result then we're done   
     
     // Make a new node
     dest = DuplicateNode( source );
@@ -1001,14 +1019,14 @@ void CompareReplace::KeyReplaceNodes( TreePtr<Node> source ) const
     
     NoSlaveFilter nsf;
     UniqueFilter uf;
-    Expand e(source, &uf, &nsf);// TODO depth first mode so we don't have to reverse!
+    Expand e(source, &uf, &nsf);
     FOREACH( TreePtr<Node> pattern, e )
 	{
 	    TRACE(*pattern)("\n");
 	    if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( pattern ) )
 	    {
             TRACE("Soft replace pattern not keyed, node at %p\n", pattern.get());
-            // Call the soft pattern impl (TODO don't like calling the function DuplicateSubtree, confusing)
+            // Call the soft pattern impl 
             TreePtr<Node> key = srp->DuplicateSubtree( this );
             // Allow this to key a coupling 
             (void)coupling_keys->KeyAndSubstitute( key, pattern, this, true ); // Just want to key
@@ -1137,7 +1155,7 @@ void SearchReplace::Configure( TreePtr<Node> sp,
                                TreePtr<Node> rp )
 {                    
     ASSERT( sp ); // a search pattern is required to configure the engine
-        
+
     // Make a non-rooted search and replace (ie where the base of the search pattern
     // does not have to be the root of the whole program tree).
     // Insert a Stuff node as root of the search pattern
@@ -1145,16 +1163,10 @@ void SearchReplace::Configure( TreePtr<Node> sp,
 
     if( !rp )
     {
-        // Just a search, so insert a Stuff
-        stuff->terminus = sp;
-        CompareReplace::Configure( stuff );
-    }
-    else if( rp==sp )
-    {
         // Search and replace immediately coupled, insert Stuff, but don't bother
         // with the redundant Overlay.
         stuff->terminus = sp;
-        CompareReplace::Configure( stuff, stuff );
+        CompareReplace::Configure( stuff );
     }
     else
     {
@@ -1256,7 +1268,7 @@ shared_ptr<ContainerInterface> AnyNodeBase::GetContainerInterface( TreePtr<Node>
 
 void CompareReplace::Test()
 {
-    CompareReplace sr = CompareReplace( MakeTreePtr<Nop>() );
+    CompareReplace sr = CompareReplace( MakeTreePtr<Nop>(), MakeTreePtr<Nop>() ); // TODO we're only using compare side
 
     {
         // single node with topological wildcarding

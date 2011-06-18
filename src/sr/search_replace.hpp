@@ -179,14 +179,18 @@ public:
     using Transformation::operator();
     void operator()( TreePtr<Node> context, 
                      TreePtr<Node> *proot );
-private:
+
     // Internal node classes - NOTE these are not special nodes, and we use them like normal tree nodes
-    struct SubSequence : Node,
+    struct SubContainer : Node
+    {
+        NODE_FUNCTIONS
+    };
+    struct SubSequence : SubContainer,
                          Sequence<Node>
     {
     	NODE_FUNCTIONS_FINAL 
     };
-    struct SubCollection : Node,
+    struct SubCollection : SubContainer,
                            Collection<Node>
     {
     	NODE_FUNCTIONS_FINAL
@@ -195,6 +199,7 @@ private:
 
 
 class SearchReplace : public CompareReplace
+
 
 
 {
