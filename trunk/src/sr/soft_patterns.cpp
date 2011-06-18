@@ -34,6 +34,7 @@ string BuildIdentifierBase::GetNewName( const CompareReplace *sr )
     bool all_same = true;
     FOREACH( TreePtr<Node> source, sources )
     {
+        ASSERT( source );
         // We have a child identifier - let replace algorithm run in the expectation it will
         // get subsitituted with a SpecificIdentifier from the original program tree
         TreePtr<Node> n = sr->DuplicateSubtree( TreePtr<Node>(source) );

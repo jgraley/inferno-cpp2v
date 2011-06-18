@@ -199,6 +199,19 @@ private:
     }                                               
 };
 
+struct BuildTypeIdentifier : Special<TypeIdentifier>,                             
+                             BuildIdentifierBase
+{
+    BuildTypeIdentifier( string s="Unnamed", int f=0 ) : BuildIdentifierBase(s,f) {}
+    SPECIAL_NODE_FUNCTIONS
+private:
+    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
+    {
+	string newname = GetNewName( sr );
+	return TreePtr<SpecificTypeIdentifier>( new SpecificTypeIdentifier( newname ) );
+    }                                               
+};
+
 struct BuildLabelIdentifier : Special<LabelIdentifier>,                             
                               BuildIdentifierBase
 {
@@ -212,5 +225,24 @@ private:
 	return TreePtr<SpecificLabelIdentifier>( new SpecificLabelIdentifier( newname ) );
     }                                               
 };
+
+struct BuildContainerSize : CompareReplace::SoftReplacePattern,
+                            Special<Integer>
+{
+    SPECIAL_NODE_FUNCTIONS
+    TreePtr< StarBase > container;
+private:
+    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
+    {
+        ASSERT( container );
+	    TreePtr<Node> n = sr->DuplicateSubtree( container );
+	    ASSERT( n );
+	    TreePtr<SearchReplace::SubCollection> sc = dynamic_pointer_cast<SearchReplace::SubCollection>(n);
+	    ASSERT( sc );
+	    int size = sc->size();
+	    TreePtr<SpecificInteger> si = MakeTreePtr<SpecificInteger>(size);
+	    return si;
+    }                                                   
+}; 
 
 #endif

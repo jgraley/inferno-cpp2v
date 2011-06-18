@@ -107,7 +107,7 @@ GenerateStacks::GenerateStacks()
     r_ret_dec->operands = ( r_index_identifier );
     r_ret_comp->statements = ( r_ret_dec, ret );
 
-    SearchReplace::Configure( fi, fi );
+    SearchReplace::Configure( fi );
 }
 
 
@@ -130,6 +130,6 @@ ExplicitiseReturn::ExplicitiseReturn()
     r_comp->statements = (pre, sx_last, r_return);
     r_return->return_value = MakeTreePtr<Uninitialised>();
     
-    SearchReplace::Configure( fi, fi );
+    SearchReplace::Configure( fi );
 }    
 

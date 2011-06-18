@@ -50,5 +50,15 @@ public:
     ShareGotos();
 };
 
+/** If there's a structure of gotos and labels that looks like a switch statement
+    then insert a switch statement, turn labels into enums and the type of the
+    control variable from void * to the new enum */
+class InsertSwitch : public SearchReplace
+{
+public:
+    InsertSwitch();
+};
+
+
 #endif
 

@@ -54,7 +54,8 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
     sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
     sequence->push_back( shared_ptr<Transformation>( new ShareGotos ) );
-/*    
+   
+    /*    
     sequence->push_back( shared_ptr<Transformation>( new UseTempsForParamsReturn ) );     
     sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) ); 
         */
@@ -68,6 +69,8 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualGoto ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
     }        
+
+ // UNDER CONSTRUCTION  sequence->push_back( shared_ptr<Transformation>( new InsertSwitch ) ); 
 }
 
 
