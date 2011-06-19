@@ -100,8 +100,18 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
     }
 
     virtual SharedPtr &operator=( shared_ptr<VALUE_INTERFACE> n )
-    {
-    	(void)shared_ptr<VALUE_TYPE>::operator=( dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(n)) );
+    {   
+        if( n )
+        {
+            shared_ptr<VALUE_TYPE> p = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(n));
+            ASSERT( p )("OOStd inferred dynamic cast has failed: from ")(*n)
+			           (" to type ")(Traceable::CPPFilt( typeid( VALUE_TYPE ).name() ))("\n");
+         	(void)shared_ptr<VALUE_TYPE>::operator=( p );
+        }
+        else
+        {
+            (void)shared_ptr<VALUE_TYPE>::operator=( shared_ptr<VALUE_TYPE>() );
+        }
     	return *this;
     }
 

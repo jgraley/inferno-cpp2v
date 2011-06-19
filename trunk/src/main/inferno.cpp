@@ -46,7 +46,7 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundSingle ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupNop ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualGoto ) ); 
+        //sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualGoto ) ); // TODO change this to only act when no other usages of the label (ie we are not marging code paths)
         sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
     }        
     sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );
@@ -66,11 +66,12 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundSingle ) );
         sequence->push_back( shared_ptr<Transformation>( new CleanupNop ) );          
-        sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualGoto ) ); 
+        //sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualGoto ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
     }        
 
- // UNDER CONSTRUCTION  sequence->push_back( shared_ptr<Transformation>( new InsertSwitch ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new InsertSwitch ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new InferBreak ) ); 
 }
 
 

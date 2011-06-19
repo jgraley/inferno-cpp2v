@@ -164,6 +164,7 @@ private:
     TreePtr<Node> DuplicateNode( TreePtr<Node> source,
     		                              shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
     TreePtr<Node> ApplySpecialAndCoupling( TreePtr<Node> source ) const;
+    TreePtr<Node> ApplySlave( TreePtr<Node> source, TreePtr<Node> dest ) const;    
 public:
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source ) const;
     TreePtr<Node> DuplicateSubtreeSubstitution( TreePtr<Node> source,

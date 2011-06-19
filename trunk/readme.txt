@@ -11,6 +11,10 @@ src/
     This contains all the Inferno source code, most of which is organised into 
     further subdirectories under src/
 
+docs/
+    This contains documentation about inferno, its design and its steps. There 
+    is more info about the docs in docs/readme.txt
+
 test/
     This contains all the test harnesses and test input. Test results go in
     here too.
@@ -50,22 +54,22 @@ flex
 bison
 libboost-dev
 libboost-thread-dev
-graphviz   [only if you want to look at pretty pictures] 
-indent     [makes reading inferno C output easier]
-doxygen    [automated class documantation]
+graphviz   (only if you want to look at pretty pictures)
+indent     (makes reading inferno C output easier)
+doxygen    (automated class documantation)
 
-First you have to get llvm and clang out of the llvm project's subversion
-repository. To do this type
+Now type:
 
-make get_libs
+make all
 
-Now you can build and run the self-tests using
+This will:
+ - clean up any old binaries       (make clean)
+ - download LLVM and clang         (make get_libs)
+ - compile inferno and clang       (make inferno.exe or just make)
+ - build the doxygen documentation (make docs)
+ - run the tests                   (make test)
 
-make test
-
-It should report "ALL TESTS PASSED". To build without testing just go
-
-make
+It should report "ALL TESTS PASSED". 
 
 To run the tests by hand go into test/ and use runtests.sh. Look at the 
 script for usage instructions. If you want to see a graph, try e.g.

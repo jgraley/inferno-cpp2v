@@ -59,6 +59,12 @@ public:
     InsertSwitch();
 };
 
+/** Insert break statements whenever there are equivalant gotos */
+class InferBreak : public SearchReplace
+{
+public:
+    InferBreak();
+};
 
 #endif
 
