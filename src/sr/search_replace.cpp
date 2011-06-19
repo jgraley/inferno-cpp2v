@@ -56,8 +56,10 @@ void CompareReplace::Configure( TreePtr<Node> cp,
             TRACE("Got %p\n", n.get());
             if( n )
             {
-                if( dynamic_pointer_cast<OverlayBase>(n) || dynamic_pointer_cast<SearchContainerBase>(n) )
-                    ms[n] = 2; // force couplings at overlay nodes TODO refactor substitution so this is not needed
+                if( dynamic_pointer_cast<OverlayBase>(n) || 
+                    dynamic_pointer_cast<SearchContainerBase>(n) ||
+                    dynamic_pointer_cast<StarBase>(n) ) // Couple stars because don't know how to overlay them when non-coupled
+                    ms[n] = 2; 
                 else if( ms.IsExist( n ) )
                     ms[n]++;
                 else
@@ -205,6 +207,13 @@ Result CompareReplace::DecidedCompare( TreePtr<Node> x,
     {
         // When DoOverlay node seen duriung search, just forward through the "base" path
         bool r = DecidedCompare( x, op->GetThrough(), can_key, conj );
+        if( r != FOUND )
+            return NOT_FOUND;
+    }
+    else if( TreePtr<SlaveBase> sp = dynamic_pointer_cast<SlaveBase>(pattern) )
+    {
+        // When a slave node seen duriung search, just forward through the "base" path
+        bool r = DecidedCompare( x, sp->GetThrough(), can_key, conj );
         if( r != FOUND )
             return NOT_FOUND;
     }
@@ -591,18 +600,20 @@ TreePtr<Node> CompareReplace::DoOverlayOrOverwrite( TreePtr<Node> dest,
     {
         // Overlaying 
         DoOverlay( dest, esource );
-        return dest;
     }
     else if( ssource )
     {
         // Overwriting: already created new subtree while applying special node or coupling so nothing more to do
-        return ssource; 
+        dest = ssource; 
     }
     else
     {
         // Overwriting, need to make a duplicate of pattern
-        return DuplicateSubtree( source );
+        dest = DuplicateSubtree( source );
     }   
+    
+    dest = ApplySlave( source, dest );
+    return dest;
 }
 
 
@@ -672,14 +683,14 @@ void CompareReplace::DoOverlay( TreePtr<Node> dest,
             ASSERT( dest_con )( "itemise for dest didn't match itemise for source");
             dest_con->clear();
 
-            TRACE("Copying container size %d\n", source_con->size() );
+            TRACE("Overwriting container size %d\n", source_con->size() );
 	        FOREACH( const TreePtrInterface &p, *source_con )
 	        {
 		        ASSERT( p ); // present simplified scheme disallows NULL
 		        TreePtr<Node> n = DuplicateSubtree( p );
 		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
 		        {
-			        TRACE("Expanding SubSequence/SubCollection length %d\n", sc->size() );
+			        TRACE("Expanding SubContainer length %d\n", sc->size() );
 		            FOREACH( const TreePtrInterface &xx, *sc )
 			            dest_con->insert( xx );
            		}
@@ -778,8 +789,10 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCoupling( TreePtr<Node> source ) co
     }
     else if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
     {
-        dest = DuplicateSubtree( sb->GetThrough() );
-        (*sb)( *pcontext, &dest );
+        if( !dest )
+        {
+            dest = DuplicateSubtree( sb->GetThrough() );
+        }
     } 
     else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
     {
@@ -809,13 +822,14 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCoupling( TreePtr<Node> source ) co
             TRACE("Did MatchAll pattern: sp=")(*source_pattern)(" dn=")(*dn)(" dest=")(*dest)("\n");
         }
     }
-    else if( dynamic_pointer_cast<SpecialBase>(source) )
+    else if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(source) )
     {        
         if( !dest )
         {
             TRACE("Acting on special node ")(*source)(" by returning Node, which acts as the null overlay\n");
-            dest = MakeTreePtr<Node>(); // Node overlays everything, with no effect i.e. is the null overlay
-        }
+         //   dest = MakeTreePtr<Node>(); // Node overlays everything, with no effect i.e. is the null overlay
+            dest = DuplicateSubtree( *(sbs->GetPreRestrictionArchitype()) );
+         }
     }
     else if( dest )
     {
@@ -823,6 +837,16 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCoupling( TreePtr<Node> source ) co
         // further down can act.
         DoOverlay( dest, source );
     }
+    return dest;
+}
+
+
+TreePtr<Node> CompareReplace::ApplySlave( TreePtr<Node> source, TreePtr<Node> dest ) const
+{
+    if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
+    {
+        (*sb)( *pcontext, &dest );
+    } 
     return dest;
 }
 
@@ -842,7 +866,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source ) const
 
     TreePtr<Node> dest = ApplySpecialAndCoupling( source );
     if( dest )
-        return dest; // if this produced a result then we're done   
+        return ApplySlave( source, dest ); // if this produced a result then we're done   
     
     // Make a new node
     dest = DuplicateNode( source );
@@ -853,13 +877,13 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source ) const
     vector< Itemiser::Element * > source_memb = source->Itemise();
     vector< Itemiser::Element * > dest_memb = dest->Itemise(); 
 
-    TRACE("Overlaying %d members source=%s dest=%s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
+    TRACE("Copying %d members source=%s dest=%s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
     // Loop over all the members of source (which can be a subset of dest)
     // and for non-NULL members, duplicate them by recursing and write the
     // duplicates to the destination.
     for( int i=0; i<dest_memb.size(); i++ )
     {
-    	TRACE("Overlaying member %d\n", i );
+    	TRACE("Copying member %d\n", i );
         ASSERT( source_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
         
@@ -875,7 +899,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source ) const
 		        TreePtr<Node> n = DuplicateSubtree( p );
 		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
 		        {
-			        TRACE("Expanding SubSequence/SubCollection length %d\n", sc->size() );
+			        TRACE("Expanding SubContainer length %d\n", sc->size() );
 		            FOREACH( const TreePtrInterface &xx, *sc )
 			            dest_con->insert( xx );
            		}
@@ -900,6 +924,8 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source ) const
             ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
         }
     }
+    
+    dest = ApplySlave( source, dest );
     
     return dest;
 }
@@ -1159,7 +1185,9 @@ void SearchReplace::Configure( TreePtr<Node> sp,
     // Make a non-rooted search and replace (ie where the base of the search pattern
     // does not have to be the root of the whole program tree).
     // Insert a Stuff node as root of the search pattern
-    TreePtr< Stuff<Scope> > stuff( new Stuff<Scope> );
+    // Needs to be Node, because we don't want pre-restriction action here (if we're a slave
+    // we got pre-restricted already.
+    TreePtr< Stuff<Node> > stuff( new Stuff<Node> );
 
     if( !rp )
     {
@@ -1189,7 +1217,7 @@ void SearchReplace::GetGraphInfo( vector<string> *labels,
                                   vector< TreePtr<Node> > *links ) const
 {
     // Find the original patterns
-    TreePtr< Stuff<Scope> > stuff = dynamic_pointer_cast< Stuff<Scope> >(compare_pattern);
+    TreePtr< Stuff<Node> > stuff = dynamic_pointer_cast< Stuff<Node> >(compare_pattern);
     ASSERT( stuff );
     TreePtr< Overlay<Node> > overlay = dynamic_pointer_cast< Overlay<Node> >(stuff->terminus);
     if( overlay )
@@ -1208,6 +1236,7 @@ void SearchReplace::GetGraphInfo( vector<string> *labels,
     
     
 shared_ptr<ContainerInterface> StuffBase::GetContainerInterface( TreePtr<Node> x )
+
 {
     Filter *rf = NULL;
     if( recurse_restriction )

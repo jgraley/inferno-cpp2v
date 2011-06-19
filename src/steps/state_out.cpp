@@ -12,6 +12,7 @@ CompactGotos::CompactGotos()
     MakeTreePtr< Expression > cond;      
     MakeTreePtr< Compound > s_comp, r_comp;  
     MakeTreePtr< Goto > s_then_goto, s_else_goto, r_goto;
+    MakeTreePtr< Star<Declaration> > decls;
     MakeTreePtr< Star<Statement> > pre, post;
     MakeTreePtr< Multiplexor > mult;
     
@@ -20,12 +21,14 @@ CompactGotos::CompactGotos()
     s_if->condition = cond;
     s_if->body = s_then_goto;
     s_if->else_body = MakeTreePtr<Nop>(); // standed conditional branch has no else clause - our "else" is the next statement
+    s_comp->members = ( decls );    
     s_comp->statements = ( pre, s_if, s_else_goto, post );    
 
     mult->operands = (cond, s_then_goto->destination, s_else_goto->destination);
     r_goto->destination = mult;
     r_comp->statements = ( pre, r_goto, post );
-    
+    r_comp->members = ( decls );    
+        
     SearchReplace::Configure( s_comp, r_comp );
 }
 
@@ -35,20 +38,23 @@ CompactGotosFinal::CompactGotosFinal()
     MakeTreePtr< Expression > cond;      
     MakeTreePtr< Compound > s_comp, r_comp;  
     MakeTreePtr< Goto > s_then_goto, s_else_goto, r_goto;
+    MakeTreePtr< Star<Declaration> > decls;
     MakeTreePtr< Star<Statement> > pre, post;
     MakeTreePtr< Multiplexor > mult;
     MakeTreePtr< Label > label;    
-    MakeTreePtr< BuildLabelIdentifier > label_id("NOJUMP");
+    MakeTreePtr< BuildLabelIdentifier > label_id("SEQUENTIAL");
     
     s_then_goto->destination = MakeTreePtr<Expression>();    
     s_if->condition = cond;
     s_if->body = s_then_goto;
     s_if->else_body = MakeTreePtr<Nop>(); // standard conditional branch has no else clause - our "else" is the next statement
+    s_comp->members = ( decls );    
     s_comp->statements = ( pre, s_if, post );    
 
     label->identifier = label_id;
     mult->operands = (cond, s_then_goto->destination, label_id);
     r_goto->destination = mult;
+    r_comp->members = ( decls );
     r_comp->statements = ( pre, r_goto, label, post );
     
     SearchReplace::Configure( s_comp, r_comp );
@@ -201,16 +207,37 @@ ShareGotos::ShareGotos()
     SearchReplace::Configure( loop );
 }
 
+
+// Something to get the size of the Collection matched by a Star as a SpecificInteger
+struct BuildContainerSize : CompareReplace::SoftReplacePattern,
+                            Special<Integer>
+{
+    SPECIAL_NODE_FUNCTIONS
+    TreePtr< StarBase > container;
+private:
+    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
+    {
+        ASSERT( container );
+	    TreePtr<Node> n = sr->DuplicateSubtree( container );
+	    ASSERT( n );
+	    TreePtr<SearchReplace::SubCollection> sc = dynamic_pointer_cast<SearchReplace::SubCollection>(n);
+	    ASSERT( sc );
+	    int size = sc->size();
+	    TreePtr<SpecificInteger> si = MakeTreePtr<SpecificInteger>(size);
+	    return si;
+    }                                                   
+}; 
+
+
 InsertSwitch::InsertSwitch()
 {
     MakeTreePtr<Instance> fn;
     MakeTreePtr<InstanceIdentifier> fn_id;
     MakeTreePtr<Subroutine> sub;
     MakeTreePtr< Overlay<Compound> > func_over, over, l_over;
-    MakeTreePtr< Overlay<Declaration> > l_func_over;
-    MakeTreePtr< Compound > l_func_comp, s_func_comp, r_func_comp, s_comp, r_comp, r_switch_comp, l_comp, ls_switch_comp, lr_switch_comp;
+    MakeTreePtr< Compound > ls_func_comp, lr_func_comp, s_func_comp, r_func_comp, s_comp, r_comp, r_switch_comp, l_comp, ls_switch_comp, lr_switch_comp;
     MakeTreePtr< Star<Declaration> > func_decls, decls, l_enum_vals;
-    MakeTreePtr< Star<Statement> > func_pre, func_post, pre, body, post, l_pre, l_post;
+    MakeTreePtr< Star<Statement> > func_pre, func_post, pre, body, post, l_func_pre, l_func_post, l_pre, l_post;
     MakeTreePtr< Stuff<Statement> > stuff, l_stuff; // TODO these are parallel stuffs, which is bad. Use two first-level slaves 
                                                     // and modify S&R to allow couplings between them. This means running slaves 
                                                     // in a post-pass and doing existing passes across all same-level slaves
@@ -218,21 +245,31 @@ InsertSwitch::InsertSwitch()
     MakeTreePtr<Label> break_label, ls_label; 
     MakeTreePtr<Switch> r_switch, l_switch;     
     MakeTreePtr<Enum> r_enum, ls_enum, lr_enum;         
-    MakeTreePtr< NotMatch<Statement> > s_prenot, s_postnot;
+    MakeTreePtr< NotMatch<Statement> > s_prenot, s_postnot, xs_rr;
     MakeTreePtr<BuildTypeIdentifier> r_enum_id("%sStates");
     MakeTreePtr<Static> lr_state_decl;    
     MakeTreePtr<BuildInstanceIdentifier> lr_state_id("STATE_%s");
     MakeTreePtr<Case> lr_case;
     MakeTreePtr<Signed> lr_int;
     MakeTreePtr<BuildContainerSize> lr_count;
-        
+    MakeTreePtr<LabelIdentifier> ls_label_id;
+    MakeTreePtr<InstanceIdentifier> var_id;
+    MakeTreePtr<Instance> var_decl, l_var_decl;
+    MakeTreePtr< Overlay<Type> > var_over;  
+    MakeTreePtr<Pointer> s_ptr;
+    
     fn->type = sub;
     fn->initialiser = func_over;
     fn->identifier = fn_id;
     func_over->through = s_func_comp;
-    s_func_comp->members = (func_decls);
+    s_func_comp->members = (func_decls, var_decl);
+    var_decl->type = var_over;
+    var_over->through = s_ptr;
+    s_ptr->destination = MakeTreePtr<Void>();
     s_func_comp->statements = (func_pre, stuff, func_post);
     stuff->terminus = over;
+    stuff->recurse_restriction = xs_rr;
+    xs_rr->pattern = MakeTreePtr<Switch>(); // stop it doing a second switch inside one we just created
     over->through = s_comp;
     s_comp->members = (decls);
     s_comp->statements = (pre, s_first_goto, body, break_label, post);
@@ -240,10 +277,11 @@ InsertSwitch::InsertSwitch()
     s_prenot->pattern = MakeTreePtr<Label>();
     post->pattern = s_prenot;
     s_postnot->pattern = MakeTreePtr<Label>();
-    s_first_goto->destination = MakeTreePtr<Expression>();
+    s_first_goto->destination = var_id;
     break_label->identifier = MakeTreePtr<LabelIdentifier>();    
 
-    r_func_comp->members = (func_decls, r_enum);
+    r_func_comp->members = (func_decls, r_enum, var_decl);
+    var_over->overlay = r_enum_id;
     r_enum->identifier = r_enum_id;
     r_enum_id->sources = (fn_id);        
     r_func_comp->statements = (func_pre, stuff, func_post);
@@ -252,15 +290,15 @@ InsertSwitch::InsertSwitch()
     r_comp->statements = (pre, r_switch, break_label, post);    
     r_switch->body = r_switch_comp;
     r_switch_comp->statements = (body);
-    r_switch->condition = s_first_goto->destination;
-    
-    MakeTreePtr< SlaveCompareReplace<Compound> > r_slave( r_func_comp, l_func_comp );
+    r_switch->condition = var_id;
+
+    MakeTreePtr< SlaveSearchReplace<Compound> > lr_sub_slave( lr_func_comp, ls_label_id, lr_state_id );    
+    MakeTreePtr< SlaveCompareReplace<Compound> > r_slave( r_func_comp, ls_func_comp, lr_sub_slave );
     func_over->overlay = r_slave;
-    l_func_comp->members = (func_decls, l_func_over);
-    l_func_over->through = ls_enum;
+    ls_func_comp->members = (func_decls, ls_enum, l_var_decl);
     ls_enum->members = (l_enum_vals);
     ls_enum->identifier = r_enum_id; // need to match id, not enum itself, because enum's members will change during slave
-    l_func_comp->statements = (func_pre, l_stuff, func_post);
+    ls_func_comp->statements = (l_func_pre, l_stuff, l_func_post);
     l_stuff->terminus = l_comp;
     l_comp->members = (decls);
     l_comp->statements = (pre, l_switch, break_label, post);
@@ -268,9 +306,9 @@ InsertSwitch::InsertSwitch()
     l_switch->condition = s_first_goto->destination;
     l_over->through = ls_switch_comp;
     ls_switch_comp->statements = (l_pre, ls_label, l_post);
-    ls_label->identifier = MakeTreePtr<LabelIdentifier>();
+    ls_label->identifier = ls_label_id;
     
-    l_func_over->overlay = lr_enum;    
+    lr_func_comp->members = (func_decls, lr_enum, l_var_decl);
     lr_enum->members = (l_enum_vals, lr_state_decl);
     lr_enum->identifier = r_enum_id;
     lr_state_decl->constancy = MakeTreePtr<Const>();
@@ -280,10 +318,37 @@ InsertSwitch::InsertSwitch()
     lr_count->container = l_enum_vals;
     lr_int->width = MakeTreePtr<SpecificInteger>(32); // TODO should be a common place for getting default types
     lr_state_id->sources = (ls_label->identifier);
+    lr_func_comp->statements = (l_func_pre, l_stuff, l_func_post);
     l_over->overlay = lr_switch_comp;
     lr_switch_comp->statements = (l_pre, lr_case, l_post);
     lr_case->value = lr_state_id;
 
     SearchReplace::Configure( fn );    
+}
+
+
+InferBreak::InferBreak()
+{
+    MakeTreePtr<Goto> ls_goto;
+    MakeTreePtr<Label> label;
+    MakeTreePtr<LabelIdentifier> label_id;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, post;
+    MakeTreePtr<Breakable> breakable;
+    MakeTreePtr<Break> lr_break;
+    MakeTreePtr<Compound> s_comp, r_comp;
+
+    ls_goto->destination = label_id;
+
+    MakeTreePtr< SlaveSearchReplace<Breakable> > slave( breakable, ls_goto, lr_break ); // todo restrict to not go through more breakables
+
+    s_comp->members = decls;
+    s_comp->statements = (pre, breakable, label, post);
+    label->identifier = label_id;
+    
+    r_comp->members = decls;
+    r_comp->statements = (pre, slave, post); 
+    
+    SearchReplace::Configure( s_comp, r_comp );        
 }
 
