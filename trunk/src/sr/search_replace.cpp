@@ -58,7 +58,8 @@ void CompareReplace::Configure( TreePtr<Node> cp,
             {
                 if( dynamic_pointer_cast<OverlayBase>(n) || 
                     dynamic_pointer_cast<SearchContainerBase>(n) ||
-                    dynamic_pointer_cast<StarBase>(n) ) // Couple stars because don't know how to overlay them when non-coupled
+                    dynamic_pointer_cast<StarBase>(n) ||
+                    dynamic_pointer_cast<SlaveBase>(n)) // Couple stars because don't know how to overlay them when non-coupled
                     ms[n] = 2; 
                 else if( ms.IsExist( n ) )
                     ms[n]++;
@@ -841,11 +842,20 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCoupling( TreePtr<Node> source ) co
 }
 
 
-TreePtr<Node> CompareReplace::ApplySlave( TreePtr<Node> source, TreePtr<Node> dest ) const
+TreePtr<Node> CompareReplace::ApplySlave( TreePtr<Node> source, TreePtr<Node> dest ) const 
 {
+    INDENT;
     if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
     {
-        (*sb)( *pcontext, &dest );
+        TreePtr<Node> input_tree_node = coupling_keys->GetCoupled(source);
+        if( input_tree_node )
+        {
+            (*sb)( *pcontext, &input_tree_node );
+            TRACE("writing back\n");
+            dest = input_tree_node;
+        }
+        else
+            (*sb)( *pcontext, &dest );
     } 
     return dest;
 }
@@ -1069,6 +1079,7 @@ void CompareReplace::KeyReplaceNodes( TreePtr<Node> source ) const
 
 TreePtr<Node> CompareReplace::MatchingDuplicateSubtree( TreePtr<Node> source ) const
 {
+    INDENT;
     // Do a two-pass matching process: first get the keys...
     TRACE("doing replace KEYING pass....\n");
     //(void)DuplicateSubtree( source, true );
@@ -1085,6 +1096,7 @@ TreePtr<Node> CompareReplace::MatchingDuplicateSubtree( TreePtr<Node> source ) c
 
 Result CompareReplace::SingleCompareReplace( TreePtr<Node> *proot ) 
 {
+    INDENT;
 	TRACE("%p Begin search\n", this);
     
     // Explicitly preserve the coupling keys structure - we do this instead
@@ -1114,6 +1126,7 @@ Result CompareReplace::SingleCompareReplace( TreePtr<Node> *proot )
 // many hits we got.
 int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
 {
+    INDENT;
 	dirty_grass.clear();
 
     TRACE("begin RCR %p\n", this);
@@ -1145,13 +1158,22 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
 // Do a search and replace based on patterns stored in our members
 void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 {
+    INDENT;
     ASSERT( compare_pattern )("CompareReplace (or SearchReplace) object was not configured before invocation.\n"
                               "Either call Configure() or supply pattern arguments to constructor.\n"
                               "Thank you for taking the time to read this message.\n");
     
     // If the initial root and context are the same node, then arrange for the context
     // to follow the root node as we modify it (in SingleSearchReplace()). This ensures
-    // new declarations can be found in slave searches. We could get the
+    // new declarations can be found in slave searches. 
+    //
+    // TODO but does not work for sub-slaves, because the first level slave's proot
+    // is not the same as pcontext. When slave finishes a singe CR, only the locally-created
+    // *proot is updated, not the top level *proot or *pcontext, so the updates do not appear 
+    // in the context until the first level slave completes, the local *proot is copied over
+    // the TL *proot (and hence *pcontext) and the mechanism described here kicks in
+    //  
+    // We could get the
     // same effect by taking the context as a reference, but leave it like this for now.
     // If *proot is under context, then we're OK as long as proot points to the actual
     // tree node - then the walk at context will follow the new *proot pointer and get
@@ -1270,7 +1292,7 @@ Result StarBase::MatchRange( const CompareReplace *sr,
     else
     {
         TRACE("pre-res\n");
-        // No pattern, so just use pre-restrictionS
+        // No pattern, so just use pre-restrictions
         FOREACH( TreePtr<Node> x, range )
         {
             if( !IsLocalMatch( x.get()) )

@@ -399,7 +399,7 @@ struct Stuff : StuffBase, Special<PRE_RESTRICTION>
 };
 
 
-// The Stuff wildcard can match a truncated subtree with special powers as listed by the members
+
 struct AnyNodeBase : virtual Node, 
                      public SearchContainerBase
 {
