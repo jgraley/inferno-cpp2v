@@ -153,3 +153,12 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
     return TreePtr<Node>();
 }
 
+
+TreePtr<Node> CouplingKeys::GetCoupled( TreePtr<Node> pattern )
+{
+	if( keys_map[pattern] )
+	    return keys_map[pattern]->root;
+	else
+	    return TreePtr<Node>();
+}
+

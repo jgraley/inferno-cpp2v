@@ -46,6 +46,8 @@ public:
 									TreePtr<Node> pattern,
 									const CompareReplace *sr,
 									bool can_key );
+// new interface
+    TreePtr<Node> GetCoupled( TreePtr<Node> pattern );									
 private:
 	Map< Coupling, shared_ptr<Key> > keys_map;
 };

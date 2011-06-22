@@ -51,9 +51,6 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     }        
     sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );
     sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) );
-    sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
-    sequence->push_back( shared_ptr<Transformation>( new ShareGotos ) );
    
     /*    
     sequence->push_back( shared_ptr<Transformation>( new UseTempsForParamsReturn ) );     
@@ -70,6 +67,8 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
     }        
 
+    sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
+    sequence->push_back( shared_ptr<Transformation>( new ShareGotos ) );
     sequence->push_back( shared_ptr<Transformation>( new InsertSwitch ) ); 
     sequence->push_back( shared_ptr<Transformation>( new InferBreak ) ); 
 }

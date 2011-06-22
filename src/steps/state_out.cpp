@@ -229,6 +229,84 @@ private:
 }; 
 
 
+struct IsLabelReached : CompareReplace::SoftSearchPattern, Special<LabelIdentifier>
+{
+	SPECIAL_NODE_FUNCTIONS	
+	// x is nominally the label id, at the position of this node
+	// y is nominally the goto expression, coupled in
+    virtual Result DecidedCompare( const CompareReplace *sr,
+                                   TreePtr<Node> xx,
+                                   bool can_key,
+                                   Conjecture &conj ) const
+    {
+        INDENT;
+        ASSERT( pattern );
+        TreePtr<Node> n = sr->coupling_keys->GetCoupled( pattern ); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
+        if( !n )
+            n = pattern;
+        TreePtr<Expression> y = dynamic_pointer_cast<Expression>( n );
+        ASSERT( y )("IsLabelReached saw pattern coupled to ")(*n)(" but an Expression is needed\n"); 
+        ASSERT( xx );
+        TreePtr<LabelIdentifier> x = dynamic_pointer_cast<LabelIdentifier>( xx );
+        ASSERT( x )("IsLabelReached at ")(*xx)(" but is of type LabelIdentifier\n"); 
+        UniqueFilter uf;        
+        Result r = CanReachExpr(sr, &uf, x, y);
+        TRACE("I reakon ")(*x)(r?" does ":" does not ")("reach ")(*y)("\n"); 
+        return r;
+    }                 
+    TreePtr<Expression> pattern;                  
+private:
+    Result CanReachExpr( const CompareReplace *sr,
+                         Filter *f,
+                         TreePtr<LabelIdentifier> x, 
+                         TreePtr<Expression> y ) const // y is expression. Can it yield expression x?
+    {
+        INDENT;
+        Result r = NOT_FOUND;
+        if( TreePtr<LabelIdentifier> liy = dynamic_pointer_cast<LabelIdentifier>(y) )
+            r = liy->IsLocalMatch( x.get() ) ? FOUND : NOT_FOUND; // y is x, so yes
+        else if( TreePtr<InstanceIdentifier> iiy = dynamic_pointer_cast<InstanceIdentifier>( y ) )
+            r = CanReachVar( sr, f, x, iiy );
+        else if( TreePtr<Ternop> ty = dynamic_pointer_cast<Ternop>( y ) )
+            r = (CanReachExpr(sr, f, x, ty->operands[1]) ||
+                 CanReachExpr(sr, f, x, ty->operands[2]) ) ? FOUND : NOT_FOUND; // only the choices, not the condition
+        TRACE("I reakon ")(*x)(r?" does ":" does not ")("reach ")(*y)("\n"); 
+        return r;
+        // TODO are there more? comma and memory (be pessimistic about memory)
+        
+    }    
+    Result CanReachVar( const CompareReplace *sr,
+                        Filter *f,
+                        TreePtr<LabelIdentifier> x, 
+                        TreePtr<InstanceIdentifier> y ) const // y is instance identifier. Can expression x be assigned to it?
+    {
+        INDENT;
+        Result r = NOT_FOUND;
+        Expand e( *sr->pcontext, f ); // use a unique filter to ensure we only see each identifier once.
+                                      // A single filter instance is used across the whole recursion.
+                                      // This way we do not recurse forever when there are loops in the data flow.
+
+        FOREACH( TreePtr<Node> n, e )
+        {
+            if( TreePtr<Assign> a = dynamic_pointer_cast<Assign>(n) )
+            {
+                TRACE("Examining assignment: ")(*a->operands[0])(" = ")(*a->operands[1])("\n"); 
+                if( a->operands[0] == y )
+                {
+                    if( CanReachExpr( sr, f, x, a->operands[1] ) )
+                    {
+                        r = FOUND;
+                        break; // early out, since we have the info we need
+                    }
+                }
+            }
+        }
+        TRACE("I reakon ")(*x)(" at %p", x.get())(r?" does ":" does not ")("reach ")(*y)("\n"); 
+        return r;
+    }
+};
+
+
 InsertSwitch::InsertSwitch()
 {
     MakeTreePtr<Instance> fn;
@@ -237,12 +315,12 @@ InsertSwitch::InsertSwitch()
     MakeTreePtr< Overlay<Compound> > func_over, over, l_over;
     MakeTreePtr< Compound > ls_func_comp, lr_func_comp, s_func_comp, r_func_comp, s_comp, r_comp, r_switch_comp, l_comp, ls_switch_comp, lr_switch_comp;
     MakeTreePtr< Star<Declaration> > func_decls, decls, l_enum_vals;
-    MakeTreePtr< Star<Statement> > func_pre, func_post, pre, body, post, l_func_pre, l_func_post, l_pre, l_post;
+    MakeTreePtr< Star<Statement> > func_pre, func_post, pre, body, l_func_pre, l_func_post, l_pre, l_post;
     MakeTreePtr< Stuff<Statement> > stuff, l_stuff; // TODO these are parallel stuffs, which is bad. Use two first-level slaves 
                                                     // and modify S&R to allow couplings between them. This means running slaves 
                                                     // in a post-pass and doing existing passes across all same-level slaves
     MakeTreePtr<Goto> s_first_goto; 
-    MakeTreePtr<Label> break_label, ls_label; 
+    MakeTreePtr<Label> ls_label; 
     MakeTreePtr<Switch> r_switch, l_switch;     
     MakeTreePtr<Enum> r_enum, ls_enum, lr_enum;         
     MakeTreePtr< NotMatch<Statement> > s_prenot, s_postnot, xs_rr;
@@ -252,12 +330,20 @@ InsertSwitch::InsertSwitch()
     MakeTreePtr<Case> lr_case;
     MakeTreePtr<Signed> lr_int;
     MakeTreePtr<BuildContainerSize> lr_count;
-    MakeTreePtr<LabelIdentifier> ls_label_id;
+    MakeTreePtr<IsLabelReached> ls_label_id;
     MakeTreePtr<InstanceIdentifier> var_id;
     MakeTreePtr<Instance> var_decl, l_var_decl;
     MakeTreePtr< Overlay<Type> > var_over;  
     MakeTreePtr<Pointer> s_ptr;
-    
+    MakeTreePtr<Label> xs_pre_label;
+    MakeTreePtr<IsLabelReached> xs_pre_reach;
+    MakeTreePtr< MatchAll<Node> > ll_all;
+    MakeTreePtr< NotMatch<Node> > lls_not1, lls_not2;    
+    MakeTreePtr< AnyNode<Node> > ll_any;
+    MakeTreePtr< Overlay<Node> > ll_over;
+    MakeTreePtr<Goto> lls_goto;    
+    MakeTreePtr<Label> lls_label;    
+            
     fn->type = sub;
     fn->initialiser = func_over;
     fn->identifier = fn_id;
@@ -268,17 +354,16 @@ InsertSwitch::InsertSwitch()
     s_ptr->destination = MakeTreePtr<Void>();
     s_func_comp->statements = (func_pre, stuff, func_post);
     stuff->terminus = over;
-    stuff->recurse_restriction = xs_rr;
+    stuff->recurse_restriction = xs_rr; // TODO Add support for elsewhere restriction in stuff node, restrict for no reaches
     xs_rr->pattern = MakeTreePtr<Switch>(); // stop it doing a second switch inside one we just created
     over->through = s_comp;
     s_comp->members = (decls);
-    s_comp->statements = (pre, s_first_goto, body, break_label, post);
+    s_comp->statements = (pre, s_first_goto, body);
     pre->pattern = s_prenot;
-    s_prenot->pattern = MakeTreePtr<Label>();
-    post->pattern = s_prenot;
-    s_postnot->pattern = MakeTreePtr<Label>();
+    s_prenot->pattern = xs_pre_label;
+    xs_pre_label->identifier = xs_pre_reach;
+    xs_pre_reach->pattern = var_id;
     s_first_goto->destination = var_id;
-    break_label->identifier = MakeTreePtr<LabelIdentifier>();    
 
     r_func_comp->members = (func_decls, r_enum, var_decl);
     var_over->overlay = r_enum_id;
@@ -287,12 +372,12 @@ InsertSwitch::InsertSwitch()
     r_func_comp->statements = (func_pre, stuff, func_post);
     over->overlay = r_comp;
     r_comp->members = (decls);
-    r_comp->statements = (pre, r_switch, break_label, post);    
+    r_comp->statements = (pre, r_switch);    
     r_switch->body = r_switch_comp;
     r_switch_comp->statements = (body);
     r_switch->condition = var_id;
 
-    MakeTreePtr< SlaveSearchReplace<Compound> > lr_sub_slave( lr_func_comp, ls_label_id, lr_state_id );    
+    MakeTreePtr< SlaveSearchReplace<Compound> > lr_sub_slave( lr_func_comp, ll_all );    
     MakeTreePtr< SlaveCompareReplace<Compound> > r_slave( r_func_comp, ls_func_comp, lr_sub_slave );
     func_over->overlay = r_slave;
     ls_func_comp->members = (func_decls, ls_enum, l_var_decl);
@@ -301,12 +386,13 @@ InsertSwitch::InsertSwitch()
     ls_func_comp->statements = (l_func_pre, l_stuff, l_func_post);
     l_stuff->terminus = l_comp;
     l_comp->members = (decls);
-    l_comp->statements = (pre, l_switch, break_label, post);
+    l_comp->statements = (pre, l_switch);
     l_switch->body = l_over;
     l_switch->condition = s_first_goto->destination;
     l_over->through = ls_switch_comp;
     ls_switch_comp->statements = (l_pre, ls_label, l_post);
     ls_label->identifier = ls_label_id;
+    ls_label_id->pattern = var_id;
     
     lr_func_comp->members = (func_decls, lr_enum, l_var_decl);
     lr_enum->members = (l_enum_vals, lr_state_decl);
@@ -320,8 +406,22 @@ InsertSwitch::InsertSwitch()
     lr_state_id->sources = (ls_label->identifier);
     lr_func_comp->statements = (l_func_pre, l_stuff, l_func_post);
     l_over->overlay = lr_switch_comp;
-    lr_switch_comp->statements = (l_pre, lr_case, l_post);
+    lr_switch_comp->statements = (l_pre, lr_case, /*ls_label,*/ l_post); 
+    // TODO retain the label for direct gotos, BUT we are spinning at 1st slave because we think the
+    // label is still a state, because we think it reaches state var, because the LABEL->STATE_LABEL change 
+    // is not being seen by IsLabelReached, because this is done by 2nd slave and stays in temps until
+    // the master's SingleCompareReplace() completes. Uh-oh!
+    // but only after fixing S&R to ensure slave output goes into context
     lr_case->value = lr_state_id;
+
+    ll_all->patterns = (ll_any, lls_not1, lls_not2);
+    ll_any->terminus = ll_over;
+    ll_over->through = ls_label_id;
+    ll_over->overlay = lr_state_id;
+    lls_not1->pattern = lls_goto;
+    lls_goto->destination = ls_label_id; // leave gotos alone in the body
+    lls_not2->pattern = lls_label;
+    lls_label->identifier = ls_label_id; // leave labels alone in the body
 
     SearchReplace::Configure( fn );    
 }
@@ -351,4 +451,8 @@ InferBreak::InferBreak()
     
     SearchReplace::Configure( s_comp, r_comp );        
 }
+
+
+
+
 
