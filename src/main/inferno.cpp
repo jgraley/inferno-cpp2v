@@ -59,18 +59,24 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     // These clean-up steps run a few times, because they need to clean up after each other
     for( int i=0; i<3; i++ )
     {
-        sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundSingle ) );
         sequence->push_back( shared_ptr<Transformation>( new CleanupNop ) );          
         //sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualGoto ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
     }        
 
     sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
     sequence->push_back( shared_ptr<Transformation>( new ShareGotos ) );
     sequence->push_back( shared_ptr<Transformation>( new InsertSwitch ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new SwitchCleanUp ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundSingle ) );
+        sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) ); 
     sequence->push_back( shared_ptr<Transformation>( new InferBreak ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new CleanUpDeadCode ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new FixFallthrough ) ); 
 }
 
 

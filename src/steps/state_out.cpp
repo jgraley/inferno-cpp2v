@@ -270,10 +270,13 @@ private:
         else if( TreePtr<Ternop> ty = dynamic_pointer_cast<Ternop>( y ) )
             r = (CanReachExpr(sr, f, x, ty->operands[1]) ||
                  CanReachExpr(sr, f, x, ty->operands[2]) ) ? FOUND : NOT_FOUND; // only the choices, not the condition
+        else if( TreePtr<Comma> cy = dynamic_pointer_cast<Comma>( y ) )
+            r = CanReachExpr(sr, f, x, ty->operands[1]) ? FOUND : NOT_FOUND; // second operand
+        else if( dynamic_pointer_cast<Dereference>( y ) )
+            r = FOUND; // assume everything is in memory
+            
         TRACE("I reakon ")(*x)(r?" does ":" does not ")("reach ")(*y)("\n"); 
-        return r;
-        // TODO are there more? comma and memory (be pessimistic about memory)
-        
+        return r;        
     }    
     Result CanReachVar( const CompareReplace *sr,
                         Filter *f,
@@ -282,7 +285,7 @@ private:
     {
         INDENT;
         Result r = NOT_FOUND;
-        Expand e( *sr->pcontext, f ); // use a unique filter to ensure we only see each identifier once.
+        Expand e( *sr->pcontext, f ); // use a unique filter to ensure we only see each assignment once.
                                       // A single filter instance is used across the whole recursion.
                                       // This way we do not recurse forever when there are loops in the data flow.
 
@@ -350,6 +353,7 @@ InsertSwitch::InsertSwitch()
     func_over->through = s_func_comp;
     s_func_comp->members = (func_decls, var_decl);
     var_decl->type = var_over;
+    var_decl->identifier = var_id;
     var_over->through = s_ptr;
     s_ptr->destination = MakeTreePtr<Void>();
     s_func_comp->statements = (func_pre, stuff, func_post);
@@ -427,6 +431,37 @@ InsertSwitch::InsertSwitch()
 }
 
 
+SwitchCleanUp::SwitchCleanUp()
+{
+    MakeTreePtr<Compound> r_comp, s_body, r_body;
+    MakeTreePtr<Switch> s_switch, r_switch;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > main, tail;
+    MakeTreePtr<Label> label;
+    MakeTreePtr<Expression> cond;
+    MakeTreePtr< NotMatch<Statement> > sx_not_tail, sx_not_main;
+    MakeTreePtr< MatchAny<Statement> > sx_any_tail;
+
+    s_switch->condition = cond;
+    s_switch->body = s_body;
+    s_body->members = decls;
+    s_body->statements = (main, label, tail);
+    main->pattern = sx_not_main;
+    sx_not_main->pattern = MakeTreePtr<Break>();
+    tail->pattern = sx_not_tail;
+    sx_not_tail->pattern = sx_any_tail;
+    sx_any_tail->patterns = (MakeTreePtr<Break>(), MakeTreePtr<Case>());
+    
+    r_comp->statements = (r_switch, label, tail);
+    r_switch->condition = cond;
+    r_switch->body = r_body;
+    r_body->members = decls;
+    r_body->statements = (main);    
+    
+    SearchReplace::Configure( s_switch, r_comp );        
+}
+
+
 InferBreak::InferBreak()
 {
     MakeTreePtr<Goto> ls_goto;
@@ -453,6 +488,25 @@ InferBreak::InferBreak()
 }
 
 
-
-
+FixFallthrough::FixFallthrough()
+{
+    // don't actually need a switch statement here, just look in the body, pattern contains Case statements
+    MakeTreePtr<Compound> s_comp, r_comp;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, cb1, cb2, post;
+    MakeTreePtr<Case> case1, case2;
+    MakeTreePtr<Break> breakk;
+    MakeTreePtr< NotMatch<Statement> > s_not1, s_not2;
+    
+    s_comp->members = (decls);
+    s_comp->statements = (pre, case1, cb1,              case2, cb2, breakk, post);
+    r_comp->members = (decls);
+    r_comp->statements = (pre, case1, cb1, cb2, breakk, case2, cb2, breakk, post);
+    cb1->pattern = s_not1;
+    s_not1->pattern = MakeTreePtr<Break>();
+    cb2->pattern = s_not2;
+    s_not2->pattern = MakeTreePtr<Case>();
+        
+    SearchReplace::Configure( s_comp, r_comp );            
+}
 

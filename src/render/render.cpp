@@ -786,11 +786,11 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep )
 		return "switch( " + RenderExpression(s->condition) + " )\n" +
 			   RenderStatement(s->body, ";\n");
 	else if( TreePtr<Case> c = dynamic_pointer_cast<Case>(statement) )
-		return "case " + RenderExpression(c->value) + ":\n";
+		return "case " + RenderExpression(c->value) + ":;\n";
 	else if( TreePtr<RangeCase> rc = dynamic_pointer_cast<RangeCase>(statement) )
 		return "case " + RenderExpression(rc->value_lo) + " ... " + RenderExpression(rc->value_hi) + ":\n";
 	else if( dynamic_pointer_cast<Default>(statement) )
-		return "default:\n";
+		return "default:;\n";
 	else if( dynamic_pointer_cast<Continue>(statement) )
 		return "continue" + sep;
 	else if( dynamic_pointer_cast<Break>(statement) )

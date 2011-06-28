@@ -59,11 +59,26 @@ public:
     InsertSwitch();
 };
 
+/** Just move the last part of a switch statement - from the last label (not case) 
+    onward out of the switch if there are no breaks */
+class SwitchCleanUp : public SearchReplace
+{
+public:
+    SwitchCleanUp();
+};
+
 /** Insert break statements whenever there are equivalant gotos */
 class InferBreak : public SearchReplace
 {
 public:
     InferBreak();
+};
+
+/** fix fallthroughs by duplicating the fallen-into statements */
+class FixFallthrough : public SearchReplace
+{
+public:
+    FixFallthrough();
 };
 
 #endif
