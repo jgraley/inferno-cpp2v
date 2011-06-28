@@ -331,7 +331,7 @@ template<class PRE_RESTRICTION>
 struct Star : StarBase, Special<PRE_RESTRICTION> 
 { 
     SPECIAL_NODE_FUNCTIONS 
-    TreePtr<PRE_RESTRICTION> pattern;
+    TreePtr<PRE_RESTRICTION> pattern; // TODO rename to "restriction"
     virtual TreePtr<Node> GetPattern() 
     {
         return pattern;

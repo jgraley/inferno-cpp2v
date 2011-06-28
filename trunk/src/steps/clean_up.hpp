@@ -52,4 +52,12 @@ public:
     CleanupUnusedLabels();
 };
 
+/** Remove dead code in switch statements */
+class CleanUpDeadCode : public SearchReplace
+{
+public:
+    CleanUpDeadCode();
+};
+
+
 #endif 

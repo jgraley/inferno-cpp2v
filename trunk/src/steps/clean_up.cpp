@@ -211,3 +211,25 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     SearchReplace::Configure( s_instance, r_instance );
 }
 
+
+CleanUpDeadCode::CleanUpDeadCode()
+{
+    MakeTreePtr<Compound> s_comp, r_comp;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, post;
+    MakeTreePtr< NotMatch<Statement> > s_dead_not;
+    MakeTreePtr< MatchAny<Statement> > s_dead_any, s_exit_any;
+    MakeTreePtr<Case> casee;
+    MakeTreePtr<Break> breakk;
+     
+    s_comp->members = decls;
+    s_comp->statements = ( pre, s_exit_any, s_dead_not, post );
+    s_exit_any->patterns = (MakeTreePtr<Break>(), MakeTreePtr<Continue>(), MakeTreePtr<Return>(), MakeTreePtr<Goto>());
+    s_dead_not->pattern = s_dead_any;
+    s_dead_any->patterns = (MakeTreePtr<Case>(), MakeTreePtr<Default>(), MakeTreePtr<Label>());
+    r_comp->members = decls;
+    r_comp->statements = ( pre, s_exit_any, post );
+    
+    SearchReplace::Configure( s_comp, r_comp );            
+}
+
