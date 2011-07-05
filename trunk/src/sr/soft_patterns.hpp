@@ -55,11 +55,15 @@ struct MatchAllBase : virtual Node
 template<class PRE_RESTRICTION>
 struct MatchAll : Special<PRE_RESTRICTION>,
                  CompareReplace::SoftSearchPattern,
+                 CompareReplace::SoftReplacePattern, 
                  MatchAllBase
 {
 	SPECIAL_NODE_FUNCTIONS
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
+    MatchAll() : initialised( false ) {}
 private:
+    mutable bool initialised;
+    mutable TreePtr<Node> modifier_pattern;
     virtual Result DecidedCompare( const CompareReplace *sr,
                                    TreePtr<Node> x,
                                    bool can_key,
@@ -74,6 +78,54 @@ private:
     	}
         return FOUND;
     }
+
+    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
+    {
+        return TreePtr<Node>();
+        //ASSERTFAIL("MatchAll in replace - it should be coupled because it should be in the search pattern\n");
+    }
+
+    void EnsureInitialised()
+    {
+        if( initialised )
+            return;
+    
+        // MatchAll can appear in replace path; if so, see whether any patterns contain
+        // modifiers, which change the tree relative to the present coupling. If so, 
+        // overlay that over the coupling. There must not be more than one modifier, 
+        // because behaviour would be indeterminate (patterns are unordered).
+        //TRACE("Coupled MatchAll: dest=")(*dest)("\n");
+
+        FOREACH( TreePtr<Node> source_pattern, GetPatterns() )
+        {                
+            Expand e(source_pattern);
+            FOREACH( TreePtr<Node> n, e )
+            {
+                if( dynamic_pointer_cast<SoftReplacePattern>(n) || 
+                    dynamic_pointer_cast<OverlayBase>(n) ||
+                    dynamic_pointer_cast<SlaveBase>(n) ) // TODO common base class for these called Modifier
+                {
+                    ASSERT( !modifier_pattern )("MatchAll coupled into replace must have no more than one modifying pattern:")
+                          (" first saw ")(*modifier_pattern)(" and now got ")(*n)("\n");   
+                    modifier_pattern = source_pattern;
+                    break;
+                }
+            }                     
+        }
+        initialised = true;
+    }
+
+    virtual TreePtr<Node> DoOverlayOrOverwrite( TreePtr<Node> dest, const CompareReplace *sr )
+    {
+        EnsureInitialised();
+        if( modifier_pattern ) 
+        {         
+            dest = sr->DoOverlayOrOverwritePattern( dest, modifier_pattern );
+            TRACE("Did MatchAll pattern: pattern=")(*modifier_pattern)(" dest=")(*dest)("\n");
+        }
+        return dest;
+    } 
+    
     CollectionInterface &GetPatterns() { return patterns; } // TODO try covariant?
 };
 

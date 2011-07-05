@@ -216,7 +216,7 @@ struct SpecificIdentifier : virtual Property
 		ASSERT( candidate );
 		return candidate == this;
 	}
-	virtual operator string() const // this is relied upon to just return the identifier name
+	virtual string GetName() const // this is relied upon to just return the identifier name
 	{
 		return name;
 	}

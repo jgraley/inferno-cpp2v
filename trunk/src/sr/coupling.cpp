@@ -20,10 +20,6 @@ Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
     ASSERT( key );
     ASSERT( key->root );
     ASSERT( key->root->IsFinal() );
-	// Find a coupling for this node. If the node is not in a coupling then there's
-	// nothing for us to do, so return without restricting the search.
-	if( !sr->couplings.IsExist(pattern) )
-		return FOUND;
 
 	// If we're keying and we haven't keyed this node so far, key it now
 	TRACE("MATCH: can_key=%d\n", (int)can_key);
@@ -31,12 +27,12 @@ Result CouplingKeys::KeyAndRestrict( shared_ptr<Key> key,
 	{
 		TRACE("keying... to ")
 		     (*(key->root))
-		     (" key ptr %p new value %p, presently %d keys out of %d couplings\n",
+		     (" key ptr %p new value %p, presently %d keys\n",
 				keys_map[pattern].get(), key.get(),
-				keys_map.size(), sr->couplings.size() );
+				keys_map.size() );
 
 		keys_map[pattern] = key;
-
+	    key->replace_pattern = pattern;
 		return FOUND; // always match when keying (could restrict here too as a slight optimisation, but KISS for now)
 	}
 
@@ -89,19 +85,8 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
     if( key )
     {
         ASSERT( key->root );
-        ASSERT( key->root != pattern )
-              ("keyed to ")
-              (*(key->root))
-              (" apparently in the search or replace pattern\n"); // just a general usage check
     }
-	// Find a coupling for this node. If the node is not in a coupling then there's
-	// nothing for us to do, so return without restricting the search.	
-	TRACE("Looking for coupling for ")(*pattern);
-    if( !sr->couplings.IsExist(pattern) )
-    {
-        TRACE(" not found\n");
-		return TreePtr<Node>();
-    }
+    
 	TRACE(" found ");
 #if 0    
 	TRACE("coupling={");
@@ -122,11 +107,11 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 	TRACE("can_key=%d\n", (int)can_key);
 	if( can_key && key && !keys_map[pattern] )
 	{
-		TRACE("keying... coupling %p key ptr %p new value %p, presently %d keys out of %d couplings\n",
+		TRACE("keying... coupling %p key ptr %p new value %p, presently %d keys\n",
 				&pattern, &keys_map[pattern], key.get(),
-				keys_map.size(), sr->couplings.size() );
+				keys_map.size() );
 		keys_map[pattern] = key;
-
+	    key->replace_pattern = pattern;
 		return key->root;
 	}
 
@@ -154,11 +139,102 @@ TreePtr<Node> CouplingKeys::KeyAndSubstitute( shared_ptr<Key> key, // key may be
 }
 
 
+void CouplingKeys::DoKey( TreePtr<Node> x, 
+	                      TreePtr<Node> pattern )
+{
+	shared_ptr<Key> key( new Key );
+	if( x )
+        key->root = x;
+    else
+        key = shared_ptr<Key>();
+	return DoKey( key, pattern );
+}
+
+
+void CouplingKeys::DoKey( shared_ptr<Key> key, 
+	                      TreePtr<Node> pattern )
+{
+	INDENT;
+	ASSERT( this );
+    ASSERT( pattern );
+    
+    if( key )
+    {
+        ASSERT( key->root );
+    }
+    
+	TRACE(" found ");
+#if 0    
+	TRACE("coupling={");
+	bool first=true;
+	FOREACH( TreePtr<Node> n, coupling )
+	{
+		if( !first )
+			TRACE(", ");
+		if( pattern == n )
+			TRACE("-->");
+		TRACE(*n);
+		first=false;
+	}
+   TRACE("} key ptr=%p\n", keys_map[coupling].get()); // TODO put this in as a common utility somewhere
+#endif
+
+	// If we're keying and we haven't keyed this node so far, key it now
+	if( key && !keys_map[pattern] )
+	{
+		TRACE("keying... coupling %p key ptr %p new value %p, presently %d keys\n",
+				&pattern, &keys_map[pattern], key.get(),
+				keys_map.size() );
+	    key->replace_pattern = pattern;
+		keys_map[pattern] = key;		
+		ASSERT( keys_map[pattern]->replace_pattern );
+	}
+}
+
+
 TreePtr<Node> CouplingKeys::GetCoupled( TreePtr<Node> pattern )
 {
-	if( keys_map[pattern] )
-	    return keys_map[pattern]->root;
+    shared_ptr<Key> k = GetKey( pattern );
+	if( k )
+	    return k->root;
 	else
-	    return TreePtr<Node>();
+	    return TreePtr<Node>(); // TODO may never happen now, try assert
 }
+
+shared_ptr<Key> CouplingKeys::GetKey( TreePtr<Node> pattern )
+{
+	if( keys_map[pattern] )
+	{
+	    ASSERT( keys_map[pattern]->replace_pattern );
+	    return keys_map[pattern];
+	}
+	else
+	    return shared_ptr<Key>(); // TODO may never happen now, try assert
+}
+
+
+Set< TreePtr<Node> > CouplingKeys::GetAllKeys()
+{
+    Set< TreePtr<Node> > s;
+    UniqueFilter uf;
+    TRACE("Key nodes:\n");
+    typedef pair< Coupling, shared_ptr<Key> > Pc;
+    FOREACH( Pc p, keys_map )
+    {
+        ASSERT( p.first );
+        if( p.second ) // TODO make this always be non-NULL
+        {
+            TRACE("Coupling of ")(*(p.first))(": ");
+            Expand e(p.second->root, &uf); 
+            FOREACH( TreePtr<Node> n, e )
+            {
+                s.insert( n );    
+                TRACE(*n)(" ");
+            }   
+            TRACE("\n");
+        }
+    }
+    return s;
+}
+
 

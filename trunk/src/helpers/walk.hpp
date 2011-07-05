@@ -190,7 +190,7 @@ protected:
     iterator my_begin, my_end;
 };
 
-
+// Traverse presents each element exactly once, and skips NULL pointers
 class Traverse : public ContainerInterface
 {
 public:
@@ -220,3 +220,4 @@ protected:
 };
 
 #endif
+

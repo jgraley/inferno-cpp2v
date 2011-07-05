@@ -76,7 +76,7 @@ TreePtr<Instance> FindMemberByName( TreePtr<Program> program, TreePtr<Record> r,
     FOREACH( TreePtr<Declaration> d, r->members )
         if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>(d) )
             if( TreePtr<SpecificInstanceIdentifier> sss = dynamic_pointer_cast<SpecificInstanceIdentifier>(i->identifier) )
-                if( (string)*sss == name )
+                if( sss->GetName() == name )
                     return i;
                 
     // Try recursing through the base classes, if there are any
