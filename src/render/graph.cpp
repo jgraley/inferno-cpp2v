@@ -159,7 +159,7 @@ string Graph::DoTransformation( Transformation *sr,
     vector< TreePtr<Node> > links;
     sr->GetGraphInfo( &labels, &links );
         
-    string name = *sr; 
+    string name = sr->GetName(); 
     int n;
     for( n=0; n<name.size(); n++ )
     {
@@ -355,7 +355,7 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 	    // to be coming from the wrong place.	     
 		*bold = false;
 		*shape = "plaintext";//"record";
-		return *sp;
+		return sp->GetName();
 	}
 }
 
@@ -415,7 +415,7 @@ string Graph::HTMLLabel( string name, TreePtr<Node> n )
 			if( *ptr )
 			{
 				s += " <TR>\n";
-				s += "  <TD>" + Sanitise(*ptr, true) + "</TD>\n";
+				s += "  <TD>" + Sanitise(ptr->GetName(), true) + "</TD>\n";
 				s += "  <TD PORT=\"" + SeqField( i ) + "\"></TD>\n";
 				s += " </TR>\n";
 		   }
@@ -574,7 +574,7 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
 		    if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(to) )   // is to a special node
 		        if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )          // pre-restrictor is nontrivial
 			{
-			    atts += "label = \"" + (string)**(sbs->GetPreRestrictionArchitype()) + "\"\n";
+			    atts += "label = \"" + (**(sbs->GetPreRestrictionArchitype())).GetName() + "\"\n";
 			}
 	}
     else if( dynamic_pointer_cast<StuffBase>(from) )

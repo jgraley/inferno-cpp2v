@@ -25,7 +25,6 @@ Result TransformOfBase::DecidedCompare( const CompareReplace *sr,
 }
 
 
-
 string BuildIdentifierBase::GetNewName( const CompareReplace *sr )
 {
     INDENT;
@@ -37,12 +36,12 @@ string BuildIdentifierBase::GetNewName( const CompareReplace *sr )
         ASSERT( source );
         // We have a child identifier - let replace algorithm run in the expectation it will
         // get subsitituted with a SpecificIdentifier from the original program tree
-        TreePtr<Node> n = sr->DuplicateSubtree( TreePtr<Node>(source) );
+        TreePtr<Node> n = sr->DuplicateSubtreePattern( TreePtr<Node>(source) );
         TRACE("End SoftMakeIdentifier recurse\n");
         ASSERT( n );
         TreePtr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>( n );
         ASSERT( si )("trying to make an identifier from ")(*n)(" which should be a kind of SpecificIdentifier");
-        string s = *si;
+        string s = si->GetName();
         if( !vs.empty() )
             all_same = all_same && (s == vs.back());
         vs.push_back( s );

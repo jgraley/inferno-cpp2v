@@ -31,7 +31,7 @@ public:
                     if( x==ofs )
                     	return *this; // don't insert if in there already, see above
                 v.push_back( ofs );
-                TRACE("%d ", ofs );
+                //TRACE("%d ", ofs );
             }
             return *this;
         }
@@ -40,7 +40,7 @@ public:
 	template< class ITEMISE_TYPE >
 	inline static vector< uintptr_t > ItemiseImpl( const ITEMISE_TYPE *itemise_architype )
 	{
-		TRACE("Static itemise %s ", typeid(*itemise_architype).name() );
+		//TRACE("Static itemise %s ", typeid(*itemise_architype).name() );
 		(void)itemise_architype;
 		ITEMISE_TYPE d( *itemise_architype );
 		ITEMISE_TYPE s( *itemise_architype );
@@ -49,9 +49,9 @@ public:
 		v.clear();
 
 		// This is the assignment that will be detected
-		TRACE("Assigning ");
+		//TRACE("Assigning ");
 		d = s;
-		TRACE(" done\n");
+		//TRACE(" done\n");
 
 		return v;
 	}

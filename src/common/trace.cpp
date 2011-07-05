@@ -7,12 +7,11 @@
 #include <malloc.h>
 
 bool Tracer::continuation = false;
-int Tracer::Descend::depth = 0;
+string Tracer::Descend::pre;
 
 void Tracer::Descend::Indent()
 {
-	for( int i=0; i<depth; i++ )
-		printf(" ");
+    printf("%s", pre.c_str());
 }
 
 inline void InfernoAbort()
@@ -125,8 +124,13 @@ string Traceable::CPPFilt( string s )
     return s;
 }
 
-Traceable::operator string() const
+string Traceable::GetName() const
 {
     return CPPFilt( typeid( *this ).name() );
+}
+
+Traceable::operator string() const
+{
+    return GetName() + SSPrintf("@%p", this); // name plus pointer
 }
 

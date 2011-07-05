@@ -27,6 +27,7 @@ public:
     static int repetitions;
     static bool rep_error;
     static bool selftest;
+    static bool assert_pedigree;
 private:
     int curarg;
     char **argv;

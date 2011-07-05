@@ -18,6 +18,7 @@ int ReadArgs::quitafter = 0x7fffffff; // basically never
 bool ReadArgs::quitenable = false;
 int ReadArgs::repetitions = 100; // default behaviour
 bool ReadArgs::rep_error = true; // default behaviour
+bool ReadArgs::assert_pedigree = false;
 
 void ReadArgs::Usage()
 {
@@ -30,6 +31,7 @@ void ReadArgs::Usage()
     		        "-th         Dump hit counts at the end of execution.\n"    		        
     		        "-th<n>      As -th but suppress indices according to set bits of n.\n"
     		        "-s          Run self-tests.\n"
+    		        "-ap         Enable pedigree assertions in search and replace engine.\n"
                     "-q<n>       Stop after <n> steps. <n> may be 0 to exercise just parser and renderer.\n"                    
 	                "-gi         Generate Graphviz graphs for output or intermediate if used with -q.\n"
 	                "-gp<n>      Generate Graphviz graphs for transformation step n.\n"
@@ -114,6 +116,16 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         else if( option=='s' )
         {
             selftest = true;
+        }
+        else if( option=='a' )
+        {
+            char option2 = argv[curarg][2];
+            if( option2=='p' )
+            {                
+                assert_pedigree = true;
+            }
+            else
+                Usage();
         }
         else if( option=='q' )
         {

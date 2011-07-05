@@ -16,10 +16,11 @@ enum Result { NOT_FOUND = (int)false,
 struct Key
 {
 	virtual ~Key(){}  // be a virtual hierarchy
-	TreePtr<Node> root; // Tree node at matched pattern; root of any replace subtree
-	TreePtr<Node> replace_pattern; // Tree node at matched pattern; root of any replace subtree TODO fix comment
+	TreePtr<Node> root; // Input program node for this coupling
+	TreePtr<Node> replace_pattern; // Pattern node for this coupling TODO rename to just pattern
 };
 
+// TODO obsolete
 typedef TreePtr<Node> Coupling;
 typedef Set<Coupling> CouplingSet;
 
@@ -47,7 +48,11 @@ public:
 									const CompareReplace *sr,
 									bool can_key );
 // new interface
+    void DoKey( TreePtr<Node> x, TreePtr<Node> pattern );
+    void DoKey( shared_ptr<Key> key, TreePtr<Node> pattern );
     TreePtr<Node> GetCoupled( TreePtr<Node> pattern );									
+    shared_ptr<Key> GetKey( TreePtr<Node> pattern );	
+    Set< TreePtr<Node> > GetAllKeys();								
 private:
 	Map< Coupling, shared_ptr<Key> > keys_map;
 };

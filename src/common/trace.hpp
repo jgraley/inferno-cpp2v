@@ -43,11 +43,12 @@ public:
     class Descend
     {
     public:
-    	inline Descend() { depth++; }
-    	inline ~Descend() { depth--; }
+    	inline Descend( string s=" " ) : os(pre.size()) { pre += s; } 
+    	inline ~Descend() { pre = pre.substr(0, os); }
     	static void Indent();
     private:
-        static int depth;
+        static string pre;
+        const int os;
     };
 
 private:
@@ -62,7 +63,8 @@ class Traceable
 {
 public:
 	static string CPPFilt( string s );
-	virtual operator string() const;
+	virtual string GetName() const; // used by parse, render etc
+	virtual operator string() const; // used for debug
 };
 
 #define INFERNO_CURRENT_FUNCTION __func__
@@ -78,7 +80,7 @@ public:
 // we make an error). You can supply a message but no printf() formatting or arguments or std::string.
 #define ASSERTFAIL(MESSAGE) do { Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
 
-#define INDENT Tracer::Descend indent_;
+#define INDENT Tracer::Descend indent_
 
 #endif
 

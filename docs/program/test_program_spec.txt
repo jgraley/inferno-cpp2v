@@ -4,19 +4,23 @@ Inferno Example Input Programs
 ==============================
 
 Example programs will serve as input to automated tests, as well as for 
-demos and as food for thought when designing tranformations.
+demos and as food for thought when designing transformations.
 
 General
 -------
 
 We need a range of sizes of programs from trivial 5-10 line programs 
 that use only a very limited range of language features up to "medium 
-size" programs of about 100-300 lines which use a greater propertion
+size" programs of about 100-300 lines which use a greater proportion
 of the language. Programs should be written in a clear style, but there
 is no coding standard (but programs could be styled after the Inferno
 code in the ../code/*/ directories). Small programs may contain completely
-arbitrary code, wheras larger ones should attempt to implement some kind 
+arbitrary code, whereas larger ones should attempt to implement some kind 
 of algorithm or meaningful function.
+
+Input programs are checked in to in test/examples/ and can be .c or .cpp 
+files. The automated test harness leaves output in test/results (do not 
+check files into here).
 
 Language features
 -----------------
@@ -27,7 +31,7 @@ most basic 75% of C and the most basic 25% of C++ would be about right.
 In particular, templates, exceptions and operator overloading should be 
 avoided, at least for now (but classes, inheritance and new/delete are OK). 
 There is no need to be systematic about language features because the 
-Clang test suite does this - we need more typical code to excercise the 
+Clang test suite does this - we need more typical code to exercise the 
 Inferno transformations, which relate more to programming styles, constructs 
 and patterns than language elements (but to prescribe specific constructs
 would encourage common-mode blind spots).
@@ -44,8 +48,11 @@ on GCC and Visual C++ but successful compilation on any well known
 and up-to-date compiler is OK. Programs should not generate warnings
 under the default compiler settings.
 
-Note: present input programs are being compiled using: g++ -ansi
-where gcc is version 3.4.4 or thereabouts.
+Note: at present, input programs are being compiled using: 
+
+g++ -ansi -nostdinc -Wreturn-type -Werror
+
+where gcc is version 4.4.5 or thereabouts.
 
 Test harness compatibility
 --------------------------
@@ -72,7 +79,7 @@ checker, so don't worry about this too much. In general, there is *no
 need* to prove the expected result - the example programs themselves are
 not under test.
 
-Programs should ignore input arguemnts and not interact over stdin/out/err.
+Programs should ignore input arguments and not interact over stdin/out/err.
 
 License
 -------
@@ -85,15 +92,3 @@ a compatible license, please let me know.
 Submitted (and accepted) programs will be available on the public internet
 via Sourceforge.
 
-Getting programs to me
-----------------------
-
-Email is fine (jgraley@bigfoot.com) and please include a comment to
-the effect that you agree to licese the code to Inferno. Alternatively, 
-I can grant you checkin powers in the Inferno-synth Sourceforge project. 
-Example input programs go in inferno-synth/trunk/test/examples and 
-there will be some kind of filelist file (TBD)
-
-I cannot guarantee to use all submissions (but I can't see why I wouldn't).
-
-John Graley 3 Nov 2008
