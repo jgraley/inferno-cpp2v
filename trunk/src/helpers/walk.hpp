@@ -115,12 +115,18 @@ public:
 	    		  Filter *recurse_filter );
 	    bool IsAtEndOfChildren() const;
 	    void BypassEndOfChildren();
+        virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const;
 	    void Push( TreePtr<Node> n );
 
 	    shared_ptr< TreePtr<Node> > root;
         Filter *out_filter;
         Filter *recurse_filter;
-	    stack< Flatten::iterator > state;
+        struct StateEntry
+        {
+            shared_ptr<ContainerInterface> container;
+            ContainerInterface::iterator iterator;
+        };
+	    stack< StateEntry > state;
         bool done;
 
 	    friend class Expand;
@@ -161,8 +167,7 @@ struct UniqueFilter : public Filter
 //
 // TODO do this as a recursion restriction on Expand - that means cleaning
 // up the recurse restriction interface to be more like an observber pattern
-// with support for multiple observers. The only tricky part is the "keys" 
-// user data item, which should be a member of the client, but isn't.
+// with support for multiple observers.
 class ParentTraverse : public ContainerInterface
 {
 public:
@@ -199,7 +204,7 @@ public:
     {
     public:
         iterator(); // makes "end" iterator
-        ~iterator(); // makes "end" iterator
+        ~iterator(); 
         iterator( const iterator &other );        
         iterator &operator=( const iterator &other );
     protected:

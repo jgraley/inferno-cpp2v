@@ -59,7 +59,7 @@ fi
 
 echo Transform... 
 # Always do self-test
-time $inferno -s -i$infile -o$outfile
+time $inferno -s -ap -i$infile -o$outfile
 ires=$?
 
 if test $ires -eq 0

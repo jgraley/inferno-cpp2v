@@ -14,6 +14,8 @@ bool ReadArgs::trace = false;
 bool ReadArgs::trace_hits = false;
 int ReadArgs::hits_mask = 0;
 bool ReadArgs::selftest = false;
+int ReadArgs::runonlystep = 0; 
+bool ReadArgs::runonlyenable = false; 
 int ReadArgs::quitafter = 0x7fffffff; // basically never
 bool ReadArgs::quitenable = false;
 int ReadArgs::repetitions = 100; // default behaviour
@@ -32,7 +34,8 @@ void ReadArgs::Usage()
     		        "-th<n>      As -th but suppress indices according to set bits of n.\n"
     		        "-s          Run self-tests.\n"
     		        "-ap         Enable pedigree assertions in search and replace engine.\n"
-                    "-q<n>       Stop after <n> steps. <n> may be 0 to exercise just parser and renderer.\n"                    
+                    "-q<n>       Stop before step <n>. <n> may be 0 to exercise just parser and renderer.\n"                    
+                    "-n<n>       Only run step <n>. User must ensure program meets any restrictions of the step.\n"                    
 	                "-gi         Generate Graphviz graphs for output or intermediate if used with -q.\n"
 	                "-gp<n>      Generate Graphviz graphs for transformation step n.\n"
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
@@ -131,6 +134,11 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         {
         	quitafter = strtoul( GetArg().c_str(), NULL, 10 );
         	quitenable = true;
+        }
+        else if( option=='n' )
+        {
+        	runonlystep = strtoul( GetArg().c_str(), NULL, 10 );
+        	runonlyenable = true;
         }
         else 
         {

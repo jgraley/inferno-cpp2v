@@ -1,5 +1,5 @@
 include makefile.common
-.PHONY: default all get_libs test docs force_subordinate_makefiles clean
+.PHONY: default all get_libs test docs force_subordinate_makefiles clean iclean
 default : inferno.exe
 all : clean get_libs inferno.exe docs test
 
@@ -37,7 +37,9 @@ LLVM_LIB_PATH = $(LLVM)/$(LLVM_BUILD)/lib
 LLVM_CLANG_LIBS =  libclangDriver.a libclangParse.a libclangLex.a libclangBasic.a   
 LLVM_CLANG_LIBS += libLLVMBitWriter.a libLLVMBitReader.a libLLVMSupport.a libLLVMSystem.a 	
 LLVM_CLANG_LIB_PATHS = $(LLVM_CLANG_LIBS:%=$(LLVM_LIB_PATH)/%)
-LLVM_CLANG_OPTIONS := ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED) CXXFLAGS="-include cstdio -include stdint.h"
+LLVM_CLANG_OPTIONS := ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED) 
+LLVM_CLANG_OPTIONS += CXXFLAGS="-include cstdio -include stdint.h $(ILC_OPTIONS)"
+LLVM_CLANG_OPTIONS += CFLAGS=$(ILC_OPTIONS)
 
 $(LLVM_LIB_PATH)/libLLVMBit%.a : force_subordinate_makefiles
 	cd llvm/lib/Bitcode/$(patsubst libLLVMBit%.a,%,$(notdir $@)) && $(MAKE) $(LLVM_CLANG_OPTIONS)	
@@ -67,7 +69,7 @@ src/build/inferno.a : force_subordinate_makefiles
 # Link inferno executable
 #
 STANDARD_LIBS += -lstdc++
-inferno.exe : makefile src/build/inferno.a $(LLVM_CLANG_LIB_PATHS)
+inferno.exe : makefile makefile.common src/build/inferno.a $(LLVM_CLANG_LIB_PATHS)
 	$(ICC) src/build/inferno.a $(LLVM_CLANG_LIB_PATHS) $(STANDARD_LIBS) -ggdb -pg -o inferno.exe
 
 #
@@ -87,7 +89,9 @@ test : makefile inferno.exe
 #
 # Cleaning up
 #
-clean : makefile $(LLVM_CLANG_LIBS:%=clean_%)
+clean : makefile $(LLVM_CLANG_LIBS:%=clean_%) iclean
+
+iclean : makefile 
 	-rm -rf src/build/
 	-rm -f inferno.exe
-	
+

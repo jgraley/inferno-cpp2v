@@ -110,19 +110,31 @@ int main( int argc, char *argv[] )
     Parse p(ReadArgs::infile);
     p( program, &program );
  
-    // Apply the transformation steps in order, but quit early if requested to
-    int i=0;
-    FOREACH( shared_ptr<Transformation> t, sequence )
+    if( ReadArgs::runonlyenable )
     {
-        if( ReadArgs::quitafter-- == 0 )
-            break;
-        fprintf(stderr, "Step %d: %s\n", i, string( *t ).c_str() ); // TODO trace should print to stderr too    
-        TRACE("Step %d: %s\n", i, string( *t ).c_str() ); // TODO trace should print to stderr too
-        HitCount::instance.SetStep(i);
+        // Apply only the transformation requested
+        shared_ptr<Transformation> t = sequence[ReadArgs::runonlystep];
+        fprintf(stderr, "Step %d: %s\n", ReadArgs::runonlystep, string( *t ).c_str() ); 
+        TRACE("Step %d: %s\n", ReadArgs::runonlystep, string( *t ).c_str() ); // TODO trace should print to stderr too
+        HitCount::instance.SetStep(ReadArgs::runonlystep);
         (*t)( &program );
-        i++;
     }
-    
+    else
+    {
+        // Apply the transformation steps in order, but quit early if requested to
+        int i=0;
+        FOREACH( shared_ptr<Transformation> t, sequence )
+        {
+            if( ReadArgs::quitafter-- == 0 )
+                break;
+            fprintf(stderr, "Step %d: %s\n", i, string( *t ).c_str() ); 
+            TRACE("Step %d: %s\n", i, string( *t ).c_str() ); // TODO trace should print to stderr too
+            HitCount::instance.SetStep(i);
+            (*t)( &program );
+            i++;
+        }
+    }
+        
     // Output either C source code or a graph, as requested
     if(ReadArgs::intermediate_graph)
         Graph()( &program );    

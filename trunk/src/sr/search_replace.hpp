@@ -92,20 +92,21 @@ public:
     TreePtr<Node> GetContext() const { ASSERT(pcontext&&*pcontext); return *pcontext; }
     struct SoftSearchPattern
     {
-        virtual Result DecidedCompare( const CompareReplace *sr,
+        virtual void FlushCache() {}
+        virtual bool DecidedCompare( const CompareReplace *sr,
         		                       TreePtr<Node> x,
         		                       bool can_key,
-        		                       Conjecture &conj ) const = 0;
+        		                       Conjecture &conj ) = 0;
     };
     struct SoftReplacePattern
     {
         // Called when not coupled
         virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr ) = 0;
         // Called when coupled, dest is coupling key
-        virtual TreePtr<Node> DoOverlayOrOverwrite( TreePtr<Node> dest, const CompareReplace *sr ) 
+        virtual TreePtr<Node> GetOverlayPattern() 
         { 
-            return dest; // default implementation for weak modifiers that just returns the coupled dest,
-                         // so that couplings appear to override local functionality
+            return TreePtr<Node>(); // default implementation for weak modifiers 
+                                    // so that couplings appear to override local functionality
         }
     };
 
@@ -116,7 +117,7 @@ public:
     TreePtr<Node> compare_pattern;
     TreePtr<Node> replace_pattern;
     TreePtr<Node> *pcontext;
-    shared_ptr< CouplingKeys > coupling_keys;
+    mutable CouplingKeys coupling_keys;
     mutable set< TreePtr<Node> > dirty_grass;
     
     // Sets of nodes for debugging purposes. Checks should be positive, because identifiers are copied
@@ -135,34 +136,35 @@ private:
     		           TreePtr<Node> pattern ) const;
 
     // DecidedCompare ring
-    Result DecidedCompare( SequenceInterface &x,
+    bool DecidedCompare( SequenceInterface &x,
     		               SequenceInterface &pattern,
     		               bool can_key,
     		               Conjecture &conj ) const;
-    Result DecidedCompare( CollectionInterface &x,
+    bool DecidedCompare( CollectionInterface &x,
     		               CollectionInterface &pattern,
     		               bool can_key,
     		               Conjecture &conj ) const;
-    Result DecidedCompare( TreePtr<Node> x,
+    bool DecidedCompare( TreePtr<Node> x,
     		               TreePtr<SearchContainerBase> pattern,
     		               bool can_key,
     		               Conjecture &conj ) const;
 public:
-    Result DecidedCompare( TreePtr<Node> x,
+    bool DecidedCompare( TreePtr<Node> x,
     		               TreePtr<Node> pattern,
     		               bool can_key,
     		               Conjecture &conj ) const;
 private:
     // MatchingDecidedCompare ring
     friend class Conjecture;
-    Result MatchingDecidedCompare( TreePtr<Node> x,
+    bool MatchingDecidedCompare( TreePtr<Node> x,
     		                       TreePtr<Node> pattern,
     		                       bool can_key,
     		                       Conjecture &conj ) const;
 
     // Compare ring (now trivial)
+    void FlushSoftPatternCaches( TreePtr<Node> pattern ) const;
 public:
-    Result Compare( TreePtr<Node> x,
+    bool Compare( TreePtr<Node> x,
     		        TreePtr<Node> pattern,
 	                bool can_key = false ) const;
     virtual bool IsMatch( TreePtr<Node> context,       
@@ -170,16 +172,14 @@ public:
 
     // Replace ring
     void ClearPtrs( TreePtr<Node> dest ) const;
-    TreePtr<Node> DoOverlayOrOverwrite( TreePtr<Node> dest,
-    		                            TreePtr<Node> source ) const; 
-    TreePtr<Node> DoOverlayOrOverwritePattern( TreePtr<Node> dest,
-    		                                   TreePtr<Node> source ) const; 
-    void DoOverlay( TreePtr<Node> dest,
-    		        TreePtr<Node> source ) const; // under substitution if not NULL
-    void DoOverlayPattern( TreePtr<Node> dest,
-    		               TreePtr<Node> source ) const; // under substitution if not NULL
+    TreePtr<Node> DoOverlayOrOverwriteSubstitutionPattern( TreePtr<Node> keynode,
+                	                                       shared_ptr<Key> current_key,
+		                                                   TreePtr<Node> source ) const;
+    TreePtr<Node> DoOverlaySubstitutionPattern( TreePtr<Node> keynode,
+    	         	                            shared_ptr<Key> current_key,
+		                                        TreePtr<Node> source ) const; // under substitution if not NULL
     TreePtr<Node> DuplicateNode( TreePtr<Node> source,
-    		                              shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
+    		                     shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
     TreePtr<Node> ApplySpecialAndCouplingPattern( TreePtr<Node> source ) const;
     TreePtr<Node> ApplySlave( TreePtr<Node> source, TreePtr<Node> dest ) const;    
 public:
@@ -190,7 +190,7 @@ private:
     void KeyReplaceNodes( TreePtr<Node> source ) const;
     TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x ) const;
     // implementation ring: Do the actual search and replace
-    Result SingleCompareReplace( TreePtr<Node> *proot );
+    bool SingleCompareReplace( TreePtr<Node> *proot );
     int RepeatingCompareReplace( TreePtr<Node> *proot );
 public:
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.
@@ -276,7 +276,7 @@ struct Special : SpecialBase, virtual PRE_RESTRICTION
 struct SlaveBase : virtual Node, virtual InPlaceTransformation
 {
     virtual TreePtr<Node> GetThrough() const = 0;
-    virtual void MergeCouplings( shared_ptr<CouplingKeys> ck ) = 0;
+    virtual void SetCouplingsMaster( CouplingKeys *ck ) = 0;
 };
 
 template<typename ALGO>
@@ -285,9 +285,9 @@ struct SlaveIntermediate : public SlaveBase, public ALGO
 	SlaveIntermediate( TreePtr<Node> sp, TreePtr<Node> rp ) :
 		ALGO( sp, rp, false )
 	{}
-    virtual void MergeCouplings( shared_ptr<CouplingKeys> ck )
+    virtual void SetCouplingsMaster( CouplingKeys *ck )
     {
-        ALGO::coupling_keys = ck; 
+        ALGO::coupling_keys.SetMaster( ck ); 
     }
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *links ) const
@@ -340,7 +340,7 @@ struct SlaveSearchReplace : Slave<SearchReplace, PRE_RESTRICTION>
 struct StarBase : virtual Node 
 {
     virtual TreePtr<Node> GetPattern() = 0;
-    Result MatchRange( const CompareReplace *sr,
+    bool MatchRange( const CompareReplace *sr,
                        ContainerInterface &range );
 };
 template<class PRE_RESTRICTION>

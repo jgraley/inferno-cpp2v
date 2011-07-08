@@ -24,6 +24,8 @@ public:
     static int hits_mask;
     static int quitafter;
     static bool quitenable;
+    static int runonlystep;
+    static bool runonlyenable;
     static int repetitions;
     static bool rep_error;
     static bool selftest;

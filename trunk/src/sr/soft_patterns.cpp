@@ -1,10 +1,10 @@
 #include "soft_patterns.hpp"
 #include "tree/tree.hpp"
 
-Result TransformOfBase::DecidedCompare( const CompareReplace *sr,
+bool TransformOfBase::DecidedCompare( const CompareReplace *sr,
 		                                                     TreePtr<Node> x,
 		                                                     bool can_key,
-		                                                     Conjecture &conj ) const
+		                                                     Conjecture &conj )
 {
     INDENT;
     // Transform the candidate expression
@@ -20,7 +20,7 @@ Result TransformOfBase::DecidedCompare( const CompareReplace *sr,
 		// type, so just don't match
 		// TODO no need for this, the pre-restriction will take care of wrong type. But maybe
 		// want this for other invalid cases?
-	    return NOT_FOUND;
+	    return false;
 	}
 }
 

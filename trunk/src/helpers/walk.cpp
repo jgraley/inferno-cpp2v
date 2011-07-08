@@ -165,9 +165,7 @@ bool Expand::iterator::IsAtEndOfChildren() const
 	if( state.empty() )
 		return false;
 
-    const Flatten::iterator &ti = state.top();
-
-    return ti == Flatten::iterator();
+    return state.top().iterator == state.top().container->end();
 }
 
 void Expand::iterator::BypassEndOfChildren()
@@ -181,13 +179,21 @@ void Expand::iterator::BypassEndOfChildren()
 	    if( done )
 	    	break;
 
-	    ++(state.top());
+	    ++state.top().iterator;
 	}
 }
 
+shared_ptr<ContainerInterface> Expand::iterator::GetChildContainer( TreePtr<Node> n ) const
+{ 
+    return shared_ptr<ContainerInterface>( new Flatten(n) );
+}        
+
 void Expand::iterator::Push( TreePtr<Node> n )
 { 
-    state.push( Flatten(n).begin() );
+    StateEntry ns;
+    ns.container = GetChildContainer( n );
+    ns.iterator = ns.container->begin();
+    state.push( ns );
 }        
 
 Expand::iterator::iterator( TreePtr<Node> &r,
@@ -220,10 +226,10 @@ Expand::iterator::iterator( const Expand::iterator & other ) :
 Expand::iterator::operator string() const
 {
     string s;
-    stack< Flatten::iterator > ps = state; // std::stack doesn't have [] so copy the whole thing and go backwards
+    stack< StateEntry > ps = state; // std::stack doesn't have [] so copy the whole thing and go backwards
     while( !ps.empty() )
     {
-        s = string(ps.top()) + string(" ") + s;
+        s = string(*(ps.top().iterator)) + string(" ") + s;
         ps.pop();
     }
     return s;
@@ -277,7 +283,7 @@ void Expand::iterator::AdvanceOver()
 	else
 	{
 		// otherwise, propagate
-	    ++(state.top());
+	    ++state.top().iterator;
   	    BypassEndOfChildren();
 	}
 }
@@ -306,7 +312,7 @@ Expand::iterator::reference Expand::iterator::operator*() const
 	}
 	else
 	{
-        return *(state.top());
+        return *(state.top().iterator);
 	}
 }
 
@@ -335,7 +341,7 @@ void Expand::iterator::Overwrite( Expand::iterator::pointer v ) const
     }
     else
     {
-        state.top().Overwrite( v );
+        state.top().iterator.Overwrite( v );
     }
 }
 

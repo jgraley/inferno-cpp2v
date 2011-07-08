@@ -5,14 +5,9 @@
 #include "node/node.hpp"
 #include <set> 
 
-// This just serves to complicate matters - just use bools directly
-// TODO also dosen't belong in couplings lol
-enum Result { NOT_FOUND = (int)false,
-			  FOUND     = (int)true };
-
-
 // Base class for coupling keys; this deals with individual node matches, and also with stars
 // by means of pointing "root" at a SubCollection or SubSequence
+class CompareReplace;
 struct Key
 {
 	virtual ~Key(){}  // be a virtual hierarchy
@@ -20,57 +15,30 @@ struct Key
 	TreePtr<Node> replace_pattern; // Pattern node for this coupling TODO rename to just pattern
 };
 
-// TODO obsolete
-typedef TreePtr<Node> Coupling;
-typedef Set<Coupling> CouplingSet;
-
-class CompareReplace;
 class CouplingKeys
 {
+// TODO const-correctness, so master can be const. Means using find() etc instead of []
+// when we only want to look - this will make things faster too I suspect
 public:
-	CouplingKeys()
-	{
-	}
-	Result KeyAndRestrict( TreePtr<Node> x,
-						   TreePtr<Node> pattern,
-						   const CompareReplace *sr,
-						   bool can_key );
-	Result KeyAndRestrict( shared_ptr<Key> key,
-						   TreePtr<Node> pattern,
-						   const CompareReplace *sr,
-						   bool can_key );
-	TreePtr<Node> KeyAndSubstitute( TreePtr<Node> x, // source after soft nodes etc
-									TreePtr<Node> pattern, // source
-									const CompareReplace *sr,
-									bool can_key );
-	TreePtr<Node> KeyAndSubstitute( shared_ptr<Key> key,
-									TreePtr<Node> pattern,
-									const CompareReplace *sr,
-									bool can_key );
-// new interface
+	CouplingKeys();
+	/// Key a node to a pattern (generates a default key structure)
     void DoKey( TreePtr<Node> x, TreePtr<Node> pattern );
+    /// Key some key to a pattern - key is supplied by user, can be subclass of Key
     void DoKey( shared_ptr<Key> key, TreePtr<Node> pattern );
+    /// Get the node to which a pattern was keyed, or NULL if pattern has not been keyed
     TreePtr<Node> GetCoupled( TreePtr<Node> pattern );									
+    /// Get the key for a given pattern, or NULL if pattern has not been keyed
     shared_ptr<Key> GetKey( TreePtr<Node> pattern );	
-    Set< TreePtr<Node> > GetAllKeys();								
+    /// Get all the keys in set form
+    Set< TreePtr<Node> > GetAllKeys();		
+    /// Provide a pointer to another (read-only) instance of this class that will 
+    /// be merged for the purposes of searching, but will not recieve new couplings 
+    void SetMaster( CouplingKeys *m );				
+    /// Clear the couplings
+    void Clear();
 private:
-	Map< Coupling, shared_ptr<Key> > keys_map;
+	Map< TreePtr<Node>, shared_ptr<Key> > keys_map;
+	CouplingKeys *master; 
 };
-
-
-inline CouplingSet operator,( Coupling l, Coupling r )
-{
-	CouplingSet cs;
-    cs.insert( l );
-    cs.insert( r );
-    return cs;
-}
-
-
-inline CouplingSet operator,( CouplingSet l, Coupling r )
-{
-    l.insert( r );
-    return l;
-}
 
 #endif
