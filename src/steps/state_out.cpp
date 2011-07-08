@@ -232,16 +232,20 @@ private:
 struct IsLabelReached : CompareReplace::SoftSearchPattern, Special<LabelIdentifier>
 {
 	SPECIAL_NODE_FUNCTIONS	
+	virtual void FlushCache()
+	{
+	    cache.clear();
+	}
 	// x is nominally the label id, at the position of this node
 	// y is nominally the goto expression, coupled in
-    virtual Result DecidedCompare( const CompareReplace *sr,
+    virtual bool DecidedCompare( const CompareReplace *sr,
                                    TreePtr<Node> xx,
                                    bool can_key,
-                                   Conjecture &conj ) const
+                                   Conjecture &conj ) 
     {
         INDENT;
         ASSERT( pattern );
-        TreePtr<Node> n = sr->coupling_keys->GetCoupled( pattern ); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
+        TreePtr<Node> n = sr->coupling_keys.GetCoupled( pattern ); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
         if( !n )
             n = pattern;
         TreePtr<Expression> y = dynamic_pointer_cast<Expression>( n );
@@ -250,41 +254,49 @@ struct IsLabelReached : CompareReplace::SoftSearchPattern, Special<LabelIdentifi
         TreePtr<LabelIdentifier> x = dynamic_pointer_cast<LabelIdentifier>( xx );
         ASSERT( x )("IsLabelReached at ")(*xx)(" but is of type LabelIdentifier\n"); 
         UniqueFilter uf;        
-        Result r = CanReachExpr(sr, &uf, x, y);
+        bool r = CanReachExpr(sr, &uf, x, y);
         TRACE("I reakon ")(*x)(r?" does ":" does not ")("reach ")(*y)("\n"); 
         return r;
     }                 
-    TreePtr<Expression> pattern;                  
+    TreePtr<Expression> pattern;           
+           
 private:
-    Result CanReachExpr( const CompareReplace *sr,
+    bool CanReachExpr( const CompareReplace *sr,
                          Filter *f,
                          TreePtr<LabelIdentifier> x, 
-                         TreePtr<Expression> y ) const // y is expression. Can it yield expression x?
+                         TreePtr<Expression> y ) // y is expression. Can it yield label x?
     {
         INDENT;
-        Result r = NOT_FOUND;
+        bool r = false;
         if( TreePtr<LabelIdentifier> liy = dynamic_pointer_cast<LabelIdentifier>(y) )
-            r = liy->IsLocalMatch( x.get() ) ? FOUND : NOT_FOUND; // y is x, so yes
+            r = liy->IsLocalMatch( x.get() ); // y is x, so yes
         else if( TreePtr<InstanceIdentifier> iiy = dynamic_pointer_cast<InstanceIdentifier>( y ) )
             r = CanReachVar( sr, f, x, iiy );
         else if( TreePtr<Ternop> ty = dynamic_pointer_cast<Ternop>( y ) )
-            r = (CanReachExpr(sr, f, x, ty->operands[1]) ||
-                 CanReachExpr(sr, f, x, ty->operands[2]) ) ? FOUND : NOT_FOUND; // only the choices, not the condition
+            r = CanReachExpr(sr, f, x, ty->operands[1]) ||
+                CanReachExpr(sr, f, x, ty->operands[2]); // only the choices, not the condition
         else if( TreePtr<Comma> cy = dynamic_pointer_cast<Comma>( y ) )
-            r = CanReachExpr(sr, f, x, ty->operands[1]) ? FOUND : NOT_FOUND; // second operand
+            r = CanReachExpr(sr, f, x, ty->operands[1]); // second operand
         else if( dynamic_pointer_cast<Dereference>( y ) )
-            r = FOUND; // assume everything is in memory
+            r = true; // assume everything is in memory
             
-        TRACE("I reakon ")(*x)(r?" does ":" does not ")("reach ")(*y)("\n"); 
+        TRACE("I reakon ")(*x)(" at %p", x.get())(r?" does ":" does not ")("reach ")(*y)("\n"); 
         return r;        
     }    
-    Result CanReachVar( const CompareReplace *sr,
+    
+    bool CanReachVar( const CompareReplace *sr,
                         Filter *f,
                         TreePtr<LabelIdentifier> x, 
-                        TreePtr<InstanceIdentifier> y ) const // y is instance identifier. Can expression x be assigned to it?
+                        TreePtr<InstanceIdentifier> y ) // y is instance identifier. Can expression x be assigned to it?
     {
         INDENT;
-        Result r = NOT_FOUND;
+        Reaching rr( x, y );
+        if( cache.IsExist(rr) )
+        {
+            TRACE("cache hit yeah yeah\n");
+            return cache[rr];
+        }
+        bool r = false;        
         Expand e( *sr->pcontext, f ); // use a unique filter to ensure we only see each assignment once.
                                       // A single filter instance is used across the whole recursion.
                                       // This way we do not recurse forever when there are loops in the data flow.
@@ -298,15 +310,29 @@ private:
                 {
                     if( CanReachExpr( sr, f, x, a->operands[1] ) )
                     {
-                        r = FOUND;
+                        r = true;
                         break; // early out, since we have the info we need
                     }
                 }
             }
         }
-        TRACE("I reakon ")(*x)(" at %p", x.get())(r?" does ":" does not ")("reach ")(*y)("\n"); 
+
+        cache[rr] = r;
+        TRACE("I reakon ")(*x)(" at %p", x.get())(r?" does ":" does not ")("reach ")(*y)(" cache size now %d\n", cache.size()); 
         return r;
     }
+    
+    struct Reaching
+    {
+        Reaching( TreePtr<LabelIdentifier> f, TreePtr<InstanceIdentifier> t ) : from(f), to(t) {}
+        const TreePtr<LabelIdentifier> from;
+        const TreePtr<InstanceIdentifier> to;
+        bool operator<( const Reaching &other ) const 
+        {
+            return from==other.from ? to<other.to : from<other.from;
+        }
+    };
+    Map<Reaching, bool> cache; 
 };
 
 
@@ -415,7 +441,7 @@ InsertSwitch::InsertSwitch()
     // label is still a state, because we think it reaches state var, because the LABEL->STATE_LABEL change 
     // is not being seen by IsLabelReached, because this is done by 2nd slave and stays in temps until
     // the master's SingleCompareReplace() completes. Uh-oh!
-    // but only after fixing S&R to ensure slave output goes into context
+    // Only fix after fixing S&R to ensure slave output goes into context
     lr_case->value = lr_state_id;
 
     ll_all->patterns = (ll_any, lls_not1, lls_not2);

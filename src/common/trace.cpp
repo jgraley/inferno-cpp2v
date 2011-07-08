@@ -5,18 +5,19 @@
 #include <string.h>
 #include <cxxabi.h>
 #include <malloc.h>
+#include <unistd.h>
 
 bool Tracer::continuation = false;
 string Tracer::Descend::pre;
 
 void Tracer::Descend::Indent()
 {
-    printf("%s", pre.c_str());
+    fprintf(stderr, "%s", pre.c_str());
 }
 
 inline void InfernoAbort()
 {
-    fflush( stdout ); // might help if the crash kills buffered output
+    fflush( stderr ); 
 
     // The C library provides abort(), but I'm not getting a stack dump under cygwin
     (*(int*)-1)++; 
@@ -32,11 +33,11 @@ Tracer::Tracer( const char *f, int l, const char *fu, Flags fl, char const *c ) 
     if( flags & ABORT )
     {
         EndContinuation();
-        printf("\n");
+        fprintf( stderr, "\n");
         Descend::Indent();
-        printf("----Assertion failed: %s\n", c);
+        fprintf( stderr, "----Assertion failed: %s\n", c);
         Descend::Indent();
-        printf( "----%s:%d in %s()\n", file, line, function);
+        fprintf( stderr, "----%s:%d in %s()\n", file, line, function);
         continuation = true;
     }
 }
@@ -62,7 +63,7 @@ Tracer &Tracer::operator()()
     //for( int i=0; i<spaces; i++ )
     //    printf(" ");
     Descend::Indent();
-    printf( "----%s:%d in %s()\n", file, line, function);
+    fprintf( stderr, "----%s:%d in %s()\n", file, line, function);
     
     return *this;
 }
@@ -81,10 +82,10 @@ Tracer &Tracer::operator()(const char *fmt, ...)
         //for( int i=0; i<spaces; i++ )
        //     printf(" ");
     	Descend::Indent();
-        printf( "----%s:%d in %s()\n", file, line, function);
+        fprintf( stderr, "----%s:%d in %s()\n", file, line, function);
         Descend::Indent();
     }
-    vprintf( fmt, vl );
+    vfprintf( stderr, fmt, vl );
     va_end( vl );
     
     continuation = (fmt[strlen(fmt)-1]!='\n');
@@ -100,7 +101,7 @@ void Tracer::EndContinuation()
 {
     if( continuation ) 
     {
-        printf("\n");
+        fprintf(stderr, "\n");
         continuation = false;
     }   
 }

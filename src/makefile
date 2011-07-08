@@ -13,7 +13,7 @@ MAIN_MODULES = main/inferno
 
 ALL_MODULES = $(COMMON_MODULES) $(NODE_MODULES) $(HELPERS_MODULES) $(TREE_MODULES) $(SR_MODULES) $(PARSE_MODULES) $(RENDER_MODULES) $(STEPS_MODULES) $(MAIN_MODULES) 
 
-build/inferno.a : makefile $(ALL_MODULES:%=build/%.o)
+build/inferno.a : $(ALL_MODULES:%=build/%.o)
 	mkdir -p buildnode/type_db 
 	$(AR) -r build/inferno.a $(ALL_MODULES:%=build/%.o)
 

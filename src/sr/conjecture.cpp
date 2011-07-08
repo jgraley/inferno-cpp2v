@@ -10,11 +10,11 @@ void Conjecture::PrepareForDecidedCompare()
 	decision_index = 0;
 }
 
-bool Conjecture::ShouldTryMore( Result r, int threshold )
+bool Conjecture::ShouldTryMore( bool r, int threshold )
 {
 	ASSERT( this );
 
-	if( r == FOUND )
+	if( r == true )
     	return false; // stop trying if we found a match
 
     if( choices.size() <= threshold ) // we've made all the decisions we can OR
@@ -24,7 +24,7 @@ bool Conjecture::ShouldTryMore( Result r, int threshold )
 }
 
 
-Result Conjecture::Search( TreePtr<Node> x,
+bool Conjecture::Search( TreePtr<Node> x,
 					       TreePtr<Node> pattern,
 						   bool can_key,
 					  	   const CompareReplace *sr )
@@ -36,7 +36,7 @@ Result Conjecture::Search( TreePtr<Node> x,
 		// HandleDecision() will return the current choice for that decision, if absent it will
 		// add the decision and choose the first choice, if the decision reaches the end it
 		// will remove the decision.
-		Result r = sr->MatchingDecidedCompare( x, pattern, can_key, *this );
+		bool r = sr->MatchingDecidedCompare( x, pattern, can_key, *this );
 
 		// If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
 		if( r || choices.empty() )
@@ -73,7 +73,7 @@ ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::ite
 		// throw away the bad iterator; will force initialisation to begin() next time
 		// NOTE: we will still return end in this case, i.e. an invalid iterator. This tells
 		// the caller to please not try to do any matching with this decision, but fall out
-		// with NOT_FOUND.
+		// with false.
 		TRACE("Decision %d hit end\n", decision_index );
 		choices.resize( decision_index );
 	}

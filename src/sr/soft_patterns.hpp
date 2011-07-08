@@ -18,30 +18,30 @@ struct NotMatch : Special<PRE_RESTRICTION>,
 	// Pattern is an abnormal context
     TreePtr<PRE_RESTRICTION> pattern;
 private:
-    virtual Result DecidedCompare( const CompareReplace *sr,
+    virtual bool DecidedCompare( const CompareReplace *sr,
     		                       TreePtr<Node> x,
     		                       bool can_key,
-    		                       Conjecture &conj ) const
+    		                       Conjecture &conj ) 
     {
         ASSERT( pattern );
     	if( can_key )
     	{
     		// Don't do a subtree search while keying - we'll only end up keying the wrong thing
-    		// or terminating with NOT_FOUND prematurely
-    		return FOUND;
+    		// or terminating with false prematurely
+    		return true;
     	}
     	else
     	{
     	    // Do not use the present conjecture since we would mess it up because
     	    // a. We didn't recurse during KEYING pass and
-    	    // b. Search under not can terminate with NOT_FOUND, but parent search will continue
+    	    // b. Search under not can terminate with false, but parent search will continue
     	    // Consequently, we go in at Compare level, which creates a new conjecture.
-    		Result r = sr->Compare( x, pattern, false );
+    		bool r = sr->Compare( x, pattern, false );
 			TRACE("SoftNot got %d, returning the opposite!\n", (int)r);
-    		if( r==NOT_FOUND )
-				return FOUND;
+    		if( r==false )
+				return true;
 			else
-				return NOT_FOUND;
+				return false;
     	}
     }
 };
@@ -64,19 +64,19 @@ struct MatchAll : Special<PRE_RESTRICTION>,
 private:
     mutable bool initialised;
     mutable TreePtr<Node> modifier_pattern;
-    virtual Result DecidedCompare( const CompareReplace *sr,
+    virtual bool DecidedCompare( const CompareReplace *sr,
                                    TreePtr<Node> x,
                                    bool can_key,
-                                   Conjecture &conj ) const
+                                   Conjecture &conj ) 
     {
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
     	    ASSERT( i );
-    		Result r = sr->DecidedCompare( x, TreePtr<Node>(i), can_key, conj );
+    		bool r = sr->DecidedCompare( x, TreePtr<Node>(i), can_key, conj );
     	    if( !r )
-    	    	return NOT_FOUND;
+    	    	return false;
     	}
-        return FOUND;
+        return true;
     }
 
     virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
@@ -115,15 +115,10 @@ private:
         initialised = true;
     }
 
-    virtual TreePtr<Node> DoOverlayOrOverwrite( TreePtr<Node> dest, const CompareReplace *sr )
+    virtual TreePtr<Node> GetOverlayPattern()
     {
         EnsureInitialised();
-        if( modifier_pattern ) 
-        {         
-            dest = sr->DoOverlayOrOverwritePattern( dest, modifier_pattern );
-            TRACE("Did MatchAll pattern: pattern=")(*modifier_pattern)(" dest=")(*dest)("\n");
-        }
-        return dest;
+        return modifier_pattern;
     } 
     
     CollectionInterface &GetPatterns() { return patterns; } // TODO try covariant?
@@ -141,19 +136,19 @@ struct MatchAny : Special<PRE_RESTRICTION>,
 	// Patterns are an abnormal context
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
-    virtual Result DecidedCompare( const CompareReplace *sr,
+    virtual bool DecidedCompare( const CompareReplace *sr,
     		                       TreePtr<Node> x,
     		                       bool can_key,
-    		                       Conjecture &conj ) const
+    		                       Conjecture &conj ) 
     {
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
     	    ASSERT( i );
-    		Result r = sr->Compare( x, i, false );
+    		bool r = sr->Compare( x, i, false );
     	    if( r )
-    	    	return FOUND;
+    	    	return true;
     	}
-        return NOT_FOUND;
+        return false;
     }
 };
 
@@ -169,20 +164,20 @@ struct MatchOdd : Special<PRE_RESTRICTION>,
 	SPECIAL_NODE_FUNCTIONS
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
-    virtual Result DecidedCompare( const CompareReplace *sr,
+    virtual bool DecidedCompare( const CompareReplace *sr,
     		                       TreePtr<Node> x,
     		                       bool can_key,
-    		                       Conjecture &conj ) const
+    		                       Conjecture &conj ) 
     {
     	int tot=0;
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
     	    ASSERT( i );
-    	    Result r = sr->Compare( x, i, false );
+    	    bool r = sr->Compare( x, i, false );
     	    if( r )
     	    	tot++;
     	}
-        return (tot%2) ? FOUND : NOT_FOUND;
+        return (tot%2) ? true : false;
     }
 };
 
@@ -198,10 +193,10 @@ struct TransformOfBase : CompareReplace::SoftSearchPattern
     }
 
 private:
-    virtual Result DecidedCompare( const CompareReplace *sr,
+    virtual bool DecidedCompare( const CompareReplace *sr,
     		                                            TreePtr<Node> x,
     		                                            bool can_key,
-    		                                            Conjecture &conj ) const;
+    		                                            Conjecture &conj ) ;
 };
 
 template<class PRE_RESTRICTION>

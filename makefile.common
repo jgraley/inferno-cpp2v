@@ -6,6 +6,9 @@ ICC ?= g++
 AR ?= ar
 MAKE ?= make
  
+# Options applied to Inferno, LLVM and clang 
+ILC_OPTIONS +=
+ 
 # No path needed when include file is in same directory
 OPTIONS += -I.
 
@@ -15,10 +18,7 @@ OPTIONS += -Wreturn-type
 # Treat all warnings as errors by making the build abort 
 OPTIONS += -Werror
 
-# Do not wrap messages (for Eclipse) 
-OPTIONS += -fmessage-length=0 
-
-# Be faster if -O2 or more debuggy if -O0
+# Optimisation level. -O2 is considerably slower to compile, beware
 OPTIONS += -O0
 
 # JSG I need this to get the boost includes in a cygwin setup. This also
