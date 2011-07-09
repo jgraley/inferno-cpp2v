@@ -11,43 +11,31 @@
     but still recurses through the "through" member. Therefore, it visits all the
     nodes at the same slave level as the root. Based on Traverse, so each node only
     visited once. */
-class TraverseNoSlavePattern : public ContainerInterface
+class TraverseNoSlavePattern_iterator : public Traverse::iterator
 {
 public:
-    // The walking iterator does all the real work.
-    class iterator : public Traverse::iterator
+    TraverseNoSlavePattern_iterator( TreePtr<Node> &root ) : Traverse::iterator(root) {}        
+    TraverseNoSlavePattern_iterator() : Traverse::iterator() {}
+private:
+    virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
     {
-    protected:
-        iterator( TreePtr<Node> &root ) : Traverse::iterator(root) {}        
-        iterator() : Traverse::iterator() {}
-        virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
+        // We need to create a container of elements of the child.
+        if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>( n ) )
         {
-            // We need to create a container of elements of the child.
-            if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>( n ) )
-            {
-                // it's a slave, so set up a container containing only "through", not "compare" or "replace"
-                shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
-                seq->push_back( sb->GetThrough() );
-                return seq;
-            }
-            else
-            {
-                // it's not a slave, so proceed as for Traverse
-                return Traverse::iterator::GetChildContainer(n);
-            }
+            // it's a slave, so set up a container containing only "through", not "compare" or "replace"
+            shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
+            seq->push_back( sb->GetThrough() );
+            return seq;
         }
-        friend class TraverseNoSlavePattern;
-    };
-    TraverseNoSlavePattern( TreePtr<Node> root ) : my_begin( iterator( root ) ), my_end( iterator() ) {}
-    virtual const iterator &begin() { return my_begin; }
-    virtual const iterator &end() { return my_end; }
-    virtual void erase( ContainerInterface::iterator it ) { ASSERTFAIL("Cannot modify through walking container"); }
-    virtual void clear() { ASSERTFAIL("Cannot modify through walking container"); }
-    virtual void insert( const TreePtrInterface & ) { ASSERTFAIL("Cannot modify through walking container"); }
-protected:
-    TreePtr<Node> root;
-    iterator my_begin, my_end;
+        else
+        {
+            // it's not a slave, so proceed as for Traverse
+            return Traverse::iterator::GetChildContainer(n);
+        }
+    }
 };
+
+typedef ContainerFromIterator< TraverseNoSlavePattern_iterator, TreePtr<Node> > TraverseNoSlavePattern;
 
 // Master constructor remembers search pattern, replace pattern and any supplied couplings as required
 CompareReplace::CompareReplace( TreePtr<Node> cp,

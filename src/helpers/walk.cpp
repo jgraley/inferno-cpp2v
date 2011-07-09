@@ -5,12 +5,12 @@
 
 ////////////////////////// Flatten //////////////////////////
 
-bool Flatten::iterator::IsAtEnd() const
+bool Flatten_iterator::IsAtEnd() const
 {
     return empty || mit == m_end;
 }
 
-void Flatten::iterator::NormaliseNewMember()
+void Flatten_iterator::NormaliseNewMember()
 {
 	if( !IsAtEnd() )
 		if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
@@ -21,7 +21,7 @@ void Flatten::iterator::NormaliseNewMember()
 		}
 }
 
-void Flatten::iterator::BypassEndOfContainer()
+void Flatten_iterator::BypassEndOfContainer()
 {
 	ASSERT( !IsAtEnd() && dynamic_cast<ContainerInterface *>(GetCurrentMember()) ); // this fn requires us to be on a container
 	if( cit == c_end )
@@ -31,7 +31,7 @@ void Flatten::iterator::BypassEndOfContainer()
 	}
 }
 
-Flatten::iterator::iterator( TreePtr<Node> r ) :
+Flatten_iterator::Flatten_iterator( TreePtr<Node> r ) :
 	root( r ),
 	empty( false )
 {
@@ -42,12 +42,12 @@ Flatten::iterator::iterator( TreePtr<Node> r ) :
     NormaliseNewMember();
 }
 
-Flatten::iterator::iterator() :
+Flatten_iterator::Flatten_iterator() :
 	empty( true )
 {
 }
 
-Flatten::iterator::iterator( const Flatten::iterator & other ) :
+Flatten_iterator::Flatten_iterator( const Flatten_iterator & other ) :
     mit( other.mit ),
     m_end( other.m_end ),
     cit( other.cit ),
@@ -57,7 +57,7 @@ Flatten::iterator::iterator( const Flatten::iterator & other ) :
 {
 }
 
-Flatten::iterator::operator string() const
+Flatten_iterator::operator string() const
 {
     if (IsAtEnd())
     	return string("end");
@@ -71,13 +71,13 @@ Flatten::iterator::operator string() const
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
 }
 
-shared_ptr<ContainerInterface::iterator_interface> Flatten::iterator::Clone() const
+shared_ptr<ContainerInterface::iterator_interface> Flatten_iterator::Clone() const
 {
-	shared_ptr<iterator> ni( new iterator(*this) );
+	shared_ptr<Flatten_iterator> ni( new Flatten_iterator(*this) );
 	return ni;
 }
 
-Flatten::iterator &Flatten::iterator::operator++()
+Flatten_iterator &Flatten_iterator::operator++()
 {
 	ASSERT( !IsAtEnd() );
     if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
@@ -97,7 +97,7 @@ Flatten::iterator &Flatten::iterator::operator++()
 	return *this;
 }
 
-Flatten::iterator::reference Flatten::iterator::operator*() const
+Flatten_iterator::reference Flatten_iterator::operator*() const
 {
     ASSERT( !IsAtEnd() );
 	if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
@@ -108,21 +108,21 @@ Flatten::iterator::reference Flatten::iterator::operator*() const
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
 }
 
-Flatten::iterator::pointer Flatten::iterator::operator->() const
+Flatten_iterator::pointer Flatten_iterator::operator->() const
 {
 	return &operator*();
 }
 
-bool Flatten::iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
+bool Flatten_iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
 {
-	const iterator *pi = dynamic_cast<const iterator *>(&ib);
+	const Flatten_iterator *pi = dynamic_cast<const Flatten_iterator *>(&ib);
 	ASSERT(pi)("Comparing traversing iterator with something else ")(ib);
 	if( pi->IsAtEnd() || IsAtEnd() )
 		return pi->IsAtEnd() && IsAtEnd();
 	return *pi == *this; 
 }
 
-void Flatten::iterator::Overwrite( Flatten::iterator::pointer v ) const
+void Flatten_iterator::Overwrite( Flatten_iterator::pointer v ) const
 {
     ASSERT( !IsAtEnd() );
 	if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
@@ -133,32 +133,15 @@ void Flatten::iterator::Overwrite( Flatten::iterator::pointer v ) const
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
 }
 
-const bool Flatten::iterator::IsOrdered() const
+const bool Flatten_iterator::IsOrdered() const
 {
 	return true; // traverse walks tree in order generally
-}
-
-Flatten::Flatten( TreePtr<Node> r ) :
-	root(r)
-{
-}
-
-const Flatten::iterator &Flatten::begin()
-{
-	my_begin = iterator( root );
-	return my_begin;
-}
-
-const Flatten::iterator &Flatten::end()
-{
-	my_end = iterator();
-	return my_end;
 }
 
 
 ////////////////////////// Expand //////////////////////////
 
-bool Expand::iterator::IsAtEndOfChildren() const
+bool Expand_iterator::IsAtEndOfChildren() const
 {
 	ASSERT( !done );
 
@@ -168,7 +151,7 @@ bool Expand::iterator::IsAtEndOfChildren() const
     return state.top().iterator == state.top().container->end();
 }
 
-void Expand::iterator::BypassEndOfChildren()
+void Expand_iterator::BypassEndOfChildren()
 {
 	ASSERT( !done );
 	while( IsAtEndOfChildren() )
@@ -183,12 +166,12 @@ void Expand::iterator::BypassEndOfChildren()
 	}
 }
 
-shared_ptr<ContainerInterface> Expand::iterator::GetChildContainer( TreePtr<Node> n ) const
+shared_ptr<ContainerInterface> Expand_iterator::GetChildContainer( TreePtr<Node> n ) const
 { 
     return shared_ptr<ContainerInterface>( new Flatten(n) );
 }        
 
-void Expand::iterator::Push( TreePtr<Node> n )
+void Expand_iterator::Push( TreePtr<Node> n )
 { 
     StateEntry ns;
     ns.container = GetChildContainer( n );
@@ -196,9 +179,9 @@ void Expand::iterator::Push( TreePtr<Node> n )
     state.push( ns );
 }        
 
-Expand::iterator::iterator( TreePtr<Node> &r,
-	                   	    Filter *of,
-                            Filter *rf ) :
+Expand_iterator::Expand_iterator( TreePtr<Node> &r,
+	                    	      Filter *of,
+                                  Filter *rf ) :
     root( new TreePtr<Node>(r) ),
     out_filter( of ),
     recurse_filter( rf ),
@@ -207,14 +190,14 @@ Expand::iterator::iterator( TreePtr<Node> &r,
     DoNodeFilter();
 }
 
-Expand::iterator::iterator() :
+Expand_iterator::Expand_iterator() :
     out_filter( NULL ),
     recurse_filter( NULL ),
     done( true )
 {
 }        
 
-Expand::iterator::iterator( const Expand::iterator & other ) :
+Expand_iterator::Expand_iterator( const Expand_iterator & other ) :
 	root( other.root ),
     out_filter( other.out_filter ),
     recurse_filter( other.recurse_filter ),
@@ -223,7 +206,7 @@ Expand::iterator::iterator( const Expand::iterator & other ) :
 {
 }
 
-Expand::iterator::operator string() const
+Expand_iterator::operator string() const
 {
     string s;
     stack< StateEntry > ps = state; // std::stack doesn't have [] so copy the whole thing and go backwards
@@ -235,7 +218,7 @@ Expand::iterator::operator string() const
     return s;
 }
 
-void Expand::iterator::AdvanceInto()
+void Expand_iterator::AdvanceInto()
 {
 	ASSERT( !done );
 	ASSERT( !IsAtEndOfChildren() );
@@ -270,7 +253,7 @@ void Expand::iterator::AdvanceInto()
     }
 }
 
-void Expand::iterator::AdvanceOver()
+void Expand_iterator::AdvanceOver()
 {
 	ASSERT( !done );
 	ASSERT( !IsAtEndOfChildren() );
@@ -288,20 +271,20 @@ void Expand::iterator::AdvanceOver()
 	}
 }
 
-shared_ptr<ContainerInterface::iterator_interface> Expand::iterator::Clone() const
+shared_ptr<ContainerInterface::iterator_interface> Expand_iterator::Clone() const
 {
-	shared_ptr<iterator> ni( new iterator(*this) );
+	shared_ptr<Expand_iterator> ni( new Expand_iterator(*this) );
 	return ni;
 }
 
-Expand::iterator &Expand::iterator::operator++()
+Expand_iterator &Expand_iterator::operator++()
 {
 	AdvanceInto();
     DoNodeFilter();
 	return *this;
 }
 
-Expand::iterator::reference Expand::iterator::operator*() const
+Expand_iterator::reference Expand_iterator::operator*() const
 {
     ASSERT( !done )("Already advanced over everything; reached end of walk");
     ASSERT( !IsAtEndOfChildren() );
@@ -316,21 +299,21 @@ Expand::iterator::reference Expand::iterator::operator*() const
 	}
 }
 
-Expand::iterator::pointer Expand::iterator::operator->() const
+Expand_iterator::pointer Expand_iterator::operator->() const
 {
 	return &operator*();
 }
 
-bool Expand::iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
+bool Expand_iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
 {
-	const iterator *pi = dynamic_cast<const iterator *>(&ib);
+	const Expand_iterator *pi = dynamic_cast<const Expand_iterator *>(&ib);
 	ASSERT(pi)("Comparing walking iterator with something else ")(ib);
 	if( pi->done || done )
 		return pi->done && done;
 	return **pi == **this;
 }
 
-void Expand::iterator::Overwrite( Expand::iterator::pointer v ) const
+void Expand_iterator::Overwrite( Expand_iterator::pointer v ) const
 {
     ASSERT( !done )("Already advanced over everything; reached end of walk");
     ASSERT( !IsAtEndOfChildren() );
@@ -345,12 +328,12 @@ void Expand::iterator::Overwrite( Expand::iterator::pointer v ) const
     }
 }
 
-const bool Expand::iterator::IsOrdered() const
+const bool Expand_iterator::IsOrdered() const
 {
 	return true; // walk walks tree in order generally
 }
 
-void Expand::iterator::DoNodeFilter()
+void Expand_iterator::DoNodeFilter()
 {
     while(!done)
     {
@@ -369,27 +352,6 @@ void Expand::iterator::DoNodeFilter()
         
         AdvanceInto();
     }    
-}
-    
-Expand::Expand( TreePtr<Node> r,
-		        Filter *of,
-                Filter *rf ) :
-	root(r),
-    out_filter( of ),
-    recurse_filter( rf ),
-	my_begin( iterator( root, out_filter, recurse_filter ) ),
-	my_end( iterator() )
-{
-}
-
-const Expand::iterator &Expand::begin()
-{
-	return my_begin;
-}
-
-const Expand::iterator &Expand::end()
-{
-	return my_end;
 }
 
 ////////////////////////// UniqueFilter //////////////////////////
@@ -411,98 +373,65 @@ bool UniqueFilter::IsMatch( TreePtr<Node> context,
 
 ////////////////////////// ParentTraverse //////////////////////////
 
-ParentTraverse::iterator::iterator() :
+ParentTraverse_iterator::ParentTraverse_iterator() :
     unique_filter( new UniqueFilter )
 {
 }        
 
-ParentTraverse::iterator::~iterator() 
+ParentTraverse_iterator::~ParentTraverse_iterator() 
 {
     delete unique_filter;
 }        
 
-ParentTraverse::iterator::iterator( const ParentTraverse::iterator & other ) :
-    Expand::iterator( other )
+ParentTraverse_iterator::ParentTraverse_iterator( const ParentTraverse_iterator & other ) :
+    Expand_iterator( other )
 {
     unique_filter = new UniqueFilter( *(other.unique_filter) );
     recurse_filter = unique_filter; 
 }
 
-ParentTraverse::iterator::iterator &ParentTraverse::iterator::operator=( const ParentTraverse::iterator & other )
+ParentTraverse_iterator::ParentTraverse_iterator &ParentTraverse_iterator::operator=( const ParentTraverse_iterator & other )
 {
-    Expand::iterator::operator=( other ),
+    Expand_iterator::operator=( other ),
     *unique_filter = *(other.unique_filter);
     recurse_filter = unique_filter; 
     return *this;
 }
 
-ParentTraverse::iterator::iterator( TreePtr<Node> &root ) :
-    Expand::iterator( root, NULL, unique_filter = new UniqueFilter )
-{
-}
- 
-ParentTraverse::ParentTraverse( TreePtr<Node> r ) :
-    root(r),
-    my_begin( iterator( root ) ),
-    my_end( iterator() )
+ParentTraverse_iterator::ParentTraverse_iterator( TreePtr<Node> &root ) :
+    Expand_iterator( root, NULL, unique_filter = new UniqueFilter )
 {
 }
 
-const ParentTraverse::iterator &ParentTraverse::begin()
-{
-    return my_begin;
-}
-
-const ParentTraverse::iterator &ParentTraverse::end()
-{
-    return my_end;
-}
-    
 ////////////////////////// Traverse //////////////////////////
 
-Traverse::iterator::iterator() :
+Traverse_iterator::Traverse_iterator() :
     unique_filter( new UniqueFilter )
 {
 }        
 
-Traverse::iterator::~iterator()
+Traverse_iterator::~Traverse_iterator()
 {
     delete unique_filter;
 }        
 
-Traverse::iterator::iterator( const Traverse::iterator & other ) :
-    Expand::iterator( other )
+Traverse_iterator::Traverse_iterator( const Traverse_iterator & other ) :
+    Expand_iterator( other )
 {
     unique_filter = new UniqueFilter( *(other.unique_filter) );
     out_filter = unique_filter; 
 }
 
-Traverse::iterator::iterator &Traverse::iterator::operator=( const Traverse::iterator &other )
+Traverse_iterator::Traverse_iterator &Traverse_iterator::operator=( const Traverse_iterator &other )
 {
-    Expand::iterator::operator=( other );
+    Expand_iterator::operator=( other );
     *unique_filter = *(other.unique_filter);
     out_filter = unique_filter; 
     return *this;
 }
 
-Traverse::iterator::iterator( TreePtr<Node> &root ) :
-    Expand::iterator( root, unique_filter = new UniqueFilter, NULL )
-{
-}
- 
-Traverse::Traverse( TreePtr<Node> r ) :
-    root(r),
-    my_begin( iterator( root ) ),
-    my_end( iterator() )
+Traverse_iterator::Traverse_iterator( TreePtr<Node> &root ) :
+    Expand_iterator( root, unique_filter = new UniqueFilter, NULL )
 {
 }
 
-const Traverse::iterator &Traverse::begin()
-{
-    return my_begin;
-}
-
-const Traverse::iterator &Traverse::end()
-{
-    return my_end;
-}
