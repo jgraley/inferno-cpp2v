@@ -6,9 +6,12 @@
  */
 
 #include "steps/clean_up.hpp"
-#include "tree/tree.hpp"
+#include "tree/cpptree.hpp"
 #include "common/common.hpp"
 #include "sr/soft_patterns.hpp"
+
+using namespace CPPTree;
+using namespace Steps;
 
 // Removing superfluous Compund blocks to clean up the code
 CleanupCompoundMulti::CleanupCompoundMulti() // LIMITAION: decls in body not allowed

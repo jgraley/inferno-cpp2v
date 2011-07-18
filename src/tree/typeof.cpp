@@ -1,11 +1,11 @@
 
-#include "tree.hpp"
+#include "cpptree.hpp"
 #include "type_db.hpp"
 #include "helpers/walk.hpp"
 #include "misc.hpp"
 #include "typeof.hpp"
 
-
+using namespace CPPTree;
 
 
 #define INT 0

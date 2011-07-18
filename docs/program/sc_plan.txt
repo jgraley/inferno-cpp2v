@@ -1,0 +1,41 @@
+
+SystemC plan - provisional
+
+0. (pre-tidying) tree.hpp to have Doxygen comments, tree nodes to be in namespace.
+   Seperate CPP, SC trees
+1. See how to enable the preprocessor in clang. Do not modify: inferno plan is to preprocess as normal.
+   Add support for include files.
+2. Update clang to latest version and integrate for same functionality
+3. Support templates in tree, parser and renderer
+4. SC support: for each construct, do
+   - #define if necessary in a new header file that replaces SC one
+   - new SC node
+   - parser produces SC node or add a detection step using s&r. SC detected
+     through appearence of otherwise undefined identifiers.
+   - render new node
+   Do for at least the following
+   - modules
+   - channels, interfaces, signals, ports, exports
+   - processes, sensitivity, wait
+   - types
+   - special stuff like asserts
+5. SC testing - get renderer to add SC includes and main fn. 
+   figure out how to get result value out
+6. write SC vectors
+
+Notes:
+
+No "parse SC" mode needed because inferno only infers SC when it sees
+identifiers which would otherwise be undefined. Such code would not 
+compile with GCC without including the SC headers. Thus including the
+inferno-SC headers is what selects SystemC input language.
+
+But we do need a render mode to control generation of #include, main etc
+and choice of whether to use SC templates for types or just int etc.
+
+Templates in general need decl-inst structure to represent. But SC templates
+like sc_port<> should be more like pointers. Similarly, sc_module should not
+be a base for a Class, but another kind of Record.
+
+Consider harmonising SC data types with inferno's existing types.
+

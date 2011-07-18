@@ -3,9 +3,12 @@
  */
 
 #include "steps/slave_test.hpp"
-#include "tree/tree.hpp"
+#include "tree/cpptree.hpp"
 #include "common/common.hpp"
 #include "sr/soft_patterns.hpp"
+
+using namespace CPPTree;
+using namespace Steps;
 
 // Just an early test for slaves, not a valid transformation
 SlaveTest::SlaveTest()

@@ -3,7 +3,7 @@
 
 #include "clang/Parse/Action.h"
 #include "rc_hold.hpp"
-#include "tree/tree.hpp"
+//#include "tree/cpptree.hpp"
 
 // Semantic.
 class DeclSpec;

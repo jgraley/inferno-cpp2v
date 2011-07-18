@@ -4,7 +4,7 @@
 
 #include <map>
 #include <vector>
-#include "tree/tree.hpp"
+#include "tree/cpptree.hpp"
 
 // Check identifiers for duplication
 // Policy is to dedupe with a simple scheme like <name>_<unique number> or even without the underscore
@@ -22,16 +22,16 @@ struct VisibleIdentifiers
 	typedef pair<const string, NameUsage> NameUsagePair;
 	map< string, NameUsage > name_usages;
 
-	string AddIdentifierNumber( NameUsage &nu, TreePtr<SpecificIdentifier> i, string b, unsigned n );
-	string AddIdentifier( TreePtr<SpecificIdentifier> i );
+	string AddIdentifierNumber( NameUsage &nu, TreePtr<CPPTree::SpecificIdentifier> i, string b, unsigned n );
+	string AddIdentifier( TreePtr<CPPTree::SpecificIdentifier> i );
 
 	static string MakeUniqueName( string b, unsigned n );
-	static void SplitName( TreePtr<SpecificIdentifier> i, string *b, unsigned *n ); // note static
+	static void SplitName( TreePtr<CPPTree::SpecificIdentifier> i, string *b, unsigned *n ); // note static
 };
 
-struct UniquifyIdentifiers : public map< TreePtr<SpecificIdentifier>, string >
+struct UniquifyIdentifiers : public map< TreePtr<CPPTree::SpecificIdentifier>, string >
 {
-	typedef pair<const TreePtr<SpecificIdentifier>, string> IdentifierNamePair;
+	typedef pair<const TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNamePair;
 	void UniquifyScope( TreePtr<Node> root, VisibleIdentifiers v = VisibleIdentifiers() ); // Not a ref because we want a copy so we can go back TODO optimise
 };
 

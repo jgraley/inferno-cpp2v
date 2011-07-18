@@ -1,9 +1,12 @@
 
 #include "steps/lower_control_flow.hpp"
-#include "tree/tree.hpp"
+#include "tree/cpptree.hpp"
 #include "common/common.hpp"
 #include "sr/soft_patterns.hpp"
 #include "tree/typeof.hpp"
+
+using namespace CPPTree;
+using namespace Steps;
 
 // TOOD go through step impls and use inline decls of leaf nodes, to reduce wordiness
 

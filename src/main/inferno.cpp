@@ -1,5 +1,5 @@
 
-#include "tree/tree.hpp"
+#include "tree/cpptree.hpp"
 #include "parse/parse.hpp"  
 #include "render/render.hpp"
 #include "render/graph.hpp"
@@ -18,6 +18,8 @@
 #include "steps/lower_control_flow.hpp"
 #include "steps/clean_up.hpp"
 #include "steps/state_out.hpp"
+
+using namespace Steps;
 
 void SelfTest();
 

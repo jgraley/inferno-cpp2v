@@ -10,6 +10,8 @@
 
 #include "sr/search_replace.hpp"
 
+namespace Steps {
+
 // Replace automatic variables with staks based on arrays and 
 // maintain the stack pointer correctly, supporting recursion.
 class GenerateStacks : public SearchReplace
@@ -23,5 +25,7 @@ class ExplicitiseReturn : public SearchReplace
 public:
 	ExplicitiseReturn();
 };
+
+}; // end namespace
 
 #endif /* GENERATE_STACKS_HPP_ */

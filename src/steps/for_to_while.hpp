@@ -10,6 +10,8 @@
 
 #include "sr/search_replace.hpp"
 
+namespace Steps {
+
 // Convert for loops into while loops, preserving correct 
 // behaviour of continue, which always means "jump to the 
 // bottom of the body"
@@ -26,4 +28,7 @@ public:
 	WhileToDo();
 };
 
+}; // end namespace
+
 #endif 
+

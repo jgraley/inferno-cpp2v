@@ -3,6 +3,8 @@
 
 #include "sr/search_replace.hpp"
 
+namespace Steps {
+
 /** conditional branch follwed by goto becomes goto with a conditional (ternary
     op) on the address. */
 class CompactGotos : public SearchReplace
@@ -80,6 +82,8 @@ class FixFallthrough : public SearchReplace
 public:
     FixFallthrough();
 };
+
+}; // end namespace
 
 #endif
 

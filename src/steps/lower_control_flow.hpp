@@ -3,6 +3,8 @@
 
 #include "sr/search_replace.hpp"
 
+namespace Steps {
+
 // Lower general if statements into a simplified form of if(x) goto y;
 class IfToIfGoto : public SearchReplace
 {
@@ -35,4 +37,7 @@ public:
     BreakToGoto();
 };
 
+}; // end namespace
+
 #endif 
+

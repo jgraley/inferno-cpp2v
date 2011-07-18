@@ -10,6 +10,8 @@
 
 #include "sr/search_replace.hpp"
 
+namespace Steps {
+
 // Find compound statements inside compund statements and flatten
 class CleanupCompoundMulti : public SearchReplace
 {    
@@ -59,5 +61,7 @@ public:
     CleanUpDeadCode();
 };
 
+}; // end namespace
 
 #endif 
+

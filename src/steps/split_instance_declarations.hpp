@@ -3,6 +3,8 @@
 
 #include "sr/search_replace.hpp"
 
+namespace Steps {
+
 // Where variables are declared in the statement body and are 
 // initialised, move the decl into the decls body and initialise
 // using an assignment.
@@ -19,6 +21,8 @@ class MoveInstanceDeclarations : public SearchReplace
 public:
     MoveInstanceDeclarations();
 };
+
+}; // end namespace
 
 #endif
 

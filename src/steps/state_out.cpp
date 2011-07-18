@@ -1,10 +1,13 @@
 
 #include "steps/state_out.hpp"
-#include "tree/tree.hpp"
+#include "tree/cpptree.hpp"
 #include "common/common.hpp"
 #include "sr/soft_patterns.hpp"
 #include "tree/typeof.hpp"
 #include "tree/misc.hpp"
+ 
+using namespace CPPTree;
+using namespace Steps;
  
 CompactGotos::CompactGotos()
 {

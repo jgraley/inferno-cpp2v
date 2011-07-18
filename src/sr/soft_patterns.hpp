@@ -2,7 +2,7 @@
 #define SOFT_PATTERNS_HPP
 
 #include "search_replace.hpp"
-#include "tree/tree.hpp"
+#include "tree/cpptree.hpp" // TODO this dep means we must move this into steps/ or at least parts
 #include "helpers/transformation.hpp"
 
 
@@ -226,13 +226,13 @@ struct TransformOf : TransformOfBase, Special<PRE_RESTRICTION>
 struct BuildIdentifierBase : CompareReplace::SoftReplacePattern
 {
     BuildIdentifierBase( string s, int f=0 ) : format(s), flags(f) {}
-    Sequence<Identifier> sources;
+    Sequence<CPPTree::Identifier> sources;
     string GetNewName( const CompareReplace *sr );
     string format;
     int flags;
 };
 
-struct BuildInstanceIdentifier : Special<InstanceIdentifier>,                             
+struct BuildInstanceIdentifier : Special<CPPTree::InstanceIdentifier>,                             
                                  BuildIdentifierBase
 {
     BuildInstanceIdentifier( string s, int f=0 ) : BuildIdentifierBase(s,f) {}
@@ -242,11 +242,11 @@ private:
     virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
     {
 	string newname = GetNewName( sr );
-	return TreePtr<SpecificInstanceIdentifier>( new SpecificInstanceIdentifier( newname ) );
+	return TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
     }                                               
 };
 
-struct BuildTypeIdentifier : Special<TypeIdentifier>,                             
+struct BuildTypeIdentifier : Special<CPPTree::TypeIdentifier>,                             
                              BuildIdentifierBase
 {
     BuildTypeIdentifier( string s="Unnamed", int f=0 ) : BuildIdentifierBase(s,f) {}
@@ -255,11 +255,11 @@ private:
     virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
     {
 	string newname = GetNewName( sr );
-	return TreePtr<SpecificTypeIdentifier>( new SpecificTypeIdentifier( newname ) );
+	return TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) );
     }                                               
 };
 
-struct BuildLabelIdentifier : Special<LabelIdentifier>,                             
+struct BuildLabelIdentifier : Special<CPPTree::LabelIdentifier>,                             
                               BuildIdentifierBase
 {
     BuildLabelIdentifier( string s, int f=0 ) : BuildIdentifierBase(s,f) {}
@@ -269,7 +269,7 @@ private:
     virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
     {
 	string newname = GetNewName( sr );
-	return TreePtr<SpecificLabelIdentifier>( new SpecificLabelIdentifier( newname ) );
+	return TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) );
     }                                               
 };
 

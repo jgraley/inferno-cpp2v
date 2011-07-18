@@ -2,6 +2,8 @@
 #include "helpers/walk.hpp"
 #include "misc.hpp"
 
+using namespace CPPTree;
+
 //
 // Handy helper to get the node that is the "scope" of the supplied node - ie basically the
 // parent in the tree. We have to do searches for this, since the tree does not contain 

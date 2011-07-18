@@ -1,6 +1,8 @@
-#include "tree.hpp"
+#include "cpptree.hpp"
 #include "helpers/walk.hpp"
 #include "misc.hpp"
+
+using namespace CPPTree;
 
 TreePtr<Identifier> GetIdentifier( TreePtr<Declaration> d )
 {
