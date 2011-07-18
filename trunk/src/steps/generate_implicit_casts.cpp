@@ -6,10 +6,13 @@
  */
 
 #include "generate_implicit_casts.hpp"
-#include "tree/tree.hpp"
+#include "tree/cpptree.hpp"
 #include "common/common.hpp"
 #include "sr/soft_patterns.hpp"
 #include "tree/typeof.hpp"
+
+using namespace CPPTree;
+using namespace Steps;
 
 GenerateImplicitCasts::GenerateImplicitCasts()
 {

@@ -5,7 +5,7 @@
  *      Author: jgraley
  */
 
-#include "tree/tree.hpp"
+#include "tree/cpptree.hpp"
 #include "helpers/transformation.hpp"
 #include "sr/search_replace.hpp"
 #include "sr/soft_patterns.hpp"
@@ -13,6 +13,8 @@
 #include "common/read_args.hpp"
 #include "graph.hpp"
 #include <inttypes.h>
+
+using namespace CPPTree;
 
 // Graph Documantation
 //

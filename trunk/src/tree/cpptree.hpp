@@ -11,76 +11,78 @@
 #include "clang/Parse/DeclSpec.h"
 #include "tree/type_db.hpp"
 
-//TODO all these in a name space perhaps?
+namespace CPPTree {
 
 //////////////////////////// Underlying Node Types ////////////////////////////
 
-// Property is the base class for property nodes. Each kind of property has an
-// intermediate which can represent any value of the property. Enum-like and
-// bool-like are implemented by choosing one of a choice of empty nodes derived
-// from the intermediate. Other properties that cannot be represented this way
-// have a Specific<Foo> node that actually contains the datatype (eg int, string
-// etc). The intermediates should be the target of SharedPtrs and may be used in
-// search patterns. The actual tree nodes for a program should always be the leaf
-// node type.
+/** Property is the base class for property nodes. Each kind of property has an
+ intermediate which can represent any value of the property. Enum-like and
+ bool-like are implemented by choosing one of a choice of empty nodes derived
+ from the intermediate. Other properties that cannot be represented this way
+ have a Specific<Foo> node that actually contains the datatype (eg int, string
+ etc). The intermediates should be the target of SharedPtrs and may be used in
+ search patterns. The actual tree nodes for a program should always be the leaf
+ node type. */
 struct Property : virtual Node { NODE_FUNCTIONS };
 
-// This intermediate is used for an initial value for for a variable/object in
-// which case it will be an Expression, or for the implementation of a Subroutine
-// in which case it will be a Compound. For an uninitialised variable/object
-// or a function declaration, it will be Uninitialised.
+/** This intermediate is used for an initial value for for a variable/object in
+ which case it will be an Expression, or for the implementation of a Subroutine
+ in which case it will be a Compound. For an uninitialised variable/object
+ or a function declaration, it will be Uninitialised. */
 struct Initialiser : virtual Node { NODE_FUNCTIONS };
-struct Uninitialised : Initialiser { NODE_FUNCTIONS_FINAL }; // an uninitialised Instance.
 
-// Represents a statement as found inside a function definition. Basically anything 
-// that ends with a ; inside a function body, as well as labels (which we consider as 
-// statements in their own right).
+/// an uninitialised Instance.
+struct Uninitialised : Initialiser { NODE_FUNCTIONS_FINAL }; 
+
+/** Represents a statement as found inside a function body. Basically anything 
+ that ends with a ; inside a function body, as well as labels (which we consider as 
+ statements in their own right). */
 struct Statement : virtual Node { NODE_FUNCTIONS };
 
-// An expression that computes a result value. Can be used anywhere a statement 
-// can, per C syntax rules.
+/** An expression that computes a result value. Can be used anywhere a statement 
+ can, per C syntax rules. */
 struct Expression : Statement,
                     Initialiser { NODE_FUNCTIONS };
 
-// Any abstract data type including fundamentals, structs, function prototypes
-// and user-named types. 
+/** Any abstract data type including fundamentals, structs, function prototypes
+ and user-named types. */
 struct Type : virtual Node { NODE_FUNCTIONS };
 
-// A declaration specifies the creation of a type or an object from a type. 
-// Declaration can appear where statements can and also inside structs etc
-// and at top level.
+/** A declaration specifies the creation of a type or an object from a type. 
+ Declaration can appear where statements can and also inside structs etc
+ and at top level. */
 struct Declaration : virtual Node { NODE_FUNCTIONS };
 
-// A scope is any space in a program where declarations may appear. Declarations
-// in the collection are associated with the scope node but unordered. Scopes
-// are used for name resolution during parse.
+/** A scope is any space in a program where declarations may appear. Declarations
+ in the collection are associated with the scope node but unordered. Scopes
+ are used for name resolution during parse. */
 struct Scope : virtual Node
 {
     NODE_FUNCTIONS
-    Collection<Declaration> members;
+    Collection<Declaration> members; /// The declarations in this scope
 };
 
-// The top level of a program is considered a collection of declarations.
-// main() would typically be a function instance somewhere in this collection.
+/** The top level of a program is considered a collection of declarations.
+ main() would typically be a function instance somewhere in this collection. */
 struct Program : Scope { NODE_FUNCTIONS_FINAL };
 
 //////////////////////////// Literals ///////////////////////////////
 
-// Means a property that can be used as a literal in a program, so
-// that we do not need to duplicate literals and properties.
+/** Means a property that can be used as a literal in a program, so
+ that we do not need to duplicate literals and properties. */
 struct Literal : Expression,
                  Property
 {
     NODE_FUNCTIONS
 };
 
-// Intermediate property node that represents a string of any value.
+/// Intermediate property node that represents a string of any value.
 struct String : Literal { NODE_FUNCTIONS };
 
-// A string with a particular value as specified. Value must be filled
-// in.
-// TODO could be a problem with memory management here or nearby. See
-// comment in test harness in search_replace.cpp.
+/** A string with a particular value as specified. Value must be filled
+ in. 
+ TODO could be a problem with memory management here or nearby. See
+ comment in test harness in search_replace.cpp. */
 struct SpecificString : String
 {
 	NODE_FUNCTIONS_FINAL
@@ -88,47 +90,47 @@ struct SpecificString : String
     	value(s)
     {
     }
-	virtual bool IsLocalMatch( const Matcher *candidate ) const
+	virtual bool IsLocalMatch( const Matcher *candidate ) const /// Overloaded comparison for search&replace
 	{
 		ASSERT( candidate );
     	const SpecificString *c = dynamic_cast<const SpecificString *>(candidate);
     	return c && c->value == value;
-	}
-	virtual operator string() const
+	} 
+	virtual operator string() const /// Produce a string for debug
 	{
 		// Since this is a string literal, output it quoted
 		return "\"" + value + "\"";
 	}
 private:
-    string value;
+    string value; /// The string itself
 };
 
-// Intermediate property node that represents a number (anything you
-// can do +, - etc on) of any value.
+/** Intermediate property node that represents a number (anything you
+ can do +, - etc on) of any value. */
 struct Number : Literal { NODE_FUNCTIONS };
 
 #define INTEGER_DEFAULT_WIDTH 32
 
-// Intermediate property node that represents an integer number of any
-// value (signed or unsigned).
+/** Intermediate property node that represents an integer number of any
+ value (signed or unsigned). */
 struct Integer : Number { NODE_FUNCTIONS };
 
-// Property node for an integer number. We use LLVM's class for this, 
-// so that we can deal with any size of number (so this can be used for
-// large bit vectors). The LLVM object also stores the signedness. The
-// value must always be filled in.
+/** Property node for an integer number. We use LLVM's class for this, 
+ so that we can deal with any size of number (so this can be used for
+ large bit vectors). The LLVM object also stores the signedness. The
+ value must always be filled in. */
 struct SpecificInteger : Integer, llvm::APSInt
 {
 	NODE_FUNCTIONS_FINAL
-    SpecificInteger( llvm::APSInt i ) : llvm::APSInt(i) {}
-    SpecificInteger( int i ) : llvm::APSInt(INTEGER_DEFAULT_WIDTH) { *(llvm::APSInt *)this = i; }
-	virtual bool IsLocalMatch( const Matcher *candidate ) const
+    SpecificInteger( llvm::APSInt i ) : llvm::APSInt(i) {} //< Construct with an LLVM-style integer
+    SpecificInteger( int i ) : llvm::APSInt(INTEGER_DEFAULT_WIDTH) { *(llvm::APSInt *)this = i; } //< Construct with an ordinary int
+	virtual bool IsLocalMatch( const Matcher *candidate ) const //< Overloaded comparison for search&replace
 	{
 		ASSERT( candidate );
     	const SpecificInteger *c = dynamic_cast<const SpecificInteger *>(candidate);
     	return c && *(llvm::APSInt *)c == *(llvm::APSInt *)this;
 	}
-	virtual operator string() const
+	virtual operator string() const /// Produce a string for debug
 	{
         return string(toString(10)) + // decimal
                (isUnsigned() ? "U" : "") +
@@ -138,24 +140,24 @@ struct SpecificInteger : Integer, llvm::APSInt
 	}
 };
 
-// Intermediate property node that represents a floating point number of any
-// value.
+/** Intermediate property node that represents a floating point number of any
+ value. */
 struct Float : Number { NODE_FUNCTIONS };
 
-// Property node for an floating point number. We use LLVM's class for this, 
-// so that we can deal with any representation convention. The value must 
-// always be filled in. To determine the type, use llvm::getSemantics()
+/** Property node for a floating point number. We use LLVM's class for this, 
+ so that we can deal with any representation convention. The value must 
+ always be filled in. To determine the type, use llvm::getSemantics() */
 struct SpecificFloat : Float, llvm::APFloat
 {
 	NODE_FUNCTIONS_FINAL
-    SpecificFloat( llvm::APFloat v ) : llvm::APFloat(v) {};
-	virtual bool IsLocalMatch( const Matcher *candidate ) const
+    SpecificFloat( llvm::APFloat v ) : llvm::APFloat(v) {}; /// Construct with an LLVM-style float
+	virtual bool IsLocalMatch( const Matcher *candidate ) const /// Overloaded comparison for search&replace
 	{
 		ASSERT( candidate );
     	const SpecificFloat *c = dynamic_cast<const SpecificFloat *>(candidate);
     	return c && bitwiseIsEqual( *c );
 	}
-	virtual operator string() const
+	virtual operator string() const /// Produce a string for debug
 	{
 		char hs[256];
 		// generate hex float since it can be exact
@@ -166,41 +168,43 @@ struct SpecificFloat : Float, llvm::APFloat
 	}
 };
 
-// Intermediate property node that represents any boolean value.
-// Note: Bool here is considered a noun, and in general Property/Literal
-// intermediates are named using nouns. C.f. the Type node Boolean
+/** Intermediate property node that represents either boolean value.
+ Note: Bool here is considered a noun, and in general Property/Literal
+ intermediates are named using nouns. C.f. the Type node Boolean */
 struct Bool : Literal { NODE_FUNCTIONS };
 
-// Property node for boolean values true and false
+/** Property node for boolean value true */
 struct True : Bool
 {
 	NODE_FUNCTIONS_FINAL
-	virtual operator string() const { return "true"; }
+	virtual operator string() const { return "true"; } /// Produce a string for debug
 };
+
+/** Property node for boolean value false */
 struct False : Bool
 {
 	NODE_FUNCTIONS_FINAL
-	virtual operator string() const { return "false"; }
+	virtual operator string() const { return "false"; } /// Produce a string for debug
 };
 
 //////////////////////////// Declarations /////////////////////
 
-// An Identifier is a name given to a user-defined entity within 
-// the program (variable/object/function, user-defined type or
-// label). In the inferno tree, these are fully scope resolved
-// and are maintained as unique nodes so that the declaration
-// and all usages all point to the same node, this preserving
-// identity via topology. We store a string, but it isn't strictly 
-// needed and there's no need to uniquify it (it's really just 
-// a hint for users examining the output).
-// TODO make sure renderer really is uniquifying where needed
+/** An Identifier is a name given to a user-defined entity within 
+ the program (variable/object/function, user-defined type or
+ label). In the inferno tree, these are fully scope resolved
+ and are maintained as unique nodes so that the declaration
+ and all usages all point to the same node, this preserving
+ identity via topology. We store a string, but it isn't strictly 
+ needed and there's no need to uniquify it (it's really just 
+ a hint for users examining the output).
+ TODO make sure renderer really is uniquifying where needed */
 struct Identifier : virtual Property { NODE_FUNCTIONS };
 
-// Stores a name found in the program, eg identifier names.
-// This is for unquoted strings, as opposed to String. Strictly,
-// Inferno doesn't need to keep this data, but it helps
-// to make renders and graphs clearer. Inferno will uniquify
-// the name when rendering code.
+/** Stores a name found in the program, eg identifier names.
+ This is for unquoted strings, as opposed to String. Strictly,
+ Inferno doesn't need to keep this data, but it helps
+ to make renders and graphs clearer. Inferno will uniquify
+ the name when rendering code. */
 struct SpecificIdentifier : virtual Property
 { 
     NODE_FUNCTIONS
@@ -543,7 +547,7 @@ struct Enum : Record { NODE_FUNCTIONS_FINAL };
 struct InheritanceRecord : Record
 {
     NODE_FUNCTIONS
-    Collection<Base> bases; // TODO just chuck them into Record::members? TODO Collection?
+    Collection<Base> bases; // TODO just chuck them into Record::members? 
 };
 
 // Struct and class as per InheritanceRecord
@@ -808,5 +812,8 @@ struct Break : Statement { NODE_FUNCTIONS_FINAL };
 
 // Do nuffink
 struct Nop : Statement { NODE_FUNCTIONS_FINAL };
-
+  
+}; // end namespace  
+   
 #endif
+

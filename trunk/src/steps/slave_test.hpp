@@ -7,10 +7,14 @@
 
 #include "sr/search_replace.hpp"
 
+namespace Steps {
+
 class SlaveTest : public SearchReplace
 {
 public:
 	SlaveTest();
 };
+
+}; // end namespace
 
 #endif

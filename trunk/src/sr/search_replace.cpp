@@ -1,7 +1,5 @@
 #include "search_replace.hpp"
-#include "soft_patterns.hpp"
 #include "conjecture.hpp"
-#include "tree/tree.hpp"
 #include "common/hit_count.hpp"
 
 //#define STRACE
@@ -1425,6 +1423,7 @@ shared_ptr<ContainerInterface> AnyNodeBase::GetContainerInterface( TreePtr<Node>
 
 void CompareReplace::Test()
 {
+#if 0
     CompareReplace sr = CompareReplace( MakeTreePtr<Nop>(), MakeTreePtr<Nop>() ); // TODO we're only using compare side
 
     {
@@ -1530,6 +1529,7 @@ void CompareReplace::Test()
         ASSERT( sr.Compare( d, l ) == false );
         */
     }
+#endif
 }
 /*
 #ifdef STRACE

@@ -2,7 +2,7 @@
 #define TYPEOF_HPP
 
 #include "helpers/transformation.hpp"
-#include "tree.hpp"
+#include "cpptree.hpp"
 
 class TypeOf : public OutOfPlaceTransformation
 {
@@ -10,7 +10,7 @@ public:
     virtual TreePtr<Node> operator()( TreePtr<Node> c, TreePtr<Node> root )
     {
     	context = c;
-    	TreePtr<Expression> e = dynamic_pointer_cast<Expression>(root);
+    	TreePtr<CPPTree::Expression> e = dynamic_pointer_cast<CPPTree::Expression>(root);
     	TreePtr<Node> n;
     	if( e ) // if the tree at root is not an expression, return NULL
     		n = Get( e );
@@ -18,16 +18,16 @@ public:
     	return n;
     }
     // TODO make these private
-    TreePtr<Type> Get( TreePtr<Expression> o );
-    TreePtr<Type> Get( TreePtr<Operator> op, Sequence<Type> optypes );
-    TreePtr<Type> GetStandard( Sequence<Type> &optypes );
-    TreePtr<Type> GetStandard( Sequence<Numeric> &optypes );
-    TreePtr<Type> GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes );
-    TreePtr<Type> GetLiteral( TreePtr<Literal> l );
+    TreePtr<CPPTree::Type> Get( TreePtr<CPPTree::Expression> o );
+    TreePtr<CPPTree::Type> Get( TreePtr<CPPTree::Operator> op, Sequence<CPPTree::Type> optypes );
+    TreePtr<CPPTree::Type> GetStandard( Sequence<CPPTree::Type> &optypes );
+    TreePtr<CPPTree::Type> GetStandard( Sequence<CPPTree::Numeric> &optypes );
+    TreePtr<CPPTree::Type> GetSpecial( TreePtr<CPPTree::Operator> op, Sequence<CPPTree::Type> &optypes );
+    TreePtr<CPPTree::Type> GetLiteral( TreePtr<CPPTree::Literal> l );
 
     // Is this call really a constructor call? If so return the object being
     // constructed. Otherwise, return NULL
-    TreePtr<Expression> IsConstructorCall( TreePtr<Node> c, TreePtr<Call> call );
+    TreePtr<CPPTree::Expression> IsConstructorCall( TreePtr<Node> c, TreePtr<CPPTree::Call> call );
 
     static TypeOf instance; 
 private:
@@ -35,3 +35,4 @@ private:
 };
 
 #endif
+

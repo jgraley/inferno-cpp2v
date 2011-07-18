@@ -26,7 +26,7 @@
 #include "clang/Driver/TextDiagnosticPrinter.h"
 #include "clang/Lex/LiteralSupport.h"
 
-#include "tree/tree.hpp"
+#include "tree/cpptree.hpp"
 #include "helpers/transformation.hpp"
 #include "common/trace.hpp"
 #include "tree/type_db.hpp"
@@ -35,6 +35,8 @@
 
 #include "rc_hold.hpp"
 #include "identifier_tracker.hpp"
+
+using namespace CPPTree; // TODO put parse in cpp file so this using does not pollute
 
 #define INFERNO_TRIPLE "arm-linux"
 

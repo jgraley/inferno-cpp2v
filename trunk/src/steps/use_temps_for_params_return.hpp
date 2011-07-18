@@ -10,10 +10,14 @@
 
 #include "sr/search_replace.hpp"
 
+namespace Steps {
+
 class UseTempsForParamsReturn : public SearchReplace
 {
 public:
 	UseTempsForParamsReturn();
 };
 
+}; // end namespace
+ 
 #endif /* USE_TEMPS_FOR_PARAMS_RETURN_HPP */

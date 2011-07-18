@@ -1,7 +1,7 @@
 #ifndef GRAPH_HPP
 #define GRAPH_HPP
 
-#include "tree/tree.hpp"
+#include "tree/cpptree.hpp"
 #include "helpers/transformation.hpp"
 
 //

@@ -6,9 +6,12 @@
  */
 
 #include "steps/for_to_while.hpp"
-#include "tree/tree.hpp"
+#include "tree/cpptree.hpp"
 #include "common/common.hpp"
 #include "sr/soft_patterns.hpp"
+
+using namespace CPPTree;
+using namespace Steps;
 
 ForToWhile::ForToWhile()
 {

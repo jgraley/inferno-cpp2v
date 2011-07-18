@@ -1,5 +1,7 @@
 #include "soft_patterns.hpp"
-#include "tree/tree.hpp"
+#include "tree/cpptree.hpp"
+
+using namespace CPPTree;
 
 bool TransformOfBase::DecidedCompare( const CompareReplace *sr,
 		                                                     TreePtr<Node> x,

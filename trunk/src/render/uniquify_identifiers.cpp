@@ -2,6 +2,9 @@
 #include "helpers/walk.hpp"
 #include "tree/misc.hpp"
 
+using namespace CPPTree;
+
+// TODO lose the underscore
 #define UID_FORMAT "%s_%u"
 
 //TODO Apparently labels do not scope in subblocks like types and instances, but instead are

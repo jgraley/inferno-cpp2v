@@ -8,7 +8,9 @@
 #include "validate.hpp"
 #include "typeof.hpp"
 #include "misc.hpp"
-#include "tree.hpp"
+#include "cpptree.hpp"
+
+using namespace CPPTree;
 
 void Validate::operator()( TreePtr<Node> context,
 						   TreePtr<Node> *proot )

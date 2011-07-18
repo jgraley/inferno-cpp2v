@@ -1,11 +1,11 @@
 #ifndef MISC_HPP
 #define MISC_HPP
 
-#include "tree.hpp"
+#include "cpptree.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 
-TreePtr<Identifier> GetIdentifier( TreePtr<Declaration> d );
+TreePtr<CPPTree::Identifier> GetIdentifier( TreePtr<CPPTree::Declaration> d );
 
 class GetDeclaration : public OutOfPlaceTransformation
 {
@@ -13,16 +13,16 @@ public:
     virtual TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root );
     static GetDeclaration instance;
 private:
-	TreePtr<UserType> Get( TreePtr<Node> context, TreePtr<TypeIdentifier> id );
-	TreePtr<Instance> Get( TreePtr<Node> context, TreePtr<InstanceIdentifier> id );
+	TreePtr<CPPTree::UserType> Get( TreePtr<Node> context, TreePtr<CPPTree::TypeIdentifier> id );
+	TreePtr<CPPTree::Instance> Get( TreePtr<Node> context, TreePtr<CPPTree::InstanceIdentifier> id );
 };
 
 // Look for a record, skipping over typedefs. Returns NULL if not a record.
 // TODO make this a Transformation
-TreePtr<Record> GetRecordDeclaration( TreePtr<Node> context, TreePtr<TypeIdentifier> id );
+TreePtr<CPPTree::Record> GetRecordDeclaration( TreePtr<Node> context, TreePtr<CPPTree::TypeIdentifier> id );
 
 // Hunt through a record and its bases to find the named member
-TreePtr<Instance> FindMemberByName( TreePtr<Program> program, TreePtr<Record> r, string name );
+TreePtr<CPPTree::Instance> FindMemberByName( TreePtr<CPPTree::Program> program, TreePtr<CPPTree::Record> r, string name );
 
 // concatenate sequences by adding them, like strings etc
 // TODO move to common/
@@ -38,6 +38,7 @@ Sequence<T> operator+( Sequence<T> &s1, Sequence<T> &s2 )
 // Really, Declaration should point to an Identifier and that would be that, but at present
 // there are differnent kinds of Declaration that point to different kinds of Node.
 // TODO refactor this away
-TreePtr<Identifier> GetIdentifierOfDeclaration( TreePtr<Declaration> d );
+TreePtr<CPPTree::Identifier> GetIdentifierOfDeclaration( TreePtr<CPPTree::Declaration> d );
 
 #endif
+

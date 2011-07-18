@@ -1,4 +1,4 @@
-#include "tree/tree.hpp"
+#include "tree/cpptree.hpp"
 #include "helpers/transformation.hpp"
 #include "tree/typeof.hpp"
 #include "common/trace.hpp"
@@ -11,6 +11,8 @@
 #include "render.hpp"
 #include "clang/Parse/DeclSpec.h"
 #include "uniquify_identifiers.hpp"
+
+using namespace CPPTree;
 
 // Don't like the layout of rendered code?
 // Install "indent" on your UNIX box and pipe the output through iindent.sh
