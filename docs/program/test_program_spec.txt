@@ -54,6 +54,9 @@ g++ -ansi -nostdinc -Wreturn-type -Werror
 
 where gcc is version 4.4.5 or thereabouts.
 
+Note that inferno always defines the symbol __INFERNO__ to 1 in case 
+input program code wishes to varient, though in test vectors this is discouraged.
+
 Test harness compatibility
 --------------------------
 

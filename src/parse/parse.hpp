@@ -93,6 +93,7 @@ public:
 		clang::Parser parser(pp, actions);
 		TRACE("Start parse\n");
 		parser.ParseTranslationUnit();
+        ASSERT( !diags.hasErrorOccurred() )("Will not proceed into inferno because clang reported errors\n");
 		TRACE("End parse\n");
 	}
 
@@ -207,6 +208,7 @@ private:
 		clang::Action::TypeTy *isTypeName(clang::IdentifierInfo &II,
 				clang::Scope *S, const clang::CXXScopeSpec *SS)
 		{
+		    TRACE();
 			TreePtr<Node> n = ident_track.TryGet(&II, FromCXXScope(SS));
 			if (n)
 			{
