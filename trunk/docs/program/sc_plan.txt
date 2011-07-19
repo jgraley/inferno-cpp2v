@@ -5,8 +5,9 @@ SystemC plan - provisional
    Seperate CPP, SC trees
 1. See how to enable the preprocessor in clang. Do not modify: inferno plan is to preprocess as normal.
    Add support for include files.
-2. Update clang to latest version and integrate for same functionality
-3. Support templates in tree, parser and renderer
+        NO 2. Update clang to latest version and integrate for same functionality
+        NO 3. Support templates in tree, parser and renderer
+        Integrating new clang takes too long, use macro instead of template
 4. SC support: for each construct, do
    - #define if necessary in a new header file that replaces SC one
    - new SC node
