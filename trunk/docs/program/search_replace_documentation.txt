@@ -210,6 +210,19 @@ GetDeclaration is a utility transformation in the form of a singleton class, whi
 
 The OutOfPlaceTransformation interface guarantees not to modify the supplied tree and to return a newly created one; this is essential for search and replace usage. OutOfPlaceTransformation can indicate failure by returning a NULL pointer. Failure results in a non-match.
 
+7a Other special search patterns
+
+7a.1 IdentifierByName
+
+IdentifierByName matches only a SpecificIdentifier whose name matches the name created by the builder. This is the only way to search for a particular identifier name. SpecificIdentifier only matches when the node itself matches, i.e. you would need to reference a SpecificIdentifier inside the input program tree itself (which could be useful, but is different functionality).
+
+There are three variants:
+ - InstanceIdentifierByName, which matches any SpecificInstanceIdentifier with the same name
+ - TypeIdentifierByName, which matches any SpecificTypeIdentifier with the same name
+ - LabelIdentifierByName, which matches any SpecificLabelIdentifier with the same name
+  
+Warning: names are an imprecise way to specify identifiers. Names are arbitrary in the input program, and may be generated during transformations by BuildIdentifier (below). Names are not guaranteed to be unique, and the renderer has to uniquify in order to generate correct C output. This node is expected to be used in early steps that detect language extensions embedded in identifiers with specific names.
+  
 8 Builder replace patterns
 
 Similar to TransformOf patterns, described above, it is sometimes desirable to generate subtrees using some algorithm apart from the search and replace, and embed these in the output program tree. This is done using builder nodes. At present, the identifier builder is only kind of builder node. 

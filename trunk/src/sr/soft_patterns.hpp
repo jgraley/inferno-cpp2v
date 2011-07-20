@@ -220,7 +220,6 @@ struct TransformOf : TransformOfBase, Special<PRE_RESTRICTION>
 // and must rely on a replace coupling to get multiple reference to the same
 // new identifier. Rule is: ONE of these per new identifier.
 
-// TODO allow multiple sources for the printf, use in eg merging successive labels
 // TODO do this via a transformation as with TransformOf/TransformOf
 #define BYPASS_WHEN_IDENTICAL 1
 struct BuildIdentifierBase : CompareReplace::SoftReplacePattern
@@ -243,7 +242,7 @@ private:
     {
 	string newname = GetNewName( sr );
 	return TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
-    }                                               
+    }                                                   
 };
 
 struct BuildTypeIdentifier : Special<CPPTree::TypeIdentifier>,                             
@@ -272,5 +271,69 @@ private:
 	return TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) );
     }                                               
 };
+
+
+
+// These can be used in search pattern to match a SpecificIdentifier by name.
+// (cannot do this using a SpecificIdentifier in the search pattern because
+// the address of the node would be compared, not the name string).
+struct IdentifierByNameBase : CompareReplace::SoftSearchPattern
+{
+    IdentifierByNameBase( string n ) : name(n) {}
+    bool IsMatch( const CompareReplace *sr, TreePtr<Node> x );
+    string name;
+};
+
+struct InstanceIdentifierByName : Special<CPPTree::InstanceIdentifier>,                             
+                                 IdentifierByNameBase
+{
+    InstanceIdentifierByName( string n ) : IdentifierByNameBase(n) {}
+    SPECIAL_NODE_FUNCTIONS
+private:
+    virtual bool DecidedCompare( const CompareReplace *sr,
+                                TreePtr<Node> x,
+                                bool can_key,
+                                Conjecture &conj )
+    {
+        return IsMatch( sr, x );
+    }                                
+};
+
+struct TypeIdentifierByName : Special<CPPTree::TypeIdentifier>,                             
+                             IdentifierByNameBase
+{
+    TypeIdentifierByName( string n ) : IdentifierByNameBase(n) {}
+    SPECIAL_NODE_FUNCTIONS
+private:
+    virtual bool DecidedCompare( const CompareReplace *sr,
+                                TreePtr<Node> x,
+                                bool can_key,
+                                Conjecture &conj )
+    {
+        return IsMatch( sr, x );
+    }                                
+};
+
+struct LabelIdentifierByName : Special<CPPTree::LabelIdentifier>,                             
+                              IdentifierByNameBase
+{
+    LabelIdentifierByName( string n ) : IdentifierByNameBase(n) {}
+
+    SPECIAL_NODE_FUNCTIONS
+private:
+    virtual bool DecidedCompare( const CompareReplace *sr,
+                                TreePtr<Node> x,
+                                bool can_key,
+                                Conjecture &conj )
+    {
+        return IsMatch( sr, x );
+    }                                
+};
+
+
+
+
+
+
 
 #endif

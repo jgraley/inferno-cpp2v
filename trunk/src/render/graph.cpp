@@ -38,13 +38,28 @@ using namespace CPPTree;
 void Graph::operator()( Transformation *root )
 {    
     string s;
-	s += Header();
-    unique_filter.Reset();
-	s += Traverse( root, Id(root), false );
-    unique_filter.Reset();
-	s += Traverse( root, Id(root), true );
+    s += Header();
+    s += MakeGraphTx(root);	
 	s += Footer();
 	Disburse( s );
+}
+
+string Graph::MakeGraphTx(Transformation *root)
+{
+    string s;
+    if( TransformationVector *tv = dynamic_cast<TransformationVector *>(root) )
+    {
+        FOREACH( shared_ptr<Transformation> t, *tv )
+            s += MakeGraphTx( t.get() );
+    }
+    else
+    {
+        unique_filter.Reset();
+	    s += Traverse( root, Id(root), false );
+        unique_filter.Reset();
+	    s += Traverse( root, Id(root), true );
+	}
+	return s;
 }
 
 
@@ -222,6 +237,9 @@ string Graph::Sanitise( string s, bool remove_tp )
 	string o;
 	if( remove_tp ) // get rid of TreePtr<>
 	    s = s.substr( 8, s.size()-9 );
+	int n = s.find("::");
+	if( n != string::npos )
+	    s = s.substr( n+2 );
 	for( int i=0; i<s.size(); i++ )
 	{
 		if( s[i] == '\"' )
@@ -324,6 +342,14 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 	    // TODO indicate whether it's building instance, label or type identifier
 		*shape = "parallelogram";
 		return smi->format;
+	}
+	else if( shared_ptr<IdentifierByNameBase> ibnb = dynamic_pointer_cast<IdentifierByNameBase>(sp) )
+	{
+	    // The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
+	    // the string that must be matched inside it.
+	    // TODO indicate whether it's matching instance, label or type identifier
+		*shape = "trapezium";
+		return ibnb->name;
 	}
 	else if( dynamic_pointer_cast<GreenGrassBase>(sp) )
 	{

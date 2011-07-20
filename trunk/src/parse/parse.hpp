@@ -208,7 +208,6 @@ private:
 		clang::Action::TypeTy *isTypeName(clang::IdentifierInfo &II,
 				clang::Scope *S, const clang::CXXScopeSpec *SS)
 		{
-		    TRACE();
 			TreePtr<Node> n = ident_track.TryGet(&II, FromCXXScope(SS));
 			if (n)
 			{

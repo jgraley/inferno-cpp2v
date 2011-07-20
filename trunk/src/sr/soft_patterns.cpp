@@ -69,3 +69,20 @@ string BuildIdentifierBase::GetNewName( const CompareReplace *sr )
     }
 }
 
+bool IdentifierByNameBase::IsMatch( const CompareReplace *sr, TreePtr<Node> x )
+{
+    string newname = name; 
+    if( TreePtr<CPPTree::SpecificIdentifier> si = dynamic_pointer_cast<CPPTree::SpecificIdentifier>(x) )
+    {
+        TRACE("IsMatch comparing ")(si->GetName())(" with ")(newname);
+        if( si->GetName() == newname )
+        {
+            TRACE(" : same\n");
+            return true;
+        }
+        TRACE(" : different\n");
+    }
+    return false;
+}
+
+

@@ -214,6 +214,12 @@ bool CompareReplace::DecidedCompare( TreePtr<Node> x,
 		}
     }
    
+    // Check couplings after everything else because they can get keyed during keying pass
+    // and then seem to match during restricting pass. A key match is not a guarantee 
+    // because when it keyed some coupled node below it may not have been keyed yet 
+    // and so their checks would not have occured and hte check would not be strict 
+    // enough. Perhaps keys can be "concrete" when all the couplings below them have
+    // been checked as matching?
     if( TreePtr<Node> keynode = coupling_keys.GetCoupled( pattern ) )
         if( Compare( x, keynode ) == false )
             return false;
@@ -952,7 +958,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
             TRACE("Copying container size %d\n", source_con->size() );
 	        FOREACH( const TreePtrInterface &p, *source_con )
 	        {
-		        ASSERT( p ); // present simplified scheme disallows NULL
+		        ASSERT( p )("Some element of member %d (", i)(*source_con)(") of ")(*source)(" was NULL\n");
 		        TreePtr<Node> n = DuplicateSubtreePattern( p );
 		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) ) // TODO maybe not, because I think subcontainers only appear in keys
 		        {
@@ -971,7 +977,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
         {
             TRACE("Copying single element\n");
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            ASSERT( *source_ptr )("source should be non-NULL");
+            ASSERT( *source_ptr )("Member %d (", i)(*source_ptr)(") of ")(*source)(" was NULL when not overlaying\n");
             *dest_ptr = DuplicateSubtreePattern( *source_ptr );
             ASSERT( *dest_ptr );
             ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            

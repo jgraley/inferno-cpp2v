@@ -15,9 +15,7 @@ void f()
     }
 }
 
-#include "inc.h"
 
-class t;
 
 int main()
 {
@@ -29,7 +27,7 @@ int main()
     int b;
     //b = 2;
     int c;
-    c = ADDONE(2);
+    c = 3;
     int d;
     d = 4;
     int e;
@@ -38,9 +36,6 @@ int main()
     //f = 6;
     int g;
     g = 7;
-    return 0;    
-    t<int> x;
+    return 0;
 }
-
-
 

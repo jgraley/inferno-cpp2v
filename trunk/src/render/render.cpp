@@ -1,4 +1,5 @@
 #include "tree/cpptree.hpp"
+#include "tree/sctree.hpp"
 #include "helpers/transformation.hpp"
 #include "tree/typeof.hpp"
 #include "common/trace.hpp"
@@ -13,6 +14,7 @@
 #include "uniquify_identifiers.hpp"
 
 using namespace CPPTree;
+using namespace SCTree;
 
 // Don't like the layout of rendered code?
 // Install "indent" on your UNIX box and pipe the output through iindent.sh
@@ -226,6 +228,8 @@ string Render::RenderType( TreePtr<Type> type, string object )
 		return RenderIdentifier(t->identifier) + sobject;
 	else if( TreePtr<SpecificTypeIdentifier> ti = dynamic_pointer_cast< SpecificTypeIdentifier >(type) )
 		return RenderIdentifier(ti) + sobject;
+	else if( shared_ptr<SCNamedIdentifier> sct = dynamic_pointer_cast< SCNamedIdentifier >(type) )
+		return sct->GetName() + sobject;
 	else
 		return ERROR_UNSUPPORTED(type);
 }
@@ -665,7 +669,8 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 		TreePtr<AccessSpec> a;
 		bool showtype=true;
 		string sep2=";\n";
-		if( dynamic_pointer_cast< Class >(r) )
+		shared_ptr<SCNamedRecord> scr = dynamic_pointer_cast< SCNamedRecord >(r);
+		if( dynamic_pointer_cast< Class >(r) || scr )
 		{
 			s += "class";
 			a = TreePtr<Private>(new Private);
@@ -698,10 +703,15 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 			// Base classes
 			if( TreePtr<InheritanceRecord> ir = dynamic_pointer_cast< InheritanceRecord >(declaration) )
 			{
-				if( !ir->bases.empty() )
+				if( !ir->bases.empty() || scr )
 				{
 					s += " : ";
 					bool first=true;
+				    if( scr )
+				    {
+				        first = false;
+				        s += "public " + scr->GetName();
+				    }
 					FOREACH( TreePtr<Base> b, ir->bases )
 					{
 						if( !first )
