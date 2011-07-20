@@ -1,5 +1,6 @@
 
 #include "tree/cpptree.hpp"
+#include "tree/sctree.hpp"
 #include "parse/parse.hpp"  
 #include "render/render.hpp"
 #include "render/graph.hpp"
@@ -18,6 +19,7 @@
 #include "steps/lower_control_flow.hpp"
 #include "steps/clean_up.hpp"
 #include "steps/state_out.hpp"
+#include "steps/systemc_detection.hpp"
 
 using namespace Steps;
 
@@ -29,6 +31,8 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     // Build a vector of transformations, in the order that we will run them
     // (ordered by hand for now, until the auto sequencer is ready)
     //sequence->push_back( shared_ptr<Transformation>( new GenerateImplicitCasts ) ); 
+    
+    sequence->push_back( shared_ptr<Transformation>( new DetectAllSCTypes ) );
     sequence->push_back( shared_ptr<Transformation>( new BreakToGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new SwitchToIfGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new ForToWhile ) ); 

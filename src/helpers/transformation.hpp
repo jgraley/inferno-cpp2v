@@ -64,6 +64,19 @@ public:
     }    		                             
 };
 
+class TransformationVector : public vector< shared_ptr<Transformation> >,
+                             public InPlaceTransformation
+{
+    virtual void operator()( TreePtr<Node> context,     // The whole program, so declarations may be searched for
+		                     TreePtr<Node> *proot )     // Root of the subtree we want to modify
+    {
+        FOREACH( shared_ptr<Transformation> t, *this )
+            (*t)(context, proot);
+    }		                           
+};
+
+
+
 class Filter
 {
 public:

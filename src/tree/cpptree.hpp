@@ -1,5 +1,5 @@
-#ifndef TREE_HPP
-#define TREE_HPP
+#ifndef CPPTREE_HPP
+#define CPPTREE_HPP
 
 #include "clang/Basic/SourceLocation.h"
 #include "clang/Basic/TokenKinds.h"
@@ -202,6 +202,7 @@ struct False : Bool
  label). In the inferno tree, these are fully scope resolved
  and are maintained as unique nodes so that the declaration
  and all usages all point to the same node, this preserving
+
  identity via topology. We store a string, but it isn't strictly 
  needed and there's no need to uniquify it (it's really just 
  a hint for users examining the output). */

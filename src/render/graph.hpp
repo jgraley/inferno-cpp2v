@@ -18,6 +18,7 @@ public:
 private:
     string Header();
     string Footer();
+    string MakeGraphTx(Transformation *root);
     void Disburse( string s );
     string Traverse( TreePtr<Node> root, bool links_pass );
     string Traverse( Transformation *sr, string id, bool links_pass );
