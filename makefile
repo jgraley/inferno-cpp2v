@@ -1,7 +1,7 @@
 include makefile.common
-.PHONY: default all get_libs test docs force_subordinate_makefiles clean iclean
+.PHONY: default all get_libs test docs force_subordinate_makefiles clean iclean resource
 default : inferno.exe
-all : clean get_libs inferno.exe docs test
+all : clean get_libs inferno.exe resource docs test
 
 #
 # Establish required revisions of external code
@@ -73,6 +73,12 @@ inferno.exe : makefile makefile.common src/build/inferno.a $(LLVM_CLANG_LIB_PATH
 	$(ICC) src/build/inferno.a $(LLVM_CLANG_LIB_PATHS) $(STANDARD_LIBS) -ggdb -pg -o inferno.exe
 
 #
+# Build the resources
+#
+resource : force_subordinate_makefiles 
+	cd resource && $(MAKE)
+
+#
 # Build the documentation
 #
 docs : makefile src/*/*.?pp
@@ -84,7 +90,7 @@ docs : makefile src/*/*.?pp
 # Run the tests
 #
 test : makefile inferno.exe
-	cd test && ./runtests.sh
+	test/runtests.sh
 	
 #
 # Cleaning up
@@ -94,4 +100,5 @@ clean : makefile $(LLVM_CLANG_LIBS:%=clean_%) iclean
 iclean : makefile 
 	-rm -rf src/build/
 	-rm -f inferno.exe
+	-rm -f resource/script/* resource/lib/*
 

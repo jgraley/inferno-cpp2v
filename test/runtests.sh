@@ -1,8 +1,7 @@
 #!/bin/bash
 
-clang_tests=../llvm/tools/clang/test
-inferno=../inferno.exe
-resfile=results.csv
+clang_tests=llvm/tools/clang/test
+resfile=test/results.csv
 
 # Usage:
 # runtests.sh - tests the known passing (regression) tests
@@ -10,11 +9,11 @@ resfile=results.csv
 # runtests.sh <file list> - tests all named files
 if test -z $1
 then
- infilelist="examples/*"
+ infilelist="test/examples/*"
 else 
  if test $1 == all
  then
-  infilelist="examples/* $clang_tests/CodeGen/*"
+  infilelist="test/examples/* $clang_tests/CodeGen/*"
  else
   infilelist=$*
  fi
@@ -29,7 +28,7 @@ echo testing files $infilelist
 failed=0
 for infile in $infilelist
 do
- ./test.sh $infile $resfile
+ test/test.sh $infile $resfile
  if test $? -ne 0
  then
   failed=1

@@ -1,18 +1,19 @@
 #!/bin/bash
 
-inferno=../inferno.exe
-resfile=results.csv
+inferno=./inferno.exe
+resfile=test/results.csv
 
 if test $# -eq 0
 then
  echo Usage: $0 \<input program\> [\<results log file\>]
+ echo from inferno-cpp2v/trunk/
  exit 1
 fi
 
 infile=$1
 resfile=$2
 fb=`basename $infile`
-outfile=results/$fb
+outfile=test/results/$fb
 
 echo
 echo -------------- $fb ----------------
@@ -34,11 +35,7 @@ cmpres=1000
 return_code=1 
  
 echo Compile input...
-# note: we restrict input to ansi since that's the project's objective. But
-# (1) we do not use -pedantic because its infuriating and
-# (2) we do not apply either restriction to intermediate output, which may
-# use gcc extensions etc
-g++ -ansi -nostdinc -Wreturn-type -Werror -c $infile -o results/"$fb"_in.o
+resource/script/compile.sh $infile test/results/"$fb"_in.o
 c1res=$?
 if test $c1res -ne 0
 then
@@ -48,12 +45,12 @@ then
 fi
 
 echo Link input...
-g++ results/"$fb"_in.o -o results/"$fb"_in.exe
+resource/script/link.sh test/results/"$fb"_in.o test/results/"$fb"_in.exe
 l1res=$?
 if test $l1res -eq 0
 then
  echo Run input...
- results/"$fb"_in.exe
+ test/results/"$fb"_in.exe
  r1res=$?
 fi
 
@@ -66,21 +63,21 @@ if test $ires -eq 0
 then
 # Note: I am iindenting the display to console, but not what gets compiled, because iindent introduces errors
 # for example in test01.cpp where a hex float (like 0x1.2) gets mangled. 
- ../iindent.sh < $outfile
+ ./iindent.sh < $outfile
  echo Compile output...
- g++ -c $outfile -o results/"$fb"_out.o
+ resource/script/compile.sh $outfile test/results/"$fb"_out.o
  c2res=$?
  if test $c2res -eq 0
  then
   if test $l1res -eq 0
   then
    echo Link output...
-   g++ results/"$fb"_out.o -o results/"$fb"_out.exe
+   resource/script/link.sh test/results/"$fb"_out.o test/results/"$fb"_out.exe
    l2res=$?
    if test $l2res -eq 0
    then
     echo Run output...
-    results/"$fb"_out.exe
+    test/results/"$fb"_out.exe
     r2res=$?
     cmpres=1
     if test $r1res -eq $r2res

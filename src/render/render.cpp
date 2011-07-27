@@ -50,7 +50,12 @@ TreePtr<Node> Render::operator()( TreePtr<Node> context, TreePtr<Node> root )
 	unique.clear();
 	unique.UniquifyScope( context );
 
-	string s = RenderDeclarationCollection( program, ";\n", true ); // gets the .hpp stuff directly
+    string s;
+
+    if( IsSystemC( root ) )
+        s += "#include \"isystemc.h\"\n\n";
+
+	s += RenderDeclarationCollection( program, ";\n", true ); // gets the .hpp stuff directly
 
 	s += deferred_decls; // these could go in a .cpp file
 
@@ -67,6 +72,16 @@ TreePtr<Node> Render::operator()( TreePtr<Node> context, TreePtr<Node> root )
 	}
 	program = TreePtr<Program>();
 	return root; // no change
+}
+
+
+bool Render::IsSystemC( TreePtr<Node> root )
+{ 
+    Expand e(root);
+    FOREACH( TreePtr<Node> n, e )
+        if( dynamic_pointer_cast<SCConstruct>(n) )
+            return true;
+    return false;
 }
 
 
@@ -809,7 +824,14 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep )
 		return "break" + sep;
 	else if( dynamic_pointer_cast<Nop>(statement) )
 		return sep;
-	else
+	else if( TreePtr<Wait> c = dynamic_pointer_cast<Wait>(statement) )
+	{
+	    if( dynamic_pointer_cast<Expression>(c->event) )
+		    return "wait( " + RenderExpression(c->event) + " );\n";
+		else
+		    return "wait();\n";
+    }
+    else
 		return ERROR_UNSUPPORTED(statement);
 }
 

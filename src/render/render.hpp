@@ -21,6 +21,7 @@ private:
     // map in the parser.
     Map< TreePtr<CPPTree::Scope>, Sequence<CPPTree::Declaration> > backing_ordering;
 
+    bool IsSystemC( TreePtr<Node> root );
     string RenderLiteral( TreePtr<CPPTree::Literal> sp );
     string RenderIdentifier( TreePtr<CPPTree::Identifier> id );
     string RenderScopePrefix( TreePtr<CPPTree::Identifier> id );
