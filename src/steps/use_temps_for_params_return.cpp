@@ -49,5 +49,5 @@ UseTempsForParamsReturn::UseTempsForParamsReturn()
 	r_sub_comp->statements.push_back( r_return );
 	r_return->return_value = id;
        
-	SearchReplace::Configure( s_return, r_sub_comp );
+	Configure( s_return, r_sub_comp );
 }

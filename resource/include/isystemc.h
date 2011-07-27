@@ -14,13 +14,22 @@
 // captures the necessary information.
 
 class sc_event;
+
 class sc_module;
+#define SC_MODULE(X) class X : public sc_module
+
 class sc_interface;
+
 void wait( sc_event e );
+
 void SC_THREAD( void func );
 void SC_CTHREAD( void func );
 void SC_METHOD( void func );
+
+/// Not really SystemC, but we detect exit and represent natively as Exit so as to 
+/// get a way of extracting results from programs.
 void exit( int code );
+#define SC_CTOR(X) X( char *name ) 
 #else
 // Parsed by native compiler
 // Reduce the macros we define outside of the SC standard to when SC expects.

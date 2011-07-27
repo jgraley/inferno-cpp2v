@@ -1,6 +1,6 @@
 
 #include <isystemc.h>
-
+/*
 class Adder : public sc_module
 {
     SC_CTOR(Adder)
@@ -18,7 +18,7 @@ class Multiplier : public sc_module
     }
     void T();
 };
-
+*/
 class TopLevel : public sc_module
 {
 public:
@@ -30,5 +30,7 @@ public:
     {
         exit(42);
     }
-} top_level("top_level");
+};
+
+TopLevel top_level("top_level");
 

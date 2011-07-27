@@ -32,7 +32,7 @@ CompactGotos::CompactGotos()
     r_comp->statements = ( pre, r_goto, post );
     r_comp->members = ( decls );    
         
-    SearchReplace::Configure( s_comp, r_comp );
+    Configure( s_comp, r_comp );
 }
 
 CompactGotosFinal::CompactGotosFinal()
@@ -60,7 +60,7 @@ CompactGotosFinal::CompactGotosFinal()
     r_comp->members = ( decls );
     r_comp->statements = ( pre, r_goto, label, post );
     
-    SearchReplace::Configure( s_comp, r_comp );
+    Configure( s_comp, r_comp );
 }
 
 
@@ -108,7 +108,7 @@ EnsureBootstrap::EnsureBootstrap()
     r_body->members = decls;
     r_body->statements = (pre, r_goto, r_label, stop, post);    
 
-    SearchReplace::Configure( fn );
+    Configure( fn );
 }
 
 
@@ -144,7 +144,7 @@ AddStateLabelVar::AddStateLabelVar()
     lr_assign->operands = (state_var->identifier, ls_goto->destination);
     lr_goto->destination = state_var->identifier;
             
-    SearchReplace::Configure( s_comp, r_slave );
+    Configure( s_comp, r_slave );
 }
 
 
@@ -181,7 +181,7 @@ EnsureSuperLoop::EnsureSuperLoop()
     r_loop_body->statements = (first_goto, post);
     r_loop->condition = MakeTreePtr< SpecificInteger >(1);
 
-    SearchReplace::Configure( fn );
+    Configure( fn );
 }
 
 ShareGotos::ShareGotos()
@@ -207,7 +207,7 @@ ShareGotos::ShareGotos()
     r_label->identifier = r_labelid;
     r_goto->destination = r_labelid;
 
-    SearchReplace::Configure( loop );
+    Configure( loop );
 }
 
 
@@ -456,7 +456,7 @@ InsertSwitch::InsertSwitch()
     lls_not2->pattern = lls_label;
     lls_label->identifier = ls_label_id; // leave labels alone in the body
 
-    SearchReplace::Configure( fn );    
+    Configure( fn );    
 }
 
 
@@ -487,7 +487,7 @@ SwitchCleanUp::SwitchCleanUp()
     r_body->members = decls;
     r_body->statements = (main);    
     
-    SearchReplace::Configure( s_switch, r_comp );        
+    Configure( s_switch, r_comp );        
 }
 
 
@@ -513,7 +513,7 @@ InferBreak::InferBreak()
     r_comp->members = decls;
     r_comp->statements = (pre, slave, post); 
     
-    SearchReplace::Configure( s_comp, r_comp );        
+    Configure( s_comp, r_comp );        
 }
 
 
@@ -536,6 +536,6 @@ FixFallthrough::FixFallthrough()
     cb2->pattern = s_not2;
     s_not2->pattern = MakeTreePtr<Case>();
         
-    SearchReplace::Configure( s_comp, r_comp );            
+    Configure( s_comp, r_comp );            
 }
 

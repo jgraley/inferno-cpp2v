@@ -49,7 +49,7 @@ IfToIfGoto::IfToIfGoto()
     r_label1->identifier = r_labelid1;
     r_label2->identifier = r_labelid2;
     
-    SearchReplace::Configure( s_and, r_comp );
+    Configure( s_and, r_comp );
 }
 
 
@@ -166,7 +166,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     r_decl->initialiser = s_cond;
     r_comp->statements = (r_decl, r_slave3);
     
-    SearchReplace::Configure( s_switch, r_comp );
+    Configure( s_switch, r_comp );
 }
 
 
@@ -214,7 +214,7 @@ DoToIfGoto::DoToIfGoto()
     r_if->else_body = r_nop;
     r_goto->destination = r_labelid;
         
-    SearchReplace::Configure( s_do, r_comp );
+    Configure( s_do, r_comp );
 }
 
 BreakToGoto::BreakToGoto()
@@ -246,5 +246,5 @@ BreakToGoto::BreakToGoto()
     r_comp->statements = (breakable, r_label);
     r_label->identifier = r_labelid;
     
-    SearchReplace::Configure( breakable, r_comp );
+    Configure( breakable, r_comp );
 }
