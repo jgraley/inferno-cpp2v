@@ -28,6 +28,12 @@ OPTIONS += -I/usr/include/boost-1_33_1
 # We supply an ASSERT handler in common/trace.cpp
 OPTIONS += -DBOOST_ENABLE_ASSERT_HANDLER
 
+# Enable gdb debugging
+OPTIONS += -ggdb 
+
+# Enable profiling
+OPTIONS += -pg
+
 # For including llvm/clang header files
 BUILD = Debug
 LLVM = $(LEVEL)/llvm

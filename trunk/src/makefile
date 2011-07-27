@@ -19,39 +19,39 @@ build/inferno.a : $(ALL_MODULES:%=build/%.o)
 
 $(COMMON_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(OPTIONS) $< -o $@ -ggdb -pg
+	$(ICC) -c $(OPTIONS) $< -o $@ 
 
 $(NODE_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(OPTIONS) $< -o $@ -ggdb -pg
+	$(ICC) -c $(OPTIONS) $< -o $@ 
 
 $(HELPERS_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(OPTIONS) $< -o $@ -ggdb -pg
+	$(ICC) -c $(OPTIONS) $< -o $@ 
 
 $(TREE_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp tree/*.hpp tree/*.inc $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(OPTIONS) $< -o $@ -ggdb -pg
+	$(ICC) -c $(OPTIONS) $< -o $@
 
 $(SR_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp sr/*.hpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(OPTIONS) $< -o $@ -ggdb -pg
+	$(ICC) -c $(OPTIONS) $< -o $@
 
 $(PARSE_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp tree/*.hpp tree/*.inc sr/*.hpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(OPTIONS) $< -o $@ -ggdb -pg
+	$(ICC) -c $(OPTIONS) $< -o $@
 
 $(RENDER_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp tree/*.hpp tree/*.inc sr/*.hpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(OPTIONS) $< -o $@ -ggdb -pg
+	$(ICC) -c $(OPTIONS) $< -o $@ 
 
 $(STEPS_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp tree/*.hpp tree/*.inc sr/*.hpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(OPTIONS) $< -o $@ -ggdb -pg
+	$(ICC) -c $(OPTIONS) $< -o $@ 
 
 $(MAIN_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp tree/*.hpp tree/*.inc sr/*.hpp parse/*.hpp render/*.hpp steps/*.hpp $(DEPS)
 	mkdir -p $(dir $@)
-	$(ICC) -c $(OPTIONS) $< -o $@ -ggdb -pg
+	$(ICC) -c $(OPTIONS) $< -o $@
 
 
 

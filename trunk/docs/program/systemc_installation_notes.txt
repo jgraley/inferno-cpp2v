@@ -24,5 +24,12 @@ make install
 make check # you should to do this check whether systemc can link
 # have to press return once
 
+------------------
 
+# For inferno to use SystemC, create a symbolic link inferno-cpp2v/trunk/systemc pointing to the
+# systemc directory, systemc-2.2.0 in this case.
+
+# To compile, use eg
+g++ my_prog.cpp -Iresource/include -Isystemc/include -Lsystemc/lib-linux64/ -lsystemc
+# Note that this makes inferno include files available too
 

@@ -14,19 +14,17 @@
 
 namespace SCTree {
 
+struct SCConstruct {};
+
 /// Base for SC nodes that correspond to named ements of SystemC
-struct SCNamedConstruct
+struct SCNamedConstruct : public SCConstruct
 {
     virtual string GetName()=0; ///< Produce the name of the corresponding SC element for detection and rendering
 };
 
-struct SCNamedIdentifier : SCNamedConstruct
-{
-};
-
-struct SCNamedRecord : SCNamedConstruct
-{
-};
+struct SCNamedIdentifier : SCNamedConstruct {};
+struct SCNamedRecord : SCNamedConstruct {};
+struct SCNamedFunction : SCNamedConstruct {};
 
 
 struct Event : CPPTree::Type,
@@ -48,6 +46,14 @@ struct Interface : CPPTree::InheritanceRecord,
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetName() { return "sc_interface"; }
+};
+
+struct Wait : CPPTree::Statement,
+              SCNamedFunction
+{
+    NODE_FUNCTIONS_FINAL
+    virtual string GetName() { return "wait"; }
+    TreePtr<CPPTree::Initialiser> event; ///< event to wait for or Uninitialised for static sens 
 };
 
 };

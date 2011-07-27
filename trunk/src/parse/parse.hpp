@@ -74,6 +74,13 @@ public:
 		ASSERT(ptarget);
 		clang::SourceManager sm;
 		clang::HeaderSearch headers(fm);
+		
+		std::vector<clang::DirectoryLookup> dirs;
+		dirs.push_back( clang::DirectoryLookup( fm.getDirectory( string(get_current_dir_name()) + string("/resource/include") ), 
+		                                        clang::SrcMgr::C_System, 
+		                                        true, 
+		                                        false ) ); // TODO would prefer based on location of exe rather than CWD
+		headers.SetSearchPaths( dirs, 0, false ); // make the directory in dirs be a system directory
 
 		clang::Preprocessor pp(diags, opts, *ptarget, sm, headers);
 		pp.setPredefines("#define __INFERNO__ 1\n");

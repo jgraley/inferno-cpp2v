@@ -16,9 +16,11 @@
 class sc_event;
 class sc_module;
 class sc_interface;
-
 void wait( sc_event e );
-
+void SC_THREAD( void func );
+void SC_CTHREAD( void func );
+void SC_METHOD( void func );
+void exit( int code );
 #else
 // Parsed by native compiler
 // Reduce the macros we define outside of the SC standard to when SC expects.
