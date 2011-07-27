@@ -50,7 +50,7 @@ string Graph::MakeGraphTx(Transformation *root)
     if( TransformationVector *tv = dynamic_cast<TransformationVector *>(root) )
     {
         FOREACH( shared_ptr<Transformation> t, *tv )
-            s += MakeGraphTx( t.get() );
+            s = MakeGraphTx( t.get() ) + s; // seem to have to pre-pend to get them appearing in the right order
     }
     else
     {

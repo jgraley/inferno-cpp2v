@@ -30,7 +30,7 @@ CleanupCompoundMulti::CleanupCompoundMulti() // LIMITAION: decls in body not all
     r_comp->statements = ( s_pre, s_body, s_post );
     r_comp->members = ( s_inner_decls, s_outer_decls );
 
-    SearchReplace::Configure( s_outer, r_comp );
+    Configure( s_outer, r_comp );
 }
 
 
@@ -60,7 +60,7 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     s_comp->statements = body;
     // Note: leaving s_comp empty meaning no decls allowed
 
-    SearchReplace::Configure( all );
+    Configure( all );
 }
 
 CleanupNop::CleanupNop() 
@@ -78,7 +78,7 @@ CleanupNop::CleanupNop()
     r_comp->members = decls;
     r_comp->statements = (pre, post);
 
-    SearchReplace::Configure( s_comp, r_comp );
+    Configure( s_comp, r_comp );
 }
 
 CleanupDuplicateLabels::CleanupDuplicateLabels()
@@ -134,7 +134,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     r_label1->identifier = r_labelid;
     r_labelid->sources = (s_labelid1, s_labelid2);
     
-    SearchReplace::Configure( s_instance, r_instance );
+    Configure( s_instance, r_instance );
 }
 
 CleanupIneffectualGoto::CleanupIneffectualGoto()
@@ -158,7 +158,7 @@ CleanupIneffectualGoto::CleanupIneffectualGoto()
     r_comp->statements = (pre, r_label, post);
     r_label->identifier = labelid;
 
-    SearchReplace::Configure( s_comp, r_comp );
+    Configure( s_comp, r_comp );
 }
 
 CleanupUnusedLabels::CleanupUnusedLabels()
@@ -211,7 +211,7 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     r_comp->members = decls;
     r_comp->statements = (pre, post);
     
-    SearchReplace::Configure( s_instance, r_instance );
+    Configure( s_instance, r_instance );
 }
 
 
@@ -233,6 +233,6 @@ CleanUpDeadCode::CleanUpDeadCode()
     r_comp->members = decls;
     r_comp->statements = ( pre, s_exit_any, post );
     
-    SearchReplace::Configure( s_comp, r_comp );            
+    Configure( s_comp, r_comp );            
 }
 

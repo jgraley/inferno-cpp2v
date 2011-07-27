@@ -58,5 +58,5 @@ GenerateImplicitCasts::GenerateImplicitCasts()
 	r_call->operands = ( r_arg, other_args );
     r_call->callee = callee;
     
-	SearchReplace::Configure(s_call, r_call);
+	Configure(s_call, r_call);
 }

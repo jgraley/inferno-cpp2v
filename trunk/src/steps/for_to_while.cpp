@@ -64,7 +64,7 @@ ForToWhile::ForToWhile()
     r_while->condition = cond;
     r_body->statements = (r_slave, inc);
 
-   	SearchReplace::Configure( s_for, r_outer );
+   	Configure( s_for, r_outer );
 }
 
 WhileToDo::WhileToDo()
@@ -87,5 +87,5 @@ WhileToDo::WhileToDo()
     r_do->condition = cond;
     r_do->body = body;
 	
-   	SearchReplace::Configure( s_while, r_if );
+   	Configure( s_while, r_if );
 }

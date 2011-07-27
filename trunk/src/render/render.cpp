@@ -233,6 +233,8 @@ string Render::RenderType( TreePtr<Type> type, string object )
 		return object + "()";
 	else if( TreePtr<Function> f = dynamic_pointer_cast< Function >(type) )
 		return RenderType( f->return_type, "(" + object + ")(" + RenderDeclarationCollection(f, ", ", false) + ")" );
+	else if( TreePtr<Process> f = dynamic_pointer_cast< Process >(type) )
+		return "void " + object + "()";
 	else if( TreePtr<Pointer> p = dynamic_pointer_cast< Pointer >(type) )
 		return RenderType( p->destination, "(*" + object + ")" );
 	else if( TreePtr<Reference> r = dynamic_pointer_cast< Reference >(type) )
@@ -244,7 +246,7 @@ string Render::RenderType( TreePtr<Type> type, string object )
 	else if( TreePtr<SpecificTypeIdentifier> ti = dynamic_pointer_cast< SpecificTypeIdentifier >(type) )
 		return RenderIdentifier(ti) + sobject;
 	else if( shared_ptr<SCNamedIdentifier> sct = dynamic_pointer_cast< SCNamedIdentifier >(type) )
-		return sct->GetName() + sobject;
+		return sct->GetToken() + sobject;
 	else
 		return ERROR_UNSUPPORTED(type);
 }
@@ -561,6 +563,14 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 
 	bool subroutine = dynamic_pointer_cast<Subroutine>(o->type);
 
+	if( TreePtr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>(o->type) )
+	    if( TreePtr<Record> r = GetRecordDeclaration(program, tid) )
+	        if( dynamic_pointer_cast<Module>(r) )
+	        {
+	            s += "(\"" + RenderIdentifier(o->identifier) + "\")" + sep;
+	            return s;
+	        }
+	
 	if( !showinit || dynamic_pointer_cast<Uninitialised>(o->initialiser) )
 	{
 		// Don't render any initialiser
@@ -725,7 +735,7 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 				    if( scr )
 				    {
 				        first = false;
-				        s += "public " + scr->GetName();
+				        s += "public " + scr->GetToken();
 				    }
 					FOREACH( TreePtr<Base> b, ir->bases )
 					{
@@ -831,6 +841,10 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep )
 		else
 		    return "wait();\n";
     }
+	else if( TreePtr<Exit> c = dynamic_pointer_cast<Exit>(statement) )
+	{
+		return "exit( " + RenderExpression(c->code) + " );\n";
+    }
     else
 		return ERROR_UNSUPPORTED(statement);
 }
@@ -894,6 +908,24 @@ string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
 	backing_ordering[sd] = sorted;
 
 	string s;
+	if( TreePtr<Module> m = dynamic_pointer_cast<Module>(sd) )
+    {
+        // SystemC module, we must produce a constructor in SC style, do this as inline
+        if( !dynamic_pointer_cast<Public>(init_access) )
+        {
+            s += "public:\n";
+            init_access = MakeTreePtr<Public>();// note that we left the access as public
+        }
+        s += "SC_CTOR( " + RenderIdentifier( m->identifier ) + " )\n";
+        s += "{\n";
+        FOREACH( TreePtr<Declaration> pd, sorted )
+            if( TreePtr<Field> f = dynamic_pointer_cast<Field>(pd) )
+                if( TreePtr<Process> r = dynamic_pointer_cast<Process>(f->type) )
+                    s += r->GetToken() + "(" + RenderIdentifier( f->identifier ) + ");\n";
+        s += "}\n";
+
+    }
+
 	// Emit an incomplete for each record
 	FOREACH( TreePtr<Declaration> pd, sorted ) //for( int i=0; i<sorted.size(); i++ )
 		if( TreePtr<Record> r = dynamic_pointer_cast<Record>(pd) ) // is a record

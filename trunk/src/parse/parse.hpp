@@ -742,6 +742,7 @@ private:
 
 		virtual void AddInitializerToDecl(DeclTy *Dcl, ExprArg Init)
 		{
+		    TRACE();
 			TreePtr<Declaration> d = hold_decl.FromRaw(Dcl);
 
 			TreePtr<Instance> o = dynamic_pointer_cast<Instance> (d);
@@ -759,6 +760,21 @@ private:
 								ai, r);
 		}
 
+        /// AddCXXDirectInitializerToDecl - This action is called immediately after 
+        /// ActOnDeclarator, when a C++ direct initializer is present.
+        /// e.g: "int x(1);"
+        virtual void AddCXXDirectInitializerToDecl(DeclTy *Dcl,
+                                                   clang::SourceLocation LParenLoc,
+                                                   ExprTy **Exprs, unsigned NumExprs,
+                                                   clang::SourceLocation *CommaLocs,
+                                                   clang::SourceLocation RParenLoc) 
+        {
+		    TRACE();
+			TreePtr<Declaration> d = hold_decl.FromRaw(Dcl);
+			TreePtr<Instance> o = dynamic_pointer_cast<Instance> (d);
+            TRACE("Ignoring C++ direct initialiser for SC Modules, not supported in general\n"); 
+        }
+        
 		// Clang tends to parse parameters and function bodies in seperate
 		// scopes so when we see them being used we don't recognise them
 		// and cannot link back to the correct Instance node. This function
