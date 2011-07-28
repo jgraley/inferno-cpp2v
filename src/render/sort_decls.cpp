@@ -4,6 +4,58 @@
 
 using namespace CPPTree;
 
+/** Walks the tree, avoiding recursing into the body (initialiser) of Subroutines. */
+class TraverseNoBody_iterator : public Traverse::iterator
+{
+public:
+    TraverseNoBody_iterator( TreePtr<Node> &root ) : Traverse::iterator(root) {}        
+    TraverseNoBody_iterator() : Traverse::iterator() {}
+protected:
+    virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
+    {
+        // We need to create a container of elements of the child.
+        if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>( n ) ) // an instance...
+            if( dynamic_pointer_cast<Subroutine>( i->type ) ) // ...of a function
+            {
+                // it's an instance, so set up a container containing type and identifier only, 
+                // not initialiser (others don't matter for deps purposes). We need 
+                // the type for params etc
+                shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
+                seq->push_back( i->type );
+                seq->push_back( i->identifier );
+                return seq;
+            }
+        // it's not a slave, so proceed as for Traverse
+        return Traverse::iterator::GetChildContainer(n);
+    }
+};
+
+typedef ContainerFromIterator< TraverseNoBody_iterator, TreePtr<Node> > TraverseNoBody;
+
+/** Walks the tree, avoiding recursing into the body (initialiser) of Subroutines. */
+class TraverseNoBodyOrIndirection_iterator : public TraverseNoBody::iterator
+{
+public:
+    TraverseNoBodyOrIndirection_iterator( TreePtr<Node> &root ) : TraverseNoBody::iterator(root) {}        
+    TraverseNoBodyOrIndirection_iterator() : TraverseNoBody::iterator() {}
+private:
+    virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
+    {
+        // We need to create a container of elements of the child.
+        if( dynamic_pointer_cast<Indirection>( n ) ) // an instance...
+        {
+            shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
+            return seq;
+        }
+        // it's not a slave, so proceed as for Traverse
+        return TraverseNoBody::iterator::GetChildContainer(n);
+    }
+};
+
+
+typedef ContainerFromIterator< TraverseNoBodyOrIndirection_iterator, TreePtr<Node> > TraverseNoBodyOrIndirection;
+
+// Does a depend on b?
 bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_indirection_to_record )
 {
 	if( a == b )
@@ -20,11 +72,14 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     TreePtr<Identifier> ib = GetIdentifier( b );
     ASSERT(ib);
           
-    Expand w( a );
-    Expand::iterator wa=w.begin();
-    while(!(wa == w.end()))
+    TraverseNoBody wnb( a );
+    TraverseNoBodyOrIndirection wnbi( a );
+    ContainerInterface *w = ignore_indirection ? (ContainerInterface *)&wnbi : (ContainerInterface *)&wnb;
+        
+    ContainerInterface::iterator wa=w->begin();
+    while(!(wa == w->end()))
     {
-    	if( ignore_indirection ) // are we to ignore pointers/refs?
+    /*	if( ignore_indirection ) // are we to ignore pointers/refs?
     	{
     		if( TreePtr<Indirection> inda = TreePtr<Indirection>::DynamicCast(*wa) ) // is a a pointer or ref?
     		{
@@ -35,7 +90,7 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     	        }
     		}
     	}
-    	
+    	*/
         if( TreePtr<Node>(*wa) == TreePtr<Node>(ib) ) // If we see b in *any* other context under a's type, there's dep.
             return true;                
 
@@ -72,6 +127,7 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
     // place in s. Repeat until we've done all the decls at which point cc is empty.
     // If no non-dependent decl may be found in cc then it's irredemably circular and
     // we fail. This looks like O(N^3). Well, that's just a damn shame.
+	TRACE("Adding decls in dep order: ");
 	while( !cc.empty() )
 	{
 		bool found = false; // just for ASSERT check
@@ -85,16 +141,24 @@ Sequence<Declaration> SortDecls( ContainerInterface &c, bool ignore_indirection_
 		    }
 		    if( !a_has_deps )
 		    {
+		        TRACE(*a)(" ");
 				s.push_back(a);
 				cc.erase(a);
 				found = true;
 		        break;
 		    }
 		}
-		ASSERT( found );//("failed to find a decl to add without dependencies");
+
+		if( !found )
+		{   
+		    TRACE("\nRemaining unsequenceable decls: ");
+		    FOREACH( const TreePtr<Declaration> &a, cc )
+   		        TRACE(*a)(" ");
+		}
+		ASSERT( found )("\nfailed to find a decl to add without dependencies, maybe circular\n");
 		//TRACE("%d %d\n", s.size(), c.size() );
 	}
-
+    TRACE("\n");
 	ASSERT( s.size() == ocs );
 	return s;
 }

@@ -14,8 +14,8 @@ IdentifierTracker::IdentifierTracker( shared_ptr<Node> g ) :
     ts->II = NULL;
     ts->node = g;
     tnodes.push_back( ts );
-    TRACE("Global tnode t%p\n", ts.get() );
-    current = ts;
+    TRACE("Global tnode %s\n", ToString(ts).c_str() );
+    scope_stack.push( ts );
 }
 
 shared_ptr<IdentifierTracker::TNode> IdentifierTracker::Find( shared_ptr<Node> node )
@@ -24,7 +24,7 @@ shared_ptr<IdentifierTracker::TNode> IdentifierTracker::Find( shared_ptr<Node> n
     shared_ptr<TNode> found;
     for( int i=0; i<tnodes.size(); i++ )
     {
-        //TRACE("%d of %d t%p\n", i, tnodes.size(), tnodes[i].get() );
+        //TRACE("%d of %d T%p\n", i, tnodes.size(), tnodes[i].get() );
         if( tnodes[i]->node == node )
             return tnodes[i];
     }
@@ -32,39 +32,61 @@ shared_ptr<IdentifierTracker::TNode> IdentifierTracker::Find( shared_ptr<Node> n
     return shared_ptr<TNode>();
 }
 
+void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<Node> n )
+{
+    shared_ptr<TNode> ts;
+    if( n )
+    {
+        ts = Find( n );
+    }
+    else
+    {
+        ts = shared_ptr<TNode>( new TNode );    
+        ts->cs = NULL;
+        ts->parent = shared_ptr<TNode>(); 
+        ts->II = NULL;
+        ts->node = shared_ptr<Node>();
+    }
+        
+    ASSERT( ts );
+    PushScope( S, ts );    
+}
+
+
 void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<TNode> ts )
 {
     // If scope has no decls, clang will not invoke ActOnPopScope()
     // so we set a non-NULL rubbish value in there whenever we push, in order
     // to be sure of getting a corresponding pop
-    clang::IdentifierInfo *fake_id = (clang::IdentifierInfo *)0xbad1dbad;    
-    S->AddDecl(fake_id); 
-    ts->cs = S;
-    ASSERT( ts->parent == current ); 
+    TRACE("push new=%s clang=S%p top=%s\n", ToString( ts ).c_str(), S, ToString( scope_stack.top() ).c_str() );
     
-    TRACE("push %s s%p\n", ToString( ts ).c_str(), S );
-    current = ts;    
+    if( S )
+    {
+        clang::IdentifierInfo *fake_id = (clang::IdentifierInfo *)0xbad1dbad;    
+        S->AddDecl(fake_id); 
+        ts->cs = S;
+    }
+    else
+    {
+        ASSERT( ts->cs ); 
+    }
+    
+    //ASSERT( ts->parent == scope_stack.top() );     
+    scope_stack.push( ts );    
 }
+
 
 // Dump the current scope and move back to the parent
 void IdentifierTracker::PopScope(clang::Scope *S) 
 {
-    TRACE("pop %s s%p s%p\n", ToString(current).c_str(), current->cs, S );
-    if( current && current->cs == S ) // do not pop if we never pushed because didnt get an Add() for this scope
+    TRACE("pop top=%s clang=S%p\n", ToString(scope_stack.top()).c_str(), S );
+    if( !scope_stack.empty() && scope_stack.top() && (!S || scope_stack.top()->cs == S) ) // do not pop if we never pushed because didnt get an Add() for this scope
     {
-        current = current->parent;
+        scope_stack.pop();
     }
-    TRACE("done pop %s s%p\n", ToString(current).c_str(), S );
+    //TRACE("done pop %s S%p\n", ToString(scope_stack.top()).c_str(), S );
 }
 
-void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<Node> n )
-{
-    shared_ptr<TNode> ts;
-    ts = Find( n );
-    TRACE("Found t%p\n", ts.get() );
-    ASSERT( ts );
-    PushScope( S, ts );    
-}
 
 void IdentifierTracker::NewScope( clang::Scope *S )
 {
@@ -84,7 +106,7 @@ void IdentifierTracker::NewScope( clang::Scope *S )
         TRACE("no next_record; \n");
         shared_ptr<TNode> ts = shared_ptr<TNode>( new TNode );    
         ts->II = NULL;
-        ts->parent = current;
+        ts->parent = scope_stack.top();
         PushScope( S, ts );
     }
 }
@@ -94,10 +116,13 @@ void IdentifierTracker::SeenScope( clang::Scope *S )
     // Detect a change of scope and create a new scope if required. Do not do anything for
     // global scope (=no parent) - in that case, we leave the current scope as NULL
     ASSERT(S);
-    if( S->getParent() && (!current || current->cs != S) )
+    if( S->getParent() && (scope_stack.empty() || !scope_stack.top() || scope_stack.top()->cs != S) )
     {
-        TRACE("Seen new clang::Scope s%p; \n", S);
-        NewScope( S );
+        TRACE("Seen new clang=S%p", S);
+        if( !scope_stack.empty() && scope_stack.top() )
+            TRACE(" top=")(ToString(scope_stack.top()));
+        TRACE("\n");
+       NewScope( S );
     }
 }
 
@@ -110,22 +135,23 @@ void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> node, c
     shared_ptr<TNode> i( new TNode );    
     i->II = II;
     i->node = node;
-    i->parent = current;  
+    i->parent = scope_stack.top();  
     i->cs = NULL; // Remember cs is the clang scope *owned* by i
     tnodes.push_back( i );
       
-    TRACE("added t%p %s (%p) at %s t%p\n", i.get(), ToString( i ).c_str(), node.get(), ToString( current ).c_str(), current.get() );    
+    TRACE("added %s new=%p top=%s clang=S%p\n", ToString( i ).c_str(), node.get(), ToString( scope_stack.top() ).c_str(), S );    
 }
 
 
 // Just for debug; make a pretty string of the scope
-string IdentifierTracker::ToString( shared_ptr<TNode> ts )
+string IdentifierTracker::ToString( shared_ptr<TNode> tss )
 {
-    if( !ts )
-        return string("<nil>");
+    if( !tss )
+        return string("T<nil>");
 
     string s;
     int i=0;
+    shared_ptr<TNode> ts = tss;
     while( ts )
     {        
         if( ts->node == global )
@@ -138,7 +164,7 @@ string IdentifierTracker::ToString( shared_ptr<TNode> ts )
         else
         {
             char c[100];
-            sprintf( c, "t%p", ts.get() );
+            sprintf( c, "T%p", ts.get() );
             ss = string(c) + s;
         }
         s = "::" + ss;
@@ -149,6 +175,11 @@ string IdentifierTracker::ToString( shared_ptr<TNode> ts )
     
     if( s.empty() )
         s = "::"; // global scope
+    
+    s = SSPrintf("T%pS%p\"", tss.get(), tss->cs) + s + "\"";
+
+    if( tss->parent )
+        s += SSPrintf("->T%p", tss->parent.get() );
     
     return s;
 }
@@ -204,15 +235,30 @@ int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNod
 shared_ptr<Node> IdentifierTracker::Get( const clang::IdentifierInfo *II, shared_ptr<Node> iscope, bool recurse )
 {
     ASSERT(II);
+    TRACE();
     shared_ptr<Node> n = TryGet( II, iscope, recurse );
-    ASSERT(n.get())("Decl not found : ")(II->getName()); 
+    if( !n ) // All just tracing to see what went wrong
+    {
+        TRACE("recurse=%s\n", recurse?"true":"false");
+        if(iscope)
+        {
+            TRACE("iscope: ")(*iscope)("\n");
+        }
+        else
+        {
+            FOREACH( shared_ptr<TNode> x, tnodes )
+            {
+                TRACE(ToString(x))("\n");
+            }
+        }
+    }
+    ASSERT(n)("Decl not found : ")(II->getName()); 
     return n;
 }
 
 
 shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, shared_ptr<Node> iscope, bool recurse )
 {
-    TRACE();
     ASSERT(II);
     
     // Choose the required identifier via a proximity search
@@ -220,7 +266,6 @@ shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, sha
     if( iscope )
     {
         // A C++ style scope was supplied (iscope::II) - search in here and don't recurse
-        TRACE("%p %p %p\n", iscope.get(), global.get(), tnodes[0]->node.get() );
         start = Find( iscope );
         ASSERT(start);
         recurse = false; // Never recurse with a C++ scope - they are exact specifications
@@ -228,9 +273,11 @@ shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, sha
     else
     {
         // No C++ scope, so use the current scope and recurse through parents
-        start = current;
+        start = scope_stack.top();
         ASSERT(start);
     }
+
+    TRACE("TryGet ")(II->getName())(" in scope ")(ToString(start))(" only, ")(iscope?"C++ ":"")(recurse?"":"not ")("recursive\n"); 
         
     int best_distance=NOMATCH;
     shared_ptr<TNode> best_tnode;

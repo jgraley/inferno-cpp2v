@@ -235,6 +235,7 @@ private:
 		virtual bool isCurrentClassName(const clang::IdentifierInfo& II,
 				clang::Scope *S, const clang::CXXScopeSpec *SS)
 		{
+		    TRACE();
 			ident_track.SeenScope(S);
 
 			TreePtr<Node> cur = ident_track.GetCurrent();
@@ -248,6 +249,7 @@ private:
 
 		virtual void ActOnPopScope(clang::SourceLocation Loc, clang::Scope *S)
 		{
+		    TRACE();
 			ident_track.PopScope(S);
 		}
 
@@ -501,6 +503,7 @@ private:
 				clang::Declarator &D, TreePtr<AccessSpec> access =
 						TreePtr<AccessSpec> (), bool automatic = false)
 		{
+		    TRACE();
 			const clang::DeclSpec &DS = D.getDeclSpec();
 			if (!access)
 				access = TreePtr<Private> (new Private); // Most scopes are private unless specified otherwise
@@ -704,9 +707,8 @@ private:
 		virtual DeclTy *ActOnDeclarator(clang::Scope *S, clang::Declarator &D,
 				DeclTy *LastInGroup)
 		{
+    		TRACE("Scope S%p\n", S);
 			ident_track.SeenScope(S);
-
-			TRACE();
 			// TODO the spurious char __builtin_va_list; line comes from the target info.
 			// Create an inferno target info customised for Inferno that doesn't do this.
 			if (strcmp(D.getIdentifier()->getName(), "__builtin_va_list") == 0)
@@ -772,7 +774,13 @@ private:
 		    TRACE();
 			TreePtr<Declaration> d = hold_decl.FromRaw(Dcl);
 			TreePtr<Instance> o = dynamic_pointer_cast<Instance> (d);
-            TRACE("Ignoring C++ direct initialiser for SC Modules, not supported in general\n"); 
+            TRACE("Ignoring C++ direct initialiser for SC Modules, not supported in general\n"); // TODO try the code below...
+		   // TreePtr<Instance> cm = GetConstructor( d->type );
+		   // ASSERT( cm );
+		   // ASSERT( cm->identifier );
+		   // Sequence<Expression> args;
+		   // CollectArgs( &args, Exprs, NumExprs );
+		   // TreePtr<Call> c = CreateCall( args, cm->identifier );
         }
         
 		// Clang tends to parse parameters and function bodies in seperate
@@ -790,7 +798,7 @@ private:
 {			TRACE();
 			clang::IdentifierInfo *paramII = backing_params[param];
 			backing_params.erase( param );
-			TRACE("%p %p %s\n", param.get(), paramII, paramII->getName());
+			TRACE("%p %p %s S%p\n", param.get(), paramII, paramII->getName(), FnBodyScope);
 			if( paramII )
 			ident_track.Add( paramII, param, FnBodyScope );
 		}
@@ -800,16 +808,22 @@ private:
 	// body to ActOnDeclarator, since the function decl itself is not inside its own body.
 	virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, clang::Declarator &D)
 	{
+	    TRACE();
+	    // Declarator is outside function sope, otherwise it would be in its own scope and unfindable
+	    DeclTy *DT = ActOnDeclarator(FnBodyScope->getParent(), D, 0);
+	    // Now enter function's scope. Use node from existing declaration so we get any enclosing classes
+	    TreePtr<Node> n = FindExistingDeclaration(D, false);
+	    ident_track.PushScope( FnBodyScope->getParent(), n );
 		// Default to ActOnDeclarator.
-		return ActOnStartOfFunctionDef(FnBodyScope,
-				ActOnDeclarator(FnBodyScope->getParent(), D, 0));
+		return ActOnStartOfFunctionDef(FnBodyScope, DT);
 	}
 
 	virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, DeclTy *D)
 	{
-		TRACE();
+		TRACE("FnBodyScope S%p\n", FnBodyScope);
 		TreePtr<Instance> o = dynamic_pointer_cast<Instance>(hold_decl.FromRaw(D));
-		ASSERT(o);
+		ASSERT(o);		
+		//ident_track.SeenScope( FnBodyScope );
 
 		if( TreePtr<Procedure> pp = dynamic_pointer_cast<Procedure>( o->type ) )
 		AddParamsToScope( pp, FnBodyScope );
@@ -821,7 +835,7 @@ private:
 		// If we tried to do this ourselves we'd lose the nested compound
 		// statement hierarchy.
 		inferno_scope_stack.push( TreePtr<Scope>(new Scope) );
-
+ 
 		return hold_decl.ToRaw( o );
 	}
 
@@ -843,6 +857,7 @@ private:
 		TRACE("finish fn %d statements %d total\n", cb->statements.size(), (dynamic_pointer_cast<Compound>(o->initialiser))->statements.size() );
 
 		inferno_scope_stack.pop(); // we dont use these - we use the clang-managed compound statement instead (passed in via Body)
+        ident_track.PopScope(NULL);
 		return Decl;
 	}
 
@@ -880,6 +895,7 @@ private:
 			bool HasTrailingLParen,
 			const clang::CXXScopeSpec *SS = 0 )
 	{
+	    TRACE("S%p\n", S);
 		TreePtr<Node> n = ident_track.Get( &II, FromCXXScope( SS ) );
 		TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
 		TreePtr<Instance> o = dynamic_pointer_cast<Instance>( n );
@@ -1374,10 +1390,10 @@ private:
 	{
 		//ASSERT( !FromCXXScope(&SS) && "We're not doing anything with the C++ scope"); // TODO do something with the C++ scope
 		// Now we're using it to link up with forward decls eg class foo { struct s; }; struct foo::s { blah } TODO is this even legal C++?
-
+        
+		TRACE("Tag type %d, kind %d\n", TagType, (int)TK);
 		ident_track.SeenScope( S );
 
-		TRACE("Tag type %d, kind %d\n", TagType, (int)TK);
 		// TagType is an instance of DeclSpec::TST, indicating what kind of tag this
 		// is (struct/union/enum/class).
 
@@ -1455,7 +1471,7 @@ private:
 	virtual void ActOnStartCXXClassDef(clang::Scope *S, DeclTy *TagDecl,
 			clang::SourceLocation LBrace)
 	{
-		TRACE();
+		TRACE("S%p\n", S);
 
 		// Just populate the members container for the Record node
 		// we already created. No need to return anything.
@@ -1521,7 +1537,12 @@ private:
 		TreePtr<Record> rbase = GetRecordDeclaration(all_decls, tibase);
 		ASSERT( rbase )( "thing on left of ./-> is not a record/record ptr" );
 		TreePtr<Instance> m = FindMemberByName( all_decls, rbase, string(Member.getName()) );
-		ASSERT(m)("in r.m or (&r)->m, could not find m in r");
+		ASSERT(m)("in r.m or (&r)->m, could not find m in r\n"
+		          "m is %s, r is ", 
+		          Member.getName())
+		          (*rbase)
+		          (" named ")
+		          (*tibase);
 
 		a->member = m->identifier;
 
@@ -1849,7 +1870,7 @@ private:
 		TRACE();
 		TreePtr<Node> n = FromCXXScope( &SS );
 		ASSERT(n);
-		ident_track.PushScope( S, n );
+		ident_track.PushScope( NULL, n );
 	}
 
 	/// ActOnCXXExitDeclaratorScope - Called when a declarator that previously
@@ -1860,7 +1881,7 @@ private:
 	virtual void ActOnCXXExitDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS)
 	{
 		TRACE();
-		ident_track.PopScope( S );
+		ident_track.PopScope( NULL );
 	}
 
 	TreePtr<Instance> GetConstructor( TreePtr<Type> t )

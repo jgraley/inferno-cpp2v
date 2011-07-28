@@ -1,10 +1,12 @@
 
 #include "systemc_detection.hpp"
 #include "tree/cpptree.hpp"
+#include "tree/typeof.hpp"
 
 using namespace CPPTree;
 using namespace SCTree;
 using namespace Steps;
+
 
 
 /// spot SystemC type by its name and replace with inferno node 
@@ -88,6 +90,8 @@ public:
  across by name match as per Inferno's MapOperator style. */
 class DetectSCWaitParm : public CompareReplace  // Note not SearchReplace
 {
+// TODO ensure param really evaluates to an event, as per DetectSCNotify above
+// OR ensure inside a Module
 public:
     DetectSCWaitParm()
     {
@@ -124,6 +128,7 @@ public:
 
 class DetectSCWaitNoParm : public CompareReplace  // Note not SearchReplace
 {
+// TODO ensure inside a Module
 public:
     DetectSCWaitNoParm()
     {
@@ -253,31 +258,85 @@ public:
     }
 };
 
+
+
 /// Remove constructors in SC modules that are now empty thanks to earlier steps
-class RemoveEmptyModuleConstructors : public SearchReplace
+/// Must also remove explicit calls to constructor (which would not do anything)
+class RemoveEmptyModuleConstructors : public CompareReplace
 {
 public:
     RemoveEmptyModuleConstructors()
     {
-        MakeTreePtr< Star<Declaration> > decls;
-        MakeTreePtr< Compound > s_comp;
+        MakeTreePtr< Stuff<Scope> > stuff;
+        MakeTreePtr< Overlay<Scope> > over;
+        MakeTreePtr< Star<Declaration> > decls, l_decls;
+        MakeTreePtr< Star<Statement> > l_pre, l_post;
+        MakeTreePtr< Star<MapOperand> > ls_args;
+        MakeTreePtr< Compound > s_comp, ls_comp, lr_comp;
         MakeTreePtr< Module > s_module, r_module;
+        MakeTreePtr< Call > ls_call;
+        MakeTreePtr< Lookup > ls_lookup;
         MakeTreePtr< Instance > s_cons;
+        MakeTreePtr< InstanceIdentifier > s_id;
         MakeTreePtr< Star<Automatic> > s_params;
         MakeTreePtr<Constructor> s_ctype;
         MakeTreePtr< Star<Base> > bases;        
+        MakeTreePtr< SlaveSearchReplace<Node> > r_slave( stuff, ls_comp, lr_comp );            
                         
+        // dispense with an empty constructor                 
+        stuff->terminus = over;
+        over->through = s_module;
+        over->overlay = r_module;
         s_module->members = (s_cons, decls);
         s_module->bases = (bases);
         s_cons->type = MakeTreePtr<Constructor>();        
         s_cons->initialiser = s_comp;
         // s_comp's members and statements left empty to signify empty constructor
+        s_cons->identifier = s_id;
         s_cons->type = s_ctype;
         s_ctype->members = (s_params); // any parameters
         r_module->members = (decls);
         r_module->bases = (bases);
                 
-        Configure( s_module, r_module );
+        // dispense with any calls to it
+        ls_comp->members = (l_decls);
+        ls_comp->statements = (l_pre, ls_call, l_post);
+        ls_call->callee = ls_lookup;
+        ls_call->operands = ls_args; // any number of args, it doesn't matter, ctor is still empty so does nothing
+        ls_lookup->member = s_id;        
+        lr_comp->members = (l_decls);
+        lr_comp->statements = (l_pre, l_post);
+                
+        Configure( stuff, r_slave );
+    }
+};
+
+
+/// spot SystemC notify() method by its name and replace with inferno node 
+/** Look for myevent.notify() and replace with Notify->myevent. No need to 
+    eliminate the notify decl - that disappeared with the sc_event class */
+class DetectSCNotify : public SearchReplace  
+{
+public:
+    DetectSCNotify()
+    {
+        MakeTreePtr<Call> s_call;
+        MakeTreePtr<Lookup> s_lookup;
+        MakeTreePtr<Event> s_event;
+        MakeTreePtr<Notify> r_notify;
+        MakeTreePtr< InstanceIdentifierByName > s_token( r_notify->GetToken() );                
+        MakeTreePtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
+        //MakeTreePtr< Expression > eexpr; 
+                
+        s_call->callee = s_lookup;
+        //s_call->operands = ();
+        s_lookup->base = eexpr;          
+        eexpr->pattern = s_event;     // ensure base really evaluates to an event 
+        s_lookup->member = s_token;        
+
+        r_notify->event = eexpr;
+           
+        Configure( s_call, r_notify );
     }
 };
 
@@ -297,5 +356,6 @@ DetectAllSCTypes::DetectAllSCTypes()
     push_back( shared_ptr<Transformation>( new DetectSCProcess( MakeTreePtr<ClockedThread>() ) ) );    
     push_back( shared_ptr<Transformation>( new DetectSCProcess( MakeTreePtr<Method>() ) ) );    
     push_back( shared_ptr<Transformation>( new RemoveEmptyModuleConstructors ) );    
+    push_back( shared_ptr<Transformation>( new DetectSCNotify ) );    
 }
 

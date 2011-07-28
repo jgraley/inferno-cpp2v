@@ -5,13 +5,16 @@ resfile=test/results.csv
 
 if test $# -eq 0
 then
- echo Usage: $0 \<input program\> [\<results log file\>]
+ echo Usage: $0 \<input program\> [\<results log file\>] [\<arguments for inferno\>]
  echo from inferno-cpp2v/trunk/
  exit 1
 fi
 
 infile=$1
-resfile=$2
+shift
+resfile=$1
+shift
+iargs=$*
 fb=`basename $infile`
 outfile=test/results/$fb
 
@@ -56,7 +59,7 @@ fi
 
 echo Transform... 
 # Always do self-test
-time $inferno -s -ap -i$infile -o$outfile
+time $inferno -s -ap -i$infile -o$outfile $iargs
 ires=$?
 
 if test $ires -eq 0

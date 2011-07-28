@@ -56,6 +56,14 @@ struct Wait : CPPTree::Statement,
     TreePtr<CPPTree::Initialiser> event; ///< event to wait for or Uninitialised for static sens 
 };
 
+struct Notify : CPPTree::Statement,
+                SCNamedFunction
+{
+    NODE_FUNCTIONS_FINAL
+    virtual string GetToken() { return "notify"; }
+    TreePtr<CPPTree::Initialiser> event; ///< event to wait for or Uninitialised for static sens 
+};
+
 struct Process : CPPTree::Subroutine,
                  SCNamedConstruct 
 {

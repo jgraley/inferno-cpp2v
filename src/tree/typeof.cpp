@@ -52,7 +52,9 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     }
     else if( TreePtr<Lookup> l = dynamic_pointer_cast<Lookup>(o) ) // a.b; just return type of b
     {
-        return Get( l->member );
+        TreePtr<Type> t = Get( l->member );
+        TRACE("TypeOf Lookup: ")(*(l->base))(" . ")(*(l->member))(" is ")(*t)("\n");
+        return t;
     }
     else if( TreePtr<Cast> c = dynamic_pointer_cast<Cast>(o) )
     {
