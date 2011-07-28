@@ -38,7 +38,7 @@ class IdentifierTracker
     };
     
     // Our best effort to determine the current scope
-    shared_ptr<TNode> current;
+    stack< shared_ptr<TNode> > scope_stack;
     
     // Every TNode we ever create goes in this list, and is never deleted. 
     deque< shared_ptr<TNode> > tnodes; 
@@ -103,7 +103,7 @@ public:
     
     shared_ptr<Node> GetCurrent()
     {
-        return current->node;
+        return scope_stack.top()->node;
     }
 };
 

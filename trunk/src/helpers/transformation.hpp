@@ -4,6 +4,16 @@
 #include "node/node.hpp"
 #include "common/trace.hpp"
 
+// TODO For in-place, use (*pcontext, *proot) rather than (context, *root). This 
+// way the caller has to decide whether the context node is the same as the root node, 
+// or some ancestor. If proot==pcontext, then writes through proot will magically 
+// become visible through pcontext. If they differ, assume *proot is under *pcontext, 
+// and therefore *pcontext does not need to change. Add an assert somewhere that 
+// *proot is indeed somewhere under *pcontext (or they are the same).
+// Then remove the if( context == *proot ) checks from TransformationVector
+// and CompareReplace. Really, this TODO is just to use these two local 
+// policies as the general policy.
+
 class Transformation : public Traceable
 {
 public:
@@ -70,8 +80,13 @@ class TransformationVector : public vector< shared_ptr<Transformation> >,
     virtual void operator()( TreePtr<Node> context,     // The whole program, so declarations may be searched for
 		                     TreePtr<Node> *proot )     // Root of the subtree we want to modify
     {
+        TreePtr<Node> *pcontext;
+        if( context = *proot )
+            pcontext = proot;
+        else 
+            pcontext = &context;
         FOREACH( shared_ptr<Transformation> t, *this )
-            (*t)(context, proot);
+            (*t)(*pcontext, proot);
     }		                           
 };
 

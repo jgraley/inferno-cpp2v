@@ -13,7 +13,10 @@
 // Inferno SystemC nodes. Since this is done using S&R, we can introduce any old construct here that
 // captures the necessary information.
 
-class sc_event;
+class sc_event
+{ 
+    void notify();
+};
 
 class sc_module;
 #define SC_MODULE(X) class X : public sc_module
@@ -35,6 +38,8 @@ void exit( int code );
 // Reduce the macros we define outside of the SC standard to when SC expects.
 // Introdude real SystemC header file
 #include <systemc.h>
+
+#define SC_PORT(X) sc_port<X>
 
 
 #endif // inferno

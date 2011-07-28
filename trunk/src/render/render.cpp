@@ -244,7 +244,7 @@ string Render::RenderType( TreePtr<Type> type, string object )
 	else if( TreePtr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
 		return RenderIdentifier(t->identifier) + sobject;
 	else if( TreePtr<SpecificTypeIdentifier> ti = dynamic_pointer_cast< SpecificTypeIdentifier >(type) )
-		return RenderIdentifier(ti) + sobject;
+		return RenderScopedIdentifier(ti) + sobject;
 	else if( shared_ptr<SCNamedIdentifier> sct = dynamic_pointer_cast< SCNamedIdentifier >(type) )
 		return sct->GetToken() + sobject;
 	else
@@ -432,7 +432,7 @@ string Render::RenderMapInOrder( TreePtr<MapOperator> ro,
 	string s;
 
 	// Get a reference to the ordered list of members for this record from a backing list
-	ASSERT( backing_ordering.IsExist( r ) );
+	ASSERT( backing_ordering.IsExist( r ) )("Needed to see ")(*r)(" before ")(*ro)(" so decls may not be sorted correctly\n");
 	Sequence<Declaration> &sd = backing_ordering[r];
 	ASSERT( sd.size() == r->members.size() );
 	bool first = true;
@@ -563,13 +563,16 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 
 	bool subroutine = dynamic_pointer_cast<Subroutine>(o->type);
 
-	if( TreePtr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>(o->type) )
-	    if( TreePtr<Record> r = GetRecordDeclaration(program, tid) )
-	        if( dynamic_pointer_cast<Module>(r) )
-	        {
-	            s += "(\"" + RenderIdentifier(o->identifier) + "\")" + sep;
-	            return s;
-	        }
+    // If object is really a module, bodge in a name as a constructor parameter
+    // But not for fields - they need an init list, done in RenderDeclarationCollection()
+	if( !dynamic_pointer_cast<Field>(o) )
+	    if( TreePtr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>(o->type) )
+	        if( TreePtr<Record> r = GetRecordDeclaration(program, tid) )
+	            if( dynamic_pointer_cast<Module>(r) )
+	            {
+	                s += "(\"" + RenderIdentifier(o->identifier) + "\")" + sep;
+	                return s;
+	            }
 	
 	if( !showinit || dynamic_pointer_cast<Uninitialised>(o->initialiser) )
 	{
@@ -834,16 +837,20 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep )
 		return "break" + sep;
 	else if( dynamic_pointer_cast<Nop>(statement) )
 		return sep;
-	else if( TreePtr<Wait> c = dynamic_pointer_cast<Wait>(statement) )
+	else if( TreePtr<Wait> c = dynamic_pointer_cast<Wait>(statement) ) // TODO here and below, use GetToken()
 	{
 	    if( dynamic_pointer_cast<Expression>(c->event) )
-		    return "wait( " + RenderExpression(c->event) + " );\n";
+		    return c->GetToken() + "( " + RenderExpression(c->event) + " );\n";
 		else
-		    return "wait();\n";
+		    return c->GetToken() + "();\n";
     }
-	else if( TreePtr<Exit> c = dynamic_pointer_cast<Exit>(statement) )
+	else if( TreePtr<Exit> e = dynamic_pointer_cast<Exit>(statement) )
 	{
-		return "exit( " + RenderExpression(c->code) + " );\n";
+		return e->GetToken() + "( " + RenderExpression(e->code) + " );\n";
+    }
+	else if( TreePtr<Notify> n = dynamic_pointer_cast<Notify>(statement) )
+	{
+		return RenderExpression( n->event, true ) + "." + n->GetToken() + "();\n";
     }
     else
 		return ERROR_UNSUPPORTED(statement);
@@ -916,8 +923,24 @@ string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
             s += "public:\n";
             init_access = MakeTreePtr<Public>();// note that we left the access as public
         }
-        s += "SC_CTOR( " + RenderIdentifier( m->identifier ) + " )\n";
-        s += "{\n";
+        s += "SC_CTOR( " + RenderIdentifier( m->identifier ) + " )";
+        int first = true;
+        // Bodge an init list that names any fields we have that are modules
+        FOREACH( TreePtr<Declaration> pd, sorted )
+            if( TreePtr<Field> f = dynamic_pointer_cast<Field>(pd) )
+                if( TreePtr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>(f->type) )
+	                if( TreePtr<Record> r = GetRecordDeclaration(program, tid) )
+	                    if( dynamic_pointer_cast<Module>(r) )
+	                    {
+	                        if( first )
+	                            s += " :";
+	                        else
+	                            s += ",";
+	                        string ids = RenderIdentifier(f->identifier);	                        
+	                        s += "\n" + ids + "(\"" + ids + "\")";
+	                        first = false;
+	                    }	    
+        s += "\n{\n";
         FOREACH( TreePtr<Declaration> pd, sorted )
             if( TreePtr<Field> f = dynamic_pointer_cast<Field>(pd) )
                 if( TreePtr<Process> r = dynamic_pointer_cast<Process>(f->type) )
