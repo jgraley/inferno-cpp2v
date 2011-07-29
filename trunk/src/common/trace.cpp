@@ -1,13 +1,13 @@
 #include "trace.hpp"
 #include <boost/assert.hpp>
 #include <stdarg.h>
-#include "read_args.hpp"
 #include <string.h>
 #include <cxxabi.h>
 #include <malloc.h>
 #include <unistd.h>
 
 bool Tracer::continuation = false;
+bool Tracer::enable = false; ///< call Tracer::Enable(true) to begin tracing
 string Tracer::Descend::pre;
 
 void Tracer::Descend::Indent()
@@ -53,8 +53,7 @@ Tracer::~Tracer()
 
 Tracer &Tracer::operator()()
 {
-    bool tracing = ReadArgs::trace && (!ReadArgs::quitenable || ReadArgs::quitafter==0); // if quitafter is enabled, only trace final pass
-    if( (flags & DISABLE) || !(tracing || (flags & FORCE)) )
+    if( (flags & DISABLE) || !(enable || (flags & FORCE)) )
         return *this;
  
     EndContinuation();
@@ -70,8 +69,7 @@ Tracer &Tracer::operator()()
 
 Tracer &Tracer::operator()(const char *fmt, ...)
 {
-    bool tracing = ReadArgs::trace && (!ReadArgs::quitenable || ReadArgs::quitafter==0); // if quitafter is enabled, only trace final pass
-    if( (flags & DISABLE) || !(tracing || (flags & FORCE)) )
+    if( (flags & DISABLE) || !(enable || (flags & FORCE)) )
         return *this;
 
     va_list vl;
@@ -105,6 +103,12 @@ void Tracer::EndContinuation()
         continuation = false;
     }   
 }
+
+void Tracer::Enable( bool e )
+{
+    enable = e;
+}
+
 
 // Make BOOST_ASSERT work (we don't use them but other code might)
 void boost::assertion_failed(char const * expr, char const * function, char const * file, long line)

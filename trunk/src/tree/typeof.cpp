@@ -44,7 +44,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     else if( TreePtr<Call> c = dynamic_pointer_cast<Call>(o) )
     {
         TreePtr<Type> t = Get(c->callee); // get type of the function itself
-        ASSERT( dynamic_pointer_cast<Subroutine>(t) )( "Trying to call something that is not a kind of Subroutine");
+        ASSERT( dynamic_pointer_cast<Callable>(t) )( "Trying to call something that is not Callable");
         if( TreePtr<Function> f = dynamic_pointer_cast<Function>(t) )
         	return f->return_type;
         else

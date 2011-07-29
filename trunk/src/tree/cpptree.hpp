@@ -28,7 +28,7 @@ struct Property : virtual Node { NODE_FUNCTIONS };
 
 /// Variable initialiser or function body
 /** This intermediate is used for an initial value for for a variable/object in
- which case it will be an Expression, or for the implementation of a Subroutine
+ which case it will be an Expression, or for the implementation of a Callable
  in which case it will be a Compound. For an uninitialised variable/object
  or a function declaration, it will be Uninitialised. */
 struct Initialiser : virtual Node { NODE_FUNCTIONS };
@@ -312,7 +312,7 @@ struct NonConst : Constancy { NODE_FUNCTIONS_FINAL };
 
 /// Declaration of a variable, object or function
 /** Instance represents a variable/object or a function. In case of function, type is a
- type under Subroutine and initialiser is a Statement (or Uninitialised for a function
+ type under Callable and initialiser is a Statement (or Uninitialised for a function
  declaration). For a variable/object, type is basically anything else, and if there is
  an initialiser, it is an Expression. We allow init here for various reasons including
  - it can be hard to know where to put stand-alone init for statics
@@ -327,8 +327,8 @@ struct Instance : Declaration,
 {
     NODE_FUNCTIONS
     TreePtr<InstanceIdentifier> identifier; ///< acts as a handle for the instance, and holds its name only as a hint
-    TreePtr<Type> type; ///< the Type of the instance, can be data or Subroutine type
-    TreePtr<Initialiser> initialiser; ///< init value for data, body for Subroutine type
+    TreePtr<Type> type; ///< the Type of the instance, can be data or Callable type
+    TreePtr<Initialiser> initialiser; ///< init value for data, body for Callable type
 };
 
 /// A variable or function with one instance across the entire program. 
@@ -418,30 +418,52 @@ struct Label : Declaration, //TODO commonize with Case and Default
 
 //////////////////////////// Anonymous Types ////////////////////////////
 
-/// Subroutine like in Basic, no params or return.
-/** Types under Subroutine refer to a function's interface as seen by 
+/// Anything that can be called
+/** Types under Callable refer to a function's interface as seen by 
  caller and as used in eg function pointers (which is simply Pointer to
  the function type). To actually have a function, with a body, you need
- an Instance with type filled in to something derived from Subroutine. */
-struct Subroutine : Type 
+ an Instance with type filled in to something derived from Callable. */
+struct Callable : Type
+{
+    NODE_FUNCTIONS
+};
+
+/// Anything that can be called and has parameters
+/** Parameters are generated as a sequence of automatic variable/object 
+ declarations (ie Instances) inside the Scope we derive from. */
+struct CallableParams : Callable,
+                        Scope // For the parameters
+{
+    NODE_FUNCTIONS
+};
+
+/// Anything that can be called and has parameters and return value
+struct CallableParamsReturn : CallableParams
+{
+    NODE_FUNCTIONS
+    TreePtr<Type> return_type; ///< The return type
+};
+
+/// Subroutine like in Basic, no params or return.
+/** Note: Subroutine has *explicitly* no params or return, this may be relied upon
+    in transformations that use Subroutine as a wildcard */
+struct Subroutine : Callable 
 {
     NODE_FUNCTIONS
 };
 
 /// A procedure like in pascal etc, params but no return value. 
-/** Parameters are generated as a sequence of automatic variable/object 
- declarations (ie Instances) inside the Scope we derive from. */
-struct Procedure : Subroutine,
-                   Scope // For the parameters
+/** Note: Procedure has *explicitly* no return, this may be relied upon
+    in transformations that use Subroutine as a wildcard */
+struct Procedure : CallableParams
 {
     NODE_FUNCTIONS
 };
 
 /// A function like in C, Pascal; params and a single return value of the specified type.
-struct Function : Procedure
+struct Function : CallableParamsReturn
 {
 	NODE_FUNCTIONS_FINAL
-    TreePtr<Type> return_type; ///< The return type of the function
 };
 
 /// A C++ constructor. The init list is just zero or more calls to constructors in the body
@@ -560,7 +582,7 @@ struct Typedef : UserType
 /// Intermediate for declaration of a struct, class, union or enum. 
 /** The set of member Declaration (which will be Field
  or Static) is in the Scope. They can be variables/objects in all 
- cases and additionally Subroutine instances in Struct/Class. */
+ cases and additionally Callable instances in Struct/Class. */
 struct Record : UserType,
                 Scope // Member declarations go in here
 {
@@ -722,13 +744,13 @@ struct MapOperator : Operator
 
 /// A function call to specified function passing in specified arguments
 /* Function is an expression to allow eg function pointer dereference. Normal
- calls have callee -> some InstanceIdentifier for a Subroutine Instance.
+ calls have callee -> some InstanceIdentifier for a Callable Instance.
  Arguments passed via MapOperator - mapped to the parameters in the callee
- type (if it's a Procedure). */
+ type (if it's a CallableParams). */
 struct Call : MapOperator
 {
 	NODE_FUNCTIONS_FINAL
-    TreePtr<Expression> callee; ///< evaluates to the Subroutine Instance we must call
+    TreePtr<Expression> callee; ///< evaluates to the Callable Instance we must call
 };
 
 /// Initialiser for a record 

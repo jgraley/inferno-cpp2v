@@ -89,7 +89,7 @@ void UniquifyIdentifiers::UniquifyScope( TreePtr<Node> root, VisibleIdentifiers 
 {
     bool func = false;
     if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>(root) )
-        func = !!dynamic_pointer_cast<Subroutine>(i->type);
+        func = !!dynamic_pointer_cast<Callable>(i->type);
     
     if(func)
     {

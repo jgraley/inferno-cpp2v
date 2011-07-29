@@ -28,7 +28,7 @@ GenerateImplicitCasts::GenerateImplicitCasts()
 	MakeTreePtr<Call> s_call;
 	MakeTreePtr< TransformOf<Expression> > callee( &TypeOf::instance );
 	s_call->callee = callee;
-	MakeTreePtr<Procedure> s_proc;
+	MakeTreePtr<CallableParams> s_proc;
 	callee->pattern = s_proc;
 	MakeTreePtr< Instance > s_param;
 	MakeTreePtr< InstanceIdentifier > param_id;

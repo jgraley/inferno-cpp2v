@@ -130,6 +130,7 @@ public:
     ParentTraverse_iterator( const ParentTraverse_iterator &other );
     ParentTraverse_iterator &operator=( const ParentTraverse_iterator &other );
     ParentTraverse_iterator( TreePtr<Node> &root );
+	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;    
 protected:
     UniqueFilter *unique_filter;
 };
@@ -149,6 +150,7 @@ public:
     Traverse_iterator( const Traverse_iterator &other );        
     Traverse_iterator &operator=( const Traverse_iterator &other );
     Traverse_iterator( TreePtr<Node> &root );
+	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;    
 protected:
     UniqueFilter *unique_filter;
 };

@@ -123,7 +123,7 @@ string Render::RenderScopePrefix( TreePtr<Identifier> id )
 		return RenderScopePrefix( e->identifier );    // omit scope for the enum itself
 	else if( TreePtr<Record> r = dynamic_pointer_cast<Record>( scope ) ) // <- for class, struct, union
 		return RenderScopedIdentifier( r->identifier ) + "::";
-	else if( dynamic_pointer_cast<Procedure>( scope ) ||  // <- this is for params
+	else if( dynamic_pointer_cast<CallableParams>( scope ) ||  // <- this is for params
 			 dynamic_pointer_cast<Compound>( scope ) )    // <- this is for locals in body
 		return string();
 	else
@@ -313,11 +313,11 @@ string Render::RenderCall( TreePtr<Call> call )
 
 	s += "(";
 
-	// If Procedure or Function, generate some arguments, resolving the order using the original function type
+	// If CallableParams, generate some arguments, resolving the order using the original function type
 	TreePtr<Node> ctype = TypeOf::instance( program, call->callee );
 	ASSERT( ctype );
-	if( TreePtr<Procedure> proc = dynamic_pointer_cast<Procedure>(ctype) )
-		s += RenderMapInOrder( call, proc, ", ", false );
+	if( TreePtr<CallableParams> cp = dynamic_pointer_cast<CallableParams>(ctype) )
+		s += RenderMapInOrder( call, cp, ", ", false );
 
 	s += ")";
 	return s;
@@ -432,7 +432,12 @@ string Render::RenderMapInOrder( TreePtr<MapOperator> ro,
 	string s;
 
 	// Get a reference to the ordered list of members for this record from a backing list
-	ASSERT( backing_ordering.IsExist( r ) )("Needed to see ")(*r)(" before ")(*ro)(" so decls may not be sorted correctly\n");
+	if( !backing_ordering.IsExist( r ) )
+	{
+	    TRACE("Needed to see ")(*r)(" before ")(*ro)(" so map may not match; sorting now\n");	    
+	    backing_ordering[r] = SortDecls( r->members, true );
+	}
+	ASSERT( backing_ordering.IsExist( r ) );
 	Sequence<Declaration> &sd = backing_ordering[r];
 	ASSERT( sd.size() == r->members.size() );
 	bool first = true;
@@ -442,7 +447,7 @@ string Render::RenderMapInOrder( TreePtr<MapOperator> ro,
 		if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
 		{
 			// ...and not function instances
-			if( !dynamic_pointer_cast<Subroutine>( i->type ) )
+			if( !dynamic_pointer_cast<Callable>( i->type ) )
 			{
 				// search init for matching member (TODO could avoid O(n^2) by exploiting the map)
 				FOREACH( TreePtr<MapOperand> mi, ro->operands )
@@ -561,7 +566,7 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 	else
 		s = name;
 
-	bool subroutine = dynamic_pointer_cast<Subroutine>(o->type);
+	bool callable = dynamic_pointer_cast<Callable>(o->type);
 
     // If object is really a module, bodge in a name as a constructor parameter
     // But not for fields - they need an init list, done in RenderDeclarationCollection()
@@ -579,7 +584,7 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 		// Don't render any initialiser
 		s += sep;
 	}
-	else if( subroutine )
+	else if( callable )
 	{
 		// Establish the scope of the function
 		AutoPush< TreePtr<Scope> > cs( scope_stack, GetScope( program, o->identifier ) );
@@ -634,18 +639,20 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 }
 
 
-// Non-const static objects and functions in records
+// Non-const static objects in records and functions 
 // get split into a part that goes into the record (main line of rendering) and
-// a part that goes separately (deferred_decls gets appended at the very end)
+// a part that goes separately (deferred_decls gets appended at the very end).
+// Do all functions, since SortDecls() ignores function bodies for dep analysis
 bool Render::ShouldSplitInstance( TreePtr<Instance> o )
 {
-	bool isfunc = !!dynamic_pointer_cast<Subroutine>( o->type );
+	bool isfunc = !!dynamic_pointer_cast<Callable>( o->type );
 	bool is_non_const_static = false;
 	if( TreePtr<Static> s = dynamic_pointer_cast<Static>(o) )
 		if( dynamic_pointer_cast<NonConst>(s->constancy) )
 			is_non_const_static = true;
-	return dynamic_pointer_cast<Record>( scope_stack.top() ) &&
-			   ( is_non_const_static || isfunc );
+	return ( dynamic_pointer_cast<Record>( scope_stack.top() ) &&
+			   is_non_const_static ) || 
+			   isfunc;
 }
 
 

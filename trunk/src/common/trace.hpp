@@ -3,7 +3,6 @@
 
 #include <string>
 #include <typeinfo> 
-#include "read_args.hpp"
 #include "hit_count.hpp" 
 using namespace std;
 
@@ -13,7 +12,7 @@ using namespace std;
  * TRACE
  * We use a functor class "Tracer" to make TRACE look like a function that works
  * just like printf(). Note that Boost provides a multi-platform "name of 
- * currrent function" macro, which we use.
+ * current function" macro, which we use.
  *
  * ASSERT
  * Boost asserts due to shared_ptr errors happen quite a lot. We compile with
@@ -28,7 +27,7 @@ class Tracer
 public:
     enum Flags
     {
-        FORCE = 1,   // Generate the output even when -t is not specfied on the command line
+        FORCE = 1,   // Generate the output even when not enabled
         DISABLE = 2, // Do nothing
         ABORT = 4    // Crash out in destructor
     };
@@ -39,11 +38,13 @@ public:
     Tracer &operator()(const string &s); // not a printf because of risk of accidental format specifiers
 
     static void EndContinuation();
+    static void Enable( bool e ); ///< enable/disable tracing, only for top level funciton to call, overridden by flags
+    inline static bool IsEnabled() { return enable; }
     
     class Descend
     {
     public:
-    	inline Descend( string s=" " ) : os(pre.size()) { pre += s; } 
+    	inline Descend( string s=" " ) : os(pre.size()) { pre += s; Tracer::EndContinuation(); } 
     	inline ~Descend() { pre = pre.substr(0, os); }
     	static void Indent();
     private:
@@ -57,6 +58,7 @@ private:
     const char * const function;
     Flags flags;
     static bool continuation;
+    static bool enable;
 };
 
 class Traceable
@@ -71,7 +73,7 @@ public:
 // can be BOOST_CURRENT_FUNCTION if you want full signature but I find
 // it can get in the way
 
-#define TRACE if(ReadArgs::trace) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION )
+#define TRACE if(Tracer::IsEnabled()) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION )
 
 // New assert uses functor. Can be used as ASSERT(cond); or ASSERT(cond)(printf args);
 #define ASSERT(CONDITION) if(!(CONDITION)) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )

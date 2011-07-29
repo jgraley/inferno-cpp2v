@@ -4,19 +4,25 @@
 
 using namespace CPPTree;
 
-/** Walks the tree, avoiding recursing into the body (initialiser) of Subroutines. */
+/** Walks the tree, avoiding recursing into the body (initialiser) of Callables. */
 class TraverseNoBody_iterator : public Traverse::iterator
 {
 public:
     TraverseNoBody_iterator( TreePtr<Node> &root ) : Traverse::iterator(root) {}        
     TraverseNoBody_iterator() : Traverse::iterator() {}
+	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
+	{
+   	    return shared_ptr<TraverseNoBody_iterator>( new TraverseNoBody_iterator(*this) );
+	}      
 protected:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
     {
+        INDENT;
         // We need to create a container of elements of the child.
         if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>( n ) ) // an instance...
-            if( dynamic_pointer_cast<Subroutine>( i->type ) ) // ...of a function
+            if( dynamic_pointer_cast<Callable>( i->type ) ) // ...of a function
             {
+                TRACE("special behaviour for ")(*n)("\n");
                 // it's an instance, so set up a container containing type and identifier only, 
                 // not initialiser (others don't matter for deps purposes). We need 
                 // the type for params etc
@@ -26,27 +32,35 @@ protected:
                 return seq;
             }
         // it's not a slave, so proceed as for Traverse
+        TRACE("defaulting ")(*n)("\n");
         return Traverse::iterator::GetChildContainer(n);
     }
 };
 
 typedef ContainerFromIterator< TraverseNoBody_iterator, TreePtr<Node> > TraverseNoBody;
 
-/** Walks the tree, avoiding recursing into the body (initialiser) of Subroutines. */
+/** Walks the tree, avoiding recursing into the body (initialiser) of Callables and anything under an indirection. */
 class TraverseNoBodyOrIndirection_iterator : public TraverseNoBody::iterator
 {
 public:
     TraverseNoBodyOrIndirection_iterator( TreePtr<Node> &root ) : TraverseNoBody::iterator(root) {}        
     TraverseNoBodyOrIndirection_iterator() : TraverseNoBody::iterator() {}
+	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
+	{
+   	    return shared_ptr<TraverseNoBodyOrIndirection_iterator>( new TraverseNoBodyOrIndirection_iterator(*this) );
+	}      
 private:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
     {
+        INDENT;
         // We need to create a container of elements of the child.
         if( dynamic_pointer_cast<Indirection>( n ) ) // an instance...
         {
+            TRACE("special behaviour for ")(*n)("\n");
             shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
             return seq;
         }
+        TRACE("defaulting ")(*n)("\n");
         // it's not a slave, so proceed as for Traverse
         return TraverseNoBody::iterator::GetChildContainer(n);
     }
@@ -58,6 +72,7 @@ typedef ContainerFromIterator< TraverseNoBodyOrIndirection_iterator, TreePtr<Nod
 // Does a depend on b?
 bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_indirection_to_record )
 {
+    INDENT;
 	if( a == b )
 	    return false;
 	
@@ -72,6 +87,9 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     TreePtr<Identifier> ib = GetIdentifier( b );
     ASSERT(ib);
           
+  	TRACE("Looking for dependencies on ")(*b)(" (identifier ")(*ib)(") under ")(*a)(ignore_indirection?"":" not")(" ignoring indirection\n");      
+          
+    // Always ignore function bodies since these are taken outboard by the renderer anyway      
     TraverseNoBody wnb( a );
     TraverseNoBodyOrIndirection wnbi( a );
     ContainerInterface *w = ignore_indirection ? (ContainerInterface *)&wnbi : (ContainerInterface *)&wnb;
@@ -79,6 +97,7 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     ContainerInterface::iterator wa=w->begin();
     while(!(wa == w->end()))
     {
+        TRACE("Seen node ")(**wa)("\n");
     /*	if( ignore_indirection ) // are we to ignore pointers/refs?
     	{
     		if( TreePtr<Indirection> inda = TreePtr<Indirection>::DynamicCast(*wa) ) // is a a pointer or ref?
@@ -92,7 +111,10 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     	}
     	*/
         if( TreePtr<Node>(*wa) == TreePtr<Node>(ib) ) // If we see b in *any* other context under a's type, there's dep.
-            return true;                
+        {
+            TRACE("Found dependency\n");
+            return true;     
+        }           
 
         ++wa;
     }
@@ -105,7 +127,7 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     	    if( IsDependOn( a, memberb, ignore_indirection_to_record ) )
     	        return true;
     }
-
+    TRACE("Did not find dependency\n");
     return false; 
 }
 
