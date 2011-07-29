@@ -291,8 +291,8 @@ private:
 			return f;
 		}
 
-		void FillParameters(TreePtr<Procedure> p,
-				const clang::DeclaratorChunk::FunctionTypeInfo &fchunk)
+		void FillParameters(TreePtr<CallableParams> p,
+				            const clang::DeclaratorChunk::FunctionTypeInfo &fchunk)
 		{
 			backing_ordering[p].clear(); // ensure at least an empty sequence is in the map
 			for (int i = 0; i < fchunk.NumArgs; i++)
@@ -789,8 +789,8 @@ private:
 		// puts all the params back in the current scope assuming:
 		// 1. They have been added to the Function node correctly and
 		// 2. They feature in the backing list for params
-		void AddParamsToScope(TreePtr<Procedure> pp,
-				clang::Scope *FnBodyScope)
+		void AddParamsToScope( TreePtr<CallableParams> pp,
+				               clang::Scope *FnBodyScope)
 		{
 			ASSERT(pp);
 
@@ -825,7 +825,7 @@ private:
 		ASSERT(o);		
 		//ident_track.SeenScope( FnBodyScope );
 
-		if( TreePtr<Procedure> pp = dynamic_pointer_cast<Procedure>( o->type ) )
+		if( TreePtr<CallableParams> pp = dynamic_pointer_cast<CallableParams>( o->type ) )
 		AddParamsToScope( pp, FnBodyScope );
 
 		// This is just a junk scope because we will not use scopes collected
@@ -1050,10 +1050,10 @@ private:
 		TreePtr<Call> c(new Call);
 		c->callee = callee;
 
-		// If Procedure or Function, fill in the args map based on the supplied args and original function type
+		// If CallableParams, fill in the args map based on the supplied args and original function type
 		TreePtr<Node> t = TypeOf::instance(all_decls, callee);
-		if( TreePtr<Procedure> p = dynamic_pointer_cast<Procedure>(t) )
-		PopulateMapOperator( c, args, p );
+		if( TreePtr<CallableParams> p = dynamic_pointer_cast<CallableParams>(t) )
+		    PopulateMapOperator( c, args, p );
 
 		return c;
 	}
@@ -1661,7 +1661,7 @@ private:
 			if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
 			{
 				// ...and not function instances
-				if( !dynamic_pointer_cast<Subroutine>( i->type ) )
+				if( !dynamic_pointer_cast<Callable>( i->type ) )
 				{
 					TRACE();
 					// Get value out of array init and put it in record init together with member instance id

@@ -403,6 +403,12 @@ ParentTraverse_iterator::ParentTraverse_iterator( TreePtr<Node> &root ) :
 {
 }
 
+shared_ptr<ContainerInterface::iterator_interface> ParentTraverse_iterator::Clone() const
+{
+	shared_ptr<ParentTraverse_iterator> ni( new ParentTraverse_iterator(*this) );
+	return ni;
+}
+
 ////////////////////////// Traverse //////////////////////////
 
 Traverse_iterator::Traverse_iterator() :
@@ -434,4 +440,11 @@ Traverse_iterator::Traverse_iterator( TreePtr<Node> &root ) :
     Expand_iterator( root, unique_filter = new UniqueFilter, NULL )
 {
 }
+
+shared_ptr<ContainerInterface::iterator_interface> Traverse_iterator::Clone() const
+{
+	shared_ptr<Traverse_iterator> ni( new Traverse_iterator(*this) );
+	return ni;
+}
+
 

@@ -1,4 +1,3 @@
-
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
 #include "parse/parse.hpp"  
@@ -90,6 +89,7 @@ int main( int argc, char *argv[] )
 {
     // Check the command line arguments 
     ReadArgs( argc, argv );
+    Tracer::Enable( ReadArgs::trace );
 
     // Do self-tests (unit tests) if requested
     if( ReadArgs::selftest )
@@ -134,7 +134,7 @@ int main( int argc, char *argv[] )
             if( ReadArgs::quitafter-- == 0 )
                 break;
             fprintf(stderr, "Step %d: %s\n", i, string( *t ).c_str() ); 
-            TRACE("Step %d: %s\n", i, string( *t ).c_str() ); // TODO trace should print to stderr too
+            Tracer::Enable( ReadArgs::trace && (!ReadArgs::quitenable || ReadArgs::quitafter==0) ); 
             HitCount::instance.SetStep(i);
             (*t)( &program );
             i++;
@@ -142,6 +142,7 @@ int main( int argc, char *argv[] )
     }
         
     // Output either C source code or a graph, as requested
+    Tracer::Enable( ReadArgs::trace );
     if(ReadArgs::intermediate_graph)
         Graph()( &program );    
     else    

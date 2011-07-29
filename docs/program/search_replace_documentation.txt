@@ -427,7 +427,22 @@ The order in which pattern nodes are created and connected together is mostly fl
 
 There is no need to implement Transformation's functor operator (operator()). By deriving publicly from SearchReplace, your transformation will inherit that operator. Configuring the SearchReplace object at construct time is strongly advised, because (a) Configure() may contain slow algorithms in future that should only run once even if the transformation is invoked many times and (b) the S&R engine may collect information, such as coverage measurements, across multiple invocations.
 
-13.3 Most important tip
+13.3 Warning about empty versus maximally wild
+
+Remember that a TreePtr<> in a search pattern that is set to NULL is a maximal wildcard, i.e. will match any node that is type-compatible. On the other hand, a Collection<> or Sequence<> that is left empty only matches an empty Collection<> or Sequence<> in the input program. If, when creating steps, these members are left uninitialised, the TreePtr<> will be NULL and the Collection<> or Sequence<> will be left empty. These behaviours differ, and this can be a gotcha when writing steps.
+
+It does not make sense for a TreePtr<> to be "empty" - this is not supported in Inferno, and TreePtr<> relationships are always 1:1 in program trees. It does make sense to wildcard a Collection<> or Sequence<> - the way to do this is to insert a single Star<> of the contained type. It is unfortunately impossible to write
+
+MakeTreePtr< Collection<X> > my_collection;
+my_collection = ();
+
+but it might be a good style to write
+
+//my_collection = ();
+
+so that the reader can see that omission means "be an empty container" rather than "be a wildcard".
+
+13.4 Most important tip
 
 It is a very good idea to use graph plots right from the start when developing steps. Look at the graphs for the kinds of input test programs you are interested in. Code up a program resembling the expected output program, and look at the graph for that too, side by side. These will give a starting point for what the search and replace patterns will need to look like. As soon as you have a transformation that compiles, even if incomplete, take a look at the pattern graph and see if it looks right. The graphs are not just for fun, they really help!
 

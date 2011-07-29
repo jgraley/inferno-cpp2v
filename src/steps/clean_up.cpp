@@ -109,7 +109,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     MakeTreePtr<BuildLabelIdentifier> r_labelid("%s_%s", BYPASS_WHEN_IDENTICAL);
     MakeTreePtr< MatchAny<LabelIdentifier> > l_s_orrule;
     MakeTreePtr<InstanceIdentifier> identifier;
-    MakeTreePtr<Subroutine> type;
+    MakeTreePtr<Callable> type;
     
     l_s_orrule->patterns = (s_labelid1, s_labelid2);
     
@@ -187,7 +187,7 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     MakeTreePtr< NotMatch<Node> > sxx_notrule;        
     MakeTreePtr< Label > sxx_label;        
     MakeTreePtr<InstanceIdentifier> identifier;
-    MakeTreePtr<Subroutine> type;
+    MakeTreePtr<Callable> type;
 
     s_instance->initialiser = s_andrule;
     s_instance->identifier = identifier;

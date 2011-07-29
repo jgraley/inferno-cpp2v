@@ -112,7 +112,7 @@ public:
         over->overlay = r_scope;
         s_scope->members = (decls, s_instance);
         s_instance->identifier = s_token;        
-        s_instance->type = MakeTreePtr<Subroutine>(); // just narrow things a little        
+        s_instance->type = MakeTreePtr<Callable>(); // just narrow things a little        
         r_scope->members = (decls);   
         
         ls_call->callee = s_token;       
@@ -146,7 +146,7 @@ public:
         over->overlay = r_scope;
         s_scope->members = (decls, s_instance);
         s_instance->identifier = s_token;        
-        s_instance->type = MakeTreePtr<Subroutine>(); // just narrow things a little        
+        s_instance->type = MakeTreePtr<Callable>(); // just narrow things a little        
         r_scope->members = (decls);   
         
         ls_call->callee = s_token;       
@@ -184,7 +184,7 @@ public:
         over->overlay = r_scope;
         s_scope->members = (decls, s_instance);
         s_instance->identifier = s_token;        
-        s_instance->type = MakeTreePtr<Subroutine>(); // just narrow things a little        
+        s_instance->type = MakeTreePtr<Callable>(); // just narrow things a little        
         r_scope->members = (decls);   
         
         ls_call->callee = s_token;       
@@ -227,7 +227,7 @@ public:
         over->overlay = r_scope;
         s_scope->members = (decls, s_instance);
         s_instance->identifier = s_token;        
-        s_instance->type = MakeTreePtr<Subroutine>(); // just narrow things a little        
+        s_instance->type = MakeTreePtr<Callable>(); // just narrow things a little        
         r_scope->members = (decls);   
                 
         l_module->members = (l_overcons, l_process, l_decls);
@@ -251,7 +251,7 @@ public:
         
         l_process->identifier = ls_id;
         l_process->type = l_overtype;
-        l_overtype->through = MakeTreePtr<Subroutine>();
+        l_overtype->through = MakeTreePtr<Callable>();
         l_overtype->overlay = lr_scprocess;
         
         Configure( over, r_slave );

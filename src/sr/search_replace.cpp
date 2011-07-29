@@ -14,6 +14,10 @@ class TraverseNoSlavePattern_iterator : public Traverse::iterator
 public:
     TraverseNoSlavePattern_iterator( TreePtr<Node> &root ) : Traverse::iterator(root) {}        
     TraverseNoSlavePattern_iterator() : Traverse::iterator() {}
+	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
+	{
+   	    return shared_ptr<TraverseNoSlavePattern_iterator>( new TraverseNoSlavePattern_iterator(*this) );
+	}      
 private:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
     {

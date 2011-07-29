@@ -29,7 +29,7 @@ GenerateStacks::GenerateStacks()
     // the stack index.    
     MakeTreePtr<Instance> fi;
     MakeTreePtr< Overlay<Initialiser> > oinit;
-    MakeTreePtr<Subroutine> s_func;
+    MakeTreePtr<Callable> s_func;
     MakeTreePtr< MatchAll<Initialiser> > s_and;
     MakeTreePtr<Compound> s_top_comp, r_top_comp, r_ret_comp, temp;
     MakeTreePtr< Star<Declaration> > top_decls;
@@ -113,27 +113,38 @@ GenerateStacks::GenerateStacks()
     Configure( fi );
 }
 
-
+/// Place return at end of void functions, if not already there
 ExplicitiseReturn::ExplicitiseReturn()
 {
     MakeTreePtr< Instance > fi;
-    MakeTreePtr<Compound> s_comp, r_comp;        
-    MakeTreePtr< Star<Statement> > pre;
+    MakeTreePtr<Compound> s_comp, sx_comp, r_comp;        
+    MakeTreePtr< Star<Statement> > pre, sx_pre;
     MakeTreePtr< Star<Declaration> > decls;
     MakeTreePtr< Overlay<Compound> > over;
-    MakeTreePtr< NotMatch<Statement> > sx_last;
-    MakeTreePtr<Return> s_return, r_return;
-    
-    fi->type = MakeTreePtr<Subroutine>();
+    MakeTreePtr<Return> sx_return, r_return;
+    MakeTreePtr< MatchAny<Callable> > s_any;
+    MakeTreePtr<Function> s_func;
+    MakeTreePtr<Procedure> s_proc;
+    MakeTreePtr< MatchAll<Compound> > s_all;
+    MakeTreePtr< NotMatch<Compound> > s_not;
+        
+    fi->type = s_any;
+    s_any->patterns = (s_func, s_proc, MakeTreePtr<Subroutine>() );
+    s_proc->members = MakeTreePtr< Star<Declaration> >();
+    s_func->members = MakeTreePtr< Star<Declaration> >();
+    s_func->return_type = MakeTreePtr< Void >();
     fi->initialiser = over;
     s_comp->members = decls;
-    s_comp->statements = (pre, sx_last);
-    over->through = s_comp;
-    sx_last->pattern = s_return;
+    s_comp->statements = (pre);
+    over->through = s_all;
+    s_all->patterns = (s_comp, s_not);
+    s_not->pattern = sx_comp;
+    sx_comp->members = decls;
+    sx_comp->statements = (sx_pre, sx_return);
     
     over->overlay = r_comp;
     r_comp->members = decls;
-    r_comp->statements = (pre, sx_last, r_return);
+    r_comp->statements = (pre, r_return);
     r_return->return_value = MakeTreePtr<Uninitialised>();
     
     Configure( fi );

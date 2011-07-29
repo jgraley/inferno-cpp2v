@@ -77,7 +77,7 @@ static TreePtr<Statement> MakeResetAssignmentPattern()
 EnsureBootstrap::EnsureBootstrap()
 {
     MakeTreePtr<Instance> fn;
-    MakeTreePtr<Subroutine> sub;
+    MakeTreePtr<Callable> sub;
     MakeTreePtr< Overlay<Compound> > over;
     MakeTreePtr< MatchAll<Compound> > s_all;
     MakeTreePtr< NotMatch<Compound> > s_not;    
@@ -151,7 +151,7 @@ AddStateLabelVar::AddStateLabelVar()
 EnsureSuperLoop::EnsureSuperLoop()
 {   
     MakeTreePtr<Instance> fn;
-    MakeTreePtr<Subroutine> sub;
+    MakeTreePtr<Callable> sub;
     MakeTreePtr< Overlay<Compound> > over;
     MakeTreePtr< MatchAll<Compound> > s_all;
     MakeTreePtr< NotMatch<Statement> > sx_not, s_limit;    
@@ -343,7 +343,7 @@ InsertSwitch::InsertSwitch()
 {
     MakeTreePtr<Instance> fn;
     MakeTreePtr<InstanceIdentifier> fn_id;
-    MakeTreePtr<Subroutine> sub;
+    MakeTreePtr<Callable> sub;
     MakeTreePtr< Overlay<Compound> > func_over, over, l_over;
     MakeTreePtr< Compound > ls_func_comp, lr_func_comp, s_func_comp, r_func_comp, s_comp, r_comp, r_switch_comp, l_comp, ls_switch_comp, lr_switch_comp;
     MakeTreePtr< Star<Declaration> > func_decls, decls, l_enum_vals;

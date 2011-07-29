@@ -79,7 +79,7 @@ void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<TNode> ts )
 // Dump the current scope and move back to the parent
 void IdentifierTracker::PopScope(clang::Scope *S) 
 {
-    TRACE("pop top=%s clang=S%p\n", ToString(scope_stack.top()).c_str(), S );
+    TRACE("pop top=%s clang=S%p\n", scope_stack.empty()?"<empty>":ToString(scope_stack.top()).c_str(), S );
     if( !scope_stack.empty() && scope_stack.top() && (!S || scope_stack.top()->cs == S) ) // do not pop if we never pushed because didnt get an Add() for this scope
     {
         scope_stack.pop();
@@ -106,7 +106,7 @@ void IdentifierTracker::NewScope( clang::Scope *S )
         TRACE("no next_record; \n");
         shared_ptr<TNode> ts = shared_ptr<TNode>( new TNode );    
         ts->II = NULL;
-        ts->parent = scope_stack.top();
+        ts->parent = scope_stack.empty()?shared_ptr<TNode>():scope_stack.top();
         PushScope( S, ts );
     }
 }
