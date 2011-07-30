@@ -1656,14 +1656,17 @@ private:
 		int seq_index=0; // TODO rename
 		FOREACH( TreePtr<Declaration> d, scope_ordered )
 		{
-			TRACE();
+			if( seq_index == seq.size() )
+			{
+			    TRACE("Early out due to fewer elements in sequence than scope\n"); 
+			    break;
+			}
 			// We only care about instances...
 			if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>( d ) )
 			{
 				// ...and not function instances
 				if( !dynamic_pointer_cast<Callable>( i->type ) )
 				{
-					TRACE();
 					// Get value out of array init and put it in record init together with member instance id
 					TreePtr<Expression> v = seq[seq_index];
 					TreePtr<MapOperand> mi( new MapOperand );
@@ -1674,8 +1677,10 @@ private:
 					seq_index++;
 				}
 			}
-		}
-		ASSERT( seq_index == seq.size() );
+		}		
+		ASSERT( seq_index == seq.size() )
+		      ("Too many arguments to function/struct init (we allow too few for poor mans overlading, but not too many)\n")
+		      ("Scope was ")(*scope)(" for map operator ")(mapop)("\n");
 	}
 
 	TreePtr<String> CreateString( const char *s )

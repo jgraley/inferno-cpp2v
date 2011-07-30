@@ -3,10 +3,24 @@
 
 int gvar;
 
+
+inline void xwait( bool &x )
+{
+    while(!x)
+        wait( SC_ZERO_TIME );
+    x=false; // reset for next time (should be atomic with the test)
+}
+
+void xnotify( bool &x )
+{
+    x=true;
+}
+
+
 class Adder : public sc_module
 {
 public:
-    sc_event proceed;
+    bool proceed;
     SC_CTOR(Adder)
     {
         SC_THREAD(T);
@@ -17,8 +31,8 @@ public:
 class Multiplier : public sc_module
 {
 public:
-    sc_event instigate;
-    sc_event proceed;
+    bool instigate;
+    bool proceed;
     //sc_event yield;
     SC_CTOR(Multiplier) 
     {
@@ -41,7 +55,7 @@ public:
     void T()
     {
         gvar = 1;
-        mul_inst.instigate.notify();      
+        xnotify( mul_inst.instigate );      
     }
 };
 
@@ -49,29 +63,26 @@ TopLevel top_level("top_level");
 
 void Adder::T()
 {
-    wait( proceed );
+    xwait( proceed );
     gvar += 2;
-    top_level.mul_inst.proceed.notify();
-    wait( proceed );
+    xnotify( top_level.mul_inst.proceed );
+    xwait( proceed );
     gvar += 3;
-    top_level.mul_inst.proceed.notify();
+    xnotify( top_level.mul_inst.proceed );
 }
 
 
 void Multiplier::T()
 {
-    wait( instigate );
+    xwait( instigate );
     gvar *= 5;
-    top_level.add_inst.proceed.notify();
-    wait( proceed );
-    gvar *= 5;
-    
-    //yield.notify(SC_ZERO_TIME);
-    //wait( yield );
-    
-    top_level.add_inst.proceed.notify();
-    wait( proceed );
+    xnotify( top_level.add_inst.proceed );
+    xwait( proceed );
+    gvar *= 5;    
+    xnotify( top_level.add_inst.proceed );
+    xwait( proceed );
     exit(gvar);
 }
+
 
 

@@ -49,19 +49,73 @@ struct Interface : CPPTree::InheritanceRecord,
 };
 
 struct Wait : CPPTree::Statement,
-              SCNamedFunction
+                 SCNamedFunction
+{
+    NODE_FUNCTIONS
+    virtual string GetToken() { return "wait"; }
+};
+
+struct WaitDynamic : Wait
 {
     NODE_FUNCTIONS_FINAL
-    virtual string GetToken() { return "wait"; }
-    TreePtr<CPPTree::Initialiser> event; ///< event to wait for or Uninitialised for static sens 
+    TreePtr<CPPTree::Expression> event; ///< event to wait for 
+};
+
+struct WaitStatic : Wait
+{
+    NODE_FUNCTIONS_FINAL
+};
+
+struct WaitDelta : Wait
+{
+    NODE_FUNCTIONS_FINAL
+};
+
+struct NextTrigger : CPPTree::Statement,
+                     SCNamedFunction
+{
+    NODE_FUNCTIONS
+    virtual string GetToken() { return "next_trigger"; }
+};
+
+struct NextTriggerDynamic : NextTrigger
+{
+    NODE_FUNCTIONS_FINAL
+    TreePtr<CPPTree::Expression> event; ///< event to wait for 
+};
+
+struct NextTriggerStatic : NextTrigger
+{
+    NODE_FUNCTIONS_FINAL
+};
+
+struct NextTriggerDelta : NextTrigger
+{
+    NODE_FUNCTIONS_FINAL
 };
 
 struct Notify : CPPTree::Statement,
                 SCNamedFunction
 {
-    NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS
     virtual string GetToken() { return "notify"; }
-    TreePtr<CPPTree::Initialiser> event; ///< event to wait for or Uninitialised for static sens 
+    TreePtr<CPPTree::Expression> event; ///< event to notify 
+};
+
+struct NotifyImmediate : Notify
+{
+    NODE_FUNCTIONS_FINAL
+};
+
+struct NotifyDelta : Notify
+{
+    NODE_FUNCTIONS_FINAL
+};
+
+struct NotifyTimed : Notify
+{
+    NODE_FUNCTIONS_FINAL
+    TreePtr<CPPTree::Expression> time; ///< how long to wait for before notifying
 };
 
 struct Process : CPPTree::Subroutine,
