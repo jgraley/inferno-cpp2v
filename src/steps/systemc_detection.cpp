@@ -83,76 +83,66 @@ public:
 };
 
 
-/// spot SystemC wait() function by its name and replace with inferno node 
-/** We look for the decl and remove it since the inferno
- Node does not require declaration. Then replace all calls to 
- the function with the explicit statement node. Bring arguments
- across by name match as per Inferno's MapOperator style. */
-class DetectSCWaitParm : public CompareReplace  // Note not SearchReplace
+template<class SCFUNC>
+class DetectSCDynamic : public SearchReplace
 {
-// TODO ensure param really evaluates to an event, as per DetectSCNotify above
-// OR ensure inside a Module
 public:
-    DetectSCWaitParm()
+    DetectSCDynamic()
     {
-        MakeTreePtr< Overlay<Node> > over;
-        MakeTreePtr< Scope > s_scope, r_scope;
-        MakeTreePtr< Star<Declaration> > decls, l_decls;
-        MakeTreePtr< Static > s_instance;
-        MakeTreePtr< Wait > lr_wait;
-        MakeTreePtr< Expression > l_event;
-        MakeTreePtr< Call > ls_call;
-        MakeTreePtr< MapOperand > ls_arg;            
-        MakeTreePtr< InstanceIdentifierByName > s_token( "wait" ); 
-        MakeTreePtr< InstanceIdentifierByName > s_arg_id( "e" ); 
-        MakeTreePtr< SlaveSearchReplace<Node> > r_slave( over, ls_call, lr_wait );    
-        
-        // Eliminate the declaration that came from isystemc.h
-        over->through = s_scope;
-        over->overlay = r_scope;
-        s_scope->members = (decls, s_instance);
-        s_instance->identifier = s_token;        
-        s_instance->type = MakeTreePtr<Callable>(); // just narrow things a little        
-        r_scope->members = (decls);   
-        
-        ls_call->callee = s_token;       
-        ls_call->operands = (ls_arg);
-        ls_arg->identifier = s_arg_id;
-        ls_arg->value = l_event;
-        lr_wait->event = l_event;       
-           
-        Configure( over, r_slave );
+        MakeTreePtr< SCFUNC > r_dynamic;
+        MakeTreePtr< Call > s_call;
+        MakeTreePtr< MapOperand > s_arg;            
+        MakeTreePtr< InstanceIdentifierByName > s_token( r_dynamic->GetToken() ); 
+        MakeTreePtr< InstanceIdentifierByName > s_param_id( "p1" ); 
+        MakeTreePtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
+                        
+        s_call->callee = s_token;       
+        s_call->operands = (s_arg);
+        s_arg->identifier = s_param_id;
+        s_arg->value = eexpr;
+        eexpr->pattern = MakeTreePtr<Event>();
+        r_dynamic->event = eexpr;       
+          
+        Configure( s_call, r_dynamic );
     }
 };
 
-
-class DetectSCWaitNoParm : public CompareReplace  // Note not SearchReplace
+template<class SCFUNC>
+class DetectSCStatic : public SearchReplace
 {
-// TODO ensure inside a Module
 public:
-    DetectSCWaitNoParm()
+    DetectSCStatic()
     {
-        MakeTreePtr< Overlay<Node> > over;
-        MakeTreePtr< Scope > s_scope, r_scope;
-        MakeTreePtr< Star<Declaration> > decls, l_decls;
-        MakeTreePtr< Static > s_instance;
-        MakeTreePtr< Wait > lr_wait;
-        MakeTreePtr< Call > ls_call;
-        MakeTreePtr< InstanceIdentifierByName > s_token( "wait" ); 
-        MakeTreePtr< SlaveSearchReplace<Node> > r_slave( over, ls_call, lr_wait );    
-        
-        // Eliminate the declaration that came from isystemc.h
-        over->through = s_scope;
-        over->overlay = r_scope;
-        s_scope->members = (decls, s_instance);
-        s_instance->identifier = s_token;        
-        s_instance->type = MakeTreePtr<Callable>(); // just narrow things a little        
-        r_scope->members = (decls);   
-        
-        ls_call->callee = s_token;       
-        lr_wait->event = MakeTreePtr<Uninitialised>();       
+        MakeTreePtr< SCFUNC > r_static;
+        MakeTreePtr< Call > s_call;
+        MakeTreePtr< InstanceIdentifierByName > s_token( r_static->GetToken() ); 
+                          
+        s_call->callee = s_token;   
+        //s_call->operands = ();       
            
-        Configure( over, r_slave );
+        Configure( s_call, r_static );
+    }
+};
+
+template<class SCFUNC>
+class DetectSCDelta : public SearchReplace
+{
+public:
+    DetectSCDelta()
+    {
+        MakeTreePtr< SCFUNC > r_delta;
+        MakeTreePtr< Call > s_call;
+        MakeTreePtr< MapOperand > s_arg;            
+        MakeTreePtr< InstanceIdentifierByName > s_token( r_delta->GetToken() ); 
+        MakeTreePtr< InstanceIdentifierByName > s_param_id( "p1" ); 
+        MakeTreePtr< InstanceIdentifierByName > s_arg_id( "SC_ZERO_TIME" ); 
+                        
+        s_call->callee = s_token;       
+        s_call->operands = (s_arg);
+        s_arg->identifier = s_param_id;
+        s_arg->value = s_arg_id;
+          
+        Configure( s_call, r_delta );
     }
 };
 
@@ -162,38 +152,25 @@ public:
  Node does not require declaration. Then replace all calls to 
  the function with the explicit statement node. Bring arguments
  across by name match as per Inferno's MapOperator style. */
-class DetectExit : public CompareReplace  // Note not SearchReplace
+class DetectExit : public SearchReplace
 {
 public:
     DetectExit()
     {
-        MakeTreePtr< Overlay<Node> > over;
-        MakeTreePtr< Scope > s_scope, r_scope;
-        MakeTreePtr< Star<Declaration> > decls, l_decls;
-        MakeTreePtr< Static > s_instance;
-        MakeTreePtr< Exit > lr_exit;
-        MakeTreePtr< Expression > l_code;
-        MakeTreePtr< Call > ls_call;
-        MakeTreePtr< MapOperand > ls_arg;            
-        MakeTreePtr< InstanceIdentifierByName > s_token( "exit" ); 
-        MakeTreePtr< InstanceIdentifierByName > s_arg_id( "code" ); 
-        MakeTreePtr< SlaveSearchReplace<Node> > r_slave( over, ls_call, lr_exit );    
-        
-        // Eliminate the declaration that came from isystemc.h
-        over->through = s_scope;
-        over->overlay = r_scope;
-        s_scope->members = (decls, s_instance);
-        s_instance->identifier = s_token;        
-        s_instance->type = MakeTreePtr<Callable>(); // just narrow things a little        
-        r_scope->members = (decls);   
-        
-        ls_call->callee = s_token;       
-        ls_call->operands = (ls_arg);
-        ls_arg->identifier = s_arg_id;
-        ls_arg->value = l_code;
-        lr_exit->code = l_code;       
-           
-        Configure( over, r_slave );
+        MakeTreePtr< Exit > r_exit;
+        MakeTreePtr< Expression > event;
+        MakeTreePtr< Call > s_call;
+        MakeTreePtr< MapOperand > s_arg;            
+        MakeTreePtr< InstanceIdentifierByName > s_token( r_exit->GetToken() ); 
+        MakeTreePtr< InstanceIdentifierByName > s_param_id( "p1" ); 
+                
+        s_call->callee = s_token;       
+        s_call->operands = (s_arg);
+        s_arg->identifier = s_param_id;
+        s_arg->value = event;
+        r_exit->code = event;       
+          
+        Configure( s_call, r_exit );
     }
 };
 
@@ -260,6 +237,69 @@ public:
 
 
 
+/// spot SystemC notify() method by its name and replace with inferno node 
+/** Look for myevent.notify() and replace with Notify->myevent. No need to 
+    eliminate the notify decl - that disappeared with the sc_event class */
+class DetectSCNotifyImmediate : public SearchReplace  
+{
+public:
+    DetectSCNotifyImmediate()
+    {
+        MakeTreePtr<Call> s_call;
+        MakeTreePtr<Lookup> s_lookup;
+        MakeTreePtr<Event> s_event;
+        MakeTreePtr<NotifyImmediate> r_notify;
+        MakeTreePtr< InstanceIdentifierByName > s_token( r_notify->GetToken() );                
+        MakeTreePtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
+        //MakeTreePtr< Expression > eexpr; 
+                
+        s_call->callee = s_lookup;
+        //s_call->operands = ();
+        s_lookup->base = eexpr;          
+        eexpr->pattern = s_event;     // ensure base really evaluates to an event 
+        s_lookup->member = s_token;        
+
+        r_notify->event = eexpr;
+           
+        Configure( s_call, r_notify );
+    }
+};
+
+
+/// spot SystemC notify(SC_ZERO_TIME) method by its name and replace with inferno node 
+/** Look for myevent.notify(SC_ZERO_TIME) and replace with Notify->myevent. No need to 
+    eliminate the notify decl - that disappeared with the sc_event class */
+class DetectSCNotifyDelta : public SearchReplace  
+{
+public:
+    DetectSCNotifyDelta()
+    {
+        MakeTreePtr<Call> s_call;
+        MakeTreePtr<Lookup> s_lookup;
+        MakeTreePtr<Event> s_event;
+        MakeTreePtr<NotifyDelta> r_notify;
+        MakeTreePtr<MapOperand> s_arg;
+        MakeTreePtr< InstanceIdentifierByName > s_zero_token( "SC_ZERO_TIME" );                
+        MakeTreePtr< InstanceIdentifierByName > s_arg_id( "p1" ); 
+        MakeTreePtr< InstanceIdentifierByName > s_token( r_notify->GetToken() );                
+        MakeTreePtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
+        //MakeTreePtr< Expression > eexpr; 
+                
+        s_call->callee = s_lookup;
+        s_call->operands = (s_arg);
+        s_arg->identifier = s_arg_id;
+        s_arg->value = s_zero_token;        
+        s_lookup->base = eexpr;          
+        eexpr->pattern = s_event;     // ensure base really evaluates to an event 
+        s_lookup->member = s_token;        
+
+        r_notify->event = eexpr;
+           
+        Configure( s_call, r_notify );
+    }
+};
+
+
 /// Remove constructors in SC modules that are now empty thanks to earlier steps
 /// Must also remove explicit calls to constructor (which would not do anything)
 class RemoveEmptyModuleConstructors : public CompareReplace
@@ -312,34 +352,34 @@ public:
 };
 
 
-/// spot SystemC notify() method by its name and replace with inferno node 
-/** Look for myevent.notify() and replace with Notify->myevent. No need to 
-    eliminate the notify decl - that disappeared with the sc_event class */
-class DetectSCNotify : public SearchReplace  
+/// Remove top-level instances that are of type void
+/** isystemc.h declares void variables to satisfy parser. Hoover them all up
+    efficiently here. */
+class RemoveVoidInstances : public CompareReplace  // Note not SearchReplace
 {
 public:
-    DetectSCNotify()
+    RemoveVoidInstances()
     {
-        MakeTreePtr<Call> s_call;
-        MakeTreePtr<Lookup> s_lookup;
-        MakeTreePtr<Event> s_event;
-        MakeTreePtr<Notify> r_notify;
-        MakeTreePtr< InstanceIdentifierByName > s_token( r_notify->GetToken() );                
-        MakeTreePtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
-        //MakeTreePtr< Expression > eexpr; 
-                
-        s_call->callee = s_lookup;
-        //s_call->operands = ();
-        s_lookup->base = eexpr;          
-        eexpr->pattern = s_event;     // ensure base really evaluates to an event 
-        s_lookup->member = s_token;        
-
-        r_notify->event = eexpr;
+        MakeTreePtr<Program> s_scope, r_scope;
+        MakeTreePtr< Star<Declaration> > decls;
+        MakeTreePtr<Static> s_instance;
+        MakeTreePtr< MatchAny<Type> > s_any;
+        MakeTreePtr<CallableParams> s_callable;
+        MakeTreePtr< Star<Instance> > s_params;
+        MakeTreePtr<Instance> s_void_param;
+        
+        // Eliminate the declaration that came from isystemc.h
+        s_scope->members = (decls, s_instance);
+        s_instance->type = s_any;
+        s_any->patterns = (s_callable, MakeTreePtr<Void>() ); // match void instances (pointless) or functions as below...
+        s_callable->members = (s_params, s_void_param); // one void param is enough, but don't match no params
+        s_void_param->type = MakeTreePtr<Void>();
+        
+        r_scope->members = (decls);   
            
-        Configure( s_call, r_notify );
+        Configure( s_scope, r_scope );
     }
 };
-
 
 
 
@@ -349,13 +389,19 @@ DetectAllSCTypes::DetectAllSCTypes()
     push_back( shared_ptr<Transformation>( new DetectSCType<Event> ) );    
     push_back( shared_ptr<Transformation>( new DetectSCBase<Module> ) );    
     push_back( shared_ptr<Transformation>( new DetectSCBase<Interface> ) );    
-    push_back( shared_ptr<Transformation>( new DetectSCWaitParm ) );        
-    push_back( shared_ptr<Transformation>( new DetectSCWaitNoParm ) );    
+    push_back( shared_ptr<Transformation>( new DetectSCDynamic<WaitDynamic> ) );        
+    push_back( shared_ptr<Transformation>( new DetectSCStatic<WaitStatic> ) );        
+    push_back( shared_ptr<Transformation>( new DetectSCDelta<WaitDelta> ) );        
+    push_back( shared_ptr<Transformation>( new DetectSCDynamic<NextTriggerDynamic> ) );        
+    push_back( shared_ptr<Transformation>( new DetectSCStatic<NextTriggerStatic> ) );        
+    push_back( shared_ptr<Transformation>( new DetectSCDelta<NextTriggerDelta> ) );        
     push_back( shared_ptr<Transformation>( new DetectExit ) );    
     push_back( shared_ptr<Transformation>( new DetectSCProcess( MakeTreePtr<Thread>() ) ) );    
     push_back( shared_ptr<Transformation>( new DetectSCProcess( MakeTreePtr<ClockedThread>() ) ) );    
     push_back( shared_ptr<Transformation>( new DetectSCProcess( MakeTreePtr<Method>() ) ) );    
+    push_back( shared_ptr<Transformation>( new DetectSCNotifyImmediate ) );    
+    push_back( shared_ptr<Transformation>( new DetectSCNotifyDelta ) );    
     push_back( shared_ptr<Transformation>( new RemoveEmptyModuleConstructors ) );    
-    push_back( shared_ptr<Transformation>( new DetectSCNotify ) );    
+    push_back( shared_ptr<Transformation>( new RemoveVoidInstances ) );    
 }
 

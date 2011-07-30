@@ -1182,6 +1182,8 @@ TreePtr<Node> CompareReplace::MatchingDuplicateSubtree( TreePtr<Node> source ) c
     // Now replace according to the couplings
     TRACE("doing replace SUBSTITUTING pass....\n");
     TreePtr<Node> r = DuplicateSubtreePattern( source );
+    // TODO do an overlay, means *proot needs passing in here and this fn should be renamed.
+    // Also make sure tree at *proot is in the "keyed" pedigree otherwise asserts will fail.
     TRACE("replace SUBSTITUTING pass\n" );
     return r;
 }

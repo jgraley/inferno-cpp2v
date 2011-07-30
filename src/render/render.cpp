@@ -844,20 +844,29 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep )
 		return "break" + sep;
 	else if( dynamic_pointer_cast<Nop>(statement) )
 		return sep;
-	else if( TreePtr<Wait> c = dynamic_pointer_cast<Wait>(statement) ) // TODO here and below, use GetToken()
-	{
-	    if( dynamic_pointer_cast<Expression>(c->event) )
-		    return c->GetToken() + "( " + RenderExpression(c->event) + " );\n";
-		else
-		    return c->GetToken() + "();\n";
-    }
+	else if( TreePtr<WaitDynamic> c = dynamic_pointer_cast<WaitDynamic>(statement) ) // TODO here and below, use GetToken()
+	    return c->GetToken() + "( " + RenderExpression(c->event) + " );\n";
+	else if( TreePtr<WaitStatic> c = dynamic_pointer_cast<WaitStatic>(statement) ) // TODO here and below, use GetToken()
+	    return c->GetToken() + "();\n";
+	else if( TreePtr<WaitDelta> c = dynamic_pointer_cast<WaitDelta>(statement) ) // TODO here and below, use GetToken()
+	    return c->GetToken() + "(SC_ZERO_TIME);\n";
+	else if( TreePtr<NextTriggerDynamic> c = dynamic_pointer_cast<NextTriggerDynamic>(statement) ) // TODO here and below, use GetToken()
+	    return c->GetToken() + "( " + RenderExpression(c->event) + " );\n";
+	else if( TreePtr<NextTriggerStatic> c = dynamic_pointer_cast<NextTriggerStatic>(statement) ) // TODO here and below, use GetToken()
+	    return c->GetToken() + "();\n";
+	else if( TreePtr<NextTriggerDelta> c = dynamic_pointer_cast<NextTriggerDelta>(statement) ) // TODO here and below, use GetToken()
+	    return c->GetToken() + "(SC_ZERO_TIME);\n";
 	else if( TreePtr<Exit> e = dynamic_pointer_cast<Exit>(statement) )
 	{
 		return e->GetToken() + "( " + RenderExpression(e->code) + " );\n";
     }
-	else if( TreePtr<Notify> n = dynamic_pointer_cast<Notify>(statement) )
+	else if( TreePtr<NotifyImmediate> n = dynamic_pointer_cast<NotifyImmediate>(statement) )
 	{
 		return RenderExpression( n->event, true ) + "." + n->GetToken() + "();\n";
+    }
+	else if( TreePtr<NotifyDelta> n = dynamic_pointer_cast<NotifyDelta>(statement) )
+	{
+		return RenderExpression( n->event, true ) + "." + n->GetToken() + "(SC_ZERO_TIME);\n";
     }
     else
 		return ERROR_UNSUPPORTED(statement);
