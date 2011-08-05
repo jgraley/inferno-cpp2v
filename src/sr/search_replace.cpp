@@ -107,7 +107,8 @@ void CompareReplace::GetGraphInfo( vector<string> *labels,
 bool CompareReplace::DecidedCompare( TreePtr<Node> x,
 									   TreePtr<Node> pattern,
 									   bool can_key,
-    								   Conjecture &conj ) const
+    								   Conjecture &conj,
+    								   Conjecture::Choice *gc ) const
 {
     INDENT;
 	ASSERT( x ); // Target must not be NULL
@@ -229,14 +230,12 @@ bool CompareReplace::DecidedCompare( TreePtr<Node> x,
             return false;
 	
 	if( can_key )
-        coupling_keys.DoKey( x, pattern );	
+        coupling_keys.DoKey( x, pattern, gc );	
 
     return true;
 }
 
 
-// xstart and pstart are the indexes into the sequence where we will begin checking for a match.
-// It is assumed that elements before these have already been matched and may be ignored.
 // TODO support SearchContainerBase(ie Stuff nodes) here and below inside the container.
 // Behaviour would be to try the container at each of the nodes matched by the star, and if
 // one match is found we have a hit (ie OR behaviour). I think this results in 3 decisions
@@ -253,16 +252,18 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
 	ContainerInterface::iterator xit = x.begin();
-	ContainerInterface::iterator pit = pattern.begin();
+	ContainerInterface::iterator pit, npit, nnpit;
+	Conjecture::Choice *governing_choice = NULL;
 
-	while( pit != pattern.end() )
+	for( pit = pattern.begin(); pit != pattern.end(); ++pit )
 	{
 		ASSERT( xit == x.end() || *xit );
 
 		// Get the next element of the pattern
 		TreePtr<Node> pe( *pit );
 		ASSERT( pe );
-		++pit;
+		npit=pit;
+		++npit;
 	    if( TreePtr<StarBase> ps = dynamic_pointer_cast<StarBase>(pe) )
 	    {
 			// We have a Star type wildcard that can match multiple elements.
@@ -272,7 +273,7 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 
 	    	// Star always matches at the end of a sequence, so we only need a 
 	    	// decision when there are more elements left
-	    	if( pit == pattern.end() )
+	    	if( npit == pattern.end() )
 	    	{
 	    		xit = x.end(); // match all remaining members of x; jump to end
 	    	}
@@ -281,23 +282,102 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 	    		TRACE("Pattern continues after star\n");
 
 	    		// Star not at end so there is more stuff to match; ensure not another star
-	    		ASSERT( !dynamic_pointer_cast<StarBase>(TreePtr<Node>(*pit)) )
-	    		      ( "Not allowed to have two neighbouring Star elements in search pattern Sequence");
+	    	//	ASSERT( !dynamic_pointer_cast<StarBase>(TreePtr<Node>(*npit)) )
+	    	//	      ( "Not allowed to have two neighbouring Star elements in search pattern Sequence");
 
 		    	// Decide how many elements the current * should match, using conjecture. Jump forward
-	    		// that many elements, to the element after the star
-		    	xit = conj.HandleDecision( xit_begin_star, x.end() );
+	    		// that many elements, to the element after the star. We need to use the special 
+	    		// interface to Conjecture because the iterator we get is itself an end to the 
+	    		// range matched by the star, and so x.end() is a legitimate choice for ss.end()
+	    		// So allow the Conjecture class to give us two ends, and only give up on the second.
+		    	Conjecture::Choice choice = conj.GetDecision( xit_begin_star, x.end(), 2 );
+		    	governing_choice = conj.GetChoicePtr();
+#if 1		    	
+		    	// Optimisation for couplings in sequences: is some future pattern node coupled?
+		    	bool do_optimise = false;
+		    	int lad=0;
+		    	shared_ptr<Key> lakey;
+		    	for( ContainerInterface::iterator lapit=npit; lapit!=pattern.end(); ++lapit )
+		    	{
+		    	    lad++;
+		        	if( dynamic_pointer_cast<StarBase>(TreePtr<Node>(*lapit)) )
+		        	    break; // Stop at stars, do not use them or go past them (TODO use stars, need to uncomment some code here and give them governing_choice */
+		        	lakey = coupling_keys.GetKey( *lapit );
+		        	// Did we find a node that has been keyed?
+		        	if( lakey && lakey->root )
+		        	{
+		        	    TRACE("Maybe optimise lad=%d *pit=", lad)(**pit)(" *lapit=")(**lapit)
+		        	         (" lakey->governing_choice=%p governing_choice=%p", lakey->governing_choice, governing_choice)
+		        	         (" lakey->pattern=")(*lakey->replace_pattern)(" lakey->root=")(*lakey->root)("\n");
+		        	    // Did the node have a governing_choice set on it (i.e. was it goverend by a Star node decision?
+		        	    // AND is it not the current decision (we leave the original decision unoptimised)
+		        	    if( lakey->governing_choice &&
+		        	        lakey->governing_choice != governing_choice )
+		            	{		            	    
+		            	    do_optimise=true;
+		            	    break;
+		            	}
+		            }
+		    	}		    			    	
 
-		    	// If we got to the end of the subject Sequence, there's no way to match the >0 elements
-				// we know are still in the pattern.
-				// TODO unless the remaining patterns are also stars (eg if we remove the rule of no
-				// sucessive stars). Then we would have a match, because * always matches 0 elements, 
-				// regardless of pre-restriciton/pattern.
-				if( xit == x.end() )
-				{
-					TRACE("Ran out of candidate\n");
-					return false;
-				}
+		    	if( do_optimise )
+		    	{
+	        	    // Is it a SubCollection? then use the first node out of subcollection as the key
+	        	    TreePtr<Node> lakeynode = lakey->root;
+//		    	    if( TreePtr<SubCollection> lakeysc = dynamic_pointer_cast<SubCollection>(lakey->root) )
+    //	    	        lakeynode = *(lakeysc->begin());
+	        	    TRACE("Optimising coupled node %d after star in sequence, looking for ", lad)(*lakeynode)("\n");
+		        	        
+		        	    // Search for the key in the input program sequence    
+#if 0 // TODO Very tenuous argument for the Choice pointed to by governing_choice not having been 
+      // deleted, maybe put them under shared_ptr for peace of mind. Argument is: Key points to 
+      // Choice. Keys all forgotten at top of MDC(). Conjecture class "live" thoughout both passes
+      // in MCD (PFDC() does not wipe the Choices). Choices only wiped after earlier or same decision 
+      // runs out of choices. Pointed-to decision earlier than current one(*). Ergo, if current Choice 
+      // is live then earlier Choice is live and current too. Like a stack. 
+      // (*) is it? Could have been reached late in the keying pass and then seen early in restricting pass
+	        	    xit = lakey->governing_choice->it;
+#else		        	    
+	        	    bool found = false;
+	        	    for( xit = xit_begin_star; xit != x.end(); ++xit )
+	        	    {
+	        	        if( (*xit) == lakeynode )
+	        	        {
+	        	            found = true;
+	        	            break;
+	        	        }
+	        	    }    
+	        	    TRACE(found ? "Found match\n" : "Did not find match\n");
+#endif		        	    
+                    TRACE("Position in input ")(**xit)("\n");
+                    // Step back in the input tree nodes, so that we don't include anything that corresponds to the patterns we skipped above
+	        	    for( int i=0; i<lad-1; i++ ) // Remember xit will be an end iterator, so it should be 1 after the last node we match to the current Star
+	        	    {
+	            	    if( xit == x.begin() )
+	            	    {
+	            	        TRACE("At beginning, cannot back up ")(**xit)(" ")(**(x.begin()))("\n");
+	            	        conj.ReportDecision( false );
+			                return false;
+			            }
+	            	    --xit;
+	            	}
+	        	    TRACE("Backed up to ")(**xit)(", forcing decision\n");
+	        	    choice = conj.ForceDecision( xit );		        	    
+		        }
+#endif		        
+		    	
+	    	    // General case for no obvious restricting coupling
+	        	xit = choice.it;
+			    if( xit == choice.end && choice.end_count == choice.end_num ) // TODO this test should not be here, move back to Conjecture and allow max_end_count specified in Get/Handle/ForceDecision
+			    {
+				    TRACE("Ran out of candidate\n");
+				    conj.ReportDecision( false );
+				    return false;
+			    }
+			    else
+			    {
+   				    conj.ReportDecision( true );
+			    }
             }
             
 			// Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
@@ -325,13 +405,15 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 	    {
 			// If there is one more element in x, see if it matches the pattern
 			//TreePtr<Node> xe( x[xit] );
-			if( xit != x.end() && DecidedCompare( *xit, pe, can_key, conj ) == true )
+			if( xit != x.end() && DecidedCompare( *xit, pe, can_key, conj, governing_choice ) == true )
 			{
 				++xit;
+				governing_choice = NULL;
 			}
 			else
 			{
 				TRACE("Element mismatched\n");
+				governing_choice = NULL;
 				return false;
 			}
 	    }
@@ -533,10 +615,26 @@ bool CompareReplace::Compare( TreePtr<Node> x,
     // the search is complete so stuff may be cached.
     FlushSoftPatternCaches( pattern );
     
-	// Create the conjecture object we will use for this compare, and then go
-	// into the recursive compare function
+	// Create the conjecture object we will use for this compare, and keep iterating
+	// though different conjectures trying to find one that allows a match.
 	Conjecture conj;
-	return conj.Search( x, pattern, can_key, this );
+	bool r;
+	while(1)
+	{
+		// Try out the current conjecture. This will call HandlDecision() once for each decision;
+		// HandleDecision() will return the current choice for that decision, if absent it will
+		// add the decision and choose the first choice, if the decision reaches the end it
+		// will remove the decision.
+		r = MatchingDecidedCompare( x, pattern, can_key, conj );
+
+		// If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
+		if( r )
+		    break; // Success
+		    
+		if( !conj.Increment() )
+		    break; // Failure
+	}
+	return r;
 }
 
 

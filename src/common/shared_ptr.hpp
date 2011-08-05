@@ -174,6 +174,15 @@ inline bool operator==( const SharedPtr<SUB_BASE, VALUE_INTERFACE, X> &x,
 	return operator==( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
 }
 
+// Similar signature to boost shared_ptr operator==, and we restrict the pointers
+// to having the same subbase and base target
+template< typename SUB_BASE, typename VALUE_INTERFACE >
+inline bool operator==( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &x,
+		                const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &y)
+{
+	return x.get() == y.get();
+}
+
 template< typename SUB_BASE, typename VALUE_INTERFACE, typename X, typename Y >
 inline bool operator!=( const SharedPtr<SUB_BASE, VALUE_INTERFACE, X> &x,
 		                const SharedPtr<SUB_BASE, VALUE_INTERFACE, Y> &y)

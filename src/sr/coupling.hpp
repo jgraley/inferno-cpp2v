@@ -3,6 +3,7 @@
 
 #include "common/common.hpp"
 #include "node/node.hpp"
+#include "conjecture.hpp"
 #include <set> 
 
 // Base class for coupling keys; this deals with individual node matches, and also with stars
@@ -13,6 +14,7 @@ struct Key
 	virtual ~Key(){}  // be a virtual hierarchy
 	TreePtr<Node> root; // Input program node for this coupling
 	TreePtr<Node> replace_pattern; // Pattern node for this coupling TODO rename to just pattern
+	Conjecture::Choice *governing_choice;
 };
 
 class CouplingKeys
@@ -22,9 +24,9 @@ class CouplingKeys
 public:
 	CouplingKeys();
 	/// Key a node to a pattern (generates a default key structure)
-    void DoKey( TreePtr<Node> x, TreePtr<Node> pattern );
+    void DoKey( TreePtr<Node> x, TreePtr<Node> pattern, Conjecture::Choice *gc=NULL );
     /// Key some key to a pattern - key is supplied by user, can be subclass of Key
-    void DoKey( shared_ptr<Key> key, TreePtr<Node> pattern );
+    void DoKey( shared_ptr<Key> key, TreePtr<Node> pattern, Conjecture::Choice *gc=NULL );
     /// Get the node to which a pattern was keyed, or NULL if pattern has not been keyed
     TreePtr<Node> GetCoupled( TreePtr<Node> pattern );									
     /// Get the key for a given pattern, or NULL if pattern has not been keyed

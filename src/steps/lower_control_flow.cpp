@@ -1,14 +1,79 @@
 
 #include "steps/lower_control_flow.hpp"
 #include "tree/cpptree.hpp"
+#include "tree/sctree.hpp"
 #include "common/common.hpp"
 #include "sr/soft_patterns.hpp"
 #include "tree/typeof.hpp"
 
 using namespace CPPTree;
+using namespace SCTree;
 using namespace Steps;
 
 // TOOD go through step impls and use inline decls of leaf nodes, to reduce wordiness
+
+GotoAfterWait::GotoAfterWait()
+{
+    // This step could have been tricky: we'd have needed 3 cases:
+    // 1. { *, wait, !goto, * }
+    // 2. { *, wait } // not covered by previous case because !goto needs to match a statement
+    // 3. eg if() wait // not directly inside a compound block 
+    // we use the but-not pattern, in which we principally search for anything->wait, but exclude
+    // the only case that needs excluding which is a compound like in case 1 above but without
+    // notting the goto. Cases 2 and 3 work because the excluded compound does not match.
+    // Overall, a good example of but-not
+    MakeTreePtr<Compound> sx_comp, r_comp;
+    MakeTreePtr< Star<Declaration> > sx_decls;
+    MakeTreePtr< Star<Statement> > sx_pre, sx_post;    
+    MakeTreePtr<Wait> wait;
+    MakeTreePtr< NotMatch<Statement> > notmatch;
+    MakeTreePtr< MatchAll<Statement> > all;
+    MakeTreePtr< AnyNode<Statement> > anynode;
+    MakeTreePtr< Overlay<Statement> > over;
+    MakeTreePtr<Goto> sx_goto, r_goto;
+    MakeTreePtr<Label> r_label;
+    MakeTreePtr<BuildLabelIdentifier> r_labelid("YIELD");
+            
+    all->patterns = (anynode, notmatch);
+    anynode->terminus = over;
+    over->through = wait;
+    notmatch->pattern = sx_comp;
+    sx_comp->members = sx_decls;
+    sx_comp->statements = (sx_pre, wait, sx_goto, sx_post);    
+    
+    over->overlay = r_comp;
+    //r_comp->members = ();
+    r_comp->statements = (wait, r_goto, r_label);
+    r_goto->destination = r_labelid;
+    r_label->identifier = r_labelid;
+    
+    Configure( all );
+}
+/*
+GotoAfterWait::GotoAfterWait()
+{
+    // TODO will miss a yield at the very end
+    MakeTreePtr<Compound> s_comp, r_comp;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, post;
+    MakeTreePtr<Wait> wait;
+    MakeTreePtr< NotMatch<Statement> > notmatch;
+    MakeTreePtr<Goto> sx_goto, r_goto;
+    MakeTreePtr<Label> r_label;
+    MakeTreePtr<BuildLabelIdentifier> r_labelid("YIELD");
+        
+    s_comp->members = (decls);
+    s_comp->statements = (pre, wait, notmatch, post);
+    notmatch->pattern = sx_goto;
+    
+    r_comp->members = (decls);
+    r_comp->statements = (pre, wait, r_goto, r_label, notmatch, post);
+    r_goto->destination = r_labelid;
+    r_label->identifier = r_labelid;
+    
+    Configure( s_comp, r_comp );
+}
+*/
 
 IfToIfGoto::IfToIfGoto()
 {

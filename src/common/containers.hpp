@@ -30,6 +30,7 @@ public:
 		// TODO const iterator and const versions of begin(), end()
 		virtual shared_ptr<iterator_interface> Clone() const = 0; // Make another copy of the present iterator
 		virtual iterator_interface &operator++() = 0;
+		virtual iterator_interface &operator--() { ASSERTFAIL("Only on reversible iterator"); };
 		const virtual VALUE_INTERFACE &operator*() const = 0;
 		const virtual VALUE_INTERFACE *operator->() const = 0;
 		virtual bool operator==( const iterator_interface &ib ) const = 0;
@@ -72,6 +73,14 @@ public:
 			ASSERT(pib)("Attempt to increment uninitialised iterator");
 			EnsureUnique();
 			pib->operator++();
+			return *this;
+		}
+
+		iterator &operator--()
+		{
+			ASSERT(pib)("Attempt to increment uninitialised iterator");
+			EnsureUnique();
+			pib->operator--();
 			return *this;
 		}
 
@@ -189,6 +198,12 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
 		    return *this;
 		}
 
+		virtual iterator &operator--()
+		{
+			CONTAINER_IMPL::iterator::operator--();
+		    return *this;
+		}
+
 		virtual const typename CONTAINER_IMPL::value_type &operator*() const
 		{
 			return CONTAINER_IMPL::iterator::operator*();
@@ -201,12 +216,9 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
 
 		virtual bool operator==( const typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface &ib ) const
 		{
-            // JSG apparently there's no operator== in std::deque::iterator, which is odd since iterators 
-            // are supposed to be Equality Comparable. So we just cast the types really carefully and use ==
 		    const typename CONTAINER_IMPL::iterator *pi = dynamic_cast<const typename CONTAINER_IMPL::iterator *>(&ib);
 		    ASSERT(pi)("Comparing iterators of different type");
 			return *(const typename CONTAINER_IMPL::iterator *)this == *pi;
-//		    return CONTAINER_IMPL::iterator::operator==( *this, *pi );
 		}
 	};
 
@@ -552,6 +564,12 @@ struct CountingIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::
 	virtual CountingIterator &operator++()
 	{
 		element++;
+		return *this;
+	}
+
+	virtual CountingIterator &operator--()
+	{
+		element--;
 		return *this;
 	}
 

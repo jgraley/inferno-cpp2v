@@ -1,12 +1,14 @@
 
 #include "steps/state_out.hpp"
 #include "tree/cpptree.hpp"
+#include "tree/sctree.hpp"
 #include "common/common.hpp"
 #include "sr/soft_patterns.hpp"
 #include "tree/typeof.hpp"
 #include "tree/misc.hpp"
  
 using namespace CPPTree;
+using namespace SCTree;
 using namespace Steps;
  
 CompactGotos::CompactGotos()
@@ -64,6 +66,36 @@ CompactGotosFinal::CompactGotosFinal()
 }
 
 
+AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
+{
+    MakeTreePtr< If > s_if;      
+    MakeTreePtr< Expression > cond;      
+    MakeTreePtr< Compound > s_comp, r_comp, sx_comp;  
+    MakeTreePtr< Goto > r_goto;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, post, sx_pre, sx_post;
+    MakeTreePtr< Multiplexor > mult;
+    MakeTreePtr< Label > label;    
+    MakeTreePtr< LabelIdentifier > label_id;
+    MakeTreePtr< MatchAll<Compound> > s_all;
+    MakeTreePtr< NotMatch<Compound> > s_not;
+        
+    s_all->patterns = (s_comp, s_not);
+    s_not->pattern = sx_comp;
+    s_comp->members = ( decls );    
+    s_comp->statements = ( pre, label, post );    
+    label->identifier = label_id;
+    sx_comp->members = ( decls );    
+    sx_comp->statements = ( sx_pre, MakeTreePtr<Goto>(), label, sx_post );
+
+    r_comp->members = ( decls );    
+    r_comp->statements = ( pre, r_goto, label, post );
+    r_goto->destination = label_id;
+
+    Configure( s_all, r_comp );
+}
+
+
 static TreePtr<Statement> MakeResetAssignmentPattern()
 {
     MakeTreePtr<Assign> ass;
@@ -88,6 +120,7 @@ EnsureBootstrap::EnsureBootstrap()
     MakeTreePtr<Label> r_label;    
     MakeTreePtr<BuildLabelIdentifier> r_labelid("BOOTSTRAP");
     MakeTreePtr< NotMatch<Statement> > stop;
+    MakeTreePtr<Goto> sx_goto;
         
     fn->type = sub;
     fn->initialiser = over;
@@ -96,8 +129,10 @@ EnsureBootstrap::EnsureBootstrap()
     s_not->pattern = sx_body;
     // only exclude if there is a goto; a goto to anywhere will suffice to boot the state machine
     sx_body->members = (MakeTreePtr< Star<Declaration> >());
-    sx_body->statements = (sx_pre, MakeTreePtr<Goto>(), MakeTreePtr< Star<Statement> >()); 
+    sx_body->statements = (sx_pre, sx_goto, MakeTreePtr< Star<Statement> >());     
     sx_pre->pattern = MakeResetAssignmentPattern();
+    sx_goto->destination = MakeTreePtr<LabelIdentifier>(); // must be a hard goto to exclude - otherwise might 
+                                                           // have calculations in it which is no good for bootstrapping
     over->overlay = r_body;
     s_body->members = decls;
     s_body->statements = (pre, stop, post);
@@ -537,5 +572,243 @@ FixFallthrough::FixFallthrough()
     s_not2->pattern = MakeTreePtr<Case>();
         
     Configure( s_comp, r_comp );            
+}
+
+
+MakeFallThroughMachine::MakeFallThroughMachine()
+{
+    MakeTreePtr<Instance> fn;
+    MakeTreePtr<InstanceIdentifier> fn_id;
+    MakeTreePtr<Callable> sub;
+    MakeTreePtr< Overlay<Compound> > func_over, over;
+    MakeTreePtr< Compound > ls_func_comp, lr_func_comp, s_func_comp, r_func_comp, s_comp, r_comp, r_switch_comp, lr_comp, ls_comp, lr_if_comp;
+    MakeTreePtr< Star<Declaration> > func_decls, l_func_decls, decls, l_enum_vals, l_decls;
+    MakeTreePtr< Star<Statement> > func_pre, func_post, stmts, body, l_func_pre, l_func_post, l_pre, l_block, l_post, l_stmts;
+    MakeTreePtr< Stuff<Statement> > stuff;
+    MakeTreePtr<Goto> s_first_goto; 
+    MakeTreePtr<Switch> r_switch, l_switch;     
+    MakeTreePtr<Enum> r_enum, ls_enum, lr_enum;         
+    MakeTreePtr< NotMatch<Statement> > s_prenot, s_postnot, xs_rr;
+    MakeTreePtr<BuildTypeIdentifier> r_enum_id("%sStates");
+    MakeTreePtr<Static> lr_state_decl;    
+    MakeTreePtr<BuildInstanceIdentifier> lr_state_id("STATE_%s");
+    MakeTreePtr<Case> lr_case;
+    MakeTreePtr<Signed> lr_int;
+    MakeTreePtr<BuildContainerSize> lr_count;
+    MakeTreePtr<LabelIdentifier> ls_label_id;
+    MakeTreePtr<InstanceIdentifier> var_id;
+    MakeTreePtr<Instance> var_decl, l_var_decl;
+    MakeTreePtr< Overlay<Type> > var_over;  
+    MakeTreePtr<Pointer> s_ptr;
+    MakeTreePtr<Label> xs_pre_label;
+    MakeTreePtr<IsLabelReached> xs_pre_reach;
+    MakeTreePtr< MatchAll<Node> > ll_all;
+    MakeTreePtr< NotMatch<Node> > lls_not1, lls_not2;    
+    MakeTreePtr< AnyNode<Node> > ll_any;
+    MakeTreePtr< Overlay<Node> > ll_over;
+    MakeTreePtr<Goto> lls_goto;    
+    MakeTreePtr<Label> lls_label;    
+    MakeTreePtr<Goto> ls_goto;   
+    MakeTreePtr<Label> ls_label; 
+    MakeTreePtr<If> lr_if;            
+    MakeTreePtr<Equal> lr_equal;
+    MakeTreePtr<Loop> l_loop;
+    MakeTreePtr< Overlay<Statement> > l_over;
+    MakeTreePtr< NotMatch<Statement> > l_not;             
+    MakeTreePtr< MatchAny<Statement> > l_any;
+                             
+    MakeTreePtr< SlaveSearchReplace<Compound> > lr_sub_slave( lr_func_comp, ll_all );    
+    MakeTreePtr< SlaveCompareReplace<Compound> > r_slave( r_func_comp, ls_func_comp, lr_sub_slave );
+
+    fn->type = sub;
+    fn->initialiser = func_over;
+    fn->identifier = fn_id;
+    
+    func_over->through = s_func_comp;
+    s_func_comp->members = (func_decls, var_decl);
+    s_func_comp->statements = (stmts);
+    var_decl->type = var_over;
+    var_decl->identifier = var_id;
+    var_over->through = s_ptr;
+    var_over->overlay = r_enum_id;
+    s_ptr->destination = MakeTreePtr<Void>();
+
+    func_over->overlay = r_slave;
+    r_func_comp->members = (func_decls, r_enum, var_decl);
+    r_func_comp->statements = (stmts);
+    r_enum->identifier = r_enum_id;
+    r_enum_id->sources = (fn_id);  
+    
+    ls_func_comp->members = (func_decls, ls_enum, l_var_decl);
+    ls_func_comp->statements = (l_func_pre, l_loop, l_func_post); 
+    ls_enum->members = (l_enum_vals);
+    ls_enum->identifier = r_enum_id; // need to match id, not enum itself, because enum's members will change during slave
+    l_loop->body = l_over;
+    l_over->through = ls_comp;
+    ls_comp->members = (l_decls);
+    ls_comp->statements = (l_pre, ls_goto, ls_label, l_block, l_post); 
+    ls_goto->destination = var_id;
+    ls_label->identifier = ls_label_id;
+    l_block->pattern = l_not;
+    l_not->pattern = l_any;
+    l_any->patterns = (MakeTreePtr<Goto>(), MakeTreePtr<If>());
+    l_post->pattern = MakeTreePtr<If>();
+    
+    lr_func_comp->members = (func_decls, lr_enum, l_var_decl);
+    lr_func_comp->statements = (l_func_pre, l_loop, l_func_post); // do final block first
+    l_over->overlay = lr_comp;
+    lr_enum->members = (l_enum_vals, lr_state_decl);
+    lr_enum->identifier = r_enum_id;
+    lr_state_decl->constancy = MakeTreePtr<Const>();
+    lr_state_decl->identifier = lr_state_id;
+    lr_state_decl->type = lr_int;
+    lr_state_decl->initialiser = lr_count;
+    lr_count->container = l_enum_vals;
+    lr_int->width = MakeTreePtr<SpecificInteger>(32); // TODO should be a common place for getting default types
+    lr_state_id->sources = (ls_label->identifier);
+    lr_comp->members = (l_decls);
+    lr_comp->statements = (l_pre, lr_if, l_post); // do final block first
+    lr_if->condition = lr_equal;
+    lr_if->body = lr_if_comp;
+    lr_if->else_body = MakeTreePtr<Nop>();
+    lr_equal->operands = (ls_label_id, var_id);
+    //lr_if_comp->members = ();
+    lr_if_comp->statements = l_block;
+
+
+    ll_all->patterns = (ll_any, lls_not1, lls_not2); // TODO don't think we need the nots
+    ll_any->terminus = ll_over;
+    ll_over->through = ls_label_id;
+    ll_over->overlay = lr_state_id;
+    lls_not1->pattern = lls_goto;
+    lls_goto->destination = ls_label_id; // leave gotos alone in the body
+    lls_not2->pattern = lls_label;
+    lls_label->identifier = ls_label_id; // leave labels alone in the body
+
+    Configure( fn );    
+}
+
+AddYieldFlag::AddYieldFlag()
+{
+    MakeTreePtr<Instance> fn;
+    MakeTreePtr<InstanceIdentifier> fn_id;
+    MakeTreePtr<Callable> sub;
+    MakeTreePtr<Compound> s_func_comp, r_func_comp, s_comp, r_comp, ms_comp, mr_comp, msx_comp;
+    MakeTreePtr< Star<Declaration> > enums, decls;
+    MakeTreePtr<Instance> var_decl;
+    MakeTreePtr<InstanceIdentifier> var_id;    
+    MakeTreePtr<TypeIdentifier> enum_id;
+    MakeTreePtr< Star<Statement> > func_pre, m_pre, msx_pre, m_post, stmts;
+    MakeTreePtr< Star<If> > l_pre, l_post;
+    MakeTreePtr<Loop> loop;
+    MakeTreePtr<If> ls_if, lr_if, ms_if, mr_if;
+    MakeTreePtr<Wait> m_wait;
+    MakeTreePtr<Enum> enum_decl;
+    MakeTreePtr<Equal> l_equal;
+    MakeTreePtr<LogicalAnd> lr_and;
+    MakeTreePtr<LogicalNot> lr_not;
+    MakeTreePtr< Overlay<Compound> > func_over, over;
+    MakeTreePtr<Automatic> r_flag_decl;
+    MakeTreePtr<Assign> r_flag_init, mr_assign, msx_assign;
+    MakeTreePtr<BuildInstanceIdentifier> r_flag_id("yield_flag");
+    MakeTreePtr< MatchAll<Compound> > ms_all;
+    MakeTreePtr< NotMatch<Compound> > ms_not;
+    MakeTreePtr< SlaveSearchReplace<Compound> > slavem( r_comp, ms_if, mr_if );
+    MakeTreePtr< SlaveSearchReplace<Compound> > slave( slavem, ls_if, lr_if );  
+      
+    fn->type = sub;
+    fn->initialiser = func_over;
+    fn->identifier = fn_id;  
+    func_over->through = s_func_comp;
+    s_func_comp->members = (var_decl, enum_decl);
+    s_func_comp->statements = (func_pre, loop);
+    var_decl->type = enum_id;
+    var_decl->identifier = var_id;
+    enum_decl->identifier = enum_id;
+    enum_decl->members = (enums);
+    loop->body = over;
+    over->through = s_comp;
+    s_comp->members = decls;
+    s_comp->statements = (stmts);
+    func_over->overlay = r_func_comp; 
+    r_func_comp->members = (var_decl, enum_decl, r_flag_decl);
+    r_func_comp->statements = (func_pre, loop);
+    r_flag_decl->identifier = r_flag_id;
+    r_flag_decl->type = MakeTreePtr<Boolean>();
+    r_flag_decl->initialiser = MakeTreePtr<Uninitialised>();
+    over->overlay = slave;
+    r_comp->members = decls;
+    r_comp->statements = (r_flag_init, stmts);
+    r_flag_init->operands = (r_flag_id, MakeTreePtr<False>());
+
+    ls_if->condition = l_equal;
+    l_equal->operands = (var_id, MakeTreePtr<InstanceIdentifier>());
+    // TODO yield_id should be of type enum_id?                         
+    lr_if->condition = lr_and;
+    lr_and->operands = (l_equal, lr_not);
+    lr_not->operands = (r_flag_id);
+
+    ms_if->body = ms_all;
+    ms_all->patterns = (ms_comp, ms_not);
+    ms_not->pattern = msx_comp;
+    //ms_comp->members = ();
+    ms_comp->statements = (m_pre, m_wait, m_post);
+    msx_comp->statements = (msx_pre, msx_assign);
+    msx_assign->operands = (r_flag_id, MakeTreePtr<True>());  
+
+    mr_if->body = mr_comp;
+    //mr_comp->members = ();
+    mr_comp->statements = (m_pre, m_wait, m_post, mr_assign);
+    mr_assign->operands = (r_flag_id, MakeTreePtr<True>());
+
+    Configure( fn, fn );            
+}
+
+AddInferredYield::AddInferredYield()
+{
+    MakeTreePtr<Instance> fn;
+    MakeTreePtr<InstanceIdentifier> fn_id;
+    MakeTreePtr<Callable> sub;
+    MakeTreePtr<Compound> func_comp, s_comp, sx_comp, r_comp;
+    MakeTreePtr< Star<Declaration> > func_decls;
+    MakeTreePtr< Star<Statement> > func_pre, stmts, sx_pre;    
+    MakeTreePtr< Overlay<Statement> > over;    
+    MakeTreePtr<Automatic> flag_decl; 
+    MakeTreePtr<InstanceIdentifier> flag_id;   
+    MakeTreePtr<WaitDelta> r_yield;
+    MakeTreePtr<Loop> loop;
+    MakeTreePtr<If> r_if, sx_if;
+    MakeTreePtr< MatchAll<Compound> > s_all;
+    MakeTreePtr< NotMatch<Compound> > s_notmatch;
+    MakeTreePtr< LogicalNot > r_not, sx_not;
+          
+    fn->type = sub;
+    fn->initialiser = func_comp;
+    fn->identifier = fn_id;  
+    func_comp->members = (func_decls, flag_decl);
+    flag_decl->type = MakeTreePtr<Boolean>();
+    flag_decl->initialiser = MakeTreePtr<Uninitialised>();
+    flag_decl->identifier = flag_id;
+    func_comp->statements = (func_pre, loop);
+    loop->body = over;
+    over->through = s_all;
+    s_all->patterns = (s_comp, s_notmatch);
+    //s_comp->members = ();
+    s_comp->statements = (stmts);
+    s_notmatch->pattern = sx_comp;
+    //sx_comp->members = ();
+    sx_comp->statements = (sx_pre, sx_if);
+    sx_if->condition = sx_not;
+    sx_not->operands = (flag_id);
+    
+    over->overlay = r_comp;
+    //r_comp->members = ();
+    r_comp->statements = (stmts, r_if);
+    r_if->condition = r_not;
+    r_not->operands = (flag_id);
+    r_if->body = r_yield;
+    r_if->else_body = MakeTreePtr<Nop>();
+    
+    Configure( fn, fn );            
 }
 

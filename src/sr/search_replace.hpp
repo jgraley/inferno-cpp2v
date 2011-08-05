@@ -152,7 +152,8 @@ public:
     bool DecidedCompare( TreePtr<Node> x,
     		               TreePtr<Node> pattern,
     		               bool can_key,
-    		               Conjecture &conj ) const;
+    		               Conjecture &conj,
+    		               Conjecture::Choice *gc = NULL ) const;
 private:
     // MatchingDecidedCompare ring
     friend class Conjecture;

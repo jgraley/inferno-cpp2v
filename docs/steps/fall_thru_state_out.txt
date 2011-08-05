@@ -1,0 +1,609 @@
+
+                                Fall-Through State Machine Generation
+
+(Or Fall-Thru Machine for short)
+
+Terminology:
+
+ - yield: allowing the current flow of execution too stop for a moment. In software, this is like a poll()/switch(), or wait for event or timeout or any blocking call. In hardware, this can be a wait for event or a wait for next clock cycle.
+  
+ - inferred yield: a yield that appears as a result of state-out. Present state-out produces a yield for each goto left in the code after cleanup.
+  
+ - combable: a block of code that can be combinationalised by Verilog, that is turned into a block of gates without reference to storage or clocks. Combable code cannot contain yields, gotos, or most kinds of loops
+
+ - state machine: an algorithm divided into parts (the states) that can remember which state it should run next, and can therefore do its work over a number of invocations. In hardware, this is a way of combining combed logic with registers and a clock to perform uncombable tasks.
+
+
+Forward fall-thru machine
+-------------------------
+
+Begin with state-var-label style, as seen after step AddStateLabelVar. Consider a simple "if" in this form:
+(xxx, yyy etc are blocks of code, assumed combable)
+
+state = cond ? THEN : ELSE
+goto state
+THEN:
+xxx 
+state = DONE
+goto state
+ELSE:
+yyy 
+state = DONE
+goto state
+DONE:
+zzz 
+
+Recall that the present inferno state-out generates a yield for every goto - i.e. we wait for the next clock cycle.
+We can avoid the goto after xxx by 
+ - removing the goto between xxx and yyy, 
+ - and placing the code in yyy (including state var assign) under a new "if" construct that tests the state, eg
+
+state = cond ? THEN : ELSE
+goto state
+THEN:
+xxx 
+state = DONE
+ELSE:
+if( state==ELSE )
+{
+    yyy 
+    state = DONE
+}
+goto state
+DONE:
+zzz 
+
+The new "if" construct is combable, because yyy and the state calculation are combable. We can relocate the label ELSE: by moving it up to next to THEN: and placing the xxx state under an if. 
+
+state = cond ? THEN : ELSE
+goto state
+THEN:
+ELSE:
+if( state==THEN )
+{
+    xxx 
+    state = DONE
+}
+if( state==ELSE )
+{
+    yyy 
+    state = DONE
+}
+goto state
+DONE:
+zzz 
+
+Now the two states are a single combable block, and there is no inferred yield between them. Note: do not actually merge the labels, then we would lose the ability to differentiate between states. This has of course tended to re-introduce the if from the original input program, but the approach can be applied to all states:
+
+PRE:
+THEN:
+ELSE:
+DONE:
+if( state==PRE )
+{
+    state = cond ? THEN : ELSE
+}
+if( state==THEN )
+{
+    xxx 
+    state = DONE
+}
+if( state==ELSE )
+{
+    yyy 
+    state = DONE
+}
+if( state==DONE )
+{
+    zzz 
+}
+goto state
+
+Now all forward-based control flow should work correctly: as long as we don't jump backwards, all the states' if statements will be executed in the correct order. The if's will act when the state matches. Should be good for nested if, switch, etc. The final goto remains, and it effectively forms a superloop, which should be replaced with an explicit one (or just removed when going to SC_METHOD). However, reaching it implies that the function has finished executing.
+
+BEHAVIOUR: no inferred yields, fully combable
+
+Forward fall-thru machine with yields
+-------------------------------------
+
+Consider an example with yield, assuming we have generated goto+label after yields:
+
+state = cond ? THEN : DONE
+goto state
+THEN:
+xxx 
+yield
+state = YIELD
+goto state
+YIELD:
+yyy 
+state = DONE
+goto state
+DONE:
+zzz 
+
+Sine we *do* want to iterate when we see a yield, we need to leave the goto in place as we follow the above process. So we get
+
+PRE:
+THEN:
+if( state==PRE )
+{  
+    state = cond ? THEN : DONE
+}
+if( state==THEN )
+{  
+    xxx 
+    yield
+    state = YIELD
+}
+goto state
+YIELD:
+DONE:
+if( state==YIELD )
+{  
+    yyy 
+    state = DONE
+}
+if( state==DONE )
+{
+    zzz 
+}
+goto state
+
+We still have a goto in the middle, but the technique of using an if for each state can be extended with a flag to elide the goto, assuming a superloop or SC_METHOD:
+
+PRE:
+THEN:
+YIELD:
+DONE:
+yield_flag = false;
+if( state==PRE && !yield_flag )
+{  
+    state = cond ? THEN : DONE
+}
+if( state==THEN && !yield_flag )
+{  
+    xxx 
+    yield_flag = true;
+    state = YIELD
+}
+if( state==YIELD && !yield_flag )
+{  
+    yyy 
+    state = DONE
+}
+if( state==DONE && !yield_flag )
+{
+    zzz 
+}
+goto state
+
+The user-requested yield can disappear, the inferred yield that comes with the goto will have the correct effect (just means we can't optimise away any gotos now). The flag could be a bit in the state word. We do need to be able to reset the flag without changing the state value though.
+
+CONCLUSION: no inferred yields, yields on demand only
+
+Bidirectional fall-thru machine
+-------------------------------
+
+Consider a do-while loop in state-label-var form, with no yields. This loop is presumably indefinite - I think definite for's could be left alone as combable blocks of code entire contained within states. xxx is the body of the loop.
+
+state=LOOP
+goto state
+LOOP:
+xxx
+state=cond ? LOOP : DONE
+goto state
+DONE:
+yyy
+
+Following the same technique described above, we get:
+
+PRE:
+LOOP:
+DONE:
+if( state==PRE )
+{
+    state=LOOP
+}
+if( state==LOOP )
+{
+    xxx
+    state=cond ? LOOP : DONE
+}
+if( state==LOOP )
+{
+    yyy
+}
+goto state
+
+Notice that only a single iteration of the loop happens for each iteration of the superloop (if the loop body had multiple states, they would all get a chance to run though). This is because when state xxx sets the the state to LOOP, we have already gone past the if statement for state LOOP and will not execute it again until we hit the goto at the bottom.
+
+Therefore we have effectively inferred a yield for the loop, as required with indefinite loops. In general, the only way to get more than one iteration without yielding is to duplicate the code or use verilog's definite-for support (which just duplicates the code anyway). There is a case for an "up-to" loop (definite loop containing if) and for turning an indefinite loop into 2 nested loops, with the inner one doing n%K as up-to loop and the outer one doing n/K as indefinite.
+
+BEHAVIOUR: 0 iterations: no inferred yields
+           1 iteration: no inferred yields
+           n iterations: n-1 inferred yields
+
+Bidirectional fall-thru machine with yields
+-------------------------------------------
+
+This is where thinfs get interesting, if we want to avoid inferring new yields into loops that already contain a yield. Note that there are gotchas here, such as
+
+while(x) if(y) yield 
+
+can loop endlessly and unyieldingly when x is true and y is false. Starting with a simpler example, consider a loop with a yield in it:
+
+state=LOOP
+goto state
+LOOP:
+xxx
+yield
+state=YIELD
+goto state
+YIELD:
+yyy
+state=cond ? LOOP : DONE
+goto state
+DONE:
+zzz
+
+In fall-thru form it becomes:
+
+PRE:
+LOOP:
+YIELD:
+DONE:
+yield_flag = false;
+if( state==PRE && !yield_flag )
+{
+    state=LOOP
+}
+if( state==LOOP && !yield_flag )
+{
+    xxx
+    yield_flag = true;
+    state=YIELD
+}    
+if( state==YIELD && !yield_flag )
+{
+    yyy
+    state=cond ? LOOP : DONE
+}
+if( state==DONE && !yield_flag )
+{
+    zzz
+}
+goto state
+
+Now it would appear that during a single iteration of the loop, we will execute state xxx and then set yield_flag, so that no more states execute until we hit the goto at the bottom which makes us yield. Then we execute state yyy and if cond is true we go to state LOOP, but (as in the previous section) we will infer a second yield.
+
+Aside: In general it is OK to re-order the if statements that correspond to the states. They could be in any order. If the order is random, then it will be random how many states execute before hitting the bottom of the loop. Requested yields will work thanks to yield_flag inhibiting any further execution until the inferred yield. But the number of states executed on each superloop iteration would probably not be optimal. Indeed, the original order in which the states appear in the input program is probably close to optimal, assuming the programmer has manually minimised the number of gotos, ifs, whiles etc.
+
+We care more about the ordering inside the loop than outside (and on entry/exit to loop), since we assume a large number of iterations. Rotating the states in a loop body (eg A B C D goes to D A B C) does not affect per-iteration behaviour since neighbouring iterations form the original sequence. So, for 5 iterations: A B C D A B C D A B C D A B C D A B C D becomes D A B C D A B C D A B C D A B C D A B C which contains 4 repetitions of A B C D. So on the order of the number of iterations, nothing has changed, just a different flow entering and leaving the loop (and these won't infer yields because they remain strictly forward transitions).
+
+So we can safely rotate a loop until the explicit yield reaches the last state of the loop, at which point we were going to yield anyway. 
+
+PRE:
+LOOP:
+YIELD:
+DONE:
+yield_flag = false;
+if( state==PRE && !yield_flag )
+{
+    state=LOOP
+}
+if( state==YIELD && !yield_flag )
+{
+    yyy
+    state=cond ? LOOP : DONE
+}
+if( state==LOOP && !yield_flag )
+{
+    xxx
+    yield_flag = true;
+    state=YIELD
+}    
+if( state==DONE && !yield_flag )
+{
+    zzz
+}
+goto state
+
+
+We don't get 2 yields per iteration any more. Instead as we pass all the remaining if statements after the loop (DONE in this example), the state test will fail (due to the loop) and the yield_flag test will also fail (due to the explicit yield). These two test failures correspond to the two yields, but one behaviour suffices for both.
+
+In practice loops will usually use conditional backward jumps, where the jump would otherwise go forward. If we assume loops have many iterations, we will assume the direction usually chosen is the backward one.
+
+BEHAVIOUR: 0 iterations: no yields
+           1 iteration: one yield
+           n iterations: n yields
+
+More complicated control flow
+-----------------------------
+
+I have considered a few cases of more complicate control flow:
+
+- 2 nested loops, yields in inner
+The outer loop contains a backward transition (= inner loop) which crosses the yield. If outer loop is rotated, the jump becomes forward and does not cross the yield. This will produce an efficient fall-thru machine, if a little confusing (outer loop is now doing the work of both loops). Alternatively we could rotate the inner loop first until the yield is at the bottom, then rotate the outer loop. This would keep the inner loop intact. Both approaches should work OK.
+
+- 2 nested loop, yield in outer but not inner
+The outer loop contains a backward jump which does not cross the yield. After rotating the outer loop the backward jump is still backward and still does not cross the yield (after rotation, no loop body transition crosses the yield, because it is at the bottom). This inner loop will generate an inferred yield as required, since it could iterator forever.
+
+- loop containing a yield inside an if 
+This is the example gotcha in the above section. Loop contains forward jump crossing the yield. After rotation, jump is backwards and does not cross the yield. Interestingly, this backward jump now appears to infer an indefinite loop, which will generate an inferred yield. This is what we want. The answer to the gotcha is thus while(x) {while(x&&!y) {}; yield}
+
+- loop containing a yield and if, yield not in if
+The if remains a forward jump not crossing yield. Efficient fall-thru-machine generated.
+
+- Duff's device
+A goto into a loop body (essentially). The goto will always be a forward transition regardless of whether the loop is rotated. So the goto will not infer a yield. Same goes for jumps out of the loop body - they remain forward as the loop rotates, all that changes is how far (how many states they cross). 
+
+Note: remember that if some overall containing loop were rotated, that could change the direction of the jump. But as explained above, on a per-iteration basis rotation doesn't really change anything since the loop loops round back to the beginning after (nearly) every iteration.
+
+- Leap-frogging loops 
+Two backward jumps that cross over, ie states A, B, C, D where D jumps to B and C to A. A yield is right in the middle, at state B. This seems to come out OK regardless of which loop is rotated first.
+
+- 2 yields
+A loop containing 2 yields must yield twice per iteration as requested. Either yield should be sufficient to be moved to the bottom. It is probably least disruptive to use the lower of the two, which would be achieved by constantly rotating the loop body downwards until one of the yields is at the bottom.
+
+- General complex structures
+Loop rotation must terminate if there is only one yield. This is because all transformations move it strictly downwards, and once it reaches the bottom it can go no further. The situation is more complex for multiple yields because moving one yield down may move another up. But if we only rotate each loop enough so that the lowest of the yields reaches the bottom, then no yields will wrap around - instead all the other yields in the loop will move down. So in fact this should terminate too. 
+
+BEHAVIOUR:
+If the above reasoning is right, every loop that contains a yield should be able to move that yield to the bottom and hence yield exactly n times, so not additional inferred yields. Forward flow does not add inferred yields. I believe a coding style as simple as ensuring every loop has an unconditional yields in its body should avoid inferred yields, giving a 1:1 relationship between requested and actual yields. This should allow eg cycle-specific protocols to be written in C. 
+
+Efficiency of synthesised logic, simple case
+--------------------------------------------
+
+Since we are combining several states into a single combable block, we expect settling times to increase accordingly. However, the user expects that inserting a yield should break the algorithm up into multiple combable blocks, each with shorter settling time. Ergo, the Verilog synthesiser needs to be able to determine that the logic can be parallelised and muxed, so that total settling time is that of the max()+tmux, not the sum.
+
+In traditional state machines this is accomplished using a switch (case) statement, which shows clearly that the cases may be parallelised and muxed. Our fall-through output is more ambiguous however, since each if statement seems to depend on the previous one in a data-flow sense, and opportunities to break the data-flow and parallelise seem hard to find.
+
+Nonetheless we can perform a little analysis on a fall-thru machine. We will determine how the state value at a particular point relates to earlier state values, going all the way back to the state value at the start of invocation. We will do the same for the yield_flag. State and yield_flag will be written state<i> and yield_flag<i> where i is 0 for the initial state, and 1, 2, 3... for states determined after that many stages (this is single-static-assignment form, and is similar to what verilog synth tools do in order to track repeated assignments to a variable). 
+
+We will take note of the range of possible states at any stage, and spot simplifications of the form:
+
+((state0=X && p) || (state0=X && !p) === state0=X
+
+which tend to remove dependencies on states reached after the initial state. Consider an example (code slightly compacted):
+
+START:
+yield_flag=false
+if( state==S1 && !yield_flag ) { state=S2 }
+if( state==S2 && !yield_flag ) { state=S3; yield_flag=true }
+if( state==S3 && !yield_flag ) { state=cond?S4:S5 }
+if( state==S4 && !yield_flag ) { state=S5 }
+if( state==S5 && !yield_flag ) { state=S6; yield_flag=true }
+
+This corresponds to a couple of states followed by a yeild, then an if, followed by a second yield. Going to SSA form for state and yield_flag gets us:
+
+START:
+yield_flag0=false;
+if( state0==S1 && !yield_flag0 ) { state1=S2 } else state1=state0
+if( state1==S2 && !yield_flag0 ) { state2=S3; yield_flag2=true; } else { state2=state1; yield_flag2=yield_flag0 }
+if( state2==S3 && !yield_flag2 ) { state3=cond?S4:S5 } else state3=state2
+if( state3==S4 && !yield_flag2 ) { state4=S5 } else state4=state3
+if( state4==S5 && !yield_flag2 ) { state5=S6; yield_flag5=true } else { state5=state4; yield_flag5=yield_flag2 }
+
+I have elided yield_flags that are just copies of earlier ones. Now to apply the analysis, comments inserted:
+
+START:
+yield_flag0=false
+if( state0==S1 ) { state1=S2 } else state1=state0
+// Noticed that yield_flag0 is always false
+// Considering true and false cases for the if, we get state1 === (state0==S1) ? S2 : state0
+
+if( state0==S1 || state0==S2 ) { state2=S3; yield_flag2=true; } else { state2=state1; yield_flag2=yield_flag0 }
+// Substituted in the above expression for state1 and simplified. We see that this if 
+// overlaps with the previous, when state0==S1, and so must cascade in the logic, as 
+// expected (user did not insert a yield)
+// Considering true and false cases for the if, we get 
+// state2 === (state0==S1||state0==S2) ? S3 : state1 === (state0==S1||state0==S2) ? S3 : state0
+// yield_flag2 === (state0==S1||state0==S2) ? true : false === state0==S1||state0==S2
+
+if( state0==S3 ) { state3=cond?S4:S5 } else state3=state2
+// The above expressions for state2 and yield_flag2 actually simplify to 
+// this. It is mainly because the yield_flag condition ensure we do not act in 
+// states S0 or S1. This is correct - the yield_flag is meant to stop us executing
+// any more states. We can see that this state does not overlap with the previous
+// two, and Verilog could synth it in parallel. Thanks to yield_flag, all further
+// states will exclude S0 and S1, making them a separable combinational block.
+// We get state3 === (state0==S3) ? (cond?S4:S5) : state2 
+// === (state0==S3) ? (cond?S4:S5) : ((state0==S1||state0==S2) ? S3 : state0) 
+
+if( (state0==S3 && cond) || state0==S4 ) { state4=S5 } else state4=state3
+// Now we have a condition from the input program driving the if statement. This is 
+// therefore the first state we have encountered so far where the execution
+// depends on more than just state0. Let's proceed, to see whether this dependency
+// sticks around or goes away.
+// We get state4 === ((state0==S3 && cond) || state0==S4) ? S5 : state3
+// === ((state0==S3 && cond) || state0==S4) ? S5 : ((state0==S3) ? (cond?S4:S5) : ((state0==S1||state0==S2) ? S3 : state0))
+// === ((state0==S3 && cond) || state0==S4) ? S5 : ((state0==S3 && !cond) ? S5 : ((state0==S1||state0==S2) ? S3 : state0))
+// === (state0==S3 || state0==S4) ? S5 : ((state0==S1||state0==S2) ? S3 : state0)
+// Note that we have used the above mentioned simplification to detect that there is no real dependency on cond
+
+if( state0==S3 || state0==S4 || state0==S5 ) { state5=S6; yield_flag5=true } else { state5=state4; yield_flag5=yield_flag2 }
+// Again the yield_flag removes cases and we only need to test state0. These states do not overlap with the S0 or S1 cases.
+
+// We get state5 === (state0==S3 || state0==S4 || state0==S5) ? S6 : state4
+// === (state0==S3 || state0==S4 || state0==S5) ? S6 : ((state0==S3 || state0==S4) ? S5 : ((state0==S1||state0==S2) ? S3 : state0))
+// === (state0==S3 || state0==S4 || state0==S5) ? S6 : ((state0==S1||state0==S2) ? S3 : state0)
+// Let's make the system loop be equating S6 and S1, and then assume S1..S5 inclusive are the only states allowed. We get
+// state5 === (state0==S3 || state0==S4 || state0==S5) ? S1 : (state0==S1 || state0==S2) ? S3 : error)
+// This is interesting because state5 is the final state before yield, i.e. the 
+// one that gets stored for the next iteration and appears as state0. So if state5 can only be S1 or S3,
+// then state0 can only be S1, S3 or the bootstrap state, which we will say is S1. So the formula becomes
+// state5 === (state0==S5) ? S1 : (state0==S1) ? S3)
+// which is pleasingly simple.
+// Note however, that we cannot reorder the states after doing this. But we don't want to anyway, because the
+// state ordering has already been optimised for minimal yields.
+
+// yield_flag5 === (state0==S3 || state0==S4 || state0==S5) ? true : yield_flag2
+// === (state0==S3 || state0==S4 || state0==S5) ? true : state0==S1||state0==S2
+// === true
+// which is a good thing because we're going to yield at this point, whatever happens.
+
+In summary, let me just collect together the ifs from the above and put them all 
+together, taking into account the above observations:
+S1:if( state0==S1 ) ...                \ subsequence A
+S2:if( state0==S1 ) ...                / 
+S3:if( state0==S3 ) ...                \
+S4:if( (state0==S3 && cond) ) ...      | subsequence B
+S5:if( state0==S3 ) ...                /
+
+Clearly, the states in subsequence A are mutually exclusive with the states in subsequence B. The condition cond, driving the decision in state S3 only appears in the condition for S4. It is a restriction (anded with the state test) so it does not threaten the exclusivity. It disappears in the next state that represents functionality that comes after the if. We could place subsequences A and B into cases of a switch statement that does *not* fall through (ie Verilog-compatible). And the if statement, from the original program, would re-appear (note: best to copy the if condition into a new variable, in case it has side-effects).
+
+BEHAVIOUR: after some rather heavily-targeted optimisation, we have been able to produce a combinational block whose worst path is roughly max(S1+S2, S3+S4+S5), which is what we expect from yield placement, and better than S1+S2+S3+S4+S5 that we thought we might get.
+
+Efficiency of synthesised logic, harder case
+--------------------------------------------
+
+Consider another example:
+
+START:
+yield_flag=false
+if( state==S1 && !yield_flag ) { state=cond?S2:S4 }
+if( state==S2 && !yield_flag ) { state=S3; yield_flag=true }
+if( state==S3 && !yield_flag ) { state=S4 }
+if( state==S4 && !yield_flag ) { state=S5 }
+
+This is an "if" with a yield in the body. The yield is therefore conditional, and it appears that we may find it harder to exploit the yield to shorten the combinational path length and hence settling time. To SSA form:
+
+START:
+yield_flag0=false
+if( state0==S1 && !yield_flag0 ) { state1=cond?S2:S4 } else state1=state0
+if( state1==S2 && !yield_flag0 ) { state2=S3; yield_flag2=true }  else {state2=state1; yield_flag2=yield_flag0}
+if( state2==S3 && !yield_flag2 ) { state3=S4 } else state3=state2
+if( state3==S4 && !yield_flag2 ) { state4=S5 } else state4=state3
+
+Tracking back the states and simplifying as we go:
+
+START:
+yield_flag0=false
+if( state0==S1 ) { state1=cond?S2:S4 } else state1=state0
+// state1 === (state0==S1) ? (cond?S2:S4) : state0
+
+if( (state0==S1 && cond) || state0==S2 ) { state2=S3; yield_flag2=true }  else {state2=state1; yield_flag2=false}
+// state2 === ((state0==S1 && cond) || state0==S2) ? S3 : (state0==S1) ? (cond?S2:S4) : state0
+// === ((state0==S1 && cond) || state0==S2) ? S3 : (state0==S1 && !cond) ? S4 : state0       
+// === (state0==S2) ? S3 : ((state0==S1)? (cond?S3:S4) : state0)    // we have not made cond go away, OK because we are still in the if body
+// yield_flag2 === ((state0==S1 && cond) || state0==S2) ? true : false
+// === (state0==S1 && cond) || state0==S2
+// Notice we have a yield_flag that depends on cond. I suppose it's obvious really, since the yield itself was in the if
+
+if( state0==S3 ) { state3=S4 } else state3=state2
+// This was complicated to simplify. I knocked out S2 based on yield_flag, 
+// as well as the case of S1 && cond. Eventually, the if is only satisfied by S3, 
+// regardless of cond.
+// state3 === (state0==S3) ? S4 : ((state0==S2) ? S3 : ((state0==S1)? (cond?S3:S4) : state0))
+// I'll stop there because I only want "cond" to appear once
+
+if( state0==S3 || (state0==S1 && !cond) || state0==S4 ) { state4=S5 } else state4=state3
+// That was really complicated to simplify. Interestingly, yield_flag2's 
+// dependency on cond was redundant with state3's dependency, suggesting we have
+// built two mechanisms to prevent S4 from running when cond is true and state0==S1 - one via 
+// the test of yield_flag2 in S4's if, and the other via state3 taking a different
+// value then S4 in this case. It is correct to prevent S4 from running when cond is true 
+// and state0==S1 because the if body contains a yield, and so if we executed the test in
+// S1 and the test passed, we should not reach S4 until after the yield, i.e. in next iteration.
+// state4 === (state0==S3 || (state0==S1 && !cond) || state0==S4) ? S5 : state3
+// === (state0==S3 || (state0==S1 && !cond) || state0==S4) ? S5 : (((state0==S2 || state0==S1) ? S3 : state0)))
+
+As before, we can limit allowed states to S1..S4, equating S5 with S1, to get
+// state4 === (state0==S3 || (state0==S1 && !cond) || state0==S4) ? S1 : (((state0==S2 || state0==S1) ? S3 : error)))
+
+If S1 and S3 are the only terminal states, make S1 the bootstrap and now S1 and S3 are the only possible values for state0, so that 
+// state4 === (state0==S3 || (state0==S1 && !cond)) ? S1 : ((state0==S1) ? S3 : error)
+
+yield_flag2, the terminal yield state is not always true now. From above,
+
+yield_flag2 === (state0==S1 && cond) || state0==S2
+
+which is true only in the case where we started at the beginning, the if cond was true, and we hit the yield. A yield could be added at the bottom to ensure the result is always 1, or we could simply yield anyway, effecting a superloop.
+
+Summarising the conditions as above, we have
+S1:if( state0==S1 ) ...
+S2:if( state0==S1 && cond ) ...
+S3:if( state0==S3 ) ...
+S4:if( state0==S3 || !cond ) ...
+
+Now S1 is exclusive with S3 and S2 is exclusive with S4, but we do *not* have (S1,S2) exclusive with (S3,S4) because S1 and S4 can both execute (when state0=S1 and cond=false). 
+
+Note that S3 is exclusive with S2. When two states are exclusive I believe we can swap them over, giving the following ordering:
+
+S1:if( state0==S1 ) ...
+S3:if( state0==S3 ) ...
+S2:if( state0==S1 && cond ) ...
+S4:if( state0==S3 || !cond ) ...
+
+Then we can divide the sequence up into sets as follows:
+ 
+ set 1
+S1:if( state0==S1 ) ...
+S3:if( state0==S3 ) ...
+
+ set 2
+S2:if( state0==S1 && cond ) ...
+S4:if( state0==S3 || !cond ) ...
+
+And look for exclusive subsequences within each set, eg
+
+ set 1
+S1:if( state0==S1 ) ...          > subsequence A
+S3:if( state0==S3 ) ...          > subsequence B
+
+ set 2
+S2:if( state0==S1 && cond ) ...  > subsequence C
+S4:if( state0==S3 || !cond ) ... > subsequence D
+
+Now, set 1 is a parallel combination of subsequences A and B, which is states S1 and S3. Set 2 is a parallel combination of subsequences C and D, which is states S2 and S4. We have satisfied the needs of both execution paths: if the test fails, we execute S1 then S4, and these are in subsequent sets, so this works. If the test passes, we need two iterations due to the yield: firstly, we execute S1 and S2, which is OK, and then on the next iteration, S3 and S4, which is also OK.
+
+BEHAVIOUR: we have got max(S1, S3) + max(S2, S4) which is on the order of 2 states combinational depth, and roughly twice as good as the combinational path length involved in cascading all four states. Since the input program as written requests 2-state paths in several cases, this is a good result.
+
+Generalising
+------------
+
+What we have here is a graph-theoretical problem. The set of states maps to an acyclic digraph of nodes. States that overlap have an edge between them. The edges point from earlier to later node, i.e. downwards. There is no edge between mutually exclusive states. We establish the "rank" of each state. That means the top state has rank 0, and any dependent states have rank 1 and so on for sub-dependents. The highest state that does not depend directly or indirectly on the top state also has rank 0, and we continue until all nodes have a rank. A state might be found to have more than one rank if it is depended on by more than one exclusive state, in which case it is given the greater of the two ranks, a max() algorithm.
+
+Now we can regard the entire system as a sequence of exclusive sets, where the members of each set have equal rank. The simple example would be
+
+S1:if( state0==S1 ) ...            rank 0 
+S2:if( state0==S1 ) ...            rank 1   
+S3:if( state0==S3 ) ...            rank 2  
+S4:if( (state0==S3 && cond) ) ...  rank 0  
+S5:if( state0==S3 ) ...            rank 1
+
+and becomes:
+
+sequence(
+set {S1, S4},
+set {S2, S5},
+set {S3} )
+
+The harder example would be 
+
+S1:if( state0==S1 ) ...            rank 0
+S2:if( state0==S1 && cond ) ...    rank 1
+S3:if( state0==S3 ) ...            rank 0
+S4:if( state0==S3 || !cond ) ...   rank 1 (two paths here, from S1 and S3, rank is max(1,1)
+
+and becomes:
+
+sequence(
+set {S1, S3},
+set {S2, S4} )
+
+Now, in the simple example case, this is potentially slower than the original effort, since in general sum(max()) may be bigger than max(sum()) over a grid of numbers. It is possible that a wire-level optimiser could do better. Since our requirement is to have settling time on the order of the largest gap between yields, we really want max(sum()), not sum(max()). But these values approach one another as the elements being summed and maxed get more similar. Therefore there may be a case to level the complexity of each state. 
+
+We can imagine a micro-clock, that ticks several times per system clock, and whose period represents the target settling time of the states. We could insert micro-yields, that just separate states and do not force iteration, as a way of controlling the state size.
+
+Alternatively, we could go back to the graph, and search for subsequences of sets in which the edges do not split or join, and combine the sets into a single set of subsequences. This could be done repeatedly until the graph cannot be simplified any further. We would end up with a sequence of sets of subsequences.
+
+Final Notes
+-----------
+
+Much of this maths would be easier if I had used additional states for yield control instead of separate yield_flag. So, in the above example, there could be S3 and S3_YIELD. S2 would go state=S3_YIELD. The _YIELD states would be eg | 0x10, so that the common code at the bottom can spot a yield state, and reset it to the non-yield version. Where a yielding state can jump to different locations, there would need to be multiple _YIELD states, but states that are never reached via yield should not need _YIELD versions. The _YIELD states are the only ones that really need to be stored in registers (as well as maybe bootstrap and closedown states).
+
+I wonder whether the should-state-execute and next-state formulas might be easier represented using tables. I imagine a 2D table with state0 down the left hand side, and identity crossed with decisions made in previous states along the top. Every time a new decision comes along, it should be crossed in to the top axis (so if there were 5 columns before, and a simple if comes along, we now have 10 columns). Algorithms should watch for symmetry in decisions and remove the decision from the table when this is seen. Tables for state execution would be of bools, and for state transitions would be populated with candidate next-state values. It should be reasonably easy then to generate each table from the previous, without the tedious math I have done altogether too much of today.
+
+

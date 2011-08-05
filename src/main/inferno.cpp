@@ -32,6 +32,8 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     //sequence->push_back( shared_ptr<Transformation>( new GenerateImplicitCasts ) ); 
     
     sequence->push_back( shared_ptr<Transformation>( new DetectAllSCTypes ) );
+   
+    
     sequence->push_back( shared_ptr<Transformation>( new BreakToGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new SwitchToIfGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new ForToWhile ) ); 
@@ -47,16 +49,26 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     sequence->push_back( shared_ptr<Transformation>( new CompactGotosFinal ) );
     for( int i=0; i<2; i++ )
     {
-        //sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundSingle ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupNop ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) ); 
         //sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualGoto ) ); // TODO change this to only act when no other usages of the label (ie we are not marging code paths)
-        sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
     }        
-    sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );
-    sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) );
-   
+    
+    sequence->push_back( shared_ptr<Transformation>( new GotoAfterWait ) );     
+    sequence->push_back( shared_ptr<Transformation>( new AddGotoBeforeLabel ) );     
+    sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );    
+        sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) );
+        sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); // sequential labels confuse MakeFallThroughMachine; best to clean up labels before AddStateLabelVar 
+        sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundSingle ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new CleanUpDeadCode ) ); // "for" lowering can produce dead code (eg break/continue at end of body) and this leaves code between goto and label, confusing MakeFallThroughMachine: 
+            
+    sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
+    //sequence->push_back( shared_ptr<Transformation>( new MakeFallThroughMachine ) ); // TODO do this after superloop or intermediate won't work. Need to add another compound to this step so it can work inside superloopm, like with InsertSwitch
+    sequence->push_back( shared_ptr<Transformation>( new AddYieldFlag ) );
+    sequence->push_back( shared_ptr<Transformation>( new AddInferredYield ) );
     /*    
     sequence->push_back( shared_ptr<Transformation>( new UseTempsForParamsReturn ) );     
     sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) ); 
@@ -72,8 +84,8 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
     }        
 
-    sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
-    sequence->push_back( shared_ptr<Transformation>( new ShareGotos ) );
+
+   /* sequence->push_back( shared_ptr<Transformation>( new ShareGotos ) );
     sequence->push_back( shared_ptr<Transformation>( new InsertSwitch ) ); 
     sequence->push_back( shared_ptr<Transformation>( new SwitchCleanUp ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
@@ -81,7 +93,7 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) ); 
     sequence->push_back( shared_ptr<Transformation>( new InferBreak ) ); 
     sequence->push_back( shared_ptr<Transformation>( new CleanUpDeadCode ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new FixFallthrough ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new FixFallthrough ) ); */
 }
 
 

@@ -10,45 +10,42 @@ void Conjecture::PrepareForDecidedCompare()
 	decision_index = 0;
 }
 
-bool Conjecture::ShouldTryMore( bool r, int threshold )
+
+bool Conjecture::Increment()
 {
-	ASSERT( this );
-
-	if( r == true )
-    	return false; // stop trying if we found a match
-
-    if( choices.size() <= threshold ) // we've made all the decisions we can OR
-        return false;         // our last decision went out of bounds
-
+	// If we've run out of choices, we're done.
+	TRACE();
+	if( choices.empty() )
+	    return false;
+	else if( choices.back().it != choices.back().end )
+	{
+		TRACE("Incrementing choice FROM ")(**choices.back().it)("\n");
+		++(choices.back().it); // There are potentially more choices so increment the last decision
+    }
+		
+    if( choices.back().it == choices.back().end )
+    {
+        TRACE("Incrementing end count FROM %d\n", choices.back().end_count);
+        ++choices.back().end_count;
+    }
+        
     return true;
 }
 
 
-bool Conjecture::Search( TreePtr<Node> x,
-					       TreePtr<Node> pattern,
-						   bool can_key,
-					  	   const CompareReplace *sr )
+ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::iterator begin,
+		                                                 ContainerInterface::iterator end,
+		                                                 int en )
 {
-	// Loop through candidate conjectures
-	while(1)
-	{
-		// Try out the current conjecture. This will call HandlDecision() once for each decision;
-		// HandleDecision() will return the current choice for that decision, if absent it will
-		// add the decision and choose the first choice, if the decision reaches the end it
-		// will remove the decision.
-		bool r = sr->MatchingDecidedCompare( x, pattern, can_key, *this );
-
-		// If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
-		if( r || choices.empty() )
-		    return r;
-		else
-			++(choices.back()); // There are potentially more choices so increment the last decision
-	}
+    Choice c = GetDecision( begin, end, en );
+    ReportDecision( c.end_count != c.end_num ); // the first end is assumed to mean this decision has failed
+    return c.it;
 }
 
 
-ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::iterator begin,
-		                                                 ContainerInterface::iterator end )
+Conjecture::Choice Conjecture::GetDecision( ContainerInterface::iterator begin,
+		                                    ContainerInterface::iterator end,
+		                                    int en )
 {
 	ASSERT( this );
 	ASSERT( choices.size() >= decision_index ); // consistency check; as we see more decisions, we should be adding them to the conjecture
@@ -57,9 +54,13 @@ ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::ite
 	// See if this decision needs to be added to the present Conjecture
 	if( choices.size() == decision_index ) // this decision missing from conjecture?
 	{
-		c = begin; // Choose the first option supplied
+		c.it = begin; // Choose the first option supplied
+		c.end = end; // Choose the first option supplied
+		c.end_count = 0;
+		c.end_num = en;
+		c.forced = false;
 		choices.push_back( c ); // append this decision so we will iterate it later
-		TRACE("Decision %d appending begin\n", decision_index );
+		TRACE("Decision %d appending begin at %p\n", decision_index, GetChoicePtr() );
 	}
 	else // already know about this decision
 	{
@@ -67,19 +68,17 @@ ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::ite
 	    c = choices[decision_index]; // Get present decision
 	}
 
+	// Return whatever choice we made
+    return c;
+}
+
+
+void Conjecture::ReportDecision( bool ok )
+{
 	// Check the decision obeys bounds
-	if( c == end ) // gone off the end?
+	if( ok ) 
 	{
-		// throw away the bad iterator; will force initialisation to begin() next time
-		// NOTE: we will still return end in this case, i.e. an invalid iterator. This tells
-		// the caller to please not try to do any matching with this decision, but fall out
-		// with false.
-		TRACE("Decision %d hit end\n", decision_index );
-		choices.resize( decision_index );
-	}
-	else
-	{
-		// That decision is OK, so move to the next one
+		// That decision is OK, so move on to the next one
 		TRACE("Decision %d OK\n", decision_index );
 
 /* JSG this is slow!
@@ -93,9 +92,32 @@ ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::ite
 */
 		decision_index++;
 	}
-
-	// Return whatever choice we made
-    return c;
+	else
+	{
+		// Throw away the current decision since we ran out of valid choices.
+		// The next Increment() will increment the *previous* decision
+		TRACE("Decision %d hit end\n", decision_index );
+		choices.resize( decision_index );
+	}
 }
 
+Conjecture::Choice Conjecture::ForceDecision( ContainerInterface::iterator tohere )
+{
+    // TODO don't keep indexing choices, use a temp lol
+	ASSERT( this );
+	ASSERT( choices.size() > decision_index ); // consistency check; as we see more decisions, we should be adding them to the conjecture
+	if( !choices[decision_index].forced )
+	{
+	    choices[decision_index].it = tohere;
+	    ++tohere;
+	    choices[decision_index].end = tohere;
+	    choices[decision_index].end_num = 1;
+        choices[decision_index].forced = true;
+        TRACE("Forcing decision to ")(**(choices[decision_index].it))("\n");
+    }
+    else
+        TRACE("not forcing decision again\n");
+        
+    return choices[decision_index];
+}
 
