@@ -196,6 +196,13 @@ private:
 			TreePtr<Declaration> d;
 		};
 
+		struct DeclarationChain: Declaration
+		{
+			NODE_FUNCTIONS
+			TreePtr<Declaration> first;
+			TreePtr<Declaration> second;
+		};
+
 		// Turn a clang::CXXScopeSpec into a pointer to the corresponding scope node.
 		// We have to deal with all the ways of it baing invalid, then just use hold_scope.
 		TreePtr<Node> FromCXXScope(const clang::CXXScopeSpec *SS)
@@ -683,11 +690,12 @@ private:
 
 		// Does 1 thing:
 		// 1. Inserts a stored decl if there is one in decl_to_insert
-		DeclTy *IssueDeclaration(clang::Scope *S, TreePtr<Declaration> d)
+		void IssueDeclaration(clang::Scope *S, TreePtr<Declaration> d)
 		{
-			// Did we leave a decl lying around to insert later? If so, pack it together with
-			// the current decl, for insertion into the code sequence.
-			TRACE("Scope flags %x ", S->getFlags());
+		    int os = inferno_scope_stack.top()->members.size();
+			// Did we leave a record decl lying around to insert later? If so, pack it together with
+			// the current instance decl, for insertion into the code sequence.
+			TRACE("Issuing instance decl ")(*d)(" scope flags %x ", S->getFlags());
 			if (decl_to_insert)
 			{
 				inferno_scope_stack.top()->members.insert(decl_to_insert);
@@ -695,13 +703,13 @@ private:
 						decl_to_insert);
 				backing_paired_decl[d] = decl_to_insert;
 				decl_to_insert = TreePtr<Declaration> (); // don't need to generate it again
-				TRACE("inserted decl\n");
+				TRACE("inserted record decl\n");
 			}
 
+			TRACE("no insert record decl\n");
 			inferno_scope_stack.top()->members.insert(d);
 			backing_ordering[inferno_scope_stack.top()].push_back(d);
-			TRACE("no insert\n");
-			return hold_decl.ToRaw(d);
+			TRACE("From %d to %d decls\n", os, inferno_scope_stack.top()->members.size() );
 		}
 
 		virtual DeclTy *ActOnDeclarator(clang::Scope *S, clang::Declarator &D,
@@ -717,15 +725,26 @@ private:
 			}
 
 			TreePtr<Declaration> d = FindExistingDeclaration(D, false); // decl exists already?
-			if (d)
-			{
-				return hold_decl.ToRaw(d); // just return it
-			}
-			else
+			if (!d)
 			{
 				d = CreateDelcaration(S, D); // make a new one
-				return IssueDeclaration(S, d); // add it to the tree and return it
+				IssueDeclaration(S, d);
 			}
+			
+			// Clang refuses to store all the DeclTys we return in cases like int a, b, c;
+			// instead it provides us with the last one we parsed (LastInGroup) and we are
+			// expected to chain them. Use a local node for this and untangle in AddStatementToCompound. 
+			TRACE("LIG=%x\n", LastInGroup);
+			if( LastInGroup )
+			{
+			    TRACE("Chaining declarations\n");
+			    MakeTreePtr<DeclarationChain> dc;
+			    dc->first = hold_decl.FromRaw(LastInGroup);
+			    dc->second = d;
+			    d = dc;
+			}     
+			
+			return hold_decl.ToRaw( d );
 		}
 
 		/// ActOnParamDeclarator - This callback is invoked when a parameter
@@ -1077,12 +1096,28 @@ private:
 		return hold_type.ToRaw( t );
 	}
 
-	void PushStmt( TreePtr<Compound> s, TreePtr<Statement> st )
+	void AddDeclarationToCompound( TreePtr<Compound> s, TreePtr<Declaration> d )
+	{
+		if( TreePtr<DeclarationChain> dc = dynamic_pointer_cast<DeclarationChain>( d ) )
+		{
+		    TRACE("Expanding declaration chain\n");
+		    AddDeclarationToCompound( s, dc->first );
+		    AddDeclarationToCompound( s, dc->second );
+		    return;
+		}
+ 		 
+		if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>(d) )
+		    AddStatementToCompound( s, i ); // Instances can have inits that require being in order, so append as a statement
+		else
+		    s->members.insert( d );
+	}
+	
+	void AddStatementToCompound( TreePtr<Compound> s, TreePtr<Statement> st )
 	{
 		/* if( TreePtr<ParseTwin> pt = dynamic_pointer_cast<ParseTwin>( st ) )
 		 {
-		 PushStmt( s, pt->d1 );
-		 PushStmt( s, pt->d2 );
+		 AddStatementToCompound( s, pt->d1 );
+		 AddStatementToCompound( s, pt->d2 );
 		 return;
 		 }
 		 */
@@ -1092,33 +1127,27 @@ private:
 			{
 				TreePtr<Declaration> bd = backing_paired_decl[d];
 				ASSERT( bd );
-
-				if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>(bd) )
-				PushStmt( s, i ); // Instances can have inits that require being in order, so append as a statement
-
-				else
-				s->members.insert( bd );
-
+                AddDeclarationToCompound( s, bd );
 				backing_paired_decl.erase(d);
 			}
 		}
 
 		if( TreePtr<DeclarationAsStatement> das = dynamic_pointer_cast<DeclarationAsStatement>(st) )
-		s->members.insert( das->d );
+		    AddDeclarationToCompound( s, das->d );
 		else
-		s->statements.push_back( st );
+		    s->statements.push_back( st );
 
 		// Flatten the "sub" statements of labels etc
 		if( TreePtr<Label> l = dynamic_pointer_cast<Label>( st ) )
 		{
 			ASSERT( backing_labels[l] );
-			PushStmt( s, backing_labels[l] );
+			AddStatementToCompound( s, backing_labels[l] );
 			backing_labels.erase(l);
 		}
 		else if( TreePtr<SwitchTarget> t = dynamic_pointer_cast<SwitchTarget>( st ) )
 		{
 			ASSERT( backing_targets[t] );
-			PushStmt( s, backing_targets[t] );
+			AddStatementToCompound( s, backing_targets[t] );
 			backing_targets.erase(t);
 		}
 	}
@@ -1131,7 +1160,7 @@ private:
 		TreePtr<Compound> s(new Compound);
 
 		for( int i=0; i<Elts.size(); i++ )
-		PushStmt( s, hold_stmt.FromRaw( Elts.get()[i] ) );
+		AddStatementToCompound( s, hold_stmt.FromRaw( Elts.get()[i] ) );
 
 		return ToStmt( s );
 	}
@@ -1378,8 +1407,9 @@ private:
 			ASSERT( o )( "only Instances may have initialisers");
 			o->initialiser = hold_expr.FromRaw( Init );
 		}
-
-		return IssueDeclaration( S, d );
+		
+        IssueDeclaration( S, d );
+		return hold_decl.ToRaw( d );
 	}
 
 	virtual DeclTy *ActOnTag(clang::Scope *S, unsigned TagType, TagKind TK,

@@ -122,9 +122,11 @@ A Star may only be placed in a container, not pointed to directly.
 
 4.1 In Sequence
 
-A Star node in a Sequence in a search pattern acts like a "*" character in a filename, in other words it can match zero or more elements at the position of the star. It is possible to use * multiple times and at any position in the pattern sequence. But it is not possible to place two stars consecutively (even if they have differing restrictions). 
+A Star node in a Sequence in a search pattern acts like a "*" character in a filename, in other words it can match zero or more elements at the position of the star. It is possible to use * multiple times and at any position in the pattern sequence. 
 
 For example the Sequence (Star<Statement>, If, Star<Statement>, For, Star<Statement>) is a search pattern for any Sequence of Statements that contains an If and a For, and which places the If before the For.
+
+It is possible to place two star nodes consecutively in the sequence. In this case, the behaviour of the inferno search engine is only well-defined when the restrictions of the two Star nodes (pre-restrictions and/or pattern restriction) are mutually exclusive. This is easiest to guarantee using pattern restrictions, where the patterns of the two Star nodes are identical excpet that one of the patterns has NotMatch inserted at the top. Since Star restriction patterns are abnormal contexts, the restriction subtree would need to be duplicated in this case, not shared.
 
 4.2 In Collection
 
@@ -419,7 +421,7 @@ Inferno containers (Sequence and Collection) support initialisation directly fro
 
 When building a Container from TreePtrs using the comma operator, it is good style to enclose the entire list in parentheses. This looks better, and is necessary when the container is being passed to a function, so that the compiler does not assume the commas are there to separate function arguments.
 
-Prefixes may be used with variable names to help clarify at the discretion of the programmer. I have used s_ for search pattern nodes and r_ for replace pattern nodes, with no prefix for nodes coupled into both (or c_ could be used here). I prepend l_ for slaves and sometimes insert x into nodes under a NotMatch node, such as with the but-not pattern.
+Prefixes may be used with variable names to help clarify at the discretion of the programmer. I have used s_ for search pattern nodes and r_ for replace pattern nodes, with no prefix for nodes coupled into both (or c_ could be used here). I prepend l_ for slaves and sometimes insert x into nodes under a NotMatch node, such as with the but-not pattern. Further slaves at the same level (reached via "through") are named m_, n_, o_ etc. Sub-slaves recieve two letters, eg ll_ or nm_. In this case n is master and m is second level slave.
 
 I usually leave numbers and strings that are passed into SpecificX or Builder nodes as magic, possibly with a comment. Any macros, enums etc will be reduced to the raw number in a graph plot anyway.
 

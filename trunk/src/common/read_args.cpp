@@ -35,7 +35,7 @@ void ReadArgs::Usage()
     		        "-s          Run self-tests.\n"
     		        "-ap         Enable pedigree assertions in search and replace engine.\n"
                     "-q<n>       Stop before step <n>. <n> may be 0 to exercise just parser and renderer.\n"                    
-                    "-n<n>       Only run step <n>. User must ensure program meets any restrictions of the step.\n"                    
+                    "-n<n>       Only run step <n>. User must ensure input program meets any restrictions of the step.\n"                    
 	                "-gi         Generate Graphviz graphs for output or intermediate if used with -q.\n"
 	                "-gp<n>      Generate Graphviz graphs for transformation step n.\n"
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"

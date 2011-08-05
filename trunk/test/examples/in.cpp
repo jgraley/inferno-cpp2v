@@ -30,6 +30,7 @@ int notmain()
     k[4]--;
     goto here;
     here:
+    j--;
     there:
     --j;
     if( k )

@@ -13,7 +13,6 @@ int tot=0;
 class TopLevel : sc_module
 {
 public:
-    sc_event yield_event;
     SC_CTOR(TopLevel)
     { 
         SC_METHOD(method);
@@ -24,7 +23,6 @@ public:
         tot+=gvar;
         if( gvar==10 )
             exit(tot);
-       // yield_event.notify(SC_ZERO_TIME);
         next_trigger( SC_ZERO_TIME );                         
     }
 };

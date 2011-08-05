@@ -21,6 +21,13 @@ public:
     CompactGotosFinal();
 };
 
+/** Labels not preceeded by a goto get a goto before them */
+class AddGotoBeforeLabel : public SearchReplace
+{
+public:
+    AddGotoBeforeLabel();
+};
+
 /** Insert a bootstrapping state transition at the top of the function. */
 class EnsureBootstrap : public SearchReplace
 {
@@ -81,6 +88,27 @@ class FixFallthrough : public SearchReplace
 {
 public:
     FixFallthrough();
+};
+
+/** Go to fallthrough machine style */
+class MakeFallThroughMachine : public SearchReplace
+{
+public:
+    MakeFallThroughMachine();
+};
+
+/** Add a flag to the state machine for yields */
+class AddYieldFlag : public SearchReplace
+{
+public:
+    AddYieldFlag();
+};
+
+/** Yield at bottom of superloop if not already yielded */
+class AddInferredYield : public SearchReplace
+{
+public:
+    AddInferredYield();
 };
 
 }; // end namespace

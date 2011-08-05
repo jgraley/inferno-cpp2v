@@ -3,20 +3,6 @@
 
 int gvar;
 
-
-inline void xwait( bool &x )
-{
-    while(!x)
-        wait( SC_ZERO_TIME );
-    x=false; // reset for next time (should be atomic with the test)
-}
-
-void xnotify( bool &x )
-{
-    x=true;
-}
-
-
 class Adder : public sc_module
 {
 public:
@@ -55,7 +41,7 @@ public:
     void T()
     {
         gvar = 1;
-        xnotify( mul_inst.instigate );      
+        mul_inst.instigate = true;      
     }
 };
 
@@ -63,24 +49,34 @@ TopLevel top_level("top_level");
 
 void Adder::T()
 {
-    xwait( proceed );
+    while(!proceed)
+        wait( SC_ZERO_TIME );
+    proceed = false; // reset for next time (should be atomic with the test)
     gvar += 2;
-    xnotify( top_level.mul_inst.proceed );
-    xwait( proceed );
+    top_level.mul_inst.proceed = true;
+    while(!proceed)
+        wait( SC_ZERO_TIME );
+    proceed = false; // reset for next time (should be atomic with the test)
     gvar += 3;
-    xnotify( top_level.mul_inst.proceed );
+    top_level.mul_inst.proceed = true;
 }
 
 
 void Multiplier::T()
 {
-    xwait( instigate );
+    while(!instigate)
+        wait( SC_ZERO_TIME );
+    instigate = false; // reset for next time (should be atomic with the test)
     gvar *= 5;
-    xnotify( top_level.add_inst.proceed );
-    xwait( proceed );
+    top_level.add_inst.proceed = true;
+    while(!proceed)
+        wait( SC_ZERO_TIME );
+    proceed = false; // reset for next time (should be atomic with the test)
     gvar *= 5;    
-    xnotify( top_level.add_inst.proceed );
-    xwait( proceed );
+    top_level.add_inst.proceed = true;
+    while(!proceed)
+        wait( SC_ZERO_TIME );
+    proceed = false; // reset for next time (should be atomic with the test)
     exit(gvar);
 }
 
