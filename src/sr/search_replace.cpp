@@ -108,7 +108,8 @@ bool CompareReplace::DecidedCompare( TreePtr<Node> x,
 									   TreePtr<Node> pattern,
 									   bool can_key,
     								   Conjecture &conj,
-    								   Conjecture::Choice *gc ) const
+    								   Conjecture::Choice *gc,
+    								   int go ) const
 {
     INDENT;
 	ASSERT( x ); // Target must not be NULL
@@ -230,12 +231,12 @@ bool CompareReplace::DecidedCompare( TreePtr<Node> x,
             return false;
 	
 	if( can_key )
-        coupling_keys.DoKey( x, pattern, gc );	
+        coupling_keys.DoKey( x, pattern, gc, go );	
 
     return true;
 }
 
-
+                                                                                                                        
 // TODO support SearchContainerBase(ie Stuff nodes) here and below inside the container.
 // Behaviour would be to try the container at each of the nodes matched by the star, and if
 // one match is found we have a hit (ie OR behaviour). I think this results in 3 decisions
@@ -254,6 +255,7 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 	ContainerInterface::iterator xit = x.begin();
 	ContainerInterface::iterator pit, npit, nnpit;
 	Conjecture::Choice *governing_choice = NULL;
+	int governing_offset;
 
 	for( pit = pattern.begin(); pit != pattern.end(); ++pit )
 	{
@@ -290,8 +292,7 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 	    		// interface to Conjecture because the iterator we get is itself an end to the 
 	    		// range matched by the star, and so x.end() is a legitimate choice for ss.end()
 	    		// So allow the Conjecture class to give us two ends, and only give up on the second.
-		    	Conjecture::Choice choice = conj.GetDecision( xit_begin_star, x.end(), 2 );
-		    	governing_choice = conj.GetChoicePtr();
+		    	Conjecture::Choice *current_choice = conj.GetChoicePtr();
 #if 1		    	
 		    	// Optimisation for couplings in sequences: is some future pattern node coupled?
 		    	bool do_optimise = false;
@@ -307,36 +308,46 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 		        	if( lakey && lakey->root )
 		        	{
 		        	    TRACE("Maybe optimise lad=%d *pit=", lad)(**pit)(" *lapit=")(**lapit)
-		        	         (" lakey->governing_choice=%p governing_choice=%p", lakey->governing_choice, governing_choice)
+		        	         (" lakey->governing_choice=%p current_choice=%p", lakey->governing_choice, current_choice)
 		        	         (" lakey->pattern=")(*lakey->replace_pattern)(" lakey->root=")(*lakey->root)("\n");
 		        	    // Did the node have a governing_choice set on it (i.e. was it goverend by a Star node decision?
 		        	    // AND is it not the current decision (we leave the original decision unoptimised)
 		        	    if( lakey->governing_choice &&
-		        	        lakey->governing_choice != governing_choice )
-		            	{		            	    
-		            	    do_optimise=true;
-		            	    break;
-		            	}
+		        	        lakey->governing_choice != current_choice )
+		        	    {
+		        	        TRACE("governing_offset=%d\n", governing_offset);
+		        	       // if( lakey->governing_offset == 1 )
+		                	{		            	    
+		                	    do_optimise=true;
+		                	    break;
+		                	}
+		                }
 		            }
 		    	}		    			    	
 
 		    	if( do_optimise )
 		    	{
-	        	    // Is it a SubCollection? then use the first node out of subcollection as the key
 	        	    TreePtr<Node> lakeynode = lakey->root;
-//		    	    if( TreePtr<SubCollection> lakeysc = dynamic_pointer_cast<SubCollection>(lakey->root) )
-    //	    	        lakeynode = *(lakeysc->begin());
+	        	    // Is it a SubCollection? then use the first node out of subcollection as the key
+		    	    if( TreePtr<SubCollection> lakeysc = dynamic_pointer_cast<SubCollection>(lakey->root) )
+    	    	        lakeynode = *(lakeysc->begin());
 	        	    TRACE("Optimising coupled node %d after star in sequence, looking for ", lad)(*lakeynode)("\n");
 		        	        
 		        	    // Search for the key in the input program sequence    
-#if 0 // TODO Very tenuous argument for the Choice pointed to by governing_choice not having been 
+#if 0 // TODO Very tenuous argument for the Choice pointed to by lakey->governing_choice not having been 
       // deleted, maybe put them under shared_ptr for peace of mind. Argument is: Key points to 
       // Choice. Keys all forgotten at top of MDC(). Conjecture class "live" thoughout both passes
       // in MCD (PFDC() does not wipe the Choices). Choices only wiped after earlier or same decision 
       // runs out of choices. Pointed-to decision earlier than current one(*). Ergo, if current Choice 
       // is live then earlier Choice is live and current too. Like a stack. 
       // (*) is it? Could have been reached late in the keying pass and then seen early in restricting pass
+      // - but keying pass was a match so all decisions were hit, and now we only dicard decisions
+      // during Increment, which isn't called between keying and restricting passes
 	        	    xit = lakey->governing_choice->it;
+	        	    ASSERT( lakey );
+	        	    ASSERT( lakey->governing_choice );
+	        	    ASSERT( lakey->governing_choice->it != lakey->governing_choice->end );
+	        	    ASSERT( lakey->governing_choice->it != x.end() );
 #else		        	    
 	        	    bool found = false;
 	        	    for( xit = xit_begin_star; xit != x.end(); ++xit )
@@ -347,46 +358,47 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 	        	            break;
 	        	        }
 	        	    }    
-	        	    TRACE(found ? "Found match\n" : "Did not find match\n");
+	        	    ASSERT( found );
 #endif		        	    
-                    TRACE("Position in input ")(**xit)("\n");
-                    // Step back in the input tree nodes, so that we don't include anything that corresponds to the patterns we skipped above
-	        	    for( int i=0; i<lad-1; i++ ) // Remember xit will be an end iterator, so it should be 1 after the last node we match to the current Star
+                    // Step back or forward in the input tree nodes, so that we don't include anything that corresponds to the patterns we skipped above
+	        	    int offset = lakey->governing_offset - lad; 
+                    TRACE("Need to go forward (backward) %d places\n", offset);
+	        	    // TODO += on iterators, this is just messy here
+	        	    for( ; offset < 0; offset++ )  
 	        	    {
 	            	    if( xit == x.begin() )
 	            	    {
-	            	        TRACE("At beginning, cannot back up ")(**xit)(" ")(**(x.begin()))("\n");
-	            	        conj.ReportDecision( false );
+	            	        TRACE("At beginning, cannot back up\n");
 			                return false;
 			            }
 	            	    --xit;
 	            	}
-	        	    TRACE("Backed up to ")(**xit)(", forcing decision\n");
-	        	    choice = conj.ForceDecision( xit );		        	    
+	        	    for( ; offset > 0; offset-- ) 
+	        	    {
+	            	    if( xit == x.end() )
+	            	    {
+	            	        TRACE("At end, cannot go forward\n");
+			                return false;
+			            }
+	            	    ++xit;
+	            	}
+	        	    TRACE("Moved to ")(**xit)(", forcing decision\n");
+		    	    xit = conj.HandleDecision( xit );
 		        }
-#endif		        
-		    	
-	    	    // General case for no obvious restricting coupling
-	        	xit = choice.it;
-			    if( xit == choice.end && choice.end_count == choice.end_num ) // TODO this test should not be here, move back to Conjecture and allow max_end_count specified in Get/Handle/ForceDecision
-			    {
-				    TRACE("Ran out of candidate\n");
-				    conj.ReportDecision( false );
-				    return false;
-			    }
-			    else
-			    {
-   				    conj.ReportDecision( true );
-			    }
+		        else
+#endif
+		        {
+		    	    xit = conj.HandleDecision( xit_begin_star, x.end(), 1 );
+		        }		        		        
             }
             
 			// Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
 		    // Now make a copy of the elements that matched the star and apply couplings
-	    	TreePtr<SubSequence> ss( new SubSequence);
-	    	for( ContainerInterface::iterator it=xit_begin_star; it != xit; ++it ) // TODO FOREACH?
-	    	{
-	    		ss->push_back( *it );
-	    	}
+	    	TreePtr<SubSequence> ss( new SubSequence( xit_begin_star, xit ) );
+	    	//for( ContainerInterface::iterator it=xit_begin_star; it != xit; ++it ) // TODO FOREACH?
+	    	//{
+	    	//	ss->push_back( *it );
+	    	//}
 	    	
 			// Apply couplings to this Star and matched range
             if( TreePtr<Node> keynode = coupling_keys.GetCoupled( pe ) )
@@ -399,24 +411,31 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
                 return false;
 
 	        if( can_key )
-                coupling_keys.DoKey( TreePtr<Node>(ss), pe );	
+                coupling_keys.DoKey( TreePtr<Node>(ss), pe, governing_choice, governing_offset );	
+
+	    	if( npit != pattern.end() )
+	    	{
+		    	governing_choice = conj.GetPrevChoicePtr();
+		    	governing_offset = 0;           
+		    }
 	    }
 	    else // not a Star so match singly...
 	    {
 			// If there is one more element in x, see if it matches the pattern
 			//TreePtr<Node> xe( x[xit] );
-			if( xit != x.end() && DecidedCompare( *xit, pe, can_key, conj, governing_choice ) == true )
+			if( xit != x.end() && DecidedCompare( *xit, pe, can_key, conj, governing_choice, governing_offset ) == true )
 			{
 				++xit;
-				governing_choice = NULL;
 			}
 			else
 			{
 				TRACE("Element mismatched\n");
-				governing_choice = NULL;
 				return false;
 			}
 	    }
+	    
+	    if( governing_choice )
+	        governing_offset++; // Gap between the last decision and affected nodes gets bigger as we go along...
 	}
 
     // If we finished the job and pattern and subject are still aligned, then it was a match
@@ -778,17 +797,28 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
 	        FOREACH( const TreePtrInterface &p, *source_con )
 	        {
 		        ASSERT( p ); // present simplified scheme disallows NULL
-		        TreePtr<Node> n = DuplicateSubtreePattern( p );
-                if( ReadArgs::assert_pedigree )
-                    ASSERT( duplicated_pedigree.IsExist(n) )(*n);
-		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )// TODO maybe not, because I think subcontainers only appear in keys
+		        TRACE("Got ")(*p)("\n");
+		        if( TreePtr<StarBase> ps = dynamic_pointer_cast<StarBase>(TreePtr<Node>(p)) )
 		        {
-			        TRACE("Expanding SubContainer length %d\n", sc->size() );
-		            FOREACH( const TreePtrInterface &xx, *sc )
-			            dest_con->insert( xx );
+		            shared_ptr<Key> key = coupling_keys.GetKey( ps );
+		            ASSERT( key );
+		            TRACE("Got ")(*key->root)("\n");
+		            ContainerInterface *psc = dynamic_cast<ContainerInterface *>(key->root.get());
+		            ASSERT( psc );
+			        TRACE("Expanding SubContainer length %d\n", psc->size() );
+		            FOREACH( const TreePtrInterface &pp, *psc )
+		            {
+		                TreePtr<Node> nn = DuplicateSubtreeSubstitution( pp, key );
+                        if( ReadArgs::assert_pedigree )
+                            ASSERT( duplicated_pedigree.IsExist(nn) )(*nn);
+			            dest_con->insert( nn );
+			        }
            		}
 		        else
 		        {
+		            TreePtr<Node> n = DuplicateSubtreePattern( p );
+                    if( ReadArgs::assert_pedigree )
+                        ASSERT( duplicated_pedigree.IsExist(n) )(*n);
 			        TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
 			        dest_con->insert( n );
 		        }
@@ -1061,15 +1091,28 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
 	        FOREACH( const TreePtrInterface &p, *source_con )
 	        {
 		        ASSERT( p )("Some element of member %d (", i)(*source_con)(") of ")(*source)(" was NULL\n");
-		        TreePtr<Node> n = DuplicateSubtreePattern( p );
-		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) ) // TODO maybe not, because I think subcontainers only appear in keys
+		        TRACE("Got ")(*p)("\n");
+		        if( TreePtr<StarBase> ps = dynamic_pointer_cast<StarBase>(TreePtr<Node>(p)) )
 		        {
-			        TRACE("Expanding SubContainer length %d\n", sc->size() );
-		            FOREACH( const TreePtrInterface &xx, *sc )
-			            dest_con->insert( xx );
+		            shared_ptr<Key> key = coupling_keys.GetKey( ps );
+		            ASSERT( key );
+		            TRACE("Got ")(*key->root)("\n");
+		            ContainerInterface *psc = dynamic_cast<ContainerInterface *>(key->root.get());
+		            ASSERT( psc );
+			        TRACE("Expanding SubContainer length %d\n", psc->size() );
+		            FOREACH( const TreePtrInterface &pp, *psc )
+		            {
+		                TreePtr<Node> nn = DuplicateSubtreeSubstitution( pp, key );
+                        if( ReadArgs::assert_pedigree )
+                            ASSERT( duplicated_pedigree.IsExist(nn) )(*nn);
+			            dest_con->insert( nn );
+			        }
            		}
 		        else
 		        {
+		            TreePtr<Node> n = DuplicateSubtreePattern( p );
+                    if( ReadArgs::assert_pedigree )
+                        ASSERT( duplicated_pedigree.IsExist(n) )(*n);
 			        TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
 			        dest_con->insert( n );
 		        }
@@ -1489,7 +1532,7 @@ shared_ptr<ContainerInterface> StuffBase::GetContainerInterface( TreePtr<Node> x
 
 
 bool StarBase::MatchRange( const CompareReplace *sr,
-                             ContainerInterface &range )
+                           ContainerInterface &range )
 {
     TreePtr<Node> p = GetPattern();
     if( p )

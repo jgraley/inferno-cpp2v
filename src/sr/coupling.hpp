@@ -15,6 +15,7 @@ struct Key
 	TreePtr<Node> root; // Input program node for this coupling
 	TreePtr<Node> replace_pattern; // Pattern node for this coupling TODO rename to just pattern
 	Conjecture::Choice *governing_choice;
+	int governing_offset;
 };
 
 class CouplingKeys
@@ -24,9 +25,9 @@ class CouplingKeys
 public:
 	CouplingKeys();
 	/// Key a node to a pattern (generates a default key structure)
-    void DoKey( TreePtr<Node> x, TreePtr<Node> pattern, Conjecture::Choice *gc=NULL );
+    void DoKey( TreePtr<Node> x, TreePtr<Node> pattern, Conjecture::Choice *gc=NULL, int go=0 );
     /// Key some key to a pattern - key is supplied by user, can be subclass of Key
-    void DoKey( shared_ptr<Key> key, TreePtr<Node> pattern, Conjecture::Choice *gc=NULL );
+    void DoKey( shared_ptr<Key> key, TreePtr<Node> pattern, Conjecture::Choice *gc=NULL, int go=0 );
     /// Get the node to which a pattern was keyed, or NULL if pattern has not been keyed
     TreePtr<Node> GetCoupled( TreePtr<Node> pattern );									
     /// Get the key for a given pattern, or NULL if pattern has not been keyed

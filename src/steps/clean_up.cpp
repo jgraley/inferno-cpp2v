@@ -85,10 +85,10 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
 {
     // Search for a function that contains a compound block that has 
     // two labels in succession. Replace the pair of labels with a single
-    // one called MERGED.
+    // one.
     //
     // Using a slave, find references to either one of the original labels 
-    // and replace by a reference to the MERGED label.
+    // and replace by a reference to the new label.
     //
     // Notes:
     // - The slave must operate over the entire function, not just the 
@@ -132,6 +132,62 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     r_comp->members = decls;
     r_comp->statements = (pre, r_label1, post);
     r_label1->identifier = r_labelid;
+    r_labelid->sources = (s_labelid1, s_labelid2);
+    
+    Configure( s_instance, r_instance );
+}
+
+CleanupIneffectualLabels::CleanupIneffectualLabels()
+{
+    // Search for a function that contains a compound block that has 
+    // a label followed by a goto. Remove the label, leaving the goto.
+    //
+    // Using a slave, find references to either one of the original labels 
+    // and replace by a reference to a new merged one.
+    //
+    // Notes:
+    // - The slave must operate over the entire function, not just the 
+    // compound that containes the labels, because labels have function 
+    // scope and the gotos can be anywhere.
+    // - Do not assume the usages of the labels will be gotos. We support
+    // GCCs goto-a-variable extension in which case a label could be 
+    // on the right of an assignment.
+    
+    MakeTreePtr<Instance> s_instance, r_instance;
+    MakeTreePtr< Stuff<Compound> > stuff;
+    MakeTreePtr< Overlay<Statement> > overlay;
+    MakeTreePtr<Compound> s_comp, r_comp;
+    MakeTreePtr<Label> s_label; // keep l1 and elide l2
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, post;
+    MakeTreePtr<LabelIdentifier> s_labelid1, s_labelid2;
+    MakeTreePtr<BuildLabelIdentifier> r_labelid("%s_%s", BYPASS_WHEN_IDENTICAL);
+    MakeTreePtr< MatchAny<LabelIdentifier> > l_s_orrule;
+    MakeTreePtr<InstanceIdentifier> identifier;
+    MakeTreePtr<Callable> type;
+    MakeTreePtr<Goto> s_goto, r_goto;
+    
+    l_s_orrule->patterns = (s_labelid1, s_labelid2);
+    
+    MakeTreePtr< SlaveSearchReplace<Compound> > r_slave( stuff, l_s_orrule, r_labelid );
+    
+    s_instance->initialiser = stuff;
+    s_instance->identifier = identifier;
+    s_instance->type = type;
+    s_comp->members = decls;
+    s_comp->statements = (pre, s_label, s_goto, post);
+    s_label->identifier = s_labelid1;
+    s_goto->destination = s_labelid2;
+    
+    r_instance->initialiser = r_slave;
+    r_instance->identifier = identifier;
+    r_instance->type = type;
+    stuff->terminus = overlay;           
+    overlay->through = s_comp;
+    overlay->overlay = r_comp;
+    r_comp->members = decls;
+    r_comp->statements = (pre, r_goto, post);
+    r_goto->destination = r_labelid;
     r_labelid->sources = (s_labelid1, s_labelid2);
     
     Configure( s_instance, r_instance );

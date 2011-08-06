@@ -131,13 +131,20 @@ public:
 			else
 				return NULL;
 		}
+		
+		virtual shared_ptr<iterator_interface> Clone()
+		{
+			ASSERT(pib)("Attempt to Clone() uninitialised iterator");
+			return pib->Clone();
+		}
+		
 	private:
 		void EnsureUnique()
 		{
 			// Call this before modifying the underlying iterator - Performs a deep copy
 			// if required to make sure there are no other refs.
 			if( pib && !pib.unique() )
-				pib = pib->Clone();
+				pib = Clone();
 			ASSERT( !pib || pib.unique() );
 		}
 

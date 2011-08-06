@@ -27,8 +27,13 @@ bool Conjecture::Increment()
     {
         TRACE("Incrementing end count FROM %d\n", choices.back().end_count);
         ++choices.back().end_count;
+        if( choices.back().end_count > choices.back().end_num )
+        {
+            choices.resize( choices.size()-1 );
+            return Increment();  // TODO use a loop?
+        }
     }
-        
+       	    
     return true;
 }
 
@@ -36,16 +41,6 @@ bool Conjecture::Increment()
 ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::iterator begin,
 		                                                 ContainerInterface::iterator end,
 		                                                 int en )
-{
-    Choice c = GetDecision( begin, end, en );
-    ReportDecision( c.end_count != c.end_num ); // the first end is assumed to mean this decision has failed
-    return c.it;
-}
-
-
-Conjecture::Choice Conjecture::GetDecision( ContainerInterface::iterator begin,
-		                                    ContainerInterface::iterator end,
-		                                    int en )
 {
 	ASSERT( this );
 	ASSERT( choices.size() >= decision_index ); // consistency check; as we see more decisions, we should be adding them to the conjecture
@@ -67,57 +62,18 @@ Conjecture::Choice Conjecture::GetDecision( ContainerInterface::iterator begin,
 		// Adopt the current decision based on Conjecture
 	    c = choices[decision_index]; // Get present decision
 	}
+    
+    decision_index++;
 
 	// Return whatever choice we made
-    return c;
+    return c.it;
 }
 
 
-void Conjecture::ReportDecision( bool ok )
+ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::iterator only )
 {
-	// Check the decision obeys bounds
-	if( ok ) 
-	{
-		// That decision is OK, so move on to the next one
-		TRACE("Decision %d OK\n", decision_index );
-
-/* JSG this is slow!
- 		bool seen_c=false;
-		for( Choice i = begin; i != end; ++i )
-		{
-			TRACE("%p == %p?\n", (*i).get(), (*c).get() );
-			seen_c |= (i==c);
-		}
-		ASSERT( seen_c )("Decision #%d: c not in x or x.end(), seems to have overshot!!!!", decision_index);
-*/
-		decision_index++;
-	}
-	else
-	{
-		// Throw away the current decision since we ran out of valid choices.
-		// The next Increment() will increment the *previous* decision
-		TRACE("Decision %d hit end\n", decision_index );
-		choices.resize( decision_index );
-	}
-}
-
-Conjecture::Choice Conjecture::ForceDecision( ContainerInterface::iterator tohere )
-{
-    // TODO don't keep indexing choices, use a temp lol
-	ASSERT( this );
-	ASSERT( choices.size() > decision_index ); // consistency check; as we see more decisions, we should be adding them to the conjecture
-	if( !choices[decision_index].forced )
-	{
-	    choices[decision_index].it = tohere;
-	    ++tohere;
-	    choices[decision_index].end = tohere;
-	    choices[decision_index].end_num = 1;
-        choices[decision_index].forced = true;
-        TRACE("Forcing decision to ")(**(choices[decision_index].it))("\n");
-    }
-    else
-        TRACE("not forcing decision again\n");
-        
-    return choices[decision_index];
+    ContainerInterface::iterator end = only;
+    ++end;
+    return HandleDecision( only, end );
 }
 

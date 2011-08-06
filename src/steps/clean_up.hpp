@@ -48,6 +48,13 @@ public:
     CleanupIneffectualGoto();
 };
 
+// Find a goto to a lable just before the label, and remove the goto
+class CleanupIneffectualLabels : public SearchReplace
+{
+public:
+    CleanupIneffectualLabels();
+};
+
 class CleanupUnusedLabels : public SearchReplace
 {
 public:

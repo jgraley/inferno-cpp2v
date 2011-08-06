@@ -9,7 +9,8 @@ CouplingKeys::CouplingKeys() :
 
 void CouplingKeys::DoKey( TreePtr<Node> x, 
 	                      TreePtr<Node> pattern, 
-	                      Conjecture::Choice *gc )
+	                      Conjecture::Choice *gc,
+	                      int go )
 {
 	INDENT;
 	shared_ptr<Key> key( new Key );
@@ -17,13 +18,14 @@ void CouplingKeys::DoKey( TreePtr<Node> x,
         key->root = x;
     else
         key = shared_ptr<Key>();
-	return DoKey( key, pattern, gc );
+	return DoKey( key, pattern, gc, go );
 }
 
 
 void CouplingKeys::DoKey( shared_ptr<Key> key, 
 	                      TreePtr<Node> pattern, 
-	                      Conjecture::Choice *gc )
+	                      Conjecture::Choice *gc,
+	                      int go )
 {
 	INDENT;
 	ASSERT( this );
@@ -54,6 +56,7 @@ void CouplingKeys::DoKey( shared_ptr<Key> key,
 	{
 	    key->replace_pattern = pattern;
 		key->governing_choice = gc;	
+		key->governing_offset = go;	
 		keys_map[pattern] = key;	
 		if( gc )
 		{
