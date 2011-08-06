@@ -30,18 +30,12 @@ public:
     // Standard interface for decided compare functions
 	ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
 			                                     ContainerInterface::iterator end,
-			                                     int en=1 );
-			                                     
-	// Standard interface for decided compare functions, supports multiple end choices (numbered 1, 2, 3 etc)
-	// Client must use ReportDecision(false) to stop endless ends
-	Choice GetDecision( ContainerInterface::iterator begin,
-			            ContainerInterface::iterator end,
-			            int en=1 );
-    void ReportDecision( bool ok );
-
-    Choice ForceDecision( ContainerInterface::iterator tohere );
+			                                     int en=0 );
+    // Version that forces the decision down to a single choice			                                     
+	ContainerInterface::iterator HandleDecision( ContainerInterface::iterator only );			                                    
     
-    Choice *GetChoicePtr() { return &choices[decision_index]; } // TODO should be const ptr
+    Choice *GetChoicePtr() { return decision_index < choices.size() ? &choices[decision_index] : NULL; } // TODO should be const ptr
+    Choice *GetPrevChoicePtr() { return (decision_index>0 && decision_index-1 < choices.size()) ? &choices[decision_index-1] : NULL; } // TODO should be const ptr
 				   
 private:
 	int decision_index;

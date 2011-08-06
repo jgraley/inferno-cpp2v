@@ -153,7 +153,8 @@ public:
     		               TreePtr<Node> pattern,
     		               bool can_key,
     		               Conjecture &conj,
-    		               Conjecture::Choice *gc = NULL ) const;
+    		               Conjecture::Choice *gc = NULL,
+    		               int go = 0 ) const;
 private:
     // MatchingDecidedCompare ring
     friend class Conjecture;
@@ -204,11 +205,24 @@ public:
     {
         NODE_FUNCTIONS
     };
-    struct SubSequence : Sequence<Node>,
+    struct SubSequence : SequenceInterface,
                          SubContainer
     {
     	NODE_FUNCTIONS_FINAL 
+
+    	shared_ptr<iterator_interface> my_begin;
+    	shared_ptr<iterator_interface> my_end;
     	operator string() const { return GetName() + SSPrintf("@%p", this); }    	
+    	SubSequence( iterator &b, iterator &e ) : my_begin(b.Clone()), my_end(e.Clone())
+    	{    	    
+    	}
+	    virtual const iterator_interface &begin() { return *my_begin; }
+        virtual const iterator_interface &end()   { return *my_end; }
+        virtual void erase( iterator )  { ASSERTFAIL("Cannot modify SubSequence"); }
+        virtual void clear()                                { ASSERTFAIL("Cannot modify SubSequence"); }    
+        virtual void insert( const TreePtrInterface & )     { ASSERTFAIL("Cannot modify SubSequence"); }
+        virtual TreePtrInterface &operator[]( int i ) { ASSERTFAIL("TODO"); }  
+        virtual void push_back( const TreePtrInterface &gx ){ ASSERTFAIL("Cannot modify SubSequence"); }  
     };
     struct SubCollection : Collection<Node>,
                            SubContainer
