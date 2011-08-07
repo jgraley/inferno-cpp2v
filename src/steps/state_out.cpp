@@ -694,7 +694,7 @@ AddYieldFlag::AddYieldFlag()
     MakeTreePtr<InstanceIdentifier> fn_id;
     MakeTreePtr<Callable> sub;
     MakeTreePtr<Compound> s_func_comp, r_func_comp, s_comp, r_comp, ms_comp, mr_comp, msx_comp;
-    MakeTreePtr< Star<Declaration> > enums, decls;
+    MakeTreePtr< Star<Declaration> > enums, decls, func_decls;
     MakeTreePtr<Instance> var_decl;
     MakeTreePtr<InstanceIdentifier> var_id;    
     MakeTreePtr<TypeIdentifier> enum_id;
@@ -720,18 +720,15 @@ AddYieldFlag::AddYieldFlag()
     fn->initialiser = func_over;
     fn->identifier = fn_id;  
     func_over->through = s_func_comp;
-    s_func_comp->members = (var_decl, enum_decl);
+    s_func_comp->members = (func_decls);
     s_func_comp->statements = (func_pre, loop);
-    var_decl->type = enum_id;
-    var_decl->identifier = var_id;
-    enum_decl->identifier = enum_id;
-    enum_decl->members = (enums);
     loop->body = over;
     over->through = s_comp;
     s_comp->members = decls;
     s_comp->statements = (stmts);
+    stmts->pattern = MakeTreePtr<If>(); // anti-spin
     func_over->overlay = r_func_comp; 
-    r_func_comp->members = (var_decl, enum_decl, r_flag_decl);
+    r_func_comp->members = (func_decls, r_flag_decl);
     r_func_comp->statements = (func_pre, loop);
     r_flag_decl->identifier = r_flag_id;
     r_flag_decl->type = MakeTreePtr<Boolean>();
@@ -742,7 +739,7 @@ AddYieldFlag::AddYieldFlag()
     r_flag_init->operands = (r_flag_id, MakeTreePtr<False>());
 
     ls_if->condition = l_equal;
-    l_equal->operands = (var_id, MakeTreePtr<InstanceIdentifier>());
+    l_equal->operands = (MakeTreePtr<InstanceIdentifier>(), MakeTreePtr<InstanceIdentifier>());
     // TODO yield_id should be of type enum_id?                         
     lr_if->condition = lr_and;
     lr_and->operands = (l_equal, lr_not);
@@ -768,7 +765,7 @@ AddInferredYield::AddInferredYield()
 {
     MakeTreePtr<Instance> fn;
     MakeTreePtr<InstanceIdentifier> fn_id;
-    MakeTreePtr<Callable> sub;
+    MakeTreePtr<Thread> thread; // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
     MakeTreePtr<Compound> func_comp, s_comp, sx_comp, r_comp;
     MakeTreePtr< Star<Declaration> > func_decls;
     MakeTreePtr< Star<Statement> > func_pre, stmts, sx_pre;    
@@ -782,7 +779,7 @@ AddInferredYield::AddInferredYield()
     MakeTreePtr< NotMatch<Compound> > s_notmatch;
     MakeTreePtr< LogicalNot > r_not, sx_not;
           
-    fn->type = sub;
+    fn->type = thread;
     fn->initialiser = func_comp;
     fn->identifier = fn_id;  
     func_comp->members = (func_decls, flag_decl);
