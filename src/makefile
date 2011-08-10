@@ -8,7 +8,7 @@ TREE_MODULES = tree/cpptree tree/validate tree/scope tree/misc tree/typeof tree/
 SR_MODULES = sr/search_replace sr/soft_patterns sr/coupling sr/conjecture 
 PARSE_MODULES = parse/identifier_tracker parse/rc_hold
 RENDER_MODULES = render/sort_decls render/graph render/render render/uniquify_identifiers
-STEPS_MODULES = steps/split_instance_declarations steps/generate_implicit_casts steps/generate_stacks steps/use_temps_for_params_return steps/for_to_while steps/slave_test steps/lower_control_flow steps/clean_up steps/state_out steps/systemc_detection
+STEPS_MODULES = steps/split_instance_declarations steps/generate_implicit_casts steps/generate_stacks steps/for_to_while steps/slave_test steps/lower_control_flow steps/clean_up steps/state_out steps/systemc_detection steps/to_sc_method
 MAIN_MODULES = main/inferno
 
 ALL_MODULES = $(COMMON_MODULES) $(NODE_MODULES) $(HELPERS_MODULES) $(TREE_MODULES) $(SR_MODULES) $(PARSE_MODULES) $(RENDER_MODULES) $(STEPS_MODULES) $(MAIN_MODULES) 

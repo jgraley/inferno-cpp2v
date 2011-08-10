@@ -19,7 +19,6 @@ class Multiplier : public sc_module
 public:
     sc_event instigate;
     sc_event proceed;
-    //sc_event yield;
     SC_CTOR(Multiplier) 
     {
         SC_THREAD(T);
@@ -41,7 +40,7 @@ public:
     void T()
     {
         gvar = 1;
-        mul_inst.instigate.notify();      
+        mul_inst.instigate.notify(SC_ZERO_TIME);      
     }
 };
 
@@ -51,10 +50,10 @@ void Adder::T()
 {
     wait( proceed );
     gvar += 2;
-    top_level.mul_inst.proceed.notify();
+    top_level.mul_inst.proceed.notify(SC_ZERO_TIME);
     wait( proceed );
     gvar += 3;
-    top_level.mul_inst.proceed.notify();
+    top_level.mul_inst.proceed.notify(SC_ZERO_TIME);
 }
 
 
@@ -62,14 +61,10 @@ void Multiplier::T()
 {
     wait( instigate );
     gvar *= 5;
-    top_level.add_inst.proceed.notify();
+    top_level.add_inst.proceed.notify(SC_ZERO_TIME);
     wait( proceed );
     gvar *= 5;
-    
-    //yield.notify(SC_ZERO_TIME);
-    //wait( yield );
-    
-    top_level.add_inst.proceed.notify();
+    top_level.add_inst.proceed.notify(SC_ZERO_TIME);
     wait( proceed );
     exit(gvar);
 }

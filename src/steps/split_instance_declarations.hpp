@@ -22,6 +22,15 @@ public:
     MoveInstanceDeclarations();
 };
 
+// Where variables are declared in the decls collection and are 
+// initialised, move the init into the statement body and initialise
+// using an assignment.
+class SplitInstanceDeclarations2 : public SearchReplace
+{
+public:
+    SplitInstanceDeclarations2();
+};
+
 }; // end namespace
 
 #endif

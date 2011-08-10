@@ -214,7 +214,7 @@ EnsureSuperLoop::EnsureSuperLoop()
     r_body->statements = (pre, r_loop);
     r_loop->body = r_loop_body;
     r_loop_body->statements = (first_goto, post);
-    r_loop->condition = MakeTreePtr< SpecificInteger >(1);
+    r_loop->condition = MakeTreePtr<True>();
 
     Configure( fn );
 }
@@ -675,7 +675,6 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     //lr_if_comp->members = ();
     lr_if_comp->statements = l_block;
 
-
     ll_all->patterns = (ll_any, lls_not1, lls_not2); // TODO don't think we need the nots
     ll_any->terminus = ll_over;
     ll_over->through = ls_label_id;
@@ -694,7 +693,7 @@ AddYieldFlag::AddYieldFlag()
     MakeTreePtr<InstanceIdentifier> fn_id;
     MakeTreePtr<Callable> sub;
     MakeTreePtr<Compound> s_func_comp, r_func_comp, s_comp, r_comp, ms_comp, mr_comp, msx_comp;
-    MakeTreePtr< Star<Declaration> > enums, decls, func_decls;
+    MakeTreePtr< Star<Declaration> > enums, decls, func_decls, m_decls;
     MakeTreePtr<Instance> var_decl;
     MakeTreePtr<InstanceIdentifier> var_id;    
     MakeTreePtr<TypeIdentifier> enum_id;
@@ -709,17 +708,16 @@ AddYieldFlag::AddYieldFlag()
     MakeTreePtr<LogicalNot> lr_not;
     MakeTreePtr< Overlay<Compound> > func_over, over;
     MakeTreePtr<Automatic> r_flag_decl;
-    MakeTreePtr<Assign> r_flag_init, mr_assign, msx_assign;
+    MakeTreePtr<Assign> r_flag_init, r_flag_reset, mr_assign, msx_assign;
     MakeTreePtr<BuildInstanceIdentifier> r_flag_id("yield_flag");
-    MakeTreePtr< MatchAll<Compound> > ms_all;
-    MakeTreePtr< NotMatch<Compound> > ms_not;
-    MakeTreePtr< SlaveSearchReplace<Compound> > slavem( r_comp, ms_if, mr_if );
-    MakeTreePtr< SlaveSearchReplace<Compound> > slave( slavem, ls_if, lr_if );  
+    MakeTreePtr< NotMatch<Statement> > ms_not;
+    MakeTreePtr< SlaveSearchReplace<Compound> > slavem( r_func_comp, ms_comp, mr_comp );
+    MakeTreePtr< SlaveSearchReplace<Compound> > slave( r_comp, ls_if, lr_if );  
       
     fn->type = sub;
     fn->initialiser = func_over;
     fn->identifier = fn_id;  
-    func_over->through = s_func_comp;
+    func_over->through = s_func_comp;    
     s_func_comp->members = (func_decls);
     s_func_comp->statements = (func_pre, loop);
     loop->body = over;
@@ -727,16 +725,17 @@ AddYieldFlag::AddYieldFlag()
     s_comp->members = decls;
     s_comp->statements = (stmts);
     stmts->pattern = MakeTreePtr<If>(); // anti-spin
-    func_over->overlay = r_func_comp; 
+    func_over->overlay = slavem; 
     r_func_comp->members = (func_decls, r_flag_decl);
-    r_func_comp->statements = (func_pre, loop);
+    r_flag_init->operands = (r_flag_id, MakeTreePtr<False>());
+    r_func_comp->statements = (r_flag_init, func_pre, loop);
     r_flag_decl->identifier = r_flag_id;
     r_flag_decl->type = MakeTreePtr<Boolean>();
     r_flag_decl->initialiser = MakeTreePtr<Uninitialised>();
     over->overlay = slave;
     r_comp->members = decls;
-    r_comp->statements = (r_flag_init, stmts);
-    r_flag_init->operands = (r_flag_id, MakeTreePtr<False>());
+    r_comp->statements = (stmts, r_flag_reset);
+    r_flag_reset->operands = (r_flag_id, MakeTreePtr<False>());
 
     ls_if->condition = l_equal;
     l_equal->operands = (MakeTreePtr<InstanceIdentifier>(), MakeTreePtr<InstanceIdentifier>());
@@ -745,20 +744,17 @@ AddYieldFlag::AddYieldFlag()
     lr_and->operands = (l_equal, lr_not);
     lr_not->operands = (r_flag_id);
 
-    ms_if->body = ms_all;
-    ms_all->patterns = (ms_comp, ms_not);
-    ms_not->pattern = msx_comp;
-    //ms_comp->members = ();
-    ms_comp->statements = (m_pre, m_wait, m_post);
+    ms_comp->members = (m_decls);
+    ms_comp->statements = (m_pre, m_wait, ms_not, m_post);
+    ms_not->pattern = msx_assign;
+    msx_assign->operands = (r_flag_id, MakeTreePtr<True>());
     msx_comp->statements = (msx_pre, msx_assign);
-    msx_assign->operands = (r_flag_id, MakeTreePtr<True>());  
 
-    mr_if->body = mr_comp;
-    //mr_comp->members = ();
-    mr_comp->statements = (m_pre, m_wait, m_post, mr_assign);
+    mr_comp->members = (m_decls);
+    mr_comp->statements = (m_pre, m_wait, mr_assign, ms_not, m_post);
     mr_assign->operands = (r_flag_id, MakeTreePtr<True>());
 
-    Configure( fn, fn );            
+    Configure( fn );            
 }
 
 AddInferredYield::AddInferredYield()
@@ -778,6 +774,7 @@ AddInferredYield::AddInferredYield()
     MakeTreePtr< MatchAll<Compound> > s_all;
     MakeTreePtr< NotMatch<Compound> > s_notmatch;
     MakeTreePtr< LogicalNot > r_not, sx_not;
+    MakeTreePtr< Assign > assign;
           
     fn->type = thread;
     fn->initialiser = func_comp;
@@ -791,21 +788,65 @@ AddInferredYield::AddInferredYield()
     over->through = s_all;
     s_all->patterns = (s_comp, s_notmatch);
     //s_comp->members = ();
-    s_comp->statements = (stmts);
+    s_comp->statements = (stmts, assign);
+    assign->operands = (flag_id, MakeTreePtr<False>());
     s_notmatch->pattern = sx_comp;
     //sx_comp->members = ();
-    sx_comp->statements = (sx_pre, sx_if);
+    sx_comp->statements = (sx_pre, sx_if, assign);
     sx_if->condition = sx_not;
     sx_not->operands = (flag_id);
     
     over->overlay = r_comp;
     //r_comp->members = ();
-    r_comp->statements = (stmts, r_if);
+    r_comp->statements = (stmts, r_if, assign);
     r_if->condition = r_not;
     r_not->operands = (flag_id);
     r_if->body = r_yield;
     r_if->else_body = MakeTreePtr<Nop>();
     
-    Configure( fn, fn );            
+    Configure( fn );            
 }
+
+
+MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
+{
+    MakeTreePtr<Instance> fn;
+    MakeTreePtr<InstanceIdentifier> fn_id;
+    MakeTreePtr<Thread> thread; // Must be SC_THREAD since we introduce SC stuff
+    MakeTreePtr< Star<Declaration> > func_decls;
+    MakeTreePtr< Star<Statement> > inits, stmts;    
+    MakeTreePtr<Loop> loop;
+    MakeTreePtr<Compound> s_func_comp, r_func_comp, s_comp, r_comp, r_if_comp;
+    MakeTreePtr<If> r_if;
+    MakeTreePtr<Equal> r_equal;
+    MakeTreePtr< Overlay<Compound> > func_over, over;    
+    MakeTreePtr<Statement> first_init;
+                    
+    fn->type = thread;
+    fn->initialiser = func_over;
+    fn->identifier = fn_id;  
+    func_over->through = s_func_comp;
+    s_func_comp->members = (func_decls);
+    s_func_comp->statements = (first_init, inits, loop);
+    loop->body = over;
+    over->through = s_comp;
+//    comp->members = ();
+    s_comp->statements = (stmts);    
+    
+    func_over->overlay = r_func_comp;
+    r_func_comp->members = (func_decls);
+    r_func_comp->statements = (loop);
+    over->overlay = r_comp;
+//    comp->members = ();
+    r_comp->statements = (r_if, stmts);
+    r_if->condition = r_equal;
+    r_equal->operands = ( MakeTreePtr<DeltaCount>(), MakeTreePtr<SpecificInteger>(0) );    
+    r_if->body = r_if_comp;
+//    r_if_comp->members = ();
+    r_if_comp->statements = (first_init, inits);//, MakeTreePtr<WaitDelta>());
+    r_if->else_body = MakeTreePtr<Nop>();
+    
+    Configure( fn );            
+}
+
 

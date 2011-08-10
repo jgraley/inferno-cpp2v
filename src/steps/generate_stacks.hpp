@@ -9,10 +9,24 @@
 #define GENERATE_STACKS_HPP
 
 #include "sr/search_replace.hpp"
+#include "tree/typeof.hpp"
+#include "tree/misc.hpp"
 
 namespace Steps {
 
-// Replace automatic variables with staks based on arrays and 
+class ExplicitiseReturn : public SearchReplace
+{
+public:
+	ExplicitiseReturn();
+};
+
+class UseTempsForParamsReturn : public SearchReplace
+{
+public:
+	UseTempsForParamsReturn();
+};
+
+// Replace automatic variables with stacks based on arrays and 
 // maintain the stack pointer correctly, supporting recursion.
 class GenerateStacks : public SearchReplace
 {
@@ -20,10 +34,12 @@ public:
 	GenerateStacks();
 };
 
-class ExplicitiseReturn : public SearchReplace
+// Find the (illegal) construct of a member variable declared
+// in a member function and move out into the enclosing class.
+class ExtractFields : public SearchReplace
 {
 public:
-	ExplicitiseReturn();
+	ExtractFields();
 };
 
 }; // end namespace
