@@ -111,6 +111,13 @@ public:
     AddInferredYield();
 };
 
+/** Move initial code into superloop, but only on first delta cycle */
+class MoveInitIntoSuperLoop : public SearchReplace
+{
+public:
+    MoveInitIntoSuperLoop();
+};
+
 }; // end namespace
 
 #endif

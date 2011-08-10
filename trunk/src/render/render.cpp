@@ -275,8 +275,8 @@ string Render::RenderOperator( TreePtr<Operator> op, Sequence<Expression> &opera
 	if( dynamic_pointer_cast< MakeArray >(op) )
 		return "{ " + RenderOperandSequence( operands, ", ", false ) + " }";
 	else if( dynamic_pointer_cast< Multiplexor >(op) )
-		return RenderExpression( operands[0], true ) + "?" +
-			   RenderExpression( operands[1], true ) + ":" +
+		return RenderExpression( operands[0], true ) + " ? " +
+			   RenderExpression( operands[1], true ) + " : " +
 			   RenderExpression( operands[2], true );
 	else if( dynamic_pointer_cast< Subscript >(op) )
 		return RenderExpression( operands[0], true ) + "[" +
@@ -401,6 +401,10 @@ string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketiz
 		return before +
 			   "this" +
 			   after;
+	else if( TreePtr<DeltaCount> dc = dynamic_pointer_cast<DeltaCount>(expression) ) 
+	    return before +
+	           dc->GetToken() + "()" +
+	           after;
 	else
 		return ERROR_UNSUPPORTED(expression);
 }
@@ -844,30 +848,24 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep )
 		return "break" + sep;
 	else if( dynamic_pointer_cast<Nop>(statement) )
 		return sep;
-	else if( TreePtr<WaitDynamic> c = dynamic_pointer_cast<WaitDynamic>(statement) ) // TODO here and below, use GetToken()
+	else if( TreePtr<WaitDynamic> c = dynamic_pointer_cast<WaitDynamic>(statement) ) 
 	    return c->GetToken() + "( " + RenderExpression(c->event) + " );\n";
-	else if( TreePtr<WaitStatic> c = dynamic_pointer_cast<WaitStatic>(statement) ) // TODO here and below, use GetToken()
+	else if( TreePtr<WaitStatic> c = dynamic_pointer_cast<WaitStatic>(statement) ) 
 	    return c->GetToken() + "();\n";
-	else if( TreePtr<WaitDelta> c = dynamic_pointer_cast<WaitDelta>(statement) ) // TODO here and below, use GetToken()
+	else if( TreePtr<WaitDelta> c = dynamic_pointer_cast<WaitDelta>(statement) )
 	    return c->GetToken() + "(SC_ZERO_TIME);\n";
-	else if( TreePtr<NextTriggerDynamic> c = dynamic_pointer_cast<NextTriggerDynamic>(statement) ) // TODO here and below, use GetToken()
+	else if( TreePtr<NextTriggerDynamic> c = dynamic_pointer_cast<NextTriggerDynamic>(statement) ) 
 	    return c->GetToken() + "( " + RenderExpression(c->event) + " );\n";
-	else if( TreePtr<NextTriggerStatic> c = dynamic_pointer_cast<NextTriggerStatic>(statement) ) // TODO here and below, use GetToken()
+	else if( TreePtr<NextTriggerStatic> c = dynamic_pointer_cast<NextTriggerStatic>(statement) ) 
 	    return c->GetToken() + "();\n";
-	else if( TreePtr<NextTriggerDelta> c = dynamic_pointer_cast<NextTriggerDelta>(statement) ) // TODO here and below, use GetToken()
+	else if( TreePtr<NextTriggerDelta> c = dynamic_pointer_cast<NextTriggerDelta>(statement) ) 
 	    return c->GetToken() + "(SC_ZERO_TIME);\n";
 	else if( TreePtr<Exit> e = dynamic_pointer_cast<Exit>(statement) )
-	{
 		return e->GetToken() + "( " + RenderExpression(e->code) + " );\n";
-    }
 	else if( TreePtr<NotifyImmediate> n = dynamic_pointer_cast<NotifyImmediate>(statement) )
-	{
 		return RenderExpression( n->event, true ) + "." + n->GetToken() + "();\n";
-    }
 	else if( TreePtr<NotifyDelta> n = dynamic_pointer_cast<NotifyDelta>(statement) )
-	{
 		return RenderExpression( n->event, true ) + "." + n->GetToken() + "(SC_ZERO_TIME);\n";
-    }
     else
 		return ERROR_UNSUPPORTED(statement);
 }

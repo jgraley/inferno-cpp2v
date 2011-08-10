@@ -153,6 +153,13 @@ struct ClockedThread : Process
     //TODO TreePtr<Sensitivity> clock;
 };
 
+struct DeltaCount : CPPTree::Operator,
+                    SCNamedFunction
+{
+    NODE_FUNCTIONS_FINAL
+    virtual string GetToken() { return "sc_delta_count"; }    
+};
+
 /// The Exit system call
 /** we use this to get a result code out of the program because 
     SystemC does not allow control of the return value from its main 

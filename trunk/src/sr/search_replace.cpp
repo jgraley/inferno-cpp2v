@@ -801,7 +801,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
 		        if( TreePtr<StarBase> ps = dynamic_pointer_cast<StarBase>(TreePtr<Node>(p)) )
 		        {
 		            shared_ptr<Key> key = coupling_keys.GetKey( ps );
-		            ASSERT( key );
+		            ASSERT( key )("Replacing ")(*p)(" but it was not keyed from the search pattern as required\n");
 		            TRACE("Got ")(*key->root)("\n");
 		            ContainerInterface *psc = dynamic_cast<ContainerInterface *>(key->root.get());
 		            ASSERT( psc );
@@ -1095,7 +1095,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
 		        if( TreePtr<StarBase> ps = dynamic_pointer_cast<StarBase>(TreePtr<Node>(p)) )
 		        {
 		            shared_ptr<Key> key = coupling_keys.GetKey( ps );
-		            ASSERT( key );
+		            ASSERT( key )("Replacing ")(*p)(" but it was not keyed from the search pattern as required\n");
 		            TRACE("Got ")(*key->root)("\n");
 		            ContainerInterface *psc = dynamic_cast<ContainerInterface *>(key->root.get());
 		            ASSERT( psc );

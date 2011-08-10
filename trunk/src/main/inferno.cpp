@@ -11,7 +11,6 @@
 #include "tree/validate.hpp"
 #include "steps/split_instance_declarations.hpp"
 #include "steps/generate_implicit_casts.hpp"
-#include "steps/use_temps_for_params_return.hpp"
 #include "steps/generate_stacks.hpp"
 #include "steps/for_to_while.hpp"
 #include "steps/slave_test.hpp"
@@ -19,6 +18,7 @@
 #include "steps/clean_up.hpp"
 #include "steps/state_out.hpp"
 #include "steps/systemc_detection.hpp"
+#include "steps/to_sc_method.hpp"
 
 using namespace Steps;
 
@@ -66,15 +66,22 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     }
     sequence->push_back( shared_ptr<Transformation>( new GotoAfterWait ) );     
     sequence->push_back( shared_ptr<Transformation>( new AddGotoBeforeLabel ) );     
-    sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );    
+    
+    sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) ); 
+           
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
         sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundSingle ) ); 
             
     sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
     sequence->push_back( shared_ptr<Transformation>( new MakeFallThroughMachine ) ); 
     sequence->push_back( shared_ptr<Transformation>( new AddYieldFlag ) );
-    sequence->push_back( shared_ptr<Transformation>( new AddInferredYield ) );
+    sequence->push_back( shared_ptr<Transformation>( new AddInferredYield ) ); // now yielding in every iteration of superloop
+    sequence->push_back( shared_ptr<Transformation>( new MoveInitIntoSuperLoop ) );
+
+    sequence->push_back( shared_ptr<Transformation>( new VarsToModule ) );
+    sequence->push_back( shared_ptr<Transformation>( new DeclsToModule ) );
+    sequence->push_back( shared_ptr<Transformation>( new ThreadToMethod ) );
 }
 
 
@@ -159,8 +166,4 @@ void SelfTest()
 // TODO Make Filter a functor. 
 // TODO Consider merging Filter into Transformation.
 // TODO Produce base class for builder nodes: TransformTo?
-// TODO Docs for node interface. 
-// TODO Improve comments in tree.h
-// TODO Star restriction pattern (eg for dead code elimination want Star(NotMatch(Label)))
-// TODO Consider parent restriction for usages - but tricky case: int x, int y=x. Decl for y points to x (as init expr) and y (as ident). Need to specify parent node *and* which TreePtr in the parent is to be excluded.
 // TODO Consider multi-terminus Stuff and multi-root (StarStuff)
