@@ -75,9 +75,10 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
             
     sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
     sequence->push_back( shared_ptr<Transformation>( new MakeFallThroughMachine ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new MoveInitIntoSuperLoop ) );
     sequence->push_back( shared_ptr<Transformation>( new AddYieldFlag ) );
     sequence->push_back( shared_ptr<Transformation>( new AddInferredYield ) ); // now yielding in every iteration of superloop
-    sequence->push_back( shared_ptr<Transformation>( new MoveInitIntoSuperLoop ) );
+    sequence->push_back( shared_ptr<Transformation>( new LoopRotation ) );
 
     sequence->push_back( shared_ptr<Transformation>( new VarsToModule ) );
     sequence->push_back( shared_ptr<Transformation>( new DeclsToModule ) );

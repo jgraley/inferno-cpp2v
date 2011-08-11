@@ -118,6 +118,13 @@ public:
     MoveInitIntoSuperLoop();
 };
 
+/** Optimise loops that contain yields by rotating until yield reaches the bottom */
+class LoopRotation : public SearchReplace
+{
+public:
+    LoopRotation();
+};
+
 }; // end namespace
 
 #endif
