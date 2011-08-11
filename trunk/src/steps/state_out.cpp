@@ -693,11 +693,11 @@ AddYieldFlag::AddYieldFlag()
     MakeTreePtr<InstanceIdentifier> fn_id;
     MakeTreePtr<Callable> sub;
     MakeTreePtr<Compound> s_func_comp, r_func_comp, s_comp, r_comp, ms_comp, mr_comp, msx_comp;
-    MakeTreePtr< Star<Declaration> > enums, decls, func_decls, m_decls;
+    MakeTreePtr< Star<Declaration> > enums, decls, func_decls, m_decls, msx_decls;
     MakeTreePtr<Instance> var_decl;
     MakeTreePtr<InstanceIdentifier> var_id;    
     MakeTreePtr<TypeIdentifier> enum_id;
-    MakeTreePtr< Star<Statement> > func_pre, m_pre, msx_pre, m_post, stmts;
+    MakeTreePtr< Star<Statement> > func_pre, m_pre, msx_pre, m_post, msx_post, stmts;
     MakeTreePtr< Star<If> > l_pre, l_post;
     MakeTreePtr<Loop> loop;
     MakeTreePtr<If> ls_if, lr_if, ms_if, mr_if;
@@ -707,11 +707,13 @@ AddYieldFlag::AddYieldFlag()
     MakeTreePtr<LogicalAnd> lr_and;
     MakeTreePtr<LogicalNot> lr_not;
     MakeTreePtr< Overlay<Compound> > func_over, over;
-    MakeTreePtr<Automatic> r_flag_decl;
-    MakeTreePtr<Assign> r_flag_init, r_flag_reset, mr_assign, msx_assign;
+    MakeTreePtr<Temporary> r_flag_decl;
+    MakeTreePtr<Assign> r_flag_init, mr_assign, msx_assign;
     MakeTreePtr<BuildInstanceIdentifier> r_flag_id("yield_flag");
-    MakeTreePtr< NotMatch<Statement> > ms_not;
-    MakeTreePtr< SlaveSearchReplace<Compound> > slavem( r_func_comp, ms_comp, mr_comp );
+    MakeTreePtr< MatchAll<Compound> > ms_all;
+    MakeTreePtr< NotMatch<Compound> > ms_not;
+    
+    MakeTreePtr< SlaveSearchReplace<Compound> > slavem( r_func_comp, ms_all, mr_comp );
     MakeTreePtr< SlaveSearchReplace<Compound> > slave( r_comp, ls_if, lr_if );  
       
     fn->type = sub;
@@ -726,16 +728,15 @@ AddYieldFlag::AddYieldFlag()
     s_comp->statements = (stmts);
     stmts->pattern = MakeTreePtr<If>(); // anti-spin
     func_over->overlay = slavem; 
-    r_func_comp->members = (func_decls, r_flag_decl);
+    r_func_comp->members = (func_decls);
     r_flag_init->operands = (r_flag_id, MakeTreePtr<False>());
-    r_func_comp->statements = (r_flag_init, func_pre, loop);
+    r_func_comp->statements = (func_pre, loop);
     r_flag_decl->identifier = r_flag_id;
     r_flag_decl->type = MakeTreePtr<Boolean>();
     r_flag_decl->initialiser = MakeTreePtr<Uninitialised>();
     over->overlay = slave;
-    r_comp->members = decls;
-    r_comp->statements = (stmts, r_flag_reset);
-    r_flag_reset->operands = (r_flag_id, MakeTreePtr<False>());
+    r_comp->members = (decls, r_flag_decl);
+    r_comp->statements = (r_flag_init, stmts);
 
     ls_if->condition = l_equal;
     l_equal->operands = (MakeTreePtr<InstanceIdentifier>(), MakeTreePtr<InstanceIdentifier>());
@@ -744,14 +745,16 @@ AddYieldFlag::AddYieldFlag()
     lr_and->operands = (l_equal, lr_not);
     lr_not->operands = (r_flag_id);
 
+    ms_all->patterns = (ms_comp, ms_not);
     ms_comp->members = (m_decls);
-    ms_comp->statements = (m_pre, m_wait, ms_not, m_post);
-    ms_not->pattern = msx_assign;
-    msx_assign->operands = (r_flag_id, MakeTreePtr<True>());
-    msx_comp->statements = (msx_pre, msx_assign);
+    ms_comp->statements = (m_pre, m_wait, m_post);
+    ms_not->pattern = msx_comp;
+    msx_comp->members = msx_decls;
+    msx_comp->statements = (msx_pre, msx_assign, msx_post);
+    msx_assign->operands = (r_flag_id, MakeTreePtr<Bool>());
 
     mr_comp->members = (m_decls);
-    mr_comp->statements = (m_pre, m_wait, mr_assign, ms_not, m_post);
+    mr_comp->statements = (m_pre, m_wait, mr_assign, m_post);
     mr_assign->operands = (r_flag_id, MakeTreePtr<True>());
 
     Configure( fn );            
@@ -766,7 +769,7 @@ AddInferredYield::AddInferredYield()
     MakeTreePtr< Star<Declaration> > func_decls;
     MakeTreePtr< Star<Statement> > func_pre, stmts, sx_pre;    
     MakeTreePtr< Overlay<Statement> > over;    
-    MakeTreePtr<Automatic> flag_decl; 
+    MakeTreePtr<LocalVariable> flag_decl; 
     MakeTreePtr<InstanceIdentifier> flag_id;   
     MakeTreePtr<WaitDelta> r_yield;
     MakeTreePtr<Loop> loop;
@@ -779,7 +782,7 @@ AddInferredYield::AddInferredYield()
     fn->type = thread;
     fn->initialiser = func_comp;
     fn->identifier = fn_id;  
-    func_comp->members = (func_decls, flag_decl);
+    func_comp->members = (func_decls);
     flag_decl->type = MakeTreePtr<Boolean>();
     flag_decl->initialiser = MakeTreePtr<Uninitialised>();
     flag_decl->identifier = flag_id;
@@ -787,18 +790,17 @@ AddInferredYield::AddInferredYield()
     loop->body = over;
     over->through = s_all;
     s_all->patterns = (s_comp, s_notmatch);
-    //s_comp->members = ();
-    s_comp->statements = (stmts, assign);
-    assign->operands = (flag_id, MakeTreePtr<False>());
+    s_comp->members = (flag_decl);
+    s_comp->statements = (stmts);
     s_notmatch->pattern = sx_comp;
-    //sx_comp->members = ();
-    sx_comp->statements = (sx_pre, sx_if, assign);
+    sx_comp->members = (flag_decl);
+    sx_comp->statements = (sx_pre, sx_if);
     sx_if->condition = sx_not;
     sx_not->operands = (flag_id);
     
     over->overlay = r_comp;
-    //r_comp->members = ();
-    r_comp->statements = (stmts, r_if, assign);
+    r_comp->members = (flag_decl);
+    r_comp->statements = (stmts, r_if);
     r_if->condition = r_not;
     r_not->operands = (flag_id);
     r_if->body = r_yield;
@@ -830,23 +832,83 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     s_func_comp->statements = (first_init, inits, loop);
     loop->body = over;
     over->through = s_comp;
-//    comp->members = ();
+//    s_comp->members = ();
     s_comp->statements = (stmts);    
     
     func_over->overlay = r_func_comp;
     r_func_comp->members = (func_decls);
     r_func_comp->statements = (loop);
     over->overlay = r_comp;
-//    comp->members = ();
+//    r_comp->members = ();
     r_comp->statements = (r_if, stmts);
     r_if->condition = r_equal;
     r_equal->operands = ( MakeTreePtr<DeltaCount>(), MakeTreePtr<SpecificInteger>(0) );    
     r_if->body = r_if_comp;
 //    r_if_comp->members = ();
-    r_if_comp->statements = (first_init, inits);//, MakeTreePtr<WaitDelta>());
+    r_if_comp->statements = (first_init, inits, MakeTreePtr<WaitDelta>());
     r_if->else_body = MakeTreePtr<Nop>();
     
     Configure( fn );            
 }
+
+
+LoopRotation::LoopRotation()
+{
+    MakeTreePtr<Instance> fn, s_var_decl;
+    MakeTreePtr<InstanceIdentifier> fn_id, s_var_id, s_cur_enum_id;
+    MakeTreePtr<Thread> thread; // Must be SC_THREAD since we introduce SC stuff
+    MakeTreePtr< Star<Declaration> > func_decls, decls, s_enums;
+    MakeTreePtr<Static> s_cur_enum;
+    MakeTreePtr< Star<Statement> > inits, stmts, pre, post;    
+    MakeTreePtr<Loop> loop;
+    MakeTreePtr<Compound> func_comp, s_comp_loop, s_comp_yield, r_comp, r_if_comp;
+    MakeTreePtr<If> loop_top, loop_bottom, yield;
+    MakeTreePtr< Star<If> > loop_body, pre_yield, post_yield;
+    MakeTreePtr<Equal> r_equal;
+    MakeTreePtr< Overlay<Compound> > func_over, over;    
+    MakeTreePtr< MatchAll<Compound> > s_all;
+    MakeTreePtr<Enum> s_enum;
+    MakeTreePtr<TypeIdentifier> s_enum_id;
+    MakeTreePtr< Stuff<Expression> > loop_top_stuff;
+    MakeTreePtr<Equal> loop_top_equal;
+    MakeTreePtr< Stuff<Statement> > loop_bottom_stuff_enum, loop_bottom_stuff_noyield, yield_stuff;
+    MakeTreePtr< MatchAll<Statement> > loop_bottom_matchall;
+    MakeTreePtr< NotMatch<Statement> > loop_bottom_notmatch;
+    
+    fn->type = thread;
+    fn->initialiser = func_comp;
+    fn->identifier = fn_id;  
+    func_comp->members = (func_decls, s_enum, s_var_decl);
+    s_enum->identifier = s_enum_id;
+    s_enum->members = (s_enums, s_cur_enum);
+    s_cur_enum->identifier = s_cur_enum_id;
+    s_var_decl->type = s_enum_id;
+    s_var_decl->identifier = s_var_id;
+    func_comp->statements = (inits, loop);
+    loop->body = over;
+    over->through = s_all;
+    s_all->patterns = (s_comp_loop, s_comp_yield);
+    s_comp_loop->members = (decls);
+    s_comp_loop->statements = (pre, loop_top, loop_body, loop_bottom, post);    
+    s_comp_yield->members = (decls);
+    s_comp_yield->statements = (pre, pre_yield, yield, post_yield, loop_bottom, post);    
+    loop_top->condition = loop_top_stuff;
+    loop_top_stuff->terminus = loop_top_equal;
+    loop_top_equal->operands = (s_var_id, s_cur_enum_id);
+    loop_bottom->body = loop_bottom_matchall;
+    loop_bottom_matchall->patterns = (loop_bottom_stuff_enum, loop_bottom_notmatch);
+    loop_bottom_stuff_enum->terminus = s_cur_enum_id;
+    loop_bottom_notmatch->pattern = loop_bottom_stuff_noyield;
+    loop_bottom_stuff_noyield->terminus = MakeTreePtr<Wait>();    
+    yield->body = yield_stuff;
+    yield_stuff->terminus = MakeTreePtr<Wait>();
+    
+    over->overlay = r_comp;
+    r_comp->members = (decls);
+    r_comp->statements = (pre, loop_bottom, loop_top, loop_body, post);    // rotated version of s_comp_loop
+        
+    Configure( fn );            
+}
+
 
 

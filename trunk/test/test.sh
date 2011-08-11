@@ -80,7 +80,7 @@ then
    if test $l2res -eq 0
    then
     echo Run output...
-    test/results/"$fb"_out.exe
+    time test/results/"$fb"_out.exe
     r2res=$?
     cmpres=1
     if test $r1res -eq $r2res

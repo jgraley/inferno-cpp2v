@@ -293,7 +293,7 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 	    		// range matched by the star, and so x.end() is a legitimate choice for ss.end()
 	    		// So allow the Conjecture class to give us two ends, and only give up on the second.
 		    	Conjecture::Choice *current_choice = conj.GetChoicePtr();
-#if 1		    	
+#if 0
 		    	// Optimisation for couplings in sequences: is some future pattern node coupled?
 		    	bool do_optimise = false;
 		    	int lad=0;
@@ -316,11 +316,7 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 		        	        lakey->governing_choice != current_choice )
 		        	    {
 		        	        TRACE("governing_offset=%d\n", governing_offset);
-		        	       // if( lakey->governing_offset == 1 )
-		                	{		            	    
-		                	    do_optimise=true;
-		                	    break;
-		                	}
+                    	    do_optimise=true;
 		                }
 		            }
 		    	}		    			    	
@@ -343,6 +339,9 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
       // (*) is it? Could have been reached late in the keying pass and then seen early in restricting pass
       // - but keying pass was a match so all decisions were hit, and now we only dicard decisions
       // during Increment, which isn't called between keying and restricting passes
+      // NOTE: we can have xit_begin_star actually beyond the target lakeynode due to earlier
+      // Star<> trynig a big number of nodes. We must reject in this case or we'll create an invalid
+      // subsequence. The only way I can see is to enumerate with integers.
 	        	    xit = lakey->governing_choice->it;
 	        	    ASSERT( lakey );
 	        	    ASSERT( lakey->governing_choice );
@@ -358,7 +357,11 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 	        	            break;
 	        	        }
 	        	    }    
-	        	    ASSERT( found );
+	        	    if( !found )
+	        	    {
+	        	        TRACE("we have already overshot the target node, so fail\n");
+	        	        return false;
+	        	    }
 #endif		        	    
                     // Step back or forward in the input tree nodes, so that we don't include anything that corresponds to the patterns we skipped above
 	        	    int offset = lakey->governing_offset - lad; 

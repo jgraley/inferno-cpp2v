@@ -1,0 +1,48 @@
+Took sctest04.cpp, and set to 5,000,000 iterations of the loop. The yield inferred by the loop
+can be seen to add onto the explicit yield in the loop body, to double simulation time (algo
+is so simple, sim time is virtually all SystemC's handling of yields). Loop rotation merges the
+two yield causes, bringing back to similar performance. We then go to SC_METHOD which speeds
+things up a little. Much noise on figures, all about +/- 0.5. Figures in seconds.
+
+Step 0: Steps::DetectAllSCTypes@0x13ee040                   6.4
+Step 1: Steps::BreakToGoto@0x13fff90
+Step 2: Steps::SwitchToIfGoto@0x1403590
+Step 3: Steps::ForToWhile@0x1409740
+Step 4: Steps::WhileToDo@0x140bb90
+Step 5: Steps::IfToIfGoto@0x140c740
+Step 6: Steps::DoToIfGoto@0x140e750
+Step 7: Steps::SplitInstanceDeclarations@0x140f2b0
+Step 8: Steps::MoveInstanceDeclarations@0x1411540
+Step 9: Steps::ExplicitiseReturn@0x14130b0
+Step 10: Steps::CompactGotos@0x1415a80
+Step 11: Steps::CompactGotosFinal@0x1417a30
+Step 12: Steps::CleanupCompoundMulti@0x1419290
+Step 13: Steps::CleanupCompoundSingle@0x141b460
+Step 14: Steps::CleanupNop@0x141be50
+Step 15: Steps::CleanupCompoundMulti@0x141ccb0
+Step 16: Steps::CleanupCompoundSingle@0x141ebc0
+Step 17: Steps::CleanupNop@0x1420500
+Step 18: Steps::CleanupUnusedLabels@0x1421390
+Step 19: Steps::CleanupDuplicateLabels@0x14240b0
+Step 20: Steps::CleanupIneffectualLabels@0x14282a0
+Step 21: Steps::CleanUpDeadCode@0x1429780
+Step 22: Steps::CleanupUnusedLabels@0x142c6d0
+Step 23: Steps::CleanupDuplicateLabels@0x142f3b0
+Step 24: Steps::CleanupIneffectualLabels@0x1431770
+Step 25: Steps::CleanUpDeadCode@0x14324c0
+Step 26: Steps::GotoAfterWait@0x1436380                     7.0
+Step 27: Steps::AddGotoBeforeLabel@0x1435910
+Step 28: Steps::EnsureBootstrap@0x1439570                   6.9
+Step 29: Steps::CleanupCompoundMulti@0x143cf70              
+Step 30: Steps::AddStateLabelVar@0x14402c0                  6.9
+Step 31: Steps::CleanupCompoundMulti@0x14424a0              
+Step 32: Steps::EnsureSuperLoop@0x1443f30                   
+Step 33: Steps::MakeFallThroughMachine@0x14202f0            6.3
+Step 34: Steps::MoveInitIntoSuperLoop@0x1449360             7.0
+Step 35: Steps::AddYieldFlag@0x144ff70                      7.5
+Step 36: Steps::AddInferredYield@0x1458da0                  14.0
+Step 37: Steps::LoopRotation@0x145a390                      7.0
+Step 38: Steps::VarsToModule@0x14614b0
+Step 39: Steps::DeclsToModule@0x14626e0
+Step 40: Steps::ThreadToMethod@0x1465790                    5.7
+
