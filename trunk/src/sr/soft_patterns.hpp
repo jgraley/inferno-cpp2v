@@ -12,17 +12,20 @@ struct NotMatchBase {}; // needed for graph plotter
 template<class PRE_RESTRICTION>
 struct NotMatch : Special<PRE_RESTRICTION>,
                  CompareReplace::SoftSearchPattern,
-                 NotMatchBase
+                 NotMatchBase,
+                 CouplingSlave
 {
 	SPECIAL_NODE_FUNCTIONS
 	// Pattern is an abnormal context
     TreePtr<PRE_RESTRICTION> pattern;
+    CompareReplace comp; // TODO only want the Compare
 private:
     virtual bool DecidedCompare( const CompareReplace *sr,
     		                       TreePtr<Node> x,
     		                       bool can_key,
     		                       Conjecture &conj ) 
     {
+        INDENT("!");
         ASSERT( pattern );
     	if( can_key )
     	{
@@ -36,13 +39,18 @@ private:
     	    // a. We didn't recurse during KEYING pass and
     	    // b. Search under not can terminate with false, but parent search will continue
     	    // Consequently, we go in at Compare level, which creates a new conjecture.
-    		bool r = sr->Compare( x, pattern, false );
-			TRACE("SoftNot got %d, returning the opposite!\n", (int)r);
+    	    comp.pcontext = sr->pcontext;
+    		bool r = comp.Compare( x, pattern, true );
+			TRACE("NotMatch pattern=")(*pattern)(" x=")(*x)(" got %d, returning the opposite!\n", (int)r);
     		if( r==false )
 				return true;
 			else
 				return false;
     	}
+    }
+    virtual void SetCouplingsMaster( CouplingKeys *ck )
+    {
+        comp.coupling_keys.SetMaster( ck ); 
     }
 };
 
@@ -69,6 +77,7 @@ private:
                                    bool can_key,
                                    Conjecture &conj ) 
     {
+        INDENT("&");
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
     	    ASSERT( i );
@@ -141,6 +150,7 @@ private:
     		                       bool can_key,
     		                       Conjecture &conj ) 
     {
+        INDENT("|");
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
     	    ASSERT( i );
@@ -169,6 +179,7 @@ private:
     		                       bool can_key,
     		                       Conjecture &conj ) 
     {
+        INDENT("^");
     	int tot=0;
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{

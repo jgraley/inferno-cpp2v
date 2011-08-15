@@ -852,28 +852,32 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
 }
 
 
+// rotate loops to avoid inferred yields when an explicit yield already exists
 LoopRotation::LoopRotation()
 {
     MakeTreePtr<Instance> fn, s_var_decl;
-    MakeTreePtr<InstanceIdentifier> fn_id, s_var_id, s_cur_enum_id;
+    MakeTreePtr<InstanceIdentifier> fn_id, s_var_id, s_cur_enum_id, s_outer_enum_id;
     MakeTreePtr<Thread> thread; // Must be SC_THREAD since we introduce SC stuff
     MakeTreePtr< Star<Declaration> > func_decls, decls, s_enums;
-    MakeTreePtr<Static> s_cur_enum;
-    MakeTreePtr< Star<Statement> > inits, stmts, pre, post;    
+    MakeTreePtr<Static> s_cur_enum, s_outer_enum;
+    MakeTreePtr< Star<Statement> > inits, stmts, pre, post, prepre, prepost, postpre, postpost;    
     MakeTreePtr<Loop> loop;
-    MakeTreePtr<Compound> func_comp, s_comp_loop, s_comp_yield, r_comp, r_if_comp;
-    MakeTreePtr<If> loop_top, loop_bottom, yield;
+    MakeTreePtr<Compound> func_comp, s_comp_loop, s_comp_yield, r_comp, r_if_comp, sx_comp;
+    MakeTreePtr<If> loop_top, loop_bottom, yield, outer_bottom, outer_top;
     MakeTreePtr< Star<If> > loop_body, pre_yield, post_yield;
     MakeTreePtr<Equal> r_equal;
     MakeTreePtr< Overlay<Compound> > func_over, over;    
     MakeTreePtr< MatchAll<Compound> > s_all;
     MakeTreePtr<Enum> s_enum;
     MakeTreePtr<TypeIdentifier> s_enum_id;
-    MakeTreePtr< Stuff<Expression> > loop_top_stuff;
-    MakeTreePtr<Equal> loop_top_equal;
-    MakeTreePtr< Stuff<Statement> > loop_bottom_stuff_enum, loop_bottom_stuff_noyield, yield_stuff;
-    MakeTreePtr< MatchAll<Statement> > loop_bottom_matchall;
-    MakeTreePtr< NotMatch<Statement> > loop_bottom_notmatch;
+    MakeTreePtr< Stuff<Expression> > loop_top_stuff, outer_top_stuff;
+    MakeTreePtr<Equal> loop_top_equal, outer_top_equal;
+    MakeTreePtr< Stuff<Statement> > loop_bottom_stuff_enum, outer_bottom_stuff_enum, 
+                                    loop_bottom_stuff_noyield, yield_stuff, outer_bottom_stuff_noyield;
+    MakeTreePtr< MatchAll<Statement> > loop_bottom_matchall, outer_bottom_matchall;
+    MakeTreePtr< NotMatch<Statement> > loop_bottom_notmatch, outer_bottom_notmatch;
+    MakeTreePtr< NotMatch<Compound> > s_notmatch;
+    MakeTreePtr< MatchAny<If> > inner_state;
     
     fn->type = thread;
     fn->initialiser = func_comp;
@@ -882,16 +886,18 @@ LoopRotation::LoopRotation()
     s_enum->identifier = s_enum_id;
     s_enum->members = (s_enums, s_cur_enum);
     s_cur_enum->identifier = s_cur_enum_id;
+    s_outer_enum->identifier = s_outer_enum_id;
     s_var_decl->type = s_enum_id;
     s_var_decl->identifier = s_var_id;
     func_comp->statements = (inits, loop);
     loop->body = over;
     over->through = s_all;
-    s_all->patterns = (s_comp_loop, s_comp_yield);
+    s_all->patterns = (s_comp_loop, s_comp_yield, s_notmatch);
     s_comp_loop->members = (decls);
+    // Search for a loop. Assume that a state enum value in a body means "could transition to the state" and one in
+    // the condition means "acts on the state". If we see the latter with the former blow it somewhere, we call
+    // it a loop and assume the upward branch is normally takner as with C compilers.    
     s_comp_loop->statements = (pre, loop_top, loop_body, loop_bottom, post);    
-    s_comp_yield->members = (decls);
-    s_comp_yield->statements = (pre, pre_yield, yield, post_yield, loop_bottom, post);    
     loop_top->condition = loop_top_stuff;
     loop_top_stuff->terminus = loop_top_equal;
     loop_top_equal->operands = (s_var_id, s_cur_enum_id);
@@ -900,9 +906,30 @@ LoopRotation::LoopRotation()
     loop_bottom_stuff_enum->terminus = s_cur_enum_id;
     loop_bottom_notmatch->pattern = loop_bottom_stuff_noyield;
     loop_bottom_stuff_noyield->terminus = MakeTreePtr<Wait>();    
+    s_comp_yield->members = (decls);
+    
+    // We need to restruct to loops that contain a yield anywhere but the bottom - these are the ones
+    // that would benefit from loop rotation.
+    s_comp_yield->statements = (pre, pre_yield, yield, post_yield, loop_bottom, post);    
     yield->body = yield_stuff;
     yield_stuff->terminus = MakeTreePtr<Wait>();
     
+    // This part is to make sure we operate on the outermost loop first - look for another loop surrounding 
+    // the current one, if it does not end in a yield, then do not transform. This way the outer loop will
+    // keep getting hits until the yield is at the bottom, then inner loops can have a go.
+    s_notmatch->pattern = sx_comp;
+    sx_comp->members = (decls);
+    sx_comp->statements = (prepre, outer_top, postpre, inner_state, prepost, outer_bottom, postpost);
+    outer_top->condition = outer_top_stuff;
+    outer_top_stuff->terminus = outer_top_equal;
+    outer_top_equal->operands = (s_var_id, s_outer_enum_id);
+    outer_bottom->body = outer_bottom_matchall;
+    outer_bottom_matchall->patterns = (outer_bottom_stuff_enum, outer_bottom_notmatch);
+    outer_bottom_stuff_enum->terminus = s_outer_enum_id;
+    outer_bottom_notmatch->pattern = outer_bottom_stuff_noyield;
+    outer_bottom_stuff_noyield->terminus = MakeTreePtr<Wait>();    
+    inner_state->patterns = (loop_top, loop_bottom); // outer loop can share top or bottom state with inner loop; but not both, so at least one must be here
+   
     over->overlay = r_comp;
     r_comp->members = (decls);
     r_comp->statements = (pre, loop_bottom, loop_top, loop_body, post);    // rotated version of s_comp_loop
