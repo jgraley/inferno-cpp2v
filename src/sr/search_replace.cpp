@@ -4,6 +4,9 @@
 
 //#define STRACE
 
+int CompareReplace::repetitions;
+bool CompareReplace::rep_error;
+
 
 /** Walks the tree, avoiding the "search"/"compare" and "replace" members of slaves
     but still recurses through the "through" member. Therefore, it visits all the
@@ -80,9 +83,9 @@ void CompareReplace::Configure( TreePtr<Node> cp,
     TraverseNoSlavePattern ss(rp);
     FOREACH( TreePtr<Node> n, ss )
     {
-        if( TreePtr<SlaveBase> rsb = dynamic_pointer_cast<SlaveBase>(n) )
+        if( TreePtr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
         {
-            rsb->SetCouplingsMaster( &coupling_keys ); 
+            cs->SetCouplingsMaster( &coupling_keys ); 
         }
     }
 
@@ -1381,7 +1384,7 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
     INDENT;
     if( ReadArgs::assert_pedigree )
     {
-	    dirty_grass.clear();
+	    dirty_grass.clear(); // TODO huh?
         duplicated_pedigree.clear();
     }
     
@@ -1389,7 +1392,7 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
         
     bool r=false;
     int i=0;
-    for(i=0; i<ReadArgs::repetitions; i++) 
+    for(i=0; i<repetitions; i++) 
     {
     	r = SingleCompareReplace( proot );
     	TRACE("%p SCR result %d\n", this, r);        
@@ -1401,8 +1404,8 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
     if( r==true )
     {
         TRACE("Over %d reps\n",i); 
-        if(ReadArgs::rep_error)
-            ASSERT(i<ReadArgs::repetitions)
+        if(rep_error)
+            ASSERT(i<repetitions)
             ("Still getting matches after %d repetitions, may be repeating forever.\n"
              "Try using -rn%d to suppress this error\n", i, i);
     }

@@ -113,7 +113,7 @@ public:
     // Some self-testing
     static void Test();
         
-    bool is_master;
+    bool is_master;// TODO seems to be obsolete
     TreePtr<Node> compare_pattern;
     TreePtr<Node> replace_pattern;
     TreePtr<Node> *pcontext;
@@ -130,7 +130,11 @@ public:
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *links ) const;
 
+    static void SetMaxReps( int n, bool e ) { repetitions=n; rep_error=e; }
+
 private:
+    static int repetitions;
+    static bool rep_error;
     // LocalCompare ring
     bool LocalCompare( TreePtr<Node> x,
     		           TreePtr<Node> pattern ) const;
@@ -285,13 +289,15 @@ struct Special : SpecialBase, virtual PRE_RESTRICTION
     }
 };
 
+/// Coupling slave can read the master's CouplingKeys structure
+struct CouplingSlave : virtual Node
+{
+    virtual void SetCouplingsMaster( CouplingKeys *ck ) = 0;    
+};
 
-
-
-struct SlaveBase : virtual Node, virtual InPlaceTransformation
+struct SlaveBase : virtual CouplingSlave, virtual InPlaceTransformation
 {
     virtual TreePtr<Node> GetThrough() const = 0;
-    virtual void SetCouplingsMaster( CouplingKeys *ck ) = 0;
 };
 
 template<typename ALGO>
