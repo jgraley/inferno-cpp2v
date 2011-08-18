@@ -938,4 +938,3 @@ LoopRotation::LoopRotation()
 }
 
 
-

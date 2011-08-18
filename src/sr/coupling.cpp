@@ -31,6 +31,8 @@ void CouplingKeys::DoKey( shared_ptr<Key> key,
 	ASSERT( this );
     ASSERT( pattern );
     
+    TRACE("CouplingKeys@%p: ", this)(master?"has ":"does not have ")("master\n");
+    
     if( key )
     {
         ASSERT( key->root );
@@ -58,10 +60,7 @@ void CouplingKeys::DoKey( shared_ptr<Key> key,
 		key->governing_choice = gc;	
 		key->governing_offset = go;	
 		keys_map[pattern] = key;	
-		if( gc )
-		{
-		    TRACE("Keyed root=")(*key->root)(" pattern=")(*key->replace_pattern)(" with governing_choice=%p\n", gc);
-		}
+        TRACE("Keyed root=")(*key->root)(" pattern=")(*key->replace_pattern)(" with governing_choice=%p\n", gc);
 	}
 	
     // TRACE("@%p Keyed ", this)(*(key->root))(" size %d\n", keys_map.size());

@@ -54,6 +54,11 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new CleanupNop ) ); 
     }        
         
+    sequence->push_back( shared_ptr<Transformation>( new UseTempForReturn ) );
+    //...
+    //sequence->push_back( shared_ptr<Transformation>( new AddReturnAddress ) );
+    //...
+
     // Ineffectual gotos, unused and duplicate labels result from compound tidy-up after construct lowering, but if not 
     // removed before AddGotoBeforeLabel, they will generate spurious states. We also remove dead code which can be exposed by
     // removal of unused labels - we must repeat because dead code removal can generate unused labels.
@@ -65,13 +70,12 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new CleanUpDeadCode ) ); 
     }
     sequence->push_back( shared_ptr<Transformation>( new GotoAfterWait ) );     
-    sequence->push_back( shared_ptr<Transformation>( new AddGotoBeforeLabel ) );     
-    
-    sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) ); 
-           
-        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new AddGotoBeforeLabel ) );         
+    sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );            
+
+    sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
+    sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
             
     sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
     sequence->push_back( shared_ptr<Transformation>( new MakeFallThroughMachine ) ); 
