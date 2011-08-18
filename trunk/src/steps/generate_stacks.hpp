@@ -20,10 +20,17 @@ public:
 	ExplicitiseReturn();
 };
 
-class UseTempsForParamsReturn : public SearchReplace
+/** Add a parameter to non-process functions giving the return state */
+class AddReturnAddress : public SearchReplace
 {
 public:
-	UseTempsForParamsReturn();
+    AddReturnAddress();
+};
+
+class UseTempForReturn : public SearchReplace
+{
+public:
+	UseTempForReturn();
 };
 
 // Replace automatic variables with stacks based on arrays and 

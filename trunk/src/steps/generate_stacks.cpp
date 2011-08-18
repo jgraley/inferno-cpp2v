@@ -52,8 +52,101 @@ ExplicitiseReturn::ExplicitiseReturn()
     Configure( fi );
 }    
 
+struct ReturnAddressTemp : Field
+{
+	NODE_FUNCTIONS_FINAL
+};
 
-UseTempsForParamsReturn::UseTempsForParamsReturn()
+struct ReturnAddress : Automatic
+{
+	NODE_FUNCTIONS_FINAL
+};
+
+
+AddReturnAddress::AddReturnAddress()
+{
+    MakeTreePtr<Module> s_module, r_module;
+    MakeTreePtr< Star<Declaration> > decls;    
+    MakeTreePtr< Star<Base> > bases;    
+    MakeTreePtr<ReturnAddressTemp> r_retaddr;
+    MakeTreePtr<BuildInstanceIdentifier> r_retaddr_id("return_address_temp");
+    MakeTreePtr<ReturnAddress> lr_retaddr;
+    MakeTreePtr<BuildInstanceIdentifier> lr_retaddr_id("return_address");
+    MakeTreePtr<Pointer> r_ptr, lr_ptr;
+    MakeTreePtr< NotMatch<Declaration> > s_nm, ls_nm;
+    MakeTreePtr<Instance> l_inst;
+    MakeTreePtr< Overlay<Compound> > l_over;
+    MakeTreePtr<Compound> ls_comp, lr_comp;
+    MakeTreePtr< Star<Declaration> > l_decls;
+    MakeTreePtr< Star<Statement> > l_stmts, llsx_stmts;
+    MakeTreePtr<Assign> lr_assign, llsx_assign;
+    MakeTreePtr<Call> ll_call;
+    MakeTreePtr<Compound> llr_comp, llsx_comp;
+    MakeTreePtr< TransformOf<Expression> > ll_typeof( &TypeOf::instance );
+    MakeTreePtr<Label> llr_label;
+    MakeTreePtr<BuildLabelIdentifier> llr_labelid("RETURN");
+    MakeTreePtr<Assign> llr_assign;
+    MakeTreePtr< MatchAll<Statement> > ll_all;
+    MakeTreePtr< AnyNode<Statement> > ll_any; // TODO rename AnyNode -> Blob
+    MakeTreePtr< NotMatch<Statement> > lls_not;
+    MakeTreePtr< Overlay<Statement> > ll_over;
+    MakeTreePtr<Function> l_func;
+   
+    ll_all->patterns = (ll_any, lls_not);
+    ll_any->terminus = ll_over;
+    ll_over->through = ll_call;
+    ll_call->callee = ll_typeof;
+    ll_typeof->pattern = l_func;
+    //lls_call->operands = ();
+    lls_not->pattern = llsx_comp;
+    llsx_comp->statements = (llsx_assign, llsx_stmts);
+    llsx_assign->operands = (r_retaddr_id, llr_labelid);
+    ll_over->overlay = llr_comp;
+    llr_comp->statements = (llr_assign, ll_call, llr_label);  
+    llr_assign->operands = (r_retaddr_id, llr_labelid);
+    llr_label->identifier = llr_labelid;    
+    
+    MakeTreePtr< SlaveSearchReplace<Module> > l_slave( r_module, ll_all, ll_all );
+    
+    l_inst->type = l_func;
+    //l_func->members = ();
+    l_func->return_type = MakeTreePtr<Void>();
+    l_inst->initialiser = l_over;
+    l_over->through = ls_comp;
+    ls_comp->members = (l_decls);
+    ls_comp->statements = (l_stmts);
+    l_over->overlay = lr_comp;
+    lr_comp->members = (l_decls, lr_retaddr);
+    l_decls->pattern = ls_nm;
+    ls_nm->pattern = MakeTreePtr<ReturnAddress>();    
+    lr_retaddr->identifier = lr_retaddr_id;
+    lr_retaddr->type = lr_ptr;
+    lr_ptr->destination = MakeTreePtr<Void>();
+    lr_retaddr->initialiser = MakeTreePtr<Uninitialised>();
+    lr_comp->statements = (lr_assign, l_stmts);
+    lr_assign->operands = (lr_retaddr_id, r_retaddr_id);
+    
+    MakeTreePtr< SlaveSearchReplace<Module> > slave( l_slave, l_inst, l_inst );
+    
+    s_module->members = (decls);
+    s_module->bases = (bases);
+    decls->pattern = s_nm;
+    s_nm->pattern = MakeTreePtr<ReturnAddressTemp>();    
+    r_module->members = (decls, r_retaddr);
+    r_module->bases = (bases);
+    r_retaddr->identifier = r_retaddr_id;
+    r_retaddr->type = r_ptr;
+    r_ptr->destination = MakeTreePtr<Void>();
+    r_retaddr->initialiser = MakeTreePtr<Uninitialised>();
+    r_retaddr->virt = MakeTreePtr<NonVirtual>();
+    r_retaddr->access = MakeTreePtr<Private>();
+    r_retaddr->constancy = MakeTreePtr<Const>();
+    
+    Configure( s_module, slave );  
+}
+
+
+UseTempForReturn::UseTempForReturn()
 {
     // search for return statement in a compound (TODO don't think we need the outer compound)
 	TreePtr<Return> s_return( new Return );
