@@ -56,7 +56,9 @@ libboost-dev
 libboost-thread-dev
 graphviz   (only if you want to look at pretty pictures)
 indent     (makes reading inferno C output easier)
-doxygen    (automated class documantation)
+doxygen    (automated class documentation)
+
+You also need to install SystemC (version 2.2.0) and set up a symlink in this directory pointing to the installation. See docs/program/systemc_installation_notes.txt for more info.
 
 Now type:
 

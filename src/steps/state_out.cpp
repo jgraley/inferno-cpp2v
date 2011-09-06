@@ -7,6 +7,7 @@
 #include "tree/typeof.hpp"
 #include "tree/misc.hpp"
  
+ 
 using namespace CPPTree;
 using namespace SCTree;
 using namespace Steps;
@@ -109,7 +110,7 @@ static TreePtr<Statement> MakeResetAssignmentPattern()
 EnsureBootstrap::EnsureBootstrap()
 {
     MakeTreePtr<Instance> fn;
-    MakeTreePtr<Callable> sub;
+    MakeTreePtr<Thread> thread;
     MakeTreePtr< Overlay<Compound> > over;
     MakeTreePtr< MatchAll<Compound> > s_all;
     MakeTreePtr< NotMatch<Compound> > s_not;    
@@ -122,7 +123,7 @@ EnsureBootstrap::EnsureBootstrap()
     MakeTreePtr< NotMatch<Statement> > stop;
     MakeTreePtr<Goto> sx_goto;
         
-    fn->type = sub;
+    fn->type = thread;
     fn->initialiser = over;
     over->through = s_all;
     s_all->patterns = (s_not, s_body);
@@ -157,7 +158,17 @@ AddStateLabelVar::AddStateLabelVar()
     MakeTreePtr<Automatic> state_var;
     MakeTreePtr< NotMatch<Expression> > sx_not, lsx_not;
     MakeTreePtr<Pointer> ptr_type;
+    MakeTreePtr< BuildInstanceIdentifier > state_var_id("state");
     
+    ls_goto->destination = lsx_not;
+    lsx_not->pattern = state_var_id; //  MakeTreePtr<InstanceIdentifier>();
+    
+    lr_compound->statements = (lr_assign, lr_goto);
+    lr_assign->operands = (state_var_id, lsx_not);
+    lr_goto->destination = state_var_id;
+            
+    MakeTreePtr< SlaveSearchReplace<Statement> > r_slave( r_comp, ls_goto, lr_compound );
+     
     s_comp->members = (decls);
     s_comp->statements = (pre, sx_goto, post); 
     sx_goto->destination = sx_not;
@@ -165,20 +176,11 @@ AddStateLabelVar::AddStateLabelVar()
         
     r_comp->members = (state_var, decls);
     r_comp->statements = (pre, sx_goto, post); 
-    state_var->identifier = MakeTreePtr< BuildInstanceIdentifier >("state");
+    state_var->identifier = state_var_id;
     state_var->type = ptr_type;    
     state_var->initialiser = MakeTreePtr<Uninitialised>();
     ptr_type->destination = MakeTreePtr<Void>();
 
-    MakeTreePtr< SlaveSearchReplace<Statement> > r_slave( r_comp, ls_goto, lr_compound );
-     
-    ls_goto->destination = lsx_not;
-    lsx_not->pattern = state_var->identifier; //  MakeTreePtr<InstanceIdentifier>();
-    
-    lr_compound->statements = (lr_assign, lr_goto);
-    lr_assign->operands = (state_var->identifier, ls_goto->destination);
-    lr_goto->destination = state_var->identifier;
-            
     Configure( s_comp, r_slave );
 }
 
@@ -186,7 +188,7 @@ AddStateLabelVar::AddStateLabelVar()
 EnsureSuperLoop::EnsureSuperLoop()
 {   
     MakeTreePtr<Instance> fn;
-    MakeTreePtr<Callable> sub;
+    MakeTreePtr<Thread> thread;
     MakeTreePtr< Overlay<Compound> > over;
     MakeTreePtr< MatchAll<Compound> > s_all;
     MakeTreePtr< NotMatch<Statement> > sx_not, s_limit;    
@@ -197,7 +199,7 @@ EnsureSuperLoop::EnsureSuperLoop()
     MakeTreePtr< Star<Declaration> > decls;    
     MakeTreePtr<Do> r_loop;
         
-    fn->type = sub;
+    fn->type = thread;
     fn->initialiser = over;
     over->through = s_all;
     s_all->patterns = (sx_stuff, s_body);
@@ -283,6 +285,8 @@ struct IsLabelReached : CompareReplace::SoftSearchPattern, Special<LabelIdentifi
     {
         INDENT;
         ASSERT( pattern );
+        if( can_key )
+            return true; // Want to wait for our pattern to get keyed before we do the search, so wait for restricting pass
         TreePtr<Node> n = sr->coupling_keys.GetCoupled( pattern ); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
         if( !n )
             n = pattern;
@@ -291,7 +295,9 @@ struct IsLabelReached : CompareReplace::SoftSearchPattern, Special<LabelIdentifi
         ASSERT( xx );
         TreePtr<LabelIdentifier> x = dynamic_pointer_cast<LabelIdentifier>( xx );
         ASSERT( x )("IsLabelReached at ")(*xx)(" but is of type LabelIdentifier\n"); 
-        UniqueFilter uf;        
+        TRACE("Can label id ")(*x)(" reach expression ")(*y)("?\n");
+
+        Set< TreePtr<InstanceIdentifier> > uf;        
         bool r = CanReachExpr(sr, &uf, x, y);
         TRACE("I reakon ")(*x)(r?" does ":" does not ")("reach ")(*y)("\n"); 
         return r;
@@ -300,7 +306,7 @@ struct IsLabelReached : CompareReplace::SoftSearchPattern, Special<LabelIdentifi
            
 private:
     bool CanReachExpr( const CompareReplace *sr,
-                         Filter *f,
+                         Set< TreePtr<InstanceIdentifier> > *f,
                          TreePtr<LabelIdentifier> x, 
                          TreePtr<Expression> y ) // y is expression. Can it yield label x?
     {
@@ -315,15 +321,17 @@ private:
                 CanReachExpr(sr, f, x, ty->operands[2]); // only the choices, not the condition
         else if( TreePtr<Comma> cy = dynamic_pointer_cast<Comma>( y ) )
             r = CanReachExpr(sr, f, x, ty->operands[1]); // second operand
+        else if( TreePtr<Subscript> sy = dynamic_pointer_cast<Subscript>( y ) ) // subscript as r-value
+            r = CanReachExpr(sr, f, x, sy->operands[0]); // first operand
         else if( dynamic_pointer_cast<Dereference>( y ) )
-            r = true; // assume everything is in memory
+            ASSERTFAIL("IsLabelReached used on expression that is read from memory, cannot figure out the answer\n");
             
         TRACE("I reakon ")(*x)(" at %p", x.get())(r?" does ":" does not ")("reach ")(*y)("\n"); 
         return r;        
     }    
     
     bool CanReachVar( const CompareReplace *sr,
-                        Filter *f,
+                        Set< TreePtr<InstanceIdentifier> > *f,
                         TreePtr<LabelIdentifier> x, 
                         TreePtr<InstanceIdentifier> y ) // y is instance identifier. Can expression x be assigned to it?
     {
@@ -335,28 +343,36 @@ private:
             return cache[rr];
         }
         bool r = false;        
-        Expand e( *sr->pcontext, f ); // use a unique filter to ensure we only see each assignment once.
-                                      // A single filter instance is used across the whole recursion.
-                                      // This way we do not recurse forever when there are loops in the data flow.
+        Expand e( *sr->pcontext ); 
+        
+        if( f->IsExist(y) )
+            return false; // already processing this identifier, so we have a loop
+                          // so don't recurse further
+                          
+        f->insert(y);                          
+
+        TRACE("Looking for assignment like ")(*y)(" = ")(*x)("\n");
 
         FOREACH( TreePtr<Node> n, e )
         {
             if( TreePtr<Assign> a = dynamic_pointer_cast<Assign>(n) )
             {
-                TRACE("Examining assignment: ")(*a->operands[0])(" = ")(*a->operands[1])("\n"); 
-                if( a->operands[0] == y )
+                TreePtr<Expression> lhs = a->operands[0];
+                if( TreePtr<Subscript> slhs = dynamic_pointer_cast<Subscript>( lhs ) ) // subscript as l-value 
+                    lhs = slhs->operands[0];
+                TRACE("Examining assignment: ")(*lhs)(" = ")(*a->operands[1])("\n"); 
+                if( lhs == y )
                 {
                     if( CanReachExpr( sr, f, x, a->operands[1] ) )
                     {
-                        r = true;
+                        r = true;                        
                         break; // early out, since we have the info we need
                     }
                 }
             }
         }
-
-        cache[rr] = r;
-        TRACE("I reakon ")(*x)(" at %p", x.get())(r?" does ":" does not ")("reach ")(*y)(" cache size now %d\n", cache.size()); 
+        
+        f->erase(y);
         return r;
     }
     
@@ -574,7 +590,151 @@ FixFallthrough::FixFallthrough()
     Configure( s_comp, r_comp );            
 }
 
+#if 1
+MakeFallThroughMachine::MakeFallThroughMachine()
+{
+    MakeTreePtr<Module> s_module, r_module;
+    MakeTreePtr< GreenGrass<Type> > gg;
+    MakeTreePtr<Field> func, m_func;
+    MakeTreePtr<InstanceIdentifier> func_id;
+    MakeTreePtr<Thread> thread;
+    MakeTreePtr< Overlay<Compound> > func_over;    
+    MakeTreePtr<Compound> s_func_comp, r_func_comp;
+    MakeTreePtr< Star<Declaration> > func_decls, module_decls;
+    MakeTreePtr< Star<Statement> > func_stmts;
+    MakeTreePtr< Star<Base> > bases;
+    MakeTreePtr<Enum> r_module_enum;
+    MakeTreePtr<BuildTypeIdentifier> r_enum_id("%sStates");
+    MakeTreePtr< MatchAll<Declaration> > m_all;
+    MakeTreePtr< Stuff<Declaration> > m_stuff_inst;
+    MakeTreePtr< Stuff<Initialiser> > m_stuff_label;
+    MakeTreePtr< Overlay<Type> > m_over;
+    MakeTreePtr< Stuff<Type> > m_stuff;
+    MakeTreePtr<Instance> m_inst;
+    MakeTreePtr<InstanceIdentifier> m_inst_id, var_id;
+    MakeTreePtr<TypeIdentifier> module_id;
+    MakeTreePtr<Label> m_label;
+    MakeTreePtr<IsLabelReached> m_ilr;
+    MakeTreePtr<Pointer> m_ptr;
+    MakeTreePtr< Compound > l_func_comp, lr_comp, ls_comp, lr_if_comp;
+    MakeTreePtr< Star<Declaration> > l_func_decls, l_enum_vals, l_decls, l_module_decls;
+    MakeTreePtr< Star<Statement> > l_func_pre, l_func_post, l_pre, l_block, l_post, l_stmts, l_dead_gotos;
+    MakeTreePtr<Switch> l_switch;     
+    MakeTreePtr<Enum> ls_enum, lr_enum;         
+    MakeTreePtr< NotMatch<Statement> > xs_rr;
+    MakeTreePtr<Static> lr_state_decl;    
+    MakeTreePtr<BuildInstanceIdentifier> lr_state_id("%s_STATE_%s");
+    MakeTreePtr<Case> lr_case;
+    MakeTreePtr<Signed> lr_int;
+    MakeTreePtr<BuildContainerSize> lr_count;
+    MakeTreePtr<LabelIdentifier> ls_label_id;
+    MakeTreePtr<Instance> var_decl, l_var_decl;
+    MakeTreePtr< MatchAll<Node> > ll_all;
+    MakeTreePtr< NotMatch<Node> > lls_not1, lls_not2;    
+    MakeTreePtr< AnyNode<Node> > ll_any;
+    MakeTreePtr< Overlay<Node> > ll_over;
+    MakeTreePtr<Goto> lls_goto;    
+    MakeTreePtr<Label> lls_label;    
+    MakeTreePtr<Goto> ls_goto;   
+    MakeTreePtr<Label> ls_label; 
+    MakeTreePtr<If> lr_if;            
+    MakeTreePtr<Equal> lr_equal;
+    MakeTreePtr<Loop> l_loop;
+    MakeTreePtr< Overlay<Statement> > l_over;
+    MakeTreePtr< NotMatch<Statement> > l_not;             
+    MakeTreePtr< MatchAny<Statement> > l_any;
+    MakeTreePtr< Stuff<Declaration> > m_stuff_func;
+    MakeTreePtr<Module> ls_module, lr_module;
+    MakeTreePtr<Field> l_func;
+        
+    ll_all->patterns = (ll_any, lls_not1, lls_not2); // TODO don't think we need the nots
+    ll_any->terminus = ll_over;
+    ll_over->through = ls_label_id;
+    ll_over->overlay = lr_state_id;
+    lls_not1->pattern = lls_goto;
+    lls_goto->destination = ls_label_id; // leave gotos alone in the body
+    lls_not2->pattern = lls_label;
+    lls_label->identifier = ls_label_id; // leave labels alone in the body
 
+    MakeTreePtr< SlaveSearchReplace<Declaration> > slavell( lr_module, ll_all );    
+    
+    m_all->patterns = (m_stuff_func, m_stuff_inst);
+    m_stuff_func->terminus = m_func;
+    m_func->identifier = func_id;
+    m_func->initialiser = m_stuff_label;
+    m_stuff_label->terminus = m_label;
+    m_label->identifier = m_ilr;
+    m_ilr->pattern = m_inst_id;
+    m_stuff_inst->terminus = m_inst;
+    m_inst->identifier = m_inst_id;
+    m_inst->type = m_stuff;
+    m_stuff->terminus = m_over;    
+    m_over->through = m_ptr;
+    m_ptr->destination = MakeTreePtr<Void>();
+    m_over->overlay = r_enum_id;    
+    
+    MakeTreePtr< SlaveCompareReplace<Declaration> > slavem( r_module, m_all );
+
+    ls_module->members = (l_module_decls, ls_enum, l_func);
+    ls_module->bases = (bases);
+    ls_module->identifier = module_id;
+    l_func->identifier = func_id;
+    l_func->initialiser = l_func_comp;
+    l_func_comp->members = (func_decls);
+    l_func_comp->statements = (l_func_pre, l_loop, l_func_post); 
+    ls_enum->members = (l_enum_vals);
+    ls_enum->identifier = r_enum_id; // need to match id, not enum itself, because enum's members will change during slave
+    l_loop->body = l_over;
+    l_over->through = ls_comp;
+    ls_comp->members = (l_decls);
+    ls_comp->statements = (l_pre, ls_goto, ls_label, l_block, l_post, l_dead_gotos); 
+    ls_goto->destination = var_id;
+    ls_label->identifier = ls_label_id;
+    l_block->pattern = l_not;
+    l_not->pattern = l_any;
+    l_any->patterns = (MakeTreePtr<Goto>(), MakeTreePtr<If>());
+    l_post->pattern = MakeTreePtr<If>();    
+    l_dead_gotos->pattern = MakeTreePtr<Goto>();
+    lr_module->members = (l_module_decls, lr_enum, l_func);
+    lr_module->bases = (bases);
+    lr_module->identifier = module_id;
+    l_over->overlay = lr_comp;
+    lr_enum->members = (l_enum_vals, lr_state_decl);
+    lr_enum->identifier = r_enum_id;
+    lr_state_decl->constancy = MakeTreePtr<Const>();
+    lr_state_decl->identifier = lr_state_id;
+    lr_state_decl->type = lr_int;
+    lr_state_decl->initialiser = lr_count;
+    lr_count->container = l_enum_vals;
+    lr_int->width = MakeTreePtr<SpecificInteger>(32); // TODO should be a common place for getting default types
+    lr_state_id->sources = (func_id, ls_label->identifier);
+    lr_comp->members = (l_decls);
+    lr_comp->statements = (l_pre, lr_if, l_post); // do final block first
+    lr_if->condition = lr_equal;
+    lr_if->body = lr_if_comp;
+    lr_if->else_body = MakeTreePtr<Nop>();
+    lr_equal->operands = (ls_label_id, var_id);
+    //lr_if_comp->members = ();
+    lr_if_comp->statements = l_block;
+
+    MakeTreePtr< SlaveCompareReplace<Declaration> > slavel( slavem, ls_module, slavell );
+    
+    s_module->members = (module_decls, func);    
+    s_module->bases = (bases);
+    s_module->identifier = module_id;
+    func->type = gg;
+    gg->through = thread;
+    func->identifier = func_id;
+    r_module->members = (module_decls, func, r_module_enum);
+    r_module->bases = (bases);
+    r_module->identifier = module_id;
+    r_module_enum->identifier = r_enum_id;
+    r_enum_id->sources = (func_id);            
+    //r_module_enum->members = ();    
+    
+    Configure( s_module, slavel );    
+}
+#else
 MakeFallThroughMachine::MakeFallThroughMachine()
 {
     MakeTreePtr<Instance> fn;
@@ -686,6 +846,9 @@ MakeFallThroughMachine::MakeFallThroughMachine()
 
     Configure( fn );    
 }
+#endif
+
+
 
 AddYieldFlag::AddYieldFlag()
 {

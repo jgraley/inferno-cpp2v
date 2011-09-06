@@ -280,6 +280,10 @@ It is possible to use more than one slave in a pattern, they appear nested (that
 
 Note: having these two nesting options is confusing: the first style looks too much like the second and can be easily confused when reading graphs, so it's important to look out for this.
 
+10.2 Important note
+
+The patterns under slaves must be fully assembled before the slave is constructed or configured. This is because configuration (which is triggered by construction with pattern pointers) examines the patterns and may cache informationa bout them or set hidden properties on them. 
+
 11 Spinning prevention
 
 As described above, SearchReplace and CompareReplace act repeatedly until no further matches are found. This means the output program tree of a search and replace operation (that terminates) does not match the search pattern. This is a reliable post-invariant and serves the concept of Inferno as a principally reductive or goal-seeking algorithm. However, it is possible to create patterns that would repeat forever if every replace action creates another match. For this reason, any algorithm that re-tries a subtree that has been modified by a replace could spin forever.

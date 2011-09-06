@@ -89,7 +89,7 @@ docs : makefile src/*/*.?pp
 #
 # Run the tests
 #
-test : makefile inferno.exe
+test : makefile inferno.exe resource
 	test/runtests.sh
 	
 #

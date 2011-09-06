@@ -104,6 +104,8 @@ private:
         // overlay that over the coupling. There must not be more than one modifier, 
         // because behaviour would be indeterminate (patterns are unordered).
         //TRACE("Coupled MatchAll: dest=")(*dest)("\n");
+        // TODO can we not arrange for the replace path to go directly to the desired child?
+        // maybe by inserting an Overlay? Then we could make MatchAll be search-only
 
         FOREACH( TreePtr<Node> source_pattern, GetPatterns() )
         {                

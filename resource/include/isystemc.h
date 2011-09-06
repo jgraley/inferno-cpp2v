@@ -34,7 +34,7 @@ void SC_METHOD( void func );
 void exit( void p1 );
 
 // Allow SC_CTOR to parse as a constructor
-#define SC_CTOR(X) X( char *name ) 
+#define SC_CTOR(X) X( const char *name ) 
 
 // Allow this symbol
 void SC_ZERO_TIME;

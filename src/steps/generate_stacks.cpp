@@ -52,14 +52,10 @@ ExplicitiseReturn::ExplicitiseReturn()
     Configure( fi );
 }    
 
-struct ReturnAddressTemp : Field
-{
-	NODE_FUNCTIONS_FINAL
-};
 
-struct ReturnAddress : Automatic
+struct TempReturnAddress : Temporary
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
 };
 
 
@@ -68,81 +64,95 @@ AddReturnAddress::AddReturnAddress()
     MakeTreePtr<Module> s_module, r_module;
     MakeTreePtr< Star<Declaration> > decls;    
     MakeTreePtr< Star<Base> > bases;    
-    MakeTreePtr<ReturnAddressTemp> r_retaddr;
-    MakeTreePtr<BuildInstanceIdentifier> r_retaddr_id("return_address_temp");
-    MakeTreePtr<ReturnAddress> lr_retaddr;
+    MakeTreePtr<Field> r_retaddr;
+    MakeTreePtr<BuildInstanceIdentifier> r_retaddr_id("%s_return_address");
+    MakeTreePtr<Automatic> lr_retaddr;
     MakeTreePtr<BuildInstanceIdentifier> lr_retaddr_id("return_address");
+    MakeTreePtr<TempReturnAddress> lr_temp_retaddr;
+    MakeTreePtr<BuildInstanceIdentifier> lr_temp_retaddr_id("temp_return_address");
     MakeTreePtr<Pointer> r_ptr, lr_ptr;
     MakeTreePtr< NotMatch<Declaration> > s_nm, ls_nm;
+    MakeTreePtr< GreenGrass<Declaration> > gg;
     MakeTreePtr<Instance> l_inst;
     MakeTreePtr< Overlay<Compound> > l_over;
     MakeTreePtr<Compound> ls_comp, lr_comp;
     MakeTreePtr< Star<Declaration> > l_decls;
-    MakeTreePtr< Star<Statement> > l_stmts, llsx_stmts;
-    MakeTreePtr<Assign> lr_assign, llsx_assign;
-    MakeTreePtr<Call> ll_call;
+    MakeTreePtr< Star<Statement> > l_stmts, msx_stmts;
+    MakeTreePtr<Assign> lr_assign, msx_assign;
+    MakeTreePtr<Call> m_call;
+    MakeTreePtr<Compound> mr_comp, msx_comp;
+    MakeTreePtr<Label> mr_label;
+    MakeTreePtr<BuildLabelIdentifier> mr_labelid("RETURN");
+    MakeTreePtr<Assign> mr_assign;
+    MakeTreePtr< MatchAll<Statement> > m_all;
+    MakeTreePtr< AnyNode<Statement> > m_any; // TODO rename AnyNode -> Blob
+    MakeTreePtr< NotMatch<Statement> > ms_not;
+    MakeTreePtr< Overlay<Statement> > m_over;
+    MakeTreePtr<Function> l_func;
+    MakeTreePtr<TypeIdentifier> ident;
+    MakeTreePtr<InstanceIdentifier> l_inst_id;
+    MakeTreePtr<Return> ll_return;
     MakeTreePtr<Compound> llr_comp, llsx_comp;
-    MakeTreePtr< TransformOf<Expression> > ll_typeof( &TypeOf::instance );
-    MakeTreePtr<Label> llr_label;
-    MakeTreePtr<BuildLabelIdentifier> llr_labelid("RETURN");
-    MakeTreePtr<Assign> llr_assign;
+    MakeTreePtr<Assign> llr_assign, llsx_assign;
     MakeTreePtr< MatchAll<Statement> > ll_all;
-    MakeTreePtr< AnyNode<Statement> > ll_any; // TODO rename AnyNode -> Blob
+    MakeTreePtr< AnyNode<Statement> > ll_any;
     MakeTreePtr< NotMatch<Statement> > lls_not;
     MakeTreePtr< Overlay<Statement> > ll_over;
-    MakeTreePtr<Function> l_func;
+    MakeTreePtr< GreenGrass<Statement> > m_gg, ll_gg;
+
+    ll_gg->through = ll_return;
+    ll_over->overlay = llr_comp;        
+    //llr_comp->members = ();
+    llr_comp->statements = (llr_assign, ll_return);
+    llr_assign->operands = (lr_temp_retaddr_id, lr_retaddr_id);
    
-    ll_all->patterns = (ll_any, lls_not);
-    ll_any->terminus = ll_over;
-    ll_over->through = ll_call;
-    ll_call->callee = ll_typeof;
-    ll_typeof->pattern = l_func;
+    MakeTreePtr< SlaveSearchReplace<Compound> > slavell( lr_comp, ll_gg, llr_comp );   
+   
+    m_gg->through = m_call;
+    m_call->callee = l_inst_id;
     //lls_call->operands = ();
-    lls_not->pattern = llsx_comp;
-    llsx_comp->statements = (llsx_assign, llsx_stmts);
-    llsx_assign->operands = (r_retaddr_id, llr_labelid);
-    ll_over->overlay = llr_comp;
-    llr_comp->statements = (llr_assign, ll_call, llr_label);  
-    llr_assign->operands = (r_retaddr_id, llr_labelid);
-    llr_label->identifier = llr_labelid;    
+    mr_comp->statements = (mr_assign, m_call, mr_label);  
+    mr_assign->operands = (r_retaddr_id, mr_labelid);
+    mr_label->identifier = mr_labelid;    
     
-    MakeTreePtr< SlaveSearchReplace<Module> > l_slave( r_module, ll_all, ll_all );
+    MakeTreePtr< SlaveSearchReplace<Module> > slavem( r_module, m_gg, mr_comp );
     
     l_inst->type = l_func;
     //l_func->members = ();
     l_func->return_type = MakeTreePtr<Void>();
     l_inst->initialiser = l_over;
+    l_inst->identifier = l_inst_id;
     l_over->through = ls_comp;
     ls_comp->members = (l_decls);
     ls_comp->statements = (l_stmts);
-    l_over->overlay = lr_comp;
-    lr_comp->members = (l_decls, lr_retaddr);
-    l_decls->pattern = ls_nm;
-    ls_nm->pattern = MakeTreePtr<ReturnAddress>();    
+    l_over->overlay = slavell;
+    lr_comp->members = (l_decls, lr_retaddr, lr_temp_retaddr);
     lr_retaddr->identifier = lr_retaddr_id;
     lr_retaddr->type = lr_ptr;
-    lr_ptr->destination = MakeTreePtr<Void>();
     lr_retaddr->initialiser = MakeTreePtr<Uninitialised>();
+    lr_temp_retaddr->identifier = lr_temp_retaddr_id;
+    lr_temp_retaddr->type = lr_ptr;
+    lr_temp_retaddr->initialiser = MakeTreePtr<Uninitialised>();
+    lr_ptr->destination = MakeTreePtr<Void>();
     lr_comp->statements = (lr_assign, l_stmts);
-    lr_assign->operands = (lr_retaddr_id, r_retaddr_id);
+    lr_assign->operands = (lr_retaddr_id, r_retaddr_id);   
     
-    MakeTreePtr< SlaveSearchReplace<Module> > slave( l_slave, l_inst, l_inst );
-    
-    s_module->members = (decls);
+    s_module->members = (gg, decls);
+    gg->through = l_inst;
     s_module->bases = (bases);
-    decls->pattern = s_nm;
-    s_nm->pattern = MakeTreePtr<ReturnAddressTemp>();    
-    r_module->members = (decls, r_retaddr);
+    s_module->identifier = ident;
+    r_module->members = (l_inst, decls, r_retaddr);
     r_module->bases = (bases);
+    r_module->identifier = ident;
     r_retaddr->identifier = r_retaddr_id;
     r_retaddr->type = r_ptr;
     r_ptr->destination = MakeTreePtr<Void>();
     r_retaddr->initialiser = MakeTreePtr<Uninitialised>();
     r_retaddr->virt = MakeTreePtr<NonVirtual>();
     r_retaddr->access = MakeTreePtr<Private>();
-    r_retaddr->constancy = MakeTreePtr<Const>();
-    
-    Configure( s_module, slave );  
+    r_retaddr->constancy = MakeTreePtr<NonConst>();
+    r_retaddr_id->sources = (l_inst_id);
+    Configure( s_module, slavem );  
 }
 
 
@@ -198,14 +208,17 @@ GenerateStacks::GenerateStacks()
     // Using a sub-slave of the variable-finding slave, look for usages of 
     // the variable. Replace with an indexing operation into the array using
     // the stack index.    
-    MakeTreePtr<Instance> fi;
+    MakeTreePtr<Instance> fi, l_fi;
     MakeTreePtr< Overlay<Initialiser> > oinit;
-    MakeTreePtr<Thread> s_func;
+    MakeTreePtr<Thread> sx_thread;
+    MakeTreePtr<Method> sx_method;
+    MakeTreePtr< MatchAny<Type> > sx_any;
+    MakeTreePtr< NotMatch<Type> > s_not;
     MakeTreePtr< MatchAll<Initialiser> > s_and;
     MakeTreePtr<Compound> s_top_comp, r_top_comp, r_ret_comp, temp;
     MakeTreePtr< Star<Declaration> > top_decls;
     MakeTreePtr< Star<Statement> > top_pre;
-    MakeTreePtr< Stuff<Statement> > stuff;
+    MakeTreePtr< Stuff<Initialiser> > stuff;
     MakeTreePtr< Stuff<Compound> > cs_stuff;
     MakeTreePtr< Overlay<Statement> > overlay;
     MakeTreePtr<Automatic> cs_instance, s_instance;
@@ -222,10 +235,77 @@ GenerateStacks::GenerateStacks()
     MakeTreePtr<BuildInstanceIdentifier> r_identifier("%s_stack");
     MakeTreePtr< GreenGrass<Statement> > s_gg;
     MakeTreePtr<Assign> r_index_init;
+    MakeTreePtr< Star<Declaration> > members;
+    MakeTreePtr<Module> s_module, r_module, ls_module, lr_module;
+    MakeTreePtr< Star<Base> > bases, l_bases;
+    MakeTreePtr<TypeIdentifier> module_id, l_module_id;
+    MakeTreePtr<Compound> s_vcomp, r_vcomp;
+    MakeTreePtr< Star<Declaration> > vdecls, l_members;
+    MakeTreePtr< Star<Statement> > vstmts;
+    MakeTreePtr<InstanceIdentifier> fi_id;
 
+    // Sub-slave replace with a subscript into the array
+    l_r_sub->operands = ( r_identifier, r_index_identifier );
+
+    MakeTreePtr< SlaveSearchReplace<Statement> > r_slave( r_vcomp, s_identifier, l_r_sub );
+
+    // SlaveSearchReplace search to find automatic variables within the function
+    stuff->terminus = overlay;
+    overlay->through = s_vcomp;
+    s_vcomp->members = (vdecls, s_instance);
+    s_vcomp->statements = (vstmts);
+    s_instance->identifier = s_identifier;
+    s_instance->initialiser = MakeTreePtr<Uninitialised>(); 
+    s_instance->type = MakeTreePtr<Type>();
+
+    // SlaveSearchReplace replace to insert as a static array (TODO be a member of enclosing class)
+    r_instance->constancy = MakeTreePtr<NonConst>();
+    r_instance->initialiser = MakeTreePtr<Uninitialised>();
+    overlay->overlay = r_slave;
+    r_vcomp->members = (vdecls);
+    r_vcomp->statements = (vstmts);
+    r_identifier->sources = (s_identifier);
+    r_instance->identifier = r_identifier;
+    r_instance->type = r_array;
+    r_instance->virt = MakeTreePtr<NonVirtual>();
+    r_instance->access = MakeTreePtr<Private>();
+    r_array->element = s_instance->type;
+    r_array->size = MakeTreePtr<SpecificInteger>(10);
+
+    // SlaveSearchReplace to find early returns in the function
+    s_gg->through = ret;
+
+    // SlaveSearchReplace replace with a decrement of the stack index coming before the return
+    //r_ret_comp->members = ( r_ret_decls );
+    r_ret_dec->operands = ( r_index_identifier );
+    r_ret_comp->statements = ( r_ret_dec, ret );
+
+    ls_module->members = (l_members, l_fi);
+    ls_module->bases = (l_bases);
+    ls_module->identifier = module_id;
+    l_fi->initialiser = stuff;
+    l_fi->identifier = fi_id;
+    lr_module->members = (l_members, l_fi, r_instance);
+    lr_module->bases = (l_bases);
+    lr_module->identifier = module_id;
+    
+    MakeTreePtr< SlaveCompareReplace<Module> > r_mid( r_module, ls_module, lr_module ); // stuff, stuff
+
+    MakeTreePtr< SlaveSearchReplace<Statement> > r_slave3( r_top_comp, s_gg, r_ret_comp );
+    temp->statements = (r_slave3);
+    oinit->overlay = temp;//r_slave3; 
+    r_module->members = (fi, members, r_index);
+    r_module->bases = (bases);
+    r_module->identifier = module_id;
+    
     // Master search - look for functions satisfying the construct limitation and get
-    fi->identifier = MakeTreePtr<InstanceIdentifier>();
-    fi->type = s_func;
+    s_module->members = (fi, members);
+    s_module->bases = (bases);
+    s_module->identifier = module_id;
+    fi->identifier = fi_id;
+    fi->type = s_not;
+    s_not->pattern = sx_any;
+    sx_any->patterns = (sx_thread, sx_method); // Do not provide stacks for these because they do not recurse
     fi->initialiser = oinit;   
     oinit->through = s_and;
     s_top_comp->members = ( top_decls );
@@ -236,19 +316,14 @@ GenerateStacks::GenerateStacks()
     s_and->patterns = ( s_top_comp, cs_stuff );
 
     // Master replace - insert index variable, inc and dec into function at top level
-    MakeTreePtr< SlaveSearchReplace<Statement> > r_slave( stuff, s_identifier, l_r_sub );
-    MakeTreePtr< SlaveCompareReplace<Statement> > r_mid( r_top_comp, stuff, r_slave );
-    MakeTreePtr< SlaveSearchReplace<Statement> > r_slave3( r_mid, s_gg, r_ret_comp );
-    temp->statements = (r_slave3);
-    oinit->overlay = temp;//r_slave3; 
-
     // top-level decls
-    r_top_comp->members = ( top_decls, r_index );
+    r_top_comp->members = (top_decls);
     r_index->type = r_index_type;
     r_index_type->width = MakeTreePtr<SpecificInteger>(32);
     r_index_identifier->sources = (fi->identifier);
     r_index->identifier = r_index_identifier;
     r_index->constancy = MakeTreePtr<NonConst>();
+    r_index->initialiser = MakeTreePtr<SpecificInteger>(0);
     //r_index->initialiser = MakeTreePtr<SpecificInteger>(0);
     r_index_init->operands = (r_index_identifier, MakeTreePtr<SpecificInteger>(0));
     r_index->virt = MakeTreePtr<NonVirtual>();
@@ -256,39 +331,9 @@ GenerateStacks::GenerateStacks()
 
     // top-level statements
     r_inc->operands = ( r_index_identifier );
-    r_top_comp->statements = ( r_index_init, r_inc, top_pre );
+    r_top_comp->statements = ( r_inc, top_pre );
 
-    // SlaveSearchReplace search to find automatic variables within the function
-    stuff->terminus = overlay;
-    overlay->through = s_instance;
-    s_instance->identifier = s_identifier;
-    s_instance->initialiser = MakeTreePtr<Uninitialised>(); // can't handle initialisers!
-    s_instance->type = MakeTreePtr<Type>();
-
-    // SlaveSearchReplace replace to insert as a static array (TODO be a member of enclosing class)
-    r_instance->constancy = MakeTreePtr<NonConst>();
-    r_instance->initialiser = MakeTreePtr<Uninitialised>();
-    overlay->overlay = r_instance;
-    r_identifier->sources = (s_identifier);
-    r_instance->identifier = r_identifier;
-    r_instance->type = r_array;
-    r_instance->virt = MakeTreePtr<NonVirtual>();
-    r_instance->access = MakeTreePtr<Private>();
-    r_array->element = s_instance->type;
-    r_array->size = MakeTreePtr<SpecificInteger>(10);
-
-    // Sub-slave replace with a subscript into the array
-    l_r_sub->operands = ( r_identifier, r_index_identifier );
-
-    // SlaveSearchReplace to find early returns in the function
-    s_gg->through = ret;
-
-    // SlaveSearchReplace replace with a decrement of the stack index coming before the return
-    //r_ret_comp->members = ( r_ret_decls );
-    r_ret_dec->operands = ( r_index_identifier );
-    r_ret_comp->statements = ( r_ret_dec, ret );
-
-    Configure( fi );
+    Configure( s_module, r_mid );
 }
 
 /*
@@ -429,6 +474,67 @@ ExtractFields::ExtractFields()
     r_comp->statements = (vstmts);
     
     Configure( s_rec, r_rec );
+}
+
+
+MergeFunctions::MergeFunctions()
+{
+    MakeTreePtr<Module> s_module, r_module;
+    MakeTreePtr<Field> thread, s_func;
+    MakeTreePtr<Thread> thread_type;
+    MakeTreePtr<Callable> func_type;
+    MakeTreePtr< Star<Declaration> > members, thread_decls;
+    MakeTreePtr< Star<Statement> > thread_stmts;
+    MakeTreePtr< Star<Base> > bases;    
+    MakeTreePtr< Overlay<Compound> > thread_over;
+    MakeTreePtr<Compound> s_thread_comp, r_thread_comp;
+    MakeTreePtr<Call> s_call, ls_call;
+    MakeTreePtr<InstanceIdentifier> func_id;
+    MakeTreePtr<Label> r_label;
+    MakeTreePtr< BuildLabelIdentifier > r_label_id("ENTER_%s");
+    MakeTreePtr< MatchAll<Compound> > s_all;
+    MakeTreePtr< Stuff<Compound> > s_stuff, func_stuff;
+    MakeTreePtr<TypeIdentifier> module_id;
+    MakeTreePtr<Goto> lr_goto, mr_goto;
+    MakeTreePtr<Return> ms_return;    
+    MakeTreePtr<TempReturnAddress> retaddr;
+    MakeTreePtr<InstanceIdentifier> retaddr_id;
+    
+    mr_goto->destination = retaddr_id;
+     
+    MakeTreePtr< SlaveSearchReplace<Compound> > slavem( func_stuff, ms_return, mr_goto );        
+    
+    ls_call->callee = func_id;
+    lr_goto->destination = r_label_id;
+        
+    MakeTreePtr< SlaveSearchReplace<Compound> > slavel( r_thread_comp, ls_call, lr_goto );    
+    
+    s_module->members = (members, thread, s_func);
+    s_module->bases = (bases);
+    s_module->identifier = module_id;
+    thread->type = thread_type;
+    thread->initialiser = thread_over;
+    thread_over->through = s_all;
+    s_all->patterns = (s_thread_comp, s_stuff);
+    s_stuff->terminus = s_call;
+    s_thread_comp->members = (thread_decls);
+    s_thread_comp->statements = (thread_stmts);
+    s_call->callee = func_id;    
+    s_func->type = func_type;
+    s_func->initialiser = func_stuff;
+    s_func->identifier = func_id;
+    func_stuff->terminus = retaddr;
+    retaddr->identifier = retaddr_id;
+    r_module->members = (members, thread);
+    r_module->bases = (bases);
+    r_module->identifier = module_id;
+    thread_over->overlay = slavel;
+    r_thread_comp->members = (thread_decls);
+    r_thread_comp->statements = (thread_stmts, r_label, slavem);
+    r_label->identifier = r_label_id;
+    r_label_id->sources = (func_id);
+         
+    Configure( s_module, r_module );
 }
 
 

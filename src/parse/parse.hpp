@@ -842,7 +842,11 @@ private:
 		TRACE("FnBodyScope S%p\n", FnBodyScope);
 		TreePtr<Instance> o = dynamic_pointer_cast<Instance>(hold_decl.FromRaw(D));
 		ASSERT(o);		
-		//ident_track.SeenScope( FnBodyScope );
+		
+		// Note: this line was commented out as of mid August, but I'm sure I put it 
+		// in recently, to fix a bug. Can't remember why it was commented out. Uncommented
+		// to fix scopes being popped without being pushed.
+		ident_track.SeenScope( FnBodyScope );
 
 		if( TreePtr<CallableParams> pp = dynamic_pointer_cast<CallableParams>( o->type ) )
 		AddParamsToScope( pp, FnBodyScope );

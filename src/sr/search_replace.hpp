@@ -116,6 +116,7 @@ public:
     bool is_master;// TODO seems to be obsolete
     TreePtr<Node> compare_pattern;
     TreePtr<Node> replace_pattern;
+    CompareReplace *master_ptr;
     TreePtr<Node> *pcontext;
     mutable CouplingKeys coupling_keys;
     mutable set< TreePtr<Node> > dirty_grass;
@@ -131,6 +132,13 @@ public:
                                vector< TreePtr<Node> > *links ) const;
 
     static void SetMaxReps( int n, bool e ) { repetitions=n; rep_error=e; }
+    const CompareReplace * GetOverallMaster() const
+    {
+        const CompareReplace *m = this;
+        while( m->master_ptr )
+            m = m->master_ptr;
+        return m;
+    }
 
 private:
     static int repetitions;
@@ -185,7 +193,7 @@ public:
     	         	                            shared_ptr<Key> current_key,
 		                                        TreePtr<Node> source ) const; // under substitution if not NULL
     TreePtr<Node> DuplicateNode( TreePtr<Node> source,
-    		                     shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
+    		                     bool force_dirty ) const;
     TreePtr<Node> ApplySpecialAndCouplingPattern( TreePtr<Node> source ) const;
     TreePtr<Node> ApplySlave( TreePtr<Node> source, TreePtr<Node> dest ) const;    
 public:
