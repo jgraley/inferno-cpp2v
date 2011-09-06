@@ -390,7 +390,7 @@ ParentTraverse_iterator::ParentTraverse_iterator( const ParentTraverse_iterator 
     recurse_filter = unique_filter; 
 }
 
-ParentTraverse_iterator::ParentTraverse_iterator &ParentTraverse_iterator::operator=( const ParentTraverse_iterator & other )
+ParentTraverse_iterator &ParentTraverse_iterator::operator=( const ParentTraverse_iterator & other )
 {
     Expand_iterator::operator=( other ),
     *unique_filter = *(other.unique_filter);
@@ -428,7 +428,7 @@ Traverse_iterator::Traverse_iterator( const Traverse_iterator & other ) :
     out_filter = unique_filter; 
 }
 
-Traverse_iterator::Traverse_iterator &Traverse_iterator::operator=( const Traverse_iterator &other )
+Traverse_iterator &Traverse_iterator::operator=( const Traverse_iterator &other )
 {
     Expand_iterator::operator=( other );
     *unique_filter = *(other.unique_filter);

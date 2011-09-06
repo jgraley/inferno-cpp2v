@@ -56,8 +56,9 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         
     sequence->push_back( shared_ptr<Transformation>( new UseTempForReturn ) );
     //...
-    //sequence->push_back( shared_ptr<Transformation>( new AddReturnAddress ) );
-    //...
+    sequence->push_back( shared_ptr<Transformation>( new AddReturnAddress ) );
+    sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) );
+    sequence->push_back( shared_ptr<Transformation>( new MergeFunctions ) );
 
     // Ineffectual gotos, unused and duplicate labels result from compound tidy-up after construct lowering, but if not 
     // removed before AddGotoBeforeLabel, they will generate spurious states. We also remove dead code which can be exposed by
@@ -87,6 +88,14 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     sequence->push_back( shared_ptr<Transformation>( new VarsToModule ) );
     sequence->push_back( shared_ptr<Transformation>( new DeclsToModule ) );
     sequence->push_back( shared_ptr<Transformation>( new ThreadToMethod ) );
+
+    for( int i=0; i<2; i++ )
+    {
+        sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) );
+        sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualLabels ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanUpDeadCode ) ); 
+    }
 }
 
 

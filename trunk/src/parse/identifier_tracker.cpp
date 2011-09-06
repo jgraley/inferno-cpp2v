@@ -83,6 +83,7 @@ void IdentifierTracker::PopScope(clang::Scope *S)
     if( !scope_stack.empty() && scope_stack.top() && (!S || scope_stack.top()->cs == S) ) // do not pop if we never pushed because didnt get an Add() for this scope
     {
         scope_stack.pop();
+        ASSERT( !scope_stack.empty() );
     }
     //TRACE("done pop %s S%p\n", ToString(scope_stack.top()).c_str(), S );
 }
@@ -273,6 +274,7 @@ shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, sha
     else
     {
         // No C++ scope, so use the current scope and recurse through parents
+        ASSERT( !scope_stack.empty() );
         start = scope_stack.top();
         ASSERT(start);
     }

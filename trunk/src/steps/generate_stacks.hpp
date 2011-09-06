@@ -27,6 +27,8 @@ public:
     AddReturnAddress();
 };
 
+// Store a return address (as a label variable) for each function call
+// in an automatic (for recursion), passing in and out via a temp.
 class UseTempForReturn : public SearchReplace
 {
 public:
@@ -47,6 +49,16 @@ class ExtractFields : public SearchReplace
 {
 public:
 	ExtractFields();
+};
+
+// Merge ordinary functions into the thread that calls them -
+// this is not inlining, because a function only need be merged
+// once for all the call points in the thread. Turn calls and
+// return into gotos.
+class MergeFunctions : public SearchReplace
+{
+public:
+	MergeFunctions();
 };
 
 }; // end namespace

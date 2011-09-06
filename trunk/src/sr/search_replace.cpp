@@ -42,13 +42,14 @@ private:
 
 typedef ContainerFromIterator< TraverseNoSlavePattern_iterator, TreePtr<Node> > TraverseNoSlavePattern;
 
-// Master constructor remembers search pattern, replace pattern and any supplied couplings as required
+
 CompareReplace::CompareReplace( TreePtr<Node> cp,
                                 TreePtr<Node> rp,
                                 bool im ) :
     is_master( im ),                                                 
     compare_pattern( NULL ),
-    replace_pattern( NULL )
+    replace_pattern( NULL ),
+    master_ptr( NULL )
 {
     if( cp )
         Configure( cp, rp );
@@ -68,20 +69,21 @@ void CompareReplace::Configure( TreePtr<Node> cp,
     // so they couple and then an overlay node can split them apart again.
     if( !rp )
         rp = cp;
-        
-    TRACE("Elaborating for instance at %p\n", this);
+
+    TRACE("Elaborating ")(string( *this ))(" at %p\n", this);
     // Fill in fields on the stuff nodes, but not in slaves
     TraverseNoSlavePattern tsp(cp);
     FOREACH( TreePtr<Node> n, tsp )
     {        
         if( TreePtr<StuffBase> sb = dynamic_pointer_cast<StuffBase>(n) )
         {
-            TRACE("Elaborating Stuff@%p, rr@%p\n", sb.get(), sb->recurse_restriction.get());
+            TRACE("Found stuff@%p, rr@%p\n", sb.get(), sb->recurse_restriction.get());
             sb->recurse_comparer.coupling_keys.SetMaster( &coupling_keys ); 
             sb->recurse_comparer.compare_pattern = sb->recurse_restriction; // TODO could move into a Stuff node constructor if there was one
         }
         if( TreePtr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
         {
+            TRACE("Found coupling slave in search pattern at %p\n", cs.get() );
             cs->SetCouplingsMaster( &coupling_keys ); 
         }
     }
@@ -93,7 +95,12 @@ void CompareReplace::Configure( TreePtr<Node> cp,
     {
         if( TreePtr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
         {
+            TRACE("Found coupling slave in replace pattern at %p\n", cs.get() );
             cs->SetCouplingsMaster( &coupling_keys ); 
+        }
+        if( shared_ptr<CompareReplace> cr = dynamic_pointer_cast<CompareReplace>(n) )
+        {
+            cr->master_ptr = this; 
         }
     }
 
@@ -163,10 +170,14 @@ bool CompareReplace::DecidedCompare( TreePtr<Node> x,
     {
         // Restrict so that everything in the input program under here must be "green grass"
         // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
-        Expand w( x );
-        FOREACH( TreePtr<Node> p, w )
-            if( dirty_grass.find( p ) != dirty_grass.end() )
+       // Expand w( x );
+       // FOREACH( TreePtr<Node> p, w )
+            if( GetOverallMaster()->dirty_grass.find( /*p*/x ) != GetOverallMaster()->dirty_grass.end() )
+            {
+                TRACE/*(*p)(" under ")*/(*x)(" is dirty grass so rejecting\n");
                 return false;
+            }
+        TRACE("subtree under ")(*x)(" is green grass\n");
         // Normal matching for the through path
         bool r = DecidedCompare( x, green_pattern->GetThrough(), can_key, conj );
         if( !r )
@@ -354,6 +365,7 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
       // Star<> trynig a big number of nodes. We must reject in this case or we'll create an invalid
       // subsequence. The only way I can see is to enumerate with integers.
 	        	    xit = lakey->governing_choice->it;
+
 	        	    ASSERT( lakey );
 	        	    ASSERT( lakey->governing_choice );
 	        	    ASSERT( lakey->governing_choice->it != lakey->governing_choice->end );
@@ -781,8 +793,8 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
     
     ASSERT( !dynamic_pointer_cast<SearchContainerKey>(current_key)  ); // we only get here when ordinary nodes are coupled
 
-    // Make a new node	    
-    dest = DuplicateNode( keynode, current_key );
+    // Make a new node, we will overlay from pattern, so resulting node will be dirty	    
+    dest = DuplicateNode( keynode, true );
 
     // Loop over the elements of source, keynode and dest, limited to elements
     // present in source, which is a non-strict subclass of keynode and dest.
@@ -875,13 +887,13 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
     // duplicates to the destination.
     for( int i=0; i<dest_memb.size(); i++ )
     {
-    	TRACE("Overlaying member %d\n", i );
         ASSERT( keynode_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
         
         if( present_in_source.IsExist(dest_memb[i]) )
             continue; // already did this one in the above loop
 
+    	TRACE("Overlaying member %d\n", i );
         if( ContainerInterface *keynode_con = dynamic_cast<ContainerInterface *>(keynode_memb[i]) )                
         {
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
@@ -941,7 +953,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
 
 
 TreePtr<Node> CompareReplace::DuplicateNode( TreePtr<Node> source,
-    		                                 shared_ptr<Key> current_key ) const
+    		                                 bool force_dirty ) const
 {
     INDENT;
     if( ReadArgs::assert_pedigree )
@@ -952,12 +964,9 @@ TreePtr<Node> CompareReplace::DuplicateNode( TreePtr<Node> source,
     TreePtr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
     ASSERT(dest);
 
-    // If not substituting a Stuff/AnyNode node, remember this node is dirty for GreenGrass restriction
-    // Also dirty the dest if the source was dirty when we are substituting Stuff
-    // TODO try removing StuffKey clause, so never acts during substitution
-    // TODO move this into callers so this fn doesn't need a current_key parameter
-    if( !current_key || !dynamic_pointer_cast<SearchContainerKey>(current_key) || dirty_grass.find( source ) != dirty_grass.end() )
-        dirty_grass.insert( dest );
+    if( force_dirty || // requested by caller
+        GetOverallMaster()->dirty_grass.find( source ) != GetOverallMaster()->dirty_grass.end() ) // source was dirty
+        GetOverallMaster()->dirty_grass.insert( dest );
 
     TRACE("Duplicated pedigree: ")(*dest)("\n");
     if( ReadArgs::assert_pedigree )
@@ -990,9 +999,15 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
         else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
         {
             ASSERT(key)(*source)(" not keyed\n");
-            TRACE("Overlay node through=")(*(ob->GetThrough()))(" overlay=")(*(ob->GetOverlay()))("\n");
             ASSERT( ob->GetOverlay() );          
+            TRACE("Overlay node through=")(*(ob->GetThrough()))(" overlay=")(*(ob->GetOverlay()))("\n");
             overlay = ob->GetOverlay(); 
+        }
+        else if( shared_ptr<GreenGrassBase> ggb = dynamic_pointer_cast<GreenGrassBase>( source ) )
+        {
+            ASSERT( ggb->GetThrough() );          
+            TRACE("GreenGrass node through=")(*(ggb->GetThrough()))("\n");
+            overlay = ggb->GetThrough(); 
         }
         
         if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
@@ -1077,8 +1092,8 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
     if( dest )
         return ApplySlave( source, dest ); // if this produced a result then we're done   
     
-    // Make a new node
-    dest = DuplicateNode( source );
+    // Make a new node, force dirty because from pattern
+    dest = DuplicateNode( source, true );
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of source, and itemises over that type. dest must
@@ -1139,7 +1154,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
             ASSERT( *source_ptr )("Member %d (", i)(*source_ptr)(") of ")(*source)(" was NULL when not overlaying\n");
             *dest_ptr = DuplicateSubtreePattern( *source_ptr );
             ASSERT( *dest_ptr );
-            ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            
+            ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() )(*dest_ptr);            
         }
         else
         {
@@ -1193,8 +1208,8 @@ TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitution( TreePtr<Node> keynod
 		}
 	}
 
-    // Make a new node	    
-    TreePtr<Node> dest = DuplicateNode( keynode, current_key );
+    // Make a new node, since we're substituting, preserve dirtyness	    
+    TreePtr<Node> dest = DuplicateNode( keynode, false );
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of keynode, and itemises over that type. dest must
@@ -1390,9 +1405,11 @@ bool CompareReplace::SingleCompareReplace( TreePtr<Node> *proot )
 int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
 {
     INDENT;
+    if( !master_ptr )
+        dirty_grass.clear(); 
+
     if( ReadArgs::assert_pedigree )
     {
-	    dirty_grass.clear(); // TODO huh?
         duplicated_pedigree.clear();
     }
     
@@ -1406,6 +1423,10 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
     	TRACE("%p SCR result %d\n", this, r);        
     	if( !r )
             break; // when the compare fails, we're done
+        TRACE("Dirty grass:");
+        FOREACH( TreePtr<Node> n, dirty_grass )
+            TRACE(" ")(*n);
+        TRACE("\n");     
        // Validate()( *pcontext, proot );
     }
     
@@ -1418,7 +1439,8 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
              "Try using -rn%d to suppress this error\n", i, i);
     }
          
-    dirty_grass.clear();     
+    if( !master_ptr )
+        dirty_grass.clear(); 
          
     TRACE("%p exiting\n", this);
     return i;

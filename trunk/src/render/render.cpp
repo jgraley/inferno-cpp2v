@@ -938,9 +938,11 @@ string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
             init_access = MakeTreePtr<Public>();// note that we left the access as public
         }
         s += "SC_CTOR( " + RenderIdentifier( m->identifier ) + " )";
-        int first = true;
-        // Bodge an init list that names any fields we have that are modules
+        int first = true;             
         FOREACH( TreePtr<Declaration> pd, sorted )
+        {
+            // Bodge an init list that names any fields we have that are modules
+            // and initialises any fields with initialisers
             if( TreePtr<Field> f = dynamic_pointer_cast<Field>(pd) )
                 if( TreePtr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>(f->type) )
 	                if( TreePtr<Record> r = GetRecordDeclaration(program, tid) )
@@ -953,7 +955,27 @@ string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
 	                        string ids = RenderIdentifier(f->identifier);	                        
 	                        s += "\n" + ids + "(\"" + ids + "\")";
 	                        first = false;
-	                    }	    
+	                    }	
+	        if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>(pd) )
+	        {
+	            TRACE("Got ")(*i)(" init is ")(*(i->initialiser))(" %d %d\n", 
+	                 (int)(bool)dynamic_pointer_cast<Callable>(i->type),
+	                 (int)(bool)dynamic_pointer_cast<Uninitialised>(i->initialiser) );	                 
+	        
+	            if( !dynamic_pointer_cast<Callable>(i->type) && !dynamic_pointer_cast<Uninitialised>(i->initialiser) )
+	            {	                
+                    if( first )
+                        s += " :";
+                    else
+                        s += ",";
+                    string ids = RenderIdentifier(i->identifier);	                        
+                    string inits = RenderExpression(i->initialiser);
+                    s += "\n" + ids + "(" + inits + ")";
+                    i->initialiser = MakeTreePtr<Uninitialised>(); // TODO naughty, changing the tree
+                    first = false;	               
+	            }
+	        }	        	       
+	    }    
         s += "\n{\n";
         FOREACH( TreePtr<Declaration> pd, sorted )
             if( TreePtr<Field> f = dynamic_pointer_cast<Field>(pd) )
