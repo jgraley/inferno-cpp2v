@@ -54,9 +54,9 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new CleanupNop ) ); 
     }        
         
-    sequence->push_back( shared_ptr<Transformation>( new UseTempForReturn ) );
+    sequence->push_back( shared_ptr<Transformation>( new UseTempForReturnValue ) );
     //...
-    sequence->push_back( shared_ptr<Transformation>( new AddReturnAddress ) );
+    sequence->push_back( shared_ptr<Transformation>( new AddLinkAddress ) );
     sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) );
     sequence->push_back( shared_ptr<Transformation>( new MergeFunctions ) );
 

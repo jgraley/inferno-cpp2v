@@ -59,17 +59,17 @@ struct TempReturnAddress : Temporary
 };
 
 
-AddReturnAddress::AddReturnAddress()
+AddLinkAddress::AddLinkAddress()
 {
     MakeTreePtr<Module> s_module, r_module;
     MakeTreePtr< Star<Declaration> > decls;    
     MakeTreePtr< Star<Base> > bases;    
     MakeTreePtr<Temporary> r_retaddr;
-    MakeTreePtr<BuildInstanceIdentifier> r_retaddr_id("%s_return_address");
+    MakeTreePtr<BuildInstanceIdentifier> r_retaddr_id("%s_link");
     MakeTreePtr<Automatic> lr_retaddr;
-    MakeTreePtr<BuildInstanceIdentifier> lr_retaddr_id("return_address");
+    MakeTreePtr<BuildInstanceIdentifier> lr_retaddr_id("link");
     MakeTreePtr<TempReturnAddress> lr_temp_retaddr;
-    MakeTreePtr<BuildInstanceIdentifier> lr_temp_retaddr_id("temp_return_address");
+    MakeTreePtr<BuildInstanceIdentifier> lr_temp_retaddr_id("temp_link");
     MakeTreePtr<Pointer> r_ptr, lr_ptr;
     MakeTreePtr< NotMatch<Declaration> > s_nm, ls_nm;
     MakeTreePtr< GreenGrass<Declaration> > gg;
@@ -82,7 +82,7 @@ AddReturnAddress::AddReturnAddress()
     MakeTreePtr<Call> m_call;
     MakeTreePtr<Compound> mr_comp, msx_comp;
     MakeTreePtr<Label> mr_label;
-    MakeTreePtr<BuildLabelIdentifier> mr_labelid("RETURN");
+    MakeTreePtr<BuildLabelIdentifier> mr_labelid("LINK");
     MakeTreePtr<Assign> mr_assign;
     MakeTreePtr< MatchAll<Statement> > m_all;
     MakeTreePtr< AnyNode<Statement> > m_any; // TODO rename AnyNode -> Blob
@@ -156,7 +156,7 @@ AddReturnAddress::AddReturnAddress()
 }
 
 
-UseTempForReturn::UseTempForReturn()
+UseTempForReturnValue::UseTempForReturnValue()
 {
     // search for return statement in a compound (TODO don't think we need the outer compound)
 	TreePtr<Return> s_return( new Return );
