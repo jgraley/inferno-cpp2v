@@ -56,6 +56,8 @@ private:
     string RenderOperandSequence( Sequence<CPPTree::Expression> spe, 
                                   string separator, 
                                   bool separate_last );
+    string RenderModuleCtor( TreePtr<SCTree::Module> m,
+                             TreePtr<CPPTree::AccessSpec> *access );    
     string RenderDeclarationCollection( TreePtr<CPPTree::Scope> sd,
 			                            string separator, 
 			                            bool separate_last,

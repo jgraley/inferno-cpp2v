@@ -860,8 +860,8 @@ string Render::RenderStatement( TreePtr<Statement> statement, string sep )
 	    return c->GetToken() + "();\n";
 	else if( TreePtr<NextTriggerDelta> c = dynamic_pointer_cast<NextTriggerDelta>(statement) ) 
 	    return c->GetToken() + "(SC_ZERO_TIME);\n";
-	else if( TreePtr<Exit> e = dynamic_pointer_cast<Exit>(statement) )
-		return e->GetToken() + "( " + RenderExpression(e->code) + " );\n";
+	else if( TreePtr<TerminationFunction> tf = dynamic_pointer_cast<TerminationFunction>(statement) )
+		return tf->GetToken() + "( " + RenderExpression(tf->code) + " );\n";
 	else if( TreePtr<NotifyImmediate> n = dynamic_pointer_cast<NotifyImmediate>(statement) )
 		return RenderExpression( n->event, true ) + "." + n->GetToken() + "();\n";
 	else if( TreePtr<NotifyDelta> n = dynamic_pointer_cast<NotifyDelta>(statement) )
@@ -913,6 +913,70 @@ string Render::RenderOperandSequence( Sequence<Expression> spe,
 }
 
 
+string Render::RenderModuleCtor( TreePtr<Module> m,
+                                 TreePtr<AccessSpec> *access )
+{
+    string s;
+    
+    // SystemC module, we must produce a constructor in SC style, do this as inline
+    if( !dynamic_pointer_cast<Public>(*access) )
+    {
+        s += "public:\n";
+        *access = MakeTreePtr<Public>();// note that we left the access as public
+    }
+    s += "SC_CTOR( " + RenderIdentifier( m->identifier ) + " )";
+    int first = true;             
+    FOREACH( TreePtr<Declaration> pd, m->members )
+    {
+        // Bodge an init list that names any fields we have that are modules
+        // and initialises any fields with initialisers
+        if( TreePtr<Field> f = dynamic_pointer_cast<Field>(pd) )
+            if( TreePtr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>(f->type) )
+                if( TreePtr<Record> r = GetRecordDeclaration(program, tid) )
+                    if( dynamic_pointer_cast<Module>(r) )
+                    {
+                        if( first )
+                            s += " :";
+                        else
+                            s += ",";
+                        string ids = RenderIdentifier(f->identifier);                           
+                        s += "\n" + ids + "(\"" + ids + "\")";
+                        first = false;
+                    }   
+                    
+        // TODO figure out what this does - it seems to look for function instances and then try to 
+        // init them as if they wew initable and their body was an expression.
+        if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>(pd) )
+        {
+            TRACE("Got ")(*i)(" init is ")(*(i->initialiser))(" %d %d\n", 
+                    (int)(bool)dynamic_pointer_cast<Callable>(i->type),
+                    (int)(bool)dynamic_pointer_cast<Uninitialised>(i->initialiser) );                   
+        
+            if( !dynamic_pointer_cast<Callable>(i->type) && !dynamic_pointer_cast<Uninitialised>(i->initialiser) )
+            {                   
+                if( first )
+                    s += " :";
+                else
+                    s += ",";
+                string ids = RenderIdentifier(i->identifier);                           
+                string inits = RenderExpression(i->initialiser);
+                s += "\n" + ids + "(" + inits + ")";
+                i->initialiser = MakeTreePtr<Uninitialised>(); // TODO naughty, changing the tree
+                first = false;                 
+            }
+        }                      
+    }    
+    s += "\n{\n";
+    FOREACH( TreePtr<Declaration> pd, m->members )
+        if( TreePtr<Field> f = dynamic_pointer_cast<Field>(pd) )
+            if( TreePtr<Process> r = dynamic_pointer_cast<Process>(f->type) )
+                s += r->GetToken() + "(" + RenderIdentifier( f->identifier ) + ");\n";
+    s += "}\n";
+    
+    return s;
+}
+
+
 string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
 									string separator,
 									bool separate_last,
@@ -928,70 +992,21 @@ string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
 	Sequence<Declaration> sorted = SortDecls( sd->members, true );
 	backing_ordering[sd] = sorted;
 
-	string s;
-	if( TreePtr<Module> m = dynamic_pointer_cast<Module>(sd) )
-    {
-        // SystemC module, we must produce a constructor in SC style, do this as inline
-        if( !dynamic_pointer_cast<Public>(init_access) )
-        {
-            s += "public:\n";
-            init_access = MakeTreePtr<Public>();// note that we left the access as public
-        }
-        s += "SC_CTOR( " + RenderIdentifier( m->identifier ) + " )";
-        int first = true;             
-        FOREACH( TreePtr<Declaration> pd, sorted )
-        {
-            // Bodge an init list that names any fields we have that are modules
-            // and initialises any fields with initialisers
-            if( TreePtr<Field> f = dynamic_pointer_cast<Field>(pd) )
-                if( TreePtr<TypeIdentifier> tid = dynamic_pointer_cast<TypeIdentifier>(f->type) )
-	                if( TreePtr<Record> r = GetRecordDeclaration(program, tid) )
-	                    if( dynamic_pointer_cast<Module>(r) )
-	                    {
-	                        if( first )
-	                            s += " :";
-	                        else
-	                            s += ",";
-	                        string ids = RenderIdentifier(f->identifier);	                        
-	                        s += "\n" + ids + "(\"" + ids + "\")";
-	                        first = false;
-	                    }	
-	        if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>(pd) )
-	        {
-	            TRACE("Got ")(*i)(" init is ")(*(i->initialiser))(" %d %d\n", 
-	                 (int)(bool)dynamic_pointer_cast<Callable>(i->type),
-	                 (int)(bool)dynamic_pointer_cast<Uninitialised>(i->initialiser) );	                 
-	        
-	            if( !dynamic_pointer_cast<Callable>(i->type) && !dynamic_pointer_cast<Uninitialised>(i->initialiser) )
-	            {	                
-                    if( first )
-                        s += " :";
-                    else
-                        s += ",";
-                    string ids = RenderIdentifier(i->identifier);	                        
-                    string inits = RenderExpression(i->initialiser);
-                    s += "\n" + ids + "(" + inits + ")";
-                    i->initialiser = MakeTreePtr<Uninitialised>(); // TODO naughty, changing the tree
-                    first = false;	               
-	            }
-	        }	        	       
-	    }    
-        s += "\n{\n";
-        FOREACH( TreePtr<Declaration> pd, sorted )
-            if( TreePtr<Field> f = dynamic_pointer_cast<Field>(pd) )
-                if( TreePtr<Process> r = dynamic_pointer_cast<Process>(f->type) )
-                    s += r->GetToken() + "(" + RenderIdentifier( f->identifier ) + ");\n";
-        s += "}\n";
-
-    }
-
 	// Emit an incomplete for each record
+    string s;
 	FOREACH( TreePtr<Declaration> pd, sorted ) //for( int i=0; i<sorted.size(); i++ )
 		if( TreePtr<Record> r = dynamic_pointer_cast<Record>(pd) ) // is a record
 			if( !dynamic_pointer_cast<Enum>(r) ) // but not an enum
 				s += RenderDeclaration( r, separator, init_access ? &init_access : NULL, showtype, true );
 
-	s += RenderSequence( sorted, separator, separate_last, init_access, showtype );
+    // For SystemC modules, we generate a constructor based on the other decls in
+    // the module. Nothing goes in the Inferno tree for a module constructor, since
+    // it is an elaboration mechanism, not funcitonal.
+    if( TreePtr<Module> m = dynamic_pointer_cast<Module>(sd) )
+        s += RenderModuleCtor( m, &init_access );
+
+    // Emit the actual declarations, sorted for dependencies
+    s += RenderSequence( sorted, separator, separate_last, init_access, showtype );
 	TRACE();
 	return s;
 }

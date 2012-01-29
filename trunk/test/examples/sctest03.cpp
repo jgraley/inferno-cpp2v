@@ -34,7 +34,7 @@ public:
         gvar++;
         tot+=gvar;
         if( gvar==10 )
-            exit(tot);
+            cease(tot);
         next_trigger( SC_ZERO_TIME );                         
     }
     int gvar;

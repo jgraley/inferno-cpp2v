@@ -147,30 +147,31 @@ public:
 };
 
 
-/// spot syscall exit() function by its name and replace with inferno node 
+/// spot syscall exit() or equivalent function by its name and replace with inferno node 
 /** We look for the decl and remove it since the inferno
  Node does not require declaration. Then replace all calls to 
  the function with the explicit statement node. Bring arguments
  across by name match as per Inferno's MapOperator style. */
-class DetectExit : public SearchReplace
+template<class SCFUNC>
+class DetectTerminationFunction : public SearchReplace
 {
 public:
-    DetectExit()
+    DetectTerminationFunction()
     {
-        MakeTreePtr< Exit > r_exit;
+        MakeTreePtr< SCFUNC > r_tf;
         MakeTreePtr< Expression > event;
         MakeTreePtr< Call > s_call;
         MakeTreePtr< MapOperand > s_arg;            
-        MakeTreePtr< InstanceIdentifierByName > s_token( r_exit->GetToken() ); 
+        MakeTreePtr< InstanceIdentifierByName > s_token( r_tf->GetToken() ); 
         MakeTreePtr< InstanceIdentifierByName > s_param_id( "p1" ); 
                 
         s_call->callee = s_token;       
         s_call->operands = (s_arg);
         s_arg->identifier = s_param_id;
         s_arg->value = event;
-        r_exit->code = event;       
+        r_tf->code = event;       
           
-        Configure( s_call, r_exit );
+        Configure( s_call, r_tf );
     }
 };
 
@@ -395,7 +396,8 @@ DetectAllSCTypes::DetectAllSCTypes()
     push_back( shared_ptr<Transformation>( new DetectSCDynamic<NextTriggerDynamic> ) );        
     push_back( shared_ptr<Transformation>( new DetectSCStatic<NextTriggerStatic> ) );        
     push_back( shared_ptr<Transformation>( new DetectSCDelta<NextTriggerDelta> ) );        
-    push_back( shared_ptr<Transformation>( new DetectExit ) );    
+    push_back( shared_ptr<Transformation>( new DetectTerminationFunction<Exit> ) );    
+    push_back( shared_ptr<Transformation>( new DetectTerminationFunction<Cease> ) );    
     push_back( shared_ptr<Transformation>( new DetectSCProcess( MakeTreePtr<Thread>() ) ) );    
     push_back( shared_ptr<Transformation>( new DetectSCProcess( MakeTreePtr<ClockedThread>() ) ) );    
     push_back( shared_ptr<Transformation>( new DetectSCProcess( MakeTreePtr<Method>() ) ) );    

@@ -21,7 +21,7 @@ public:
             wait(SC_ZERO_TIME);      
             gvar *= 2;
         }
-        exit( gvar );
+        cease( gvar );
     }
 };
 

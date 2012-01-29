@@ -64,7 +64,7 @@ AddReturnAddress::AddReturnAddress()
     MakeTreePtr<Module> s_module, r_module;
     MakeTreePtr< Star<Declaration> > decls;    
     MakeTreePtr< Star<Base> > bases;    
-    MakeTreePtr<Field> r_retaddr;
+    MakeTreePtr<Temporary> r_retaddr;
     MakeTreePtr<BuildInstanceIdentifier> r_retaddr_id("%s_return_address");
     MakeTreePtr<Automatic> lr_retaddr;
     MakeTreePtr<BuildInstanceIdentifier> lr_retaddr_id("return_address");
@@ -148,9 +148,9 @@ AddReturnAddress::AddReturnAddress()
     r_retaddr->type = r_ptr;
     r_ptr->destination = MakeTreePtr<Void>();
     r_retaddr->initialiser = MakeTreePtr<Uninitialised>();
-    r_retaddr->virt = MakeTreePtr<NonVirtual>();
-    r_retaddr->access = MakeTreePtr<Private>();
-    r_retaddr->constancy = MakeTreePtr<NonConst>();
+    //r_retaddr->virt = MakeTreePtr<NonVirtual>();
+    //r_retaddr->access = MakeTreePtr<Private>();
+    //r_retaddr->constancy = MakeTreePtr<NonConst>();
     r_retaddr_id->sources = (l_inst_id);
     Configure( s_module, slavem );  
 }
@@ -167,7 +167,8 @@ UseTempForReturn::UseTempForReturn()
 	retval->pattern = type;
     
     // Restrict the search to returns that have an automatic variable under them
-    TreePtr< Stuff<Expression> > cs_stuff( new Stuff<Expression> );
+    TreePtr< Stuff<Expression> > cs_stuff( new Stuff<Expression> ); // TODO the exclusion Stuff<GetDec<Automatic>> is too strong;
+                                                                    // use Not<GetDec<Temp>>
 	s_and->patterns = ( retval, cs_stuff );
     MakeTreePtr< TransformOf<InstanceIdentifier> > cs_id( &GetDeclaration::instance );
     cs_stuff->terminus = cs_id;
