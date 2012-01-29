@@ -27,7 +27,7 @@ public:
             gvar *= 2;
             wait(SC_ZERO_TIME);      // this yield protects the 0-iteration case of the for-loop, so no inferred yields 
         }
-        exit( gvar );
+        cease( gvar );
     }
 };
 

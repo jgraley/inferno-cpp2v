@@ -32,6 +32,7 @@ void SC_METHOD( void func );
 /// Not really SystemC, but we detect exit and represent natively as Exit so as to 
 /// get a way of extracting results from programs.
 void exit( void p1 );
+void cease( void p1 );
 
 // Allow SC_CTOR to parse as a constructor
 #define SC_CTOR(X) X( const char *name ) 
@@ -46,7 +47,11 @@ void SC_ZERO_TIME;
 #include <systemc.h>
 
 #define SC_PORT(X) sc_port<X>
+extern sc_trace_file *GetSCTraceFP();
 
 #endif // inferno
+
+void cease( unsigned char exit_code );
+
 #endif // guard
 

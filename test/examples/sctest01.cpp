@@ -66,7 +66,7 @@ void Multiplier::T()
     gvar *= 5;
     top_level.add_inst.proceed.notify(SC_ZERO_TIME);
     wait( proceed );
-    exit(gvar);
+    cease(gvar);
 }
 
 

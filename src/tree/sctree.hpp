@@ -160,16 +160,31 @@ struct DeltaCount : CPPTree::Operator,
     virtual string GetToken() { return "sc_delta_count"; }    
 };
 
-/// The Exit system call
-/** we use this to get a result code out of the program because 
+/// Termination functions
+/** These are used to stop the program and produce an exit code because 
     SystemC does not allow control of the return value from its main 
-    function. Not strictly SystemC. */
-struct Exit : CPPTree::Statement,
-              SCNamedFunction
+    function.*/
+struct TerminationFunction : CPPTree::Statement,
+                             SCNamedFunction
+{
+    NODE_FUNCTIONS
+    TreePtr<CPPTree::Expression> code; ///< exit code for program, 0 to 255 
+};
+
+/// The exit() system call; cease() below is preferred.
+struct Exit : TerminationFunction
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetToken() { return "exit"; }
-    TreePtr<CPPTree::Expression> code; ///< exit code for program, 0 to 255 
+};
+
+/// Cease function 
+/** an alternative to exit(), supplied by the inferno runtime glue for SC
+    to complete logging activities etc before calling exit(). */
+struct Cease : TerminationFunction
+{
+    NODE_FUNCTIONS_FINAL
+    virtual string GetToken() { return "cease"; }
 };
 
 };

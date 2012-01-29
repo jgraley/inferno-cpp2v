@@ -26,7 +26,7 @@ public:
             }
             gvar *= 2;
         }
-        exit( gvar );
+        cease( gvar );
     }
 };
 

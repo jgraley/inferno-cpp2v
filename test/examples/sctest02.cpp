@@ -77,7 +77,7 @@ void Multiplier::T()
     while(!proceed)
         wait( SC_ZERO_TIME );
     proceed = false; // reset for next time (should be atomic with the test)
-    exit(gvar);
+    cease(gvar);
 }
 
 
