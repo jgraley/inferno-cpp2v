@@ -20,19 +20,19 @@ public:
 	ExplicitiseReturn();
 };
 
-/** Add a parameter to non-process functions giving the return state */
-class AddReturnAddress : public SearchReplace
+/** Add a parameter to non-process functions giving the link state */
+class AddLinkAddress : public SearchReplace
 {
 public:
-    AddReturnAddress();
+    AddLinkAddress();
 };
 
 // Store a return address (as a label variable) for each function call
 // in an automatic (for recursion), passing in and out via a temp.
-class UseTempForReturn : public SearchReplace
+class UseTempForReturnValue : public SearchReplace
 {
 public:
-	UseTempForReturn();
+	UseTempForReturnValue();
 };
 
 // Replace automatic variables with stacks based on arrays and 
