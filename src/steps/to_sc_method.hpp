@@ -5,10 +5,16 @@
 
 namespace Steps {
 
-class VarsToModule : public SearchReplace
+class AutosToModule : public SearchReplace
 {
 public:
-    VarsToModule();
+    AutosToModule();
+};
+
+class TempsAndStaticsToModule : public SearchReplace
+{
+public:
+    TempsAndStaticsToModule();
 };
 
 class DeclsToModule : public SearchReplace

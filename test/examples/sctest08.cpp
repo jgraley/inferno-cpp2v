@@ -46,7 +46,12 @@ public:
             wait(SC_ZERO_TIME);      
             gvar=gvar+1;
         }    
+        otherhelper();
         return;
+    }
+    void otherhelper()
+    {
+        gvar = gvar - 1;
     }
 };
 
