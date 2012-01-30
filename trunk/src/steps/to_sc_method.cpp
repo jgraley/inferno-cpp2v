@@ -10,7 +10,7 @@ using namespace CPPTree;
 using namespace SCTree;
 using namespace Steps;
  
-VarsToModule::VarsToModule()
+AutosToModule::AutosToModule()
 {
     MakeTreePtr<Module> s_rec, r_rec;
     MakeTreePtr< Star<Declaration> > decls, vdecls;
@@ -50,6 +50,45 @@ VarsToModule::VarsToModule()
     r_var->virt = MakeTreePtr<NonVirtual>();
     r_var->access = MakeTreePtr<Private>();
     r_var->constancy = MakeTreePtr<NonConst>();
+    
+    Configure( s_rec, r_rec );
+}
+
+
+TempsAndStaticsToModule::TempsAndStaticsToModule()
+{
+    MakeTreePtr<Module> s_rec, r_rec;
+    MakeTreePtr< Star<Declaration> > decls, vdecls;
+    MakeTreePtr< Star<Statement> > vstmts;
+    MakeTreePtr< MatchAny<Instance> > var;
+    MakeTreePtr<Temporary> tempvar;
+    MakeTreePtr<Static> staticvar;
+    MakeTreePtr<Field> fn;
+    MakeTreePtr<Thread> ft;
+    MakeTreePtr< Stuff<Initialiser> > stuff;
+    MakeTreePtr<Compound> s_comp, r_comp;
+    MakeTreePtr< Overlay<Compound> > over;
+    MakeTreePtr< Star<Base> > bases;
+    MakeTreePtr<Type> type;
+    MakeTreePtr<InstanceIdentifier> var_id;
+    MakeTreePtr<Initialiser> init;
+    
+    s_rec->members = (decls, fn);
+    s_rec->bases = bases;
+    fn->type = ft;
+    fn->initialiser = stuff;
+    // TODO recurse restriction for locally declared classes
+    stuff->terminus = over;
+    over->through = s_comp;
+    s_comp->members = (vdecls, var);
+    s_comp->statements = (vstmts);
+    var->patterns = (tempvar, staticvar);
+     
+    r_rec->members = (decls, fn, var);
+    r_rec->bases = bases;
+    over->overlay = r_comp;
+    r_comp->members = (vdecls);
+    r_comp->statements = (vstmts);
     
     Configure( s_rec, r_rec );
 }

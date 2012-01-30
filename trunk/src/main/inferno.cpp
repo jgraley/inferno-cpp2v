@@ -65,6 +65,7 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     // removal of unused labels - we must repeat because dead code removal can generate unused labels.
     for( int i=0; i<2; i++ )
     {
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
         sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) );
         sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualLabels ) ); 
@@ -85,7 +86,8 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     sequence->push_back( shared_ptr<Transformation>( new AddInferredYield ) ); // now yielding in every iteration of superloop
     sequence->push_back( shared_ptr<Transformation>( new LoopRotation ) );
 
-    sequence->push_back( shared_ptr<Transformation>( new VarsToModule ) );
+    sequence->push_back( shared_ptr<Transformation>( new AutosToModule ) );
+    sequence->push_back( shared_ptr<Transformation>( new TempsAndStaticsToModule ) );
     sequence->push_back( shared_ptr<Transformation>( new DeclsToModule ) );
     sequence->push_back( shared_ptr<Transformation>( new ThreadToMethod ) );
 
