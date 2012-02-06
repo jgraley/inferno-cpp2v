@@ -1,6 +1,10 @@
 
         Documentation resources
 
+docs/web/
+
+The html that goes on the sourceforge website
+
 docs/steps/
 
 This directory contains detailed designs for the actual steps that the convertor

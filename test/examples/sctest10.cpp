@@ -1,5 +1,5 @@
 
-// thread with subordinate function, which recurses
+// subordinate funciton with multiple parameters
 
 #include <isystemc.h>
 
@@ -14,17 +14,12 @@ public:
     void T()
     {
         x = 0;
-        recurser(1);
+        f(4, 6, 8);
         cease(x);
     }
-    void recurser( int i )
+    void f( int i, short j, char k )
     {
-        x++; // x is a total, so just increment
-        if( i < 5 )
-        {
-            recurser(i+1);
-            recurser(i+1);
-        }
+        x = i+j*3+k*5;
     }
 };
 

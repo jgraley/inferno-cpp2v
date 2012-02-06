@@ -9,9 +9,16 @@
 bool Tracer::continuation = false;
 bool Tracer::enable = false; ///< call Tracer::Enable(true) to begin tracing
 string Tracer::Descend::pre;
+string Tracer::Descend::last_traced_pre, Tracer::Descend::leftmost_pre;
 
 void Tracer::Descend::Indent()
 {
+    // Detect cases where the indent level dropped and then went up again, without
+    // any actual traces at the lower indent level. Put a "<" in at the level it
+    // dropped to.
+    if( leftmost_pre.size() < last_traced_pre.size() && leftmost_pre.size() < pre.size() )
+        fprintf(stderr, "%s<\n", leftmost_pre.c_str());
+    last_traced_pre = leftmost_pre = pre;
     fprintf(stderr, "%s", pre.c_str());
 }
 

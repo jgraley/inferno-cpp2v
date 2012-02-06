@@ -24,7 +24,7 @@ public:
         {
             gvar = gvar + i;
             //gvar = helper(3, gvar);
-            helper();
+            helper(3);
             gvar = gvar * 2;
             wait(SC_ZERO_TIME);      // this yield protects the 0-iteration case of the for-loop, so no inferred yields 
         }      
@@ -39,9 +39,9 @@ public:
         }    
         return var;
     }*/
-    void helper()
+    void helper( int n )
     {
-        for( j=0; j<3; j=j+1 )
+        for( j=0; j<n; j=j+1 )
         {                        
             wait(SC_ZERO_TIME);      
             gvar=gvar+1;

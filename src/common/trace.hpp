@@ -44,11 +44,22 @@ public:
     class Descend
     {
     public:
-    	inline Descend( string s=" " ) : os(pre.size()) { pre += s; Tracer::EndContinuation(); } 
-    	inline ~Descend() { pre = pre.substr(0, os); }
+    	inline Descend( string s=" " ) : 
+    	    os(pre.size()) 
+    	{ 
+            pre += s; 
+            Tracer::EndContinuation(); 
+        } 
+    	inline ~Descend() 
+    	{ 
+            pre = pre.substr(0, os); 
+            if( pre.size() < leftmost_pre.size() )
+                leftmost_pre = pre;
+        }
     	static void Indent();
     private:
         static string pre;
+        static string last_traced_pre, leftmost_pre;
         const int os;
     };
 
