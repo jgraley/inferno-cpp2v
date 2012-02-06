@@ -41,8 +41,6 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     sequence->push_back( shared_ptr<Transformation>( new IfToIfGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new DoToIfGoto ) ); 
 
-    sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new MoveInstanceDeclarations ) ); 
     sequence->push_back( shared_ptr<Transformation>( new ExplicitiseReturn ) );
     
     sequence->push_back( shared_ptr<Transformation>( new CompactGotos ) ); // maybe put these after the label cleanups
@@ -55,8 +53,10 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     }        
         
     sequence->push_back( shared_ptr<Transformation>( new UseTempForReturnValue ) );
-    //...
     sequence->push_back( shared_ptr<Transformation>( new AddLinkAddress ) );
+    sequence->push_back( shared_ptr<Transformation>( new ParamsViaTemps ) );
+    sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new MoveInstanceDeclarations ) ); 
     sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) );
     sequence->push_back( shared_ptr<Transformation>( new MergeFunctions ) );
 

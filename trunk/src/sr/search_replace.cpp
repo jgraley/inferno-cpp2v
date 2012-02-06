@@ -1154,7 +1154,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
             ASSERT( *source_ptr )("Member %d (", i)(*source_ptr)(") of ")(*source)(" was NULL when not overlaying\n");
             *dest_ptr = DuplicateSubtreePattern( *source_ptr );
             ASSERT( *dest_ptr );
-            ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() )(*dest_ptr);            
+            ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() )("Member %d (", i)(**source_ptr)(") of ")(*source)(" was not final\n");            
         }
         else
         {

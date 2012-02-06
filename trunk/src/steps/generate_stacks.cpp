@@ -53,6 +53,45 @@ ExplicitiseReturn::ExplicitiseReturn()
 }    
 
 
+UseTempForReturnValue::UseTempForReturnValue()
+{
+    // search for return statement in a compound (TODO don't think we need the outer compound)
+	TreePtr<Return> s_return( new Return );
+	TreePtr< MatchAll<Expression> > s_and( new MatchAll<Expression> );
+	s_return->return_value = s_and;
+    MakeTreePtr< TransformOf<Expression> > retval( &TypeOf::instance );
+	MakeTreePtr<Type> type;
+	retval->pattern = type;
+    
+    // Restrict the search to returns that have an automatic variable under them
+    TreePtr< Stuff<Expression> > cs_stuff( new Stuff<Expression> ); // TODO the exclusion Stuff<GetDec<Automatic>> is too strong;
+                                                                    // use Not<GetDec<Temp>>
+	s_and->patterns = ( retval, cs_stuff );
+    MakeTreePtr< TransformOf<InstanceIdentifier> > cs_id( &GetDeclaration::instance );
+    cs_stuff->terminus = cs_id;
+    TreePtr<Instance> cs_instance( new Automatic );
+    cs_id->pattern = cs_instance;
+    
+    // replace with a new sub-compound, that declares a Temp, intialises it to the return value and returns it
+	TreePtr<Compound> r_sub_comp( new Compound );
+	TreePtr< Temporary > r_newvar( new Temporary );
+	r_newvar->type = type;
+	MakeTreePtr<BuildInstanceIdentifier> id("temp_retval");
+	r_newvar->identifier = id;
+	r_newvar->initialiser = MakeTreePtr<Uninitialised>();
+	r_sub_comp->members = ( r_newvar );
+	TreePtr<Assign> r_assign( new Assign );
+	r_assign->operands.push_back( id );
+	r_assign->operands.push_back( retval );
+	r_sub_comp->statements.push_back( r_assign );
+	TreePtr<Return> r_return( new Return );
+	r_sub_comp->statements.push_back( r_return );
+	r_return->return_value = id;
+       
+	Configure( s_return, r_sub_comp );
+}
+
+
 struct TempReturnAddress : Temporary
 {
     NODE_FUNCTIONS_FINAL
@@ -109,6 +148,7 @@ AddLinkAddress::AddLinkAddress()
     MakeTreePtr< SlaveSearchReplace<Compound> > slavell( lr_comp, ll_gg, llr_comp );   
    
     m_gg->through = m_call;
+    m_call->operands = (MakeTreePtr< Star<MapOperand> >());
     m_call->callee = l_inst_id;
     //lls_call->operands = ();
     mr_comp->statements = (mr_assign, m_call, mr_label);  
@@ -120,6 +160,7 @@ AddLinkAddress::AddLinkAddress()
     l_inst->type = l_func;
     //l_func->members = ();
     l_func->return_type = MakeTreePtr<Void>();
+    l_func->members = MakeTreePtr< Star<Instance> >(); // Params OK here, just not in MergeFunctions
     l_inst->initialiser = l_over;
     l_inst->identifier = l_inst_id;
     l_over->through = ls_comp;
@@ -156,42 +197,75 @@ AddLinkAddress::AddLinkAddress()
 }
 
 
-UseTempForReturnValue::UseTempForReturnValue()
+ParamsViaTemps::ParamsViaTemps()
 {
-    // search for return statement in a compound (TODO don't think we need the outer compound)
-	TreePtr<Return> s_return( new Return );
-	TreePtr< MatchAll<Expression> > s_and( new MatchAll<Expression> );
-	s_return->return_value = s_and;
-    MakeTreePtr< TransformOf<Expression> > retval( &TypeOf::instance );
-	MakeTreePtr<Type> type;
-	retval->pattern = type;
+    MakeTreePtr<Module> s_module, r_module;
+    MakeTreePtr<Field> s_func, r_func;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Base> > bases;
+    MakeTreePtr<Function> s_cp, r_cp;
+    MakeTreePtr<Type> return_type;
+    MakeTreePtr<Compound> s_body, r_body, mr_comp;
+    MakeTreePtr< Star<Statement> > statements;
+    MakeTreePtr< Star<Declaration> > locals;
+    MakeTreePtr<InstanceIdentifier> func_id, param_id;
+    MakeTreePtr<TypeIdentifier> module_id;
+    MakeTreePtr<Instance> s_param;
+    MakeTreePtr< Star<Instance> > params;
+    MakeTreePtr<Call> ms_call, mr_call;
+    MakeTreePtr<MapOperand> ms_operand;
+    MakeTreePtr< Star<MapOperand> > m_operands;
+    MakeTreePtr<Automatic> r_param;
+    MakeTreePtr<Type> param_type;
+    MakeTreePtr<Temporary> r_temp;
+    MakeTreePtr<Assign> mr_assign;
+    MakeTreePtr<Expression> m_expr;
+    MakeTreePtr<BuildInstanceIdentifier> r_temp_id("%s_%s");
     
-    // Restrict the search to returns that have an automatic variable under them
-    TreePtr< Stuff<Expression> > cs_stuff( new Stuff<Expression> ); // TODO the exclusion Stuff<GetDec<Automatic>> is too strong;
-                                                                    // use Not<GetDec<Temp>>
-	s_and->patterns = ( retval, cs_stuff );
-    MakeTreePtr< TransformOf<InstanceIdentifier> > cs_id( &GetDeclaration::instance );
-    cs_stuff->terminus = cs_id;
-    TreePtr<Instance> cs_instance( new Automatic );
-    cs_id->pattern = cs_instance;
+    ms_call->callee = func_id;
+    ms_call->operands = (m_operands, ms_operand);
+    ms_operand->identifier = param_id;
+    ms_operand->value = m_expr;
+    mr_comp->statements = (mr_assign, mr_call);
+    mr_assign->operands = (r_temp_id, m_expr);
+    mr_call->callee = func_id;
+    mr_call->operands = (m_operands);
+    MakeTreePtr< SlaveSearchReplace<Module> > slavem( r_module, ms_call, mr_comp );
     
-    // replace with a new sub-compound, that declares a Temp, intialises it to the return value and returns it
-	TreePtr<Compound> r_sub_comp( new Compound );
-	TreePtr< Temporary > r_newvar( new Temporary );
-	r_newvar->type = type;
-	MakeTreePtr<BuildInstanceIdentifier> id("temp_retval");
-	r_newvar->identifier = id;
-	r_newvar->initialiser = MakeTreePtr<Uninitialised>();
-	r_sub_comp->members = ( r_newvar );
-	TreePtr<Assign> r_assign( new Assign );
-	r_assign->operands.push_back( id );
-	r_assign->operands.push_back( retval );
-	r_sub_comp->statements.push_back( r_assign );
-	TreePtr<Return> r_return( new Return );
-	r_sub_comp->statements.push_back( r_return );
-	r_return->return_value = id;
-       
-	Configure( s_return, r_sub_comp );
+    s_module->members = (decls, s_func);
+    s_module->bases = (bases);
+    s_module->identifier = module_id;
+    s_func->type = s_cp;
+    s_func->initialiser = s_body;
+    s_func->identifier = func_id;
+    s_func->virt = r_func->virt = MakeTreePtr<NonVirtual>(); // virtual funcitons are more complicated
+    s_func->access = r_func->access = MakeTreePtr<AccessSpec>(); 
+    s_func->constancy = r_func->constancy = MakeTreePtr<Constancy>(); 
+    s_body->members = (locals);
+    s_body->statements = (statements);
+    s_cp->members = (params, s_param);  
+    s_cp->return_type = return_type;
+    s_param->identifier = param_id;
+    s_param->type = param_type;
+    r_module->members = (decls, r_func, r_temp);
+    r_module->bases = (bases);
+    r_module->identifier = module_id;
+    r_func->type = r_cp;
+    r_func->initialiser = r_body;
+    r_func->identifier = func_id;
+    r_body->members = (locals);
+    r_body->statements = (r_param, statements);
+    r_param->type = param_type;
+    r_param->initialiser = r_temp_id;
+    r_param->identifier = param_id;
+    r_cp->members = (params);
+    r_cp->return_type = return_type;
+    r_temp->type = param_type;
+    r_temp->initialiser = MakeTreePtr<Uninitialised>();
+    r_temp->identifier = r_temp_id;
+    r_temp_id->sources = (func_id, param_id);
+    
+    Configure( s_module, slavem );  
 }
 
 

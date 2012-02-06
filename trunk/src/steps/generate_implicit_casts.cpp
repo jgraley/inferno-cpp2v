@@ -14,7 +14,7 @@
 using namespace CPPTree;
 using namespace Steps;
 
-GenerateImplicitCasts::GenerateImplicitCasts()
+GenerateImplicitCasts::GenerateImplicitCasts() 
 {
     // Find a function call and use TypeOf to get the fucntion's declaration.
     // Select a single argument. Inforno does arguments via a map (as opposed

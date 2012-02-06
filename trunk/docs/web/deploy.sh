@@ -1,11 +1,6 @@
 #!/bin/sh
 # Script to deploy the HTML in htdocs to sourceforge's web server. 
-# Lets you check the site first, and checks in if not done already 
-# to ensure version control is up-to-date.
-
-echo Showing website in web browser...
-echo Proceed if it all looks OK, or ctrl-C me if not.
-firefox htdocs/index.html
+# Checks in if not done already to ensure version control is up-to-date.
 
 echo Uploading web page...
 sftp $USER@web.sourceforge.net <<EOF
