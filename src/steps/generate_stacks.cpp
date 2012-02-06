@@ -117,17 +117,17 @@ AddLinkAddress::AddLinkAddress()
     MakeTreePtr<Compound> ls_comp, lr_comp;
     MakeTreePtr< Star<Declaration> > l_decls;
     MakeTreePtr< Star<Statement> > l_stmts, msx_stmts;
-    MakeTreePtr<Assign> lr_assign, msx_assign;
-    MakeTreePtr<Call> m_call;
+    MakeTreePtr<Assign> msx_assign;
+    MakeTreePtr<Call> ms_call, mr_call;
     MakeTreePtr<Compound> mr_comp, msx_comp;
     MakeTreePtr<Label> mr_label;
     MakeTreePtr<BuildLabelIdentifier> mr_labelid("LINK");
-    MakeTreePtr<Assign> mr_assign;
     MakeTreePtr< MatchAll<Statement> > m_all;
     MakeTreePtr< AnyNode<Statement> > m_any; // TODO rename AnyNode -> Blob
     MakeTreePtr< NotMatch<Statement> > ms_not;
     MakeTreePtr< Overlay<Statement> > m_over;
-    MakeTreePtr<Function> l_func;
+    MakeTreePtr< Overlay<Function> > l_func_over;
+    MakeTreePtr<Function> ls_func, lr_func;
     MakeTreePtr<TypeIdentifier> ident;
     MakeTreePtr<InstanceIdentifier> l_inst_id;
     MakeTreePtr<Return> ll_return;
@@ -138,6 +138,7 @@ AddLinkAddress::AddLinkAddress()
     MakeTreePtr< NotMatch<Statement> > lls_not;
     MakeTreePtr< Overlay<Statement> > ll_over;
     MakeTreePtr< GreenGrass<Statement> > m_gg, ll_gg;
+    MakeTreePtr<MapOperand> mr_operand;
 
     ll_gg->through = ll_return;
     ll_over->overlay = llr_comp;        
@@ -147,27 +148,32 @@ AddLinkAddress::AddLinkAddress()
    
     MakeTreePtr< SlaveSearchReplace<Compound> > slavell( lr_comp, ll_gg, llr_comp );   
    
-    m_gg->through = m_call;
-    m_call->operands = (MakeTreePtr< Star<MapOperand> >());
-    m_call->callee = l_inst_id;
-    //lls_call->operands = ();
-    mr_comp->statements = (mr_assign, m_call, mr_label);  
-    mr_assign->operands = (r_retaddr_id, mr_labelid);
+    m_gg->through = ms_call;
+    ms_call->operands = (MakeTreePtr< Star<MapOperand> >());
+    ms_call->callee = l_inst_id;
+    mr_comp->statements = (mr_call, mr_label);  
+    mr_call->operands = (ms_call->operands, mr_operand);
+    mr_call->callee = l_inst_id;
+    mr_operand->identifier = lr_retaddr_id;
+    mr_operand->value = mr_labelid;
     mr_label->identifier = mr_labelid;    
     
     MakeTreePtr< SlaveSearchReplace<Module> > slavem( r_module, m_gg, mr_comp );
     
-    l_inst->type = l_func;
-    //l_func->members = ();
-    l_func->return_type = MakeTreePtr<Void>();
-    l_func->members = MakeTreePtr< Star<Instance> >(); // Params OK here, just not in MergeFunctions
+    l_inst->type = l_func_over;
+    l_func_over->through = ls_func;
+    l_func_over->overlay = lr_func;    
+    ls_func->return_type = MakeTreePtr<Void>();
+    ls_func->members = MakeTreePtr< Star<Instance> >(); // Params OK here, just not in MergeFunctions
+    lr_func->return_type = ls_func->return_type;
+    lr_func->members = (ls_func->members, lr_retaddr);
     l_inst->initialiser = l_over;
     l_inst->identifier = l_inst_id;
     l_over->through = ls_comp;
     ls_comp->members = (l_decls);
     ls_comp->statements = (l_stmts);
     l_over->overlay = slavell;
-    lr_comp->members = (l_decls, lr_retaddr, lr_temp_retaddr);
+    lr_comp->members = (l_decls, lr_temp_retaddr);
     lr_retaddr->identifier = lr_retaddr_id;
     lr_retaddr->type = lr_ptr;
     lr_retaddr->initialiser = MakeTreePtr<Uninitialised>();
@@ -175,8 +181,7 @@ AddLinkAddress::AddLinkAddress()
     lr_temp_retaddr->type = lr_ptr;
     lr_temp_retaddr->initialiser = MakeTreePtr<Uninitialised>();
     lr_ptr->destination = MakeTreePtr<Void>();
-    lr_comp->statements = (lr_assign, l_stmts);
-    lr_assign->operands = (lr_retaddr_id, r_retaddr_id);   
+    lr_comp->statements = (l_stmts);
     
     s_module->members = (gg, decls);
     gg->through = l_inst;
