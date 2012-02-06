@@ -4,10 +4,10 @@ Inferno source tree
 
 The source directories under src/ correspond to the segments in Inferno's high-level design. The compile time or "#include" dependencies are given here. 
 
-The following graph has depending above depended-on, and omits dependencies that go "through" segments - the true graph is a transitive closure of this one. Note that the dependency graph is a DAG not a tree, and so it did not make sense to try and reflect it in the directory structure and we use a flat stucture with each directory under src/ copntaining one segment. Clang and LLVM have been added to clarify the relationship. The graph is divided by a dotted line into segments that are aware of the programming language represented by the tree and segments that are not aware of and do not depend on the language in use.
+The following graph has depending above depended-on, and omits dependencies that go "through" segments - the true graph is a transitive closure of this one. Note that the dependency graph is a DAG not a tree, and so it did not make sense to try and reflect it in the directory structure and we use a flat stucture with each directory under src/ copntaining one segment. Clang and LLVM have been added to clarify the relationship. The graph is divided by a dotted line into segments that are aware of the programming language represented by the tree (above) and segments that are not aware and so do not depend on the language in use (below).
 
 
-                    main                      main is really just a small main() function.
+                    main                      main is really just a small main() function
                       |
          /------------+------------\          
          |            |            |      .   parse contains parsing code that works with clang to parse C++  
@@ -19,11 +19,11 @@ The following graph has depending above depended-on, and omits dependencies that
   parser     / |              .      |        sr contains the language-independent search-replace tool
             /  \--------------+------/
            /              .   |
-      clang, LLVM       .  helpers             helpers contains language-independent utilities for nodes
+      clang, LLVM       .   helpers           helpers contains language-independent utilities for nodes
        generics       .       |
-                    .        node              node defines the node base class interface 
+                    .        node             node defines the node base class interface 
                   .           | 
-    language-   .           common             common has general utilities that could be useful in any program
+    language-   .           common            common has general utilities that could be useful in any program
     dependant . language-
             .  independent                           
 

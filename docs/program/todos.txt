@@ -1,0 +1,73 @@
+TODO (to get the sequential phase looking good)
+Note: (0.2 #x) means do this for 0.2 release, in order of x. 
+0.2 planned release notes: Better S&R, maybe ready for general use; initial SystemC support; sequential phase at alpha or beta; doxygen and generally better documentation
+
+return values (0.2 #1)
+   - note that the copy must come after the link label, so at least some of this step should be done before AddLinkAddress
+   - build this up on UseTempForReturnValue but keep original step to support an earlier invocation of GenerateStacks
+   - use a module member temp
+   - and of course the other function call stuff needs calls to be at statement level, so do this first!
+   - support calls embedded in arbitrary expressions; substitute the temp directly into the expression; restrict for innermost first (I think)
+
+functions embedded in expressions, must split up (0.2 #2)
+   - must first split out side effects per C standard
+   - then deal with both expressions surrounding the call (unless done in return values step)
+   - maybe don't need to do expressions in parameters because params lowering already accomplishes this
+
+add ability to lower wait(X) into yielding wait loop (0.2 #3)
+   - not really critical at this stage, but makes the intention clearer for SC users
+
+only generate stacks for non-leaf functions (sensiblising) (0.2 #4)
+
+do not lower combable if, switch, for (sensiblising) (0.2 #5)
+   - need combability detector
+
+test with multiple SC_THREAD, since this is nominally supported, let's keep it working (0.2 #6)
+   - funciton merging needs fixing so it does not kill the callee, in case other threads call it. A seperate kill uncalled functions
+     cleanup can get rid of these. This means possible duplication of callee though - the ultimate solution would be to make a seperate
+     server for them, but we're not doing servers yet.
+
+figure out how to keep using the non-SC tests (0.2 #7 but not if hard)
+
+Update sequential phase docs (0.2 #8)
+
+Fix the dependency fault if not done already (0.2 #9)
+   - something to do with stuff in SR depending on tree I think
+   - try and use the TransformTo model
+   - otherwise got to put 
+
+Sweep for TODOs in code, but quite high theshold (0.2 #10)
+
+add comments in sctree, like in cpptree (0.2 #11)
+
+Doxygen comments for all the steps (0.2 #12)
+
+Ensure SR docs up to date (0.2 #13)
+   - will have to look at diffs from the summer to remind myself, sadly
+
+-- post 0.2 --
+
+sc_signal support
+   - maybe just replace all fundy types
+   - not sure where to put, earlier means new vars generated after step, later reduces usefulness of trace
+   - allowed everywhere though
+   - sc_signal for enums to be only just wide enough - make sure this works with state variables
+
+sc_trace for all sc_signals so they appear in VCD files (VCD trace otherwise done)
+   - due to statically declared modules strategy, output name must be trace.vcd, so move in test.sh etc
+
+fix steps with too-strong "and-not" clauses 
+   - like UseTempForReturnValue, for example 
+
+assertions for redundant intermediates? - no, builtin_return_address() will not match link label if there's caller-side epilog code
+
+tidy-up step to move module member temps back down into a function temp where possible (sensiblising)
+
+deal with returning from a thread module correctly (for elegance mostly)
+   - SC terminates when no pending events
+   - need to be able to exit the superloop in a SC_THREAD
+   - and fail to next_trigger() in SC_MEHTOD
+   - I think we already generate explicit return statements, so act on these during ThreadToMethod
+   
+
+
