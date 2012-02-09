@@ -14,19 +14,28 @@
 
 namespace SCTree {
 
-struct SCConstruct {};
+/** Base for all SystemC nodes, permitting detection of SystemC dialect eg for rendering */
+struct SCConstruct {}; 
 
-/// Base for SC nodes that correspond to named ements of SystemC
+/** Base for SystemC nodes that helps with detection and rendering by allowing constructs
+    that differ only in source-code-name to be treated as a group. The actual source-code-name
+    is available via a virtual accessor. */
 struct SCNamedConstruct : public SCConstruct
 {
-    virtual string GetToken() {ASSERTFAIL("GetToken() called on intermediate node\n")} ///< Produce the name of the corresponding SC element for detection and rendering
+    virtual string GetToken() {ASSERTFAIL("GetToken() called on intermediate node\n")} ///< Produce the source-code-name of the corresponding SystemC construct
 };
 
+/// Anything derived from this renders like an identifier
 struct SCNamedIdentifier : SCNamedConstruct {};
+
+/// Anything derived from this renders like a record
 struct SCNamedRecord : SCNamedConstruct {};
+
+/// Anything derived from this renders like a function
 struct SCNamedFunction : SCNamedConstruct {};
 
-
+/** SystemC event type, no members need to be set up. Event instances
+    are declared to be of this type. They can then be signalled, waited etc. */
 struct Event : CPPTree::Type,
                SCNamedIdentifier
 {
@@ -34,6 +43,12 @@ struct Event : CPPTree::Type,
     virtual string GetToken() { return "sc_event"; }
 };
 
+/** SystemC module type. The processes, registers, submodules and everything
+    else within the module appear as members of the record. No constructor/destructor 
+    is needed (so module is not a kind of class) - the renderer generates a constructor
+    based on the module's members. Thus elaboration is structural in the tree
+    (as with Verilog) and the renderer generates the run-time elaboration
+    fu to satisfy SystemC. */
 struct Module : CPPTree::InheritanceRecord,
                 SCNamedRecord
 {
@@ -41,6 +56,8 @@ struct Module : CPPTree::InheritanceRecord,
     virtual string GetToken() { return "sc_module"; }
 };
 
+/** SystemC interface construct. Not exactly sure whether/how I will use 
+    this. Presumably this is why Module comes from InheritanceRecord not Record. */                                                                      
 struct Interface : CPPTree::InheritanceRecord,
                    SCNamedRecord
 {
@@ -48,6 +65,10 @@ struct Interface : CPPTree::InheritanceRecord,
     virtual string GetToken() { return "sc_interface"; }
 };
 
+/** Intermediate node for SystemC wait() primitive. wait() can be used
+    in a few fundamentally different ways and to be explicit we use specialised
+    nodes for each. All waits must be done in local execution contexts
+    like threads. Waits allow the SystemC kernel to run other processes. */
 struct Wait : CPPTree::Statement,
                  SCNamedFunction
 {
@@ -55,22 +76,34 @@ struct Wait : CPPTree::Statement,
     virtual string GetToken() { return "wait"; }
 };
 
+/** Waiting for a SystemC event - blocks until the event indicated by the expression is 
+    triggered, regardless of clocks, deltas etc. Ands and ors etc are probably OK as 
+    the correpsonding boolean expressions on the events. */
 struct WaitDynamic : Wait
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<CPPTree::Expression> event; ///< event to wait for 
 };
 
+/** Waiting for a SystemC event - blocks until an event is triggered. I think the event
+    is specified during elaboration, but I'm not sure if nodes exist for this yet */
 struct WaitStatic : Wait
 {
     NODE_FUNCTIONS_FINAL
 };
 
+/** Basically a yield. Blocks for a short period of time (a delta cycle) and then continues.
+    Allows other processes to run immediately. Equivalent to wait(SC_ZERO_TIME) */    
 struct WaitDelta : Wait
 {
     NODE_FUNCTIONS_FINAL
 };
 
+/** Intermediate node for SystemC next_trigger() primitive. next_trigger() can be used
+    in a few fundamentally different ways and to be explicit we use specialised
+    nodes for each. All next_triggers must be done in combable contexts like SC_METHOD.
+    Next_triggers do NOT allow the SystemC kernel to run other processes until
+    the combable block completes. */
 struct NextTrigger : CPPTree::Statement,
                      SCNamedFunction
 {
@@ -78,22 +111,33 @@ struct NextTrigger : CPPTree::Statement,
     virtual string GetToken() { return "next_trigger"; }
 };
 
+/** Causes the method to be triggered again when the event indicated by the expression is 
+    triggered, regardless of clocks, deltas etc. Ands and ors etc are probably OK as 
+    the correpsonding boolean expressions on the events. */
 struct NextTriggerDynamic : NextTrigger
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<CPPTree::Expression> event; ///< event to wait for 
 };
 
+/** Causes the method to be triggered again when an event is triggered. I think the event
+    is specified during elaboration, but I'm not sure if nodes exist for this yet */
 struct NextTriggerStatic : NextTrigger
 {
     NODE_FUNCTIONS_FINAL
 };
 
+/** Causes the method to be triggered again very soon after it completes.
+    Other things run when combable block completes. Equivalent to 
+    next_trigger(SC_ZERO_TIME) */    
 struct NextTriggerDelta : NextTrigger
 {
     NODE_FUNCTIONS_FINAL
 };
 
+/** Triggers the event instance given in the expression. It must be an lvalue of
+    type Event I would think. This is an intermediate because there are a few
+    distinct flavours. */
 struct Notify : CPPTree::Statement,
                 SCNamedFunction
 {
@@ -102,49 +146,64 @@ struct Notify : CPPTree::Statement,
     TreePtr<CPPTree::Expression> event; ///< event to notify 
 };
 
+/** Notify the event immediately. Not sure if this can force control to go 
+    directly to a waiting process like a function call. Probably not. */
 struct NotifyImmediate : Notify
 {
     NODE_FUNCTIONS_FINAL
 };
 
+/** Notify the event with a delta cycle delay (SC_ZERO_TIME). */
 struct NotifyDelta : Notify
 {
     NODE_FUNCTIONS_FINAL
 };
 
+/** Notify the event with a specified time delay. */
 struct NotifyTimed : Notify
 {
     NODE_FUNCTIONS_FINAL
     TreePtr<CPPTree::Expression> time; ///< how long to wait for before notifying
 };
 
+/** Intermediate class for processes, which are the places in SystemC where we 
+    put code. Different final nodes have different invocation and execution models.
+    Processes look like functions that have no params or return value. */
 struct Process : CPPTree::Subroutine,
                  SCNamedConstruct 
 {
     NODE_FUNCTIONS
 };
 
+/** Any process that begins or resumes execution in return to events (presumably
+    including the virtual events created by deltas). Essentially unclocked */
 struct EventProcess : Process
 {
     NODE_FUNCTIONS
    //TODO Collection<Sensitivity> sensitivity;
 };
 
-/** SystemC method */
+/** SystemC method process. This must contain a combable block of code. The method
+    will return when the combinational block has settled and then issued any state
+    updates. */
 struct Method : EventProcess
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetToken() { return "SC_METHOD"; }
 };
 
-/** SystemC thread */
-struct Thread : EventProcess
+/** SystemC thread process. Local context, so this can run forever (stopping only to indicate completion
+    of a test run) and may block in wait or run busy for a while. Actually I dont think 
+    the SystemC kernel can pre-empt, so it should not run busy all the time. */
+struct Thread : EventProcess // TODO if SystemC really can't pre-empt, then this should be renamed to Context
+                             // TODO and I should create a real thread support extension because user's threads will run busy sometimes
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetToken() { return "SC_THREAD"; }
 };
 
-/** SystemC clocked thread 
+/** SystemC clocked thread process. A local context as with Thread, but can only
+    wait on clock cycles. I forget the advantage of this over Thread.
     Sensitivity must be a ClockInPort */
 struct ClockedThread : Process
 {
@@ -153,8 +212,10 @@ struct ClockedThread : Process
     //TODO TreePtr<Sensitivity> clock;
 };
 
+/** Evaluates to the total number of delta cycles thus far. Can be compared with zero 
+    to produce an inferred reset signal for initialising state machines */
 struct DeltaCount : CPPTree::Operator,
-                    SCNamedFunction
+                    SCNamedFunction // TODO rename as InferredReset() since that will transform more easily to a real reset system
 {
     NODE_FUNCTIONS_FINAL
     virtual string GetToken() { return "sc_delta_count"; }    
