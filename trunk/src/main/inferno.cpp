@@ -52,7 +52,7 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new CleanupNop ) ); 
     }        
         
-    sequence->push_back( shared_ptr<Transformation>( new UseTempForReturnValue ) );
+    sequence->push_back( shared_ptr<Transformation>( new ReturnViaTemp ) );
     sequence->push_back( shared_ptr<Transformation>( new AddLinkAddress ) );
     sequence->push_back( shared_ptr<Transformation>( new ParamsViaTemps ) );
     sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) ); 

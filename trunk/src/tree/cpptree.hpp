@@ -784,10 +784,21 @@ struct AlignOf : TypeOperator { NODE_FUNCTIONS_FINAL };
  can go in the members of the Scope or in the statements (since Declaration
  derives from Statement) */
 struct Compound : Statement,
-                  Scope,      // Local declarations go in here (preferably)
-                  Initialiser // Can "initialise" a function (with the body) 
+                  Scope,      ///< Local declarations go in here (preferably)
+                  Initialiser ///< Can "initialise" a function (with the body) 
 {
-	NODE_FUNCTIONS_FINAL
+    NODE_FUNCTIONS_FINAL
+    Sequence<Statement> statements; ///< Can contain local declarations and code
+};                   
+
+/// GCC extension for compound statements that return a value
+/** Note that local declarations
+ can go in the members of the Scope or in the statements (since Declaration
+ derives from Statement) */
+struct CompoundExpression : Expression, ///< Evaluates to whatever the last statement evaluates to
+                            Scope       ///< Local declarations go in here (preferably)
+{
+    NODE_FUNCTIONS_FINAL
     Sequence<Statement> statements; ///< Can contain local declarations and code
 };                   
 
