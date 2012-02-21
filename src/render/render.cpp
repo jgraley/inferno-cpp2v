@@ -333,6 +333,14 @@ string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketiz
 
 	if( dynamic_pointer_cast< Uninitialised >(expression) )
 		return string();
+    else if( TreePtr<CompoundExpression> ce = dynamic_pointer_cast< CompoundExpression >(expression) )
+    {
+        AutoPush< TreePtr<Scope> > cs( scope_stack, ce );
+        string s = "({ ";
+        s += RenderDeclarationCollection( ce, "; ", true ); // Must do this first to populate backing list
+        s += RenderSequence( ce->statements, "; ", true );
+        return s + "})";
+    }
 	else if( TreePtr<SpecificLabelIdentifier> li = dynamic_pointer_cast< SpecificLabelIdentifier >(expression) )
 		return before +
 			   "&&" + RenderIdentifier( li ) + // label-as-variable (GCC extension)

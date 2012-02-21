@@ -1,5 +1,5 @@
 
-// subordinate funciton with multiple parameters
+// subordinate funciton with multiple parameters and return value
 
 #include <isystemc.h>
 
@@ -14,12 +14,13 @@ public:
     void T()
     {
         x = 0;
-        f(4, 6, 8);
+        x = f(4, 6, 8);
         cease(x);
     }
-    void f( int i, short j, char k )
+    int f( int i, short j, char k )
     {
-        x = i+j*3+k*5;
+        int t = i+j*3;
+        return t+k*5;
     }
 };
 

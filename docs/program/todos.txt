@@ -3,16 +3,10 @@ Note: (0.2 #x) means do this for 0.2 release, in order of x.
 0.2 planned release notes: Better S&R, maybe ready for general use; initial SystemC support; sequential phase at alpha or beta; doxygen and generally better documentation
 
 return values (0.2 #1)
-   - note that the copy must come after the link label, so at least some of this step should be done before AddLinkAddress
-   - build this up on UseTempForReturnValue but keep original step to support an earlier invocation of GenerateStacks
-   - use a module member temp
-   - and of course the other function call stuff needs calls to be at statement level, so do this first!
-   - support calls embedded in arbitrary expressions; substitute the temp directly into the expression; restrict for innermost first (I think)
-
-functions embedded in expressions, must split up (0.2 #2)
-   - must first split out side effects per C standard
-   - then deal with both expressions surrounding the call (unless done in return values step)
-   - maybe don't need to do expressions in parameters because params lowering already accomplishes this
+   - step mostly done, just need to produce CompoundExpression instead of current transofrmation which will not
+     deal with calls inside if expression etc
+   - then expand CompoundExpression in all the places where it can appear, including if expression etc
+   - check correctness re side effects
 
 add ability to lower wait(X) into yielding wait loop (0.2 #3)
    - not really critical at this stage, but makes the intention clearer for SC users
@@ -69,5 +63,5 @@ deal with returning from a thread module correctly (for elegance mostly)
    - and fail to next_trigger() in SC_MEHTOD
    - I think we already generate explicit return statements, so act on these during ThreadToMethod
    
-
+get rid of Callable, CallableParams, Procedure etc. It's all guff. Just have Function
 

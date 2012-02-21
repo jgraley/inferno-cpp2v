@@ -20,12 +20,17 @@ public:
 	ExplicitiseReturn();
 };
 
-// Store a return address (as a label variable) for each function call
-// in an automatic (for recursion), passing in and out via a temp.
 class UseTempForReturnValue : public SearchReplace
 {
 public:
 	UseTempForReturnValue();
+};
+
+/** Pass parameters in to functions via class-level temps */
+class ReturnViaTemp : public SearchReplace
+{
+public:
+    ReturnViaTemp();
 };
 
 /** Add a parameter to non-process functions giving the link address */
