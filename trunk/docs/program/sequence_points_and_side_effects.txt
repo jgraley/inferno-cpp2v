@@ -1,0 +1,62 @@
+Sequence points and side effects
+
+From Wikipedia:
+In C[2] and C++,[3] sequence points occur in the following places. (In C++, overloaded operators act like functions, and thus operators that have been overloaded introduce sequence points in the same way as function calls.)
+
+   1. Between evaluation of the left and right operands of the && (logical AND), || (logical OR), and comma operators. For example, in the expression *p++ != 0 && *q++ != 0, all side effects of the sub-expression *p++ != 0 are completed before any attempt to access q.
+   2. Between the evaluation of the first operand of the ternary "question-mark" operator and the second or third operand. For example, in the expression a = (*p++) ? (*p++) : 0 there is a sequence point after the first *p++, meaning it has already been incremented by the time the second instance is executed.
+   3. At the end of a full expression. This category includes expression statements (such as the assignment a=b;), return statements, the controlling expressions of if, switch, while, or do-while statements, and all three expressions in a for statement.
+   4. Before a function is entered in a function call. The order in which the arguments are evaluated is not specified, but this sequence point means that all of their side effects are complete before the function is entered. In the expression f(i++) + g(j++) + h(k++), f is called with a parameter of the original value of i, but i is incremented before entering the body of f. Similarly, j and k are updated before entering g and h respectively. However, it is not specified in which order f(), g(), h() are executed, nor in which order i, j, k are incremented. Variables j and k in the body of f may or may not have been already incremented. Note that a function call f(a,b,c) is not a use of the comma operator and the order of evaluation for a, b, and c is unspecified.
+   5. At a function return, after the return value is copied into the calling context. (This sequence point is only specified in the C++ standard; it is present only implicitly in C.[4])
+   6. At the end of an initializer; for example, after the evaluation of 5 in the declaration int a = 5;.
+   7. Between each declarator in each declarator sequence; for example, between the two evaluations of a++ in int x = a++, y = a++[5].
+JSG: also CompoundExpression as with Compound
+JSG: maybe add the end of evaluation of the parameters to intrinsics
+
+
+Side effects are (from memory):
+ - Assign
+ - Assignment operators
+ - Post- and pre-inc
+ - Function calls (including void-void)
+ - Possible some intrinsics (but these are statements)
+
+
+Sequence point rules must be observed in all transformations. But they are complicated, so invent Simple Sequence Points (SSP) style:
+ - Sequence point inferred by Compound and CompoundExpression must be respected (i.e. sequence points inferred by semicolons)
+ - So to get to SSP we can insert ; wherever we see a sequence point
+ - Sequence points not co-incidnet with ; (ie all the other ones) will have only a direct usage of a temp variable, guaranteed to be
+   free of side effects.
+ - We can get here by introducing temps and setting them up in an earlier statement, so a ; exists between setup and usage i.e.
+   x SEQ y becomes temp=x; temp SEQ y
+ - Note innermost sub-expression is the one that moves up
+ - Where nesting means multple SEQ, do outermost first (outermost defined by tree structure I think) - because of sequence point rules
+   x SEQ (y SEQ z) means do x first, then y and then z - this differs from precidence!
+ - expressions, if, switch, calls, returns, intrinsics all easy
+ - But loops are hard, we would need to get in before *each* evaluation of the loop expressions
+ - OTOH we've probebly lowered loops by the time we need this; definite fors don't have side effects anyway
+
+We can apply "light touch" to this with Simple Challenged Sequence Points (SCSP):
+ - Challenged means there's definitely or probably a side effect in x
+ - Only expand challenged sequence points
+ - just leave other cases since they're safe
+
+We could go further and look for conflicts between the side-effect and the code after the seq point, but this is probably going too far
+as a light touch thing. Better to search for parallelism globally ie including across ;
+
+In general, if we're in SSP or SCSP
+ - respect semicolons as sequence points
+ - introduce no more side effects
+
+Note on post-increment: same algorithm - the rules seem to suggest that eg x++ && x is equivalant to temp = x++; temp && x
+ 
+We can insert a base for SideEffectyExpression or some such - under SSP we only care about side-effecty expressions since statements
+always end in ; and will therefore be assumed side-effecty anyway.
+
+Detecting sequence points is harder because only certain children of the nodes need to be checked for side effects eg operand[1] of &&, ||, ?:,
+only the condition of an If etc. Maybe should write one step for operators and then seperate ones for If etc as required.
+
+Note: where a side-effect is buried in an expression (seq point-less), I think we can choose whether to move the whole expression or 
+just the side effecty part - check this! If there are multiple side effect buried in the expression, then moving the whole expression 
+is more economical because it gets all the side effects, as well as clarifying that the side effects are indeterminate in order and
+thus parallelisable.
