@@ -2,11 +2,15 @@ TODO list (to get the sequential phase looking good)
 Note: (0.2 #x) means do this for 0.2 release, in order of x. 
 0.2 planned release notes: Better S&R, maybe ready for general use; initial SystemC support; sequential phase at alpha or beta; doxygen and generally better documentation
 
-return values (0.2 #1)
-   - step mostly done, just need to produce CompoundExpression instead of current transofrmation which will not
-     deal with calls inside if expression etc
-   - then expand CompoundExpression in all the places where it can appear, including if expression etc
-   - check correctness re side effects
+go to SCSP mode (dealing with sequence points and side effects)
+   - can just do SSP if SCSP is too much hassle
+   - see docs/program
+   - after this, the only challenged seq points are ;, so any reordering is OK between semicolons
+   - maybe cheat and treat all CompoundExpressions as side-effecty. Otherwise feels like we have to duplicate a bit
+     in lowering compund expressions step...?
+   
+lower compound expressions (0.2 #1)
+   - expand CompoundExpression in all the places where it can appear, including if expression etc
 
 add ability to lower wait(X) into yielding wait loop (0.2 #3)
    - not really critical at this stage, but makes the intention clearer for SC users
@@ -39,6 +43,9 @@ Doxygen comments for all the steps (0.2 #12)
 Ensure SR docs up to date (0.2 #13)
    - will have to look at diffs from the summer to remind myself, sadly
 
+Get web page to reference all the docs (0.2 #14)
+   - including this one
+
 -- post 0.2 --
 
 sc_signal support
@@ -64,4 +71,3 @@ deal with returning from a thread module correctly (for elegance mostly)
    - I think we already generate explicit return statements, so act on these during ThreadToMethod
    
 get rid of Callable, CallableParams, Procedure etc. It's all guff. Just have Function
-
