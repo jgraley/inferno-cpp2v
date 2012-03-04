@@ -21,7 +21,7 @@ struct NotMatch : Special<PRE_RESTRICTION>,
     CompareReplace comp; // TODO only want the Compare
 private:
     virtual bool DecidedCompare( const CompareReplace *sr,
-    		                       TreePtr<Node> x,
+    		                       const TreePtrInterface &x,
     		                       bool can_key,
     		                       Conjecture &conj ) 
     {
@@ -73,7 +73,7 @@ private:
     mutable bool initialised;
     mutable TreePtr<Node> modifier_pattern;
     virtual bool DecidedCompare( const CompareReplace *sr,
-                                   TreePtr<Node> x,
+                                   const TreePtrInterface &x,
                                    bool can_key,
                                    Conjecture &conj ) 
     {
@@ -148,7 +148,7 @@ struct MatchAny : Special<PRE_RESTRICTION>,
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
     virtual bool DecidedCompare( const CompareReplace *sr,
-    		                       TreePtr<Node> x,
+    		                       const TreePtrInterface &x,
     		                       bool can_key,
     		                       Conjecture &conj ) 
     {
@@ -177,7 +177,7 @@ struct MatchOdd : Special<PRE_RESTRICTION>,
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
     virtual bool DecidedCompare( const CompareReplace *sr,
-    		                       TreePtr<Node> x,
+    		                       const TreePtrInterface &x,
     		                       bool can_key,
     		                       Conjecture &conj ) 
     {
@@ -207,15 +207,18 @@ struct TransformOfBase : CompareReplace::SoftSearchPattern
 
 private:
     virtual bool DecidedCompare( const CompareReplace *sr,
-    		                                            TreePtr<Node> x,
+    		                                            const TreePtrInterface &x,
     		                                            bool can_key,
     		                                            Conjecture &conj ) ;
+protected: 
+    TransformOfBase() {}    
 };
 
 template<class PRE_RESTRICTION>
 struct TransformOf : TransformOfBase, Special<PRE_RESTRICTION>
 {
 	SPECIAL_NODE_FUNCTIONS	
+    TransformOf() {}    
     TransformOf( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) : 
         TransformOfBase(t, p) 
     {
@@ -247,9 +250,9 @@ struct BuildIdentifierBase : CompareReplace::SoftReplacePattern
 struct BuildInstanceIdentifier : Special<CPPTree::InstanceIdentifier>,                             
                                  BuildIdentifierBase
 {
+    SPECIAL_NODE_FUNCTIONS
     BuildInstanceIdentifier( string s, int f=0 ) : BuildIdentifierBase(s,f) {}
     BuildInstanceIdentifier() : BuildIdentifierBase("unnamed") {}
-    SPECIAL_NODE_FUNCTIONS
 private:
     virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
     {
@@ -261,8 +264,8 @@ private:
 struct BuildTypeIdentifier : Special<CPPTree::TypeIdentifier>,                             
                              BuildIdentifierBase
 {
-    BuildTypeIdentifier( string s="Unnamed", int f=0 ) : BuildIdentifierBase(s,f) {}
     SPECIAL_NODE_FUNCTIONS
+    BuildTypeIdentifier( string s="Unnamed", int f=0 ) : BuildIdentifierBase(s,f) {}
 private:
     virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
     {
@@ -274,9 +277,9 @@ private:
 struct BuildLabelIdentifier : Special<CPPTree::LabelIdentifier>,                             
                               BuildIdentifierBase
 {
-    BuildLabelIdentifier( string s, int f=0 ) : BuildIdentifierBase(s,f) {}
-    BuildLabelIdentifier() : BuildIdentifierBase("UNNAMED") {}
     SPECIAL_NODE_FUNCTIONS
+    BuildLabelIdentifier() : BuildIdentifierBase("UNNAMED") {}
+    BuildLabelIdentifier( string s, int f=0 ) : BuildIdentifierBase(s,f) {}
 private:
     virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
     {
@@ -289,22 +292,24 @@ private:
 
 // These can be used in search pattern to match a SpecificIdentifier by name.
 // (cannot do this using a SpecificIdentifier in the search pattern because
-// the address of the node would be compared, not the name string).
+// the address of the node would be compared, not the name string). TODO document
 struct IdentifierByNameBase : CompareReplace::SoftSearchPattern
 {
     IdentifierByNameBase( string n ) : name(n) {}
-    bool IsMatch( const CompareReplace *sr, TreePtr<Node> x );
+    bool IsMatch( const CompareReplace *sr, const TreePtrInterface &x );
     string name;
 };
 
 struct InstanceIdentifierByName : Special<CPPTree::InstanceIdentifier>,                             
                                  IdentifierByNameBase
 {
-    InstanceIdentifierByName( string n ) : IdentifierByNameBase(n) {}
     SPECIAL_NODE_FUNCTIONS
+
+    InstanceIdentifierByName() : IdentifierByNameBase(string()) {}    
+    InstanceIdentifierByName( string n ) : IdentifierByNameBase(n) {}
 private:
     virtual bool DecidedCompare( const CompareReplace *sr,
-                                TreePtr<Node> x,
+                                const TreePtrInterface &x,
                                 bool can_key,
                                 Conjecture &conj )
     {
@@ -315,11 +320,13 @@ private:
 struct TypeIdentifierByName : Special<CPPTree::TypeIdentifier>,                             
                              IdentifierByNameBase
 {
-    TypeIdentifierByName( string n ) : IdentifierByNameBase(n) {}
     SPECIAL_NODE_FUNCTIONS
+
+    TypeIdentifierByName() : IdentifierByNameBase(string()) {}    
+    TypeIdentifierByName( string n ) : IdentifierByNameBase(n) {}
 private:
     virtual bool DecidedCompare( const CompareReplace *sr,
-                                TreePtr<Node> x,
+                                const TreePtrInterface &x,
                                 bool can_key,
                                 Conjecture &conj )
     {
@@ -330,12 +337,13 @@ private:
 struct LabelIdentifierByName : Special<CPPTree::LabelIdentifier>,                             
                               IdentifierByNameBase
 {
-    LabelIdentifierByName( string n ) : IdentifierByNameBase(n) {}
-
     SPECIAL_NODE_FUNCTIONS
+
+    LabelIdentifierByName() : IdentifierByNameBase(string()) {}    
+    LabelIdentifierByName( string n ) : IdentifierByNameBase(n) {}
 private:
     virtual bool DecidedCompare( const CompareReplace *sr,
-                                TreePtr<Node> x,
+                                const TreePtrInterface &x,
                                 bool can_key,
                                 Conjecture &conj )
     {
@@ -343,6 +351,33 @@ private:
     }                                
 };
 
+
+struct PointerIsBase
+{
+};
+/** Make an architype of the pointed-to type and compare that.
+    So if in the program tree we have a->b and the search pattern is
+    x->PointerIsBase->y, then a must match x, and the type of the pointer
+    in a that points to b must match y. */
+template<class PRE_RESTRICTION>
+struct PointerIs : Special<PRE_RESTRICTION>,
+                   CompareReplace::SoftSearchPattern,
+                   PointerIsBase // TODO document
+{
+    SPECIAL_NODE_FUNCTIONS
+    TreePtr<PRE_RESTRICTION> pointer;
+    virtual bool DecidedCompare( const CompareReplace *sr,
+                                   const TreePtrInterface &x,
+                                   bool can_key,
+                                   Conjecture &conj ) 
+    {
+        INDENT("@");
+        
+        TreePtr<Node> ptr_arch = x.MakeValueArchitype();
+        
+        return sr->DecidedCompare( ptr_arch, pointer, can_key, conj );
+    }
+};
 
 
 

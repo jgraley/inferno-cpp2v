@@ -33,6 +33,10 @@ public:
 	{
 		return OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>::DynamicCast(g);
 	}
+	virtual OOStd::SharedPtr<Itemiser::Element, Node, Node> MakeValueArchitype() const
+    {
+        return new VALUE_TYPE; // means VALUE_TYPE must be constructable
+    }
 };
 
 

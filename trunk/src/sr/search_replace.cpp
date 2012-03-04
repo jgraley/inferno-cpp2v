@@ -75,13 +75,13 @@ void CompareReplace::Configure( TreePtr<Node> cp,
     TraverseNoSlavePattern tsp(cp);
     FOREACH( TreePtr<Node> n, tsp )
     {        
-        if( TreePtr<StuffBase> sb = dynamic_pointer_cast<StuffBase>(n) )
+        if( shared_ptr<StuffBase> sb = dynamic_pointer_cast<StuffBase>(n) )
         {
             TRACE("Found stuff@%p, rr@%p\n", sb.get(), sb->recurse_restriction.get());
             sb->recurse_comparer.coupling_keys.SetMaster( &coupling_keys ); 
             sb->recurse_comparer.compare_pattern = sb->recurse_restriction; // TODO could move into a Stuff node constructor if there was one
         }
-        if( TreePtr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
+        if( shared_ptr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
         {
             TRACE("Found coupling slave in search pattern at %p\n", cs.get() );
             cs->SetCouplingsMaster( &coupling_keys ); 
@@ -93,7 +93,7 @@ void CompareReplace::Configure( TreePtr<Node> cp,
     TraverseNoSlavePattern ss(rp);
     FOREACH( TreePtr<Node> n, ss )
     {
-        if( TreePtr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
+        if( shared_ptr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
         {
             TRACE("Found coupling slave in replace pattern at %p\n", cs.get() );
             cs->SetCouplingsMaster( &coupling_keys ); 
@@ -122,7 +122,7 @@ void CompareReplace::GetGraphInfo( vector<string> *labels,
 
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-bool CompareReplace::DecidedCompare( TreePtr<Node> x,
+bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
 									   TreePtr<Node> pattern,
 									   bool can_key,
     								   Conjecture &conj,
@@ -158,7 +158,7 @@ bool CompareReplace::DecidedCompare( TreePtr<Node> x,
     {
     	// No further restriction beyond the pre-restriction for these nodes when searching.
     }
-    else if( TreePtr<SearchContainerBase> sc_pattern = dynamic_pointer_cast<SearchContainerBase>(pattern) )
+    else if( shared_ptr<SearchContainerBase> sc_pattern = dynamic_pointer_cast<SearchContainerBase>(pattern) )
     {
     	// Invoke stuff node compare
     	// Check whether the present node matches
@@ -166,7 +166,7 @@ bool CompareReplace::DecidedCompare( TreePtr<Node> x,
         if( !r )
             return false;
     }
-    else if( TreePtr<GreenGrassBase> green_pattern = dynamic_pointer_cast<GreenGrassBase>(pattern) )
+    else if( shared_ptr<GreenGrassBase> green_pattern = dynamic_pointer_cast<GreenGrassBase>(pattern) )
     {
         // Restrict so that everything in the input program under here must be "green grass"
         // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
@@ -183,14 +183,14 @@ bool CompareReplace::DecidedCompare( TreePtr<Node> x,
         if( !r )
             return false;
     }
-    else if( TreePtr<OverlayBase> op = dynamic_pointer_cast<OverlayBase>(pattern) )
+    else if( shared_ptr<OverlayBase> op = dynamic_pointer_cast<OverlayBase>(pattern) )
     {
         // When DoOverlay node seen duriung search, just forward through the "base" path
         bool r = DecidedCompare( x, op->GetThrough(), can_key, conj );
         if( !r )
             return false;
     }
-    else if( TreePtr<SlaveBase> sp = dynamic_pointer_cast<SlaveBase>(pattern) )
+    else if( shared_ptr<SlaveBase> sp = dynamic_pointer_cast<SlaveBase>(pattern) )
     {
         // When a slave node seen duriung search, just forward through the "base" path
         bool r = DecidedCompare( x, sp->GetThrough(), can_key, conj );
@@ -288,7 +288,7 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 		ASSERT( pe );
 		npit=pit;
 		++npit;
-	    if( TreePtr<StarBase> ps = dynamic_pointer_cast<StarBase>(pe) )
+	    if( shared_ptr<StarBase> ps = dynamic_pointer_cast<StarBase>(pe) )
 	    {
 			// We have a Star type wildcard that can match multiple elements.
 			// Remember where we are - this is the beginning of the subsequence that
@@ -484,7 +484,7 @@ bool CompareReplace::DecidedCompare( CollectionInterface &x,
     FOREACH( const TreePtrInterface &xe, x )
         xremaining->insert( xe );
     
-    TreePtr<StarBase> star;
+    shared_ptr<StarBase> star;
     bool seen_star = false;
 
     for( CollectionInterface::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
@@ -493,7 +493,7 @@ bool CompareReplace::DecidedCompare( CollectionInterface &x,
     			xremaining->size(),
     			pattern.size(),
     			TypeInfo( TreePtr<Node>(*pit) ).name().c_str() );
-    	TreePtr<StarBase> maybe_star = dynamic_pointer_cast<StarBase>( TreePtr<Node>(*pit) );
+    	shared_ptr<StarBase> maybe_star = dynamic_pointer_cast<StarBase>( TreePtr<Node>(*pit) );
 
         if( maybe_star ) // Star in pattern collection?
         {
@@ -550,8 +550,8 @@ bool CompareReplace::DecidedCompare( CollectionInterface &x,
 
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-bool CompareReplace::DecidedCompare( TreePtr<Node> x,
-									   TreePtr<SearchContainerBase> pattern,
+bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
+									   shared_ptr<SearchContainerBase> pattern,
 									   bool can_key,
 									   Conjecture &conj ) const
 {
@@ -592,7 +592,7 @@ bool CompareReplace::DecidedCompare( TreePtr<Node> x,
 }
 
 
-bool CompareReplace::MatchingDecidedCompare( TreePtr<Node> x,
+bool CompareReplace::MatchingDecidedCompare( const TreePtrInterface &x,
 		                                       TreePtr<Node> pattern,
 		                                       bool can_key,
 		                                       Conjecture &conj ) const
@@ -640,7 +640,7 @@ void CompareReplace::FlushSoftPatternCaches( TreePtr<Node> pattern ) const
 }
 
 
-bool CompareReplace::Compare( TreePtr<Node> x,
+bool CompareReplace::Compare( const TreePtrInterface &x,
 		                        TreePtr<Node> pattern,
 								bool can_key ) const
 {
@@ -824,7 +824,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
 	        {
 		        ASSERT( p ); // present simplified scheme disallows NULL
 		        TRACE("Got ")(*p)("\n");
-		        if( TreePtr<StarBase> ps = dynamic_pointer_cast<StarBase>(TreePtr<Node>(p)) )
+		        if( shared_ptr<StarBase> ps = dynamic_pointer_cast<StarBase>(TreePtr<Node>(p)) )
 		        {
 		            shared_ptr<Key> key = coupling_keys.GetKey( ps );
 		            ASSERT( key )("Replacing ")(*p)(" but it was not keyed from the search pattern as required\n");
@@ -1010,7 +1010,7 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
             overlay = ggb->GetThrough(); 
         }
         
-        if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
+        if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
         {   
             ASSERT(!key)("slave should not be coupled; should be in replace pattern only\n");
             HIT;
@@ -1056,7 +1056,7 @@ TreePtr<Node> CompareReplace::ApplySlave( TreePtr<Node> source, TreePtr<Node> de
         ASSERT( duplicated_pedigree.IsExist(dest) )(*dest);
     }
 
-    if( TreePtr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
+    if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
     {
         TreePtr<Node> input_tree_node = coupling_keys.GetCoupled(source);
         (*sb)( *pcontext, &dest );
@@ -1121,7 +1121,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
 	        {
 		        ASSERT( p )("Some element of member %d (", i)(*source_con)(") of ")(*source)(" was NULL\n");
 		        TRACE("Got ")(*p)("\n");
-		        if( TreePtr<StarBase> ps = dynamic_pointer_cast<StarBase>(TreePtr<Node>(p)) )
+		        if( shared_ptr<StarBase> ps = dynamic_pointer_cast<StarBase>(TreePtr<Node>(p)) )
 		        {
 		            shared_ptr<Key> key = coupling_keys.GetKey( ps );
 		            ASSERT( key )("Replacing ")(*p)(" but it was not keyed from the search pattern as required\n");
@@ -1193,7 +1193,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitution( TreePtr<Node> keynod
 	{
 		TRACE( "Substituting stuff: keynode=")(*keynode)(", term=")(stuff_key->terminus)("\n");
 		ASSERT( stuff_key->replace_pattern );
-		TreePtr<SearchContainerBase> replace_stuff = dynamic_pointer_cast<SearchContainerBase>( stuff_key->replace_pattern );
+		shared_ptr<SearchContainerBase> replace_stuff = dynamic_pointer_cast<SearchContainerBase>( stuff_key->replace_pattern );
 		ASSERT( replace_stuff );
 		if( replace_stuff->terminus &&      // There is a terminus in replace pattern
 			keynode == stuff_key->terminus ) // and the present node is the terminus in the keynode pattern

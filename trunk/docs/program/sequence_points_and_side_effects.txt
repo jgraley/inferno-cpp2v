@@ -10,15 +10,17 @@ In C[2] and C++,[3] sequence points occur in the following places. (In C++, over
    5. At a function return, after the return value is copied into the calling context. (This sequence point is only specified in the C++ standard; it is present only implicitly in C.[4])
    6. At the end of an initializer; for example, after the evaluation of 5 in the declaration int a = 5;.
    7. Between each declarator in each declarator sequence; for example, between the two evaluations of a++ in int x = a++, y = a++[5].
+JSG: also the condition of an if etc
 JSG: also CompoundExpression as with Compound
 JSG: maybe add the end of evaluation of the parameters to intrinsics
+ 
 
 
 Side effects are (from memory):
  - Assign
  - Assignment operators
  - Post- and pre-inc
- - Function calls (including void-void)
+ - Function calls 
  - Possible some intrinsics (but these are statements)
 
 
@@ -60,3 +62,51 @@ Note: where a side-effect is buried in an expression (seq point-less), I think w
 just the side effecty part - check this! If there are multiple side effect buried in the expression, then moving the whole expression 
 is more economical because it gets all the side effects, as well as clarifying that the side effects are indeterminate in order and
 thus parallelisable.
+
+----- additional notes ------
+
+OK, thought about this some more.
+
+Firstly, need to determine whether syntheisable Verilog can deal with side effects. What does verilog do with eg x++ && y++? Maybe we can 
+leave some side effects in place, allowing a lighter touch. If so, I think we're interested in un-combable subexpressions, since these are the
+one we must move out. This suggests Simple Uncombable Sequence Points, in which we only break down sequence point expressions when they 
+contain uncombable subexpressions. If Verilog is OK with stuff like assigns and assignment operator and pre/post inc, then the only uncombables
+in expressions are function calls (and pre-existing compound expressions) - these must always be assumed side-effecty. So only limited value in actually analyzing for 
+side effects in conjunction. i.e. x SEQ f() is safe to move f(), but we may as well break it down anyway to keep the transformations simpler.
+
+I have also been forgetting the elephant in the room wrt && || and ?: which is that the right hand pats sometimes do not execute at all. 
+When breaking these down, therefore, we must ensure ifs are inserted to correctly conditionalise execution. This obviously needs to happen
+above if lowering. So we actually get a new step for each of the three, positioned among the construct lowering. As with them, it can start 
+by always breaking up these constructs (SSP), and then can be made lighter alone with the rest of them when combability checks are added (SUSP)
+(assuming Verilog can handle combable side-effects).
+
+Note: side effects could get moved up or down in general. So eg x++ && x could become x && x; x++ which is wrong. Conversely, x && ++x could
+become ++x; x && x also wrong. Assign and assign ops are like ++x, but because of x++ and the possibility we might need to expand it in 
+inferno (if verilog doesn't handle), I think all positions within &&, || and ?: should be checked for side effects and/or uncombables
+
+Lets go over the list of sequence points again:
+1. Expanded by new LowerBooleanAnd/Or always in SSP and where side effect is contained on either side. In SUSP expand if there are any uncombables.
+2. As 1 using LowerConditionalOperator
+3. This is the invariant defined by SSP/SUSP, must be respected by all steps. It corresponds to the principal of sequentially executing 
+   statements in a Compound block, an existing requirement.
+4. ParamsViaTemps moves param expressions up and when it runs, calls are always at statement level. This satisfied SSP/SUSP
+5. ReturnViaTemp moves return expression up; return is a statement; updating the temp suffices for "copied into the calling context" (a 
+   little ugly implementation detail leaking into the language spec, methinks)
+6. This is a statement so satisfies SSP/SUSP. We just need to ensure that no non-trivial inits, that might be side-effecty or uncombable 
+   get into the members collection since this is unordered. I think present behaviour is OK.
+7. These get broken down at parse into seperate statements, satisfying SSP/SUSP.
+If etc: OK since the first statement in the body or after the construct is a seperate statement under the SSP/SUSP invariant
+CompoundExpression: actually a bit hard: if we lower with construct lowering, we'll re-introduce lower down. More below [1]
+Intrinsics: I think these sort themselves out when we expand them into their definition, except that we'll often do that below
+   the construct lowerings. Hmmm
+
+[1]Maybe define the semicolons here as SSP/SUSP invariant sequence points, and expand at the lower position. OR maybe we can 
+   exchange the entire functions subphase with the entire construct lowering subphase, then it would be neater. But expanding
+   the conditions for loops is complicated, I'd rather lower away all loops before doing the expansions that are already
+   there for funciton calls. So the overall order should not change. As long as we are happy that SSP/SUSP compliance makes 
+   CE expansion safe, then we can do this whenever we want. I think to be safe the result must mediate through a temp, to ensude
+   that the SeqP following the last statement of the CE (which is really its return value expression) remains in place. Otherwise, 
+   we'll merge that last statement into the surrounding expression, losing a Seqp. So eg ({x++;}) && x becomes x++ && x which
+   is probably wrong and breaks SSP/SUSP rules.
+
+

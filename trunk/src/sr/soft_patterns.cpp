@@ -4,7 +4,7 @@
 using namespace CPPTree;
 
 bool TransformOfBase::DecidedCompare( const CompareReplace *sr,
-		                                                     TreePtr<Node> x,
+		                                                     const TreePtrInterface &x,
 		                                                     bool can_key,
 		                                                     Conjecture &conj )
 {
@@ -69,10 +69,11 @@ string BuildIdentifierBase::GetNewName( const CompareReplace *sr )
     }
 }
 
-bool IdentifierByNameBase::IsMatch( const CompareReplace *sr, TreePtr<Node> x )
+bool IdentifierByNameBase::IsMatch( const CompareReplace *sr, const TreePtrInterface &x )
 {
     string newname = name; 
-    if( TreePtr<CPPTree::SpecificIdentifier> si = dynamic_pointer_cast<CPPTree::SpecificIdentifier>(x) )
+    TreePtr<Node> nx = x; // TODO dynamic_pointer_cast support for TreePtrInterface
+    if( TreePtr<CPPTree::SpecificIdentifier> si = dynamic_pointer_cast<CPPTree::SpecificIdentifier>(nx) )
     {
         TRACE("IsMatch comparing ")(si->GetName())(" with ")(newname);
         if( si->GetName() == newname )

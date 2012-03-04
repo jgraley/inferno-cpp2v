@@ -50,6 +50,8 @@ struct SharedPtrInterface : virtual SUB_BASE, public Traceable
     	(void)Traceable::operator=( o );
     	return *this;
     }
+    virtual SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_INTERFACE> MakeValueArchitype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone 
+                                                                                        // of the object we're pointing to) 
 };
 
 template<typename SUB_BASE, typename VALUE_INTERFACE, typename VALUE_TYPE>
@@ -163,6 +165,10 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
 			return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>();
 		}
 	}
+	virtual SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_INTERFACE> MakeValueArchitype() const
+	{
+        ASSERTFAIL("MakeValueArchitype() not implemented for this SharedPtr\n");
+    }
 };
 
 // Similar signature to boost shared_ptr operator==, and we restrict the pointers

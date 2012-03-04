@@ -10,14 +10,22 @@ go to SCSP mode (dealing with sequence points and side effects)
      in lowering compund expressions step...?
    
 lower compound expressions (0.2 #1)
-   - expand CompoundExpression in all the places where it can appear, including if expression etc
+   - expand CompoundExpression in all the places where it can appear, including if expression etc. 
+   - Do this in or just after the functions lowering steps. But before we need flatness. Maybe during clean-ups.
+   - Do use a temp to avoid voiolating SSP/SUSP
+
+lower sequence-pointed subexpressions (0.2 #2)
+   - &&, || and ?: into if-based constructions
+   - Locate this among construct lowerings, so that it is above the if lowering
+   - Note: not sequence-point correct until this is done - this gets us SSP compliance as defined in s_p_a_s_e.txt
+   - The sensiblising change below gets us to SUSP compliance
 
 add ability to lower wait(X) into yielding wait loop (0.2 #3)
    - not really critical at this stage, but makes the intention clearer for SC users
 
 only generate stacks for non-leaf functions (sensiblising) (0.2 #4)
 
-do not lower combable if, switch, for (sensiblising) (0.2 #5)
+do not lower combable if, switch, for &&, ||, ?: (sensiblising) (0.2 #5)
    - need combability detector
 
 test with multiple SC_THREAD, since this is nominally supported, let's keep it working (0.2 #6)

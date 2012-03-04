@@ -9,9 +9,66 @@
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
 #include "sr/soft_patterns.hpp"
+#include "tree/typeof.hpp"
 
 using namespace CPPTree;
 using namespace Steps;
+
+// Removing superfluous CompundExpression blocks to clean up the code
+CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in body not allowed
+{
+     // Lowering compound expressions
+     //
+     // exp( ({a; b; c; )) ) -> a; b; t=c; exp(t)
+     //
+     // Temp is used to preserve sequence point after c. This step assumes that
+     // all sequence points that need preserving co-incide with the semicolons
+     // in a Compound or CompundExpression. It also requires that there be no loops.
+    MakeTreePtr< MatchAll<Statement> > s_all;
+    MakeTreePtr< PointerIs<Statement> > sx_pointeris;
+    MakeTreePtr< NotMatch<Statement> > sx_not;
+    MakeTreePtr<Expression> sx_expr;
+    
+    MakeTreePtr< Stuff<Statement> > stuff;
+    MakeTreePtr< NotMatch<Statement> > sr_not;
+    MakeTreePtr< MatchAny<Statement> > sr_any;
+    MakeTreePtr<Compound> sr_comp;
+    MakeTreePtr<CompoundExpression> sr_ce;
+    
+    MakeTreePtr<CompoundExpression> s_ce;
+    MakeTreePtr<Compound> r_comp;
+    MakeTreePtr< Star<Statement> > s_pre, s_post, body;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr<Temporary> r_temp;
+    MakeTreePtr< TransformOf<Expression> > last( &TypeOf::instance );
+    MakeTreePtr<BuildInstanceIdentifier> r_temp_id("result");
+    MakeTreePtr<Assign> r_assign;
+    MakeTreePtr< Overlay<Expression> > overlay;
+    MakeTreePtr<Type> r_type;
+
+    s_all->patterns = (stuff, sx_pointeris);
+    sx_pointeris->pointer = sx_not;
+    sx_not->pattern = sx_expr;
+    stuff->recurse_restriction = sr_not;
+    sr_not->pattern = sr_any;
+    sr_any->patterns = (sr_comp, sr_ce);
+    stuff->terminus = overlay;
+    overlay->through = s_ce;
+    s_ce->statements = ( body, last );
+    s_ce->members = ( decls );
+    
+    r_comp->statements = ( body, r_assign, stuff );
+    r_comp->members = ( decls, r_temp );
+    r_temp->identifier = r_temp_id;
+    r_temp->initialiser = MakeTreePtr<Uninitialised>();
+    r_temp->type = r_type;
+    r_assign->operands = (r_temp_id, last);
+    last->pattern = r_type;
+    overlay->overlay = r_temp_id;        
+    
+    Configure( s_all, r_comp );
+}
+
 
 // Removing superfluous Compund blocks to clean up the code
 CleanupCompoundMulti::CleanupCompoundMulti() // LIMITAION: decls in body not allowed

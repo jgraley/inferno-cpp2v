@@ -4,13 +4,13 @@
         
 Inferno tree nodes implement a set of virtual functions defined by the base class Node, as well as observing certain stylistic conventions (termed topology-oriented). Both of these are documented here.
 
-The reason for defining an interface at this level is to allow algorithms to be written that process trees (for analysis and transformation) without needing knowledge of the particular language that is being used. In effect, a tree for a particular language is part of the implementation of the node interface, and a generic algorithm is a client of the node interface. We also aim to keep nodes simple to manipulate by algorithms that are aware of the language.
+The reason for defining an interface at this level is to allow algorithms to process trees (for analysis and transformation) without needing knowledge of the particular language that is being represented. In effect, a tree for a particular language is the implementation behind the node interface, and a generic algorithm is a client of the node interface. We also aim to keep nodes easy to manipulate by algorithms that are aware of the language being represented.
 
-Program trees are networks of nodes rather than a single node (actually they are acyclic directed graphs). We do not attempt to place a tree within a single container object which could marshal the incoming method calls, because this approach is too inflexible - algorithms need to get "closer" to the nodes themselves. So instead we expose a tree as a multiplicity of nodes and ensure that client code can move between nodes as required.
+Program trees are networks of nodes (actually acyclic directed graphs). We do not attempt to place a tree within a single container object which could marshal the incoming method calls, because this approach is too inflexible - algorithms need to get "close" to the nodes themselves. So instead we expose a tree as a multiplicity of nodes and ensure that client code can move between nodes as required.
 
 2 Topologically-Oriented tree
 
-Inferno trees are typically inheritance hierarchies under Node, including intermediate nodes which represent categories of nodes. It is useful to see such a hierarchy in a set-theoretical sense, where subclass is equivalent to subset. Thus the base class called Node is equivalent to the set of all nodes, and an intermediate is equivalent to some subset of nodes. 
+Inferno nodes are typically inheritance hierarchies under Node, including intermediate nodes which represent categories. It is useful to see such a hierarchy in a set-theoretical sense, where subclass is equivalent to subset. Thus the base class called Node is equivalent to the set of all nodes, and an intermediate node is equivalent to the subset of nodes that inherit from it. 
 
 Multiple inheritance is allowed, and by convention inferno trees use virtual inheritance, so that diamonds do not duplicate the base (our inheritance is true specialisation and so we want the set-union of members, not membership in disguise where we would want concatenation).
 
@@ -24,7 +24,9 @@ For example if a node naturally seems to contain a boolean or enum, we will pref
  - redefine the node as intermediate, and derive a final node for each option or
  - create a new intermediate and final nodes called properties, and add a pointer to the new intermediate to our node
  
-Both of these approaches removes the need for the bool/enum. The information has been represented in the topological aspect of the tree. Sometimes it is more difficult to represent data topologically, for example with int, float and string. So to be topologically-oriented it is sufficient to minimise the number of nodes defined with such data members.
+Both of these approaches removes the need for the bool/enum. The information has been represented in the topological aspect of the tree. Sometimes it is inconvenient to represent data topologically, for example with int, float and string. So to be topologically-oriented it is sufficient to minimise the number of nodes defined with such data members.
+
+A common practice in Inferno is the use of so-called architypes. These are objects (in inferno, they are nodes) whose purpose is only to indicate their type - i.e. the values of any members are irrelevent. An architype is useful for storing and passing around type information at run-time without the need to resort to ugly and inflexible RTTI objects. By way of support for architypes, we require that all node types should be constructible (including intermediates) and that they all contain a default (parameterless) constructor.
 
 3 Node Virtual Functions
 
@@ -83,7 +85,7 @@ Two macros, NODE_FUNCTIONS and NODE_FUNCTIONS_FINAL are defined to use in nodes.
     virtual bool IsFinal() {...}
 that reports whether the node is final.
 
-4 Standard topological elements
+4 Standard topological members
 
 These are the objects that are used by nodes to point to child nodes. These objects are based on boost and STL's templates, and a wrapper named OOStd has been created to support Inferno's requirements while maintaining the original look and feel. 
 Specifically:
