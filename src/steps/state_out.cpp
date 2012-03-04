@@ -253,7 +253,7 @@ struct BuildContainerSize : CompareReplace::SoftReplacePattern,
                             Special<Integer>
 {
     SPECIAL_NODE_FUNCTIONS
-    TreePtr< StarBase > container;
+    shared_ptr< StarBase > container;
 private:
     virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
     {
@@ -279,7 +279,7 @@ struct IsLabelReached : CompareReplace::SoftSearchPattern, Special<LabelIdentifi
 	// x is nominally the label id, at the position of this node
 	// y is nominally the goto expression, coupled in
     virtual bool DecidedCompare( const CompareReplace *sr,
-                                   TreePtr<Node> xx,
+                                 const TreePtrInterface &xx,
                                    bool can_key,
                                    Conjecture &conj ) 
     {
@@ -293,7 +293,8 @@ struct IsLabelReached : CompareReplace::SoftSearchPattern, Special<LabelIdentifi
         TreePtr<Expression> y = dynamic_pointer_cast<Expression>( n );
         ASSERT( y )("IsLabelReached saw pattern coupled to ")(*n)(" but an Expression is needed\n"); 
         ASSERT( xx );
-        TreePtr<LabelIdentifier> x = dynamic_pointer_cast<LabelIdentifier>( xx );
+        TreePtr<Node> nxx = xx;
+        TreePtr<LabelIdentifier> x = dynamic_pointer_cast<LabelIdentifier>( nxx );
         ASSERT( x )("IsLabelReached at ")(*xx)(" but is of type LabelIdentifier\n"); 
         TRACE("Can label id ")(*x)(" reach expression ")(*y)("?\n");
 

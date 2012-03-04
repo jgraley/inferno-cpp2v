@@ -13,6 +13,13 @@
 namespace Steps {
 
 // Find compound statements inside compund statements and flatten
+class CleanupCompoundExpression : public SearchReplace
+{    
+public:
+    CleanupCompoundExpression();
+};
+   
+// Find compound statements inside compund statements and flatten
 class CleanupCompoundMulti : public SearchReplace
 {    
 public:

@@ -94,7 +94,7 @@ public:
     {
         virtual void FlushCache() {}
         virtual bool DecidedCompare( const CompareReplace *sr,
-        		                       TreePtr<Node> x,
+        		                       const TreePtrInterface &x,
         		                       bool can_key,
         		                       Conjecture &conj ) = 0;
     };
@@ -156,12 +156,12 @@ private:
     		               CollectionInterface &pattern,
     		               bool can_key,
     		               Conjecture &conj ) const;
-    bool DecidedCompare( TreePtr<Node> x,
-    		               TreePtr<SearchContainerBase> pattern,
+    bool DecidedCompare( const TreePtrInterface &x,
+    		               shared_ptr<SearchContainerBase> pattern,
     		               bool can_key,
     		               Conjecture &conj ) const;
 public:
-    bool DecidedCompare( TreePtr<Node> x,
+    bool DecidedCompare( const TreePtrInterface &x,
     		               TreePtr<Node> pattern,
     		               bool can_key,
     		               Conjecture &conj,
@@ -170,7 +170,7 @@ public:
 private:
     // MatchingDecidedCompare ring
     friend class Conjecture;
-    bool MatchingDecidedCompare( TreePtr<Node> x,
+    bool MatchingDecidedCompare( const TreePtrInterface &x,
     		                       TreePtr<Node> pattern,
     		                       bool can_key,
     		                       Conjecture &conj ) const;
@@ -178,7 +178,7 @@ private:
     // Compare ring (now trivial)
     void FlushSoftPatternCaches( TreePtr<Node> pattern ) const;
 public:
-    bool Compare( TreePtr<Node> x,
+    bool Compare( const TreePtrInterface &x,
     		        TreePtr<Node> pattern,
 	                bool can_key = false ) const;
     virtual bool IsMatch( TreePtr<Node> context,       
@@ -222,9 +222,11 @@ public:
     {
     	NODE_FUNCTIONS_FINAL 
 
+        SubSequence() {}
     	shared_ptr<iterator_interface> my_begin;
     	shared_ptr<iterator_interface> my_end;
-    	operator string() const { return GetName() + SSPrintf("@%p", this); }    	
+    	operator string() const { return GetName() + SSPrintf("@%p", this); }    
+    public:
     	SubSequence( iterator &b, iterator &e ) : my_begin(b.Clone()), my_end(e.Clone())
     	{    	    
     	}
@@ -298,7 +300,7 @@ struct Special : SpecialBase, virtual PRE_RESTRICTION
 };
 
 /// Coupling slave can read the master's CouplingKeys structure
-struct CouplingSlave : virtual Node
+struct CouplingSlave 
 {
     virtual void SetCouplingsMaster( CouplingKeys *ck ) = 0;    
 };
@@ -348,14 +350,17 @@ struct Slave : SlaveIntermediate<ALGO>, Special<PRE_RESTRICTION>
 
 // Partial specialisation is an arse in C++
 template<class PRE_RESTRICTION>
-struct SlaveCompareReplace : Slave<CompareReplace, PRE_RESTRICTION> 
+struct SlaveCompareReplace : Slave<CompareReplace, PRE_RESTRICTION>, virtual Node
 {
+    SlaveCompareReplace() : Slave<CompareReplace, PRE_RESTRICTION>( NULL, NULL, NULL ) {}      
     SlaveCompareReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
         Slave<CompareReplace, PRE_RESTRICTION>( t, sp, rp ) {}
 };
+
 template<class PRE_RESTRICTION>
-struct SlaveSearchReplace : Slave<SearchReplace, PRE_RESTRICTION>
+struct SlaveSearchReplace : Slave<SearchReplace, PRE_RESTRICTION>, virtual Node
 {
+    SlaveSearchReplace() : Slave<SearchReplace, PRE_RESTRICTION>( NULL, NULL, NULL ) {}      
     SlaveSearchReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
         Slave<SearchReplace, PRE_RESTRICTION>( t, sp, rp ) {}
 };

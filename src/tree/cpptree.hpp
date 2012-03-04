@@ -92,6 +92,7 @@ struct String : Literal { NODE_FUNCTIONS };
 struct SpecificString : String
 {
 	NODE_FUNCTIONS_FINAL
+    SpecificString() {} ///< default constructor, for making architypes 
     SpecificString( string s ) :
     	value(s) /// Construct with a given STL string
     {
@@ -129,6 +130,7 @@ struct Integer : Number { NODE_FUNCTIONS };
 struct SpecificInteger : Integer, llvm::APSInt
 {
 	NODE_FUNCTIONS_FINAL
+    SpecificInteger() {} ///< default constructor, for making architypes 
     SpecificInteger( llvm::APSInt i ) : llvm::APSInt(i) {} ///< Construct with an LLVM-style integer
     SpecificInteger( int i ) : llvm::APSInt(INTEGER_DEFAULT_WIDTH) { *(llvm::APSInt *)this = i; } ///< Construct with an ordinary int
 	virtual bool IsLocalMatch( const Matcher *candidate ) const /// Overloaded comparison for search&replace
@@ -157,6 +159,7 @@ struct Float : Number { NODE_FUNCTIONS };
 struct SpecificFloat : Float, llvm::APFloat
 {
 	NODE_FUNCTIONS_FINAL
+    SpecificFloat() : llvm::APFloat(0.0) {} ///< default constructor, for making architypes 
     SpecificFloat( llvm::APFloat v ) : llvm::APFloat(v) {}; ///< Construct with an LLVM-style float
 	virtual bool IsLocalMatch( const Matcher *candidate ) const /// Overloaded comparison for search&replace
 	{
@@ -216,7 +219,7 @@ struct Identifier : virtual Property { NODE_FUNCTIONS };
 struct SpecificIdentifier : virtual Property
 { 
     NODE_FUNCTIONS
-	SpecificIdentifier() {} ///< default constructor TODO make private and friend Itemise
+	SpecificIdentifier() {} ///< default constructor, for making architypes 
 	SpecificIdentifier( string s ) : name(s) {} ///< construct with a given name
     virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p ) /// Overloaded duplication function for search&replace
     {
@@ -529,6 +532,7 @@ struct FloatSemantics : Property { NODE_FUNCTIONS };
 struct SpecificFloatSemantics : FloatSemantics
 {
 	NODE_FUNCTIONS_FINAL
+    SpecificFloatSemantics() {} ///< default constructor, for making architypes 
     SpecificFloatSemantics( const llvm::fltSemantics *s ) : /// Construct from LLVM's class
     	value(s)
     {
@@ -547,7 +551,6 @@ struct SpecificFloatSemantics : FloatSemantics
 	{
 		return *value;
 	}
-private:
     const llvm::fltSemantics *value;
 };    
 
