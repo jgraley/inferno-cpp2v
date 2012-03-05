@@ -313,3 +313,31 @@ BreakToGoto::BreakToGoto()
     
     Configure( breakable, r_comp );
 }
+
+
+LogicalAndToIf::LogicalAndToIf()
+{
+    MakeTreePtr<LogicalAnd> s_and;
+    MakeTreePtr<Expression> op1, op2;
+    MakeTreePtr<CompoundExpression> r_comp;
+    MakeTreePtr<BuildInstanceIdentifier> r_temp_id("andtemp");
+    MakeTreePtr<Temporary> r_temp;
+    MakeTreePtr<Boolean> r_boolean;
+    MakeTreePtr<If> r_if;
+    MakeTreePtr<Assign> r_assign1, r_assign2;
+    
+    s_and->operands = (op1, op2);
+    
+    r_comp->members = (r_temp);
+    r_temp->identifier = r_temp_id;
+    r_temp->type= r_boolean;
+    r_temp->initialiser = MakeTreePtr<Uninitialised>();
+    r_comp->statements = (r_assign1, r_if, r_temp_id);
+    r_assign1->operands = (r_temp_id, op1);
+    r_if->condition = r_temp_id;
+    r_if->body = r_assign2;
+    r_if->else_body = MakeTreePtr<Nop>();
+    r_assign2->operands = (r_temp_id, op2);    
+    
+    Configure( s_and, r_comp );
+}

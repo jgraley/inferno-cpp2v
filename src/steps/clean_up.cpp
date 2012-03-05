@@ -34,6 +34,8 @@ CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in bo
     MakeTreePtr< MatchAny<Statement> > sr_any;
     MakeTreePtr<Compound> sr_comp;
     MakeTreePtr<CompoundExpression> sr_ce;
+    MakeTreePtr< Star<Declaration> > sr_cdecls, sr_cedecls;
+    MakeTreePtr< Star<Statement> > sr_cstmts, sr_cestmts;
     
     MakeTreePtr<CompoundExpression> s_ce;
     MakeTreePtr<Compound> r_comp;
@@ -52,6 +54,11 @@ CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in bo
     stuff->recurse_restriction = sr_not;
     sr_not->pattern = sr_any;
     sr_any->patterns = (sr_comp, sr_ce);
+    sr_comp->members = sr_cdecls;
+    sr_comp->statements = sr_cstmts;
+    sr_ce->members = sr_cedecls;
+    sr_ce->statements = sr_cestmts;
+    
     stuff->terminus = overlay;
     overlay->through = s_ce;
     s_ce->statements = ( body, last );

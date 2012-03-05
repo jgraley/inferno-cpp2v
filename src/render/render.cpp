@@ -124,7 +124,8 @@ string Render::RenderScopePrefix( TreePtr<Identifier> id )
 	else if( TreePtr<Record> r = dynamic_pointer_cast<Record>( scope ) ) // <- for class, struct, union
 		return RenderScopedIdentifier( r->identifier ) + "::";
 	else if( dynamic_pointer_cast<CallableParams>( scope ) ||  // <- this is for params
-			 dynamic_pointer_cast<Compound>( scope ) )    // <- this is for locals in body
+             dynamic_pointer_cast<Compound>( scope ) ||    // <- this is for locals in body
+             dynamic_pointer_cast<CompoundExpression>( scope ) )    // <- this is for locals in body
 		return string();
 	else
 		return ERROR_UNSUPPORTED( scope );
