@@ -48,6 +48,14 @@ public:
     BreakToGoto();
 };
 
+class LogicalAndToIf : public SearchReplace
+{
+public:
+    LogicalAndToIf();
+};
+
+
+
 }; // end namespace
 
 #endif 

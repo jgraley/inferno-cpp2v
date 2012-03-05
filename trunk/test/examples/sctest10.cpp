@@ -14,8 +14,8 @@ public:
     void T()
     {
         x = 0;
-        x = f(4, 6, 8);
-        cease(x);
+        x = f( f(0,0,0), 6, 8);
+        cease( x + f(1, 2, 3)*2 );
     }
     int f( int i, short j, char k )
     {
