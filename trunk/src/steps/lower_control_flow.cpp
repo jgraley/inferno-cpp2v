@@ -341,3 +341,43 @@ LogicalAndToIf::LogicalAndToIf()
     
     Configure( s_and, r_comp );
 }
+
+ExtractCallParams::ExtractCallParams()
+{
+    MakeTreePtr<Call> s_call, r_call;
+    MakeTreePtr<BuildInstanceIdentifier> r_temp_id("temp_%s");
+    MakeTreePtr<Temporary> r_temp;
+    MakeTreePtr<CompoundExpression> r_ce;
+    MakeTreePtr<Assign> r_assign;
+    MakeTreePtr< Star<MapOperand> > params;
+    MakeTreePtr<MapOperand> s_param, r_param;
+    MakeTreePtr< TransformOf<Expression> > value( &TypeOf::instance );
+    MakeTreePtr<Type> type;
+    MakeTreePtr<Expression> callee;
+    MakeTreePtr<InstanceIdentifier> id;
+    MakeTreePtr< MatchAll<Expression> > all;
+    MakeTreePtr< NotMatch<Expression> > x_not;
+    MakeTreePtr<InstanceIdentifier> x_id;
+    
+    s_call->operands = (params, s_param);
+    s_param->value = all;
+    all->patterns = (value, x_not);
+    s_param->identifier = id;
+    value->pattern = type;
+    s_call->callee = callee;
+    x_not->pattern = x_id; // this restriction to become light-touch restriction
+    
+    r_ce->members = (r_temp);
+    r_temp->identifier = r_temp_id;
+    r_temp_id->sources = (id);
+    r_temp->initialiser = MakeTreePtr<Uninitialised>();
+    r_temp->type = type;
+    r_ce->statements = (r_assign, r_call);
+    r_assign->operands = (r_temp_id, value);
+    r_call->operands = (params, r_param);
+    r_param->value = r_temp_id;    
+    r_param->identifier = id;
+    r_call->callee = callee;
+    
+    Configure( s_call, r_ce );
+}

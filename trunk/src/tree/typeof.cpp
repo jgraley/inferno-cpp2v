@@ -89,6 +89,17 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     {
         return MakeTreePtr<Type>();
     }
+    else if( TreePtr<CompoundExpression> ce = dynamic_pointer_cast<CompoundExpression>(o) )
+    {
+        int sz = ce->statements.size();
+        if( !sz )
+            return MakeTreePtr<Type>();
+        TreePtr<Statement> last = ce->statements[sz-1];
+        if( TreePtr<Expression> e = dynamic_pointer_cast<Expression>(last) )
+            return Get(e);
+        else
+            return MakeTreePtr<Type>();
+    }
     else 
     {
         ASSERT(0)("Unknown expression ")(*o)(", please add to TypeOf class");

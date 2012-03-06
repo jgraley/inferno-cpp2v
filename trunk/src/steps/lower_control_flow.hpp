@@ -54,6 +54,12 @@ public:
     LogicalAndToIf();
 };
 
+class ExtractCallParams : public SearchReplace
+{
+public:
+    ExtractCallParams();
+};
+
 
 
 }; // end namespace

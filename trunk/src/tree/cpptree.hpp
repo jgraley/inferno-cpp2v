@@ -782,27 +782,30 @@ struct AlignOf : TypeOperator { NODE_FUNCTIONS_FINAL };
 
 //////////////////////////// Statements ////////////////////////////
 
-/// Declarations and Statements inside {} or begin/end. 
+/// A sequence of statements in a scope that shall execute in sequence
 /** Note that local declarations
  can go in the members of the Scope or in the statements (since Declaration
- derives from Statement) */
+ derives from Statement). There is a sequence point between each statement. */
+struct SequentialScope : Scope
+{
+    Sequence<Statement> statements; ///< Can contain local declarations and code
+};
+
+/// Declarations and Statements inside {} or begin/end. 
 struct Compound : Statement,
-                  Scope,      ///< Local declarations go in here (preferably)
+                  SequentialScope,      ///< Local declarations go in here (preferably)
                   Initialiser ///< Can "initialise" a function (with the body) 
 {
     NODE_FUNCTIONS_FINAL
-    Sequence<Statement> statements; ///< Can contain local declarations and code
 };                   
 
 /// GCC extension for compound statements that return a value
-/** Note that local declarations
- can go in the members of the Scope or in the statements (since Declaration
- derives from Statement) */
+/** The returned value is that returned by the last statement if it
+    is an expresison. Otherwise evaluates to void */
 struct CompoundExpression : Expression, ///< Evaluates to whatever the last statement evaluates to
-                            Scope       ///< Local declarations go in here (preferably)
+                            SequentialScope       ///< Local declarations go in here (preferably)
 {
     NODE_FUNCTIONS_FINAL
-    Sequence<Statement> statements; ///< Can contain local declarations and code
 };                   
 
 /// The return statement of a function
