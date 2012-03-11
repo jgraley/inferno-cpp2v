@@ -328,13 +328,20 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		*shape = "circle";
 		return string("^");
 	}
-	else if( shared_ptr<TransformOfBase> tob = dynamic_pointer_cast<TransformOfBase>(sp) )
-	{
-	    // The TransformOf node appears as a slightly flattened hexagon, with the name of the specified 
-	    // kind of Transformation class inside it.
-		*shape = "hexagon";
-		return *(tob->transformation);
-	}
+    else if( shared_ptr<TransformOfBase> tob = dynamic_pointer_cast<TransformOfBase>(sp) )
+    {
+        // The TransformOf node appears as a slightly flattened hexagon, with the name of the specified 
+        // kind of Transformation class inside it.
+        *shape = "hexagon";
+        return *(tob->transformation);
+    }
+    else if( dynamic_pointer_cast<PointerIsBase>(sp) )
+    {
+        // The TransformOf node appears as a slightly flattened hexagon, with the name of the specified 
+        // kind of Transformation class inside it.
+        *shape = "pentagon";
+        return string("pointer is"); 
+    }
 	else if( shared_ptr<BuildIdentifierBase> smi = dynamic_pointer_cast<BuildIdentifierBase>(sp) )
 	{
 	    // The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
