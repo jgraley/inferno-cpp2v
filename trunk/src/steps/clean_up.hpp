@@ -75,6 +75,13 @@ public:
     CleanUpDeadCode();
 };
 
+/** turn a compound expression that does not end in an expression into an ordinary compound */
+class ReduceVoidCompoundExpression : public SearchReplace
+{
+public:
+    ReduceVoidCompoundExpression();
+};
+
 }; // end namespace
 
 #endif 

@@ -2,26 +2,15 @@ TODO list (to get the sequential phase looking good)
 Note: (0.2 #x) means do this for 0.2 release, in order of x. 
 0.2 planned release notes: Better S&R, maybe ready for general use; initial SystemC support; sequential phase at alpha or beta; doxygen and generally better documentation
 
-go to SCSP mode (dealing with sequence points and side effects)
-   - can just do SSP if SCSP is too much hassle
-   - see docs/program
-   - after this, the only challenged seq points are ;, so any reordering is OK between semicolons
-   - maybe cheat and treat all CompoundExpressions as side-effecty. Otherwise feels like we have to duplicate a bit
-     in lowering compund expressions step...?
+** more tidyups, lower CE more and possibly temp tidyupos
    
-lower sequence-pointed subexpressions (0.2 #2)
-   - &&, || and ?: into if-based constructions
-   - Locate this among construct lowerings, so that it is above the if lowering
-   - Note: not sequence-point correct until this is done - this gets us SSP compliance as defined in s_p_a_s_e.txt
-   - The sensiblising change below gets us to SUSP compliance
+do not lower combable if, switch, for &&, ||, ?: (sensiblising) (0.2 #3)
+   - need combability detector
 
-add ability to lower wait(X) into yielding wait loop (0.2 #3)
+add ability to lower wait(X) into yielding wait loop (0.2 #4)
    - not really critical at this stage, but makes the intention clearer for SC users
 
-only generate stacks for non-leaf functions (sensiblising) (0.2 #4)
-
-do not lower combable if, switch, for &&, ||, ?: (sensiblising) (0.2 #5)
-   - need combability detector
+only generate stacks for non-leaf functions (sensiblising) (0.2 #5)
 
 test with multiple SC_THREAD, since this is nominally supported, let's keep it working (0.2 #6)
    - funciton merging needs fixing so it does not kill the callee, in case other threads call it. A seperate kill uncalled functions

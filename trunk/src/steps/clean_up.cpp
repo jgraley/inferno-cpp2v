@@ -31,11 +31,9 @@ CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in bo
     
     MakeTreePtr< Stuff<Statement> > stuff;
     MakeTreePtr< NotMatch<Statement> > sr_not;
-    MakeTreePtr< MatchAny<Statement> > sr_any;
-    MakeTreePtr<Compound> sr_comp;
-    MakeTreePtr<CompoundExpression> sr_ce;
-    MakeTreePtr< Star<Declaration> > sr_cdecls, sr_cedecls;
-    MakeTreePtr< Star<Statement> > sr_cstmts, sr_cestmts;
+    MakeTreePtr<SequentialScope> sr_comp;
+    MakeTreePtr< Star<Declaration> > sr_cdecls;
+    MakeTreePtr< Star<Statement> > sr_cstmts;
     
     MakeTreePtr<CompoundExpression> s_ce;
     MakeTreePtr<Compound> r_comp;
@@ -52,12 +50,9 @@ CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in bo
     sx_pointeris->pointer = sx_not;
     sx_not->pattern = sx_expr;
     stuff->recurse_restriction = sr_not;
-    sr_not->pattern = sr_any;
-    sr_any->patterns = (sr_comp, sr_ce);
+    sr_not->pattern = sr_comp;
     sr_comp->members = sr_cdecls;
     sr_comp->statements = sr_cstmts;
-    sr_ce->members = sr_cedecls;
-    sr_ce->statements = sr_cestmts;
     
     stuff->terminus = overlay;
     overlay->through = s_ce;
@@ -356,3 +351,25 @@ CleanUpDeadCode::CleanUpDeadCode()
     Configure( s_comp, r_comp );            
 }
 
+
+ReduceVoidCompoundExpression::ReduceVoidCompoundExpression()
+{
+    MakeTreePtr<CompoundExpression> s_ce;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > stmts;
+    MakeTreePtr< NotMatch<Statement> > last;
+    MakeTreePtr< TransformOf<Expression> > sx_expr( &TypeOf::instance );
+    MakeTreePtr< NotMatch<Type> > sx_type_not;
+    MakeTreePtr<Void> sx_void;
+    MakeTreePtr<Compound> r_comp;
+    
+    s_ce->members = (decls);
+    s_ce->statements = (stmts, last);
+    last->pattern = sx_expr;
+    sx_expr->pattern = sx_type_not;
+    sx_type_not->pattern = sx_void;
+    r_comp->members = (decls);
+    r_comp->statements = (stmts, last);
+    
+    Configure( s_ce, r_comp );      
+}

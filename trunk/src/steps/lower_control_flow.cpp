@@ -342,6 +342,63 @@ LogicalAndToIf::LogicalAndToIf()
     Configure( s_and, r_comp );
 }
 
+
+LogicalOrToIf::LogicalOrToIf()
+{
+    MakeTreePtr<LogicalOr> s_or;
+    MakeTreePtr<Expression> op1, op2;
+    MakeTreePtr<CompoundExpression> r_comp;
+    MakeTreePtr<BuildInstanceIdentifier> r_temp_id("ortemp");
+    MakeTreePtr<Temporary> r_temp;
+    MakeTreePtr<Boolean> r_boolean;
+    MakeTreePtr<If> r_if;
+    MakeTreePtr<Assign> r_assign1, r_assign2;
+    
+    s_or->operands = (op1, op2);
+    
+    r_comp->members = (r_temp);
+    r_temp->identifier = r_temp_id;
+    r_temp->type= r_boolean;
+    r_temp->initialiser = MakeTreePtr<Uninitialised>();
+    r_comp->statements = (r_assign1, r_if, r_temp_id);
+    r_assign1->operands = (r_temp_id, op1);
+    r_if->condition = r_temp_id;
+    r_if->body = MakeTreePtr<Nop>();
+    r_if->else_body = r_assign2;
+    r_assign2->operands = (r_temp_id, op2);    
+    
+    Configure( s_or, r_comp );
+}
+
+
+MultiplexorToIf::MultiplexorToIf()
+{
+    MakeTreePtr<Multiplexor> s_mux;
+    MakeTreePtr<Expression> op1, op2, op3;
+    MakeTreePtr<CompoundExpression> r_comp;
+    MakeTreePtr<BuildInstanceIdentifier> r_temp_id("muxtemp");
+    MakeTreePtr<Temporary> r_temp;
+    MakeTreePtr<Boolean> r_boolean;
+    MakeTreePtr<If> r_if;
+    MakeTreePtr<Assign> r_assignt, r_assignf;
+    
+    s_mux->operands = (op1, op2, op3);
+    
+    r_comp->members = (r_temp);
+    r_temp->identifier = r_temp_id;
+    r_temp->type= r_boolean;
+    r_temp->initialiser = MakeTreePtr<Uninitialised>();
+    r_comp->statements = (r_if, r_temp_id);
+    r_if->condition = op1;
+    r_if->body = r_assignt;
+    r_if->else_body = r_assignf;
+    r_assignt->operands = (r_temp_id, op2);    
+    r_assignf->operands = (r_temp_id, op3);    
+    
+    Configure( s_mux, r_comp );
+}
+
+
 ExtractCallParams::ExtractCallParams()
 {
     MakeTreePtr<Call> s_call, r_call;

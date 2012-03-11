@@ -13,13 +13,16 @@ public:
     }
     void T()
     {
-        x = 0;
+        x = 4;
         ++x && (y = f(x));
+        !(++x) || (y += f(x));
+        for( x=0; x<2; )
+            x++ ? (y+=f(x)) : (y-=f(x));
         cease( y );
     }
     int f( int i )
     {
-        return i+9;
+        return 100/i;
     }
 };
 
