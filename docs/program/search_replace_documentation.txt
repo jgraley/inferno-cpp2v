@@ -225,6 +225,12 @@ There are three variants:
   
 Warning: names are an imprecise way to specify identifiers. Names are arbitrary in the input program, and may be generated during transformations by BuildIdentifier (below). Names are not guaranteed to be unique, and the renderer has to uniquify in order to generate correct C output. This node is expected to be used in early steps that detect language extensions embedded in identifiers with specific names.
   
+7a.2 PointerIs
+
+PointerIs discovers the type of the TreePtr in the input program node that points to the current node. This is then matched to the subtree pointed to by member "pointer". 
+
+So, for example, one may detect an expression by simply using the wildcard Expression. However, to detect an expression only when pointed to by a TreePtr<Statement> but not TreePtr<Expression>, one would use PointerIs( NotMatch( Expression ) ). This will match Expression in eg Compound( Expression ) because Compound's statements collection uses TreePtr<Statement> but not eg LogicalNot( Expression ) since LogicalNot uses a TreePtr<Expression>.
+
 8 Builder replace patterns
 
 Similar to TransformOf patterns, described above, it is sometimes desirable to generate subtrees using some algorithm apart from the search and replace, and embed these in the output program tree. This is done using builder nodes. At present, the identifier builder is only kind of builder node. 
