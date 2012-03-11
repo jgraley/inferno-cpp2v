@@ -61,7 +61,7 @@ INFIX(pipeequal            , "|=",  AssignmentBitwiseOr,  AssignmentOperator,   
 INFIX(equal                , "=",   Assign,               AssignmentOperator,     SPECIAL )
 INFIX(equalequal           , "==",  Equal,                CommutativeBinop,       COMPARISON )
 INFIX(comma                , ",",   Comma,                Binop,                  SPECIAL ) 
-// TODO these four have no clang id, no string and are non-standard - put them back in tree.hpp
+// TODO these four have no clang id, no string and are non-standard - put them back in cpptree.hpp
 OTHER(0                    , "",    Multiplexor,          Ternop,                 SPECIAL )  // a?b:c
 OTHER(0                    , "",    Subscript,            Binop,                  SPECIAL )  // a[b]
 OTHER(0                    , "",    MakeArray,            NonCommutativeOperator, SPECIAL ) // {a, b, c}

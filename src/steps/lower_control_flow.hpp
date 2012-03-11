@@ -48,10 +48,25 @@ public:
     BreakToGoto();
 };
 
+// Reduce || to an if, due to its conditional execution and sequence point behaviour
+class LogicalOrToIf : public SearchReplace
+{
+public:
+    LogicalOrToIf();
+};
+
+// Reduce && to an if, due to its conditional execution and sequence point behaviour
 class LogicalAndToIf : public SearchReplace
 {
 public:
     LogicalAndToIf();
+};
+
+// Reduce ?: to an if, due to its conditional execution and sequence point behaviour
+class MultiplexorToIf : public SearchReplace
+{
+public:
+    MultiplexorToIf();
 };
 
 class ExtractCallParams : public SearchReplace

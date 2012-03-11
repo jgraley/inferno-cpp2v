@@ -39,9 +39,12 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     sequence->push_back( shared_ptr<Transformation>( new ForToWhile ) ); 
     sequence->push_back( shared_ptr<Transformation>( new WhileToDo ) ); 
     sequence->push_back( shared_ptr<Transformation>( new LogicalAndToIf ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new LogicalOrToIf ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new MultiplexorToIf ) ); 
     sequence->push_back( shared_ptr<Transformation>( new IfToIfGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new DoToIfGoto ) ); 
     sequence->push_back( shared_ptr<Transformation>( new ExtractCallParams ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new ReduceVoidCompoundExpression ) ); 
 
     sequence->push_back( shared_ptr<Transformation>( new ExplicitiseReturn ) );
     

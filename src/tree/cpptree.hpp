@@ -44,7 +44,7 @@ struct Statement : virtual Node { NODE_FUNCTIONS };
 
 /// An expression that computes a result value. 
 /** Can be used anywhere a statement can, per C syntax rules. */
-struct Expression : Statement,
+struct Expression : virtual Statement,
                     Initialiser { NODE_FUNCTIONS };
 
 /// Any abstract data type
@@ -786,14 +786,15 @@ struct AlignOf : TypeOperator { NODE_FUNCTIONS_FINAL };
 /** Note that local declarations
  can go in the members of the Scope or in the statements (since Declaration
  derives from Statement). There is a sequence point between each statement. */
-struct SequentialScope : Scope
+struct SequentialScope : Scope,
+                         virtual Statement
 {
+    NODE_FUNCTIONS
     Sequence<Statement> statements; ///< Can contain local declarations and code
 };
 
 /// Declarations and Statements inside {} or begin/end. 
-struct Compound : Statement,
-                  SequentialScope,      ///< Local declarations go in here (preferably)
+struct Compound : SequentialScope,      ///< Local declarations go in here (preferably)
                   Initialiser ///< Can "initialise" a function (with the body) 
 {
     NODE_FUNCTIONS_FINAL

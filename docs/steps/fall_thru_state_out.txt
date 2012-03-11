@@ -13,6 +13,7 @@ Terminology:
 
  - state machine: an algorithm divided into parts (the states) that can remember which state it should run next, and can therefore do its work over a number of invocations. In hardware, this is a way of combining combed logic with registers and a clock to perform uncombable tasks.
 
+ - superloop: an infinite loop surrounding all the funcitonality in a function. This provides the multiple iterations that a state machine needs to run. It is assumed implicitly in the examples blow.
 
 Forward fall-thru machine
 -------------------------
@@ -227,11 +228,11 @@ BEHAVIOUR: 0 iterations: no inferred yields
 Bidirectional fall-thru machine with yields
 -------------------------------------------
 
-This is where thinfs get interesting, if we want to avoid inferring new yields into loops that already contain a yield. Note that there are gotchas here, such as
+This is where things get interesting, if we want to avoid inferring new yields into loops that already contain a yield. Note that there are gotchas here, such as
 
 while(x) if(y) yield 
 
-can loop endlessly and unyieldingly when x is true and y is false. Starting with a simpler example, consider a loop with a yield in it:
+contains no explicit yield if x is always true and y is always false. Starting with a simpler example, consider a loop with a yield in it:
 
 state=LOOP
 goto state
@@ -277,7 +278,7 @@ goto state
 
 Now it would appear that during a single iteration of the loop, we will execute state xxx and then set yield_flag, so that no more states execute until we hit the goto at the bottom which makes us yield. Then we execute state yyy and if cond is true we go to state LOOP, but (as in the previous section) we will infer a second yield.
 
-Aside: In general it is OK to re-order the if statements that correspond to the states. They could be in any order. If the order is random, then it will be random how many states execute before hitting the bottom of the loop. Requested yields will work thanks to yield_flag inhibiting any further execution until the inferred yield. But the number of states executed on each superloop iteration would probably not be optimal. Indeed, the original order in which the states appear in the input program is probably close to optimal, assuming the programmer has manually minimised the number of gotos, ifs, whiles etc.
+Aside: In general it is OK to re-order the if statements that correspond to the states. They could be in any order. If the order is random, then it will be random how many states execute before hitting the bottom. Requested yields will work thanks to yield_flag inhibiting any further execution until the inferred yield. But the number of states executed on each superloop iteration would probably not be optimal. Indeed, the original order in which the states appear in the input program is probably close to optimal, assuming the programmer has manually minimised the number of gotos, ifs, whiles etc.
 
 We care more about the ordering inside the loop than outside (and on entry/exit to loop), since we assume a large number of iterations. Rotating the states in a loop body (eg A B C D goes to D A B C) does not affect per-iteration behaviour since neighbouring iterations form the original sequence. So, for 5 iterations: A B C D A B C D A B C D A B C D A B C D becomes D A B C D A B C D A B C D A B C D A B C which contains 4 repetitions of A B C D. So on the order of the number of iterations, nothing has changed, just a different flow entering and leaving the loop (and these won't infer yields because they remain strictly forward transitions).
 
@@ -314,6 +315,8 @@ We don't get 2 yields per iteration any more. Instead as we pass all the remaini
 
 In practice loops will usually use conditional backward jumps, where the jump would otherwise go forward. If we assume loops have many iterations, we will assume the direction usually chosen is the backward one.
 
+NOTE: though the iteration-to-iteration performance is more important, this example is optimal for entry and exit too, since these are always forward transitions: entry is from above the loop to somewhere in the rotated loop body, and exit is from somewhere in the rotated loop body to after the loop, so always downward transitions.
+
 BEHAVIOUR: 0 iterations: no yields
            1 iteration: one yield
            n iterations: n yields
@@ -321,16 +324,18 @@ BEHAVIOUR: 0 iterations: no yields
 More complicated control flow
 -----------------------------
 
-I have considered a few cases of more complicate control flow:
+I have considered a few cases of more complicated control flow:
 
 - 2 nested loops, yields in inner
 The outer loop contains a backward transition (= inner loop) which crosses the yield. If outer loop is rotated, the jump becomes forward and does not cross the yield. This will produce an efficient fall-thru machine, if a little confusing (outer loop is now doing the work of both loops). Alternatively we could rotate the inner loop first until the yield is at the bottom, then rotate the outer loop. This would keep the inner loop intact. Both approaches should work OK.
+
+NOTE: having implemented loop rotation, I find it is better to rotate the outer loop first. If the inner loop is rotated first, the transition out of the loop body after the last iteration becomes a forward transition that crosses the yield and hence infers a yield when the outer loop is rotated. So it is better to rotate outer loop first. 
 
 - 2 nested loop, yield in outer but not inner
 The outer loop contains a backward jump which does not cross the yield. After rotating the outer loop the backward jump is still backward and still does not cross the yield (after rotation, no loop body transition crosses the yield, because it is at the bottom). This inner loop will generate an inferred yield as required, since it could iterator forever.
 
 - loop containing a yield inside an if 
-This is the example gotcha in the above section. Loop contains forward jump crossing the yield. After rotation, jump is backwards and does not cross the yield. Interestingly, this backward jump now appears to infer an indefinite loop, which will generate an inferred yield. This is what we want. The answer to the gotcha is thus while(x) {while(x&&!y) {}; yield}
+This is the example gotcha in the above section. Loop contains forward jump crossing the yield. After rotation, jump is backwards and does not cross the yield. Interestingly, this backward jump now appears to infer an indefinite loop, which will generate an inferred yield. This is what we want. The answer to the gotcha mentioned above is thus while(x) {while(x&&!y) {}; yield}
 
 - loop containing a yield and if, yield not in if
 The if remains a forward jump not crossing yield. Efficient fall-thru-machine generated.
@@ -338,7 +343,7 @@ The if remains a forward jump not crossing yield. Efficient fall-thru-machine ge
 - Duff's device
 A goto into a loop body (essentially). The goto will always be a forward transition regardless of whether the loop is rotated. So the goto will not infer a yield. Same goes for jumps out of the loop body - they remain forward as the loop rotates, all that changes is how far (how many states they cross). 
 
-Note: remember that if some overall containing loop were rotated, that could change the direction of the jump. But as explained above, on a per-iteration basis rotation doesn't really change anything since the loop loops round back to the beginning after (nearly) every iteration.
+Note: remember that if some overall containing loop were rotated, that could change the direction of the jump. But as explained above, on a per-iteration basis rotation doesn't really change anything since the loop loops round back to the beginning after (nearly) every iteration. NOTE but we can suffer unneccesary inferred yields in loop entry/exit if not careful. 
 
 - Leap-frogging loops 
 Two backward jumps that cross over, ie states A, B, C, D where D jumps to B and C to A. A yield is right in the middle, at state B. This seems to come out OK regardless of which loop is rotated first.
@@ -347,7 +352,7 @@ Two backward jumps that cross over, ie states A, B, C, D where D jumps to B and 
 A loop containing 2 yields must yield twice per iteration as requested. Either yield should be sufficient to be moved to the bottom. It is probably least disruptive to use the lower of the two, which would be achieved by constantly rotating the loop body downwards until one of the yields is at the bottom.
 
 - General complex structures
-Loop rotation must terminate if there is only one yield. This is because all transformations move it strictly downwards, and once it reaches the bottom it can go no further. The situation is more complex for multiple yields because moving one yield down may move another up. But if we only rotate each loop enough so that the lowest of the yields reaches the bottom, then no yields will wrap around - instead all the other yields in the loop will move down. So in fact this should terminate too. 
+Loop rotation must terminate if there is only one yield. This is because all transformations move it strictly downwards, and once it reaches the bottom it can go no further. The situation is more complex for multiple yields because moving one yield down may move another up. But if we only rotate each loop enough so that the lowest of the yields reaches the bottom, then no yields will wrap around - instead all the yields in the loop will move down. So in fact this should terminate too. 
 
 BEHAVIOUR:
 If the above reasoning is right, every loop that contains a yield should be able to move that yield to the bottom and hence yield exactly n times, so not additional inferred yields. Forward flow does not add inferred yields. I believe a coding style as simple as ensuring every loop has an unconditional yields in its body should avoid inferred yields, giving a 1:1 relationship between requested and actual yields. This should allow eg cycle-specific protocols to be written in C. 
@@ -525,7 +530,7 @@ Summarising the conditions as above, we have
 S1:if( state0==S1 ) ...
 S2:if( state0==S1 && cond ) ...
 S3:if( state0==S3 ) ...
-S4:if( state0==S3 || !cond ) ...
+S4:if( state0==S3 || (state0==S1 && !cond) ) ...
 
 Now S1 is exclusive with S3 and S2 is exclusive with S4, but we do *not* have (S1,S2) exclusive with (S3,S4) because S1 and S4 can both execute (when state0=S1 and cond=false). 
 
@@ -534,7 +539,7 @@ Note that S3 is exclusive with S2. When two states are exclusive I believe we ca
 S1:if( state0==S1 ) ...
 S3:if( state0==S3 ) ...
 S2:if( state0==S1 && cond ) ...
-S4:if( state0==S3 || !cond ) ...
+S4:if( state0==S3 || (state0==S1 && !cond) ) ...
 
 Then we can divide the sequence up into sets as follows:
  
@@ -544,19 +549,21 @@ S3:if( state0==S3 ) ...
 
  set 2
 S2:if( state0==S1 && cond ) ...
-S4:if( state0==S3 || !cond ) ...
+S4:if( state0==S3 || (state0==S1 && !cond) ) ...
 
 And look for exclusive subsequences within each set, eg
 
  set 1
 S1:if( state0==S1 ) ...          > subsequence A
-S3:if( state0==S3 ) ...          > subsequence B
+S3:if( state0==S3 ) ...          > subsequence B; A and B are mutually exclusive
 
  set 2
 S2:if( state0==S1 && cond ) ...  > subsequence C
-S4:if( state0==S3 || !cond ) ... > subsequence D
+S4:if( state0==S3 || !cond ) ... > subsequence D; C and D are mutually exclusive
 
-Now, set 1 is a parallel combination of subsequences A and B, which is states S1 and S3. Set 2 is a parallel combination of subsequences C and D, which is states S2 and S4. We have satisfied the needs of both execution paths: if the test fails, we execute S1 then S4, and these are in subsequent sets, so this works. If the test passes, we need two iterations due to the yield: firstly, we execute S1 and S2, which is OK, and then on the next iteration, S3 and S4, which is also OK.
+Now, set 1 can be a parallel combination of subsequences A and B, which is states S1 and S3. Set 2 can be a parallel combination of subsequences C and D, which is states S2 and S4. These two sets 1 and 2 can be placed in a standard fall through machine with set 1 above set 2, so that they can combinationalise together in the correct sequential order, always set 1 (S1 or S3) then set 2 (S2 or S4).
+
+We have satisfied the needs of both execution paths: if the test fails, we execute S1 then S4, and these are in subsequent sets, so this works. If the test passes, we need two iterations due to the yield: firstly, we execute S1 and S2, which is OK, and then on the next iteration, S3 and S4, which is also OK.
 
 BEHAVIOUR: we have got max(S1, S3) + max(S2, S4) which is on the order of 2 states combinational depth, and roughly twice as good as the combinational path length involved in cascading all four states. Since the input program as written requests 2-state paths in several cases, this is a good result.
 
@@ -585,7 +592,7 @@ The harder example would be
 S1:if( state0==S1 ) ...            rank 0
 S2:if( state0==S1 && cond ) ...    rank 1
 S3:if( state0==S3 ) ...            rank 0
-S4:if( state0==S3 || !cond ) ...   rank 1 (two paths here, from S1 and S3, rank is max(1,1)
+S4:if( state0==S3 || !cond ) ...   rank 1 (two paths to here, from S1 and S3, rank is max(0,0)+1
 
 and becomes:
 
@@ -593,7 +600,7 @@ sequence(
 set {S1, S3},
 set {S2, S4} )
 
-Now, in the simple example case, this is potentially slower than the original effort, since in general sum(max()) may be bigger than max(sum()) over a grid of numbers. It is possible that a wire-level optimiser could do better. Since our requirement is to have settling time on the order of the largest gap between yields, we really want max(sum()), not sum(max()). But these values approach one another as the elements being summed and maxed get more similar. Therefore there may be a case to level the complexity of each state. 
+Now, in the simple example case, this is potentially slower than the original effort, since in general sum(max()) may be bigger than max(sum()) over a grid of numbers. It is possible that a wire-level optimiser could do better. Since our requirement is to have settling time on the order of the largest gap between yields, we really want max(sum()), not sum(max()). But these values approach one another as the elements being summed and maxed get more similar. Therefore there may be a case to level-out the complexities of states. 
 
 We can imagine a micro-clock, that ticks several times per system clock, and whose period represents the target settling time of the states. We could insert micro-yields, that just separate states and do not force iteration, as a way of controlling the state size.
 
