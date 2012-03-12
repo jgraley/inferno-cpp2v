@@ -29,25 +29,41 @@ void SelfTest();
 void build_sequence( vector< shared_ptr<Transformation> > *sequence )
 {
     ASSERT( sequence );
-    //
+    // SystemC detection, converts implicit SystemC to explicit. Always at the top
+    // because we never want to process implicit SystemC.
     sequence->push_back( shared_ptr<Transformation>( new DetectAllSCTypes ) );
 
     //sequence->push_back( shared_ptr<Transformation>( new GenerateImplicitCasts ) );        
     
+    // Lowerings that always apply regardless of combability of sub-blocks
+    sequence->push_back( shared_ptr<Transformation>( new ExtractCallParams ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new ExplicitiseReturn ) );
+    sequence->push_back( shared_ptr<Transformation>( new ReturnViaTemp ) );
+    sequence->push_back( shared_ptr<Transformation>( new AddLinkAddress ) );
+    sequence->push_back( shared_ptr<Transformation>( new ParamsViaTemps ) );
+    sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new MoveInstanceDeclarations ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) );
+    sequence->push_back( shared_ptr<Transformation>( new MergeFunctions ) );
+
     sequence->push_back( shared_ptr<Transformation>( new BreakToGoto ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new SwitchToIfGoto ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new ForToWhile ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new WhileToDo ) ); 
+    
+    // Lowerings that happen for intrinsic reasons OR due to uncombable sub blocks
+    for( int i=0; i<2; i++ )
+    {
+        sequence->push_back( shared_ptr<Transformation>( new ForToWhile ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new WhileToDo ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new DoToIfGoto ) ); 
+    }
+    
+    // Lowerings that only happen if uncombable sub-blocks
     sequence->push_back( shared_ptr<Transformation>( new LogicalAndToIf ) ); 
     sequence->push_back( shared_ptr<Transformation>( new LogicalOrToIf ) ); 
     sequence->push_back( shared_ptr<Transformation>( new MultiplexorToIf ) ); 
+    sequence->push_back( shared_ptr<Transformation>( new SwitchToIfGoto ) );
     sequence->push_back( shared_ptr<Transformation>( new IfToIfGoto ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new DoToIfGoto ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new ExtractCallParams ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new ReduceVoidCompoundExpression ) ); 
-
-    sequence->push_back( shared_ptr<Transformation>( new ExplicitiseReturn ) );
     
+    sequence->push_back( shared_ptr<Transformation>( new ReduceVoidCompoundExpression ) ); 
     sequence->push_back( shared_ptr<Transformation>( new CompactGotos ) ); // maybe put these after the label cleanups
     sequence->push_back( shared_ptr<Transformation>( new CompactGotosFinal ) );
     for( int i=0; i<2; i++ )
@@ -57,14 +73,6 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new CleanupNop ) ); 
     }        
         
-    sequence->push_back( shared_ptr<Transformation>( new ReturnViaTemp ) );
-    sequence->push_back( shared_ptr<Transformation>( new AddLinkAddress ) );
-    sequence->push_back( shared_ptr<Transformation>( new ParamsViaTemps ) );
-    sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new MoveInstanceDeclarations ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) );
-    sequence->push_back( shared_ptr<Transformation>( new MergeFunctions ) );
-
     // Ineffectual gotos, unused and duplicate labels result from compound tidy-up after construct lowering, but if not 
     // removed before AddGotoBeforeLabel, they will generate spurious states. We also remove dead code which can be exposed by
     // removal of unused labels - we must repeat because dead code removal can generate unused labels.
