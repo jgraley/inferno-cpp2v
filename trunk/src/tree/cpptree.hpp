@@ -71,6 +71,9 @@ struct Scope : virtual Node
  main() would typically be a function instance somewhere in this collection. */
 struct Program : Scope { NODE_FUNCTIONS_FINAL };
 
+/// Indicates that the node cannot be combinationalised
+struct Uncombable : virtual Node { NODE_FUNCTIONS };
+
 //////////////////////////// Literals ///////////////////////////////
 
 /// A property that can also be used as a literal in a program
@@ -413,7 +416,8 @@ struct SpecificLabelIdentifier : LabelIdentifier,
  It serves to declare the label; the identifier should be
  used for references. */
 struct Label : Declaration, //TODO commonize with Case and Default
-               Statement
+               Statement,
+               Uncombable
 {
 	NODE_FUNCTIONS_FINAL
     TreePtr<LabelIdentifier> identifier; ///< a handle for the label to be referenced elewhere
@@ -750,7 +754,7 @@ struct MapOperator : Operator
  calls have callee -> some InstanceIdentifier for a Callable Instance.
  Arguments passed via MapOperator - mapped to the parameters in the callee
  type (if it's a CallableParams). */
-struct Call : MapOperator
+struct Call : MapOperator, Uncombable
 {
 	NODE_FUNCTIONS_FINAL
     TreePtr<Expression> callee; ///< evaluates to the Callable Instance we must call
@@ -823,7 +827,7 @@ struct Return : Statement
  it is expected to be useful during sequential lowering (state-out).
  Therefore we do not directly require LabelIdentifier, but the Expression
  must evaluate to one. No * or && needed. */
-struct Goto : Statement
+struct Goto : Statement, Uncombable
 {
 	NODE_FUNCTIONS_FINAL
     // Dest is an expression for goto-a-variable support.
@@ -858,14 +862,14 @@ struct Breakable : Statement
 struct Loop : Breakable { NODE_FUNCTIONS };
 
 /// While loop
-struct While : Loop
+struct While : Loop, Uncombable
 {
 	NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition; ///< Tested before each iteration; false terminates immediately
 };
 
 /// Do loop (first iteration always runs)
-struct Do : Loop // a do..while() construct 
+struct Do : Loop, Uncombable // a do..while() construct 
 {
 	NODE_FUNCTIONS_FINAL
     TreePtr<Expression> condition; ///< Tested after each iteration; false terminates immediately

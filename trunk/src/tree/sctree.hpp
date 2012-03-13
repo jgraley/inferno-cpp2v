@@ -70,7 +70,8 @@ struct Interface : CPPTree::InheritanceRecord,
     nodes for each. All waits must be done in local execution contexts
     like threads. Waits allow the SystemC kernel to run other processes. */
 struct Wait : CPPTree::Statement,
-                 SCNamedFunction
+              SCNamedFunction, 
+              CPPTree::Uncombable
 {
     NODE_FUNCTIONS
     virtual string GetToken() { return "wait"; }
@@ -224,9 +225,10 @@ struct DeltaCount : CPPTree::Operator,
 /// Termination functions
 /** These are used to stop the program and produce an exit code because 
     SystemC does not allow control of the return value from its main 
-    function.*/
+    function. */
 struct TerminationFunction : CPPTree::Statement,
-                             SCNamedFunction
+                             SCNamedFunction, 
+                             CPPTree::Uncombable
 {
     NODE_FUNCTIONS
     TreePtr<CPPTree::Expression> code; ///< exit code for program, 0 to 255 
