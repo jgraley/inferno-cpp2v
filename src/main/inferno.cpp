@@ -35,82 +35,94 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
 
     //sequence->push_back( shared_ptr<Transformation>( new GenerateImplicitCasts ) );        
     
-    // Lowerings that always apply regardless of combability of sub-blocks
-    sequence->push_back( shared_ptr<Transformation>( new ExtractCallParams ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new ExplicitiseReturn ) );
-    sequence->push_back( shared_ptr<Transformation>( new ReturnViaTemp ) );
-    sequence->push_back( shared_ptr<Transformation>( new AddLinkAddress ) );
-    sequence->push_back( shared_ptr<Transformation>( new ParamsViaTemps ) );
-    sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new MoveInstanceDeclarations ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) );
-    sequence->push_back( shared_ptr<Transformation>( new MergeFunctions ) );
+    { // Construct lowerings
+        { // function call lowering (and function merging)
+            sequence->push_back( shared_ptr<Transformation>( new ExtractCallParams ) ); 
+            sequence->push_back( shared_ptr<Transformation>( new ExplicitiseReturn ) );
+            sequence->push_back( shared_ptr<Transformation>( new ReturnViaTemp ) );
+            sequence->push_back( shared_ptr<Transformation>( new AddLinkAddress ) );
+            sequence->push_back( shared_ptr<Transformation>( new ParamsViaTemps ) );
+            sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) ); 
+            sequence->push_back( shared_ptr<Transformation>( new MoveInstanceDeclarations ) ); 
+            sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) );
+            sequence->push_back( shared_ptr<Transformation>( new MergeFunctions ) );
+        }
 
-    sequence->push_back( shared_ptr<Transformation>( new BreakToGoto ) ); 
-    
-    // Lowerings that happen for intrinsic reasons OR due to uncombable sub blocks
-    for( int i=0; i<2; i++ )
-    {
+        sequence->push_back( shared_ptr<Transformation>( new BreakToGoto ) ); 
         sequence->push_back( shared_ptr<Transformation>( new ForToWhile ) ); 
         sequence->push_back( shared_ptr<Transformation>( new WhileToDo ) ); 
         sequence->push_back( shared_ptr<Transformation>( new DoToIfGoto ) ); 
-    }
-    
-    // Lowerings that only happen if uncombable sub-blocks
-    sequence->push_back( shared_ptr<Transformation>( new LogicalAndToIf ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new LogicalOrToIf ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new MultiplexorToIf ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new SwitchToIfGoto ) );
-    sequence->push_back( shared_ptr<Transformation>( new IfToIfGoto ) ); 
-    
-    sequence->push_back( shared_ptr<Transformation>( new ReduceVoidCompoundExpression ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new CompactGotos ) ); // maybe put these after the label cleanups
-    sequence->push_back( shared_ptr<Transformation>( new CompactGotosFinal ) );
-    for( int i=0; i<2; i++ )
-    {
-        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundSingle ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new CleanupNop ) ); 
-    }        
         
-    // Ineffectual gotos, unused and duplicate labels result from compound tidy-up after construct lowering, but if not 
-    // removed before AddGotoBeforeLabel, they will generate spurious states. We also remove dead code which can be exposed by
-    // removal of unused labels - we must repeat because dead code removal can generate unused labels.
-    sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundExpression ) ); // TODO only safe in SSP, so don't call this a cleanup!
-    for( int i=0; i<2; i++ )
-    {
-        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
-        sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) );
-        sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualLabels ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new CleanUpDeadCode ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new LogicalAndToIf ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new LogicalOrToIf ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new MultiplexorToIf ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new SwitchToIfGoto ) );
+        sequence->push_back( shared_ptr<Transformation>( new IfToIfGoto ) ); 
+        // All remaining uncomables at the top level and in SUSP style
     }
-    sequence->push_back( shared_ptr<Transformation>( new GotoAfterWait ) );     
-    sequence->push_back( shared_ptr<Transformation>( new AddGotoBeforeLabel ) );         
-    sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );            
-
-    sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
-    sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
+    
+    { // big round of cleaning up
+        sequence->push_back( shared_ptr<Transformation>( new CompactGotos ) ); // maybe put these after the label cleanups
+        sequence->push_back( shared_ptr<Transformation>( new CompactGotosFinal ) );
+        
+        sequence->push_back( shared_ptr<Transformation>( new ReduceVoidCompoundExpression ) ); 
+        for( int i=0; i<2; i++ )
+        {
+            sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
+            sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundSingle ) ); 
+            sequence->push_back( shared_ptr<Transformation>( new CleanupNop ) ); 
+        }        
             
-    sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
-    sequence->push_back( shared_ptr<Transformation>( new MakeFallThroughMachine ) ); 
-    sequence->push_back( shared_ptr<Transformation>( new MoveInitIntoSuperLoop ) );
-    sequence->push_back( shared_ptr<Transformation>( new AddYieldFlag ) );
-    sequence->push_back( shared_ptr<Transformation>( new AddInferredYield ) ); // now yielding in every iteration of superloop
-    sequence->push_back( shared_ptr<Transformation>( new LoopRotation ) );
+        // Ineffectual gotos, unused and duplicate labels result from compound tidy-up after construct lowering, but if not 
+        // removed before AddGotoBeforeLabel, they will generate spurious states. We also remove dead code which can be exposed by
+        // removal of unused labels - we must repeat because dead code removal can generate unused labels.
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundExpression ) ); // TODO only safe in SSP, so don't call this a cleanup!
+        for( int i=0; i<2; i++ )
+        {
+            sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
+            sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
+            sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) );
+            sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualLabels ) ); 
+            sequence->push_back( shared_ptr<Transformation>( new CleanUpDeadCode ) ); 
+        }
+    }
+    
+    { // creating fallthrough machine
+        sequence->push_back( shared_ptr<Transformation>( new GotoAfterWait ) );     
+        sequence->push_back( shared_ptr<Transformation>( new AddGotoBeforeLabel ) );         
+        sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );            
 
-    sequence->push_back( shared_ptr<Transformation>( new AutosToModule ) );
-    sequence->push_back( shared_ptr<Transformation>( new TempsAndStaticsToModule ) );
-    sequence->push_back( shared_ptr<Transformation>( new DeclsToModule ) );
-    sequence->push_back( shared_ptr<Transformation>( new ThreadToMethod ) );
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
+        sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
+                
+        sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
+        sequence->push_back( shared_ptr<Transformation>( new MakeFallThroughMachine ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new MoveInitIntoSuperLoop ) );
+        sequence->push_back( shared_ptr<Transformation>( new AddYieldFlag ) );
+        sequence->push_back( shared_ptr<Transformation>( new AddInferredYield ) ); 
+        // now yielding in every iteration of superloop
+    }
+    
+    { // optimsiing fall though machine
+        sequence->push_back( shared_ptr<Transformation>( new LoopRotation ) );
+    }
 
-    for( int i=0; i<2; i++ )
-    {
-        sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) );
-        sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualLabels ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new CleanUpDeadCode ) ); 
+    { // transition to event driven style
+        sequence->push_back( shared_ptr<Transformation>( new AutosToModule ) );
+        sequence->push_back( shared_ptr<Transformation>( new TempsAndStaticsToModule ) );
+        sequence->push_back( shared_ptr<Transformation>( new DeclsToModule ) );
+        sequence->push_back( shared_ptr<Transformation>( new ThreadToMethod ) );
+    }
+
+    { // final cleanups
+        for( int i=0; i<2; i++ )
+        {
+            sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
+            sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) );
+            sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualLabels ) ); 
+            sequence->push_back( shared_ptr<Transformation>( new CleanUpDeadCode ) ); 
+        }
     }
 }
 

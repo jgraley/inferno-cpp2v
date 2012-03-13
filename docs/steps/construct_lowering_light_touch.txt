@@ -28,26 +28,34 @@ Since we now only have cat 1 and 3 constructs, and the type 1 constructs are all
     - &&, ||, ?:
     - If, Switch
  
+CORRECTION: actually going to create Uncomable : Node and then tuck it in as required eg While : Loop, Uncomable and 
+UncomableFor : For, Uncombable and obviously UncomableFor is a local node due to finality rules.
+
 Break, Continue
 ---------------
 
 Continue is handled inside loop lowering steps: in the case of For, it would make the for loop uncomable and trigger lowering.
-Break is presently done in a seperate step. If Break and Continue are both designated cat 1 and derived from UncombableStatement then I think they will be correctly handled. According to inferral ordering, Break lowering *may* happen before for lowering, but Break is cat 1 so this is OK. A better general statement of ordering is thus
-- steps from cat 1
-- for lowering (the only cat 2 step)
-- steps from either cat 1 or cat 3
-which still does not conflict the inferral ordering.
+Break is presently done in a seperate step. Break and Continue are not considered uncombable in their own right, since break can be part of a combable switch statement. But the presence of break or continue in a For loop would render that for loop indefinite and hence uncombable.
+
+Overall, as long as the constructs themselves are correctly designated into cat 1 or cat 3 then the lowering of break, continue can carry on working as it does presently.
+
+Verilog disable
+---------------
 
 I suspect, though not sure, that Synthesisable Verilog can support a keyword called "disable" which seems to be able to exit a compound block, hence similar to continue/break/return though not identical. This would seem to imply the existance of comable break, continue and return operations. Actually at this stage return must still always be taken as uncombable (add to UncomableStatement?).
 
 If we allow break/continue to stick around in unlowered constructs, it seems like we would need to do break/continue lowering in any lowerng step that does indeed act, which feeld like duplication.
 
-Verilog disable
----------------
-
-We might want to exploit disable to simplify the lwoering of various constructs, particularly given its greater expressivity (it can exit any of the enclosing compound blocks).
+We might want to exploit disable to simplify the lowering of various constructs, particularly given its greater expressivity (it can exit any of the enclosing compound blocks).
 
 This is a matter for consideration - I do not intend to use disable at present. Let's get the rest of this working first!
+
+Exit, Cease
+-----------
+
+These are marked uncombable too, so that they get pulled out of enclosing constructs. 
+
+Most likely verilog simulators can be persuaded to just cease when the algorithm is done as with systemc, but I'm not sure, and I may need to align cessation with exiting an always block. Either way, the intermediates will look better if I get out of ifs, fors etc when ceasing. 
 
 Sequence point issue
 --------------------
@@ -56,13 +64,24 @@ It is worth noting that this method does not deem side effects as uncombable. Th
 
 x++ && x
 
-combable and trusting Verilog to get it right. Therefore, we will leave sequence points behind that are near side effects AND do not co-incide with semicolons, i.e. would generate SCSP (simple combable sequence points). It is believed that such statements will remain atomic and will not contain compound expressions. I think we must always regard compound expressions as uncomabble for this to be safe, so we do break up eg
+combable and trusting Verilog to get it right. Therefore, we will leave sequence points behind that are near side effects AND do not co-incide with semicolons, i.e. would generate SCSP (simple combable sequence points). It is believed that such statements will remain atomic and will not contain compound expressions. We must break up eg
 
-x++ && ({ blah })
+x++ && ({ blah; blah })
+
+but do not need to break up any enclosing constructs, therefore the test for &&, ||, ?: should trigger on uncombables and compound statements. 
 
 A final list of UncomableStatements is thus:
-Call, While, Do
-Yield, Goto, Label
-Break, Continue
-CompoundExpression
+Call, 
+While, Do
+Goto, Label, Return
+Wait, Exit, Cease
+UncomableFor, UncombableSwitch
 
+Implementation note
+-------------------
+
+It will be a frequent requirement to detect uncomables under a given node. While the pattern to do this is simple, basically
+
+MatchAll( original_search_pattern, NotMatch( Stuff( Uncombable ) ) )
+
+I will provide a factored out implementation.
