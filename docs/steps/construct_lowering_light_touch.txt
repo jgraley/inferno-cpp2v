@@ -1,35 +1,35 @@
 
 Combability
+-----------
 
 It is desirable to introduce "light-touch" approach to the construct lowering (loops, if, switch etc). Since the fall-through machine can already merge forward iterations, this is only essential for definite for loops which are indeed combable. But it is desirable for all constructs - the fall thru machine will be less bluky, with fewer states and constructs that reasonably could appear in the output verilog untouched should do so (as one of the overall project objectives).
 
 We can categorise constructs as follows:
 1. Always intriniscally uncombable (function call, do, while) 
-2. Sometimes intrinsically uncombable (for)
-3. Never intrinically uncombable (if, switch, &&, ||, ?:)
+2. Sometimes intrinsically uncombable (for, switch)
+3. Never intrinsically uncombable (if, &&, ||, ?:)
 
 In all of these cases, if there is anything uncombable underneath the construct, ie in its condition or body, then the construct must be lowered.  There are other kinds of Statements that are uncombable, but which are not lowere here: Yield, Label, Goto. From the point of view of analysis, these are similar to category 1 constructs.
 
 It might appear that we can order this best by doing category 1 first, and ararnge for the output of the cat 1 lowerings to triger the cat 2 and 3 lowerings. But there is an existing partial ordering to these lowerings, since some lowerings generate output that contains another construct which itself may need lowering - the "inferral ordering".
 
-So instead we seek to apply the lwoerings in an order decided based on the existing ordering. And of course we would prefer not to have to repeat steps.
+So instead we seek to apply the lowerings in an order decided based on the existing ordering. And of course we would prefer not to have to repeat steps.
 
-This suggest we need a way of detecting uncombables underneath a construct, ideally with some consistency. We can insert a tree intermediate called UncombableStatement under Statement as a base for Call, Do, While, Yield, Label, Goto. This means it does not matter when we do the cat 1 lowerings, since they will be detected uncomabble beofre and after their lowering step. We only now have to consider cats 2 and 3.
+This suggests we need a way of detecting uncombables underneath a construct, ideally with some consistency. We can insert a tree intermediate called UncombableStatement under Statement as a base for Call, Do, While, Yield, Label, Goto. This means it does not matter when we do the cat 1 lowerings, since they will be detected uncombable beofre and after their lowering step. But the cat 2 constructs are sometimes combable and sometimes not.
 
-Cat 2 could be simplified if some earlier step converted the intrinsically combable for loop (which is called a definite for loop) into a new kind of node named DefiniteFor. Then For could be cat 1 (and so derive from UncombableStatemnet) while DefiniteFor would be cat3. However, DefiniteFor might still need lowering (eg if it has uncombables below it). We do not want to code For lowering twice for each kind of loop so an intermediate would be needed for both kinds of for node. 
+Cat 2 could be simplified if some earlier step converted the intrinsically uncombable case (indefinte for loops, switches with fall-thru) into new kinds of nodes eg UncobmableFor, UncombableSwitch. Then these could be cat 1 (and so derive from UncombableStatemnet) and combable cat 2 nodes would be cat3. Obviously, the comable versions might still need lowering it they have uncombables below. We do not want to code the For and Switch lowering steps twice for each kind of loop so an intermediate would be needed for both kinds of for node that contained all the useful members. 
 
-Since we now only have cat 1 and 3 constructs, and the type 1 constructs are all unambiguously detectable via UncombableStatement, we can now place the actual lowerings in any order we want (wrt uncomabble detection) and hence fully free to order per the inferral ordering. The sequence of steps is thus:
+Since we now only have cat 1 and 3 constructs, and the type 1 constructs are all unambiguously detectable by searching for UncombableStatement, we can now place the actual lowerings in any order we want (wrt uncomabble detection) and hence fully free to order per the inferral ordering. The sequence of steps is thus:
 
-- split for into For and DefiniteFor based on intrinsic comability
+- split cat2 into comable and uncomable variants
 - do all the actual lowerings in the natural order, which is (basically)
     - For
     - While, Do
     - &&, ||, ?:
     - If, Switch
-
-Noting that, as luck would have it, For is at the top of the natural ordering, immediately following the for-splitting step, we in fact can just do a conditional For lowering directly as a first step, knowing that the products of that lowering (While) will be correctly identified as uncombable by ensuing lowerings. The only question remaining is with a for under another for. Here, the outer For may be definite, but would need lowering if the inner for needed lowering. But if the for lowering is a single step, S&R will keep going until this scenario has been detected and handled.
  
-Break, Continue and Disable
+Break, Continue
+---------------
 
 Continue is handled inside loop lowering steps: in the case of For, it would make the for loop uncomable and trigger lowering.
 Break is presently done in a seperate step. If Break and Continue are both designated cat 1 and derived from UncombableStatement then I think they will be correctly handled. According to inferral ordering, Break lowering *may* happen before for lowering, but Break is cat 1 so this is OK. A better general statement of ordering is thus
@@ -42,11 +42,15 @@ I suspect, though not sure, that Synthesisable Verilog can support a keyword cal
 
 If we allow break/continue to stick around in unlowered constructs, it seems like we would need to do break/continue lowering in any lowerng step that does indeed act, which feeld like duplication.
 
-Further, we might want to exploit disable to simplify the lwoering of various constructs, particularly given its greater expressivity (it can exit any of the enclosing compound blocks).
+Verilog disable
+---------------
+
+We might want to exploit disable to simplify the lwoering of various constructs, particularly given its greater expressivity (it can exit any of the enclosing compound blocks).
 
 This is a matter for consideration - I do not intend to use disable at present. Let's get the rest of this working first!
 
 Sequence point issue
+--------------------
 
 It is worth noting that this method does not deem side effects as uncombable. Therefore, we are calling eg
 
