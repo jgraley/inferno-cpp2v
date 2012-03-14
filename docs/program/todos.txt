@@ -7,9 +7,6 @@ Note: (0.2 #x) means do this for 0.2 release, in order of x.
 do not lower combable if, switch, for &&, ||, ?: (sensiblising) (0.2 #3)
    - need combability detector
 
-add ability to lower wait(X) into yielding wait loop (0.2 #4)
-   - not really critical at this stage, but makes the intention clearer for SC users
-
 only generate stacks for non-leaf functions (sensiblising) (0.2 #5)
 
 test with multiple SC_THREAD, since this is nominally supported, let's keep it working (0.2 #6)
@@ -64,3 +61,7 @@ deal with returning from a thread module correctly (for elegance mostly)
    - I think we already generate explicit return statements, so act on these during ThreadToMethod
    
 get rid of Callable, CallableParams, Procedure etc. It's all guff. Just have Function
+
+add ability to lower wait(X) into yielding wait loop 
+   - not really critical at this stage, but makes the intention clearer for SC users
+   - moved out of 0.2, not actually sure if belongs in sequential phase

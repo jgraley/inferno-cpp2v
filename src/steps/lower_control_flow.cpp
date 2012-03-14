@@ -5,6 +5,7 @@
 #include "common/common.hpp"
 #include "sr/soft_patterns.hpp"
 #include "tree/typeof.hpp"
+#include "steps/uncombable.hpp"
 
 using namespace CPPTree;
 using namespace SCTree;
@@ -114,7 +115,7 @@ IfToIfGoto::IfToIfGoto()
     r_label1->identifier = r_labelid1;
     r_label2->identifier = r_labelid2;
     
-    Configure( s_and, r_comp );
+    Configure( MakeCheckUncombable(s_and), r_comp );
 }
 
 
@@ -231,7 +232,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     r_decl->initialiser = s_cond;
     r_comp->statements = (r_decl, r_slave3);
     
-    Configure( s_switch, r_comp );
+    Configure( MakeCheckUncombable(s_switch), r_comp );
 }
 
 
@@ -279,7 +280,7 @@ DoToIfGoto::DoToIfGoto()
     r_if->else_body = r_nop;
     r_goto->destination = r_labelid;
         
-    Configure( s_do, r_comp );
+    Configure( MakeCheckUncombable(s_do), r_comp );
 }
 
 BreakToGoto::BreakToGoto()
@@ -339,7 +340,7 @@ LogicalAndToIf::LogicalAndToIf()
     r_if->else_body = MakeTreePtr<Nop>();
     r_assign2->operands = (r_temp_id, op2);    
     
-    Configure( s_and, r_comp );
+    Configure( MakeCheckUncombable( s_and ), r_comp );
 }
 
 
@@ -367,7 +368,7 @@ LogicalOrToIf::LogicalOrToIf()
     r_if->else_body = r_assign2;
     r_assign2->operands = (r_temp_id, op2);    
     
-    Configure( s_or, r_comp );
+    Configure( MakeCheckUncombable(s_or), r_comp );
 }
 
 
@@ -395,7 +396,7 @@ MultiplexorToIf::MultiplexorToIf()
     r_assignt->operands = (r_temp_id, op2);    
     r_assignf->operands = (r_temp_id, op3);    
     
-    Configure( s_mux, r_comp );
+    Configure( MakeCheckUncombable(s_mux), r_comp );
 }
 
 
@@ -436,5 +437,5 @@ ExtractCallParams::ExtractCallParams()
     r_param->identifier = id;
     r_call->callee = callee;
     
-    Configure( s_call, r_ce );
+    Configure( MakeCheckUncombable(s_call), r_ce );
 }

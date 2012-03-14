@@ -82,6 +82,6 @@ Implementation note
 
 It will be a frequent requirement to detect uncomables under a given node. While the pattern to do this is simple, basically
 
-MatchAll( original_search_pattern, NotMatch( Stuff( Uncombable ) ) )
+MatchAll( original_search_pattern, Stuff( Uncombable ) )
 
 I will provide a factored out implementation.

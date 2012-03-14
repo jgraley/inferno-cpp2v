@@ -876,7 +876,7 @@ struct Do : Loop, Uncombable // a do..while() construct
 };
 
 /// C-style for loop. 
-struct For : Loop
+struct For : Loop, Uncombable // TODO detect combable cases and seperate out
 {
 	NODE_FUNCTIONS_FINAL
     TreePtr<Statement> initialisation; // Initialiser; use Nop if absent
