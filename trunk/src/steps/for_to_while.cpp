@@ -9,6 +9,7 @@
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
 #include "sr/soft_patterns.hpp"
+#include "steps/uncombable.hpp"
 
 using namespace CPPTree;
 using namespace Steps;
@@ -64,7 +65,7 @@ ForToWhile::ForToWhile()
     r_while->condition = cond;
     r_body->statements = (r_slave, inc);
 
-   	Configure( s_for, r_outer );
+   	Configure( MakeCheckUncombable(s_for), r_outer );
 }
 
 WhileToDo::WhileToDo()
@@ -87,5 +88,5 @@ WhileToDo::WhileToDo()
     r_do->condition = cond;
     r_do->body = body;
 	
-   	Configure( s_while, r_if );
+   	Configure( MakeCheckUncombable(s_while), r_if );
 }

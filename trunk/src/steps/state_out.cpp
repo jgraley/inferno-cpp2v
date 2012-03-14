@@ -643,7 +643,6 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     MakeTreePtr<Loop> l_loop;
     MakeTreePtr< Overlay<Statement> > l_over;
     MakeTreePtr< NotMatch<Statement> > l_not;             
-    MakeTreePtr< MatchAny<Statement> > l_any;
     MakeTreePtr< Stuff<Declaration> > m_stuff_func;
     MakeTreePtr<Module> ls_module, lr_module;
     MakeTreePtr<Field> l_func;
@@ -692,8 +691,7 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     ls_goto->destination = var_id;
     ls_label->identifier = ls_label_id;
     l_block->pattern = l_not;
-    l_not->pattern = l_any;
-    l_any->patterns = (MakeTreePtr<Goto>(), MakeTreePtr<If>());
+    l_not->pattern = MakeTreePtr<Goto>();
     l_post->pattern = MakeTreePtr<If>();    
     l_dead_gotos->pattern = MakeTreePtr<Goto>();
     lr_module->members = (l_module_decls, lr_enum, l_func);
