@@ -14,9 +14,31 @@ public:
     void T()
     {
         x = 0;
-        if(x==0 || x==2)
-            x=2;   
+        switch(0)
+        {
+            case 1:
+                x=99;
+            break;
+            case 0:
+            if(x==0 || x==2)
+                x=false ? 88 : 2;   
+            break;
+        }
+        switch(0)
+        {
+            case 1:
+                x=99;                
+            break;
+            case 2:
+            if(x==0 || x==2)
+                x=false ? 88 : f();   
+            break;
+        }
         cease(x);
+    }
+    int f()
+    {
+        return 3;
     }
 };
 
