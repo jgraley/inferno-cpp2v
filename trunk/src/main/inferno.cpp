@@ -57,6 +57,7 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new LogicalOrToIf ) ); 
         sequence->push_back( shared_ptr<Transformation>( new MultiplexorToIf ) ); 
         sequence->push_back( shared_ptr<Transformation>( new SwitchToIfGoto ) );
+        sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) );  
         sequence->push_back( shared_ptr<Transformation>( new IfToIfGoto ) ); 
         // All remaining uncomables at the top level and in SUSP style
     }

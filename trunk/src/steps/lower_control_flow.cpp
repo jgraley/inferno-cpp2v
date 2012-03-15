@@ -312,7 +312,7 @@ BreakToGoto::BreakToGoto()
     r_comp->statements = (breakable, r_label);
     r_label->identifier = r_labelid;
     
-    Configure( breakable, r_comp );
+    Configure( MakeCheckUncombable( breakable ), r_comp );
 }
 
 
