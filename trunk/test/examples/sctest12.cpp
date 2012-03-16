@@ -24,7 +24,7 @@ public:
                 x=false ? 88 : 2;   
             break;
         }
-        switch(0)
+        switch(2)
         {
             case 1:
                 x=99;                
