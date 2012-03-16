@@ -1,0 +1,190 @@
+Improving Fall-thru machine generation
+--------------------------------------
+
+The present fall-thru machine generation may have a latent bug whereby it depends on the order in which S&R finds matches. In particular, code that has already been converted into fall-thru form may be converted again. This would generate incorrect code, since individual hits of state blocks are not correctness preserving (step is all or nothing).
+
+It is also rather complicated, making it slow and difficult to maintain. And it could be improved to lighten its touch.
+
+Enum versus Label
+-----------------
+
+One consideration for the original MakeFallThruMachine was that it is difficulat to blend the state-as-label style and the state-as-enum style. So the transformation had to do this conversion together with the sequential part of the conversion. We cannot simply use labels in place of enums. If labels get removed, they can no longer be used for assignment and comparison. If they get put together, they may compare equal, which would cause intermediate renders to fail. Worse, a tidy-up step that merges labels would destroy information permanently.
+
+I propose a hybrid scheme as follows:
+1. Create the enum, change usages of enums and decls of labels into the enum. 
+2. Create an initialised array as folows:
+void *(labels[]) = { &&LABEL1, // ENUM_LABEL1
+                     &&LABEL2, // ENUM_LABEL2
+                     ... };
+The comments clarify that the indexes correspond to the enums, so the mapping is correct.
+3. Replace goto LABELX with goto labels[ENUM_LABELX];
+Note that I have used different identifiers for the enums, but I think they can be the same in Inferno; for the intermediate renders, uniquification will work, and once the labels are gone, there will be no conflict.
+
+In this style, we can safely mix and match tests of the enum with gotos to labels, and we can safely allow labels to coalesce.
+
+Breaking down fall-thru generation
+----------------------------------
+
+We wish to be able to move to fall-thru in small steps, and the transformations should be correct per state-block hit, so they could be stopped part-way through and still create a correct output. The suggested steps are called policies, for no particular reason.
+
+1. Goto policy
+
+A goto policy tries to eliminate gotos. Look for this somewhere in a compound block:
+
+goto labels[state];
+LABEL1:
+state_body1;
+goto labels[state];
+
+and replace with
+
+LABEL1:
+if( state==LABEL1 )
+    state_body1
+goto labels[state];
+
+Precondition cases are state==LABEL1 and state!=LABEL1. This will remove the gotos from regular patterend code, except for one at the bottom. The goto at the bottom could also be a return, since at function return state falls out of scope and it's value does not matter. If the function was originally coded as a superloop, then there will be a goto at the bottom. I suspect therefore that no superloop needs to be generated.
+
+The step needs to hit the uppermost block first and work its way down, otherwise multiple blocks will be drawn into a single if statement. If we have 2 blocks and the second has been transformed, we would have:
+
+goto labels[state];
+LABEL1:
+state_body1;
+LABEL2:
+if( state==LABEL2 )
+    state_body2
+goto labels[state];
+
+which would then become:
+
+LABEL1:
+if( state==LABEL1 )
+    state_body1;
+    LABEL2:
+    if( state==LABEL2 )
+        state_body2
+goto labels[state];
+
+Now this is not incorrect, since transition to state 2 can jump directly to LABEL2 inside the if. But having a label in an if will prove difficult when the time comes to coalesce the labels, which we must do to create something combable. If we just kill labels, the fall-thru machine would be incorrect.
+
+I think to get the goto policy to work in the correct order, we have to always eliminate the uppermost goto, so the preamble should be restricted for no gotos.
+
+2. Label policy
+
+A label policy tries to coalesce labels. Look for this somewhere in a compound block:
+
+state_body1;
+LABEL2:
+
+and replace with 
+
+LABEL2:
+if( state==LABEL1 )
+    state_body1;
+
+Again, this can nest ifs if done in the wrong order. I submit that the label to be moved should be the last lable, i.e. the postamble should be labelless.
+
+The goto and label policies together should create a fallthru machine without passing through incorrect intermediates. We can do better by adjusting existing steps to leave conditional gotos in place and inserting
+
+1.5 Conditional goto policy
+
+Starting with:
+
+goto labels[state];
+LABEL1:
+state_body1;
+if( x ) 
+    goto labels[state];
+state_body2:
+goto labels[state];
+
+replace with:
+
+goto labels[state];
+LABEL1:
+state_body1;
+if( !x ) 
+    state_body2:
+goto labels[state];
+
+The trick here, I think, is to present the conditional goto in the right way to begin with. The above is closes to the standard for, i.e. state variable update is inside the state_body (because it is combable) and the goto is outside the body and manifestly conditional. But to get to that form we'd have to duplicate the if - one inside doing the state and another outside doing the goto. So let's instead try the following:
+
+goto labels[state];
+LABEL1:
+state_body1;
+if( x ) 
+    state=y;
+    goto labels[state];
+state_body2:
+goto labels[state];
+
+which becomes:
+
+goto labels[state];
+LABEL1:
+state_body1;
+if( x ) 
+    state=y;
+else
+    state_body2:
+goto labels[state];
+
+Suppose the condiitonal goto camme from lowering an uncomabble if in the input program (assume it had no else clause). x would in fact be !original_condition. It makes sense to swap around the generated if, as follows:
+
+if( !!original_condition ) // obviously simplify
+    state_body_2;
+else
+    state = y;
+    
+Which feels a little like preserving the original if. But of course the original if was uncombable, so state_body_2 is only part of the body of the original if, with other parts in other states. So all we're really getting is to reduce the number of labels and states we need to define.
+
+Yield flag
+----------
+
+None of the above addresses the question of the yield flag. This flag should be kept seperate from the state because it is not persistent unlike the state. It implies a yield, which in SC_METHOD just exits the method body. It is possible that we can simply ignore the issue as long as we are in SC_THREAD and hence making use of SC_WAIT. Then when we go to SC_METHOD we turn
+
+wait(X)
+
+into 
+
+next_trigger(X)
+return;
+
+Then we need a lowering for early returns in SC_METHOD, which must be done befopre verilog. Since there are no loops (at least, none surrounding the early return) we know the control flow that must be skipped is strictly downward. If we also assume we are in exactly one layer of if frmo top level, and that the return is the last statement in the body (otherwise there would be dead code) then we only have to update the ifs that follow at top level.
+
+Obviously, there would be a single "return_flag" and we would test it in every if, just as with yield_flag presently.
+
+ALTERNATIVELY
+
+we could use Verilog's disable keyword to implement the early return directly, if this is really synthesisable - I'll have to ask about that.
+
+De-duplication
+--------------
+
+The abovce steps can cause duplciation. Goto policy followed by label policy would give eg
+
+if( state==LABEL1 )
+    if( state==LABEL1 )
+        state_body1;
+ 
+A cleanup can simplify this. Care in the general case about side effects in the condition expression.
+
+return_flag implementation could create eg
+
+if( state==LABEL1 && !return_flag && !return_flag ) 
+
+etc which can be similaraly optimsied out.
+
+Application to switch normalisation
+-----------------------------------
+
+The label policy described above could be used to address falling-though cases in C switch statements, taking them back to the more canonical verilog style.
+
+I will only note that the samantics are subtly different. In fall-thru, we want to lose all gotos and labels because they are uncombable. But in a switch statement, the following:
+
+case X:
+case_body;
+break;
+
+is combable inside a switch body. We only want to act when the break; is missing. Runnign the label policy on its own may achieve this, but the restriction of first label may stop it working. More thought required.
+
