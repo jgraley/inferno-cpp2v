@@ -24,6 +24,18 @@ public:
                 x=false ? 88 : 2;   
             break;
         }
+        switch(0)
+        {
+            case 1:
+                x=99;
+            break;
+            case 4:
+                x=44; // falling through...
+            case 0:
+            if(x==0 || x==2)
+                x=false ? 88 : 2;   
+            break;
+        }
         switch(2)
         {
             case 1:

@@ -118,7 +118,7 @@ string Render::RenderScopePrefix( TreePtr<Identifier> id )
 	if( scope == scope_stack.top() )
 		return string(); // local scope
 	else if( scope == program )
-		return "::";
+		return " ::";
 	else if( TreePtr<Enum> e = dynamic_pointer_cast<Enum>( scope ) ) // <- for enum
 		return RenderScopePrefix( e->identifier );    // omit scope for the enum itself
 	else if( TreePtr<Record> r = dynamic_pointer_cast<Record>( scope ) ) // <- for class, struct, union

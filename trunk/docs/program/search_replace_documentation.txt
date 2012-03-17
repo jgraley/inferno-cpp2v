@@ -332,6 +332,7 @@ Inferno S&R supports a special node called GreenGrass to help in tricky cases of
 - During the first search in any SearchReplace, CompareReplace or slave, the GreenGrass node does not restrict at all
 - During successive passes, GreenGrass restricts to nodes that reached the input program tree via Stuff node substitution in the previous pass. Note this includes the portion outside of the match when SearchReplace is used (see the implementation note by CompareReplace).
 - In cases where one pass creates a new node (that GreenGrass would reject) and then a later pass preserves it via Stuff node substitution, GreenGrass will still reject it.
+- GreenGrass will restrict nodes created by the parent, even when located in a slave search pattern.
 
 Broadly speaking, GreenGrass assumes that Stuff substitution is not really changing the nodes, just moving them around. It restricts matches to nodes from the original input tree that may be been moved around. 
 

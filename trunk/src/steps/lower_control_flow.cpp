@@ -11,70 +11,194 @@ using namespace CPPTree;
 using namespace SCTree;
 using namespace Steps;
 
-// TOOD go through step impls and use inline decls of leaf nodes, to reduce wordiness
+// Local nodes let us designate switch and for nodes as uncombable
+struct UncombableSwitch : Switch, Uncombable { NODE_FUNCTIONS_FINAL };
+struct UncombableFor : For, Uncombable { NODE_FUNCTIONS_FINAL };
+struct CombableFor : For { NODE_FUNCTIONS_FINAL };
+   
 
-GotoAfterWait::GotoAfterWait()
+DetectUncombableSwitch::DetectUncombableSwitch()
 {
-    // This step could have been tricky: we'd have needed 3 cases:
-    // 1. { *, wait, !goto, * }
-    // 2. { *, wait } // not covered by previous case because !goto needs to match a statement
-    // 3. eg if() wait // not directly inside a compound block 
-    // we use the but-not pattern, in which we principally search for anything->wait, but exclude
-    // the only case that needs excluding which is a compound like in case 1 above but without
-    // notting the goto. Cases 2 and 3 work because the excluded compound does not match.
-    // Overall, a good example of but-not
-    MakeTreePtr<Compound> sx_comp, r_comp;
-    MakeTreePtr< Star<Declaration> > sx_decls;
-    MakeTreePtr< Star<Statement> > sx_pre, sx_post;    
-    MakeTreePtr<Wait> wait;
-    MakeTreePtr< NotMatch<Statement> > notmatch;
-    MakeTreePtr< MatchAll<Statement> > all;
-    MakeTreePtr< AnyNode<Statement> > anynode;
-    MakeTreePtr< Overlay<Statement> > over;
-    MakeTreePtr<Goto> sx_goto, r_goto;
-    MakeTreePtr<Label> r_label;
-    MakeTreePtr<BuildLabelIdentifier> r_labelid("YIELD");
-            
-    all->patterns = (anynode, notmatch);
-    anynode->terminus = over;
-    over->through = wait;
-    notmatch->pattern = sx_comp;
-    sx_comp->members = sx_decls;
-    sx_comp->statements = (sx_pre, wait, sx_goto, sx_post);    
-    
-    over->overlay = r_comp;
-    //r_comp->members = ();
-    r_comp->statements = (wait, r_goto, r_label);
-    r_goto->destination = r_labelid;
-    r_label->identifier = r_labelid;
-    
-    Configure( all );
-}
-/*
-GotoAfterWait::GotoAfterWait()
-{
-    // TODO will miss a yield at the very end
-    MakeTreePtr<Compound> s_comp, r_comp;
+    MakeTreePtr< MatchAll<Switch> > s_all;
+    MakeTreePtr< NotMatch<Switch> > sx_not;
+    MakeTreePtr<UncombableSwitch> sx_uswitch;
+    MakeTreePtr<Switch> s_switch;
+    MakeTreePtr<Expression> expr;
+    MakeTreePtr<Compound> comp;
     MakeTreePtr< Star<Declaration> > decls;
     MakeTreePtr< Star<Statement> > pre, post;
-    MakeTreePtr<Wait> wait;
-    MakeTreePtr< NotMatch<Statement> > notmatch;
-    MakeTreePtr<Goto> sx_goto, r_goto;
-    MakeTreePtr<Label> r_label;
-    MakeTreePtr<BuildLabelIdentifier> r_labelid("YIELD");
-        
-    s_comp->members = (decls);
-    s_comp->statements = (pre, wait, notmatch, post);
-    notmatch->pattern = sx_goto;
+    MakeTreePtr< NotMatch<Statement> > x_not;
+    MakeTreePtr<Break> x_break;
+    MakeTreePtr<SwitchTarget> target;
+    MakeTreePtr<UncombableSwitch> r_uswitch;
     
-    r_comp->members = (decls);
-    r_comp->statements = (pre, wait, r_goto, r_label, notmatch, post);
-    r_goto->destination = r_labelid;
-    r_label->identifier = r_labelid;
+    s_all->patterns = (sx_not, s_switch);
+    sx_not->pattern = sx_uswitch;
+    s_switch->body = comp;
+    s_switch->condition = expr;
+    comp->members = decls;
+    comp->statements = (pre, x_not, target, post);
+    x_not->pattern = x_break;
     
-    Configure( s_comp, r_comp );
+    r_uswitch->body = comp;
+    r_uswitch->condition = expr;
+    
+    Configure( s_all, r_uswitch );
 }
-*/
+
+
+// Turn all for into uncombablefor, so the next step can go the other
+// way, and can avoid a top-level NOT
+MakeAllForUncombable::MakeAllForUncombable()
+{
+    MakeTreePtr< MatchAll<For> > s_all;
+    MakeTreePtr< NotMatch<For> > s_not;
+    MakeTreePtr<UncombableFor> sx_ufor;
+    MakeTreePtr<For> s_for;
+    MakeTreePtr<Statement> init;
+    MakeTreePtr<Expression> test; 
+    MakeTreePtr<Statement> inc; 
+    MakeTreePtr<Statement> body;
+    MakeTreePtr<UncombableFor> r_ufor;
+    
+    s_all->patterns = (s_not, s_for);
+    s_not->pattern = sx_ufor;
+    s_for->initialisation = init;
+    s_for->condition = test;
+    s_for->increment = inc;
+    s_for->body = body;
+    
+    r_ufor->initialisation = init;
+    r_ufor->condition = test;
+    r_ufor->increment = inc;
+    r_ufor->body = body;
+    
+    Configure( s_all, r_ufor );
+}
+
+
+DetectCombableFor::DetectCombableFor()
+{
+    MakeTreePtr<UncombableFor> s_ufor;
+    MakeTreePtr<Assign> init;
+    MakeTreePtr<Less> test; // TODO or <= or !=
+    MakeTreePtr<PostIncrement> inc; // TODO or pre-inc or maybe +=n
+    MakeTreePtr< NotMatch<Statement> > body, bnot, cnot;
+    MakeTreePtr< MatchAny<Statement> > any;
+    MakeTreePtr< Stuff<Statement> > astuff, bstuff, cstuff;
+    MakeTreePtr<AssignmentOperator> assign;
+    MakeTreePtr<Break> brk;
+    MakeTreePtr<Continue> cont;
+    
+    MakeTreePtr<CombableFor> r_for;
+    MakeTreePtr< TransformOf<InstanceIdentifier> > loopvar( &TypeOf::instance );
+    MakeTreePtr<Integral> type;
+    
+    s_ufor->initialisation = init;
+    init->operands = (loopvar, MakeTreePtr<Integer>());
+    s_ufor->condition = test;
+    test->operands = (loopvar, MakeTreePtr<Integer>());
+    s_ufor->increment = inc;
+    inc->operands = (loopvar);
+    s_ufor->body = body;
+    body->pattern = any;
+    any->patterns = (astuff, bstuff, cstuff);
+    astuff->terminus = assign;
+    bstuff->terminus = brk;
+    bstuff->recurse_restriction = bnot;
+    bnot->pattern = MakeTreePtr<Breakable>(); // don't "see" somebody else's break
+    cstuff->terminus = cont;
+    cstuff->recurse_restriction = cnot;
+    cnot->pattern = MakeTreePtr<Loop>(); // don't "see" somebody else's continue
+    
+    assign->operands = (loopvar, MakeTreePtr< Star<Expression> >());
+    loopvar->pattern = type;
+    
+    r_for->initialisation = init;
+    r_for->condition = test;
+    r_for->increment = inc;
+    r_for->body = body;
+    
+    Configure( s_ufor, r_for );
+}
+
+
+ForToWhile::ForToWhile()
+{
+    // Add new compunds inside and outside the While node, and place the For
+    // node's statements and expressions in the appropriate places.
+    //
+    // Deal with continue by inserting a copy of the increment just before the 
+    // continue, and leave the continue in place. This avoids the need for 
+    // gotos in case that matters. Not ideal if the increment statement 
+    // is huge. 
+    //
+    // Avoid matching continues that don't belong to use by using a recurse 
+    // restriction, like in BreakToGoto.
+    //
+    // We have to use the GreenGrass hack to prevent the slave spinning 
+    // forever. The continue in the slave search pattern has a GreenGrass
+    // node under it indicating that it must be from the input program and
+    // not one we just inserted on an earlier iteration.
+    
+    MakeTreePtr<For> s_for;
+    MakeTreePtr<Statement> forbody, inc, init;
+    MakeTreePtr<Expression> cond;
+    MakeTreePtr<While> r_while;
+    MakeTreePtr<Compound> r_outer, r_body, l_r_block;
+    MakeTreePtr< GreenGrass<Statement> > l_s_gg;
+    MakeTreePtr< Stuff<Statement> > l_stuff;
+    MakeTreePtr< Overlay<Statement> > l_overlay;
+    MakeTreePtr< NotMatch<Statement> > l_s_not;
+    MakeTreePtr< Loop > l_s_loop;
+    
+    MakeTreePtr<Continue> l_s_cont, l_r_cont;
+    MakeTreePtr<Nop> l_r_nop;
+
+    l_r_block->statements = (inc, l_r_cont);
+    l_s_gg->through = l_s_cont;
+    l_stuff->terminus = l_overlay;
+    l_overlay->through = l_s_gg;
+    l_stuff->recurse_restriction = l_s_not;
+    l_overlay->overlay = l_r_block;
+    l_s_not->pattern = l_s_loop;
+    MakeTreePtr< SlaveCompareReplace<Statement> > r_slave( forbody, l_stuff, l_stuff );
+    
+    s_for->body = forbody;
+    s_for->initialisation = init;
+    s_for->condition = cond;
+    s_for->increment = inc;
+
+    r_outer->statements = (init, r_while);
+    r_while->body = r_body;
+    r_while->condition = cond;
+    r_body->statements = (r_slave, inc);
+
+    Configure( MakeCheckUncombable(s_for), r_outer );
+}
+
+WhileToDo::WhileToDo()
+{
+    // Just need to insert an "if" statement for the case 
+    // where there are 0 iterations.
+    MakeTreePtr<While> s_while;
+    MakeTreePtr<Statement> body;
+    MakeTreePtr<Expression> cond;
+    MakeTreePtr<Nop> r_nop;
+    MakeTreePtr<If> r_if;
+    MakeTreePtr<Do> r_do;
+
+    s_while->body = body;
+    s_while->condition = cond;
+
+    r_if->condition = cond;
+    r_if->body = r_do;
+    r_if->else_body = r_nop;
+    r_do->condition = cond;
+    r_do->body = body;
+    
+    Configure( MakeCheckUncombable(s_while), r_if );
+}
 
 IfToIfGoto::IfToIfGoto()
 {

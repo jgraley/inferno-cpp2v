@@ -964,10 +964,14 @@ TreePtr<Node> CompareReplace::DuplicateNode( TreePtr<Node> source,
     TreePtr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
     ASSERT(dest);
 
+    bool source_dirty = GetOverallMaster()->dirty_grass.find( source ) != GetOverallMaster()->dirty_grass.end();
     if( force_dirty || // requested by caller
-        GetOverallMaster()->dirty_grass.find( source ) != GetOverallMaster()->dirty_grass.end() ) // source was dirty
+        source_dirty ) // source was dirty
+    {
+        TRACE("dirtying ")(*dest)(" force=%d source=%d (")(*source)(")\n", force_dirty, source_dirty);        
         GetOverallMaster()->dirty_grass.insert( dest );
-
+    }
+    
     TRACE("Duplicated pedigree: ")(*dest)("\n");
     if( ReadArgs::assert_pedigree )
         duplicated_pedigree.insert( dest );    
