@@ -375,19 +375,21 @@ LogicalOrToIf::LogicalOrToIf()
 MultiplexorToIf::MultiplexorToIf()
 {
     MakeTreePtr<Multiplexor> s_mux;
-    MakeTreePtr<Expression> op1, op2, op3;
+    MakeTreePtr<Expression> op1, op3;
     MakeTreePtr<CompoundExpression> r_comp;
     MakeTreePtr<BuildInstanceIdentifier> r_temp_id("muxtemp");
     MakeTreePtr<Temporary> r_temp;
-    MakeTreePtr<Boolean> r_boolean;
+    MakeTreePtr< TransformOf<Expression> > op2( &TypeOf::instance );
+    MakeTreePtr<Type> type;
     MakeTreePtr<If> r_if;
     MakeTreePtr<Assign> r_assignt, r_assignf;
     
     s_mux->operands = (op1, op2, op3);
+    op2->pattern = type;
     
     r_comp->members = (r_temp);
     r_temp->identifier = r_temp_id;
-    r_temp->type= r_boolean;
+    r_temp->type= type;
     r_temp->initialiser = MakeTreePtr<Uninitialised>();
     r_comp->statements = (r_if, r_temp_id);
     r_if->condition = op1;
