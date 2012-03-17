@@ -12,7 +12,6 @@
 #include "steps/split_instance_declarations.hpp"
 #include "steps/generate_implicit_casts.hpp"
 #include "steps/generate_stacks.hpp"
-#include "steps/for_to_while.hpp"
 #include "steps/slave_test.hpp"
 #include "steps/lower_control_flow.hpp"
 #include "steps/clean_up.hpp"
@@ -33,7 +32,9 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     // because we never want to process implicit SystemC.
     sequence->push_back( shared_ptr<Transformation>( new DetectAllSCTypes ) );
 
-    //sequence->push_back( shared_ptr<Transformation>( new GenerateImplicitCasts ) );        
+    sequence->push_back( shared_ptr<Transformation>( new DetectUncombableSwitch ) );
+    sequence->push_back( shared_ptr<Transformation>( new MakeAllForUncombable ) );
+    sequence->push_back( shared_ptr<Transformation>( new DetectCombableFor ) );
     
     { // Construct lowerings
         { // function call lowering (and function merging)

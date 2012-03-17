@@ -2,10 +2,10 @@ TODO list (to get the sequential phase looking good)
 Note: (0.2 #x) means do this for 0.2 release, in order of x. 
 0.2 planned release notes: Better S&R, maybe ready for general use; initial SystemC support; sequential phase at alpha or beta; doxygen and generally better documentation
 
-** more tidyups, lower CE more and possibly temp tidyupos
-   
-do not lower combable if, switch, for &&, ||, ?: (sensiblising) (0.2 #3)
-   - need combability detector
+- fix ForToWhile, cannot use GG in slave if master has already dirtied.
+- Make break and continue be uncombable
+- allow breaks in combable switches: but only top level modulo raw compounds (use cleanup step?) 
+- for to allow eg ++i, steps, backward - be optimistic about increment direction versus limits direction.
 
 only generate stacks for non-leaf functions (sensiblising) (0.2 #5)
 
