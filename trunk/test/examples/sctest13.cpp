@@ -17,6 +17,14 @@ public:
         x = 0;
         for( i=0; i<4; i++ )
             x += i;
+        for( i=0; i<=4; i++ )
+            x += i;
+        for( i=0; i!=4; i++ )
+            x += i;
+        for( i=4; i>0; i-- )
+            x += i;
+        for( i=4; i>=0; i-- )
+            x += i;
         for( i=0; i<4; i++ )
             break;
         for( i=0; i<4; i++ )
@@ -28,6 +36,14 @@ public:
         for( i=0; i<x; i++ )
             {};
         for( i=0; i<4; i=i+1 )
+            x += i;
+        for( i=0; i<4; i+=1 )
+            x += i;
+        for( i=4; i>0; i=i-1 )
+            x += i;
+        for( i=4; i>0; i-=1 )
+            x += i;
+        for( i=0; i<4; i=4 )
             x += i;
         for( i=0; i<4; i++ )
             i += 0;
