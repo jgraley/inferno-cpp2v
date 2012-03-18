@@ -28,6 +28,18 @@ public:
     DetectCombableFor();
 };
         
+class MakeAllBreakUncombable : public SearchReplace
+{
+public:
+    MakeAllBreakUncombable();
+};
+        
+class DetectCombableBreak : public SearchReplace
+{
+public:
+    DetectCombableBreak();
+};
+        
 // Convert for loops into while loops, preserving correct 
 // behaviour of continue, which always means "jump to the 
 // bottom of the body"

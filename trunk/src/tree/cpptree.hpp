@@ -921,7 +921,7 @@ struct Default : SwitchTarget { NODE_FUNCTIONS_FINAL };
 struct Continue : Statement, Uncombable { NODE_FUNCTIONS_FINAL };
 
 /// Break (from innermost Breakable)
-struct Break : Statement, Uncombable { NODE_FUNCTIONS_FINAL };
+struct Break : Statement { NODE_FUNCTIONS_FINAL };
 
 /// Do nothing; these get optimised out where possible
 struct Nop : Statement { NODE_FUNCTIONS_FINAL };
