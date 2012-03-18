@@ -35,6 +35,9 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     sequence->push_back( shared_ptr<Transformation>( new DetectUncombableSwitch ) );
     sequence->push_back( shared_ptr<Transformation>( new MakeAllForUncombable ) );
     sequence->push_back( shared_ptr<Transformation>( new DetectCombableFor ) );
+    sequence->push_back( shared_ptr<Transformation>( new MakeAllBreakUncombable ) );
+    sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );    // for DetectCombableBreak
+    sequence->push_back( shared_ptr<Transformation>( new DetectCombableBreak ) );
     
     { // Construct lowerings
         { // function call lowering (and function merging)

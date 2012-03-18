@@ -15,6 +15,8 @@ using namespace Steps;
 struct UncombableSwitch : Switch, Uncombable { NODE_FUNCTIONS_FINAL };
 struct UncombableFor : For, Uncombable { NODE_FUNCTIONS_FINAL };
 struct CombableFor : For { NODE_FUNCTIONS_FINAL };
+struct UncombableBreak : Break, Uncombable { NODE_FUNCTIONS_FINAL };
+struct CombableBreak : Break { NODE_FUNCTIONS_FINAL };
    
 
 DetectUncombableSwitch::DetectUncombableSwitch()
@@ -110,6 +112,56 @@ DetectCombableFor::DetectCombableFor()
     r_for->body = body;
     
     Configure( s_ufor, r_for );
+}
+
+
+// Turn all break into uncombable break, so the next step can go the other
+// way, and can avoid a top-level NOT
+MakeAllBreakUncombable::MakeAllBreakUncombable()
+{
+    MakeTreePtr< NotMatch<Break> > s_not;
+    MakeTreePtr<UncombableBreak> sx_ubreak;
+    MakeTreePtr<Break> s_break;
+    MakeTreePtr<Statement> init;
+    MakeTreePtr<Expression> test; 
+    MakeTreePtr<Statement> inc; 
+    MakeTreePtr<Statement> body;
+    MakeTreePtr<UncombableBreak> r_ubreak;
+    
+    s_not->pattern = sx_ubreak;
+        
+    Configure( s_not, r_ubreak );
+}
+
+
+// Detect combable breaks - these are the ones at the top level of
+// a combable switch. Run the compound statemnts cleanup before this
+// to get breaks in compound blocks. But we do not accept breaks 
+// under constructs like if
+DetectCombableBreak::DetectCombableBreak()
+{
+    MakeTreePtr< MatchAll<Switch> > all;
+    MakeTreePtr< NotMatch<Switch> > x_not;
+    MakeTreePtr<UncombableSwitch> uswitch;
+    MakeTreePtr<Switch> swtch;
+    MakeTreePtr<Expression> expr;
+    MakeTreePtr<Compound> comp;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, post;
+    MakeTreePtr< Overlay<Break> > over;
+    MakeTreePtr<UncombableBreak> s_ubreak;
+    MakeTreePtr<CombableBreak> r_break;
+    
+    all->patterns = (x_not, swtch);
+    x_not->pattern = uswitch;
+    swtch->condition = expr;
+    swtch->body = comp;
+    comp->members = decls;
+    comp->statements = (pre, over, post);
+    over->through = s_ubreak;
+    over->overlay = r_break;
+    
+    Configure( all, swtch );
 }
 
 
