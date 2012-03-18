@@ -83,12 +83,9 @@ DetectCombableFor::DetectCombableFor()
     MakeTreePtr<Assign> init;
     MakeTreePtr<Less> test; // TODO or <= or !=
     MakeTreePtr<PostIncrement> inc; // TODO or pre-inc or maybe +=n
-    MakeTreePtr< NotMatch<Statement> > body, bnot, cnot;
-    MakeTreePtr< MatchAny<Statement> > any;
-    MakeTreePtr< Stuff<Statement> > astuff, bstuff, cstuff;
+    MakeTreePtr< NotMatch<Statement> > body;
+    MakeTreePtr< Stuff<Statement> > astuff;
     MakeTreePtr<AssignmentOperator> assign;
-    MakeTreePtr<Break> brk;
-    MakeTreePtr<Continue> cont;
     
     MakeTreePtr<CombableFor> r_for;
     MakeTreePtr< TransformOf<InstanceIdentifier> > loopvar( &TypeOf::instance );
@@ -101,15 +98,8 @@ DetectCombableFor::DetectCombableFor()
     s_ufor->increment = inc;
     inc->operands = (loopvar);
     s_ufor->body = body;
-    body->pattern = any;
-    any->patterns = (astuff, bstuff, cstuff);
+    body->pattern = astuff;
     astuff->terminus = assign;
-    bstuff->terminus = brk;
-    bstuff->recurse_restriction = bnot;
-    bnot->pattern = MakeTreePtr<Breakable>(); // don't "see" somebody else's break
-    cstuff->terminus = cont;
-    cstuff->recurse_restriction = cnot;
-    cnot->pattern = MakeTreePtr<Loop>(); // don't "see" somebody else's continue
     
     assign->operands = (loopvar, MakeTreePtr< Star<Expression> >());
     loopvar->pattern = type;
