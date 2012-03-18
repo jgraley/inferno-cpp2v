@@ -83,27 +83,56 @@ DetectCombableFor::DetectCombableFor()
 {
     MakeTreePtr<UncombableFor> s_ufor;
     MakeTreePtr<Assign> init;
-    MakeTreePtr<Less> test; // TODO or <= or !=
-    MakeTreePtr<PostIncrement> inc; // TODO or pre-inc or maybe +=n
+    MakeTreePtr< MatchAny<Operator> > test;
+    MakeTreePtr<Less> lt;
+    MakeTreePtr<LessOrEqual> le;
+    MakeTreePtr<Greater> gt;
+    MakeTreePtr<GreaterOrEqual> ge;
+    MakeTreePtr<NotEqual> ne;    
+    MakeTreePtr<Integer> init_val, test_val, inc_val;
+    MakeTreePtr< MatchAny<AssignmentOperator> > inc;
+    MakeTreePtr<PostIncrement> postinc; 
+    MakeTreePtr<PreIncrement> preinc; 
+    MakeTreePtr<PostDecrement> postdec; 
+    MakeTreePtr<PreDecrement> predec; 
+    MakeTreePtr<AssignmentAdd> asadd; 
+    MakeTreePtr<AssignmentSubtract> assub; 
+    MakeTreePtr<Assign> assign1, assign2;
+    MakeTreePtr<Add> add;
+    MakeTreePtr<Subtract> sub;    
     MakeTreePtr< NotMatch<Statement> > body;
     MakeTreePtr< Stuff<Statement> > astuff;
-    MakeTreePtr<AssignmentOperator> assign;
+    MakeTreePtr<AssignmentOperator> assignop;
     
     MakeTreePtr<CombableFor> r_for;
     MakeTreePtr< TransformOf<InstanceIdentifier> > loopvar( &TypeOf::instance );
     MakeTreePtr<Integral> type;
     
     s_ufor->initialisation = init;
-    init->operands = (loopvar, MakeTreePtr<Integer>());
+    init->operands = (loopvar, init_val);
     s_ufor->condition = test;
-    test->operands = (loopvar, MakeTreePtr<Integer>());
+    test->patterns = (gt, ge, lt, le, ne);
+    gt->operands = (loopvar, test_val);
+    ge->operands = (loopvar, test_val); 
+    lt->operands = (loopvar, test_val);
+    le->operands = (loopvar, test_val);
+    ne->operands = (loopvar, test_val);
     s_ufor->increment = inc;
-    inc->operands = (loopvar);
+    inc->patterns = (preinc, postinc, predec, postdec, asadd, assub, assign1, assign2);
+    preinc->operands = (loopvar);
+    postinc->operands = (loopvar);
+    predec->operands = (loopvar);
+    postdec->operands = (loopvar);
+    asadd->operands = (loopvar, inc_val);
+    assub->operands = (loopvar, inc_val);
+    assign1->operands = (loopvar, add);
+    add->operands = (loopvar, inc_val);
+    assign2->operands = (loopvar, sub);
+    sub->operands = (loopvar, inc_val);
     s_ufor->body = body;
     body->pattern = astuff;
-    astuff->terminus = assign;
-    
-    assign->operands = (loopvar, MakeTreePtr< Star<Expression> >());
+    astuff->terminus = assignop;
+    assignop->operands = (loopvar, MakeTreePtr< Star<Expression> >());
     loopvar->pattern = type;
     
     r_for->initialisation = init;
