@@ -145,22 +145,23 @@ ForToWhile::ForToWhile()
     MakeTreePtr<Statement> forbody, inc, init;
     MakeTreePtr<Expression> cond;
     MakeTreePtr<While> r_while;
-    MakeTreePtr<Compound> r_outer, r_body, l_r_block;
-    MakeTreePtr< GreenGrass<Statement> > l_s_gg;
+    MakeTreePtr<Compound> r_outer, r_body;
     MakeTreePtr< Stuff<Statement> > l_stuff;
     MakeTreePtr< Overlay<Statement> > l_overlay;
     MakeTreePtr< NotMatch<Statement> > l_s_not;
     MakeTreePtr< Loop > l_s_loop;
     
-    MakeTreePtr<Continue> l_s_cont, l_r_cont;
+    MakeTreePtr<Continue> l_s_cont;
     MakeTreePtr<Nop> l_r_nop;
+    MakeTreePtr<BuildLabelIdentifier> r_cont_labelid("CONTINUE");
+    MakeTreePtr<Label> r_cont_label;
+    MakeTreePtr<Goto> lr_goto;
 
-    l_r_block->statements = (inc, l_r_cont);
-    l_s_gg->through = l_s_cont;
     l_stuff->terminus = l_overlay;
-    l_overlay->through = l_s_gg;
+    l_overlay->through = l_s_cont;
     l_stuff->recurse_restriction = l_s_not;
-    l_overlay->overlay = l_r_block;
+    l_overlay->overlay = lr_goto;
+    lr_goto->destination = r_cont_labelid;
     l_s_not->pattern = l_s_loop;
     MakeTreePtr< SlaveCompareReplace<Statement> > r_slave( forbody, l_stuff, l_stuff );
     
@@ -172,7 +173,8 @@ ForToWhile::ForToWhile()
     r_outer->statements = (init, r_while);
     r_while->body = r_body;
     r_while->condition = cond;
-    r_body->statements = (r_slave, inc);
+    r_body->statements = (r_slave, r_cont_label, inc);
+    r_cont_label->identifier = r_cont_labelid;
 
     Configure( MakeCheckUncombable(s_for), r_outer );
 }

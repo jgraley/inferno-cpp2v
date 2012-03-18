@@ -21,8 +21,8 @@ public:
             break;
         for( i=0; i<4; i++ )
             switch(0) { case 0: break; }
-//        for( i=0; i<4; i++ )
-//            continue;
+        for( i=0; i<4; i++ )
+            continue;
         for( ; i<4; i++ )
             x += i;
         for( i=0; i<x; i++ )
