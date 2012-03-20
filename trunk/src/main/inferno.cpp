@@ -48,6 +48,7 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
             sequence->push_back( shared_ptr<Transformation>( new ParamsViaTemps ) );
             sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) ); 
             sequence->push_back( shared_ptr<Transformation>( new MoveInstanceDeclarations ) ); 
+            sequence->push_back( shared_ptr<Transformation>( new AutosToModule ) );
             sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) );
             sequence->push_back( shared_ptr<Transformation>( new MergeFunctions ) );
         }
@@ -72,12 +73,6 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         
         sequence->push_back( shared_ptr<Transformation>( new ReduceVoidCompoundExpression ) ); 
         for( int i=0; i<2; i++ )
-        {
-            sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
-            sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundSingle ) ); 
-            sequence->push_back( shared_ptr<Transformation>( new CleanupNop ) ); 
-        }        
-            
         // Ineffectual gotos, unused and duplicate labels result from compound tidy-up after construct lowering, but if not 
         // removed before AddGotoBeforeLabel, they will generate spurious states. We also remove dead code which can be exposed by
         // removal of unused labels - we must repeat because dead code removal can generate unused labels.
@@ -85,6 +80,8 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         for( int i=0; i<2; i++ )
         {
             sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
+            sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundSingle ) ); 
+            sequence->push_back( shared_ptr<Transformation>( new CleanupNop ) ); 
             sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedLabels ) ); 
             sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) );
             sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualLabels ) ); 

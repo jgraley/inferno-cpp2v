@@ -10,6 +10,9 @@ using namespace CPPTree;
 using namespace SCTree;
 using namespace Steps;
  
+// oving automatic variables out to class scope as fields, but only
+// when the compound block they are declared in does not make outgoing 
+// calls which could lead to recursion.
 AutosToModule::AutosToModule()
 {
     MakeTreePtr<Module> s_rec, r_rec;
@@ -17,7 +20,7 @@ AutosToModule::AutosToModule()
     MakeTreePtr< Star<Statement> > vstmts;
     MakeTreePtr<Automatic> s_var;
     MakeTreePtr<Field> fn, r_var;
-    MakeTreePtr<Thread> ft;
+    MakeTreePtr<Callable> ft;
     MakeTreePtr< Stuff<Initialiser> > stuff;
     MakeTreePtr<Compound> s_comp, r_comp;
     MakeTreePtr< Overlay<Compound> > over;
@@ -25,14 +28,21 @@ AutosToModule::AutosToModule()
     MakeTreePtr<Type> type;
     MakeTreePtr<InstanceIdentifier> var_id;
     MakeTreePtr<Initialiser> init;
-    
+    MakeTreePtr< MatchAll<Compound> > s_all;
+    MakeTreePtr< NotMatch<Compound> > sx_not;
+    MakeTreePtr< Stuff<Compound> > sx_stuff;
+    MakeTreePtr<Call> sx_call;
+        
     s_rec->members = (decls, fn);
     s_rec->bases = bases;
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
     stuff->terminus = over;
-    over->through = s_comp;
+    over->through = s_all;
+    s_all->patterns = (sx_not, s_comp);
+    sx_not->pattern = sx_stuff;
+    sx_stuff->terminus = sx_call;
     s_comp->members = (vdecls, s_var);
     s_comp->statements = (vstmts);
     s_var->type = type;
