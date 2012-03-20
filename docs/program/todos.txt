@@ -2,18 +2,18 @@ TODO list (to get the sequential phase looking good)
 Note: (0.2 #x) means do this for 0.2 release, in order of x. 
 0.2 planned release notes: Better S&R, maybe ready for general use; initial SystemC support; sequential phase at alpha or beta; doxygen and generally better documentation
 
-- for to allow eg ++i, steps, backward - be optimistic about increment direction versus limits direction.
-
-only generate stacks for non-leaf functions (sensiblising) (0.2 #5)
+Reduce dependencies on SC nodes where it doesn't really matter. (0.2)
+   - Dependence on Module could go altogether maybe.  
+   - Makes it easier to retarget the sequential phase away from SC for eg pure software use
+   - In fact, why not operate on Scopes, so that it acts at Program level and hence with C code
+   - less insitence on Thread
 
 test with multiple SC_THREAD, since this is nominally supported, let's keep it working (0.2 #6)
    - funciton merging needs fixing so it does not kill the callee, in case other threads call it. A seperate kill uncalled functions
      cleanup can get rid of these. This means possible duplication of callee though - the ultimate solution would be to make a seperate
-     server for them, but we're not doing servers yet.
+     server for them, but we're not doing servers yet. OR use verilog functions.
 
 figure out how to keep using the non-SC tests (0.2 #7 but not if hard)
-
-Update sequential phase docs (0.2 #8)
 
 Fix the dependency fault if not done already (0.2 #9)
    - something to do with stuff in SR depending on tree I think
