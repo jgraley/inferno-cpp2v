@@ -190,6 +190,10 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
         if( !r )
             return false;
     }
+    else if( dynamic_pointer_cast<InsertBase>(pattern) )
+    {
+       ASSERTFAIL("Insert node found not in a collection\n");
+    }
     else if( shared_ptr<SlaveBase> sp = dynamic_pointer_cast<SlaveBase>(pattern) )
     {
         // When a slave node seen duriung search, just forward through the "base" path
@@ -288,7 +292,12 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 		ASSERT( pe );
 		npit=pit;
 		++npit;
-	    if( shared_ptr<StarBase> ps = dynamic_pointer_cast<StarBase>(pe) )
+
+        if( dynamic_pointer_cast<InsertBase>(pe) )
+        {
+            // do nothing, insert nodes are skipped when searching
+        }
+	    else if( shared_ptr<StarBase> ps = dynamic_pointer_cast<StarBase>(pe) )
 	    {
 			// We have a Star type wildcard that can match multiple elements.
 			// Remember where we are - this is the beginning of the subsequence that
@@ -495,7 +504,11 @@ bool CompareReplace::DecidedCompare( CollectionInterface &x,
     			TypeInfo( TreePtr<Node>(*pit) ).name().c_str() );
     	shared_ptr<StarBase> maybe_star = dynamic_pointer_cast<StarBase>( TreePtr<Node>(*pit) );
 
-        if( maybe_star ) // Star in pattern collection?
+        if( dynamic_pointer_cast<InsertBase>(TreePtr<Node>(*pit)) )
+        {
+            // do nothing, insert nodes are skipped when searching
+        }
+        else if( maybe_star ) // Star in pattern collection?
         {
         	ASSERT(!seen_star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
         	// TODO remove this restriction - I might want to match one star and leave another unmatched.
@@ -991,7 +1004,7 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
 
     // See if the source node is coupled to anything
     shared_ptr<Key> key = coupling_keys.GetKey( source );
-    TreePtr<Node> overlay;
+    TreePtr<Node> overlay, insert;
         
     if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(source) )
     {   
@@ -1006,6 +1019,12 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
             ASSERT( ob->GetOverlay() );          
             TRACE("Overlay node through=")(*(ob->GetThrough()))(" overlay=")(*(ob->GetOverlay()))("\n");
             overlay = ob->GetOverlay(); 
+        }
+        else if( shared_ptr<InsertBase> ib = dynamic_pointer_cast<InsertBase>( source ) )
+        {
+            ASSERT( ib->GetInsert() );          
+            TRACE("Insert node insert=")(*(ib->GetInsert()))("\n");
+            insert = ib->GetInsert(); 
         }
         else if( shared_ptr<GreenGrassBase> ggb = dynamic_pointer_cast<GreenGrassBase>( source ) )
         {
@@ -1023,6 +1042,10 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
         else if( overlay )
         {
             return DoOverlayOrOverwriteSubstitutionPattern(key->root, key, overlay);
+        }
+        else if( insert )
+        {
+            return DuplicateSubtreePattern( insert );
         }
         else
         {

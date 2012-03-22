@@ -659,7 +659,8 @@ FixFallthrough::FixFallthrough()
 #if 1
 MakeFallThroughMachine::MakeFallThroughMachine()
 {
-    MakeTreePtr<Module> s_module, r_module;
+    MakeTreePtr<Scope> module;
+    MakeTreePtr< Insert<Declaration> > insert;
     MakeTreePtr< GreenGrass<Type> > gg;
     MakeTreePtr<Field> func, m_func;
     MakeTreePtr<InstanceIdentifier> func_id;
@@ -671,8 +672,8 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     MakeTreePtr< Star<Base> > bases;
     MakeTreePtr<Enum> r_module_enum;
     MakeTreePtr<BuildTypeIdentifier> r_enum_id("%sStates");
-    MakeTreePtr< MatchAll<Declaration> > m_all;
-    MakeTreePtr< Stuff<Declaration> > m_stuff_inst;
+    MakeTreePtr< MatchAll<Scope> > m_all;
+    MakeTreePtr< Stuff<Scope> > m_stuff_inst;
     MakeTreePtr< Stuff<Initialiser> > m_stuff_label;
     MakeTreePtr< Overlay<Type> > m_over;
     MakeTreePtr< Stuff<Type> > m_stuff;
@@ -686,7 +687,8 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     MakeTreePtr< Star<Declaration> > l_func_decls, l_enum_vals, l_decls, l_module_decls;
     MakeTreePtr< Star<Statement> > l_func_pre, l_func_post, l_pre, l_block, l_post, l_stmts, l_dead_gotos;
     MakeTreePtr<Switch> l_switch;     
-    MakeTreePtr<Enum> ls_enum, lr_enum;         
+    MakeTreePtr<Enum> l_enum;     
+    MakeTreePtr< Insert<Declaration> > l_insert;
     MakeTreePtr< NotMatch<Statement> > xs_rr;
     MakeTreePtr<Static> lr_state_decl;    
     MakeTreePtr<BuildInstanceIdentifier> lr_state_id("%s_STATE_%s");
@@ -708,8 +710,8 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     MakeTreePtr<Loop> l_loop;
     MakeTreePtr< Overlay<Statement> > l_over;
     MakeTreePtr< NotMatch<Statement> > l_not;             
-    MakeTreePtr< Stuff<Declaration> > m_stuff_func;
-    MakeTreePtr<Module> ls_module, lr_module;
+    MakeTreePtr< Stuff<Scope> > m_stuff_func;
+    MakeTreePtr<Scope> l_module;
     MakeTreePtr<Field> l_func;
         
     ll_all->patterns = (ll_any, lls_not1, lls_not2); // TODO don't think we need the nots
@@ -721,7 +723,7 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     lls_not2->pattern = lls_label;
     lls_label->identifier = ls_label_id; // leave labels alone in the body
 
-    MakeTreePtr< SlaveSearchReplace<Declaration> > slavell( lr_module, ll_all );    
+    MakeTreePtr< SlaveSearchReplace<Scope> > slavell( l_module, ll_all );    
     
     m_all->patterns = (m_stuff_func, m_stuff_inst);
     m_stuff_func->terminus = m_func;
@@ -738,33 +740,27 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     m_ptr->destination = MakeTreePtr<Void>();
     m_over->overlay = r_enum_id;    
     
-    MakeTreePtr< SlaveCompareReplace<Declaration> > slavem( r_module, m_all );
+    MakeTreePtr< SlaveCompareReplace<Scope> > slavem( module, m_all );
 
-    ls_module->members = (l_module_decls, ls_enum, l_func);
-    ls_module->bases = (bases);
-    ls_module->identifier = module_id;
     l_func->identifier = func_id;
     l_func->initialiser = l_func_comp;
     l_func_comp->members = (func_decls);
     l_func_comp->statements = (l_func_pre, l_loop, l_func_post); 
-    ls_enum->members = (l_enum_vals);
-    ls_enum->identifier = r_enum_id; // need to match id, not enum itself, because enum's members will change during slave
     l_loop->body = l_over;
     l_over->through = ls_comp;
     ls_comp->members = (l_decls);
     ls_comp->statements = (l_pre, ls_goto, ls_label, l_block, l_post, l_dead_gotos); 
     ls_goto->destination = var_id;
     ls_label->identifier = ls_label_id;
+    l_enum->members = (l_enum_vals, l_insert);
+    l_enum->identifier = r_enum_id;
     l_block->pattern = l_not;
     l_not->pattern = MakeTreePtr<Goto>();
     l_post->pattern = MakeTreePtr<If>();    
     l_dead_gotos->pattern = MakeTreePtr<Goto>();
-    lr_module->members = (l_module_decls, lr_enum, l_func);
-    lr_module->bases = (bases);
-    lr_module->identifier = module_id;
+    l_module->members = (l_module_decls, l_enum, l_func);
     l_over->overlay = lr_comp;
-    lr_enum->members = (l_enum_vals, lr_state_decl);
-    lr_enum->identifier = r_enum_id;
+    l_insert->insert = lr_state_decl;
     lr_state_decl->constancy = MakeTreePtr<Const>();
     lr_state_decl->identifier = lr_state_id;
     lr_state_decl->type = lr_int;
@@ -781,22 +777,22 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     //lr_if_comp->members = ();
     lr_if_comp->statements = l_block;
 
-    MakeTreePtr< SlaveCompareReplace<Declaration> > slavel( slavem, ls_module, slavell );
+    MakeTreePtr< SlaveCompareReplace<Scope> > slavel( slavem, l_module, slavell );
     
-    s_module->members = (module_decls, func);    
-    s_module->bases = (bases);
-    s_module->identifier = module_id;
+    //s_module->bases = (bases);
+    //s_module->identifier = module_id;
     func->type = gg;
     gg->through = thread;
     func->identifier = func_id;
-    r_module->members = (module_decls, func, r_module_enum);
-    r_module->bases = (bases);
-    r_module->identifier = module_id;
+    module->members = (module_decls, func, insert);
+    insert->insert = r_module_enum;
+    //r_module->bases = (bases);
+    //r_module->identifier = module_id;
     r_module_enum->identifier = r_enum_id;
     r_enum_id->sources = (func_id);            
     //r_module_enum->members = ();    
     
-    Configure( s_module, slavel );    
+    Configure( module, slavel );    
 }
 #else
 MakeFallThroughMachine::MakeFallThroughMachine()

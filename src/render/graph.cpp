@@ -373,6 +373,13 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
         *shape = "triangle";
         return string(""); 
     }
+    else if( dynamic_pointer_cast<InsertBase>(sp) )
+    {
+        // The Insert node is shown as a small triangle containing a + symbol, with the insert link
+        // coming out of the bottom
+        *shape = "triangle";
+        return string("+"); 
+    }
 	else
 	{
 	    // All the other nodes are represented as a rectangle with curved corners. At the top of the rectangle, 
@@ -625,6 +632,10 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
             s+= ":s";
         else
             s+= ":e";
+    }
+    else if( dynamic_pointer_cast<InsertBase>(from) )
+    {
+        s+= ":s";
     }
 
 	s += " -> ";
