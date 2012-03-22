@@ -7,6 +7,7 @@ Reduce dependencies on SC nodes where it doesn't really matter. (0.2)
    - Makes it easier to retarget the sequential phase away from SC for eg pure software use
    - In fact, why not operate on Scopes, so that it acts at Program level and hence with C code
    - less insitence on Thread
+   - Need Insert and Remove for collections, which work like Overlay, so I can couple the Scopes
 
 test with multiple SC_THREAD, since this is nominally supported, let's keep it working (0.2 #6)
    - funciton merging needs fixing so it does not kill the callee, in case other threads call it. A seperate kill uncalled functions

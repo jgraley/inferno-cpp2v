@@ -100,6 +100,10 @@ The overlaying process is recursive, that is it can overlay a child of the node 
 
 Note that the condition for overlaying versus overwriting depend only on the patterns provided for .overlay and .though in the Overlay node, not on the contents of the input program tree.
 
+3.3a Inserting
+
+It is not possible to overlay a collection or sequence directly. However you can insert a new node into a coupled container by using the Insert special node. One or moree Insert nodes may be placed in a container that is coupled, and the Insert node will be ignored during search but will cause a new node to be inserted (at that location, for sequences) in the output program tree. Point the "insert" member of the Insert node to the subtree you wish to insert. 
+
 3.4 Notes on keyability of couplings
 
 Inferno search and replace has an implementation concept called keying, which is the process of choosing a particular input program subtree that will correspond to a particular coupling. Each coupling only needs to be keyed once for each search hit, and once it is keyed, the key-to-coupling relationship remains unchanged until the replace has completed.

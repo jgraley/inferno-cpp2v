@@ -484,5 +484,21 @@ struct Overlay : OverlayBase, Special<PRE_RESTRICTION>
     }
 };
 
+struct InsertBase : virtual Node
+{
+    virtual TreePtr<Node> GetInsert() const = 0;    
+};
+
+template<class PRE_RESTRICTION>
+struct Insert : InsertBase, Special<PRE_RESTRICTION>
+{
+    SPECIAL_NODE_FUNCTIONS
+    TreePtr<PRE_RESTRICTION> insert;
+    virtual TreePtr<Node> GetInsert() const 
+    {
+        return (TreePtr<Node>)insert;
+    }
+};
+
 #endif
 
