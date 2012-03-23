@@ -15,7 +15,7 @@ using namespace Steps;
 // calls which could lead to recursion.
 AutosToModule::AutosToModule()
 {
-    MakeTreePtr<Module> s_rec, r_rec;
+    MakeTreePtr<Scope> rec;
     MakeTreePtr< Star<Declaration> > decls, vdecls;
     MakeTreePtr< Star<Statement> > vstmts;
     MakeTreePtr<Automatic> s_var;
@@ -32,9 +32,9 @@ AutosToModule::AutosToModule()
     MakeTreePtr< NotMatch<Compound> > sx_not;
     MakeTreePtr< Stuff<Compound> > sx_stuff;
     MakeTreePtr<Call> sx_call;
+    MakeTreePtr< Insert<Declaration> > insert;
         
-    s_rec->members = (decls, fn);
-    s_rec->bases = bases;
+    rec->members = (decls, fn, insert);
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
@@ -49,8 +49,7 @@ AutosToModule::AutosToModule()
     s_var->identifier = var_id;
     s_var->initialiser = init;
      
-    r_rec->members = (decls, fn, r_var);
-    r_rec->bases = bases;
+    insert->insert = r_var;
     over->overlay = r_comp;
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
@@ -61,13 +60,13 @@ AutosToModule::AutosToModule()
     r_var->access = MakeTreePtr<Private>();
     r_var->constancy = MakeTreePtr<NonConst>();
     
-    Configure( s_rec, r_rec );
+    Configure( rec );
 }
 
 
 TempsAndStaticsToModule::TempsAndStaticsToModule()
 {
-    MakeTreePtr<Module> s_rec, r_rec;
+    MakeTreePtr<Scope> rec;
     MakeTreePtr< Star<Declaration> > decls, vdecls;
     MakeTreePtr< Star<Statement> > vstmts;
     MakeTreePtr< MatchAny<Instance> > var;
@@ -82,9 +81,9 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     MakeTreePtr<Type> type;
     MakeTreePtr<InstanceIdentifier> var_id;
     MakeTreePtr<Initialiser> init;
-    
-    s_rec->members = (decls, fn);
-    s_rec->bases = bases;
+    MakeTreePtr< Insert<Declaration> > insert;
+
+    rec->members = (decls, fn, insert);
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
@@ -94,19 +93,18 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     s_comp->statements = (vstmts);
     var->patterns = (tempvar, staticvar);
      
-    r_rec->members = (decls, fn, var);
-    r_rec->bases = bases;
+    insert->insert = var;
     over->overlay = r_comp;
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
     
-    Configure( s_rec, r_rec );
+    Configure( rec );
 }
 
 
 DeclsToModule::DeclsToModule()
 {
-    MakeTreePtr<Module> s_rec, r_rec;
+    MakeTreePtr<Scope> rec;
     MakeTreePtr< Star<Declaration> > decls, vdecls;
     MakeTreePtr< Star<Statement> > vstmts;
     MakeTreePtr<Field> fn;
@@ -116,9 +114,9 @@ DeclsToModule::DeclsToModule()
     MakeTreePtr<Compound> s_comp, r_comp;
     MakeTreePtr< Overlay<Compound> > over;
     MakeTreePtr< Star<Base> > bases;
+    MakeTreePtr< Insert<Declaration> > insert;
     
-    s_rec->members = (decls, fn);
-    s_rec->bases = bases;
+    rec->members = (decls, fn, insert);
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
@@ -127,13 +125,12 @@ DeclsToModule::DeclsToModule()
     s_comp->members = (vdecls, ut);
     s_comp->statements = (vstmts);
      
-    r_rec->members = (decls, fn, ut);
-    r_rec->bases = bases;
+    insert->insert = ut;
     over->overlay = r_comp;
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
     
-    Configure( s_rec, r_rec );
+    Configure( rec );
 }
 
 
