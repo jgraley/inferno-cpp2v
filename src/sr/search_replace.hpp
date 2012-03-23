@@ -143,6 +143,9 @@ public:
 private:
     static int repetitions;
     static bool rep_error;
+    Sequence<Node> ExpandContainerPattern( ContainerInterface &pattern,
+                                           bool replacing ) const;
+
     // LocalCompare ring
     bool LocalCompare( TreePtr<Node> x,
     		           TreePtr<Node> pattern ) const;
@@ -486,33 +489,33 @@ struct Overlay : OverlayBase, Special<PRE_RESTRICTION>
 
 struct InsertBase : virtual Node
 {
-    virtual TreePtr<Node> GetInsert() const = 0;    
+    virtual SequenceInterface *GetInsert() = 0;    
 };
 
 template<class PRE_RESTRICTION>
 struct Insert : InsertBase, Special<PRE_RESTRICTION>
 {
     SPECIAL_NODE_FUNCTIONS
-    TreePtr<PRE_RESTRICTION> insert;
-    virtual TreePtr<Node> GetInsert() const 
+    Sequence<PRE_RESTRICTION> insert;
+    virtual SequenceInterface *GetInsert()  
     {
-        return (TreePtr<Node>)insert;
+        return &insert;
     }
 };
 
 struct EraseBase : virtual Node
 {
-    virtual TreePtr<Node> GetErase() const = 0;    
+    virtual SequenceInterface *GetErase() = 0;    
 };
 
 template<class PRE_RESTRICTION>
 struct Erase : EraseBase, Special<PRE_RESTRICTION>
 {
     SPECIAL_NODE_FUNCTIONS
-    TreePtr<PRE_RESTRICTION> erase;
-    virtual TreePtr<Node> GetErase() const 
+    Sequence<PRE_RESTRICTION> erase;
+    virtual SequenceInterface *GetErase()  
     {
-        return (TreePtr<Node>)erase;
+        return &erase;
     }
 };
 

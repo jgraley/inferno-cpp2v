@@ -55,14 +55,6 @@ public:
 	GenerateStacks();
 };
 
-// Find the (illegal) construct of a member variable declared
-// in a member function and move out into the enclosing class.
-class ExtractFields : public SearchReplace
-{
-public:
-	ExtractFields();
-};
-
 // Merge ordinary functions into the thread that calls them -
 // this is not inlining, because a function only need be merged
 // once for all the call points in the thread. Turn calls and

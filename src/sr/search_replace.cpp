@@ -190,16 +190,9 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
         if( !r )
             return false;
     }
-    else if( dynamic_pointer_cast<InsertBase>(pattern) )
+    else if( dynamic_pointer_cast<InsertBase>(pattern) || dynamic_pointer_cast<EraseBase>(pattern) )
     {
-       ASSERTFAIL("Insert node found not in a collection\n");
-    }
-    else if( shared_ptr<EraseBase> ep = dynamic_pointer_cast<EraseBase>(pattern) )
-    {
-        // When Erase node seen duriung search, just forward 
-        bool r = DecidedCompare( x, ep->GetErase(), can_key, conj );
-        if( !r )
-            return false;
+       ASSERTFAIL(*pattern)(" found outside of a container; can only be used in containers\n");
     }
     else if( shared_ptr<SlaveBase> sp = dynamic_pointer_cast<SlaveBase>(pattern) )
     {
@@ -269,7 +262,40 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
     return true;
 }
 
-                                                                                                                        
+
+Sequence<Node> CompareReplace::ExpandContainerPattern( ContainerInterface &pattern,
+                                                       bool replacing ) const
+{
+    // This helper is for Insert and Erase nodes. It takes a pattern container (which
+    // is the only place these nodes should occur) and expands out either Insert or
+    // Erase nodes. When searching, Erase is expanded out so that the program nodes
+    // to be erased may be matched off (cond keyed etc) and Insert is skipped because
+    // it does not need to correspond to anything during search. When replacing, 
+    // erase is skipped to erase the elements and Insert is expanded to insert them. 
+    Sequence<Node> expanded;
+    FOREACH( TreePtr<Node> n, pattern )
+    {
+        if( shared_ptr<EraseBase> pe = dynamic_pointer_cast<EraseBase>(n) )
+        {
+            if( !replacing )
+                FOREACH( TreePtr<Node> e, *(pe->GetErase()) )
+                    expanded.push_back( e );                
+        }
+        else if( shared_ptr<InsertBase> pi = dynamic_pointer_cast<InsertBase>(n) )
+        {
+            if( replacing )
+                FOREACH( TreePtr<Node> i, *(pi->GetInsert()) )
+                    expanded.push_back( i );                
+        }
+        else
+        {
+            expanded.push_back( n );
+        }
+    }
+    return expanded;
+}
+                                                     
+                                                     
 // TODO support SearchContainerBase(ie Stuff nodes) here and below inside the container.
 // Behaviour would be to try the container at each of the nodes matched by the star, and if
 // one match is found we have a hit (ie OR behaviour). I think this results in 3 decisions
@@ -283,6 +309,8 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 		                               Conjecture &conj ) const
 {
     INDENT;
+    Sequence<Node> epattern = ExpandContainerPattern( pattern, false );    
+    
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
 	ContainerInterface::iterator xit = x.begin();
@@ -290,7 +318,7 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 	Conjecture::Choice *governing_choice = NULL;
 	int governing_offset;
 
-	for( pit = pattern.begin(); pit != pattern.end(); ++pit )
+	for( pit = epattern.begin(); pit != epattern.end(); ++pit )
 	{
 		ASSERT( xit == x.end() || *xit );
 
@@ -300,74 +328,70 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 		npit=pit;
 		++npit;
 
-        if( dynamic_pointer_cast<InsertBase>(pe) )
+        if( shared_ptr<StarBase> ps = dynamic_pointer_cast<StarBase>(pe) )
         {
-            // do nothing, insert nodes are skipped when searching
-        }
-	    else if( shared_ptr<StarBase> ps = dynamic_pointer_cast<StarBase>(pe) )
-	    {
-			// We have a Star type wildcard that can match multiple elements.
-			// Remember where we are - this is the beginning of the subsequence that
-	    	// potentially matches the Star.
-	    	ContainerInterface::iterator xit_begin_star = xit;
+            // We have a Star type wildcard that can match multiple elements.
+            // Remember where we are - this is the beginning of the subsequence that
+            // potentially matches the Star.
+            ContainerInterface::iterator xit_begin_star = xit;
 
-	    	// Star always matches at the end of a sequence, so we only need a 
-	    	// decision when there are more elements left
-	    	if( npit == pattern.end() )
-	    	{
-	    		xit = x.end(); // match all remaining members of x; jump to end
-	    	}
-	    	else
-	    	{
-	    		TRACE("Pattern continues after star\n");
+            // Star always matches at the end of a sequence, so we only need a 
+            // decision when there are more elements left
+            if( npit == epattern.end() )
+            {
+                xit = x.end(); // match all remaining members of x; jump to end
+            }
+            else
+            {
+                TRACE("Pattern continues after star\n");
 
-	    		// Star not at end so there is more stuff to match; ensure not another star
-	    	//	ASSERT( !dynamic_pointer_cast<StarBase>(TreePtr<Node>(*npit)) )
-	    	//	      ( "Not allowed to have two neighbouring Star elements in search pattern Sequence");
+                // Star not at end so there is more stuff to match; ensure not another star
+            //  ASSERT( !dynamic_pointer_cast<StarBase>(TreePtr<Node>(*npit)) )
+            //        ( "Not allowed to have two neighbouring Star elements in search pattern Sequence");
 
-		    	// Decide how many elements the current * should match, using conjecture. Jump forward
-	    		// that many elements, to the element after the star. We need to use the special 
-	    		// interface to Conjecture because the iterator we get is itself an end to the 
-	    		// range matched by the star, and so x.end() is a legitimate choice for ss.end()
-	    		// So allow the Conjecture class to give us two ends, and only give up on the second.
-		    	Conjecture::Choice *current_choice = conj.GetChoicePtr();
+                // Decide how many elements the current * should match, using conjecture. Jump forward
+                // that many elements, to the element after the star. We need to use the special 
+                // interface to Conjecture because the iterator we get is itself an end to the 
+                // range matched by the star, and so x.end() is a legitimate choice for ss.end()
+                // So allow the Conjecture class to give us two ends, and only give up on the second.
+                Conjecture::Choice *current_choice = conj.GetChoicePtr();
 #if 0
-		    	// Optimisation for couplings in sequences: is some future pattern node coupled?
-		    	bool do_optimise = false;
-		    	int lad=0;
-		    	shared_ptr<Key> lakey;
-		    	for( ContainerInterface::iterator lapit=npit; lapit!=pattern.end(); ++lapit )
-		    	{
-		    	    lad++;
-		        	if( dynamic_pointer_cast<StarBase>(TreePtr<Node>(*lapit)) )
-		        	    break; // Stop at stars, do not use them or go past them (TODO use stars, need to uncomment some code here and give them governing_choice */
-		        	lakey = coupling_keys.GetKey( *lapit );
-		        	// Did we find a node that has been keyed?
-		        	if( lakey && lakey->root )
-		        	{
-		        	    TRACE("Maybe optimise lad=%d *pit=", lad)(**pit)(" *lapit=")(**lapit)
-		        	         (" lakey->governing_choice=%p current_choice=%p", lakey->governing_choice, current_choice)
-		        	         (" lakey->pattern=")(*lakey->replace_pattern)(" lakey->root=")(*lakey->root)("\n");
-		        	    // Did the node have a governing_choice set on it (i.e. was it goverend by a Star node decision?
-		        	    // AND is it not the current decision (we leave the original decision unoptimised)
-		        	    if( lakey->governing_choice &&
-		        	        lakey->governing_choice != current_choice )
-		        	    {
-		        	        TRACE("governing_offset=%d\n", governing_offset);
-                    	    do_optimise=true;
-		                }
-		            }
-		    	}		    			    	
+                // Optimisation for couplings in sequences: is some future pattern node coupled?
+                bool do_optimise = false;
+                int lad=0;
+                shared_ptr<Key> lakey;
+                for( ContainerInterface::iterator lapit=npit; lapit!=pattern.end(); ++lapit )
+                {
+                    lad++;
+                    if( dynamic_pointer_cast<StarBase>(TreePtr<Node>(*lapit)) )
+                        break; // Stop at stars, do not use them or go past them (TODO use stars, need to uncomment some code here and give them governing_choice */
+                    lakey = coupling_keys.GetKey( *lapit );
+                    // Did we find a node that has been keyed?
+                    if( lakey && lakey->root )
+                    {
+                        TRACE("Maybe optimise lad=%d *pit=", lad)(**pit)(" *lapit=")(**lapit)
+                             (" lakey->governing_choice=%p current_choice=%p", lakey->governing_choice, current_choice)
+                             (" lakey->pattern=")(*lakey->replace_pattern)(" lakey->root=")(*lakey->root)("\n");
+                        // Did the node have a governing_choice set on it (i.e. was it goverend by a Star node decision?
+                        // AND is it not the current decision (we leave the original decision unoptimised)
+                        if( lakey->governing_choice &&
+                            lakey->governing_choice != current_choice )
+                        {
+                            TRACE("governing_offset=%d\n", governing_offset);
+                            do_optimise=true;
+                        }
+                    }
+                }                               
 
-		    	if( do_optimise )
-		    	{
-	        	    TreePtr<Node> lakeynode = lakey->root;
-	        	    // Is it a SubCollection? then use the first node out of subcollection as the key
-		    	    if( TreePtr<SubCollection> lakeysc = dynamic_pointer_cast<SubCollection>(lakey->root) )
-    	    	        lakeynode = *(lakeysc->begin());
-	        	    TRACE("Optimising coupled node %d after star in sequence, looking for ", lad)(*lakeynode)("\n");
-		        	        
-		        	    // Search for the key in the input program sequence    
+                if( do_optimise )
+                {
+                    TreePtr<Node> lakeynode = lakey->root;
+                    // Is it a SubCollection? then use the first node out of subcollection as the key
+                    if( TreePtr<SubCollection> lakeysc = dynamic_pointer_cast<SubCollection>(lakey->root) )
+                        lakeynode = *(lakeysc->begin());
+                    TRACE("Optimising coupled node %d after star in sequence, looking for ", lad)(*lakeynode)("\n");
+                            
+                        // Search for the key in the input program sequence    
 #if 0 // TODO Very tenuous argument for the Choice pointed to by lakey->governing_choice not having been 
       // deleted, maybe put them under shared_ptr for peace of mind. Argument is: Key points to 
       // Choice. Keys all forgotten at top of MDC(). Conjecture class "live" thoughout both passes
@@ -380,69 +404,69 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
       // NOTE: we can have xit_begin_star actually beyond the target lakeynode due to earlier
       // Star<> trynig a big number of nodes. We must reject in this case or we'll create an invalid
       // subsequence. The only way I can see is to enumerate with integers.
-	        	    xit = lakey->governing_choice->it;
+                    xit = lakey->governing_choice->it;
 
-	        	    ASSERT( lakey );
-	        	    ASSERT( lakey->governing_choice );
-	        	    ASSERT( lakey->governing_choice->it != lakey->governing_choice->end );
-	        	    ASSERT( lakey->governing_choice->it != x.end() );
-#else		        	    
-	        	    bool found = false;
-	        	    for( xit = xit_begin_star; xit != x.end(); ++xit )
-	        	    {
-	        	        if( (*xit) == lakeynode )
-	        	        {
-	        	            found = true;
-	        	            break;
-	        	        }
-	        	    }    
-	        	    if( !found )
-	        	    {
-	        	        TRACE("we have already overshot the target node, so fail\n");
-	        	        return false;
-	        	    }
-#endif		        	    
+                    ASSERT( lakey );
+                    ASSERT( lakey->governing_choice );
+                    ASSERT( lakey->governing_choice->it != lakey->governing_choice->end );
+                    ASSERT( lakey->governing_choice->it != x.end() );
+#else                       
+                    bool found = false;
+                    for( xit = xit_begin_star; xit != x.end(); ++xit )
+                    {
+                        if( (*xit) == lakeynode )
+                        {
+                            found = true;
+                            break;
+                        }
+                    }    
+                    if( !found )
+                    {
+                        TRACE("we have already overshot the target node, so fail\n");
+                        return false;
+                    }
+#endif                      
                     // Step back or forward in the input tree nodes, so that we don't include anything that corresponds to the patterns we skipped above
-	        	    int offset = lakey->governing_offset - lad; 
+                    int offset = lakey->governing_offset - lad; 
                     TRACE("Need to go forward (backward) %d places\n", offset);
-	        	    // TODO += on iterators, this is just messy here
-	        	    for( ; offset < 0; offset++ )  
-	        	    {
-	            	    if( xit == x.begin() )
-	            	    {
-	            	        TRACE("At beginning, cannot back up\n");
-			                return false;
-			            }
-	            	    --xit;
-	            	}
-	        	    for( ; offset > 0; offset-- ) 
-	        	    {
-	            	    if( xit == x.end() )
-	            	    {
-	            	        TRACE("At end, cannot go forward\n");
-			                return false;
-			            }
-	            	    ++xit;
-	            	}
-	        	    TRACE("Moved to ")(**xit)(", forcing decision\n");
-		    	    xit = conj.HandleDecision( xit );
-		        }
-		        else
+                    // TODO += on iterators, this is just messy here
+                    for( ; offset < 0; offset++ )  
+                    {
+                        if( xit == x.begin() )
+                        {
+                            TRACE("At beginning, cannot back up\n");
+                            return false;
+                        }
+                        --xit;
+                    }
+                    for( ; offset > 0; offset-- ) 
+                    {
+                        if( xit == x.end() )
+                        {
+                            TRACE("At end, cannot go forward\n");
+                            return false;
+                        }
+                        ++xit;
+                    }
+                    TRACE("Moved to ")(**xit)(", forcing decision\n");
+                    xit = conj.HandleDecision( xit );
+                }
+                else
 #endif
-		        {
-		    	    xit = conj.HandleDecision( xit_begin_star, x.end(), 1 );
-		        }		        		        
+                {
+                    xit = conj.HandleDecision( xit_begin_star, x.end(), 1 );
+                }                               
             }
             
-			// Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
-		    // Now make a copy of the elements that matched the star and apply couplings
-	    	TreePtr<SubSequence> ss( new SubSequence( xit_begin_star, xit ) );
-	    	//for( ContainerInterface::iterator it=xit_begin_star; it != xit; ++it ) // TODO FOREACH?
-	    	//{
-	    	//	ss->push_back( *it );
-	    	//}
-	    	
-			// Apply couplings to this Star and matched range
+            // Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
+            // Now make a copy of the elements that matched the star and apply couplings
+            TreePtr<SubSequence> ss( new SubSequence( xit_begin_star, xit ) );
+            //for( ContainerInterface::iterator it=xit_begin_star; it != xit; ++it ) // TODO FOREACH?
+            //{
+            //  ss->push_back( *it );
+            //}
+            
+            // Apply couplings to this Star and matched range
             if( TreePtr<Node> keynode = coupling_keys.GetCoupled( pe ) )
                 if( Compare( TreePtr<Node>(ss), keynode ) == false )
                     return false;
@@ -452,16 +476,16 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
             if( !r )
                 return false;
 
-	        if( can_key )
-                coupling_keys.DoKey( TreePtr<Node>(ss), pe, governing_choice, governing_offset );	
+            if( can_key )
+                coupling_keys.DoKey( TreePtr<Node>(ss), pe, governing_choice, governing_offset );   
 
-	    	if( npit != pattern.end() )
-	    	{
-		    	governing_choice = conj.GetPrevChoicePtr();
-		    	governing_offset = 0;           
-		    }
-	    }
-	    else // not a Star so match singly...
+            if( npit != epattern.end() )
+            {
+                governing_choice = conj.GetPrevChoicePtr();
+                governing_offset = 0;           
+            }
+        }
+ 	    else // not a Star so match singly...
 	    {
             // If there is one more element in x, see if it matches the pattern
 			//TreePtr<Node> xe( x[xit] );
@@ -481,8 +505,8 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 	}
 
     // If we finished the job and pattern and subject are still aligned, then it was a match
-	TRACE("Finishing compare sequence %d %d\n", xit==x.end(), pit==pattern.end() );
-    return (xit==x.end() && pit==pattern.end()) ? true : false;
+	TRACE("Finishing compare sequence %d %d\n", xit==x.end(), pit==epattern.end() );
+    return (xit==x.end() && pit==epattern.end()) ? true : false;
 }
 
 
@@ -492,6 +516,8 @@ bool CompareReplace::DecidedCompare( CollectionInterface &x,
 									   Conjecture &conj ) const
 {
     INDENT;
+    Sequence<Node> epattern = ExpandContainerPattern( pattern, false );    
+   
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
 	// after decisions.
@@ -503,21 +529,17 @@ bool CompareReplace::DecidedCompare( CollectionInterface &x,
     shared_ptr<StarBase> star;
     bool seen_star = false;
 
-    for( CollectionInterface::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
+    for( CollectionInterface::iterator pit = epattern.begin(); pit != epattern.end(); ++pit )
     {
-    	TRACE("Collection compare %d remain out of %d; looking at %s in pattern\n",
+    	TRACE("Collection compare %d remain out of %d; looking at %s in epattern\n",
     			xremaining->size(),
-    			pattern.size(),
+    			epattern.size(),
     			TypeInfo( TreePtr<Node>(*pit) ).name().c_str() );
     	shared_ptr<StarBase> maybe_star = dynamic_pointer_cast<StarBase>( TreePtr<Node>(*pit) );
 
-        if( dynamic_pointer_cast<InsertBase>(TreePtr<Node>(*pit)) )
+        if( maybe_star ) // Star in pattern collection?
         {
-            // do nothing, insert nodes are skipped when searching
-        }
-        else if( maybe_star ) // Star in pattern collection?
-        {
-        	ASSERT(!seen_star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
+        	ASSERT(!seen_star)("Only one Star node (or NULL ptr) allowed in a search epattern Collection");
         	// TODO remove this restriction - I might want to match one star and leave another unmatched.
             star = maybe_star; // remember for later and skip to next pattern
             seen_star = true; // TODO do we need?
@@ -835,34 +857,32 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
         ASSERT( keynode_memb[i] )( "itemise returned null element" );                
         if( ContainerInterface *source_con = dynamic_cast<ContainerInterface *>(source_memb[i]) )                
         {
+            Sequence<Node> esource_con = ExpandContainerPattern( *source_con, true );    
+
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
-            ASSERT( dest_con )( "itemise for dest didn't match itemise for source");
+            ASSERT( dest_con )( "itemise for dest didn't match itemise for esource");
             dest_con->clear();
 
-            TRACE("Copying container size %d from source\n", source_con->size() );
-	        FOREACH( const TreePtrInterface &p, *source_con )
+            TRACE("Copying container size %d from esource\n", esource_con.size() );
+	        FOREACH( const TreePtrInterface &p, esource_con )
 	        {
 		        ASSERT( p ); // present simplified scheme disallows NULL
 		        TRACE("Got ")(*p)("\n");
-		        if( shared_ptr<StarBase> ps = dynamic_pointer_cast<StarBase>(TreePtr<Node>(p)) )
-		        {
-		            shared_ptr<Key> key = coupling_keys.GetKey( ps );
-		            ASSERT( key )("Replacing ")(*p)(" but it was not keyed from the search pattern as required\n");
-		            TRACE("Got ")(*key->root)("\n");
-		            ContainerInterface *psc = dynamic_cast<ContainerInterface *>(key->root.get());
-		            ASSERT( psc );
-			        TRACE("Expanding SubContainer length %d\n", psc->size() );
-		            FOREACH( const TreePtrInterface &pp, *psc )
-		            {
-		                TreePtr<Node> nn = DuplicateSubtreeSubstitution( pp, key );
+                if( shared_ptr<StarBase> ps = dynamic_pointer_cast<StarBase>(TreePtr<Node>(p)) )
+                {
+                    shared_ptr<Key> key = coupling_keys.GetKey( ps );
+                    ASSERT( key )("Replacing ")(*p)(" but it was not keyed from the search pattern as required\n");
+                    TRACE("Got ")(*key->root)("\n");
+                    ContainerInterface *psc = dynamic_cast<ContainerInterface *>(key->root.get());
+                    ASSERT( psc );
+                    TRACE("Expanding SubContainer length %d\n", psc->size() );
+                    FOREACH( const TreePtrInterface &pp, *psc )
+                    {
+                        TreePtr<Node> nn = DuplicateSubtreeSubstitution( pp, key );
                         if( ReadArgs::assert_pedigree )
                             ASSERT( duplicated_pedigree.IsExist(nn) )(*nn);
-			            dest_con->insert( nn );
-			        }
-           		}
-                else if( shared_ptr<EraseBase> pe = dynamic_pointer_cast<EraseBase>(TreePtr<Node>(p)) )
-                {
-                    TRACE("Erase element, no action taken\n");
+                        dest_con->insert( nn );
+                    }
                 }
                 else 
                 {
@@ -1018,7 +1038,7 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
 
     // See if the source node is coupled to anything
     shared_ptr<Key> key = coupling_keys.GetKey( source );
-    TreePtr<Node> overlay, insert;
+    TreePtr<Node> overlay;
         
     if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(source) )
     {   
@@ -1033,12 +1053,6 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
             ASSERT( ob->GetOverlay() );          
             TRACE("Overlay node through=")(*(ob->GetThrough()))(" overlay=")(*(ob->GetOverlay()))("\n");
             overlay = ob->GetOverlay(); 
-        }
-        else if( shared_ptr<InsertBase> ib = dynamic_pointer_cast<InsertBase>( source ) )
-        {
-            ASSERT( ib->GetInsert() );          
-            TRACE("Insert node insert=")(*(ib->GetInsert()))("\n");
-            insert = ib->GetInsert(); 
         }
         else if( shared_ptr<GreenGrassBase> ggb = dynamic_pointer_cast<GreenGrassBase>( source ) )
         {
@@ -1056,10 +1070,6 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
         else if( overlay )
         {
             return DoOverlayOrOverwriteSubstitutionPattern(key->root, key, overlay);
-        }
-        else if( insert )
-        {
-            return DuplicateSubtreePattern( insert );
         }
         else
         {

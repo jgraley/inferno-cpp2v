@@ -102,11 +102,15 @@ Note that the condition for overlaying versus overwriting depend only on the pat
 
 3.3a Inserting
 
-It is not possible to overlay a collection or sequence directly. However you can insert a new node into a coupled container by using the Insert special node. One or moree Insert nodes may be placed in a container that is coupled, and the Insert node will be ignored during search but will cause a new node to be inserted (at that location, for sequences) in the output program tree. Point the "insert" member of the Insert node to the subtree you wish to insert. 
+It is not possible to overlay a collection or sequence directly. However you can insert new nodes into a coupled container by using the Insert special node. One or moree Insert nodes may be placed in a container that is coupled, and the Insert node will be ignored during search but will cause new nodes to be inserted (at that location, for sequences) in the output program tree. 
+
+Place the nodes you wish to insert into the sequence named "insert" in the Insert node. These nodes may be coupled, and may include Star nodes (which must be coupled, as usual).
 
 3.3b Erasing
 
-You can erase a node from a coupled container by using the Erase special node. One or more Erase nodes may be placed in a container that is coupled, and the Erase node will be matched to its "erase" member during search but will not appear in the output program tree. Point the "erase" member of the Insert node to the subtree you wish to match to the element being erased. 
+You can erase a node from a coupled container by using the Erase special node. One or more Erase nodes may be placed in a container that is coupled, and the Erase node will be matched to its "erase" member during search but will not appear in the output program tree. 
+
+Place the nodes you wish to erase into the sequence named "erase" in the Erase node. These nodes may be coupled, and may include Star nodes (which must be coupled, as usual).
 
 Note that you *can* couple to the erase pattern under an Erase node. You will often want to do this when, for example, the program subtree is to be relocated somewhere else, possibly with modifications.
 

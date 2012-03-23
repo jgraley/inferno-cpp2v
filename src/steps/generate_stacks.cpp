@@ -133,7 +133,7 @@ ReturnViaTemp::ReturnViaTemp()
     MakeTreePtr< SlaveSearchReplace<Scope> > slavem( module, ms_gg, mr_comp );
     
     module->members = (decls, func, insert);
-    insert->insert = r_temp;
+    insert->insert = (r_temp);
     func->type = cp;
     func->initialiser = overi;
     overi->through = s_body;
@@ -251,7 +251,7 @@ AddLinkAddress::AddLinkAddress()
     lr_comp->statements = (l_stmts);
     
     module->members = (gg, decls, insert);
-    insert->insert = r_retaddr;
+    insert->insert = (r_retaddr);
     gg->through = l_inst;
     r_retaddr->identifier = r_retaddr_id;
     r_retaddr->type = r_ptr;
@@ -321,7 +321,7 @@ ParamsViaTemps::ParamsViaTemps()
     r_param->identifier = param_id;
     r_cp->members = (params);
     r_cp->return_type = return_type;
-    insert->insert = r_temp;
+    insert->insert = (r_temp);
     r_temp->type = param_type;
     r_temp->initialiser = MakeTreePtr<Uninitialised>();
     r_temp->identifier = r_temp_id;
@@ -419,7 +419,7 @@ GenerateStacks::GenerateStacks()
     r_ret_comp->statements = ( r_ret_dec, ret );
 
     l_module->members = (l_members, l_fi, l_insert);
-    l_insert->insert = r_instance;
+    l_insert->insert = (r_instance);
     l_fi->initialiser = stuff;
     l_fi->identifier = fi_id;
     
@@ -431,7 +431,7 @@ GenerateStacks::GenerateStacks()
     
     // Master search - look for functions satisfying the construct limitation and get
     module->members = (fi, members, insert);
-    insert->insert = r_index;
+    insert->insert = (r_index);
     fi->identifier = fi_id;
     fi->type = s_not;
     s_not->pattern = sx_any;
@@ -575,37 +575,6 @@ GenerateStacks::GenerateStacks()
 
 */
 
-ExtractFields::ExtractFields()
-{
-    MakeTreePtr<Module> s_rec, r_rec;
-    MakeTreePtr< Star<Declaration> > decls, vdecls;
-    MakeTreePtr< Star<Statement> > vstmts;
-    MakeTreePtr<Field> fn, var;
-    MakeTreePtr<Callable> ft;
-    MakeTreePtr< Stuff<Initialiser> > stuff;
-    MakeTreePtr<Compound> s_comp, r_comp;
-    MakeTreePtr< Overlay<Compound> > over;
-    MakeTreePtr< Star<Base> > bases;
-    
-    s_rec->members = (decls, fn);
-    s_rec->bases = bases;
-    fn->type = ft;
-    fn->initialiser = stuff;
-    // TODO recurse restriction for locally declared classes
-    stuff->terminus = over;
-    over->through = s_comp;
-    s_comp->members = (vdecls, var);
-    s_comp->statements = (vstmts);
-     
-    r_rec->members = (decls, fn, var);
-    r_rec->bases = bases;
-    over->overlay = r_comp;
-    r_comp->members = (vdecls);
-    r_comp->statements = (vstmts);
-    
-    Configure( s_rec, r_rec );
-}
-
 
 MergeFunctions::MergeFunctions()
 {
@@ -641,7 +610,7 @@ MergeFunctions::MergeFunctions()
     MakeTreePtr< SlaveSearchReplace<Compound> > slavel( r_thread_comp, ls_call, lr_goto );    
     
     module->members = (members, thread, erase);
-    erase->erase = s_func;
+    erase->erase = (s_func);
     thread->type = thread_type;
     thread->initialiser = thread_over;
     thread_over->through = s_all;
