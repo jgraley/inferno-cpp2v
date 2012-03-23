@@ -7,7 +7,7 @@ Reduce dependencies on SC nodes where it doesn't really matter. (0.2)
    - Makes it easier to retarget the sequential phase away from SC for eg pure software use
    - In fact, why not operate on Scopes, so that it acts at Program level and hence with C code
    - less insitence on Thread
-   - Need Insert and Remove for collections, which work like Overlay, so I can couple the Scopes
+   - Need Insert and Erase for collections, which work like Overlay, so I can couple the Scopes
 
 test with multiple SC_THREAD, since this is nominally supported, let's keep it working (0.2 #6)
    - funciton merging needs fixing so it does not kill the callee, in case other threads call it. A seperate kill uncalled functions
@@ -64,7 +64,7 @@ add ability to lower wait(X) into yielding wait loop
    - not really critical at this stage, but makes the intention clearer for SC users
    - moved out of 0.2, not actually sure if belongs in sequential phase
 
-add a Delete special node to go with Insert node, and get them to take a collection since they appear in collections.
+get Erase and Insert to take a container since they appear in containers.
 
 new Transformation interface, allows returning a bool for "hit or missed" result (ie xformations used for emasurement)
    - Make a "keep going until miss" meta-transformation, maybe use in S&R, definitely for cleanups

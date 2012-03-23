@@ -760,7 +760,7 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     l_dead_gotos->pattern = MakeTreePtr<Goto>();
     l_module->members = (l_module_decls, l_enum, l_func);
     l_over->overlay = lr_comp;
-    l_insert->insert = lr_state_decl;
+    l_insert->insert = (lr_state_decl);
     lr_state_decl->constancy = MakeTreePtr<Const>();
     lr_state_decl->identifier = lr_state_id;
     lr_state_decl->type = lr_int;
@@ -785,7 +785,7 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     gg->through = thread;
     func->identifier = func_id;
     module->members = (module_decls, func, insert);
-    insert->insert = r_module_enum;
+    insert->insert = (r_module_enum);
     //r_module->bases = (bases);
     //r_module->identifier = module_id;
     r_module_enum->identifier = r_enum_id;

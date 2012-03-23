@@ -49,7 +49,7 @@ AutosToModule::AutosToModule()
     s_var->identifier = var_id;
     s_var->initialiser = init;
      
-    insert->insert = r_var;
+    insert->insert = (r_var);
     over->overlay = r_comp;
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
@@ -93,7 +93,7 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     s_comp->statements = (vstmts);
     var->patterns = (tempvar, staticvar);
      
-    insert->insert = var;
+    insert->insert = (var);
     over->overlay = r_comp;
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
@@ -125,7 +125,7 @@ DeclsToModule::DeclsToModule()
     s_comp->members = (vdecls, ut);
     s_comp->statements = (vstmts);
      
-    insert->insert = ut;
+    insert->insert = (ut);
     over->overlay = r_comp;
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
