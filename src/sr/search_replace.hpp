@@ -500,5 +500,21 @@ struct Insert : InsertBase, Special<PRE_RESTRICTION>
     }
 };
 
+struct EraseBase : virtual Node
+{
+    virtual TreePtr<Node> GetErase() const = 0;    
+};
+
+template<class PRE_RESTRICTION>
+struct Erase : EraseBase, Special<PRE_RESTRICTION>
+{
+    SPECIAL_NODE_FUNCTIONS
+    TreePtr<PRE_RESTRICTION> erase;
+    virtual TreePtr<Node> GetErase() const 
+    {
+        return (TreePtr<Node>)erase;
+    }
+};
+
 #endif
 

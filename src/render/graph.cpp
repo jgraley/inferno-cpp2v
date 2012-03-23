@@ -380,6 +380,13 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
         *shape = "triangle";
         return string("+"); 
     }
+    else if( dynamic_pointer_cast<EraseBase>(sp) )
+    {
+        // The Erase node is shown as a small triangle containing a - symbol, with the erase link
+        // coming out of the right
+        *shape = "triangle";
+        return string("-"); 
+    }
 	else
 	{
 	    // All the other nodes are represented as a rectangle with curved corners. At the top of the rectangle, 
@@ -636,6 +643,11 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
     else if( dynamic_pointer_cast<InsertBase>(from) )
     {
         s+= ":s";
+    }
+
+    else if( dynamic_pointer_cast<EraseBase>(from) )
+    {
+        s+= ":e";
     }
 
 	s += " -> ";

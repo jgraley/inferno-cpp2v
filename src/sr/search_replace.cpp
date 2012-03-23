@@ -185,7 +185,7 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
     }
     else if( shared_ptr<OverlayBase> op = dynamic_pointer_cast<OverlayBase>(pattern) )
     {
-        // When DoOverlay node seen duriung search, just forward through the "base" path
+        // When Overlay node seen duriung search, just forward through the "through" path
         bool r = DecidedCompare( x, op->GetThrough(), can_key, conj );
         if( !r )
             return false;
@@ -193,6 +193,13 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
     else if( dynamic_pointer_cast<InsertBase>(pattern) )
     {
        ASSERTFAIL("Insert node found not in a collection\n");
+    }
+    else if( shared_ptr<EraseBase> ep = dynamic_pointer_cast<EraseBase>(pattern) )
+    {
+        // When Erase node seen duriung search, just forward 
+        bool r = DecidedCompare( x, ep->GetErase(), can_key, conj );
+        if( !r )
+            return false;
     }
     else if( shared_ptr<SlaveBase> sp = dynamic_pointer_cast<SlaveBase>(pattern) )
     {
@@ -456,7 +463,7 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 	    }
 	    else // not a Star so match singly...
 	    {
-			// If there is one more element in x, see if it matches the pattern
+            // If there is one more element in x, see if it matches the pattern
 			//TreePtr<Node> xe( x[xit] );
 			if( xit != x.end() && DecidedCompare( *xit, pe, can_key, conj, governing_choice, governing_offset ) == true )
 			{
@@ -819,10 +826,10 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
     ASSERT( source_memb.size() == dest_memb.size() );
     Set< Itemiser::Element * > present_in_source;
     
-    TRACE("Overlaying %d members source=%s dest=%s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
+    TRACE("Copying %d members from source=%s dest=%s\n", dest_memb.size(), TypeInfo(source).name().c_str(), TypeInfo(dest).name().c_str());
     for( int i=0; i<dest_memb.size(); i++ )
     {
-    	TRACE("Overlaying member %d\n", i );
+    	TRACE("member %d from source\n", i );
         ASSERT( source_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
         ASSERT( keynode_memb[i] )( "itemise returned null element" );                
@@ -832,7 +839,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
             ASSERT( dest_con )( "itemise for dest didn't match itemise for source");
             dest_con->clear();
 
-            TRACE("Overwriting container size %d\n", source_con->size() );
+            TRACE("Copying container size %d from source\n", source_con->size() );
 	        FOREACH( const TreePtrInterface &p, *source_con )
 	        {
 		        ASSERT( p ); // present simplified scheme disallows NULL
@@ -853,14 +860,18 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
 			            dest_con->insert( nn );
 			        }
            		}
-		        else
-		        {
-		            TreePtr<Node> n = DuplicateSubtreePattern( p );
+                else if( shared_ptr<EraseBase> pe = dynamic_pointer_cast<EraseBase>(TreePtr<Node>(p)) )
+                {
+                    TRACE("Erase element, no action taken\n");
+                }
+                else 
+                {
+                    TreePtr<Node> n = DuplicateSubtreePattern( p );
                     if( ReadArgs::assert_pedigree )
                         ASSERT( duplicated_pedigree.IsExist(n) )(*n);
-			        TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
-			        dest_con->insert( n );
-		        }
+                    TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
+                    dest_con->insert( n );
+                }
 	        }
 	        present_in_source.insert( dest_memb[i] );
         }            
@@ -894,7 +905,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
     keynode_memb = keynode->Itemise();
     dest_memb = dest->Itemise(); 
     
-    TRACE("Overlaying %d members keynode=%s dest=%s\n", dest_memb.size(), TypeInfo(keynode).name().c_str(), TypeInfo(dest).name().c_str());
+    TRACE("Copying %d members from keynode=%s dest=%s\n", dest_memb.size(), TypeInfo(keynode).name().c_str(), TypeInfo(dest).name().c_str());
     // Loop over all the members of keynode (which can be a subset of dest)
     // and for non-NULL members, duplicate them by recursing and write the
     // duplicates to the destination.
@@ -906,13 +917,16 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
         if( present_in_source.IsExist(dest_memb[i]) )
             continue; // already did this one in the above loop
 
-    	TRACE("Overlaying member %d\n", i );
+    	TRACE("Member %d from key\n", i );
         if( ContainerInterface *keynode_con = dynamic_cast<ContainerInterface *>(keynode_memb[i]) )                
         {
+            // Note: we get here when a wildcard is coupled that does not have the container
+            // because it is an intermediate node. Eg Scope as a wildcard matching Module does 
+            // not have "bases".
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
             dest_con->clear();
 
-            TRACE("Copying container size %d\n", keynode_con->size() );
+            TRACE("Copying container size %d from key\n", keynode_con->size() );
 	        FOREACH( const TreePtrInterface &p, *keynode_con )
 	        {
 		        ASSERT( p ); // present simplified scheme disallows NULL
@@ -934,7 +948,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
         else if( TreePtrInterface *keynode_ptr = dynamic_cast<TreePtrInterface *>(keynode_memb[i]) )
         {
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            ASSERT( *keynode_ptr )("source should be non-NULL");
+            ASSERT( *keynode_ptr );
             HIT;
             *dest_ptr = DuplicateSubtreeSubstitution( *keynode_ptr, current_key );
             ASSERT( *dest_ptr );
