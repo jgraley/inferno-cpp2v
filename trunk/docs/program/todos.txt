@@ -63,3 +63,8 @@ get rid of Callable, CallableParams, Procedure etc. It's all guff. Just have Fun
 add ability to lower wait(X) into yielding wait loop 
    - not really critical at this stage, but makes the intention clearer for SC users
    - moved out of 0.2, not actually sure if belongs in sequential phase
+
+add a Delete special node to go with Insert node, and get them to take a collection since they appear in collections.
+
+new Transformation interface, allows returning a bool for "hit or missed" result (ie xformations used for emasurement)
+   - Make a "keep going until miss" meta-transformation, maybe use in S&R, definitely for cleanups
