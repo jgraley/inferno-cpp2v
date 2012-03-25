@@ -1,5 +1,6 @@
 #include "split_instance_declarations.hpp"
 #include "tree/cpptree.hpp"
+#include "inferno_patterns.hpp"
 
 using namespace CPPTree;
 using namespace Steps;

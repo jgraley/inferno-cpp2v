@@ -10,6 +10,7 @@
 #include "common/common.hpp"
 #include "sr/soft_patterns.hpp"
 #include "tree/typeof.hpp"
+#include "inferno_patterns.hpp"
 
 using namespace CPPTree;
 using namespace Steps;

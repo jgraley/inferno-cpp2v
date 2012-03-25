@@ -14,12 +14,14 @@
 
 namespace Steps {
 
+/** Ensure an actual return statement is present in void-returning functions */
 class ExplicitiseReturn : public SearchReplace
 {
 public:
 	ExplicitiseReturn();
 };
 
+/** Convey return value through a module-level variable */
 class UseTempForReturnValue : public SearchReplace
 {
 public:
@@ -47,18 +49,18 @@ public:
     ParamsViaTemps();
 };
 
-// Replace automatic variables with stacks based on arrays and 
-// maintain the stack pointer correctly, supporting recursion.
+/** Replace automatic variables with stacks based on arrays and 
+    maintain the stack pointer correctly, supporting recursion. */
 class GenerateStacks : public SearchReplace
 {
 public:
 	GenerateStacks();
 };
 
-// Merge ordinary functions into the thread that calls them -
-// this is not inlining, because a function only need be merged
-// once for all the call points in the thread. Turn calls and
-// return into gotos.
+/** Merge ordinary functions into the thread that calls them -
+    this is not inlining, because a function only need be merged
+    once for all the call points in the thread. Turn calls and
+    return into gotos. */
 class MergeFunctions : public SearchReplace
 {
 public:

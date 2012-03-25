@@ -12,6 +12,9 @@
 
 namespace Steps {
 
+/** Holder for the steps that detect implicit SysetemC constructs in C++ code
+    and replace them with Inferno's Explicit nodes for SystemC which are much
+    more succinct in tree form */
 class DetectAllSCTypes : public TransformationVector // TODO make generic version
 {
 public:
