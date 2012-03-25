@@ -12,9 +12,9 @@
 
 namespace Steps {
 
-// Wherever an argument to a function call differs in type from
-// the funciton's declaration, insert a cast to the declared
-// type.
+/** Wherever an argument to a function call differs in type from
+    the funciton's declaration, insert a cast to the declared
+    type. */
 class GenerateImplicitCasts : public SearchReplace
 {
 public:

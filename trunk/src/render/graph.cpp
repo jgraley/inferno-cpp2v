@@ -12,6 +12,7 @@
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
 #include "graph.hpp"
+#include "steps/inferno_patterns.hpp"
 #include <inttypes.h>
 
 using namespace CPPTree;

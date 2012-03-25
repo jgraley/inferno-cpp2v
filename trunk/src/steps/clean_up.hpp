@@ -12,56 +12,58 @@
 
 namespace Steps {
 
-// Find compound statements inside compund statements and flatten
+/// Find compound statements inside compund statements and flatten
 class CleanupCompoundExpression : public SearchReplace
 {    
 public:
     CleanupCompoundExpression();
 };
    
-// Find compound statements inside compund statements and flatten
+/// Find compound statements inside compund statements and flatten
 class CleanupCompoundMulti : public SearchReplace
 {    
 public:
     CleanupCompoundMulti();
 };
 
-// Find compound blocks with only a single statement, and flatten
+/// Find compound blocks with only a single statement, and flatten
 class CleanupCompoundSingle : public SearchReplace
 {
 public:
     CleanupCompoundSingle();
 };
 
-// Get rid of Nops
+/// Get rid of Nops
 class CleanupNop : public SearchReplace
 {
 public:
     CleanupNop();
 };
 
-// Simplify the case where two lables appear together and are therefore 
-// duplicates. Just have one label.
+/** Simplify the case where two lables appear together and are therefore 
+    duplicates. Just have one label. */
 class CleanupDuplicateLabels : public SearchReplace
 {
 public:
     CleanupDuplicateLabels();
 };
 
-// Find a goto to a lable just before the label, and remove the goto
+/// Find a goto to a lable just before the label, and remove the goto
 class CleanupIneffectualGoto : public SearchReplace
 {
 public:
     CleanupIneffectualGoto();
 };
 
-// Find a goto to a lable just before the label, and remove the goto
+/// Find a goto to a lable just before the label, and remove the goto
 class CleanupIneffectualLabels : public SearchReplace
 {
 public:
     CleanupIneffectualLabels();
 };
 
+/** Find labels never referenced (ie neither jumped to nor used as a variable) 
+    and dispense with them */
 class CleanupUnusedLabels : public SearchReplace
 {
 public:

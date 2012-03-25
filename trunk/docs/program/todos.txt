@@ -2,39 +2,16 @@ TODO list (to get the sequential phase looking good)
 Note: (0.2 #x) means do this for 0.2 release, in order of x. 
 0.2 planned release notes: Better S&R, maybe ready for general use; initial SystemC support; sequential phase at alpha or beta; doxygen and generally better documentation
 
-Reduce dependencies on SC nodes where it doesn't really matter. (0.2)
-   - Dependence on Module could go altogether maybe.  
-   - Makes it easier to retarget the sequential phase away from SC for eg pure software use
-   - In fact, why not operate on Scopes, so that it acts at Program level and hence with C code
-   - less insitence on Thread
-   - Need Insert and Erase for collections, which work like Overlay, so I can couple the Scopes
-
-test with multiple SC_THREAD, since this is nominally supported, let's keep it working (0.2 #6)
-   - funciton merging needs fixing so it does not kill the callee, in case other threads call it. A seperate kill uncalled functions
-     cleanup can get rid of these. This means possible duplication of callee though - the ultimate solution would be to make a seperate
-     server for them, but we're not doing servers yet. OR use verilog functions.
-
-figure out how to keep using the non-SC tests (0.2 #7 but not if hard)
-
-Fix the dependency fault if not done already (0.2 #9)
-   - something to do with stuff in SR depending on tree I think
-   - try and use the TransformTo model
-   - otherwise got to put 
-
 Sweep for TODOs in code, but quite high theshold (0.2 #10)
 
-add comments in sctree, like in cpptree (0.2 #11)
-
 Doxygen comments for all the steps (0.2 #12)
-
-Ensure SR docs up to date (0.2 #13)
-   - Also make the new PointerTo node look sensible in graphs
-   - will have to look at diffs from the summer to remind myself, sadly
 
 Get web page to reference all the docs (0.2 #14)
    - including this one
 
 -- post 0.2 --
+
+figure out how to keep using the non-SC tests
 
 sc_signal support
    - maybe just replace all fundy types
@@ -64,7 +41,11 @@ add ability to lower wait(X) into yielding wait loop
    - not really critical at this stage, but makes the intention clearer for SC users
    - moved out of 0.2, not actually sure if belongs in sequential phase
 
-get Erase and Insert to take a container since they appear in containers.
-
 new Transformation interface, allows returning a bool for "hit or missed" result (ie xformations used for emasurement)
    - Make a "keep going until miss" meta-transformation, maybe use in S&R, definitely for cleanups
+
+make node-specific graphing be based on virtual functions in nodes, so that graph plotter does not need so many deps
+   - problem with hacky code in graph plotter that needs to decide when to recurse
+
+step to get the parameters of a function together into a single struct
+   - use this just before the step that passes params via temp, that way no need for additional temp

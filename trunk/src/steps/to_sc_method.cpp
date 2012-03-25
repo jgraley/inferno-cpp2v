@@ -5,14 +5,12 @@
 #include "sr/soft_patterns.hpp"
 #include "tree/typeof.hpp"
 #include "tree/misc.hpp"
- 
+#include "inferno_patterns.hpp"
+
 using namespace CPPTree;
 using namespace SCTree;
 using namespace Steps;
  
-// oving automatic variables out to class scope as fields, but only
-// when the compound block they are declared in does not make outgoing 
-// calls which could lead to recursion.
 AutosToModule::AutosToModule()
 {
     MakeTreePtr<Scope> rec;
