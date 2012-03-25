@@ -1,274 +1,271 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<HTML>
-<HEAD>
-	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
-	<TITLE>Inferno C++ to Verilog Converter</TITLE>
-	<META NAME="GENERATOR" CONTENT="OpenOffice.org 3.2  (Unix)">
-	<META NAME="CREATED" CONTENT="20061017;20451500">
-	<META NAME="CHANGEDBY" CONTENT="John Graley">
-	<META NAME="CHANGED" CONTENT="20120203;20012100">
-	<META NAME="Info 1" CONTENT="">
-	<META NAME="Info 2" CONTENT="">
-	<META NAME="Info 3" CONTENT="">
-	<META NAME="Info 4" CONTENT="">
-</HEAD>
-<BODY LANG="en-US" BGCOLOR="#ffffff" DIR="LTR">
-<H1 ALIGN=CENTER><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">Inferno:
-C++ to Verilog Converter </SPAN></FONT>
-</H1>
-<H1 ALIGN=CENTER><FONT COLOR="#0066cc"><SPAN STYLE="background: #ffffff">Project
-Home Page</SPAN></FONT></H1>
-<HR>
-<P STYLE="margin-top: 0.42cm; page-break-after: avoid"><FONT COLOR="#0066cc"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>The
-general idea</FONT></FONT></FONT></P>
-<P><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">To
-convert software programs written in <A HREF="http://en.wikipedia.org/wiki/C++">C++</A></SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">
-</SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">into
-synthesisable <A HREF="http://en.wikipedia.org/wiki/Verilog">Verilog
-HDL</A></SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">
-</SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">(a
-<A HREF="http://en.wikipedia.org/wiki/Register_transfer_level">register
-transfer level</A></SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">
-</SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">hardware
-description language) such that existing <A HREF="http://en.wikipedia.org/wiki/Electronic_design_automation">EDA</A>
-tools can generate integrated circuit layouts and <A HREF="http://en.wikipedia.org/wiki/FPGA">FPGA</A></SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">
-</SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">configurations.
-&nbsp;<BR>&nbsp;<BR>The conversion will proceed in a number of
-</SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><I><SPAN STYLE="background: #ffffff">transformations,</SPAN></I></SPAN></FONT><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">
-</SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">each
+<html><head>
+
+
+	<meta http-equiv="CONTENT-TYPE" content="text/html; charset=utf-8"><title>Inferno C++ to Verilog Converter</title>
+	
+	<meta name="GENERATOR" content="OpenOffice.org 3.2  (Unix)">
+	<meta name="CREATED" content="20061017;20451500">
+	<meta name="CHANGEDBY" content="John Graley">
+	<meta name="CHANGED" content="20120203;20012100">
+	<meta name="Info 1" content="">
+	<meta name="Info 2" content="">
+	<meta name="Info 3" content="">
+	<meta name="Info 4" content=""></head><body dir="ltr" bgcolor="#ffffff" lang="en-US">
+<h1 align="center"><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Inferno:
+C++ to Verilog Converter </span></font>
+</h1>
+<h1 style="color: rgb(0, 102, 0);" align="center"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Project
+Home Page</span></h1>
+<hr>
+<p style="margin-top: 0.42cm; page-break-after: avoid; color: rgb(0, 102, 0);"><font face="Albany, sans-serif"><font size="4">The
+general idea</font></font></p>
+<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">To
+convert software programs written in <a href="http://en.wikipedia.org/wiki/C++">C++</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">into
+synthesisable <a href="http://en.wikipedia.org/wiki/Verilog">Verilog
+HDL</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">(a
+<a href="http://en.wikipedia.org/wiki/Register_transfer_level">register
+transfer level</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">hardware
+description language) such that existing <a href="http://en.wikipedia.org/wiki/Electronic_design_automation">EDA</a>
+tools can generate integrated circuit layouts and <a href="http://en.wikipedia.org/wiki/FPGA">FPGA</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">configurations.
+&nbsp;<br>&nbsp;<br>The conversion will proceed in a number of
+</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">transformations,</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">each
 of which modifies the program slightly to convert some aspect of the
-program to a more hardware-like or lower level </SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><I><SPAN STYLE="background: #ffffff">dialect
-</SPAN></I></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">(hence
-Inferno, from <A HREF="http://en.wikipedia.org/wiki/Dante_Alighieri#Works">Dante's</A></SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">
-</SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff"><A HREF="http://en.wikipedia.org/wiki/The_Divine_Comedy">epic
-poem</A>) whilst leaving the functionality of the program unchanged.
+program to a more hardware-like or lower level </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">dialect
+</span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">(hence
+Inferno, from <a href="http://en.wikipedia.org/wiki/Dante_Alighieri#Works">Dante's</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://en.wikipedia.org/wiki/The_Divine_Comedy">epic
+poem</a>) whilst leaving the functionality of the program unchanged.
 In inferno, we implement lowering transformations as elimination and
-substitution of language </SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><I><SPAN STYLE="background: #ffffff">constructs</SPAN></I></SPAN></FONT><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">
-</SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">thereby
-progressively restricting the dialect</SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><I><SPAN STYLE="background: #ffffff">.</SPAN></I></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff"><BR>&nbsp;<BR>Inferno
+substitution of language </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">constructs</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">thereby
+progressively restricting the dialect</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">.</span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><br>&nbsp;<br>Inferno
 will map C++ classes and objects bijectively to Verilog modules and
 module instances respectively, thereby preserving program
 architecture. Each module instance will contain its own sequential
 execution infrastructure and will communicate with other instances
-over protocols comparable to standard bus protocols such as <A HREF="http://www.arm.com/">ARM</A>'s
-<A HREF="http://www.arm.com/products/solutions/AMBA3AXI.html">AXI</A>.
+over protocols comparable to standard bus protocols such as <a href="http://www.arm.com/">ARM</a>'s
+<a href="http://www.arm.com/products/solutions/AMBA3AXI.html">AXI</a>.
 Some of the intermediate dialects will correspond to valid and
-simulatable <A HREF="http://www.systemc.org/">SystemC</A></SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">
-</SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">models
-(including SystemC <A HREF="http://www.us.design-reuse.com/articles/article10626.html">Transaction
-Level Models)</A>, for the purposes of validation and clarification
+simulatable <a href="http://www.systemc.org/">SystemC</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">models
+(including SystemC <a href="http://www.us.design-reuse.com/articles/article10626.html">Transaction
+Level Models)</a>, for the purposes of validation and clarification
 of intent when neither pure C++ nor Verilog are suitable source-forms
-for the program.</SPAN></SPAN></FONT></P>
-<P><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">Inferno
+for the program.</span></span></font></p>
+<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Inferno
 transformations are applied to an internal representation called the
-</SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><I><SPAN STYLE="background: #ffffff"><A HREF="http://inferno-cpp2v.svn.sourceforge.net/viewvc/inferno-cpp2v/trunk/src/tree/tree.hpp?content-type=text%2Fplain">inferno
-tree</A> </SPAN></I></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="font-style: normal"><SPAN STYLE="font-weight: normal"><SPAN STYLE="background: #ffffff">which
-is a polymorphic, </SPAN></SPAN></SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><I><SPAN STYLE="font-weight: normal"><SPAN STYLE="background: #ffffff">topology-oriented
-</SPAN></SPAN></I></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="font-style: normal"><SPAN STYLE="font-weight: normal"><SPAN STYLE="background: #ffffff">acyclic
+</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://inferno-cpp2v.svn.sourceforge.net/viewvc/inferno-cpp2v/trunk/src/tree/tree.hpp?content-type=text%2Fplain">inferno
+tree</a> </span></i></span></font><font color="#000000"><span lang="en-GB"><span style="font-style: normal;"><span style="font-weight: normal;"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">which
+is a polymorphic, </span></span></span></span></font><font color="#000000"><span lang="en-GB"><i><span style="font-weight: normal;"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">topology-oriented
+</span></span></i></span></font><font color="#000000"><span lang="en-GB"><span style="font-style: normal;"><span style="font-weight: normal;"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">acyclic
 digraph – this means that it uses nodes' type, inheritance ancestry
 and link topology to capture the maximum possible proportion of
 information about the program (as opposed to enums, bools, custom
-classes etc)</SPAN></SPAN></SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">.
+classes etc)</span></span></span></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">.
 The inferno tree represents programs with source-like semantics and
 will support an approximate closure of C++, SystemC and Verilog. We
-specify the tree in a minimal style plus utilities, and use <A HREF="http://www.boost.org/">Boost</A>'s
-<A HREF="http://www.boost.org/doc/libs/1_39_0/libs/smart_ptr/shared_ptr.htm">shared_ptr
-</A>for the links between nodes to simplify memory management.</SPAN></SPAN></FONT></P>
-<P><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">The
+specify the tree in a minimal style plus utilities, and use <a href="http://www.boost.org/">Boost</a>'s
+<a href="http://www.boost.org/doc/libs/1_39_0/libs/smart_ptr/shared_ptr.htm">shared_ptr
+</a>for the links between nodes to simplify memory management.</span></span></font></p>
+<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
 sequence of transformations will be controlled by an automatic tool
 based on the properties of individual transformations expressed in
-terms of </SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><I><SPAN STYLE="background: #ffffff">disallowed,</SPAN></I></SPAN></FONT><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">
-</SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><I><SPAN STYLE="background: #ffffff">introduced
-</SPAN></I></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">and
-</SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><I><SPAN STYLE="background: #ffffff">removed
-</SPAN></I></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">constructs.
-Inferno interfaces with the <A HREF="http://clang.llvm.org/">clang</A></SPAN></SPAN></FONT>
-front-end<FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">
-</SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">(part
-of the <A HREF="http://www.llvm.org/">LLVM</A> compiler project) to
-parse C++ programs into the inferno tree.&nbsp;We can render</SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">
-</SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">legal
+terms of </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">disallowed,</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">introduced
+</span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">and
+</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">removed
+</span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">constructs.
+Inferno interfaces with the <a href="http://clang.llvm.org/">clang</a></span></span></font>
+front-end<font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">(part
+of the <a href="http://www.llvm.org/">LLVM</a> compiler project) to
+parse C++ programs into the inferno tree.&nbsp;We can render</span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">legal
 C++ output programs directly from the tree and generate input files
-for <A HREF="http://www.graphviz.org/">Graphviz</A>. A graph for an
-example program that sums the numbers from 1 to 10 follows.</SPAN></SPAN></FONT></P>
-<P STYLE="margin-top: 0.42cm"><A HREF="http://sourceforge.net/projects/inferno-synth/#item3rd-2"><IMG SRC="http://sourceforge.net/dbimage.php?id=293703" NAME="Inferno tree for recursive factorial program" ALIGN=LEFT WIDTH=643 HEIGHT=283 BORDER=0><BR CLEAR=LEFT></A><FONT COLOR="#0066cc"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>Search
-and replace</FONT></FONT></FONT></P>
-<P STYLE="margin-top: 0.42cm"><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">Most
-of the transformations will be implemented using a generic </SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><I><SPAN STYLE="background: #ffffff"><A HREF="http://inferno-cpp2v.svn.sourceforge.net/viewvc/inferno-cpp2v/trunk/docs/program/search_replace_documentation.txt">in-tree
-search and replace</A> </SPAN></I></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">tool
-which implements </SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><I><SPAN STYLE="background: #ffffff">topological
-wildcarding </SPAN></I></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">based
-on the tree's existing class hierarchy.</SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">
-</SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">The
+for <a href="http://www.graphviz.org/">Graphviz</a>. A graph for an
+example program that sums the numbers from 1 to 10 follows.</span></span></font></p>
+<p style="margin-top: 0.42cm;"><a href="http://sourceforge.net/projects/inferno-synth/#item3rd-2"><img src="http://sourceforge.net/dbimage.php?id=293703" name="Inferno tree for recursive factorial program" align="left" border="0" height="283" width="643"><br clear="left"></a><font style="color: rgb(0, 102, 0);" color="#0066cc"><font face="Albany, sans-serif"><font size="4">Search
+and replace</font></font></font></p>
+<p style="margin-top: 0.42cm;"><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Most
+of the transformations will be implemented using a generic </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://inferno-cpp2v.svn.sourceforge.net/viewvc/inferno-cpp2v/trunk/docs/program/search_replace_documentation.txt">in-tree
+search and replace</a> </span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">tool
+which implements </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">topological
+wildcarding </span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">based
+on the tree's existing class hierarchy.</span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
 algorithm has many extensions to increase its expressivity, and it
 takes advantage of the topology-oriented style of inferno trees in
-order to be language-indepenedent.</SPAN></SPAN></FONT></P>
-<P LANG="en-GB" STYLE="margin-top: 0.42cm"><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">An
+order to be language-indepenedent.</span></span></font></p>
+<p style="margin-top: 0.42cm;" lang="en-GB"><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">An
 example search and replace pattern follows: this one searches for
 do-while loops and replaces them with a network of gotos, and it
 handles continue correctly (break is handled by another
-transformation).</SPAN></FONT></P>
-<P STYLE="margin-top: 0.42cm"><A HREF="http://sourceforge.net/projects/inferno-synth/#item3rd-2"><IMG SRC="http://sourceforge.net/dbimage.php?id=293697" NAME="Inferno tree for recursive factorial program" ALIGN=BOTTOM WIDTH=643 HEIGHT=206 BORDER=0></A></P>
-<P STYLE="margin-top: 0.42cm">The result of applying the above
-transformation to the above example program is shown below.</P>
-<P STYLE="margin-top: 0.42cm"><A HREF="http://sourceforge.net/projects/inferno-synth/#item3rd-2"><IMG SRC="http://sourceforge.net/dbimage.php?id=293705" NAME="Inferno tree for recursive factorial program" ALIGN=BOTTOM WIDTH=643 HEIGHT=329 BORDER=0></A></P>
-<P><FONT COLOR="#0066cc"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>Development</FONT></FONT></FONT>
-</P>
-<P><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">The
+transformation).</span></font></p>
+<p style="margin-top: 0.42cm;"><a href="http://sourceforge.net/projects/inferno-synth/#item3rd-2"><img src="http://sourceforge.net/dbimage.php?id=293697" name="Inferno tree for recursive factorial program" align="bottom" border="0" height="206" width="643"></a></p>
+<p style="margin-top: 0.42cm;">The result of applying the above
+transformation to the above example program is shown below.</p>
+<p style="margin-top: 0.42cm;"><a href="http://sourceforge.net/projects/inferno-synth/#item3rd-2"><img src="http://sourceforge.net/dbimage.php?id=293705" name="Inferno tree for recursive factorial program" align="bottom" border="0" height="329" width="643"></a></p>
+<p style="color: rgb(0, 102, 0);"><font face="Albany, sans-serif"><font size="4">Development</font></font>
+</p>
+<p><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
 project is written in C++ with STL and Boost libraries. It brings in
 specific snapshot revisions of llvm and clang. It presently builds in
 GCC3.x and 4.x on Linux and Cygwin. This page, and the project's
-subversion repository, docs and forums are all hosted at</SPAN></FONT></P>
-<P><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff"><A HREF="http://sourceforge.net/"><IMG SRC="http://sflogo.sourceforge.net/sflogo.php?group_id=179957&amp;type=6" NAME="Graphic1" ALIGN=BOTTOM WIDTH=210 HEIGHT=62 BORDER=0></A></SPAN></FONT>.</P>
-<P>See the SourceForge <A HREF="http://sourceforge.net/projects/inferno-synth">project
-page</A> for more information.</P>
-<P><FONT COLOR="#0066cc"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>Releases</FONT></FONT></FONT></P>
-<TABLE BORDER=1 CELLPADDING=2 CELLSPACING=2>
-	<TR>
-		<TD>
-			<P><I>Version</I></P>
-		</TD>
-		<TD>
-			<P><I>Subversion revision</I></P>
-		</TD>
-		<TD>
-			<P><I>Date</I></P>
-		</TD>
-		<TD>
-			<P><I>Notes</I></P>
-		</TD>
-	</TR>
-	<TR>
-		<TD>
-			<P>0.1</P>
-		</TD>
-		<TD>
-			<P>707</P>
-		</TD>
-		<TD>
-			<P>Feb 2011</P>
-		</TD>
-		<TD>
-			<P>Includes a beta-level Search and Replace algorithm, with&nbsp;
-			documentation, and 16 transformation steps implemented.</P>
-		</TD>
-	</TR>
-</TABLE>
-<P><BR><BR>
-</P>
-<P STYLE="margin-top: 0.42cm; page-break-after: avoid"><FONT COLOR="#0066cc"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>Background
-reading</FONT></FONT></FONT></P>
-<P STYLE="margin-top: 0.42cm; page-break-after: avoid"><FONT COLOR="#0066cc"><FONT FACE="Albany, sans-serif"><FONT SIZE=3><I>Program
-Theory</I></FONT></FONT></FONT></P>
-<P>Some background on academic program theory can be found in the
-<A HREF="http://www.wikipedia.org/">Wikipedia</A> pages on
-<A HREF="http://en.wikipedia.org/wiki/Programming_language_theory">programming
-language theory</A>, <A HREF="http://en.wikipedia.org/wiki/Lambda_calculus">lambda
-calculus</A>, <A HREF="http://en.wikipedia.org/wiki/Process_calculus">process
-calculus</A> and <A HREF="http://en.wikipedia.org/wiki/Pi_calculus">pi
-calculus</A>. The latter two deal with parallel programs and
-introduce the concept of the <I>channel</I> which will be important
+subversion repository, docs and forums are all hosted at</span></font></p>
+<p><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://sourceforge.net/"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=179957&amp;type=6" name="Graphic1" align="bottom" border="0" height="62" width="210"></a></span></font>.</p>
+<p>See the SourceForge <a href="http://sourceforge.net/projects/inferno-synth">project
+page</a> for more information.</p>
+<p style="color: rgb(0, 102, 0);"><font face="Albany, sans-serif"><font size="4">Releases</font></font></p>
+<table border="1" cellpadding="2" cellspacing="2">
+	<tbody><tr>
+		<td>
+			<p><i>Version</i></p>
+		</td>
+		<td>
+			<p><i>Subversion revision</i></p>
+		</td>
+		<td>
+			<p><i>Date</i></p>
+		</td>
+		<td>
+			<p><i>Notes</i></p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p>0.1</p>
+		</td>
+		<td>
+			<p>707</p>
+		</td>
+		<td>
+			<p>Feb 2011</p>
+		</td>
+		<td>
+			<p>Includes a beta-level Search and Replace algorithm, with&nbsp;
+			documentation, and 16 transformation steps implemented.</p>
+		</td>
+	</tr>
+</tbody></table>
+<p><br><br>
+</p>
+<p style="margin-top: 0.42cm; page-break-after: avoid; color: rgb(0, 102, 0);"><font face="Albany, sans-serif"><font size="4">Background
+reading</font></font></p>
+<p style="margin-top: 0.42cm; page-break-after: avoid;"><font color="#0066cc"><font face="Albany, sans-serif"><font size="3"><i>Program
+Theory</i></font></font></font></p>
+<p>Some background on academic program theory can be found in the
+<a href="http://www.wikipedia.org/">Wikipedia</a> pages on
+<a href="http://en.wikipedia.org/wiki/Programming_language_theory">programming
+language theory</a>, <a href="http://en.wikipedia.org/wiki/Lambda_calculus">lambda
+calculus</a>, <a href="http://en.wikipedia.org/wiki/Process_calculus">process
+calculus</a> and <a href="http://en.wikipedia.org/wiki/Pi_calculus">pi
+calculus</a>. The latter two deal with parallel programs and
+introduce the concept of the <i>channel</i> which will be important
 in our intermediate representations. 
-</P>
-<P><A HREF="http://www.inf.ethz.ch/personal/julah/seminar_papers/hw_synth%20ws%202004-2005/7/p17.pdf">A
-higher level language for Hardware Synthesis</A> defines an academic
+</p>
+<p><a href="http://www.inf.ethz.ch/personal/julah/seminar_papers/hw_synth%20ws%202004-2005/7/p17.pdf">A
+higher level language for Hardware Synthesis</a> defines an academic
 hardware language which extends the concept of channels slightly in
-the direction of pointers. <A HREF="http://www.cs.indiana.edu/%7Esganz/publications/icfp99/paper.pdf">Trampolined
-style</A> presents a generic way of <I>stating-out</I> (converting to
+the direction of pointers. <a href="http://www.cs.indiana.edu/%7Esganz/publications/icfp99/paper.pdf">Trampolined
+style</a> presents a generic way of <i>stating-out</i> (converting to
 a state machine) within the lambda calculus. Lambda calculus's
 obsession with recursion makes the examples harder to read than the
-underlying ideas require. <A HREF="http://www-cad.eecs.berkeley.edu/%7Ewjiang/ee219b/report/bret.pdf"><SPAN LANG="en-GB">Software
-Optimisation Using Hardware Synthesis Techniques</SPAN></A> <SPAN LANG="en-GB">makes
+underlying ideas require. <a href="http://www-cad.eecs.berkeley.edu/%7Ewjiang/ee219b/report/bret.pdf"><span lang="en-GB">Software
+Optimisation Using Hardware Synthesis Techniques</span></a> <span lang="en-GB">makes
 interesting comparisons between software compilation and hardware
 synthesis. It should be noted that in our project, synthesis is
 performed on our output by existing tools, and we don't need to
-duplicate their optimisations.</SPAN></P>
-<P LANG="en-GB" STYLE="margin-top: 0.42cm; page-break-after: avoid"><FONT COLOR="#0066cc"><FONT FACE="Albany, sans-serif"><FONT SIZE=3><I>Software
-to hardware conversion</I></FONT></FONT></FONT></P>
-<P><SPAN LANG="en-GB"><A HREF="http://www1.cs.columbia.edu/%7Esedwards/papers/edwards2004challenges.pdf">The
-Challenges of Hardware Synthesis from C-like Languages</A> provides a
+duplicate their optimisations.</span></p>
+<p style="margin-top: 0.42cm; page-break-after: avoid; color: rgb(0, 102, 0);" lang="en-GB"><font face="Albany, sans-serif"><font size="3"><i>Software
+to hardware conversion</i></font></font></p>
+<p><span lang="en-GB"><a href="http://www1.cs.columbia.edu/%7Esedwards/papers/edwards2004challenges.pdf">The
+Challenges of Hardware Synthesis from C-like Languages</a> provides a
 thorough overview of existing technologies in the area of the present
-project and should be considered </SPAN><SPAN LANG="en-GB"><I>essential</I></SPAN>
-<SPAN LANG="en-GB">reading in spite of its downbeat tone. <A HREF="http://csdl.computer.org/comp/proceedings/date/1999/0078/00/00780387abs.htm">Hardware
-synthesis from C/C++</A> from 1999 illustrates the state of the art
+project and should be considered </span><span lang="en-GB"><i>essential</i></span>
+<span lang="en-GB">reading in spite of its downbeat tone. <a href="http://csdl.computer.org/comp/proceedings/date/1999/0078/00/00780387abs.htm">Hardware
+synthesis from C/C++</a> from 1999 illustrates the state of the art
 before the emergence of SystemC and TLM and therefore serves as
-background and motivation for later ideas </SPAN><SPAN LANG="en-GB"><I>(Let
-me know if you can find a legitimate free link to this article)</I></SPAN><SPAN LANG="en-GB">.
-</SPAN>
-</P>
-<P><SPAN LANG="en-GB"><A HREF="http://arxiv.org/pdf/cs.PL/9811021">Automatic
+background and motivation for later ideas </span><span lang="en-GB"><i>(Let
+me know if you can find a legitimate free link to this article)</i></span><span lang="en-GB">.
+</span>
+</p>
+<p><span lang="en-GB"><a href="http://arxiv.org/pdf/cs.PL/9811021">Automatic
 Hardware Synthesis for a Hybrid Reconfigurable CPU featuring Philips
-CPLDs</A> describes a conversion from assembly language into hardware
+CPLDs</a> describes a conversion from assembly language into hardware
 that can work alongside a conventional processor. For our project,
 assembly language is rejected as an input format because it does not
 represent the structure of a program's data, and instead requires the
-presence of flat, RAM-like storage. <A HREF="http://www.inf.ethz.ch/personal/julah/seminar_papers/hw_synth%20ws%202004-2005/2/p14.pdf">Memory
+presence of flat, RAM-like storage. <a href="http://www.inf.ethz.ch/personal/julah/seminar_papers/hw_synth%20ws%202004-2005/2/p14.pdf">Memory
 Representation and Hardware Synthesis of C Code with Pointers and
-Complex Data Structures</A> gives ideas for pointer representation
+Complex Data Structures</a> gives ideas for pointer representation
 but appears to group data based on dynamic (usage) analysis, whereas
 I intend to use static (structural) information for
-grouping/locality.</SPAN> <SPAN LANG="en-GB"><A HREF="http://www.doc.ic.ac.uk/%7Eawb01/projects/cobblecml/cobble-cml-outsource.pdf">Optimisation
-of Hardware Compilation using Programmable Transformations</A> is
+grouping/locality.</span> <span lang="en-GB"><a href="http://www.doc.ic.ac.uk/%7Eawb01/projects/cobblecml/cobble-cml-outsource.pdf">Optimisation
+of Hardware Compilation using Programmable Transformations</a> is
 interesting for its discussion of program transformations in hardware
 synthesis (most work on program transformations applies to software
-compilers). Note that the emphasis of this paper is on </SPAN><SPAN LANG="en-GB"><I>optimisations</I></SPAN><SPAN LANG="en-GB">,
-whereas we will focus on </SPAN><SPAN LANG="en-GB"><I>translation</I></SPAN>
-<SPAN LANG="en-GB">from software to hardware.</SPAN></P>
-<P LANG="en-GB" STYLE="margin-top: 0.42cm; page-break-after: avoid"><FONT COLOR="#0066cc"><FONT FACE="Albany, sans-serif"><FONT SIZE=3><I>SystemC
-and Transaction Level Modelling</I></FONT></FONT></FONT></P>
-<P>The <A HREF="http://www.systemc.org/web/sitedocs/library_overview.html">SystemC
-Library Overview</A> and <A HREF="https://www.systemc.org/projects/sitedocs/document/v201_Users_guide/en/1">SystemC
-Version 2.0 User s Guide </A>describe what SystemC can do and how to
+compilers). Note that the emphasis of this paper is on </span><span lang="en-GB"><i>optimisations</i></span><span lang="en-GB">,
+whereas we will focus on </span><span lang="en-GB"><i>translation</i></span>
+<span lang="en-GB">from software to hardware.</span></p>
+<p style="margin-top: 0.42cm; page-break-after: avoid; color: rgb(0, 102, 0);" lang="en-GB"><font face="Albany, sans-serif"><font size="3"><i>SystemC
+and Transaction Level Modelling</i></font></font></p>
+<p>The <a href="http://www.systemc.org/web/sitedocs/library_overview.html">SystemC
+Library Overview</a> and <a href="https://www.systemc.org/projects/sitedocs/document/v201_Users_guide/en/1">SystemC
+Version 2.0 User s Guide </a>describe what SystemC can do and how to
 use it. The best way to understand SystemC internals is via the code,
-which may be downloaded from the <A HREF="http://www.systemc.org/"><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">SystemC
-web site</SPAN></SPAN></FONT></A>. No-one ever talks about SystemC
-version 1; it must have sucked.</P>
-<P><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">The
-power-point presentation <A HREF="http://www.ics.uci.edu/%7Egajski/presentation/Transaction.ppt">Transaction
-Level Modeling: An Overview</A> gives an intro to the subject. Note
+which may be downloaded from the <a href="http://www.systemc.org/"><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">SystemC
+web site</span></span></font></a>. No-one ever talks about SystemC
+version 1; it must have sucked.</p>
+<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
+power-point presentation <a href="http://www.ics.uci.edu/%7Egajski/presentation/Transaction.ppt">Transaction
+Level Modeling: An Overview</a> gives an intro to the subject. Note
 in particular the 2-axis graph that enumerates different TLM styles
-by algorithmic and timing precision. <A HREF="http://www.cecs.uci.edu/technical_report/TR03-10.pdf">Transaction
-Level Modeling in System Level Design</A> has excellent diagrams that
-illustrate TLM styles and the difference between them.</SPAN></SPAN></FONT>
-<A HREF="http://www.systemc.org/projects/sitedocs/document/HW_SW_Int_paper/en/1">Early
-Hardware/Software Integration Using SystemC 2.0</A> and <A HREF="http://www.systemc.org/projects/sitedocs/document/Transaction_level_STM/en/3"><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">Transaction
-level modeling of SoC with SystemC 2.0</SPAN></SPAN></FONT></A> give
-examples of a few different TLM styles. <FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff"><A HREF="http://www.us.design-reuse.com/articles/article10037.html">Advancing
+by algorithmic and timing precision. <a href="http://www.cecs.uci.edu/technical_report/TR03-10.pdf">Transaction
+Level Modeling in System Level Design</a> has excellent diagrams that
+illustrate TLM styles and the difference between them.</span></span></font>
+<a href="http://www.systemc.org/projects/sitedocs/document/HW_SW_Int_paper/en/1">Early
+Hardware/Software Integration Using SystemC 2.0</a> and <a href="http://www.systemc.org/projects/sitedocs/document/Transaction_level_STM/en/3"><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Transaction
+level modeling of SoC with SystemC 2.0</span></span></font></a> give
+examples of a few different TLM styles. <font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://www.us.design-reuse.com/articles/article10037.html">Advancing
 Transaction Level Modeling -- Linking the OSCI and OCP-IP Worlds at
-Transaction Level</A> is interesting but OCP-IP (chip-level
+Transaction Level</a> is interesting but OCP-IP (chip-level
 networking) is out of the scope of this project (our converter might
-</SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><I><SPAN STYLE="background: #ffffff">translate</SPAN></I></SPAN></FONT><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">
-</SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">implementations
-of OCP-IP protocols but it doesn't have to </SPAN></SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><I><SPAN STYLE="background: #ffffff">understand</SPAN></I></SPAN></FONT><FONT COLOR="#000000"><SPAN STYLE="background: #ffffff">
-</SPAN></FONT><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">them)
-.</SPAN></SPAN></FONT></P>
-<P><FONT COLOR="#0066cc"><FONT FACE="Albany, sans-serif"><FONT SIZE=3><I><SPAN STYLE="background: #ffffff">Other</SPAN></I></FONT></FONT></FONT>
-</P>
-<P><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">The
-<A HREF="http://www.cs.utexas.edu/users/lavender/courses/c++/cd2/index.html">ANSI
-C++ spec</A> from 1997. <A HREF="http://www.icarus.com/eda/verilog/">Icarus
-Verilog</A> is a handy package for simulating and synthesising
-Verilog. <A HREF="http://www.sutherland-hdl.com/papers/2000-HDLCon-paper_Verilog-2000.pdf">The
-IEEE Verilog 1364-2001 Standard What's New, and Why You Need It</A>
-discusses the Verilog-2001 standard which is the one we will use.</SPAN></SPAN></FONT></P>
-<P><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff">Parallelism
+</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">translate</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">implementations
+of OCP-IP protocols but it doesn't have to </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">understand</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">them)
+.</span></span></font></p>
+<p style="color: rgb(0, 102, 0);"><font face="Albany, sans-serif"><font size="3"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Other</span></i></font></font>
+</p>
+<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
+<a href="http://www.cs.utexas.edu/users/lavender/courses/c++/cd2/index.html">ANSI
+C++ spec</a> from 1997. <a href="http://www.icarus.com/eda/verilog/">Icarus
+Verilog</a> is a handy package for simulating and synthesising
+Verilog. <a href="http://www.sutherland-hdl.com/papers/2000-HDLCon-paper_Verilog-2000.pdf">The
+IEEE Verilog 1364-2001 Standard What's New, and Why You Need It</a>
+discusses the Verilog-2001 standard which is the one we will use.</span></span></font></p>
+<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Parallelism
 is not an initial priority for this project. However, when the time
-comes, <A HREF="http://anusf.anu.edu.au/%7Edbs900/OpenMP/openmp.pdf">OpenMP</A>
+comes, <a href="http://anusf.anu.edu.au/%7Edbs900/OpenMP/openmp.pdf">OpenMP</a>
 is a candidate for the necessary extensions to the input language
-(however it seems rather complex).&nbsp;</SPAN></SPAN></FONT> 
-</P>
-<P><FONT COLOR="#000000"><SPAN LANG="en-GB"><SPAN STYLE="background: #ffffff"><A HREF="http://www.drccomputer.com/pages/products.html">DRC's
-Reconfigurable Processor Unit</A> seems like an interesting target
+(however it seems rather complex).&nbsp;</span></span></font> 
+</p>
+<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://www.drccomputer.com/pages/products.html">DRC's
+Reconfigurable Processor Unit</a> seems like an interesting target
 platform. FPGA+CPU systems are not an initial target, but to make
 this particular configuration work well, we would need to integrate
-efficiently with <A HREF="http://www.amd.com/us-en/Processors/DevelopWithAMD/0,,30_2252_2353,00.html">HyperTransport</A>.</SPAN></SPAN></FONT></P>
-<P><FONT COLOR="#0066cc"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>License</FONT></FONT></FONT></P>
-<P>This is an open source project, and all the code, documents and
-web pages are subject to the <A HREF="http://www.opensource.org/licenses/bsd-license.php">BSD
-license</A>. Since the license applicable to GCC differs, any
-additions/modifications made to GCC will be released under the same
-license as GCC, and interaction will be via file or stream formats.</P>
-<P>This page copyright © John Graley 2009. Licensing conditions as
-per the BSD license.</P>
-</BODY>
-</HTML>
+efficiently with <a href="http://www.amd.com/us-en/Processors/DevelopWithAMD/0,,30_2252_2353,00.html">HyperTransport</a>.</span></span></font></p>
+<p style="color: rgb(0, 102, 0);"><font face="Albany, sans-serif"><font size="4">License</font></font></p>
+<p>This is an open source project, and all the code, documents and
+web pages are subject to the <a href="http://www.opensource.org/licenses/bsd-license.php">BSD
+license</a>. <br>
+</p>
+<p>This page copyright © John Graley 2009-2012. Licensing conditions as
+per the BSD license.</p>
+</body></html>
