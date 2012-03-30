@@ -175,6 +175,58 @@ if( state==LABEL1 && !return_flag && !return_flag )
 
 etc which can be similaraly optimsied out.
 
+Inferred superloop and termination
+----------------------------------
+
+The goto policy leaves the last goto in place. To work properly, it requires that the last statement in the top level is a goto. Is this true? Given that the alternative is code that runs before the function exits, it should be true in the case where the original Thread executes in an infinite loop (TODO prove this, deal with return statements). 
+
+The label policy groups the lablels at the top of the top level. We require a label at the top and must make sure of this.
+
+If we merge the labels, and detect that there is now only one label, we have a manifest superloop. Ergo, we may not need to add one manually. This sup[erloop could be explicitised (probably into a do loop) ann then elminated in the switch from Thread to Method. This is arguably cleaner and a lighter touch than the current scheme of inderting a superloop.
+
+Now, in the inferno case of generating hardware, the Threads should always run forever, because real hardware "keeps going" till you hit reset or power-cycle it. Reset is obviously not manifest in the structural phase (nor is power cycling). But if we consider alternative deployment of the structural phase in eg a software contexxt, we may wish to support termination correctly.
+
+I think this means that the last state block, at the bottom of the top level, has no goto, but just ends in return or falls off the bottom. Presently (until/unless we exploit Verilog disbale) we cannot do early returns in Verilog, so it makes sense to transform away early returns and revert to a style that returns by falling off the bottom (Thread never has a return value). For this case we need a variant of the goto policy, called the "fall-off policy" that does not require a goto at the end (instead delineating by going to the end of the top level compound block) which differs from the existing goto policy by adding a condittional goto at the bottom that has the inverse condition to the if. Eg
+
+goto labels[state];
+LABEL1:
+state_body1;
+}
+
+becomes
+
+LABEL1:
+if( state==LABEL1 )
+    state_body1
+else
+    goto labels[state];
+}
+
+Note, *cannot* use if( state != LABEL1 ) since state_body1 can change state, and we lose equivalence... *UNLESS* state_body one does not change the state because it is the last block, so why would it? We can restrict the transformation to require no assignments to state in state_body1, then we can output
+
+LABEL1:
+if( state==LABEL1 )
+    state_body1
+if( state!=LABEL1 )
+    goto labels[state];
+}
+
+which provides a recognisable conditional goto pattern forming an exitable superloop, which may be converted trivially to do...while(state!=LABEL1);
+
+I belive the existing generation of inferred yields uses the yield_flag to determine if a yield was already done i.e.
+
+if( !yield_flag )
+    wait(SC_ZERO_TIME)
+
+This could be extended to 
+
+if( !yield_flag && state!=LABEL1 )
+    wait(SC_ZERO_TIME)
+
+i.e. using the while condition from the superloop to prevent an inferred yield in the exiting case. This will prevent an unnecessary wait when exiting, and more importantly will prevent the generate Method from calling next_trigger(...) and hence preventing it from being called again (in effect, failure to call next_trigger() is a Method's way of telling the environment that its algorith is complete and it needs no more iterations).
+
+Of course, the extra work for the terminating case is only needed if (a) there is a non-inferno use case and (2) its Threads terminate. So these extensions will not be pert of the Inferno plan, but the inferred superloop should be since it is a lighter touch, and rtemoves the need for insertion of superloop, making the phase cleaner and better.
+
 Application to switch normalisation
 -----------------------------------
 

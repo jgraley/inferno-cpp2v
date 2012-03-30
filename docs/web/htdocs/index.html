@@ -2,6 +2,7 @@
 <html><head>
 
 
+
 	<meta http-equiv="CONTENT-TYPE" content="text/html; charset=utf-8"><title>Inferno C++ to Verilog Converter</title>
 	
 	<meta name="GENERATOR" content="OpenOffice.org 3.2  (Unix)">
@@ -12,39 +13,39 @@
 	<meta name="Info 2" content="">
 	<meta name="Info 3" content="">
 	<meta name="Info 4" content=""></head><body dir="ltr" bgcolor="#ffffff" lang="en-US">
-<h1 align="center"><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Inferno:
+<h1 align="center"><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Inferno:
 C++ to Verilog Converter </span></font>
 </h1>
-<h1 style="color: rgb(0, 102, 0);" align="center"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Project
+<h1 style="color: rgb(0, 102, 0);" align="center"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Project
 Home Page</span></h1>
 <hr>
 <p style="margin-top: 0.42cm; page-break-after: avoid; color: rgb(0, 102, 0);"><font face="Albany, sans-serif"><font size="4">The
 general idea</font></font></p>
-<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">To
-convert software programs written in <a href="http://en.wikipedia.org/wiki/C++">C++</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">into
+<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">To
+convert software programs written in <a href="http://en.wikipedia.org/wiki/C++">C++</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">into
 synthesisable <a href="http://en.wikipedia.org/wiki/Verilog">Verilog
-HDL</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">(a
+HDL</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">(a
 <a href="http://en.wikipedia.org/wiki/Register_transfer_level">register
-transfer level</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">hardware
+transfer level</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">hardware
 description language) such that existing <a href="http://en.wikipedia.org/wiki/Electronic_design_automation">EDA</a>
-tools can generate integrated circuit layouts and <a href="http://en.wikipedia.org/wiki/FPGA">FPGA</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">configurations.
+tools can generate integrated circuit layouts and <a href="http://en.wikipedia.org/wiki/FPGA">FPGA</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">configurations.
 &nbsp;<br>&nbsp;<br>The conversion will proceed in a number of
-</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">transformations,</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">each
+</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">transformations,</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">each
 of which modifies the program slightly to convert some aspect of the
-program to a more hardware-like or lower level </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">dialect
-</span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">(hence
-Inferno, from <a href="http://en.wikipedia.org/wiki/Dante_Alighieri#Works">Dante's</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://en.wikipedia.org/wiki/The_Divine_Comedy">epic
+program to a more hardware-like or lower level </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">dialect
+</span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">(hence
+Inferno, from <a href="http://en.wikipedia.org/wiki/Dante_Alighieri#Works">Dante's</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://en.wikipedia.org/wiki/The_Divine_Comedy">epic
 poem</a>) whilst leaving the functionality of the program unchanged.
 In inferno, we implement lowering transformations as elimination and
-substitution of language </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">constructs</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">thereby
-progressively restricting the dialect</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">.</span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><br>&nbsp;<br>Inferno
+substitution of language </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">constructs</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">thereby
+progressively restricting the dialect</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">.</span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><br>&nbsp;<br>Inferno
 will map C++ classes and objects bijectively to Verilog modules and
 module instances respectively, thereby preserving program
 architecture. Each module instance will contain its own sequential
@@ -52,57 +53,57 @@ execution infrastructure and will communicate with other instances
 over protocols comparable to standard bus protocols such as <a href="http://www.arm.com/">ARM</a>'s
 <a href="http://www.arm.com/products/solutions/AMBA3AXI.html">AXI</a>.
 Some of the intermediate dialects will correspond to valid and
-simulatable <a href="http://www.systemc.org/">SystemC</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">models
+simulatable <a href="http://www.systemc.org/">SystemC</a></span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">models
 (including SystemC <a href="http://www.us.design-reuse.com/articles/article10626.html">Transaction
 Level Models)</a>, for the purposes of validation and clarification
 of intent when neither pure C++ nor Verilog are suitable source-forms
 for the program.</span></span></font></p>
-<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Inferno
+<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Inferno
 transformations are applied to an internal representation called the
-</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://inferno-cpp2v.svn.sourceforge.net/viewvc/inferno-cpp2v/trunk/src/tree/tree.hpp?content-type=text%2Fplain">inferno
-tree</a> </span></i></span></font><font color="#000000"><span lang="en-GB"><span style="font-style: normal;"><span style="font-weight: normal;"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">which
-is a polymorphic, </span></span></span></span></font><font color="#000000"><span lang="en-GB"><i><span style="font-weight: normal;"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">topology-oriented
-</span></span></i></span></font><font color="#000000"><span lang="en-GB"><span style="font-style: normal;"><span style="font-weight: normal;"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">acyclic
+</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://inferno-cpp2v.svn.sourceforge.net/viewvc/inferno-cpp2v/trunk/docs/program/node_interface.txt">inferno
+tree</a> </span></i></span></font><font color="#000000"><span lang="en-GB"><span style="font-style: normal;"><span style="font-weight: normal;"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">which
+is a polymorphic, </span></span></span></span></font><font color="#000000"><span lang="en-GB"><i><span style="font-weight: normal;"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">topology-oriented
+</span></span></i></span></font><font color="#000000"><span lang="en-GB"><span style="font-style: normal;"><span style="font-weight: normal;"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">acyclic
 digraph – this means that it uses nodes' type, inheritance ancestry
 and link topology to capture the maximum possible proportion of
 information about the program (as opposed to enums, bools, custom
-classes etc)</span></span></span></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">.
+classes etc)</span></span></span></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">.
 The inferno tree represents programs with source-like semantics and
 will support an approximate closure of C++, SystemC and Verilog. We
 specify the tree in a minimal style plus utilities, and use <a href="http://www.boost.org/">Boost</a>'s
 <a href="http://www.boost.org/doc/libs/1_39_0/libs/smart_ptr/shared_ptr.htm">shared_ptr
 </a>for the links between nodes to simplify memory management.</span></span></font></p>
-<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
+<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
 sequence of transformations will be controlled by an automatic tool
 based on the properties of individual transformations expressed in
-terms of </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">disallowed,</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-</span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">introduced
-</span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">and
-</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">removed
-</span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">constructs.
+terms of </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">disallowed,</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">introduced
+</span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">and
+</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">removed
+</span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">constructs.
 Inferno interfaces with the <a href="http://clang.llvm.org/">clang</a></span></span></font>
-front-end<font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">(part
+front-end<font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">(part
 of the <a href="http://www.llvm.org/">LLVM</a> compiler project) to
-parse C++ programs into the inferno tree.&nbsp;We can render</span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">legal
+parse C++ programs into the inferno tree.&nbsp;We can render</span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">legal
 C++ output programs directly from the tree and generate input files
 for <a href="http://www.graphviz.org/">Graphviz</a>. A graph for an
 example program that sums the numbers from 1 to 10 follows.</span></span></font></p>
 <p style="margin-top: 0.42cm;"><a href="http://sourceforge.net/projects/inferno-synth/#item3rd-2"><img src="http://sourceforge.net/dbimage.php?id=293703" name="Inferno tree for recursive factorial program" align="left" border="0" height="283" width="643"><br clear="left"></a><font style="color: rgb(0, 102, 0);" color="#0066cc"><font face="Albany, sans-serif"><font size="4">Search
 and replace</font></font></font></p>
-<p style="margin-top: 0.42cm;"><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Most
-of the transformations will be implemented using a generic </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://inferno-cpp2v.svn.sourceforge.net/viewvc/inferno-cpp2v/trunk/docs/program/search_replace_documentation.txt">in-tree
-search and replace</a> </span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">tool
-which implements </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">topological
-wildcarding </span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">based
-on the tree's existing class hierarchy.</span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
+<p style="margin-top: 0.42cm;"><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Most
+of the transformations will be implemented using a generic </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://inferno-cpp2v.svn.sourceforge.net/viewvc/inferno-cpp2v/trunk/docs/program/search_replace_documentation.txt">in-tree
+search and replace</a> </span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">tool
+which implements </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">topological
+wildcarding </span></i></span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">based
+on the tree's existing class hierarchy.</span></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
 algorithm has many extensions to increase its expressivity, and it
 takes advantage of the topology-oriented style of inferno trees in
 order to be language-indepenedent.</span></span></font></p>
-<p style="margin-top: 0.42cm;" lang="en-GB"><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">An
+<p style="margin-top: 0.42cm;" lang="en-GB"><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">An
 example search and replace pattern follows: this one searches for
 do-while loops and replaces them with a network of gotos, and it
 handles continue correctly (break is handled by another
@@ -113,18 +114,21 @@ transformation to the above example program is shown below.</p>
 <p style="margin-top: 0.42cm;"><a href="http://sourceforge.net/projects/inferno-synth/#item3rd-2"><img src="http://sourceforge.net/dbimage.php?id=293705" name="Inferno tree for recursive factorial program" align="bottom" border="0" height="329" width="643"></a></p>
 <p style="color: rgb(0, 102, 0);"><font face="Albany, sans-serif"><font size="4">Development</font></font>
 </p>
-<p><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
+
+<p><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
 project is written in C++ with STL and Boost libraries. It brings in
 specific snapshot revisions of llvm and clang. It presently builds in
 GCC3.x and 4.x on Linux and Cygwin. This page, and the project's
 subversion repository, docs and forums are all hosted at</span></font></p>
-<p><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://sourceforge.net/"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=179957&amp;type=6" name="Graphic1" align="bottom" border="0" height="62" width="210"></a></span></font>.</p>
+<p><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://sourceforge.net/"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=179957&amp;type=6" name="Graphic1" align="bottom" border="0" height="62" width="210"></a></span></font>.</p>
 <p>See the SourceForge <a href="http://sourceforge.net/projects/inferno-synth">project
 page</a> for more information.</p>
 <p style="color: rgb(0, 102, 0);"><font face="Albany, sans-serif"><font size="4">Releases</font></font></p>
 <table border="1" cellpadding="2" cellspacing="2">
 	<tbody><tr>
-		<td>
+		<td style="vertical-align: top;"><br>
+      </td>
+<td>
 			<p><i>Version</i></p>
 		</td>
 		<td>
@@ -138,7 +142,9 @@ page</a> for more information.</p>
 		</td>
 	</tr>
 	<tr>
-		<td>
+		<td style="vertical-align: top;"><br>
+      </td>
+<td>
 			<p>0.1</p>
 		</td>
 		<td>
@@ -151,10 +157,20 @@ page</a> for more information.</p>
 			<p>Includes a beta-level Search and Replace algorithm, with&nbsp;
 			documentation, and 16 transformation steps implemented.</p>
 		</td>
-	</tr>
+	</tr><tr>
+      <td style="vertical-align: top;"><br>
+      </td>
+      <td style="vertical-align: top;">0.2<br>
+      </td>
+      <td style="vertical-align: top;">786<br>
+      </td>
+      <td style="vertical-align: top;">Mar 2012<br>
+      </td>
+      <td style="vertical-align: top;">Release level search and replace algorithm, partial SystemC integration, suite of SystemC test cases, beta-level sequential phase implementation, better documentation including Doxygen.</td>
+    </tr>
+
 </tbody></table>
-<p><br><br>
-</p>
+
 <p style="margin-top: 0.42cm; page-break-after: avoid; color: rgb(0, 102, 0);"><font face="Albany, sans-serif"><font size="4">Background
 reading</font></font></p>
 <p style="margin-top: 0.42cm; page-break-after: avoid;"><font color="#0066cc"><font face="Albany, sans-serif"><font size="3"><i>Program
@@ -219,10 +235,10 @@ and Transaction Level Modelling</i></font></font></p>
 Library Overview</a> and <a href="https://www.systemc.org/projects/sitedocs/document/v201_Users_guide/en/1">SystemC
 Version 2.0 User s Guide </a>describe what SystemC can do and how to
 use it. The best way to understand SystemC internals is via the code,
-which may be downloaded from the <a href="http://www.systemc.org/"><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">SystemC
+which may be downloaded from the <a href="http://www.systemc.org/"><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">SystemC
 web site</span></span></font></a>. No-one ever talks about SystemC
 version 1; it must have sucked.</p>
-<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
+<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
 power-point presentation <a href="http://www.ics.uci.edu/%7Egajski/presentation/Transaction.ppt">Transaction
 Level Modeling: An Overview</a> gives an intro to the subject. Note
 in particular the 2-axis graph that enumerates different TLM styles
@@ -230,33 +246,33 @@ by algorithmic and timing precision. <a href="http://www.cecs.uci.edu/technical_
 Level Modeling in System Level Design</a> has excellent diagrams that
 illustrate TLM styles and the difference between them.</span></span></font>
 <a href="http://www.systemc.org/projects/sitedocs/document/HW_SW_Int_paper/en/1">Early
-Hardware/Software Integration Using SystemC 2.0</a> and <a href="http://www.systemc.org/projects/sitedocs/document/Transaction_level_STM/en/3"><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Transaction
+Hardware/Software Integration Using SystemC 2.0</a> and <a href="http://www.systemc.org/projects/sitedocs/document/Transaction_level_STM/en/3"><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Transaction
 level modeling of SoC with SystemC 2.0</span></span></font></a> give
-examples of a few different TLM styles. <font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://www.us.design-reuse.com/articles/article10037.html">Advancing
+examples of a few different TLM styles. <font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://www.us.design-reuse.com/articles/article10037.html">Advancing
 Transaction Level Modeling -- Linking the OSCI and OCP-IP Worlds at
 Transaction Level</a> is interesting but OCP-IP (chip-level
 networking) is out of the scope of this project (our converter might
-</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">translate</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">implementations
-of OCP-IP protocols but it doesn't have to </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">understand</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
-</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">them)
+</span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">translate</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">implementations
+of OCP-IP protocols but it doesn't have to </span></span></font><font color="#000000"><span lang="en-GB"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">understand</span></i></span></font><font color="#000000"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">
+</span></font><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">them)
 .</span></span></font></p>
-<p style="color: rgb(0, 102, 0);"><font face="Albany, sans-serif"><font size="3"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Other</span></i></font></font>
+<p style="color: rgb(0, 102, 0);"><font face="Albany, sans-serif"><font size="3"><i><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Other</span></i></font></font>
 </p>
-<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
+<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">The
 <a href="http://www.cs.utexas.edu/users/lavender/courses/c++/cd2/index.html">ANSI
 C++ spec</a> from 1997. <a href="http://www.icarus.com/eda/verilog/">Icarus
 Verilog</a> is a handy package for simulating and synthesising
 Verilog. <a href="http://www.sutherland-hdl.com/papers/2000-HDLCon-paper_Verilog-2000.pdf">The
 IEEE Verilog 1364-2001 Standard What's New, and Why You Need It</a>
 discusses the Verilog-2001 standard which is the one we will use.</span></span></font></p>
-<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Parallelism
+<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">Parallelism
 is not an initial priority for this project. However, when the time
 comes, <a href="http://anusf.anu.edu.au/%7Edbs900/OpenMP/openmp.pdf">OpenMP</a>
 is a candidate for the necessary extensions to the input language
 (however it seems rather complex).&nbsp;</span></span></font> 
 </p>
-<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://www.drccomputer.com/pages/products.html">DRC's
+<p><font color="#000000"><span lang="en-GB"><span style="background: rgb(255, 255, 255) none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"><a href="http://www.drccomputer.com/pages/products.html">DRC's
 Reconfigurable Processor Unit</a> seems like an interesting target
 platform. FPGA+CPU systems are not an initial target, but to make
 this particular configuration work well, we would need to integrate

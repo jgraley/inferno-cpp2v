@@ -1069,7 +1069,7 @@ MoveInitIntoSuperLoop::MoveInitIntoSuperLoop()
     r_equal->operands = ( MakeTreePtr<DeltaCount>(), MakeTreePtr<SpecificInteger>(0) );    
     r_if->body = r_if_comp;
 //    r_if_comp->members = ();
-    r_if_comp->statements = (first_init, inits, MakeTreePtr<WaitDelta>());
+    r_if_comp->statements = (first_init, inits);//, MakeTreePtr<WaitDelta>());
     r_if->else_body = MakeTreePtr<Nop>();
     
     Configure( fn );            

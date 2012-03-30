@@ -1,17 +1,12 @@
 TODO list (to get the sequential phase looking good)
-Note: (0.2 #x) means do this for 0.2 release, in order of x. 
-0.2 planned release notes: Better S&R, maybe ready for general use; initial SystemC support; sequential phase at alpha or beta; doxygen and generally better documentation
 
-Sweep for TODOs in code, but quite high theshold (0.2 #10)
-
-Doxygen comments for all the steps (0.2 #12)
-
-Get web page to reference all the docs (0.2 #14)
+Sweep for TODOs in code, but quite high theshold
+Get web page to reference all the docs 
    - including this one
 
--- post 0.2 --
-
 figure out how to keep using the non-SC tests
+
+more reduction of reliance on Module - SC detection should be changed to not only work in Modules.
 
 sc_signal support
    - maybe just replace all fundy types
@@ -49,3 +44,11 @@ make node-specific graphing be based on virtual functions in nodes, so that grap
 
 step to get the parameters of a function together into a single struct
    - use this just before the step that passes params via temp, that way no need for additional temp
+
+function merging would be lighter touch if the callee was inserted near the first call point, not at the end
+   - obviously, the return label should lie below the inserted function
+   - manifestly no iteration for a call when only one call point 
+   - would tend to leave a top level superloop in place
+
+do not lower a manifest superloop if it is compatible with conversion directly to Method
+   - need to choose cannonical form, probably do...while(cond);
