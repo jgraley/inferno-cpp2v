@@ -92,7 +92,7 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     { // creating fallthrough machine
         sequence->push_back( shared_ptr<Transformation>( new GotoAfterWait ) );     
         sequence->push_back( shared_ptr<Transformation>( new AddGotoBeforeLabel ) );         
-        sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );            
+        //sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );            
 
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
         sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) ); 
