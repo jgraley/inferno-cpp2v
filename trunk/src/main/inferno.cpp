@@ -72,7 +72,7 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new CompactGotosFinal ) );
         
         sequence->push_back( shared_ptr<Transformation>( new ReduceVoidCompoundExpression ) ); 
-        for( int i=0; i<2; i++ )
+        //for( int i=0; i<2; i++ )
         // Ineffectual gotos, unused and duplicate labels result from compound tidy-up after construct lowering, but if not 
         // removed before AddGotoBeforeLabel, they will generate spurious states. We also remove dead code which can be exposed by
         // removal of unused labels - we must repeat because dead code removal can generate unused labels.
