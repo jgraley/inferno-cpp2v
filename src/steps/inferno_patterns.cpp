@@ -18,7 +18,7 @@ string BuildIdentifierBase::GetNewName( const CompareReplace *sr )
         TRACE("End SoftMakeIdentifier recurse\n");
         ASSERT( n );
         TreePtr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>( n );
-        ASSERT( si )("trying to make an identifier from ")(*n)(" which should be a kind of SpecificIdentifier");
+        ASSERT( si )("BuildIdentifier: ")(*n)(" should be a kind of SpecificIdentifier (format is %s)", format.c_str());
         string s = si->GetName();
         if( !vs.empty() )
             all_same = all_same && (s == vs.back());

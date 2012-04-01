@@ -472,7 +472,7 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
                     return false;
 
             // Restrict to pre-restriction or pattern
-            bool r = ps->MatchRange( this, *ss );
+            bool r = ps->MatchRange( this, *ss, can_key );
             if( !r )
                 return false;
 
@@ -578,7 +578,7 @@ bool CompareReplace::DecidedCompare( CollectionInterface &x,
             if( Compare( TreePtr<Node>(xremaining), keynode ) == false )
                 return false;
 
-        bool r = star->MatchRange( this, *xremaining );
+        bool r = star->MatchRange( this, *xremaining, can_key );
         if( !r )
             return false;
     
@@ -1619,8 +1619,15 @@ shared_ptr<ContainerInterface> StuffBase::GetContainerInterface( TreePtr<Node> x
 
 
 bool StarBase::MatchRange( const CompareReplace *sr,
-                           ContainerInterface &range )
+                           ContainerInterface &range,
+                           bool can_key )
 {
+    // this is an abnormal context (which of the program nodes
+    // in the range should key the pattern?) so just wave keying
+    // pass right on through.
+    if( can_key )
+        return true;
+                
     TreePtr<Node> p = GetPattern();
     if( p )
     {

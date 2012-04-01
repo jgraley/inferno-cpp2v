@@ -189,6 +189,7 @@ public:
 
     // Replace ring
     void ClearPtrs( TreePtr<Node> dest ) const;
+
     TreePtr<Node> DoOverlayOrOverwriteSubstitutionPattern( TreePtr<Node> keynode,
                 	                                       shared_ptr<Key> current_key,
 		                                                   TreePtr<Node> source ) const;
@@ -378,7 +379,8 @@ struct StarBase : virtual Node
 {
     virtual TreePtr<Node> GetPattern() = 0;
     bool MatchRange( const CompareReplace *sr,
-                       ContainerInterface &range );
+                       ContainerInterface &range,
+                       bool can_key );
 };
 template<class PRE_RESTRICTION>
 struct Star : StarBase, Special<PRE_RESTRICTION> 

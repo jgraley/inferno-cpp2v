@@ -16,6 +16,7 @@
 #include "steps/lower_control_flow.hpp"
 #include "steps/clean_up.hpp"
 #include "steps/state_out.hpp"
+#include "steps/fall_out.hpp"
 #include "steps/systemc_detection.hpp"
 #include "steps/to_sc_method.hpp"
 
@@ -67,10 +68,13 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         // All remaining uncomables at the top level and in SUSP style
     }
     
-    { // big round of cleaning up
+    { // Initial treatment of gotos and labels
+  //      sequence->push_back( shared_ptr<Transformation>( new PlaceLabelsInArray ) ); 
         sequence->push_back( shared_ptr<Transformation>( new CompactGotos ) ); // maybe put these after the label cleanups
         sequence->push_back( shared_ptr<Transformation>( new CompactGotosFinal ) );
+    }
         
+    { // big round of cleaning up
         sequence->push_back( shared_ptr<Transformation>( new ReduceVoidCompoundExpression ) ); 
         //for( int i=0; i<2; i++ )
         // Ineffectual gotos, unused and duplicate labels result from compound tidy-up after construct lowering, but if not 
@@ -96,8 +100,7 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
 
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
         sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) ); 
-                
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );                 
         sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
         sequence->push_back( shared_ptr<Transformation>( new MakeFallThroughMachine ) ); 
         sequence->push_back( shared_ptr<Transformation>( new MoveInitIntoSuperLoop ) );
