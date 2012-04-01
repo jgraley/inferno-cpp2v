@@ -52,3 +52,9 @@ function merging would be lighter touch if the callee was inserted near the firs
 
 do not lower a manifest superloop if it is compatible with conversion directly to Method
    - need to choose cannonical form, probably do...while(cond);
+   
+the handling of "const" is completely wrong, fix it 
+   - it should be a property of types, not of instances
+   - so that in pointer decls, const canb e applied correctly to the pointer and/or pointed-to object
+   - present impl is wrong - a Const decl of a pointer renders to making the pointed-to item const
+   

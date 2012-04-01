@@ -544,14 +544,15 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 
 	ASSERT(o->type);
 
+	if( TreePtr<Static> st = dynamic_pointer_cast<Static>(o) )
+		if( dynamic_pointer_cast<Const>(st->constancy) )
+			s += "const ";
+	if( TreePtr<Field> f = dynamic_pointer_cast<Field>(o) )
+		if( dynamic_pointer_cast<Const>(f->constancy) )
+			s += "const ";
+
 	if( showstorage )
 	{
-		if( TreePtr<Static> st = dynamic_pointer_cast<Static>(o) )
-			if( dynamic_pointer_cast<Const>(st->constancy) )
-				s += "const ";
-		if( TreePtr<Field> f = dynamic_pointer_cast<Field>(o) )
-			if( dynamic_pointer_cast<Const>(f->constancy) )
-				s += "const ";
 		s += RenderStorage(o);
 	}
 
@@ -659,12 +660,13 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 bool Render::ShouldSplitInstance( TreePtr<Instance> o )
 {
 	bool isfunc = !!dynamic_pointer_cast<Callable>( o->type );
-	bool is_non_const_static = false;
+	bool isnumber = !!dynamic_pointer_cast<Numeric>( o->type );
+	bool split_var = false;
 	if( TreePtr<Static> s = dynamic_pointer_cast<Static>(o) )
-		if( dynamic_pointer_cast<NonConst>(s->constancy) )
-			is_non_const_static = true;
+		if( dynamic_pointer_cast<NonConst>(s->constancy) || !isnumber )
+			split_var = true;
 	return ( dynamic_pointer_cast<Record>( scope_stack.top() ) &&
-			   is_non_const_static ) || 
+			   split_var ) || 
 			   isfunc;
 }
 
@@ -955,7 +957,7 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
                     
         // TODO figure out what this does - it seems to look for function instances and then try to 
         // init them as if they wew initable and their body was an expression.
-        if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>(pd) )
+        if( TreePtr<Field> i = dynamic_pointer_cast<Field>(pd) )
         {
             TRACE("Got ")(*i)(" init is ")(*(i->initialiser))(" %d %d\n", 
                     (int)(bool)dynamic_pointer_cast<Callable>(i->type),
