@@ -58,3 +58,6 @@ the handling of "const" is completely wrong, fix it
    - so that in pointer decls, const canb e applied correctly to the pointer and/or pointed-to object
    - present impl is wrong - a Const decl of a pointer renders to making the pointed-to item const
    
+now that we have SimpleCompare factored out of S&R, why not also factor out a SimpleDuplicate for program tree->program tree duplication?
+   - but don't use for Stuff node substitution, because that terminates back into pattern subst!
+

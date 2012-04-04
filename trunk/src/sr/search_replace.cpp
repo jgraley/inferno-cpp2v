@@ -1,6 +1,7 @@
 #include "search_replace.hpp"
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
+#include "helpers/simple_compare.hpp"
 
 //#define STRACE
 
@@ -253,8 +254,11 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
     // enough. Perhaps keys can be "concrete" when all the couplings below them have
     // been checked as matching?
     if( TreePtr<Node> keynode = coupling_keys.GetCoupled( pattern ) )
-        if( Compare( x, keynode ) == false )
+    {
+        SimpleCompare sc;
+        if( sc( x, keynode ) == false )
             return false;
+    }
 	
 	if( can_key )
         coupling_keys.DoKey( x, pattern, gc, go );	
@@ -468,9 +472,12 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
             
             // Apply couplings to this Star and matched range
             if( TreePtr<Node> keynode = coupling_keys.GetCoupled( pe ) )
-                if( Compare( TreePtr<Node>(ss), keynode ) == false )
+            {
+                SimpleCompare sc;
+                if( sc( TreePtr<Node>(ss), keynode ) == false )
                     return false;
-
+            }
+            
             // Restrict to pre-restriction or pattern
             bool r = ps->MatchRange( this, *ss, can_key );
             if( !r )
@@ -575,8 +582,11 @@ bool CompareReplace::DecidedCompare( CollectionInterface &x,
     if( seen_star )
     {
         if( TreePtr<Node> keynode = coupling_keys.GetCoupled( star ) )
-            if( Compare( TreePtr<Node>(xremaining), keynode ) == false )
+        {
+            SimpleCompare sc;
+            if( sc( TreePtr<Node>(xremaining), keynode ) == false )
                 return false;
+        }
 
         bool r = star->MatchRange( this, *xremaining, can_key );
         if( !r )
@@ -617,8 +627,11 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
         return false;
         
     if( TreePtr<Node> keynode = coupling_keys.GetCoupled( pattern ) )
-        if( Compare( x, keynode ) == false )
+    {
+        SimpleCompare sc;
+        if( sc( x, keynode ) == false )
             return false;
+    }
     
     // If we got this far, do the couplings
     if( can_key )
@@ -1622,6 +1635,7 @@ bool StarBase::MatchRange( const CompareReplace *sr,
                            ContainerInterface &range,
                            bool can_key )
 {
+    INDENT;
     // this is an abnormal context (which of the program nodes
     // in the range should key the pattern?) so just wave keying
     // pass right on through.
