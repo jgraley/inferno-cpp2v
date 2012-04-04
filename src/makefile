@@ -3,7 +3,7 @@ include ../makefile.common
 
 COMMON_MODULES = common/standard common/read_args common/trace common/hit_count
 NODE_MODULES = node/node node/itemise 
-HELPERS_MODULES = helpers/walk  
+HELPERS_MODULES = helpers/walk helpers/simple_compare
 TREE_MODULES = tree/cpptree tree/validate tree/scope tree/misc tree/typeof tree/type_db 
 SR_MODULES = sr/search_replace sr/soft_patterns sr/coupling sr/conjecture 
 PARSE_MODULES = parse/identifier_tracker parse/rc_hold
