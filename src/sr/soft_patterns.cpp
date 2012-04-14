@@ -1,6 +1,7 @@
 #include "soft_patterns.hpp"
+#include "coupling.hpp"
 
-bool TransformOfBase::DecidedCompare( const CompareReplace *sr,
+shared_ptr<Key> TransformOfBase::DecidedCompare( const CompareReplace *sr,
 		                                                     const TreePtrInterface &x,
 		                                                     bool can_key,
 		                                                     Conjecture &conj )
@@ -11,7 +12,24 @@ bool TransformOfBase::DecidedCompare( const CompareReplace *sr,
 	if( xt )
 	{
 	    // Punt it back into the search/replace engine
-	    return sr->DecidedCompare( xt, TreePtr<Node>(pattern), can_key, conj );
+	    bool r = sr->DecidedCompare( xt, TreePtr<Node>(pattern), can_key, conj );
+        if( r )
+        {
+            // If we have a match, make the output of the transformation be a terminus
+            // for substitution during replace - if it is under the original node x
+            // then the replace will resume overlaying at the correct place. If not, no
+            // harm done since the replace won't see the terminus (there would be no
+            // right place to overlay)
+            shared_ptr<TerminusKey> k( new TerminusKey );
+            k->root = x;
+            k->terminus = xt;
+            terminus = pattern; // TODO go through and replace pattern with terminus, and do not declare pattern in this class
+            return k;
+        }
+        else
+        {
+            return shared_ptr<Key>();
+        }
 	}
 	else
 	{
@@ -19,8 +37,7 @@ bool TransformOfBase::DecidedCompare( const CompareReplace *sr,
 		// type, so just don't match
 		// TODO no need for this, the pre-restriction will take care of wrong type. But maybe
 		// want this for other invalid cases?
-	    return false;
+	    return shared_ptr<Key>();
 	}
 }
-
 

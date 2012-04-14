@@ -78,6 +78,38 @@ GotoAfterWait::GotoAfterWait()
 }
 */
 
+NormaliseConditionalGotos::NormaliseConditionalGotos()
+{
+    MakeTreePtr< If > iif;      
+    MakeTreePtr< Expression > cond;      
+    MakeTreePtr< Compound > s_comp, r_comp, sx_comp;  
+    MakeTreePtr< Goto > then_goto, s_else_goto, r_goto, sx_goto;// TODO sx_goto could be any departure, like Return or Cease etc
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, post, sx_post;
+    MakeTreePtr< Multiplexor > mult;
+    MakeTreePtr< Label > label;    
+    MakeTreePtr< BuildLabelIdentifier > label_id("PROCEED");
+    MakeTreePtr< MatchAll<Statement> > s_all;
+    MakeTreePtr< NotMatch<Statement> > sx_not;    
+    
+    s_all->patterns = (s_comp, sx_not);
+    sx_not->pattern = sx_comp;    
+    iif->condition = cond;
+    iif->body = then_goto;
+    iif->else_body = MakeTreePtr<Nop>(); 
+    s_comp->members = ( decls );    
+    s_comp->statements = ( pre, iif, post );    
+    sx_comp->statements = ( pre, iif, sx_goto, sx_post );    
+
+    label->identifier = label_id;
+    r_goto->destination = label_id;
+    r_comp->members = ( decls );
+    r_comp->statements = ( pre, iif, r_goto, label, post );
+    
+    Configure( s_all, r_comp );
+}
+
+
 CompactGotos::CompactGotos()
 {
     MakeTreePtr< If > s_if;      
@@ -101,34 +133,6 @@ CompactGotos::CompactGotos()
     r_comp->statements = ( pre, r_goto, post );
     r_comp->members = ( decls );    
         
-    Configure( s_comp, r_comp );
-}
-
-CompactGotosFinal::CompactGotosFinal()
-{
-    MakeTreePtr< If > s_if;      
-    MakeTreePtr< Expression > cond;      
-    MakeTreePtr< Compound > s_comp, r_comp;  
-    MakeTreePtr< Goto > s_then_goto, s_else_goto, r_goto;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, post;
-    MakeTreePtr< Multiplexor > mult;
-    MakeTreePtr< Label > label;    
-    MakeTreePtr< BuildLabelIdentifier > label_id("SEQUENTIAL");
-    
-    s_then_goto->destination = MakeTreePtr<Expression>();    
-    s_if->condition = cond;
-    s_if->body = s_then_goto;
-    s_if->else_body = MakeTreePtr<Nop>(); // standard conditional branch has no else clause - our "else" is the next statement
-    s_comp->members = ( decls );    
-    s_comp->statements = ( pre, s_if, post );    
-
-    label->identifier = label_id;
-    mult->operands = (cond, s_then_goto->destination, label_id);
-    r_goto->destination = mult;
-    r_comp->members = ( decls );
-    r_comp->statements = ( pre, r_goto, label, post );
-    
     Configure( s_comp, r_comp );
 }
 

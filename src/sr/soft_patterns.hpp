@@ -194,7 +194,8 @@ private:
 };
 
 
-struct TransformOfBase : CompareReplace::SoftSearchPattern 
+struct TransformOfBase : CompareReplace::SoftSearchPatternSpecialKey,
+                         TerminusBase
 {
     TreePtr<Node> pattern; 
     Transformation *transformation;
@@ -205,10 +206,10 @@ struct TransformOfBase : CompareReplace::SoftSearchPattern
     }
 
 private:
-    virtual bool DecidedCompare( const CompareReplace *sr,
-    		                                            const TreePtrInterface &x,
-    		                                            bool can_key,
-    		                                            Conjecture &conj ) ;
+    virtual shared_ptr<Key> DecidedCompare( const CompareReplace *sr,
+    		                     const TreePtrInterface &x,
+    		                     bool can_key,
+    		                     Conjecture &conj );
 protected: 
     TransformOfBase() {}    
 };

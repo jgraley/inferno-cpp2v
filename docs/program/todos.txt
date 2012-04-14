@@ -1,5 +1,22 @@
 TODO list (to get the sequential phase looking good)
 
+NestedSubscript on rvalue (m slave) spins on the generated lmap subscript, generates infinity
+    - NestedSubscript should not hit these because the relationship is though the index, investigate more...
+    - Could add a "depth" integer to the NestedArray/NEstedSubscript nodes. These would then need to be full softnodes.
+    - Could just enforce the type, since this changes.
+
+In recursive test case, we are hitting the stack array. 
+    - Need to do better than just "typeof integer" - we should try to match the whole lmap array
+    - Ideally including the "const" but "const" is broken atm anyway
+
+Add the Lookup skipping node to the pattern, so we can put label-vars into struct members. 
+    - Put it immediately under NestedSubscript
+
+Do a new test case with complicated mixtures of array and struct containing the label var, make sure it works!
+
+
+
+
 Sweep for TODOs in code, but quite high theshold
 Get web page to reference all the docs 
    - including this one
@@ -57,7 +74,10 @@ the handling of "const" is completely wrong, fix it
    - it should be a property of types, not of instances
    - so that in pointer decls, const canb e applied correctly to the pointer and/or pointed-to object
    - present impl is wrong - a Const decl of a pointer renders to making the pointed-to item const
+   - by the way, is const the same as single-static-assignment?
    
 now that we have SimpleCompare factored out of S&R, why not also factor out a SimpleDuplicate for program tree->program tree duplication?
    - but don't use for Stuff node substitution, because that terminates back into pattern subst!
 
+introduce intermediate called Departure, a base for Goto, Return, Break, Continue, Cease, Exit etc
+   - and maybe Arrival for labels?

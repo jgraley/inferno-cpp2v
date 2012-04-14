@@ -661,6 +661,9 @@ bool Render::ShouldSplitInstance( TreePtr<Instance> o )
 {
 	bool isfunc = !!dynamic_pointer_cast<Callable>( o->type );
 	bool isnumber = !!dynamic_pointer_cast<Numeric>( o->type );
+    if( TreePtr<TypeIdentifier> ti = dynamic_pointer_cast<TypeIdentifier>(o->type) )
+        if( dynamic_pointer_cast<Enum>( GetRecordDeclaration(program, ti) ) )
+            isnumber = 1; // enum is like a number        
 	bool split_var = false;
 	if( TreePtr<Static> s = dynamic_pointer_cast<Static>(o) )
 		if( dynamic_pointer_cast<NonConst>(s->constancy) || !isnumber )

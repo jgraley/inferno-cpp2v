@@ -26,7 +26,7 @@ Inferno nodes are organised in an inheritance hierarchy beginning with Node, fro
 
 The trees for programs are only allowed to consist of final nodes. So Node and the intermediates are not allowed in program trees. They are allowed, however, in search and replace patterns as long as they would not end up in the output of the search and replace transformation. 
 
-When an intermediate node is seen in a search pattern, it serves as a wildcard for any node derived from it. For example, Return and Goto are both derived from Statement, so a Statement node in a search pattern will match Return, Goto and any other node derived from statement. In set theoretic terms, we have restricted the search to the set of statements.
+When an intermediate node is seen in a search pattern, it serves as a wildcard for any node derived from it. For example, Return and Goto are both derived from Statement, so a Statement node in a search pattern will match Return, Goto and any other node derived from Statement. In set theoretic terms, we have restricted the search to the set of statements.
 
 As an example of multiple layers of intermediates, consider that Expression is derived from Statement, making expressions a subset of statements. This is consistent with the rule in C that an expression may be used in place of a statement, but not the other way around. Consequently, a node of type Statement in a search pattern will match any expression as well as other kinds of statements, but an Expression node in a search pattern will only match expressions.
 
