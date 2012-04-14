@@ -90,15 +90,29 @@ public:
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
     // back into the general search algorithm.
     TreePtr<Node> GetContext() const { ASSERT(pcontext&&*pcontext); return *pcontext; }
-    struct SoftSearchPattern
+
+    // Tell soft nodes that a compare rtun is beginning and it can flush any caches it may have
+    struct Flushable
     {
         virtual void FlushCache() {}
-        virtual bool DecidedCompare( const CompareReplace *sr,
-        		                       const TreePtrInterface &x,
-        		                       bool can_key,
-        		                       Conjecture &conj ) = 0;
     };
-    struct SoftReplacePattern
+    
+    struct SoftSearchPattern : Flushable
+    {
+        virtual bool DecidedCompare( const CompareReplace *sr,
+                                       const TreePtrInterface &x,
+                                       bool can_key,
+                                       Conjecture &conj ) = 0;
+    };
+    struct SoftSearchPatternSpecialKey : Flushable
+    {
+        // Return NULL for not found
+        virtual shared_ptr<Key> DecidedCompare( const CompareReplace *sr,
+                                                const TreePtrInterface &x,
+                                                bool can_key,
+                                                Conjecture &conj ) = 0;
+    };
+    struct SoftReplacePattern : Flushable
     {
         // Called when not coupled
         virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr ) = 0;
@@ -409,15 +423,19 @@ struct GreenGrass : GreenGrassBase, Special<PRE_RESTRICTION>
     }
 };
 
-
-struct SearchContainerBase : virtual Node
-{
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) = 0;
-    TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
-};
-struct SearchContainerKey : Key // TODO put in SearchContainer
+struct TerminusKey : Key // TODO put in TerminusBase
 {
     TreePtr<Node> terminus;
+};
+struct TerminusBase : virtual Node 
+{
+    TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
+};
+
+
+struct SearchContainerBase : TerminusBase
+{
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) = 0;
 };
 
 

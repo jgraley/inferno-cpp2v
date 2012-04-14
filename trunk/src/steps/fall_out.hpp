@@ -5,11 +5,32 @@
 
 namespace Steps {
 
-/// PPut all the labels in an array indexable by an enum
+/// Put all the labels in an array indexable by an enum
 class PlaceLabelsInArray : public SearchReplace
 {
 public:
     PlaceLabelsInArray();
+};
+
+/// Put all the labels in an array indexable by an enum
+class LabelVarsToEnum : public SearchReplace
+{
+public:
+    LabelVarsToEnum();
+};
+
+/// Find c ? a[i] : a[j] and replace with a[ c ? i : j ]
+class SwapSubscriptMultiplex : public SearchReplace
+{
+public:
+    SwapSubscriptMultiplex();
+};
+
+/// Insert state variable as an enum
+class AddStateEnumVar : public SearchReplace
+{
+public:
+    AddStateEnumVar();
 };
 
 }; // end namespace

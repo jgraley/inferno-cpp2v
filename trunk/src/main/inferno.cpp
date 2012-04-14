@@ -23,7 +23,7 @@
 using namespace Steps;
 
 void SelfTest();
-
+//#define NEW
     // Build a vector of transformations, in the order that we will run them
     // (ordered by hand for now, until the auto sequencer is ready)
 void build_sequence( vector< shared_ptr<Transformation> > *sequence )
@@ -69,9 +69,8 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     }
     
     { // Initial treatment of gotos and labels
-  //      sequence->push_back( shared_ptr<Transformation>( new PlaceLabelsInArray ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new NormaliseConditionalGotos ) );
         sequence->push_back( shared_ptr<Transformation>( new CompactGotos ) ); // maybe put these after the label cleanups
-        sequence->push_back( shared_ptr<Transformation>( new CompactGotosFinal ) );
     }
         
     { // big round of cleaning up
@@ -97,9 +96,15 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new GotoAfterWait ) );     
         sequence->push_back( shared_ptr<Transformation>( new AddGotoBeforeLabel ) );         
         //sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );            
-
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
         sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) ); 
+
+#ifdef NEW
+        sequence->push_back( shared_ptr<Transformation>( new PlaceLabelsInArray ) );  
+        sequence->push_back( shared_ptr<Transformation>( new LabelVarsToEnum ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new SwapSubscriptMultiplex ) );        
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
+#else
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );                 
         sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
         sequence->push_back( shared_ptr<Transformation>( new MakeFallThroughMachine ) ); 
@@ -107,8 +112,9 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new AddYieldFlag ) );
         sequence->push_back( shared_ptr<Transformation>( new AddInferredYield ) ); 
         // now yielding in every iteration of superloop
+#endif
     }
-    
+#ifndef NEW    
     { // optimsiing fall though machine
         sequence->push_back( shared_ptr<Transformation>( new LoopRotation ) );
     }
@@ -119,7 +125,7 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new DeclsToModule ) );
         sequence->push_back( shared_ptr<Transformation>( new ThreadToMethod ) );
     }
-
+#endif
     { // final cleanups
         for( int i=0; i<2; i++ )
         {

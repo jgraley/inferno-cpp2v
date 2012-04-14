@@ -16,20 +16,20 @@ public:
     GotoAfterWait();
 };
 
+/** conditionasl branch with no else clause gets goto in both 
+    clauses - generates new label for this. */
+class NormaliseConditionalGotos : public SearchReplace
+{
+public:
+    NormaliseConditionalGotos();
+};
+
 /** conditional branch follwed by goto becomes goto with a conditional (ternary
     op) on the address. */
 class CompactGotos : public SearchReplace
 {
 public:
     CompactGotos();
-};
-
-/** any conditional branch becomes goto with a conditional (ternary
-    op) on the address - generates new label for this. */
-class CompactGotosFinal : public SearchReplace
-{
-public:
-    CompactGotosFinal();
 };
 
 /** Labels not preceeded by a goto get a goto before them */

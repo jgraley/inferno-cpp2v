@@ -1750,11 +1750,13 @@ private:
 			clang::SourceLocation IdLoc, clang::IdentifierInfo *Id,
 			clang::SourceLocation EqualLoc, ExprTy *Val)
 	{
+        TreePtr<Declaration> d( hold_decl.FromRaw( EnumDecl ) );
+        TreePtr<Enum> e( dynamic_pointer_cast<Enum>(d) );
 		TreePtr<Static> o(new Static());
 		all_decls->members.insert(o);
 		o->identifier = CreateInstanceIdentifier(Id);
 		o->constancy = MakeTreePtr<Const>(); // static const member need not consume storage!!
-		o->type = CreateIntegralType( TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified], false );
+		o->type = e->identifier;//CreateIntegralType( TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified], false );
 		if( Val )
 		{
 			o->initialiser = hold_expr.FromRaw( Val );
@@ -1785,7 +1787,7 @@ private:
 		TreePtr<Enum> e( dynamic_pointer_cast<Enum>(d) );
 		ASSERT( e )( "expected the declaration to be an enum");
 		for( int i=0; i<NumElements; i++ )
-		e->members.insert( hold_decl.FromRaw( Elements[i] ) );
+		    e->members.insert( hold_decl.FromRaw( Elements[i] ) );
 	}
 
 	/// ParsedFreeStandingDeclSpec - This method is invoked when a declspec with

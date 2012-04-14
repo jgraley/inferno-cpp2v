@@ -139,6 +139,7 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
          (" with pattern=")
          (*pattern)
          ("\n");
+    shared_ptr<Key> special_key;
     
 	// Check whether the present node matches. Do this for all nodes: this will be the local
 	// restriction for normal nodes and the pre-restriction for special nodes (based on
@@ -148,12 +149,19 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
 		return false;
     }
     
-	if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
+    if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
     {
-    	// Hand over to any soft search functionality in the search pattern node
-    	bool r = ssp->DecidedCompare( this, x, can_key, conj );
-    	if( !r )
-    		return false;
+        // Hand over to any soft search functionality in the search pattern node
+        bool r = ssp->DecidedCompare( this, x, can_key, conj );
+        if( !r )
+            return false;
+    }
+    else if( shared_ptr<SoftSearchPatternSpecialKey> sspsk = dynamic_pointer_cast<SoftSearchPatternSpecialKey>(pattern) )
+    {
+        // Hand over to any soft search functionality in the search pattern node
+        special_key = sspsk->DecidedCompare( this, x, can_key, conj );
+        if( !special_key )
+            return false;
     }
     else if( dynamic_pointer_cast<SoftReplacePattern>(pattern) )
     {
@@ -261,7 +269,12 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
     }
 	
 	if( can_key )
-        coupling_keys.DoKey( x, pattern, gc, go );	
+    {
+        if( special_key )
+            coupling_keys.DoKey( special_key, pattern, gc, go );  
+        else
+            coupling_keys.DoKey( x, pattern, gc, go );  
+    }
 
     return true;
 }
@@ -636,7 +649,7 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
     // If we got this far, do the couplings
     if( can_key )
     {
-    	shared_ptr<SearchContainerKey> key( new SearchContainerKey );
+    	shared_ptr<TerminusKey> key( new TerminusKey );
     	key->root = x;
     	key->terminus = *thistime;
     	shared_ptr<Key> sckey( key );
@@ -690,7 +703,7 @@ void CompareReplace::FlushSoftPatternCaches( TreePtr<Node> pattern ) const
 {
     Traverse t(pattern);
     FOREACH( TreePtr<Node> n, t )
-        if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(n) )
+        if( shared_ptr<Flushable> ssp = dynamic_pointer_cast<Flushable>(n) )
             ssp->FlushCache();      
 }
 
@@ -846,7 +859,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
     (", so that it does not have more members");
     TreePtr<Node> dest;
     
-    ASSERT( !dynamic_pointer_cast<SearchContainerKey>(current_key)  ); // we only get here when ordinary nodes are coupled
+    ASSERT( !dynamic_pointer_cast<TerminusKey>(current_key)  ); // we only get here when ordinary nodes are coupled
 
     // Make a new node, we will overlay from pattern, so resulting node will be dirty	    
     dest = DuplicateNode( keynode, true );
@@ -1074,6 +1087,11 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
             overlay = ggb->GetThrough(); 
         }
         
+        TRACE("Special ")
+             (*source)
+             (key?(dynamic_pointer_cast<TerminusKey>(key)?", terminus key":", non-terminus key"):", no key")
+             (overlay?", overlay\n":"non-overlay\n");
+        
         if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
         {   
             ASSERT(!key)("slave should not be coupled; should be in replace pattern only\n");
@@ -1098,8 +1116,12 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
     }
     else
     {
+        TRACE("Non-special ")
+             (*source)
+             (key?(dynamic_pointer_cast<TerminusKey>(key)?", terminus key":", non-terminus key"):", no key");
         if( key )
         {
+            ASSERT( !dynamic_pointer_cast<TerminusKey>(key) )("Only special nodes should have terminus\n");
             // If we're here we keyed a coupling on a normal node.
             return DoOverlaySubstitutionPattern( key->root, key, source );
         }
@@ -1253,11 +1275,11 @@ TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitution( TreePtr<Node> keynod
     // Are we substituting a stuff node? If so, see if we reached the terminus, and if
 	// so come out of substitution. Done as tail recursion so that we already duplicated
 	// the terminus key, and can just overlay the terminus replace pattern.
-	if( shared_ptr<SearchContainerKey> stuff_key = dynamic_pointer_cast<SearchContainerKey>(current_key) )
+	if( shared_ptr<TerminusKey> stuff_key = dynamic_pointer_cast<TerminusKey>(current_key) )
 	{
 		TRACE( "Substituting stuff: keynode=")(*keynode)(", term=")(stuff_key->terminus)("\n");
 		ASSERT( stuff_key->replace_pattern );
-		shared_ptr<SearchContainerBase> replace_stuff = dynamic_pointer_cast<SearchContainerBase>( stuff_key->replace_pattern );
+		shared_ptr<TerminusBase> replace_stuff = dynamic_pointer_cast<TerminusBase>( stuff_key->replace_pattern );
 		ASSERT( replace_stuff );
 		if( replace_stuff->terminus &&      // There is a terminus in replace pattern
 			keynode == stuff_key->terminus ) // and the present node is the terminus in the keynode pattern
