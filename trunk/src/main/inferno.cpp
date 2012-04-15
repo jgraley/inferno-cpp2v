@@ -101,8 +101,11 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
 
 #ifdef NEW
         sequence->push_back( shared_ptr<Transformation>( new PlaceLabelsInArray ) );  
-        sequence->push_back( shared_ptr<Transformation>( new LabelVarsToEnum ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new SwapSubscriptMultiplex ) );        
+        for( int i=0; i<2; i++ )
+        {
+            sequence->push_back( shared_ptr<Transformation>( new LabelVarsToEnum ) ); 
+            sequence->push_back( shared_ptr<Transformation>( new SwapSubscriptMultiplex ) );        
+        }
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
 #else
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );                 
