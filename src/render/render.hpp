@@ -28,7 +28,7 @@ private:
     string RenderScopedIdentifier( TreePtr<CPPTree::Identifier> id );
     string RenderIntegralType( TreePtr<CPPTree::Integral> type, string object=string() );
     string RenderFloatingType( TreePtr<CPPTree::Floating> type );
-    string RenderType( TreePtr<CPPTree::Type> type, string object=string() );
+    string RenderType( TreePtr<CPPTree::Type> type, string object=string(), bool constant=false );
     string Sanitise( string s );
     string RenderOperator( TreePtr<CPPTree::Operator> op, Sequence<CPPTree::Expression> &operands );
     string RenderCall( TreePtr<CPPTree::Call> call );

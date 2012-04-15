@@ -44,20 +44,20 @@ struct StateLabel : Label
 struct NestedBase : CompareReplace::SoftSearchPatternSpecialKey,
                     TerminusBase
 {
-    virtual TreePtr<Node> Advance( TreePtr<Node> n ) = 0;
+    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) = 0;
     virtual shared_ptr<Key> DecidedCompare( const CompareReplace *sr,
                                  const TreePtrInterface &x,
                                  bool can_key,
                                  Conjecture &conj )
     {
         INDENT;
+        string s;
         // Keep advancing until we get NULL, and remember the last non-null position
         TreePtr<Node> xt = x;
         int i = 0;
-        while( TreePtr<Node> tt = Advance(xt) )
+        while( TreePtr<Node> tt = Advance(xt, &s) )
         {
             xt = tt;
-            i++;
         } 
                 
         // Compare the last position with the terminus pattern
@@ -66,7 +66,7 @@ struct NestedBase : CompareReplace::SoftSearchPatternSpecialKey,
         // Compare the depth with the supplied pattern if present
         if( r && depth )
         {
-            TreePtr<Node> cur_depth( new SpecificInteger(i) );
+            TreePtr<Node> cur_depth( new SpecificString(s) );
             r = sr->DecidedCompare( cur_depth, TreePtr<Node>(depth), can_key, conj );
         }
         
@@ -83,7 +83,7 @@ struct NestedBase : CompareReplace::SoftSearchPatternSpecialKey,
             return shared_ptr<Key>();
         }
     }    
-    TreePtr<Integer> depth;
+    TreePtr<String> depth;
 };
 
 // Recurse through a number of nested Array nodes, but only by going through
@@ -92,9 +92,9 @@ struct NestedBase : CompareReplace::SoftSearchPatternSpecialKey,
 struct NestedArray : NestedBase, Special<Type>
 {
     SPECIAL_NODE_FUNCTIONS
-    virtual TreePtr<Node> Advance( TreePtr<Node> n )
+    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth )
     {
-        if( TreePtr<Array> a = dynamic_pointer_cast<Array>(n) )            
+        if( TreePtr<Array> a = dynamic_pointer_cast<Array>(n) )                          
             return a->element;
         else
             return TreePtr<Node>();
@@ -104,15 +104,25 @@ struct NestedArray : NestedBase, Special<Type>
 // Recurse through a number of Subscript nodes, but only going through
 // the base, not the index. Thus we seek the instance that contains the 
 // data we strarted with.
-struct NestedSubscript : NestedBase, Special<Expression>
+struct NestedSubscriptLookup : NestedBase, Special<Expression>
 {
     SPECIAL_NODE_FUNCTIONS
-    virtual TreePtr<Node> Advance( TreePtr<Node> n )
+    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth )
     {
         if( TreePtr<Subscript> s = dynamic_pointer_cast<Subscript>(n) )            
+        {
+            *depth += "S";
             return s->operands[0]; // the base, not the index
+        }
+        else if( TreePtr<Lookup> l  = dynamic_pointer_cast<Lookup>(n) )            
+        {
+            *depth += "L";
+            return l->member; 
+        }
         else
+        {
             return TreePtr<Node>();
+        }
     }
 };
 
@@ -244,7 +254,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     r_lmap->type = r_array;
     r_lmap->identifier = r_lmap_id;
     r_lmap->initialiser = r_make;    
-    r_lmap->constancy = MakeTreePtr<NonConst>();        
+    r_lmap->constancy = MakeTreePtr<Const>();        
 //    r_lmap->virt = MakeTreePtr<NonVirtual>();
   //  r_lmap->access = MakeTreePtr<Private>();    
     r_array->element = r_pointer;
@@ -260,7 +270,7 @@ LabelVarsToEnum::LabelVarsToEnum()
 {
     MakeTreePtr< MatchAll<Scope> > s_all;
     MakeTreePtr< MatchAll<Statement> > sx_all;
-    MakeTreePtr<Scope> scope, l_scope;
+    MakeTreePtr< Stuff<Scope> > scope;
     MakeTreePtr<Instance> var;
     MakeTreePtr<Pointer> s_ptr;
     MakeTreePtr<Void> s_void;
@@ -268,7 +278,6 @@ LabelVarsToEnum::LabelVarsToEnum()
     MakeTreePtr< Stuff<Scope> > s_stuff, sx_stuff;
     MakeTreePtr<Assign> s_assign, sx_assign, l_assign;
     MakeTreePtr<Subscript> s_sub, sx_sub, ls_sub, mr_sub, msx_sub;
-    MakeTreePtr<InstanceIdentifier> array_id; // TODO arrange for this to be const, since if the array itself can change this step is broken
     MakeTreePtr< NotMatch<Scope> > sx_not1;
     MakeTreePtr<AssignmentOperator> sx_asop, ms_asop;
     MakeTreePtr< NotMatch<Statement> > sx_not2, msx_not, msx_not2, msx_not3;
@@ -280,16 +289,22 @@ LabelVarsToEnum::LabelVarsToEnum()
     MakeTreePtr< MatchAll<Node> > ms_all;
     MakeTreePtr< AnyNode<Node> > ms_anynode;    
     MakeTreePtr<NestedArray> nested_array;
-    MakeTreePtr<NestedSubscript> nested_subscript, nested_subscript2, nested_subscript3;
-    MakeTreePtr<NestedSubscript> l_nested_subscript, m_nested_subscript, m_nested_subscript2;
+    MakeTreePtr<NestedSubscriptLookup> nested_subscript, nested_subscript2, nested_subscript3;
+    MakeTreePtr<NestedSubscriptLookup> l_nested_subscript, m_nested_subscript, m_nested_subscript2;
     MakeTreePtr<Instance> msx_inst;
-    MakeTreePtr<Integer> depth;
-   
+    MakeTreePtr<String> depth;
+    MakeTreePtr< Stuff<Scope> > lmap_stuff;
+    MakeTreePtr<Static> lmap;
+    MakeTreePtr<Const> lmap_const;
+    MakeTreePtr<Array> lmap_type;
+    MakeTreePtr<Type> label_type;
+    MakeTreePtr<InstanceIdentifier> lmap_id; 
+    
     l_assign->operands = (l_nested_subscript, l_over);
     l_nested_subscript->terminus = var_id;    
     l_nested_subscript->depth = depth;
     l_over->through = ls_sub;
-    ls_sub->operands = (array_id, l_index);
+    ls_sub->operands = (lmap_id, l_index);
     l_over->overlay = l_index;    
    
     MakeTreePtr< SlaveSearchReplace<Scope> > slavel( scope, l_assign );   
@@ -307,24 +322,24 @@ LabelVarsToEnum::LabelVarsToEnum()
     m_nested_subscript->depth = depth;
     m_over->overlay = mr_sub;
     msx_not3->pattern = msx_sub;
-    msx_sub->operands = (array_id, m_nested_subscript);
-    mr_sub->operands = (array_id, m_nested_subscript);
+    msx_sub->operands = (lmap_id, m_nested_subscript);
+    mr_sub->operands = (lmap_id, m_nested_subscript);
     
     MakeTreePtr< SlaveSearchReplace<Scope> > slavem( slavel, ms_all, ms_anynode );   
    
-    s_all->patterns = (scope, s_stuff, sx_not1);
-    scope->members = (var, MakeTreePtr< Star<Declaration> >());
+    s_all->patterns = (scope, s_stuff, sx_not1, lmap_stuff);
+    scope->terminus = var;
     var->type = nested_array;
     nested_array->terminus = over;
-    nested_array->depth = depth;
-    over->through = s_ptr;    
+    //nested_array->depth = depth;
+    over->through = label_type;    
     var->identifier = var_id;
     s_ptr->destination = s_void;
     s_stuff->terminus = s_assign;
     s_assign->operands = (nested_subscript, s_sub);
     nested_subscript->terminus = var_id;
     nested_subscript->depth = depth;
-    s_sub->operands = (array_id, s_index);
+    s_sub->operands = (lmap_id, s_index);
     s_index->pattern = type;
     sx_not1->pattern = sx_stuff;
     sx_stuff->terminus = sx_all;
@@ -336,9 +351,14 @@ LabelVarsToEnum::LabelVarsToEnum()
     sx_assign->operands = (nested_subscript2, sx_sub);
     nested_subscript2->terminus = var_id;
     nested_subscript2->depth = depth;
-    sx_sub->operands = (array_id, MakeTreePtr<Expression>() );
+    sx_sub->operands = (lmap_id, MakeTreePtr<Expression>() );
     over->overlay = type;
-    
+    lmap_stuff->terminus = lmap;
+    lmap->identifier = lmap_id;
+    lmap->type = lmap_type;
+    lmap->constancy = lmap_const;
+    lmap_type->element = label_type;
+        
     Configure( s_all, slavem );
 }
 

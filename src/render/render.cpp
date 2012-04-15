@@ -213,41 +213,43 @@ string Render::RenderFloatingType( TreePtr<Floating> type )
 }
 
 
-string Render::RenderType( TreePtr<Type> type, string object )
+string Render::RenderType( TreePtr<Type> type, string object, bool constant )
 {
 	string sobject;
 	if( !object.empty() )
 		sobject = " " + object;
+    
+    string const_str = constant?"const ":"";
 
 	TRACE();
 	if( TreePtr<Integral> i = dynamic_pointer_cast< Integral >(type) )
-		return RenderIntegralType( i, object );
+		return const_str + RenderIntegralType( i, object );
 	if( TreePtr<Floating> f = dynamic_pointer_cast< Floating >(type) )
-		return RenderFloatingType( f ) + sobject;
+		return const_str + RenderFloatingType( f ) + sobject;
 	else if( dynamic_pointer_cast< Void >(type) )
-		return "void" + sobject;
+		return const_str + "void" + sobject;
 	else if( dynamic_pointer_cast< Boolean >(type) )
-		return "bool" + sobject;
+		return const_str + "bool" + sobject;
 	else if( TreePtr<Constructor> c = dynamic_pointer_cast< Constructor >(type) )
-		return object + "(" + RenderDeclarationCollection(c, ", ", false) + ")";
+		return object + "(" + RenderDeclarationCollection(c, ", ", false) + ")" + const_str;
 	else if( TreePtr<Destructor> f = dynamic_pointer_cast< Destructor >(type) )
-		return object + "()";
+		return object + "()" + const_str;
 	else if( TreePtr<Function> f = dynamic_pointer_cast< Function >(type) )
-		return RenderType( f->return_type, "(" + object + ")(" + RenderDeclarationCollection(f, ", ", false) + ")" );
+		return RenderType( f->return_type, "(" + object + ")(" + RenderDeclarationCollection(f, ", ", false) + ")" + const_str );
 	else if( TreePtr<Process> f = dynamic_pointer_cast< Process >(type) )
-		return "void " + object + "()";
+		return "void " + object + "()" + const_str;
 	else if( TreePtr<Pointer> p = dynamic_pointer_cast< Pointer >(type) )
-		return RenderType( p->destination, "(*" + object + ")" );
+		return RenderType( p->destination, const_str + "(*" + object + ")", false ); // TODO Pointer node to indicate constancy of pointed-to object - would go into this call to RenderType
 	else if( TreePtr<Reference> r = dynamic_pointer_cast< Reference >(type) )
-		return RenderType( r->destination, "(&" + object + ")" );
+		return RenderType( r->destination, const_str + "(&" + object + ")" );
 	else if( TreePtr<Array> a = dynamic_pointer_cast< Array >(type) )
-		return RenderType( a->element, object.empty() ? "[" + RenderExpression(a->size) + "]" : "(" + object + "[" + RenderExpression(a->size) + "])" );
+		return RenderType( a->element, object.empty() ? "[" + RenderExpression(a->size) + "]" : "(" + object + "[" + RenderExpression(a->size) + "])", constant );
 	else if( TreePtr<Typedef> t = dynamic_pointer_cast< Typedef >(type) )
-		return RenderIdentifier(t->identifier) + sobject;
+		return const_str + RenderIdentifier(t->identifier) + sobject;
 	else if( TreePtr<SpecificTypeIdentifier> ti = dynamic_pointer_cast< SpecificTypeIdentifier >(type) )
-		return RenderScopedIdentifier(ti) + sobject;
+		return const_str + RenderScopedIdentifier(ti) + sobject;
 	else if( shared_ptr<SCNamedIdentifier> sct = dynamic_pointer_cast< SCNamedIdentifier >(type) )
-		return sct->GetToken() + sobject;
+		return const_str + sct->GetToken() + sobject;
 	else
 		return ERROR_UNSUPPORTED(type);
 }
@@ -541,32 +543,32 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 					   bool showstorage, bool showinit, bool showscope )
 {
 	string s;
+    string name;
+    bool constant=false;
 
 	ASSERT(o->type);
 
 	if( TreePtr<Static> st = dynamic_pointer_cast<Static>(o) )
 		if( dynamic_pointer_cast<Const>(st->constancy) )
-			s += "const ";
+			constant = true;
 	if( TreePtr<Field> f = dynamic_pointer_cast<Field>(o) )
 		if( dynamic_pointer_cast<Const>(f->constancy) )
-			s += "const ";
+            constant = true;
 
 	if( showstorage )
 	{
 		s += RenderStorage(o);
 	}
 
-	string name;
-
 	if( showscope )
-		name = RenderScopePrefix(o->identifier);
+		name += RenderScopePrefix(o->identifier);
 
 	TreePtr<Constructor> con = dynamic_pointer_cast<Constructor>(o->type);
 	TreePtr<Destructor> de = dynamic_pointer_cast<Destructor>(o->type);
 	if( con || de )
 	{
 		TreePtr<Record> rec = dynamic_pointer_cast<Record>( GetScope( program, o->identifier ) );
-		ASSERT( rec );
+		ASSERT( rec );        
 		name += (de ? "~" : "");
 		name += RenderIdentifier(rec->identifier);
 	}
@@ -576,7 +578,7 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 	}
 
 	if( showtype )
-		s += RenderType( o->type, name );
+		s += RenderType( o->type, name, constant );
 	else
 		s = name;
 

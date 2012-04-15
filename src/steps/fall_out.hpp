@@ -13,7 +13,7 @@ public:
 };
 
 /// Put all the labels in an array indexable by an enum
-class LabelVarsToEnum : public SearchReplace
+class LabelVarsToEnum : public CompareReplace
 {
 public:
     LabelVarsToEnum();
