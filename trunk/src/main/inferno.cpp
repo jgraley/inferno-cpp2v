@@ -107,6 +107,9 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
             sequence->push_back( shared_ptr<Transformation>( new SwapSubscriptMultiplex ) );        
         }
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
+        sequence->push_back( shared_ptr<Transformation>( new ApplyGotoPolicy ) );
+        sequence->push_back( shared_ptr<Transformation>( new ApplyGotoPolicyBottom ) );
+        sequence->push_back( shared_ptr<Transformation>( new ApplyLabelPolicy ) );
 #else
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );                 
         sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
@@ -128,7 +131,6 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new DeclsToModule ) );
         sequence->push_back( shared_ptr<Transformation>( new ThreadToMethod ) );
     }
-#endif
     { // final cleanups
         for( int i=0; i<2; i++ )
         {
@@ -138,6 +140,7 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
             sequence->push_back( shared_ptr<Transformation>( new CleanUpDeadCode ) ); 
         }
     }
+#endif
 }
 
 

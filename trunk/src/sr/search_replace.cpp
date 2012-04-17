@@ -304,6 +304,20 @@ Sequence<Node> CompareReplace::ExpandContainerPattern( ContainerInterface &patte
                 FOREACH( TreePtr<Node> i, *(pi->GetInsert()) )
                     expanded.push_back( i );                
         }
+        else if( shared_ptr<OverlayBase> po = dynamic_pointer_cast<OverlayBase>(n) )
+        {
+            if( dynamic_pointer_cast<StarBase>(po->GetOverlay()) || dynamic_pointer_cast<StarBase>(po->GetThrough()) )
+            {
+                if( replacing )
+                    expanded.push_back( po->GetOverlay() );         
+                else
+                    expanded.push_back( po->GetThrough() );    
+            }
+            else
+            {
+                expanded.push_back( n );
+            }                
+        }
         else
         {
             expanded.push_back( n );

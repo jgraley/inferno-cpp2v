@@ -33,6 +33,29 @@ public:
     AddStateEnumVar();
 };
 
+/// Eliminate all but the last goto by placing state bodies under if
+class ApplyGotoPolicy : public SearchReplace
+{
+public:
+     ApplyGotoPolicy();
+};
+
+/// Deal with a state at the end that is not followed by a goto and which
+/// will therefore end up exiting off the bottom of the function (absent a
+/// return or terminator). Create a conditional goto so that exit can occur.
+class ApplyGotoPolicyBottom : public SearchReplace
+{
+public:
+     ApplyGotoPolicyBottom();
+};
+
+/// Group all labels at the top by placing state bodies under if
+class ApplyLabelPolicy : public SearchReplace
+{
+public:
+     ApplyLabelPolicy();
+};
+
 }; // end namespace
 
 #endif

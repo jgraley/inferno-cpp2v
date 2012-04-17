@@ -425,4 +425,123 @@ AddStateEnumVar::AddStateEnumVar()
 }
 
 
+ApplyGotoPolicy::ApplyGotoPolicy()
+{
+    MakeTreePtr<Compound> comp, r_body_comp;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, body, post;
+    MakeTreePtr<Goto> s_goto1, goto2, sx_pre_goto, sx_body_goto;
+    MakeTreePtr<Subscript> sub;
+    MakeTreePtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
+    MakeTreePtr<StateLabel> label, sx_body_label;
+    MakeTreePtr< NotMatch<Statement> > sx_pre, sx_body;
+    MakeTreePtr< MatchAny<Statement> > sx_any_body;
+    MakeTreePtr< Erase<Statement> > s_erase;
+    MakeTreePtr< Overlay<Statement> > over;
+    MakeTreePtr<If> r_if;
+    MakeTreePtr<Equal> r_equal;   
+    
+    comp->members = (decls);
+    comp->statements = (pre, s_erase, label, over, goto2, post);
+    pre->pattern = sx_pre,
+    sx_pre->pattern = sx_pre_goto; // ensure we act on the first goto only
+    s_erase->erase = s_goto1;
+    s_goto1->destination = sub;
+    sub->operands = (lmap_id, state_var_id);
+    label->state = state_id;
+    over->through = body;
+    body->pattern = sx_body,
+    sx_body->pattern = sx_any_body; 
+    sx_any_body->patterns = (sx_body_label, sx_body_goto); // ensure body has no labels or gotos
+    goto2->destination = sub;    
+    
+    over->overlay = r_if;
+    r_if->condition = r_equal;
+    r_if->body = r_body_comp;
+    r_if->else_body = MakeTreePtr<Nop>();
+    r_equal->operands = (state_var_id, state_id);
+    //r_body_comp->members = ();
+    r_body_comp->statements = body;
+    
+    Configure(comp);
+}
+
+
+ApplyGotoPolicyBottom::ApplyGotoPolicyBottom()
+{
+    MakeTreePtr<Compound> comp, r_body_comp;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, body;
+    MakeTreePtr<Goto> goto1, sx_pre_goto, sx_body_goto;
+    MakeTreePtr<Subscript> sub;
+    MakeTreePtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
+    MakeTreePtr<StateLabel> label, sx_body_label;
+    MakeTreePtr< NotMatch<Statement> > sx_pre, sx_body;
+    MakeTreePtr< MatchAny<Statement> > sx_any_body;
+    MakeTreePtr< Erase<Statement> > s_erase;
+    MakeTreePtr< Insert<Statement> > r_insert;
+    MakeTreePtr< Overlay<Statement> > over;
+    MakeTreePtr<If> r_if, r_if2;
+    MakeTreePtr<Equal> r_equal;   
+    MakeTreePtr<NotEqual> r_not_equal;   
+    
+    comp->members = (decls);
+    comp->statements = (pre, s_erase, label, over, r_insert);
+    pre->pattern = sx_pre,
+    sx_pre->pattern = sx_pre_goto; // ensure we act on the first goto only
+    s_erase->erase = goto1;
+    goto1->destination = sub;
+    sub->operands = (lmap_id, state_var_id);
+    label->state = state_id;
+    over->through = body;
+    body->pattern = sx_body,
+    sx_body->pattern = sx_any_body; 
+    sx_any_body->patterns = (sx_body_label, sx_body_goto); // ensure body has no labels or gotos
+    
+    over->overlay = r_if;
+    r_if->condition = r_equal;
+    r_if->body = r_body_comp;
+    r_if->else_body = MakeTreePtr<Nop>();
+    r_equal->operands = (state_var_id, state_id);
+    //r_body_comp->members = ();
+    r_body_comp->statements = body;
+    r_insert->insert = r_if2;
+    r_if2->condition = r_not_equal;
+    r_if2->body = goto1;
+    r_if2->else_body = MakeTreePtr<Nop>();
+    r_not_equal->operands = (state_var_id, state_id);    
+    
+    Configure(comp);
+}
+
+
+ApplyLabelPolicy::ApplyLabelPolicy()
+{
+    MakeTreePtr<Compound> comp, r_body_comp;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, post;
+    MakeTreePtr<StateLabel> label1;
+    MakeTreePtr<Label> label2, sx_post_label;
+    MakeTreePtr<If> iif;
+    MakeTreePtr<Equal> equal;   
+    MakeTreePtr< NotMatch<Statement> > sx_post;
+    MakeTreePtr<InstanceIdentifier> state_var_id, state_id;
+    MakeTreePtr< Erase<Label> > erase, erase_star;
+    MakeTreePtr< Insert<Label> > insert, insert_star;
+    MakeTreePtr< Star<Label> > label_star;    
+        
+    comp->members = (decls);
+    comp->statements = (pre, insert, insert_star, label1, iif, erase, erase_star, post);
+    label1->state = state_id;
+    insert->insert = label2;
+    insert_star->insert = label_star;
+    iif->condition = equal;
+    equal->operands = (state_var_id, state_id);
+    erase->erase = label2;
+    erase_star->erase = label_star;
+    post->pattern = sx_post;
+    sx_post->pattern = sx_post_label;
+        
+    Configure(comp);
+}
 

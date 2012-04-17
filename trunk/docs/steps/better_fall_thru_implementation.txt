@@ -73,11 +73,13 @@ I think to get the goto policy to work in the correct order, we have to always e
 
 A label policy tries to coalesce labels. Look for this somewhere in a compound block:
 
+LABEL1:
 state_body1;
 LABEL2:
 
 and replace with 
 
+LABEL1:
 LABEL2:
 if( state==LABEL1 )
     state_body1;
