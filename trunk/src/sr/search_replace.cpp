@@ -306,6 +306,10 @@ Sequence<Node> CompareReplace::ExpandContainerPattern( ContainerInterface &patte
         }
         else if( shared_ptr<OverlayBase> po = dynamic_pointer_cast<OverlayBase>(n) )
         {
+            // Unfortunate inconsistency here: An overlay node ca either (a) support stars under it for use in 
+            // collections or (b) support overlaying, but not both. TODO think about overlaying subsequences 
+            // We use the pattern-tweaking method if thre are stars, but let the replace engine do overlaying
+            // if there are not (overlaying takes place for the single element at the position of the Overlay node)
             if( dynamic_pointer_cast<StarBase>(po->GetOverlay()) || dynamic_pointer_cast<StarBase>(po->GetThrough()) )
             {
                 if( replacing )
