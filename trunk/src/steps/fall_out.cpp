@@ -545,3 +545,37 @@ ApplyLabelPolicy::ApplyLabelPolicy()
     Configure(comp);
 }
 
+ApplyTopPolicy::ApplyTopPolicy()
+{
+    MakeTreePtr<Compound> comp, r_body_comp;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, post;
+    MakeTreePtr<Label> label, sx_label, sx_label2;
+    MakeTreePtr< NotMatch<Statement> > sx_pre, sx_stmt;
+    MakeTreePtr< Erase<Statement> > s_erase;
+    MakeTreePtr< Insert<Statement> > r_insert;
+    MakeTreePtr<If> r_if;
+    MakeTreePtr<Equal> r_equal;   
+    MakeTreePtr<DeltaCount> r_delta_count;
+    MakeTreePtr<SpecificInteger> r_zero(0);
+    MakeTreePtr<WaitDelta> r_yield;
+        
+    comp->members = (decls);
+    comp->statements = (s_erase, label, r_insert, post);
+    s_erase->erase = (pre, sx_stmt);
+    pre->pattern = sx_pre;
+    sx_pre->pattern = sx_label;
+    sx_stmt->pattern = sx_label2;
+    
+    r_insert->insert = r_if;
+    r_if->condition = r_equal;
+    r_equal->operands = (r_delta_count, r_zero);
+    r_if->body = r_body_comp;
+    //r_body_comp->members = ();
+    r_body_comp->statements = (pre, sx_stmt, r_yield);
+    r_if->else_body = MakeTreePtr<Nop>();
+    
+    Configure(comp);
+}
+
+

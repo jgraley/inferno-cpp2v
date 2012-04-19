@@ -64,3 +64,10 @@ now that we have SimpleCompare factored out of S&R, why not also factor out a Si
 
 introduce intermediate called Departure, a base for Goto, Return, Break, Continue, Cease, Exit etc
    - and maybe Arrival for labels?
+
+fix the test of delta cycles in the init state to use a 64-bit zero
+   - otherwise the compare is happening after downcasting to 32 bits and we will wrap prematurely
+   - probably need overloaded constructor for SpecificInteger
+   - or a templated one that uses the detection in type_db
+   - render in graphs using verilog notation eg 0'64
+
