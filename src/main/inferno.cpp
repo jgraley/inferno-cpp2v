@@ -110,6 +110,8 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new ApplyGotoPolicy ) );
         sequence->push_back( shared_ptr<Transformation>( new ApplyGotoPolicyBottom ) );
         sequence->push_back( shared_ptr<Transformation>( new ApplyLabelPolicy ) );
+        sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) );
+        sequence->push_back( shared_ptr<Transformation>( new ApplyTopPolicy ) );
 #else
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );                 
         sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );

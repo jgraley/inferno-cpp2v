@@ -56,6 +56,14 @@ public:
      ApplyLabelPolicy();
 };
 
+/// Move code above the uppermost label under the label but conditional
+/// on the delta count being zero, i.e. no waits have occurred yet.
+class ApplyTopPolicy : public SearchReplace
+{
+public:
+     ApplyTopPolicy();
+};
+
 }; // end namespace
 
 #endif

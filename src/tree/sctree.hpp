@@ -227,8 +227,7 @@ struct DeltaCount : CPPTree::Operator,
     SystemC does not allow control of the return value from its main 
     function. */
 struct TerminationFunction : CPPTree::Statement,
-                             SCNamedFunction, 
-                             CPPTree::Uncombable
+                             SCNamedFunction
 {
     NODE_FUNCTIONS
     TreePtr<CPPTree::Expression> code; ///< exit code for program, 0 to 255 
