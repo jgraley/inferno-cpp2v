@@ -63,3 +63,69 @@ bool IdentifierByNameBase::IsMatch( const CompareReplace *sr, const TreePtrInter
 }
 
 
+shared_ptr<Key> NestedBase::DecidedCompare( const CompareReplace *sr,
+                                            const TreePtrInterface &x,
+                                            bool can_key,
+                                            Conjecture &conj )
+{
+    INDENT;
+    string s;
+    // Keep advancing until we get NULL, and remember the last non-null position
+    TreePtr<Node> xt = x;
+    int i = 0;
+    while( TreePtr<Node> tt = Advance(xt, &s) )
+    {
+        xt = tt;
+    } 
+            
+    // Compare the last position with the terminus pattern
+    bool r = sr->DecidedCompare( xt, TreePtr<Node>(terminus), can_key, conj );
+    
+    // Compare the depth with the supplied pattern if present
+    if( r && depth )
+    {
+        TreePtr<Node> cur_depth( new SpecificString(s) );
+        r = sr->DecidedCompare( cur_depth, TreePtr<Node>(depth), can_key, conj );
+    }
+    
+    if( r )
+    {
+        // Ensure the replace can terminate and overlay
+        shared_ptr<TerminusKey> k( new TerminusKey );
+        k->root = x;
+        k->terminus = xt;
+        return k;
+    }
+    else
+    {
+        return shared_ptr<Key>();
+    }
+}    
+
+
+TreePtr<Node> NestedArray::Advance( TreePtr<Node> n, string *depth )
+{
+    if( TreePtr<Array> a = dynamic_pointer_cast<Array>(n) )                          
+        return a->element;
+    else
+        return TreePtr<Node>();
+}
+
+
+TreePtr<Node> NestedSubscriptLookup::Advance( TreePtr<Node> n, string *depth )
+{
+    if( TreePtr<Subscript> s = dynamic_pointer_cast<Subscript>(n) )            
+    {
+        *depth += "S";
+        return s->operands[0]; // the base, not the index
+    }
+    else if( TreePtr<Lookup> l  = dynamic_pointer_cast<Lookup>(n) )            
+    {
+        *depth += "L";
+        return l->member; 
+    }
+    else
+    {
+        return TreePtr<Node>();
+    }
+}

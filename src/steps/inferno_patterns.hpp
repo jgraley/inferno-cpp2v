@@ -131,4 +131,35 @@ private:
     }                                
 };
 
+// Base class for special nodes that match nested nodes
+struct NestedBase : CompareReplace::SoftSearchPatternSpecialKey,
+                    TerminusBase
+{
+    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) = 0;
+    virtual shared_ptr<Key> DecidedCompare( const CompareReplace *sr,
+                                            const TreePtrInterface &x,
+                                            bool can_key,
+                                            Conjecture &conj );
+    TreePtr<CPPTree::String> depth;
+};
+
+// Recurse through a number of nested Array nodes, but only by going through
+// the "element" member, not the "size" member. So this will get you from the type
+// of an instance to the type of the eventual element in a nested array decl.
+struct NestedArray : NestedBase, Special<CPPTree::Type>
+{
+    SPECIAL_NODE_FUNCTIONS
+    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth );
+};
+
+// Recurse through a number of Subscript nodes, but only going through
+// the base, not the index. Thus we seek the instance that contains the 
+// data we strarted with. Also go through member field of Lookup nodes.
+struct NestedSubscriptLookup : NestedBase, Special<CPPTree::Expression>
+{
+    SPECIAL_NODE_FUNCTIONS
+    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth );
+};
+
+
 #endif

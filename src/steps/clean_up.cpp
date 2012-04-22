@@ -10,6 +10,7 @@
 #include "common/common.hpp"
 #include "sr/soft_patterns.hpp"
 #include "tree/typeof.hpp"
+#include "tree/misc.hpp"
 #include "inferno_patterns.hpp"
 
 using namespace CPPTree;
@@ -373,4 +374,46 @@ ReduceVoidCompoundExpression::ReduceVoidCompoundExpression()
     r_comp->statements = (stmts, last);
     
     Configure( s_ce, r_comp );      
+}
+
+
+CleanupUnusedVariables::CleanupUnusedVariables()
+{
+    MakeTreePtr< MatchAll<Scope> > s_all;
+    MakeTreePtr<Scope> scope;
+    MakeTreePtr< Star<Declaration> > decls;    
+    MakeTreePtr<Instance> inst;
+    MakeTreePtr<NestedArray> nested_array;
+    MakeTreePtr< NotMatch<Type> > sx_not;
+    MakeTreePtr< MatchAny<Type> > sx_any;
+    MakeTreePtr< TransformOf<TypeIdentifier> > getdecl( &GetDeclaration::instance );
+    MakeTreePtr<InstanceIdentifier> id;
+    MakeTreePtr< Stuff<Scope> > stuff1, s_stuff2;
+    MakeTreePtr< MatchAll<Node> > s_antip;
+    MakeTreePtr< AnyNode<Node> > s_anynode;
+    MakeTreePtr< NotMatch<Node> > s_nm;
+    MakeTreePtr< Erase<Instance> > erase;
+    MakeTreePtr<InheritanceRecord> sx_ir;     
+    MakeTreePtr< NotMatch<Scope> > s_nscope;
+    
+    s_all->patterns = (stuff1, s_nscope);
+    stuff1->terminus = scope;
+    scope->members = (erase, decls);
+    erase->erase = inst;
+    inst->type = nested_array;
+    inst->identifier = id;
+    nested_array->terminus = sx_not;
+    sx_not->pattern = sx_any;
+    sx_any->patterns = ( MakeTreePtr<Callable>(),
+                         getdecl );
+    getdecl->pattern = sx_ir;
+    sx_ir->members = MakeTreePtr< Star<Declaration> >();
+    sx_ir->bases = MakeTreePtr< Star<Base> >();
+    s_nscope->pattern = s_stuff2;
+    s_stuff2->terminus = s_antip;
+    s_antip->patterns = (s_anynode, s_nm);
+    s_anynode->terminus = id;
+    s_nm->pattern = inst;
+                        
+    Configure( s_all, stuff1 );
 }

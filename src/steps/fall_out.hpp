@@ -33,20 +33,27 @@ public:
     AddStateEnumVar();
 };
 
-/// Eliminate all but the last goto by placing state bodies under if
-class ApplyGotoPolicy : public SearchReplace
+/// Eliminate all but the last goto by placing state bodies under if. Only
+/// act on states that are combable i.e. do not yield
+class ApplyCombGotoPolicy : public SearchReplace
 {
 public:
-     ApplyGotoPolicy();
+     ApplyCombGotoPolicy();
+};
+
+class ApplyYieldGotoPolicy : public SearchReplace
+{
+public:
+     ApplyYieldGotoPolicy();
 };
 
 /// Deal with a state at the end that is not followed by a goto and which
 /// will therefore end up exiting off the bottom of the function (absent a
 /// return or terminator). Create a conditional goto so that exit can occur.
-class ApplyGotoPolicyBottom : public SearchReplace
+class ApplyBottomPolicy : public SearchReplace
 {
 public:
-     ApplyGotoPolicyBottom();
+     ApplyBottomPolicy();
 };
 
 /// Group all labels at the top by placing state bodies under if
@@ -57,11 +64,37 @@ public:
 };
 
 /// Move code above the uppermost label under the label but conditional
-/// on the delta count being zero, i.e. no waits have occurred yet.
+/// on the delta count being zero, i.e. no yields have occurred yet. Only
+/// works if there is already a yield before the first goto 
 class ApplyTopPolicy : public SearchReplace
 {
 public:
      ApplyTopPolicy();
+};
+
+/// Ensure we always yield before the first goto (since reset does not
+/// comb into non-reset code).
+class EnsureResetYield : public SearchReplace
+{
+public:
+     EnsureResetYield();
+};
+
+/// Detect a superloop formed from the remaingin gotos. There must be only one
+/// label, and there must be nothing above or below the superloop. Intermediate
+/// gotos become continues. Parameter chooses whether to handle conditional goto
+/// at the bottom. You always want to run this with false, and again with true
+/// if you want to support exiting the loop.
+class DetectSuperLoop : public SearchReplace
+{
+public:
+     DetectSuperLoop( bool is_conditional_goto );
+};
+
+class InsertInferredYield : public SearchReplace
+{
+public:
+     InsertInferredYield();
 };
 
 }; // end namespace

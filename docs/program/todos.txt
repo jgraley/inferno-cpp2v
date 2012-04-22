@@ -71,3 +71,20 @@ fix the test of delta cycles in the init state to use a 64-bit zero
    - or a templated one that uses the detection in type_db
    - render in graphs using verilog notation eg 0'64
 
+maybe add an intermediate node Yield, that is a base for Wait etc. 
+   - It could go in cpptree, and so let us talk about yields generally.
+   - Backfit where Wait is searched for as a general yield rather than the actual SC wait.
+   - Uncombable, obviously
+
+do not like getting Wait(); state=blah; goto state; sequence
+   - Should be state=blah; Wait(); goto state;
+   - Only works at the moment because Wait does not invalidate blah which can be local/temp; conceptually wrong
+   - turn step for Wait-Wait, Goto, Label into step for Wait->State, Wait, Goto, Label bringing in fu from Goto->State, Goto 
+   - maybe get YieldGotoPolicy to insist that the wait comes last in the state block, slightly safer/more correct.
+
+do not enforce return in Thread functions - let them drop out
+
+come up with a way of getting result code out of test cases without needing exit/cease. 
+   - Excercise the "dropping out" capability 
+
+

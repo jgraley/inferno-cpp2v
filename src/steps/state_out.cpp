@@ -1110,7 +1110,7 @@ LoopRotation::LoopRotation()
     fn->type = thread;
     fn->initialiser = func_comp;
     fn->identifier = fn_id;  
-    func_comp->members = (func_decls, s_enum, s_var_decl);
+    func_comp->members = (func_decls, /*s_enum,*/ s_var_decl); // enum removed because it is class member, not local to the function
     s_enum->identifier = s_enum_id;
     s_enum->members = (s_enums, s_cur_enum);
     s_cur_enum->identifier = s_cur_enum_id;
