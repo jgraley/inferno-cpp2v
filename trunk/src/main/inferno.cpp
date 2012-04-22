@@ -23,7 +23,7 @@
 using namespace Steps;
 
 void SelfTest();
-//#define NEW
+#define NEW
     // Build a vector of transformations, in the order that we will run them
     // (ordered by hand for now, until the auto sequencer is ready)
 void build_sequence( vector< shared_ptr<Transformation> > *sequence )
@@ -95,7 +95,8 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     { // creating fallthrough machine
         sequence->push_back( shared_ptr<Transformation>( new GotoAfterWait ) );     
         sequence->push_back( shared_ptr<Transformation>( new AddGotoBeforeLabel ) );         
-        //sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );            
+        //sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );     
+        sequence->push_back( shared_ptr<Transformation>( new EnsureResetYield ) );
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
         sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) ); 
 
@@ -107,11 +108,18 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
             sequence->push_back( shared_ptr<Transformation>( new SwapSubscriptMultiplex ) );        
         }
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
-        sequence->push_back( shared_ptr<Transformation>( new ApplyGotoPolicy ) );
-        sequence->push_back( shared_ptr<Transformation>( new ApplyGotoPolicyBottom ) );
+        for( int i=0; i<5; i++ )
+        {
+            sequence->push_back( shared_ptr<Transformation>( new ApplyCombGotoPolicy ) );
+            sequence->push_back( shared_ptr<Transformation>( new ApplyYieldGotoPolicy ) );
+        }
+        sequence->push_back( shared_ptr<Transformation>( new ApplyBottomPolicy ) );
         sequence->push_back( shared_ptr<Transformation>( new ApplyLabelPolicy ) );
         sequence->push_back( shared_ptr<Transformation>( new CleanupDuplicateLabels ) );
         sequence->push_back( shared_ptr<Transformation>( new ApplyTopPolicy ) );
+        sequence->push_back( shared_ptr<Transformation>( new DetectSuperLoop(false) ) );
+        sequence->push_back( shared_ptr<Transformation>( new DetectSuperLoop(true) ) );
+        sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedVariables ) );
 #else
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );                 
         sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
@@ -122,12 +130,14 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         // now yielding in every iteration of superloop
 #endif
     }
-#ifndef NEW    
     { // optimsiing fall though machine
         sequence->push_back( shared_ptr<Transformation>( new LoopRotation ) );
     }
 
     { // transition to event driven style
+#ifdef NEW
+        sequence->push_back( shared_ptr<Transformation>( new InsertInferredYield ) ); 
+#endif
         sequence->push_back( shared_ptr<Transformation>( new AutosToModule ) );
         sequence->push_back( shared_ptr<Transformation>( new TempsAndStaticsToModule ) );
         sequence->push_back( shared_ptr<Transformation>( new DeclsToModule ) );
@@ -142,7 +152,6 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
             sequence->push_back( shared_ptr<Transformation>( new CleanUpDeadCode ) ); 
         }
     }
-#endif
 }
 
 

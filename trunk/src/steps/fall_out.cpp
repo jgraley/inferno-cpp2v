@@ -41,90 +41,6 @@ struct StateLabel : Label
 };
 
 
-struct NestedBase : CompareReplace::SoftSearchPatternSpecialKey,
-                    TerminusBase
-{
-    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) = 0;
-    virtual shared_ptr<Key> DecidedCompare( const CompareReplace *sr,
-                                 const TreePtrInterface &x,
-                                 bool can_key,
-                                 Conjecture &conj )
-    {
-        INDENT;
-        string s;
-        // Keep advancing until we get NULL, and remember the last non-null position
-        TreePtr<Node> xt = x;
-        int i = 0;
-        while( TreePtr<Node> tt = Advance(xt, &s) )
-        {
-            xt = tt;
-        } 
-                
-        // Compare the last position with the terminus pattern
-        bool r = sr->DecidedCompare( xt, TreePtr<Node>(terminus), can_key, conj );
-        
-        // Compare the depth with the supplied pattern if present
-        if( r && depth )
-        {
-            TreePtr<Node> cur_depth( new SpecificString(s) );
-            r = sr->DecidedCompare( cur_depth, TreePtr<Node>(depth), can_key, conj );
-        }
-        
-        if( r )
-        {
-            // Ensure the replace can terminate and overlay
-            shared_ptr<TerminusKey> k( new TerminusKey );
-            k->root = x;
-            k->terminus = xt;
-            return k;
-        }
-        else
-        {
-            return shared_ptr<Key>();
-        }
-    }    
-    TreePtr<String> depth;
-};
-
-// Recurse through a number of nested Array nodes, but only by going through
-// the "element" member, not the "size" member. So this will get you from the type
-// of an instance to the type of the eventual element in a nested array decl.
-struct NestedArray : NestedBase, Special<Type>
-{
-    SPECIAL_NODE_FUNCTIONS
-    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth )
-    {
-        if( TreePtr<Array> a = dynamic_pointer_cast<Array>(n) )                          
-            return a->element;
-        else
-            return TreePtr<Node>();
-    }
-};
-
-// Recurse through a number of Subscript nodes, but only going through
-// the base, not the index. Thus we seek the instance that contains the 
-// data we strarted with.
-struct NestedSubscriptLookup : NestedBase, Special<Expression>
-{
-    SPECIAL_NODE_FUNCTIONS
-    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth )
-    {
-        if( TreePtr<Subscript> s = dynamic_pointer_cast<Subscript>(n) )            
-        {
-            *depth += "S";
-            return s->operands[0]; // the base, not the index
-        }
-        else if( TreePtr<Lookup> l  = dynamic_pointer_cast<Lookup>(n) )            
-        {
-            *depth += "L";
-            return l->member; 
-        }
-        else
-        {
-            return TreePtr<Node>();
-        }
-    }
-};
 
 PlaceLabelsInArray::PlaceLabelsInArray()
 {
@@ -425,17 +341,17 @@ AddStateEnumVar::AddStateEnumVar()
 }
 
 
-ApplyGotoPolicy::ApplyGotoPolicy()
+ApplyCombGotoPolicy::ApplyCombGotoPolicy()
 {
     MakeTreePtr<Compound> comp, r_body_comp;
     MakeTreePtr< Star<Declaration> > decls;
     MakeTreePtr< Star<Statement> > pre, body, post;
-    MakeTreePtr<Goto> s_goto1, goto2, sx_pre_goto, sx_body_goto;
+    MakeTreePtr<Goto> s_goto1, goto2, sx_pre_goto;
     MakeTreePtr<Subscript> sub;
     MakeTreePtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
-    MakeTreePtr<StateLabel> label, sx_body_label;
+    MakeTreePtr<StateLabel> label;
     MakeTreePtr< NotMatch<Statement> > sx_pre, sx_body;
-    MakeTreePtr< MatchAny<Statement> > sx_any_body;
+    MakeTreePtr<Uncombable> sx_uncombable;
     MakeTreePtr< Erase<Statement> > s_erase;
     MakeTreePtr< Overlay<Statement> > over;
     MakeTreePtr<If> r_if;
@@ -450,9 +366,8 @@ ApplyGotoPolicy::ApplyGotoPolicy()
     sub->operands = (lmap_id, state_var_id);
     label->state = state_id;
     over->through = body;
-    body->pattern = sx_body,
-    sx_body->pattern = sx_any_body; 
-    sx_any_body->patterns = (sx_body_label, sx_body_goto); // ensure body has no labels or gotos
+    body->pattern = sx_body;
+    sx_body->pattern = sx_uncombable; 
     goto2->destination = sub;    
     
     over->overlay = r_if;
@@ -467,23 +382,67 @@ ApplyGotoPolicy::ApplyGotoPolicy()
 }
 
 
-ApplyGotoPolicyBottom::ApplyGotoPolicyBottom()
+ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
+{
+    MakeTreePtr<Compound> comp, r_body_comp;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, body1, body2, post;
+    MakeTreePtr<Goto> s_goto1, goto2, sx_pre_goto;
+    MakeTreePtr<Subscript> sub;
+    MakeTreePtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
+    MakeTreePtr<StateLabel> label;
+    MakeTreePtr< NotMatch<Statement> > sx_pre, sx_body1, sx_body2;
+    MakeTreePtr< Erase<Statement> > s_erase, s_erase2;
+    MakeTreePtr< Insert<Statement> > r_insert;
+    MakeTreePtr<If> r_if;
+    MakeTreePtr<Equal> r_equal;   
+    MakeTreePtr<Wait> wait;
+    MakeTreePtr<Uncombable> sx_uncombable1, sx_uncombable2;
+    
+    comp->members = (decls);
+    comp->statements = (pre, s_erase, label, s_erase2, r_insert, goto2, post);
+    pre->pattern = sx_pre,
+    sx_pre->pattern = sx_pre_goto; // ensure we act on the first goto only
+    s_erase->erase = s_goto1;
+    s_goto1->destination = sub;
+    sub->operands = (lmap_id, state_var_id);
+    label->state = state_id;
+    s_erase2->erase = (body1, wait, body2);
+    goto2->destination = sub;    
+    body1->pattern = sx_body1;
+    sx_body1->pattern = sx_uncombable1;
+    body2->pattern = sx_body2;
+    sx_body2->pattern = sx_uncombable2;
+        
+    r_insert->insert = r_if;
+    r_if->condition = r_equal;
+    r_if->body = r_body_comp;
+    r_if->else_body = MakeTreePtr<Nop>();
+    r_equal->operands = (state_var_id, state_id);
+    //r_body_comp->members = ();
+    r_body_comp->statements = (body1, wait, body2, goto2);
+    
+    Configure(comp);
+}
+
+
+ApplyBottomPolicy::ApplyBottomPolicy()
 {
     MakeTreePtr<Compound> comp, r_body_comp;
     MakeTreePtr< Star<Declaration> > decls;
     MakeTreePtr< Star<Statement> > pre, body;
-    MakeTreePtr<Goto> goto1, sx_pre_goto, sx_body_goto;
+    MakeTreePtr<Goto> goto1, sx_pre_goto;
     MakeTreePtr<Subscript> sub;
     MakeTreePtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
-    MakeTreePtr<StateLabel> label, sx_body_label;
+    MakeTreePtr<StateLabel> label;
     MakeTreePtr< NotMatch<Statement> > sx_pre, sx_body;
-    MakeTreePtr< MatchAny<Statement> > sx_any_body;
     MakeTreePtr< Erase<Statement> > s_erase;
     MakeTreePtr< Insert<Statement> > r_insert;
     MakeTreePtr< Overlay<Statement> > over;
     MakeTreePtr<If> r_if, r_if2;
     MakeTreePtr<Equal> r_equal;   
     MakeTreePtr<NotEqual> r_not_equal;   
+    MakeTreePtr<Uncombable> sx_uncombable;
     
     comp->members = (decls);
     comp->statements = (pre, s_erase, label, over, r_insert);
@@ -495,8 +454,7 @@ ApplyGotoPolicyBottom::ApplyGotoPolicyBottom()
     label->state = state_id;
     over->through = body;
     body->pattern = sx_body,
-    sx_body->pattern = sx_any_body; 
-    sx_any_body->patterns = (sx_body_label, sx_body_goto); // ensure body has no labels or gotos
+    sx_body->pattern = sx_uncombable; 
     
     over->overlay = r_if;
     r_if->condition = r_equal;
@@ -505,7 +463,7 @@ ApplyGotoPolicyBottom::ApplyGotoPolicyBottom()
     r_equal->operands = (state_var_id, state_id);
     //r_body_comp->members = ();
     r_body_comp->statements = body;
-    r_insert->insert = r_if2;
+    r_insert->insert = goto1; // r_if2; TODO: with the condition, superloop is exiting before the last state block has run
     r_if2->condition = r_not_equal;
     r_if2->body = goto1;
     r_if2->else_body = MakeTreePtr<Nop>();
@@ -547,35 +505,147 @@ ApplyLabelPolicy::ApplyLabelPolicy()
 
 ApplyTopPolicy::ApplyTopPolicy()
 {
+    MakeTreePtr< MatchAll<Compound> > s_all;
     MakeTreePtr<Compound> comp, r_body_comp;
     MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, post;
+    MakeTreePtr< Star<Statement> > body1, body2, post;
     MakeTreePtr<Label> label, sx_label, sx_label2;
-    MakeTreePtr< NotMatch<Statement> > sx_pre, sx_stmt;
+    MakeTreePtr< NotMatch<Statement> > sx_stmt;
     MakeTreePtr< Erase<Statement> > s_erase;
     MakeTreePtr< Insert<Statement> > r_insert;
     MakeTreePtr<If> r_if;
     MakeTreePtr<Equal> r_equal;   
     MakeTreePtr<DeltaCount> r_delta_count;
     MakeTreePtr<SpecificInteger> r_zero(0);
-    MakeTreePtr<WaitDelta> r_yield;
-        
+    MakeTreePtr<Wait> wait;
+    MakeTreePtr< Stuff<Compound> > s_stuff;
+    MakeTreePtr<Goto> gotoo;
+    MakeTreePtr< NotMatch<Statement> > sx_body1, sx_body2;
+    MakeTreePtr<Uncombable> sx_uncombable1, sx_uncombable2;
+       
+    s_all->patterns = (comp, s_stuff);
     comp->members = (decls);
     comp->statements = (s_erase, label, r_insert, post);
-    s_erase->erase = (pre, sx_stmt);
-    pre->pattern = sx_pre;
-    sx_pre->pattern = sx_label;
-    sx_stmt->pattern = sx_label2;
+    s_stuff->terminus = gotoo;
+    s_erase->erase = (body1, wait, body2);
+    body1->pattern = sx_body1;
+    sx_body1->pattern = sx_uncombable1;
+    body2->pattern = sx_body2;
+    sx_body2->pattern = sx_uncombable2;
     
     r_insert->insert = r_if;
     r_if->condition = r_equal;
     r_equal->operands = (r_delta_count, r_zero);
     r_if->body = r_body_comp;
     //r_body_comp->members = ();
-    r_body_comp->statements = (pre, sx_stmt, r_yield);
+    r_body_comp->statements = (body1, wait, body2, gotoo);
     r_if->else_body = MakeTreePtr<Nop>();
     
+    Configure(s_all, comp);
+}
+
+
+EnsureResetYield::EnsureResetYield()
+{
+    MakeTreePtr<Compound> comp;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > pre, post;
+    MakeTreePtr< NotMatch<Statement> > sx_not;
+    MakeTreePtr< MatchAny<Statement> > sx_any;
+    MakeTreePtr<Goto> gotoo;
+    MakeTreePtr< Insert<Statement> > insert;
+    MakeTreePtr<WaitDelta> r_yield;
+    
+    comp->members = (decls);
+    comp->statements = (pre, insert, gotoo, post);
+    pre->pattern = sx_not;
+    sx_not->pattern = sx_any;
+    sx_any->patterns = (MakeTreePtr<Goto>(), MakeTreePtr<Label>(), MakeTreePtr<Wait>() );
+    
+    insert->insert = r_yield;
+    
     Configure(comp);
+}
+
+
+DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
+{
+    MakeTreePtr<Instance> inst;
+    MakeTreePtr<Compound> s_comp, r_comp, r_body_comp;
+    MakeTreePtr< Star<Declaration> > decls;
+    MakeTreePtr< Star<Statement> > body;
+    MakeTreePtr<Label> s_label;
+    MakeTreePtr<If> s_ifgoto;
+    MakeTreePtr<Goto> s_goto;
+    MakeTreePtr<Expression> cond;
+    MakeTreePtr< NotMatch<Statement> > sx_not;
+    MakeTreePtr<Do> r_do;
+    MakeTreePtr< Overlay<Compound> > over;
+    
+    MakeTreePtr< SlaveSearchReplace<Statement> > slavell( r_body_comp, MakeTreePtr<Goto>(), MakeTreePtr<Continue>() );    
+    
+    inst->type = MakeTreePtr<Callable>();
+    inst->initialiser = over;
+    over->through = s_comp;
+    s_comp->members = (decls);
+    s_comp->statements = (s_label, body, is_conditional_goto 
+                                         ? TreePtr<Statement>(s_ifgoto) 
+                                         : TreePtr<Statement>(s_goto) );
+    body->pattern = sx_not;
+    sx_not->pattern = MakeTreePtr<Label>(); // so s_label is the only one - all gotos must go to it.
+    s_ifgoto->condition = cond;
+    s_ifgoto->body = s_goto;
+    s_ifgoto->else_body = MakeTreePtr<Nop>();
+    
+    over->overlay = r_comp;
+    r_comp->members = (decls);
+    r_comp->statements = (r_do);
+    r_do->condition = is_conditional_goto 
+                      ? cond 
+                      : TreePtr<Expression>(MakeTreePtr<True>());
+    r_do->body = slavell;
+    //r_body_comp->members = ();
+    r_body_comp->statements = body;
+    
+    Configure(inst);
+}
+
+
+InsertInferredYield::InsertInferredYield()
+{
+    MakeTreePtr<Instance> fn;
+    MakeTreePtr<InstanceIdentifier> fn_id;
+    MakeTreePtr<Thread> thread; // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
+    MakeTreePtr<Compound> func_comp, s_comp, sx_comp, r_comp;
+    MakeTreePtr< Star<Declaration> > func_decls, loop_decls;
+    MakeTreePtr< Star<Statement> >  stmts, sx_pre;    
+    MakeTreePtr< Overlay<Statement> > over;    
+    MakeTreePtr<LocalVariable> flag_decl; 
+    MakeTreePtr<InstanceIdentifier> flag_id;   
+    MakeTreePtr<WaitDelta> r_yield;
+    MakeTreePtr<Loop> loop;
+    MakeTreePtr<If> r_if, sx_if;
+    MakeTreePtr< MatchAll<Compound> > s_all;
+    MakeTreePtr< NotMatch<Compound> > s_notmatch;
+    MakeTreePtr< LogicalNot > r_not, sx_not;
+    MakeTreePtr< Assign > assign;
+          
+    fn->type = thread;
+    fn->initialiser = func_comp;
+    fn->identifier = fn_id;  
+    func_comp->members = (func_decls);
+    func_comp->statements = (loop);
+    loop->body = over;
+    over->through = s_comp;
+    s_comp->members = (loop_decls);
+    s_comp->statements = (stmts);
+    stmts->pattern = MakeTreePtr<If>();
+    
+    over->overlay = r_comp;
+    r_comp->members = (loop_decls);
+    r_comp->statements = (stmts, r_yield);
+    
+    Configure( fn );            
 }
 
 

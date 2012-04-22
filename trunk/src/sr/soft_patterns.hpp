@@ -15,8 +15,9 @@ struct NotMatch : Special<PRE_RESTRICTION>,
                  CouplingSlave
 {
 	SPECIAL_NODE_FUNCTIONS
-	// Pattern is an abnormal context
-    TreePtr<PRE_RESTRICTION> pattern;
+	// Pattern is an abnormal context. Fascinatingly, we can supply any node here because there
+    // is no type-correctness limitation with *excluding* a kind of node
+    TreePtr<Node> pattern;
     CompareReplace comp; // TODO only want the Compare
 private:
     virtual bool DecidedCompare( const CompareReplace *sr,

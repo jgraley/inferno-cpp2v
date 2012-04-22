@@ -84,6 +84,14 @@ public:
     ReduceVoidCompoundExpression();
 };
 
+/** Remove instances not used anywhere - except Callables and instances of InheritanceRecord since
+    these might do something useful even when not referenced.*/
+class CleanupUnusedVariables : public CompareReplace
+{
+public:
+    CleanupUnusedVariables();
+};
+
 }; // end namespace
 
 #endif 

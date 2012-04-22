@@ -49,6 +49,7 @@ TopLevel top_level("top_level");
 
 void Adder::T()
 {
+    wait( SC_ZERO_TIME );
     while(!proceed)
         wait( SC_ZERO_TIME );
     proceed = false; // reset for next time (should be atomic with the test)

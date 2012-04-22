@@ -149,8 +149,15 @@ ThreadToMethod::ThreadToMethod()
     MakeTreePtr<NextTriggerStatic> mr_nt_static;
     MakeTreePtr<WaitDelta> ns_wait_delta;
     MakeTreePtr<NextTriggerDelta> nr_nt_delta;
+    MakeTreePtr<Continue> os_continue;
+    MakeTreePtr<Return> or_return;
+    MakeTreePtr<Uninitialised> or_retval;
     MakeTreePtr<Expression> l_event;
-    MakeTreePtr< SlaveSearchReplace<Compound> > slaven( loop_comp, ns_wait_delta, nr_nt_delta);
+    
+    or_return->return_value = or_retval;
+    
+    MakeTreePtr< SlaveSearchReplace<Compound> > slaveo( loop_comp, os_continue, or_return);
+    MakeTreePtr< SlaveSearchReplace<Compound> > slaven( slaveo, ns_wait_delta, nr_nt_delta);
     MakeTreePtr< SlaveSearchReplace<Compound> > slavem( slaven, ms_wait_static, mr_nt_static);
     MakeTreePtr< SlaveSearchReplace<Compound> > slavel( slavem, ls_wait_dynamic, lr_nt_dynamic);
 
@@ -172,5 +179,3 @@ ThreadToMethod::ThreadToMethod()
     
     Configure( s_thread, r_method );
 }
-
-
