@@ -23,7 +23,6 @@
 using namespace Steps;
 
 void SelfTest();
-#define NEW
     // Build a vector of transformations, in the order that we will run them
     // (ordered by hand for now, until the auto sequencer is ready)
 void build_sequence( vector< shared_ptr<Transformation> > *sequence )
@@ -33,13 +32,14 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
     // because we never want to process implicit SystemC.
     sequence->push_back( shared_ptr<Transformation>( new DetectAllSCTypes ) );
 
-    sequence->push_back( shared_ptr<Transformation>( new DetectUncombableSwitch ) );
-    sequence->push_back( shared_ptr<Transformation>( new MakeAllForUncombable ) );
-    sequence->push_back( shared_ptr<Transformation>( new DetectCombableFor ) );
-    sequence->push_back( shared_ptr<Transformation>( new MakeAllBreakUncombable ) );
-    sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );    // for DetectCombableBreak
-    sequence->push_back( shared_ptr<Transformation>( new DetectCombableBreak ) );
-    
+    { // establish what is locally uncombable
+        sequence->push_back( shared_ptr<Transformation>( new DetectUncombableSwitch ) );
+        sequence->push_back( shared_ptr<Transformation>( new MakeAllForUncombable ) );
+        sequence->push_back( shared_ptr<Transformation>( new DetectCombableFor ) );
+        sequence->push_back( shared_ptr<Transformation>( new MakeAllBreakUncombable ) );
+        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );    // for DetectCombableBreak
+        sequence->push_back( shared_ptr<Transformation>( new DetectCombableBreak ) );
+    }    
     { // Construct lowerings
         { // function call lowering (and function merging)
             sequence->push_back( shared_ptr<Transformation>( new ExtractCallParams ) ); 
@@ -66,13 +66,11 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) );  
         sequence->push_back( shared_ptr<Transformation>( new IfToIfGoto ) ); 
         // All remaining uncomables at the top level and in SUSP style
-    }
-    
+    }    
     { // Initial treatment of gotos and labels
         sequence->push_back( shared_ptr<Transformation>( new NormaliseConditionalGotos ) );
         sequence->push_back( shared_ptr<Transformation>( new CompactGotos ) ); // maybe put these after the label cleanups
-    }
-        
+    }        
     { // big round of cleaning up
         sequence->push_back( shared_ptr<Transformation>( new ReduceVoidCompoundExpression ) ); 
         //for( int i=0; i<2; i++ )
@@ -90,17 +88,14 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
             sequence->push_back( shared_ptr<Transformation>( new CleanupIneffectualLabels ) ); 
             sequence->push_back( shared_ptr<Transformation>( new CleanUpDeadCode ) ); 
         }
-    }
-    
-    { // creating fallthrough machine
+    }    
+    { // transition to normalised lmap style
         sequence->push_back( shared_ptr<Transformation>( new GotoAfterWait ) );     
         sequence->push_back( shared_ptr<Transformation>( new AddGotoBeforeLabel ) );         
         //sequence->push_back( shared_ptr<Transformation>( new EnsureBootstrap ) );     
         sequence->push_back( shared_ptr<Transformation>( new EnsureResetYield ) );
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
         sequence->push_back( shared_ptr<Transformation>( new AddStateLabelVar ) ); 
-
-#ifdef NEW
         sequence->push_back( shared_ptr<Transformation>( new PlaceLabelsInArray ) );  
         for( int i=0; i<2; i++ )
         {
@@ -108,6 +103,8 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
             sequence->push_back( shared_ptr<Transformation>( new SwapSubscriptMultiplex ) );        
         }
         sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );
+    }    
+    { // creating fallthrough machine
         for( int i=0; i<5; i++ )
         {
             sequence->push_back( shared_ptr<Transformation>( new ApplyCombGotoPolicy ) );
@@ -120,28 +117,18 @@ void build_sequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new DetectSuperLoop(false) ) );
         sequence->push_back( shared_ptr<Transformation>( new DetectSuperLoop(true) ) );
         sequence->push_back( shared_ptr<Transformation>( new CleanupUnusedVariables ) );
-#else
-        sequence->push_back( shared_ptr<Transformation>( new CleanupCompoundMulti ) );                 
-        sequence->push_back( shared_ptr<Transformation>( new EnsureSuperLoop ) );
-        sequence->push_back( shared_ptr<Transformation>( new MakeFallThroughMachine ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new MoveInitIntoSuperLoop ) );
-        sequence->push_back( shared_ptr<Transformation>( new AddYieldFlag ) );
-        sequence->push_back( shared_ptr<Transformation>( new AddInferredYield ) ); 
-        // now yielding in every iteration of superloop
-#endif
     }
-    { // optimsiing fall though machine
+    { // optimsing fall though machine
         sequence->push_back( shared_ptr<Transformation>( new LoopRotation ) );
     }
-
     { // transition to event driven style
-#ifdef NEW
-        sequence->push_back( shared_ptr<Transformation>( new InsertInferredYield ) ); 
-#endif
+        sequence->push_back( shared_ptr<Transformation>( new InsertInferredYield ) );
         sequence->push_back( shared_ptr<Transformation>( new AutosToModule ) );
-        sequence->push_back( shared_ptr<Transformation>( new TempsAndStaticsToModule ) );
+        sequence->push_back( shared_ptr<Transformation>( new TempsAndStaticsToModule ) ); // TODO why?
         sequence->push_back( shared_ptr<Transformation>( new DeclsToModule ) );
         sequence->push_back( shared_ptr<Transformation>( new ThreadToMethod ) );
+        sequence->push_back( shared_ptr<Transformation>( new ExplicitiseReturns ) );   // TODO move this into Verilog phase?
+        sequence->push_back( shared_ptr<Transformation>( new CleanupNestedIf ) );      // and this
     }
     { // final cleanups
         for( int i=0; i<2; i++ )

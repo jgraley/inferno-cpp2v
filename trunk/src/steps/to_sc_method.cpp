@@ -179,3 +179,61 @@ ThreadToMethod::ThreadToMethod()
     
     Configure( s_thread, r_method );
 }
+
+
+ExplicitiseReturns::ExplicitiseReturns()
+{
+    MakeTreePtr<Instance> inst;
+    MakeTreePtr<Callable> s_callable;
+    MakeTreePtr<Compound> comp, m_comp;
+    MakeTreePtr< MatchAll<Instance> > s_all;
+    MakeTreePtr< Stuff<Instance> > s_stuff;
+    MakeTreePtr<Return> s_return, ls_return, m_return;
+    MakeTreePtr< Star<Declaration> > decls, m_decls;
+    MakeTreePtr< Star<Statement> > stmts, m_pre, m_mid, m_post;
+    MakeTreePtr< Insert<Declaration> > insert;
+    MakeTreePtr<Temporary> r_flag;
+    MakeTreePtr<Boolean> r_boolean;
+    MakeTreePtr<BuildInstanceIdentifier> r_flag_id("enabled");
+    MakeTreePtr<False> lr_false;
+    MakeTreePtr<True> r_true;
+    MakeTreePtr<Uninitialised> s_uninit, ls_uninit, m_uninit;
+    MakeTreePtr<Assign> lr_assign;
+    MakeTreePtr< Stuff<Statement> > m_stuff;
+    MakeTreePtr< NotMatch<Statement> > ms_affected;
+    MakeTreePtr<If> ms_if, mr_if;
+    MakeTreePtr< Overlay<Statement> > m_over;
+    
+    m_comp->members = (m_decls);
+    m_comp->statements = (m_pre, m_stuff, m_mid, m_over, m_post);
+    m_stuff->terminus = m_return;
+    m_return->return_value = m_uninit;
+    m_over->through = ms_affected;
+    ms_affected->pattern = ms_if;
+    ms_if->condition = r_flag_id;
+    m_over->overlay = mr_if;
+    mr_if->condition = r_flag_id;
+    mr_if->body = ms_affected;
+    mr_if->else_body = MakeTreePtr<Nop>();
+    
+    MakeTreePtr< SlaveSearchReplace<Compound> > slavem( comp, m_comp );
+    
+    ls_return->return_value = ls_uninit;
+    lr_assign->operands = (r_flag_id, lr_false);
+    
+    MakeTreePtr< SlaveSearchReplace<Compound> > slavel( slavem, ls_return, lr_assign);
+    
+    s_all->patterns = (inst, s_stuff);
+    inst->type = s_callable; // TODO when functions are sorted out, set return type to void
+    inst->initialiser = slavel;
+    s_stuff->terminus = s_return;
+    s_return->return_value = s_uninit;
+    comp->members = (decls, insert);
+    comp->statements = (stmts);
+    insert->insert = r_flag;
+    r_flag->type = r_boolean;
+    r_flag->identifier = r_flag_id;
+    r_flag->initialiser = r_true;
+        
+    Configure( s_all, inst );
+}

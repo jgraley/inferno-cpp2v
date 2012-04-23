@@ -1104,21 +1104,24 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
             TRACE("GreenGrass node through=")(*(ggb->GetThrough()))("\n");
             overlay = ggb->GetThrough(); 
         }
+        else if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
+        {   
+            ASSERT( sb->GetThrough() );   
+            overlay = sb->GetThrough();
+        } 
         
         TRACE("Special ")
              (*source)
              (key?(dynamic_pointer_cast<TerminusKey>(key)?", terminus key":", non-terminus key"):", no key")
              (overlay?", overlay\n":"non-overlay\n");
         
-        if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
-        {   
-            ASSERT(!key)("slave should not be coupled; should be in replace pattern only\n");
-            HIT;
-            return DuplicateSubtreePattern( sb->GetThrough() ); 
-        } 
-        else if( overlay )
+        if( overlay && key )
         {
             return DoOverlayOrOverwriteSubstitutionPattern(key->root, key, overlay);
+        }
+        else if( overlay)
+        {
+            return DuplicateSubtreePattern( overlay ); 
         }
         else
         {
