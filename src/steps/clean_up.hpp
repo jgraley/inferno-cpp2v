@@ -92,6 +92,13 @@ public:
     CleanupUnusedVariables();
 };
 
+/// Simplify if(x) if(y) z using &&
+class CleanupNestedIf : public SearchReplace
+{
+public:
+    CleanupNestedIf();
+};
+
 }; // end namespace
 
 #endif 

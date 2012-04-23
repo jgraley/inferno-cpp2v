@@ -39,6 +39,15 @@ public:
     ThreadToMethod();
 };
 
+/// Detect return statements and arrange for the function to fall down
+/// to the bottom without doing anything more. only for void functions and
+/// loops not supported.
+class ExplicitiseReturns : public SearchReplace
+{
+public:
+    ExplicitiseReturns();
+};
+
 }; // end namespace
 
 #endif

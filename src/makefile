@@ -45,7 +45,7 @@ $(RENDER_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helper
 	mkdir -p $(dir $@)
 	$(ICC) -c $(OPTIONS) $< -o $@ 
 
-$(STEPS_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp tree/*.hpp tree/*.inc sr/*.hpp $(DEPS)
+$(STEPS_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp tree/*.hpp tree/*.inc sr/*.hpp %.hpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(OPTIONS) $< -o $@ 
 

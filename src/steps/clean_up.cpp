@@ -386,7 +386,7 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     MakeTreePtr<NestedArray> nested_array;
     MakeTreePtr< NotMatch<Type> > sx_not;
     MakeTreePtr< MatchAny<Type> > sx_any;
-    MakeTreePtr< TransformOf<TypeIdentifier> > getdecl( &GetDeclaration::instance );
+    MakeTreePtr< TransformOf<TypeIdentifier> > getdecl( &GetDeclaration::instance ); // TODO should be modulo typedefs
     MakeTreePtr<InstanceIdentifier> id;
     MakeTreePtr< Stuff<Scope> > stuff1, s_stuff2;
     MakeTreePtr< MatchAll<Node> > s_antip;
@@ -416,4 +416,28 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     s_nm->pattern = inst;
                         
     Configure( s_all, stuff1 );
+}
+
+
+CleanupNestedIf::CleanupNestedIf()
+{
+    MakeTreePtr<If> s_outer_if, s_inner_if, r_if;
+    MakeTreePtr<Statement> body;
+    MakeTreePtr<Nop> s_inner_nop, s_outer_nop, r_nop;
+    MakeTreePtr<Expression> inner_cond, outer_cond;
+    MakeTreePtr<LogicalAnd> r_and;
+    
+    s_outer_if->condition = outer_cond;
+    s_outer_if->body = s_inner_if;
+    s_outer_if->else_body = s_outer_nop;
+    s_inner_if->condition = inner_cond;
+    s_inner_if->body = body;
+    s_inner_if->else_body = s_inner_nop;
+    
+    r_if->condition = r_and;
+    r_if->body = body; 
+    r_if->else_body = r_nop;
+    r_and->operands = (outer_cond, inner_cond); // outer first, to be side-effect correct
+    
+    Configure( s_outer_if, r_if );
 }
