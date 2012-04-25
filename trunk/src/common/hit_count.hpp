@@ -21,7 +21,8 @@ private:
     Map<Category, unsigned> counter;
     typedef pair<Category, unsigned> pc;
     unsigned current_step;
-
+    static bool enable;
+    
 public:    
     static HitCount instance;
     void Hit( string file, unsigned line, string function, const void *caller_this )
@@ -45,11 +46,14 @@ public:
     {
         current_step = i;
     }    
+    
+    static void Enable( bool e ); ///< enable/disable hit counting, only for top level function to call, overridden by flags
+    inline static bool IsEnabled() { return enable; }    
 };
 
 extern bool operator<( const HitCount::Category &l, const HitCount::Category &r );
 
-#define HIT HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, this )
+#define HIT if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, this )
 
 #endif
 

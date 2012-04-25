@@ -72,7 +72,6 @@ typedef ContainerFromIterator< TraverseNoBodyOrIndirection_iterator, TreePtr<Nod
 // Does a depend on b?
 bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_indirection_to_record )
 {
-    INDENT;
 	if( a == b )
 	    return false;
 	

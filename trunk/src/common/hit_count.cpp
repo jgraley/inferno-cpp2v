@@ -9,6 +9,8 @@ HitCount HitCount::instance;
 #define HCM_INSTANCE 0x8
 #define HCM_STEP     0x10
 
+bool HitCount::enable = false; ///< call HitCount::Enable(true) to begin counting hits
+
 bool operator<( const HitCount::Category &l, const HitCount::Category &r )
 {
     // prioritise the comparisons in a way that makes for a nice dump when dumped in order
@@ -29,8 +31,9 @@ void HitCount::Dump()
 {
     FOREACH( pc p, counter )
     {
+        printf("%8u ", p.second );  
         if( (ReadArgs::hits_mask&HCM_STEP)==0 ) 
-            printf("#%3d ", p.first.step );                   
+            printf("step %3d ", p.first.step );                   
         if( (ReadArgs::hits_mask&HCM_INSTANCE)==0 ) 
             printf("@%p ", p.first.instance );                   
         if( (ReadArgs::hits_mask&HCM_FILE)==0 ) 
@@ -38,8 +41,14 @@ void HitCount::Dump()
         if( (ReadArgs::hits_mask&HCM_LINE)==0 ) 
             printf(":%d ", p.first.line );                   
         if( (ReadArgs::hits_mask&HCM_FUNCTION)==0 ) 
-            printf("in %s", p.first.function.c_str() );                   
-        printf(": %u\n", p.second );  
+            printf("in %s", p.first.function.c_str() );    
+        printf("\n");               
     }                 
 }
+
+void HitCount::Enable( bool e )
+{
+    enable = e;
+}
+
 

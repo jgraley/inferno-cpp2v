@@ -64,10 +64,6 @@ Tracer &Tracer::operator()()
         return *this;
  
     EndContinuation();
-
-    //int spaces = stack_track.GetIndent();
-    //for( int i=0; i<spaces; i++ )
-    //    printf(" ");
     Descend::Indent();
     fprintf( stderr, "----%s:%d in %s()\n", file, line, function);
     
@@ -83,9 +79,6 @@ Tracer &Tracer::operator()(const char *fmt, ...)
     va_start( vl, fmt );
     if( !continuation ) 
     {
-      //  int spaces = stack_track.GetIndent();
-        //for( int i=0; i<spaces; i++ )
-       //     printf(" ");
     	Descend::Indent();
         fprintf( stderr, "----%s:%d in %s()\n", file, line, function);
         Descend::Indent();

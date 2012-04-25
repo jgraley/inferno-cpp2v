@@ -182,7 +182,7 @@ Inferred superloop and termination
 
 The goto policy leaves the last goto in place. To work properly, it requires that the last statement in the top level is a goto. Is this true? Given that the alternative is code that runs before the function exits, it should be true in the case where the original Thread executes in an infinite loop (TODO prove this, deal with return statements). 
 
-The label policy groups the lables at the top of the top level. We require a label at the top and must make sure of this.
+The label policy groups the lables at the top of the top level. We require a label at the top and must make sure of this. Any code that appears above the first label will only run at the start of the first iteration of the state machine - we can move it below the label if we test the delta count as done presently - this is very similar to the label policy so we call it the boot policy.
 
 If we merge the labels, and detect that there is now only one label, we have a manifest superloop. Ergo, we may not need to add one manually. This superloop could be explicitised (probably into a do loop) and then elminated in the switch from Thread to Method. This is arguably cleaner and a lighter touch than the current scheme of inserting a superloop.
 

@@ -802,7 +802,7 @@ TreePtr<Node> CompareReplace::DoOverlayOrOverwriteSubstitutionPattern( TreePtr<N
     ASSERT( source ); 
     ASSERT( keynode );
     TRACE("key=")(*keynode)(" source=")(*source)("\n");
-    HIT;
+
     if( ReadArgs::assert_pedigree )
     {
         ASSERT( keyed_pedigree.IsExist(keynode) )(*keynode);
@@ -815,12 +815,10 @@ TreePtr<Node> CompareReplace::DoOverlayOrOverwriteSubstitutionPattern( TreePtr<N
     
     if( source->IsLocalMatch(keynode.get()) ) 
     {
-        HIT;
         dest = DoOverlaySubstitutionPattern( keynode, current_key, source );
     }
     else
     {
-        HIT;    
         dest = DuplicateSubtreePattern( source ); // Overwriting pattern over dest, need to make a duplicate 
     }
     
@@ -836,7 +834,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
 	INDENT;
     ASSERT( source );
     ASSERT( keynode );
-    HIT;
+
     if( ReadArgs::assert_pedigree )
     {
         ASSERT( keyed_pedigree.IsExist(keynode) )(*keynode);
@@ -994,7 +992,6 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
 	        FOREACH( const TreePtrInterface &p, *keynode_con )
 	        {
 		        ASSERT( p ); // present simplified scheme disallows NULL
-		        HIT;
 		        TreePtr<Node> n = DuplicateSubtreeSubstitution( p, current_key );
 		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
 		        {
@@ -1013,7 +1010,6 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
         {
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( *keynode_ptr );
-            HIT;
             *dest_ptr = DuplicateSubtreeSubstitution( *keynode_ptr, current_key );
             ASSERT( *dest_ptr );
             ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            
@@ -1075,7 +1071,6 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
 {
     INDENT;
     ASSERT( source );
-    HIT;
     if( ReadArgs::assert_pedigree )
         ASSERT( pattern_pedigree.IsExist(source) )(*source);
     // TODO source must be pattern?    
@@ -1131,7 +1126,6 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
             // we have nothing to overlay (Star pattern is only restriction, NotMatch pattern is abnormal, 
             // TransformOf pattern is not type-correct to overlay etc).
             // DuplicateSubtreeSubstitution() will spot the terminus of SearchContainers (Stuff, AnyNode)
-            HIT;
             return DuplicateSubtreeSubstitution(key->root, key);   
         }     
     }
@@ -1192,7 +1186,6 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
 
     ASSERT( source );
  	TRACE("Duplicating ")(*source)("\n");
-    HIT;
     if( ReadArgs::assert_pedigree )
         ASSERT( pattern_pedigree.IsExist(source) )(*source);
     TreePtr<Node> dest = ApplySpecialAndCouplingPattern( source );
@@ -1281,7 +1274,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitution( TreePtr<Node> keynod
 	INDENT;
 	ASSERT( current_key );
 	ASSERT(keynode);
-    HIT;
+	
     if( ReadArgs::assert_pedigree )
         ASSERT( keyed_pedigree.IsExist(keynode) )(*keynode);
     
@@ -1337,13 +1330,13 @@ TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitution( TreePtr<Node> keynod
         if( ContainerInterface *keynode_con = dynamic_cast<ContainerInterface *>(keynode_memb[i]) )                
         {
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
+
             dest_con->clear();
 
             TRACE("Duplicating container size %d\n", keynode_con->size() );
 	        FOREACH( const TreePtrInterface &p, *keynode_con )
 	        {
 		        ASSERT( p ); // present simplified scheme disallows NULL
-		        HIT;
 		        TRACE("Duplicating ")(*p)("\n");
 		        TreePtr<Node> n = DuplicateSubtreeSubstitution( p, current_key );
 		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
@@ -1365,7 +1358,6 @@ TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitution( TreePtr<Node> keynod
             TRACE("Duplicating node ")(*keynode_ptr)("\n");
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( *keynode_ptr )("keynode should be non-NULL");
-            HIT;
             *dest_ptr = DuplicateSubtreeSubstitution( *keynode_ptr, current_key );
             ASSERT( *dest_ptr );
             ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            
@@ -1816,6 +1808,7 @@ void CompareReplace::Test()
         TreePtr<Label> l( new Label );
         TreePtr<Public> p1( new Public );
         l->access = p1;
+
         TreePtr<LabelIdentifier> li( new LabelIdentifier );
         li->name = "mylabel";
         l->identifier = li;
