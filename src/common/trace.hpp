@@ -93,7 +93,7 @@ public:
 // we make an error). You can supply a message but no printf() formatting or arguments or std::string.
 #define ASSERTFAIL(MESSAGE) do { Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
 
-#define INDENT Tracer::Descend indent_
+#define INDENT HIT; Tracer::Descend indent_
 
 #endif
 

@@ -147,6 +147,7 @@ int main( int argc, char *argv[] )
     // Check the command line arguments 
     ReadArgs( argc, argv );
     Tracer::Enable( ReadArgs::trace );
+    HitCount::Enable( ReadArgs::trace_hits );
 
     // Do self-tests (unit tests) if requested
     if( ReadArgs::selftest )
@@ -193,6 +194,7 @@ int main( int argc, char *argv[] )
                 break;
             fprintf(stderr, "Step %d: %s\n", i, string( *t ).c_str() ); 
             Tracer::Enable( ReadArgs::trace && (!ReadArgs::quitenable || ReadArgs::quitafter==0) ); 
+            HitCount::Enable( ReadArgs::trace_hits && (!ReadArgs::quitenable || ReadArgs::quitafter==0) ); 
             if( (!ReadArgs::quitenable || ReadArgs::quitafter==0) )
                 CompareReplace::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
             else
@@ -205,6 +207,8 @@ int main( int argc, char *argv[] )
         
     // Output either C source code or a graph, as requested
     Tracer::Enable( ReadArgs::trace );
+    HitCount::Enable( ReadArgs::trace_hits );
+    HitCount::instance.SetStep(0);
     if(ReadArgs::intermediate_graph)
         Graph()( &program );    
     else    
