@@ -12,7 +12,7 @@ void CouplingKeys::DoKey( TreePtr<Node> x,
 	                      Conjecture::Choice *gc,
 	                      int go )
 {
-	INDENT;
+//	INDENT;
 	shared_ptr<Key> key( new Key );
 	if( x )
         key->root = x;
@@ -27,11 +27,11 @@ void CouplingKeys::DoKey( shared_ptr<Key> key,
 	                      Conjecture::Choice *gc,
 	                      int go )
 {
-	INDENT;
+	//INDENT;
 	ASSERT( this );
     ASSERT( pattern );
     
-    TRACE("CouplingKeys@%p: ", this)(master?"has ":"does not have ")("master\n");
+   // TRACE("CouplingKeys@%p: ", this)(master?"has ":"does not have ")("master\n");
     
     if( key )
     {
@@ -60,7 +60,7 @@ void CouplingKeys::DoKey( shared_ptr<Key> key,
 		key->governing_choice = gc;	
 		key->governing_offset = go;	
 		keys_map[pattern] = key;	
-        TRACE("Keyed root=")(*key->root)(" pattern=")(*key->replace_pattern)(" with governing_choice=%p\n", gc);
+      //  TRACE("Keyed root=")(*key->root)(" pattern=")(*key->replace_pattern)(" with governing_choice=%p\n", gc);
 	}
 	
     // TRACE("@%p Keyed ", this)(*(key->root))(" size %d\n", keys_map.size());
@@ -69,7 +69,7 @@ void CouplingKeys::DoKey( shared_ptr<Key> key,
 
 TreePtr<Node> CouplingKeys::GetCoupled( TreePtr<Node> pattern )  
 {
-    INDENT;
+  //  INDENT;
     shared_ptr<Key> k = GetKey( pattern );
 	if( k )
 	    return k->root;
@@ -80,7 +80,7 @@ TreePtr<Node> CouplingKeys::GetCoupled( TreePtr<Node> pattern )
 
 shared_ptr<Key> CouplingKeys::GetKey( TreePtr<Node> pattern )  
 {
-    INDENT;
+ //   INDENT;
     //TRACE("@%p Getting key for ", this)(*pattern)(" master is %p size %d\n", master, keys_map.size());
 	if( keys_map.IsExist(pattern) )
 	{
@@ -103,7 +103,7 @@ shared_ptr<Key> CouplingKeys::GetKey( TreePtr<Node> pattern )
 
 Set< TreePtr<Node> > CouplingKeys::GetAllKeys() 
 {
-    INDENT;
+ //   INDENT;
     Set< TreePtr<Node> > s;
     UniqueFilter uf;
  //   TRACE("Key nodes:\n");
@@ -114,7 +114,7 @@ Set< TreePtr<Node> > CouplingKeys::GetAllKeys()
         ASSERT( p.first );
         if( p.second ) // TODO make this always be non-NULL
         {
-            TRACE("Coupling of ")(*(p.first))(": ");
+   //         TRACE("Coupling of ")(*(p.first))(": ");
             Expand e(p.second->root, &uf); 
             // Iterate over every node in the subtree under the key
             FOREACH( TreePtr<Node> n, e )
@@ -143,7 +143,7 @@ Set< TreePtr<Node> > CouplingKeys::GetAllKeys()
 
 void CouplingKeys::SetMaster( CouplingKeys *m ) 
 { 
-    INDENT;
+//    INDENT;
   //  TRACE("@%p Setting master to %p\n", this, m);
     master = m; 
 }
@@ -151,7 +151,7 @@ void CouplingKeys::SetMaster( CouplingKeys *m )
 
 void CouplingKeys::Clear() 
 { 
-    INDENT;
+  //  INDENT;
   //  TRACE("@%p Clearing keys\n", this);
     keys_map.clear(); 
 }

@@ -12,7 +12,7 @@ bool ReadArgs::intermediate_graph = false;
 int ReadArgs::pattern_graph = -1; // -1 disables
 bool ReadArgs::trace = false;
 bool ReadArgs::trace_hits = false;
-int ReadArgs::hits_mask = 0;
+std::string ReadArgs::hits_format;
 bool ReadArgs::selftest = false;
 int ReadArgs::runonlystep = 0; 
 bool ReadArgs::runonlyenable = false; 
@@ -30,8 +30,8 @@ void ReadArgs::Usage()
     		        "-i<infile>  Read input program (C/C++) from <infile>.\n"
     		        "-o<outfile> Write output program to <outfile>. C/C++ by default. Writes to stdout if omitted.\n"
     		        "-t          Turn on tracing internals (very verbose).\n"    		        
-    		        "-th         Dump hit counts at the end of execution.\n"    		        
-    		        "-th<n>      As -th but suppress indices according to set bits of n.\n"
+                    "-th<fmt>    Dump hit counts at the end of execution based on <fmt>.\n"
+                    "            Note: use -th? for help on <fmt>.\n"
     		        "-s          Run self-tests.\n"
     		        "-ap         Enable pedigree assertions in search and replace engine.\n"
                     "-q<n>       Stop before step <n>. <n> may be 0 to exercise just parser and renderer.\n"    
@@ -90,8 +90,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             else if( option2=='h' )
             {                
                 trace_hits = true;
-                if( strlen(argv[curarg]) > 3 )
-                    hits_mask = strtoul( GetArg(2).c_str(), NULL, 10 );
+                hits_format = GetArg(2);
             }
             else
                 Usage();
@@ -148,6 +147,9 @@ ReadArgs::ReadArgs( int ac, char *av[] )
     }    
     
     // infile or selftest is always required
-    if( infile.empty() && !selftest && pattern_graph==-1 )
+    if( infile.empty() && 
+        !selftest && 
+        pattern_graph==-1 && 
+        !(trace_hits && hits_format==std::string("?") ) )
         Usage();
 }
