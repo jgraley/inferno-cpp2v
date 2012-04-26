@@ -40,6 +40,8 @@ public:
         counter[c] = count;            
     }
     
+    void Usage();
+    void Check();
     void Dump();
     
     void SetStep( int i )

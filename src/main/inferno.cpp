@@ -146,6 +146,7 @@ int main( int argc, char *argv[] )
 {
     // Check the command line arguments 
     ReadArgs( argc, argv );
+    HitCount::instance.Check();
     Tracer::Enable( ReadArgs::trace );
     HitCount::Enable( ReadArgs::trace_hits );
 
