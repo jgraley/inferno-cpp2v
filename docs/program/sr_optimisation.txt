@@ -1,0 +1,88 @@
+
+Search and Replace Optimisation plan
+
+At the time of writing, the sequential phase is "ready" for serious use in a software context, for eg
+ - Stating out an algorithm for a call-in cooperative scheduler (removing the need for contexts)
+ - Stating out an algorithm to run over multiple invocations of an ISR
+ - etc
+
+However, the remaining impediment to actual deployment would be the speed of the search and replace engine itself, which for certain patterns has been seen to be at least O(n^4) in input program size, effecively prohibiting use on programs large enough to justify automation (and doing it by had will be less than quartic order, I would think).
+
+Past measurements seemed to show the replace taking longer than search, which is paradoxical since search is the part expected to be complex. Sine then I have done some tidying up in replace, not sure if this improved execution speed. I may also have been decieved by the use of too-small n to expose the true big-O behaviour. Recent measurements concentrating on LabelVarsToEnum running on an input program tree with a few hundred nodes, seem to show O(n^4) in search (and less for replace).
+
+A plan is shown which concentrates on the big-O of search, but which also involves changes to replace that seem to be required is shown below.
+
+1. Outboarding the substitution duplication
+
+Replace complexity lies mainly in the recursive DuplicateSubtreeSubstitution and its worker DuplicateNode. These are the only parts of replace that have any dependecny on program size (all other hits depend on pattern only). I propose breaking this out into a seperate helper class called SimpleDuplicateSubtree (rather like SimpleCompare). 
+
+One issue is that this function stops recursing and jumps across somewhere else when the terminus of a stuff node is being reached. This mechanism will need to be abstracted into the SimpleDuplicateSubtree - i.e. a node in the input tree amy be specified as a terminus for the duplciation process. The duplicate function should return a ref to the TreePtr that should be pointed toward whatever we create for the terminus. 
+
+Hopefully after this the big-O of the actual replace system in S&R will be wholly independent of program size, and this code will never run with DuplicateSubtreeSubstitution layers on the stack (since terminus is passed back as a return value not a callback). Additionally, I can use this for the Transformation out-of-place to in-place adaptor.
+
+2. Split replace using a work-list
+
+Replace can hopefully be split into two passes: a "policy" pass that creates a worklist of things to do (based on the existing recursive system) and an "execution" pass that executes the instructions in the work list to create a new tree.
+
+The key to this is the level at which the work list is defined. Individual commands should be one of two kinds:
+ 1. Simply placing a node created by the policy pass somewhere in the new tree (placement commands)
+ 2. Invoking the SimpleDuplicateSubtree into the new tree, allowing for terminii (duplication commands)
+
+Whether the work-list should be a linear list or a tree itself is up for debate.
+
+3. Light-touch on replace
+
+It should be possible to analyse the duplication commands to determine which ones can safely be replaced with shallow copies - ie, just placing an input program subtree into the output program tree without using SimpleDuplicateSubtree. This is safe as long as each node in the input tree is never placed more than once.
+
+Unfortunately, this analysis may itself need a walk through subtrees. Consider a search pattern:
+
+  /---- # ---- X
+& 
+  \---- # ---- Y
+
+where X and Y are coupled into locations in the replace pattern, acting on an input program:
+
+blah ---- X ---- blah ---- Y ---- blah
+
+Now it is difficult to determine that we cannot place both the X and Y subtrees because the Y subtree is common to both (so the program tree would contain a convergent link that is not necessarily an identifier). Maybe we could allow such convergent links, but for now, I'll just write the O(n) checker algorithm (easy using Walk).
+
+The changes to the work list described here would be inserted as an additional pass run after policy and before execution. It should considerably reduce the amount of work being done by the SimpleDuplicateSubtree, since inferno transformations usually avoid creating multiple copies of sizeable program subtrees at different location in the output tree.
+
+4. Targetted cache invalidation
+
+This is a conceptual step, really. Where the search engine has cached information during search, it presently has to invalidate the cache after every replace operation, because the generated tree is new, and nothing can be assumed about it. This adds an order of the number of hits (which is really O(n), since bigger programs will get more hits) on to the cache creation complexity. 
+
+But now we can try to retain cached info, subject to running through the work list and discarding only that which is deemed to be invalidated by a command. Basically, placement from the input program preserves some of the same actual program tree nodes, and where a unit of cached information can be shown to only depend on those preserved nodes, it may be said to remain correct.
+
+Note: actually, where a terminus is in play, a program tree node will be modified by means of changing one of its pointers. Thus we need to be careful to invalidate cache entries with that dependency.
+
+5. Search engine preparation
+
+Note: existing terminology: Conjectures are collections of Decisions, and Decisions are between one or more Choices. Decisions correspond roughly to Stuff, Star, MatchAny and n-1 elements of a Collection. Couplings are denoted by pattern nodes with multiple parents, whose matches must correspond via all parents. A coupling is Keyed to a program node when a path to it (in a normal context) matches.
+
+It semes like it might be helpful to always recurse the search system on a decision - so a single invokation of a function in the search system makes at most one decision, and directly-affected functions are called directly from it.
+
+Because we walk the tree in the search system, all decisions directly-affected by the current decision will take place during that outgoing call, and we can easily get our hands on things before and after those dependents have been seen. 
+
+Note: by directly-affected, I mean if decision X is directly-affected by decision Y then a change in choice of Y always means X corresponds to a different location in the input tree and therefore sees a different set of choices, irrespective of couplings.
+
+This change will apply to Sequence and Collection compares, forcing them into recursive algorithms. Sequence compare will loop though non-Star pattern elements and recurse for Stars, or just recurse for every pattern element (generally not too many elements in pattern sequences). Collection compares will certainly recurse for every pattern element.
+
+6. Active decisions 
+
+The Conjecture class can be told when we are about to recurse under a given decision and when we have returned from that recursion. Conjecture can know that between these two calls relating to Y (we could say Y is "actve"), any decision it may encounter is directly-affected by Y. And I think this is the only case of direct-affectation. Thus the conjecture class can track direct-affectation between decisions. 
+
+At this point is tempting to conclude that two decisions X and Y with no direct-affectation between them can be optimised to avoid iterating the X*Y space - a failure to match on either X or Y would be a failure to match anything. This would be true if it were not for couplings. If there was a coupling between a node under X and a node under Y then the decisions could fail due to coupling mismatch and retries with different choices on X*Y are needed to find a match.
+
+Thus the Conjecture class needs to be told something about couplings. It might suffice to inform Conjecture about keying events - Conjecture can then associate the coupling that was keyed with all the active decisions. We need more...
+
+7. Conjecture into tree form
+
+Presently a conjecture is a linear vector of decisions stored in the order they are seen during the search system's walk. Fails iterate the last decision, unless it runs out of choices in which case it is discarded and the increment "carries" back to the previous one, etc. Search fails when the first deicsion runs out of choices. This works because all decisions directly-affecting X are before X (but the converse does not apply).
+
+A tree form is more succinct - we form the tree on direct-affectation relation, and now the converse is also true: X is directly-affected by Y if and only if X is in the subtree at Y. In the absence of couplings, this would suffice to minimise the decision iterations required (indeed it would be just the same as if no Conjecture system was in use at all and decisions simply looped locally in the search system). For the time being, just embed a parasitic ordering of the old kind, just to keep it working.
+
+8. Reporting the fail reason
+
+Mismatches due to a coupling should be reported back through the search system, probebly by replacing the "bool" return value with some new structure. Needs to carry pointers to the coupled pattern node and the actual program tree node that it tried, and failed, to match up to the key. This needs to be passed back to the Conjecture system when reporting that a choice failed.
+
