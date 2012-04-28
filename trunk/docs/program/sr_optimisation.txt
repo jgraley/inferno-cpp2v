@@ -1,24 +1,85 @@
 
-Search and Replace Optimisation plan
+Search and Replace Optimization plan - History
 
 At the time of writing, the sequential phase is "ready" for serious use in a software context, for eg
  - Stating out an algorithm for a call-in cooperative scheduler (removing the need for contexts)
  - Stating out an algorithm to run over multiple invocations of an ISR
  - etc
 
-However, the remaining impediment to actual deployment would be the speed of the search and replace engine itself, which for certain patterns has been seen to be at least O(n^4) in input program size, effecively prohibiting use on programs large enough to justify automation (and doing it by had will be less than quartic order, I would think).
+However, the remaining impediment to actual deployment would be the speed of the search and replace engine itself, which for certain patterns has been seen to be at least O(n^4) in input program size, effectively prohibiting use on programs large enough to justify automation (and doing it by hand will be less than quartic order, I would think).
 
-Past measurements seemed to show the replace taking longer than search, which is paradoxical since search is the part expected to be complex. Sine then I have done some tidying up in replace, not sure if this improved execution speed. I may also have been decieved by the use of too-small n to expose the true big-O behaviour. Recent measurements concentrating on LabelVarsToEnum running on an input program tree with a few hundred nodes, seem to show O(n^4) in search (and less for replace).
+Past measurements seemed to show the replace taking longer than search, which is paradoxical since search is the part expected to be complex. Sine then I have done some tidying up in replace, not sure if this improved execution speed. I may also have been deceived by the use of too-small n to expose the true big-O behavior. Recent measurements concentrating on LabelVarsToEnum running on an input program tree with a few hundred nodes, seem to show O(n^4) in search (and less for replace).
 
-A plan is shown which concentrates on the big-O of search, but which also involves changes to replace that seem to be required is shown below.
+General Observations
+
+Note: existing terminology: Conjectures are collections of Decisions, and Decisions are between one or more Choices. Decisions correspond roughly to Stuff, Star, MatchAny and n-1 elements of a Collection. Couplings are denoted by pattern nodes with multiple parents, whose matches must correspond via all parents. A coupling is Keyed to a program node when a path to it (in a normal context) matches.
+
+The plan concentrates on the big-O of search, but also involves changes to replace that seem to be required. Basically, the search optimization is based on pre-calculating data structures (a) during construction of the step, before any input program has been seen and (b) on sight of the input program, but before search runs. These are called construction-time and cached structures respectively.
+
+At present, every hit infers a complete regeneration of the tree. This requires caches to be fully regenerated each time, and cache generation time will therefore be an issue since it will be multiplied by the number of hits, which is proportional to program size.
+
+Therefore, changes to the replace algorithm will be needed, to allow a kind of "light touch" which clarifies exactly which nodes have been changed. Then caches can be brought up-to-date via deltas rather then fully recreating them after each hit.
+
+ ------- Basic search stuff --------
+
+1. Compile-time decision/coupling tree
+
+Terminology: two decisions can be:
+ - nested (if and only if one is underneath the other in the search pattern)
+ - coupled (if not nested, but a code is coupled under both)
+ - independent otherwise
+
+Crossing decisions X and Y (where X is seen before Y) refers to the technique of iterating X every time Y runs out of choices, instead of just stopping with a mismatch. This is done to avoid the multiple choices bug. However, there is no need to cross independent decisions.
+
+The plan is to create a construct-time data structure of decisions, in tree form, as opposed to the current linear form, which expresses the structure of decisions and the couplings that affect them. Nesting and coupled relationships between decisions will be expressed in this structure. 
+
+The tree should also indicate when couplings will be keyed and when they will be used for restriction. The usual rule will apply, that is the first appearance of a coupled node in a non-abnormal context keys; all others restrict.
+
+The search-time conjecture code will be modified to avoid crossing independent decisions.
+
+2. Decoupling container compares
+
+Sequence and Collections compares currently iterate through the pattern container, making decisions as they go along and progressively restricting the set of choices available to later decisions based on the choices in earlier decisions. This needs to be changed to make all the decisions entirely independent. Essentially, each decision must be made as though it were the first and hence most free decision possible.
+
+Naturally, this will cause some combinations of choices to be incompatible, for example by trying to match two pattern nodes to a single program tree mode, or (in the case of sequences) matching out of sequence. I believe these cases can be restricted out at the end, or as soon as seen. A failure at this point would require re-iteration of potentially all the decisions in the container, but a failure to match by any one of those decisions is a reason to abort the entire container compare.
+
+Possibly the thing to do is to go through each decision in turn, trying all choices, and restricting to the choices that match. Then fit the ordering/separateness criteria on the remaining smaller decisions. If any leave no choices, discard the entire container compare. 
+
+3. Restrict keying decisions by uniqueness
+
+Couplings work by simple subtree comparisons. Consequently, if two candidates for keying a coupling are equal, there is no need to try them both because the resulting coupling will restrict in the same way. So the options for a keying should be uniqueised. 
+
+ ------- Coupling reverse walk --------
+
+1. Expand node interface for ordering, hashing
+
+Expand the concept of "LocalMatch" in the Node interface to support a local ordering and a hash function. Extend the simple compare class to generate ordering and hash for subtrees. ORdering is the usual keep going as long as things match, then return the local result. Hash function should either just be the local hash of the root node, or we should recurse and combine to some limited number of nodes, combining the hashes in a standard way.
+
+Create a facade for subtrees that makes them look like single objects for the purposes of STL. Use simple compare functions as above and a simple duplicate (as factored out of replace in the instructions listed below) for deep copies. 
+
+2. Create ParentBySubtreeEquality cache
+
+Build a cache of parent->child pairs in the input program, indexed by subtree equality of the child (using multimap or hashmap). Store something in the map that indicates which TreePtr within the parent is the one pointing to the matching child (and uniquify on this so that two links from X to Y are two separate entries). Thus, looking up a subtree gets you all the parents of subtrees equal to the one you started with. 
+
+The cache contains only parent->child links, not whole paths, so that its contents can be considered as localized. Eventually, the light-touch on replace will lead is to incrementally update this cache, rather than regenerate the whole lot, and that will be easier if the elements are localized.
+
+3. Decision restriction by reverse walk
+
+When a decision is known to be subject to a restricting coupling, we can get the program node the coupling is keyed to and use the ParentBySubtreeEquality repeatedly to get a full union of all nodes that exist in routes to nodes that would match on the coupling (ie all ancestors). This set can be intersected with the set of "lead" nodes corresponding with available choices and hence restrict the choice.
+
+"Lead" node is just the first node seen in the subtree selected by the decision.
+
+The reverse walk can be enhanced if it is combined with a traversal through the pattern from coupling to the current decision, and is mutually restricted by comparison with pattern. Thus, if the pattern has a coupled X in an expression (x+2)*3 then restrictions for +2 and then *3 can be applied to the candidate paths to X during the reverse walk.
+
+ ------- Replace stuff --------
 
 1. Outboarding the substitution duplication
 
-Replace complexity lies mainly in the recursive DuplicateSubtreeSubstitution and its worker DuplicateNode. These are the only parts of replace that have any dependecny on program size (all other hits depend on pattern only). I propose breaking this out into a seperate helper class called SimpleDuplicateSubtree (rather like SimpleCompare). 
+Replace complexity lies mainly in the recursive DuplicateSubtreeSubstitution and its worker DuplicateNode. These are the only parts of replace that have any dependecny on program size (all other hits depend on pattern only). I propose breaking this out into a separate helper class called SimpleDuplicateSubtree (rather like SimpleCompare). 
 
-One issue is that this function stops recursing and jumps across somewhere else when the terminus of a stuff node is being reached. This mechanism will need to be abstracted into the SimpleDuplicateSubtree - i.e. a node in the input tree amy be specified as a terminus for the duplciation process. The duplicate function should return a ref to the TreePtr that should be pointed toward whatever we create for the terminus. 
+One issue is that this function stops recursing and jumps across somewhere else when the terminus of a stuff node is being reached. This mechanism will need to be abstracted into the SimpleDuplicateSubtree - i.e. a node in the input tree amy be specified as a terminus for the duplication process. The duplicate function should return a ref to the TreePtr that should be pointed toward whatever we create for the terminus. 
 
-Hopefully after this the big-O of the actual replace system in S&R will be wholly independent of program size, and this code will never run with DuplicateSubtreeSubstitution layers on the stack (since terminus is passed back as a return value not a callback). Additionally, I can use this for the Transformation out-of-place to in-place adaptor.
+Hopefully after this the big-O of the actual replace system in S&R will be wholly independent of program size, and this code will never run with DuplicateSubtreeSubstitution layers on the stack (since terminus is passed back as a return value not a callback). Additionally, I can use this for the Transformation out-of-place to in-place adapter.
 
 2. Split replace using a work-list
 
@@ -32,7 +93,7 @@ Whether the work-list should be a linear list or a tree itself is up for debate.
 
 3. Light-touch on replace
 
-It should be possible to analyse the duplication commands to determine which ones can safely be replaced with shallow copies - ie, just placing an input program subtree into the output program tree without using SimpleDuplicateSubtree. This is safe as long as each node in the input tree is never placed more than once.
+It should be possible to analyze the duplication commands to determine which ones can safely be replaced with shallow copies - ie, just placing an input program subtree into the output program tree without using SimpleDuplicateSubtree. This is safe as long as each node in the input tree is never placed more than once.
 
 Unfortunately, this analysis may itself need a walk through subtrees. Consider a search pattern:
 
@@ -55,34 +116,3 @@ This is a conceptual step, really. Where the search engine has cached informatio
 But now we can try to retain cached info, subject to running through the work list and discarding only that which is deemed to be invalidated by a command. Basically, placement from the input program preserves some of the same actual program tree nodes, and where a unit of cached information can be shown to only depend on those preserved nodes, it may be said to remain correct.
 
 Note: actually, where a terminus is in play, a program tree node will be modified by means of changing one of its pointers. Thus we need to be careful to invalidate cache entries with that dependency.
-
-5. Search engine preparation
-
-Note: existing terminology: Conjectures are collections of Decisions, and Decisions are between one or more Choices. Decisions correspond roughly to Stuff, Star, MatchAny and n-1 elements of a Collection. Couplings are denoted by pattern nodes with multiple parents, whose matches must correspond via all parents. A coupling is Keyed to a program node when a path to it (in a normal context) matches.
-
-It semes like it might be helpful to always recurse the search system on a decision - so a single invokation of a function in the search system makes at most one decision, and directly-affected functions are called directly from it.
-
-Because we walk the tree in the search system, all decisions directly-affected by the current decision will take place during that outgoing call, and we can easily get our hands on things before and after those dependents have been seen. 
-
-Note: by directly-affected, I mean if decision X is directly-affected by decision Y then a change in choice of Y always means X corresponds to a different location in the input tree and therefore sees a different set of choices, irrespective of couplings.
-
-This change will apply to Sequence and Collection compares, forcing them into recursive algorithms. Sequence compare will loop though non-Star pattern elements and recurse for Stars, or just recurse for every pattern element (generally not too many elements in pattern sequences). Collection compares will certainly recurse for every pattern element.
-
-6. Active decisions 
-
-The Conjecture class can be told when we are about to recurse under a given decision and when we have returned from that recursion. Conjecture can know that between these two calls relating to Y (we could say Y is "actve"), any decision it may encounter is directly-affected by Y. And I think this is the only case of direct-affectation. Thus the conjecture class can track direct-affectation between decisions. 
-
-At this point is tempting to conclude that two decisions X and Y with no direct-affectation between them can be optimised to avoid iterating the X*Y space - a failure to match on either X or Y would be a failure to match anything. This would be true if it were not for couplings. If there was a coupling between a node under X and a node under Y then the decisions could fail due to coupling mismatch and retries with different choices on X*Y are needed to find a match.
-
-Thus the Conjecture class needs to be told something about couplings. It might suffice to inform Conjecture about keying events - Conjecture can then associate the coupling that was keyed with all the active decisions. We need more...
-
-7. Conjecture into tree form
-
-Presently a conjecture is a linear vector of decisions stored in the order they are seen during the search system's walk. Fails iterate the last decision, unless it runs out of choices in which case it is discarded and the increment "carries" back to the previous one, etc. Search fails when the first deicsion runs out of choices. This works because all decisions directly-affecting X are before X (but the converse does not apply).
-
-A tree form is more succinct - we form the tree on direct-affectation relation, and now the converse is also true: X is directly-affected by Y if and only if X is in the subtree at Y. In the absence of couplings, this would suffice to minimise the decision iterations required (indeed it would be just the same as if no Conjecture system was in use at all and decisions simply looped locally in the search system). For the time being, just embed a parasitic ordering of the old kind, just to keep it working.
-
-8. Reporting the fail reason
-
-Mismatches due to a coupling should be reported back through the search system, probebly by replacing the "bool" return value with some new structure. Needs to carry pointers to the coupled pattern node and the actual program tree node that it tried, and failed, to match up to the key. This needs to be passed back to the Conjecture system when reporting that a choice failed.
-
