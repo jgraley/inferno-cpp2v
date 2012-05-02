@@ -1,6 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 # Script to deploy the HTML in htdocs to sourceforge's web server. 
 # Checks in if not done already to ensure version control is up-to-date.
+
+echo Rebuilding...
+cd ../..
+make inferno.exe
+cd docs/web
+
+echo Generating pattern graphs...
+./gen_pattern_graphs.sh
 
 echo Uploading web page...
 sftp $USER@web.sourceforge.net <<EOF
