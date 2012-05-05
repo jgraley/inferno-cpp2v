@@ -37,7 +37,7 @@ Install Doxygen and run
 
     make docs
 
-from trunk/ directory. Documentation is generated as html in trunk/docs/doxygen/html.
+from trunk/ directory. Documentation is generated as html in trunk/docs/generated/html.
 
 Comments in source code
 

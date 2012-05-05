@@ -177,12 +177,22 @@ string Graph::DoTransformation( Transformation *sr,
     vector< TreePtr<Node> > links;
     sr->GetGraphInfo( &labels, &links );
         
-    string name = sr->GetName(); 
+    string name = *sr;//->GetName(); 
     int n;
     for( n=0; n<name.size(); n++ )
     {
         if( name[n] == '<' )        
-            name = name.substr( 0, n );
+        {
+            int nn;
+            for( nn=n; nn<name.size(); nn++ )
+            {            
+                if( name[nn] == '>' )        
+                {
+                    name = name.substr( 0, n ) + name.substr( nn+1 );
+                    break;
+                }
+            }
+        }
     }
         
     string s;
