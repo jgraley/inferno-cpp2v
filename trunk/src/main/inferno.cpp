@@ -210,14 +210,13 @@ int main( int argc, char *argv[] )
     Tracer::Enable( ReadArgs::trace );
     HitCount::Enable( ReadArgs::trace_hits );
     HitCount::instance.SetStep(0);
-    if(ReadArgs::intermediate_graph)
+    if( ReadArgs::trace_hits )
+        HitCount::instance.Dump();    
+    else if(ReadArgs::intermediate_graph)
         Graph()( &program );    
     else    
         Render()(&program );     
-        
-    if( ReadArgs::trace_hits )
-        HitCount::instance.Dump();    
-    
+            
     return 0;
 }
 
@@ -234,3 +233,4 @@ void SelfTest()
 // TODO Consider merging Filter into Transformation.
 // TODO Produce base class for builder nodes: TransformTo?
 // TODO Consider multi-terminus Stuff and multi-root (StarStuff)
+

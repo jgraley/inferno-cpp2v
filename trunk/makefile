@@ -83,8 +83,9 @@ resource : force_subordinate_makefiles
 #
 docs : makefile src/*/*.?pp
 	doxygen docs/doxygen/Doxy-Inferno
-	@echo Documentation now at:
-	@echo $(PWD)/docs/doxygen/html/index.html
+	cd docs/generated ./gen_pattern_graphs.sh
+	@echo Doxygen documentation now at: $(PWD)/docs/generated/html/index.html
+	@echo Patterns and hits counts at: $(PWD)/docs/generated/html/step_index.html
 	
 #
 # Run the tests

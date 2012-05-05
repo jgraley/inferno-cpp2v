@@ -78,9 +78,9 @@ void HitCount::Dump()
             {
                 case 'S':
                 if( p.first.step>0 )
-                    printf("step %3d", p.first.step );                   
+                    printf("step %d", p.first.step );                   
                 else
-                    printf("not step");
+                    printf("pre/post");
                 break;
                 
                 case 'I':
@@ -92,7 +92,7 @@ void HitCount::Dump()
                 break;
                 
                 case 'L':
-                printf("%d", p.first.line );         
+                printf(":%d", p.first.line );         
                 break;
                 
                 case 'M':
@@ -100,20 +100,15 @@ void HitCount::Dump()
                 break;
                 
                 case 'n':
-                printf("#%8u", p.second );  
+                printf("%u hits", p.second );  
                 break;
                 
                 default:
                 Usage();
                 break;
             }
-            if( i+1<ReadArgs::hits_format.size() )
-            {
-                if( ReadArgs::hits_format[i]=='F' && ReadArgs::hits_format[i+1]=='L' )
-                    printf(":");
-                else 
-                    printf(" ");
-            }
+            if( i+1<ReadArgs::hits_format.size() )            
+                printf(" ");            
         }
         printf("\n");               
     }                 
