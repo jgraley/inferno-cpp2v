@@ -5,7 +5,7 @@ using namespace CPPTree;
 
 string BuildIdentifierBase::GetNewName( const CompareReplace *sr )
 {
-    INDENT;
+    //INDENT;
     TRACE("Begin SoftMakeIdentifier recurse for \"")(format)("\"\n");
     vector<string> vs;
     bool all_same = true;

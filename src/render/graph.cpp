@@ -177,7 +177,7 @@ string Graph::DoTransformation( Transformation *sr,
     vector< TreePtr<Node> > links;
     sr->GetGraphInfo( &labels, &links );
         
-    string name = *sr;//->GetName(); 
+    string name = sr->GetName(); 
     int n;
     for( n=0; n<name.size(); n++ )
     {

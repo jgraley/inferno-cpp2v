@@ -72,14 +72,6 @@ private:
     static bool enable;
 };
 
-class Traceable
-{
-public:
-	static string CPPFilt( string s );
-	virtual string GetName() const; // used by parse, render etc
-	virtual operator string() const; // used for debug
-};
-
 #define INFERNO_CURRENT_FUNCTION __func__
 // can be BOOST_CURRENT_FUNCTION if you want full signature but I find
 // it can get in the way

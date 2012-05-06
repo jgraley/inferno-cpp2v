@@ -32,3 +32,19 @@ void CommonTest()
     ASSERT( r[2] == 102 );
     ASSERT( r[3] == 103 );
 }
+
+string Traceable::GetName() const
+{
+    return CPPFilt( typeid( *this ).name() );
+}
+
+string Traceable::GetAddr() const
+{
+    return SSPrintf("@%p", this);
+}
+
+Traceable::operator string() const
+{
+    return GetName() + GetAddr(); // name plus pointer
+}
+
