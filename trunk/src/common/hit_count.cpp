@@ -18,6 +18,7 @@ bool operator<( const HitCount::Category &l, const HitCount::Category &r )
             break;
             
             case 'I':
+            case 'N':
             if( l.instance != r.instance )
                 return l.instance < r.instance;
             break;
@@ -77,16 +78,20 @@ void HitCount::Dump()
             switch( ReadArgs::hits_format[i] )
             {
                 case 'S':
-                if( p.first.step>0 )
+                if( p.first.step>=0 )
                     printf("step %d", p.first.step );                   
                 else
                     printf("pre/post");
                 break;
                 
                 case 'I':
-                printf("@%p", p.first.instance );                   
+                printf("%s", p.first.instance->GetAddr().c_str() );                   
                 break;
                 
+                case 'N':
+                printf("%s", p.first.instance->GetName().c_str() );                   
+                break;
+
                 case 'F':
                 printf("%s", p.first.file.c_str() );
                 break;

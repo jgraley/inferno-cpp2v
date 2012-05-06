@@ -65,4 +65,13 @@ public:
 
 void CommonTest();
 
+class Traceable
+{
+public:
+    static string CPPFilt( string s );
+    virtual string GetName() const; // used by parse, render etc
+    virtual string GetAddr() const; // used by parse, render etc
+    virtual operator string() const; // used for debug
+};
+
 #endif

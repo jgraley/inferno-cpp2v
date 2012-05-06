@@ -148,6 +148,7 @@ int main( int argc, char *argv[] )
     ReadArgs( argc, argv );
     HitCount::instance.Check();
     Tracer::Enable( ReadArgs::trace );
+    HitCount::instance.SetStep(-1);
     HitCount::Enable( ReadArgs::trace_hits );
 
     // Do self-tests (unit tests) if requested
@@ -209,7 +210,7 @@ int main( int argc, char *argv[] )
     // Output either C source code or a graph, as requested
     Tracer::Enable( ReadArgs::trace );
     HitCount::Enable( ReadArgs::trace_hits );
-    HitCount::instance.SetStep(0);
+    HitCount::instance.SetStep(-1);
     if( ReadArgs::trace_hits )
         HitCount::instance.Dump();    
     else if(ReadArgs::intermediate_graph)

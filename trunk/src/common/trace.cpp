@@ -129,13 +129,3 @@ string Traceable::CPPFilt( string s )
     return s;
 }
 
-string Traceable::GetName() const
-{
-    return CPPFilt( typeid( *this ).name() );
-}
-
-Traceable::operator string() const
-{
-    return GetName() + SSPrintf("@%p", this); // name plus pointer
-}
-

@@ -11,7 +11,7 @@ echo \<body dir="ltr" bgcolor="#ffffff" lang="en-US"\> >> $destdir/$idxname
 echo \<h1\>Inferno search and replace patterns\</h1\> >> $destdir/$idxname
 
 cd ../..
-./inferno.exe -i$testcase -thSIMn > docs/generated/hits.txt 2> docs/generated/steps.txt
+./inferno.exe -i$testcase -thSNnMFL > docs/generated/hits.txt 2> docs/generated/steps.txt
 cd docs/generated
 
 i=0
@@ -30,8 +30,8 @@ do
   mogrify -antialias -resize 35% $destdir/$imgname
 
   # Generate step-specific page
-  grep "step $i" hits.txt > curhits.txt
-  grep "Step $i" steps.txt | sed 's/Step [0-9]*: Steps::\([a-zA-Z]*\)@0x[0-9a-f]*/\1/' > name.txt
+  grep "step $i " hits.txt > curhits.txt
+  grep "Step $i:" steps.txt | sed 's/Step [0-9]*: Steps::\([a-zA-Z]*\)@0x[0-9a-f]*/\1/' > name.txt
   name=`cat name.txt`
   echo \<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"\> > $destdir/$stepname
   echo \<html\>\<head\>\</head\> >> $destdir/$stepname

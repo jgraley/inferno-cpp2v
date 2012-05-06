@@ -14,7 +14,7 @@ public:
         string function; // function the HIT is in
         unsigned line;   // line the HIT is on
         unsigned step;   // current step number
-        const void *instance;  // "this" pointer of the function, differentiates between master and slaves        
+        const Traceable *instance;  // "this" pointer of the function, differentiates between master and slaves        
     };
     
 private:
@@ -25,7 +25,7 @@ private:
     
 public:    
     static HitCount instance;
-    void Hit( string file, unsigned line, string function, const void *caller_this )
+    void Hit( string file, unsigned line, string function, const Traceable *caller_this )
     {
         Category c;
         c.file = file;
