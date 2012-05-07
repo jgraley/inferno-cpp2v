@@ -27,7 +27,7 @@ do
     break
   fi
   dot -T$imgtype -o$destdir/$imgname temp.dot 
-  mogrify -antialias -resize 35% $destdir/$imgname
+  mogrify -antialias -resize 40% $destdir/$imgname
 
   # Generate step-specific page
   grep "step $i " hits.txt > curhits.txt

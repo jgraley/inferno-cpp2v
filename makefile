@@ -91,7 +91,7 @@ docs : makefile inferno.exe docs/generated/Doxy-Inferno docs/generated/gen_patte
 # Push web site to sourceforge
 #
 publish : makefile docs inferno.exe docs/web/publish.sh
-	cd docs/web ./publish.sh
+	cd docs/web && ./publish.sh
 
 #
 # Run the tests
