@@ -5,15 +5,9 @@
 echo Uploading web page...
 sftp $USER@web.sourceforge.net <<EOF
 cd /home/project-web/inferno-cpp2v/htdocs
-mkdir web
-cd web
-mkdir html
-cd html
 put html/*
 mkdir generated
 cd generated
-mkdir html
-cd html
 put ../generated/html/*
 exit
 EOF

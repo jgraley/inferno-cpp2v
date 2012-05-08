@@ -10,60 +10,99 @@ However, the remaining impediment to actual deployment would be the speed of the
 
 Past measurements seemed to show the replace taking longer than search, which is paradoxical since search is the part expected to be complex. Sine then I have done some tidying up in replace, not sure if this improved execution speed. I may also have been deceived by the use of too-small n to expose the true big-O behavior. Recent measurements concentrating on LabelVarsToEnum running on an input program tree with a few hundred nodes, seem to show O(n^4) in search (and less for replace).
 
+Existing Terminology/Concepts
+
+Containers hold 0 or more pointers to child nodes. A Sequence is a container that remembers the order; a colelction is a container that does not. Pointers can also be placed directly ni nodes for a 1:1 relationship. There can be multiple of each.
+
+A "system" is here used to refer to a collection of functions that are all mutually recursive, (and would form a single cycle group in gprof). There is a search system which walks search pattern and input program, checking for a match. There is the replace system which walks the replace pattern building the output program as it goes.
+
+Conjectures are collections of Decisions, and Decisions are between one or more Choices. Decisions correspond roughly to Stuff, Star, MatchAny and n-1 elements of a Collection. Couplings are denoted by pattern nodes with multiple parents, whose matches must correspond via all parents. A coupling is Keyed to a program node when a path to it (in a normal context) matches.
+
+The existing conjecture mechanism is designed to avoid the so-called "multiple choices" bug, in which a choice is made in a decision leading to a match (and a coupling is keyed), the search engine then unwinds back out of that branch of the pattern and into another, which contains a choice coupled to the earlier key and cannot match. A simple recursive walk would give up, assuming the second branch is unmatchable, when in fact a different choice in the first branch may have allowed the second branch to find a match.
+
+The multiple choices bug is designed out at present by establishing control of decisions in the Conjecture class, a recursible state machine. As the main search system walks the tree, all decisions are referred to the Conjecture object which logs the decision and provides a choice. If a search pass then fails to match, the last decision recorded by the conjecture is incremented etc. When that runs out of choices, it is discarded, and the penultimate decision incremented etc. Thus the decisions are held in a stack and the conjecture class is a state out walk over the tree of  reported decisions. 
+
+Note that this tree does not co-incide with the pattern tree at all. Two neighbouring branches in the pattern tree (assuming they contain decisions) become parent and child in the conjecture. This is the brute-force method by which the above counter-example is fixed - now they are parent-and-child they will be crossed as required to try all possibilities (Crossing means trying all pairs of choices when you have two decisions, an N^2 operation).
+
 General Observations
 
-Note: existing terminology: Conjectures are collections of Decisions, and Decisions are between one or more Choices. Decisions correspond roughly to Stuff, Star, MatchAny and n-1 elements of a Collection. Couplings are denoted by pattern nodes with multiple parents, whose matches must correspond via all parents. A coupling is Keyed to a program node when a path to it (in a normal context) matches.
+The plan concentrates on the big-O of search, but also involves changes to replace that seem to be required. Basically, the search optimization is based on pre-calculating data structures (a) during construction of the step, before any input program has been seen and (b) on sight of the input program, but before search runs and (c) during the execution of the main search-engine. These are called construct-time, cached, and run-time respectively.
 
-The plan concentrates on the big-O of search, but also involves changes to replace that seem to be required. Basically, the search optimization is based on pre-calculating data structures (a) during construction of the step, before any input program has been seen and (b) on sight of the input program, but before search runs. These are called construction-time and cached structures respectively.
+The initial search optimisations focus on a combination of construct-time changes to the pattern (pattern optimisations) and run-time optimisations running in the context of a simple (conjectureless) recursive walk. As simple walk allows a function in the recursive system to rely on its local scope to persist as long as the present portion of program tree remains of interest (broadly speaking).
 
 At present, every hit infers a complete regeneration of the tree. This requires caches to be fully regenerated each time, and cache generation time will therefore be an issue since it will be multiplied by the number of hits, which is proportional to program size.
 
 Therefore, changes to the replace algorithm will be needed, to allow a kind of "light touch" which clarifies exactly which nodes have been changed. Then caches can be brought up-to-date via deltas rather then fully recreating them after each hit.
 
- ------- Basic search stuff --------
+ ------- Search stuff --------
 
-1. Compile-time decision/coupling tree
+1. Construct-time fold-forward of couplings
 
-Terminology: two decisions can be:
- - nested (if and only if one is underneath the other in the search pattern)
- - coupled (if not nested, but a code is coupled under both)
- - independent otherwise
+This is the first change to make since it introduces an invariant that makes the other search optimisations easier/possibler. 
 
-Crossing decisions X and Y (where X is seen before Y) refers to the technique of iterating X every time Y runs out of choices, instead of just stopping with a mismatch. This is done to avoid the multiple choices bug. However, there is no need to cross independent decisions.
+Note that the only reason we actually need the conjecture mechanism is because of couplings, as discussed above. In the case of non-coupled sibling branches, it crosses unrelated decisions unnecessarily leading to teh slowz. The idea is to find some way of making sure coupled branches get crossed, so we can get rid of conjectures and go back to a simple recursive walk that tries out choices as it goes (hence naturally crossing descendants but not siblings).
 
-The plan is to create a construct-time data structure of decisions, in tree form, as opposed to the current linear form, which expresses the structure of decisions and the couplings that affect them. Nesting and coupled relationships between decisions will be expressed in this structure. 
+We can decide the keying branch for a particualar coupling and leave that branch in place to be seen by the search system. The sibling branch that would be restricted by the coupling could be sort-of moved down to the location of the coupling, so that the search pattern cursor would simply roll into it, while the inptu tree cursor would "teleport" to the base of the branch. An And-rule would be inserted between coupled subtree and teleported branch. Then the reference to the coupled node at the end of the teleported branch would be coupled in as normal. 
 
-The tree should also indicate when couplings will be keyed and when they will be used for restriction. The usual rule will apply, that is the first appearance of a coupled node in a non-abnormal context keys; all others restrict.
+The above is a little vague, but you get the idea. The search engine has not conjecture mechnism and simply tries to walk the search pattern obeying what it sees and if the walk completes with no match the whole step completes - no retries by a conjecture layer. The pattern itself is now allowed to contain some fu to make the input tree pointer jump somewhere else in the program tree (the actual node location needs to be stored when the branching-point position is first reached).
 
-The search-time conjecture code will be modified to avoid crossing independent decisions.
+Naturally, this would need to repeat for all dependent branches as well as for all couplings. Keying decisions will need to be made at construct-time, and abnormal contexts must be avoided for keying. This could be heuristic and it could be over-constrained. Do trials! Form proofs! Check this!
 
-2. Decoupling container compares
+2. Construct-time fold-back of couplings
 
-Sequence and Collections compares currently iterate through the pattern container, making decisions as they go along and progressively restricting the set of choices available to later decisions based on the choices in earlier decisions. This needs to be changed to make all the decisions entirely independent. Essentially, each decision must be made as though it were the first and hence most free decision possible.
+In later stages of the plan, coupling restrictions will be optimised by traversing backwards from the coupled node to the branch point (reasons given later). It may make sense to express this at the present stage in the way in which patterns are optimised at construct-time. 
 
-Naturally, this will cause some combinations of choices to be incompatible, for example by trying to match two pattern nodes to a single program tree mode, or (in the case of sequences) matching out of sequence. I believe these cases can be restricted out at the end, or as soon as seen. A failure at this point would require re-iteration of potentially all the decisions in the container, but a failure to match by any one of those decisions is a reason to abort the entire container compare.
+Instead of the above fold-forward where a branch of the pattern is moved piecemeal, the proposal is to reverse the parent-child relationships in the branch that we move. So that the coupling point points to the parent of the coupling that is in the restricting branch, then its parent, and so on until the branch-point node is reference from the leaf of the new search pattern. Again, this is somewhat sketchy.
 
-Possibly the thing to do is to go through each decision in turn, trying all choices, and restricting to the choices that match. Then fit the ordering/separateness criteria on the remaining smaller decisions. If any leave no choices, discard the entire container compare. 
+Wrappers will be needed for pattern nodes that can "fold" them "back". Basically, one member pointer in a node is taken to be the "folded back pointer", and is left as NULL. All other outgoing pointers behave normally and the nodes they point to are *not* considered folded back. The wrapper provides a new "parent" pointer that must only point to a pattern representing the parent of the wrapped node. incoming pointers are assumed to come from patterns representing children that would be reached via the folded-back pointer. This needs clearing up in the case of entering and leaving folded-back segments.
 
-3. Restrict keying decisions by uniqueness
+Now the originally coupled node does not need a coupling at all. At that location, we now have and and-rule with the subtree under the coupled node and a folded-back path for every restricting branch ot the coupling. Branches out the side of the folded back section are once again normal forward branches. The leaf of the pattern, which is the branch-point, must somehow be coupled to the branch-point in order to ensure that we worked backward through the correct branch.
 
-Couplings work by simple subtree comparisons. Consequently, if two candidates for keying a coupling are equal, there is no need to try them both because the resulting coupling will restrict in the same way. So the options for a keying should be uniqueised. 
+The general process of going from child to parent in a tree will be termed backwardation. Folding-back refrees to implementing backwardation via construct-time reversal and wrapping of pattern nodes. Going backwards in program trees will be termed either backwardation by search or backwardisation by cache depending on whether a cache/bakcing list is used to speed the backwardation.
 
- ------- Coupling reverse walk --------
+Note that there are two different catagories of backwardation called for here. One is by coupling rules, and looks for any parent of any node whose subtree matches the one we started with - this will get us a set of nodes that could be a parent to a node that satisfies the coupling (remember to consider Identifier and non-Identifier cases). Then there is normal parent-finding for subsequent hops, which will be unique because identifiers are only leaf nodes, and we already did one hop to a parent. 
 
-1. Expand node interface for ordering, hashing
+Because most parent-finding is unique, backwardised paths are actually preferable - the only decision is the initial coupling-parent search which can have multiple hits, but after that the only decision left is the langth of the path, and even that could be optimised. We should aim to key the shortest path to a coupling (in terms of decsions) because the return paths will always suffer the hit of the couling parent search, but after that there will be no more decision no matter how long the path.
+
+3. Container matching changes
+
+The present implmentation of Sequence/Collection compare would need to be changed substantially if it is to loop through options locally, because there are multiple choices in a typical pattern container. I propose to re-implement using a recursive scheme whereby one decision is made in each invocation of a worker function, and that it recurses to itself to introduce more decisions. The sub-containers can be passed around as SubSequences and SubCollections (SubContainers already exist in S&R for keying coupled Star nodes. Thy just contain a container of some templated type).
+
+Note: do this first!
+
+4. Sequence matching optimisations
+
+It will become possible (and then mandatory) to explicitly specify how a complex Sequence match is to be broken up in the pattern, by mentioning SubSequences explicitly. I.e. there will be a search pattern that infers no more than one decision under the original pattern node that contains the sequence. One or more of the Star nodes in that sequence pattern will actually be SubSequence and will have a further one-decision pattern under them. Thus a sequence pattern breaks up into a subtree of sinlgle-decision matches. 
+
+Now the explicit recursion support can be removed from the sequence compare function and we can rely on the general case recursions. 
+
+Firstly, we can fold-back some of these SubSequence matches, while leaving others alone. This is vital for eg *X*Y* with X and Y coupled - Y can be placed in the subsequence copmare, and X can key. Now the subsequence compare under Y has been folded back, and is duly optimised as reuqired. Generally, we desire to key via the shortest path for resons given above, so we prefer to choose a keyable path for the initial decision and key it. 
+
+Secondly, the expansion, subject to the above, should be as shallow and wide as possible. I.e. balanced not skewed. If we imagine *Z*Y*Z* and we decide Y first, then X and Z will come off as two SubSequence compares at the same level and will not cross. Thus we can reduce the amount of crossing we do between different decsisions in a sequence.
+
+5. Collection matching optimisations
+
+This is a bit fuzzier. If at construct time we can detect that the islands are mutually exclusive matches, then they are independent and the pattern can be replaced by an and-rule on the sub-collection i.e. AB* becomes A* && B*. This would be good news (since && will not cross and will easily support folding back). 
+
+If A and B are really the same, then we can compare in a nested manner similar to sequences, but can assume no dependency. If there is a subset matthing effect in place, we can do the same but must apply strictest first.
+
+There could be a general intersection, i.e. comparing capitals with vowels. This might have to be broken up into cases of the above under an overall OR rule.
+
+6. Expand node interface for ordering, hashing
 
 Expand the concept of "LocalMatch" in the Node interface to support a local ordering and a hash function. Extend the simple compare class to generate ordering and hash for subtrees. ORdering is the usual keep going as long as things match, then return the local result. Hash function should either just be the local hash of the root node, or we should recurse and combine to some limited number of nodes, combining the hashes in a standard way.
 
 Create a facade for subtrees that makes them look like single objects for the purposes of STL. Use simple compare functions as above and a simple duplicate (as factored out of replace in the instructions listed below) for deep copies. 
 
-2. Create ParentBySubtreeEquality cache
+7. Create ParentBySubtreeEquality cache
 
 Build a cache of parent->child pairs in the input program, indexed by subtree equality of the child (using multimap or hashmap). Store something in the map that indicates which TreePtr within the parent is the one pointing to the matching child (and uniquify on this so that two links from X to Y are two separate entries). Thus, looking up a subtree gets you all the parents of subtrees equal to the one you started with. 
 
 The cache contains only parent->child links, not whole paths, so that its contents can be considered as localized. Eventually, the light-touch on replace will lead is to incrementally update this cache, rather than regenerate the whole lot, and that will be easier if the elements are localized.
 
-3. Decision restriction by reverse walk
+NOTE: still interested in general cache of node->descendent pairs and a set of these (or map of booleans indexed by node and descendant) for backwardation. Under cache invalidation, we would need the boolean map (so that absent means invalid).
+
+8. Decision restriction by reverse walk
 
 When a decision is known to be subject to a restricting coupling, we can get the program node the coupling is keyed to and use the ParentBySubtreeEquality repeatedly to get a full union of all nodes that exist in routes to nodes that would match on the coupling (ie all ancestors). This set can be intersected with the set of "lead" nodes corresponding with available choices and hence restrict the choice.
 
