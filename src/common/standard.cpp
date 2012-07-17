@@ -1,6 +1,7 @@
 #include "standard.hpp"
 #include "trace.hpp"
 #include <stdarg.h>
+#include <cxxabi.h>
 
 string SSPrintf(const char *fmt, ...)
 {
@@ -46,5 +47,16 @@ string Traceable::GetAddr() const
 Traceable::operator string() const
 {
     return GetName() + GetAddr(); // name plus pointer
+}
+
+string Traceable::CPPFilt( string s )
+{
+	int status;
+	char *ps;
+	// Use GCC extension to demangle based on the present ABI
+	ps = abi::__cxa_demangle(s.c_str(), 0, 0, &status);
+    s = ps;
+    free(ps); // as ordained
+    return s;
 }
 

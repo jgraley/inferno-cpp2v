@@ -2,7 +2,6 @@
 #include <boost/assert.hpp>
 #include <stdarg.h>
 #include <string.h>
-#include <cxxabi.h>
 #include <malloc.h>
 #include <unistd.h>
 
@@ -118,14 +117,4 @@ void boost::assertion_failed(char const * expr, char const * function, char cons
     InfernoAbort();
 }
 
-string Traceable::CPPFilt( string s )
-{
-	int status;
-	char *ps;
-	// Use GCC extension to demangle based on the present ABI
-	ps = abi::__cxa_demangle(s.c_str(), 0, 0, &status);
-    s = ps;
-    free(ps);
-    return s;
-}
 

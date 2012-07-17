@@ -2,7 +2,7 @@
 
 destdir=html
 idxname=step_index.html
-imgtype=png
+imgtype=svg
 testcase=test/examples/sctest13.cpp
 
 echo \<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"\> > $destdir/$idxname
