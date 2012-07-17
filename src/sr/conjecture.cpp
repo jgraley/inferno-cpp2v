@@ -33,7 +33,8 @@ bool Conjecture::Increment()
     {
         counts.resize( decision_index+1 );
         it_names.resize( decision_index+1 );
-        it_names[decision_index] = Traceable::CPPFilt((string)(typeid(choices.back().it).name()));
+        if( !choices.empty() )
+            it_names[decision_index] = (string)(choices.back().it);
         counts[decision_index] = 0;
     }
     counts[decision_index]++;
