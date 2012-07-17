@@ -2,6 +2,22 @@
 #include "search_replace.hpp"
 #include "conjecture.hpp"
 
+Conjecture::Conjecture()
+{
+    failed = false;
+}
+
+Conjecture::~Conjecture()
+{
+    TRACE("Conjecture counts@%p: ", this);
+    for( int i=1; i<counts.size(); i++ )
+        TRACE("%d ", counts[i]);
+    TRACE("\nIterators: ");
+    for( int i=1; i<counts.size(); i++ )
+        TRACE("%s ", it_names[i].c_str());
+    TRACE("%s\n", failed?"FAILED":"SUCCEEDED");
+}
+
 void Conjecture::PrepareForDecidedCompare()
 {
 	ASSERT( this );
@@ -13,10 +29,22 @@ void Conjecture::PrepareForDecidedCompare()
 
 bool Conjecture::Increment()
 {
+    if( decision_index >= counts.size() )
+    {
+        counts.resize( decision_index+1 );
+        it_names.resize( decision_index+1 );
+        it_names[decision_index] = Traceable::CPPFilt((string)(typeid(choices.back().it).name()));
+        counts[decision_index] = 0;
+    }
+    counts[decision_index]++;
+   
 	// If we've run out of choices, we're done.
 	TRACE();
 	if( choices.empty() )
+	{
+	    failed = true;
 	    return false;
+	}
 	else if( choices.back().it != choices.back().end )
 	{
 		TRACE("Incrementing choice FROM ")(**choices.back().it)("\n");

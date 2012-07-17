@@ -20,6 +20,8 @@ public:
         bool forced;
     };
 public:
+    Conjecture();
+    ~Conjecture();
 	void PrepareForDecidedCompare();    			                                     
     bool Increment(); // returns true for try again, false for give up				 
     				   
@@ -40,6 +42,9 @@ public:
 private:
 	int decision_index;
 	vector<Choice> choices;
+	vector<int> counts;
+	vector<string> it_names;
+	bool failed;
 };
 
 #endif

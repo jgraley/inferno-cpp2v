@@ -12,6 +12,14 @@
 using namespace CPPTree;
 using namespace SCTree;
 using namespace Steps;
+
+TreePtr<Type> MakeLabelType()
+{
+    MakeTreePtr<Pointer> ptr;
+    ptr->destination = MakeTreePtr<Void>();
+    return ptr;
+}
+
  
 // Something to get the size of the Collection matched by a Star as a SpecificInteger
 struct BuildContainerSize : CompareReplace::SoftReplacePattern,
@@ -88,8 +96,6 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakeTreePtr<Field> l_func;
     MakeTreePtr<Static> r_lmap, l_lmap;
     MakeTreePtr<BuildInstanceIdentifier> r_lmap_id("lmap");
-    MakeTreePtr<Pointer> r_pointer;
-    MakeTreePtr<Void> r_void;
     MakeTreePtr<Array> r_array;
     MakeTreePtr<MakeArray> r_make, l_make, lls_make;
     MakeTreePtr< Insert<Expression> > l_minsert;
@@ -173,9 +179,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     r_lmap->constancy = MakeTreePtr<Const>();        
 //    r_lmap->virt = MakeTreePtr<NonVirtual>();
   //  r_lmap->access = MakeTreePtr<Private>();    
-    r_array->element = r_pointer;
+    r_array->element = MakeLabelType();
     r_array->size = MakeTreePtr<Uninitialised>();
-    r_pointer->destination = r_void;
     //r_make->operands = ()
     
     Configure( module, slavel );    
@@ -188,8 +193,6 @@ LabelVarsToEnum::LabelVarsToEnum()
     MakeTreePtr< MatchAll<Statement> > sx_all;
     MakeTreePtr< Stuff<Scope> > scope;
     MakeTreePtr<Instance> var;
-    MakeTreePtr<Pointer> s_ptr;
-    MakeTreePtr<Void> s_void;
     MakeTreePtr<InstanceIdentifier> var_id;
     MakeTreePtr< Stuff<Scope> > s_stuff, sx_stuff;
     MakeTreePtr<Assign> s_assign, sx_assign, l_assign;
@@ -213,7 +216,6 @@ LabelVarsToEnum::LabelVarsToEnum()
     MakeTreePtr<Static> lmap;
     MakeTreePtr<Const> lmap_const;
     MakeTreePtr<Array> lmap_type;
-    MakeTreePtr<Type> label_type;
     MakeTreePtr<InstanceIdentifier> lmap_id; 
     
     l_assign->operands = (l_nested_subscript, l_over);
@@ -248,9 +250,8 @@ LabelVarsToEnum::LabelVarsToEnum()
     var->type = nested_array;
     nested_array->terminus = over;
     //nested_array->depth = depth;
-    over->through = label_type;    
+    over->through = MakeLabelType();    
     var->identifier = var_id;
-    s_ptr->destination = s_void;
     s_stuff->terminus = s_assign;
     s_assign->operands = (nested_subscript, s_sub);
     nested_subscript->terminus = var_id;
@@ -273,7 +274,7 @@ LabelVarsToEnum::LabelVarsToEnum()
     lmap->identifier = lmap_id;
     lmap->type = lmap_type;
     lmap->constancy = lmap_const;
-    lmap_type->element = label_type;
+    lmap_type->element = MakeLabelType();
         
     Configure( s_all, slavem );
 }
