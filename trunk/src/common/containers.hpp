@@ -132,12 +132,19 @@ public:
 				return NULL;
 		}
 		
-		virtual shared_ptr<iterator_interface> Clone()
+		virtual shared_ptr<iterator_interface> Clone() // TODO does this need to be virtual?
 		{
 			ASSERT(pib)("Attempt to Clone() uninitialised iterator");
 			return pib->Clone();
 		}
 		
+		operator string()
+		{   
+		    if( pib )
+		        return (string)(Traceable::CPPFilt( typeid( *pib ).name() ));
+		    else 
+		        return (string)("no-impl");
+		}
 	private:
 		void EnsureUnique()
 		{
