@@ -9,13 +9,16 @@ Conjecture::Conjecture()
 
 Conjecture::~Conjecture()
 {
-    TRACE("Conjecture counts@%p: ", this);
-    for( int i=1; i<counts.size(); i++ )
-        TRACE("%d ", counts[i]);
+    TRACE("Conjecture @%p %d entries\nstart counts: ", this, it_names.size());
+    for( int i=0; i<it_names.size(); i++ )
+        TRACE("%d ", start_counts[i]);
+    TRACE("\nIncrement counts: ", this);
+    for( int i=0; i<it_names.size(); i++ )
+        TRACE("%d ", inc_counts[i]);
     TRACE("\nIterators: ");
-    for( int i=1; i<counts.size(); i++ )
+    for( int i=0; i<it_names.size(); i++ )
         TRACE("%s ", it_names[i].c_str());
-    TRACE("%s\n", failed?"FAILED":"SUCCEEDED");
+    TRACE("\nresult: %s\n", failed?"FAILED":"SUCCEEDED");
 }
 
 void Conjecture::PrepareForDecidedCompare()
@@ -28,32 +31,37 @@ void Conjecture::PrepareForDecidedCompare()
 
 
 bool Conjecture::Increment()
-{
-    if( decision_index >= counts.size() )
+{   
+    // tracing stuff
+    while( choices.size() > it_names.size() )
     {
-        counts.resize( decision_index+1 );
-        it_names.resize( decision_index+1 );
-        if( !choices.empty() )
-            it_names[decision_index] = (string)(choices.back().it);
-        counts[decision_index] = 0;
+        start_counts.resize( start_counts.size()+1 );
+        inc_counts.resize( inc_counts.size()+1 );
+        it_names.resize( it_names.size()+1 );         
+        it_names[it_names.size()-1] = (string)(choices[it_names.size()-1].it);
+        start_counts[start_counts.size()-1] = 0;
+        inc_counts[inc_counts.size()-1] = 0;
     }
-    counts[decision_index]++;
-   
+
 	// If we've run out of choices, we're done.
-	TRACE();
 	if( choices.empty() )
 	{
 	    failed = true;
+        TRACE("Giving up\n");
 	    return false;
 	}
 	else if( choices.back().it != choices.back().end )
 	{
-		TRACE("Incrementing choice FROM ")(**choices.back().it)("\n");
+        inc_counts[choices.size()-1]++;
+
+ 		TRACE("Incrementing choice FROM ")(**choices.back().it)("\n");
 		++(choices.back().it); // There are potentially more choices so increment the last decision
     }
 		
     if( choices.back().it == choices.back().end )
     {
+        start_counts[choices.size()-1]++;
+
         TRACE("Incrementing end count FROM %d\n", choices.back().end_count);
         ++choices.back().end_count;
         if( choices.back().end_count > choices.back().end_num )
@@ -93,7 +101,7 @@ ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::ite
 	}
     
     decision_index++;
-
+    
 	// Return whatever choice we made
     return c.it;
 }

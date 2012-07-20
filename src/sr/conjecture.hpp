@@ -42,7 +42,8 @@ public:
 private:
 	int decision_index;
 	vector<Choice> choices;
-	vector<int> counts;
+	vector<int> inc_counts;
+	vector<int> start_counts;
 	vector<string> it_names;
 	bool failed;
 };
