@@ -43,7 +43,7 @@ private:
 	int decision_index;
 	vector<Choice> choices;
 	vector<int> inc_counts;
-	vector<int> start_counts;
+	vector<int> end_counts;
 	vector<string> it_names;
 	bool failed;
 };

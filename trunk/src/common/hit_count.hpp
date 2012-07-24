@@ -49,6 +49,11 @@ public:
         current_step = i;
     }    
     
+    int GetStep()
+    {
+        return current_step;
+    }    
+    
     static void Enable( bool e ); ///< enable/disable hit counting, only for top level function to call, overridden by flags
     inline static bool IsEnabled() { return enable; }    
 };
