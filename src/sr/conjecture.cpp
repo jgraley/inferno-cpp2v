@@ -9,16 +9,16 @@ Conjecture::Conjecture()
 
 Conjecture::~Conjecture()
 {
-    TRACE("Conjecture @%p %d entries\nstart counts: ", this, it_names.size());
+    TRACE("Conjecture dump step %d; end counts: ", HitCount::instance.GetStep());
     for( int i=0; i<it_names.size(); i++ )
-        TRACE("%d ", start_counts[i]);
-    TRACE("\nIncrement counts: ", this);
+        TRACE("%d ", end_counts[i]);
+    TRACE("; inc counts: ", this);
     for( int i=0; i<it_names.size(); i++ )
         TRACE("%d ", inc_counts[i]);
-    TRACE("\nIterators: ");
+    TRACE("; iterators: ");
     for( int i=0; i<it_names.size(); i++ )
         TRACE("%s ", it_names[i].c_str());
-    TRACE("\nresult: %s\n", failed?"FAILED":"SUCCEEDED");
+    TRACE("; %s\n", failed?"FAILED":"SUCCEEDED");
 }
 
 void Conjecture::PrepareForDecidedCompare()
@@ -35,11 +35,11 @@ bool Conjecture::Increment()
     // tracing stuff
     while( choices.size() > it_names.size() )
     {
-        start_counts.resize( start_counts.size()+1 );
+        end_counts.resize( end_counts.size()+1 );
         inc_counts.resize( inc_counts.size()+1 );
         it_names.resize( it_names.size()+1 );         
         it_names[it_names.size()-1] = (string)(choices[it_names.size()-1].it);
-        start_counts[start_counts.size()-1] = 0;
+        end_counts[end_counts.size()-1] = 0;
         inc_counts[inc_counts.size()-1] = 0;
     }
 
@@ -60,7 +60,7 @@ bool Conjecture::Increment()
 		
     if( choices.back().it == choices.back().end )
     {
-        start_counts[choices.size()-1]++;
+        end_counts[choices.size()-1]++;
 
         TRACE("Incrementing end count FROM %d\n", choices.back().end_count);
         ++choices.back().end_count;

@@ -4,6 +4,7 @@ destdir=html
 idxname=step_index.html
 imgtype=svg
 testcase=test/examples/sctest13.cpp
+extraiopt=-q15
 
 echo \<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"\> > $destdir/$idxname
 echo \<html\>\<head\>\</head\> >> $destdir/$idxname
@@ -11,7 +12,8 @@ echo \<body dir="ltr" bgcolor="#ffffff" lang="en-US"\> >> $destdir/$idxname
 echo \<h1\>Inferno search and replace patterns\</h1\> >> $destdir/$idxname
 
 cd ../..
-./inferno.exe -i$testcase -thSNnMFL > docs/generated/hits.txt 2> docs/generated/steps.txt
+./inferno.exe $extraiopt -i$testcase -thSNnMFL > docs/generated/hits.txt 2> docs/generated/steps.txt
+./inferno.exe $extraiopt -i$testcase -t 2>&1 | grep "Conjecture dump" > docs/generated/conj_counts.txt
 cd docs/generated
 
 i=0
@@ -30,7 +32,8 @@ do
   mogrify -antialias -resize 40% $destdir/$imgname
 
   # Generate step-specific page
-  grep "step $i " hits.txt > curhits.txt
+  grep "step $i " hits.txt > cur_hits.txt
+  grep "step $i;" conj_counts.txt > cur_conj_counts.txt
   grep "Step $i:" steps.txt | sed 's/Step [0-9]*: Steps::\([a-zA-Z]*\)@0x[0-9a-f]*/\1/' > name.txt
   name=`cat name.txt`
   echo \<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"\> > $destdir/$stepname
@@ -46,7 +49,12 @@ do
   echo Hit counts breakdown based on $testcase\<br\> >> $destdir/$stepname   
   while read p; do
     echo $p\<br\> >> $destdir/$stepname
-  done < curhits.txt
+  done < cur_hits.txt
+  echo \</p\> >> $destdir/$stepname  
+  echo Decision activity summaries based on $testcase\<br\> >> $destdir/$stepname   
+  while read p; do
+    echo $p\<br\> >> $destdir/$stepname
+  done < cur_conj_counts.txt
   echo \</body\>\</html\> >> $destdir/$stepname
 
   # Add link to link farm page
