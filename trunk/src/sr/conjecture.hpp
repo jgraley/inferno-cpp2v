@@ -42,8 +42,11 @@ public:
 private:
 	int decision_index;
 	vector<Choice> choices;
+	
+	// Tracing stuff
+	void ResizeCounts();
 	vector<int> inc_counts;
-	vector<int> end_counts;
+	vector<int> start_counts;
 	vector<string> it_names;
 	bool failed;
 };
