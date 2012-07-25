@@ -4,7 +4,7 @@ destdir=html
 idxname=step_index.html
 imgtype=svg
 testcase=test/examples/sctest13.cpp
-extraiopt=-q15
+extraiopt=
 
 echo \<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"\> > $destdir/$idxname
 echo \<html\>\<head\>\</head\> >> $destdir/$idxname
