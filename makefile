@@ -1,5 +1,5 @@
 include makefile.common
-.PHONY: default all get_libs test docs force_subordinate_makefiles clean iclean resource publish
+.PHONY: default all get_libs test docs force_subordinate_makefiles clean iclean resource publish doxygen
 default : inferno.exe
 all : clean get_libs inferno.exe resource docs test
 
@@ -81,7 +81,7 @@ resource : force_subordinate_makefiles
 #
 # Build the doxygen docs
 #
-doxygen : docs/generated/Doxy-Inferno
+doxygen : 
 	doxygen docs/generated/Doxy-Inferno
 	@echo Doxygen documentation now at: $(PWD)/docs/generated/html/index.html
 
