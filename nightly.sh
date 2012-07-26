@@ -15,8 +15,8 @@ LOGFILE=log_`date +%Y%m%d`.txt
     # See if any changes have been checked in since we last ran
     svn diff -rHEAD > diff.txt
 
-    //if [ -s diff.txt ]
-   // then
+    if [ -s diff.txt ]
+    then
         # yes, so grab the changes
         svn update
 
@@ -25,5 +25,5 @@ LOGFILE=log_`date +%Y%m%d`.txt
         # created and the public key logged with sourceforge. See
         # https://sourceforge.net/apps/trac/sourceforge/wiki/SSH%20keys
         make publish  
-   // fi
+    fi
 ) > $LOGFILE 2>&1 
