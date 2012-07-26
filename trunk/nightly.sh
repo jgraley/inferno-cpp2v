@@ -5,18 +5,25 @@
 SCRIPT=$(readlink -f "$0")
 SCRIPTPATH=`dirname "$SCRIPT"`
 cd $SCRIPTPATH
+LOGFILE=log_`date +%Y%m%d`.txt
 
-# See if any changes have been checked in since we last ran
-svn diff -rHEAD > diff.txt
+# Use a subshell to capture all the stdout, stderr etc
+(
+    # Logging
+    echo "Nightly script run at "`date`" from user $USER on $HOSTNAME" 
 
-if [ -s diff.txt ]
-then
-  # yes, so grab the changes
-  svn update
+    # See if any changes have been checked in since we last ran
+    svn diff -rHEAD > diff.txt
 
-  # build inferno, generate docs and publish them on sourceforge.net
-  # Note: for publishing to work non-interactively, you need DSA keys 
-  # created and the public key logged with sourceforge. See
-  # https://sourceforge.net/apps/trac/sourceforge/wiki/SSH%20keys
-  make publish  
-fi
+    //if [ -s diff.txt ]
+   // then
+        # yes, so grab the changes
+        svn update
+
+        # build inferno, generate docs and publish them on sourceforge.net
+        # Note: for publishing to work non-interactively, you need DSA keys 
+        # created and the public key logged with sourceforge. See
+        # https://sourceforge.net/apps/trac/sourceforge/wiki/SSH%20keys
+        make publish  
+   // fi
+) > $LOGFILE 2>&1 
