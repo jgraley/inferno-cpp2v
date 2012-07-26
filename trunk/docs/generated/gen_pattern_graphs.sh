@@ -6,7 +6,7 @@ imgtype=svg
 testcase=test/examples/sctest13.cpp
 extraiopt=
 
-echo \<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"\> > $destdir/$idxname
+echo \<!DOCTYPE html\> > $destdir/$idxname
 echo \<html\>\<head\>\</head\> >> $destdir/$idxname
 echo \<body dir="ltr" bgcolor="#ffffff" lang="en-US"\> >> $destdir/$idxname
 echo \<h1\>Inferno search and replace patterns\</h1\> >> $destdir/$idxname
