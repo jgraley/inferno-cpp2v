@@ -29,7 +29,8 @@ do
     break
   fi
   dot -T$imgtype -o$destdir/$imgname temp.dot 
-  mogrify -antialias -resize 40% $destdir/$imgname
+  # transform image size - not needed if vector eg svg
+  # mogrify -antialias -resize 40% $destdir/$imgname
 
   # Generate step-specific page
   grep "step $i " hits.txt > cur_hits.txt
