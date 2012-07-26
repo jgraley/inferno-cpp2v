@@ -79,14 +79,24 @@ resource : force_subordinate_makefiles
 	cd resource && $(MAKE)
 
 #
-# Build the documentation
+# Build the doxygen docs
 #
-docs : makefile inferno.exe docs/generated/Doxy-Inferno docs/generated/gen_pattern_graphs.sh
+doxygen : docs/generated/Doxy-Inferno
 	doxygen docs/generated/Doxy-Inferno
-	cd docs/generated && ./gen_pattern_graphs.sh
 	@echo Doxygen documentation now at: $(PWD)/docs/generated/html/index.html
+
+#
+# Build the step graphs and stats
+#
+pattern_graphs : makefile inferno.exe docs/generated/gen_pattern_graphs.sh
+	cd docs/generated && ./gen_pattern_graphs.sh
 	@echo Patterns and hits counts at: $(PWD)/docs/generated/html/step_index.html
-	
+
+#
+# Build all of the generatable documentation
+#
+docs : doxygen pattern_graphs
+
 #
 # Push web site to sourceforge
 #
