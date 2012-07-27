@@ -6,11 +6,12 @@ SCRIPT=$(readlink -f "$0")
 SCRIPTPATH=`dirname "$SCRIPT"`
 cd $SCRIPTPATH
 LOGFILE=log_`date +%Y%m%d`.txt
+export USER=jgraley
 
 # Use a subshell to capture all the stdout, stderr etc
 (
     # Logging
-    echo "Nightly script run at "`date`" from user $USER on $HOSTNAME" 
+    echo "Nightly script run at "`date`" on $HOSTNAME" 
 
     # See if any changes have been checked in since we last ran
     svn diff -rHEAD > diff.txt
