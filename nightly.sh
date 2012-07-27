@@ -23,7 +23,7 @@ LOGFILE=log_`date +%Y%m%d`.txt
     # Any argument forces run even if no diffs in subversion
     echo Diffing...
     svn diff -rHEAD | tee diff.txt
-    echo $1 >> diff.txt
+    echo -n $1 >> diff.txt
 
     if [ -s diff.txt ]
     then
@@ -37,6 +37,9 @@ LOGFILE=log_`date +%Y%m%d`.txt
         # https://sourceforge.net/apps/trac/sourceforge/wiki/SSH%20keys
         echo Build, generate, publish...
         make publish  
+
+        # Do a test
+        make test
     fi
 ) > $LOGFILE 2>&1 
 
