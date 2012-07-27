@@ -5,8 +5,12 @@
 SCRIPT=$(readlink -f "$0")
 SCRIPTPATH=`dirname "$SCRIPT"`
 cd $SCRIPTPATH
+
+# Set the user as the owner of this script. This is used by sftp in the publish script.
+export USER=`stat -c %U $0`
+
+# Name the log file.
 LOGFILE=log_`date +%Y%m%d`.txt
-export USER=jgraley
 
 # Use a subshell to capture all the stdout, stderr etc
 (
@@ -28,3 +32,4 @@ export USER=jgraley
         make publish  
     fi
 ) > $LOGFILE 2>&1 
+
