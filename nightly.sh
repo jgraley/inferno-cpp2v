@@ -16,12 +16,18 @@ LOGFILE=log_`date +%Y%m%d`.txt
 (
     # Logging
     echo "Nightly script run at "`date`" on $HOSTNAME" 
+    echo "Running from "`pwd`" USER set to $USER" 
+    echo
 
     # See if any changes have been checked in since we last ran
-    svn diff -rHEAD > diff.txt
+    # Any argument forces run even if no diffs in subversion
+    echo Diffing...
+    svn diff -rHEAD | tee diff.txt
+    echo $1 >> diff.txt
 
     if [ -s diff.txt ]
     then
+        echo Updating...
         # yes, so grab the changes
         svn update
 
@@ -29,6 +35,7 @@ LOGFILE=log_`date +%Y%m%d`.txt
         # Note: for publishing to work non-interactively, you need DSA keys 
         # created and the public key logged with sourceforge. See
         # https://sourceforge.net/apps/trac/sourceforge/wiki/SSH%20keys
+        echo Build, generate, publish...
         make publish  
     fi
 ) > $LOGFILE 2>&1 
