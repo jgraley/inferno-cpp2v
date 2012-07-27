@@ -41,5 +41,7 @@ LOGFILE=log_`date +%Y%m%d`.txt
         # Do a test
         make test
     fi
+    
+    echo Done.
 ) > $LOGFILE 2>&1 
 
