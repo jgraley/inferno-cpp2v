@@ -37,7 +37,7 @@ do
   grep "step $i;" conj_counts.txt > cur_conj_counts.txt
   grep "Step $i:" steps.txt | sed 's/Step [0-9]*: Steps::\([a-zA-Z]*\)@0x[0-9a-f]*/\1/' > name.txt
   name=`cat name.txt`
-  echo \<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"\> > $destdir/$stepname
+  echo \<!DOCTYPE html\> > $destdir/$stepname
   echo \<html\>\<head\>\</head\> >> $destdir/$stepname
   echo \<body dir="ltr" bgcolor="#ffffff" lang="en-US"\> >> $destdir/$stepname
   echo \<p\> >> $destdir/$stepname
