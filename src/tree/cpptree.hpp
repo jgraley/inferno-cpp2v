@@ -565,6 +565,15 @@ struct Floating : Numeric
     TreePtr<FloatSemantics> semantics; ///< These are the semantics of the representation
 }; 
 
+/// Type of a variable that can hold a label. Similar to the GCC extension
+/// for labels-in-variables but we use this type not void * (which is 
+/// inconvenient for stataic analysis). To declare a conventional label
+/// at a particular position, use Label.
+struct Labeley : Type
+{
+	NODE_FUNCTIONS_FINAL   
+};
+
 //////////////////////////// User-defined Types ////////////////////////////
 
 /// Intermediate declaration of a user defined type of any kind (struct, typedef etc).

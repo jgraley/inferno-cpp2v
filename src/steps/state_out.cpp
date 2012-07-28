@@ -227,7 +227,6 @@ AddStateLabelVar::AddStateLabelVar()
     MakeTreePtr<Assign> lr_assign;
     MakeTreePtr<Automatic> state_var;
     MakeTreePtr< NotMatch<Expression> > sx_not, lsx_not;
-    MakeTreePtr<Pointer> ptr_type;
     MakeTreePtr< BuildInstanceIdentifier > state_var_id("state");
     
     ls_goto->destination = lsx_not;
@@ -247,9 +246,8 @@ AddStateLabelVar::AddStateLabelVar()
     r_comp->members = (state_var, decls);
     r_comp->statements = (pre, sx_goto, post); 
     state_var->identifier = state_var_id;
-    state_var->type = ptr_type;    
+    state_var->type = MakeTreePtr<Labeley>();    
     state_var->initialiser = MakeTreePtr<Uninitialised>();
-    ptr_type->destination = MakeTreePtr<Void>();
 
     Configure( s_comp, r_slave );
 }
@@ -488,7 +486,6 @@ InsertSwitch::InsertSwitch()
     MakeTreePtr<InstanceIdentifier> var_id;
     MakeTreePtr<Instance> var_decl, l_var_decl;
     MakeTreePtr< Overlay<Type> > var_over;  
-    MakeTreePtr<Pointer> s_ptr;
     MakeTreePtr<Label> xs_pre_label;
     MakeTreePtr<IsLabelReached> xs_pre_reach;
     MakeTreePtr< MatchAll<Node> > ll_all;
@@ -505,8 +502,7 @@ InsertSwitch::InsertSwitch()
     s_func_comp->members = (func_decls, var_decl);
     var_decl->type = var_over;
     var_decl->identifier = var_id;
-    var_over->through = s_ptr;
-    s_ptr->destination = MakeTreePtr<Void>();
+    var_over->through = MakeTreePtr<Labeley>();
     s_func_comp->statements = (func_pre, stuff, func_post);
     stuff->terminus = over;
     stuff->recurse_restriction = xs_rr; // TODO Add support for elsewhere restriction in stuff node, restrict for no reaches
@@ -687,7 +683,6 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     MakeTreePtr<TypeIdentifier> module_id;
     MakeTreePtr<Label> m_label;
     MakeTreePtr<IsLabelReached> m_ilr;
-    MakeTreePtr<Pointer> m_ptr;
     MakeTreePtr< Compound > l_func_comp, lr_comp, ls_comp, lr_if_comp;
     MakeTreePtr< Star<Declaration> > l_func_decls, l_enum_vals, l_decls, l_module_decls;
     MakeTreePtr< Star<Statement> > l_func_pre, l_func_post, l_pre, l_block, l_post, l_stmts, l_dead_gotos;
@@ -741,8 +736,7 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     m_inst->identifier = m_inst_id;
     m_inst->type = m_stuff;
     m_stuff->terminus = m_over;    
-    m_over->through = m_ptr;
-    m_ptr->destination = MakeTreePtr<Void>();
+    m_over->through = MakeTreePtr<Labeley>();
     m_over->overlay = r_enum_id;    
     
     MakeTreePtr< SlaveCompareReplace<Scope> > slavem( module, m_all );
@@ -824,7 +818,6 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     MakeTreePtr<InstanceIdentifier> var_id;
     MakeTreePtr<Instance> var_decl, l_var_decl;
     MakeTreePtr< Overlay<Type> > var_over;  
-    MakeTreePtr<Pointer> s_ptr;
     MakeTreePtr<Label> xs_pre_label;
     MakeTreePtr<IsLabelReached> xs_pre_reach;
     MakeTreePtr< MatchAll<Node> > ll_all;
@@ -854,9 +847,8 @@ MakeFallThroughMachine::MakeFallThroughMachine()
     s_func_comp->statements = (stmts);
     var_decl->type = var_over;
     var_decl->identifier = var_id;
-    var_over->through = s_ptr;
+    var_over->through = MakeTreePtr<Labeley>();
     var_over->overlay = r_enum_id;
-    s_ptr->destination = MakeTreePtr<Void>();
 
     func_over->overlay = r_slave;
     r_func_comp->members = (func_decls, r_enum, var_decl);

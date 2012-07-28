@@ -176,7 +176,6 @@ AddLinkAddress::AddLinkAddress()
     MakeTreePtr<BuildInstanceIdentifier> lr_retaddr_id("link");
     MakeTreePtr<TempReturnAddress> lr_temp_retaddr;
     MakeTreePtr<BuildInstanceIdentifier> lr_temp_retaddr_id("temp_link");
-    MakeTreePtr<Pointer> r_ptr, lr_ptr;
     MakeTreePtr< NotMatch<Declaration> > s_nm, ls_nm;
     MakeTreePtr< GreenGrass<Declaration> > gg;
     MakeTreePtr<Instance> l_inst;
@@ -243,20 +242,18 @@ AddLinkAddress::AddLinkAddress()
     l_over->overlay = slavell;
     lr_comp->members = (l_decls, lr_temp_retaddr);
     lr_retaddr->identifier = lr_retaddr_id;
-    lr_retaddr->type = lr_ptr;
+    lr_retaddr->type = MakeTreePtr<Labeley>();
     lr_retaddr->initialiser = MakeTreePtr<Uninitialised>();
     lr_temp_retaddr->identifier = lr_temp_retaddr_id;
-    lr_temp_retaddr->type = lr_ptr;
+    lr_temp_retaddr->type = MakeTreePtr<Labeley>();
     lr_temp_retaddr->initialiser = MakeTreePtr<Uninitialised>();
-    lr_ptr->destination = MakeTreePtr<Void>();
     lr_comp->statements = (l_stmts);
     
     module->members = (gg, decls, insert);
     insert->insert = (r_retaddr);
     gg->through = l_inst;
     r_retaddr->identifier = r_retaddr_id;
-    r_retaddr->type = r_ptr;
-    r_ptr->destination = MakeTreePtr<Void>();
+    r_retaddr->type = MakeTreePtr<Labeley>();
     r_retaddr->initialiser = MakeTreePtr<Uninitialised>();
     //r_retaddr->virt = MakeTreePtr<NonVirtual>();
     //r_retaddr->access = MakeTreePtr<Private>();

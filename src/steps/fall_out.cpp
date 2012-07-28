@@ -13,14 +13,7 @@ using namespace CPPTree;
 using namespace SCTree;
 using namespace Steps;
 
-TreePtr<Type> MakeLabelType()
-{
-    MakeTreePtr<Pointer> ptr;
-    ptr->destination = MakeTreePtr<Void>();
-    return ptr;
-}
 
- 
 // Something to get the size of the Collection matched by a Star as a SpecificInteger
 struct BuildContainerSize : CompareReplace::SoftReplacePattern,
                             Special<Integer>
@@ -179,7 +172,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     r_lmap->constancy = MakeTreePtr<Const>();        
 //    r_lmap->virt = MakeTreePtr<NonVirtual>();
   //  r_lmap->access = MakeTreePtr<Private>();    
-    r_array->element = MakeLabelType();
+    r_array->element = MakeTreePtr<Labeley>();
     r_array->size = MakeTreePtr<Uninitialised>();
     //r_make->operands = ()
     
@@ -250,7 +243,7 @@ LabelVarsToEnum::LabelVarsToEnum()
     var->type = nested_array;
     nested_array->terminus = over;
     //nested_array->depth = depth;
-    over->through = MakeLabelType();    
+    over->through = MakeTreePtr<Labeley>();    
     var->identifier = var_id;
     s_stuff->terminus = s_assign;
     s_assign->operands = (nested_subscript, s_sub);
@@ -274,7 +267,7 @@ LabelVarsToEnum::LabelVarsToEnum()
     lmap->identifier = lmap_id;
     lmap->type = lmap_type;
     lmap->constancy = lmap_const;
-    lmap_type->element = MakeLabelType();
+    lmap_type->element = MakeTreePtr<Labeley>();
         
     Configure( s_all, slavem );
 }
