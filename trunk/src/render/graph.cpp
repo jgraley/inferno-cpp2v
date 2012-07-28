@@ -36,6 +36,12 @@ using namespace CPPTree;
 // Secondary: Normal nodes and special nodes that occupy space
 // Tertiary: CompareReplace and special nodes that do not occupy space
 
+#define FS_SMALL "10"
+#define FS_MIDDLE "12"
+#define FS_LARGE "15"
+#define NS_SMALL "0.4"
+#define FONT "Arial"
+
 void Graph::operator()( Transformation *root )
 {    
     string s;
@@ -87,10 +93,11 @@ string Graph::Header()
 	s += "digraph Inferno {\n"; // g is name of graph
 	s += "graph [\n";
 	s += "rankdir = \"LR\"\n"; // left-to-right looks more like source code
-    s += "fontname = \"arial\"\n"; // get with the 21st century
+	s += "size = \"14,20\"\n"; // make it smaller
   //  s += "concentrate = \"true\"\n"; 
 	s += "];\n";
 	s += "node [\n";
+    s += "fontname = \"" FONT "\"\n"; // get with the 21st century
 	s += "];\n";
 	return s;
 }
@@ -206,7 +213,7 @@ string Graph::DoTransformation( Transformation *sr,
 
 	s += "shape = \"record\"\n"; // nodes can be split into fields
 	s += "style = \"filled\"\n";
-	s += "fontsize = \"16\"\n";
+	s += "fontsize = \"" FS_MIDDLE "\"\n";
 	s += "];\n";
 
 	return s;
@@ -452,7 +459,7 @@ string Graph::HTMLLabel( string name, TreePtr<Node> n )
 {
 	string s = "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\">\n";
 	s += " <TR>\n";
-	s += "  <TD><FONT POINT-SIZE=\"24.0\">" + Sanitise(name) + "</FONT></TD>\n";
+	s += "  <TD><FONT POINT-SIZE=\"" FS_LARGE ".0\">" + Sanitise(name) + "</FONT></TD>\n";
 	s += "  <TD></TD>\n";
 	s += " </TR>\n";
 	vector< Itemiser::Element * > members = n->Itemise();
@@ -544,7 +551,7 @@ string Graph::DoNode( TreePtr<Node> n )
 	{
 		s += "label = " + HTMLLabel( name, n );
 		s += "style = \"rounded,filled\"\n";
-		s += "fontsize = \"16\"\n";
+		s += "fontsize = \"" FS_SMALL "\"\n";
 	}
 	else
 	{
@@ -554,13 +561,13 @@ string Graph::DoNode( TreePtr<Node> n )
 		if( shape == "circle" || shape=="triangle" )
 		{
 			s += "fixedsize = true\n";
-			s += "width = 0.55\n";
-			s += "height = 0.55\n";
-			s += "fontsize = \"24\"\n";
+			s += "width = " NS_SMALL "\n";
+			s += "height = " NS_SMALL "\n";
+			s += "fontsize = \"" FS_LARGE "\"\n";
 		}
 		else
 		{
-			s += "fontsize = \"20\"\n";
+			s += "fontsize = \"" FS_MIDDLE "\"\n";
 		}
 	}
 
