@@ -30,6 +30,7 @@ public:
     static bool rep_error;
     static bool selftest;
     static bool assert_pedigree;
+    static bool documentation_graphs;
 private:
     int curarg;
     char **argv;

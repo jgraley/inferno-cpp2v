@@ -35,7 +35,8 @@ using namespace SCTree;
     ERROR_UNKNOWN( P ? typeid(*P).name() : "<NULL>" );
 
 
-Render::Render()
+Render::Render( string of ) :
+    outfile( of )
 {
 }
 
@@ -59,14 +60,14 @@ TreePtr<Node> Render::operator()( TreePtr<Node> context, TreePtr<Node> root )
 
 	s += deferred_decls; // these could go in a .cpp file
 
-	if( ReadArgs::outfile.empty() )
+	if( outfile.empty() )
 	{
 		puts( s.c_str() );
 	}
 	else
 	{
-		FILE *fp = fopen( ReadArgs::outfile.c_str(), "wt" );
-		ASSERT( fp )( "Cannot open output file" );
+		FILE *fp = fopen( outfile.c_str(), "wt" );
+		ASSERT( fp )( "Cannot open output file \"%s\"", outfile.c_str() );
 		fputs( s.c_str(), fp );
 		fclose( fp );
 	}

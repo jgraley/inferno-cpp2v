@@ -21,6 +21,7 @@ bool ReadArgs::quitenable = false;
 int ReadArgs::repetitions = 100; // default behaviour
 bool ReadArgs::rep_error = true; // default behaviour
 bool ReadArgs::assert_pedigree = false;
+bool ReadArgs::documentation_graphs = false;
 
 void ReadArgs::Usage()
 {
@@ -37,12 +38,13 @@ void ReadArgs::Usage()
                     "-q<n>       Stop before step <n>. <n> may be 0 to exercise just parser and renderer.\n"    
                     "            Note: -q<n> makes -t and -r operate only on step n-1.\n"                
                     "-n<n>       Only run step <n>. User must ensure input program meets any restrictions of the step.\n"                    
-	                "-gi         Generate Graphviz graphs for output or intermediate if used with -q.\n"
-	                "-gp<n>      Generate Graphviz graphs for transformation step n.\n"
+	                "-gi         Generate Graphviz dot file for output or intermediate if used with -q.\n"
+	                "-gp<n>      Generate dot file for specified transformation step n.\n"
+	                "-gd         Generate dot files for documentation; -o specifies directory.\n"
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
                     "\n"
-    		        "One of -i, -s or -gp required; all others are optional.\n",
+    		        "One of -i, -s, -th, -gp, -gd required; all others are optional.\n",
     		        exename.c_str() );
     exit(1);
 }
@@ -102,6 +104,8 @@ ReadArgs::ReadArgs( int ac, char *av[] )
                 intermediate_graph = true;
             else if( option2=='p' )
                 pattern_graph = strtoul( GetArg(2).c_str(), NULL, 10 );
+            else if( option2=='d' )
+                documentation_graphs = true;
             else
                 Usage();
         }
@@ -150,6 +154,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
     if( infile.empty() && 
         !selftest && 
         pattern_graph==-1 && 
-        !(trace_hits && hits_format==std::string("?") ) )
+        !(trace_hits && hits_format==std::string("?") ) &&
+        !documentation_graphs )
         Usage();
 }

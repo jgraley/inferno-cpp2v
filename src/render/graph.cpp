@@ -42,6 +42,11 @@ using namespace CPPTree;
 #define NS_SMALL "0.4"
 #define FONT "Arial"
 
+Graph::Graph( string of ) :
+    outfile(of)
+{
+}
+
 void Graph::operator()( Transformation *root )
 {    
     string s;
@@ -113,14 +118,14 @@ string Graph::Footer()
 
 void Graph::Disburse( string s )
 {
-	if( ReadArgs::outfile.empty() )
+	if( outfile.empty() )
 	{
 		puts( s.c_str() );
 	}
 	else
 	{
-		FILE *fp = fopen( ReadArgs::outfile.c_str(), "wt" );
-		ASSERT( fp )( "Cannot open output file " )(ReadArgs::outfile);
+		FILE *fp = fopen( outfile.c_str(), "wt" );
+		ASSERT( fp )( "Cannot open output file \"%s\"", outfile.c_str() );
 		fputs( s.c_str(), fp );
 		fclose( fp );
 	}

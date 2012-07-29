@@ -12,6 +12,7 @@ class CompareReplace;
 class Graph : public OutOfPlaceTransformation
 {
 public:
+    Graph( string of = string() );
 	using Transformation::operator();
     void operator()( Transformation *root ); // Graph the search/replace pattern
     TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root ); // graph the subtree under root node
@@ -36,6 +37,7 @@ private:
     bool IsRecord( TreePtr<Node> n );
     string DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string atts=string(), const TreePtrInterface *ptr=NULL );
     UniqueFilter unique_filter;
+    const string outfile; // empty means stdout
 };
 
 #endif
