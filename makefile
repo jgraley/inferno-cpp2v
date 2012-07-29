@@ -1,5 +1,5 @@
 include makefile.common
-.PHONY: default all get_libs test docs force_subordinate_makefiles clean iclean resource publish doxygen
+.PHONY: default all get_libs test docs force_subordinate_makefiles clean iclean resource publish doxygen pattern_graphs doc_graphs
 default : inferno.exe
 all : clean get_libs inferno.exe resource docs test
 
@@ -81,7 +81,7 @@ resource : force_subordinate_makefiles
 #
 # Build the doxygen docs
 #
-doxygen : 
+doxygen :
 	doxygen docs/generated/Doxy-Inferno
 	@echo Doxygen documentation now at: $(PWD)/docs/generated/html/index.html
 
@@ -90,7 +90,12 @@ doxygen :
 #
 pattern_graphs : makefile inferno.exe docs/generated/gen_pattern_graphs.sh
 	cd docs/generated && ./gen_pattern_graphs.sh
-	@echo Patterns and hits counts at: $(PWD)/docs/generated/html/step_index.html
+
+#
+# Build the step graphs and stats
+#
+doc_graphs : makefile inferno.exe docs/generated/gen_doc_graphs.sh
+	cd docs/generated && ./gen_doc_graphs.sh
 
 #
 # Build all of the generatable documentation
