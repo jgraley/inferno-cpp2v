@@ -100,7 +100,7 @@ doc_graphs : makefile inferno.exe docs/generated/gen_doc_graphs.sh
 #
 # Build all of the generatable documentation
 #
-docs : doxygen pattern_graphs
+docs : doxygen pattern_graphs doc_graphs
 
 #
 # Push web site to sourceforge
