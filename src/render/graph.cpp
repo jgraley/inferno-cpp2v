@@ -97,7 +97,7 @@ string Graph::Header()
   //  s += "concentrate = \"true\"\n"; 
 	s += "];\n";
 	s += "node [\n";
-    s += "fontname = \"" FONT "\"\n"; // get with the 21st century
+//    s += "fontname = \"" FONT "\"\n"; // get with the 21st century
 	s += "];\n";
 	return s;
 }
