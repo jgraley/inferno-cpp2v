@@ -10,7 +10,7 @@ class Render : public OutOfPlaceTransformation
 {
 public:
 	using Transformation::operator();
-    Render();
+    Render( string of = string() );
     TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root );
 private:
     TreePtr<CPPTree::Program> program;
@@ -63,6 +63,7 @@ private:
 			                            bool separate_last,
 			                            TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>(),
 			                            bool showtype=true );
+    const string outfile;			                            
 };
 
 #endif

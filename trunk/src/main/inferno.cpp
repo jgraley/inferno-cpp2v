@@ -19,13 +19,14 @@
 #include "steps/fall_out.hpp"
 #include "steps/systemc_detection.hpp"
 #include "steps/to_sc_method.hpp"
+#include "render/doc_graphs.hpp"
 
 using namespace Steps;
 
 void SelfTest();
     // Build a vector of transformations, in the order that we will run them
     // (ordered by hand for now, until the auto sequencer is ready)
-void build_sequence( vector< shared_ptr<Transformation> > *sequence )
+void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
 {
     ASSERT( sequence );
     // SystemC detection, converts implicit SystemC to explicit. Always at the top
@@ -155,16 +156,21 @@ int main( int argc, char *argv[] )
     if( ReadArgs::selftest )
         SelfTest();
     
+    // Build documentation graphs if requested
+    if( ReadArgs::documentation_graphs )
+        GenerateDocumentationGraphs();
+    
     // get the transformations, in sequence, in a vector
     vector< shared_ptr<Transformation> > sequence;
-    build_sequence( &sequence );
+    BuildSequence( &sequence );
     
     // If a pattern graph was requested, generate it now
     if( ReadArgs::pattern_graph != -1 )
     {
         ASSERT( ReadArgs::pattern_graph >= 0 )("Negative step number is silly\n");
         ASSERT( ReadArgs::pattern_graph < sequence.size() )("There are only %d steps at present\n", sequence.size() );
-        Graph()( sequence[ReadArgs::pattern_graph].get() );
+        Graph g( ReadArgs::outfile );
+        g( sequence[ReadArgs::pattern_graph].get() );
     }        
     
     // If there was no input program then there's nothing more to do
@@ -214,9 +220,15 @@ int main( int argc, char *argv[] )
     if( ReadArgs::trace_hits )
         HitCount::instance.Dump();    
     else if(ReadArgs::intermediate_graph)
-        Graph()( &program );    
+    {
+        Graph g( ReadArgs::outfile );
+        g( &program );    
+    }
     else    
-        Render()(&program );     
+    {
+        Render r( ReadArgs::outfile );
+        r( &program );     
+    }
             
     return 0;
 }
