@@ -36,11 +36,11 @@ using namespace CPPTree;
 // Secondary: Normal nodes and special nodes that occupy space
 // Tertiary: CompareReplace and special nodes that do not occupy space
 
-#define FS_SMALL "10"
-#define FS_MIDDLE "12"
-#define FS_LARGE "15"
+#define FS_SMALL "12"
+#define FS_MIDDLE "14"
+#define FS_LARGE "16"
 #define NS_SMALL "0.4"
-#define FONT "Arial"
+//#define FONT "Arial"
 
 Graph::Graph( string of ) :
     outfile(of)
@@ -102,7 +102,9 @@ string Graph::Header()
   //  s += "concentrate = \"true\"\n"; 
 	s += "];\n";
 	s += "node [\n";
-//    s += "fontname = \"" FONT "\"\n"; // get with the 21st century
+#ifdef FONT
+    s += "fontname = \"" FONT "\"\n";
+#endif    
 	s += "];\n";
 	return s;
 }
