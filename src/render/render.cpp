@@ -251,6 +251,8 @@ string Render::RenderType( TreePtr<Type> type, string object, bool constant )
 		return const_str + RenderScopedIdentifier(ti) + sobject;
 	else if( shared_ptr<SCNamedIdentifier> sct = dynamic_pointer_cast< SCNamedIdentifier >(type) )
 		return const_str + sct->GetToken() + sobject;
+    else if( dynamic_pointer_cast<Labeley>(type) )
+        return const_str + "void *" + object;
 	else
 		return ERROR_UNSUPPORTED(type);
 }
