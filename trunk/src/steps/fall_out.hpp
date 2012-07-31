@@ -12,7 +12,14 @@ public:
     PlaceLabelsInArray();
 };
 
-/// Put all the labels in an array indexable by an enum
+/// Change all types from Labeley to the state enum, and move lmap lookups from && to goto
+class LabelTypeToEnum : public SearchReplace
+{
+public:
+    LabelTypeToEnum();
+};
+
+/// Variable-by-variable, change type from Labeley to the state enum, and move lmap lookups though the variable
 class LabelVarsToEnum : public CompareReplace
 {
 public:

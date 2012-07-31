@@ -179,6 +179,68 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     Configure( module, slavel );    
 }
 
+// New better way of propogating lmap through variables. This supercedes LabelVarsToEnum
+// and SwapSubscriptMultiplex. It works by just changing all appearances of the Labeley 
+// type (except in the decl of the lvar). 
+// TODO Use local node for enum, so that we can change to this, and not unsigned int
+LabelTypeToEnum::LabelTypeToEnum()
+{
+    MakeTreePtr< Stuff<Scope> > stuff_labeley, stuff_lmap;
+    MakeTreePtr<Labeley> labeley;
+    MakeTreePtr<Static> lmap;
+    MakeTreePtr<Const> lmap_const;
+    MakeTreePtr<Array> lmap_type;
+    MakeTreePtr<InstanceIdentifier> lmap_id; 
+    MakeTreePtr< MatchAll<Node> > apall, l_apall;
+    MakeTreePtr< NotMatch<Node> > apnot, l_apnot;
+    MakeTreePtr< AnyNode<Node> > apany, l_apany;
+    MakeTreePtr< Overlay<Type> > l_over;
+    MakeTreePtr<Subscript> ms_sub, nr_sub, nsx_sub;;
+    MakeTreePtr<InstanceIdentifier> m_state_id;
+    MakeTreePtr<Goto> ns_goto, nr_goto;
+    MakeTreePtr< NotMatch<Expression> > n_dest_expr;
+    MakeTreePtr<Unsigned> l_enum; // TODO use the real enum!!
+    MakeTreePtr< MatchAll<Scope> > all;
+    MakeTreePtr<Record> record;
+    MakeTreePtr< Star<Declaration> > decls;
+    
+    record->members = ( decls );
+
+    l_apall->patterns = (l_apany, l_apnot);
+    l_apnot->pattern = lmap;
+    l_apany->terminus = l_over;
+    l_over->through = MakeTreePtr<Labeley>();
+    l_over->overlay = l_enum; 
+    l_enum->width = MakeTreePtr<SpecificInteger>(32);
+            
+    MakeTreePtr< SlaveSearchReplace<Scope> > slavel( record, l_apall );   
+
+    ms_sub->operands = (lmap_id, m_state_id);
+    
+    MakeTreePtr< SlaveSearchReplace<Scope> > slavem( slavel, ms_sub, m_state_id );   
+
+    ns_goto->destination = n_dest_expr;
+    nr_goto->destination = nr_sub;
+    nr_sub->operands = (lmap_id, n_dest_expr);
+    n_dest_expr->pattern = nsx_sub;
+    nsx_sub->operands = (lmap_id, MakeTreePtr<Expression>());
+    
+    MakeTreePtr< SlaveSearchReplace<Scope> > slaven( slavem, ns_goto, nr_goto );   
+    
+    all->patterns = (record, stuff_labeley, stuff_lmap);
+    stuff_lmap->terminus = lmap;
+    lmap->identifier = lmap_id;
+    lmap->type = lmap_type;
+    lmap->constancy = lmap_const;
+    lmap_type->element = MakeTreePtr<Labeley>();
+    stuff_labeley->terminus = apall;
+    apall->patterns = (apany, apnot);
+    apany->terminus = labeley;
+    apnot->pattern = lmap;
+    
+    Configure( all, slaven );
+}
+
 
 LabelVarsToEnum::LabelVarsToEnum()
 {
