@@ -96,7 +96,7 @@ void UniquifyIdentifiers::UniquifyScope( TreePtr<Node> root, VisibleIdentifiers 
         // At function level just do everything together - this is the safe option,
         // even with function inside functions. Required for Labels, which are always 
         // whole function scope
-        Expand t( root );
+        Walk t( root );
         FOREACH( TreePtr<Node> p, t )
         {
             if( TreePtr<Declaration> d = dynamic_pointer_cast<Declaration>(p) )
@@ -112,7 +112,7 @@ void UniquifyIdentifiers::UniquifyScope( TreePtr<Node> root, VisibleIdentifiers 
     {
         // Above function level (top level, classes etc),
         // look for declarations in the current scope (directly, not in sub scopes).
-        Flatten t( root );
+        FlattenNode t( root );
         FOREACH( TreePtr<Node> p, t )
         {
             if( TreePtr<Declaration> d = dynamic_pointer_cast<Declaration>(p) )

@@ -28,7 +28,7 @@ TreePtr<Node> GetDeclaration::operator()( TreePtr<Node> context, TreePtr<Node> r
 
 TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdentifier> id )
 {
-	Expand w(context);
+	Walk w(context);
 	FOREACH( TreePtr<Node> n, w )
 	{
         if( TreePtr<UserType> d = dynamic_pointer_cast<UserType>(n) )
@@ -40,7 +40,7 @@ TreePtr<UserType> GetDeclaration::Get( TreePtr<Node> context, TreePtr<TypeIdenti
 
 TreePtr<Instance> GetDeclaration::Get( TreePtr<Node> context, TreePtr<InstanceIdentifier> id )
 {
-	Expand w( context );
+	Walk w( context );
 	FOREACH( TreePtr<Node> n, w )
 	{
         if( TreePtr<Instance> d = dynamic_pointer_cast<Instance>(n) )

@@ -1104,7 +1104,7 @@ private:
 	{
 		if( TreePtr<DeclarationChain> dc = dynamic_pointer_cast<DeclarationChain>( d ) )
 		{
-		    TRACE("Expanding declaration chain\n");
+		    TRACE("Walking declaration chain\n");
 		    AddDeclarationToCompound( s, dc->first );
 		    AddDeclarationToCompound( s, dc->second );
 		    return;
@@ -1141,7 +1141,7 @@ private:
 		else
 		    s->statements.push_back( st );
 
-		// Flatten the "sub" statements of labels etc
+		// FlattenNode the "sub" statements of labels etc
 		if( TreePtr<Label> l = dynamic_pointer_cast<Label>( st ) )
 		{
 			ASSERT( backing_labels[l] );

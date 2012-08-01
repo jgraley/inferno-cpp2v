@@ -157,7 +157,7 @@ public:
 private:
     static int repetitions;
     static bool rep_error;
-    Sequence<Node> ExpandContainerPattern( ContainerInterface &pattern,
+    Sequence<Node> WalkContainerPattern( ContainerInterface &pattern,
                                            bool replacing ) const;
 
     // LocalCompare ring

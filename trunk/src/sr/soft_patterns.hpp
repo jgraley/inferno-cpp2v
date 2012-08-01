@@ -109,7 +109,7 @@ private:
 
         FOREACH( TreePtr<Node> source_pattern, GetPatterns() )
         {                
-            Expand e(source_pattern);
+            Walk e(source_pattern);
             FOREACH( TreePtr<Node> n, e )
             {
                 if( dynamic_pointer_cast<SoftReplacePattern>(n) || 

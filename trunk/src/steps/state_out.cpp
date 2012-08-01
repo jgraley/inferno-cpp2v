@@ -412,7 +412,7 @@ private:
             return cache[rr];
         }
         bool r = false;        
-        Expand e( *sr->pcontext ); 
+        Walk e( *sr->pcontext ); 
         
         if( f->IsExist(y) )
             return false; // already processing this identifier, so we have a loop

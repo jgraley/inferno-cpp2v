@@ -3,14 +3,14 @@
 #include "transformation.hpp"
 
 
-////////////////////////// Flatten //////////////////////////
+////////////////////////// FlattenNode //////////////////////////
 
-bool Flatten_iterator::IsAtEnd() const
+bool FlattenNode_iterator::IsAtEnd() const
 {
     return empty || mit == m_end;
 }
 
-void Flatten_iterator::NormaliseNewMember()
+void FlattenNode_iterator::NormaliseNewMember()
 {
 	if( !IsAtEnd() )
 		if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
@@ -21,7 +21,7 @@ void Flatten_iterator::NormaliseNewMember()
 		}
 }
 
-void Flatten_iterator::BypassEndOfContainer()
+void FlattenNode_iterator::BypassEndOfContainer()
 {
 	ASSERT( !IsAtEnd() && dynamic_cast<ContainerInterface *>(GetCurrentMember()) ); // this fn requires us to be on a container
 	if( cit == c_end )
@@ -31,7 +31,7 @@ void Flatten_iterator::BypassEndOfContainer()
 	}
 }
 
-Flatten_iterator::Flatten_iterator( TreePtr<Node> r ) :
+FlattenNode_iterator::FlattenNode_iterator( TreePtr<Node> r ) :
 	root( r ),
 	empty( false )
 {
@@ -42,12 +42,12 @@ Flatten_iterator::Flatten_iterator( TreePtr<Node> r ) :
     NormaliseNewMember();
 }
 
-Flatten_iterator::Flatten_iterator() :
+FlattenNode_iterator::FlattenNode_iterator() :
 	empty( true )
 {
 }
 
-Flatten_iterator::Flatten_iterator( const Flatten_iterator & other ) :
+FlattenNode_iterator::FlattenNode_iterator( const FlattenNode_iterator & other ) :
     mit( other.mit ),
     m_end( other.m_end ),
     cit( other.cit ),
@@ -57,7 +57,7 @@ Flatten_iterator::Flatten_iterator( const Flatten_iterator & other ) :
 {
 }
 
-Flatten_iterator::operator string() const
+FlattenNode_iterator::operator string() const
 {
     if (IsAtEnd())
     	return string("end");
@@ -71,13 +71,13 @@ Flatten_iterator::operator string() const
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
 }
 
-shared_ptr<ContainerInterface::iterator_interface> Flatten_iterator::Clone() const
+shared_ptr<ContainerInterface::iterator_interface> FlattenNode_iterator::Clone() const
 {
-	shared_ptr<Flatten_iterator> ni( new Flatten_iterator(*this) );
+	shared_ptr<FlattenNode_iterator> ni( new FlattenNode_iterator(*this) );
 	return ni;
 }
 
-Flatten_iterator &Flatten_iterator::operator++()
+FlattenNode_iterator &FlattenNode_iterator::operator++()
 {
 	ASSERT( !IsAtEnd() );
     if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
@@ -97,7 +97,7 @@ Flatten_iterator &Flatten_iterator::operator++()
 	return *this;
 }
 
-Flatten_iterator::reference Flatten_iterator::operator*() const
+FlattenNode_iterator::reference FlattenNode_iterator::operator*() const
 {
     ASSERT( !IsAtEnd() );
 	if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
@@ -108,21 +108,21 @@ Flatten_iterator::reference Flatten_iterator::operator*() const
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
 }
 
-Flatten_iterator::pointer Flatten_iterator::operator->() const
+FlattenNode_iterator::pointer FlattenNode_iterator::operator->() const
 {
 	return &operator*();
 }
 
-bool Flatten_iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
+bool FlattenNode_iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
 {
-	const Flatten_iterator *pi = dynamic_cast<const Flatten_iterator *>(&ib);
+	const FlattenNode_iterator *pi = dynamic_cast<const FlattenNode_iterator *>(&ib);
 	ASSERT(pi)("Comparing traversing iterator with something else ")(ib);
 	if( pi->IsAtEnd() || IsAtEnd() )
 		return pi->IsAtEnd() && IsAtEnd();
 	return *pi == *this; 
 }
 
-void Flatten_iterator::Overwrite( Flatten_iterator::pointer v ) const
+void FlattenNode_iterator::Overwrite( FlattenNode_iterator::pointer v ) const
 {
     ASSERT( !IsAtEnd() );
 	if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
@@ -133,15 +133,15 @@ void Flatten_iterator::Overwrite( Flatten_iterator::pointer v ) const
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
 }
 
-const bool Flatten_iterator::IsOrdered() const
+const bool FlattenNode_iterator::IsOrdered() const
 {
 	return true; // traverse walks tree in order generally
 }
 
 
-////////////////////////// Expand //////////////////////////
+////////////////////////// Walk //////////////////////////
 
-bool Expand_iterator::IsAtEndOfChildren() const
+bool Walk_iterator::IsAtEndOfChildren() const
 {
 	ASSERT( !done );
 
@@ -151,7 +151,7 @@ bool Expand_iterator::IsAtEndOfChildren() const
     return state.top().iterator == state.top().container->end();
 }
 
-void Expand_iterator::BypassEndOfChildren()
+void Walk_iterator::BypassEndOfChildren()
 {
 	ASSERT( !done );
 	while( IsAtEndOfChildren() )
@@ -166,12 +166,12 @@ void Expand_iterator::BypassEndOfChildren()
 	}
 }
 
-shared_ptr<ContainerInterface> Expand_iterator::GetChildContainer( TreePtr<Node> n ) const
+shared_ptr<ContainerInterface> Walk_iterator::GetChildContainer( TreePtr<Node> n ) const
 { 
-    return shared_ptr<ContainerInterface>( new Flatten(n) );
+    return shared_ptr<ContainerInterface>( new FlattenNode(n) );
 }        
 
-void Expand_iterator::Push( TreePtr<Node> n )
+void Walk_iterator::Push( TreePtr<Node> n )
 { 
     StateEntry ns;
     ns.container = GetChildContainer( n );
@@ -179,7 +179,7 @@ void Expand_iterator::Push( TreePtr<Node> n )
     state.push( ns );
 }        
 
-Expand_iterator::Expand_iterator( TreePtr<Node> &r,
+Walk_iterator::Walk_iterator( TreePtr<Node> &r,
 	                    	      Filter *of,
                                   Filter *rf ) :
     root( new TreePtr<Node>(r) ),
@@ -190,14 +190,14 @@ Expand_iterator::Expand_iterator( TreePtr<Node> &r,
     DoNodeFilter();
 }
 
-Expand_iterator::Expand_iterator() :
+Walk_iterator::Walk_iterator() :
     out_filter( NULL ),
     recurse_filter( NULL ),
     done( true )
 {
 }        
 
-Expand_iterator::Expand_iterator( const Expand_iterator & other ) :
+Walk_iterator::Walk_iterator( const Walk_iterator & other ) :
 	root( other.root ),
     out_filter( other.out_filter ),
     recurse_filter( other.recurse_filter ),
@@ -206,7 +206,7 @@ Expand_iterator::Expand_iterator( const Expand_iterator & other ) :
 {
 }
 
-Expand_iterator::operator string() const
+Walk_iterator::operator string() const
 {
     string s;
     stack< StateEntry > ps = state; // std::stack doesn't have [] so copy the whole thing and go backwards
@@ -218,7 +218,7 @@ Expand_iterator::operator string() const
     return s;
 }
 
-void Expand_iterator::AdvanceInto()
+void Walk_iterator::AdvanceInto()
 {
 	ASSERT( !done );
 	ASSERT( !IsAtEndOfChildren() );
@@ -253,7 +253,7 @@ void Expand_iterator::AdvanceInto()
     }
 }
 
-void Expand_iterator::AdvanceOver()
+void Walk_iterator::AdvanceOver()
 {
 	ASSERT( !done );
 	ASSERT( !IsAtEndOfChildren() );
@@ -271,20 +271,20 @@ void Expand_iterator::AdvanceOver()
 	}
 }
 
-shared_ptr<ContainerInterface::iterator_interface> Expand_iterator::Clone() const
+shared_ptr<ContainerInterface::iterator_interface> Walk_iterator::Clone() const
 {
-	shared_ptr<Expand_iterator> ni( new Expand_iterator(*this) );
+	shared_ptr<Walk_iterator> ni( new Walk_iterator(*this) );
 	return ni;
 }
 
-Expand_iterator &Expand_iterator::operator++()
+Walk_iterator &Walk_iterator::operator++()
 {
 	AdvanceInto();
     DoNodeFilter();
 	return *this;
 }
 
-Expand_iterator::reference Expand_iterator::operator*() const
+Walk_iterator::reference Walk_iterator::operator*() const
 {
     ASSERT( !done )("Already advanced over everything; reached end of walk");
     ASSERT( !IsAtEndOfChildren() );
@@ -299,21 +299,21 @@ Expand_iterator::reference Expand_iterator::operator*() const
 	}
 }
 
-Expand_iterator::pointer Expand_iterator::operator->() const
+Walk_iterator::pointer Walk_iterator::operator->() const
 {
 	return &operator*();
 }
 
-bool Expand_iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
+bool Walk_iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
 {
-	const Expand_iterator *pi = dynamic_cast<const Expand_iterator *>(&ib);
+	const Walk_iterator *pi = dynamic_cast<const Walk_iterator *>(&ib);
 	ASSERT(pi)("Comparing walking iterator with something else ")(ib);
 	if( pi->done || done )
 		return pi->done && done;
 	return **pi == **this;
 }
 
-void Expand_iterator::Overwrite( Expand_iterator::pointer v ) const
+void Walk_iterator::Overwrite( Walk_iterator::pointer v ) const
 {
     ASSERT( !done )("Already advanced over everything; reached end of walk");
     ASSERT( !IsAtEndOfChildren() );
@@ -328,12 +328,12 @@ void Expand_iterator::Overwrite( Expand_iterator::pointer v ) const
     }
 }
 
-const bool Expand_iterator::IsOrdered() const
+const bool Walk_iterator::IsOrdered() const
 {
 	return true; // walk walks tree in order generally
 }
 
-void Expand_iterator::DoNodeFilter()
+void Walk_iterator::DoNodeFilter()
 {
     while(!done)
     {
@@ -371,79 +371,79 @@ bool UniqueFilter::IsMatch( TreePtr<Node> context,
     return true;        
 }
 
-////////////////////////// ParentTraverse //////////////////////////
+////////////////////////// ParentWalk //////////////////////////
 
-ParentTraverse_iterator::ParentTraverse_iterator() :
+ParentWalk_iterator::ParentWalk_iterator() :
     unique_filter( new UniqueFilter )
 {
 }        
 
-ParentTraverse_iterator::~ParentTraverse_iterator() 
+ParentWalk_iterator::~ParentWalk_iterator() 
 {
     delete unique_filter;
 }        
 
-ParentTraverse_iterator::ParentTraverse_iterator( const ParentTraverse_iterator & other ) :
-    Expand_iterator( other )
+ParentWalk_iterator::ParentWalk_iterator( const ParentWalk_iterator & other ) :
+    Walk_iterator( other )
 {
     unique_filter = new UniqueFilter( *(other.unique_filter) );
     recurse_filter = unique_filter; 
 }
 
-ParentTraverse_iterator &ParentTraverse_iterator::operator=( const ParentTraverse_iterator & other )
+ParentWalk_iterator &ParentWalk_iterator::operator=( const ParentWalk_iterator & other )
 {
-    Expand_iterator::operator=( other ),
+    Walk_iterator::operator=( other ),
     *unique_filter = *(other.unique_filter);
     recurse_filter = unique_filter; 
     return *this;
 }
 
-ParentTraverse_iterator::ParentTraverse_iterator( TreePtr<Node> &root ) :
-    Expand_iterator( root, NULL, unique_filter = new UniqueFilter )
+ParentWalk_iterator::ParentWalk_iterator( TreePtr<Node> &root ) :
+    Walk_iterator( root, NULL, unique_filter = new UniqueFilter )
 {
 }
 
-shared_ptr<ContainerInterface::iterator_interface> ParentTraverse_iterator::Clone() const
+shared_ptr<ContainerInterface::iterator_interface> ParentWalk_iterator::Clone() const
 {
-	shared_ptr<ParentTraverse_iterator> ni( new ParentTraverse_iterator(*this) );
+	shared_ptr<ParentWalk_iterator> ni( new ParentWalk_iterator(*this) );
 	return ni;
 }
 
-////////////////////////// Traverse //////////////////////////
+////////////////////////// UniqueWalk //////////////////////////
 
-Traverse_iterator::Traverse_iterator() :
+UniqueWalk_iterator::UniqueWalk_iterator() :
     unique_filter( new UniqueFilter )
 {
 }        
 
-Traverse_iterator::~Traverse_iterator()
+UniqueWalk_iterator::~UniqueWalk_iterator()
 {
     delete unique_filter;
 }        
 
-Traverse_iterator::Traverse_iterator( const Traverse_iterator & other ) :
-    Expand_iterator( other )
+UniqueWalk_iterator::UniqueWalk_iterator( const UniqueWalk_iterator & other ) :
+    Walk_iterator( other )
 {
     unique_filter = new UniqueFilter( *(other.unique_filter) );
     out_filter = unique_filter; 
 }
 
-Traverse_iterator &Traverse_iterator::operator=( const Traverse_iterator &other )
+UniqueWalk_iterator &UniqueWalk_iterator::operator=( const UniqueWalk_iterator &other )
 {
-    Expand_iterator::operator=( other );
+    Walk_iterator::operator=( other );
     *unique_filter = *(other.unique_filter);
     out_filter = unique_filter; 
     return *this;
 }
 
-Traverse_iterator::Traverse_iterator( TreePtr<Node> &root ) :
-    Expand_iterator( root, unique_filter = new UniqueFilter, NULL )
+UniqueWalk_iterator::UniqueWalk_iterator( TreePtr<Node> &root ) :
+    Walk_iterator( root, unique_filter = new UniqueFilter, NULL )
 {
 }
 
-shared_ptr<ContainerInterface::iterator_interface> Traverse_iterator::Clone() const
+shared_ptr<ContainerInterface::iterator_interface> UniqueWalk_iterator::Clone() const
 {
-	shared_ptr<Traverse_iterator> ni( new Traverse_iterator(*this) );
+	shared_ptr<UniqueWalk_iterator> ni( new UniqueWalk_iterator(*this) );
 	return ni;
 }
 
