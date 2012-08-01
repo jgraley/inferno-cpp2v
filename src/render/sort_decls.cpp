@@ -5,14 +5,14 @@
 using namespace CPPTree;
 
 /** Walks the tree, avoiding recursing into the body (initialiser) of Callables. */
-class TraverseNoBody_iterator : public Traverse::iterator
+class UniqueWalkNoBody_iterator : public UniqueWalk::iterator
 {
 public:
-    TraverseNoBody_iterator( TreePtr<Node> &root ) : Traverse::iterator(root) {}        
-    TraverseNoBody_iterator() : Traverse::iterator() {}
+    UniqueWalkNoBody_iterator( TreePtr<Node> &root ) : UniqueWalk::iterator(root) {}        
+    UniqueWalkNoBody_iterator() : UniqueWalk::iterator() {}
 	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
 	{
-   	    return shared_ptr<TraverseNoBody_iterator>( new TraverseNoBody_iterator(*this) );
+   	    return shared_ptr<UniqueWalkNoBody_iterator>( new UniqueWalkNoBody_iterator(*this) );
 	}      
 protected:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
@@ -31,23 +31,23 @@ protected:
                 seq->push_back( i->identifier );
                 return seq;
             }
-        // it's not a slave, so proceed as for Traverse
+        // it's not a slave, so proceed as for UniqueWalk
         TRACE("defaulting ")(*n)("\n");
-        return Traverse::iterator::GetChildContainer(n);
+        return UniqueWalk::iterator::GetChildContainer(n);
     }
 };
 
-typedef ContainerFromIterator< TraverseNoBody_iterator, TreePtr<Node> > TraverseNoBody;
+typedef ContainerFromIterator< UniqueWalkNoBody_iterator, TreePtr<Node> > UniqueWalkNoBody;
 
 /** Walks the tree, avoiding recursing into the body (initialiser) of Callables and anything under an indirection. */
-class TraverseNoBodyOrIndirection_iterator : public TraverseNoBody::iterator
+class UniqueWalkNoBodyOrIndirection_iterator : public UniqueWalkNoBody::iterator
 {
 public:
-    TraverseNoBodyOrIndirection_iterator( TreePtr<Node> &root ) : TraverseNoBody::iterator(root) {}        
-    TraverseNoBodyOrIndirection_iterator() : TraverseNoBody::iterator() {}
+    UniqueWalkNoBodyOrIndirection_iterator( TreePtr<Node> &root ) : UniqueWalkNoBody::iterator(root) {}        
+    UniqueWalkNoBodyOrIndirection_iterator() : UniqueWalkNoBody::iterator() {}
 	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
 	{
-   	    return shared_ptr<TraverseNoBodyOrIndirection_iterator>( new TraverseNoBodyOrIndirection_iterator(*this) );
+   	    return shared_ptr<UniqueWalkNoBodyOrIndirection_iterator>( new UniqueWalkNoBodyOrIndirection_iterator(*this) );
 	}      
 private:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
@@ -61,13 +61,13 @@ private:
             return seq;
         }
         TRACE("defaulting ")(*n)("\n");
-        // it's not a slave, so proceed as for Traverse
-        return TraverseNoBody::iterator::GetChildContainer(n);
+        // it's not a slave, so proceed as for UniqueWalk
+        return UniqueWalkNoBody::iterator::GetChildContainer(n);
     }
 };
 
 
-typedef ContainerFromIterator< TraverseNoBodyOrIndirection_iterator, TreePtr<Node> > TraverseNoBodyOrIndirection;
+typedef ContainerFromIterator< UniqueWalkNoBodyOrIndirection_iterator, TreePtr<Node> > UniqueWalkNoBodyOrIndirection;
 
 // Does a depend on b?
 bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_indirection_to_record )
@@ -89,8 +89,8 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
   	TRACE("Looking for dependencies on ")(*b)(" (identifier ")(*ib)(") under ")(*a)(ignore_indirection?"":" not")(" ignoring indirection\n");      
           
     // Always ignore function bodies since these are taken outboard by the renderer anyway      
-    TraverseNoBody wnb( a );
-    TraverseNoBodyOrIndirection wnbi( a );
+    UniqueWalkNoBody wnb( a );
+    UniqueWalkNoBodyOrIndirection wnbi( a );
     ContainerInterface *w = ignore_indirection ? (ContainerInterface *)&wnbi : (ContainerInterface *)&wnb;
         
     ContainerInterface::iterator wa=w->begin();

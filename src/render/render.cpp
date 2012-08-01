@@ -78,7 +78,7 @@ TreePtr<Node> Render::operator()( TreePtr<Node> context, TreePtr<Node> root )
 
 bool Render::IsSystemC( TreePtr<Node> root )
 { 
-    Expand e(root);
+    Walk e(root);
     FOREACH( TreePtr<Node> n, e )
         if( dynamic_pointer_cast<SCConstruct>(n) )
             return true;

@@ -115,7 +115,7 @@ Set< TreePtr<Node> > CouplingKeys::GetAllKeys()
         if( p.second ) // TODO make this always be non-NULL
         {
    //         TRACE("Coupling of ")(*(p.first))(": ");
-            Expand e(p.second->root, &uf); 
+            Walk e(p.second->root, &uf); 
             // Iterate over every node in the subtree under the key
             FOREACH( TreePtr<Node> n, e )
             {

@@ -4,8 +4,8 @@
 #include "node/node.hpp"
 #include "transformation.hpp"
 
-/// Iterator for Flatten
-class Flatten_iterator : public ContainerInterface::iterator_interface
+/// Iterator for FlattenNode
+class FlattenNode_iterator : public ContainerInterface::iterator_interface
 {
 public:
 	// Standard types for stl compliance (note that the iterators are implicitly const)
@@ -16,9 +16,9 @@ public:
     typedef const value_type &reference;
 
 	// Copy constructor and standard iterator operations
-	Flatten_iterator( const Flatten_iterator & other );
+	FlattenNode_iterator( const FlattenNode_iterator & other );
 	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;
-	virtual Flatten_iterator &operator++();
+	virtual FlattenNode_iterator &operator++();
 	virtual reference operator*() const;
 	virtual pointer operator->() const;
 	virtual bool operator==( const ContainerInterface::iterator_interface &ib ) const;
@@ -27,8 +27,8 @@ public:
     virtual const bool IsOrdered() const;
     // Some additional operations specific to walk iterators
     operator string() const;
-    Flatten_iterator(); // makes "end" iterator
-    Flatten_iterator( TreePtr<Node> root );
+    FlattenNode_iterator(); // makes "end" iterator
+    FlattenNode_iterator( TreePtr<Node> root );
 private:
     bool IsAtEnd() const;
     void BypassEndOfContainer();
@@ -47,13 +47,13 @@ private:
     bool empty; // TODO use NULL root for empty
 };
 
-/** Stated out traversal across a node's children. Traverses the members and elements of containers
+/*! Stated out traversal across a node's children. UniqueWalks the members and elements of containers
     but does not follow any TreePtr. Basically an itemise that expands containers. */
-typedef ContainerFromIterator< Flatten_iterator, TreePtr<Node> > Flatten;
+typedef ContainerFromIterator< FlattenNode_iterator, TreePtr<Node> > FlattenNode;
 
 
-/// Iterator for Expand
-class Expand_iterator : public ContainerInterface::iterator_interface
+/// Iterator for Walk
+class Walk_iterator : public ContainerInterface::iterator_interface
 {
 public:
 	// Standard types for stl compliance (note that the iterators are implicitly const)
@@ -64,9 +64,9 @@ public:
 	typedef const value_type &reference;
 
 	// Copy constructor and standard iterator operations
-	Expand_iterator( const Expand_iterator & other );
+	Walk_iterator( const Walk_iterator & other );
 	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;
-	virtual Expand_iterator &operator++();
+	virtual Walk_iterator &operator++();
 	virtual reference operator*() const;
 	virtual pointer operator->() const;
 	virtual bool operator==( const ContainerInterface::iterator_interface &ib ) const;
@@ -77,8 +77,8 @@ public:
     operator string() const;
     virtual void AdvanceOver();
     virtual void AdvanceInto();
-    Expand_iterator(); // makes "end" iterator
-    Expand_iterator( TreePtr<Node> &root,
+    Walk_iterator(); // makes "end" iterator
+    Walk_iterator( TreePtr<Node> &root,
                      Filter *out_filter = NULL,
     		         Filter *recurse_filter = NULL );
 protected:
@@ -101,14 +101,11 @@ protected:
 };
 
 
-/** Inferno's tree-walking class. This is a stated out depth-first tree walker.
+/*! Inferno's tree-walking class. This is a stated out depth-first tree walker.
     A walk object is constructed on a node (possibly with other params) and it acts
     like an OOStd container whose iterator walks the subtree with sucessive invocations
-    of operator++. A walking loop may be created using FOREACH as with containers. 
-    
-    TODO create a seperate container/iterator filter template for the out_filter.
-    Make it not execute the filter from the constructor. Simplify Traverse etc. */
-typedef ContainerFromIterator< Expand_iterator, TreePtr<Node>, Filter *, Filter * > Expand;
+    of operator++. A walking loop may be created using FOREACH as with containers. */
+typedef ContainerFromIterator< Walk_iterator, TreePtr<Node>, Filter *, Filter * > Walk;
 
 
 /// Filter that only matches each Node one time, then not again until Reset() is called
@@ -121,42 +118,42 @@ struct UniqueFilter : public Filter
 };
 
 
-/// Iterator for ParentTraverse
-class ParentTraverse_iterator : public Expand::iterator
+/// Iterator for ParentWalk
+class ParentWalk_iterator : public Walk::iterator
 {
 public:
-    ParentTraverse_iterator(); // makes "end" iterator
-    ~ParentTraverse_iterator(); 
-    ParentTraverse_iterator( const ParentTraverse_iterator &other );
-    ParentTraverse_iterator &operator=( const ParentTraverse_iterator &other );
-    ParentTraverse_iterator( TreePtr<Node> &root );
+    ParentWalk_iterator(); // makes "end" iterator
+    ~ParentWalk_iterator(); 
+    ParentWalk_iterator( const ParentWalk_iterator &other );
+    ParentWalk_iterator &operator=( const ParentWalk_iterator &other );
+    ParentWalk_iterator( TreePtr<Node> &root );
 	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;    
 protected:
     UniqueFilter *unique_filter;
 };
 
-/** Version of Expand that only sees a node once for each parent i.e. 
+/*! Version of Walk that only sees a node once for each parent i.e. 
     with a->c, b->c, c->d
-    we get c twice but d only once (Expand would get d twice too) */
-typedef ContainerFromIterator< ParentTraverse_iterator, TreePtr<Node> > ParentTraverse;
+    we get c twice but d only once (Walk would get d twice too) */
+typedef ContainerFromIterator< ParentWalk_iterator, TreePtr<Node> > ParentWalk;
 
 
-/// Iterator for Traverse
-class Traverse_iterator : public Expand::iterator
+/// Iterator for UniqueWalk
+class UniqueWalk_iterator : public Walk::iterator
 {
 public:
-    Traverse_iterator(); // makes "end" iterator
-    ~Traverse_iterator(); 
-    Traverse_iterator( const Traverse_iterator &other );        
-    Traverse_iterator &operator=( const Traverse_iterator &other );
-    Traverse_iterator( TreePtr<Node> &root );
+    UniqueWalk_iterator(); // makes "end" iterator
+    ~UniqueWalk_iterator(); 
+    UniqueWalk_iterator( const UniqueWalk_iterator &other );        
+    UniqueWalk_iterator &operator=( const UniqueWalk_iterator &other );
+    UniqueWalk_iterator( TreePtr<Node> &root );
 	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;    
 protected:
     UniqueFilter *unique_filter;
 };
 
-/// Traverse presents each element exactly once, and skips NULL pointers
-typedef ContainerFromIterator< Traverse_iterator, TreePtr<Node> > Traverse;
+/*! UniqueWalk presents each element exactly once, and skips NULL pointers */
+typedef ContainerFromIterator< UniqueWalk_iterator, TreePtr<Node> > UniqueWalk;
 
 #endif
 

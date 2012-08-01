@@ -21,8 +21,8 @@ private:
     string Footer();
     string MakeGraphTx(Transformation *root);
     void Disburse( string s );
-    string Traverse( TreePtr<Node> root, bool links_pass );
-    string Traverse( Transformation *sr, string id, bool links_pass );
+    string UniqueWalk( TreePtr<Node> root, bool links_pass );
+    string UniqueWalk( Transformation *sr, string id, bool links_pass );
 	string DoTransformation( Transformation *sr, string id );
 	string DoTransformationLinks( Transformation *sr, string id );
     string Id( void *p );

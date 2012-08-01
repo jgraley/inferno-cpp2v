@@ -11,16 +11,16 @@ bool CompareReplace::rep_error;
 
 /** Walks the tree, avoiding the "search"/"compare" and "replace" members of slaves
     but still recurses through the "through" member. Therefore, it visits all the
-    nodes at the same slave level as the root. Based on Traverse, so each node only
+    nodes at the same slave level as the root. Based on UniqueWalk, so each node only
     visited once. */
-class TraverseNoSlavePattern_iterator : public Traverse::iterator
+class UniqueWalkNoSlavePattern_iterator : public UniqueWalk::iterator
 {
 public:
-    TraverseNoSlavePattern_iterator( TreePtr<Node> &root ) : Traverse::iterator(root) {}        
-    TraverseNoSlavePattern_iterator() : Traverse::iterator() {}
+    UniqueWalkNoSlavePattern_iterator( TreePtr<Node> &root ) : UniqueWalk::iterator(root) {}        
+    UniqueWalkNoSlavePattern_iterator() : UniqueWalk::iterator() {}
 	virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
 	{
-   	    return shared_ptr<TraverseNoSlavePattern_iterator>( new TraverseNoSlavePattern_iterator(*this) );
+   	    return shared_ptr<UniqueWalkNoSlavePattern_iterator>( new UniqueWalkNoSlavePattern_iterator(*this) );
 	}      
 private:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
@@ -35,13 +35,13 @@ private:
         }
         else
         {
-            // it's not a slave, so proceed as for Traverse
-            return Traverse::iterator::GetChildContainer(n);
+            // it's not a slave, so proceed as for UniqueWalk
+            return UniqueWalk::iterator::GetChildContainer(n);
         }
     }
 };
 
-typedef ContainerFromIterator< TraverseNoSlavePattern_iterator, TreePtr<Node> > TraverseNoSlavePattern;
+typedef ContainerFromIterator< UniqueWalkNoSlavePattern_iterator, TreePtr<Node> > UniqueWalkNoSlavePattern;
 
 
 CompareReplace::CompareReplace( TreePtr<Node> cp,
@@ -73,7 +73,7 @@ void CompareReplace::Configure( TreePtr<Node> cp,
 
     TRACE("Elaborating ")(string( *this ))(" at %p\n", this);
     // Fill in fields on the stuff nodes, but not in slaves
-    TraverseNoSlavePattern tsp(cp);
+    UniqueWalkNoSlavePattern tsp(cp);
     FOREACH( TreePtr<Node> n, tsp )
     {        
         if( shared_ptr<StuffBase> sb = dynamic_pointer_cast<StuffBase>(n) )
@@ -91,7 +91,7 @@ void CompareReplace::Configure( TreePtr<Node> cp,
 
     // look for first-level slaves. Set their couplings master pointer to point
     // to our couplings. 
-    TraverseNoSlavePattern ss(rp);
+    UniqueWalkNoSlavePattern ss(rp);
     FOREACH( TreePtr<Node> n, ss )
     {
         if( shared_ptr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
@@ -179,7 +179,7 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
     {
         // Restrict so that everything in the input program under here must be "green grass"
         // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
-       // Expand w( x );
+       // Walk w( x );
        // FOREACH( TreePtr<Node> p, w )
             if( GetOverallMaster()->dirty_grass.find( /*p*/x ) != GetOverallMaster()->dirty_grass.end() )
             {
@@ -280,7 +280,7 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
 }
 
 
-Sequence<Node> CompareReplace::ExpandContainerPattern( ContainerInterface &pattern,
+Sequence<Node> CompareReplace::WalkContainerPattern( ContainerInterface &pattern,
                                                        bool replacing ) const
 {
     // This helper is for Insert and Erase nodes. It takes a pattern container (which
@@ -344,7 +344,7 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
 		                               Conjecture &conj ) const
 {
     INDENT;
-    Sequence<Node> epattern = ExpandContainerPattern( pattern, false );    
+    Sequence<Node> epattern = WalkContainerPattern( pattern, false );    
     
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
@@ -554,7 +554,7 @@ bool CompareReplace::DecidedCompare( CollectionInterface &x,
 									   Conjecture &conj ) const
 {
     INDENT;
-    Sequence<Node> epattern = ExpandContainerPattern( pattern, false );    
+    Sequence<Node> epattern = WalkContainerPattern( pattern, false );    
    
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
@@ -719,7 +719,7 @@ bool CompareReplace::MatchingDecidedCompare( const TreePtrInterface &x,
 
 void CompareReplace::FlushSoftPatternCaches( TreePtr<Node> pattern ) const
 {
-    Traverse t(pattern);
+    UniqueWalk t(pattern);
     FOREACH( TreePtr<Node> n, t )
         if( shared_ptr<Flushable> ssp = dynamic_pointer_cast<Flushable>(n) )
             ssp->FlushCache();      
@@ -842,7 +842,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
     }
 #ifdef STRACE
     TRACE("DoOverlayPattern dest={");
-   {    Expand w(dest);
+   {    Walk w(dest);
         bool first=true;
         FOREACH( TreePtr<Node> n, w )
         {
@@ -854,7 +854,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
         TRACE("}\n"); // TODO put this in as a common utility somewhere
    }
    TRACE("source={");
-   {    Expand w(source);
+   {    Walk w(source);
         bool first=true;
         FOREACH( TreePtr<Node> n, w )
         {
@@ -899,7 +899,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
         ASSERT( keynode_memb[i] )( "itemise returned null element" );                
         if( ContainerInterface *source_con = dynamic_cast<ContainerInterface *>(source_memb[i]) )                
         {
-            Sequence<Node> esource_con = ExpandContainerPattern( *source_con, true );    
+            Sequence<Node> esource_con = WalkContainerPattern( *source_con, true );    
 
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
             ASSERT( dest_con )( "itemise for dest didn't match itemise for esource");
@@ -917,7 +917,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
                     TRACE("Got ")(*key->root)("\n");
                     ContainerInterface *psc = dynamic_cast<ContainerInterface *>(key->root.get());
                     ASSERT( psc );
-                    TRACE("Expanding SubContainer length %d\n", psc->size() );
+                    TRACE("Walking SubContainer length %d\n", psc->size() );
                     FOREACH( const TreePtrInterface &pp, *psc )
                     {
                         TreePtr<Node> nn = DuplicateSubtreeSubstitution( pp, key );
@@ -995,7 +995,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
 		        TreePtr<Node> n = DuplicateSubtreeSubstitution( p, current_key );
 		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
 		        {
-			        TRACE("Expanding SubContainer length %d\n", sc->size() );
+			        TRACE("Walking SubContainer length %d\n", sc->size() );
 		            FOREACH( const TreePtrInterface &xx, *sc )
 			            dest_con->insert( xx );
            		}
@@ -1022,7 +1022,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
     
 #ifdef STRACE
     TRACE("DoOverlayPattern result={");
-   {    Expand w(dest);
+   {    Walk w(dest);
         bool first=true;
         FOREACH( TreePtr<Node> n, w )
         {
@@ -1167,7 +1167,7 @@ TreePtr<Node> CompareReplace::ApplySlave( TreePtr<Node> source, TreePtr<Node> de
             // The slave's output will be seen by the master when for example
             // the master overlays something over it.
             TRACE("Duplicated pedigree (from slave): ");
-            Traverse t1(dest);
+            UniqueWalk t1(dest);
             FOREACH( TreePtr<Node> n, t1 )
             {
                 duplicated_pedigree.insert( n );    
@@ -1228,7 +1228,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
 		            TRACE("Got ")(*key->root)("\n");
 		            ContainerInterface *psc = dynamic_cast<ContainerInterface *>(key->root.get());
 		            ASSERT( psc );
-			        TRACE("Expanding SubContainer length %d\n", psc->size() );
+			        TRACE("Walking SubContainer length %d\n", psc->size() );
 		            FOREACH( const TreePtrInterface &pp, *psc )
 		            {
 		                TreePtr<Node> nn = DuplicateSubtreeSubstitution( pp, key );
@@ -1341,7 +1341,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitution( TreePtr<Node> keynod
 		        TreePtr<Node> n = DuplicateSubtreeSubstitution( p, current_key );
 		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
 		        {
-			        TRACE("Expanding SubContainer length %d\n", sc->size() );
+			        TRACE("Walking SubContainer length %d\n", sc->size() );
 		            FOREACH( const TreePtrInterface &xx, *sc )
 			            dest_con->insert( xx );
 			            ASSERT(0);
@@ -1381,7 +1381,7 @@ void CompareReplace::KeyReplaceNodes( TreePtr<Node> source ) const
     INDENT;
     TRACE("Walking replace pattern to key the soft nodes\n");
     
-    TraverseNoSlavePattern e(source);
+    UniqueWalkNoSlavePattern e(source);
     FOREACH( TreePtr<Node> pattern, e )
 	{
 	    TRACE(*pattern)("\n");
@@ -1397,7 +1397,7 @@ void CompareReplace::KeyReplaceNodes( TreePtr<Node> source ) const
                 if( ReadArgs::assert_pedigree )
                 {
                     TRACE("Keyed pedigree: ");
-                    Traverse t1(key);
+                    UniqueWalk t1(key);
                     FOREACH( TreePtr<Node> n, t1 )
                     {
                         keyed_pedigree.insert( n );    
@@ -1416,7 +1416,7 @@ void CompareReplace::KeyReplaceNodes( TreePtr<Node> source ) const
 /*
 void RunSlaves( TreePtr<Node> pattern )
 {
-    Flatten f( pattern );
+    FlattenNode f( pattern );
     FOREACH( TreePtr<Node> n, f )
     {
         if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>( n ) )
@@ -1466,7 +1466,7 @@ bool CompareReplace::SingleCompareReplace( TreePtr<Node> *proot )
     {
         TRACE("\n")("Replace pattern pedigree: "); 
         pattern_pedigree.clear();                    
-        Traverse t2(replace_pattern);
+        UniqueWalk t2(replace_pattern);
         FOREACH( TreePtr<Node> n, t2 )
         {
             pattern_pedigree.insert( n );    
@@ -1660,9 +1660,9 @@ shared_ptr<ContainerInterface> StuffBase::GetContainerInterface( TreePtr<Node> x
     }
     
     if( one_level )
-        return shared_ptr<ContainerInterface>( new Flatten( x ) );
+        return shared_ptr<ContainerInterface>( new FlattenNode( x ) );
     else
-        return shared_ptr<ContainerInterface>( new Expand( x, NULL, rf ) );
+        return shared_ptr<ContainerInterface>( new Walk( x, NULL, rf ) );
 }
 
 
@@ -1707,13 +1707,13 @@ bool StarBase::MatchRange( const CompareReplace *sr,
 
 shared_ptr<ContainerInterface> AnyNodeBase::GetContainerInterface( TreePtr<Node> x )
 { 
-    TRACE("Flattening an AnyNode at ")(*x)(": { ");
-    Flatten f( x );
+    TRACE("FlattenNodeing an AnyNode at ")(*x)(": { ");
+    FlattenNode f( x );
     FOREACH( TreePtr<Node> pn, f )
         {TRACE(*pn)(" ");}
     TRACE("}\n");
         
-    return shared_ptr<ContainerInterface>( new Flatten( x ) );
+    return shared_ptr<ContainerInterface>( new FlattenNode( x ) );
 }
 
 
@@ -1832,7 +1832,7 @@ void CompareReplace::Test()
 /*
 #ifdef STRACE
     TRACE("DuplicateSubtree source={");
-	    Expand w(source);
+	    Walk w(source);
 	    bool first=true;
 	    FOREACH( TreePtr<Node> n, w )
 	    {

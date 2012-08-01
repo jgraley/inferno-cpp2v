@@ -15,7 +15,7 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
     TRACE("Trying program (global)\n" );
 
     // Look through the members of all scopes (Program, Records, CallableParams, Compounds)
-    Expand walkr(program);
+    Walk walkr(program);
 	FOREACH( const TreePtr<Node> n, walkr )
 	{
     	if( TreePtr<Scope> s = dynamic_pointer_cast<Scope>(n) )
@@ -27,7 +27,7 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 	}
 	
 	// Special additional processing for Compounds - look for statements that are really Instance Declarations
-	Expand walkc(program);
+	Walk walkc(program);
 	FOREACH( const TreePtr<Node> n, walkc )
 	{
     	if( TreePtr<Compound> c = dynamic_pointer_cast<Compound>(n) )
@@ -44,6 +44,6 @@ TreePtr<Scope> GetScope( TreePtr<Program> program, TreePtr<Identifier> id )
 	else
 		ASSERT(0)("non-specific type ")(*id)(" - should not be doing GetScope() on these" );
 	// every identifier should have a scope - if this fails, we've missed out a kind of scope
-	// Note: if Flattener is not automated yet, then it may have missed something
+	// Note: if FlattenNodeer is not automated yet, then it may have missed something
 	return TreePtr<Scope>();
 }

@@ -67,9 +67,9 @@ string Graph::MakeGraphTx(Transformation *root)
     else
     {
         unique_filter.Reset();
-	    s += Traverse( root, Id(root), false );
+	    s += UniqueWalk( root, Id(root), false );
         unique_filter.Reset();
-	    s += Traverse( root, Id(root), true );
+	    s += UniqueWalk( root, Id(root), true );
 	}
 	return s;
 }
@@ -82,9 +82,9 @@ TreePtr<Node> Graph::operator()( TreePtr<Node> context, TreePtr<Node> root )
 	string s;
 	s += Header();
     unique_filter.Reset();
-	s += Traverse( root, false );
+	s += UniqueWalk( root, false );
     unique_filter.Reset();
-	s += Traverse( root, true );
+	s += UniqueWalk( root, true );
 	s += Footer();
 	Disburse( s );
 
@@ -134,11 +134,11 @@ void Graph::Disburse( string s )
 }
 
 
-string Graph::Traverse( TreePtr<Node> root, bool links_pass )
+string Graph::UniqueWalk( TreePtr<Node> root, bool links_pass )
 {
 	string s;
     TRACE("Graph plotter traversing intermediate %s pass\n", links_pass ? "links" : "nodes");
-	::Traverse w( root );
+	::UniqueWalk w( root );
 	FOREACH( TreePtr<Node> n, w )
 	{
 		if( n )
@@ -148,7 +148,7 @@ string Graph::Traverse( TreePtr<Node> root, bool links_pass )
 }
 
 
-string Graph::Traverse( Transformation *sr, string id, bool links_pass )
+string Graph::UniqueWalk( Transformation *sr, string id, bool links_pass )
 {
 	string s;
     s += links_pass ? DoTransformationLinks(sr, id) : DoTransformation(sr, id);
@@ -172,8 +172,8 @@ string Graph::Traverse( Transformation *sr, string id, bool links_pass )
     {
         if( pattern )
         {
-            TRACE("Expanding transform pattern ")(*pattern)("\n");
-            Expand w( pattern, &unique_filter, &no_tx_filter ); // return each node only once; do not recurse through transformations
+            TRACE("Walking transform pattern ")(*pattern)("\n");
+            Walk w( pattern, &unique_filter, &no_tx_filter ); // return each node only once; do not recurse through transformations
             FOREACH( TreePtr<Node> n, w )
             {              
                 s += links_pass ? DoNodeLinks(n) : DoNode(n);
@@ -545,7 +545,7 @@ string Graph::DoNode( TreePtr<Node> n )
 {
     if( !dynamic_pointer_cast<TransformOfBase>(n) && !dynamic_pointer_cast<BuildIdentifierBase>(n) ) // ignire the fact that these also derive from Transformation
   	    if( Transformation *rsb = dynamic_cast<Transformation *>(n.get()) )
-		    return Traverse( rsb, Id( n.get() ), false );
+		    return UniqueWalk( rsb, Id( n.get() ), false );
 
 	string s;
 	bool bold;
@@ -591,7 +591,7 @@ string Graph::DoNodeLinks( TreePtr<Node> n )
 {
     if( !dynamic_pointer_cast<TransformOfBase>(n) && !dynamic_pointer_cast<BuildIdentifierBase>(n) ) // ignire the fact that these also derive from Transformation
         if( Transformation *rsb = dynamic_cast<Transformation *>(n.get()) )
-            return Traverse( rsb, Id( n.get() ), true );
+            return UniqueWalk( rsb, Id( n.get() ), true );
 
     string s;
     TRACE("Itemising\n");

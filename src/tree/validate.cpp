@@ -26,12 +26,12 @@ void Validate::operator()( TreePtr<Node> context,
 	// First walk over the entire context counting incoming links (because
 	// incoming links from other than the subtree of interest still count
 	// when validating link counts).
-	Expand wcon( context );
+	Walk wcon( context );
 	FOREACH( const TreePtr<Node> x, wcon )
 	{
 		if( x )
 		{
-			// TODO use Traverse for this!
+			// TODO use UniqueWalk for this!
 			vector< Itemiser::Element * > members = x->Itemise();
 		    FOREACH( Itemiser::Element *m, members )
 			{
@@ -51,8 +51,8 @@ void Validate::operator()( TreePtr<Node> context,
 	}
 
 	// Now do the actual validation, only on the specified subtree
-	Expand w( *proot );
-	for( Expand::iterator wit = w.begin(); wit != w.end(); ++wit )
+	Walk w( *proot );
+	for( Walk::iterator wit = w.begin(); wit != w.end(); ++wit )
 	{
 		const TreePtr<Node> x = *wit;
 		if( !is_pattern ) // Don't do these checks on search/replace patterns
