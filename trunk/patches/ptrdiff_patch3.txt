@@ -1,0 +1,12 @@
+Index: llvm/include/llvm/Use.h
+===================================================================
+--- llvm/include/llvm/Use.h	(revision 61726)
++++ llvm/include/llvm/Use.h	(working copy)
+@@ -19,6 +19,7 @@
+ #include "llvm/Support/Casting.h"
+ #include "llvm/ADT/iterator.h"
+ #include "llvm/ADT/PointerIntPair.h"
++#include <csstddef>
+ 
+ namespace llvm {
+ 
