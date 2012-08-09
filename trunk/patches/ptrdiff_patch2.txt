@@ -6,7 +6,7 @@ Index: llvm/include/llvm/ADT/SmallVector.h
  #include <cstring>
  #include <memory>
  #include <cassert>
-+#include <csstddef>
++#include <cstddef>
  
  #ifdef _MSC_VER
  namespace std {
