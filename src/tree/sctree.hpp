@@ -12,6 +12,7 @@
 #include "tree/type_db.hpp"
 #include "tree/cpptree.hpp"
 
+/// SCTree namespace contains node definitions that represent elements of SystemC, expressed as though native language elements
 namespace SCTree {
 
 /** Base for all SystemC nodes, permitting detection of SystemC dialect eg for rendering */

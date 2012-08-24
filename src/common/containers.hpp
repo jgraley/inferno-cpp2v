@@ -10,6 +10,7 @@
 
 #include "common.hpp"
 
+/// OOStd namespace contains wrappers for STL and Boost features adding run-time polymorphism
 namespace OOStd {
 
 //
