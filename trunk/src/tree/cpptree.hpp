@@ -11,6 +11,7 @@
 #include "clang/Parse/DeclSpec.h"
 #include "tree/type_db.hpp"
 
+/// CPPTree namespace contains node definitions that represent elements of the C++ language
 namespace CPPTree {
 
 //////////////////////////// Underlying Node Types ////////////////////////////

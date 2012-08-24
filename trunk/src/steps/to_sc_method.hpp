@@ -3,6 +3,7 @@
 
 #include "sr/search_replace.hpp"
 
+/// Steps namespace contains all of inferno's transformation steps. 
 namespace Steps {
 
 /** Move automatic variables out to class scope as fields, but only
