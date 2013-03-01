@@ -28,7 +28,7 @@ echo testing files $infilelist
 failed=0
 for infile in $infilelist
 do
- test/test.sh $infile $resfile
+ test/test.sh $infile $resfile -ap
  if test $? -ne 0
  then
   failed=1
@@ -49,3 +49,4 @@ else
  echo "SOME TESTS FAILED"
 fi
 
+ 
