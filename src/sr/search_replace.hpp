@@ -205,19 +205,19 @@ public:
     void ClearPtrs( TreePtr<Node> dest ) const;
 
     TreePtr<Node> DoOverlayOrOverwriteSubstitutionPattern( TreePtr<Node> keynode,
-                	                                       shared_ptr<Key> current_key,
 		                                                   TreePtr<Node> source ) const;
     TreePtr<Node> DoOverlaySubstitutionPattern( TreePtr<Node> keynode,
-    	         	                            shared_ptr<Key> current_key,
 		                                        TreePtr<Node> source ) const; // under substitution if not NULL
     TreePtr<Node> DuplicateNode( TreePtr<Node> source,
     		                     bool force_dirty ) const;
+    TreePtr<Node> ApplySpecialAndCouplingOverlayPattern( TreePtr<Node> source ) const;
     TreePtr<Node> ApplySpecialAndCouplingPattern( TreePtr<Node> source ) const;
     TreePtr<Node> ApplySlave( TreePtr<Node> source, TreePtr<Node> dest ) const;    
+    TreePtr<Node> DuplicateSubtreeSubstitutionStuff( TreePtr<Node> source,
+                		                              shared_ptr<Key> current_key ) const;
 public:
     TreePtr<Node> DuplicateSubtreePattern( TreePtr<Node> source ) const;
-    TreePtr<Node> DuplicateSubtreeSubstitution( TreePtr<Node> source,
-                		                        shared_ptr<Key> current_key=shared_ptr<Key>() ) const;
+    TreePtr<Node> DuplicateSubtreeSubstitution( TreePtr<Node> source ) const;
 private:
     void KeyReplaceNodes( TreePtr<Node> source ) const;
     TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x ) const;
