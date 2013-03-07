@@ -188,6 +188,8 @@ private:
     // MatchingDecidedCompare ring
     friend class Conjecture;
     bool MatchingDecidedCompare( const TreePtrInterface &x,
+
+
     		                       TreePtr<Node> pattern,
     		                       bool can_key,
     		                       Conjecture &conj ) const;
@@ -210,7 +212,8 @@ public:
 		                                        TreePtr<Node> source ) const; // under substitution if not NULL
     TreePtr<Node> DuplicateNode( TreePtr<Node> source,
     		                     bool force_dirty ) const;
-    TreePtr<Node> ApplySpecialAndCouplingOverlayPattern( TreePtr<Node> source ) const;
+    TreePtr<Node> ApplySpecialAndCouplingOverlayPattern( TreePtr<Node> keynode,
+		                                                 TreePtr<Node> source ) const;
     TreePtr<Node> ApplySpecialAndCouplingPattern( TreePtr<Node> source ) const;
     TreePtr<Node> ApplySlave( TreePtr<Node> source, TreePtr<Node> dest ) const;    
     TreePtr<Node> DuplicateSubtreeSubstitutionStuff( TreePtr<Node> source,

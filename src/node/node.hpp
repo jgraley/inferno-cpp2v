@@ -43,6 +43,20 @@ struct Node : NodeBases
     // without making Node ambiguous
 };
 
+template<>
+struct MakeTreePtr<Node> : TreePtr<Node>
+{
+	MakeTreePtr() : TreePtr<Node>( new Node ) {}
+	template<typename CP0>
+	MakeTreePtr(const CP0 &cp0) : TreePtr<Node>( new Node(cp0) ) {}
+	template<typename CP0, typename CP1>
+	MakeTreePtr(const CP0 &cp0, const CP1 &cp1) : TreePtr<Node>( new Node(cp0, cp1) ) {}
+	template<typename CP0, typename CP1, typename CP2>
+	MakeTreePtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : TreePtr<Node>( new Node(cp0, cp1, cp2) ) {}
+	// Add more params as needed...
+};
+
+
 extern void GenericsTest();
 
 #endif
