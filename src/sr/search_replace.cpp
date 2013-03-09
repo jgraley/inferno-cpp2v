@@ -818,7 +818,7 @@ TreePtr<Node> CompareReplace::DoOverlayOrOverwriteSubstitutionPattern( TreePtr<N
     }
     else
     {
-        dest = DuplicateSubtreePattern( source ); // Overwriting pattern over dest, need to make a duplicate 
+        dest = ApplySpecialAndCouplingPattern( source ); // Overwriting pattern over dest, need to make a duplicate 
     }
     
     dest = ApplySlave( source, dest );
@@ -924,7 +924,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
                 }
                 else 
                 {
-                    TreePtr<Node> n = DuplicateSubtreePattern( p );
+                    TreePtr<Node> n = ApplySpecialAndCouplingPattern( p );
                     if( ReadArgs::assert_pedigree )
                         ASSERT( duplicated_pedigree.IsExist(n) )(*n);
                     TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
@@ -1113,7 +1113,7 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingOverlayPattern( TreePtr<Nod
         }
         else if( overlay)
         {
-            return ApplySlave( source, DuplicateSubtreePattern( overlay ) );  
+            return ApplySlave( source, ApplySpecialAndCouplingPattern( overlay ) );  
         }
         else if( dynamic_pointer_cast<SearchContainerBase>(source) )
         {
@@ -1200,7 +1200,7 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
         }
         else if( overlay)
         {
-            return ApplySlave( source, DuplicateSubtreePattern( overlay ) ); 
+            return ApplySlave( source, ApplySpecialAndCouplingPattern( overlay ) ); 
         }
         else if( dynamic_pointer_cast<SearchContainerBase>(source) )
         {
@@ -1232,7 +1232,7 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
         }
         else
         {
-            return TreePtr<Node>();
+            return DuplicateSubtreePattern(source);
         }
     }
 }
@@ -1274,16 +1274,14 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
 {
 	INDENT;
 
-    ASSERT( source );
- 	TRACE("Duplicating ")(*source)("\n");
-    if( ReadArgs::assert_pedigree )
-        ASSERT( pattern_pedigree.IsExist(source) )(*source);
-    TreePtr<Node> dest = ApplySpecialAndCouplingPattern( source );
-    if( dest )
-        return dest; // if this produced a result then we're done   
+//    ASSERT( source );
+// 	TRACE("Duplicating ")(*source)("\n");
+//    TreePtr<Node> dest = ApplySpecialAndCouplingPattern( source );
+//    if( dest )
+//        return dest; // if this produced a result then we're done   
     
     // Make a new node, force dirty because from pattern
-    dest = DuplicateNode( source, true );
+    TreePtr<Node> dest = DuplicateNode( source, true );
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of source, and itemises over that type. dest must
@@ -1329,7 +1327,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
            		}
 		        else
 		        {
-		            TreePtr<Node> n = DuplicateSubtreePattern( p );
+		            TreePtr<Node> n = ApplySpecialAndCouplingPattern( p );
                     if( ReadArgs::assert_pedigree )
                         ASSERT( duplicated_pedigree.IsExist(n) )(*n);
 			        TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
@@ -1342,7 +1340,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
             TRACE("Copying single element\n");
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( *source_ptr )("Member %d (", i)(*source_ptr)(") of ")(*source)(" was NULL when not overlaying\n");
-            *dest_ptr = DuplicateSubtreePattern( *source_ptr );
+            *dest_ptr = ApplySpecialAndCouplingPattern( *source_ptr );
             ASSERT( *dest_ptr );
             ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() )("Member %d (", i)(**source_ptr)(") of ")(*source)(" was not final\n");            
         }
@@ -1619,7 +1617,7 @@ TreePtr<Node> CompareReplace::MatchingDuplicateSubtree( TreePtr<Node> source ) c
 
     // Now replace according to the couplings
     TRACE("doing replace SUBSTITUTING pass....\n");
-    TreePtr<Node> r = DuplicateSubtreePattern( source );
+    TreePtr<Node> r = ApplySpecialAndCouplingPattern( source );
     // TODO do an overlay, means *proot needs passing in here and this fn should be renamed.
     // Also make sure tree at *proot is in the "keyed" pedigree otherwise asserts will fail.
     TRACE("replace SUBSTITUTING pass\n" );
