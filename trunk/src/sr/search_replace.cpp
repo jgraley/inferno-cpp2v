@@ -810,7 +810,7 @@ TreePtr<Node> CompareReplace::DoOverlayOrOverwriteSubstitutionPattern( TreePtr<N
     
     TreePtr<Node> dest = ApplySpecialAndCouplingOverlayPattern( keynode, source );
     if( dest )
-        return ApplySlave( source, dest ); // if this produced a result then we're done (effectively, always overwrite)  
+        return dest; // if this produced a result then we're done (effectively, always overwrite)  
     
     if( source->IsLocalMatch(keynode.get()) ) 
     {
@@ -1109,11 +1109,11 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingOverlayPattern( TreePtr<Nod
         
         if( overlay && key )
         {
-            return DoOverlayOrOverwriteSubstitutionPattern(key->root, overlay);
+            return ApplySlave( source, DoOverlayOrOverwriteSubstitutionPattern(key->root, overlay) );
         }
         else if( overlay)
         {
-            return DuplicateSubtreePattern( overlay ); 
+            return ApplySlave( source, DuplicateSubtreePattern( overlay ) );  
         }
         else if( dynamic_pointer_cast<SearchContainerBase>(source) )
         {
@@ -1122,14 +1122,14 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingOverlayPattern( TreePtr<Nod
             // this call is justified: we really do want to go all the way to leaves for eg Star, NotMatch because
             // we have nothing to overlay (Star pattern is only restriction, NotMatch pattern is abnormal, 
             // TransformOf pattern is not type-correct to overlay etc).
-            return DuplicateSubtreeSubstitutionStuff(key->root, key);   
+            return ApplySlave( source, DuplicateSubtreeSubstitutionStuff(key->root, key) );    
         }     
         else
         {
             // Star, Not, TransformOf etc. Also MatchAll with no overlay pattern falls thru to here
             ASSERT(key)(*source)(" not keyed\n");     
             // DuplicateSubtreeSubstitutionStuff() will spot the terminus of SearchContainers (Stuff, AnyNode)
-            return DuplicateSubtreeSubstitution(key->root);   
+            return ApplySlave( source, DuplicateSubtreeSubstitution(key->root) );   
         }     
     }
     else
@@ -1141,7 +1141,7 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingOverlayPattern( TreePtr<Nod
         {
             ASSERT( !dynamic_pointer_cast<TerminusKey>(key) )("Only special nodes should have terminus\n");
             // If we're here we keyed a coupling on a normal node.
-            return DoOverlaySubstitutionPattern( key->root, source );
+            return ApplySlave( source, DoOverlaySubstitutionPattern( key->root, source ) );
         }
         else
         {
@@ -1196,11 +1196,11 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
         
         if( overlay && key )
         {
-            return DoOverlayOrOverwriteSubstitutionPattern(key->root, overlay);
+            return ApplySlave( source, DoOverlayOrOverwriteSubstitutionPattern(key->root, overlay) );
         }
         else if( overlay)
         {
-            return DuplicateSubtreePattern( overlay ); 
+            return ApplySlave( source, DuplicateSubtreePattern( overlay ) ); 
         }
         else if( dynamic_pointer_cast<SearchContainerBase>(source) )
         {
@@ -1209,14 +1209,14 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
             // this call is justified: we really do want to go all the way to leaves for eg Star, NotMatch because
             // we have nothing to overlay (Star pattern is only restriction, NotMatch pattern is abnormal, 
             // TransformOf pattern is not type-correct to overlay etc).
-            return DuplicateSubtreeSubstitutionStuff(key->root, key);   
+            return ApplySlave( source, DuplicateSubtreeSubstitutionStuff(key->root, key) );    
         }     
         else
         {
             // Star, Not, TransformOf etc. Also MatchAll with no overlay pattern falls thru to here
             ASSERT(key)(*source)(" not keyed\n");     
             // DuplicateSubtreeSubstitutionStuff() will spot the terminus of SearchContainers (Stuff, AnyNode)
-            return DuplicateSubtreeSubstitution(key->root);   
+            return ApplySlave( source, DuplicateSubtreeSubstitution(key->root) );   
         }     
     }
     else
@@ -1228,7 +1228,7 @@ TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> sour
         {
             ASSERT( !dynamic_pointer_cast<TerminusKey>(key) )("Only special nodes should have terminus\n");
             // If we're here we keyed a coupling on a normal node.
-            return DoOverlaySubstitutionPattern( key->root, source );
+            return ApplySlave( source, DoOverlaySubstitutionPattern( key->root, source ) );
         }
         else
         {
@@ -1280,7 +1280,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
         ASSERT( pattern_pedigree.IsExist(source) )(*source);
     TreePtr<Node> dest = ApplySpecialAndCouplingPattern( source );
     if( dest )
-        return ApplySlave( source, dest ); // if this produced a result then we're done   
+        return dest; // if this produced a result then we're done   
     
     // Make a new node, force dirty because from pattern
     dest = DuplicateNode( source, true );
