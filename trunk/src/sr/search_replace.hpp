@@ -206,6 +206,12 @@ public:
     // Replace ring
     void ClearPtrs( TreePtr<Node> dest ) const;
 
+public:
+    TreePtr<Node> TopPattern( TreePtr<Node> source ) const;
+    TreePtr<Node> TopOverlayPattern( TreePtr<Node> keynode,
+		                             TreePtr<Node> source ) const;
+    TreePtr<Node> DuplicateSubtreeSubstitution( TreePtr<Node> source ) const;
+private:
     TreePtr<Node> DoOverlayOrOverwriteSubstitutionPattern( TreePtr<Node> keynode,
 		                                                   TreePtr<Node> source ) const;
     TreePtr<Node> DoOverlaySubstitutionPattern( TreePtr<Node> keynode,
@@ -218,10 +224,7 @@ public:
     TreePtr<Node> ApplySlave( TreePtr<Node> source, TreePtr<Node> dest ) const;    
     TreePtr<Node> DuplicateSubtreeSubstitutionStuff( TreePtr<Node> source,
                 		                              shared_ptr<Key> current_key ) const;
-public:
     TreePtr<Node> DuplicateSubtreePattern( TreePtr<Node> source ) const;
-    TreePtr<Node> DuplicateSubtreeSubstitution( TreePtr<Node> source ) const;
-private:
     void KeyReplaceNodes( TreePtr<Node> source ) const;
     TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x ) const;
     // implementation ring: Do the actual search and replace
