@@ -294,7 +294,7 @@ What makes slaves useful (as opposed to just running the program through the mas
 
 It is possible to use more than one slave in a pattern, they appear nested (that is as direct or indirect children of each other) and can nest in two distinct ways:
 
-1. A second slave may be pointed to by the through member of the first. These slaves are conceptually at the same level, and the nesting just defines the order in which they operate: child first. Both slave patterns operate for each match of the master in the prescribed order.
+1. A second slave may be pointed to by the through member of the first. These slaves are conceptually at the same level, and the nesting just defines the order in which they operate: child first. Both slave patterns operate for each match of the master in the prescribed order. The relationship here is 1:n+m.
 
 2. A second slave may be pointed to by the replace member of the first. This creates a sub-slave, which has the relationship described above to the first slave (so the first slave now acts as master to the second). The second slave acts for each match of the first. Overall, we get a 1:n:nm type of relationship.
 

@@ -24,7 +24,7 @@ private:
     virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
     {
         ASSERT( container );
-	    TreePtr<Node> n = sr->TopPattern( container );
+	    TreePtr<Node> n = sr->DuplicateSubtreePattern( container );
 	    ASSERT( n );
 	    TreePtr<SearchReplace::SubCollection> sc = dynamic_pointer_cast<SearchReplace::SubCollection>(n);
 	    ASSERT( sc );
@@ -183,6 +183,13 @@ PlaceLabelsInArray::PlaceLabelsInArray()
 // and SwapSubscriptMultiplex. It works by just changing all appearances of the Labeley 
 // type (except in the decl of the lvar). 
 // TODO Use local node for enum, so that we can change to this, and not unsigned int
+// TODO does not handle the case where there are two threads in a module, one of 
+// hwich does not have a state variable. Master can hit due to a thread that does have 
+// a "state" variable, but will choose lmap randomly from either thread and only
+// modify the usages of *that* lmap. Since there is now no state varaible in the 
+// module, no more updates to usages of lmap will occur. The answer is to recode the 
+// step based on pinning down a module and a compund within, and tying everything 
+// together properly.
 LabelTypeToEnum::LabelTypeToEnum()
 {
     MakeTreePtr< Stuff<Scope> > stuff_labeley, stuff_lmap;
