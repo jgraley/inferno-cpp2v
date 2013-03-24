@@ -34,6 +34,9 @@ OPTIONS += -ggdb
 # Enable profiling
 OPTIONS += -pg
 
+# Workaround compile error with SystemC
+OPTIONS += -fpermissive
+
 # For including llvm/clang header files
 BUILD = Debug
 LLVM = $(LEVEL)/llvm

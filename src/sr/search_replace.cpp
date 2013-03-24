@@ -794,47 +794,6 @@ void CompareReplace::ClearPtrs( TreePtr<Node> dest ) const
 }
 
 
-TreePtr<Node> CompareReplace::TopOverlayPattern( TreePtr<Node> keynode,
-		                                         TreePtr<Node> source ) const
-{
-
-    TreePtr<Node> dest = ApplySpecialAndCouplingOverlayPattern( keynode, source );
-    if( dest )
-        return dest; // if this produced a result then we're done (effectively, always overwrite)  
-        
-    return DoOverlayOrOverwriteSubstitutionPattern( keynode, source );
-}
-
-
-TreePtr<Node> CompareReplace::DoOverlayOrOverwriteSubstitutionPattern( TreePtr<Node> keynode,
-		                                                               TreePtr<Node> source ) const
-{
-    INDENT;
-    ASSERT( source ); 
-    ASSERT( keynode );
-    TRACE("key=")(*keynode)(" source=")(*source)("\n");
-
-	if( ReadArgs::assert_pedigree )
-    {
-        ASSERT( keyed_pedigree.IsExist(keynode) )(*keynode);
-        ASSERT( pattern_pedigree.IsExist(source) )(*source);
-    }
-    
-    TreePtr<Node> dest;
-    if( source->IsLocalMatch(keynode.get()) ) 
-    {
-        dest = DoOverlaySubstitutionPattern( keynode, source );
-    }
-    else
-    {
-        dest = TopPattern( source ); // Overwriting pattern over dest, need to make a duplicate 
-    }
-    
-    dest = ApplySlave( source, dest );
-    return dest;
-}
-
-
 TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynode,
 		                                                    TreePtr<Node> source ) const // under substitution if not NULL
 {
@@ -933,7 +892,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
                 }
                 else 
                 {
-                    TreePtr<Node> n = TopPattern( p );
+                    TreePtr<Node> n = DuplicateSubtreePattern( p );
                     if( ReadArgs::assert_pedigree )
                         ASSERT( duplicated_pedigree.IsExist(n) )(*n);
                     TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
@@ -953,7 +912,7 @@ TreePtr<Node> CompareReplace::DoOverlaySubstitutionPattern( TreePtr<Node> keynod
                        
             if( source_child )
             {                             
-                dest_child = TopOverlayPattern( *keynode_ptr, source_child );
+                dest_child = DuplicateSubtreePattern( source_child, *keynode_ptr );
                 ASSERT( dest_child );
                 ASSERT( dest_child->IsFinal() );
                 present_in_source.insert( dest_memb[i] );
@@ -1072,184 +1031,86 @@ TreePtr<Node> CompareReplace::DuplicateNode( TreePtr<Node> source,
 }    		                                          
 
 
-TreePtr<Node> CompareReplace::ApplySpecialAndCouplingOverlayPattern( TreePtr<Node> keynode,
-		                                                             TreePtr<Node> source ) const
+TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source,
+	                                                   TreePtr<Node> keynode ) const
 {
     INDENT;
     ASSERT( source );
     if( ReadArgs::assert_pedigree )
         ASSERT( pattern_pedigree.IsExist(source) )(*source);
-    // TODO source must be pattern?    
 
     // See if the source node is coupled to anything
     shared_ptr<Key> key = coupling_keys.GetKey( source );
-    TreePtr<Node> overlay;
-        
-    if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(source) )
-    {   
-        if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
-        {
-            ASSERT(key)(*source)(" not keyed\n");
-            overlay = srp->GetOverlayPattern(); // only strong modifiers use this
-        }
-        else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
-        {
-            ASSERT(key)(*source)(" not keyed\n");
-            ASSERT( ob->GetOverlay() );          
-            TRACE("Overlay node through=")(*(ob->GetThrough()))(" overlay=")(*(ob->GetOverlay()))("\n");
-            overlay = ob->GetOverlay(); 
-        }
-        else if( shared_ptr<GreenGrassBase> ggb = dynamic_pointer_cast<GreenGrassBase>( source ) )
-        {
-            ASSERT( ggb->GetThrough() );          
-            TRACE("GreenGrass node through=")(*(ggb->GetThrough()))("\n");
-            overlay = ggb->GetThrough(); 
-        }
-        else if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
-        {   
-            ASSERT( sb->GetThrough() );   
-            overlay = sb->GetThrough();
-        } 
-        
-        TRACE("Special ")
-             (*source)
-             (key?(dynamic_pointer_cast<TerminusKey>(key)?", terminus key":", non-terminus key"):", no key")
-             (overlay?", overlay\n":"non-overlay\n");
-        
-        if( overlay && key )
-        {
-            return ApplySlave( source, TopOverlayPattern(key->root, overlay) );
-        }
-        else if( overlay)
-        {
-            return ApplySlave( source, TopPattern( overlay ) );  
-        }
-        else if( dynamic_pointer_cast<SearchContainerBase>(source) )
-        {
-            // SearchContainer.
-            ASSERT(key)(*source)(" not keyed\n");     
-            // this call is justified: we really do want to go all the way to leaves for eg Star, NotMatch because
-            // we have nothing to overlay (Star pattern is only restriction, NotMatch pattern is abnormal, 
-            // TransformOf pattern is not type-correct to overlay etc).
-            return ApplySlave( source, DuplicateSubtreeSubstitutionStuff(key->root, key) );    
-        }     
-        else
-        {
-            // Star, Not, TransformOf etc. Also MatchAll with no overlay pattern falls thru to here
-            ASSERT(key)(*source)(" not keyed\n");     
-            // DuplicateSubtreeSubstitutionStuff() will spot the terminus of SearchContainers (Stuff, AnyNode)
-            return ApplySlave( source, DuplicateSubtreeSubstitution(key->root) );   
-        }     
-    }
-    else
-    {
-        TRACE("Non-special ")
-             (*source)
-             (key?(dynamic_pointer_cast<TerminusKey>(key)?", terminus key":", non-terminus key"):", no key");
-        if( key )
-        {
-            ASSERT( !dynamic_pointer_cast<TerminusKey>(key) )("Only special nodes should have terminus\n");
-            // If we're here we keyed a coupling on a normal node.
-            return ApplySlave( source, DoOverlaySubstitutionPattern( key->root, source ) );
-        }
-        else
-        {
-            return TreePtr<Node>();
-        }
-    }
+	if( key )
+		keynode = key->root;
+	if( dynamic_pointer_cast<SearchContainerBase>(source) )
+	{
+		// SearchContainer.
+		return DuplicateSubtreeSubstitutionStuff(keynode, key);   
+	}     
+	else
+	{
+	    return DuplicateSubtreePatternKeyed( source, keynode );
+	}
 }
-
-
-TreePtr<Node> CompareReplace::ApplySpecialAndCouplingPattern( TreePtr<Node> source ) const
-{
+	
+	
+TreePtr<Node> CompareReplace::DuplicateSubtreePatternKeyed( TreePtr<Node> source,
+	                                                        TreePtr<Node> keynode ) const
+{	
     INDENT;
     ASSERT( source );
     if( ReadArgs::assert_pedigree )
         ASSERT( pattern_pedigree.IsExist(source) )(*source);
-    // TODO source must be pattern?    
 
-    // See if the source node is coupled to anything
-    shared_ptr<Key> key = coupling_keys.GetKey( source );
-    TreePtr<Node> overlay;
-        
-    if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(source) )
-    {   
-        if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
-        {
-            ASSERT(key)(*source)(" not keyed\n");
-            overlay = srp->GetOverlayPattern(); // only strong modifiers use this
-        }
-        else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
-        {
-            ASSERT(key)(*source)(" not keyed\n");
-            ASSERT( ob->GetOverlay() );          
-            TRACE("Overlay node through=")(*(ob->GetThrough()))(" overlay=")(*(ob->GetOverlay()))("\n");
-            overlay = ob->GetOverlay(); 
-        }
-        else if( shared_ptr<GreenGrassBase> ggb = dynamic_pointer_cast<GreenGrassBase>( source ) )
-        {
-            ASSERT( ggb->GetThrough() );          
-            TRACE("GreenGrass node through=")(*(ggb->GetThrough()))("\n");
-            overlay = ggb->GetThrough(); 
-        }
-        else if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
-        {   
-            ASSERT( sb->GetThrough() );   
-            overlay = sb->GetThrough();
-        } 
-        
-        TRACE("Special ")
-             (*source)
-             (key?(dynamic_pointer_cast<TerminusKey>(key)?", terminus key":", non-terminus key"):", no key")
-             (overlay?", overlay\n":"non-overlay\n");
-        
-        if( overlay && key )
-        {
-            return ApplySlave( source, TopOverlayPattern(key->root, overlay) );
-        }
-        else if( overlay)
-        {
-            return ApplySlave( source, TopPattern( overlay ) ); 
-        }
-        else if( dynamic_pointer_cast<SearchContainerBase>(source) )
-        {
-            // SearchContainer.
-            ASSERT(key)(*source)(" not keyed\n");     
-            // this call is justified: we really do want to go all the way to leaves for eg Star, NotMatch because
-            // we have nothing to overlay (Star pattern is only restriction, NotMatch pattern is abnormal, 
-            // TransformOf pattern is not type-correct to overlay etc).
-            return ApplySlave( source, DuplicateSubtreeSubstitutionStuff(key->root, key) );    
-        }     
-        else
-        {
-            // Star, Not, TransformOf etc. Also MatchAll with no overlay pattern falls thru to here
-            ASSERT(key)(*source)(" not keyed\n");     
-            // DuplicateSubtreeSubstitutionStuff() will spot the terminus of SearchContainers (Stuff, AnyNode)
-            return ApplySlave( source, DuplicateSubtreeSubstitution(key->root) );   
-        }     
-    }
-    else
+	if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( source ) )
+	{
+		TreePtr<Node> overlay = srp->GetOverlayPattern(); // only strong modifiers use this
+		if( overlay )
+			return DuplicateSubtreePattern( overlay, keynode );
+		else
+			return DuplicateSubtreeSubstitution(keynode);   
+	}
+	else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( source ) )
+	{
+		ASSERT( ob->GetOverlay() );          
+		TRACE("Overlay node through=")(*(ob->GetThrough()))(" overlay=")(*(ob->GetOverlay()))("\n");
+		return DuplicateSubtreePattern( ob->GetOverlay(), keynode );
+	}
+	else if( shared_ptr<GreenGrassBase> ggb = dynamic_pointer_cast<GreenGrassBase>( source ) )
+	{
+		ASSERT( ggb->GetThrough() );          
+		TRACE("GreenGrass node through=")(*(ggb->GetThrough()))("\n");
+		TreePtr<Node> overlay = ggb->GetThrough(); 
+    	return DuplicateSubtreePattern( overlay, keynode );
+	}
+	else if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(source) )
+	{   
+		ASSERT( sb->GetThrough() );   
+		TreePtr<Node> overlay = sb->GetThrough();
+		return ApplySlave( source, DuplicateSubtreePattern( overlay, keynode ) );
+	} 
+	else if( dynamic_pointer_cast<SpecialBase>(source) )
+	{
+		// Star, Not, TransformOf etc. Also MatchAll with no overlay pattern falls thru to here
+		// DuplicateSubtreeSubstitutionStuff() will spot the terminus of SearchContainers (Stuff, AnyNode)
+		return DuplicateSubtreeSubstitution(keynode);   
+	}     
+    else // Normal node
     {
-        TRACE("Non-special ")
-             (*source)
-             (key?(dynamic_pointer_cast<TerminusKey>(key)?", terminus key":", non-terminus key"):", no key");
-        if( key )
-        {
-            ASSERT( !dynamic_pointer_cast<TerminusKey>(key) )("Only special nodes should have terminus\n");
-            // If we're here we keyed a coupling on a normal node.
-            return ApplySlave( source, DoOverlaySubstitutionPattern( key->root, source ) );
-        }
+        if( keynode && source->IsLocalMatch(keynode.get()) ) 
+            return DoOverlaySubstitutionPattern( keynode, source );
         else
-        {
-            return TreePtr<Node>();
-        }
-    }
+            return DuplicateSubtreePatternImpl( source ); // Overwriting pattern over dest, need to make a duplicate 
+	}
 }
 
 
 TreePtr<Node> CompareReplace::ApplySlave( TreePtr<Node> source, TreePtr<Node> dest ) const 
 {
     INDENT;
+	ASSERT( source );
+	ASSERT( dest );
     if( ReadArgs::assert_pedigree )
     {
         ASSERT( pattern_pedigree.IsExist(source) )(*source);
@@ -1275,25 +1136,16 @@ TreePtr<Node> CompareReplace::ApplySlave( TreePtr<Node> source, TreePtr<Node> de
             TRACE("\n");
         }
     } 
+    ASSERT( dest );
     return dest;
 }
 
-
-TreePtr<Node> CompareReplace::TopPattern( TreePtr<Node> source ) const
+    
+TreePtr<Node> CompareReplace::DuplicateSubtreePatternImpl( TreePtr<Node> source ) const
 {
-    TreePtr<Node> dest = ApplySpecialAndCouplingPattern( source );
-    if( dest )
-        return dest; // if this produced a result then we're done   
-        
-    return DuplicateSubtreePattern( source );
-}
+	INDENT;
 
-
-TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) const
-{
-    INDENT;
     ASSERT( source );
- 	TRACE("Duplicating ")(*source)("\n");
     if( ReadArgs::assert_pedigree )
         ASSERT( pattern_pedigree.IsExist(source) )(*source);
 
@@ -1344,7 +1196,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
            		}
 		        else
 		        {
-		            TreePtr<Node> n = TopPattern( p );
+		            TreePtr<Node> n = DuplicateSubtreePattern( p );
                     if( ReadArgs::assert_pedigree )
                         ASSERT( duplicated_pedigree.IsExist(n) )(*n);
 			        TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
@@ -1357,7 +1209,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
             TRACE("Copying single element\n");
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( *source_ptr )("Member %d (", i)(*source_ptr)(") of ")(*source)(" was NULL when not overlaying\n");
-            *dest_ptr = TopPattern( *source_ptr );
+            *dest_ptr = DuplicateSubtreePattern( *source_ptr );
             ASSERT( *dest_ptr );
             ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() )("Member %d (", i)(**source_ptr)(") of ")(*source)(" was not final\n");            
         }
@@ -1367,7 +1219,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source ) co
         }
     }
     
-    dest = ApplySlave( source, dest );
+   // dest = ApplySlave( source, dest );
     
     return dest;
 }
@@ -1404,7 +1256,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitutionStuff( TreePtr<Node> k
 			keynode == stuff_key->terminus ) // and the present node is the terminus in the keynode pattern
 		{
 			TRACE( "Leaving substitution to duplicate terminus replace pattern at ")(*(replace_stuff->terminus))("\n" );
-			TreePtr<Node> term = TopOverlayPattern( keynode, replace_stuff->terminus );
+			TreePtr<Node> term = DuplicateSubtreePattern( replace_stuff->terminus, keynode );
 			//DuplicateSubtree( replace_stuff->terminus ); // not in substitution any more
 			TRACE( "Returning to substitution for rest of stuff\n" );
 			return term;
@@ -1634,7 +1486,7 @@ TreePtr<Node> CompareReplace::MatchingDuplicateSubtree( TreePtr<Node> source ) c
 
     // Now replace according to the couplings
     TRACE("doing replace SUBSTITUTING pass....\n");
-    TreePtr<Node> r = TopPattern( source );
+    TreePtr<Node> r = DuplicateSubtreePattern( source );
     // TODO do an overlay, means *proot needs passing in here and this fn should be renamed.
     // Also make sure tree at *proot is in the "keyed" pedigree otherwise asserts will fail.
     TRACE("replace SUBSTITUTING pass\n" );

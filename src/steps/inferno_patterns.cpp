@@ -14,7 +14,7 @@ string BuildIdentifierBase::GetNewName( const CompareReplace *sr )
         ASSERT( source );
         // We have a child identifier - let replace algorithm run in the expectation it will
         // get subsitituted with a SpecificIdentifier from the original program tree
-        TreePtr<Node> n = sr->TopPattern( TreePtr<Node>(source) );
+        TreePtr<Node> n = sr->DuplicateSubtreePattern( TreePtr<Node>(source) );
         TRACE("End SoftMakeIdentifier recurse\n");
         ASSERT( n );
         TreePtr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>( n );

@@ -202,29 +202,24 @@ public:
 	                bool can_key = false ) const;
     virtual bool IsMatch( TreePtr<Node> context,       
                           TreePtr<Node> root );
-
+private:
     // Replace ring
     void ClearPtrs( TreePtr<Node> dest ) const;
 
-public:
-    TreePtr<Node> TopPattern( TreePtr<Node> source ) const;
-    TreePtr<Node> TopOverlayPattern( TreePtr<Node> keynode,
-		                             TreePtr<Node> source ) const;
-    TreePtr<Node> DuplicateSubtreeSubstitution( TreePtr<Node> source ) const;
-private:
-    TreePtr<Node> DoOverlayOrOverwriteSubstitutionPattern( TreePtr<Node> keynode,
-		                                                   TreePtr<Node> source ) const;
     TreePtr<Node> DoOverlaySubstitutionPattern( TreePtr<Node> keynode,
 		                                        TreePtr<Node> source ) const; // under substitution if not NULL
     TreePtr<Node> DuplicateNode( TreePtr<Node> source,
     		                     bool force_dirty ) const;
-    TreePtr<Node> ApplySpecialAndCouplingOverlayPattern( TreePtr<Node> keynode,
-		                                                 TreePtr<Node> source ) const;
-    TreePtr<Node> ApplySpecialAndCouplingPattern( TreePtr<Node> source ) const;
     TreePtr<Node> ApplySlave( TreePtr<Node> source, TreePtr<Node> dest ) const;    
     TreePtr<Node> DuplicateSubtreeSubstitutionStuff( TreePtr<Node> source,
                 		                              shared_ptr<Key> current_key ) const;
-    TreePtr<Node> DuplicateSubtreePattern( TreePtr<Node> source ) const;
+    TreePtr<Node> Foo( TreePtr<Node> source ) const;												      
+    TreePtr<Node> DuplicateSubtreePatternImpl( TreePtr<Node> source ) const;
+    TreePtr<Node> DuplicateSubtreePatternKeyed( TreePtr<Node> source, TreePtr<Node> keynode ) const;
+public:
+    TreePtr<Node> DuplicateSubtreePattern( TreePtr<Node> source, TreePtr<Node> keynode=TreePtr<Node>() ) const;
+    TreePtr<Node> DuplicateSubtreeSubstitution( TreePtr<Node> source ) const;
+private:
     void KeyReplaceNodes( TreePtr<Node> source ) const;
     TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x ) const;
     // implementation ring: Do the actual search and replace
