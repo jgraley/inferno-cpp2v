@@ -1046,7 +1046,20 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePattern( TreePtr<Node> source,
 	if( dynamic_pointer_cast<SearchContainerBase>(source) )
 	{
 		// SearchContainer.
-		return DuplicateSubtreeSubstitutionStuff(keynode, key);   
+		// Are we substituting a stuff node? If so, see if we reached the terminus, and if
+		// so come out of substitution. Done as tail recursion so that we already duplicated
+		// the terminus key, and can just overlay the terminus replace pattern.
+		shared_ptr<TerminusKey> stuff_key = dynamic_pointer_cast<TerminusKey>(key);
+		ASSERT( stuff_key );
+		ASSERT( stuff_key->replace_pattern );
+		shared_ptr<TerminusBase> replace_stuff = dynamic_pointer_cast<TerminusBase>( stuff_key->replace_pattern );
+		ASSERT( replace_stuff );
+		ASSERT( replace_stuff->terminus );
+		TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(replace_stuff->terminus))
+		                                                  (", term=")(*(stuff_key->terminus))("\n");
+		TreePtr<Node> term = DuplicateSubtreePattern( replace_stuff->terminus, stuff_key->terminus );
+		TRACE( "Stuff node: Substituting stuff");
+		return DuplicateSubtreeSubstitution(keynode, stuff_key->terminus, term);   
 	}     
 	else
 	{
@@ -1225,17 +1238,16 @@ TreePtr<Node> CompareReplace::DuplicateSubtreePatternImpl( TreePtr<Node> source 
 }
 
 
-TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitutionStuff( TreePtr<Node> keynode,
-		                                                         shared_ptr<Key> current_key ) const
+TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitution( TreePtr<Node> keynode,
+		                                                    TreePtr<Node> kterminus,
+													          TreePtr<Node> rterminus ) const
 {
 	INDENT;
-	ASSERT( current_key );
-	ASSERT(keynode);
+	ASSERT( keynode );
 	
     if( ReadArgs::assert_pedigree )
         ASSERT( keyed_pedigree.IsExist(keynode) )(*keynode);
     
-    TRACE("Duplicating %s current_key=%p\n", ((string)*keynode).c_str(), current_key.get());
     // Under substitution, we should be duplicating a subtree of the input
     // program, which should not contain any special nodes
     ASSERT( !(dynamic_pointer_cast<SpecialBase>(keynode)) )
@@ -1243,27 +1255,11 @@ TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitutionStuff( TreePtr<Node> k
           (*keynode)
           (" while under substitution\n" );
 
-    // Are we substituting a stuff node? If so, see if we reached the terminus, and if
-	// so come out of substitution. Done as tail recursion so that we already duplicated
-	// the terminus key, and can just overlay the terminus replace pattern.
-	if( shared_ptr<TerminusKey> stuff_key = dynamic_pointer_cast<TerminusKey>(current_key) )
-	{
-		TRACE( "Substituting stuff: keynode=")(*keynode)(", term=")(stuff_key->terminus)("\n");
-		ASSERT( stuff_key->replace_pattern );
-		shared_ptr<TerminusBase> replace_stuff = dynamic_pointer_cast<TerminusBase>( stuff_key->replace_pattern );
-		ASSERT( replace_stuff );
-		if( replace_stuff->terminus &&      // There is a terminus in replace pattern
-			keynode == stuff_key->terminus ) // and the present node is the terminus in the keynode pattern
-		{
-			TRACE( "Leaving substitution to duplicate terminus replace pattern at ")(*(replace_stuff->terminus))("\n" );
-			TreePtr<Node> term = DuplicateSubtreePattern( replace_stuff->terminus, keynode );
-			//DuplicateSubtree( replace_stuff->terminus ); // not in substitution any more
-			TRACE( "Returning to substitution for rest of stuff\n" );
-			return term;
-		}
-	}
+	
+	if( kterminus && keynode == kterminus ) // and the present node is the terminus in the keynode pattern
+		return rterminus;
 
-    // Make a new node, since we're substituting, preserve dirtyness	    
+	// Make a new node, since we're substituting, preserve dirtyness	    
     TreePtr<Node> dest = DuplicateNode( keynode, false );
 
     // Itemise the members. Note that the itemiser internally does a
@@ -1293,7 +1289,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitutionStuff( TreePtr<Node> k
 	        {
 		        ASSERT( p ); // present simplified scheme disallows NULL
 		        TRACE("Duplicating ")(*p)("\n");
-		        TreePtr<Node> n = DuplicateSubtreeSubstitutionStuff( p, current_key );
+		        TreePtr<Node> n = DuplicateSubtreeSubstitution( p, kterminus, rterminus );
 		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
 		        {
 			        TRACE("Walking SubContainer length %d\n", sc->size() );
@@ -1313,7 +1309,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitutionStuff( TreePtr<Node> k
             TRACE("Duplicating node ")(*keynode_ptr)("\n");
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( *keynode_ptr )("keynode should be non-NULL");
-            *dest_ptr = DuplicateSubtreeSubstitutionStuff( *keynode_ptr, current_key );
+            *dest_ptr = DuplicateSubtreeSubstitution( *keynode_ptr, kterminus, rterminus );
             ASSERT( *dest_ptr );
             ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            
         }
@@ -1325,88 +1321,6 @@ TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitutionStuff( TreePtr<Node> k
     
     return dest;
 }
-
-
-
-TreePtr<Node> CompareReplace::DuplicateSubtreeSubstitution( TreePtr<Node> keynode ) const
-{
-	INDENT;
-	ASSERT(keynode);
-	
-    if( ReadArgs::assert_pedigree )
-        ASSERT( keyed_pedigree.IsExist(keynode) )(*keynode);
-    
-    TRACE("Duplicating %s\n", ((string)*keynode).c_str());
-    // Under substitution, we should be duplicating a subtree of the input
-    // program, which should not contain any special nodes
-    ASSERT( !(dynamic_pointer_cast<SpecialBase>(keynode)) )
-          ("Duplicating special node ")
-          (*keynode)
-          (" while under substitution\n" );
-
-    // Make a new node, since we're substituting, preserve dirtyness	    
-    TreePtr<Node> dest = DuplicateNode( keynode, false );
-
-    // Itemise the members. Note that the itemiser internally does a
-    // dynamic_cast onto the type of keynode, and itemises over that type. dest must
-    // be dynamic_castable to keynode's type.
-    vector< Itemiser::Element * > keynode_memb = keynode->Itemise();
-    vector< Itemiser::Element * > dest_memb = dest->Itemise(); 
-
-    TRACE("Duplicating %d members keynode=", dest_memb.size())(*keynode)(" dest=")(*dest)("\n");
-    // Loop over all the members of keynode (which can be a subset of dest)
-    // and for non-NULL members, duplicate them by recursing and write the
-    // duplicates to the destination.
-    for( int i=0; i<dest_memb.size(); i++ )
-    {
-    	TRACE("Duplicating member %d\n", i );
-        ASSERT( keynode_memb[i] )( "itemise returned null element" );
-        ASSERT( dest_memb[i] )( "itemise returned null element" );
-        
-        if( ContainerInterface *keynode_con = dynamic_cast<ContainerInterface *>(keynode_memb[i]) )                
-        {
-            ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
-
-            dest_con->clear();
-
-            TRACE("Duplicating container size %d\n", keynode_con->size() );
-	        FOREACH( const TreePtrInterface &p, *keynode_con )
-	        {
-		        ASSERT( p ); // present simplified scheme disallows NULL
-		        TRACE("Duplicating ")(*p)("\n");
-		        TreePtr<Node> n = DuplicateSubtreeSubstitution( p );
-		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
-		        {
-			        TRACE("Walking SubContainer length %d\n", sc->size() );
-		            FOREACH( const TreePtrInterface &xx, *sc )
-			            dest_con->insert( xx );
-			            ASSERT(0);
-           		}
-		        else
-		        {
-			        TRACE("Normal element, inserting ")(*n)(" directly\n");
-			        dest_con->insert( n );
-		        }
-	        }
-        }            
-        else if( TreePtrInterface *keynode_ptr = dynamic_cast<TreePtrInterface *>(keynode_memb[i]) )
-        {
-            TRACE("Duplicating node ")(*keynode_ptr)("\n");
-            TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            ASSERT( *keynode_ptr )("keynode should be non-NULL");
-            *dest_ptr = DuplicateSubtreeSubstitution( *keynode_ptr );
-            ASSERT( *dest_ptr );
-            ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            
-        }
-        else
-        {
-            ASSERTFAIL("got something from itemise that isn't a sequence or a shared pointer");
-        }
-    }
-    
-    return dest;
-}
-
 
 
 // Key for replace by just walking the tree (uniquised walk, not recursing into 
