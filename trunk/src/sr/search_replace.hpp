@@ -211,14 +211,14 @@ private:
     TreePtr<Node> DuplicateNode( TreePtr<Node> source,
     		                     bool force_dirty ) const;
     TreePtr<Node> ApplySlave( TreePtr<Node> source, TreePtr<Node> dest ) const;    
-    TreePtr<Node> DuplicateSubtreeSubstitutionStuff( TreePtr<Node> source,
-                		                              shared_ptr<Key> current_key ) const;
+    TreePtr<Node> DuplicateSubtreeSubstitution( TreePtr<Node> source,
+		                                        TreePtr<Node> kterminus=TreePtr<Node>(),
+		                                        TreePtr<Node> rterminus=TreePtr<Node>() ) const;
     TreePtr<Node> Foo( TreePtr<Node> source ) const;												      
     TreePtr<Node> DuplicateSubtreePatternImpl( TreePtr<Node> source ) const;
     TreePtr<Node> DuplicateSubtreePatternKeyed( TreePtr<Node> source, TreePtr<Node> keynode ) const;
 public:
     TreePtr<Node> DuplicateSubtreePattern( TreePtr<Node> source, TreePtr<Node> keynode=TreePtr<Node>() ) const;
-    TreePtr<Node> DuplicateSubtreeSubstitution( TreePtr<Node> source ) const;
 private:
     void KeyReplaceNodes( TreePtr<Node> source ) const;
     TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x ) const;
