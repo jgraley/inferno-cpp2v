@@ -24,7 +24,7 @@ private:
     virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
     {
         ASSERT( container );
-	    TreePtr<Node> n = sr->DuplicateSubtreePattern( container );
+	    TreePtr<Node> n = sr->BuildReplace( container );
 	    ASSERT( n );
 	    TreePtr<SearchReplace::SubCollection> sc = dynamic_pointer_cast<SearchReplace::SubCollection>(n);
 	    ASSERT( sc );
