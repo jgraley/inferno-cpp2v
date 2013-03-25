@@ -69,6 +69,7 @@ class Conjecture;
 class SpecialBase;
 class StuffBase;
 class StarBase;
+class SlaveBase;
 class SearchContainerBase;
 
 class CompareReplace : virtual public InPlaceTransformation, 
@@ -188,8 +189,6 @@ private:
     // MatchingDecidedCompare ring
     friend class Conjecture;
     bool MatchingDecidedCompare( const TreePtrInterface &x,
-
-
     		                       TreePtr<Node> pattern,
     		                       bool can_key,
     		                       Conjecture &conj ) const;
@@ -206,22 +205,21 @@ private:
     // Replace ring
     void ClearPtrs( TreePtr<Node> dest ) const;
 
-    TreePtr<Node> DoOverlaySubstitutionPattern( TreePtr<Node> keynode,
-		                                        TreePtr<Node> source ) const; // under substitution if not NULL
-    TreePtr<Node> DuplicateNode( TreePtr<Node> source,
+    TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode,
+		                                        TreePtr<Node> pattern ) const; // under substitution if not NULL
+    TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
     		                     bool force_dirty ) const;
-    TreePtr<Node> ApplySlave( TreePtr<Node> source, TreePtr<Node> dest ) const;    
-    TreePtr<Node> DuplicateSubtreeSubstitution( TreePtr<Node> source,
+    TreePtr<Node> BuildReplaceSlave( shared_ptr<SlaveBase> pattern, TreePtr<Node> keynode ) const;    
+    TreePtr<Node> DuplicateSubtree( TreePtr<Node> pattern,
 		                                        TreePtr<Node> kterminus=TreePtr<Node>(),
 		                                        TreePtr<Node> rterminus=TreePtr<Node>() ) const;
-    TreePtr<Node> Foo( TreePtr<Node> source ) const;												      
-    TreePtr<Node> DuplicateSubtreePatternImpl( TreePtr<Node> source ) const;
-    TreePtr<Node> DuplicateSubtreePatternKeyed( TreePtr<Node> source, TreePtr<Node> keynode ) const;
+    TreePtr<Node> BuildReplaceNormal( TreePtr<Node> pattern ) const;
+    TreePtr<Node> BuildReplaceKeyed( TreePtr<Node> pattern, TreePtr<Node> keynode ) const;
 public:
-    TreePtr<Node> DuplicateSubtreePattern( TreePtr<Node> source, TreePtr<Node> keynode=TreePtr<Node>() ) const;
+    TreePtr<Node> BuildReplace( TreePtr<Node> pattern, TreePtr<Node> keynode=TreePtr<Node>() ) const;
 private:
-    void KeyReplaceNodes( TreePtr<Node> source ) const;
-    TreePtr<Node> MatchingDuplicateSubtree( TreePtr<Node> x ) const;
+    void KeyReplaceNodes( TreePtr<Node> pattern ) const;
+    TreePtr<Node> ReplacePhase( TreePtr<Node> x ) const;
     // implementation ring: Do the actual search and replace
     bool SingleCompareReplace( TreePtr<Node> *proot );
     int RepeatingCompareReplace( TreePtr<Node> *proot );
