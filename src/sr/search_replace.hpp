@@ -210,9 +210,9 @@ private:
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
     		                     bool force_dirty ) const;
     TreePtr<Node> BuildReplaceSlave( shared_ptr<SlaveBase> pattern, TreePtr<Node> keynode ) const;    
-    TreePtr<Node> DuplicateSubtree( TreePtr<Node> pattern,
-		                                        TreePtr<Node> kterminus=TreePtr<Node>(),
-		                                        TreePtr<Node> rterminus=TreePtr<Node>() ) const;
+    TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
+		                            TreePtr<Node> source_terminus = TreePtr<Node>(),
+		                            TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
     TreePtr<Node> BuildReplaceNormal( TreePtr<Node> pattern ) const;
     TreePtr<Node> BuildReplaceKeyed( TreePtr<Node> pattern, TreePtr<Node> keynode ) const;
 public:
