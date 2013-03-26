@@ -852,7 +852,7 @@ TreePtr<Node> CompareReplace::BuildReplaceOverlay( TreePtr<Node> keynode,
     vector< Itemiser::Element * > keynode_memb = keynode->Itemise( dest.get() ); // Get the members of keynode corresponding to pattern's class
     vector< Itemiser::Element * >  dest_memb = pattern->Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
     ASSERT( pattern_memb.size() == dest_memb.size() );
-    Set< Itemiser::Element * > present_in_source;
+    Set< Itemiser::Element * > present_in_pattern;
     
     TRACE("Copying %d members from pattern=%s dest=%s\n", dest_memb.size(), TypeInfo(pattern).name().c_str(), TypeInfo(dest).name().c_str());
     for( int i=0; i<dest_memb.size(); i++ )
@@ -861,16 +861,16 @@ TreePtr<Node> CompareReplace::BuildReplaceOverlay( TreePtr<Node> keynode,
         ASSERT( pattern_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
         ASSERT( keynode_memb[i] )( "itemise returned null element" );                
-        if( ContainerInterface *source_con = dynamic_cast<ContainerInterface *>(pattern_memb[i]) )                
+        if( ContainerInterface *pattern_con = dynamic_cast<ContainerInterface *>(pattern_memb[i]) )                
         {
-            Sequence<Node> esource_con = WalkContainerPattern( *source_con, true );    
+            Sequence<Node> expanded_pattern_con = WalkContainerPattern( *pattern_con, true );    
 
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
-            ASSERT( dest_con )( "itemise for dest didn't match itemise for esource");
+            ASSERT( dest_con )( "itemise for dest didn't match itemise for expanded_pattern_con");
             dest_con->clear();
 
-            TRACE("Copying container size %d from esource\n", esource_con.size() );
-	        FOREACH( const TreePtrInterface &p, esource_con )
+            TRACE("Copying container size %d from expanded_pattern_con\n", expanded_pattern_con.size() );
+	        FOREACH( const TreePtrInterface &p, expanded_pattern_con )
 	        {
 		        ASSERT( p ); // present simplified scheme disallows NULL
 		        TRACE("Got ")(*p)("\n");
@@ -899,7 +899,7 @@ TreePtr<Node> CompareReplace::BuildReplaceOverlay( TreePtr<Node> keynode,
                     dest_con->insert( n );
                 }
 	        }
-	        present_in_source.insert( dest_memb[i] );
+	        present_in_pattern.insert( dest_memb[i] );
         }            
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -907,15 +907,15 @@ TreePtr<Node> CompareReplace::BuildReplaceOverlay( TreePtr<Node> keynode,
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             TreePtrInterface *keynode_ptr = dynamic_cast<TreePtrInterface *>(keynode_memb[i]);
             ASSERT( dest_ptr )( "itemise for target didn't match itemise for pattern");
-            TreePtr<Node> source_child = *pattern_ptr;
+            TreePtr<Node> pattern_child = *pattern_ptr;
             TreePtr<Node> dest_child = *dest_ptr;
                        
-            if( source_child )
+            if( pattern_child )
             {                             
-                dest_child = BuildReplace( source_child, *keynode_ptr );
+                dest_child = BuildReplace( pattern_child, *keynode_ptr );
                 ASSERT( dest_child );
                 ASSERT( dest_child->IsFinal() );
-                present_in_source.insert( dest_memb[i] );
+                present_in_pattern.insert( dest_memb[i] );
             }
             
             *dest_ptr = dest_child;
@@ -940,7 +940,7 @@ TreePtr<Node> CompareReplace::BuildReplaceOverlay( TreePtr<Node> keynode,
         ASSERT( keynode_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
         
-        if( present_in_source.IsExist(dest_memb[i]) )
+        if( present_in_pattern.IsExist(dest_memb[i]) )
             continue; // already did this one in the above loop
 
     	TRACE("Member %d from key\n", i );
@@ -1015,11 +1015,11 @@ TreePtr<Node> CompareReplace::DuplicateNode( TreePtr<Node> pattern,
     TreePtr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
     ASSERT(dest);
 
-    bool source_dirty = GetOverallMaster()->dirty_grass.find( pattern ) != GetOverallMaster()->dirty_grass.end();
+    bool pattern_dirty = GetOverallMaster()->dirty_grass.find( pattern ) != GetOverallMaster()->dirty_grass.end();
     if( force_dirty || // requested by caller
-        source_dirty ) // pattern was dirty
+        pattern_dirty ) // pattern was dirty
     {
-        TRACE("dirtying ")(*dest)(" force=%d pattern=%d (")(*pattern)(")\n", force_dirty, source_dirty);        
+        TRACE("dirtying ")(*dest)(" force=%d pattern=%d (")(*pattern)(")\n", force_dirty, pattern_dirty);        
         GetOverallMaster()->dirty_grass.insert( dest );
     }
     
@@ -1172,15 +1172,15 @@ TreePtr<Node> CompareReplace::BuildReplaceNormal( TreePtr<Node> pattern ) const
         ASSERT( pattern_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
         
-        if( ContainerInterface *source_con = dynamic_cast<ContainerInterface *>(pattern_memb[i]) )                
+        if( ContainerInterface *pattern_con = dynamic_cast<ContainerInterface *>(pattern_memb[i]) )                
         {
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
             dest_con->clear();
 
-            TRACE("Copying container size %d\n", source_con->size() );
-	        FOREACH( const TreePtrInterface &p, *source_con )
+            TRACE("Copying container size %d\n", pattern_con->size() );
+	        FOREACH( const TreePtrInterface &p, *pattern_con )
 	        {
-		        ASSERT( p )("Some element of member %d (", i)(*source_con)(") of ")(*pattern)(" was NULL\n");
+		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*pattern)(" was NULL\n");
 		        TRACE("Got ")(*p)("\n");
 		        if( shared_ptr<StarBase> ps = dynamic_pointer_cast<StarBase>(TreePtr<Node>(p)) )
 		        {
@@ -1226,38 +1226,35 @@ TreePtr<Node> CompareReplace::BuildReplaceNormal( TreePtr<Node> pattern ) const
 }
 
 
-TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> keynode,
-		                                                    TreePtr<Node> kterminus,
-													          TreePtr<Node> rterminus ) const
+TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
+		                                        TreePtr<Node> source_terminus,
+												 TreePtr<Node> dest_terminus ) const
 {
 	INDENT;
-	ASSERT( keynode );
-	
-    if( ReadArgs::assert_pedigree )
-        ASSERT( keyed_pedigree.IsExist(keynode) )(*keynode);
-    
-    // Under substitution, we should be duplicating a subtree of the input
+	ASSERT( source );
+    if( source_terminus )
+		ASSERT( dest_terminus );
+     // Under substitution, we should be duplicating a subtree of the input
     // program, which should not contain any special nodes
-    ASSERT( !(dynamic_pointer_cast<SpecialBase>(keynode)) )
-          ("Duplicating special node ")
-          (*keynode)
-          (" while under substitution\n" );
-
+    ASSERT( !(dynamic_pointer_cast<SpecialBase>(source)) )
+          ("Cannot duplicate special node ")(*source);
 	
-	if( kterminus && keynode == kterminus ) // and the present node is the terminus in the keynode pattern
-		return rterminus;
+	// If source_terminus and dest_terminus are supplied, substitute dest_terminus node
+    // in place of all copes of source terminus (directly, without duplicating).
+	if( source_terminus && source == source_terminus ) 
+		return dest_terminus;
 
 	// Make a new node, since we're substituting, preserve dirtyness	    
-    TreePtr<Node> dest = DuplicateNode( keynode, false );
+    TreePtr<Node> dest = DuplicateNode( source, false );
 
     // Itemise the members. Note that the itemiser internally does a
-    // dynamic_cast onto the type of keynode, and itemises over that type. dest must
-    // be dynamic_castable to keynode's type.
-    vector< Itemiser::Element * > keynode_memb = keynode->Itemise();
+    // dynamic_cast onto the type of source, and itemises over that type. dest must
+    // be dynamic_castable to source's type.
+    vector< Itemiser::Element * > keynode_memb = source->Itemise();
     vector< Itemiser::Element * > dest_memb = dest->Itemise(); 
 
-    TRACE("Duplicating %d members keynode=", dest_memb.size())(*keynode)(" dest=")(*dest)("\n");
-    // Loop over all the members of keynode (which can be a subset of dest)
+    TRACE("Duplicating %d members source=", dest_memb.size())(*source)(" dest=")(*dest)("\n");
+    // Loop over all the members of source (which can be a subset of dest)
     // and for non-NULL members, duplicate them by recursing and write the
     // duplicates to the destination.
     for( int i=0; i<dest_memb.size(); i++ )
@@ -1277,27 +1274,17 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> keynode,
 	        {
 		        ASSERT( p ); // present simplified scheme disallows NULL
 		        TRACE("Duplicating ")(*p)("\n");
-		        TreePtr<Node> n = DuplicateSubtree( p, kterminus, rterminus );
-		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
-		        {
-			        TRACE("Walking SubContainer length %d\n", sc->size() );
-		            FOREACH( const TreePtrInterface &xx, *sc )
-			            dest_con->insert( xx );
-			            ASSERT(0);
-           		}
-		        else
-		        {
-			        TRACE("Normal element, inserting ")(*n)(" directly\n");
-			        dest_con->insert( n );
-		        }
+		        TreePtr<Node> n = DuplicateSubtree( p, source_terminus, dest_terminus );
+  	            TRACE("Normal element, inserting ")(*n)(" directly\n");
+		        dest_con->insert( n );
 	        }
         }            
         else if( TreePtrInterface *keynode_ptr = dynamic_cast<TreePtrInterface *>(keynode_memb[i]) )
         {
             TRACE("Duplicating node ")(*keynode_ptr)("\n");
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            ASSERT( *keynode_ptr )("keynode should be non-NULL");
-            *dest_ptr = DuplicateSubtree( *keynode_ptr, kterminus, rterminus );
+            ASSERT( *keynode_ptr )("source should be non-NULL");
+            *dest_ptr = DuplicateSubtree( *keynode_ptr, source_terminus, dest_terminus );
             ASSERT( *dest_ptr );
             ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            
         }
