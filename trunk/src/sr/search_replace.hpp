@@ -205,8 +205,7 @@ private:
     // Replace ring
     void ClearPtrs( TreePtr<Node> dest ) const;
 
-    TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode,
-		                                        TreePtr<Node> pattern ) const; // under substitution if not NULL
+    TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> pattern, TreePtr<Node> keynode ) const; // under substitution if not NULL
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
     		                     bool force_dirty ) const;
     TreePtr<Node> BuildReplaceSlave( shared_ptr<SlaveBase> pattern, TreePtr<Node> keynode ) const;    
@@ -215,6 +214,7 @@ private:
 		                            TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
     TreePtr<Node> BuildReplaceNormal( TreePtr<Node> pattern ) const;
     TreePtr<Node> BuildReplaceKeyed( TreePtr<Node> pattern, TreePtr<Node> keynode ) const;
+    TreePtr<Node> BuildReplaceStar( shared_ptr<StarBase> pattern, TreePtr<Node> keynode ) const;
 public:
     TreePtr<Node> BuildReplace( TreePtr<Node> pattern, TreePtr<Node> keynode=TreePtr<Node>() ) const;
 private:
@@ -234,26 +234,32 @@ public:
     {
         NODE_FUNCTIONS
     };
-    struct SubSequence : SequenceInterface,
-                         SubContainer
+    struct SubSequenceRange : SequenceInterface,
+                              SubContainer
     {
     	NODE_FUNCTIONS_FINAL 
 
-        SubSequence() {}
+        SubSequenceRange() {}
     	shared_ptr<iterator_interface> my_begin;
     	shared_ptr<iterator_interface> my_end;
     	operator string() const { return GetName() + SSPrintf("@%p", this); }    
     public:
-    	SubSequence( iterator &b, iterator &e ) : my_begin(b.Clone()), my_end(e.Clone())
+    	SubSequenceRange( iterator &b, iterator &e ) : my_begin(b.Clone()), my_end(e.Clone())
     	{    	    
     	}
 	    virtual const iterator_interface &begin() { return *my_begin; }
         virtual const iterator_interface &end()   { return *my_end; }
-        virtual void erase( iterator )  { ASSERTFAIL("Cannot modify SubSequence"); }
-        virtual void clear()                                { ASSERTFAIL("Cannot modify SubSequence"); }    
-        virtual void insert( const TreePtrInterface & )     { ASSERTFAIL("Cannot modify SubSequence"); }
+        virtual void erase( iterator )  { ASSERTFAIL("Cannot modify SubSequenceRange"); }
+        virtual void clear()                                { ASSERTFAIL("Cannot modify SubSequenceRange"); }    
+        virtual void insert( const TreePtrInterface & )     { ASSERTFAIL("Cannot modify SubSequenceRange"); }
         virtual TreePtrInterface &operator[]( int i ) { ASSERTFAIL("TODO"); }  
-        virtual void push_back( const TreePtrInterface &gx ){ ASSERTFAIL("Cannot modify SubSequence"); }  
+        virtual void push_back( const TreePtrInterface &gx ){ ASSERTFAIL("Cannot modify SubSequenceRange"); }  
+    };
+    struct SubSequence : Sequence<Node>,
+                         SubContainer
+    {
+    	NODE_FUNCTIONS_FINAL 
+    	operator string() const { return GetName() + SSPrintf("@%p", this); }    
     };
     struct SubCollection : Collection<Node>,
                            SubContainer
