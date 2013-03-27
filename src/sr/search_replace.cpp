@@ -495,7 +495,7 @@ bool CompareReplace::DecidedCompare( SequenceInterface &x,
             
             // Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
             // Now make a copy of the elements that matched the star and apply couplings
-            TreePtr<SubSequence> ss( new SubSequence( xit_begin_star, xit ) );
+            TreePtr<SubSequenceRange> ss( new SubSequenceRange( xit_begin_star, xit ) );
             //for( ContainerInterface::iterator it=xit_begin_star; it != xit; ++it ) // TODO FOREACH?
             //{
             //  ss->push_back( *it );
@@ -794,8 +794,7 @@ void CompareReplace::ClearPtrs( TreePtr<Node> dest ) const
 }
 
 
-TreePtr<Node> CompareReplace::BuildReplaceOverlay( TreePtr<Node> keynode,
-		                                                    TreePtr<Node> pattern ) const // under substitution if not NULL
+TreePtr<Node> CompareReplace::BuildReplaceOverlay( TreePtr<Node> pattern, TreePtr<Node> keynode ) const // under substitution if not NULL
 {
 	INDENT;
     ASSERT( pattern );
@@ -872,27 +871,17 @@ TreePtr<Node> CompareReplace::BuildReplaceOverlay( TreePtr<Node> keynode,
             TRACE("Copying container size %d from expanded_pattern_con\n", expanded_pattern_con.size() );
 	        FOREACH( const TreePtrInterface &p, expanded_pattern_con )
 	        {
-		        ASSERT( p ); // present simplified scheme disallows NULL
+		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*pattern)(" was NULL\n");
 		        TRACE("Got ")(*p)("\n");
-                if( shared_ptr<StarBase> ps = dynamic_pointer_cast<StarBase>(TreePtr<Node>(p)) )
+				TreePtr<Node> n = BuildReplace( p );
+                if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(n.get()) )
                 {
-                    shared_ptr<Key> key = coupling_keys.GetKey( ps );
-                    ASSERT( key )("Replacing ")(*p)(" but it was not keyed from the search pattern as required\n");
-                    TRACE("Got ")(*key->root)("\n");
-                    ContainerInterface *psc = dynamic_cast<ContainerInterface *>(key->root.get());
-                    ASSERT( psc );
                     TRACE("Walking SubContainer length %d\n", psc->size() );
                     FOREACH( const TreePtrInterface &pp, *psc )
-                    {
-                        TreePtr<Node> nn = DuplicateSubtree( pp );
-                        if( ReadArgs::assert_pedigree )
-                            ASSERT( duplicated_pedigree.IsExist(nn) )(*nn);
-                        dest_con->insert( nn );
-                    }
+                        dest_con->insert( pp );
                 }
                 else 
                 {
-                    TreePtr<Node> n = BuildReplace( p );
                     if( ReadArgs::assert_pedigree )
                         ASSERT( duplicated_pedigree.IsExist(n) )(*n);
                     TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
@@ -1076,6 +1065,10 @@ TreePtr<Node> CompareReplace::BuildReplaceKeyed( TreePtr<Node> pattern,
     if( ReadArgs::assert_pedigree )
         ASSERT( pattern_pedigree.IsExist(pattern) )(*pattern);
 
+	if( shared_ptr<StarBase> stb = dynamic_pointer_cast<StarBase>( pattern ) )
+	{
+		return BuildReplaceStar( stb, keynode ); // Strong modifier
+	}
 	if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( pattern ) )
 	{
 		TreePtr<Node> overlay = srp->GetOverlayPattern(); // only strong modifiers use this
@@ -1103,13 +1096,12 @@ TreePtr<Node> CompareReplace::BuildReplaceKeyed( TreePtr<Node> pattern,
 	else if( dynamic_pointer_cast<SpecialBase>(pattern) )
 	{
 		// Star, Not, TransformOf etc. Also MatchAll with no overlay pattern falls thru to here
-		// DuplicateSubtreeSubstitutionStuff() will spot the terminus of SearchContainers (Stuff, AnyNode)
 		return DuplicateSubtree(keynode);   
 	}     
     else // Normal node
     {
         if( keynode && pattern->IsLocalMatch(keynode.get()) ) 
-            return BuildReplaceOverlay( keynode, pattern );
+            return BuildReplaceOverlay( pattern, keynode );
         else
             return BuildReplaceNormal( pattern ); // Overwriting pattern over dest, need to make a duplicate 
 	}
@@ -1182,25 +1174,15 @@ TreePtr<Node> CompareReplace::BuildReplaceNormal( TreePtr<Node> pattern ) const
 	        {
 		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*pattern)(" was NULL\n");
 		        TRACE("Got ")(*p)("\n");
-		        if( shared_ptr<StarBase> ps = dynamic_pointer_cast<StarBase>(TreePtr<Node>(p)) )
+	            TreePtr<Node> n = BuildReplace( p );
+		        if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(n.get()) )
 		        {
-		            shared_ptr<Key> key = coupling_keys.GetKey( ps );
-		            ASSERT( key )("Replacing ")(*p)(" but it was not keyed from the search pattern as required\n");
-		            TRACE("Got ")(*key->root)("\n");
-		            ContainerInterface *psc = dynamic_cast<ContainerInterface *>(key->root.get());
-		            ASSERT( psc );
 			        TRACE("Walking SubContainer length %d\n", psc->size() );
 		            FOREACH( const TreePtrInterface &pp, *psc )
-		            {
-		                TreePtr<Node> nn = DuplicateSubtree( pp );
-                        if( ReadArgs::assert_pedigree )
-                            ASSERT( duplicated_pedigree.IsExist(nn) )(*nn);
-			            dest_con->insert( nn );
-			        }
+			            dest_con->insert( pp );  // TODO support Container::insert(Container) to do this generically
            		}
 		        else
 		        {
-		            TreePtr<Node> n = BuildReplace( p );
                     if( ReadArgs::assert_pedigree )
                         ASSERT( duplicated_pedigree.IsExist(n) )(*n);
 			        TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
@@ -1223,6 +1205,37 @@ TreePtr<Node> CompareReplace::BuildReplaceNormal( TreePtr<Node> pattern ) const
         }
     }
     return dest;
+}
+
+
+TreePtr<Node> CompareReplace::BuildReplaceStar( shared_ptr<StarBase> pattern,
+	                                            TreePtr<Node> keynode ) const
+{
+	ASSERT( pattern ); // not used at present but should be there since we may need to use it
+	ASSERT( keynode );
+	ContainerInterface *psc = dynamic_cast<ContainerInterface *>(keynode.get());
+	ASSERT( psc )("Star node ")(*pattern)(" keyed to ")(*keynode)(" which should implement ContainerInterface");	
+	TRACE("Walking container length %d\n", psc->size() );
+	
+	TreePtr<SubContainer> dest;
+	ContainerInterface *dest_container;
+	if( dynamic_cast<SequenceInterface *>(keynode.get()) )
+		dest = TreePtr<SubSequence>(new SubSequence);
+	else if( dynamic_cast<CollectionInterface *>(keynode.get()) )
+		dest = TreePtr<SubCollection>(new SubCollection);
+	else
+		ASSERT(0)("Please add new kind of Star");
+	
+    dest_container = dynamic_cast<ContainerInterface *>(dest.get());
+	FOREACH( const TreePtrInterface &pp, *psc )
+	{
+		TreePtr<Node> nn = DuplicateSubtree( pp );
+		if( ReadArgs::assert_pedigree )
+			ASSERT( duplicated_pedigree.IsExist(nn) )(*nn);
+		dest_container->insert( nn );
+	}
+	
+	return dest;
 }
 
 
