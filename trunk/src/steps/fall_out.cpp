@@ -15,7 +15,7 @@ using namespace Steps;
 
 
 // Something to get the size of the Collection matched by a Star as a SpecificInteger
-struct BuildContainerSize : CompareReplace::SoftReplacePattern,
+struct BuildContainerSize : SoftReplacePattern,
                             Special<Integer>
 {
     SPECIAL_NODE_FUNCTIONS
@@ -26,9 +26,9 @@ private:
         ASSERT( container );
 	    TreePtr<Node> n = sr->BuildReplace( container );
 	    ASSERT( n );
-	    TreePtr<SearchReplace::SubCollection> sc = dynamic_pointer_cast<SearchReplace::SubCollection>(n);
-	    ASSERT( sc );
-	    int size = sc->size();
+	    ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
+	    ASSERT( n_container );
+	    int size = n_container->size();
 	    TreePtr<SpecificInteger> si = MakeTreePtr<SpecificInteger>(size);
 	    return si;
     }                                                   

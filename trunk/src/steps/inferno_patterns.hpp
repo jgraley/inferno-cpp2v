@@ -18,7 +18,7 @@
 
 // TODO do this via a transformation as with TransformOf/TransformOf
 #define BYPASS_WHEN_IDENTICAL 1
-struct BuildIdentifierBase : CompareReplace::SoftReplacePattern
+struct BuildIdentifierBase : ::SoftReplacePattern
 {
     BuildIdentifierBase( string s, int f=0 ) : format(s), flags(f) {}
     Sequence<CPPTree::Identifier> sources;
@@ -73,7 +73,7 @@ private:
 // These can be used in search pattern to match a SpecificIdentifier by name.
 // (cannot do this using a SpecificIdentifier in the search pattern because
 // the address of the node would be compared, not the name string). TODO document
-struct IdentifierByNameBase : CompareReplace::SoftSearchPattern
+struct IdentifierByNameBase : SoftSearchPattern
 {
     IdentifierByNameBase( string n ) : name(n) {}
     bool IsMatch( const CompareReplace *sr, const TreePtrInterface &x );
@@ -132,7 +132,7 @@ private:
 };
 
 // Base class for special nodes that match nested nodes
-struct NestedBase : CompareReplace::SoftSearchPatternSpecialKey,
+struct NestedBase : SoftSearchPatternSpecialKey,
                     TerminusBase
 {
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) = 0;
