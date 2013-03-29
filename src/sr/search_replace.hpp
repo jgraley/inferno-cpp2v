@@ -6,6 +6,7 @@
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 #include "coupling.hpp"
+#include "agent.hpp"
 #include <set>
 
 // In-tree search and replace utility. To use, you make a search pattern and a 
@@ -73,7 +74,7 @@ class SlaveBase;
 class SearchContainerBase;
 
 class CompareReplace : virtual public InPlaceTransformation, 
-                       public Filter // TODO extract Compare, and make that the filter
+                       public Filter 
 {  
 public:
     // Constructor and destructor. Search and replace patterns and couplings are
@@ -91,39 +92,6 @@ public:
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
     // back into the general search algorithm.
     TreePtr<Node> GetContext() const { ASSERT(pcontext&&*pcontext); return *pcontext; }
-
-    // Tell soft nodes that a compare rtun is beginning and it can flush any caches it may have
-    struct Flushable
-    {
-        virtual void FlushCache() {}
-    };
-    
-    struct SoftSearchPattern : Flushable
-    {
-        virtual bool DecidedCompare( const CompareReplace *sr,
-                                       const TreePtrInterface &x,
-                                       bool can_key,
-                                       Conjecture &conj ) = 0;
-    };
-    struct SoftSearchPatternSpecialKey : Flushable
-    {
-        // Return NULL for not found
-        virtual shared_ptr<Key> DecidedCompare( const CompareReplace *sr,
-                                                const TreePtrInterface &x,
-                                                bool can_key,
-                                                Conjecture &conj ) = 0;
-    };
-    struct SoftReplacePattern : Flushable
-    {
-        // Called when not coupled
-        virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr ) = 0;
-        // Called when coupled, dest is coupling key
-        virtual TreePtr<Node> GetOverlayPattern() 
-        { 
-            return TreePtr<Node>(); // default implementation for weak modifiers 
-                                    // so that couplings appear to override local functionality
-        }
-    };
 
     // Some self-testing
     static void Test();
@@ -158,33 +126,11 @@ public:
 private:
     static int repetitions;
     static bool rep_error;
-    Sequence<Node> WalkContainerPattern( ContainerInterface &pattern,
-                                           bool replacing ) const;
-
-    // LocalCompare ring
-    bool LocalCompare( TreePtr<Node> x,
-    		           TreePtr<Node> pattern ) const;
-
-    // DecidedCompare ring
-    bool DecidedCompare( SequenceInterface &x,
-    		               SequenceInterface &pattern,
-    		               bool can_key,
-    		               Conjecture &conj ) const;
-    bool DecidedCompare( CollectionInterface &x,
-    		               CollectionInterface &pattern,
-    		               bool can_key,
-    		               Conjecture &conj ) const;
-    bool DecidedCompare( const TreePtrInterface &x,
-    		               shared_ptr<SearchContainerBase> pattern,
-    		               bool can_key,
-    		               Conjecture &conj ) const;
 public:
     bool DecidedCompare( const TreePtrInterface &x,
     		               TreePtr<Node> pattern,
     		               bool can_key,
-    		               Conjecture &conj,
-    		               Conjecture::Choice *gc = NULL,
-    		               int go = 0 ) const;
+    		               Conjecture &conj ) const;
 private:
     // MatchingDecidedCompare ring
     friend class Conjecture;
@@ -193,31 +139,22 @@ private:
     		                       bool can_key,
     		                       Conjecture &conj ) const;
 
-    // Compare ring (now trivial)
     void FlushSoftPatternCaches( TreePtr<Node> pattern ) const;
 public:
+    // Compare ring (now trivial)
     bool Compare( const TreePtrInterface &x,
     		        TreePtr<Node> pattern,
 	                bool can_key = false ) const;
     virtual bool IsMatch( TreePtr<Node> context,       
                           TreePtr<Node> root );
+public:
+    TreePtr<Node> BuildReplace( TreePtr<Node> pattern ) const;
 private:
-    // Replace ring
-    void ClearPtrs( TreePtr<Node> dest ) const;
-
-    TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> pattern, TreePtr<Node> keynode ) const; // under substitution if not NULL
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
     		                     bool force_dirty ) const;
-    TreePtr<Node> BuildReplaceSlave( shared_ptr<SlaveBase> pattern, TreePtr<Node> keynode ) const;    
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
 		                            TreePtr<Node> source_terminus = TreePtr<Node>(),
 		                            TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
-    TreePtr<Node> BuildReplaceNormal( TreePtr<Node> pattern ) const;
-    TreePtr<Node> BuildReplaceKeyed( TreePtr<Node> pattern, TreePtr<Node> keynode ) const;
-    TreePtr<Node> BuildReplaceStar( shared_ptr<StarBase> pattern, TreePtr<Node> keynode ) const;
-public:
-    TreePtr<Node> BuildReplace( TreePtr<Node> pattern, TreePtr<Node> keynode=TreePtr<Node>() ) const;
-private:
     void KeyReplaceNodes( TreePtr<Node> pattern ) const;
     TreePtr<Node> ReplacePhase( TreePtr<Node> x ) const;
     // implementation ring: Do the actual search and replace
@@ -229,51 +166,11 @@ public:
     void operator()( TreePtr<Node> context, 
                      TreePtr<Node> *proot );
 
-    // Internal node classes - NOTE these are not special nodes, and we use them like normal tree nodes
-    struct SubContainer : Node
-    {
-        NODE_FUNCTIONS
-    };
-    struct SubSequenceRange : SequenceInterface,
-                              SubContainer
-    {
-    	NODE_FUNCTIONS_FINAL 
-
-        SubSequenceRange() {}
-    	shared_ptr<iterator_interface> my_begin;
-    	shared_ptr<iterator_interface> my_end;
-    	operator string() const { return GetName() + SSPrintf("@%p", this); }    
-    public:
-    	SubSequenceRange( iterator &b, iterator &e ) : my_begin(b.Clone()), my_end(e.Clone())
-    	{    	    
-    	}
-	    virtual const iterator_interface &begin() { return *my_begin; }
-        virtual const iterator_interface &end()   { return *my_end; }
-        virtual void erase( iterator )  { ASSERTFAIL("Cannot modify SubSequenceRange"); }
-        virtual void clear()                                { ASSERTFAIL("Cannot modify SubSequenceRange"); }    
-        virtual void insert( const TreePtrInterface & )     { ASSERTFAIL("Cannot modify SubSequenceRange"); }
-        virtual TreePtrInterface &operator[]( int i ) { ASSERTFAIL("TODO"); }  
-        virtual void push_back( const TreePtrInterface &gx ){ ASSERTFAIL("Cannot modify SubSequenceRange"); }  
-    };
-    struct SubSequence : Sequence<Node>,
-                         SubContainer
-    {
-    	NODE_FUNCTIONS_FINAL 
-    	operator string() const { return GetName() + SSPrintf("@%p", this); }    
-    };
-    struct SubCollection : Collection<Node>,
-                           SubContainer
-    {
-    	NODE_FUNCTIONS_FINAL
-    	operator string() const { return GetName() + SSPrintf("@%p", this); } 
-    };
+	friend class LegacyAgent;
 };
 
 
 class SearchReplace : public CompareReplace
-
-
-
 {
 public:
     SearchReplace( TreePtr<Node> sp = TreePtr<Node>(),
@@ -542,6 +439,39 @@ struct Erase : EraseBase, Special<PRE_RESTRICTION>
     {
         return &erase;
     }
+};
+
+// Tell soft nodes that a compare rtun is beginning and it can flush any caches it may have
+struct Flushable
+{
+	virtual void FlushCache() {}
+};
+
+struct SoftSearchPattern : Flushable
+{
+	virtual bool DecidedCompare( const CompareReplace *sr,
+									const TreePtrInterface &x,
+									bool can_key,
+									Conjecture &conj ) = 0;
+};
+struct SoftSearchPatternSpecialKey : Flushable
+{
+	// Return NULL for not found
+	virtual shared_ptr<Key> DecidedCompare( const CompareReplace *sr,
+											const TreePtrInterface &x,
+											bool can_key,
+											Conjecture &conj ) = 0;
+};
+struct SoftReplacePattern : Flushable
+{
+	// Called when not coupled
+	virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr ) = 0;
+	// Called when coupled, dest is coupling key
+	virtual TreePtr<Node> GetOverlayPattern() 
+	{ 
+		return TreePtr<Node>(); // default implementation for weak modifiers 
+								// so that couplings appear to override local functionality
+	}
 };
 
 #endif

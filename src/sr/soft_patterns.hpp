@@ -10,7 +10,7 @@ struct NotMatchBase {}; // needed for graph plotter
 // Match if the supplied patterns does not match (between you and me, it's just a NOT)
 template<class PRE_RESTRICTION>
 struct NotMatch : Special<PRE_RESTRICTION>,
-                 CompareReplace::SoftSearchPattern,
+                 SoftSearchPattern,
                  NotMatchBase,
                  CouplingSlave
 {
@@ -62,8 +62,8 @@ struct MatchAllBase : virtual Node
 // Match all of the supplied patterns (between you and me, it's an AND)
 template<class PRE_RESTRICTION>
 struct MatchAll : Special<PRE_RESTRICTION>,
-                 CompareReplace::SoftSearchPattern,
-                 CompareReplace::SoftReplacePattern, 
+                 SoftSearchPattern,
+                 SoftReplacePattern, 
                  MatchAllBase
 {
 	SPECIAL_NODE_FUNCTIONS
@@ -140,7 +140,7 @@ struct MatchAnyBase {};
 // Match zero or more of the supplied patterns (between you and me, it's an OR)
 template<class PRE_RESTRICTION>
 struct MatchAny : Special<PRE_RESTRICTION>,
-                 CompareReplace::SoftSearchPattern,
+                 SoftSearchPattern,
                  MatchAnyBase
 {
 	SPECIAL_NODE_FUNCTIONS
@@ -170,7 +170,7 @@ struct MatchOddBase {};
 // Match an odd number of patterns (between you and me, it's an EOR)
 template<class PRE_RESTRICTION>
 struct MatchOdd : Special<PRE_RESTRICTION>,
-                  CompareReplace::SoftSearchPattern,
+                  SoftSearchPattern,
                   MatchOddBase
 {
 	SPECIAL_NODE_FUNCTIONS
@@ -195,7 +195,7 @@ private:
 };
 
 
-struct TransformOfBase : CompareReplace::SoftSearchPatternSpecialKey,
+struct TransformOfBase : SoftSearchPatternSpecialKey,
                          TerminusBase
 {
     TreePtr<Node> pattern; 
@@ -236,7 +236,7 @@ struct PointerIsBase
     in a that points to b must match y. */
 template<class PRE_RESTRICTION>
 struct PointerIs : Special<PRE_RESTRICTION>,
-                   CompareReplace::SoftSearchPattern,
+                   SoftSearchPattern,
                    PointerIsBase // TODO document
 {
     SPECIAL_NODE_FUNCTIONS
