@@ -14,6 +14,11 @@ void NormalAgent::Configure( const CompareReplace *s, CouplingKeys *c )
 }
 
 
+void NormalAgent::ConfigureTreePtrThis( TreePtr<Node> tpt )								
+{
+	//TODO
+}
+
 bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 							       TreePtr<Node> pattern,
 							       bool can_key,
