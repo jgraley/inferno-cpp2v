@@ -16,7 +16,7 @@ class SlaveBase;
 class SearchContainerBase;
 class SearchReplace;
 
-class Agent
+class Agent : public Traceable
 {
 public:
     virtual bool DecidedCompare( const TreePtrInterface &x,
@@ -25,14 +25,17 @@ public:
 							      Conjecture &conj ) const = 0;
     virtual TreePtr<Node> BuildReplace( TreePtr<Node> pattern, 
 			 					         TreePtr<Node> keynode=TreePtr<Node>() ) const = 0;
+    virtual void ConfigureTreePtrThis( TreePtr<Node> tpt ) = 0;										 
+	virtual void Configure( const CompareReplace *s, CouplingKeys *c ) = 0;
 };
 
 
 
-class NormalAgent : public Traceable
+class NormalAgent : public Agent
 {
 public:
 	NormalAgent() :sr(NULL), coupling_keys(NULL) {}
+    void ConfigureTreePtrThis( TreePtr<Node> tpt );										 
 	void Configure( const CompareReplace *s, CouplingKeys *c );
 private:
 	const CompareReplace *sr;
@@ -117,7 +120,7 @@ private:
 
 template<typename NODE_TYPE>
 class NormalAgentWrapper : public NODE_TYPE,
-                           NormalAgent
+                           public NormalAgent
 {
 };
 
@@ -126,22 +129,21 @@ class NormalAgentWrapper : public NODE_TYPE,
 // than just NODE_TYPE when NODE_TYPE is not already a kind of Agent. Wrapping case only allowed with zero constructor 
 // parameters, which is a requirement for normal nodes anyway.
 template<typename NODE_TYPE>
-class MakePatternPtr : TreePtr<NODE_TYPE>
+class MakePatternPtr : public TreePtr<NODE_TYPE>
 {
 private:
 	bool IsNeedWrapper()
 	{
-		if( NODE_TYPE::GetInterfaces()=="agent" )
-			return false; // No need, already implements agent
-		else
-			return true; // Add a wrapper
+		return !( NODE_TYPE::GetInterfaces()=="agent" );
 	}
 public:	
 	MakePatternPtr() : TreePtr<NODE_TYPE>( IsNeedWrapper() ? 
 	                                       new NormalAgentWrapper<NODE_TYPE> : 
 	                                       new NODE_TYPE )
 	{
-		TreePtr<NODE_TYPE>::get()->InitialiseTreePtrThis( (TreePtr<Node>)(*this) );
+		Agent *ap = dynamic_cast<Agent *>( TreePtr<NODE_TYPE>::get() );
+		ASSERT( ap )("Trying to produce non-Agent object, IsNeedWrapper returns %d", IsNeedWrapper());
+		ap->ConfigureTreePtrThis( (TreePtr<Node>)(*this) );
 	}
 	template<typename CP0>
 	MakePatternPtr(const CP0 &cp0) : TreePtr<NODE_TYPE>( new NODE_TYPE(cp0) ) 

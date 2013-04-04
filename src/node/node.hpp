@@ -42,7 +42,7 @@ struct Node : NodeBases
     // Node must be inherited virtually, to allow MI diamonds
     // without making Node ambiguous
     
-    virtual string GetInterfaces() { return string(""); }
+    static string GetInterfaces() { return string(""); }
 };
 
 template<>
