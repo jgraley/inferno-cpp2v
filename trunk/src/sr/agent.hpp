@@ -29,13 +29,14 @@ public:
 
 
 
-class LegacyAgent : public Traceable
+class NormalAgent : public Traceable
 {
 public:
-	LegacyAgent( const CompareReplace &s, CouplingKeys &c );
+	NormalAgent() :sr(NULL), coupling_keys(NULL) {}
+	void Configure( const CompareReplace *s, CouplingKeys *c );
 private:
-	const CompareReplace &sr;
-	CouplingKeys &coupling_keys;
+	const CompareReplace *sr;
+	CouplingKeys *coupling_keys;
 public:
     virtual bool DecidedCompare( const TreePtrInterface &x,
     		                     TreePtr<Node> pattern,
@@ -111,6 +112,53 @@ private:
     	operator string() const { return GetName() + SSPrintf("@%p", this); } 
     };
 
+};
+
+
+template<typename NODE_TYPE>
+class NormalAgentWrapper : public NODE_TYPE,
+                           NormalAgent
+{
+};
+
+
+// Similar to MakeTreePtr<> (see node/specialise_oostd.hpp) but produces a TreePtr to NormalAgentWrapper<NODE_TYPE> rather
+// than just NODE_TYPE when NODE_TYPE is not already a kind of Agent. Wrapping case only allowed with zero constructor 
+// parameters, which is a requirement for normal nodes anyway.
+template<typename NODE_TYPE>
+class MakePatternPtr : TreePtr<NODE_TYPE>
+{
+private:
+	bool IsNeedWrapper()
+	{
+		if( NODE_TYPE::GetInterfaces()=="agent" )
+			return false; // No need, already implements agent
+		else
+			return true; // Add a wrapper
+	}
+public:	
+	MakePatternPtr() : TreePtr<NODE_TYPE>( IsNeedWrapper() ? 
+	                                       new NormalAgentWrapper<NODE_TYPE> : 
+	                                       new NODE_TYPE )
+	{
+		TreePtr<NODE_TYPE>::get()->InitialiseTreePtrThis( (TreePtr<Node>)(*this) );
+	}
+	template<typename CP0>
+	MakePatternPtr(const CP0 &cp0) : TreePtr<NODE_TYPE>( new NODE_TYPE(cp0) ) 
+	{ 
+		ASSERT( !IsNeedWrapper() )("MakePatternPtr cannot pass constructor params to normal nodes"); 		
+	}
+	template<typename CP0, typename CP1>
+	MakePatternPtr(const CP0 &cp0, const CP1 &cp1) : TreePtr<NODE_TYPE>( new NODE_TYPE(cp0, cp1) )
+	{ 
+		ASSERT( !IsNeedWrapper() )("MakePatternPtr cannot pass constructor params to normal nodes"); 		
+	}
+	template<typename CP0, typename CP1, typename CP2>
+	MakePatternPtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : TreePtr<NODE_TYPE>( new NODE_TYPE(cp0, cp1, cp2) )
+	{ 
+		ASSERT( !IsNeedWrapper() )("MakePatternPtr cannot pass constructor params to normal nodes"); 		
+	}
+	// Add more params as needed...
 };
 
 #endif

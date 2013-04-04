@@ -4,14 +4,17 @@
 #include "helpers/simple_compare.hpp"
 #include "agent.hpp"
 
-LegacyAgent::LegacyAgent( const CompareReplace &s, CouplingKeys &c ) :
-    sr(s),
-    coupling_keys(c)
+void NormalAgent::Configure( const CompareReplace *s, CouplingKeys *c )
 {
+	ASSERT(s);
+	ASSERT(c);
+	sr = s;
+    coupling_keys = c;
+	// TODO recursively configure children
 }
 
 
-bool LegacyAgent::DecidedCompare( const TreePtrInterface &x,
+bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 							       TreePtr<Node> pattern,
 							       bool can_key,
     						       Conjecture &conj ) const
@@ -38,14 +41,14 @@ bool LegacyAgent::DecidedCompare( const TreePtrInterface &x,
     if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
     {
         // Hand over to any soft search functionality in the search pattern node
-        bool r = ssp->DecidedCompare( &sr, x, can_key, conj );
+        bool r = ssp->DecidedCompare( sr, x, can_key, conj );
         if( !r )
             return false;
     }
     else if( shared_ptr<SoftSearchPatternSpecialKey> sspsk = dynamic_pointer_cast<SoftSearchPatternSpecialKey>(pattern) )
     {
         // Hand over to any soft search functionality in the search pattern node
-        special_key = sspsk->DecidedCompare( &sr, x, can_key, conj );
+        special_key = sspsk->DecidedCompare( sr, x, can_key, conj );
         if( !special_key )
             return false;
     }
@@ -67,7 +70,7 @@ bool LegacyAgent::DecidedCompare( const TreePtrInterface &x,
         // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
        // Walk w( x );
        // FOREACH( TreePtr<Node> p, w )
-		if( sr.GetOverallMaster()->dirty_grass.find( /*p*/x ) != sr.GetOverallMaster()->dirty_grass.end() )
+		if( sr->GetOverallMaster()->dirty_grass.find( /*p*/x ) != sr->GetOverallMaster()->dirty_grass.end() )
 		{
 			TRACE/*(*p)(" under ")*/(*x)(" is dirty grass so rejecting\n");
 			return false;
@@ -147,7 +150,7 @@ bool LegacyAgent::DecidedCompare( const TreePtrInterface &x,
     // and so their checks would not have occured and hte check would not be strict 
     // enough. Perhaps keys can be "concrete" when all the couplings below them have
     // been checked as matching?
-    if( TreePtr<Node> keynode = coupling_keys.GetCoupled( pattern ) )
+    if( TreePtr<Node> keynode = coupling_keys->GetCoupled( pattern ) )
     {
         SimpleCompare sc;
         if( sc( x, keynode ) == false )
@@ -157,9 +160,9 @@ bool LegacyAgent::DecidedCompare( const TreePtrInterface &x,
 	if( can_key )
     {
         if( special_key )
-            coupling_keys.DoKey( special_key, pattern );  
+            coupling_keys->DoKey( special_key, pattern );  
         else
-            coupling_keys.DoKey( x, pattern );  
+            coupling_keys->DoKey( x, pattern );  
     }
 
     return true;
@@ -173,7 +176,7 @@ bool LegacyAgent::DecidedCompare( const TreePtrInterface &x,
 // first: How many elements to match (as with Star)
 // second: Which of the above to try for container match
 // third: Which element of the SearchContainer to try 
-bool LegacyAgent::DecidedCompare( SequenceInterface &x,
+bool NormalAgent::DecidedCompare( SequenceInterface &x,
 		                          SequenceInterface &pattern,
 		                          bool can_key,
 		                          Conjecture &conj ) const
@@ -237,7 +240,7 @@ bool LegacyAgent::DecidedCompare( SequenceInterface &x,
             //}
             
             // Apply couplings to this Star and matched range
-            if( TreePtr<Node> keynode = coupling_keys.GetCoupled( pe ) )
+            if( TreePtr<Node> keynode = coupling_keys->GetCoupled( pe ) )
             {
                 SimpleCompare sc;
                 if( sc( TreePtr<Node>(ss), keynode ) == false )
@@ -245,12 +248,12 @@ bool LegacyAgent::DecidedCompare( SequenceInterface &x,
             }
             
             // Restrict to pre-restriction or pattern
-            bool r = ps->MatchRange( &sr, *ss, can_key );
+            bool r = ps->MatchRange( sr, *ss, can_key );
             if( !r )
                 return false;
 
             if( can_key )
-                coupling_keys.DoKey( TreePtr<Node>(ss), pe );   
+                coupling_keys->DoKey( TreePtr<Node>(ss), pe );   
         }
  	    else // not a Star so match singly...
 	    {
@@ -274,7 +277,7 @@ bool LegacyAgent::DecidedCompare( SequenceInterface &x,
 }
 
 
-bool LegacyAgent::DecidedCompare( CollectionInterface &x,
+bool NormalAgent::DecidedCompare( CollectionInterface &x,
 		 					       CollectionInterface &pattern,
 							       bool can_key,
 							       Conjecture &conj ) const
@@ -338,19 +341,19 @@ bool LegacyAgent::DecidedCompare( CollectionInterface &x,
     // Apply pre-restriction to the star
     if( seen_star )
     {
-        if( TreePtr<Node> keynode = coupling_keys.GetCoupled( star ) )
+        if( TreePtr<Node> keynode = coupling_keys->GetCoupled( star ) )
         {
             SimpleCompare sc;
             if( sc( TreePtr<Node>(xremaining), keynode ) == false )
                 return false;
         }
 
-        bool r = star->MatchRange( &sr, *xremaining, can_key );
+        bool r = star->MatchRange( sr, *xremaining, can_key );
         if( !r )
             return false;
     
         if( can_key )
-            coupling_keys.DoKey( TreePtr<Node>(xremaining), star );	
+            coupling_keys->DoKey( TreePtr<Node>(xremaining), star );	
     }
     TRACE("matched\n");
 	return true;
@@ -359,7 +362,7 @@ bool LegacyAgent::DecidedCompare( CollectionInterface &x,
 
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-bool LegacyAgent::DecidedCompare( const TreePtrInterface &x,
+bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 							       shared_ptr<SearchContainerBase> pattern,
 						     	   bool can_key,
 							       Conjecture &conj ) const
@@ -383,7 +386,7 @@ bool LegacyAgent::DecidedCompare( const TreePtrInterface &x,
     if( !r )
         return false;
         
-    if( TreePtr<Node> keynode = coupling_keys.GetCoupled( pattern ) )
+    if( TreePtr<Node> keynode = coupling_keys->GetCoupled( pattern ) )
     {
         SimpleCompare sc;
         if( sc( x, keynode ) == false )
@@ -398,20 +401,20 @@ bool LegacyAgent::DecidedCompare( const TreePtrInterface &x,
     	key->terminus = *thistime;
     	shared_ptr<Key> sckey( key );
     	TRACE("Matched, so keying search container type ")(*pattern)(" for ")(*x)(" at %p\n", key.get());
-        coupling_keys.DoKey( sckey, pattern );	
+        coupling_keys->DoKey( sckey, pattern );	
     }
 	return r;
 }
 
 
-TreePtr<Node> LegacyAgent::BuildReplace( TreePtr<Node> pattern,
+TreePtr<Node> NormalAgent::BuildReplace( TreePtr<Node> pattern,
 	                                     TreePtr<Node> keynode ) const
 {
     INDENT;
     ASSERT( pattern );
 
     // See if the pattern node is coupled to anything
-    shared_ptr<Key> key = coupling_keys.GetKey( pattern );
+    shared_ptr<Key> key = coupling_keys->GetKey( pattern );
 	if( key )
 		keynode = key->root;
 	if( dynamic_pointer_cast<SearchContainerBase>(pattern) )
@@ -430,7 +433,7 @@ TreePtr<Node> LegacyAgent::BuildReplace( TreePtr<Node> pattern,
 		                                                  (", term=")(*(stuff_key->terminus))("\n");
 		TreePtr<Node> term = BuildReplace( replace_stuff->terminus, stuff_key->terminus );
 		TRACE( "Stuff node: Substituting stuff");
-		return sr.DuplicateSubtree(keynode, stuff_key->terminus, term);   
+		return sr->DuplicateSubtree(keynode, stuff_key->terminus, term);   
 	}     
 	else
 	{
@@ -439,7 +442,7 @@ TreePtr<Node> LegacyAgent::BuildReplace( TreePtr<Node> pattern,
 }
 	
 	
-TreePtr<Node> LegacyAgent::BuildReplaceKeyed( TreePtr<Node> pattern,
+TreePtr<Node> NormalAgent::BuildReplaceKeyed( TreePtr<Node> pattern,
 	                                          TreePtr<Node> keynode ) const
 {	
     INDENT;
@@ -455,7 +458,7 @@ TreePtr<Node> LegacyAgent::BuildReplaceKeyed( TreePtr<Node> pattern,
 		if( overlay ) // Really two different kinds of pattern node
 			return BuildReplace( overlay, keynode ); // Strong modifier
 		else
-			return sr.DuplicateSubtree(keynode);   // Weak modifier
+			return sr->DuplicateSubtree(keynode);   // Weak modifier
 	}
 	else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( pattern ) )
 	{
@@ -476,7 +479,7 @@ TreePtr<Node> LegacyAgent::BuildReplaceKeyed( TreePtr<Node> pattern,
 	else if( dynamic_pointer_cast<SpecialBase>(pattern) )
 	{
 		// Star, Not, TransformOf etc. Also MatchAll with no overlay pattern falls thru to here
-		return sr.DuplicateSubtree(keynode);   
+		return sr->DuplicateSubtree(keynode);   
 	}     
     else // Normal node
     {
@@ -489,7 +492,7 @@ TreePtr<Node> LegacyAgent::BuildReplaceKeyed( TreePtr<Node> pattern,
 
 
 
-TreePtr<Node> LegacyAgent::BuildReplaceOverlay( TreePtr<Node> pattern, 
+TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> pattern, 
 										         TreePtr<Node> keynode ) const // under substitution if not NULL
 {
 	INDENT;
@@ -532,7 +535,7 @@ TreePtr<Node> LegacyAgent::BuildReplaceOverlay( TreePtr<Node> pattern,
     TreePtr<Node> dest;
     
     // Make a new node, we will overlay from pattern, so resulting node will be dirty	    
-    dest = sr.DuplicateNode( keynode, true );
+    dest = sr->DuplicateNode( keynode, true );
 
     // Loop over the elements of pattern, keynode and dest, limited to elements
     // present in pattern, which is a non-strict subclass of keynode and dest.
@@ -634,7 +637,7 @@ TreePtr<Node> LegacyAgent::BuildReplaceOverlay( TreePtr<Node> pattern,
 	        FOREACH( const TreePtrInterface &p, *keynode_con )
 	        {
 		        ASSERT( p ); // present simplified scheme disallows NULL
-		        TreePtr<Node> n = sr.DuplicateSubtree( p );
+		        TreePtr<Node> n = sr->DuplicateSubtree( p );
 		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
 		        {
 			        TRACE("Walking SubContainer length %d\n", sc->size() );
@@ -652,7 +655,7 @@ TreePtr<Node> LegacyAgent::BuildReplaceOverlay( TreePtr<Node> pattern,
         {
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( *keynode_ptr );
-            *dest_ptr = sr.DuplicateSubtree( *keynode_ptr );
+            *dest_ptr = sr->DuplicateSubtree( *keynode_ptr );
             ASSERT( *dest_ptr );
             ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            
         }
@@ -681,7 +684,7 @@ TreePtr<Node> LegacyAgent::BuildReplaceOverlay( TreePtr<Node> pattern,
 }
 
 
-TreePtr<Node> LegacyAgent::BuildReplaceSlave( shared_ptr<SlaveBase> pattern, 
+TreePtr<Node> NormalAgent::BuildReplaceSlave( shared_ptr<SlaveBase> pattern, 
 										       TreePtr<Node> keynode ) const 
 {
     INDENT;
@@ -692,20 +695,20 @@ TreePtr<Node> LegacyAgent::BuildReplaceSlave( shared_ptr<SlaveBase> pattern,
     TreePtr<Node> dest = BuildReplace( pattern->GetThrough(), keynode );
     
 	// Run the slave as a new transformation at the current location
-	(*pattern)( sr.GetContext(), &dest );
+	(*pattern)( sr->GetContext(), &dest );
 	
     ASSERT( dest );
     return dest;
 }
 
     
-TreePtr<Node> LegacyAgent::BuildReplaceNormal( TreePtr<Node> pattern ) const
+TreePtr<Node> NormalAgent::BuildReplaceNormal( TreePtr<Node> pattern ) const
 {
 	INDENT;
     ASSERT( pattern );
  
 	// Make a new node, force dirty because from pattern
-    TreePtr<Node> dest = sr.DuplicateNode( pattern, true );
+    TreePtr<Node> dest = sr->DuplicateNode( pattern, true );
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of pattern, and itemises over that type. dest must
@@ -765,7 +768,7 @@ TreePtr<Node> LegacyAgent::BuildReplaceNormal( TreePtr<Node> pattern ) const
 }
 
 
-TreePtr<Node> LegacyAgent::BuildReplaceStar( shared_ptr<StarBase> pattern,
+TreePtr<Node> NormalAgent::BuildReplaceStar( shared_ptr<StarBase> pattern,
 	                                         TreePtr<Node> keynode ) const
 {
 	ASSERT( pattern ); // not used at present but should be there since we may need to use it
@@ -786,7 +789,7 @@ TreePtr<Node> LegacyAgent::BuildReplaceStar( shared_ptr<StarBase> pattern,
     dest_container = dynamic_cast<ContainerInterface *>(dest.get());
 	FOREACH( const TreePtrInterface &pp, *psc )
 	{
-		TreePtr<Node> nn = sr.DuplicateSubtree( pp );
+		TreePtr<Node> nn = sr->DuplicateSubtree( pp );
 		dest_container->insert( nn );
 	}
 	
@@ -794,7 +797,7 @@ TreePtr<Node> LegacyAgent::BuildReplaceStar( shared_ptr<StarBase> pattern,
 }
 
 
-Sequence<Node> LegacyAgent::WalkContainerPattern( ContainerInterface &pattern,
+Sequence<Node> NormalAgent::WalkContainerPattern( ContainerInterface &pattern,
                                                   bool replacing ) const
 {
     // This helper is for Insert and Erase nodes. It takes a pattern container (which

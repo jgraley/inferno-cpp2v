@@ -128,7 +128,8 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
 									   bool can_key,
     								   Conjecture &conj ) const
 {
-    LegacyAgent agent( *this, coupling_keys );
+    NormalAgent agent;
+	agent.Configure( this, &coupling_keys );
     return agent.DecidedCompare( x, pattern, can_key, conj );
 }
 
@@ -360,7 +361,8 @@ void CompareReplace::KeyReplaceNodes( TreePtr<Node> pattern ) const
 
 TreePtr<Node> CompareReplace::BuildReplace( TreePtr<Node> pattern ) const
 {
-    LegacyAgent agent( *this, coupling_keys );
+    NormalAgent agent;
+	agent.Configure( this, &coupling_keys );
     return agent.BuildReplace( pattern );
 }
 

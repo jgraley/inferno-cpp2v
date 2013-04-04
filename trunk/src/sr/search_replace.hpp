@@ -166,7 +166,7 @@ public:
     void operator()( TreePtr<Node> context, 
                      TreePtr<Node> *proot );
 
-	friend class LegacyAgent;
+	friend class NormalAgent;
 };
 
 
