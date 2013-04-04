@@ -41,6 +41,8 @@ struct Node : NodeBases
     virtual ~Node(){}  // be a virtual hierarchy
     // Node must be inherited virtually, to allow MI diamonds
     // without making Node ambiguous
+    
+    virtual string GetInterfaces() { return string(""); }
 };
 
 template<>
