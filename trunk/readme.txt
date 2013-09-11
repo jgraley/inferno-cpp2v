@@ -38,9 +38,9 @@ eclipse/
 
 How to check out:
 
-Inferno is hosted at Sourceforge in a Subversion repository. You can get it using:
+Inferno is hosted at Sourceforge in a Subversion repository. You can get a modifiable checkout using:
 
-svn co https://inferno-cpp2v.svn.sourceforge.net/svnroot/inferno-cpp2v inferno-cpp2v  
+svn checkout svn+ssh://jgraley@svn.code.sf.net/p/inferno-cpp2v/code/trunk inferno-cpp2v-code 
 
 How to build:
 
