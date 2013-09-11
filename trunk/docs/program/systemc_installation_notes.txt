@@ -26,6 +26,11 @@ make check # you should to do this check whether systemc can link
 
 ------------------
 
+Additional note: repeating this with GCC4.7, I needed to remove a few (presumably 
+incorrect) "mutable" keywords at reference decls, as requested by the compiler.
+
+------------------
+
 # For inferno to use SystemC, create a symbolic link inferno-cpp2v/trunk/systemc pointing to the
 # systemc directory, systemc-2.2.0 in this case.
 
