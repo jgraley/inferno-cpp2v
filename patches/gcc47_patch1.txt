@@ -1,0 +1,15 @@
+Index: include/llvm/Support/CommandLine.h
+===================================================================
+--- include/llvm/Support/CommandLine.h	(revision 61726)
++++ include/llvm/Support/CommandLine.h	(working copy)
+@@ -804,8 +804,8 @@
+        typename ParserClass::parser_data_type();
+     if (Parser.parse(*this, ArgName, Arg, Val))
+       return true;                            // Parse error!
+-    setValue(Val);
+-    setPosition(pos);
++    this->setValue(Val);
++    this->setPosition(pos);
+     return false;
+   }
+ 
