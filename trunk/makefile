@@ -40,6 +40,7 @@ LLVM_CLANG_LIB_PATHS = $(LLVM_CLANG_LIBS:%=$(LLVM_LIB_PATH)/%)
 LLVM_CLANG_OPTIONS := ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED) 
 LLVM_CLANG_OPTIONS += CXXFLAGS="-include cstdio -include stdint.h $(ILC_OPTIONS)"
 LLVM_CLANG_OPTIONS += CFLAGS=$(ILC_OPTIONS)
+LLVM_CLANG_OPTIONS += --jobs=$(JOBS) 
 
 $(LLVM_LIB_PATH)/libLLVMBit%.a : force_subordinate_makefiles
 	cd llvm/lib/Bitcode/$(patsubst libLLVMBit%.a,%,$(notdir $@)) && $(MAKE) $(LLVM_CLANG_OPTIONS)	
@@ -63,7 +64,7 @@ clean_libclang%.a :
 # Compile inferno sources
 #    	
 src/build/inferno.a : force_subordinate_makefiles
-	cd src && $(MAKE) --jobs=3 build/inferno.a
+	cd src && $(MAKE) --jobs=$(JOBS) build/inferno.a
 
 #
 # Link inferno executable

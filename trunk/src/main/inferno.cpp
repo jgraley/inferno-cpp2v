@@ -190,8 +190,8 @@ int main( int argc, char *argv[] )
     {
         // Apply only the transformation requested
         shared_ptr<Transformation> t = sequence[ReadArgs::runonlystep];
-        fprintf(stderr, "Step %d: %s\n", ReadArgs::runonlystep, string( *t ).c_str() ); 
-        TRACE("Step %d: %s\n", ReadArgs::runonlystep, string( *t ).c_str() ); // TODO trace should print to stderr too
+        fprintf(stderr, "%s step %d: %s\n", ReadArgs::infile.c_str(), ReadArgs::runonlystep, string( *t ).c_str() ); 
+//        TRACE("Step %d: %s\n", ReadArgs::runonlystep, string( *t ).c_str() ); // TODO trace should print to stderr too
         HitCount::instance.SetStep(ReadArgs::runonlystep);
         CompareReplace::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
         (*t)( &program );
@@ -204,7 +204,7 @@ int main( int argc, char *argv[] )
         {
             if( ReadArgs::quitafter-- == 0 )
                 break;
-            fprintf(stderr, "Step %d: %s\n", i, string( *t ).c_str() ); 
+            fprintf(stderr, "%s step %d: %s\n", ReadArgs::infile.c_str(), i, string( *t ).c_str() ); 
             Tracer::Enable( ReadArgs::trace && (!ReadArgs::quitenable || ReadArgs::quitafter==0) ); 
             HitCount::Enable( ReadArgs::trace_hits && (!ReadArgs::quitenable || ReadArgs::quitafter==0) ); 
             if( (!ReadArgs::quitenable || ReadArgs::quitafter==0) )
