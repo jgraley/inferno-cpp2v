@@ -44,3 +44,7 @@ CLANG = $(LLVM)/tools/clang
 OPTIONS += -I$(LLVM)/include -I$(CLANG)/include
 OPTIONS += -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS
 DEPS = $(LLVM)/include/llvm/*/*.h* $(CLANG)/include/clang/*/*.h*
+
+# For compiling on multi-core machines
+JOBS=8
+
