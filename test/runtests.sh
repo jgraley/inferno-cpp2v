@@ -25,14 +25,15 @@ rm -f results/*
 
 echo testing files $infilelist
 
-failed=0
 for infile in $infilelist
 do
  test/test.sh $infile $resfile -ap &
- if test $? -ne 0
- then
-  failed=1
- fi
+done
+
+failed=0
+for job in `jobs -p`
+do
+    wait $job || let "failed+=1"
 done
 
 echo
@@ -46,7 +47,7 @@ if test $failed -eq 0
 then
  echo "ALL TESTS PASSED"
 else
- echo "SOME TESTS FAILED"
+ echo "$failed TESTS FAILED"
 fi
 
  
