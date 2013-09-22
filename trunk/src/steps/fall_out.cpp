@@ -29,7 +29,7 @@ private:
 	    ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
 	    ASSERT( n_container );
 	    int size = n_container->size();
-	    TreePtr<SpecificInteger> si = MakeTreePtr<SpecificInteger>(size);
+	    TreePtr<SpecificInteger> si = MakePatternPtr<SpecificInteger>(size);
 	    return si;
     }                                                   
 }; 
@@ -45,61 +45,61 @@ struct StateLabel : Label
 
 PlaceLabelsInArray::PlaceLabelsInArray()
 {
-    MakeTreePtr<Scope> module;
-    MakeTreePtr< Insert<Declaration> > insert;
-    MakeTreePtr< GreenGrass<Type> > gg;
-    MakeTreePtr<Field> func, m_func;
-    MakeTreePtr<InstanceIdentifier> func_id;
-    MakeTreePtr<Thread> thread;
-    MakeTreePtr< Star<Declaration> > func_decls, module_decls;
-    MakeTreePtr< Star<Statement> > func_stmts;
-    MakeTreePtr< Star<Base> > bases;
-    MakeTreePtr<Enum> r_module_enum;
-    MakeTreePtr<BuildTypeIdentifier> r_enum_id("%sStates");
-    MakeTreePtr<InstanceIdentifier> var_id;
-    MakeTreePtr<TypeIdentifier> module_id;
-    MakeTreePtr< Star<Declaration> > l_func_decls, l_enum_vals, l_decls, l_module_decls;
-    MakeTreePtr< Star<Statement> > l_func_pre, l_func_post, l_pre, l_block, l_post, l_stmts, l_dead_gotos;
-    MakeTreePtr<Switch> l_switch;     
-    MakeTreePtr<Enum> l_enum;     
-    MakeTreePtr< Insert<Declaration> > l_insert;
-    MakeTreePtr< NotMatch<Statement> > xs_rr;
-    MakeTreePtr<Static> lr_state_decl;    
-    MakeTreePtr<BuildInstanceIdentifier> lr_state_id("%s_STATE_%s");
-    MakeTreePtr<Case> lr_case;
-    MakeTreePtr<Signed> lr_int;
-    MakeTreePtr<BuildContainerSize> lr_count;
-    MakeTreePtr<LabelIdentifier> ls_label_id;
-    MakeTreePtr<Instance> var_decl, l_var_decl;
-    MakeTreePtr< MatchAll<Node> > ll_all;
-    MakeTreePtr< NotMatch<Node> > lls_not1, lls_not2;    
-    MakeTreePtr< AnyNode<Node> > ll_any;
-    MakeTreePtr< Overlay<Node> > ll_over;
-    MakeTreePtr<Goto> lls_goto;    
-    MakeTreePtr<Label> lls_label;    
-    MakeTreePtr<Goto> ls_goto;   
-    MakeTreePtr<Label> ls_label, l_label; 
-    MakeTreePtr<If> lr_if;            
-    MakeTreePtr<Equal> lr_equal;
-    MakeTreePtr<Loop> l_loop;
-    MakeTreePtr< Overlay<Statement> > l_over;
-    MakeTreePtr< NotMatch<Statement> > l_not;             
-    MakeTreePtr< Stuff<Scope> > m_stuff_func;
-    MakeTreePtr<Scope> l_module;
-    MakeTreePtr<Field> l_func;
-    MakeTreePtr<Static> r_lmap, l_lmap;
-    MakeTreePtr<BuildInstanceIdentifier> r_lmap_id("lmap");
-    MakeTreePtr<Array> r_array;
-    MakeTreePtr<MakeArray> r_make, l_make, lls_make;
-    MakeTreePtr< Insert<Expression> > l_minsert;
-    MakeTreePtr< Stuff<Statement> > l_stuff;
-    MakeTreePtr< Star<Expression> > l_existing;
-    MakeTreePtr< NotMatch<Expression> > l_mnot;
-    MakeTreePtr< Subscript > ll_sub;
-    MakeTreePtr<Compound> comp, l_comp;
-    MakeTreePtr< Insert<Declaration> > finsert, l_finsert;
-    MakeTreePtr< Overlay<Statement> > l_overll;
-    MakeTreePtr< StateLabel > l_state_label;
+    MakePatternPtr<Scope> module;
+    MakePatternPtr< Insert<Declaration> > insert;
+    MakePatternPtr< GreenGrass<Type> > gg;
+    MakePatternPtr<Field> func, m_func;
+    MakePatternPtr<InstanceIdentifier> func_id;
+    MakePatternPtr<Thread> thread;
+    MakePatternPtr< Star<Declaration> > func_decls, module_decls;
+    MakePatternPtr< Star<Statement> > func_stmts;
+    MakePatternPtr< Star<Base> > bases;
+    MakePatternPtr<Enum> r_module_enum;
+    MakePatternPtr<BuildTypeIdentifier> r_enum_id("%sStates");
+    MakePatternPtr<InstanceIdentifier> var_id;
+    MakePatternPtr<TypeIdentifier> module_id;
+    MakePatternPtr< Star<Declaration> > l_func_decls, l_enum_vals, l_decls, l_module_decls;
+    MakePatternPtr< Star<Statement> > l_func_pre, l_func_post, l_pre, l_block, l_post, l_stmts, l_dead_gotos;
+    MakePatternPtr<Switch> l_switch;     
+    MakePatternPtr<Enum> l_enum;     
+    MakePatternPtr< Insert<Declaration> > l_insert;
+    MakePatternPtr< NotMatch<Statement> > xs_rr;
+    MakePatternPtr<Static> lr_state_decl;    
+    MakePatternPtr<BuildInstanceIdentifier> lr_state_id("%s_STATE_%s");
+    MakePatternPtr<Case> lr_case;
+    MakePatternPtr<Signed> lr_int;
+    MakePatternPtr<BuildContainerSize> lr_count;
+    MakePatternPtr<LabelIdentifier> ls_label_id;
+    MakePatternPtr<Instance> var_decl, l_var_decl;
+    MakePatternPtr< MatchAll<Node> > ll_all;
+    MakePatternPtr< NotMatch<Node> > lls_not1, lls_not2;    
+    MakePatternPtr< AnyNode<Node> > ll_any;
+    MakePatternPtr< Overlay<Node> > ll_over;
+    MakePatternPtr<Goto> lls_goto;    
+    MakePatternPtr<Label> lls_label;    
+    MakePatternPtr<Goto> ls_goto;   
+    MakePatternPtr<Label> ls_label, l_label; 
+    MakePatternPtr<If> lr_if;            
+    MakePatternPtr<Equal> lr_equal;
+    MakePatternPtr<Loop> l_loop;
+    MakePatternPtr< Overlay<Statement> > l_over;
+    MakePatternPtr< NotMatch<Statement> > l_not;             
+    MakePatternPtr< Stuff<Scope> > m_stuff_func;
+    MakePatternPtr<Scope> l_module;
+    MakePatternPtr<Field> l_func;
+    MakePatternPtr<Static> r_lmap, l_lmap;
+    MakePatternPtr<BuildInstanceIdentifier> r_lmap_id("lmap");
+    MakePatternPtr<Array> r_array;
+    MakePatternPtr<MakeArray> r_make, l_make, lls_make;
+    MakePatternPtr< Insert<Expression> > l_minsert;
+    MakePatternPtr< Stuff<Statement> > l_stuff;
+    MakePatternPtr< Star<Expression> > l_existing;
+    MakePatternPtr< NotMatch<Expression> > l_mnot;
+    MakePatternPtr< Subscript > ll_sub;
+    MakePatternPtr<Compound> comp, l_comp;
+    MakePatternPtr< Insert<Declaration> > finsert, l_finsert;
+    MakePatternPtr< Overlay<Statement> > l_overll;
+    MakePatternPtr< StateLabel > l_state_label;
             
     ll_all->patterns = (ll_any, lls_not1, lls_not2); 
     ll_any->terminus = ll_over;
@@ -107,29 +107,29 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     ll_over->overlay = ll_sub;
     ll_sub->operands = (r_lmap_id, lr_state_id);
     lls_not1->pattern = lls_make;
-    lls_make->operands = (MakeTreePtr< Star<Expression> >(), 
+    lls_make->operands = (MakePatternPtr< Star<Expression> >(), 
                           ls_label_id,
-                          MakeTreePtr< Star<Expression> >()); // TODO too strong, will hit (arr){LABEL} in original code
+                          MakePatternPtr< Star<Expression> >()); // TODO too strong, will hit (arr){LABEL} in original code
     lls_not2->pattern = lls_label;
     lls_label->identifier = ls_label_id; // leave labels alone in the body
 
-    MakeTreePtr< SlaveSearchReplace<Scope> > slavell( l_module, ll_all );    
+    MakePatternPtr< SlaveSearchReplace<Scope> > slavell( l_module, ll_all );    
     
     l_func->identifier = func_id;
     l_func->initialiser = l_comp;
-    l_comp->members = (MakeTreePtr< Star<Declaration> >(), l_lmap);
-    l_comp->statements = (MakeTreePtr< Star<Statement> >(), l_stuff, MakeTreePtr< Star<Statement> >());
+    l_comp->members = (MakePatternPtr< Star<Declaration> >(), l_lmap);
+    l_comp->statements = (MakePatternPtr< Star<Statement> >(), l_stuff, MakePatternPtr< Star<Statement> >());
     ls_goto->destination = var_id;
     ls_label->identifier = ls_label_id;
     l_enum->members = (l_enum_vals, l_insert);
     l_enum->identifier = r_enum_id;
     l_block->pattern = l_not;
-    l_not->pattern = MakeTreePtr<Goto>();
-    l_post->pattern = MakeTreePtr<If>();    
-    l_dead_gotos->pattern = MakeTreePtr<Goto>();
+    l_not->pattern = MakePatternPtr<Goto>();
+    l_post->pattern = MakePatternPtr<If>();    
+    l_dead_gotos->pattern = MakePatternPtr<Goto>();
     l_module->members = (l_module_decls, l_enum, l_func);
     l_insert->insert = (lr_state_decl);
-    lr_state_decl->constancy = MakeTreePtr<Const>();
+    lr_state_decl->constancy = MakePatternPtr<Const>();
     lr_state_decl->identifier = lr_state_id;
     lr_state_decl->type = r_enum_id;
     lr_state_decl->initialiser = lr_count;
@@ -148,7 +148,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     l_state_label->identifier = ls_label_id;
     l_state_label->state = lr_state_id;
 
-    MakeTreePtr< SlaveCompareReplace<Scope> > slavel( module, l_module, slavell );
+    MakePatternPtr< SlaveCompareReplace<Scope> > slavel( module, l_module, slavell );
     
     //s_module->bases = (bases);
     //s_module->identifier = module_id;
@@ -156,8 +156,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     gg->through = thread;
     func->identifier = func_id;
     func->initialiser = comp;
-    comp->members = (MakeTreePtr< Star<Declaration> >(), finsert);
-    comp->statements = (MakeTreePtr< Star<Statement> >());
+    comp->members = (MakePatternPtr< Star<Declaration> >(), finsert);
+    comp->statements = (MakePatternPtr< Star<Statement> >());
     finsert->insert = (r_lmap);    
     module->members = (module_decls, func, insert);
     insert->insert = (r_module_enum);
@@ -169,11 +169,11 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     r_lmap->type = r_array;
     r_lmap->identifier = r_lmap_id;
     r_lmap->initialiser = r_make;    
-    r_lmap->constancy = MakeTreePtr<Const>();        
-//    r_lmap->virt = MakeTreePtr<NonVirtual>();
-  //  r_lmap->access = MakeTreePtr<Private>();    
-    r_array->element = MakeTreePtr<Labeley>();
-    r_array->size = MakeTreePtr<Uninitialised>();
+    r_lmap->constancy = MakePatternPtr<Const>();        
+//    r_lmap->virt = MakePatternPtr<NonVirtual>();
+  //  r_lmap->access = MakePatternPtr<Private>();    
+    r_array->element = MakePatternPtr<Labeley>();
+    r_array->size = MakePatternPtr<Uninitialised>();
     //r_make->operands = ()
     
     Configure( module, slavel );    
@@ -192,54 +192,54 @@ PlaceLabelsInArray::PlaceLabelsInArray()
 // together properly.
 LabelTypeToEnum::LabelTypeToEnum()
 {
-    MakeTreePtr< Stuff<Scope> > stuff_labeley, stuff_lmap;
-    MakeTreePtr<Labeley> labeley;
-    MakeTreePtr<Static> lmap;
-    MakeTreePtr<Const> lmap_const;
-    MakeTreePtr<Array> lmap_type;
-    MakeTreePtr<InstanceIdentifier> lmap_id; 
-    MakeTreePtr< MatchAll<Node> > apall, l_apall;
-    MakeTreePtr< NotMatch<Node> > apnot, l_apnot;
-    MakeTreePtr< AnyNode<Node> > apany, l_apany;
-    MakeTreePtr< Overlay<Type> > l_over;
-    MakeTreePtr<Subscript> ms_sub, nr_sub, nsx_sub;;
-    MakeTreePtr<InstanceIdentifier> m_state_id;
-    MakeTreePtr<Goto> ns_goto, nr_goto;
-    MakeTreePtr< NotMatch<Expression> > n_dest_expr;
-    MakeTreePtr<Unsigned> l_enum; // TODO use the real enum!!
-    MakeTreePtr< MatchAll<Scope> > all;
-    MakeTreePtr<Record> record;
-    MakeTreePtr< Star<Declaration> > decls;
+    MakePatternPtr< Stuff<Scope> > stuff_labeley, stuff_lmap;
+    MakePatternPtr<Labeley> labeley;
+    MakePatternPtr<Static> lmap;
+    MakePatternPtr<Const> lmap_const;
+    MakePatternPtr<Array> lmap_type;
+    MakePatternPtr<InstanceIdentifier> lmap_id; 
+    MakePatternPtr< MatchAll<Node> > apall, l_apall;
+    MakePatternPtr< NotMatch<Node> > apnot, l_apnot;
+    MakePatternPtr< AnyNode<Node> > apany, l_apany;
+    MakePatternPtr< Overlay<Type> > l_over;
+    MakePatternPtr<Subscript> ms_sub, nr_sub, nsx_sub;;
+    MakePatternPtr<InstanceIdentifier> m_state_id;
+    MakePatternPtr<Goto> ns_goto, nr_goto;
+    MakePatternPtr< NotMatch<Expression> > n_dest_expr;
+    MakePatternPtr<Unsigned> l_enum; // TODO use the real enum!!
+    MakePatternPtr< MatchAll<Scope> > all;
+    MakePatternPtr<Record> record;
+    MakePatternPtr< Star<Declaration> > decls;
     
     record->members = ( decls );
 
     l_apall->patterns = (l_apany, l_apnot);
     l_apnot->pattern = lmap;
     l_apany->terminus = l_over;
-    l_over->through = MakeTreePtr<Labeley>();
+    l_over->through = MakePatternPtr<Labeley>();
     l_over->overlay = l_enum; 
-    l_enum->width = MakeTreePtr<SpecificInteger>(32);
+    l_enum->width = MakePatternPtr<SpecificInteger>(32);
             
-    MakeTreePtr< SlaveSearchReplace<Scope> > slavel( record, l_apall );   
+    MakePatternPtr< SlaveSearchReplace<Scope> > slavel( record, l_apall );   
 
     ms_sub->operands = (lmap_id, m_state_id);
     
-    MakeTreePtr< SlaveSearchReplace<Scope> > slavem( slavel, ms_sub, m_state_id );   
+    MakePatternPtr< SlaveSearchReplace<Scope> > slavem( slavel, ms_sub, m_state_id );   
 
     ns_goto->destination = n_dest_expr;
     nr_goto->destination = nr_sub;
     nr_sub->operands = (lmap_id, n_dest_expr);
     n_dest_expr->pattern = nsx_sub;
-    nsx_sub->operands = (lmap_id, MakeTreePtr<Expression>());
+    nsx_sub->operands = (lmap_id, MakePatternPtr<Expression>());
     
-    MakeTreePtr< SlaveSearchReplace<Scope> > slaven( slavem, ns_goto, nr_goto );   
+    MakePatternPtr< SlaveSearchReplace<Scope> > slaven( slavem, ns_goto, nr_goto );   
     
     all->patterns = (record, stuff_labeley, stuff_lmap);
     stuff_lmap->terminus = lmap;
     lmap->identifier = lmap_id;
     lmap->type = lmap_type;
     lmap->constancy = lmap_const;
-    lmap_type->element = MakeTreePtr<Labeley>();
+    lmap_type->element = MakePatternPtr<Labeley>();
     stuff_labeley->terminus = apall;
     apall->patterns = (apany, apnot);
     apany->terminus = labeley;
@@ -251,34 +251,34 @@ LabelTypeToEnum::LabelTypeToEnum()
 
 LabelVarsToEnum::LabelVarsToEnum()
 {
-    MakeTreePtr< MatchAll<Scope> > s_all;
-    MakeTreePtr< MatchAll<Statement> > sx_all;
-    MakeTreePtr< Stuff<Scope> > scope;
-    MakeTreePtr<Instance> var;
-    MakeTreePtr<InstanceIdentifier> var_id;
-    MakeTreePtr< Stuff<Scope> > s_stuff, sx_stuff;
-    MakeTreePtr<Assign> s_assign, sx_assign, l_assign;
-    MakeTreePtr<Subscript> s_sub, sx_sub, ls_sub, mr_sub, msx_sub;
-    MakeTreePtr< NotMatch<Scope> > sx_not1;
-    MakeTreePtr<AssignmentOperator> sx_asop, ms_asop;
-    MakeTreePtr< NotMatch<Statement> > sx_not2, msx_not, msx_not2, msx_not3;
-    MakeTreePtr< Overlay<Type> > over;
-    MakeTreePtr< TransformOf<Expression> > s_index( &TypeOf::instance );
-    MakeTreePtr<TypeIdentifier> type; 
-    MakeTreePtr< Overlay<Expression> > l_over, m_over;
-    MakeTreePtr<Expression> l_index;
-    MakeTreePtr< MatchAll<Node> > ms_all;
-    MakeTreePtr< AnyNode<Node> > ms_anynode;    
-    MakeTreePtr<NestedArray> nested_array;
-    MakeTreePtr<NestedSubscriptLookup> nested_subscript, nested_subscript2, nested_subscript3;
-    MakeTreePtr<NestedSubscriptLookup> l_nested_subscript, m_nested_subscript, m_nested_subscript2;
-    MakeTreePtr<Instance> msx_inst;
-    MakeTreePtr<String> depth;
-    MakeTreePtr< Stuff<Scope> > lmap_stuff;
-    MakeTreePtr<Static> lmap;
-    MakeTreePtr<Const> lmap_const;
-    MakeTreePtr<Array> lmap_type;
-    MakeTreePtr<InstanceIdentifier> lmap_id; 
+    MakePatternPtr< MatchAll<Scope> > s_all;
+    MakePatternPtr< MatchAll<Statement> > sx_all;
+    MakePatternPtr< Stuff<Scope> > scope;
+    MakePatternPtr<Instance> var;
+    MakePatternPtr<InstanceIdentifier> var_id;
+    MakePatternPtr< Stuff<Scope> > s_stuff, sx_stuff;
+    MakePatternPtr<Assign> s_assign, sx_assign, l_assign;
+    MakePatternPtr<Subscript> s_sub, sx_sub, ls_sub, mr_sub, msx_sub;
+    MakePatternPtr< NotMatch<Scope> > sx_not1;
+    MakePatternPtr<AssignmentOperator> sx_asop, ms_asop;
+    MakePatternPtr< NotMatch<Statement> > sx_not2, msx_not, msx_not2, msx_not3;
+    MakePatternPtr< Overlay<Type> > over;
+    MakePatternPtr< TransformOf<Expression> > s_index( &TypeOf::instance );
+    MakePatternPtr<TypeIdentifier> type; 
+    MakePatternPtr< Overlay<Expression> > l_over, m_over;
+    MakePatternPtr<Expression> l_index;
+    MakePatternPtr< MatchAll<Node> > ms_all;
+    MakePatternPtr< AnyNode<Node> > ms_anynode;    
+    MakePatternPtr<NestedArray> nested_array;
+    MakePatternPtr<NestedSubscriptLookup> nested_subscript, nested_subscript2, nested_subscript3;
+    MakePatternPtr<NestedSubscriptLookup> l_nested_subscript, m_nested_subscript, m_nested_subscript2;
+    MakePatternPtr<Instance> msx_inst;
+    MakePatternPtr<String> depth;
+    MakePatternPtr< Stuff<Scope> > lmap_stuff;
+    MakePatternPtr<Static> lmap;
+    MakePatternPtr<Const> lmap_const;
+    MakePatternPtr<Array> lmap_type;
+    MakePatternPtr<InstanceIdentifier> lmap_id; 
     
     l_assign->operands = (l_nested_subscript, l_over);
     l_nested_subscript->terminus = var_id;    
@@ -287,13 +287,13 @@ LabelVarsToEnum::LabelVarsToEnum()
     ls_sub->operands = (lmap_id, l_index);
     l_over->overlay = l_index;    
    
-    MakeTreePtr< SlaveSearchReplace<Scope> > slavel( scope, l_assign );   
+    MakePatternPtr< SlaveSearchReplace<Scope> > slavel( scope, l_assign );   
    
     ms_all->patterns = (ms_anynode, msx_not, msx_not2, msx_not3);
     msx_not2->pattern = msx_inst;
     msx_inst->identifier = var_id;    
     msx_not->pattern = ms_asop;
-    ms_asop->operands = (m_nested_subscript2, MakeTreePtr< Star<Expression> >() );
+    ms_asop->operands = (m_nested_subscript2, MakePatternPtr< Star<Expression> >() );
     m_nested_subscript2->terminus = var_id;
     m_nested_subscript2->depth = depth;
     ms_anynode->terminus = m_over;
@@ -305,14 +305,14 @@ LabelVarsToEnum::LabelVarsToEnum()
     msx_sub->operands = (lmap_id, m_nested_subscript);
     mr_sub->operands = (lmap_id, m_nested_subscript);
     
-    MakeTreePtr< SlaveSearchReplace<Scope> > slavem( slavel, ms_all, ms_anynode );   
+    MakePatternPtr< SlaveSearchReplace<Scope> > slavem( slavel, ms_all, ms_anynode );   
    
     s_all->patterns = (scope, s_stuff, sx_not1, lmap_stuff);
     scope->terminus = var;
     var->type = nested_array;
     nested_array->terminus = over;
     //nested_array->depth = depth;
-    over->through = MakeTreePtr<Labeley>();    
+    over->through = MakePatternPtr<Labeley>();    
     var->identifier = var_id;
     s_stuff->terminus = s_assign;
     s_assign->operands = (nested_subscript, s_sub);
@@ -323,20 +323,20 @@ LabelVarsToEnum::LabelVarsToEnum()
     sx_not1->pattern = sx_stuff;
     sx_stuff->terminus = sx_all;
     sx_all->patterns = (sx_asop, sx_not2);
-    sx_asop->operands = (nested_subscript3, MakeTreePtr< Star<Expression> >() );
+    sx_asop->operands = (nested_subscript3, MakePatternPtr< Star<Expression> >() );
     nested_subscript3->terminus = var_id;
     nested_subscript3->depth = depth;
     sx_not2->pattern = sx_assign;
     sx_assign->operands = (nested_subscript2, sx_sub);
     nested_subscript2->terminus = var_id;
     nested_subscript2->depth = depth;
-    sx_sub->operands = (lmap_id, MakeTreePtr<Expression>() );
+    sx_sub->operands = (lmap_id, MakePatternPtr<Expression>() );
     over->overlay = type;
     lmap_stuff->terminus = lmap;
     lmap->identifier = lmap_id;
     lmap->type = lmap_type;
     lmap->constancy = lmap_const;
-    lmap_type->element = MakeTreePtr<Labeley>();
+    lmap_type->element = MakePatternPtr<Labeley>();
         
     Configure( s_all, slavem );
 }
@@ -344,10 +344,10 @@ LabelVarsToEnum::LabelVarsToEnum()
 
 SwapSubscriptMultiplex::SwapSubscriptMultiplex()
 {
-    MakeTreePtr<Multiplexor> s_mux, r_mux;
-    MakeTreePtr<Subscript> s_sub1, s_sub2, r_sub;
-    MakeTreePtr<Expression> cond, index1, index2;
-    MakeTreePtr<InstanceIdentifier> array; // Instance used to prevent side effects, which would go out of sequence
+    MakePatternPtr<Multiplexor> s_mux, r_mux;
+    MakePatternPtr<Subscript> s_sub1, s_sub2, r_sub;
+    MakePatternPtr<Expression> cond, index1, index2;
+    MakePatternPtr<InstanceIdentifier> array; // Instance used to prevent side effects, which would go out of sequence
     
     s_mux->operands = (cond, s_sub1, s_sub2);
     s_sub1->operands = (array, index1);
@@ -362,30 +362,30 @@ SwapSubscriptMultiplex::SwapSubscriptMultiplex()
 
 AddStateEnumVar::AddStateEnumVar()
 {
-    MakeTreePtr<Compound> s_comp, r_comp, lr_compound;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, post;
-    MakeTreePtr<Goto> ls_goto, lr_goto, s_goto;
-    MakeTreePtr<Assign> lr_assign;
-    MakeTreePtr<Automatic> state_var;
-    MakeTreePtr< NotMatch<Expression> > lx_not;
-    MakeTreePtr< BuildInstanceIdentifier > state_var_id("state");
-    MakeTreePtr< GreenGrass<Compound> > s_gg;
-    MakeTreePtr<Subscript> s_sub, ls_sub, lr_sub;
-    MakeTreePtr<InstanceIdentifier> array;
-    MakeTreePtr< TransformOf<Expression> > s_index( &TypeOf::instance );
-    MakeTreePtr<Integral> type; // TODO use the enum type, and ensure properly supported in TypeOf
+    MakePatternPtr<Compound> s_comp, r_comp, lr_compound;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > pre, post;
+    MakePatternPtr<Goto> ls_goto, lr_goto, s_goto;
+    MakePatternPtr<Assign> lr_assign;
+    MakePatternPtr<Automatic> state_var;
+    MakePatternPtr< NotMatch<Expression> > lx_not;
+    MakePatternPtr< BuildInstanceIdentifier > state_var_id("state");
+    MakePatternPtr< GreenGrass<Compound> > s_gg;
+    MakePatternPtr<Subscript> s_sub, ls_sub, lr_sub;
+    MakePatternPtr<InstanceIdentifier> array;
+    MakePatternPtr< TransformOf<Expression> > s_index( &TypeOf::instance );
+    MakePatternPtr<Integral> type; // TODO use the enum type, and ensure properly supported in TypeOf
     
     ls_goto->destination = ls_sub;
     ls_sub->operands = (array, lx_not);
-    lx_not->pattern = state_var_id; //  MakeTreePtr<InstanceIdentifier>();
+    lx_not->pattern = state_var_id; //  MakePatternPtr<InstanceIdentifier>();
     
     lr_compound->statements = (lr_assign, lr_goto);
     lr_assign->operands = (state_var_id, lx_not);
     lr_goto->destination = lr_sub;
     lr_sub->operands = (array, state_var_id);
             
-    MakeTreePtr< SlaveSearchReplace<Statement> > r_slave( r_comp, ls_goto, lr_compound );
+    MakePatternPtr< SlaveSearchReplace<Statement> > r_slave( r_comp, ls_goto, lr_compound );
      
     s_gg->through = s_comp;
     s_comp->members = (decls);
@@ -398,7 +398,7 @@ AddStateEnumVar::AddStateEnumVar()
     r_comp->statements = (pre, s_goto, post); 
     state_var->identifier = state_var_id;
     state_var->type = type;    
-    state_var->initialiser = MakeTreePtr<Uninitialised>();
+    state_var->initialiser = MakePatternPtr<Uninitialised>();
 
     Configure( s_gg, r_slave );
 }
@@ -406,19 +406,19 @@ AddStateEnumVar::AddStateEnumVar()
 
 ApplyCombGotoPolicy::ApplyCombGotoPolicy()
 {
-    MakeTreePtr<Compound> comp, r_body_comp;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, body, post;
-    MakeTreePtr<Goto> s_goto1, goto2, sx_pre_goto;
-    MakeTreePtr<Subscript> sub;
-    MakeTreePtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
-    MakeTreePtr<StateLabel> label;
-    MakeTreePtr< NotMatch<Statement> > sx_pre, sx_body;
-    MakeTreePtr<Uncombable> sx_uncombable;
-    MakeTreePtr< Erase<Statement> > s_erase;
-    MakeTreePtr< Overlay<Statement> > over;
-    MakeTreePtr<If> r_if;
-    MakeTreePtr<Equal> r_equal;   
+    MakePatternPtr<Compound> comp, r_body_comp;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > pre, body, post;
+    MakePatternPtr<Goto> s_goto1, goto2, sx_pre_goto;
+    MakePatternPtr<Subscript> sub;
+    MakePatternPtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
+    MakePatternPtr<StateLabel> label;
+    MakePatternPtr< NotMatch<Statement> > sx_pre, sx_body;
+    MakePatternPtr<Uncombable> sx_uncombable;
+    MakePatternPtr< Erase<Statement> > s_erase;
+    MakePatternPtr< Overlay<Statement> > over;
+    MakePatternPtr<If> r_if;
+    MakePatternPtr<Equal> r_equal;   
     
     comp->members = (decls);
     comp->statements = (pre, s_erase, label, over, goto2, post);
@@ -436,7 +436,7 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     over->overlay = r_if;
     r_if->condition = r_equal;
     r_if->body = r_body_comp;
-    r_if->else_body = MakeTreePtr<Nop>();
+    r_if->else_body = MakePatternPtr<Nop>();
     r_equal->operands = (state_var_id, state_id);
     //r_body_comp->members = ();
     r_body_comp->statements = body;
@@ -447,20 +447,20 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
 
 ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
 {
-    MakeTreePtr<Compound> comp, r_body_comp;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, body1, body2, post;
-    MakeTreePtr<Goto> s_goto1, goto2, sx_pre_goto;
-    MakeTreePtr<Subscript> sub;
-    MakeTreePtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
-    MakeTreePtr<StateLabel> label;
-    MakeTreePtr< NotMatch<Statement> > sx_pre, sx_body1, sx_body2;
-    MakeTreePtr< Erase<Statement> > s_erase, s_erase2;
-    MakeTreePtr< Insert<Statement> > r_insert;
-    MakeTreePtr<If> r_if;
-    MakeTreePtr<Equal> r_equal;   
-    MakeTreePtr<Wait> wait;
-    MakeTreePtr<Uncombable> sx_uncombable1, sx_uncombable2;
+    MakePatternPtr<Compound> comp, r_body_comp;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > pre, body1, body2, post;
+    MakePatternPtr<Goto> s_goto1, goto2, sx_pre_goto;
+    MakePatternPtr<Subscript> sub;
+    MakePatternPtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
+    MakePatternPtr<StateLabel> label;
+    MakePatternPtr< NotMatch<Statement> > sx_pre, sx_body1, sx_body2;
+    MakePatternPtr< Erase<Statement> > s_erase, s_erase2;
+    MakePatternPtr< Insert<Statement> > r_insert;
+    MakePatternPtr<If> r_if;
+    MakePatternPtr<Equal> r_equal;   
+    MakePatternPtr<Wait> wait;
+    MakePatternPtr<Uncombable> sx_uncombable1, sx_uncombable2;
     
     comp->members = (decls);
     comp->statements = (pre, s_erase, label, s_erase2, r_insert, goto2, post);
@@ -480,7 +480,7 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     r_insert->insert = r_if;
     r_if->condition = r_equal;
     r_if->body = r_body_comp;
-    r_if->else_body = MakeTreePtr<Nop>();
+    r_if->else_body = MakePatternPtr<Nop>();
     r_equal->operands = (state_var_id, state_id);
     //r_body_comp->members = ();
     r_body_comp->statements = (body1, wait, body2, goto2);
@@ -491,21 +491,21 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
 
 ApplyBottomPolicy::ApplyBottomPolicy()
 {
-    MakeTreePtr<Compound> comp, r_body_comp;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, body;
-    MakeTreePtr<Goto> goto1, sx_pre_goto;
-    MakeTreePtr<Subscript> sub;
-    MakeTreePtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
-    MakeTreePtr<StateLabel> label;
-    MakeTreePtr< NotMatch<Statement> > sx_pre, sx_body;
-    MakeTreePtr< Erase<Statement> > s_erase;
-    MakeTreePtr< Insert<Statement> > r_insert;
-    MakeTreePtr< Overlay<Statement> > over;
-    MakeTreePtr<If> r_if, r_if2;
-    MakeTreePtr<Equal> r_equal;   
-    MakeTreePtr<NotEqual> r_not_equal;   
-    MakeTreePtr<Uncombable> sx_uncombable;
+    MakePatternPtr<Compound> comp, r_body_comp;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > pre, body;
+    MakePatternPtr<Goto> goto1, sx_pre_goto;
+    MakePatternPtr<Subscript> sub;
+    MakePatternPtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
+    MakePatternPtr<StateLabel> label;
+    MakePatternPtr< NotMatch<Statement> > sx_pre, sx_body;
+    MakePatternPtr< Erase<Statement> > s_erase;
+    MakePatternPtr< Insert<Statement> > r_insert;
+    MakePatternPtr< Overlay<Statement> > over;
+    MakePatternPtr<If> r_if, r_if2;
+    MakePatternPtr<Equal> r_equal;   
+    MakePatternPtr<NotEqual> r_not_equal;   
+    MakePatternPtr<Uncombable> sx_uncombable;
     
     comp->members = (decls);
     comp->statements = (pre, s_erase, label, over, r_insert);
@@ -522,14 +522,14 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     over->overlay = r_if;
     r_if->condition = r_equal;
     r_if->body = r_body_comp;
-    r_if->else_body = MakeTreePtr<Nop>();
+    r_if->else_body = MakePatternPtr<Nop>();
     r_equal->operands = (state_var_id, state_id);
     //r_body_comp->members = ();
     r_body_comp->statements = body;
     r_insert->insert = goto1; // r_if2; TODO: with the condition, superloop is exiting before the last state block has run
     r_if2->condition = r_not_equal;
     r_if2->body = goto1;
-    r_if2->else_body = MakeTreePtr<Nop>();
+    r_if2->else_body = MakePatternPtr<Nop>();
     r_not_equal->operands = (state_var_id, state_id);    
     
     Configure(comp);
@@ -538,18 +538,18 @@ ApplyBottomPolicy::ApplyBottomPolicy()
 
 ApplyLabelPolicy::ApplyLabelPolicy()
 {
-    MakeTreePtr<Compound> comp, r_body_comp;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, post;
-    MakeTreePtr<StateLabel> label1;
-    MakeTreePtr<Label> label2, sx_post_label;
-    MakeTreePtr<If> iif;
-    MakeTreePtr<Equal> equal;   
-    MakeTreePtr< NotMatch<Statement> > sx_post;
-    MakeTreePtr<InstanceIdentifier> state_var_id, state_id;
-    MakeTreePtr< Erase<Label> > erase, erase_star;
-    MakeTreePtr< Insert<Label> > insert, insert_star;
-    MakeTreePtr< Star<Label> > label_star;    
+    MakePatternPtr<Compound> comp, r_body_comp;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > pre, post;
+    MakePatternPtr<StateLabel> label1;
+    MakePatternPtr<Label> label2, sx_post_label;
+    MakePatternPtr<If> iif;
+    MakePatternPtr<Equal> equal;   
+    MakePatternPtr< NotMatch<Statement> > sx_post;
+    MakePatternPtr<InstanceIdentifier> state_var_id, state_id;
+    MakePatternPtr< Erase<Label> > erase, erase_star;
+    MakePatternPtr< Insert<Label> > insert, insert_star;
+    MakePatternPtr< Star<Label> > label_star;    
         
     comp->members = (decls);
     comp->statements = (pre, insert, insert_star, label1, iif, erase, erase_star, post);
@@ -568,23 +568,23 @@ ApplyLabelPolicy::ApplyLabelPolicy()
 
 ApplyTopPolicy::ApplyTopPolicy()
 {
-    MakeTreePtr< MatchAll<Compound> > s_all;
-    MakeTreePtr<Compound> comp, r_body_comp;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > body1, body2, post;
-    MakeTreePtr<Label> label, sx_label, sx_label2;
-    MakeTreePtr< NotMatch<Statement> > sx_stmt;
-    MakeTreePtr< Erase<Statement> > s_erase;
-    MakeTreePtr< Insert<Statement> > r_insert;
-    MakeTreePtr<If> r_if;
-    MakeTreePtr<Equal> r_equal;   
-    MakeTreePtr<DeltaCount> r_delta_count;
-    MakeTreePtr<SpecificInteger> r_zero(0);
-    MakeTreePtr<Wait> wait;
-    MakeTreePtr< Stuff<Compound> > s_stuff;
-    MakeTreePtr<Goto> gotoo;
-    MakeTreePtr< NotMatch<Statement> > sx_body1, sx_body2;
-    MakeTreePtr<Uncombable> sx_uncombable1, sx_uncombable2;
+    MakePatternPtr< MatchAll<Compound> > s_all;
+    MakePatternPtr<Compound> comp, r_body_comp;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > body1, body2, post;
+    MakePatternPtr<Label> label, sx_label, sx_label2;
+    MakePatternPtr< NotMatch<Statement> > sx_stmt;
+    MakePatternPtr< Erase<Statement> > s_erase;
+    MakePatternPtr< Insert<Statement> > r_insert;
+    MakePatternPtr<If> r_if;
+    MakePatternPtr<Equal> r_equal;   
+    MakePatternPtr<DeltaCount> r_delta_count;
+    MakePatternPtr<SpecificInteger> r_zero(0);
+    MakePatternPtr<Wait> wait;
+    MakePatternPtr< Stuff<Compound> > s_stuff;
+    MakePatternPtr<Goto> gotoo;
+    MakePatternPtr< NotMatch<Statement> > sx_body1, sx_body2;
+    MakePatternPtr<Uncombable> sx_uncombable1, sx_uncombable2;
        
     s_all->patterns = (comp, s_stuff);
     comp->members = (decls);
@@ -602,7 +602,7 @@ ApplyTopPolicy::ApplyTopPolicy()
     r_if->body = r_body_comp;
     //r_body_comp->members = ();
     r_body_comp->statements = (body1, wait, body2, gotoo);
-    r_if->else_body = MakeTreePtr<Nop>();
+    r_if->else_body = MakePatternPtr<Nop>();
     
     Configure(s_all, comp);
 }
@@ -610,20 +610,20 @@ ApplyTopPolicy::ApplyTopPolicy()
 
 EnsureResetYield::EnsureResetYield()
 {
-    MakeTreePtr<Compound> comp;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, post;
-    MakeTreePtr< NotMatch<Statement> > sx_not;
-    MakeTreePtr< MatchAny<Statement> > sx_any;
-    MakeTreePtr<Goto> gotoo;
-    MakeTreePtr< Insert<Statement> > insert;
-    MakeTreePtr<WaitDelta> r_yield;
+    MakePatternPtr<Compound> comp;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > pre, post;
+    MakePatternPtr< NotMatch<Statement> > sx_not;
+    MakePatternPtr< MatchAny<Statement> > sx_any;
+    MakePatternPtr<Goto> gotoo;
+    MakePatternPtr< Insert<Statement> > insert;
+    MakePatternPtr<WaitDelta> r_yield;
     
     comp->members = (decls);
     comp->statements = (pre, insert, gotoo, post);
     pre->pattern = sx_not;
     sx_not->pattern = sx_any;
-    sx_any->patterns = (MakeTreePtr<Goto>(), MakeTreePtr<Label>(), MakeTreePtr<Wait>() );
+    sx_any->patterns = (MakePatternPtr<Goto>(), MakePatternPtr<Label>(), MakePatternPtr<Wait>() );
     
     insert->insert = r_yield;
     
@@ -633,21 +633,21 @@ EnsureResetYield::EnsureResetYield()
 
 DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
 {
-    MakeTreePtr<Instance> inst;
-    MakeTreePtr<Compound> s_comp, r_comp, r_body_comp;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > body;
-    MakeTreePtr<Label> s_label;
-    MakeTreePtr<If> s_ifgoto;
-    MakeTreePtr<Goto> s_goto;
-    MakeTreePtr<Expression> cond;
-    MakeTreePtr< NotMatch<Statement> > sx_not;
-    MakeTreePtr<Do> r_do;
-    MakeTreePtr< Overlay<Compound> > over;
+    MakePatternPtr<Instance> inst;
+    MakePatternPtr<Compound> s_comp, r_comp, r_body_comp;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > body;
+    MakePatternPtr<Label> s_label;
+    MakePatternPtr<If> s_ifgoto;
+    MakePatternPtr<Goto> s_goto;
+    MakePatternPtr<Expression> cond;
+    MakePatternPtr< NotMatch<Statement> > sx_not;
+    MakePatternPtr<Do> r_do;
+    MakePatternPtr< Overlay<Compound> > over;
     
-    MakeTreePtr< SlaveSearchReplace<Statement> > slavell( r_body_comp, MakeTreePtr<Goto>(), MakeTreePtr<Continue>() );    
+    MakePatternPtr< SlaveSearchReplace<Statement> > slavell( r_body_comp, MakePatternPtr<Goto>(), MakePatternPtr<Continue>() );    
     
-    inst->type = MakeTreePtr<Callable>();
+    inst->type = MakePatternPtr<Callable>();
     inst->initialiser = over;
     over->through = s_comp;
     s_comp->members = (decls);
@@ -655,17 +655,17 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
                                          ? TreePtr<Statement>(s_ifgoto) 
                                          : TreePtr<Statement>(s_goto) );
     body->pattern = sx_not;
-    sx_not->pattern = MakeTreePtr<Label>(); // so s_label is the only one - all gotos must go to it.
+    sx_not->pattern = MakePatternPtr<Label>(); // so s_label is the only one - all gotos must go to it.
     s_ifgoto->condition = cond;
     s_ifgoto->body = s_goto;
-    s_ifgoto->else_body = MakeTreePtr<Nop>();
+    s_ifgoto->else_body = MakePatternPtr<Nop>();
     
     over->overlay = r_comp;
     r_comp->members = (decls);
     r_comp->statements = (r_do);
     r_do->condition = is_conditional_goto 
                       ? cond 
-                      : TreePtr<Expression>(MakeTreePtr<True>());
+                      : TreePtr<Expression>(MakePatternPtr<True>());
     r_do->body = slavell;
     //r_body_comp->members = ();
     r_body_comp->statements = body;
@@ -676,22 +676,22 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
 
 InsertInferredYield::InsertInferredYield()
 {
-    MakeTreePtr<Instance> fn;
-    MakeTreePtr<InstanceIdentifier> fn_id;
-    MakeTreePtr<Thread> thread; // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
-    MakeTreePtr<Compound> func_comp, s_comp, sx_comp, r_comp;
-    MakeTreePtr< Star<Declaration> > func_decls, loop_decls;
-    MakeTreePtr< Star<Statement> >  stmts, sx_pre;    
-    MakeTreePtr< Overlay<Statement> > over;    
-    MakeTreePtr<LocalVariable> flag_decl; 
-    MakeTreePtr<InstanceIdentifier> flag_id;   
-    MakeTreePtr<WaitDelta> r_yield;
-    MakeTreePtr<Loop> loop;
-    MakeTreePtr<If> r_if, sx_if;
-    MakeTreePtr< MatchAll<Compound> > s_all;
-    MakeTreePtr< NotMatch<Compound> > s_notmatch;
-    MakeTreePtr< LogicalNot > r_not, sx_not;
-    MakeTreePtr< Assign > assign;
+    MakePatternPtr<Instance> fn;
+    MakePatternPtr<InstanceIdentifier> fn_id;
+    MakePatternPtr<Thread> thread; // Must be SC_THREAD since we introduce new yield here, only makes sense in SC_THREAD
+    MakePatternPtr<Compound> func_comp, s_comp, sx_comp, r_comp;
+    MakePatternPtr< Star<Declaration> > func_decls, loop_decls;
+    MakePatternPtr< Star<Statement> >  stmts, sx_pre;    
+    MakePatternPtr< Overlay<Statement> > over;    
+    MakePatternPtr<LocalVariable> flag_decl; 
+    MakePatternPtr<InstanceIdentifier> flag_id;   
+    MakePatternPtr<WaitDelta> r_yield;
+    MakePatternPtr<Loop> loop;
+    MakePatternPtr<If> r_if, sx_if;
+    MakePatternPtr< MatchAll<Compound> > s_all;
+    MakePatternPtr< NotMatch<Compound> > s_notmatch;
+    MakePatternPtr< LogicalNot > r_not, sx_not;
+    MakePatternPtr< Assign > assign;
           
     fn->type = thread;
     fn->initialiser = func_comp;
@@ -702,7 +702,7 @@ InsertInferredYield::InsertInferredYield()
     over->through = s_comp;
     s_comp->members = (loop_decls);
     s_comp->statements = (stmts);
-    stmts->pattern = MakeTreePtr<If>();
+    stmts->pattern = MakePatternPtr<If>();
     
     over->overlay = r_comp;
     r_comp->members = (loop_decls);

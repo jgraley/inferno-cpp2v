@@ -16,7 +16,7 @@ class SlaveBase;
 class SearchContainerBase;
 class SearchReplace;
 
-class Agent : public Traceable
+class Agent : public virtual Traceable
 {
 public:
     virtual bool DecidedCompare( const TreePtrInterface &x,
@@ -118,10 +118,12 @@ private:
 };
 
 
+#define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
 template<typename NODE_TYPE>
 class NormalAgentWrapper : public NODE_TYPE,
                            public NormalAgent
 {
+    SPECIAL_NODE_FUNCTIONS	
 };
 
 
@@ -148,17 +150,17 @@ public:
 	template<typename CP0>
 	MakePatternPtr(const CP0 &cp0) : TreePtr<NODE_TYPE>( new NODE_TYPE(cp0) ) 
 	{ 
-		ASSERT( !IsNeedWrapper() )("MakePatternPtr cannot pass constructor params to normal nodes"); 		
+		//ASSERT( !IsNeedWrapper() )("MakePatternPtr cannot pass constructor params to normal nodes"); 		
 	}
 	template<typename CP0, typename CP1>
 	MakePatternPtr(const CP0 &cp0, const CP1 &cp1) : TreePtr<NODE_TYPE>( new NODE_TYPE(cp0, cp1) )
 	{ 
-		ASSERT( !IsNeedWrapper() )("MakePatternPtr cannot pass constructor params to normal nodes"); 		
+		//ASSERT( !IsNeedWrapper() )("MakePatternPtr cannot pass constructor params to normal nodes"); 		
 	}
 	template<typename CP0, typename CP1, typename CP2>
 	MakePatternPtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : TreePtr<NODE_TYPE>( new NODE_TYPE(cp0, cp1, cp2) )
 	{ 
-		ASSERT( !IsNeedWrapper() )("MakePatternPtr cannot pass constructor params to normal nodes"); 		
+		//ASSERT( !IsNeedWrapper() )("MakePatternPtr cannot pass constructor params to normal nodes"); 		
 	}
 	// Add more params as needed...
 };

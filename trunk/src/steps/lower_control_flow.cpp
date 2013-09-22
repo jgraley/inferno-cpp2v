@@ -22,18 +22,18 @@ struct CombableBreak : Break { NODE_FUNCTIONS_FINAL };
 
 DetectUncombableSwitch::DetectUncombableSwitch()
 {
-    MakeTreePtr< MatchAll<Switch> > s_all;
-    MakeTreePtr< NotMatch<Switch> > sx_not;
-    MakeTreePtr<UncombableSwitch> sx_uswitch;
-    MakeTreePtr<Switch> s_switch;
-    MakeTreePtr<Expression> expr;
-    MakeTreePtr<Compound> comp;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, post;
-    MakeTreePtr< NotMatch<Statement> > x_not;
-    MakeTreePtr<Break> x_break;
-    MakeTreePtr<SwitchTarget> target;
-    MakeTreePtr<UncombableSwitch> r_uswitch;
+    MakePatternPtr< MatchAll<Switch> > s_all;
+    MakePatternPtr< NotMatch<Switch> > sx_not;
+    MakePatternPtr<UncombableSwitch> sx_uswitch;
+    MakePatternPtr<Switch> s_switch;
+    MakePatternPtr<Expression> expr;
+    MakePatternPtr<Compound> comp;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > pre, post;
+    MakePatternPtr< NotMatch<Statement> > x_not;
+    MakePatternPtr<Break> x_break;
+    MakePatternPtr<SwitchTarget> target;
+    MakePatternPtr<UncombableSwitch> r_uswitch;
     
     s_all->patterns = (sx_not, s_switch);
     sx_not->pattern = sx_uswitch;
@@ -54,15 +54,15 @@ DetectUncombableSwitch::DetectUncombableSwitch()
 // way, and can avoid a top-level NOT
 MakeAllForUncombable::MakeAllForUncombable()
 {
-    MakeTreePtr< MatchAll<For> > s_all;
-    MakeTreePtr< NotMatch<For> > s_not;
-    MakeTreePtr<UncombableFor> sx_ufor;
-    MakeTreePtr<For> s_for;
-    MakeTreePtr<Statement> init;
-    MakeTreePtr<Expression> test; 
-    MakeTreePtr<Statement> inc; 
-    MakeTreePtr<Statement> body;
-    MakeTreePtr<UncombableFor> r_ufor;
+    MakePatternPtr< MatchAll<For> > s_all;
+    MakePatternPtr< NotMatch<For> > s_not;
+    MakePatternPtr<UncombableFor> sx_ufor;
+    MakePatternPtr<For> s_for;
+    MakePatternPtr<Statement> init;
+    MakePatternPtr<Expression> test; 
+    MakePatternPtr<Statement> inc; 
+    MakePatternPtr<Statement> body;
+    MakePatternPtr<UncombableFor> r_ufor;
     
     s_all->patterns = (s_not, s_for);
     s_not->pattern = sx_ufor;
@@ -82,32 +82,32 @@ MakeAllForUncombable::MakeAllForUncombable()
 
 DetectCombableFor::DetectCombableFor()
 {
-    MakeTreePtr<UncombableFor> s_ufor;
-    MakeTreePtr<Assign> init;
-    MakeTreePtr< MatchAny<Operator> > test;
-    MakeTreePtr<Less> lt;
-    MakeTreePtr<LessOrEqual> le;
-    MakeTreePtr<Greater> gt;
-    MakeTreePtr<GreaterOrEqual> ge;
-    MakeTreePtr<NotEqual> ne;    
-    MakeTreePtr<Integer> init_val, test_val, inc_val;
-    MakeTreePtr< MatchAny<AssignmentOperator> > inc;
-    MakeTreePtr<PostIncrement> postinc; 
-    MakeTreePtr<PreIncrement> preinc; 
-    MakeTreePtr<PostDecrement> postdec; 
-    MakeTreePtr<PreDecrement> predec; 
-    MakeTreePtr<AssignmentAdd> asadd; 
-    MakeTreePtr<AssignmentSubtract> assub; 
-    MakeTreePtr<Assign> assign1, assign2;
-    MakeTreePtr<Add> add;
-    MakeTreePtr<Subtract> sub;    
-    MakeTreePtr< NotMatch<Statement> > body;
-    MakeTreePtr< Stuff<Statement> > astuff;
-    MakeTreePtr<AssignmentOperator> assignop;
+    MakePatternPtr<UncombableFor> s_ufor;
+    MakePatternPtr<Assign> init;
+    MakePatternPtr< MatchAny<Operator> > test;
+    MakePatternPtr<Less> lt;
+    MakePatternPtr<LessOrEqual> le;
+    MakePatternPtr<Greater> gt;
+    MakePatternPtr<GreaterOrEqual> ge;
+    MakePatternPtr<NotEqual> ne;    
+    MakePatternPtr<Integer> init_val, test_val, inc_val;
+    MakePatternPtr< MatchAny<AssignmentOperator> > inc;
+    MakePatternPtr<PostIncrement> postinc; 
+    MakePatternPtr<PreIncrement> preinc; 
+    MakePatternPtr<PostDecrement> postdec; 
+    MakePatternPtr<PreDecrement> predec; 
+    MakePatternPtr<AssignmentAdd> asadd; 
+    MakePatternPtr<AssignmentSubtract> assub; 
+    MakePatternPtr<Assign> assign1, assign2;
+    MakePatternPtr<Add> add;
+    MakePatternPtr<Subtract> sub;    
+    MakePatternPtr< NotMatch<Statement> > body;
+    MakePatternPtr< Stuff<Statement> > astuff;
+    MakePatternPtr<AssignmentOperator> assignop;
     
-    MakeTreePtr<CombableFor> r_for;
-    MakeTreePtr< TransformOf<InstanceIdentifier> > loopvar( &TypeOf::instance );
-    MakeTreePtr<Integral> type;
+    MakePatternPtr<CombableFor> r_for;
+    MakePatternPtr< TransformOf<InstanceIdentifier> > loopvar( &TypeOf::instance );
+    MakePatternPtr<Integral> type;
     
     s_ufor->initialisation = init;
     init->operands = (loopvar, init_val);
@@ -133,7 +133,7 @@ DetectCombableFor::DetectCombableFor()
     s_ufor->body = body;
     body->pattern = astuff;
     astuff->terminus = assignop;
-    assignop->operands = (loopvar, MakeTreePtr< Star<Expression> >());
+    assignop->operands = (loopvar, MakePatternPtr< Star<Expression> >());
     loopvar->pattern = type;
     
     r_for->initialisation = init;
@@ -149,14 +149,14 @@ DetectCombableFor::DetectCombableFor()
 // way, and can avoid a top-level NOT
 MakeAllBreakUncombable::MakeAllBreakUncombable()
 {
-    MakeTreePtr< NotMatch<Break> > s_not;
-    MakeTreePtr<UncombableBreak> sx_ubreak;
-    MakeTreePtr<Break> s_break;
-    MakeTreePtr<Statement> init;
-    MakeTreePtr<Expression> test; 
-    MakeTreePtr<Statement> inc; 
-    MakeTreePtr<Statement> body;
-    MakeTreePtr<UncombableBreak> r_ubreak;
+    MakePatternPtr< NotMatch<Break> > s_not;
+    MakePatternPtr<UncombableBreak> sx_ubreak;
+    MakePatternPtr<Break> s_break;
+    MakePatternPtr<Statement> init;
+    MakePatternPtr<Expression> test; 
+    MakePatternPtr<Statement> inc; 
+    MakePatternPtr<Statement> body;
+    MakePatternPtr<UncombableBreak> r_ubreak;
     
     s_not->pattern = sx_ubreak;
         
@@ -170,17 +170,17 @@ MakeAllBreakUncombable::MakeAllBreakUncombable()
 // under constructs like if
 DetectCombableBreak::DetectCombableBreak()
 {
-    MakeTreePtr< MatchAll<Switch> > all;
-    MakeTreePtr< NotMatch<Switch> > x_not;
-    MakeTreePtr<UncombableSwitch> uswitch;
-    MakeTreePtr<Switch> swtch;
-    MakeTreePtr<Expression> expr;
-    MakeTreePtr<Compound> comp;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, post;
-    MakeTreePtr< Overlay<Break> > over;
-    MakeTreePtr<UncombableBreak> s_ubreak;
-    MakeTreePtr<CombableBreak> r_break;
+    MakePatternPtr< MatchAll<Switch> > all;
+    MakePatternPtr< NotMatch<Switch> > x_not;
+    MakePatternPtr<UncombableSwitch> uswitch;
+    MakePatternPtr<Switch> swtch;
+    MakePatternPtr<Expression> expr;
+    MakePatternPtr<Compound> comp;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > pre, post;
+    MakePatternPtr< Overlay<Break> > over;
+    MakePatternPtr<UncombableBreak> s_ubreak;
+    MakePatternPtr<CombableBreak> r_break;
     
     all->patterns = (x_not, swtch);
     x_not->pattern = uswitch;
@@ -213,21 +213,21 @@ ForToWhile::ForToWhile()
     // node under it indicating that it must be from the input program and
     // not one we just inserted on an earlier iteration.
     
-    MakeTreePtr<For> s_for;
-    MakeTreePtr<Statement> forbody, inc, init;
-    MakeTreePtr<Expression> cond;
-    MakeTreePtr<While> r_while;
-    MakeTreePtr<Compound> r_outer, r_body;
-    MakeTreePtr< Stuff<Statement> > l_stuff;
-    MakeTreePtr< Overlay<Statement> > l_overlay;
-    MakeTreePtr< NotMatch<Statement> > l_s_not;
-    MakeTreePtr< Loop > l_s_loop;
+    MakePatternPtr<For> s_for;
+    MakePatternPtr<Statement> forbody, inc, init;
+    MakePatternPtr<Expression> cond;
+    MakePatternPtr<While> r_while;
+    MakePatternPtr<Compound> r_outer, r_body;
+    MakePatternPtr< Stuff<Statement> > l_stuff;
+    MakePatternPtr< Overlay<Statement> > l_overlay;
+    MakePatternPtr< NotMatch<Statement> > l_s_not;
+    MakePatternPtr< Loop > l_s_loop;
     
-    MakeTreePtr<Continue> l_s_cont;
-    MakeTreePtr<Nop> l_r_nop;
-    MakeTreePtr<BuildLabelIdentifier> r_cont_labelid("CONTINUE");
-    MakeTreePtr<Label> r_cont_label;
-    MakeTreePtr<Goto> lr_goto;
+    MakePatternPtr<Continue> l_s_cont;
+    MakePatternPtr<Nop> l_r_nop;
+    MakePatternPtr<BuildLabelIdentifier> r_cont_labelid("CONTINUE");
+    MakePatternPtr<Label> r_cont_label;
+    MakePatternPtr<Goto> lr_goto;
 
     l_stuff->terminus = l_overlay;
     l_overlay->through = l_s_cont;
@@ -235,7 +235,7 @@ ForToWhile::ForToWhile()
     l_overlay->overlay = lr_goto;
     lr_goto->destination = r_cont_labelid;
     l_s_not->pattern = l_s_loop;
-    MakeTreePtr< SlaveCompareReplace<Statement> > r_slave( forbody, l_stuff, l_stuff );
+    MakePatternPtr< SlaveCompareReplace<Statement> > r_slave( forbody, l_stuff, l_stuff );
     
     s_for->body = forbody;
     s_for->initialisation = init;
@@ -255,12 +255,12 @@ WhileToDo::WhileToDo()
 {
     // Just need to insert an "if" statement for the case 
     // where there are 0 iterations.
-    MakeTreePtr<While> s_while;
-    MakeTreePtr<Statement> body;
-    MakeTreePtr<Expression> cond;
-    MakeTreePtr<Nop> r_nop;
-    MakeTreePtr<If> r_if;
-    MakeTreePtr<Do> r_do;
+    MakePatternPtr<While> s_while;
+    MakePatternPtr<Statement> body;
+    MakePatternPtr<Expression> cond;
+    MakePatternPtr<Nop> r_nop;
+    MakePatternPtr<If> r_if;
+    MakePatternPtr<Do> r_do;
 
     s_while->body = body;
     s_while->condition = cond;
@@ -281,17 +281,17 @@ IfToIfGoto::IfToIfGoto()
     // to a more specific kind (the condiitonal goto pattern) we have to 
     // exclude the conditional goto explicitly using and-not in the search 
     // pattern. Otherwise we would spin forever expanding them over and over.
-    MakeTreePtr< MatchAll<Statement> > s_and;    
-    MakeTreePtr<If> s_if, l_r_if, r_if;
-    MakeTreePtr<Statement> body, else_body;
-    MakeTreePtr<Expression> cond;
-    MakeTreePtr< NotMatch<Statement> > l_r_not;
-    MakeTreePtr<Goto> l_r_goto, r_goto, r_goto_else;
-    MakeTreePtr<Nop> l_r_nop, r_nop;
-    MakeTreePtr<Compound> r_comp;
-    MakeTreePtr<LogicalNot> r_not;
-    MakeTreePtr<BuildLabelIdentifier> r_labelid1("THEN"), r_labelid2("ELSE");
-    MakeTreePtr<Label> r_label1, r_label2;
+    MakePatternPtr< MatchAll<Statement> > s_and;    
+    MakePatternPtr<If> s_if, l_r_if, r_if;
+    MakePatternPtr<Statement> body, else_body;
+    MakePatternPtr<Expression> cond;
+    MakePatternPtr< NotMatch<Statement> > l_r_not;
+    MakePatternPtr<Goto> l_r_goto, r_goto, r_goto_else;
+    MakePatternPtr<Nop> l_r_nop, r_nop;
+    MakePatternPtr<Compound> r_comp;
+    MakePatternPtr<LogicalNot> r_not;
+    MakePatternPtr<BuildLabelIdentifier> r_labelid1("THEN"), r_labelid2("ELSE");
+    MakePatternPtr<Label> r_label1, r_label2;
     
     s_and->patterns = (s_if, l_r_not);
     s_if->condition = cond;
@@ -332,22 +332,22 @@ SwitchToIfGoto::SwitchToIfGoto()
     //
     // The order of the conditional gotos that result from cases should not matter
     // because cases should not overlap. 
-    MakeTreePtr<Switch> s_switch;
-    MakeTreePtr<Compound> r_comp;
-    MakeTreePtr<Statement> body;
-    MakeTreePtr<Type> cond_type;
-    MakeTreePtr<Automatic> r_decl;
-    MakeTreePtr<BuildInstanceIdentifier> id("switch_value");
-    MakeTreePtr< TransformOf<Expression> > s_cond( &TypeOf::instance );
+    MakePatternPtr<Switch> s_switch;
+    MakePatternPtr<Compound> r_comp;
+    MakePatternPtr<Statement> body;
+    MakePatternPtr<Type> cond_type;
+    MakePatternPtr<Automatic> r_decl;
+    MakePatternPtr<BuildInstanceIdentifier> id("switch_value");
+    MakePatternPtr< TransformOf<Expression> > s_cond( &TypeOf::instance );
     
     // SlaveSearchReplace for default
-    MakeTreePtr<Compound> l1_s_body, l1_r_body;
-    MakeTreePtr< Star<Declaration> > l1_decls;
-    MakeTreePtr< Star<Statement> > l1_pre, l1_post;
-    MakeTreePtr< Default > l1_s_default;
-    MakeTreePtr< Label > l1_r_label;
-    MakeTreePtr<BuildLabelIdentifier> l1_r_labelid("DEFAULT");
-    MakeTreePtr<Goto> l1_r_goto;
+    MakePatternPtr<Compound> l1_s_body, l1_r_body;
+    MakePatternPtr< Star<Declaration> > l1_decls;
+    MakePatternPtr< Star<Statement> > l1_pre, l1_post;
+    MakePatternPtr< Default > l1_s_default;
+    MakePatternPtr< Label > l1_r_label;
+    MakePatternPtr<BuildLabelIdentifier> l1_r_labelid("DEFAULT");
+    MakePatternPtr<Goto> l1_r_goto;
     
     l1_s_body->members = l1_decls;
     l1_s_body->statements = (l1_pre, l1_s_default, l1_post);
@@ -357,20 +357,20 @@ SwitchToIfGoto::SwitchToIfGoto()
     l1_r_goto->destination = l1_r_labelid;
     l1_r_label->identifier = l1_r_labelid;
     
-    MakeTreePtr< SlaveCompareReplace<Statement> > r_slave1( body, l1_s_body, l1_r_body );
+    MakePatternPtr< SlaveCompareReplace<Statement> > r_slave1( body, l1_s_body, l1_r_body );
 
     // slave for normal case statements (single value)
-    MakeTreePtr<Compound> l2_s_body, l2_r_body;
-    MakeTreePtr< Star<Declaration> > l2_decls;
-    MakeTreePtr< Star<Statement> > l2_pre, l2_post;
-    MakeTreePtr< Case > l2_s_case;
-    MakeTreePtr< Label > l2_r_label;
-    MakeTreePtr<BuildLabelIdentifier> l2_r_labelid("CASE");
-    MakeTreePtr<If> l2_r_if;
-    MakeTreePtr<Nop> l2_r_nop;
-    MakeTreePtr<Goto> l2_r_goto;
-    MakeTreePtr<Equal> l2_r_equal;
-    MakeTreePtr<Expression> l2_exp;
+    MakePatternPtr<Compound> l2_s_body, l2_r_body;
+    MakePatternPtr< Star<Declaration> > l2_decls;
+    MakePatternPtr< Star<Statement> > l2_pre, l2_post;
+    MakePatternPtr< Case > l2_s_case;
+    MakePatternPtr< Label > l2_r_label;
+    MakePatternPtr<BuildLabelIdentifier> l2_r_labelid("CASE");
+    MakePatternPtr<If> l2_r_if;
+    MakePatternPtr<Nop> l2_r_nop;
+    MakePatternPtr<Goto> l2_r_goto;
+    MakePatternPtr<Equal> l2_r_equal;
+    MakePatternPtr<Expression> l2_exp;
     
     l2_s_body->members = l2_decls;
     l2_s_body->statements = (l2_pre, l2_s_case, l2_post);
@@ -385,22 +385,22 @@ SwitchToIfGoto::SwitchToIfGoto()
     l2_r_goto->destination = l2_r_labelid;
     l2_r_label->identifier = l2_r_labelid;
     
-    MakeTreePtr< SlaveCompareReplace<Statement> > r_slave2( r_slave1, l2_s_body, l2_r_body );
+    MakePatternPtr< SlaveCompareReplace<Statement> > r_slave2( r_slave1, l2_s_body, l2_r_body );
     
     // SlaveSearchReplace for range cases (GCC extension) eg case 5..7:    
-    MakeTreePtr<Compound> l3_s_body, l3_r_body;
-    MakeTreePtr< Star<Declaration> > l3_decls;
-    MakeTreePtr< Star<Statement> > l3_pre, l3_post;
-    MakeTreePtr< RangeCase > l3_s_case;
-    MakeTreePtr< Label > l3_r_label;
-    MakeTreePtr<BuildLabelIdentifier> l3_r_labelid("CASE");
-    MakeTreePtr<If> l3_r_if;
-    MakeTreePtr<Nop> l3_r_nop;
-    MakeTreePtr<Goto> l3_r_goto;
-    MakeTreePtr<LogicalAnd> l3_r_and;
-    MakeTreePtr<GreaterOrEqual> l3_r_ge;
-    MakeTreePtr<LessOrEqual> l3_r_le;
-    MakeTreePtr<Expression> l3_exp_lo, l3_exp_hi;
+    MakePatternPtr<Compound> l3_s_body, l3_r_body;
+    MakePatternPtr< Star<Declaration> > l3_decls;
+    MakePatternPtr< Star<Statement> > l3_pre, l3_post;
+    MakePatternPtr< RangeCase > l3_s_case;
+    MakePatternPtr< Label > l3_r_label;
+    MakePatternPtr<BuildLabelIdentifier> l3_r_labelid("CASE");
+    MakePatternPtr<If> l3_r_if;
+    MakePatternPtr<Nop> l3_r_nop;
+    MakePatternPtr<Goto> l3_r_goto;
+    MakePatternPtr<LogicalAnd> l3_r_and;
+    MakePatternPtr<GreaterOrEqual> l3_r_ge;
+    MakePatternPtr<LessOrEqual> l3_r_le;
+    MakePatternPtr<Expression> l3_exp_lo, l3_exp_hi;
     
     l3_s_body->members = l3_decls;
     l3_s_body->statements = (l3_pre, l3_s_case, l3_post);
@@ -418,7 +418,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     l3_r_goto->destination = l3_r_labelid;
     l3_r_label->identifier = l3_r_labelid;
     
-    MakeTreePtr< SlaveCompareReplace<Statement> > r_slave3( r_slave2, l3_s_body, l3_r_body );
+    MakePatternPtr< SlaveCompareReplace<Statement> > r_slave3( r_slave2, l3_s_body, l3_r_body );
 
     // Finish up master
     s_cond->pattern = cond_type;
@@ -443,20 +443,20 @@ DoToIfGoto::DoToIfGoto()
     // We prevent the continue transformation from acting on continues in nested 
     // blocks using the same method as seen in BreakToGoto. 
     
-    MakeTreePtr<Do> s_do;
-    MakeTreePtr<If> r_if;
-    MakeTreePtr<Statement> body;
-    MakeTreePtr<Expression> cond;
-    MakeTreePtr<Goto> r_goto, l_r_goto;
-    MakeTreePtr<Nop> r_nop;    
-    MakeTreePtr<Compound> r_comp;
-    MakeTreePtr<BuildLabelIdentifier> r_labelid("NEXT"), l_r_cont_labelid("CONTINUE");
-    MakeTreePtr<Label> r_label, r_cont_label;
-    MakeTreePtr< Stuff<Statement> > l_stuff;
-    MakeTreePtr< Overlay<Statement> > l_overlay;
-    MakeTreePtr<Continue> l_s_cont;
-    MakeTreePtr< NotMatch<Statement> > l_s_not;
-    MakeTreePtr< Loop > l_s_loop;
+    MakePatternPtr<Do> s_do;
+    MakePatternPtr<If> r_if;
+    MakePatternPtr<Statement> body;
+    MakePatternPtr<Expression> cond;
+    MakePatternPtr<Goto> r_goto, l_r_goto;
+    MakePatternPtr<Nop> r_nop;    
+    MakePatternPtr<Compound> r_comp;
+    MakePatternPtr<BuildLabelIdentifier> r_labelid("NEXT"), l_r_cont_labelid("CONTINUE");
+    MakePatternPtr<Label> r_label, r_cont_label;
+    MakePatternPtr< Stuff<Statement> > l_stuff;
+    MakePatternPtr< Overlay<Statement> > l_overlay;
+    MakePatternPtr<Continue> l_s_cont;
+    MakePatternPtr< NotMatch<Statement> > l_s_not;
+    MakePatternPtr< Loop > l_s_loop;
 
     l_s_not->pattern = l_s_loop;
     l_overlay->through = l_s_cont;
@@ -464,7 +464,7 @@ DoToIfGoto::DoToIfGoto()
     l_overlay->overlay = l_r_goto;
     l_r_goto->destination = l_r_cont_labelid;
     
-    MakeTreePtr< SlaveCompareReplace<Statement> > r_slave( body, l_stuff, l_stuff );
+    MakePatternPtr< SlaveCompareReplace<Statement> > r_slave( body, l_stuff, l_stuff );
     l_stuff->terminus = l_overlay;
     
     s_do->condition = cond;
@@ -489,15 +489,15 @@ BreakToGoto::BreakToGoto()
     // 2. The Break is reached via a Stuff node whose recurse 
     //    restriction is set to not recurse through any Breakable
     //    blocks, so we won't find a Break that is not for us.
-    MakeTreePtr<Breakable> breakable, sx_breakable;
-    MakeTreePtr< Stuff<Statement> > stuff;
-    MakeTreePtr< Overlay<Statement> > overlay;
-    MakeTreePtr< NotMatch<Statement> > sx_not;
-    MakeTreePtr<Break> s_break;
-    MakeTreePtr<Goto> r_goto;
-    MakeTreePtr<BuildLabelIdentifier> r_labelid("BREAK");
-    MakeTreePtr<Label> r_label;
-    MakeTreePtr<Compound> r_comp;
+    MakePatternPtr<Breakable> breakable, sx_breakable;
+    MakePatternPtr< Stuff<Statement> > stuff;
+    MakePatternPtr< Overlay<Statement> > overlay;
+    MakePatternPtr< NotMatch<Statement> > sx_not;
+    MakePatternPtr<Break> s_break;
+    MakePatternPtr<Goto> r_goto;
+    MakePatternPtr<BuildLabelIdentifier> r_labelid("BREAK");
+    MakePatternPtr<Label> r_label;
+    MakePatternPtr<Compound> r_comp;
     
     sx_not->pattern = sx_breakable;
     stuff->terminus = overlay;
@@ -516,26 +516,26 @@ BreakToGoto::BreakToGoto()
 
 LogicalAndToIf::LogicalAndToIf()
 {
-    MakeTreePtr<LogicalAnd> s_and;
-    MakeTreePtr<Expression> op1, op2;
-    MakeTreePtr<CompoundExpression> r_comp;
-    MakeTreePtr<BuildInstanceIdentifier> r_temp_id("andtemp");
-    MakeTreePtr<Temporary> r_temp;
-    MakeTreePtr<Boolean> r_boolean;
-    MakeTreePtr<If> r_if;
-    MakeTreePtr<Assign> r_assign1, r_assign2;
+    MakePatternPtr<LogicalAnd> s_and;
+    MakePatternPtr<Expression> op1, op2;
+    MakePatternPtr<CompoundExpression> r_comp;
+    MakePatternPtr<BuildInstanceIdentifier> r_temp_id("andtemp");
+    MakePatternPtr<Temporary> r_temp;
+    MakePatternPtr<Boolean> r_boolean;
+    MakePatternPtr<If> r_if;
+    MakePatternPtr<Assign> r_assign1, r_assign2;
     
     s_and->operands = (op1, op2);
     
     r_comp->members = (r_temp);
     r_temp->identifier = r_temp_id;
     r_temp->type= r_boolean;
-    r_temp->initialiser = MakeTreePtr<Uninitialised>();
+    r_temp->initialiser = MakePatternPtr<Uninitialised>();
     r_comp->statements = (r_assign1, r_if, r_temp_id);
     r_assign1->operands = (r_temp_id, op1);
     r_if->condition = r_temp_id;
     r_if->body = r_assign2;
-    r_if->else_body = MakeTreePtr<Nop>();
+    r_if->else_body = MakePatternPtr<Nop>();
     r_assign2->operands = (r_temp_id, op2);    
     
     Configure( MakeCheckUncombable( s_and ), r_comp );
@@ -544,25 +544,25 @@ LogicalAndToIf::LogicalAndToIf()
 
 LogicalOrToIf::LogicalOrToIf()
 {
-    MakeTreePtr<LogicalOr> s_or;
-    MakeTreePtr<Expression> op1, op2;
-    MakeTreePtr<CompoundExpression> r_comp;
-    MakeTreePtr<BuildInstanceIdentifier> r_temp_id("ortemp");
-    MakeTreePtr<Temporary> r_temp;
-    MakeTreePtr<Boolean> r_boolean;
-    MakeTreePtr<If> r_if;
-    MakeTreePtr<Assign> r_assign1, r_assign2;
+    MakePatternPtr<LogicalOr> s_or;
+    MakePatternPtr<Expression> op1, op2;
+    MakePatternPtr<CompoundExpression> r_comp;
+    MakePatternPtr<BuildInstanceIdentifier> r_temp_id("ortemp");
+    MakePatternPtr<Temporary> r_temp;
+    MakePatternPtr<Boolean> r_boolean;
+    MakePatternPtr<If> r_if;
+    MakePatternPtr<Assign> r_assign1, r_assign2;
     
     s_or->operands = (op1, op2);
     
     r_comp->members = (r_temp);
     r_temp->identifier = r_temp_id;
     r_temp->type= r_boolean;
-    r_temp->initialiser = MakeTreePtr<Uninitialised>();
+    r_temp->initialiser = MakePatternPtr<Uninitialised>();
     r_comp->statements = (r_assign1, r_if, r_temp_id);
     r_assign1->operands = (r_temp_id, op1);
     r_if->condition = r_temp_id;
-    r_if->body = MakeTreePtr<Nop>();
+    r_if->body = MakePatternPtr<Nop>();
     r_if->else_body = r_assign2;
     r_assign2->operands = (r_temp_id, op2);    
     
@@ -572,15 +572,15 @@ LogicalOrToIf::LogicalOrToIf()
 
 MultiplexorToIf::MultiplexorToIf()
 {
-    MakeTreePtr<Multiplexor> s_mux;
-    MakeTreePtr<Expression> op1, op3;
-    MakeTreePtr<CompoundExpression> r_comp;
-    MakeTreePtr<BuildInstanceIdentifier> r_temp_id("muxtemp");
-    MakeTreePtr<Temporary> r_temp;
-    MakeTreePtr< TransformOf<Expression> > op2( &TypeOf::instance );
-    MakeTreePtr<Type> type;
-    MakeTreePtr<If> r_if;
-    MakeTreePtr<Assign> r_assignt, r_assignf;
+    MakePatternPtr<Multiplexor> s_mux;
+    MakePatternPtr<Expression> op1, op3;
+    MakePatternPtr<CompoundExpression> r_comp;
+    MakePatternPtr<BuildInstanceIdentifier> r_temp_id("muxtemp");
+    MakePatternPtr<Temporary> r_temp;
+    MakePatternPtr< TransformOf<Expression> > op2( &TypeOf::instance );
+    MakePatternPtr<Type> type;
+    MakePatternPtr<If> r_if;
+    MakePatternPtr<Assign> r_assignt, r_assignf;
     
     s_mux->operands = (op1, op2, op3);
     op2->pattern = type;
@@ -588,7 +588,7 @@ MultiplexorToIf::MultiplexorToIf()
     r_comp->members = (r_temp);
     r_temp->identifier = r_temp_id;
     r_temp->type= type;
-    r_temp->initialiser = MakeTreePtr<Uninitialised>();
+    r_temp->initialiser = MakePatternPtr<Uninitialised>();
     r_comp->statements = (r_if, r_temp_id);
     r_if->condition = op1;
     r_if->body = r_assignt;
@@ -602,20 +602,20 @@ MultiplexorToIf::MultiplexorToIf()
 
 ExtractCallParams::ExtractCallParams()
 {
-    MakeTreePtr<Call> s_call, r_call;
-    MakeTreePtr<BuildInstanceIdentifier> r_temp_id("temp_%s");
-    MakeTreePtr<Temporary> r_temp;
-    MakeTreePtr<CompoundExpression> r_ce;
-    MakeTreePtr<Assign> r_assign;
-    MakeTreePtr< Star<MapOperand> > params;
-    MakeTreePtr<MapOperand> s_param, r_param;
-    MakeTreePtr< TransformOf<Expression> > value( &TypeOf::instance );
-    MakeTreePtr<Type> type;
-    MakeTreePtr<Expression> callee;
-    MakeTreePtr<InstanceIdentifier> id;
-    MakeTreePtr< MatchAll<Expression> > all;
-    MakeTreePtr< NotMatch<Expression> > x_not;
-    MakeTreePtr<InstanceIdentifier> x_id;
+    MakePatternPtr<Call> s_call, r_call;
+    MakePatternPtr<BuildInstanceIdentifier> r_temp_id("temp_%s");
+    MakePatternPtr<Temporary> r_temp;
+    MakePatternPtr<CompoundExpression> r_ce;
+    MakePatternPtr<Assign> r_assign;
+    MakePatternPtr< Star<MapOperand> > params;
+    MakePatternPtr<MapOperand> s_param, r_param;
+    MakePatternPtr< TransformOf<Expression> > value( &TypeOf::instance );
+    MakePatternPtr<Type> type;
+    MakePatternPtr<Expression> callee;
+    MakePatternPtr<InstanceIdentifier> id;
+    MakePatternPtr< MatchAll<Expression> > all;
+    MakePatternPtr< NotMatch<Expression> > x_not;
+    MakePatternPtr<InstanceIdentifier> x_id;
     
     s_call->operands = (params, s_param);
     s_param->value = all;
@@ -628,7 +628,7 @@ ExtractCallParams::ExtractCallParams()
     r_ce->members = (r_temp);
     r_temp->identifier = r_temp_id;
     r_temp_id->sources = (id);
-    r_temp->initialiser = MakeTreePtr<Uninitialised>();
+    r_temp->initialiser = MakePatternPtr<Uninitialised>();
     r_temp->type = type;
     r_ce->statements = (r_assign, r_call);
     r_assign->operands = (r_temp_id, value);

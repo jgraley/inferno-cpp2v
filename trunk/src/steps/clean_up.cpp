@@ -26,27 +26,27 @@ CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in bo
      // Temp is used to preserve sequence point after c. This step assumes that
      // all sequence points that need preserving co-incide with the semicolons
      // in a Compound or CompundExpression. It also requires that there be no loops.
-    MakeTreePtr< MatchAll<Statement> > s_all;
-    MakeTreePtr< PointerIs<Statement> > sx_pointeris;
-    MakeTreePtr< NotMatch<Statement> > sx_not;
-    MakeTreePtr<Expression> sx_expr;
+    MakePatternPtr< MatchAll<Statement> > s_all;
+    MakePatternPtr< PointerIs<Statement> > sx_pointeris;
+    MakePatternPtr< NotMatch<Statement> > sx_not;
+    MakePatternPtr<Expression> sx_expr;
     
-    MakeTreePtr< Stuff<Statement> > stuff;
-    MakeTreePtr< NotMatch<Statement> > sr_not;
-    MakeTreePtr<SequentialScope> sr_comp;
-    MakeTreePtr< Star<Declaration> > sr_cdecls;
-    MakeTreePtr< Star<Statement> > sr_cstmts;
+    MakePatternPtr< Stuff<Statement> > stuff;
+    MakePatternPtr< NotMatch<Statement> > sr_not;
+    MakePatternPtr<SequentialScope> sr_comp;
+    MakePatternPtr< Star<Declaration> > sr_cdecls;
+    MakePatternPtr< Star<Statement> > sr_cstmts;
     
-    MakeTreePtr<CompoundExpression> s_ce;
-    MakeTreePtr<Compound> r_comp;
-    MakeTreePtr< Star<Statement> > s_pre, s_post, body;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr<Temporary> r_temp;
-    MakeTreePtr< TransformOf<Expression> > last( &TypeOf::instance );
-    MakeTreePtr<BuildInstanceIdentifier> r_temp_id("result");
-    MakeTreePtr<Assign> r_assign;
-    MakeTreePtr< Overlay<Expression> > overlay;
-    MakeTreePtr<Type> r_type;
+    MakePatternPtr<CompoundExpression> s_ce;
+    MakePatternPtr<Compound> r_comp;
+    MakePatternPtr< Star<Statement> > s_pre, s_post, body;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr<Temporary> r_temp;
+    MakePatternPtr< TransformOf<Expression> > last( &TypeOf::instance );
+    MakePatternPtr<BuildInstanceIdentifier> r_temp_id("result");
+    MakePatternPtr<Assign> r_assign;
+    MakePatternPtr< Overlay<Expression> > overlay;
+    MakePatternPtr<Type> r_type;
 
     s_all->patterns = (stuff, sx_pointeris);
     sx_pointeris->pointer = sx_not;
@@ -64,7 +64,7 @@ CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in bo
     r_comp->statements = ( body, r_assign, stuff );
     r_comp->members = ( decls, r_temp );
     r_temp->identifier = r_temp_id;
-    r_temp->initialiser = MakeTreePtr<Uninitialised>();
+    r_temp->initialiser = MakePatternPtr<Uninitialised>();
     r_temp->type = r_type;
     r_assign->operands = (r_temp_id, last);
     last->pattern = r_type;
@@ -80,9 +80,9 @@ CleanupCompoundMulti::CleanupCompoundMulti() // LIMITAION: decls in body not all
      // {x;{a;b;c}y} -> {x;a;b;c;y}
      // Find a compound block as a statement in another compound block. 
      // Merge the decls and insert the statements in the correct sequence..
-    MakeTreePtr<Compound> s_inner, s_outer, r_comp;
-    MakeTreePtr< Star<Statement> > s_pre, s_post, s_body;
-    MakeTreePtr< Star<Declaration> > s_inner_decls, s_outer_decls;
+    MakePatternPtr<Compound> s_inner, s_outer, r_comp;
+    MakePatternPtr< Star<Statement> > s_pre, s_post, s_body;
+    MakePatternPtr< Star<Declaration> > s_inner_decls, s_outer_decls;
 
     s_inner->statements = ( s_body );
     s_inner->members = ( s_inner_decls );
@@ -103,13 +103,13 @@ CleanupCompoundSingle::CleanupCompoundSingle()
     //{a} -> a TODO need to restrict parent node to Statement: For, If etc OK; Instance is NOT OK
     //         TODO OR maybe just fix renderer for that case
     // Note: this hits eg If(x){a;} which the "Multi" version misses 
-    MakeTreePtr< MatchAll<Statement> > all;    
-    MakeTreePtr< NotMatch<Statement> > sx_not;
-    MakeTreePtr<Instance> sx_instance;
-    MakeTreePtr< AnyNode<Statement> > node;
-    MakeTreePtr< Overlay<Statement> > over;   
-    MakeTreePtr<Compound> s_comp;
-    MakeTreePtr< Statement > body;
+    MakePatternPtr< MatchAll<Statement> > all;    
+    MakePatternPtr< NotMatch<Statement> > sx_not;
+    MakePatternPtr<Instance> sx_instance;
+    MakePatternPtr< AnyNode<Statement> > node;
+    MakePatternPtr< Overlay<Statement> > over;   
+    MakePatternPtr<Compound> s_comp;
+    MakePatternPtr< Statement > body;
 
     all->patterns = (node, sx_not);
     node->terminus = over;
@@ -128,10 +128,10 @@ CleanupNop::CleanupNop()
 {
     // Find compound block with Nop in it, replace has the Nop removed.
     // Note: Nop is a no-effect statement, sort-of like ; on its own.
-    MakeTreePtr<Compound> s_comp, r_comp;
-    MakeTreePtr<Nop> s_nop;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, post;
+    MakePatternPtr<Compound> s_comp, r_comp;
+    MakePatternPtr<Nop> s_nop;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > pre, post;
 
     s_comp->members = decls;
     s_comp->statements = (pre, s_nop, post);
@@ -159,22 +159,22 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     // GCCs goto-a-variable extension in which case a label could be 
     // on the right of an assignment.
     
-    MakeTreePtr<Instance> s_instance, r_instance;
-    MakeTreePtr< Stuff<Compound> > stuff;
-    MakeTreePtr< Overlay<Statement> > overlay;
-    MakeTreePtr<Compound> s_comp, r_comp;
-    MakeTreePtr<Label> s_label1, s_label2, r_label1; // keep l1 and elide l2
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, post;
-    MakeTreePtr<LabelIdentifier> s_labelid1, s_labelid2;
-    MakeTreePtr<BuildLabelIdentifier> r_labelid("%s_%s", BYPASS_WHEN_IDENTICAL);
-    MakeTreePtr< MatchAny<LabelIdentifier> > l_s_orrule;
-    MakeTreePtr<InstanceIdentifier> identifier;
-    MakeTreePtr<Callable> type;
+    MakePatternPtr<Instance> s_instance, r_instance;
+    MakePatternPtr< Stuff<Compound> > stuff;
+    MakePatternPtr< Overlay<Statement> > overlay;
+    MakePatternPtr<Compound> s_comp, r_comp;
+    MakePatternPtr<Label> s_label1, s_label2, r_label1; // keep l1 and elide l2
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > pre, post;
+    MakePatternPtr<LabelIdentifier> s_labelid1, s_labelid2;
+    MakePatternPtr<BuildLabelIdentifier> r_labelid("%s_%s", BYPASS_WHEN_IDENTICAL);
+    MakePatternPtr< MatchAny<LabelIdentifier> > l_s_orrule;
+    MakePatternPtr<InstanceIdentifier> identifier;
+    MakePatternPtr<Callable> type;
     
     l_s_orrule->patterns = (s_labelid1, s_labelid2);
     
-    MakeTreePtr< SlaveSearchReplace<Compound> > r_slave( stuff, l_s_orrule, r_labelid );
+    MakePatternPtr< SlaveSearchReplace<Compound> > r_slave( stuff, l_s_orrule, r_labelid );
     
     s_instance->initialiser = stuff;
     s_instance->identifier = identifier;
@@ -214,23 +214,23 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     // GCCs goto-a-variable extension in which case a label could be 
     // on the right of an assignment.
     
-    MakeTreePtr<Instance> s_instance, r_instance;
-    MakeTreePtr< Stuff<Compound> > stuff;
-    MakeTreePtr< Overlay<Statement> > overlay;
-    MakeTreePtr<Compound> s_comp, r_comp;
-    MakeTreePtr<Label> s_label; // keep l1 and elide l2
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, post;
-    MakeTreePtr<LabelIdentifier> s_labelid1, s_labelid2;
-    MakeTreePtr<BuildLabelIdentifier> r_labelid("%s_%s", BYPASS_WHEN_IDENTICAL);
-    MakeTreePtr< MatchAny<LabelIdentifier> > l_s_orrule;
-    MakeTreePtr<InstanceIdentifier> identifier;
-    MakeTreePtr<Callable> type;
-    MakeTreePtr<Goto> s_goto, r_goto;
+    MakePatternPtr<Instance> s_instance, r_instance;
+    MakePatternPtr< Stuff<Compound> > stuff;
+    MakePatternPtr< Overlay<Statement> > overlay;
+    MakePatternPtr<Compound> s_comp, r_comp;
+    MakePatternPtr<Label> s_label; // keep l1 and elide l2
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > pre, post;
+    MakePatternPtr<LabelIdentifier> s_labelid1, s_labelid2;
+    MakePatternPtr<BuildLabelIdentifier> r_labelid("%s_%s", BYPASS_WHEN_IDENTICAL);
+    MakePatternPtr< MatchAny<LabelIdentifier> > l_s_orrule;
+    MakePatternPtr<InstanceIdentifier> identifier;
+    MakePatternPtr<Callable> type;
+    MakePatternPtr<Goto> s_goto, r_goto;
     
     l_s_orrule->patterns = (s_labelid1, s_labelid2);
     
-    MakeTreePtr< SlaveSearchReplace<Compound> > r_slave( stuff, l_s_orrule, r_labelid );
+    MakePatternPtr< SlaveSearchReplace<Compound> > r_slave( stuff, l_s_orrule, r_labelid );
     
     s_instance->initialiser = stuff;
     s_instance->identifier = identifier;
@@ -259,12 +259,12 @@ CleanupIneffectualGoto::CleanupIneffectualGoto()
     // Find a compound containing a Goto and a Label where the 
     // goto goes to the label. Remove the Goto (but not the Label
     // since there may be other Gotos to it).
-    MakeTreePtr<Compound> s_comp, r_comp;
-    MakeTreePtr<Goto> s_goto;
-    MakeTreePtr<Label> s_label, r_label;
-    MakeTreePtr<LabelIdentifier> labelid;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, post;
+    MakePatternPtr<Compound> s_comp, r_comp;
+    MakePatternPtr<Goto> s_goto;
+    MakePatternPtr<Label> s_label, r_label;
+    MakePatternPtr<LabelIdentifier> labelid;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > pre, post;
 
     s_comp->members = decls;
     s_comp->statements = (pre, s_goto, s_label, post);
@@ -289,22 +289,22 @@ CleanupUnusedLabels::CleanupUnusedLabels()
     // using a recurse restriction that prevents recusing through
     // the Label node, thus excluding the declaration which we want
     // to ignore.
-    MakeTreePtr<Instance> s_instance, r_instance;
-    MakeTreePtr< Stuff<Compound> > stuff;
-    MakeTreePtr< Stuff<Compound> > sx_stuff;
-    MakeTreePtr< Overlay<Statement> > overlay;
-    MakeTreePtr<Compound> s_comp, r_comp;
-    MakeTreePtr<Label> s_label; // keep l1 and elide l2
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, post;
-    MakeTreePtr<LabelIdentifier> labelid;
-    MakeTreePtr<Goto> sx_goto;
-    MakeTreePtr< MatchAll<Compound> > s_andrule;
-    MakeTreePtr< NotMatch<Compound> > sx_notrule;
-    MakeTreePtr< NotMatch<Node> > sxx_notrule;        
-    MakeTreePtr< Label > sxx_label;        
-    MakeTreePtr<InstanceIdentifier> identifier;
-    MakeTreePtr<Callable> type;
+    MakePatternPtr<Instance> s_instance, r_instance;
+    MakePatternPtr< Stuff<Compound> > stuff;
+    MakePatternPtr< Stuff<Compound> > sx_stuff;
+    MakePatternPtr< Overlay<Statement> > overlay;
+    MakePatternPtr<Compound> s_comp, r_comp;
+    MakePatternPtr<Label> s_label; // keep l1 and elide l2
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > pre, post;
+    MakePatternPtr<LabelIdentifier> labelid;
+    MakePatternPtr<Goto> sx_goto;
+    MakePatternPtr< MatchAll<Compound> > s_andrule;
+    MakePatternPtr< NotMatch<Compound> > sx_notrule;
+    MakePatternPtr< NotMatch<Node> > sxx_notrule;        
+    MakePatternPtr< Label > sxx_label;        
+    MakePatternPtr<InstanceIdentifier> identifier;
+    MakePatternPtr<Callable> type;
 
     s_instance->initialiser = s_andrule;
     s_instance->identifier = identifier;
@@ -334,19 +334,19 @@ CleanupUnusedLabels::CleanupUnusedLabels()
 
 CleanUpDeadCode::CleanUpDeadCode()
 {
-    MakeTreePtr<Compound> s_comp, r_comp;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > pre, post;
-    MakeTreePtr< NotMatch<Statement> > s_dead_not;
-    MakeTreePtr< MatchAny<Statement> > s_dead_any, s_exit_any;
-    MakeTreePtr<Case> casee;
-    MakeTreePtr<Break> breakk;
+    MakePatternPtr<Compound> s_comp, r_comp;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > pre, post;
+    MakePatternPtr< NotMatch<Statement> > s_dead_not;
+    MakePatternPtr< MatchAny<Statement> > s_dead_any, s_exit_any;
+    MakePatternPtr<Case> casee;
+    MakePatternPtr<Break> breakk;
      
     s_comp->members = decls;
     s_comp->statements = ( pre, s_exit_any, s_dead_not, post );
-    s_exit_any->patterns = (MakeTreePtr<Break>(), MakeTreePtr<Continue>(), MakeTreePtr<Return>(), MakeTreePtr<Goto>());
+    s_exit_any->patterns = (MakePatternPtr<Break>(), MakePatternPtr<Continue>(), MakePatternPtr<Return>(), MakePatternPtr<Goto>());
     s_dead_not->pattern = s_dead_any;
-    s_dead_any->patterns = (MakeTreePtr<Case>(), MakeTreePtr<Default>(), MakeTreePtr<Label>());
+    s_dead_any->patterns = (MakePatternPtr<Case>(), MakePatternPtr<Default>(), MakePatternPtr<Label>());
     r_comp->members = decls;
     r_comp->statements = ( pre, s_exit_any, post );
     
@@ -356,14 +356,14 @@ CleanUpDeadCode::CleanUpDeadCode()
 
 ReduceVoidCompoundExpression::ReduceVoidCompoundExpression()
 {
-    MakeTreePtr<CompoundExpression> s_ce;
-    MakeTreePtr< Star<Declaration> > decls;
-    MakeTreePtr< Star<Statement> > stmts;
-    MakeTreePtr< NotMatch<Statement> > last;
-    MakeTreePtr< TransformOf<Expression> > sx_expr( &TypeOf::instance );
-    MakeTreePtr< NotMatch<Type> > sx_type_not;
-    MakeTreePtr<Void> sx_void;
-    MakeTreePtr<Compound> r_comp;
+    MakePatternPtr<CompoundExpression> s_ce;
+    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Statement> > stmts;
+    MakePatternPtr< NotMatch<Statement> > last;
+    MakePatternPtr< TransformOf<Expression> > sx_expr( &TypeOf::instance );
+    MakePatternPtr< NotMatch<Type> > sx_type_not;
+    MakePatternPtr<Void> sx_void;
+    MakePatternPtr<Compound> r_comp;
     
     s_ce->members = (decls);
     s_ce->statements = (stmts, last);
@@ -379,22 +379,22 @@ ReduceVoidCompoundExpression::ReduceVoidCompoundExpression()
 
 CleanupUnusedVariables::CleanupUnusedVariables()
 {
-    MakeTreePtr< MatchAll<Scope> > s_all;
-    MakeTreePtr<Scope> scope;
-    MakeTreePtr< Star<Declaration> > decls;    
-    MakeTreePtr<Instance> inst;
-    MakeTreePtr<NestedArray> nested_array;
-    MakeTreePtr< NotMatch<Type> > sx_not;
-    MakeTreePtr< MatchAny<Type> > sx_any;
-    MakeTreePtr< TransformOf<TypeIdentifier> > getdecl( &GetDeclaration::instance ); // TODO should be modulo typedefs
-    MakeTreePtr<InstanceIdentifier> id;
-    MakeTreePtr< Stuff<Scope> > stuff1, s_stuff2;
-    MakeTreePtr< MatchAll<Node> > s_antip;
-    MakeTreePtr< AnyNode<Node> > s_anynode;
-    MakeTreePtr< NotMatch<Node> > s_nm;
-    MakeTreePtr< Erase<Instance> > erase;
-    MakeTreePtr<InheritanceRecord> sx_ir;     
-    MakeTreePtr< NotMatch<Scope> > s_nscope;
+    MakePatternPtr< MatchAll<Scope> > s_all;
+    MakePatternPtr<Scope> scope;
+    MakePatternPtr< Star<Declaration> > decls;    
+    MakePatternPtr<Instance> inst;
+    MakePatternPtr<NestedArray> nested_array;
+    MakePatternPtr< NotMatch<Type> > sx_not;
+    MakePatternPtr< MatchAny<Type> > sx_any;
+    MakePatternPtr< TransformOf<TypeIdentifier> > getdecl( &GetDeclaration::instance ); // TODO should be modulo typedefs
+    MakePatternPtr<InstanceIdentifier> id;
+    MakePatternPtr< Stuff<Scope> > stuff1, s_stuff2;
+    MakePatternPtr< MatchAll<Node> > s_antip;
+    MakePatternPtr< AnyNode<Node> > s_anynode;
+    MakePatternPtr< NotMatch<Node> > s_nm;
+    MakePatternPtr< Erase<Instance> > erase;
+    MakePatternPtr<InheritanceRecord> sx_ir;     
+    MakePatternPtr< NotMatch<Scope> > s_nscope;
     
     s_all->patterns = (stuff1, s_nscope);
     stuff1->terminus = scope;
@@ -404,11 +404,11 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     inst->identifier = id;
     nested_array->terminus = sx_not;
     sx_not->pattern = sx_any;
-    sx_any->patterns = ( MakeTreePtr<Callable>(),
+    sx_any->patterns = ( MakePatternPtr<Callable>(),
                          getdecl );
     getdecl->pattern = sx_ir;
-    sx_ir->members = MakeTreePtr< Star<Declaration> >();
-    sx_ir->bases = MakeTreePtr< Star<Base> >();
+    sx_ir->members = MakePatternPtr< Star<Declaration> >();
+    sx_ir->bases = MakePatternPtr< Star<Base> >();
     s_nscope->pattern = s_stuff2;
     s_stuff2->terminus = s_antip;
     s_antip->patterns = (s_anynode, s_nm);
@@ -421,11 +421,11 @@ CleanupUnusedVariables::CleanupUnusedVariables()
 
 CleanupNestedIf::CleanupNestedIf()
 {
-    MakeTreePtr<If> s_outer_if, s_inner_if, r_if;
-    MakeTreePtr<Statement> body;
-    MakeTreePtr<Nop> s_inner_nop, s_outer_nop, r_nop;
-    MakeTreePtr<Expression> inner_cond, outer_cond;
-    MakeTreePtr<LogicalAnd> r_and;
+    MakePatternPtr<If> s_outer_if, s_inner_if, r_if;
+    MakePatternPtr<Statement> body;
+    MakePatternPtr<Nop> s_inner_nop, s_outer_nop, r_nop;
+    MakePatternPtr<Expression> inner_cond, outer_cond;
+    MakePatternPtr<LogicalAnd> r_and;
     
     s_outer_if->condition = outer_cond;
     s_outer_if->body = s_inner_if;

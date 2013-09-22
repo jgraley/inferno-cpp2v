@@ -13,12 +13,15 @@ bool FlattenNode_iterator::IsAtEnd() const
 void FlattenNode_iterator::NormaliseNewMember()
 {
 	if( !IsAtEnd() )
-		if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
+	{
+		Itemiser::Element *ie = GetCurrentMember();
+		if( ContainerInterface *con = dynamic_cast<ContainerInterface *>(ie) )
 		{
 			cit = con->begin();
 			c_end = con->end();
 			BypassEndOfContainer();
 		}
+	}
 }
 
 void FlattenNode_iterator::BypassEndOfContainer()
@@ -39,6 +42,7 @@ FlattenNode_iterator::FlattenNode_iterator( TreePtr<Node> r ) :
 
     mit = 0;
     m_end = root->ItemiseSize();
+	TRACE("Flattening node ")(*root)(" size %d\n", m_end);
     NormaliseNewMember();
 }
 

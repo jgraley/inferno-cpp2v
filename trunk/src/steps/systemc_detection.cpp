@@ -20,13 +20,13 @@ class DetectSCType : public CompareReplace  // Note not SearchReplace
 public:
     DetectSCType()
     {
-        MakeTreePtr< Overlay<Node> > over;
-        MakeTreePtr< Scope > s_scope, r_scope;
-        MakeTreePtr< Star<Declaration> > decls;
-        MakeTreePtr< UserType > s_usertype;
-        MakeTreePtr< SCNODE > lr_scnode;
-        MakeTreePtr< TypeIdentifierByName > s_token( lr_scnode->GetToken() );                
-        MakeTreePtr< SlaveSearchReplace<Node> > r_slave( over, s_token, lr_scnode );    
+        MakePatternPtr< Overlay<Node> > over;
+        MakePatternPtr< Scope > s_scope, r_scope;
+        MakePatternPtr< Star<Declaration> > decls;
+        MakePatternPtr< UserType > s_usertype;
+        MakePatternPtr< SCNODE > lr_scnode;
+        MakePatternPtr< TypeIdentifierByName > s_token( lr_scnode->GetToken() );                
+        MakePatternPtr< SlaveSearchReplace<Node> > r_slave( over, s_token, lr_scnode );    
         
         // Eliminate the declaration that came from isystemc.h
         over->through = s_scope;
@@ -52,17 +52,17 @@ class DetectSCBase : public CompareReplace  // Note not SearchReplace
 public:
     DetectSCBase()
     {
-        MakeTreePtr< Overlay<Node> > over;
-        MakeTreePtr< Scope > s_scope, r_scope;
-        MakeTreePtr< Star<Declaration> > decls, l_decls;
-        MakeTreePtr< Star<Base> > l_bases;
-        MakeTreePtr< UserType > s_usertype;
-        MakeTreePtr< SCCLASS > lr_scclass;
-        MakeTreePtr< InheritanceRecord > ls_class;
-        MakeTreePtr< Base > ls_base;            
-        MakeTreePtr< TypeIdentifier > l_tid;
-        MakeTreePtr< TypeIdentifierByName > s_token( lr_scclass->GetToken() ); 
-        MakeTreePtr< SlaveSearchReplace<Node> > r_slave( over, ls_class, lr_scclass );    
+        MakePatternPtr< Overlay<Node> > over;
+        MakePatternPtr< Scope > s_scope, r_scope;
+        MakePatternPtr< Star<Declaration> > decls, l_decls;
+        MakePatternPtr< Star<Base> > l_bases;
+        MakePatternPtr< UserType > s_usertype;
+        MakePatternPtr< SCCLASS > lr_scclass;
+        MakePatternPtr< InheritanceRecord > ls_class;
+        MakePatternPtr< Base > ls_base;            
+        MakePatternPtr< TypeIdentifier > l_tid;
+        MakePatternPtr< TypeIdentifierByName > s_token( lr_scclass->GetToken() ); 
+        MakePatternPtr< SlaveSearchReplace<Node> > r_slave( over, ls_class, lr_scclass );    
         
         // Eliminate the declaration that came from isystemc.h
         over->through = s_scope;
@@ -90,18 +90,18 @@ class DetectSCDynamic : public SearchReplace
 public:
     DetectSCDynamic()
     {
-        MakeTreePtr< SCFUNC > r_dynamic;
-        MakeTreePtr< Call > s_call;
-        MakeTreePtr< MapOperand > s_arg;            
-        MakeTreePtr< InstanceIdentifierByName > s_token( r_dynamic->GetToken() ); 
-        MakeTreePtr< InstanceIdentifierByName > s_param_id( "p1" ); 
-        MakeTreePtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
+        MakePatternPtr< SCFUNC > r_dynamic;
+        MakePatternPtr< Call > s_call;
+        MakePatternPtr< MapOperand > s_arg;            
+        MakePatternPtr< InstanceIdentifierByName > s_token( r_dynamic->GetToken() ); 
+        MakePatternPtr< InstanceIdentifierByName > s_param_id( "p1" ); 
+        MakePatternPtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
                         
         s_call->callee = s_token;       
         s_call->operands = (s_arg);
         s_arg->identifier = s_param_id;
         s_arg->value = eexpr;
-        eexpr->pattern = MakeTreePtr<Event>();
+        eexpr->pattern = MakePatternPtr<Event>();
         r_dynamic->event = eexpr;       
           
         Configure( s_call, r_dynamic );
@@ -114,9 +114,9 @@ class DetectSCStatic : public SearchReplace
 public:
     DetectSCStatic()
     {
-        MakeTreePtr< SCFUNC > r_static;
-        MakeTreePtr< Call > s_call;
-        MakeTreePtr< InstanceIdentifierByName > s_token( r_static->GetToken() ); 
+        MakePatternPtr< SCFUNC > r_static;
+        MakePatternPtr< Call > s_call;
+        MakePatternPtr< InstanceIdentifierByName > s_token( r_static->GetToken() ); 
                           
         s_call->callee = s_token;   
         //s_call->operands = ();       
@@ -131,12 +131,12 @@ class DetectSCDelta : public SearchReplace
 public:
     DetectSCDelta()
     {
-        MakeTreePtr< SCFUNC > r_delta;
-        MakeTreePtr< Call > s_call;
-        MakeTreePtr< MapOperand > s_arg;            
-        MakeTreePtr< InstanceIdentifierByName > s_token( r_delta->GetToken() ); 
-        MakeTreePtr< InstanceIdentifierByName > s_param_id( "p1" ); 
-        MakeTreePtr< InstanceIdentifierByName > s_arg_id( "SC_ZERO_TIME" ); 
+        MakePatternPtr< SCFUNC > r_delta;
+        MakePatternPtr< Call > s_call;
+        MakePatternPtr< MapOperand > s_arg;            
+        MakePatternPtr< InstanceIdentifierByName > s_token( r_delta->GetToken() ); 
+        MakePatternPtr< InstanceIdentifierByName > s_param_id( "p1" ); 
+        MakePatternPtr< InstanceIdentifierByName > s_arg_id( "SC_ZERO_TIME" ); 
                         
         s_call->callee = s_token;       
         s_call->operands = (s_arg);
@@ -159,12 +159,12 @@ class DetectTerminationFunction : public SearchReplace
 public:
     DetectTerminationFunction()
     {
-        MakeTreePtr< SCFUNC > r_tf;
-        MakeTreePtr< Expression > event;
-        MakeTreePtr< Call > s_call;
-        MakeTreePtr< MapOperand > s_arg;            
-        MakeTreePtr< InstanceIdentifierByName > s_token( r_tf->GetToken() ); 
-        MakeTreePtr< InstanceIdentifierByName > s_param_id( "p1" ); 
+        MakePatternPtr< SCFUNC > r_tf;
+        MakePatternPtr< Expression > event;
+        MakePatternPtr< Call > s_call;
+        MakePatternPtr< MapOperand > s_arg;            
+        MakePatternPtr< InstanceIdentifierByName > s_token( r_tf->GetToken() ); 
+        MakePatternPtr< InstanceIdentifierByName > s_param_id( "p1" ); 
                 
         s_call->callee = s_token;       
         s_call->operands = (s_arg);
@@ -182,42 +182,42 @@ class DetectSCProcess : public CompareReplace // Note not SearchReplace
 public:
     DetectSCProcess( TreePtr< Process > lr_scprocess )
     {
-        MakeTreePtr< Overlay<Node> > over;
-        MakeTreePtr< Scope > s_scope, r_scope;
-        MakeTreePtr< Star<Declaration> > decls, l_decls, l_cdecls;
-        MakeTreePtr< Static > s_instance;
-        MakeTreePtr< Compound > ls_comp, lr_comp;
-        MakeTreePtr< Module > l_module;
-        MakeTreePtr< Call > ls_pcall;
-        MakeTreePtr< MapOperand > ls_arg;            
-        MakeTreePtr< Overlay<Instance> > l_overcons;
-        MakeTreePtr< Overlay<Type> > l_overtype;
-        MakeTreePtr< Instance > ls_cons, lr_cons, l_process;
-        MakeTreePtr< Star<Statement> > l_pre, l_post;
-        MakeTreePtr< InstanceIdentifier > ls_id;
-        MakeTreePtr< Star<Base> > l_bases;        
-        MakeTreePtr<Constructor> l_ctype;
-        MakeTreePtr< InstanceIdentifierByName > s_token( lr_scprocess->GetToken() ); 
-        MakeTreePtr< InstanceIdentifierByName > s_arg_id( "func" );
-        MakeTreePtr< SlaveSearchReplace<Node> > r_slave( over, l_module, l_module );            
+        MakePatternPtr< Overlay<Node> > over;
+        MakePatternPtr< Scope > s_scope, r_scope;
+        MakePatternPtr< Star<Declaration> > decls, l_decls, l_cdecls;
+        MakePatternPtr< Static > s_instance;
+        MakePatternPtr< Compound > ls_comp, lr_comp;
+        MakePatternPtr< Module > l_module;
+        MakePatternPtr< Call > ls_pcall;
+        MakePatternPtr< MapOperand > ls_arg;            
+        MakePatternPtr< Overlay<Instance> > l_overcons;
+        MakePatternPtr< Overlay<Type> > l_overtype;
+        MakePatternPtr< Instance > ls_cons, lr_cons, l_process;
+        MakePatternPtr< Star<Statement> > l_pre, l_post;
+        MakePatternPtr< InstanceIdentifier > ls_id;
+        MakePatternPtr< Star<Base> > l_bases;        
+        MakePatternPtr<Constructor> l_ctype;
+        MakePatternPtr< InstanceIdentifierByName > s_token( lr_scprocess->GetToken() ); 
+        MakePatternPtr< InstanceIdentifierByName > s_arg_id( "func" );
+        MakePatternPtr< SlaveSearchReplace<Node> > r_slave( over, l_module, l_module );            
         
         // Eliminate the declaration that came from isystemc.h
         over->through = s_scope;
         over->overlay = r_scope;
         s_scope->members = (decls, s_instance);
         s_instance->identifier = s_token;        
-        s_instance->type = MakeTreePtr<Callable>(); // just narrow things a little        
+        s_instance->type = MakePatternPtr<Callable>(); // just narrow things a little        
         r_scope->members = (decls);   
                 
         l_module->members = (l_overcons, l_process, l_decls);
         l_module->bases = (l_bases);
         l_overcons->through = ls_cons;
-        ls_cons->type = MakeTreePtr<Constructor>();        
+        ls_cons->type = MakePatternPtr<Constructor>();        
         ls_cons->initialiser = ls_comp;
         ls_comp->members = l_cdecls;
         ls_comp->statements = (l_pre, ls_pcall, l_post);
         ls_cons->type = l_ctype;
-        l_ctype->members = (MakeTreePtr<Automatic>()); // one parameter
+        l_ctype->members = (MakePatternPtr<Automatic>()); // one parameter
         ls_pcall->callee = s_token;
         ls_pcall->operands = (ls_arg);
         ls_arg->identifier = s_arg_id;
@@ -230,7 +230,7 @@ public:
         
         l_process->identifier = ls_id;
         l_process->type = l_overtype;
-        l_overtype->through = MakeTreePtr<Callable>();
+        l_overtype->through = MakePatternPtr<Callable>();
         l_overtype->overlay = lr_scprocess;
         
         Configure( over, r_slave );
@@ -247,13 +247,13 @@ class DetectSCNotifyImmediate : public SearchReplace
 public:
     DetectSCNotifyImmediate()
     {
-        MakeTreePtr<Call> s_call;
-        MakeTreePtr<Lookup> s_lookup;
-        MakeTreePtr<Event> s_event;
-        MakeTreePtr<NotifyImmediate> r_notify;
-        MakeTreePtr< InstanceIdentifierByName > s_token( r_notify->GetToken() );                
-        MakeTreePtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
-        //MakeTreePtr< Expression > eexpr; 
+        MakePatternPtr<Call> s_call;
+        MakePatternPtr<Lookup> s_lookup;
+        MakePatternPtr<Event> s_event;
+        MakePatternPtr<NotifyImmediate> r_notify;
+        MakePatternPtr< InstanceIdentifierByName > s_token( r_notify->GetToken() );                
+        MakePatternPtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
+        //MakePatternPtr< Expression > eexpr; 
                 
         s_call->callee = s_lookup;
         //s_call->operands = ();
@@ -276,16 +276,16 @@ class DetectSCNotifyDelta : public SearchReplace
 public:
     DetectSCNotifyDelta()
     {
-        MakeTreePtr<Call> s_call;
-        MakeTreePtr<Lookup> s_lookup;
-        MakeTreePtr<Event> s_event;
-        MakeTreePtr<NotifyDelta> r_notify;
-        MakeTreePtr<MapOperand> s_arg;
-        MakeTreePtr< InstanceIdentifierByName > s_zero_token( "SC_ZERO_TIME" );                
-        MakeTreePtr< InstanceIdentifierByName > s_arg_id( "p1" ); 
-        MakeTreePtr< InstanceIdentifierByName > s_token( r_notify->GetToken() );                
-        MakeTreePtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
-        //MakeTreePtr< Expression > eexpr; 
+        MakePatternPtr<Call> s_call;
+        MakePatternPtr<Lookup> s_lookup;
+        MakePatternPtr<Event> s_event;
+        MakePatternPtr<NotifyDelta> r_notify;
+        MakePatternPtr<MapOperand> s_arg;
+        MakePatternPtr< InstanceIdentifierByName > s_zero_token( "SC_ZERO_TIME" );                
+        MakePatternPtr< InstanceIdentifierByName > s_arg_id( "p1" ); 
+        MakePatternPtr< InstanceIdentifierByName > s_token( r_notify->GetToken() );                
+        MakePatternPtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
+        //MakePatternPtr< Expression > eexpr; 
                 
         s_call->callee = s_lookup;
         s_call->operands = (s_arg);
@@ -309,21 +309,21 @@ class RemoveEmptyModuleConstructors : public CompareReplace
 public:
     RemoveEmptyModuleConstructors()
     {
-        MakeTreePtr< Stuff<Scope> > stuff;
-        MakeTreePtr< Overlay<Scope> > over;
-        MakeTreePtr< Star<Declaration> > decls, l_decls;
-        MakeTreePtr< Star<Statement> > l_pre, l_post;
-        MakeTreePtr< Star<MapOperand> > ls_args;
-        MakeTreePtr< Compound > s_comp, ls_comp, lr_comp;
-        MakeTreePtr< Module > s_module, r_module;
-        MakeTreePtr< Call > ls_call;
-        MakeTreePtr< Lookup > ls_lookup;
-        MakeTreePtr< Instance > s_cons;
-        MakeTreePtr< InstanceIdentifier > s_id;
-        MakeTreePtr< Star<Automatic> > s_params;
-        MakeTreePtr<Constructor> s_ctype;
-        MakeTreePtr< Star<Base> > bases;        
-        MakeTreePtr< SlaveSearchReplace<Node> > r_slave( stuff, ls_comp, lr_comp );            
+        MakePatternPtr< Stuff<Scope> > stuff;
+        MakePatternPtr< Overlay<Scope> > over;
+        MakePatternPtr< Star<Declaration> > decls, l_decls;
+        MakePatternPtr< Star<Statement> > l_pre, l_post;
+        MakePatternPtr< Star<MapOperand> > ls_args;
+        MakePatternPtr< Compound > s_comp, ls_comp, lr_comp;
+        MakePatternPtr< Module > s_module, r_module;
+        MakePatternPtr< Call > ls_call;
+        MakePatternPtr< Lookup > ls_lookup;
+        MakePatternPtr< Instance > s_cons;
+        MakePatternPtr< InstanceIdentifier > s_id;
+        MakePatternPtr< Star<Automatic> > s_params;
+        MakePatternPtr<Constructor> s_ctype;
+        MakePatternPtr< Star<Base> > bases;        
+        MakePatternPtr< SlaveSearchReplace<Node> > r_slave( stuff, ls_comp, lr_comp );            
                         
         // dispense with an empty constructor                 
         stuff->terminus = over;
@@ -331,7 +331,7 @@ public:
         over->overlay = r_module;
         s_module->members = (s_cons, decls);
         s_module->bases = (bases);
-        s_cons->type = MakeTreePtr<Constructor>();        
+        s_cons->type = MakePatternPtr<Constructor>();        
         s_cons->initialiser = s_comp;
         // s_comp's members and statements left empty to signify empty constructor
         s_cons->identifier = s_id;
@@ -362,20 +362,20 @@ class RemoveVoidInstances : public CompareReplace  // Note not SearchReplace
 public:
     RemoveVoidInstances()
     {
-        MakeTreePtr<Program> s_scope, r_scope;
-        MakeTreePtr< Star<Declaration> > decls;
-        MakeTreePtr<Static> s_instance;
-        MakeTreePtr< MatchAny<Type> > s_any;
-        MakeTreePtr<CallableParams> s_callable;
-        MakeTreePtr< Star<Instance> > s_params;
-        MakeTreePtr<Instance> s_void_param;
+        MakePatternPtr<Program> s_scope, r_scope;
+        MakePatternPtr< Star<Declaration> > decls;
+        MakePatternPtr<Static> s_instance;
+        MakePatternPtr< MatchAny<Type> > s_any;
+        MakePatternPtr<CallableParams> s_callable;
+        MakePatternPtr< Star<Instance> > s_params;
+        MakePatternPtr<Instance> s_void_param;
         
         // Eliminate the declaration that came from isystemc.h
         s_scope->members = (decls, s_instance);
         s_instance->type = s_any;
-        s_any->patterns = (s_callable, MakeTreePtr<Void>() ); // match void instances (pointless) or functions as below...
+        s_any->patterns = (s_callable, MakePatternPtr<Void>() ); // match void instances (pointless) or functions as below...
         s_callable->members = (s_params, s_void_param); // one void param is enough, but don't match no params
-        s_void_param->type = MakeTreePtr<Void>();
+        s_void_param->type = MakePatternPtr<Void>();
         
         r_scope->members = (decls);   
            
@@ -399,9 +399,9 @@ DetectAllSCTypes::DetectAllSCTypes()
     push_back( shared_ptr<Transformation>( new DetectSCDelta<NextTriggerDelta> ) );        
     push_back( shared_ptr<Transformation>( new DetectTerminationFunction<Exit> ) );    
     push_back( shared_ptr<Transformation>( new DetectTerminationFunction<Cease> ) );    
-    push_back( shared_ptr<Transformation>( new DetectSCProcess( MakeTreePtr<Thread>() ) ) );    
-    push_back( shared_ptr<Transformation>( new DetectSCProcess( MakeTreePtr<ClockedThread>() ) ) );    
-    push_back( shared_ptr<Transformation>( new DetectSCProcess( MakeTreePtr<Method>() ) ) );    
+    push_back( shared_ptr<Transformation>( new DetectSCProcess( MakePatternPtr<Thread>() ) ) );    
+    push_back( shared_ptr<Transformation>( new DetectSCProcess( MakePatternPtr<ClockedThread>() ) ) );    
+    push_back( shared_ptr<Transformation>( new DetectSCProcess( MakePatternPtr<Method>() ) ) );    
     push_back( shared_ptr<Transformation>( new DetectSCNotifyImmediate ) );    
     push_back( shared_ptr<Transformation>( new DetectSCNotifyDelta ) );    
     push_back( shared_ptr<Transformation>( new RemoveEmptyModuleConstructors ) );    
