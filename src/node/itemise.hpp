@@ -27,11 +27,12 @@ public:
                 (uintptr_t)this < (uintptr_t)dend )
             {
                 uintptr_t ofs = (uintptr_t)this - (uintptr_t)dstart;
+
                 FOREACH( uintptr_t x, v )
                     if( x==ofs )
                     	return *this; // don't insert if in there already, see above
                 v.push_back( ofs );
-                //TRACE("%d ", ofs );
+                TRACE("Itemiser caught ptr %p which is offset %d\n", this, ofs );
             }
             return *this;
         }
@@ -47,6 +48,7 @@ public:
 		dstart = (char *)&d;
 		dend = dstart + sizeof(d);
 		v.clear();
+        TRACE("Starting itemise d=")(d)(" *arch=")(*itemise_architype)(", ptr range %p to %p\n", dstart, dend );
 
 		// This is the assignment that will be detected
 		//TRACE("Assigning ");
@@ -64,9 +66,15 @@ public:
 		static bool done=false;
 		if(!done)
 		{
+			TRACE("Not cached *arch=")(*itemise_architype)(", caching at %p\n", &v);
 			v = ItemiseImpl( itemise_architype );
 			done = true;
 		}
+		else
+		{
+			TRACE("Using cached *arch=")(*itemise_architype)(" at %p\n", &v);
+		}
+
 		return v;
 	}
 
@@ -74,6 +82,8 @@ public:
     inline static const vector< Itemiser::Element * > ItemiseStatic( const ITEMISE_TYPE *itemise_architype,
                                                                      const Itemiser *itemise_object )
     {
+		TRACE("Itemise() arch=%p *arch=", itemise_architype)(*itemise_architype)
+		               ("obj=%p *obj=", itemise_object)(*itemise_object)("\n");
         ASSERT( itemise_architype )("Itemiser got itemise_architype=NULL\n");
         ASSERT( itemise_object )("Itemiser got itemise_object=NULL\n");
         
@@ -99,17 +109,22 @@ public:
 	inline static Itemiser::Element *ItemiseIndexStatic( const ITEMISE_TYPE *itemise_object,
 			                                             int i )
 	{
+		TRACE("ItemiseIndex() index=%d obj=%p *obj=", i, itemise_object)(*itemise_object)(" size=%d\n", sizeof(*itemise_object));
 		const vector< uintptr_t > &v = BasicItemiseStatic( itemise_object );
-		ASSERT( i>=0 );
-		ASSERT( i<v.size() );
+		ASSERT( i>=0 )("i=%d size=%d", i, v.size());
+		ASSERT( i<v.size() )("i=%d size=%d", i, v.size());
 		uintptr_t ofs = v[i];
-		return (Element *)((const char *)itemise_object + ofs);
+		Element *res = (Element *)((const char *)itemise_object + ofs);
+		TRACE("ofs=%d result=%p\n", ofs, res);
+		return res;
 	}
 
 	template< class ITEMISE_TYPE >
 	inline static int ItemiseSizeStatic( const ITEMISE_TYPE *itemise_object )
 	{
+		TRACE("ItemiseSize() obj=")(*itemise_object)("\n");
 		const vector< uintptr_t > &v = BasicItemiseStatic( itemise_object );
+		TRACE("size result=%d\n", v.size());
 		return v.size();
 	}
 
