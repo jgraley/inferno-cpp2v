@@ -64,9 +64,6 @@ ires=$?
 
 if test $ires -eq 0
 then
-# Note: I am iindenting the display to console, but not what gets compiled, because iindent introduces errors
-# for example in test01.cpp where a hex float (like 0x1.2) gets mangled. 
-# ./iindent.sh < $outfile
  echo Compile output...
  resource/script/compile.sh $outfile test/results/"$fb"_out.o
  c2res=$?
