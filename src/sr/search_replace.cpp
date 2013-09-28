@@ -4,7 +4,7 @@
 #include "helpers/simple_compare.hpp"
 
 //#define STRACE
-
+ 
 int CompareReplace::repetitions;
 bool CompareReplace::rep_error;
 

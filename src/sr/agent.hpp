@@ -15,8 +15,9 @@ class StarBase;
 class SlaveBase;
 class SearchContainerBase;
 class SearchReplace;
-
-class Agent : public virtual Traceable
+ 
+class Agent : public virtual Traceable,
+              public virtual Node
 {
 public:
     virtual bool DecidedCompare( const TreePtrInterface &x,
@@ -31,7 +32,7 @@ public:
 
 
 
-class NormalAgent : public Agent
+class NormalAgent : public virtual Agent
 {
 public:
 	NormalAgent() :sr(NULL), coupling_keys(NULL) {}
@@ -120,10 +121,9 @@ private:
 
 #define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
 template<typename NODE_TYPE>
-class NormalAgentWrapper : public NODE_TYPE,
-                           public NormalAgent
+class NormalAgentWrapper : public virtual NODE_TYPE,
+                           public virtual NormalAgent
 {
-    SPECIAL_NODE_FUNCTIONS	
 };
 
 
