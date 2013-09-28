@@ -5,14 +5,12 @@ resfile=test/results.csv
 
 if test $# -eq 0
 then
- echo Usage: $0 \<input program\> [\<results log file\>] [\<arguments for inferno\>]
+ echo Usage: $0 \<input program\> [\<arguments for inferno\>]
  echo from inferno-cpp2v/trunk/
  exit 1
 fi
 
 infile=$1
-shift
-resfile=$1
 shift
 iargs=$*
 fb=`basename $infile`
