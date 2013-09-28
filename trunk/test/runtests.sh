@@ -40,7 +40,7 @@ do
     # Decide where to put the log file for this test run 
     logfile=$logdir/`basename $infile`.log
     # Start the test and pipe output to tee so we get it on the terminal and in the log file
-    test/test.sh $infile $resfile -ap 2>&1 | tee $logfile &
+    test/test.sh $infile -ap 2>&1 | tee $logfile &
 done
 
 # Wait for all the tests to complete and count failures 
