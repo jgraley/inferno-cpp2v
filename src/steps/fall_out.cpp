@@ -249,6 +249,84 @@ LabelTypeToEnum::LabelTypeToEnum()
 }
 
 
+RemoveLabelSubscript::RemoveLabelSubscript()
+{
+    MakePatternPtr< Stuff<Scope> > stuff_labeley, stuff_lmap;
+    MakePatternPtr<Labeley> labeley;
+    MakePatternPtr<Static> lmap;
+    MakePatternPtr<Const> lmap_const;
+    MakePatternPtr<Array> lmap_type;
+    MakePatternPtr<InstanceIdentifier> lmap_id; 
+    MakePatternPtr< MatchAll<Node> > apall, l_apall;
+    MakePatternPtr< NotMatch<Node> > apnot, l_apnot;
+    MakePatternPtr< AnyNode<Node> > apany, l_apany;
+    MakePatternPtr< Overlay<Type> > l_over;
+    MakePatternPtr<Subscript> ms_sub, nr_sub, nsx_sub;;
+    MakePatternPtr<InstanceIdentifier> m_state_id;
+    MakePatternPtr<Goto> ns_goto, nr_goto;
+    MakePatternPtr< NotMatch<Expression> > n_dest_expr;
+    MakePatternPtr<Unsigned> l_enum; // TODO use the real enum!!
+    MakePatternPtr< MatchAll<Scope> > all;
+    MakePatternPtr<Record> record;
+    MakePatternPtr< Star<Declaration> > decls;
+    
+
+
+    ms_sub->operands = (lmap_id, m_state_id);
+    
+    MakePatternPtr< SlaveSearchReplace<Scope> > slavem( slavel, ms_sub, m_state_id );   
+    
+    Configure( all, slaven );
+}
+
+
+LabelInstancesToEnum::LabelInstancesToEnum()
+{
+    MakePatternPtr< Stuff<Scope> > stuff_labeley, stuff_lmap;
+    MakePatternPtr<Labeley> labeley;
+    MakePatternPtr<Static> lmap;
+    MakePatternPtr<Const> lmap_const;
+    MakePatternPtr<Array> lmap_type;
+    MakePatternPtr<InstanceIdentifier> lmap_id; 
+    MakePatternPtr< MatchAll<Node> > apall, l_apall;
+    MakePatternPtr< NotMatch<Node> > apnot, l_apnot;
+    MakePatternPtr< AnyNode<Node> > apany, l_apany;
+    MakePatternPtr< Overlay<Type> > l_over;
+    MakePatternPtr<Subscript> ms_sub, nr_sub, nsx_sub;;
+    MakePatternPtr<InstanceIdentifier> m_state_id;
+    MakePatternPtr<Goto> ns_goto, nr_goto;
+    MakePatternPtr< NotMatch<Expression> > n_dest_expr;
+    MakePatternPtr<Unsigned> l_enum; // TODO use the real enum!!
+    MakePatternPtr< MatchAll<Scope> > all;
+    MakePatternPtr<Record> record;
+    MakePatternPtr< Star<Declaration> > decls;
+    
+    record->members = ( decls );
+
+    l_apall->patterns = (l_apany, l_apnot);
+    l_apnot->pattern = lmap;
+    l_apany->terminus = l_over;
+    l_over->through = MakePatternPtr<Labeley>();
+    l_over->overlay = l_enum; 
+    l_enum->width = MakePatternPtr<SpecificInteger>(32);
+            
+    MakePatternPtr< SlaveSearchReplace<Scope> > slavel( record, l_apall );   
+
+    all->patterns = (record, stuff_labeley, stuff_lmap);
+    stuff_lmap->terminus = lmap;
+    lmap->identifier = lmap_id;
+    lmap->type = lmap_type;
+    lmap->constancy = lmap_const;
+    lmap_type->element = MakePatternPtr<Labeley>();
+    stuff_labeley->terminus = apall;
+    apall->patterns = (apany, apnot);
+    apany->terminus = labeley;
+    apnot->pattern = lmap;
+    
+    Configure( all, slavel );
+}
+
+
 LabelVarsToEnum::LabelVarsToEnum()
 {
     MakePatternPtr< MatchAll<Scope> > s_all;
