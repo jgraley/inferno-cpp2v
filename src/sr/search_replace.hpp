@@ -225,9 +225,10 @@ struct CouplingSlave
     virtual void SetCouplingsMaster( CouplingKeys *ck ) = 0;    
 };
 
-struct SlaveBase : virtual CouplingSlave, virtual InPlaceTransformation
+struct SlaveBase : virtual CouplingSlave, virtual InPlaceTransformation, virtual NormalAgent
 {
     virtual TreePtr<Node> GetThrough() const = 0;
+    static string GetInterfaces() { return string("agent"); }	
 };
 
 template<typename ALGO>

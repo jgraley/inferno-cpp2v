@@ -128,9 +128,10 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
 									   bool can_key,
     								   Conjecture &conj ) const
 {
-    NormalAgent agent;
-	agent.Configure( this, &coupling_keys );
-    return agent.DecidedCompare( x, pattern, can_key, conj );
+    shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(pattern);
+	ASSERT(agent)(*pattern);
+	agent->Configure( this, &coupling_keys );
+    return agent->DecidedCompare( x, pattern, can_key, conj );
 }
 
 
@@ -361,9 +362,10 @@ void CompareReplace::KeyReplaceNodes( TreePtr<Node> pattern ) const
 
 TreePtr<Node> CompareReplace::BuildReplace( TreePtr<Node> pattern ) const
 {
-    NormalAgent agent;
-	agent.Configure( this, &coupling_keys );
-    return agent.BuildReplace( pattern );
+    shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(pattern);
+	ASSERT(agent)(*pattern);
+	agent->Configure( this, &coupling_keys );
+    return agent->BuildReplace( pattern );
 }
 
 TreePtr<Node> CompareReplace::ReplacePhase( TreePtr<Node> pattern ) const
@@ -511,7 +513,7 @@ void SearchReplace::Configure( TreePtr<Node> sp,
     // Insert a Stuff node as root of the search pattern
     // Needs to be Node, because we don't want pre-restriction action here (if we're a slave
     // we got pre-restricted already.
-    TreePtr< Stuff<Node> > stuff( new Stuff<Node> );
+    MakePatternPtr< Stuff<Node> > stuff;
 
     if( !rp )
     {
@@ -526,7 +528,7 @@ void SearchReplace::Configure( TreePtr<Node> sp,
         // an Overlay node to overwrite the replace pattern at replace time.
         
         // Insert a Stuff node as root of the replace pattern
-        TreePtr< Overlay<Node> > overlay( new Overlay<Node> );
+        MakePatternPtr< Overlay<Node> > overlay;
         stuff->terminus = overlay;
         overlay->through = sp;
         overlay->overlay = rp;
