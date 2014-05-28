@@ -25,33 +25,33 @@ GenerateImplicitCasts::GenerateImplicitCasts()
     // does not match the type of the param in the declaration. Then we can 
     // simply insert a cast to the declaration param type at the root of the 
     // expression.
-	MakeTreePtr<Call> s_call;
-	MakeTreePtr< TransformOf<Expression> > callee( &TypeOf::instance );
+	MakePatternPtr<Call> s_call;
+	MakePatternPtr< TransformOf<Expression> > callee( &TypeOf::instance );
 	s_call->callee = callee;
-	MakeTreePtr<CallableParams> s_proc;
+	MakePatternPtr<CallableParams> s_proc;
 	callee->pattern = s_proc;
-	MakeTreePtr< Instance > s_param;
-	MakeTreePtr< InstanceIdentifier > param_id;
+	MakePatternPtr< Instance > s_param;
+	MakePatternPtr< InstanceIdentifier > param_id;
 	s_param->identifier = param_id;
-	MakeTreePtr< Type > type;
+	MakePatternPtr< Type > type;
 	s_param->type = type;
-	MakeTreePtr< Star<Instance> > s_other_params;
+	MakePatternPtr< Star<Instance> > s_other_params;
 	s_proc->members = (s_param, s_other_params);
-	MakeTreePtr< MapOperand > s_arg;
+	MakePatternPtr< MapOperand > s_arg;
 	s_arg->identifier = param_id;
-	MakeTreePtr< TransformOf<Expression> > s_arg_value( &TypeOf::instance );
+	MakePatternPtr< TransformOf<Expression> > s_arg_value( &TypeOf::instance );
 	s_arg->value = s_arg_value;
-	//s_arg_value->pattern = MakeTreePtr< Type >();
-	MakeTreePtr< NotMatch<Type> > s_arg_type;
+	//s_arg_value->pattern = MakePatternPtr< Type >();
+	MakePatternPtr< NotMatch<Type> > s_arg_type;
 	s_arg_value->pattern = s_arg_type;
 	s_arg_type->pattern = type;
-	MakeTreePtr< Star<MapOperand> > other_args;
+	MakePatternPtr< Star<MapOperand> > other_args;
 	s_call->operands = ( s_arg, other_args );
 
-	MakeTreePtr<Call> r_call;
-	MakeTreePtr< MapOperand > r_arg;
+	MakePatternPtr<Call> r_call;
+	MakePatternPtr< MapOperand > r_arg;
 	r_arg->identifier = param_id;
-	MakeTreePtr<Cast> r_cast;
+	MakePatternPtr<Cast> r_cast;
 	r_arg->value = r_cast;
 	r_cast->operand = s_arg->value;
 	r_cast->type = type;

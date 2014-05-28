@@ -104,6 +104,19 @@ public:
      InsertInferredYield();
 };
 
+/*
+class RemoveLabelSubscript : public SearchReplace
+{
+public:
+     RemoveLabelSubscript();
+};
+
+class LabelInstanceToEnum : public SearchReplace
+{
+public:
+     LabelInstanceToEnum();
+};
+*/
 }; // end namespace
 
 #endif

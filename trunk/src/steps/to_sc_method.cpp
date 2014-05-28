@@ -13,24 +13,24 @@ using namespace Steps;
  
 AutosToModule::AutosToModule()
 {
-    MakeTreePtr<Scope> rec;
-    MakeTreePtr< Star<Declaration> > decls, vdecls;
-    MakeTreePtr< Star<Statement> > vstmts;
-    MakeTreePtr<Automatic> s_var;
-    MakeTreePtr<Field> fn, r_var;
-    MakeTreePtr<Callable> ft;
-    MakeTreePtr< Stuff<Initialiser> > stuff;
-    MakeTreePtr<Compound> s_comp, r_comp;
-    MakeTreePtr< Overlay<Compound> > over;
-    MakeTreePtr< Star<Base> > bases;
-    MakeTreePtr<Type> type;
-    MakeTreePtr<InstanceIdentifier> var_id;
-    MakeTreePtr<Initialiser> init;
-    MakeTreePtr< MatchAll<Compound> > s_all;
-    MakeTreePtr< NotMatch<Compound> > sx_not;
-    MakeTreePtr< Stuff<Compound> > sx_stuff;
-    MakeTreePtr<Call> sx_call;
-    MakeTreePtr< Insert<Declaration> > insert;
+    MakePatternPtr<Scope> rec;
+    MakePatternPtr< Star<Declaration> > decls, vdecls;
+    MakePatternPtr< Star<Statement> > vstmts;
+    MakePatternPtr<Automatic> s_var;
+    MakePatternPtr<Field> fn, r_var;
+    MakePatternPtr<Callable> ft;
+    MakePatternPtr< Stuff<Initialiser> > stuff;
+    MakePatternPtr<Compound> s_comp, r_comp;
+    MakePatternPtr< Overlay<Compound> > over;
+    MakePatternPtr< Star<Base> > bases;
+    MakePatternPtr<Type> type;
+    MakePatternPtr<InstanceIdentifier> var_id;
+    MakePatternPtr<Initialiser> init;
+    MakePatternPtr< MatchAll<Compound> > s_all;
+    MakePatternPtr< NotMatch<Compound> > sx_not;
+    MakePatternPtr< Stuff<Compound> > sx_stuff;
+    MakePatternPtr<Call> sx_call;
+    MakePatternPtr< Insert<Declaration> > insert;
         
     rec->members = (decls, fn, insert);
     fn->type = ft;
@@ -54,9 +54,9 @@ AutosToModule::AutosToModule()
     r_var->type = type;
     r_var->identifier = var_id;
     r_var->initialiser = init;
-    r_var->virt = MakeTreePtr<NonVirtual>();
-    r_var->access = MakeTreePtr<Private>();
-    r_var->constancy = MakeTreePtr<NonConst>();
+    r_var->virt = MakePatternPtr<NonVirtual>();
+    r_var->access = MakePatternPtr<Private>();
+    r_var->constancy = MakePatternPtr<NonConst>();
     
     Configure( rec );
 }
@@ -64,22 +64,22 @@ AutosToModule::AutosToModule()
 
 TempsAndStaticsToModule::TempsAndStaticsToModule()
 {
-    MakeTreePtr<Scope> rec;
-    MakeTreePtr< Star<Declaration> > decls, vdecls;
-    MakeTreePtr< Star<Statement> > vstmts;
-    MakeTreePtr< MatchAny<Instance> > var;
-    MakeTreePtr<Temporary> tempvar;
-    MakeTreePtr<Static> staticvar;
-    MakeTreePtr<Field> fn;
-    MakeTreePtr<Thread> ft;
-    MakeTreePtr< Stuff<Initialiser> > stuff;
-    MakeTreePtr<Compound> s_comp, r_comp;
-    MakeTreePtr< Overlay<Compound> > over;
-    MakeTreePtr< Star<Base> > bases;
-    MakeTreePtr<Type> type;
-    MakeTreePtr<InstanceIdentifier> var_id;
-    MakeTreePtr<Initialiser> init;
-    MakeTreePtr< Insert<Declaration> > insert;
+    MakePatternPtr<Scope> rec;
+    MakePatternPtr< Star<Declaration> > decls, vdecls;
+    MakePatternPtr< Star<Statement> > vstmts;
+    MakePatternPtr< MatchAny<Instance> > var;
+    MakePatternPtr<Temporary> tempvar;
+    MakePatternPtr<Static> staticvar;
+    MakePatternPtr<Field> fn;
+    MakePatternPtr<Thread> ft;
+    MakePatternPtr< Stuff<Initialiser> > stuff;
+    MakePatternPtr<Compound> s_comp, r_comp;
+    MakePatternPtr< Overlay<Compound> > over;
+    MakePatternPtr< Star<Base> > bases;
+    MakePatternPtr<Type> type;
+    MakePatternPtr<InstanceIdentifier> var_id;
+    MakePatternPtr<Initialiser> init;
+    MakePatternPtr< Insert<Declaration> > insert;
 
     rec->members = (decls, fn, insert);
     fn->type = ft;
@@ -102,17 +102,17 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
 
 DeclsToModule::DeclsToModule()
 {
-    MakeTreePtr<Scope> rec;
-    MakeTreePtr< Star<Declaration> > decls, vdecls;
-    MakeTreePtr< Star<Statement> > vstmts;
-    MakeTreePtr<Field> fn;
-    MakeTreePtr<UserType> ut;
-    MakeTreePtr<Thread> ft;
-    MakeTreePtr< Stuff<Initialiser> > stuff;
-    MakeTreePtr<Compound> s_comp, r_comp;
-    MakeTreePtr< Overlay<Compound> > over;
-    MakeTreePtr< Star<Base> > bases;
-    MakeTreePtr< Insert<Declaration> > insert;
+    MakePatternPtr<Scope> rec;
+    MakePatternPtr< Star<Declaration> > decls, vdecls;
+    MakePatternPtr< Star<Statement> > vstmts;
+    MakePatternPtr<Field> fn;
+    MakePatternPtr<UserType> ut;
+    MakePatternPtr<Thread> ft;
+    MakePatternPtr< Stuff<Initialiser> > stuff;
+    MakePatternPtr<Compound> s_comp, r_comp;
+    MakePatternPtr< Overlay<Compound> > over;
+    MakePatternPtr< Star<Base> > bases;
+    MakePatternPtr< Insert<Declaration> > insert;
     
     rec->members = (decls, fn, insert);
     fn->type = ft;
@@ -134,32 +134,32 @@ DeclsToModule::DeclsToModule()
 
 ThreadToMethod::ThreadToMethod()
 {
-    MakeTreePtr<Instance> s_thread, r_method;
-    MakeTreePtr<Thread> s_thread_type;
-    MakeTreePtr<Method> r_method_type;
-    MakeTreePtr<Compound> s_comp, loop_comp;
-    MakeTreePtr<InstanceIdentifier> id;
-    MakeTreePtr<Do> s_loop;
-    MakeTreePtr<True> s_loop_cond;
-    MakeTreePtr< Star<Declaration> > loop_decls;
-    MakeTreePtr< Star<Statement> > loop_stmts;
-    MakeTreePtr<WaitDynamic> ls_wait_dynamic;
-    MakeTreePtr<NextTriggerDynamic> lr_nt_dynamic;
-    MakeTreePtr<WaitStatic> ms_wait_static;
-    MakeTreePtr<NextTriggerStatic> mr_nt_static;
-    MakeTreePtr<WaitDelta> ns_wait_delta;
-    MakeTreePtr<NextTriggerDelta> nr_nt_delta;
-    MakeTreePtr<Continue> os_continue;
-    MakeTreePtr<Return> or_return;
-    MakeTreePtr<Uninitialised> or_retval;
-    MakeTreePtr<Expression> l_event;
+    MakePatternPtr<Instance> s_thread, r_method;
+    MakePatternPtr<Thread> s_thread_type;
+    MakePatternPtr<Method> r_method_type;
+    MakePatternPtr<Compound> s_comp, loop_comp;
+    MakePatternPtr<InstanceIdentifier> id;
+    MakePatternPtr<Do> s_loop;
+    MakePatternPtr<True> s_loop_cond;
+    MakePatternPtr< Star<Declaration> > loop_decls;
+    MakePatternPtr< Star<Statement> > loop_stmts;
+    MakePatternPtr<WaitDynamic> ls_wait_dynamic;
+    MakePatternPtr<NextTriggerDynamic> lr_nt_dynamic;
+    MakePatternPtr<WaitStatic> ms_wait_static;
+    MakePatternPtr<NextTriggerStatic> mr_nt_static;
+    MakePatternPtr<WaitDelta> ns_wait_delta;
+    MakePatternPtr<NextTriggerDelta> nr_nt_delta;
+    MakePatternPtr<Continue> os_continue;
+    MakePatternPtr<Return> or_return;
+    MakePatternPtr<Uninitialised> or_retval;
+    MakePatternPtr<Expression> l_event;
     
     or_return->return_value = or_retval;
     
-    MakeTreePtr< SlaveSearchReplace<Compound> > slaveo( loop_comp, os_continue, or_return);
-    MakeTreePtr< SlaveSearchReplace<Compound> > slaven( slaveo, ns_wait_delta, nr_nt_delta);
-    MakeTreePtr< SlaveSearchReplace<Compound> > slavem( slaven, ms_wait_static, mr_nt_static);
-    MakeTreePtr< SlaveSearchReplace<Compound> > slavel( slavem, ls_wait_dynamic, lr_nt_dynamic);
+    MakePatternPtr< SlaveSearchReplace<Compound> > slaveo( loop_comp, os_continue, or_return);
+    MakePatternPtr< SlaveSearchReplace<Compound> > slaven( slaveo, ns_wait_delta, nr_nt_delta);
+    MakePatternPtr< SlaveSearchReplace<Compound> > slavem( slaven, ms_wait_static, mr_nt_static);
+    MakePatternPtr< SlaveSearchReplace<Compound> > slavel( slavem, ls_wait_dynamic, lr_nt_dynamic);
 
     s_thread->type = s_thread_type;
     s_thread->initialiser = s_comp;
@@ -183,26 +183,26 @@ ThreadToMethod::ThreadToMethod()
 
 ExplicitiseReturns::ExplicitiseReturns()
 {
-    MakeTreePtr<Instance> inst;
-    MakeTreePtr<Callable> s_callable;
-    MakeTreePtr<Compound> comp, m_comp;
-    MakeTreePtr< MatchAll<Instance> > s_all;
-    MakeTreePtr< Stuff<Instance> > s_stuff;
-    MakeTreePtr<Return> s_return, ls_return, m_return;
-    MakeTreePtr< Star<Declaration> > decls, m_decls;
-    MakeTreePtr< Star<Statement> > stmts, m_pre, m_mid, m_post;
-    MakeTreePtr< Insert<Declaration> > insert;
-    MakeTreePtr<Temporary> r_flag;
-    MakeTreePtr<Boolean> r_boolean;
-    MakeTreePtr<BuildInstanceIdentifier> r_flag_id("enabled");
-    MakeTreePtr<False> lr_false;
-    MakeTreePtr<True> r_true;
-    MakeTreePtr<Uninitialised> s_uninit, ls_uninit, m_uninit;
-    MakeTreePtr<Assign> lr_assign;
-    MakeTreePtr< Stuff<Statement> > m_stuff;
-    MakeTreePtr< NotMatch<Statement> > ms_affected;
-    MakeTreePtr<If> ms_if, mr_if;
-    MakeTreePtr< Overlay<Statement> > m_over;
+    MakePatternPtr<Instance> inst;
+    MakePatternPtr<Callable> s_callable;
+    MakePatternPtr<Compound> comp, m_comp;
+    MakePatternPtr< MatchAll<Instance> > s_all;
+    MakePatternPtr< Stuff<Instance> > s_stuff;
+    MakePatternPtr<Return> s_return, ls_return, m_return;
+    MakePatternPtr< Star<Declaration> > decls, m_decls;
+    MakePatternPtr< Star<Statement> > stmts, m_pre, m_mid, m_post;
+    MakePatternPtr< Insert<Declaration> > insert;
+    MakePatternPtr<Temporary> r_flag;
+    MakePatternPtr<Boolean> r_boolean;
+    MakePatternPtr<BuildInstanceIdentifier> r_flag_id("enabled");
+    MakePatternPtr<False> lr_false;
+    MakePatternPtr<True> r_true;
+    MakePatternPtr<Uninitialised> s_uninit, ls_uninit, m_uninit;
+    MakePatternPtr<Assign> lr_assign;
+    MakePatternPtr< Stuff<Statement> > m_stuff;
+    MakePatternPtr< NotMatch<Statement> > ms_affected;
+    MakePatternPtr<If> ms_if, mr_if;
+    MakePatternPtr< Overlay<Statement> > m_over;
     
     m_comp->members = (m_decls);
     m_comp->statements = (m_pre, m_stuff, m_mid, m_over, m_post);
@@ -214,14 +214,14 @@ ExplicitiseReturns::ExplicitiseReturns()
     m_over->overlay = mr_if;
     mr_if->condition = r_flag_id;
     mr_if->body = ms_affected;
-    mr_if->else_body = MakeTreePtr<Nop>();
+    mr_if->else_body = MakePatternPtr<Nop>();
     
-    MakeTreePtr< SlaveSearchReplace<Compound> > slavem( comp, m_comp );
+    MakePatternPtr< SlaveSearchReplace<Compound> > slavem( comp, m_comp );
     
     ls_return->return_value = ls_uninit;
     lr_assign->operands = (r_flag_id, lr_false);
     
-    MakeTreePtr< SlaveSearchReplace<Compound> > slavel( slavem, ls_return, lr_assign);
+    MakePatternPtr< SlaveSearchReplace<Compound> > slavel( slavem, ls_return, lr_assign);
     
     s_all->patterns = (inst, s_stuff);
     inst->type = s_callable; // TODO when functions are sorted out, set return type to void

@@ -4,7 +4,7 @@
  *  Created on: 14 Mar 2012
  *      Author: jgraley
  */
-
+ 
 #include "steps/uncombable.hpp"
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
@@ -15,9 +15,9 @@ using namespace Steps;
 
 TreePtr<Node> Steps::MakeCheckUncombable( TreePtr<CPPTree::Statement> construct )
 {
-    MakeTreePtr< MatchAll<Node> > all;
-    MakeTreePtr< Stuff<Node> > stuff;
-    MakeTreePtr<Uncombable> uncombable;
+    MakePatternPtr< MatchAll<Node> > all;
+    MakePatternPtr< Stuff<Node> > stuff;
+    MakePatternPtr<Uncombable> uncombable;
     
     all->patterns = (construct, stuff);
     stuff->terminus = uncombable;

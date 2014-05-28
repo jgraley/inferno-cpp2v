@@ -248,7 +248,7 @@ LabelTypeToEnum::LabelTypeToEnum()
     Configure( all, slaven );
 }
 
-
+/*
 RemoveLabelSubscript::RemoveLabelSubscript()
 {
     MakePatternPtr< Stuff<Scope> > stuff_labeley, stuff_lmap;
@@ -270,12 +270,8 @@ RemoveLabelSubscript::RemoveLabelSubscript()
     MakePatternPtr<Record> record;
     MakePatternPtr< Star<Declaration> > decls;
     
-
-
-    ms_sub->operands = (lmap_id, m_state_id);
-    
-    MakePatternPtr< SlaveSearchReplace<Scope> > slavem( slavel, ms_sub, m_state_id );   
-    
+    ms_sub->operands = (lmap_id, m_state_id);    
+    MakePatternPtr< SlaveSearchReplace<Scope> > slavem( slavel, ms_sub, m_state_id );       
     Configure( all, slaven );
 }
 
@@ -325,7 +321,7 @@ LabelInstancesToEnum::LabelInstancesToEnum()
     
     Configure( all, slavel );
 }
-
+*/
 
 LabelVarsToEnum::LabelVarsToEnum()
 {

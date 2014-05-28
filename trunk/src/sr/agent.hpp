@@ -124,6 +124,17 @@ template<typename NODE_TYPE>
 class NormalAgentWrapper : public virtual NODE_TYPE,
                            public virtual NormalAgent
 {
+public:
+    NormalAgentWrapper() : NODE_TYPE() {}
+
+	template<typename CP0>
+    NormalAgentWrapper(const CP0 &cp0) : NODE_TYPE(cp0) {}
+
+	template<typename CP0, typename CP1>
+    NormalAgentWrapper(const CP0 &cp0, const CP1 &cp1) : NODE_TYPE(cp0, cp1) {}
+
+	template<typename CP0, typename CP1, typename CP2>
+    NormalAgentWrapper(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : NODE_TYPE(cp0, cp1, cp2) {}
 };
 
 
@@ -148,19 +159,31 @@ public:
 		ap->ConfigureTreePtrThis( (TreePtr<Node>)(*this) );
 	}
 	template<typename CP0>
-	MakePatternPtr(const CP0 &cp0) : TreePtr<NODE_TYPE>( new NODE_TYPE(cp0) ) 
+	MakePatternPtr(const CP0 &cp0) : TreePtr<NODE_TYPE>( IsNeedWrapper() ? 
+	                                                     new NormalAgentWrapper<NODE_TYPE>(cp0) : 
+	                                                     new NODE_TYPE(cp0) ) 
 	{ 
-		//ASSERT( !IsNeedWrapper() )("MakePatternPtr cannot pass constructor params to normal nodes"); 		
+		Agent *ap = dynamic_cast<Agent *>( TreePtr<NODE_TYPE>::get() );
+		ASSERT( ap )("Trying to produce non-Agent object, IsNeedWrapper returns %d", IsNeedWrapper());
+		ap->ConfigureTreePtrThis( (TreePtr<Node>)(*this) );
 	}
-	template<typename CP0, typename CP1>
-	MakePatternPtr(const CP0 &cp0, const CP1 &cp1) : TreePtr<NODE_TYPE>( new NODE_TYPE(cp0, cp1) )
+    template<typename CP0, typename CP1>
+	MakePatternPtr(const CP0 &cp0, const CP1 &cp1) : TreePtr<NODE_TYPE>(  IsNeedWrapper() ? 
+	                                                                      new NormalAgentWrapper<NODE_TYPE>(cp0, cp1) : 
+	                                                                      new NODE_TYPE(cp0, cp1) )
 	{ 
-		//ASSERT( !IsNeedWrapper() )("MakePatternPtr cannot pass constructor params to normal nodes"); 		
+		Agent *ap = dynamic_cast<Agent *>( TreePtr<NODE_TYPE>::get() );
+		ASSERT( ap )("Trying to produce non-Agent object, IsNeedWrapper returns %d", IsNeedWrapper());
+		ap->ConfigureTreePtrThis( (TreePtr<Node>)(*this) );
 	}
 	template<typename CP0, typename CP1, typename CP2>
-	MakePatternPtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : TreePtr<NODE_TYPE>( new NODE_TYPE(cp0, cp1, cp2) )
+	MakePatternPtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : TreePtr<NODE_TYPE>( IsNeedWrapper() ? 
+	                                                                                     new NormalAgentWrapper<NODE_TYPE>(cp0, cp1, cp2) : 
+	                                                                                     new NODE_TYPE(cp0, cp1, cp2) )
 	{ 
-		//ASSERT( !IsNeedWrapper() )("MakePatternPtr cannot pass constructor params to normal nodes"); 		
+		Agent *ap = dynamic_cast<Agent *>( TreePtr<NODE_TYPE>::get() );
+		ASSERT( ap )("Trying to produce non-Agent object, IsNeedWrapper returns %d", IsNeedWrapper());
+		ap->ConfigureTreePtrThis( (TreePtr<Node>)(*this) );
 	}
 	// Add more params as needed...
 };
