@@ -1,8 +1,8 @@
 Detailed plan for refactoring into agent patterns
 
 ---NOTE: all steps here to be applied equalliy to search as well as replace---
-1. all patterns wrapped by NormalAgentWrapper (except slaves, which jump ahead to 4)
-2. initial invocation via agent interface 
+1. all patterns wrapped by NormalAgentWrapper (except slaves, which jump ahead to 4) DONE
+2. initial invocation via agent interface  DONE
 3. all invocations via agent interface
 4. all special patterns to derive from NormalAgent
 5. pattern parameter (to BuildReplace) to be deduced from "this" locally, not passed in
@@ -11,3 +11,4 @@ Detailed plan for refactoring into agent patterns
 8. Central couplingkeys object to be pensioned off
 9. Call Confiugre on all agents centrally via a walk
 10. Try to minimise depednecy on SearchReplace back pointer (sr)
+11. Better method of deciding whether wrapper needed (prefer not to need a pure virtual in Node class for this) DONE
