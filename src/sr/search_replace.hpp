@@ -228,7 +228,6 @@ struct CouplingSlave
 struct SlaveBase : virtual CouplingSlave, virtual InPlaceTransformation, virtual NormalAgent
 {
     virtual TreePtr<Node> GetThrough() const = 0;
-    static string GetInterfaces() { return string("agent"); }	
 };
 
 template<typename ALGO>
