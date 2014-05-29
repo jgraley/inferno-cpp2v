@@ -1,14 +1,36 @@
 Detailed plan for refactoring into agent patterns
 
----NOTE: all steps here to be applied equalliy to search as well as replace---
+---NOTE: all steps here to be applied equally to search as well as replace---
 1. all patterns wrapped by NormalAgentWrapper (except slaves, which jump ahead to 4) DONE
 2. initial invocation via agent interface  DONE
 3. all invocations via agent interface
 4. all special patterns to derive from NormalAgent
 5. pattern parameter (to BuildReplace) to be deduced from "this" locally, not passed in
 6. Special node functions in NormalNode to be moved into the special nodes themselves (and just derive from Agent)
-7. keynodes to be remmebered by agents, not passed in or looked up in central coupling keys object
+7. keynodes to be remembered by agents, not passed in or looked up in central coupling keys object
 8. Central couplingkeys object to be pensioned off
-9. Call Confiugre on all agents centrally via a walk
-10. Try to minimise depednecy on SearchReplace back pointer (sr)
+9. Call Configure on all agents centrally via a walk
+10. Try to minimise dependency on SearchReplace back pointer (sr)
 11. Better method of deciding whether wrapper needed (prefer not to need a pure virtual in Node class for this) DONE
+
+QUESTION: should patterns eventually refer to each other via TreePtr<Agent> instead of TreePre<Node>? 
+And does that even work, or should it really be shared_ptr<Agent> or SharedPtr<Agent>?
+
+What are the Agent configs used for?
+ - Configure couplingkeys is used to get to the central CouplingKeys for storing and retrieving keyings. Step 8 removes need.
+ - Configure sr is used for :
+     - reaching the common DuplicateNode and DuplicateSubtree (which needs no Agent context) - could this be free-standing, in src/helpers/?
+	 - reaching common GetContext() for slaves replace (not sure what exactly is in the context)
+     - passed to soft search pattern nodes, for calling back into search I think, eventually want to pass the Agent for step 3
+	 - to get to a central dirty grass list - again, could dirtiness be stored locally?
+	 - goes into Star's MatchRange, don't know why
+ - ConfigureTreePtrThis is UNUSED with a TODO at present. Not sure why??? 
+   In fact, we can always deduce it by simply repeating the code in MakePatternPtr.
+   Would anything other than the NormalNodeWrapper actually care? 
+   
+NOTE: need an answer to pre-restrictions (actually, the answer is to use the existing MakePatternPtr with templated Agents, and implement 
+using an intermediate PreRestrictionAgent<> template.
+
+The real question is, how to do pre-restriction propogation, where a special node's child pointers are the pre-restriction class, enforcing 
+type-safety on their children relative to their declared type. We can insist that all such child pointers are really PreRestrictionAgent
+ONLY IF the NormalAgentWrapper uses (derives from) PreRestrictionAgent, so that normal nodes (once wrapped) can be pointed to.
