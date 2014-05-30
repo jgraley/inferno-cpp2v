@@ -1,36 +1,72 @@
 Detailed plan for refactoring into agent patterns
 
 ---NOTE: all steps here to be applied equally to search as well as replace---
+---NOTE: ignore the numbers, the order as listed is believed correct---
 1. all patterns wrapped by NormalAgentWrapper (except slaves, which jump ahead to 4) DONE
 2. initial invocation via agent interface  DONE
-3. all invocations via agent interface
-4. all special patterns to derive from NormalAgent
-5. pattern parameter (to BuildReplace) to be deduced from "this" locally, not passed in
-6. Special node functions in NormalNode to be moved into the special nodes themselves (and just derive from Agent)
-7. keynodes to be remembered by agents, not passed in or looked up in central coupling keys object
-8. Central couplingkeys object to be pensioned off
-9. Call Configure on all agents centrally via a walk
-10. Try to minimise dependency on SearchReplace back pointer (sr)
 11. Better method of deciding whether wrapper needed (prefer not to need a pure virtual in Node class for this) DONE
+- Derive all special nodes from NormalAgent instead of relying on NormalAgentWrapper (mostly to smoke out problems)
+- Get rid of ConfigureNodePtrThis()
+- Add AsAgent() and AsNode() STATIC functions in Agent (move impl from MakePatternPtr). 
+  NOTE: Experiment with shared_ptr vs SharedPtr vs TreePtr for the returned agent. Start with SharedPtr, I think this is most correct.
+- Walk all pattern nodes and Configure() with sr and couplingkeys - do this during SR Configure(). 
+  NOTE: Set current sr on slave node itself and recurse into through, but not slave_search or slave_replace (slave's own walk should do them)
+3. all invocations via agent interface, use AsAgent and call on the agent, not self
+- Additionally for soft nodes, pass this to them instead of sr, and provide a thunk (so soft algo is fully enclosed from agent network)
+- Once you think this is done, start asserting that pattern==this in the major functions
+5. pattern parameter (to BuildReplace) to be deduced from "this" locally, not passed in
+---now you are technically distributed, yay, but lots of tidying up to do...---
+- Insert an AgentCommon class (between Agent and NormalAgent) for handy stuff needed by NormalAgent as well as the special ones 
+- move the pre-restriction check into AgentCommon, based on an ARCHITYPE passed to the constructor
+- NormalAgent, NormalAgentWrapper and MakePatternPtr to get own source file 
+6. Special node functions in NormalNode to be moved into the special nodes themselves (and just derive from AgentCommon) - give them own source files
+   NOTE: get the AgentCommon into the non-templated XBase and rename it to XAgent - these will be the 
+   "generic" agents and the templated versions of X will just be a "concretisation" that bring in normal-nodes-in-pattern and compile-time-type-safety concepts
+7. keynodes to be remembered by agents (all of thm) in AgentCommon, not passed in or looked up in central coupling keys object. Do not pass around.
+8. Central couplingkeys object to be pensioned off, and remove from Configure()
+---now agent to agent calls are context-free and parameterless in the case of BuildReplace()---
+- Same for the dirty grass, try to keep the state locally
+- Slave tidy-up. Add a funciton in SR to invoke slave SR and send slave invocation through that. It can fill in the context (obviously sr ptr still needed).
+- Slaves: try to invoke them from SR AFTER master replace has finished. Only need to do 1st level, and recursion will take care of the rest. see [1]
+- RETHINK how to do the restriction pattern on Star nodes. It will be hard to accommodate hopping back out into SR's Compare. 
+  NOTE: maybe even revoke the feature, and go back to just a PRE_RESTRICTION by typee...? see what the use cases are...
+- Move SR::DuplicateNode and DuplicateSubtree out into src/helpers/
+---now the sr passed in via Configure() is nearly or completely unnecessary making the agents reasonably self-sufficient---
+- Note: don't kill the Configure sweep since might need in future even if not needed now
 
 QUESTION: should patterns eventually refer to each other via TreePtr<Agent> instead of TreePre<Node>? 
-And does that even work, or should it really be shared_ptr<Agent> or SharedPtr<Agent>?
+And does that even work, or should it really be shared_ptr<Agent> or SharedPtr<Agent>? --- requires experimentation, added to plan
 
 What are the Agent configs used for?
  - Configure couplingkeys is used to get to the central CouplingKeys for storing and retrieving keyings. Step 8 removes need.
  - Configure sr is used for :
      - reaching the common DuplicateNode and DuplicateSubtree (which needs no Agent context) - could this be free-standing, in src/helpers/?
-	 - reaching common GetContext() for slaves replace (not sure what exactly is in the context)
+	 - reaching common GetContext() for slaves replace (context is true program root, and this passes it into slave SR)
      - passed to soft search pattern nodes, for calling back into search I think, eventually want to pass the Agent for step 3
+	   NOTE: also needed to for GetContext() which is the "true" program root, needed by eg GetDeclaration() 
 	 - to get to a central dirty grass list - again, could dirtiness be stored locally?
-	 - goes into Star's MatchRange, don't know why
+	 - passed into Star's MatchRange, so that a fresh call to Compare can be made with the restriction pattern (so as to avoid coupling keys I think)
  - ConfigureTreePtrThis is UNUSED with a TODO at present. Not sure why??? 
    In fact, we can always deduce it by simply repeating the code in MakePatternPtr.
-   Would anything other than the NormalNodeWrapper actually care? 
+   Would anything other than the NormalNodeWrapper actually care? --- plan is to remove and just create as needed via AsAgent()
    
 NOTE: need an answer to pre-restrictions (actually, the answer is to use the existing MakePatternPtr with templated Agents, and implement 
-using an intermediate PreRestrictionAgent<> template.
+using an intermediate PreRestrictionAgent<> template.  ---NO, we insist that the Agent classes are not templated (except wrapper) so must use ARCHITYPES
 
 The real question is, how to do pre-restriction propogation, where a special node's child pointers are the pre-restriction class, enforcing 
 type-safety on their children relative to their declared type. We can insist that all such child pointers are really PreRestrictionAgent
-ONLY IF the NormalAgentWrapper uses (derives from) PreRestrictionAgent, so that normal nodes (once wrapped) can be pointed to.
+ONLY IF the NormalAgentWrapper uses (derives from) PreRestrictionAgent, so that normal nodes (once wrapped) can be pointed to. --- not an issue;
+where special nodes expose members that point to children (through, terminus etc) these remain the same and are already safe. AsAgent() 
+converts them as required (it drops the node type but don't care; already safe)
+
+[1] The anatomy of a slave
+SlaveCompareReplace is a special Node, Agent and CompareReplace object in its own right.
+The Agent/special Node is understood to be a part of some other CompareReplace's pattern (the
+master), and "surrounds" its own SearchReplace object. However, we don't need to hide the slave SR
+from the master SR as they're both the same class... So the plan is for the master sr to "seek out"
+slaves in the tree and invoke them as required. Slave will need to tell master SR where to act
+in the newly generated output program tree. Could multiple slaves of the same master be run
+concurrently? Yeah, probably, lol.
+
+
+ 
