@@ -27,8 +27,14 @@ public:
 							      Conjecture &conj ) const = 0;
     virtual TreePtr<Node> BuildReplace( TreePtr<Node> pattern, 
 			 					         TreePtr<Node> keynode=TreePtr<Node>() ) const = 0;
-    virtual void ConfigureTreePtrThis( TreePtr<Node> tpt ) = 0;										 
 	virtual void Configure( const CompareReplace *s, CouplingKeys *c ) = 0;
+	static Agent *AsAgent( TreePtr<Node> node )
+	{
+		ASSERT( node )("Called AsAgent(")(node)(") with NULL TreePtr");
+		Agent *agent = dynamic_cast<Agent *>(node.get());
+		ASSERT( agent )("Called AsAgent(")(*node)(") with non-Agent");
+		return agent;
+	}
 };
 
 
@@ -152,37 +158,24 @@ public:
 	                                       new NODE_TYPE : // Already an agent, so behave like MakeTreePtr
 										   new NormalAgentWrapper<NODE_TYPE> ) // not an agent, so wrap. Ultimately this will only happen to normal nodes
 	{
-	    // All this stuff is just needed to provide the Agent class with a TreePtr<Node> version of *this
-		Agent *ap = dynamic_cast<Agent *>( TreePtr<NODE_TYPE>::get() );
-		ASSERT( ap )("Trying to produce non-Agent object, NODE_IS_AGENT is %d", NODE_IS_AGENT);
-		ap->ConfigureTreePtrThis( (TreePtr<Node>)(*this) );
 	}
 	template<typename CP0>
 	MakePatternPtr(const CP0 &cp0) : TreePtr<NODE_TYPE>( NODE_IS_AGENT ?  
 	                                                     new NODE_TYPE(cp0) :
 	                                                     new NormalAgentWrapper<NODE_TYPE>(cp0) ) 
 	{ 
-		Agent *ap = dynamic_cast<Agent *>( TreePtr<NODE_TYPE>::get() );
-		ASSERT( ap )("Trying to produce non-Agent object, NODE_IS_AGENT is %d", NODE_IS_AGENT);
-		ap->ConfigureTreePtrThis( (TreePtr<Node>)(*this) );
 	}
     template<typename CP0, typename CP1>
 	MakePatternPtr(const CP0 &cp0, const CP1 &cp1) : TreePtr<NODE_TYPE>(  NODE_IS_AGENT ?  
 	                                                                      new NODE_TYPE(cp0, cp1) :
 	                                                                      new NormalAgentWrapper<NODE_TYPE>(cp0, cp1) )
 	{ 
-		Agent *ap = dynamic_cast<Agent *>( TreePtr<NODE_TYPE>::get() );
-		ASSERT( ap )("Trying to produce non-Agent object, NODE_IS_AGENT is %d", NODE_IS_AGENT);
-		ap->ConfigureTreePtrThis( (TreePtr<Node>)(*this) );
 	}
 	template<typename CP0, typename CP1, typename CP2>
 	MakePatternPtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : TreePtr<NODE_TYPE>( NODE_IS_AGENT ? 	 
 	                                                                                     new NODE_TYPE(cp0, cp1, cp2) :
 	                                                                                     new NormalAgentWrapper<NODE_TYPE>(cp0, cp1, cp2) )
 	{ 
-		Agent *ap = dynamic_cast<Agent *>( TreePtr<NODE_TYPE>::get() );
-		ASSERT( ap )("Trying to produce non-Agent object, NODE_IS_AGENT is %d", NODE_IS_AGENT);
-		ap->ConfigureTreePtrThis( (TreePtr<Node>)(*this) );
 	}
 	// Add more params as needed...
 };
