@@ -5,10 +5,12 @@ Detailed plan for refactoring into agent patterns
 1. all patterns wrapped by NormalAgentWrapper (except slaves, which jump ahead to 4) DONE
 2. initial invocation via agent interface  DONE
 11. Better method of deciding whether wrapper needed (prefer not to need a pure virtual in Node class for this) DONE
-- Derive all special nodes from NormalAgent instead of relying on NormalAgentWrapper (mostly to smoke out problems)
+- Derive all special nodes from NormalAgent instead of relying on NormalAgentWrapper (mostly to smoke out problems) DONE
 - Get rid of ConfigureNodePtrThis()
-- Add AsAgent() and AsNode() STATIC functions in Agent (move impl from MakePatternPtr). 
+- Add AsAgent() and AsNode() STATIC functions in Agent (move impl from MakePatternPtr). DONE only AsAgent, reasons given below
   NOTE: Experiment with shared_ptr vs SharedPtr vs TreePtr for the returned agent. Start with SharedPtr, I think this is most correct.
+  --- actually no, hopping between different kinds of smart pointers to the same things breaks smart pointer rules. We must only
+      convert TreePtr<Node> into Agent * (and only for immediate use). We should never convert back again
 - Walk all pattern nodes and Configure() with sr and couplingkeys - do this during SR Configure(). 
   NOTE: Set current sr on slave node itself and recurse into through, but not slave_search or slave_replace (slave's own walk should do them)
 3. all invocations via agent interface, use AsAgent and call on the agent, not self

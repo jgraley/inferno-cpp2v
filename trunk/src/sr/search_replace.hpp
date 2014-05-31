@@ -291,7 +291,7 @@ struct SlaveSearchReplace : Slave<SearchReplace, PRE_RESTRICTION>, virtual Node
 // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
 // Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
 // in the collection. TODO a restrict pattern
-struct StarBase : virtual Node 
+struct StarBase : virtual Node, virtual NormalAgent 
 {
     virtual TreePtr<Node> GetPattern() = 0;
     bool MatchRange( const CompareReplace *sr,
@@ -310,7 +310,7 @@ struct Star : StarBase, Special<PRE_RESTRICTION>
 };
 
 
-struct GreenGrassBase : virtual Node
+struct GreenGrassBase : virtual Node, virtual NormalAgent 
 {
     virtual TreePtr<Node> GetThrough() const = 0;
 };
@@ -335,11 +335,10 @@ struct TerminusBase : virtual Node
 };
 
 
-struct SearchContainerBase : TerminusBase
+struct SearchContainerBase : TerminusBase, virtual NormalAgent
 {
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) = 0;
 };
-
 
 
 // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
@@ -374,7 +373,6 @@ struct Stuff : StuffBase, Special<PRE_RESTRICTION>
 };
 
 
-
 struct AnyNodeBase : virtual Node, 
                      public SearchContainerBase
 {
@@ -387,7 +385,7 @@ struct AnyNode : AnyNodeBase, Special<PRE_RESTRICTION>
 };
 
 
-struct OverlayBase : virtual Node
+struct OverlayBase : virtual Node, virtual NormalAgent
 {
     virtual TreePtr<Node> GetThrough() const = 0;
     virtual TreePtr<Node> GetOverlay() const = 0;    
@@ -409,7 +407,7 @@ struct Overlay : OverlayBase, Special<PRE_RESTRICTION>
     }
 };
 
-struct InsertBase : virtual Node
+struct InsertBase : virtual Node, virtual NormalAgent
 {
     virtual SequenceInterface *GetInsert() = 0;    
 };
@@ -425,7 +423,7 @@ struct Insert : InsertBase, Special<PRE_RESTRICTION>
     }
 };
 
-struct EraseBase : virtual Node
+struct EraseBase : virtual Node, virtual NormalAgent
 {
     virtual SequenceInterface *GetErase() = 0;    
 };
