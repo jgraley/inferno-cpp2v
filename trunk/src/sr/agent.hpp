@@ -45,7 +45,7 @@ public:
 	NormalAgent() :sr(NULL), coupling_keys(NULL) {}
     void ConfigureTreePtrThis( TreePtr<Node> tpt );										 
 	void Configure( const CompareReplace *s, CouplingKeys *c );
-private:
+//private:
 	const CompareReplace *sr;
 	CouplingKeys *coupling_keys;
 public:

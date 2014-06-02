@@ -40,7 +40,7 @@ private:
     	    // b. Search under not can terminate with false, but parent search will continue
     	    // Consequently, we go in at Compare level, which creates a new conjecture.
     	    comp.pcontext = sr->pcontext;
-    		bool r = comp.Compare( x, pattern, true );
+    		bool r = comp.Compare( x, pattern, false );
 			TRACE("NotMatch pattern=")(*pattern)(" x=")(*x)(" got %d, returning the opposite!\n", (int)r);
     		if( r==false )
 				return true;

@@ -72,21 +72,28 @@ void CompareReplace::Configure( TreePtr<Node> cp,
         rp = cp;
 
     TRACE("Elaborating ")(string( *this ))(" at %p\n", this);
-    // Fill in fields on the stuff nodes, but not in slaves
+    // --- walk over the master compare pattern ---
     UniqueWalkNoSlavePattern tsp(cp);
     FOREACH( TreePtr<Node> n, tsp )
     {        
         if( shared_ptr<StuffBase> sb = dynamic_pointer_cast<StuffBase>(n) )
         {
+		    // Provide Stuff nodes with slave-access to our master coupling keys. They are not allowed to add keys,
+			// only use the ones that are already there. Note that recurse restriction is done using a local CompareReplace object.
             TRACE("Found stuff@%p, rr@%p\n", sb.get(), sb->recurse_restriction.get());
             sb->recurse_comparer.coupling_keys.SetMaster( &coupling_keys ); 
             sb->recurse_comparer.compare_pattern = sb->recurse_restriction; // TODO could move into a Stuff node constructor if there was one
         }
+		
         if( shared_ptr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
         {
+		    // Provide Slaves (and potentially anything else derived from CouplingSlave) with slave-access to our coupling keys
             TRACE("Found coupling slave in search pattern at %p\n", cs.get() );
             cs->SetCouplingsMaster( &coupling_keys ); 
         }
+		
+		// Give agents pointers to here and our coupling keys
+        Agent::AsAgent(n)->Configure( this, &coupling_keys );		
     }
 
     // look for first-level slaves. Set their couplings master pointer to point
@@ -96,14 +103,19 @@ void CompareReplace::Configure( TreePtr<Node> cp,
     {
         if( shared_ptr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
         {
+		    // As above, but in the replace pattern
             TRACE("Found coupling slave in replace pattern at %p\n", cs.get() );
             cs->SetCouplingsMaster( &coupling_keys ); 
         }
         if( shared_ptr<CompareReplace> cr = dynamic_pointer_cast<CompareReplace>(n) )
         {
+		    // Provide a back pointer for slaves (not sure why)
             cr->master_ptr = this; 
         }
-    }
+
+		// Give agents pointers to here and our coupling keys
+        Agent::AsAgent(n)->Configure( this, &coupling_keys );		
+	}
 
     // Finally store the patterns in the object (we are now ready to transform)
     compare_pattern = cp;
@@ -128,10 +140,7 @@ bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
 									   bool can_key,
     								   Conjecture &conj ) const
 {
-    shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(pattern);
-	ASSERT(agent)(*pattern);
-	agent->Configure( this, &coupling_keys );
-    return agent->DecidedCompare( x, pattern, can_key, conj );
+    return Agent::AsAgent(pattern)->DecidedCompare( x, pattern, can_key, conj );
 }
 
 
@@ -361,12 +370,10 @@ void CompareReplace::KeyReplaceNodes( TreePtr<Node> pattern ) const
 
 
 TreePtr<Node> CompareReplace::BuildReplace( TreePtr<Node> pattern ) const
-{
-    shared_ptr<Agent> agent = dynamic_pointer_cast<Agent>(pattern);
-	ASSERT(agent)(*pattern);
-	agent->Configure( this, &coupling_keys );
-    return agent->BuildReplace( pattern );
+{	
+    return Agent::AsAgent(pattern)->BuildReplace( pattern );
 }
+
 
 TreePtr<Node> CompareReplace::ReplacePhase( TreePtr<Node> pattern ) const
 {
@@ -534,7 +541,7 @@ void SearchReplace::Configure( TreePtr<Node> sp,
         overlay->overlay = rp;
 
         // Configure the rooted implementation (CompareReplace) with new patterns and couplings
-        CompareReplace::Configure( stuff, stuff );
+        CompareReplace::Configure( stuff, stuff ); // TODO don't need it twice
     }
 }
 
