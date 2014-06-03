@@ -86,7 +86,8 @@ public:
     // Call this to set the patterns after construction. This should not be virtual since
     // the constructor calls it.
     void Configure( TreePtr<Node> cp,
-                    TreePtr<Node> rp = TreePtr<Node>() );                 
+                    TreePtr<Node> rp = TreePtr<Node>() );                
+    virtual void ConfigureImpl();					
     
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
@@ -228,6 +229,7 @@ struct CouplingSlave
 struct SlaveBase : virtual CouplingSlave, virtual InPlaceTransformation, virtual NormalAgent
 {
     virtual TreePtr<Node> GetThrough() const = 0;
+	virtual void ConfigureImpl() = 0; // For master to trigger configuration
 };
 
 template<typename ALGO>
@@ -247,6 +249,10 @@ struct SlaveIntermediate : public SlaveBase, public ALGO
         links->push_back(GetThrough());
         ALGO::GetGraphInfo( labels, links );
     }
+    virtual void ConfigureImpl()
+	{
+	    ALGO::ConfigureImpl();
+	}		
 };
 
 template<typename ALGO, class PRE_RESTRICTION>

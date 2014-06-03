@@ -42,7 +42,7 @@ FlattenNode_iterator::FlattenNode_iterator( TreePtr<Node> r ) :
 
     mit = 0;
     m_end = root->ItemiseSize();
-	TRACE("Flattening node ")(*root)(" size %d\n", m_end);
+	//TRACE("Flattening node ")(*root)(" size %d\n", m_end);
     NormaliseNewMember();
 }
 

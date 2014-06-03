@@ -48,34 +48,45 @@ CompareReplace::CompareReplace( TreePtr<Node> cp,
                                 TreePtr<Node> rp,
                                 bool im ) :
     is_master( im ),                                                 
-    compare_pattern( NULL ),
-    replace_pattern( NULL ),
+    compare_pattern( cp ),
+    replace_pattern( rp ),
     master_ptr( NULL )
 {
-    if( cp )
-        Configure( cp, rp );
+    if( compare_pattern )
+        ConfigureImpl(); 
 }    
     
     
 void CompareReplace::Configure( TreePtr<Node> cp,
                                 TreePtr<Node> rp )
 {
+    compare_pattern = cp;
+    replace_pattern = rp;
+	ConfigureImpl();
+}
+								
+
+void CompareReplace::ConfigureImpl()
+{
     // TODO now that this operates per-slave instead of recursing through everything from the 
     // master, we need to obey the rule that slave patterns are complete before Configure, as
     // with master. Maybe an optional check on first invocation? And change all existing 
     // steps to comply.
-    ASSERT( cp );
+    ASSERT( compare_pattern );
     
     // If only a search pattern is supplied, make the replace pattern the same
     // so they couple and then an overlay node can split them apart again.
-    if( !rp )
-        rp = cp;
+    if( !replace_pattern )
+        replace_pattern = compare_pattern;
 
     TRACE("Elaborating ")(string( *this ))(" at %p\n", this);
     // --- walk over the master compare pattern ---
-    UniqueWalkNoSlavePattern tsp(cp);
+    UniqueWalkNoSlavePattern tsp(compare_pattern);
     FOREACH( TreePtr<Node> n, tsp )
     {        
+		// Give agents pointers to here and our coupling keys
+		TRACE("Configuring search pattern ")(*n)("\n");
+        Agent::AsAgent(n)->Configure( this, &coupling_keys );		
         if( shared_ptr<StuffBase> sb = dynamic_pointer_cast<StuffBase>(n) )
         {
 		    // Provide Stuff nodes with slave-access to our master coupling keys. They are not allowed to add keys,
@@ -91,16 +102,20 @@ void CompareReplace::Configure( TreePtr<Node> cp,
             TRACE("Found coupling slave in search pattern at %p\n", cs.get() );
             cs->SetCouplingsMaster( &coupling_keys ); 
         }
-		
-		// Give agents pointers to here and our coupling keys
-        Agent::AsAgent(n)->Configure( this, &coupling_keys );		
     }
 
     // look for first-level slaves. Set their couplings master pointer to point
     // to our couplings. 
-    UniqueWalkNoSlavePattern ss(rp);
+	// TODO cross uniquise the compare and replace walks because they are mostly
+	// going to be hitting the same things. But only after making sure master_ptr
+	// will be set on the right things (find out what it's used for)
+    UniqueWalkNoSlavePattern ss(replace_pattern);
     FOREACH( TreePtr<Node> n, ss )
     {
+		// Give agents pointers to here and our coupling keys
+		TRACE("Configuring replace pattern ")(*n)("\n");		
+        Agent::AsAgent(n)->Configure( this, &coupling_keys );		
+
         if( shared_ptr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
         {
 		    // As above, but in the replace pattern
@@ -112,14 +127,7 @@ void CompareReplace::Configure( TreePtr<Node> cp,
 		    // Provide a back pointer for slaves (not sure why)
             cr->master_ptr = this; 
         }
-
-		// Give agents pointers to here and our coupling keys
-        Agent::AsAgent(n)->Configure( this, &coupling_keys );		
 	}
-
-    // Finally store the patterns in the object (we are now ready to transform)
-    compare_pattern = cp;
-    replace_pattern = rp;
 } 
 
 
@@ -260,7 +268,7 @@ TreePtr<Node> CompareReplace::DuplicateNode( TreePtr<Node> source,
     if( force_dirty || // requested by caller
         source_dirty ) // source was dirty
     {
-        TRACE("dirtying ")(*dest)(" force=%d source=%d (")(*source)(")\n", force_dirty, source_dirty);        
+        //TRACE("dirtying ")(*dest)(" force=%d source=%d (")(*source)(")\n", force_dirty, source_dirty);        
         GetOverallMaster()->dirty_grass.insert( dest );
     }
     
@@ -301,7 +309,7 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
     // duplicates to the destination.
     for( int i=0; i<dest_memb.size(); i++ )
     {
-    	TRACE("Duplicating member %d\n", i );
+    	//TRACE("Duplicating member %d\n", i );
         ASSERT( keynode_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
         
@@ -311,19 +319,19 @@ TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
 
             dest_con->clear();
 
-            TRACE("Duplicating container size %d\n", keynode_con->size() );
+            //TRACE("Duplicating container size %d\n", keynode_con->size() );
 	        FOREACH( const TreePtrInterface &p, *keynode_con )
 	        {
 		        ASSERT( p ); // present simplified scheme disallows NULL
-		        TRACE("Duplicating ")(*p)("\n");
+		        //TRACE("Duplicating ")(*p)("\n");
 		        TreePtr<Node> n = DuplicateSubtree( p, source_terminus, dest_terminus );
-  	            TRACE("Normal element, inserting ")(*n)(" directly\n");
+  	            //TRACE("Normal element, inserting ")(*n)(" directly\n");
 		        dest_con->insert( n );
 	        }
         }            
         else if( TreePtrInterface *keynode_ptr = dynamic_cast<TreePtrInterface *>(keynode_memb[i]) )
         {
-            TRACE("Duplicating node ")(*keynode_ptr)("\n");
+            //TRACE("Duplicating node ")(*keynode_ptr)("\n");
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( *keynode_ptr )("source should be non-NULL");
             *dest_ptr = DuplicateSubtree( *keynode_ptr, source_terminus, dest_terminus );
@@ -351,11 +359,11 @@ void CompareReplace::KeyReplaceNodes( TreePtr<Node> pattern ) const
     UniqueWalkNoSlavePattern e(pattern);
     FOREACH( TreePtr<Node> pattern, e )
 	{
-	    TRACE(*pattern)("\n");
+	    //TRACE(*pattern)("\n");
 	    TreePtr<Node> key = pattern;
 	    if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( pattern ) )
 	    {
-            TRACE("Soft replace pattern not keyed, ")(*pattern)("\n");
+            //TRACE("Soft replace pattern not keyed, ")(*pattern)("\n");
 
             // Call the soft pattern impl 
             key = srp->DuplicateSubtree( this );
@@ -469,7 +477,7 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
 void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 {
     INDENT("");
-    TRACE("Enter S&R instance at %p\n", this);
+    TRACE("Enter S&R instance ")(*this)(" at %p\n", this);
     ASSERT( compare_pattern )("CompareReplace (or SearchReplace) object was not configured before invocation.\n"
                               "Either call Configure() or supply pattern arguments to constructor.\n"
                               "Thank you for taking the time to read this message.\n");
