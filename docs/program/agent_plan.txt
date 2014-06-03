@@ -13,6 +13,9 @@ Detailed plan for refactoring into agent patterns
       convert TreePtr<Node> into Agent * (and only for immediate use). We should never convert back again
 - Walk all pattern nodes and Configure() with sr and couplingkeys - do this during SR Configure(). DONE
   NOTE: Set current sr on slave node itself and recurse into through, but not slave_search or slave_replace (slave's own walk should do them)
+- EXTRA STEP: mend configure-happening-too-soon-on-saves by configuring slaves during master config (but check for any explicit calls on slaves in the steps)
+  NOTE: use shaken-down recursive style here, to set a precident for how the main algo will eventually work
+  NOTE: shaken down means note what the 1-st level slaves are in a list, and recurse directly from master Configure to slave Configure AFTER the pattern walk, not during.
 3. all invocations via agent interface, use AsAgent and call on the agent, not self
 - Additionally for soft nodes, pass this to them instead of sr, and provide a thunk (so soft algo is fully enclosed from agent network)
 - Once you think this is done, start asserting that pattern==this in the major functions
@@ -29,6 +32,7 @@ Detailed plan for refactoring into agent patterns
 ---now agent to agent calls are context-free and parameterless in the case of BuildReplace()---
 - Same for the dirty grass, try to keep the state locally
 - Slave tidy-up. Add a funciton in SR to invoke slave SR and send slave invocation through that. It can fill in the context (obviously sr ptr still needed).
+  NOTE: this is shaken down style, wher slave SR is invoked directly from master SR, AFTER the replace walk not during
 - Slaves: try to invoke them from SR AFTER master replace has finished. Only need to do 1st level, and recursion will take care of the rest. see [1]
 - RETHINK how to do the restriction pattern on Star nodes. It will be hard to accommodate hopping back out into SR's Compare. 
   NOTE: maybe even revoke the feature, and go back to just a PRE_RESTRICTION by typee...? see what the use cases are...
