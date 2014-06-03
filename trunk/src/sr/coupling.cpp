@@ -13,6 +13,7 @@ void CouplingKeys::DoKey( TreePtr<Node> x,
 	                      int go )
 {
 //	INDENT;
+    ASSERT(this);
 	shared_ptr<Key> key( new Key );
 	if( x )
         key->root = x;
@@ -70,6 +71,7 @@ void CouplingKeys::DoKey( shared_ptr<Key> key,
 TreePtr<Node> CouplingKeys::GetCoupled( TreePtr<Node> pattern )  
 {
   //  INDENT;
+    ASSERT(this);
     shared_ptr<Key> k = GetKey( pattern );
 	if( k )
 	    return k->root;
@@ -82,6 +84,7 @@ shared_ptr<Key> CouplingKeys::GetKey( TreePtr<Node> pattern )
 {
  //   INDENT;
     //TRACE("@%p Getting key for ", this)(*pattern)(" master is %p size %d\n", master, keys_map.size());
+    ASSERT(this);
 	if( keys_map.IsExist(pattern) )
 	{
 	    return keys_map[pattern];
@@ -104,6 +107,7 @@ shared_ptr<Key> CouplingKeys::GetKey( TreePtr<Node> pattern )
 Set< TreePtr<Node> > CouplingKeys::GetAllKeys() 
 {
  //   INDENT;
+    ASSERT(this);
     Set< TreePtr<Node> > s;
     UniqueFilter uf;
  //   TRACE("Key nodes:\n");

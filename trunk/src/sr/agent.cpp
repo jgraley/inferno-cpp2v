@@ -14,17 +14,14 @@ void NormalAgent::Configure( const CompareReplace *s, CouplingKeys *c )
 }
 
 
-void NormalAgent::ConfigureTreePtrThis( TreePtr<Node> tpt )								
-{
-	//TODO
-}
-
 bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 							       TreePtr<Node> pattern,
 							       bool can_key,
     						       Conjecture &conj ) const
 {
     INDENT;
+	ASSERT(sr)("Agent ")(*pattern)(" at %p appears not to have been configured, since sr is NULL", this);
+	ASSERT(coupling_keys);
 	ASSERT( x ); // Target must not be NULL
 	if( !pattern )    // NULL matches anything in search patterns (just to save typing)
 		return true;
@@ -137,7 +134,7 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 				TreePtrInterface *x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
 				ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
 				TRACE("Member %d is TreePtr, pattern ptr=%p\n", i, pattern_ptr->get());
-				r = DecidedCompare( *x_ptr, TreePtr<Node>(*pattern_ptr), can_key, conj );
+				r = /*Agent::AsAgent(TreePtr<Node>(*pattern_ptr))->*/DecidedCompare( *x_ptr, TreePtr<Node>(*pattern_ptr), can_key, conj );
 			}
 			else
 			{
@@ -264,7 +261,7 @@ bool NormalAgent::DecidedCompare( SequenceInterface &x,
 	    {
             // If there is one more element in x, see if it matches the pattern
 			//TreePtr<Node> xe( x[xit] );
-			if( xit != x.end() && DecidedCompare( *xit, pe, can_key, conj ) == true )
+			if( xit != x.end() && /*Agent::AsAgent(pe)->*/DecidedCompare( *xit, pe, can_key, conj ) == true )
 			{
 				++xit;
 			}
@@ -330,7 +327,7 @@ bool NormalAgent::DecidedCompare( CollectionInterface &x,
 	    		return false;
 
 	    	// Recurse into comparison function for the chosen node
-			if( !DecidedCompare( *xit, TreePtr<Node>(*pit), can_key, conj ) )
+			if( !/*Agent::AsAgent(TreePtr<Node>(*pit))->*/DecidedCompare( *xit, TreePtr<Node>(*pit), can_key, conj ) )
 			    return false;
 	    }
     }
@@ -387,7 +384,7 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 
 	// Try out comparison at this position
 	TRACE("Trying terminus ")(**thistime);
-	bool r = DecidedCompare( *thistime, pattern->terminus, can_key, conj );
+	bool r = /*Agent::AsAgent(pattern->terminus)->*/DecidedCompare( *thistime, pattern->terminus, can_key, conj );
     if( !r )
         return false;
         
