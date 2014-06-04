@@ -23,8 +23,7 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 	ASSERT(sr)("Agent ")(*pattern)(" at %p appears not to have been configured, since sr is NULL", this);
 	ASSERT(coupling_keys);
 	ASSERT( x ); // Target must not be NULL
-	if( !pattern )    // NULL matches anything in search patterns (just to save typing)
-		return true;
+	ASSERT(pattern);
     TRACE("Comparing x=")
          (*x)
          (" with pattern=")
@@ -131,10 +130,17 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 			}
 			else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
 			{
-				TreePtrInterface *x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
-				ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
-				TRACE("Member %d is TreePtr, pattern ptr=%p\n", i, pattern_ptr->get());
-				r = /*Agent::AsAgent(TreePtr<Node>(*pattern_ptr))->*/DecidedCompare( *x_ptr, TreePtr<Node>(*pattern_ptr), can_key, conj );
+			    if( !TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be NULL meaning no restriction
+				{
+				    r = true;
+				}
+				else
+				{
+					TreePtrInterface *x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
+					ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
+					TRACE("Member %d is TreePtr, pattern ptr=%p\n", i, pattern_ptr->get());
+					r = DecidedCompare( *x_ptr, TreePtr<Node>(*pattern_ptr), can_key, conj );
+				}
 			}
 			else
 			{
