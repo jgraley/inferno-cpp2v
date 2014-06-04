@@ -47,27 +47,33 @@ typedef ContainerFromIterator< UniqueWalkNoSlavePattern_iterator, TreePtr<Node> 
 CompareReplace::CompareReplace( TreePtr<Node> cp,
                                 TreePtr<Node> rp,
                                 bool im ) :
+    is_configured( false ),								 
     is_master( im ),                                                 
     compare_pattern( cp ),
     replace_pattern( rp ),
     master_ptr( NULL )
 {
-    if( compare_pattern )
-        ConfigureImpl(); 
 }    
     
     
 void CompareReplace::Configure( TreePtr<Node> cp,
                                 TreePtr<Node> rp )
 {
+    INDENT;
+    ASSERT(!is_configured)("Calling configure on already-configured ")(*this);
+    TRACE("Entering SR::Configure on ")(*this)("\n");
     compare_pattern = cp;
     replace_pattern = rp;
 	ConfigureImpl();
 }
+																
 								
-
 void CompareReplace::ConfigureImpl()
 {
+    INDENT;
+    TRACE("Entering CR::ConfigureImpl on ")(*this)("\n");
+
+    ASSERT(!is_configured)("Should not directly configure slave ")(*this);
     // TODO now that this operates per-slave instead of recursing through everything from the 
     // master, we need to obey the rule that slave patterns are complete before Configure, as
     // with master. Maybe an optional check on first invocation? And change all existing 
@@ -85,7 +91,7 @@ void CompareReplace::ConfigureImpl()
     FOREACH( TreePtr<Node> n, tsp )
     {        
 		// Give agents pointers to here and our coupling keys
-		TRACE("Configuring search pattern ")(*n)("\n");
+		//TRACE("Configuring search pattern ")(*n)("\n");
         Agent::AsAgent(n)->Configure( this, &coupling_keys );		
         if( shared_ptr<StuffBase> sb = dynamic_pointer_cast<StuffBase>(n) )
         {
@@ -102,6 +108,11 @@ void CompareReplace::ConfigureImpl()
             TRACE("Found coupling slave in search pattern at %p\n", cs.get() );
             cs->SetCouplingsMaster( &coupling_keys ); 
         }
+		
+		if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(n) )
+		{
+		    immediate_slaves.insert( sb );
+		}
     }
 
     // look for first-level slaves. Set their couplings master pointer to point
@@ -113,7 +124,7 @@ void CompareReplace::ConfigureImpl()
     FOREACH( TreePtr<Node> n, ss )
     {
 		// Give agents pointers to here and our coupling keys
-		TRACE("Configuring replace pattern ")(*n)("\n");		
+		//TRACE("Configuring replace pattern ")(*n)("\n");		
         Agent::AsAgent(n)->Configure( this, &coupling_keys );		
 
         if( shared_ptr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
@@ -127,7 +138,19 @@ void CompareReplace::ConfigureImpl()
 		    // Provide a back pointer for slaves (not sure why)
             cr->master_ptr = this; 
         }
+		if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(n) )
+		{
+		    immediate_slaves.insert( sb );
+		}
 	}
+	
+	FOREACH( shared_ptr<SlaveBase> s, immediate_slaves )
+	{
+	    TRACE("Recursing to configure slave ")(*s)("\n");
+	    s->ConfigureImpl();
+	}
+	
+	is_configured = true;
 } 
 
 
@@ -476,6 +499,7 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
 // Do a search and replace based on patterns stored in our members
 void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 {
+    ASSERT( is_configured )(*this)(" has not been configured");
     INDENT("");
     TRACE("Enter S&R instance ")(*this)(" at %p\n", this);
     ASSERT( compare_pattern )("CompareReplace (or SearchReplace) object was not configured before invocation.\n"
@@ -511,17 +535,16 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 SearchReplace::SearchReplace( TreePtr<Node> sp,
                               TreePtr<Node> rp,
                               bool im ) :
-    CompareReplace( NULL, NULL, im )                              
+    CompareReplace( sp, rp, im )                              
 {
-    if( sp )
-        Configure( sp, rp );
 }
 
 
-void SearchReplace::Configure( TreePtr<Node> sp,
-                               TreePtr<Node> rp )
+void SearchReplace::ConfigureImpl()
 {                    
-    ASSERT( sp ); // a search pattern is required to configure the engine
+    INDENT;
+    ASSERT( compare_pattern ); // a search pattern is required to configure the engine
+	TRACE("Entering SR::Configure on ")(*this)("\n");
 
     // Make a non-rooted search and replace (ie where the base of the search pattern
     // does not have to be the root of the whole program tree).
@@ -530,27 +553,28 @@ void SearchReplace::Configure( TreePtr<Node> sp,
     // we got pre-restricted already.
     MakePatternPtr< Stuff<Node> > stuff;
 
-    if( !rp )
+    if( !replace_pattern )
     {
         // Search and replace immediately coupled, insert Stuff, but don't bother
         // with the redundant Overlay.
-        stuff->terminus = sp;
-        CompareReplace::Configure( stuff );
+        stuff->terminus = compare_pattern;
+		compare_pattern = stuff;
     }
     else
     {
-        // Classic search and replace with seperate replace pattern, we can use
+        // Classic search and replace with separate replace pattern, we can use
         // an Overlay node to overwrite the replace pattern at replace time.
         
         // Insert a Stuff node as root of the replace pattern
         MakePatternPtr< Overlay<Node> > overlay;
         stuff->terminus = overlay;
-        overlay->through = sp;
-        overlay->overlay = rp;
-
-        // Configure the rooted implementation (CompareReplace) with new patterns and couplings
-        CompareReplace::Configure( stuff, stuff ); // TODO don't need it twice
+        overlay->through = compare_pattern;
+        overlay->overlay = replace_pattern;
+        compare_pattern = stuff;
+		replace_pattern = stuff;
     }
+
+	CompareReplace::ConfigureImpl();	
 }
 
 
