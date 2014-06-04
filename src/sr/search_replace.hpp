@@ -125,6 +125,8 @@ public:
     }
 
 private:
+    bool is_configured; 
+    std::set< shared_ptr<SlaveBase> > immediate_slaves;
     static int repetitions;
     static bool rep_error;
 public:
@@ -178,10 +180,7 @@ public:
                    TreePtr<Node> rp = TreePtr<Node>(),
                    bool im = true );
                    
-    // Call this to set the patterns after construction. This should not be virtual since
-    // the constructor calls it.
-    void Configure( TreePtr<Node> sp,
-                    TreePtr<Node> rp = TreePtr<Node>() );                 
+    virtual void ConfigureImpl();                 
                     
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *links ) const;
