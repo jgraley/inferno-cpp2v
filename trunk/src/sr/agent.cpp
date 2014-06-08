@@ -139,7 +139,13 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 					TreePtrInterface *x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
 					ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
 					TRACE("Member %d is TreePtr, pattern ptr=%p\n", i, pattern_ptr->get());
-					r = DecidedCompare( *x_ptr, TreePtr<Node>(*pattern_ptr), can_key, conj );
+					TreePtr<Node> tpp(*pattern_ptr);
+					Agent *ap = Agent::AsAgent(tpp);
+					//NormalAgent *nap = dynamic_cast<NormalAgent *>(ap);
+					//ASSERT( nap ); 
+					//ASSERT( nap->sr == sr )("%p != %p", nap->sr, sr);
+					//ASSERT( nap->coupling_keys == coupling_keys );
+					r = ap->DecidedCompare( *x_ptr, tpp, can_key, conj );
 				}
 			}
 			else
