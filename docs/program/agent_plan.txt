@@ -13,9 +13,10 @@ Detailed plan for refactoring into agent patterns
       convert TreePtr<Node> into Agent * (and only for immediate use). We should never convert back again
 - Walk all pattern nodes and Configure() with sr and couplingkeys - do this during SR Configure(). DONE
   NOTE: Set current sr on slave node itself and recurse into through, but not slave_search or slave_replace (slave's own walk should do them)
-- EXTRA STEP: mend configure-happening-too-soon-on-saves by configuring slaves during master config (but check for any explicit calls on slaves in the steps)
+- EXTRA STEP: mend configure-happening-too-soon-on-saves by configuring slaves during master config (but check for any explicit calls on slaves in the steps) DONE
   NOTE: use shaken-down recursive style here, to set a precident for how the main algo will eventually work
   NOTE: shaken down means note what the 1-st level slaves are in a list, and recurse directly from master Configure to slave Configure AFTER the pattern walk, not during.
+- EXTRA STEP: do not pass NULL as a pattern into DecidedCompare (as in NULL wildcarding)
 3. all invocations via agent interface, use AsAgent and call on the agent, not self
 - Additionally for soft nodes, pass this to them instead of sr, and provide a thunk (so soft algo is fully enclosed from agent network)
 - Once you think this is done, start asserting that pattern==this in the major functions

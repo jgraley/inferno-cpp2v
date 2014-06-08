@@ -86,8 +86,37 @@ void CompareReplace::ConfigureImpl()
         replace_pattern = compare_pattern;
 
     TRACE("Elaborating ")(string( *this ))(" at %p\n", this);
-    // --- walk over the master compare pattern ---
+
+    // Walkers for compare and replace patterns that do not recurse beyond slaves
     UniqueWalkNoSlavePattern tsp(compare_pattern);
+    UniqueWalkNoSlavePattern ss(replace_pattern);
+
+	// Collect together all the first-level slaves
+    FOREACH( TreePtr<Node> n, tsp )
+    {        
+		if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(n) )
+		{
+		    immediate_slaves.insert( sb );
+		}
+    }
+    FOREACH( TreePtr<Node> n, ss )
+    {
+		if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(n) )
+		{
+		    immediate_slaves.insert( sb );
+		}
+	}
+	
+	// Recurse into the slaves' configure
+	FOREACH( shared_ptr<SlaveBase> s, immediate_slaves )
+	{
+	    TRACE("Recursing to configure slave ")(*s)("\n");
+	    s->ConfigureImpl();
+	}
+	
+	// Configure all the other nodes - do this last so if a node
+	// is reachable from both master and slave, the master config
+	// takes priority (overwriting the slave config).
     FOREACH( TreePtr<Node> n, tsp )
     {        
 		// Give agents pointers to here and our coupling keys
@@ -108,19 +137,8 @@ void CompareReplace::ConfigureImpl()
             TRACE("Found coupling slave in search pattern at %p\n", cs.get() );
             cs->SetCouplingsMaster( &coupling_keys ); 
         }
-		
-		if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(n) )
-		{
-		    immediate_slaves.insert( sb );
-		}
     }
 
-    // look for first-level slaves. Set their couplings master pointer to point
-    // to our couplings. 
-	// TODO cross uniquise the compare and replace walks because they are mostly
-	// going to be hitting the same things. But only after making sure master_ptr
-	// will be set on the right things (find out what it's used for)
-    UniqueWalkNoSlavePattern ss(replace_pattern);
     FOREACH( TreePtr<Node> n, ss )
     {
 		// Give agents pointers to here and our coupling keys
@@ -138,18 +156,8 @@ void CompareReplace::ConfigureImpl()
 		    // Provide a back pointer for slaves (not sure why)
             cr->master_ptr = this; 
         }
-		if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(n) )
-		{
-		    immediate_slaves.insert( sb );
-		}
 	}
-	
-	FOREACH( shared_ptr<SlaveBase> s, immediate_slaves )
-	{
-	    TRACE("Recursing to configure slave ")(*s)("\n");
-	    s->ConfigureImpl();
-	}
-	
+
 	is_configured = true;
 } 
 
