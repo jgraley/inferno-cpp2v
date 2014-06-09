@@ -78,14 +78,14 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 		}
         TRACE("subtree under ")(*x)(" is green grass\n");
         // Normal matching for the through path
-        bool r = DecidedCompare( x, green_pattern->GetThrough(), can_key, conj );
+        bool r = Agent::AsAgent(green_pattern->GetThrough())->DecidedCompare( x, green_pattern->GetThrough(), can_key, conj );
         if( !r )
             return false;
     }
     else if( shared_ptr<OverlayBase> op = dynamic_pointer_cast<OverlayBase>(pattern) )
     {
         // When Overlay node seen duriung search, just forward through the "through" path
-        bool r = DecidedCompare( x, op->GetThrough(), can_key, conj );
+        bool r = Agent::AsAgent(op->GetThrough())->DecidedCompare( x, op->GetThrough(), can_key, conj );
         if( !r )
             return false;
     }
@@ -96,7 +96,7 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
     else if( shared_ptr<SlaveBase> sp = dynamic_pointer_cast<SlaveBase>(pattern) )
     {
         // When a slave node seen duriung search, just forward through the "base" path
-        bool r = DecidedCompare( x, sp->GetThrough(), can_key, conj );
+        bool r = Agent::AsAgent(sp->GetThrough())->DecidedCompare( x, sp->GetThrough(), can_key, conj );
         if( !r )
             return false;
     }
@@ -273,7 +273,7 @@ bool NormalAgent::DecidedCompare( SequenceInterface &x,
 	    {
             // If there is one more element in x, see if it matches the pattern
 			//TreePtr<Node> xe( x[xit] );
-			if( xit != x.end() && /*Agent::AsAgent(pe)->*/DecidedCompare( *xit, pe, can_key, conj ) == true )
+			if( xit != x.end() && Agent::AsAgent(pe)->DecidedCompare( *xit, pe, can_key, conj ) == true )
 			{
 				++xit;
 			}
@@ -339,7 +339,7 @@ bool NormalAgent::DecidedCompare( CollectionInterface &x,
 	    		return false;
 
 	    	// Recurse into comparison function for the chosen node
-			if( !/*Agent::AsAgent(TreePtr<Node>(*pit))->*/DecidedCompare( *xit, TreePtr<Node>(*pit), can_key, conj ) )
+			if( !Agent::AsAgent(TreePtr<Node>(*pit))->DecidedCompare( *xit, TreePtr<Node>(*pit), can_key, conj ) )
 			    return false;
 	    }
     }
@@ -396,7 +396,7 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 
 	// Try out comparison at this position
 	TRACE("Trying terminus ")(**thistime);
-	bool r = /*Agent::AsAgent(pattern->terminus)->*/DecidedCompare( *thistime, pattern->terminus, can_key, conj );
+	bool r = Agent::AsAgent(pattern->terminus)->DecidedCompare( *thistime, pattern->terminus, can_key, conj );
     if( !r )
         return false;
         
@@ -425,7 +425,9 @@ TreePtr<Node> NormalAgent::BuildReplace( TreePtr<Node> pattern,
 	                                     TreePtr<Node> keynode ) const
 {
     INDENT;
-    ASSERT( pattern );
+	ASSERT(sr)("Agent ")(*pattern)(" at %p appears not to have been configured, since sr is NULL", this);
+	ASSERT(coupling_keys);
+	ASSERT(pattern);
 
     // See if the pattern node is coupled to anything
     shared_ptr<Key> key = coupling_keys->GetKey( pattern );
@@ -445,7 +447,7 @@ TreePtr<Node> NormalAgent::BuildReplace( TreePtr<Node> pattern,
 		ASSERT( replace_stuff->terminus );
 		TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(replace_stuff->terminus))
 		                                                  (", term=")(*(stuff_key->terminus))("\n");
-		TreePtr<Node> term = BuildReplace( replace_stuff->terminus, stuff_key->terminus );
+		TreePtr<Node> term = AsAgent(replace_stuff->terminus)->BuildReplace( replace_stuff->terminus, stuff_key->terminus );
 		TRACE( "Stuff node: Substituting stuff");
 		return sr->DuplicateSubtree(keynode, stuff_key->terminus, term);   
 	}     
@@ -470,7 +472,7 @@ TreePtr<Node> NormalAgent::BuildReplaceKeyed( TreePtr<Node> pattern,
 	{
 		TreePtr<Node> overlay = srp->GetOverlayPattern(); // only strong modifiers use this
 		if( overlay ) // Really two different kinds of pattern node
-			return BuildReplace( overlay, keynode ); // Strong modifier
+			return AsAgent(overlay)->BuildReplace( overlay, keynode ); // Strong modifier
 		else
 			return sr->DuplicateSubtree(keynode);   // Weak modifier
 	}
@@ -478,13 +480,13 @@ TreePtr<Node> NormalAgent::BuildReplaceKeyed( TreePtr<Node> pattern,
 	{
 		ASSERT( ob->GetOverlay() );          
 		TRACE("Overlay node through=")(*(ob->GetThrough()))(" overlay=")(*(ob->GetOverlay()))("\n");
-		return BuildReplace( ob->GetOverlay(), keynode );
+		return AsAgent(ob->GetOverlay())->BuildReplace( ob->GetOverlay(), keynode );
 	}
 	else if( shared_ptr<GreenGrassBase> ggb = dynamic_pointer_cast<GreenGrassBase>( pattern ) )
 	{
 		ASSERT( ggb->GetThrough() );          
 		TRACE("GreenGrass node through=")(*(ggb->GetThrough()))("\n");
-    	return BuildReplace( ggb->GetThrough(), keynode );
+    	return AsAgent(ggb->GetThrough())->BuildReplace( ggb->GetThrough(), keynode );
 	}
 	else if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(pattern) )
 	{   
@@ -581,7 +583,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> pattern,
 	        {
 		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*pattern)(" was NULL\n");
 		        TRACE("Got ")(*p)("\n");
-				TreePtr<Node> n = BuildReplace( p );
+				TreePtr<Node> n = AsAgent(p)->BuildReplace( p );
                 if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(n.get()) )
                 {
                     TRACE("Walking SubContainer length %d\n", psc->size() );
@@ -607,7 +609,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> pattern,
                        
             if( pattern_child )
             {                             
-                dest_child = BuildReplace( pattern_child, *keynode_ptr );
+                dest_child = AsAgent(pattern_child)->BuildReplace( pattern_child, *keynode_ptr );
                 ASSERT( dest_child );
                 ASSERT( dest_child->IsFinal() );
                 present_in_pattern.insert( dest_memb[i] );
@@ -750,7 +752,7 @@ TreePtr<Node> NormalAgent::BuildReplaceNormal( TreePtr<Node> pattern ) const
 	        {
 		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*pattern)(" was NULL\n");
 		        TRACE("Got ")(*p)("\n");
-	            TreePtr<Node> n = BuildReplace( p );
+	            TreePtr<Node> n = AsAgent(p)->BuildReplace( p );
 		        if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(n.get()) )
 		        {
 			        TRACE("Walking SubContainer length %d\n", psc->size() );
@@ -769,7 +771,7 @@ TreePtr<Node> NormalAgent::BuildReplaceNormal( TreePtr<Node> pattern ) const
             TRACE("Copying single element\n");
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( *pattern_ptr )("Member %d (", i)(*pattern_ptr)(") of ")(*pattern)(" was NULL when not overlaying\n");
-            *dest_ptr = BuildReplace( *pattern_ptr );
+            *dest_ptr = AsAgent(*pattern_ptr)->BuildReplace( *pattern_ptr );
             ASSERT( *dest_ptr );
             ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() )("Member %d (", i)(**pattern_ptr)(") of ")(*pattern)(" was not final\n");            
         }
