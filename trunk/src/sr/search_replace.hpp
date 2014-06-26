@@ -444,18 +444,51 @@ struct Erase : EraseBase, Special<PRE_RESTRICTION>
     }
 };
 
-// Tell soft nodes that a compare rtun is beginning and it can flush any caches it may have
+// Tell soft nodes that a compare run is beginning and it can flush any caches it may have
 struct Flushable
 {
 	virtual void FlushCache() {}
 };
 
-struct SoftSearchPattern : Flushable
+class SoftSearchPattern : Flushable
 {
+public:
+    SoftSearchPattern() :
+	    current_sr( NULL ),
+		current_can_key( false ),
+		current_conj( NULL )
+	{}
+	
 	virtual bool DecidedCompare( const CompareReplace *sr,
 									const TreePtrInterface &x,
 									bool can_key,
-									Conjecture &conj ) = 0;
+									Conjecture &conj ) 									
+	{
+		ASSERT( !current_sr )("DecidedCompare() recursion detected in soft node");
+		ASSERT( !current_conj )("DecidedCompare() recursion detected in soft node");
+	    current_sr = sr;
+		current_can_key = can_key;
+		current_conj = &conj;	
+        bool result = MyNormalCompare( x );
+        current_sr = NULL;
+		current_conj = NULL;
+		return result;
+	}
+    virtual bool MyNormalCompare( const TreePtrInterface &x )
+    {
+	    ASSERTFAIL("One of DecidedCompare() (deprecated) or MyNormalCompare() must be overridden in soft nodes");
+    }	
+protected:
+	bool NormalCompare( TreePtr<Node> x, TreePtr<Node> pattern )
+	{
+		ASSERT( current_sr )("Cannot call NormalCompare() from other than MyNormalCompare()");
+		ASSERT( current_conj )("Cannot call NormalCompare() from other than MyNormalCompare()");
+		return current_sr->DecidedCompare( x, pattern, current_can_key, *current_conj );
+	}
+private:
+    const CompareReplace *current_sr;
+	bool current_can_key;
+	Conjecture *current_conj; 
 };
 struct SoftSearchPatternSpecialKey : Flushable
 {
