@@ -469,21 +469,31 @@ public:
 	    current_sr = sr;
 		current_can_key = can_key;
 		current_conj = &conj;	
-        bool result = MyNormalCompare( x );
+        bool result = MyCompare( x, can_key );
         current_sr = NULL;
 		current_conj = NULL;
 		return result;
 	}
-    virtual bool MyNormalCompare( const TreePtrInterface &x )
+	// Soft nodes should override this to implement their comparison function
+    virtual bool MyCompare( const TreePtrInterface &x, bool can_key )
     {
-	    ASSERTFAIL("One of DecidedCompare() (deprecated) or MyNormalCompare() must be overridden in soft nodes");
+	    ASSERTFAIL("One of DecidedCompare() (deprecated) or MyCompare() must be overridden in soft nodes");
     }	
-protected:
-	bool NormalCompare( TreePtr<Node> x, TreePtr<Node> pattern )
+protected: // Call only from the soft node implementation in MyCompare()
+    // Compare for child nodes in a normal context (i.e. in which the pattern must match
+	// for an overall match to be possible, and so can be used to key a coupling)
+	bool Compare( TreePtr<Node> x, TreePtr<Node> pattern )
 	{
-		ASSERT( current_sr )("Cannot call NormalCompare() from other than MyNormalCompare()");
-		ASSERT( current_conj )("Cannot call NormalCompare() from other than MyNormalCompare()");
+		ASSERT( current_sr )("Cannot call Compare() from other than MyCompare()");
+		ASSERT( current_conj )("Cannot call Compare() from other than MyCompare()");
 		return current_sr->DecidedCompare( x, pattern, current_can_key, *current_conj );
+	}
+    // Compare for child nodes in an abnormal context (i.e. in which the pattern need not match
+	// for an overall match to be possible, and so cannot be used to key a coupling)
+	bool AbnormalCompare( TreePtr<Node> x, TreePtr<Node> pattern )
+	{
+		ASSERT( current_sr )("Cannot call AbnormalCompare() from other than MyNormalCompare()");
+		return current_sr->Compare( x, pattern, false ); 
 	}
 private:
     const CompareReplace *current_sr;
