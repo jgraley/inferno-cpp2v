@@ -14,6 +14,8 @@
 
 namespace Steps {
 
+using namespace SR;
+
 /** Ensure an actual return statement is present in void-returning functions */
 class ExplicitiseReturn : public SearchReplace
 {

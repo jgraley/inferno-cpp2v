@@ -5,8 +5,10 @@
 //#include "coupling.hpp"
 #include <vector>
 
-class CompareReplace;
+namespace SR 
+{
 
+class CompareReplace;
 
 class Conjecture
 {
@@ -49,6 +51,8 @@ private:
 	vector<int> start_counts;
 	vector<string> it_names;
 	bool failed;
+};
+
 };
 
 #endif

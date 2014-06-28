@@ -2,6 +2,8 @@
 #include "helpers/walk.hpp" 
 #include "search_replace.hpp" 
 
+using namespace SR;
+
 CouplingKeys::CouplingKeys() : 
     master(NULL) 
 {
@@ -159,4 +161,3 @@ void CouplingKeys::Clear()
   //  TRACE("@%p Clearing keys\n", this);
     keys_map.clear(); 
 }
-

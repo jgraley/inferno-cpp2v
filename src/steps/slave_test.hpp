@@ -9,6 +9,8 @@
 
 namespace Steps {
 
+using namespace SR;
+
 class SlaveTest : public SearchReplace
 {
 public:

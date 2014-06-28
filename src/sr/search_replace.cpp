@@ -3,6 +3,8 @@
 #include "common/hit_count.hpp"
 #include "helpers/simple_compare.hpp"
 
+using namespace SR;
+
 //#define STRACE
  
 int CompareReplace::repetitions;

@@ -6,6 +6,9 @@
 #include "conjecture.hpp"
 #include <set> 
 
+namespace SR 
+{
+
 // Base class for coupling keys; this deals with individual node matches, and also with stars
 // by means of pointing "root" at a SubCollection or SubSequence
 class CompareReplace;
@@ -35,7 +38,7 @@ public:
     /// Get all the keys in set form
     Set< TreePtr<Node> > GetAllKeys();		
     /// Provide a pointer to another (read-only) instance of this class that will 
-    /// be merged for the purposes of searching, but will not recieve new couplings 
+    /// be merged for the purposes of searching, but will not receive new couplings 
     void SetMaster( CouplingKeys *m );				
     /// Clear the couplings
     void Clear();
@@ -44,4 +47,5 @@ private:
 	CouplingKeys *master; 
 };
 
+};
 #endif

@@ -1,6 +1,8 @@
 #include "soft_patterns.hpp"
 #include "coupling.hpp"
 
+using namespace SR;
+
 shared_ptr<Key> TransformOfBase::DecidedCompare( const CompareReplace *sr,
 		                                                     const TreePtrInterface &x,
 		                                                     bool can_key,

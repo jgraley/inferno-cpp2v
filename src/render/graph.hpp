@@ -3,12 +3,12 @@
 
 #include "tree/cpptree.hpp"
 #include "helpers/transformation.hpp"
+#include "sr/search_replace.hpp"
 
 //
 // Generate a GraphViz compatible graph description from a subtree (when used as a
 // Transformation) or a search/replace pattern set.
 //
-class CompareReplace;
 class Graph : public OutOfPlaceTransformation
 {
 public:

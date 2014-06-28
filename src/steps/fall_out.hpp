@@ -5,6 +5,8 @@
 
 namespace Steps {
 
+using namespace SR;
+
 /// Put all the labels in an array indexable by an enum
 class PlaceLabelsInArray : public SearchReplace
 {
