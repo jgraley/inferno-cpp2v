@@ -12,6 +12,8 @@
 
 namespace Steps {
 
+using namespace SR;
+
 /** Convert for loops into while loops, preserving correct 
     behaviour of continue, which always means "jump to the 
     bottom of the body" */

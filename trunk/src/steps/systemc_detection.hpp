@@ -12,6 +12,8 @@
 
 namespace Steps {
 
+using namespace SR;
+
 /** Holder for the steps that detect implicit SysetemC constructs in C++ code
     and replace them with Inferno's Explicit nodes for SystemC which are much
     more succinct in tree form */

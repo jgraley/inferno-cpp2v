@@ -5,6 +5,8 @@
 
 namespace Steps {
 
+using namespace SR;
+
 /// Make sure every SystemC wait is followed by a goto
 /** This is in preparation for state-out/fall-out. We will only reorganise the 
     program around gotos, and so we need to have a goto in place to re-organise.

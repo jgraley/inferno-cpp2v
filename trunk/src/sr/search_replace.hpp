@@ -9,62 +9,8 @@
 #include "agent.hpp"
 #include <set>
 
-// In-tree search and replace utility. To use, you make a search pattern and a 
-// replace pattern, each in the form of a subtree. You pass these into the 
-// constructor and you now have a pass object (functor) that will apply the 
-// implied transformation on programs passed to it.
-// 
-// Additional functionality as follows:
-// - Intermediate tree nodes like Numeric or Expression can be placed
-//   in search pattern, in which case they act as wildcards matching
-//   any subclass node (think of set-theory interpretation of inheritance)
-//
-// - A NULL shared_ptr is also a wildcard for anything.
-//
-// - Multiple nodes in the search pattern can be forced to match the same 
-//   program node if a the same node is pointed to by more than one
-//   parent in the search pattern. Must be >= 1 node in normal 
-//   context.
-//
-// - Nodes in the replace pattern may be substituted by program nodes
-//   found during matching by allowing the replace pattern to point to 
-//   a node also present in the search patter (in a normal context).
-//
-// - Identifiers (any node derived from Identifier) are kept unique
-//   during replace by pointing directly to the identifier in the 
-//   program tree rather than duplicating (only when substituting).
-//
-// - Soft search pattern nodes may be created which can support custom
-//   matching rules by implementing a virtual DecidedCompare() function.
-//   Ready made soft nodes are documented in soft_patterns.hpp
-//
-// - Sequence/ContainerCommon support: sequences require matching ordering
-//   and containers do not (only the presence of the matching elements).
-//
-// - Multi-node wildcards like * in sequences and collections (Star node).
-//
-// - Recursive wildcards, arbitrary depth and arbitrary depth with
-//   restricted intermediates (the Stuff node). Restriction can be a
-//   general tree (in abnormal context)
-//
-// - SlaveSearchReplace search/replace so that a second SR can happen 
-//   for each match of the first one, and can borrow its couplings.
-//
-// - Boolean rules supported by NotMatch, MAtchAll, MatchAny and
-//   MatchOdd. For all but MatchAll, pattern is abnormal context.
-//
-// - The base type supplied as template param to all special nodes
-//   acts as a pre-restriction according to usual topological rules.
-//
-// - Green grass node only matches nodes that have not already been
-//   replaced, to avoid spinning forever.
-//
-// - Overlay node allows a replace pattern to be overlayed over 
-//   a substituted node. NULL shared_ptr (or empty container) in overly 
-//   means fill this in from the substitute. Intemediate node types
-//   mean fill in those members introduced in derived classes from the
-//   substitute.
-//
+namespace SR 
+{
 
 class Conjecture;
 class SpecialBase;
@@ -477,7 +423,7 @@ public:
 	// Soft nodes should override this to implement their comparison function
     virtual bool MyCompare( const TreePtrInterface &x, bool can_key )
     {
-	    ASSERTFAIL("One of DecidedCompare() (deprecated) or MyCompare() must be overridden in soft nodes");
+	    ASSERTFAIL("One of DecidedCompare() (deprecated) or Myompare() must be overridden in soft nodes");
     }	
 protected: // Call only from the soft node implementation in MyCompare()
     // Compare for child nodes in a normal context (i.e. in which the pattern must match
@@ -518,6 +464,8 @@ struct SoftReplacePattern : Flushable
 		return TreePtr<Node>(); // default implementation for weak modifiers 
 								// so that couplings appear to override local functionality
 	}
+};
+
 };
 
 #endif

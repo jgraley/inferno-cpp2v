@@ -4,6 +4,8 @@
 #include "search_replace.hpp"
 #include "helpers/transformation.hpp"
 
+namespace SR
+{
 
 struct NotMatchBase {}; // needed for graph plotter
 
@@ -254,4 +256,5 @@ struct PointerIs : Special<PRE_RESTRICTION>,
     }
 };
 
+};
 #endif

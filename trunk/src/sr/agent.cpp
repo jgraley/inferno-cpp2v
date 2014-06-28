@@ -4,6 +4,8 @@
 #include "helpers/simple_compare.hpp"
 #include "agent.hpp"
 
+using namespace SR;
+
 void NormalAgent::Configure( const CompareReplace *s, CouplingKeys *c )
 {
 	ASSERT(s);
@@ -862,5 +864,3 @@ Sequence<Node> NormalAgent::WalkContainerPattern( ContainerInterface &pattern,
     }
     return expanded;
 }
-                                                                                                        
-

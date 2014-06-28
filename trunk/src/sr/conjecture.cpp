@@ -2,6 +2,9 @@
 #include "search_replace.hpp"
 #include "conjecture.hpp"
 
+namespace SR 
+{
+
 Conjecture::Conjecture()
 {
     failed = false;
@@ -130,3 +133,4 @@ void Conjecture::ResizeCounts()
     }
 }
 
+};

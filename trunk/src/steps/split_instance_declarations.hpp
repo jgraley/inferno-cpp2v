@@ -5,6 +5,8 @@
 
 namespace Steps {
 
+using namespace SR;
+
 /** Where variables are declared in the statement body and are 
     initialised, move the decl into the decls body and initialise 
     using an assignment. */

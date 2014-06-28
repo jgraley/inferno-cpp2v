@@ -5,6 +5,8 @@
 #include "tree/cpptree.hpp" // TODO this dep means we must move this into steps/ or at least parts
 #include "helpers/transformation.hpp"
 
+using namespace SR;
+// TODO pollutes client namespace
 
 // Make an identifer based on an existing one. New identfier is named using
 // sprintf( format, source->name )

@@ -5,6 +5,8 @@
 
 namespace Steps {
 
+using namespace SR;
+
 /** Detect an uncombable switch and mark it for lowering. This is 
     any switch with fall throughs.  */
 class DetectUncombableSwitch : public SearchReplace

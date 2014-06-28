@@ -9,6 +9,9 @@
 #include <set>
 #include <boost/type_traits.hpp>
  
+namespace SR
+{ 
+ 
 class Conjecture;
 class SpecialBase;
 class StuffBase;
@@ -178,6 +181,8 @@ public:
 	{ 
 	}
 	// Add more params as needed...
+};
+
 };
 
 #endif
