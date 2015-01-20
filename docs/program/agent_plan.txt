@@ -68,6 +68,11 @@ ONLY IF the NormalAgentWrapper uses (derives from) PreRestrictionAgent, so that 
 where special nodes expose members that point to children (through, terminus etc) these remain the same and are already safe. AsAgent() 
 converts them as required (it drops the node type but don't care; already safe)
 
+NOTE: A version of DuplicateSubtree exists in helpers/ and is based on DuplicateSubtree in SR after the big replace call-graph refactor. This
+refactor means it does not need to recurse back into SR replace even if there is a substitution at terminus. However, GreenGrass support is 
+missing - it cannot fill in the DirtyGrass backing structure correctly in its output. Add this then remove the redundant version from
+the actual SR.
+
 [1] The anatomy of a slave
 SlaveCompareReplace is a special Node, Agent and CompareReplace object in its own right.
 The Agent/special Node is understood to be a part of some other CompareReplace's pattern (the

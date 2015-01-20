@@ -13,7 +13,7 @@ public:
     Render( string of = string() );
     TreePtr<Node> operator()( TreePtr<Node> context, TreePtr<Node> root );
 private:
-    TreePtr<CPPTree::Program> program;
+    TreePtr<CPPTree::Program> program, temp_old_program;
     string deferred_decls;
     stack< TreePtr<CPPTree::Scope> > scope_stack;
     UniquifyIdentifiers unique;
@@ -44,15 +44,20 @@ private:
     string RenderInstance( TreePtr<CPPTree::Instance> o, string sep, bool showtype = true,
                            bool showstorage = true, bool showinit = true, bool showscope = false );
     bool ShouldSplitInstance( TreePtr<CPPTree::Instance> o );
-    string RenderDeclaration( TreePtr<CPPTree::Declaration> declaration, string sep, TreePtr<CPPTree::AccessSpec> *current_access = NULL,
-                              bool showtype = true, bool force_incomplete = false );
+    string RenderDeclaration( TreePtr<CPPTree::Declaration> declaration, 
+                              string sep, 
+                              TreePtr<CPPTree::AccessSpec> *current_access = NULL,
+                              bool showtype = true, 
+                              bool force_incomplete = false,
+                              bool shownonfuncinit = true );
     string RenderStatement( TreePtr<CPPTree::Statement> statement, string sep );
     template< class ELEMENT >
     string RenderSequence( Sequence<ELEMENT> spe, 
                            string separator, 
                            bool separate_last,
                            TreePtr<CPPTree::AccessSpec> init_access = TreePtr<CPPTree::AccessSpec>(),
-                           bool showtype=true );
+                           bool showtype = true,
+                           bool shownonfuncinit = true );
     string RenderOperandSequence( Sequence<CPPTree::Expression> spe, 
                                   string separator, 
                                   bool separate_last );

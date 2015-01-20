@@ -31,6 +31,7 @@ public:
     static bool selftest;
     static bool assert_pedigree;
     static bool documentation_graphs;
+    static bool output_all;
 private:
     int curarg;
     char **argv;

@@ -1,5 +1,19 @@
 #!/bin/bash
 
+#
+# test.sh
+#
+# This runs the standard Inferno test, which runs Inferno on an input C++ 
+# or SystemC program, and checks the output by compiling and running both 
+# the input and output programs and comparing their result code. Bugs can 
+# cause various of these stages to fail, and all are checked. The test is
+# only good if the return value truly reflects what the program actually 
+# did. Also note that a failure to transform is likely to cause a false 
+# pass. TODO add a heuristic check on output .cpp file to ensure it really
+# is in the target format, i.e. satisfies invariants, but not if -q is
+# specified.
+#
+
 inferno=./inferno.exe
 resfile=test/results.csv
 

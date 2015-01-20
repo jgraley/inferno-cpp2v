@@ -6,6 +6,8 @@
 #include "common/read_args.hpp"
 #include "tree/type_db.hpp"
 #include "helpers/walk.hpp"
+#include "helpers/duplicate.hpp"
+#include "helpers/simple_compare.hpp"
 #include "tree/misc.hpp"
 #include "tree/scope.hpp"
 #include "sort_decls.hpp"
@@ -41,19 +43,38 @@ Render::Render( string of ) :
 }
 
 
+// Note: this does not modify the program tree, and that can be checked by 
+// defining TEST_FOR_UNMODIFIED_TREE and retesting everything.
+//#define TEST_FOR_UNMODIFIED_TREE
 TreePtr<Node> Render::operator()( TreePtr<Node> context, TreePtr<Node> root )
 {
 	// Render can only work on a whole program
 	ASSERT( context == root );
-	program = dynamic_pointer_cast<Program>(root);
+    
+#ifdef TEST_FOR_UNMODIFIED_TREE    
+    temp_old_program = dynamic_pointer_cast<Program>(root);
+    root = Duplicate::DuplicateSubtree(root);
+#endif
+    
+    // Must be a program
+    program = dynamic_pointer_cast<Program>(root);
 	ASSERT( program );
-	AutoPush< TreePtr<Scope> > cs( scope_stack, program );
+
+#ifdef TEST_FOR_UNMODIFIED_TREE   
+    SimpleCompare sc;
+    bool before = sc(program, temp_old_program);  
+#endif
+    
+    // Track scopes for name resolution
+    AutoPush< TreePtr<Scope> > cs( scope_stack, program );
+    
+    // Make the identifiers unique
 	unique.clear();
-	unique.UniquifyScope( context );
+	unique.UniquifyScope( program );
 
     string s;
 
-    if( IsSystemC( root ) )
+    if( IsSystemC( program ) )
         s += "#include \"isystemc.h\"\n\n";
 
 	s += RenderDeclarationCollection( program, ";\n", true ); // gets the .hpp stuff directly
@@ -71,8 +92,12 @@ TreePtr<Node> Render::operator()( TreePtr<Node> context, TreePtr<Node> root )
 		fputs( s.c_str(), fp );
 		fclose( fp );
 	}
-	program = TreePtr<Program>();
-	return root; // no change
+		
+#ifdef TEST_FOR_UNMODIFIED_TREE   
+    ASSERT( sc(program, temp_old_program) == before );    	
+#endif
+    
+	return program; // no change
 }
 
 
@@ -681,7 +706,7 @@ bool Render::ShouldSplitInstance( TreePtr<Instance> o )
 
 string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 							 string sep, TreePtr<AccessSpec> *current_access,
-						  bool showtype, bool force_incomplete )
+						  bool showtype, bool force_incomplete, bool shownonfuncinit )
 {
 	TRACE();
 	string s;
@@ -715,7 +740,7 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 		else
 		{
 			// Otherwise, render everything directly using the default settings
-			s += RenderInstance( o, sep, showtype, showtype, true, false );
+			s += RenderInstance( o, sep, showtype, showtype, shownonfuncinit, false );
 		}
 	}
 	else if( TreePtr<Typedef> t = dynamic_pointer_cast< Typedef >(declaration) )
@@ -895,7 +920,8 @@ string Render::RenderSequence( Sequence<ELEMENT> spe,
 					   string separator,
 					   bool separate_last,
 					   TreePtr<AccessSpec> init_access,
-					   bool showtype )
+					   bool showtype,
+                       bool shownonfuncinit )
 {
 	TRACE();
 	string s;
@@ -905,7 +931,7 @@ string Render::RenderSequence( Sequence<ELEMENT> spe,
 		string sep = (separate_last || i+1<spe.size()) ? separator : "";
 		TreePtr<ELEMENT> pe = spe[i];
 		if( TreePtr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
-			s += RenderDeclaration( d, sep, init_access ? &init_access : NULL, showtype );
+			s += RenderDeclaration( d, sep, init_access ? &init_access : NULL, showtype, false, shownonfuncinit );
 		else if( TreePtr<Statement> st = dynamic_pointer_cast< Statement >(pe) )
 			s += RenderStatement( st, sep );
 		else
@@ -963,8 +989,9 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
                         first = false;
                     }   
                     
-        // TODO figure out what this does - it seems to look for function instances and then try to 
-        // init them as if they wew initable and their body was an expression.
+        // Where data members are initialised, generate the init into the init list. We will 
+        // inhibit rendering of these inits in the module decls. TODO inconsistent 
+        // with normal C++ constructors where the inits should already be in the correct place.
         if( TreePtr<Field> i = dynamic_pointer_cast<Field>(pd) )
         {
             TRACE("Got ")(*i)(" init is ")(*(i->initialiser))(" %d %d\n", 
@@ -980,7 +1007,6 @@ string Render::RenderModuleCtor( TreePtr<Module> m,
                 string ids = RenderIdentifier(i->identifier);                           
                 string inits = RenderExpression(i->initialiser);
                 s += "\n" + ids + "(" + inits + ")";
-                i->initialiser = MakeTreePtr<Uninitialised>(); // TODO naughty, changing the tree
                 first = false;                 
             }
         }                      
@@ -1021,11 +1047,15 @@ string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
     // For SystemC modules, we generate a constructor based on the other decls in
     // the module. Nothing goes in the Inferno tree for a module constructor, since
     // it is an elaboration mechanism, not funcitonal.
-    if( TreePtr<Module> m = dynamic_pointer_cast<Module>(sd) )
-        s += RenderModuleCtor( m, &init_access );
+    TreePtr<Module> sc_module = dynamic_pointer_cast<Module>(sd);
+    if( sc_module )
+        s += RenderModuleCtor( sc_module, &init_access );
 
     // Emit the actual declarations, sorted for dependencies
-    s += RenderSequence( sorted, separator, separate_last, init_access, showtype );
+    // Note that in SC modules there can be inits on non-funciton members, which we hide.
+    // TODO not consistent with C++ classes in general, where the inits have already been
+    // moved into constructor inits before rendering begins.
+    s += RenderSequence( sorted, separator, separate_last, init_access, showtype, !sc_module );
 	TRACE();
 	return s;
 }
