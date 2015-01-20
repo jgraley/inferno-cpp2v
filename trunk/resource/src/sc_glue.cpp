@@ -5,7 +5,7 @@ static sc_trace_file *fp;                          // Declare FilePointer fp
 
 sc_trace_file *GetSCTraceFP()
 {
-    if( !(long long int)fp ) // this is correct, uninitialised stratic data is zero in a bitwise zense - a NULL pointer can be any bit sequence
+    if( !(long long int)fp ) // this is correct, uninitialised static data is zero in a bitwise zense - a NULL pointer can be any bit sequence
     {
         fp=sc_create_vcd_trace_file("trace"); 
         fp->delta_cycles(true);        

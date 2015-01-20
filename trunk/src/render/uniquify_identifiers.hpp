@@ -18,7 +18,7 @@ struct UniquifyIdentifiers;
 
 struct VisibleIdentifiers
 {
-	// Mao of basenames to their offset number tables
+	// Map of basenames to their offset number tables
 	typedef pair<const string, NameUsage> NameUsagePair;
 	map< string, NameUsage > name_usages;
 

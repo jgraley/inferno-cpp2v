@@ -22,11 +22,12 @@ int ReadArgs::repetitions = 100; // default behaviour
 bool ReadArgs::rep_error = true; // default behaviour
 bool ReadArgs::assert_pedigree = false;
 bool ReadArgs::documentation_graphs = false;
+bool ReadArgs::output_all = false;
 
 void ReadArgs::Usage()
 {
     fprintf(stderr, "Usage:\n"
-    		        "%s [-i<infile>] [-o<outfile>] [-t] [-s] [-g<opts>] [-q<n>] \n"
+    		        "%s <options> \n"
     		        "\n"
     		        "-i<infile>  Read input program (C/C++) from <infile>.\n"
     		        "-o<outfile> Write output program to <outfile>. C/C++ by default. Writes to stdout if omitted.\n"
@@ -43,6 +44,7 @@ void ReadArgs::Usage()
 	                "-gd         Generate dot files for documentation; -o specifies directory.\n"
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
+                    "-f          Output all intermediates. <outfile> is path/basename.\n"
                     "\n"
     		        "One of -i, -s, -th, -gp, -gd required; all others are optional.\n",
     		        exename.c_str() );
@@ -143,6 +145,10 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         {
         	runonlystep = strtoul( GetArg().c_str(), NULL, 10 );
         	runonlyenable = true;
+        }
+        else if( option=='f' )
+        {
+            output_all = true;
         }
         else 
         {

@@ -213,6 +213,15 @@ int main( int argc, char *argv[] )
                 CompareReplace::SetMaxReps( 100, true );
             HitCount::instance.SetStep(i);
             (*t)( &program );
+            if( ReadArgs::output_all )
+            {
+                Render r( ReadArgs::outfile+SSPrintf("_%03d.cpp", i) );
+                r( &program );     
+                // TODO prove that the graph renderer does not modify the tree before enabling
+                //Graph g( ReadArgs::outfile+SSPrintf("_%03d.dot", i) );
+                //g( &program );    
+            }
+                
             i++;
         }
     }
@@ -223,12 +232,12 @@ int main( int argc, char *argv[] )
     HitCount::instance.SetStep(-1);
     if( ReadArgs::trace_hits )
         HitCount::instance.Dump();    
-    else if(ReadArgs::intermediate_graph)
+    else if( ReadArgs::intermediate_graph && !ReadArgs::output_all )
     {
         Graph g( ReadArgs::outfile );
         g( &program );    
     }
-    else    
+    else if( !ReadArgs::output_all )   
     {
         Render r( ReadArgs::outfile );
         r( &program );     

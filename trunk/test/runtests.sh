@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# runtests.sh
+#
+# This is the runner for the inferno test suite. It loops over a set of test 
+# vectors and invokes whichever test script is required. It attempts to run 
+# them in parallel to seepd things up on a multicore machine. See test.sh
+# or fulltest.sh for details of the tests performed.
+#
+
 # Stop on error (errors in individual tests will be trapped)
 set -e
 
@@ -11,23 +19,29 @@ logdir=test/results
 # Usage:
 # runtests.sh - tests the known passing (regression) tests
 # runtests.sh all - tests all vectors including some that are expected to fail
+# runtests.sh full - direct reference check of each intermediate
 # runtests.sh <file list> - tests all named files
 if test -z $1
 then
     infilelist="test/examples/*"
-else 
-    if test $1 == all
-    then
-        infilelist="test/examples/* $clang_tests/CodeGen/*"
-    else
-        infilelist=$*
-    fi
+    testscript="test.sh"
+elif test $1 == all
+then
+    infilelist="test/examples/* $clang_tests/CodeGen/*"
+    testscript="test.sh"
+elif test $1 == sr
+then
+    infilelist="test/examples/*"
+    testscript="srtest.sh"
+else
+    infilelist=$*
+    testscript="test.sh"
 fi
 
 # Clear down output files/directories since we would not like out-of-date results
 rm -f $resfile
-mkdir -p results
-rm -f results/*
+mkdir -p test/results
+rm -rf test/results/*
 
 echo testing files $infilelist
 
@@ -40,7 +54,7 @@ do
     # Decide where to put the log file for this test run 
     logfile=$logdir/`basename $infile`.log
     # Start the test and pipe output to tee so we get it on the terminal and in the log file
-    test/test.sh $infile -ap 2>&1 | tee $logfile &
+    test/$testscript $infile 2>&1 | tee $logfile &
 done
 
 # Wait for all the tests to complete and count failures 

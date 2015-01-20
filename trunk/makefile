@@ -110,10 +110,16 @@ publish : makefile docs inferno.exe docs/web/publish.sh
 	cd docs/web && ./publish.sh
 
 #
-# Run the tests
+# Run the main Inforno tests
 #
 test : makefile inferno.exe resource
 	test/runtests.sh
+	
+#
+# Run the search and replace tests 
+#
+srtest : makefile inferno.exe resource
+	test/runtests.sh sr
 	
 #
 # Cleaning up

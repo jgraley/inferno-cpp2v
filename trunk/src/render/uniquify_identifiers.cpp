@@ -5,10 +5,10 @@
 using namespace CPPTree;
 
 // TODO lose the underscore
-#define UID_FORMAT "%s_%u"
+#define UID_FORMAT "%s%u"
 
 //TODO Apparently labels do not scope in subblocks like types and instances, but instead are
-// always function scope (opbvious when you think about it) so uniquify them accordingly.
+// always function scope (obvious when you think about it) so uniquify them accordingly.
 
 string VisibleIdentifiers::MakeUniqueName( string b, unsigned n ) // note static
 {

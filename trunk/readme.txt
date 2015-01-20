@@ -35,6 +35,9 @@ eclipse/
     There is a "standard makefile" C++ project in inferno-cpp2v/trunk/eclipse 
     Note that IDE integration is not officially supported for Inferno.
 
+resources/
+    Code needed to get SystemC to work for running test vectors etc, both in Inferno 
+    and when compiling natively.
 
 How to check out:
 
