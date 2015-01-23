@@ -36,14 +36,6 @@ public:
             }
             return *this;
         }
-        // We now require that itemisable elements in nodes can be compared to each other
-        // for the benefit of implementation ordering. This will allow Collections to 
-        // render consistently as well as helpng with some optimisations. The ordering
-        // should be resilient across recompiles.
-        virtual int Cmp( const Element &other ) const
-        {
-            ASSERTFAIL("Cmp() not implemented in this type"); // TODO say which type
-        }
     };
     
 	template< class ITEMISE_TYPE >

@@ -1,15 +1,14 @@
 #ifndef NODE_HPP
 #define NODE_HPP
 
+#include "common/common.hpp"
+#include "common/shared_ptr.hpp"
 #include "specialise_oostd.hpp"
 #include "itemise.hpp"
 #include "type_info.hpp"
 #include "clone.hpp"
-#include "ordering.hpp"
-#include "match.hpp"
 #include "common/magic.hpp"
-#include "common/common.hpp"
-#include "common/shared_ptr.hpp"
+#include "match.hpp"
 
 #define FINAL_FUNCTION(F) virtual bool IsFinal() { return (F); }
 
@@ -20,7 +19,6 @@
 struct NodeBases : Magic,
                    virtual Traceable,
                    Matcher,
-                   Orderer,
                    Itemiser,
                    Cloner
 {

@@ -101,19 +101,12 @@ struct SpecificString : String
     	value(s) /// Construct with a given STL string
     {
     }
-    virtual bool IsLocalMatch( const Matcher *candidate ) const /// Overloaded comparison for search&replace
-    {
-        ASSERT( candidate );
-        const SpecificString *c = dynamic_cast<const SpecificString *>(candidate);
-        return c && c->value == value;
-    } 
-    virtual int GetLocalCmp( const Orderer &other ) const /// Overloaded comparison for ordering
-    {        
-        const SpecificString *o = dynamic_cast<const SpecificString *>(&other);
-        if( !o )
-            return Orderer::GetLocalCmp( other );
-        return value.compare( o->value ); 
-    } 
+	virtual bool IsLocalMatch( const Matcher *candidate ) const /// Overloaded comparison for search&replace
+	{
+		ASSERT( candidate );
+    	const SpecificString *c = dynamic_cast<const SpecificString *>(candidate);
+    	return c && c->value == value;
+	} 
 	virtual operator string() const /// Produce a string for debug
 	{
 		// Since this is a string literal, output it quoted
@@ -150,13 +143,6 @@ struct SpecificInteger : Integer, llvm::APSInt
     	const SpecificInteger *c = dynamic_cast<const SpecificInteger *>(candidate);
     	return c && *(llvm::APSInt *)c == *(llvm::APSInt *)this;
 	}
-    virtual int GetLocalCmp( const Orderer &other ) const /// Overloaded comparison for ordering
-    {        
-        const SpecificInteger *o = dynamic_cast<const SpecificInteger *>(&other);
-        if( !o )
-            return Orderer::GetLocalCmp( other );
-        return (int)sgt( *o ) - (int)slt( *o );  // This is assuming the int is signed, for ordering purposes 
-    } 
 	virtual operator string() const /// Produce a string for debug
 	{
         return string(toString(10)) + // decimal
@@ -185,26 +171,6 @@ struct SpecificFloat : Float, llvm::APFloat
     	const SpecificFloat *c = dynamic_cast<const SpecificFloat *>(candidate);
     	return c && bitwiseIsEqual( *c );
 	}
-    virtual int GetLocalCmp( const Orderer &other ) const /// Overloaded comparison for ordering
-    {        
-        const SpecificFloat *o = dynamic_cast<const SpecificFloat *>(&other);
-        if( !o )
-            return Orderer::GetLocalCmp( other );
-        llvm::APFloat::cmpResult cr = compare( *o );
-        switch( cr )
-        {
-            case cmpLessThan:
-                return -1;
-            case cmpEqual:
-                return 0;
-            case cmpGreaterThan:
-                return 1;
-            case cmpUnordered:
-                ASSERTFAIL("Non-real floats not suported yet- need to add ordering support"); // TODO
-            default:
-                ASSERTFAIL("Bad result from llvm::compare");
-        }
-    } 
 	virtual operator string() const /// Produce a string for debug
 	{
 		char hs[256];
