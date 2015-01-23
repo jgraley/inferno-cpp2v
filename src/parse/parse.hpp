@@ -309,7 +309,6 @@ private:
 				TreePtr<Instance> inst = dynamic_pointer_cast<Instance> (d);
 				ASSERT( inst );
 				backing_ordering[p].push_back(inst);
-                TRACE("Scope ")(*p)(" added ")(inst)("size now %d\n", backing_ordering[p].size());
 				p->members.insert(inst);
 			}
 		}
@@ -710,10 +709,6 @@ private:
 			TRACE("no insert record decl\n");
 			inferno_scope_stack.top()->members.insert(d);
 			backing_ordering[inferno_scope_stack.top()].push_back(d);
-            TRACE("Scope ")(*(inferno_scope_stack.top()))
-                 (" added ")(d)
-                 (" size now %d at %p\n", backing_ordering[inferno_scope_stack.top()].size(),
-                                          &(backing_ordering[inferno_scope_stack.top()]) );                
 			TRACE("From %d to %d decls\n", os, inferno_scope_stack.top()->members.size() );
 		}
 
@@ -1689,7 +1684,7 @@ private:
 		// Get a reference to the ordered list of members for this scope from a backing list
 		ASSERT( backing_ordering.IsExist(scope) )("Supplied scope did not make it into the backing ordering list");
 		Sequence<Declaration> &scope_ordered = backing_ordering[scope];
-        TRACE("Scope ")(*scope)(" size=%d backing size=%d addr=%p\n", scope->members.size(), scope_ordered.size(), &scope_ordered);
+		TRACE("%p %p\n", &scope->members, scope.get());
 
 		// Go over the entire scope, keeping track of where we are in the Sequence
 		int seq_index=0; // TODO rename
@@ -1718,8 +1713,8 @@ private:
 			}
 		}		
 		ASSERT( seq_index == seq.size() )
-		      ("Too many arguments to function/struct init (we allow too few for poor mans overloading, but not too many)\n")
-		      ("Scope was ")(*scope)(" for map operator ")(mapop)(" scope size %d num expressions %d", seq_index, seq.size())("\n");
+		      ("Too many arguments to function/struct init (we allow too few for poor mans overlading, but not too many)\n")
+		      ("Scope was ")(*scope)(" for map operator ")(mapop)("\n");
 	}
 
 	TreePtr<String> CreateString( const char *s )
@@ -1818,7 +1813,6 @@ private:
 
 		inferno_scope_stack.top()->members.insert( d );
 		backing_ordering[inferno_scope_stack.top()].push_back( d );
-        TRACE("Scope ")(*(inferno_scope_stack.top()))(" added ")(d)("size now %d\n", backing_ordering[inferno_scope_stack.top()].size());
 		return hold_decl.ToRaw( d );
 	}
 

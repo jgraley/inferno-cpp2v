@@ -8,9 +8,6 @@
 #include <deque>
 #include <set>
 #include <iterator>
-#include <algorithm>
-
-//#define USE_ORDERING_FOR_COLLECTION_IMPL
 
 // Inferno tree shared pointers
 
@@ -40,14 +37,9 @@ public:
     {
         return new VALUE_TYPE; // means VALUE_TYPE must be constructable
     }
-    int Cmp( const Itemiser::Element &eo ) const; // implements Itemiser::Element::Cmp() 
-#ifdef USE_ORDERING_FOR_COLLECTION_IMPL
-    bool operator<( const TreePtr<VALUE_TYPE> &o ) const // needed for std::multiset to reproduce the ordering
-    {
-        return Cmp(o) < 0;
-    }
-#endif    
 };
+
+
 
 // Inferno tree containers
 typedef OOStd::ContainerInterface<Itemiser::Element, TreePtrInterface> ContainerInterface;
@@ -56,23 +48,10 @@ typedef OOStd::CountingIterator<Itemiser::Element, TreePtrInterface> CountingIte
 typedef OOStd::SequenceInterface<Itemiser::Element, TreePtrInterface> SequenceInterface;
 typedef OOStd::SimpleAssociativeContainerInterface<Itemiser::Element, TreePtrInterface> CollectionInterface;
 
-template<typename VALUE_TYPE, class CONTAINER_IMPL>
-struct Container : virtual OOStd::ContainerCommon< Itemiser::Element, TreePtrInterface, CONTAINER_IMPL >
-{
-    inline Container() {}
-    int Cmp( const Itemiser::Element &eo ) const; // implements Itemiser::Element::Cmp()     
-};
-
 template<typename VALUE_TYPE>
-struct Sequence : virtual Container< VALUE_TYPE, deque< TreePtr<VALUE_TYPE> > >,
-                  virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, deque< TreePtr<VALUE_TYPE> > >
+struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, deque< TreePtr<VALUE_TYPE> > >
 {
-    // TODO do these belong here, or in containers.hpp?
-    using OOStd::Sequence< Itemiser::Element, TreePtrInterface, deque< TreePtr<VALUE_TYPE> > >::insert;
-    using OOStd::Sequence< Itemiser::Element, TreePtrInterface, deque< TreePtr<VALUE_TYPE> > >::begin;
-    using OOStd::Sequence< Itemiser::Element, TreePtrInterface, deque< TreePtr<VALUE_TYPE> > >::end;
-    
-    typedef deque< TreePtr<VALUE_TYPE> > Impl;
+	typedef deque< TreePtr<VALUE_TYPE> > Impl;
 
 	inline Sequence() {}
 	template<typename L, typename R>
@@ -85,13 +64,8 @@ struct Sequence : virtual Container< VALUE_TYPE, deque< TreePtr<VALUE_TYPE> > >,
 
 
 template<typename VALUE_TYPE> 
-struct Collection : virtual Container< VALUE_TYPE, multiset< TreePtr<VALUE_TYPE> > >,
-                    virtual OOStd::SimpleAssociativeContainer< Itemiser::Element, TreePtrInterface, multiset< TreePtr<VALUE_TYPE> > >
+struct Collection : virtual OOStd::SimpleAssociativeContainer< Itemiser::Element, TreePtrInterface, multiset< TreePtr<VALUE_TYPE> > >
 {
-    // TODO do these belong here, or in containers.hpp?
-    using OOStd::SimpleAssociativeContainer< Itemiser::Element, TreePtrInterface, multiset< TreePtr<VALUE_TYPE> > >::insert;
-    using OOStd::SimpleAssociativeContainer< Itemiser::Element, TreePtrInterface, multiset< TreePtr<VALUE_TYPE> > >::begin;
-    using OOStd::SimpleAssociativeContainer< Itemiser::Element, TreePtrInterface, multiset< TreePtr<VALUE_TYPE> > >::end;
  	typedef multiset< TreePtr<VALUE_TYPE> > Impl;
 
  	inline Collection<VALUE_TYPE>() {}
@@ -157,102 +131,6 @@ struct MakeTreePtr : TreePtr<VALUE_TYPE>
 	// Add more params as needed...
 };
 
-
-template<typename VALUE_TYPE> int TreePtr<VALUE_TYPE>::Cmp( const Itemiser::Element &eo ) const
-{
-    INDENT;
-    const TreePtr<VALUE_TYPE> *po = dynamic_cast< const TreePtr<VALUE_TYPE>* >(&eo);
-    ASSERT( po )("Cmp() called with mismatched types");
-    const TreePtr<VALUE_TYPE> &o = *po; // get a ref for convenience
- 
-    // Null-ness of the pointers takes first priority
-    bool this_not_null = !!*this;
-    bool o_not_null = !!o;
-    TRACE(*this)(" < ")(o)("\n");
-    if( !(this_not_null && o_not_null) )
-    {
-        int nc = (int)this_not_null - (int)o_not_null; 
-        TRACE("is %d (nullness)\n", nc);
-        return nc;
-    }
-    
-    {
-        INDENT;
-        // Identity of the node itself takes second priority
-        int lc = (*this)->GetLocalCmp(*o);
-        TRACE(**this)(" < ")(*o)("\n");
-        if( lc != 0 )
-        {
-            TRACE("is %d (node type)\n", lc);
-            return lc;
-        } 
-        
-        // Itemise them both - sizes should match!
-        vector< Itemiser::Element * > t_memb = (*this)->Itemise();
-        vector< Itemiser::Element * > o_memb = o->Itemise();
-        ASSERT( t_memb.size() == o_memb.size() ); // since we should have excluded differing node types above
-        
-        for( int i=0; i<t_memb.size(); i++ )
-        {
-            ASSERT( t_memb[i] )( "itemise returned null element");
-            ASSERT( o_memb[i] )( "itemise returned null element");
-
-            int pc = t_memb[i]->Cmp( *o_memb[i] );
-            if( pc != 0 )
-            {
-                TRACE("is %d (member %d)\n", pc, i);
-                return pc;
-            } 
-        }
-    }
-
-    // survived to the end? then we have a match.
-    TRACE("is 0\n");
-    return 0;
-}
-
-
-template<typename VALUE_TYPE, class CONTAINER_IMPL> int Container<VALUE_TYPE, CONTAINER_IMPL>::Cmp( const Itemiser::Element &eo ) const
-{
-    INDENT;
-    const Container<VALUE_TYPE, CONTAINER_IMPL> *po = dynamic_cast< const Container<VALUE_TYPE, CONTAINER_IMPL> *>(&eo);
-    ASSERT( po )("Cmp() called with mismatched types");
-    
-    TRACE("Container comparison\n");
-    
-    // Sorry!
-    Container<VALUE_TYPE, CONTAINER_IMPL> &o = const_cast< Container<VALUE_TYPE, CONTAINER_IMPL> &>(*po); // get a ref for convenience
-    Container<VALUE_TYPE, CONTAINER_IMPL> &t = const_cast< Container<VALUE_TYPE, CONTAINER_IMPL> &>(*this); // get a ref for convenience
-    
-    typename Container<VALUE_TYPE, CONTAINER_IMPL>::iterator tit, oit;
-    
-    // Check each element in turn. And-rule in condition means we stop at the end of the smallest.
-    int i;
-    for( tit = t.begin(), oit = o.begin(), i=0; tit != t.end() && oit != o.end(); ++tit, ++oit, ++i )
-    {
-        int pc = tit->Cmp( *oit );
-        if( pc != 0 )
-        {
-            TRACE("is %d (element %d)\n", pc, i);
-            return pc;
-        } 
-    }
-
-    int lc=0;
-    if( tit == t.end() )           
-        lc = -1; // this was shorter, so less
-    else if( oit == o.end() )
-        lc = 1; // other was shorter, so greater
-    else
-        lc = 0; // length equal, all elements checked, must be the same.
-
-    if( lc != 0 )
-        TRACE("is %d (length)\n", lc);
-    else
-        TRACE("is 0\n");
-
-    return lc;       
-}
 
 #endif
 
