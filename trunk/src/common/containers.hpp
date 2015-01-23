@@ -35,8 +35,8 @@ public:
 		const virtual VALUE_INTERFACE &operator*() const = 0;
 		const virtual VALUE_INTERFACE *operator->() const = 0;
 		virtual bool operator==( const iterator_interface &ib ) const = 0;
-		virtual void Overwrite( const VALUE_INTERFACE *v ) const = 0;
-		virtual const bool IsOrdered() const = 0;
+		virtual void Overwrite( const VALUE_INTERFACE *v ) const { ASSERTFAIL("Only when container is specified"); }
+		virtual const bool IsOrdered() const { ASSERTFAIL("Only when container is specified"); }
 		virtual const int GetCount() const { ASSERTFAIL("Only on CountingIterator"); }
 	};
 
@@ -202,12 +202,20 @@ struct SimpleAssociativeContainerInterface : virtual ContainerInterface<SUB_BASE
 // as the stl container class eg std::list<blah>
 //
 template<class SUB_BASE, typename VALUE_INTERFACE, class CONTAINER_IMPL>
-struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, CONTAINER_IMPL
+struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
+                         virtual CONTAINER_IMPL
 {
 	struct iterator : public CONTAINER_IMPL::iterator,
 	                  public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface
 	{
-		virtual iterator &operator++()
+        virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
+        {
+            shared_ptr<iterator> ni( new iterator );
+            *ni = *this;
+            return ni;
+        }
+
+        virtual iterator &operator++()
 		{
 			CONTAINER_IMPL::iterator::operator++();
 		    return *this;
@@ -261,6 +269,26 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
 	{
         return Traceable::CPPFilt( typeid( typename CONTAINER_IMPL::value_type ).name() );
 	}
+    // Covariant style only works with refs and pointers, so force begin/end to return refs safely
+    // This complies with STL's thread safety model. To quote SGI,
+    // "The SGI implementation of STL is thread-safe only in the sense that simultaneous accesses
+    // to distinct containers are safe, and simultaneous read accesses to to shared containers are
+    // safe. If multiple threads access a single container, and at least one thread may potentially
+    // write, then the user is responsible for ensuring mutual exclusion between the threads during
+    // the container accesses."
+    // So that's OK then.
+    iterator my_begin, my_end;
+
+    virtual const iterator &begin()
+    {
+        my_begin.CONTAINER_IMPL::iterator::operator=( CONTAINER_IMPL::begin() );
+        return my_begin;
+    }
+    virtual const iterator &end()
+    {
+        my_end.CONTAINER_IMPL::iterator::operator=( CONTAINER_IMPL::end() );
+        return my_end;
+    }
 };
 
 
@@ -269,7 +297,8 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
 // (basically vector, deque etc). Instantiate as per ContainerCommon.
 //
 template<class SUB_BASE, typename VALUE_INTERFACE, class CONTAINER_IMPL>
-struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>, virtual SequenceInterface<SUB_BASE, VALUE_INTERFACE>
+struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>, 
+                  virtual SequenceInterface<SUB_BASE, VALUE_INTERFACE>
 {
     using typename CONTAINER_IMPL::insert; // due to silly C++ rule where different overloads hide each other
     inline Sequence<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>() {}
@@ -284,12 +313,6 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 		virtual typename CONTAINER_IMPL::value_type *operator->() const
 		{
 			return CONTAINER_IMPL::iterator::operator->();
-		}
-		virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
-		{
-			shared_ptr<iterator> ni( new iterator );
-			*ni = *this;
-			return ni;
 		}
     	virtual void Overwrite( const VALUE_INTERFACE *v ) const
 		{
@@ -385,19 +408,14 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 // (basically associative containers). Instantiate as per ContainerCommon.
 //
 template<class SUB_BASE, typename VALUE_INTERFACE, class CONTAINER_IMPL>
-struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>, virtual SimpleAssociativeContainerInterface<SUB_BASE, VALUE_INTERFACE>
+struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>, 
+                                    virtual SimpleAssociativeContainerInterface<SUB_BASE, VALUE_INTERFACE>
 {
     inline SimpleAssociativeContainer<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>() {}
 	struct iterator : public ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator
     {
 		inline iterator( typename CONTAINER_IMPL::iterator &i ) : CONTAINER_IMPL::iterator(i) {}
 		inline iterator() {}
-		virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
-		{
-			shared_ptr<iterator> ni( new iterator );
-			*ni = *this;
-			return ni;
-		}
     	virtual void Overwrite( const VALUE_INTERFACE *v ) const
 		{
 		    // SimpleAssociativeContainers (unordered containers) do not allow elements to be modified

@@ -76,7 +76,7 @@ bool SimpleCompare::operator()( SequenceInterface &x, SequenceInterface &y )
 
 bool SimpleCompare::operator()( CollectionInterface &x, CollectionInterface &y )
 {
-    // Ensure the sizes are the same so we don;t go off the end
+    // Ensure the sizes are the same so we don't go off the end
     if( x.size() != y.size() )
         return false;
     
