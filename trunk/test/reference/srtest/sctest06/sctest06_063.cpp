@@ -1,6 +1,7 @@
 #include "isystemc.h"
 
 class TopLevel;
+int i;
 class TopLevel : public sc_module
 {
 public:
@@ -8,38 +9,37 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
+void T();
 enum TStates
 {
 T_STATE_YIELD = 2U,
+T_STATE_PROCEED_NEXT = 1U,
+T_STATE_PROCEED_NEXT1 = 0U,
 T_STATE_PROCEED_THEN_ELSE = 4U,
 T_STATE_PROCEED_THEN_ELSE1 = 3U,
-T_STATE_PROCEED_NEXT = 0U,
-T_STATE_PROCEED_NEXT1 = 1U,
 };
-void T();
 };
-TopLevel top_level("top_level");
 int gvar;
+TopLevel top_level("top_level");
 int j;
-int i;
 
 void TopLevel::T()
 {
-auto unsigned int state;
 static const unsigned int (lmap[]) = { &&PROCEED_NEXT, &&PROCEED_NEXT1, &&YIELD, &&PROCEED_THEN_ELSE, &&PROCEED_THEN_ELSE1 };
+auto unsigned int state;
  ::gvar=(1);
  ::i=(0);
 wait(SC_ZERO_TIME);
-state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
+state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT1);
 PROCEED_NEXT:;
-if( state== ::TopLevel::T_STATE_PROCEED_NEXT )
+if( state== ::TopLevel::T_STATE_PROCEED_NEXT1 )
 {
  ::gvar+= ::i;
  ::j=(0);
-state=((!( ::j<(3))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT1);
+state=((!( ::j<(3))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT);
 }
 PROCEED_NEXT1:;
-if( state== ::TopLevel::T_STATE_PROCEED_NEXT1 )
+if( state== ::TopLevel::T_STATE_PROCEED_NEXT )
 {
 wait(SC_ZERO_TIME);
 state= ::TopLevel::T_STATE_YIELD;
@@ -50,14 +50,14 @@ if( state== ::TopLevel::T_STATE_YIELD )
 {
  ::gvar++;
  ::j++;
-state=(( ::j<(3)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
+state=(( ::j<(3)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
 }
 PROCEED_THEN_ELSE:;
 if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 )
 {
  ::gvar*=(2);
  ::i++;
-state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
+state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
 PROCEED_THEN_ELSE1:;
 if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE )

@@ -9,8 +9,8 @@ SC_CTOR( TopLevel )
 SC_METHOD(method);
 }
 int tot;
-void method();
 int gvar;
+void method();
 };
 TopLevel top_level("top_level");
 

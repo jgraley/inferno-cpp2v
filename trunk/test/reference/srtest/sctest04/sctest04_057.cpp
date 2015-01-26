@@ -37,7 +37,7 @@ state= ::TopLevel::T_STATE_YIELD;
 goto *(lmap[state]);
 }
 YIELD:;
-if(  ::TopLevel::T_STATE_YIELD==state )
+if( state== ::TopLevel::T_STATE_YIELD )
 {
  ::gvar*=(2);
  ::i++;

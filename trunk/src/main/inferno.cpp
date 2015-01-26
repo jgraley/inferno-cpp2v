@@ -57,6 +57,7 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
 
         sequence->push_back( shared_ptr<Transformation>( new BreakToGoto ) ); 
         sequence->push_back( shared_ptr<Transformation>( new ForToWhile ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new ForToWhile ) ); 
         sequence->push_back( shared_ptr<Transformation>( new WhileToDo ) ); 
         sequence->push_back( shared_ptr<Transformation>( new DoToIfGoto ) ); 
         

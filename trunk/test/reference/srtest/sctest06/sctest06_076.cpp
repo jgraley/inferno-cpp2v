@@ -1,9 +1,7 @@
 #include "isystemc.h"
 
 class TopLevel;
-int i;
 int gvar;
-int j;
 class TopLevel : public sc_module
 {
 public:
@@ -11,19 +9,21 @@ SC_CTOR( TopLevel )
 {
 SC_METHOD(T);
 }
-enum TStates
-{
-T_STATE_PROCEED_THEN_ELSE = 3U,
-T_STATE_PROCEED_NEXT = 1U,
-T_STATE_PROCEED_THEN_ELSE1 = 4U,
-T_STATE_PROCEED_NEXT1 = 0U,
-T_STATE_YIELD = 2U,
-};
+void T();
 private:
 unsigned int state;
 public:
-void T();
+enum TStates
+{
+T_STATE_PROCEED_NEXT = 1U,
+T_STATE_YIELD = 2U,
+T_STATE_PROCEED_THEN_ELSE = 3U,
+T_STATE_PROCEED_NEXT1 = 0U,
+T_STATE_PROCEED_THEN_ELSE1 = 4U,
 };
+};
+int i;
+int j;
 TopLevel top_level("top_level");
 
 void TopLevel::T()

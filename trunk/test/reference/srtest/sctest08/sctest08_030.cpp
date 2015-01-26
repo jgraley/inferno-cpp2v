@@ -2,8 +2,6 @@
 
 class TopLevel;
 int j;
-int gvar;
-int i;
 class TopLevel : public sc_module
 {
 public:
@@ -12,21 +10,24 @@ helper_stack_index(0U)
 {
 SC_THREAD(T);
 }
-/*temp*/ void *otherhelper_link;
 /*temp*/ void *helper_link;
-void T();
 private:
 void *(link_stack[10U]);
 public:
-/*temp*/ void *otherhelper_link1;
+void T();
 /*temp*/ void *helper_link1;
-private:
-void *link;
-unsigned int helper_stack_index;
-int (n_stack[10U]);
-public:
 /*temp*/ int helper_n;
+private:
+unsigned int helper_stack_index;
+public:
+/*temp*/ void *otherhelper_link;
+/*temp*/ void *otherhelper_link1;
+private:
+int (n_stack[10U]);
+void *link;
 };
+int gvar;
+int i;
 TopLevel top_level("top_level");
 
 void TopLevel::T()
@@ -56,11 +57,11 @@ goto ENTER_helper;
 LINK:;
 }
 }
- ::gvar=( ::gvar*(2));
+ ::gvar=((2)* ::gvar);
 wait(SC_ZERO_TIME);
 }
 CONTINUE:;
- ::i=( ::i+(1));
+ ::i=((1)+ ::i);
 }
 CONTINUE1:;
 goto *(( ::i<(4)) ? (&&NEXT) : (&&PROCEED1));
@@ -91,7 +92,7 @@ NEXT1:;
 {
 {
 wait(SC_ZERO_TIME);
- ::gvar=( ::gvar+(1));
+ ::gvar=((1)+ ::gvar);
 }
 CONTINUE2:;
  ::j=( ::j+(1));

@@ -11,15 +11,14 @@ SC_CTOR( TopLevel )
 SC_METHOD(T);
 }
 void T();
-private:
-unsigned int state;
-public:
 enum TStates
 {
-T_STATE_PROCEED_NEXT = 0U,
 T_STATE_PROCEED_THEN_ELSE = 2U,
+T_STATE_PROCEED_NEXT = 0U,
 T_STATE_YIELD = 1U,
 };
+private:
+unsigned int state;
 };
 TopLevel top_level("top_level");
 
@@ -46,7 +45,7 @@ enabled=(false);
 }
 if( enabled )
 {
-if(  ::TopLevel::T_STATE_YIELD== ::TopLevel::state )
+if(  ::TopLevel::state== ::TopLevel::T_STATE_YIELD )
 {
  ::gvar*=(2);
  ::i++;

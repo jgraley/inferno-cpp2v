@@ -1,6 +1,8 @@
 #include "isystemc.h"
 
 class TopLevel;
+int i;
+int gvar;
 class TopLevel : public sc_module
 {
 public:
@@ -17,8 +19,6 @@ T_STATE_PROCEED_THEN_ELSE = 2U,
 void T();
 };
 TopLevel top_level("top_level");
-int i;
-int gvar;
 
 void TopLevel::T()
 {
@@ -40,7 +40,7 @@ wait(SC_ZERO_TIME);
 state= ::TopLevel::T_STATE_YIELD;
 continue;
 }
-if(  ::TopLevel::T_STATE_YIELD==state )
+if( state== ::TopLevel::T_STATE_YIELD )
 {
  ::gvar*=(2);
  ::i++;

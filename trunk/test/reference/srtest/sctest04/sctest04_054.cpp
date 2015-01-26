@@ -2,6 +2,7 @@
 
 class TopLevel;
 int gvar;
+int i;
 class TopLevel : public sc_module
 {
 public:
@@ -11,14 +12,13 @@ SC_THREAD(T);
 }
 enum TStates
 {
+T_STATE_YIELD = 1U,
 T_STATE_PROCEED_NEXT = 0U,
 T_STATE_PROCEED_THEN_ELSE = 2U,
-T_STATE_YIELD = 1U,
 };
 void T();
 };
 TopLevel top_level("top_level");
-int i;
 
 void TopLevel::T()
 {

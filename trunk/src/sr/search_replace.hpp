@@ -49,7 +49,7 @@ public:
     CompareReplace *master_ptr;
     TreePtr<Node> *pcontext;
     mutable CouplingKeys coupling_keys;
-    mutable set< TreePtr<Node> > dirty_grass;
+    mutable Set< TreePtr<Node> > dirty_grass;
     
     // Sets of nodes for debugging purposes. Checks should be positive, because identifiers are copied
     // shallowly and will appear in more than one set. Since they are const, preservation rules do not
@@ -72,7 +72,6 @@ public:
 
 private:
     bool is_configured; 
-    std::set< shared_ptr<SlaveBase> > immediate_slaves;
     static int repetitions;
     static bool rep_error;
 public:

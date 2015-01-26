@@ -116,10 +116,16 @@ test : makefile inferno.exe resource
 	test/runtests.sh
 	
 #
-# Run the search and replace tests 
+# Run the search and replace tests (requires reference outputs to be in in test/reference/srtest/)
 #
 srtest : makefile inferno.exe resource
 	test/runtests.sh sr
+	
+#
+# Run the repeatbility tests (requires reference trace logs to be in in test/reference/reptest/)
+#
+reptest : makefile inferno.exe resource
+	test/runtests.sh rep
 	
 #
 # Cleaning up

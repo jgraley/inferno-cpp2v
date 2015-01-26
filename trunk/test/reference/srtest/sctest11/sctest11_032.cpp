@@ -8,35 +8,35 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-/*temp*/ int f_return;
 int x;
 int y;
+/*temp*/ int f_return;
 private:
 void *link;
 public:
 /*temp*/ void *f_link;
 /*temp*/ int f_i;
+/*temp*/ void *f_link1;
 private:
 int i;
 public:
 void T();
-/*temp*/ void *f_link1;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-/*temp*/ int muxtemp;
 /*temp*/ int result;
-/*temp*/ bool ortemp;
+/*temp*/ int result1;
+/*temp*/ bool result2;
+/*temp*/ int muxtemp;
 /*temp*/ bool andtemp;
-/*temp*/ bool result1;
-/*temp*/ int result2;
 /*temp*/ int result3;
-/*temp*/ void *temp_link;
-/*temp*/ bool result4;
-/*temp*/ int result5;
+/*temp*/ int result4;
+/*temp*/ bool result5;
 /*temp*/ int result6;
+/*temp*/ void *temp_link;
+/*temp*/ bool ortemp;
  ::TopLevel::x=(4);
 andtemp=(++ ::TopLevel::x);
 goto *((!andtemp) ? (&&THEN) : (&&PROCEED));
@@ -45,14 +45,14 @@ PROCEED:;
  ::TopLevel::f_link=(&&LINK);
 goto ENTER_f;
 LINK:;
-result2= ::TopLevel::f_return;
-andtemp=( ::TopLevel::y=result2);
+result3= ::TopLevel::f_return;
+andtemp=( ::TopLevel::y=result3);
 goto ELSE;
 THEN:;
 ;
 ELSE:;
-result4=andtemp;
-result4;
+result2=andtemp;
+result2;
 ortemp=(!(++ ::TopLevel::x));
 goto *((!ortemp) ? (&&THEN1) : (&&PROCEED1));
 PROCEED1:;
@@ -63,11 +63,11 @@ THEN1:;
  ::TopLevel::f_link=(&&LINK1);
 goto ENTER_f;
 LINK1:;
-result6= ::TopLevel::f_return;
-ortemp=( ::TopLevel::y+=result6);
+result4= ::TopLevel::f_return;
+ortemp=( ::TopLevel::y+=result4);
 ELSE1:;
-result1=ortemp;
-result1;
+result5=ortemp;
+result5;
  ::TopLevel::x=(0);
 goto *((!( ::TopLevel::x<(2))) ? (&&THEN3) : (&&PROCEED2));
 PROCEED2:;
@@ -78,19 +78,19 @@ PROCEED3:;
  ::TopLevel::f_link=(&&LINK2);
 goto ENTER_f;
 LINK2:;
-result= ::TopLevel::f_return;
-muxtemp=( ::TopLevel::y+=result);
+result6= ::TopLevel::f_return;
+muxtemp=( ::TopLevel::y+=result6);
 goto ELSE2;
 THEN2:;
  ::TopLevel::f_i= ::TopLevel::x;
  ::TopLevel::f_link=(&&LINK3);
 goto ENTER_f;
 LINK3:;
-result5= ::TopLevel::f_return;
-muxtemp=( ::TopLevel::y-=result5);
+result= ::TopLevel::f_return;
+muxtemp=( ::TopLevel::y-=result);
 ELSE2:;
-result3=muxtemp;
-result3;
+result1=muxtemp;
+result1;
 CONTINUE:;
 ;
 CONTINUE1:;

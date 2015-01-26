@@ -8,29 +8,29 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-/*temp*/ int f_return;
-float fi;
 void T();
-int x;
-/*temp*/ void *f_link;
-/*temp*/ void *f_link1;
+int i;
 private:
 void *link;
 public:
-int i;
+int x;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link1;
+/*temp*/ int f_return;
+float fi;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-/*temp*/ int result;
 /*temp*/ void *temp_link;
+/*temp*/ int result;
  ::TopLevel::x=(0);
 for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
 for(  ::TopLevel::i=(0);  ::TopLevel::i<=(4);  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
-for(  ::TopLevel::i=(0);  ::TopLevel::i!=(4);  ::TopLevel::i++ )
+for(  ::TopLevel::i=(0); (4)!= ::TopLevel::i;  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
 for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i-- )
  ::TopLevel::x+= ::TopLevel::i;
@@ -88,7 +88,7 @@ PROCEED_THEN_ELSE4:;
  ::TopLevel::i=(0);
 goto *((!( ::TopLevel::i<(4))) ? (&&PROCEED_THEN_ELSE5) : (&&PROCEED_NEXT4));
 PROCEED_NEXT4:;
- ::TopLevel::f_link1=(&&LINK);
+ ::TopLevel::f_link=(&&LINK);
 goto ENTER_f;
 LINK:;
 result= ::TopLevel::f_return;
@@ -100,7 +100,7 @@ cease(  ::TopLevel::x );
 return ;
 goto ENTER_f;
 ENTER_f:;
- ::TopLevel::link= ::TopLevel::f_link1;
+ ::TopLevel::link= ::TopLevel::f_link;
  ::TopLevel::f_return=(3);
 temp_link= ::TopLevel::link;
 goto *(temp_link);

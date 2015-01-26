@@ -9,9 +9,9 @@ SC_CTOR( TopLevel )
 SC_THREAD(U);
 }
 /*temp*/ void *HelperU_link;
-/*temp*/ void *HelperU_link1;
 void U();
 void (HelperU)();
+/*temp*/ void *HelperU_link1;
 };
 TopLevel top_level("top_level");
 

@@ -12,9 +12,9 @@ int x;
 private:
 void *link;
 public:
-/*temp*/ void *f_link;
-int i;
 void T();
+int i;
+/*temp*/ void *f_link;
 /*temp*/ void *f_link1;
 /*temp*/ int f_return;
 float fi;

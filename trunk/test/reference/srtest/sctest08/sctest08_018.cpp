@@ -1,8 +1,6 @@
 #include "isystemc.h"
 
 class TopLevel;
-int j;
-int gvar;
 class TopLevel : public sc_module
 {
 public:
@@ -11,25 +9,24 @@ helper_stack_index(0U)
 {
 SC_THREAD(T);
 }
+/*temp*/ void *helper_link;
+/*temp*/ void *helper_link1;
+/*temp*/ int helper_n;
+void T();
+private:
+void *link;
+public:
 /*temp*/ void *otherhelper_link;
 private:
 unsigned int helper_stack_index;
 public:
-/*temp*/ void *helper_link;
-private:
-void *link;
-public:
 /*temp*/ void *otherhelper_link1;
 private:
 int (n_stack[10U]);
-public:
-/*temp*/ void *helper_link1;
-private:
 void *(link_stack[10U]);
-public:
-/*temp*/ int helper_n;
-void T();
 };
+int j;
+int gvar;
 int i;
 TopLevel top_level("top_level");
 
@@ -57,7 +54,7 @@ LINK:;
 wait(SC_ZERO_TIME);
 }
 CONTINUE:;
- ::i=((1)+ ::i);
+ ::i=( ::i+(1));
 }
 }
 cease(  ::gvar );
@@ -83,7 +80,7 @@ CONTINUE1:;
 }
 {
 {
- ::TopLevel::otherhelper_link1=(&&LINK1);
+ ::TopLevel::otherhelper_link=(&&LINK1);
 goto ENTER_otherhelper;
 }
 LINK1:;
@@ -100,7 +97,7 @@ goto *(temp_link);
 ENTER_otherhelper:;
 {
 /*temp*/ void *temp_link1;
- ::TopLevel::link= ::TopLevel::otherhelper_link1;
+ ::TopLevel::link= ::TopLevel::otherhelper_link;
  ::gvar=( ::gvar-(1));
 {
 temp_link1= ::TopLevel::link;

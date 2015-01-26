@@ -9,33 +9,34 @@ helper_stack_index(0U)
 {
 SC_THREAD(T);
 }
-/*temp*/ int helper_n;
 private:
 void *link;
+void *(link_stack[10U]);
 public:
 /*temp*/ void *helper_link;
 /*temp*/ void *otherhelper_link;
-private:
-void *(link_stack[10U]);
-unsigned int helper_stack_index;
-public:
-void T();
 /*temp*/ void *otherhelper_link1;
-/*temp*/ void *helper_link1;
 private:
 int (n_stack[10U]);
+public:
+/*temp*/ int helper_n;
+void T();
+private:
+unsigned int helper_stack_index;
+public:
+/*temp*/ void *helper_link1;
 };
-int j;
-TopLevel top_level("top_level");
 int gvar;
+TopLevel top_level("top_level");
 int i;
+int j;
 
 void TopLevel::T()
 {
-auto void *state;
 /*temp*/ void *temp_link;
-/*temp*/ void *temp_link1;
+auto void *state;
 /*temp*/ int temp_n;
+/*temp*/ void *temp_link1;
  ::gvar=(1);
  ::i=(0);
 wait(SC_ZERO_TIME);
@@ -95,7 +96,7 @@ state=(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ? (&&PROCE
 goto *(state);
 }
 PROCEED_THEN_ELSE1:;
- ::TopLevel::otherhelper_link=(&&LINK1);
+ ::TopLevel::otherhelper_link1=(&&LINK1);
 {
 state=(&&ENTER_otherhelper);
 goto *(state);
@@ -108,7 +109,7 @@ state=temp_link1;
 goto *(state);
 }
 ENTER_otherhelper:;
- ::TopLevel::link= ::TopLevel::otherhelper_link;
+ ::TopLevel::link= ::TopLevel::otherhelper_link1;
  ::gvar=( ::gvar-(1));
 temp_link= ::TopLevel::link;
 {

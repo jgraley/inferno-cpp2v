@@ -1,6 +1,7 @@
 #include "isystemc.h"
 
 class TopLevel;
+int gvar;
 class TopLevel : public sc_module
 {
 public:
@@ -11,7 +12,6 @@ SC_THREAD(T);
 void T();
 };
 TopLevel top_level("top_level");
-int gvar;
 int i;
 
 void TopLevel::T()
@@ -20,7 +20,7 @@ void TopLevel::T()
 for(  ::i=(0);  ::i<(5);  ::i++ )
 {
  ::gvar+= ::i;
-if( (0)==( ::i%(2)) )
+if( ( ::i%(2))==(0) )
 {
 wait(SC_ZERO_TIME);
  ::gvar^=(1);

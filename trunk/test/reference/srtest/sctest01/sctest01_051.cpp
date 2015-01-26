@@ -10,17 +10,16 @@ SC_CTOR( Multiplier )
 {
 SC_THREAD(T);
 }
+void T();
 enum TStates
 {
-T_STATE_YIELD = 1U,
-T_STATE_YIELD1 = 0U,
-T_STATE_YIELD2 = 2U,
+T_STATE_YIELD = 0U,
+T_STATE_YIELD1 = 2U,
+T_STATE_YIELD2 = 1U,
 };
-void T();
 sc_event instigate;
 sc_event proceed;
 };
-int gvar;
 class Adder : public sc_module
 {
 public:
@@ -28,13 +27,13 @@ SC_CTOR( Adder )
 {
 SC_THREAD(T);
 }
+void T();
+sc_event proceed;
 enum TStates
 {
-T_STATE_YIELD = 1U,
-T_STATE_YIELD1 = 0U,
+T_STATE_YIELD = 0U,
+T_STATE_YIELD1 = 1U,
 };
-sc_event proceed;
-void T();
 };
 class TopLevel : public sc_module
 {
@@ -45,22 +44,23 @@ mul_inst("mul_inst")
 {
 SC_THREAD(T);
 }
- ::Adder add_inst;
+void T();
 enum TStates
 {
 };
-void T();
+ ::Adder add_inst;
  ::Multiplier mul_inst;
 };
+int gvar;
 TopLevel top_level("top_level");
 
 void Multiplier::T()
 {
-auto unsigned int state;
 static const unsigned int (lmap[]) = { &&YIELD, &&YIELD1, &&YIELD2 };
+auto unsigned int state;
 wait(  ::Multiplier::instigate );
 {
-state= ::Multiplier::T_STATE_YIELD1;
+state= ::Multiplier::T_STATE_YIELD;
 goto *(lmap[state]);
 }
 YIELD:;
@@ -68,7 +68,7 @@ YIELD:;
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
 wait(  ::Multiplier::proceed );
 {
-state= ::Multiplier::T_STATE_YIELD;
+state= ::Multiplier::T_STATE_YIELD2;
 goto *(lmap[state]);
 }
 YIELD1:;
@@ -76,7 +76,7 @@ YIELD1:;
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
 wait(  ::Multiplier::proceed );
 {
-state= ::Multiplier::T_STATE_YIELD2;
+state= ::Multiplier::T_STATE_YIELD1;
 goto *(lmap[state]);
 }
 YIELD2:;
@@ -86,11 +86,11 @@ return ;
 
 void Adder::T()
 {
-auto unsigned int state;
 static const unsigned int (lmap[]) = { &&YIELD, &&YIELD1 };
+auto unsigned int state;
 wait(  ::Adder::proceed );
 {
-state= ::Adder::T_STATE_YIELD1;
+state= ::Adder::T_STATE_YIELD;
 goto *(lmap[state]);
 }
 YIELD:;
@@ -98,7 +98,7 @@ YIELD:;
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
 wait(  ::Adder::proceed );
 {
-state= ::Adder::T_STATE_YIELD;
+state= ::Adder::T_STATE_YIELD1;
 goto *(lmap[state]);
 }
 YIELD1:;

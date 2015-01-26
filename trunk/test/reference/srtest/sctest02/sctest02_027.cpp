@@ -3,7 +3,6 @@
 class Adder;
 class Multiplier;
 class TopLevel;
-int gvar;
 class Adder : public sc_module
 {
 public:
@@ -11,9 +10,10 @@ SC_CTOR( Adder )
 {
 SC_THREAD(T);
 }
-bool proceed;
 void T();
+bool proceed;
 };
+int gvar;
 class Multiplier : public sc_module
 {
 public:
@@ -22,21 +22,21 @@ SC_CTOR( Multiplier )
 SC_THREAD(T);
 }
 void T();
-bool instigate;
 bool proceed;
+bool instigate;
 };
 class TopLevel : public sc_module
 {
 public:
 SC_CTOR( TopLevel ) :
-mul_inst("mul_inst"),
-add_inst("add_inst")
+add_inst("add_inst"),
+mul_inst("mul_inst")
 {
 SC_THREAD(T);
 }
+ ::Adder add_inst;
  ::Multiplier mul_inst;
 void T();
- ::Adder add_inst;
 };
 TopLevel top_level("top_level");
 

@@ -10,8 +10,8 @@ SC_THREAD(T);
 }
 void T();
 };
-int j;
 TopLevel top_level("top_level");
+int j;
 int i;
 int gvar;
 

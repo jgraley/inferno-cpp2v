@@ -2,6 +2,7 @@
 
 class TopLevel;
 int i;
+int gvar;
 int j;
 class TopLevel : public sc_module
 {
@@ -12,17 +13,16 @@ SC_THREAD(T);
 }
 enum TStates
 {
+T_STATE_YIELD = 4U,
+T_STATE_YIELD1 = 2U,
 T_STATE_PROCEED_NEXT = 0U,
-T_STATE_YIELD = 2U,
 T_STATE_PROCEED_THEN_ELSE = 5U,
-T_STATE_YIELD1 = 4U,
-T_STATE_PROCEED_THEN_ELSE1 = 3U,
 T_STATE_PROCEED_NEXT1 = 1U,
+T_STATE_PROCEED_THEN_ELSE1 = 3U,
 };
 void T();
 };
 TopLevel top_level("top_level");
-int gvar;
 
 void TopLevel::T()
 {
@@ -43,11 +43,11 @@ PROCEED_NEXT1:;
 if( state== ::TopLevel::T_STATE_PROCEED_NEXT1 )
 {
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD;
+state= ::TopLevel::T_STATE_YIELD1;
 goto *(lmap[state]);
 }
 YIELD:;
-if( state== ::TopLevel::T_STATE_YIELD )
+if( state== ::TopLevel::T_STATE_YIELD1 )
 {
  ::gvar++;
  ::j++;
@@ -58,7 +58,7 @@ if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 )
 {
  ::gvar*=(2);
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD1;
+state= ::TopLevel::T_STATE_YIELD;
 goto *(lmap[state]);
 }
 goto *(lmap[state]);

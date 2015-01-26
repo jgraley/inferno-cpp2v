@@ -10,14 +10,14 @@ SC_THREAD(T);
 }
 void T();
 /*temp*/ void *f_link;
-int x;
-/*temp*/ void *f_link1;
+int i;
 /*temp*/ int f_return;
+float fi;
 private:
 void *link;
 public:
-float fi;
-int i;
+/*temp*/ void *f_link1;
+int x;
 };
 TopLevel top_level("top_level");
 

@@ -8,34 +8,34 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-private:
-int i;
-public:
-/*temp*/ int f_i;
-/*temp*/ void *f_link;
-int x;
+/*temp*/ int f_return;
+void T();
 private:
 void *link;
 public:
-/*temp*/ int f_return;
-void T();
+/*temp*/ void *f_link;
+private:
+int i;
+public:
 int y;
+int x;
 /*temp*/ void *f_link1;
+/*temp*/ int f_i;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-/*temp*/ int result;
-/*temp*/ bool ortemp;
+/*temp*/ bool result;
 /*temp*/ int result1;
-/*temp*/ bool result2;
-/*temp*/ bool result3;
+/*temp*/ int result2;
+/*temp*/ int result3;
 /*temp*/ int result4;
-/*temp*/ int result5;
-/*temp*/ int result6;
-/*temp*/ bool andtemp;
+/*temp*/ bool ortemp;
 /*temp*/ void *temp_link;
+/*temp*/ bool result5;
+/*temp*/ bool andtemp;
+/*temp*/ int result6;
 /*temp*/ int muxtemp;
  ::TopLevel::x=(4);
 andtemp=(++ ::TopLevel::x);
@@ -45,13 +45,13 @@ PROCEED:;
  ::TopLevel::f_link1=(&&LINK);
 goto ENTER_f;
 LINK:;
-result5= ::TopLevel::f_return;
-andtemp=( ::TopLevel::y=result5);
+result2= ::TopLevel::f_return;
+andtemp=( ::TopLevel::y=result2);
 goto ELSE;
 THEN:;
 ELSE:;
-result3=andtemp;
-result3;
+result5=andtemp;
+result5;
 ortemp=(!(++ ::TopLevel::x));
 goto *((!ortemp) ? (&&THEN1) : (&&PROCEED1));
 PROCEED1:;
@@ -61,11 +61,11 @@ THEN1:;
  ::TopLevel::f_link1=(&&LINK1);
 goto ENTER_f;
 LINK1:;
-result4= ::TopLevel::f_return;
-ortemp=( ::TopLevel::y+=result4);
+result3= ::TopLevel::f_return;
+ortemp=( ::TopLevel::y+=result3);
 ELSE1:;
-result2=ortemp;
-result2;
+result=ortemp;
+result;
  ::TopLevel::x=(0);
 goto *((!( ::TopLevel::x<(2))) ? (&&THEN3) : (&&PROCEED2));
 PROCEED2:;
@@ -84,8 +84,8 @@ THEN2:;
  ::TopLevel::f_link1=(&&LINK3);
 goto ENTER_f;
 LINK3:;
-result= ::TopLevel::f_return;
-muxtemp=( ::TopLevel::y-=result);
+result4= ::TopLevel::f_return;
+muxtemp=( ::TopLevel::y-=result4);
 ELSE2:;
 result1=muxtemp;
 result1;

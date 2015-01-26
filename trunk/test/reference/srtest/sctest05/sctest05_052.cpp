@@ -1,6 +1,7 @@
 #include "isystemc.h"
 
 class TopLevel;
+int gvar;
 class TopLevel : public sc_module
 {
 public:
@@ -10,22 +11,21 @@ SC_THREAD(T);
 }
 enum TStates
 {
-T_STATE_THEN_ELSE = 3U,
 T_STATE_PROCEED = 1U,
+T_STATE_THEN_ELSE = 3U,
+T_STATE_PROCEED_NEXT = 0U,
 T_STATE_YIELD = 2U,
 T_STATE_PROCEED_THEN_ELSE = 4U,
-T_STATE_PROCEED_NEXT = 0U,
 };
 void T();
 };
 TopLevel top_level("top_level");
 int i;
-int gvar;
 
 void TopLevel::T()
 {
-static const unsigned int (lmap[]) = { &&PROCEED_NEXT, &&PROCEED, &&YIELD, &&THEN_ELSE, &&PROCEED_THEN_ELSE };
 auto unsigned int state;
+static const unsigned int (lmap[]) = { &&PROCEED_NEXT, &&PROCEED, &&YIELD, &&THEN_ELSE, &&PROCEED_THEN_ELSE };
  ::gvar=(1);
  ::i=(0);
 wait(SC_ZERO_TIME);
