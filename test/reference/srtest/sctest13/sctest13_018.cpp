@@ -8,16 +8,16 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
+void T();
+int i;
 /*temp*/ void *f_link;
+/*temp*/ int f_return;
+/*temp*/ void *f_link1;
+int x;
 private:
 void *link;
 public:
-/*temp*/ int f_return;
 float fi;
-void T();
-int x;
-int i;
-/*temp*/ void *f_link_1;
 };
 TopLevel top_level("top_level");
 
@@ -56,8 +56,8 @@ break;
  ::TopLevel::i=(0);
 while(  ::TopLevel::i<(4) )
 {
-goto CONTINUE_1;
-CONTINUE_1:;
+goto CONTINUE1;
+CONTINUE1:;
  ::TopLevel::i++;
 }
 }
@@ -66,7 +66,7 @@ CONTINUE_1:;
 while(  ::TopLevel::i<(4) )
 {
  ::TopLevel::x+= ::TopLevel::i;
-CONTINUE_2:;
+CONTINUE2:;
  ::TopLevel::i++;
 }
 }
@@ -76,7 +76,7 @@ while(  ::TopLevel::i< ::TopLevel::x )
 {
 {
 }
-CONTINUE_3:;
+CONTINUE3:;
  ::TopLevel::i++;
 }
 }
@@ -94,7 +94,7 @@ for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i-=(1) )
 while(  ::TopLevel::i<(4) )
 {
  ::TopLevel::x+= ::TopLevel::i;
-CONTINUE_4:;
+CONTINUE4:;
  ::TopLevel::i=(4);
 }
 }
@@ -103,7 +103,7 @@ CONTINUE_4:;
 while(  ::TopLevel::i<(4) )
 {
  ::TopLevel::i+=(0);
-CONTINUE_5:;
+CONTINUE5:;
  ::TopLevel::i++;
 }
 }
@@ -119,7 +119,7 @@ goto ENTER_f;
 LINK:;
 }
  ::TopLevel::f_return; });
-CONTINUE_6:;
+CONTINUE6:;
  ::TopLevel::i++;
 }
 }

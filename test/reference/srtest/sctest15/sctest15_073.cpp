@@ -9,19 +9,17 @@ SC_CTOR( TopLevel )
 SC_THREAD(U);
 }
 /*temp*/ unsigned int temp_link;
-void U();
-private:
-unsigned int state;
-public:
 enum UStates
 {
 U_STATE_ENTER_HelperU = 1U,
 U_STATE_LINK = 0U,
 };
+/*temp*/ unsigned int HelperU_link;
 private:
+unsigned int state;
 unsigned int link;
 public:
-/*temp*/ unsigned int HelperU_link;
+void U();
 };
 TopLevel top_level("top_level");
 
@@ -29,7 +27,7 @@ void TopLevel::U()
 {
 do
 {
-if( (sc_delta_count())==(0U) )
+if( (0U)==(sc_delta_count()) )
 {
  ::TopLevel::HelperU_link= ::TopLevel::U_STATE_LINK;
 wait(SC_ZERO_TIME);

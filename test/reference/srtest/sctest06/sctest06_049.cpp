@@ -22,17 +22,17 @@ auto void *state;
  ::i=(0);
 wait(SC_ZERO_TIME);
 {
-state=((!( ::i<(4))) ? (&&PROCEED_THEN_ELSE_1) : (&&PROCEED_NEXT));
+state=((!( ::i<(4))) ? (&&PROCEED_THEN_ELSE1) : (&&PROCEED_NEXT));
 goto *(state);
 }
 PROCEED_NEXT:;
  ::gvar+= ::i;
  ::j=(0);
 {
-state=((!( ::j<(3))) ? (&&PROCEED_THEN_ELSE) : (&&PROCEED_NEXT_1));
+state=((!( ::j<(3))) ? (&&PROCEED_THEN_ELSE) : (&&PROCEED_NEXT1));
 goto *(state);
 }
-PROCEED_NEXT_1:;
+PROCEED_NEXT1:;
 wait(SC_ZERO_TIME);
 {
 state=(&&YIELD);
@@ -42,17 +42,17 @@ YIELD:;
  ::gvar++;
  ::j++;
 {
-state=(( ::j<(3)) ? (&&PROCEED_NEXT_1) : (&&PROCEED_THEN_ELSE));
+state=(( ::j<(3)) ? (&&PROCEED_NEXT1) : (&&PROCEED_THEN_ELSE));
 goto *(state);
 }
 PROCEED_THEN_ELSE:;
  ::gvar*=(2);
  ::i++;
 {
-state=(( ::i<(4)) ? (&&PROCEED_NEXT) : (&&PROCEED_THEN_ELSE_1));
+state=(( ::i<(4)) ? (&&PROCEED_NEXT) : (&&PROCEED_THEN_ELSE1));
 goto *(state);
 }
-PROCEED_THEN_ELSE_1:;
+PROCEED_THEN_ELSE1:;
 cease(  ::gvar );
 return ;
 }

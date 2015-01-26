@@ -8,16 +8,16 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-int x;
-/*temp*/ void *f_link;
-float fi;
 void T();
+int i;
+float fi;
 private:
 void *link;
 public:
-int i;
+int x;
 /*temp*/ int f_return;
-/*temp*/ void *f_link_1;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link1;
 };
 TopLevel top_level("top_level");
 
@@ -28,7 +28,7 @@ for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
 for(  ::TopLevel::i=(0);  ::TopLevel::i<=(4);  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
-for(  ::TopLevel::i=(0); (4)!= ::TopLevel::i;  ::TopLevel::i++ )
+for(  ::TopLevel::i=(0);  ::TopLevel::i!=(4);  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
 for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i-- )
  ::TopLevel::x+= ::TopLevel::i;
@@ -45,7 +45,7 @@ goto BREAK;
 CONTINUE:;
  ::TopLevel::i++;
 }
-CONTINUE_1:;
+CONTINUE1:;
 if(  ::TopLevel::i<(4) )
 goto NEXT;
 }
@@ -62,46 +62,46 @@ break;
  ::TopLevel::i=(0);
 if(  ::TopLevel::i<(4) )
 {
-NEXT_1:;
+NEXT1:;
 {
-goto CONTINUE_2;
-CONTINUE_2:;
+goto CONTINUE2;
+CONTINUE2:;
  ::TopLevel::i++;
 }
-CONTINUE_3:;
+CONTINUE3:;
 if(  ::TopLevel::i<(4) )
-goto NEXT_1;
+goto NEXT1;
 }
 }
 {
 ;
 if(  ::TopLevel::i<(4) )
 {
-NEXT_2:;
+NEXT2:;
 {
  ::TopLevel::x+= ::TopLevel::i;
-CONTINUE_4:;
+CONTINUE4:;
  ::TopLevel::i++;
 }
-CONTINUE_5:;
+CONTINUE5:;
 if(  ::TopLevel::i<(4) )
-goto NEXT_2;
+goto NEXT2;
 }
 }
 {
  ::TopLevel::i=(0);
 if(  ::TopLevel::i< ::TopLevel::x )
 {
-NEXT_3:;
+NEXT3:;
 {
 {
 }
-CONTINUE_6:;
+CONTINUE6:;
  ::TopLevel::i++;
 }
-CONTINUE_7:;
+CONTINUE7:;
 if(  ::TopLevel::i< ::TopLevel::x )
-goto NEXT_3;
+goto NEXT3;
 }
 }
 ;
@@ -117,52 +117,52 @@ for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i-=(1) )
  ::TopLevel::i=(0);
 if(  ::TopLevel::i<(4) )
 {
-NEXT_4:;
+NEXT4:;
 {
  ::TopLevel::x+= ::TopLevel::i;
-CONTINUE_8:;
+CONTINUE8:;
  ::TopLevel::i=(4);
 }
-CONTINUE_9:;
+CONTINUE9:;
 if(  ::TopLevel::i<(4) )
-goto NEXT_4;
+goto NEXT4;
 }
 }
 {
  ::TopLevel::i=(0);
 if(  ::TopLevel::i<(4) )
 {
-NEXT_5:;
+NEXT5:;
 {
  ::TopLevel::i+=(0);
-CONTINUE_10:;
+CONTINUE10:;
  ::TopLevel::i++;
 }
-CONTINUE_11:;
+CONTINUE11:;
 if(  ::TopLevel::i<(4) )
-goto NEXT_5;
+goto NEXT5;
 }
 }
 {
  ::TopLevel::i=(0);
 if(  ::TopLevel::i<(4) )
 {
-NEXT_6:;
+NEXT6:;
 {
  ::TopLevel::x+=({ {
 {
- ::TopLevel::f_link_1=(&&LINK);
+ ::TopLevel::f_link1=(&&LINK);
 goto ENTER_f;
 }
 LINK:;
 }
  ::TopLevel::f_return; });
-CONTINUE_12:;
+CONTINUE12:;
  ::TopLevel::i++;
 }
-CONTINUE_13:;
+CONTINUE13:;
 if(  ::TopLevel::i<(4) )
-goto NEXT_6;
+goto NEXT6;
 }
 }
 cease(  ::TopLevel::x );
@@ -170,7 +170,7 @@ return ;
 ENTER_f:;
 {
 /*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link_1;
+ ::TopLevel::link= ::TopLevel::f_link1;
 {
  ::TopLevel::f_return=(3);
 {

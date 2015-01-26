@@ -37,7 +37,10 @@ public:
     {
         return new VALUE_TYPE; // means VALUE_TYPE must be constructable
     }
+private:    
 };
+
+
 
 
 

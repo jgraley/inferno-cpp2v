@@ -10,10 +10,11 @@ SC_CTOR( Multiplier )
 {
 SC_THREAD(T);
 }
-bool instigate;
-void T();
 bool proceed;
+void T();
+bool instigate;
 };
+int gvar;
 class Adder : public sc_module
 {
 public:
@@ -21,10 +22,9 @@ SC_CTOR( Adder )
 {
 SC_THREAD(T);
 }
-void T();
 bool proceed;
+void T();
 };
-int gvar;
 class TopLevel : public sc_module
 {
 public:
@@ -55,22 +55,22 @@ goto NEXT;
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
 if( ! ::Multiplier::proceed )
 {
-NEXT_1:;
+NEXT1:;
 wait(SC_ZERO_TIME);
-CONTINUE_1:;
+CONTINUE1:;
 if( ! ::Multiplier::proceed )
-goto NEXT_1;
+goto NEXT1;
 }
  ::Multiplier::proceed=(false);
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
 if( ! ::Multiplier::proceed )
 {
-NEXT_2:;
+NEXT2:;
 wait(SC_ZERO_TIME);
-CONTINUE_2:;
+CONTINUE2:;
 if( ! ::Multiplier::proceed )
-goto NEXT_2;
+goto NEXT2;
 }
  ::Multiplier::proceed=(false);
 cease(  ::gvar );
@@ -93,11 +93,11 @@ goto NEXT;
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
 if( ! ::Adder::proceed )
 {
-NEXT_1:;
+NEXT1:;
 wait(SC_ZERO_TIME);
-CONTINUE_1:;
+CONTINUE1:;
 if( ! ::Adder::proceed )
-goto NEXT_1;
+goto NEXT1;
 }
  ::Adder::proceed=(false);
  ::gvar+=(3);

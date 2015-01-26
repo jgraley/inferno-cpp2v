@@ -21,6 +21,7 @@ public:
     ReadArgs( int argc, char *argv[] );
     static bool trace;
     static bool trace_hits;    
+    static bool trace_quiet;    
     static std::string hits_format;
     static int quitafter;
     static bool quitenable;

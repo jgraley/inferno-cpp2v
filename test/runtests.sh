@@ -53,8 +53,9 @@ for infile in $infilelist
 do
     # Decide where to put the log file for this test run 
     logfile=$logdir/`basename $infile`.log
-    # Start the test and pipe output to tee so we get it on the terminal and in the log file
-    test/$testscript $infile 2>&1 | tee $logfile &
+    # Start the test and pipe output to tee so we get it on the terminal and in the 
+    # log file, but turn off the normal messges because there's too many! 
+    test/$testscript $infile -tq 2>&1 | tee $logfile &
 done
 
 # Wait for all the tests to complete and count failures 

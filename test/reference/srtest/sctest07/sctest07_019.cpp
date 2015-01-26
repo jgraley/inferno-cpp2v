@@ -1,7 +1,6 @@
 #include "isystemc.h"
 
 class TopLevel;
-int j;
 class TopLevel : public sc_module
 {
 public:
@@ -11,8 +10,9 @@ SC_THREAD(T);
 }
 void T();
 };
-int i;
 int gvar;
+int j;
+int i;
 TopLevel top_level("top_level");
 
 void TopLevel::T()
@@ -42,7 +42,7 @@ while(  ::j<(3) );
  ::gvar*=(2);
 wait(SC_ZERO_TIME);
 }
-CONTINUE_1:;
+CONTINUE1:;
  ::i++;
 }
 while(  ::i<(4) );

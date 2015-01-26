@@ -8,18 +8,18 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-void T();
 enum TStates
 {
-T_STATE_PROCEED_THEN_ELSE = 4U,
 T_STATE_THEN_ELSE = 3U,
-T_STATE_PROCEED_NEXT = 0U,
-T_STATE_YIELD = 2U,
 T_STATE_PROCEED = 1U,
+T_STATE_YIELD = 2U,
+T_STATE_PROCEED_THEN_ELSE = 4U,
+T_STATE_PROCEED_NEXT = 0U,
 };
+void T();
 };
-int i;
 TopLevel top_level("top_level");
+int i;
 int gvar;
 
 void TopLevel::T()

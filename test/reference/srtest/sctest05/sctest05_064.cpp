@@ -8,7 +8,6 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-void T();
 enum TStates
 {
 T_STATE_PROCEED_NEXT = 0U,
@@ -17,10 +16,11 @@ T_STATE_THEN_ELSE = 3U,
 T_STATE_PROCEED = 1U,
 T_STATE_YIELD = 2U,
 };
+void T();
 };
-int gvar;
 int i;
 TopLevel top_level("top_level");
+int gvar;
 
 void TopLevel::T()
 {
@@ -35,12 +35,12 @@ THEN_ELSE:;
 YIELD:;
 PROCEED:;
 PROCEED_NEXT:;
-if(  ::TopLevel::T_STATE_PROCEED_NEXT==state )
+if( state== ::TopLevel::T_STATE_PROCEED_NEXT )
 {
  ::gvar+= ::i;
 state=((!((0)==( ::i%(2)))) ?  ::TopLevel::T_STATE_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED);
 }
-if(  ::TopLevel::T_STATE_PROCEED==state )
+if( state== ::TopLevel::T_STATE_PROCEED )
 {
 wait(SC_ZERO_TIME);
 state= ::TopLevel::T_STATE_YIELD;

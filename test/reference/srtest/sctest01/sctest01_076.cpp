@@ -10,17 +10,17 @@ SC_CTOR( Adder )
 {
 SC_METHOD(T);
 }
-private:
-unsigned int state;
-public:
+void T();
 enum TStates
 {
 T_STATE_YIELD = 1U,
-T_STATE_YIELD_1 = 0U,
+T_STATE_YIELD1 = 0U,
 };
 sc_event proceed;
-void T();
+private:
+unsigned int state;
 };
+int gvar;
 class Multiplier : public sc_module
 {
 public:
@@ -29,17 +29,16 @@ SC_CTOR( Multiplier )
 SC_METHOD(T);
 }
 void T();
-sc_event proceed;
 sc_event instigate;
-private:
-unsigned int state;
-public:
 enum TStates
 {
 T_STATE_YIELD = 0U,
-T_STATE_YIELD_1 = 2U,
-T_STATE_YIELD_2 = 1U,
+T_STATE_YIELD1 = 2U,
+T_STATE_YIELD2 = 1U,
 };
+sc_event proceed;
+private:
+unsigned int state;
 };
 class TopLevel : public sc_module
 {
@@ -51,27 +50,26 @@ mul_inst("mul_inst")
 SC_THREAD(T);
 }
 void T();
- ::Adder add_inst;
 enum TStates
 {
 };
+ ::Adder add_inst;
  ::Multiplier mul_inst;
 };
 TopLevel top_level("top_level");
-int gvar;
 
 void Adder::T()
 {
 /*temp*/ bool enabled = true;
-if( (sc_delta_count())==(0U) )
+if( (0U)==(sc_delta_count()) )
 {
 next_trigger(  ::Adder::proceed );
- ::Adder::state= ::Adder::T_STATE_YIELD_1;
+ ::Adder::state= ::Adder::T_STATE_YIELD1;
 enabled=(false);
 }
 if( enabled )
 {
-if(  ::Adder::T_STATE_YIELD_1== ::Adder::state )
+if(  ::Adder::state== ::Adder::T_STATE_YIELD1 )
 {
  ::gvar+=(2);
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
@@ -109,24 +107,24 @@ if(  ::Multiplier::T_STATE_YIELD== ::Multiplier::state )
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
 next_trigger(  ::Multiplier::proceed );
- ::Multiplier::state= ::Multiplier::T_STATE_YIELD_2;
+ ::Multiplier::state= ::Multiplier::T_STATE_YIELD2;
 enabled=(false);
 }
 }
 if( enabled )
 {
-if(  ::Multiplier::T_STATE_YIELD_2== ::Multiplier::state )
+if(  ::Multiplier::state== ::Multiplier::T_STATE_YIELD2 )
 {
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
 next_trigger(  ::Multiplier::proceed );
- ::Multiplier::state= ::Multiplier::T_STATE_YIELD_1;
+ ::Multiplier::state= ::Multiplier::T_STATE_YIELD1;
 enabled=(false);
 }
 }
 if( enabled )
 {
-if(  ::Multiplier::state== ::Multiplier::T_STATE_YIELD_1 )
+if(  ::Multiplier::state== ::Multiplier::T_STATE_YIELD1 )
 {
 cease(  ::gvar );
 enabled=(false);

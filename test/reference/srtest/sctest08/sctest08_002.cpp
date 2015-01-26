@@ -1,8 +1,6 @@
 #include "isystemc.h"
 
 class TopLevel;
-int gvar;
-int i;
 class TopLevel : public sc_module
 {
 public:
@@ -10,12 +8,19 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
+void (otherhelper)();
 void T();
 void (helper)(auto int n);
-void (otherhelper)();
 };
-TopLevel top_level("top_level");
 int j;
+TopLevel top_level("top_level");
+int gvar;
+int i;
+
+void (TopLevel::otherhelper)()
+{
+ ::gvar=( ::gvar-(1));
+}
 
 void TopLevel::T()
 {
@@ -39,9 +44,4 @@ wait(SC_ZERO_TIME);
 }
  ::TopLevel::otherhelper();
 return ;
-}
-
-void (TopLevel::otherhelper)()
-{
- ::gvar=( ::gvar-(1));
 }

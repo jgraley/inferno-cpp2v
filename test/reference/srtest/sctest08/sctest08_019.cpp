@@ -1,6 +1,7 @@
 #include "isystemc.h"
 
 class TopLevel;
+int i;
 int gvar;
 class TopLevel : public sc_module
 {
@@ -10,23 +11,23 @@ helper_stack_index(0U)
 {
 SC_THREAD(T);
 }
+void T();
+/*temp*/ int helper_n;
 private:
 int (n_stack[10U]);
-void *(link_stack[10U]);
 public:
-void T();
-/*temp*/ void *helper_link;
-/*temp*/ void *helper_link_1;
 /*temp*/ void *otherhelper_link;
-/*temp*/ void *otherhelper_link_1;
 private:
-void *link;
 unsigned int helper_stack_index;
 public:
-/*temp*/ int helper_n;
+/*temp*/ void *otherhelper_link1;
+/*temp*/ void *helper_link;
+/*temp*/ void *helper_link1;
+private:
+void *link;
+void *(link_stack[10U]);
 };
 TopLevel top_level("top_level");
-int i;
 int j;
 
 void TopLevel::T()
@@ -43,14 +44,14 @@ do
 {
  ::TopLevel::helper_n=temp_n;
 {
- ::TopLevel::helper_link=(&&LINK);
+ ::TopLevel::helper_link1=(&&LINK);
 goto ENTER_helper;
 }
 }
 LINK:;
 }
 });
- ::gvar=((2)* ::gvar);
+ ::gvar=( ::gvar*(2));
 wait(SC_ZERO_TIME);
 }
 CONTINUE:;
@@ -65,7 +66,7 @@ ENTER_helper:;
 {
 /*temp*/ void *temp_link;
  ::TopLevel::helper_stack_index++;
-( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link;
+( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link1;
 ( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_n;
 {
  ::j=(0);
@@ -76,17 +77,17 @@ do
 wait(SC_ZERO_TIME);
  ::gvar=( ::gvar+(1));
 }
-CONTINUE_1:;
+CONTINUE1:;
  ::j=( ::j+(1));
 }
 while(  ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]) );
 }
 {
 {
- ::TopLevel::otherhelper_link_1=(&&LINK_1);
+ ::TopLevel::otherhelper_link=(&&LINK1);
 goto ENTER_otherhelper;
 }
-LINK_1:;
+LINK1:;
 }
 {
 temp_link=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
@@ -99,12 +100,12 @@ goto *(temp_link);
 }
 ENTER_otherhelper:;
 {
-/*temp*/ void *temp_link_1;
- ::TopLevel::link= ::TopLevel::otherhelper_link_1;
+/*temp*/ void *temp_link1;
+ ::TopLevel::link= ::TopLevel::otherhelper_link;
  ::gvar=( ::gvar-(1));
 {
-temp_link_1= ::TopLevel::link;
-goto *(temp_link_1);
+temp_link1= ::TopLevel::link;
+goto *(temp_link1);
 }
 }
 }

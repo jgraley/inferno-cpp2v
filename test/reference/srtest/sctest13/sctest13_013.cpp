@@ -10,20 +10,20 @@ SC_THREAD(T);
 }
 int i;
 void (f)();
-float fi;
-void T();
-/*temp*/ int f_return;
-int x;
 /*temp*/ void *f_link;
-/*temp*/ void *f_link_1;
+/*temp*/ int f_return;
+void T();
+/*temp*/ void *f_link1;
+int x;
+float fi;
 };
 TopLevel top_level("top_level");
 
 void (TopLevel::f)()
 {
-auto void *link;
 /*temp*/ void *temp_link;
-link= ::TopLevel::f_link;
+auto void *link;
+link= ::TopLevel::f_link1;
 {
  ::TopLevel::f_return=(3);
 {
@@ -62,7 +62,7 @@ for(  ::TopLevel::i=(0);  ::TopLevel::i< ::TopLevel::x;  ::TopLevel::i++ )
 {
 }
 ;
-for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i=((1)+ ::TopLevel::i) )
+for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i=( ::TopLevel::i+(1)) )
  ::TopLevel::x+= ::TopLevel::i;
 for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i+=(1) )
  ::TopLevel::x+= ::TopLevel::i;
@@ -77,7 +77,7 @@ for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
 for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
  ::TopLevel::x+=({ {
 {
- ::TopLevel::f_link=(&&LINK);
+ ::TopLevel::f_link1=(&&LINK);
  ::TopLevel::f();
 }
 LINK:;

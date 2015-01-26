@@ -8,16 +8,16 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
+/*temp*/ void *f_link;
+void T();
+/*temp*/ void *f_link1;
 private:
 void *link;
 public:
-void T();
-/*temp*/ void *f_link;
-int x;
-/*temp*/ int f_return;
-/*temp*/ void *f_link_1;
 int i;
+int x;
 float fi;
+/*temp*/ int f_return;
 };
 TopLevel top_level("top_level");
 
@@ -28,7 +28,7 @@ for(  ::TopLevel::i=(0);  ::TopLevel::i<(4);  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
 for(  ::TopLevel::i=(0);  ::TopLevel::i<=(4);  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
-for(  ::TopLevel::i=(0); (4)!= ::TopLevel::i;  ::TopLevel::i++ )
+for(  ::TopLevel::i=(0);  ::TopLevel::i!=(4);  ::TopLevel::i++ )
  ::TopLevel::x+= ::TopLevel::i;
 for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i-- )
  ::TopLevel::x+= ::TopLevel::i;
@@ -49,11 +49,11 @@ goto BREAK;
 CONTINUE:;
  ::TopLevel::i++;
 }
-CONTINUE_1:;
+CONTINUE1:;
 if(  ::TopLevel::i<(4) )
 goto NEXT;
-goto PROCEED_1;
-PROCEED_1:;
+goto PROCEED1;
+PROCEED1:;
 }
 goto ELSE;
 THEN:;
@@ -73,79 +73,79 @@ break;
  ::TopLevel::i=(0);
 {
 if( !( ::TopLevel::i<(4)) )
-goto THEN_1;
-goto PROCEED_2;
-PROCEED_2:;
+goto THEN1;
+goto PROCEED2;
+PROCEED2:;
 {
-NEXT_1:;
+NEXT1:;
 {
-goto CONTINUE_2;
-CONTINUE_2:;
+goto CONTINUE2;
+CONTINUE2:;
  ::TopLevel::i++;
 }
-CONTINUE_3:;
+CONTINUE3:;
 if(  ::TopLevel::i<(4) )
-goto NEXT_1;
-goto PROCEED_3;
-PROCEED_3:;
+goto NEXT1;
+goto PROCEED3;
+PROCEED3:;
 }
-goto ELSE_1;
-THEN_1:;
+goto ELSE1;
+THEN1:;
 ;
-ELSE_1:;
+ELSE1:;
 }
 }
 {
 ;
 {
 if( !( ::TopLevel::i<(4)) )
-goto THEN_2;
-goto PROCEED_4;
-PROCEED_4:;
+goto THEN2;
+goto PROCEED4;
+PROCEED4:;
 {
-NEXT_2:;
+NEXT2:;
 {
  ::TopLevel::x+= ::TopLevel::i;
-CONTINUE_4:;
+CONTINUE4:;
  ::TopLevel::i++;
 }
-CONTINUE_5:;
+CONTINUE5:;
 if(  ::TopLevel::i<(4) )
-goto NEXT_2;
-goto PROCEED_5;
-PROCEED_5:;
+goto NEXT2;
+goto PROCEED5;
+PROCEED5:;
 }
-goto ELSE_2;
-THEN_2:;
+goto ELSE2;
+THEN2:;
 ;
-ELSE_2:;
+ELSE2:;
 }
 }
 {
  ::TopLevel::i=(0);
 {
 if( !( ::TopLevel::i< ::TopLevel::x) )
-goto THEN_3;
-goto PROCEED_6;
-PROCEED_6:;
+goto THEN3;
+goto PROCEED6;
+PROCEED6:;
 {
-NEXT_3:;
+NEXT3:;
 {
 {
 }
-CONTINUE_6:;
+CONTINUE6:;
  ::TopLevel::i++;
 }
-CONTINUE_7:;
+CONTINUE7:;
 if(  ::TopLevel::i< ::TopLevel::x )
-goto NEXT_3;
-goto PROCEED_7;
-PROCEED_7:;
+goto NEXT3;
+goto PROCEED7;
+PROCEED7:;
 }
-goto ELSE_3;
-THEN_3:;
+goto ELSE3;
+THEN3:;
 ;
-ELSE_3:;
+ELSE3:;
 }
 }
 ;
@@ -161,63 +161,63 @@ for(  ::TopLevel::i=(4);  ::TopLevel::i>(0);  ::TopLevel::i-=(1) )
  ::TopLevel::i=(0);
 {
 if( !( ::TopLevel::i<(4)) )
-goto THEN_4;
-goto PROCEED_8;
-PROCEED_8:;
+goto THEN4;
+goto PROCEED8;
+PROCEED8:;
 {
-NEXT_4:;
+NEXT4:;
 {
  ::TopLevel::x+= ::TopLevel::i;
-CONTINUE_8:;
+CONTINUE8:;
  ::TopLevel::i=(4);
 }
-CONTINUE_9:;
+CONTINUE9:;
 if(  ::TopLevel::i<(4) )
-goto NEXT_4;
-goto PROCEED_9;
-PROCEED_9:;
+goto NEXT4;
+goto PROCEED9;
+PROCEED9:;
 }
-goto ELSE_4;
-THEN_4:;
+goto ELSE4;
+THEN4:;
 ;
-ELSE_4:;
+ELSE4:;
 }
 }
 {
  ::TopLevel::i=(0);
 {
 if( !( ::TopLevel::i<(4)) )
-goto THEN_5;
-goto PROCEED_10;
-PROCEED_10:;
+goto THEN5;
+goto PROCEED10;
+PROCEED10:;
 {
-NEXT_5:;
+NEXT5:;
 {
  ::TopLevel::i+=(0);
-CONTINUE_10:;
+CONTINUE10:;
  ::TopLevel::i++;
 }
-CONTINUE_11:;
+CONTINUE11:;
 if(  ::TopLevel::i<(4) )
-goto NEXT_5;
-goto PROCEED_11;
-PROCEED_11:;
+goto NEXT5;
+goto PROCEED11;
+PROCEED11:;
 }
-goto ELSE_5;
-THEN_5:;
+goto ELSE5;
+THEN5:;
 ;
-ELSE_5:;
+ELSE5:;
 }
 }
 {
  ::TopLevel::i=(0);
 {
 if( !( ::TopLevel::i<(4)) )
-goto THEN_6;
-goto PROCEED_12;
-PROCEED_12:;
+goto THEN6;
+goto PROCEED12;
+PROCEED12:;
 {
-NEXT_6:;
+NEXT6:;
 {
  ::TopLevel::x+=({ {
 {
@@ -227,19 +227,19 @@ goto ENTER_f;
 LINK:;
 }
  ::TopLevel::f_return; });
-CONTINUE_12:;
+CONTINUE12:;
  ::TopLevel::i++;
 }
-CONTINUE_13:;
+CONTINUE13:;
 if(  ::TopLevel::i<(4) )
-goto NEXT_6;
-goto PROCEED_13;
-PROCEED_13:;
+goto NEXT6;
+goto PROCEED13;
+PROCEED13:;
 }
-goto ELSE_6;
-THEN_6:;
+goto ELSE6;
+THEN6:;
 ;
-ELSE_6:;
+ELSE6:;
 }
 }
 cease(  ::TopLevel::x );

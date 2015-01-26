@@ -10,20 +10,20 @@ SC_THREAD(T);
 }
 enum TStates
 {
-T_STATE_YIELD = 1U,
-T_STATE_PROCEED_NEXT = 0U,
 T_STATE_PROCEED_THEN_ELSE = 2U,
+T_STATE_PROCEED_NEXT = 0U,
+T_STATE_YIELD = 1U,
 };
 void T();
 };
+TopLevel top_level("top_level");
 int i;
 int gvar;
-TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-static const unsigned int (lmap[]) = { &&PROCEED_NEXT, &&YIELD, &&PROCEED_THEN_ELSE };
 auto unsigned int state;
+static const unsigned int (lmap[]) = { &&PROCEED_NEXT, &&YIELD, &&PROCEED_THEN_ELSE };
  ::gvar=(1);
  ::i=(0);
 wait(SC_ZERO_TIME);

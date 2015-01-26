@@ -2,6 +2,7 @@
 
 class TopLevel;
 int gvar;
+int j;
 int i;
 class TopLevel : public sc_module
 {
@@ -13,62 +14,61 @@ SC_THREAD(T);
 void T();
 enum TStates
 {
-T_STATE_YIELD = 2U,
+T_STATE_YIELD = 4U,
+T_STATE_PROCEED_THEN_ELSE = 3U,
+T_STATE_PROCEED_THEN_ELSE1 = 5U,
 T_STATE_PROCEED_NEXT = 0U,
-T_STATE_YIELD_1 = 4U,
-T_STATE_PROCEED_THEN_ELSE = 5U,
-T_STATE_PROCEED_THEN_ELSE_1 = 3U,
-T_STATE_PROCEED_NEXT_1 = 1U,
+T_STATE_PROCEED_NEXT1 = 1U,
+T_STATE_YIELD1 = 2U,
 };
 };
 TopLevel top_level("top_level");
-int j;
 
 void TopLevel::T()
 {
-static const void *(lmap[]) = { &&PROCEED_NEXT, &&PROCEED_NEXT_1, &&YIELD, &&PROCEED_THEN_ELSE, &&YIELD_1, &&PROCEED_THEN_ELSE_1 };
 auto void *state;
+static const void *(lmap[]) = { &&PROCEED_NEXT, &&PROCEED_NEXT1, &&YIELD, &&PROCEED_THEN_ELSE, &&YIELD1, &&PROCEED_THEN_ELSE1 };
  ::gvar=(1);
  ::i=(0);
 wait(SC_ZERO_TIME);
 {
-state=((!( ::i<(4))) ? (lmap[ ::TopLevel::T_STATE_PROCEED_THEN_ELSE]) : (lmap[ ::TopLevel::T_STATE_PROCEED_NEXT]));
+state=((!( ::i<(4))) ? (lmap[ ::TopLevel::T_STATE_PROCEED_THEN_ELSE1]) : (lmap[ ::TopLevel::T_STATE_PROCEED_NEXT]));
 goto *(state);
 }
 PROCEED_NEXT:;
  ::gvar+= ::i;
  ::j=(0);
 {
-state=((!( ::j<(3))) ? (lmap[ ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1]) : (lmap[ ::TopLevel::T_STATE_PROCEED_NEXT_1]));
+state=((!( ::j<(3))) ? (lmap[ ::TopLevel::T_STATE_PROCEED_THEN_ELSE]) : (lmap[ ::TopLevel::T_STATE_PROCEED_NEXT1]));
 goto *(state);
 }
-PROCEED_NEXT_1:;
+PROCEED_NEXT1:;
 wait(SC_ZERO_TIME);
 {
-state=(lmap[ ::TopLevel::T_STATE_YIELD]);
+state=(lmap[ ::TopLevel::T_STATE_YIELD1]);
 goto *(state);
 }
 YIELD:;
  ::gvar++;
  ::j++;
 {
-state=(( ::j<(3)) ? (lmap[ ::TopLevel::T_STATE_PROCEED_NEXT_1]) : (lmap[ ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1]));
+state=(( ::j<(3)) ? (lmap[ ::TopLevel::T_STATE_PROCEED_NEXT1]) : (lmap[ ::TopLevel::T_STATE_PROCEED_THEN_ELSE]));
 goto *(state);
 }
 PROCEED_THEN_ELSE:;
  ::gvar*=(2);
 wait(SC_ZERO_TIME);
 {
-state=(lmap[ ::TopLevel::T_STATE_YIELD_1]);
+state=(lmap[ ::TopLevel::T_STATE_YIELD]);
 goto *(state);
 }
-YIELD_1:;
+YIELD1:;
  ::i++;
 {
-state=(( ::i<(4)) ? (lmap[ ::TopLevel::T_STATE_PROCEED_NEXT]) : (lmap[ ::TopLevel::T_STATE_PROCEED_THEN_ELSE]));
+state=(( ::i<(4)) ? (lmap[ ::TopLevel::T_STATE_PROCEED_NEXT]) : (lmap[ ::TopLevel::T_STATE_PROCEED_THEN_ELSE1]));
 goto *(state);
 }
-PROCEED_THEN_ELSE_1:;
+PROCEED_THEN_ELSE1:;
 cease(  ::gvar );
 return ;
 }

@@ -1,7 +1,6 @@
 #include "isystemc.h"
 
 class TopLevel;
-int i;
 class TopLevel : public sc_module
 {
 public:
@@ -9,38 +8,39 @@ SC_CTOR( TopLevel )
 {
 SC_METHOD(T);
 }
+void T();
 private:
 unsigned int state;
 public:
 enum TStates
 {
 T_STATE_PROCEED_THEN_ELSE = 3U,
-T_STATE_PROCEED_NEXT = 1U,
-T_STATE_PROCEED_THEN_ELSE_1 = 5U,
 T_STATE_YIELD = 4U,
-T_STATE_PROCEED_NEXT_1 = 0U,
-T_STATE_YIELD_1 = 2U,
+T_STATE_PROCEED_THEN_ELSE1 = 5U,
+T_STATE_PROCEED_NEXT = 1U,
+T_STATE_YIELD1 = 2U,
+T_STATE_PROCEED_NEXT1 = 0U,
 };
-void T();
 };
-TopLevel top_level("top_level");
-int j;
 int gvar;
+int j;
+int i;
+TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
 /*temp*/ bool enabled = true;
-if( (0U)==(sc_delta_count()) )
+if( (sc_delta_count())==(0U) )
 {
  ::gvar=(1);
  ::i=(0);
 next_trigger(SC_ZERO_TIME);
- ::TopLevel::state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1 :  ::TopLevel::T_STATE_PROCEED_NEXT_1);
+ ::TopLevel::state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT1);
 enabled=(false);
 }
 if( enabled )
 {
-if(  ::TopLevel::T_STATE_PROCEED_NEXT_1== ::TopLevel::state )
+if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT1 )
 {
  ::gvar+= ::i;
  ::j=(0);
@@ -49,16 +49,16 @@ if(  ::TopLevel::T_STATE_PROCEED_NEXT_1== ::TopLevel::state )
 }
 if( enabled )
 {
-if(  ::TopLevel::T_STATE_PROCEED_NEXT== ::TopLevel::state )
+if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT )
 {
 next_trigger(SC_ZERO_TIME);
- ::TopLevel::state= ::TopLevel::T_STATE_YIELD_1;
+ ::TopLevel::state= ::TopLevel::T_STATE_YIELD1;
 enabled=(false);
 }
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_YIELD_1 )
+if(  ::TopLevel::state== ::TopLevel::T_STATE_YIELD1 )
 {
  ::gvar++;
  ::j++;
@@ -80,12 +80,12 @@ if( enabled )
 if(  ::TopLevel::state== ::TopLevel::T_STATE_YIELD )
 {
  ::i++;
- ::TopLevel::state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT_1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1);
+ ::TopLevel::state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
 }
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1 )
+if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 )
 {
 cease(  ::gvar );
 enabled=(false);

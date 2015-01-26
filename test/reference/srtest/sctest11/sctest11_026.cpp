@@ -8,18 +8,19 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-/*temp*/ void *f_link;
-int x;
+/*temp*/ int f_i;
+private:
+int i;
+public:
 void T();
+/*temp*/ void *f_link;
 private:
 void *link;
 public:
 /*temp*/ int f_return;
-/*temp*/ void *f_link_1;
 int y;
-/*temp*/ int f_i;
-private:
-int i;
+int x;
+/*temp*/ void *f_link1;
 };
 TopLevel top_level("top_level");
 
@@ -33,7 +34,7 @@ andtemp=( ::TopLevel::y=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link_1=(&&LINK);
+ ::TopLevel::f_link1=(&&LINK);
 goto ENTER_f;
 }
 }
@@ -48,73 +49,73 @@ ELSE:;
 andtemp; });
 ({ /*temp*/ bool ortemp; ortemp=(!(++ ::TopLevel::x)); {
 if( !ortemp )
-goto THEN_1;
+goto THEN1;
 ;
-goto ELSE_1;
-THEN_1:;
+goto ELSE1;
+THEN1:;
 ortemp=( ::TopLevel::y+=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link_1=(&&LINK_1);
+ ::TopLevel::f_link1=(&&LINK1);
 goto ENTER_f;
 }
 }
-LINK_1:;
+LINK1:;
 }
  ::TopLevel::f_return; }));
-ELSE_1:;
+ELSE1:;
 }
 ortemp; });
 {
  ::TopLevel::x=(0);
 {
 if( !( ::TopLevel::x<(2)) )
-goto THEN_3;
+goto THEN3;
 {
 NEXT:;
 {
 ({ /*temp*/ int muxtemp; {
 if( !( ::TopLevel::x++) )
-goto THEN_2;
+goto THEN2;
 muxtemp=( ::TopLevel::y+=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link_1=(&&LINK_2);
+ ::TopLevel::f_link1=(&&LINK2);
 goto ENTER_f;
 }
 }
-LINK_2:;
+LINK2:;
 }
  ::TopLevel::f_return; }));
-goto ELSE_2;
-THEN_2:;
+goto ELSE2;
+THEN2:;
 muxtemp=( ::TopLevel::y-=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link_1=(&&LINK_3);
+ ::TopLevel::f_link1=(&&LINK3);
 goto ENTER_f;
 }
 }
-LINK_3:;
+LINK3:;
 }
  ::TopLevel::f_return; }));
-ELSE_2:;
+ELSE2:;
 }
 muxtemp; });
 CONTINUE:;
 ;
 }
-CONTINUE_1:;
+CONTINUE1:;
 if(  ::TopLevel::x<(2) )
 goto NEXT;
 }
-goto ELSE_3;
-THEN_3:;
+goto ELSE3;
+THEN3:;
 ;
-ELSE_3:;
+ELSE3:;
 }
 }
 cease(  ::TopLevel::y );
@@ -122,7 +123,7 @@ return ;
 ENTER_f:;
 {
 /*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link_1;
+ ::TopLevel::link= ::TopLevel::f_link1;
  ::TopLevel::i= ::TopLevel::f_i;
 {
  ::TopLevel::f_return=((100)/ ::TopLevel::i);

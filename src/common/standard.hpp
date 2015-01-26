@@ -9,6 +9,7 @@
 #include <set>
 using namespace std;
 #include <stdarg.h> 
+#include <stdint.h>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
@@ -72,6 +73,24 @@ public:
     virtual string GetName() const; // used by parse, render etc
     virtual string GetAddr() const; // used by parse, render etc
     virtual operator string() const; // used for debug
+};
+
+class SerialNumber
+{
+    typedef uint64_t SNType;
+    static SNType master_serial;
+    const SNType serial;
+
+protected:
+    SerialNumber();
+    inline SNType GetSerialNumber() const 
+    {
+        return serial;
+    }
+    inline SerialNumber &operator=( const SerialNumber &other )
+    {
+        return *this;
+    }
 };
 
 #endif

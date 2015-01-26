@@ -15,8 +15,11 @@ OPTIONS += -I.
 # Warn if return is missing
 OPTIONS += -Wreturn-type
 
-# Treat all warnings as errors by making the build abort 
+# Treat all warnings as errors 
 OPTIONS += -Werror
+
+# Make the build abort after the first error
+OPTIONS += -Wfatal-errors
 
 # Optimisation level. -O2 is considerably slower to compile, beware
 OPTIONS += -O0

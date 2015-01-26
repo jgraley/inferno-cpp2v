@@ -8,15 +8,15 @@ SC_CTOR( TopLevel )
 {
 SC_METHOD(U);
 }
+void U();
+/*temp*/ unsigned int HelperU_link;
 private:
 unsigned int state;
 public:
 /*temp*/ unsigned int temp_link;
-void U();
 private:
 unsigned int link;
 public:
-/*temp*/ unsigned int HelperU_link;
 enum UStates
 {
 U_STATE_ENTER_HelperU = 1U,

@@ -8,9 +8,9 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
+/*temp*/ void *recurser_link;
 int x;
 void T();
-/*temp*/ void *recurser_link;
 void (recurser)(auto void *link, auto int i);
 };
 TopLevel top_level("top_level");
@@ -38,9 +38,9 @@ if( i<(5) )
 LINK:;
 }
 });
-({ /*temp*/ int temp_i_1; temp_i_1=(i+(1)); {
- ::TopLevel::recurser(&&LINK_1, temp_i_1);
-LINK_1:;
+({ /*temp*/ int temp_i1; temp_i1=(i+(1)); {
+ ::TopLevel::recurser(&&LINK1, temp_i1);
+LINK1:;
 }
 });
 }

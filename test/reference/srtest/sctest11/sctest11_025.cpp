@@ -8,18 +8,19 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-/*temp*/ int f_i;
-int x;
-/*temp*/ int f_return;
 /*temp*/ void *f_link;
-/*temp*/ void *f_link_1;
-private:
-int i;
-public:
-int y;
+/*temp*/ int f_return;
+/*temp*/ void *f_link1;
 void T();
 private:
 void *link;
+public:
+int y;
+int x;
+private:
+int i;
+public:
+/*temp*/ int f_i;
 };
 TopLevel top_level("top_level");
 
@@ -31,7 +32,7 @@ andtemp=( ::TopLevel::y=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link_1=(&&LINK);
+ ::TopLevel::f_link=(&&LINK);
 goto ENTER_f;
 }
 }
@@ -46,11 +47,11 @@ ortemp=( ::TopLevel::y+=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link_1=(&&LINK_1);
+ ::TopLevel::f_link=(&&LINK1);
 goto ENTER_f;
 }
 }
-LINK_1:;
+LINK1:;
 }
  ::TopLevel::f_return; }));
 ortemp; });
@@ -65,11 +66,11 @@ muxtemp=( ::TopLevel::y+=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link_1=(&&LINK_2);
+ ::TopLevel::f_link=(&&LINK2);
 goto ENTER_f;
 }
 }
-LINK_2:;
+LINK2:;
 }
  ::TopLevel::f_return; }));
 else
@@ -77,18 +78,18 @@ muxtemp=( ::TopLevel::y-=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link_1=(&&LINK_3);
+ ::TopLevel::f_link=(&&LINK3);
 goto ENTER_f;
 }
 }
-LINK_3:;
+LINK3:;
 }
  ::TopLevel::f_return; }));
 muxtemp; });
 CONTINUE:;
 ;
 }
-CONTINUE_1:;
+CONTINUE1:;
 if(  ::TopLevel::x<(2) )
 goto NEXT;
 }
@@ -98,7 +99,7 @@ return ;
 ENTER_f:;
 {
 /*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link_1;
+ ::TopLevel::link= ::TopLevel::f_link;
  ::TopLevel::i= ::TopLevel::f_i;
 {
  ::TopLevel::f_return=((100)/ ::TopLevel::i);

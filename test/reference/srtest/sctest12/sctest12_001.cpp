@@ -8,8 +8,8 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-int x;
 void T();
+int x;
 int (f)();
 };
 TopLevel top_level("top_level");
@@ -35,7 +35,7 @@ break;
 case 4:;
  ::TopLevel::x=(44);
 case 0:;
-if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
+if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
  ::TopLevel::x=((false) ? (88) : (2));
 break;
 }

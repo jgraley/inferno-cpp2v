@@ -10,9 +10,9 @@ SC_THREAD(T);
 }
 void T();
 };
-int gvar;
 TopLevel top_level("top_level");
 int i;
+int gvar;
 
 void TopLevel::T()
 {
@@ -26,9 +26,9 @@ wait(SC_ZERO_TIME);
  ::gvar*=(2);
 CONTINUE:;
  ::i++;
-CONTINUE_1:;
-goto *(( ::i<(5)) ? (&&NEXT) : (&&PROCEED_1));
-PROCEED_1:;
+CONTINUE1:;
+goto *(( ::i<(5)) ? (&&NEXT) : (&&PROCEED1));
+PROCEED1:;
 goto ELSE;
 THEN:;
 ELSE:;

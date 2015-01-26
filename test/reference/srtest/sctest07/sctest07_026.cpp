@@ -10,10 +10,10 @@ SC_THREAD(T);
 }
 void T();
 };
-int i;
-TopLevel top_level("top_level");
-int j;
 int gvar;
+TopLevel top_level("top_level");
+int i;
+int j;
 
 void TopLevel::T()
 {
@@ -22,7 +22,7 @@ void TopLevel::T()
  ::i=(0);
 {
 if( !( ::i<(4)) )
-goto THEN_1;
+goto THEN1;
 {
 NEXT:;
 {
@@ -34,7 +34,7 @@ NEXT:;
 if( !( ::j<(3)) )
 goto THEN;
 {
-NEXT_1:;
+NEXT1:;
 {
 {
 wait(SC_ZERO_TIME);
@@ -43,9 +43,9 @@ wait(SC_ZERO_TIME);
 CONTINUE:;
  ::j++;
 }
-CONTINUE_1:;
+CONTINUE1:;
 if(  ::j<(3) )
-goto NEXT_1;
+goto NEXT1;
 }
 goto ELSE;
 THEN:;
@@ -56,17 +56,17 @@ ELSE:;
  ::gvar*=(2);
 wait(SC_ZERO_TIME);
 }
-CONTINUE_2:;
+CONTINUE2:;
  ::i++;
 }
-CONTINUE_3:;
+CONTINUE3:;
 if(  ::i<(4) )
 goto NEXT;
 }
-goto ELSE_1;
-THEN_1:;
+goto ELSE1;
+THEN1:;
 ;
-ELSE_1:;
+ELSE1:;
 }
 }
 cease(  ::gvar );

@@ -9,14 +9,14 @@ SC_CTOR( TopLevel )
 SC_THREAD(U);
 }
 /*temp*/ unsigned int HelperU_link;
-enum UStates
-{
-U_STATE_ENTER_HelperU = 1U,
-U_STATE_LINK = 0U,
-};
 private:
 unsigned int link;
 public:
+enum UStates
+{
+U_STATE_LINK = 0U,
+U_STATE_ENTER_HelperU = 1U,
+};
 void U();
 };
 TopLevel top_level("top_level");

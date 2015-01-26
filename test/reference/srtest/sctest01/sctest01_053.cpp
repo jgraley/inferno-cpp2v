@@ -10,13 +10,13 @@ SC_CTOR( Adder )
 {
 SC_THREAD(T);
 }
-void T();
-sc_event proceed;
 enum TStates
 {
 T_STATE_YIELD = 1U,
-T_STATE_YIELD_1 = 0U,
+T_STATE_YIELD1 = 0U,
 };
+sc_event proceed;
+void T();
 };
 class Multiplier : public sc_module
 {
@@ -25,41 +25,41 @@ SC_CTOR( Multiplier )
 {
 SC_THREAD(T);
 }
-sc_event proceed;
-sc_event instigate;
 enum TStates
 {
 T_STATE_YIELD = 0U,
-T_STATE_YIELD_1 = 1U,
-T_STATE_YIELD_2 = 2U,
+T_STATE_YIELD1 = 2U,
+T_STATE_YIELD2 = 1U,
 };
 void T();
+sc_event instigate;
+sc_event proceed;
 };
 class TopLevel : public sc_module
 {
 public:
 SC_CTOR( TopLevel ) :
-mul_inst("mul_inst"),
-add_inst("add_inst")
+add_inst("add_inst"),
+mul_inst("mul_inst")
 {
 SC_THREAD(T);
 }
- ::Multiplier mul_inst;
 enum TStates
 {
 };
  ::Adder add_inst;
 void T();
+ ::Multiplier mul_inst;
 };
 TopLevel top_level("top_level");
 int gvar;
 
 void Adder::T()
 {
+static const unsigned int (lmap[]) = { &&YIELD, &&YIELD1 };
 auto unsigned int state;
-static const unsigned int (lmap[]) = { &&YIELD, &&YIELD_1 };
 wait(  ::Adder::proceed );
-state= ::Adder::T_STATE_YIELD_1;
+state= ::Adder::T_STATE_YIELD1;
 goto *(lmap[state]);
 YIELD:;
  ::gvar+=(2);
@@ -67,7 +67,7 @@ YIELD:;
 wait(  ::Adder::proceed );
 state= ::Adder::T_STATE_YIELD;
 goto *(lmap[state]);
-YIELD_1:;
+YIELD1:;
  ::gvar+=(3);
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
 return ;
@@ -75,8 +75,8 @@ return ;
 
 void Multiplier::T()
 {
-static const unsigned int (lmap[]) = { &&YIELD, &&YIELD_1, &&YIELD_2 };
 auto unsigned int state;
+static const unsigned int (lmap[]) = { &&YIELD, &&YIELD1, &&YIELD2 };
 wait(  ::Multiplier::instigate );
 state= ::Multiplier::T_STATE_YIELD;
 goto *(lmap[state]);
@@ -84,15 +84,15 @@ YIELD:;
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
 wait(  ::Multiplier::proceed );
-state= ::Multiplier::T_STATE_YIELD_1;
+state= ::Multiplier::T_STATE_YIELD2;
 goto *(lmap[state]);
-YIELD_1:;
+YIELD1:;
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
 wait(  ::Multiplier::proceed );
-state= ::Multiplier::T_STATE_YIELD_2;
+state= ::Multiplier::T_STATE_YIELD1;
 goto *(lmap[state]);
-YIELD_2:;
+YIELD2:;
 cease(  ::gvar );
 return ;
 }
