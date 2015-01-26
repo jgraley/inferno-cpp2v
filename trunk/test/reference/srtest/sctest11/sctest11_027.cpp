@@ -8,18 +8,19 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-/*temp*/ int f_i;
-void T();
+private:
+int i;
+public:
+/*temp*/ void *f_link;
 /*temp*/ int f_return;
-int x;
+int y;
+void T();
+/*temp*/ int f_i;
 private:
 void *link;
 public:
-/*temp*/ void *f_link;
-int y;
-/*temp*/ void *f_link_1;
-private:
-int i;
+int x;
+/*temp*/ void *f_link1;
 };
 TopLevel top_level("top_level");
 
@@ -35,7 +36,7 @@ andtemp=( ::TopLevel::y=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link_1=(&&LINK);
+ ::TopLevel::f_link=(&&LINK);
 goto ENTER_f;
 }
 }
@@ -50,81 +51,81 @@ ELSE:;
 andtemp; });
 ({ /*temp*/ bool ortemp; ortemp=(!(++ ::TopLevel::x)); {
 if( !ortemp )
-goto THEN_1;
-goto PROCEED_1;
-PROCEED_1:;
+goto THEN1;
+goto PROCEED1;
+PROCEED1:;
 ;
-goto ELSE_1;
-THEN_1:;
+goto ELSE1;
+THEN1:;
 ortemp=( ::TopLevel::y+=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link_1=(&&LINK_1);
+ ::TopLevel::f_link=(&&LINK1);
 goto ENTER_f;
 }
 }
-LINK_1:;
+LINK1:;
 }
  ::TopLevel::f_return; }));
-ELSE_1:;
+ELSE1:;
 }
 ortemp; });
 {
  ::TopLevel::x=(0);
 {
 if( !( ::TopLevel::x<(2)) )
-goto THEN_3;
-goto PROCEED_2;
-PROCEED_2:;
+goto THEN3;
+goto PROCEED2;
+PROCEED2:;
 {
 NEXT:;
 {
 ({ /*temp*/ int muxtemp; {
 if( !( ::TopLevel::x++) )
-goto THEN_2;
-goto PROCEED_3;
-PROCEED_3:;
+goto THEN2;
+goto PROCEED3;
+PROCEED3:;
 muxtemp=( ::TopLevel::y+=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link_1=(&&LINK_2);
+ ::TopLevel::f_link=(&&LINK2);
 goto ENTER_f;
 }
 }
-LINK_2:;
+LINK2:;
 }
  ::TopLevel::f_return; }));
-goto ELSE_2;
-THEN_2:;
+goto ELSE2;
+THEN2:;
 muxtemp=( ::TopLevel::y-=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link_1=(&&LINK_3);
+ ::TopLevel::f_link=(&&LINK3);
 goto ENTER_f;
 }
 }
-LINK_3:;
+LINK3:;
 }
  ::TopLevel::f_return; }));
-ELSE_2:;
+ELSE2:;
 }
 muxtemp; });
 CONTINUE:;
 ;
 }
-CONTINUE_1:;
+CONTINUE1:;
 if(  ::TopLevel::x<(2) )
 goto NEXT;
-goto PROCEED_4;
-PROCEED_4:;
+goto PROCEED4;
+PROCEED4:;
 }
-goto ELSE_3;
-THEN_3:;
+goto ELSE3;
+THEN3:;
 ;
-ELSE_3:;
+ELSE3:;
 }
 }
 cease(  ::TopLevel::y );
@@ -132,7 +133,7 @@ return ;
 ENTER_f:;
 {
 /*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link_1;
+ ::TopLevel::link= ::TopLevel::f_link;
  ::TopLevel::i= ::TopLevel::f_i;
 {
  ::TopLevel::f_return=((100)/ ::TopLevel::i);

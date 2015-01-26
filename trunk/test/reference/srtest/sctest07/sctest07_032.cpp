@@ -1,7 +1,6 @@
 #include "isystemc.h"
 
 class TopLevel;
-int i;
 class TopLevel : public sc_module
 {
 public:
@@ -11,44 +10,45 @@ SC_THREAD(T);
 }
 void T();
 };
-int gvar;
 TopLevel top_level("top_level");
+int i;
+int gvar;
 int j;
 
 void TopLevel::T()
 {
  ::gvar=(1);
  ::i=(0);
-goto *((!( ::i<(4))) ? (&&THEN_1) : (&&PROCEED));
+goto *((!( ::i<(4))) ? (&&THEN1) : (&&PROCEED));
 PROCEED:;
 NEXT:;
  ::gvar+= ::i;
  ::j=(0);
-goto *((!( ::j<(3))) ? (&&THEN) : (&&PROCEED_1));
-PROCEED_1:;
-NEXT_1:;
+goto *((!( ::j<(3))) ? (&&THEN) : (&&PROCEED1));
+PROCEED1:;
+NEXT1:;
 wait(SC_ZERO_TIME);
  ::gvar++;
 CONTINUE:;
  ::j++;
-CONTINUE_1:;
-goto *(( ::j<(3)) ? (&&NEXT_1) : (&&PROCEED_2));
-PROCEED_2:;
+CONTINUE1:;
+goto *(( ::j<(3)) ? (&&NEXT1) : (&&PROCEED2));
+PROCEED2:;
 goto ELSE;
 THEN:;
 ;
 ELSE:;
  ::gvar*=(2);
 wait(SC_ZERO_TIME);
-CONTINUE_2:;
+CONTINUE2:;
  ::i++;
-CONTINUE_3:;
-goto *(( ::i<(4)) ? (&&NEXT) : (&&PROCEED_3));
-PROCEED_3:;
-goto ELSE_1;
-THEN_1:;
+CONTINUE3:;
+goto *(( ::i<(4)) ? (&&NEXT) : (&&PROCEED3));
+PROCEED3:;
+goto ELSE1;
+THEN1:;
 ;
-ELSE_1:;
+ELSE1:;
 cease(  ::gvar );
 return ;
 }

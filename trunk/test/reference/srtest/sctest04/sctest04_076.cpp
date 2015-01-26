@@ -1,6 +1,8 @@
 #include "isystemc.h"
 
 class TopLevel;
+int i;
+int gvar;
 class TopLevel : public sc_module
 {
 public:
@@ -8,20 +10,18 @@ SC_CTOR( TopLevel )
 {
 SC_METHOD(T);
 }
+void T();
 private:
 unsigned int state;
 public:
 enum TStates
 {
+T_STATE_PROCEED_NEXT = 0U,
 T_STATE_PROCEED_THEN_ELSE = 2U,
 T_STATE_YIELD = 1U,
-T_STATE_PROCEED_NEXT = 0U,
 };
-void T();
 };
-int i;
 TopLevel top_level("top_level");
-int gvar;
 
 void TopLevel::T()
 {
@@ -36,7 +36,7 @@ enabled=(false);
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT )
+if(  ::TopLevel::T_STATE_PROCEED_NEXT== ::TopLevel::state )
 {
  ::gvar+= ::i;
 next_trigger(SC_ZERO_TIME);
@@ -46,7 +46,7 @@ enabled=(false);
 }
 if( enabled )
 {
-if(  ::TopLevel::state== ::TopLevel::T_STATE_YIELD )
+if(  ::TopLevel::T_STATE_YIELD== ::TopLevel::state )
 {
  ::gvar*=(2);
  ::i++;

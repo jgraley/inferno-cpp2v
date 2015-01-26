@@ -11,17 +11,17 @@ SC_CTOR( TopLevel )
 SC_METHOD(method);
 }
 void method();
-int tot_1;
-int gvar_1;
+int tot1;
+int gvar1;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::method()
 {
- ::TopLevel::gvar_1++;
- ::TopLevel::tot_1+= ::TopLevel::gvar_1;
-if( (10)== ::TopLevel::gvar_1 )
-cease(  ::TopLevel::tot_1 );
+ ::TopLevel::gvar1++;
+ ::TopLevel::tot1+= ::TopLevel::gvar1;
+if( (10)== ::TopLevel::gvar1 )
+cease(  ::TopLevel::tot1 );
 next_trigger(SC_ZERO_TIME);
 return ;
 }

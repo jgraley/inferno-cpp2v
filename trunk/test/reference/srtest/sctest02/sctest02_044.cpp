@@ -22,21 +22,21 @@ SC_CTOR( Multiplier )
 SC_THREAD(T);
 }
 bool instigate;
-void T();
 bool proceed;
+void T();
 };
 class TopLevel : public sc_module
 {
 public:
 SC_CTOR( TopLevel ) :
-add_inst("add_inst"),
-mul_inst("mul_inst")
+mul_inst("mul_inst"),
+add_inst("add_inst")
 {
 SC_THREAD(T);
 }
 void T();
- ::Adder add_inst;
  ::Multiplier mul_inst;
+ ::Adder add_inst;
 };
 TopLevel top_level("top_level");
 
@@ -51,11 +51,11 @@ PROCEED_THEN_ELSE:;
  ::Adder::proceed=(false);
  ::gvar+=(2);
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
-goto *((!(! ::Adder::proceed)) ? (&&PROCEED_THEN_ELSE_1) : (&&PROCEED_NEXT_1));
-PROCEED_NEXT_1:;
+goto *((!(! ::Adder::proceed)) ? (&&PROCEED_THEN_ELSE1) : (&&PROCEED_NEXT1));
+PROCEED_NEXT1:;
 wait(SC_ZERO_TIME);
-goto *((! ::Adder::proceed) ? (&&PROCEED_NEXT_1) : (&&PROCEED_THEN_ELSE_1));
-PROCEED_THEN_ELSE_1:;
+goto *((! ::Adder::proceed) ? (&&PROCEED_NEXT1) : (&&PROCEED_THEN_ELSE1));
+PROCEED_THEN_ELSE1:;
  ::Adder::proceed=(false);
  ::gvar+=(3);
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
@@ -72,19 +72,19 @@ PROCEED_THEN_ELSE:;
  ::Multiplier::instigate=(false);
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
-goto *((!(! ::Multiplier::proceed)) ? (&&PROCEED_THEN_ELSE_1) : (&&PROCEED_NEXT_1));
-PROCEED_NEXT_1:;
+goto *((!(! ::Multiplier::proceed)) ? (&&PROCEED_THEN_ELSE1) : (&&PROCEED_NEXT1));
+PROCEED_NEXT1:;
 wait(SC_ZERO_TIME);
-goto *((! ::Multiplier::proceed) ? (&&PROCEED_NEXT_1) : (&&PROCEED_THEN_ELSE_1));
-PROCEED_THEN_ELSE_1:;
+goto *((! ::Multiplier::proceed) ? (&&PROCEED_NEXT1) : (&&PROCEED_THEN_ELSE1));
+PROCEED_THEN_ELSE1:;
  ::Multiplier::proceed=(false);
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed)=(true);
-goto *((!(! ::Multiplier::proceed)) ? (&&PROCEED_THEN_ELSE_2) : (&&PROCEED_NEXT_2));
-PROCEED_NEXT_2:;
+goto *((!(! ::Multiplier::proceed)) ? (&&PROCEED_THEN_ELSE2) : (&&PROCEED_NEXT2));
+PROCEED_NEXT2:;
 wait(SC_ZERO_TIME);
-goto *((! ::Multiplier::proceed) ? (&&PROCEED_NEXT_2) : (&&PROCEED_THEN_ELSE_2));
-PROCEED_THEN_ELSE_2:;
+goto *((! ::Multiplier::proceed) ? (&&PROCEED_NEXT2) : (&&PROCEED_THEN_ELSE2));
+PROCEED_THEN_ELSE2:;
  ::Multiplier::proceed=(false);
 cease(  ::gvar );
 return ;

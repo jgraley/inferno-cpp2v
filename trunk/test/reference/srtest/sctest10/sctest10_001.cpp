@@ -10,18 +10,18 @@ SC_THREAD(T);
 }
 int x;
 void T();
-int (f)(auto int i, auto char k, auto short j);
+int (f)(auto char k, auto int i, auto short j);
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
  ::TopLevel::x=(0);
- ::TopLevel::x=( ::TopLevel::f( ::TopLevel::f(0, 0, 0), 8, 6));
-cease(  ::TopLevel::x+((2)*( ::TopLevel::f(1, 3, 2))) );
+ ::TopLevel::x=( ::TopLevel::f(8,  ::TopLevel::f(0, 0, 0), 6));
+cease( (( ::TopLevel::f(3, 1, 2))*(2))+ ::TopLevel::x );
 }
 
-int (TopLevel::f)(int i, char k, short j)
+int (TopLevel::f)(char k, int i, short j)
 {
 auto int t = i+(j*(3));
 return t+(k*(5));

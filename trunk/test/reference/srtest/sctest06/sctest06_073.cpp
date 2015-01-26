@@ -11,40 +11,40 @@ SC_THREAD(T);
 private:
 unsigned int state;
 public:
+void T();
 enum TStates
 {
-T_STATE_PROCEED_NEXT = 0U,
-T_STATE_PROCEED_THEN_ELSE = 4U,
 T_STATE_YIELD = 2U,
-T_STATE_PROCEED_NEXT_1 = 1U,
-T_STATE_PROCEED_THEN_ELSE_1 = 3U,
+T_STATE_PROCEED_THEN_ELSE = 4U,
+T_STATE_PROCEED_NEXT = 1U,
+T_STATE_PROCEED_NEXT1 = 0U,
+T_STATE_PROCEED_THEN_ELSE1 = 3U,
 };
-void T();
 };
-int gvar;
 TopLevel top_level("top_level");
-int i;
 int j;
+int gvar;
+int i;
 
 void TopLevel::T()
 {
 do
 {
-if( (sc_delta_count())==(0U) )
+if( (0U)==(sc_delta_count()) )
 {
  ::gvar=(1);
  ::i=(0);
 wait(SC_ZERO_TIME);
- ::TopLevel::state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
+ ::TopLevel::state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT1);
 continue;
 }
-if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT )
+if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT1 )
 {
  ::gvar+= ::i;
  ::j=(0);
- ::TopLevel::state=((!( ::j<(3))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1 :  ::TopLevel::T_STATE_PROCEED_NEXT_1);
+ ::TopLevel::state=((!( ::j<(3))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT);
 }
-if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT_1 )
+if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT )
 {
 wait(SC_ZERO_TIME);
  ::TopLevel::state= ::TopLevel::T_STATE_YIELD;
@@ -54,13 +54,13 @@ if(  ::TopLevel::state== ::TopLevel::T_STATE_YIELD )
 {
  ::gvar++;
  ::j++;
- ::TopLevel::state=(( ::j<(3)) ?  ::TopLevel::T_STATE_PROCEED_NEXT_1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1);
+ ::TopLevel::state=(( ::j<(3)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
 }
-if(  ::TopLevel::T_STATE_PROCEED_THEN_ELSE_1== ::TopLevel::state )
+if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 )
 {
  ::gvar*=(2);
  ::i++;
- ::TopLevel::state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
+ ::TopLevel::state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
 if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE )
 {

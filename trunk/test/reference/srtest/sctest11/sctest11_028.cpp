@@ -8,19 +8,19 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-/*temp*/ int f_return;
+private:
+int i;
+public:
+int y;
+/*temp*/ void *f_link;
+int x;
 void T();
 private:
 void *link;
 public:
-/*temp*/ void *f_link;
+/*temp*/ void *f_link1;
 /*temp*/ int f_i;
-/*temp*/ void *f_link_1;
-private:
-int i;
-public:
-int x;
-int y;
+/*temp*/ int f_return;
 };
 TopLevel top_level("top_level");
 
@@ -48,74 +48,74 @@ ELSE:;
 }
 andtemp; });
 ({ /*temp*/ bool ortemp; ortemp=(!(++ ::TopLevel::x)); {
-goto *((!ortemp) ? (&&THEN_1) : (&&PROCEED_1));
-PROCEED_1:;
+goto *((!ortemp) ? (&&THEN1) : (&&PROCEED1));
+PROCEED1:;
 ;
-goto ELSE_1;
-THEN_1:;
+goto ELSE1;
+THEN1:;
 ortemp=( ::TopLevel::y+=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link=(&&LINK_1);
+ ::TopLevel::f_link=(&&LINK1);
 goto ENTER_f;
 }
 }
-LINK_1:;
+LINK1:;
 }
  ::TopLevel::f_return; }));
-ELSE_1:;
+ELSE1:;
 }
 ortemp; });
 {
  ::TopLevel::x=(0);
 {
-goto *((!( ::TopLevel::x<(2))) ? (&&THEN_3) : (&&PROCEED_2));
-PROCEED_2:;
+goto *((!( ::TopLevel::x<(2))) ? (&&THEN3) : (&&PROCEED2));
+PROCEED2:;
 {
 NEXT:;
 {
 ({ /*temp*/ int muxtemp; {
-goto *((!( ::TopLevel::x++)) ? (&&THEN_2) : (&&PROCEED_3));
-PROCEED_3:;
+goto *((!( ::TopLevel::x++)) ? (&&THEN2) : (&&PROCEED3));
+PROCEED3:;
 muxtemp=( ::TopLevel::y+=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link=(&&LINK_2);
+ ::TopLevel::f_link=(&&LINK2);
 goto ENTER_f;
 }
 }
-LINK_2:;
+LINK2:;
 }
  ::TopLevel::f_return; }));
-goto ELSE_2;
-THEN_2:;
+goto ELSE2;
+THEN2:;
 muxtemp=( ::TopLevel::y-=({ {
 {
  ::TopLevel::f_i= ::TopLevel::x;
 {
- ::TopLevel::f_link=(&&LINK_3);
+ ::TopLevel::f_link=(&&LINK3);
 goto ENTER_f;
 }
 }
-LINK_3:;
+LINK3:;
 }
  ::TopLevel::f_return; }));
-ELSE_2:;
+ELSE2:;
 }
 muxtemp; });
 CONTINUE:;
 ;
 }
-CONTINUE_1:;
-goto *(( ::TopLevel::x<(2)) ? (&&NEXT) : (&&PROCEED_4));
-PROCEED_4:;
+CONTINUE1:;
+goto *(( ::TopLevel::x<(2)) ? (&&NEXT) : (&&PROCEED4));
+PROCEED4:;
 }
-goto ELSE_3;
-THEN_3:;
+goto ELSE3;
+THEN3:;
 ;
-ELSE_3:;
+ELSE3:;
 }
 }
 cease(  ::TopLevel::y );

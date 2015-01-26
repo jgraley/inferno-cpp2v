@@ -9,19 +9,18 @@ SC_CTOR( TopLevel )
 SC_METHOD(U);
 }
 void U();
-private:
-unsigned int state;
-public:
-/*temp*/ unsigned int HelperU_link;
-private:
-unsigned int link;
-public:
 /*temp*/ unsigned int temp_link;
 enum UStates
 {
 U_STATE_ENTER_HelperU = 1U,
 U_STATE_LINK = 0U,
 };
+private:
+unsigned int state;
+public:
+/*temp*/ unsigned int HelperU_link;
+private:
+unsigned int link;
 };
 TopLevel top_level("top_level");
 

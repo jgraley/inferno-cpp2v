@@ -12,6 +12,7 @@ bool ReadArgs::intermediate_graph = false;
 int ReadArgs::pattern_graph = -1; // -1 disables
 bool ReadArgs::trace = false;
 bool ReadArgs::trace_hits = false;
+bool ReadArgs::trace_quiet = false;
 std::string ReadArgs::hits_format;
 bool ReadArgs::selftest = false;
 int ReadArgs::runonlystep = 0; 
@@ -34,6 +35,7 @@ void ReadArgs::Usage()
     		        "-t          Turn on tracing internals (very verbose).\n"    		        
                     "-th<fmt>    Dump hit counts at the end of execution based on <fmt>.\n"
                     "            Note: use -th? for help on <fmt>.\n"
+                    "-tq         No output to console.\n"
     		        "-s          Run self-tests.\n"
     		        "-ap         Enable pedigree assertions in search and replace engine.\n"
                     "-q<n>       Stop before step <n>. <n> may be 0 to exercise just parser and renderer.\n"    
@@ -96,6 +98,8 @@ ReadArgs::ReadArgs( int ac, char *av[] )
                 trace_hits = true;
                 hits_format = GetArg(2);
             }
+            else if( option2=='q' )
+                trace_quiet = true;
             else
                 Usage();
         }
@@ -130,9 +134,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         {
             char option2 = argv[curarg][2];
             if( option2=='p' )
-            {                
                 assert_pedigree = true;
-            }
             else
                 Usage();
         }

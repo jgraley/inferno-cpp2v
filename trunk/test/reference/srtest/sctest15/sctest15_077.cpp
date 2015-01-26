@@ -13,14 +13,12 @@ enum UStates
 U_STATE_ENTER_HelperU = 1U,
 U_STATE_LINK = 0U,
 };
-private:
-unsigned int link;
-public:
-void U();
 /*temp*/ unsigned int temp_link;
+void U();
 /*temp*/ unsigned int HelperU_link;
 private:
 unsigned int state;
+unsigned int link;
 };
 TopLevel top_level("top_level");
 

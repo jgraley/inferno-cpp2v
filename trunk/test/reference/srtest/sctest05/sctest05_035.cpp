@@ -1,6 +1,7 @@
 #include "isystemc.h"
 
 class TopLevel;
+int gvar;
 class TopLevel : public sc_module
 {
 public:
@@ -12,13 +13,12 @@ void T();
 };
 TopLevel top_level("top_level");
 int i;
-int gvar;
 
 void TopLevel::T()
 {
  ::gvar=(1);
  ::i=(0);
-goto *((!( ::i<(5))) ? (&&THEN_ELSE_1) : (&&PROCEED_NEXT));
+goto *((!( ::i<(5))) ? (&&THEN_ELSE1) : (&&PROCEED_NEXT));
 PROCEED_NEXT:;
  ::gvar+= ::i;
 goto *((!(( ::i%(2))==(0))) ? (&&THEN_ELSE) : (&&PROCEED));
@@ -29,10 +29,10 @@ goto THEN_ELSE;
 THEN_ELSE:;
  ::gvar*=(2);
  ::i++;
-goto *(( ::i<(5)) ? (&&PROCEED_NEXT) : (&&PROCEED_1));
-PROCEED_1:;
-goto THEN_ELSE_1;
-THEN_ELSE_1:;
+goto *(( ::i<(5)) ? (&&PROCEED_NEXT) : (&&PROCEED1));
+PROCEED1:;
+goto THEN_ELSE1;
+THEN_ELSE1:;
 cease(  ::gvar );
 return ;
 }

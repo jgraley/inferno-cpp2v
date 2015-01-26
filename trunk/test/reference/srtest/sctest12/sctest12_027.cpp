@@ -9,13 +9,13 @@ SC_CTOR( TopLevel )
 SC_THREAD(T);
 }
 int x;
-/*temp*/ void *f_link;
 void T();
+/*temp*/ void *f_link;
+/*temp*/ void *f_link1;
 private:
 void *link;
 public:
 /*temp*/ int f_return;
-/*temp*/ void *f_link_1;
 };
 TopLevel top_level("top_level");
 
@@ -28,7 +28,7 @@ case 1:;
  ::TopLevel::x=(99);
 break;
 case 0:;
-if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
+if( ((0)== ::TopLevel::x)||( ::TopLevel::x==(2)) )
  ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
@@ -39,23 +39,23 @@ auto int switch_value;
 switch_value=(0);
 {
 if( switch_value==(0) )
-goto CASE_2;
+goto CASE2;
 goto PROCEED;
 PROCEED:;
-if( (4)==switch_value )
-goto CASE_1;
-goto PROCEED_1;
-PROCEED_1:;
+if( switch_value==(4) )
+goto CASE1;
+goto PROCEED1;
+PROCEED1:;
 if( (1)==switch_value )
 goto CASE;
-goto PROCEED_2;
-PROCEED_2:;
+goto PROCEED2;
+PROCEED2:;
 CASE:;
  ::TopLevel::x=(99);
-goto BREAK_1;
-CASE_1:;
+goto BREAK1;
+CASE1:;
  ::TopLevel::x=(44);
-CASE_2:;
+CASE2:;
 if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
  ::TopLevel::x=((false) ? (88) : (2));
 goto BREAK;
@@ -63,42 +63,42 @@ goto BREAK;
 }
 BREAK:;
 }
-BREAK_1:;
+BREAK1:;
 }
 {
 {
 {
-auto int switch_value_1;
-switch_value_1=(2);
+auto int switch_value1;
+switch_value1=(2);
 {
-if( switch_value_1==(2) )
-goto CASE_4;
-goto PROCEED_3;
-PROCEED_3:;
-if( switch_value_1==(1) )
-goto CASE_3;
-goto PROCEED_4;
-PROCEED_4:;
-CASE_3:;
+if( switch_value1==(2) )
+goto CASE4;
+goto PROCEED3;
+PROCEED3:;
+if( switch_value1==(1) )
+goto CASE3;
+goto PROCEED4;
+PROCEED4:;
+CASE3:;
  ::TopLevel::x=(99);
-goto BREAK_3;
-CASE_4:;
+goto BREAK3;
+CASE4:;
 {
 if( !(( ::TopLevel::x==(0))||( ::TopLevel::x==(2))) )
-goto THEN_1;
-goto PROCEED_5;
-PROCEED_5:;
+goto THEN1;
+goto PROCEED5;
+PROCEED5:;
  ::TopLevel::x=({ /*temp*/ int muxtemp; {
 if( !(false) )
 goto THEN;
-goto PROCEED_6;
-PROCEED_6:;
+goto PROCEED6;
+PROCEED6:;
 muxtemp=(88);
 goto ELSE;
 THEN:;
 muxtemp=({ {
 {
- ::TopLevel::f_link_1=(&&LINK);
+ ::TopLevel::f_link=(&&LINK);
 goto ENTER_f;
 }
 LINK:;
@@ -107,24 +107,24 @@ LINK:;
 ELSE:;
 }
 muxtemp; });
-goto ELSE_1;
-THEN_1:;
+goto ELSE1;
+THEN1:;
 ;
-ELSE_1:;
+ELSE1:;
 }
-goto BREAK_2;
+goto BREAK2;
 }
 }
-BREAK_2:;
+BREAK2:;
 }
-BREAK_3:;
+BREAK3:;
 }
 cease(  ::TopLevel::x );
 return ;
 ENTER_f:;
 {
 /*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link_1;
+ ::TopLevel::link= ::TopLevel::f_link;
 {
  ::TopLevel::f_return=(3);
 {

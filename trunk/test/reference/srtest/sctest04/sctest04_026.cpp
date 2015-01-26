@@ -2,6 +2,7 @@
 
 class TopLevel;
 int gvar;
+int i;
 class TopLevel : public sc_module
 {
 public:
@@ -12,7 +13,6 @@ SC_THREAD(T);
 void T();
 };
 TopLevel top_level("top_level");
-int i;
 
 void TopLevel::T()
 {
@@ -33,7 +33,7 @@ wait(SC_ZERO_TIME);
 CONTINUE:;
  ::i++;
 }
-CONTINUE_1:;
+CONTINUE1:;
 if(  ::i<(5) )
 goto NEXT;
 }

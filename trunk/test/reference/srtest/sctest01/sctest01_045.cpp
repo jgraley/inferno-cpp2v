@@ -1,19 +1,8 @@
 #include "isystemc.h"
 
-class Adder;
 class Multiplier;
+class Adder;
 class TopLevel;
-class Adder : public sc_module
-{
-public:
-SC_CTOR( Adder )
-{
-SC_THREAD(T);
-}
-sc_event proceed;
-void T();
-};
-int gvar;
 class Multiplier : public sc_module
 {
 public:
@@ -22,42 +11,34 @@ SC_CTOR( Multiplier )
 SC_THREAD(T);
 }
 sc_event proceed;
-sc_event instigate;
 void T();
+sc_event instigate;
+};
+int gvar;
+class Adder : public sc_module
+{
+public:
+SC_CTOR( Adder )
+{
+SC_THREAD(T);
+}
+void T();
+sc_event proceed;
 };
 class TopLevel : public sc_module
 {
 public:
 SC_CTOR( TopLevel ) :
-mul_inst("mul_inst"),
-add_inst("add_inst")
+add_inst("add_inst"),
+mul_inst("mul_inst")
 {
 SC_THREAD(T);
 }
- ::Multiplier mul_inst;
  ::Adder add_inst;
 void T();
+ ::Multiplier mul_inst;
 };
 TopLevel top_level("top_level");
-
-void Adder::T()
-{
-{
-wait(  ::Adder::proceed );
-goto YIELD;
-YIELD:;
-}
- ::gvar+=(2);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
-{
-wait(  ::Adder::proceed );
-goto YIELD_1;
-YIELD_1:;
-}
- ::gvar+=(3);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
-return ;
-}
 
 void Multiplier::T()
 {
@@ -70,17 +51,36 @@ YIELD:;
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
 {
 wait(  ::Multiplier::proceed );
-goto YIELD_1;
-YIELD_1:;
+goto YIELD1;
+YIELD1:;
 }
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
 {
 wait(  ::Multiplier::proceed );
-goto YIELD_2;
-YIELD_2:;
+goto YIELD2;
+YIELD2:;
 }
 cease(  ::gvar );
+return ;
+}
+
+void Adder::T()
+{
+{
+wait(  ::Adder::proceed );
+goto YIELD;
+YIELD:;
+}
+ ::gvar+=(2);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
+{
+wait(  ::Adder::proceed );
+goto YIELD1;
+YIELD1:;
+}
+ ::gvar+=(3);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
 return ;
 }
 

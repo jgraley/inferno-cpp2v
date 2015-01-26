@@ -10,8 +10,8 @@ SC_THREAD(T);
 }
 int x;
 int (f)(auto int i);
-int y;
 void T();
+int y;
 };
 TopLevel top_level("top_level");
 

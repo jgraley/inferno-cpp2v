@@ -1,6 +1,7 @@
 #include "isystemc.h"
 
 class TopLevel;
+int j;
 class TopLevel : public sc_module
 {
 public:
@@ -10,10 +11,9 @@ SC_THREAD(T);
 }
 void T();
 };
-int i;
 int gvar;
-int j;
 TopLevel top_level("top_level");
+int i;
 
 void TopLevel::T()
 {
@@ -22,17 +22,17 @@ auto void *state;
  ::i=(0);
 wait(SC_ZERO_TIME);
 {
-state=((!( ::i<(4))) ? (&&PROCEED_THEN_ELSE_1) : (&&PROCEED_NEXT));
+state=((!( ::i<(4))) ? (&&PROCEED_THEN_ELSE1) : (&&PROCEED_NEXT));
 goto *(state);
 }
 PROCEED_NEXT:;
  ::gvar+= ::i;
  ::j=(0);
 {
-state=((!( ::j<(3))) ? (&&PROCEED_THEN_ELSE) : (&&PROCEED_NEXT_1));
+state=((!( ::j<(3))) ? (&&PROCEED_THEN_ELSE) : (&&PROCEED_NEXT1));
 goto *(state);
 }
-PROCEED_NEXT_1:;
+PROCEED_NEXT1:;
 wait(SC_ZERO_TIME);
 {
 state=(&&YIELD);
@@ -42,23 +42,23 @@ YIELD:;
  ::gvar++;
  ::j++;
 {
-state=(( ::j<(3)) ? (&&PROCEED_NEXT_1) : (&&PROCEED_THEN_ELSE));
+state=(( ::j<(3)) ? (&&PROCEED_NEXT1) : (&&PROCEED_THEN_ELSE));
 goto *(state);
 }
 PROCEED_THEN_ELSE:;
  ::gvar*=(2);
 wait(SC_ZERO_TIME);
 {
-state=(&&YIELD_1);
+state=(&&YIELD1);
 goto *(state);
 }
-YIELD_1:;
+YIELD1:;
  ::i++;
 {
-state=(( ::i<(4)) ? (&&PROCEED_NEXT) : (&&PROCEED_THEN_ELSE_1));
+state=(( ::i<(4)) ? (&&PROCEED_NEXT) : (&&PROCEED_THEN_ELSE1));
 goto *(state);
 }
-PROCEED_THEN_ELSE_1:;
+PROCEED_THEN_ELSE1:;
 cease(  ::gvar );
 return ;
 }

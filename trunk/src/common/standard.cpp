@@ -60,3 +60,26 @@ string Traceable::CPPFilt( string s )
     return s;
 }
 
+SerialNumber::SNType SerialNumber::master_serial;
+
+SerialNumber::SerialNumber() :
+    serial( master_serial )
+{
+#if 0
+    static FILE *fp;
+    if( master_serial==0 )
+    {
+        fp = fopen("tps.txt", "r");
+    }
+    if( fp )
+    {
+        void *a;
+        int n = fscanf(fp, "%p\n", &a);
+        if( n==1 )
+            ASSERT( __builtin_return_address(1)==a )("Mismatch at serial %lu: got %p expcted %p", master_serial, __builtin_return_address(1), a);
+    }
+    printf("%p\n", __builtin_return_address(1));
+#endif    
+    master_serial++;
+}    
+

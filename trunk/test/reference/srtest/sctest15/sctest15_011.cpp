@@ -9,30 +9,30 @@ SC_CTOR( TopLevel )
 SC_THREAD(U);
 }
 /*temp*/ void *HelperU_link;
-/*temp*/ void *HelperU_link_1;
-void (HelperU)();
+/*temp*/ void *HelperU_link1;
 void U();
+void (HelperU)();
 };
 TopLevel top_level("top_level");
-
-void (TopLevel::HelperU)()
-{
-/*temp*/ void *temp_link;
-auto void *link =  ::TopLevel::HelperU_link_1;
-{
-temp_link=link;
-return ;
-}
-}
 
 void TopLevel::U()
 {
 {
 {
- ::TopLevel::HelperU_link_1=(&&LINK);
+ ::TopLevel::HelperU_link1=(&&LINK);
  ::TopLevel::HelperU();
 }
 LINK:;
 }
 return ;
+}
+
+void (TopLevel::HelperU)()
+{
+/*temp*/ void *temp_link;
+auto void *link =  ::TopLevel::HelperU_link1;
+{
+temp_link=link;
+return ;
+}
 }

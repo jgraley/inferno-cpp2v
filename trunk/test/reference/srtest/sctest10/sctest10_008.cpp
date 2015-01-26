@@ -8,22 +8,22 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-int (f)(auto char k, auto int i, auto short j);
 void T();
 int x;
+int (f)(auto int i, auto short j, auto char k);
 };
 TopLevel top_level("top_level");
-
-int (TopLevel::f)(char k, int i, short j)
-{
-auto int t = ((3)*j)+i;
-return ((5)*k)+t;
-}
 
 void TopLevel::T()
 {
  ::TopLevel::x=(0);
- ::TopLevel::x=({ /*temp*/ int temp_i; temp_i=({ /*temp*/ int temp_i_1; temp_i_1=(0); ({ /*temp*/ int temp_j; temp_j=(0); ({ /*temp*/ int temp_k; temp_k=(0);  ::TopLevel::f(temp_k, temp_i_1, temp_j); }); }); }); ({ /*temp*/ int temp_j_1; temp_j_1=(6); ({ /*temp*/ int temp_k_1; temp_k_1=(8);  ::TopLevel::f(temp_k_1, temp_i, temp_j_1); }); }); });
-cease(  ::TopLevel::x+(({ /*temp*/ int temp_k_2; temp_k_2=(3); ({ /*temp*/ int temp_i_2; temp_i_2=(1); ({ /*temp*/ int temp_j_2; temp_j_2=(2);  ::TopLevel::f(temp_k_2, temp_i_2, temp_j_2); }); }); })*(2)) );
+ ::TopLevel::x=({ /*temp*/ int temp_i; temp_i=({ /*temp*/ int temp_k; temp_k=(0); ({ /*temp*/ int temp_i1; temp_i1=(0); ({ /*temp*/ int temp_j; temp_j=(0);  ::TopLevel::f(temp_i1, temp_j, temp_k); }); }); }); ({ /*temp*/ int temp_k1; temp_k1=(8); ({ /*temp*/ int temp_j1; temp_j1=(6);  ::TopLevel::f(temp_i, temp_j1, temp_k1); }); }); });
+cease( ((2)*({ /*temp*/ int temp_j2; temp_j2=(2); ({ /*temp*/ int temp_k2; temp_k2=(3); ({ /*temp*/ int temp_i2; temp_i2=(1);  ::TopLevel::f(temp_i2, temp_j2, temp_k2); }); }); }))+ ::TopLevel::x );
 return ;
+}
+
+int (TopLevel::f)(int i, short j, char k)
+{
+auto int t = i+((3)*j);
+return t+(k*(5));
 }

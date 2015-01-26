@@ -1,18 +1,8 @@
 #include "isystemc.h"
 
-class Adder;
 class Multiplier;
+class Adder;
 class TopLevel;
-class Adder : public sc_module
-{
-public:
-SC_CTOR( Adder )
-{
-SC_THREAD(T);
-}
-void T();
-bool proceed;
-};
 class Multiplier : public sc_module
 {
 public:
@@ -20,7 +10,18 @@ SC_CTOR( Multiplier )
 {
 SC_THREAD(T);
 }
+bool proceed;
+void T();
 bool instigate;
+};
+int gvar;
+class Adder : public sc_module
+{
+public:
+SC_CTOR( Adder )
+{
+SC_THREAD(T);
+}
 void T();
 bool proceed;
 };
@@ -38,27 +39,6 @@ SC_THREAD(T);
 void T();
 };
 TopLevel top_level("top_level");
-int gvar;
-
-void Adder::T()
-{
-wait(SC_ZERO_TIME);
-if( ! ::Adder::proceed )
-do
-wait(SC_ZERO_TIME);
-while( ! ::Adder::proceed );
- ::Adder::proceed=(false);
- ::gvar+=(2);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
-if( ! ::Adder::proceed )
-do
-wait(SC_ZERO_TIME);
-while( ! ::Adder::proceed );
- ::Adder::proceed=(false);
- ::gvar+=(3);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
-return ;
-}
 
 void Multiplier::T()
 {
@@ -82,6 +62,26 @@ wait(SC_ZERO_TIME);
 while( ! ::Multiplier::proceed );
  ::Multiplier::proceed=(false);
 cease(  ::gvar );
+return ;
+}
+
+void Adder::T()
+{
+wait(SC_ZERO_TIME);
+if( ! ::Adder::proceed )
+do
+wait(SC_ZERO_TIME);
+while( ! ::Adder::proceed );
+ ::Adder::proceed=(false);
+ ::gvar+=(2);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
+if( ! ::Adder::proceed )
+do
+wait(SC_ZERO_TIME);
+while( ! ::Adder::proceed );
+ ::Adder::proceed=(false);
+ ::gvar+=(3);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
 return ;
 }
 
