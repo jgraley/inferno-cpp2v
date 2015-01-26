@@ -41,7 +41,7 @@ string Traceable::GetName() const
 
 string Traceable::GetAddr() const
 {
-    return SSPrintf("@%p", this);
+    return string();
 }
 
 Traceable::operator string() const

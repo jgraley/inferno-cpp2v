@@ -1,8 +1,18 @@
 #include "isystemc.h"
 
-class Multiplier;
 class Adder;
+class Multiplier;
 class TopLevel;
+class Adder : public sc_module
+{
+public:
+SC_CTOR( Adder )
+{
+SC_THREAD(T);
+}
+bool proceed;
+void T();
+};
 int gvar;
 class Multiplier : public sc_module
 {
@@ -15,30 +25,62 @@ void T();
 bool instigate;
 bool proceed;
 };
-class Adder : public sc_module
-{
-public:
-SC_CTOR( Adder )
-{
-SC_THREAD(T);
-}
-bool proceed;
-void T();
-};
 class TopLevel : public sc_module
 {
 public:
 SC_CTOR( TopLevel ) :
-add_inst("add_inst"),
-mul_inst("mul_inst")
+mul_inst("mul_inst"),
+add_inst("add_inst")
 {
 SC_THREAD(T);
 }
- ::Adder add_inst;
 void T();
  ::Multiplier mul_inst;
+ ::Adder add_inst;
 };
 TopLevel top_level("top_level");
+
+void Adder::T()
+{
+wait(SC_ZERO_TIME);
+{
+if( !(! ::Adder::proceed) )
+goto THEN;
+{
+NEXT:;
+wait(SC_ZERO_TIME);
+CONTINUE:;
+if( ! ::Adder::proceed )
+goto NEXT;
+}
+goto ELSE;
+THEN:;
+;
+ELSE:;
+}
+ ::Adder::proceed=(false);
+ ::gvar+=(2);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
+{
+if( !(! ::Adder::proceed) )
+goto THEN1;
+{
+NEXT1:;
+wait(SC_ZERO_TIME);
+CONTINUE1:;
+if( ! ::Adder::proceed )
+goto NEXT1;
+}
+goto ELSE1;
+THEN1:;
+;
+ELSE1:;
+}
+ ::Adder::proceed=(false);
+ ::gvar+=(3);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
+return ;
+}
 
 void Multiplier::T()
 {
@@ -95,48 +137,6 @@ ELSE2:;
 }
  ::Multiplier::proceed=(false);
 cease(  ::gvar );
-return ;
-}
-
-void Adder::T()
-{
-wait(SC_ZERO_TIME);
-{
-if( !(! ::Adder::proceed) )
-goto THEN;
-{
-NEXT:;
-wait(SC_ZERO_TIME);
-CONTINUE:;
-if( ! ::Adder::proceed )
-goto NEXT;
-}
-goto ELSE;
-THEN:;
-;
-ELSE:;
-}
- ::Adder::proceed=(false);
- ::gvar+=(2);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
-{
-if( !(! ::Adder::proceed) )
-goto THEN1;
-{
-NEXT1:;
-wait(SC_ZERO_TIME);
-CONTINUE1:;
-if( ! ::Adder::proceed )
-goto NEXT1;
-}
-goto ELSE1;
-THEN1:;
-;
-ELSE1:;
-}
- ::Adder::proceed=(false);
- ::gvar+=(3);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed)=(true);
 return ;
 }
 

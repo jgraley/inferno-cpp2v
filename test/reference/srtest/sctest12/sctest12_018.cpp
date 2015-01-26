@@ -58,10 +58,10 @@ case 1:;
  ::TopLevel::x=(99);
 goto BREAK3;
 case 2:;
-if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
  ::TopLevel::x=((false) ? (88) : ({ {
 {
- ::TopLevel::f_link1=(&&LINK);
+ ::TopLevel::f_link=(&&LINK);
 goto ENTER_f;
 }
 LINK:;
@@ -78,7 +78,7 @@ return ;
 ENTER_f:;
 {
 /*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link1;
+ ::TopLevel::link= ::TopLevel::f_link;
 {
  ::TopLevel::f_return=(3);
 {

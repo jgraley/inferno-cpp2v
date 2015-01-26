@@ -8,35 +8,36 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
+void T();
 /*temp*/ void *f_link;
+/*temp*/ void *f_link1;
+int y;
+private:
+int i;
+public:
+/*temp*/ int f_return;
 private:
 void *link;
 public:
-/*temp*/ void *f_link1;
-void T();
-int y;
-/*temp*/ int f_return;
-/*temp*/ int f_i;
 int x;
-private:
-int i;
+/*temp*/ int f_i;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-/*temp*/ bool ortemp;
-/*temp*/ int result;
 auto void *state;
-/*temp*/ bool result1;
-/*temp*/ void *temp_link;
-/*temp*/ int result2;
-/*temp*/ int result3;
 /*temp*/ bool andtemp;
+/*temp*/ bool result;
+/*temp*/ int result1;
+/*temp*/ int muxtemp;
+/*temp*/ int result2;
+/*temp*/ bool ortemp;
+/*temp*/ int result3;
 /*temp*/ bool result4;
 /*temp*/ int result5;
-/*temp*/ int muxtemp;
 /*temp*/ int result6;
+/*temp*/ void *temp_link;
  ::TopLevel::x=(4);
 andtemp=(++ ::TopLevel::x);
 wait(SC_ZERO_TIME);
@@ -59,8 +60,8 @@ state=(&&THEN_ELSE);
 goto *(state);
 }
 THEN_ELSE:;
-result4=andtemp;
-result4;
+result=andtemp;
+result;
 ortemp=(!(++ ::TopLevel::x));
 {
 state=((!ortemp) ? (&&THEN) : (&&PROCEED_ELSE));
@@ -74,15 +75,15 @@ state=(&&ENTER_f);
 goto *(state);
 }
 LINK1:;
-result6= ::TopLevel::f_return;
-ortemp=( ::TopLevel::y+=result6);
+result1= ::TopLevel::f_return;
+ortemp=( ::TopLevel::y+=result1);
 {
 state=(&&PROCEED_ELSE);
 goto *(state);
 }
 PROCEED_ELSE:;
-result1=ortemp;
-result1;
+result4=ortemp;
+result4;
  ::TopLevel::x=(0);
 {
 state=((!( ::TopLevel::x<(2))) ? (&&PROCEED_THEN_ELSE) : (&&PROCEED_NEXT));
@@ -115,8 +116,8 @@ state=(&&ENTER_f);
 goto *(state);
 }
 LINK3:;
-result= ::TopLevel::f_return;
-muxtemp=( ::TopLevel::y-=result);
+result6= ::TopLevel::f_return;
+muxtemp=( ::TopLevel::y-=result6);
 {
 state=(&&ELSE);
 goto *(state);

@@ -33,6 +33,10 @@ elif test $1 == sr
 then
     infilelist="test/examples/*"
     testscript="srtest.sh"
+elif test $1 == rep
+then
+    infilelist="test/examples/*"
+    testscript="reptest.sh"
 else
     infilelist=$*
     testscript="test.sh"

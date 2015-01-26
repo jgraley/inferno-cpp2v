@@ -2,7 +2,6 @@
 
 class TopLevel;
 int tot = 0;
-int gvar = 0;
 class TopLevel : public sc_module
 {
 public:
@@ -11,10 +10,11 @@ SC_CTOR( TopLevel )
 SC_METHOD(method);
 }
 int tot1;
-void method();
 int gvar1;
+void method();
 };
 TopLevel top_level("top_level");
+int gvar = 0;
 
 void TopLevel::method()
 {

@@ -9,25 +9,26 @@ helper_stack_index(0U)
 {
 SC_THREAD(T);
 }
-/*temp*/ void *helper_link;
 /*temp*/ int helper_n;
-/*temp*/ void *otherhelper_link;
 private:
-unsigned int helper_stack_index;
-void *link;
 void *(link_stack[10U]);
 public:
+/*temp*/ void *otherhelper_link;
 void T();
 /*temp*/ void *otherhelper_link1;
 private:
-int (n_stack[10U]);
+void *link;
 public:
+/*temp*/ void *helper_link;
 /*temp*/ void *helper_link1;
+private:
+int (n_stack[10U]);
+unsigned int helper_stack_index;
 };
-int j;
-int i;
-TopLevel top_level("top_level");
 int gvar;
+TopLevel top_level("top_level");
+int i;
+int j;
 
 void TopLevel::T()
 {
@@ -55,7 +56,7 @@ goto ENTER_helper;
 LINK:;
 }
 });
- ::gvar=((2)* ::gvar);
+ ::gvar=( ::gvar*(2));
 wait(SC_ZERO_TIME);
 }
 CONTINUE:;
@@ -94,10 +95,10 @@ NEXT1:;
 {
 {
 wait(SC_ZERO_TIME);
- ::gvar=((1)+ ::gvar);
+ ::gvar=( ::gvar+(1));
 }
 CONTINUE2:;
- ::j=( ::j+(1));
+ ::j=((1)+ ::j);
 }
 CONTINUE3:;
 if(  ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]) )

@@ -1,8 +1,6 @@
 #include "isystemc.h"
 
 class TopLevel;
-int i;
-int gvar;
 class TopLevel : public sc_module
 {
 public:
@@ -12,6 +10,8 @@ SC_THREAD(T);
 }
 void T();
 };
+int i;
+int gvar;
 TopLevel top_level("top_level");
 
 void TopLevel::T()

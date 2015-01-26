@@ -563,7 +563,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> pattern,
     vector< Itemiser::Element * > keynode_memb = keynode->Itemise( dest.get() ); // Get the members of keynode corresponding to pattern's class
     vector< Itemiser::Element * >  dest_memb = pattern->Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
     ASSERT( pattern_memb.size() == dest_memb.size() );
-    Set< Itemiser::Element * > present_in_pattern;
+    Set< Itemiser::Element * > present_in_pattern; // Repeatability audit: OK since only checking for existance TODO special version of set that disallows non-repeatable things
     
     TRACE("Copying %d members from pattern=%s dest=%s\n", dest_memb.size(), TypeInfo(pattern).name().c_str(), TypeInfo(dest).name().c_str());
     for( int i=0; i<dest_memb.size(); i++ )

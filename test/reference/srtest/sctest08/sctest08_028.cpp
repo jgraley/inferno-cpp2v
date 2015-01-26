@@ -1,7 +1,6 @@
 #include "isystemc.h"
 
 class TopLevel;
-int i;
 int j;
 class TopLevel : public sc_module
 {
@@ -11,23 +10,25 @@ helper_stack_index(0U)
 {
 SC_THREAD(T);
 }
-private:
-int (n_stack[10U]);
-void *(link_stack[10U]);
-public:
 /*temp*/ void *otherhelper_link;
+/*temp*/ void *otherhelper_link1;
 /*temp*/ void *helper_link;
 private:
-void *link;
-unsigned int helper_stack_index;
+int (n_stack[10U]);
 public:
-/*temp*/ int helper_n;
-/*temp*/ void *otherhelper_link1;
 /*temp*/ void *helper_link1;
 void T();
+private:
+void *link;
+public:
+/*temp*/ int helper_n;
+private:
+unsigned int helper_stack_index;
+void *(link_stack[10U]);
 };
 TopLevel top_level("top_level");
 int gvar;
+int i;
 
 void TopLevel::T()
 {
@@ -88,7 +89,7 @@ NEXT1:;
 {
 {
 wait(SC_ZERO_TIME);
- ::gvar=( ::gvar+(1));
+ ::gvar=((1)+ ::gvar);
 }
 CONTINUE2:;
  ::j=( ::j+(1));

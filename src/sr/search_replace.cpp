@@ -2,6 +2,7 @@
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
 #include "helpers/simple_compare.hpp"
+#include <list>
 
 using namespace SR;
 
@@ -94,6 +95,7 @@ void CompareReplace::ConfigureImpl()
     UniqueWalkNoSlavePattern ss(replace_pattern);
 
 	// Collect together all the first-level slaves
+    Set< OOStd::SharedPtr<SlaveBase> > immediate_slaves;
     FOREACH( TreePtr<Node> n, tsp )
     {        
 		if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(n) )

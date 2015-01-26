@@ -8,22 +8,58 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-/*temp*/ void *helper_link;
-void T();
-/*temp*/ void *otherhelper_link;
-void (helper)();
-/*temp*/ void *helper_link1;
-/*temp*/ int helper_n;
+void (otherhelper)();
 private:
 void *link;
 public:
+/*temp*/ void *helper_link;
+void (helper)();
+/*temp*/ void *helper_link1;
+void T();
+/*temp*/ void *otherhelper_link;
+/*temp*/ int helper_n;
 /*temp*/ void *otherhelper_link1;
-void (otherhelper)();
 };
-TopLevel top_level("top_level");
 int gvar;
+TopLevel top_level("top_level");
 int j;
 int i;
+
+void (TopLevel::otherhelper)()
+{
+/*temp*/ void *temp_link;
+ ::TopLevel::link= ::TopLevel::otherhelper_link;
+ ::gvar=( ::gvar-(1));
+{
+temp_link= ::TopLevel::link;
+return ;
+}
+}
+
+void (TopLevel::helper)()
+{
+auto int n;
+/*temp*/ void *temp_link;
+auto void *link1;
+link1= ::TopLevel::helper_link;
+n= ::TopLevel::helper_n;
+for(  ::j=(0);  ::j<n;  ::j=( ::j+(1)) )
+{
+wait(SC_ZERO_TIME);
+ ::gvar=((1)+ ::gvar);
+}
+{
+{
+ ::TopLevel::otherhelper_link=(&&LINK);
+ ::TopLevel::otherhelper();
+}
+LINK:;
+}
+{
+temp_link=link1;
+return ;
+}
+}
 
 void TopLevel::T()
 {
@@ -42,45 +78,9 @@ for(  ::i=(0);  ::i<(4);  ::i=( ::i+(1)) )
 LINK:;
 }
 });
- ::gvar=( ::gvar*(2));
+ ::gvar=((2)* ::gvar);
 wait(SC_ZERO_TIME);
 }
 cease(  ::gvar );
 return ;
-}
-
-void (TopLevel::helper)()
-{
-auto int n;
-auto void *link1;
-/*temp*/ void *temp_link;
-link1= ::TopLevel::helper_link;
-n= ::TopLevel::helper_n;
-for(  ::j=(0);  ::j<n;  ::j=( ::j+(1)) )
-{
-wait(SC_ZERO_TIME);
- ::gvar=( ::gvar+(1));
-}
-{
-{
- ::TopLevel::otherhelper_link=(&&LINK);
- ::TopLevel::otherhelper();
-}
-LINK:;
-}
-{
-temp_link=link1;
-return ;
-}
-}
-
-void (TopLevel::otherhelper)()
-{
-/*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::otherhelper_link;
- ::gvar=( ::gvar-(1));
-{
-temp_link= ::TopLevel::link;
-return ;
-}
 }

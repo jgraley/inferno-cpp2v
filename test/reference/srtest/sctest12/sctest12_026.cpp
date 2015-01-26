@@ -8,14 +8,14 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
+void T();
+/*temp*/ void *f_link;
+/*temp*/ void *f_link1;
 private:
 void *link;
 public:
-void T();
-/*temp*/ int f_return;
-/*temp*/ void *f_link;
 int x;
-/*temp*/ void *f_link1;
+/*temp*/ int f_return;
 };
 TopLevel top_level("top_level");
 
@@ -38,7 +38,7 @@ break;
 auto int switch_value;
 switch_value=(0);
 {
-if( (0)==switch_value )
+if( switch_value==(0) )
 goto CASE2;
 if( (4)==switch_value )
 goto CASE1;
@@ -65,16 +65,16 @@ BREAK1:;
 auto int switch_value1;
 switch_value1=(2);
 {
-if( (2)==switch_value1 )
+if( switch_value1==(2) )
 goto CASE4;
-if( (1)==switch_value1 )
+if( switch_value1==(1) )
 goto CASE3;
 CASE3:;
  ::TopLevel::x=(99);
 goto BREAK3;
 CASE4:;
 {
-if( !(( ::TopLevel::x==(0))||( ::TopLevel::x==(2))) )
+if( !(((0)== ::TopLevel::x)||( ::TopLevel::x==(2))) )
 goto THEN1;
  ::TopLevel::x=({ /*temp*/ int muxtemp; {
 if( !(false) )
@@ -84,7 +84,7 @@ goto ELSE;
 THEN:;
 muxtemp=({ {
 {
- ::TopLevel::f_link1=(&&LINK);
+ ::TopLevel::f_link=(&&LINK);
 goto ENTER_f;
 }
 LINK:;
@@ -110,7 +110,7 @@ return ;
 ENTER_f:;
 {
 /*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link1;
+ ::TopLevel::link= ::TopLevel::f_link;
 {
  ::TopLevel::f_return=(3);
 {

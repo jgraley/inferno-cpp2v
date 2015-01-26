@@ -13,11 +13,11 @@ SC_METHOD(T);
 void T();
 enum TStates
 {
-T_STATE_THEN_ELSE = 3U,
 T_STATE_PROCEED_THEN_ELSE = 4U,
-T_STATE_PROCEED = 1U,
 T_STATE_YIELD = 2U,
+T_STATE_THEN_ELSE = 3U,
 T_STATE_PROCEED_NEXT = 0U,
+T_STATE_PROCEED = 1U,
 };
 private:
 unsigned int state;
@@ -27,7 +27,7 @@ TopLevel top_level("top_level");
 void TopLevel::T()
 {
 /*temp*/ bool enabled = true;
-if( (sc_delta_count())==(0U) )
+if( (0U)==(sc_delta_count()) )
 {
  ::gvar=(1);
  ::i=(0);
@@ -40,7 +40,7 @@ if( enabled )
 if(  ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT )
 {
  ::gvar+= ::i;
- ::TopLevel::state=((!(( ::i%(2))==(0))) ?  ::TopLevel::T_STATE_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED);
+ ::TopLevel::state=((!((0)==( ::i%(2)))) ?  ::TopLevel::T_STATE_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED);
 }
 }
 if( enabled )

@@ -131,13 +131,13 @@ private:
 	private:
 		// Parameters are parsed outside function scope, so we defer entering them
 		// into the ident_track until we're in the function. This stores the clang identifiers.
-		map<TreePtr<Declaration> , clang::IdentifierInfo *> backing_params;
+		Map<TreePtr<Declaration> , clang::IdentifierInfo *> backing_params;
 
 		// The statement after a label is parsed as a sub-construct under the label which
 		// is not how the inferno tree does it. Remember that relationship here and
 		// generate the extra nodes when rendering a compound statement.
-		map<TreePtr<Label> , TreePtr<Statement> > backing_labels;
-		map<TreePtr<SwitchTarget> , TreePtr<Statement> > backing_targets;
+		Map<TreePtr<Label> , TreePtr<Statement> > backing_labels;
+		Map<TreePtr<SwitchTarget> , TreePtr<Statement> > backing_targets;
 		Map<TreePtr<Declaration> , TreePtr<Declaration> >
 				backing_paired_decl;
 

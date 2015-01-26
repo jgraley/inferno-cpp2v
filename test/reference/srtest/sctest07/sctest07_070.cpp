@@ -1,7 +1,7 @@
 #include "isystemc.h"
 
 class TopLevel;
-int gvar;
+int i;
 class TopLevel : public sc_module
 {
 public:
@@ -12,36 +12,36 @@ SC_THREAD(T);
 void T();
 enum TStates
 {
-T_STATE_PROCEED_THEN_ELSE = 5U,
 T_STATE_PROCEED_NEXT = 0U,
+T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_PROCEED_NEXT1 = 1U,
 T_STATE_YIELD = 2U,
-T_STATE_PROCEED_THEN_ELSE1 = 3U,
+T_STATE_PROCEED_THEN_ELSE1 = 5U,
 T_STATE_YIELD1 = 4U,
 };
 };
 TopLevel top_level("top_level");
+int gvar;
 int j;
-int i;
 
 void TopLevel::T()
 {
 auto unsigned int state;
 do
 {
-if( (0U)==(sc_delta_count()) )
+if( (sc_delta_count())==(0U) )
 {
  ::gvar=(1);
  ::i=(0);
 wait(SC_ZERO_TIME);
-state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
+state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT);
 continue;
 }
 if( state== ::TopLevel::T_STATE_PROCEED_NEXT )
 {
  ::gvar+= ::i;
  ::j=(0);
-state=((!( ::j<(3))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT1);
+state=((!( ::j<(3))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT1);
 }
 if( state== ::TopLevel::T_STATE_PROCEED_NEXT1 )
 {
@@ -53,9 +53,9 @@ if( state== ::TopLevel::T_STATE_YIELD )
 {
  ::gvar++;
  ::j++;
-state=(( ::j<(3)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
+state=(( ::j<(3)) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
-if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 )
+if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE )
 {
  ::gvar*=(2);
 wait(SC_ZERO_TIME);
@@ -65,9 +65,9 @@ continue;
 if( state== ::TopLevel::T_STATE_YIELD1 )
 {
  ::i++;
-state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
+state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
 }
-if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE )
+if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 )
 {
 cease(  ::gvar );
 return ;

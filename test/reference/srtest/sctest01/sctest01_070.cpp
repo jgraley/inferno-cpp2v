@@ -11,13 +11,14 @@ SC_CTOR( Adder )
 SC_THREAD(T);
 }
 void T();
-sc_event proceed;
 enum TStates
 {
 T_STATE_YIELD = 0U,
 T_STATE_YIELD1 = 1U,
 };
+sc_event proceed;
 };
+int gvar;
 class Multiplier : public sc_module
 {
 public:
@@ -25,8 +26,8 @@ SC_CTOR( Multiplier )
 {
 SC_THREAD(T);
 }
-sc_event proceed;
 void T();
+sc_event proceed;
 enum TStates
 {
 T_STATE_YIELD = 1U,
@@ -39,20 +40,19 @@ class TopLevel : public sc_module
 {
 public:
 SC_CTOR( TopLevel ) :
-add_inst("add_inst"),
-mul_inst("mul_inst")
+mul_inst("mul_inst"),
+add_inst("add_inst")
 {
 SC_THREAD(T);
 }
+void T();
+ ::Multiplier mul_inst;
  ::Adder add_inst;
 enum TStates
 {
 };
-void T();
- ::Multiplier mul_inst;
 };
 TopLevel top_level("top_level");
-int gvar;
 
 void Adder::T()
 {
@@ -94,7 +94,7 @@ wait(  ::Multiplier::instigate );
 state= ::Multiplier::T_STATE_YIELD1;
 continue;
 }
-if(  ::Multiplier::T_STATE_YIELD1==state )
+if( state== ::Multiplier::T_STATE_YIELD1 )
 {
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);

@@ -3,6 +3,7 @@
 class TopLevel;
 int i;
 int gvar;
+int j;
 class TopLevel : public sc_module
 {
 public:
@@ -13,7 +14,6 @@ SC_THREAD(T);
 void T();
 };
 TopLevel top_level("top_level");
-int j;
 
 void TopLevel::T()
 {

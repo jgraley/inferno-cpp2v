@@ -28,7 +28,26 @@
 
 namespace OOStd {
 
-template<typename SUB_BASE, typename VALUE_INTERFACE, typename VALUE_TYPE>
+class NullClass
+{
+};
+
+//    
+// This is the interface for SharedPtr<>. It may be used like shared_ptr, with 
+// template parameter VALUE_TYPE set to the pointed-to type. Various
+// benefits accrue, including:
+// - SerialNumber is used for inequality comparisons, for repeatability
+// - Tracing support
+// - Can obtain an architype object for the type of an object
+//
+// Additionally, template parameters SUB_BASE and VALUE_INTERFACE may be supplied 
+// (presumbaby by a wrapper class). These work as follows:
+// - SUB_BASE is a parent class of the SharedPtr, allowing
+//   containers of different types to be treated polymorphically.
+// - VALUE_INTERFACE is a parent class for the pointed-to object, allowing 
+//   contained objects to be handled polymorphically.
+//
+template<typename VALUE_TYPE, typename SUB_BASE=NullClass, typename VALUE_INTERFACE=VALUE_TYPE>
 struct SharedPtr;
 
 // An interface for our SharedPtr object. This interface works regardless of pointed-to
@@ -39,7 +58,7 @@ struct SharedPtrInterface : virtual SUB_BASE, public Traceable
 {
     // Convert to and from shared_ptr<VALUE_INTERFACE> and SharedPtr<VALUE_INTERFACE>
 	virtual operator shared_ptr<VALUE_INTERFACE>() const = 0;
-	virtual operator SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_INTERFACE>() const = 0;
+	virtual operator SharedPtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE>() const = 0;
 
     virtual operator bool() const = 0; // for testing against NULL
     virtual VALUE_INTERFACE *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
@@ -50,11 +69,15 @@ struct SharedPtrInterface : virtual SUB_BASE, public Traceable
     	(void)Traceable::operator=( o );
     	return *this;
     }
-    virtual SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_INTERFACE> MakeValueArchitype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone 
+    virtual SharedPtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE> MakeValueArchitype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone 
                                                                                         // of the object we're pointing to) 
+    string GetAddr() const
+    {
+        return SSPrintf("[]");
+    }
 };
 
-template<typename SUB_BASE, typename VALUE_INTERFACE, typename VALUE_TYPE>
+template<typename VALUE_TYPE, typename SUB_BASE, typename VALUE_INTERFACE>
 struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared_ptr<VALUE_TYPE>,
                    SerialNumber
 {
@@ -72,7 +95,7 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
     }
 
     template< typename OTHER >
-    inline SharedPtr( const SharedPtr<SUB_BASE, VALUE_INTERFACE, OTHER> &o ) :
+    inline SharedPtr( const SharedPtr<OTHER, SUB_BASE, VALUE_INTERFACE> &o ) :
         shared_ptr<VALUE_TYPE>( (shared_ptr<OTHER>)(o) )
     {
     }
@@ -83,12 +106,11 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
         return p;
     }
 
-	virtual operator SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_INTERFACE>() const
+	virtual operator SharedPtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE>() const
 	{
         const shared_ptr<VALUE_TYPE> p1 = *(const shared_ptr<VALUE_TYPE> *)this;
-        return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_INTERFACE>( p1 );
+        return SharedPtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE>( p1 );
 	}
-
 
     virtual VALUE_TYPE *get() const 
     {
@@ -119,7 +141,7 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
     }
 
     template< typename OTHER >
-    inline SharedPtr &operator=( SharedPtr<SUB_BASE, VALUE_INTERFACE, OTHER> n )
+    inline SharedPtr &operator=( SharedPtr<OTHER, SUB_BASE, VALUE_INTERFACE> n )
     {
     	(void)operator=( shared_ptr<OTHER>(n) );
     	return *this;
@@ -136,21 +158,21 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
     	return !!*(const shared_ptr<VALUE_TYPE> *)this;
     }
 
-	static inline SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>
+	static inline SharedPtr<VALUE_TYPE, SUB_BASE, VALUE_INTERFACE>
 	    DynamicCast( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g )
 	{
 		if( g )
 		{
 			shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(g));
-			return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>(v);
+			return SharedPtr<VALUE_TYPE, SUB_BASE, VALUE_INTERFACE>(v);
 		}
 		else
 		{
-			return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>();
+			return SharedPtr<VALUE_TYPE, SUB_BASE, VALUE_INTERFACE>();
 		}
 	}
 	// For when OOStd itself needs to dyncast, as opposed to the user asking for it.
-	static inline SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>
+	static inline SharedPtr<VALUE_TYPE, SUB_BASE, VALUE_INTERFACE>
 	    InferredDynamicCast( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &g )
 	{
 		if( g )
@@ -158,30 +180,34 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
 			shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(g));
 			ASSERT( v )("OOStd inferred dynamic cast has failed: from ")(*g)
 			           (" to type ")(Traceable::CPPFilt( typeid( VALUE_TYPE ).name() ))("\n");
-			return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>(v);
+			return SharedPtr<VALUE_TYPE, SUB_BASE, VALUE_INTERFACE>(v);
 		}
 		else
 		{
 		    // Null came in, null goes out.
-			return SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_TYPE>();
+			return SharedPtr<VALUE_TYPE, SUB_BASE, VALUE_INTERFACE>();
 		}
 	}
-	virtual SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_INTERFACE> MakeValueArchitype() const
+	virtual SharedPtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE> MakeValueArchitype() const
 	{
         ASSERTFAIL("MakeValueArchitype() not implemented for this SharedPtr\n");
     }
 
-    inline bool operator<( const SharedPtr<SUB_BASE, VALUE_INTERFACE, VALUE_INTERFACE> &other )
+    inline bool operator<( const SharedPtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE> &other )
     {
         return GetSerialNumber() < other.GetSerialNumber();
     }    
+    string GetAddr() const
+    {
+        return SSPrintf("[%lu]", GetSerialNumber());
+    }
 };
 
 // Similar signature to boost shared_ptr operator==, and we restrict the pointers
 // to having the same subbase and base target
 template< typename SUB_BASE, typename VALUE_INTERFACE, typename X, typename Y >
-inline bool operator==( const SharedPtr<SUB_BASE, VALUE_INTERFACE, X> &x,
-		                const SharedPtr<SUB_BASE, VALUE_INTERFACE, Y> &y)
+inline bool operator==( const SharedPtr<X, SUB_BASE, VALUE_INTERFACE> &x,
+		                const SharedPtr<Y, SUB_BASE, VALUE_INTERFACE> &y)
 {
 	return operator==( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
 }
@@ -196,8 +222,8 @@ inline bool operator==( const SharedPtrInterface<SUB_BASE, VALUE_INTERFACE> &x,
 }
 
 template< typename SUB_BASE, typename VALUE_INTERFACE, typename X, typename Y >
-inline bool operator!=( const SharedPtr<SUB_BASE, VALUE_INTERFACE, X> &x,
-		                const SharedPtr<SUB_BASE, VALUE_INTERFACE, Y> &y)
+inline bool operator!=( const SharedPtr<X, SUB_BASE, VALUE_INTERFACE> &x,
+		                const SharedPtr<Y, SUB_BASE, VALUE_INTERFACE> &y)
 {
 	return operator!=( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
 }

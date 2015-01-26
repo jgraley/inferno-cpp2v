@@ -9,17 +9,19 @@ recurser_stack_index(0U)
 {
 SC_THREAD(T);
 }
+private:
+unsigned int recurser_stack_index;
+public:
 void T();
 /*temp*/ void *recurser_link;
-int x;
 /*temp*/ int recurser_i;
+/*temp*/ void *recurser_link1;
 private:
 void *(link_stack[10U]);
 public:
-/*temp*/ void *recurser_link1;
+int x;
 private:
 int (i_stack[10U]);
-unsigned int recurser_stack_index;
 };
 TopLevel top_level("top_level");
 

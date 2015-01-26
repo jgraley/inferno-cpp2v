@@ -51,7 +51,7 @@ ires=$?
 
 if test $ires -eq 0
 then
- echo Compare output...
+ echo Compare output of each step...
  diff -r $outdir $refdir
  dres=$?
  if test $dres -eq 0

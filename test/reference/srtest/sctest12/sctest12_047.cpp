@@ -8,25 +8,25 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
+/*temp*/ void *f_link;
+/*temp*/ void *f_link1;
+int x;
 private:
 void *link;
 public:
 /*temp*/ int f_return;
-/*temp*/ void *f_link;
-int x;
 void T();
-/*temp*/ void *f_link1;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-/*temp*/ void *temp_link;
-/*temp*/ int result;
 auto int switch_value;
-/*temp*/ int result1;
-auto int switch_value1;
 /*temp*/ int muxtemp;
+auto int switch_value1;
+/*temp*/ int result;
+/*temp*/ void *temp_link;
+/*temp*/ int result1;
  ::TopLevel::x=(0);
 switch( 0 )
 {
@@ -38,13 +38,13 @@ if( ( ::TopLevel::x==(0))||((2)== ::TopLevel::x) )
  ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
-switch_value1=(0);
+switch_value=(0);
 wait(SC_ZERO_TIME);
-goto *((switch_value1==(0)) ? (&&CASE1) : (&&PROCEED));
+goto *(((0)==switch_value) ? (&&CASE1) : (&&PROCEED));
 PROCEED:;
-goto *((switch_value1==(4)) ? (&&CASE) : (&&PROCEED1));
+goto *(((4)==switch_value) ? (&&CASE) : (&&PROCEED1));
 PROCEED1:;
-goto *((switch_value1==(1)) ? (&&PROCEED_CASE) : (&&PROCEED_CASE));
+goto *(((1)==switch_value) ? (&&PROCEED_CASE) : (&&PROCEED_CASE));
 PROCEED_CASE:;
  ::TopLevel::x=(99);
 goto BREAK;
@@ -52,19 +52,19 @@ CASE:;
  ::TopLevel::x=(44);
 goto CASE1;
 CASE1:;
-if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
+if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
  ::TopLevel::x=((false) ? (88) : (2));
 goto BREAK;
 BREAK:;
-switch_value=(2);
-goto *(((2)==switch_value) ? (&&CASE2) : (&&PROCEED2));
+switch_value1=(2);
+goto *(((2)==switch_value1) ? (&&CASE2) : (&&PROCEED2));
 PROCEED2:;
-goto *(((1)==switch_value) ? (&&PROCEED_CASE1) : (&&PROCEED_CASE1));
+goto *(((1)==switch_value1) ? (&&PROCEED_CASE1) : (&&PROCEED_CASE1));
 PROCEED_CASE1:;
  ::TopLevel::x=(99);
 goto THEN_ELSE_BREAK;
 CASE2:;
-goto *((!(( ::TopLevel::x==(0))||( ::TopLevel::x==(2)))) ? (&&THEN_ELSE_BREAK) : (&&PROCEED3));
+goto *((!(((0)== ::TopLevel::x)||( ::TopLevel::x==(2)))) ? (&&THEN_ELSE_BREAK) : (&&PROCEED3));
 PROCEED3:;
 goto *((!(false)) ? (&&THEN) : (&&PROCEED4));
 PROCEED4:;

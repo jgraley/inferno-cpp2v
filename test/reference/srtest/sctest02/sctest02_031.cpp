@@ -21,21 +21,21 @@ SC_CTOR( Multiplier )
 {
 SC_THREAD(T);
 }
+void T();
 bool instigate;
 bool proceed;
-void T();
 };
 class TopLevel : public sc_module
 {
 public:
 SC_CTOR( TopLevel ) :
-add_inst("add_inst"),
-mul_inst("mul_inst")
+mul_inst("mul_inst"),
+add_inst("add_inst")
 {
 SC_THREAD(T);
 }
- ::Adder add_inst;
  ::Multiplier mul_inst;
+ ::Adder add_inst;
 void T();
 };
 TopLevel top_level("top_level");

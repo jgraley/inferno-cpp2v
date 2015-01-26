@@ -9,52 +9,49 @@ helper_stack_index(0U)
 {
 SC_THREAD(T);
 }
-void T();
-private:
-unsigned int link;
-int (n_stack[10U]);
-public:
 /*temp*/ unsigned int otherhelper_link;
-private:
-unsigned int (link_stack[10U]);
-public:
-/*temp*/ int helper_n;
-/*temp*/ unsigned int helper_link;
-/*temp*/ unsigned int otherhelper_link1;
-/*temp*/ unsigned int helper_link1;
-private:
-unsigned int helper_stack_index;
-public:
 enum TStates
 {
-T_STATE_LINK = 8U,
-T_STATE_PROCEED_THEN_ELSE = 7U,
 T_STATE_PROCEED_NEXT = 0U,
-T_STATE_YIELD = 6U,
+T_STATE_PROCEED_THEN_ELSE = 3U,
+T_STATE_PROCEED_THEN_ELSE1 = 7U,
+T_STATE_LINK = 8U,
 T_STATE_PROCEED_NEXT1 = 5U,
-T_STATE_YIELD1 = 2U,
-T_STATE_PROCEED_THEN_ELSE1 = 3U,
-T_STATE_ENTER_helper = 4U,
 T_STATE_ENTER_otherhelper = 9U,
+T_STATE_ENTER_helper = 4U,
+T_STATE_YIELD = 2U,
+T_STATE_YIELD1 = 6U,
 T_STATE_LINK1 = 1U,
 };
+/*temp*/ int helper_n;
+/*temp*/ unsigned int otherhelper_link1;
+private:
+int (n_stack[10U]);
+unsigned int helper_stack_index;
+public:
+/*temp*/ unsigned int helper_link;
+/*temp*/ unsigned int helper_link1;
+void T();
+private:
+unsigned int (link_stack[10U]);
+unsigned int link;
 };
 int i;
-TopLevel top_level("top_level");
 int j;
+TopLevel top_level("top_level");
 int gvar;
 
 void TopLevel::T()
 {
-/*temp*/ int temp_n;
 /*temp*/ unsigned int temp_link;
+auto unsigned int state;
 /*temp*/ unsigned int temp_link1;
 static const unsigned int (lmap[]) = { &&PROCEED_NEXT1, &&LINK1, &&YIELD1, &&PROCEED_THEN_ELSE1, &&ENTER_helper, &&PROCEED_NEXT, &&YIELD, &&PROCEED_THEN_ELSE, &&LINK, &&ENTER_otherhelper };
-auto unsigned int state;
+/*temp*/ int temp_n;
  ::gvar=(1);
  ::i=(0);
 wait(SC_ZERO_TIME);
-state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT);
+state=((!( ::i<(4))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT);
 ENTER_otherhelper:;
 LINK:;
 PROCEED_THEN_ELSE:;
@@ -77,15 +74,15 @@ if( state== ::TopLevel::T_STATE_LINK1 )
 {
  ::gvar=( ::gvar*(2));
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD1;
+state= ::TopLevel::T_STATE_YIELD;
 goto *(lmap[state]);
 }
-if( state== ::TopLevel::T_STATE_YIELD1 )
+if( state== ::TopLevel::T_STATE_YIELD )
 {
  ::i=( ::i+(1));
-state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
+state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
 }
-if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 )
+if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE )
 {
 cease(  ::gvar );
 return ;
@@ -97,37 +94,37 @@ if( state== ::TopLevel::T_STATE_ENTER_helper )
 ( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link;
 ( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_n;
  ::j=(0);
-state=((!( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE :  ::TopLevel::T_STATE_PROCEED_NEXT1);
+state=((!( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]))) ?  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 :  ::TopLevel::T_STATE_PROCEED_NEXT1);
 }
 if( state== ::TopLevel::T_STATE_PROCEED_NEXT1 )
 {
 wait(SC_ZERO_TIME);
-state= ::TopLevel::T_STATE_YIELD;
+state= ::TopLevel::T_STATE_YIELD1;
 goto *(lmap[state]);
 }
-if( state== ::TopLevel::T_STATE_YIELD )
+if( state== ::TopLevel::T_STATE_YIELD1 )
 {
  ::gvar=( ::gvar+(1));
  ::j=( ::j+(1));
-state=(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE);
+state=(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ?  ::TopLevel::T_STATE_PROCEED_NEXT1 :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);
 }
-if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE )
+if( state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE1 )
 {
  ::TopLevel::otherhelper_link= ::TopLevel::T_STATE_LINK;
 state= ::TopLevel::T_STATE_ENTER_otherhelper;
 }
 if( state== ::TopLevel::T_STATE_LINK )
 {
-temp_link1=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
+temp_link=( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index]);
  ::TopLevel::helper_stack_index--;
-state=temp_link1;
+state=temp_link;
 }
 if( state== ::TopLevel::T_STATE_ENTER_otherhelper )
 {
  ::TopLevel::link= ::TopLevel::otherhelper_link;
  ::gvar=( ::gvar-(1));
-temp_link= ::TopLevel::link;
-state=temp_link;
+temp_link1= ::TopLevel::link;
+state=temp_link1;
 }
 goto *(lmap[state]);
 }

@@ -12,18 +12,17 @@ SC_THREAD(T);
 private:
 unsigned int recurser_stack_index;
 public:
+int x;
 /*temp*/ void *recurser_link;
-void T();
-private:
-void *(link_stack[10U]);
-public:
-/*temp*/ void *recurser_link1;
-/*temp*/ int recurser_i;
 private:
 int (i_stack[10U]);
 public:
+/*temp*/ void *recurser_link1;
+void T();
+/*temp*/ int recurser_i;
 void (recurser)();
-int x;
+private:
+void *(link_stack[10U]);
 };
 TopLevel top_level("top_level");
 
@@ -55,7 +54,7 @@ void (TopLevel::recurser)()
  ::TopLevel::x++;
 if( ( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5) )
 {
-({ /*temp*/ int temp_i; temp_i=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1)); {
+({ /*temp*/ int temp_i; temp_i=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])); {
 {
  ::TopLevel::recurser_link=(&&LINK);
 {
@@ -66,7 +65,7 @@ if( ( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5) )
 LINK:;
 }
 });
-({ /*temp*/ int temp_i1; temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1)); {
+({ /*temp*/ int temp_i1; temp_i1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])); {
 {
  ::TopLevel::recurser_link=(&&LINK1);
 {

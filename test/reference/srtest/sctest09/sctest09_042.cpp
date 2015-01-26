@@ -10,29 +10,30 @@ recurser_stack_index(0U)
 SC_THREAD(T);
 }
 private:
+void *(link_stack[10U]);
 int (i_stack[10U]);
-unsigned int recurser_stack_index;
 public:
 /*temp*/ void *recurser_link;
-void T();
-/*temp*/ void *recurser_link1;
-/*temp*/ int recurser_i;
 int x;
+/*temp*/ int recurser_i;
 private:
-void *(link_stack[10U]);
+unsigned int recurser_stack_index;
+public:
+/*temp*/ void *recurser_link1;
+void T();
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
 /*temp*/ int temp_i;
-/*temp*/ void *temp_link;
 /*temp*/ int temp_i1;
+/*temp*/ void *temp_link;
 /*temp*/ int temp_i2;
  ::TopLevel::x=(0);
-temp_i=(1);
+temp_i2=(1);
  ::TopLevel::recurser_link=(&&LINK);
- ::TopLevel::recurser_i=temp_i;
+ ::TopLevel::recurser_i=temp_i2;
 goto ENTER_recurser;
 LINK:;
 cease(  ::TopLevel::x );
@@ -44,14 +45,14 @@ ENTER_recurser:;
  ::TopLevel::x++;
 goto *((!(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])<(5))) ? (&&LINK_THEN_ELSE) : (&&PROCEED));
 PROCEED:;
-temp_i1=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1));
+temp_i=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
  ::TopLevel::recurser_link=(&&LINK1);
- ::TopLevel::recurser_i=temp_i1;
+ ::TopLevel::recurser_i=temp_i;
 goto ENTER_recurser;
 LINK1:;
-temp_i2=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
+temp_i1=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index]));
  ::TopLevel::recurser_link=(&&LINK_THEN_ELSE);
- ::TopLevel::recurser_i=temp_i2;
+ ::TopLevel::recurser_i=temp_i1;
 goto ENTER_recurser;
 LINK_THEN_ELSE:;
 temp_link=( ::TopLevel::link_stack[ ::TopLevel::recurser_stack_index]);

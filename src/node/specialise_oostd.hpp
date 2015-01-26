@@ -17,23 +17,24 @@ struct Node;
 typedef OOStd::SharedPtrInterface<Itemiser::Element, Node> TreePtrInterface;
 
 template<typename VALUE_TYPE>
-class TreePtr : public OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>
+class TreePtr : public OOStd::SharedPtr<VALUE_TYPE, Itemiser::Element, Node>
 {
+    typedef OOStd::SharedPtr<VALUE_TYPE, Itemiser::Element, Node> SPType; // just to save typing!
 public:
-	inline TreePtr() : OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>() {}
-	inline TreePtr( VALUE_TYPE *o ) : OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>(o) {}
-	inline TreePtr( const TreePtrInterface &g ) : OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>(g) {}
-    inline operator TreePtr<Node>() const { return OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>::operator OOStd::SharedPtr<Itemiser::Element, Node, Node>(); }
-	inline TreePtr( const OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE> &g ) : OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>(g) {}
+	inline TreePtr() : SPType() {}
+	inline TreePtr( VALUE_TYPE *o ) : SPType(o) {}
+	inline TreePtr( const TreePtrInterface &g ) : SPType(g) {}
+    inline operator TreePtr<Node>() const { return SPType::operator OOStd::SharedPtr<Node, Itemiser::Element, Node>(); }
+	inline TreePtr( const SPType &g ) : SPType(g) {}
 	template< typename OTHER >
-	inline TreePtr( const shared_ptr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>(o) {}
+	inline TreePtr( const shared_ptr<OTHER> &o ) : SPType(o) {}
 	template< typename OTHER >
-	inline TreePtr( const TreePtr<OTHER> &o ) : OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>(o) {}
+	inline TreePtr( const TreePtr<OTHER> &o ) : SPType(o) {}
 	static inline TreePtr<VALUE_TYPE> DynamicCast( const TreePtrInterface &g )
 	{
-		return OOStd::SharedPtr<Itemiser::Element, Node, VALUE_TYPE>::DynamicCast(g);
+		return SPType::DynamicCast(g);
 	}
-	virtual OOStd::SharedPtr<Itemiser::Element, Node, Node> MakeValueArchitype() const
+	virtual OOStd::SharedPtr<Node, Itemiser::Element, Node> MakeValueArchitype() const
     {
         return new VALUE_TYPE; // means VALUE_TYPE must be constructable
     }

@@ -9,15 +9,17 @@ recurser_stack_index(0U)
 {
 SC_THREAD(T);
 }
-/*temp*/ int recurser_i;
+void T();
 private:
-unsigned int recurser_stack_index;
 int (i_stack[10U]);
-void *(link_stack[10U]);
 public:
 int x;
 /*temp*/ void *recurser_link;
-void T();
+/*temp*/ int recurser_i;
+private:
+void *(link_stack[10U]);
+unsigned int recurser_stack_index;
+public:
 /*temp*/ void *recurser_link1;
 };
 TopLevel top_level("top_level");
@@ -63,7 +65,7 @@ goto ENTER_recurser;
 LINK1:;
 }
 });
-({ /*temp*/ int temp_i2; temp_i2=((1)+( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])); {
+({ /*temp*/ int temp_i2; temp_i2=(( ::TopLevel::i_stack[ ::TopLevel::recurser_stack_index])+(1)); {
 {
  ::TopLevel::recurser_link=(&&LINK2);
 {

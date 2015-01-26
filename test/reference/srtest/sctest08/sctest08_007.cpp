@@ -2,7 +2,6 @@
 
 class TopLevel;
 int gvar;
-int i;
 class TopLevel : public sc_module
 {
 public:
@@ -10,23 +9,13 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-void (helper)(auto int n);
 void (otherhelper)();
 void T();
+void (helper)(auto int n);
 };
-int j;
 TopLevel top_level("top_level");
-
-void (TopLevel::helper)(int n)
-{
-for(  ::j=(0);  ::j<n;  ::j=( ::j+(1)) )
-{
-wait(SC_ZERO_TIME);
- ::gvar=((1)+ ::gvar);
-}
- ::TopLevel::otherhelper();
-return ;
-}
+int j;
+int i;
 
 void (TopLevel::otherhelper)()
 {
@@ -36,7 +25,7 @@ void (TopLevel::otherhelper)()
 void TopLevel::T()
 {
  ::gvar=(1);
-for(  ::i=(0);  ::i<(4);  ::i=((1)+ ::i) )
+for(  ::i=(0);  ::i<(4);  ::i=( ::i+(1)) )
 {
  ::gvar=( ::gvar+ ::i);
 ({ /*temp*/ int temp_n; temp_n=(3);  ::TopLevel::helper(temp_n); });
@@ -44,4 +33,15 @@ for(  ::i=(0);  ::i<(4);  ::i=((1)+ ::i) )
 wait(SC_ZERO_TIME);
 }
 cease(  ::gvar );
+}
+
+void (TopLevel::helper)(int n)
+{
+for(  ::j=(0);  ::j<n;  ::j=( ::j+(1)) )
+{
+wait(SC_ZERO_TIME);
+ ::gvar=( ::gvar+(1));
+}
+ ::TopLevel::otherhelper();
+return ;
 }

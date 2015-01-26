@@ -1,6 +1,7 @@
 #include "isystemc.h"
 
 class TopLevel;
+int gvar;
 class TopLevel : public sc_module
 {
 public:
@@ -9,64 +10,26 @@ helper_stack_index(0U)
 {
 SC_THREAD(T);
 }
-/*temp*/ void *helper_link;
+void (helper)();
 private:
 void *link;
-public:
-/*temp*/ void *otherhelper_link;
-/*temp*/ void *helper_link1;
-void T();
-private:
-unsigned int helper_stack_index;
+int (n_stack[10U]);
 void *(link_stack[10U]);
 public:
-/*temp*/ void *otherhelper_link1;
-/*temp*/ int helper_n;
-private:
-int (n_stack[10U]);
-public:
+/*temp*/ void *otherhelper_link;
 void (otherhelper)();
-void (helper)();
+private:
+unsigned int helper_stack_index;
+public:
+/*temp*/ void *helper_link;
+/*temp*/ void *otherhelper_link1;
+void T();
+/*temp*/ void *helper_link1;
+/*temp*/ int helper_n;
 };
-int j;
-int i;
-int gvar;
 TopLevel top_level("top_level");
-
-void TopLevel::T()
-{
- ::gvar=(1);
-for(  ::i=(0);  ::i<(4);  ::i=((1)+ ::i) )
-{
- ::gvar=( ::gvar+ ::i);
-({ /*temp*/ int temp_n; temp_n=(3); {
-{
- ::TopLevel::helper_n=temp_n;
-{
- ::TopLevel::helper_link1=(&&LINK);
- ::TopLevel::helper();
-}
-}
-LINK:;
-}
-});
- ::gvar=((2)* ::gvar);
-wait(SC_ZERO_TIME);
-}
-cease(  ::gvar );
-return ;
-}
-
-void (TopLevel::otherhelper)()
-{
-/*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::otherhelper_link1;
- ::gvar=( ::gvar-(1));
-{
-temp_link= ::TopLevel::link;
-return ;
-}
-}
+int i;
+int j;
 
 void (TopLevel::helper)()
 {
@@ -82,7 +45,7 @@ wait(SC_ZERO_TIME);
 }
 {
 {
- ::TopLevel::otherhelper_link1=(&&LINK);
+ ::TopLevel::otherhelper_link=(&&LINK);
  ::TopLevel::otherhelper();
 }
 LINK:;
@@ -95,4 +58,39 @@ return ;
 }
 }
 }
+}
+
+void (TopLevel::otherhelper)()
+{
+/*temp*/ void *temp_link;
+ ::TopLevel::link= ::TopLevel::otherhelper_link;
+ ::gvar=( ::gvar-(1));
+{
+temp_link= ::TopLevel::link;
+return ;
+}
+}
+
+void TopLevel::T()
+{
+ ::gvar=(1);
+for(  ::i=(0);  ::i<(4);  ::i=( ::i+(1)) )
+{
+ ::gvar=( ::gvar+ ::i);
+({ /*temp*/ int temp_n; temp_n=(3); {
+{
+ ::TopLevel::helper_n=temp_n;
+{
+ ::TopLevel::helper_link1=(&&LINK);
+ ::TopLevel::helper();
+}
+}
+LINK:;
+}
+});
+ ::gvar=( ::gvar*(2));
+wait(SC_ZERO_TIME);
+}
+cease(  ::gvar );
+return ;
 }
