@@ -395,7 +395,7 @@ private:
         else if( dynamic_pointer_cast<Dereference>( y ) )
             ASSERTFAIL("IsLabelReached used on expression that is read from memory, cannot figure out the answer\n");
             
-        TRACE("I reakon ")(*x)(" at %p", x.get())(r?" does ":" does not ")("reach ")(*y)("\n"); 
+        TRACE("I reakon ")(*x)(r?" does ":" does not ")("reach ")(*y)("\n"); 
         return r;        
     }    
     

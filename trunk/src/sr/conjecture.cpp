@@ -97,7 +97,7 @@ ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::ite
         
         ResizeCounts();
         start_counts[choices.size()-1]++;
-        TRACE("Decision %d appending begin at %p\n", decision_index, GetChoicePtr() );
+        TRACE("Decision %d appending begin\n", decision_index );
 	}
 	else // already know about this decision
 	{

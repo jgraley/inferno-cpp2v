@@ -82,7 +82,7 @@ void Validate::operator()( TreePtr<Node> context,
 		if( x && x != context && connected ) // Skip the root, since we won't have counted any refs to it
 			                                 // Also, these rules may be broken for disconnected subtrees
 		{
-			TRACE("%p decl_refs=%d total refs=%d\n", x.get(), decl_refs[x], total_refs[x] );
+			TRACE("decl_refs=%d total refs=%d\n", decl_refs[x], total_refs[x] );
 			// Check incoming pointers rule: Non-identifier nodes should be referenced exactly once
 			// Identifiers should be referenced exactly once by the node that declares them,
 			// and may be referenced zero or more times by other nodes. We skip the
@@ -102,7 +102,6 @@ void Validate::operator()( TreePtr<Node> context,
 
 void Validate::OnLink( TreePtr<Node> p, TreePtr<Node> c )
 {
-	TRACE("Ref %p to %p\n", p.get(), c.get() );
 	if( TreePtr<Instance> pi = dynamic_pointer_cast<Instance>(p) )
 	{
 		if( c == pi->identifier )

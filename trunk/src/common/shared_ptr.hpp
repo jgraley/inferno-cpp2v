@@ -70,11 +70,6 @@ struct SharedPtrInterface : virtual SUB_BASE, public Traceable
     	return *this;
     }
     virtual SharedPtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE> MakeValueArchitype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone 
-                                                                                        // of the object we're pointing to) 
-    string GetAddr() const
-    {
-        return SSPrintf("[]");
-    }
 };
 
 template<typename VALUE_TYPE, typename SUB_BASE, typename VALUE_INTERFACE>
@@ -115,7 +110,6 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
     virtual VALUE_TYPE *get() const 
     {
     	VALUE_TYPE *e = shared_ptr<VALUE_TYPE>::get();
-    	//TRACE("sp::get() returns %p\n", e );
     	return e;
     }
 
@@ -195,11 +189,11 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
 
     inline bool operator<( const SharedPtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE> &other )
     {
-        return GetSerialNumber() < other.GetSerialNumber();
+        return SerialNumber::operator<(other);
     }    
     string GetAddr() const
     {
-        return SSPrintf("[%lu]", GetSerialNumber());
+        return SerialNumber::GetAddr(); // avoiding the need for virtual inheritance
     }
 };
 

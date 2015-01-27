@@ -50,8 +50,8 @@ ires=$?
 if test $ires -eq 0
 then
  echo Compare output...
- diff $logfile $reflogfile | head -n 100
- dres=$?
+ diff $reflogfile $logfile | head -n 100
+ dres=${PIPESTATUS[0]}
  if test $dres -eq 0
  then
   echo $infile PASSED

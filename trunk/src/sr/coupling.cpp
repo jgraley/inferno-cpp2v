@@ -53,7 +53,7 @@ void CouplingKeys::DoKey( shared_ptr<Key> key,
 		TRACE(*n);
 		first=false;
 	}
-   TRACE("} key ptr=%p\n", keys_map[coupling].get()); // TODO put this in as a common utility somewhere
+   TRACE("}\n"); // TODO put this in as a common utility somewhere
 #endif
 
 	// If we're keying and we haven't keyed this node so far, key it now

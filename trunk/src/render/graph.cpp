@@ -612,7 +612,7 @@ string Graph::DoNodeLinks( TreePtr<Node> n )
 		}
 		else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(members[i]) )
 		{
-        TRACE("TreePtr %d is @%p\n", i, ptr );
+            //TRACE("TreePtr %d is @%p\n", i, ptr );
 			if( *ptr )
 				s += DoLink( n, SeqField(i), *ptr, string(), ptr );
 		}

@@ -100,7 +100,6 @@ private:
         SubSequenceRange() {}
     	shared_ptr<iterator_interface> my_begin;
     	shared_ptr<iterator_interface> my_end;
-    	operator string() const { return GetName() + SSPrintf("@%p", this); }    
     public:
     	SubSequenceRange( iterator &b, iterator &e ) : my_begin(b.Clone()), my_end(e.Clone())
     	{    	    
@@ -117,13 +116,11 @@ private:
                          SubContainer
     {
     	NODE_FUNCTIONS_FINAL 
-    	operator string() const { return GetName() + SSPrintf("@%p", this); }    
     };
     struct SubCollection : Collection<Node>,
                            SubContainer
     {
     	NODE_FUNCTIONS_FINAL
-    	operator string() const { return GetName() + SSPrintf("@%p", this); } 
     };
 
 };
