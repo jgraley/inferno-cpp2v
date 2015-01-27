@@ -75,11 +75,29 @@ public:
     virtual operator string() const; // used for debug
 };
 
+//
+// The idea is to provide an alternative to raw pointers for ordering our sets, miltsets etc.
+// This should be more repeatable - i.e. a slight disturbance to the dynamic memory allocator
+// should not cause everything to come out in a different order.
+//
+// We construct the new ordering as follows:
+// 1st: the step the object was constructed during (as specified by the top level)
+// 2nd: the location in the code where the object was constructed, foced down into 
+//      a sequential ordering to protect against changes in the location of code
+// 3rd: the count of objects constructed at that point.
+//
+// Note the 2nd criterion should differentiate between different object types, so 
+// no further action needed there.
+//
 class SerialNumber
 {
     typedef uint64_t SNType;
-    static SNType master_serial;
-    const SNType serial;
+    static SNType master_location_serial;
+    static int step;
+    static map<void *, SNType> location_serial;
+    static map<void *, SNType> master_serial;
+    SNType serial;
+    SNType location;
 
 protected:
     SerialNumber();
@@ -91,6 +109,18 @@ protected:
     {
         return *this;
     }
+    string GetAddr() const; 
+    inline bool operator<( const SerialNumber &o )
+    {
+        if( step != o.step )
+            return step < o.step;
+        else if( location < o.location )
+            return location < o.location;
+        else
+            return serial < o.serial;
+    }
+public:
+    static void SetStep( int s );
 };
 
 #endif

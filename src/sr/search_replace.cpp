@@ -88,7 +88,7 @@ void CompareReplace::ConfigureImpl()
     if( !replace_pattern )
         replace_pattern = compare_pattern;
 
-    TRACE("Elaborating ")(string( *this ))(" at %p\n", this);
+    TRACE("Elaborating ")(string( *this ));
 
     // Walkers for compare and replace patterns that do not recurse beyond slaves
     UniqueWalkNoSlavePattern tsp(compare_pattern);
@@ -130,7 +130,7 @@ void CompareReplace::ConfigureImpl()
         {
 		    // Provide Stuff nodes with slave-access to our master coupling keys. They are not allowed to add keys,
 			// only use the ones that are already there. Note that recurse restriction is done using a local CompareReplace object.
-            TRACE("Found stuff@%p, rr@%p\n", sb.get(), sb->recurse_restriction.get());
+            //TRACE("Found stuff, rr@%p\n", sb->recurse_restriction.get());
             sb->recurse_comparer.coupling_keys.SetMaster( &coupling_keys ); 
             sb->recurse_comparer.compare_pattern = sb->recurse_restriction; // TODO could move into a Stuff node constructor if there was one
         }
@@ -138,7 +138,7 @@ void CompareReplace::ConfigureImpl()
         if( shared_ptr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
         {
 		    // Provide Slaves (and potentially anything else derived from CouplingSlave) with slave-access to our coupling keys
-            TRACE("Found coupling slave in search pattern at %p\n", cs.get() );
+            //TRACE("Found coupling slave in search pattern at %p\n", cs.get() );
             cs->SetCouplingsMaster( &coupling_keys ); 
         }
     }
@@ -152,7 +152,7 @@ void CompareReplace::ConfigureImpl()
         if( shared_ptr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
         {
 		    // As above, but in the replace pattern
-            TRACE("Found coupling slave in replace pattern at %p\n", cs.get() );
+            //TRACE("Found coupling slave in replace pattern at %p\n", cs.get() );
             cs->SetCouplingsMaster( &coupling_keys ); 
         }
         if( shared_ptr<CompareReplace> cr = dynamic_pointer_cast<CompareReplace>(n) )
@@ -242,7 +242,7 @@ bool CompareReplace::Compare( const TreePtrInterface &x,
     INDENT("C");
     ASSERT( x );
     ASSERT( pattern );
-	TRACE("Compare @%p x=", this)(*x);
+	TRACE("Compare x=")(*x);
     TRACE(" pattern=")(*pattern);
     TRACE(" can_key=%d \n", (int)can_key);
     //TRACE(**pcontext)(" @%p\n", pcontext);
@@ -446,14 +446,14 @@ bool CompareReplace::SingleCompareReplace( TreePtr<Node> *proot )
     // of clearing the keys in case the keys were set up in advance, as will
     // be the case if this is a slave.
     
-	TRACE("%p Begin search\n", this);
+	TRACE("Begin search\n");
 	bool r = Compare( *proot, compare_pattern, true );
 	if( !r )
 		return false;
 
     if( r == true && replace_pattern )
     {
-    	TRACE("%p Search successful, now replacing\n", this);
+    	TRACE("Search successful, now replacing\n");
         *proot = ReplacePhase( replace_pattern );
     }
 
@@ -474,14 +474,14 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
     if( !master_ptr )
         dirty_grass.clear(); 
 
-    TRACE("begin RCR %p\n", this);
+    TRACE("begin RCR\n");
         
     bool r=false;
     int i=0;
     for(i=0; i<repetitions; i++) 
     {
     	r = SingleCompareReplace( proot );
-    	TRACE("%p SCR result %d\n", this, r);        
+    	TRACE("SCR result %d\n", r);        
     	if( !r )
             break; // when the compare fails, we're done
         TRACE("Dirty grass:");
@@ -503,7 +503,7 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
     if( !master_ptr )
         dirty_grass.clear(); 
          
-    TRACE("%p exiting\n", this);
+    TRACE("exiting\n");
     return i;
 }
 
@@ -513,7 +513,7 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 {
     ASSERT( is_configured )(*this)(" has not been configured");
     INDENT("");
-    TRACE("Enter S&R instance ")(*this)(" at %p\n", this);
+    TRACE("Enter S&R instance ")(*this);
     ASSERT( compare_pattern )("CompareReplace (or SearchReplace) object was not configured before invocation.\n"
                               "Either call Configure() or supply pattern arguments to constructor.\n"
                               "Thank you for taking the time to read this message.\n");
@@ -618,7 +618,7 @@ shared_ptr<ContainerInterface> StuffBase::GetContainerInterface( TreePtr<Node> x
     Filter *rf = NULL;
     if( recurse_restriction )
     {
-        ASSERT( recurse_comparer.compare_pattern )("Stuff node in slave must be initialised before slave (at %p)\n", this);     
+        ASSERT( recurse_comparer.compare_pattern )("Stuff node in slave must be initialised before slave\n");     
         rf = &recurse_comparer;
     }
     
@@ -802,7 +802,7 @@ void CompareReplace::Test()
 	    	if( !first )
 	    		TRACE(", ");
 	    	if( n )
-                TRACE( *n )(":%p", n.get());
+                TRACE( *n );
             else
                 TRACE("NULL");
 	    	first=false;

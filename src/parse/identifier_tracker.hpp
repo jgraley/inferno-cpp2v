@@ -90,7 +90,7 @@ public:
     // Omit to clear (eg after the struct)
     void SetNextRecord( shared_ptr<Node> n = shared_ptr<Node>() )
     {
-        TRACE("next record is %p\n", n.get() );
+        TRACE("next record\n");
         
         if( n )
             next_record.push(n);

@@ -60,26 +60,43 @@ string Traceable::CPPFilt( string s )
     return s;
 }
 
-SerialNumber::SNType SerialNumber::master_serial;
+SerialNumber::SNType SerialNumber::master_location_serial;
+int SerialNumber::step;
+map<void *, SerialNumber::SNType> SerialNumber::location_serial;
+map<void *, SerialNumber::SNType> SerialNumber::master_serial;
 
-SerialNumber::SerialNumber() :
-    serial( master_serial )
+SerialNumber::SerialNumber() 
 {
-#if 0
-    static FILE *fp;
-    if( master_serial==0 )
+    // Get the point in the code where we were constructed 
+    void *lp = __builtin_return_address(1); 
+    
+    // See if we know about this location
+    map<void *, SNType>::iterator it = location_serial.find(lp);
+    if( it == location_serial.end() )
     {
-        fp = fopen("tps.txt", "r");
+        // We don't know about this location, so produce a new location seriel number and start the construction count 
+        location_serial.insert( pair<void *, SerialNumber::SNType>(lp, master_location_serial) );
+        master_serial.insert( pair<void *, SerialNumber::SNType>(lp, 0) );
+        master_location_serial++;
     }
-    if( fp )
-    {
-        void *a;
-        int n = fscanf(fp, "%p\n", &a);
-        if( n==1 )
-            ASSERT( __builtin_return_address(1)==a )("Mismatch at serial %lu: got %p expcted %p", master_serial, __builtin_return_address(1), a);
-    }
-    printf("%p\n", __builtin_return_address(1));
-#endif    
-    master_serial++;
+        
+    // Remember values for this object
+    serial = master_serial[lp];
+    location = location_serial[lp];
+    
+    // produce a new construction serial number
+    master_serial[lp]++;
 }    
 
+void SerialNumber::SetStep( int s )
+{
+    step = s;
+    // Just bin the structures we built up - this forces step to be primary ordering
+    location_serial = map<void *, SNType>();
+    master_serial = map<void *, SNType>();
+}
+
+string SerialNumber::GetAddr() const
+{
+    return SSPrintf("%d-%lu-%lu", step, location, serial);  
+}

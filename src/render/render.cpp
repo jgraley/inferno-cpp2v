@@ -140,7 +140,7 @@ string Render::RenderIdentifier( TreePtr<Identifier> id )
 string Render::RenderScopePrefix( TreePtr<Identifier> id )
 {
 	TreePtr<Scope> scope = GetScope( program, id );
-	TRACE("%p %p %p\n", program.get(), scope.get(), scope_stack.top().get() );
+	//TRACE("%p %p %p\n", program.get(), scope.get(), scope_stack.top().get() );
 	if( scope == scope_stack.top() )
 		return string(); // local scope
 	else if( scope == program )
@@ -357,7 +357,7 @@ string Render::RenderCall( TreePtr<Call> call )
 
 string Render::RenderExpression( TreePtr<Initialiser> expression, bool bracketize_operator )
 {
-	TRACE("%p\n", expression.get());
+	//TRACE("%p\n", expression.get());
 
 	string before = bracketize_operator ? "(" : "";
 	string after = bracketize_operator ? ")" : "";
@@ -927,7 +927,7 @@ string Render::RenderSequence( Sequence<ELEMENT> spe,
 	string s;
 	for( int i=0; i<spe.size(); i++ )
 	{
-		TRACE("%d %p\n", i, &i);
+		//TRACE("%d %p\n", i, &i);
 		string sep = (separate_last || i+1<spe.size()) ? separator : "";
 		TreePtr<ELEMENT> pe = spe[i];
 		if( TreePtr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
@@ -949,7 +949,7 @@ string Render::RenderOperandSequence( Sequence<Expression> spe,
 	string s;
 	for( int i=0; i<spe.size(); i++ )
 	{
-		TRACE("%d %p\n", i, &i);
+		//TRACE("%d %p\n", i, &i);
 		string sep = (separate_last || i+1<spe.size()) ? separator : "";
 		TreePtr<Expression> pe = spe[i];
 		s += RenderExpression( pe ) + sep;

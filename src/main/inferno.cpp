@@ -54,15 +54,14 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
             sequence->push_back( shared_ptr<Transformation>( new GenerateStacks ) );
             sequence->push_back( shared_ptr<Transformation>( new MergeFunctions ) );
         }
-
+   
         sequence->push_back( shared_ptr<Transformation>( new BreakToGoto ) ); 
-        sequence->push_back( shared_ptr<Transformation>( new ForToWhile ) ); 
         sequence->push_back( shared_ptr<Transformation>( new ForToWhile ) ); 
         sequence->push_back( shared_ptr<Transformation>( new WhileToDo ) ); 
         sequence->push_back( shared_ptr<Transformation>( new DoToIfGoto ) ); 
         
-        sequence->push_back( shared_ptr<Transformation>( new LogicalAndToIf ) ); 
         sequence->push_back( shared_ptr<Transformation>( new LogicalOrToIf ) ); 
+        sequence->push_back( shared_ptr<Transformation>( new LogicalAndToIf ) ); 
         sequence->push_back( shared_ptr<Transformation>( new MultiplexorToIf ) ); 
         sequence->push_back( shared_ptr<Transformation>( new SwitchToIfGoto ) );
         sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) );  
@@ -155,6 +154,7 @@ int main( int argc, char *argv[] )
     HitCount::instance.Check();
     Tracer::Enable( ReadArgs::trace );
     HitCount::instance.SetStep(-1);
+    SerialNumber::SetStep(-1);
     HitCount::Enable( ReadArgs::trace_hits );
 
     // Do self-tests (unit tests) if requested
@@ -214,6 +214,7 @@ int main( int argc, char *argv[] )
             else
                 CompareReplace::SetMaxReps( 100, true );
             HitCount::instance.SetStep(i);
+            SerialNumber::SetStep(i);
             (*t)( &program );
             if( ReadArgs::output_all )
             {
@@ -232,6 +233,7 @@ int main( int argc, char *argv[] )
     Tracer::Enable( ReadArgs::trace );
     HitCount::Enable( ReadArgs::trace_hits );
     HitCount::instance.SetStep(-1);
+    SerialNumber::SetStep(-2);
     if( ReadArgs::trace_hits )
         HitCount::instance.Dump();    
     else if( ReadArgs::intermediate_graph && !ReadArgs::output_all )

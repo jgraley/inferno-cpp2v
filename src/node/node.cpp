@@ -18,8 +18,8 @@ void GenericsTest()
 	TRACE();
     vector< Itemiser::Element * > i = n->Itemise();
 	TRACE();
-    for( int e=0; e<i.size(); e++ )
-        TRACE("element at %p\n", i[e]);
+    //for( int e=0; e<i.size(); e++ )
+    //    TRACE("element at %p\n", i[e]);
     ASSERT( i.size() == 1 )("%d elements\n", i.size());
 }
 

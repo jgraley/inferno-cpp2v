@@ -617,7 +617,7 @@ private:
 			}
 			t->type = CreateTypeNode(D);
 
-			TRACE("%s %p %p\n", ID->getName(), t.get(), ID);
+			//TRACE("%s %p %p\n", ID->getName(), t.get(), ID);
 			return t;
 		}
 		/*
@@ -627,7 +627,7 @@ private:
 		 all_decls->members.insert(l);
 		 l->access = MakeTreePtr<Public>();
 		 l->identifier = CreateLabelIdentifier(ID);
-		 TRACE("%s %p %p\n", ID->getName(), l.get(), ID );
+		 //TRACE("%s %p %p\n", ID->getName(), l.get(), ID );
 		 return l;
 		 }
 		 */
@@ -644,8 +644,8 @@ private:
 
 			// Use C++ scope if non-NULL; do not recurse (=precise match only)
 			TreePtr<Node> found_n = ident_track.TryGet(ID, cxxs, recurse);
-			TRACE("Looked for %s, result %p (%p)\n", ID->getName(),
-					found_n.get(), cxxs.get());
+			//TRACE("Looked for %s, result %p (%p)\n", ID->getName(),
+			//		found_n.get(), cxxs.get());
 			if (!found_n)
 			{
 				// Nothing was found with the supplied name
@@ -715,7 +715,7 @@ private:
 		virtual DeclTy *ActOnDeclarator(clang::Scope *S, clang::Declarator &D,
 				DeclTy *LastInGroup)
 		{
-    		TRACE("Scope S%p\n", S);
+    		//TRACE("Scope S%p\n", S);
 			ident_track.SeenScope(S);
 			// TODO the spurious char __builtin_va_list; line comes from the target info.
 			// Create an inferno target info customised for Inferno that doesn't do this.
@@ -817,7 +817,7 @@ private:
 {			TRACE();
 			clang::IdentifierInfo *paramII = backing_params[param];
 			backing_params.erase( param );
-			TRACE("%p %p %s S%p\n", param.get(), paramII, paramII->getName(), FnBodyScope);
+			//TRACE("%p %p %s S%p\n", param.get(), paramII, paramII->getName(), FnBodyScope);
 			if( paramII )
 			ident_track.Add( paramII, param, FnBodyScope );
 		}
@@ -839,7 +839,7 @@ private:
 
 	virtual DeclTy *ActOnStartOfFunctionDef(clang::Scope *FnBodyScope, DeclTy *D)
 	{
-		TRACE("FnBodyScope S%p\n", FnBodyScope);
+		//TRACE("FnBodyScope S%p\n", FnBodyScope);
 		TreePtr<Instance> o = dynamic_pointer_cast<Instance>(hold_decl.FromRaw(D));
 		ASSERT(o);		
 		
@@ -908,7 +908,7 @@ private:
 		r->return_value = hold_expr.FromRaw(RetValExp);
 		else
 		r->return_value = MakeTreePtr<Uninitialised>();
-		TRACE("aors %p\n", r.get() );
+		//TRACE("aors %p\n", r.get() );
 		return hold_stmt.ToRaw( r );
 	}
 
@@ -918,7 +918,7 @@ private:
 			bool HasTrailingLParen,
 			const clang::CXXScopeSpec *SS = 0 )
 	{
-	    TRACE("S%p\n", S);
+	    //TRACE("S%p\n", S);
 		TreePtr<Node> n = ident_track.Get( &II, FromCXXScope( SS ) );
 		TRACE("aoie %s %s\n", II.getName(), typeid(*n).name() );
 		TreePtr<Instance> o = dynamic_pointer_cast<Instance>( n );
@@ -1389,7 +1389,7 @@ private:
 			ExprTy *Init, DeclTy *LastInGroup)
 	{
 		const clang::DeclSpec &DS = D.getDeclSpec();
-		TRACE("Element %p\n", Init);
+		//TRACE("Element %p\n", Init);
 		TreePtr<Declaration> d = CreateDelcaration( S, D, ConvertAccess( AS ) );
 		TreePtr<Instance> o = dynamic_pointer_cast<Instance>(d);
 
@@ -1495,7 +1495,7 @@ private:
 		if( (clang::DeclSpec::TST)TagType == clang::DeclSpec::TST_enum )
 		decl_to_insert = h;
 
-		TRACE("done tag %p\n", h.get());
+		//TRACE("done tag %p\n", h.get());
 
 		return hold_decl.ToRaw( h );
 	}
@@ -1505,7 +1505,7 @@ private:
 	virtual void ActOnStartCXXClassDef(clang::Scope *S, DeclTy *TagDecl,
 			clang::SourceLocation LBrace)
 	{
-		TRACE("S%p\n", S);
+		//TRACE("S%p\n", S);
 
 		// Just populate the members container for the Record node
 		// we already created. No need to return anything.
@@ -1684,7 +1684,7 @@ private:
 		// Get a reference to the ordered list of members for this scope from a backing list
 		ASSERT( backing_ordering.IsExist(scope) )("Supplied scope did not make it into the backing ordering list");
 		Sequence<Declaration> &scope_ordered = backing_ordering[scope];
-		TRACE("%p %p\n", &scope->members, scope.get());
+		//TRACE("%p %p\n", &scope->members, scope.get());
 
 		// Go over the entire scope, keeping track of where we are in the Sequence
 		int seq_index=0; // TODO rename
@@ -2050,7 +2050,7 @@ private:
 		TreePtr<Type> t = hold_type.FromRaw( Ty );
 		TreePtr<Expression> e = hold_expr.FromRaw( Op );
 
-		TRACE("%p\n", t.get() );
+		//TRACE("%p\n", t.get() );
 
 		// At this point, when we have the instance (and hence the type) and the initialiser
 		// we can detect when an array initialiser has been inserted for a record instance and

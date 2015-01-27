@@ -550,7 +550,7 @@ struct SpecificFloatSemantics : FloatSemantics
 	}
 	virtual operator string() const /// get a debug string
 	{
-		return SSPrintf("fltSemantics@%p", value );
+		return SSPrintf("fltSemantics"); //  TODO not very good
 	}
 	operator const llvm::fltSemantics &() const /// convert back to LLVM's class
 	{

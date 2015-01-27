@@ -22,7 +22,7 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
     						       Conjecture &conj ) const
 {
     INDENT;
-	ASSERT(sr)("Agent ")(*pattern)(" at %p appears not to have been configured, since sr is NULL", this);
+	ASSERT(sr)("Agent ")(*pattern)(" at appears not to have been configured, since sr is NULL");
 	ASSERT(coupling_keys);
 	ASSERT( x ); // Target must not be NULL
 	ASSERT(pattern);
@@ -140,12 +140,12 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 				{
 					TreePtrInterface *x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
 					ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
-					TRACE("Member %d is TreePtr, pattern ptr=%p\n", i, pattern_ptr->get());
+					TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
 					TreePtr<Node> tpp(*pattern_ptr);
 					Agent *ap = Agent::AsAgent(tpp);
 					//NormalAgent *nap = dynamic_cast<NormalAgent *>(ap);
 					//ASSERT( nap ); 
-					//ASSERT( nap->sr == sr )("%p != %p", nap->sr, sr);
+					//ASSERT( nap->sr == sr );
 					//ASSERT( nap->coupling_keys == coupling_keys );
 					r = ap->DecidedCompare( *x_ptr, tpp, can_key, conj );
 				}
@@ -352,7 +352,7 @@ bool NormalAgent::DecidedCompare( CollectionInterface &x,
     if( !xremaining->empty() && !seen_star )
     	return false; // there were elements left over and no star to match them against
 
-    TRACE("seen_star %d star %p size of xremaining %d\n", seen_star, star.get(), xremaining->size() );
+    TRACE("seen_star %d size of xremaining %d\n", seen_star, xremaining->size() );
 
     // Apply pre-restriction to the star
     if( seen_star )
@@ -416,7 +416,7 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
     	key->root = x;
     	key->terminus = *thistime;
     	shared_ptr<Key> sckey( key );
-    	TRACE("Matched, so keying search container type ")(*pattern)(" for ")(*x)(" at %p\n", key.get());
+    	TRACE("Matched, so keying search container type ")(*pattern)(" for ")(*x);
         coupling_keys->DoKey( sckey, pattern );	
     }
 	return r;
@@ -427,7 +427,7 @@ TreePtr<Node> NormalAgent::BuildReplace( TreePtr<Node> pattern,
 	                                     TreePtr<Node> keynode ) const
 {
     INDENT;
-	ASSERT(sr)("Agent ")(*pattern)(" at %p appears not to have been configured, since sr is NULL", this);
+	ASSERT(sr)("Agent ")(*pattern)(" at appears not to have been configured, since sr is NULL");
 	ASSERT(coupling_keys);
 	ASSERT(pattern);
 
