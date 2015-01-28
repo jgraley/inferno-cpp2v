@@ -43,17 +43,24 @@ private:
 
 
 
-
+#define COLLECTION_IMPL multiset
+#define COLLECTION_BASE OOStd::SimpleAssociativeContainer
+#define COLLECTION_INTERFACE_BASE OOStd::SimpleAssociativeContainerInterface
 
 // Inferno tree containers
 typedef OOStd::ContainerInterface<Itemiser::Element, TreePtrInterface> ContainerInterface;
 typedef OOStd::PointIterator<Itemiser::Element, TreePtrInterface> PointIterator;
 typedef OOStd::CountingIterator<Itemiser::Element, TreePtrInterface> CountingIterator;
-typedef OOStd::SequenceInterface<Itemiser::Element, TreePtrInterface> SequenceInterface;
-typedef OOStd::SimpleAssociativeContainerInterface<Itemiser::Element, TreePtrInterface> CollectionInterface;
+struct SequenceInterface : virtual OOStd::SequenceInterface<Itemiser::Element, TreePtrInterface>
+{
+};
+struct CollectionInterface : virtual COLLECTION_INTERFACE_BASE<Itemiser::Element, TreePtrInterface>
+{
+};
 
 template<typename VALUE_TYPE>
-struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, deque< TreePtr<VALUE_TYPE> > >
+struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, deque< TreePtr<VALUE_TYPE> > >,
+                  virtual SequenceInterface
 {
 	typedef deque< TreePtr<VALUE_TYPE> > Impl;
 
@@ -68,17 +75,18 @@ struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, 
 
 
 template<typename VALUE_TYPE> 
-struct Collection : virtual OOStd::SimpleAssociativeContainer< Itemiser::Element, TreePtrInterface, multiset< TreePtr<VALUE_TYPE> > >
+struct Collection : virtual COLLECTION_BASE< Itemiser::Element, TreePtrInterface, COLLECTION_IMPL< TreePtr<VALUE_TYPE> > >,
+                    virtual CollectionInterface
 {
- 	typedef multiset< TreePtr<VALUE_TYPE> > Impl;
+ 	typedef COLLECTION_IMPL< TreePtr<VALUE_TYPE> > Impl;
 
  	inline Collection<VALUE_TYPE>() {}
 	template<typename L, typename R>
 	inline Collection( const pair<L, R> &p ) :
-		OOStd::SimpleAssociativeContainer< Itemiser::Element, TreePtrInterface, Impl >( p ) {}
+		COLLECTION_BASE< Itemiser::Element, TreePtrInterface, Impl >( p ) {}
 	template< typename OTHER >
 	inline Collection( const TreePtr<OTHER> &v ) :
-		OOStd::SimpleAssociativeContainer< Itemiser::Element, TreePtrInterface, Impl >( v ) {}
+		COLLECTION_BASE< Itemiser::Element, TreePtrInterface, Impl >( v ) {}
 };
 
 
