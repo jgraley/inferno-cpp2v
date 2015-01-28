@@ -2,6 +2,8 @@
 
 class TopLevel;
 int gvar;
+int i;
+int j;
 class TopLevel : public sc_module
 {
 public:
@@ -9,26 +11,23 @@ SC_CTOR( TopLevel )
 {
 SC_METHOD(T);
 }
-private:
-unsigned int state;
-public:
-void T();
 enum TStates
 {
 T_STATE_PROCEED_NEXT = 0U,
+T_STATE_PROCEED_NEXT1 = 1U,
 T_STATE_YIELD = 2U,
 T_STATE_PROCEED_THEN_ELSE = 3U,
-T_STATE_PROCEED_NEXT1 = 1U,
 T_STATE_PROCEED_THEN_ELSE1 = 4U,
 };
+void T();
+private:
+unsigned int state;
 };
 TopLevel top_level("top_level");
-int j;
-int i;
 
 void TopLevel::T()
 {
-if( (0U)==(sc_delta_count()) )
+if( (sc_delta_count())==(0U) )
 {
  ::gvar=(1);
  ::i=(0);

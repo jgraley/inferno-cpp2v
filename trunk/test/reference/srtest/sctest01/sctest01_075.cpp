@@ -1,9 +1,26 @@
 #include "isystemc.h"
 
-class Multiplier;
 class Adder;
+class Multiplier;
 class TopLevel;
 int gvar;
+class Adder : public sc_module
+{
+public:
+SC_CTOR( Adder )
+{
+SC_METHOD(T);
+}
+sc_event proceed;
+enum TStates
+{
+T_STATE_YIELD = 0U,
+T_STATE_YIELD1 = 1U,
+};
+void T();
+private:
+unsigned int state;
+};
 class Multiplier : public sc_module
 {
 public:
@@ -13,9 +30,6 @@ SC_METHOD(T);
 }
 sc_event instigate;
 sc_event proceed;
-private:
-unsigned int state;
-public:
 enum TStates
 {
 T_STATE_YIELD = 0U,
@@ -23,21 +37,6 @@ T_STATE_YIELD1 = 1U,
 T_STATE_YIELD2 = 2U,
 };
 void T();
-};
-class Adder : public sc_module
-{
-public:
-SC_CTOR( Adder )
-{
-SC_METHOD(T);
-}
-void T();
-enum TStates
-{
-T_STATE_YIELD = 0U,
-T_STATE_YIELD1 = 1U,
-};
-sc_event proceed;
 private:
 unsigned int state;
 };
@@ -45,19 +44,44 @@ class TopLevel : public sc_module
 {
 public:
 SC_CTOR( TopLevel ) :
-mul_inst("mul_inst"),
-add_inst("add_inst")
+add_inst("add_inst"),
+mul_inst("mul_inst")
 {
 SC_THREAD(T);
 }
+ ::Adder add_inst;
  ::Multiplier mul_inst;
+void T();
 enum TStates
 {
 };
- ::Adder add_inst;
-void T();
 };
 TopLevel top_level("top_level");
+
+void Adder::T()
+{
+if( (sc_delta_count())==(0U) )
+{
+next_trigger(  ::Adder::proceed );
+ ::Adder::state= ::Adder::T_STATE_YIELD;
+return ;
+}
+if(  ::Adder::state== ::Adder::T_STATE_YIELD )
+{
+ ::gvar+=(2);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
+next_trigger(  ::Adder::proceed );
+ ::Adder::state= ::Adder::T_STATE_YIELD1;
+return ;
+}
+if(  ::Adder::state== ::Adder::T_STATE_YIELD1 )
+{
+ ::gvar+=(3);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
+return ;
+}
+next_trigger(SC_ZERO_TIME);
+}
 
 void Multiplier::T()
 {
@@ -86,31 +110,6 @@ return ;
 if(  ::Multiplier::state== ::Multiplier::T_STATE_YIELD2 )
 {
 cease(  ::gvar );
-return ;
-}
-next_trigger(SC_ZERO_TIME);
-}
-
-void Adder::T()
-{
-if( (0U)==(sc_delta_count()) )
-{
-next_trigger(  ::Adder::proceed );
- ::Adder::state= ::Adder::T_STATE_YIELD;
-return ;
-}
-if(  ::Adder::state== ::Adder::T_STATE_YIELD )
-{
- ::gvar+=(2);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
-next_trigger(  ::Adder::proceed );
- ::Adder::state= ::Adder::T_STATE_YIELD1;
-return ;
-}
-if(  ::Adder::state== ::Adder::T_STATE_YIELD1 )
-{
- ::gvar+=(3);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
 return ;
 }
 next_trigger(SC_ZERO_TIME);

@@ -3,6 +3,7 @@
 class Adder;
 class Multiplier;
 class TopLevel;
+int gvar;
 class Adder : public sc_module
 {
 public:
@@ -10,15 +11,14 @@ SC_CTOR( Adder )
 {
 SC_THREAD(T);
 }
-void T();
+sc_event proceed;
 enum TStates
 {
-T_STATE_YIELD = 1U,
-T_STATE_YIELD1 = 0U,
+T_STATE_YIELD = 0U,
+T_STATE_YIELD1 = 1U,
 };
-sc_event proceed;
+void T();
 };
-int gvar;
 class Multiplier : public sc_module
 {
 public:
@@ -26,14 +26,14 @@ SC_CTOR( Multiplier )
 {
 SC_THREAD(T);
 }
+sc_event instigate;
+sc_event proceed;
 enum TStates
 {
 T_STATE_YIELD = 0U,
 T_STATE_YIELD1 = 1U,
 T_STATE_YIELD2 = 2U,
 };
-sc_event instigate;
-sc_event proceed;
 void T();
 };
 class TopLevel : public sc_module
@@ -46,34 +46,34 @@ mul_inst("mul_inst")
 SC_THREAD(T);
 }
  ::Adder add_inst;
+ ::Multiplier mul_inst;
+void T();
 enum TStates
 {
 };
- ::Multiplier mul_inst;
-void T();
 };
 TopLevel top_level("top_level");
 
 void Adder::T()
 {
-static const unsigned int (lmap[]) = { &&YIELD, &&YIELD };
 auto unsigned int state;
+static const unsigned int (lmap[]) = { &&YIELD, &&YIELD };
 YIELD:;
-if( (0U)==(sc_delta_count()) )
+if( (sc_delta_count())==(0U) )
 {
-wait(  ::Adder::proceed );
-state= ::Adder::T_STATE_YIELD1;
-goto *(lmap[state]);
-}
-if( state== ::Adder::T_STATE_YIELD1 )
-{
- ::gvar+=(2);
-(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
 wait(  ::Adder::proceed );
 state= ::Adder::T_STATE_YIELD;
 goto *(lmap[state]);
 }
 if( state== ::Adder::T_STATE_YIELD )
+{
+ ::gvar+=(2);
+(( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
+wait(  ::Adder::proceed );
+state= ::Adder::T_STATE_YIELD1;
+goto *(lmap[state]);
+}
+if( state== ::Adder::T_STATE_YIELD1 )
 {
  ::gvar+=(3);
 (( ::top_level. ::TopLevel::mul_inst). ::Multiplier::proceed).notify(SC_ZERO_TIME);
@@ -84,10 +84,10 @@ goto *(lmap[state]);
 
 void Multiplier::T()
 {
-static const unsigned int (lmap[]) = { &&YIELD, &&YIELD, &&YIELD };
 auto unsigned int state;
+static const unsigned int (lmap[]) = { &&YIELD, &&YIELD, &&YIELD };
 YIELD:;
-if( (0U)==(sc_delta_count()) )
+if( (sc_delta_count())==(0U) )
 {
 wait(  ::Multiplier::instigate );
 state= ::Multiplier::T_STATE_YIELD;

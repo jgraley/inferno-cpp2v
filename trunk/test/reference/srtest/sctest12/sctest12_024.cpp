@@ -8,14 +8,14 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
+int x;
+/*temp*/ int f_return;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link1;
 private:
 void *link;
 public:
-/*temp*/ void *f_link;
-/*temp*/ int f_return;
-int x;
 void T();
-/*temp*/ void *f_link1;
 };
 TopLevel top_level("top_level");
 
@@ -63,7 +63,7 @@ BREAK1:;
 {
 auto int switch_value1 = 2;
 {
-if( (2)==switch_value1 )
+if( switch_value1==(2) )
 goto CASE4;
 if( switch_value1==(1) )
 goto CASE3;

@@ -8,13 +8,13 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
+int x;
+/*temp*/ int f_return;
 /*temp*/ void *f_link;
+/*temp*/ void *f_link1;
 private:
 void *link;
 public:
-int x;
-/*temp*/ void *f_link1;
-/*temp*/ int f_return;
 void T();
 };
 TopLevel top_level("top_level");
@@ -38,11 +38,11 @@ break;
 auto int switch_value;
 switch_value=(0);
 {
-goto *(((0)==switch_value) ? (&&CASE2) : (&&PROCEED));
+goto *((switch_value==(0)) ? (&&CASE2) : (&&PROCEED));
 PROCEED:;
-goto *(((4)==switch_value) ? (&&CASE1) : (&&PROCEED1));
+goto *((switch_value==(4)) ? (&&CASE1) : (&&PROCEED1));
 PROCEED1:;
-goto *(((1)==switch_value) ? (&&CASE) : (&&PROCEED2));
+goto *((switch_value==(1)) ? (&&CASE) : (&&PROCEED2));
 PROCEED2:;
 CASE:;
  ::TopLevel::x=(99);
@@ -74,11 +74,11 @@ CASE3:;
 goto BREAK3;
 CASE4:;
 {
-goto *((!(((0)== ::TopLevel::x)||((2)== ::TopLevel::x))) ? (&&THEN1) : (&&PROCEED5));
+goto *((!(( ::TopLevel::x==(0))||( ::TopLevel::x==(2)))) ? (&&THEN1) : (&&PROCEED5));
 PROCEED5:;
 {
-/*temp*/ int result;
 /*temp*/ int muxtemp;
+/*temp*/ int result;
 {
 goto *((!(false)) ? (&&THEN) : (&&PROCEED6));
 PROCEED6:;

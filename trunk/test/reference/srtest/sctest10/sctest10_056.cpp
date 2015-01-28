@@ -8,121 +8,115 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-/*temp*/ char f_k;
+int x;
 /*temp*/ int f_return;
-/*temp*/ short f_j;
-private:
-short j;
-public:
-enum TStates
-{
-T_STATE_LINK = 1U,
-T_STATE_LINK1 = 0U,
-T_STATE_ENTER_f = 3U,
-T_STATE_LINK2 = 2U,
-};
-private:
-int t;
-public:
 /*temp*/ unsigned int f_link;
 /*temp*/ int f_i;
+/*temp*/ short f_j;
+/*temp*/ char f_k;
+/*temp*/ unsigned int f_link1;
 private:
+int t;
+int i;
+short j;
 char k;
 unsigned int link;
 public:
-int x;
-private:
-int i;
-public:
-/*temp*/ unsigned int f_link1;
+enum TStates
+{
+T_STATE_LINK = 0U,
+T_STATE_LINK1 = 1U,
+T_STATE_LINK2 = 2U,
+T_STATE_ENTER_f = 3U,
+};
 void T();
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
+auto unsigned int state;
+/*temp*/ unsigned int temp_link;
 /*temp*/ int result;
-static const unsigned int (lmap[]) = { &&LINK, &&LINK1, &&LINK2, &&ENTER_f };
-/*temp*/ int temp_j;
 /*temp*/ int temp_k;
 /*temp*/ int result1;
-/*temp*/ int temp_j1;
-/*temp*/ unsigned int temp_link;
-auto unsigned int state;
+/*temp*/ int temp_j;
 /*temp*/ int result2;
-/*temp*/ int temp_k1;
-/*temp*/ int temp_j2;
+/*temp*/ int temp_i;
 /*temp*/ int result3;
 /*temp*/ int result4;
-/*temp*/ int temp_i;
+/*temp*/ int temp_k1;
 /*temp*/ int result5;
+/*temp*/ int temp_j1;
 /*temp*/ int result6;
 /*temp*/ int result7;
+/*temp*/ int temp_k2;
 /*temp*/ int result8;
+/*temp*/ int temp_j2;
 /*temp*/ int result9;
 /*temp*/ int temp_i1;
 /*temp*/ int result10;
 /*temp*/ int temp_i2;
 /*temp*/ int result11;
-/*temp*/ int temp_k2;
+static const unsigned int (lmap[]) = { &&LINK, &&LINK1, &&LINK2, &&ENTER_f };
  ::TopLevel::x=(0);
-temp_k1=(8);
-temp_j1=(6);
+temp_i1=(0);
 temp_j2=(0);
-temp_i2=(0);
-temp_k=(0);
- ::TopLevel::f_i=temp_i2;
+temp_k2=(0);
+ ::TopLevel::f_i=temp_i1;
  ::TopLevel::f_j=temp_j2;
- ::TopLevel::f_k=temp_k;
- ::TopLevel::f_link= ::TopLevel::T_STATE_LINK1;
+ ::TopLevel::f_k=temp_k2;
+ ::TopLevel::f_link1= ::TopLevel::T_STATE_LINK;
 wait(SC_ZERO_TIME);
 state= ::TopLevel::T_STATE_ENTER_f;
 LINK:;
-if( state== ::TopLevel::T_STATE_LINK1 )
+if( state== ::TopLevel::T_STATE_LINK )
 {
-result5= ::TopLevel::f_return;
-result11=result5;
-result2=result11;
-result1=result2;
-temp_i1=result1;
- ::TopLevel::f_i=temp_i1;
+result7= ::TopLevel::f_return;
+result8=result7;
+result9=result8;
+result10=result9;
+temp_i2=result10;
+temp_j1=(6);
+temp_k1=(8);
+ ::TopLevel::f_i=temp_i2;
  ::TopLevel::f_j=temp_j1;
  ::TopLevel::f_k=temp_k1;
- ::TopLevel::f_link= ::TopLevel::T_STATE_LINK;
+ ::TopLevel::f_link1= ::TopLevel::T_STATE_LINK1;
 state= ::TopLevel::T_STATE_ENTER_f;
 }
 LINK1:;
-if(  ::TopLevel::T_STATE_LINK==state )
+if( state== ::TopLevel::T_STATE_LINK1 )
 {
-result9= ::TopLevel::f_return;
-result6=result9;
-result7=result6;
-result3=result7;
- ::TopLevel::x=result3;
+result4= ::TopLevel::f_return;
+result5=result4;
+result6=result5;
+result11=result6;
+ ::TopLevel::x=result11;
 temp_i=(1);
-temp_k2=(3);
 temp_j=(2);
+temp_k=(3);
  ::TopLevel::f_i=temp_i;
  ::TopLevel::f_j=temp_j;
- ::TopLevel::f_k=temp_k2;
- ::TopLevel::f_link= ::TopLevel::T_STATE_LINK2;
+ ::TopLevel::f_k=temp_k;
+ ::TopLevel::f_link1= ::TopLevel::T_STATE_LINK2;
 state= ::TopLevel::T_STATE_ENTER_f;
 }
 LINK2:;
 if( state== ::TopLevel::T_STATE_LINK2 )
 {
-result8= ::TopLevel::f_return;
-result=result8;
-result4=result;
-result10=result4;
-cease(  ::TopLevel::x+(result10*(2)) );
+result= ::TopLevel::f_return;
+result1=result;
+result2=result1;
+result3=result2;
+cease(  ::TopLevel::x+(result3*(2)) );
 return ;
 state= ::TopLevel::T_STATE_ENTER_f;
 }
 ENTER_f:;
 if( state== ::TopLevel::T_STATE_ENTER_f )
 {
- ::TopLevel::link= ::TopLevel::f_link;
+ ::TopLevel::link= ::TopLevel::f_link1;
  ::TopLevel::k= ::TopLevel::f_k;
  ::TopLevel::j= ::TopLevel::f_j;
  ::TopLevel::i= ::TopLevel::f_i;

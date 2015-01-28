@@ -8,18 +8,20 @@ SC_CTOR( TopLevel )
 {
 SC_METHOD(U);
 }
+/*temp*/ unsigned int HelperU_link;
 private:
 unsigned int link;
-unsigned int state;
 public:
-/*temp*/ unsigned int temp_link;
 enum UStates
 {
 U_STATE_LINK = 0U,
 U_STATE_ENTER_HelperU = 1U,
 };
-/*temp*/ unsigned int HelperU_link;
+private:
+unsigned int state;
+public:
 void U();
+/*temp*/ unsigned int temp_link;
 };
 TopLevel top_level("top_level");
 
@@ -32,7 +34,7 @@ next_trigger(SC_ZERO_TIME);
  ::TopLevel::state= ::TopLevel::U_STATE_ENTER_HelperU;
 return ;
 }
-if(  ::TopLevel::U_STATE_LINK== ::TopLevel::state )
+if(  ::TopLevel::state== ::TopLevel::U_STATE_LINK )
 {
 return ;
  ::TopLevel::state= ::TopLevel::U_STATE_ENTER_HelperU;

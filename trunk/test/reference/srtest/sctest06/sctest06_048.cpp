@@ -1,9 +1,9 @@
 #include "isystemc.h"
 
 class TopLevel;
-int j;
 int gvar;
 int i;
+int j;
 class TopLevel : public sc_module
 {
 public:

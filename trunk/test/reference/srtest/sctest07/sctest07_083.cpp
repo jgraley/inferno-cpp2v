@@ -1,6 +1,9 @@
 #include "isystemc.h"
 
 class TopLevel;
+int gvar;
+int i;
+int j;
 class TopLevel : public sc_module
 {
 public:
@@ -8,24 +11,20 @@ SC_CTOR( TopLevel )
 {
 SC_METHOD(T);
 }
-private:
-unsigned int state;
-public:
-void T();
 enum TStates
 {
-T_STATE_PROCEED_THEN_ELSE = 3U,
-T_STATE_YIELD = 4U,
-T_STATE_YIELD1 = 2U,
-T_STATE_PROCEED_THEN_ELSE1 = 5U,
 T_STATE_PROCEED_NEXT = 0U,
 T_STATE_PROCEED_NEXT1 = 1U,
+T_STATE_YIELD = 2U,
+T_STATE_PROCEED_THEN_ELSE = 3U,
+T_STATE_YIELD1 = 4U,
+T_STATE_PROCEED_THEN_ELSE1 = 5U,
 };
+void T();
+private:
+unsigned int state;
 };
-int gvar;
-int j;
 TopLevel top_level("top_level");
-int i;
 
 void TopLevel::T()
 {
@@ -47,10 +46,10 @@ if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT) )
 if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_NEXT1) )
 {
 next_trigger(SC_ZERO_TIME);
- ::TopLevel::state= ::TopLevel::T_STATE_YIELD1;
+ ::TopLevel::state= ::TopLevel::T_STATE_YIELD;
 enabled=(false);
 }
-if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_YIELD1) )
+if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_YIELD) )
 {
  ::gvar++;
  ::j++;
@@ -60,10 +59,10 @@ if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_PROCEED_THEN_ELSE) )
 {
  ::gvar*=(2);
 next_trigger(SC_ZERO_TIME);
- ::TopLevel::state= ::TopLevel::T_STATE_YIELD;
+ ::TopLevel::state= ::TopLevel::T_STATE_YIELD1;
 enabled=(false);
 }
-if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_YIELD) )
+if( enabled&&( ::TopLevel::state== ::TopLevel::T_STATE_YIELD1) )
 {
  ::i++;
  ::TopLevel::state=(( ::i<(4)) ?  ::TopLevel::T_STATE_PROCEED_NEXT :  ::TopLevel::T_STATE_PROCEED_THEN_ELSE1);

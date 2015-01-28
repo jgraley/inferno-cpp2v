@@ -11,26 +11,26 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-void T();
 enum TStates
 {
 T_STATE_PROCEED_NEXT = 0U,
-T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_PROCEED_NEXT1 = 1U,
 T_STATE_YIELD = 2U,
-T_STATE_PROCEED_THEN_ELSE1 = 5U,
+T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_YIELD1 = 4U,
+T_STATE_PROCEED_THEN_ELSE1 = 5U,
 };
+void T();
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-static const unsigned int (lmap[]) = { &&, &&, &&, &&, &&, && };
 auto unsigned int state;
+static const unsigned int (lmap[]) = { &&, &&, &&, &&, &&, && };
 do
 {
-if( (0U)==(sc_delta_count()) )
+if( (sc_delta_count())==(0U) )
 {
  ::gvar=(1);
  ::i=(0);

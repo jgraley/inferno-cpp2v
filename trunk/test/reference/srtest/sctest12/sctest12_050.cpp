@@ -8,45 +8,46 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-/*temp*/ void *f_link;
-enum TStates
-{
-T_STATE_CASE = 3U,
-T_STATE_ENTER_f = 15U,
-T_STATE_THEN = 11U,
-T_STATE_BREAK = 5U,
-T_STATE_PROCEED_CASE = 7U,
-T_STATE_ELSE = 13U,
-T_STATE_THEN_ELSE_BREAK = 14U,
-T_STATE_PROCEED_CASE1 = 2U,
-T_STATE_PROCEED = 0U,
-T_STATE_PROCEED1 = 1U,
-T_STATE_PROCEED2 = 9U,
-T_STATE_CASE1 = 4U,
-T_STATE_PROCEED3 = 6U,
-T_STATE_PROCEED4 = 10U,
-T_STATE_CASE2 = 8U,
-T_STATE_LINK = 12U,
-};
-void T();
-/*temp*/ void *f_link1;
 int x;
 /*temp*/ int f_return;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link1;
 private:
 void *link;
+public:
+enum TStates
+{
+T_STATE_PROCEED = 0U,
+T_STATE_PROCEED1 = 1U,
+T_STATE_PROCEED_CASE = 2U,
+T_STATE_CASE = 3U,
+T_STATE_CASE1 = 4U,
+T_STATE_BREAK = 5U,
+T_STATE_PROCEED2 = 6U,
+T_STATE_PROCEED_CASE1 = 7U,
+T_STATE_CASE2 = 8U,
+T_STATE_PROCEED3 = 9U,
+T_STATE_PROCEED4 = 10U,
+T_STATE_THEN = 11U,
+T_STATE_LINK = 12U,
+T_STATE_ELSE = 13U,
+T_STATE_THEN_ELSE_BREAK = 14U,
+T_STATE_ENTER_f = 15U,
+};
+void T();
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-static const void *(lmap[]) = { &&PROCEED, &&PROCEED1, &&PROCEED_CASE, &&CASE, &&CASE1, &&BREAK, &&PROCEED2, &&PROCEED_CASE1, &&CASE2, &&PROCEED3, &&PROCEED4, &&THEN, &&LINK, &&ELSE, &&THEN_ELSE_BREAK, &&ENTER_f };
+auto void *state;
+/*temp*/ void *temp_link;
 /*temp*/ int result;
 /*temp*/ int muxtemp;
-auto int switch_value;
-auto void *state;
 /*temp*/ int result1;
-/*temp*/ void *temp_link;
+auto int switch_value;
 auto int switch_value1;
+static const void *(lmap[]) = { &&PROCEED, &&PROCEED1, &&PROCEED_CASE, &&CASE, &&CASE1, &&BREAK, &&PROCEED2, &&PROCEED_CASE1, &&CASE2, &&PROCEED3, &&PROCEED4, &&THEN, &&LINK, &&ELSE, &&THEN_ELSE_BREAK, &&ENTER_f };
  ::TopLevel::x=(0);
 switch( 0 )
 {
@@ -58,20 +59,20 @@ if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
  ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
-switch_value=(0);
+switch_value1=(0);
 wait(SC_ZERO_TIME);
 {
-state=((switch_value==(0)) ? (lmap[ ::TopLevel::T_STATE_CASE1]) : (lmap[ ::TopLevel::T_STATE_PROCEED]));
+state=((switch_value1==(0)) ? (lmap[ ::TopLevel::T_STATE_CASE1]) : (lmap[ ::TopLevel::T_STATE_PROCEED]));
 goto *(state);
 }
 PROCEED:;
 {
-state=((switch_value==(4)) ? (lmap[ ::TopLevel::T_STATE_CASE]) : (lmap[ ::TopLevel::T_STATE_PROCEED1]));
+state=((switch_value1==(4)) ? (lmap[ ::TopLevel::T_STATE_CASE]) : (lmap[ ::TopLevel::T_STATE_PROCEED1]));
 goto *(state);
 }
 PROCEED1:;
 {
-state=((switch_value==(1)) ? (lmap[ ::TopLevel::T_STATE_PROCEED_CASE1]) : (lmap[ ::TopLevel::T_STATE_PROCEED_CASE1]));
+state=((switch_value1==(1)) ? (lmap[ ::TopLevel::T_STATE_PROCEED_CASE]) : (lmap[ ::TopLevel::T_STATE_PROCEED_CASE]));
 goto *(state);
 }
 PROCEED_CASE:;
@@ -94,14 +95,14 @@ state=(lmap[ ::TopLevel::T_STATE_BREAK]);
 goto *(state);
 }
 BREAK:;
-switch_value1=(2);
+switch_value=(2);
 {
-state=((switch_value1==(2)) ? (lmap[ ::TopLevel::T_STATE_CASE2]) : (lmap[ ::TopLevel::T_STATE_PROCEED3]));
+state=((switch_value==(2)) ? (lmap[ ::TopLevel::T_STATE_CASE2]) : (lmap[ ::TopLevel::T_STATE_PROCEED2]));
 goto *(state);
 }
 PROCEED2:;
 {
-state=((switch_value1==(1)) ? (lmap[ ::TopLevel::T_STATE_PROCEED_CASE]) : (lmap[ ::TopLevel::T_STATE_PROCEED_CASE]));
+state=((switch_value==(1)) ? (lmap[ ::TopLevel::T_STATE_PROCEED_CASE1]) : (lmap[ ::TopLevel::T_STATE_PROCEED_CASE1]));
 goto *(state);
 }
 PROCEED_CASE1:;
@@ -112,7 +113,7 @@ goto *(state);
 }
 CASE2:;
 {
-state=((!(( ::TopLevel::x==(0))||( ::TopLevel::x==(2)))) ? (lmap[ ::TopLevel::T_STATE_THEN_ELSE_BREAK]) : (lmap[ ::TopLevel::T_STATE_PROCEED2]));
+state=((!(( ::TopLevel::x==(0))||( ::TopLevel::x==(2)))) ? (lmap[ ::TopLevel::T_STATE_THEN_ELSE_BREAK]) : (lmap[ ::TopLevel::T_STATE_PROCEED3]));
 goto *(state);
 }
 PROCEED3:;

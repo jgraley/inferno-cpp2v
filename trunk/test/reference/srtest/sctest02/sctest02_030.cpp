@@ -11,8 +11,8 @@ SC_CTOR( Adder )
 {
 SC_THREAD(T);
 }
-bool proceed;
 void T();
+bool proceed;
 };
 class Multiplier : public sc_module
 {
@@ -21,9 +21,9 @@ SC_CTOR( Multiplier )
 {
 SC_THREAD(T);
 }
-bool proceed;
 void T();
 bool instigate;
+bool proceed;
 };
 class TopLevel : public sc_module
 {
@@ -34,9 +34,9 @@ mul_inst("mul_inst")
 {
 SC_THREAD(T);
 }
+void T();
  ::Adder add_inst;
  ::Multiplier mul_inst;
-void T();
 };
 TopLevel top_level("top_level");
 

@@ -1,8 +1,9 @@
 #include "isystemc.h"
 
 class TopLevel;
-int j;
+int gvar;
 int i;
+int j;
 class TopLevel : public sc_module
 {
 public:
@@ -12,29 +13,25 @@ helper_stack_index(0U)
 SC_THREAD(T);
 }
 /*temp*/ void *helper_link;
-private:
-void *link;
-void *(link_stack[10U]);
-public:
-/*temp*/ void *helper_link1;
 /*temp*/ void *otherhelper_link;
 /*temp*/ void *otherhelper_link1;
-private:
-int (n_stack[10U]);
-public:
 /*temp*/ int helper_n;
-void T();
+/*temp*/ void *helper_link1;
 private:
+void *link;
 unsigned int helper_stack_index;
+int (n_stack[10U]);
+void *(link_stack[10U]);
+public:
+void T();
 };
 TopLevel top_level("top_level");
-int gvar;
 
 void TopLevel::T()
 {
-/*temp*/ int temp_n;
 /*temp*/ void *temp_link;
 /*temp*/ void *temp_link1;
+/*temp*/ int temp_n;
  ::gvar=(1);
  ::i=(0);
 wait(SC_ZERO_TIME);
@@ -66,7 +63,7 @@ PROCEED_NEXT1:;
 wait(SC_ZERO_TIME);
 goto YIELD1;
 YIELD1:;
- ::gvar=((1)+ ::gvar);
+ ::gvar=( ::gvar+(1));
  ::j=( ::j+(1));
 goto *(( ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])) ? (&&PROCEED_NEXT1) : (&&PROCEED_THEN_ELSE1));
 PROCEED_THEN_ELSE1:;
