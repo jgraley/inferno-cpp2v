@@ -3,6 +3,7 @@
 class Adder;
 class Multiplier;
 class TopLevel;
+int gvar;
 class Adder : public sc_module
 {
 public:
@@ -10,15 +11,14 @@ SC_CTOR( Adder )
 {
 SC_THREAD(T);
 }
-void T();
+sc_event proceed;
 enum TStates
 {
 T_STATE_YIELD = 0U,
 T_STATE_YIELD1 = 1U,
 };
-sc_event proceed;
+void T();
 };
-int gvar;
 class Multiplier : public sc_module
 {
 public:
@@ -26,28 +26,28 @@ SC_CTOR( Multiplier )
 {
 SC_THREAD(T);
 }
-void T();
+sc_event instigate;
 sc_event proceed;
 enum TStates
 {
-T_STATE_YIELD = 1U,
-T_STATE_YIELD1 = 0U,
+T_STATE_YIELD = 0U,
+T_STATE_YIELD1 = 1U,
 T_STATE_YIELD2 = 2U,
 };
-sc_event instigate;
+void T();
 };
 class TopLevel : public sc_module
 {
 public:
 SC_CTOR( TopLevel ) :
-mul_inst("mul_inst"),
-add_inst("add_inst")
+add_inst("add_inst"),
+mul_inst("mul_inst")
 {
 SC_THREAD(T);
 }
-void T();
- ::Multiplier mul_inst;
  ::Adder add_inst;
+ ::Multiplier mul_inst;
+void T();
 enum TStates
 {
 };
@@ -59,7 +59,7 @@ void Adder::T()
 auto unsigned int state;
 do
 {
-if( (0U)==(sc_delta_count()) )
+if( (sc_delta_count())==(0U) )
 {
 wait(  ::Adder::proceed );
 state= ::Adder::T_STATE_YIELD;
@@ -91,18 +91,18 @@ do
 if( (sc_delta_count())==(0U) )
 {
 wait(  ::Multiplier::instigate );
-state= ::Multiplier::T_STATE_YIELD1;
-continue;
-}
-if( state== ::Multiplier::T_STATE_YIELD1 )
-{
- ::gvar*=(5);
-(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
-wait(  ::Multiplier::proceed );
 state= ::Multiplier::T_STATE_YIELD;
 continue;
 }
 if( state== ::Multiplier::T_STATE_YIELD )
+{
+ ::gvar*=(5);
+(( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
+wait(  ::Multiplier::proceed );
+state= ::Multiplier::T_STATE_YIELD1;
+continue;
+}
+if( state== ::Multiplier::T_STATE_YIELD1 )
 {
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);

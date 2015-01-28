@@ -308,10 +308,33 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
     {
     	return CONTAINER_IMPL::operator[](i);
     }
-	virtual void insert( const VALUE_INTERFACE &gx )
+	virtual void insert( const VALUE_INTERFACE &gx ) // Simulating the SimpleAssociatedContaner API 
 	{
+        // Like multiset, we do allow more than one copy of the same element
 		push_back( gx );
 	}
+    virtual int erase( const VALUE_INTERFACE &gx ) // Simulating the SimpleAssociatedContaner API 
+    {
+        // Like multiset, we erase all matching elemnts. Doing this though the API, bearing in 
+        // mind validity rules post-erase, is horrible.
+        typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(gx) );
+        typename CONTAINER_IMPL::iterator it;
+        int count = 0;
+        do 
+        {
+            for( it=begin(); it != end(); ++it )
+            {
+                if( *it==sx )
+                {
+                    CONTAINER_IMPL::erase(it);
+                    count++;
+                    break;
+                }
+            }
+        }
+        while( it != end() );
+        return count;
+    }
 	virtual void push_back( const VALUE_INTERFACE &gx )
 	{
 		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(gx) );

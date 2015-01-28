@@ -3,6 +3,7 @@
 class Adder;
 class Multiplier;
 class TopLevel;
+int gvar;
 class Adder : public sc_module
 {
 public:
@@ -18,7 +19,6 @@ T_STATE_YIELD1 = 1U,
 };
 void T();
 };
-int gvar;
 class Multiplier : public sc_module
 {
 public:
@@ -26,14 +26,14 @@ SC_CTOR( Multiplier )
 {
 SC_THREAD(T);
 }
-enum TStates
-{
-T_STATE_YIELD = 1U,
-T_STATE_YIELD1 = 0U,
-T_STATE_YIELD2 = 2U,
-};
 sc_event instigate;
 sc_event proceed;
+enum TStates
+{
+T_STATE_YIELD = 0U,
+T_STATE_YIELD1 = 1U,
+T_STATE_YIELD2 = 2U,
+};
 void T();
 };
 class TopLevel : public sc_module
@@ -56,8 +56,8 @@ TopLevel top_level("top_level");
 
 void Adder::T()
 {
-static const unsigned int (lmap[]) = { &&YIELD, &&YIELD1 };
 auto unsigned int state;
+static const unsigned int (lmap[]) = { &&YIELD, &&YIELD1 };
 wait(  ::Adder::proceed );
 state= ::Adder::T_STATE_YIELD;
 YIELD:;
@@ -84,18 +84,18 @@ void Multiplier::T()
 auto unsigned int state;
 static const unsigned int (lmap[]) = { &&YIELD, &&YIELD1, &&YIELD2 };
 wait(  ::Multiplier::instigate );
-state= ::Multiplier::T_STATE_YIELD1;
+state= ::Multiplier::T_STATE_YIELD;
 YIELD:;
-if( state== ::Multiplier::T_STATE_YIELD1 )
+if( state== ::Multiplier::T_STATE_YIELD )
 {
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);
 wait(  ::Multiplier::proceed );
-state= ::Multiplier::T_STATE_YIELD;
+state= ::Multiplier::T_STATE_YIELD1;
 goto *(lmap[state]);
 }
 YIELD1:;
-if( state== ::Multiplier::T_STATE_YIELD )
+if( state== ::Multiplier::T_STATE_YIELD1 )
 {
  ::gvar*=(5);
 (( ::top_level. ::TopLevel::add_inst). ::Adder::proceed).notify(SC_ZERO_TIME);

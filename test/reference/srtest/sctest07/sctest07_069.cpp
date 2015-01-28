@@ -1,7 +1,9 @@
 #include "isystemc.h"
 
 class TopLevel;
+int gvar;
 int i;
+int j;
 class TopLevel : public sc_module
 {
 public:
@@ -9,20 +11,18 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-void T();
 enum TStates
 {
 T_STATE_PROCEED_NEXT = 0U,
-T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_PROCEED_NEXT1 = 1U,
 T_STATE_YIELD = 2U,
-T_STATE_PROCEED_THEN_ELSE1 = 5U,
+T_STATE_PROCEED_THEN_ELSE = 3U,
 T_STATE_YIELD1 = 4U,
+T_STATE_PROCEED_THEN_ELSE1 = 5U,
 };
+void T();
 };
 TopLevel top_level("top_level");
-int gvar;
-int j;
 
 void TopLevel::T()
 {

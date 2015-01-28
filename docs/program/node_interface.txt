@@ -112,7 +112,7 @@ Sequence<> has similar semantics to deque< TreePtr<> >. SequenceInterface is a b
 
 Collection<> is a TreePtr<> specialisation of OOStd::SimpleAssociativeContainer<> and std::multiset<>. We use it to hold zero or more TreePtr<> objects which will point to other nodes and discard the order in which elements were first added i.e. an unordered 1:n relationship. The use of multiset ensures that multiple references to the same node in a collection will not disappear. Both Sequence and Collection preserve the number of TreePtr<>s inserted.
 
-Sequence<> has similar semantics to multiset< TreePtr<> >. CollectionInterface is a base class for all Collection<X>. The node interface adds Itemiser::Element as a sub base class.
+Collection<> has similar semantics to multiset< TreePtr<> >. CollectionInterface is a base class for all Collection<X>. The node interface adds Itemiser::Element as a sub base class.
 
 4.4 Notes
 
@@ -121,6 +121,8 @@ The OOStd provides Container<>, which is a common base interface for Sequence<> 
 We need a scheme for iterators that supports inheritance of their host containers. This is done using a proxy iterator for the interface that maintains a copy of the implementation's iterator. This introduces extra new and delete as well as an additional layer of indirection. However, it uses copy-on-write semantics to reduce the extra work, and for large/complex iterators, could be a performance improvement. 
 
 Sequence and Collection both support the Overwrite() method. Given an iterator i, you can call i.Overwrite( p ) where p is a compatible TreePtr<>. In Sequences, this is equivalent to *i = p, but in Collections you cannot do this because *i is const, so you need Overwrite() which does erase() and insert(). Overwrite() is available in the common ContainerInterface<> interface.
+
+By enabling USE_DEQUE_FOR_COLLECTION, it is possible to use the Sequence<> implementation for Collection<> too, so that the pair become functionally identical. This is possible because the ordering for std::multiset<>, when used for Collection<> is based on the addressesof the contained nodes, and is somewhat arbitrary as well as unique. Thus we don't rely on the order and we don't use find(). The remaining operation we need (eg insert, erase) are already supported by Sequence<>. Choosing this option makes execution more repeatable because iterating through the container will then give an ordering that depends only on previous inserts and erases on the same Collection<> instance.
 
 5 Examples
 

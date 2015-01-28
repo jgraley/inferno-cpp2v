@@ -8,24 +8,20 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
+int x;
+/*temp*/ int f_return;
+/*temp*/ void *f_link;
 /*temp*/ int f_i;
+/*temp*/ short f_j;
 /*temp*/ char f_k;
+/*temp*/ void *f_link1;
 private:
+int t;
+int i;
+short j;
 char k;
 void *link;
 public:
-int x;
-private:
-int i;
-int t;
-public:
-/*temp*/ void *f_link;
-/*temp*/ short f_j;
-/*temp*/ int f_return;
-private:
-short j;
-public:
-/*temp*/ void *f_link1;
 void T();
 };
 TopLevel top_level("top_level");
@@ -34,39 +30,31 @@ void TopLevel::T()
 {
  ::TopLevel::x=(0);
 {
-/*temp*/ int temp_k;
-/*temp*/ int result;
-temp_k=(8);
-{
-/*temp*/ int temp_j;
-/*temp*/ int result1;
-temp_j=(6);
-{
 /*temp*/ int temp_i;
-/*temp*/ int result2;
-{
-/*temp*/ int temp_j1;
-/*temp*/ int result3;
-temp_j1=(0);
+/*temp*/ int result;
 {
 /*temp*/ int temp_i1;
-/*temp*/ int result4;
+/*temp*/ int result1;
 temp_i1=(0);
 {
-/*temp*/ int result5;
-/*temp*/ int temp_k1;
-temp_k1=(0);
+/*temp*/ int temp_j;
+/*temp*/ int result2;
+temp_j=(0);
 {
-/*temp*/ int result6;
+/*temp*/ int temp_k;
+/*temp*/ int result3;
+temp_k=(0);
+{
+/*temp*/ int result4;
 {
 {
  ::TopLevel::f_i=temp_i1;
 {
- ::TopLevel::f_j=temp_j1;
+ ::TopLevel::f_j=temp_j;
 {
- ::TopLevel::f_k=temp_k1;
+ ::TopLevel::f_k=temp_k;
 {
- ::TopLevel::f_link=(&&LINK);
+ ::TopLevel::f_link1=(&&LINK);
 goto ENTER_f;
 }
 }
@@ -74,26 +62,34 @@ goto ENTER_f;
 }
 LINK:;
 }
-result6= ::TopLevel::f_return;
-result5=result6;
-}
-result4=result5;
-}
+result4= ::TopLevel::f_return;
 result3=result4;
 }
-temp_i=result3;
+result2=result3;
 }
+result1=result2;
+}
+temp_i=result1;
+}
+{
+/*temp*/ int temp_j1;
+/*temp*/ int result5;
+temp_j1=(6);
+{
+/*temp*/ int temp_k1;
+/*temp*/ int result6;
+temp_k1=(8);
 {
 /*temp*/ int result7;
 {
 {
  ::TopLevel::f_i=temp_i;
 {
- ::TopLevel::f_j=temp_j;
+ ::TopLevel::f_j=temp_j1;
 {
- ::TopLevel::f_k=temp_k;
+ ::TopLevel::f_k=temp_k1;
 {
- ::TopLevel::f_link=(&&LINK1);
+ ::TopLevel::f_link1=(&&LINK1);
 goto ENTER_f;
 }
 }
@@ -102,11 +98,11 @@ goto ENTER_f;
 LINK1:;
 }
 result7= ::TopLevel::f_return;
-result2=result7;
+result6=result7;
 }
-result1=result2;
+result5=result6;
 }
-result=result1;
+result=result5;
 }
  ::TopLevel::x=result;
 }
@@ -115,13 +111,13 @@ result=result1;
 /*temp*/ int result8;
 temp_i2=(1);
 {
-/*temp*/ int result9;
-/*temp*/ int temp_k2;
-temp_k2=(3);
-{
-/*temp*/ int result10;
 /*temp*/ int temp_j2;
+/*temp*/ int result9;
 temp_j2=(2);
+{
+/*temp*/ int temp_k2;
+/*temp*/ int result10;
+temp_k2=(3);
 {
 /*temp*/ int result11;
 {
@@ -132,7 +128,7 @@ temp_j2=(2);
 {
  ::TopLevel::f_k=temp_k2;
 {
- ::TopLevel::f_link=(&&LINK2);
+ ::TopLevel::f_link1=(&&LINK2);
 goto ENTER_f;
 }
 }
@@ -153,7 +149,7 @@ return ;
 ENTER_f:;
 {
 /*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link;
+ ::TopLevel::link= ::TopLevel::f_link1;
  ::TopLevel::k= ::TopLevel::f_k;
  ::TopLevel::j= ::TopLevel::f_j;
  ::TopLevel::i= ::TopLevel::f_i;

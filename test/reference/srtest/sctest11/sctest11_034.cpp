@@ -8,35 +8,33 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
+int x;
+int y;
 /*temp*/ int f_return;
-void T();
-private:
-void *link;
-public:
 /*temp*/ void *f_link;
+/*temp*/ int f_i;
+/*temp*/ void *f_link1;
 private:
 int i;
+void *link;
 public:
-int y;
-int x;
-/*temp*/ void *f_link1;
-/*temp*/ int f_i;
+void T();
 };
 TopLevel top_level("top_level");
 
 void TopLevel::T()
 {
-/*temp*/ bool result;
+/*temp*/ void *temp_link;
+/*temp*/ int result;
 /*temp*/ int result1;
+/*temp*/ int muxtemp;
 /*temp*/ int result2;
 /*temp*/ int result3;
-/*temp*/ int result4;
 /*temp*/ bool ortemp;
-/*temp*/ void *temp_link;
-/*temp*/ bool result5;
+/*temp*/ bool result4;
+/*temp*/ int result5;
 /*temp*/ bool andtemp;
-/*temp*/ int result6;
-/*temp*/ int muxtemp;
+/*temp*/ bool result6;
  ::TopLevel::x=(4);
 andtemp=(++ ::TopLevel::x);
 goto *((!andtemp) ? (&&THEN) : (&&PROCEED));
@@ -45,13 +43,13 @@ PROCEED:;
  ::TopLevel::f_link1=(&&LINK);
 goto ENTER_f;
 LINK:;
-result2= ::TopLevel::f_return;
-andtemp=( ::TopLevel::y=result2);
+result5= ::TopLevel::f_return;
+andtemp=( ::TopLevel::y=result5);
 goto ELSE;
 THEN:;
 ELSE:;
-result5=andtemp;
-result5;
+result6=andtemp;
+result6;
 ortemp=(!(++ ::TopLevel::x));
 goto *((!ortemp) ? (&&THEN1) : (&&PROCEED1));
 PROCEED1:;
@@ -64,8 +62,8 @@ LINK1:;
 result3= ::TopLevel::f_return;
 ortemp=( ::TopLevel::y+=result3);
 ELSE1:;
-result=ortemp;
-result;
+result4=ortemp;
+result4;
  ::TopLevel::x=(0);
 goto *((!( ::TopLevel::x<(2))) ? (&&THEN3) : (&&PROCEED2));
 PROCEED2:;
@@ -76,19 +74,19 @@ PROCEED3:;
  ::TopLevel::f_link1=(&&LINK2);
 goto ENTER_f;
 LINK2:;
-result6= ::TopLevel::f_return;
-muxtemp=( ::TopLevel::y+=result6);
+result1= ::TopLevel::f_return;
+muxtemp=( ::TopLevel::y+=result1);
 goto ELSE2;
 THEN2:;
  ::TopLevel::f_i= ::TopLevel::x;
  ::TopLevel::f_link1=(&&LINK3);
 goto ENTER_f;
 LINK3:;
-result4= ::TopLevel::f_return;
-muxtemp=( ::TopLevel::y-=result4);
+result= ::TopLevel::f_return;
+muxtemp=( ::TopLevel::y-=result);
 ELSE2:;
-result1=muxtemp;
-result1;
+result2=muxtemp;
+result2;
 goto *(( ::TopLevel::x<(2)) ? (&&NEXT) : (&&PROCEED4));
 PROCEED4:;
 goto ELSE3;

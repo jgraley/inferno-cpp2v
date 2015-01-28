@@ -10,14 +10,14 @@ SC_THREAD(U);
 }
 /*temp*/ unsigned int HelperU_link;
 /*temp*/ unsigned int HelperU_link1;
-enum UStates
-{
-U_STATE_ENTER_HelperU = 1U,
-U_STATE_LINK = 0U,
-};
 private:
 unsigned int link;
 public:
+enum UStates
+{
+U_STATE_LINK = 0U,
+U_STATE_ENTER_HelperU = 1U,
+};
 void U();
 };
 TopLevel top_level("top_level");
@@ -31,7 +31,7 @@ static const unsigned int (lmap[]) = { &&ENTER_HelperU_LINK, &&ENTER_HelperU_LIN
 wait(SC_ZERO_TIME);
 state= ::TopLevel::U_STATE_ENTER_HelperU;
 ENTER_HelperU_LINK:;
-if(  ::TopLevel::U_STATE_LINK==state )
+if( state== ::TopLevel::U_STATE_LINK )
 {
 return ;
 state= ::TopLevel::U_STATE_ENTER_HelperU;

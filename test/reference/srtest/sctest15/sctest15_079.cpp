@@ -8,7 +8,10 @@ SC_CTOR( TopLevel )
 {
 SC_METHOD(U);
 }
-/*temp*/ unsigned int temp_link;
+/*temp*/ unsigned int HelperU_link;
+private:
+unsigned int link;
+public:
 enum UStates
 {
 U_STATE_LINK = 0U,
@@ -16,24 +19,23 @@ U_STATE_ENTER_HelperU = 1U,
 };
 private:
 unsigned int state;
-unsigned int link;
 public:
 void U();
-/*temp*/ unsigned int HelperU_link;
+/*temp*/ unsigned int temp_link;
 };
 TopLevel top_level("top_level");
 
 void TopLevel::U()
 {
 /*temp*/ bool enabled = true;
-if( (0U)==(sc_delta_count()) )
+if( (sc_delta_count())==(0U) )
 {
  ::TopLevel::HelperU_link= ::TopLevel::U_STATE_LINK;
 next_trigger(SC_ZERO_TIME);
  ::TopLevel::state= ::TopLevel::U_STATE_ENTER_HelperU;
 enabled=(false);
 }
-if( enabled&&( ::TopLevel::U_STATE_LINK== ::TopLevel::state) )
+if( enabled&&( ::TopLevel::state== ::TopLevel::U_STATE_LINK) )
 {
 enabled=(false);
 if( enabled )

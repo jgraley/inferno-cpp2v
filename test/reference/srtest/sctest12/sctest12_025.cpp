@@ -8,14 +8,14 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
+int x;
+/*temp*/ int f_return;
 /*temp*/ void *f_link;
 /*temp*/ void *f_link1;
-void T();
 private:
 void *link;
 public:
-/*temp*/ int f_return;
-int x;
+void T();
 };
 TopLevel top_level("top_level");
 
@@ -28,7 +28,7 @@ case 1:;
  ::TopLevel::x=(99);
 break;
 case 0:;
-if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
+if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
  ::TopLevel::x=((false) ? (88) : (2));
 break;
 }
@@ -38,9 +38,9 @@ break;
 auto int switch_value;
 switch_value=(0);
 {
-if( (0)==switch_value )
+if( switch_value==(0) )
 goto CASE2;
-if( (4)==switch_value )
+if( switch_value==(4) )
 goto CASE1;
 if( switch_value==(1) )
 goto CASE;
@@ -73,7 +73,7 @@ CASE3:;
  ::TopLevel::x=(99);
 goto BREAK3;
 CASE4:;
-if( ((0)== ::TopLevel::x)||((2)== ::TopLevel::x) )
+if( ( ::TopLevel::x==(0))||( ::TopLevel::x==(2)) )
  ::TopLevel::x=({ /*temp*/ int muxtemp; if( false )
 muxtemp=(88);
 else

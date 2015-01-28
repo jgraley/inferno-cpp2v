@@ -3,6 +3,7 @@
 class TopLevel;
 int gvar;
 int i;
+int j;
 class TopLevel : public sc_module
 {
 public:
@@ -11,28 +12,25 @@ helper_stack_index(0U)
 {
 SC_THREAD(T);
 }
-/*temp*/ void *otherhelper_link;
-private:
-void *link;
-int (n_stack[10U]);
-unsigned int helper_stack_index;
-public:
 /*temp*/ void *helper_link;
+/*temp*/ void *otherhelper_link;
 /*temp*/ void *otherhelper_link1;
 /*temp*/ int helper_n;
+/*temp*/ void *helper_link1;
 private:
+void *link;
+unsigned int helper_stack_index;
+int (n_stack[10U]);
 void *(link_stack[10U]);
 public:
-/*temp*/ void *helper_link1;
 void T();
 };
 TopLevel top_level("top_level");
-int j;
 
 void TopLevel::T()
 {
  ::gvar=(1);
-for(  ::i=(0);  ::i<(4);  ::i=((1)+ ::i) )
+for(  ::i=(0);  ::i<(4);  ::i=( ::i+(1)) )
 {
  ::gvar=( ::gvar+ ::i);
 ({ /*temp*/ int temp_n; temp_n=(3); {
@@ -58,14 +56,14 @@ ENTER_helper:;
  ::TopLevel::helper_stack_index++;
 ( ::TopLevel::link_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_link1;
 ( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index])= ::TopLevel::helper_n;
-for(  ::j=(0);  ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]);  ::j=((1)+ ::j) )
+for(  ::j=(0);  ::j<( ::TopLevel::n_stack[ ::TopLevel::helper_stack_index]);  ::j=( ::j+(1)) )
 {
 wait(SC_ZERO_TIME);
  ::gvar=( ::gvar+(1));
 }
 {
 {
- ::TopLevel::otherhelper_link=(&&LINK1);
+ ::TopLevel::otherhelper_link1=(&&LINK1);
 goto ENTER_otherhelper;
 }
 LINK1:;
@@ -82,7 +80,7 @@ goto *(temp_link);
 ENTER_otherhelper:;
 {
 /*temp*/ void *temp_link1;
- ::TopLevel::link= ::TopLevel::otherhelper_link;
+ ::TopLevel::link= ::TopLevel::otherhelper_link1;
  ::gvar=( ::gvar-(1));
 {
 temp_link1= ::TopLevel::link;

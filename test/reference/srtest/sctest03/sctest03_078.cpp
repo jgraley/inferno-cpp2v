@@ -8,9 +8,9 @@ SC_CTOR( TopLevel )
 {
 SC_METHOD(method);
 }
-int tot;
-int gvar;
 void method();
+int gvar;
+int tot;
 };
 TopLevel top_level("top_level");
 
@@ -19,7 +19,7 @@ void TopLevel::method()
 /*temp*/ bool enabled = true;
  ::TopLevel::gvar++;
  ::TopLevel::tot+= ::TopLevel::gvar;
-if( (10)== ::TopLevel::gvar )
+if(  ::TopLevel::gvar==(10) )
 cease(  ::TopLevel::tot );
 next_trigger(SC_ZERO_TIME);
 enabled=(false);

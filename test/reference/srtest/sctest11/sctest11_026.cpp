@@ -8,19 +8,17 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
+int x;
 int y;
-private:
-int i;
-public:
-void T();
 /*temp*/ int f_return;
 /*temp*/ void *f_link;
 /*temp*/ int f_i;
+/*temp*/ void *f_link1;
 private:
+int i;
 void *link;
 public:
-/*temp*/ void *f_link1;
-int x;
+void T();
 };
 TopLevel top_level("top_level");
 

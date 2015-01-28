@@ -9,6 +9,11 @@
 #include <set>
 #include <iterator>
 
+// This should be enabled to make inferno use a sequence-like container for 
+// it's collections, so that insertion order always applies to walks over the 
+// collection. This will improve repeatability (and output will better resemble input).
+#define USE_DEQUE_FOR_COLLECTION 1
+
 // Inferno tree shared pointers
 
 struct Node;
@@ -42,10 +47,15 @@ private:
 };
 
 
-
+#if USE_DEQUE_FOR_COLLECTION
+#define COLLECTION_IMPL deque
+#define COLLECTION_BASE OOStd::Sequence
+#define COLLECTION_INTERFACE_BASE OOStd::SequenceInterface
+#else
 #define COLLECTION_IMPL multiset
 #define COLLECTION_BASE OOStd::SimpleAssociativeContainer
 #define COLLECTION_INTERFACE_BASE OOStd::SimpleAssociativeContainerInterface
+#endif
 
 // Inferno tree containers
 typedef OOStd::ContainerInterface<Itemiser::Element, TreePtrInterface> ContainerInterface;

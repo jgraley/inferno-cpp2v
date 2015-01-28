@@ -8,16 +8,16 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(T);
 }
-void T();
-/*temp*/ void *f_link;
+int x;
 int i;
+float fi;
+/*temp*/ int f_return;
+/*temp*/ void *f_link;
+/*temp*/ void *f_link1;
 private:
 void *link;
 public:
-/*temp*/ void *f_link1;
-float fi;
-int x;
-/*temp*/ int f_return;
+void T();
 };
 TopLevel top_level("top_level");
 
@@ -195,7 +195,7 @@ NEXT6:;
 {
  ::TopLevel::x+=({ {
 {
- ::TopLevel::f_link=(&&LINK);
+ ::TopLevel::f_link1=(&&LINK);
 goto ENTER_f;
 }
 LINK:;
@@ -219,7 +219,7 @@ return ;
 ENTER_f:;
 {
 /*temp*/ void *temp_link;
- ::TopLevel::link= ::TopLevel::f_link;
+ ::TopLevel::link= ::TopLevel::f_link1;
 {
  ::TopLevel::f_return=(3);
 {

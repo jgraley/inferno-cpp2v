@@ -8,8 +8,8 @@ SC_CTOR( TopLevel )
 {
 SC_THREAD(U);
 }
-/*temp*/ void *HelperU_link;
 void U();
+/*temp*/ void *HelperU_link;
 void (HelperU)();
 /*temp*/ void *HelperU_link1;
 };
