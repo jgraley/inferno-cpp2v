@@ -19,10 +19,11 @@ Detailed plan for refactoring into agent patterns
   NOTE ALSO: Got to do slave before master because some nodes appear in both and master should get priority
 - EXTRA STEP: do not pass NULL as a pattern into DecidedCompare (as in NULL wildcarding) DONE
 3. all invocations via agent interface, use AsAgent and call on the agent, not self DONE (except soft nodes)
-- For soft nodes, provide a thunk in the base class for calls back into main S&R (so soft algo is fully enclosed from agent network)
-- Additionally for soft nodes, pass this to them instead of sr (hidden from soft node impls by the thunk) 
+- For soft nodes, provide a thunk in the base class for calls back into main S&R (so soft algo is fully enclosed from agent network) DONE
+- Additionally for soft nodes, do not pass in sr and use the sr in the Agent config instead (prove they match?) 
 - Once you think this is done, start asserting that pattern==this in the major functions
-5. pattern parameter (to BuildReplace) to be deduced from "this" locally, not passed in
+5. pattern parameter (to BuildReplace and DecidedCompare) to be deduced from "this" locally, not passed in
+- Note for soft nodes, DecidedCompare should look the same as other DecidedCompare functions
 ---now you are technically distributed, yay, but lots of tidying up to do...---
 - Insert an AgentCommon class (between Agent and NormalAgent) for handy stuff needed by NormalAgent as well as the special ones 
 - move the pre-restriction check into AgentCommon, based on an ARCHITYPE passed to the constructor
@@ -31,15 +32,15 @@ Detailed plan for refactoring into agent patterns
    NOTE: get the AgentCommon into the non-templated XBase and rename it to XAgent - these will be the 
    "generic" agents and the templated versions of X will just be a "concretisation" that bring in normal-nodes-in-pattern and compile-time-type-safety concepts
 7. keynodes to be remembered by agents (all of thm) in AgentCommon, not passed in or looked up in central coupling keys object. Do not pass around.
-8. Central couplingkeys object to be pensioned off, and remove from Configure()
+8. Central couplingkeys object to be pensioned off, and remove from Configure(). 
+- Same for the dirty grass, try to keep the state locally. Check for other state in SR that should be in the agents
 ---now agent to agent calls are context-free and parameterless in the case of BuildReplace()---
-- Same for the dirty grass, try to keep the state locally
 - Slave tidy-up. Add a funciton in SR to invoke slave SR and send slave invocation through that. It can fill in the context (obviously sr ptr still needed).
-  NOTE: this is shaken down style, wher slave SR is invoked directly from master SR, AFTER the replace walk not during
 - Slaves: try to invoke them from SR AFTER master replace has finished. Only need to do 1st level, and recursion will take care of the rest. see [1]
+  NOTE: this is shaken down style, wher slave SR is invoked directly from master SR, AFTER the replace walk not during
 - RETHINK how to do the restriction pattern on Star nodes. It will be hard to accommodate hopping back out into SR's Compare. 
   NOTE: maybe even revoke the feature, and go back to just a PRE_RESTRICTION by typee...? see what the use cases are...
-- Move SR::DuplicateNode and DuplicateSubtree out into src/helpers/
+- Move SR::DuplicateNode and DuplicateSubtree out into src/helpers/ DONE but without GreenGrass support
 ---now the sr passed in via Configure() is nearly or completely unnecessary making the agents reasonably self-sufficient---
 - Note: don't kill the Configure sweep since might need in future even if not needed now
 
