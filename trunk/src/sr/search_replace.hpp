@@ -91,8 +91,8 @@ private:
 public:
     // Compare ring (now trivial)
     bool Compare( const TreePtrInterface &x,
-    		        TreePtr<Node> pattern,
-	                bool can_key = false ) const;
+                  TreePtr<Node> pattern,
+                  bool can_key = false ) const;
     virtual bool IsMatch( TreePtr<Node> context,       
                           TreePtr<Node> root );
 public:
@@ -154,6 +154,8 @@ struct SpecialBase
 {
     virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() = 0;
 };
+
+
 template<class PRE_RESTRICTION>
 struct Special : SpecialBase, virtual PRE_RESTRICTION
 {
@@ -395,39 +397,19 @@ struct Flushable
 	virtual void FlushCache() {}
 };
 
-class SoftSearchPattern : Flushable
+
+class SofSearchPatternCallbacks : Flushable
 {
 public:
-    SoftSearchPattern() :
-	    current_sr( NULL ),
-		current_can_key( false ),
-		current_conj( NULL )
-	{}
-	
-	virtual bool DecidedCompare( const CompareReplace *sr,
-									const TreePtrInterface &x,
-									bool can_key,
-									Conjecture &conj ) 									
-	{
-		ASSERT( !current_sr )("DecidedCompare() recursion detected in soft node");
-		ASSERT( !current_conj )("DecidedCompare() recursion detected in soft node");
-	    current_sr = sr;
-		current_can_key = can_key;
-		current_conj = &conj;	
-        bool result = MyCompare( x, can_key );
-        current_sr = NULL;
-		current_conj = NULL;
-		return result;
-	}
-	// Soft nodes should override this to implement their comparison function
-    virtual bool MyCompare( const TreePtrInterface &x, bool can_key )
-    {
-	    ASSERTFAIL("One of DecidedCompare() (deprecated) or Myompare() must be overridden in soft nodes");
-    }	
+    SofSearchPatternCallbacks() :
+        current_sr( NULL ),
+        current_can_key( false ),
+        current_conj( NULL )
+    {}
 protected: // Call only from the soft node implementation in MyCompare()
     // Compare for child nodes in a normal context (i.e. in which the pattern must match
 	// for an overall match to be possible, and so can be used to key a coupling)
-	bool Compare( TreePtr<Node> x, TreePtr<Node> pattern )
+	inline bool Compare( const TreePtrInterface &x, const TreePtrInterface &pattern )
 	{
 		ASSERT( current_sr )("Cannot call Compare() from other than MyCompare()");
 		ASSERT( current_conj )("Cannot call Compare() from other than MyCompare()");
@@ -435,34 +417,111 @@ protected: // Call only from the soft node implementation in MyCompare()
 	}
     // Compare for child nodes in an abnormal context (i.e. in which the pattern need not match
 	// for an overall match to be possible, and so cannot be used to key a coupling)
-	bool AbnormalCompare( TreePtr<Node> x, TreePtr<Node> pattern )
+	inline bool AbnormalCompare( const TreePtrInterface &x, const TreePtrInterface &pattern )
 	{
 		ASSERT( current_sr )("Cannot call AbnormalCompare() from other than MyNormalCompare()");
 		return current_sr->Compare( x, pattern, false ); 
 	}
-private:
+    inline TreePtr<Node> *GetContext()
+    {
+        ASSERT( current_sr )("Cannot call GetContext() from other than MyCompare()");
+        return current_sr->pcontext;
+    }
+    inline bool IsCanKey()
+    {
+        ASSERT( current_sr )("Cannot call IsCanKey() from other than MyCompare()");
+        return current_can_key;
+    }
+    inline TreePtr<Node> GetCoupled( TreePtr<Node> pattern )
+    {
+        return current_sr->coupling_keys.GetCoupled( pattern );
+    }
+protected:
     const CompareReplace *current_sr;
 	bool current_can_key;
 	Conjecture *current_conj; 
 };
-struct SoftSearchPatternSpecialKey : Flushable
+
+
+class SoftSearchPattern : public SofSearchPatternCallbacks
 {
+public:    
+    virtual bool DecidedCompare( const CompareReplace *sr,
+                                    const TreePtrInterface &x,
+                                    bool can_key,
+                                    Conjecture &conj )                                  
+    {
+        ASSERT( !current_sr )("DecidedCompare() recursion detected in soft node");
+        ASSERT( !current_conj )("DecidedCompare() recursion detected in soft node");
+        current_sr = sr;
+        current_can_key = can_key;
+        current_conj = &conj;   
+        bool result = MyCompare( x );
+        current_sr = NULL;
+        current_conj = NULL;
+        return result;
+    }
+    // Soft nodes should override this to implement their comparison function
+    virtual bool MyCompare( const TreePtrInterface &x ) = 0;
+};
+
+
+class SoftSearchPatternSpecialKey : public SofSearchPatternCallbacks
+{
+public:    
 	// Return NULL for not found
 	virtual shared_ptr<Key> DecidedCompare( const CompareReplace *sr,
 											const TreePtrInterface &x,
 											bool can_key,
-											Conjecture &conj ) = 0;
+											Conjecture &conj )
+    {
+        ASSERT( !current_sr )("DecidedCompare() recursion detected in soft node");
+        ASSERT( !current_conj )("DecidedCompare() recursion detected in soft node");
+        current_sr = sr;
+        current_can_key = can_key;
+        current_conj = &conj;   
+        shared_ptr<Key> result = MyCompare( x );
+        current_sr = NULL;
+        current_conj = NULL;
+        return result;
+    }
+    // Soft nodes should override this to implement their comparison function
+    virtual shared_ptr<Key> MyCompare( const TreePtrInterface &x ) = 0;
 };
-struct SoftReplacePattern : Flushable
-{
-	// Called when not coupled
-	virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr ) = 0;
+
+
+class SoftReplacePattern : Flushable
+{    
+public:
+    SoftReplacePattern() :
+        current_sr( NULL )
+    {}
+
+    // Called when not coupled
+	virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
+    {
+        ASSERT( !current_sr )("DuplicateSubtree() recursion detected in soft node");
+        current_sr = sr;
+        TreePtr<Node> st = MyBuildReplace();
+        current_sr = NULL;
+        return st;
+    }
 	// Called when coupled, dest is coupling key
 	virtual TreePtr<Node> GetOverlayPattern() 
 	{ 
 		return TreePtr<Node>(); // default implementation for weak modifiers 
 								// so that couplings appear to override local functionality
-	}
+	}	
+    virtual TreePtr<Node> MyBuildReplace() = 0;
+    
+protected:    
+    inline TreePtr<Node> BuildReplace( TreePtr<Node> pattern ) 
+    {
+        ASSERT( current_sr )("Cannot call BuildReplace() from other than MyBuildReplace()");     
+        return current_sr->BuildReplace( pattern );
+    }
+private:    
+    const CompareReplace *current_sr;       
 };
 
 };

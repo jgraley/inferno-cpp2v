@@ -24,7 +24,7 @@ struct BuildIdentifierBase : ::SoftReplacePattern
 {
     BuildIdentifierBase( string s, int f=0 ) : format(s), flags(f) {}
     Sequence<CPPTree::Identifier> sources;
-    string GetNewName( const CompareReplace *sr );
+    string GetNewName();
     string format;
     int flags;
 };
@@ -36,10 +36,11 @@ struct BuildInstanceIdentifier : Special<CPPTree::InstanceIdentifier>,
     BuildInstanceIdentifier( string s, int f=0 ) : BuildIdentifierBase(s,f) {}
     BuildInstanceIdentifier() : BuildIdentifierBase("unnamed") {}
 private:
-    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
+    
+    virtual TreePtr<Node> MyBuildReplace()
     {
-    string newname = GetNewName( sr );
-    return TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
+        string newname = GetNewName();
+        return TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
     }                                                   
 };
 
@@ -49,9 +50,9 @@ struct BuildTypeIdentifier : Special<CPPTree::TypeIdentifier>,
     SPECIAL_NODE_FUNCTIONS
     BuildTypeIdentifier( string s="Unnamed", int f=0 ) : BuildIdentifierBase(s,f) {}
 private:
-    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
+    virtual TreePtr<Node> MyBuildReplace()
     {
-    string newname = GetNewName( sr );
+    string newname = GetNewName();
     return TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) );
     }                                               
 };
@@ -63,9 +64,9 @@ struct BuildLabelIdentifier : Special<CPPTree::LabelIdentifier>,
     BuildLabelIdentifier() : BuildIdentifierBase("UNNAMED") {}
     BuildLabelIdentifier( string s, int f=0 ) : BuildIdentifierBase(s,f) {}
 private:
-    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
+    virtual TreePtr<Node> MyBuildReplace()
     {
-    string newname = GetNewName( sr );
+    string newname = GetNewName();
     return TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) );
     }                                               
 };
@@ -78,24 +79,21 @@ private:
 struct IdentifierByNameBase : SoftSearchPattern
 {
     IdentifierByNameBase( string n ) : name(n) {}
-    bool IsMatch( const CompareReplace *sr, const TreePtrInterface &x );
+    bool IsMatch( const TreePtrInterface &x );
     string name;
 };
 
 struct InstanceIdentifierByName : Special<CPPTree::InstanceIdentifier>,                             
-                                 IdentifierByNameBase
+                                  IdentifierByNameBase
 {
     SPECIAL_NODE_FUNCTIONS
 
     InstanceIdentifierByName() : IdentifierByNameBase(string()) {}    
     InstanceIdentifierByName( string n ) : IdentifierByNameBase(n) {}
 private:
-    virtual bool DecidedCompare( const CompareReplace *sr,
-                                const TreePtrInterface &x,
-                                bool can_key,
-                                Conjecture &conj )
+    virtual bool MyCompare( const TreePtrInterface &x )
     {
-        return IsMatch( sr, x );
+        return IsMatch( x );
     }                                
 };
 
@@ -107,12 +105,9 @@ struct TypeIdentifierByName : Special<CPPTree::TypeIdentifier>,
     TypeIdentifierByName() : IdentifierByNameBase(string()) {}    
     TypeIdentifierByName( string n ) : IdentifierByNameBase(n) {}
 private:
-    virtual bool DecidedCompare( const CompareReplace *sr,
-                                const TreePtrInterface &x,
-                                bool can_key,
-                                Conjecture &conj )
+    virtual bool MyCompare( const TreePtrInterface &x )
     {
-        return IsMatch( sr, x );
+        return IsMatch( x );
     }                                
 };
 
@@ -124,12 +119,9 @@ struct LabelIdentifierByName : Special<CPPTree::LabelIdentifier>,
     LabelIdentifierByName() : IdentifierByNameBase(string()) {}    
     LabelIdentifierByName( string n ) : IdentifierByNameBase(n) {}
 private:
-    virtual bool DecidedCompare( const CompareReplace *sr,
-                                const TreePtrInterface &x,
-                                bool can_key,
-                                Conjecture &conj )
+    virtual bool MyCompare( const TreePtrInterface &x )
     {
-        return IsMatch( sr, x );
+        return IsMatch( x );
     }                                
 };
 
@@ -138,10 +130,7 @@ struct NestedBase : SoftSearchPatternSpecialKey,
                     TerminusBase
 {
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) = 0;
-    virtual shared_ptr<Key> DecidedCompare( const CompareReplace *sr,
-                                            const TreePtrInterface &x,
-                                            bool can_key,
-                                            Conjecture &conj );
+    virtual shared_ptr<Key> MyCompare( const TreePtrInterface &x );
     TreePtr<CPPTree::String> depth;
 };
 
@@ -156,7 +145,7 @@ struct NestedArray : NestedBase, Special<CPPTree::Type>
 
 // Recurse through a number of Subscript nodes, but only going through
 // the base, not the index. Thus we seek the instance that contains the 
-// data we strarted with. Also go through member field of Lookup nodes.
+// data we started with. Also go through member field of Lookup nodes.
 struct NestedSubscriptLookup : NestedBase, Special<CPPTree::Expression>
 {
     SPECIAL_NODE_FUNCTIONS

@@ -3,7 +3,7 @@
 
 using namespace CPPTree;
 
-string BuildIdentifierBase::GetNewName( const CompareReplace *sr )
+string BuildIdentifierBase::GetNewName()
 {
     //INDENT;
     TRACE("Begin SoftMakeIdentifier recurse for \"")(format)("\"\n");
@@ -14,7 +14,7 @@ string BuildIdentifierBase::GetNewName( const CompareReplace *sr )
         ASSERT( source );
         // We have a child identifier - let replace algorithm run in the expectation it will
         // get subsitituted with a SpecificIdentifier from the original program tree
-        TreePtr<Node> n = sr->BuildReplace( TreePtr<Node>(source) );
+        TreePtr<Node> n = BuildReplace( TreePtr<Node>(source) );
         TRACE("End SoftMakeIdentifier recurse\n");
         ASSERT( n );
         TreePtr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>( n );
@@ -45,7 +45,7 @@ string BuildIdentifierBase::GetNewName( const CompareReplace *sr )
     }
 }
 
-bool IdentifierByNameBase::IsMatch( const CompareReplace *sr, const TreePtrInterface &x )
+bool IdentifierByNameBase::IsMatch( const TreePtrInterface &x )
 {
     string newname = name; 
     TreePtr<Node> nx = x; // TODO dynamic_pointer_cast support for TreePtrInterface
@@ -63,10 +63,7 @@ bool IdentifierByNameBase::IsMatch( const CompareReplace *sr, const TreePtrInter
 }
 
 
-shared_ptr<Key> NestedBase::DecidedCompare( const CompareReplace *sr,
-                                            const TreePtrInterface &x,
-                                            bool can_key,
-                                            Conjecture &conj )
+shared_ptr<Key> NestedBase::MyCompare( const TreePtrInterface &x )
 {
     INDENT;
     string s;
@@ -79,13 +76,13 @@ shared_ptr<Key> NestedBase::DecidedCompare( const CompareReplace *sr,
     } 
             
     // Compare the last position with the terminus pattern
-    bool r = sr->DecidedCompare( xt, TreePtr<Node>(terminus), can_key, conj );
+    bool r = Compare( xt, TreePtr<Node>(terminus) );
     
     // Compare the depth with the supplied pattern if present
     if( r && depth )
     {
         TreePtr<Node> cur_depth( new SpecificString(s) );
-        r = sr->DecidedCompare( cur_depth, TreePtr<Node>(depth), can_key, conj );
+        r = Compare( cur_depth, TreePtr<Node>(depth) );
     }
     
     if( r )

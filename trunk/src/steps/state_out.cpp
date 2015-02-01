@@ -323,10 +323,10 @@ struct BuildContainerSize : SoftReplacePattern,
     SPECIAL_NODE_FUNCTIONS
     shared_ptr< StarBase > container;
 private:
-    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
+    virtual TreePtr<Node> MyBuildReplace()
     {
         ASSERT( container );
-	    TreePtr<Node> n = sr->BuildReplace( container );
+	    TreePtr<Node> n = BuildReplace( container );
 	    ASSERT( n );
 	    ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
 	    ASSERT( n_container );
@@ -346,16 +346,13 @@ struct IsLabelReached : SoftSearchPattern, Special<LabelIdentifier>
 	}
 	// x is nominally the label id, at the position of this node
 	// y is nominally the goto expression, coupled in
-    virtual bool DecidedCompare( const CompareReplace *sr,
-                                 const TreePtrInterface &xx,
-                                   bool can_key,
-                                   Conjecture &conj ) 
+    virtual bool MyCompare( const TreePtrInterface &xx ) 
     {
         INDENT;
         ASSERT( pattern );
-        if( can_key )
+        if( IsCanKey() )
             return true; // Want to wait for our pattern to get keyed before we do the search, so wait for restricting pass
-        TreePtr<Node> n = sr->coupling_keys.GetCoupled( pattern ); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
+        TreePtr<Node> n = GetCoupled( pattern ); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
         if( !n )
             n = pattern;
         TreePtr<Expression> y = dynamic_pointer_cast<Expression>( n );
@@ -367,15 +364,14 @@ struct IsLabelReached : SoftSearchPattern, Special<LabelIdentifier>
         TRACE("Can label id ")(*x)(" reach expression ")(*y)("?\n");
 
         Set< TreePtr<InstanceIdentifier> > uf;        
-        bool r = CanReachExpr(sr, &uf, x, y);
+        bool r = CanReachExpr(&uf, x, y);
         TRACE("I reakon ")(*x)(r?" does ":" does not ")("reach ")(*y)("\n"); 
         return r;
     }                 
     TreePtr<Expression> pattern;           
            
 private:
-    bool CanReachExpr( const CompareReplace *sr,
-                         Set< TreePtr<InstanceIdentifier> > *f,
+    bool CanReachExpr( Set< TreePtr<InstanceIdentifier> > *f,
                          TreePtr<LabelIdentifier> x, 
                          TreePtr<Expression> y ) // y is expression. Can it yield label x?
     {
@@ -384,14 +380,14 @@ private:
         if( TreePtr<LabelIdentifier> liy = dynamic_pointer_cast<LabelIdentifier>(y) )
             r = liy->IsLocalMatch( x.get() ); // y is x, so yes
         else if( TreePtr<InstanceIdentifier> iiy = dynamic_pointer_cast<InstanceIdentifier>( y ) )
-            r = CanReachVar( sr, f, x, iiy );
+            r = CanReachVar(f, x, iiy );
         else if( TreePtr<Ternop> ty = dynamic_pointer_cast<Ternop>( y ) )
-            r = CanReachExpr(sr, f, x, ty->operands[1]) ||
-                CanReachExpr(sr, f, x, ty->operands[2]); // only the choices, not the condition
+            r = CanReachExpr(f, x, ty->operands[1]) ||
+                CanReachExpr(f, x, ty->operands[2]); // only the choices, not the condition
         else if( TreePtr<Comma> cy = dynamic_pointer_cast<Comma>( y ) )
-            r = CanReachExpr(sr, f, x, ty->operands[1]); // second operand
+            r = CanReachExpr(f, x, ty->operands[1]); // second operand
         else if( TreePtr<Subscript> sy = dynamic_pointer_cast<Subscript>( y ) ) // subscript as r-value
-            r = CanReachExpr(sr, f, x, sy->operands[0]); // first operand
+            r = CanReachExpr(f, x, sy->operands[0]); // first operand
         else if( dynamic_pointer_cast<Dereference>( y ) )
             ASSERTFAIL("IsLabelReached used on expression that is read from memory, cannot figure out the answer\n");
             
@@ -399,10 +395,9 @@ private:
         return r;        
     }    
     
-    bool CanReachVar( const CompareReplace *sr,
-                        Set< TreePtr<InstanceIdentifier> > *f,
-                        TreePtr<LabelIdentifier> x, 
-                        TreePtr<InstanceIdentifier> y ) // y is instance identifier. Can expression x be assigned to it?
+    bool CanReachVar( Set< TreePtr<InstanceIdentifier> > *f,
+                      TreePtr<LabelIdentifier> x, 
+                      TreePtr<InstanceIdentifier> y ) // y is instance identifier. Can expression x be assigned to it?
     {
         INDENT;
         Reaching rr( x, y );
@@ -412,7 +407,7 @@ private:
             return cache[rr];
         }
         bool r = false;        
-        Walk e( *sr->pcontext ); 
+        Walk e( *GetContext() ); 
         
         if( f->IsExist(y) )
             return false; // already processing this identifier, so we have a loop
@@ -432,7 +427,7 @@ private:
                 TRACE("Examining assignment: ")(*lhs)(" = ")(*a->operands[1])("\n"); 
                 if( lhs == y )
                 {
-                    if( CanReachExpr( sr, f, x, a->operands[1] ) )
+                    if( CanReachExpr( f, x, a->operands[1] ) )
                     {
                         r = true;                        
                         break; // early out, since we have the info we need
