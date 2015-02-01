@@ -21,10 +21,10 @@ struct BuildContainerSize : SoftReplacePattern,
     SPECIAL_NODE_FUNCTIONS
     shared_ptr< StarBase > container;
 private:
-    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
+    virtual TreePtr<Node> MyBuildReplace()
     {
         ASSERT( container );
-	    TreePtr<Node> n = sr->BuildReplace( container );
+	    TreePtr<Node> n = BuildReplace( container );
 	    ASSERT( n );
 	    ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
 	    ASSERT( n_container );

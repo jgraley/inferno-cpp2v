@@ -22,14 +22,11 @@ struct NotMatch : Special<PRE_RESTRICTION>,
     TreePtr<Node> pattern;
     CompareReplace comp; // TODO only want the Compare
 private:
-    virtual bool DecidedCompare( const CompareReplace *sr,
-    		                       const TreePtrInterface &x,
-    		                       bool can_key,
-    		                       Conjecture &conj ) 
+    virtual bool MyCompare( const TreePtrInterface &x ) 
     {
         INDENT("!");
         ASSERT( pattern );
-    	if( can_key )
+    	if( IsCanKey() )
     	{
     		// Don't do a subtree search while keying - we'll only end up keying the wrong thing
     		// or terminating with false prematurely
@@ -41,8 +38,8 @@ private:
     	    // a. We didn't recurse during KEYING pass and
     	    // b. Search under not can terminate with false, but parent search will continue
     	    // Consequently, we go in at Compare level, which creates a new conjecture.
-    	    comp.pcontext = sr->pcontext;
-    		bool r = comp.Compare( x, pattern, false );
+    	    comp.pcontext = GetContext();
+    		bool r = comp.Compare( x, pattern );
 			TRACE("NotMatch pattern=")(*pattern)(" x=")(*x)(" got %d, returning the opposite!\n", (int)r);
     		if( r==false )
 				return true;
@@ -74,23 +71,20 @@ struct MatchAll : Special<PRE_RESTRICTION>,
 private:
     mutable bool initialised;
     mutable TreePtr<Node> modifier_pattern;
-    virtual bool DecidedCompare( const CompareReplace *sr,
-                                   const TreePtrInterface &x,
-                                   bool can_key,
-                                   Conjecture &conj ) 
+    virtual bool MyCompare( const TreePtrInterface &x )
     {
         INDENT("&");
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
     	    ASSERT( i );
-    		bool r = sr->DecidedCompare( x, TreePtr<Node>(i), can_key, conj );
+    		bool r = Compare( x, i );
     	    if( !r )
     	    	return false;
     	}
         return true;
     }
 
-    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
+    virtual TreePtr<Node> MyBuildReplace()
     {
         return TreePtr<Node>();
         //ASSERTFAIL("MatchAll in replace - it should be coupled because it should be in the search pattern\n");
@@ -149,16 +143,13 @@ struct MatchAny : Special<PRE_RESTRICTION>,
 	// Patterns are an abnormal context
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
-    virtual bool DecidedCompare( const CompareReplace *sr,
-    		                       const TreePtrInterface &x,
-    		                       bool can_key,
-    		                       Conjecture &conj ) 
+    virtual bool MyCompare( const TreePtrInterface &x ) 
     {
         INDENT("|");
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
     	    ASSERT( i );
-    		bool r = sr->Compare( x, i, false );
+    		bool r = AbnormalCompare( x, i );
     	    if( r )
     	    	return true;
     	}
@@ -178,17 +169,14 @@ struct MatchOdd : Special<PRE_RESTRICTION>,
 	SPECIAL_NODE_FUNCTIONS
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
-    virtual bool DecidedCompare( const CompareReplace *sr,
-    		                       const TreePtrInterface &x,
-    		                       bool can_key,
-    		                       Conjecture &conj ) 
+    virtual bool MyCompare( const TreePtrInterface &x ) 
     {
         INDENT("^");
     	int tot=0;
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
     	    ASSERT( i );
-    	    bool r = sr->Compare( x, i, false );
+    	    bool r = AbnormalCompare( x, i );
     	    if( r )
     	    	tot++;
     	}
@@ -209,10 +197,8 @@ struct TransformOfBase : SoftSearchPatternSpecialKey,
     }
 
 private:
-    virtual shared_ptr<Key> DecidedCompare( const CompareReplace *sr,
-    		                     const TreePtrInterface &x,
-    		                     bool can_key,
-    		                     Conjecture &conj );
+    virtual shared_ptr<Key> MyCompare( const TreePtrInterface &x );
+    
 protected: 
     TransformOfBase() {}    
 };
@@ -232,6 +218,7 @@ struct TransformOf : TransformOfBase, Special<PRE_RESTRICTION>
 struct PointerIsBase
 {
 };
+
 /** Make an architype of the pointed-to type and compare that.
     So if in the program tree we have a->b and the search pattern is
     x->PointerIsBase->y, then a must match x, and the type of the pointer
@@ -243,16 +230,17 @@ struct PointerIs : Special<PRE_RESTRICTION>,
 {
     SPECIAL_NODE_FUNCTIONS
     TreePtr<PRE_RESTRICTION> pointer;
-    virtual bool DecidedCompare( const CompareReplace *sr,
-                                   const TreePtrInterface &x,
-                                   bool can_key,
-                                   Conjecture &conj ) 
+    virtual bool MyCompare( const TreePtrInterface &x )
     {
         INDENT("@");
         
+        // Note: using MakeValueArchitype() means we need to be using the 
+        // TreePtr<Blah> from the original node, not converted to TreePtr<Node>.
+        // Thus, it musat be passed around via const TreePtrInterface &
+        
         TreePtr<Node> ptr_arch = x.MakeValueArchitype();
         
-        return sr->DecidedCompare( ptr_arch, pointer, can_key, conj );
+        return Compare( ptr_arch, pointer );
     }
 };
 

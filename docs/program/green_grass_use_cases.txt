@@ -1,0 +1,48 @@
+src/steps/fall_out.cpp:50:    MakePatternPtr< GreenGrass<Type> > gg;
+PlaceLabelsInArray step 50
+GreenGrass acts on Thread
+Things will be placed at the top level in a SC Thread. Basically an array of Labeley and an
+enum to index it. We only want to insert one copy of these, but don't want to trip up on similar-
+looking stuff that may already be there. Can Labeley already be there? Not sure. It represents
+a GCC extension, and would have to have been "detected" from a void * earlier on.
+
+src/steps/fall_out.cpp:447:    MakePatternPtr< GreenGrass<Compound> > s_gg;
+AddStateEnumVar (out of use)
+
+src/steps/generate_stacks.cpp:119:    MakePatternPtr< GreenGrass<Call> > ms_gg;
+ReturnViaTemp step 9
+GreenGrass acts on Call
+This is to convey the return value via a variable rather than the return value mechanism. The call 
+is replaced with a compund expression including the call then the variable, so that the variable
+is the value of the compound expression. Since the call itself does not change, we need GG. Maybe
+we should only act on calls in expression contexts (other than CompoundExpression in non-last place).
+Or could maybe trace the called function's type and restrict to non-void-returning.
+
+src/steps/generate_stacks.cpp:180:    MakePatternPtr< GreenGrass<Declaration> > gg;
+src/steps/generate_stacks.cpp:206:    MakePatternPtr< GreenGrass<Statement> > m_gg, ll_gg;
+AddLinkAddress step 10
+GreenGrass acts on Instance of Function
+GreenGrass acts on Return
+GreenGrass acts on Call
+Finds the Function and adds a TempLinkAddress (seems to be a variant of Instance) called 
+temp_link, type Labeley. Looks in the body for the Return and precedes it with an assignment of
+the link parameter to temp_link, in a compund block. Finds the Call to the function, follows it
+with a Label and supplies the label as the link parameter to the call. There are 3 non-trivial
+GGs here, not sure how to get rid.
+
+src/steps/generate_stacks.cpp:371:    MakePatternPtr< GreenGrass<Statement> > s_gg;
+GenerateStacks step 15
+GreenGrass acts on Return
+Searches for functions (not Method or Thread) containing an automatic variable (which protects
+this level) and then looks for the Return in it and replaces with a compound block that decrements
+a stack pointer before the return.
+
+src/steps/generate_stacks.cpp:505:    MakePatternPtr< GreenGrass<Statement> > s_gg;
+OLD GenerateStacks (out of use)
+
+src/steps/lower_control_flow.cpp:211:    // We have to use the GreenGrass hack to prevent the slave spinning 
+src/steps/lower_control_flow.cpp:212:    // forever. The continue in the slave search pattern has a GreenGrass
+(comments)
+
+src/steps/state_out.cpp:665:    MakePatternPtr< GreenGrass<Type> > gg;
+MakeFallThroughMachine (out of use)

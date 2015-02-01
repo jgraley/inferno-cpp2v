@@ -3,18 +3,15 @@
 
 using namespace SR;
 
-shared_ptr<Key> TransformOfBase::DecidedCompare( const CompareReplace *sr,
-		                                                     const TreePtrInterface &x,
-		                                                     bool can_key,
-		                                                     Conjecture &conj )
+shared_ptr<Key> TransformOfBase::MyCompare( const TreePtrInterface &x )
 {
     INDENT;
     // Transform the candidate expression
-    TreePtr<Node> xt = (*transformation)( sr->GetContext(), x );
+    TreePtr<Node> xt = (*transformation)( *GetContext(), x );
 	if( xt )
 	{
 	    // Punt it back into the search/replace engine
-	    bool r = sr->DecidedCompare( xt, TreePtr<Node>(pattern), can_key, conj );
+	    bool r =Compare( xt, TreePtr<Node>(pattern) );
         if( r )
         {
             // If we have a match, make the output of the transformation be a terminus
