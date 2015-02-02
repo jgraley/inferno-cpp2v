@@ -19,44 +19,39 @@ void NormalAgent::Configure( const CompareReplace *s, CouplingKeys *c )
 bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 							       TreePtr<Node> pattern,
 							       bool can_key,
-    						       Conjecture &conj ) const
+    						       Conjecture &conj )
 {
     INDENT;
-	ASSERT(sr)("Agent ")(*pattern)(" at appears not to have been configured, since sr is NULL");
+	ASSERT(sr)("Agent ")(*this)(" at appears not to have been configured, since sr is NULL");
 	ASSERT(coupling_keys);
 	ASSERT( x ); // Target must not be NULL
-    ASSERT(pattern);
+    ASSERT(this);
     ASSERT(Agent::AsAgent(pattern)==(Agent *)this);
-    TRACE("Comparing x=")
-         (*x)
-         (" with pattern=")
-         (*pattern)
-         ("\n");
     shared_ptr<Key> special_key;
     
 	// Check whether the present node matches. Do this for all nodes: this will be the local
 	// restriction for normal nodes and the pre-restriction for special nodes (based on
 	// how IsLocalMatch() has been overridden.
-	if( !pattern->IsLocalMatch(x.get()) )
+	if( !IsLocalMatch(x.get()) )
 	{
 		return false;
     }
     
-    if( shared_ptr<SoftSearchPattern> ssp = dynamic_pointer_cast<SoftSearchPattern>(pattern) )
+    if( SoftSearchPattern* ss_this = dynamic_cast<SoftSearchPattern *>(this) )
     {
         // Hand over to any soft search functionality in the search pattern node
-        bool r = ssp->DecidedCompare( sr, x, can_key, conj );
+        bool r = ss_this->DecidedCompare( sr, x, can_key, conj );
         if( !r )
             return false;
     }
-    else if( shared_ptr<SoftSearchPatternSpecialKey> sspsk = dynamic_pointer_cast<SoftSearchPatternSpecialKey>(pattern) )
+    else if( SoftSearchPatternSpecialKey *sspsk_this = dynamic_cast<SoftSearchPatternSpecialKey *>(this) )
     {
         // Hand over to any soft search functionality in the search pattern node
-        special_key = sspsk->DecidedCompare( sr, x, can_key, conj );
+        special_key = sspsk_this->DecidedCompare( sr, x, can_key, conj );
         if( !special_key )
             return false;
     }
-    else if( dynamic_pointer_cast<SoftReplacePattern>(pattern) )
+    else if( dynamic_cast<SoftReplacePattern *>(this) )
     {
     	// No further restriction beyond the pre-restriction for these nodes when searching.
     }
@@ -108,8 +103,8 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 		// Recurse through the children. Note that the itemiser internally does a
 		// dynamic_cast onto the type of pattern, and itemises over that type. x must
 		// be dynamic_castable to pattern's type.
-		vector< Itemiser::Element * > pattern_memb = pattern->Itemise();
-		vector< Itemiser::Element * > x_memb = pattern->Itemise( x.get() );   // Get the members of x corresponding to pattern's class
+		vector< Itemiser::Element * > pattern_memb = Itemise();
+		vector< Itemiser::Element * > x_memb = Itemise( x.get() );   // Get the members of x corresponding to pattern's class
 		ASSERT( pattern_memb.size() == x_memb.size() );
 		for( int i=0; i<pattern_memb.size(); i++ )
 		{
@@ -196,7 +191,7 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 bool NormalAgent::DecidedCompare( SequenceInterface &x,
 		                          SequenceInterface &pattern,
 		                          bool can_key,
-		                          Conjecture &conj ) const
+		                          Conjecture &conj )
 {
     INDENT;
     Sequence<Node> epattern = WalkContainerPattern( pattern, false );    
@@ -297,7 +292,7 @@ bool NormalAgent::DecidedCompare( SequenceInterface &x,
 bool NormalAgent::DecidedCompare( CollectionInterface &x,
 		 					       CollectionInterface &pattern,
 							       bool can_key,
-							       Conjecture &conj ) const
+							       Conjecture &conj )
 {
     INDENT;
     Sequence<Node> epattern = WalkContainerPattern( pattern, false );    
@@ -382,7 +377,7 @@ bool NormalAgent::DecidedCompare( CollectionInterface &x,
 bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 							       shared_ptr<SearchContainerBase> pattern,
 						     	   bool can_key,
-							       Conjecture &conj ) const
+							       Conjecture &conj )
 {
     INDENT;
 	ASSERT( pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
@@ -427,7 +422,7 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 bool NormalAgent::MatchingDecidedCompare( const TreePtrInterface &x,
                                              TreePtr<Node> pattern,
                                              bool can_key,
-                                             Conjecture &conj ) const
+                                             Conjecture &conj ) 
 {
     INDENT;
     bool r;
@@ -466,7 +461,7 @@ bool NormalAgent::MatchingDecidedCompare( const TreePtrInterface &x,
 
 bool NormalAgent::Compare( const TreePtrInterface &x,
                                 TreePtr<Node> pattern,
-                                bool can_key ) const
+                                bool can_key ) 
 {
     INDENT("C");
     ASSERT( x );
@@ -506,7 +501,7 @@ bool NormalAgent::Compare( const TreePtrInterface &x,
 
 
 TreePtr<Node> NormalAgent::BuildReplace( TreePtr<Node> pattern,
-	                                     TreePtr<Node> keynode ) const
+	                                     TreePtr<Node> keynode ) 
 {
     INDENT;
 	ASSERT(sr)("Agent ")(*pattern)(" at appears not to have been configured, since sr is NULL");
@@ -544,7 +539,7 @@ TreePtr<Node> NormalAgent::BuildReplace( TreePtr<Node> pattern,
 	
 	
 TreePtr<Node> NormalAgent::BuildReplaceKeyed( TreePtr<Node> pattern,
-	                                          TreePtr<Node> keynode ) const
+	                                          TreePtr<Node> keynode ) 
 {	
     INDENT;
     ASSERT( pattern );
@@ -594,7 +589,7 @@ TreePtr<Node> NormalAgent::BuildReplaceKeyed( TreePtr<Node> pattern,
 
 
 TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> pattern, 
-										         TreePtr<Node> keynode ) const // under substitution if not NULL
+										         TreePtr<Node> keynode )  // under substitution if not NULL
 {
 	INDENT;
     ASSERT( pattern );
@@ -786,7 +781,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> pattern,
 
 
 TreePtr<Node> NormalAgent::BuildReplaceSlave( shared_ptr<SlaveBase> pattern, 
-										       TreePtr<Node> keynode ) const 
+										       TreePtr<Node> keynode )  
 {
     INDENT;
 	ASSERT( pattern );
@@ -803,7 +798,7 @@ TreePtr<Node> NormalAgent::BuildReplaceSlave( shared_ptr<SlaveBase> pattern,
 }
 
     
-TreePtr<Node> NormalAgent::BuildReplaceNormal( TreePtr<Node> pattern ) const
+TreePtr<Node> NormalAgent::BuildReplaceNormal( TreePtr<Node> pattern ) 
 {
 	INDENT;
     ASSERT( pattern );
@@ -870,7 +865,7 @@ TreePtr<Node> NormalAgent::BuildReplaceNormal( TreePtr<Node> pattern ) const
 
 
 TreePtr<Node> NormalAgent::BuildReplaceStar( shared_ptr<StarBase> pattern,
-	                                         TreePtr<Node> keynode ) const
+	                                         TreePtr<Node> keynode ) 
 {
 	ASSERT( pattern ); // not used at present but should be there since we may need to use it
 	ASSERT( keynode );
@@ -899,7 +894,7 @@ TreePtr<Node> NormalAgent::BuildReplaceStar( shared_ptr<StarBase> pattern,
 
 
 Sequence<Node> NormalAgent::WalkContainerPattern( ContainerInterface &pattern,
-                                                  bool replacing ) const
+                                                  bool replacing ) 
 {
     // This helper is for Insert and Erase nodes. It takes a pattern container (which
     // is the only place these nodes should occur) and expands out either Insert or

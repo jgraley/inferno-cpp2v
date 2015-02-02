@@ -27,12 +27,12 @@ public:
     virtual bool DecidedCompare( const TreePtrInterface &x,
                                   TreePtr<Node> pattern,
                                   bool can_key,
-                                  Conjecture &conj ) const = 0;
+                                  Conjecture &conj ) = 0;
     virtual bool Compare( const TreePtrInterface &x,
                           TreePtr<Node> pattern,
-                          bool can_key = false ) const = 0;
+                          bool can_key = false ) = 0;
     virtual TreePtr<Node> BuildReplace( TreePtr<Node> pattern, 
-			 					         TreePtr<Node> keynode=TreePtr<Node>() ) const = 0;
+			 					         TreePtr<Node> keynode=TreePtr<Node>() ) = 0;
 	virtual void Configure( const CompareReplace *s, CouplingKeys *c ) = 0;
 	static Agent *AsAgent( TreePtr<Node> node )
 	{
@@ -58,45 +58,45 @@ public:
     virtual bool DecidedCompare( const TreePtrInterface &x,
     		                     TreePtr<Node> pattern,
     		                     bool can_key,
-    		                     Conjecture &conj ) const;
+    		                     Conjecture &conj );
 private:
     bool DecidedCompare( SequenceInterface &x,
     		             SequenceInterface &pattern,
     		             bool can_key,
-    		             Conjecture &conj ) const;
+    		             Conjecture &conj );
     bool DecidedCompare( CollectionInterface &x,
     		             CollectionInterface &pattern,
     		             bool can_key,
-    		             Conjecture &conj ) const;
+    		             Conjecture &conj );
     bool DecidedCompare( const TreePtrInterface &x,
     		             shared_ptr<SearchContainerBase> pattern,
     		             bool can_key,
-    		             Conjecture &conj ) const;
+    		             Conjecture &conj );
     bool MatchingDecidedCompare( const TreePtrInterface &x,
                                    TreePtr<Node> pattern,
                                    bool can_key,
-                                   Conjecture &conj ) const;
+                                   Conjecture &conj );
 
 public:	
     bool Compare( const TreePtrInterface &x,
                   TreePtr<Node> pattern,
-                  bool can_key = false ) const;
+                  bool can_key = false );
     virtual TreePtr<Node> BuildReplace( TreePtr<Node> pattern, 
-								         TreePtr<Node> keynode=TreePtr<Node>() ) const;
+								        TreePtr<Node> keynode=TreePtr<Node>() );
 private:	
 	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> pattern, 
-									    TreePtr<Node> keynode ) const; // under substitution if not NULL
+									    TreePtr<Node> keynode ); // under substitution if not NULL
     TreePtr<Node> BuildReplaceSlave( shared_ptr<SlaveBase> pattern, 
-									  TreePtr<Node> keynode ) const;    
-    TreePtr<Node> BuildReplaceNormal( TreePtr<Node> pattern ) const;
+									  TreePtr<Node> keynode );    
+    TreePtr<Node> BuildReplaceNormal( TreePtr<Node> pattern );
     TreePtr<Node> BuildReplaceKeyed( TreePtr<Node> pattern, 
-									  TreePtr<Node> keynode ) const;
+									  TreePtr<Node> keynode );
     TreePtr<Node> BuildReplaceStar( shared_ptr<StarBase> pattern, 
-									 TreePtr<Node> keynode ) const;
+									 TreePtr<Node> keynode );
 									 
 private:
     Sequence<Node> WalkContainerPattern( ContainerInterface &pattern,
-                                         bool replacing ) const;
+                                         bool replacing );
 	// Internal node classes - NOTE these are not special nodes, and we use them like normal tree nodes
 	// Note: only needed for Star pattern
     struct SubContainer : Node
