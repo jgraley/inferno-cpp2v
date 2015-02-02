@@ -11,7 +11,7 @@ shared_ptr<Key> TransformOfBase::MyCompare( const TreePtrInterface &x )
 	if( xt )
 	{
 	    // Punt it back into the search/replace engine
-	    bool r =Compare( xt, TreePtr<Node>(pattern) );
+	    bool r = NormalCompare( xt, TreePtr<Node>(pattern) );
         if( r )
         {
             // If we have a match, make the output of the transformation be a terminus

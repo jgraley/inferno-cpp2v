@@ -76,13 +76,13 @@ shared_ptr<Key> NestedBase::MyCompare( const TreePtrInterface &x )
     } 
             
     // Compare the last position with the terminus pattern
-    bool r = Compare( xt, TreePtr<Node>(terminus) );
+    bool r = NormalCompare( xt, TreePtr<Node>(terminus) );
     
     // Compare the depth with the supplied pattern if present
     if( r && depth )
     {
         TreePtr<Node> cur_depth( new SpecificString(s) );
-        r = Compare( cur_depth, TreePtr<Node>(depth) );
+        r = NormalCompare( cur_depth, TreePtr<Node>(depth) );
     }
     
     if( r )

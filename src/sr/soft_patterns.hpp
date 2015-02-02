@@ -61,9 +61,9 @@ struct MatchAllBase : virtual Node
 // Match all of the supplied patterns (between you and me, it's an AND)
 template<class PRE_RESTRICTION>
 struct MatchAll : Special<PRE_RESTRICTION>,
-                 SoftSearchPattern,
-                 SoftReplacePattern, 
-                 MatchAllBase
+                  virtual SoftSearchPattern,
+                  virtual SoftReplacePattern, 
+                  MatchAllBase
 {
 	SPECIAL_NODE_FUNCTIONS
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
@@ -77,7 +77,7 @@ private:
     	FOREACH( const TreePtr<PRE_RESTRICTION> i, patterns )
     	{
     	    ASSERT( i );
-    		bool r = Compare( x, i );
+    		bool r = NormalCompare( x, i );
     	    if( !r )
     	    	return false;
     	}
@@ -240,7 +240,7 @@ struct PointerIs : Special<PRE_RESTRICTION>,
         
         TreePtr<Node> ptr_arch = x.MakeValueArchitype();
         
-        return Compare( ptr_arch, pointer );
+        return NormalCompare( ptr_arch, pointer );
     }
 };
 

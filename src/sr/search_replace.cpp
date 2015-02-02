@@ -176,53 +176,12 @@ void CompareReplace::GetGraphInfo( vector<string> *labels,
 }
 
 
-// Helper for DecidedCompare that does the actual match testing work for the children and recurses.
-// Also checks for soft matches.
-bool CompareReplace::DecidedCompare( const TreePtrInterface &x,
-									   TreePtr<Node> pattern,
-									   bool can_key,
-    								   Conjecture &conj ) const
+// TODO remove whan all calls are Agent to Agent
+bool CompareReplace::Compare( const TreePtrInterface &x,
+                                TreePtr<Node> pattern,
+                                bool can_key ) const
 {
-    return Agent::AsAgent(pattern)->DecidedCompare( x, pattern, can_key, conj );
-}
-
-
-bool CompareReplace::MatchingDecidedCompare( const TreePtrInterface &x,
-		                                     TreePtr<Node> pattern,
-		                                     bool can_key,
-		                                     Conjecture &conj ) const
-{
-    INDENT;
-    bool r;
-
-    if( can_key )
-        coupling_keys.Clear();
-
-    // Only key if the keys are already set to KEYING (which is 
-    // the initial value). Keys could be RESTRICTING if we're under
-    // a SoftNot node, in which case we only want to restrict.
-    if( can_key )
-    {
-        // Do a two-pass matching process: first get the keys...
-        TRACE("doing KEYING pass....\n");
-        conj.PrepareForDecidedCompare();
-        r = DecidedCompare( x, pattern, true, conj );
-        TRACE("KEYING pass result %d\n", r );
-        if( !r )
-            return false;                  // Save time by giving up if no match found
-    }
-    
-    // Now restrict the search according to the couplings
-    TRACE("doing RESTRICTING pass....\n");
-    conj.PrepareForDecidedCompare();
-    r = DecidedCompare( x, pattern, false, conj );
-    TRACE("RESTRICTING pass result %d\n", r );
-    if( !r )
-        return false;	               // Save time by giving up if no match found
-
-    // Do not revert match keys if we were successful - keep them for replace
-    // and any slave search and replace operations we might do.
-    return true;
+    return Agent::AsAgent(pattern)->Compare( x, pattern, can_key );
 }
 
 
@@ -235,55 +194,12 @@ void CompareReplace::FlushSoftPatternCaches( TreePtr<Node> pattern ) const
 }
 
 
-bool CompareReplace::Compare( const TreePtrInterface &x,
-		                        TreePtr<Node> pattern,
-								bool can_key ) const
-{
-    INDENT("C");
-    ASSERT( x );
-    ASSERT( pattern );
-	TRACE("Compare x=")(*x);
-    TRACE(" pattern=")(*pattern);
-    TRACE(" can_key=%d \n", (int)can_key);
-    //TRACE(**pcontext)(" @%p\n", pcontext);
-    
-    // easy optimisation - also important because couplings do this a lot
-    if( x == pattern )
-        return true;
-    
-    // Reset caches for this search run - the input tree will not change until 
-    // the search is complete so stuff may be cached.
-    FlushSoftPatternCaches( pattern );
-    
-	// Create the conjecture object we will use for this compare, and keep iterating
-	// though different conjectures trying to find one that allows a match.
-	Conjecture conj;
-	bool r;
-	while(1)
-	{
-		// Try out the current conjecture. This will call HandlDecision() once for each decision;
-		// HandleDecision() will return the current choice for that decision, if absent it will
-		// add the decision and choose the first choice, if the decision reaches the end it
-		// will remove the decision.
-		r = MatchingDecidedCompare( x, pattern, can_key, conj );
-
-		// If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
-		if( r )
-		    break; // Success
-		    
-		if( !conj.Increment() )
-		    break; // Failure
-	}
-	return r;
-}
-
-
 bool CompareReplace::IsMatch( TreePtr<Node> context,       
                               TreePtr<Node> root )
 {
     pcontext = &context;
     ASSERT( compare_pattern );
-    bool r = Compare( root, compare_pattern, false );
+    bool r = Agent::AsAgent(compare_pattern)->Compare( root, compare_pattern, false );
     pcontext = NULL;
     return r == true;
 }
@@ -430,7 +346,7 @@ TreePtr<Node> CompareReplace::ReplacePhase( TreePtr<Node> pattern ) const
 
     // Now replace according to the couplings
     TRACE("doing replace SUBSTITUTING pass....\n");
-    TreePtr<Node> r = BuildReplace( pattern );
+    TreePtr<Node> r = Agent::AsAgent(pattern)->BuildReplace( pattern );
 
 	// TODO do an overlay, means *proot needs passing in here and this fn should be renamed.
     TRACE("replace SUBSTITUTING pass\n" );
@@ -446,8 +362,13 @@ bool CompareReplace::SingleCompareReplace( TreePtr<Node> *proot )
     // of clearing the keys in case the keys were set up in advance, as will
     // be the case if this is a slave.
     
-	TRACE("Begin search\n");
-	bool r = Compare( *proot, compare_pattern, true );
+        
+    // Reset caches for this search run - the input tree will not change until 
+    // the search is complete so stuff may be cached.
+    FlushSoftPatternCaches( compare_pattern );
+    
+    TRACE("Begin search\n");
+	bool r = Agent::AsAgent(compare_pattern)->Compare( *proot, compare_pattern, true );
 	if( !r )
 		return false;
 

@@ -74,19 +74,9 @@ private:
     bool is_configured; 
     static int repetitions;
     static bool rep_error;
-public:
-    bool DecidedCompare( const TreePtrInterface &x,
-    		               TreePtr<Node> pattern,
-    		               bool can_key,
-    		               Conjecture &conj ) const;
 private:
     // MatchingDecidedCompare ring
     friend class Conjecture;
-    bool MatchingDecidedCompare( const TreePtrInterface &x,
-    		                       TreePtr<Node> pattern,
-    		                       bool can_key,
-    		                       Conjecture &conj ) const;
-
     void FlushSoftPatternCaches( TreePtr<Node> pattern ) const;
 public:
     // Compare ring (now trivial)
@@ -409,18 +399,18 @@ public:
 protected: // Call only from the soft node implementation in MyCompare()
     // Compare for child nodes in a normal context (i.e. in which the pattern must match
 	// for an overall match to be possible, and so can be used to key a coupling)
-	inline bool Compare( const TreePtrInterface &x, const TreePtrInterface &pattern )
+	inline bool NormalCompare( const TreePtrInterface &x, const TreePtrInterface &pattern )
 	{
-		ASSERT( current_sr )("Cannot call Compare() from other than MyCompare()");
-		ASSERT( current_conj )("Cannot call Compare() from other than MyCompare()");
-		return current_sr->DecidedCompare( x, pattern, current_can_key, *current_conj );
+		ASSERT( current_sr )("Cannot call NormalCompare() from other than MyCompare()");
+		ASSERT( current_conj )("Cannot call NormalCompare() from other than MyCompare()");
+		return Agent::AsAgent(pattern)->DecidedCompare( x, pattern, current_can_key, *current_conj );
 	}
     // Compare for child nodes in an abnormal context (i.e. in which the pattern need not match
 	// for an overall match to be possible, and so cannot be used to key a coupling)
 	inline bool AbnormalCompare( const TreePtrInterface &x, const TreePtrInterface &pattern )
 	{
 		ASSERT( current_sr )("Cannot call AbnormalCompare() from other than MyNormalCompare()");
-		return current_sr->Compare( x, pattern, false ); 
+		return Agent::AsAgent(pattern)->Compare( x, pattern, false ); 
 	}
     inline TreePtr<Node> *GetContext()
     {
@@ -434,6 +424,7 @@ protected: // Call only from the soft node implementation in MyCompare()
     }
     inline TreePtr<Node> GetCoupled( TreePtr<Node> pattern )
     {
+        ASSERT( current_sr )("Cannot call GetCoupled() from other than MyCompare()");
         return current_sr->coupling_keys.GetCoupled( pattern );
     }
 protected:
@@ -443,7 +434,8 @@ protected:
 };
 
 
-class SoftSearchPattern : public SofSearchPatternCallbacks
+class SoftSearchPattern : public SofSearchPatternCallbacks,
+                          public virtual NormalAgent
 {
 public:    
     virtual bool DecidedCompare( const CompareReplace *sr,
@@ -466,7 +458,8 @@ public:
 };
 
 
-class SoftSearchPatternSpecialKey : public SofSearchPatternCallbacks
+class SoftSearchPatternSpecialKey : public SofSearchPatternCallbacks,
+                                    public virtual NormalAgent
 {
 public:    
 	// Return NULL for not found
@@ -490,7 +483,8 @@ public:
 };
 
 
-class SoftReplacePattern : Flushable
+class SoftReplacePattern : Flushable,
+                           public virtual NormalAgent
 {    
 public:
     SoftReplacePattern() :
@@ -518,7 +512,7 @@ protected:
     inline TreePtr<Node> BuildReplace( TreePtr<Node> pattern ) 
     {
         ASSERT( current_sr )("Cannot call BuildReplace() from other than MyBuildReplace()");     
-        return current_sr->BuildReplace( pattern );
+        return Agent::AsAgent(pattern)->BuildReplace( pattern );
     }
 private:    
     const CompareReplace *current_sr;       

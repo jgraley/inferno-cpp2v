@@ -25,9 +25,12 @@ class Agent : public virtual Traceable,
 {
 public:
     virtual bool DecidedCompare( const TreePtrInterface &x,
-								  TreePtr<Node> pattern,
-								  bool can_key,
-							      Conjecture &conj ) const = 0;
+                                  TreePtr<Node> pattern,
+                                  bool can_key,
+                                  Conjecture &conj ) const = 0;
+    virtual bool Compare( const TreePtrInterface &x,
+                          TreePtr<Node> pattern,
+                          bool can_key = false ) const = 0;
     virtual TreePtr<Node> BuildReplace( TreePtr<Node> pattern, 
 			 					         TreePtr<Node> keynode=TreePtr<Node>() ) const = 0;
 	virtual void Configure( const CompareReplace *s, CouplingKeys *c ) = 0;
@@ -69,7 +72,15 @@ private:
     		             shared_ptr<SearchContainerBase> pattern,
     		             bool can_key,
     		             Conjecture &conj ) const;
+    bool MatchingDecidedCompare( const TreePtrInterface &x,
+                                   TreePtr<Node> pattern,
+                                   bool can_key,
+                                   Conjecture &conj ) const;
+
 public:	
+    bool Compare( const TreePtrInterface &x,
+                  TreePtr<Node> pattern,
+                  bool can_key = false ) const;
     virtual TreePtr<Node> BuildReplace( TreePtr<Node> pattern, 
 								         TreePtr<Node> keynode=TreePtr<Node>() ) const;
 private:	
