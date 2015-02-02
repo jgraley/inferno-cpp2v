@@ -18,12 +18,15 @@ Detailed plan for refactoring into agent patterns
   NOTE: shaken down means note what the 1-st level slaves are in a list, and recurse directly from master Configure to slave Configure AFTER the pattern walk, not during.
   NOTE ALSO: Got to do slave before master because some nodes appear in both and master should get priority
 - EXTRA STEP: do not pass NULL as a pattern into DecidedCompare (as in NULL wildcarding) DONE
-3. all invocations via agent interface, use AsAgent and call on the agent, not self DONE (except soft nodes)
+3. all invocations via agent interface, use AsAgent and call on the agent, not self DONE 
+- Remove "const" from all agent API functions
 - For abnormal context searches, move MatchingDecidedCompare() and Compare() into NormalAgent 
 - For soft nodes, provide a thunk in the base class for calls back into main S&R (so soft algo is fully enclosed from agent network) DONE
 - Additionally for soft nodes, do not pass in sr and use the sr in the Agent config instead (prove they match?) 
 - Once you think this is done, start asserting that pattern==this in the major functions
 5. pattern parameter (to BuildReplace and DecidedCompare) to be deduced from "this" locally, not passed in
+- Convert Couplings to index using Agent * not TreePtr<Node> 
+- Note we cannot actually create a TreePtr<> from a normal pointer, so must first convert all the dyncasts to normal pointers
 - Note for soft nodes, DecidedCompare should look the same as other DecidedCompare functions
 ---now you are technically distributed, yay, but lots of tidying up to do...---
 - Insert an AgentCommon class (between Agent and NormalAgent) for handy stuff needed by NormalAgent as well as the special ones 
