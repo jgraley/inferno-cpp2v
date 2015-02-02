@@ -25,7 +25,8 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 	ASSERT(sr)("Agent ")(*pattern)(" at appears not to have been configured, since sr is NULL");
 	ASSERT(coupling_keys);
 	ASSERT( x ); // Target must not be NULL
-	ASSERT(pattern);
+    ASSERT(pattern);
+    ASSERT(Agent::AsAgent(pattern)==(Agent *)this);
     TRACE("Comparing x=")
          (*x)
          (" with pattern=")
@@ -423,11 +424,93 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 }
 
 
+bool NormalAgent::MatchingDecidedCompare( const TreePtrInterface &x,
+                                             TreePtr<Node> pattern,
+                                             bool can_key,
+                                             Conjecture &conj ) const
+{
+    INDENT;
+    bool r;
+
+    ASSERT(Agent::AsAgent(pattern)==(Agent *)this);
+    if( can_key )
+        coupling_keys->Clear();
+
+    // Only key if the keys are already set to KEYING (which is 
+    // the initial value). Keys could be RESTRICTING if we're under
+    // a SoftNot node, in which case we only want to restrict.
+    if( can_key )
+    {
+        // Do a two-pass matching process: first get the keys...
+        TRACE("doing KEYING pass....\n");
+        conj.PrepareForDecidedCompare();
+        r = DecidedCompare( x, pattern, true, conj );
+        TRACE("KEYING pass result %d\n", r );
+        if( !r )
+            return false;                  // Save time by giving up if no match found
+    }
+    
+    // Now restrict the search according to the couplings
+    TRACE("doing RESTRICTING pass....\n");
+    conj.PrepareForDecidedCompare();
+    r = DecidedCompare( x, pattern, false, conj );
+    TRACE("RESTRICTING pass result %d\n", r );
+    if( !r )
+        return false;                  // Save time by giving up if no match found
+
+    // Do not revert match keys if we were successful - keep them for replace
+    // and any slave search and replace operations we might do.
+    return true;
+}
+
+
+bool NormalAgent::Compare( const TreePtrInterface &x,
+                                TreePtr<Node> pattern,
+                                bool can_key ) const
+{
+    INDENT("C");
+    ASSERT( x );
+    ASSERT( pattern );
+    ASSERT(Agent::AsAgent(pattern)==(Agent *)this);
+    TRACE("Compare x=")(*x);
+    TRACE(" pattern=")(*pattern);
+    TRACE(" can_key=%d \n", (int)can_key);
+    //TRACE(**pcontext)(" @%p\n", pcontext);
+    
+    // easy optimisation - also important because couplings do this a lot
+    if( x == pattern )
+        return true;
+
+    // Create the conjecture object we will use for this compare, and keep iterating
+    // though different conjectures trying to find one that allows a match.
+    Conjecture conj;
+    bool r;
+    while(1)
+    {
+        // Try out the current conjecture. This will call HandlDecision() once for each decision;
+        // HandleDecision() will return the current choice for that decision, if absent it will
+        // add the decision and choose the first choice, if the decision reaches the end it
+        // will remove the decision.
+        r = MatchingDecidedCompare( x, pattern, can_key, conj );
+
+        // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
+        if( r )
+            break; // Success
+            
+        if( !conj.Increment() )
+            break; // Failure
+    }
+    return r;
+}
+
+
+
 TreePtr<Node> NormalAgent::BuildReplace( TreePtr<Node> pattern,
 	                                     TreePtr<Node> keynode ) const
 {
     INDENT;
 	ASSERT(sr)("Agent ")(*pattern)(" at appears not to have been configured, since sr is NULL");
+    ASSERT(Agent::AsAgent(pattern)==(Agent *)this);
 	ASSERT(coupling_keys);
 	ASSERT(pattern);
 
@@ -710,7 +793,7 @@ TreePtr<Node> NormalAgent::BuildReplaceSlave( shared_ptr<SlaveBase> pattern,
 	ASSERT( pattern->GetThrough() );   
 	
 	// Continue current replace operation by following the "through" pointer
-    TreePtr<Node> dest = BuildReplace( pattern->GetThrough(), keynode );
+    TreePtr<Node> dest = AsAgent(pattern->GetThrough())->BuildReplace( pattern->GetThrough(), keynode );
     
 	// Run the slave as a new transformation at the current location
 	(*pattern)( sr->GetContext(), &dest );
