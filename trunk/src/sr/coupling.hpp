@@ -11,12 +11,13 @@ namespace SR
 
 // Base class for coupling keys; this deals with individual node matches, and also with stars
 // by means of pointing "root" at a SubCollection or SubSequence
+class Agent; 
 class CompareReplace;
 struct Key
 {
 	virtual ~Key(){}  // be a virtual hierarchy
 	TreePtr<Node> root; // Input program node for this coupling
-	TreePtr<Node> replace_pattern; // Pattern node for this coupling TODO rename to just pattern
+	Agent *agent; // Agent for this coupling
 	Conjecture::Choice *governing_choice;
 	int governing_offset;
 };
@@ -28,13 +29,13 @@ class CouplingKeys
 public:
 	CouplingKeys();
 	/// Key a node to a pattern (generates a default key structure)
-    void DoKey( TreePtr<Node> x, TreePtr<Node> pattern, Conjecture::Choice *gc=NULL, int go=0 );
+    void DoKey( TreePtr<Node> x,  Agent *agent, Conjecture::Choice *gc=NULL, int go=0 );
     /// Key some key to a pattern - key is supplied by user, can be subclass of Key
-    void DoKey( shared_ptr<Key> key, TreePtr<Node> pattern, Conjecture::Choice *gc=NULL, int go=0 );
+    void DoKey( shared_ptr<Key> key,  Agent *agent, Conjecture::Choice *gc=NULL, int go=0 );
     /// Get the node to which a pattern was keyed, or NULL if pattern has not been keyed
-    TreePtr<Node> GetCoupled( TreePtr<Node> pattern );									
+    TreePtr<Node> GetCoupled(  Agent *agent );									
     /// Get the key for a given pattern, or NULL if pattern has not been keyed
-    shared_ptr<Key> GetKey( TreePtr<Node> pattern );	
+    shared_ptr<Key> GetKey(  Agent *agent );	
     /// Get all the keys in set form
     Set< TreePtr<Node> > GetAllKeys();		
     /// Provide a pointer to another (read-only) instance of this class that will 
@@ -43,7 +44,7 @@ public:
     /// Clear the couplings
     void Clear();
 private:
-	Map< TreePtr<Node>, shared_ptr<Key> > keys_map;
+	Map< Agent *, shared_ptr<Key> > keys_map;
 	CouplingKeys *master; 
 };
 
