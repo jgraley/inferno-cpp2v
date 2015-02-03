@@ -162,7 +162,7 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
     // and so their checks would not have occured and hte check would not be strict 
     // enough. Perhaps keys can be "concrete" when all the couplings below them have
     // been checked as matching?
-    if( TreePtr<Node> keynode = coupling_keys->GetCoupled( pattern ) )
+    if( TreePtr<Node> keynode = coupling_keys->GetCoupled( this ) )
     {
         SimpleCompare sc;
         if( sc( x, keynode ) == false )
@@ -172,9 +172,9 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 	if( can_key )
     {
         if( special_key )
-            coupling_keys->DoKey( special_key, pattern );  
+            coupling_keys->DoKey( special_key, this );  
         else
-            coupling_keys->DoKey( x, pattern );  
+            coupling_keys->DoKey( x, this );  
     }
 
     return true;
@@ -252,7 +252,7 @@ bool NormalAgent::DecidedCompare( SequenceInterface &x,
             //}
             
             // Apply couplings to this Star and matched range
-            if( TreePtr<Node> keynode = coupling_keys->GetCoupled( pe ) )
+            if( TreePtr<Node> keynode = coupling_keys->GetCoupled( Agent::AsAgent(pe) ) )
             {
                 SimpleCompare sc;
                 if( sc( TreePtr<Node>(ss), keynode ) == false )
@@ -265,7 +265,7 @@ bool NormalAgent::DecidedCompare( SequenceInterface &x,
                 return false;
 
             if( can_key )
-                coupling_keys->DoKey( TreePtr<Node>(ss), pe );   
+                coupling_keys->DoKey( TreePtr<Node>(ss), Agent::AsAgent(pe) );   
         }
  	    else // not a Star so match singly...
 	    {
@@ -353,7 +353,7 @@ bool NormalAgent::DecidedCompare( CollectionInterface &x,
     // Apply pre-restriction to the star
     if( seen_star )
     {
-        if( TreePtr<Node> keynode = coupling_keys->GetCoupled( star ) )
+        if( TreePtr<Node> keynode = coupling_keys->GetCoupled( Agent::AsAgent(star) ) )
         {
             SimpleCompare sc;
             if( sc( TreePtr<Node>(xremaining), keynode ) == false )
@@ -365,7 +365,7 @@ bool NormalAgent::DecidedCompare( CollectionInterface &x,
             return false;
     
         if( can_key )
-            coupling_keys->DoKey( TreePtr<Node>(xremaining), star );	
+            coupling_keys->DoKey( TreePtr<Node>(xremaining), Agent::AsAgent(star) );	
     }
     TRACE("matched\n");
 	return true;
@@ -398,7 +398,7 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
     if( !r )
         return false;
         
-    if( TreePtr<Node> keynode = coupling_keys->GetCoupled( pattern ) )
+    if( TreePtr<Node> keynode = coupling_keys->GetCoupled( this ) )
     {
         SimpleCompare sc;
         if( sc( x, keynode ) == false )
@@ -413,7 +413,7 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
     	key->terminus = *thistime;
     	shared_ptr<Key> sckey( key );
     	TRACE("Matched, so keying search container type ")(*pattern)(" for ")(*x);
-        coupling_keys->DoKey( sckey, pattern );	
+        coupling_keys->DoKey( sckey, this );	
     }
 	return r;
 }
@@ -510,7 +510,7 @@ TreePtr<Node> NormalAgent::BuildReplace( TreePtr<Node> pattern,
 	ASSERT(pattern);
 
     // See if the pattern node is coupled to anything
-    shared_ptr<Key> key = coupling_keys->GetKey( pattern );
+    shared_ptr<Key> key = coupling_keys->GetKey( this );
 	if( key )
 		keynode = key->root;
 	if( dynamic_pointer_cast<SearchContainerBase>(pattern) )
@@ -521,8 +521,8 @@ TreePtr<Node> NormalAgent::BuildReplace( TreePtr<Node> pattern,
 		// the terminus key, and can just overlay the terminus replace pattern.
 		shared_ptr<TerminusKey> stuff_key = dynamic_pointer_cast<TerminusKey>(key);
 		ASSERT( stuff_key );
-		ASSERT( stuff_key->replace_pattern );
-		shared_ptr<TerminusBase> replace_stuff = dynamic_pointer_cast<TerminusBase>( stuff_key->replace_pattern );
+		ASSERT( stuff_key->agent );
+		TerminusBase *replace_stuff = dynamic_cast<TerminusBase *>( stuff_key->agent );
 		ASSERT( replace_stuff );
 		ASSERT( replace_stuff->terminus );
 		TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(replace_stuff->terminus))

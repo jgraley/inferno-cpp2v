@@ -321,7 +321,7 @@ void CompareReplace::KeyReplaceNodes( TreePtr<Node> pattern ) const
             if( key )
             {            
                 // Allow this to key a coupling. 
-                coupling_keys.DoKey( key, pattern );
+                coupling_keys.DoKey( key, Agent::AsAgent(pattern) );
             } 
 	    }
     }

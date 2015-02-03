@@ -425,7 +425,7 @@ protected: // Call only from the soft node implementation in MyCompare()
     inline TreePtr<Node> GetCoupled( TreePtr<Node> pattern )
     {
         ASSERT( current_sr )("Cannot call GetCoupled() from other than MyCompare()");
-        return current_sr->coupling_keys.GetCoupled( pattern );
+        return current_sr->coupling_keys.GetCoupled( Agent::AsAgent(pattern) );
     }
 protected:
     const CompareReplace *current_sr;

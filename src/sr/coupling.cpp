@@ -4,13 +4,14 @@
 
 using namespace SR;
 
+
 CouplingKeys::CouplingKeys() : 
     master(NULL) 
 {
 }
 
 void CouplingKeys::DoKey( TreePtr<Node> x, 
-	                      TreePtr<Node> pattern, 
+	                      Agent *agent, 
 	                      Conjecture::Choice *gc,
 	                      int go )
 {
@@ -21,18 +22,18 @@ void CouplingKeys::DoKey( TreePtr<Node> x,
         key->root = x;
     else
         key = shared_ptr<Key>();
-	return DoKey( key, pattern, gc, go );
+	return DoKey( key, agent, gc, go );
 }
 
 
 void CouplingKeys::DoKey( shared_ptr<Key> key, 
-	                      TreePtr<Node> pattern, 
+	                      Agent *agent, 
 	                      Conjecture::Choice *gc,
 	                      int go )
 {
 	//INDENT;
 	ASSERT( this );
-    ASSERT( pattern );
+    ASSERT( agent );
     
    // TRACE("CouplingKeys@%p: ", this)(master?"has ":"does not have ")("master\n");
     
@@ -48,7 +49,7 @@ void CouplingKeys::DoKey( shared_ptr<Key> key,
 	{
 		if( !first )
 			TRACE(", ");
-		if( pattern == n )
+		if( agent == Agent::AsAgent(n) )
 			TRACE("-->");
 		TRACE(*n);
 		first=false;
@@ -57,24 +58,24 @@ void CouplingKeys::DoKey( shared_ptr<Key> key,
 #endif
 
 	// If we're keying and we haven't keyed this node so far, key it now
-	if( key && !GetKey( pattern ) )
+	if( key && !GetKey( agent ) )
 	{
-	    key->replace_pattern = pattern;
+	    key->agent = agent;
 		key->governing_choice = gc;	
 		key->governing_offset = go;	
-		keys_map[pattern] = key;	
-      //  TRACE("Keyed root=")(*key->root)(" pattern=")(*key->replace_pattern)(" with governing_choice=%p\n", gc);
+		keys_map[agent] = key;	
+      //  TRACE("Keyed root=")(*key->root)(" agent=")(*key->agent)(" with governing_choice=%p\n", gc);
 	}
 	
     // TRACE("@%p Keyed ", this)(*(key->root))(" size %d\n", keys_map.size());
 }
 
 
-TreePtr<Node> CouplingKeys::GetCoupled( TreePtr<Node> pattern )  
+TreePtr<Node> CouplingKeys::GetCoupled( Agent *agent )  
 {
   //  INDENT;
     ASSERT(this);
-    shared_ptr<Key> k = GetKey( pattern );
+    shared_ptr<Key> k = GetKey( agent );
 	if( k )
 	    return k->root;
 	else
@@ -82,19 +83,19 @@ TreePtr<Node> CouplingKeys::GetCoupled( TreePtr<Node> pattern )
 }
 
 
-shared_ptr<Key> CouplingKeys::GetKey( TreePtr<Node> pattern )  
+shared_ptr<Key> CouplingKeys::GetKey( Agent *agent )  
 {
  //   INDENT;
     //TRACE("@%p Getting key for ", this)(*pattern)(" master is %p size %d\n", master, keys_map.size());
     ASSERT(this);
-	if( keys_map.IsExist(pattern) )
+	if( keys_map.IsExist(agent) )
 	{
-	    return keys_map[pattern];
+	    return keys_map[agent];
 	}
 	else if( master )
 	{
-	   // TRACE("Going to master to get key for ")(*pattern)("\n");
-	    shared_ptr<Key> k = master->GetKey(pattern);
+	   // TRACE("Going to master to get key for ")(*agent)("\n");
+	    shared_ptr<Key> k = master->GetKey(agent);
 	  //  if( k )
 	  //      TRACE("Got root ")(*(k->root))("\n");
 	  //  else
