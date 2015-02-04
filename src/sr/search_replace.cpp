@@ -176,12 +176,11 @@ void CompareReplace::GetGraphInfo( vector<string> *labels,
 }
 
 
-// TODO remove whan all calls are Agent to Agent
 bool CompareReplace::Compare( const TreePtrInterface &x,
-                                TreePtr<Node> pattern,
-                                bool can_key ) const
+                              TreePtr<Node> pattern,
+                              bool can_key ) const
 {
-    return Agent::AsAgent(pattern)->Compare( x, pattern, can_key );
+    return Agent::AsAgent(pattern)->Compare( x, can_key );
 }
 
 
@@ -199,18 +198,18 @@ bool CompareReplace::IsMatch( TreePtr<Node> context,
 {
     pcontext = &context;
     ASSERT( compare_pattern );
-    bool r = Agent::AsAgent(compare_pattern)->Compare( root, compare_pattern, false );
+    bool r = Agent::AsAgent(compare_pattern)->Compare( root, false );
     pcontext = NULL;
     return r == true;
 }
 
 
 TreePtr<Node> CompareReplace::DuplicateNode( TreePtr<Node> source,
-    		                                  bool force_dirty ) const
+                                              bool force_dirty ) const
 {
     INDENT;
 
-	// Make the new node (destination node)
+    // Make the new node (destination node)
     shared_ptr<Cloner> dup_dest = source->Duplicate(source);
     TreePtr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
     ASSERT(dest);
@@ -224,12 +223,12 @@ TreePtr<Node> CompareReplace::DuplicateNode( TreePtr<Node> source,
     }
     
     return dest;    
-}    		                                          
+}                                                     
 
 
 TreePtr<Node> CompareReplace::DuplicateSubtree( TreePtr<Node> source,
 		                                        TreePtr<Node> source_terminus,
-												 TreePtr<Node> dest_terminus ) const
+											    TreePtr<Node> dest_terminus ) const
 {
 	INDENT;
 	ASSERT( source );
@@ -330,7 +329,7 @@ void CompareReplace::KeyReplaceNodes( TreePtr<Node> pattern ) const
 
 TreePtr<Node> CompareReplace::BuildReplace( TreePtr<Node> pattern ) const
 {	
-    return Agent::AsAgent(pattern)->BuildReplace( pattern );
+    return Agent::AsAgent(pattern)->BuildReplace();
 }
 
 
@@ -346,7 +345,7 @@ TreePtr<Node> CompareReplace::ReplacePhase( TreePtr<Node> pattern ) const
 
     // Now replace according to the couplings
     TRACE("doing replace SUBSTITUTING pass....\n");
-    TreePtr<Node> r = Agent::AsAgent(pattern)->BuildReplace( pattern );
+    TreePtr<Node> r = Agent::AsAgent(pattern)->BuildReplace();
 
 	// TODO do an overlay, means *proot needs passing in here and this fn should be renamed.
     TRACE("replace SUBSTITUTING pass\n" );
@@ -368,7 +367,7 @@ bool CompareReplace::SingleCompareReplace( TreePtr<Node> *proot )
     FlushSoftPatternCaches( compare_pattern );
     
     TRACE("Begin search\n");
-	bool r = Agent::AsAgent(compare_pattern)->Compare( *proot, compare_pattern, true );
+	bool r = Agent::AsAgent(compare_pattern)->Compare( *proot, true );
 	if( !r )
 		return false;
 
@@ -534,8 +533,8 @@ void SearchReplace::GetGraphInfo( vector<string> *labels,
     
     
 shared_ptr<ContainerInterface> StuffBase::GetContainerInterface( TreePtr<Node> x )
-
 {
+    // TODO cache this?
     Filter *rf = NULL;
     if( recurse_restriction )
     {

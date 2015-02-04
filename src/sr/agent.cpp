@@ -17,7 +17,6 @@ void NormalAgent::Configure( const CompareReplace *s, CouplingKeys *c )
 
 
 bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
-							       TreePtr<Node> pattern,
 							       bool can_key,
     						       Conjecture &conj )
 {
@@ -26,7 +25,6 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 	ASSERT(coupling_keys);
 	ASSERT( x ); // Target must not be NULL
     ASSERT(this);
-    ASSERT(Agent::AsAgent(pattern)==(Agent *)this);
     shared_ptr<Key> special_key;
     
 	// Check whether the present node matches. Do this for all nodes: this will be the local
@@ -55,46 +53,44 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
     {
     	// No further restriction beyond the pre-restriction for these nodes when searching.
     }
-    else if( shared_ptr<SearchContainerBase> sc_pattern = dynamic_pointer_cast<SearchContainerBase>(pattern) )
+    else if( dynamic_cast<SearchContainerBase *>(this) )
     {
     	// Invoke stuff node compare
     	// Check whether the present node matches
-    	bool r = DecidedCompare( x, sc_pattern, can_key, conj );
+    	bool r = DecidedCompareSearchContainer( x, can_key, conj );
         if( !r )
             return false;
     }
-    else if( shared_ptr<GreenGrassBase> green_pattern = dynamic_pointer_cast<GreenGrassBase>(pattern) )
+    else if( GreenGrassBase *green_this = dynamic_cast<GreenGrassBase *>(this) )
     {
         // Restrict so that everything in the input program under here must be "green grass"
         // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
-       // Walk w( x );
-       // FOREACH( TreePtr<Node> p, w )
-		if( sr->GetOverallMaster()->dirty_grass.find( /*p*/x ) != sr->GetOverallMaster()->dirty_grass.end() )
+		if( sr->GetOverallMaster()->dirty_grass.find( x ) != sr->GetOverallMaster()->dirty_grass.end() )
 		{
-			TRACE/*(*p)(" under ")*/(*x)(" is dirty grass so rejecting\n");
+			TRACE(*x)(" is dirty grass so rejecting\n");
 			return false;
 		}
         TRACE("subtree under ")(*x)(" is green grass\n");
         // Normal matching for the through path
-        bool r = Agent::AsAgent(green_pattern->GetThrough())->DecidedCompare( x, green_pattern->GetThrough(), can_key, conj );
+        bool r = Agent::AsAgent(green_this->GetThrough())->DecidedCompare( x, can_key, conj );
         if( !r )
             return false;
     }
-    else if( shared_ptr<OverlayBase> op = dynamic_pointer_cast<OverlayBase>(pattern) )
+    else if( OverlayBase *o_this = dynamic_cast<OverlayBase *>(this) )
     {
         // When Overlay node seen duriung search, just forward through the "through" path
-        bool r = Agent::AsAgent(op->GetThrough())->DecidedCompare( x, op->GetThrough(), can_key, conj );
+        bool r = Agent::AsAgent(o_this->GetThrough())->DecidedCompare( x, can_key, conj );
         if( !r )
             return false;
     }
-    else if( dynamic_pointer_cast<InsertBase>(pattern) || dynamic_pointer_cast<EraseBase>(pattern) )
+    else if( dynamic_cast<InsertBase *>(this) || dynamic_cast<EraseBase *>(this) )
     {
-       ASSERTFAIL(*pattern)(" found outside of a container; can only be used in containers\n");
+       ASSERTFAIL(*this)(" found outside of a container; can only be used in containers\n");
     }
-    else if( shared_ptr<SlaveBase> sp = dynamic_pointer_cast<SlaveBase>(pattern) )
+    else if( SlaveBase *s_this = dynamic_cast<SlaveBase *>(this) )
     {
         // When a slave node seen duriung search, just forward through the "base" path
-        bool r = Agent::AsAgent(sp->GetThrough())->DecidedCompare( x, sp->GetThrough(), can_key, conj );
+        bool r = Agent::AsAgent(s_this->GetThrough())->DecidedCompare( x, can_key, conj );
         if( !r )
             return false;
     }
@@ -137,13 +133,12 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 					TreePtrInterface *x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
 					ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
 					TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
-					TreePtr<Node> tpp(*pattern_ptr);
-					Agent *ap = Agent::AsAgent(tpp);
+					Agent *ap = Agent::AsAgent(*pattern_ptr);
 					//NormalAgent *nap = dynamic_cast<NormalAgent *>(ap);
 					//ASSERT( nap ); 
 					//ASSERT( nap->sr == sr );
 					//ASSERT( nap->coupling_keys == coupling_keys );
-					r = ap->DecidedCompare( *x_ptr, tpp, can_key, conj );
+					r = ap->DecidedCompare( *x_ptr, can_key, conj );
 				}
 			}
 			else
@@ -271,7 +266,7 @@ bool NormalAgent::DecidedCompare( SequenceInterface &x,
 	    {
             // If there is one more element in x, see if it matches the pattern
 			//TreePtr<Node> xe( x[xit] );
-			if( xit != x.end() && Agent::AsAgent(pe)->DecidedCompare( *xit, pe, can_key, conj ) == true )
+			if( xit != x.end() && Agent::AsAgent(pe)->DecidedCompare( *xit, can_key, conj ) == true )
 			{
 				++xit;
 			}
@@ -337,7 +332,7 @@ bool NormalAgent::DecidedCompare( CollectionInterface &x,
 	    		return false;
 
 	    	// Recurse into comparison function for the chosen node
-			if( !Agent::AsAgent(TreePtr<Node>(*pit))->DecidedCompare( *xit, TreePtr<Node>(*pit), can_key, conj ) )
+			if( !Agent::AsAgent(TreePtr<Node>(*pit))->DecidedCompare( *xit, can_key, conj ) )
 			    return false;
 	    }
     }
@@ -374,18 +369,19 @@ bool NormalAgent::DecidedCompare( CollectionInterface &x,
 
 // Helper for DecidedCompare that does the actual match testing work for the children and recurses.
 // Also checks for soft matches.
-bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
-							       shared_ptr<SearchContainerBase> pattern,
-						     	   bool can_key,
-							       Conjecture &conj )
+bool NormalAgent::DecidedCompareSearchContainer( const TreePtrInterface &x,
+						     	                 bool can_key,
+							                     Conjecture &conj )
 {
     INDENT;
-	ASSERT( pattern->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
+    SearchContainerBase *sc_this = dynamic_cast<SearchContainerBase *>(this);
+    ASSERT( sc_this );
+	ASSERT( sc_this->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
-    TRACE("SearchContainer pattern ")(*pattern)(" terminus pattern is ")(*(pattern->terminus))(" at ")(*x)("\n");
+    TRACE("SearchContainer agent ")(*sc_this)(" terminus pattern is ")(*(sc_this->terminus))(" at ")(*x)("\n");
 
     // Get an interface to the container we will search
-    shared_ptr<ContainerInterface> pwx = pattern->GetContainerInterface( x );
+    shared_ptr<ContainerInterface> pwx = sc_this->GetContainerInterface( x );
     
 	// Get choice from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = conj.HandleDecision( pwx->begin(), pwx->end() );
@@ -394,7 +390,7 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 
 	// Try out comparison at this position
 	TRACE("Trying terminus ")(**thistime);
-	bool r = Agent::AsAgent(pattern->terminus)->DecidedCompare( *thistime, pattern->terminus, can_key, conj );
+	bool r = Agent::AsAgent(sc_this->terminus)->DecidedCompare( *thistime, can_key, conj );
     if( !r )
         return false;
         
@@ -412,7 +408,7 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
     	key->root = x;
     	key->terminus = *thistime;
     	shared_ptr<Key> sckey( key );
-    	TRACE("Matched, so keying search container type ")(*pattern)(" for ")(*x);
+    	TRACE("Matched, so keying search container type ")(*sc_this)(" for ")(*x);
         coupling_keys->DoKey( sckey, this );	
     }
 	return r;
@@ -420,14 +416,12 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 
 
 bool NormalAgent::MatchingDecidedCompare( const TreePtrInterface &x,
-                                             TreePtr<Node> pattern,
                                              bool can_key,
                                              Conjecture &conj ) 
 {
     INDENT;
     bool r;
 
-    ASSERT(Agent::AsAgent(pattern)==(Agent *)this);
     if( can_key )
         coupling_keys->Clear();
 
@@ -439,7 +433,7 @@ bool NormalAgent::MatchingDecidedCompare( const TreePtrInterface &x,
         // Do a two-pass matching process: first get the keys...
         TRACE("doing KEYING pass....\n");
         conj.PrepareForDecidedCompare();
-        r = DecidedCompare( x, pattern, true, conj );
+        r = DecidedCompare( x, true, conj );
         TRACE("KEYING pass result %d\n", r );
         if( !r )
             return false;                  // Save time by giving up if no match found
@@ -448,7 +442,7 @@ bool NormalAgent::MatchingDecidedCompare( const TreePtrInterface &x,
     // Now restrict the search according to the couplings
     TRACE("doing RESTRICTING pass....\n");
     conj.PrepareForDecidedCompare();
-    r = DecidedCompare( x, pattern, false, conj );
+    r = DecidedCompare( x, false, conj );
     TRACE("RESTRICTING pass result %d\n", r );
     if( !r )
         return false;                  // Save time by giving up if no match found
@@ -460,22 +454,15 @@ bool NormalAgent::MatchingDecidedCompare( const TreePtrInterface &x,
 
 
 bool NormalAgent::Compare( const TreePtrInterface &x,
-                                TreePtr<Node> pattern,
-                                bool can_key ) 
+                           bool can_key ) 
 {
     INDENT("C");
     ASSERT( x );
-    ASSERT( pattern );
-    ASSERT(Agent::AsAgent(pattern)==(Agent *)this);
     TRACE("Compare x=")(*x);
-    TRACE(" pattern=")(*pattern);
+    TRACE(" pattern=")(*this);
     TRACE(" can_key=%d \n", (int)can_key);
     //TRACE(**pcontext)(" @%p\n", pcontext);
     
-    // easy optimisation - also important because couplings do this a lot
-    if( x == pattern )
-        return true;
-
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
     Conjecture conj;
@@ -486,7 +473,7 @@ bool NormalAgent::Compare( const TreePtrInterface &x,
         // HandleDecision() will return the current choice for that decision, if absent it will
         // add the decision and choose the first choice, if the decision reaches the end it
         // will remove the decision.
-        r = MatchingDecidedCompare( x, pattern, can_key, conj );
+        r = MatchingDecidedCompare( x, can_key, conj );
 
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
         if( r )
@@ -500,20 +487,18 @@ bool NormalAgent::Compare( const TreePtrInterface &x,
 
 
 
-TreePtr<Node> NormalAgent::BuildReplace( TreePtr<Node> pattern,
-	                                     TreePtr<Node> keynode ) 
+TreePtr<Node> NormalAgent::BuildReplace( TreePtr<Node> keynode ) 
 {
     INDENT;
-	ASSERT(sr)("Agent ")(*pattern)(" at appears not to have been configured, since sr is NULL");
-    ASSERT(Agent::AsAgent(pattern)==(Agent *)this);
+    ASSERT(this);
+	ASSERT(sr)("Agent ")(*this)(" at appears not to have been configured, since sr is NULL");
 	ASSERT(coupling_keys);
-	ASSERT(pattern);
-
+    
     // See if the pattern node is coupled to anything
     shared_ptr<Key> key = coupling_keys->GetKey( this );
 	if( key )
 		keynode = key->root;
-	if( dynamic_pointer_cast<SearchContainerBase>(pattern) )
+	if( dynamic_cast<SearchContainerBase *>(this) )
 	{
 		// SearchContainer.
 		// Are we substituting a stuff node? If so, see if we reached the terminus, and if
@@ -527,123 +512,81 @@ TreePtr<Node> NormalAgent::BuildReplace( TreePtr<Node> pattern,
 		ASSERT( replace_stuff->terminus );
 		TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(replace_stuff->terminus))
 		                                                  (", term=")(*(stuff_key->terminus))("\n");
-		TreePtr<Node> term = AsAgent(replace_stuff->terminus)->BuildReplace( replace_stuff->terminus, stuff_key->terminus );
+		TreePtr<Node> term = AsAgent(replace_stuff->terminus)->BuildReplace( stuff_key->terminus );
 		TRACE( "Stuff node: Substituting stuff");
 		return sr->DuplicateSubtree(keynode, stuff_key->terminus, term);   
 	}     
-	else
+	else if( dynamic_cast<StarBase *>(this) )
 	{
-	    return BuildReplaceKeyed( pattern, keynode );
+		return BuildReplaceStar( keynode ); // Strong modifier
 	}
-}
-	
-	
-TreePtr<Node> NormalAgent::BuildReplaceKeyed( TreePtr<Node> pattern,
-	                                          TreePtr<Node> keynode ) 
-{	
-    INDENT;
-    ASSERT( pattern );
-
-	if( shared_ptr<StarBase> stb = dynamic_pointer_cast<StarBase>( pattern ) )
+	else if( SoftReplacePattern *sr_this = dynamic_cast<SoftReplacePattern *>(this) )
 	{
-		return BuildReplaceStar( stb, keynode ); // Strong modifier
-	}
-	if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( pattern ) )
-	{
-		TreePtr<Node> overlay = srp->GetOverlayPattern(); // only strong modifiers use this
+		TreePtr<Node> overlay = sr_this->GetOverlayPattern(); // only strong modifiers use this
 		if( overlay ) // Really two different kinds of pattern node
-			return AsAgent(overlay)->BuildReplace( overlay, keynode ); // Strong modifier
+			return AsAgent(overlay)->BuildReplace( keynode ); // Strong modifier
 		else
 			return sr->DuplicateSubtree(keynode);   // Weak modifier
 	}
-	else if( shared_ptr<OverlayBase> ob = dynamic_pointer_cast<OverlayBase>( pattern ) )
+	else if( OverlayBase *ob_this = dynamic_cast<OverlayBase *>(this) )
 	{
-		ASSERT( ob->GetOverlay() );          
-		TRACE("Overlay node through=")(*(ob->GetThrough()))(" overlay=")(*(ob->GetOverlay()))("\n");
-		return AsAgent(ob->GetOverlay())->BuildReplace( ob->GetOverlay(), keynode );
+		ASSERT( ob_this->GetOverlay() );          
+		TRACE("Overlay node through=")(*(ob_this->GetThrough()))(" overlay=")(*(ob_this->GetOverlay()))("\n");
+		return AsAgent(ob_this->GetOverlay())->BuildReplace( keynode );
 	}
-	else if( shared_ptr<GreenGrassBase> ggb = dynamic_pointer_cast<GreenGrassBase>( pattern ) )
+	else if( GreenGrassBase *ggb_this = dynamic_cast<GreenGrassBase *>(this) )
 	{
-		ASSERT( ggb->GetThrough() );          
-		TRACE("GreenGrass node through=")(*(ggb->GetThrough()))("\n");
-    	return AsAgent(ggb->GetThrough())->BuildReplace( ggb->GetThrough(), keynode );
+		ASSERT( ggb_this->GetThrough() );          
+		TRACE("GreenGrass node through=")(*(ggb_this->GetThrough()))("\n");
+    	return AsAgent(ggb_this->GetThrough())->BuildReplace( keynode );
 	}
-	else if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(pattern) )
+	else if( dynamic_cast<SlaveBase *>(this) )
 	{   
-		return BuildReplaceSlave( sb, keynode );
+		return BuildReplaceSlave( keynode );
 	} 
-	else if( dynamic_pointer_cast<SpecialBase>(pattern) )
+	else if( dynamic_cast<SpecialBase *>(this) )
 	{
 		// Star, Not, TransformOf etc. Also MatchAll with no overlay pattern falls thru to here
 		return sr->DuplicateSubtree(keynode);   
 	}     
     else // Normal node
     {
-        if( keynode && pattern->IsLocalMatch(keynode.get()) ) 
-            return BuildReplaceOverlay( pattern, keynode );
+        if( keynode && IsLocalMatch(keynode.get()) ) 
+            return BuildReplaceOverlay( keynode );
         else
-            return BuildReplaceNormal( pattern ); // Overwriting pattern over dest, need to make a duplicate 
+            return BuildReplaceNormal(); // Overwriting pattern over dest, need to make a duplicate 
 	}
 }
 
 
-
-TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> pattern, 
-										         TreePtr<Node> keynode )  // under substitution if not NULL
+TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // under substitution if not NULL
 {
 	INDENT;
-    ASSERT( pattern );
     ASSERT( keynode );
-
-#ifdef STRACE
-    TRACE("DoOverlayPattern dest={");
-   {    Walk w(dest);
-        bool first=true;
-        FOREACH( TreePtr<Node> n, w )
-        {
-            if( !first )
-                TRACE(", ");
-            TRACE( n ? *n : string("NULL"));
-            first=false;
-        }
-        TRACE("}\n"); // TODO put this in as a common utility somewhere
-   }
-   TRACE("pattern={");
-   {    Walk w(pattern);
-        bool first=true;
-        FOREACH( TreePtr<Node> n, w )
-        {
-            if( !first )
-                TRACE(", ");
-            TRACE( n ? *n : string("NULL"));
-            first=false;
-        }
-        TRACE("}\n"); // TODO put this in as a common utility somewhere
-   }
-#endif   
     
-    ASSERT( pattern->IsLocalMatch(keynode.get()) )
+    ASSERT( IsLocalMatch(keynode.get()) )
 	  	  ("pattern=")
-		  (*pattern)
+		  (*this)
 		  (" must be a non-strict superclass of keynode=")
 		  (*keynode)
 		  (", so that it does not have more members");
     TreePtr<Node> dest;
     
-    // Make a new node, we will overlay from pattern, so resulting node will be dirty	    
+    // Make a new node, we will overlay from pattern, so resulting node will be dirty	
+    // Duplicate the key node since it is at least as specialised    
     dest = sr->DuplicateNode( keynode, true );
 
     // Loop over the elements of pattern, keynode and dest, limited to elements
     // present in pattern, which is a non-strict subclass of keynode and dest.
     // Overlay or overwrite pattern over a duplicate of dest. Keep track of 
     // corresponding elements of dest. 
-    vector< Itemiser::Element * > pattern_memb = pattern->Itemise();
+    vector< Itemiser::Element * > pattern_memb = Itemise();
     vector< Itemiser::Element * > keynode_memb = keynode->Itemise( dest.get() ); // Get the members of keynode corresponding to pattern's class
-    vector< Itemiser::Element * >  dest_memb = pattern->Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
+    vector< Itemiser::Element * >  dest_memb = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
     ASSERT( pattern_memb.size() == dest_memb.size() );
     Set< Itemiser::Element * > present_in_pattern; // Repeatability audit: OK since only checking for existance TODO special version of set that disallows non-repeatable things
     
-    TRACE("Copying %d members from pattern=%s dest=%s\n", dest_memb.size(), TypeInfo(pattern).name().c_str(), TypeInfo(dest).name().c_str());
+    TRACE("Copying %d members from pattern=%s dest=%s\n", dest_memb.size(), TypeInfo(this).name().c_str(), TypeInfo(dest).name().c_str());
     for( int i=0; i<dest_memb.size(); i++ )
     {
     	TRACE("member %d from pattern\n", i );
@@ -661,9 +604,9 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> pattern,
             TRACE("Copying container size %d from expanded_pattern_con\n", expanded_pattern_con.size() );
 	        FOREACH( const TreePtrInterface &p, expanded_pattern_con )
 	        {
-		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*pattern)(" was NULL\n");
+		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*this)(" was NULL\n");
 		        TRACE("Got ")(*p)("\n");
-				TreePtr<Node> n = AsAgent(p)->BuildReplace( p );
+				TreePtr<Node> n = AsAgent(p)->BuildReplace();
                 if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(n.get()) )
                 {
                     TRACE("Walking SubContainer length %d\n", psc->size() );
@@ -689,7 +632,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> pattern,
                        
             if( pattern_child )
             {                             
-                dest_child = AsAgent(pattern_child)->BuildReplace( pattern_child, *keynode_ptr );
+                dest_child = AsAgent(pattern_child)->BuildReplace( *keynode_ptr );
                 ASSERT( dest_child );
                 ASSERT( dest_child->IsFinal() );
                 present_in_pattern.insert( dest_memb[i] );
@@ -761,58 +704,48 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> pattern,
         }
     }
     
-#ifdef STRACE
-    TRACE("DoOverlayPattern result={");
-   {    Walk w(dest);
-        bool first=true;
-        FOREACH( TreePtr<Node> n, w )
-        {
-            if( !first )
-                TRACE(", ");
-            TRACE( n ? *n : string("NULL"));
-            first=false;
-        }
-        TRACE("}\n"); // TODO put this in as a common utility somewhere
-   }
-#endif    
     ASSERT( dest );
     return dest;
 }
 
 
-TreePtr<Node> NormalAgent::BuildReplaceSlave( shared_ptr<SlaveBase> pattern, 
-										       TreePtr<Node> keynode )  
+TreePtr<Node> NormalAgent::BuildReplaceSlave( TreePtr<Node> keynode )  
 {
     INDENT;
-	ASSERT( pattern );
-	ASSERT( pattern->GetThrough() );   
+    SlaveBase *sb_this = dynamic_cast<SlaveBase *>(this);
+	ASSERT( sb_this );
+	ASSERT( sb_this->GetThrough() );   
 	
 	// Continue current replace operation by following the "through" pointer
-    TreePtr<Node> dest = AsAgent(pattern->GetThrough())->BuildReplace( pattern->GetThrough(), keynode );
+    TreePtr<Node> dest = AsAgent(sb_this->GetThrough())->BuildReplace( keynode );
     
 	// Run the slave as a new transformation at the current location
-	(*pattern)( sr->GetContext(), &dest );
+	(*sb_this)( sr->GetContext(), &dest );
 	
     ASSERT( dest );
     return dest;
 }
 
     
-TreePtr<Node> NormalAgent::BuildReplaceNormal( TreePtr<Node> pattern ) 
+TreePtr<Node> NormalAgent::BuildReplaceNormal() 
 {
 	INDENT;
-    ASSERT( pattern );
  
 	// Make a new node, force dirty because from pattern
-    TreePtr<Node> dest = sr->DuplicateNode( pattern, true );
+    // Use clone here because we never want to place an Agent object in the output program tree.
+    // Identifiers that have multiple referneces in the pattern will be coupled, and  
+    // after the first hit, BuildReplaceOverlay() will handle the rest and it uses Duplicate()
+    shared_ptr<Cloner> dup_dest = Clone();
+    TreePtr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
+    sr->GetOverallMaster()->dirty_grass.insert( dest );
 
     // Itemise the members. Note that the itemiser internally does a
     // dynamic_cast onto the type of pattern, and itemises over that type. dest must
     // be dynamic_castable to pattern's type.
-    vector< Itemiser::Element * > pattern_memb = pattern->Itemise();
+    vector< Itemiser::Element * > pattern_memb = Itemise();
     vector< Itemiser::Element * > dest_memb = dest->Itemise(); 
 
-    TRACE("Copying %d members pattern=", dest_memb.size())(*pattern)(" dest=")(*dest)("\n");
+    TRACE("Copying %d members pattern=", dest_memb.size())(*this)(" dest=")(*dest)("\n");
     // Loop over all the members of pattern (which can be a subset of dest)
     // and for non-NULL members, duplicate them by recursing and write the
     // duplicates to the destination.
@@ -830,9 +763,9 @@ TreePtr<Node> NormalAgent::BuildReplaceNormal( TreePtr<Node> pattern )
             TRACE("Copying container size %d\n", pattern_con->size() );
 	        FOREACH( const TreePtrInterface &p, *pattern_con )
 	        {
-		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*pattern)(" was NULL\n");
+		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*this)(" was NULL\n");
 		        TRACE("Got ")(*p)("\n");
-	            TreePtr<Node> n = AsAgent(p)->BuildReplace( p );
+	            TreePtr<Node> n = AsAgent(p)->BuildReplace();
 		        if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(n.get()) )
 		        {
 			        TRACE("Walking SubContainer length %d\n", psc->size() );
@@ -850,10 +783,10 @@ TreePtr<Node> NormalAgent::BuildReplaceNormal( TreePtr<Node> pattern )
         {
             TRACE("Copying single element\n");
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            ASSERT( *pattern_ptr )("Member %d (", i)(*pattern_ptr)(") of ")(*pattern)(" was NULL when not overlaying\n");
-            *dest_ptr = AsAgent(*pattern_ptr)->BuildReplace( *pattern_ptr );
+            ASSERT( *pattern_ptr )("Member %d (", i)(*pattern_ptr)(") of ")(*this)(" was NULL when not overlaying\n");
+            *dest_ptr = AsAgent(*pattern_ptr)->BuildReplace();
             ASSERT( *dest_ptr );
-            ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() )("Member %d (", i)(**pattern_ptr)(") of ")(*pattern)(" was not final\n");            
+            ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() )("Member %d (", i)(**pattern_ptr)(") of ")(*this)(" was not final\n");            
         }
         else
         {
@@ -864,13 +797,13 @@ TreePtr<Node> NormalAgent::BuildReplaceNormal( TreePtr<Node> pattern )
 }
 
 
-TreePtr<Node> NormalAgent::BuildReplaceStar( shared_ptr<StarBase> pattern,
-	                                         TreePtr<Node> keynode ) 
+TreePtr<Node> NormalAgent::BuildReplaceStar( TreePtr<Node> keynode ) 
 {
-	ASSERT( pattern ); // not used at present but should be there since we may need to use it
+    StarBase *star_this = dynamic_cast<StarBase *>(this);
+	ASSERT( star_this ); // not used at present but should be there since we may need to use it
 	ASSERT( keynode );
 	ContainerInterface *psc = dynamic_cast<ContainerInterface *>(keynode.get());
-	ASSERT( psc )("Star node ")(*pattern)(" keyed to ")(*keynode)(" which should implement ContainerInterface");	
+	ASSERT( psc )("Star node ")(*star_this)(" keyed to ")(*keynode)(" which should implement ContainerInterface");	
 	TRACE("Walking container length %d\n", psc->size() );
 	
 	TreePtr<SubContainer> dest;

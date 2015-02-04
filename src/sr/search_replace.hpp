@@ -403,14 +403,14 @@ protected: // Call only from the soft node implementation in MyCompare()
 	{
 		ASSERT( current_sr )("Cannot call NormalCompare() from other than MyCompare()");
 		ASSERT( current_conj )("Cannot call NormalCompare() from other than MyCompare()");
-		return Agent::AsAgent(pattern)->DecidedCompare( x, pattern, current_can_key, *current_conj );
+		return Agent::AsAgent(pattern)->DecidedCompare( x, current_can_key, *current_conj );
 	}
     // Compare for child nodes in an abnormal context (i.e. in which the pattern need not match
 	// for an overall match to be possible, and so cannot be used to key a coupling)
 	inline bool AbnormalCompare( const TreePtrInterface &x, const TreePtrInterface &pattern )
 	{
 		ASSERT( current_sr )("Cannot call AbnormalCompare() from other than MyNormalCompare()");
-		return Agent::AsAgent(pattern)->Compare( x, pattern, false ); 
+		return Agent::AsAgent(pattern)->Compare( x, false ); 
 	}
     inline TreePtr<Node> *GetContext()
     {
@@ -509,9 +509,9 @@ public:
     virtual TreePtr<Node> MyBuildReplace() = 0;
     
 protected:    
-    inline TreePtr<Node> BuildReplace( TreePtr<Node> pattern ) 
+    inline TreePtr<Node> DoBuildReplace( TreePtr<Node> pattern ) 
     {
-        ASSERT( current_sr )("Cannot call BuildReplace() from other than MyBuildReplace()");     
+        ASSERT( current_sr )("Cannot call DoBuildReplace() from other than MyBuildReplace()");     
         return Agent::AsAgent(pattern)->BuildReplace( pattern );
     }
 private:    
