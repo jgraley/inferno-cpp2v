@@ -72,7 +72,6 @@ private:
 };
 
 
-
 // These can be used in search pattern to match a SpecificIdentifier by name.
 // (cannot do this using a SpecificIdentifier in the search pattern because
 // the address of the node would be compared, not the name string). TODO document

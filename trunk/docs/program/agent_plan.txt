@@ -24,17 +24,20 @@ Detailed plan for refactoring into agent patterns
 - For soft nodes, provide a thunk in the base class for calls back into main S&R (so soft algo is fully enclosed from agent network) DONE
 - Additionally for soft nodes, do not pass in sr and use the sr in the Agent config instead (prove they match?) 
 - Once you think this is done, start asserting that pattern==this in the major functions DONE
-5. pattern parameter (to BuildReplace and DecidedCompare) to be deduced from "this" locally, not passed in
 - Convert Couplings to index using Agent * not TreePtr<Node> DONE
-- Note we cannot actually create a TreePtr<> from a normal pointer, so must first convert all the dyncasts to normal pointers
-- Note for soft nodes, DecidedCompare should look the same as other DecidedCompare functions
----now you are technically distributed, yay, but lots of tidying up to do...---
+- Note we cannot actually create a TreePtr<> from a normal pointer, so must first convert all the dyncasts to normal pointers DONE 
+- In BuildReplaceNormal() which duplicates pattern into output tree, use Clone() so that even identifiers are re-constructed (do not want agents in output tree) DONE
+5. pattern parameter (to BuildReplace and DecidedCompare) to be deduced from "this" locally, not passed in DONE 
+---now you are technically distributed (=object-based paradigm), yay, but lots of tidying up to do...---
 - Insert an AgentCommon class (between Agent and NormalAgent) for handy stuff needed by NormalAgent as well as the special ones 
 - move the pre-restriction check into AgentCommon, based on an ARCHITYPE passed to the constructor
 - NormalAgent, NormalAgentWrapper and MakePatternPtr to get own source file 
 6. Special node functions in NormalNode to be moved into the special nodes themselves (and just derive from AgentCommon) - give them own source files
+   NOTE: can remove the dynamic_cast checks for these special agents
    NOTE: get the AgentCommon into the non-templated XBase and rename it to XAgent - these will be the 
    "generic" agents and the templated versions of X will just be a "concretisation" that bring in normal-nodes-in-pattern and compile-time-type-safety concepts
+- Try to move the compare functionality (at least LocalCompare()) into the agent for Star (replace is already OK for Star)
+   ---now the choice of algorithm is decide by vcall not if-elseif chain (=object-oriented paradigm)
 7. keynodes to be remembered by agents (all of thm) in AgentCommon, not passed in or looked up in central coupling keys object. Do not pass around.
 8. Central couplingkeys object to be pensioned off, and remove from Configure(). 
 - Same for the dirty grass, try to keep the state locally. Check for other state in SR that should be in the agents
@@ -81,7 +84,7 @@ the actual SR.
 [1] The anatomy of a slave
 SlaveCompareReplace is a special Node, Agent and CompareReplace object in its own right.
 The Agent/special Node is understood to be a part of some other CompareReplace's pattern (the
-master), and "surrounds" its own SearchReplace object. However, we don't need to hide the slave SR
+master), and "surrounds" its own CompareReplace object. However, we don't need to hide the slave SR
 from the master SR as they're both the same class... So the plan is for the master sr to "seek out"
 slaves in the tree and invoke them as required. Slave will need to tell master SR where to act
 in the newly generated output program tree. Could multiple slaves of the same master be run

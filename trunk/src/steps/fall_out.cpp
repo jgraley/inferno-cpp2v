@@ -24,7 +24,7 @@ private:
     virtual TreePtr<Node> MyBuildReplace()
     {
         ASSERT( container );
-	    TreePtr<Node> n = BuildReplace( container );
+	    TreePtr<Node> n = DoBuildReplace( container );
 	    ASSERT( n );
 	    ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
 	    ASSERT( n_container );
