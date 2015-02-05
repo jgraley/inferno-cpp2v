@@ -31,13 +31,6 @@ private:
     bool DecidedCompareSearchContainer( const TreePtrInterface &x,
     		             bool can_key,
     		             Conjecture &conj );
-    bool MatchingDecidedCompare( const TreePtrInterface &x,
-                                 bool can_key,
-                                 Conjecture &conj );
-
-public:	
-    bool Compare( const TreePtrInterface &x,
-                  bool can_key = false );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:	
 	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not NULL
