@@ -40,5 +40,28 @@ public:
 	}
 };
 
+// - Configure
+// - Pre-restriction
+// - Keying (default case)
+// - Indenting the trace output
+class AgentCommon : public Agent
+{
+public:
+    AgentCommon() :sr(NULL), coupling_keys(NULL) {}
+    void Configure( const CompareReplace *s, CouplingKeys *c );
+    virtual bool DecidedCompare( const TreePtrInterface &x,
+                                 bool can_key,
+                                 Conjecture &conj );
+    virtual TreePtr<Node> BuildReplace( TreePtr<Node> keynode=TreePtr<Node>() );
+    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
+                                  bool can_key,
+                                  Conjecture &conj ) = 0;
+    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() ) = 0;
+protected:
+    const CompareReplace *sr;
+    CouplingKeys *coupling_keys;
+};
+
+
 };
 #endif

@@ -13,28 +13,21 @@
 namespace SR
 { 
     
-class NormalAgent : public virtual Agent
+class NormalAgent : public virtual AgentCommon
 {
 public:
-	NormalAgent() :sr(NULL), coupling_keys(NULL) {}
-    void ConfigureTreePtrThis( TreePtr<Node> tpt );										 
-	void Configure( const CompareReplace *s, CouplingKeys *c );
-//private:
-	const CompareReplace *sr;
-	CouplingKeys *coupling_keys;
-public:
-    virtual bool DecidedCompare( const TreePtrInterface &x,
-    		                     bool can_key,
-    		                     Conjecture &conj );
+    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
+    		                         bool can_key,
+    		                         Conjecture &conj );
 private:
-    bool DecidedCompare( SequenceInterface &x,
-    		             SequenceInterface &pattern,
-    		             bool can_key,
-    		             Conjecture &conj );
-    bool DecidedCompare( CollectionInterface &x,
-    		             CollectionInterface &pattern,
-    		             bool can_key,
-    		             Conjecture &conj );
+    bool DecidedCompareSequence( SequenceInterface &x,
+    	                         SequenceInterface &pattern,
+    	                         bool can_key,
+    	                         Conjecture &conj );
+    bool DecidedCompareCollection( CollectionInterface &x,
+    		                       CollectionInterface &pattern,
+    		                       bool can_key,
+    		                       Conjecture &conj );
     bool DecidedCompareSearchContainer( const TreePtrInterface &x,
     		             bool can_key,
     		             Conjecture &conj );
@@ -45,7 +38,7 @@ private:
 public:	
     bool Compare( const TreePtrInterface &x,
                   bool can_key = false );
-    virtual TreePtr<Node> BuildReplace( TreePtr<Node> keynode=TreePtr<Node>() );
+    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:	
 	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not NULL
     TreePtr<Node> BuildReplaceSlave( TreePtr<Node> keynode );    
