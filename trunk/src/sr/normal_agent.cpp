@@ -6,35 +6,10 @@
 
 using namespace SR;
 
-void NormalAgent::Configure( const CompareReplace *s, CouplingKeys *c )
+bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
+							          bool can_key,
+    						          Conjecture &conj )
 {
-	ASSERT(s);
-	ASSERT(c);
-	sr = s;
-    coupling_keys = c;
-	// TODO recursively configure children
-}
-
-
-bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
-							       bool can_key,
-    						       Conjecture &conj )
-{
-    INDENT;
-	ASSERT(sr)("Agent ")(*this)(" at appears not to have been configured, since sr is NULL");
-	ASSERT(coupling_keys);
-	ASSERT( x ); // Target must not be NULL
-    ASSERT(this);
-    shared_ptr<Key> special_key;
-    
-	// Check whether the present node matches. Do this for all nodes: this will be the local
-	// restriction for normal nodes and the pre-restriction for special nodes (based on
-	// how IsLocalMatch() has been overridden.
-	if( !IsLocalMatch(x.get()) )
-	{
-		return false;
-    }
-    
     if( SoftSearchPattern* ss_this = dynamic_cast<SoftSearchPattern *>(this) )
     {
         // Hand over to any soft search functionality in the search pattern node
@@ -45,8 +20,10 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
     else if( SoftSearchPatternSpecialKey *sspsk_this = dynamic_cast<SoftSearchPatternSpecialKey *>(this) )
     {
         // Hand over to any soft search functionality in the search pattern node
-        special_key = sspsk_this->DecidedCompare( sr, x, can_key, conj );
-        if( !special_key )
+        shared_ptr<Key> special_key = sspsk_this->DecidedCompare( sr, x, can_key, conj );
+        if( special_key )
+            coupling_keys->DoKey( special_key, this ); 
+        else
             return false;
     }
     else if( dynamic_cast<SoftReplacePattern *>(this) )
@@ -113,14 +90,14 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 				SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
 				ASSERT( x_seq )( "itemise for x didn't match itemise for pattern");
 				TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
-				r = DecidedCompare( *x_seq, *pattern_seq, can_key, conj );
+				r = DecidedCompareSequence( *x_seq, *pattern_seq, can_key, conj );
 			}
 			else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
 			{
 				CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
 				ASSERT( x_col )( "itemise for x didn't match itemise for pattern");
 				TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
-				r = DecidedCompare( *x_col, *pattern_col, can_key, conj );
+				r = DecidedCompareCollection( *x_col, *pattern_col, can_key, conj );
 			}
 			else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
 			{
@@ -150,28 +127,6 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 				return false;
 		}
     }
-   
-    // Check couplings after everything else because they can get keyed during keying pass
-    // and then seem to match during restricting pass. A key match is not a guarantee 
-    // because when it keyed some coupled node below it may not have been keyed yet 
-    // and so their checks would not have occured and hte check would not be strict 
-    // enough. Perhaps keys can be "concrete" when all the couplings below them have
-    // been checked as matching?
-    if( TreePtr<Node> keynode = coupling_keys->GetCoupled( this ) )
-    {
-        SimpleCompare sc;
-        if( sc( x, keynode ) == false )
-            return false;
-    }
-	
-	if( can_key )
-    {
-        if( special_key )
-            coupling_keys->DoKey( special_key, this );  
-        else
-            coupling_keys->DoKey( x, this );  
-    }
-
     return true;
 }
 
@@ -183,10 +138,10 @@ bool NormalAgent::DecidedCompare( const TreePtrInterface &x,
 // first: How many elements to match (as with Star)
 // second: Which of the above to try for container match
 // third: Which element of the SearchContainer to try 
-bool NormalAgent::DecidedCompare( SequenceInterface &x,
-		                          SequenceInterface &pattern,
-		                          bool can_key,
-		                          Conjecture &conj )
+bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
+		                                  SequenceInterface &pattern,
+		                                  bool can_key,
+		                                  Conjecture &conj )
 {
     INDENT;
     Sequence<Node> epattern = WalkContainerPattern( pattern, false );    
@@ -284,10 +239,10 @@ bool NormalAgent::DecidedCompare( SequenceInterface &x,
 }
 
 
-bool NormalAgent::DecidedCompare( CollectionInterface &x,
-		 					       CollectionInterface &pattern,
-							       bool can_key,
-							       Conjecture &conj )
+bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
+		 					                CollectionInterface &pattern,
+							                bool can_key,
+							                Conjecture &conj )
 {
     INDENT;
     Sequence<Node> epattern = WalkContainerPattern( pattern, false );    
@@ -487,24 +442,15 @@ bool NormalAgent::Compare( const TreePtrInterface &x,
 
 
 
-TreePtr<Node> NormalAgent::BuildReplace( TreePtr<Node> keynode ) 
+TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
-    INDENT;
-    ASSERT(this);
-	ASSERT(sr)("Agent ")(*this)(" at appears not to have been configured, since sr is NULL");
-	ASSERT(coupling_keys);
-    
-    // See if the pattern node is coupled to anything. The keynode that was passed
-    // in is just a suggestion and will be overriden if we are keyed.
-    shared_ptr<Key> key = coupling_keys->GetKey( this );
-	if( key )
-		keynode = key->root;
 	if( dynamic_cast<SearchContainerBase *>(this) )
 	{
 		// SearchContainer.
 		// Are we substituting a stuff node? If so, see if we reached the terminus, and if
 		// so come out of substitution. Done as tail recursion so that we already duplicated
 		// the terminus key, and can just overlay the terminus replace pattern.
+        shared_ptr<Key> key = coupling_keys->GetKey( this );
 		shared_ptr<TerminusKey> stuff_key = dynamic_pointer_cast<TerminusKey>(key);
 		ASSERT( stuff_key );
 		ASSERT( stuff_key->agent );

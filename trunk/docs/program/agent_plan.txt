@@ -29,8 +29,8 @@ Detailed plan for refactoring into agent patterns
 - In BuildReplaceNormal() which duplicates pattern into output tree, use Clone() so that even identifiers are re-constructed (do not want agents in output tree) DONE
 5. pattern parameter (to BuildReplace and DecidedCompare) to be deduced from "this" locally, not passed in DONE 
 ---now you are technically distributed (=object-based paradigm), yay, but lots of tidying up to do...---
-- Insert an AgentCommon class (between Agent and NormalAgent) for handy stuff needed by NormalAgent as well as the special ones 
-- move the pre-restriction check into AgentCommon, based on an ARCHITYPE passed to the constructor
+- Insert an AgentCommon class (between Agent and NormalAgent) for handy stuff needed by NormalAgent as well as the special ones DONE
+- move the pre-restriction check into AgentCommon, based on an ARCHITYPE passed to the constructor NO NEED!
 - NormalAgent, NormalAgentWrapper and MakePatternPtr to get own source file 
 6. Special node functions in NormalNode to be moved into the special nodes themselves (and just derive from AgentCommon) - give them own source files
    NOTE: can remove the dynamic_cast checks for these special agents
