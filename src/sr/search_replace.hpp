@@ -7,6 +7,7 @@
 #include "helpers/transformation.hpp"
 #include "coupling.hpp"
 #include "agent.hpp"
+#include "normal_agent.hpp"
 #include <set>
 
 namespace SR 
