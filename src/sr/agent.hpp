@@ -43,7 +43,7 @@ public:
 // - Configure
 // - Pre-restriction
 // - Keying (default case)
-// - Indenting the trace output
+// - Compare and MAtchingDecidedCompare rings
 class AgentCommon : public Agent
 {
 public:
@@ -57,6 +57,11 @@ public:
                                   bool can_key,
                                   Conjecture &conj ) = 0;
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() ) = 0;
+    bool MatchingDecidedCompare( const TreePtrInterface &x,
+                                 bool can_key,
+                                 Conjecture &conj );
+    bool Compare( const TreePtrInterface &x,
+                  bool can_key = false );
 protected:
     const CompareReplace *sr;
     CouplingKeys *coupling_keys;
