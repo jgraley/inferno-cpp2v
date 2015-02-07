@@ -30,21 +30,6 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
     {
     	// No further restriction beyond the pre-restriction for these nodes when searching.
     }
-    else if( GreenGrassBase *green_this = dynamic_cast<GreenGrassBase *>(this) )
-    {
-        // Restrict so that everything in the input program under here must be "green grass"
-        // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
-		if( sr->GetOverallMaster()->dirty_grass.find( x ) != sr->GetOverallMaster()->dirty_grass.end() )
-		{
-			TRACE(*x)(" is dirty grass so rejecting\n");
-			return false;
-		}
-        TRACE("subtree under ")(*x)(" is green grass\n");
-        // Normal matching for the through path
-        bool r = Agent::AsAgent(green_this->GetThrough())->DecidedCompare( x, can_key, conj );
-        if( !r )
-            return false;
-    }
     else if( OverlayBase *o_this = dynamic_cast<OverlayBase *>(this) )
     {
         // When Overlay node seen duriung search, just forward through the "through" path
@@ -333,12 +318,6 @@ TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 		ASSERT( ob_this->GetOverlay() );          
 		TRACE("Overlay node through=")(*(ob_this->GetThrough()))(" overlay=")(*(ob_this->GetOverlay()))("\n");
 		return AsAgent(ob_this->GetOverlay())->BuildReplace( keynode );
-	}
-	else if( GreenGrassBase *ggb_this = dynamic_cast<GreenGrassBase *>(this) )
-	{
-		ASSERT( ggb_this->GetThrough() );          
-		TRACE("GreenGrass node through=")(*(ggb_this->GetThrough()))("\n");
-    	return AsAgent(ggb_this->GetThrough())->BuildReplace( keynode );
 	}
 	else if( dynamic_cast<SlaveBase *>(this) )
 	{   
