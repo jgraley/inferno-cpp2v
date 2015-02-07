@@ -10,6 +10,7 @@
 #include "normal_agent.hpp"
 #include "search_container_agent.hpp"
 #include "green_grass_agent.hpp"
+#include "overlay_agent.hpp"
 #include <set>
 
 namespace SR 
@@ -218,66 +219,6 @@ struct Star : StarBase, Special<PRE_RESTRICTION>
     virtual TreePtr<Node> GetPattern() 
     {
         return pattern;
-    }
-};
-
-
-struct OverlayBase : virtual Node, virtual NormalAgent
-{
-    virtual TreePtr<Node> GetThrough() const = 0;
-    virtual TreePtr<Node> GetOverlay() const = 0;    
-};
-
-
-template<class PRE_RESTRICTION>
-struct Overlay : OverlayBase, Special<PRE_RESTRICTION>
-{
-    SPECIAL_NODE_FUNCTIONS
-    TreePtr<PRE_RESTRICTION> through;
-    TreePtr<PRE_RESTRICTION> overlay;
-    virtual TreePtr<Node> GetThrough() const 
-    {
-        return (TreePtr<Node>)through;
-    }
-    virtual TreePtr<Node> GetOverlay() const
-    {
-        return (TreePtr<Node>)overlay;
-    }
-};
-
-
-struct InsertBase : virtual Node, virtual NormalAgent
-{
-    virtual SequenceInterface *GetInsert() = 0;    
-};
-
-
-template<class PRE_RESTRICTION>
-struct Insert : InsertBase, Special<PRE_RESTRICTION>
-{
-    SPECIAL_NODE_FUNCTIONS
-    Sequence<PRE_RESTRICTION> insert;
-    virtual SequenceInterface *GetInsert()  
-    {
-        return &insert;
-    }
-};
-
-
-struct EraseBase : virtual Node, virtual NormalAgent
-{
-    virtual SequenceInterface *GetErase() = 0;    
-};
-
-
-template<class PRE_RESTRICTION>
-struct Erase : EraseBase, Special<PRE_RESTRICTION>
-{
-    SPECIAL_NODE_FUNCTIONS
-    Sequence<PRE_RESTRICTION> erase;
-    virtual SequenceInterface *GetErase()  
-    {
-        return &erase;
     }
 };
 
