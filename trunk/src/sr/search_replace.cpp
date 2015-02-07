@@ -126,13 +126,13 @@ void CompareReplace::ConfigureImpl()
 		// Give agents pointers to here and our coupling keys
 		//TRACE("Configuring search pattern ")(*n)("\n");
         Agent::AsAgent(n)->Configure( this, &coupling_keys );		
-        if( shared_ptr<StuffBase> sb = dynamic_pointer_cast<StuffBase>(n) )
+        if( shared_ptr<StuffAgent> sb = dynamic_pointer_cast<StuffAgent>(n) )
         {
 		    // Provide Stuff nodes with slave-access to our master coupling keys. They are not allowed to add keys,
 			// only use the ones that are already there. Note that recurse restriction is done using a local CompareReplace object.
             //TRACE("Found stuff, rr@%p\n", sb->recurse_restriction.get());
-            sb->recurse_comparer.coupling_keys.SetMaster( &coupling_keys ); 
-            sb->recurse_comparer.compare_pattern = sb->recurse_restriction; // TODO could move into a Stuff node constructor if there was one
+            sb->recurse_comparer->coupling_keys.SetMaster( &coupling_keys ); 
+            sb->recurse_comparer->compare_pattern = sb->recurse_restriction; // TODO could move into a Stuff node constructor if there was one
         }
 		
         if( shared_ptr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
@@ -530,23 +530,6 @@ void SearchReplace::GetGraphInfo( vector<string> *labels,
         links->push_back(stuff->terminus);
     }
 }
-    
-    
-shared_ptr<ContainerInterface> StuffBase::GetContainerInterface( TreePtr<Node> x )
-{
-    // TODO cache this?
-    Filter *rf = NULL;
-    if( recurse_restriction )
-    {
-        ASSERT( recurse_comparer.compare_pattern )("Stuff node in slave must be initialised before slave\n");     
-        rf = &recurse_comparer;
-    }
-    
-    if( one_level )
-        return shared_ptr<ContainerInterface>( new FlattenNode( x ) );
-    else
-        return shared_ptr<ContainerInterface>( new Walk( x, NULL, rf ) );
-}
 
 
 bool StarBase::MatchRange( const CompareReplace *sr,
@@ -587,17 +570,6 @@ bool StarBase::MatchRange( const CompareReplace *sr,
 }                       
 
 
-
-shared_ptr<ContainerInterface> AnyNodeBase::GetContainerInterface( TreePtr<Node> x )
-{ 
-    TRACE("FlattenNodeing an AnyNode at ")(*x)(": { ");
-    FlattenNode f( x );
-    FOREACH( TreePtr<Node> pn, f )
-        {TRACE(*pn)(" ");}
-    TRACE("}\n");
-        
-    return shared_ptr<ContainerInterface>( new FlattenNode( x ) );
-}
 
 
 void CompareReplace::Test()

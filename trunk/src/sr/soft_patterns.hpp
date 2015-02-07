@@ -3,6 +3,7 @@
 
 #include "search_replace.hpp"
 #include "helpers/transformation.hpp"
+#include "search_container_agent.hpp"
 
 namespace SR
 {

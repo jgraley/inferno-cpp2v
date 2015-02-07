@@ -14,7 +14,6 @@ namespace SR
  
 class Conjecture;
 class SpecialBase;
-class StuffBase;
 class StarBase;
 class SlaveBase;
 class SearchContainerBase;
@@ -65,6 +64,41 @@ public:
 protected:
     const CompareReplace *sr;
     CouplingKeys *coupling_keys;
+};
+
+
+// --- General note on SPECIAL_NODE_FUNCTIONS and PRE_RESTRICTION ---
+// Special nodes (that is nodes defined here with special S&R behaviour)
+// derive from a normal tree node via templating. This base class is
+// the PRE_RESTRICTION node, and we want it for 2 reasons:
+// 1. To allow normal nodes to point to special nodes, they must
+//    expose a normal interface, which can vary depending on usage
+//    so must be templated.
+// 2. We are able to provide a "free" and-rule restriction on all
+//    special nodes by restricting to non-strict subclasses of the
+//    pre-restrictor.
+// In order to make 2. work, we need to *avoid* overriding IsLocalMatch()
+// or IsSubclass() on special nodes, so that the behaviour of the 
+// PRE_RESTRICTION is preserved wrt comparisons. So all special nodes
+// including speicialisations of TransformTo etc should use 
+// SPECIAL_NODE_FUNCTIONS instead of NODE_FUNCTIONS.
+// Itemise is known required (for eg graph plotting), other bounces
+// are TBD.
+#define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
+struct SpecialBase
+{
+    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() = 0;
+};
+
+
+template<class PRE_RESTRICTION>
+struct Special : SpecialBase, virtual PRE_RESTRICTION
+{
+    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype()
+    {
+        // Esta muchos indirection
+        return shared_ptr<TreePtrInterface>( new TreePtr<PRE_RESTRICTION>( new PRE_RESTRICTION ));  
+    }
 };
 
 
