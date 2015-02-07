@@ -393,21 +393,21 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		*shape = "circle";
 		return string("||||");
 	}
-    else if( dynamic_pointer_cast<OverlayBase>(sp) )
+    else if( dynamic_pointer_cast<OverlayAgent>(sp) )
     {
         // The Overlay node is shown as a small triangle, with the through link on the right and the overlay link
         // coming out of the bottom.
         *shape = "triangle";
         return string(""); 
     }
-    else if( dynamic_pointer_cast<InsertBase>(sp) )
+    else if( dynamic_pointer_cast<InsertAgent>(sp) )
     {
         // The Insert node is shown as a small triangle containing a + symbol, with the insert link
         // coming out of the bottom
         *shape = "triangle";
         return string("+"); 
     }
-    else if( dynamic_pointer_cast<EraseBase>(sp) )
+    else if( dynamic_pointer_cast<EraseAgent>(sp) )
     {
         // The Erase node is shown as a small triangle containing a - symbol, with the erase link
         // coming out of the right
@@ -660,19 +660,19 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
         else
             s+= ":e";
     }
-    else if( dynamic_pointer_cast<OverlayBase>(from) )
+    else if( dynamic_pointer_cast<OverlayAgent>(from) )
     {
         if( field == "portb0" )
             s+= ":s";
         else
             s+= ":e";
     }
-    else if( dynamic_pointer_cast<InsertBase>(from) )
+    else if( dynamic_pointer_cast<InsertAgent>(from) )
     {
         s+= ":s";
     }
 
-    else if( dynamic_pointer_cast<EraseBase>(from) )
+    else if( dynamic_pointer_cast<EraseAgent>(from) )
     {
         s+= ":e";
     }

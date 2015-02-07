@@ -110,7 +110,7 @@ private:
             FOREACH( TreePtr<Node> n, e )
             {
                 if( dynamic_pointer_cast<SoftReplacePattern>(n) || 
-                    dynamic_pointer_cast<OverlayBase>(n) ||
+                    dynamic_pointer_cast<OverlayAgent>(n) ||
                     dynamic_pointer_cast<SlaveBase>(n) ) // TODO common base class for these called Modifier
                 {
                     ASSERT( !modifier_pattern )("MatchAll coupled into replace must have no more than one modifying pattern:")

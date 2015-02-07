@@ -2,6 +2,7 @@
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
 #include "helpers/simple_compare.hpp"
+#include "overlay_agent.hpp"
 #include "normal_agent.hpp"
 
 using namespace SR;
@@ -29,17 +30,6 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
     else if( dynamic_cast<SoftReplacePattern *>(this) )
     {
     	// No further restriction beyond the pre-restriction for these nodes when searching.
-    }
-    else if( OverlayBase *o_this = dynamic_cast<OverlayBase *>(this) )
-    {
-        // When Overlay node seen duriung search, just forward through the "through" path
-        bool r = Agent::AsAgent(o_this->GetThrough())->DecidedCompare( x, can_key, conj );
-        if( !r )
-            return false;
-    }
-    else if( dynamic_cast<InsertBase *>(this) || dynamic_cast<EraseBase *>(this) )
-    {
-       ASSERTFAIL(*this)(" found outside of a container; can only be used in containers\n");
     }
     else if( SlaveBase *s_this = dynamic_cast<SlaveBase *>(this) )
     {
@@ -121,7 +111,7 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
 		                                  Conjecture &conj )
 {
     INDENT;
-    Sequence<Node> epattern = WalkContainerPattern( pattern, false );    
+    Sequence<Node> epattern = OverlayAgent::WalkContainerPattern( pattern, false );    
     
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
@@ -222,7 +212,7 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 							                Conjecture &conj )
 {
     INDENT;
-    Sequence<Node> epattern = WalkContainerPattern( pattern, false );    
+    Sequence<Node> epattern = OverlayAgent::WalkContainerPattern( pattern, false );    
    
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
@@ -313,12 +303,6 @@ TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 		else
 			return sr->DuplicateSubtree(keynode);   // Weak modifier
 	}
-	else if( OverlayBase *ob_this = dynamic_cast<OverlayBase *>(this) )
-	{
-		ASSERT( ob_this->GetOverlay() );          
-		TRACE("Overlay node through=")(*(ob_this->GetThrough()))(" overlay=")(*(ob_this->GetOverlay()))("\n");
-		return AsAgent(ob_this->GetOverlay())->BuildReplace( keynode );
-	}
 	else if( dynamic_cast<SlaveBase *>(this) )
 	{   
 		return BuildReplaceSlave( keynode );
@@ -374,7 +358,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
         ASSERT( keynode_memb[i] )( "itemise returned null element" );                
         if( ContainerInterface *pattern_con = dynamic_cast<ContainerInterface *>(pattern_memb[i]) )                
         {
-            Sequence<Node> expanded_pattern_con = WalkContainerPattern( *pattern_con, true );    
+            Sequence<Node> expanded_pattern_con = OverlayAgent::WalkContainerPattern( *pattern_con, true );    
 
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
             ASSERT( dest_con )( "itemise for dest didn't match itemise for expanded_pattern_con");
@@ -604,53 +588,3 @@ TreePtr<Node> NormalAgent::BuildReplaceStar( TreePtr<Node> keynode )
 	return dest;
 }
 
-
-Sequence<Node> NormalAgent::WalkContainerPattern( ContainerInterface &pattern,
-                                                  bool replacing ) 
-{
-    // This helper is for Insert and Erase nodes. It takes a pattern container (which
-    // is the only place these nodes should occur) and expands out either Insert or
-    // Erase nodes. When searching, Erase is expanded out so that the program nodes
-    // to be erased may be matched off (cond keyed etc) and Insert is skipped because
-    // it does not need to correspond to anything during search. When replacing, 
-    // erase is skipped to erase the elements and Insert is expanded to insert them. 
-    Sequence<Node> expanded;
-    FOREACH( TreePtr<Node> n, pattern )
-    {
-        if( shared_ptr<EraseBase> pe = dynamic_pointer_cast<EraseBase>(n) )
-        {
-            if( !replacing )
-                FOREACH( TreePtr<Node> e, *(pe->GetErase()) )
-                    expanded.push_back( e );                
-        }
-        else if( shared_ptr<InsertBase> pi = dynamic_pointer_cast<InsertBase>(n) )
-        {
-            if( replacing )
-                FOREACH( TreePtr<Node> i, *(pi->GetInsert()) )
-                    expanded.push_back( i );                
-        }
-        else if( shared_ptr<OverlayBase> po = dynamic_pointer_cast<OverlayBase>(n) )
-        {
-            // Unfortunate inconsistency here: An overlay node ca either (a) support stars under it for use in 
-            // collections or (b) support overlaying, but not both. TODO think about overlaying subsequences 
-            // We use the pattern-tweaking method if thre are stars, but let the replace engine do overlaying
-            // if there are not (overlaying takes place for the single element at the position of the Overlay node)
-            if( dynamic_pointer_cast<StarBase>(po->GetOverlay()) || dynamic_pointer_cast<StarBase>(po->GetThrough()) )
-            {
-                if( replacing )
-                    expanded.push_back( po->GetOverlay() );         
-                else
-                    expanded.push_back( po->GetThrough() );    
-            }
-            else
-            {
-                expanded.push_back( n );
-            }                
-        }
-        else
-        {
-            expanded.push_back( n );
-        }
-    }
-    return expanded;
-}
