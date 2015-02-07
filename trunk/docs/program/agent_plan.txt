@@ -38,16 +38,23 @@ Detailed plan for refactoring into agent patterns
    "generic" agents and the templated versions of X will just be a "concretisation" that bring in normal-nodes-in-pattern and compile-time-type-safety concepts
 - Try to move the compare functionality (at least LocalCompare()) into the agent for Star (replace is already OK for Star)
    ---now the choice of algorithm is decide by vcall not if-elseif chain (=object-oriented paradigm)
-7. keynodes to be remembered by agents (all of thm) in AgentCommon, not passed in or looked up in central coupling keys object. Do not pass around.
+- Consider alternatives for the SpecialNode hierarchy, and make sure you don't break pre-restrictions (might already be broken for Stuff)
+- Tidy up: sort out Stuff-specific code in SR configure walk; Check out the other
+  uses of TerminusBase which apparently should not work since not detected during replace... mend or remove.
+7. keynodes to be remembered by agents (all of thm) in AgentCommon, not passed in or looked up in central coupling keys 
+   object. Do not pass around. Sort out sometimes needing to pass keynode to child node during replace.
 8. Central couplingkeys object to be pensioned off, and remove from Configure(). 
 - Same for the dirty grass, try to keep the state locally. Check for other state in SR that should be in the agents
 ---now agent to agent calls are context-free and parameterless in the case of BuildReplace()---
 - Slave tidy-up. Add a funciton in SR to invoke slave SR and send slave invocation through that. It can fill in the context (obviously sr ptr still needed).
 - Slaves: try to invoke them from SR AFTER master replace has finished. Only need to do 1st level, and recursion will take care of the rest. see [1]
+- Conjecture: add fu to allow abnormal context compares in all the styles currently in use with just calling DecidedCompare()
+  These include: calls to Compare() as seen in MatchAny, a local DecidedCompare as used in NotMatch, a local DecidedCompare 
+  with init during configure as seen in slave recurse restriction.
   NOTE: this is shaken down style, wher slave SR is invoked directly from master SR, AFTER the replace walk not during
 - RETHINK how to do the restriction pattern on Star nodes. It will be hard to accommodate hopping back out into SR's Compare. 
   NOTE: maybe even revoke the feature, and go back to just a PRE_RESTRICTION by typee...? see what the use cases are...
-- Move SR::DuplicateNode and DuplicateSubtree out into src/helpers/ DONE but without GreenGrass support
+- Move SR::DuplicateNode and DuplicateSubtree out into src/helpers/ DONE but without GreenGrass support, sosort this out (or just put in AgentCommon)
 ---now the sr passed in via Configure() is nearly or completely unnecessary making the agents reasonably self-sufficient---
 - Note: don't kill the Configure sweep since might need in future even if not needed now
 

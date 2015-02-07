@@ -9,6 +9,7 @@
 #include "agent.hpp"
 #include "normal_agent.hpp"
 #include "search_container_agent.hpp"
+#include "green_grass_agent.hpp"
 #include <set>
 
 namespace SR 
@@ -217,24 +218,6 @@ struct Star : StarBase, Special<PRE_RESTRICTION>
     virtual TreePtr<Node> GetPattern() 
     {
         return pattern;
-    }
-};
-
-
-struct GreenGrassBase : virtual Node, virtual NormalAgent 
-{
-    virtual TreePtr<Node> GetThrough() const = 0;
-};
-
-
-template<class PRE_RESTRICTION>
-struct GreenGrass : GreenGrassBase, Special<PRE_RESTRICTION>
-{
-    SPECIAL_NODE_FUNCTIONS
-    TreePtr<PRE_RESTRICTION> through;
-    virtual TreePtr<Node> GetThrough() const
-    {
-        return TreePtr<Node>( through );
     }
 };
 

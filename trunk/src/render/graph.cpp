@@ -14,6 +14,7 @@
 #include "graph.hpp"
 #include "steps/inferno_patterns.hpp"
 #include "sr/search_container_agent.hpp"
+#include "sr/green_grass_agent.hpp"
 #include <inttypes.h>
 
 using namespace CPPTree;
@@ -384,7 +385,7 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		*shape = "trapezium";
 		return ibnb->name;
 	}
-	else if( dynamic_pointer_cast<GreenGrassBase>(sp) )
+	else if( dynamic_pointer_cast<GreenGrassAgent>(sp) )
 	{
 	    // The GreenGrass node appears as a small circle containing four vertical line characters,
 	    // like this: ||||. These are meant to represent the blades of grass. It was late and I was
