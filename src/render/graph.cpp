@@ -13,6 +13,7 @@
 #include "common/read_args.hpp"
 #include "graph.hpp"
 #include "steps/inferno_patterns.hpp"
+#include "sr/search_container_agent.hpp"
 #include <inttypes.h>
 
 using namespace CPPTree;
@@ -302,7 +303,7 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		*shape = "circle";
 		return string("*");
 	}
-	else if( TreePtr<StuffBase> stuff = dynamic_pointer_cast<StuffBase>(sp) )
+	else if( TreePtr<StuffAgent> stuff = dynamic_pointer_cast<StuffAgent>(sp) )
 	{
 	    // The Stuff node appears as a small circle with a # character inside it. The terminus link emerges from the
 	    // right of the circle. If there is a recurse restriction the circle is egg-shaped and the restriction link 
@@ -314,7 +315,7 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
      	    *shape = "circle";
 		return string("#"); 
 	}
-	else if( dynamic_pointer_cast<AnyNodeBase>(sp) )
+	else if( dynamic_pointer_cast<AnyNodeAgent>(sp) )
 	{
 	    // The AnyNode node appears as a small circle with a ? sign in it. The terminus link emerges from the
 	    // right of the circle. ? implies the tendancy to match exactly one thing.
@@ -651,7 +652,7 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
 			    atts += "label = \"" + (**(sbs->GetPreRestrictionArchitype())).GetName() + "\"\n";
 			}
 	}
-    else if( dynamic_pointer_cast<StuffBase>(from) )
+    else if( dynamic_pointer_cast<StuffAgent>(from) )
     {
         if( field == "porta0" )
             s+= ":n";

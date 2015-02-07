@@ -8,6 +8,7 @@
 #include "coupling.hpp"
 #include "agent.hpp"
 #include "normal_agent.hpp"
+#include "search_container_agent.hpp"
 #include <set>
 
 namespace SR 
@@ -15,7 +16,6 @@ namespace SR
 
 class Conjecture;
 class SpecialBase;
-class StuffBase;
 class StarBase;
 class SlaveBase;
 class SearchContainerBase;
@@ -88,12 +88,12 @@ public:
                           TreePtr<Node> root );
 public:
     TreePtr<Node> BuildReplace( TreePtr<Node> pattern ) const;
+    TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
+                                    TreePtr<Node> source_terminus = TreePtr<Node>(),
+                                    TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 private:
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
     		                     bool force_dirty ) const;
-    TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
-		                            TreePtr<Node> source_terminus = TreePtr<Node>(),
-		                            TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
     void KeyReplaceNodes( TreePtr<Node> pattern ) const;
     TreePtr<Node> ReplacePhase( TreePtr<Node> x ) const;
     // implementation ring: Do the actual search and replace
@@ -122,40 +122,6 @@ public:
                                vector< TreePtr<Node> > *links ) const;
 };
 
-
-// --- General note on SPECIAL_NODE_FUNCTIONS and PRE_RESTRICTION ---
-// Special nodes (that is nodes defined here with special S&R behaviour)
-// derive from a normal tree node via templating. This base class is
-// the PRE_RESTRICTION node, and we want it for 2 reasons:
-// 1. To allow normal nodes to point to special nodes, they must
-//    expose a normal interface, which can vary depending on usage
-//    so must be templated.
-// 2. We are able to provide a "free" and-rule restriction on all
-//    special nodes by restricting to non-strict subclasses of the
-//    pre-restrictor.
-// In order to make 2. work, we need to *avoid* overriding IsLocalMatch()
-// or IsSubclass() on special nodes, so that the behaviour of the 
-// PRE_RESTRICTION is preserved wrt comparisons. So all special nodes
-// including speicialisations of TransformTo etc should use 
-// SPECIAL_NODE_FUNCTIONS instead of NODE_FUNCTIONS.
-// Itemise is known required (for eg graph plotting), other bounces
-// are TBD.
-#define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
-struct SpecialBase
-{
-    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() = 0;
-};
-
-
-template<class PRE_RESTRICTION>
-struct Special : SpecialBase, virtual PRE_RESTRICTION
-{
-    virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype()
-    {
-        // Esta muchos indirection
-        return shared_ptr<TreePtrInterface>( new TreePtr<PRE_RESTRICTION>( new PRE_RESTRICTION ));  
-    }
-};
 
 /// Coupling slave can read the master's CouplingKeys structure
 struct CouplingSlave 
@@ -241,6 +207,8 @@ struct StarBase : virtual Node, virtual NormalAgent
                        ContainerInterface &range,
                        bool can_key );
 };
+
+
 template<class PRE_RESTRICTION>
 struct Star : StarBase, Special<PRE_RESTRICTION> 
 { 
@@ -257,6 +225,8 @@ struct GreenGrassBase : virtual Node, virtual NormalAgent
 {
     virtual TreePtr<Node> GetThrough() const = 0;
 };
+
+
 template<class PRE_RESTRICTION>
 struct GreenGrass : GreenGrassBase, Special<PRE_RESTRICTION>
 {
@@ -268,71 +238,13 @@ struct GreenGrass : GreenGrassBase, Special<PRE_RESTRICTION>
     }
 };
 
-struct TerminusKey : Key // TODO put in TerminusBase
-{
-    TreePtr<Node> terminus;
-};
-struct TerminusBase : virtual Node 
-{
-    TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
-};
-
-
-struct SearchContainerBase : TerminusBase, virtual NormalAgent
-{
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) = 0;
-};
-
-
-// The Stuff wildcard can match a truncated subtree with special powers as listed by the members
-struct StuffBase : virtual Node, 
-                   public SearchContainerBase
-{
-    StuffBase() : one_level(false){}
-    TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
-    CompareReplace recurse_comparer; // TODO only need the compare half, maybe split it out?
-    bool one_level;
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
-};
-template<class PRE_RESTRICTION>
-struct Stuff : StuffBase, Special<PRE_RESTRICTION> 
-{
-    // Do the itemiser by hand since it gets confused by the CompareReplace object   
-    virtual vector< Itemiser::Element * > Itemise( const Itemiser *itemise_object = 0 ) const
-    {
-        vector< Itemiser::Element * > v;
-        v.push_back( (Itemiser::Element *)(&recurse_restriction) );
-        v.push_back( (Itemiser::Element *)(&terminus) );
-        return v;
-    }
-    virtual Itemiser::Element *ItemiseIndex( int i ) const  
-    { 
-        return Itemise()[i];
-    } 
-    virtual int ItemiseSize() const  
-    { 
-        return Itemise().size();
-    }
-};
-
-
-struct AnyNodeBase : virtual Node, 
-                     public SearchContainerBase
-{
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
-};
-template<class PRE_RESTRICTION>
-struct AnyNode : AnyNodeBase, Special<PRE_RESTRICTION> 
-{
-    SPECIAL_NODE_FUNCTIONS
-};
-
 
 struct OverlayBase : virtual Node, virtual NormalAgent
 {
     virtual TreePtr<Node> GetThrough() const = 0;
     virtual TreePtr<Node> GetOverlay() const = 0;    
 };
+
 
 template<class PRE_RESTRICTION>
 struct Overlay : OverlayBase, Special<PRE_RESTRICTION>
@@ -350,10 +262,12 @@ struct Overlay : OverlayBase, Special<PRE_RESTRICTION>
     }
 };
 
+
 struct InsertBase : virtual Node, virtual NormalAgent
 {
     virtual SequenceInterface *GetInsert() = 0;    
 };
+
 
 template<class PRE_RESTRICTION>
 struct Insert : InsertBase, Special<PRE_RESTRICTION>
@@ -366,10 +280,12 @@ struct Insert : InsertBase, Special<PRE_RESTRICTION>
     }
 };
 
+
 struct EraseBase : virtual Node, virtual NormalAgent
 {
     virtual SequenceInterface *GetErase() = 0;    
 };
+
 
 template<class PRE_RESTRICTION>
 struct Erase : EraseBase, Special<PRE_RESTRICTION>
@@ -381,6 +297,7 @@ struct Erase : EraseBase, Special<PRE_RESTRICTION>
         return &erase;
     }
 };
+
 
 // Tell soft nodes that a compare run is beginning and it can flush any caches it may have
 struct Flushable

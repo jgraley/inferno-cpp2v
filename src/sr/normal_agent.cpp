@@ -30,14 +30,6 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
     {
     	// No further restriction beyond the pre-restriction for these nodes when searching.
     }
-    else if( dynamic_cast<SearchContainerBase *>(this) )
-    {
-    	// Invoke stuff node compare
-    	// Check whether the present node matches
-    	bool r = DecidedCompareSearchContainer( x, can_key, conj );
-        if( !r )
-            return false;
-    }
     else if( GreenGrassBase *green_this = dynamic_cast<GreenGrassBase *>(this) )
     {
         // Restrict so that everything in the input program under here must be "green grass"
@@ -322,76 +314,9 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 }
 
 
-// Helper for DecidedCompare that does the actual match testing work for the children and recurses.
-// Also checks for soft matches.
-bool NormalAgent::DecidedCompareSearchContainer( const TreePtrInterface &x,
-						     	                 bool can_key,
-							                     Conjecture &conj )
-{
-    INDENT;
-    SearchContainerBase *sc_this = dynamic_cast<SearchContainerBase *>(this);
-    ASSERT( sc_this );
-	ASSERT( sc_this->terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
-
-    TRACE("SearchContainer agent ")(*sc_this)(" terminus pattern is ")(*(sc_this->terminus))(" at ")(*x)("\n");
-
-    // Get an interface to the container we will search
-    shared_ptr<ContainerInterface> pwx = sc_this->GetContainerInterface( x );
-    
-	// Get choice from conjecture about where we are in the walk
-	ContainerInterface::iterator thistime = conj.HandleDecision( pwx->begin(), pwx->end() );
-	if( thistime == (ContainerInterface::iterator)(pwx->end()) )
-		return false; // ran out of choices
-
-	// Try out comparison at this position
-	TRACE("Trying terminus ")(**thistime);
-	bool r = Agent::AsAgent(sc_this->terminus)->DecidedCompare( *thistime, can_key, conj );
-    if( !r )
-        return false;
-        
-    if( TreePtr<Node> keynode = coupling_keys->GetCoupled( this ) )
-    {
-        SimpleCompare sc;
-        if( sc( x, keynode ) == false )
-            return false;
-    }
-    
-    // If we got this far, do the couplings
-    if( can_key )
-    {
-    	shared_ptr<TerminusKey> key( new TerminusKey );
-    	key->root = x;
-    	key->terminus = *thistime;
-    	shared_ptr<Key> sckey( key );
-    	TRACE("Matched, so keying search container type ")(*sc_this)(" for ")(*x);
-        coupling_keys->DoKey( sckey, this );	
-    }
-	return r;
-}
-
-
 TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
-	if( dynamic_cast<SearchContainerBase *>(this) )
-	{
-		// SearchContainer.
-		// Are we substituting a stuff node? If so, see if we reached the terminus, and if
-		// so come out of substitution. Done as tail recursion so that we already duplicated
-		// the terminus key, and can just overlay the terminus replace pattern.
-        shared_ptr<Key> key = coupling_keys->GetKey( this );
-		shared_ptr<TerminusKey> stuff_key = dynamic_pointer_cast<TerminusKey>(key);
-		ASSERT( stuff_key );
-		ASSERT( stuff_key->agent );
-		TerminusBase *replace_stuff = dynamic_cast<TerminusBase *>( stuff_key->agent );
-		ASSERT( replace_stuff );
-		ASSERT( replace_stuff->terminus );
-		TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(replace_stuff->terminus))
-		                                                  (", term=")(*(stuff_key->terminus))("\n");
-		TreePtr<Node> term = AsAgent(replace_stuff->terminus)->BuildReplace( stuff_key->terminus );
-		TRACE( "Stuff node: Substituting stuff");
-		return sr->DuplicateSubtree(keynode, stuff_key->terminus, term);   
-	}     
-	else if( dynamic_cast<StarBase *>(this) )
+	if( dynamic_cast<StarBase *>(this) )
 	{
 		return BuildReplaceStar( keynode ); // Strong modifier
 	}
