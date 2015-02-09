@@ -317,7 +317,7 @@ ShareGotos::ShareGotos()
 
 
 // Something to get the size of the Collection matched by a Star as a SpecificInteger
-struct BuildContainerSize : SoftReplacePattern,
+struct BuildContainerSize : SoftPattern,
                             Special<Integer>
 {
     SPECIAL_NODE_FUNCTIONS
@@ -337,7 +337,7 @@ private:
 }; 
 
 
-struct IsLabelReached : SoftSearchPattern, Special<LabelIdentifier>
+struct IsLabelReached : SoftPattern, Special<LabelIdentifier>
 {
 	SPECIAL_NODE_FUNCTIONS	
 	virtual void FlushCache()
