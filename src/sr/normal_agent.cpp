@@ -11,14 +11,14 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
 							          bool can_key,
     						          Conjecture &conj )
 {
-    if( SoftSearchPattern* ss_this = dynamic_cast<SoftSearchPattern *>(this) )
+    if( SoftPattern* ss_this = dynamic_cast<SoftPattern *>(this) )
     {
         // Hand over to any soft search functionality in the search pattern node
         bool r = ss_this->DecidedCompare( sr, x, can_key, conj );
         if( !r )
             return false;
     }
-    else if( SoftSearchPatternSpecialKey *sspsk_this = dynamic_cast<SoftSearchPatternSpecialKey *>(this) )
+    else if( SoftPatternSpecialKey *sspsk_this = dynamic_cast<SoftPatternSpecialKey *>(this) )
     {
         // Hand over to any soft search functionality in the search pattern node
         shared_ptr<Key> special_key = sspsk_this->DecidedCompare( sr, x, can_key, conj );
@@ -26,10 +26,6 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
             coupling_keys->DoKey( special_key, this ); 
         else
             return false;
-    }
-    else if( dynamic_cast<SoftReplacePattern *>(this) )
-    {
-    	// No further restriction beyond the pre-restriction for these nodes when searching.
     }
     else if( SlaveBase *s_this = dynamic_cast<SlaveBase *>(this) )
     {
@@ -295,13 +291,16 @@ TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 	{
 		return BuildReplaceStar( keynode ); // Strong modifier
 	}
-	else if( SoftReplacePattern *sr_this = dynamic_cast<SoftReplacePattern *>(this) )
+	else if( SoftPattern *sr_this = dynamic_cast<SoftPattern *>(this) )
 	{
 		TreePtr<Node> overlay = sr_this->GetOverlayPattern(); // only strong modifiers use this
 		if( overlay ) // Really two different kinds of pattern node
 			return AsAgent(overlay)->BuildReplace( keynode ); // Strong modifier
 		else
+        {
+            ASSERT(keynode)("Soft pattern seen in tree but it produced no keynode or overlay");
 			return sr->DuplicateSubtree(keynode);   // Weak modifier
+        }
 	}
 	else if( dynamic_cast<SlaveBase *>(this) )
 	{   

@@ -230,14 +230,34 @@ struct Flushable
 };
 
 
-class SofSearchPatternCallbacks : Flushable
+class SoftPatternCommon : Flushable
 {
 public:
-    SofSearchPatternCallbacks() :
+    SoftPatternCommon() :
         current_sr( NULL ),
         current_can_key( false ),
         current_conj( NULL )
     {}
+    // Called when not coupled
+    virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
+    {
+        ASSERT( !current_sr )("DuplicateSubtree() recursion detected in soft node");
+        current_sr = sr;
+        TreePtr<Node> st = MyBuildReplace();
+        current_sr = NULL;
+        return st;
+    }
+    // Called when coupled, dest is coupling key TODO route through "my" version
+    virtual TreePtr<Node> GetOverlayPattern() 
+    { 
+        return TreePtr<Node>(); // default implementation for weak modifiers 
+                                // so that couplings appear to override local functionality
+    }   
+    virtual TreePtr<Node> MyBuildReplace()
+    {
+        return TreePtr<Node>(); // default implementation for weak modifiers 
+                                // so that couplings appear to override local functionality
+    }
 protected: // Call only from the soft node implementation in MyCompare()
     // Compare for child nodes in a normal context (i.e. in which the pattern must match
 	// for an overall match to be possible, and so can be used to key a coupling)
@@ -269,6 +289,11 @@ protected: // Call only from the soft node implementation in MyCompare()
         ASSERT( current_sr )("Cannot call GetCoupled() from other than MyCompare()");
         return current_sr->coupling_keys.GetCoupled( Agent::AsAgent(pattern) );
     }
+    inline TreePtr<Node> DoBuildReplace( TreePtr<Node> pattern ) 
+    {
+        ASSERT( current_sr )("Cannot call DoBuildReplace() from other than MyBuildReplace()");     
+        return Agent::AsAgent(pattern)->BuildReplace( pattern );
+    }
 protected:
     const CompareReplace *current_sr;
 	bool current_can_key;
@@ -276,8 +301,8 @@ protected:
 };
 
 
-class SoftSearchPattern : public SofSearchPatternCallbacks,
-                          public virtual NormalAgent
+class SoftPattern : public SoftPatternCommon,
+                    public virtual NormalAgent
 {
 public:    
     virtual bool DecidedCompare( const CompareReplace *sr,
@@ -296,12 +321,15 @@ public:
         return result;
     }
     // Soft nodes should override this to implement their comparison function
-    virtual bool MyCompare( const TreePtrInterface &x ) = 0;
+    virtual bool MyCompare( const TreePtrInterface &x )
+    {
+        return true;
+    }
 };
 
 
-class SoftSearchPatternSpecialKey : public SofSearchPatternCallbacks,
-                                    public virtual NormalAgent
+class SoftPatternSpecialKey : public SoftPatternCommon,
+                              public virtual NormalAgent
 {
 public:    
 	// Return NULL for not found
@@ -321,43 +349,8 @@ public:
         return result;
     }
     // Soft nodes should override this to implement their comparison function
+    // Note compulsory when this base is used
     virtual shared_ptr<Key> MyCompare( const TreePtrInterface &x ) = 0;
-};
-
-
-class SoftReplacePattern : Flushable,
-                           public virtual NormalAgent
-{    
-public:
-    SoftReplacePattern() :
-        current_sr( NULL )
-    {}
-
-    // Called when not coupled
-	virtual TreePtr<Node> DuplicateSubtree( const CompareReplace *sr )
-    {
-        ASSERT( !current_sr )("DuplicateSubtree() recursion detected in soft node");
-        current_sr = sr;
-        TreePtr<Node> st = MyBuildReplace();
-        current_sr = NULL;
-        return st;
-    }
-	// Called when coupled, dest is coupling key
-	virtual TreePtr<Node> GetOverlayPattern() 
-	{ 
-		return TreePtr<Node>(); // default implementation for weak modifiers 
-								// so that couplings appear to override local functionality
-	}	
-    virtual TreePtr<Node> MyBuildReplace() = 0;
-    
-protected:    
-    inline TreePtr<Node> DoBuildReplace( TreePtr<Node> pattern ) 
-    {
-        ASSERT( current_sr )("Cannot call DoBuildReplace() from other than MyBuildReplace()");     
-        return Agent::AsAgent(pattern)->BuildReplace( pattern );
-    }
-private:    
-    const CompareReplace *current_sr;       
 };
 
 };

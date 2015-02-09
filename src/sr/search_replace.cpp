@@ -311,7 +311,7 @@ void CompareReplace::KeyReplaceNodes( TreePtr<Node> pattern ) const
 	{
 	    //TRACE(*pattern)("\n");
 	    TreePtr<Node> key = pattern;
-	    if( shared_ptr<SoftReplacePattern> srp = dynamic_pointer_cast<SoftReplacePattern>( pattern ) )
+	    if( shared_ptr<SoftPattern> srp = dynamic_pointer_cast<SoftPattern>( pattern ) )
 	    {
             //TRACE("Soft replace pattern not keyed, ")(*pattern)("\n");
 
