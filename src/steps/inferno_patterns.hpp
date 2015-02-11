@@ -20,7 +20,7 @@ using namespace SR;
 
 // TODO do this via a transformation as with TransformOf/TransformOf
 #define BYPASS_WHEN_IDENTICAL 1
-struct BuildIdentifierBase : ::SoftPattern
+struct BuildIdentifierBase : SoftAgent
 {
     BuildIdentifierBase( string s, int f=0 ) : format(s), flags(f) {}
     Sequence<CPPTree::Identifier> sources;
@@ -75,7 +75,7 @@ private:
 // These can be used in search pattern to match a SpecificIdentifier by name.
 // (cannot do this using a SpecificIdentifier in the search pattern because
 // the address of the node would be compared, not the name string). TODO document
-struct IdentifierByNameBase : SoftPattern
+struct IdentifierByNameBase : SoftAgent
 {
     IdentifierByNameBase( string n ) : name(n) {}
     bool IsMatch( const TreePtrInterface &x );
@@ -125,7 +125,7 @@ private:
 };
 
 // Base class for special nodes that match nested nodes
-struct NestedBase : SoftPatternSpecialKey,
+struct NestedBase : SoftAgentSpecialKey,
                     TerminusBase
 {
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) = 0;

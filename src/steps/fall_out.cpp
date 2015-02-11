@@ -15,7 +15,7 @@ using namespace Steps;
 
 
 // Something to get the size of the Collection matched by a Star as a SpecificInteger
-struct BuildContainerSize : SoftPattern,
+struct BuildContainerSize : SoftAgent,
                             Special<Integer>
 {
     SPECIAL_NODE_FUNCTIONS

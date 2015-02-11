@@ -5,7 +5,7 @@ COMMON_MODULES = common/standard common/read_args common/trace common/hit_count
 NODE_MODULES = node/node node/itemise 
 HELPERS_MODULES = helpers/walk helpers/simple_compare helpers/duplicate
 TREE_MODULES = tree/cpptree tree/validate tree/scope tree/misc tree/typeof tree/type_db 
-SR_MODULES = sr/search_replace sr/soft_patterns sr/coupling sr/conjecture sr/agent sr/normal_agent sr/search_container_agent sr/green_grass_agent sr/overlay_agent
+SR_MODULES = sr/search_replace sr/soft_patterns sr/coupling sr/conjecture sr/agent sr/normal_agent sr/search_container_agent sr/green_grass_agent sr/overlay_agent sr/soft_agent
 PARSE_MODULES = parse/identifier_tracker parse/rc_hold
 RENDER_MODULES = render/sort_decls render/graph render/render render/uniquify_identifiers render/doc_graphs
 STEPS_MODULES = steps/inferno_patterns steps/split_instance_declarations steps/generate_implicit_casts steps/generate_stacks steps/slave_test steps/lower_control_flow steps/clean_up steps/state_out steps/systemc_detection steps/to_sc_method steps/uncombable steps/fall_out
@@ -37,15 +37,15 @@ $(SR_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.
 	mkdir -p $(dir $@)
 	$(ICC) -c $(OPTIONS) $< -o $@
 
-$(PARSE_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp tree/*.hpp tree/*.inc sr/*.hpp $(DEPS)
+$(PARSE_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp tree/*.hpp tree/*.inc sr/*.hpp parse/*.hpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(OPTIONS) $< -o $@
 
-$(RENDER_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp tree/*.hpp tree/*.inc sr/*.hpp $(DEPS)
+$(RENDER_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp tree/*.hpp tree/*.inc sr/*.hpp render/*.hpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(OPTIONS) $< -o $@ 
 
-$(STEPS_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp tree/*.hpp tree/*.inc sr/*.hpp %.hpp $(DEPS)
+$(STEPS_MODULES:%=build/%.o) : build/%.o : %.cpp common/*.hpp node/*.hpp helpers/*.hpp tree/*.hpp tree/*.inc sr/*.hpp steps/*.hpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(OPTIONS) $< -o $@ 
 

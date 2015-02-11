@@ -124,7 +124,7 @@ void CompareReplace::ConfigureImpl()
     FOREACH( TreePtr<Node> n, tsp )
     {        
 		// Give agents pointers to here and our coupling keys
-		//TRACE("Configuring search pattern ")(*n)("\n");
+		TRACE("Configuring search pattern ")(*n)("\n");
         Agent::AsAgent(n)->Configure( this, &coupling_keys );		
         if( shared_ptr<StuffAgent> sb = dynamic_pointer_cast<StuffAgent>(n) )
         {
@@ -146,7 +146,7 @@ void CompareReplace::ConfigureImpl()
     FOREACH( TreePtr<Node> n, ss )
     {
 		// Give agents pointers to here and our coupling keys
-		//TRACE("Configuring replace pattern ")(*n)("\n");		
+		TRACE("Configuring replace pattern ")(*n)("\n");		
         Agent::AsAgent(n)->Configure( this, &coupling_keys );		
 
         if( shared_ptr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
@@ -307,23 +307,8 @@ void CompareReplace::KeyReplaceNodes( TreePtr<Node> pattern ) const
     TRACE("Walking replace pattern to key the soft nodes\n");
     
     UniqueWalkNoSlavePattern e(pattern);
-    FOREACH( TreePtr<Node> pattern, e )
-	{
-	    //TRACE(*pattern)("\n");
-	    TreePtr<Node> key = pattern;
-	    if( shared_ptr<SoftPattern> srp = dynamic_pointer_cast<SoftPattern>( pattern ) )
-	    {
-            //TRACE("Soft replace pattern not keyed, ")(*pattern)("\n");
-
-            // Call the soft pattern impl 
-            key = srp->DuplicateSubtree( this );
-            if( key )
-            {            
-                // Allow this to key a coupling. 
-                coupling_keys.DoKey( key, Agent::AsAgent(pattern) );
-            } 
-	    }
-    }
+    FOREACH( TreePtr<Node> pattern, e )	
+	    Agent::AsAgent(pattern)->KeyReplace();
 }
 
 
@@ -568,137 +553,3 @@ bool StarBase::MatchRange( const CompareReplace *sr,
     TRACE("done\n");
     return true;   
 }                       
-
-
-
-
-void CompareReplace::Test()
-{
-#if 0
-    CompareReplace sr = CompareReplace( MakeTreePtr<Nop>(), MakeTreePtr<Nop>() ); // TODO we're only using compare side
-
-    {
-        // single node with topological wildcarding
-        TreePtr<Void> v(new Void);
-        ASSERT( sr.Compare( v, v ) == true );
-        TreePtr<Boolean> b(new Boolean);
-        ASSERT( sr.Compare( v, b ) == false );
-        ASSERT( sr.Compare( b, v ) == false );
-        TreePtr<Type> t(new Type);
-        ASSERT( sr.Compare( v, t ) == true );
-        ASSERT( sr.Compare( t, v ) == false );
-        ASSERT( sr.Compare( b, t ) == true );
-        ASSERT( sr.Compare( t, b ) == false );
-        
-        // node points directly to another with TC
-        TreePtr<Pointer> p1(new Pointer);
-        p1->destination = v;
-        ASSERT( sr.Compare( p1, b ) == false );
-        ASSERT( sr.Compare( p1, p1 ) == true );
-        TreePtr<Pointer> p2(new Pointer);
-        p2->destination = b;
-        ASSERT( sr.Compare( p1, p2 ) == false );
-        p2->destination = t;
-        ASSERT( sr.Compare( p1, p2 ) == true );
-        ASSERT( sr.Compare( p2, p1 ) == false );
-    }
-    
-    {
-        // string property
-        TreePtr<SpecificString> s1( new SpecificString("here") );
-        TreePtr<SpecificString> s2( new SpecificString("there") );
-        ASSERT( sr.Compare( s1, s1 ) == true );
-    //    ASSERT( sr.Compare( s1, s2 ) == false ); 
-    //TODO seems to get a crash freeing s1 or s2 if uncommented, latent problem in SpecificString?
-    }    
-    
-    {
-        // int property
-        TreePtr<SpecificInteger> i1( new SpecificInteger(3) );
-        TreePtr<SpecificInteger> i2( new SpecificInteger(5) );
-        TRACE("  %s %s\n", ((llvm::APSInt)*i1).toString(10).c_str(), ((llvm::APSInt)*i2).toString(10).c_str() );
-        ASSERT( sr.Compare( i1, i1 ) == true );
-        ASSERT( sr.Compare( i1, i2 ) == false );
-    }    
-
-    
-    {
-        // node with sequence, check lengths 
-        TreePtr<Compound> c1( new Compound );
-        ASSERT( sr.Compare( c1, c1 ) == true );
-        TreePtr<Nop> n1( new Nop );
-        c1->statements.push_back( n1 );
-        ASSERT( sr.Compare( c1, c1 ) == true );
-        TreePtr<Nop> n2( new Nop );
-        c1->statements.push_back( n2 );
-        ASSERT( sr.Compare( c1, c1 ) == true );
-        TreePtr<Compound> c2( new Compound );
-        ASSERT( sr.Compare( c1, c2 ) == false );
-        TreePtr<Nop> n3( new Nop );
-        c2->statements.push_back( n3 );
-        ASSERT( sr.Compare( c1, c2 ) == false );
-        TreePtr<Nop> n4( new Nop );
-        c2->statements.push_back( n4 );
-        ASSERT( sr.Compare( c1, c2 ) == true );
-        TreePtr<Nop> n5( new Nop );
-        c2->statements.push_back( n5 );
-        ASSERT( sr.Compare( c1, c2 ) == false );
-    }
-
-    {
-        // node with sequence, TW 
-        TreePtr<Compound> c1( new Compound );
-        TreePtr<Nop> n1( new Nop );
-        c1->statements.push_back( n1 );
-        TreePtr<Compound> c2( new Compound );
-        TreePtr<Statement> s( new Statement );
-        c2->statements.push_back( s );
-        ASSERT( sr.Compare( c1, c2 ) == true );
-        ASSERT( sr.Compare( c2, c1 ) == false );
-    }
-
-    {
-        // topological with extra member in target node
-        /* gone obsolete with tree changes TODO un-obsolete
-        TreePtr<Label> l( new Label );
-        TreePtr<Public> p1( new Public );
-        l->access = p1;
-
-        TreePtr<LabelIdentifier> li( new LabelIdentifier );
-        li->name = "mylabel";
-        l->identifier = li;
-        TreePtr<Declaration> d( new Declaration );
-        TreePtr<Public> p2( new Public );
-        d->access = p2;
-        ASSERT( sr.Compare( l, d ) == true );
-        ASSERT( sr.Compare( d, l ) == false );
-        TreePtr<Private> p3( new Private );
-        d->access = p3;
-        ASSERT( sr.Compare( l, d ) == false );
-        ASSERT( sr.Compare( d, l ) == false );
-        TreePtr<AccessSpec> p4( new AccessSpec );
-        d->access = p4;
-        ASSERT( sr.Compare( l, d ) == true );
-        ASSERT( sr.Compare( d, l ) == false );
-        */
-    }
-#endif
-}
-/*
-#ifdef STRACE
-    TRACE("DuplicateSubtree pattern={");
-	    Walk w(pattern);
-	    bool first=true;
-	    FOREACH( TreePtr<Node> n, w )
-	    {
-	    	if( !first )
-	    		TRACE(", ");
-	    	if( n )
-                TRACE( *n );
-            else
-                TRACE("NULL");
-	    	first=false;
-	    }
-	    TRACE("}\n"); // TODO put this in as a common utility somewhere
-#endif
-*/

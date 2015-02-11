@@ -13,9 +13,9 @@ struct NotMatchBase {}; // needed for graph plotter
 // Match if the supplied patterns does not match (between you and me, it's just a NOT)
 template<class PRE_RESTRICTION>
 struct NotMatch : Special<PRE_RESTRICTION>,
-                 SoftPattern,
-                 NotMatchBase,
-                 CouplingSlave
+                  SoftAgent,
+                  NotMatchBase,
+                  CouplingSlave
 {
 	SPECIAL_NODE_FUNCTIONS
 	// Pattern is an abnormal context. Fascinatingly, we can supply any node here because there
@@ -62,7 +62,7 @@ struct MatchAllBase : virtual Node
 // Match all of the supplied patterns (between you and me, it's an AND)
 template<class PRE_RESTRICTION>
 struct MatchAll : Special<PRE_RESTRICTION>,
-                  virtual SoftPattern, 
+                  virtual SoftAgent, 
                   MatchAllBase
 {
 	SPECIAL_NODE_FUNCTIONS
@@ -108,7 +108,7 @@ private:
             Walk e(source_pattern);
             FOREACH( TreePtr<Node> n, e )
             {
-                if( (dynamic_pointer_cast<SoftPattern>(n) && !dynamic_pointer_cast<SoftPattern>(n)) || 
+                if( (dynamic_pointer_cast<SoftAgent>(n) && !dynamic_pointer_cast<NotMatchBase>(n)) || 
                     dynamic_pointer_cast<OverlayAgent>(n) ||
                     dynamic_pointer_cast<SlaveBase>(n) ) // TODO common base class for these called Modifier
                 {
@@ -136,8 +136,8 @@ struct MatchAnyBase {};
 // Match zero or more of the supplied patterns (between you and me, it's an OR)
 template<class PRE_RESTRICTION>
 struct MatchAny : Special<PRE_RESTRICTION>,
-                 SoftPattern,
-                 MatchAnyBase
+                  SoftAgent,
+                  MatchAnyBase
 {
 	SPECIAL_NODE_FUNCTIONS
 	// Patterns are an abnormal context
@@ -163,7 +163,7 @@ struct MatchOddBase {};
 // Match an odd number of patterns (between you and me, it's an EOR)
 template<class PRE_RESTRICTION>
 struct MatchOdd : Special<PRE_RESTRICTION>,
-                  SoftPattern,
+                  SoftAgent,
                   MatchOddBase
 {
 	SPECIAL_NODE_FUNCTIONS
@@ -185,7 +185,7 @@ private:
 };
 
 
-struct TransformOfBase : SoftPatternSpecialKey,
+struct TransformOfBase : SoftAgentSpecialKey,
                          TerminusBase
 {
     TreePtr<Node> pattern; 
@@ -202,6 +202,7 @@ private:
 protected: 
     TransformOfBase() {}    
 };
+
 
 template<class PRE_RESTRICTION>
 struct TransformOf : TransformOfBase, Special<PRE_RESTRICTION>
@@ -225,7 +226,7 @@ struct PointerIsBase
     in a that points to b must match y. */
 template<class PRE_RESTRICTION>
 struct PointerIs : Special<PRE_RESTRICTION>,
-                   SoftPattern,
+                   SoftAgent,
                    PointerIsBase // TODO document
 {
     SPECIAL_NODE_FUNCTIONS

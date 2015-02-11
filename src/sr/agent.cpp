@@ -123,6 +123,11 @@ bool AgentCommon::Compare( const TreePtrInterface &x,
 }
 
 
+void AgentCommon::KeyReplace()
+{    
+}
+
+
 TreePtr<Node> AgentCommon::BuildReplace( TreePtr<Node> keynode )
 {
     INDENT;
