@@ -162,18 +162,22 @@ private:
 public:	
 	inline MakePatternPtr() : TreePtr<NODE_TYPE>( Maker::Make() )
 	{
+        TRACE("MakePatternPtr made a ")(*this)("\n");
 	}
 	template<typename CP0>
 	inline MakePatternPtr(const CP0 &cp0) : TreePtr<NODE_TYPE>( Maker::Make(cp0) ) 
 	{ 
+        TRACE("MakePatternPtr made a ")(*this)("\n");
 	}
     template<typename CP0, typename CP1>
 	inline MakePatternPtr(const CP0 &cp0, const CP1 &cp1) : TreePtr<NODE_TYPE>(  Maker::Make(cp0, cp1) )
 	{ 
+        TRACE("MakePatternPtr made a ")(*this)("\n");
 	}
 	template<typename CP0, typename CP1, typename CP2>
 	inline MakePatternPtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : TreePtr<NODE_TYPE>( Maker::Make(cp0, cp1, cp2) )
 	{ 
+        TRACE("MakePatternPtr made a ")(*this)("\n");
 	}
 	// Add more params as needed...
 };

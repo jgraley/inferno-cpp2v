@@ -11,23 +11,7 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
 							          bool can_key,
     						          Conjecture &conj )
 {
-    if( SoftPattern* ss_this = dynamic_cast<SoftPattern *>(this) )
-    {
-        // Hand over to any soft search functionality in the search pattern node
-        bool r = ss_this->DecidedCompare( sr, x, can_key, conj );
-        if( !r )
-            return false;
-    }
-    else if( SoftPatternSpecialKey *sspsk_this = dynamic_cast<SoftPatternSpecialKey *>(this) )
-    {
-        // Hand over to any soft search functionality in the search pattern node
-        shared_ptr<Key> special_key = sspsk_this->DecidedCompare( sr, x, can_key, conj );
-        if( special_key )
-            coupling_keys->DoKey( special_key, this ); 
-        else
-            return false;
-    }
-    else if( SlaveBase *s_this = dynamic_cast<SlaveBase *>(this) )
+    if( SlaveBase *s_this = dynamic_cast<SlaveBase *>(this) )
     {
         // When a slave node seen duriung search, just forward through the "base" path
         bool r = Agent::AsAgent(s_this->GetThrough())->DecidedCompare( x, can_key, conj );
@@ -290,17 +274,6 @@ TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 	if( dynamic_cast<StarBase *>(this) )
 	{
 		return BuildReplaceStar( keynode ); // Strong modifier
-	}
-	else if( SoftPattern *sr_this = dynamic_cast<SoftPattern *>(this) )
-	{
-		TreePtr<Node> overlay = sr_this->GetOverlayPattern(); // only strong modifiers use this
-		if( overlay ) // Really two different kinds of pattern node
-			return AsAgent(overlay)->BuildReplace( keynode ); // Strong modifier
-		else
-        {
-            ASSERT(keynode)("Soft pattern seen in tree but it produced no keynode or overlay");
-			return sr->DuplicateSubtree(keynode);   // Weak modifier
-        }
 	}
 	else if( dynamic_cast<SlaveBase *>(this) )
 	{   
