@@ -282,7 +282,8 @@ TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 	else if( dynamic_cast<SpecialBase *>(this) )
 	{
 		// Star, Not, TransformOf etc. Also MatchAll with no overlay pattern falls thru to here
-		return sr->DuplicateSubtree(keynode);   
+        ASSERT(keynode)(*this)(" needs to be coupled but has no key");
+		return DuplicateSubtree(keynode);   
 	}     
     else // Normal node
     {
@@ -309,7 +310,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
     
     // Make a new node, we will overlay from pattern, so resulting node will be dirty	
     // Duplicate the key node since it is at least as specialised    
-    dest = sr->DuplicateNode( keynode, true );
+    dest = DuplicateNode( keynode, true );
 
     // Loop over the elements of pattern, keynode and dest, limited to elements
     // present in pattern, which is a non-strict subclass of keynode and dest.
@@ -411,7 +412,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
 	        FOREACH( const TreePtrInterface &p, *keynode_con )
 	        {
 		        ASSERT( p ); // present simplified scheme disallows NULL
-		        TreePtr<Node> n = sr->DuplicateSubtree( p );
+		        TreePtr<Node> n = DuplicateSubtree( p );
 		        if( ContainerInterface *sc = dynamic_cast<ContainerInterface *>(n.get()) )
 		        {
 			        TRACE("Walking SubContainer length %d\n", sc->size() );
@@ -429,7 +430,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
         {
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
             ASSERT( *keynode_ptr );
-            *dest_ptr = sr->DuplicateSubtree( *keynode_ptr );
+            *dest_ptr = DuplicateSubtree( *keynode_ptr );
             ASSERT( *dest_ptr );
             ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            
         }
@@ -553,7 +554,7 @@ TreePtr<Node> NormalAgent::BuildReplaceStar( TreePtr<Node> keynode )
     dest_container = dynamic_cast<ContainerInterface *>(dest.get());
 	FOREACH( const TreePtrInterface &pp, *psc )
 	{
-		TreePtr<Node> nn = sr->DuplicateSubtree( pp );
+		TreePtr<Node> nn = DuplicateSubtree( pp );
 		dest_container->insert( nn );
 	}
 	

@@ -66,7 +66,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode )
                                                         (", term=")(*(stuff_key->terminus))("\n");
     TreePtr<Node> term = AsAgent(replace_stuff->terminus)->BuildReplace( stuff_key->terminus );
     TRACE( "Stuff node: Substituting stuff");
-    return sr->DuplicateSubtree(keynode, stuff_key->terminus, term);   
+    return DuplicateSubtree(keynode, stuff_key->terminus, term);   
 }
 
 
