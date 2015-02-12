@@ -76,6 +76,13 @@ StuffAgent::StuffAgent() :
 {
 }
 
+void StuffAgent::Configure( const CompareReplace *s, CouplingKeys *c )
+{
+    AgentCommon::Configure( s, c ); // To main version of Configure
+    recurse_comparer->coupling_keys.SetMaster( coupling_keys ); 
+    recurse_comparer->compare_pattern = recurse_restriction; // TODO could move into constructor?
+}
+
 
 shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> x )
 {
