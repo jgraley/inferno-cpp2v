@@ -414,39 +414,3 @@ void SearchReplace::GetGraphInfo( vector<string> *labels,
 }
 
 
-bool StarBase::MatchRange( const CompareReplace *sr,
-                           ContainerInterface &range,
-                           bool can_key )
-{
-    INDENT;
-    // this is an abnormal context (which of the program nodes
-    // in the range should key the pattern?) so just wave keying
-    // pass right on through.
-    if( can_key )
-        return true;
-                
-    TreePtr<Node> p = GetPattern();
-    if( p )
-    {
-        TRACE("MatchRange pattern\n");
-        // Apply pattern restriction - will be at least as strict as pre-restriction
-        FOREACH( TreePtr<Node> x, range )
-        {
-            bool r = sr->Compare( x, p, false );
-            if( !r )
-                return false;
-        }
-    }
-    else
-    {
-        TRACE("MatchRange pre-res\n");
-        // No pattern, so just use pre-restrictions
-        FOREACH( TreePtr<Node> x, range )
-        {
-            if( !IsLocalMatch( x.get()) )
-                return false;
-        }
-    }     
-    TRACE("done\n");
-    return true;   
-}                       
