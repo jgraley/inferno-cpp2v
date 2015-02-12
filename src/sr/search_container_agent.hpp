@@ -36,14 +36,17 @@ public:
 
 
 // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
-struct StuffAgent : virtual Node, // TODO no need
+class StuffAgent : virtual Node, // TODO no need
                     public SearchContainerAgent
 {
+public:
     StuffAgent();
+    void Configure( const CompareReplace *s, CouplingKeys *c );
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
+
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
     CompareReplace * const recurse_comparer;
     bool one_level; // TODO lose this "one_level" thing: AnyNode now does that
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
 };
 
 
