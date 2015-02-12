@@ -12,6 +12,7 @@
 #include "green_grass_agent.hpp"
 #include "overlay_agent.hpp"
 #include "soft_agent.hpp"
+#include "star_agent.hpp"
 #include <set>
 
 namespace SR 
@@ -19,9 +20,7 @@ namespace SR
 
 class Conjecture;
 class SpecialBase;
-class StarBase;
 class SlaveBase;
-class SearchContainerBase;
 
 class CompareReplace : virtual public InPlaceTransformation, 
                        public Filter 
@@ -187,32 +186,6 @@ struct SlaveSearchReplace : Slave<SearchReplace, PRE_RESTRICTION>, virtual Node
     SlaveSearchReplace() : Slave<SearchReplace, PRE_RESTRICTION>( NULL, NULL, NULL ) {}      
     SlaveSearchReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
         Slave<SearchReplace, PRE_RESTRICTION>( t, sp, rp ) {}
-};
-
-
-// The * wildcard can match more than one node of any type in a container
-// In a Sequence, only a contiguous subsequence of 0 or more elements will match
-// In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
-// Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
-// in the collection. TODO a restrict pattern
-struct StarBase : virtual Node, virtual NormalAgent 
-{
-    virtual TreePtr<Node> GetPattern() = 0;
-    bool MatchRange( const CompareReplace *sr,
-                       ContainerInterface &range,
-                       bool can_key );
-};
-
-
-template<class PRE_RESTRICTION>
-struct Star : StarBase, Special<PRE_RESTRICTION> 
-{ 
-    SPECIAL_NODE_FUNCTIONS 
-    TreePtr<PRE_RESTRICTION> pattern; // TODO rename to "restriction"
-    virtual TreePtr<Node> GetPattern() 
-    {
-        return pattern;
-    }
 };
 
 };

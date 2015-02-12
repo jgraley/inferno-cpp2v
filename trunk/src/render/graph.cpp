@@ -297,7 +297,7 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
     // member TreePtr names below. These may be some combination of search, compare, replace and through
     // and their links are approximately to the right.
 	*bold=true;
-	if( dynamic_pointer_cast<StarBase>(sp) )
+	if( dynamic_pointer_cast<StarAgent>(sp) )
 	{
 	    // The Star node appears as a small circle with a * character inside it. * is chosen for its role in 
 	    // filename wildcarding, which is semantically equiviant only when used in a Sequence.

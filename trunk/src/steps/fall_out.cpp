@@ -19,7 +19,7 @@ struct BuildContainerSize : SoftAgent,
                             Special<Integer>
 {
     SPECIAL_NODE_FUNCTIONS
-    shared_ptr< StarBase > container;
+    shared_ptr< StarAgent > container;
 private:
     virtual TreePtr<Node> MyBuildReplace()
     {

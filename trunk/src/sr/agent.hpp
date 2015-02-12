@@ -11,12 +11,9 @@
  
 namespace SR
 { 
- 
 class Conjecture;
 class SpecialBase;
-class StarBase;
 class SlaveBase;
-class SearchContainerBase;
 class SearchReplace;
  
 class Agent : public virtual Traceable,

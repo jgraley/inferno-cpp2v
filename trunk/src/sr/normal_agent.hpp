@@ -33,46 +33,8 @@ private:
 	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not NULL
     TreePtr<Node> BuildReplaceSlave( TreePtr<Node> keynode );    
     TreePtr<Node> BuildReplaceNormal();
-    TreePtr<Node> BuildReplaceStar( TreePtr<Node> keynode );
     Sequence<Node> WalkContainerPattern( ContainerInterface &pattern,
                                          bool replacing );
-	// Internal node classes - NOTE these are not special nodes, and we use them like normal tree nodes
-	// Note: only needed for Star pattern
-    struct SubContainer : Node
-    {
-        NODE_FUNCTIONS
-    };
-    struct SubSequenceRange : SequenceInterface,
-                              SubContainer
-    {
-    	NODE_FUNCTIONS_FINAL 
-
-        SubSequenceRange() {}
-    	shared_ptr<iterator_interface> my_begin;
-    	shared_ptr<iterator_interface> my_end;
-    public:
-    	SubSequenceRange( iterator &b, iterator &e ) : my_begin(b.Clone()), my_end(e.Clone())
-    	{    	    
-    	}
-	    virtual const iterator_interface &begin() { return *my_begin; }
-        virtual const iterator_interface &end()   { return *my_end; }
-        virtual void erase( iterator )  { ASSERTFAIL("Cannot modify SubSequenceRange"); }
-        virtual void clear()                                { ASSERTFAIL("Cannot modify SubSequenceRange"); }    
-        virtual void insert( const TreePtrInterface & )     { ASSERTFAIL("Cannot modify SubSequenceRange"); }
-        virtual TreePtrInterface &operator[]( int i ) { ASSERTFAIL("TODO"); }  
-        virtual void push_back( const TreePtrInterface &gx ){ ASSERTFAIL("Cannot modify SubSequenceRange"); }  
-    };
-    struct SubSequence : Sequence<Node>,
-                         SubContainer
-    {
-    	NODE_FUNCTIONS_FINAL 
-    };
-    struct SubCollection : Collection<Node>,
-                           SubContainer
-    {
-    	NODE_FUNCTIONS_FINAL
-    };
-
 };
 
 

@@ -4,6 +4,7 @@
 #include "helpers/simple_compare.hpp"
 #include "overlay_agent.hpp"
 #include "normal_agent.hpp"
+#include "star_agent.hpp"
 
 using namespace SR;
 
@@ -105,10 +106,11 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
 		// Get the next element of the pattern
 		TreePtr<Node> pe( *pit );
 		ASSERT( pe );
+        Agent *pea = Agent::AsAgent(pe);
 		npit=pit;
 		++npit;
 
-        if( shared_ptr<StarBase> ps = dynamic_pointer_cast<StarBase>(pe) )
+        if( StarAgent *psa = dynamic_cast<StarAgent *>(pea) )
         {
             // We have a Star type wildcard that can match multiple elements.
             // Remember where we are - this is the beginning of the subsequence that
@@ -126,7 +128,7 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
                 TRACE("Pattern continues after star\n");
 
                 // Star not at end so there is more stuff to match; ensure not another star
-            //  ASSERT( !dynamic_pointer_cast<StarBase>(TreePtr<Node>(*npit)) )
+            //  ASSERT( !dynamic_pointer_cast<StarAgent>(TreePtr<Node>(*npit)) )
             //        ( "Not allowed to have two neighbouring Star elements in search pattern Sequence");
 
                 // Decide how many elements the current * should match, using conjecture. Jump forward
@@ -142,14 +144,14 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
             
             // Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
             // Now make a copy of the elements that matched the star and apply couplings
-            TreePtr<SubSequenceRange> ss( new SubSequenceRange( xit_begin_star, xit ) );
+            TreePtr<StarAgent::SubSequenceRange> ss( new StarAgent::SubSequenceRange( xit_begin_star, xit ) );
             //for( ContainerInterface::iterator it=xit_begin_star; it != xit; ++it ) // TODO FOREACH?
             //{
             //  ss->push_back( *it );
             //}
             
             // Apply couplings to this Star and matched range
-            if( TreePtr<Node> keynode = coupling_keys->GetCoupled( Agent::AsAgent(pe) ) )
+            if( TreePtr<Node> keynode = coupling_keys->GetCoupled( pea ) )
             {
                 SimpleCompare sc;
                 if( sc( TreePtr<Node>(ss), keynode ) == false )
@@ -157,7 +159,7 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
             }
             
             // Restrict to pre-restriction or pattern
-            bool r = ps->MatchRange( sr, *ss, can_key );
+            bool r = psa->CompareRange( *ss, can_key );
             if( !r )
                 return false;
 
@@ -198,11 +200,11 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
 	// after decisions.
 	// TODO is there some stl algorithm for this?
-    TreePtr<SubCollection> xremaining( new SubCollection );
+    TreePtr<StarAgent::SubCollection> xremaining( new StarAgent::SubCollection );
     FOREACH( const TreePtrInterface &xe, x )
         xremaining->insert( xe );
     
-    shared_ptr<StarBase> star;
+    StarAgent *star;
     bool seen_star = false;
 
     for( CollectionInterface::iterator pit = epattern.begin(); pit != epattern.end(); ++pit )
@@ -211,7 +213,7 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
     			xremaining->size(),
     			epattern.size(),
     			TypeInfo( TreePtr<Node>(*pit) ).name().c_str() );
-    	shared_ptr<StarBase> maybe_star = dynamic_pointer_cast<StarBase>( TreePtr<Node>(*pit) );
+    	StarAgent *maybe_star = dynamic_cast<StarAgent *>( Agent::AsAgent(TreePtr<Node>(*pit)) );
 
         if( maybe_star ) // Star in pattern collection?
         {
@@ -250,19 +252,19 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
     // Apply pre-restriction to the star
     if( seen_star )
     {
-        if( TreePtr<Node> keynode = coupling_keys->GetCoupled( Agent::AsAgent(star) ) )
+        if( TreePtr<Node> keynode = coupling_keys->GetCoupled( star ) )
         {
             SimpleCompare sc;
             if( sc( TreePtr<Node>(xremaining), keynode ) == false )
                 return false;
         }
 
-        bool r = star->MatchRange( sr, *xremaining, can_key );
+        bool r = star->CompareRange( *xremaining, can_key );
         if( !r )
             return false;
     
         if( can_key )
-            coupling_keys->DoKey( TreePtr<Node>(xremaining), Agent::AsAgent(star) );	
+            coupling_keys->DoKey( TreePtr<Node>(xremaining), star );	
     }
     TRACE("matched\n");
 	return true;
@@ -271,11 +273,7 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 
 TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
-	if( dynamic_cast<StarBase *>(this) )
-	{
-		return BuildReplaceStar( keynode ); // Strong modifier
-	}
-	else if( dynamic_cast<SlaveBase *>(this) )
+    if( dynamic_cast<SlaveBase *>(this) )
 	{   
 		return BuildReplaceSlave( keynode );
 	} 
@@ -531,33 +529,3 @@ TreePtr<Node> NormalAgent::BuildReplaceNormal()
     }
     return dest;
 }
-
-
-TreePtr<Node> NormalAgent::BuildReplaceStar( TreePtr<Node> keynode ) 
-{
-    StarBase *star_this = dynamic_cast<StarBase *>(this);
-	ASSERT( star_this ); // not used at present but should be there since we may need to use it
-	ASSERT( keynode );
-	ContainerInterface *psc = dynamic_cast<ContainerInterface *>(keynode.get());
-	ASSERT( psc )("Star node ")(*star_this)(" keyed to ")(*keynode)(" which should implement ContainerInterface");	
-	TRACE("Walking container length %d\n", psc->size() );
-	
-	TreePtr<SubContainer> dest;
-	ContainerInterface *dest_container;
-	if( dynamic_cast<SequenceInterface *>(keynode.get()) )
-		dest = TreePtr<SubSequence>(new SubSequence);
-	else if( dynamic_cast<CollectionInterface *>(keynode.get()) )
-		dest = TreePtr<SubCollection>(new SubCollection);
-	else
-		ASSERT(0)("Please add new kind of Star");
-	
-    dest_container = dynamic_cast<ContainerInterface *>(dest.get());
-	FOREACH( const TreePtrInterface &pp, *psc )
-	{
-		TreePtr<Node> nn = DuplicateSubtree( pp );
-		dest_container->insert( nn );
-	}
-	
-	return dest;
-}
-
