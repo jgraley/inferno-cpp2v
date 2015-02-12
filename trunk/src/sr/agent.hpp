@@ -63,6 +63,11 @@ public:
                                  Conjecture &conj );
     bool Compare( const TreePtrInterface &x,
                   bool can_key = false );
+    TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
+                                 bool force_dirty ) const;
+    TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
+                                    TreePtr<Node> source_terminus = TreePtr<Node>(),
+                                    TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
     const CompareReplace *sr;
     CouplingKeys *coupling_keys;

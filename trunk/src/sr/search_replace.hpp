@@ -88,12 +88,7 @@ public:
                           TreePtr<Node> root );
 public:
     TreePtr<Node> BuildReplace( TreePtr<Node> pattern ) const;
-    TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
-                                    TreePtr<Node> source_terminus = TreePtr<Node>(),
-                                    TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 private:
-    TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
-    		                     bool force_dirty ) const;
     void KeyReplaceNodes( TreePtr<Node> pattern ) const;
     TreePtr<Node> ReplacePhase( TreePtr<Node> x ) const;
     // implementation ring: Do the actual search and replace
