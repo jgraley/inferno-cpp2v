@@ -4,6 +4,7 @@
 #include "search_replace.hpp"
 #include "helpers/transformation.hpp"
 #include "search_container_agent.hpp"
+#include "slave_agent.hpp"
 
 namespace SR
 {
@@ -110,7 +111,7 @@ private:
             {
                 if( (dynamic_pointer_cast<SoftAgent>(n) && !dynamic_pointer_cast<NotMatchBase>(n)) || 
                     dynamic_pointer_cast<OverlayAgent>(n) ||
-                    dynamic_pointer_cast<SlaveBase>(n) ) // TODO common base class for these called Modifier
+                    dynamic_pointer_cast<SlaveAgent>(n) ) // TODO common base class for these called Modifier
                 {
                     ASSERT( !modifier_pattern )("MatchAll coupled into replace must have no more than one modifying pattern:")
                           (" first saw ")(*modifier_pattern)(" and now got ")(*n)("\n");   

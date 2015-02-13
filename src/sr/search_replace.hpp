@@ -13,14 +13,14 @@
 #include "overlay_agent.hpp"
 #include "soft_agent.hpp"
 #include "star_agent.hpp"
+#include "slave_agent.hpp"
 #include <set>
 
 namespace SR 
 {
-
+class Agent;
 class Conjecture;
 class SpecialBase;
-class SlaveBase;
 
 class CompareReplace : virtual public InPlaceTransformation, 
                        public Filter 
@@ -36,7 +36,7 @@ public:
     // the constructor calls it.
     void Configure( TreePtr<Node> cp,
                     TreePtr<Node> rp = TreePtr<Node>() );                
-    virtual void ConfigureImpl();					
+    virtual void ConfigureImpl( const Set<Agent *> &agents_already_configured=Set<Agent *>() );					
     
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
@@ -110,82 +110,10 @@ public:
                    TreePtr<Node> rp = TreePtr<Node>(),
                    bool im = true );
                    
-    virtual void ConfigureImpl();                 
+    virtual void ConfigureImpl( const Set<Agent *> &agents_already_configured=Set<Agent *>() );                 
                     
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *links ) const;
-};
-
-
-/// Coupling slave can read the master's CouplingKeys structure
-struct CouplingSlave 
-{
-    virtual void SetCouplingsMaster( CouplingKeys *ck ) = 0;    
-};
-
-struct SlaveBase : virtual CouplingSlave, virtual InPlaceTransformation, virtual NormalAgent
-{
-    virtual TreePtr<Node> GetThrough() const = 0;
-	virtual void ConfigureImpl() = 0; // For master to trigger configuration
-};
-
-template<typename ALGO>
-struct SlaveIntermediate : public SlaveBase, public ALGO                                 
-{
-	SlaveIntermediate( TreePtr<Node> sp, TreePtr<Node> rp ) :
-		ALGO( sp, rp, false )
-	{}
-    virtual void SetCouplingsMaster( CouplingKeys *ck )
-    {
-        ALGO::coupling_keys.SetMaster( ck ); 
-    }
-    virtual void GetGraphInfo( vector<string> *labels, 
-                               vector< TreePtr<Node> > *links ) const
-    {
-        labels->push_back("through");
-        links->push_back(GetThrough());
-        ALGO::GetGraphInfo( labels, links );
-    }
-    virtual void ConfigureImpl()
-	{
-	    ALGO::ConfigureImpl();
-	}		
-};
-
-template<typename ALGO, class PRE_RESTRICTION>
-struct Slave : SlaveIntermediate<ALGO>, Special<PRE_RESTRICTION>
-{
-	SPECIAL_NODE_FUNCTIONS
-
-	// SlaveSearchReplace must be constructed using constructor
-	Slave( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp, TreePtr<Node> rp ) :
-		through( t ),
-		SlaveIntermediate<ALGO>( sp, rp )
-	{
-	}
-
-	TreePtr<PRE_RESTRICTION> through;
-	virtual TreePtr<Node> GetThrough() const
-	{
-		return TreePtr<Node>( through );
-	}
-};
-
-// Partial specialisation is an arse in C++
-template<class PRE_RESTRICTION>
-struct SlaveCompareReplace : Slave<CompareReplace, PRE_RESTRICTION>, virtual Node
-{
-    SlaveCompareReplace() : Slave<CompareReplace, PRE_RESTRICTION>( NULL, NULL, NULL ) {}      
-    SlaveCompareReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
-        Slave<CompareReplace, PRE_RESTRICTION>( t, sp, rp ) {}
-};
-
-template<class PRE_RESTRICTION>
-struct SlaveSearchReplace : Slave<SearchReplace, PRE_RESTRICTION>, virtual Node
-{
-    SlaveSearchReplace() : Slave<SearchReplace, PRE_RESTRICTION>( NULL, NULL, NULL ) {}      
-    SlaveSearchReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
-        Slave<SearchReplace, PRE_RESTRICTION>( t, sp, rp ) {}
 };
 
 };

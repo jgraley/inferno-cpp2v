@@ -54,15 +54,49 @@ public:
     }
 };
 
+
 template< typename KEY >
 class Set : public set<KEY>
 {
-public:
+public:    
     inline bool IsExist( const KEY &k ) const 
     {
         return set<KEY>::find( k ) != set<KEY>::end();
     }
 };
+
+
+template< typename KEY >
+inline Set<KEY> SetUnion( const Set<KEY> s1, const Set<KEY> s2 )
+{
+    Set<KEY> result;
+    std::set_union( s1.begin(), s1.end(), 
+                    s2.begin(), s2.end(),
+                    std::inserter(result, result.end()) );
+    return result; 
+}
+
+
+template< typename KEY >
+inline Set<KEY> SetIntersection( const Set<KEY> s1, const Set<KEY> s2 )
+{
+    Set<KEY> result;
+    std::set_intersection( s1.begin(), s1.end(), 
+                            s2.begin(), s2.end(),
+                            std::inserter(result, result.end()) );
+    return result; 
+}
+
+
+template< typename KEY >
+inline Set<KEY> SetDifference( const Set<KEY> s1, const Set<KEY> s2 )
+{
+    Set<KEY> result;
+    std::set_difference( s1.begin(), s1.end(), 
+                         s2.begin(), s2.end(),
+                         std::inserter(result, result.end()) );
+    return result; // There, much nicer!
+}    
 
 void CommonTest();
 

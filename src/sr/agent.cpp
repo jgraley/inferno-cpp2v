@@ -6,13 +6,23 @@
 
 using namespace SR;
 
+AgentCommon::AgentCommon() :
+    sr(NULL), 
+    coupling_keys(NULL) 
+{
+}
+
+
 void AgentCommon::Configure( const CompareReplace *s, CouplingKeys *c )
 {
+    // Repeat configuration regarded as an error because it suggests I maybe don't
+    // have a clue what should actaually be configing the agent. Plus general lifecycle 
+    // rule enforcement.
+    ASSERT(!sr && !coupling_keys)("Detected repeat configuration of ")(*this);
     ASSERT(s);
     ASSERT(c);
     sr = s;
     coupling_keys = c;
-    // TODO recursively configure children
 }
 
 
