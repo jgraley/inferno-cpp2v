@@ -29,11 +29,11 @@ private:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
     {
         // We need to create a container of elements of the child.
-        if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>( n ) )
+        if( SlaveAgent *sa = dynamic_cast<SlaveAgent *>( Agent::AsAgent(n) ) )
         {
             // it's a slave, so set up a container containing only "through", not "compare" or "replace"
             shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
-            seq->push_back( sb->GetThrough() );
+            seq->push_back( sa->GetThrough() );
             return seq;
         }
         else
@@ -71,7 +71,11 @@ void CompareReplace::Configure( TreePtr<Node> cp,
 }
 																
 								
-void CompareReplace::ConfigureImpl()
+// The agents_already_configured argument is a set of agents that we should not
+// configure because they were already configured by a master, and masters take 
+// higher priority for configuration (so when an agent is reached from multiple
+// engines, it's the most masterish one that "owns" it).
+void CompareReplace::ConfigureImpl( const Set<Agent *> &agents_already_configured )
 {
     INDENT;
     TRACE("Entering CR::ConfigureImpl on ")(*this)("\n");
@@ -90,66 +94,62 @@ void CompareReplace::ConfigureImpl()
 
     TRACE("Elaborating ")(string( *this ));
 
-    // Walkers for compare and replace patterns that do not recurse beyond slaves
+    // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
     UniqueWalkNoSlavePattern tsp(compare_pattern);
     UniqueWalkNoSlavePattern ss(replace_pattern);
-
-	// Collect together all the first-level slaves
-    Set< OOStd::SharedPtr<SlaveBase> > immediate_slaves;
+    Set<Agent *> immediate_agents;
     FOREACH( TreePtr<Node> n, tsp )
-    {        
-		if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(n) )
-		{
-		    immediate_slaves.insert( sb );
-		}
-    }
+        immediate_agents.insert( Agent::AsAgent(n) );
     FOREACH( TreePtr<Node> n, ss )
-    {
-		if( shared_ptr<SlaveBase> sb = dynamic_pointer_cast<SlaveBase>(n) )
-		{
-		    immediate_slaves.insert( sb );
-		}
-	}
+        immediate_agents.insert( Agent::AsAgent(n) );
 	
-	// Recurse into the slaves' configure
-	FOREACH( shared_ptr<SlaveBase> s, immediate_slaves )
+    // Now configure all the ones we are allowed to configure        
+    Set<Agent *> agents_to_configure = SetDifference( immediate_agents, agents_already_configured );         
+    FOREACH( Agent *a, agents_to_configure )
+    {
+        TRACE("Configuring agent ")(*a)("\n");
+        a->Configure( this, &coupling_keys );       
+    }
+
+    // These are the ones our slaves should not configure
+    Set<Agent *> agents_configured = SetUnion( immediate_agents, agents_already_configured ); 
+    
+    // Recurse into the slaves' configure
+	FOREACH( Agent *a, agents_to_configure )
 	{
-	    TRACE("Recursing to configure slave ")(*s)("\n");
-	    s->ConfigureImpl();
-	}
+        // Give agents pointers to here and our coupling keys
+        if( SlaveAgent *sa = dynamic_cast<SlaveAgent *>(a) )
+        {            
+            TRACE("Recursing to configure slave ")(*sa)("\n");
+            sa->ConfigureImpl(agents_configured);
+        }
+    }
 	
 	// Configure all the other nodes - do this last so if a node
 	// is reachable from both master and slave, the master config
 	// takes priority (overwriting the slave config).
-    FOREACH( TreePtr<Node> n, tsp )
+    FOREACH( Agent *a, agents_to_configure )
     {        
-		// Give agents pointers to here and our coupling keys
-		TRACE("Configuring search pattern ")(*n)("\n");
-        Agent::AsAgent(n)->Configure( this, &coupling_keys );		
-
-        if( shared_ptr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
+		TRACE("Checking agent ")(*a)("\n");
+        AgentCommon *ac = dynamic_cast<AgentCommon *>(a);
+        ASSERT(ac);
+        ASSERT(ac->coupling_keys == &coupling_keys);
+        ASSERT(ac->sr == this);
+        if( CouplingSlave *csa = dynamic_cast<CouplingSlave *>(a) )
         {
 		    // Provide Slaves (and potentially anything else derived from CouplingSlave) with slave-access to our coupling keys
             //TRACE("Found coupling slave in search pattern at %p\n", cs.get() );
-            cs->SetCouplingsMaster( &coupling_keys ); 
+            csa->SetCouplingsMaster( &coupling_keys ); 
         }
     }
 
+    // Provide a back pointer for slaves (not sure why) TODO find out!
     FOREACH( TreePtr<Node> n, ss )
     {
 		// Give agents pointers to here and our coupling keys
 		TRACE("Configuring replace pattern ")(*n)("\n");		
-        Agent::AsAgent(n)->Configure( this, &coupling_keys );		
-
-        if( shared_ptr<CouplingSlave> cs = dynamic_pointer_cast<CouplingSlave>(n) )
-        {
-		    // As above, but in the replace pattern
-            //TRACE("Found coupling slave in replace pattern at %p\n", cs.get() );
-            cs->SetCouplingsMaster( &coupling_keys ); 
-        }
         if( shared_ptr<CompareReplace> cr = dynamic_pointer_cast<CompareReplace>(n) )
-        {
-		    // Provide a back pointer for slaves (not sure why)
+        {		    
             cr->master_ptr = this; 
         }
 	}
@@ -354,7 +354,7 @@ SearchReplace::SearchReplace( TreePtr<Node> sp,
 }
 
 
-void SearchReplace::ConfigureImpl()
+void SearchReplace::ConfigureImpl( const Set<Agent *> &agents_already_configured )
 {                    
     INDENT;
     ASSERT( compare_pattern ); // a search pattern is required to configure the engine
@@ -388,7 +388,7 @@ void SearchReplace::ConfigureImpl()
 		replace_pattern = stuff;
     }
 
-	CompareReplace::ConfigureImpl();	
+	CompareReplace::ConfigureImpl( agents_already_configured );	
 }
 
 

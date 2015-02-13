@@ -14,7 +14,7 @@
 // and CompareReplace. Really, this TODO is just to use these two local 
 // policies as the general policy.
 
-class Transformation : public Traceable
+class Transformation : public virtual Traceable
 {
 public:
     // Apply this transformation to tree at root, using context for decls etc.

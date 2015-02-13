@@ -13,7 +13,6 @@ namespace SR
 { 
 class Conjecture;
 class SpecialBase;
-class SlaveBase;
 class SearchReplace;
  
 class Agent : public virtual Traceable,
@@ -44,7 +43,7 @@ public:
 class AgentCommon : public Agent
 {
 public:
-    AgentCommon() :sr(NULL), coupling_keys(NULL) {}
+    AgentCommon();
     void Configure( const CompareReplace *s, CouplingKeys *c );
     virtual bool DecidedCompare( const TreePtrInterface &x,
                                  bool can_key,
@@ -65,7 +64,7 @@ public:
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
-protected:
+//protected:
     const CompareReplace *sr;
     CouplingKeys *coupling_keys;
 };

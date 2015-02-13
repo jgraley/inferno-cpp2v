@@ -12,14 +12,6 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
 							          bool can_key,
     						          Conjecture &conj )
 {
-    if( SlaveBase *s_this = dynamic_cast<SlaveBase *>(this) )
-    {
-        // When a slave node seen duriung search, just forward through the "base" path
-        bool r = Agent::AsAgent(s_this->GetThrough())->DecidedCompare( x, can_key, conj );
-        if( !r )
-            return false;
-    }
-    else
     {
 		// Recurse through the children. Note that the itemiser internally does a
 		// dynamic_cast onto the type of pattern, and itemises over that type. x must
@@ -273,11 +265,7 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 
 TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
-    if( dynamic_cast<SlaveBase *>(this) )
-	{   
-		return BuildReplaceSlave( keynode );
-	} 
-	else if( dynamic_cast<SpecialBase *>(this) )
+    if( dynamic_cast<SpecialBase *>(this) )
 	{
 		// Star, Not, TransformOf etc. Also MatchAll with no overlay pattern falls thru to here
         ASSERT(keynode)(*this)(" needs to be coupled but has no key");
@@ -438,24 +426,6 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
         }
     }
     
-    ASSERT( dest );
-    return dest;
-}
-
-
-TreePtr<Node> NormalAgent::BuildReplaceSlave( TreePtr<Node> keynode )  
-{
-    INDENT;
-    SlaveBase *sb_this = dynamic_cast<SlaveBase *>(this);
-	ASSERT( sb_this );
-	ASSERT( sb_this->GetThrough() );   
-	
-	// Continue current replace operation by following the "through" pointer
-    TreePtr<Node> dest = AsAgent(sb_this->GetThrough())->BuildReplace( keynode );
-    
-	// Run the slave as a new transformation at the current location
-	(*sb_this)( sr->GetContext(), &dest );
-	
     ASSERT( dest );
     return dest;
 }
