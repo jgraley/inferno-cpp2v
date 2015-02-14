@@ -16,8 +16,7 @@ namespace SR
 // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
 // Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
 // in the collection.
-class StarAgent : public virtual Node, 
-                        public virtual AgentCommon 
+class StarAgent : public virtual AgentCommon 
 {
 public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
@@ -70,7 +69,8 @@ public:
 
 
 template<class PRE_RESTRICTION>
-struct Star : StarAgent, Special<PRE_RESTRICTION>
+struct Star : StarAgent, 
+              Special<PRE_RESTRICTION>
 {
     SPECIAL_NODE_FUNCTIONS
     TreePtr<PRE_RESTRICTION> pattern; // TODO rename to "restriction"

@@ -12,60 +12,58 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
 							          bool can_key,
     						          Conjecture &conj )
 {
+    // Recurse through the children. Note that the itemiser internally does a
+    // dynamic_cast onto the type of pattern, and itemises over that type. x must
+    // be dynamic_castable to pattern's type.
+    vector< Itemiser::Element * > pattern_memb = Itemise();
+    vector< Itemiser::Element * > x_memb = Itemise( x.get() );   // Get the members of x corresponding to pattern's class
+    ASSERT( pattern_memb.size() == x_memb.size() );
+    for( int i=0; i<pattern_memb.size(); i++ )
     {
-		// Recurse through the children. Note that the itemiser internally does a
-		// dynamic_cast onto the type of pattern, and itemises over that type. x must
-		// be dynamic_castable to pattern's type.
-		vector< Itemiser::Element * > pattern_memb = Itemise();
-		vector< Itemiser::Element * > x_memb = Itemise( x.get() );   // Get the members of x corresponding to pattern's class
-		ASSERT( pattern_memb.size() == x_memb.size() );
-		for( int i=0; i<pattern_memb.size(); i++ )
-		{
-			bool r;
-			ASSERT( pattern_memb[i] )( "itemise returned null element");
-			ASSERT( x_memb[i] )( "itemise returned null element");
+        bool r;
+        ASSERT( pattern_memb[i] )( "itemise returned null element");
+        ASSERT( x_memb[i] )( "itemise returned null element");
 
-			if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(pattern_memb[i]) )
-			{
-				SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
-				ASSERT( x_seq )( "itemise for x didn't match itemise for pattern");
-				TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
-				r = DecidedCompareSequence( *x_seq, *pattern_seq, can_key, conj );
-			}
-			else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
-			{
-				CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
-				ASSERT( x_col )( "itemise for x didn't match itemise for pattern");
-				TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
-				r = DecidedCompareCollection( *x_col, *pattern_col, can_key, conj );
-			}
-			else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
-			{
-			    if( !TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be NULL meaning no restriction
-				{
-				    r = true;
-				}
-				else
-				{
-					TreePtrInterface *x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
-					ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
-					TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
-					Agent *ap = Agent::AsAgent(*pattern_ptr);
-					//NormalAgent *nap = dynamic_cast<NormalAgent *>(ap);
-					//ASSERT( nap ); 
-					//ASSERT( nap->sr == sr );
-					//ASSERT( nap->coupling_keys == coupling_keys );
-					r = ap->DecidedCompare( *x_ptr, can_key, conj );
-				}
-			}
-			else
-			{
-				ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
-			}
+        if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(pattern_memb[i]) )
+        {
+            SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
+            ASSERT( x_seq )( "itemise for x didn't match itemise for pattern");
+            TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
+            r = DecidedCompareSequence( *x_seq, *pattern_seq, can_key, conj );
+        }
+        else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
+        {
+            CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
+            ASSERT( x_col )( "itemise for x didn't match itemise for pattern");
+            TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
+            r = DecidedCompareCollection( *x_col, *pattern_col, can_key, conj );
+        }
+        else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
+        {
+            if( !TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be NULL meaning no restriction
+            {
+                r = true;
+            }
+            else
+            {
+                TreePtrInterface *x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
+                ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
+                TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
+                Agent *ap = Agent::AsAgent(*pattern_ptr);
+                //NormalAgent *nap = dynamic_cast<NormalAgent *>(ap);
+                //ASSERT( nap ); 
+                //ASSERT( nap->sr == sr );
+                //ASSERT( nap->coupling_keys == coupling_keys );
+                r = ap->DecidedCompare( *x_ptr, can_key, conj );
+            }
+        }
+        else
+        {
+            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
+        }
 
-			if( !r )
-				return false;
-		}
+        if( !r )
+            return false;
     }
     return true;
 }

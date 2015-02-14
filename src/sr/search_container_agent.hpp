@@ -17,7 +17,7 @@ struct TerminusKey : Key // TODO put in TerminusBase
 };
 
 
-struct TerminusBase : virtual Node 
+struct TerminusBase 
 {
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
 };
@@ -36,8 +36,7 @@ public:
 
 
 // The Stuff wildcard can match a truncated subtree with special powers as listed by the members
-class StuffAgent : virtual Node, // TODO no need
-                    public SearchContainerAgent
+class StuffAgent : public SearchContainerAgent
 {
 public:
     StuffAgent();
@@ -51,7 +50,8 @@ public:
 
 
 template<class PRE_RESTRICTION>
-struct Stuff : StuffAgent, Special<PRE_RESTRICTION> 
+struct Stuff : StuffAgent, 
+               Special<PRE_RESTRICTION> 
 {
     // Do the itemiser by hand since it gets confused by the CompareReplace object   
     virtual vector< Itemiser::Element * > Itemise( const Itemiser *itemise_object = 0 ) const
@@ -72,15 +72,15 @@ struct Stuff : StuffAgent, Special<PRE_RESTRICTION>
 };
 
 
-struct AnyNodeAgent : virtual Node, // TODO no need?
-                      public SearchContainerAgent
+struct AnyNodeAgent : public SearchContainerAgent
 {
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
 };
 
 
 template<class PRE_RESTRICTION>
-struct AnyNode : AnyNodeAgent, Special<PRE_RESTRICTION> 
+struct AnyNode : AnyNodeAgent, 
+                 Special<PRE_RESTRICTION> 
 {
     SPECIAL_NODE_FUNCTIONS
 };
