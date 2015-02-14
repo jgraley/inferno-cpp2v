@@ -18,7 +18,10 @@ void AgentCommon::Configure( const CompareReplace *s, CouplingKeys *c )
     // Repeat configuration regarded as an error because it suggests I maybe don't
     // have a clue what should actaually be configing the agent. Plus general lifecycle 
     // rule enforcement.
-    ASSERT(!sr && !coupling_keys)("Detected repeat configuration of ")(*this);
+    // Why no coupling across sibling slaves? Would need an ordering for keying
+    // but ordering not defined on sibling slaves.
+    ASSERT(!sr && !coupling_keys)("Detected repeat configuration of ")(*this)
+                                 ("\nCould be result of coupling this node across sibling slaves - not allowed :(");
     ASSERT(s);
     ASSERT(c);
     sr = s;

@@ -107,6 +107,7 @@ void CompareReplace::ConfigureImpl( const Set<Agent *> &agents_already_configure
     Set<Agent *> agents_to_configure = SetDifference( immediate_agents, agents_already_configured );         
     FOREACH( Agent *a, agents_to_configure )
     {
+        // Give agents pointers to here and our coupling keys
         TRACE("Configuring agent ")(*a)("\n");
         a->Configure( this, &coupling_keys );       
     }
@@ -117,43 +118,13 @@ void CompareReplace::ConfigureImpl( const Set<Agent *> &agents_already_configure
     // Recurse into the slaves' configure
 	FOREACH( Agent *a, agents_to_configure )
 	{
-        // Give agents pointers to here and our coupling keys
         if( SlaveAgent *sa = dynamic_cast<SlaveAgent *>(a) )
-        {            
+        {                        
             TRACE("Recursing to configure slave ")(*sa)("\n");
             sa->ConfigureImpl(agents_configured);
         }
     }
 	
-	// Configure all the other nodes - do this last so if a node
-	// is reachable from both master and slave, the master config
-	// takes priority (overwriting the slave config).
-    FOREACH( Agent *a, agents_to_configure )
-    {        
-		TRACE("Checking agent ")(*a)("\n");
-        AgentCommon *ac = dynamic_cast<AgentCommon *>(a);
-        ASSERT(ac);
-        ASSERT(ac->coupling_keys == &coupling_keys);
-        ASSERT(ac->sr == this);
-        if( CouplingSlave *csa = dynamic_cast<CouplingSlave *>(a) )
-        {
-		    // Provide Slaves (and potentially anything else derived from CouplingSlave) with slave-access to our coupling keys
-            //TRACE("Found coupling slave in search pattern at %p\n", cs.get() );
-            csa->SetCouplingsMaster( &coupling_keys ); 
-        }
-    }
-
-    // Provide a back pointer for slaves (not sure why) TODO find out!
-    FOREACH( TreePtr<Node> n, ss )
-    {
-		// Give agents pointers to here and our coupling keys
-		TRACE("Configuring replace pattern ")(*n)("\n");		
-        if( shared_ptr<CompareReplace> cr = dynamic_pointer_cast<CompareReplace>(n) )
-        {		    
-            cr->master_ptr = this; 
-        }
-	}
-
 	is_configured = true;
 } 
 

@@ -4,6 +4,13 @@
 
 using namespace SR;
 
+void SoftAgentCommon::Configure( const CompareReplace *s, CouplingKeys *c )
+{
+    AgentCommon::Configure( s, c ); // To main version of Configure
+    MyConfigure();
+}
+
+    
 void SoftAgentCommon::KeyReplace()
 {    
     TRACE("Keying replace pattern (via agent) ")(*this)("\n");
@@ -78,7 +85,13 @@ bool SoftAgentCommon::IsCanKey()
 
 TreePtr<Node> SoftAgentCommon::GetCoupled( TreePtr<Node> pattern )
 {
-    return sr->coupling_keys.GetCoupled( Agent::AsAgent(pattern) );
+    return coupling_keys->GetCoupled( Agent::AsAgent(pattern) );
+}
+
+
+CouplingKeys *SoftAgentCommon::GetCouplingKeys()
+{
+    return coupling_keys;
 }
 
 

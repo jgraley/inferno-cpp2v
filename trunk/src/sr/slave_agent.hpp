@@ -11,15 +11,7 @@
 namespace SR
 { 
 
-/// Coupling slave can read the master's CouplingKeys structure
-struct CouplingSlave 
-{
-    virtual void SetCouplingsMaster( CouplingKeys *ck ) = 0;    
-};
-
-
-class SlaveAgent : public virtual CouplingSlave, 
-                   public virtual InPlaceTransformation, 
+class SlaveAgent : public virtual InPlaceTransformation, 
                    public virtual AgentCommon 
 {
 public:
@@ -41,10 +33,6 @@ public:
     SlaveIntermediate( TreePtr<Node> sp, TreePtr<Node> rp ) :
         ALGO( sp, rp, false )
     {}
-    virtual void SetCouplingsMaster( CouplingKeys *ck )
-    {
-        ALGO::coupling_keys.SetMaster( ck ); 
-    }
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *links ) const
     {
@@ -59,6 +47,8 @@ public:
     virtual void Configure( const CompareReplace *s, CouplingKeys *c )
     {
         AgentCommon::Configure( s, c );
+        ALGO::coupling_keys.SetMaster( c );  
+        ALGO::master_ptr = s;
     }       
 };
 

@@ -46,7 +46,7 @@ public:
     bool is_master;// TODO seems to be obsolete
     TreePtr<Node> compare_pattern;
     TreePtr<Node> replace_pattern;
-    CompareReplace *master_ptr;
+    const CompareReplace *master_ptr;
     TreePtr<Node> *pcontext;
     mutable CouplingKeys coupling_keys;
     mutable Set< TreePtr<Node> > dirty_grass;

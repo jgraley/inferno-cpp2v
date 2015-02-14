@@ -26,6 +26,7 @@ public:
         current_can_key( false ),
         current_conj( NULL )
     {}
+    void Configure( const CompareReplace *s, CouplingKeys *c );
     // This entrypoint is actually called by the main engine before the replace
     // and the results are put into a key. This one calls into the impl.
     virtual void KeyReplace(); 
@@ -36,6 +37,7 @@ public:
     // Called when coupled, dest is coupling key TODO route through "my" version
     virtual TreePtr<Node> GetOverlayPattern();
     virtual TreePtr<Node> MyBuildReplace();
+    virtual void MyConfigure() {}
 protected: // Call only from the soft node implementation in MyCompare()
     // Compare for child nodes in a normal context (i.e. in which the pattern must match
     // for an overall match to be possible, and so can be used to key a coupling)
@@ -46,6 +48,7 @@ protected: // Call only from the soft node implementation in MyCompare()
     TreePtr<Node> *GetContext();
     bool IsCanKey();
     TreePtr<Node> GetCoupled( TreePtr<Node> pattern );
+    CouplingKeys *GetCouplingKeys();
     TreePtr<Node> DoBuildReplace( TreePtr<Node> pattern ) ;
 protected:
     bool current_can_key;

@@ -15,8 +15,7 @@ struct NotMatchBase {}; // needed for graph plotter
 template<class PRE_RESTRICTION>
 struct NotMatch : Special<PRE_RESTRICTION>,
                   SoftAgent,
-                  NotMatchBase,
-                  CouplingSlave
+                  NotMatchBase
 {
 	SPECIAL_NODE_FUNCTIONS
 	// Pattern is an abnormal context. Fascinatingly, we can supply any node here because there
@@ -49,9 +48,9 @@ private:
 				return false;
     	}
     }
-    virtual void SetCouplingsMaster( CouplingKeys *ck )
+    virtual void MyConfigure()
     {
-        comp.coupling_keys.SetMaster( ck ); 
+        comp.coupling_keys.SetMaster( GetCouplingKeys() ); 
     }
 };
 
