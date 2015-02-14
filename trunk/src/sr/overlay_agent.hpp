@@ -11,8 +11,7 @@
 namespace SR
 { 
 
-class OverlayAgent : public virtual Node, 
-                     public virtual AgentCommon
+class OverlayAgent : public virtual AgentCommon
 {
 public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
@@ -44,8 +43,7 @@ struct Overlay : OverlayAgent, Special<PRE_RESTRICTION>
 };
 
 
-class InsertAgent : public virtual Node, 
-                    public virtual AgentCommon
+class InsertAgent : public virtual AgentCommon
 {
 public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
@@ -70,8 +68,7 @@ struct Insert : InsertAgent, Special<PRE_RESTRICTION>
 };
 
 
-class EraseAgent : public virtual Node, 
-                   public virtual AgentCommon
+class EraseAgent : public virtual AgentCommon
 {
 public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,

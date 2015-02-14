@@ -77,8 +77,7 @@ public:
 
 // Partial specialisation is an arse in C++
 template<class PRE_RESTRICTION>
-class SlaveCompareReplace : public Slave<CompareReplace, PRE_RESTRICTION>, 
-                            public virtual Node
+class SlaveCompareReplace : public Slave<CompareReplace, PRE_RESTRICTION>
 {
 public:
     SlaveCompareReplace() : Slave<CompareReplace, PRE_RESTRICTION>( NULL, NULL, NULL ) {}      
@@ -88,8 +87,7 @@ public:
 
 
 template<class PRE_RESTRICTION>
-class SlaveSearchReplace : public Slave<SearchReplace, PRE_RESTRICTION>, 
-                           public virtual Node
+class SlaveSearchReplace : public Slave<SearchReplace, PRE_RESTRICTION>
 {
 public:
     SlaveSearchReplace() : Slave<SearchReplace, PRE_RESTRICTION>( NULL, NULL, NULL ) {}      

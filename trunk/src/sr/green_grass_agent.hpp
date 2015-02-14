@@ -11,8 +11,7 @@
 namespace SR
 { 
 
-class GreenGrassAgent : public virtual Node, 
-                        public virtual AgentCommon 
+class GreenGrassAgent : public virtual AgentCommon 
 {
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key,
