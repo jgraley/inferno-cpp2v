@@ -15,6 +15,7 @@ class Conjecture;
 class SpecialBase;
 class SearchReplace;
  
+/// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Traceable,
               public virtual Node
 {
@@ -40,6 +41,7 @@ public:
 // - Pre-restriction
 // - Keying (default case)
 // - Compare and MAtchingDecidedCompare rings
+/// Implments misc functionality common to all or most agents
 class AgentCommon : public Agent
 {
 public:
@@ -64,7 +66,7 @@ public:
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
-//protected:
+protected:
     const CompareReplace *sr;
     CouplingKeys *coupling_keys;
 };
@@ -88,12 +90,14 @@ public:
 // Itemise is known required (for eg graph plotting), other bounces
 // are TBD.
 #define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
+/// Common stuff for pattern nodes other than normal nodes
 struct SpecialBase
 {
     virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() = 0;
 };
 
 
+/// Common stuff for pattern nodes other than normal nodes
 template<class PRE_RESTRICTION>
 struct Special : SpecialBase, 
                  virtual PRE_RESTRICTION

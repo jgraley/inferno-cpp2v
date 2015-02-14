@@ -9,9 +9,10 @@
 namespace SR
 {
 
+/// Match if the supplied patterns does not match (between you and me, it's just a NOT)
 struct NotMatchBase {}; // needed for graph plotter
 
-// Match if the supplied patterns does not match (between you and me, it's just a NOT)
+/// Match if the supplied patterns does not match (between you and me, it's just a NOT)
 template<class PRE_RESTRICTION>
 struct NotMatch : Special<PRE_RESTRICTION>,
                   SoftAgent,
@@ -54,12 +55,13 @@ private:
     }
 };
 
+/// Match all of the supplied patterns (between you and me, it's an AND)
 struct MatchAllBase : virtual Node
 {
     virtual CollectionInterface &GetPatterns() = 0;
 };
 
-// Match all of the supplied patterns (between you and me, it's an AND)
+/// Match all of the supplied patterns (between you and me, it's an AND)
 template<class PRE_RESTRICTION>
 struct MatchAll : Special<PRE_RESTRICTION>,
                   virtual SoftAgent, 
@@ -131,9 +133,10 @@ private:
     CollectionInterface &GetPatterns() { return patterns; } // TODO try covariant?
 };
 
+/// Match zero or more of the supplied patterns (between you and me, it's an OR)
 struct MatchAnyBase {};
 
-// Match zero or more of the supplied patterns (between you and me, it's an OR)
+/// Match zero or more of the supplied patterns (between you and me, it's an OR)
 template<class PRE_RESTRICTION>
 struct MatchAny : Special<PRE_RESTRICTION>,
                   SoftAgent,
@@ -158,9 +161,10 @@ private:
 };
 
 
+/// Match an odd number of patterns (between you and me, it's an EOR)
 struct MatchOddBase {};
 
-// Match an odd number of patterns (between you and me, it's an EOR)
+/// Match an odd number of patterns (between you and me, it's an EOR)
 template<class PRE_RESTRICTION>
 struct MatchOdd : Special<PRE_RESTRICTION>,
                   SoftAgent,
@@ -185,6 +189,7 @@ private:
 };
 
 
+/// Match the output of some transformation against the child pattern 
 struct TransformOfBase : SoftAgentSpecialKey,
                          TerminusBase
 {
@@ -204,6 +209,7 @@ protected:
 };
 
 
+/// Match the output of some transformation against the child pattern 
 template<class PRE_RESTRICTION>
 struct TransformOf : TransformOfBase, Special<PRE_RESTRICTION>
 {
@@ -216,6 +222,7 @@ struct TransformOf : TransformOfBase, Special<PRE_RESTRICTION>
 };
 
 
+/// Match based on the type of a child pointer
 struct PointerIsBase
 {
 };
@@ -224,6 +231,7 @@ struct PointerIsBase
     So if in the program tree we have a->b and the search pattern is
     x->PointerIsBase->y, then a must match x, and the type of the pointer
     in a that points to b must match y. */
+/// Match based on the type of a child pointer
 template<class PRE_RESTRICTION>
 struct PointerIs : Special<PRE_RESTRICTION>,
                    SoftAgent,

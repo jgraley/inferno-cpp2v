@@ -10,6 +10,7 @@ namespace SR
 
 class CompareReplace;
 
+/// Utility to keep track of the current set of choices that have been made at decision points, and to advance through them until a full match is found
 class Conjecture
 {
 public:

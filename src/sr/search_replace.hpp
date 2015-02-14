@@ -16,12 +16,14 @@
 #include "slave_agent.hpp"
 #include <set>
 
+/// SR namespace contains the search and replace implementation
 namespace SR 
 {
 class Agent;
 class Conjecture;
 class SpecialBase;
 
+/// Main implementation of a compare and replace function, that matches at the root of the program tree
 class CompareReplace : virtual public InPlaceTransformation, 
                        public Filter 
 {  
@@ -103,6 +105,7 @@ public:
 };
 
 
+/// Main implementation of a search and replace function, that matches anywhere in program tree
 class SearchReplace : public CompareReplace
 {
 public:

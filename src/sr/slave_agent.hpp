@@ -11,6 +11,7 @@
 namespace SR
 { 
 
+/// Common implementaiton stuff for slaves
 class SlaveAgent : public virtual InPlaceTransformation, 
                    public virtual AgentCommon 
 {
@@ -25,6 +26,7 @@ public:
 };
 
 
+/// Agent that allows some transformation to run at the corresponding place in the output tree 
 template<typename ALGO>
 class SlaveIntermediate : public SlaveAgent, 
                           public ALGO                                 
@@ -53,6 +55,7 @@ public:
 };
 
 
+/// Agent that allows some transformation to run at the corresponding place in the output tree 
 template<typename ALGO, class PRE_RESTRICTION>
 class Slave : public SlaveIntermediate<ALGO>, 
               public Special<PRE_RESTRICTION>
@@ -75,7 +78,7 @@ public:
 };
 
 
-// Partial specialisation is an arse in C++
+/// Agent that performs a seperate compare and replace operation at the corresponding place in the output tree
 template<class PRE_RESTRICTION>
 class SlaveCompareReplace : public Slave<CompareReplace, PRE_RESTRICTION>
 {
@@ -86,6 +89,7 @@ public:
 };
 
 
+/// Agent that performs a seperate search and replace operation at the corresponding place in the output tree
 template<class PRE_RESTRICTION>
 class SlaveSearchReplace : public Slave<SearchReplace, PRE_RESTRICTION>
 {

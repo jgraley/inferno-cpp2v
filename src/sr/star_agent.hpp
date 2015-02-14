@@ -16,6 +16,7 @@ namespace SR
 // In a Collection, a sub-collection of 0 or more elements may be matched anywhere in the collection
 // Only one Star is allowed in a Collection. Star must be templated on a type that is allowed
 // in the collection.
+/// Agent used in a container pattern that matches zero or more elements
 class StarAgent : public virtual AgentCommon 
 {
 public:
@@ -68,6 +69,7 @@ public:
 };
 
 
+/// Agent used in a container pattern that matches zero or more elements
 template<class PRE_RESTRICTION>
 struct Star : StarAgent, 
               Special<PRE_RESTRICTION>

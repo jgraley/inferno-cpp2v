@@ -5,6 +5,7 @@
 #include <string>
 #include "common/trace.hpp"
 
+/// Support class allowing hierarchical type comparisons between nodes
 struct Matcher
 {
 	virtual bool IsSubclass( const Matcher *source_architype ) const = 0;

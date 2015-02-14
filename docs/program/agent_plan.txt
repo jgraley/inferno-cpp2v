@@ -56,6 +56,7 @@ Detailed plan for refactoring into agent patterns
 - Use clean_grass list rather than dirty_grass - then can use the SR::DuplicateNode and DuplicateSubtree in src/helpers/ and remove from AgentCommon
 ---now the sr passed in via Configure() is nearly or completely unnecessary making the agents reasonably self-sufficient---
 - Note: don't kill the Configure sweep since needed for various things now not just sr and couplingkys pointers
+9. Turn the boolean soft agents into proper agents. Maybe lose MatchEven if no users? Or becomes MatchOne?
 
 QUESTION: should patterns eventually refer to each other via TreePtr<Agent> instead of TreePre<Node>? 
 And does that even work, or should it really be shared_ptr<Agent> or SharedPtr<Agent>? --- requires experimentation, added to plan

@@ -13,7 +13,7 @@ using namespace std;
 // *even if* virtual inheritance is used. This may be a compiler bug in which case the above
 // is true only for GCC4.3. Anyway, if we see it twice it will have the same address,
 // so we de-duplicate during itemise algorithm.
-
+/// Support class allowing the child-pointing members of a node to be extracted in a vector
 class Itemiser : public virtual Traceable
 {
 public:

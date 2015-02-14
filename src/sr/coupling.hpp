@@ -8,11 +8,12 @@
 
 namespace SR 
 {
+class Agent; 
+class CompareReplace;
 
 // Base class for coupling keys; this deals with individual node matches, and also with stars
 // by means of pointing "root" at a SubCollection or SubSequence
-class Agent; 
-class CompareReplace;
+/// General holder for coupling keys, remembers important details of partil or full matches
 struct Key
 {
 	virtual ~Key(){}  // be a virtual hierarchy
@@ -22,6 +23,8 @@ struct Key
 	int governing_offset;
 };
 
+
+/// Utility to keep track of the current mapping of pattern nodes to input tree nodes resulting from a partial or full match
 class CouplingKeys
 {
 // TODO const-correctness, so master can be const. Means using find() etc instead of []

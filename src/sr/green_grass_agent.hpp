@@ -11,6 +11,7 @@
 namespace SR
 { 
 
+/// Agent that restricts the node under it to one that was in the original program tree
 class GreenGrassAgent : public virtual AgentCommon 
 {
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
@@ -21,6 +22,7 @@ class GreenGrassAgent : public virtual AgentCommon
 };
 
 
+/// Agent that restricts the node under it to one that was in the original program tree
 template<class PRE_RESTRICTION>
 struct GreenGrass : GreenGrassAgent, Special<PRE_RESTRICTION>
 {

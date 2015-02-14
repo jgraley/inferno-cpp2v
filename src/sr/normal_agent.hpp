@@ -12,7 +12,8 @@
  
 namespace SR
 { 
-    
+
+/// Agent implementation used for all normal pattern nodes    
 class NormalAgent : public virtual AgentCommon
 {
 public:
@@ -39,6 +40,7 @@ private:
 
 
 #define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
+/// Wrapper for normal pattern nodes that combines a NormalAgent with the specified pattern node
 template<typename NODE_TYPE>
 class NormalAgentWrapper : public virtual NODE_TYPE,
                            public virtual NormalAgent
@@ -57,8 +59,7 @@ public:
 };
 
 
-// Helper that does the constructing of pattern nodes when they are not already 
-// agents, by applying the NormalAgentWrapper to get normal agent functionality.
+/// Helper that does the constructing of pattern nodes when they are not already agents
 template< bool IS_AGENT, typename NODE_TYPE >
 class MakePatternPtrHelper  
 {
@@ -85,8 +86,7 @@ public:
 };
 
 
-// Helper that does the constructing of pattern nodes that are already agents, 
-// by just constructing them directly.
+/// Helper that does the constructing of pattern nodes that are already agents
 template<typename NODE_TYPE>
 class MakePatternPtrHelper<true, NODE_TYPE> // NODE_TYPE is an agent, so behave like MakeTreePtr
 {
@@ -115,6 +115,7 @@ public:
 
 // Similar to MakeTreePtr<> (see node/specialise_oostd.hpp) but produces a TreePtr to NormalAgentWrapper<NODE_TYPE> rather
 // than just NODE_TYPE when NODE_TYPE is not already a kind of Agent. 
+/// Utility for constructing nodes that are to be used in patterns
 template<typename NODE_TYPE>
 class MakePatternPtr : public TreePtr<NODE_TYPE>
 {

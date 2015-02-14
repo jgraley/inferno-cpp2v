@@ -16,6 +16,7 @@
 // TODO figure out how to enforce finality in NODE_FUNCTIONS_FINAL
 #define NODE_FUNCTIONS ITEMISE_FUNCTION MATCHER_FUNCTION CLONE_FUNCTION FINAL_FUNCTION(false)
 #define NODE_FUNCTIONS_FINAL ITEMISE_FUNCTION MATCHER_FUNCTION CLONE_FUNCTION FINAL_FUNCTION(true)
+/// The node support classes all collected together for convenience
 struct NodeBases : Magic,
                    virtual Traceable,
                    Matcher,
@@ -34,6 +35,7 @@ struct NodeBases : Magic,
 // inheritance diamonds arise, Node should be derived virtually
 // (we always want the set-restricting model of inheritance in
 // the inferno tree node hierarchy).
+/// The main base class for inferno nodes
 struct Node : NodeBases
 {
     NODE_FUNCTIONS
@@ -42,6 +44,7 @@ struct Node : NodeBases
     // Node must be inherited virtually, to allow MI diamonds
     // without making Node ambiguous
 };
+
 
 template<>
 struct MakeTreePtr<Node> : TreePtr<Node>
