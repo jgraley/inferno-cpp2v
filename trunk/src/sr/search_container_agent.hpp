@@ -11,18 +11,21 @@
 namespace SR
 { 
 
+/// A kind of couplings key that allows a found terminus to be remembered    
 struct TerminusKey : Key // TODO put in TerminusBase
 {
     TreePtr<Node> terminus;
 };
 
 
+/// Support for agents that feature a terminus
 struct TerminusBase 
 {
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
 };
     
 
+/// Agent that can match a terminus within a supplied container of nodes
 class SearchContainerAgent : public TerminusBase,
                              public virtual AgentCommon
 {
@@ -35,7 +38,7 @@ public:
 };
 
 
-// The Stuff wildcard can match a truncated subtree with special powers as listed by the members
+/// Agent that matches an arbitrary subtree, with restrictions on elements therein and terminus support 
 class StuffAgent : public SearchContainerAgent
 {
 public:
@@ -48,7 +51,7 @@ public:
     bool one_level; // TODO lose this "one_level" thing: AnyNode now does that
 };
 
-
+/// Agent that matches an arbitrary subtree, with restrictions on elements therein and terminus support 
 template<class PRE_RESTRICTION>
 struct Stuff : StuffAgent, 
                Special<PRE_RESTRICTION> 
@@ -71,13 +74,14 @@ struct Stuff : StuffAgent,
     }
 };
 
-
+/// Agent that matches any single node, with terminus support
 struct AnyNodeAgent : public SearchContainerAgent
 {
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
 };
 
 
+/// Agent that matches any single node, with terminus support
 template<class PRE_RESTRICTION>
 struct AnyNode : AnyNodeAgent, 
                  Special<PRE_RESTRICTION> 

@@ -7,6 +7,7 @@
 // NOTE: Duplicate uses shared_ptr so that it can be overloaded to return
 // the supplied pointer (as done by SpecificIdentifier). Clone is guaranteed
 // to return a new() object.
+/// Support class for allowing copies of nodes to be made
 class Cloner
 {
 public:

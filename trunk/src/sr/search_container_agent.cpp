@@ -94,6 +94,7 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> 
         rf = recurse_comparer;
     }
     
+    // TODO do we have to do these walks every time???? Maybe cache???!!
     if( one_level )
         return shared_ptr<ContainerInterface>( new FlattenNode( x ) );
     else

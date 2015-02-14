@@ -6,6 +6,8 @@
 #include "common/trace.hpp"
 #include "match.hpp"
 
+//TODO do we still need this? If so, is it in the right place?
+/// Utility for getting the type of a node as a string
 class TypeInfo 
 {
 private:
