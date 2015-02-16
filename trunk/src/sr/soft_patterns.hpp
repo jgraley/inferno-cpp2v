@@ -195,7 +195,7 @@ private:
 
 
 /// Match the output of some transformation against the child pattern 
-class TransformOfBase : public SoftAgentSpecialKey
+class TransformOfBase : public SoftAgent
 {
 public:
     TreePtr<Node> pattern; 
@@ -207,7 +207,7 @@ public:
     }
 
 private:
-    virtual shared_ptr<Key> MyCompare( const TreePtrInterface &x );
+    virtual bool MyCompare( const TreePtrInterface &x );
     
 protected: 
     TransformOfBase() {}    

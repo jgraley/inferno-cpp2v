@@ -29,6 +29,7 @@ struct BuildIdentifierBase : SoftAgent
     int flags;
 };
 
+
 struct BuildInstanceIdentifier : Special<CPPTree::InstanceIdentifier>,                             
                                  BuildIdentifierBase
 {
@@ -44,6 +45,7 @@ private:
     }                                                   
 };
 
+
 struct BuildTypeIdentifier : Special<CPPTree::TypeIdentifier>,                             
                              BuildIdentifierBase
 {
@@ -56,6 +58,7 @@ private:
     return TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) );
     }                                               
 };
+
 
 struct BuildLabelIdentifier : Special<CPPTree::LabelIdentifier>,                             
                               BuildIdentifierBase
@@ -82,6 +85,7 @@ struct IdentifierByNameBase : SoftAgent
     string name;
 };
 
+
 struct InstanceIdentifierByName : Special<CPPTree::InstanceIdentifier>,                             
                                   IdentifierByNameBase
 {
@@ -95,6 +99,7 @@ private:
         return IsMatch( x );
     }                                
 };
+
 
 struct TypeIdentifierByName : Special<CPPTree::TypeIdentifier>,                             
                              IdentifierByNameBase
@@ -110,6 +115,7 @@ private:
     }                                
 };
 
+
 struct LabelIdentifierByName : Special<CPPTree::LabelIdentifier>,                             
                               IdentifierByNameBase
 {
@@ -124,14 +130,16 @@ private:
     }                                
 };
 
+
 // Base class for special nodes that match nested nodes
-struct NestedBase : SoftAgentSpecialKey
+struct NestedBase : SoftAgent
 {
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) = 0;
-    virtual shared_ptr<Key> MyCompare( const TreePtrInterface &x );
+    virtual bool MyCompare( const TreePtrInterface &x );
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;    
 };
+
 
 // Recurse through a number of nested Array nodes, but only by going through
 // the "element" member, not the "size" member. So this will get you from the type
@@ -141,6 +149,7 @@ struct NestedArray : NestedBase, Special<CPPTree::Type>
     SPECIAL_NODE_FUNCTIONS
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth );
 };
+
 
 // Recurse through a number of Subscript nodes, but only going through
 // the base, not the index. Thus we seek the instance that contains the 

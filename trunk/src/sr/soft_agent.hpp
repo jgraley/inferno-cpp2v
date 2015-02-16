@@ -21,15 +21,18 @@ public:
 
 
 /// Common implemtation stuff for soft nodes
-class SoftAgentCommon : Flushable,
-                        public virtual AgentCommon
+class SoftAgent : Flushable,
+                  public virtual AgentCommon
 {
 public:
-    SoftAgentCommon() :
+    SoftAgent() :
         current_can_key( false ),
         current_conj( NULL )
     {}
     void Configure( const CompareReplace *s, CouplingKeys *c );
+    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
+                                     bool can_key,
+                                     Conjecture &conj );
     // This entrypoint is actually called by the main engine before the replace
     // and the results are put into a key. This one calls into the impl.
     virtual void KeyReplace(); 
@@ -39,6 +42,8 @@ public:
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     // Called when coupled, dest is coupling key TODO route through "my" version
     virtual TreePtr<Node> GetOverlayPattern();
+    // Soft nodes should override this to implement their comparison function
+    virtual bool MyCompare( const TreePtrInterface &x );
     virtual TreePtr<Node> MyBuildReplace();
     virtual void MyConfigure() {}
 protected: // Call only from the soft node implementation in MyCompare()
@@ -56,32 +61,6 @@ protected: // Call only from the soft node implementation in MyCompare()
 protected:
     bool current_can_key;
     Conjecture *current_conj; 
-};
-
-
-/// Adaptor for plug-in comparison and replace building algorithms
-class SoftAgent : public SoftAgentCommon
-{
-public:    
-    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key,
-                                     Conjecture &conj );
-    // Soft nodes should override this to implement their comparison function
-    virtual bool MyCompare( const TreePtrInterface &x );
-};
-
-
-/// Adaptor for plug-in comparison and replace building algorithms allowing control of generated key
-class SoftAgentSpecialKey : public SoftAgentCommon
-{
-public:    
-    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key,
-                                     Conjecture &conj );
-    // Soft nodes should override this to implement their comparison function
-    // Note compulsory when this base is used
-    // Return NULL for not found
-    virtual shared_ptr<Key> MyCompare( const TreePtrInterface &x ) = 0;
 };
 
 };
