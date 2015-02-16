@@ -340,8 +340,9 @@ private:
 struct IsLabelReached : SoftAgent, Special<LabelIdentifier>
 {
 	SPECIAL_NODE_FUNCTIONS	
-	virtual void FlushCache()
+	virtual void FlushCache() 
 	{
+        ASSERT(0);
 	    cache.clear();
 	}
 	// x is nominally the label id, at the position of this node
@@ -352,6 +353,11 @@ struct IsLabelReached : SoftAgent, Special<LabelIdentifier>
         ASSERT( pattern );
         if( IsCanKey() )
             return true; // Want to wait for our pattern to get keyed before we do the search, so wait for restricting pass
+        
+        // TODO Flushable mechanism removed - flush every time for safety (if
+        // this code ever gets used again). This may be slow!
+        FlushCache();
+        
         TreePtr<Node> n = GetCoupled( pattern ); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
         if( !n )
             n = pattern;

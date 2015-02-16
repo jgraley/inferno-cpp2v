@@ -147,15 +147,6 @@ bool CompareReplace::Compare( const TreePtrInterface &x,
 }
 
 
-void CompareReplace::FlushSoftPatternCaches( TreePtr<Node> pattern ) const
-{
-    UniqueWalk t(pattern);
-    FOREACH( TreePtr<Node> n, t )
-        if( shared_ptr<Flushable> ssp = dynamic_pointer_cast<Flushable>(n) )
-            ssp->FlushCache();      
-}
-
-
 bool CompareReplace::IsMatch( TreePtr<Node> context,       
                               TreePtr<Node> root )
 {
@@ -213,12 +204,6 @@ bool CompareReplace::SingleCompareReplace( TreePtr<Node> *proot )
     // Explicitly preserve the coupling keys structure - we do this instead
     // of clearing the keys in case the keys were set up in advance, as will
     // be the case if this is a slave.
-    
-        
-    // Reset caches for this search run - the input tree will not change until 
-    // the search is complete so stuff may be cached.
-    FlushSoftPatternCaches( compare_pattern );
-    
     TRACE("Begin search\n");
 	bool r = Agent::AsAgent(compare_pattern)->Compare( *proot, true );
 	if( !r )
