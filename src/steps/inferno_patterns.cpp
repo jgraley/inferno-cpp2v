@@ -63,7 +63,7 @@ bool IdentifierByNameBase::IsMatch( const TreePtrInterface &x )
 }
 
 
-shared_ptr<Key> NestedBase::MyCompare( const TreePtrInterface &x )
+bool NestedBase::MyCompare( const TreePtrInterface &x )
 {
     INDENT;
     string s;
@@ -85,17 +85,7 @@ shared_ptr<Key> NestedBase::MyCompare( const TreePtrInterface &x )
         r = NormalCompare( cur_depth, TreePtr<Node>(depth) );
     }
     
-    if( r )
-    {
-        // Ensure the replace can terminate and overlay
-        shared_ptr<Key> k( new Key );
-        k->root = x;        
-        return k;
-    }
-    else
-    {
-        return shared_ptr<Key>();
-    }
+    return r;    
 }    
 
 
