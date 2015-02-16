@@ -11,30 +11,24 @@
 namespace SR
 { 
 
-/// A kind of couplings key that allows a found terminus to be remembered    
-struct TerminusKey : Key // TODO put in TerminusBase
-{
-    TreePtr<Node> terminus;
-};
-
-
-/// Support for agents that feature a terminus
-struct TerminusBase 
-{
-    TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
-};
-    
-
 /// Agent that can match a terminus within a supplied container of nodes
-class SearchContainerAgent : public TerminusBase,
-                             public virtual AgentCommon
+class SearchContainerAgent : public virtual AgentCommon
 {
+    /// A kind of couplings key that allows a found terminus to be remembered    
+    class TerminusKey : public Key // TODO put in SearchContainerAgent
+    {
+    public:
+        TreePtr<Node> terminus;
+    };
+
 public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key,
                                      Conjecture &conj );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) = 0;
+
+    TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
 };
 
 
@@ -48,14 +42,14 @@ public:
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
     CompareReplace * const recurse_comparer;
-    bool one_level; // TODO lose this "one_level" thing: AnyNode now does that
 };
 
 /// Agent that matches an arbitrary subtree, with restrictions on elements therein and terminus support 
 template<class PRE_RESTRICTION>
-struct Stuff : StuffAgent, 
-               Special<PRE_RESTRICTION> 
+class Stuff : public StuffAgent, 
+              public Special<PRE_RESTRICTION> 
 {
+public:
     // Do the itemiser by hand since it gets confused by the CompareReplace object   
     virtual vector< Itemiser::Element * > Itemise( const Itemiser *itemise_object = 0 ) const
     {
@@ -75,17 +69,19 @@ struct Stuff : StuffAgent,
 };
 
 /// Agent that matches any single node, with terminus support
-struct AnyNodeAgent : public SearchContainerAgent
+class AnyNodeAgent : public SearchContainerAgent
 {
+public:
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
 };
 
 
 /// Agent that matches any single node, with terminus support
 template<class PRE_RESTRICTION>
-struct AnyNode : AnyNodeAgent, 
-                 Special<PRE_RESTRICTION> 
+class AnyNode : public AnyNodeAgent, 
+                public Special<PRE_RESTRICTION> 
 {
+public:
     SPECIAL_NODE_FUNCTIONS
 };
 

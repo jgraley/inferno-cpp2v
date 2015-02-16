@@ -29,8 +29,10 @@ private:
 
 /// Agent that is used in a combined search/replace path to seperate search and replace patterns out again    
 template<class PRE_RESTRICTION>
-struct Overlay : OverlayAgent, Special<PRE_RESTRICTION>
+class Overlay : public OverlayAgent, 
+                public Special<PRE_RESTRICTION>
 {
+public:
     SPECIAL_NODE_FUNCTIONS
     TreePtr<PRE_RESTRICTION> through;
     TreePtr<PRE_RESTRICTION> overlay;
@@ -61,8 +63,10 @@ private:
 
 /// Agent used in a container pattern to add a new element during replace
 template<class PRE_RESTRICTION>
-struct Insert : InsertAgent, Special<PRE_RESTRICTION>
+class Insert : public InsertAgent, 
+               public Special<PRE_RESTRICTION>
 {
+public:
     SPECIAL_NODE_FUNCTIONS
     Sequence<PRE_RESTRICTION> insert;
     virtual SequenceInterface *GetInsert()  
@@ -88,8 +92,10 @@ private:
 
 /// Agent used in a container pattern to match an element then discard it during replace
 template<class PRE_RESTRICTION>
-struct Erase : EraseAgent, Special<PRE_RESTRICTION>
+class Erase : public EraseAgent,
+              public Special<PRE_RESTRICTION>
 {
+public:
     SPECIAL_NODE_FUNCTIONS
     Sequence<PRE_RESTRICTION> erase;
     virtual SequenceInterface *GetErase()  

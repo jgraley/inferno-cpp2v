@@ -56,23 +56,20 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode )
     // so come out of substitution. Done as tail recursion so that we already duplicated
     // the terminus key, and can just overlay the terminus replace pattern.
     shared_ptr<Key> key = coupling_keys->GetKey( this );
+    ASSERT( key->root==keynode );    // Check we got the same keynode passed in as we found in the couplins structure
     shared_ptr<TerminusKey> stuff_key = dynamic_pointer_cast<TerminusKey>(key);
     ASSERT( stuff_key );
-    ASSERT( stuff_key->agent );
-    TerminusBase *replace_stuff = dynamic_cast<TerminusBase *>( stuff_key->agent );
-    ASSERT( replace_stuff );
-    ASSERT( replace_stuff->terminus );
-    TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(replace_stuff->terminus))
+
+    TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(terminus))
                                                         (", term=")(*(stuff_key->terminus))("\n");
-    TreePtr<Node> term = AsAgent(replace_stuff->terminus)->BuildReplace( stuff_key->terminus );
+    TreePtr<Node> term = AsAgent(terminus)->BuildReplace( stuff_key->terminus );
     TRACE( "Stuff node: Substituting stuff");
-    return DuplicateSubtree(keynode, stuff_key->terminus, term);   
+    return DuplicateSubtree(stuff_key->root, stuff_key->terminus, term);   
 }
 
 
 StuffAgent::StuffAgent() : 
-    recurse_comparer( new CompareReplace ),
-    one_level(false)
+    recurse_comparer( new CompareReplace )
 {
 }
 
@@ -95,10 +92,7 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> 
     }
     
     // TODO do we have to do these walks every time???? Maybe cache???!!
-    if( one_level )
-        return shared_ptr<ContainerInterface>( new FlattenNode( x ) );
-    else
-        return shared_ptr<ContainerInterface>( new Walk( x, NULL, rf ) );
+    return shared_ptr<ContainerInterface>( new Walk( x, NULL, rf ) );
 }
 
 

@@ -88,9 +88,8 @@ shared_ptr<Key> NestedBase::MyCompare( const TreePtrInterface &x )
     if( r )
     {
         // Ensure the replace can terminate and overlay
-        shared_ptr<TerminusKey> k( new TerminusKey );
-        k->root = x;
-        k->terminus = xt;
+        shared_ptr<Key> k( new Key );
+        k->root = x;        
         return k;
     }
     else

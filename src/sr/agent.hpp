@@ -91,17 +91,19 @@ protected:
 // are TBD.
 #define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
 /// Common stuff for pattern nodes other than normal nodes
-struct SpecialBase
+class SpecialBase
 {
+public:    
     virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype() = 0;
 };
 
 
 /// Common stuff for pattern nodes other than normal nodes
 template<class PRE_RESTRICTION>
-struct Special : SpecialBase, 
-                 virtual PRE_RESTRICTION
+class Special : public SpecialBase, 
+                public virtual PRE_RESTRICTION
 {
+public:
     virtual shared_ptr< TreePtrInterface > GetPreRestrictionArchitype()
     {
         // Esta muchos indirection

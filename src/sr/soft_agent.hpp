@@ -13,8 +13,9 @@ namespace SR
 
 // Tell soft nodes that a compare run is beginning and it can flush any caches it may have
 /// Utility for agents that allow a flush to be requested
-struct Flushable
+class Flushable
 {
+public:    
     virtual void FlushCache() {}
 };
 

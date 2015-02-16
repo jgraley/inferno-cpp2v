@@ -14,11 +14,12 @@ struct NotMatchBase {}; // needed for graph plotter
 
 /// Match if the supplied patterns does not match (between you and me, it's just a NOT)
 template<class PRE_RESTRICTION>
-struct NotMatch : Special<PRE_RESTRICTION>,
-                  SoftAgent,
-                  NotMatchBase
+class NotMatch : public Special<PRE_RESTRICTION>,
+                 public SoftAgent,
+                 public NotMatchBase
 {
-	SPECIAL_NODE_FUNCTIONS
+public:
+    SPECIAL_NODE_FUNCTIONS
 	// Pattern is an abnormal context. Fascinatingly, we can supply any node here because there
     // is no type-correctness limitation with *excluding* a kind of node
     TreePtr<Node> pattern;
@@ -56,18 +57,20 @@ private:
 };
 
 /// Match all of the supplied patterns (between you and me, it's an AND)
-struct MatchAllBase : virtual Node
+class MatchAllBase : public virtual Node
 {
+public:
     virtual CollectionInterface &GetPatterns() = 0;
 };
 
 /// Match all of the supplied patterns (between you and me, it's an AND)
 template<class PRE_RESTRICTION>
-struct MatchAll : Special<PRE_RESTRICTION>,
-                  virtual SoftAgent, 
-                  MatchAllBase
+class MatchAll : public Special<PRE_RESTRICTION>,
+                 public virtual SoftAgent, 
+                 public MatchAllBase
 {
-	SPECIAL_NODE_FUNCTIONS
+public:
+    SPECIAL_NODE_FUNCTIONS
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
     MatchAll() : initialised( false ) {}
 private:
@@ -134,15 +137,16 @@ private:
 };
 
 /// Match zero or more of the supplied patterns (between you and me, it's an OR)
-struct MatchAnyBase {};
+class MatchAnyBase {};
 
 /// Match zero or more of the supplied patterns (between you and me, it's an OR)
 template<class PRE_RESTRICTION>
-struct MatchAny : Special<PRE_RESTRICTION>,
-                  SoftAgent,
-                  MatchAnyBase
+class MatchAny : public Special<PRE_RESTRICTION>,
+                 public SoftAgent,
+                 public MatchAnyBase
 {
-	SPECIAL_NODE_FUNCTIONS
+public:
+    SPECIAL_NODE_FUNCTIONS
 	// Patterns are an abnormal context
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
@@ -162,15 +166,16 @@ private:
 
 
 /// Match an odd number of patterns (between you and me, it's an EOR)
-struct MatchOddBase {};
+class MatchOddBase {};
 
 /// Match an odd number of patterns (between you and me, it's an EOR)
 template<class PRE_RESTRICTION>
-struct MatchOdd : Special<PRE_RESTRICTION>,
-                  SoftAgent,
-                  MatchOddBase
+class MatchOdd : public Special<PRE_RESTRICTION>,
+                 public SoftAgent,
+                 public MatchOddBase
 {
-	SPECIAL_NODE_FUNCTIONS
+public:
+    SPECIAL_NODE_FUNCTIONS
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
     virtual bool MyCompare( const TreePtrInterface &x ) 
@@ -190,9 +195,9 @@ private:
 
 
 /// Match the output of some transformation against the child pattern 
-struct TransformOfBase : SoftAgentSpecialKey,
-                         TerminusBase
+class TransformOfBase : public SoftAgentSpecialKey
 {
+public:
     TreePtr<Node> pattern; 
     Transformation *transformation;
     TransformOfBase( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) :
@@ -211,9 +216,11 @@ protected:
 
 /// Match the output of some transformation against the child pattern 
 template<class PRE_RESTRICTION>
-struct TransformOf : TransformOfBase, Special<PRE_RESTRICTION>
+class TransformOf : public TransformOfBase,
+                    public Special<PRE_RESTRICTION>
 {
-	SPECIAL_NODE_FUNCTIONS	
+public:
+    SPECIAL_NODE_FUNCTIONS	
     TransformOf() {}    
     TransformOf( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) : 
         TransformOfBase(t, p) 
@@ -223,7 +230,7 @@ struct TransformOf : TransformOfBase, Special<PRE_RESTRICTION>
 
 
 /// Match based on the type of a child pointer
-struct PointerIsBase
+class PointerIsBase
 {
 };
 
@@ -233,10 +240,11 @@ struct PointerIsBase
     in a that points to b must match y. */
 /// Match based on the type of a child pointer
 template<class PRE_RESTRICTION>
-struct PointerIs : Special<PRE_RESTRICTION>,
-                   SoftAgent,
-                   PointerIsBase // TODO document
+class PointerIs : public Special<PRE_RESTRICTION>,
+                  public SoftAgent,
+                  public PointerIsBase // TODO document
 {
+public:
     SPECIAL_NODE_FUNCTIONS
     TreePtr<PRE_RESTRICTION> pointer;
     virtual bool MyCompare( const TreePtrInterface &x )
