@@ -14,9 +14,10 @@ class CompareReplace;
 // Base class for coupling keys; this deals with individual node matches, and also with stars
 // by means of pointing "root" at a SubCollection or SubSequence
 /// General holder for coupling keys, remembers important details of partil or full matches
-struct Key
+class Key
 {
-	virtual ~Key(){}  // be a virtual hierarchy
+public:
+    virtual ~Key(){}  // be a virtual hierarchy
 	TreePtr<Node> root; // Input program node for this coupling
 	Agent *agent; // Agent for this coupling
 	Conjecture::Choice *governing_choice;

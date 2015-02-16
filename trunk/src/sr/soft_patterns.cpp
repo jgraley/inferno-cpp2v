@@ -19,10 +19,9 @@ shared_ptr<Key> TransformOfBase::MyCompare( const TreePtrInterface &x )
             // then the replace will resume overlaying at the correct place. If not, no
             // harm done since the replace won't see the terminus (there would be no
             // right place to overlay)
-            shared_ptr<TerminusKey> k( new TerminusKey );
+            shared_ptr<Key> k( new Key );
             k->root = x;
-            k->terminus = xt;
-            terminus = pattern; // TODO go through and replace pattern with terminus, and do not declare pattern in this class
+            //terminus = pattern; // TODO go through and replace pattern with terminus, and do not declare pattern in this class
             return k;
         }
         else

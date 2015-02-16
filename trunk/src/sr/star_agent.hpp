@@ -71,9 +71,10 @@ public:
 
 /// Agent used in a container pattern that matches zero or more elements
 template<class PRE_RESTRICTION>
-struct Star : StarAgent, 
-              Special<PRE_RESTRICTION>
+class Star : public StarAgent, 
+             public Special<PRE_RESTRICTION>
 {
+public:
     SPECIAL_NODE_FUNCTIONS
     TreePtr<PRE_RESTRICTION> pattern; // TODO rename to "restriction"
     virtual TreePtr<Node> GetPattern() 

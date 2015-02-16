@@ -125,12 +125,12 @@ private:
 };
 
 // Base class for special nodes that match nested nodes
-struct NestedBase : SoftAgentSpecialKey,
-                    TerminusBase
+struct NestedBase : SoftAgentSpecialKey
 {
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) = 0;
     virtual shared_ptr<Key> MyCompare( const TreePtrInterface &x );
-    TreePtr<CPPTree::String> depth;
+    TreePtr<Node> terminus; 
+    TreePtr<CPPTree::String> depth;    
 };
 
 // Recurse through a number of nested Array nodes, but only by going through

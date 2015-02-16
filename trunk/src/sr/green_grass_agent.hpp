@@ -24,8 +24,10 @@ class GreenGrassAgent : public virtual AgentCommon
 
 /// Agent that restricts the node under it to one that was in the original program tree
 template<class PRE_RESTRICTION>
-struct GreenGrass : GreenGrassAgent, Special<PRE_RESTRICTION>
+class GreenGrass : public GreenGrassAgent, 
+                   public Special<PRE_RESTRICTION>
 {
+public:
     SPECIAL_NODE_FUNCTIONS
     TreePtr<PRE_RESTRICTION> through;
     virtual TreePtr<Node> GetThrough() const
