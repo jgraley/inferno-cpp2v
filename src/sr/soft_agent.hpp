@@ -11,18 +11,8 @@
 namespace SR
 { 
 
-// Tell soft nodes that a compare run is beginning and it can flush any caches it may have
-/// Utility for agents that allow a flush to be requested
-class Flushable
-{
-public:    
-    virtual void FlushCache() {}
-};
-
-
 /// Common implemtation stuff for soft nodes
-class SoftAgent : Flushable,
-                  public virtual AgentCommon
+class SoftAgent : public virtual AgentCommon
 {
 public:
     SoftAgent() :

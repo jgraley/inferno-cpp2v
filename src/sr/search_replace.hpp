@@ -79,7 +79,6 @@ private:
 private:
     // MatchingDecidedCompare ring
     friend class Conjecture;
-    void FlushSoftPatternCaches( TreePtr<Node> pattern ) const;
 public:
     // Compare ring (now trivial)
     bool Compare( const TreePtrInterface &x,
