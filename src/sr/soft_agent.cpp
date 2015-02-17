@@ -42,7 +42,7 @@ TreePtr<Node> SoftAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 {
     TreePtr<Node> overlay = GetOverlayPattern(); // only strong modifiers use this
     if( overlay ) // Really two different kinds of pattern node
-        return AsAgent(overlay)->BuildReplace( keynode ); // Strong modifier
+        return AsAgent(overlay)->BuildReplace(); // Strong modifier
     else
     {
         ASSERT(keynode)("Soft pattern seen in tree but it produced no keynode or overlay");

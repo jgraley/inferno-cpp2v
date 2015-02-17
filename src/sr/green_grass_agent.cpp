@@ -25,6 +25,6 @@ TreePtr<Node> GreenGrassAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 {
     ASSERT( GetThrough() );          
     TRACE("GreenGrass node through=")(*GetThrough())("\n");
-    return AsAgent(GetThrough())->BuildReplace( keynode );
+    return AsAgent(GetThrough())->BuildReplace();
 }
 

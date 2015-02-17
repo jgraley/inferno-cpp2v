@@ -143,7 +143,7 @@ void AgentCommon::KeyReplace()
 }
 
 
-TreePtr<Node> AgentCommon::BuildReplace( TreePtr<Node> keynode )
+TreePtr<Node> AgentCommon::BuildReplace()
 {
     INDENT;
     ASSERT(this);
@@ -152,13 +152,13 @@ TreePtr<Node> AgentCommon::BuildReplace( TreePtr<Node> keynode )
     
     // See if the pattern node is coupled to anything. The keynode that was passed
     // in is just a suggestion and will be overriden if we are keyed.
+    TreePtr<Node> keynode;
     shared_ptr<Key> key = coupling_keys->GetKey( this );
     
-    //if( keynode && key )
-    //    ASSERT(keynode==key->root)("Got disagreeing keynode=")(*keynode)(" and key=")(*(key->root));
-    
     if( key )
-        keynode = key->root;    
+        keynode = key->root;   
+    else
+        keynode = TreePtr<Node>();
 
     return BuildReplaceImpl( keynode );    
 }

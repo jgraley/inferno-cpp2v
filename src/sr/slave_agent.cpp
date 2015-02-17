@@ -19,7 +19,7 @@ TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> keynode )
     ASSERT( GetThrough() );   
     
     // Continue current replace operation by following the "through" pointer
-    TreePtr<Node> dest = AsAgent(GetThrough())->BuildReplace( keynode );
+    TreePtr<Node> dest = AsAgent(GetThrough())->BuildReplace();
     
     // Run the slave as a new transformation at the current location
     operator()( sr->GetContext(), &dest );

@@ -352,7 +352,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
                        
             if( pattern_child )
             {                             
-                dest_child = AsAgent(pattern_child)->BuildReplace( *keynode_ptr );
+                dest_child = AsAgent(pattern_child)->BuildReplace();
                 ASSERT( dest_child );
                 ASSERT( dest_child->IsFinal() );
                 present_in_pattern.insert( dest_memb[i] );
