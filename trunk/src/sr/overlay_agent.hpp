@@ -18,6 +18,7 @@ public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key,
                                      Conjecture &conj );
+    virtual void KeyReplace();
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     static Sequence<Node> WalkContainerPattern( ContainerInterface &pattern,
                                                 bool replacing );

@@ -13,17 +13,35 @@ bool OverlayAgent::DecidedCompareImpl( const TreePtrInterface &x,
 }
 
 
+void OverlayAgent::KeyReplace()
+{
+    // Give the overlay side a nudge in case it wants to key itself eg due to
+    // Builder node. TODO avoid repeat calls to KeyReplace()    
+    Agent::AsAgent(GetOverlay())->KeyReplace();
+    
+    // Now, if the overlay side did not key itself, key it per the through 
+    // side key that will have been obtained during search. Thus, the immediate
+    // children of Overlay appear as though coupled.
+    if( !coupling_keys->GetCoupled( Agent::AsAgent(GetOverlay()) ) )
+    {
+        TreePtr<Node> keynode = coupling_keys->GetCoupled( Agent::AsAgent(GetThrough()) );
+        ASSERT(keynode);
+        coupling_keys->DoKey( keynode, Agent::AsAgent(GetOverlay()) );
+    }
+}
+
+
 TreePtr<Node> OverlayAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     ASSERT( GetOverlay() );          
     TRACE("Overlay node through=")(*(GetThrough()))(" overlay=")(*(GetOverlay()))("\n");
-    return AsAgent(GetOverlay())->BuildReplace( keynode );
+    return AsAgent(GetOverlay())->BuildReplace();
 }
 
 
 bool InsertAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                          bool can_key,
-                                          Conjecture &conj )
+                                      bool can_key,
+                                      Conjecture &conj )
 {
     ASSERTFAIL(*this)(" found outside of a container; can only be used in containers\n");
 }
@@ -36,8 +54,8 @@ TreePtr<Node> InsertAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 
 
 bool EraseAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                          bool can_key,
-                                          Conjecture &conj )
+                                     bool can_key,
+                                     Conjecture &conj )
 {
     ASSERTFAIL(*this)(" found outside of a container; can only be used in containers\n");    
 }

@@ -62,7 +62,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 
     TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(terminus))
                                                         (", term=")(*(stuff_key->terminus))("\n");
-    TreePtr<Node> term = AsAgent(terminus)->BuildReplace( stuff_key->terminus );
+    TreePtr<Node> term = AsAgent(terminus)->BuildReplace();
     TRACE( "Stuff node: Substituting stuff");
     return DuplicateSubtree(stuff_key->root, stuff_key->terminus, term);   
 }
