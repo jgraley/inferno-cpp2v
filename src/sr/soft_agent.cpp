@@ -117,5 +117,5 @@ CouplingKeys *SoftAgent::GetCouplingKeys()
 
 TreePtr<Node> SoftAgent::DoBuildReplace( TreePtr<Node> pattern ) 
 {
-    return Agent::AsAgent(pattern)->BuildReplace( pattern );
+    return Agent::AsAgent(pattern)->BuildReplace();
 }

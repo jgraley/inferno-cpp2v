@@ -60,7 +60,9 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
     
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
     if( can_key )
+    {
         coupling_keys->DoKey( x, this );  
+    }
 
     return true;
 }
@@ -133,6 +135,32 @@ bool AgentCommon::Compare( const TreePtrInterface &x,
             break; // Failure
     }
     return r;
+}
+
+
+void AgentCommon::KeyReplace()
+{    
+}
+
+
+TreePtr<Node> AgentCommon::BuildReplace( TreePtr<Node> keynode )
+{
+    INDENT;
+    ASSERT(this);
+    ASSERT(sr)("Agent ")(*this)(" at appears not to have been configured, since sr is NULL");
+    ASSERT(coupling_keys);
+    
+    // See if the pattern node is coupled to anything. The keynode that was passed
+    // in is just a suggestion and will be overriden if we are keyed.
+    shared_ptr<Key> key = coupling_keys->GetKey( this );
+    
+    //if( keynode && key )
+    //    ASSERT(keynode==key->root)("Got disagreeing keynode=")(*keynode)(" and key=")(*(key->root));
+    
+    if( key )
+        keynode = key->root;    
+
+    return BuildReplaceImpl( keynode );    
 }
 
 
@@ -229,26 +257,5 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
     return dest;
 }
 
-
-void AgentCommon::KeyReplace()
-{    
-}
-
-
-TreePtr<Node> AgentCommon::BuildReplace( TreePtr<Node> keynode )
-{
-    INDENT;
-    ASSERT(this);
-    ASSERT(sr)("Agent ")(*this)(" at appears not to have been configured, since sr is NULL");
-    ASSERT(coupling_keys);
-    
-    // See if the pattern node is coupled to anything. The keynode that was passed
-    // in is just a suggestion and will be overriden if we are keyed.
-    shared_ptr<Key> key = coupling_keys->GetKey( this );
-    if( key )
-        keynode = key->root;
-
-    return BuildReplaceImpl( keynode );    
-}
 
 
