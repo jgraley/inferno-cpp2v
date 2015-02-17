@@ -197,6 +197,7 @@ public:
         MakePatternPtr< InstanceIdentifier > ls_id;
         MakePatternPtr< Star<Base> > l_bases;        
         MakePatternPtr<Constructor> l_ctype;
+        MakePatternPtr<InstanceIdentifier> l_ident;
         MakePatternPtr< InstanceIdentifierByName > s_token( lr_scprocess->GetToken() ); 
         MakePatternPtr< InstanceIdentifierByName > s_arg_id( "func" );
         MakePatternPtr< SlaveSearchReplace<Node> > r_slave( over, l_module, l_module );            
@@ -211,12 +212,12 @@ public:
                 
         l_module->members = (l_overcons, l_process, l_decls);
         l_module->bases = (l_bases);
-        l_overcons->through = ls_cons;
-        ls_cons->type = MakePatternPtr<Constructor>();        
+        l_overcons->through = ls_cons;       
         ls_cons->initialiser = ls_comp;
         ls_comp->members = l_cdecls;
         ls_comp->statements = (l_pre, ls_pcall, l_post);
         ls_cons->type = l_ctype;
+        ls_cons->identifier = l_ident;
         l_ctype->members = (MakePatternPtr<Automatic>()); // one parameter
         ls_pcall->callee = s_token;
         ls_pcall->operands = (ls_arg);
@@ -227,6 +228,7 @@ public:
         lr_comp->members = l_cdecls;
         lr_comp->statements = (l_pre, l_post);
         lr_cons->type = l_ctype;
+        lr_cons->identifier = l_ident;
         
         l_process->identifier = ls_id;
         l_process->type = l_overtype;
@@ -323,6 +325,7 @@ public:
         MakePatternPtr< Star<Automatic> > s_params;
         MakePatternPtr<Constructor> s_ctype;
         MakePatternPtr< Star<Base> > bases;        
+        MakePatternPtr< TypeIdentifier > module_typeid;        
         MakePatternPtr< SlaveSearchReplace<Node> > r_slave( stuff, ls_comp, lr_comp );            
                         
         // dispense with an empty constructor                 
@@ -331,6 +334,7 @@ public:
         over->overlay = r_module;
         s_module->members = (s_cons, decls);
         s_module->bases = (bases);
+        s_module->identifier = module_typeid;
         s_cons->type = MakePatternPtr<Constructor>();        
         s_cons->initialiser = s_comp;
         // s_comp's members and statements left empty to signify empty constructor
@@ -339,6 +343,7 @@ public:
         s_ctype->members = (s_params); // any parameters
         r_module->members = (decls);
         r_module->bases = (bases);
+        r_module->identifier = module_typeid;
                 
         // dispense with any calls to it
         ls_comp->members = (l_decls);
