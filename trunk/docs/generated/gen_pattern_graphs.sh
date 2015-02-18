@@ -11,10 +11,11 @@ echo \<html\>\<head\>\</head\> >> $destdir/$idxname
 echo \<body dir="ltr" bgcolor="#ffffff" lang="en-US"\> >> $destdir/$idxname
 echo \<h1\>Inferno search and replace patterns\</h1\> >> $destdir/$idxname
 
-cd ../..
-./inferno.exe $extraiopt -i$testcase -thSNnMFL > docs/generated/hits.txt 2> docs/generated/steps.txt
-./inferno.exe $extraiopt -i$testcase -t 2>&1 | grep "Conjecture dump" > docs/generated/conj_counts.txt
-cd docs/generated
+#TODO one of these got broken and seems to spin forever!
+#cd ../..
+#./inferno.exe $extraiopt -i$testcase -thSNnMFL > docs/generated/hits.txt 2> docs/generated/steps.txt
+#./inferno.exe $extraiopt -i$testcase -t 2>&1 | grep "Conjecture dump" > docs/generated/conj_counts.txt
+#cd docs/generated
 
 i=0
 while :

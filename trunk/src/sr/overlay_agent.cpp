@@ -90,24 +90,6 @@ Sequence<Node> OverlayAgent::WalkContainerPattern( ContainerInterface &pattern,
                 FOREACH( TreePtr<Node> i, *(pi->GetInsert()) )
                     expanded.push_back( i );                
         }
-        else if( shared_ptr<OverlayAgent> po = dynamic_pointer_cast<OverlayAgent>(n) )
-        {
-            // Unfortunate inconsistency here: An overlay node ca either (a) support stars under it for use in 
-            // collections or (b) support overlaying, but not both. TODO think about overlaying subsequences 
-            // We use the pattern-tweaking method if thre are stars, but let the replace engine do overlaying
-            // if there are not (overlaying takes place for the single element at the position of the Overlay node)
-            if( dynamic_pointer_cast<StarAgent>(po->GetOverlay()) || dynamic_pointer_cast<StarAgent>(po->GetThrough()) )
-            {
-                if( replacing )
-                    expanded.push_back( po->GetOverlay() );         
-                else
-                    expanded.push_back( po->GetThrough() );    
-            }
-            else
-            {
-                expanded.push_back( n );
-            }                
-        }
         else
         {
             expanded.push_back( n );

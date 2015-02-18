@@ -480,7 +480,7 @@ AddStateEnumVar::AddStateEnumVar()
 
 ApplyCombGotoPolicy::ApplyCombGotoPolicy()
 {
-    MakePatternPtr<Compound> comp, r_body_comp;
+    MakePatternPtr<Compound> s_comp, r_comp, r_body_comp;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, body, post;
     MakePatternPtr<Goto> s_goto1, goto2, sx_pre_goto;
@@ -489,25 +489,21 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     MakePatternPtr<StateLabel> label;
     MakePatternPtr< NotMatch<Statement> > sx_pre, sx_body;
     MakePatternPtr<Uncombable> sx_uncombable;
-    MakePatternPtr< Erase<Statement> > s_erase;
-    MakePatternPtr< Overlay<Statement> > over;
     MakePatternPtr<If> r_if;
     MakePatternPtr<Equal> r_equal;   
     
-    comp->members = (decls);
-    comp->statements = (pre, s_erase, label, over, goto2, post);
+    r_comp->members = s_comp->members = (decls);
+    s_comp->statements = (pre, s_goto1, label, body, goto2, post);
+    r_comp->statements = (pre, label, r_if, goto2, post);
     pre->pattern = sx_pre,
     sx_pre->pattern = sx_pre_goto; // ensure we act on the first goto only
-    s_erase->erase = s_goto1;
     s_goto1->destination = sub;
     sub->operands = (lmap_id, state_var_id);
     label->state = state_id;
-    over->through = body;
     body->pattern = sx_body;
     sx_body->pattern = sx_uncombable; 
     goto2->destination = sub;    
     
-    over->overlay = r_if;
     r_if->condition = r_equal;
     r_if->body = r_body_comp;
     r_if->else_body = MakePatternPtr<Nop>();
@@ -515,7 +511,7 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     //r_body_comp->members = ();
     r_body_comp->statements = body;
     
-    Configure(comp);
+    Configure(s_comp, r_comp);
 }
 
 
@@ -565,7 +561,7 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
 
 ApplyBottomPolicy::ApplyBottomPolicy()
 {
-    MakePatternPtr<Compound> comp, r_body_comp;
+    MakePatternPtr<Compound> s_comp, r_comp, r_body_comp;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, body;
     MakePatternPtr<Goto> goto1, sx_pre_goto;
@@ -573,40 +569,35 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     MakePatternPtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
     MakePatternPtr<StateLabel> label;
     MakePatternPtr< NotMatch<Statement> > sx_pre, sx_body;
-    MakePatternPtr< Erase<Statement> > s_erase;
-    MakePatternPtr< Insert<Statement> > r_insert;
-    MakePatternPtr< Overlay<Statement> > over;
     MakePatternPtr<If> r_if, r_if2;
     MakePatternPtr<Equal> r_equal;   
     MakePatternPtr<NotEqual> r_not_equal;   
     MakePatternPtr<Uncombable> sx_uncombable;
     
-    comp->members = (decls);
-    comp->statements = (pre, s_erase, label, over, r_insert);
+    s_comp->members = r_comp->members = (decls);
+    s_comp->statements = (pre, goto1, label, body);
+    r_comp->statements = (pre, label, r_if, goto1);
     pre->pattern = sx_pre,
     sx_pre->pattern = sx_pre_goto; // ensure we act on the first goto only
-    s_erase->erase = goto1;
     goto1->destination = sub;
     sub->operands = (lmap_id, state_var_id);
     label->state = state_id;
-    over->through = body;
     body->pattern = sx_body,
     sx_body->pattern = sx_uncombable; 
     
-    over->overlay = r_if;
     r_if->condition = r_equal;
     r_if->body = r_body_comp;
     r_if->else_body = MakePatternPtr<Nop>();
     r_equal->operands = (state_var_id, state_id);
     //r_body_comp->members = ();
     r_body_comp->statements = body;
-    r_insert->insert = goto1; // r_if2; TODO: with the condition, superloop is exiting before the last state block has run
+    // TODO: with the condition, superloop is exiting before the last state block has run
     r_if2->condition = r_not_equal;
     r_if2->body = goto1;
     r_if2->else_body = MakePatternPtr<Nop>();
     r_not_equal->operands = (state_var_id, state_id);    
     
-    Configure(comp);
+    Configure(s_comp, r_comp);
 }
 
 
