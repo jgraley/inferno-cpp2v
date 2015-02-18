@@ -263,19 +263,10 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 
 TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
-    if( dynamic_cast<SpecialBase *>(this) )
-	{
-		// Star, Not, TransformOf etc. Also MatchAll with no overlay pattern falls thru to here
-        ASSERT(keynode)(*this)(" needs to be coupled but has no key");
-		return DuplicateSubtree(keynode);   
-	}     
-    else // Normal node
-    {
-        if( keynode && IsLocalMatch(keynode.get()) ) 
-            return BuildReplaceOverlay( keynode );
-        else
-            return BuildReplaceNormal(); // Overwriting pattern over dest, need to make a duplicate 
-	}
+    if( keynode && IsLocalMatch(keynode.get()) ) 
+        return BuildReplaceOverlay( keynode );
+    else
+        return BuildReplaceNormal(); // Overwriting pattern over dest, need to make a duplicate 
 }
 
 

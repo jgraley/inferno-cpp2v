@@ -30,8 +30,6 @@ public:
     // call into the soft implementation. Instead, it expects the impl to have
     // already run and to be in a key
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
-    // Called when coupled, dest is coupling key TODO route through "my" version
-    virtual TreePtr<Node> GetOverlayPattern();
     // Soft nodes should override this to implement their comparison function
     virtual bool MyCompare( const TreePtrInterface &x );
     virtual TreePtr<Node> MyBuildReplace();
