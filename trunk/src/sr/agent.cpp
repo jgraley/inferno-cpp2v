@@ -57,7 +57,7 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
         if( sc( x, keynode ) == false )
             return false;
     }
-    
+      
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
     if( can_key )
     {

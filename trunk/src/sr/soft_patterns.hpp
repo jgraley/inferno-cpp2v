@@ -127,11 +127,15 @@ private:
         initialised = true;
     }
 
-    virtual TreePtr<Node> GetOverlayPattern()
+    // NOTE: this is cheating slightly by overloading the Agent interface directly
+    // but we need to be able to progress a general replace through the selected 
+    // modifier pattern. The way to resolve is to make this an agent directly, not soft.
+    TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode ) 
     {
         EnsureInitialised();
-        return modifier_pattern;
-    } 
+        ASSERT(modifier_pattern);
+        return AsAgent(modifier_pattern)->BuildReplace(); 
+    }
     
     CollectionInterface &GetPatterns() { return patterns; } // TODO try covariant?
 };

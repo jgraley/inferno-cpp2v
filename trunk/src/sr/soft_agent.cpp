@@ -40,24 +40,10 @@ void SoftAgent::KeyReplace()
 
 TreePtr<Node> SoftAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
-    TreePtr<Node> overlay = GetOverlayPattern(); // only strong modifiers use this
-    if( overlay ) // Really two different kinds of pattern node
-        return AsAgent(overlay)->BuildReplace(); // Strong modifier
-    else
-    {
-        ASSERT(keynode)("Soft pattern seen in tree but it produced no keynode or overlay");
-        ASSERT(sr);
-        return DuplicateSubtree(keynode);   // Weak modifier
-    }
+    ASSERT(keynode)("Soft pattern seen in tree but it produced no keynode or overlay");
+    ASSERT(sr);
+    return DuplicateSubtree(keynode);   
 }
-
-
-// Called when coupled, dest is coupling key TODO route through "my" version
-TreePtr<Node> SoftAgent::GetOverlayPattern() 
-{ 
-    return TreePtr<Node>(); // default implementation for weak modifiers 
-                            // so that couplings appear to override local functionality
-}   
 
 
 // Soft nodes should override this to implement their comparison function
