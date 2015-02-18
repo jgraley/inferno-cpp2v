@@ -318,6 +318,8 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
 		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*this)(" was NULL\n");
 		        TRACE("Got ")(*p)("\n");
 				TreePtr<Node> n = AsAgent(p)->BuildReplace();
+                ASSERT(n); //.TODO Could use "null" here for Erase nodes to mean don't bother inserting anyting
+                // ... but correpsonding situation in compare is harder
                 if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(n.get()) )
                 {
                     TRACE("Walking SubContainer length %d\n", psc->size() );
