@@ -414,25 +414,36 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
         *shape = "triangle";
         return string("-"); 
     }
+    else if( dynamic_pointer_cast<SoftAgent>(sp) )
+    {
+        *bold = false;
+        *shape = "plaintext";//"record";
+        return sp->GetName();
+    }
+    else if( dynamic_pointer_cast<NormalAgent>(sp) )
+    {
+        // All the other nodes are represented as a rectangle with curved corners. At the top of the rectangle, 
+        // in large font, is the name of the node's type OR the identifier name if the node is a kind of 
+        // SpecificIdentifier. All TreePtr<>, Sequence<> and Collection<> members are listed below in a 
+        // smaller font. The name of the pointed-to type is given (not the member's name, Inferno cannot deduce
+        // this). 
+        // Collections appear once and are followed by {...} where the number of dots equals the number of 
+        // elements in the Collection.
+        // Sequences appear once for each element in the sequence. Each appearance is followed by [i] where
+        // i is the index, starting from 0.
+        // All child pointers emerge from *approximately* the right of the corresponding member name. I cannot
+        // for the life of me get GraphViz to make the lines begin *on* the right edge of the rectangle. They 
+        // always come from some way in from the right edge, and if they are angled up or down, they can appear
+        // to be coming from the wrong place.        
+        *bold = false;
+        *shape = "plaintext";//"record";
+        return sp->GetName();
+    }
 	else
-	{
-	    // All the other nodes are represented as a rectangle with curved corners. At the top of the rectangle, 
-	    // in large font, is the name of the node's type OR the identifier name if the node is a kind of 
-	    // SpecificIdentifier. All TreePtr<>, Sequence<> and Collection<> members are listed below in a 
-	    // smaller font. The name of the pointed-to type is given (not the member's name, Inferno cannot deduce
-	    // this). 
-	    // Collections appear once and are followed by {...} where the number of dots equals the number of 
-	    // elements in the Collection.
-	    // Sequences appear once for each element in the sequence. Each appearance is followed by [i] where
-	    // i is the index, starting from 0.
-	    // All child pointers emerge from *approximately* the right of the corresponding member name. I cannot
-	    // for the life of me get GraphViz to make the lines begin *on* the right edge of the rectangle. They 
-	    // always come from some way in from the right edge, and if they are angled up or down, they can appear
-	    // to be coming from the wrong place.	     
-		*bold = false;
-		*shape = "plaintext";//"record";
-		return sp->GetName();
-	}
+    {
+        ASSERT(false)(sp)(" ")(*sp)(" ")(sp->GetName());
+        ASSERTFAIL("Unknown node in graph plotter");
+    }
 }
 
 
