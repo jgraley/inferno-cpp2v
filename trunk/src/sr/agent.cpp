@@ -143,7 +143,7 @@ void AgentCommon::KeyReplace()
 }
 
 
-void AgentCommon::SetReplaceKey( TreePtr<Node> keynode )
+void AgentCommon::SetReplaceKey( shared_ptr<Key> key )
 {
     // This function is called on nodes under the "overlay" branch of Overlay nodes.
     // Some special nodes will not know what to do...

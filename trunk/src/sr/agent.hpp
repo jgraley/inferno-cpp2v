@@ -26,7 +26,7 @@ public:
     virtual bool Compare( const TreePtrInterface &x,
                           bool can_key = false ) = 0;
     virtual void KeyReplace() = 0;
-    virtual void SetReplaceKey( TreePtr<Node> keynode ) = 0;
+    virtual void SetReplaceKey( shared_ptr<Key> key ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
 	virtual void Configure( const CompareReplace *s, CouplingKeys *c ) = 0;
 	static Agent *AsAgent( TreePtr<Node> node )
@@ -51,7 +51,7 @@ public:
     virtual bool DecidedCompare( const TreePtrInterface &x,
                                  bool can_key,
                                  Conjecture &conj );
-    virtual void SetReplaceKey( TreePtr<Node> keynode );
+    virtual void SetReplaceKey( shared_ptr<Key> key );
     virtual void KeyReplace();
     virtual TreePtr<Node> BuildReplace();
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,

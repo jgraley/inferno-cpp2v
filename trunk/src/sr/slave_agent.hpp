@@ -19,7 +19,7 @@ public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key,
                                      Conjecture &conj );
-    virtual void SetReplaceKey( TreePtr<Node> keynode );
+    virtual void SetReplaceKey( shared_ptr<Key> key );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual TreePtr<Node> GetThrough() const = 0;
     virtual void ConfigureImpl( const Set<Agent *> &agents_already_configured ) = 0; // For master to trigger configuration
