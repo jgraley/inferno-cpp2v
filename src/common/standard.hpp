@@ -104,6 +104,7 @@ class Traceable
 {
 public:
     static string CPPFilt( string s );
+    virtual string GetTypeName() const; 
     virtual string GetName() const; // used by parse, render etc
     virtual string GetAddr() const; 
     virtual operator string() const; // used for debug

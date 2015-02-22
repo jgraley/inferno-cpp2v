@@ -107,7 +107,7 @@ struct SpecificString : String
     	const SpecificString *c = dynamic_cast<const SpecificString *>(candidate);
     	return c && c->value == value;
 	} 
-	virtual operator string() const /// Produce a string for debug
+	virtual string GetName() const /// Produce a string for debug
 	{
 		// Since this is a string literal, output it quoted
 		return "\"" + value + "\"";
@@ -143,7 +143,7 @@ struct SpecificInteger : Integer, llvm::APSInt
     	const SpecificInteger *c = dynamic_cast<const SpecificInteger *>(candidate);
     	return c && *(llvm::APSInt *)c == *(llvm::APSInt *)this;
 	}
-	virtual operator string() const /// Produce a string for debug
+	virtual string GetName() const /// Produce a string for debug
 	{
         return string(toString(10)) + // decimal
                (isUnsigned() ? "U" : "") +
@@ -171,7 +171,7 @@ struct SpecificFloat : Float, llvm::APFloat
     	const SpecificFloat *c = dynamic_cast<const SpecificFloat *>(candidate);
     	return c && bitwiseIsEqual( *c );
 	}
-	virtual operator string() const /// Produce a string for debug
+	virtual string GetName() const /// Produce a string for debug and graphing
 	{
 		char hs[256];
 		// generate hex float since it can be exact
@@ -237,7 +237,7 @@ struct SpecificIdentifier : virtual Property
 	}
 	virtual string GetName() const /// This is relied upon to just return the identifier name for rendering
 	{
-		return name;
+		return "`"+name+"'";
 	}
 private:
 	string name;
@@ -547,10 +547,6 @@ struct SpecificFloatSemantics : FloatSemantics
 		ASSERT( candidate );
     	const SpecificFloatSemantics *c = dynamic_cast<const SpecificFloatSemantics *>(candidate);
     	return c && c->value == value;
-	}
-	virtual operator string() const /// get a debug string
-	{
-		return SSPrintf("fltSemantics"); //  TODO not very good
 	}
 	operator const llvm::fltSemantics &() const /// convert back to LLVM's class
 	{

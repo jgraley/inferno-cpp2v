@@ -57,13 +57,13 @@ public:
 	template<typename CP0, typename CP1, typename CP2>
     NormalAgentWrapper(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : NODE_TYPE(cp0, cp1, cp2) {}
     
-    virtual string GetName() const // used by parse, render etc
+    virtual string GetTypeName() const // used by parse, render etc
     {
         // Want to get rid of the NormalAgentWrapper<...> around the name. The main
         // GetName() works via RTTI so no amount of casting of "this" will stop the full
         // final node's name being returned. So we have to actually make a temp in the
         // node type and use that.
-        return NODE_TYPE().GetName();
+        return NODE_TYPE().GetTypeName();
     }
 };
 
