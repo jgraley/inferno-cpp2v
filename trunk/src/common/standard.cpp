@@ -34,31 +34,42 @@ void CommonTest()
     ASSERT( r[3] == 103 );
 }
 
-string Traceable::GetName() const
+
+string Traceable::CPPFilt( string s )
+{
+    int status;
+    char *ps;
+    // Use GCC extension to demangle based on the present ABI
+    ps = abi::__cxa_demangle(s.c_str(), 0, 0, &status);
+    s = ps;
+    free(ps); // as ordained
+    return s;
+}
+
+
+string Traceable::GetTypeName() const
 {
     return CPPFilt( typeid( *this ).name() );
 }
+
+
+string Traceable::GetName() const
+{
+    return GetTypeName();
+}
+
 
 string Traceable::GetAddr() const
 {
     return string();
 }
 
+
 Traceable::operator string() const
 {
     return GetName() + GetAddr(); // name plus pointer
 }
 
-string Traceable::CPPFilt( string s )
-{
-	int status;
-	char *ps;
-	// Use GCC extension to demangle based on the present ABI
-	ps = abi::__cxa_demangle(s.c_str(), 0, 0, &status);
-    s = ps;
-    free(ps); // as ordained
-    return s;
-}
 
 SerialNumber::SNType SerialNumber::master_location_serial;
 int SerialNumber::step;
