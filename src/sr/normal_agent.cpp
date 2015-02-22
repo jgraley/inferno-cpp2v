@@ -293,15 +293,23 @@ void NormalAgent::SetReplaceKey( shared_ptr<Key> key )
         ASSERT( keyer_memb[i] )( "itemise returned null element" );
         
         TRACE("Member %d\n", i );
-        if( ContainerInterface *pattern_con = dynamic_cast<ContainerInterface *>(pattern_memb[i]) )                
+        if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )                
         {
-            ContainerInterface *keyer_con = dynamic_cast<ContainerInterface *>(keyer_memb[i]);
-            FOREACH( const TreePtrInterface &p, *pattern_con )
+            // Algorithm for collections is just to pick off any pattern element 
+            // from the search side that is a non-strict subclass of our pattern
+            // element (i.e. we have a wildcard for it). It is then removed from
+            // the search so will not be used again. O(p^2)
+            CollectionInterface *keyer_col = dynamic_cast<CollectionInterface *>(keyer_memb[i]);
+            Collection<Node> keyer_unused;            
+            FOREACH( const TreePtrInterface &k, *keyer_col )
+                keyer_unused.insert( k );
+                
+            FOREACH( const TreePtrInterface &p, *pattern_col )
             {
                 if( !(*p).IsFinal() )
                 {
                     TreePtr<Node> keyer;
-                    FOREACH( const TreePtrInterface &k, *keyer_con )
+                    FOREACH( const TreePtrInterface &k, keyer_unused )
                     {
                         if( (*p).IsLocalMatch(k.get()) )
                         {
@@ -311,6 +319,37 @@ void NormalAgent::SetReplaceKey( shared_ptr<Key> key )
                     }
                     if( keyer )
                     {
+                        keyer_unused.erase(keyer);
+                        shared_ptr<Key> nkey = coupling_keys->GetKey( AsAgent(keyer) );
+                        AsAgent(p)->SetReplaceKey( nkey );
+                    }
+                }
+            }
+        }            
+        else if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(pattern_memb[i]) )                
+        {
+            // Algorithm for sequences is to pick off the first pattern element 
+            // from the search side that is a non-strict subclass of our pattern
+            // element (i.e. we have a wildcard for it). It is then skipped in
+            // the search so will not be used again. O(p)
+            SequenceInterface *keyer_seq = dynamic_cast<SequenceInterface *>(keyer_memb[i]);
+            SequenceInterface::iterator kit = keyer_seq->begin();
+            FOREACH( const TreePtrInterface &p, *pattern_seq )
+            {
+                if( !(*p).IsFinal() )
+                {
+                    TreePtr<Node> keyer;
+                    for(; kit != keyer_seq->end(); ++kit )
+                    {
+                        if( (*p).IsLocalMatch((*kit).get()) )
+                        {
+                            keyer = *kit;
+                            break;
+                        }
+                    }
+                    if( keyer )
+                    {
+                        ++kit;
                         shared_ptr<Key> nkey = coupling_keys->GetKey( AsAgent(keyer) );
                         AsAgent(p)->SetReplaceKey( nkey );
                     }
