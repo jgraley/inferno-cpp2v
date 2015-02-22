@@ -261,54 +261,59 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 }
 
 
-void NormalAgent::SetReplaceKey( TreePtr<Node> keynode )
+void NormalAgent::SetReplaceKey( shared_ptr<Key> key )
 {
     INDENT;
-    TRACE(*this)("::SetReplaceKey(")(*keynode)(")\n");
+    ASSERT( key );
+    ASSERT( key->root );
+    ASSERT( key->agent );
+    TRACE(*this)("::SetReplaceKey(")(*(key->root))(" from ")(*(key->agent))(")\n");
     
     if( coupling_keys->GetKey(this) )
         return; // Already keyed, no point wasting time keying this (and the subtree under it) again
-    
-    if( !IsLocalMatch(keynode.get()) ) 
-    {
-        TRACE("No match");
-        return; // Key not compatible with pattern: recursion stops here
-    }
         
-    coupling_keys->DoKey( keynode, this );
+    if( !IsLocalMatch(key->agent) ) 
+        return; // Key not compatible with pattern: recursion stops here
+        
+    coupling_keys->DoKey( key->root, this );
     
     // Loop over all the elements of keynode and dest that do not appear in pattern or
     // appear in pattern but are NULL TreePtr<>s. Duplicate from keynode into dest.
-    vector< Itemiser::Element * > keynode_memb = Itemise( keynode.get() );
     vector< Itemiser::Element * > pattern_memb = Itemise(); 
+    vector< Itemiser::Element * > keynode_memb = Itemise( key->root.get() );
+    vector< Itemiser::Element * > keyer_memb = Itemise( key->agent ); 
     
     // Loop over all the members of keynode (which can be a subset of dest)
     // and for non-NULL members, duplicate them by recursing and write the
     // duplicates to the destination.
     for( int i=0; i<pattern_memb.size(); i++ )
     {
-        ASSERT( keynode_memb[i] )( "itemise returned null element" );
         ASSERT( pattern_memb[i] )( "itemise returned null element" );
+        ASSERT( keynode_memb[i] )( "itemise returned null element" );
+        ASSERT( keyer_memb[i] )( "itemise returned null element" );
         
-        TRACE("Member %d from key\n", i );
+        TRACE("Member %d\n", i );
         if( ContainerInterface *pattern_con = dynamic_cast<ContainerInterface *>(pattern_memb[i]) )                
         {
-            ContainerInterface *keynode_con = dynamic_cast<ContainerInterface *>(keynode_memb[i]);
+            ContainerInterface *keyer_con = dynamic_cast<ContainerInterface *>(keyer_memb[i]);
             FOREACH( const TreePtrInterface &p, *pattern_con )
             {
                 if( !(*p).IsFinal() )
                 {
-                    TreePtr<Node> key;
-                    FOREACH( const TreePtrInterface &k, *keynode_con )
+                    TreePtr<Node> keyer;
+                    FOREACH( const TreePtrInterface &k, *keyer_con )
                     {
                         if( (*p).IsLocalMatch(k.get()) )
                         {
-                            key = k;
+                            keyer = k;
                             break;
                         }
                     }
-                    if( key )
-                        AsAgent(p)->SetReplaceKey( key );
+                    if( keyer )
+                    {
+                        shared_ptr<Key> nkey = coupling_keys->GetKey( AsAgent(keyer) );
+                        AsAgent(p)->SetReplaceKey( nkey );
+                    }
                 }
             }
         }            
@@ -316,8 +321,11 @@ void NormalAgent::SetReplaceKey( TreePtr<Node> keynode )
         {
             if( *pattern_ptr )
             {
-                TreePtrInterface *keynode_ptr = dynamic_cast<TreePtrInterface *>(keynode_memb[i]);
-                AsAgent(*pattern_ptr)->SetReplaceKey( *keynode_ptr );
+                TreePtrInterface *keyer_ptr = dynamic_cast<TreePtrInterface *>(keyer_memb[i]);
+                TRACE("Keyer is ")(**keyer_ptr)(" this=%p kagent=%p", this, key->agent);
+                shared_ptr<Key> nkey = coupling_keys->GetKey( AsAgent(*keyer_ptr) );
+                ASSERT(nkey);
+                AsAgent(*pattern_ptr)->SetReplaceKey( nkey );
             }
         }
     }

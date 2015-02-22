@@ -30,7 +30,7 @@ private:
     		                       bool can_key,
     		                       Conjecture &conj );
 public:
-    virtual void SetReplaceKey( TreePtr<Node> keynode );
+    virtual void SetReplaceKey( shared_ptr<Key> key );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:	
 	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not NULL

@@ -13,10 +13,11 @@ bool SlaveAgent::DecidedCompareImpl( const TreePtrInterface &x,
 }
 
 
-void SlaveAgent::SetReplaceKey( TreePtr<Node> keynode )
+void SlaveAgent::SetReplaceKey( shared_ptr<Key> key )
 {
-    coupling_keys->DoKey( keynode, this );
-    AsAgent(GetThrough())->SetReplaceKey(keynode);   
+    // Make slaves "invisible" to Overlay key propagation
+    coupling_keys->DoKey( key->root, this );
+    AsAgent(GetThrough())->SetReplaceKey(key);   
 }
 
 

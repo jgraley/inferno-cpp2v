@@ -26,11 +26,11 @@ void OverlayAgent::KeyReplace()
     if( !coupling_keys->GetCoupled( Agent::AsAgent(GetOverlay()) ) )
     {
         // Get a key from the search side
-        TreePtr<Node> keynode = coupling_keys->GetCoupled( Agent::AsAgent(GetThrough()) );
-        ASSERT(keynode);
+        shared_ptr<Key> key = coupling_keys->GetKey( Agent::AsAgent(GetThrough()) );
+        ASSERT(key);
         // Key as many nodes as possible on the replace side
         Agent *over = Agent::AsAgent(GetOverlay());
-        over->SetReplaceKey(keynode);
+        over->SetReplaceKey(key);
     }
 }
 
