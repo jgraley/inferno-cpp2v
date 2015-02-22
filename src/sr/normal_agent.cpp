@@ -306,7 +306,7 @@ void NormalAgent::SetReplaceKey( shared_ptr<Key> key )
                 
             FOREACH( const TreePtrInterface &p, *pattern_col )
             {
-                if( !(*p).IsFinal() )
+                if( !(*p).IsFinal() && !coupling_keys->GetKey( AsAgent(p) ) ) // We must key all non-final nodes that are not already keyed
                 {
                     TreePtr<Node> keyer;
                     FOREACH( const TreePtrInterface &k, keyer_unused )
@@ -317,12 +317,10 @@ void NormalAgent::SetReplaceKey( shared_ptr<Key> key )
                             break;
                         }
                     }
-                    if( keyer )
-                    {
-                        keyer_unused.erase(keyer);
-                        shared_ptr<Key> nkey = coupling_keys->GetKey( AsAgent(keyer) );
-                        AsAgent(p)->SetReplaceKey( nkey );
-                    }
+                    ASSERT(keyer)("Cannot key intermediate because correpsonding search node not found");
+                    keyer_unused.erase(keyer);
+                    shared_ptr<Key> nkey = coupling_keys->GetKey( AsAgent(keyer) );
+                    AsAgent(p)->SetReplaceKey( nkey );                
                 }
             }
         }            
@@ -336,7 +334,7 @@ void NormalAgent::SetReplaceKey( shared_ptr<Key> key )
             SequenceInterface::iterator kit = keyer_seq->begin();
             FOREACH( const TreePtrInterface &p, *pattern_seq )
             {
-                if( !(*p).IsFinal() )
+                if( !(*p).IsFinal() && !coupling_keys->GetKey( AsAgent(p) ) ) // We must key all non-final nodes that are not already keyed
                 {
                     TreePtr<Node> keyer;
                     for(; kit != keyer_seq->end(); ++kit )
@@ -347,23 +345,20 @@ void NormalAgent::SetReplaceKey( shared_ptr<Key> key )
                             break;
                         }
                     }
-                    if( keyer )
-                    {
-                        ++kit;
-                        shared_ptr<Key> nkey = coupling_keys->GetKey( AsAgent(keyer) );
-                        AsAgent(p)->SetReplaceKey( nkey );
-                    }
+                    ASSERT(keyer)("Cannot key intermediate because correpsonding search node not found");
+                    ++kit;
+                    shared_ptr<Key> nkey = coupling_keys->GetKey( AsAgent(keyer) );
+                    AsAgent(p)->SetReplaceKey( nkey );
                 }
             }
         }            
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
-            if( *pattern_ptr )
+            if( *pattern_ptr && !(**pattern_ptr).IsFinal() && !coupling_keys->GetKey( AsAgent(*pattern_ptr) ))
             {
                 TreePtrInterface *keyer_ptr = dynamic_cast<TreePtrInterface *>(keyer_memb[i]);
-                TRACE("Keyer is ")(**keyer_ptr)(" this=%p kagent=%p", this, key->agent);
+                ASSERT(*keyer_ptr)("Cannot key intermediate because correpsonding search node is NULL");
                 shared_ptr<Key> nkey = coupling_keys->GetKey( AsAgent(*keyer_ptr) );
-                ASSERT(nkey);
                 AsAgent(*pattern_ptr)->SetReplaceKey( nkey );
             }
         }
