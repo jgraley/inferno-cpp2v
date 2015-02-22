@@ -261,6 +261,69 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 }
 
 
+void NormalAgent::SetReplaceKey( TreePtr<Node> keynode )
+{
+    INDENT;
+    TRACE(*this)("::SetReplaceKey(")(*keynode)(")\n");
+    
+    if( coupling_keys->GetKey(this) )
+        return; // Already keyed, no point wasting time keying this (and the subtree under it) again
+    
+    if( !IsLocalMatch(keynode.get()) ) 
+    {
+        TRACE("No match");
+        return; // Key not compatible with pattern: recursion stops here
+    }
+        
+    coupling_keys->DoKey( keynode, this );
+    
+    // Loop over all the elements of keynode and dest that do not appear in pattern or
+    // appear in pattern but are NULL TreePtr<>s. Duplicate from keynode into dest.
+    vector< Itemiser::Element * > keynode_memb = Itemise( keynode.get() );
+    vector< Itemiser::Element * > pattern_memb = Itemise(); 
+    
+    // Loop over all the members of keynode (which can be a subset of dest)
+    // and for non-NULL members, duplicate them by recursing and write the
+    // duplicates to the destination.
+    for( int i=0; i<pattern_memb.size(); i++ )
+    {
+        ASSERT( keynode_memb[i] )( "itemise returned null element" );
+        ASSERT( pattern_memb[i] )( "itemise returned null element" );
+        
+        TRACE("Member %d from key\n", i );
+        if( ContainerInterface *pattern_con = dynamic_cast<ContainerInterface *>(pattern_memb[i]) )                
+        {
+            ContainerInterface *keynode_con = dynamic_cast<ContainerInterface *>(keynode_memb[i]);
+            FOREACH( const TreePtrInterface &p, *pattern_con )
+            {
+                if( !(*p).IsFinal() )
+                {
+                    TreePtr<Node> key;
+                    FOREACH( const TreePtrInterface &k, *keynode_con )
+                    {
+                        if( (*p).IsLocalMatch(k.get()) )
+                        {
+                            key = k;
+                            break;
+                        }
+                    }
+                    if( key )
+                        AsAgent(p)->SetReplaceKey( key );
+                }
+            }
+        }            
+        else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
+        {
+            if( *pattern_ptr )
+            {
+                TreePtrInterface *keynode_ptr = dynamic_cast<TreePtrInterface *>(keynode_memb[i]);
+                AsAgent(*pattern_ptr)->SetReplaceKey( *keynode_ptr );
+            }
+        }
+    }
+}
+
+
 TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     if( keynode && IsLocalMatch(keynode.get()) ) 
@@ -329,6 +392,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
                 else 
                 {
                     TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
+                    ASSERT( n->IsFinal() );
                     dest_con->insert( n );
                 }
 	        }
@@ -346,11 +410,10 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
             if( pattern_child )
             {                             
                 dest_child = AsAgent(pattern_child)->BuildReplace();
-                ASSERT( dest_child );
-                ASSERT( dest_child->IsFinal() );
+                ASSERT( dest_child );                
                 present_in_pattern.insert( dest_memb[i] );
             }
-            
+            ASSERT( dest_child->IsFinal() );
             *dest_ptr = dest_child;
         }
         else
@@ -400,6 +463,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
 		        {
 			        TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
 			        dest_con->insert( n );
+                    ASSERT( n->IsFinal() );
 		        }
 	        }
         }            

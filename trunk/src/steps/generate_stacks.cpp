@@ -95,7 +95,7 @@ UseTempForReturnValue::UseTempForReturnValue()
 
 ReturnViaTemp::ReturnViaTemp()
 {
-    MakePatternPtr<Scope> module;
+    MakePatternPtr<Scope> s_module, r_module;
     MakePatternPtr<Instance> func;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Base> > bases;
@@ -119,7 +119,6 @@ ReturnViaTemp::ReturnViaTemp()
     MakePatternPtr< GreenGrass<Call> > ms_gg;
     MakePatternPtr< Overlay<Type> > overcp;
     MakePatternPtr< Overlay<Initialiser> > overi;
-    MakePatternPtr< Insert<Declaration> > insert;
     
     MakePatternPtr< SlaveSearchReplace<Compound> > slavel( r_body, ls_return, lr_comp );
     ls_return->return_value = l_return_value; // note this also pre-restricts away Return<Uninitialised>
@@ -131,10 +130,10 @@ ReturnViaTemp::ReturnViaTemp()
     m_call->callee = func_id;
     m_call->operands = (m_operands);
     mr_comp->statements = (m_call, r_temp_id);
-    MakePatternPtr< SlaveSearchReplace<Scope> > slavem( module, ms_gg, mr_comp );
+    MakePatternPtr< SlaveSearchReplace<Scope> > slavem( r_module, ms_gg, mr_comp );
     
-    module->members = (decls, func, insert);
-    insert->insert = (r_temp);
+    s_module->members = (decls, func);
+    r_module->members = (decls, func, r_temp);
     func->type = cp;
     func->initialiser = overi;
     overi->through = s_body;
@@ -154,9 +153,8 @@ ReturnViaTemp::ReturnViaTemp()
     r_temp->identifier = r_temp_id;
     r_temp_id->sources = (func_id);
     
-    Configure( module, slavem );  
+    Configure( s_module, slavem );  
 }
-
 
 
 struct TempReturnAddress : Temporary
@@ -167,7 +165,7 @@ struct TempReturnAddress : Temporary
 
 AddLinkAddress::AddLinkAddress()
 {
-    MakePatternPtr<Scope> module;
+    MakePatternPtr<Scope> s_module, r_module;
     MakePatternPtr< Star<Declaration> > decls;    
     MakePatternPtr< Star<Base> > bases;    
     MakePatternPtr<Temporary> r_retaddr;
@@ -205,7 +203,6 @@ AddLinkAddress::AddLinkAddress()
     MakePatternPtr< Overlay<Statement> > ll_over;
     MakePatternPtr< GreenGrass<Statement> > m_gg, ll_gg;
     MakePatternPtr<MapOperand> mr_operand;
-    MakePatternPtr< Insert<Declaration> > insert;
 
     ll_gg->through = ll_return;
     ll_over->overlay = llr_comp;        
@@ -225,7 +222,7 @@ AddLinkAddress::AddLinkAddress()
     mr_operand->value = mr_labelid;
     mr_label->identifier = mr_labelid;    
     
-    MakePatternPtr< SlaveSearchReplace<Scope> > slavem( module, m_gg, mr_comp );
+    MakePatternPtr< SlaveSearchReplace<Scope> > slavem( r_module, m_gg, mr_comp );
     
     l_inst->type = l_func_over;
     l_func_over->through = ls_func;
@@ -249,8 +246,8 @@ AddLinkAddress::AddLinkAddress()
     lr_temp_retaddr->initialiser = MakePatternPtr<Uninitialised>();
     lr_comp->statements = (l_stmts);
     
-    module->members = (gg, decls, insert);
-    insert->insert = (r_retaddr);
+    s_module->members = (gg, decls);
+    r_module->members = (gg, decls, r_retaddr);
     gg->through = l_inst;
     r_retaddr->identifier = r_retaddr_id;
     r_retaddr->type = MakePatternPtr<Labeley>();
@@ -259,19 +256,19 @@ AddLinkAddress::AddLinkAddress()
     //r_retaddr->access = MakePatternPtr<Private>();
     //r_retaddr->constancy = MakePatternPtr<NonConst>();
     r_retaddr_id->sources = (l_inst_id);
-    Configure( module, slavem );  
+    Configure( s_module, slavem );  
 }
 
 
 ParamsViaTemps::ParamsViaTemps()
 {
-    MakePatternPtr<Scope> module;
-    MakePatternPtr<Instance> func;
+    MakePatternPtr<Scope> s_module, r_module;
+    MakePatternPtr<Instance> s_func, r_func;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Base> > bases;
     MakePatternPtr<Function> s_cp, r_cp;
     MakePatternPtr<Type> return_type;
-    MakePatternPtr<Compound> body, mr_comp;
+    MakePatternPtr<Compound> s_body, r_body, mr_comp;
     MakePatternPtr< Star<Statement> > statements;
     MakePatternPtr< Star<Declaration> > locals;
     MakePatternPtr<InstanceIdentifier> func_id, param_id;
@@ -288,8 +285,6 @@ ParamsViaTemps::ParamsViaTemps()
     MakePatternPtr<Expression> m_expr;
     MakePatternPtr<BuildInstanceIdentifier> r_temp_id("%s_%s");
     MakePatternPtr< Insert<Declaration> > insert;
-    MakePatternPtr< Insert<Statement> > ins_param;    
-    MakePatternPtr< Overlay<Type> > over;
     
     ms_call->callee = func_id;
     ms_call->operands = (m_operands, ms_operand);
@@ -299,33 +294,35 @@ ParamsViaTemps::ParamsViaTemps()
     mr_assign->operands = (r_temp_id, m_expr);
     mr_call->callee = func_id;
     mr_call->operands = (m_operands);
-    MakePatternPtr< SlaveSearchReplace<Scope> > slavem( module, ms_call, mr_comp );
+    MakePatternPtr< SlaveSearchReplace<Scope> > slavem( r_module, ms_call, mr_comp );
     
-    module->members = (decls, func, insert);
-    func->type = over;
-    over->through = s_cp;
-    func->initialiser = body;
-    func->identifier = func_id;
-    body->members = (locals);
-    body->statements = (ins_param, statements);
+    s_module->members = (decls, s_func);
+    r_module->members = (decls, r_func, r_temp);
+    s_func->type = s_cp;
+    r_func->type = r_cp;
+    s_func->initialiser = s_body;
+    r_func->initialiser = r_body;
+    s_func->identifier = func_id;
+    r_func->identifier = func_id;
+    s_body->members = (locals);
+    r_body->members = (locals);
+    s_body->statements = (statements);
+    r_body->statements = (r_param, statements);
     s_cp->members = (params, s_param);  
     s_cp->return_type = return_type;
     s_param->identifier = param_id;
     s_param->type = param_type;
-    over->overlay = r_cp;
-    ins_param->insert = r_param;
     r_param->type = param_type;
     r_param->initialiser = r_temp_id;
     r_param->identifier = param_id;
     r_cp->members = (params);
     r_cp->return_type = return_type;
-    insert->insert = (r_temp);
     r_temp->type = param_type;
     r_temp->initialiser = MakePatternPtr<Uninitialised>();
     r_temp->identifier = r_temp_id;
     r_temp_id->sources = (func_id, param_id);
     
-    Configure( module, slavem );  
+    Configure( s_module, slavem );  
 }
 
 

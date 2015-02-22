@@ -546,7 +546,7 @@ string Render::RenderStorage( TreePtr<Instance> st )
 			return ERROR_UNKNOWN("virtualness");
 	}
 	else
-		return ERROR_UNKNOWN("storage class");
+		return ERROR_UNKNOWN(st->GetTypeName());
 }
 
 
