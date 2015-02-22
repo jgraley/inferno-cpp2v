@@ -237,7 +237,7 @@ struct SpecificIdentifier : virtual Property
 	}
 	virtual string GetName() const /// This is relied upon to just return the identifier name for rendering
 	{
-		return "`"+name+"'";
+		return name;
 	}
 private:
 	string name;
