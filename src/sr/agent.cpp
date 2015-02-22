@@ -143,6 +143,14 @@ void AgentCommon::KeyReplace()
 }
 
 
+void AgentCommon::SetReplaceKey( TreePtr<Node> keynode )
+{
+    // This function is called on nodes under the "overlay" branch of Overlay nodes.
+    // Some special nodes will not know what to do...
+    ASSERT(coupling_keys->GetKey(this))(*this)(" cannot appear in a replace-only context");
+}
+
+
 TreePtr<Node> AgentCommon::BuildReplace()
 {
     INDENT;

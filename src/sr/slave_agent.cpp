@@ -13,6 +13,13 @@ bool SlaveAgent::DecidedCompareImpl( const TreePtrInterface &x,
 }
 
 
+void SlaveAgent::SetReplaceKey( TreePtr<Node> keynode )
+{
+    coupling_keys->DoKey( keynode, this );
+    AsAgent(GetThrough())->SetReplaceKey(keynode);   
+}
+
+
 TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT;

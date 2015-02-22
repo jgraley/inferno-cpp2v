@@ -15,6 +15,7 @@ bool OverlayAgent::DecidedCompareImpl( const TreePtrInterface &x,
 
 void OverlayAgent::KeyReplace()
 {
+    INDENT("O");
     // Give the overlay side a nudge in case it wants to key itself eg due to
     // Builder node. TODO avoid repeat calls to KeyReplace()    
     Agent::AsAgent(GetOverlay())->KeyReplace();
@@ -24,9 +25,12 @@ void OverlayAgent::KeyReplace()
     // children of Overlay appear as though coupled.
     if( !coupling_keys->GetCoupled( Agent::AsAgent(GetOverlay()) ) )
     {
+        // Get a key from the search side
         TreePtr<Node> keynode = coupling_keys->GetCoupled( Agent::AsAgent(GetThrough()) );
         ASSERT(keynode);
-        coupling_keys->DoKey( keynode, Agent::AsAgent(GetOverlay()) );
+        // Key as many nodes as possible on the replace side
+        Agent *over = Agent::AsAgent(GetOverlay());
+        over->SetReplaceKey(keynode);
     }
 }
 
