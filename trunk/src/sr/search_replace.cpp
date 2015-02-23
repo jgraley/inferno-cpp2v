@@ -145,10 +145,19 @@ void CompareReplace::ConfigureImpl( const Set<Agent *> &agents_already_configure
 void CompareReplace::GetGraphInfo( vector<string> *labels, 
                                    vector< TreePtr<Node> > *links ) const
 {
-    labels->push_back("compare");
-    links->push_back(compare_pattern);
-    labels->push_back("replace");
-    links->push_back(replace_pattern);
+    TreePtr< Overlay<Node> > overlay = dynamic_pointer_cast< Overlay<Node> >(compare_pattern);
+    if( overlay )
+    {        
+        labels->push_back("compare");    
+        links->push_back(overlay->through);
+        labels->push_back("replace");
+        links->push_back(overlay->overlay);
+    }
+    else
+    {
+        labels->push_back("compare_replace");    
+        links->push_back(compare_pattern);
+    }
 }
 
 

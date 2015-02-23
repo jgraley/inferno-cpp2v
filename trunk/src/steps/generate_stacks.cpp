@@ -340,8 +340,7 @@ GenerateStacks::GenerateStacks()
     // Using a sub-slave of the variable-finding slave, look for usages of 
     // the variable. Replace with an indexing operation into the array using
     // the stack index.    
-    MakePatternPtr<Instance> fi, l_fi;
-    MakePatternPtr< Overlay<Initialiser> > oinit;
+    MakePatternPtr<Instance> s_fi, r_fi, l_fi;
     MakePatternPtr<Thread> sx_thread;
     MakePatternPtr<Method> sx_method;
     MakePatternPtr< MatchAny<Type> > sx_any;
@@ -421,17 +420,16 @@ GenerateStacks::GenerateStacks()
 
     MakePatternPtr< SlaveSearchReplace<Statement> > r_slave3( r_top_comp, s_gg, r_ret_comp );
     temp->statements = (r_slave3);
-    oinit->overlay = temp;//r_slave3; 
     
     // Master search - look for functions satisfying the construct limitation and get
-    s_module->members = (fi, members);
-    r_module->members = (fi, members, r_index);
-    fi->identifier = fi_id;
-    fi->type = s_not;
+    s_module->members = (s_fi, members);
+    r_module->members = (r_fi, members, r_index);
+    s_fi->identifier = r_fi->identifier = fi_id;
+    s_fi->type = r_fi->type = s_not;
     s_not->pattern = sx_any;
     sx_any->patterns = (sx_thread, sx_method); // Do not provide stacks for these because they do not recurse
-    fi->initialiser = oinit;   
-    oinit->through = s_and;
+    s_fi->initialiser = s_and;   
+    r_fi->initialiser = temp;   
     s_top_comp->members = ( top_decls );
     s_top_comp->statements = ( top_pre );
 
@@ -444,7 +442,7 @@ GenerateStacks::GenerateStacks()
     r_top_comp->members = (top_decls);
     r_index->type = r_index_type;
     r_index_type->width = MakePatternPtr<SpecificInteger>(32);
-    r_index_identifier->sources = (fi->identifier);
+    r_index_identifier->sources = (fi_id);
     r_index->identifier = r_index_identifier;
     r_index->constancy = MakePatternPtr<NonConst>();
     r_index->initialiser = MakePatternPtr<SpecificInteger>(0);
