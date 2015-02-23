@@ -582,7 +582,7 @@ TreePtr<Node> NormalAgent::BuildReplaceNormal()
             ASSERT( *pattern_ptr )("Member %d (", i)(*pattern_ptr)(") of ")(*this)(" was NULL when not overlaying\n");
             *dest_ptr = AsAgent(*pattern_ptr)->BuildReplace();
             ASSERT( *dest_ptr );
-            ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() )("Member %d (", i)(**pattern_ptr)(") of ")(*this)(" was not final\n");            
+            ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() )("Member %d (", i)(**pattern_ptr)(") of ")(*this)(" was not final\n"); // TODO don't create a TreePtr here!
         }
         else
         {

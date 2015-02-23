@@ -19,7 +19,10 @@ void CouplingKeys::DoKey( TreePtr<Node> x,
     ASSERT(this);
 	shared_ptr<Key> key( new Key );
 	if( x )
+    {
+        ASSERT( x->IsFinal() )("Intermediate node ")(*x)(" set as key by/for ")(*agent);
         key->root = x;
+    }
     else
         key = shared_ptr<Key>();
 	return DoKey( key, agent, gc, go );
@@ -40,6 +43,7 @@ void CouplingKeys::DoKey( shared_ptr<Key> key,
     if( key )
     {
         ASSERT( key->root );
+        ASSERT( key->root->IsFinal() )("Intermediate node ")(*(key->root))(" set as key by/for ")(*agent);
     }
     
 #if 0    
@@ -59,7 +63,7 @@ void CouplingKeys::DoKey( shared_ptr<Key> key,
 
 	// If we're keying and we haven't keyed this node so far, key it now
 	if( key && !GetKey( agent ) )
-	{
+	{        
 	    key->agent = agent;
 		key->governing_choice = gc;	
 		key->governing_offset = go;	

@@ -261,7 +261,10 @@ public:
         
         TreePtr<Node> ptr_arch = x.MakeValueArchitype();
         
-        return NormalCompare( ptr_arch, pointer );
+        return AbnormalCompare( ptr_arch, pointer );
+        // TODO this used to use NormalCompare(), but that was keying the architype
+        // which is not generally a final node hence invalid key. Fid a suitable keying
+        // policy if one exists.
     }
 };
 
