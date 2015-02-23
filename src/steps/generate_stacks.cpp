@@ -368,14 +368,13 @@ GenerateStacks::GenerateStacks()
     MakePatternPtr< GreenGrass<Statement> > s_gg;
     MakePatternPtr<Assign> r_index_init;
     MakePatternPtr< Star<Declaration> > members;
-    MakePatternPtr<Scope> s_module, r_module, l_module;
+    MakePatternPtr<Scope> s_module, r_module, ls_module, lr_module;
     MakePatternPtr< Star<Base> > bases, l_bases;
     MakePatternPtr<TypeIdentifier> module_id, l_module_id;
     MakePatternPtr<Compound> s_vcomp, r_vcomp;
     MakePatternPtr< Star<Declaration> > vdecls, l_members;
     MakePatternPtr< Star<Statement> > vstmts;
     MakePatternPtr<InstanceIdentifier> fi_id;
-    MakePatternPtr< Insert<Declaration> > l_insert;
 
     // Sub-slave replace with a subscript into the array
     l_r_sub->operands = ( r_identifier, r_index_identifier );
@@ -413,12 +412,12 @@ GenerateStacks::GenerateStacks()
     r_ret_dec->operands = ( r_index_identifier );
     r_ret_comp->statements = ( r_ret_dec, ret );
 
-    l_module->members = (l_members, l_fi, l_insert);
-    l_insert->insert = (r_instance);
+    ls_module->members = (l_members, l_fi);
+    lr_module->members = (l_members, l_fi, r_instance);
     l_fi->initialiser = stuff;
     l_fi->identifier = fi_id;
     
-    MakePatternPtr< SlaveCompareReplace<Scope> > r_mid( r_module, l_module ); // stuff, stuff
+    MakePatternPtr< SlaveCompareReplace<Scope> > r_mid( r_module, ls_module, lr_module ); // stuff, stuff
 
     MakePatternPtr< SlaveSearchReplace<Statement> > r_slave3( r_top_comp, s_gg, r_ret_comp );
     temp->statements = (r_slave3);

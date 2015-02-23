@@ -92,10 +92,23 @@ void CompareReplace::ConfigureImpl( const Set<Agent *> &agents_already_configure
     if( !replace_pattern )
         replace_pattern = compare_pattern;
 
+    if( replace_pattern != compare_pattern ) 
+    {
+        // Classic compare and replace with separate replace pattern, we can use
+        // an Overlay node to overwrite the replace pattern at replace time.
+        MakePatternPtr< Overlay<Node> > overlay;
+        overlay->through = compare_pattern;
+        overlay->overlay = replace_pattern;
+        compare_pattern = overlay; // TODO now redundant to even have both; just have pattern
+        replace_pattern = overlay;
+    }
+    
+    
+    
     TRACE("Elaborating ")(string( *this ));
 
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
-    UniqueWalkNoSlavePattern tsp(compare_pattern);
+    UniqueWalkNoSlavePattern tsp(compare_pattern); // TODO remove duplication here when just have pattern, as mentioned above
     UniqueWalkNoSlavePattern ss(replace_pattern);
     Set<Agent *> immediate_agents;
     FOREACH( TreePtr<Node> n, tsp )
@@ -323,7 +336,7 @@ void SearchReplace::ConfigureImpl( const Set<Agent *> &agents_already_configured
     // we got pre-restricted already.
     MakePatternPtr< Stuff<Node> > stuff;
 
-    if( !replace_pattern )
+    if( !replace_pattern ) // TODO or search_pattern==replace_pattern presumably
     {
         // Search and replace immediately coupled, insert Stuff, but don't bother
         // with the redundant Overlay.
