@@ -368,14 +368,14 @@ GenerateStacks::GenerateStacks()
     MakePatternPtr< GreenGrass<Statement> > s_gg;
     MakePatternPtr<Assign> r_index_init;
     MakePatternPtr< Star<Declaration> > members;
-    MakePatternPtr<Scope> module, l_module;
+    MakePatternPtr<Scope> s_module, r_module, l_module;
     MakePatternPtr< Star<Base> > bases, l_bases;
     MakePatternPtr<TypeIdentifier> module_id, l_module_id;
     MakePatternPtr<Compound> s_vcomp, r_vcomp;
     MakePatternPtr< Star<Declaration> > vdecls, l_members;
     MakePatternPtr< Star<Statement> > vstmts;
     MakePatternPtr<InstanceIdentifier> fi_id;
-    MakePatternPtr< Insert<Declaration> > insert, l_insert;
+    MakePatternPtr< Insert<Declaration> > l_insert;
 
     // Sub-slave replace with a subscript into the array
     l_r_sub->operands = ( r_identifier, r_index_identifier );
@@ -418,15 +418,15 @@ GenerateStacks::GenerateStacks()
     l_fi->initialiser = stuff;
     l_fi->identifier = fi_id;
     
-    MakePatternPtr< SlaveCompareReplace<Scope> > r_mid( module, l_module ); // stuff, stuff
+    MakePatternPtr< SlaveCompareReplace<Scope> > r_mid( r_module, l_module ); // stuff, stuff
 
     MakePatternPtr< SlaveSearchReplace<Statement> > r_slave3( r_top_comp, s_gg, r_ret_comp );
     temp->statements = (r_slave3);
     oinit->overlay = temp;//r_slave3; 
     
     // Master search - look for functions satisfying the construct limitation and get
-    module->members = (fi, members, insert);
-    insert->insert = (r_index);
+    s_module->members = (fi, members);
+    r_module->members = (fi, members, r_index);
     fi->identifier = fi_id;
     fi->type = s_not;
     s_not->pattern = sx_any;
@@ -458,7 +458,7 @@ GenerateStacks::GenerateStacks()
     r_inc->operands = ( r_index_identifier );
     r_top_comp->statements = ( r_inc, top_pre );
 
-    Configure( module, r_mid );
+    Configure( s_module, r_mid );
 }
 
 /*

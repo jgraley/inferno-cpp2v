@@ -280,7 +280,6 @@ void NormalAgent::SetReplaceKey( shared_ptr<Key> key )
     // Loop over all the elements of keynode and dest that do not appear in pattern or
     // appear in pattern but are NULL TreePtr<>s. Duplicate from keynode into dest.
     vector< Itemiser::Element * > pattern_memb = Itemise(); 
-    vector< Itemiser::Element * > keynode_memb = Itemise( key->root.get() );
     vector< Itemiser::Element * > keyer_memb = Itemise( key->agent ); 
     
     // Loop over all the members of keynode (which can be a subset of dest)
@@ -289,7 +288,6 @@ void NormalAgent::SetReplaceKey( shared_ptr<Key> key )
     for( int i=0; i<pattern_memb.size(); i++ )
     {
         ASSERT( pattern_memb[i] )( "itemise returned null element" );
-        ASSERT( keynode_memb[i] )( "itemise returned null element" );
         ASSERT( keyer_memb[i] )( "itemise returned null element" );
         
         TRACE("Member %d\n", i );
@@ -392,13 +390,12 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
     // Duplicate the key node since it is at least as specialised    
     dest = DuplicateNode( keynode, true );
 
-    // Loop over the elements of pattern, keynode and dest, limited to elements
+    // Loop over the elements of pattern and dest, limited to elements
     // present in pattern, which is a non-strict subclass of keynode and dest.
     // Overlay or overwrite pattern over a duplicate of dest. Keep track of 
     // corresponding elements of dest. 
     vector< Itemiser::Element * > pattern_memb = Itemise();
-    vector< Itemiser::Element * > keynode_memb = keynode->Itemise( dest.get() ); // Get the members of keynode corresponding to pattern's class
-    vector< Itemiser::Element * >  dest_memb = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
+    vector< Itemiser::Element * > dest_memb = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
     ASSERT( pattern_memb.size() == dest_memb.size() );
     Set< Itemiser::Element * > present_in_pattern; // Repeatability audit: OK since only checking for existance TODO special version of set that disallows non-repeatable things
     
@@ -408,7 +405,6 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
     	TRACE("member %d from pattern\n", i );
         ASSERT( pattern_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
-        ASSERT( keynode_memb[i] )( "itemise returned null element" );                
         if( ContainerInterface *pattern_con = dynamic_cast<ContainerInterface *>(pattern_memb[i]) )                
         {
             Sequence<Node> expanded_pattern_con = OverlayAgent::WalkContainerPattern( *pattern_con, true );    
@@ -444,7 +440,6 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
         {
         	TRACE();
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            TreePtrInterface *keynode_ptr = dynamic_cast<TreePtrInterface *>(keynode_memb[i]);
             ASSERT( dest_ptr )( "itemise for target didn't match itemise for pattern");
             TreePtr<Node> pattern_child = *pattern_ptr;
             TreePtr<Node> dest_child = *dest_ptr;
@@ -466,8 +461,8 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
     
     // Loop over all the elements of keynode and dest that do not appear in pattern or
     // appear in pattern but are NULL TreePtr<>s. Duplicate from keynode into dest.
-    keynode_memb = keynode->Itemise();
-    dest_memb = dest->Itemise(); 
+    vector< Itemiser::Element * > keynode_memb = keynode->Itemise();
+    dest_memb = keynode->Itemise( dest.get() ); 
     
     TRACE("Copying %d members from keynode=%s dest=%s\n", dest_memb.size(), TypeInfo(keynode).name().c_str(), TypeInfo(dest).name().c_str());
     // Loop over all the members of keynode (which can be a subset of dest)

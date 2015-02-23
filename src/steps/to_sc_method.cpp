@@ -13,7 +13,7 @@ using namespace Steps;
  
 AutosToModule::AutosToModule()
 {
-    MakePatternPtr<Scope> rec;
+    MakePatternPtr<Scope> s_rec, r_rec;
     MakePatternPtr< Star<Declaration> > decls, vdecls;
     MakePatternPtr< Star<Statement> > vstmts;
     MakePatternPtr<Automatic> s_var;
@@ -30,9 +30,9 @@ AutosToModule::AutosToModule()
     MakePatternPtr< NotMatch<Compound> > sx_not;
     MakePatternPtr< Stuff<Compound> > sx_stuff;
     MakePatternPtr<Call> sx_call;
-    MakePatternPtr< Insert<Declaration> > insert;
         
-    rec->members = (decls, fn, insert);
+    s_rec->members = (decls, fn);
+    r_rec->members = (decls, fn, r_var);
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
@@ -47,7 +47,6 @@ AutosToModule::AutosToModule()
     s_var->identifier = var_id;
     s_var->initialiser = init;
      
-    insert->insert = (r_var);
     over->overlay = r_comp;
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
@@ -58,7 +57,7 @@ AutosToModule::AutosToModule()
     r_var->access = MakePatternPtr<Private>();
     r_var->constancy = MakePatternPtr<NonConst>();
     
-    Configure( rec );
+    Configure( s_rec, r_rec );
 }
 
 
