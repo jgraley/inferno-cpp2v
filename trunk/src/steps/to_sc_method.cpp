@@ -63,7 +63,7 @@ AutosToModule::AutosToModule()
 
 TempsAndStaticsToModule::TempsAndStaticsToModule()
 {
-    MakePatternPtr<Scope> rec;
+    MakePatternPtr<Scope> s_rec, r_rec;
     MakePatternPtr< Star<Declaration> > decls, vdecls;
     MakePatternPtr< Star<Statement> > vstmts;
     MakePatternPtr< MatchAny<Instance> > var;
@@ -78,9 +78,9 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     MakePatternPtr<Type> type;
     MakePatternPtr<InstanceIdentifier> var_id;
     MakePatternPtr<Initialiser> init;
-    MakePatternPtr< Insert<Declaration> > insert;
 
-    rec->members = (decls, fn, insert);
+    s_rec->members = (decls, fn);
+    r_rec->members = (decls, fn, var);
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
@@ -90,18 +90,17 @@ TempsAndStaticsToModule::TempsAndStaticsToModule()
     s_comp->statements = (vstmts);
     var->patterns = (tempvar, staticvar);
      
-    insert->insert = (var);
     over->overlay = r_comp;
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
     
-    Configure( rec );
+    Configure( s_rec, r_rec );
 }
 
 
 DeclsToModule::DeclsToModule()
 {
-    MakePatternPtr<Scope> rec;
+    MakePatternPtr<Scope> s_rec, r_rec;
     MakePatternPtr< Star<Declaration> > decls, vdecls;
     MakePatternPtr< Star<Statement> > vstmts;
     MakePatternPtr<Field> fn;
@@ -111,9 +110,9 @@ DeclsToModule::DeclsToModule()
     MakePatternPtr<Compound> s_comp, r_comp;
     MakePatternPtr< Overlay<Compound> > over;
     MakePatternPtr< Star<Base> > bases;
-    MakePatternPtr< Insert<Declaration> > insert;
     
-    rec->members = (decls, fn, insert);
+    s_rec->members = (decls, fn);
+    r_rec->members = (decls, fn, ut);
     fn->type = ft;
     fn->initialiser = stuff;
     // TODO recurse restriction for locally declared classes
@@ -122,12 +121,11 @@ DeclsToModule::DeclsToModule()
     s_comp->members = (vdecls, ut);
     s_comp->statements = (vstmts);
      
-    insert->insert = (ut);
     over->overlay = r_comp;
     r_comp->members = (vdecls);
     r_comp->statements = (vstmts);
     
-    Configure( rec );
+    Configure( s_rec, r_rec );
 }
 
 
@@ -184,13 +182,13 @@ ExplicitiseReturns::ExplicitiseReturns()
 {
     MakePatternPtr<Instance> inst;
     MakePatternPtr<Callable> s_callable;
-    MakePatternPtr<Compound> comp, m_comp;
+    MakePatternPtr<Compound> s_comp, r_comp, m_comp;
+    MakePatternPtr< Overlay<Compound> > over_comp;
     MakePatternPtr< MatchAll<Instance> > s_all;
     MakePatternPtr< Stuff<Instance> > s_stuff;
     MakePatternPtr<Return> s_return, ls_return, m_return;
     MakePatternPtr< Star<Declaration> > decls, m_decls;
     MakePatternPtr< Star<Statement> > stmts, m_pre, m_mid, m_post;
-    MakePatternPtr< Insert<Declaration> > insert;
     MakePatternPtr<Temporary> r_flag;
     MakePatternPtr<Boolean> r_boolean;
     MakePatternPtr<BuildInstanceIdentifier> r_flag_id("enabled");
@@ -215,7 +213,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     mr_if->body = ms_affected;
     mr_if->else_body = MakePatternPtr<Nop>();
     
-    MakePatternPtr< SlaveSearchReplace<Compound> > slavem( comp, m_comp );
+    MakePatternPtr< SlaveSearchReplace<Compound> > slavem( over_comp, m_comp );
     
     ls_return->return_value = ls_uninit;
     lr_assign->operands = (r_flag_id, lr_false);
@@ -227,9 +225,11 @@ ExplicitiseReturns::ExplicitiseReturns()
     inst->initialiser = slavel;
     s_stuff->terminus = s_return;
     s_return->return_value = s_uninit;
-    comp->members = (decls, insert);
-    comp->statements = (stmts);
-    insert->insert = r_flag;
+    over_comp->through = s_comp;
+    over_comp->overlay = r_comp;
+    s_comp->members = (decls);
+    r_comp->members = (decls, r_flag);
+    s_comp->statements = r_comp->statements = (stmts);
     r_flag->type = r_boolean;
     r_flag->identifier = r_flag_id;
     r_flag->initialiser = r_true;

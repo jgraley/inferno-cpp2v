@@ -45,8 +45,7 @@ struct StateLabel : Label
 
 PlaceLabelsInArray::PlaceLabelsInArray()
 {
-    MakePatternPtr<Scope> module;
-    MakePatternPtr< Insert<Declaration> > insert;
+    MakePatternPtr<Scope> s_module, r_module;
     MakePatternPtr< GreenGrass<Type> > gg;
     MakePatternPtr<Field> func, m_func;
     MakePatternPtr<InstanceIdentifier> func_id;
@@ -61,8 +60,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr< Star<Declaration> > l_func_decls, l_enum_vals, l_decls, l_module_decls;
     MakePatternPtr< Star<Statement> > l_func_pre, l_func_post, l_pre, l_block, l_post, l_stmts, l_dead_gotos;
     MakePatternPtr<Switch> l_switch;     
-    MakePatternPtr<Enum> l_enum;     
-    MakePatternPtr< Insert<Declaration> > l_insert;
+    MakePatternPtr< Overlay<Enum> > l_over_enum;     
+    MakePatternPtr<Enum> ls_enum, lr_enum;     
     MakePatternPtr< NotMatch<Statement> > xs_rr;
     MakePatternPtr<Static> lr_state_decl;    
     MakePatternPtr<BuildInstanceIdentifier> lr_state_id("%s_STATE_%s");
@@ -90,16 +89,17 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr<Static> r_lmap, l_lmap;
     MakePatternPtr<BuildInstanceIdentifier> r_lmap_id("lmap");
     MakePatternPtr<Array> r_array;
-    MakePatternPtr<MakeArray> r_make, l_make, lls_make;
-    MakePatternPtr< Insert<Expression> > l_minsert;
+    MakePatternPtr<MakeArray> r_make, ls_make, lr_make, lls_make;
+    MakePatternPtr< Overlay<Expression> > l_mover;
     MakePatternPtr< Stuff<Statement> > l_stuff;
     MakePatternPtr< Star<Expression> > l_existing;
     MakePatternPtr< NotMatch<Expression> > l_mnot;
     MakePatternPtr< Subscript > ll_sub;
-    MakePatternPtr<Compound> comp, l_comp;
-    MakePatternPtr< Insert<Declaration> > finsert, l_finsert;
+    MakePatternPtr<Compound> s_comp, r_comp, l_comp;
+    MakePatternPtr< Overlay<Compound> > over_comp;
     MakePatternPtr< Overlay<Statement> > l_overll;
     MakePatternPtr< StateLabel > l_state_label;
+    MakePatternPtr< Star<Declaration> > comp_membs;
             
     ll_all->patterns = (ll_any, lls_not1, lls_not2); 
     ll_any->terminus = ll_over;
@@ -121,14 +121,16 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     l_comp->statements = (MakePatternPtr< Star<Statement> >(), l_stuff, MakePatternPtr< Star<Statement> >());
     ls_goto->destination = var_id;
     ls_label->identifier = ls_label_id;
-    l_enum->members = (l_enum_vals, l_insert);
-    l_enum->identifier = r_enum_id;
+    ls_enum->members = (l_enum_vals);
+    lr_enum->members = (l_enum_vals, lr_state_decl);
+    lr_enum->identifier = ls_enum->identifier = r_enum_id;
     l_block->pattern = l_not;
     l_not->pattern = MakePatternPtr<Goto>();
     l_post->pattern = MakePatternPtr<If>();    
     l_dead_gotos->pattern = MakePatternPtr<Goto>();
-    l_module->members = (l_module_decls, l_enum, l_func);
-    l_insert->insert = (lr_state_decl);
+    l_over_enum->through = ls_enum;
+    l_over_enum->overlay = lr_enum;
+    l_module->members = (l_module_decls, l_over_enum, l_func);
     lr_state_decl->constancy = MakePatternPtr<Const>();
     lr_state_decl->identifier = lr_state_id;
     lr_state_decl->type = r_enum_id;
@@ -136,11 +138,13 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     lr_count->container = l_enum_vals;
     lr_state_id->sources = (func_id, ls_label->identifier);
     l_lmap->identifier = r_lmap_id;
-    l_lmap->initialiser = l_make;
-    l_make->operands = (l_existing, l_minsert);
+    l_lmap->initialiser = l_mover;
+    l_mover->through = ls_make;
+    l_mover->overlay = lr_make;
+    ls_make->operands = (l_existing);
+    lr_make->operands = (l_existing, ls_label_id);
     l_existing->pattern = l_mnot;
     l_mnot->pattern = ls_label_id;
-    l_minsert->insert = ls_label_id;
     l_label->identifier = ls_label_id;
     l_stuff->terminus = l_overll;
     l_overll->through = l_label;
@@ -148,19 +152,21 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     l_state_label->identifier = ls_label_id;
     l_state_label->state = lr_state_id;
 
-    MakePatternPtr< SlaveCompareReplace<Scope> > slavel( module, l_module, slavell );
+    MakePatternPtr< SlaveCompareReplace<Scope> > slavel( r_module, l_module, slavell );
     
     //s_module->bases = (bases);
     //s_module->identifier = module_id;
     func->type = gg;
     gg->through = thread;
     func->identifier = func_id;
-    func->initialiser = comp;
-    comp->members = (MakePatternPtr< Star<Declaration> >(), finsert);
-    comp->statements = (MakePatternPtr< Star<Statement> >());
-    finsert->insert = (r_lmap);    
-    module->members = (module_decls, func, insert);
-    insert->insert = (r_module_enum);
+    func->initialiser = over_comp;
+    over_comp->through = s_comp;
+    over_comp->overlay = r_comp;
+    s_comp->members = (comp_membs);
+    r_comp->members = (comp_membs, r_lmap);
+    r_comp->statements = s_comp->statements = (MakePatternPtr< Star<Statement> >());
+    s_module->members = (module_decls, func);
+    r_module->members = (module_decls, func, r_module_enum);
     //r_module->bases = (bases);
     //r_module->identifier = module_id;
     r_module_enum->identifier = r_enum_id;
@@ -176,7 +182,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     r_array->size = MakePatternPtr<Uninitialised>();
     //r_make->operands = ()
     
-    Configure( module, slavel );    
+    Configure( s_module, slavel );    
 }
 
 // New better way of propogating lmap through variables. This supercedes LabelVarsToEnum
@@ -517,7 +523,7 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
 
 ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
 {
-    MakePatternPtr<Compound> comp, r_body_comp;
+    MakePatternPtr<Compound> s_comp, r_comp, r_body_comp;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, body1, body2, post;
     MakePatternPtr<Goto> s_goto1, goto2, sx_pre_goto;
@@ -525,29 +531,25 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     MakePatternPtr<InstanceIdentifier> lmap_id, state_var_id, state_id;
     MakePatternPtr<StateLabel> label;
     MakePatternPtr< NotMatch<Statement> > sx_pre, sx_body1, sx_body2;
-    MakePatternPtr< Erase<Statement> > s_erase, s_erase2;
-    MakePatternPtr< Insert<Statement> > r_insert;
     MakePatternPtr<If> r_if;
     MakePatternPtr<Equal> r_equal;   
     MakePatternPtr<Wait> wait;
     MakePatternPtr<Uncombable> sx_uncombable1, sx_uncombable2;
     
-    comp->members = (decls);
-    comp->statements = (pre, s_erase, label, s_erase2, r_insert, goto2, post);
+    s_comp->members = r_comp->members = (decls);
+    s_comp->statements = (pre, s_goto1, label, body1, wait, body2, goto2, post);
+    r_comp->statements = (pre, label, r_if, goto2, post);
     pre->pattern = sx_pre,
     sx_pre->pattern = sx_pre_goto; // ensure we act on the first goto only
-    s_erase->erase = s_goto1;
     s_goto1->destination = sub;
     sub->operands = (lmap_id, state_var_id);
     label->state = state_id;
-    s_erase2->erase = (body1, wait, body2);
     goto2->destination = sub;    
     body1->pattern = sx_body1;
     sx_body1->pattern = sx_uncombable1;
     body2->pattern = sx_body2;
     sx_body2->pattern = sx_uncombable2;
         
-    r_insert->insert = r_if;
     r_if->condition = r_equal;
     r_if->body = r_body_comp;
     r_if->else_body = MakePatternPtr<Nop>();
@@ -555,7 +557,7 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     //r_body_comp->members = ();
     r_body_comp->statements = (body1, wait, body2, goto2);
     
-    Configure(comp);
+    Configure(s_comp, r_comp);
 }
 
 
@@ -603,7 +605,7 @@ ApplyBottomPolicy::ApplyBottomPolicy()
 
 ApplyLabelPolicy::ApplyLabelPolicy()
 {
-    MakePatternPtr<Compound> comp, r_body_comp;
+    MakePatternPtr<Compound> s_comp, r_comp, r_body_comp;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, post;
     MakePatternPtr<StateLabel> label1;
@@ -612,35 +614,28 @@ ApplyLabelPolicy::ApplyLabelPolicy()
     MakePatternPtr<Equal> equal;   
     MakePatternPtr< NotMatch<Statement> > sx_post;
     MakePatternPtr<InstanceIdentifier> state_var_id, state_id;
-    MakePatternPtr< Erase<Label> > erase, erase_star;
-    MakePatternPtr< Insert<Label> > insert, insert_star;
     MakePatternPtr< Star<Label> > label_star;    
         
-    comp->members = (decls);
-    comp->statements = (pre, insert, insert_star, label1, iif, erase, erase_star, post);
+    s_comp->members = r_comp->members = (decls);
+    s_comp->statements = (pre, label1, iif, label2, label_star, post);
+    r_comp->statements = (pre, label2, label_star, label1, iif, post);
     label1->state = state_id;
-    insert->insert = label2;
-    insert_star->insert = label_star;
     iif->condition = equal;
     equal->operands = (state_var_id, state_id);
-    erase->erase = label2;
-    erase_star->erase = label_star;
     post->pattern = sx_post;
     sx_post->pattern = sx_post_label;
         
-    Configure(comp);
+    Configure(s_comp, r_comp);
 }
 
 ApplyTopPolicy::ApplyTopPolicy()
 {
     MakePatternPtr< MatchAll<Compound> > s_all;
-    MakePatternPtr<Compound> comp, r_body_comp;
+    MakePatternPtr<Compound> s_comp, r_comp, r_body_comp;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > body1, body2, post;
     MakePatternPtr<Label> label, sx_label, sx_label2;
     MakePatternPtr< NotMatch<Statement> > sx_stmt;
-    MakePatternPtr< Erase<Statement> > s_erase;
-    MakePatternPtr< Insert<Statement> > r_insert;
     MakePatternPtr<If> r_if;
     MakePatternPtr<Equal> r_equal;   
     MakePatternPtr<DeltaCount> r_delta_count;
@@ -651,17 +646,16 @@ ApplyTopPolicy::ApplyTopPolicy()
     MakePatternPtr< NotMatch<Statement> > sx_body1, sx_body2;
     MakePatternPtr<Uncombable> sx_uncombable1, sx_uncombable2;
        
-    s_all->patterns = (comp, s_stuff);
-    comp->members = (decls);
-    comp->statements = (s_erase, label, r_insert, post);
+    s_all->patterns = (s_comp, s_stuff);
+    s_comp->members = r_comp->members = (decls);
+    s_comp->statements = (body1, wait, body2, label, post);
+    r_comp->statements = (label, r_if, post);
     s_stuff->terminus = gotoo;
-    s_erase->erase = (body1, wait, body2);
     body1->pattern = sx_body1;
     sx_body1->pattern = sx_uncombable1;
     body2->pattern = sx_body2;
     sx_body2->pattern = sx_uncombable2;
     
-    r_insert->insert = r_if;
     r_if->condition = r_equal;
     r_equal->operands = (r_delta_count, r_zero);
     r_if->body = r_body_comp;
@@ -669,30 +663,28 @@ ApplyTopPolicy::ApplyTopPolicy()
     r_body_comp->statements = (body1, wait, body2, gotoo);
     r_if->else_body = MakePatternPtr<Nop>();
     
-    Configure(s_all, comp);
+    Configure(s_all, r_comp);
 }
 
 
 EnsureResetYield::EnsureResetYield()
 {
-    MakePatternPtr<Compound> comp;
+    MakePatternPtr<Compound> s_comp, r_comp;
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, post;
     MakePatternPtr< NotMatch<Statement> > sx_not;
     MakePatternPtr< MatchAny<Statement> > sx_any;
     MakePatternPtr<Goto> gotoo;
-    MakePatternPtr< Insert<Statement> > insert;
     MakePatternPtr<WaitDelta> r_yield;
     
-    comp->members = (decls);
-    comp->statements = (pre, insert, gotoo, post);
+    s_comp->members = r_comp->members = (decls);
+    s_comp->statements = (pre, gotoo, post);
+    r_comp->statements = (pre, r_yield, gotoo, post);
     pre->pattern = sx_not;
     sx_not->pattern = sx_any;
     sx_any->patterns = (MakePatternPtr<Goto>(), MakePatternPtr<Label>(), MakePatternPtr<Wait>() );
-    
-    insert->insert = r_yield;
-    
-    Configure(comp);
+        
+    Configure(s_comp, r_comp);
 }
 
 

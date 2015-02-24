@@ -380,7 +380,8 @@ ReduceVoidCompoundExpression::ReduceVoidCompoundExpression()
 CleanupUnusedVariables::CleanupUnusedVariables()
 {
     MakePatternPtr< MatchAll<Scope> > s_all;
-    MakePatternPtr<Scope> scope;
+    MakePatternPtr<Scope> s_scope, r_scope;
+    MakePatternPtr< Overlay<Scope> > over_scope; 
     MakePatternPtr< Star<Declaration> > decls;    
     MakePatternPtr<Instance> inst;
     MakePatternPtr<NestedArray> nested_array;
@@ -392,14 +393,15 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     MakePatternPtr< MatchAll<Node> > s_antip;
     MakePatternPtr< AnyNode<Node> > s_anynode;
     MakePatternPtr< NotMatch<Node> > s_nm;
-    MakePatternPtr< Erase<Instance> > erase;
     MakePatternPtr<InheritanceRecord> sx_ir;     
     MakePatternPtr< NotMatch<Scope> > s_nscope;
     
     s_all->patterns = (stuff1, s_nscope);
-    stuff1->terminus = scope;
-    scope->members = (erase, decls);
-    erase->erase = inst;
+    stuff1->terminus = over_scope;
+    over_scope->through = s_scope;
+    over_scope->overlay = r_scope;
+    s_scope->members = (inst, decls);
+    r_scope->members = (decls);
     inst->type = nested_array;
     inst->identifier = id;
     nested_array->terminus = sx_not;
