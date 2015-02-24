@@ -291,66 +291,8 @@ void NormalAgent::SetReplaceKey( shared_ptr<Key> key )
         ASSERT( keyer_memb[i] )( "itemise returned null element" );
         
         TRACE("Member %d\n", i );
-        if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )                
-        {
-            // Algorithm for collections is just to pick off any pattern element 
-            // from the search side that is a non-strict subclass of our pattern
-            // element (i.e. we have a wildcard for it). It is then removed from
-            // the search so will not be used again. O(p^2)
-            CollectionInterface *keyer_col = dynamic_cast<CollectionInterface *>(keyer_memb[i]);
-            Collection<Node> keyer_unused;            
-            FOREACH( const TreePtrInterface &k, *keyer_col )
-                keyer_unused.insert( k );
-                
-            FOREACH( const TreePtrInterface &p, *pattern_col )
-            {
-                if( !(*p).IsFinal() && !coupling_keys->GetKey( AsAgent(p) ) ) // We must key all non-final nodes that are not already keyed
-                {
-                    TreePtr<Node> keyer;
-                    FOREACH( const TreePtrInterface &k, keyer_unused )
-                    {
-                        if( (*p).IsLocalMatch(k.get()) )
-                        {
-                            keyer = k;
-                            break;
-                        }
-                    }
-                    ASSERT(keyer)("Cannot key intermediate because correpsonding search node not found");
-                    keyer_unused.erase(keyer);
-                    shared_ptr<Key> nkey = coupling_keys->GetKey( AsAgent(keyer) );
-                    AsAgent(p)->SetReplaceKey( nkey );                
-                }
-            }
-        }            
-        else if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(pattern_memb[i]) )                
-        {
-            // Algorithm for sequences is to pick off the first pattern element 
-            // from the search side that is a non-strict subclass of our pattern
-            // element (i.e. we have a wildcard for it). It is then skipped in
-            // the search so will not be used again. O(p)
-            SequenceInterface *keyer_seq = dynamic_cast<SequenceInterface *>(keyer_memb[i]);
-            SequenceInterface::iterator kit = keyer_seq->begin();
-            FOREACH( const TreePtrInterface &p, *pattern_seq )
-            {
-                if( !(*p).IsFinal() && !coupling_keys->GetKey( AsAgent(p) ) ) // We must key all non-final nodes that are not already keyed
-                {
-                    TreePtr<Node> keyer;
-                    for(; kit != keyer_seq->end(); ++kit )
-                    {
-                        if( (*p).IsLocalMatch((*kit).get()) )
-                        {
-                            keyer = *kit;
-                            break;
-                        }
-                    }
-                    ASSERT(keyer)("Cannot key intermediate because correpsonding search node not found");
-                    ++kit;
-                    shared_ptr<Key> nkey = coupling_keys->GetKey( AsAgent(keyer) );
-                    AsAgent(p)->SetReplaceKey( nkey );
-                }
-            }
-        }            
-        else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
+
+        if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
             if( *pattern_ptr && !(**pattern_ptr).IsFinal() && !coupling_keys->GetKey( AsAgent(*pattern_ptr) ))
             {
@@ -430,7 +372,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
                 else 
                 {
                     TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
-                    ASSERT( n->IsFinal() );
+                    ASSERT( n->IsFinal() )("Got intermediate node ")(*n);
                     dest_con->insert( n );
                 }
 	        }
