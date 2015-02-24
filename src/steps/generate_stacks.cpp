@@ -284,7 +284,7 @@ ParamsViaTemps::ParamsViaTemps()
     MakePatternPtr<Assign> mr_assign;
     MakePatternPtr<Expression> m_expr;
     MakePatternPtr<BuildInstanceIdentifier> r_temp_id("%s_%s");
-    MakePatternPtr< Insert<Declaration> > insert;
+    MakePatternPtr< Overlay<Declaration> > over;
     
     ms_call->callee = func_id;
     ms_call->operands = (m_operands, ms_operand);
@@ -296,8 +296,10 @@ ParamsViaTemps::ParamsViaTemps()
     mr_call->operands = (m_operands);
     MakePatternPtr< SlaveSearchReplace<Scope> > slavem( r_module, ms_call, mr_comp );
     
-    s_module->members = (decls, s_func);
-    r_module->members = (decls, r_func, r_temp);
+    s_module->members = (decls, over);
+    r_module->members = (decls, over, r_temp);
+    over->through = s_func;
+    over->overlay = r_func;
     s_func->type = s_cp;
     r_func->type = r_cp;
     s_func->initialiser = s_body;
@@ -352,6 +354,7 @@ GenerateStacks::GenerateStacks()
     MakePatternPtr< Stuff<Initialiser> > stuff;
     MakePatternPtr< Stuff<Compound> > cs_stuff;
     MakePatternPtr< Overlay<Statement> > overlay;
+    MakePatternPtr< Overlay<Declaration> > over;
     MakePatternPtr<Automatic> cs_instance, s_instance;
     MakePatternPtr<Field> r_index, r_instance;
     MakePatternPtr<Unsigned> r_index_type;
@@ -422,8 +425,10 @@ GenerateStacks::GenerateStacks()
     temp->statements = (r_slave3);
     
     // Master search - look for functions satisfying the construct limitation and get
-    s_module->members = (s_fi, members);
-    r_module->members = (r_fi, members, r_index);
+    s_module->members = (over, members);
+    r_module->members = (over, members, r_index);
+    over->through = s_fi;
+    over->overlay = r_fi;    
     s_fi->identifier = r_fi->identifier = fi_id;
     s_fi->type = r_fi->type = s_not;
     s_not->pattern = sx_any;
