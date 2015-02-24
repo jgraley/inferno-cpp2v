@@ -575,7 +575,7 @@ GenerateStacks::GenerateStacks()
 
 MergeFunctions::MergeFunctions()
 {
-    MakePatternPtr<Scope> module;
+    MakePatternPtr<Scope> s_module, r_module;
     MakePatternPtr<Field> thread, s_func;
     MakePatternPtr<Thread> thread_type;
     MakePatternPtr<Callable> func_type;
@@ -595,7 +595,6 @@ MergeFunctions::MergeFunctions()
     MakePatternPtr<Return> ms_return;    
     MakePatternPtr<TempReturnAddress> retaddr;
     MakePatternPtr<InstanceIdentifier> retaddr_id;
-    MakePatternPtr< Erase<Declaration> > erase;
     
     mr_goto->destination = retaddr_id;
      
@@ -606,8 +605,8 @@ MergeFunctions::MergeFunctions()
         
     MakePatternPtr< SlaveSearchReplace<Compound> > slavel( r_thread_comp, ls_call, lr_goto );    
     
-    module->members = (members, thread, erase);
-    erase->erase = (s_func);
+    s_module->members = (members, thread, s_func);
+    r_module->members = (members, thread);
     thread->type = thread_type;
     thread->initialiser = thread_over;
     thread_over->through = s_all;
@@ -627,7 +626,7 @@ MergeFunctions::MergeFunctions()
     r_label->identifier = r_label_id;
     r_label_id->sources = (func_id);
          
-    Configure( module );
+    Configure( s_module, r_module );
 }
 
 

@@ -103,13 +103,6 @@ public:
     FixFallthrough();
 };
 
-/** Go to fallthrough machine style */
-class MakeFallThroughMachine : public SearchReplace
-{
-public:
-    MakeFallThroughMachine();
-};
-
 /** Add a flag to the state machine for yields */
 class AddYieldFlag : public SearchReplace
 {
