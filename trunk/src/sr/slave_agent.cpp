@@ -4,6 +4,13 @@
 
 using namespace SR;
 
+SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp ) :
+    search_pattern( sp ),
+    replace_pattern( rp )
+{
+}
+
+
 bool SlaveAgent::DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key,
                                      Conjecture &conj )

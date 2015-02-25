@@ -44,74 +44,62 @@ private:
     }
 };
 
+
 typedef ContainerFromIterator< UniqueWalkNoSlavePattern_iterator, TreePtr<Node> > UniqueWalkNoSlavePattern;
 
 
 CompareReplace::CompareReplace( TreePtr<Node> cp,
                                 TreePtr<Node> rp ) :
-    is_configured( false ),								 
-    compare_pattern( cp ),
-    replace_pattern( rp ),
     master_ptr( NULL )
 {
+    // If cp and rp are provided, do an instant configuration
+    if( cp )
+        Configure( cp, rp );
 }    
     
     
-void CompareReplace::Configure( TreePtr<Node> cp,
-                                TreePtr<Node> rp )
-{
-    INDENT;
-    ASSERT(!is_configured)("Calling configure on already-configured ")(*this);
-    TRACE("Entering SR::Configure on ")(*this)("\n");
-    compare_pattern = cp;
-    replace_pattern = rp;
-	ConfigureImpl();
-}
-																
-								
 // The agents_already_configured argument is a set of agents that we should not
 // configure because they were already configured by a master, and masters take 
 // higher priority for configuration (so when an agent is reached from multiple
 // engines, it's the most masterish one that "owns" it).
-void CompareReplace::ConfigureImpl( const Set<Agent *> &agents_already_configured )
+void CompareReplace::Configure( TreePtr<Node> cp,
+                                TreePtr<Node> rp,
+                                const Set<Agent *> &agents_already_configured )
 {
     INDENT;
-    TRACE("Entering CR::ConfigureImpl on ")(*this)("\n");
+    ASSERT(!pattern)("Calling configure on already-configured ")(*this);
+    TRACE("Entering CR::Configure on ")(*this)("\n");
 
-    ASSERT(!is_configured)("Should not directly configure slave ")(*this);
     // TODO now that this operates per-slave instead of recursing through everything from the 
     // master, we need to obey the rule that slave patterns are complete before Configure, as
     // with master. Maybe an optional check on first invocation? And change all existing 
     // steps to comply.
-    ASSERT( compare_pattern );
+    ASSERT( cp );
     
     // If only a search pattern is supplied, make the replace pattern the same
     // so they couple and then an overlay node can split them apart again.
-    if( !replace_pattern )
-        replace_pattern = compare_pattern;
+    if( !rp )
+        rp = cp;
 
-    if( replace_pattern != compare_pattern ) 
+    if( rp != cp ) 
     {
         // Classic compare and replace with separate replace pattern, we can use
         // an Overlay node to overwrite the replace pattern at replace time.
         MakePatternPtr< Overlay<Node> > overlay;
-        overlay->through = compare_pattern;
-        overlay->overlay = replace_pattern;
-        compare_pattern = overlay; // TODO now redundant to even have both; just have pattern
-        replace_pattern = overlay;
+        overlay->through = cp;
+        overlay->overlay = rp;
+        cp = rp = overlay; // TODO now redundant to even have both; just have pattern
     }
-    
-    
-    
+
+    ASSERT( cp==rp ); // Should have managed to reduce to a single pattern by now
+    pattern = cp; 
+            
     TRACE("Elaborating ")(string( *this ));
 
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
-    UniqueWalkNoSlavePattern tsp(compare_pattern); // TODO remove duplication here when just have pattern, as mentioned above
-    UniqueWalkNoSlavePattern ss(replace_pattern);
+    UniqueWalkNoSlavePattern tp(pattern); // TODO remove duplication here when just have pattern, as mentioned above
     Set<Agent *> immediate_agents;
-    FOREACH( TreePtr<Node> n, tsp )
-        immediate_agents.insert( Agent::AsAgent(n) );
-    FOREACH( TreePtr<Node> n, ss )
+    FOREACH( TreePtr<Node> n, tp )
         immediate_agents.insert( Agent::AsAgent(n) );
 	
     // Now configure all the ones we are allowed to configure        
@@ -124,7 +112,7 @@ void CompareReplace::ConfigureImpl( const Set<Agent *> &agents_already_configure
     }
 
     // These are the ones our slaves should not configure
-    Set<Agent *> agents_configured = SetUnion( immediate_agents, agents_already_configured ); 
+    Set<Agent *> agents_now_configured = SetUnion( immediate_agents, agents_already_configured ); 
     
     // Recurse into the slaves' configure
 	FOREACH( Agent *a, agents_to_configure )
@@ -132,18 +120,16 @@ void CompareReplace::ConfigureImpl( const Set<Agent *> &agents_already_configure
         if( SlaveAgent *sa = dynamic_cast<SlaveAgent *>(a) )
         {                        
             TRACE("Recursing to configure slave ")(*sa)("\n");
-            sa->ConfigureImpl(agents_configured);
+            sa->Configure(agents_now_configured);
         }
     }
-	
-	is_configured = true;
 } 
 
 
 void CompareReplace::GetGraphInfo( vector<string> *labels, 
                                    vector< TreePtr<Node> > *links ) const
 {
-    TreePtr< Overlay<Node> > overlay = dynamic_pointer_cast< Overlay<Node> >(compare_pattern);
+    TreePtr< Overlay<Node> > overlay = dynamic_pointer_cast< Overlay<Node> >(pattern);
     if( overlay )
     {        
         labels->push_back("compare");    
@@ -154,7 +140,7 @@ void CompareReplace::GetGraphInfo( vector<string> *labels,
     else
     {
         labels->push_back("compare_replace");    
-        links->push_back(compare_pattern);
+        links->push_back(pattern);
     }
 }
 
@@ -171,8 +157,8 @@ bool CompareReplace::IsMatch( TreePtr<Node> context,
                               TreePtr<Node> root )
 {
     pcontext = &context;
-    ASSERT( compare_pattern );
-    bool r = Agent::AsAgent(compare_pattern)->Compare( root, false );
+    ASSERT( pattern );
+    bool r = Agent::AsAgent(pattern)->Compare( root, false );
     pcontext = NULL;
     return r == true;
 }
@@ -225,14 +211,14 @@ bool CompareReplace::SingleCompareReplace( TreePtr<Node> *proot )
     // of clearing the keys in case the keys were set up in advance, as will
     // be the case if this is a slave.
     TRACE("Begin search\n");
-	bool r = Agent::AsAgent(compare_pattern)->Compare( *proot, true );
+	bool r = Agent::AsAgent(pattern)->Compare( *proot, true );
 	if( !r )
 		return false;
 
-    if( r == true && replace_pattern )
+    if( r == true )
     {
     	TRACE("Search successful, now replacing\n");
-        *proot = ReplacePhase( replace_pattern );
+        *proot = ReplacePhase( pattern );
     }
 
     // Clean up, to allow dead nodes to be deleted
@@ -289,12 +275,11 @@ int CompareReplace::RepeatingCompareReplace( TreePtr<Node> *proot )
 // Do a search and replace based on patterns stored in our members
 void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 {
-    ASSERT( is_configured )(*this)(" has not been configured");
     INDENT("");
     TRACE("Enter S&R instance ")(*this);
-    ASSERT( compare_pattern )("CompareReplace (or SearchReplace) object was not configured before invocation.\n"
-                              "Either call Configure() or supply pattern arguments to constructor.\n"
-                              "Thank you for taking the time to read this message.\n");
+    ASSERT( pattern )("CompareReplace (or SearchReplace) object was not configured before invocation.\n"
+                      "Either call Configure() or supply pattern arguments to constructor.\n"
+                      "Thank you for taking the time to read this message.\n");
     
     // If the initial root and context are the same node, then arrange for the context
     // to follow the root node as we modify it (in SingleSearchReplace()). This ensures
@@ -329,11 +314,15 @@ SearchReplace::SearchReplace( TreePtr<Node> sp,
 }
 
 
-void SearchReplace::ConfigureImpl( const Set<Agent *> &agents_already_configured )
-{                    
+void SearchReplace::Configure( TreePtr<Node> sp,
+                               TreePtr<Node> rp,
+                               const Set<Agent *> &agents_already_configured )
+{
     INDENT;
-    ASSERT( compare_pattern ); // a search pattern is required to configure the engine
-	TRACE("Entering SR::Configure on ")(*this)("\n");
+    ASSERT(!pattern)("Calling configure on already-configured ")(*this);
+    TRACE("Entering SR::Configure on ")(*this)("\n");
+
+    ASSERT( sp ); // a search pattern is required to configure the engine
 
     // Make a non-rooted search and replace (ie where the base of the search pattern
     // does not have to be the root of the whole program tree).
@@ -342,12 +331,11 @@ void SearchReplace::ConfigureImpl( const Set<Agent *> &agents_already_configured
     // we got pre-restricted already.
     MakePatternPtr< Stuff<Node> > stuff;
 
-    if( !replace_pattern ) // TODO or search_pattern==replace_pattern presumably
+    if( !rp || sp==rp )
     {
         // Search and replace immediately coupled, insert Stuff, but don't bother
         // with the redundant Overlay.
-        stuff->terminus = compare_pattern;
-		compare_pattern = stuff;
+        stuff->terminus = sp;
     }
     else
     {
@@ -356,14 +344,12 @@ void SearchReplace::ConfigureImpl( const Set<Agent *> &agents_already_configured
         
         // Insert a Stuff node as root of the replace pattern
         MakePatternPtr< Overlay<Node> > overlay;
+        overlay->through = sp;
+        overlay->overlay = rp;
         stuff->terminus = overlay;
-        overlay->through = compare_pattern;
-        overlay->overlay = replace_pattern;
-        compare_pattern = stuff;
-		replace_pattern = stuff;
     }
 
-	CompareReplace::ConfigureImpl( agents_already_configured );	
+	CompareReplace::Configure( stuff, stuff, agents_already_configured );	
 }
 
 
@@ -371,7 +357,7 @@ void SearchReplace::GetGraphInfo( vector<string> *labels,
                                   vector< TreePtr<Node> > *links ) const
 {
     // Find the original patterns
-    TreePtr< Stuff<Node> > stuff = dynamic_pointer_cast< Stuff<Node> >(compare_pattern);
+    TreePtr< Stuff<Node> > stuff = dynamic_pointer_cast< Stuff<Node> >(pattern);
     ASSERT( stuff );
     TreePtr< Overlay<Node> > overlay = dynamic_pointer_cast< Overlay<Node> >(stuff->terminus);
     if( overlay )

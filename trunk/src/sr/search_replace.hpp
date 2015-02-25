@@ -35,17 +35,16 @@ public:
                     
     // Call this to set the patterns after construction. This should not be virtual since
     // the constructor calls it.
-    void Configure( TreePtr<Node> cp,
-                    TreePtr<Node> rp = TreePtr<Node>() );                
-    virtual void ConfigureImpl( const Set<Agent *> &agents_already_configured=Set<Agent *>() );					
+    virtual void Configure( TreePtr<Node> cp,
+                            TreePtr<Node> rp = TreePtr<Node>(),
+                            const Set<Agent *> &agents_already_configured=Set<Agent *>() );
     
     // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
     // back into the general search algorithm.
     TreePtr<Node> GetContext() const { ASSERT(pcontext&&*pcontext); return *pcontext; }
 
-    TreePtr<Node> compare_pattern;
-    TreePtr<Node> replace_pattern;
+    TreePtr<Node> pattern;
     const CompareReplace *master_ptr;
     TreePtr<Node> *pcontext;
     mutable CouplingKeys coupling_keys;
@@ -71,7 +70,6 @@ public:
     }
 
 private:
-    bool is_configured; 
     static int repetitions;
     static bool rep_error;
 private:
@@ -109,7 +107,9 @@ public:
     SearchReplace( TreePtr<Node> sp = TreePtr<Node>(),
                    TreePtr<Node> rp = TreePtr<Node>() );
                    
-    virtual void ConfigureImpl( const Set<Agent *> &agents_already_configured=Set<Agent *>() );                 
+    virtual void Configure( TreePtr<Node> sp,
+                            TreePtr<Node> rp = TreePtr<Node>(),
+                            const Set<Agent *> &agents_already_configured=Set<Agent *>() );
                     
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *links ) const;
