@@ -28,7 +28,7 @@ public:
     virtual void KeyReplace() = 0;
     virtual void SetReplaceKey( shared_ptr<Key> key ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
-	virtual void Configure( const CompareReplace *s, CouplingKeys *c ) = 0;
+	virtual void AgentConfigure( const CompareReplace *s, CouplingKeys *c ) = 0;
 	static Agent *AsAgent( TreePtr<Node> node )
 	{
 		ASSERT( node )("Called AsAgent(")(node)(") with NULL TreePtr");
@@ -47,7 +47,7 @@ class AgentCommon : public Agent
 {
 public:
     AgentCommon();
-    void Configure( const CompareReplace *s, CouplingKeys *c );
+    void AgentConfigure( const CompareReplace *s, CouplingKeys *c );
     virtual bool DecidedCompare( const TreePtrInterface &x,
                                  bool can_key,
                                  Conjecture &conj );

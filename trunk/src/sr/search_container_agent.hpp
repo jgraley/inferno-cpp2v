@@ -37,7 +37,7 @@ class StuffAgent : public SearchContainerAgent
 {
 public:
     StuffAgent();
-    void Configure( const CompareReplace *s, CouplingKeys *c );
+    void AgentConfigure( const CompareReplace *s, CouplingKeys *c );
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree

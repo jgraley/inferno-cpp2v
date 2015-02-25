@@ -48,10 +48,8 @@ typedef ContainerFromIterator< UniqueWalkNoSlavePattern_iterator, TreePtr<Node> 
 
 
 CompareReplace::CompareReplace( TreePtr<Node> cp,
-                                TreePtr<Node> rp,
-                                bool im ) :
+                                TreePtr<Node> rp ) :
     is_configured( false ),								 
-    is_master( im ),                                                 
     compare_pattern( cp ),
     replace_pattern( rp ),
     master_ptr( NULL )
@@ -122,7 +120,7 @@ void CompareReplace::ConfigureImpl( const Set<Agent *> &agents_already_configure
     {
         // Give agents pointers to here and our coupling keys
         TRACE("Configuring agent ")(*a)("\n");
-        a->Configure( this, &coupling_keys );       
+        a->AgentConfigure( this, &coupling_keys );       
     }
 
     // These are the ones our slaves should not configure
@@ -325,9 +323,8 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 
 
 SearchReplace::SearchReplace( TreePtr<Node> sp,
-                              TreePtr<Node> rp,
-                              bool im ) :
-    CompareReplace( sp, rp, im )                              
+                              TreePtr<Node> rp ) :
+    CompareReplace( sp, rp )                              
 {
 }
 

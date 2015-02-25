@@ -31,8 +31,7 @@ public:
     // Constructor and destructor. Search and replace patterns and couplings are
     // specified here, so that we have a fully confiugured functor.
     CompareReplace( TreePtr<Node> cp = TreePtr<Node>(),
-                    TreePtr<Node> rp = TreePtr<Node>(),
-                    bool im = true );
+                    TreePtr<Node> rp = TreePtr<Node>() );
                     
     // Call this to set the patterns after construction. This should not be virtual since
     // the constructor calls it.
@@ -45,7 +44,6 @@ public:
     // back into the general search algorithm.
     TreePtr<Node> GetContext() const { ASSERT(pcontext&&*pcontext); return *pcontext; }
 
-    bool is_master;// TODO seems to be obsolete
     TreePtr<Node> compare_pattern;
     TreePtr<Node> replace_pattern;
     const CompareReplace *master_ptr;
@@ -109,8 +107,7 @@ class SearchReplace : public CompareReplace
 {
 public:
     SearchReplace( TreePtr<Node> sp = TreePtr<Node>(),
-                   TreePtr<Node> rp = TreePtr<Node>(),
-                   bool im = true );
+                   TreePtr<Node> rp = TreePtr<Node>() );
                    
     virtual void ConfigureImpl( const Set<Agent *> &agents_already_configured=Set<Agent *>() );                 
                     
