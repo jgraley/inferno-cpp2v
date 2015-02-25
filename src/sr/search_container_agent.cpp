@@ -77,7 +77,7 @@ void StuffAgent::AgentConfigure( const CompareReplace *s, CouplingKeys *c )
 {
     AgentCommon::AgentConfigure( s, c ); // To main version of Configure
     recurse_comparer->coupling_keys.SetMaster( coupling_keys ); 
-    recurse_comparer->compare_pattern = recurse_restriction; // TODO could move into constructor?
+    recurse_comparer->pattern = recurse_restriction; // TODO should call Configure()? possible bug
 }
 
 
@@ -87,7 +87,7 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> 
     Filter *rf = NULL;
     if( recurse_restriction )
     {
-        ASSERT( recurse_comparer->compare_pattern )("Stuff node in slave must be initialised before slave\n");     
+        ASSERT( recurse_comparer->pattern )("Stuff node in slave must be initialised before slave\n");     
         rf = recurse_comparer;
     }
     

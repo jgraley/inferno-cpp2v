@@ -16,14 +16,17 @@ class SlaveAgent : public virtual InPlaceTransformation,
                    public virtual AgentCommon 
 {
 public:
+    SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp );
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key,
                                      Conjecture &conj );
     virtual void SetReplaceKey( shared_ptr<Key> key );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual TreePtr<Node> GetThrough() const = 0;
-    virtual void ConfigureImpl( const Set<Agent *> &agents_already_configured ) = 0; // For master to trigger configuration
+    virtual void Configure( const Set<Agent *> &agents_already_configured ) = 0; // For master to trigger configuration
     virtual void AgentConfigure( const CompareReplace *s, CouplingKeys *c ) = 0;
+    TreePtr<Node> search_pattern;
+    TreePtr<Node> replace_pattern;    
 };
 
 
@@ -34,8 +37,10 @@ class SlaveIntermediate : public SlaveAgent,
 {
 public:
     SlaveIntermediate( TreePtr<Node> sp, TreePtr<Node> rp ) :
-        ALGO( sp, rp )
-    {}
+        SlaveAgent( sp, rp )
+    {        
+    }
+    
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *links ) const
     {
@@ -43,9 +48,9 @@ public:
         links->push_back(GetThrough());
         ALGO::GetGraphInfo( labels, links );
     }
-    virtual void ConfigureImpl( const Set<Agent *> &agents_already_configured )
+    virtual void Configure( const Set<Agent *> &agents_already_configured )
     {
-        ALGO::ConfigureImpl(agents_already_configured);
+        ALGO::Configure(search_pattern, replace_pattern, agents_already_configured);
     }       
     virtual void AgentConfigure( const CompareReplace *s, CouplingKeys *c )
     {
