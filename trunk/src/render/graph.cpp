@@ -400,20 +400,6 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
         *shape = "triangle";
         return string(""); 
     }
-    else if( dynamic_pointer_cast<InsertAgent>(sp) )
-    {
-        // The Insert node is shown as a small triangle containing a + symbol, with the insert link
-        // coming out of the bottom
-        *shape = "triangle";
-        return string("+"); 
-    }
-    else if( dynamic_pointer_cast<EraseAgent>(sp) )
-    {
-        // The Erase node is shown as a small triangle containing a - symbol, with the erase link
-        // coming out of the right
-        *shape = "triangle";
-        return string("-"); 
-    }
     else if( dynamic_pointer_cast<SoftAgent>(sp) )
     {
         *bold = false;
@@ -677,15 +663,6 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
             s+= ":s";
         else
             s+= ":e";
-    }
-    else if( dynamic_pointer_cast<InsertAgent>(from) )
-    {
-        s+= ":s";
-    }
-
-    else if( dynamic_pointer_cast<EraseAgent>(from) )
-    {
-        s+= ":e";
     }
 
 	s += " -> ";

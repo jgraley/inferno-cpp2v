@@ -20,8 +20,6 @@ public:
                                      Conjecture &conj );
     virtual void KeyReplace();
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
-    static Sequence<Node> WalkContainerPattern( ContainerInterface &pattern,
-                                                bool replacing );
 private:
     virtual TreePtr<Node> GetThrough() const = 0;
     virtual TreePtr<Node> GetOverlay() const = 0;    
@@ -47,64 +45,6 @@ public:
     }
 };
 
-
-/// Agent used in a container pattern to add a new element during replace
-class InsertAgent : public virtual AgentCommon
-{
-public:
-    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key,
-                                     Conjecture &conj );
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
-private:
-    friend class OverlayAgent;
-    virtual SequenceInterface *GetInsert() = 0;    
-};
-
-
-/// Agent used in a container pattern to add a new element during replace
-template<class PRE_RESTRICTION>
-class Insert : public InsertAgent, 
-               public Special<PRE_RESTRICTION>
-{
-public:
-    SPECIAL_NODE_FUNCTIONS
-    Sequence<PRE_RESTRICTION> insert;
-    virtual SequenceInterface *GetInsert()  
-    {
-        return &insert;
-    }
-};
-
-
-/// Agent used in a container pattern to match an element then discard it during replace
-class EraseAgent : public virtual AgentCommon
-{
-public:
-    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key,
-                                     Conjecture &conj );
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
-private:
-    friend class OverlayAgent;
-    virtual SequenceInterface *GetErase() = 0;    
-};
-
-
-/// Agent used in a container pattern to match an element then discard it during replace
-template<class PRE_RESTRICTION>
-class Erase : public EraseAgent,
-              public Special<PRE_RESTRICTION>
-{
-public:
-    SPECIAL_NODE_FUNCTIONS
-    Sequence<PRE_RESTRICTION> erase;
-    virtual SequenceInterface *GetErase()  
-    {
-        return &erase;
-    }
-};
-    
 };
 
 #endif
