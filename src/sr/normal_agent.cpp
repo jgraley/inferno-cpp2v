@@ -82,14 +82,13 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
 		                                  Conjecture &conj )
 {
     INDENT;
-    Sequence<Node> epattern = OverlayAgent::WalkContainerPattern( pattern, false );    
     
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
 	ContainerInterface::iterator xit = x.begin();
 	ContainerInterface::iterator pit, npit, nnpit;
 
-	for( pit = epattern.begin(); pit != epattern.end(); ++pit )
+	for( pit = pattern.begin(); pit != pattern.end(); ++pit )
 	{
 		ASSERT( xit == x.end() || *xit );
 
@@ -109,7 +108,7 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
 
             // Star always matches at the end of a sequence, so we only need a 
             // decision when there are more elements left
-            if( npit == epattern.end() )
+            if( npit == pattern.end() )
             {
                 xit = x.end(); // match all remaining members of x; jump to end
             }
@@ -173,8 +172,8 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
 	}
 
     // If we finished the job and pattern and subject are still aligned, then it was a match
-	TRACE("Finishing compare sequence %d %d\n", xit==x.end(), pit==epattern.end() );
-    return (xit==x.end() && pit==epattern.end()) ? true : false;
+	TRACE("Finishing compare sequence %d %d\n", xit==x.end(), pit==pattern.end() );
+    return (xit==x.end() && pit==pattern.end()) ? true : false;
 }
 
 
@@ -184,8 +183,7 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 							                Conjecture &conj )
 {
     INDENT;
-    Sequence<Node> epattern = OverlayAgent::WalkContainerPattern( pattern, false );    
-   
+    
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
 	// after decisions.
@@ -197,17 +195,17 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
     StarAgent *star;
     bool seen_star = false;
 
-    for( CollectionInterface::iterator pit = epattern.begin(); pit != epattern.end(); ++pit )
+    for( CollectionInterface::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
     {
-    	TRACE("Collection compare %d remain out of %d; looking at %s in epattern\n",
+    	TRACE("Collection compare %d remain out of %d; looking at %s in pattern\n",
     			xremaining->size(),
-    			epattern.size(),
+    			pattern.size(),
     			TypeInfo( TreePtr<Node>(*pit) ).name().c_str() );
     	StarAgent *maybe_star = dynamic_cast<StarAgent *>( Agent::AsAgent(TreePtr<Node>(*pit)) );
 
         if( maybe_star ) // Star in pattern collection?
         {
-        	ASSERT(!seen_star)("Only one Star node (or NULL ptr) allowed in a search epattern Collection");
+        	ASSERT(!seen_star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
         	// TODO remove this restriction - I might want to match one star and leave another unmatched.
             star = maybe_star; // remember for later and skip to next pattern
             seen_star = true; // TODO do we need?
@@ -349,20 +347,17 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
         ASSERT( dest_memb[i] )( "itemise returned null element" );
         if( ContainerInterface *pattern_con = dynamic_cast<ContainerInterface *>(pattern_memb[i]) )                
         {
-            Sequence<Node> expanded_pattern_con = OverlayAgent::WalkContainerPattern( *pattern_con, true );    
-
             ContainerInterface *dest_con = dynamic_cast<ContainerInterface *>(dest_memb[i]);
-            ASSERT( dest_con )( "itemise for dest didn't match itemise for expanded_pattern_con");
+            ASSERT( dest_con )( "itemise for dest didn't match itemise for pattern_con");
             dest_con->clear();
 
-            TRACE("Copying container size %d from expanded_pattern_con\n", expanded_pattern_con.size() );
-	        FOREACH( const TreePtrInterface &p, expanded_pattern_con )
+            TRACE("Copying container size %d from pattern_con\n", (*pattern_con).size() );
+	        FOREACH( const TreePtrInterface &p, *pattern_con )
 	        {
 		        ASSERT( p )("Some element of member %d (", i)(*pattern_con)(") of ")(*this)(" was NULL\n");
 		        TRACE("Got ")(*p)("\n");
 				TreePtr<Node> n = AsAgent(p)->BuildReplace();
-                ASSERT(n); //.TODO Could use "null" here for Erase nodes to mean don't bother inserting anyting
-                // ... but correpsonding situation in compare is harder
+                ASSERT(n); 
                 if( ContainerInterface *psc = dynamic_cast<ContainerInterface *>(n.get()) )
                 {
                     TRACE("Walking SubContainer length %d\n", psc->size() );
