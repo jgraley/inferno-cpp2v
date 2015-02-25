@@ -19,7 +19,7 @@ public:
         current_can_key( false ),
         current_conj( NULL )
     {}
-    void Configure( const CompareReplace *s, CouplingKeys *c );
+    void AgentConfigure( const CompareReplace *s, CouplingKeys *c );
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key,
                                      Conjecture &conj );

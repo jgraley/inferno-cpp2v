@@ -34,10 +34,7 @@ public:
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:	
 	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not NULL
-    TreePtr<Node> BuildReplaceSlave( TreePtr<Node> keynode );    
     TreePtr<Node> BuildReplaceNormal();
-    Sequence<Node> WalkContainerPattern( ContainerInterface &pattern,
-                                         bool replacing );
 };
 
 

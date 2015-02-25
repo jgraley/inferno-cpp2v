@@ -13,7 +13,7 @@ AgentCommon::AgentCommon() :
 }
 
 
-void AgentCommon::Configure( const CompareReplace *s, CouplingKeys *c )
+void AgentCommon::AgentConfigure( const CompareReplace *s, CouplingKeys *c )
 {
     // Repeat configuration regarded as an error because it suggests I maybe don't
     // have a clue what should actaually be configing the agent. Plus general lifecycle 

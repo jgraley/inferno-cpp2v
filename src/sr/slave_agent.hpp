@@ -23,7 +23,7 @@ public:
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual TreePtr<Node> GetThrough() const = 0;
     virtual void ConfigureImpl( const Set<Agent *> &agents_already_configured ) = 0; // For master to trigger configuration
-    virtual void Configure( const CompareReplace *s, CouplingKeys *c ) = 0;
+    virtual void AgentConfigure( const CompareReplace *s, CouplingKeys *c ) = 0;
 };
 
 
@@ -34,7 +34,7 @@ class SlaveIntermediate : public SlaveAgent,
 {
 public:
     SlaveIntermediate( TreePtr<Node> sp, TreePtr<Node> rp ) :
-        ALGO( sp, rp, false )
+        ALGO( sp, rp )
     {}
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *links ) const
@@ -47,9 +47,9 @@ public:
     {
         ALGO::ConfigureImpl(agents_already_configured);
     }       
-    virtual void Configure( const CompareReplace *s, CouplingKeys *c )
+    virtual void AgentConfigure( const CompareReplace *s, CouplingKeys *c )
     {
-        AgentCommon::Configure( s, c );
+        AgentCommon::AgentConfigure( s, c );
         ALGO::coupling_keys.SetMaster( c );  
         ALGO::master_ptr = s;
     }       
