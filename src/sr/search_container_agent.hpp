@@ -41,7 +41,7 @@ public:
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
-    CompareReplace * recurse_comparer;
+    CompareReplace *recurse_comparer;
 };
 
 /// Agent that matches an arbitrary subtree, with restrictions on elements therein and terminus support 

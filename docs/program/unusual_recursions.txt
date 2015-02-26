@@ -1,0 +1,53 @@
+Local instance of CompareReplace
+--------------------------------
+
+- Stuff node
+search_container_agent.cpp:44
+Any can_key
+Configures the local CR with restrict_pattern and sets master coupling keys, then
+passes into Walk to get the search container.
+
+- NotMatch node
+soft_patterns.hpp:26
+Only when can_key==false
+Comments about an abnormal context, which is correct
+? Try calling AbnormalCompare, but only on can_key==false due to the inversion of the result
+
+
+Use of CompareReplace::Compare()
+--------------------------------
+
+- Slave node
+slave_agent.cpp:50
+Leave alone - this one really does want to recurse into a new engine!
+
+- Star agent
+star_agent.cpp:32
+Only when can_key==false
+Repeated calls over a specified range (candidate match for Star)
+
+
+Use of Agent::Compare()
+-----------------------
+
+- Soft agent
+soft_agent.cpp:76
+Used to implement AbnormalCompare()
+? Try only on can_key==false, while returning true otherwise
+
+
+AbnormalCompare() 
+-----------------
+Note: all are any can_key - soft patterns not even told!
+
+- MatchAny
+soft_patterns.hpp:163
+Used here due abnormal context (some children need not match)
+
+- MatchOdd
+soft_patterns.hpp:192
+Used here due abnormal context (some children need not match)
+
+- PointerIs
+soft_patterns.hpp:264
+Used here because cannot figure out how to do coupling and no use case needs it.
