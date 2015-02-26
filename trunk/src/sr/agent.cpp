@@ -68,45 +68,9 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
 }
 
 
-bool AgentCommon::MatchingDecidedCompare( const TreePtrInterface &x,
-                                          bool can_key,
-                                          Conjecture &conj ) 
-{
-    bool r;
-
-    if( can_key )
-        coupling_keys->Clear();
-
-    // Only key if the keys are already set to KEYING (which is 
-    // the initial value). Keys could be RESTRICTING if we're under
-    // a SoftNot node, in which case we only want to restrict.
-    if( can_key )
-    {
-        // Do a two-pass matching process: first get the keys...
-        TRACE("doing KEYING pass....\n");
-        conj.PrepareForDecidedCompare();
-        r = DecidedCompare( x, true, conj );
-        TRACE("KEYING pass result %d\n", r );
-        if( !r )
-            return false;                  // Save time by giving up if no match found
-    }
-    
-    // Now restrict the search according to the couplings
-    TRACE("doing RESTRICTING pass....\n");
-    conj.PrepareForDecidedCompare();
-    r = DecidedCompare( x, false, conj );
-    TRACE("RESTRICTING pass result %d\n", r );
-    if( !r )
-        return false;                  // Save time by giving up if no match found
-
-    // Do not revert match keys if we were successful - keep them for replace
-    // and any slave search and replace operations we might do.
-    return true;
-}
-
-
 bool AgentCommon::Compare( const TreePtrInterface &x,
-                           bool can_key ) 
+                           bool can_key,
+                          Conjecture *in_conj  ) 
 {
     INDENT("C");
     ASSERT( x );
@@ -114,6 +78,13 @@ bool AgentCommon::Compare( const TreePtrInterface &x,
     TRACE(" pattern=")(*this);
     TRACE(" can_key=%d \n", (int)can_key);
     //TRACE(**pcontext)(" @%p\n", pcontext);
+    
+    //if( can_key == false )
+    //{
+    //    ASSERT(in_conj);
+        //return DecidedCompare( x, false, *in_conj );
+   // }
+        
     
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
@@ -125,14 +96,38 @@ bool AgentCommon::Compare( const TreePtrInterface &x,
         // HandleDecision() will return the current choice for that decision, if absent it will
         // add the decision and choose the first choice, if the decision reaches the end it
         // will remove the decision.
-        r = MatchingDecidedCompare( x, can_key, conj );
+        r = true;
 
+        if( can_key )
+            coupling_keys->Clear();
+
+        // Only key if the keys are already set to KEYING (which is 
+        // the initial value). Keys could be RESTRICTING if we're under
+        // a SoftNot node, in which case we only want to restrict.
+        if( can_key )
+        {
+            // Do a two-pass matching process: first get the keys...
+            TRACE("doing KEYING pass....\n");
+            conj.PrepareForDecidedCompare();
+            r = DecidedCompare( x, true, conj );
+            TRACE("KEYING pass result %d\n", r );
+        }
+        
+        // Now restrict the search according to the couplings
+        if( r )
+        {
+            TRACE("doing RESTRICTING pass....\n");
+            conj.PrepareForDecidedCompare();
+            r = DecidedCompare( x, false, conj );
+            TRACE("RESTRICTING pass result %d\n", r );
+        }
+        
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
         if( r )
             break; // Success
             
         if( !conj.Increment() )
-            break; // Failure
+            break; // Failure            
     }
     return r;
 }

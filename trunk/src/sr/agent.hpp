@@ -24,7 +24,8 @@ public:
                                   bool can_key,
                                   Conjecture &conj ) = 0;
     virtual bool Compare( const TreePtrInterface &x,
-                          bool can_key = false ) = 0;
+                          bool can_key = false,
+                          Conjecture *conj = NULL ) = 0;
     virtual void KeyReplace() = 0;
     virtual void SetReplaceKey( shared_ptr<Key> key ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
@@ -62,7 +63,8 @@ public:
                                  bool can_key,
                                  Conjecture &conj );
     bool Compare( const TreePtrInterface &x,
-                  bool can_key = false );
+                  bool can_key = false,
+                          Conjecture *conj = NULL );
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
                                  bool force_dirty ) const;
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,

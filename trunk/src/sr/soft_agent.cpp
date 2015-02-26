@@ -65,7 +65,7 @@ TreePtr<Node> SoftAgent::MyBuildReplace()
 bool SoftAgent::NormalCompare( const TreePtrInterface &x, const TreePtrInterface &pattern )
 {
     ASSERT( current_conj )("Cannot call NormalCompare() from other than MyCompare()");
-    return Agent::AsAgent(pattern)->DecidedCompare( x, current_can_key, *current_conj );
+    return AsAgent(pattern)->DecidedCompare( x, current_can_key, *current_conj );
 }
 
 
@@ -73,7 +73,10 @@ bool SoftAgent::NormalCompare( const TreePtrInterface &x, const TreePtrInterface
 // for an overall match to be possible, and so cannot be used to key a coupling)
 bool SoftAgent::AbnormalCompare( const TreePtrInterface &x, const TreePtrInterface &pattern )
 {
-    return Agent::AsAgent(pattern)->Compare( x, false ); 
+    if( current_can_key )
+        return true; // Since we must not key, skip the keying phase, letting all the normal nodes key themselves
+    else
+        return AsAgent(pattern)->Compare( x, false, current_conj ); 
 }
 
 

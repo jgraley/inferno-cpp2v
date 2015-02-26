@@ -24,7 +24,8 @@ public:
                                      bool can_key,
                                      Conjecture &conj );
     bool CompareRange( ContainerInterface &range, // range should really be a SubContainer
-                       bool can_key );
+                       bool can_key,
+                       Conjecture &conj );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:
     virtual TreePtr<Node> GetPattern() = 0;
