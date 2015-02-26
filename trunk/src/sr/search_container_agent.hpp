@@ -41,7 +41,7 @@ public:
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
 
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
-    CompareReplace * const recurse_comparer;
+    CompareReplace * recurse_comparer;
 };
 
 /// Agent that matches an arbitrary subtree, with restrictions on elements therein and terminus support 
@@ -50,22 +50,7 @@ class Stuff : public StuffAgent,
               public Special<PRE_RESTRICTION> 
 {
 public:
-    // Do the itemiser by hand since it gets confused by the CompareReplace object   
-    virtual vector< Itemiser::Element * > Itemise( const Itemiser *itemise_object = 0 ) const
-    {
-        vector< Itemiser::Element * > v;
-        v.push_back( (Itemiser::Element *)(&recurse_restriction) );
-        v.push_back( (Itemiser::Element *)(&terminus) );
-        return v;
-    }
-    virtual Itemiser::Element *ItemiseIndex( int i ) const  
-    { 
-        return Itemise()[i];
-    } 
-    virtual int ItemiseSize() const  
-    { 
-        return Itemise().size();
-    }
+    SPECIAL_NODE_FUNCTIONS
 };
 
 /// Agent that matches any single node, with terminus support
