@@ -23,7 +23,6 @@ public:
 	// Pattern is an abnormal context. Fascinatingly, we can supply any node here because there
     // is no type-correctness limitation with *excluding* a kind of node
     TreePtr<Node> pattern;
-    CompareReplace comp; // TODO only want the Compare
 private:
     virtual bool MyCompare( const TreePtrInterface &x ) 
     {
@@ -41,18 +40,13 @@ private:
     	    // a. We didn't recurse during KEYING pass and
     	    // b. Search under not can terminate with false, but parent search will continue
     	    // Consequently, we go in at Compare level, which creates a new conjecture.
-    	    comp.pcontext = GetContext();
-    		bool r = comp.Compare( x, pattern );
+    		bool r = AbnormalCompare( x, pattern );
 			TRACE("NotMatch pattern=")(*pattern)(" x=")(*x)(" got %d, returning the opposite!\n", (int)r);
     		if( r==false )
 				return true;
 			else
 				return false;
     	}
-    }
-    virtual void MyConfigure()
-    {
-        comp.coupling_keys.SetMaster( GetCouplingKeys() ); 
     }
 };
 

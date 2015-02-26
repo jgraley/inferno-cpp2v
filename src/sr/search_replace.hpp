@@ -73,10 +73,10 @@ private:
     static int repetitions;
     static bool rep_error;
 private:
-    // MatchingDecidedCompare ring
+
     friend class Conjecture;
 public:
-    // Compare ring (now trivial)
+
     bool Compare( const TreePtrInterface &x,
                   TreePtr<Node> pattern,
                   bool can_key = false ) const;
@@ -87,7 +87,7 @@ public:
 private:
     void KeyReplaceNodes( TreePtr<Node> pattern ) const;
     TreePtr<Node> ReplacePhase( TreePtr<Node> x ) const;
-    // implementation ring: Do the actual search and replace
+
     bool SingleCompareReplace( TreePtr<Node> *proot );
     int RepeatingCompareReplace( TreePtr<Node> *proot );
 public:

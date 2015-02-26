@@ -148,7 +148,7 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
             }
             
             // Restrict to pre-restriction or pattern
-            bool r = psa->CompareRange( *ss, can_key );
+            bool r = psa->CompareRange( *ss, can_key, conj );
             if( !r )
                 return false;
 
@@ -247,7 +247,7 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
                 return false;
         }
 
-        bool r = star->CompareRange( *xremaining, can_key );
+        bool r = star->CompareRange( *xremaining, can_key, conj );
         if( !r )
             return false;
     

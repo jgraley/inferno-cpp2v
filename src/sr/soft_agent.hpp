@@ -33,7 +33,7 @@ public:
     // Soft nodes should override this to implement their comparison function
     virtual bool MyCompare( const TreePtrInterface &x );
     virtual TreePtr<Node> MyBuildReplace();
-    virtual void MyConfigure() {}
+    virtual void MyConfigure() {} // No overrides at present
 protected: // Call only from the soft node implementation in MyCompare()
     // Compare for child nodes in a normal context (i.e. in which the pattern must match
     // for an overall match to be possible, and so can be used to key a coupling)

@@ -91,7 +91,8 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> 
         rf = recurse_comparer;
     }
     
-    // TODO do we have to do these walks every time???? Maybe cache???!!
+    // Note: does not do the walk every time - instead, the Walk object's range is presented
+    // to the Conjecture object, which increments it only when trying alternative choice
     return shared_ptr<ContainerInterface>( new Walk( x, NULL, rf ) );
 }
 
