@@ -31,7 +31,7 @@ bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
     if( !r )
         return false;
         
-    if( TreePtr<Node> keynode = coupling_keys->GetCoupled( this ) )
+    if( TreePtr<Node> keynode = GetCoupled() )
     {
         SimpleCompare sc;
         if( sc( x, keynode ) == false )
@@ -46,7 +46,7 @@ bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
         key->terminus = *thistime;
         shared_ptr<Key> sckey( key );
         TRACE("Matched, so keying search container type ")(*this)(" for ")(*x);
-        coupling_keys->DoKey( sckey, this );    
+        DoKey( sckey );    
     }
     return r;
 }
@@ -58,7 +58,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode )
     // Are we substituting a stuff node? If so, see if we reached the terminus, and if
     // so come out of substitution. Done as tail recursion so that we already duplicated
     // the terminus key, and can just overlay the terminus replace pattern.
-    shared_ptr<Key> key = coupling_keys->GetKey( this );
+    shared_ptr<Key> key = GetKey();
     ASSERT( key->root==keynode );    // Check we got the same keynode passed in as we found in the couplins structure
     shared_ptr<TerminusKey> stuff_key = dynamic_pointer_cast<TerminusKey>(key);
     ASSERT( stuff_key );

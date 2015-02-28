@@ -6,6 +6,15 @@
 
 using namespace SR;
 
+Agent *Agent::AsAgent( TreePtr<Node> node )
+{
+    ASSERT( node )("Called AsAgent(")(node)(") with NULL TreePtr");
+    Agent *agent = dynamic_cast<Agent *>(node.get());
+    ASSERT( agent )("Called AsAgent(")(*node)(") with non-Agent");
+    return agent;
+}
+
+
 AgentCommon::AgentCommon() :
     sr(NULL), 
     coupling_keys(NULL) 
@@ -20,8 +29,8 @@ void AgentCommon::AgentConfigure( const CompareReplace *s, CouplingKeys *c )
     // rule enforcement.
     // Why no coupling across sibling slaves? Would need an ordering for keying
     // but ordering not defined on sibling slaves.
-    ASSERT(!sr && !coupling_keys)("Detected repeat configuration of ")(*this)
-                                 ("\nCould be result of coupling this node across sibling slaves - not allowed :(");
+    ASSERT(!sr)("Detected repeat configuration of ")(*this)
+               ("\nCould be result of coupling this node across sibling slaves - not allowed :(");
     ASSERT(s);
     ASSERT(c);
     sr = s;
@@ -35,7 +44,6 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
 {
     INDENT;
     ASSERT(sr)("Agent ")(*this)(" at appears not to have been configured, since sr is NULL");
-    ASSERT(coupling_keys);
     ASSERT( x ); // Target must not be NULL
     ASSERT(this);
     
@@ -51,7 +59,7 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
     if( !match )
         return false;
     
-    if( TreePtr<Node> keynode = coupling_keys->GetCoupled( this ) )
+    if( TreePtr<Node> keynode = GetCoupled() )
     {
         SimpleCompare sc;
         if( sc( x, keynode ) == false )
@@ -61,7 +69,7 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
     if( can_key )
     {
-        coupling_keys->DoKey( x, this );  
+        DoKey( x );  
     }
 
     return true;
@@ -113,7 +121,7 @@ bool AgentCommon::Compare( const TreePtrInterface &x,
         {
             // Unkey 
             FOREACH( Agent *a, sr->my_agents )
-                coupling_keys->Erase(a);
+                a->ResetKey();
 
             // Do a two-pass matching process: first get the keys...
             TRACE("doing KEYING pass....\n");
@@ -142,9 +150,40 @@ bool AgentCommon::Compare( const TreePtrInterface &x,
 }
 
 
+void AgentCommon::DoKey( TreePtr<Node> x )
+{
+    ASSERT(x);
+    shared_ptr<Key> key( new Key );
+    key->root = x;
+    DoKey( key );
+}
+
+
+void AgentCommon::DoKey( shared_ptr<Key> key )
+{
+    coupling_keys->DoKey(key, this);
+}
+
+
+TreePtr<Node> AgentCommon::GetCoupled()
+{
+    shared_ptr<Key> k = GetKey();
+    if( k )
+        return k->root;
+    else
+        return TreePtr<Node>(); 
+}
+
+
 shared_ptr<Key> AgentCommon::GetKey()
 {
     return coupling_keys->GetKey(this);
+}
+
+
+void AgentCommon::ResetKey()
+{
+    coupling_keys->Erase(this);
 }
 
 
@@ -157,7 +196,7 @@ void AgentCommon::SetReplaceKey( shared_ptr<Key> key )
 {
     // This function is called on nodes under the "overlay" branch of Overlay nodes.
     // Some special nodes will not know what to do...
-    ASSERT(coupling_keys->GetKey(this))(*this)(" cannot appear in a replace-only context");
+    ASSERT(GetKey())(*this)(" cannot appear in a replace-only context");
 }
 
 
@@ -166,18 +205,11 @@ TreePtr<Node> AgentCommon::BuildReplace()
     INDENT;
     ASSERT(this);
     ASSERT(sr)("Agent ")(*this)(" at appears not to have been configured, since sr is NULL");
-    ASSERT(coupling_keys);
     
     // See if the pattern node is coupled to anything. The keynode that was passed
     // in is just a suggestion and will be overriden if we are keyed.
-    TreePtr<Node> keynode;
-    shared_ptr<Key> key = coupling_keys->GetKey( this );
+    TreePtr<Node> keynode = GetCoupled();
     
-    if( key )
-        keynode = key->root;   
-    else
-        keynode = TreePtr<Node>();
-
     return BuildReplaceImpl( keynode );    
 }
 

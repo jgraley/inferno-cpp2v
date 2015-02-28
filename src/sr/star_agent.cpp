@@ -11,7 +11,7 @@ bool StarAgent::DecidedCompare( const TreePtrInterface &x,
     INDENT;
 
     // Coupling restriction check
-    if( TreePtr<Node> keynode = coupling_keys->GetCoupled( this ) )
+    if( TreePtr<Node> keynode = GetCoupled() )
     {
         SimpleCompare sc;
         if( sc( TreePtr<Node>(x), keynode ) == false )
@@ -23,7 +23,7 @@ bool StarAgent::DecidedCompare( const TreePtrInterface &x,
     // pass right on through.
     if( can_key )
     {
-        coupling_keys->DoKey( TreePtr<Node>(x), this );   
+        DoKey( TreePtr<Node>(x) );   
         return true;
     }
                 

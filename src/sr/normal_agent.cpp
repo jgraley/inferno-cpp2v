@@ -50,10 +50,6 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
                 ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
                 Agent *ap = Agent::AsAgent(*pattern_ptr);
-                //NormalAgent *nap = dynamic_cast<NormalAgent *>(ap);
-                //ASSERT( nap ); 
-                //ASSERT( nap->sr == sr );
-                //ASSERT( nap->coupling_keys == coupling_keys );
                 r = ap->DecidedCompare( *x_ptr, can_key, conj );
             }
         }
@@ -245,13 +241,13 @@ void NormalAgent::SetReplaceKey( shared_ptr<Key> key )
     ASSERT( key->agent );
     TRACE(*this)("::SetReplaceKey(")(*(key->root))(" from ")(*(key->agent))(")\n");
     
-    if( coupling_keys->GetKey(this) )
+    if( GetKey() )
         return; // Already keyed, no point wasting time keying this (and the subtree under it) again
         
     if( !IsLocalMatch(key->agent) ) 
         return; // Key not compatible with pattern: recursion stops here
         
-    coupling_keys->DoKey( key->root, this );
+    DoKey( key->root );
     
     // Loop over all the elements of keynode and dest that do not appear in pattern or
     // appear in pattern but are NULL TreePtr<>s. Duplicate from keynode into dest.

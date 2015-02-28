@@ -55,7 +55,6 @@ public:
     virtual void AgentConfigure( const CompareReplace *s, CouplingKeys *c )
     {
         AgentCommon::AgentConfigure( s, c );
-        ALGO::coupling_keys.SetMaster( c );  
         ALGO::master_ptr = s;
     }       
 };

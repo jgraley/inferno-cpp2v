@@ -33,20 +33,18 @@ class CouplingKeys
 public:
 	CouplingKeys();
 	/// Key a node to a pattern (generates a default key structure)
-    void DoKey( TreePtr<Node> x,  Agent *agent, Conjecture::Choice *gc=NULL, int go=0 );
+    void DoKey( TreePtr<Node> x,  Agent *agent );
     /// Key some key to a pattern - key is supplied by user, can be subclass of Key
-    void DoKey( shared_ptr<Key> key,  Agent *agent, Conjecture::Choice *gc=NULL, int go=0 );
+    void DoKey( shared_ptr<Key> key,  Agent *agent );
     /// Get the node to which a pattern was keyed, or NULL if pattern has not been keyed
     TreePtr<Node> GetCoupled(  Agent *agent );									
     /// Get the key for a given pattern, or NULL if pattern has not been keyed
     shared_ptr<Key> GetKey(  Agent *agent );	
     /// Get all the keys in set form
-    Set< TreePtr<Node> > GetAllKeys();		
     /// Provide a pointer to another (read-only) instance of this class that will 
     /// be merged for the purposes of searching, but will not receive new couplings 
     void SetMaster( CouplingKeys *m );				
     /// Clear the couplings
-    void Clear();
     void Erase( Agent *a )
     {
         keys_map.erase(a);
