@@ -108,7 +108,7 @@ void CompareReplace::Configure( TreePtr<Node> cp,
     {
         // Give agents pointers to here and our coupling keys
         TRACE("Configuring agent ")(*a)("\n");
-        a->AgentConfigure( this, &coupling_keys );       
+        a->AgentConfigure( this );       
     }
 
     // These are the ones our slaves should not configure

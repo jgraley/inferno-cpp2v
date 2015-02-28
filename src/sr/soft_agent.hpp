@@ -6,7 +6,6 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
-#include "coupling.hpp"
 
 namespace SR
 { 
@@ -19,7 +18,7 @@ public:
         current_can_key( false ),
         current_conj( NULL )
     {}
-    void AgentConfigure( const CompareReplace *s, CouplingKeys *c );
+    void AgentConfigure( const CompareReplace *s );
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key,
                                      Conjecture &conj );

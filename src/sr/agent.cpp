@@ -16,13 +16,12 @@ Agent *Agent::AsAgent( TreePtr<Node> node )
 
 
 AgentCommon::AgentCommon() :
-    sr(NULL), 
-    coupling_keys(NULL) 
+    sr(NULL)
 {
 }
 
 
-void AgentCommon::AgentConfigure( const CompareReplace *s, CouplingKeys *c )
+void AgentCommon::AgentConfigure( const CompareReplace *s )
 {
     // Repeat configuration regarded as an error because it suggests I maybe don't
     // have a clue what should actaually be configing the agent. Plus general lifecycle 
@@ -32,9 +31,7 @@ void AgentCommon::AgentConfigure( const CompareReplace *s, CouplingKeys *c )
     ASSERT(!sr)("Detected repeat configuration of ")(*this)
                ("\nCould be result of coupling this node across sibling slaves - not allowed :(");
     ASSERT(s);
-    ASSERT(c);
     sr = s;
-    coupling_keys = c;
 }
 
 
@@ -161,7 +158,10 @@ void AgentCommon::DoKey( TreePtr<Node> x )
 
 void AgentCommon::DoKey( shared_ptr<Key> key )
 {
-    coupling_keys->DoKey(key, this);
+    if( !coupling_key )
+    {
+        coupling_key = key;
+    }
 }
 
 
@@ -175,15 +175,15 @@ TreePtr<Node> AgentCommon::GetCoupled()
 }
 
 
-shared_ptr<Key> AgentCommon::GetKey()
+shared_ptr<AgentCommon::Key> AgentCommon::GetKey()
 {
-    return coupling_keys->GetKey(this);
+    return coupling_key;
 }
 
 
 void AgentCommon::ResetKey()
 {
-    coupling_keys->Erase(this);
+    coupling_key = shared_ptr<Key>();
 }
 
 
@@ -192,7 +192,7 @@ void AgentCommon::KeyReplace()
 }
 
 
-void AgentCommon::SetReplaceKey( shared_ptr<Key> key )
+void AgentCommon::TrackingKey( Agent *from )
 {
     // This function is called on nodes under the "overlay" branch of Overlay nodes.
     // Some special nodes will not know what to do...

@@ -1,6 +1,7 @@
 #include "search_container_agent.hpp"
 #include "helpers/simple_compare.hpp"
 #include "search_replace.hpp" // TODO should not need
+#include "conjecture.hpp" 
 
 using namespace SR;
 

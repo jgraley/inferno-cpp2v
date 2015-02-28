@@ -41,9 +41,9 @@ Detailed plan for refactoring into agent patterns
 - Consider alternatives for the SpecialNode hierarchy, and make sure you don't break pre-restrictions (might already be broken for Stuff)
 - Tidy up: sort out Stuff-specific code in SR configure walk DONE; Check out the other
   uses of TerminusBase which apparently should not work since not detected during replace... mend or remove.DONE
-7. keynodes to be remembered by agents (all of thm) in AgentCommon, not passed in or looked up in central coupling keys 
-   object. Do not pass around. Sort out sometimes needing to pass keynode to child node during replace.
-8. Central couplingkeys object to be pensioned off, and remove from Configure(). 
+7. keynodes to be remembered by agents (all of thm) in AgentCommon, not passed in or looked up in central coupling keys DONE
+   object. Do not pass around. Sort out sometimes needing to pass keynode to child node during replace. DONE
+8. Central couplingkeys object to be pensioned off, and remove from Configure(). DONE
 - Same for the dirty grass, try to keep the state locally. Check for other state in SR that should be in the agents
 ---now agent to agent calls are context-free and parameterless in the case of BuildReplace()---
 - Slave tidy-up. Add a funciton in SR to invoke slave SR and send slave invocation through that. It can fill in the context (obviously sr ptr still needed).

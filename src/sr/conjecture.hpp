@@ -2,7 +2,6 @@
 #define CONJECTURE_HPP
 
 #include "common/common.hpp"
-//#include "coupling.hpp"
 #include <vector>
 
 namespace SR 

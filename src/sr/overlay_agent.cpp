@@ -18,17 +18,14 @@ void OverlayAgent::KeyReplace()
     INDENT("O");
     // Give the overlay side a nudge in case it wants to key itself eg due to
     // Builder node. TODO avoid repeat calls to KeyReplace()    
-    Agent::AsAgent(GetOverlay())->KeyReplace();
+    AsAgent(GetOverlay())->KeyReplace();
     
     // Now, if the overlay side did not key itself, key it per the through 
     // side key that will have been obtained during search. Thus, the immediate
     // children of Overlay appear as though coupled.
 
-    // Get a key from the search side
-    shared_ptr<Key> key = AsAgent(GetThrough())->GetKey();
-    ASSERT(key);
     // Key as many nodes as possible on the replace side
-    AsAgent(GetOverlay())->SetReplaceKey(key);
+    AsAgent(GetOverlay())->TrackingKey(AsAgent(GetThrough()));
 }
 
 

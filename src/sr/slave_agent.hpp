@@ -6,10 +6,10 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
-#include "coupling.hpp"
 
 namespace SR
 { 
+class SearchReplace;
 
 /// Common implementaiton stuff for slaves
 class SlaveAgent : public virtual InPlaceTransformation, 
@@ -20,11 +20,11 @@ public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key,
                                      Conjecture &conj );
-    virtual void SetReplaceKey( shared_ptr<Key> key );
+    virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual TreePtr<Node> GetThrough() const = 0;
     virtual void Configure( const Set<Agent *> &agents_already_configured ) = 0; // For master to trigger configuration
-    virtual void AgentConfigure( const CompareReplace *s, CouplingKeys *c ) = 0;
+    virtual void AgentConfigure( const CompareReplace *s ) = 0;
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;    
 };
@@ -52,9 +52,9 @@ public:
     {
         ALGO::Configure(search_pattern, replace_pattern, agents_already_configured);
     }       
-    virtual void AgentConfigure( const CompareReplace *s, CouplingKeys *c )
+    virtual void AgentConfigure( const CompareReplace *s )
     {
-        AgentCommon::AgentConfigure( s, c );
+        AgentCommon::AgentConfigure( s );
         ALGO::master_ptr = s;
     }       
 };

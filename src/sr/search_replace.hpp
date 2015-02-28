@@ -5,7 +5,6 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
-#include "coupling.hpp"
 #include "agent.hpp"
 #include "normal_agent.hpp"
 #include "search_container_agent.hpp"
@@ -47,7 +46,6 @@ public:
     TreePtr<Node> pattern;
     const CompareReplace *master_ptr;
     TreePtr<Node> *pcontext;
-    mutable CouplingKeys coupling_keys;
     mutable Set< TreePtr<Node> > dirty_grass;
     Set<Agent *> my_agents;
     
