@@ -6,7 +6,6 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
-#include "coupling.hpp"
 #include <set>
 #include <boost/type_traits.hpp>
  
@@ -30,7 +29,7 @@ private:
     		                       bool can_key,
     		                       Conjecture &conj );
 public:
-    virtual void SetReplaceKey( shared_ptr<Key> key );
+    virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:	
 	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not NULL

@@ -233,26 +233,26 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 }
 
 
-void NormalAgent::SetReplaceKey( shared_ptr<Key> key )
+void NormalAgent::TrackingKey( Agent *from )
 {
     INDENT;
+    ASSERT( from );
+    TreePtr<Node> key = from->GetCoupled();
     ASSERT( key );
-    ASSERT( key->root );
-    ASSERT( key->agent );
-    TRACE(*this)("::SetReplaceKey(")(*(key->root))(" from ")(*(key->agent))(")\n");
+    TRACE(*this)("::TrackingKey(")(*(key))(" from ")(*(from))(")\n");
     
     if( GetKey() )
         return; // Already keyed, no point wasting time keying this (and the subtree under it) again
         
-    if( !IsLocalMatch(key->agent) ) 
-        return; // Key not compatible with pattern: recursion stops here
+    if( !IsLocalMatch(from) ) 
+        return; // Not compatible with pattern: recursion stops here
         
-    DoKey( key->root );
+    DoKey( key );
     
     // Loop over all the elements of keynode and dest that do not appear in pattern or
     // appear in pattern but are NULL TreePtr<>s. Duplicate from keynode into dest.
     vector< Itemiser::Element * > pattern_memb = Itemise(); 
-    vector< Itemiser::Element * > keyer_memb = Itemise( key->agent ); 
+    vector< Itemiser::Element * > keyer_memb = Itemise( from ); 
     
     // Loop over all the members of keynode (which can be a subset of dest)
     // and for non-NULL members, duplicate them by recursing and write the
@@ -266,12 +266,11 @@ void NormalAgent::SetReplaceKey( shared_ptr<Key> key )
 
         if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
+            TreePtrInterface *keyer_ptr = dynamic_cast<TreePtrInterface *>(keyer_memb[i]);
             if( *pattern_ptr )
             {
-                TreePtrInterface *keyer_ptr = dynamic_cast<TreePtrInterface *>(keyer_memb[i]);
                 ASSERT(*keyer_ptr)("Cannot key intermediate because correpsonding search node is NULL");
-                shared_ptr<Key> nkey = AsAgent(*keyer_ptr)->GetKey();
-                AsAgent(*pattern_ptr)->SetReplaceKey( nkey );
+                AsAgent(*pattern_ptr)->TrackingKey( AsAgent(*keyer_ptr) );
             }
         }
     }

@@ -4,9 +4,9 @@
 
 using namespace SR;
 
-void SoftAgent::AgentConfigure( const CompareReplace *s, CouplingKeys *c )
+void SoftAgent::AgentConfigure( const CompareReplace *s )
 {
-    AgentCommon::AgentConfigure( s, c ); // To main version of Configure
+    AgentCommon::AgentConfigure( s ); // To main version of Configure
     MyConfigure();
 }
 

@@ -6,7 +6,6 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
-#include "coupling.hpp"
 
 namespace SR
 { 

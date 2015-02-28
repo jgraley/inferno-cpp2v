@@ -6,7 +6,6 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
-#include "coupling.hpp"
 
 namespace SR
 { 
@@ -15,7 +14,7 @@ namespace SR
 class SearchContainerAgent : public virtual AgentCommon
 {
     /// A kind of couplings key that allows a found terminus to be remembered    
-    class TerminusKey : public Key // TODO put in SearchContainerAgent
+    class TerminusKey : public Key 
     {
     public:
         TreePtr<Node> terminus;

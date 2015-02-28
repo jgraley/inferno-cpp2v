@@ -1,5 +1,4 @@
 #include "soft_patterns.hpp"
-#include "coupling.hpp"
 
 using namespace SR;
 

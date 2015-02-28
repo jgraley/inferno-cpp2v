@@ -5,7 +5,6 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
-#include "coupling.hpp"
 #include <set>
 #include <boost/type_traits.hpp>
  
@@ -13,7 +12,7 @@ namespace SR
 { 
 class Conjecture;
 class SpecialBase;
-class SearchReplace;
+class CompareReplace;
  
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Traceable,
@@ -27,12 +26,11 @@ public:
                           bool can_key = false,
                           Conjecture *conj = NULL ) = 0;
     virtual TreePtr<Node> GetCoupled() = 0;                                  
-    virtual shared_ptr<Key> GetKey() = 0;
     virtual void ResetKey() = 0;     
     virtual void KeyReplace() = 0;
-    virtual void SetReplaceKey( shared_ptr<Key> key ) = 0;
+    virtual void TrackingKey( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
-	virtual void AgentConfigure( const CompareReplace *s, CouplingKeys *c ) = 0;
+	virtual void AgentConfigure( const CompareReplace *s ) = 0;
 	static Agent *AsAgent( TreePtr<Node> node );
 };
 
@@ -43,9 +41,20 @@ public:
 /// Implments misc functionality common to all or most agents
 class AgentCommon : public Agent
 {
+protected:
+    // Base class for coupling keys; this deals with individual node matches, and also with stars
+    // by means of pointing "root" at a SubCollection or SubSequence
+    /// General holder for coupling keys, remembers important details of partil or full matches
+    class Key
+    {
+    public:
+        virtual ~Key(){}  // be a virtual hierarchy
+        TreePtr<Node> root; // Input program node for this coupling
+    };        
+
 public:
     AgentCommon();
-    void AgentConfigure( const CompareReplace *s, CouplingKeys *c );
+    void AgentConfigure( const CompareReplace *s );
     virtual bool DecidedCompare( const TreePtrInterface &x,
                                  bool can_key,
                                  Conjecture &conj );
@@ -59,7 +68,7 @@ public:
     void ResetKey();                                  
 
     virtual void KeyReplace();
-    virtual void SetReplaceKey( shared_ptr<Key> key );
+    virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplace();
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() ) = 0;
     bool MatchingDecidedCompare( const TreePtrInterface &x,
@@ -75,7 +84,9 @@ public:
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
     const CompareReplace *sr;
-    CouplingKeys *coupling_keys;
+    
+private:    
+    shared_ptr<Key> coupling_key;    
 };
 
 
