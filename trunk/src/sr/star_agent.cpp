@@ -4,33 +4,40 @@
 
 using namespace SR;
 
-bool StarAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                    bool can_key,
-                                    Conjecture &conj )
-{
-    ASSERTFAIL("Can only use Star in a container"); 
-}
-
-
-bool StarAgent::CompareRange( ContainerInterface &range,
-                              bool can_key,
-                              Conjecture &conj )
+bool StarAgent::DecidedCompare( const TreePtrInterface &x,
+                                bool can_key,
+                                Conjecture &conj )
 {
     INDENT;
+
+    // Coupling restriction check
+    if( TreePtr<Node> keynode = coupling_keys->GetCoupled( this ) )
+    {
+        SimpleCompare sc;
+        if( sc( TreePtr<Node>(x), keynode ) == false )
+            return false;
+    }
+            
     // this is an abnormal context (which of the program nodes
     // in the range should key the pattern?) so just wave keying
     // pass right on through.
     if( can_key )
+    {
+        coupling_keys->DoKey( TreePtr<Node>(x), this );   
         return true;
+    }
                 
+    ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
+    ASSERT(xc)("Nodes passed to StarAgent::DecidedCompare() must implement ContainerInterface, since * matches multiple things");
+    
     TreePtr<Node> p = GetPattern();
     if( p )
     {
         TRACE("MatchRange pattern\n");
         // Apply pattern restriction - will be at least as strict as pre-restriction
-        FOREACH( TreePtr<Node> x, range )
+        FOREACH( TreePtr<Node> xe, *xc )
         {
-            bool r = AsAgent(p)->Compare( x, false, &conj ); 
+            bool r = AsAgent(p)->Compare( xe, false, &conj ); 
             if( !r )
                 return false;
         }
@@ -39,9 +46,9 @@ bool StarAgent::CompareRange( ContainerInterface &range,
     {
         TRACE("MatchRange pre-res\n");
         // No pattern, so just use pre-restrictions
-        FOREACH( TreePtr<Node> x, range )
+        FOREACH( TreePtr<Node> xe, *xc )
         {
-            if( !IsLocalMatch( x.get()) )
+            if( !IsLocalMatch( xe.get()) )
                 return false;
         }
     }     

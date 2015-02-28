@@ -95,7 +95,7 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
 		// Get the next element of the pattern
 		TreePtr<Node> pe( *pit );
 		ASSERT( pe );
-        Agent *pea = Agent::AsAgent(pe);
+        Agent *pea = AsAgent(pe);
 		npit=pit;
 		++npit;
 
@@ -126,40 +126,28 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
                 // range matched by the star, and so x.end() is a legitimate choice for ss.end()
                 // So allow the Conjecture class to give us two ends, and only give up on the second.
                 Conjecture::Choice *current_choice = conj.GetChoicePtr();
-                {
-                    xit = conj.HandleDecision( xit_begin_star, x.end(), 1 );
-                }                               
+                xit = conj.HandleDecision( xit_begin_star, x.end(), 1 );
             }
             
             // Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
             // Now make a copy of the elements that matched the star and apply couplings
-            TreePtr<StarAgent::SubSequenceRange> ss( new StarAgent::SubSequenceRange( xit_begin_star, xit ) );
+            TreePtr<StarAgent::SubSequenceRange> xss( new StarAgent::SubSequenceRange( xit_begin_star, xit ) );
             //for( ContainerInterface::iterator it=xit_begin_star; it != xit; ++it ) // TODO FOREACH?
             //{
             //  ss->push_back( *it );
             //}
             
             // Apply couplings to this Star and matched range
-            if( TreePtr<Node> keynode = coupling_keys->GetCoupled( pea ) )
-            {
-                SimpleCompare sc;
-                if( sc( TreePtr<Node>(ss), keynode ) == false )
-                    return false;
-            }
-            
             // Restrict to pre-restriction or pattern
-            bool r = psa->CompareRange( *ss, can_key, conj );
+            bool r = psa->DecidedCompare( xss, can_key, conj );
             if( !r )
                 return false;
-
-            if( can_key )
-                coupling_keys->DoKey( TreePtr<Node>(ss), Agent::AsAgent(pe) );   
         }
  	    else // not a Star so match singly...
 	    {
             // If there is one more element in x, see if it matches the pattern
 			//TreePtr<Node> xe( x[xit] );
-			if( xit != x.end() && Agent::AsAgent(pe)->DecidedCompare( *xit, can_key, conj ) == true )
+			if( xit != x.end() && pea->DecidedCompare( *xit, can_key, conj ) == true )
 			{
 				++xit;
 			}
@@ -240,19 +228,9 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
     // Apply pre-restriction to the star
     if( seen_star )
     {
-        if( TreePtr<Node> keynode = coupling_keys->GetCoupled( star ) )
-        {
-            SimpleCompare sc;
-            if( sc( TreePtr<Node>(xremaining), keynode ) == false )
-                return false;
-        }
-
-        bool r = star->CompareRange( *xremaining, can_key, conj );
+        bool r = star->DecidedCompare( xremaining, can_key, conj );
         if( !r )
             return false;
-    
-        if( can_key )
-            coupling_keys->DoKey( TreePtr<Node>(xremaining), star );	
     }
     TRACE("matched\n");
 	return true;

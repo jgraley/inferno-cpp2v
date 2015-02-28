@@ -68,6 +68,14 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
 }
 
 
+bool AgentCommon::DecidedCompareImpl( const TreePtrInterface &x,
+                                      bool can_key,
+                                      Conjecture &conj )
+{
+    ASSERTFAIL("Agents must overload one of DecidedCompare() or DecidedCompareImpl()");
+}
+
+
 bool AgentCommon::Compare( const TreePtrInterface &x,
                            bool can_key,
                           Conjecture *in_conj  ) 

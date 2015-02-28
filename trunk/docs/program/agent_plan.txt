@@ -40,7 +40,7 @@ Detailed plan for refactoring into agent patterns
    ---now the choice of algorithm is decide by vcall not if-elseif chain (=object-oriented paradigm)
 - Consider alternatives for the SpecialNode hierarchy, and make sure you don't break pre-restrictions (might already be broken for Stuff)
 - Tidy up: sort out Stuff-specific code in SR configure walk DONE; Check out the other
-  uses of TerminusBase which apparently should not work since not detected during replace... mend or remove.
+  uses of TerminusBase which apparently should not work since not detected during replace... mend or remove.DONE
 7. keynodes to be remembered by agents (all of thm) in AgentCommon, not passed in or looked up in central coupling keys 
    object. Do not pass around. Sort out sometimes needing to pass keynode to child node during replace.
 8. Central couplingkeys object to be pensioned off, and remove from Configure(). 
@@ -58,7 +58,7 @@ Detailed plan for refactoring into agent patterns
 - Note: don't kill the Configure sweep since needed for various things now not just sr and couplingkys pointers
 9. Turn the boolean soft agents into proper agents. Maybe lose MatchEven if no users? Or becomes MatchOne?
 
-QUESTION: should patterns eventually refer to each other via TreePtr<Agent> instead of TreePre<Node>? 
+QUESTION: should patterns eventually refer to each other via TreePtr<Agent> instead of TreePtr<Node>? 
 And does that even work, or should it really be shared_ptr<Agent> or SharedPtr<Agent>? --- requires experimentation, added to plan
 -> Explicit Agent crosslinks should be done via Agent * pointers. But eventually all the work
 will be done by other objects that are contained by the agents, and shared_ptr should be used

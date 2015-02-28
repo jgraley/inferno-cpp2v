@@ -20,12 +20,9 @@ namespace SR
 class StarAgent : public virtual AgentCommon 
 {
 public:
-    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key,
-                                     Conjecture &conj );
-    bool CompareRange( ContainerInterface &range, // range should really be a SubContainer
-                       bool can_key,
-                       Conjecture &conj );
+    virtual bool DecidedCompare( const TreePtrInterface &x, // x must be a SubContainer
+                                 bool can_key,
+                                 Conjecture &conj );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:
     virtual TreePtr<Node> GetPattern() = 0;
