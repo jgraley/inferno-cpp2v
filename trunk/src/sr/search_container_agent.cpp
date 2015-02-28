@@ -88,7 +88,7 @@ bool StuffAgent::RecurseFilter::IsMatch( TreePtr<Node> context,
                                          TreePtr<Node> root )
 {
     if( agent->recurse_restriction )
-        return AsAgent(agent->recurse_restriction)->Compare(root);
+        return AsAgent(agent->recurse_restriction)->AbnormalCompare(root);
     else
         return true;
 }

@@ -146,10 +146,57 @@ void CompareReplace::GetGraphInfo( vector<string> *labels,
 
 
 bool CompareReplace::Compare( const TreePtrInterface &x,
-                              TreePtr<Node> pattern,
-                              bool can_key ) const
+                              TreePtr<Node> pattern ) const
 {
-    return Agent::AsAgent(pattern)->Compare( x, can_key );
+    INDENT("C");
+    ASSERT( x );
+    TRACE("Compare x=")(*x);
+    TRACE(" pattern=")(*pattern);
+    Agent *root_agent = Agent::AsAgent(pattern);
+    //TRACE(**pcontext)(" @%p\n", pcontext);
+           
+    // Create the conjecture object we will use for this compare, and keep iterating
+    // though different conjectures trying to find one that allows a match.
+    Conjecture conj;
+    bool r;
+    while(1)
+    {
+        // Try out the current conjecture. This will call HandlDecision() once for each decision;
+        // HandleDecision() will return the current choice for that decision, if absent it will
+        // add the decision and choose the first choice, if the decision reaches the end it
+        // will remove the decision.
+        r = true;
+
+        // Only key if the keys are already set to KEYING (which is 
+        // the initial value). Keys could be RESTRICTING if we're under
+        // a SoftNot node, in which case we only want to restrict.
+            // Unkey 
+        FOREACH( Agent *a, my_agents )
+            a->ResetKey();
+
+        // Do a two-pass matching process: first get the keys...
+        TRACE("doing KEYING pass....\n");
+        conj.PrepareForDecidedCompare();
+        r = root_agent->DecidedCompare( x, true, conj );
+        TRACE("KEYING pass result %d\n", r );
+               
+        if( r )
+        {
+            // ...now restrict the search according to the couplings
+            TRACE("doing RESTRICTING pass....\n");
+            conj.PrepareForDecidedCompare();
+            r = root_agent->DecidedCompare( x, false, conj );
+            TRACE("RESTRICTING pass result %d\n", r );
+        }
+        
+        // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
+        if( r )
+            break; // Success
+            
+        if( !conj.Increment() )
+            break; // Failure            
+    }
+    return r;
 }
 
 
@@ -158,7 +205,7 @@ bool CompareReplace::IsMatch( TreePtr<Node> context,
 {
     pcontext = &context;
     ASSERT( pattern );
-    bool r = Agent::AsAgent(pattern)->Compare( root, false );
+    bool r = Agent::AsAgent(pattern)->AbnormalCompare( root );
     pcontext = NULL;
     return r == true;
 }
@@ -210,7 +257,7 @@ bool CompareReplace::SingleCompareReplace( TreePtr<Node> *proot )
     // of clearing the keys in case the keys were set up in advance, as will
     // be the case if this is a slave.
     TRACE("Begin search\n");
-	bool r = Agent::AsAgent(pattern)->Compare( *proot, true );
+	bool r = Compare( *proot, pattern );
 	if( !r )
 		return false;
 

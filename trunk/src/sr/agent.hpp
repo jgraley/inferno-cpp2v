@@ -22,9 +22,7 @@ public:
     virtual bool DecidedCompare( const TreePtrInterface &x,
                                   bool can_key,
                                   Conjecture &conj ) = 0;
-    virtual bool Compare( const TreePtrInterface &x,
-                          bool can_key = false,
-                          Conjecture *conj = NULL ) = 0;
+    virtual bool AbnormalCompare( const TreePtrInterface &x ) = 0;
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace() = 0;
@@ -61,6 +59,7 @@ public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key,
                                      Conjecture &conj );
+    bool AbnormalCompare( const TreePtrInterface &x );
     void DoKey( TreePtr<Node> x );
     void DoKey( shared_ptr<Key> key );
     TreePtr<Node> GetCoupled();                                  
@@ -74,9 +73,6 @@ public:
     bool MatchingDecidedCompare( const TreePtrInterface &x,
                                  bool can_key,
                                  Conjecture &conj );
-    bool Compare( const TreePtrInterface &x,
-                  bool can_key = false,
-                          Conjecture *conj = NULL );
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
                                  bool force_dirty ) const;
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,

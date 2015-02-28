@@ -37,7 +37,7 @@ bool StarAgent::DecidedCompare( const TreePtrInterface &x,
         // Apply pattern restriction - will be at least as strict as pre-restriction
         FOREACH( TreePtr<Node> xe, *xc )
         {
-            bool r = AsAgent(p)->Compare( xe, false, &conj ); 
+            bool r = AsAgent(p)->AbnormalCompare( xe ); 
             if( !r )
                 return false;
         }
