@@ -1,7 +1,7 @@
+#include "overlay_agent.hpp" 
 #include "green_grass_agent.hpp"
 #include "helpers/simple_compare.hpp"
 #include "search_replace.hpp" // TODO should not need
-#include "star_agent.hpp" // TODO should not need
 
 using namespace SR;
 

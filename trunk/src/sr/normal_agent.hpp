@@ -47,13 +47,20 @@ public:
     NormalAgentWrapper() : NODE_TYPE() {}
 
 	template<typename CP0>
-    NormalAgentWrapper(const CP0 &cp0) : NODE_TYPE(cp0) {}
+    NormalAgentWrapper(const CP0 &cp0) : 
+        NODE_TYPE(cp0) {}
 
 	template<typename CP0, typename CP1>
-    NormalAgentWrapper(const CP0 &cp0, const CP1 &cp1) : NODE_TYPE(cp0, cp1) {}
+    NormalAgentWrapper(const CP0 &cp0, const CP1 &cp1) : 
+        NODE_TYPE(cp0, cp1) {}
 
-	template<typename CP0, typename CP1, typename CP2>
-    NormalAgentWrapper(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : NODE_TYPE(cp0, cp1, cp2) {}
+    template<typename CP0, typename CP1, typename CP2>
+    NormalAgentWrapper(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : 
+        NODE_TYPE(cp0, cp1, cp2) {}
+    
+    template<typename CP0, typename CP1, typename CP2, typename CP3>
+    NormalAgentWrapper(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2, const CP2 &cp3) : 
+        NODE_TYPE(cp0, cp1, cp2, cp3) {}
     
     virtual string GetTypeName() const // used by parse, render etc
     {
@@ -90,6 +97,11 @@ public:
     {
         return new NormalAgentWrapper<NODE_TYPE>(cp0, cp1, cp2);
     }    
+    template<typename CP0, typename CP1, typename CP2, typename CP3>
+    static inline TreePtr<NODE_TYPE> Make(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2, const CP3 &cp3)
+    {
+        return new NormalAgentWrapper<NODE_TYPE>(cp0, cp1, cp2, cp3);
+    }    
 };
 
 
@@ -117,6 +129,11 @@ public:
     {
         return new NODE_TYPE(cp0, cp1, cp2);
     }    
+    template<typename CP0, typename CP1, typename CP2, typename CP3>
+    static inline TreePtr<NODE_TYPE> Make(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2, const CP3 &cp3)
+    {
+        return new NODE_TYPE(cp0, cp1, cp2, cp3);
+    }    
 };
 
 
@@ -135,20 +152,29 @@ public:
         TRACE("MakePatternPtr made a ")(*this)("\n");
 	}
 	template<typename CP0>
-	inline MakePatternPtr(const CP0 &cp0) : TreePtr<NODE_TYPE>( Maker::Make(cp0) ) 
+	inline MakePatternPtr(const CP0 &cp0) : 
+	    TreePtr<NODE_TYPE>( Maker::Make(cp0) ) 
 	{ 
         TRACE("MakePatternPtr made a ")(*this)("\n");
 	}
     template<typename CP0, typename CP1>
-	inline MakePatternPtr(const CP0 &cp0, const CP1 &cp1) : TreePtr<NODE_TYPE>(  Maker::Make(cp0, cp1) )
+	inline MakePatternPtr(const CP0 &cp0, const CP1 &cp1) : 
+	    TreePtr<NODE_TYPE>(  Maker::Make(cp0, cp1) )
 	{ 
         TRACE("MakePatternPtr made a ")(*this)("\n");
 	}
-	template<typename CP0, typename CP1, typename CP2>
-	inline MakePatternPtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : TreePtr<NODE_TYPE>( Maker::Make(cp0, cp1, cp2) )
-	{ 
+    template<typename CP0, typename CP1, typename CP2>
+    inline MakePatternPtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : 
+        TreePtr<NODE_TYPE>( Maker::Make(cp0, cp1, cp2) )
+    { 
         TRACE("MakePatternPtr made a ")(*this)("\n");
-	}
+    }
+    template<typename CP0, typename CP1, typename CP2, typename CP3>
+    inline MakePatternPtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2, const CP3 &cp3) : 
+        TreePtr<NODE_TYPE>( Maker::Make(cp0, cp1, cp2, cp3) )
+    { 
+        TRACE("MakePatternPtr made a ")(*this)("\n");
+    }
 	// Add more params as needed...
 };
 

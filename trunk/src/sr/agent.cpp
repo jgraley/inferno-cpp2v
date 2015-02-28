@@ -16,22 +16,22 @@ Agent *Agent::AsAgent( TreePtr<Node> node )
 
 
 AgentCommon::AgentCommon() :
-    sr(NULL)
+    engine(NULL)
 {
 }
 
 
-void AgentCommon::AgentConfigure( const CompareReplace *s )
+void AgentCommon::AgentConfigure( const Engine *e )
 {
     // Repeat configuration regarded as an error because it suggests I maybe don't
     // have a clue what should actaually be configing the agent. Plus general lifecycle 
     // rule enforcement.
     // Why no coupling across sibling slaves? Would need an ordering for keying
     // but ordering not defined on sibling slaves.
-    ASSERT(!sr)("Detected repeat configuration of ")(*this)
-               ("\nCould be result of coupling this node across sibling slaves - not allowed :(");
-    ASSERT(s);
-    sr = s;
+    ASSERT(!engine)("Detected repeat configuration of ")(*this)
+                   ("\nCould be result of coupling this node across sibling slaves - not allowed :(");
+    ASSERT(e);
+    engine = e;
 }
 
 
@@ -40,7 +40,7 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
                                   Conjecture &conj )
 {
     INDENT;
-    ASSERT(sr)("Agent ")(*this)(" at appears not to have been configured, since sr is NULL");
+    ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
     ASSERT( x ); // Target must not be NULL
     ASSERT(this);
     
@@ -165,7 +165,7 @@ TreePtr<Node> AgentCommon::BuildReplace()
 {
     INDENT;
     ASSERT(this);
-    ASSERT(sr)("Agent ")(*this)(" at appears not to have been configured, since sr is NULL");
+    ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
     
     // See if the pattern node is coupled to anything. The keynode that was passed
     // in is just a suggestion and will be overriden if we are keyed.
@@ -185,12 +185,12 @@ TreePtr<Node> AgentCommon::DuplicateNode( TreePtr<Node> source,
     TreePtr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
     ASSERT(dest);
 
-    bool source_dirty = sr->GetOverallMaster()->dirty_grass.find( source ) != sr->GetOverallMaster()->dirty_grass.end();
+    bool source_dirty = engine->GetOverallMaster()->dirty_grass.find( source ) != engine->GetOverallMaster()->dirty_grass.end();
     if( force_dirty || // requested by caller
         source_dirty ) // source was dirty
     {
         //TRACE("dirtying ")(*dest)(" force=%d source=%d (")(*source)(")\n", force_dirty, source_dirty);        
-        sr->GetOverallMaster()->dirty_grass.insert( dest );
+        engine->GetOverallMaster()->dirty_grass.insert( dest );
     }
     
     return dest;    

@@ -4,7 +4,8 @@
 
 using namespace SR;
 
-SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp ) :
+SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search ) :
+    Engine( is_search ),
     search_pattern( sp ),
     replace_pattern( rp )
 {
@@ -28,7 +29,29 @@ void SlaveAgent::TrackingKey( Agent *from )
 }
 
 
-TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+void SlaveAgent::GetGraphInfo( vector<string> *labels, 
+                               vector< TreePtr<Node> > *links ) const
+{
+    labels->push_back("through");
+    links->push_back(GetThrough());
+    Engine::GetGraphInfo( labels, links );
+}
+
+
+void SlaveAgent::Configure( const Set<Agent *> &agents_already_configured )
+{
+    Engine::Configure(search_pattern, replace_pattern, agents_already_configured);
+}    
+
+
+void SlaveAgent::AgentConfigure( const Engine *e )
+{
+    AgentCommon::AgentConfigure( e );
+    Engine::master_ptr = e;
+}       
+
+
+TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 {
     INDENT;
     ASSERT( GetThrough() );   
@@ -36,10 +59,8 @@ TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> keynode )
     // Continue current replace operation by following the "through" pointer
     TreePtr<Node> dest = AsAgent(GetThrough())->BuildReplace();
     
-    // Run the slave as a new transformation at the current location
-    operator()( sr->GetContext(), &dest );
+    (void)Engine::RepeatingCompareReplace( &dest );   
     
     ASSERT( dest );
     return dest;
 }
-
