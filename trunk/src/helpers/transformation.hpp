@@ -91,7 +91,6 @@ class TransformationVector : public vector< shared_ptr<Transformation> >,
 };
 
 
-
 class Filter
 {
 public:
