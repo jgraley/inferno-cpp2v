@@ -103,8 +103,8 @@ void CompareReplace::Configure( TreePtr<Node> cp,
         immediate_agents.insert( Agent::AsAgent(n) );
 	
     // Now configure all the ones we are allowed to configure        
-    Set<Agent *> agents_to_configure = SetDifference( immediate_agents, agents_already_configured );         
-    FOREACH( Agent *a, agents_to_configure )
+    my_agents = SetDifference( immediate_agents, agents_already_configured );         
+    FOREACH( Agent *a, my_agents )
     {
         // Give agents pointers to here and our coupling keys
         TRACE("Configuring agent ")(*a)("\n");
@@ -112,10 +112,10 @@ void CompareReplace::Configure( TreePtr<Node> cp,
     }
 
     // These are the ones our slaves should not configure
-    Set<Agent *> agents_now_configured = SetUnion( immediate_agents, agents_already_configured ); 
+    Set<Agent *> agents_now_configured = SetUnion( agents_already_configured, my_agents ); 
     
     // Recurse into the slaves' configure
-	FOREACH( Agent *a, agents_to_configure )
+	FOREACH( Agent *a, my_agents )
 	{
         if( SlaveAgent *sa = dynamic_cast<SlaveAgent *>(a) )
         {                        
@@ -172,9 +172,8 @@ void CompareReplace::KeyReplaceNodes( TreePtr<Node> pattern ) const
     INDENT;
     TRACE("Walking replace pattern to key the soft nodes\n");
     
-    UniqueWalkNoSlavePattern e(pattern);
-    FOREACH( TreePtr<Node> pattern, e )	
-	    Agent::AsAgent(pattern)->KeyReplace();
+    FOREACH( Agent *a, my_agents )
+	    a->KeyReplace();
 }
 
 
@@ -220,9 +219,6 @@ bool CompareReplace::SingleCompareReplace( TreePtr<Node> *proot )
     	TRACE("Search successful, now replacing\n");
         *proot = ReplacePhase( pattern );
     }
-
-    // Clean up, to allow dead nodes to be deleted
-    coupling_keys.Clear(); 
 
     return r;
 }

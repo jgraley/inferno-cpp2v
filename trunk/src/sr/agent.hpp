@@ -26,6 +26,7 @@ public:
     virtual bool Compare( const TreePtrInterface &x,
                           bool can_key = false,
                           Conjecture *conj = NULL ) = 0;
+    virtual shared_ptr<Key> GetKey() = 0;
     virtual void KeyReplace() = 0;
     virtual void SetReplaceKey( shared_ptr<Key> key ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
@@ -55,8 +56,9 @@ public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key,
                                      Conjecture &conj );
-    virtual void SetReplaceKey( shared_ptr<Key> key );
+    virtual shared_ptr<Key> GetKey();
     virtual void KeyReplace();
+    virtual void SetReplaceKey( shared_ptr<Key> key );
     virtual TreePtr<Node> BuildReplace();
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() ) = 0;
     bool MatchingDecidedCompare( const TreePtrInterface &x,

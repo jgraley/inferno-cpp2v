@@ -44,7 +44,6 @@ protected: // Call only from the soft node implementation in MyCompare()
     TreePtr<Node> *GetContext();
     bool IsCanKey();
     TreePtr<Node> GetCoupled( TreePtr<Node> pattern );
-    CouplingKeys *GetCouplingKeys();
     TreePtr<Node> DoBuildReplace( TreePtr<Node> pattern ) ;
 protected:
     bool current_can_key;

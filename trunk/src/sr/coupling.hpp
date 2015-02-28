@@ -47,6 +47,12 @@ public:
     void SetMaster( CouplingKeys *m );				
     /// Clear the couplings
     void Clear();
+    void Erase( Agent *a )
+    {
+        keys_map.erase(a);
+        if( master )
+            master->Erase(a);
+    }
 private:
 	Map< Agent *, shared_ptr<Key> > keys_map;
 	CouplingKeys *master; 

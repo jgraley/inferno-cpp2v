@@ -49,6 +49,7 @@ public:
     TreePtr<Node> *pcontext;
     mutable CouplingKeys coupling_keys;
     mutable Set< TreePtr<Node> > dirty_grass;
+    Set<Agent *> my_agents;
     
     // Sets of nodes for debugging purposes. Checks should be positive, because identifiers are copied
     // shallowly and will appear in more than one set. Since they are const, preservation rules do not
