@@ -4,9 +4,9 @@
 
 using namespace SR;
 
-void SoftAgent::AgentConfigure( const CompareReplace *s )
+void SoftAgent::AgentConfigure( const Engine *e )
 {
-    AgentCommon::AgentConfigure( s ); // To main version of Configure
+    AgentCommon::AgentConfigure( e ); // To main version of Configure
     MyConfigure();
 }
 
@@ -41,7 +41,6 @@ void SoftAgent::KeyReplace()
 TreePtr<Node> SoftAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     ASSERT(keynode)("Soft pattern seen in tree but it produced no keynode or overlay");
-    ASSERT(sr);
     return DuplicateSubtree(keynode);   
 }
 
@@ -82,7 +81,7 @@ bool SoftAgent::AbnormalCompare( const TreePtrInterface &x, const TreePtrInterfa
 
 TreePtr<Node> *SoftAgent::GetContext()
 {
-    return sr->pcontext;
+    return engine->GetOverallMaster()->pcontext;
 }
 
 

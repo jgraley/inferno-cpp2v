@@ -12,7 +12,7 @@ namespace SR
 { 
 class Conjecture;
 class SpecialBase;
-class CompareReplace;
+class Engine;
  
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Traceable,
@@ -28,7 +28,7 @@ public:
     virtual void KeyReplace() = 0;
     virtual void TrackingKey( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
-	virtual void AgentConfigure( const CompareReplace *s ) = 0;
+	virtual void AgentConfigure( const Engine *e ) = 0;
 	static Agent *AsAgent( TreePtr<Node> node );
 };
 
@@ -52,7 +52,7 @@ protected:
 
 public:
     AgentCommon();
-    void AgentConfigure( const CompareReplace *s );
+    void AgentConfigure( const Engine *e );
     virtual bool DecidedCompare( const TreePtrInterface &x,
                                  bool can_key,
                                  Conjecture &conj );
@@ -79,7 +79,7 @@ public:
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
-    const CompareReplace *sr;
+    const Engine *engine;
     
 private:    
     shared_ptr<Key> coupling_key;    

@@ -10,7 +10,7 @@ bool GreenGrassAgent::DecidedCompareImpl( const TreePtrInterface &x,
 {
     // Restrict so that everything in the input program under here must be "green grass"
     // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
-    if( sr->GetOverallMaster()->dirty_grass.find( x ) != sr->GetOverallMaster()->dirty_grass.end() )
+    if( engine->GetOverallMaster()->dirty_grass.find( x ) != engine->GetOverallMaster()->dirty_grass.end() )
     {
         TRACE(*x)(" is dirty grass so rejecting\n");
         return false;

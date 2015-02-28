@@ -3,7 +3,8 @@
 
 #include "search_replace.hpp"
 #include "helpers/transformation.hpp"
-#include "search_container_agent.hpp"
+#include "soft_agent.hpp"
+#include "overlay_agent.hpp"
 #include "slave_agent.hpp"
 
 namespace SR
