@@ -76,7 +76,7 @@ bool SoftAgent::AbnormalCompare( const TreePtrInterface &x, const TreePtrInterfa
     if( current_can_key )
         return true; // Since we must not key, skip the keying phase, letting all the normal nodes key themselves
     else
-        return AsAgent(pattern)->Compare( x, false, current_conj ); 
+        return AsAgent(pattern)->AbnormalCompare( x ); 
 }
 
 

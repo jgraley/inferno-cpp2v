@@ -77,8 +77,7 @@ private:
 public:
 
     bool Compare( const TreePtrInterface &x,
-                  TreePtr<Node> pattern,
-                  bool can_key = false ) const;
+                  TreePtr<Node> pattern ) const;
     virtual bool IsMatch( TreePtr<Node> context,       
                           TreePtr<Node> root );
 public:

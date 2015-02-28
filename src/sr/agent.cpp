@@ -81,23 +81,12 @@ bool AgentCommon::DecidedCompareImpl( const TreePtrInterface &x,
 }
 
 
-bool AgentCommon::Compare( const TreePtrInterface &x,
-                           bool can_key,
-                           Conjecture *in_conj  ) 
+bool AgentCommon::AbnormalCompare( const TreePtrInterface &x ) 
 {
     INDENT("C");
     ASSERT( x );
     TRACE("Compare x=")(*x);
     TRACE(" pattern=")(*this);
-    TRACE(" can_key=%d \n", (int)can_key);
-    //TRACE(**pcontext)(" @%p\n", pcontext);
-    
-    //if( can_key == false )
-    //{
-    //    ASSERT(in_conj);
-        //return DecidedCompare( x, false, *in_conj );
-   // }
-        
     
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
@@ -105,36 +94,8 @@ bool AgentCommon::Compare( const TreePtrInterface &x,
     bool r;
     while(1)
     {
-        // Try out the current conjecture. This will call HandlDecision() once for each decision;
-        // HandleDecision() will return the current choice for that decision, if absent it will
-        // add the decision and choose the first choice, if the decision reaches the end it
-        // will remove the decision.
-        r = true;
-
-        // Only key if the keys are already set to KEYING (which is 
-        // the initial value). Keys could be RESTRICTING if we're under
-        // a SoftNot node, in which case we only want to restrict.
-        if( can_key )
-        {
-            // Unkey 
-            FOREACH( Agent *a, sr->my_agents )
-                a->ResetKey();
-
-            // Do a two-pass matching process: first get the keys...
-            TRACE("doing KEYING pass....\n");
-            conj.PrepareForDecidedCompare();
-            r = DecidedCompare( x, true, conj );
-            TRACE("KEYING pass result %d\n", r );
-        }
-               
-        if( r )
-        {
-            // ...now restrict the search according to the couplings
-            TRACE("doing RESTRICTING pass....\n");
-            conj.PrepareForDecidedCompare();
-            r = DecidedCompare( x, false, conj );
-            TRACE("RESTRICTING pass result %d\n", r );
-        }
+        conj.PrepareForDecidedCompare();
+        r = DecidedCompare( x, false, conj );
         
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
         if( r )
