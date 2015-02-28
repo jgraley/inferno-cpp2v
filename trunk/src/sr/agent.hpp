@@ -26,18 +26,14 @@ public:
     virtual bool Compare( const TreePtrInterface &x,
                           bool can_key = false,
                           Conjecture *conj = NULL ) = 0;
+    virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual shared_ptr<Key> GetKey() = 0;
+    virtual void ResetKey() = 0;     
     virtual void KeyReplace() = 0;
     virtual void SetReplaceKey( shared_ptr<Key> key ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
 	virtual void AgentConfigure( const CompareReplace *s, CouplingKeys *c ) = 0;
-	static Agent *AsAgent( TreePtr<Node> node )
-	{
-		ASSERT( node )("Called AsAgent(")(node)(") with NULL TreePtr");
-		Agent *agent = dynamic_cast<Agent *>(node.get());
-		ASSERT( agent )("Called AsAgent(")(*node)(") with non-Agent");
-		return agent;
-	}
+	static Agent *AsAgent( TreePtr<Node> node );
 };
 
 // - Configure
@@ -56,7 +52,12 @@ public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key,
                                      Conjecture &conj );
+    void DoKey( TreePtr<Node> x );
+    void DoKey( shared_ptr<Key> key );
+    TreePtr<Node> GetCoupled();                                  
     virtual shared_ptr<Key> GetKey();
+    void ResetKey();                                  
+
     virtual void KeyReplace();
     virtual void SetReplaceKey( shared_ptr<Key> key );
     virtual TreePtr<Node> BuildReplace();

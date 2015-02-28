@@ -33,7 +33,7 @@ void SoftAgent::KeyReplace()
     if( key )           
     {            
         // Allow this to key a coupling. 
-        coupling_keys->DoKey( key, this );
+        DoKey( key );
     } 
 }
 
@@ -94,15 +94,11 @@ bool SoftAgent::IsCanKey()
 
 TreePtr<Node> SoftAgent::GetCoupled( TreePtr<Node> pattern )
 {
-    shared_ptr<Key> key = Agent::AsAgent(pattern)->GetKey();
-    if( key )
-        return key->root;
-    else
-        return TreePtr<Node>();        
+    return AsAgent(pattern)->GetCoupled();
 }
 
 
 TreePtr<Node> SoftAgent::DoBuildReplace( TreePtr<Node> pattern ) 
 {
-    return Agent::AsAgent(pattern)->BuildReplace();
+    return AsAgent(pattern)->BuildReplace();
 }

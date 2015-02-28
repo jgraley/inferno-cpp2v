@@ -11,12 +11,10 @@ CouplingKeys::CouplingKeys() :
 }
 
 void CouplingKeys::DoKey( TreePtr<Node> x, 
-	                      Agent *agent, 
-	                      Conjecture::Choice *gc,
-	                      int go )
+	                      Agent *agent )
 {
-//	INDENT;
     ASSERT(this);
+    ASSERT(x);
 	shared_ptr<Key> key( new Key );
 	if( x )
     {
@@ -25,62 +23,37 @@ void CouplingKeys::DoKey( TreePtr<Node> x,
     }
     else
         key = shared_ptr<Key>();
-	return DoKey( key, agent, gc, go );
+	return DoKey( key, agent );
 }
 
 
 void CouplingKeys::DoKey( shared_ptr<Key> key, 
-	                      Agent *agent, 
-	                      Conjecture::Choice *gc,
-	                      int go )
+	                      Agent *agent )
 {
 	//INDENT;
 	ASSERT( this );
     ASSERT( agent );
-    
-   // TRACE("CouplingKeys@%p: ", this)(master?"has ":"does not have ")("master\n");
-    
+        
     if( key )
     {
         ASSERT( key->root );
         ASSERT( key->root->IsFinal() )("Intermediate node ")(*(key->root))(" set as key by/for ")(*agent);
     }
     
-#if 0    
-	TRACE("coupling={");
-	bool first=true;
-	FOREACH( TreePtr<Node> n, coupling )
-	{
-		if( !first )
-			TRACE(", ");
-		if( agent == Agent::AsAgent(n) )
-			TRACE("-->");
-		TRACE(*n);
-		first=false;
-	}
-   TRACE("}\n"); // TODO put this in as a common utility somewhere
-#endif
-
-	// If we're keying and we haven't keyed this node so far, key it now
+    // If we're keying and we haven't keyed this node so far, key it now
 	if( key && !GetKey( agent ) )
 	{        
 	    key->agent = agent;
-		key->governing_choice = gc;	
-		key->governing_offset = go;	
 		keys_map[agent] = key;	
-      //  TRACE("Keyed root=")(*key->root)(" agent=")(*key->agent)(" with governing_choice=%p\n", gc);
 	}
 	
 	if( master )
-        master->DoKey( key, agent, gc, go );
-       
-    // TRACE("@%p Keyed ", this)(*(key->root))(" size %d\n", keys_map.size());
+        master->DoKey( key, agent );
 }
 
 
 TreePtr<Node> CouplingKeys::GetCoupled( Agent *agent )  
 {
-  //  INDENT;
     ASSERT(this);
     shared_ptr<Key> k = GetKey( agent );
 	if( k )
@@ -92,8 +65,6 @@ TreePtr<Node> CouplingKeys::GetCoupled( Agent *agent )
 
 shared_ptr<Key> CouplingKeys::GetKey( Agent *agent )  
 {
- //   INDENT;
-    //TRACE("@%p Getting key for ", this)(*pattern)(" master is %p size %d\n", master, keys_map.size());
     ASSERT(this);
 	if( keys_map.IsExist(agent) )
 	{
@@ -101,12 +72,7 @@ shared_ptr<Key> CouplingKeys::GetKey( Agent *agent )
 	}
 	else if( master )
 	{
-	   // TRACE("Going to master to get key for ")(*agent)("\n");
 	    shared_ptr<Key> k = master->GetKey(agent);
-	  //  if( k )
-	  //      TRACE("Got root ")(*(k->root))("\n");
-	  //  else
-	  //      TRACE("Didn't get key\n");
 	    return k;
 	}
 	else
@@ -114,60 +80,8 @@ shared_ptr<Key> CouplingKeys::GetKey( Agent *agent )
 }
 
 
-Set< TreePtr<Node> > CouplingKeys::GetAllKeys() 
-{
- //   INDENT;
-    ASSERT(this);
-    Set< TreePtr<Node> > s;
-    UniqueFilter uf;
- //   TRACE("Key nodes:\n");
-    typedef pair< TreePtr<Node>, shared_ptr<Key> > Pc;
-    // iterate over out couplings
-    FOREACH( Pc p, keys_map )
-    {
-        ASSERT( p.first );
-        if( p.second ) // TODO make this always be non-NULL
-        {
-   //         TRACE("Coupling of ")(*(p.first))(": ");
-            Walk e(p.second->root, &uf); 
-            // Iterate over every node in the subtree under the key
-            FOREACH( TreePtr<Node> n, e )
-            {
-                s.insert( n );    
-                TRACE(*n)(" ");
-            }   
-            TRACE("\n");
-        }
-    }
-    
-    if( master )
-    {
-        // Fold in the results of calling the master
-        Set< TreePtr<Node> > ms = master->GetAllKeys();
-        FOREACH( TreePtr<Node> n, ms )
-        {
-            s.insert( n );    
-            TRACE(*n)(" ");
-        }   
-    }
-        
-    return s;
-}
-
-
 void CouplingKeys::SetMaster( CouplingKeys *m ) 
 { 
-//    INDENT;
-  //  TRACE("@%p Setting master to %p\n", this, m);
     master = m; 
 }
 
-
-void CouplingKeys::Clear() 
-{ 
-  //  INDENT;
-  //  TRACE("@%p Clearing keys\n", this);
-    keys_map.clear(); 
-    if( master )
-        master->Clear();
-}
