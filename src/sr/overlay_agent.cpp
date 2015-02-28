@@ -23,15 +23,12 @@ void OverlayAgent::KeyReplace()
     // Now, if the overlay side did not key itself, key it per the through 
     // side key that will have been obtained during search. Thus, the immediate
     // children of Overlay appear as though coupled.
-    if( !coupling_keys->GetCoupled( Agent::AsAgent(GetOverlay()) ) )
-    {
-        // Get a key from the search side
-        shared_ptr<Key> key = coupling_keys->GetKey( Agent::AsAgent(GetThrough()) );
-        ASSERT(key);
-        // Key as many nodes as possible on the replace side
-        Agent *over = Agent::AsAgent(GetOverlay());
-        over->SetReplaceKey(key);
-    }
+
+    // Get a key from the search side
+    shared_ptr<Key> key = AsAgent(GetThrough())->GetKey();
+    ASSERT(key);
+    // Key as many nodes as possible on the replace side
+    AsAgent(GetOverlay())->SetReplaceKey(key);
 }
 
 

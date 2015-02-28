@@ -94,13 +94,11 @@ bool SoftAgent::IsCanKey()
 
 TreePtr<Node> SoftAgent::GetCoupled( TreePtr<Node> pattern )
 {
-    return coupling_keys->GetCoupled( Agent::AsAgent(pattern) );
-}
-
-
-CouplingKeys *SoftAgent::GetCouplingKeys()
-{
-    return coupling_keys;
+    shared_ptr<Key> key = Agent::AsAgent(pattern)->GetKey();
+    if( key )
+        return key->root;
+    else
+        return TreePtr<Node>();        
 }
 
 

@@ -270,11 +270,11 @@ void NormalAgent::SetReplaceKey( shared_ptr<Key> key )
 
         if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
-            if( *pattern_ptr && !(**pattern_ptr).IsFinal() && !coupling_keys->GetKey( AsAgent(*pattern_ptr) ))
+            if( *pattern_ptr )
             {
                 TreePtrInterface *keyer_ptr = dynamic_cast<TreePtrInterface *>(keyer_memb[i]);
                 ASSERT(*keyer_ptr)("Cannot key intermediate because correpsonding search node is NULL");
-                shared_ptr<Key> nkey = coupling_keys->GetKey( AsAgent(*keyer_ptr) );
+                shared_ptr<Key> nkey = AsAgent(*keyer_ptr)->GetKey();
                 AsAgent(*pattern_ptr)->SetReplaceKey( nkey );
             }
         }

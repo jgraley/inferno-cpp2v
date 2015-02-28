@@ -71,6 +71,9 @@ void CouplingKeys::DoKey( shared_ptr<Key> key,
       //  TRACE("Keyed root=")(*key->root)(" agent=")(*key->agent)(" with governing_choice=%p\n", gc);
 	}
 	
+	if( master )
+        master->DoKey( key, agent, gc, go );
+       
     // TRACE("@%p Keyed ", this)(*(key->root))(" size %d\n", keys_map.size());
 }
 
@@ -83,7 +86,7 @@ TreePtr<Node> CouplingKeys::GetCoupled( Agent *agent )
 	if( k )
 	    return k->root;
 	else
-	    return TreePtr<Node>(); // TODO may never happen now, try assert
+	    return TreePtr<Node>(); 
 }
 
 
@@ -107,7 +110,7 @@ shared_ptr<Key> CouplingKeys::GetKey( Agent *agent )
 	    return k;
 	}
 	else
-	    return shared_ptr<Key>(); // TODO may never happen now, try assert
+	    return shared_ptr<Key>(); 
 }
 
 
@@ -165,4 +168,6 @@ void CouplingKeys::Clear()
   //  INDENT;
   //  TRACE("@%p Clearing keys\n", this);
     keys_map.clear(); 
+    if( master )
+        master->Clear();
 }
