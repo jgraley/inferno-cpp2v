@@ -37,12 +37,22 @@ class StuffAgent : public SearchContainerAgent
 {
 public:
     StuffAgent();
-    void AgentConfigure( const CompareReplace *s, CouplingKeys *c );
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
-
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
-    CompareReplace *recurse_comparer;
+private:
+    class RecurseFilter : public Filter
+    {
+    public:
+        RecurseFilter( StuffAgent *a );
+    private:
+        StuffAgent *agent;
+        virtual bool IsMatch( TreePtr<Node> context,       
+                              TreePtr<Node> root );
+    };
+private:    
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
+    RecurseFilter recurse_filter;
 };
+
 
 /// Agent that matches an arbitrary subtree, with restrictions on elements therein and terminus support 
 template<class PRE_RESTRICTION>
@@ -53,10 +63,10 @@ public:
     SPECIAL_NODE_FUNCTIONS
 };
 
+
 /// Agent that matches any single node, with terminus support
 class AnyNodeAgent : public SearchContainerAgent
 {
-public:
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
 };
 

@@ -15,6 +15,9 @@ bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(*x)("\n");
 
     // Get an interface to the container we will search
+    // TODO what is keeping pwx alive after this funciton exits? Are the iterators 
+    // doing it? (they are stores in Conjecture). Maybe pwxis just a stateless
+    // facade for the iterators and can be abandoned safely?
     shared_ptr<ContainerInterface> pwx = GetContainerInterface( x );
     
     // Get choice from conjecture about where we are in the walk
@@ -69,42 +72,39 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 
 
 StuffAgent::StuffAgent() : 
-    recurse_comparer( new CompareReplace )
+    recurse_filter( this )
 {
 }
 
-void StuffAgent::AgentConfigure( const CompareReplace *s, CouplingKeys *c )
+
+StuffAgent::RecurseFilter::RecurseFilter( StuffAgent *a ) :
+    agent(a)
 {
-    AgentCommon::AgentConfigure( s, c ); // To main version of Configure
-    recurse_comparer->coupling_keys.SetMaster( coupling_keys ); 
-    recurse_comparer->pattern = recurse_restriction; // TODO should call Configure()? possible bug
+}
+
+
+bool StuffAgent::RecurseFilter::IsMatch( TreePtr<Node> context,       
+                                         TreePtr<Node> root )
+{
+    if( agent->recurse_restriction )
+        return AsAgent(agent->recurse_restriction)->Compare(root);
+    else
+        return true;
 }
 
 
 shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> x )
-{
-    // TODO cache this?
-    Filter *rf = NULL;
-    if( recurse_restriction )
-    {
-        ASSERT( recurse_comparer->pattern )("Stuff node in slave must be initialised before slave\n");     
-        rf = recurse_comparer;
-    }
-    
+{    
     // Note: does not do the walk every time - instead, the Walk object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
-    return shared_ptr<ContainerInterface>( new Walk( x, NULL, rf ) );
+    return shared_ptr<ContainerInterface>( new Walk( x, NULL, &recurse_filter ) );
 }
 
 
 shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( TreePtr<Node> x )
 { 
-    TRACE("FlattenNodeing an AnyNode at ")(*x)(": { ");
-    FlattenNode f( x );
-    FOREACH( TreePtr<Node> pn, f )
-        {TRACE(*pn)(" ");}
-    TRACE("}\n");
-        
+    // Note: does not do the flatten every time - instead, the FlattenNode object's range is presented
+    // to the Conjecture object, which increments it only when trying alternative choice
     return shared_ptr<ContainerInterface>( new FlattenNode( x ) );
 }
 
