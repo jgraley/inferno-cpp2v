@@ -25,12 +25,47 @@ public:
     virtual TreePtr<Node> GetThrough() const = 0;    
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *links ) const;
-    virtual void Configure( const Set<Agent *> &agents_already_configured );
-    virtual void AgentConfigure( const Engine *e );
+    virtual void Configure( const Set<Agent *> &agents_already_configured, const Engine *master );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     
     TreePtr<Node> search_pattern;
-    TreePtr<Node> replace_pattern;    
+    TreePtr<Node> replace_pattern;   
+    
+private:    
+    /** Walks the tree, avoiding the "search"/"compare" and "replace" members of slaves
+        but still recurses through the "through" member. Therefore, it visits all the
+        nodes under the same engine as the root. Based on UniqueWalk, so each node only
+        visited once. */
+    class UniqueWalkNoSlavePattern_iterator : public UniqueWalk::iterator
+    {
+    public:
+        UniqueWalkNoSlavePattern_iterator( TreePtr<Node> &root ) : UniqueWalk::iterator(root) {}        
+        UniqueWalkNoSlavePattern_iterator() : UniqueWalk::iterator() {}
+        virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
+        {
+            return shared_ptr<UniqueWalkNoSlavePattern_iterator>( new UniqueWalkNoSlavePattern_iterator(*this) );
+        }      
+    private:
+        virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
+        {
+            // We need to create a container of elements of the child.
+            if( SlaveAgent *sa = dynamic_cast<SlaveAgent *>( Agent::AsAgent(n) ) )
+            {
+                // it's a slave, so set up a container containing only "through", not "compare" or "replace"
+                shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
+                seq->push_back( sa->GetThrough() );
+                return seq;
+            }
+            else
+            {
+                // it's not a slave, so proceed as for UniqueWalk
+                return UniqueWalk::iterator::GetChildContainer(n);
+            }
+        }
+    };
+
+public:
+    typedef ContainerFromIterator< UniqueWalkNoSlavePattern_iterator, TreePtr<Node> > UniqueWalkNoSlavePattern;    
 };
 
 

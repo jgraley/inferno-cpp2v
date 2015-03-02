@@ -65,13 +65,6 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
 }
 
 
-// TODO support SearchContainerBase(ie Stuff nodes) here and below inside the container.
-// Behaviour would be to try the container at each of the nodes matched by the star, and if
-// one match is found we have a hit (ie OR behaviour). I think this results in 3 decisions
-// for sequences as opposed to Star and Stuff, which are one decision each. They are:
-// first: How many elements to match (as with Star)
-// second: Which of the above to try for container match
-// third: Which element of the SearchContainer to try 
 bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
 		                                  SequenceInterface &pattern,
 		                                  bool can_key,
@@ -112,10 +105,6 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
             {
                 TRACE("Pattern continues after star\n");
 
-                // Star not at end so there is more stuff to match; ensure not another star
-            //  ASSERT( !dynamic_pointer_cast<StarAgent>(TreePtr<Node>(*npit)) )
-            //        ( "Not allowed to have two neighbouring Star elements in search pattern Sequence");
-
                 // Decide how many elements the current * should match, using conjecture. Jump forward
                 // that many elements, to the element after the star. We need to use the special 
                 // interface to Conjecture because the iterator we get is itself an end to the 
@@ -128,11 +117,7 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
             // Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
             // Now make a copy of the elements that matched the star and apply couplings
             TreePtr<StarAgent::SubSequenceRange> xss( new StarAgent::SubSequenceRange( xit_begin_star, xit ) );
-            //for( ContainerInterface::iterator it=xit_begin_star; it != xit; ++it ) // TODO FOREACH?
-            //{
-            //  ss->push_back( *it );
-            //}
-            
+
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern
             bool r = psa->DecidedCompare( xss, can_key, conj );
@@ -142,7 +127,6 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
  	    else // not a Star so match singly...
 	    {
             // If there is one more element in x, see if it matches the pattern
-			//TreePtr<Node> xe( x[xit] );
 			if( xit != x.end() && pea->DecidedCompare( *xit, can_key, conj ) == true )
 			{
 				++xit;
@@ -171,13 +155,11 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
 	// after decisions.
-	// TODO is there some stl algorithm for this?
     TreePtr<StarAgent::SubCollection> xremaining( new StarAgent::SubCollection );
     FOREACH( const TreePtrInterface &xe, x )
         xremaining->insert( xe );
     
-    StarAgent *star;
-    bool seen_star = false;
+    StarAgent *star = NULL;
 
     for( CollectionInterface::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
     {
@@ -185,14 +167,11 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
     			xremaining->size(),
     			pattern.size(),
     			TypeInfo( TreePtr<Node>(*pit) ).name().c_str() );
-    	StarAgent *maybe_star = dynamic_cast<StarAgent *>( Agent::AsAgent(TreePtr<Node>(*pit)) );
-
-        if( maybe_star ) // Star in pattern collection?
+   
+        if( StarAgent *s = dynamic_cast<StarAgent *>( Agent::AsAgent(TreePtr<Node>(*pit)) ) ) // Star in pattern collection?
         {
-        	ASSERT(!seen_star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
-        	// TODO remove this restriction - I might want to match one star and leave another unmatched.
-            star = maybe_star; // remember for later and skip to next pattern
-            seen_star = true; // TODO do we need?
+        	ASSERT(!star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
+            star = s; // remember for later and skip to next pattern
         }
 	    else // not a Star so match singly...
 	    {
@@ -216,13 +195,13 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
     // Now handle the star if there was one; all the non-star matches have been erased from
     // the collection, leaving only the star matches.
 
-    if( !xremaining->empty() && !seen_star )
+    if( !xremaining->empty() && !star )
     	return false; // there were elements left over and no star to match them against
 
-    TRACE("seen_star %d size of xremaining %d\n", seen_star, xremaining->size() );
+    TRACE("seen_star %d size of xremaining %d\n", !!star, xremaining->size() );
 
     // Apply pre-restriction to the star
-    if( seen_star )
+    if( star )
     {
         bool r = star->DecidedCompare( xremaining, can_key, conj );
         if( !r )
@@ -310,7 +289,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
     vector< Itemiser::Element * > pattern_memb = Itemise();
     vector< Itemiser::Element * > dest_memb = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
     ASSERT( pattern_memb.size() == dest_memb.size() );
-    Set< Itemiser::Element * > present_in_pattern; // Repeatability audit: OK since only checking for existance TODO special version of set that disallows non-repeatable things
+    Set< Itemiser::Element * > present_in_pattern; // Repeatability audit: OK since only checking for existance 
     
     TRACE("Copying %d members from pattern=%s dest=%s\n", dest_memb.size(), TypeInfo(this).name().c_str(), TypeInfo(dest).name().c_str());
     for( int i=0; i<dest_memb.size(); i++ )
@@ -420,7 +399,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
             ASSERT( *keynode_ptr );
             *dest_ptr = DuplicateSubtree( *keynode_ptr );
             ASSERT( *dest_ptr );
-            ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            
+            ASSERT( (**dest_ptr).IsFinal() );            
         }
         else
         {
@@ -476,7 +455,7 @@ TreePtr<Node> NormalAgent::BuildReplaceNormal()
 		        {
 			        TRACE("Walking SubContainer length %d\n", psc->size() );
 		            FOREACH( const TreePtrInterface &pp, *psc )
-			            dest_con->insert( pp );  // TODO support Container::insert(Container) to do this generically
+			            dest_con->insert( pp );  
            		}
 		        else
 		        {
@@ -492,7 +471,7 @@ TreePtr<Node> NormalAgent::BuildReplaceNormal()
             ASSERT( *pattern_ptr )("Member %d (", i)(*pattern_ptr)(") of ")(*this)(" was NULL when not overlaying\n");
             *dest_ptr = AsAgent(*pattern_ptr)->BuildReplace();
             ASSERT( *dest_ptr );
-            ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() )("Member %d (", i)(**pattern_ptr)(") of ")(*this)(" was not final\n"); // TODO don't create a TreePtr here!
+            ASSERT( (**dest_ptr).IsFinal() )("Member %d (", i)(**pattern_ptr)(") of ")(*this)(" was not final\n"); 
         }
         else
         {

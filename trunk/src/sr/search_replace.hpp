@@ -29,26 +29,22 @@ public:
                     bool search=false );
                     
     
-    // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
-    // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
-    // back into the general search algorithm.
-    TreePtr<Node> GetContext() const { ASSERT(pcontext&&*pcontext); return *pcontext; }
-
-    TreePtr<Node> *pcontext;
-    mutable Set< TreePtr<Node> > dirty_grass;
-    
-    virtual void GetGraphInfo( vector<string> *labels, 
-                               vector< TreePtr<Node> > *links ) const;    
-    
-    friend class Conjecture;
-    virtual bool IsMatch( TreePtr<Node> context,       
-                          TreePtr<Node> root );
-   // Functor style interface for RepeatingSearchReplace; implements Pass interface.
     using Transformation::operator();
     void operator()( TreePtr<Node> context, 
                      TreePtr<Node> *proot );
 
-	friend class NormalAgent;
+    // Stuff for soft nodes; support this base class in addition to whatever tree intermediate
+    // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
+    // back into the general search algorithm.
+    TreePtr<Node> GetContext() const { ASSERT(pcontext&&*pcontext); return *pcontext; }
+    TreePtr<Node> *pcontext;
+    mutable Set< TreePtr<Node> > dirty_grass;    
+    virtual void GetGraphInfo( vector<string> *labels, 
+                               vector< TreePtr<Node> > *links ) const;    
+    friend class Conjecture;
+    virtual bool IsMatch( TreePtr<Node> context,       
+                          TreePtr<Node> root );
+   // Functor style interface for RepeatingSearchReplace; implements Pass interface.
 };
 
 

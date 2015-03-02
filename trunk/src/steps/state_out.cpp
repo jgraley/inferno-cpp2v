@@ -201,13 +201,13 @@ EnsureBootstrap::EnsureBootstrap()
     // only exclude if there is a goto; a goto to anywhere will suffice to boot the state machine
     sx_body->members = (MakePatternPtr< Star<Declaration> >());
     sx_body->statements = (sx_pre, sx_goto, MakePatternPtr< Star<Statement> >());     
-    sx_pre->pattern = MakeResetAssignmentPattern();
+    sx_pre->restriction = MakeResetAssignmentPattern();
     sx_goto->destination = MakePatternPtr<LabelIdentifier>(); // must be a hard goto to exclude - otherwise might 
                                                            // have calculations in it which is no good for bootstrapping
     over->overlay = r_body;
     s_body->members = decls;
     s_body->statements = (pre, stop, post);
-    pre->pattern = MakeResetAssignmentPattern();    
+    pre->restriction = MakeResetAssignmentPattern();    
     stop->pattern = MakeResetAssignmentPattern();
     r_label->identifier = r_labelid;
     r_goto->destination = r_labelid;
@@ -276,7 +276,7 @@ EnsureSuperLoop::EnsureSuperLoop()
     sx_not->pattern = MakePatternPtr<Do>();
     s_body->members = (decls);
     s_body->statements = (pre, first_goto, post);
-    pre->pattern = s_limit;
+    pre->restriction = s_limit;
     s_limit->pattern = MakePatternPtr<Goto>();
     
     over->overlay = r_body;
@@ -511,7 +511,7 @@ InsertSwitch::InsertSwitch()
     over->through = s_comp;
     s_comp->members = (decls);
     s_comp->statements = (pre, s_first_goto, body);
-    pre->pattern = s_prenot;
+    pre->restriction = s_prenot;
     s_prenot->pattern = xs_pre_label;
     xs_pre_label->identifier = xs_pre_reach;
     xs_pre_reach->pattern = var_id;
@@ -594,9 +594,9 @@ SwitchCleanUp::SwitchCleanUp()
     s_switch->body = s_body;
     s_body->members = decls;
     s_body->statements = (main, label, tail);
-    main->pattern = sx_not_main;
+    main->restriction = sx_not_main;
     sx_not_main->pattern = MakePatternPtr<Break>();
-    tail->pattern = sx_not_tail;
+    tail->restriction = sx_not_tail;
     sx_not_tail->pattern = sx_any_tail;
     sx_any_tail->patterns = (MakePatternPtr<Break>(), MakePatternPtr<Case>());
     
@@ -650,9 +650,9 @@ FixFallthrough::FixFallthrough()
     s_comp->statements = (pre, case1, cb1,              case2, cb2, breakk, post);
     r_comp->members = (decls);
     r_comp->statements = (pre, case1, cb1, cb2, breakk, case2, cb2, breakk, post);
-    cb1->pattern = s_not1;
+    cb1->restriction = s_not1;
     s_not1->pattern = MakePatternPtr<Break>();
-    cb2->pattern = s_not2;
+    cb2->restriction = s_not2;
     s_not2->pattern = MakePatternPtr<Case>();
         
     Configure( s_comp, r_comp );            
@@ -698,7 +698,7 @@ AddYieldFlag::AddYieldFlag()
     over->through = s_comp;
     s_comp->members = decls;
     s_comp->statements = (stmts);
-    stmts->pattern = MakePatternPtr<If>(); // anti-spin
+    stmts->restriction = MakePatternPtr<If>(); // anti-spin
     func_over->overlay = slavem; 
     r_func_comp->members = (func_decls);
     r_flag_init->operands = (r_flag_id, MakePatternPtr<False>());

@@ -24,12 +24,12 @@ public:
                                  Conjecture &conj );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:
-    virtual TreePtr<Node> GetPattern() = 0;
+    virtual TreePtr<Node> GetRestriction() = 0;
 
 public:
     // Internal node classes - NOTE these are not special nodes, and we use them like normal tree nodes
     // Note: only needed for Star pattern
-    struct SubContainer : Node // TODO this would be more useful if grid-inherited from ContainerInterface but Node cannot be abstract due NODE_FUNCITONS
+    struct SubContainer : Node 
     {
         NODE_FUNCTIONS
     };
@@ -73,10 +73,10 @@ class Star : public StarAgent,
 {
 public:
     SPECIAL_NODE_FUNCTIONS
-    TreePtr<PRE_RESTRICTION> pattern; // TODO rename to "restriction"
-    virtual TreePtr<Node> GetPattern() 
+    TreePtr<PRE_RESTRICTION> restriction; // TODO rename to "restriction"
+    virtual TreePtr<Node> GetRestriction() 
     {
-        return pattern;
+        return restriction;
     }
 };
 
