@@ -124,10 +124,10 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     ls_enum->members = (l_enum_vals);
     lr_enum->members = (l_enum_vals, lr_state_decl);
     lr_enum->identifier = ls_enum->identifier = r_enum_id;
-    l_block->pattern = l_not;
+    l_block->restriction = l_not;
     l_not->pattern = MakePatternPtr<Goto>();
-    l_post->pattern = MakePatternPtr<If>();    
-    l_dead_gotos->pattern = MakePatternPtr<Goto>();
+    l_post->restriction = MakePatternPtr<If>();    
+    l_dead_gotos->restriction = MakePatternPtr<Goto>();
     l_over_enum->through = ls_enum;
     l_over_enum->overlay = lr_enum;
     l_module->members = (l_module_decls, l_over_enum, l_func);
@@ -143,7 +143,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     l_mover->overlay = lr_make;
     ls_make->operands = (l_existing);
     lr_make->operands = (l_existing, ls_label_id);
-    l_existing->pattern = l_mnot;
+    l_existing->restriction = l_mnot;
     l_mnot->pattern = ls_label_id;
     l_label->identifier = ls_label_id;
     l_stuff->terminus = l_overll;
@@ -501,12 +501,12 @@ ApplyCombGotoPolicy::ApplyCombGotoPolicy()
     r_comp->members = s_comp->members = (decls);
     s_comp->statements = (pre, s_goto1, label, body, goto2, post);
     r_comp->statements = (pre, label, r_if, goto2, post);
-    pre->pattern = sx_pre,
+    pre->restriction = sx_pre,
     sx_pre->pattern = sx_pre_goto; // ensure we act on the first goto only
     s_goto1->destination = sub;
     sub->operands = (lmap_id, state_var_id);
     label->state = state_id;
-    body->pattern = sx_body;
+    body->restriction = sx_body;
     sx_body->pattern = sx_uncombable; 
     goto2->destination = sub;    
     
@@ -539,15 +539,15 @@ ApplyYieldGotoPolicy::ApplyYieldGotoPolicy()
     s_comp->members = r_comp->members = (decls);
     s_comp->statements = (pre, s_goto1, label, body1, wait, body2, goto2, post);
     r_comp->statements = (pre, label, r_if, goto2, post);
-    pre->pattern = sx_pre,
+    pre->restriction = sx_pre,
     sx_pre->pattern = sx_pre_goto; // ensure we act on the first goto only
     s_goto1->destination = sub;
     sub->operands = (lmap_id, state_var_id);
     label->state = state_id;
     goto2->destination = sub;    
-    body1->pattern = sx_body1;
+    body1->restriction = sx_body1;
     sx_body1->pattern = sx_uncombable1;
-    body2->pattern = sx_body2;
+    body2->restriction = sx_body2;
     sx_body2->pattern = sx_uncombable2;
         
     r_if->condition = r_equal;
@@ -579,12 +579,12 @@ ApplyBottomPolicy::ApplyBottomPolicy()
     s_comp->members = r_comp->members = (decls);
     s_comp->statements = (pre, goto1, label, body);
     r_comp->statements = (pre, label, r_if, goto1);
-    pre->pattern = sx_pre,
+    pre->restriction = sx_pre,
     sx_pre->pattern = sx_pre_goto; // ensure we act on the first goto only
     goto1->destination = sub;
     sub->operands = (lmap_id, state_var_id);
     label->state = state_id;
-    body->pattern = sx_body,
+    body->restriction = sx_body,
     sx_body->pattern = sx_uncombable; 
     
     r_if->condition = r_equal;
@@ -622,7 +622,7 @@ ApplyLabelPolicy::ApplyLabelPolicy()
     label1->state = state_id;
     iif->condition = equal;
     equal->operands = (state_var_id, state_id);
-    post->pattern = sx_post;
+    post->restriction = sx_post;
     sx_post->pattern = sx_post_label;
         
     Configure(s_comp, r_comp);
@@ -651,9 +651,9 @@ ApplyTopPolicy::ApplyTopPolicy()
     s_comp->statements = (body1, wait, body2, label, post);
     r_comp->statements = (label, r_if, post);
     s_stuff->terminus = gotoo;
-    body1->pattern = sx_body1;
+    body1->restriction = sx_body1;
     sx_body1->pattern = sx_uncombable1;
-    body2->pattern = sx_body2;
+    body2->restriction = sx_body2;
     sx_body2->pattern = sx_uncombable2;
     
     r_if->condition = r_equal;
@@ -680,7 +680,7 @@ EnsureResetYield::EnsureResetYield()
     s_comp->members = r_comp->members = (decls);
     s_comp->statements = (pre, gotoo, post);
     r_comp->statements = (pre, r_yield, gotoo, post);
-    pre->pattern = sx_not;
+    pre->restriction = sx_not;
     sx_not->pattern = sx_any;
     sx_any->patterns = (MakePatternPtr<Goto>(), MakePatternPtr<Label>(), MakePatternPtr<Wait>() );
         
@@ -711,7 +711,7 @@ DetectSuperLoop::DetectSuperLoop( bool is_conditional_goto )
     s_comp->statements = (s_label, body, is_conditional_goto 
                                          ? TreePtr<Statement>(s_ifgoto) 
                                          : TreePtr<Statement>(s_goto) );
-    body->pattern = sx_not;
+    body->restriction = sx_not;
     sx_not->pattern = MakePatternPtr<Label>(); // so s_label is the only one - all gotos must go to it.
     s_ifgoto->condition = cond;
     s_ifgoto->body = s_goto;
@@ -759,7 +759,7 @@ InsertInferredYield::InsertInferredYield()
     over->through = s_comp;
     s_comp->members = (loop_decls);
     s_comp->statements = (stmts);
-    stmts->pattern = MakePatternPtr<If>();
+    stmts->restriction = MakePatternPtr<If>();
     
     over->overlay = r_comp;
     r_comp->members = (loop_decls);

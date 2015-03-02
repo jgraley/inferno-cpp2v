@@ -1,6 +1,6 @@
 #include "search_container_agent.hpp"
 #include "helpers/simple_compare.hpp"
-#include "search_replace.hpp" // TODO should not need
+#include "search_replace.hpp" 
 #include "conjecture.hpp" 
 
 using namespace SR;
@@ -17,7 +17,7 @@ bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
 
     // Get an interface to the container we will search
     // TODO what is keeping pwx alive after this funciton exits? Are the iterators 
-    // doing it? (they are stores in Conjecture). Maybe pwxis just a stateless
+    // doing it? (they are stores in Conjecture). Maybe pwx is just a stateless
     // facade for the iterators and can be abandoned safely?
     shared_ptr<ContainerInterface> pwx = GetContainerInterface( x );
     

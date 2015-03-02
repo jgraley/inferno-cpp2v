@@ -1,6 +1,6 @@
 #include "star_agent.hpp"
 #include "helpers/simple_compare.hpp"
-#include "search_replace.hpp" // TODO should not need
+#include "search_replace.hpp" 
 
 using namespace SR;
 
@@ -30,8 +30,7 @@ bool StarAgent::DecidedCompare( const TreePtrInterface &x,
     ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
     ASSERT(xc)("Nodes passed to StarAgent::DecidedCompare() must implement ContainerInterface, since * matches multiple things");
     
-    TreePtr<Node> p = GetPattern();
-    if( p )
+    if( TreePtr<Node> p = GetRestriction() )
     {
         TRACE("MatchRange pattern\n");
         // Apply pattern restriction - will be at least as strict as pre-restriction

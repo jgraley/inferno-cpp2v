@@ -1,6 +1,6 @@
 #include "soft_agent.hpp"
 #include "helpers/simple_compare.hpp"
-#include "search_replace.hpp" // TODO should not need
+#include "search_replace.hpp" 
 
 using namespace SR;
 
@@ -40,7 +40,7 @@ void SoftAgent::KeyReplace()
 
 TreePtr<Node> SoftAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
-    ASSERT(keynode)("Soft pattern seen in tree but it produced no keynode or overlay");
+    ASSERT(keynode)("Search-only soft pattern seen in replace-only context");
     return DuplicateSubtree(keynode);   
 }
 

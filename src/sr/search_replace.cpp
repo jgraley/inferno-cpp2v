@@ -31,8 +31,7 @@ bool CompareReplace::IsMatch( TreePtr<Node> context,
                               TreePtr<Node> root )
 {
     pcontext = &context;
-    ASSERT( pattern );
-    bool r = Compare(root, pattern);
+    bool r = Compare(root);
     pcontext = NULL;
     return r == true;
 }
@@ -43,9 +42,6 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 {
     INDENT("");
     TRACE("Enter S&R instance ")(*this);
-    ASSERT( pattern )("CompareReplace (or SearchReplace) object was not configured before invocation.\n"
-                      "Either call Configure() or supply pattern arguments to constructor.\n"
-                      "Thank you for taking the time to read this message.\n");
     
     // If the initial root and context are the same node, then arrange for the context
     // to follow the root node as we modify it (in SingleSearchReplace()). This ensures

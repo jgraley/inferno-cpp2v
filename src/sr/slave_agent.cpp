@@ -1,6 +1,6 @@
 #include "slave_agent.hpp"
 #include "helpers/simple_compare.hpp"
-#include "search_replace.hpp" // TODO should not need
+#include "search_replace.hpp" 
 
 using namespace SR;
 
@@ -38,17 +38,11 @@ void SlaveAgent::GetGraphInfo( vector<string> *labels,
 }
 
 
-void SlaveAgent::Configure( const Set<Agent *> &agents_already_configured )
+void SlaveAgent::Configure( const Set<Agent *> &agents_already_configured, const Engine *master )
 {
-    Engine::Configure(search_pattern, replace_pattern, agents_already_configured);
+    ASSERT(master); // must not be overall master (i.e. NULL)
+    Engine::Configure(search_pattern, replace_pattern, agents_already_configured, master);
 }    
-
-
-void SlaveAgent::AgentConfigure( const Engine *e )
-{
-    AgentCommon::AgentConfigure( e );
-    Engine::master_ptr = e;
-}       
 
 
 TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> keynode )

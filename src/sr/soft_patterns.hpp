@@ -110,7 +110,7 @@ private:
             {
                 if( (dynamic_pointer_cast<SoftAgent>(n) && !dynamic_pointer_cast<NotMatchBase>(n)) || 
                     dynamic_pointer_cast<OverlayAgent>(n) ||
-                    dynamic_pointer_cast<SlaveAgent>(n) ) // TODO common base class for these called Modifier
+                    dynamic_pointer_cast<SlaveAgent>(n) ) 
                 {
                     ASSERT( !modifier_pattern )("MatchAll coupled into replace must have no more than one modifying pattern:")
                           (" first saw ")(*modifier_pattern)(" and now got ")(*n)("\n");   
@@ -132,7 +132,7 @@ private:
         return AsAgent(modifier_pattern)->BuildReplace(); 
     }
     
-    CollectionInterface &GetPatterns() { return patterns; } // TODO try covariant?
+    CollectionInterface &GetPatterns() { return patterns; } 
 };
 
 /// Match zero or more of the supplied patterns (between you and me, it's an OR)
@@ -241,7 +241,7 @@ class PointerIsBase
 template<class PRE_RESTRICTION>
 class PointerIs : public Special<PRE_RESTRICTION>,
                   public SoftAgent,
-                  public PointerIsBase // TODO document
+                  public PointerIsBase 
 {
 public:
     SPECIAL_NODE_FUNCTIONS
