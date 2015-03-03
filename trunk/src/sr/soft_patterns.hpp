@@ -76,10 +76,6 @@ private:
     	}
         return true;
     }
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() )
-    {
-        ASSERTFAIL("MatchAll found in replace path");
-    }
 };
 
 /// Match zero or more of the supplied patterns (between you and me, it's an OR)

@@ -28,19 +28,24 @@ void SoftAgent::KeyReplace()
 {    
     TRACE("Keying replace pattern (via agent) ")(*this)("\n");
 
-    // Call the soft pattern impl 
-    TreePtr<Node> key = MyBuildReplace();
-    if( key )           
-    {            
-        // Allow this to key a coupling. 
-        DoKey( key );
-    } 
+    if( !GetKey() )
+    {
+        // Call the soft pattern impl 
+        TreePtr<Node> key = MyBuildReplace();
+        if( key )           
+        {            
+            // Allow this to key a coupling. 
+            DoKey( key );
+        } 
+    }
 }
 
 
 TreePtr<Node> SoftAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
-    ASSERT(keynode)("Search-only soft pattern seen in replace-only context");
+    // Note that the keynode could have been set via coupling - but still not
+    // likely to do anything sensible, so explicitly check
+    ASSERT(has_replace_impl)("Search-only soft pattern seen in replace-only context");
     return DuplicateSubtree(keynode);   
 }
 
@@ -48,14 +53,16 @@ TreePtr<Node> SoftAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 // Soft nodes should override this to implement their comparison function
 bool SoftAgent::MyCompare( const TreePtrInterface &x )
 {
+    // Seems reasonable to allow a soft node with no compare impl to just 
+    // always match.
     return true;
 }
 
 
 TreePtr<Node> SoftAgent::MyBuildReplace()
 {
-    return TreePtr<Node>(); // default implementation for weak modifiers 
-                            // so that couplings appear to override local functionality
+    has_replace_impl = false;
+    return TreePtr<Node>(); 
 }
 
 
