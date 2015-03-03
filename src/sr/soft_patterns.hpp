@@ -52,11 +52,7 @@ private:
 };
 
 /// Match all of the supplied patterns (between you and me, it's an AND)
-class MatchAllBase : public virtual Node
-{
-public:
-    virtual CollectionInterface &GetPatterns() = 0;
-};
+class MatchAllBase {};
 
 /// Match all of the supplied patterns (between you and me, it's an AND)
 template<class PRE_RESTRICTION>
@@ -67,10 +63,7 @@ class MatchAll : public Special<PRE_RESTRICTION>,
 public:
     SPECIAL_NODE_FUNCTIONS
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
-    MatchAll() : initialised( false ) {}
 private:
-    mutable bool initialised;
-    mutable TreePtr<Node> modifier_pattern;
     virtual bool MyCompare( const TreePtrInterface &x )
     {
         INDENT("&");
@@ -83,56 +76,10 @@ private:
     	}
         return true;
     }
-
-    virtual TreePtr<Node> MyBuildReplace()
+    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() )
     {
-        return TreePtr<Node>();
-        //ASSERTFAIL("MatchAll in replace - it should be coupled because it should be in the search pattern\n");
+        ASSERTFAIL("MatchAll found in replace path");
     }
-
-    void EnsureInitialised()
-    {
-        if( initialised )
-            return;
-    
-        // MatchAll can appear in replace path; if so, see whether any patterns contain
-        // modifiers, which change the tree relative to the present coupling. If so, 
-        // overlay that over the coupling. There must not be more than one modifier, 
-        // because behaviour would be indeterminate (patterns are unordered).
-        //TRACE("Coupled MatchAll: dest=")(*dest)("\n");
-        // TODO can we not arrange for the replace path to go directly to the desired child?
-        // maybe by inserting an Overlay? Then we could make MatchAll be search-only
-
-        FOREACH( TreePtr<Node> source_pattern, GetPatterns() )
-        {                
-            Walk e(source_pattern);
-            FOREACH( TreePtr<Node> n, e )
-            {
-                if( (dynamic_pointer_cast<SoftAgent>(n) && !dynamic_pointer_cast<NotMatchBase>(n)) || 
-                    dynamic_pointer_cast<OverlayAgent>(n) ||
-                    dynamic_pointer_cast<SlaveAgent>(n) ) 
-                {
-                    ASSERT( !modifier_pattern )("MatchAll coupled into replace must have no more than one modifying pattern:")
-                          (" first saw ")(*modifier_pattern)(" and now got ")(*n)("\n");   
-                    modifier_pattern = source_pattern;
-                    break;
-                }
-            }                     
-        }
-        initialised = true;
-    }
-
-    // NOTE: this is cheating slightly by overloading the Agent interface directly
-    // but we need to be able to progress a general replace through the selected 
-    // modifier pattern. The way to resolve is to make this an agent directly, not soft.
-    TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode ) 
-    {
-        EnsureInitialised();
-        ASSERT(modifier_pattern);
-        return AsAgent(modifier_pattern)->BuildReplace(); 
-    }
-    
-    CollectionInterface &GetPatterns() { return patterns; } 
 };
 
 /// Match zero or more of the supplied patterns (between you and me, it's an OR)

@@ -73,7 +73,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr< MatchAll<Node> > ll_all;
     MakePatternPtr< NotMatch<Node> > lls_not1, lls_not2;    
     MakePatternPtr< AnyNode<Node> > ll_any;
-    MakePatternPtr< Overlay<Node> > ll_over;
+    MakePatternPtr< Overlay<Node> > ll_over, ll_all_over;
     MakePatternPtr<Goto> lls_goto;    
     MakePatternPtr<Label> lls_label;    
     MakePatternPtr<Goto> ls_goto;   
@@ -101,6 +101,8 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr< StateLabel > l_state_label;
     MakePatternPtr< Star<Declaration> > comp_membs;
             
+    ll_all_over->through = ll_all;
+    ll_all_over->overlay = ll_any;
     ll_all->patterns = (ll_any, lls_not1, lls_not2); 
     ll_any->terminus = ll_over;
     ll_over->through = ls_label_id;
@@ -113,7 +115,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     lls_not2->pattern = lls_label;
     lls_label->identifier = ls_label_id; // leave labels alone in the body
 
-    MakePatternPtr< SlaveSearchReplace<Scope> > slavell( l_module, ll_all );    
+    MakePatternPtr< SlaveSearchReplace<Scope> > slavell( l_module, ll_all_over );    
     
     l_func->identifier = func_id;
     l_func->initialiser = l_comp;
@@ -207,6 +209,7 @@ LabelTypeToEnum::LabelTypeToEnum()
     MakePatternPtr< MatchAll<Node> > apall, l_apall;
     MakePatternPtr< NotMatch<Node> > apnot, l_apnot;
     MakePatternPtr< AnyNode<Node> > apany, l_apany;
+    MakePatternPtr< Overlay<Node> > l_apall_over;
     MakePatternPtr< Overlay<Type> > l_over;
     MakePatternPtr<Subscript> ms_sub, nr_sub, nsx_sub;;
     MakePatternPtr<InstanceIdentifier> m_state_id;
@@ -219,6 +222,8 @@ LabelTypeToEnum::LabelTypeToEnum()
     
     record->members = ( decls );
 
+    l_apall_over->through = l_apall;
+    l_apall_over->overlay = l_apany;
     l_apall->patterns = (l_apany, l_apnot);
     l_apnot->pattern = lmap;
     l_apany->terminus = l_over;
@@ -226,7 +231,7 @@ LabelTypeToEnum::LabelTypeToEnum()
     l_over->overlay = l_enum; 
     l_enum->width = MakePatternPtr<SpecificInteger>(32);
             
-    MakePatternPtr< SlaveSearchReplace<Scope> > slavel( record, l_apall );   
+    MakePatternPtr< SlaveSearchReplace<Scope> > slavel( record, l_apall_over );   
 
     ms_sub->operands = (lmap_id, m_state_id);
     
