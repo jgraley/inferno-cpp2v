@@ -15,6 +15,7 @@ class SoftAgent : public virtual AgentCommon
 {
 public:
     SoftAgent() :
+        has_replace_impl( true ),
         current_can_key( false ),
         current_conj( NULL )
     {}
@@ -45,6 +46,7 @@ protected: // Call only from the soft node implementation in MyCompare()
     TreePtr<Node> GetCoupled( TreePtr<Node> pattern );
     TreePtr<Node> DoBuildReplace( TreePtr<Node> pattern ) ;
 protected:
+    bool has_replace_impl;
     bool current_can_key;
     Conjecture *current_conj; 
 };
