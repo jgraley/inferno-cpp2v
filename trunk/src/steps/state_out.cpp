@@ -32,11 +32,13 @@ GotoAfterWait::GotoAfterWait()
     MakePatternPtr< NotMatch<Statement> > notmatch;
     MakePatternPtr< MatchAll<Statement> > all;
     MakePatternPtr< AnyNode<Statement> > anynode;
-    MakePatternPtr< Overlay<Statement> > over;
+    MakePatternPtr< Overlay<Statement> > over, all_over;
     MakePatternPtr<Goto> sx_goto, r_goto;
     MakePatternPtr<Label> r_label;
     MakePatternPtr<BuildLabelIdentifier> r_labelid("YIELD");
-            
+          
+    all_over->through = all;
+    all_over->overlay = anynode;
     all->patterns = (anynode, notmatch);
     anynode->terminus = over;
     over->through = wait;
@@ -50,7 +52,7 @@ GotoAfterWait::GotoAfterWait()
     r_goto->destination = r_labelid;
     r_label->identifier = r_labelid;
     
-    Configure( all );
+    Configure( all_over );
 }
 /*
 GotoAfterWait::GotoAfterWait()
