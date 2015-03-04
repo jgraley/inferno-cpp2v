@@ -2,6 +2,10 @@
 
 bool SimpleCompare::operator()( TreePtr<Node> x, TreePtr<Node> y )
 {
+    // If we are asked to do a trivial compare, return immediately reporting success
+    if( x==y )
+        return true;
+    
     // Local comparison deals with node type (or any overloaded matching rule)
     // Try both ways to explicitly disallow wildcarding (this fn guaranteed symmetrical)
     if( !x->IsLocalMatch(y.get()) || !y->IsLocalMatch(x.get()))
