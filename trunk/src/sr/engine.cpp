@@ -128,6 +128,9 @@ const CompareReplace * Engine::GetOverallMaster() const
 void Engine::GetGraphInfo( vector<string> *labels, 
                            vector< TreePtr<Node> > *links ) const
 {
+    // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
+    // nodes under the SR, CR or slave. These are obviously unnecessary, maybe I
+    // should error on them?
     TreePtr<Node> original_pattern = pattern;
     if( is_search )
     {
