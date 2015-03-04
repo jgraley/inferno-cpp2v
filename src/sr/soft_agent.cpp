@@ -45,7 +45,6 @@ TreePtr<Node> SoftAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 {
     // Note that the keynode could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
-    ASSERT(has_replace_impl)("Search-only soft pattern seen in replace-only context");
     return DuplicateSubtree(keynode);   
 }
 
@@ -61,7 +60,6 @@ bool SoftAgent::MyCompare( const TreePtrInterface &x )
 
 TreePtr<Node> SoftAgent::MyBuildReplace()
 {
-    has_replace_impl = false;
     return TreePtr<Node>(); 
 }
 
