@@ -68,6 +68,7 @@ public:
 #include "green_grass_agent.hpp"
 #include "overlay_agent.hpp"
 #include "slave_agent.hpp"
+#include "boolean_agents.hpp"
 #include "soft_agent.hpp"
 
 #endif

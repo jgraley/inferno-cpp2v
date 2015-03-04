@@ -180,15 +180,11 @@ But consider coupling a node within the NotMatch's subtree into the replace patt
 
 6.2 MatchAll
 
-MatchAll implements the "and" function (intersection in set theory). The MatchAll node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that should match. MatchAll does *not* create an abnormal context for its pattern subtrees.
+MatchAll implements the "and" function (intersection in set theory). The MatchAll node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that should match. MatchAll does creates a normal context for its pattern subtrees, so they can key couplings. MatchAll's patterns are not invoked during replace (since it would be unclear which one to use) so an Overlay node must be placed around the MatchAll node, coupling its overlay pattern to the desired element.
 
 6.3 MatchAny
 
-MatchAny implements the "or" function (union in set theory). The MatchAny node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that may match. The subtree under a MatchAny node in a search pattern is an abnormal context.
-
-6.4 MatchOdd
-
-MatchOdd implements the "eor" function. The MatchOdd node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that may match. This is probably most useful with 2 patterns, in which case a match is achieved when exactly one of them matches. The subtree under a MatchOdd node in a search pattern is an abnormal context. 
+MatchAny implements the "or" function (union in set theory). The MatchAny node should be placed at the root of the subtree of interest, and the member named patterns (a collection) should be populated with all the subtrees that may match. The subtrees under a MatchAny node in a search pattern abnormal contexts because a given pattern element may not be a match even when the MatchAny itself does match.
 
 7 TransformOf search patterns
 

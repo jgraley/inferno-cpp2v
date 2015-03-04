@@ -69,7 +69,7 @@ public:
     virtual void KeyReplace();
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplace();
-    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() ) = 0;
+    virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     bool MatchingDecidedCompare( const TreePtrInterface &x,
                                  bool can_key,
                                  Conjecture &conj );

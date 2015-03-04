@@ -321,7 +321,7 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
    	    *shape = "circle";
 		return string("?"); 
 	}
-	else if( dynamic_pointer_cast<NotMatchBase>(sp) )
+	else if( dynamic_pointer_cast<NotMatchAgent>(sp) )
 	{
 	    // The NotMatch node appears as a small circle with an ! character inside it. The affected subtree is 
 	    // on the right.
@@ -332,26 +332,19 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		*shape = "circle";
 		return string("!");
 	}
-	else if( dynamic_pointer_cast<MatchAllBase>(sp) )
+	else if( dynamic_pointer_cast<MatchAllAgent>(sp) )
 	{
 	    // The MatchAll node appears as a small circle with an & character inside it. The affected subtrees are 
 	    // on the right.
 		*shape = "circle";
 		return string("&"); // note & is a wildcard in dot but not handled properly, this becomes "& ". At least some of the time.
 	}
-	else if( dynamic_pointer_cast<MatchAnyBase>(sp) )
+	else if( dynamic_pointer_cast<MatchAnyAgent>(sp) )
 	{
 	    // The MatchAny node appears as a small circle with an | character inside it. The affected subtrees are 
 	    // on the right.
 		*shape = "circle";
 		return string("|");
-	}
-	else if( dynamic_pointer_cast<MatchOddBase>(sp) )
-	{
-	    // The MatchOdd node appears as a small circle with an | character inside it. The affected subtrees are 
-	    // on the right.
-		*shape = "circle";
-		return string("^");
 	}
     else if( shared_ptr<TransformOfBase> tob = dynamic_pointer_cast<TransformOfBase>(sp) )
     {

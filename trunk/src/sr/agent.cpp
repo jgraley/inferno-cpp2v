@@ -175,6 +175,13 @@ TreePtr<Node> AgentCommon::BuildReplace()
 }
 
 
+TreePtr<Node> AgentCommon::BuildReplaceImpl( TreePtr<Node> keynode )
+{
+    ASSERT(keynode)("Unkeyed search-only agent seen in replace context");
+    return DuplicateSubtree(keynode);   
+}
+
+
 TreePtr<Node> AgentCommon::DuplicateNode( TreePtr<Node> source,
                                           bool force_dirty ) const
 {
