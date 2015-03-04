@@ -9,6 +9,7 @@
 #include "helpers/transformation.hpp"
 #include "sr/search_replace.hpp"
 #include "sr/soft_patterns.hpp"
+#include "sr/engine.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
 #include "graph.hpp"
@@ -64,13 +65,18 @@ string Graph::MakeGraphTx(Transformation *root)
         FOREACH( shared_ptr<Transformation> t, *tv )
             s = MakeGraphTx( t.get() ) + s; // seem to have to pre-pend to get them appearing in the right order
     }
-    else
+    else if( Engine *e = dynamic_cast<Engine *>(root) )
     {
         unique_filter.Reset();
-	    s += UniqueWalk( root, Id(root), false );
+	    s += UniqueWalk( e, Id(root), false );
         unique_filter.Reset();
-	    s += UniqueWalk( root, Id(root), true );
+	    s += UniqueWalk( e, Id(root), true );
 	}
+	else
+    {
+        ASSERT(false)(*root);
+        ASSERTFAIL("Unknown kind of transformation in graph plotter");
+    }
 	return s;
 }
 
@@ -148,25 +154,23 @@ string Graph::UniqueWalk( TreePtr<Node> root, bool links_pass )
 }
 
 
-string Graph::UniqueWalk( Transformation *sr, string id, bool links_pass )
+string Graph::UniqueWalk( Engine *e, string id, bool links_pass )
 {
 	string s;
-    s += links_pass ? DoTransformationLinks(sr, id) : DoTransformation(sr, id);
+    s += links_pass ? DoEngineLinks(e, id) : DoEngine(e, id);
     
     struct : public Filter
     {
         virtual bool IsMatch( TreePtr<Node> context,
                               TreePtr<Node> root )
         {
-            return !( !dynamic_pointer_cast<TransformOfBase>(root) && 
-                      !dynamic_pointer_cast<BuildIdentifierBase>(root) && 
-                      dynamic_cast<Transformation*>(root.get()) );
+            return !dynamic_cast<Engine*>(root.get());
         }
     } no_tx_filter;
     
     vector<string> labels;
     vector< TreePtr<Node> > links;
-    (void)sr->GetGraphInfo( &labels, &links );
+    (void)e->GetGraphInfo( &labels, &links );
     
     FOREACH( TreePtr<Node> pattern, links )
     {
@@ -184,14 +188,14 @@ string Graph::UniqueWalk( Transformation *sr, string id, bool links_pass )
 }
 
 
-string Graph::DoTransformation( Transformation *sr,
-		                        string id )
+string Graph::DoEngine( Engine *e,
+                        string id )
 {    
     vector<string> labels;
     vector< TreePtr<Node> > links;
-    sr->GetGraphInfo( &labels, &links );
+    e->GetGraphInfo( &labels, &links );
         
-    string name = sr->GetName(); 
+    string name = e->GetName(); 
     int n;
     for( n=0; n<name.size(); n++ )
     {
@@ -227,11 +231,11 @@ string Graph::DoTransformation( Transformation *sr,
 }
 
 
-string Graph::DoTransformationLinks( Transformation *sr, string id )
+string Graph::DoEngineLinks( Engine *e, string id )
 {
     vector<string> labels;
     vector< TreePtr<Node> > links;
-    sr->GetGraphInfo( &labels, &links );
+    e->GetGraphInfo( &labels, &links );
 
     string s;
     for( int i=0; i<labels.size(); i++ )        
@@ -533,9 +537,8 @@ string Graph::SimpleLabel( string name, TreePtr<Node> n )
 
 string Graph::DoNode( TreePtr<Node> n )
 {
-    if( !dynamic_pointer_cast<TransformOfBase>(n) && !dynamic_pointer_cast<BuildIdentifierBase>(n) ) // ignire the fact that these also derive from Transformation
-  	    if( Transformation *rsb = dynamic_cast<Transformation *>(n.get()) )
-		    return UniqueWalk( rsb, Id( n.get() ), false );
+    if( Engine *e = dynamic_cast<Engine *>(n.get()) )
+	    return UniqueWalk( e, Id( n.get() ), false );
 
 	string s;
 	bool bold;
@@ -579,9 +582,8 @@ string Graph::DoNode( TreePtr<Node> n )
 
 string Graph::DoNodeLinks( TreePtr<Node> n )
 {
-    if( !dynamic_pointer_cast<TransformOfBase>(n) && !dynamic_pointer_cast<BuildIdentifierBase>(n) ) // ignire the fact that these also derive from Transformation
-        if( Transformation *rsb = dynamic_cast<Transformation *>(n.get()) )
-            return UniqueWalk( rsb, Id( n.get() ), true );
+    if( Engine *e = dynamic_cast<Engine *>(n.get()) )
+        return UniqueWalk( e, Id( n.get() ), true );
 
     string s;
     TRACE("Itemising\n");
