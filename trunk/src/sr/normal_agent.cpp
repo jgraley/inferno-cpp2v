@@ -12,6 +12,7 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
 							          bool can_key,
     						          Conjecture &conj )
 {
+    INDENT(".");
     // Recurse through the children. Note that the itemiser internally does a
     // dynamic_cast onto the type of pattern, and itemises over that type. x must
     // be dynamic_castable to pattern's type.
@@ -70,7 +71,7 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
 		                                  bool can_key,
 		                                  Conjecture &conj )
 {
-    INDENT;
+    INDENT(" ");
     
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
@@ -150,7 +151,7 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 							                bool can_key,
 							                Conjecture &conj )
 {
-    INDENT;
+    INDENT(" ");
     
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
@@ -214,7 +215,7 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 
 void NormalAgent::TrackingKey( Agent *from )
 {
-    INDENT;
+    INDENT(".");
     ASSERT( from );
     TreePtr<Node> key = from->GetCoupled();
     ASSERT( key );
@@ -258,6 +259,7 @@ void NormalAgent::TrackingKey( Agent *from )
 
 TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
+    INDENT(".");
     if( keynode && IsLocalMatch(keynode.get()) ) 
         return BuildReplaceOverlay( keynode );
     else
@@ -267,7 +269,7 @@ TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 
 TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // under substitution if not NULL
 {
-	INDENT;
+	INDENT(" ");
     ASSERT( keynode );
     
     ASSERT( IsLocalMatch(keynode.get()) )
@@ -414,7 +416,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
     
 TreePtr<Node> NormalAgent::BuildReplaceNormal() 
 {
-	INDENT;
+	INDENT(" ");
  
 	// Make a new node, force dirty because from pattern
     // Use clone here because we never want to place an Agent object in the output program tree.

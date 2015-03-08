@@ -38,6 +38,11 @@ bool operator<( const HitCount::Category &l, const HitCount::Category &r )
                 return l.function < r.function;
             break;
             
+            case 'P':
+            if( l.prefix != r.prefix )
+                return l.prefix < r.prefix;
+            break;
+            
             default: // lower case letter have no effect
                 break;
         }
@@ -50,14 +55,14 @@ void HitCount::Usage()
     fprintf(stderr,
             "Hit count format string:\n\n"
             "Letters after -th correspond to fields displayed in the dump.\n"
-            "Dump is sorted according to the capital letters.\n"
-            "left-most fields take precidence. Letters are:\n\n"
-            "S Step number\n"
-            "I Instance address\n"
+            "Fields specified first take precidence. Letters are:\n\n"
+            "S step number\n"
+            "A instance address\n"
+            "N instance name\n"
             "F source file name\n"
             "L line number in source\n"
             "M function/method name\n"
-            "n number of hits in this category\n\n");
+            "P trace prefix string (=mini-stacktrace)\n");
     exit(1);
 }
 
@@ -104,17 +109,17 @@ void HitCount::Dump()
                 printf("in %s", p.first.function.c_str() );    
                 break;
                 
-                case 'n':
-                printf("%u hits", p.second );  
+                case 'P':
+                printf("%s", p.first.prefix.c_str() );                   
                 break;
-                
+                                
                 default:
                 Usage();
                 break;
             }
-            if( i+1<ReadArgs::hits_format.size() )            
-                printf(" ");            
+            printf(" ");            
         }
+        printf("%u hits", p.second );  
         printf("\n");               
     }                 
 }

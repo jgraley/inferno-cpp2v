@@ -16,6 +16,7 @@ bool SlaveAgent::DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key,
                                      Conjecture &conj )
 {
+    INDENT("l");
     // When a slave node seen duriung search, just forward through the "base" path
     return Agent::AsAgent(GetThrough())->DecidedCompare( x, can_key, conj );
 }
@@ -23,6 +24,7 @@ bool SlaveAgent::DecidedCompareImpl( const TreePtrInterface &x,
 
 void SlaveAgent::TrackingKey( Agent *from )
 {
+    INDENT("l");
     // Make slaves "invisible" to Overlay key propagation
     DoKey( from->GetCoupled() );
     AsAgent(GetThrough())->TrackingKey(from);   
@@ -47,7 +49,7 @@ void SlaveAgent::Configure( const Set<Agent *> &agents_already_configured, const
 
 TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 {
-    INDENT;
+    INDENT("l");
     ASSERT( GetThrough() );   
     
     // Continue current replace operation by following the "through" pointer

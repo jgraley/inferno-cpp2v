@@ -9,7 +9,7 @@ bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
                                                bool can_key,
                                                Conjecture &conj )
 {
-    INDENT;
+    INDENT("#");
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
@@ -55,6 +55,7 @@ bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
 
 TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
+    INDENT("#");
     // SearchContainer.
     // Are we substituting a stuff node? If so, see if we reached the terminus, and if
     // so come out of substitution. Done as tail recursion so that we already duplicated
