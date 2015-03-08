@@ -8,7 +8,7 @@ bool StarAgent::DecidedCompare( const TreePtrInterface &x,
                                 bool can_key,
                                 Conjecture &conj )
 {
-    INDENT;
+    INDENT("*");
 
     // Coupling restriction check
     if( TreePtr<Node> keynode = GetCoupled() )
@@ -58,6 +58,7 @@ bool StarAgent::DecidedCompare( const TreePtrInterface &x,
 
 TreePtr<Node> StarAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
+    INDENT("*");
     ASSERT( keynode );
     ContainerInterface *psc = dynamic_cast<ContainerInterface *>(keynode.get());
     ASSERT( psc )("Star node ")(*this)(" keyed to ")(*keynode)(" which should implement ContainerInterface");  

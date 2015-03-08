@@ -31,6 +31,7 @@ void OverlayAgent::KeyReplace()
 
 TreePtr<Node> OverlayAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
+    INDENT("O");
     ASSERT( GetOverlay() );          
     TRACE("Overlay node through=")(*(GetThrough()))(" overlay=")(*(GetOverlay()))("\n");
     return AsAgent(GetOverlay())->BuildReplace();

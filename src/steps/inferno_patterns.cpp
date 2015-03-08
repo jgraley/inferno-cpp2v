@@ -5,7 +5,7 @@ using namespace CPPTree;
 
 string BuildIdentifierBase::GetNewName()
 {
-    //INDENT;
+    INDENT("B");
     TRACE("Begin SoftMakeIdentifier recurse for \"")(format)("\"\n");
     vector<string> vs;
     bool all_same = true;
@@ -65,7 +65,7 @@ bool IdentifierByNameBase::IsMatch( const TreePtrInterface &x )
 
 bool NestedBase::MyCompare( const TreePtrInterface &x )
 {
-    INDENT;
+    INDENT("N");
     string s;
     // Keep advancing until we get NULL, and remember the last non-null position
     TreePtr<Node> xt = x;

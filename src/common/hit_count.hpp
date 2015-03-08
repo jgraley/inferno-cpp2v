@@ -15,6 +15,7 @@ public:
         unsigned line;   // line the HIT is on
         unsigned step;   // current step number
         const Traceable *instance;  // "this" pointer of the function, differentiates between master and slaves        
+        string prefix;
     };
     
 private:
@@ -25,7 +26,7 @@ private:
     
 public:    
     static HitCount instance;
-    void Hit( string file, unsigned line, string function, const Traceable *caller_this )
+    void Hit( string file, unsigned line, string function, const Traceable *caller_this, string prefix="" )
     {
         Category c;
         c.file = file;
@@ -33,6 +34,7 @@ public:
         c.line = line;
         c.step = current_step;
         c.instance = caller_this;        
+        c.prefix = prefix;
         int count=0;
         if( counter.IsExist( c ) )        
             count = counter[c];
@@ -60,7 +62,8 @@ public:
 
 extern bool operator<( const HitCount::Category &l, const HitCount::Category &r );
 
-#define HIT if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, this )
+#define HIT do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, this ); } while(false)
+#define HITP(P) do { if(HitCount::IsEnabled()) HitCount::instance.Hit( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, this, P ); } while(false)
 
 #endif
 

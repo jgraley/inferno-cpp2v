@@ -8,6 +8,7 @@ bool GreenGrassAgent::DecidedCompareImpl( const TreePtrInterface &x,
                                           bool can_key,
                                           Conjecture &conj )
 {
+    INDENT("G");
     // Restrict so that everything in the input program under here must be "green grass"
     // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
     if( engine->GetOverallMaster()->dirty_grass.find( x ) != engine->GetOverallMaster()->dirty_grass.end() )
@@ -23,6 +24,7 @@ bool GreenGrassAgent::DecidedCompareImpl( const TreePtrInterface &x,
 
 TreePtr<Node> GreenGrassAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
+    INDENT("G");
     ASSERT( GetThrough() );          
     TRACE("GreenGrass node through=")(*GetThrough())("\n");
     return AsAgent(GetThrough())->BuildReplace();

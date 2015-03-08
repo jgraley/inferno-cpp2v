@@ -40,7 +40,7 @@ bool CompareReplace::IsMatch( TreePtr<Node> context,
 // Do a search and replace based on patterns stored in our members
 void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 {
-    INDENT("");
+    INDENT(")");
     TRACE("Enter S&R instance ")(*this);
     
     // If the initial root and context are the same node, then arrange for the context

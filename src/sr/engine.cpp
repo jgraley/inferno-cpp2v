@@ -34,7 +34,7 @@ void Engine::Configure( TreePtr<Node> cp,
                         const Set<Agent *> &agents_already_configured,
                         const Engine *master )
 {
-    INDENT;
+    INDENT(" ");
     ASSERT(!pattern)("Calling configure on already-configured ")(*this);
     TRACE("Entering Engine::Configure on ")(*this)("\n");
     master_ptr = master;
@@ -222,7 +222,7 @@ TreePtr<Node> Engine::Replace() const
 
 bool Engine::SingleCompareReplace( TreePtr<Node> *proot ) 
 {
-    INDENT;
+    INDENT(">");
 
     TRACE("Begin search\n");
     bool r = Compare( *proot );
@@ -245,7 +245,7 @@ bool Engine::SingleCompareReplace( TreePtr<Node> *proot )
 // many hits we got.
 int Engine::RepeatingCompareReplace( TreePtr<Node> *proot )
 {
-    INDENT;
+    INDENT("}");
     TRACE("begin RCR\n");
         
     ASSERT( pattern )("Engine object was not configured before invocation.\n"

@@ -351,7 +351,7 @@ struct IsLabelReached : SoftAgent, Special<LabelIdentifier>
 	// y is nominally the goto expression, coupled in
     virtual bool MyCompare( const TreePtrInterface &xx ) 
     {
-        INDENT;
+        INDENT("L");
         ASSERT( pattern );
         if( IsCanKey() )
             return true; // Want to wait for our pattern to get keyed before we do the search, so wait for restricting pass
@@ -383,7 +383,7 @@ private:
                          TreePtr<LabelIdentifier> x, 
                          TreePtr<Expression> y ) // y is expression. Can it yield label x?
     {
-        INDENT;
+        INDENT("X");
         bool r = false;
         if( TreePtr<LabelIdentifier> liy = dynamic_pointer_cast<LabelIdentifier>(y) )
             r = liy->IsLocalMatch( x.get() ); // y is x, so yes
@@ -407,7 +407,7 @@ private:
                       TreePtr<LabelIdentifier> x, 
                       TreePtr<InstanceIdentifier> y ) // y is instance identifier. Can expression x be assigned to it?
     {
-        INDENT;
+        INDENT(" ");
         Reaching rr( x, y );
         if( cache.IsExist(rr) )
         {

@@ -4,7 +4,7 @@ using namespace SR;
 
 bool TransformOfBase::MyCompare( const TreePtrInterface &x )
 {
-    INDENT;
+    INDENT("T");
     // Transform the candidate expression
     TreePtr<Node> xt = (*transformation)( *GetContext(), x );
 	if( xt )

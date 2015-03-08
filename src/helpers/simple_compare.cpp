@@ -1,7 +1,10 @@
 #include "simple_compare.hpp"
+#include "common/trace.hpp"
 
 bool SimpleCompare::operator()( TreePtr<Node> x, TreePtr<Node> y )
 {
+    INDENT("=");
+    
     // If we are asked to do a trivial compare, return immediately reporting success
     if( x==y )
         return true;

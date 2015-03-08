@@ -40,6 +40,7 @@ public:
     static void EndContinuation();
     static void Enable( bool e ); ///< enable/disable tracing, only for top level funciton to call, overridden by flags
     inline static bool IsEnabled() { return enable; }
+    static string GetPrefix() { return Descend::pre; }
     
     class Descend
     {
@@ -61,6 +62,7 @@ public:
         static string pre;
         static string last_traced_pre, leftmost_pre;
         const int os;
+        friend class Tracer;
     };
 
 private:
@@ -85,7 +87,7 @@ private:
 // we make an error). You can supply a message but no printf() formatting or arguments or std::string.
 #define ASSERTFAIL(MESSAGE) do { Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #MESSAGE ); abort(); } while(0);
 
-#define INDENT HIT; Tracer::Descend indent_
+#define INDENT(P) Tracer::Descend indent_(P); HITP(Tracer::GetPrefix());
 
 #endif
 

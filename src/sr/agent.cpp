@@ -39,7 +39,7 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
                                   bool can_key,
                                   Conjecture &conj )
 {
-    INDENT;
+    INDENT(" ");
     ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
     ASSERT( x ); // Target must not be NULL
     ASSERT(this);
@@ -83,7 +83,7 @@ bool AgentCommon::DecidedCompareImpl( const TreePtrInterface &x,
 
 bool AgentCommon::AbnormalCompare( const TreePtrInterface &x ) 
 {
-    INDENT("C");
+    INDENT("A");
     ASSERT( x );
     TRACE("Compare x=")(*x);
     TRACE(" pattern=")(*this);
@@ -163,7 +163,7 @@ void AgentCommon::TrackingKey( Agent *from )
 
 TreePtr<Node> AgentCommon::BuildReplace()
 {
-    INDENT;
+    INDENT(" ");
     ASSERT(this);
     ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
     
@@ -185,7 +185,7 @@ TreePtr<Node> AgentCommon::BuildReplaceImpl( TreePtr<Node> keynode )
 TreePtr<Node> AgentCommon::DuplicateNode( TreePtr<Node> source,
                                           bool force_dirty ) const
 {
-    INDENT;
+    INDENT(" ");
 
     // Make the new node (destination node)
     shared_ptr<Cloner> dup_dest = source->Duplicate(source);
@@ -208,7 +208,7 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
                                              TreePtr<Node> source_terminus,
                                              TreePtr<Node> dest_terminus ) const
 {
-    INDENT;
+    INDENT(" ");
     ASSERT( source );
     if( source_terminus )
         ASSERT( dest_terminus );
