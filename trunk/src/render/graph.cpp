@@ -422,9 +422,11 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
     }
 	else
     {
-        ASSERT(false)(sp)(" ")(*sp)(" ")(sp->GetName());
-        ASSERTFAIL("Unknown node in graph plotter");
-    }
+        // Normal node was not turned into an agent because this is a program graph not a pattern graph
+        *bold = false;
+        *shape = "plaintext";//"record";
+        return sp->GetName();
+   }
 }
 
 

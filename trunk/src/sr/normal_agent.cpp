@@ -21,7 +21,7 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
     ASSERT( pattern_memb.size() == x_memb.size() );
     for( int i=0; i<pattern_memb.size(); i++ )
     {
-        bool r;
+        bool r=true;
         ASSERT( pattern_memb[i] )( "itemise returned null element");
         ASSERT( x_memb[i] )( "itemise returned null element");
 
@@ -41,17 +41,14 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
-            if( !TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be NULL meaning no restriction
-            {
-                r = true;
-            }
-            else
+            if( TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be NULL meaning no restriction
             {
                 TreePtrInterface *x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
                 ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
                 Agent *ap = Agent::AsAgent(*pattern_ptr);
-                r = ap->DecidedCompare( *x_ptr, can_key, conj );
+                links.normal[ap] = x_ptr;
+                //r = ap->DecidedCompare( *x_ptr, can_key, conj );
             }
         }
         else

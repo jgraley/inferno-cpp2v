@@ -13,7 +13,8 @@ namespace SR
 class Conjecture;
 class SpecialBase;
 class Engine;
- 
+
+
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Traceable,
               public virtual Node
@@ -31,6 +32,24 @@ public:
 	virtual void AgentConfigure( const Engine *e ) = 0;
 	static Agent *AsAgent( TreePtr<Node> node );
 };
+
+
+class Links
+{
+public:    
+    typedef Map<Agent *, const TreePtrInterface *> LinksMap;
+    typedef pair<Agent *, const TreePtrInterface *> Link;
+    
+    void clear()
+    {
+        normal.clear();
+        abnormal.clear();
+    }
+    
+    LinksMap normal;
+    LinksMap abnormal;     
+};
+
 
 // - Configure
 // - Pre-restriction
@@ -80,6 +99,7 @@ public:
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
     const Engine *engine;
+    Links links;
     
 private:    
     shared_ptr<Key> coupling_key;    
