@@ -28,9 +28,7 @@ bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
 
     // Try out comparison at this position
     TRACE("Trying terminus ")(**thistime);
-    bool r = Agent::AsAgent(terminus)->DecidedCompare( *thistime, can_key, conj );
-    if( !r )
-        return false;
+    links.normal[AsAgent(terminus)] = &(*thistime);
         
     if( TreePtr<Node> keynode = GetCoupled() )
     {
@@ -49,7 +47,7 @@ bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
         TRACE("Matched, so keying search container type ")(*this)(" for ")(*x);
         DoKey( sckey );    
     }
-    return r;
+    return true;
 }
 
 

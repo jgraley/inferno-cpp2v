@@ -52,16 +52,28 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
         return false;
     }
     
+    // Do the agent-specific local checks (x versus characteristics of the present agent)
+    // Also takes notes of how child agents link to children of x (depending on conjecture)
+    links.clear();    
     bool match = DecidedCompareImpl( x, can_key, conj );
     if( !match )
         return false;
     
+    // If the agent is coupled already, check for a coupling match
     if( TreePtr<Node> keynode = GetCoupled() )
     {
         SimpleCompare sc;
         if( sc( x, keynode ) == false )
             return false;
     }
+      
+    // Follow up on any links that were noted by the agent impl
+    FOREACH( Links::Link l, links.normal )
+        if( !l.first->DecidedCompare(*l.second, can_key, conj) )
+            return false;
+    FOREACH( Links::Link l, links.abnormal )
+        if( !l.first->AbnormalCompare(*l.second) )
+            return false;
       
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
     if( can_key )
