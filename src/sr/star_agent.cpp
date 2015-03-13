@@ -32,7 +32,7 @@ bool StarAgent::DecidedCompare( const TreePtrInterface &x,
     ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
     ASSERT(xc)("Nodes passed to StarAgent::DecidedCompare() must implement ContainerInterface, since * matches multiple things");
     
-    links.clear();    
+    ClearLinks();    
 
     if( TreePtr<Node> p = GetRestriction() )
     {
@@ -44,18 +44,16 @@ bool StarAgent::DecidedCompare( const TreePtrInterface &x,
             // Resolve via a keep-alive in the link 
             RememberAbnormalLink( AsAgent(p), xe ); 
         }
-        ASSERT(links.abnormal.size()==xc->size())("%d %d\n", links.abnormal.size(), xc->size());
     }
-    else
+ 
+    TRACE("MatchRange pre-res\n");
+    // No pattern, so just use own pre-restriction
+    FOREACH( TreePtr<Node> xe, *xc )
     {
-        TRACE("MatchRange pre-res\n");
-        // No pattern, so just use own pre-restriction
-        FOREACH( TreePtr<Node> xe, *xc )
-        {
-            if( !IsLocalMatch( xe.get()) )
-                return false;
-        }
-    }     
+        if( !IsLocalMatch( xe.get()) )
+            return false;
+    }
+     
     TRACE("done\n");
     return DecidedCompareLinks( can_key, conj ); 
 }                       

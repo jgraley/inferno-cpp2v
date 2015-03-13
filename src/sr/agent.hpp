@@ -37,20 +37,24 @@ public:
 class Links
 {
 public:    
-    typedef MultiMap<Agent *, const TreePtrInterface *> LinksMap;
-    typedef pair<Agent *, const TreePtrInterface *> Link;
+    struct Link
+    {
+        Agent *agent;
+        const TreePtrInterface *px;
+        bool abnormal;
+    };
     
     void clear()
     {
-        normal.clear();
-        abnormal.clear();
+        links.clear();
     }
     
-    LinksMap normal;
-    LinksMap abnormal;     
+    Set<Link> links;
 };
 
+bool operator<(const Links::Link &l0, const Links::Link &l1);
 
+        
 // - Configure
 // - Pre-restriction
 // - Keying (default case)
@@ -84,6 +88,7 @@ public:
     TreePtr<Node> GetCoupled();                                  
     virtual shared_ptr<Key> GetKey();
     void ResetKey();    
+    void ClearLinks();
     void RememberNormalLink( Agent *a, const TreePtrInterface &x );
     void RememberAbnormalLink( Agent *a, const TreePtrInterface &x );
     bool DecidedCompareLinks( bool can_key,
@@ -103,10 +108,10 @@ public:
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
     const Engine *engine;    
-    Links links;
     
 private:    
     shared_ptr<Key> coupling_key;    
+    Links links;
 };
 
 
