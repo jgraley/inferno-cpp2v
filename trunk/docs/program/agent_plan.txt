@@ -62,7 +62,7 @@ Detailed plan for refactoring into agent patterns
 ---End of original plan, now properly in agent form
 10. Agent impls to build up a "links store" of child agents and corresponding program nodes and move the
     actual DecidedCompare calls to the end of AgentCommon::DecidedCompare. 
- - Move the links from MultiMap to Set, since cleaner and can use union etc
+ - Move the links from MultiMap to Set, since cleaner and can use union etc DONE
  - Requires storing a "threshold" from couplings, to avoid iterating invalid descisions that previously
    would not have been registered due to an earlier mismatch (nodes with multiple decisions). Maybe route 
    HandleDecision through AgentCommon so no algorithmic change needed to agent impls.
