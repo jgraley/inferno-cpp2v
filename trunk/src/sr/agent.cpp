@@ -21,6 +21,19 @@ AgentCommon::AgentCommon() :
 }
 
 
+bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
+{
+    if( l0.agent != l1.agent )
+        return l0.agent < l1.agent;
+    else if( l0.px != l1.px )
+        return l0.px < l1.px;
+    else if( l0.abnormal != l1.abnormal )
+        return (int)l0.abnormal < (int)l1.abnormal;
+    
+    return false; // equal
+}
+
+
 void AgentCommon::AgentConfigure( const Engine *e )
 {
     // Repeat configuration regarded as an error because it suggests I maybe don't
@@ -54,7 +67,7 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
     
     // Do the agent-specific local checks (x versus characteristics of the present agent)
     // Also takes notes of how child agents link to children of x (depending on conjecture)
-    links.clear();    
+    ClearLinks();    
     
     bool match = DecidedCompareImpl( x, can_key, conj );
     if( !match )
@@ -158,15 +171,29 @@ void AgentCommon::ResetKey()
 }
 
 
+void AgentCommon::ClearLinks()
+{
+    links.clear();
+}
+
+
 void AgentCommon::RememberNormalLink( Agent *a, const TreePtrInterface &x )
 {
-    links.normal.insert( make_pair(a, &x) );
+    Links::Link l;
+    l.agent = a;
+    l.px = &x;
+    l.abnormal = false;
+    links.links.insert( l );
 }
 
 
 void AgentCommon::RememberAbnormalLink( Agent *a, const TreePtrInterface &x )
 {
-    links.abnormal.insert( make_pair(a, &x) );
+    Links::Link l;
+    l.agent = a;
+    l.px = &x;
+    l.abnormal = true;
+    links.links.insert( l );
 }
 
 
@@ -174,12 +201,16 @@ bool AgentCommon::DecidedCompareLinks( bool can_key,
                                        Conjecture &conj )
 {
     // Follow up on any links that were noted by the agent impl
-    FOREACH( Links::Link l, links.normal )
-        if( !l.first->DecidedCompare(*l.second, can_key, conj) )
+    FOREACH( Links::Link l, links.links )
+    {
+        bool r;
+        if( l.abnormal )
+            r = l.agent->AbnormalCompare(*l.px);
+        else
+            r = l.agent->DecidedCompare(*l.px, can_key, conj);
+        if( !r )
             return false;
-    FOREACH( Links::Link l, links.abnormal )
-        if( !l.first->AbnormalCompare(*l.second) )
-            return false;
+    }
     return true;
 }
 
