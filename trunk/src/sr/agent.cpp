@@ -55,6 +55,7 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
     // Do the agent-specific local checks (x versus characteristics of the present agent)
     // Also takes notes of how child agents link to children of x (depending on conjecture)
     links.clear();    
+    
     bool match = DecidedCompareImpl( x, can_key, conj );
     if( !match )
         return false;
@@ -68,12 +69,9 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
     }
       
     // Follow up on any links that were noted by the agent impl
-    FOREACH( Links::Link l, links.normal )
-        if( !l.first->DecidedCompare(*l.second, can_key, conj) )
-            return false;
-    FOREACH( Links::Link l, links.abnormal )
-        if( !l.first->AbnormalCompare(*l.second) )
-            return false;
+    match = DecidedCompareLinks( can_key, conj );
+    if( !match )
+        return false;
       
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
     if( can_key )
@@ -157,6 +155,32 @@ shared_ptr<AgentCommon::Key> AgentCommon::GetKey()
 void AgentCommon::ResetKey()
 {
     coupling_key = shared_ptr<Key>();
+}
+
+
+void AgentCommon::RememberNormalLink( Agent *a, const TreePtrInterface &x )
+{
+    links.normal.insert( make_pair(a, &x) );
+}
+
+
+void AgentCommon::RememberAbnormalLink( Agent *a, const TreePtrInterface &x )
+{
+    links.abnormal.insert( make_pair(a, &x) );
+}
+
+
+bool AgentCommon::DecidedCompareLinks( bool can_key,
+                                       Conjecture &conj )
+{
+    // Follow up on any links that were noted by the agent impl
+    FOREACH( Links::Link l, links.normal )
+        if( !l.first->DecidedCompare(*l.second, can_key, conj) )
+            return false;
+    FOREACH( Links::Link l, links.abnormal )
+        if( !l.first->AbnormalCompare(*l.second) )
+            return false;
+    return true;
 }
 
 

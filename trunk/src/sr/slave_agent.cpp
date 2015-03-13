@@ -17,8 +17,9 @@ bool SlaveAgent::DecidedCompareImpl( const TreePtrInterface &x,
                                      Conjecture &conj )
 {
     INDENT("l");
-    // When a slave node seen duriung search, just forward through the "base" path
-    return Agent::AsAgent(GetThrough())->DecidedCompare( x, can_key, conj );
+    // When a slave node seen duriung search, just forward through the "through" path
+    RememberNormalLink( AsAgent(GetThrough()), x );
+    return true;
 }
 
 

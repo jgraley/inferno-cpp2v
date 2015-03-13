@@ -37,7 +37,7 @@ public:
 class Links
 {
 public:    
-    typedef Map<Agent *, const TreePtrInterface *> LinksMap;
+    typedef MultiMap<Agent *, const TreePtrInterface *> LinksMap;
     typedef pair<Agent *, const TreePtrInterface *> Link;
     
     void clear()
@@ -83,7 +83,11 @@ public:
     void DoKey( shared_ptr<Key> key );
     TreePtr<Node> GetCoupled();                                  
     virtual shared_ptr<Key> GetKey();
-    void ResetKey();                                  
+    void ResetKey();    
+    void RememberNormalLink( Agent *a, const TreePtrInterface &x );
+    void RememberAbnormalLink( Agent *a, const TreePtrInterface &x );
+    bool DecidedCompareLinks( bool can_key,
+                              Conjecture &conj );
 
     virtual void KeyReplace();
     virtual void TrackingKey( Agent *from );
@@ -98,7 +102,7 @@ public:
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
-    const Engine *engine;
+    const Engine *engine;    
     Links links;
     
 private:    

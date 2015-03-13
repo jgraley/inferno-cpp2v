@@ -37,9 +37,7 @@ bool MatchAllAgent::DecidedCompareImpl( const TreePtrInterface &x,
         ASSERT( p );
         // Context is normal because all patterns must match (but none should contain
         // nodes with reploace functionlity because they will not be invoked during replace) 
-        bool r = AsAgent(p)->DecidedCompare( x, can_key, conj );
-        if( !r )
-            return false;
+        RememberNormalLink( AsAgent(p), x );
     }
     return true;
 }    

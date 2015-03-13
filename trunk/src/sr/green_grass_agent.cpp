@@ -18,7 +18,8 @@ bool GreenGrassAgent::DecidedCompareImpl( const TreePtrInterface &x,
     }
     TRACE("subtree under ")(*x)(" is green grass\n");
     // Normal matching for the through path
-    return Agent::AsAgent(GetThrough())->DecidedCompare( x, can_key, conj );
+    RememberNormalLink( AsAgent(GetThrough()), x );
+    return true;
 }
 
 
