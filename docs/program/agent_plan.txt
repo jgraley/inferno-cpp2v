@@ -46,17 +46,30 @@ Detailed plan for refactoring into agent patterns
 8. Central couplingkeys object to be pensioned off, and remove from Configure(). DONE
 - Same for the dirty grass, try to keep the state locally. Check for other state in SR that should be in the agents
 ---now agent to agent calls are context-free and parameterless in the case of BuildReplace()---
-- Slave tidy-up. Add a funciton in SR to invoke slave SR and send slave invocation through that. It can fill in the context (obviously sr ptr still needed).
+- Slave tidy-up. Introduce Engine class containing the parts of CompareReplace needed by slaves and invoke from slave agent. DONE
 - Slaves: try to invoke them from SR AFTER master replace has finished. Only need to do 1st level, and recursion will take care of the rest. see [1]
   This probably means filtering the immediate_agents set to slaves only and holding on to it.
   NOTE: this is shaken down style, wher slave SR is invoked directly from master SR, AFTER the replace walk not during
 - Conjecture: add fu to allow abnormal context compares in all the styles currently in use with just calling DecidedCompare()
   These include: calls to Compare() as seen in MatchAny, a local DecidedCompare as used in NotMatch, a local DecidedCompare 
-  with init during configure as seen in slave recurse restriction.
+  with init during configure as seen in slave recurse restriction. Actully provided a single AbnormalCompare() in agent
+  common and mapped them all through that except slave which goes to Comapre in Engine. Now 2 seperate
+  comparison top-levels, which is clearer (undoing false refactor). DONE
 - Use clean_grass list rather than dirty_grass - then can use the SR::DuplicateNode and DuplicateSubtree in src/helpers/ and remove from AgentCommon
 ---now the sr passed in via Configure() is nearly or completely unnecessary making the agents reasonably self-sufficient---
 - Note: don't kill the Configure sweep since needed for various things now not just sr and couplingkys pointers
-9. Turn the boolean soft agents into proper agents. Maybe lose MatchEven if no users? Or becomes MatchOne?
+9. Turn the boolean soft agents into proper agents. Maybe lose MatchEven if no users? Or becomes MatchOne? DONE
+---End of original plan, now properly in agent form
+10. Agent impls to build up a "links store" of child agents and corresponding program nodes and move the
+    actual DecidedCompare calls to the end of AgentCommon::DecidedCompare. 
+ - Move the links from MultiMap to Set, since cleaner and can use union etc
+ - Requires storing a "threshold" from couplings, to avoid iterating invalid descisions that previously
+   would not have been registered due to an earlier mismatch (nodes with multiple decisions). Maybe route 
+   HandleDecision through AgentCommon so no algorithmic change needed to agent impls.
+ - Bring the looping through the links part out into a new recursive function in Engine
+ - Convert it to an explicit stack iterative model
+ - Explore options for a more generalised unaware/aware-but-unknown/known sweep. Maybe need to make
+   Conjecture use real dependencies rather than just walk order
 
 QUESTION: should patterns eventually refer to each other via TreePtr<Agent> instead of TreePtr<Node>? 
 And does that even work, or should it really be shared_ptr<Agent> or SharedPtr<Agent>? --- requires experimentation, added to plan

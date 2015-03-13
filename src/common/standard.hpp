@@ -43,14 +43,26 @@ private:
     std::stack<T> &st;
 };
 
-// Find out whether an element exists in the map, without the pain of iterators
 template< typename KEY, typename DATA >
 class Map : public map<KEY, DATA>
 {
 public:
+    // Find out whether an element exists in the map, without the pain of iterators
     inline bool IsExist( const KEY &k ) const 
     {
         return map<KEY, DATA>::find( k ) != map<KEY, DATA>::end();
+    }
+};
+
+
+template< typename KEY, typename DATA >
+class MultiMap : public multimap<KEY, DATA>
+{
+public:
+    // Find out whether an element exists in the map, without the pain of iterators
+    inline bool IsExist( const KEY &k ) const 
+    {
+        return multimap<KEY, DATA>::find( k ) != multimap<KEY, DATA>::end();
     }
 };
 
@@ -59,6 +71,7 @@ template< typename KEY >
 class Set : public set<KEY>
 {
 public:    
+    // Find out whether an element exists in the map, without the pain of iterators
     inline bool IsExist( const KEY &k ) const 
     {
         return set<KEY>::find( k ) != set<KEY>::end();
@@ -66,6 +79,7 @@ public:
 };
 
 
+// Union two sets, without the pain of iterators
 template< typename KEY >
 inline Set<KEY> SetUnion( const Set<KEY> s1, const Set<KEY> s2 )
 {
@@ -77,6 +91,7 @@ inline Set<KEY> SetUnion( const Set<KEY> s1, const Set<KEY> s2 )
 }
 
 
+// Intersect two sets, without the pain of iterators
 template< typename KEY >
 inline Set<KEY> SetIntersection( const Set<KEY> s1, const Set<KEY> s2 )
 {
@@ -88,6 +103,7 @@ inline Set<KEY> SetIntersection( const Set<KEY> s1, const Set<KEY> s2 )
 }
 
 
+// Intersect set with complement, without the pain of iterators
 template< typename KEY >
 inline Set<KEY> SetDifference( const Set<KEY> s1, const Set<KEY> s2 )
 {

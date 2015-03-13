@@ -1,0 +1,39 @@
+
+Problems encountered while trying to remember links between parent 
+and child agents instead of directly recursing from impls.
+
+Compare side
+1. PointerIs needs to see the TreePtr itself, hence the ubiquitous use of TreePtrInterface &
+   (really a double indirection) durin recusivce descent. Clunky to store these and feels unsafe.
+   
+2. Stars use a locally-created temporary proxy for pattern nodes based on SubContainer. It feels
+   wrong to store these (via TreePtr) when we really want to only reference actual program nodes.
+   Issue in NormalNode container matching AND Star restriction pattern
+   
+NOTE: 1. and 2. conflict - 1. needs TreePtrInterface & stored and 2. needs TreePtr. 
+Resolution would be to store both (yuk)
+
+3. Normal nodes seen in collections and n-1 stars in sequences require a decision each. We
+   could end up registering all the decision even though the first DecidedCompare would have
+   failed. Resolution is to store a cookie from the conj that can be passed back to the conj 
+   on mismatch and prevents wasteful exploration of invalidated decisions.
+ 
+4. The NotMatch node requires inversion of the result of the linked DecidedCompare. Maybe 
+   store a flag indicating inversion.
+ 
+5. The MatchAny node wants an OR rule on multiple remembered links. The OR rule is inline at present
+   since all children are abnormal. Resolution may be to introduce a descision here. Note:
+   it might be possible to move to NormalCompare, so that a coupling can be placed in all legs
+   (but need legality checks or more generally unkey patterns abandoned by comparison failures)
+
+6. Soft nodes - it is hard to know how a soft node impl will want to use the results of a 
+   DecidedCompare. Could just return true and hope for the best, but AND-rule cannot be 
+   guaranteed. Also could see bugs when true returned when a mismatch is known of and false is 
+   expected. Resolution: Some sort of stricter rule for soft nodes, possibly requiring 0 or 1
+   compare, and taking as an output from MyCompare.
+   
+7. Stuff node. The terminus is fine, but recurse restriction is tricky because the actual 
+   decided compare calls don't happen until the conjecture tries to iterate the range (a
+   walker). Resolution: maybe restructure Conjecture so it actually requires the agent itself
+   to do the iterator increments (certainly, increments are in some sense "near" the corresponding 
+   node's DecidedCompare())

@@ -28,7 +28,7 @@ bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
 
     // Try out comparison at this position
     TRACE("Trying terminus ")(**thistime);
-    links.normal[AsAgent(terminus)] = &(*thistime);
+    RememberNormalLink( AsAgent(terminus), *thistime );
         
     if( TreePtr<Node> keynode = GetCoupled() )
     {

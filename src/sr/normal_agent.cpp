@@ -47,7 +47,7 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
                 ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
                 Agent *ap = Agent::AsAgent(*pattern_ptr);
-                links.normal[ap] = x_ptr;
+                RememberNormalLink(ap, *x_ptr);
                 //r = ap->DecidedCompare( *x_ptr, can_key, conj );
             }
         }
