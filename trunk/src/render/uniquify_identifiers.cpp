@@ -95,12 +95,13 @@ void UniquifyIdentifiers::UniquifyScope( TreePtr<Node> root, VisibleIdentifiers 
         Walk t( root );
         FOREACH( TreePtr<Node> p, t )
         {
-            if( TreePtr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>(p) )
-                if( !IsExist(si) )
-                {
-                    string nn = v.AddIdentifier( si );
-                    insert( IdentifierNamePair( si, nn ) );
-                }
+            if( TreePtr<Declaration> d = dynamic_pointer_cast<Declaration>(p) )
+                if( TreePtr<Identifier> i = GetIdentifierOfDeclaration(d) )
+                    if( TreePtr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>(i) )
+                    {
+                        string nn = v.AddIdentifier( si );
+                        insert( IdentifierNamePair( si, nn ) );
+                    }
         }
     }
     else
@@ -110,12 +111,13 @@ void UniquifyIdentifiers::UniquifyScope( TreePtr<Node> root, VisibleIdentifiers 
         FlattenNode t( root );
         FOREACH( TreePtr<Node> p, t )
         {
-            if( TreePtr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>(p) )
-                if( !IsExist(si) )
-                {
-                    string nn = v.AddIdentifier( si );
-                    insert( IdentifierNamePair( si, nn ) );
-                }
+            if( TreePtr<Declaration> d = dynamic_pointer_cast<Declaration>(p) )
+                if( TreePtr<Identifier> i = GetIdentifierOfDeclaration(d) )
+                    if( TreePtr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>(i) )
+                    {
+                        string nn = v.AddIdentifier( si );
+                        insert( IdentifierNamePair( si, nn ) );
+                    }
         }
         
         // Recurse, to find sub-scopes. Pass v by value so our copy remains the same.

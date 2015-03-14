@@ -37,7 +37,17 @@ auto unsigned int state;
 /*temp*/ int temp_i1;
 /*temp*/ unsigned int temp_link;
 /*temp*/ int temp_i2;
-static const unsigned int (lmap[]) = { &&, &&, &&, &&, && };
+static const unsigned int (lmap[]) = { &&
+#error identifier LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK undeclared not supported in RenderIdentifier
+, &&
+#error identifier LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK undeclared not supported in RenderIdentifier
+, &&
+#error identifier LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK undeclared not supported in RenderIdentifier
+, &&
+#error identifier LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK undeclared not supported in RenderIdentifier
+, &&
+#error identifier LINK_THEN_ELSE_LINK_PROCEED_ENTER_recurser_LINK undeclared not supported in RenderIdentifier
+ };
 do
 {
 if( (sc_delta_count())==(0U) )

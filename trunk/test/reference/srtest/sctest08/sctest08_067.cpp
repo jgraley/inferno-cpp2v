@@ -46,7 +46,27 @@ auto unsigned int state;
 /*temp*/ unsigned int temp_link;
 /*temp*/ unsigned int temp_link1;
 /*temp*/ int temp_n;
-static const unsigned int (lmap[]) = { &&, &&, &&, &&, &&, &&, &&, &&, &&, && };
+static const unsigned int (lmap[]) = { &&
+#error identifier ENTER_otherhelper_LINK_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_ENTER_helper_PROCEED_THEN_ELSE_YIELD_LINK_PROCEED_NEXT undeclared not supported in RenderIdentifier
+, &&
+#error identifier ENTER_otherhelper_LINK_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_ENTER_helper_PROCEED_THEN_ELSE_YIELD_LINK_PROCEED_NEXT undeclared not supported in RenderIdentifier
+, &&
+#error identifier ENTER_otherhelper_LINK_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_ENTER_helper_PROCEED_THEN_ELSE_YIELD_LINK_PROCEED_NEXT undeclared not supported in RenderIdentifier
+, &&
+#error identifier ENTER_otherhelper_LINK_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_ENTER_helper_PROCEED_THEN_ELSE_YIELD_LINK_PROCEED_NEXT undeclared not supported in RenderIdentifier
+, &&
+#error identifier ENTER_otherhelper_LINK_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_ENTER_helper_PROCEED_THEN_ELSE_YIELD_LINK_PROCEED_NEXT undeclared not supported in RenderIdentifier
+, &&
+#error identifier ENTER_otherhelper_LINK_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_ENTER_helper_PROCEED_THEN_ELSE_YIELD_LINK_PROCEED_NEXT undeclared not supported in RenderIdentifier
+, &&
+#error identifier ENTER_otherhelper_LINK_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_ENTER_helper_PROCEED_THEN_ELSE_YIELD_LINK_PROCEED_NEXT undeclared not supported in RenderIdentifier
+, &&
+#error identifier ENTER_otherhelper_LINK_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_ENTER_helper_PROCEED_THEN_ELSE_YIELD_LINK_PROCEED_NEXT undeclared not supported in RenderIdentifier
+, &&
+#error identifier ENTER_otherhelper_LINK_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_ENTER_helper_PROCEED_THEN_ELSE_YIELD_LINK_PROCEED_NEXT undeclared not supported in RenderIdentifier
+, &&
+#error identifier ENTER_otherhelper_LINK_PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT_ENTER_helper_PROCEED_THEN_ELSE_YIELD_LINK_PROCEED_NEXT undeclared not supported in RenderIdentifier
+ };
 do
 {
 if( (sc_delta_count())==(0U) )

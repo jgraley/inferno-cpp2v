@@ -58,7 +58,15 @@ auto unsigned int state;
 /*temp*/ int result10;
 /*temp*/ int temp_i2;
 /*temp*/ int result11;
-static const unsigned int (lmap[]) = { &&, &&, &&, && };
+static const unsigned int (lmap[]) = { &&
+#error identifier ENTER_f_LINK_LINK_LINK undeclared not supported in RenderIdentifier
+, &&
+#error identifier ENTER_f_LINK_LINK_LINK undeclared not supported in RenderIdentifier
+, &&
+#error identifier ENTER_f_LINK_LINK_LINK undeclared not supported in RenderIdentifier
+, &&
+#error identifier ENTER_f_LINK_LINK_LINK undeclared not supported in RenderIdentifier
+ };
 do
 {
 if( (sc_delta_count())==(0U) )

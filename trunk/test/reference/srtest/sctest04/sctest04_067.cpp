@@ -23,7 +23,13 @@ TopLevel top_level("top_level");
 void TopLevel::T()
 {
 auto unsigned int state;
-static const unsigned int (lmap[]) = { &&, &&, && };
+static const unsigned int (lmap[]) = { &&
+#error identifier PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT undeclared not supported in RenderIdentifier
+, &&
+#error identifier PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT undeclared not supported in RenderIdentifier
+, &&
+#error identifier PROCEED_THEN_ELSE_YIELD_PROCEED_NEXT undeclared not supported in RenderIdentifier
+ };
 do
 {
 if( (sc_delta_count())==(0U) )

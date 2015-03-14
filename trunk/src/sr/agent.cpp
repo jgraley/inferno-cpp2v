@@ -63,11 +63,8 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
     if( TreePtr<Node> keynode = GetCoupled() )
     {
         SimpleCompare sc;
-        //if( (TreePtr<Node>)x!=keynode ) 
         if( sc( x, keynode ) == false )
             return false;
-       // else
-         //   ASSERT((TreePtr<Node>)x==keynode)(x)(" -> ")(*x)(" != ")(keynode)(" -> ")(*keynode);
     }
 
     // Check whether the present node matches. Do this for all nodes: this will be the local

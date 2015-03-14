@@ -26,7 +26,11 @@ void TopLevel::U()
 {
 auto unsigned int state;
 /*temp*/ unsigned int temp_link;
-static const unsigned int (lmap[]) = { &&, && };
+static const unsigned int (lmap[]) = { &&
+#error identifier ENTER_HelperU_LINK undeclared not supported in RenderIdentifier
+, &&
+#error identifier ENTER_HelperU_LINK undeclared not supported in RenderIdentifier
+ };
 do
 {
 if( (sc_delta_count())==(0U) )
