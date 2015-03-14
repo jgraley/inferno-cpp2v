@@ -123,7 +123,10 @@ string Render::RenderIdentifier( TreePtr<Identifier> id )
 	if( id )
 	{
 		if( TreePtr<SpecificIdentifier> ii = dynamic_pointer_cast<SpecificIdentifier>( id ) )
-			ids = unique[ii];
+        {
+            ASSERT( unique.IsExist(ii) )(*ii);
+            ids = unique[ii];
+        }
 		else
 			ids = ERROR_UNSUPPORTED( (id) );
 
@@ -133,6 +136,7 @@ string Render::RenderIdentifier( TreePtr<Identifier> id )
 	{
 		TRACE();
 	}
+	ASSERT(ids.size()>0)(*id)(" rendered to an empty string\n");
 	return ids;
 }
 
