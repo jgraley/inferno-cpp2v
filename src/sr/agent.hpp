@@ -39,9 +39,10 @@ class Links
 public:    
     struct Link
     {
+        bool abnormal;
         Agent *agent;
         const TreePtrInterface *px;
-        bool abnormal;
+        TreePtr<Node> local_x;
     };
     
     void clear()
@@ -89,8 +90,8 @@ public:
     virtual shared_ptr<Key> GetKey();
     void ResetKey();    
     void ClearLinks();
-    void RememberNormalLink( Agent *a, const TreePtrInterface &x );
-    void RememberAbnormalLink( Agent *a, const TreePtrInterface &x );
+    void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x );
+    void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x );
     bool DecidedCompareLinks( bool can_key,
                               Conjecture &conj );
 

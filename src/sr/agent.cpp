@@ -23,12 +23,14 @@ AgentCommon::AgentCommon() :
 
 bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
 {
+    if( l0.abnormal != l1.abnormal )
+        return (int)l0.abnormal < (int)l1.abnormal;
     if( l0.agent != l1.agent )
         return l0.agent < l1.agent;
-    else if( l0.px != l1.px )
-        return l0.px < l1.px;
-    else if( l0.abnormal != l1.abnormal )
-        return (int)l0.abnormal < (int)l1.abnormal;
+    if( l0.px != l1.px )
+        return l0.px < l1.px;    
+    if( l0.local_x != l1.local_x )
+        return l0.local_x < l1.local_x;    
     
     return false; // equal
 }
@@ -177,22 +179,25 @@ void AgentCommon::ClearLinks()
 }
 
 
-void AgentCommon::RememberNormalLink( Agent *a, const TreePtrInterface &x )
+void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x )
 {
     Links::Link l;
+    l.abnormal = abnormal;
     l.agent = a;
     l.px = &x;
-    l.abnormal = false;
+    l.local_x = TreePtr<Node>();
     links.links.insert( l );
 }
 
 
-void AgentCommon::RememberAbnormalLink( Agent *a, const TreePtrInterface &x )
+void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
 {
+    ASSERT(x);
     Links::Link l;
+    l.abnormal = abnormal;
     l.agent = a;
-    l.px = &x;
-    l.abnormal = true;
+    l.px = NULL;    
+    l.local_x = x;
     links.links.insert( l );
 }
 
@@ -201,13 +206,18 @@ bool AgentCommon::DecidedCompareLinks( bool can_key,
                                        Conjecture &conj )
 {
     // Follow up on any links that were noted by the agent impl
-    FOREACH( Links::Link l, links.links )
+    FOREACH( const Links::Link &l, links.links )
     {
         bool r;
-        if( l.abnormal )
-            r = l.agent->AbnormalCompare(*l.px);
+        const TreePtrInterface *px;
+        if( l.px )
+            px = l.px;
         else
-            r = l.agent->DecidedCompare(*l.px, can_key, conj);
+            px = &(l.local_x);        
+        if( l.abnormal )
+            r = l.agent->AbnormalCompare(*px);
+        else
+            r = l.agent->DecidedCompare(*px, can_key, conj);
         if( !r )
             return false;
     }

@@ -47,7 +47,7 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
                 ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
                 Agent *ap = Agent::AsAgent(*pattern_ptr);
-                RememberNormalLink(ap, *x_ptr);
+                RememberLink(false, ap, *x_ptr);
                 //r = ap->DecidedCompare( *x_ptr, can_key, conj );
             }
         }
@@ -201,9 +201,7 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
     // Apply pre-restriction to the star
     if( star )
     {
-        bool r = star->DecidedCompare( xremaining, can_key, conj );
-        if( !r )
-            return false;
+        RememberLocalLink( false, star, xremaining );
     }
     TRACE("matched\n");
 	return true;

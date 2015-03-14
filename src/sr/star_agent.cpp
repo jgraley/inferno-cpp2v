@@ -11,6 +11,7 @@ bool StarAgent::DecidedCompare( const TreePtrInterface &x,
                                 Conjecture &conj )
 {
     INDENT("*");
+    ASSERT(x);
 
     // Coupling restriction check
     if( TreePtr<Node> keynode = GetCoupled() )
@@ -29,23 +30,11 @@ bool StarAgent::DecidedCompare( const TreePtrInterface &x,
         return true;
     }
                 
+    ClearLinks();    
+
     ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
     ASSERT(xc)("Nodes passed to StarAgent::DecidedCompare() must implement ContainerInterface, since * matches multiple things");
     
-    ClearLinks();    
-
-    if( TreePtr<Node> p = GetRestriction() )
-    {
-        TRACE("MatchRange pattern\n");
-        // Apply pattern restriction - will be at least as strict as pre-restriction
-        FOREACH( const TreePtrInterface &xe, *xc )
-        {
-            // NOTE only getting away with this because xc is still in scope when DecidedCompareLinks() is called
-            // Resolve via a keep-alive in the link 
-            RememberAbnormalLink( AsAgent(p), xe ); 
-        }
-    }
- 
     TRACE("MatchRange pre-res\n");
     // No pattern, so just use own pre-restriction
     FOREACH( TreePtr<Node> xe, *xc )
@@ -54,8 +43,18 @@ bool StarAgent::DecidedCompare( const TreePtrInterface &x,
             return false;
     }
      
+    if( TreePtr<Node> p = GetRestriction() )
+    {
+        TRACE("MatchRange pattern\n");
+        // Apply pattern restriction - will be at least as strict as pre-restriction
+        FOREACH( const TreePtrInterface &xe, *xc )
+        {
+            RememberLocalLink( false, AsAgent(p), xe );
+        }
+    }
+ 
     TRACE("done\n");
-    return DecidedCompareLinks( can_key, conj ); 
+    return DecidedCompareLinks( can_key, conj );
 }                       
 
 
