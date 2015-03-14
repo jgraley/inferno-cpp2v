@@ -110,6 +110,6 @@ void SerialNumber::SetStep( int s )
 string SerialNumber::GetAddr() const
 {
     string ss = SSPrintf("#%d-%lu-%lu", step, location, serial);  
-    ss += SSPrintf("@%p", this);
+    //ss += SSPrintf("@%p", this);
     return ss;
 }

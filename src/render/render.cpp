@@ -124,11 +124,12 @@ string Render::RenderIdentifier( TreePtr<Identifier> id )
 	{
 		if( TreePtr<SpecificIdentifier> ii = dynamic_pointer_cast<SpecificIdentifier>( id ) )
         {
-            ASSERT( unique.IsExist(ii) )(*ii);
+            if( !unique.IsExist(ii) )
+                return ERROR_UNKNOWN( SSPrintf("identifier %s undeclared", ii->GetRender().c_str() ) );
             ids = unique[ii];
         }
 		else
-			ids = ERROR_UNSUPPORTED( (id) );
+			return ERROR_UNSUPPORTED( (id) );
 
 		TRACE( "%s\n", ids.c_str() );
 	}

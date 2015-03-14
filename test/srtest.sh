@@ -52,7 +52,7 @@ ires=$?
 if test $ires -eq 0
 then
  echo Compare output of each step...
- diff -r $refdir $outdir 
+ diff --recursive $refdir $outdir  # --brief
  dres=$?
  if test $dres -eq 0
  then
