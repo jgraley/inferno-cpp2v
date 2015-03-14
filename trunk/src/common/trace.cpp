@@ -94,6 +94,11 @@ Tracer &Tracer::operator()(const string &s)
     return operator()("%s", s.c_str());
 }
 
+Tracer &Tracer::operator()(const Traceable &s)
+{    
+    return operator()(s.GetTrace());
+}
+
 void Tracer::EndContinuation()
 {
     if( continuation ) 

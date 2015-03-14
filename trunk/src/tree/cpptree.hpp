@@ -107,7 +107,7 @@ struct SpecificString : String
     	const SpecificString *c = dynamic_cast<const SpecificString *>(candidate);
     	return c && c->value == value;
 	} 
-	virtual string GetName() const /// Produce a string for debug
+	virtual string GetRender() const /// Produce a string for debug
 	{
 		// Since this is a string literal, output it quoted
 		return "\"" + value + "\"";
@@ -143,7 +143,7 @@ struct SpecificInteger : Integer, llvm::APSInt
     	const SpecificInteger *c = dynamic_cast<const SpecificInteger *>(candidate);
     	return c && *(llvm::APSInt *)c == *(llvm::APSInt *)this;
 	}
-	virtual string GetName() const /// Produce a string for debug
+	virtual string GetRender() const /// Produce a string for debug
 	{
         return string(toString(10)) + // decimal
                (isUnsigned() ? "U" : "") +
@@ -171,7 +171,7 @@ struct SpecificFloat : Float, llvm::APFloat
     	const SpecificFloat *c = dynamic_cast<const SpecificFloat *>(candidate);
     	return c && bitwiseIsEqual( *c );
 	}
-	virtual string GetName() const /// Produce a string for debug and graphing
+	virtual string GetRender() const /// Produce a string for graphing
 	{
 		char hs[256];
 		// generate hex float since it can be exact
@@ -191,14 +191,14 @@ struct Bool : Literal { NODE_FUNCTIONS };
 struct True : Bool
 {
 	NODE_FUNCTIONS_FINAL
-	virtual operator string() const { return "true"; } ///< Produce a string for debug
+	virtual string GetRender() const { return "true"; } ///< Produce a string for debug
 };
 
 /// Property node for boolean value false 
 struct False : Bool
 {
 	NODE_FUNCTIONS_FINAL
-	virtual operator string() const { return "false"; } ///< Produce a string for debug
+	virtual string GetRender() const { return "false"; } ///< Produce a string for debug
 };
 
 //////////////////////////// Declarations /////////////////////
@@ -235,7 +235,7 @@ struct SpecificIdentifier : virtual Property
 		ASSERT( candidate );
 		return candidate == this;
 	}
-	virtual string GetName() const /// This is relied upon to just return the identifier name for rendering
+	virtual string GetRender() const /// This is relied upon to just return the identifier name for rendering
 	{
 		return name;
 	}

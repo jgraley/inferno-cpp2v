@@ -61,7 +61,7 @@ FlattenNode_iterator::FlattenNode_iterator( const FlattenNode_iterator & other )
 {
 }
 
-FlattenNode_iterator::operator string() const
+string FlattenNode_iterator::GetName() const
 {
     if (IsAtEnd())
     	return string("end");
@@ -210,13 +210,13 @@ Walk_iterator::Walk_iterator( const Walk_iterator & other ) :
 {
 }
 
-Walk_iterator::operator string() const
+string Walk_iterator::GetName() const
 {
     string s;
     stack< StateEntry > ps = state; // std::stack doesn't have [] so copy the whole thing and go backwards
     while( !ps.empty() )
     {
-        s = string(*(ps.top().iterator)) + string(" ") + s;
+        s = ps.top().iterator->GetName() + string(" ") + s;
         ps.pop();
     }
     return s;

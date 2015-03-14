@@ -58,12 +58,23 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
     ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
     ASSERT( x ); // Target must not be NULL
     ASSERT(this);
-    
+
+    // If the agent is coupled already, check for a coupling match
+    if( TreePtr<Node> keynode = GetCoupled() )
+    {
+        SimpleCompare sc;
+        //if( (TreePtr<Node>)x!=keynode ) 
+        if( sc( x, keynode ) == false )
+            return false;
+       // else
+         //   ASSERT((TreePtr<Node>)x==keynode)(x)(" -> ")(*x)(" != ")(keynode)(" -> ")(*keynode);
+    }
+
     // Check whether the present node matches. Do this for all nodes: this will be the local
     // restriction for normal nodes and the pre-restriction for special nodes (based on
     // how IsLocalMatch() has been overridden.
     if( !IsLocalMatch(x.get()) )
-    {
+    {        
         return false;
     }
     
@@ -74,15 +85,7 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
     bool match = DecidedCompareImpl( x, can_key, conj );
     if( !match )
         return false;
-    
-    // If the agent is coupled already, check for a coupling match
-    if( TreePtr<Node> keynode = GetCoupled() )
-    {
-        SimpleCompare sc;
-        if( sc( x, keynode ) == false )
-            return false;
-    }
-      
+          
     // Follow up on any links that were noted by the agent impl
     match = DecidedCompareLinks( can_key, conj );
     if( !match )

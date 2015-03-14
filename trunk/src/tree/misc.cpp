@@ -71,7 +71,7 @@ TreePtr<Record> GetRecordDeclaration( TreePtr<Node> context, TreePtr<TypeIdentif
 }
 
 
-// Hunt through a record and its bases to find the named member
+// Hunt through a record and its bases to find the named member (actually, render string)
 TreePtr<Instance> FindMemberByName( TreePtr<Program> program, TreePtr<Record> r, string name )
 {
     TRACE("Record has %d members\n", r->members.size() );
@@ -80,7 +80,7 @@ TreePtr<Instance> FindMemberByName( TreePtr<Program> program, TreePtr<Record> r,
     FOREACH( TreePtr<Declaration> d, r->members )
         if( TreePtr<Instance> i = dynamic_pointer_cast<Instance>(d) )
             if( TreePtr<SpecificInstanceIdentifier> sss = dynamic_pointer_cast<SpecificInstanceIdentifier>(i->identifier) )
-                if( sss->GetName() == name )
+                if( sss->GetRender() == name )
                     return i;
                 
     // Try recursing through the base classes, if there are any

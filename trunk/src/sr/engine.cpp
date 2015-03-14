@@ -70,7 +70,7 @@ void Engine::Configure( TreePtr<Node> cp,
     pattern = cp; 
     root_agent = Agent::AsAgent(pattern);
             
-    TRACE("Elaborating ")(string( *this ));
+    TRACE("Elaborating ")(*this );
 
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
     SlaveAgent::UniqueWalkNoSlavePattern tp(pattern); 
