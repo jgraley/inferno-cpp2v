@@ -9,6 +9,7 @@
 #include "clone.hpp"
 #include "common/magic.hpp"
 #include "match.hpp"
+#include "renderable.hpp"
 
 #define FINAL_FUNCTION(F) virtual bool IsFinal() { return (F); }
 
@@ -18,11 +19,16 @@
 #define NODE_FUNCTIONS_FINAL ITEMISE_FUNCTION MATCHER_FUNCTION CLONE_FUNCTION FINAL_FUNCTION(true)
 /// The node support classes all collected together for convenience
 struct NodeBases : Magic,
-                   virtual Traceable,
+                   virtual Renderable,
                    Matcher,
                    Itemiser,
-                   Cloner
+                   Cloner,
+                   SerialNumber
 {
+    string GetAddr() const
+    {
+        return SerialNumber::GetAddr(); // avoiding the need for virtual inheritance
+    }
 };
 
 // Base class for all tree nodes and nodes in search/replace

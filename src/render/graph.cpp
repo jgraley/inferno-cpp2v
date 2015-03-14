@@ -355,7 +355,7 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
         // The TransformOf node appears as a slightly flattened hexagon, with the name of the specified 
         // kind of Transformation class inside it.
         *shape = "hexagon";
-        return *(tob->transformation);
+        return tob->transformation->GetName();
     }
     else if( dynamic_pointer_cast<PointerIsBase>(sp) )
     {
@@ -399,7 +399,7 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
     {
         *bold = false;
         *shape = "plaintext";//"record";
-        return sp->GetName();
+        return sp->GetRender();
     }
     else if( dynamic_pointer_cast<NormalAgent>(sp) )
     {
@@ -418,14 +418,14 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
         // to be coming from the wrong place.        
         *bold = false;
         *shape = "plaintext";//"record";
-        return sp->GetName();
+        return sp->GetRender();
     }
 	else
     {
         // Normal node was not turned into an agent because this is a program graph not a pattern graph
         *bold = false;
         *shape = "plaintext";//"record";
-        return sp->GetName();
+        return sp->GetRender();
    }
 }
 
@@ -475,7 +475,7 @@ string Graph::HTMLLabel( string name, TreePtr<Node> n )
 				char c[20];
 				sprintf(c, "%d", j);
 				s += " <TR>\n";
-				s += "  <TD>" + Sanitise(*seq, true) + "[" + string(c) + "]</TD>\n";
+				s += "  <TD>" + Sanitise(seq->GetName(), true) + "[" + string(c) + "]</TD>\n";
 				s += "  <TD PORT=\"" + SeqField( i, j ) + "\"></TD>\n";
 				s += " </TR>\n";
 			}
@@ -493,7 +493,7 @@ string Graph::HTMLLabel( string name, TreePtr<Node> n )
 		else if( CollectionInterface *col = dynamic_cast<CollectionInterface *>(members[i]) )
 		{
 			s += " <TR>\n";
-			s += "  <TD>" + Sanitise(*col, true) + "{";
+			s += "  <TD>" + Sanitise(col->GetName(), true) + "{";
             for( int j=0; j<col->size(); j++ )
                 s += ".";
             s += "}</TD>\n";
@@ -642,7 +642,7 @@ string Graph::DoLink( TreePtr<Node> from, string field, TreePtr<Node> to, string
 		    if( shared_ptr<SpecialBase> sbs = dynamic_pointer_cast<SpecialBase>(to) )   // is to a special node
 		        if( typeid( *ptr ) != typeid( *(sbs->GetPreRestrictionArchitype()) ) )          // pre-restrictor is nontrivial
 			{
-			    atts += "label = \"" + (**(sbs->GetPreRestrictionArchitype())).GetName() + "\"\n";
+			    atts += "label = \"" + (**(sbs->GetPreRestrictionArchitype())).GetRender() + "\"\n";
 			}
 	}
     else if( dynamic_pointer_cast<StuffAgent>(from) )

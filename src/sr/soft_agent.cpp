@@ -15,7 +15,7 @@ bool SoftAgent::DecidedCompareImpl( const TreePtrInterface &x,
                                     bool can_key,
                                     Conjecture &conj )
 {
-    INDENT("@");
+    INDENT("%");
     ASSERT( !current_conj )("DecidedCompare() recursion detected in soft node");
     current_can_key = can_key;
     current_conj = &conj;   
@@ -27,7 +27,7 @@ bool SoftAgent::DecidedCompareImpl( const TreePtrInterface &x,
     
 void SoftAgent::KeyReplace()
 {    
-    INDENT("@");
+    INDENT("%");
     TRACE("Keying replace pattern (via agent) ")(*this)("\n");
 
     if( !GetKey() )
@@ -45,7 +45,7 @@ void SoftAgent::KeyReplace()
 
 TreePtr<Node> SoftAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
-    INDENT("@");
+    INDENT("%");
     // Note that the keynode could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
     return DuplicateSubtree(keynode);   

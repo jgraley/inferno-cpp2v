@@ -65,7 +65,7 @@ string Traceable::GetAddr() const
 }
 
 
-Traceable::operator string() const
+string Traceable::GetTrace() const
 {
     return GetName() + GetAddr(); // name plus pointer
 }
@@ -76,7 +76,7 @@ int SerialNumber::step;
 map<void *, SerialNumber::SNType> SerialNumber::location_serial;
 map<void *, SerialNumber::SNType> SerialNumber::master_serial;
 
-SerialNumber::SerialNumber() 
+void SerialNumber::Construct()
 {
     // Get the point in the code where we were constructed 
     void *lp = __builtin_return_address(1); 
@@ -109,5 +109,7 @@ void SerialNumber::SetStep( int s )
 
 string SerialNumber::GetAddr() const
 {
-    return SSPrintf("%d-%lu-%lu", step, location, serial);  
+    string ss = SSPrintf("#%d-%lu-%lu", step, location, serial);  
+    ss += SSPrintf("@%p", this);
+    return ss;
 }

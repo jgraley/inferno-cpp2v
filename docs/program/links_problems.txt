@@ -11,7 +11,7 @@ Compare side
    Issue in NormalNode container matching AND Star restriction pattern
    
 NOTE: 1. and 2. conflict - 1. needs TreePtrInterface & stored and 2. needs TreePtr. 
-Resolution would be to store both (yuk)
+Resolution would be to store both (yuk) DONE (yuk)
 
 3. Normal nodes seen in collections and n-1 stars in sequences require a decision each. We
    could end up registering all the decision even though the first DecidedCompare would have

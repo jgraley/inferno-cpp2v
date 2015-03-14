@@ -26,7 +26,7 @@ public:
 	virtual void Overwrite( pointer v ) const;
     virtual const bool IsOrdered() const;
     // Some additional operations specific to walk iterators
-    operator string() const;
+    string GetName() const;
     FlattenNode_iterator(); // makes "end" iterator
     FlattenNode_iterator( TreePtr<Node> root );
 private:
@@ -74,7 +74,7 @@ public:
 	virtual void Overwrite( pointer v ) const;
     virtual const bool IsOrdered() const;
     // Some additional operations specific to walk iterators
-    operator string() const;
+    string GetName() const;
     virtual void AdvanceOver();
     virtual void AdvanceInto();
     Walk_iterator(); // makes "end" iterator

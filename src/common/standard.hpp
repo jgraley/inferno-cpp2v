@@ -123,7 +123,7 @@ public:
     virtual string GetTypeName() const; 
     virtual string GetName() const; // used by parse, render etc
     virtual string GetAddr() const; 
-    virtual operator string() const; // used for debug
+    virtual string GetTrace() const; // used for debug
 };
 
 //
@@ -151,14 +151,24 @@ class SerialNumber
     SNType location;
 
 protected:
-    SerialNumber();
-    inline SNType GetSerialNumber() const 
+    void Construct();
+    inline SerialNumber() 
+    { 
+        Construct();       
+    }
+    inline SerialNumber( const SerialNumber &other ) 
     {
-        return serial;
+        // Identity semantics: ignore "other"
+        Construct();        
     }
     inline SerialNumber &operator=( const SerialNumber &other )
     {
+        // Identity semantics: ignore "other"
         return *this;
+    }
+    inline SNType GetSerialNumber() const 
+    {
+        return serial;
     }
     string GetAddr() const; 
     inline bool operator<( const SerialNumber &o )

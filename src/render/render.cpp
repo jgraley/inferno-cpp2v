@@ -113,7 +113,7 @@ bool Render::IsSystemC( TreePtr<Node> root )
 
 string Render::RenderLiteral( TreePtr<Literal> sp )
 {
-	return Sanitise( *sp );
+	return Sanitise( sp->GetRender() );
 }
 
 

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <typeinfo> 
+#include "standard.hpp" 
 #include "hit_count.hpp" 
 using namespace std;
 
@@ -36,6 +37,7 @@ public:
     Tracer &operator()();
     Tracer &operator()(const char *fmt, ...);
     Tracer &operator()(const string &s); // not a printf because of risk of accidental format specifiers
+    Tracer &operator()(const Traceable &s); 
 
     static void EndContinuation();
     static void Enable( bool e ); ///< enable/disable tracing, only for top level funciton to call, overridden by flags

@@ -19,7 +19,7 @@ string BuildIdentifierBase::GetNewName()
         ASSERT( n );
         TreePtr<SpecificIdentifier> si = dynamic_pointer_cast<SpecificIdentifier>( n );
         ASSERT( si )("BuildIdentifier: ")(*n)(" should be a kind of SpecificIdentifier (format is %s)", format.c_str());
-        string s = si->GetName();
+        string s = si->GetRender();
         if( !vs.empty() )
             all_same = all_same && (s == vs.back());
         vs.push_back( s );
@@ -51,8 +51,8 @@ bool IdentifierByNameBase::IsMatch( const TreePtrInterface &x )
     TreePtr<Node> nx = x; // TODO dynamic_pointer_cast support for TreePtrInterface
     if( TreePtr<CPPTree::SpecificIdentifier> si = dynamic_pointer_cast<CPPTree::SpecificIdentifier>(nx) )
     {
-        TRACE("IsMatch comparing ")(si->GetName())(" with ")(newname);
-        if( si->GetName() == newname )
+        TRACE("IsMatch comparing ")(si->GetRender())(" with ")(newname);
+        if( si->GetRender() == newname )
         {
             TRACE(" : same\n");
             return true;
