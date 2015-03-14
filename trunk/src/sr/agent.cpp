@@ -21,21 +21,6 @@ AgentCommon::AgentCommon() :
 }
 
 
-bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
-{
-    if( l0.abnormal != l1.abnormal )
-        return (int)l0.abnormal < (int)l1.abnormal;
-    if( l0.agent != l1.agent )
-        return l0.agent < l1.agent;
-    if( l0.px != l1.px )
-        return l0.px < l1.px;    
-    if( l0.local_x != l1.local_x )
-        return l0.local_x < l1.local_x;    
-    
-    return false; // equal
-}
-
-
 void AgentCommon::AgentConfigure( const Engine *e )
 {
     // Repeat configuration regarded as an error because it suggests I maybe don't
@@ -186,6 +171,19 @@ void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface 
     l.agent = a;
     l.px = &x;
     l.local_x = TreePtr<Node>();
+    l.invert = false;
+    links.links.insert( l );
+}
+
+
+void AgentCommon::RememberInvertedLink( Agent *a, const TreePtrInterface &x )
+{
+    Links::Link l;
+    l.abnormal = true; // always
+    l.agent = a;
+    l.px = &x;
+    l.local_x = TreePtr<Node>();
+    l.invert = true;
     links.links.insert( l );
 }
 
@@ -198,7 +196,25 @@ void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
     l.agent = a;
     l.px = NULL;    
     l.local_x = x;
+    l.invert = false;
     links.links.insert( l );
+}
+
+
+bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
+{
+    if( l0.abnormal != l1.abnormal )
+        return (int)l0.abnormal < (int)l1.abnormal;
+    if( l0.agent != l1.agent )
+        return l0.agent < l1.agent;
+    if( l0.px != l1.px )
+        return l0.px < l1.px;    
+    if( l0.local_x != l1.local_x )
+        return l0.local_x < l1.local_x;    
+    if( l0.invert != l1.invert )
+        return (int)l0.invert < (int)l1.invert;
+    
+    return false; // equal
 }
 
 
@@ -218,6 +234,8 @@ bool AgentCommon::DecidedCompareLinks( bool can_key,
             r = l.agent->AbnormalCompare(*px);
         else
             r = l.agent->DecidedCompare(*px, can_key, conj);
+        if( l.invert )
+            r = !r || can_key; // only apply during restricting pass 
         if( !r )
             return false;
     }

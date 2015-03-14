@@ -1,4 +1,5 @@
 #include "boolean_agents.hpp"
+#include "conjecture.hpp"
 
 using namespace SR;
 
@@ -8,22 +9,8 @@ bool NotMatchAgent::DecidedCompareImpl( const TreePtrInterface &x,
 {
     INDENT("!");
     ASSERT( GetPattern() );
-    if( can_key )
-    {
-        // Don't do a subtree search while keying - we'll only end up keying the wrong thing
-        // or terminating with false prematurely
-        return true;
-    }
-    else
-    {
-        // Context is abnormal because the supplied subtree must not match the pattern
-        bool r = AsAgent(GetPattern())->AbnormalCompare( x );
-        TRACE("NotMatch pattern=")(*GetPattern())(" x=")(*x)(" got %d, returning the opposite!\n", (int)r);
-        if( r==false )
-            return true;
-        else
-            return false;
-    }
+    RememberInvertedLink( AsAgent(GetPattern()), x );
+    return true;
 }
 
 
@@ -48,13 +35,9 @@ bool MatchAnyAgent::DecidedCompareImpl( const TreePtrInterface &x,
                                         Conjecture &conj )
 {
     INDENT("|");
-    FOREACH( const TreePtr<Node> p, GetPatterns() )
-    {
-        // Context is abnormal because the supplied subtree need not match any given pattern
-        ASSERT( p );
-        bool r = AsAgent(p)->AbnormalCompare( x );
-        if( r )
-            return true;
-    }
-    return false;
+    ContainerInterface::iterator b = GetPatterns().begin();
+    ContainerInterface::iterator e = GetPatterns().end();
+    ContainerInterface::iterator pit = conj.HandleDecision( b, e );
+    RememberLink( true, AsAgent(*pit), x );
+    return true;
 }

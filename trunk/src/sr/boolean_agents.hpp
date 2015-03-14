@@ -79,7 +79,7 @@ public:
                                      bool can_key,
                                      Conjecture &conj );
 private:
-    virtual const CollectionInterface &GetPatterns() const = 0;
+    virtual CollectionInterface &GetPatterns() const = 0;
 };
 
 
@@ -93,7 +93,7 @@ public:
     // Patterns are an abnormal context
     mutable Collection<PRE_RESTRICTION> patterns; // TODO provide const iterators and remove mutable
 private:
-    virtual const CollectionInterface &GetPatterns() const
+    virtual CollectionInterface &GetPatterns() const
     {
         return patterns;
     }
