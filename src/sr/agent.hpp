@@ -43,6 +43,7 @@ public:
         Agent *agent;
         const TreePtrInterface *px;
         TreePtr<Node> local_x;
+        bool invert;
     };
     
     void clear()
@@ -91,6 +92,7 @@ public:
     void ResetKey();    
     void ClearLinks();
     void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x );
+    void RememberInvertedLink( Agent *a, const TreePtrInterface &x );
     void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x );
     bool DecidedCompareLinks( bool can_key,
                               Conjecture &conj );

@@ -19,7 +19,7 @@ Resolution would be to store both (yuk) DONE (yuk)
    on mismatch and prevents wasteful exploration of invalidated decisions.
  
 4. The NotMatch node requires inversion of the result of the linked DecidedCompare. Maybe 
-   store a flag indicating inversion.
+   store a flag indicating inversion. DONE
  
 5. The MatchAny node wants an OR rule on multiple remembered links. The OR rule is inline at present
    since all children are abnormal. Resolution may be to introduce a descision here. Note:
