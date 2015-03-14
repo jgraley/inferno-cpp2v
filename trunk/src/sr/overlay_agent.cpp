@@ -9,7 +9,7 @@ bool OverlayAgent::DecidedCompareImpl( const TreePtrInterface &x,
                                           bool can_key,
                                           Conjecture &conj )
 {
-    RememberNormalLink( AsAgent(GetThrough()), x );
+    RememberLink( false, AsAgent(GetThrough()), x );
     return true;
 }
 
