@@ -172,7 +172,7 @@ void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface 
     l.px = &x;
     l.local_x = TreePtr<Node>();
     l.invert = false;
-    links.links.insert( l );
+    links.links.push_back( l );
 }
 
 
@@ -184,7 +184,7 @@ void AgentCommon::RememberInvertedLink( Agent *a, const TreePtrInterface &x )
     l.px = &x;
     l.local_x = TreePtr<Node>();
     l.invert = true;
-    links.links.insert( l );
+    links.links.push_back( l );
 }
 
 
@@ -197,11 +197,11 @@ void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
     l.px = NULL;    
     l.local_x = x;
     l.invert = false;
-    links.links.insert( l );
+    links.links.push_back( l );
 }
 
 
-bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
+/*bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
 {
     if( l0.abnormal != l1.abnormal )
         return (int)l0.abnormal < (int)l1.abnormal;
@@ -215,7 +215,7 @@ bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
         return (int)l0.invert < (int)l1.invert;
     
     return false; // equal
-}
+}*/
 
 
 bool AgentCommon::DecidedCompareLinks( bool can_key,
