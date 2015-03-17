@@ -5,7 +5,7 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
-#include <set>
+#include <vector>
 #include <boost/type_traits.hpp>
  
 namespace SR
@@ -51,7 +51,7 @@ public:
         links.clear();
     }
     
-    Set<Link> links;
+    vector<Link> links;
 };
 
 bool operator<(const Links::Link &l0, const Links::Link &l1);
