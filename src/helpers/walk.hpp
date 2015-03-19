@@ -3,6 +3,7 @@
 
 #include "node/node.hpp"
 #include "transformation.hpp"
+#include <deque>
 
 /// Iterator for FlattenNode
 class FlattenNode_iterator : public ContainerInterface::iterator_interface
@@ -79,8 +80,11 @@ public:
     virtual void AdvanceInto();
     Walk_iterator(); // makes "end" iterator
     Walk_iterator( TreePtr<Node> &root,
-                     Filter *out_filter = NULL,
-    		         Filter *recurse_filter = NULL );
+                   Filter *out_filter = NULL,
+    		       Filter *recurse_filter = NULL );
+    // Get all the true recursions made so far (i.e. excluding root and current position)
+    virtual vector< TreePtr<Node> > GetPath() const; 
+    
 protected:
     virtual void DoNodeFilter();
     bool IsAtEndOfChildren() const;
@@ -96,7 +100,8 @@ protected:
         shared_ptr<ContainerInterface> container;
         ContainerInterface::iterator iterator;
     };
-    stack< StateEntry > state;
+    // deque not stack so we can iterate the whole thing
+    deque< StateEntry > state; // Mapping: top is back
     bool done;   
 };
 
