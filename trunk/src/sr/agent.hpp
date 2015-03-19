@@ -51,7 +51,7 @@ public:
         links.clear();
     }
     
-    vector<Link> links;
+    Set<Link> links;
 };
 
 bool operator<(const Links::Link &l0, const Links::Link &l1);
