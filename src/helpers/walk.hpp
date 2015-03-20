@@ -4,6 +4,7 @@
 #include "node/node.hpp"
 #include "transformation.hpp"
 #include <deque>
+#include <list>
 
 /// Iterator for FlattenNode
 class FlattenNode_iterator : public ContainerInterface::iterator_interface
@@ -83,7 +84,13 @@ public:
                    Filter *out_filter = NULL,
     		       Filter *recurse_filter = NULL );
     // Get all the true recursions made so far (i.e. excluding root and current position)
-    virtual vector< TreePtr<Node> > GetPath() const; 
+    virtual list< TreePtr<Node> > GetPath() const;  // return current recurse nodes
+    // NOTE on recurse nodes. Recuse nodes are the nodes that were "passed through" 
+    // (flattened) on the way to the current node (i.e. *iterator). That means the 
+    // current node is not a recurse node. The root node is not a recurse node at
+    // begin(), when it is the current node. But it *is* a recurse node after iterator++
+    // when it has been passed through in order to reach the current node (expect
+    // when we are at end() of course).
     
 protected:
     virtual void DoNodeFilter();
@@ -97,6 +104,7 @@ protected:
     Filter *recurse_filter;
     struct StateEntry
     {
+        TreePtr<Node> node;
         shared_ptr<ContainerInterface> container;
         ContainerInterface::iterator iterator;
     };

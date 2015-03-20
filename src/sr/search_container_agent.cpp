@@ -5,15 +5,34 @@
 
 using namespace SR;
 
-bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                               bool can_key,
-                                               Conjecture &conj )
+bool SearchContainerAgent::DecidedCompare( const TreePtrInterface &x,
+                                           bool can_key,
+                                           Conjecture &conj )
 {
     INDENT("#");
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(*x)("\n");
+
+    if( TreePtr<Node> keynode = GetCoupled() )
+    {
+        SimpleCompare sc;
+        if( sc( x, keynode ) == false )
+            return false;
+    }
+
+    // Check whether the present node matches. Do this for all nodes: this will be the local
+    // restriction for normal nodes and the pre-restriction for special nodes (based on
+    // how IsLocalMatch() has been overridden.
+    if( !IsLocalMatch(x.get()) )
+    {        
+        return false;
+    }
+
+    // Do the agent-specific local checks (x versus characteristics of the present agent)
+    // Also takes notes of how child agents link to children of x (depending on conjecture)
+    ClearLinks();    
 
     // Get an interface to the container we will search
     // TODO what is keeping pwx alive after this funciton exits? Are the iterators 
@@ -26,17 +45,30 @@ bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
     if( thistime == (ContainerInterface::iterator)(pwx->end()) )
         return false; // ran out of choices
 
+    // Where a recurse restriction is in use, apply it to all the recursion points
+    // underlying the current iterator, thistime.
+    if( recurse_restriction )
+    {
+        const Walk::iterator *pwtt = dynamic_cast<const Walk::iterator *>(thistime.GetUnderlyingIterator());
+        ASSERT(pwtt)("recurse_restriction set on non-Stuff node (probably AnyNode)");    
+        list< TreePtr<Node> > path = pwtt->GetPath();    
+        TRACE("Stuff rooted at ")(*x)(" checking candiate terminus ")(**thistime)(" against recurse restriction\n");
+        TRACE("Path:")(*pwtt)("\n");
+        FOREACH( TreePtr<Node> n, path )
+        {            
+            RememberLocalLink( true, AsAgent(recurse_restriction), n );
+        }
+    }
+    
     // Try out comparison at this position
     TRACE("Trying terminus ")(**thistime);
     RememberLink( false, AsAgent(terminus), *thistime );
-        
-    if( TreePtr<Node> keynode = GetCoupled() )
-    {
-        SimpleCompare sc;
-        if( sc( x, keynode ) == false )
-            return false;
-    }
-    
+            
+    // Follow up on any links that were noted by the agent impl
+    bool match = DecidedCompareLinks( can_key, conj );
+    if( !match )
+        return false;
+
     // If we got this far, do the couplings
     if( can_key )
     {
@@ -71,33 +103,11 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 }
 
 
-StuffAgent::StuffAgent() : 
-    recurse_filter( this )
-{
-}
-
-
-StuffAgent::RecurseFilter::RecurseFilter( StuffAgent *a ) :
-    agent(a)
-{
-}
-
-
-bool StuffAgent::RecurseFilter::IsMatch( TreePtr<Node> context,       
-                                         TreePtr<Node> root )
-{
-    if( agent->recurse_restriction )
-        return AsAgent(agent->recurse_restriction)->AbnormalCompare(root);
-    else
-        return true;
-}
-
-
 shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> x )
 {    
     // Note: does not do the walk every time - instead, the Walk object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
-    return shared_ptr<ContainerInterface>( new Walk( x, NULL, &recurse_filter ) );
+    return shared_ptr<ContainerInterface>( new Walk( x, NULL, NULL ) );
 }
 
 

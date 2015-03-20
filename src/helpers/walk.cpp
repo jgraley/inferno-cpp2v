@@ -2,7 +2,6 @@
 #include "walk.hpp"
 #include "transformation.hpp"
 
-
 ////////////////////////// FlattenNode //////////////////////////
 
 bool FlattenNode_iterator::IsAtEnd() const
@@ -154,8 +153,8 @@ Walk_iterator::Walk_iterator() :
 
 
 Walk_iterator::Walk_iterator( TreePtr<Node> &r,
-                                  Filter *of,
-                                  Filter *rf ) :
+                              Filter *of,
+                              Filter *rf ) :
     root( new TreePtr<Node>(r) ),
     out_filter( of ),
     recurse_filter( rf ),
@@ -168,7 +167,7 @@ Walk_iterator::Walk_iterator( TreePtr<Node> &r,
 Walk_iterator::Walk_iterator( const Walk_iterator & other ) :
     root( other.root ),
     out_filter( other.out_filter ),
-    recurse_filter( other.recurse_filter ),
+    recurse_filter( other.recurse_filter ), // See note in header about recurse nodes
     state( other.state ),
     done( other.done )
 {
@@ -205,28 +204,24 @@ Walk_iterator::pointer Walk_iterator::operator->() const
 }
 
 
-vector< TreePtr<Node> > Walk_iterator::GetPath() const
+// See note in header about recurse nodes
+list< TreePtr<Node> > Walk_iterator::GetPath() const
 {
-    vector< TreePtr<Node> > v;
-    int size = state.size();
-    int i=0;
+    list< TreePtr<Node> > l;
     FOREACH( const StateEntry &se, state )
-    {
-        if( i<size-1 ) // Don't do the last one
-            v.push_back( *(se.iterator) );
-    }    
-    ASSERT( size==0 || v.size() == size-1 );
-    return v;
+        l.push_back( se.node );
+    return l;
 }
 
 
 bool Walk_iterator::IsAtEndOfChildren() const
 {
-	ASSERT( !done );
+	ASSERT( !done ); // Caller should have already checked this (done is our resultant end-state for the whole walk)
 
 	if( state.empty() )
-		return false;
+		return false; // At root i.e. initial state - this is not an end state
 
+	// An end state means top iterator is at "end"
     return state.back().iterator == state.back().container->end();
 }
 
@@ -246,28 +241,33 @@ void Walk_iterator::BypassEndOfChildren()
 	}
 }
 
+
 shared_ptr<ContainerInterface> Walk_iterator::GetChildContainer( TreePtr<Node> n ) const
 { 
     return shared_ptr<ContainerInterface>( new FlattenNode(n) );
 }        
 
+
 void Walk_iterator::Push( TreePtr<Node> n )
 { 
     StateEntry ns;
+    ns.node = n;
     ns.container = GetChildContainer( n );
     ns.iterator = ns.container->begin();
     state.push_back( ns );
 }        
+
 
 string Walk_iterator::GetName() const
 {
     string s;
     FOREACH( const StateEntry &se, state )
     {
-        s += se.iterator->GetName() + string(" ");
+        s += (*se.node).GetTrace() + string(" ");
     }
     return s;
 }
+
 
 void Walk_iterator::AdvanceInto()
 {
@@ -277,32 +277,27 @@ void Walk_iterator::AdvanceInto()
 	bool recurse = false;
 	if( element ) // must be non-NULL
 	{
-		recurse = true;
 		if( recurse_filter ) // is there a filter on recursion?
-		{
-            //TRACE("Recurse filter @%p, this@%p, entering...\n", recurse_filter, this);
-			bool ok = recurse_filter->IsMatch( element, element ); // must pass the restriction
-			//TRACE("Recurse filter @%p, leaving...\n", recurse_filter);
-
-			if( !ok )
-				recurse = false;
-		}
-		//else
-            //TRACE("No recurse filter\n", recurse_filter);
+			recurse = recurse_filter->IsMatch( element, element ); // must pass the restriction
+		else
+            recurse = true; // no filter so try to recurse into node
 	}
+	else
+        recurse = false; // no node so cannot recurse
 
     if( recurse )
     {
     	// Step into
         Push( **this );
-        BypassEndOfChildren();
+        BypassEndOfChildren(); // get past an empty child
     }
     else
     {
     	// If we can't step into then step over
-    	AdvanceOver();
+    	AdvanceOver(); // this will do its own BypassEndOfChildren()
     }
 }
+
 
 void Walk_iterator::AdvanceOver()
 {
@@ -322,11 +317,13 @@ void Walk_iterator::AdvanceOver()
 	}
 }
 
+
 shared_ptr<ContainerInterface::iterator_interface> Walk_iterator::Clone() const
 {
 	shared_ptr<Walk_iterator> ni( new Walk_iterator(*this) );
 	return ni;
 }
+
 
 bool Walk_iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
 {
@@ -336,6 +333,7 @@ bool Walk_iterator::operator==( const ContainerInterface::iterator_interface &ib
 		return pi->done && done;
 	return **pi == **this;
 }
+
 
 void Walk_iterator::Overwrite( Walk_iterator::pointer v ) const
 {
@@ -352,10 +350,12 @@ void Walk_iterator::Overwrite( Walk_iterator::pointer v ) const
     }
 }
 
+
 const bool Walk_iterator::IsOrdered() const
 {
 	return true; // walk walks tree in order generally
 }
+
 
 void Walk_iterator::DoNodeFilter()
 {
