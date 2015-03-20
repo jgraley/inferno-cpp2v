@@ -49,15 +49,13 @@ bool SearchContainerAgent::DecidedCompare( const TreePtrInterface &x,
     // underlying the current iterator, thistime.
     if( recurse_restriction )
     {
+        // See if we are looking at a walk iterator
         const Walk::iterator *pwtt = dynamic_cast<const Walk::iterator *>(thistime.GetUnderlyingIterator());
         ASSERT(pwtt)("recurse_restriction set on non-Stuff node (probably AnyNode)");    
-        list< TreePtr<Node> > path = pwtt->GetPath();    
-        TRACE("Stuff rooted at ")(*x)(" checking candiate terminus ")(**thistime)(" against recurse restriction\n");
-        TRACE("Path:")(*pwtt)("\n");
-        FOREACH( TreePtr<Node> n, path )
-        {            
+
+        // Check all the nodes that we recursed through in order to get here
+        FOREACH( TreePtr<Node> n, pwtt->GetPath() )
             RememberLocalLink( true, AsAgent(recurse_restriction), n );
-        }
     }
     
     // Try out comparison at this position
