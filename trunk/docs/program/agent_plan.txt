@@ -66,6 +66,7 @@ Detailed plan for refactoring into agent patterns
  - Requires storing a "threshold" from couplings, to avoid iterating invalid descisions that previously
    would not have been registered due to an earlier mismatch (nodes with multiple decisions). Maybe route 
    HandleDecision through AgentCommon so no algorithmic change needed to agent impls.
+ - Deal with remaining direct overloads of DecidedCompare so they are all ringfenced (extra layer; key as return value?).
  - Bring the looping through the links part out into a new recursive function in Engine
  - Convert it to an explicit stack iterative model
  - Explore options for a more generalised unaware/aware-but-unknown/known sweep. Maybe need to make

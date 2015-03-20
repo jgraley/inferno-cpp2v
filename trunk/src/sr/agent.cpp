@@ -41,6 +41,7 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
 {
     INDENT(" ");
     ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
+    ASSERT( &x ); // Ref to target must not be NULL (i.e. corrupted ref)
     ASSERT( x ); // Target must not be NULL
     ASSERT(this);
 

@@ -21,35 +21,21 @@ class SearchContainerAgent : public virtual AgentCommon
     };
 
 public:
-    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key,
-                                     Conjecture &conj );
+    virtual bool DecidedCompare( const TreePtrInterface &x,
+                                 bool can_key,
+                                 Conjecture &conj );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) = 0;
 
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
+    TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
 };
 
 
 /// Agent that matches an arbitrary subtree, with restrictions on elements therein and terminus support 
 class StuffAgent : public SearchContainerAgent
 {
-public:
-    StuffAgent();
-    TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
-private:
-    class RecurseFilter : public Filter
-    {
-    public:
-        RecurseFilter( StuffAgent *a );
-    private:
-        StuffAgent *agent;
-        virtual bool IsMatch( TreePtr<Node> context,       
-                              TreePtr<Node> root );
-    };
-private:    
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
-    RecurseFilter recurse_filter;
 };
 
 
