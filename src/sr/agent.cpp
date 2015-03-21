@@ -44,61 +44,54 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
     ASSERT( &x ); // Ref to target must not be NULL (i.e. corrupted ref)
     ASSERT( x ); // Target must not be NULL
     ASSERT(this);
-
-    // If the agent is coupled already, check for a coupling match
-    if( TreePtr<Node> keynode = GetCoupled() )
-    {
-        SimpleCompare sc;
-        if( sc( x, keynode ) == false )
-            return false;
-    }
-
-    // Check whether the present node matches. Do this for all nodes: this will be the local
-    // restriction for normal nodes and the pre-restriction for special nodes (based on
-    // how IsLocalMatch() has been overridden.
-    if( !IsLocalMatch(x.get()) )
-    {        
-        return false;
-    }
     
     // Do the agent-specific local checks (x versus characteristics of the present agent)
     // Also takes notes of how child agents link to children of x (depending on conjecture)
     ClearLinks();    
     
-    bool match = DecidedCompareImpl( x, can_key, conj );
-    if( !match )
-        return false;
-          
+    { // Keying
+        // If the agent is coupled already, check for a coupling match
+        if( TreePtr<Node> keynode = GetCoupled() )
+        {
+            SimpleCompare sc;
+            if( sc( x, keynode ) == false )
+                return false;
+        }
+
+        { // Compare
+            bool match = DecidedCompareImpl( x, can_key, conj );
+            if( !match )
+                return false;
+        }
+        
+        // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
+        if( can_key )
+        {
+            DoKey( x );  
+        }
+    }
+
     // Follow up on any links that were noted by the agent impl
-    match = DecidedCompareLinks( can_key, conj );
+    bool match = DecidedCompareLinks( can_key, conj );
     if( !match )
         return false;
       
-    // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
-    if( can_key )
-    {
-        DoKey( x );  
-    }
-
     return true;
 }
 
 
-bool AgentCommon::DecidedCompareImpl( const TreePtrInterface &x,
-                                      bool can_key,
-                                      Conjecture &conj )
-{
-    ASSERTFAIL("Agents must overload one of DecidedCompare() or DecidedCompareImpl()");
-}
-
-
-bool AgentCommon::AbnormalCompare( const TreePtrInterface &x ) 
+bool AgentCommon::AbnormalCompare( const TreePtrInterface &x, 
+                                   bool can_key ) 
 {
     INDENT("A");
     ASSERT( x );
     TRACE("Compare x=")(*x);
     TRACE(" pattern=")(*this);
-    
+
+    // Only run during "restricting" pass
+    if( can_key )
+        return true;
+
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
     Conjecture conj;
@@ -232,7 +225,7 @@ bool AgentCommon::DecidedCompareLinks( bool can_key,
         else
             px = &(l.local_x);        
         if( l.abnormal )
-            r = l.agent->AbnormalCompare(*px);
+            r = l.agent->AbnormalCompare(*px, can_key);
         else
             r = l.agent->DecidedCompare(*px, can_key, conj);
         if( l.invert )

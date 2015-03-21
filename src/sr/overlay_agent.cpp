@@ -9,6 +9,10 @@ bool OverlayAgent::DecidedCompareImpl( const TreePtrInterface &x,
                                           bool can_key,
                                           Conjecture &conj )
 {
+    // Check pre-restriction
+    if( !IsLocalMatch(x.get()) )        
+        return false;
+
     RememberLink( false, AsAgent(GetThrough()), x );
     return true;
 }

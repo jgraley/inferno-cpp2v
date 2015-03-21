@@ -21,9 +21,10 @@ class Agent : public virtual Traceable,
 {
 public:
     virtual bool DecidedCompare( const TreePtrInterface &x,
-                                  bool can_key,
-                                  Conjecture &conj ) = 0;
-    virtual bool AbnormalCompare( const TreePtrInterface &x ) = 0;
+                                 bool can_key,
+                                 Conjecture &conj ) = 0;
+    virtual bool AbnormalCompare( const TreePtrInterface &x, 
+                                  bool can_key ) = 0;
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace() = 0;
@@ -83,8 +84,9 @@ public:
                                  Conjecture &conj );
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key,
-                                     Conjecture &conj );
-    bool AbnormalCompare( const TreePtrInterface &x );
+                                     Conjecture &conj ) = 0;
+    virtual bool AbnormalCompare( const TreePtrInterface &x, 
+                                  bool can_key );
     void DoKey( TreePtr<Node> x );
     void DoKey( shared_ptr<Key> key );
     TreePtr<Node> GetCoupled();                                  

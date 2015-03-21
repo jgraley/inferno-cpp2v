@@ -9,6 +9,11 @@ bool GreenGrassAgent::DecidedCompareImpl( const TreePtrInterface &x,
                                           Conjecture &conj )
 {
     INDENT("G");
+    
+    // Check pre-restriction
+    if( !IsLocalMatch(x.get()) )        
+        return false;
+    
     // Restrict so that everything in the input program under here must be "green grass"
     // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
     if( engine->GetOverallMaster()->dirty_grass.find( x ) != engine->GetOverallMaster()->dirty_grass.end() )
