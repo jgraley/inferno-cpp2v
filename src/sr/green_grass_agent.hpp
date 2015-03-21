@@ -14,8 +14,7 @@ namespace SR
 class GreenGrassAgent : public virtual AgentCommon 
 {
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key,
-                                     Conjecture &conj );
+                                     bool can_key );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual TreePtr<Node> GetThrough() const = 0;
 };

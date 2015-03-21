@@ -15,8 +15,7 @@ class OverlayAgent : public virtual AgentCommon
 {
 public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key,
-                                     Conjecture &conj );
+                                     bool can_key );
     virtual void KeyReplace();
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:

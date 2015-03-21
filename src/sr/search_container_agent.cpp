@@ -6,8 +6,7 @@
 using namespace SR;
 
 bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                               bool can_key,
-                                               Conjecture &conj )
+                                               bool can_key )
 {
     INDENT("#");
     ASSERT( this );
@@ -26,7 +25,7 @@ bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
     shared_ptr<ContainerInterface> pwx = GetContainerInterface( x );
     
     // Get choice from conjecture about where we are in the walk
-    ContainerInterface::iterator thistime = conj.HandleDecision( pwx->begin(), pwx->end() );
+    ContainerInterface::iterator thistime = HandleDecision( pwx->begin(), pwx->end() );
     if( thistime == (ContainerInterface::iterator)(pwx->end()) )
         return false; // ran out of choices
 

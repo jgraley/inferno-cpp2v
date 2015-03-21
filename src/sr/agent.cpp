@@ -16,7 +16,8 @@ Agent *Agent::AsAgent( TreePtr<Node> node )
 
 
 AgentCommon::AgentCommon() :
-    engine(NULL)
+    engine(NULL),
+    pconj(NULL)
 {
 }
 
@@ -48,38 +49,46 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
     // Do the agent-specific local checks (x versus characteristics of the present agent)
     // Also takes notes of how child agents link to children of x (depending on conjecture)
     ClearLinks();    
-    
-    { // Keying
-        // If the agent is coupled already, check for a coupling match
-        if( TreePtr<Node> keynode = GetCoupled() )
-        {
-            SimpleCompare sc;
-            if( sc( x, keynode ) == false )
-                return false;
-        }
-
-        { // Compare
-            bool match = DecidedCompareImpl( x, can_key, conj );
-            if( !match )
-                return false;
-        }
+    pconj = &conj;
         
-        // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
-        if( can_key )
-        {
-            DoKey( x );  
-        }
-    }
+    // Run the compare implementation with couplings check/update
+    bool match = DecidedCompareCoupled( x, can_key );
 
+    pconj = NULL;
+    
     // Follow up on any links that were noted by the agent impl
-    bool match = DecidedCompareLinks( can_key, conj );
-    if( !match )
-        return false;
+    if( match )
+        match = DecidedCompareLinks( can_key, conj );
       
-    return true;
+    return match;
 }
 
 
+bool AgentCommon::DecidedCompareCoupled( const TreePtrInterface &x,
+                                         bool can_key )
+{
+    // If the agent is coupled already, check for a coupling match
+    if( TreePtr<Node> keynode = GetCoupled() )
+    {
+        SimpleCompare sc;
+        if( sc( x, keynode ) == false )
+            return false;
+    }
+
+    bool match = DecidedCompareImpl( x, can_key );
+    if( !match )
+        return false;
+    
+    // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
+    if( can_key )
+    {
+        DoKey( x );  
+    }
+    
+    return true;
+}
+
+    
 bool AgentCommon::AbnormalCompare( const TreePtrInterface &x, 
                                    bool can_key ) 
 {
@@ -192,6 +201,14 @@ void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
     l.local_x = x;
     l.invert = false;
     links.links.insert( l );
+}
+
+
+ContainerInterface::iterator AgentCommon::HandleDecision( ContainerInterface::iterator begin,
+                                                          ContainerInterface::iterator end )
+{
+    ASSERT( pconj )("AgentCommon::HandleDecision() called outside of DecidedCompareImpl()");
+    return pconj->HandleDecision( begin, end );
 }
 
 

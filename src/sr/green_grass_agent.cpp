@@ -5,8 +5,7 @@
 using namespace SR;
 
 bool GreenGrassAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                          bool can_key,
-                                          Conjecture &conj )
+                                          bool can_key )
 {
     INDENT("G");
     

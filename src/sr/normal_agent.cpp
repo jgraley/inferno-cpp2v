@@ -9,8 +9,7 @@
 using namespace SR;
 
 bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
-							          bool can_key,
-    						          Conjecture &conj )
+							          bool can_key )
 {
     INDENT(".");
 
@@ -35,14 +34,14 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
             SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
             ASSERT( x_seq )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
-            r = DecidedCompareSequence( *x_seq, *pattern_seq, can_key, conj );
+            r = DecidedCompareSequence( *x_seq, *pattern_seq, can_key );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
             CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
-            r = DecidedCompareCollection( *x_col, *pattern_col, can_key, conj );
+            r = DecidedCompareCollection( *x_col, *pattern_col, can_key );
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -70,8 +69,7 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
 
 bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
 		                                  SequenceInterface &pattern,
-		                                  bool can_key,
-		                                  Conjecture &conj )
+		                                  bool can_key )
 {
     INDENT(" ");
     
@@ -109,12 +107,8 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
                 TRACE("Pattern continues after star\n");
 
                 // Decide how many elements the current * should match, using conjecture. Jump forward
-                // that many elements, to the element after the star. We need to use the special 
-                // interface to Conjecture because the iterator we get is itself an end to the 
-                // range matched by the star, and so x.end() is a legitimate choice for ss.end()
-                // So allow the Conjecture class to give us two ends, and only give up on the second.
-                Conjecture::Choice *current_choice = conj.GetChoicePtr();
-                xit = conj.HandleDecision( xit_begin_star, x.end(), 1 );
+                // that many elements, to the element after the star. 
+                xit = HandleDecision( xit_begin_star, x.end() );
             }
             
             // Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
@@ -123,14 +117,14 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern
-            bool r = psa->DecidedCompare( xss, can_key, conj );
+            bool r = psa->DecidedCompare( xss, can_key, *pconj );
             if( !r )
                 return false;
         }
  	    else // not a Star so match singly...
 	    {
             // If there is one more element in x, see if it matches the pattern
-			if( xit != x.end() && pea->DecidedCompare( *xit, can_key, conj ) == true )
+			if( xit != x.end() && pea->DecidedCompare( *xit, can_key, *pconj ) == true )
 			{
 				++xit;
 			}
@@ -150,8 +144,7 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
 
 bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 		 					                CollectionInterface &pattern,
-							                bool can_key,
-							                Conjecture &conj )
+							                bool can_key )
 {
     INDENT(" ");
     
@@ -179,7 +172,7 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 	    else // not a Star so match singly...
 	    {
 	    	// We have to decide which node in the tree to match, so use the present conjecture
-	    	ContainerInterface::iterator xit = conj.HandleDecision( x.begin(), x.end() );
+	    	ContainerInterface::iterator xit = HandleDecision( x.begin(), x.end() );
 			if( xit == x.end() )
 				return false;
 
@@ -190,7 +183,7 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 	    		return false;
 
 	    	// Recurse into comparison function for the chosen node
-			if( !Agent::AsAgent(TreePtr<Node>(*pit))->DecidedCompare( *xit, can_key, conj ) )
+			if( !Agent::AsAgent(TreePtr<Node>(*pit))->DecidedCompare( *xit, can_key, *pconj ) )
 			    return false;
 	    }
     }

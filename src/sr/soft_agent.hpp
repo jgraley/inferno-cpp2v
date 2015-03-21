@@ -15,13 +15,11 @@ class SoftAgent : public virtual AgentCommon
 {
 public:
     SoftAgent() :
-        current_can_key( false ),
-        current_conj( NULL )
+        current_can_key( false )
     {}
     void AgentConfigure( const Engine *e );
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key,
-                                     Conjecture &conj );
+                                     bool can_key );
     // This entrypoint is actually called by the main engine before the replace
     // and the results are put into a key. This one calls into the impl.
     virtual void KeyReplace(); 
@@ -46,7 +44,6 @@ protected: // Call only from the soft node implementation in MyCompare()
     TreePtr<Node> DoBuildReplace( TreePtr<Node> pattern ) ;
 protected:
     bool current_can_key;
-    Conjecture *current_conj; 
 };
 
 };

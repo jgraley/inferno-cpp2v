@@ -4,8 +4,7 @@
 using namespace SR;
 
 bool NotMatchAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                        bool can_key,
-                                        Conjecture &conj )
+                                        bool can_key )
 {
     INDENT("!");
     ASSERT( GetPattern() );
@@ -20,8 +19,7 @@ bool NotMatchAgent::DecidedCompareImpl( const TreePtrInterface &x,
 
 
 bool MatchAllAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                        bool can_key,
-                                        Conjecture &conj )
+                                        bool can_key )
 {
     INDENT("&");
     
@@ -41,8 +39,7 @@ bool MatchAllAgent::DecidedCompareImpl( const TreePtrInterface &x,
 
 
 bool MatchAnyAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                        bool can_key,
-                                        Conjecture &conj )
+                                        bool can_key )
 {
     INDENT("|");
     
@@ -52,7 +49,7 @@ bool MatchAnyAgent::DecidedCompareImpl( const TreePtrInterface &x,
     
     ContainerInterface::iterator b = GetPatterns().begin();
     ContainerInterface::iterator e = GetPatterns().end();
-    ContainerInterface::iterator pit = conj.HandleDecision( b, e );
+    ContainerInterface::iterator pit = HandleDecision( b, e );
     RememberLink( true, AsAgent(*pit), x );
     return true;
 }
