@@ -82,9 +82,10 @@ public:
     virtual bool DecidedCompare( const TreePtrInterface &x,
                                  bool can_key,
                                  Conjecture &conj );
+    virtual bool DecidedCompareCoupled( const TreePtrInterface &x,
+                                        bool can_key );
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key,
-                                     Conjecture &conj ) = 0;
+                                     bool can_key ) = 0;
     virtual bool AbnormalCompare( const TreePtrInterface &x, 
                                   bool can_key );
     void DoKey( TreePtr<Node> x );
@@ -96,6 +97,8 @@ public:
     void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x );
     void RememberInvertedLink( Agent *a, const TreePtrInterface &x );
     void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x );
+    ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
+                                                 ContainerInterface::iterator end );
     bool DecidedCompareLinks( bool can_key,
                               Conjecture &conj );
 
@@ -113,6 +116,7 @@ public:
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
     const Engine *engine;    
+    Conjecture *pconj; // TODO make private once references removed from NormalAgent
     
 private:    
     shared_ptr<Key> coupling_key;    

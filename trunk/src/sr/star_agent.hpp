@@ -20,8 +20,7 @@ class StarAgent : public virtual AgentCommon
 {
 public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x, // x must be a SubContainer
-                                     bool can_key,
-                                     Conjecture &conj );
+                                     bool can_key );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:
     virtual TreePtr<Node> GetRestriction() = 0;

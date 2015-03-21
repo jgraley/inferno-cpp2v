@@ -15,8 +15,7 @@ class NotMatchAgent : public AgentCommon
 {
 public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key,
-                                     Conjecture &conj );
+                                     bool can_key );
 private:
     virtual TreePtr<Node> GetPattern() const = 0;
 };
@@ -47,8 +46,7 @@ class MatchAllAgent : public AgentCommon
 {
 public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key,
-                                     Conjecture &conj );
+                                     bool can_key );
 private:
     virtual const CollectionInterface &GetPatterns() const = 0;
 };
@@ -76,8 +74,7 @@ class MatchAnyAgent : public AgentCommon
 {
 public:
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key,
-                                     Conjecture &conj );
+                                     bool can_key );
 private:
     virtual CollectionInterface &GetPatterns() const = 0;
 };
