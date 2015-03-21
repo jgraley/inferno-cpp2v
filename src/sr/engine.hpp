@@ -54,6 +54,12 @@ public:
 
     //friend class NormalAgent;
     friend class Conjecture;
+
+    virtual void SetStopAfter( vector<int> ssa, int d=0 )
+    {
+        stop_after = ssa;
+        depth = d;
+    }
     
 private:
     bool is_search;
@@ -65,6 +71,9 @@ private:
     
     static int repetitions;
     static bool rep_error;
+    
+    vector<int> stop_after;
+    int depth;    
 };
 
 };

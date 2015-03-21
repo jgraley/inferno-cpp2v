@@ -3,6 +3,7 @@
 
 #include "node/node.hpp"
 #include "common/trace.hpp"
+#include "common/read_args.hpp"
 
 // TODO For in-place, use (*pcontext, *proot) rather than (context, *root). This 
 // way the caller has to decide whether the context node is the same as the root node, 
@@ -43,6 +44,10 @@ public:
                                vector< TreePtr<Node> > *links ) const 
     {
     }
+    
+    virtual void SetStopAfter( vector<int> ssa, int depth=0 )
+    {
+    }
 };
 
 
@@ -77,17 +82,46 @@ public:
 class TransformationVector : public vector< shared_ptr<Transformation> >,
                              public InPlaceTransformation
 {
+public:
+    TransformationVector() :
+        depth(0)
+    {
+    }
+        
     virtual void operator()( TreePtr<Node> context,     // The whole program, so declarations may be searched for
 		                     TreePtr<Node> *proot )     // Root of the subtree we want to modify
     {
+        INDENT("¬");
         TreePtr<Node> *pcontext;
         if( context = *proot )
             pcontext = proot;
         else 
             pcontext = &context;
+        int i = 0;
         FOREACH( shared_ptr<Transformation> t, *this )
+        {
+            TRACE("Transformation vector element %d ", i)(*t)("\n");
+            bool stop = depth < stop_after.size() && stop_after[depth]==i;
+            if( stop )
+                t->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
             (*t)(*pcontext, proot);
+            if( stop )
+            {
+                TRACE("Stopping after sub-step %d\n", stop_after[depth]);
+                break;
+            }
+            i++;
+        }                            
     }		                           
+    virtual void SetStopAfter( vector<int> ssa, int d=0 )
+    {
+        stop_after = ssa;
+        depth = d;
+    }
+    
+private:    
+    vector<int> stop_after;
+    int depth;
 };
 
 

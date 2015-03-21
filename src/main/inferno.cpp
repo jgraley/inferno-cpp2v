@@ -186,7 +186,7 @@ int main( int argc, char *argv[] )
     TreePtr<Node> program = TreePtr<Node>();
     Parse p(ReadArgs::infile);
     p( program, &program );
- 
+            
     if( ReadArgs::runonlyenable )
     {
         // Apply only the transformation requested
@@ -197,24 +197,25 @@ int main( int argc, char *argv[] )
         CompareReplace::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
         (*t)( &program );
     }
-    else
+    else if( !(!ReadArgs::quitafter.empty() && ReadArgs::quitafter[0]==-1 ) )
     {
         // Apply the transformation steps in order, but quit early if requested to
         int i=0;
         FOREACH( shared_ptr<Transformation> t, sequence )
         {
-            if( ReadArgs::quitafter-- == 0 )
-                break;
+            bool allow = ReadArgs::quitafter.empty() || ReadArgs::quitafter[0]==i;
             if( !ReadArgs::trace_quiet )
                 fprintf(stderr, "%s step %d: %s\n", ReadArgs::infile.c_str(), i, t->GetName().c_str() ); 
-            Tracer::Enable( ReadArgs::trace && (!ReadArgs::quitenable || ReadArgs::quitafter==0) ); 
-            HitCount::Enable( ReadArgs::trace_hits && (!ReadArgs::quitenable || ReadArgs::quitafter==0) ); 
-            if( (!ReadArgs::quitenable || ReadArgs::quitafter==0) )
+            Tracer::Enable( ReadArgs::trace && allow ); 
+            HitCount::Enable( ReadArgs::trace_hits && allow ); 
+            if( allow )
                 CompareReplace::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
             else
                 CompareReplace::SetMaxReps( 100, true );
             HitCount::instance.SetStep(i);
             SerialNumber::SetStep(i);
+            if( allow )
+                t->SetStopAfter(ReadArgs::quitafter, 1);
             (*t)( &program );
             if( ReadArgs::output_all )
             {
@@ -225,6 +226,11 @@ int main( int argc, char *argv[] )
                 //g( &program );    
             }
                 
+            if( !ReadArgs::quitafter.empty() && ReadArgs::quitafter[0]==i )
+            {
+                TRACE("Stopping after step %d", ReadArgs::quitafter[0]);
+                break;
+            }
             i++;
         }
     }

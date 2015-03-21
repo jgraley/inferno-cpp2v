@@ -30,6 +30,7 @@ public:
                     
     
     using Transformation::operator();
+    // Functor style interface for RepeatingSearchReplace; implements Pass interface.
     void operator()( TreePtr<Node> context, 
                      TreePtr<Node> *proot );
 
@@ -44,7 +45,10 @@ public:
     friend class Conjecture;
     virtual bool IsMatch( TreePtr<Node> context,       
                           TreePtr<Node> root );
-   // Functor style interface for RepeatingSearchReplace; implements Pass interface.
+    virtual void SetStopAfter( vector<int> ssa, int d=0 )
+    {
+        Engine::SetStopAfter( ssa, d );
+    }
 };
 
 

@@ -2,6 +2,7 @@
 #define READ_ARGS_HPP
 
 #include <string>
+#include <vector>
 
 // Try to share one command line args parser between all executable
 // targets so usage is consistent and to avoid duplciation. We allow
@@ -23,8 +24,7 @@ public:
     static bool trace_hits;    
     static bool trace_quiet;    
     static std::string hits_format;
-    static int quitafter;
-    static bool quitenable;
+    static std::vector<int> quitafter;
     static int runonlystep;
     static bool runonlyenable;
     static int repetitions;
@@ -34,6 +34,7 @@ public:
     static bool documentation_graphs;
     static bool output_all;
 private:
+    void ParseQuitAfter(std::string arg);
     int curarg;
     char **argv;
     int argc;
