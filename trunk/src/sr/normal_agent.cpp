@@ -117,20 +117,19 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern
-            bool r = psa->DecidedCompare( xss, can_key, *pconj );
-            if( !r )
-                return false;
+            RememberLocalLink( false, psa, xss );
         }
  	    else // not a Star so match singly...
 	    {
             // If there is one more element in x, see if it matches the pattern
-			if( xit != x.end() && pea->DecidedCompare( *xit, can_key, *pconj ) == true )
+			if( xit != x.end() ) 
 			{
+                RememberLink( false, pea, *xit );
 				++xit;
 			}
 			else
 			{
-				TRACE("Element mismatched\n");
+				TRACE("Sequence too short\n");
 				return false;
 			}
 	    }
@@ -163,8 +162,8 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
     			xremaining->size(),
     			pattern.size(),
     			TypeInfo( TreePtr<Node>(*pit) ).name().c_str() );
-   
-        if( StarAgent *s = dynamic_cast<StarAgent *>( Agent::AsAgent(TreePtr<Node>(*pit)) ) ) // Star in pattern collection?
+        Agent *pia = Agent::AsAgent(TreePtr<Node>(*pit));
+        if( StarAgent *s = dynamic_cast<StarAgent *>( pia ) ) // Star in pattern collection?
         {
         	ASSERT(!star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
             star = s; // remember for later and skip to next pattern
@@ -174,7 +173,7 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 	    	// We have to decide which node in the tree to match, so use the present conjecture
 	    	ContainerInterface::iterator xit = HandleDecision( x.begin(), x.end() );
 			if( xit == x.end() )
-				return false;
+				return false; // TODO try asserting that this doesn't happen
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.
@@ -183,8 +182,7 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 	    		return false;
 
 	    	// Recurse into comparison function for the chosen node
-			if( !Agent::AsAgent(TreePtr<Node>(*pit))->DecidedCompare( *xit, can_key, *pconj ) )
-			    return false;
+			RememberLink( false, pia, *xit );
 	    }
     }
 

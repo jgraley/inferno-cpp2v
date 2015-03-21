@@ -5,12 +5,12 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
+#include "conjecture.hpp"
 #include <vector>
 #include <boost/type_traits.hpp>
  
 namespace SR
 { 
-class Conjecture;
 class SpecialBase;
 class Engine;
 
@@ -45,6 +45,7 @@ public:
         const TreePtrInterface *px;
         TreePtr<Node> local_x;
         bool invert;
+        Conjecture::Mark mark;
     };
     
     void clear()
@@ -116,11 +117,11 @@ public:
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
     const Engine *engine;    
-    Conjecture *pconj; // TODO make private once references removed from NormalAgent
     
 private:    
     shared_ptr<Key> coupling_key;    
     Links links;
+    Conjecture *pconj;
 };
 
 

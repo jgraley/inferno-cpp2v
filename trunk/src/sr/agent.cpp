@@ -49,17 +49,17 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
     // Do the agent-specific local checks (x versus characteristics of the present agent)
     // Also takes notes of how child agents link to children of x (depending on conjecture)
     ClearLinks();    
+    ASSERT(!pconj)("Recursion!!!!");
     pconj = &conj;
         
     // Run the compare implementation with couplings check/update
     bool match = DecidedCompareCoupled( x, can_key );
-
-    pconj = NULL;
     
     // Follow up on any links that were noted by the agent impl
     if( match )
         match = DecidedCompareLinks( can_key, conj );
-      
+    pconj = NULL;
+    
     return match;
 }
 
@@ -169,30 +169,37 @@ void AgentCommon::ClearLinks()
 
 void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x )
 {
+    ASSERT( pconj );
     Links::Link l;
     l.abnormal = abnormal;
     l.agent = a;
     l.px = &x;
     l.local_x = TreePtr<Node>();
     l.invert = false;
+    l.mark = pconj->GetMark();
+    TRACE("Remembering link ")(*a)("->")(*x)(abnormal?" abnormal":" normal")(" mark=%d\n", l.mark);
     links.links.insert( l );
 }
 
 
 void AgentCommon::RememberInvertedLink( Agent *a, const TreePtrInterface &x )
 {
+    ASSERT( pconj );
     Links::Link l;
     l.abnormal = true; // always
     l.agent = a;
     l.px = &x;
     l.local_x = TreePtr<Node>();
     l.invert = true;
+    l.mark = pconj->GetMark();
+    TRACE("Remembering inverted link ")(*a)("->")(*x)(" mark=%d\n", l.mark);
     links.links.insert( l );
 }
 
 
 void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
 {
+    ASSERT( pconj );
     ASSERT(x);
     Links::Link l;
     l.abnormal = abnormal;
@@ -200,6 +207,8 @@ void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
     l.px = NULL;    
     l.local_x = x;
     l.invert = false;
+    l.mark = pconj->GetMark();
+    TRACE("Remembering local link ")(*a)("->")(*x)(abnormal?" abnormal":" normal")(" mark=%d\n", l.mark);
     links.links.insert( l );
 }
 
@@ -225,6 +234,8 @@ bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
     if( l0.invert != l1.invert )
         return (int)l0.invert < (int)l1.invert;
     
+    ASSERT( l0.mark==l1.mark );
+    
     return false; // equal
 }
 
@@ -235,6 +246,7 @@ bool AgentCommon::DecidedCompareLinks( bool can_key,
     // Follow up on any links that were noted by the agent impl
     FOREACH( const Links::Link &l, links.links )
     {
+        TRACE("Comparing link\n");
         bool r;
         const TreePtrInterface *px;
         if( l.px )
@@ -248,7 +260,12 @@ bool AgentCommon::DecidedCompareLinks( bool can_key,
         if( l.invert )
             r = !r || can_key; // only apply during restricting pass 
         if( !r )
+        {
+            TRACE("Link compare failed; reverting conjecture\n");
+            // Discard decisions that were registered after a failing compare 
+            //conj.ReturnToMark( l.mark );
             return false;
+        }
     }
     return true;
 }

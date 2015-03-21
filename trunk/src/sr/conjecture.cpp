@@ -53,7 +53,15 @@ bool Conjecture::Increment()
         TRACE("Giving up\n");
 	    return false;
 	}
-	else if( choices.back().it != choices.back().end )
+	
+    if( choices.back().bad )
+    {
+        TRACE("Discarding bad decision #%d\n", choices.size()-1);
+        choices.resize( choices.size()-1 );
+        return Increment();  
+    }
+	
+	if( choices.back().it != choices.back().end )
 	{
     	ResizeCounts();
         inc_counts[choices.size()-1]++;
@@ -69,7 +77,7 @@ bool Conjecture::Increment()
         if( choices.back().end_count > choices.back().end_num )
         {
             choices.resize( choices.size()-1 );
-            return Increment();  // TODO use a loop?
+            return Increment();  
         }
     }
        	    
@@ -92,7 +100,7 @@ ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::ite
 		c.end = end; // Choose the first option supplied
 		c.end_count = 0;
 		c.end_num = en;
-		c.forced = false;
+		c.bad = false;
 		choices.push_back( c ); // append this decision so we will iterate it later
         
         ResizeCounts();
@@ -132,5 +140,26 @@ void Conjecture::ResizeCounts()
         inc_counts[inc_counts.size()-1] = 0;
     }
 }
+
+
+Conjecture::Mark Conjecture::GetMark()
+{
+    TRACE("Remembering mark decision #%d\n", decision_index);
+    return decision_index;
+}
+
+
+void Conjecture::ReturnToMark( Mark mark )
+{
+    ASSERT( mark>=0 );
+    ASSERT( mark<=choices.size() );
+    ASSERT( mark<=decision_index );
+    
+    for( int i=mark; i<decision_index; i++ )
+    {
+        TRACE("Setting decision #%d bad\n", i);
+        choices[i].bad = true;
+    }
+}    
 
 };
