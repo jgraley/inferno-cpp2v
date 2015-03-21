@@ -20,7 +20,8 @@ bool Engine::rep_error;
 
 Engine::Engine( bool is_s ) :
     is_search( is_s ),
-    master_ptr( NULL )
+    master_ptr( NULL ),
+    depth( 0 )
 {
 }    
     
@@ -254,10 +255,19 @@ int Engine::RepeatingCompareReplace( TreePtr<Node> *proot )
     
     for(int i=0; i<repetitions; i++) 
     {
+        bool stop = depth < stop_after.size() && stop_after[depth]==i;
+        if( stop )
+            FOREACH( Engine *e, my_engines )
+                e->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
         bool r = SingleCompareReplace( proot );
         TRACE("SCR result %d\n", r);        
         if( !r )
             return i; // when the compare fails, we're done
+        if( stop )
+        {
+            TRACE("Stopping after hit %d\n", stop_after[depth]);
+            return i;
+        }    
     }
     
     TRACE("Over %d reps\n", repetitions); 

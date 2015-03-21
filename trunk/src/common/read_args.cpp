@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
+using namespace std;
+
 std::string ReadArgs::exename;
 std::string ReadArgs::infile;
 std::string ReadArgs::outfile;
@@ -17,8 +20,7 @@ std::string ReadArgs::hits_format;
 bool ReadArgs::selftest = false;
 int ReadArgs::runonlystep = 0; 
 bool ReadArgs::runonlyenable = false; 
-int ReadArgs::quitafter = 0x7fffffff; // basically never
-bool ReadArgs::quitenable = false;
+vector<int> ReadArgs::quitafter;
 int ReadArgs::repetitions = 100; // default behaviour
 bool ReadArgs::rep_error = true; // default behaviour
 bool ReadArgs::assert_pedigree = false;
@@ -140,8 +142,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         }
         else if( option=='q' )
         {
-        	quitafter = strtoul( GetArg().c_str(), NULL, 10 );
-        	quitenable = true;
+            ParseQuitAfter( string(argv[curarg]+2) );
         }
         else if( option=='n' )
         {
@@ -165,4 +166,32 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         !(trace_hits && hits_format==std::string("?") ) &&
         !documentation_graphs )
         Usage();
+}
+
+// quitafter syntax
+// "step.sub0.sub1.sub2.master.slave1.slave2.slave3"
+// or "p" for parse
+void ReadArgs::ParseQuitAfter(string arg)
+{
+    if( arg[0]=='p' ) // Quit after parse - nothing more to know
+    {
+        quitafter.push_back(-1);
+        return;
+    }
+    
+    int p = 0;
+    int i = 0;
+    int dot = 0;
+    do
+    {
+        dot = arg.find('.', p);
+        string s;
+        if( dot != string::npos )   
+            s = arg.substr(p, dot-p);
+        else 
+            s = arg.substr(p);
+        int v = atoi(s.c_str());
+        quitafter.push_back(v);
+        p = dot+1;
+    } while( dot != string::npos );
 }
