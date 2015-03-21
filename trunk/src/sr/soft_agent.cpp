@@ -16,6 +16,11 @@ bool SoftAgent::DecidedCompareImpl( const TreePtrInterface &x,
                                     Conjecture &conj )
 {
     INDENT("%");
+
+    // Check pre-restriction
+    if( !IsLocalMatch(x.get()) )        
+        return false;
+
     ASSERT( !current_conj )("DecidedCompare() recursion detected in soft node");
     current_can_key = can_key;
     current_conj = &conj;   

@@ -9,6 +9,11 @@ bool NotMatchAgent::DecidedCompareImpl( const TreePtrInterface &x,
 {
     INDENT("!");
     ASSERT( GetPattern() );
+    
+    // Check pre-restriction
+    if( !IsLocalMatch(x.get()) )        
+        return false;
+    
     RememberInvertedLink( AsAgent(GetPattern()), x );
     return true;
 }
@@ -19,6 +24,11 @@ bool MatchAllAgent::DecidedCompareImpl( const TreePtrInterface &x,
                                         Conjecture &conj )
 {
     INDENT("&");
+    
+    // Check pre-restriction
+    if( !IsLocalMatch(x.get()) )        
+        return false;
+    
     FOREACH( const TreePtr<Node> p, GetPatterns() )
     {
         ASSERT( p );
@@ -35,6 +45,11 @@ bool MatchAnyAgent::DecidedCompareImpl( const TreePtrInterface &x,
                                         Conjecture &conj )
 {
     INDENT("|");
+    
+    // Check pre-restriction
+    if( !IsLocalMatch(x.get()) )        
+        return false;
+    
     ContainerInterface::iterator b = GetPatterns().begin();
     ContainerInterface::iterator e = GetPatterns().end();
     ContainerInterface::iterator pit = conj.HandleDecision( b, e );

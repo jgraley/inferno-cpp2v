@@ -5,34 +5,19 @@
 
 using namespace SR;
 
-bool SearchContainerAgent::DecidedCompare( const TreePtrInterface &x,
-                                           bool can_key,
-                                           Conjecture &conj )
+bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
+                                               bool can_key,
+                                               Conjecture &conj )
 {
     INDENT("#");
     ASSERT( this );
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
 
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(*x)("\n");
-
-    if( TreePtr<Node> keynode = GetCoupled() )
-    {
-        SimpleCompare sc;
-        if( sc( x, keynode ) == false )
-            return false;
-    }
-
-    // Check whether the present node matches. Do this for all nodes: this will be the local
-    // restriction for normal nodes and the pre-restriction for special nodes (based on
-    // how IsLocalMatch() has been overridden.
-    if( !IsLocalMatch(x.get()) )
-    {        
+    // Check pre-restriction
+    if( !IsLocalMatch(x.get()) )        
         return false;
-    }
 
-    // Do the agent-specific local checks (x versus characteristics of the present agent)
-    // Also takes notes of how child agents link to children of x (depending on conjecture)
-    ClearLinks();    
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(*x)("\n");
 
     // Get an interface to the container we will search
     // TODO what is keeping pwx alive after this funciton exits? Are the iterators 
@@ -62,11 +47,6 @@ bool SearchContainerAgent::DecidedCompare( const TreePtrInterface &x,
     TRACE("Trying terminus ")(**thistime);
     RememberLink( false, AsAgent(terminus), *thistime );
             
-    // Follow up on any links that were noted by the agent impl
-    bool match = DecidedCompareLinks( can_key, conj );
-    if( !match )
-        return false;
-
     // If we got this far, do the couplings
     if( can_key )
     {

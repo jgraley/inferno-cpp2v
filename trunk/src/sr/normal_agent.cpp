@@ -13,6 +13,11 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
     						          Conjecture &conj )
 {
     INDENT(".");
+
+    // Check pre-restriction
+    if( !IsLocalMatch(x.get()) )        
+        return false;
+
     // Recurse through the children. Note that the itemiser internally does a
     // dynamic_cast onto the type of pattern, and itemises over that type. x must
     // be dynamic_castable to pattern's type.

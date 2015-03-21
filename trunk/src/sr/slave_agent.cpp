@@ -17,6 +17,11 @@ bool SlaveAgent::DecidedCompareImpl( const TreePtrInterface &x,
                                      Conjecture &conj )
 {
     INDENT("l");
+
+    // Check pre-restriction
+    if( !IsLocalMatch(x.get()) )        
+        return false;
+
     // When a slave node seen duriung search, just forward through the "through" path
     RememberLink( false, AsAgent(GetThrough()), x );
     return true;

@@ -21,9 +21,9 @@ class SearchContainerAgent : public virtual AgentCommon
     };
 
 public:
-    virtual bool DecidedCompare( const TreePtrInterface &x,
-                                 bool can_key,
-                                 Conjecture &conj );
+    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
+                                     bool can_key,
+                                     Conjecture &conj );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) = 0;
 
