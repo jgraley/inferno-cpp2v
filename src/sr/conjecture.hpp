@@ -19,8 +19,9 @@ public:
         ContainerInterface::iterator end;        
         int end_count;
         int end_num;
-        bool forced;
+        bool bad;
     };
+    typedef int Mark;
 public:
     Conjecture();
     ~Conjecture();
@@ -40,6 +41,9 @@ public:
     
     Choice *GetChoicePtr() { return decision_index < choices.size() ? &choices[decision_index] : NULL; } // TODO should be const ptr
     Choice *GetPrevChoicePtr() { return (decision_index>0 && decision_index-1 < choices.size()) ? &choices[decision_index-1] : NULL; } // TODO should be const ptr
+				   
+    Mark GetMark();
+    void ReturnToMark( Mark mark ); // call with the mark from the last valid decision
 				   
 private:
 	int decision_index;
