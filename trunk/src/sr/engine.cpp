@@ -167,6 +167,7 @@ bool Engine::Compare( const TreePtrInterface &x ) const
     // though different conjectures trying to find one that allows a match.
     Conjecture conj;
     bool r;
+    //int i=0;
     while(1)
     {
         // Try out the current conjecture. This will call HandlDecision() once for each decision;
@@ -195,10 +196,16 @@ bool Engine::Compare( const TreePtrInterface &x ) const
         
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
         if( r )
+        {
+            TRACE("ConjSpin Engine hit\n");
             break; // Success
+        }
             
         if( !conj.Increment() )
-            break; // Failure            
+            break; // Failure                   
+
+        //assert(i<1000);
+        //i++;
     }
     return r;
 }
@@ -262,7 +269,11 @@ int Engine::RepeatingCompareReplace( TreePtr<Node> *proot )
         bool r = SingleCompareReplace( proot );
         TRACE("SCR result %d\n", r);        
         if( !r )
+        {
+            if( depth < stop_after.size() )
+                ASSERT(stop_after[depth]<i)("Stop requested after hit that doesn't happen, there are only %d", i);
             return i; // when the compare fails, we're done
+        }
         if( stop )
         {
             TRACE("Stopping after hit %d\n", stop_after[depth]);

@@ -43,7 +43,7 @@ bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
     }
     
     // Try out comparison at this position
-    TRACE("Trying terminus ")(**thistime);
+    TRACE("Trying terminus ")(**thistime)("\n");
     RememberLink( false, AsAgent(terminus), *thistime );
             
     // If we got this far, do the couplings
@@ -53,7 +53,7 @@ bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
         key->root = x;
         key->terminus = *thistime;
         shared_ptr<Key> sckey( key );
-        TRACE("Matched, so keying search container type ")(*this)(" for ")(*x);
+        TRACE("Matched, so keying search container type ")(*this)(" for ")(*x)("\n");
         DoKey( sckey );    
     }
     return true;

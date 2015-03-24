@@ -16,17 +16,17 @@ public:
     struct Choice
     {
         ContainerInterface::iterator it;
-        ContainerInterface::iterator end;        
+        ContainerInterface::iterator end;   
+        int choice_num;
         int end_count;
         int end_num;
-        bool bad;
     };
     typedef int Mark;
 public:
     Conjecture();
     ~Conjecture();
 	void PrepareForDecidedCompare();    			                                     
-    bool Increment(); // returns true for try again, false for give up				 
+    bool Increment(bool trace=true); // returns true for try again, false for give up				 
     				   
     // General note: decided compare functions should call one of HandleDecision() or 
     // GetDecision() before calling other functions like ReportDecision() or
@@ -42,8 +42,7 @@ public:
     Choice *GetChoicePtr() { return decision_index < choices.size() ? &choices[decision_index] : NULL; } // TODO should be const ptr
     Choice *GetPrevChoicePtr() { return (decision_index>0 && decision_index-1 < choices.size()) ? &choices[decision_index-1] : NULL; } // TODO should be const ptr
 				   
-    Mark GetMark();
-    void ReturnToMark( Mark mark ); // call with the mark from the last valid decision
+    string ChoiceAsString(const Choice &c);
 				   
 private:
 	int decision_index;

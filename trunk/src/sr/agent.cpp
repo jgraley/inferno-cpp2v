@@ -46,20 +46,31 @@ bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
     ASSERT( x ); // Target must not be NULL
     ASSERT(this);
     
+    //Conjecture::Mark start_mark = conj.GetMark(); 
+        
     // Do the agent-specific local checks (x versus characteristics of the present agent)
     // Also takes notes of how child agents link to children of x (depending on conjecture)
     ClearLinks();    
     ASSERT(!pconj)("Recursion!!!!");
     pconj = &conj;
-        
+    
+    TRACE(*this)(" Gathering links\n");    
     // Run the compare implementation with couplings check/update
     bool match = DecidedCompareCoupled( x, can_key );
+    if(!match)
+        TRACE(*this)(" local mismatch, aborting\n");
     
     // Follow up on any links that were noted by the agent impl
     if( match )
+    {
+        TRACE(*this)(" Comparing links\n");    
         match = DecidedCompareLinks( can_key, conj );
+    }
     pconj = NULL;
     
+    //conj.ResoreDecisionIndex( start_mark );    
+  
+    TRACE(*this)(" Done\n");        
     return match;
 }
 
@@ -105,6 +116,7 @@ bool AgentCommon::AbnormalCompare( const TreePtrInterface &x,
     // though different conjectures trying to find one that allows a match.
     Conjecture conj;
     bool r;
+    //int i = 0;
     while(1)
     {
         conj.PrepareForDecidedCompare();
@@ -112,10 +124,16 @@ bool AgentCommon::AbnormalCompare( const TreePtrInterface &x,
         
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
         if( r )
+        {
+            TRACE("ConjSpin Abnormal hit\n");            
             break; // Success
+        }
             
         if( !conj.Increment() )
-            break; // Failure            
+            break; // Failure        
+            
+        //assert(i<1000);
+        //i++;
     }
     return r;
 }
@@ -176,9 +194,8 @@ void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface 
     l.px = &x;
     l.local_x = TreePtr<Node>();
     l.invert = false;
-    l.mark = pconj->GetMark();
-    TRACE("Remembering link ")(*a)("->")(*x)(abnormal?" abnormal":" normal")(" mark=%d\n", l.mark);
-    links.links.insert( l );
+    TRACE("Remembering link %d ", links.links.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
+    links.links.push_back( l );
 }
 
 
@@ -191,9 +208,8 @@ void AgentCommon::RememberInvertedLink( Agent *a, const TreePtrInterface &x )
     l.px = &x;
     l.local_x = TreePtr<Node>();
     l.invert = true;
-    l.mark = pconj->GetMark();
-    TRACE("Remembering inverted link ")(*a)("->")(*x)(" mark=%d\n", l.mark);
-    links.links.insert( l );
+    TRACE("Remembering inverted link %d ", links.links.size())(*a)(" -> ")(*x)("\n");
+    links.links.push_back( l );
 }
 
 
@@ -207,9 +223,8 @@ void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
     l.px = NULL;    
     l.local_x = x;
     l.invert = false;
-    l.mark = pconj->GetMark();
-    TRACE("Remembering local link ")(*a)("->")(*x)(abnormal?" abnormal":" normal")(" mark=%d\n", l.mark);
-    links.links.insert( l );
+    TRACE("Remembering local link %d ", links.links.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
+    links.links.push_back( l );
 }
 
 
@@ -233,9 +248,7 @@ bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
         return l0.local_x < l1.local_x;    
     if( l0.invert != l1.invert )
         return (int)l0.invert < (int)l1.invert;
-    
-    ASSERT( l0.mark==l1.mark );
-    
+        
     return false; // equal
 }
 
@@ -244,9 +257,10 @@ bool AgentCommon::DecidedCompareLinks( bool can_key,
                                        Conjecture &conj )
 {
     // Follow up on any links that were noted by the agent impl
+    int i=0;
     FOREACH( const Links::Link &l, links.links )
     {
-        TRACE("Comparing link\n");
+        TRACE("ConjSpin Comparing link %d\n", i);
         bool r;
         const TreePtrInterface *px;
         if( l.px )
@@ -260,12 +274,8 @@ bool AgentCommon::DecidedCompareLinks( bool can_key,
         if( l.invert )
             r = !r || can_key; // only apply during restricting pass 
         if( !r )
-        {
-            TRACE("Link compare failed; reverting conjecture\n");
-            // Discard decisions that were registered after a failing compare 
-            //conj.ReturnToMark( l.mark );
             return false;
-        }
+        i++;
     }
     return true;
 }

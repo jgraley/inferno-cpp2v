@@ -112,6 +112,10 @@ struct SpecificString : String
 		// Since this is a string literal, output it quoted
 		return "\"" + value + "\"";
 	}
+    virtual string GetTrace() const
+    {
+        return GetName() + "(" + GetRender() + ")" + GetAddr();
+    }
 private:
     string value; ///< The string itself
 };
@@ -151,6 +155,10 @@ struct SpecificInteger : Integer, llvm::APSInt
                (getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_long] ? "L" : "");
                // note, assuming longlong bigger than long, so second L appends first to get LL
 	}
+    virtual string GetTrace() const
+    {
+        return GetName() + "(" + GetRender() + ")" + GetAddr();
+    }
 };
 
 /// Intermediate property node that represents a floating point number of any value. 
@@ -180,6 +188,10 @@ struct SpecificFloat : Float, llvm::APFloat
 			   (&getSemantics()==TypeDb::float_semantics ? "F" : "") +
 			   (&getSemantics()==TypeDb::long_double_semantics ? "L" : "");
 	}
+    virtual string GetTrace() const
+    {
+        return GetName() + "(" + GetRender() + ")" + GetAddr();
+    }
 };
 
 /// Intermediate property node that represents either boolean value.
@@ -239,6 +251,10 @@ struct SpecificIdentifier : virtual Property
 	{
 		return name;
 	}
+    virtual string GetTrace() const
+    {
+        return GetName() + "(" + GetRender() + ")" + GetAddr();
+    }
 private:
 	string name;
 };
@@ -552,6 +568,7 @@ struct SpecificFloatSemantics : FloatSemantics
 	{
 		return *value;
 	}
+	// TODO no render?
     const llvm::fltSemantics *value;
 };    
 

@@ -117,6 +117,8 @@ public:
     {
         stop_after = ssa;
         depth = d;
+        if( depth < stop_after.size()) 
+            ASSERT( stop_after[depth] < size() )("Stop requested after non-existant sub-step, there are only %d", size());
     }
     
 private:    

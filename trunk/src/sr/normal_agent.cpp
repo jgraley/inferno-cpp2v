@@ -158,10 +158,9 @@ bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
 
     for( CollectionInterface::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
     {
-    	TRACE("Collection compare %d remain out of %d; looking at %s in pattern\n",
-    			xremaining->size(),
-    			pattern.size(),
-    			TypeInfo( TreePtr<Node>(*pit) ).name().c_str() );
+    	TRACE("Collection compare %d remain out of %d; looking at ",
+                xremaining->size(),
+                pattern.size() )(**pit)(" in pattern\n" );
         Agent *pia = Agent::AsAgent(TreePtr<Node>(*pit));
         if( StarAgent *s = dynamic_cast<StarAgent *>( pia ) ) // Star in pattern collection?
         {
