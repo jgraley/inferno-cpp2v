@@ -10,6 +10,7 @@ Conjecture::Conjecture()
     failed = false;
 }
 
+
 Conjecture::~Conjecture()
 {
     if( !it_names.empty() )
@@ -35,6 +36,7 @@ Conjecture::~Conjecture()
     }
 }
 
+
 void Conjecture::PrepareForDecidedCompare()
 {
 	ASSERT( this );
@@ -44,43 +46,64 @@ void Conjecture::PrepareForDecidedCompare()
 }
 
 
-bool Conjecture::Increment()
+bool Conjecture::Increment(bool trace)
 {   
+    if(trace)
+    {
+        string s;
+        int i=0;
+        FOREACH( const Choice &c, choices )
+        {
+            s += SSPrintf("%d:", i) + ChoiceAsString(c) + " ";
+            i++;
+        }
+        TRACE("ConjSpin ")(s)(" mismatch at %d\n", decision_index-1);
+    }
+    
 	// If we've run out of choices, we're done.
 	if( choices.empty() )
 	{
 	    failed = true;
-        TRACE("Giving up\n");
+        TRACE("ConjSpin Giving up\n");
 	    return false;
 	}
-	
-    if( choices.back().bad )
-    {
-        TRACE("Discarding bad decision #%d\n", choices.size()-1);
-        choices.resize( choices.size()-1 );
-        return Increment();  
-    }
 	
 	if( choices.back().it != choices.back().end )
 	{
     	ResizeCounts();
         inc_counts[choices.size()-1]++;
 
- 		TRACE("Incrementing choice FROM ")(**choices.back().it)("\n");
+ 		TRACE("Incrementing decision #%d FROM ", choices.size()-1)(ChoiceAsString(choices.back()))("\n");
 		++(choices.back().it); // There are potentially more choices so increment the last decision
+        ++(choices.back().choice_num);
     }
 		
     if( choices.back().it == choices.back().end )
     {
-        TRACE("Incrementing end count FROM %d\n", choices.back().end_count);
+        TRACE("Incrementing decision #%d end count FROM %d\n", choices.size()-1, choices.back().end_count);
         ++choices.back().end_count;
         if( choices.back().end_count > choices.back().end_num )
         {
             choices.resize( choices.size()-1 );
-            return Increment();  
+            bool r = Increment(false);  
+            if( !r )
+                return false;
         }
     }
        	    
+       	
+    if(trace)
+    {
+        string s;
+        int i=0;
+        FOREACH( const Choice &c, choices )
+        {            
+            s += SSPrintf("%d:", i) + ChoiceAsString(c) + " ";
+            i++;
+        }
+        TRACE("ConjSpin ")(s)("...\n");
+    }
+
     return true;
 }
 
@@ -93,24 +116,28 @@ ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::ite
 	ASSERT( choices.size() >= decision_index ); // consistency check; as we see more decisions, we should be adding them to the conjecture
 	Choice c;
 
-	// See if this decision needs to be added to the present Conjecture
+    TRACE("Handle decision index #%d size=#%d\n", decision_index, choices.size());
+
+    // See if this decision needs to be added to the present Conjecture
 	if( choices.size() == decision_index ) // this decision missing from conjecture?
 	{
 		c.it = begin; // Choose the first option supplied
+		c.choice_num = 0;
 		c.end = end; // Choose the first option supplied
 		c.end_count = 0;
 		c.end_num = en;
-		c.bad = false;
 		choices.push_back( c ); // append this decision so we will iterate it later
         
         ResizeCounts();
         start_counts[choices.size()-1]++;
-        TRACE("Decision %d appending begin\n", decision_index );
+        TRACE("New decision choosing ")(ChoiceAsString(c))("\n");
 	}
 	else // already know about this decision
 	{
 		// Adopt the current decision based on Conjecture
 	    c = choices[decision_index]; // Get present decision
+
+        TRACE("Existing decision choosing ")(ChoiceAsString(c))("\n");
 	}
     
     decision_index++;
@@ -135,31 +162,31 @@ void Conjecture::ResizeCounts()
         start_counts.resize( start_counts.size()+1 );
         inc_counts.resize( inc_counts.size()+1 );
         it_names.resize( it_names.size()+1 );         
-        it_names[it_names.size()-1] = (string)(choices[it_names.size()-1].it);
+        it_names[it_names.size()-1] = ChoiceAsString(choices[it_names.size()-1]);
         start_counts[start_counts.size()-1] = 0;
         inc_counts[inc_counts.size()-1] = 0;
     }
 }
 
 
-Conjecture::Mark Conjecture::GetMark()
+string Conjecture::ChoiceAsString(const Choice &c)
 {
-    TRACE("Remembering mark decision #%d\n", decision_index);
-    return decision_index;
+    string s;
+    if( c.it==c.end )
+        s=SSPrintf("end[%d]", c.end_count);
+    else
+    {
+        TreePtr<Node> n = *c.it;
+        if( !n )
+            s="NULL";
+        else
+            s=(*n).GetTrace();
+        s+=SSPrintf("[%d]", c.choice_num);
+    }
+    return s;        
 }
 
 
-void Conjecture::ReturnToMark( Mark mark )
-{
-    ASSERT( mark>=0 );
-    ASSERT( mark<=choices.size() );
-    ASSERT( mark<=decision_index );
-    
-    for( int i=mark; i<decision_index; i++ )
-    {
-        TRACE("Setting decision #%d bad\n", i);
-        choices[i].bad = true;
-    }
-}    
-
 };
+/*
+ **/

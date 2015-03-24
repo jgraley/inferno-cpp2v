@@ -45,7 +45,6 @@ public:
         const TreePtrInterface *px;
         TreePtr<Node> local_x;
         bool invert;
-        Conjecture::Mark mark;
     };
     
     void clear()
@@ -53,7 +52,7 @@ public:
         links.clear();
     }
     
-    Set<Link> links;
+    vector<Link> links;
 };
 
 bool operator<(const Links::Link &l0, const Links::Link &l1);
