@@ -18,10 +18,8 @@ public:
         ContainerInterface::iterator it;
         ContainerInterface::iterator end;   
         int choice_num;
-        int end_count;
-        int end_num;
     };
-    typedef int Mark;
+
 public:
     Conjecture();
     ~Conjecture();
@@ -34,11 +32,8 @@ public:
     				   
     // Standard interface for decided compare functions
 	ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
-			                                     ContainerInterface::iterator end,
-			                                     int en=0 );
-    // Version that forces the decision down to a single choice			                                     
-	ContainerInterface::iterator HandleDecision( ContainerInterface::iterator only );			                                    
-    
+			                                     ContainerInterface::iterator end );
+
     Choice *GetChoicePtr() { return decision_index < choices.size() ? &choices[decision_index] : NULL; } // TODO should be const ptr
     Choice *GetPrevChoicePtr() { return (decision_index>0 && decision_index-1 < choices.size()) ? &choices[decision_index-1] : NULL; } // TODO should be const ptr
 				   

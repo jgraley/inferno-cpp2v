@@ -80,17 +80,11 @@ bool Conjecture::Increment(bool trace)
 		
     if( choices.back().it == choices.back().end )
     {
-        TRACE("Incrementing decision #%d end count FROM %d\n", choices.size()-1, choices.back().end_count);
-        ++choices.back().end_count;
-        if( choices.back().end_count > choices.back().end_num )
-        {
-            choices.resize( choices.size()-1 );
-            bool r = Increment(false);  
-            if( !r )
-                return false;
-        }
-    }
-       	    
+        choices.resize( choices.size()-1 );
+        bool r = Increment(false);  
+        if( !r )
+            return false;
+    }       	    
        	
     if(trace)
     {
@@ -109,8 +103,7 @@ bool Conjecture::Increment(bool trace)
 
 
 ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::iterator begin,
-		                                                 ContainerInterface::iterator end,
-		                                                 int en )
+		                                                 ContainerInterface::iterator end )
 {
 	ASSERT( this );
 	ASSERT( choices.size() >= decision_index ); // consistency check; as we see more decisions, we should be adding them to the conjecture
@@ -124,8 +117,6 @@ ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::ite
 		c.it = begin; // Choose the first option supplied
 		c.choice_num = 0;
 		c.end = end; // Choose the first option supplied
-		c.end_count = 0;
-		c.end_num = en;
 		choices.push_back( c ); // append this decision so we will iterate it later
         
         ResizeCounts();
@@ -147,14 +138,6 @@ ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::ite
 }
 
 
-ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::iterator only )
-{
-    ContainerInterface::iterator end = only;
-    ++end;
-    return HandleDecision( only, end );
-}
-
-
 void Conjecture::ResizeCounts()
 {
     while( choices.size() > it_names.size() )
@@ -173,7 +156,7 @@ string Conjecture::ChoiceAsString(const Choice &c)
 {
     string s;
     if( c.it==c.end )
-        s=SSPrintf("end[%d]", c.end_count);
+        s=SSPrintf("end");
     else
     {
         TreePtr<Node> n = *c.it;

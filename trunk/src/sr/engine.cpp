@@ -155,6 +155,93 @@ void Engine::GetGraphInfo( vector<string> *labels,
 }
 
 
+bool Engine::DecidedCompare( Agent *agent,
+                             const TreePtrInterface &x,
+                             bool can_key,
+                             Conjecture &conj ) const
+{
+    INDENT(" ");
+    ASSERT( &x ); // Ref to target must not be NULL (i.e. corrupted ref)
+    ASSERT( x ); // Target must not be NULL
+        
+    TRACE(*agent)(" Gathering links\n");    
+    // Run the compare implementation with couplings check/update
+    Links mylinks = agent->DecidedCompareCoupled( x, can_key, conj );
+    
+    if(!mylinks.local_match)
+    {
+        TRACE(*agent)(" local mismatch, aborting\n");
+        return false;
+    }
+    
+    // Follow up on any links that were noted by the agent impl
+    TRACE(*agent)(" Comparing links\n");    
+    int i=0;
+    FOREACH( const Links::Link &l, mylinks.links )
+    {
+        TRACE("ConjSpin Comparing link %d\n", i);
+        bool r;
+        const TreePtrInterface *px;
+        if( l.px )
+            px = l.px;
+        else
+            px = &(l.local_x);        
+        if( l.abnormal )
+            r = AbnormalCompare(l.agent, *px, can_key);
+        else
+            r = DecidedCompare(l.agent, *px, can_key, conj);
+        if( l.invert )
+            r = !r || can_key; // only apply during restricting pass 
+        if( !r )
+            return false;
+        i++;
+    }
+      
+    TRACE(*agent)(" Done\n");        
+    return true;
+}
+
+
+bool Engine::AbnormalCompare( Agent *agent,
+                              const TreePtrInterface &x, 
+                              bool can_key ) const
+{
+    INDENT("A");
+    ASSERT( x );
+    TRACE("Compare x=")(*x);
+    TRACE(" pattern=")(*agent);
+
+    // Only run during "restricting" pass
+    if( can_key )
+        return true;
+
+    // Create the conjecture object we will use for this compare, and keep iterating
+    // though different conjectures trying to find one that allows a match.
+    Conjecture conj;
+    bool r;
+    //int i = 0;
+    while(1)
+    {
+        conj.PrepareForDecidedCompare();
+        r = DecidedCompare( agent, x, false, conj );
+        
+        // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
+        if( r )
+        {
+            TRACE("ConjSpin Abnormal hit\n");            
+            break; // Success
+        }
+            
+        if( !conj.Increment() )
+            break; // Failure        
+            
+        //assert(i<1000);
+        //i++;
+    }
+    return r;
+}
+
+
 bool Engine::Compare( const TreePtrInterface &x ) const
 {
     INDENT("C");
@@ -185,13 +272,13 @@ bool Engine::Compare( const TreePtrInterface &x ) const
 
         // Do a two-pass matching process: first get the keys...
         conj.PrepareForDecidedCompare();
-        r = root_agent->DecidedCompare( x, true, conj );
+        r = DecidedCompare( root_agent, x, true, conj );
                
         if( r )
         {
             // ...now restrict the search according to the couplings
             conj.PrepareForDecidedCompare();
-            r = root_agent->DecidedCompare( x, false, conj );
+            r = DecidedCompare( root_agent, x, false, conj );
         }
         
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.

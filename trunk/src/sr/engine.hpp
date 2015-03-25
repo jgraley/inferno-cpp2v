@@ -42,6 +42,13 @@ public:
 protected:
     bool SingleCompareReplace( TreePtr<Node> *proot );
     bool Compare( const TreePtrInterface &x ) const;
+    bool DecidedCompare( Agent *agent,
+                         const TreePtrInterface &x,
+                         bool can_key,
+                         Conjecture &conj ) const;
+    bool AbnormalCompare( Agent *agent,
+                          const TreePtrInterface &x, 
+                          bool can_key ) const;
     void KeyReplaceNodes() const;
     TreePtr<Node> Replace() const;
 
