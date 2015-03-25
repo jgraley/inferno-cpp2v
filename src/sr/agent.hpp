@@ -13,27 +13,7 @@ namespace SR
 { 
 class SpecialBase;
 class Engine;
-
-
-/// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
-class Agent : public virtual Traceable,
-              public virtual Node
-{
-public:
-    virtual bool DecidedCompare( const TreePtrInterface &x,
-                                 bool can_key,
-                                 Conjecture &conj ) = 0;
-    virtual bool AbnormalCompare( const TreePtrInterface &x, 
-                                  bool can_key ) = 0;
-    virtual TreePtr<Node> GetCoupled() = 0;                                  
-    virtual void ResetKey() = 0;     
-    virtual void KeyReplace() = 0;
-    virtual void TrackingKey( Agent *from ) = 0;
-    virtual TreePtr<Node> BuildReplace() = 0;
-	virtual void AgentConfigure( const Engine *e ) = 0;
-	static Agent *AsAgent( TreePtr<Node> node );
-};
-
+class Agent;
 
 class Links
 {
@@ -53,11 +33,31 @@ public:
     }
     
     vector<Link> links;
+    bool local_match;
 };
 
 bool operator<(const Links::Link &l0, const Links::Link &l1);
 
         
+
+/// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
+class Agent : public virtual Traceable,
+              public virtual Node
+{
+public:
+    virtual Links DecidedCompareCoupled( const TreePtrInterface &x,
+                                         bool can_key,
+                                         Conjecture &conj ) = 0;
+    virtual TreePtr<Node> GetCoupled() = 0;                                  
+    virtual void ResetKey() = 0;     
+    virtual void KeyReplace() = 0;
+    virtual void TrackingKey( Agent *from ) = 0;
+    virtual TreePtr<Node> BuildReplace() = 0;
+	virtual void AgentConfigure( const Engine *e ) = 0;
+	static Agent *AsAgent( TreePtr<Node> node );
+};
+
+
 // - Configure
 // - Pre-restriction
 // - Keying (default case)
@@ -79,15 +79,11 @@ protected:
 public:
     AgentCommon();
     void AgentConfigure( const Engine *e );
-    virtual bool DecidedCompare( const TreePtrInterface &x,
-                                 bool can_key,
-                                 Conjecture &conj );
-    virtual bool DecidedCompareCoupled( const TreePtrInterface &x,
-                                        bool can_key );
+    virtual Links DecidedCompareCoupled( const TreePtrInterface &x,
+                                         bool can_key,
+                                         Conjecture &conj );
     virtual bool DecidedCompareImpl( const TreePtrInterface &x,
                                      bool can_key ) = 0;
-    virtual bool AbnormalCompare( const TreePtrInterface &x, 
-                                  bool can_key );
     void DoKey( TreePtr<Node> x );
     void DoKey( shared_ptr<Key> key );
     TreePtr<Node> GetCoupled();                                  
@@ -97,11 +93,9 @@ public:
     void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x );
     void RememberInvertedLink( Agent *a, const TreePtrInterface &x );
     void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x );
+    void RememberLocal( bool m );
     ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
                                                  ContainerInterface::iterator end );
-    bool DecidedCompareLinks( bool can_key,
-                              Conjecture &conj );
-
     virtual void KeyReplace();
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplace();

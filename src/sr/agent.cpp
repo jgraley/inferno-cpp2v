@@ -36,109 +36,45 @@ void AgentCommon::AgentConfigure( const Engine *e )
 }
 
 
-bool AgentCommon::DecidedCompare( const TreePtrInterface &x,
-                                  bool can_key,
-                                  Conjecture &conj )
+
+Links AgentCommon::DecidedCompareCoupled( const TreePtrInterface &x,
+                                          bool can_key,
+                                          Conjecture &conj )
 {
-    INDENT(" ");
-    ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
-    ASSERT( &x ); // Ref to target must not be NULL (i.e. corrupted ref)
-    ASSERT( x ); // Target must not be NULL
     ASSERT(this);
-    
-    //Conjecture::Mark start_mark = conj.GetMark(); 
-        
-    // Do the agent-specific local checks (x versus characteristics of the present agent)
-    // Also takes notes of how child agents link to children of x (depending on conjecture)
+    ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
+
+    bool match = true;
     ClearLinks();    
-    ASSERT(!pconj)("Recursion!!!!");
-    pconj = &conj;
     
-    TRACE(*this)(" Gathering links\n");    
-    // Run the compare implementation with couplings check/update
-    bool match = DecidedCompareCoupled( x, can_key );
-    if(!match)
-        TRACE(*this)(" local mismatch, aborting\n");
-    
-    // Follow up on any links that were noted by the agent impl
-    if( match )
-    {
-        TRACE(*this)(" Comparing links\n");    
-        match = DecidedCompareLinks( can_key, conj );
-    }
-    pconj = NULL;
-    
-    //conj.ResoreDecisionIndex( start_mark );    
-  
-    TRACE(*this)(" Done\n");        
-    return match;
-}
-
-
-bool AgentCommon::DecidedCompareCoupled( const TreePtrInterface &x,
-                                         bool can_key )
-{
     // If the agent is coupled already, check for a coupling match
     if( TreePtr<Node> keynode = GetCoupled() )
     {
         SimpleCompare sc;
-        if( sc( x, keynode ) == false )
-            return false;
+        match = sc( x, keynode );
     }
 
-    bool match = DecidedCompareImpl( x, can_key );
-    if( !match )
-        return false;
+    // Do the agent-specific local checks (x versus characteristics of the present agent)
+    // Also takes notes of how child agents link to children of x (depending on conjecture)
+    if( match )
+    { 
+        ASSERT(!pconj)("Recursion!!!!");
+        pconj = &conj;
+        match = DecidedCompareImpl( x, can_key );
+        pconj = NULL;
+    }
     
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
-    if( can_key )
+    if( match && can_key )
     {
         DoKey( x );  
     }
     
-    return true;
+    RememberLocal(match);
+    return links;
 }
 
     
-bool AgentCommon::AbnormalCompare( const TreePtrInterface &x, 
-                                   bool can_key ) 
-{
-    INDENT("A");
-    ASSERT( x );
-    TRACE("Compare x=")(*x);
-    TRACE(" pattern=")(*this);
-
-    // Only run during "restricting" pass
-    if( can_key )
-        return true;
-
-    // Create the conjecture object we will use for this compare, and keep iterating
-    // though different conjectures trying to find one that allows a match.
-    Conjecture conj;
-    bool r;
-    //int i = 0;
-    while(1)
-    {
-        conj.PrepareForDecidedCompare();
-        r = DecidedCompare( x, false, conj );
-        
-        // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
-        if( r )
-        {
-            TRACE("ConjSpin Abnormal hit\n");            
-            break; // Success
-        }
-            
-        if( !conj.Increment() )
-            break; // Failure        
-            
-        //assert(i<1000);
-        //i++;
-    }
-    return r;
-}
-
-
 void AgentCommon::DoKey( TreePtr<Node> x )
 {
     ASSERT(x);
@@ -228,6 +164,12 @@ void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
 }
 
 
+void AgentCommon::RememberLocal( bool m )
+{
+    links.local_match = m;
+}
+
+
 ContainerInterface::iterator AgentCommon::HandleDecision( ContainerInterface::iterator begin,
                                                           ContainerInterface::iterator end )
 {
@@ -250,34 +192,6 @@ bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
         return (int)l0.invert < (int)l1.invert;
         
     return false; // equal
-}
-
-
-bool AgentCommon::DecidedCompareLinks( bool can_key,
-                                       Conjecture &conj )
-{
-    // Follow up on any links that were noted by the agent impl
-    int i=0;
-    FOREACH( const Links::Link &l, links.links )
-    {
-        TRACE("ConjSpin Comparing link %d\n", i);
-        bool r;
-        const TreePtrInterface *px;
-        if( l.px )
-            px = l.px;
-        else
-            px = &(l.local_x);        
-        if( l.abnormal )
-            r = l.agent->AbnormalCompare(*px, can_key);
-        else
-            r = l.agent->DecidedCompare(*px, can_key, conj);
-        if( l.invert )
-            r = !r || can_key; // only apply during restricting pass 
-        if( !r )
-            return false;
-        i++;
-    }
-    return true;
 }
 
 

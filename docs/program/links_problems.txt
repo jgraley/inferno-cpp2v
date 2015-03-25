@@ -16,7 +16,7 @@ Resolution would be to store both (yuk) DONE (yuk)
 3. Normal nodes seen in collections and n-1 stars in sequences require a decision each. We
    could end up registering all the decision even though the first DecidedCompare would have
    failed. Resolution is to store a cookie from the conj that can be passed back to the conj 
-   on mismatch and prevents wasteful exploration of invalidated decisions.
+   on mismatch and prevents wasteful exploration of invalidated decisions. DONE but no reoptimisation yet
  
 4. The NotMatch node requires inversion of the result of the linked DecidedCompare. Maybe 
    store a flag indicating inversion. DONE
@@ -24,13 +24,13 @@ Resolution would be to store both (yuk) DONE (yuk)
 5. The MatchAny node wants an OR rule on multiple remembered links. The OR rule is inline at present
    since all children are abnormal. Resolution may be to introduce a descision here. Note:
    it might be possible to move to NormalCompare, so that a coupling can be placed in all legs
-   (but need legality checks or more generally unkey patterns abandoned by comparison failures)
+   (but need legality checks or more generally unkey patterns abandoned by comparison failures) DONE
 
 6. Soft nodes - it is hard to know how a soft node impl will want to use the results of a 
    DecidedCompare. Could just return true and hope for the best, but AND-rule cannot be 
    guaranteed. Also could see bugs when true returned when a mismatch is known of and false is 
    expected. Resolution: Some sort of stricter rule for soft nodes, possibly requiring 0 or 1
-   compare, and taking as an output from MyCompare.
+   compare, and taking as an output from MyCompare. DONE (just trusting the soft impls for now)
    
 7. Stuff node. The terminus is fine, but recurse restriction is tricky because the actual 
    decided compare calls don't happen until the conjecture tries to iterate the range (a
