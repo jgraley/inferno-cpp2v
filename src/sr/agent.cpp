@@ -37,9 +37,9 @@ void AgentCommon::AgentConfigure( const Engine *e )
 
 
 
-Links AgentCommon::DecidedCompareCoupled( const TreePtrInterface &x,
-                                          bool can_key,
-                                          Conjecture &conj )
+Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
+                                 bool can_key,
+                                 Conjecture &conj )
 {
     ASSERT(this);
     ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
@@ -60,7 +60,7 @@ Links AgentCommon::DecidedCompareCoupled( const TreePtrInterface &x,
     { 
         ASSERT(!pconj)("Recursion!!!!");
         pconj = &conj;
-        match = DecidedCompareImpl( x, can_key );
+        match = DecidedQueryImpl( x, can_key );
         pconj = NULL;
     }
     

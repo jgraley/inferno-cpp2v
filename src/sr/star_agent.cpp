@@ -6,8 +6,8 @@ using namespace SR;
 
 // NOTE this is a DecidedCompare() not DecidedCompareImpl() so some of the AgentCommon 
 // stuff has to be done explicitly in here.
-bool StarAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                    bool can_key )
+bool StarAgent::DecidedQueryImpl( const TreePtrInterface &x,
+                                  bool can_key )
 {
     INDENT("*");
     ASSERT(x);

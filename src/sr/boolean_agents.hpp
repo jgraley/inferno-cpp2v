@@ -14,8 +14,8 @@ namespace SR
 class NotMatchAgent : public AgentCommon 
 {
 public:
-    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key );
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x,
+                                   bool can_key );
 private:
     virtual TreePtr<Node> GetPattern() const = 0;
 };
@@ -45,8 +45,8 @@ private:
 class MatchAllAgent : public AgentCommon 
 {
 public:
-    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key );
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x,
+                                   bool can_key );
 private:
     virtual const CollectionInterface &GetPatterns() const = 0;
 };
@@ -73,8 +73,8 @@ private:
 class MatchAnyAgent : public AgentCommon 
 {
 public:
-    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key );
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x,
+                                   bool can_key );
 private:
     virtual CollectionInterface &GetPatterns() const = 0;
 };
