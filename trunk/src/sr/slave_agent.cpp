@@ -12,8 +12,8 @@ SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search ) :
 }
 
 
-bool SlaveAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key )
+bool SlaveAgent::DecidedQueryImpl( const TreePtrInterface &x,
+                                   bool can_key )
 {
     INDENT("l");
 

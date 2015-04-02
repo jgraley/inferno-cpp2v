@@ -13,8 +13,8 @@ namespace SR
 /// Agent that restricts the node under it to one that was in the original program tree
 class GreenGrassAgent : public virtual AgentCommon 
 {
-    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key );
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x,
+                                   bool can_key );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual TreePtr<Node> GetThrough() const = 0;
 };

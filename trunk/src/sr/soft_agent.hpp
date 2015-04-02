@@ -18,8 +18,8 @@ public:
         current_can_key( false )
     {}
     void AgentConfigure( const Engine *e );
-    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key );
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x,
+                                   bool can_key );
     // This entrypoint is actually called by the main engine before the replace
     // and the results are put into a key. This one calls into the impl.
     virtual void KeyReplace(); 

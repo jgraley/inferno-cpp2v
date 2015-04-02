@@ -166,7 +166,7 @@ bool Engine::DecidedCompare( Agent *agent,
         
     TRACE(*agent)(" Gathering links\n");    
     // Run the compare implementation with couplings check/update
-    Links mylinks = agent->DecidedCompareCoupled( x, can_key, conj );
+    Links mylinks = agent->DecidedQuery( x, can_key, conj );
     
     if(!mylinks.local_match)
     {

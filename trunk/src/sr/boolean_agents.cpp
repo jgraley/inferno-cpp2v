@@ -3,8 +3,8 @@
 
 using namespace SR;
 
-bool NotMatchAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                        bool can_key )
+bool NotMatchAgent::DecidedQueryImpl( const TreePtrInterface &x,
+                                      bool can_key )
 {
     INDENT("!");
     ASSERT( GetPattern() );
@@ -18,8 +18,8 @@ bool NotMatchAgent::DecidedCompareImpl( const TreePtrInterface &x,
 }
 
 
-bool MatchAllAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                        bool can_key )
+bool MatchAllAgent::DecidedQueryImpl( const TreePtrInterface &x,
+                                      bool can_key )
 {
     INDENT("&");
     
@@ -38,8 +38,8 @@ bool MatchAllAgent::DecidedCompareImpl( const TreePtrInterface &x,
 }    
 
 
-bool MatchAnyAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                        bool can_key )
+bool MatchAnyAgent::DecidedQueryImpl( const TreePtrInterface &x,
+                                      bool can_key )
 {
     INDENT("|");
     

@@ -8,8 +8,8 @@
 
 using namespace SR;
 
-bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
-							          bool can_key )
+bool NormalAgent::DecidedQueryImpl( const TreePtrInterface &x,
+							        bool can_key )
 {
     INDENT(".");
 
@@ -34,14 +34,14 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
             SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
             ASSERT( x_seq )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
-            r = DecidedCompareSequence( *x_seq, *pattern_seq, can_key );
+            r = DecidedQuerySequence( *x_seq, *pattern_seq, can_key );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
             CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
-            r = DecidedCompareCollection( *x_col, *pattern_col, can_key );
+            r = DecidedQueryCollection( *x_col, *pattern_col, can_key );
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -67,9 +67,9 @@ bool NormalAgent::DecidedCompareImpl( const TreePtrInterface &x,
 }
 
 
-bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
-		                                  SequenceInterface &pattern,
-		                                  bool can_key )
+bool NormalAgent::DecidedQuerySequence( SequenceInterface &x,
+		                                SequenceInterface &pattern,
+		                                bool can_key )
 {
     INDENT(" ");
     
@@ -141,9 +141,9 @@ bool NormalAgent::DecidedCompareSequence( SequenceInterface &x,
 }
 
 
-bool NormalAgent::DecidedCompareCollection( CollectionInterface &x,
-		 					                CollectionInterface &pattern,
-							                bool can_key )
+bool NormalAgent::DecidedQueryCollection( CollectionInterface &x,
+		 					              CollectionInterface &pattern,
+							              bool can_key )
 {
     INDENT(" ");
     

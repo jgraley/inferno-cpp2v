@@ -5,8 +5,8 @@
 
 using namespace SR;
 
-bool SearchContainerAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                               bool can_key )
+bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x,
+                                             bool can_key )
 {
     INDENT("#");
     ASSERT( this );

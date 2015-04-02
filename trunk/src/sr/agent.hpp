@@ -45,9 +45,14 @@ class Agent : public virtual Traceable,
               public virtual Node
 {
 public:
-    virtual Links DecidedCompareCoupled( const TreePtrInterface &x,
-                                         bool can_key,
-                                         Conjecture &conj ) = 0;
+    // Produce info about an Agent no input tree info
+    //virtual Wat? PatternQuery() = 0;
+    // Produce info about an Agent given only the location (x)
+    //virtual Wat? LocatedQuery( const TreePtrInterface &x ) = 0;
+    /// Produce info about an Agent given location (x) and a vector of choices (conj). 
+    virtual Links DecidedQuery( const TreePtrInterface &x,
+                                bool can_key,
+                                Conjecture &conj ) = 0;                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace() = 0;
@@ -79,11 +84,11 @@ protected:
 public:
     AgentCommon();
     void AgentConfigure( const Engine *e );
-    virtual Links DecidedCompareCoupled( const TreePtrInterface &x,
-                                         bool can_key,
-                                         Conjecture &conj );
-    virtual bool DecidedCompareImpl( const TreePtrInterface &x,
-                                     bool can_key ) = 0;
+    virtual Links DecidedQuery( const TreePtrInterface &x,
+                                bool can_key,
+                                Conjecture &conj );
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x,
+                                   bool can_key ) = 0;
     void DoKey( TreePtr<Node> x );
     void DoKey( shared_ptr<Key> key );
     TreePtr<Node> GetCoupled();                                  

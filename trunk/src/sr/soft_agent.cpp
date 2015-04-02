@@ -11,8 +11,8 @@ void SoftAgent::AgentConfigure( const Engine *e )
 }
 
 
-bool SoftAgent::DecidedCompareImpl( const TreePtrInterface &x,
-                                    bool can_key )
+bool SoftAgent::DecidedQueryImpl( const TreePtrInterface &x,
+                                  bool can_key )
 {
     INDENT("%");
 

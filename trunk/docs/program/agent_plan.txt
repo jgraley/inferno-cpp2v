@@ -59,7 +59,7 @@ Detailed plan for refactoring into agent patterns
 ---now the sr passed in via Configure() is nearly or completely unnecessary making the agents reasonably self-sufficient---
 - Note: don't kill the Configure sweep since needed for various things now not just sr and couplingkys pointers
 9. Turn the boolean soft agents into proper agents. Maybe lose MatchEven if no users? Or becomes MatchOne? DONE
----End of original plan, now properly in agent form
+---End of original plan, now properly in agent form ---
 10. Agent impls to build up a "links store" of child agents and corresponding program nodes and move the
     actual DecidedCompare calls to the end of AgentCommon::DecidedCompare. 
  - Move the links from MultiMap to Set, since cleaner and can use union etc DONE
@@ -68,9 +68,30 @@ Detailed plan for refactoring into agent patterns
    HandleDecision through AgentCommon so no algorithmic change needed to agent impls. NOT DONE - deferred
  - Deal with remaining direct overloads of DecidedCompare so they are all ringfenced (extra layer; key as return value?).
  - Bring the looping through the links part out into a new recursive function in Engine DONE
- - Convert it to an explicit stack iterative model
- - Explore options for a more generalised unaware/aware-but-unknown/known sweep. Maybe need to make
-   Conjecture use real dependencies rather than just walk order
+ - Rename remaining agent funcitonality DecidedQuery...() DONE
+--- Recursive comparing walk is now centralised to the engine, in an agent-independent form ---
+11. Store agent pointer and count of decisions for that agent in first decision for that agent
+ - Pass vector of choices into agents, length as stored in as the "conj" (maybe rename), process in
+   AgentCommon and then pass back a vector of choices in the Links object.
+ - Pass the vectors of choices into KeyReplaceNodes(), and get Stuff to key itself here. 
+ - Prove that Stuff and no other nodes require keying beyond what AgentCommon does for them
+ - Move keying out of agents and into Engine, using a map of agent onto key for now
+ - Try to make the Query functions "const". Check for modifiers of Engine (via engine ptr) too.
+--- Agents may now be queried idempotently ---
+   **UNSURE ABOUT THESE...**
+12. Generalise Conjecture impl, and maybe fold directly into Engine
+ - Map agents to vectors of choice pointers, to better handle passing choice vectors to Query fns
+ - Show that we never need to hop from choice to next choice now (new map removes the need)
+ - Provide something like shared_ptr or weak_ptr from later choice to previous choice (ie
+   backwards) and use that for backtracking. Clean up the agent->choice map entries when choices deleted.
+--- Conjecture now has no central vector ---
+13. Begin trying to collect more detailed info on decision relationships.
+ - Remember a "contingency" relation of child agent decisions to parent agent decisions
+ - also of later on earlier decisions from a single agent query
+ - and a (possibly symmetric) coupling relation between latest in-effect decisions on both (or all)
+   routes into a coupling.
+ - try to recode conjecture search based on these!
+--- Conjecture search now independent of the order of events in a tree walk ---
 
 QUESTION: should patterns eventually refer to each other via TreePtr<Agent> instead of TreePtr<Node>? 
 And does that even work, or should it really be shared_ptr<Agent> or SharedPtr<Agent>? --- requires experimentation, added to plan
