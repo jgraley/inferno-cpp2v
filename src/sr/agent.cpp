@@ -16,8 +16,7 @@ Agent *Agent::AsAgent( TreePtr<Node> node )
 
 
 AgentCommon::AgentCommon() :
-    engine(NULL),
-    pconj(NULL)
+    engine(NULL)
 {
 }
 
@@ -47,6 +46,18 @@ Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
     bool match = true;
     ClearLinks();    
     
+    decisions.clear();
+    choices.clear();
+    int n = conj.GetCount(this);
+    for( int i=0; i<n; i++ )
+    {
+        ContainerInterface::iterator it;
+        bool ok = conj.GetChoice(it);
+        if( !ok )
+            break; // Previously registered decisions beyond here were invalidated
+        choices.push_back(it);
+    }
+            
     // If the agent is coupled already, check for a coupling match
     if( TreePtr<Node> keynode = GetCoupled() )
     {
@@ -57,20 +68,24 @@ Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
     // Do the agent-specific local checks (x versus characteristics of the present agent)
     // Also takes notes of how child agents link to children of x (depending on conjecture)
     if( match )
-    { 
-        ASSERT(!pconj)("Recursion!!!!");
-        pconj = &conj;
         match = DecidedQueryImpl( x, can_key );
-        pconj = NULL;
-    }
+
+    if( match )
+        ASSERT( n<=decisions.size() )(*this)(" n=%d ds=%d\n", n, decisions.size());
     
+    RememberLocal(match);
+
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
     if( match && can_key )
     {
         DoKey( x );  
     }
-    
-    RememberLocal(match);
+
+    conj.BeginAgent(this);
+    FOREACH( Range r, decisions )
+        conj.RegisterDecision( r.begin, r.end );
+    conj.EndAgent();
+        
     return links;
 }
 
@@ -123,7 +138,6 @@ void AgentCommon::ClearLinks()
 
 void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x )
 {
-    ASSERT( pconj );
     Links::Link l;
     l.abnormal = abnormal;
     l.agent = a;
@@ -137,7 +151,6 @@ void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface 
 
 void AgentCommon::RememberInvertedLink( Agent *a, const TreePtrInterface &x )
 {
-    ASSERT( pconj );
     Links::Link l;
     l.abnormal = true; // always
     l.agent = a;
@@ -151,7 +164,6 @@ void AgentCommon::RememberInvertedLink( Agent *a, const TreePtrInterface &x )
 
 void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
 {
-    ASSERT( pconj );
     ASSERT(x);
     Links::Link l;
     l.abnormal = abnormal;
@@ -173,8 +185,23 @@ void AgentCommon::RememberLocal( bool m )
 ContainerInterface::iterator AgentCommon::HandleDecision( ContainerInterface::iterator begin,
                                                           ContainerInterface::iterator end )
 {
-    ASSERT( pconj )("AgentCommon::HandleDecision() called outside of DecidedCompareImpl()");
-    return pconj->HandleDecision( begin, end );
+    ContainerInterface::iterator it;
+    if( choices.empty() )
+    {
+        it = begin; // Use the choice that was given to us
+    }
+    else
+    {
+        it = choices.front(); // No choice was given to us so assume first one
+        choices.pop_front();
+    }
+    
+    Range r;
+    r.begin = begin;
+    r.end = end;
+    decisions.push_back(r); // Report the range back
+    
+    return it;
 }
 
 

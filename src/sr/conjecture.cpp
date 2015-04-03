@@ -42,7 +42,10 @@ void Conjecture::PrepareForDecidedCompare()
 	ASSERT( this );
 
 	TRACE("Decision prepare\n");
-	decision_index = 0;
+	get_choice_index = 0;
+    register_decision_index = 0;
+    current_agent = NULL;
+    agent_first_index = 0;
 }
 
 
@@ -57,7 +60,6 @@ bool Conjecture::Increment(bool trace)
             s += SSPrintf("%d:", i) + ChoiceAsString(c) + " ";
             i++;
         }
-        TRACE("ConjSpin ")(s)(" mismatch at %d\n", decision_index-1);
     }
     
 	// If we've run out of choices, we're done.
@@ -102,39 +104,99 @@ bool Conjecture::Increment(bool trace)
 }
 
 
-ContainerInterface::iterator Conjecture::HandleDecision( ContainerInterface::iterator begin,
-		                                                 ContainerInterface::iterator end )
-{
-	ASSERT( this );
-	ASSERT( choices.size() >= decision_index ); // consistency check; as we see more decisions, we should be adding them to the conjecture
-	Choice c;
+void Conjecture::BeginAgent( Agent *agent )
+{            
+    ASSERT( !current_agent );
+    
+    // Start tracking the next agent if not already done
+    if( register_decision_index >= choices.size() )
+    {
+        current_agent = agent;
+        agent_first_index = register_decision_index;
+    }
+}
 
-    TRACE("Handle decision index #%d size=#%d\n", decision_index, choices.size());
+
+void Conjecture::EndAgent()
+{            
+    // Store info for current agent if there was one
+    if( current_agent )
+    {
+        int n = register_decision_index - agent_first_index;
+        if( n >= 1 )
+        {
+            choices[agent_first_index].agent = current_agent;                
+            choices[agent_first_index].num_decisions = n;
+        }
+        current_agent = NULL;
+        agent_first_index = 0;
+    }
+}
+
+
+int Conjecture::GetCount(Agent *agent)
+{            
+    if( register_decision_index < choices.size() && choices[register_decision_index].agent == agent) 
+    {
+        // There is at least one choice and it is marked for us (we might make
+        // no decisions, in which case we are not recorded in the choice)
+        TRACE("Retrieved count %d\n", choices[register_decision_index].num_decisions);
+        return choices[register_decision_index].num_decisions;
+    }
+    else 
+    {
+        return 0;
+    }
+}
+
+
+bool Conjecture::GetChoice(ContainerInterface::iterator &it)
+{
+    ASSERT( this );
+    Choice c;
+    bool known;
 
     // See if this decision needs to be added to the present Conjecture
-	if( choices.size() == decision_index ) // this decision missing from conjecture?
+    known = ( get_choice_index < choices.size() ); // this decision missing from conjecture?
+
+    if( known ) // already know about this decision
+    {
+        // Adopt the current decision based on Conjecture
+        c = choices[get_choice_index]; // Get present decision
+        it = c.it;
+        TRACE("Existing decision choosing ")(ChoiceAsString(c))("\n");
+    }
+    
+    get_choice_index++;
+    
+    // Return whatever choice we made
+    return known;
+}
+
+
+void Conjecture::RegisterDecision( ContainerInterface::iterator begin,
+	                               ContainerInterface::iterator end )
+{
+	ASSERT( this );
+	ASSERT( register_decision_index <= choices.size() ); // consistency check; as we see more decisions, we should be adding them to the conjecture
+	Choice c;
+
+    TRACE("Register decision index #%d size=#%d\n", register_decision_index, choices.size());
+
+    // See if this decision needs to be added to the present Conjecture
+	if( register_decision_index >= choices.size() ) // this decision missing from conjecture?
 	{
 		c.it = begin; // Choose the first option supplied
 		c.choice_num = 0;
 		c.end = end; // Choose the first option supplied
+		c.agent = NULL;
 		choices.push_back( c ); // append this decision so we will iterate it later
         
         ResizeCounts();
         start_counts[choices.size()-1]++;
-        TRACE("New decision choosing ")(ChoiceAsString(c))("\n");
-	}
-	else // already know about this decision
-	{
-		// Adopt the current decision based on Conjecture
-	    c = choices[decision_index]; // Get present decision
-
-        TRACE("Existing decision choosing ")(ChoiceAsString(c))("\n");
 	}
     
-    decision_index++;
-    
-	// Return whatever choice we made
-    return c.it;
+    register_decision_index++;
 }
 
 

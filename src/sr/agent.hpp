@@ -38,7 +38,11 @@ public:
 
 bool operator<(const Links::Link &l0, const Links::Link &l1);
 
-        
+struct Range
+{
+    ContainerInterface::iterator begin;
+    ContainerInterface::iterator end;    
+};
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Traceable,
@@ -119,7 +123,8 @@ protected:
 private:    
     shared_ptr<Key> coupling_key;    
     Links links;
-    Conjecture *pconj;
+    deque<Range> decisions;
+    deque<ContainerInterface::iterator> choices;
 };
 
 

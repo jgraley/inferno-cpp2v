@@ -8,6 +8,7 @@ namespace SR
 {
 
 class CompareReplace;
+class Agent;
 
 /// Utility to keep track of the current set of choices that have been made at decision points, and to advance through them until a full match is found
 class Conjecture
@@ -18,6 +19,8 @@ public:
         ContainerInterface::iterator it;
         ContainerInterface::iterator end;   
         int choice_num;
+        Agent *agent; // Only for first decision registered by the agent; others NULL
+        int num_decisions; // Only for first decision registered by the agent
     };
 
 public:
@@ -31,17 +34,21 @@ public:
     // ForceDecision().
     				   
     // Standard interface for decided compare functions
-	ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
-			                                     ContainerInterface::iterator end );
+    void BeginAgent( Agent *agent );
+    void EndAgent();
+    int GetCount( Agent *agent );
+    bool GetChoice( ContainerInterface::iterator &it );
+    void RegisterDecision( ContainerInterface::iterator begin,
+                           ContainerInterface::iterator end );    
 
-    Choice *GetChoicePtr() { return decision_index < choices.size() ? &choices[decision_index] : NULL; } // TODO should be const ptr
-    Choice *GetPrevChoicePtr() { return (decision_index>0 && decision_index-1 < choices.size()) ? &choices[decision_index-1] : NULL; } // TODO should be const ptr
-				   
     string ChoiceAsString(const Choice &c);
 				   
 private:
-	int decision_index;
+    int get_choice_index;
+    int register_decision_index;
 	vector<Choice> choices;
+	Agent *current_agent;
+    int agent_first_index;
 	
 	// Tracing stuff
 	void ResizeCounts();
