@@ -27,22 +27,25 @@ public:
         bool invert;
     };
     
+    struct Range
+    {
+        ContainerInterface::iterator begin;
+        ContainerInterface::iterator end;    
+    };
+
     void clear()
     {
         links.clear();
+        decisions.clear();
     }
     
     vector<Link> links;
+    deque<Range> decisions;
     bool local_match;
 };
 
 bool operator<(const Links::Link &l0, const Links::Link &l1);
 
-struct Range
-{
-    ContainerInterface::iterator begin;
-    ContainerInterface::iterator end;    
-};
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Traceable,
@@ -56,7 +59,7 @@ public:
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual Links DecidedQuery( const TreePtrInterface &x,
                                 bool can_key,
-                                Conjecture &conj ) = 0;                                
+                                deque<ContainerInterface::iterator> choices ) = 0;                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace() = 0;
@@ -90,7 +93,7 @@ public:
     void AgentConfigure( const Engine *e );
     virtual Links DecidedQuery( const TreePtrInterface &x,
                                 bool can_key,
-                                Conjecture &conj );
+                                deque<ContainerInterface::iterator> choices );
     virtual bool DecidedQueryImpl( const TreePtrInterface &x,
                                    bool can_key ) = 0;
     void DoKey( TreePtr<Node> x );
@@ -123,7 +126,7 @@ protected:
 private:    
     shared_ptr<Key> coupling_key;    
     Links links;
-    deque<Range> decisions;
+    
     deque<ContainerInterface::iterator> choices;
 };
 

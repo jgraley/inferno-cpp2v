@@ -164,10 +164,29 @@ bool Engine::DecidedCompare( Agent *agent,
     ASSERT( &x ); // Ref to target must not be NULL (i.e. corrupted ref)
     ASSERT( x ); // Target must not be NULL
         
+    deque<ContainerInterface::iterator> choices;
+    int n = conj.GetCount(agent);
+    for( int i=0; i<n; i++ )
+    {
+        ContainerInterface::iterator it;
+        bool ok = conj.GetChoice(it);
+        if( !ok )
+            break; // Previously registered decisions beyond here were invalidated
+        choices.push_back(it);
+    }
+    
     TRACE(*agent)(" Gathering links\n");    
     // Run the compare implementation with couplings check/update
-    Links mylinks = agent->DecidedQuery( x, can_key, conj );
+    Links mylinks = agent->DecidedQuery( x, can_key, choices );
     
+    if( mylinks.local_match )
+        ASSERT( n<=mylinks.decisions.size() )(*this)(" n=%d ds=%d\n", n, mylinks.decisions.size());    
+    
+    conj.BeginAgent(agent);
+    FOREACH( Links::Range r, mylinks.decisions )
+        conj.RegisterDecision( r.begin, r.end );
+    conj.EndAgent();
+        
     if(!mylinks.local_match)
     {
         TRACE(*agent)(" local mismatch, aborting\n");
