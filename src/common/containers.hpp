@@ -165,7 +165,7 @@ public:
 	virtual const iterator_interface &begin() = 0;
     virtual const iterator_interface &end() = 0;
     virtual void erase( typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator it ) = 0;
-    virtual bool empty() const { return size() == 0; }
+    virtual bool empty() { return begin()==end(); }
     virtual int size() const
     {
     	// TODO support const_interator properly and get rid of this const_cast
@@ -245,7 +245,7 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
         ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator
         CONTAINER_IMPL::erase( *(typename CONTAINER_IMPL::iterator *)cit );
     }
-    virtual bool empty() const
+    virtual bool empty() 
     {
         return CONTAINER_IMPL::empty();
     }

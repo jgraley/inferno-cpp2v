@@ -106,9 +106,12 @@ bool NormalAgent::DecidedQuerySequence( SequenceInterface &x,
             {
                 TRACE("Pattern continues after star\n");
 
+                if( xit == x.end() )
+                    return false; // more stuff in pattern but not in x
+                
                 // Decide how many elements the current * should match, using conjecture. Jump forward
                 // that many elements, to the element after the star. 
-                xit = HandleDecision( xit_begin_star, x.end() );
+                xit = HandleDecision( xit, x.end() );
             }
             
             // Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
@@ -167,12 +170,10 @@ bool NormalAgent::DecidedQueryCollection( CollectionInterface &x,
         	ASSERT(!star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
             star = s; // remember for later and skip to next pattern
         }
-	    else // not a Star so match singly...
+	    else if( !x.empty() ) // not a Star so match singly...
 	    {
 	    	// We have to decide which node in the tree to match, so use the present conjecture
 	    	ContainerInterface::iterator xit = HandleDecision( x.begin(), x.end() );
-			if( xit == x.end() )
-				return false; // TODO try asserting that this doesn't happen
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.
@@ -183,6 +184,10 @@ bool NormalAgent::DecidedQueryCollection( CollectionInterface &x,
 	    	// Recurse into comparison function for the chosen node
 			RememberLink( false, pia, *xit );
 	    }
+	    else
+        {
+            return false;
+        }
     }
 
     // Now handle the star if there was one; all the non-star matches have been erased from
