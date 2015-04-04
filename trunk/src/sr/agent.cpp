@@ -185,6 +185,7 @@ void AgentCommon::RememberLocal( bool m )
 ContainerInterface::iterator AgentCommon::HandleDecision( ContainerInterface::iterator begin,
                                                           ContainerInterface::iterator end )
 {
+    ASSERT( begin != end )("no empty decisions");
     ContainerInterface::iterator it;
     if( choices.empty() )
     {
@@ -193,6 +194,7 @@ ContainerInterface::iterator AgentCommon::HandleDecision( ContainerInterface::it
     else
     {
         it = choices.front(); // No choice was given to us so assume first one
+        ASSERT( it != end );
         choices.pop_front();
     }
     

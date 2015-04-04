@@ -20,8 +20,9 @@ bool NotMatchAgent::DecidedQueryImpl( const TreePtrInterface &x,
 
 bool MatchAllAgent::DecidedQueryImpl( const TreePtrInterface &x,
                                       bool can_key )
-{
+{ 
     INDENT("&");
+    ASSERT( !GetPatterns().empty() ); // must be at least one thing!
     
     // Check pre-restriction
     if( !IsLocalMatch(x.get()) )        
@@ -42,6 +43,7 @@ bool MatchAnyAgent::DecidedQueryImpl( const TreePtrInterface &x,
                                       bool can_key )
 {
     INDENT("|");
+    ASSERT( !GetPatterns().empty() ); // must be at least one thing!
     
     // Check pre-restriction
     if( !IsLocalMatch(x.get()) )        

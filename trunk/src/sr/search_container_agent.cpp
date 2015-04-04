@@ -24,10 +24,13 @@ bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x,
     // facade for the iterators and can be abandoned safely?
     shared_ptr<ContainerInterface> pwx = GetContainerInterface( x );
     
+    if( pwx->empty() )
+    {
+        return false; // The search container is empty, thus terminus could never be matched
+    }
+    
     // Get choice from conjecture about where we are in the walk
     ContainerInterface::iterator thistime = HandleDecision( pwx->begin(), pwx->end() );
-    if( thistime == (ContainerInterface::iterator)(pwx->end()) )
-        return false; // ran out of choices
 
     // Where a recurse restriction is in use, apply it to all the recursion points
     // underlying the current iterator, thistime.
