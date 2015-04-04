@@ -38,26 +38,15 @@ void AgentCommon::AgentConfigure( const Engine *e )
 
 Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
                                  bool can_key,
-                                 Conjecture &conj )
+                                 deque<ContainerInterface::iterator> c )
 {
     ASSERT(this);
     ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
 
     bool match = true;
-    ClearLinks();    
-    
-    decisions.clear();
-    choices.clear();
-    int n = conj.GetCount(this);
-    for( int i=0; i<n; i++ )
-    {
-        ContainerInterface::iterator it;
-        bool ok = conj.GetChoice(it);
-        if( !ok )
-            break; // Previously registered decisions beyond here were invalidated
-        choices.push_back(it);
-    }
-            
+    ClearLinks();        
+    choices = c;
+                
     // If the agent is coupled already, check for a coupling match
     if( TreePtr<Node> keynode = GetCoupled() )
     {
@@ -69,9 +58,6 @@ Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
     // Also takes notes of how child agents link to children of x (depending on conjecture)
     if( match )
         match = DecidedQueryImpl( x, can_key );
-
-    if( match )
-        ASSERT( n<=decisions.size() )(*this)(" n=%d ds=%d\n", n, decisions.size());
     
     RememberLocal(match);
 
@@ -81,11 +67,6 @@ Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
         DoKey( x );  
     }
 
-    conj.BeginAgent(this);
-    FOREACH( Range r, decisions )
-        conj.RegisterDecision( r.begin, r.end );
-    conj.EndAgent();
-        
     return links;
 }
 
@@ -198,10 +179,10 @@ ContainerInterface::iterator AgentCommon::HandleDecision( ContainerInterface::it
         choices.pop_front();
     }
     
-    Range r;
+    Links::Range r;
     r.begin = begin;
     r.end = end;
-    decisions.push_back(r); // Report the range back
+    links.decisions.push_back(r); // Report the range back
     
     return it;
 }
