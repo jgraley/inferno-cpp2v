@@ -62,7 +62,8 @@ public:
                                 deque<ContainerInterface::iterator> choices ) = 0;                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
-    virtual void KeyReplace() = 0;
+    virtual void KeyReplace( const TreePtrInterface &x,
+                             deque<ContainerInterface::iterator> choices ) = 0;
     virtual void TrackingKey( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
 	virtual void AgentConfigure( const Engine *e ) = 0;
@@ -108,7 +109,8 @@ public:
     void RememberLocal( bool m );
     ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
                                                  ContainerInterface::iterator end );
-    virtual void KeyReplace();
+    virtual void KeyReplace( const TreePtrInterface &x,
+                             deque<ContainerInterface::iterator> choices );
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplace();
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );

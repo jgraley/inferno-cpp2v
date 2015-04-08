@@ -36,7 +36,7 @@ public:
     // Standard interface for decided compare functions
     void BeginAgent( Agent *agent );
     void EndAgent();
-    int GetCount( Agent *agent );
+    deque<ContainerInterface::iterator> GetChoices(Agent *agent);
     bool GetChoice( ContainerInterface::iterator &it );
     void RegisterDecision( ContainerInterface::iterator begin,
                            ContainerInterface::iterator end );    

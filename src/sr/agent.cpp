@@ -205,8 +205,11 @@ bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
 }
 
 
-void AgentCommon::KeyReplace()
-{    
+void AgentCommon::KeyReplace( const TreePtrInterface &x,
+                              deque<ContainerInterface::iterator> choices )
+{   
+    if( x )
+        ASSERT( x == GetKey()->root );
 }
 
 

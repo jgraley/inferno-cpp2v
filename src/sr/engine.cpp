@@ -158,29 +158,21 @@ void Engine::GetGraphInfo( vector<string> *labels,
 bool Engine::DecidedCompare( Agent *agent,
                              const TreePtrInterface &x,
                              bool can_key,
-                             Conjecture &conj ) const
+                             Conjecture &conj,
+                             Map< Agent *, TreePtr<Node> > &coupling_keys ) const
 {
     INDENT(" ");
     ASSERT( &x ); // Ref to target must not be NULL (i.e. corrupted ref)
     ASSERT( x ); // Target must not be NULL
         
-    deque<ContainerInterface::iterator> choices;
-    int n = conj.GetCount(agent);
-    for( int i=0; i<n; i++ )
-    {
-        ContainerInterface::iterator it;
-        bool ok = conj.GetChoice(it);
-        if( !ok )
-            break; // Previously registered decisions beyond here were invalidated
-        choices.push_back(it);
-    }
+    deque<ContainerInterface::iterator> choices = conj.GetChoices(agent);
     
     TRACE(*agent)(" Gathering links\n");    
     // Run the compare implementation with couplings check/update
     Links mylinks = agent->DecidedQuery( x, can_key, choices );
     
     if( mylinks.local_match )
-        ASSERT( n<=mylinks.decisions.size() )(*this)(" n=%d ds=%d\n", n, mylinks.decisions.size());    
+        ASSERT( choices.size()<=mylinks.decisions.size() )(*this)(" cs=%d ds=%d\n", choices.size(), mylinks.decisions.size());    
     
     conj.BeginAgent(agent);
     FOREACH( Links::Range r, mylinks.decisions )
@@ -206,15 +198,18 @@ bool Engine::DecidedCompare( Agent *agent,
         else
             px = &(l.local_x);        
         if( l.abnormal )
-            r = AbnormalCompare(l.agent, *px, can_key);
+            r = AbnormalCompare(l.agent, *px, can_key, coupling_keys);
         else
-            r = DecidedCompare(l.agent, *px, can_key, conj);
+            r = DecidedCompare(l.agent, *px, can_key, conj, coupling_keys);
         if( l.invert )
             r = !r || can_key; // only apply during restricting pass 
         if( !r )
             return false;
         i++;
     }
+      
+    if( can_key && !coupling_keys.IsExist(agent) )
+        coupling_keys[agent] = x;
       
     TRACE(*agent)(" Done\n");        
     return true;
@@ -223,7 +218,8 @@ bool Engine::DecidedCompare( Agent *agent,
 
 bool Engine::AbnormalCompare( Agent *agent,
                               const TreePtrInterface &x, 
-                              bool can_key ) const
+                              bool can_key,
+                              Map< Agent *, TreePtr<Node> > &coupling_keys ) const
 {
     INDENT("A");
     ASSERT( x );
@@ -242,7 +238,7 @@ bool Engine::AbnormalCompare( Agent *agent,
     while(1)
     {
         conj.PrepareForDecidedCompare();
-        r = DecidedCompare( agent, x, false, conj );
+        r = DecidedCompare( agent, x, false, conj, coupling_keys );
         
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
         if( r )
@@ -263,6 +259,16 @@ bool Engine::AbnormalCompare( Agent *agent,
 
 bool Engine::Compare( const TreePtrInterface &x ) const
 {
+    Map< Agent *, TreePtr<Node> > coupling_keys;
+    Conjecture conj;
+    return Compare( x, conj, coupling_keys );
+}
+
+
+bool Engine::Compare( const TreePtrInterface &x,
+                      Conjecture &conj,
+                      Map< Agent *, TreePtr<Node> > &coupling_keys ) const
+{
     INDENT("C");
     ASSERT( x );
     TRACE("Compare x=")(*x);
@@ -271,7 +277,6 @@ bool Engine::Compare( const TreePtrInterface &x ) const
            
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
-    Conjecture conj;
     bool r;
     //int i=0;
     while(1)
@@ -288,16 +293,17 @@ bool Engine::Compare( const TreePtrInterface &x ) const
             // Unkey 
         FOREACH( Agent *a, my_agents )
             a->ResetKey();
+        coupling_keys.clear();
 
         // Do a two-pass matching process: first get the keys...
         conj.PrepareForDecidedCompare();
-        r = DecidedCompare( root_agent, x, true, conj );
+        r = DecidedCompare( root_agent, x, true, conj, coupling_keys );
                
         if( r )
         {
             // ...now restrict the search according to the couplings
             conj.PrepareForDecidedCompare();
-            r = DecidedCompare( root_agent, x, false, conj );
+            r = DecidedCompare( root_agent, x, false, conj, coupling_keys );
         }
         
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
@@ -317,11 +323,17 @@ bool Engine::Compare( const TreePtrInterface &x ) const
 }
 
 
-void Engine::KeyReplaceNodes() const
+void Engine::KeyReplaceNodes( Conjecture &conj,
+                              Map< Agent *, TreePtr<Node> > &coupling_keys ) const
 {
     INDENT("K");    
     FOREACH( Agent *a, my_agents )
-        a->KeyReplace();
+    {
+        if( coupling_keys.IsExist(a) )
+            a->KeyReplace(coupling_keys[a], conj.GetChoices(a));
+        else
+            a->KeyReplace(TreePtr<Node>(), conj.GetChoices(a));        
+    }
 }
 
 
@@ -338,13 +350,16 @@ bool Engine::SingleCompareReplace( TreePtr<Node> *proot )
 {
     INDENT(">");
 
+    Map< Agent *, TreePtr<Node> > coupling_keys;
+    Conjecture conj;
+
     TRACE("Begin search\n");
-    bool r = Compare( *proot );
+    bool r = Compare( *proot, conj, coupling_keys );
     if( !r )
         return false;
 
     TRACE("Search successful, now keying replace nodes\n");
-    KeyReplaceNodes();
+    KeyReplaceNodes( conj, coupling_keys );
 
     TRACE("Now replacing\n");
     *proot = Replace();

@@ -134,19 +134,18 @@ void Conjecture::EndAgent()
 }
 
 
-int Conjecture::GetCount(Agent *agent)
+deque<ContainerInterface::iterator> Conjecture::GetChoices(Agent *agent)
 {            
-    if( register_decision_index < choices.size() && choices[register_decision_index].agent == agent) 
+    deque<ContainerInterface::iterator> ac;
+    bool ours = false;
+    FOREACH( const Choice &c, choices )
     {
-        // There is at least one choice and it is marked for us (we might make
-        // no decisions, in which case we are not recorded in the choice)
-        TRACE("Retrieved count %d\n", choices[register_decision_index].num_decisions);
-        return choices[register_decision_index].num_decisions;
+        if( c.agent )
+            ours = (c.agent == agent);
+        if( ours )
+            ac.push_back(c.it);
     }
-    else 
-    {
-        return 0;
-    }
+    return ac;
 }
 
 
