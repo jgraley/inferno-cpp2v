@@ -26,10 +26,14 @@ bool SoftAgent::DecidedQueryImpl( const TreePtrInterface &x,
 }
 
     
-void SoftAgent::KeyReplace()
+void SoftAgent::KeyReplace( const TreePtrInterface &x,
+                            deque<ContainerInterface::iterator> choices )
 {    
     INDENT("%");
     TRACE("Keying replace pattern (via agent) ")(*this)("\n");
+
+    if( x )
+        ASSERT( x == GetKey()->root );
 
     if( !GetKey() )
     {

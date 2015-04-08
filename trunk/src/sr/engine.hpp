@@ -42,14 +42,20 @@ public:
 protected:
     bool SingleCompareReplace( TreePtr<Node> *proot );
     bool Compare( const TreePtrInterface &x ) const;
+    bool Compare( const TreePtrInterface &x,
+                  Conjecture &conj,
+                  Map< Agent *, TreePtr<Node> > &coupling_keys ) const;
     bool DecidedCompare( Agent *agent,
                          const TreePtrInterface &x,
                          bool can_key,
-                         Conjecture &conj ) const;
+                         Conjecture &conj,
+                         Map< Agent *, TreePtr<Node> > &coupling_keys ) const;
     bool AbnormalCompare( Agent *agent,
                           const TreePtrInterface &x, 
-                          bool can_key ) const;
-    void KeyReplaceNodes() const;
+                          bool can_key,
+                          Map< Agent *, TreePtr<Node> > &coupling_keys ) const;
+    void KeyReplaceNodes( Conjecture &conj,
+                          Map< Agent *, TreePtr<Node> > &coupling_keys) const;
     TreePtr<Node> Replace() const;
 
 public:
