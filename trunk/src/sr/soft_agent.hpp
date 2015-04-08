@@ -20,10 +20,6 @@ public:
     void AgentConfigure( const Engine *e );
     virtual bool DecidedQueryImpl( const TreePtrInterface &x,
                                    bool can_key );
-    // This entrypoint is actually called by the main engine before the replace
-    // and the results are put into a key. This one calls into the impl.
-    virtual void KeyReplace( const TreePtrInterface &x,
-                             deque<ContainerInterface::iterator> choices ); 
     // This is the main entry-point during replace, but it (confusingly) doesn't
     // call into the soft implementation. Instead, it expects the impl to have
     // already run and to be in a key

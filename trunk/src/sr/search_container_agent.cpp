@@ -66,15 +66,18 @@ bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x,
 void SearchContainerAgent::KeyReplace( const TreePtrInterface &x,
                                        deque<ContainerInterface::iterator> choices )
 {
-    if(x)
-    {
-        ASSERT( choices.size() == 1 );
-        ContainerInterface::iterator thistime = choices.front();
-        shared_ptr<Key> key = GetKey();
-        shared_ptr<TerminusKey> stuff_key = dynamic_pointer_cast<TerminusKey>(key);
-        ASSERT( stuff_key->root == x ); 
-        ASSERT( stuff_key->terminus == *thistime );
-    }
+    ASSERT( choices.size() == 1 );
+    ContainerInterface::iterator thistime = choices.front();
+#ifdef LATE_KEYING
+    shared_ptr<TerminusKey> stuff_key;
+    stuff_key->root = x;
+    stuff_key->terminus = *thistime;
+#else
+    shared_ptr<Key> key = GetKey();
+    shared_ptr<TerminusKey> stuff_key = dynamic_pointer_cast<TerminusKey>(key);
+    ASSERT( stuff_key->root == x ); 
+    ASSERT( stuff_key->terminus == *thistime );
+#endif        
 }
 
 

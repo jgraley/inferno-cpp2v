@@ -16,8 +16,6 @@ class OverlayAgent : public virtual AgentCommon
 public:
     virtual bool DecidedQueryImpl( const TreePtrInterface &x,
                                    bool can_key );
-    virtual void KeyReplace( const TreePtrInterface &x,
-                             deque<ContainerInterface::iterator> choices );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:
     virtual TreePtr<Node> GetThrough() const = 0;

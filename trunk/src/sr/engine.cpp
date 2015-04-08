@@ -167,6 +167,15 @@ bool Engine::DecidedCompare( Agent *agent,
         
     deque<ContainerInterface::iterator> choices = conj.GetChoices(agent);
     
+    // If the agent is coupled already, check for a coupling match
+    if( coupling_keys.IsExist(agent) )
+    {
+        SimpleCompare sc;
+        bool match = sc( x, coupling_keys[agent] );
+        if( !match )
+            return false;
+    }
+
     TRACE(*agent)(" Gathering links\n");    
     // Run the compare implementation with couplings check/update
     Links mylinks = agent->DecidedQuery( x, can_key, choices );
@@ -208,7 +217,7 @@ bool Engine::DecidedCompare( Agent *agent,
         i++;
     }
       
-    if( can_key && !coupling_keys.IsExist(agent) )
+    if( can_key && !coupling_keys.IsExist(agent) && !agent->GetCoupled() )
         coupling_keys[agent] = x;
       
     TRACE(*agent)(" Done\n");        
@@ -326,14 +335,11 @@ bool Engine::Compare( const TreePtrInterface &x,
 void Engine::KeyReplaceNodes( Conjecture &conj,
                               Map< Agent *, TreePtr<Node> > &coupling_keys ) const
 {
-    INDENT("K");    
-    FOREACH( Agent *a, my_agents )
-    {
-        if( coupling_keys.IsExist(a) )
-            a->KeyReplace(coupling_keys[a], conj.GetChoices(a));
-        else
-            a->KeyReplace(TreePtr<Node>(), conj.GetChoices(a));        
-    }
+    INDENT("K");   
+    // For every agent, 
+    typedef pair< Agent *, TreePtr<Node> > keypair;
+    FOREACH( keypair c, coupling_keys )
+        c.first->KeyReplace(c.second, conj.GetChoices(c.first));
 }
 
 
