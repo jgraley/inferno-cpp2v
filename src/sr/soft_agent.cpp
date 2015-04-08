@@ -25,32 +25,20 @@ bool SoftAgent::DecidedQueryImpl( const TreePtrInterface &x,
     return result;
 }
 
-    
-void SoftAgent::KeyReplace( const TreePtrInterface &x,
-                            deque<ContainerInterface::iterator> choices )
-{    
-    INDENT("%");
-    TRACE("Keying replace pattern (via agent) ")(*this)("\n");
-
-    if( x )
-        ASSERT( x == GetKey()->root );
-
-    if( !GetKey() )
-    {
-        // Call the soft pattern impl 
-        TreePtr<Node> key = MyBuildReplace();
-        if( key )           
-        {            
-            // Allow this to key a coupling. 
-            DoKey( key );
-        } 
-    }
-}
-
 
 TreePtr<Node> SoftAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT("%");
+    if( !GetKey() )
+    {
+        // Call the soft pattern impl 
+        keynode = MyBuildReplace();
+        if( keynode )           
+        {            
+            // Allow this to key a coupling. 
+            DoKey( keynode );
+        } 
+    }
     // Note that the keynode could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
     return DuplicateSubtree(keynode);   
