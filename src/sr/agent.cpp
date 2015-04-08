@@ -48,6 +48,7 @@ Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
     choices = c;
     
     // If the agent is coupled already, check for a coupling match
+    // Note: now only when keyed by master
     if( TreePtr<Node> keynode = GetCoupled() )
     {
         SimpleCompare sc;
@@ -62,13 +63,6 @@ Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
     RememberLocal(match);
 
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
-#ifndef LATE_KEYING
-    if( match && can_key )
-    {
-        DoKey( x );  
-    }
-#endif
-
     return links;
 }
 
@@ -210,11 +204,7 @@ bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
 void AgentCommon::KeyReplace( const TreePtrInterface &x,
                               deque<ContainerInterface::iterator> choices )
 {   
-#ifdef LATE_KEYING
-    DoKey(x);
-#else   
-    ASSERT( x == GetKey()->root );
-#endif    
+    DoKey(x);  
 }
 
 

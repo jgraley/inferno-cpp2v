@@ -70,13 +70,15 @@ Detailed plan for refactoring into agent patterns
  - Bring the looping through the links part out into a new recursive function in Engine DONE
  - Rename remaining agent funcitonality DecidedQuery...() DONE
 --- Recursive comparing walk is now centralised to the engine, in an agent-independent form ---
-11. Store agent pointer and count of decisions for that agent in first decision for that agent
+11. Store agent pointer and count of decisions for that agent in first decision for that agent DONE
  - Pass vector of choices into agents, length as stored in as the "conj" (maybe rename), process in
-   AgentCommon and then pass back a vector of choices in the Links object.
- - Pass the vectors of choices into KeyReplaceNodes(), and get Stuff to key itself here. 
- - Prove that Stuff and no other nodes require keying beyond what AgentCommon does for them
- - Move keying out of agents and into Engine, using a map of agent onto key for now
- - Try to make the Query functions "const". Check for modifiers of Engine (via engine ptr) too.
+   AgentCommon and then pass back a vector of choices in the Links object. DONE
+ - Pass the vectors of choices into KeyReplace(), and get Stuff to key itself here. DONE
+ - Prove that Stuff and no other nodes require keying beyond what AgentCommon does for them DONE with some refactoring
+ - Move keying out of agents and into Engine, using a map of agent onto key for now DONE
+ - Check that the Query functions "const". Check for modifiers of Engine (via engine ptr) too.
+ - Pass master's coupling set to slaves, so we do not rely on the KeyReplace() keyings for slaves, so that
+   KeyReplace() keyings are only relied on for the imminent replace, not for slave searches.
 --- Agents may now be queried idempotently ---
    **UNSURE ABOUT THESE...**
 12. Generalise Conjecture impl, and maybe fold directly into Engine

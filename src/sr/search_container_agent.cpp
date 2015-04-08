@@ -49,16 +49,6 @@ bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x,
     TRACE("Trying terminus ")(**thistime)("\n");
     RememberLink( false, AsAgent(terminus), *thistime );
             
-    // If we got this far, do the couplings
-    if( can_key )
-    {
-        shared_ptr<TerminusKey> key( new TerminusKey );
-        key->root = x;
-        key->terminus = *thistime;
-        shared_ptr<Key> sckey( key );
-        TRACE("Matched, so keying search container type ")(*this)(" for ")(*x)("\n");
-        DoKey( sckey );    
-    }
     return true;
 }
 
@@ -68,16 +58,11 @@ void SearchContainerAgent::KeyReplace( const TreePtrInterface &x,
 {
     ASSERT( choices.size() == 1 );
     ContainerInterface::iterator thistime = choices.front();
-#ifdef LATE_KEYING
-    shared_ptr<TerminusKey> stuff_key;
-    stuff_key->root = x;
-    stuff_key->terminus = *thistime;
-#else
-    shared_ptr<Key> key = GetKey();
-    shared_ptr<TerminusKey> stuff_key = dynamic_pointer_cast<TerminusKey>(key);
-    ASSERT( stuff_key->root == x ); 
-    ASSERT( stuff_key->terminus == *thistime );
-#endif        
+    shared_ptr<TerminusKey> key( new TerminusKey );
+    key->root = x;
+    key->terminus = *thistime;
+    shared_ptr<Key> sckey( key );
+    DoKey( sckey );    
 }
 
 

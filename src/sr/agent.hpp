@@ -8,10 +8,7 @@
 #include "conjecture.hpp"
 #include <vector>
 #include <boost/type_traits.hpp>
- 
-// Temporarily make this keying strategy change switchable while other refactors are tried  
-//#define LATE_KEYING 
- 
+  
 namespace SR
 { 
 class SpecialBase;
