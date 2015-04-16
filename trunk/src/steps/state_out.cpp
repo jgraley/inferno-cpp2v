@@ -353,8 +353,8 @@ struct IsLabelReached : SoftAgent, Special<LabelIdentifier>
     {
         INDENT("L");
         ASSERT( pattern );
-        if( IsCanKey() )
-            return true; // Want to wait for our pattern to get keyed before we do the search, so wait for restricting pass
+        //if( IsCanKey() )
+        //    return true; // Want to wait for our pattern to get keyed before we do the search, so wait for restricting pass
         
         // TODO Flushable mechanism removed - flush every time for safety (if
         // this code ever gets used again). This may be slow!

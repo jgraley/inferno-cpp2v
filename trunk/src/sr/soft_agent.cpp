@@ -11,8 +11,7 @@ void SoftAgent::AgentConfigure( const Engine *e )
 }
 
 
-bool SoftAgent::DecidedQueryImpl( const TreePtrInterface &x,
-                                  bool can_key )
+bool SoftAgent::DecidedQueryImpl( const TreePtrInterface &x )
 {
     INDENT("%");
 
@@ -20,7 +19,6 @@ bool SoftAgent::DecidedQueryImpl( const TreePtrInterface &x,
     if( !IsLocalMatch(x.get()) )        
         return false;
 
-    current_can_key = can_key;
     bool result = MyCompare( x );
     return result;
 }
@@ -82,12 +80,6 @@ bool SoftAgent::AbnormalCompare( const TreePtrInterface &x, const TreePtrInterfa
 TreePtr<Node> *SoftAgent::GetContext()
 {
     return engine->GetOverallMaster()->pcontext;
-}
-
-
-bool SoftAgent::IsCanKey()
-{
-    return current_can_key;
 }
 
 

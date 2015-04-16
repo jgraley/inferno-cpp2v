@@ -8,8 +8,7 @@
 
 using namespace SR;
 
-bool NormalAgent::DecidedQueryImpl( const TreePtrInterface &x,
-							        bool can_key )
+bool NormalAgent::DecidedQueryImpl( const TreePtrInterface &x )
 {
     INDENT(".");
 
@@ -34,14 +33,14 @@ bool NormalAgent::DecidedQueryImpl( const TreePtrInterface &x,
             SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
             ASSERT( x_seq )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
-            r = DecidedQuerySequence( *x_seq, *pattern_seq, can_key );
+            r = DecidedQuerySequence( *x_seq, *pattern_seq );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
             CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
-            r = DecidedQueryCollection( *x_col, *pattern_col, can_key );
+            r = DecidedQueryCollection( *x_col, *pattern_col );
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -52,7 +51,6 @@ bool NormalAgent::DecidedQueryImpl( const TreePtrInterface &x,
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
                 Agent *ap = Agent::AsAgent(*pattern_ptr);
                 RememberLink(false, ap, *x_ptr);
-                //r = ap->DecidedCompare( *x_ptr, can_key, conj );
             }
         }
         else
@@ -68,8 +66,7 @@ bool NormalAgent::DecidedQueryImpl( const TreePtrInterface &x,
 
 
 bool NormalAgent::DecidedQuerySequence( SequenceInterface &x,
-		                                SequenceInterface &pattern,
-		                                bool can_key )
+		                                SequenceInterface &pattern )
 {
     INDENT(" ");
     
@@ -145,8 +142,7 @@ bool NormalAgent::DecidedQuerySequence( SequenceInterface &x,
 
 
 bool NormalAgent::DecidedQueryCollection( CollectionInterface &x,
-		 					              CollectionInterface &pattern,
-							              bool can_key )
+		 					              CollectionInterface &pattern )
 {
     INDENT(" ");
     
