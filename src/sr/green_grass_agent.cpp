@@ -4,8 +4,7 @@
 
 using namespace SR;
 
-bool GreenGrassAgent::DecidedQueryImpl( const TreePtrInterface &x,
-                                        bool can_key )
+bool GreenGrassAgent::DecidedQueryImpl( const TreePtrInterface &x )
 {
     INDENT("G");
     

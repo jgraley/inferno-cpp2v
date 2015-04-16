@@ -58,7 +58,6 @@ public:
     //virtual Wat? LocatedQuery( const TreePtrInterface &x ) = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual Links DecidedQuery( const TreePtrInterface &x,
-                                bool can_key,
                                 deque<ContainerInterface::iterator> choices ) = 0;                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
@@ -93,10 +92,8 @@ public:
     AgentCommon();
     void AgentConfigure( const Engine *e );
     virtual Links DecidedQuery( const TreePtrInterface &x,
-                                bool can_key,
                                 deque<ContainerInterface::iterator> choices );
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x,
-                                   bool can_key ) = 0;
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) = 0;
     void DoKey( TreePtr<Node> x );
     void DoKey( shared_ptr<Key> key );
     TreePtr<Node> GetCoupled();                                  
@@ -114,9 +111,6 @@ public:
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplace();
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
-    bool MatchingDecidedCompare( const TreePtrInterface &x,
-                                 bool can_key,
-                                 Conjecture &conj );
     TreePtr<Node> DuplicateNode( TreePtr<Node> pattern,
                                  bool force_dirty ) const;
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,

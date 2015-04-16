@@ -19,8 +19,7 @@ namespace SR
 class StarAgent : public virtual AgentCommon 
 {
 public:
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x, // x must be a SubContainer
-                                   bool can_key );
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x ); // x must be a SubContainer                                  
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:
     virtual TreePtr<Node> GetRestriction() = 0;

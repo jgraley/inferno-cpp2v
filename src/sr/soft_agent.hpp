@@ -14,12 +14,8 @@ namespace SR
 class SoftAgent : public virtual AgentCommon
 {
 public:
-    SoftAgent() :
-        current_can_key( false )
-    {}
     void AgentConfigure( const Engine *e );
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x,
-                                   bool can_key );
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x );
     // This is the main entry-point during replace, but it (confusingly) doesn't
     // call into the soft implementation. Instead, it expects the impl to have
     // already run and to be in a key
@@ -36,11 +32,8 @@ protected: // Call only from the soft node implementation in MyCompare()
     // for an overall match to be possible, and so cannot be used to key a coupling)
     bool AbnormalCompare( const TreePtrInterface &x, const TreePtrInterface &pattern );
     TreePtr<Node> *GetContext();
-    bool IsCanKey();
     TreePtr<Node> GetCoupled( TreePtr<Node> pattern );
     TreePtr<Node> DoBuildReplace( TreePtr<Node> pattern ) ;
-protected:
-    bool current_can_key;
 };
 
 };

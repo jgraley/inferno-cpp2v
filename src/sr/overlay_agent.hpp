@@ -14,8 +14,7 @@ namespace SR
 class OverlayAgent : public virtual AgentCommon
 {
 public:
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x,
-                                   bool can_key );
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:
     virtual TreePtr<Node> GetThrough() const = 0;

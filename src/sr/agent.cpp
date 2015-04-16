@@ -37,15 +37,14 @@ void AgentCommon::AgentConfigure( const Engine *e )
 
 
 Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
-                                 bool can_key,
-                                 deque<ContainerInterface::iterator> c )
+                                 deque<ContainerInterface::iterator> ch )
 {
     ASSERT(this);
     ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
 
     bool match = true;
     ClearLinks();        
-    choices = c;
+    choices = ch;
     
     // If the agent is coupled already, check for a coupling match
     // Note: now only when keyed by master
@@ -58,7 +57,7 @@ Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
     // Do the agent-specific local checks (x versus characteristics of the present agent)
     // Also takes notes of how child agents link to children of x (depending on conjecture)
     if( match )
-        match = DecidedQueryImpl( x, can_key );
+        match = DecidedQueryImpl( x );
     
     RememberLocal(match);
 

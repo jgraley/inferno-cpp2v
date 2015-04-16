@@ -178,7 +178,7 @@ bool Engine::DecidedCompare( Agent *agent,
 
     TRACE(*agent)(" Gathering links\n");    
     // Run the compare implementation with couplings check/update
-    Links mylinks = agent->DecidedQuery( x, can_key, choices );
+    Links mylinks = agent->DecidedQuery( x, choices );
     
     if( mylinks.local_match )
         ASSERT( choices.size()<=mylinks.decisions.size() )(*this)(" cs=%d ds=%d\n", choices.size(), mylinks.decisions.size());    
