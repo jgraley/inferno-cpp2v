@@ -77,17 +77,6 @@ public:
 /// Implments misc functionality common to all or most agents
 class AgentCommon : public Agent
 {
-protected:
-    // Base class for coupling keys; this deals with individual node matches, and also with stars
-    // by means of pointing "root" at a SubCollection or SubSequence
-    /// General holder for coupling keys, remembers important details of partil or full matches
-    class Key
-    {
-    public:
-        virtual ~Key(){}  // be a virtual hierarchy
-        TreePtr<Node> root; // Input program node for this coupling
-    };        
-
 public:
     AgentCommon();
     void AgentConfigure( const Engine *e );
@@ -95,9 +84,7 @@ public:
                                 deque<ContainerInterface::iterator> choices );
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) = 0;
     void DoKey( TreePtr<Node> x );
-    void DoKey( shared_ptr<Key> key );
     TreePtr<Node> GetCoupled();                                  
-    virtual shared_ptr<Key> GetKey();
     void ResetKey();    
     void ClearLinks();
     void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x );
@@ -120,7 +107,7 @@ protected:
     const Engine *engine;    
     
 private:    
-    shared_ptr<Key> coupling_key;    
+    TreePtr<Node> coupling_key;    
     Links links;
     
     deque<ContainerInterface::iterator> choices;

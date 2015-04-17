@@ -69,40 +69,22 @@ Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
 void AgentCommon::DoKey( TreePtr<Node> x )
 {
     ASSERT(x);
-    shared_ptr<Key> key( new Key );
-    key->root = x;
-    DoKey( key );
-}
-
-
-void AgentCommon::DoKey( shared_ptr<Key> key )
-{
     if( !coupling_key )
     {
-        coupling_key = key;
+        coupling_key = x;
     }
 }
 
 
 TreePtr<Node> AgentCommon::GetCoupled()
 {
-    shared_ptr<Key> k = GetKey();
-    if( k )
-        return k->root;
-    else
-        return TreePtr<Node>(); 
-}
-
-
-shared_ptr<AgentCommon::Key> AgentCommon::GetKey()
-{
-    return coupling_key;
+    return coupling_key; 
 }
 
 
 void AgentCommon::ResetKey()
 {
-    coupling_key = shared_ptr<Key>();
+    coupling_key = TreePtr<Node>();
 }
 
 
@@ -211,7 +193,7 @@ void AgentCommon::TrackingKey( Agent *from )
 {
     // This function is called on nodes under the "overlay" branch of Overlay nodes.
     // Some special nodes will not know what to do...
-    ASSERT(GetKey())(*this)(" cannot appear in a replace-only context");
+    ASSERT(GetCoupled())(*this)(" cannot appear in a replace-only context");
 }
 
 

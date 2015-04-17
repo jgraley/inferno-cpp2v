@@ -13,12 +13,8 @@ namespace SR
 /// Agent that can match a terminus within a supplied container of nodes
 class SearchContainerAgent : public virtual AgentCommon
 {
-    /// A kind of couplings key that allows a found terminus to be remembered    
-    class TerminusKey : public Key 
-    {
-    public:
-        TreePtr<Node> terminus;
-    };
+private:
+    TreePtr<Node> terminus_key;
 
 public:
     virtual bool DecidedQueryImpl( const TreePtrInterface &x );

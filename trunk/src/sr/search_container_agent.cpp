@@ -57,31 +57,19 @@ void SearchContainerAgent::KeyReplace( const TreePtrInterface &x,
 {
     ASSERT( choices.size() == 1 );
     ContainerInterface::iterator thistime = choices.front();
-    shared_ptr<TerminusKey> key( new TerminusKey );
-    key->root = x;
-    key->terminus = *thistime;
-    shared_ptr<Key> sckey( key );
-    DoKey( sckey );    
+    terminus_key = *thistime;
+    DoKey(x);
 }
 
 
 TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT("#");
-    // SearchContainer.
-    // Are we substituting a stuff node? If so, see if we reached the terminus, and if
-    // so come out of substitution. Done as tail recursion so that we already duplicated
-    // the terminus key, and can just overlay the terminus replace pattern.
-    shared_ptr<Key> key = GetKey();
-    ASSERT( key->root==keynode );    // Check we got the same keynode passed in as we found in the couplins structure
-    shared_ptr<TerminusKey> stuff_key = dynamic_pointer_cast<TerminusKey>(key);
-    ASSERT( stuff_key );
-
     TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(terminus))
-                                                        (", term=")(*(stuff_key->terminus))("\n");
+                                                        (", term=")(*(terminus_key))("\n");
     TreePtr<Node> term = AsAgent(terminus)->BuildReplace();
     TRACE( "Stuff node: Substituting stuff");
-    return DuplicateSubtree(stuff_key->root, stuff_key->terminus, term);   
+    return DuplicateSubtree(keynode, terminus_key, term);   
 }
 
 

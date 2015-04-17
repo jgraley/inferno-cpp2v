@@ -360,7 +360,7 @@ struct IsLabelReached : SoftAgent, Special<LabelIdentifier>
         // this code ever gets used again). This may be slow!
         FlushCache();
         
-        TreePtr<Node> n = GetCoupled( pattern ); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
+        TreePtr<Node> n = GetPatternCoupled( pattern ); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
         if( !n )
             n = pattern;
         TreePtr<Expression> y = dynamic_pointer_cast<Expression>( n );

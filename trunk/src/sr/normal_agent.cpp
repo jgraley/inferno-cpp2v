@@ -212,7 +212,7 @@ void NormalAgent::TrackingKey( Agent *from )
     ASSERT( key );
     TRACE(*this)("::TrackingKey(")(*(key))(" from ")(*(from))(")\n");
     
-    if( GetKey() )
+    if( GetCoupled() )
         return; // Already keyed, no point wasting time keying this (and the subtree under it) again
         
     if( !IsLocalMatch(from) ) 
