@@ -27,15 +27,11 @@ bool SoftAgent::DecidedQueryImpl( const TreePtrInterface &x )
 TreePtr<Node> SoftAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT("%");
-    if( !GetKey() )
+    if( !GetCoupled() )
     {
         // Call the soft pattern impl 
         keynode = MyBuildReplace();
-        if( keynode )           
-        {            
-            // Allow this to key a coupling. 
-            DoKey( keynode );
-        } 
+        DoKey( keynode );
     }
     // Note that the keynode could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
@@ -83,7 +79,7 @@ TreePtr<Node> *SoftAgent::GetContext()
 }
 
 
-TreePtr<Node> SoftAgent::GetCoupled( TreePtr<Node> pattern )
+TreePtr<Node> SoftAgent::GetPatternCoupled( TreePtr<Node> pattern )
 {
     return AsAgent(pattern)->GetCoupled();
 }

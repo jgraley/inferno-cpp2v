@@ -84,16 +84,18 @@ void Engine::Configure( TreePtr<Node> cp,
     my_agents = SetDifference( immediate_agents, agents_already_configured );         
 
     // Determine who our slaves are
-    my_engines = Set<Engine *>();
+    my_slaves = Set<SlaveAgent *>();
     FOREACH( Agent *a, my_agents )
-        if( Engine *e = dynamic_cast<Engine *>(a) )
-            my_engines.insert( e );
+        if( SlaveAgent *sa = dynamic_cast<SlaveAgent *>(a) )
+            my_slaves.insert( sa );
+        else
+            ASSERT( !dynamic_cast<Engine *>(a) ); // not expecting to see any engine other than a slave
 
     // Determine which agents our slaves should not configure
     Set<Agent *> agents_now_configured = SetUnion( agents_already_configured, my_agents ); 
             
     // Recurse into the slaves' configure
-    FOREACH( Engine *e, my_engines )
+    FOREACH( Engine *e, my_slaves )
     {
         TRACE("Recursing to configure slave ")(*e)("\n");
         e->Configure(agents_now_configured, this);
@@ -391,7 +393,7 @@ int Engine::RepeatingCompareReplace( TreePtr<Node> *proot )
     {
         bool stop = depth < stop_after.size() && stop_after[depth]==i;
         if( stop )
-            FOREACH( Engine *e, my_engines )
+            FOREACH( Engine *e, my_slaves )
                 e->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
         bool r = SingleCompareReplace( proot );
         TRACE("SCR result %d\n", r);        

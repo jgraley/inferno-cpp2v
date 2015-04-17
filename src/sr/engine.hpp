@@ -12,6 +12,7 @@
 namespace SR 
 {
 class Agent;
+class SlaveAgent;
 class Conjecture;
 class SpecialBase;
 class CompareReplace;
@@ -79,7 +80,7 @@ private:
     TreePtr<Node> pattern;
     Agent *root_agent;
     const Engine *master_ptr;
-    Set<Engine *> my_engines;   
+    Set<SlaveAgent *> my_slaves;   
     Set<Agent *> my_agents;   
     
     static int repetitions;

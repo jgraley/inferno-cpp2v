@@ -32,7 +32,7 @@ protected: // Call only from the soft node implementation in MyCompare()
     // for an overall match to be possible, and so cannot be used to key a coupling)
     bool AbnormalCompare( const TreePtrInterface &x, const TreePtrInterface &pattern );
     TreePtr<Node> *GetContext();
-    TreePtr<Node> GetCoupled( TreePtr<Node> pattern );
+    TreePtr<Node> GetPatternCoupled( TreePtr<Node> pattern );
     TreePtr<Node> DoBuildReplace( TreePtr<Node> pattern ) ;
 };
 
