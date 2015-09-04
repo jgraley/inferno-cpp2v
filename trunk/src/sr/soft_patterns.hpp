@@ -22,7 +22,7 @@ public:
     }
 
 private:
-    virtual bool MyCompare( const TreePtrInterface &x );
+    virtual bool MyCompare( const TreePtrInterface &x ) const;
     
 protected: 
     TransformOfBase() {}    
@@ -62,7 +62,7 @@ class PointerIs : public Special<PRE_RESTRICTION>,
 public:
     SPECIAL_NODE_FUNCTIONS
     TreePtr<PRE_RESTRICTION> pointer;
-    virtual bool MyCompare( const TreePtrInterface &x )
+    virtual bool MyCompare( const TreePtrInterface &x ) const
     {
         INDENT("@");
         

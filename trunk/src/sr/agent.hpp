@@ -82,12 +82,10 @@ public:
     void AgentConfigure( const Engine *e );
     virtual Links DecidedQuery( const TreePtrInterface &x,
                                 deque<ContainerInterface::iterator> choices );
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) = 0;
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const = 0;
     void DoKey( TreePtr<Node> x );
     TreePtr<Node> GetCoupled();                                  
     void ResetKey();    
-    ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
-                                                 ContainerInterface::iterator end );
     virtual void KeyReplace( const TreePtrInterface &x,
                              deque<ContainerInterface::iterator> choices );
     virtual void TrackingKey( Agent *from );
@@ -99,16 +97,25 @@ public:
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
-    void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x );
-    void RememberInvertedLink( Agent *a, const TreePtrInterface &x );
-    void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x );
+    void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x ) const;
+    void RememberInvertedLink( Agent *a, const TreePtrInterface &x ) const;
+    void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) const;
     const Engine *engine;    
+    ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
+                                                 ContainerInterface::iterator end ) const;
     
 private:    
     TreePtr<Node> coupling_key;    
-    Links links;
     
-    deque<ContainerInterface::iterator> choices;
+    // These are mutable because they are the only things that change during 
+    // a call to DecidedQuery(). It is "OK" because their usage lifetime is 
+    // restricted to a single call (they do not carry state from one call to
+    // the next). TODO pass in and out of DecidedQueryImpl() as params - some
+    // restructuing needed to make this nice as there are modifiers here that
+    // would need to operate on some new object that combines the "links" and
+    // "choices".
+    mutable Links links;    
+    mutable deque<ContainerInterface::iterator> choices;
 };
 
 

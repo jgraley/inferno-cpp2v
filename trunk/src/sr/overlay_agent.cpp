@@ -5,7 +5,7 @@
 
 using namespace SR;
 
-bool OverlayAgent::DecidedQueryImpl( const TreePtrInterface &x )
+bool OverlayAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 {
     // Check pre-restriction
     if( !IsLocalMatch(x.get()) )        

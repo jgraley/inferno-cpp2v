@@ -80,7 +80,7 @@ void AgentCommon::ResetKey()
 }
 
 
-void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x )
+void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x ) const
 {
     Links::Link l;
     l.abnormal = abnormal;
@@ -93,7 +93,7 @@ void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface 
 }
 
 
-void AgentCommon::RememberInvertedLink( Agent *a, const TreePtrInterface &x )
+void AgentCommon::RememberInvertedLink( Agent *a, const TreePtrInterface &x ) const
 {
     Links::Link l;
     l.abnormal = true; // always
@@ -106,7 +106,7 @@ void AgentCommon::RememberInvertedLink( Agent *a, const TreePtrInterface &x )
 }
 
 
-void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
+void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) const
 {
     ASSERT(x);
     Links::Link l;
@@ -121,7 +121,7 @@ void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
 
 
 ContainerInterface::iterator AgentCommon::HandleDecision( ContainerInterface::iterator begin,
-                                                          ContainerInterface::iterator end )
+                                                          ContainerInterface::iterator end ) const
 {
     ASSERT( begin != end )("no empty decisions");
     ContainerInterface::iterator it;

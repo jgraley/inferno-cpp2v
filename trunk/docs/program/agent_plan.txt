@@ -78,10 +78,10 @@ Detailed plan for refactoring into agent patterns
  - Move keying out of agents and into Engine, using a map of agent onto key for now DONE
  - Pass master's coupling set to slaves, so we do not rely on the KeyReplace() keyings for slaves, so that
    KeyReplace() keyings are only relied on for the imminent replace, not for slave searches. DONE
- - Use const ref for the master couplings when passed around in Engine
- - Find and try removing the self-keying in the search side (is it TrackingKey? no)
- - Check that the Agent's query functions are "const" (choices and links member mutable). 
- - Check for modifiers of Engine (via engine ptr) too - hopefully does not need to be mutable.
+ - Use const ref for the master couplings when passed around in Engine DONE
+ - Find and try removing the self-keying in the search side (master replace - was only being used to pick up master)
+ - Check that the Agent's query functions are "const" (choices and links member mutable). DONE
+ - Check for modifiers of Engine (via engine ptr) too - hopefully does not need to be mutable. - WAS const ALREADY
 --- Agents may now be queried idempotently ---
    **UNSURE ABOUT THESE...**
 12. Generalise Conjecture impl, and maybe fold directly into Engine

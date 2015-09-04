@@ -8,7 +8,7 @@
 
 using namespace SR;
 
-bool NormalAgent::DecidedQueryImpl( const TreePtrInterface &x )
+bool NormalAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 {
     INDENT(".");
 
@@ -66,7 +66,7 @@ bool NormalAgent::DecidedQueryImpl( const TreePtrInterface &x )
 
 
 bool NormalAgent::DecidedQuerySequence( SequenceInterface &x,
-		                                SequenceInterface &pattern )
+		                                SequenceInterface &pattern ) const
 {
     INDENT(" ");
     
@@ -142,7 +142,7 @@ bool NormalAgent::DecidedQuerySequence( SequenceInterface &x,
 
 
 bool NormalAgent::DecidedQueryCollection( CollectionInterface &x,
-		 					              CollectionInterface &pattern )
+		 					              CollectionInterface &pattern ) const
 {
     INDENT(" ");
     

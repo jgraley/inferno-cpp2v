@@ -5,7 +5,7 @@
 
 using namespace SR;
 
-bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x )
+bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 {
     INDENT("#");
     ASSERT( this );
@@ -73,7 +73,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 }
 
 
-shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> x )
+shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> x ) const
 {    
     // Note: does not do the walk every time - instead, the Walk object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
@@ -81,7 +81,7 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> 
 }
 
 
-shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( TreePtr<Node> x )
+shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( TreePtr<Node> x ) const
 { 
     // Note: does not do the flatten every time - instead, the FlattenNode object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice

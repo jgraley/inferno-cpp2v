@@ -45,7 +45,7 @@ string BuildIdentifierBase::GetNewName()
     }
 }
 
-bool IdentifierByNameBase::IsMatch( const TreePtrInterface &x )
+bool IdentifierByNameBase::IsMatch( const TreePtrInterface &x ) const
 {
     string newname = name; 
     TreePtr<Node> nx = x; // TODO dynamic_pointer_cast support for TreePtrInterface
@@ -63,7 +63,7 @@ bool IdentifierByNameBase::IsMatch( const TreePtrInterface &x )
 }
 
 
-bool NestedBase::MyCompare( const TreePtrInterface &x )
+bool NestedBase::MyCompare( const TreePtrInterface &x ) const
 {
     INDENT("N");
     string s;
@@ -89,7 +89,7 @@ bool NestedBase::MyCompare( const TreePtrInterface &x )
 }    
 
 
-TreePtr<Node> NestedArray::Advance( TreePtr<Node> n, string *depth )
+TreePtr<Node> NestedArray::Advance( TreePtr<Node> n, string *depth ) const
 {
     if( TreePtr<Array> a = dynamic_pointer_cast<Array>(n) )                          
         return a->element;
@@ -98,7 +98,7 @@ TreePtr<Node> NestedArray::Advance( TreePtr<Node> n, string *depth )
 }
 
 
-TreePtr<Node> NestedSubscriptLookup::Advance( TreePtr<Node> n, string *depth )
+TreePtr<Node> NestedSubscriptLookup::Advance( TreePtr<Node> n, string *depth ) const
 {
     if( TreePtr<Subscript> s = dynamic_pointer_cast<Subscript>(n) )            
     {

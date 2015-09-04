@@ -166,9 +166,7 @@ bool Engine::DecidedCompare( Agent *agent,
     INDENT(" ");
     ASSERT( &x ); // Ref to target must not be NULL (i.e. corrupted ref)
     ASSERT( x ); // Target must not be NULL
-        
-    deque<ContainerInterface::iterator> choices = conj.GetChoices(agent);
-    
+            
     // If the agent is coupled already, check for a coupling match
     if( coupling_keys.IsExist(agent) )
     {
@@ -177,57 +175,64 @@ bool Engine::DecidedCompare( Agent *agent,
         if( !match )
             return false;
     }
-
-    if( TreePtr<Node> keynode = agent->GetCoupled() )
-    {
-		ASSERT( coupling_keys.IsExist(agent) )(*agent)(" can_key=%s", can_key?"true":"false");
-        SimpleCompare sc;
-        bool match = sc( x, keynode );
-        ASSERT( match );
-    }
     
+    // Obtain the choices from the conjecture
+    deque<ContainerInterface::iterator> choices = conj.GetChoices(agent);
+
     TRACE(*agent)(" Gathering links\n");    
-    // Run the compare implementation with couplings check/update
+    // Run the compare implementation to get the links based on the choices
     Links mylinks = agent->DecidedQuery( x, choices );
     
+    // The number of decisions reported should not shrink
     if( mylinks.local_match )
-        ASSERT( choices.size()<=mylinks.decisions.size() )(*this)(" cs=%d ds=%d\n", choices.size(), mylinks.decisions.size());    
+        ASSERT( mylinks.decisions.size()>=choices.size() )(*this)(" cs=%d ds=%d\n", choices.size(), mylinks.decisions.size());    
     
+    // Feed the decisions info in the links structure back to the conjecture
     conj.BeginAgent(agent);
     FOREACH( Links::Range r, mylinks.decisions )
         conj.RegisterDecision( r.begin, r.end );
     conj.EndAgent();
         
-    // Remember the coupling before recursing, as we can hit the same node 
-    // (eg identifier) and we need to have coupled it. 
-    // TODO but try moving below the local_match check
-    if( can_key && !coupling_keys.IsExist(agent) )
-        coupling_keys[agent] = x;
-      
+    // Stop if the node itself mismatched (can be for any reason depending on agent)
     if(!mylinks.local_match)
     {
         TRACE(*agent)(" local mismatch, aborting\n");
         return false;
     }
     
+    // Remember the coupling before recursing, as we can hit the same node 
+    // (eg identifier) and we need to have coupled it. 
+    if( can_key && !coupling_keys.IsExist(agent) )
+        coupling_keys[agent] = x;
+      
     // Follow up on any links that were noted by the agent impl
     TRACE(*agent)(" Comparing links\n");    
     int i=0;
     FOREACH( const Links::Link &l, mylinks.links )
     {
         TRACE("ConjSpin Comparing link %d\n", i);
-        bool r;
+ 
+        // Get pattern for linked node
         const TreePtrInterface *px;
         if( l.px )
-            px = l.px;
+            px = l.px; // linked pattern is in input tree
         else
-            px = &(l.local_x);        
+            px = &(l.local_x); // linked pattern is local, kept alive by local_x    
+            
+        // Recurse now       
+        bool r;       
         if( l.abnormal )
+            // Recurse into an abnormal context
             r = AbnormalCompare(l.agent, *px, can_key, coupling_keys);
         else
+            // Recurse normally
             r = DecidedCompare(l.agent, *px, can_key, conj, coupling_keys);
+            
+        // sense swapping for "not" nodes, only apply during restricting pass 
         if( l.invert )
-            r = !r || can_key; // only apply during restricting pass 
+            r = !r || can_key; 
+            
+        // Early out on mismatch
         if( !r )
             return false;
         i++;
@@ -259,7 +264,10 @@ bool Engine::AbnormalCompare( Agent *agent,
     //int i = 0;
     while(1)
     {
+		// Prepare for a new tree walk
         conj.PrepareForDecidedCompare();
+        
+        // Walk into the abnormal subtree
         r = DecidedCompare( agent, x, false, conj, coupling_keys );
         
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
@@ -314,17 +322,9 @@ bool Engine::Compare( const TreePtrInterface &x,
         // Only key if the keys are already set to KEYING (which is 
         // the initial value). Keys could be RESTRICTING if we're under
         // a SoftNot node, in which case we only want to restrict.
-            // Unkey 
-            
-        typedef pair< Agent *, TreePtr<Node> > KeyPair;
-        FOREACH( KeyPair c, initial_coupling_keys )
-        {
-            ASSERT( !my_agents.IsExist(c.first) ); // only master's agents should be in the init keys
-            ASSERT( c.first->GetCoupled() == c.second ); // and they should match the stored keys
-		}
-
-        FOREACH( Agent *a, my_agents )
-            a->ResetKey();
+        
+        // Initialise keys to the ones inherited from master, keeping 
+        // none of our own from any previous unsuccessful attempt.
         matching_coupling_keys = initial_coupling_keys;
 
         // Do a two-pass matching process: first get the keys...
@@ -333,7 +333,9 @@ bool Engine::Compare( const TreePtrInterface &x,
                
         if( r )
         {
-            // ...now restrict the search according to the couplings
+            // ...now restrict the search according to the couplings. This 
+            // allows a coupling keyed late in the walk to restrict something 
+            // seen earlier (eg in an abnormal context where keying is impossible)
             conj.PrepareForDecidedCompare();
             r = DecidedCompare( root_agent, x, false, conj, matching_coupling_keys );
         }
@@ -411,6 +413,10 @@ bool Engine::SingleCompareReplace( TreePtr<Node> *proot,
 
     TRACE("Now replacing\n");
     *proot = Replace();
+    
+    // Clear out all the replace keys (the ones inside the agents) now that replace is done
+    FOREACH( Agent *a, my_agents )
+        a->ResetKey();
 
     return true;
 }
