@@ -76,9 +76,12 @@ Detailed plan for refactoring into agent patterns
  - Pass the vectors of choices into KeyReplace(), and get Stuff to key itself here. DONE
  - Prove that Stuff and no other nodes require keying beyond what AgentCommon does for them DONE with some refactoring
  - Move keying out of agents and into Engine, using a map of agent onto key for now DONE
- - Check that the Query functions "const". Check for modifiers of Engine (via engine ptr) too.
  - Pass master's coupling set to slaves, so we do not rely on the KeyReplace() keyings for slaves, so that
-   KeyReplace() keyings are only relied on for the imminent replace, not for slave searches.
+   KeyReplace() keyings are only relied on for the imminent replace, not for slave searches. DONE
+ - Use const ref for the master couplings when passed aound in Engine
+ - Find and try removing the self-keying in the search side (is it TrackingKey?)
+ - Check that the Agent's query functions are "const" (choices and links member mutable). 
+ - Check for modifiers of Engine (via engine ptr) too - hopefully does not need to be mutable.
 --- Agents may now be queried idempotently ---
    **UNSURE ABOUT THESE...**
 12. Generalise Conjecture impl, and maybe fold directly into Engine

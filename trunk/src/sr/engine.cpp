@@ -178,6 +178,14 @@ bool Engine::DecidedCompare( Agent *agent,
             return false;
     }
 
+    if( TreePtr<Node> keynode = agent->GetCoupled() )
+    {
+		ASSERT( coupling_keys.IsExist(agent) )(*agent)(" can_key=%s", can_key?"true":"false");
+        SimpleCompare sc;
+        bool match = sc( x, keynode );
+        ASSERT( match );
+    }
+    
     TRACE(*agent)(" Gathering links\n");    
     // Run the compare implementation with couplings check/update
     Links mylinks = agent->DecidedQuery( x, choices );
@@ -190,6 +198,12 @@ bool Engine::DecidedCompare( Agent *agent,
         conj.RegisterDecision( r.begin, r.end );
     conj.EndAgent();
         
+    // Remember the coupling before recursing, as we can hit the same node 
+    // (eg identifier) and we need to have coupled it. 
+    // TODO but try moving below the local_match check
+    if( can_key && !coupling_keys.IsExist(agent) )
+        coupling_keys[agent] = x;
+      
     if(!mylinks.local_match)
     {
         TRACE(*agent)(" local mismatch, aborting\n");
@@ -218,9 +232,6 @@ bool Engine::DecidedCompare( Agent *agent,
             return false;
         i++;
     }
-      
-    if( can_key && !coupling_keys.IsExist(agent) && !agent->GetCoupled() )
-        coupling_keys[agent] = x;
       
     TRACE(*agent)(" Done\n");        
     return true;
@@ -270,20 +281,22 @@ bool Engine::AbnormalCompare( Agent *agent,
 
 bool Engine::Compare( const TreePtrInterface &x ) const
 {
-    Map< Agent *, TreePtr<Node> > coupling_keys;
+    Map< Agent *, TreePtr<Node> > coupling_keys, empty;
     Conjecture conj;
-    return Compare( x, conj, coupling_keys );
+    return Compare( x, conj, coupling_keys, empty );
 }
 
 
 bool Engine::Compare( const TreePtrInterface &x,
                       Conjecture &conj,
-                      Map< Agent *, TreePtr<Node> > &coupling_keys ) const
+                      Map< Agent *, TreePtr<Node> > &matching_coupling_keys,
+                      Map< Agent *, TreePtr<Node> > &initial_coupling_keys ) const
 {
     INDENT("C");
     ASSERT( x );
     TRACE("Compare x=")(*x);
     TRACE(" pattern=")(*root_agent);
+    ASSERT( &matching_coupling_keys != &initial_coupling_keys );
     //TRACE(**pcontext)(" @%p\n", pcontext);
            
     // Create the conjecture object we will use for this compare, and keep iterating
@@ -302,19 +315,27 @@ bool Engine::Compare( const TreePtrInterface &x,
         // the initial value). Keys could be RESTRICTING if we're under
         // a SoftNot node, in which case we only want to restrict.
             // Unkey 
+            
+        typedef pair< Agent *, TreePtr<Node> > keypair;
+        FOREACH( keypair c, initial_coupling_keys )
+        {
+            ASSERT( !my_agents.IsExist(c.first) ); // only master's agents should be in the init keys
+            ASSERT( c.first->GetCoupled() == c.second ); // and they should match the stored keys
+		}
+
         FOREACH( Agent *a, my_agents )
             a->ResetKey();
-        coupling_keys.clear();
+        matching_coupling_keys = initial_coupling_keys;
 
         // Do a two-pass matching process: first get the keys...
         conj.PrepareForDecidedCompare();
-        r = DecidedCompare( root_agent, x, true, conj, coupling_keys );
+        r = DecidedCompare( root_agent, x, true, conj, matching_coupling_keys );
                
         if( r )
         {
             // ...now restrict the search according to the couplings
             conj.PrepareForDecidedCompare();
-            r = DecidedCompare( root_agent, x, false, conj, coupling_keys );
+            r = DecidedCompare( root_agent, x, false, conj, matching_coupling_keys );
         }
         
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
@@ -330,6 +351,7 @@ bool Engine::Compare( const TreePtrInterface &x,
         //assert(i<1000);
         //i++;
     }
+    // by now, we succeeded and matching_coupling_keys is the right set of keys
     return r;
 }
 
@@ -338,10 +360,15 @@ void Engine::KeyReplaceNodes( Conjecture &conj,
                               Map< Agent *, TreePtr<Node> > &coupling_keys ) const
 {
     INDENT("K");   
-    // For every agent, 
-    typedef pair< Agent *, TreePtr<Node> > keypair;
-    FOREACH( keypair c, coupling_keys )
-        c.first->KeyReplace(c.second, conj.GetChoices(c.first));
+    // NO! coupling_keys now contains the master's couplings - we must not touch the 
+    // master's agents 
+    //typedef pair< Agent *, TreePtr<Node> > keypair;
+    //FOREACH( keypair c, coupling_keys )
+    //    c.first->KeyReplace(c.second, conj.GetChoices(c.first));
+        
+    FOREACH( Agent *a, my_agents )
+        if( coupling_keys.IsExist( a ) && !a->GetCoupled() )
+            a->KeyReplace(coupling_keys[a], conj.GetChoices(a));
 }
 
 
@@ -354,20 +381,33 @@ TreePtr<Node> Engine::Replace() const
 }
 
 
-bool Engine::SingleCompareReplace( TreePtr<Node> *proot ) 
+void Engine::GatherCouplings( Map< Agent *, TreePtr<Node> > &coupling_keys ) const
+{
+	// Get couplings from agents into the supplied map if not there already
+    FOREACH( Agent *a, my_agents )
+        if( a->GetCoupled() && !coupling_keys.IsExist( a ) )
+            coupling_keys[a] = a->GetCoupled();	
+}
+
+
+bool Engine::SingleCompareReplace( TreePtr<Node> *proot,
+                                   Map< Agent *, TreePtr<Node> > &initial_coupling_keys ) 
 {
     INDENT(">");
 
-    Map< Agent *, TreePtr<Node> > coupling_keys;
+    Map< Agent *, TreePtr<Node> > matching_coupling_keys;
     Conjecture conj;
 
     TRACE("Begin search\n");
-    bool r = Compare( *proot, conj, coupling_keys );
+    bool r = Compare( *proot, conj, matching_coupling_keys, initial_coupling_keys );
     if( !r )
         return false;
 
     TRACE("Search successful, now keying replace nodes\n");
-    KeyReplaceNodes( conj, coupling_keys );
+    KeyReplaceNodes( conj, matching_coupling_keys );
+
+    FOREACH( SlaveAgent *sa, my_slaves )
+        sa->SetMasterCouplingKeys( matching_coupling_keys );
 
     TRACE("Now replacing\n");
     *proot = Replace();
@@ -380,7 +420,8 @@ bool Engine::SingleCompareReplace( TreePtr<Node> *proot )
 // on supplied patterns and couplings. Does search and replace
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
-int Engine::RepeatingCompareReplace( TreePtr<Node> *proot )
+int Engine::RepeatingCompareReplace( TreePtr<Node> *proot,
+                                     Map< Agent *, TreePtr<Node> > &initial_coupling_keys )
 {
     INDENT("}");
     TRACE("begin RCR\n");
@@ -395,8 +436,10 @@ int Engine::RepeatingCompareReplace( TreePtr<Node> *proot )
         if( stop )
             FOREACH( Engine *e, my_slaves )
                 e->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
-        bool r = SingleCompareReplace( proot );
+                
+        bool r = SingleCompareReplace( proot, initial_coupling_keys );
         TRACE("SCR result %d\n", r);        
+        
         if( !r )
         {
             if( depth < stop_after.size() )

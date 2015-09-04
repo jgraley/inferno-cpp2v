@@ -38,14 +38,18 @@ protected:
                             const Engine *master /* if null, IT'S YOU!!!! */ );
     
 public:
-    int RepeatingCompareReplace( TreePtr<Node> *proot );
+    void GatherCouplings( Map< Agent *, TreePtr<Node> > &coupling_keys ) const;
+    int RepeatingCompareReplace( TreePtr<Node> *proot,
+                                 Map< Agent *, TreePtr<Node> > &initial_coupling_keys );
     
 protected:
-    bool SingleCompareReplace( TreePtr<Node> *proot );
+    bool SingleCompareReplace( TreePtr<Node> *proot,
+                               Map< Agent *, TreePtr<Node> > &initial_coupling_keys );
     bool Compare( const TreePtrInterface &x ) const;
     bool Compare( const TreePtrInterface &x,
                   Conjecture &conj,
-                  Map< Agent *, TreePtr<Node> > &coupling_keys ) const;
+                  Map< Agent *, TreePtr<Node> > &matching_coupling_keys,
+                  Map< Agent *, TreePtr<Node> > &initial_coupling_keys ) const;
     bool DecidedCompare( Agent *agent,
                          const TreePtrInterface &x,
                          bool can_key,
