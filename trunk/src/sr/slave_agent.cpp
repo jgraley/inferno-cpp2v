@@ -52,7 +52,7 @@ void SlaveAgent::Configure( const Set<Agent *> &agents_already_configured, const
 }    
 
 
-void SlaveAgent::SetMasterCouplingKeys( Map< Agent *, TreePtr<Node> > &keys )
+void SlaveAgent::SetMasterCouplingKeys( CouplingMap &keys )
 {
 	master_coupling_keys = &keys;
 }
