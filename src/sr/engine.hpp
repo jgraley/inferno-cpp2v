@@ -38,29 +38,29 @@ protected:
                             const Engine *master /* if null, IT'S YOU!!!! */ );
     
 public:
-    void GatherCouplings( Map< Agent *, TreePtr<Node> > &coupling_keys ) const;
+    void GatherCouplings( CouplingMap &coupling_keys ) const;
     int RepeatingCompareReplace( TreePtr<Node> *proot,
-                                 Map< Agent *, TreePtr<Node> > &initial_coupling_keys );
+                                 const CouplingMap &initial_coupling_keys );
     
 protected:
     bool SingleCompareReplace( TreePtr<Node> *proot,
-                               Map< Agent *, TreePtr<Node> > &initial_coupling_keys );
+                               const CouplingMap &initial_coupling_keys );
     bool Compare( const TreePtrInterface &x ) const;
     bool Compare( const TreePtrInterface &x,
                   Conjecture &conj,
-                  Map< Agent *, TreePtr<Node> > &matching_coupling_keys,
-                  Map< Agent *, TreePtr<Node> > &initial_coupling_keys ) const;
+                  CouplingMap &matching_coupling_keys,
+                  const CouplingMap &initial_coupling_keys ) const;
     bool DecidedCompare( Agent *agent,
                          const TreePtrInterface &x,
                          bool can_key,
                          Conjecture &conj,
-                         Map< Agent *, TreePtr<Node> > &coupling_keys ) const;
+                         CouplingMap &coupling_keys ) const;
     bool AbnormalCompare( Agent *agent,
                           const TreePtrInterface &x, 
                           bool can_key,
-                          Map< Agent *, TreePtr<Node> > &coupling_keys ) const;
+                          CouplingMap &coupling_keys ) const;
     void KeyReplaceNodes( Conjecture &conj,
-                          Map< Agent *, TreePtr<Node> > &coupling_keys) const;
+                          const CouplingMap &coupling_keys) const;
     TreePtr<Node> Replace() const;
 
 public:

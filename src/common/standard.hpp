@@ -52,6 +52,15 @@ public:
     {
         return map<KEY, DATA>::find( k ) != map<KEY, DATA>::end();
     }
+    // Tried to just do a const version of [], but it was getting called in
+    // non-const cases, which is crap because C++ should use the non-const one
+    // where it can.
+    const DATA& At(const KEY& k) const
+    {
+		typename map<KEY, DATA>::const_iterator cit = map<KEY, DATA>::find(k);
+		ASSERT( cit != map<KEY, DATA>::end() );
+		return *cit;
+	}
 };
 
 
