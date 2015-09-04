@@ -17,11 +17,11 @@ private:
     TreePtr<Node> terminus_key;
 
 public:
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x );
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
     virtual void KeyReplace( const TreePtrInterface &x,
                              deque<ContainerInterface::iterator> choices ); 
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) = 0;
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) const = 0;
 
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
@@ -31,7 +31,7 @@ public:
 /// Agent that matches an arbitrary subtree, with restrictions on elements therein and terminus support 
 class StuffAgent : public SearchContainerAgent
 {
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) const;
 };
 
 
@@ -48,7 +48,7 @@ public:
 /// Agent that matches any single node, with terminus support
 class AnyNodeAgent : public SearchContainerAgent
 {
-    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x );
+    virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) const;
 };
 
 

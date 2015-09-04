@@ -13,7 +13,7 @@ SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search ) :
 }
 
 
-bool SlaveAgent::DecidedQueryImpl( const TreePtrInterface &x )
+bool SlaveAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 {
     INDENT("l");
 

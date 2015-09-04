@@ -81,7 +81,7 @@ private:
 struct IdentifierByNameBase : SoftAgent
 {
     IdentifierByNameBase( string n ) : name(n) {}
-    bool IsMatch( const TreePtrInterface &x );
+    bool IsMatch( const TreePtrInterface &x ) const;
     string name;
 };
 
@@ -94,7 +94,7 @@ struct InstanceIdentifierByName : Special<CPPTree::InstanceIdentifier>,
     InstanceIdentifierByName() : IdentifierByNameBase(string()) {}    
     InstanceIdentifierByName( string n ) : IdentifierByNameBase(n) {}
 private:
-    virtual bool MyCompare( const TreePtrInterface &x )
+    virtual bool MyCompare( const TreePtrInterface &x ) const
     {
         return IsMatch( x );
     }                                
@@ -109,7 +109,7 @@ struct TypeIdentifierByName : Special<CPPTree::TypeIdentifier>,
     TypeIdentifierByName() : IdentifierByNameBase(string()) {}    
     TypeIdentifierByName( string n ) : IdentifierByNameBase(n) {}
 private:
-    virtual bool MyCompare( const TreePtrInterface &x )
+    virtual bool MyCompare( const TreePtrInterface &x ) const
     {
         return IsMatch( x );
     }                                
@@ -124,7 +124,7 @@ struct LabelIdentifierByName : Special<CPPTree::LabelIdentifier>,
     LabelIdentifierByName() : IdentifierByNameBase(string()) {}    
     LabelIdentifierByName( string n ) : IdentifierByNameBase(n) {}
 private:
-    virtual bool MyCompare( const TreePtrInterface &x )
+    virtual bool MyCompare( const TreePtrInterface &x ) const
     {
         return IsMatch( x );
     }                                
@@ -134,8 +134,8 @@ private:
 // Base class for special nodes that match nested nodes
 struct NestedBase : SoftAgent
 {
-    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) = 0;
-    virtual bool MyCompare( const TreePtrInterface &x );
+    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const = 0;
+    virtual bool MyCompare( const TreePtrInterface &x ) const;
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;    
 };
@@ -147,7 +147,7 @@ struct NestedBase : SoftAgent
 struct NestedArray : NestedBase, Special<CPPTree::Type>
 {
     SPECIAL_NODE_FUNCTIONS
-    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth );
+    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const;
 };
 
 
@@ -157,7 +157,7 @@ struct NestedArray : NestedBase, Special<CPPTree::Type>
 struct NestedSubscriptLookup : NestedBase, Special<CPPTree::Expression>
 {
     SPECIAL_NODE_FUNCTIONS
-    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth );
+    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const;
 };
 
 

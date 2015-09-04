@@ -2,7 +2,7 @@
 
 using namespace SR;
 
-bool TransformOfBase::MyCompare( const TreePtrInterface &x )
+bool TransformOfBase::MyCompare( const TreePtrInterface &x ) const
 {
     INDENT("T");
     // Transform the candidate expression

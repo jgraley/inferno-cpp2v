@@ -16,12 +16,12 @@ namespace SR
 class NormalAgent : public virtual AgentCommon
 {
 public:
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x );
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
 private:
     bool DecidedQuerySequence( SequenceInterface &x,
-    	                       SequenceInterface &pattern );
+    	                       SequenceInterface &pattern ) const;
     bool DecidedQueryCollection( CollectionInterface &x,
-    		                     CollectionInterface &pattern );
+    		                     CollectionInterface &pattern ) const;
 public:
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
