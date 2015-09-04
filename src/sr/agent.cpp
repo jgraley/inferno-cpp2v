@@ -42,25 +42,17 @@ Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
     ASSERT(this);
     ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
 
-    bool match = true;
-    ClearLinks();        
+    // choices are read by the impl; links are updated by the impl
+    links.clear();
     choices = ch;
     
-    // If the agent is coupled already, check for a coupling match
-    // Note: now only when keyed by master
-    if( TreePtr<Node> keynode = GetCoupled() )
-    {
-        SimpleCompare sc;
-        match = sc( x, keynode );
-    }
-
     // Do the agent-specific local checks (x versus characteristics of the present agent)
     // Also takes notes of how child agents link to children of x (depending on conjecture)
-    if( match )
-        match = DecidedQueryImpl( x );
+    links.local_match = DecidedQueryImpl( x );
     
-    RememberLocal(match);
-
+    // choices should not need to be preserved after exit
+    choices.clear(); 
+    
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
     return links;
 }
@@ -85,12 +77,6 @@ TreePtr<Node> AgentCommon::GetCoupled()
 void AgentCommon::ResetKey()
 {
     coupling_key = TreePtr<Node>();
-}
-
-
-void AgentCommon::ClearLinks()
-{
-    links.clear();
 }
 
 
@@ -131,12 +117,6 @@ void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
     l.invert = false;
     TRACE("Remembering local link %d ", links.links.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
     links.links.push_back( l );
-}
-
-
-void AgentCommon::RememberLocal( bool m )
-{
-    links.local_match = m;
 }
 
 

@@ -55,7 +55,7 @@ bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x )
 void SearchContainerAgent::KeyReplace( const TreePtrInterface &x,
                                        deque<ContainerInterface::iterator> choices )
 {
-    ASSERT( choices.size() == 1 );
+    ASSERT( choices.size() == 1 )("Expected a single choice, choices.size()=%d", choices.size());
     ContainerInterface::iterator thistime = choices.front();
     terminus_key = *thistime;
     DoKey(x);

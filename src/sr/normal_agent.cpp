@@ -180,7 +180,7 @@ bool NormalAgent::DecidedQueryCollection( CollectionInterface &x,
 	    	// Recurse into comparison function for the chosen node
 			RememberLink( false, pia, *xit );
 	    }
-	    else
+	    else // ran out of x elements - local mismatch
         {
             return false;
         }

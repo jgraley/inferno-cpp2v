@@ -86,11 +86,6 @@ public:
     void DoKey( TreePtr<Node> x );
     TreePtr<Node> GetCoupled();                                  
     void ResetKey();    
-    void ClearLinks();
-    void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x );
-    void RememberInvertedLink( Agent *a, const TreePtrInterface &x );
-    void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x );
-    void RememberLocal( bool m );
     ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
                                                  ContainerInterface::iterator end );
     virtual void KeyReplace( const TreePtrInterface &x,
@@ -104,6 +99,9 @@ public:
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
+    void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x );
+    void RememberInvertedLink( Agent *a, const TreePtrInterface &x );
+    void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x );
     const Engine *engine;    
     
 private:    
