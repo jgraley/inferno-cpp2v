@@ -99,13 +99,13 @@ public:
 
 		bool operator==( const iterator &i ) const
 		{
-			ASSERT(pib)("Attempt to compare uninitialised iterator");
+			ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
 			return pib->operator==( *(i.pib) );
 		}
 
 		bool operator!=( const iterator &i ) const
 		{
-			ASSERT(pib)("Attempt to compare uninitialised iterator");
+			ASSERT(pib && i.pib)("Attempt to compare uninitialised iterator %s==%s", pib?"i":"U", i.pib?"i":"U");
 			return !operator==( i );
 		}
 
