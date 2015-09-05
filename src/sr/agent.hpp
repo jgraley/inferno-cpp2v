@@ -27,12 +27,6 @@ public:
         bool invert;
     };
     
-    struct Range
-    {
-        ContainerInterface::iterator begin;
-        ContainerInterface::iterator end;    
-    };
-
     void clear()
     {
         links.clear();
@@ -40,7 +34,7 @@ public:
     }
     
     vector<Link> links;
-    deque<Range> decisions;
+    deque<Conjecture::Range> decisions;
     bool local_match;
 };
 
