@@ -136,7 +136,7 @@ ContainerInterface::iterator AgentCommon::HandleDecision( ContainerInterface::it
         choices.pop_front();
     }
     
-    Links::Range r;
+    Conjecture::Range r;
     r.begin = begin;
     r.end = end;
     links.decisions.push_back(r); // Report the range back

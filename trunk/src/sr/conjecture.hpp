@@ -22,6 +22,12 @@ public:
         Agent *agent; // Only for first decision registered by the agent; others NULL
         int num_decisions; // Only for first decision registered by the agent
     };
+    struct Range
+    {
+        ContainerInterface::iterator begin;
+        ContainerInterface::iterator end;    
+    };
+
 
 public:
     Conjecture();
@@ -32,14 +38,10 @@ public:
     // General note: decided compare functions should call one of HandleDecision() or 
     // GetDecision() before calling other functions like ReportDecision() or
     // ForceDecision().
-    				   
+    				       
     // Standard interface for decided compare functions
-    void BeginAgent( Agent *agent );
-    void EndAgent();
+    void RegisterDecisions( Agent *agent, deque<Range> decisions );      
     deque<ContainerInterface::iterator> GetChoices(Agent *agent);
-    bool GetChoice( ContainerInterface::iterator &it );
-    void RegisterDecision( ContainerInterface::iterator begin,
-                           ContainerInterface::iterator end );    
 
     string ChoiceAsString(const Choice &c);
 				   
@@ -47,8 +49,6 @@ private:
     int get_choice_index;
     int register_decision_index;
 	vector<Choice> choices;
-	Agent *current_agent;
-    int agent_first_index;
 	
 	// Tracing stuff
 	void ResizeCounts();

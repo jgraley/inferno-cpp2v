@@ -188,10 +188,7 @@ bool Engine::DecidedCompare( Agent *agent,
         ASSERT( mylinks.decisions.size()>=choices.size() )(*this)(" cs=%d ds=%d\n", choices.size(), mylinks.decisions.size());    
     
     // Feed the decisions info in the links structure back to the conjecture
-    conj.BeginAgent(agent);
-    FOREACH( Links::Range r, mylinks.decisions )
-        conj.RegisterDecision( r.begin, r.end );
-    conj.EndAgent();
+    conj.RegisterDecisions( agent, mylinks.decisions );
         
     // Stop if the node itself mismatched (can be for any reason depending on agent)
     if(!mylinks.local_match)
