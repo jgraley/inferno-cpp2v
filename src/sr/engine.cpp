@@ -256,13 +256,13 @@ bool Engine::AbnormalCompare( Agent *agent,
 
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
-    Conjecture conj;
+    Conjecture conj(my_agents);
     bool r;
     //int i = 0;
     while(1)
     {
 		// Prepare for a new tree walk
-        conj.PrepareForDecidedCompare();
+        conj.PrepareForDecidedCompare(0);
         
         // Walk into the abnormal subtree
         r = DecidedCompare( agent, x, false, conj, coupling_keys );
@@ -287,7 +287,7 @@ bool Engine::AbnormalCompare( Agent *agent,
 bool Engine::Compare( const TreePtrInterface &x ) const
 {
     Map< Agent *, TreePtr<Node> > coupling_keys, empty;
-    Conjecture conj;
+    Conjecture conj(my_agents);
     return Compare( x, conj, coupling_keys, empty );
 }
 
@@ -325,7 +325,7 @@ bool Engine::Compare( const TreePtrInterface &x,
         matching_coupling_keys = initial_coupling_keys;
 
         // Do a two-pass matching process: first get the keys...
-        conj.PrepareForDecidedCompare();
+        conj.PrepareForDecidedCompare(0);
         r = DecidedCompare( root_agent, x, true, conj, matching_coupling_keys );
                
         if( r )
@@ -333,7 +333,7 @@ bool Engine::Compare( const TreePtrInterface &x,
             // ...now restrict the search according to the couplings. This 
             // allows a coupling keyed late in the walk to restrict something 
             // seen earlier (eg in an abnormal context where keying is impossible)
-            conj.PrepareForDecidedCompare();
+            conj.PrepareForDecidedCompare(1);
             r = DecidedCompare( root_agent, x, false, conj, matching_coupling_keys );
         }
         
@@ -395,7 +395,7 @@ bool Engine::SingleCompareReplace( TreePtr<Node> *proot,
     INDENT(">");
 
     CouplingMap matching_coupling_keys;
-    Conjecture conj;
+    Conjecture conj(my_agents);
 
     TRACE("Begin search\n");
     bool r = Compare( *proot, conj, matching_coupling_keys, initial_coupling_keys );
