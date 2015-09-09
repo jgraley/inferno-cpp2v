@@ -83,15 +83,17 @@ bool Conjecture::Increment()
 }
 
 
-void Conjecture::RegisterDecisions( Agent *agent, deque<Range> decisions )
+void Conjecture::RegisterDecisions( Agent *agent, bool local_match, deque<Range> decisions )
 {                
 	ASSERT( prepared );
 	
+	ASSERT( agent_blocks.IsExist(agent) )(*agent);
+ 	AgentBlock &block = agent_blocks[agent];
+    block.local_match = local_match; // always overwrite this field - if the local match fails it will be the last call here before Increment()
+
 	if( decisions.empty() )
 	    return;
 	
-	ASSERT( agent_blocks.IsExist(agent) );
- 	AgentBlock &block = agent_blocks[agent];
 	if( block.seen )
 	{
 	    ASSERT( block.decisions == decisions )(*agent)(" %d!=%d %d", block.decisions.size(), decisions.size(), block.choices.size());
@@ -105,6 +107,7 @@ void Conjecture::RegisterDecisions( Agent *agent, deque<Range> decisions )
 		}
 		block.seen = true;
 		block.decisions = decisions;
+		block.local_match = local_match;
 		while( block.choices.size() < block.decisions.size() )
 		{
 			int index = block.choices.size();

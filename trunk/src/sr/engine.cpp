@@ -172,8 +172,13 @@ bool Engine::DecidedCompare( Agent *agent,
     {
         SimpleCompare sc;
         bool match = sc( x, coupling_keys[agent] );
+        if( !my_agents.IsExist(agent) )
+            return match; // do not recurse into master's agents
         if( !match )
+        {
+            conj.RegisterDecisions( agent, false );
             return false;
+		}
     }
     
     // Obtain the choices from the conjecture
@@ -188,7 +193,7 @@ bool Engine::DecidedCompare( Agent *agent,
         ASSERT( mylinks.decisions.size()>=choices.size() )(*this)(" cs=%d ds=%d\n", choices.size(), mylinks.decisions.size());    
     
     // Feed the decisions info in the links structure back to the conjecture
-    conj.RegisterDecisions( agent, mylinks.decisions );
+    conj.RegisterDecisions( agent, mylinks.local_match, mylinks.decisions );
         
     // Stop if the node itself mismatched (can be for any reason depending on agent)
     if(!mylinks.local_match)

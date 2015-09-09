@@ -31,7 +31,10 @@ public:
 		deque<ContainerInterface::iterator> choices;
 		AgentBlock *previous_block;
 		bool seen;
+		bool local_match;
 	};
+    typedef pair<Agent * const, AgentBlock> BlockPair;
+
 
 public:
     Conjecture(Set<Agent *> my_agents);
@@ -45,7 +48,7 @@ public:
     // ForceDecision().
     				       
     // Standard interface for decided compare functions
-    void RegisterDecisions( Agent *agent, deque<Range> decisions );      
+    void RegisterDecisions( Agent *agent, bool local_match, deque<Range> decisions=deque<Range>() );      
     deque<ContainerInterface::iterator> GetChoices(Agent *agent);
 				   
 private:
