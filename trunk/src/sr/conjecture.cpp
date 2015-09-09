@@ -5,9 +5,17 @@
 namespace SR 
 {
 
-Conjecture::Conjecture()
+Conjecture::Conjecture(Set<Agent *> my_agents)
 {
     last_block = NULL;
+    FOREACH( Agent *a, my_agents )
+    {
+		AgentBlock block;
+		block.agent = a;
+		block.seen = false;
+		agent_blocks[a] = block;
+	}        
+	prepared = false;
 }
 
 
@@ -16,19 +24,29 @@ Conjecture::~Conjecture()
 }
 
 
-void Conjecture::PrepareForDecidedCompare()
+void Conjecture::PrepareForDecidedCompare(int pass)
 {
 	ASSERT( this );
 
 	TRACE("Decision prepare\n");
-    register_decision_index = 0;
+    
+	typedef pair<Agent * const, AgentBlock> BlockPair;
+	FOREACH( BlockPair &p, agent_blocks )
+	{
+		AgentBlock &block = p.second;
+		block.seen = false;
+	}          
+	prepared = true;
 }
 
 
 bool Conjecture::IncrementBlock( AgentBlock *block )
 {
 	if( block->choices.empty() )
+	{
+		block->decisions.clear(); // make it defunct
 	    return false;
+	}
 	
 	if( block->choices.back() != block->decisions[block->choices.size()-1].end ) 
 	{
@@ -41,21 +59,22 @@ bool Conjecture::IncrementBlock( AgentBlock *block )
         block->choices.pop_back();
         return IncrementBlock( block );
 	}
-        
+		
     return true;
 }
 
 
 bool Conjecture::Increment()
 {   
+    prepared = false;
+
 	// If we've run out of choices, we're done.
 	if( last_block==NULL )
 	    return false;
 	
     bool ok = IncrementBlock( last_block );
     if( !ok )
-    {
-		last_block->decisions.clear(); // make it defunct
+    {		
 		last_block = last_block->previous_block;
 		return Increment();
 	}
@@ -66,25 +85,33 @@ bool Conjecture::Increment()
 
 void Conjecture::RegisterDecisions( Agent *agent, deque<Range> decisions )
 {                
+	ASSERT( prepared );
+	
 	if( decisions.empty() )
 	    return;
 	
+	ASSERT( agent_blocks.IsExist(agent) );
  	AgentBlock &block = agent_blocks[agent];
-	if( block.decisions.empty() ) // new block or defunct
+	if( block.seen )
 	{
-	    block.previous_block = last_block;	
-	    last_block = &block;
+	    ASSERT( block.decisions == decisions )(*agent)(" %d!=%d %d", block.decisions.size(), decisions.size(), block.choices.size());
 	}
-    block.decisions = decisions;
-    int choices_already_initialised = block.choices.size();
-    FOREACH( Range r, decisions )
-    {
-		if( choices_already_initialised == 0 )
-			block.choices.push_back( r.begin );
-		else
-			choices_already_initialised--;
-    }
-    ASSERT( block.choices.size()==block.decisions.size() )("%d != %d", block.choices.size(), block.decisions.size() );
+	else
+	{
+		if( block.decisions.empty() ) // new block or defunct
+		{
+			block.previous_block = last_block;	
+			last_block = &block;
+		}
+		block.seen = true;
+		block.decisions = decisions;
+		while( block.choices.size() < block.decisions.size() )
+		{
+			int index = block.choices.size();
+			block.choices.push_back( block.decisions[index].begin );
+		}
+		ASSERT( block.choices.size()==block.decisions.size() )("%d != %d", block.choices.size(), block.decisions.size() );
+	}
 }
 
 

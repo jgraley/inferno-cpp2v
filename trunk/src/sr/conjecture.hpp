@@ -18,19 +18,25 @@ public:
     {
         ContainerInterface::iterator begin;
         ContainerInterface::iterator end;    
+        bool operator==(const Range &o)
+        {
+			return begin==o.begin && end==o.end;
+		}
     };
 
     struct AgentBlock
     {
+		Agent *agent;
 		deque<Range> decisions;
 		deque<ContainerInterface::iterator> choices;
 		AgentBlock *previous_block;
+		bool seen;
 	};
 
 public:
-    Conjecture();
+    Conjecture(Set<Agent *> my_agents);
     ~Conjecture();
-	void PrepareForDecidedCompare();    
+	void PrepareForDecidedCompare(int pass);    
 	bool IncrementBlock( AgentBlock *block );			                                     
     bool Increment(); // returns true for try again, false for give up				 
     				   
@@ -43,9 +49,9 @@ public:
     deque<ContainerInterface::iterator> GetChoices(Agent *agent);
 				   
 private:
-    int register_decision_index;
 	Map<Agent *, AgentBlock> agent_blocks;
 	AgentBlock *last_block;	
+	bool prepared;
 };
 
 };
