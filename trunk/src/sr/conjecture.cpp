@@ -107,7 +107,6 @@ void Conjecture::RegisterDecisions( Agent *agent, bool local_match, deque<Range>
 		}
 		block.seen = true;
 		block.decisions = decisions;
-		block.local_match = local_match;
 		while( block.choices.size() < block.decisions.size() )
 		{
 			int index = block.choices.size();
