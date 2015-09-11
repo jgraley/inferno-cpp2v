@@ -207,12 +207,18 @@ bool Engine::DecidedCompare( Agent *agent,
     if( can_key && !coupling_keys.IsExist(agent) )
         coupling_keys[agent] = x;
       
+    // When evaluating, all links are abnormal contexts, so only check
+    // them in restricting pass.
+    if( mylinks.evaluator && can_key )
+        return true;
+      
     // Follow up on any links that were noted by the agent impl
-    TRACE(*agent)(" Comparing links\n");    
+    TRACE(*agent)("Comparing links\n");    
     int i=0;
+    deque<bool> results;
     FOREACH( const Links::Link &l, mylinks.links )
     {
-        TRACE("ConjSpin Comparing link %d\n", i);
+        TRACE("Comparing link %d\n", i);
  
         // Get pattern for linked node
         const TreePtrInterface *px;
@@ -230,15 +236,24 @@ bool Engine::DecidedCompare( Agent *agent,
             // Recurse normally
             r = DecidedCompare(l.agent, *px, can_key, conj, coupling_keys);
             
-        // sense swapping for "not" nodes, only apply during restricting pass 
-        if( l.invert )
-            r = !r || can_key; 
-            
-        // Early out on mismatch
-        if( !r )
-            return false;
+        if( mylinks.evaluator )
+        {
+			ASSERT( l.abnormal )("When an evaluator is used, all links must be into abnormal contexts")(*agent)("->")(*(l.agent));
+			results.push_back(r);
+		}
+		else // No evaluator, so use default AND rule.
+		{
+			// Early out on mismatch
+            if( !r )
+                return false;
+		} 
         i++;
     }
+    if( mylinks.evaluator )
+    {
+		bool match = (*mylinks.evaluator)( results );
+		return match;
+	}
       
     TRACE(*agent)(" Done\n");        
     return true;
@@ -275,7 +290,7 @@ bool Engine::AbnormalCompare( Agent *agent,
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
         if( r )
         {
-            TRACE("ConjSpin Abnormal hit\n");            
+            TRACE("Abnormal hit\n");            
             break; // Success
         }
             
@@ -345,7 +360,7 @@ bool Engine::Compare( const TreePtrInterface &x,
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
         if( r )
         {
-            TRACE("ConjSpin Engine hit\n");
+            TRACE("Engine hit\n");
             break; // Success
         }
             

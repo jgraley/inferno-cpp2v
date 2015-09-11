@@ -99,6 +99,11 @@ Tracer &Tracer::operator()(const Traceable &s)
     return operator()(s.GetTrace());
 }
 
+Tracer &Tracer::operator()(bool b)
+{    
+    return operator()(b?"true":"false");
+}
+
 void Tracer::EndContinuation()
 {
     if( continuation ) 

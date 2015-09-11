@@ -87,21 +87,7 @@ void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface 
     l.agent = a;
     l.px = &x;
     l.local_x = TreePtr<Node>();
-    l.invert = false;
     TRACE("Remembering link %d ", links.links.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
-    links.links.push_back( l );
-}
-
-
-void AgentCommon::RememberInvertedLink( Agent *a, const TreePtrInterface &x ) const
-{
-    Links::Link l;
-    l.abnormal = true; // always
-    l.agent = a;
-    l.px = &x;
-    l.local_x = TreePtr<Node>();
-    l.invert = true;
-    TRACE("Remembering inverted link %d ", links.links.size())(*a)(" -> ")(*x)("\n");
     links.links.push_back( l );
 }
 
@@ -114,10 +100,16 @@ void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) 
     l.agent = a;
     l.px = NULL;    
     l.local_x = x;
-    l.invert = false;
     TRACE("Remembering local link %d ", links.links.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
     links.links.push_back( l );
 }
+
+
+void AgentCommon::RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const
+{
+	ASSERT( !links.evaluator ); // should not register more than one
+	links.evaluator = e;
+}	
 
 
 ContainerInterface::iterator AgentCommon::HandleDecision( ContainerInterface::iterator begin,
@@ -155,8 +147,6 @@ bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
         return l0.px < l1.px;    
     if( l0.local_x != l1.local_x )
         return l0.local_x < l1.local_x;    
-    if( l0.invert != l1.invert )
-        return (int)l0.invert < (int)l1.invert;
         
     return false; // equal
 }
