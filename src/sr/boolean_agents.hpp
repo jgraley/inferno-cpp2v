@@ -5,6 +5,7 @@
 #include "helpers/transformation.hpp"
 #include "overlay_agent.hpp"
 #include "slave_agent.hpp"
+#include "boolean_evaluator.hpp"
 
 namespace SR
 {
@@ -17,6 +18,11 @@ public:
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
 private:
     virtual TreePtr<Node> GetPattern() const = 0;
+    class BooleanEvaluatorNot : public BooleanEvaluator
+    {
+	public:
+   	    virtual bool operator()( deque<bool> &inputs ) const;
+	};
 };
 
 
@@ -74,6 +80,11 @@ public:
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
 private:
     virtual CollectionInterface &GetPatterns() const = 0;
+    class BooleanEvaluatorOr : public BooleanEvaluator
+    {
+	public:
+   	    virtual bool operator()( deque<bool> &inputs ) const;
+	};
 };
 
 

@@ -6,6 +6,7 @@
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 #include "conjecture.hpp"
+#include "boolean_evaluator.hpp"
 #include <vector>
 #include <boost/type_traits.hpp>
   
@@ -24,18 +25,19 @@ public:
         Agent *agent;
         const TreePtrInterface *px;
         TreePtr<Node> local_x;
-        bool invert;
     };
-    
+        
+    vector<Link> links;
+    deque<Conjecture::Range> decisions;
+    bool local_match;
+    shared_ptr<BooleanEvaluator> evaluator;
+
     void clear()
     {
         links.clear();
         decisions.clear();
+        evaluator = shared_ptr<BooleanEvaluator>();
     }
-    
-    vector<Link> links;
-    deque<Conjecture::Range> decisions;
-    bool local_match;
 };
 
 bool operator<(const Links::Link &l0, const Links::Link &l1);
@@ -92,8 +94,9 @@ public:
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
     void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x ) const;
-    void RememberInvertedLink( Agent *a, const TreePtrInterface &x ) const;
     void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) const;
+    void RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const;
+
     const Engine *engine;    
     ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
                                                  ContainerInterface::iterator end ) const;

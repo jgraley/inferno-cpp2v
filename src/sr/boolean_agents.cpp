@@ -12,8 +12,17 @@ bool NotMatchAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
     if( !IsLocalMatch(x.get()) )        
         return false;
     
-    RememberInvertedLink( AsAgent(GetPattern()), x );
+    // Context is abnormal because patterns must not match
+    RememberLink( true, AsAgent(GetPattern()), x );
+    RememberEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
     return true;
+}
+
+
+bool NotMatchAgent::BooleanEvaluatorNot::operator()( deque<bool> &inputs ) const
+{
+	ASSERT( inputs.size() == 1 ); // we should remember one link
+	return !inputs[0];
 }
 
 
@@ -46,9 +55,25 @@ bool MatchAnyAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
     if( !IsLocalMatch(x.get()) )        
         return false;
     
-    ContainerInterface::iterator b = GetPatterns().begin();
-    ContainerInterface::iterator e = GetPatterns().end();
-    ContainerInterface::iterator pit = HandleDecision( b, e );
-    RememberLink( true, AsAgent(*pit), x );
+    FOREACH( const TreePtr<Node> p, GetPatterns() )
+    {
+        ASSERT( p );
+        // Context is abnormal because not all patterns must match
+        RememberLink( true, AsAgent(p), x );
+    }
+    RememberEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
     return true;
 }
+
+
+bool MatchAnyAgent::BooleanEvaluatorOr::operator()( deque<bool> &inputs ) const
+{
+	bool res = false;
+	FOREACH( bool ai, inputs )
+	{
+	    res = res || ai;
+	}
+	return res;
+}
+
+

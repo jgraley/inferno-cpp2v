@@ -38,6 +38,7 @@ public:
     Tracer &operator()(const char *fmt, ...);
     Tracer &operator()(const string &s); // not a printf because of risk of accidental format specifiers
     Tracer &operator()(const Traceable &s); 
+    Tracer &operator()(bool b); 
 
     static void EndContinuation();
     static void Enable( bool e ); ///< enable/disable tracing, only for top level funciton to call, overridden by flags
@@ -80,8 +81,8 @@ private:
 // can be BOOST_CURRENT_FUNCTION if you want full signature but I find
 // it can get in the way
 
-#define FTRACE Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION )
-#define TRACE if(Tracer::IsEnabled()) FTRACE
+#define FTRACE Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, Tracer::FORCE )
+#define TRACE if(Tracer::IsEnabled()) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION )
 
 // New assert uses functor. Can be used as ASSERT(cond); or ASSERT(cond)(printf args);
 #define ASSERT(CONDITION) if(!(CONDITION)) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )
