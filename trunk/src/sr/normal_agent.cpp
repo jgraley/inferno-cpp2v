@@ -69,13 +69,14 @@ bool NormalAgent::DecidedQuerySequence( SequenceInterface &x,
 		                                SequenceInterface &pattern ) const
 {
     INDENT(" ");
+	ContainerInterface::iterator pit, npit, nnpit, nxit;
     
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
 	ContainerInterface::iterator xit = x.begin();
-	ContainerInterface::iterator pit, npit, nnpit;
+	int psize, xsize = x.size();
 
-	for( pit = pattern.begin(); pit != pattern.end(); ++pit )
+	for( pit = pattern.begin(), psize = pattern.size(); pit != pattern.end(); ++pit, --psize )
 	{
 		ASSERT( xit == x.end() || *xit );
 
@@ -83,8 +84,6 @@ bool NormalAgent::DecidedQuerySequence( SequenceInterface &x,
 		TreePtr<Node> pe( *pit );
 		ASSERT( pe );
         Agent *pea = AsAgent(pe);
-		npit=pit;
-		++npit;
 
         if( StarAgent *psa = dynamic_cast<StarAgent *>(pea) )
         {
@@ -95,20 +94,39 @@ bool NormalAgent::DecidedQuerySequence( SequenceInterface &x,
 
             // Star always matches at the end of a sequence, so we only need a 
             // decision when there are more elements left
+			npit=pit;
+			++npit;
             if( npit == pattern.end() )
             {
                 xit = x.end(); // match all remaining members of x; jump to end
+                xsize = 0;
             }
             else
             {
                 TRACE("Pattern continues after star\n");
-
                 if( xit == x.end() )
-                    return false; // more stuff in pattern but not in x
-                
-                // Decide how many elements the current * should match, using conjecture. Jump forward
-                // that many elements, to the element after the star. 
-                xit = HandleDecision( xit, x.end() );
+                    return false; // more stuff in pattern but not in x TODO break to get the final trace?
+                    
+				// The last Star does not need a decision            
+				bool found_more_star = false;
+				for( nnpit = npit; nnpit != pattern.end(); ++nnpit )
+					found_more_star = found_more_star || dynamic_cast<StarAgent *>(AsAgent(*nnpit));
+
+                if( found_more_star )
+				{
+					// Decide how many elements the current * should match, using conjecture. Jump forward
+					// that many elements, to the element after the star. 
+					nxit = HandleDecision( xit, x.end() );
+					for( ; xit!=nxit; ++xit, --xsize );
+				}
+				else
+				{
+					// No more starts, so skip through the pattern until we have the same
+					// number of x nodes as pattern nodes, allowing for the Star in the pattern
+					// that has not been "consumed" yet. 
+					int npsize = psize-1;
+					for( ; xsize>npsize; ++xit, --xsize ); // TODO same as the npit == pattern.end() behaviour above when at end of pattern
+				}				
             }
             
             // Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
@@ -126,18 +144,25 @@ bool NormalAgent::DecidedQuerySequence( SequenceInterface &x,
 			{
                 RememberLink( false, pea, *xit );
 				++xit;
+				--xsize;
 			}
 			else
 			{
 				TRACE("Sequence too short\n");
-				return false;
+				return false; // TODO break to get the final trace?
 			}
 	    }
 	}
 
     // If we finished the job and pattern and subject are still aligned, then it was a match
 	TRACE("Finishing compare sequence %d %d\n", xit==x.end(), pit==pattern.end() );
-    return (xit==x.end() && pit==pattern.end()) ? true : false;
+    bool result = (xit==x.end() && pit==pattern.end());
+    if( result )
+    {
+        ASSERT( xsize==0 )("xsize=%d\n", xsize);
+        ASSERT( psize==0 );
+	}
+    return result;
 }
 
 
