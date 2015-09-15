@@ -234,8 +234,8 @@ bool Engine::DecidedCompare( Agent *agent,
             r = AbnormalCompare(l.agent, *px, can_key, coupling_keys);
         else
             // Recurse normally
-            r = DecidedCompare(l.agent, *px, can_key, conj, coupling_keys);
-            
+			r = DecidedCompare(l.agent, *px, can_key, conj, coupling_keys);
+			
         if( mylinks.evaluator )
         {
 			ASSERT( l.abnormal )("When an evaluator is used, all links must be into abnormal contexts")(*agent)("->")(*(l.agent));
@@ -252,6 +252,10 @@ bool Engine::DecidedCompare( Agent *agent,
     if( mylinks.evaluator )
     {
 		bool match = (*mylinks.evaluator)( results );
+		TRACE("Evaluating ");
+		FOREACH(bool b, results)
+		    TRACE(b)(" ");
+		TRACE("got ")(match)("\n");
 		return match;
 	}
       
