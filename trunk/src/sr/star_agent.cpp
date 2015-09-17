@@ -4,6 +4,14 @@
 
 using namespace SR;
 
+deque<Agent *> StarAgent::PatternQuery() const
+{
+	deque<Agent *> child_agents;
+    // Recurse restriction is abnormal context, so not included
+	return child_agents;
+}
+
+
 // NOTE this is a DecidedCompare() not DecidedCompareImpl() so some of the AgentCommon 
 // stuff has to be done explicitly in here.
 bool StarAgent::DecidedQueryImpl( const TreePtrInterface &x ) const

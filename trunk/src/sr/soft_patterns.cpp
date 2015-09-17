@@ -2,6 +2,14 @@
 
 using namespace SR;
 
+deque< TreePtr<Node> > TransformOfBase::MyPatternQuery() const
+{
+	deque< TreePtr<Node> > child_patterns;
+	child_patterns.push_back( TreePtr<Node>(pattern) );
+	return child_patterns;
+}
+
+
 bool TransformOfBase::MyCompare( const TreePtrInterface &x ) const
 {
     INDENT("T");

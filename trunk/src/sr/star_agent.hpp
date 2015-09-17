@@ -19,6 +19,7 @@ namespace SR
 class StarAgent : public virtual AgentCommon 
 {
 public:
+    virtual deque<Agent *> PatternQuery() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const; // x must be a SubContainer                                  
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:
@@ -71,7 +72,7 @@ class Star : public StarAgent,
 {
 public:
     SPECIAL_NODE_FUNCTIONS
-    TreePtr<PRE_RESTRICTION> restriction; // TODO rename to "restriction"
+    TreePtr<PRE_RESTRICTION> restriction; 
     virtual TreePtr<Node> GetRestriction() const
     {
         return restriction;

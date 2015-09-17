@@ -15,11 +15,14 @@ class SoftAgent : public virtual AgentCommon
 {
 public:
     void AgentConfigure( const Engine *e );
+    virtual deque<Agent *> PatternQuery() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
     // This is the main entry-point during replace, but it (confusingly) doesn't
     // call into the soft implementation. Instead, it expects the impl to have
     // already run and to be in a key
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
+    // Soft nodes should override this to list all their normal child pattern nodes
+    virtual deque< TreePtr<Node> > MyPatternQuery() const;
     // Soft nodes should override this to implement their comparison function
     virtual bool MyCompare( const TreePtrInterface &x ) const;
     virtual TreePtr<Node> MyBuildReplace();

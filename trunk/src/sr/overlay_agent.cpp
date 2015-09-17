@@ -5,6 +5,15 @@
 
 using namespace SR;
 
+deque<Agent *> OverlayAgent::PatternQuery() const
+{
+	deque<Agent *> child_agents;
+	child_agents.push_back( AsAgent(GetThrough()) );
+	// Not overlay as that is replace-side only
+	return child_agents;
+}
+
+
 bool OverlayAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 {
     // Check pre-restriction
