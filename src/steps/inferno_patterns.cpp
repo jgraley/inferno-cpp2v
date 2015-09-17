@@ -63,6 +63,16 @@ bool IdentifierByNameBase::IsMatch( const TreePtrInterface &x ) const
 }
 
 
+deque< TreePtr<Node> > NestedBase::MyPatternQuery() const
+{
+	deque< TreePtr<Node> > child_patterns;
+	child_patterns.push_back( terminus );
+	if( depth )
+		child_patterns.push_back( depth );
+	return child_patterns;
+}
+
+
 bool NestedBase::MyCompare( const TreePtrInterface &x ) const
 {
     INDENT("N");

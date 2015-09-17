@@ -8,6 +8,36 @@
 
 using namespace SR;
 
+deque<Agent *> NormalAgent::PatternQuery() const
+{
+	deque<Agent *> child_agents;
+    vector< Itemiser::Element * > pattern_memb = Itemise();
+    FOREACH( Itemiser::Element *ie, pattern_memb )
+    {
+        if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )
+        {
+   			FOREACH( TreePtr<Node> pe, *pattern_seq )
+				child_agents.push_back( AsAgent(pe) );     
+        }
+        else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )
+        {
+   			FOREACH( TreePtr<Node> pe, *pattern_seq )
+				child_agents.push_back( AsAgent(pe) ); 
+        }
+        else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
+        {
+            if( TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be NULL meaning no restriction            
+                child_agents.push_back( AsAgent(*pattern_ptr) );            
+        }
+        else
+        {
+            ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
+        }
+    }
+	return child_agents;
+}
+
+
 bool NormalAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 {
     INDENT(".");

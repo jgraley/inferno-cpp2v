@@ -3,6 +3,14 @@
 
 using namespace SR;
 
+deque<Agent *> NotMatchAgent::PatternQuery() const
+{
+	deque<Agent *> child_agents;
+    // Pattern is abnormal context, so not included
+	return child_agents;
+}
+
+
 bool NotMatchAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 {
     INDENT("!");
@@ -26,6 +34,15 @@ bool NotMatchAgent::BooleanEvaluatorNot::operator()( deque<bool> &inputs ) const
 }
 
 
+deque<Agent *> MatchAllAgent::PatternQuery() const
+{
+	deque<Agent *> child_agents;
+    FOREACH( const TreePtr<Node> p, GetPatterns() )
+		child_agents.push_back( AsAgent(p) );
+	return child_agents;
+}
+
+
 bool MatchAllAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 { 
     INDENT("&");
@@ -44,6 +61,14 @@ bool MatchAllAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
     }
     return true;
 }    
+
+
+deque<Agent *> MatchAnyAgent::PatternQuery() const
+{
+	deque<Agent *> child_agents;
+    // Pattern is abnormal context, so not included
+	return child_agents;
+}
 
 
 bool MatchAnyAgent::DecidedQueryImpl( const TreePtrInterface &x ) const

@@ -4,6 +4,14 @@
 
 using namespace SR;
 
+deque<Agent *> GreenGrassAgent::PatternQuery() const
+{
+	deque<Agent *> child_agents;
+	child_agents.push_back( AsAgent(GetThrough()) );
+	return child_agents;
+}
+
+
 bool GreenGrassAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 {
     INDENT("G");

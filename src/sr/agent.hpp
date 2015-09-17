@@ -48,8 +48,8 @@ class Agent : public virtual Traceable,
               public virtual Node
 {
 public:
-    // Produce info about an Agent no input tree info
-    //virtual Wat? PatternQuery() = 0;
+    // List the Agents reached via normal links during search
+    virtual deque<Agent *> PatternQuery() const = 0;
     // Produce info about an Agent given only the location (x)
     //virtual Wat? LocatedQuery( const TreePtrInterface &x ) = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
@@ -76,6 +76,7 @@ class AgentCommon : public Agent
 public:
     AgentCommon();
     void AgentConfigure( const Engine *e );
+    virtual deque<Agent *> PatternQuery() const = 0;
     virtual Links DecidedQuery( const TreePtrInterface &x,
                                 deque<ContainerInterface::iterator> choices );
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const = 0;

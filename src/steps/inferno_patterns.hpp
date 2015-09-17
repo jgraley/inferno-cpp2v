@@ -134,8 +134,9 @@ private:
 // Base class for special nodes that match nested nodes
 struct NestedBase : SoftAgent
 {
-    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const = 0;
+    virtual deque< TreePtr<Node> > MyPatternQuery() const;
     virtual bool MyCompare( const TreePtrInterface &x ) const;
+    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const = 0;
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;    
 };

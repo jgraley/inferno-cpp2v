@@ -45,8 +45,12 @@ public:
 protected:
     bool SingleCompareReplace( TreePtr<Node> *proot,
                                const CouplingMap &initial_coupling_keys );
-    bool Compare( const TreePtrInterface &x ) const;
-    bool Compare( const TreePtrInterface &x,
+    bool Compare( const TreePtrInterface &start_x ) const;
+    bool Compare( Agent *start_agent,
+                  const TreePtrInterface &start_x,
+                  const CouplingMap &initial_coupling_keys ) const;
+    bool Compare( Agent *start_agent,
+                  const TreePtrInterface &start_x,
                   Conjecture &conj,
                   CouplingMap &matching_coupling_keys,
                   const CouplingMap &initial_coupling_keys ) const;
@@ -55,10 +59,6 @@ protected:
                          bool can_key,
                          Conjecture &conj,
                          CouplingMap &coupling_keys ) const;
-    bool AbnormalCompare( Agent *agent,
-                          const TreePtrInterface &x, 
-                          bool can_key,
-                          CouplingMap &coupling_keys ) const;
     void KeyReplaceNodes( Conjecture &conj,
                           const CouplingMap &coupling_keys) const;
     TreePtr<Node> Replace() const;

@@ -5,6 +5,15 @@
 
 using namespace SR;
 
+deque<Agent *> SearchContainerAgent::PatternQuery() const
+{
+	deque<Agent *> child_agents;
+    child_agents.push_back( AsAgent(terminus) );
+    // Recurse restriction is abnormal context, so not included
+	return child_agents;
+}
+
+
 bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 {
     INDENT("#");
@@ -67,6 +76,7 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode )
     INDENT("#");
     TRACE( "Stuff node: Duplicating at terminus first: keynode=")(*(terminus))
                                                         (", term=")(*(terminus_key))("\n");
+    ASSERT(terminus_key);// this could mean replace is being attempted on a SearchContainerAgent in an abnormal context
     TreePtr<Node> term = AsAgent(terminus)->BuildReplace();
     TRACE( "Stuff node: Substituting stuff");
     return DuplicateSubtree(keynode, terminus_key, term);   

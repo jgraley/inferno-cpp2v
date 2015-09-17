@@ -13,6 +13,7 @@ namespace SR
 class TransformOfBase : public SoftAgent
 {
 public:
+    virtual deque< TreePtr<Node> > MyPatternQuery() const;
     TreePtr<Node> pattern; 
     Transformation *transformation;
     TransformOfBase( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) :
