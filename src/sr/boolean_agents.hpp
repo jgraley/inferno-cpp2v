@@ -15,7 +15,7 @@ namespace SR
 class NotMatchAgent : public AgentCommon 
 {
 public:
-    virtual deque<Agent *> PatternQuery() const;
+    virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
 private:
     virtual TreePtr<Node> GetPattern() const = 0;
@@ -51,7 +51,7 @@ private:
 class MatchAllAgent : public AgentCommon 
 {
 public:
-    virtual deque<Agent *> PatternQuery() const;
+    virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
 private:
     virtual CollectionInterface &GetPatterns() const = 0;
@@ -79,7 +79,7 @@ private:
 class MatchAnyAgent : public AgentCommon 
 {
 public:
-    virtual deque<Agent *> PatternQuery() const;
+    virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
 private:
     virtual CollectionInterface &GetPatterns() const = 0;

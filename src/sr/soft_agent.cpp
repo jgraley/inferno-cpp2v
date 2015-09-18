@@ -4,16 +4,6 @@
 
 using namespace SR;
 
-deque<Agent *> SoftAgent::PatternQuery() const
-{
-	deque<Agent *> child_agents;
-	deque< TreePtr<Node> > patterns = MyPatternQuery();
-    FOREACH( const TreePtr<Node> p, patterns )
-		child_agents.push_back( AsAgent(p) );
-	return child_agents;
-}
-
-
 void SoftAgent::AgentConfigure( const Engine *e )
 {
     AgentCommon::AgentConfigure( e ); // To main version of Configure
@@ -46,12 +36,6 @@ TreePtr<Node> SoftAgent::BuildReplaceImpl( TreePtr<Node> keynode )
     // Note that the keynode could have been set via coupling - but still not
     // likely to do anything sensible, so explicitly check
     return DuplicateSubtree(keynode);   
-}
-
-
-deque< TreePtr<Node> > SoftAgent::MyPatternQuery() const
-{
-	return deque< TreePtr<Node> >();
 }
 
 

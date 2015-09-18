@@ -18,7 +18,7 @@ class SlaveAgent : public virtual AgentCommon,
 {
 public:
     SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );
-    virtual deque<Agent *> PatternQuery() const;
+    virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> GetThrough() const = 0;    

@@ -5,12 +5,11 @@
 
 using namespace SR;
 
-deque<Agent *> SearchContainerAgent::PatternQuery() const
+void SearchContainerAgent::PatternQueryImpl() const
 {
-	deque<Agent *> child_agents;
-    child_agents.push_back( AsAgent(terminus) );
-    // Recurse restriction is abnormal context, so not included
-	return child_agents;
+	RememberLink( false, AsAgent(terminus) );
+    if( recurse_restriction )
+        RememberLink( true, AsAgent(recurse_restriction) );
 }
 
 

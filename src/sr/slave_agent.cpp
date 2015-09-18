@@ -13,12 +13,9 @@ SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search ) :
 }
 
 
-deque<Agent *> SlaveAgent::PatternQuery() const
+void SlaveAgent::PatternQueryImpl() const
 {
-	deque<Agent *> child_agents;
-	child_agents.push_back( AsAgent(GetThrough()) );
-	// Not the slave links as they are run in their own Engine
-	return child_agents;
+	RememberLink( false, AsAgent(GetThrough()) );
 }
 
 

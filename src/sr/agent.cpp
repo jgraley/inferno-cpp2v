@@ -16,7 +16,8 @@ Agent *Agent::AsAgent( TreePtr<Node> node )
 
 
 AgentCommon::AgentCommon() :
-    engine(NULL)
+    engine(NULL),
+    current_query(IDLE)
 {
 }
 
@@ -35,12 +36,32 @@ void AgentCommon::AgentConfigure( const Engine *e )
 }
 
 
-
-Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
-                                 deque<ContainerInterface::iterator> ch )
+PatternLinks AgentCommon::PatternQuery() const
 {
     ASSERT(this);
     ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
+	ASSERT( current_query == IDLE );
+	current_query = PATTERN;
+
+    // choices are read by the impl; links are updated by the impl
+    pattern_links.clear();
+        
+    // Determine how agent links to other agents
+    PatternQueryImpl();
+        
+    // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
+    current_query = IDLE;
+    return links;
+}
+
+
+Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
+                                 deque<ContainerInterface::iterator> ch ) const
+{
+    ASSERT(this);
+    ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
+	ASSERT( current_query == IDLE );
+	current_query = DECIDED;
 
     // choices are read by the impl; links are updated by the impl
     links.clear();
@@ -49,11 +70,9 @@ Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
     // Do the agent-specific local checks (x versus characteristics of the present agent)
     // Also takes notes of how child agents link to children of x (depending on conjecture)
     links.local_match = DecidedQueryImpl( x );
-    
-    // choices should not need to be preserved after exit
-    choices.clear(); 
-    
+        
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
+    current_query = IDLE;
     return links;
 }
 
@@ -80,8 +99,20 @@ void AgentCommon::ResetKey()
 }
 
 
+void AgentCommon::RememberLink( bool abnormal, Agent *a ) const
+{
+	ASSERT( current_query==PATTERN );
+    PatternLinks::Link l;
+    l.abnormal = abnormal;
+    l.agent = a;
+    TRACE("Remembering link %d ", pattern_links.links.size())(*a)(abnormal?" abnormal":" normal")("\n");
+    pattern_links.links.push_back( l );
+}
+
+
 void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x ) const
 {
+	ASSERT( current_query==DECIDED );
     Links::Link l;
     l.abnormal = abnormal;
     l.agent = a;
@@ -94,6 +125,7 @@ void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface 
 
 void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) const
 {
+	ASSERT( current_query==DECIDED );
     ASSERT(x);
     Links::Link l;
     l.abnormal = abnormal;
@@ -107,8 +139,12 @@ void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) 
 
 void AgentCommon::RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const
 {
+	ASSERT( current_query!=IDLE );
 	ASSERT( !links.evaluator ); // should not register more than one
-	links.evaluator = e;
+	if( current_query==PATTERN )
+		pattern_links.evaluator = e;
+	else
+	    links.evaluator = e;
 }	
 
 

@@ -16,13 +16,30 @@ class SpecialBase;
 class Engine;
 class Agent;
 
-class Links
+class PatternLinks
 {
 public:    
-    struct Link
+    struct Link 
     {
         bool abnormal;
         Agent *agent;
+    };
+        
+    vector<Link> links;
+    shared_ptr<BooleanEvaluator> evaluator;
+
+    void clear()
+    {
+        evaluator = shared_ptr<BooleanEvaluator>();
+    }
+};
+
+
+class Links : public PatternLinks
+{
+public:    
+    struct Link : PatternLinks::Link
+    {
         const TreePtrInterface *px;
         TreePtr<Node> local_x;
     };
@@ -30,13 +47,12 @@ public:
     vector<Link> links;
     deque<Conjecture::Range> decisions;
     bool local_match;
-    shared_ptr<BooleanEvaluator> evaluator;
 
     void clear()
     {
         links.clear();
         decisions.clear();
-        evaluator = shared_ptr<BooleanEvaluator>();
+        PatternLinks::clear();
     }
 };
 
@@ -48,13 +64,11 @@ class Agent : public virtual Traceable,
               public virtual Node
 {
 public:
-    // List the Agents reached via normal links during search
-    virtual deque<Agent *> PatternQuery() const = 0;
-    // Produce info about an Agent given only the location (x)
-    //virtual Wat? LocatedQuery( const TreePtrInterface &x ) = 0;
+    /// List the Agents reached via normal links during search
+    virtual PatternLinks PatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual Links DecidedQuery( const TreePtrInterface &x,
-                                deque<ContainerInterface::iterator> choices ) = 0;                                
+                                deque<ContainerInterface::iterator> choices ) const = 0;                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const TreePtrInterface &x,
@@ -76,9 +90,10 @@ class AgentCommon : public Agent
 public:
     AgentCommon();
     void AgentConfigure( const Engine *e );
-    virtual deque<Agent *> PatternQuery() const = 0;
+    virtual PatternLinks PatternQuery() const;
+    virtual void PatternQueryImpl() const = 0;
     virtual Links DecidedQuery( const TreePtrInterface &x,
-                                deque<ContainerInterface::iterator> choices );
+                                deque<ContainerInterface::iterator> choices ) const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const = 0;
     void DoKey( TreePtr<Node> x );
     TreePtr<Node> GetCoupled();                                  
@@ -94,9 +109,10 @@ public:
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
-    void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x ) const;
-    void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) const;
-    void RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const;
+    void RememberLink( bool abnormal, Agent *a ) const; // Pattern query
+    void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x ) const; // Decided query
+    void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) const; // Decided query
+    void RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const; // All queries
 
     const Engine *engine;    
     ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
@@ -112,6 +128,8 @@ private:
     // restructuing needed to make this nice as there are modifiers here that
     // would need to operate on some new object that combines the "links" and
     // "choices".
+    mutable enum {IDLE, PATTERN, DECIDED} current_query;
+    mutable PatternLinks pattern_links;    
     mutable Links links;    
     mutable deque<ContainerInterface::iterator> choices;
 };

@@ -13,7 +13,7 @@ namespace SR
 class TransformOfBase : public SoftAgent
 {
 public:
-    virtual deque< TreePtr<Node> > MyPatternQuery() const;
+    virtual void PatternQueryImpl() const;
     TreePtr<Node> pattern; 
     Transformation *transformation;
     TransformOfBase( Transformation *t, TreePtr<Node> p=TreePtr<Node>() ) :
@@ -63,6 +63,10 @@ class PointerIs : public Special<PRE_RESTRICTION>,
 public:
     SPECIAL_NODE_FUNCTIONS
     TreePtr<PRE_RESTRICTION> pointer;
+    virtual void PatternQueryImpl() const
+    {
+		RememberLink( true, AsAgent(pointer) );
+	}
     virtual bool MyCompare( const TreePtrInterface &x ) const
     {
         INDENT("@");

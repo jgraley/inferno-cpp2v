@@ -17,7 +17,7 @@ private:
     TreePtr<Node> terminus_key;
 
 public:
-    virtual deque<Agent *> PatternQuery() const;
+    virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
     virtual void KeyReplace( const TreePtrInterface &x,
                              deque<ContainerInterface::iterator> choices ); 
