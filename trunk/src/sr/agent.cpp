@@ -51,7 +51,7 @@ PatternLinks AgentCommon::PatternQuery() const
         
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
     current_query = IDLE;
-    return links;
+    return pattern_links;
 }
 
 
@@ -140,11 +140,16 @@ void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) 
 void AgentCommon::RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const
 {
 	ASSERT( current_query!=IDLE );
-	ASSERT( !links.evaluator ); // should not register more than one
 	if( current_query==PATTERN )
+	{
+		ASSERT( !pattern_links.evaluator ); // should not register more than one
 		pattern_links.evaluator = e;
+	}
 	else
+	{
+		ASSERT( !links.evaluator ); // should not register more than one
 	    links.evaluator = e;
+	}
 }	
 
 

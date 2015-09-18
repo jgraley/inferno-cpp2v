@@ -39,6 +39,10 @@ bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
     // Get choice from conjecture about where we are in the walk
     ContainerInterface::iterator thistime = HandleDecision( pwx->begin(), pwx->end() );
 
+    // Try out comparison at this position
+    TRACE("Trying terminus ")(**thistime)("\n");
+    RememberLink( false, AsAgent(terminus), *thistime );
+            
     // Where a recurse restriction is in use, apply it to all the recursion points
     // underlying the current iterator, thistime.
     if( recurse_restriction )
@@ -52,10 +56,6 @@ bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
             RememberLocalLink( true, AsAgent(recurse_restriction), n );
     }
     
-    // Try out comparison at this position
-    TRACE("Trying terminus ")(**thistime)("\n");
-    RememberLink( false, AsAgent(terminus), *thistime );
-            
     return true;
 }
 

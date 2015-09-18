@@ -6,6 +6,7 @@ using namespace SR;
 void NotMatchAgent::PatternQueryImpl() const
 {
 	RememberLink( true, AsAgent(GetPattern()) );
+	RememberEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
 }
 
 
@@ -63,6 +64,7 @@ void MatchAnyAgent::PatternQueryImpl() const
 {
     FOREACH( const TreePtr<Node> p, GetPatterns() )
 	    RememberLink( true, AsAgent(p) );
+	RememberEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
 }
 
 
