@@ -20,8 +20,16 @@ void NormalAgent::PatternQueryImpl() const
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )
         {
-   			FOREACH( TreePtr<Node> pe, *pattern_seq )
-				RememberLink(false, AsAgent(pe));    
+   			StarAgent *star = NULL;
+   			FOREACH( TreePtr<Node> pe, *pattern_col )
+   			{
+				if( StarAgent *s = dynamic_cast<StarAgent *>( AsAgent(pe) ) ) // per the impl, the star in a collection is not linked
+				    star = s;
+				else
+				    RememberLink(false, AsAgent(pe));    	    
+		    }
+		    if( star )
+		        RememberLink(false, star);    
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
         {

@@ -30,6 +30,7 @@ public:
 
     void clear()
     {
+		links.clear();
         evaluator = shared_ptr<BooleanEvaluator>();
     }
 };
@@ -44,7 +45,7 @@ public:
         TreePtr<Node> local_x;
     };
         
-    vector<Link> links;
+    vector<Link> links; // TODO hides "links" in base class PatternLinks, ugly
     deque<Conjecture::Range> decisions;
     bool local_match;
 
