@@ -21,6 +21,7 @@ struct BuildContainerSize : SoftAgent,
     SPECIAL_NODE_FUNCTIONS
     shared_ptr< StarAgent > container;
 private:
+    virtual void PatternQueryImpl() const {}
     virtual TreePtr<Node> MyBuildReplace()
     {
         ASSERT( container );

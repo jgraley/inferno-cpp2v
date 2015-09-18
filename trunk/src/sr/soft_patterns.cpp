@@ -2,11 +2,9 @@
 
 using namespace SR;
 
-deque< TreePtr<Node> > TransformOfBase::MyPatternQuery() const
+void TransformOfBase::PatternQueryImpl() const
 {
-	deque< TreePtr<Node> > child_patterns;
-	child_patterns.push_back( TreePtr<Node>(pattern) );
-	return child_patterns;
+	RememberLink( false, AsAgent(pattern) );
 }
 
 

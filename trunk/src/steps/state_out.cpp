@@ -325,6 +325,7 @@ struct BuildContainerSize : SoftAgent,
     SPECIAL_NODE_FUNCTIONS
     shared_ptr< StarAgent > container;
 private:
+    virtual void PatternQueryImpl() const {}
     virtual TreePtr<Node> MyBuildReplace()
     {
         ASSERT( container );
@@ -347,6 +348,7 @@ struct IsLabelReached : SoftAgent, Special<LabelIdentifier>
         ASSERT(0);
 	    cache.clear();
 	}
+    virtual void PatternQueryImpl() const {}
 	// x is nominally the label id, at the position of this node
 	// y is nominally the goto expression, coupled in
     virtual bool MyCompare( const TreePtrInterface &xx ) 

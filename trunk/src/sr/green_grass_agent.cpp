@@ -4,11 +4,9 @@
 
 using namespace SR;
 
-deque<Agent *> GreenGrassAgent::PatternQuery() const
+void GreenGrassAgent::PatternQueryImpl() const
 {
-	deque<Agent *> child_agents;
-	child_agents.push_back( AsAgent(GetThrough()) );
-	return child_agents;
+    RememberLink( false, AsAgent(GetThrough()) );
 }
 
 

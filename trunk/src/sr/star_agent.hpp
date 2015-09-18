@@ -19,7 +19,7 @@ namespace SR
 class StarAgent : public virtual AgentCommon 
 {
 public:
-    virtual deque<Agent *> PatternQuery() const;
+    virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const; // x must be a SubContainer                                  
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:

@@ -23,6 +23,7 @@ using namespace SR;
 struct BuildIdentifierBase : SoftAgent
 {
     BuildIdentifierBase( string s, int f=0 ) : format(s), flags(f) {}
+    virtual void PatternQueryImpl() const {}
     Sequence<CPPTree::Identifier> sources;
     string GetNewName();
     string format;
@@ -81,6 +82,7 @@ private:
 struct IdentifierByNameBase : SoftAgent
 {
     IdentifierByNameBase( string n ) : name(n) {}
+    virtual void PatternQueryImpl() const {}
     bool IsMatch( const TreePtrInterface &x ) const;
     string name;
 };
@@ -134,7 +136,7 @@ private:
 // Base class for special nodes that match nested nodes
 struct NestedBase : SoftAgent
 {
-    virtual deque< TreePtr<Node> > MyPatternQuery() const;
+    virtual void PatternQueryImpl() const;
     virtual bool MyCompare( const TreePtrInterface &x ) const;
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const = 0;
     TreePtr<Node> terminus; 

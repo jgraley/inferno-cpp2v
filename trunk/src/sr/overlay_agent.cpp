@@ -5,12 +5,9 @@
 
 using namespace SR;
 
-deque<Agent *> OverlayAgent::PatternQuery() const
+void OverlayAgent::PatternQueryImpl() const
 {
-	deque<Agent *> child_agents;
-	child_agents.push_back( AsAgent(GetThrough()) );
-	// Not overlay as that is replace-side only
-	return child_agents;
+	RememberLink( false, AsAgent(GetThrough()) );
 }
 
 

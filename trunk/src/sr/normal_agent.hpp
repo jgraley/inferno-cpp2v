@@ -16,7 +16,7 @@ namespace SR
 class NormalAgent : public virtual AgentCommon
 {
 public:
-    virtual deque<Agent *> PatternQuery() const;
+    virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
 private:
     bool DecidedQuerySequence( SequenceInterface &x,

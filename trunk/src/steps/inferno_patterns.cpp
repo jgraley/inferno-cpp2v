@@ -63,13 +63,11 @@ bool IdentifierByNameBase::IsMatch( const TreePtrInterface &x ) const
 }
 
 
-deque< TreePtr<Node> > NestedBase::MyPatternQuery() const
+void NestedBase::PatternQueryImpl() const
 {
-	deque< TreePtr<Node> > child_patterns;
-	child_patterns.push_back( terminus );
+	RememberLink( false, AsAgent(terminus) );
 	if( depth )
-		child_patterns.push_back( depth );
-	return child_patterns;
+		RememberLink( false, AsAgent(depth) );
 }
 
 

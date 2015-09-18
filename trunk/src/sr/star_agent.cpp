@@ -4,11 +4,10 @@
 
 using namespace SR;
 
-deque<Agent *> StarAgent::PatternQuery() const
+void StarAgent::PatternQueryImpl() const
 {
-	deque<Agent *> child_agents;
-    // Recurse restriction is abnormal context, so not included
-	return child_agents;
+    if( TreePtr<Node> p = GetRestriction() )
+        RememberLink( true, AsAgent(p) );
 }
 
 
