@@ -190,7 +190,6 @@ bool Engine::DecidedCompare( Agent *agent,
 
     TRACE(*agent)("?=")(*x)(" Gathering links\n");    
     // Run the compare implementation to get the links based on the choices
-    PatternLinks plinks = agent->PatternQuery();
     Links mylinks = agent->DecidedQuery( x, choices );
     
     // The number of decisions reported should not shrink
@@ -214,9 +213,6 @@ bool Engine::DecidedCompare( Agent *agent,
       
     // When evaluating, all links are abnormal contexts, so only check
     // them in restricting pass.
-    ASSERT( !!mylinks.evaluator==!!plinks.evaluator )(*agent);
-    if( plinks.evaluator )
-        ASSERT( typeid(*(mylinks.evaluator))==typeid(*(plinks.evaluator)) )(*agent);
     if( mylinks.evaluator && can_key )
         return true;
       
@@ -224,10 +220,6 @@ bool Engine::DecidedCompare( Agent *agent,
     TRACE(*agent)("?=")(*x)(" Comparing links\n");    
     int i=0;
     deque<bool> results;
-    // mylinks is allowed to be smaller due to early-out due position or choices
-    //ASSERT( plinks.links.size() >= mylinks.links.size() )(*agent)(" %d < %d\n", plinks.links.size(), mylinks.links.size()); 
-    vector<PatternLinks::Link>::iterator plit = plinks.links.begin();
-    Agent *prev_agent = NULL;
     FOREACH( const Links::Link &l, mylinks.links )
     {
         TRACE("Comparing link %d\n", i);
@@ -238,17 +230,7 @@ bool Engine::DecidedCompare( Agent *agent,
             px = l.px; // linked pattern is in input tree
         else
             px = &(l.local_x); // linked pattern is local, kept alive by local_x    
-                
-        // Coalesce repeated agents (due to stuff/star restrictions) for the purposes of checking against pattern query
-        if( l.agent != prev_agent ) 
-        {
-            ASSERT( plit != plinks.links.end() );
-			const PatternLinks::Link &pl = *plit;
-			ASSERT( pl.agent == l.agent )(*agent)(" %d %d\n", plinks.links.size(), mylinks.links.size());
-            ASSERT( pl.abnormal == l.abnormal )(*agent);
-            ++plit;
-		}
-
+            
         // Recurse now       
         bool r;       
         if( l.abnormal )
@@ -278,7 +260,6 @@ bool Engine::DecidedCompare( Agent *agent,
             if( !r )
                 return false;
 		} 
-		prev_agent = l.agent;
         i++;
     }
     if( mylinks.evaluator )
