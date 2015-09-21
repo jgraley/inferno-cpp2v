@@ -54,14 +54,27 @@ public:
     }
     // Tried to just do a const version of [], but it was getting called in
     // non-const cases, which is crap because C++ should use the non-const one
-    // where it can.
+    // where it needs to.
     const DATA& At(const KEY& k) const
     {
 		typename map<KEY, DATA>::const_iterator cit = map<KEY, DATA>::find(k);
-		ASSERT( cit != map<KEY, DATA>::end() );
-		return *cit;
+		return (*cit).second;
 	}
 };
+
+
+// Union two maps. Second overrules first!!
+template< typename KEY, typename DATA >
+inline Map<KEY, DATA> MapUnion( const Map<KEY, DATA> m1, const Map<KEY, DATA> m2 )
+{
+	typedef pair<KEY, DATA> Pair;
+    Map<KEY, DATA> result = m1;
+    FOREACH( Pair x, m2 )
+    {
+		result[x.first] = x.second;
+    }
+    return result; 
+}
 
 
 template< typename KEY, typename DATA >
