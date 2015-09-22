@@ -61,6 +61,17 @@ protected:
                          CouplingMap &local_keys,
                          const CouplingMap &master_keys,
                          Set<Agent *> &reached ) const;
+    bool CompareLinks( const Links &mylinks,
+                       bool can_key,
+                       Conjecture &conj,
+                       CouplingMap &local_keys,
+                       const CouplingMap &master_keys,
+                       Set<Agent *> &reached ) const;
+    bool CompareEvaluatorLinks( const Links &mylinks,
+							    Conjecture &conj,
+							    CouplingMap &local_keys,
+							    const CouplingMap &master_keys,
+							    Set<Agent *> &reached ) const;
     void KeyReplaceNodes( Conjecture &conj,
                           const CouplingMap &coupling_keys) const;
     TreePtr<Node> Replace() const;

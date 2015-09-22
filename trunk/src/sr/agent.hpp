@@ -43,6 +43,13 @@ public:
     {
         const TreePtrInterface *px;
         TreePtr<Node> local_x;
+        const TreePtrInterface *GetX() const
+        {
+			if( px )
+				return px; // linked pattern is in input tree
+			else
+				return &local_x; // linked pattern is local, kept alive by local_x    
+		}	
     };
         
     vector<Link> links; // TODO hides "links" in base class PatternLinks, ugly
