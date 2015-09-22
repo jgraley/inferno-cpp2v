@@ -59,7 +59,8 @@ protected:
                          bool can_key,
                          Conjecture &conj,
                          CouplingMap &local_keys,
-                         const CouplingMap &master_keys ) const;
+                         const CouplingMap &master_keys,
+                         Set<Agent *> &reached ) const;
     void KeyReplaceNodes( Conjecture &conj,
                           const CouplingMap &coupling_keys) const;
     TreePtr<Node> Replace() const;
