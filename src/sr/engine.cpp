@@ -157,6 +157,91 @@ void Engine::GetGraphInfo( vector<string> *labels,
 }
 
 
+bool Engine::CompareLinks( const Links &mylinks,
+                           bool can_key,
+                           Conjecture &conj,
+                           CouplingMap &local_keys,      
+                           const CouplingMap &master_keys,
+                           Set<Agent *> &reached ) const
+{
+	ASSERT( !mylinks.evaluator );
+    // Follow up on any links that were noted by the agent impl
+    //TRACE(*agent)("?=")(*x)(" Comparing links\n"); 
+    bool made_coupling_keys = false;  
+    CouplingMap coupling_keys;
+    int i=0;
+    deque<bool> results;
+    FOREACH( const Links::Link &l, mylinks.links )
+    {
+        TRACE("Comparing link %d\n", i);
+ 
+        // Get pattern for linked node
+        const TreePtrInterface *px = l.GetX();
+           
+        // Recurse now       
+        if( l.abnormal )
+        {
+			// Non-evaluator abnormal cases only.
+			if( can_key )
+			    continue; // Only check abnormals in restricting pass
+			    
+			if( !made_coupling_keys ) // optimisation: only make them once, if needed at all.
+			{
+			    coupling_keys = MapUnion( master_keys, local_keys ); 
+     	        made_coupling_keys = true;
+			}
+			
+			if( !Compare( l.agent, *px, coupling_keys ) )
+			    return false;
+        }    
+        else
+        {
+			// Recurse normally
+            if( !DecidedCompare(l.agent, *px, can_key, conj, local_keys, master_keys, reached) )
+                return false;
+ 		}
+ 		
+        i++;
+    }
+      
+    return true;
+}
+
+
+// Only to be called in the restricting pass
+bool Engine::CompareEvaluatorLinks( const Links &mylinks,
+									Conjecture &conj,
+									CouplingMap &local_keys,      
+									const CouplingMap &master_keys,
+									Set<Agent *> &reached ) const
+{
+	ASSERT( mylinks.evaluator );
+    CouplingMap coupling_keys = MapUnion( master_keys, local_keys );
+
+    // Follow up on any links that were noted by the agent impl    
+    int i=0;
+    deque<bool> results;
+    FOREACH( const Links::Link &l, mylinks.links )
+    {
+        TRACE("Comparing link %d\n", i);
+ 		ASSERT( l.abnormal )("When an evaluator is used, all links must be into abnormal contexts");
+ 
+        // Get pattern for linked node
+        const TreePtrInterface *px = l.GetX();
+                     		
+		results.push_back( Compare( l.agent, *px, coupling_keys ) );
+        i++;
+    }
+
+	bool match = (*mylinks.evaluator)( results );
+	TRACE(" Evaluating ");
+	FOREACH(bool b, results)
+	    TRACE(b)(" ");
+	TRACE("got ")(match)("\n");
+	return match;
+}
+
+
 bool Engine::DecidedCompare( Agent *agent,
                              const TreePtrInterface &x,
                              bool can_key,
@@ -202,73 +287,19 @@ bool Engine::DecidedCompare( Agent *agent,
     // Remember we reached this agent in this pass
     reached.insert( agent );
       
-    // When evaluating, all links are abnormal contexts, so only check
-    // them in restricting pass.
-    if( mylinks.evaluator && can_key )
-        return true;
-      
-    // Follow up on any links that were noted by the agent impl
-    TRACE(*agent)("?=")(*x)(" Comparing links\n");    
-    int i=0;
-    deque<bool> results;
-    FOREACH( const Links::Link &l, mylinks.links )
+    // Use worker function to go through the links, special case if there is evaluator
+    if( !mylinks.evaluator )
     {
-        TRACE("Comparing link %d\n", i);
- 
-        // Get pattern for linked node
-        const TreePtrInterface *px;
-        if( l.px )
-            px = l.px; // linked pattern is in input tree
-        else
-            px = &(l.local_x); // linked pattern is local, kept alive by local_x    
-            
-        // Recurse now       
-        bool r;       
-        if( l.abnormal )
-        {
-			// Recurse into an abnormal context, but only once surrounding context has keyed
-			// Note: Compare() will do a 2-pass compare - but this permits eg
-			// abnormal( x, abnormal(x) ) where x couples, to work properly.
-			if( can_key )
-			    r = true;
-			else
-			{
-			    CouplingMap coupling_keys = MapUnion( master_keys, local_keys );
-			    r = Compare( l.agent, *px, coupling_keys );
-			}			    
-        }    
-        else
-        {
-			// Recurse normally
-			r = DecidedCompare(l.agent, *px, can_key, conj, local_keys, master_keys, reached);
-		}
-		
-        if( mylinks.evaluator )
-        {
-			ASSERT( l.abnormal )("When an evaluator is used, all links must be into abnormal contexts")(*agent)("->")(*(l.agent));
-			results.push_back(r);
-		}
-		else // No evaluator, so use default AND rule.
-		{
-			// Early out on mismatch
-            if( !r )
-                return false;
-		} 
-        i++;
-    }
-    if( mylinks.evaluator )
-    {
-		bool match = (*mylinks.evaluator)( results );
-		TRACE(*agent)("?=")(*x)(" Evaluating ");
-		FOREACH(bool b, results)
-		    TRACE(b)(" ");
-		TRACE("got ")(match)("\n");
-		return match;
+		TRACE(*agent)("?=")(*x)(" Comparing links\n");
+        return CompareLinks( mylinks, can_key, conj, local_keys, master_keys, reached );
 	}
-      
-    ASSERT( !local_keys.empty() );
-    TRACE(*agent)("?=")(*x)(" Done\n");        
-    return true;
+    else if( !can_key )
+    {
+		TRACE(*agent)("?=")(*x)(" Comparing evaluator links\n");
+        return CompareEvaluatorLinks( mylinks, conj, local_keys, master_keys, reached );
+	}
+    else
+        return true;
 }
 
 
