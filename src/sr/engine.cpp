@@ -427,10 +427,13 @@ bool Engine::SingleCompareReplace( TreePtr<Node> *proot,
     TRACE("Search successful, now keying replace nodes\n");
     KeyReplaceNodes( conj, local_keys );
 
-    CouplingMap coupling_keys = MapUnion( master_keys, local_keys );    
-
-    FOREACH( SlaveAgent *sa, my_slaves )
-        sa->SetMasterCouplingKeys( coupling_keys );
+    if( !my_slaves.empty() )
+    {
+		CouplingMap coupling_keys = MapUnion( master_keys, local_keys );    
+		
+        FOREACH( SlaveAgent *sa, my_slaves )
+            sa->SetMasterCouplingKeys( coupling_keys );
+	}
 
     TRACE("Now replacing\n");
     *proot = Replace();

@@ -25,7 +25,7 @@ public:
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *links ) const;
     virtual void Configure( const Set<Agent *> &agents_already_configured, const Engine *master );
-    void SetMasterCouplingKeys( CouplingMap &keys );
+    void SetMasterCouplingKeys( const CouplingMap &keys );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     
     TreePtr<Node> search_pattern;
@@ -66,7 +66,7 @@ private:
 
 public:
     typedef ContainerFromIterator< UniqueWalkNoSlavePattern_iterator, TreePtr<Node> > UniqueWalkNoSlavePattern;    
-    CouplingMap *master_coupling_keys;
+    CouplingMap master_keys;
 };
 
 
