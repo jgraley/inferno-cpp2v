@@ -161,8 +161,9 @@ bool Engine::DecidedCompare( Agent *agent,
                              const TreePtrInterface &x,
                              bool can_key,
                              Conjecture &conj,
-                             CouplingMap &local_keys,
-                             const CouplingMap &master_keys ) const
+                             CouplingMap &local_keys,      // applies ACROSS PASSES
+                             const CouplingMap &master_keys,
+                             Set<Agent *> &reached ) const // applies to CURRENT PASS only
 {
     INDENT(" ");
     ASSERT( &x ); // Ref to target must not be NULL (i.e. corrupted ref)
@@ -170,54 +171,36 @@ bool Engine::DecidedCompare( Agent *agent,
             
 	SimpleCompare sc;
 
-    // If the agent is coupled already, check for a coupling match
-	//ASSERT( my_agents.IsExist(agent)!=master_keys.IsExist(agent) )( my_agents.IsExist(agent))(" ")(master_keys.IsExist(agent) )(*agent);
-	// NOTE: when recursed into an abnormal context, we can receive one of 
-	// our agents in the master keys map - but the behavior should still be
-	// to short-circuit out. TODO why not always after SC has found a match?
+    // Check for a coupling match to a master engine's agent
     if( master_keys.IsExist(agent) )
-    {
-        bool match = sc( x, master_keys.At(agent) );
-	    TRACE(*agent)("?=")(*x)(" Short-circuiting master agent; match=")(match)("\n");    
-        return match; // do not recurse into master's agents
-    }
+        return sc( x, master_keys.At(agent) );
 	
-	if( local_keys.IsExist(agent) )
-    {
-        bool match = sc( x, local_keys[agent] );
-        if( !match )
-        {
-			TRACE(*agent)("?=")(*x)(" Coupling mismatch\n");    
-            conj.RegisterDecisions( agent, false );
-            return false;
-		}
-    }
-    
+	// Check for a coupling match to one of our agents we reached earlier in this pass
+	if( reached.IsExist(agent) )
+        return sc( x, local_keys.At(agent) );
+     
     // Obtain the choices from the conjecture
     deque<ContainerInterface::iterator> choices = conj.GetChoices(agent);
 
-    TRACE(*agent)("?=")(*x)(" Gathering links\n");    
     // Run the compare implementation to get the links based on the choices
+    TRACE(*agent)("?=")(*x)(" Gathering links\n");    
     Links mylinks = agent->DecidedQuery( x, choices );
-    
-    // The number of decisions reported should not shrink
-    if( mylinks.local_match )
-        ASSERT( mylinks.decisions.size()>=choices.size() )(*this)(" cs=%d ds=%d\n", choices.size(), mylinks.decisions.size());    
+    TRACE(*agent)("?=")(*x)(" local match ")(mylinks.local_match)("\n");
     
     // Feed the decisions info in the links structure back to the conjecture
     conj.RegisterDecisions( agent, mylinks.local_match, mylinks.decisions );
         
     // Stop if the node itself mismatched (can be for any reason depending on agent)
     if(!mylinks.local_match)
-    {
-        TRACE(*agent)("?=")(*x)(" local mismatch, aborting\n");
         return false;
-    }
-    
+
     // Remember the coupling before recursing, as we can hit the same node 
     // (eg identifier) and we need to have coupled it. 
     if( can_key && !local_keys.IsExist(agent) )
         local_keys[agent] = x;
+        
+    // Remember we reached this agent in this pass
+    reached.insert( agent );
       
     // When evaluating, all links are abnormal contexts, so only check
     // them in restricting pass.
@@ -252,13 +235,12 @@ bool Engine::DecidedCompare( Agent *agent,
 			{
 			    CouplingMap coupling_keys = MapUnion( master_keys, local_keys );
 			    r = Compare( l.agent, *px, coupling_keys );
-			}
-			    
+			}			    
         }    
         else
         {
 			// Recurse normally
-			r = DecidedCompare(l.agent, *px, can_key, conj, local_keys, master_keys);
+			r = DecidedCompare(l.agent, *px, can_key, conj, local_keys, master_keys, reached);
 		}
 		
         if( mylinks.evaluator )
@@ -343,8 +325,11 @@ bool Engine::Compare( Agent *start_agent,
         local_keys = CouplingMap();
 
         // Do a two-pass matching process: first get the keys...
-        conj.PrepareForDecidedCompare(0);
-        r = DecidedCompare( start_agent, start_x, true, conj, local_keys, master_keys );
+        {
+            conj.PrepareForDecidedCompare(0);
+			Set<Agent *> reached;
+            r = DecidedCompare( start_agent, start_x, true, conj, local_keys, master_keys, reached );
+        }
                
         if( r )
         {
@@ -352,7 +337,8 @@ bool Engine::Compare( Agent *start_agent,
             // allows a coupling keyed late in the walk to restrict something 
             // seen earlier (eg in an abnormal context where keying is impossible)
             conj.PrepareForDecidedCompare(1);
-            r = DecidedCompare( start_agent, start_x, false, conj, local_keys, master_keys );
+            Set<Agent *> reached;
+            r = DecidedCompare( start_agent, start_x, false, conj, local_keys, master_keys, reached );
         }
         
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
