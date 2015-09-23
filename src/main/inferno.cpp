@@ -7,7 +7,6 @@
 #include "common/hit_count.hpp"
 #include "helpers/walk.hpp"
 #include "sr/search_replace.hpp"
-#include "sr/soft_patterns.hpp"
 #include "tree/validate.hpp"
 #include "steps/split_instance_declarations.hpp"
 #include "steps/generate_implicit_casts.hpp"

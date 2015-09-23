@@ -166,11 +166,9 @@ bool Engine::CompareLinks( const Links &mylinks,
 {
 	ASSERT( !mylinks.evaluator );
     // Follow up on any links that were noted by the agent impl
-    //TRACE(*agent)("?=")(*x)(" Comparing links\n"); 
     bool made_coupling_keys = false;  
     CouplingMap coupling_keys;
     int i=0;
-    deque<bool> results;
     FOREACH( const Links::Link &l, mylinks.links )
     {
         TRACE("Comparing link %d\n", i);

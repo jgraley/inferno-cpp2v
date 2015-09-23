@@ -8,7 +8,8 @@
 #include "generate_implicit_casts.hpp"
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
-#include "sr/soft_patterns.hpp"
+#include "sr/pointer_is_agent.hpp"
+#include "sr/transform_of_agent.hpp"
 #include "tree/typeof.hpp"
 
 using namespace CPPTree;

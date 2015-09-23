@@ -8,7 +8,8 @@
 #include "steps/generate_stacks.hpp"
 #include "tree/cpptree.hpp"
 #include "common/common.hpp"
-#include "sr/soft_patterns.hpp"
+#include "sr/pointer_is_agent.hpp"
+#include "sr/transform_of_agent.hpp"
 #include "tree/sctree.hpp"
 #include "inferno_patterns.hpp"
 
