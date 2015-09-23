@@ -3,7 +3,8 @@
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
 #include "common/common.hpp"
-#include "sr/soft_patterns.hpp"
+#include "sr/pointer_is_agent.hpp"
+#include "sr/transform_of_agent.hpp"
 #include "tree/typeof.hpp"
 #include "tree/misc.hpp"
 #include "inferno_patterns.hpp"
@@ -13,27 +14,6 @@ using namespace CPPTree;
 using namespace SCTree;
 using namespace Steps;
 
-
-// Something to get the size of the Collection matched by a Star as a SpecificInteger
-struct BuildContainerSize : SoftAgent,
-                            Special<Integer>
-{
-    SPECIAL_NODE_FUNCTIONS
-    shared_ptr< StarAgent > container;
-private:
-    virtual void PatternQueryImpl() const {}
-    virtual TreePtr<Node> MyBuildReplace()
-    {
-        ASSERT( container );
-	    TreePtr<Node> n = DoBuildReplace( container );
-	    ASSERT( n );
-	    ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
-	    ASSERT( n_container );
-	    int size = n_container->size();
-	    TreePtr<SpecificInteger> si = MakePatternPtr<SpecificInteger>(size);
-	    return si;
-    }                                                   
-}; 
 
 // A label with a piggybacked pointer to the corresponding enum value
 struct StateLabel : Label

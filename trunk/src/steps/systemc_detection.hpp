@@ -6,7 +6,8 @@
 // Inferno SystemC nodes.
 
 #include "sr/search_replace.hpp"
-#include "sr/soft_patterns.hpp"
+#include "sr/pointer_is_agent.hpp"
+#include "sr/transform_of_agent.hpp"
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
 

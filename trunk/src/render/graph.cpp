@@ -8,7 +8,8 @@
 #include "tree/cpptree.hpp"
 #include "helpers/transformation.hpp"
 #include "sr/search_replace.hpp"
-#include "sr/soft_patterns.hpp"
+#include "sr/pointer_is_agent.hpp"
+#include "sr/transform_of_agent.hpp"
 #include "sr/engine.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
@@ -350,21 +351,21 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		*shape = "circle";
 		return string("|");
 	}
-    else if( shared_ptr<TransformOfBase> tob = dynamic_pointer_cast<TransformOfBase>(sp) )
+    else if( shared_ptr<TransformOfAgent> tob = dynamic_pointer_cast<TransformOfAgent>(sp) )
     {
         // The TransformOf node appears as a slightly flattened hexagon, with the name of the specified 
         // kind of Transformation class inside it.
         *shape = "hexagon";
         return tob->transformation->GetName();
     }
-    else if( dynamic_pointer_cast<PointerIsBase>(sp) )
+    else if( dynamic_pointer_cast<PointerIsAgent>(sp) )
     {
         // The TransformOf node appears as a slightly flattened hexagon, with the name of the specified 
         // kind of Transformation class inside it.
         *shape = "pentagon";
         return string("pointer is"); 
     }
-	else if( shared_ptr<BuildIdentifierBase> smi = dynamic_pointer_cast<BuildIdentifierBase>(sp) )
+	else if( shared_ptr<BuildIdentifierAgent> smi = dynamic_pointer_cast<BuildIdentifierAgent>(sp) )
 	{
 	    // The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
 	    // the printf format string that controls the name of the generated identifier inside it.
@@ -372,7 +373,7 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
 		*shape = "parallelogram";
 		return smi->format;
 	}
-	else if( shared_ptr<IdentifierByNameBase> ibnb = dynamic_pointer_cast<IdentifierByNameBase>(sp) )
+	else if( shared_ptr<IdentifierByNameAgent> ibnb = dynamic_pointer_cast<IdentifierByNameAgent>(sp) )
 	{
 	    // The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
 	    // the string that must be matched inside it.
@@ -395,7 +396,12 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
         *shape = "triangle";
         return string(""); 
     }
-    else if( dynamic_pointer_cast<SoftAgent>(sp) )
+    else if( dynamic_pointer_cast<NestedAgent>(sp) ||
+             dynamic_pointer_cast<SoftAgent>(sp) ||
+             dynamic_pointer_cast<SoftAgent>(sp) ||
+             dynamic_pointer_cast<SoftAgent>(sp) ||
+             dynamic_pointer_cast<SoftAgent>(sp) ||
+             dynamic_pointer_cast<SoftAgent>(sp) )
     {
         *bold = false;
         *shape = "plaintext";//"record";

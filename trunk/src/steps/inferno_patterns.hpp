@@ -2,8 +2,9 @@
 #define INFERNO_PATTERNS_HPP
 
 #include "sr/search_replace.hpp"
-#include "tree/cpptree.hpp" // TODO this dep means we must move this into steps/ or at least parts
+#include "tree/cpptree.hpp" 
 #include "helpers/transformation.hpp"
+#include "tree/sctree.hpp"
 
 using namespace SR;
 // TODO pollutes client namespace
@@ -16,14 +17,15 @@ using namespace SR;
 // to specify it in more than one place. Note that SoftMakeIdentifier is stateless
 // and cannot therefore keep track of uniqueness - you'll get a new one each time
 // and must rely on a replace coupling to get multiple reference to the same
-// new identifier. Rule is: ONE of these per new identifier.
+// new identifier. Rule is: ONE of these per new identifier. 
 
 // TODO do this via a transformation as with TransformOf/TransformOf
 #define BYPASS_WHEN_IDENTICAL 1
-struct BuildIdentifierBase : SoftAgent
+struct BuildIdentifierAgent : public virtual AgentCommon
 {
-    BuildIdentifierBase( string s, int f=0 ) : format(s), flags(f) {}
+    BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
     virtual void PatternQueryImpl() const {}
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const { return true; }    
     Sequence<CPPTree::Identifier> sources;
     string GetNewName();
     string format;
@@ -32,56 +34,83 @@ struct BuildIdentifierBase : SoftAgent
 
 
 struct BuildInstanceIdentifier : Special<CPPTree::InstanceIdentifier>,                             
-                                 BuildIdentifierBase
+                                 BuildIdentifierAgent
 {
     SPECIAL_NODE_FUNCTIONS
-    BuildInstanceIdentifier( string s, int f=0 ) : BuildIdentifierBase(s,f) {}
-    BuildInstanceIdentifier() : BuildIdentifierBase("unnamed") {}
+    BuildInstanceIdentifier( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
+    BuildInstanceIdentifier() : BuildIdentifierAgent("unnamed") {}
 private:
     
-    virtual TreePtr<Node> MyBuildReplace()
-    {
-        string newname = GetNewName();
-        return TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
+	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode ) 
+	{
+		INDENT("%");
+		if( !GetCoupled() )
+		{
+			// Call the soft pattern impl 
+			string newname = GetNewName();
+			keynode = TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
+			DoKey( keynode );
+		}
+		// Note that the keynode could have been set via coupling - but still not
+		// likely to do anything sensible, so explicitly check
+		return DuplicateSubtree(keynode);   
     }                                                   
 };
 
 
 struct BuildTypeIdentifier : Special<CPPTree::TypeIdentifier>,                             
-                             BuildIdentifierBase
+                             BuildIdentifierAgent
 {
     SPECIAL_NODE_FUNCTIONS
-    BuildTypeIdentifier( string s="Unnamed", int f=0 ) : BuildIdentifierBase(s,f) {}
+    BuildTypeIdentifier( string s="Unnamed", int f=0 ) : BuildIdentifierAgent(s,f) {}
 private:
-    virtual TreePtr<Node> MyBuildReplace()
-    {
-    string newname = GetNewName();
-    return TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) );
-    }                                               
+	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode ) 
+	{
+		INDENT("%");
+		if( !GetCoupled() )
+		{
+			// Call the soft pattern impl 
+			string newname = GetNewName();
+			keynode = TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) );
+			DoKey( keynode );
+		}
+		// Note that the keynode could have been set via coupling - but still not
+		// likely to do anything sensible, so explicitly check
+		return DuplicateSubtree(keynode);   
+    }                                                   
 };
 
 
 struct BuildLabelIdentifier : Special<CPPTree::LabelIdentifier>,                             
-                              BuildIdentifierBase
+                              BuildIdentifierAgent
 {
     SPECIAL_NODE_FUNCTIONS
-    BuildLabelIdentifier() : BuildIdentifierBase("UNNAMED") {}
-    BuildLabelIdentifier( string s, int f=0 ) : BuildIdentifierBase(s,f) {}
+    BuildLabelIdentifier() : BuildIdentifierAgent("UNNAMED") {}
+    BuildLabelIdentifier( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
 private:
-    virtual TreePtr<Node> MyBuildReplace()
-    {
-    string newname = GetNewName();
-    return TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) );
-    }                                               
+	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode ) 
+	{
+		INDENT("%");
+		if( !GetCoupled() )
+		{
+			// Call the soft pattern impl 
+			string newname = GetNewName();
+			keynode = TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) );
+			DoKey( keynode );
+		}
+		// Note that the keynode could have been set via coupling - but still not
+		// likely to do anything sensible, so explicitly check
+		return DuplicateSubtree(keynode);   
+    }                                                   
 };
 
 
 // These can be used in search pattern to match a SpecificIdentifier by name.
 // (cannot do this using a SpecificIdentifier in the search pattern because
 // the address of the node would be compared, not the name string). TODO document
-struct IdentifierByNameBase : SoftAgent
+struct IdentifierByNameAgent : public virtual AgentCommon
 {
-    IdentifierByNameBase( string n ) : name(n) {}
+    IdentifierByNameAgent( string n ) : name(n) {}
     virtual void PatternQueryImpl() const {}
     bool IsMatch( const TreePtrInterface &x ) const;
     string name;
@@ -89,14 +118,14 @@ struct IdentifierByNameBase : SoftAgent
 
 
 struct InstanceIdentifierByName : Special<CPPTree::InstanceIdentifier>,                             
-                                  IdentifierByNameBase
+                                  IdentifierByNameAgent
 {
     SPECIAL_NODE_FUNCTIONS
 
-    InstanceIdentifierByName() : IdentifierByNameBase(string()) {}    
-    InstanceIdentifierByName( string n ) : IdentifierByNameBase(n) {}
+    InstanceIdentifierByName() : IdentifierByNameAgent(string()) {}    
+    InstanceIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
-    virtual bool MyCompare( const TreePtrInterface &x ) const
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const                                  
     {
         return IsMatch( x );
     }                                
@@ -104,14 +133,14 @@ private:
 
 
 struct TypeIdentifierByName : Special<CPPTree::TypeIdentifier>,                             
-                             IdentifierByNameBase
+                              IdentifierByNameAgent
 {
     SPECIAL_NODE_FUNCTIONS
 
-    TypeIdentifierByName() : IdentifierByNameBase(string()) {}    
-    TypeIdentifierByName( string n ) : IdentifierByNameBase(n) {}
+    TypeIdentifierByName() : IdentifierByNameAgent(string()) {}    
+    TypeIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
-    virtual bool MyCompare( const TreePtrInterface &x ) const
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const                                  
     {
         return IsMatch( x );
     }                                
@@ -119,14 +148,14 @@ private:
 
 
 struct LabelIdentifierByName : Special<CPPTree::LabelIdentifier>,                             
-                              IdentifierByNameBase
+                               IdentifierByNameAgent
 {
     SPECIAL_NODE_FUNCTIONS
 
-    LabelIdentifierByName() : IdentifierByNameBase(string()) {}    
-    LabelIdentifierByName( string n ) : IdentifierByNameBase(n) {}
+    LabelIdentifierByName() : IdentifierByNameAgent(string()) {}    
+    LabelIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
-    virtual bool MyCompare( const TreePtrInterface &x ) const
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const                                  
     {
         return IsMatch( x );
     }                                
@@ -134,10 +163,10 @@ private:
 
 
 // Base class for special nodes that match nested nodes
-struct NestedBase : SoftAgent
+struct NestedAgent : public virtual AgentCommon
 {
     virtual void PatternQueryImpl() const;
-    virtual bool MyCompare( const TreePtrInterface &x ) const;
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;                                
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const = 0;
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;    
@@ -147,7 +176,7 @@ struct NestedBase : SoftAgent
 // Recurse through a number of nested Array nodes, but only by going through
 // the "element" member, not the "size" member. So this will get you from the type
 // of an instance to the type of the eventual element in a nested array decl.
-struct NestedArray : NestedBase, Special<CPPTree::Type>
+struct NestedArray : NestedAgent, Special<CPPTree::Type>
 {
     SPECIAL_NODE_FUNCTIONS
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const;
@@ -157,11 +186,59 @@ struct NestedArray : NestedBase, Special<CPPTree::Type>
 // Recurse through a number of Subscript nodes, but only going through
 // the base, not the index. Thus we seek the instance that contains the 
 // data we started with. Also go through member field of Lookup nodes.
-struct NestedSubscriptLookup : NestedBase, Special<CPPTree::Expression>
+struct NestedSubscriptLookup : NestedAgent, Special<CPPTree::Expression>
 {
     SPECIAL_NODE_FUNCTIONS
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const;
 };
 
+
+// Something to get the size of the Collection matched by a Star as a SpecificInteger
+struct BuildContainerSize : SoftAgent,
+                            Special<CPPTree::Integer>
+{
+    SPECIAL_NODE_FUNCTIONS
+    shared_ptr< StarAgent > container;
+private:
+    virtual void PatternQueryImpl() const {}
+    virtual TreePtr<Node> MyBuildReplace();
+}; 
+
+
+struct IsLabelReached : SoftAgent, Special<CPPTree::LabelIdentifier>
+{
+	SPECIAL_NODE_FUNCTIONS	
+	virtual void FlushCache() 
+	{
+        ASSERT(0);
+	    cache.clear();
+	}
+    virtual void PatternQueryImpl() const {}
+	// x is nominally the label id, at the position of this node
+	// y is nominally the goto expression, coupled in
+    virtual bool MyCompare( const TreePtrInterface &xx );
+    TreePtr<CPPTree::Expression> pattern;           
+           
+private:
+    bool CanReachExpr( Set< TreePtr<CPPTree::InstanceIdentifier> > *f,
+                         TreePtr<CPPTree::LabelIdentifier> x, 
+                         TreePtr<CPPTree::Expression> y ); // y is expression. Can it yield label x?
+    
+    bool CanReachVar( Set< TreePtr<CPPTree::InstanceIdentifier> > *f,
+                      TreePtr<CPPTree::LabelIdentifier> x, 
+                      TreePtr<CPPTree::InstanceIdentifier> y ); // y is instance identifier. Can expression x be assigned to it?
+    
+    struct Reaching
+    {
+        Reaching( TreePtr<CPPTree::LabelIdentifier> f, TreePtr<CPPTree::InstanceIdentifier> t ) : from(f), to(t) {}
+        const TreePtr<CPPTree::LabelIdentifier> from;
+        const TreePtr<CPPTree::InstanceIdentifier> to;
+        bool operator<( const Reaching &other ) const 
+        {
+            return from==other.from ? to<other.to : from<other.from;
+        }
+    };
+    Map<Reaching, bool> cache; 
+};
 
 #endif
