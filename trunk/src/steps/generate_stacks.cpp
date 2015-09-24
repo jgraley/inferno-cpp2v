@@ -11,7 +11,7 @@
 #include "sr/pointer_is_agent.hpp"
 #include "sr/transform_of_agent.hpp"
 #include "tree/sctree.hpp"
-#include "inferno_patterns.hpp"
+#include "inferno_agents.hpp"
 
 using namespace CPPTree;
 using namespace Steps;

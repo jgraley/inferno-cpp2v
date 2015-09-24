@@ -14,7 +14,7 @@
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
 #include "graph.hpp"
-#include "steps/inferno_patterns.hpp"
+#include "steps/inferno_agents.hpp"
 #include <inttypes.h>
 
 using namespace CPPTree;
@@ -397,11 +397,8 @@ string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put 
         return string(""); 
     }
     else if( dynamic_pointer_cast<NestedAgent>(sp) ||
-             dynamic_pointer_cast<SoftAgent>(sp) ||
-             dynamic_pointer_cast<SoftAgent>(sp) ||
-             dynamic_pointer_cast<SoftAgent>(sp) ||
-             dynamic_pointer_cast<SoftAgent>(sp) ||
-             dynamic_pointer_cast<SoftAgent>(sp) )
+             dynamic_pointer_cast<BuildContainerSize>(sp) ||
+             dynamic_pointer_cast<IsLabelReached>(sp) ) // TODO give them their own appearance
     {
         *bold = false;
         *shape = "plaintext";//"record";

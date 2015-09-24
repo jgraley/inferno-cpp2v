@@ -2,7 +2,7 @@
 #include "systemc_detection.hpp"
 #include "tree/cpptree.hpp"
 #include "tree/typeof.hpp"
-#include "inferno_patterns.hpp"
+#include "inferno_agents.hpp"
 
 using namespace CPPTree;
 using namespace SCTree;

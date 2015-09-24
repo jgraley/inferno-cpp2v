@@ -12,7 +12,7 @@
 #include "sr/transform_of_agent.hpp"
 #include "tree/typeof.hpp"
 #include "tree/misc.hpp"
-#include "inferno_patterns.hpp"
+#include "inferno_agents.hpp"
 
 using namespace CPPTree;
 using namespace Steps;
