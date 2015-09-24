@@ -1,5 +1,5 @@
-#ifndef INFERNO_PATTERNS_HPP
-#define INFERNO_PATTERNS_HPP
+#ifndef INFERNO_AGENTS_HPP
+#define INFERNO_AGENTS_HPP
 
 #include "sr/search_replace.hpp"
 #include "tree/cpptree.hpp" 
@@ -194,39 +194,39 @@ struct NestedSubscriptLookup : NestedAgent, Special<CPPTree::Expression>
 
 
 // Something to get the size of the Collection matched by a Star as a SpecificInteger
-struct BuildContainerSize : SoftAgent,
+struct BuildContainerSize : public virtual AgentCommon,
                             Special<CPPTree::Integer>
 {
     SPECIAL_NODE_FUNCTIONS
     shared_ptr< StarAgent > container;
 private:
     virtual void PatternQueryImpl() const {}
-    virtual TreePtr<Node> MyBuildReplace();
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const { return true; }    
+	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
 }; 
 
 
-struct IsLabelReached : SoftAgent, Special<CPPTree::LabelIdentifier>
+struct IsLabelReached : public virtual AgentCommon, 
+                        Special<CPPTree::LabelIdentifier>
 {
 	SPECIAL_NODE_FUNCTIONS	
-	virtual void FlushCache() 
+	virtual void FlushCache() const 
 	{
         ASSERT(0);
 	    cache.clear();
 	}
     virtual void PatternQueryImpl() const {}
-	// x is nominally the label id, at the position of this node
-	// y is nominally the goto expression, coupled in
-    virtual bool MyCompare( const TreePtrInterface &xx );
+    virtual bool DecidedQueryImpl( const TreePtrInterface &xx ) const;
     TreePtr<CPPTree::Expression> pattern;           
            
 private:
     bool CanReachExpr( Set< TreePtr<CPPTree::InstanceIdentifier> > *f,
                          TreePtr<CPPTree::LabelIdentifier> x, 
-                         TreePtr<CPPTree::Expression> y ); // y is expression. Can it yield label x?
+                         TreePtr<CPPTree::Expression> y ) const; // y is expression. Can it yield label x?
     
     bool CanReachVar( Set< TreePtr<CPPTree::InstanceIdentifier> > *f,
                       TreePtr<CPPTree::LabelIdentifier> x, 
-                      TreePtr<CPPTree::InstanceIdentifier> y ); // y is instance identifier. Can expression x be assigned to it?
+                      TreePtr<CPPTree::InstanceIdentifier> y ) const; // y is instance identifier. Can expression x be assigned to it?
     
     struct Reaching
     {
@@ -238,7 +238,7 @@ private:
             return from==other.from ? to<other.to : from<other.from;
         }
     };
-    Map<Reaching, bool> cache; 
+    mutable Map<Reaching, bool> cache; // it's a cache, so sue me
 };
 
 #endif

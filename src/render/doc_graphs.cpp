@@ -5,7 +5,7 @@
 #include "common/read_args.hpp"
 #include "doc_graphs.hpp"
 #include "graph.hpp"
-#include "steps/inferno_patterns.hpp"
+#include "steps/inferno_agents.hpp"
 #include <inttypes.h>
 
 using namespace CPPTree;

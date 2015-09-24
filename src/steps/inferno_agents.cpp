@@ -1,4 +1,4 @@
-#include "inferno_patterns.hpp"
+#include "inferno_agents.hpp"
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
 
@@ -127,31 +127,38 @@ TreePtr<Node> NestedSubscriptLookup::Advance( TreePtr<Node> n, string *depth ) c
 }
 
 
-TreePtr<Node> BuildContainerSize::MyBuildReplace()
+TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
-    ASSERT( container );
-	TreePtr<Node> n = DoBuildReplace( container );
-	ASSERT( n );
-	ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
-	ASSERT( n_container );
-	int size = n_container->size();
-	TreePtr<SpecificInteger> si = MakePatternPtr<SpecificInteger>(size);
-	return si;
+	INDENT("%");
+	if( !GetCoupled() )
+	{
+		ASSERT( container );
+		TreePtr<Node> n = AsAgent( container )->BuildReplace();
+		ASSERT( n );
+		ContainerInterface *n_container = dynamic_cast<ContainerInterface *>(n.get());
+		ASSERT( n_container );
+		int size = n_container->size();
+		keynode = MakePatternPtr<SpecificInteger>(size);
+		DoKey( keynode );
+	}
+	// Note that the keynode could have been set via coupling - but still not
+	// likely to do anything sensible, so explicitly check
+	return DuplicateSubtree(keynode);   
 }                                                   
 
 
-bool IsLabelReached::MyCompare( const TreePtrInterface &xx ) 
+bool IsLabelReached::DecidedQueryImpl( const TreePtrInterface &xx ) const
 {
 	INDENT("L");
 	ASSERT( pattern );
-	//if( IsCanKey() )
-	//    return true; // Want to wait for our pattern to get keyed before we do the search, so wait for restricting pass
 	
 	// TODO Flushable mechanism removed - flush every time for safety (if
 	// this code ever gets used again). This may be slow!
+	// x is nominally the label id, at the position of this node
+	// y is nominally the goto expression, coupled in
 	FlushCache();
 	
-	TreePtr<Node> n = GetPatternCoupled( pattern ); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
+	TreePtr<Node> n = AsAgent(pattern)->GetCoupled(); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
 	if( !n )
 		n = pattern;
 	TreePtr<Expression> y = dynamic_pointer_cast<Expression>( n );
@@ -171,7 +178,7 @@ bool IsLabelReached::MyCompare( const TreePtrInterface &xx )
 
 bool IsLabelReached::CanReachExpr( Set< TreePtr<InstanceIdentifier> > *f,
 								   TreePtr<LabelIdentifier> x, 
-					               TreePtr<Expression> y ) // y is expression. Can it yield label x?
+					               TreePtr<Expression> y ) const // y is expression. Can it yield label x?
 {
 	INDENT("X");
 	bool r = false;
@@ -196,7 +203,7 @@ bool IsLabelReached::CanReachExpr( Set< TreePtr<InstanceIdentifier> > *f,
 
 bool IsLabelReached::CanReachVar( Set< TreePtr<InstanceIdentifier> > *f,
 			            	      TreePtr<LabelIdentifier> x, 
-				                  TreePtr<InstanceIdentifier> y ) // y is instance identifier. Can expression x be assigned to it?
+				                  TreePtr<InstanceIdentifier> y ) const // y is instance identifier. Can expression x be assigned to it?
 {
 	INDENT(" ");
 	Reaching rr( x, y );
@@ -206,13 +213,13 @@ bool IsLabelReached::CanReachVar( Set< TreePtr<InstanceIdentifier> > *f,
 		return cache[rr];
 	}
 	bool r = false;        
-	Walk e( *GetContext() ); 
+	Walk e( *(engine->GetOverallMaster()->pcontext) ); 
 	
 	if( f->IsExist(y) )
 		return false; // already processing this identifier, so we have a loop
 					  // so don't recurse further
 					  
-	f->insert(y);                          
+	f->insert(y);                           
 
 	TRACE("Looking for assignment like ")(*y)(" = ")(*x)("\n");
 
