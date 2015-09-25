@@ -33,6 +33,7 @@ public:
 class StuffAgent : public SearchContainerAgent
 {
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) const;
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
 };
 
 
@@ -50,6 +51,7 @@ public:
 class AnyNodeAgent : public SearchContainerAgent
 {
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) const;
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
 };
 
 

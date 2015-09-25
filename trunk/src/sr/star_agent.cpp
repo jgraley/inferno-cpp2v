@@ -72,3 +72,12 @@ TreePtr<Node> StarAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 }
 
 
+void StarAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+{
+	// The Star node appears as a small circle with a * character inside it. * is chosen for its role in 
+	// filename wildcarding, which is semantically equiviant only when used in a Sequence.
+	*bold = true;
+	*shape = "circle";
+	*text = string("*");
+}
+

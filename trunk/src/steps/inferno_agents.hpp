@@ -26,6 +26,7 @@ struct BuildIdentifierAgent : public virtual AgentCommon
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
     virtual void PatternQueryImpl() const {}
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const { return true; }    
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
     Sequence<CPPTree::Identifier> sources;
     string GetNewName();
     string format;
@@ -111,6 +112,7 @@ private:
 struct IdentifierByNameAgent : public virtual AgentCommon
 {
     IdentifierByNameAgent( string n ) : name(n) {}
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
     virtual void PatternQueryImpl() const {}
     bool IsMatch( const TreePtrInterface &x ) const;
     string name;
@@ -167,6 +169,7 @@ struct NestedAgent : public virtual AgentCommon
 {
     virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;                                
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) {} // TODO give own appearance
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const = 0;
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;    
@@ -203,6 +206,7 @@ private:
     virtual void PatternQueryImpl() const {}
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const { return true; }    
 	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) {} // TODO give own appearance
 }; 
 
 
@@ -217,6 +221,7 @@ struct IsLabelReached : public virtual AgentCommon,
 	}
     virtual void PatternQueryImpl() const {}
     virtual bool DecidedQueryImpl( const TreePtrInterface &xx ) const;
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) {} // TODO give own appearance
     TreePtr<CPPTree::Expression> pattern;           
            
 private:

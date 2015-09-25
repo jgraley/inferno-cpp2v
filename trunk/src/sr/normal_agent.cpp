@@ -534,3 +534,12 @@ TreePtr<Node> NormalAgent::BuildReplaceNormal()
     }
     return dest;
 }
+
+
+void NormalAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+{
+	// The graph plotter pre-loads the variables with the appearance of a normal node
+	// that will be used when plotting input/output trees that have not been 
+	// agentised. We want the same, so leave them alone.
+}
+

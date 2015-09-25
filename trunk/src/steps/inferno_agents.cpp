@@ -4,6 +4,17 @@
 
 using namespace CPPTree;
 
+void BuildIdentifierAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+{
+	// The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
+	// the printf format string that controls the name of the generated identifier inside it.
+	// TODO indicate whether it's building instance, label or type identifier
+	*bold = true;
+	*shape = "parallelogram";
+	*text = format;
+}
+
+
 string BuildIdentifierAgent::GetNewName()
 {
     INDENT("B");
@@ -45,6 +56,18 @@ string BuildIdentifierAgent::GetNewName()
             ASSERTFAIL("Please add more cases to GetNewName()");
     }
 }
+
+
+void IdentifierByNameAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+{
+	// The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
+	// the string that must be matched inside it.
+	// TODO indicate whether it's matching instance, label or type identifier
+	*bold = true;
+	*shape = "trapezium";
+	*text = name;
+}
+
 
 bool IdentifierByNameAgent::IsMatch( const TreePtrInterface &x ) const
 {

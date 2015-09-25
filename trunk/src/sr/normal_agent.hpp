@@ -18,6 +18,7 @@ class NormalAgent : public virtual AgentCommon
 public:
     virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
 private:
     bool DecidedQuerySequence( SequenceInterface &x,
     	                       SequenceInterface &pattern ) const;

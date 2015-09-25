@@ -28,3 +28,12 @@ bool TransformOfAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 	}
 }
 
+
+void TransformOfAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+{
+	// The TransformOf node appears as a slightly flattened hexagon, with the name of the specified 
+	// kind of Transformation class inside it.
+	*bold = true;
+	*shape = "hexagon";
+	*text = transformation->GetName();
+}
