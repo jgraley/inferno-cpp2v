@@ -15,6 +15,7 @@ class GreenGrassAgent : public virtual AgentCommon
 {
     virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual TreePtr<Node> GetThrough() const = 0;
 };

@@ -295,141 +295,28 @@ string Graph::Sanitise( string s, bool remove_tp )
 
 string Graph::Name( TreePtr<Node> sp, bool *bold, string *shape )   // TODO put stringize capabilities into the Property nodes as virtual methods
 {
-    // This function does not deal directly with SearchReplace, CompareReplace, SlaveSearchReplace or 
-    // SlaveCompareReplace. These appear in sharp-cornered rectangles, with the name at the top and the
-    // member TreePtr names below. These may be some combination of search, compare, replace and through
-    // and their links are approximately to the right.
-	*bold=true;
-	if( dynamic_pointer_cast<StarAgent>(sp) )
-	{
-	    // The Star node appears as a small circle with a * character inside it. * is chosen for its role in 
-	    // filename wildcarding, which is semantically equiviant only when used in a Sequence.
-		*shape = "circle";
-		return string("*");
-	}
-	else if( TreePtr<StuffAgent> stuff = dynamic_pointer_cast<StuffAgent>(sp) )
-	{
-	    // The Stuff node appears as a small circle with a # character inside it. The terminus link emerges from the
-	    // right of the circle. If there is a recurse restriction the circle is egg-shaped and the restriction link 
-	    // emerges from the top of the egg shape. # is chosen (as is the name Stuff) for its similarity to * because
-	    // the nodes are both able to wildcard multiple nodes in the tree.
-		if( stuff->recurse_restriction )
-		    *shape = "egg";
-		else
-     	    *shape = "circle";
-		return string("#"); 
-	}
-	else if( dynamic_pointer_cast<AnyNodeAgent>(sp) )
-	{
-	    // The AnyNode node appears as a small circle with a ? sign in it. The terminus link emerges from the
-	    // right of the circle. ? implies the tendancy to match exactly one thing.
-   	    *shape = "circle";
-		return string("?"); 
-	}
-	else if( dynamic_pointer_cast<NotMatchAgent>(sp) )
-	{
-	    // The NotMatch node appears as a small circle with an ! character inside it. The affected subtree is 
-	    // on the right.
-	    // NOTE this and the next few special nodes are the nodes that control the action of the search engine in 
-	    // Inferno search/replace. They are not the nodes that represent the operations in the program being processed.
-	    // Those nodes would appear as rounded rectangles with the name at the top. The nmes may be found in
-	    // src/tree/operator_db.txt  
-		*shape = "circle";
-		return string("!");
-	}
-	else if( dynamic_pointer_cast<MatchAllAgent>(sp) )
-	{
-	    // The MatchAll node appears as a small circle with an & character inside it. The affected subtrees are 
-	    // on the right.
-		*shape = "circle";
-		return string("&"); // note & is a wildcard in dot but not handled properly, this becomes "& ". At least some of the time.
-	}
-	else if( dynamic_pointer_cast<MatchAnyAgent>(sp) )
-	{
-	    // The MatchAny node appears as a small circle with an | character inside it. The affected subtrees are 
-	    // on the right.
-		*shape = "circle";
-		return string("|");
-	}
-    else if( shared_ptr<TransformOfAgent> tob = dynamic_pointer_cast<TransformOfAgent>(sp) )
-    {
-        // The TransformOf node appears as a slightly flattened hexagon, with the name of the specified 
-        // kind of Transformation class inside it.
-        *shape = "hexagon";
-        return tob->transformation->GetName();
-    }
-    else if( dynamic_pointer_cast<PointerIsAgent>(sp) )
-    {
-        // The TransformOf node appears as a slightly flattened hexagon, with the name of the specified 
-        // kind of Transformation class inside it.
-        *shape = "pentagon";
-        return string("pointer is"); 
-    }
-	else if( shared_ptr<BuildIdentifierAgent> smi = dynamic_pointer_cast<BuildIdentifierAgent>(sp) )
-	{
-	    // The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
-	    // the printf format string that controls the name of the generated identifier inside it.
-	    // TODO indicate whether it's building instance, label or type identifier
-		*shape = "parallelogram";
-		return smi->format;
-	}
-	else if( shared_ptr<IdentifierByNameAgent> ibnb = dynamic_pointer_cast<IdentifierByNameAgent>(sp) )
-	{
-	    // The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
-	    // the string that must be matched inside it.
-	    // TODO indicate whether it's matching instance, label or type identifier
-		*shape = "trapezium";
-		return ibnb->name;
-	}
-	else if( dynamic_pointer_cast<GreenGrassAgent>(sp) )
-	{
-	    // The GreenGrass node appears as a small circle containing four vertical line characters,
-	    // like this: ||||. These are meant to represent the blades of grass. It was late and I was
-	    // tired.
-		*shape = "circle";
-		return string("||||");
-	}
-    else if( dynamic_pointer_cast<OverlayAgent>(sp) )
-    {
-        // The Overlay node is shown as a small triangle, with the through link on the right and the overlay link
-        // coming out of the bottom.
-        *shape = "triangle";
-        return string(""); 
-    }
-    else if( dynamic_pointer_cast<NestedAgent>(sp) ||
-             dynamic_pointer_cast<BuildContainerSize>(sp) ||
-             dynamic_pointer_cast<IsLabelReached>(sp) ) // TODO give them their own appearance
-    {
-        *bold = false;
-        *shape = "plaintext";//"record";
-        return sp->GetRender();
-    }
-    else if( dynamic_pointer_cast<NormalAgent>(sp) )
-    {
-        // All the other nodes are represented as a rectangle with curved corners. At the top of the rectangle, 
-        // in large font, is the name of the node's type OR the identifier name if the node is a kind of 
-        // SpecificIdentifier. All TreePtr<>, Sequence<> and Collection<> members are listed below in a 
-        // smaller font. The name of the pointed-to type is given (not the member's name, Inferno cannot deduce
-        // this). 
-        // Collections appear once and are followed by {...} where the number of dots equals the number of 
-        // elements in the Collection.
-        // Sequences appear once for each element in the sequence. Each appearance is followed by [i] where
-        // i is the index, starting from 0.
-        // All child pointers emerge from *approximately* the right of the corresponding member name. I cannot
-        // for the life of me get GraphViz to make the lines begin *on* the right edge of the rectangle. They 
-        // always come from some way in from the right edge, and if they are angled up or down, they can appear
-        // to be coming from the wrong place.        
-        *bold = false;
-        *shape = "plaintext";//"record";
-        return sp->GetRender();
-    }
-	else
-    {
-        // Normal node was not turned into an agent because this is a program graph not a pattern graph
-        *bold = false;
-        *shape = "plaintext";//"record";
-        return sp->GetRender();
-   }
+	// normal nodes and agents are represented as a rectangle with curved corners. At the top of the rectangle, 
+	// in large font, is the name of the node's type OR the identifier name if the node is a kind of 
+	// SpecificIdentifier. All TreePtr<>, Sequence<> and Collection<> members are listed below in a 
+	// smaller font. The name of the pointed-to type is given (not the member's name, Inferno cannot deduce
+	// this). 
+	// Collections appear once and are followed by {...} where the number of dots equals the number of 
+	// elements in the Collection.
+	// Sequences appear once for each element in the sequence. Each appearance is followed by [i] where
+	// i is the index, starting from 0.
+	// All child pointers emerge from *approximately* the right of the corresponding member name. I cannot
+	// for the life of me get GraphViz to make the lines begin *on* the right edge of the rectangle. They 
+	// always come from some way in from the right edge, and if they are angled up or down, they can appear
+	// to be coming from the wrong place.        
+	string text = sp->GetRender(); 
+	*bold = false;
+	*shape = "plaintext";//"record";
+    
+    // Permit agents to set their own appearance
+    if( Agent *agent = dynamic_cast<Agent *>(sp.get()) )
+		agent->GetGraphAppearance( bold, &text, shape );
+
+    return text;
 }
 
 

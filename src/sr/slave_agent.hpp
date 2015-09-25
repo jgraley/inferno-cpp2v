@@ -27,6 +27,7 @@ public:
     virtual void Configure( const Set<Agent *> &agents_already_configured, const Engine *master );
     void SetMasterCouplingKeys( const CouplingMap &keys );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
     
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;   

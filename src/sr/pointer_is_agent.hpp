@@ -39,6 +39,13 @@ public:
         RememberLocalLink( false, AsAgent(pointer), ptr_arch );
         return true;
     }
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape )
+	{
+        // The PointerIs node appears as a slightly flattened pentagon.
+        *bold = true;
+        *shape = "pentagon";
+        *text = string("pointer is"); 
+	}
 };
 
 };

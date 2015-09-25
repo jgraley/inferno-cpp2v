@@ -22,6 +22,7 @@ public:
     virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const; // x must be a SubContainer                                  
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
 private:
     virtual TreePtr<Node> GetRestriction() const = 0;
 

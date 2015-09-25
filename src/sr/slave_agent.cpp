@@ -81,3 +81,14 @@ TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> keynode )
     ASSERT( dest );
     return dest;
 }
+
+
+void SlaveAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+{
+    ASSERTFAIL(); // Slaves are identified as Engines and plotted seperately. See GetGraphInfo().
+    // Note from graph plotter: SearchReplace, CompareReplace, SlaveSearchReplace or 
+    // SlaveCompareReplace appear in sharp-cornered rectangles, with the name at the top and the
+    // member TreePtr names below. These may be some combination of search, compare, replace and through
+    // and their links are approximately to the right.
+}
+

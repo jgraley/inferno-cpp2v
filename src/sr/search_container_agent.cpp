@@ -90,10 +90,36 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> 
 }
 
 
+void StuffAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+{
+	// The Stuff node appears as a small circle with a # character inside it. The terminus link emerges from the
+	// right of the circle. If there is a recurse restriction the circle is egg-shaped and the restriction link 
+	// emerges from the top of the egg shape. # is chosen (as is the name Stuff) for its similarity to * because
+	// the nodes are both able to wildcard multiple nodes in the tree.
+	*bold = true;
+	if( recurse_restriction )
+		*shape = "egg";
+	else
+		*shape = "circle";
+	*text = string("#"); 
+}
+
+
 shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( TreePtr<Node> x ) const
 { 
     // Note: does not do the flatten every time - instead, the FlattenNode object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
     return shared_ptr<ContainerInterface>( new FlattenNode( x ) );
 }
+
+
+void AnyNodeAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+{
+	// The AnyNode node appears as a small circle with a ? sign in it. The terminus link emerges from the
+	// right of the circle. ? implies the tendancy to match exactly one thing.
+	*bold = true;
+	*shape = "circle";
+	*text = string("?"); 
+}
+
 

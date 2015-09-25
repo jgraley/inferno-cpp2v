@@ -17,6 +17,8 @@ class NotMatchAgent : public AgentCommon
 public:
     virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
+    
 private:
     virtual TreePtr<Node> GetPattern() const = 0;
     class BooleanEvaluatorNot : public BooleanEvaluator
@@ -53,6 +55,7 @@ class MatchAllAgent : public AgentCommon
 public:
     virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
 private:
     virtual CollectionInterface &GetPatterns() const = 0;
 };
@@ -81,6 +84,7 @@ class MatchAnyAgent : public AgentCommon
 public:
     virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
 private:
     virtual CollectionInterface &GetPatterns() const = 0;
     class BooleanEvaluatorOr : public BooleanEvaluator

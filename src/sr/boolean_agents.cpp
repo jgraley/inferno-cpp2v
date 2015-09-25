@@ -26,6 +26,20 @@ bool NotMatchAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 }
 
 
+void NotMatchAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+{
+	// The NotMatch node appears as a small circle with an ! character inside it. The affected subtree is 
+	// on the right.
+	// NOTE this and the next few special nodes are the nodes that control the action of the search engine in 
+	// Inferno search/replace. They are not the nodes that represent the operations in the program being processed.
+	// Those nodes would appear as rounded rectangles with the name at the top. The nmes may be found in
+	// src/tree/operator_db.txt  
+	*bold = true;
+	*shape = "circle";
+	*text = string("!");
+}
+
+
 bool NotMatchAgent::BooleanEvaluatorNot::operator()( deque<bool> &inputs ) const
 {
 	ASSERT( inputs.size() == 1 ); // we should remember one link
@@ -60,6 +74,20 @@ bool MatchAllAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 }    
 
 
+void MatchAllAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+{
+	// The NotMatch node appears as a small circle with an ! character inside it. The affected subtree is 
+	// on the right.
+	// NOTE this and the next few special nodes are the nodes that control the action of the search engine in 
+	// Inferno search/replace. They are not the nodes that represent the operations in the program being processed.
+	// Those nodes would appear as rounded rectangles with the name at the top. The nmes may be found in
+	// src/tree/operator_db.txt  
+	*bold = true;
+	*shape = "circle";
+	*text = string("!");
+}
+
+
 void MatchAnyAgent::PatternQueryImpl() const
 {
     FOREACH( const TreePtr<Node> p, GetPatterns() )
@@ -85,6 +113,16 @@ bool MatchAnyAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
     }
     RememberEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
     return true;
+}
+
+
+void MatchAnyAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+{
+	// The MatchAny node appears as a small circle with an | character inside it. The affected subtrees are 
+	// on the right.
+	*bold = true;
+	*shape = "circle";
+	*text = string("|");
 }
 
 

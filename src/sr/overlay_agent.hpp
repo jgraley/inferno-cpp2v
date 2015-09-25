@@ -16,6 +16,7 @@ class OverlayAgent : public virtual AgentCommon
 public:
     virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:
     virtual TreePtr<Node> GetThrough() const = 0;
