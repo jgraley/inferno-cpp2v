@@ -25,7 +25,7 @@ public:
     TreePtr<PRE_RESTRICTION> pointer;
     virtual void PatternQueryImpl() const
     {
-		RememberLink( true, AsAgent(pointer) );
+		RememberLink( false, AsAgent(pointer) );
 	}
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const
     {
@@ -36,10 +36,7 @@ public:
         // Thus, it musat be passed around via const TreePtrInterface &        
         TreePtr<Node> ptr_arch = x.MakeValueArchitype();
         
-        RememberLocalLink( true, AsAgent(pointer), ptr_arch );
-        // TODO this used to be a normal context, but that was keying the architype
-        // which is not generally a final node hence invalid key. Find a suitable keying
-        // policy if one exists.
+        RememberLocalLink( false, AsAgent(pointer), ptr_arch );
         return true;
     }
 };
