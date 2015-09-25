@@ -1,0 +1,59 @@
+		Abnormal Contexts:
+		------------------
+
+	NotMatchAgent
+
+And-rule does not apply (evaluator context)
+Negation means certainly cannot key
+
+	MatchAnyAgent
+
+And-rule does not apply (evaluator context)
+Permitted non-match means maybe cannot key
+ - unless key to non-matching leg just does not restrict?
+
+	SearchContainerAgent (recurse restriction)
+
+Reuse of agent confuses conjecture (multiuse context)	
+	
+	PointerIsAgent
+	
+Not sure TODO
+	
+	StarAgent
+
+Reuse of agent confuses conjecture (multiuse context)	
+
+
+		Local links:
+		------------
+
+	NormalAgent (subcontainers)
+	
+Subcontainer is constructed - even though it could be refs...?	
+	
+	SearchContainerAgent (recurse restriction)
+	
+Comes from Walk_iterator::GetPath(). Whole thing would need to use refs.
+	
+	TransformOfAgent
+
+Is output of a transformation (input tree nodes crossed with transformations)
+	
+	PointerIsAgent
+	
+Architype is created locally (but 1:1 with input tree nodes)
+	
+	StarAgent
+
+Subcontainer is constructed - even though it could be refs...?	
+ - just like NormalAgent subcontainers TODO should merge star 
+   algo back in (maybe absorb stars into NAs in a pre-pass).
+
+	NestedAgent (terminus)
+	
+Need Advance() etc to work with refs; not difficult TODO
+	
+	NestedAgent (depth)
+
+Depth is constructed (input tree nodes crossed with subclasses)
