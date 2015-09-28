@@ -10,7 +10,10 @@
 namespace SR
 { 
 
-/// Agent that restricts the node under it to one that was in the original program tree
+/// Agent that only matches if the subtree at `through` is part of the original
+/// input tree, i.e. durng the second and later hits of the master or any slave,
+/// it does not match any part of the working graph that was created by an earlier
+/// pass. This departs from the reductive style, so should be used with care.
 class GreenGrassAgent : public virtual AgentCommon 
 {
     virtual void PatternQueryImpl() const;
@@ -21,7 +24,6 @@ class GreenGrassAgent : public virtual AgentCommon
 };
 
 
-/// Agent that restricts the node under it to one that was in the original program tree
 template<class PRE_RESTRICTION>
 class GreenGrass : public GreenGrassAgent, 
                    public Special<PRE_RESTRICTION>

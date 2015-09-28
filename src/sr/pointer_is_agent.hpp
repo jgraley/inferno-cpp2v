@@ -11,11 +11,12 @@ class PointerIsAgent : public virtual AgentCommon
 {
 };
 	
-/** Make an architype of the pointed-to type and compare that.
-    So if in the program tree we have a->b and the search pattern is
-    x->PointerIsBase->y, then a must match x, and the type of the pointer
-    in a that points to b must match y. */
-/// Match based on the type of a child pointer
+/// Match based on the type of a a parent pointer. This agent matches
+/// if the pointer-type of whichever agent points to this one matches the 
+/// subtree under `pointer`. An architype node is created from the 
+/// original pointer object for the purposes of comparison, so if the
+/// original pointer is unavailable, as may be the case if it was 
+/// created locally, this agent will not work correctly.
 template<class PRE_RESTRICTION>
 class PointerIs : public Special<PRE_RESTRICTION>,
                   public PointerIsAgent

@@ -8,8 +8,6 @@ using namespace SR;
 void SearchContainerAgent::PatternQueryImpl() const
 {
 	RememberLink( false, AsAgent(terminus) );
-    if( recurse_restriction )
-        RememberLink( true, AsAgent(recurse_restriction) );
 }
 
 
@@ -42,20 +40,10 @@ bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
     // Try out comparison at this position
     TRACE("Trying terminus ")(**thistime)("\n");
     RememberLink( false, AsAgent(terminus), *thistime );
-            
-    // Where a recurse restriction is in use, apply it to all the recursion points
-    // underlying the current iterator, thistime.
-    if( recurse_restriction )
-    {
-        // See if we are looking at a walk iterator
-        const Walk::iterator *pwtt = dynamic_cast<const Walk::iterator *>(thistime.GetUnderlyingIterator());
-        ASSERT(pwtt)("recurse_restriction set on non-Stuff node (probably AnyNode)");    
-
-        // Check all the nodes that we recursed through in order to get here
-        FOREACH( TreePtr<Node> n, pwtt->GetPath() )
-            RememberLocalLink( true, AsAgent(recurse_restriction), n );
-    }
     
+    // Let subclasses implement further restrictions
+    DecidedQueryRestrictions( thistime );
+                
     return true;
 }
 
@@ -87,6 +75,30 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> 
     // Note: does not do the walk every time - instead, the Walk object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
     return shared_ptr<ContainerInterface>( new Walk( x, NULL, NULL ) );
+}
+
+
+void StuffAgent::PatternQueryRestrictions() const
+{
+    if( recurse_restriction )
+        RememberLink( true, AsAgent(recurse_restriction) );
+}
+
+
+void StuffAgent::DecidedQueryRestrictions( ContainerInterface::iterator thistime ) const
+{
+    // Where a recurse restriction is in use, apply it to all the recursion points
+    // underlying the current iterator, thistime.
+    if( recurse_restriction )
+    {
+        // See if we are looking at a walk iterator
+        const Walk::iterator *pwtt = dynamic_cast<const Walk::iterator *>(thistime.GetUnderlyingIterator());
+        ASSERT(pwtt)("Failed to get Walk::iterator out of the decision iterator");    
+
+        // Check all the nodes that we recursed through in order to get here
+        FOREACH( TreePtr<Node> n, pwtt->GetPath() )
+            RememberLocalLink( true, AsAgent(recurse_restriction), n );
+    }   
 }
 
 

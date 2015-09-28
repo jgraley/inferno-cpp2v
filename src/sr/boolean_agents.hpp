@@ -9,10 +9,19 @@
 
 namespace SR
 {
+
+/// Boolean agents permit simple logic operations to be applied to one
+/// or more sub-patterns, which then become the matching status of the 
+/// overall pattern.
+class BooleanAgent : public AgentCommon 
+{
+};
     
 //---------------------------------- NotMatch ------------------------------------    
-/// Match if the supplied patterns does not match (between you and me, it's just a NOT)
-class NotMatchAgent : public AgentCommon 
+/// Boolean node that matches if the sub-pattern at `pattern` does 
+/// not match i.e. a "not" operation. `pattern` points to an abnormal 
+/// context since in an overall match, the sub-pattern does not match.
+class NotMatchAgent : public BooleanAgent 
 {
 public:
     virtual void PatternQueryImpl() const;
@@ -29,7 +38,6 @@ private:
 };
 
 
-/// Match if the supplied patterns does not match (between you and me, it's just a NOT)
 template<class PRE_RESTRICTION>
 class NotMatch : public Special<PRE_RESTRICTION>,
                  public NotMatchAgent
@@ -49,8 +57,10 @@ private:
 
 
 //---------------------------------- MatchAll ------------------------------------    
-/// Match all of the supplied patterns (between you and me, it's an AND)
-class MatchAllAgent : public AgentCommon 
+/// Boolean node that matches if all of the sub-patterns at the pointers in
+/// `patterns` do match i.e. an "and" operation. `patterns` point to  
+/// normal contexts, since the global and-rule is preserved.
+class MatchAllAgent : public BooleanAgent 
 {
 public:
     virtual void PatternQueryImpl() const;
@@ -61,7 +71,6 @@ private:
 };
 
 
-/// Match all of the supplied patterns (between you and me, it's an AND)
 template<class PRE_RESTRICTION>
 class MatchAll : public Special<PRE_RESTRICTION>,
                  public MatchAllAgent
@@ -78,8 +87,10 @@ private:
 
 
 //---------------------------------- MatchAny ------------------------------------    
-/// Match zero or more of the supplied patterns (between you and me, it's an OR)
-class MatchAnyAgent : public AgentCommon 
+/// Boolean node that matches if any of the sub-patterns at the pointers in
+/// `patterns` do match i.e. an "or" operation. `patterns` point to abnormal 
+/// contexts since in an overall match, some sub-patterns may not match.
+class MatchAnyAgent : public BooleanAgent 
 {
 public:
     virtual void PatternQueryImpl() const;
@@ -95,7 +106,6 @@ private:
 };
 
 
-/// Match zero or more of the supplied patterns (between you and me, it's an OR)
 template<class PRE_RESTRICTION>
 class MatchAny : public Special<PRE_RESTRICTION>,
                  public MatchAnyAgent
