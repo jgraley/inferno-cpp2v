@@ -12,7 +12,14 @@ namespace SR
 { 
 class SearchReplace;
 
-/// Common implementaiton stuff for slaves
+/// Slave agents provide an instance of a search and replace engine within 
+/// a pattern as an agent in a replace context. This engine acts as a "slave"
+/// to the surounding pattern which is termed the "master". During the master's
+/// replace operation, the sub-pattern at `through` is used to replace at the 
+/// current location. After that subtree has been created, the slave engine
+/// operates on the resulting subtree, performing search and replace operations
+/// via the `search_pattern` and `replace_pattern` pointers until no more 
+/// matches are found (the usual reductive style).  
 class SlaveAgent : public virtual AgentCommon, 
                    public Engine   
 {
@@ -94,7 +101,7 @@ public:
 };
 
 
-/// Agent that performs a seperate compare and replace operation at the corresponding place in the output tree
+/// Slave that performs a seperate compare and replace operation at the corresponding place in the output tree
 template<class PRE_RESTRICTION>
 class SlaveCompareReplace : public Slave<PRE_RESTRICTION>
 {
@@ -105,7 +112,7 @@ public:
 };
 
 
-/// Agent that performs a seperate search and replace operation at the corresponding place in the output tree
+/// Slave that performs a seperate search and replace operation at the corresponding place in the output tree
 template<class PRE_RESTRICTION>
 class SlaveSearchReplace : public Slave<PRE_RESTRICTION>
 {

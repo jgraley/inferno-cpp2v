@@ -10,7 +10,13 @@
 namespace SR
 { 
 
-/// Agent that is used in a combined search/replace path to seperate search and replace patterns out again    
+/// Agent that is used in a combined search/replace path to seperate search 
+/// and replace sub-patterns. During search, the `through` pointer will be 
+/// followed and the sub-pattern found there must match. During replace, the 
+/// sub-pattern under `overlay` is used to reconstruct the output tree.
+/// If the replace pattern under `overlay` contains wildcards, these will 
+/// be overlayed over the pattern under `through`, to the extent that this
+/// is unambiguous and the structures of the two subtrees match.
 class OverlayAgent : public virtual AgentCommon
 {
 public:
@@ -24,7 +30,6 @@ private:
 };
 
 
-/// Agent that is used in a combined search/replace path to seperate search and replace patterns out again    
 template<class PRE_RESTRICTION>
 class Overlay : public OverlayAgent, 
                 public Special<PRE_RESTRICTION>
