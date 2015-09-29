@@ -83,7 +83,7 @@ TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 }
 
 
-void SlaveAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+void SlaveAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
     ASSERTFAIL(); // Slaves are identified as Engines and plotted seperately. See GetGraphInfo().
     // Note from graph plotter: SearchReplace, CompareReplace, SlaveSearchReplace or 

@@ -41,7 +41,7 @@ public:
 class AnyNodeAgent : public SearchContainerAgent
 {
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) const;
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 };
 
 
@@ -72,7 +72,7 @@ public:
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) const;
     virtual void PatternQueryRestrictions() const;
     virtual void DecidedQueryRestrictions( ContainerInterface::iterator thistime ) const;
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
 };
 

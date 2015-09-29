@@ -84,7 +84,7 @@ public:
     virtual void TrackingKey( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
 	virtual void AgentConfigure( const Engine *e ) = 0;
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) = 0;
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const = 0;
 		
 	static Agent *AsAgent( TreePtr<Node> node );
 };

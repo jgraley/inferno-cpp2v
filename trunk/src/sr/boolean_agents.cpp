@@ -3,6 +3,8 @@
 
 using namespace SR;
 
+//---------------------------------- NotMatch ------------------------------------    
+
 void NotMatchAgent::PatternQueryImpl() const
 {
 	RememberLink( true, AsAgent(GetPattern()) );
@@ -26,7 +28,7 @@ bool NotMatchAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 }
 
 
-void NotMatchAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+void NotMatchAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The NotMatch node appears as a small circle with an ! character inside it. The affected subtree is 
 	// on the right.
@@ -46,6 +48,7 @@ bool NotMatchAgent::BooleanEvaluatorNot::operator()( deque<bool> &inputs ) const
 	return !inputs[0];
 }
 
+//---------------------------------- MatchAll ------------------------------------    
 
 void MatchAllAgent::PatternQueryImpl() const
 {
@@ -74,7 +77,7 @@ bool MatchAllAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 }    
 
 
-void MatchAllAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+void MatchAllAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The NotMatch node appears as a small circle with an ! character inside it. The affected subtree is 
 	// on the right.
@@ -95,6 +98,7 @@ void MatchAnyAgent::PatternQueryImpl() const
 	RememberEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
 }
 
+//---------------------------------- MatchAny ------------------------------------    
 
 bool MatchAnyAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 {
@@ -116,7 +120,7 @@ bool MatchAnyAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 }
 
 
-void MatchAnyAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+void MatchAnyAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The MatchAny node appears as a small circle with an | character inside it. The affected subtrees are 
 	// on the right.

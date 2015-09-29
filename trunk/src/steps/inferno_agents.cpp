@@ -4,7 +4,9 @@
 
 using namespace CPPTree;
 
-void BuildIdentifierAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+//---------------------------------- BuildIdentifier ------------------------------------    
+
+void BuildIdentifierAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The BuildIdentifier node appears as a parallelogram (rectangle pushed to the side) with
 	// the printf format string that controls the name of the generated identifier inside it.
@@ -57,8 +59,9 @@ string BuildIdentifierAgent::GetNewName()
     }
 }
 
+//---------------------------------- IdentifierByName ------------------------------------    
 
-void IdentifierByNameAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+void IdentifierByNameAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The IdentifierByNameBase node appears as a trapezium (rectangle narrower at the top) with
 	// the string that must be matched inside it.
@@ -86,6 +89,7 @@ bool IdentifierByNameAgent::IsMatch( const TreePtrInterface &x ) const
     return false;
 }
 
+//---------------------------------- Nested ------------------------------------    
 
 void NestedAgent::PatternQueryImpl() const
 {
@@ -149,6 +153,7 @@ TreePtr<Node> NestedSubscriptLookup::Advance( TreePtr<Node> n, string *depth ) c
     }
 }
 
+//---------------------------------- BuildContainerSize ------------------------------------    
 
 TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
@@ -169,6 +174,7 @@ TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode )
 	return DuplicateSubtree(keynode);   
 }                                                   
 
+//---------------------------------- IsLabelReached ------------------------------------    
 
 bool IsLabelReached::DecidedQueryImpl( const TreePtrInterface &xx ) const
 {

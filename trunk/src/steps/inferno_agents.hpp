@@ -10,6 +10,13 @@ using namespace SR;
 // TODO pollutes client namespace
 #define BYPASS_WHEN_IDENTICAL 1
 
+/// Agents specific to the inferno C++ and SystemC trees.
+class InfernoAgent : public virtual AgentCommon
+{
+};
+
+//---------------------------------- BuildIdentifier ------------------------------------    
+
 /// Make an identifer based on an existing set, `sources` and a printf
 /// format string, `format`. The new identfier is named using
 /// `sprintf( format, sources[0].name, source[1].name, etc )`
@@ -24,13 +31,13 @@ using namespace SR;
 /// `BYPASS_WHEN_IDENTICAL` means if all the names of the source nodes are the
 /// same, that name is used. This reduces verbosity and is a good fit when
 /// in some sense you are "merging" objects with identifiers.
-struct BuildIdentifierAgent : public virtual AgentCommon
+struct BuildIdentifierAgent : public virtual InfernoAgent
 {
 	// TODO do this via a transformation as with TransformOf/TransformOf
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
     virtual void PatternQueryImpl() const {}
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const { return true; }    
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     Sequence<CPPTree::Identifier> sources;
     string GetNewName();
     string format;
@@ -109,6 +116,7 @@ private:
     }                                                   
 };
 
+//---------------------------------- IdentifierByName ------------------------------------    
 
 /// These can be used in search pattern to match a SpecificIdentifier by name.
 /// The identifier must have a name that matches the string in `name`. One
@@ -118,10 +126,10 @@ private:
 /// a minimum due to the risk of co-incidentla unwanted matches and the 
 /// general principle that identifier names should not be important (it is
 /// the identiy proprty itself that matters with identifiers). 
-struct IdentifierByNameAgent : public virtual AgentCommon
+struct IdentifierByNameAgent : public virtual InfernoAgent
 {
     IdentifierByNameAgent( string n ) : name(n) {}
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape );
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual void PatternQueryImpl() const {}
     bool IsMatch( const TreePtrInterface &x ) const;
     string name;
@@ -172,16 +180,17 @@ private:
     }                                
 };
 
+//---------------------------------- Nested ------------------------------------    
 
 /// Matching for the nested nature of array and struct nodes, both when declaring and 
 /// when accessing arrays. The `terminus` is the node to be found at the end of
 /// the recursion and `depth` is a string matching the steps taken to 
 /// reach the terminus.
-struct NestedAgent : public virtual AgentCommon
+struct NestedAgent : public virtual InfernoAgent
 {
     virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;                                
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) {} // TODO give own appearance
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const = 0;
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;    
@@ -211,11 +220,12 @@ struct NestedSubscriptLookup : NestedAgent, Special<CPPTree::Expression>
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const;
 };
 
+//---------------------------------- BuildContainerSize ------------------------------------    
 
 /// `BuildContainerSize` is used in replace context to create an integer-valued
 /// constant that is the size of a `Star` node pointed to by `container`. The
 /// container should couple the star node.
-struct BuildContainerSize : public virtual AgentCommon,
+struct BuildContainerSize : public virtual InfernoAgent,
                             Special<CPPTree::Integer>
 {
     SPECIAL_NODE_FUNCTIONS
@@ -224,14 +234,15 @@ private:
     virtual void PatternQueryImpl() const {}
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const { return true; }    
 	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) {} // TODO give own appearance
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
 }; 
 
+//---------------------------------- IsLabelReached ------------------------------------    
 
 /// `IsLabelReached` matches a `LabelIdentifier` if that label is used
 /// anywhere in the expression pointed to by `pattern`.
 /// TODO generalise to more than just labels.
-struct IsLabelReached : public virtual AgentCommon, 
+struct IsLabelReached : public virtual InfernoAgent, 
                         Special<CPPTree::LabelIdentifier>
 {
 	SPECIAL_NODE_FUNCTIONS	
@@ -242,7 +253,7 @@ struct IsLabelReached : public virtual AgentCommon,
 	}
     virtual void PatternQueryImpl() const {}
     virtual bool DecidedQueryImpl( const TreePtrInterface &xx ) const;
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) {} // TODO give own appearance
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
     TreePtr<CPPTree::Expression> pattern;           
            
 private:

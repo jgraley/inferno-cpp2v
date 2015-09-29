@@ -41,7 +41,7 @@ TreePtr<Node> GreenGrassAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 }
 
 
-void GreenGrassAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+void GreenGrassAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The GreenGrass node appears as a small circle containing four vertical line characters,
 	// like this: ||||. These are meant to represent the blades of grass. It was late and I was
