@@ -194,9 +194,19 @@ bool Engine::CompareLinks( const Links &mylinks,
         }    
         else
         {
-			// Recurse normally
-            if( !DecidedCompare(l.agent, *px, can_key, conj, local_keys, master_keys, reached) )
-                return false;
+			// Check for a coupling match to one of our agents we reached earlier in this pass
+			SimpleCompare sc;
+			if( reached.IsExist(l.agent) )
+			{
+				if( !sc( *px, local_keys.At(l.agent) ) )
+				    return false;
+			}
+			else
+			{
+				// Recurse normally
+				if( !DecidedCompare(l.agent, *px, can_key, conj, local_keys, master_keys, reached) )
+					return false;
+			}
  		}
  		
         i++;
@@ -252,16 +262,11 @@ bool Engine::DecidedCompare( Agent *agent,
     ASSERT( &x ); // Ref to target must not be NULL (i.e. corrupted ref)
     ASSERT( x ); // Target must not be NULL
             
-	SimpleCompare sc;
-
     // Check for a coupling match to a master engine's agent
+	SimpleCompare sc;
     if( master_keys.IsExist(agent) )
         return sc( x, master_keys.At(agent) );
 	
-	// Check for a coupling match to one of our agents we reached earlier in this pass
-	if( reached.IsExist(agent) )
-        return sc( x, local_keys.At(agent) );
-     
     // Obtain the choices from the conjecture
     deque<ContainerInterface::iterator> choices = conj.GetChoices(agent);
 

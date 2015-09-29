@@ -5,6 +5,8 @@
 
 using namespace SR;
 
+//---------------------------------- SearchContainerAgent ------------------------------------    
+
 void SearchContainerAgent::PatternQueryImpl() const
 {
 	RememberLink( false, AsAgent(terminus) );
@@ -70,6 +72,27 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 }
 
 
+//---------------------------------- AnyNode ------------------------------------    
+
+shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( TreePtr<Node> x ) const
+{ 
+    // Note: does not do the flatten every time - instead, the FlattenNode object's range is presented
+    // to the Conjecture object, which increments it only when trying alternative choice
+    return shared_ptr<ContainerInterface>( new FlattenNode( x ) );
+}
+
+
+void AnyNodeAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+{
+	// The AnyNode node appears as a small circle with a ? sign in it. The terminus link emerges from the
+	// right of the circle. ? implies the tendancy to match exactly one thing.
+	*bold = true;
+	*shape = "circle";
+	*text = string("?"); 
+}
+
+//---------------------------------- Stuff ------------------------------------    
+
 shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> x ) const
 {    
     // Note: does not do the walk every time - instead, the Walk object's range is presented
@@ -102,7 +125,7 @@ void StuffAgent::DecidedQueryRestrictions( ContainerInterface::iterator thistime
 }
 
 
-void StuffAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
+void StuffAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The Stuff node appears as a small circle with a # character inside it. The terminus link emerges from the
 	// right of the circle. If there is a recurse restriction the circle is egg-shaped and the restriction link 
@@ -115,23 +138,4 @@ void StuffAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
 		*shape = "circle";
 	*text = string("#"); 
 }
-
-
-shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( TreePtr<Node> x ) const
-{ 
-    // Note: does not do the flatten every time - instead, the FlattenNode object's range is presented
-    // to the Conjecture object, which increments it only when trying alternative choice
-    return shared_ptr<ContainerInterface>( new FlattenNode( x ) );
-}
-
-
-void AnyNodeAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
-{
-	// The AnyNode node appears as a small circle with a ? sign in it. The terminus link emerges from the
-	// right of the circle. ? implies the tendancy to match exactly one thing.
-	*bold = true;
-	*shape = "circle";
-	*text = string("?"); 
-}
-
 
