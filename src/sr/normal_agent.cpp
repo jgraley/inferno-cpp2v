@@ -230,16 +230,15 @@ bool NormalAgent::DecidedQueryCollection( CollectionInterface &x,
 	    else if( !x.empty() ) // not a Star so match singly...
 	    {
 	    	// We have to decide which node in the tree to match, so use the present conjecture
-	    	ContainerInterface::iterator xit = HandleDecision( x.begin(), x.end() );
+	    	// Note: would like to use xremaining, but it will fall out of scope
+	    	// Report a link for the chosen node
+			ContainerInterface::iterator xit = RememberDecisionLink( false, pia, x.begin(), x.end() );
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.
 	    	// We'll just return false so we do not stop trying further choices (xit+1 may be legal).
 	    	if( xremaining->erase( *xit ) == 0 )
 	    		return false;
-
-	    	// Recurse into comparison function for the chosen node
-			RememberLink( false, pia, *xit );
 	    }
 	    else // ran out of x elements - local mismatch
         {

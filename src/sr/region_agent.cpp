@@ -26,10 +26,9 @@ bool RegionAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 		TreePtr<Node> c = *(engine->GetOverallMaster()->pcontext);
 		// Make a walker of everything
 		shared_ptr<ContainerInterface> pwc = shared_ptr<ContainerInterface>( new Walk( c, NULL, NULL ) );
-		// Give that walker to the conjecture as a decision
-		ContainerInterface::iterator thistime = HandleDecision( pwc->begin(), pwc->end() );
-		// And the current choice is the link to use
-        RememberLink( false, a, *thistime ); 
+		// Give that walker to the conjecture as a decision and make a link
+		// Note: this permits coupling pushing, which would remove the complexity order from the search
+		ContainerInterface::iterator thistime = RememberDecisionLink( false, a, pwc->begin(), pwc->end() );
         
         // Note: the problems with this are that
         // (1) If the coupling is to a locally generated tree node, we'll never propose it here

@@ -175,6 +175,7 @@ bool Engine::CompareLinks( const Links &mylinks,
  
         // Get pattern for linked node
         const TreePtrInterface *px = l.GetX();
+        ASSERT( *px );
            
         // Recurse now       
         if( l.abnormal )

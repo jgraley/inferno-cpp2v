@@ -37,12 +37,8 @@ bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
     }
     
     // Get choice from conjecture about where we are in the walk
-    ContainerInterface::iterator thistime = HandleDecision( pwx->begin(), pwx->end() );
+    ContainerInterface::iterator thistime = RememberDecisionLink( false, AsAgent(terminus), pwx->begin(), pwx->end() );
 
-    // Try out comparison at this position
-    TRACE("Trying terminus ")(**thistime)("\n");
-    RememberLink( false, AsAgent(terminus), *thistime );
-    
     // Let subclasses implement further restrictions
     DecidedQueryRestrictions( thistime );
                 
