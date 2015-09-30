@@ -194,11 +194,15 @@ bool Engine::CompareLinks( const Links &mylinks,
         }    
         else
         {
-			// Check for a coupling match to one of our agents we reached earlier in this pass.
-			// This check cannot simply be cached by the agent's position and choices since
-			// the local keys are set via other agents' choices.
+			// Check for a coupling match to a master engine's agent. 
 			SimpleCompare sc;
-			if( reached.IsExist(l.agent) )
+			if( master_keys.IsExist(l.agent) )
+			{
+				if( !sc( *px, master_keys.At(l.agent) ) )
+				    return false;
+			}
+			// Check for a coupling match to one of our agents we reached earlier in this pass.
+			else if( reached.IsExist(l.agent) )
 			{
 				if( !sc( *px, local_keys.At(l.agent) ) )
 				    return false;
@@ -263,16 +267,7 @@ bool Engine::DecidedCompare( Agent *agent,
     INDENT(" ");
     ASSERT( &x ); // Ref to target must not be NULL (i.e. corrupted ref)
     ASSERT( x ); // Target must not be NULL
-            
-    // Check for a coupling match to a master engine's agent. Note that since
-    // the master's keys remain constant throughout the search, these results
-    // may be cached by the agent's position+choices only, unlike the local keys
-    // TODO push this up to the same level as local keys, since Coupling Pushing
-    // is the next big thing, and it can work just as well with these.
-	SimpleCompare sc;
-    if( master_keys.IsExist(agent) )
-        return sc( x, master_keys.At(agent) );
-	
+            	
     // Obtain the choices from the conjecture
     deque<ContainerInterface::iterator> choices = conj.GetChoices(agent);
 
@@ -344,6 +339,12 @@ bool Engine::Compare( Agent *start_agent,
     TRACE(" pattern=")(*start_agent);
     ASSERT( &local_keys != &master_keys );
     //TRACE(**pcontext)(" @%p\n", pcontext);
+           
+    SimpleCompare sc;
+    if( master_keys.IsExist(start_agent) )
+	{
+		return sc( start_x, master_keys.At(start_agent) );
+	}      
            
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
