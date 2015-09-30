@@ -84,19 +84,30 @@ Detailed plan for refactoring into agent patterns
  - Check for modifiers of Engine (via engine ptr) too - hopefully does not need to be mutable. - WAS const ALREADY
 --- Agents may now be queried idempotently ---
    **UNSURE ABOUT THESE...**
-12. Generalise Conjecture impl, and maybe fold directly into Engine
- - Map agents to vectors of choice pointers, to better handle passing choice vectors to Query fns
- - Show that we never need to hop from choice to next choice now (new map removes the need)
- - Provide something like shared_ptr or weak_ptr from later choice to previous choice (ie
-   backwards) and use that for backtracking. Clean up the agent->choice map entries when choices deleted.
---- Conjecture now has no central vector ---
-13. Begin trying to collect more detailed info on decision relationships.
- - Remember a "contingency" relation of child agent decisions to parent agent decisions
- - also of later on earlier decisions from a single agent query
- - and a (possibly symmetric) coupling relation between latest in-effect decisions on both (or all)
-   routes into a coupling.
- - try to recode conjecture search based on these!
---- Conjecture search now independent of the order of events in a tree walk ---
+12. (done before documentation)
+ - Add evaluator objects for boolean nodes other than AND. Invoke it in Engine.
+ - Do not union the master and local keys - treat seperately
+ - Track agents seen in a particular pass. This permits early-out on couplings whether matching or not
+ - Move couplings check down into parent's DC
+ - Remove soft agents
+ - Make Graph appearance a virtual interface on Agents
+ - Prototype a RegionAgent that could represent a non-AND-rule region. 
+ - Add Agent API support for combined decision and link registering
+13. Coupling push
+ - Collect keys for sub-agents before DecidedQuery call based on pattern query. 
+ - Pass them into DecidedQuery alongside choices
+ - Allow RememberDecisionLink to short-circuit (but only if keys are inside ranges - may need more find() 
+   support and reporting of decisions by container instead of begin/end pair)
+14. Seperate Engine instances for abnormal/evaluator contexts; should never recurse Compare on a 
+    particular Engine instance (ASSERT this?)
+16. Solution for abnormal contexts (multi-hit AND evaluator)
+ - Demonstrate that couplings are never used
+ - Code to check this in a Configure pass
+ - Then just use a local Engine instance and tuck away in a wrapper around DecidedQuery (so abnormal flag never gets out as true)
+15. Regions for evaluators
+ - Create a Configure pass that substitutes RegionAgents for evaluator contexts up to couplings.
+ - Leave outgoing links unchanged - just fill in the master keys for them and the Engine will stop
+16. ???  
 
 QUESTION: should patterns eventually refer to each other via TreePtr<Agent> instead of TreePtr<Node>? 
 And does that even work, or should it really be shared_ptr<Agent> or SharedPtr<Agent>? --- requires experimentation, added to plan
@@ -133,4 +144,35 @@ concurrently? Yeah, probably, lol.
 TODO make CompareReplace a member, on the end of a pointer or shared_ptr. Then it will not interfere 
 with Itemise(), and an ordinary walk will not go into the children.
 
- 
+
+Original note on couplings and abnormal contexts:
+	A pass reaches a RegionAgent for an evaluator context. The region agent registers whole-domain 
+	decisions for all couplings OUT of the evaluator context and gets choices. It links out back
+	into the surrounding context with these choices, and they are therefore evaluated using the 
+	global AND-rule. But this is CORRECT! Since a coupling must include at least one normal 
+	context, that normal context will restrict the entire search to successful matches of the
+	subtree at the coupling point. We then additionally restrict according to the output of
+	the evaluator.
+
+Basically, the presence of a normal context in every coupling, taken together with the global
+AND-rule that prevails in normal contexts, means that the coupled node itself and the subtree 
+under it must match SOMEWHERE for an overall match to be possible. Thus the evaluator
+context's rule is something like:
+
+GIVEN coupled nodes keyed xi and matching, IS the evaluator(xi) satisfied?
+
+Thus, a "region" can be described around an evaluator node that ENDS at the couplings. It must
+cautiously offer a whole-domain decision at each coupling, but then the engine for the surrounding
+pattern can take care of further matching for these nodes. Thus, couplings can be presented in the 
+usual way, with no extra baggage, and the "consequences" of the non-AND evaluator are not seen
+outside the region.
+
+Strictly, a region will contain the OR or NOT node itself, and he abnormal contexts, within the 
+region, are the subtrees at each pattern. Both the region and the abnormal contexts end at couplings.
+Since the abnormal contexts are already (planned to be) farmed off to seperate Engine objects, only
+the evaluator_region - union(abnormal_contexts) needs to be treated locally, which is just the
+evaluator node itself, and all that needs to be done is to invoke the evaluator functor on the
+results returned by the engines (once everything has ben set up).
+
+
+
