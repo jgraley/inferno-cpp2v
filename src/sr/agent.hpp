@@ -36,7 +36,7 @@ public:
 };
 
 
-class Links : public PatternLinks
+class Links 
 {
 public:    
     struct Link : PatternLinks::Link
@@ -52,15 +52,16 @@ public:
 		}	
     };
         
-    vector<Link> links; // TODO hides "links" in base class PatternLinks, ugly
+    vector<Link> links; 
     deque<Conjecture::Range> decisions;
+    shared_ptr<BooleanEvaluator> evaluator;
     bool local_match;
 
     void clear()
     {
         links.clear();
         decisions.clear();
-        PatternLinks::clear();
+        evaluator = shared_ptr<BooleanEvaluator>();        
     }
 };
 
