@@ -127,7 +127,11 @@ protected:
     const Engine *engine;    
     ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
                                                  ContainerInterface::iterator end ) const;
-    
+    ContainerInterface::iterator RememberDecisionLink( bool abnormal, 
+													   Agent *a, 
+													   ContainerInterface::iterator begin,
+													   ContainerInterface::iterator end ) const; // Decided query
+			
 private:    
     TreePtr<Node> coupling_key;    
     

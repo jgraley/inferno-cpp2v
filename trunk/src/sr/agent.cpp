@@ -160,11 +160,11 @@ ContainerInterface::iterator AgentCommon::HandleDecision( ContainerInterface::it
     ContainerInterface::iterator it;
     if( choices.empty() )
     {
-        it = begin; // Use the choice that was given to us
+        it = begin; // No choice was given to us so assume first one
     }
     else
     {
-        it = choices.front(); // No choice was given to us so assume first one
+        it = choices.front(); // Use and consume the choice that was given to us
         ASSERT( it != end );
         choices.pop_front();
     }
@@ -173,11 +173,51 @@ ContainerInterface::iterator AgentCommon::HandleDecision( ContainerInterface::it
     r.begin = begin;
     r.end = end;
     links.decisions.push_back(r); // Report the range back
-    
+        
     return it;
 }
 
 
+ContainerInterface::iterator AgentCommon::RememberDecisionLink( bool abnormal, 
+																Agent *a, 
+																ContainerInterface::iterator begin,
+																ContainerInterface::iterator end ) const
+{
+	ASSERT( current_query==DECIDED );
+    ASSERT( begin != end )("no empty decisions");
+    ContainerInterface::iterator it;
+    if( choices.empty() )
+    {
+        it = begin; // No choice was given to us so assume first one
+    }
+    else
+    {
+        it = choices.front();  // Use and consume the choice that was given to us
+        ASSERT( it != end );
+        choices.pop_front();
+    }
+    
+    Links::Link l;
+    l.abnormal = abnormal;
+    l.agent = a;
+    l.px = &(*it); // do not simplify! we want a simple pointer, not an iterator TODO or do we
+    l.local_x = TreePtr<Node>();
+    TRACE("Remembering decision link %d ", links.links.size())(*a)(" -> ")(**it)(abnormal?" abnormal":" normal")("\n");
+
+    Conjecture::Range r;
+    r.begin = begin;
+    r.end = end;
+
+    // Put it all in links TODO tie these together in the links struct
+    links.links.push_back( l );    
+    links.decisions.push_back(r); 
+    
+    return it; // Note: we have to have the iterator even when a coupling push has occurred, since
+               // we should have checked that the pushed back node is actually in the container 
+               // (find() etc gets us an iterator)
+}                                        
+                                        
+                                        
 bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
 {
     if( l0.abnormal != l1.abnormal )
