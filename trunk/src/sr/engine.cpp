@@ -11,8 +11,6 @@
 #include <list>
 
 using namespace SR;
-
-//#define STRACE
  
 int Engine::repetitions;
 bool Engine::rep_error;
@@ -26,21 +24,39 @@ Engine::Engine( bool is_s ) :
 }    
     
     
-// The agents_already_configured argument is a set of agents that we should not
+// The master_agents argument is a set of agents that we should not
 // configure because they were already configured by a master, and masters take 
 // higher priority for configuration (so when an agent is reached from multiple
 // engines, it's the most masterish one that "owns" it).
 void Engine::Configure( TreePtr<Node> cp,
                         TreePtr<Node> rp,
-                        const Set<Agent *> &agents_already_configured,
+                        const Set<Agent *> &master_agents,
                         const Engine *master )
 {
     INDENT(" ");
-    ASSERT(!pattern)("Calling configure on already-configured ")(*this);
+    ASSERT(!master_ptr)("Calling configure on already-configured ")(*this);
     TRACE("Entering Engine::Configure on ")(*this)("\n");
     master_ptr = master;
+    
+    ConfigInstallRootAgents(cp, rp);
+            
+    TRACE("Elaborating ")(*this );    
+    ConfigCategoriseSubs( master_agents );    
+    ConfigConfigureSubs( master_agents );
+} 
 
-    ASSERT( cp );
+
+void Engine::Configure( const Set<Agent *> &master_agents,
+                        const Engine *master )
+{
+    ASSERTFAIL("Engine::Configure(already, master) Must be overridden by a subclass");
+}
+
+
+void Engine::ConfigInstallRootAgents( TreePtr<Node> cp,
+									  TreePtr<Node> rp )
+{
+    ASSERT( cp )("Compare pattern must always be provided\n");
     
     // If only a search pattern is supplied, make the replace pattern the same
     // so they couple and then an overlay node can split them apart again.
@@ -70,18 +86,21 @@ void Engine::Configure( TreePtr<Node> cp,
     ASSERT( cp==rp ); // Should have managed to reduce to a single pattern by now
     pattern = cp; 
     root_agent = Agent::AsAgent(pattern);
-            
-    TRACE("Elaborating ")(*this );
+}
+    
 
+void Engine::ConfigCategoriseSubs( const Set<Agent *> &master_agents )
+{
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
-    SlaveAgent::UniqueWalkNoSlavePattern tp(pattern); 
-    Set<Agent *> immediate_agents;
+    // So that the compare and replace subtrees of slaves are "obsucured" and not visible
+    VisibleWalk tp(pattern); 
+    Set<Agent *> visible_agents;
     FOREACH( TreePtr<Node> n, tp )
-        immediate_agents.insert( Agent::AsAgent(n) );
+        visible_agents.insert( Agent::AsAgent(n) );
     
     // Determine which ones really belong to us (some might be visible from one of our masters, 
     // in which case it should be in the supplied set.        
-    my_agents = SetDifference( immediate_agents, agents_already_configured );         
+    my_agents = SetDifference( visible_agents, master_agents );         
 
     // Determine who our slaves are
     my_slaves = Set<SlaveAgent *>();
@@ -90,9 +109,13 @@ void Engine::Configure( TreePtr<Node> cp,
             my_slaves.insert( sa );
         else
             ASSERT( !dynamic_cast<Engine *>(a) ); // not expecting to see any engine other than a slave
+}
 
+
+void Engine::ConfigConfigureSubs( const Set<Agent *> &master_agents )
+{
     // Determine which agents our slaves should not configure
-    Set<Agent *> agents_now_configured = SetUnion( agents_already_configured, my_agents ); 
+    Set<Agent *> agents_now_configured = SetUnion( master_agents, my_agents ); 
             
     // Recurse into the slaves' configure
     FOREACH( Engine *e, my_slaves )
@@ -107,13 +130,6 @@ void Engine::Configure( TreePtr<Node> cp,
         TRACE("Configuring agent ")(*a)("\n");
         a->AgentConfigure( this );             
     }    
-} 
-
-
-void Engine::Configure( const Set<Agent *> &agents_already_configured,
-                        const Engine *master )
-{
-    ASSERTFAIL("Engine::Configure(already, master) Must be overridden by a subclass");
 }
 
 

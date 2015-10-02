@@ -92,3 +92,11 @@ void SlaveAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) c
     // and their links are approximately to the right.
 }
 
+
+shared_ptr<ContainerInterface> SlaveAgent::GetVisibleChildren() const
+{
+	// it's a slave, so set up a container containing only "through", not "compare" or "replace"
+	shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
+	seq->push_back( GetThrough() );
+	return seq;
+}

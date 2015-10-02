@@ -35,45 +35,11 @@ public:
     void SetMasterCouplingKeys( const CouplingMap &keys );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
-    
+    virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
+
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;   
     
-private:    
-    /** Walks the tree, avoiding the "search"/"compare" and "replace" members of slaves
-        but still recurses through the "through" member. Therefore, it visits all the
-        nodes under the same engine as the root. Based on UniqueWalk, so each node only
-        visited once. */
-    class UniqueWalkNoSlavePattern_iterator : public UniqueWalk::iterator
-    {
-    public:
-        UniqueWalkNoSlavePattern_iterator( TreePtr<Node> &root ) : UniqueWalk::iterator(root) {}        
-        UniqueWalkNoSlavePattern_iterator() : UniqueWalk::iterator() {}
-        virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
-        {
-            return shared_ptr<UniqueWalkNoSlavePattern_iterator>( new UniqueWalkNoSlavePattern_iterator(*this) );
-        }      
-    private:
-        virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
-        {
-            // We need to create a container of elements of the child.
-            if( SlaveAgent *sa = dynamic_cast<SlaveAgent *>( Agent::AsAgent(n) ) )
-            {
-                // it's a slave, so set up a container containing only "through", not "compare" or "replace"
-                shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
-                seq->push_back( sa->GetThrough() );
-                return seq;
-            }
-            else
-            {
-                // it's not a slave, so proceed as for UniqueWalk
-                return UniqueWalk::iterator::GetChildContainer(n);
-            }
-        }
-    };
-
-public:
-    typedef ContainerFromIterator< UniqueWalkNoSlavePattern_iterator, TreePtr<Node> > UniqueWalkNoSlavePattern;    
     CouplingMap master_keys;
 };
 
