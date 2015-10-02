@@ -190,7 +190,5 @@ public:
 };
 
 typedef Map< Agent *, TreePtr<Node> > CouplingMap;
-
-
 };
 #endif

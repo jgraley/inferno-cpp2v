@@ -94,3 +94,14 @@ void RegionAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) 
 	*shape = "diamond";
 	*text = string("[]");
 }
+
+
+shared_ptr<ContainerInterface> RegionAgent::GetVisibleChildren() const
+{
+	// Normally, when an engine hits another engine while walking its subtree
+	// during configure, any children (presumably in a co-inherited Agent class)
+	// are hidden. Unless the agent overrides (eg Slave, which exposes "through")
+	return shared_ptr< Sequence<Node> >();
+}
+
+

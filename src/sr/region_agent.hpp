@@ -21,6 +21,7 @@ class RegionAgent : public virtual AgentCommon,
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
+    virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
     
     deque< Agent * > external_couplings;
     Agent *root_agent;
