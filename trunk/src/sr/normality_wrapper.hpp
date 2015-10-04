@@ -11,8 +11,7 @@
 namespace SR
 { 
 
-class NormalityWrapper : public virtual AgentCommon,
-                         public Engine
+class NormalityWrapper : public virtual AgentCommon
 {
 	NormalityWrapper( Agent *agent ); 
 	void Configure( const Set<Agent *> &engine_agents, // Agents of the enclosing engine
