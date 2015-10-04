@@ -115,13 +115,13 @@ void Engine::ConfigCategoriseSubs( const Set<Agent *> &master_agents )
 void Engine::ConfigConfigureSubs( const Set<Agent *> &master_agents )
 {
     // Determine which agents our slaves should not configure
-    Set<Agent *> agents_now_configured = SetUnion( master_agents, my_agents ); 
+    Set<Agent *> surrounding_agents = SetUnion( master_agents, my_agents ); 
             
     // Recurse into the slaves' configure
     FOREACH( Engine *e, my_slaves )
     {
         TRACE("Recursing to configure slave ")(*e)("\n");
-        e->Configure(agents_now_configured, this);
+        e->Configure(surrounding_agents, this);
     }
     
     // Give agents pointers to here and our coupling keys
@@ -325,9 +325,10 @@ bool Engine::DecidedCompare( Agent *agent,
 
 
 // This one operates from root for a stand-alone compare operation (side API)
-bool Engine::Compare( const TreePtrInterface &start_x ) const
+bool Engine::Compare( const TreePtrInterface &start_x,
+                      const CouplingMap &master_keys ) const
 {
-    const Map< Agent *, TreePtr<Node> > master_keys; // always empty
+	ASSERT( root_agent );
     return Compare( root_agent, start_x, master_keys );
 }
 
@@ -534,5 +535,17 @@ int Engine::RepeatingCompareReplace( TreePtr<Node> *proot,
        
     TRACE("exiting\n");
     return repetitions;
+}
+
+
+shared_ptr<ContainerInterface::iterator_interface> Engine::VisibleWalk_iterator::Clone() const
+{
+	return shared_ptr<VisibleWalk_iterator>( new VisibleWalk_iterator(*this) );
+}      
+
+
+shared_ptr<ContainerInterface> Engine::VisibleWalk_iterator::GetChildContainer( TreePtr<Node> n ) const
+{
+	return Agent::AsAgent(n)->GetVisibleChildren(); 
 }
 

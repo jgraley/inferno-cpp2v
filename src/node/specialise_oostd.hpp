@@ -119,6 +119,10 @@ public:
     ContainerFromIterator( ConsParam1 p1, 
                            ConsParam2 p2,
                            ConsParam2 p3 ) : my_begin( p1, p2, p3 ), my_end() {} /// Constructor for 3 params
+    ContainerFromIterator( ConsParam1 p1, 
+                           ConsParam2 p2,
+                           ConsParam2 p3,
+                           ConsParam2 p4 ) : my_begin( p1, p2, p3, p4 ), my_end() {} /// Constructor for 4 params
     // ... add more as required
     
 	virtual const iterator &begin() { return my_begin; }

@@ -11,21 +11,62 @@
 namespace SR
 { 
 
-/// EXPERIMENTAL agent that captures all the agents in an abnormal context or
-/// evaluator context (TBD) and represents it as a single agent that does
-/// NOT require 2-pass matching because it can key safely (if slowly)
-class RegionAgent : public virtual AgentCommon,
-                    public Engine
+class NormalityWrapper : public virtual AgentCommon,
+                         public Engine
 {
+	NormalityWrapper( Agent *agent ); 
+	void Configure( const Set<Agent *> &engine_agents, // Agents of the enclosing engine
+	                const Set<Agent *> &master_agents, // Agents of the enclosing engine's master
+	                const Engine *master );
+	void SetMasterKeys( const CouplingMap &keys ); // Keys of the enclosing engine's master (call this at top of engine Compare())
     virtual void PatternQueryImpl() const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     shared_ptr<ContainerInterface> GetVisibleChildren() const;
     
-    deque< Agent * > external_couplings;
-    Agent *root_agent;
+    // Holder for info beyond what PatternQuery provides (the agent) for abnormal links.     
+    struct AbnormalLink
+    {
+		AbnormalLink() : engine(false) {} // Engine is compare, not search
+		
+		// An engine instance to do the comparing within the context,
+		Engine engine;
+		// A set of terminal couplings which are couplings into the master's normal
+        // context, and which terminate the abnormal context.		
+        Set< Agent * > terminal_agents;
+	};
+    
+    // The agent we are wrapping. Typically we will wrap all agents with >0 
+    // abnormal links.
+    Agent * const wrapped_agent;    
+    
+    // Additional link info for abnormal links, in same order as Pattern/DecidedQuery
+    deque< shared_ptr<AbnormalLink> > abnormal_links;
+    
+    // Map of keys
     CouplingMap master_keys;
+    shared_ptr<BooleanEvaluator> evaluator;
+    
+    // Specialisation of unique tree walk that will collect together our terminator agents.
+	class TerminalFinder_iterator : public UniqueWalk::iterator
+	{
+	public:
+		TerminalFinder_iterator( const Node *root, const Set<Agent *> &ea, const Set<Agent *> &ma, Set< Agent * > &ta ) : 
+		    UniqueWalk::iterator(root),
+		    const Set<Agent *> &engine_agents(ea),
+		    const Set<Agent *> &master_agents(ma),
+		    Set< Agent * > &terminal_agents(ta)
+		{}        
+		VisibleWalk_iterator() : UniqueWalk::iterator() {}
+		virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;
+	private:
+	    const Set<Agent *> &engine_agents;
+	    const Set<Agent *> &master_agents;
+	    Set< Agent * > &terminal_agents;
+		virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const;
+	};
+	typedef ContainerFromIterator< TerminalFinder_iterator, const Node *, const Set<Agent *> &, Set< Agent * > & > TerminalFinder;    
 };
 
 };

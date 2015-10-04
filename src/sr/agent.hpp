@@ -39,7 +39,7 @@ public:
 class Links 
 {
 public:    
-    struct Link : PatternLinks::Link
+    struct Link : PatternLinks::Link // TODO expand out inheritance
     {
         const TreePtrInterface *px;
         TreePtr<Node> local_x;
@@ -73,7 +73,7 @@ class Agent : public virtual Traceable,
               public virtual Node
 {
 public:
-    /// List the Agents reached via normal links during search
+    /// List the Agents reached via links during search
     virtual PatternLinks PatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual Links DecidedQuery( const TreePtrInterface &x,
@@ -126,6 +126,8 @@ protected:
     void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x ) const; // Decided query
     void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) const; // Decided query
     void RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const; // All queries
+    void RememberLink( const Links::Link &l ) const; // Decided query
+    void RememberLink( const PatternLinks::Link &l ) const; // Decided query
 
     const Engine *engine;    
     ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
@@ -154,10 +156,10 @@ private:
 
 // --- General note on SPECIAL_NODE_FUNCTIONS and PRE_RESTRICTION ---
 // Special nodes (that is nodes defined here with special S&R behaviour)
-// derive from a normal tree node via templating. This base class is
+// derive from a standard tree node via templating. This base class is
 // the PRE_RESTRICTION node, and we want it for 2 reasons:
-// 1. To allow normal nodes to point to special nodes, they must
-//    expose a normal interface, which can vary depending on usage
+// 1. To allow standard nodes to point to special nodes, they must
+//    expose a standard interface, which can vary depending on usage
 //    so must be templated.
 // 2. We are able to provide a "free" and-rule restriction on all
 //    special nodes by restricting to non-strict subclasses of the
@@ -170,7 +172,7 @@ private:
 // Itemise is known required (for eg graph plotting), other bounces
 // are TBD.
 #define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
-/// Common stuff for pattern nodes other than normal nodes
+/// Common stuff for pattern nodes other than standard nodes
 class SpecialBase
 {
 public:    
@@ -178,7 +180,7 @@ public:
 };
 
 
-/// Common stuff for pattern nodes other than normal nodes
+/// Common stuff for pattern nodes other than standard nodes
 template<class PRE_RESTRICTION>
 class Special : public SpecialBase, 
                 public virtual PRE_RESTRICTION
