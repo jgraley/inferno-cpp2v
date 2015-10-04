@@ -169,8 +169,8 @@ bool NormalityWrapper::DecidedQueryImpl( const TreePtrInterface &x ) const
 // think this happens. 
 
 /* What might happen:
- * A pass reaches a NormalityWrapper for an evaluator context. The region agent registers whole-domain 
- * decisions for all couplings OUT of the evaluator context and gets choices. It links out back
+ * A pass reaches a NormalityWrapper for an evaluator context. The wrapper registers whole-domain 
+ * decisions for all couplings OUT of the evaluator's abnormals and gets choices. It links out back
  * into the surrounding context with these choices, and they are therefore evaluated using the 
  * global AND-rule. But this is CORRECT! Since a coupling must include at least one normal 
  * context, that normal context will restrict the entire search to successful matches of the
@@ -219,16 +219,16 @@ shared_ptr<ContainerInterface> NormalityWrapper::GetVisibleChildren() const
 shared_ptr<ContainerInterface> NormalityWrapper::TerminalFinder_iterator::GetChildContainer( TreePtr<Node> n ) const
 {
 	// We are walking agents under the wrapped agent, which is hidden from the 
-	// master engine, so we will only see a master agent if it is coupled to the
+	// surrounding engine, so we will only see an engine agent if it is coupled to the
 	// subtree under our wrapped agent (the abnormal context) - these are the
 	// agents we want to use as the terminator layer. 
-	if( master_agents.IsExist( AsAgent(n) )
+	if( master_agents.IsExist( AsAgent(n) ) // Surrounding engine's master - ignore (will always be already coupled)
 	{
 		return shared_ptr< Sequence<Node> >(); // Do not recurse into its children
 	}    		    
 	else if( engine_agents.IsExist( AsAgent(n) )
 	{
-		terminal_couplings.insert( AsAgent(n) ); // Add this agent as a terminator 
+		terminal_agents.insert( AsAgent(n) ); // Add this agent as a terminator 
 		return shared_ptr< Sequence<Node> >(); // Do not recurse into its children
 	}    		    
 	else
@@ -238,6 +238,7 @@ shared_ptr<ContainerInterface> NormalityWrapper::TerminalFinder_iterator::GetChi
 }
 
 
+// Standard virtual cloner
 shared_ptr<ContainerInterface::iterator_interface> NormalityWrapper::TerminalFinder_iterator::Clone() const
 {
 	return shared_ptr<VisibleWalk_iterator>( new VisibleWalk_iterator(*this) );
