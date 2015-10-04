@@ -371,7 +371,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
                 }
                 else 
                 {
-                    TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
+                    TRACE("inserting %s directly\n", TypeInfo(n).name().c_str());
                     ASSERT( n->IsFinal() )("Got intermediate node ")(*n);
                     dest_con->insert( n );
                 }
@@ -440,7 +440,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
            		}
 		        else
 		        {
-			        TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
+			        TRACE("inserting %s directly\n", TypeInfo(n).name().c_str());
 			        dest_con->insert( n );
                     ASSERT( n->IsFinal() );
 		        }
@@ -512,7 +512,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
            		}
 		        else
 		        {
-			        TRACE("Normal element, inserting %s directly\n", TypeInfo(n).name().c_str());
+			        TRACE("inserting %s directly\n", TypeInfo(n).name().c_str());
 			        dest_con->insert( n );
 		        }
 	        }
@@ -537,7 +537,7 @@ TreePtr<Node> StandardAgent::BuildReplaceNormal()
 
 void StandardAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
-	// The graph plotter pre-loads the variables with the appearance of a normal node
+	// The graph plotter pre-loads the variables with the appearance of a standard node
 	// that will be used when plotting input/output trees that have not been 
 	// agentised. We want the same, so leave them alone.
 }

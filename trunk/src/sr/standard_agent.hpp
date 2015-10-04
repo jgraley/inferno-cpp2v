@@ -12,7 +12,7 @@
 namespace SR
 { 
 
-/// Agent implementation used for all normal pattern nodes. Normal agents are
+/// Agent implementation used for all standard pattern nodes. Normal agents are
 /// constructed using `MakePatternPtr`. All the `TreePtr` members are treated
 /// as pointers to sub-patterns and must match. Direct members (i.e. not in a 
 /// `Collection`) may be NULL to indicate a full wildcard (matches anything). 
@@ -139,7 +139,7 @@ public:
 
 // Similar to MakeTreePtr<> (see node/specialise_oostd.hpp) but produces a TreePtr to StandardAgentWrapper<NODE_TYPE> rather
 // than just NODE_TYPE when NODE_TYPE is not already a kind of Agent. 
-/// Utility for constructing nodes that are to be used in patterns from normal tree nodes
+/// Utility for constructing nodes that are to be used in patterns from standard tree nodes
 template<typename NODE_TYPE>
 class MakePatternPtr : public TreePtr<NODE_TYPE>
 {

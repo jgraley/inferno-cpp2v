@@ -132,6 +132,18 @@ void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface 
 }
 
 
+void AgentCommon::RememberLink( const Links::Link &l ) const
+{
+    links.links.push_back( l );
+}
+
+    
+void AgentCommon::RememberLink( const PatternLinks::Link &l ) const
+{
+    pattern_links.links.push_back( l );
+}
+
+    
 void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) const
 {
 	ASSERT( current_query==DECIDED );
@@ -349,7 +361,7 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
                 ASSERT( p ); // present simplified scheme disallows NULL
                 //TRACE("Duplicating ")(*p)("\n");
                 TreePtr<Node> n = DuplicateSubtree( p, source_terminus, dest_terminus );
-                //TRACE("Normal element, inserting ")(*n)(" directly\n");
+                //TRACE("inserting ")(*n)(" directly\n");
                 dest_con->insert( n );
             }
         }            

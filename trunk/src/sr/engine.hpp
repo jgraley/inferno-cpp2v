@@ -21,8 +21,6 @@ class CompareReplace;
 class Engine : public virtual Traceable
 {  
 public:
-    // Constructor and destructor. Search and replace patterns and couplings are
-    // specified here, so that we have a fully confiugured functor.
     Engine( bool is_s );
                     
     // Call this to set the patterns after construction. This should not be virtual since
@@ -53,7 +51,8 @@ public:
 protected:
     bool SingleCompareReplace( TreePtr<Node> *proot,
                                const CouplingMap &master_keys );
-    bool Compare( const TreePtrInterface &start_x ) const;
+    bool Compare( const TreePtrInterface &start_x,
+                  const CouplingMap &master_keys = CouplingMap() ) const;
     bool Compare( Agent *start_agent,
                   const TreePtrInterface &start_x,
                   const CouplingMap &master_keys ) const;
@@ -124,15 +123,9 @@ private:
 	public:
 		VisibleWalk_iterator( TreePtr<Node> &root ) : UniqueWalk::iterator(root) {}        
 		VisibleWalk_iterator() : UniqueWalk::iterator() {}
-		virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const
-		{
-			return shared_ptr<VisibleWalk_iterator>( new VisibleWalk_iterator(*this) );
-		}      
+		virtual shared_ptr<ContainerInterface::iterator_interface> Clone() const;
 	private:
-		virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
-		{
-    		return Agent::AsAgent(n)->GetVisibleChildren(); 
-		}
+		virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const;
 	};
 
 	typedef ContainerFromIterator< VisibleWalk_iterator, TreePtr<Node> > VisibleWalk;       

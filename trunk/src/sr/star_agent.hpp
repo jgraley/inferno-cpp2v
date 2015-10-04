@@ -10,7 +10,7 @@
 namespace SR
 { 
 
-/// Agent used in a container pattern under a normal agent, that matches 
+/// Agent used in a container pattern under a standard agent, that matches 
 /// zero or more elements
 /// Star can match more than one node of any type in a container
 /// In a Sequence, only a contiguous subsequence of 0 or more elements will match
@@ -33,7 +33,7 @@ private:
     virtual TreePtr<Node> GetRestriction() const = 0;
 
 public:
-    // Internal node classes - NOTE these are not special nodes, and we use them like normal tree nodes
+    // Internal node classes - NOTE these are not agents, they are local tree nodes
     // Note: only needed for Star pattern
     struct SubContainer : Node 
     {
