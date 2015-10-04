@@ -92,7 +92,7 @@ public:
     static void SetMaxReps( int n, bool e ) { repetitions=n; rep_error=e; }
     const CompareReplace * GetOverallMaster() const;
 
-    //friend class NormalAgent;
+    //friend class StandardAgent;
     friend class Conjecture;
 
     virtual void SetStopAfter( vector<int> ssa, int d=0 )
@@ -131,19 +131,11 @@ private:
 	private:
 		virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
 		{
-			// We need to create a container of elements of the child.
-			if( Engine *e = dynamic_cast<Engine *>( n.get() ) )
-				return e->GetVisibleChildren();
-			else
-				return UniqueWalk::iterator::GetChildContainer(n);
+    		return Agent::AsAgent(n)->GetVisibleChildren(); 
 		}
 	};
 
 	typedef ContainerFromIterator< VisibleWalk_iterator, TreePtr<Node> > VisibleWalk;       
-};
-
-class EmbedableEngine : public Engine
-{
 };
 
 };

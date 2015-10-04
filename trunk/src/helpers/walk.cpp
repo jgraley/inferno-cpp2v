@@ -34,6 +34,19 @@ void FlattenNode_iterator::BypassEndOfContainer()
 }
 
 FlattenNode_iterator::FlattenNode_iterator( TreePtr<Node> r ) :
+	root( r.get() ),
+	ref_holder( r ),
+	empty( false )
+{
+    //members = shared_ptr< vector< int > >( new vector< int >( root->BasicItemise() ) );
+
+    mit = 0;
+    m_end = root->ItemiseSize();
+	//TRACE("Flattening node ")(*root)(" size %d\n", m_end);
+    NormaliseNewMember();
+}
+
+FlattenNode_iterator::FlattenNode_iterator( const Node *r ) :
 	root( r ),
 	empty( false )
 {

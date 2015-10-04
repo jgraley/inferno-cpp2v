@@ -3,12 +3,12 @@
 #include "common/hit_count.hpp"
 #include "helpers/simple_compare.hpp"
 #include "overlay_agent.hpp"
-#include "normal_agent.hpp"
+#include "standard_agent.hpp"
 #include "star_agent.hpp"
 
 using namespace SR;
 
-void NormalAgent::PatternQueryImpl() const
+void StandardAgent::PatternQueryImpl() const
 {
     vector< Itemiser::Element * > pattern_memb = Itemise();
     FOREACH( Itemiser::Element *ie, pattern_memb )
@@ -44,7 +44,7 @@ void NormalAgent::PatternQueryImpl() const
 }
 
 
-bool NormalAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
+bool StandardAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 {
     INDENT(".");
 
@@ -101,7 +101,7 @@ bool NormalAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 }
 
 
-bool NormalAgent::DecidedQuerySequence( SequenceInterface &x,
+bool StandardAgent::DecidedQuerySequence( SequenceInterface &x,
 		                                SequenceInterface &pattern ) const
 {
     INDENT(" ");
@@ -202,7 +202,7 @@ bool NormalAgent::DecidedQuerySequence( SequenceInterface &x,
 }
 
 
-bool NormalAgent::DecidedQueryCollection( CollectionInterface &x,
+bool StandardAgent::DecidedQueryCollection( CollectionInterface &x,
 		 					              CollectionInterface &pattern ) const
 {
     INDENT(" ");
@@ -264,7 +264,7 @@ bool NormalAgent::DecidedQueryCollection( CollectionInterface &x,
 }
 
 
-void NormalAgent::TrackingKey( Agent *from )
+void StandardAgent::TrackingKey( Agent *from )
 {
     INDENT(".");
     ASSERT( from );
@@ -308,7 +308,7 @@ void NormalAgent::TrackingKey( Agent *from )
 }
 
 
-TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> StandardAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT(".");
     if( keynode && IsLocalMatch(keynode.get()) ) 
@@ -318,7 +318,7 @@ TreePtr<Node> NormalAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 }
 
 
-TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // under substitution if not NULL
+TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // under substitution if not NULL
 {
 	INDENT(" ");
     ASSERT( keynode );
@@ -465,7 +465,7 @@ TreePtr<Node> NormalAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // unde
 }
 
     
-TreePtr<Node> NormalAgent::BuildReplaceNormal() 
+TreePtr<Node> StandardAgent::BuildReplaceNormal() 
 {
 	INDENT(" ");
  
@@ -535,7 +535,7 @@ TreePtr<Node> NormalAgent::BuildReplaceNormal()
 }
 
 
-void NormalAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+void StandardAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The graph plotter pre-loads the variables with the appearance of a normal node
 	// that will be used when plotting input/output trees that have not been 

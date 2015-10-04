@@ -76,6 +76,15 @@ Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
     return links;
 }
 
+
+shared_ptr<ContainerInterface> AgentCommon::GetVisibleChildren() const
+{
+	// Normally all children should be visible 
+   typedef ContainerFromIterator< FlattenNode_iterator, const Node * > FlattenNodePtr;
+   return shared_ptr<ContainerInterface>( new FlattenNodePtr(this) );
+    // Note: a pattern query should be just as good...
+}
+
     
 void AgentCommon::DoKey( TreePtr<Node> x )
 {
