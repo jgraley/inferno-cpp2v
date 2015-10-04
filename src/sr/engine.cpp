@@ -4,7 +4,7 @@
 #include "common/hit_count.hpp"
 #include "helpers/simple_compare.hpp"
 #include "slave_agent.hpp"
-#include "normal_agent.hpp"
+#include "standard_agent.hpp"
 #include "overlay_agent.hpp"
 #include "search_container_agent.hpp"
 #include "common/common.hpp"

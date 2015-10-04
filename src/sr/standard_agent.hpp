@@ -1,5 +1,5 @@
-#ifndef NORMAL_AGENT_HPP
-#define NORMAL_AGENT_HPP
+#ifndef STANDARD_AGENT_HPP
+#define STANDARD_AGENT_HPP
 
 #include "agent.hpp"
 #include "common/common.hpp"
@@ -16,7 +16,7 @@ namespace SR
 /// constructed using `MakePatternPtr`. All the `TreePtr` members are treated
 /// as pointers to sub-patterns and must match. Direct members (i.e. not in a 
 /// `Collection`) may be NULL to indicate a full wildcard (matches anything). 
-class NormalAgent : public virtual AgentCommon
+class StandardAgent : public virtual AgentCommon
 {
 public:
     virtual void PatternQueryImpl() const;
@@ -38,33 +38,33 @@ private:
 
 #define SPECIAL_NODE_FUNCTIONS ITEMISE_FUNCTION  
 
-/// Wrapper for normal pattern nodes that combines a NormalAgent with the specified pattern node
+/// Wrapper for normal pattern nodes that combines a StandardAgent with the specified pattern node
 template<typename NODE_TYPE>
-class NormalAgentWrapper : public virtual NODE_TYPE,
-                           public virtual NormalAgent
+class StandardAgentWrapper : public virtual NODE_TYPE,
+                           public virtual StandardAgent
 {
 public:
-    NormalAgentWrapper() : NODE_TYPE() {}
+    StandardAgentWrapper() : NODE_TYPE() {}
 
 	template<typename CP0>
-    NormalAgentWrapper(const CP0 &cp0) : 
+    StandardAgentWrapper(const CP0 &cp0) : 
         NODE_TYPE(cp0) {}
 
 	template<typename CP0, typename CP1>
-    NormalAgentWrapper(const CP0 &cp0, const CP1 &cp1) : 
+    StandardAgentWrapper(const CP0 &cp0, const CP1 &cp1) : 
         NODE_TYPE(cp0, cp1) {}
 
     template<typename CP0, typename CP1, typename CP2>
-    NormalAgentWrapper(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : 
+    StandardAgentWrapper(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : 
         NODE_TYPE(cp0, cp1, cp2) {}
     
     template<typename CP0, typename CP1, typename CP2, typename CP3>
-    NormalAgentWrapper(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2, const CP2 &cp3) : 
+    StandardAgentWrapper(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2, const CP2 &cp3) : 
         NODE_TYPE(cp0, cp1, cp2, cp3) {}
     
     virtual string GetTypeName() const // used by parse, render etc
     {
-        // Want to get rid of the NormalAgentWrapper<...> around the name. The main
+        // Want to get rid of the StandardAgentWrapper<...> around the name. The main
         // GetName() works via RTTI so no amount of casting of "this" will stop the full
         // final node's name being returned. So we have to actually make a temp in the
         // node type and use that.
@@ -80,27 +80,27 @@ class MakePatternPtrHelper
 public:    
     static inline TreePtr<NODE_TYPE> Make()
     {
-        return new NormalAgentWrapper<NODE_TYPE>;
+        return new StandardAgentWrapper<NODE_TYPE>;
     }    
     template<typename CP0>
     static inline TreePtr<NODE_TYPE> Make(const CP0 &cp0)
     {
-        return new NormalAgentWrapper<NODE_TYPE>(cp0);
+        return new StandardAgentWrapper<NODE_TYPE>(cp0);
     }    
     template<typename CP0, typename CP1>
     static inline TreePtr<NODE_TYPE> Make(const CP0 &cp0, const CP1 &cp1)
     {
-        return new NormalAgentWrapper<NODE_TYPE>(cp0, cp1);
+        return new StandardAgentWrapper<NODE_TYPE>(cp0, cp1);
     }    
     template<typename CP0, typename CP1, typename CP2>
     static inline TreePtr<NODE_TYPE> Make(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2)
     {
-        return new NormalAgentWrapper<NODE_TYPE>(cp0, cp1, cp2);
+        return new StandardAgentWrapper<NODE_TYPE>(cp0, cp1, cp2);
     }    
     template<typename CP0, typename CP1, typename CP2, typename CP3>
     static inline TreePtr<NODE_TYPE> Make(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2, const CP3 &cp3)
     {
-        return new NormalAgentWrapper<NODE_TYPE>(cp0, cp1, cp2, cp3);
+        return new StandardAgentWrapper<NODE_TYPE>(cp0, cp1, cp2, cp3);
     }    
 };
 
@@ -137,7 +137,7 @@ public:
 };
 
 
-// Similar to MakeTreePtr<> (see node/specialise_oostd.hpp) but produces a TreePtr to NormalAgentWrapper<NODE_TYPE> rather
+// Similar to MakeTreePtr<> (see node/specialise_oostd.hpp) but produces a TreePtr to StandardAgentWrapper<NODE_TYPE> rather
 // than just NODE_TYPE when NODE_TYPE is not already a kind of Agent. 
 /// Utility for constructing nodes that are to be used in patterns from normal tree nodes
 template<typename NODE_TYPE>

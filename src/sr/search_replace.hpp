@@ -66,7 +66,7 @@ public:
 // search_replace.hpp. This would not be so under the agents scheme. 
 // We compromise by putting them here. Putting them after the code clarifies
 // that there is no dependency; just the will to be nice to client code.
-#include "normal_agent.hpp"
+#include "standard_agent.hpp"
 #include "search_container_agent.hpp"
 #include "star_agent.hpp"
 #include "green_grass_agent.hpp"

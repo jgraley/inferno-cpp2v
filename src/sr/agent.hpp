@@ -85,6 +85,7 @@ public:
     virtual void TrackingKey( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
 	virtual void AgentConfigure( const Engine *e ) = 0;
+    virtual shared_ptr<ContainerInterface> GetVisibleChildren() const = 0;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const = 0;
 		
 	static Agent *AsAgent( TreePtr<Node> node );
@@ -106,6 +107,7 @@ public:
     virtual Links DecidedQuery( const TreePtrInterface &x,
                                 deque<ContainerInterface::iterator> choices ) const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const = 0;
+    virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
     void DoKey( TreePtr<Node> x );
     TreePtr<Node> GetCoupled();                                  
     void ResetKey();    

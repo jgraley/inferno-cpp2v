@@ -31,6 +31,7 @@ public:
     string GetName() const;
     FlattenNode_iterator(); // makes "end" iterator
     FlattenNode_iterator( TreePtr<Node> root );
+    FlattenNode_iterator( const Node *root );
 private:
     bool IsAtEnd() const;
     void BypassEndOfContainer();
@@ -45,7 +46,8 @@ private:
     int m_end;
     ContainerInterface::iterator cit;
     ContainerInterface::iterator c_end;
-    TreePtr<Node> root;
+    const Node *root;
+    TreePtr<Node> ref_holder;
     bool empty; // TODO use NULL root for empty
 };
 
