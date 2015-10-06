@@ -1,4 +1,4 @@
-#include "normality_wrapper.hpp"
+#include "normality_agent_wrapper.hpp"
 #include "helpers/simple_compare.hpp"
 #include "search_replace.hpp" 
 
@@ -9,13 +9,13 @@ using namespace SR;
 // in both cases, contexts end at couplings.
 // The region contains all the agents in a context.
 
-NormalityWrapper::NormalityWrapper( Agent *agent ) :
+NormalityAgentWrapper::NormalityAgentWrapper( Agent *agent ) :
     wrapped_agent( agent )
 {
 }
     
 
-void NormalityWrapper::Configure( const Set<Agent *> &engine_agents, 
+void NormalityAgentWrapper::Configure( const Set<Agent *> &engine_agents, 
                                   const Set<Agent *> &master_agents, 
                                   const Engine *engine )
 {
@@ -32,7 +32,7 @@ void NormalityWrapper::Configure( const Set<Agent *> &engine_agents,
 			Set< Agent * > surrounding_agents = SetUnion( master_agents, engine_agents );
 			al.engine.Configure( l.agent, TreePtr<Node>(), surrounding_agents, engine );
 			
-			// Find the terminal 
+			// Find the terminal agents
 			TerminalFinder tf( l.agent, engine_agents, master_agents, al->terminal_agents );
 			FOREACH( TreePtr<Node> n, tf )
 			{ // Don't do anything: the TerminalFinder itself fills in al->terminal_agents
@@ -55,7 +55,7 @@ void SetMasterKeys( const CouplingMap &keys )
 }
 
 
-void NormalityWrapper::PatternQueryImpl() const
+void NormalityAgentWrapper::PatternQueryImpl() const
 {
     PatternLinks plinks = wrapped_agent->PatternQuery();
 
@@ -79,7 +79,7 @@ void NormalityWrapper::PatternQueryImpl() const
 }
 
 
-bool NormalityWrapper::DecidedQueryImpl( const TreePtrInterface &x ) const
+bool NormalityAgentWrapper::DecidedQueryImpl( const TreePtrInterface &x ) const
 {
     INDENT("'");    
     
@@ -169,7 +169,7 @@ bool NormalityWrapper::DecidedQueryImpl( const TreePtrInterface &x ) const
 // think this happens. 
 
 /* What might happen:
- * A pass reaches a NormalityWrapper for an evaluator context. The wrapper registers whole-domain 
+ * A pass reaches a NormalityAgentWrapper for an evaluator context. The wrapper registers whole-domain 
  * decisions for all couplings OUT of the evaluator's abnormals and gets choices. It links out back
  * into the surrounding context with these choices, and they are therefore evaluated using the 
  * global AND-rule. But this is CORRECT! Since a coupling must include at least one normal 
@@ -191,14 +191,14 @@ bool NormalityWrapper::DecidedQueryImpl( const TreePtrInterface &x ) const
  */
 
 
-TreePtr<Node> NormalityWrapper::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> NormalityAgentWrapper::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     ASSERT("search only");
     return TreePtr<Node>();
 }
 
 
-void NormalityWrapper::GetGraphAppearance( bool *bold, string *text, string *shape ) const
+void NormalityAgentWrapper::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
 	// The Region agent should not be used
 	*bold = true;
@@ -207,7 +207,7 @@ void NormalityWrapper::GetGraphAppearance( bool *bold, string *text, string *sha
 }
 
 
-shared_ptr<ContainerInterface> NormalityWrapper::GetVisibleChildren() const
+shared_ptr<ContainerInterface> NormalityAgentWrapper::GetVisibleChildren() const
 {
 	// Normally, when an engine hits another engine while walking its subtree
 	// during configure, any children (presumably in a co-inherited Agent class)
@@ -216,7 +216,7 @@ shared_ptr<ContainerInterface> NormalityWrapper::GetVisibleChildren() const
 }
 
 
-shared_ptr<ContainerInterface> NormalityWrapper::TerminalFinder_iterator::GetChildContainer( TreePtr<Node> n ) const
+shared_ptr<ContainerInterface> NormalityAgentWrapper::TerminalFinder_iterator::GetChildContainer( TreePtr<Node> n ) const
 {
 	// We are walking agents under the wrapped agent, which is hidden from the 
 	// surrounding engine, so we will only see an engine agent if it is coupled to the
@@ -239,7 +239,7 @@ shared_ptr<ContainerInterface> NormalityWrapper::TerminalFinder_iterator::GetChi
 
 
 // Standard virtual cloner
-shared_ptr<ContainerInterface::iterator_interface> NormalityWrapper::TerminalFinder_iterator::Clone() const
+shared_ptr<ContainerInterface::iterator_interface> NormalityAgentWrapper::TerminalFinder_iterator::Clone() const
 {
 	return shared_ptr<VisibleWalk_iterator>( new VisibleWalk_iterator(*this) );
 }      

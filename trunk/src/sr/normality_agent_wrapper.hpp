@@ -1,5 +1,5 @@
-#ifndef NORMALITY_WRAPPER_HPP
-#define NORMALITY_WRAPPER_HPP
+#ifndef NORMALITY_AGENT_WRAPPER_HPP
+#define NORMALITY_AGENT_WRAPPER_HPP
 
 #include "agent.hpp"
 #include "engine.hpp"
@@ -11,9 +11,9 @@
 namespace SR
 { 
 
-class NormalityWrapper : public virtual AgentCommon
+class NormalityAgentWrapper : public virtual AgentCommon
 {
-	NormalityWrapper( Agent *agent ); 
+	NormalityAgentWrapper( Agent *agent ); 
 	void Configure( const Set<Agent *> &engine_agents, // Agents of the enclosing engine
 	                const Set<Agent *> &master_agents, // Agents of the enclosing engine's master
 	                const Engine *master );
