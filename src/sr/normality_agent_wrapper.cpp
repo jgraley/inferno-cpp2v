@@ -99,7 +99,7 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface &
 			++alit;
 			FOREACH( Agent *ta, al->terminal_agents )
 			{
-				wrapper_choices.push_back( *(wrapper_choices.front()) );
+				wrapper_choices.push_back( *(wrapper_choices.front()) ); // TODO use iterator for choices; all this popping is stupid
 				choices.pop_front();
 			}
 		}
@@ -110,98 +110,97 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface &
 		}
 	}
     
+    PatternQueryResult wrapper_result;
+    wrapper_result.evaluator = false; // we will hide evaluators
+    wrapper_result.local_match = true; // ready for and-rule 
     
     // Query the wrapped node for blocks and decisions
     DecidedQueryResult wrapped_result = wrapped_agent->DecidedQuery( x, wrapped_choices );
-    PatternQueryResult wrapper_result;
     
-    // Copy base stuff over
-    wrapper_result.evaluator = wrapped_result.evaluator;
-    wrapper_result.local_match = wrapped_result.local_match;
+    // Early-out on local mismatch of wrapped node.
+    if( !wrapped_result.local_match )
+    {
+        wrapper_result.local_match = false;
+		return wrapper_result;
+	}           
 
-    // early out on local mismatch of wrapped node.
-    if( !wrapper_result.local_match )
-        return wrapper_result; 
-		           
     // Loop over the wrapped node's returned blocks. Abnormal entries are co-looped with our
     // own abnormal_links container.
-    deque<bool> results;
+    deque<bool> compare_results;
     deque< AbnormalLink >::iterator alit = abnormal_links.begin();    
     FOREACH( DecidedQueryResult::Block b, wrapped_result.blocks )
     {
-		if( b.is_link )
+		if( b.is_link && b.abnormal )
 		{
-			if( b.abnormal )
+			ASSERT( !b.is_decision ); // Don't know what to do with decision joined to abnormal link TODO decide
+			al = *alit;
+			++alit;
+			
+			// TODO should do this before the wrapped_agent->DecidedQuery() since it *might* help with
+			// choice pushing into the wrapped node.
+			// Create whole-domain decisions for the terminal agents and key them with the resultant choices 
+			CouplingMap terminal_keys;			
+			FOREACH( Agent *ta, terminal_agents )
 			{
-				ASSERT( !b.is_decision ); // Don't know what to do with decision joined to abnormal link TODO decide
-				al = *alit;
-				++alit;
+				// Get the root of everything
+				TreePtr<Node> c = *(engine->GetOverallMaster()->pcontext);
+				// Make a walker of everything
+				shared_ptr<ContainerInterface> pwc = shared_ptr<ContainerInterface>( new Walk( c, NULL, NULL ) );
+				// TODO see "Problems with context walk" below
 				
-				// TODO should do this before the wrapped_agent->DecidedQuery() since it *might* help with
-				// choice pushing into the wrapped node.
-				// Create whole-domain decisions for the terminal agents and key them with the resultant choices 
-				CouplingMap terminal_keys;			
-				FOREACH( Agent *ta, terminal_agents )
+				// Give that walker to the conjecture as a decision and make a block
+				ContainerInterface::iterator cit;
+				if( wrapper_choices.empty() )
 				{
-					// Get the root of everything
-					TreePtr<Node> c = *(engine->GetOverallMaster()->pcontext);
-					// Make a walker of everything
-					shared_ptr<ContainerInterface> pwc = shared_ptr<ContainerInterface>( new Walk( c, NULL, NULL ) );
-					// TODO see "Problems with context walk" below
-					
-					// Give that walker to the conjecture as a decision and make a block
-					ContainerInterface::iterator cit;
-                    if( wrapper_choices.empty() )
-					{
-						cit = pwc->begin(); // No choice was given to us so assume first one
-					}
-					else
-					{
-						cit = wrapper_choices.front();  // Use and consume the choice that was given to us
-						ASSERT( cit != end );
-						wrapper_choices.pop_front();
-					}
-					DecidedQueryResult::Block nb;
-					nb.is_link = true;
-					nb.abnormal = false;
-					nb.agent = ta;
-                    nb.px = ????&(*cit); // do not simplify! we want a simple pointer, not an iterator TODO or do we
-                    nb.local_x = TreePtr<Node>();					
-					Conjecture::Range r;
-					r.begin = pwc->begin();
-					r.end = pwc->end();
-					nb.is_decision = true;
-					nb.decision = Conjecture::Range( pwc->begin(), pwc->end() );
-					wrapped_result.push_back( nb );
-
-					// Consider the chosen (or pushed) node to be a key for the benefit of the local engine
-					terminal_keys[ta] = *cit;				
+					cit = pwc->begin(); // No choice was given to us so assume first one
 				}
-				
-				// Get the keys that the sub-engine will need to use, and invoke it on the block
-				// Theory is that, of the enclosing engine's agents, the terminal ones are the only ones the sub-engine will see.
-				CouplingMap coupling_keys = MapUnion( master_keys, terminal_keys ); 
-				bool result = al.engine.Compare( l.GetX(), coupling_keys );
-				
-				// Deal with result - store for evaluator otherwise do AND-rule with early-out
-				if( evaluator )
-					results.push_back(result);
-				else if( !result )
-					return false;
+				else
+				{
+					cit = wrapper_choices.front();  // Use and consume the choice that was given to us
+					ASSERT( cit != end );
+					wrapper_choices.pop_front();
+				}
+				DecidedQueryResult::Block nb;
+				nb.is_link = true;
+				nb.abnormal = false;
+				nb.agent = ta;
+				nb.px = &(*cit); // do not simplify! we want a simple pointer, not an iterator TODO or do we
+				nb.local_x = TreePtr<Node>();					
+				Conjecture::Range r;
+				r.begin = pwc->begin();
+				r.end = pwc->end();
+				nb.is_decision = true;
+				nb.decision = Conjecture::Range( pwc->begin(), pwc->end() );
+				wrapped_result.push_back( nb );
+
+				// Consider the chosen (or pushed) node to be a key for the benefit of the local engine
+				terminal_keys[ta] = *cit;				
 			}
-			else
+			
+			// Get the keys that the sub-engine will need to use, and invoke it on the block
+			// Theory is that, of the enclosing engine's agents, the terminal ones are the only ones the sub-engine will see.
+			CouplingMap coupling_keys = MapUnion( master_keys, terminal_keys ); 
+			bool result = al.engine.Compare( l.GetX(), coupling_keys );
+			
+			// Deal with result - store for evaluator otherwise do AND-rule with early-out
+			if( evaluator )
+				compare_results.push_back(result);
+			else if( !result )
 			{
-				// Normal blocks are handled normally, so forward to enclosing engine
-				RememberLink( l );
-			}		
+				wrapper_result.local_match = false;
+				return wrapper_result;
+			}
+    	}
+	    else
+	    {
+		    wrapped_result.push_back( b );
 		}
-	}
+    }
 	
 	// Run the evaluator if one was supplied.
-	if( evaluator )
-	    return (*evaluator)( results );
-	else
-	    return true;
+	if( wrapped_result.evaluator )
+	    wrapper_result.local_match = (*evaluator)( compare_results );
+    return wrapper_result;
 }
 
 // Note: Problems with context walk
@@ -267,10 +266,15 @@ void NormalityAgentWrapper::GetGraphAppearance( bool *bold, string *text, string
 
 shared_ptr<ContainerInterface> NormalityAgentWrapper::GetVisibleChildren() const
 {
-	// Normally, when an engine hits another engine while walking its subtree
-	// during configure, any children (presumably in a co-inherited Agent class)
-	// are hidden. Unless the agent overrides (eg Slave, which exposes "through")
-	return shared_ptr< Sequence<Node> >();
+    PatternQueryResult plinks = wrapped_agent->PatternQuery();
+	shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
+
+    // Hide the abnormal children. I need different names for things.
+    FOREACH( PatternQueryResult::Block b, plinks.blocks )
+		if( !b.abnormal )
+			seq->push_back( GetThrough() );
+			
+	return seq;
 }
 
 
