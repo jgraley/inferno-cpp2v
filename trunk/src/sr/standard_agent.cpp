@@ -231,7 +231,7 @@ bool StandardAgent::DecidedQueryCollection( CollectionInterface &x,
 	    {
 	    	// We have to decide which node in the tree to match, so use the present conjecture
 	    	// Note: would like to use xremaining, but it will fall out of scope
-	    	// Report a link for the chosen node
+	    	// Report a block for the chosen node
 			ContainerInterface::iterator xit = RememberDecisionLink( false, pia, x.begin(), x.end() );
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)

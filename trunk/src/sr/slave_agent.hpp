@@ -30,7 +30,7 @@ public:
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> GetThrough() const = 0;    
     virtual void GetGraphInfo( vector<string> *labels, 
-                               vector< TreePtr<Node> > *links ) const;
+                               vector< TreePtr<Node> > *blocks ) const;
     virtual void Configure( const Set<Agent *> &agents_already_configured, const Engine *master );
     void SetMasterCouplingKeys( const CouplingMap &keys );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );

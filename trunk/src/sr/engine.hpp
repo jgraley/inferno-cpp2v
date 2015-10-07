@@ -69,13 +69,13 @@ private:
                          CouplingMap &local_keys,
                          const CouplingMap &master_keys,
                          Set<Agent *> &reached ) const;
-    bool CompareLinks( const Links &mylinks,
+    bool CompareLinks( const DecidedQueryResult &mylinks,
                        bool can_key,
                        Conjecture &conj,
                        CouplingMap &local_keys,
                        const CouplingMap &master_keys,
                        Set<Agent *> &reached ) const;
-    bool CompareEvaluatorLinks( const Links &mylinks,
+    bool CompareEvaluatorLinks( const DecidedQueryResult &mylinks,
 							    Conjecture &conj,
 							    CouplingMap &local_keys,
 							    const CouplingMap &master_keys,
@@ -86,7 +86,7 @@ private:
 
 public:
     virtual void GetGraphInfo( vector<string> *labels, 
-                               vector< TreePtr<Node> > *links ) const;
+                               vector< TreePtr<Node> > *blocks ) const;
 
     static void SetMaxReps( int n, bool e ) { repetitions=n; rep_error=e; }
     const CompareReplace * GetOverallMaster() const;

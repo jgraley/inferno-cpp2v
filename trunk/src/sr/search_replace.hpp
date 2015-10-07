@@ -41,7 +41,7 @@ public:
     TreePtr<Node> *pcontext;
     mutable Set< TreePtr<Node> > dirty_grass;    
     virtual void GetGraphInfo( vector<string> *labels, 
-                               vector< TreePtr<Node> > *links ) const;    
+                               vector< TreePtr<Node> > *blocks ) const;    
     friend class Conjecture;
     virtual bool IsMatch( TreePtr<Node> context,       
                           TreePtr<Node> root );

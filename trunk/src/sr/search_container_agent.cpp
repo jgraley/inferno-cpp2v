@@ -80,7 +80,7 @@ shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( TreePtr<Node
 
 void AnyNodeAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
-	// The AnyNode node appears as a small circle with a ? sign in it. The terminus link emerges from the
+	// The AnyNode node appears as a small circle with a ? sign in it. The terminus block emerges from the
 	// right of the circle. ? implies the tendancy to match exactly one thing.
 	*bold = true;
 	*shape = "circle";
@@ -123,8 +123,8 @@ void StuffAgent::DecidedQueryRestrictions( ContainerInterface::iterator thistime
 
 void StuffAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
-	// The Stuff node appears as a small circle with a # character inside it. The terminus link emerges from the
-	// right of the circle. If there is a recurse restriction the circle is egg-shaped and the restriction link 
+	// The Stuff node appears as a small circle with a # character inside it. The terminus block emerges from the
+	// right of the circle. If there is a recurse restriction the circle is egg-shaped and the restriction block 
 	// emerges from the top of the egg shape. # is chosen (as is the name Stuff) for its similarity to * because
 	// the nodes are both able to wildcard multiple nodes in the tree.
 	*bold = true;

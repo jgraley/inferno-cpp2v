@@ -16,33 +16,31 @@ class SpecialBase;
 class Engine;
 class Agent;
 
-class PatternLinks
+class PatternQueryResult 
 {
 public:    
-    struct Link 
+    struct Block 
     {
         bool abnormal;
         Agent *agent;
     };
         
-    vector<Link> links;
+    deque<Block> blocks;
     shared_ptr<BooleanEvaluator> evaluator;
 
     void clear()
     {
-		links.clear();
+		blocks.clear();
         evaluator = shared_ptr<BooleanEvaluator>();
     }
 };
 
 
-class Links 
+class DecidedQueryResult 
 {
 public:    
-    struct Link : PatternLinks::Link // TODO expand out inheritance
+    struct Block 
     {
-        const TreePtrInterface *px;
-        TreePtr<Node> local_x;
         const TreePtrInterface *GetX() const
         {
 			if( px )
@@ -50,22 +48,28 @@ public:
 			else
 				return &local_x; // linked pattern is local, kept alive by local_x    
 		}	
+
+        bool is_link;
+        bool abnormal;
+        Agent *agent;
+        const TreePtrInterface *px;
+        TreePtr<Node> local_x;
+        bool is_decision;
+        Conjecture::Range decision;
     };
         
-    vector<Link> links; 
-    deque<Conjecture::Range> decisions;
-    shared_ptr<BooleanEvaluator> evaluator;
-    bool local_match;
-
     void clear()
     {
-        links.clear();
-        decisions.clear();
+        blocks.clear();
         evaluator = shared_ptr<BooleanEvaluator>();        
     }
+
+    deque<Block> blocks; 
+    shared_ptr<BooleanEvaluator> evaluator;
+    bool local_match;
 };
 
-bool operator<(const Links::Link &l0, const Links::Link &l1);
+bool operator<(const DecidedQueryResult::Block &l0, const DecidedQueryResult::Block &l1);
 
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
@@ -73,11 +77,11 @@ class Agent : public virtual Traceable,
               public virtual Node
 {
 public:
-    /// List the Agents reached via links during search
-    virtual PatternLinks PatternQuery() const = 0;
+    /// List the Agents reached via blocks during search
+    virtual PatternQueryResult PatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
-    virtual Links DecidedQuery( const TreePtrInterface &x,
-                                deque<ContainerInterface::iterator> choices ) const = 0;                                
+    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
+                                             deque<ContainerInterface::iterator> choices ) const = 0;                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const TreePtrInterface &x,
@@ -102,10 +106,10 @@ class AgentCommon : public Agent
 public:
     AgentCommon();
     void AgentConfigure( const Engine *e );
-    virtual PatternLinks PatternQuery() const;
+    virtual PatternQueryResult PatternQuery() const;
+    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
+                                             deque<ContainerInterface::iterator> choices ) const;
     virtual void PatternQueryImpl() const = 0;
-    virtual Links DecidedQuery( const TreePtrInterface &x,
-                                deque<ContainerInterface::iterator> choices ) const;
     virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const = 0;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
     void DoKey( TreePtr<Node> x );
@@ -126,8 +130,8 @@ protected:
     void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x ) const; // Decided query
     void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) const; // Decided query
     void RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const; // All queries
-    void RememberLink( const Links::Link &l ) const; // Decided query
-    void RememberLink( const PatternLinks::Link &l ) const; // Decided query
+    void RememberLink( const DecidedQueryResult::Block &l ) const; // Decided query
+    void RememberLink( const PatternQueryResult::Block &l ) const; // Decided query
 
     const Engine *engine;    
     ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
@@ -145,11 +149,11 @@ private:
     // restricted to a single call (they do not carry state from one call to
     // the next). TODO pass in and out of DecidedQueryImpl() as params - some
     // restructuing needed to make this nice as there are modifiers here that
-    // would need to operate on some new object that combines the "links" and
+    // would need to operate on some new object that combines the "blocks" and
     // "choices".
     mutable enum {IDLE, PATTERN, DECIDED} current_query;
-    mutable PatternLinks pattern_links;    
-    mutable Links links;    
+    mutable PatternQueryResult pattern_result;    
+    mutable DecidedQueryResult decided_result;    
     mutable deque<ContainerInterface::iterator> choices;
 };
 
