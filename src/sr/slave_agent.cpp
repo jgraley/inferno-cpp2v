@@ -42,11 +42,11 @@ void SlaveAgent::TrackingKey( Agent *from )
 
 
 void SlaveAgent::GetGraphInfo( vector<string> *labels, 
-                               vector< TreePtr<Node> > *links ) const
+                               vector< TreePtr<Node> > *blocks ) const
 {
     labels->push_back("through");
-    links->push_back(GetThrough());
-    Engine::GetGraphInfo( labels, links );
+    blocks->push_back(GetThrough());
+    Engine::GetGraphInfo( labels, blocks );
 }
 
 
@@ -89,7 +89,7 @@ void SlaveAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) c
     // Note from graph plotter: SearchReplace, CompareReplace, SlaveSearchReplace or 
     // SlaveCompareReplace appear in sharp-cornered rectangles, with the name at the top and the
     // member TreePtr names below. These may be some combination of search, compare, replace and through
-    // and their links are approximately to the right.
+    // and their blocks are approximately to the right.
 }
 
 

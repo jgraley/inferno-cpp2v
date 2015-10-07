@@ -44,7 +44,7 @@ void NotMatchAgent::GetGraphAppearance( bool *bold, string *text, string *shape 
 
 bool NotMatchAgent::BooleanEvaluatorNot::operator()( deque<bool> &inputs ) const
 {
-	ASSERT( inputs.size() == 1 ); // we should remember one link
+	ASSERT( inputs.size() == 1 ); // we should remember one block
 	return !inputs[0];
 }
 

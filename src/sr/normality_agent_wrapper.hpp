@@ -11,20 +11,21 @@
 namespace SR
 { 
 
-class NormalityAgentWrapper : public virtual AgentCommon
+class NormalityAgentWrapper : public virtual Agent
 {
 	NormalityAgentWrapper( Agent *agent ); 
 	void Configure( const Set<Agent *> &engine_agents, // Agents of the enclosing engine
 	                const Set<Agent *> &master_agents, // Agents of the enclosing engine's master
 	                const Engine *master );
 	void SetMasterKeys( const CouplingMap &keys ); // Keys of the enclosing engine's master (call this at top of engine Compare())
-    virtual void PatternQueryImpl() const;
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
+    virtual PatternQueryResult PatternQuery() const;
+    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
+                                             deque<ContainerInterface::iterator> choices ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     shared_ptr<ContainerInterface> GetVisibleChildren() const;
     
-    // Holder for info beyond what PatternQuery provides (the agent) for abnormal links.     
+    // Holder for info beyond what PatternQuery provides (the agent) for abnormal blocks.     
     struct AbnormalLink
     {
 		AbnormalLink() : engine(false) {} // Engine is compare, not search
@@ -37,10 +38,10 @@ class NormalityAgentWrapper : public virtual AgentCommon
 	};
     
     // The agent we are wrapping. Typically we will wrap all agents with >0 
-    // abnormal links.
+    // abnormal blocks.
     Agent * const wrapped_agent;    
     
-    // Additional link info for abnormal links, in same order as Pattern/DecidedQuery
+    // Additional block info for abnormal blocks, in same order as Pattern/DecidedQuery
     deque< shared_ptr<AbnormalLink> > abnormal_links;
     
     // Map of keys

@@ -20,10 +20,10 @@ CompareReplace::CompareReplace( TreePtr<Node> cp,
 
 
 void CompareReplace::GetGraphInfo( vector<string> *labels, 
-                                   vector< TreePtr<Node> > *links ) const
+                                   vector< TreePtr<Node> > *blocks ) const
 {
     // Disambiguate conflict between Transformation and Engine
-    Engine::GetGraphInfo( labels, links );
+    Engine::GetGraphInfo( labels, blocks );
 }
 
     

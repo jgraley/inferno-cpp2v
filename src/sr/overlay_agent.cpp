@@ -36,7 +36,7 @@ TreePtr<Node> OverlayAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 
 void OverlayAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
-	// The Overlay node is shown as a small triangle, with the through link on the right and the overlay link
+	// The Overlay node is shown as a small triangle, with the through block on the right and the overlay block
 	// coming out of the bottom.
 	*bold = true;
 	*shape = "triangle";

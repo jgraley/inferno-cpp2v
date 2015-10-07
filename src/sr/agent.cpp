@@ -36,26 +36,26 @@ void AgentCommon::AgentConfigure( const Engine *e )
 }
 
 
-PatternLinks AgentCommon::PatternQuery() const
+PatternQueryResult AgentCommon::PatternQuery() const
 {
     ASSERT(this);
     ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
 	ASSERT( current_query == IDLE );
 	current_query = PATTERN;
 
-    // choices are read by the impl; links are updated by the impl
-    pattern_links.clear();
+    // choices are read by the impl; blocks are updated by the impl
+    pattern_result.clear();
         
-    // Determine how agent links to other agents
+    // Determine how agent blocks to other agents
     PatternQueryImpl();
         
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
     current_query = IDLE;
-    return pattern_links;
+    return pattern_result;
 }
 
 
-Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
+DecidedQueryResult AgentCommon::DecidedQuery( const TreePtrInterface &x,
                                  deque<ContainerInterface::iterator> ch ) const
 {
     ASSERT(this);
@@ -63,17 +63,17 @@ Links AgentCommon::DecidedQuery( const TreePtrInterface &x,
 	ASSERT( current_query == IDLE );
 	current_query = DECIDED;
 
-    // choices are read by the impl; links are updated by the impl
-    links.clear();
+    // choices are read by the impl; blocks are updated by the impl
+    decided_result.clear();
     choices = ch;
     
     // Do the agent-specific local checks (x versus characteristics of the present agent)
-    // Also takes notes of how child agents link to children of x (depending on conjecture)
-    links.local_match = DecidedQueryImpl( x );
+    // Also takes notes of how child agents block to children of x (depending on conjecture)
+    decided_result.local_match = DecidedQueryImpl( x );
         
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
     current_query = IDLE;
-    return links;
+    return decided_result;
 }
 
 
@@ -111,65 +111,69 @@ void AgentCommon::ResetKey()
 void AgentCommon::RememberLink( bool abnormal, Agent *a ) const
 {
 	ASSERT( current_query==PATTERN );
-    PatternLinks::Link l;
-    l.abnormal = abnormal;
-    l.agent = a;
-    TRACE("Remembering link %d ", pattern_links.links.size())(*a)(abnormal?" abnormal":" normal")("\n");
-    pattern_links.links.push_back( l );
+    PatternQueryResult::Block b;
+    b.abnormal = abnormal;
+    b.agent = a;
+    TRACE("Remembering block %d ", pattern_result.blocks.size())(*a)(abnormal?" abnormal":" normal")("\n");
+    pattern_result.blocks.push_back( b );
 }
 
 
 void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x ) const
 {
 	ASSERT( current_query==DECIDED );
-    Links::Link l;
-    l.abnormal = abnormal;
-    l.agent = a;
-    l.px = &x;
-    l.local_x = TreePtr<Node>();
-    TRACE("Remembering link %d ", links.links.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
-    links.links.push_back( l );
+    DecidedQueryResult::Block b;
+    b.is_link = true;
+    b.abnormal = abnormal;
+    b.agent = a;
+    b.px = &x;
+    b.local_x = TreePtr<Node>();
+    b.is_decision = false;
+    TRACE("Remembering block %d ", decided_result.blocks.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
+    decided_result.blocks.push_back( b );
 }
 
 
-void AgentCommon::RememberLink( const Links::Link &l ) const
-{
-    links.links.push_back( l );
-}
-
-    
-void AgentCommon::RememberLink( const PatternLinks::Link &l ) const
-{
-    pattern_links.links.push_back( l );
-}
-
-    
 void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) const
 {
 	ASSERT( current_query==DECIDED );
     ASSERT(x);
-    Links::Link l;
-    l.abnormal = abnormal;
-    l.agent = a;
-    l.px = NULL;    
-    l.local_x = x;
-    TRACE("Remembering local link %d ", links.links.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
-    links.links.push_back( l );
+    DecidedQueryResult::Block b;
+    b.is_link = true;
+    b.abnormal = abnormal;
+    b.agent = a;
+    b.px = NULL;    
+    b.local_x = x;
+    b.is_decision = false;
+    TRACE("Remembering local block %d ", decided_result.blocks.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
+    decided_result.blocks.push_back( b );
 }
 
 
+void AgentCommon::RememberLink( const DecidedQueryResult::Block &b ) const
+{
+    decided_result.blocks.push_back( b );
+}
+
+    
+void AgentCommon::RememberLink( const PatternQueryResult::Block &b ) const
+{
+    pattern_result.blocks.push_back( b);
+}
+
+    
 void AgentCommon::RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const
 {
 	ASSERT( current_query!=IDLE );
 	if( current_query==PATTERN )
 	{
-		ASSERT( !pattern_links.evaluator ); // should not register more than one
-		pattern_links.evaluator = e;
+		ASSERT( !pattern_result.evaluator ); // should not register more than one
+		pattern_result.evaluator = e;
 	}
 	else
 	{
-		ASSERT( !links.evaluator ); // should not register more than one
-	    links.evaluator = e;
+		ASSERT( !decided_result.evaluator ); // should not register more than one
+	    decided_result.evaluator = e;
 	}
 }	
 
@@ -193,7 +197,12 @@ ContainerInterface::iterator AgentCommon::HandleDecision( ContainerInterface::it
     Conjecture::Range r;
     r.begin = begin;
     r.end = end;
-    links.decisions.push_back(r); // Report the range back
+	ASSERT( current_query==DECIDED );
+    DecidedQueryResult::Block b;
+    b.is_link = false;
+    b.is_decision = true;
+    b.decision = r;
+    decided_result.blocks.push_back( b );
         
     return it;
 }
@@ -218,20 +227,22 @@ ContainerInterface::iterator AgentCommon::RememberDecisionLink( bool abnormal,
         choices.pop_front();
     }
     
-    Links::Link l;
-    l.abnormal = abnormal;
-    l.agent = a;
-    l.px = &(*it); // do not simplify! we want a simple pointer, not an iterator TODO or do we
-    l.local_x = TreePtr<Node>();
-    TRACE("Remembering decision link %d ", links.links.size())(*a)(" -> ")(**it)(abnormal?" abnormal":" normal")("\n");
+    DecidedQueryResult::Block b;
+    b.is_link = true;
+    b.abnormal = abnormal;
+    b.agent = a;
+    b.px = &(*it); // do not simplify! we want a simple pointer, not an iterator TODO or do we
+    b.local_x = TreePtr<Node>();
+    TRACE("Remembering decision block %d ", decided_result.blocks.size())(*a)(" -> ")(**it)(abnormal?" abnormal":" normal")("\n");
 
     Conjecture::Range r;
     r.begin = begin;
     r.end = end;
+    b.is_decision = true;
+    b.decision = r;
 
-    // Put it all in links TODO tie these together in the links struct
-    links.links.push_back( l );    
-    links.decisions.push_back(r); 
+    // Put it all in blocks TODO tie these together in the blocks struct
+    decided_result.blocks.push_back( b );    
     
     return it; // Note: we have to have the iterator even when a coupling push has occurred, since
                // we should have checked that the pushed back node is actually in the container 
@@ -239,7 +250,7 @@ ContainerInterface::iterator AgentCommon::RememberDecisionLink( bool abnormal,
 }                                        
                                         
                                         
-bool SR::operator<(const SR::Links::Link &l0, const SR::Links::Link &l1)
+bool SR::operator<(const SR::DecidedQueryResult::Block &l0, const SR::DecidedQueryResult::Block &l1)
 {
     if( l0.abnormal != l1.abnormal )
         return (int)l0.abnormal < (int)l1.abnormal;
