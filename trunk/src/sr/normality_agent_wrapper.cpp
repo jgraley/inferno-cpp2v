@@ -272,7 +272,7 @@ shared_ptr<ContainerInterface> NormalityAgentWrapper::GetVisibleChildren() const
     // Hide the abnormal children. I need different names for things.
     FOREACH( PatternQueryResult::Block b, plinks.blocks )
 		if( !b.abnormal )
-			seq->push_back( GetThrough() );
+			seq->push_back( b.agent );
 			
 	return seq;
 }
