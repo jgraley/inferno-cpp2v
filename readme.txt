@@ -47,6 +47,8 @@ svn checkout svn+ssh://jgraley@svn.code.sf.net/p/inferno-cpp2v/code/trunk infern
 
 How to build:
 
+Inferno works with gcc/g++ 4.4.5, 4.7.? and 4.8.5
+
 On a Debian/Ubuntu system, you need approximately the following apt packages:
     
 subversion

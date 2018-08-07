@@ -1,5 +1,6 @@
-# What I had to do to install systemc-2.2.0.tgz on Ubuntu 10.10 using bash and gcc 4.4.5. Best
+# What I had to do to install systemc-2.2.0.tgz on Ubuntu 10.10 using bash and gcc 4.4.5, 4.7.? and 4.8.5. Best
 # done by hand, and read the INSTALL guide that comes with SystemC
+# Got from http://www.accellera.org/downloads/standards/systemc/files (2007 version of SystemC 2.2)
 
 tar -zxf systemc-2.2.0.tgz
 cd systemc-2.2.0
@@ -26,12 +27,12 @@ make check # you should to do this check whether systemc can link
 
 ------------------
 
-Additional note: repeating this with GCC4.7, I needed to remove a few (presumably 
+Additional note: repeating this with GCC4.7 onward, I needed to remove four (presumably 
 incorrect) "mutable" keywords at reference decls, as requested by the compiler.
 
 ------------------
 
-# For inferno to use SystemC, create a symbolic link inferno-cpp2v/trunk/systemc pointing to the
+# For inferno to use SystemC, create a symbolic link inferno-cpp2v-code/systemc pointing to the
 # systemc directory, systemc-2.2.0 in this case.
 
 # To compile, use eg
