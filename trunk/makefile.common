@@ -9,6 +9,9 @@ MAKE ?= make
 # Options applied to Inferno, LLVM and clang 
 ILC_OPTIONS +=
  
+# Use the C++03 standard (pretty simialr to C++98)
+OPTIONS += -std=c++03 
+ 
 # No path needed when include file is in same directory
 OPTIONS += -I.
 
