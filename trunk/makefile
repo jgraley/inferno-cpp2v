@@ -24,7 +24,7 @@ get_libs : makefile
 	svn checkout --force --revision $(LLVM_REVISION) $(LLVM_URL) llvm
 	cd llvm && ./configure
 	cd llvm/tools && svn checkout --force --revision $(CLANG_REVISION) $(CLANG_URL) clang
-	cd patches && ./apply.sh
+	patches/apply.sh
 								
 #
 # Compile llvm and clang sources
