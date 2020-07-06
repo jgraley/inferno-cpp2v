@@ -9,8 +9,11 @@ MAKE ?= make
 # Options applied to Inferno, LLVM and clang 
 ILC_OPTIONS +=
  
-# Use the C++03 standard (pretty simialr to C++98)
-OPTIONS += -std=c++03 
+# Use the C++11 standard 
+OPTIONS += -std=c++11
+ 
+# This warning is hard to deal with in C++11
+#OPTIONS += -Wno-virtual-move-assign 
  
 # No path needed when include file is in same directory
 OPTIONS += -I.
@@ -42,6 +45,8 @@ OPTIONS += -pg
 
 # Workaround compile error with SystemC
 OPTIONS += -fpermissive
+
+OPTIONS += -fPIC
 
 # For including llvm/clang header files
 BUILD = Debug

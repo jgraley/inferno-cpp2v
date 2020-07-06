@@ -18,7 +18,7 @@ public:
     {
         ContainerInterface::iterator begin;
         ContainerInterface::iterator end;    
-        bool operator==(const Range &o)
+        bool operator==(const Range &o) const
         {
 			return begin==o.begin && end==o.end;
 		}

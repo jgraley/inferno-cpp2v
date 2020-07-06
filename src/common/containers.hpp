@@ -204,6 +204,13 @@ struct SimpleAssociativeContainerInterface : virtual ContainerInterface<SUB_BASE
 template<class SUB_BASE, typename VALUE_INTERFACE, class CONTAINER_IMPL>
 struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, CONTAINER_IMPL
 {
+    // C++11 fix
+    ContainerCommon& operator=(const ContainerCommon& other)
+    {
+        (void)CONTAINER_IMPL::operator=(other);
+        return *this;
+    }
+    
 	struct iterator : public CONTAINER_IMPL::iterator,
 	                  public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface
 	{
@@ -271,6 +278,13 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
 template<class SUB_BASE, typename VALUE_INTERFACE, class CONTAINER_IMPL>
 struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>, virtual SequenceInterface<SUB_BASE, VALUE_INTERFACE>
 {
+    // C++11 fix
+    Sequence& operator=(const Sequence& other)
+    {
+        (void)ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::operator=(other);
+        return *this;
+    }
+
     using typename CONTAINER_IMPL::insert; // due to silly C++ rule where different overloads hide each other
     inline Sequence<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>() {}
 	struct iterator : public ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator
@@ -396,6 +410,15 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
             CONTAINER_IMPL::push_back( *i );
 		}
 	}
+    Sequence& operator=( std::initializer_list<typename CONTAINER_IMPL::value_type> ilv )
+    {
+        CONTAINER_IMPL::clear();
+		for( const typename CONTAINER_IMPL::value_type &v : ilv )
+		{
+            CONTAINER_IMPL::push_back( v );
+		}        
+        return *this;
+    }
 	inline Sequence( const typename CONTAINER_IMPL::value_type &v )
 	{
 		push_back( v );

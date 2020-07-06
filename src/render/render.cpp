@@ -615,7 +615,7 @@ string Render::RenderInstance( TreePtr<Instance> o, string sep, bool showtype,
 	else
 		s = name;
 
-	bool callable = dynamic_pointer_cast<Callable>(o->type);
+	bool callable = (bool)dynamic_pointer_cast<Callable>(o->type);
 
     // If object is really a module, bodge in a name as a constructor parameter
     // But not for fields - they need an init list, done in RenderDeclarationCollection()

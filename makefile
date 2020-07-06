@@ -38,9 +38,11 @@ LLVM_CLANG_LIBS =  libclangDriver.a libclangParse.a libclangLex.a libclangBasic.
 LLVM_CLANG_LIBS += libLLVMBitWriter.a libLLVMBitReader.a libLLVMSupport.a libLLVMSystem.a 	
 LLVM_CLANG_LIB_PATHS = $(LLVM_CLANG_LIBS:%=$(LLVM_LIB_PATH)/%)
 LLVM_CLANG_OPTIONS := ENABLE_OPTIMIZED=$(ENABLE_OPTIMIZED) 
-LLVM_CLANG_OPTIONS += CXXFLAGS="-include cstdio -include stdint.h $(ILC_OPTIONS)"
+# Strangely, on C++11, we get problems with inferred rvalue refs, and below 11
+# the clang code tries to use alignof. We work around the latter here.
+LLVM_CLANG_OPTIONS += CXXFLAGS="-include cstdio -include stdint.h -std=c++03 $(ILC_OPTIONS) -fPIC"
 LLVM_CLANG_OPTIONS += CFLAGS=$(ILC_OPTIONS)
-LLVM_CLANG_OPTIONS += --jobs=$(JOBS) 
+LLVM_CLANG_OPTIONS += --jobs=$(JOBS)
 
 $(LLVM_LIB_PATH)/libLLVMBit%.a : force_subordinate_makefiles
 	cd llvm/lib/Bitcode/$(patsubst libLLVMBit%.a,%,$(notdir $@)) && $(MAKE) $(LLVM_CLANG_OPTIONS)	
@@ -71,7 +73,7 @@ src/build/inferno.a : force_subordinate_makefiles
 #
 STANDARD_LIBS += -lstdc++
 inferno.exe : makefile makefile.common src/build/inferno.a $(LLVM_CLANG_LIB_PATHS)
-	$(ICC) src/build/inferno.a $(LLVM_CLANG_LIB_PATHS) $(STANDARD_LIBS) -ggdb -pg -o inferno.exe
+	$(ICC) src/build/inferno.a $(LLVM_CLANG_LIB_PATHS) $(STANDARD_LIBS) -ggdb -pg -no-pie -o inferno.exe
 
 #
 # Build the resources

@@ -20,7 +20,7 @@ SplitInstanceDeclarations::SplitInstanceDeclarations()
     MakePatternPtr< Star<Declaration> > decls;
     sc->members = ( decls );
     MakePatternPtr< Star<Statement> > pre, post;
-    sc->statements = ( pre, over, post );
+    sc->statements = { pre, over, post };
 
     MakePatternPtr<Compound> rc;
     MakePatternPtr<LocalVariable> ri;

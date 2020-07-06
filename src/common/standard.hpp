@@ -11,9 +11,9 @@ using namespace std;
 #include <stdarg.h> 
 #include <stdint.h>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-using namespace boost;
+#include <memory>
+#include <algorithm>
+using namespace std;
 
 // JSG we now use boost's FOREACH which means we depend on Boost 1.34 (I think)
 #include <boost/foreach.hpp>

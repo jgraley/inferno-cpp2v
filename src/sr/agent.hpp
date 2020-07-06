@@ -77,6 +77,13 @@ class Agent : public virtual Traceable,
               public virtual Node
 {
 public:
+    // C++11 fix
+    Agent& operator=(Agent& other)
+    {
+        (void)Node::operator=(other);
+        return *this;
+    }
+
     /// List the Agents reached via blocks during search
     virtual PatternQueryResult PatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 

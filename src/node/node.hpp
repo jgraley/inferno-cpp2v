@@ -44,6 +44,14 @@ struct NodeBases : Magic,
 /// The main base class for inferno nodes
 struct Node : NodeBases
 {
+    // C++11 fix
+    Node& operator=(Node& other)
+    {
+        // Must do nothing - will get invoked mutliple times due
+        // virtual MI diamonds
+        return *this;
+    }
+
     NODE_FUNCTIONS
 
     virtual ~Node(){}  // be a virtual hierarchy

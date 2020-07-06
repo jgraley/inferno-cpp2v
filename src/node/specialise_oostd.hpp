@@ -81,6 +81,11 @@ struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, 
 	template< typename OTHER >
 	inline Sequence( const TreePtr<OTHER> &v ) :
 		OOStd::Sequence< Itemiser::Element, TreePtrInterface, Impl >( v ) {}
+    Sequence& operator=( std::initializer_list< TreePtr<VALUE_TYPE> > ilv )
+    {
+        (void)OOStd::Sequence< Itemiser::Element, TreePtrInterface, Impl >::operator=(ilv);
+        return *this;
+    }
 };
 
 

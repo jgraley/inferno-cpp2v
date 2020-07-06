@@ -78,29 +78,10 @@ template< bool IS_AGENT, typename NODE_TYPE >
 class MakePatternPtrHelper  
 {
 public:    
-    static inline TreePtr<NODE_TYPE> Make()
+    template<typename ... CP>
+    static inline TreePtr<NODE_TYPE> Make(const CP& ... cp)
     {
-        return new StandardAgentWrapper<NODE_TYPE>;
-    }    
-    template<typename CP0>
-    static inline TreePtr<NODE_TYPE> Make(const CP0 &cp0)
-    {
-        return new StandardAgentWrapper<NODE_TYPE>(cp0);
-    }    
-    template<typename CP0, typename CP1>
-    static inline TreePtr<NODE_TYPE> Make(const CP0 &cp0, const CP1 &cp1)
-    {
-        return new StandardAgentWrapper<NODE_TYPE>(cp0, cp1);
-    }    
-    template<typename CP0, typename CP1, typename CP2>
-    static inline TreePtr<NODE_TYPE> Make(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2)
-    {
-        return new StandardAgentWrapper<NODE_TYPE>(cp0, cp1, cp2);
-    }    
-    template<typename CP0, typename CP1, typename CP2, typename CP3>
-    static inline TreePtr<NODE_TYPE> Make(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2, const CP3 &cp3)
-    {
-        return new StandardAgentWrapper<NODE_TYPE>(cp0, cp1, cp2, cp3);
+        return new StandardAgentWrapper<NODE_TYPE>(cp...);
     }    
 };
 
@@ -110,29 +91,10 @@ template<typename NODE_TYPE>
 class MakePatternPtrHelper<true, NODE_TYPE> // NODE_TYPE is an agent, so behave like MakeTreePtr
 {
 public:
-    static inline TreePtr<NODE_TYPE> Make()
+    template<typename ... CP>
+    static inline TreePtr<NODE_TYPE> Make(const CP&... cp)
     {
-        return new NODE_TYPE;
-    }    
-    template<typename CP0>
-    static inline TreePtr<NODE_TYPE> Make(const CP0 &cp0)
-    {
-        return new NODE_TYPE(cp0);
-    }    
-    template<typename CP0, typename CP1>
-    static inline TreePtr<NODE_TYPE> Make(const CP0 &cp0, const CP1 &cp1)
-    {
-        return new NODE_TYPE(cp0, cp1);
-    }    
-    template<typename CP0, typename CP1, typename CP2>
-    static inline TreePtr<NODE_TYPE> Make(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2)
-    {
-        return new NODE_TYPE(cp0, cp1, cp2);
-    }    
-    template<typename CP0, typename CP1, typename CP2, typename CP3>
-    static inline TreePtr<NODE_TYPE> Make(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2, const CP3 &cp3)
-    {
-        return new NODE_TYPE(cp0, cp1, cp2, cp3);
+        return new NODE_TYPE(cp...);
     }    
 };
 
@@ -147,35 +109,12 @@ private:
     // Using the magic of Boost, find out at compile time whether the NODE_TYPE is already an Agent.	
 	typedef MakePatternPtrHelper<is_base_of<Agent, NODE_TYPE>::value, NODE_TYPE> Maker;
 public:	
-	inline MakePatternPtr() : TreePtr<NODE_TYPE>( Maker::Make() )
-	{
-        TRACE("MakePatternPtr made a ")(*this)("\n");
-	}
-	template<typename CP0>
-	inline MakePatternPtr(const CP0 &cp0) : 
-	    TreePtr<NODE_TYPE>( Maker::Make(cp0) ) 
+	template<typename ... CP>
+	inline MakePatternPtr(const CP& ... cp) : 
+	    TreePtr<NODE_TYPE>( Maker::Make(cp...) ) 
 	{ 
         TRACE("MakePatternPtr made a ")(*this)("\n");
 	}
-    template<typename CP0, typename CP1>
-	inline MakePatternPtr(const CP0 &cp0, const CP1 &cp1) : 
-	    TreePtr<NODE_TYPE>(  Maker::Make(cp0, cp1) )
-	{ 
-        TRACE("MakePatternPtr made a ")(*this)("\n");
-	}
-    template<typename CP0, typename CP1, typename CP2>
-    inline MakePatternPtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : 
-        TreePtr<NODE_TYPE>( Maker::Make(cp0, cp1, cp2) )
-    { 
-        TRACE("MakePatternPtr made a ")(*this)("\n");
-    }
-    template<typename CP0, typename CP1, typename CP2, typename CP3>
-    inline MakePatternPtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2, const CP3 &cp3) : 
-        TreePtr<NODE_TYPE>( Maker::Make(cp0, cp1, cp2, cp3) )
-    { 
-        TRACE("MakePatternPtr made a ")(*this)("\n");
-    }
-	// Add more params as needed...
 };
 
 };

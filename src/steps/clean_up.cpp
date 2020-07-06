@@ -181,7 +181,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     s_instance->identifier = identifier;
     s_instance->type = type;
     s_comp->members = decls;
-    s_comp->statements = (pre, s_label1, s_label2, post);
+    s_comp->statements = {pre, s_label1, s_label2, post};
     s_label1->identifier = s_labelid1;
     s_label2->identifier = s_labelid2;
     
