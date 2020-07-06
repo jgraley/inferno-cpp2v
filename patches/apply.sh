@@ -17,4 +17,8 @@ patch llvm/include/llvm/Use.h patches/ptrdiff_patch3.txt
 # GCC4.7 fussy about something or other
 patch llvm/include/llvm/Support/CommandLine.h patches/gcc47_patch1.txt
 
+# C++11 fix: LLVM defined it's own alignof in a silly way.
+patch llvm/include/llvm/Support/Alignof.h patches/alignof_patch1.txt
+patch llvm/include/llvm/ADT/StringMap.h patches/alignof_patch2.txt
+
 

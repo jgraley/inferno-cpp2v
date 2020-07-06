@@ -1,0 +1,15 @@
+Index: llvm/include/llvm/Support/AlignOf.h
+===================================================================
+--- llvm/include/llvm/Support/AlignOf.h	(revision 61726)
++++ llvm/include/llvm/Support/AlignOf.h	(working copy)
+@@ -53,8 +53,8 @@
+ ///  of a type.  This provides no extra functionality beyond the AlignOf
+ ///  class besides some cosmetic cleanliness.  Example usage:
+ ///  alignof<int>() returns the alignment of an int.
+-template <typename T>
+-static inline unsigned alignof() { return AlignOf<T>::Alignment; }
++//template <typename T>
++//static inline unsigned alignof() { return AlignOf<T>::Alignment; }
+   
+ } // end namespace llvm
+ #endif
