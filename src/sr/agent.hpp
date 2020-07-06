@@ -61,12 +61,14 @@ public:
     void clear()
     {
         blocks.clear();
+        decision_count = 0;
         evaluator = shared_ptr<BooleanEvaluator>();        
     }
 
     deque<Block> blocks; 
     shared_ptr<BooleanEvaluator> evaluator;
     bool local_match;
+    int decision_count;
 };
 
 bool operator<(const DecidedQueryResult::Block &l0, const DecidedQueryResult::Block &l1);
@@ -141,8 +143,8 @@ protected:
     void RememberLink( const PatternQueryResult::Block &l ) const; // Decided query
 
     const Engine *engine;    
-    ContainerInterface::iterator HandleDecision( ContainerInterface::iterator begin,
-                                                 ContainerInterface::iterator end ) const;
+    ContainerInterface::iterator RememberDecision( ContainerInterface::iterator begin,
+                                                   ContainerInterface::iterator end ) const;
     ContainerInterface::iterator RememberDecisionLink( bool abnormal, 
 													   Agent *a, 
 													   ContainerInterface::iterator begin,

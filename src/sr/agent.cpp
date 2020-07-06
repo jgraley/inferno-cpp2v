@@ -178,20 +178,19 @@ void AgentCommon::RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const
 }	
 
 
-ContainerInterface::iterator AgentCommon::HandleDecision( ContainerInterface::iterator begin,
-                                                          ContainerInterface::iterator end ) const
+ContainerInterface::iterator AgentCommon::RememberDecision( ContainerInterface::iterator begin,
+                                                            ContainerInterface::iterator end ) const
 {
     ASSERT( begin != end )("no empty decisions");
     ContainerInterface::iterator it;
-    if( choices.empty() )
+    if( decided_result.decision_count >= choices.size() )
     {
         it = begin; // No choice was given to us so assume first one
     }
     else
     {
-        it = choices.front(); // Use and consume the choice that was given to us
+        it = choices[decided_result.decision_count]; // Use and consume the choice that was given to us
         ASSERT( it != end );
-        choices.pop_front();
     }
     
     Conjecture::Range r;
@@ -201,8 +200,9 @@ ContainerInterface::iterator AgentCommon::HandleDecision( ContainerInterface::it
     DecidedQueryResult::Block b;
     b.is_link = false;
     b.is_decision = true;
-    b.decision = r;
+    b.decision = r;    
     decided_result.blocks.push_back( b );
+    decided_result.decision_count++;
         
     return it;
 }
@@ -216,15 +216,14 @@ ContainerInterface::iterator AgentCommon::RememberDecisionLink( bool abnormal,
 	ASSERT( current_query==DECIDED );
     ASSERT( begin != end )("no empty decisions");
     ContainerInterface::iterator it;
-    if( choices.empty() )
+    if( decided_result.decision_count >= choices.size() )
     {
         it = begin; // No choice was given to us so assume first one
     }
     else
     {
-        it = choices.front();  // Use and consume the choice that was given to us
+        it = choices[decided_result.decision_count]; // Use and consume the choice that was given to us
         ASSERT( it != end );
-        choices.pop_front();
     }
     
     DecidedQueryResult::Block b;
@@ -243,7 +242,8 @@ ContainerInterface::iterator AgentCommon::RememberDecisionLink( bool abnormal,
 
     // Put it all in blocks TODO tie these together in the blocks struct
     decided_result.blocks.push_back( b );    
-    
+    decided_result.decision_count++;
+
     return it; // Note: we have to have the iterator even when a coupling push has occurred, since
                // we should have checked that the pushed back node is actually in the container 
                // (find() etc gets us an iterator)

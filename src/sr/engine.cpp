@@ -376,8 +376,8 @@ bool Engine::Compare( Agent *start_agent,
     //int i=0;
     while(1)
     {
-        // Try out the current conjecture. This will call HandlDecision() once for each decision;
-        // HandleDecision() will return the current choice for that decision, if absent it will
+        // Try out the current conjecture. This will call RememberDecision() once for each decision;
+        // RememberDecision() will return the current choice for that decision, if absent it will
         // add the decision and choose the first choice, if the decision reaches the end it
         // will remove the decision.
 

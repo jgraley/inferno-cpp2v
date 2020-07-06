@@ -152,7 +152,7 @@ bool StandardAgent::DecidedQuerySequence( SequenceInterface &x,
 				{
 					// Decide how many elements the current * should match, using conjecture. Jump forward
 					// that many elements, to the element after the star. 
-					nxit = HandleDecision( xit, x.end() );
+					nxit = RememberDecision( xit, x.end() );
 					for( ; xit!=nxit; ++xit, --xsize );
 				}
 				else

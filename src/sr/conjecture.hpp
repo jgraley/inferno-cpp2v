@@ -42,10 +42,6 @@ public:
 	void PrepareForDecidedCompare(int pass);    
 	bool IncrementBlock( AgentBlock *block );			                                     
     bool Increment(); // returns true for try again, false for give up				 
-    				   
-    // General note: decided compare functions should call one of HandleDecision() or 
-    // GetDecision() before calling other functions like ReportDecision() or
-    // ForceDecision().
     				       
     // Standard interface for decided compare functions
     void RegisterDecisions( Agent *agent, bool local_match, deque<Range> decisions=deque<Range>() );      

@@ -58,7 +58,7 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
     wrapper_result.evaluator = wrapped_result.evaluator;
 	
     deque< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
-    FOREACH( PatternQueryResult::Block b, plinks.blocks )
+    FOREACH( PatternQueryResult::Block b, plinks.blocks ) // JSG2020 wrapped_result.blocks?
     {
 		if( b.abnormal )
 		{
@@ -69,12 +69,12 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
 				PatternQueryResult::Block nb;
 				nb.abnormal = false;
 				nb.agent = ta;
-				wrapped_result.push_back( nb );
+				wrapped_result.push_back( nb ); // JSG2020 wrapper_result.push_back?
 			}
 		}
 		else
 		{
-			wrapped_result.push_back( b );
+			wrapped_result.push_back( b ); // JSG2020 wrapper_result.push_back?
 		}
 	}
 	return wrapper_result;
@@ -85,13 +85,14 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface &
                                                         deque<ContainerInterface::iterator> choices ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const{
     INDENT("'");    
-    deque<ContainerInterface::iterator> wrapped_choices, wrapper_choices;
+    deque<ContainerInterface::iterator> wrapped_choices, wrapper_choices; // JSG2020 wrapper_choices either is choices or should be init'd from it?
 
     PatternQueryResult wrapped_result = wrapped_agent->PatternQuery();
     wrapper_result.evaluator = wrapped_result.evaluator;
 	
     deque< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
-    FOREACH( PatternQueryResult::Block b, plinks.blocks )
+    int i=0;
+    FOREACH( PatternQueryResult::Block b, plinks.blocks ) // JSG2020 wrapped_result.blocks?
     {
 		if( b.abnormal )
 		{
@@ -99,14 +100,14 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface &
 			++alit;
 			FOREACH( Agent *ta, al->terminal_agents )
 			{
-				wrapper_choices.push_back( *(wrapper_choices.front()) ); // TODO use iterator for choices; all this popping is stupid
-				choices.pop_front();
+				wrapped_choices.push_back( *(wrapper_choices[i]) ); 
+				i++;
 			}
 		}
 		else
 		{
-			wrapped_choices.push_back( *(wrapper_choices.front()) );
-		    choices.pop_front();
+			wrapped_choices.push_back( *(wrapper_choices[i]) ); 
+			i++;
 		}
 	}
     
@@ -166,7 +167,7 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface &
 				nb.agent = ta;
 				nb.px = &(*cit); // do not simplify! we want a simple pointer, not an iterator TODO or do we
 				nb.local_x = TreePtr<Node>();					
-				Conjecture::Range r;
+				Conjecture::Range r; // JSG2020 these 3 lines can be removed; see nb.decision =...
 				r.begin = pwc->begin();
 				r.end = pwc->end();
 				nb.is_decision = true;
@@ -193,7 +194,7 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface &
     	}
 	    else
 	    {
-		    wrapped_result.push_back( b );
+		    wrapped_result.push_back( b ); // JSG2020 wrapper_result?
 		}
     }
 	
