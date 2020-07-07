@@ -6,6 +6,8 @@
 #include "standard_agent.hpp"
 #include "star_agent.hpp"
 
+#define SKIP_END_NONSTAR
+
 using namespace SR;
 
 PatternQueryResult StandardAgent::PatternQuery() const
@@ -106,7 +108,6 @@ DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface &x,
     return r;
 }
 
-
 void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
                                           SequenceInterface &x,
 		                                  SequenceInterface &pattern,
@@ -119,6 +120,32 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 	// if either pattern or subject runs out.
 	ContainerInterface::iterator xit = x.begin();
 	int psize, xsize = x.size();
+
+#ifdef SKIP_END_NONSTAR
+    int pattern_num_non_star = 0;
+	for( pit = pattern.begin(); pit != pattern.end(); ++pit ) // this loop pattern-only
+    {
+		TreePtr<Node> pe( *pit );
+		ASSERT( pe );
+        Agent *pea = AsAgent(pe);
+        if( !dynamic_cast<StarAgent *>(pea) )
+            pattern_num_non_star++;
+    }
+    int init_starrable_x = x.size() - pattern_num_non_star;
+    if( init_starrable_x < 0 )
+    {
+        r.AddLocalMatch(false);   // TODO break to get the final trace?
+        return;
+    }
+    ContainerInterface::iterator xstarendit = x.begin();            
+    for( int i=0; i<init_starrable_x; i++ )
+        ++xstarendit;
+        
+    // We really want the decision to be inclusive of end() since the choice
+    // really descibes a range itself. See #2
+    if( xstarendit != x.end() )
+        ++xstarendit;
+#endif
 
 	for( pit = pattern.begin(), psize = pattern.size(); pit != pattern.end(); ++pit, --psize )
 	{
@@ -163,7 +190,14 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 				{
 					// Decide how many elements the current * should match, using conjecture. Jump forward
 					// that many elements, to the element after the star. 
-					nxit = r.AddDecision( xit, x.end(), choices );
+#ifdef SKIP_END_NONSTAR
+					if( xit != xstarendit )
+                        nxit = r.AddDecision( xit, xstarendit, choices );
+                    else
+                        nxit = xit;
+#else
+					nxit = r.AddDecision( xit, x.end(), choices ); // @bug see #2
+#endif                    
 					for( ; xit!=nxit; ++xit, --xsize );
 				}
 				else
@@ -192,6 +226,11 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
                 r.AddLink( false, pea, *xit );
 				++xit;
 				--xsize;
+#ifdef SKIP_END_NONSTAR
+                // Every non-star pattern node we pass means there's one fewer remaining
+                // and we can match a star one step further
+                ++xstarendit;
+#endif
 			}
 			else
 			{
