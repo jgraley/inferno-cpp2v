@@ -19,15 +19,17 @@ namespace SR
 class StandardAgent : public virtual AgentCommon
 {
 public:
-    virtual void PatternQueryImpl() const;
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x, 
-                                   const deque<ContainerInterface::iterator> &choices ) const;
+    virtual PatternQueryResult PatternQuery() const;
+    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
+                                             const deque<ContainerInterface::iterator> &choices ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
-    bool DecidedQuerySequence( SequenceInterface &x,
+    void DecidedQuerySequence( DecidedQueryResult &r,
+                               SequenceInterface &x,
     	                       SequenceInterface &pattern,
                                const deque<ContainerInterface::iterator> &choices ) const;
-    bool DecidedQueryCollection( CollectionInterface &x,
+    void DecidedQueryCollection( DecidedQueryResult &r,
+                                 CollectionInterface &x,
     		                     CollectionInterface &pattern,
                                  const deque<ContainerInterface::iterator> &choices ) const;
 public:

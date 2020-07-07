@@ -105,34 +105,40 @@ void MatchAllAgent::GetGraphAppearance( bool *bold, string *text, string *shape 
 	*text = string("!");
 }
 
-
-void MatchAnyAgent::PatternQueryImpl() const
-{
-    FOREACH( const TreePtr<Node> p, GetPatterns() )
-	    RememberLink( true, AsAgent(p) );
-	RememberEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
-}
-
 //---------------------------------- MatchAny ------------------------------------    
 
-bool MatchAnyAgent::DecidedQueryImpl( const TreePtrInterface &x, 
-                                      const deque<ContainerInterface::iterator> &choices ) const
+PatternQueryResult MatchAnyAgent::PatternQuery() const
+{
+    PatternQueryResult r;
+    FOREACH( const TreePtr<Node> p, GetPatterns() )
+	    r.AddLink( true, AsAgent(p) );
+	r.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
+    return r;
+}
+
+
+DecidedQueryResult MatchAnyAgent::DecidedQuery( const TreePtrInterface &x, 
+                                                const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT("|");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!
+    DecidedQueryResult r;
     
     // Check pre-restriction
     if( !IsLocalMatch(x.get()) )        
-        return false;
+    {
+        r.AddLocalMatch(false);  
+        return r;
+    }
     
     FOREACH( const TreePtr<Node> p, GetPatterns() )
     {
         ASSERT( p );
         // Context is abnormal because not all patterns must match
-        RememberLink( true, AsAgent(p), x );
+        r.AddLink( true, AsAgent(p), x );
     }
-    RememberEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
-    return true;
+    r.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
+    return r;
 }
 
 

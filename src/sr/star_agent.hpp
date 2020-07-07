@@ -25,9 +25,9 @@ namespace SR
 class StarAgent : public virtual AgentCommon 
 {
 public:
-    virtual void PatternQueryImpl() const;
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x,
-                                   const deque<ContainerInterface::iterator> &choices ) const; // x must be a SubContainer                                  
+    virtual PatternQueryResult PatternQuery() const;
+    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
+                                             const deque<ContainerInterface::iterator> &choices ) const;
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:

@@ -2,31 +2,36 @@
 
 using namespace SR;
 
-void TransformOfAgent::PatternQueryImpl() const
+PatternQueryResult TransformOfAgent::PatternQuery() const
 {
-	RememberLink( false, AsAgent(pattern) );
+    PatternQueryResult r;
+	r.AddLink( false, AsAgent(pattern) );
+    return r;
 }
 
 
-bool TransformOfAgent::DecidedQueryImpl( const TreePtrInterface &x,
-                                         const deque<ContainerInterface::iterator> &choices ) const
+DecidedQueryResult TransformOfAgent::DecidedQuery( const TreePtrInterface &x,
+                                                   const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT("T");
+    DecidedQueryResult r;
+    
     // Transform the candidate expression, sharing the overall S&R context so that
     // things like GetDeclaration can work (they search the whole program tree).
     TreePtr<Node> xt = (*transformation)( *(engine->GetOverallMaster()->pcontext), x );
 	if( xt )
 	{
 	    // Punt it back into the search/replace engine
-	    RememberLocalLink( false, AsAgent(pattern), xt );
-	    return true;
+	    r.AddLocalLink( false, AsAgent(pattern), xt );
 	}
 	else
 	{
 	    // Transformation returned NULL, probably because the candidate was incompatible
         // with the transofrmation - a search MISS.
-	    return false;
+	    r.AddLocalMatch(false);
 	}
+    
+    return r;
 }
 
 

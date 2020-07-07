@@ -4,20 +4,23 @@
 
 using namespace SR;
 
-void StarAgent::PatternQueryImpl() const
+PatternQueryResult StarAgent::PatternQuery() const
 {
+    PatternQueryResult r;
     if( TreePtr<Node> p = GetRestriction() )
-        RememberLink( true, AsAgent(p) );
+        r.AddLink( true, AsAgent(p) );
+    return r;
 }
 
 
 // NOTE this is a DecidedCompare() not DecidedCompareImpl() so some of the AgentCommon 
 // stuff has to be done explicitly in here.
-bool StarAgent::DecidedQueryImpl( const TreePtrInterface &x, 
-                                  const deque<ContainerInterface::iterator> &choices ) const
+DecidedQueryResult StarAgent::DecidedQuery( const TreePtrInterface &x, 
+                                            const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT("*");
     ASSERT(x);
+    DecidedQueryResult r;
                 
     ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
     ASSERT(xc)("Nodes passed to StarAgent::DecidedCompare() must implement ContainerInterface, since * matches multiple things");
@@ -27,7 +30,10 @@ bool StarAgent::DecidedQueryImpl( const TreePtrInterface &x,
     FOREACH( TreePtr<Node> xe, *xc )
     {
         if( !IsLocalMatch( xe.get()) )
-            return false;
+        {
+            r.AddLocalMatch(false);
+            return r;
+        }
     }
      
     if( TreePtr<Node> p = GetRestriction() )
@@ -36,12 +42,12 @@ bool StarAgent::DecidedQueryImpl( const TreePtrInterface &x,
         // Apply pattern restriction - will be at least as strict as pre-restriction
         FOREACH( const TreePtrInterface &xe, *xc )
         {
-            RememberLocalLink( true, AsAgent(p), xe );
+            r.AddLocalLink( true, AsAgent(p), xe );
         }
     }
  
     TRACE("done\n");
-    return true;
+    return r;
 }                       
 
 

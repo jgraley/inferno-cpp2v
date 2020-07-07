@@ -12,24 +12,30 @@ SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search ) :
 }
 
 
-void SlaveAgent::PatternQueryImpl() const
+PatternQueryResult SlaveAgent::PatternQuery() const
 {
-	RememberLink( false, AsAgent(GetThrough()) );
+    PatternQueryResult r;
+	r.AddLink( false, AsAgent(GetThrough()) );
+    return r;
 }
 
 
-bool SlaveAgent::DecidedQueryImpl( const TreePtrInterface &x, 
-                                   const deque<ContainerInterface::iterator> &choices ) const
+DecidedQueryResult SlaveAgent::DecidedQuery( const TreePtrInterface &x, 
+                                             const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT("l");
+    DecidedQueryResult r;
 
     // Check pre-restriction
     if( !IsLocalMatch(x.get()) )        
-        return false;
+    {
+        r.AddLocalMatch(false);  
+        return r;
+    }
 
     // When a slave node seen duriung search, just forward through the "through" path
-    RememberLink( false, AsAgent(GetThrough()), x );
-    return true;
+    r.AddLink( false, AsAgent(GetThrough()), x );
+    return r;
 }
 
 

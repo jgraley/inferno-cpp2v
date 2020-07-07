@@ -91,18 +91,22 @@ bool IdentifierByNameAgent::IsMatch( const TreePtrInterface &x ) const
 
 //---------------------------------- Nested ------------------------------------    
 
-void NestedAgent::PatternQueryImpl() const
+PatternQueryResult NestedAgent::PatternQuery() const
 {
-	RememberLink( false, AsAgent(terminus) );
+    PatternQueryResult r;
+	r.AddLink( false, AsAgent(terminus) );
 	if( depth )
-		RememberLink( false, AsAgent(depth) );
+		r.AddLink( false, AsAgent(depth) );
+    return r;
 }
 
 
-bool NestedAgent::DecidedQueryImpl( const TreePtrInterface &x, 
-                                    const deque<ContainerInterface::iterator> &choices ) const                          
+DecidedQueryResult NestedAgent::DecidedQuery( const TreePtrInterface &x, 
+                                              const deque<ContainerInterface::iterator> &choices ) const                          
 {
     INDENT("N");
+    DecidedQueryResult r;
+    
     string s;
     // Keep advancing until we get NULL, and remember the last non-null position
     TreePtr<Node> xt = x;
@@ -114,16 +118,16 @@ bool NestedAgent::DecidedQueryImpl( const TreePtrInterface &x,
             
     // Compare the last position with the terminus pattern
     // TODO I don't think a local link should be needed here?
-    RememberLocalLink( false, AsAgent(terminus), xt );
+    r.AddLocalLink( false, AsAgent(terminus), xt );
     
     // Compare the depth with the supplied pattern if present
     if( depth )
     {
         TreePtr<Node> cur_depth( new SpecificString(s) );
-        RememberLocalLink( false, AsAgent(depth), cur_depth );
+        r.AddLocalLink( false, AsAgent(depth), cur_depth );
     }
     
-    return true;    
+    return r;    
 }    
 
 
@@ -177,11 +181,12 @@ TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode )
 
 //---------------------------------- IsLabelReached ------------------------------------    
 
-bool IsLabelReached::DecidedQueryImpl( const TreePtrInterface &xx, 
-                                       const deque<ContainerInterface::iterator> &choices ) const
+DecidedQueryResult IsLabelReached::DecidedQuery( const TreePtrInterface &xx, 
+                                                 const deque<ContainerInterface::iterator> &choices ) const
 {
 	INDENT("L");
 	ASSERT( pattern );
+    DecidedQueryResult r;
 	
 	// TODO Flushable mechanism removed - flush every time for safety (if
 	// this code ever gets used again). This may be slow!
@@ -201,8 +206,8 @@ bool IsLabelReached::DecidedQueryImpl( const TreePtrInterface &xx,
 	TRACE("Can label id ")(*x)(" reach expression ")(*y)("?\n");
 
 	Set< TreePtr<InstanceIdentifier> > uf;        
-	bool r = CanReachExpr(&uf, x, y);
-	TRACE("I reakon ")(*x)(r?" does ":" does not ")("reach ")(*y)("\n"); 
+	r.AddLocalMatch( CanReachExpr(&uf, x, y) );
+	TRACE("I reakon ")(*x)(r.IsLocalMatch()?" does ":" does not ")("reach ")(*y)("\n"); 
 	return r;
 }                 
 
