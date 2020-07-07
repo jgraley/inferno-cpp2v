@@ -13,7 +13,8 @@ void SearchContainerAgent::PatternQueryImpl() const
 }
 
 
-bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
+bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x, 
+                                             const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT("#");
     ASSERT( this );
@@ -37,7 +38,7 @@ bool SearchContainerAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
     }
     
     // Get choice from conjecture about where we are in the walk
-    ContainerInterface::iterator thistime = RememberDecisionLink( false, AsAgent(terminus), pwx->begin(), pwx->end() );
+    ContainerInterface::iterator thistime = RememberDecisionLink( false, AsAgent(terminus), pwx->begin(), pwx->end(), choices );
 
     // Let subclasses implement further restrictions
     DecidedQueryRestrictions( thistime );

@@ -90,7 +90,7 @@ public:
     virtual PatternQueryResult PatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
-                                             deque<ContainerInterface::iterator> choices ) const = 0;                                
+                                             const deque<ContainerInterface::iterator> &choices ) const = 0;                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const TreePtrInterface &x,
@@ -117,9 +117,10 @@ public:
     void AgentConfigure( const Engine *e );
     virtual PatternQueryResult PatternQuery() const;
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
-                                             deque<ContainerInterface::iterator> choices ) const;
+                                             const deque<ContainerInterface::iterator> &choices ) const;
     virtual void PatternQueryImpl() const = 0;
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const = 0;
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x, 
+                                   const deque<ContainerInterface::iterator> &choices ) const = 0;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
     void DoKey( TreePtr<Node> x );
     TreePtr<Node> GetCoupled();                                  
@@ -144,11 +145,13 @@ protected:
 
     const Engine *engine;    
     ContainerInterface::iterator RememberDecision( ContainerInterface::iterator begin,
-                                                   ContainerInterface::iterator end ) const;
+                                                   ContainerInterface::iterator end,
+                                                   const deque<ContainerInterface::iterator> &choices ) const;
     ContainerInterface::iterator RememberDecisionLink( bool abnormal, 
 													   Agent *a, 
 													   ContainerInterface::iterator begin,
-													   ContainerInterface::iterator end ) const; // Decided query
+													   ContainerInterface::iterator end,
+                                                       const deque<ContainerInterface::iterator> &choices ) const; // Decided query
 			
 private:    
     TreePtr<Node> coupling_key;    
@@ -163,7 +166,6 @@ private:
     mutable enum {IDLE, PATTERN, DECIDED} current_query;
     mutable PatternQueryResult pattern_result;    
     mutable DecidedQueryResult decided_result;    
-    mutable deque<ContainerInterface::iterator> choices;
 };
 
 

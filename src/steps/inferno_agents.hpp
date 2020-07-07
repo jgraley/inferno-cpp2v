@@ -36,7 +36,8 @@ struct BuildIdentifierAgent : public virtual InfernoAgent
 	// TODO do this via a transformation as with TransformOf/TransformOf
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
     virtual void PatternQueryImpl() const {}
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const { return true; }    
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x, 
+                                   const deque<ContainerInterface::iterator> &choices ) const { return true; }    
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     Sequence<CPPTree::Identifier> sources;
     string GetNewName();
@@ -144,7 +145,8 @@ struct InstanceIdentifierByName : Special<CPPTree::InstanceIdentifier>,
     InstanceIdentifierByName() : IdentifierByNameAgent(string()) {}    
     InstanceIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const                                  
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x, 
+                                   const deque<ContainerInterface::iterator> &choices ) const                                  
     {
         return IsMatch( x );
     }                                
@@ -159,7 +161,8 @@ struct TypeIdentifierByName : Special<CPPTree::TypeIdentifier>,
     TypeIdentifierByName() : IdentifierByNameAgent(string()) {}    
     TypeIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const                                  
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x, 
+                                   const deque<ContainerInterface::iterator> &choices ) const                                  
     {
         return IsMatch( x );
     }                                
@@ -174,7 +177,8 @@ struct LabelIdentifierByName : Special<CPPTree::LabelIdentifier>,
     LabelIdentifierByName() : IdentifierByNameAgent(string()) {}    
     LabelIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const                                  
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x, 
+                                   const deque<ContainerInterface::iterator> &choices ) const                                  
     {
         return IsMatch( x );
     }                                
@@ -189,7 +193,8 @@ private:
 struct NestedAgent : public virtual InfernoAgent
 {
     virtual void PatternQueryImpl() const;
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;                                
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x, 
+                                   const deque<ContainerInterface::iterator> &choices ) const;                                
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const = 0;
     TreePtr<Node> terminus; 
@@ -232,7 +237,8 @@ struct BuildContainerSize : public virtual InfernoAgent,
     shared_ptr< StarAgent > container;
 private:
     virtual void PatternQueryImpl() const {}
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const { return true; }    
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x, 
+                                   const deque<ContainerInterface::iterator> &choices ) const { return true; }    
 	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
 }; 
@@ -252,7 +258,8 @@ struct IsLabelReached : public virtual InfernoAgent,
 	    cache.clear();
 	}
     virtual void PatternQueryImpl() const {}
-    virtual bool DecidedQueryImpl( const TreePtrInterface &xx ) const;
+    virtual bool DecidedQueryImpl( const TreePtrInterface &xx, 
+                                   const deque<ContainerInterface::iterator> &choices ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
     TreePtr<CPPTree::Expression> pattern;           
            

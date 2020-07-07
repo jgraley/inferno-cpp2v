@@ -11,7 +11,8 @@ void OverlayAgent::PatternQueryImpl() const
 }
 
 
-bool OverlayAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
+bool OverlayAgent::DecidedQueryImpl( const TreePtrInterface &x, 
+                                     const deque<ContainerInterface::iterator> &choices ) const
 {
     // Check pre-restriction
     if( !IsLocalMatch(x.get()) )        

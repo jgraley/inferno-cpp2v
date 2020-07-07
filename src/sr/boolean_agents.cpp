@@ -12,7 +12,8 @@ void NotMatchAgent::PatternQueryImpl() const
 }
 
 
-bool NotMatchAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
+bool NotMatchAgent::DecidedQueryImpl( const TreePtrInterface &x, 
+                                      const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT("!");
     ASSERT( GetPattern() );
@@ -57,7 +58,8 @@ void MatchAllAgent::PatternQueryImpl() const
 }
 
 
-bool MatchAllAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
+bool MatchAllAgent::DecidedQueryImpl( const TreePtrInterface &x, 
+                                      const deque<ContainerInterface::iterator> &choices ) const
 { 
     INDENT("&");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!
@@ -100,7 +102,8 @@ void MatchAnyAgent::PatternQueryImpl() const
 
 //---------------------------------- MatchAny ------------------------------------    
 
-bool MatchAnyAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
+bool MatchAnyAgent::DecidedQueryImpl( const TreePtrInterface &x, 
+                                      const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT("|");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!

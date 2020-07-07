@@ -11,7 +11,8 @@ void PointerIsAgent::PatternQueryImpl() const
 }
 
 
-bool PointerIsAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
+bool PointerIsAgent::DecidedQueryImpl( const TreePtrInterface &x, 
+                                       const deque<ContainerInterface::iterator> &choices ) const
 {
 	INDENT("@");
 	

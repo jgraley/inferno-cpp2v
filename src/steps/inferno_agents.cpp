@@ -99,7 +99,8 @@ void NestedAgent::PatternQueryImpl() const
 }
 
 
-bool NestedAgent::DecidedQueryImpl( const TreePtrInterface &x ) const                          
+bool NestedAgent::DecidedQueryImpl( const TreePtrInterface &x, 
+                                    const deque<ContainerInterface::iterator> &choices ) const                          
 {
     INDENT("N");
     string s;
@@ -176,7 +177,8 @@ TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode )
 
 //---------------------------------- IsLabelReached ------------------------------------    
 
-bool IsLabelReached::DecidedQueryImpl( const TreePtrInterface &xx ) const
+bool IsLabelReached::DecidedQueryImpl( const TreePtrInterface &xx, 
+                                       const deque<ContainerInterface::iterator> &choices ) const
 {
 	INDENT("L");
 	ASSERT( pattern );

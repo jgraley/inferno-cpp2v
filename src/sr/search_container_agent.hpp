@@ -21,7 +21,8 @@ private:
 
 public:
     virtual void PatternQueryImpl() const;
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x ) const;
+    virtual bool DecidedQueryImpl( const TreePtrInterface &x, 
+                                   const deque<ContainerInterface::iterator> &choices ) const;
     virtual void KeyReplace( const TreePtrInterface &x,
                              deque<ContainerInterface::iterator> choices ); 
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );

@@ -56,7 +56,7 @@ PatternQueryResult AgentCommon::PatternQuery() const
 
 
 DecidedQueryResult AgentCommon::DecidedQuery( const TreePtrInterface &x,
-                                 deque<ContainerInterface::iterator> ch ) const
+                                              const deque<ContainerInterface::iterator> &choices ) const
 {
     ASSERT(this);
     ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
@@ -65,11 +65,10 @@ DecidedQueryResult AgentCommon::DecidedQuery( const TreePtrInterface &x,
 
     // choices are read by the impl; blocks are updated by the impl
     decided_result.clear();
-    choices = ch;
     
     // Do the agent-specific local checks (x versus characteristics of the present agent)
     // Also takes notes of how child agents block to children of x (depending on conjecture)
-    decided_result.local_match = DecidedQueryImpl( x );
+    decided_result.local_match = DecidedQueryImpl( x, choices );
         
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
     current_query = IDLE;
@@ -179,7 +178,8 @@ void AgentCommon::RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const
 
 
 ContainerInterface::iterator AgentCommon::RememberDecision( ContainerInterface::iterator begin,
-                                                            ContainerInterface::iterator end ) const
+                                                            ContainerInterface::iterator end,
+                                                            const deque<ContainerInterface::iterator> &choices ) const
 {
     ASSERT( begin != end )("no empty decisions");
     ContainerInterface::iterator it;
@@ -211,7 +211,8 @@ ContainerInterface::iterator AgentCommon::RememberDecision( ContainerInterface::
 ContainerInterface::iterator AgentCommon::RememberDecisionLink( bool abnormal, 
 																Agent *a, 
 																ContainerInterface::iterator begin,
-																ContainerInterface::iterator end ) const
+																ContainerInterface::iterator end,
+                                                                const deque<ContainerInterface::iterator> &choices ) const
 {
 	ASSERT( current_query==DECIDED );
     ASSERT( begin != end )("no empty decisions");

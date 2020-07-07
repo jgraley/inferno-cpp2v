@@ -13,7 +13,8 @@ void StarAgent::PatternQueryImpl() const
 
 // NOTE this is a DecidedCompare() not DecidedCompareImpl() so some of the AgentCommon 
 // stuff has to be done explicitly in here.
-bool StarAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
+bool StarAgent::DecidedQueryImpl( const TreePtrInterface &x, 
+                                  const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT("*");
     ASSERT(x);

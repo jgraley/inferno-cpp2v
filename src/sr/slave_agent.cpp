@@ -18,7 +18,8 @@ void SlaveAgent::PatternQueryImpl() const
 }
 
 
-bool SlaveAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
+bool SlaveAgent::DecidedQueryImpl( const TreePtrInterface &x, 
+                                   const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT("l");
 

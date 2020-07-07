@@ -10,7 +10,8 @@ void GreenGrassAgent::PatternQueryImpl() const
 }
 
 
-bool GreenGrassAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
+bool GreenGrassAgent::DecidedQueryImpl( const TreePtrInterface &x, 
+                                        const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT("G");
     

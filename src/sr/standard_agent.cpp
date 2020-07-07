@@ -44,7 +44,8 @@ void StandardAgent::PatternQueryImpl() const
 }
 
 
-bool StandardAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
+bool StandardAgent::DecidedQueryImpl( const TreePtrInterface &x, 
+                                      const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT(".");
 
@@ -69,14 +70,14 @@ bool StandardAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
             SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
             ASSERT( x_seq )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
-            r = DecidedQuerySequence( *x_seq, *pattern_seq );
+            r = DecidedQuerySequence( *x_seq, *pattern_seq, choices );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
             CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
-            r = DecidedQueryCollection( *x_col, *pattern_col );
+            r = DecidedQueryCollection( *x_col, *pattern_col, choices );
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -102,7 +103,8 @@ bool StandardAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
 
 
 bool StandardAgent::DecidedQuerySequence( SequenceInterface &x,
-		                                SequenceInterface &pattern ) const
+		                                  SequenceInterface &pattern,
+                                          const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT(" ");
 	ContainerInterface::iterator pit, npit, nnpit, nxit;
@@ -152,7 +154,7 @@ bool StandardAgent::DecidedQuerySequence( SequenceInterface &x,
 				{
 					// Decide how many elements the current * should match, using conjecture. Jump forward
 					// that many elements, to the element after the star. 
-					nxit = RememberDecision( xit, x.end() );
+					nxit = RememberDecision( xit, x.end(), choices );
 					for( ; xit!=nxit; ++xit, --xsize );
 				}
 				else
@@ -203,7 +205,8 @@ bool StandardAgent::DecidedQuerySequence( SequenceInterface &x,
 
 
 bool StandardAgent::DecidedQueryCollection( CollectionInterface &x,
-		 					              CollectionInterface &pattern ) const
+		 					                CollectionInterface &pattern,
+                                            const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT(" ");
     
@@ -232,7 +235,7 @@ bool StandardAgent::DecidedQueryCollection( CollectionInterface &x,
 	    	// We have to decide which node in the tree to match, so use the present conjecture
 	    	// Note: would like to use xremaining, but it will fall out of scope
 	    	// Report a block for the chosen node
-			ContainerInterface::iterator xit = RememberDecisionLink( false, pia, x.begin(), x.end() );
+			ContainerInterface::iterator xit = RememberDecisionLink( false, pia, x.begin(), x.end(), choices );
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.

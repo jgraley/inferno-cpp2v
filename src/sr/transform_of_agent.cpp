@@ -8,7 +8,8 @@ void TransformOfAgent::PatternQueryImpl() const
 }
 
 
-bool TransformOfAgent::DecidedQueryImpl( const TreePtrInterface &x ) const
+bool TransformOfAgent::DecidedQueryImpl( const TreePtrInterface &x,
+                                         const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT("T");
     // Transform the candidate expression, sharing the overall S&R context so that
