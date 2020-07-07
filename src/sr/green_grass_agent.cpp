@@ -4,32 +4,41 @@
 
 using namespace SR;
 
-void GreenGrassAgent::PatternQueryImpl() const
+PatternQueryResult GreenGrassAgent::PatternQuery() const
 {
-    RememberLink( false, AsAgent(GetThrough()) );
+    PatternQueryResult r;
+    r.AddLink( false, AsAgent(GetThrough()) );
+    return r;
 }
 
 
-bool GreenGrassAgent::DecidedQueryImpl( const TreePtrInterface &x, 
-                                        const deque<ContainerInterface::iterator> &choices ) const
+DecidedQueryResult GreenGrassAgent::DecidedQuery( const TreePtrInterface &x, 
+                                                  const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT("G");
+    DecidedQueryResult r;
     
     // Check pre-restriction
     if( !IsLocalMatch(x.get()) )        
-        return false;
+    {
+        r.AddLocalMatch(false);  
+        return r;
+    }
     
     // Restrict so that everything in the input program under here must be "green grass"
     // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
     if( engine->GetOverallMaster()->dirty_grass.find( x ) != engine->GetOverallMaster()->dirty_grass.end() )
     {
         TRACE(*x)(" is dirty grass so rejecting\n");
-        return false;
+        {
+            r.AddLocalMatch(false);  
+            return r;
+        }
     }
     TRACE("subtree under ")(*x)(" is green grass\n");
     // Normal matching for the through path
-    RememberLink( false, AsAgent(GetThrough()), x );
-    return true;
+    r.AddLink( false, AsAgent(GetThrough()), x );
+    return r;
 }
 
 

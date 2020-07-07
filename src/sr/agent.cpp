@@ -68,7 +68,8 @@ DecidedQueryResult AgentCommon::DecidedQuery( const TreePtrInterface &x,
     
     // Do the agent-specific local checks (x versus characteristics of the present agent)
     // Also takes notes of how child agents block to children of x (depending on conjecture)
-    decided_result.local_match = DecidedQueryImpl( x, choices );
+    bool local_match = DecidedQueryImpl( x, choices );
+    decided_result.AddLocalMatch( local_match ); 
         
     // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
     current_query = IDLE;
@@ -107,57 +108,54 @@ void AgentCommon::ResetKey()
 }
 
 
-void AgentCommon::RememberLink( bool abnormal, Agent *a ) const
+void PatternQueryResult::AddLink( bool abnormal, Agent *a )
 {
-	ASSERT( current_query==PATTERN );
-    PatternQueryResult::Block b;
+    Block b;
     b.abnormal = abnormal;
     b.agent = a;
-    TRACE("Remembering block %d ", pattern_result.blocks.size())(*a)(abnormal?" abnormal":" normal")("\n");
-    pattern_result.blocks.push_back( b );
+    TRACE("Remembering block %d ", blocks.size())(*a)(abnormal?" abnormal":" normal")("\n");
+    blocks.push_back( b );
 }
 
 
-void AgentCommon::RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x ) const
+void DecidedQueryResult::AddLink( bool abnormal, Agent *a, const TreePtrInterface &x )
 {
-	ASSERT( current_query==DECIDED );
-    DecidedQueryResult::Block b;
+    Block b;
     b.is_link = true;
     b.abnormal = abnormal;
     b.agent = a;
     b.px = &x;
     b.local_x = TreePtr<Node>();
     b.is_decision = false;
-    TRACE("Remembering block %d ", decided_result.blocks.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
-    decided_result.blocks.push_back( b );
+    TRACE("Remembering block %d ", blocks.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
+    blocks.push_back( b );
 }
 
 
-void AgentCommon::RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) const
+void DecidedQueryResult::AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
 {
-	ASSERT( current_query==DECIDED );
     ASSERT(x);
-    DecidedQueryResult::Block b;
+    Block b;
     b.is_link = true;
     b.abnormal = abnormal;
     b.agent = a;
     b.px = NULL;    
     b.local_x = x;
     b.is_decision = false;
-    TRACE("Remembering local block %d ", decided_result.blocks.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
-    decided_result.blocks.push_back( b );
+    TRACE("Remembering local block %d ", blocks.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
+    blocks.push_back( b );
 }
 
 
-void AgentCommon::RememberLink( const DecidedQueryResult::Block &b ) const
+void DecidedQueryResult::AddLink( const DecidedQueryResult::Block &b )
 {
-    decided_result.blocks.push_back( b );
+    blocks.push_back( b );
 }
 
     
-void AgentCommon::RememberLink( const PatternQueryResult::Block &b ) const
+void PatternQueryResult::AddLink( const PatternQueryResult::Block &b )
 {
-    pattern_result.blocks.push_back( b);
+    blocks.push_back( b);
 }
 
     
@@ -166,74 +164,84 @@ void AgentCommon::RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const
 	ASSERT( current_query!=IDLE );
 	if( current_query==PATTERN )
 	{
-		ASSERT( !pattern_result.evaluator ); // should not register more than one
-		pattern_result.evaluator = e;
+		pattern_result.AddEvaluator(e);
 	}
 	else
 	{
-		ASSERT( !decided_result.evaluator ); // should not register more than one
-	    decided_result.evaluator = e;
+	    decided_result.AddEvaluator(e);
 	}
 }	
 
 
-ContainerInterface::iterator AgentCommon::RememberDecision( ContainerInterface::iterator begin,
-                                                            ContainerInterface::iterator end,
-                                                            const deque<ContainerInterface::iterator> &choices ) const
+void PatternQueryResult::AddEvaluator( shared_ptr<BooleanEvaluator> e )
+{
+	ASSERT( !evaluator ); // should not register more than one
+	evaluator = e;
+}	
+
+
+void DecidedQueryResult::AddEvaluator( shared_ptr<BooleanEvaluator> e )
+{
+	ASSERT( !evaluator ); // should not register more than one
+	evaluator = e;
+}	
+
+
+ContainerInterface::iterator DecidedQueryResult::AddDecision( ContainerInterface::iterator begin,
+                                                              ContainerInterface::iterator end,
+                                                              const deque<ContainerInterface::iterator> &choices )
 {
     ASSERT( begin != end )("no empty decisions");
     ContainerInterface::iterator it;
-    if( decided_result.decision_count >= choices.size() )
+    if( decision_count >= choices.size() )
     {
         it = begin; // No choice was given to us so assume first one
     }
     else
     {
-        it = choices[decided_result.decision_count]; // Use and consume the choice that was given to us
+        it = choices[decision_count]; // Use and consume the choice that was given to us
         ASSERT( it != end );
     }
     
     Conjecture::Range r;
     r.begin = begin;
     r.end = end;
-	ASSERT( current_query==DECIDED );
-    DecidedQueryResult::Block b;
+    Block b;
     b.is_link = false;
     b.is_decision = true;
     b.decision = r;    
-    decided_result.blocks.push_back( b );
-    decided_result.decision_count++;
+    blocks.push_back( b );
+    decision_count++;
         
     return it;
 }
 
 
-ContainerInterface::iterator AgentCommon::RememberDecisionLink( bool abnormal, 
-																Agent *a, 
-																ContainerInterface::iterator begin,
-																ContainerInterface::iterator end,
-                                                                const deque<ContainerInterface::iterator> &choices ) const
+ContainerInterface::iterator DecidedQueryResult::AddDecisionLink( bool abnormal, 
+													 			  Agent *a, 
+																  ContainerInterface::iterator begin,
+																  ContainerInterface::iterator end,
+                                                                  const deque<ContainerInterface::iterator> &choices )
 {
-	ASSERT( current_query==DECIDED );
     ASSERT( begin != end )("no empty decisions");
     ContainerInterface::iterator it;
-    if( decided_result.decision_count >= choices.size() )
+    if( decision_count >= choices.size() )
     {
         it = begin; // No choice was given to us so assume first one
     }
     else
     {
-        it = choices[decided_result.decision_count]; // Use and consume the choice that was given to us
+        it = choices[decision_count]; // Use and consume the choice that was given to us
         ASSERT( it != end );
     }
     
-    DecidedQueryResult::Block b;
+    Block b;
     b.is_link = true;
     b.abnormal = abnormal;
     b.agent = a;
     b.px = &(*it); // do not simplify! we want a simple pointer, not an iterator TODO or do we
     b.local_x = TreePtr<Node>();
-    TRACE("Remembering decision block %d ", decided_result.blocks.size())(*a)(" -> ")(**it)(abnormal?" abnormal":" normal")("\n");
+    TRACE("Remembering decision block %d ", blocks.size())(*a)(" -> ")(**it)(abnormal?" abnormal":" normal")("\n");
 
     Conjecture::Range r;
     r.begin = begin;
@@ -242,13 +250,19 @@ ContainerInterface::iterator AgentCommon::RememberDecisionLink( bool abnormal,
     b.decision = r;
 
     // Put it all in blocks TODO tie these together in the blocks struct
-    decided_result.blocks.push_back( b );    
-    decided_result.decision_count++;
+    blocks.push_back( b );    
+    decision_count++;
 
     return it; // Note: we have to have the iterator even when a coupling push has occurred, since
                // we should have checked that the pushed back node is actually in the container 
                // (find() etc gets us an iterator)
 }                                        
+                                        
+                                        
+void DecidedQueryResult::AddLocalMatch( bool lm )
+{
+    local_match = lm;
+}                                    
                                         
                                         
 bool SR::operator<(const SR::DecidedQueryResult::Block &l0, const SR::DecidedQueryResult::Block &l1)

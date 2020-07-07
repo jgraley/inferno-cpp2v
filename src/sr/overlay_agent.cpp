@@ -5,21 +5,28 @@
 
 using namespace SR;
 
-void OverlayAgent::PatternQueryImpl() const
+PatternQueryResult OverlayAgent::PatternQuery() const
 {
-	RememberLink( false, AsAgent(GetThrough()) );
+    PatternQueryResult r;
+	r.AddLink( false, AsAgent(GetThrough()) );
+    return r;
 }
 
 
-bool OverlayAgent::DecidedQueryImpl( const TreePtrInterface &x, 
-                                     const deque<ContainerInterface::iterator> &choices ) const
+DecidedQueryResult OverlayAgent::DecidedQuery( const TreePtrInterface &x, 
+                                               const deque<ContainerInterface::iterator> &choices ) const
 {
+    DecidedQueryResult r;
+    
     // Check pre-restriction
     if( !IsLocalMatch(x.get()) )        
-        return false;
+    {
+        r.AddLocalMatch(false);  
+        return r;
+    }
 
-    RememberLink( false, AsAgent(GetThrough()), x );
-    return true;
+    r.AddLink( false, AsAgent(GetThrough()), x );
+    return r;
 }
 
 

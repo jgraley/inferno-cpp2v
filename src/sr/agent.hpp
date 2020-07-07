@@ -25,14 +25,21 @@ public:
         Agent *agent;
     };
         
-    deque<Block> blocks;
-    shared_ptr<BooleanEvaluator> evaluator;
-
     void clear()
     {
 		blocks.clear();
         evaluator = shared_ptr<BooleanEvaluator>();
     }
+    void AddLink( bool abnormal, Agent *a );
+    void AddLink( const Block &b );
+    void AddEvaluator( shared_ptr<BooleanEvaluator> e );
+    
+    deque<Block> GetBlocks() const { return blocks; }
+    shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
+
+private:
+    deque<Block> blocks;
+    shared_ptr<BooleanEvaluator> evaluator;
 };
 
 
@@ -65,10 +72,29 @@ public:
         evaluator = shared_ptr<BooleanEvaluator>();        
     }
 
+    void AddLink( bool abnormal, Agent *a, const TreePtrInterface &x ); 
+    void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ); 
+    void AddEvaluator( shared_ptr<BooleanEvaluator> e ); 
+    void AddLink( const DecidedQueryResult::Block &l ); 
+    ContainerInterface::iterator AddDecision( ContainerInterface::iterator begin,
+                                              ContainerInterface::iterator end,
+                                              const deque<ContainerInterface::iterator> &choices );
+    ContainerInterface::iterator AddDecisionLink( bool abnormal, 
+											      Agent *a, 
+												  ContainerInterface::iterator begin,
+												  ContainerInterface::iterator end,
+                                                  const deque<ContainerInterface::iterator> &choices );
+    void AddLocalMatch( bool local_match );
+                                                  
+    deque<Block> GetBlocks() const { return blocks; }
+    shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
+    bool IsLocalMatch() { return local_match; }
+    
+private:
     deque<Block> blocks; 
     shared_ptr<BooleanEvaluator> evaluator;
-    bool local_match;
-    int decision_count;
+    bool local_match = true;
+    int decision_count = 0;
 };
 
 bool operator<(const DecidedQueryResult::Block &l0, const DecidedQueryResult::Block &l1);
@@ -118,9 +144,9 @@ public:
     virtual PatternQueryResult PatternQuery() const;
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
                                              const deque<ContainerInterface::iterator> &choices ) const;
-    virtual void PatternQueryImpl() const = 0;
+    virtual void PatternQueryImpl() const { ASSERT("must override PatternQuery or PatternQueryImpl"); }
     virtual bool DecidedQueryImpl( const TreePtrInterface &x, 
-                                   const deque<ContainerInterface::iterator> &choices ) const = 0;
+                                   const deque<ContainerInterface::iterator> &choices ) const  { ASSERT("must override DecidedQuery or DecidedQueryImpl"); return false; };
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
     void DoKey( TreePtr<Node> x );
     TreePtr<Node> GetCoupled();                                  
@@ -136,22 +162,22 @@ public:
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
-    void RememberLink( bool abnormal, Agent *a ) const; // Pattern query
-    void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x ) const; // Decided query
-    void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) const; // Decided query
+    void RememberLink( bool abnormal, Agent *a ) const { pattern_result.AddLink(abnormal, a); } 
+    void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x ) const { decided_result.AddLink(abnormal, a, x); }
+    void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) const { decided_result.AddLocalLink(abnormal, a, x); }
     void RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const; // All queries
-    void RememberLink( const DecidedQueryResult::Block &l ) const; // Decided query
-    void RememberLink( const PatternQueryResult::Block &l ) const; // Decided query
+    void RememberLink( const DecidedQueryResult::Block &l ) const { decided_result.AddLink( l ); }
+    void RememberLink( const PatternQueryResult::Block &l ) const { pattern_result.AddLink( l ); } 
 
     const Engine *engine;    
     ContainerInterface::iterator RememberDecision( ContainerInterface::iterator begin,
                                                    ContainerInterface::iterator end,
-                                                   const deque<ContainerInterface::iterator> &choices ) const;
+                                                   const deque<ContainerInterface::iterator> &choices ) const { return decided_result.AddDecision(begin, end, choices); }
     ContainerInterface::iterator RememberDecisionLink( bool abnormal, 
 													   Agent *a, 
 													   ContainerInterface::iterator begin,
 													   ContainerInterface::iterator end,
-                                                       const deque<ContainerInterface::iterator> &choices ) const; // Decided query
+                                                       const deque<ContainerInterface::iterator> &choices ) const { return decided_result.AddDecisionLink(abnormal, a, begin, end, choices); }
 			
 private:    
     TreePtr<Node> coupling_key;    

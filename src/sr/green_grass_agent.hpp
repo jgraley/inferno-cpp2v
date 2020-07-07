@@ -16,9 +16,9 @@ namespace SR
 /// pass. This departs from the reductive style, so should be used with care.
 class GreenGrassAgent : public virtual AgentCommon 
 {
-    virtual void PatternQueryImpl() const;
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x, 
-                                   const deque<ContainerInterface::iterator> &choices ) const;
+    virtual PatternQueryResult PatternQuery() const;
+    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
+                                             const deque<ContainerInterface::iterator> &choices ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual TreePtr<Node> GetThrough() const = 0;

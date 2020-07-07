@@ -180,12 +180,13 @@ bool Engine::CompareLinks( const DecidedQueryResult &query_result,
                            const CouplingMap &master_keys,
                            Set<Agent *> &reached ) const
 {
-	ASSERT( !query_result.evaluator );
+	ASSERT( !query_result.GetEvaluator() );
     // Follow up on any blocks that were noted by the agent impl
     bool made_coupling_keys = false;  
     CouplingMap coupling_keys;
     int i=0;
-    FOREACH( const DecidedQueryResult::Block &b, query_result.blocks )
+    FOREACH( const DecidedQueryResult::Block &b, query_result.GetBlocks() )
+    {
         if( b.is_link ) // skikp decisions    
 		{
 			TRACE("Comparing block %d\n", i);
@@ -235,6 +236,7 @@ bool Engine::CompareLinks( const DecidedQueryResult &query_result,
 			
 			i++;
 		}
+    }
       
     return true;
 }
@@ -247,13 +249,14 @@ bool Engine::CompareEvaluatorLinks( const DecidedQueryResult &query_result,
 									const CouplingMap &master_keys,
 									Set<Agent *> &reached ) const
 {
-	ASSERT( query_result.evaluator );
+	ASSERT( query_result.GetEvaluator() );
     CouplingMap coupling_keys = MapUnion( master_keys, local_keys );
 
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
     deque<bool> compare_results;
-    FOREACH( const DecidedQueryResult::Block &b, query_result.blocks )
+    FOREACH( const DecidedQueryResult::Block &b, query_result.GetBlocks() )
+    {
         if( b.is_link ) // skikp decisions
 		{
 			TRACE("Comparing block %d\n", i);
@@ -265,8 +268,10 @@ bool Engine::CompareEvaluatorLinks( const DecidedQueryResult &query_result,
 			compare_results.push_back( Compare( b.agent, *px, coupling_keys ) );
 			i++;
 		}
-
-	bool match = (*query_result.evaluator)( compare_results );
+    }
+    
+    shared_ptr<BooleanEvaluator> evaluator = query_result.GetEvaluator();
+	bool match = (*evaluator)( compare_results );
 	TRACE(" Evaluating ");
 	FOREACH(bool b, compare_results)
 	    TRACE(b)(" ");
@@ -293,17 +298,17 @@ bool Engine::DecidedCompare( Agent *agent,
     // Run the compare implementation to get the blocks based on the choices
     TRACE(*agent)("?=")(*x)(" Gathering blocks\n");    
     DecidedQueryResult query_result = agent->DecidedQuery( x, choices );
-    TRACE(*agent)("?=")(*x)(" local match ")(query_result.local_match)("\n");
+    TRACE(*agent)("?=")(*x)(" local match ")(query_result.IsLocalMatch())("\n");
     
     // Feed the decisions info in the blocks structure back to the conjecture
     deque<Conjecture::Range> decisions;
-    FOREACH( const DecidedQueryResult::Block &b, query_result.blocks )
+    FOREACH( const DecidedQueryResult::Block &b, query_result.GetBlocks() )
         if( b.is_decision ) 
             decisions.push_back( b.decision );
-    conj.RegisterDecisions( agent, query_result.local_match, decisions );
+    conj.RegisterDecisions( agent, query_result.IsLocalMatch(), decisions );
         
     // Stop if the node itself mismatched (can be for any reason depending on agent)
-    if(!query_result.local_match)
+    if(!query_result.IsLocalMatch())
         return false;
 
     // Remember the coupling before recursing, as we can hit the same node 
@@ -315,7 +320,7 @@ bool Engine::DecidedCompare( Agent *agent,
     reached.insert( agent );
       
     // Use worker function to go through the blocks, special case if there is evaluator
-    if( !query_result.evaluator )
+    if( !query_result.GetEvaluator() )
     {
 		TRACE(*agent)("?=")(*x)(" Comparing blocks\n");
         return CompareLinks( query_result, can_key, conj, local_keys, master_keys, reached );

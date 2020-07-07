@@ -20,15 +20,15 @@ private:
     TreePtr<Node> terminus_key;
 
 public:
-    virtual void PatternQueryImpl() const;
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x, 
-                                   const deque<ContainerInterface::iterator> &choices ) const;
+    virtual PatternQueryResult PatternQuery() const;
+    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
+                                             const deque<ContainerInterface::iterator> &choices ) const;
     virtual void KeyReplace( const TreePtrInterface &x,
                              deque<ContainerInterface::iterator> choices ); 
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) const = 0;
     virtual void PatternQueryRestrictions() const {};
-    virtual void DecidedQueryRestrictions( ContainerInterface::iterator thistime ) const {};
+    virtual void DecidedQueryRestrictions( DecidedQueryResult &r, ContainerInterface::iterator thistime ) const {};
 
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree
 };
@@ -72,7 +72,7 @@ class StuffAgent : public SearchContainerAgent
 public:
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) const;
     virtual void PatternQueryRestrictions() const;
-    virtual void DecidedQueryRestrictions( ContainerInterface::iterator thistime ) const;
+    virtual void DecidedQueryRestrictions( DecidedQueryResult &r, ContainerInterface::iterator thistime ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree
 };

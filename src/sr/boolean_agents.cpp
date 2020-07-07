@@ -5,27 +5,33 @@ using namespace SR;
 
 //---------------------------------- NotMatch ------------------------------------    
 
-void NotMatchAgent::PatternQueryImpl() const
+PatternQueryResult NotMatchAgent::PatternQuery() const
 {
-	RememberLink( true, AsAgent(GetPattern()) );
-	RememberEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
+    PatternQueryResult r;
+	r.AddLink( true, AsAgent(GetPattern()) );
+	r.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
+    return r;
 }
 
 
-bool NotMatchAgent::DecidedQueryImpl( const TreePtrInterface &x, 
-                                      const deque<ContainerInterface::iterator> &choices ) const
+DecidedQueryResult NotMatchAgent::DecidedQuery( const TreePtrInterface &x, 
+                                                const deque<ContainerInterface::iterator> &choices ) const
 {
     INDENT("!");
     ASSERT( GetPattern() );
+    DecidedQueryResult r;
     
     // Check pre-restriction
-    if( !IsLocalMatch(x.get()) )        
-        return false;
+    if( !IsLocalMatch(x.get()) )      
+    {
+        r.AddLocalMatch(false);  
+        return r;
+    }
     
     // Context is abnormal because patterns must not match
-    RememberLink( true, AsAgent(GetPattern()), x );
-    RememberEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
-    return true;
+    r.AddLink( true, AsAgent(GetPattern()), x );
+    r.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
+    return r;
 }
 
 
@@ -51,31 +57,38 @@ bool NotMatchAgent::BooleanEvaluatorNot::operator()( deque<bool> &inputs ) const
 
 //---------------------------------- MatchAll ------------------------------------    
 
-void MatchAllAgent::PatternQueryImpl() const
+PatternQueryResult MatchAllAgent::PatternQuery() const
 {
+    PatternQueryResult r;
     FOREACH( const TreePtr<Node> p, GetPatterns() )
-	    RememberLink( false, AsAgent(p) );
+	    r.AddLink( false, AsAgent(p) );
+        
+    return r;
 }
 
 
-bool MatchAllAgent::DecidedQueryImpl( const TreePtrInterface &x, 
-                                      const deque<ContainerInterface::iterator> &choices ) const
+DecidedQueryResult MatchAllAgent::DecidedQuery( const TreePtrInterface &x, 
+                                                const deque<ContainerInterface::iterator> &choices ) const
 { 
     INDENT("&");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!
+    DecidedQueryResult r;
     
     // Check pre-restriction
     if( !IsLocalMatch(x.get()) )        
-        return false;
+    {
+        r.AddLocalMatch(false);  
+        return r;
+    }
     
     FOREACH( const TreePtr<Node> p, GetPatterns() )
     {
         ASSERT( p );
         // Context is normal because all patterns must match (but none should contain
         // nodes with reploace functionlity because they will not be invoked during replace) 
-        RememberLink( false, AsAgent(p), x );
+        r.AddLink( false, AsAgent(p), x );
     }
-    return true;
+    return r;
 }    
 
 
