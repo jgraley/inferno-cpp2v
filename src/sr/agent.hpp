@@ -141,12 +141,9 @@ class AgentCommon : public Agent
 public:
     AgentCommon();
     void AgentConfigure( const Engine *e );
-    virtual PatternQueryResult PatternQuery() const;
+    virtual PatternQueryResult PatternQuery() const = 0;
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
-                                             const deque<ContainerInterface::iterator> &choices ) const;
-    virtual void PatternQueryImpl() const { ASSERT("must override PatternQuery or PatternQueryImpl"); }
-    virtual bool DecidedQueryImpl( const TreePtrInterface &x, 
-                                   const deque<ContainerInterface::iterator> &choices ) const  { ASSERT("must override DecidedQuery or DecidedQueryImpl"); return false; };
+                                             const deque<ContainerInterface::iterator> &choices ) const = 0;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
     void DoKey( TreePtr<Node> x );
     TreePtr<Node> GetCoupled();                                  
@@ -162,36 +159,10 @@ public:
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
-    void RememberLink( bool abnormal, Agent *a ) const { pattern_result.AddLink(abnormal, a); } 
-    void RememberLink( bool abnormal, Agent *a, const TreePtrInterface &x ) const { decided_result.AddLink(abnormal, a, x); }
-    void RememberLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) const { decided_result.AddLocalLink(abnormal, a, x); }
-    void RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const; // All queries
-    void RememberLink( const DecidedQueryResult::Block &l ) const { decided_result.AddLink( l ); }
-    void RememberLink( const PatternQueryResult::Block &l ) const { pattern_result.AddLink( l ); } 
-
     const Engine *engine;    
-    ContainerInterface::iterator RememberDecision( ContainerInterface::iterator begin,
-                                                   ContainerInterface::iterator end,
-                                                   const deque<ContainerInterface::iterator> &choices ) const { return decided_result.AddDecision(begin, end, choices); }
-    ContainerInterface::iterator RememberDecisionLink( bool abnormal, 
-													   Agent *a, 
-													   ContainerInterface::iterator begin,
-													   ContainerInterface::iterator end,
-                                                       const deque<ContainerInterface::iterator> &choices ) const { return decided_result.AddDecisionLink(abnormal, a, begin, end, choices); }
 			
 private:    
     TreePtr<Node> coupling_key;    
-    
-    // These are mutable because they are the only things that change during 
-    // a call to DecidedQuery(). It is "OK" because their usage lifetime is 
-    // restricted to a single call (they do not carry state from one call to
-    // the next). TODO pass in and out of DecidedQueryImpl() as params - some
-    // restructuing needed to make this nice as there are modifiers here that
-    // would need to operate on some new object that combines the "blocks" and
-    // "choices".
-    mutable enum {IDLE, PATTERN, DECIDED} current_query;
-    mutable PatternQueryResult pattern_result;    
-    mutable DecidedQueryResult decided_result;    
 };
 
 

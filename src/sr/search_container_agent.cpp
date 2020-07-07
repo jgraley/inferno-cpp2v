@@ -105,10 +105,10 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> 
 }
 
 
-void StuffAgent::PatternQueryRestrictions() const
+void StuffAgent::PatternQueryRestrictions( PatternQueryResult &r ) const
 {
     if( recurse_restriction )
-        RememberLink( true, AsAgent(recurse_restriction) );
+        r.AddLink( true, AsAgent(recurse_restriction) );
 }
 
 

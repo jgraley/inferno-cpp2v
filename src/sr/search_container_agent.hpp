@@ -71,7 +71,7 @@ class StuffAgent : public SearchContainerAgent
 {
 public:
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) const;
-    virtual void PatternQueryRestrictions() const;
+    virtual void PatternQueryRestrictions( PatternQueryResult &r ) const;
     virtual void DecidedQueryRestrictions( DecidedQueryResult &r, ContainerInterface::iterator thistime ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     TreePtr<Node> recurse_restriction; // Restricts the intermediate nodes in the truncated subtree

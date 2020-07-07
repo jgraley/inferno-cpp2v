@@ -16,8 +16,7 @@ Agent *Agent::AsAgent( TreePtr<Node> node )
 
 
 AgentCommon::AgentCommon() :
-    engine(NULL),
-    current_query(IDLE)
+    engine(NULL)
 {
 }
 
@@ -33,47 +32,6 @@ void AgentCommon::AgentConfigure( const Engine *e )
                    ("\nCould be result of coupling this node across sibling slaves - not allowed :(");
     ASSERT(e);
     engine = e;
-}
-
-
-PatternQueryResult AgentCommon::PatternQuery() const
-{
-    ASSERT(this);
-    ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
-	ASSERT( current_query == IDLE );
-	current_query = PATTERN;
-
-    // choices are read by the impl; blocks are updated by the impl
-    pattern_result.clear();
-        
-    // Determine how agent blocks to other agents
-    PatternQueryImpl();
-        
-    // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
-    current_query = IDLE;
-    return pattern_result;
-}
-
-
-DecidedQueryResult AgentCommon::DecidedQuery( const TreePtrInterface &x,
-                                              const deque<ContainerInterface::iterator> &choices ) const
-{
-    ASSERT(this);
-    ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
-	ASSERT( current_query == IDLE );
-	current_query = DECIDED;
-
-    // choices are read by the impl; blocks are updated by the impl
-    decided_result.clear();
-    
-    // Do the agent-specific local checks (x versus characteristics of the present agent)
-    // Also takes notes of how child agents block to children of x (depending on conjecture)
-    bool local_match = DecidedQueryImpl( x, choices );
-    decided_result.AddLocalMatch( local_match ); 
-        
-    // Note that if the DecidedCompareImpl() already keyed, then this does nothing.
-    current_query = IDLE;
-    return decided_result;
 }
 
 
@@ -157,20 +115,6 @@ void PatternQueryResult::AddLink( const PatternQueryResult::Block &b )
 {
     blocks.push_back( b);
 }
-
-    
-void AgentCommon::RememberEvaluator( shared_ptr<BooleanEvaluator> e ) const
-{
-	ASSERT( current_query!=IDLE );
-	if( current_query==PATTERN )
-	{
-		pattern_result.AddEvaluator(e);
-	}
-	else
-	{
-	    decided_result.AddEvaluator(e);
-	}
-}	
 
 
 void PatternQueryResult::AddEvaluator( shared_ptr<BooleanEvaluator> e )
