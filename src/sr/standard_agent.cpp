@@ -131,15 +131,14 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
         if( !dynamic_cast<StarAgent *>(pea) )
             pattern_num_non_star++;
     }
-    int init_starrable_x = x.size() - pattern_num_non_star;
-    if( init_starrable_x < 0 )
+    if( x.size() < pattern_num_non_star )
     {
         r.AddLocalMatch(false);   // TODO break to get the final trace?
         return;
     }
-    ContainerInterface::iterator xstarendit = x.begin();            
-    for( int i=0; i<init_starrable_x; i++ )
-        ++xstarendit;
+    ContainerInterface::iterator xstarendit = x.end();            
+    for( int i=0; i<pattern_num_non_star; i++ )
+        --xstarendit;
         
     // We really want the decision to be inclusive of end() since the choice
     // really descibes a range itself. See #2
