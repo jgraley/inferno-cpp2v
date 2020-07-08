@@ -123,7 +123,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 
 #ifdef SKIP_END_NONSTAR
     int pattern_num_non_star = 0;
-	for( pit = pattern.begin(); pit != pattern.end(); ++pit ) // this loop pattern-only
+	for( pit = pattern.begin(); pit != pattern.end(); ++pit ) // @TODO this is just pattern analysis - do in PatternQuery and cache?
     {
 		TreePtr<Node> pe( *pit );
 		ASSERT( pe );
@@ -148,7 +148,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 
 	for( pit = pattern.begin(), psize = pattern.size(); pit != pattern.end(); ++pit, --psize )
 	{
-		ASSERT( xit == x.end() || *xit );
+ 		ASSERT( xit == x.end() || *xit );
 
 		// Get the next element of the pattern
 		TreePtr<Node> pe( *pit );
@@ -161,53 +161,33 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
             // Remember where we are - this is the beginning of the subsequence that
             // potentially matches the Star.
             ContainerInterface::iterator xit_begin_star = xit;
-
-            // Star always matches at the end of a sequence, so we only need a 
-            // decision when there are more elements left
 			npit=pit;
 			++npit;
-            if( npit == pattern.end() )
+                
+            // The last Star does not need a decision            
+            bool found_more_star = false;// @TODO just use counts, no ned for a search here
+            for( nnpit = npit; nnpit != pattern.end(); ++nnpit )
+                found_more_star = found_more_star || dynamic_cast<StarAgent *>(AsAgent(*nnpit));
+
+            if( found_more_star )
             {
-                xit = x.end(); // match all remaining members of x; jump to end
-                xsize = 0;
+                // Decide how many elements the current * should match, using conjecture. Jump forward
+                // that many elements, to the element after the star. 
+#ifdef SKIP_END_NONSTAR
+                nxit = r.AddDecision( xit, xstarendit, choices );
+#else
+                nxit = r.AddDecision( xit, x.end(), choices ); // @bug see #2
+#endif                    
+                for( ; xit!=nxit; ++xit, --xsize );
             }
             else
             {
-                TRACE("Pattern continues after star\n");
-                if( xit == x.end() )
-                {
-                    r.AddLocalMatch(false);   // more stuff in pattern but not in x TODO break to get the final trace?
-                    return;
-                }
-                    
-				// The last Star does not need a decision            
-				bool found_more_star = false;
-				for( nnpit = npit; nnpit != pattern.end(); ++nnpit )
-					found_more_star = found_more_star || dynamic_cast<StarAgent *>(AsAgent(*nnpit));
-
-                if( found_more_star )
-				{
-					// Decide how many elements the current * should match, using conjecture. Jump forward
-					// that many elements, to the element after the star. 
-#ifdef SKIP_END_NONSTAR
-					if( xit != xstarendit )
-                        nxit = r.AddDecision( xit, xstarendit, choices );
-                    else
-                        nxit = xit;
-#else
-					nxit = r.AddDecision( xit, x.end(), choices ); // @bug see #2
-#endif                    
-					for( ; xit!=nxit; ++xit, --xsize );
-				}
-				else
-				{
-					// No more starts, so skip through the pattern until we have the same
-					// number of x nodes as pattern nodes, allowing for the Star in the pattern
-					// that has not been "consumed" yet. 
-					int npsize = psize-1;
-					for( ; xsize>npsize; ++xit, --xsize ); // TODO same as the npit == pattern.end() behaviour above when at end of pattern
-				}				
-            }
+                // No more stars, so skip through the pattern until we have the same
+                // number of x nodes as pattern nodes, allowing for the Star in the pattern
+                // that has not been "consumed" yet. 
+                int npsize = psize-1;
+                for( ; xsize>npsize; ++xit, --xsize ); // @TODO would it be better to decrement from the end, using --?
+            }				
             
             // Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
             // Now make a copy of the elements that matched the star and apply couplings
@@ -219,24 +199,17 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
         }
  	    else // not a Star so match singly...
 	    {
-            // If there is one more element in x, see if it matches the pattern
-			if( xit != x.end() ) 
-			{
-                r.AddLink( false, pea, *xit );
-				++xit;
-				--xsize;
+            if( xit == x.end() )
+                break;
+       
+            r.AddLink( false, pea, *xit );
+            ++xit;
+			--xsize;
 #ifdef SKIP_END_NONSTAR
-                // Every non-star pattern node we pass means there's one fewer remaining
-                // and we can match a star one step further
-                ++xstarendit;
+            // Every non-star pattern node we pass means there's one fewer remaining
+            // and we can match a star one step further
+            ++xstarendit;
 #endif
-			}
-			else
-			{
-				TRACE("Sequence too short\n");
-                r.AddLocalMatch(false);   // TODO break to get the final trace?
-                return;
-			}
 	    }
 	}
 
