@@ -119,7 +119,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
 	ContainerInterface::iterator xit = x.begin();
-	int psize, xsize = x.size();
+	int p_remaining, x_remaining = x.size();
 
 #ifdef SKIP_END_NONSTAR
     int pattern_num_non_star = 0;
@@ -149,7 +149,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
         ++xstarendit;
 #endif
 
-	for( pit = pattern.begin(), psize = pattern.size(); pit != pattern.end(); ++pit, --psize )
+	for( pit = pattern.begin(), p_remaining = pattern.size(); pit != pattern.end(); ++pit, --p_remaining )
 	{
  		ASSERT( xit == x.end() || *xit );
 
@@ -164,17 +164,17 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
             // Remember where we are - this is the beginning of the subsequence that
             // potentially matches the Star.
             ContainerInterface::iterator xit_begin_star = xit;
-			npit=pit;
-			++npit;
                 
             // The last Star does not need a decision            
             if( pit == p_last_star )
             {
-                // No more stars, so skip through the pattern until we have the same
+                // No more stars, so skip backwards through x from end() until we have the same
                 // number of x nodes as pattern nodes, allowing for the Star in the pattern
                 // that has not been "consumed" yet. 
-                int npsize = psize-1;
-                for( ; xsize>npsize; ++xit, --xsize ); // @TODO would it be better to decrement from the end, using --?
+                int next_p_remaining = p_remaining-1;
+                for( xit = x.end(), x_remaining=0; 
+                     x_remaining<next_p_remaining; 
+                     --xit, ++x_remaining );
             }				
             else
             {
@@ -185,7 +185,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 #else
                 nxit = r.AddDecision( xit, x.end(), choices ); // @bug see #2
 #endif                    
-                for( ; xit!=nxit; ++xit, --xsize );
+                for( ; xit!=nxit; ++xit, --x_remaining );
             }
             
             // Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
@@ -203,7 +203,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
        
             r.AddLink( false, pea, *xit );
             ++xit;
-			--xsize;
+			--x_remaining;
 #ifdef SKIP_END_NONSTAR
             // Every non-star pattern node we pass means there's one fewer remaining
             // and we can match a star one step further
@@ -217,8 +217,8 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
     r.AddLocalMatch( xit==x.end() && pit==pattern.end() );
     if( r.IsLocalMatch() )
     {
-        ASSERT( xsize==0 )("xsize=%d\n", xsize);
-        ASSERT( psize==0 );
+        ASSERT( x_remaining==0 )("x_remaining=%d\n", x_remaining);
+        ASSERT( p_remaining==0 );
 	}
 }
 
