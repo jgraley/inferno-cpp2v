@@ -140,11 +140,6 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
     for( int i=0; i<pattern_num_non_star; i++ )
         --xit_star_end;
         
-    // We really want the decision to be inclusive of end() since the choice
-    // really descibes a range itself. See #2
-    if( xit_star_end != x.end() )
-        ++xit_star_end;
-
 	for( pit = pattern.begin(), p_remaining = pattern.size(); pit != pattern.end(); ++pit, --p_remaining )
 	{
  		ASSERT( xit == x.end() || *xit );
@@ -174,10 +169,25 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
             }				
             else
             {
+                // We really want the decision to be inclusive of end() since the choice
+                // really descibes a range itself. See #2
+                ContainerInterface::iterator xit_star_end_plus_oneish = xit_star_end;
+                if( xit_star_end_plus_oneish != x.end() )
+                {
+                    ++xit_star_end_plus_oneish;
+                }
+                else
+                {
+                    if(xit == x.end())
+                        goto DONTDOIT;
+                    // still wrong in this case, but we seem to get away with it
+                }
                 // Decide how many elements the current * should match, using conjecture. Jump forward
                 // that many elements, to the element after the star. 
-                nxit = r.AddDecision( xit, xit_star_end, choices );
+                nxit = r.AddDecision( xit, xit_star_end_plus_oneish, choices );
                 for( ; xit!=nxit; ++xit, --x_remaining );
+                
+                DONTDOIT:do {} while(0);
             }
             
             // Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
@@ -198,6 +208,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 			--x_remaining;
             // Every non-star pattern node we pass means there's one fewer remaining
             // and we can match a star one step further
+            ASSERT(xit_star_end != x.end());
             ++xit_star_end;
 	    }
 	}
