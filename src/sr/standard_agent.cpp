@@ -152,18 +152,21 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
         if( StarAgent *psa = dynamic_cast<StarAgent *>(pea) )
         {
             // We have a Star type wildcard that can match multiple elements.
-            ContainerInterface::iterator xit_star_end;
+            // Remember where we are - this is the beginning of the subsequence that
+            // potentially matches the Star.
+            ContainerInterface::iterator xit_begin_star = xit;
                 
             // The last Star does not need a decision            
             if( pit == p_last_star )
             {
-                // No more stars, so skip ahead to the end of the possible star range.
-                xit_star_end = xit_star_limit;
+                // No more stars, so skip ahead to the end of the possible star range, 
+                // allowing for the Star in the pattern that has not been "consumed" yet. 
+                xit = xit_star_limit;
             }				
             else
             {
                 // We really want the decision to be inclusive of end() since the choice
-                // really descibes a range itself. Workaround for #2
+                // really descibes a range itself. Workaround #2
                 ContainerInterface::iterator xit_star_end_plus_oneish = xit_star_limit;
                 if( xit_star_end_plus_oneish != x.end() )
                 {
@@ -177,22 +180,20 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
                     // of x) but we seem to get away with it, possibly because there's at least one more star.
                 }
                 
-                // Decide how many elements the current * should match, using conjecture.
-                xit_star_end = r.AddDecision( xit, xit_star_end_plus_oneish, choices );
+                // Decide how many elements the current * should match, using conjecture. Jump forward
+                // that many elements, to the element after the star. 
+                xit = r.AddDecision( xit, xit_star_end_plus_oneish, choices );
                 
                 DONTDOIT:do {} while(0);
             }
             
-            // Star matched [xit, xit_star_end) i.e. xit_star_end-xit elements
+            // Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
             // Now make a copy of the elements that matched the star and apply couplings
-            TreePtr<StarAgent::SubSequenceRange> xss( new StarAgent::SubSequenceRange( xit, xit_star_end ) );
+            TreePtr<StarAgent::SubSequenceRange> xss( new StarAgent::SubSequenceRange( xit_begin_star, xit ) );
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern
             r.AddLocalLink( false, psa, xss );
-            
-            // Progress tothe element past the end of the star (which could be x.end())
-            xit = xit_star_end;
         }
  	    else // not a Star so match singly...
 	    {
