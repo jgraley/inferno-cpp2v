@@ -123,12 +123,15 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 
 #ifdef SKIP_END_NONSTAR
     int pattern_num_non_star = 0;
+    ContainerInterface::iterator p_last_star;
 	for( pit = pattern.begin(); pit != pattern.end(); ++pit ) // @TODO this is just pattern analysis - do in PatternQuery and cache?
     {
 		TreePtr<Node> pe( *pit );
 		ASSERT( pe );
         Agent *pea = AsAgent(pe);
-        if( !dynamic_cast<StarAgent *>(pea) )
+        if( dynamic_cast<StarAgent *>(pea) )
+            p_last_star = pit;
+        else
             pattern_num_non_star++;
     }
     if( x.size() < pattern_num_non_star )
@@ -165,11 +168,15 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 			++npit;
                 
             // The last Star does not need a decision            
-            bool found_more_star = false;// @TODO just use counts, no ned for a search here
-            for( nnpit = npit; nnpit != pattern.end(); ++nnpit )
-                found_more_star = found_more_star || dynamic_cast<StarAgent *>(AsAgent(*nnpit));
-
-            if( found_more_star )
+            if( pit == p_last_star )
+            {
+                // No more stars, so skip through the pattern until we have the same
+                // number of x nodes as pattern nodes, allowing for the Star in the pattern
+                // that has not been "consumed" yet. 
+                int npsize = psize-1;
+                for( ; xsize>npsize; ++xit, --xsize ); // @TODO would it be better to decrement from the end, using --?
+            }				
+            else
             {
                 // Decide how many elements the current * should match, using conjecture. Jump forward
                 // that many elements, to the element after the star. 
@@ -180,14 +187,6 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 #endif                    
                 for( ; xit!=nxit; ++xit, --xsize );
             }
-            else
-            {
-                // No more stars, so skip through the pattern until we have the same
-                // number of x nodes as pattern nodes, allowing for the Star in the pattern
-                // that has not been "consumed" yet. 
-                int npsize = psize-1;
-                for( ; xsize>npsize; ++xit, --xsize ); // @TODO would it be better to decrement from the end, using --?
-            }				
             
             // Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
             // Now make a copy of the elements that matched the star and apply couplings
