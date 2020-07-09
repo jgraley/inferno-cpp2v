@@ -46,7 +46,7 @@ private:
 /// Wrapper for normal pattern nodes that combines a StandardAgent with the specified pattern node
 template<typename NODE_TYPE>
 class StandardAgentWrapper : public virtual NODE_TYPE,
-                           public virtual StandardAgent
+                             public virtual StandardAgent // please keep this ordering, so StandardAgent::StandardAgent can introspect the NODE_TYPE
 {
 public:
     StandardAgentWrapper() : NODE_TYPE() {}

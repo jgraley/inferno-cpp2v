@@ -6,8 +6,6 @@
 #include "standard_agent.hpp"
 #include "star_agent.hpp"
 
-#define SKIP_END_NONSTAR
-
 using namespace SR;
 
 PatternQueryResult StandardAgent::PatternQuery() const
@@ -121,7 +119,6 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 	ContainerInterface::iterator xit = x.begin();
 	int p_remaining, x_remaining = x.size();
 
-#ifdef SKIP_END_NONSTAR
     int pattern_num_non_star = 0;
     ContainerInterface::iterator p_last_star;
 	for( pit = pattern.begin(); pit != pattern.end(); ++pit ) // @TODO this is just pattern analysis - do in PatternQuery and cache?
@@ -139,15 +136,14 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
         r.AddLocalMatch(false);   // TODO break to get the final trace?
         return;
     }
-    ContainerInterface::iterator xstarendit = x.end();            
+    ContainerInterface::iterator xit_star_end = x.end();            
     for( int i=0; i<pattern_num_non_star; i++ )
-        --xstarendit;
+        --xit_star_end;
         
     // We really want the decision to be inclusive of end() since the choice
     // really descibes a range itself. See #2
-    if( xstarendit != x.end() )
-        ++xstarendit;
-#endif
+    if( xit_star_end != x.end() )
+        ++xit_star_end;
 
 	for( pit = pattern.begin(), p_remaining = pattern.size(); pit != pattern.end(); ++pit, --p_remaining )
 	{
@@ -180,11 +176,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
             {
                 // Decide how many elements the current * should match, using conjecture. Jump forward
                 // that many elements, to the element after the star. 
-#ifdef SKIP_END_NONSTAR
-                nxit = r.AddDecision( xit, xstarendit, choices );
-#else
-                nxit = r.AddDecision( xit, x.end(), choices ); // @bug see #2
-#endif                    
+                nxit = r.AddDecision( xit, xit_star_end, choices );
                 for( ; xit!=nxit; ++xit, --x_remaining );
             }
             
@@ -204,11 +196,9 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
             r.AddLink( false, pea, *xit );
             ++xit;
 			--x_remaining;
-#ifdef SKIP_END_NONSTAR
             // Every non-star pattern node we pass means there's one fewer remaining
             // and we can match a star one step further
-            ++xstarendit;
-#endif
+            ++xit_star_end;
 	    }
 	}
 
