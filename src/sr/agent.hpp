@@ -76,6 +76,7 @@ public:
     void AddEvaluator( shared_ptr<BooleanEvaluator> e ); 
     ContainerInterface::iterator AddDecision( ContainerInterface::iterator begin,
                                               ContainerInterface::iterator end,
+                                              bool inclusive,
                                               const deque<ContainerInterface::iterator> &choices );
     void AddLocalMatch( bool local_match );
                                                   

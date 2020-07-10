@@ -162,30 +162,9 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
             }				
             else
             {
-                // We really want the decision to be inclusive of end() since each choice
-                // itself descibes a range. Workaround #2
-                ContainerInterface::iterator xit_star_end_plus_oneish = xit_star_limit;
-                if( xit_star_end_plus_oneish != x.end() )
-                {
-                    ++xit_star_end_plus_oneish;
-                }
-                else
-                {
-                    if(xit == x.end())
-                    {
-                        xit_star_end = xit;
-                        goto DONTDOIT;
-                    }
-                    // still wrong in this case, because the decision will lack the final choice (extend this star to end
-                    // of x) but we seem to get away with it, possibly because there's at least one more star which
-                    // matches >= 1 element in all our test coverage.
-                }
-                
                 // Decide how many elements the current * should match, using conjecture. The star's range
-                // ends at the chosen element.
-                xit_star_end = r.AddDecision( xit, xit_star_end_plus_oneish, choices );
-                
-                DONTDOIT:do {} while(0);
+                // ends at the chosen element. Be inclusive because what we really want is a range.
+                xit_star_end = r.AddDecision( xit, xit_star_limit, true, choices );
             }
             
             // Star matched [xit, xit_star_end) i.e. xit-xit_begin_star elements
@@ -255,7 +234,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
 	    	// We have to decide which node in the tree to match, so use the present conjecture
 	    	// Note: would like to use xremaining, but it will fall out of scope
 	    	// Report a block for the chosen node
-			ContainerInterface::iterator xit = r.AddDecision( x.begin(), x.end(), choices );
+			ContainerInterface::iterator xit = r.AddDecision( x.begin(), x.end(), false, choices );
             r.AddLink( false, pia, *xit );
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)

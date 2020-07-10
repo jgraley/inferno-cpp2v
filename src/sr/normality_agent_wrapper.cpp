@@ -171,7 +171,7 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface &
 				r.begin = pwc->begin();
 				r.end = pwc->end();
 				nb.is_decision = true;
-				nb.decision = Conjecture::Range( pwc->begin(), pwc->end() );
+				nb.decision = Conjecture::Range( false, pwc->begin(), pwc->end() );
 				wrapped_result.push_back( nb );
 
 				// Consider the chosen (or pushed) node to be a key for the benefit of the local engine

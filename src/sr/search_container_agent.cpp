@@ -45,7 +45,7 @@ DecidedQueryResult SearchContainerAgent::DecidedQuery( const TreePtrInterface &x
     }
 
     // Get choice from conjecture about where we are in the walk
-	ContainerInterface::iterator thistime = r.AddDecision( pwx->begin(), pwx->end(), choices );
+	ContainerInterface::iterator thistime = r.AddDecision( pwx->begin(), pwx->end(), false, choices );
     r.AddLink( false, AsAgent(terminus), *thistime );
 
     // Let subclasses implement further restrictions

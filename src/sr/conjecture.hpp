@@ -18,7 +18,8 @@ public:
     {
         ContainerInterface::iterator begin;
         ContainerInterface::iterator end;    
-        bool operator==(const Range &o) const
+        bool inclusive; // If true, include "end" as a possible choice
+        bool operator==(const Range &o) const // Only required for an ASSERT
         {
 			return begin==o.begin && end==o.end;
 		}

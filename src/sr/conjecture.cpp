@@ -41,20 +41,29 @@ void Conjecture::PrepareForDecidedCompare(int pass)
 
 
 bool Conjecture::IncrementBlock( AgentBlock *block )
-{
+{    
 	if( block->choices.empty() )
 	{
 		block->decisions.clear(); // make it defunct
 	    return false;
 	}
 	
-	if( block->choices.back() != block->decisions[block->choices.size()-1].end ) 
+    auto &decision = block->decisions[block->choices.size()-1];
+
+    // Inclusive case - we let the choice go to end() but we won't go any further
+    if( decision.inclusive && block->choices.back() == decision.end )
+    {
+        block->choices.pop_back();
+        return IncrementBlock( block );
+	}
+
+	if( block->choices.back() != decision.end ) 
 	{
         ++(last_block->choices.back()); 
-        // note this can push us onto "end" which is not valid, so more must be done
     }
 		
-    if( block->choices.back() == block->decisions[block->choices.size()-1].end )
+    // Exclusive case - we don't let the choice be end
+    if( !decision.inclusive && block->choices.back() == decision.end )
     {
         block->choices.pop_back();
         return IncrementBlock( block );
