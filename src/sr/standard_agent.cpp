@@ -152,21 +152,18 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
         if( StarAgent *psa = dynamic_cast<StarAgent *>(pea) )
         {
             // We have a Star type wildcard that can match multiple elements.
-            // Remember where we are - this is the beginning of the subsequence that
-            // potentially matches the Star.
-            ContainerInterface::iterator xit_begin_star = xit;
+            ContainerInterface::iterator xit_star_end;
                 
             // The last Star does not need a decision            
             if( pit == p_last_star )
             {
-                // No more stars, so skip ahead to the end of the possible star range, 
-                // allowing for the Star in the pattern that has not been "consumed" yet. 
-                xit = xit_star_limit;
+                // No more stars, so skip ahead to the end of the possible star range. 
+                xit_star_end = xit_star_limit;
             }				
             else
             {
-                // We really want the decision to be inclusive of end() since the choice
-                // really descibes a range itself. Workaround #2
+                // We really want the decision to be inclusive of end() since each choice
+                // itself descibes a range. Workaround #2
                 ContainerInterface::iterator xit_star_end_plus_oneish = xit_star_limit;
                 if( xit_star_end_plus_oneish != x.end() )
                 {
@@ -175,25 +172,31 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
                 else
                 {
                     if(xit == x.end())
+                    {
+                        xit_star_end = xit;
                         goto DONTDOIT;
+                    }
                     // still wrong in this case, because the decision will lack the final choice (extend this star to end
-                    // of x) but we seem to get away with it, possibly because there's at least one more star.
+                    // of x) but we seem to get away with it, possibly because there's at least one more star which
+                    // matches >= 1 element in all our test coverage.
                 }
                 
-                // Decide how many elements the current * should match, using conjecture. Jump forward
-                // that many elements, to the element after the star. 
-                xit = r.AddDecision( xit, xit_star_end_plus_oneish, choices );
+                // Decide how many elements the current * should match, using conjecture. The star's range
+                // ends at the chosen element.
+                xit_star_end = r.AddDecision( xit, xit_star_end_plus_oneish, choices );
                 
                 DONTDOIT:do {} while(0);
             }
             
-            // Star matched [xit_begin_star, xit) i.e. xit-xit_begin_star elements
-            // Now make a copy of the elements that matched the star and apply couplings
-            TreePtr<StarAgent::SubSequenceRange> xss( new StarAgent::SubSequenceRange( xit_begin_star, xit ) );
+            // Star matched [xit, xit_star_end) i.e. xit-xit_begin_star elements
+            TreePtr<StarAgent::SubSequenceRange> xss( new StarAgent::SubSequenceRange( xit, xit_star_end ) );
 
             // Apply couplings to this Star and matched range
-            // Restrict to pre-restriction or pattern
+            // Restrict to pre-restriction or pattern restriction
             r.AddLocalLink( false, psa, xss );
+            
+            // Resume at the first element after the matched range
+            xit = xit_star_end;
         }
  	    else // not a Star so match singly...
 	    {
@@ -202,6 +205,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
        
             r.AddLink( false, pea, *xit );
             ++xit;
+            
             // Every non-star pattern node we pass means there's one fewer remaining
             // and we can match a star one step further
             ASSERT(xit_star_limit != x.end());
@@ -251,7 +255,8 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
 	    	// We have to decide which node in the tree to match, so use the present conjecture
 	    	// Note: would like to use xremaining, but it will fall out of scope
 	    	// Report a block for the chosen node
-			ContainerInterface::iterator xit = r.AddDecisionLink( false, pia, x.begin(), x.end(), choices );
+			ContainerInterface::iterator xit = r.AddDecision( x.begin(), x.end(), choices );
+            r.AddLink( false, pia, *xit );
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.

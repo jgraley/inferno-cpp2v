@@ -191,7 +191,7 @@ bool Engine::CompareLinks( const DecidedQueryResult &query_result,
 		{
 			TRACE("Comparing block %d\n", i);
 	 
-			// Get pattern for linked node
+			// Get x for linked node
 			const TreePtrInterface *px = b.GetX();
 			ASSERT( *px );
 			   
@@ -262,7 +262,7 @@ bool Engine::CompareEvaluatorLinks( const DecidedQueryResult &query_result,
 			TRACE("Comparing block %d\n", i);
 			ASSERT( b.abnormal )("When an evaluator is used, all blocks must be into abnormal contexts");
 	 
-			// Get pattern for linked node
+			// Get x for linked node
 			const TreePtrInterface *px = b.GetX();
 								
 			compare_results.push_back( Compare( b.agent, *px, coupling_keys ) );

@@ -31,7 +31,6 @@ public:
         evaluator = shared_ptr<BooleanEvaluator>();
     }
     void AddLink( bool abnormal, Agent *a );
-    void AddLink( const Block &b );
     void AddEvaluator( shared_ptr<BooleanEvaluator> e );
     
     deque<Block> GetBlocks() const { return blocks; }
@@ -51,9 +50,9 @@ public:
         const TreePtrInterface *GetX() const
         {
 			if( px )
-				return px; // linked pattern is in input tree
+				return px; // linked x is in input tree
 			else
-				return &local_x; // linked pattern is local, kept alive by local_x    
+				return &local_x; // linked x is local, kept alive by local_x    
 		}	
 
         bool is_link;
@@ -75,15 +74,9 @@ public:
     void AddLink( bool abnormal, Agent *a, const TreePtrInterface &x ); 
     void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ); 
     void AddEvaluator( shared_ptr<BooleanEvaluator> e ); 
-    void AddLink( const DecidedQueryResult::Block &l ); 
     ContainerInterface::iterator AddDecision( ContainerInterface::iterator begin,
                                               ContainerInterface::iterator end,
                                               const deque<ContainerInterface::iterator> &choices );
-    ContainerInterface::iterator AddDecisionLink( bool abnormal, 
-											      Agent *a, 
-												  ContainerInterface::iterator begin,
-												  ContainerInterface::iterator end,
-                                                  const deque<ContainerInterface::iterator> &choices );
     void AddLocalMatch( bool local_match );
                                                   
     deque<Block> GetBlocks() const { return blocks; }

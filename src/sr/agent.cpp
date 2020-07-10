@@ -105,18 +105,6 @@ void DecidedQueryResult::AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x 
 }
 
 
-void DecidedQueryResult::AddLink( const DecidedQueryResult::Block &b )
-{
-    blocks.push_back( b );
-}
-
-    
-void PatternQueryResult::AddLink( const PatternQueryResult::Block &b )
-{
-    blocks.push_back( b);
-}
-
-
 void PatternQueryResult::AddEvaluator( shared_ptr<BooleanEvaluator> e )
 {
 	ASSERT( !evaluator ); // should not register more than one
@@ -159,49 +147,7 @@ ContainerInterface::iterator DecidedQueryResult::AddDecision( ContainerInterface
         
     return it;
 }
-
-
-ContainerInterface::iterator DecidedQueryResult::AddDecisionLink( bool abnormal, 
-													 			  Agent *a, 
-																  ContainerInterface::iterator begin,
-																  ContainerInterface::iterator end,
-                                                                  const deque<ContainerInterface::iterator> &choices )
-{
-    ASSERT( begin != end )("no empty decisions");
-    ContainerInterface::iterator it;
-    if( decision_count >= choices.size() )
-    {
-        it = begin; // No choice was given to us so assume first one
-    }
-    else
-    {
-        it = choices[decision_count]; // Use and consume the choice that was given to us
-        ASSERT( it != end );
-    }
-    
-    Block b;
-    b.is_link = true;
-    b.abnormal = abnormal;
-    b.agent = a;
-    b.px = &(*it); // do not simplify! we want a simple pointer, not an iterator TODO or do we
-    b.local_x = TreePtr<Node>();
-    TRACE("Remembering decision block %d ", blocks.size())(*a)(" -> ")(**it)(abnormal?" abnormal":" normal")("\n");
-
-    Conjecture::Range r;
-    r.begin = begin;
-    r.end = end;
-    b.is_decision = true;
-    b.decision = r;
-
-    // Put it all in blocks TODO tie these together in the blocks struct
-    blocks.push_back( b );    
-    decision_count++;
-
-    return it; // Note: we have to have the iterator even when a coupling push has occurred, since
-               // we should have checked that the pushed back node is actually in the container 
-               // (find() etc gets us an iterator)
-}                                        
-                                        
+                                                                    
                                         
 void DecidedQueryResult::AddLocalMatch( bool lm )
 {
