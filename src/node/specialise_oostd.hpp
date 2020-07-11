@@ -17,7 +17,8 @@
 #define USE_LIST_FOR_SEQUENCE 1
 #endif
 
-#define USE_DEQUE_FOR_COLLECTION 1
+#define USE_DEQUE_FOR_COLLECTION 0
+#define USE_LIST_FOR_COLLECTION 1
 
 // Inferno tree shared pointers
 
