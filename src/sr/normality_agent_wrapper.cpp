@@ -127,7 +127,7 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface &
 
     // Loop over the wrapped node's returned blocks. Abnormal entries are co-looped with our
     // own abnormal_links container.
-    deque<bool> compare_results;
+    list<bool> compare_results;
     deque< AbnormalLink >::iterator alit = abnormal_links.begin();    
     FOREACH( DecidedQueryResult::Block b, wrapped_result.blocks )
     {

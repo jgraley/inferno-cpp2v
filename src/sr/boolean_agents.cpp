@@ -49,10 +49,10 @@ void NotMatchAgent::GetGraphAppearance( bool *bold, string *text, string *shape 
 }
 
 
-bool NotMatchAgent::BooleanEvaluatorNot::operator()( deque<bool> &inputs ) const
+bool NotMatchAgent::BooleanEvaluatorNot::operator()( list<bool> &inputs ) const
 {
 	ASSERT( inputs.size() == 1 ); // we should remember one block
-	return !inputs[0];
+	return !inputs.front();
 }
 
 //---------------------------------- MatchAll ------------------------------------    
@@ -152,10 +152,10 @@ void MatchAnyAgent::GetGraphAppearance( bool *bold, string *text, string *shape 
 }
 
 
-bool MatchAnyAgent::BooleanEvaluatorOr::operator()( deque<bool> &inputs ) const
+bool MatchAnyAgent::BooleanEvaluatorOr::operator()( list<bool> &inputs ) const
 {
 	bool res = false;
-	FOREACH( bool ai, inputs )
+	for( bool ai : inputs )
 	{
 	    res = res || ai;
 	}

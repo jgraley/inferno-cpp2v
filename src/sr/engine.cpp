@@ -254,7 +254,7 @@ bool Engine::CompareEvaluatorLinks( const DecidedQueryResult &query_result,
 
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
-    deque<bool> compare_results;
+    list<bool> compare_results;
     FOREACH( const DecidedQueryResult::Block &b, query_result.GetBlocks() )
     {
         if( b.is_link ) // skikp decisions

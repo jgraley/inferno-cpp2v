@@ -34,7 +34,7 @@ private:
     class BooleanEvaluatorNot : public BooleanEvaluator
     {
 	public:
-   	    virtual bool operator()( deque<bool> &inputs ) const;
+   	    virtual bool operator()( list<bool> &inputs ) const;
 	};
 };
 
@@ -104,7 +104,7 @@ private:
     class BooleanEvaluatorOr : public BooleanEvaluator
     {
 	public:
-   	    virtual bool operator()( deque<bool> &inputs ) const;
+   	    virtual bool operator()( list<bool> &inputs ) const;
 	};
 };
 
