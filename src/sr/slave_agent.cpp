@@ -21,7 +21,7 @@ PatternQueryResult SlaveAgent::PatternQuery() const
 
 
 DecidedQueryResult SlaveAgent::DecidedQuery( const TreePtrInterface &x, 
-                                             const deque<ContainerInterface::iterator> &choices ) const
+                                             const Conjecture::Choices &choices ) const
 {
     INDENT("l");
     DecidedQueryResult r;

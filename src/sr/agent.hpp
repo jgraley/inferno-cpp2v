@@ -77,7 +77,7 @@ public:
     ContainerInterface::iterator AddDecision( ContainerInterface::iterator begin,
                                               ContainerInterface::iterator end,
                                               bool inclusive,
-                                              const deque<ContainerInterface::iterator> &choices );
+                                              const Conjecture::Choices &choices );
     void AddLocalMatch( bool local_match );
                                                   
     deque<Block> GetBlocks() const { return blocks; }
@@ -110,11 +110,11 @@ public:
     virtual PatternQueryResult PatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
-                                             const deque<ContainerInterface::iterator> &choices ) const = 0;                                
+                                             const Conjecture::Choices &choices ) const = 0;                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const TreePtrInterface &x,
-                             deque<ContainerInterface::iterator> choices ) = 0;
+                             Conjecture::Choices choices ) = 0;
     virtual void TrackingKey( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
 	virtual void AgentConfigure( const Engine *e ) = 0;
@@ -137,13 +137,13 @@ public:
     void AgentConfigure( const Engine *e );
     virtual PatternQueryResult PatternQuery() const = 0;
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
-                                             const deque<ContainerInterface::iterator> &choices ) const = 0;
+                                             const Conjecture::Choices &choices ) const = 0;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
     void DoKey( TreePtr<Node> x );
     TreePtr<Node> GetCoupled();                                  
     void ResetKey();    
     virtual void KeyReplace( const TreePtrInterface &x,
-                             deque<ContainerInterface::iterator> choices );
+                             Conjecture::Choices choices );
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplace();
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );

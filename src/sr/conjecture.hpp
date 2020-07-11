@@ -14,6 +14,8 @@ class Agent;
 class Conjecture
 {
 public:
+    typedef vector<ContainerInterface::iterator> Choices;
+
     struct Range
     {
         ContainerInterface::iterator begin;
@@ -29,13 +31,12 @@ public:
     {
 		Agent *agent;
 		deque<Range> decisions;
-		deque<ContainerInterface::iterator> choices;
+		Choices choices;
 		AgentBlock *previous_block;
 		bool seen;
 		bool local_match;
 	};
     typedef pair<Agent * const, AgentBlock> BlockPair;
-
 
 public:
     Conjecture(Set<Agent *> my_agents);
@@ -46,7 +47,7 @@ public:
     				       
     // Standard interface for decided compare functions
     void RegisterDecisions( Agent *agent, bool local_match, deque<Range> decisions=deque<Range>() );      
-    deque<ContainerInterface::iterator> GetChoices(Agent *agent);
+    Conjecture::Choices GetChoices(Agent *agent);
 				   
 private:
 	Map<Agent *, AgentBlock> agent_blocks;

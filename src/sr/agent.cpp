@@ -122,7 +122,7 @@ void DecidedQueryResult::AddEvaluator( shared_ptr<BooleanEvaluator> e )
 ContainerInterface::iterator DecidedQueryResult::AddDecision( ContainerInterface::iterator begin,
                                                               ContainerInterface::iterator end,
                                                               bool inclusive,
-                                                              const deque<ContainerInterface::iterator> &choices )
+                                                              const Conjecture::Choices &choices )
 {
     ASSERT( inclusive || begin != end )("no empty decisions");
     ContainerInterface::iterator it;
@@ -173,7 +173,7 @@ bool SR::operator<(const SR::DecidedQueryResult::Block &l0, const SR::DecidedQue
 
 
 void AgentCommon::KeyReplace( const TreePtrInterface &x,
-                              deque<ContainerInterface::iterator> choices )
+                              Conjecture::Choices choices )
 {   
     DoKey(x);  
 }

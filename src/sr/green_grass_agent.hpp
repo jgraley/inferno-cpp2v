@@ -18,7 +18,7 @@ class GreenGrassAgent : public virtual AgentCommon
 {
     virtual PatternQueryResult PatternQuery() const;
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
-                                             const deque<ContainerInterface::iterator> &choices ) const;
+                                             const Conjecture::Choices &choices ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual TreePtr<Node> GetThrough() const = 0;

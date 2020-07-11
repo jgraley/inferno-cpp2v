@@ -14,7 +14,7 @@ PatternQueryResult PointerIsAgent::PatternQuery() const
 
 
 DecidedQueryResult PointerIsAgent::DecidedQuery( const TreePtrInterface &x, 
-                                                 const deque<ContainerInterface::iterator> &choices ) const
+                                                 const Conjecture::Choices &choices ) const
 {
 	INDENT("@");
     DecidedQueryResult r;

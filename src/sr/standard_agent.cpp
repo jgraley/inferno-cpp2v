@@ -47,7 +47,7 @@ PatternQueryResult StandardAgent::PatternQuery() const
 
 
 DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface &x, 
-                                                const deque<ContainerInterface::iterator> &choices ) const
+                                                const Conjecture::Choices &choices ) const
 {
     INDENT(".");
     DecidedQueryResult r;
@@ -109,7 +109,7 @@ DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface &x,
 void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
                                           SequenceInterface &x,
 		                                  SequenceInterface &pattern,
-                                          const deque<ContainerInterface::iterator> &choices ) const
+                                          const Conjecture::Choices &choices ) const
 {
     INDENT(" ");
 	ContainerInterface::iterator pit, npit, nnpit, nxit;
@@ -205,7 +205,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
                                             CollectionInterface &x,
 		 					                CollectionInterface &pattern,
-                                            const deque<ContainerInterface::iterator> &choices ) const
+                                            const Conjecture::Choices &choices ) const
 {
     INDENT(" ");
     

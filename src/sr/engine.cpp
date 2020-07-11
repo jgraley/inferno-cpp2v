@@ -293,7 +293,7 @@ bool Engine::DecidedCompare( Agent *agent,
     ASSERT( x ); // Target must not be NULL
             	
     // Obtain the choices from the conjecture
-    deque<ContainerInterface::iterator> choices = conj.GetChoices(agent);
+    Conjecture::Choices choices = conj.GetChoices(agent);
 
     // Run the compare implementation to get the blocks based on the choices
     TRACE(*agent)("?=")(*x)(" Gathering blocks\n");    

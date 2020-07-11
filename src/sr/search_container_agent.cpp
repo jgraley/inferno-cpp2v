@@ -16,7 +16,7 @@ PatternQueryResult SearchContainerAgent::PatternQuery() const
 
 
 DecidedQueryResult SearchContainerAgent::DecidedQuery( const TreePtrInterface &x, 
-                                                       const deque<ContainerInterface::iterator> &choices ) const
+                                                       const Conjecture::Choices &choices ) const
 {
     INDENT("#");
     ASSERT( this );
@@ -56,7 +56,7 @@ DecidedQueryResult SearchContainerAgent::DecidedQuery( const TreePtrInterface &x
 
 
 void SearchContainerAgent::KeyReplace( const TreePtrInterface &x,
-                                       deque<ContainerInterface::iterator> choices )
+                                       Conjecture::Choices choices )
 {
     ASSERT( choices.size() == 1 )("Expected a single choice, choices.size()=%d", choices.size());
     ContainerInterface::iterator thistime = choices.front();

@@ -82,10 +82,10 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
 
 
 DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface &x,
-                                                        const deque<ContainerInterface::iterator> &choices ) const;
+                                                        const Conjecture::Choices &choices ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const{
     INDENT("'");    
-    deque<ContainerInterface::iterator> wrapped_choices, wrapper_choices; // JSG2020 wrapper_choices either is choices or should be init'd from it?
+    Conjecture::Choices wrapped_choices, wrapper_choices; // JSG2020 wrapper_choices either is choices or should be init'd from it?
 
     PatternQueryResult wrapped_result = wrapped_agent->PatternQuery();
     wrapper_result.evaluator = wrapped_result.evaluator;

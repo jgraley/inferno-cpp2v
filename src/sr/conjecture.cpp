@@ -126,7 +126,7 @@ void Conjecture::RegisterDecisions( Agent *agent, bool local_match, deque<Range>
 }
 
 
-deque<ContainerInterface::iterator> Conjecture::GetChoices(Agent *agent)
+Conjecture::Choices Conjecture::GetChoices(Agent *agent)
 {            
     if( agent_blocks.IsExist(agent) )
     {
@@ -134,7 +134,7 @@ deque<ContainerInterface::iterator> Conjecture::GetChoices(Agent *agent)
 	}
 	else
 	{
-		return deque<ContainerInterface::iterator>(); // no choices
+		return Choices(); // no choices
 	}    
 }
 
