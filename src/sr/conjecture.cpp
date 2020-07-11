@@ -92,7 +92,7 @@ bool Conjecture::Increment()
 }
 
 
-void Conjecture::RegisterDecisions( Agent *agent, bool local_match, deque<Range> decisions )
+void Conjecture::RegisterDecisions( Agent *agent, bool local_match, Ranges decisions )
 {                
 	ASSERT( prepared );
 	

@@ -301,7 +301,7 @@ bool Engine::DecidedCompare( Agent *agent,
     TRACE(*agent)("?=")(*x)(" local match ")(query_result.IsLocalMatch())("\n");
     
     // Feed the decisions info in the blocks structure back to the conjecture
-    deque<Conjecture::Range> decisions;
+    Conjecture::Ranges decisions;
     FOREACH( const DecidedQueryResult::Block &b, query_result.GetBlocks() )
         if( b.is_decision ) 
             decisions.push_back( b.decision );

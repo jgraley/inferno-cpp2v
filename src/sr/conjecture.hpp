@@ -14,8 +14,6 @@ class Agent;
 class Conjecture
 {
 public:
-    typedef vector<ContainerInterface::iterator> Choices;
-
     struct Range
     {
         ContainerInterface::iterator begin;
@@ -27,10 +25,16 @@ public:
 		}
     };
 
+    // There is a "random access" in DecidedQueryResult::AddDecision()
+    typedef vector<ContainerInterface::iterator> Choices; 
+    
+    // There is a "random access" in IncrementBlock()
+    typedef vector<Range> Ranges;
+
     struct AgentBlock
     {
 		Agent *agent;
-		deque<Range> decisions;
+		Ranges decisions;
 		Choices choices;
 		AgentBlock *previous_block;
 		bool seen;
@@ -46,7 +50,7 @@ public:
     bool Increment(); // returns true for try again, false for give up				 
     				       
     // Standard interface for decided compare functions
-    void RegisterDecisions( Agent *agent, bool local_match, deque<Range> decisions=deque<Range>() );      
+    void RegisterDecisions( Agent *agent, bool local_match, Ranges decisions=Ranges() );      
     Conjecture::Choices GetChoices(Agent *agent);
 				   
 private:
