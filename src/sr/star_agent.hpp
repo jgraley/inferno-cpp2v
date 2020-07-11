@@ -57,7 +57,9 @@ public:
         virtual void erase( iterator )                      { ASSERTFAIL("Cannot modify SubSequenceRange"); }
         virtual void clear()                                { ASSERTFAIL("Cannot modify SubSequenceRange"); }    
         virtual void insert( const TreePtrInterface & )     { ASSERTFAIL("Cannot modify SubSequenceRange"); }
+#if SEQUENCE_HAS_RANDOM_ACCESS
         virtual TreePtrInterface &operator[]( int i )       { ASSERTFAIL("TODO"); }  
+#endif
         virtual void push_back( const TreePtrInterface &gx ){ ASSERTFAIL("Cannot modify SubSequenceRange"); }  
     };
     struct SubSequence : Sequence<Node>,

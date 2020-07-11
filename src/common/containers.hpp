@@ -10,6 +10,8 @@
 
 #include "common.hpp"
 
+#define SEQUENCE_HAS_RANDOM_ACCESS 0
+
 /// OOStd namespace contains wrappers for STL and Boost features adding run-time polymorphism
 namespace OOStd {
 
@@ -182,7 +184,9 @@ public:
 template< class SUB_BASE, typename VALUE_INTERFACE >
 struct SequenceInterface : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>
 {
+#if SEQUENCE_HAS_RANDOM_ACCESS
     virtual VALUE_INTERFACE &operator[]( int i ) = 0;
+#endif
     virtual void push_back( const VALUE_INTERFACE &gx ) = 0;
 };
 
@@ -318,10 +322,12 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
     	}
 	};
 
+#if SEQUENCE_HAS_RANDOM_ACCESS
     virtual typename CONTAINER_IMPL::value_type &operator[]( int i )
     {
     	return CONTAINER_IMPL::operator[](i);
     }
+#endif
 	virtual void insert( const VALUE_INTERFACE &gx ) // Simulating the SimpleAssociatedContaner API 
 	{
         // Like multiset, we do allow more than one copy of the same element

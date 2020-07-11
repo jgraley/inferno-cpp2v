@@ -308,31 +308,52 @@ string Render::Sanitise( string s )
 string Render::RenderOperator( TreePtr<Operator> op, Sequence<Expression> &operands )
 {
 	ASSERT(op);
+    string s;
+    Sequence<Expression>::iterator operands_it = operands.begin();
 	if( dynamic_pointer_cast< MakeArray >(op) )
-		return "{ " + RenderOperandSequence( operands, ", ", false ) + " }";
+    {
+		s = "{ " + RenderOperandSequence( operands, ", ", false ) + " }";
+    }
 	else if( dynamic_pointer_cast< Multiplexor >(op) )
-		return RenderExpression( operands[0], true ) + " ? " +
-			   RenderExpression( operands[1], true ) + " : " +
-			   RenderExpression( operands[2], true );
+    {
+		s = RenderExpression( *operands_it, true ) + " ? ";
+        ++operands_it;
+		s += RenderExpression( *operands_it, true ) + " : ";
+        ++operands_it;
+        s += RenderExpression( *operands_it, true );           
+    }
 	else if( dynamic_pointer_cast< Subscript >(op) )
-		return RenderExpression( operands[0], true ) + "[" +
-			   RenderExpression( operands[1], false ) + "]";
+	{
+        s = RenderExpression( *operands_it, true ) + "[";
+        ++operands_it;
+		s += RenderExpression( *operands_it, false ) + "]";
+    }
 #define INFIX(TOK, TEXT, NODE, BASE, CAT) \
-	else if( dynamic_pointer_cast<NODE>(op) ) \
-		return RenderExpression( operands[0], true ) +\
-			   TEXT +\
-			   RenderExpression( operands[1], true );
+    else if( dynamic_pointer_cast<NODE>(op) ) \
+	{ \
+		s = RenderExpression( *operands_it, true ); \
+		s += TEXT; \
+        ++operands_it; \
+		s += RenderExpression( *operands_it, true ); \
+    }
 #define PREFIX(TOK, TEXT, NODE, BASE, CAT) \
 	else if( dynamic_pointer_cast<NODE>(op) ) \
-		return TEXT +\
-			   RenderExpression( operands[0], true );
+    { \
+		s = TEXT; \
+		s += RenderExpression( *operands_it, true ); \
+    }
 #define POSTFIX(TOK, TEXT, NODE, BASE, CAT) \
 	else if( dynamic_pointer_cast<NODE>(op) ) \
-		return RenderExpression( operands[0], true ) +\
-			   TEXT;
+    { \
+		s = RenderExpression( *operands_it, true ); \
+		s += TEXT; \
+    }
 #include "tree/operator_db.inc"
 	else
-		return ERROR_UNSUPPORTED(op);
+    {
+		s = ERROR_UNSUPPORTED(op);
+    }
+    return s;
 }
 
 
@@ -930,11 +951,13 @@ string Render::RenderSequence( Sequence<ELEMENT> spe,
 {
 	TRACE();
 	string s;
-	for( int i=0; i<spe.size(); i++ )
+    typename Sequence<ELEMENT>::iterator last_it=spe.end();
+    --last_it;
+	for( typename Sequence<ELEMENT>::iterator it=spe.begin(); it!=spe.end(); ++it )
 	{
 		//TRACE("%d %p\n", i, &i);
-		string sep = (separate_last || i+1<spe.size()) ? separator : "";
-		TreePtr<ELEMENT> pe = spe[i];
+		string sep = (separate_last || it!=last_it) ? separator : "";
+		TreePtr<ELEMENT> pe = *it;
 		if( TreePtr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
 			s += RenderDeclaration( d, sep, init_access ? &init_access : NULL, showtype, false, shownonfuncinit );
 		else if( TreePtr<Statement> st = dynamic_pointer_cast< Statement >(pe) )
@@ -952,11 +975,13 @@ string Render::RenderOperandSequence( Sequence<Expression> spe,
 {
 	TRACE();
 	string s;
-	for( int i=0; i<spe.size(); i++ )
+    Sequence<Expression>::iterator last_it=spe.end();
+    --last_it;
+	for( Sequence<Expression>::iterator it=spe.begin(); it!=spe.end(); ++it )
 	{
 		//TRACE("%d %p\n", i, &i);
-		string sep = (separate_last || i+1<spe.size()) ? separator : "";
-		TreePtr<Expression> pe = spe[i];
+		string sep = (separate_last || it!=last_it) ? separator : "";
+		TreePtr<Expression> pe = *it;
 		s += RenderExpression( pe ) + sep;
 	}
 	return s;

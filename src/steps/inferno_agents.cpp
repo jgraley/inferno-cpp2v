@@ -145,7 +145,7 @@ TreePtr<Node> NestedSubscriptLookup::Advance( TreePtr<Node> n, string *depth ) c
     if( TreePtr<Subscript> s = dynamic_pointer_cast<Subscript>(n) )            
     {
         *depth += "S";
-        return s->operands[0]; // the base, not the index
+        return s->operands.front(); // the base, not the index
     }
     else if( TreePtr<Lookup> l  = dynamic_pointer_cast<Lookup>(n) )            
     {
@@ -219,18 +219,33 @@ bool IsLabelReached::CanReachExpr( Set< TreePtr<InstanceIdentifier> > *f,
 	INDENT("X");
 	bool r = false;
 	if( TreePtr<LabelIdentifier> liy = dynamic_pointer_cast<LabelIdentifier>(y) )
+    {
 		r = liy->IsLocalMatch( x.get() ); // y is x, so yes
+    }
 	else if( TreePtr<InstanceIdentifier> iiy = dynamic_pointer_cast<InstanceIdentifier>( y ) )
+    {
 		r = CanReachVar(f, x, iiy );
+    }
 	else if( TreePtr<Ternop> ty = dynamic_pointer_cast<Ternop>( y ) )
-		r = CanReachExpr(f, x, ty->operands[1]) ||
-			CanReachExpr(f, x, ty->operands[2]); // only the choices, not the condition
+    {
+        Sequence<Expression>::iterator ops_it = ty->operands.begin();
+        ++ops_it; // only the choices, not the condition
+		r = CanReachExpr(f, x, *ops_it);
+        ++ops_it;
+		r = r || CanReachExpr(f, x, *ops_it); 
+    }
 	else if( TreePtr<Comma> cy = dynamic_pointer_cast<Comma>( y ) )
-		r = CanReachExpr(f, x, ty->operands[1]); // second operand
+    {
+		r = CanReachExpr(f, x, cy->operands.back()); // second operand
+    }
 	else if( TreePtr<Subscript> sy = dynamic_pointer_cast<Subscript>( y ) ) // subscript as r-value
-		r = CanReachExpr(f, x, sy->operands[0]); // first operand
+	{
+        r = CanReachExpr(f, x, sy->operands.front()); // first operand
+    }
 	else if( dynamic_pointer_cast<Dereference>( y ) )
-		ASSERTFAIL("IsLabelReached used on expression that is read from memory, cannot figure out the answer\n");
+    {
+        ASSERTFAIL("IsLabelReached used on expression that is read from memory, cannot figure out the answer\n");
+    }
 		
 	TRACE("I reakon ")(*x)(r?" does ":" does not ")("reach ")(*y)("\n"); 
 	return r;        
@@ -263,13 +278,13 @@ bool IsLabelReached::CanReachVar( Set< TreePtr<InstanceIdentifier> > *f,
 	{
 		if( TreePtr<Assign> a = dynamic_pointer_cast<Assign>(n) )
 		{
-			TreePtr<Expression> lhs = a->operands[0];
+			TreePtr<Expression> lhs = a->operands.front();
 			if( TreePtr<Subscript> slhs = dynamic_pointer_cast<Subscript>( lhs ) ) // subscript as l-value 
-				lhs = slhs->operands[0];
-			TRACE("Examining assignment: ")(*lhs)(" = ")(*a->operands[1])("\n"); 
+				lhs = slhs->operands.front();
+			TRACE("Examining assignment: ")(*lhs)(" = ")(*a->operands.back())("\n"); 
 			if( lhs == y )
 			{
-				if( CanReachExpr( f, x, a->operands[1] ) )
+				if( CanReachExpr( f, x, a->operands.back() ) )
 				{
 					r = true;                        
 					break; // early out, since we have the info we need

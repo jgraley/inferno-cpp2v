@@ -6,12 +6,17 @@
 #include "common/containers.hpp"
 #include "itemise.hpp"
 #include <deque>
+#include <list>
 #include <set>
 #include <iterator>
 
 // This should be enabled to make inferno use a sequence-like container for 
 // it's collections, so that insertion order always applies to walks over the 
 // collection. This will improve repeatability (and output will better resemble input).
+#if SEQUENCE_HAS_RANDOM_ACCESS==0
+#define USE_LIST_FOR_SEQUENCE 1
+#endif
+
 #define USE_DEQUE_FOR_COLLECTION 1
 
 // Inferno tree shared pointers
@@ -47,7 +52,11 @@ private:
 };
 
 
-#if USE_DEQUE_FOR_COLLECTION
+#if USE_LIST_FOR_COLLECTION
+#define COLLECTION_IMPL list
+#define COLLECTION_BASE OOStd::Sequence
+#define COLLECTION_INTERFACE_BASE OOStd::SequenceInterface
+#elif USE_DEQUE_FOR_COLLECTION
 #define COLLECTION_IMPL deque
 #define COLLECTION_BASE OOStd::Sequence
 #define COLLECTION_INTERFACE_BASE OOStd::SequenceInterface
@@ -55,6 +64,12 @@ private:
 #define COLLECTION_IMPL multiset
 #define COLLECTION_BASE OOStd::SimpleAssociativeContainer
 #define COLLECTION_INTERFACE_BASE OOStd::SimpleAssociativeContainerInterface
+#endif
+
+#if USE_LIST_FOR_SEQUENCE
+#define SEQUENCE_IMPL list
+#else
+#define SEQUENCE_IMPL deque
 #endif
 
 // Inferno tree containers
@@ -69,10 +84,10 @@ struct CollectionInterface : virtual COLLECTION_INTERFACE_BASE<Itemiser::Element
 };
 
 template<typename VALUE_TYPE>
-struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, deque< TreePtr<VALUE_TYPE> > >,
+struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > >,
                   virtual SequenceInterface
 {
-	typedef deque< TreePtr<VALUE_TYPE> > Impl;
+	typedef SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > Impl;
 
 	inline Sequence() {}
 	template<typename L, typename R>

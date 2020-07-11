@@ -1687,10 +1687,10 @@ private:
 		//TRACE("%p %p\n", &scope->members, scope.get());
 
 		// Go over the entire scope, keeping track of where we are in the Sequence
-		int seq_index=0; // TODO rename
+		Sequence<Expression>::iterator seq_it = seq.begin();
 		FOREACH( TreePtr<Declaration> d, scope_ordered )
 		{
-			if( seq_index == seq.size() )
+			if( seq_it == seq.end() )
 			{
 			    TRACE("Early out due to fewer elements in sequence than scope\n"); 
 			    break;
@@ -1702,17 +1702,17 @@ private:
 				if( !dynamic_pointer_cast<Callable>( i->type ) )
 				{
 					// Get value out of array init and put it in record init together with member instance id
-					TreePtr<Expression> v = seq[seq_index];
+					TreePtr<Expression> v = *seq_it;
 					TreePtr<MapOperand> mi( new MapOperand );
 					mi->identifier = i->identifier;
 					mi->value = v;
 					mapop->operands.insert( mi );
 
-					seq_index++;
+					++seq_it;
 				}
 			}
 		}		
-		ASSERT( seq_index == seq.size() )
+		ASSERT( seq_it == seq.end() )
 		      ("Too many arguments to function/struct init (we allow too few for poor mans overlading, but not too many)\n")
 		      ("Scope was ")(*scope)(" for map operator ")(mapop)("\n");
 	}

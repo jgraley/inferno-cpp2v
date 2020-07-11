@@ -77,7 +77,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     		n = MakeTreePtr<Unsigned>();
     	TreePtr<SpecificInteger> sz( new SpecificInteger(TypeDb::integral_bits[INT]) );
     	n->width = sz;
-       return n;
+        return n;
     }
     else if( TreePtr<New> n = dynamic_pointer_cast<New>(o) )
     {
@@ -91,10 +91,9 @@ TreePtr<Type> TypeOf::Get( TreePtr<Expression> o )
     }
     else if( TreePtr<CompoundExpression> ce = dynamic_pointer_cast<CompoundExpression>(o) )
     {
-        int sz = ce->statements.size();
-        if( !sz )
+        if( ce->statements.empty() )
             return MakeTreePtr<Type>();
-        TreePtr<Statement> last = ce->statements[sz-1];
+        TreePtr<Statement> last = ce->statements.back();
         if( TreePtr<Expression> e = dynamic_pointer_cast<Expression>(last) )
             return Get(e);
         else
@@ -133,7 +132,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
     if( TreePtr<MakeArray> al = dynamic_pointer_cast<MakeArray>(op) )
     {
     	TreePtr<Array> a( new Array );
-    	a->element = optypes[0];
+    	a->element = optypes.front();
     	TreePtr<SpecificInteger> sz( new SpecificInteger(optypes.size()) );
     	a->size = sz;
         return a;
@@ -142,14 +141,14 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 	// Assignment operators return their left-hand operand type in all cases
 	if( dynamic_pointer_cast<AssignmentOperator>(op) )
 	{
-		return optypes[0];
+		return optypes.front();
 	}
 
 	// Pointer arithmetic: a subtract involving two pointers returns int
 	// we are not bothering to check that the pointer types are compatible.
 	if( dynamic_pointer_cast<Subtract>(op) )
 	{
-		if( dynamic_pointer_cast<Pointer>(optypes[0]) && dynamic_pointer_cast<Pointer>(optypes[1]) )
+		if( dynamic_pointer_cast<Pointer>(optypes.front()) && dynamic_pointer_cast<Pointer>(optypes.back()) )
 		{
 			TreePtr<Signed> i = TreePtr<Signed>( new Signed );
 			TreePtr<SpecificInteger> nc( new SpecificInteger(TypeDb::integral_bits[INT]) );
@@ -170,7 +169,7 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 #define BITWISE GetStandard( optypes )
 #define LOGICAL MakeTreePtr<Boolean>()
 #define COMPARISON MakeTreePtr<Boolean>()
-#define SHIFT optypes[0]
+#define SHIFT optypes.front()
 #define SPECIAL GetSpecial( op, optypes )
 
     if(0) {}
@@ -198,16 +197,16 @@ TreePtr<Type> TypeOf::Get( TreePtr<Operator> op, Sequence<Type> optypes )
 TreePtr<Type> TypeOf::GetStandard( Sequence<Type> &optypes )
 {
 	Sequence<Numeric> nums;
-	for( int i=0; i<optypes.size(); i++ )
-		if( TreePtr<Numeric> n = dynamic_pointer_cast<Numeric>(optypes[i]) )
+	for( TreePtr<Type> optype : optypes )
+		if( TreePtr<Numeric> n = dynamic_pointer_cast<Numeric>(optype) )
 			nums.push_back(n);
 	if( nums.size() == optypes.size() )
 		return GetStandard( nums );
 
 	if( optypes.size() == 2 )
-		ASSERT(0)("Standard operator with operands ")(*optypes[0])(*optypes[1])(" is unknown usage, please add to TypeOf class");
+		ASSERT(0)("Standard operator unknown usage, please add to TypeOf class");
 	else
-		ASSERT(0)("Standard operator with ")(*optypes[0])(" is unknown usage, please add to TypeOf class");
+		ASSERT(0)("Standard operator unknown usage, please add to TypeOf class");
     ASSERTFAIL();
 }
 
@@ -221,10 +220,10 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 	TreePtr<SpecificFloatSemantics> maxwidth_float;
 
 	// Look at the operands in turn
-	for( int i=0; i<optypes.size(); i++ )
+	for( TreePtr<Type> optype : optypes )
 	{
 		// Floats take priority
-		if( TreePtr<Floating> f = dynamic_pointer_cast<Floating>(optypes[i]) )
+		if( TreePtr<Floating> f = dynamic_pointer_cast<Floating>(optype) )
 		{
 			TreePtr<SpecificFloatSemantics> sfs = dynamic_pointer_cast<SpecificFloatSemantics>(f->semantics);
 			ASSERT(sfs)("Floating point type seen with semantics not specific");
@@ -235,19 +234,19 @@ TreePtr<Type> TypeOf::GetStandard( Sequence<Numeric> &optypes )
 		}
 
 		// Should only have Integrals from here on
-		TreePtr<Integral> intop = dynamic_pointer_cast<Integral>(optypes[i]);
-        ASSERT( intop )(*optypes[i])(" is not Floating or Integral, please add to TypeOf class" );
+		TreePtr<Integral> intop = dynamic_pointer_cast<Integral>(optype);
+        ASSERT( intop )(*optype)(" is not Floating or Integral, please add to TypeOf class" );
 
         // Do a max algorithm on the width
 		TreePtr<SpecificInteger> width = dynamic_pointer_cast<SpecificInteger>(intop->width);
 		ASSERT( width )( "Integral size ")(*(intop->width))(" is not specific, cannot decide result type");
 
-		if( dynamic_pointer_cast<Signed>(optypes[i]) )
+		if( dynamic_pointer_cast<Signed>(optype) )
 		{
 			if( *width >= *maxwidth_signed )
 		    	maxwidth_signed = width;
 		}
-		else if( dynamic_pointer_cast<Unsigned>(optypes[i]) )
+		else if( dynamic_pointer_cast<Unsigned>(optype) )
 		{
 			if( !maxwidth_unsigned || *width >= *maxwidth_unsigned )
 				maxwidth_unsigned = width;
@@ -283,9 +282,9 @@ TreePtr<Type> TypeOf::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes 
 {
     if( dynamic_pointer_cast<Dereference>(op) || dynamic_pointer_cast<Subscript>(op) )
     {
-        if( TreePtr<Pointer> o2 = dynamic_pointer_cast<Pointer>( optypes[0] ) )
+        if( TreePtr<Pointer> o2 = dynamic_pointer_cast<Pointer>( optypes.front() ) )
             return o2->destination;
-        else if( TreePtr<Array> o2 = dynamic_pointer_cast<Array>( optypes[0] ) )
+        else if( TreePtr<Array> o2 = dynamic_pointer_cast<Array>( optypes.front() ) )
             return o2->element;
         else
             ASSERTFAIL( "dereferencing non-pointer" );
@@ -293,17 +292,19 @@ TreePtr<Type> TypeOf::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes 
     else if( dynamic_pointer_cast<AddressOf>(op) )
     {
         TreePtr<Pointer> p( new Pointer );
-        p->destination = optypes[0];
+        p->destination = optypes.front();
         return p;
     }
     else if( dynamic_pointer_cast<Comma>(op) )
     {
         ASSERT( optypes.size() == 2 );
-        return optypes[1];
+        return optypes.back();
     }
     else if( dynamic_pointer_cast<Multiplexor>(op) )
 	{
-		return optypes[1]; // TODO do this properly, consider cond ? NULL : &x
+        Sequence<Type>::iterator optypes_it = optypes.begin();
+        ++optypes_it;
+		return *optypes_it; // middle element TODO do this properly, consider cond ? NULL : &x
 	}
     else if( dynamic_pointer_cast<This>(op) )
     {
