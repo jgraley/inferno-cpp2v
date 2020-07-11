@@ -93,7 +93,7 @@ TreePtr<Instance> FindMemberByName( TreePtr<Program> program, TreePtr<Record> r,
             if( TreePtr<Instance> i = FindMemberByName( program, ir, name ) )
                 return i;
         }
-                
+    
     // We failed. Hang our head in shame.                
     return TreePtr<Instance>();
 }                
