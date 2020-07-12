@@ -122,24 +122,30 @@ void DecidedQueryResult::AddEvaluator( shared_ptr<BooleanEvaluator> e )
 ContainerInterface::iterator DecidedQueryResult::AddDecision( ContainerInterface::iterator begin,
                                                               ContainerInterface::iterator end,
                                                               bool inclusive,
-                                                              const Conjecture::Choices &choices )
+                                                              const Conjecture::Choices &choices,
+                                                              shared_ptr<ContainerInterface> keep_alive )
 {
     ASSERT( inclusive || begin != end )("no empty decisions");
     ContainerInterface::iterator it;
     if( decision_count >= choices.size() )
     {
         it = begin; // No choice was given to us so assume first one
+        //ASSERT(*it);
     }
     else
     {
         it = choices[decision_count]; // Use and consume the choice that was given to us
         ASSERT( inclusive || it != end );
-    }
+        //ASSERT(*it);
+    }    
+    
+    //ASSERT(*begin);
     
     Conjecture::Range r;
-    r.inclusive = inclusive;
     r.begin = begin;
     r.end = end;
+    r.inclusive = inclusive;
+    r.keep_alive = keep_alive;
     Block b;
     b.is_link = false;
     b.is_decision = true;

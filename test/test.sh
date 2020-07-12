@@ -71,6 +71,7 @@ fi
 
 echo Transform... 
 # Always do self-test
+#gdb -ex run --args $inferno -s -ap -i$infile -o$outfile $iargs
 time $inferno -s -ap -i$infile -o$outfile $iargs
 ires=$?
 
@@ -89,7 +90,7 @@ then
    if test $l2res -eq 0
    then
     echo Run output...
-    time test/results/"$fb"_out.exe
+    test/results/"$fb"_out.exe
     r2res=$?
     cmpres=1
     if test $r1res -eq $r2res

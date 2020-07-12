@@ -187,7 +187,7 @@ bool Engine::CompareLinks( const DecidedQueryResult &query_result,
     int i=0;
     FOREACH( const DecidedQueryResult::Block &b, query_result.GetBlocks() )
     {
-        if( b.is_link ) // skikp decisions    
+        if( b.is_link ) // skip decisions    
 		{
 			TRACE("Comparing block %d\n", i);
 	 

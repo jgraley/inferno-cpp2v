@@ -57,7 +57,7 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
     PatternQueryResult wrapper_result;
     wrapper_result.evaluator = wrapped_result.evaluator;
 	
-    deque< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
+    list< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
     FOREACH( PatternQueryResult::Block b, plinks.blocks ) // JSG2020 wrapped_result.blocks?
     {
 		if( b.abnormal )
@@ -90,7 +90,7 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface &
     PatternQueryResult wrapped_result = wrapped_agent->PatternQuery();
     wrapper_result.evaluator = wrapped_result.evaluator;
 	
-    deque< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
+    list< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
     int i=0;
     FOREACH( PatternQueryResult::Block b, plinks.blocks ) // JSG2020 wrapped_result.blocks?
     {
@@ -128,7 +128,7 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface &
     // Loop over the wrapped node's returned blocks. Abnormal entries are co-looped with our
     // own abnormal_links container.
     list<bool> compare_results;
-    deque< AbnormalLink >::iterator alit = abnormal_links.begin();    
+    list< AbnormalLink >::iterator alit = abnormal_links.begin();    
     FOREACH( DecidedQueryResult::Block b, wrapped_result.blocks )
     {
 		if( b.is_link && b.abnormal )

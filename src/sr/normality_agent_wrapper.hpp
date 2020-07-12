@@ -42,7 +42,7 @@ class NormalityAgentWrapper : public virtual Agent
     Agent * const wrapped_agent;    
     
     // Additional block info for abnormal blocks, in same order as Pattern/DecidedQuery
-    deque< shared_ptr<AbnormalLink> > abnormal_links;
+    list< shared_ptr<AbnormalLink> > abnormal_links;
     
     // Map of keys
     CouplingMap master_keys;

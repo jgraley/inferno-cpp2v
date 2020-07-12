@@ -33,11 +33,11 @@ public:
     void AddLink( bool abnormal, Agent *a );
     void AddEvaluator( shared_ptr<BooleanEvaluator> e );
     
-    deque<Block> GetBlocks() const { return blocks; }
+    list<Block> GetBlocks() const { return blocks; }
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
 
 private:
-    deque<Block> blocks;
+    list<Block> blocks;
     shared_ptr<BooleanEvaluator> evaluator;
 };
 
@@ -77,15 +77,16 @@ public:
     ContainerInterface::iterator AddDecision( ContainerInterface::iterator begin,
                                               ContainerInterface::iterator end,
                                               bool inclusive,
-                                              const Conjecture::Choices &choices );
+                                              const Conjecture::Choices &choices,
+                                              std::shared_ptr<ContainerInterface> keep_alive=nullptr );
     void AddLocalMatch( bool local_match );
                                                   
-    deque<Block> GetBlocks() const { return blocks; }
+    list<Block> GetBlocks() const { return blocks; }
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
     bool IsLocalMatch() { return local_match; }
     
 private:
-    deque<Block> blocks; 
+    list<Block> blocks; 
     shared_ptr<BooleanEvaluator> evaluator;
     bool local_match = true;
     int decision_count = 0;

@@ -6,6 +6,8 @@
 #include "standard_agent.hpp"
 #include "star_agent.hpp"
 
+#define USE_REMAINING 0
+
 using namespace SR;
 
 PatternQueryResult StandardAgent::PatternQuery() const
@@ -234,7 +236,14 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
 	    	// We have to decide which node in the tree to match, so use the present conjecture
 	    	// Note: would like to use xremaining, but it will fall out of scope
 	    	// Report a block for the chosen node
-			ContainerInterface::iterator xit = r.AddDecision( x.begin(), x.end(), false, choices );
+#if USE_REMAINING
+            auto x_decision = make_shared< Collection<Node> >();
+            for( TreePtr<Node> xx : *xremaining )
+                x_decision->push_back(xx);
+			ContainerInterface::iterator xit = r.AddDecision( x_decision->begin(), x_decision->end(), false, choices, x_decision );
+#else
+            ContainerInterface::iterator xit = r.AddDecision( x.begin(), x.end(), false, choices );
+#endif
             r.AddLink( false, pia, *xit );
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
