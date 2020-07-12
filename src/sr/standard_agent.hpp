@@ -21,7 +21,8 @@ class StandardAgent : public virtual AgentCommon
 public:
     virtual PatternQueryResult PatternQuery() const;
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
-                                             const Conjecture::Choices &choices ) const;
+                                             const Conjecture::Choices &choices,
+                                             const Conjecture::Ranges &decisions ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
     void DecidedQuerySequence( DecidedQueryResult &r,
@@ -31,7 +32,8 @@ private:
     void DecidedQueryCollection( DecidedQueryResult &r,
                                  CollectionInterface &x,
     		                     CollectionInterface &pattern,
-                                 const Conjecture::Choices &choices ) const;
+                                 const Conjecture::Choices &choices,
+                                 const Conjecture::Ranges &decisions ) const;
 public:
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );

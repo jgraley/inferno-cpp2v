@@ -53,6 +53,7 @@ public:
     // Standard interface for decided compare functions
     void RegisterDecisions( Agent *agent, bool local_match, Ranges decisions=Ranges() );      
     Conjecture::Choices GetChoices(Agent *agent);
+    Conjecture::Ranges GetDecisions(Agent *agent);
 				   
 private:
 	Map<Agent *, AgentBlock> agent_blocks;

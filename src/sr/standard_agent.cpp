@@ -6,7 +6,7 @@
 #include "standard_agent.hpp"
 #include "star_agent.hpp"
 
-#define USE_REMAINING 0
+#define USE_REMAINING 1
 
 using namespace SR;
 
@@ -49,7 +49,8 @@ PatternQueryResult StandardAgent::PatternQuery() const
 
 
 DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface &x, 
-                                                const Conjecture::Choices &choices ) const
+                                                const Conjecture::Choices &choices,
+                                                const Conjecture::Ranges &decisions ) const
 {
     INDENT(".");
     DecidedQueryResult r;
@@ -84,7 +85,7 @@ DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface &x,
             CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
-            DecidedQueryCollection( r, *x_col, *pattern_col, choices );
+            DecidedQueryCollection( r, *x_col, *pattern_col, choices, decisions );
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -208,7 +209,8 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
                                             CollectionInterface &x,
 		 					                CollectionInterface &pattern,
-                                            const Conjecture::Choices &choices ) const
+                                            const Conjecture::Choices &choices,
+                                            const Conjecture::Ranges &decisions ) const
 {
     INDENT(" ");
     
@@ -232,32 +234,48 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
         	ASSERT(!star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
             star = s; // remember for later and skip to next pattern
         }
-	    else if( !x.empty() ) // not a Star so match singly...
+	    else if( !xremaining->empty() ) // not a Star so match singly...
 	    {
 	    	// We have to decide which node in the tree to match, so use the present conjecture
 	    	// Note: would like to use xremaining, but it will fall out of scope
 	    	// Report a block for the chosen node
+            ContainerInterface::iterator xit;
 #if USE_REMAINING
-            auto x_decision = make_shared< Collection<Node> >();
-            for( TreePtr<Node> xx : *xremaining )
-                x_decision->push_back(xx);
-			ContainerInterface::iterator xit = r.AddDecision( x_decision->begin(), x_decision->end(), false, choices, x_decision );
+            shared_ptr< Collection<Node> > x_decision;
+            if( r.GetDecisionCount() >= choices.size() )
+            {
+                x_decision = make_shared< Collection<Node> >();
+                for( TreePtr<Node> xx : *xremaining )
+                    x_decision->push_back(xx);
+                xit = r.AddDecision( x_decision->begin(), x_decision->end(), false, choices, x_decision );
+            }
+            else
+            {
+                xremaining->clear();
+                //for( TreePtr<Node> xx : *(decisions[r.GetDecisionCount()].container) )
+                for( ContainerInterface::iterator it=decisions[r.GetDecisionCount()].container->begin();
+                     it != decisions[r.GetDecisionCount()].container->end();
+                     ++it )
+                    xremaining->push_back(*it);
+                // Note that r.AddDecision() increments r.GetDecisionCount()
+                xit = r.AddDecision( decisions[r.GetDecisionCount()].begin, decisions[r.GetDecisionCount()].end, false, choices, decisions[r.GetDecisionCount()].container );
+            }
 #else
-            ContainerInterface::iterator xit = r.AddDecision( x.begin(), x.end(), false, choices );
+            xit = r.AddDecision( x.begin(), x.end(), false, choices );
 #endif
-            r.AddLink( false, pia, *xit );
+            r.AddLocalLink( false, pia, *xit );
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.
 	    	// We'll just return false so we do not stop trying further choices (xit+1 may be legal).
 	    	if( xremaining->erase( *xit ) == 0 )
             {
-                r.AddLocalMatch(false);
-                return;
+                ASSERT(!"failed to remove element from collection");
             }
 	    }
 	    else // ran out of x elements - local mismatch
         {
+            TRACE("mismatch - x ran out\n");
             r.AddLocalMatch(false);
             return;
         }
@@ -268,6 +286,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
 
     if( !xremaining->empty() && !star )
     {
+        TRACE("mismatch - x left over\n");
         r.AddLocalMatch(false); // there were elements left over and no star to match them against
         return;
     }

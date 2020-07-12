@@ -294,10 +294,11 @@ bool Engine::DecidedCompare( Agent *agent,
             	
     // Obtain the choices from the conjecture
     Conjecture::Choices choices = conj.GetChoices(agent);
+    Conjecture::Ranges previous_decisions = conj.GetDecisions(agent);
 
     // Run the compare implementation to get the blocks based on the choices
     TRACE(*agent)("?=")(*x)(" Gathering blocks\n");    
-    DecidedQueryResult query_result = agent->DecidedQuery( x, choices );
+    DecidedQueryResult query_result = agent->DecidedQuery( x, choices, previous_decisions );
     TRACE(*agent)("?=")(*x)(" local match ")(query_result.IsLocalMatch())("\n");
     
     // Feed the decisions info in the blocks structure back to the conjecture

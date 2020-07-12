@@ -84,6 +84,7 @@ public:
     list<Block> GetBlocks() const { return blocks; }
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
     bool IsLocalMatch() { return local_match; }
+    int GetDecisionCount() const { return decision_count; }
     
 private:
     list<Block> blocks; 
@@ -111,7 +112,10 @@ public:
     virtual PatternQueryResult PatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
-                                             const Conjecture::Choices &choices ) const = 0;                                
+                                             const Conjecture::Choices &choices,
+                                             const Conjecture::Ranges &decisions ) const { return DecidedQuery(x, choices); }                                
+    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
+                                             const Conjecture::Choices &choices ) const { ASSERT(!"implement DecidedQuery()"); return DecidedQueryResult(); }                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const TreePtrInterface &x,
@@ -136,9 +140,6 @@ class AgentCommon : public Agent
 public:
     AgentCommon();
     void AgentConfigure( const Engine *e );
-    virtual PatternQueryResult PatternQuery() const = 0;
-    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
-                                             const Conjecture::Choices &choices ) const = 0;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
     void DoKey( TreePtr<Node> x );
     TreePtr<Node> GetCoupled();                                  

@@ -138,4 +138,16 @@ Conjecture::Choices Conjecture::GetChoices(Agent *agent)
 	}    
 }
 
+Conjecture::Ranges Conjecture::GetDecisions(Agent *agent)
+{            
+    if( agent_blocks.IsExist(agent) )
+    {
+        return agent_blocks[agent].decisions;
+	}
+	else
+	{
+		return Ranges(); // no decisions
+	}    
+}
+
 };
