@@ -120,8 +120,6 @@ void Conjecture::RegisterDecisions( Agent *agent, bool local_match, Ranges decis
 		{
 			int index = block.choices.size();
 			block.choices.push_back( block.decisions[index].begin );
-          //  for( auto c : block.choices )
-          //      ASSERT(*c);
 		}
 		ASSERT( block.choices.size()==block.decisions.size() )("%d != %d", block.choices.size(), block.decisions.size() );
 	}
@@ -132,8 +130,6 @@ Conjecture::Choices Conjecture::GetChoices(Agent *agent)
 {            
     if( agent_blocks.IsExist(agent) )
     {
-        //for( auto c : agent_blocks[agent].choices )
-        //    ASSERT(*c);
         return agent_blocks[agent].choices;
 	}
 	else

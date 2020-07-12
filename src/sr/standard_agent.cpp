@@ -166,6 +166,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
             {
                 // Decide how many elements the current * should match, using conjecture. The star's range
                 // ends at the chosen element. Be inclusive because what we really want is a range.
+                ASSERT( xit == x.end() || *xit );
                 xit_star_end = r.AddDecision( xit, xit_star_limit, true, choices );
             }
             

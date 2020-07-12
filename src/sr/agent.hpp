@@ -78,7 +78,7 @@ public:
                                               ContainerInterface::iterator end,
                                               bool inclusive,
                                               const Conjecture::Choices &choices,
-                                              std::shared_ptr<ContainerInterface> keep_alive=nullptr );
+                                              std::shared_ptr<ContainerInterface> container=nullptr );
     void AddLocalMatch( bool local_match );
                                                   
     list<Block> GetBlocks() const { return blocks; }

@@ -19,10 +19,10 @@ public:
         ContainerInterface::iterator begin;
         ContainerInterface::iterator end;    
         bool inclusive; // If true, include "end" as a possible choice
-        std::shared_ptr<ContainerInterface> keep_alive; // Only needed if the container is not part of the x tree
+        std::shared_ptr<ContainerInterface> container; // Only needed if the container is not part of the x tree
         bool operator==(const Range &o) const // Only required for an ASSERT
         {
-			return begin==o.begin && end==o.end && inclusive==o.inclusive && keep_alive==o.keep_alive;
+			return begin==o.begin && end==o.end && inclusive==o.inclusive && container==o.container;
 		}
     };
 

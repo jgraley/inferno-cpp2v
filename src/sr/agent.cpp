@@ -123,29 +123,29 @@ ContainerInterface::iterator DecidedQueryResult::AddDecision( ContainerInterface
                                                               ContainerInterface::iterator end,
                                                               bool inclusive,
                                                               const Conjecture::Choices &choices,
-                                                              shared_ptr<ContainerInterface> keep_alive )
+                                                              shared_ptr<ContainerInterface> container )
 {
     ASSERT( inclusive || begin != end )("no empty decisions");
     ContainerInterface::iterator it;
     if( decision_count >= choices.size() )
     {
         it = begin; // No choice was given to us so assume first one
-        //ASSERT(*it);
+        ASSERT( it == end || *it );
     }
     else
     {
         it = choices[decision_count]; // Use and consume the choice that was given to us
         ASSERT( inclusive || it != end );
-        //ASSERT(*it);
+        ASSERT( it == end || *it );
     }    
     
-    //ASSERT(*begin);
+    ASSERT(begin==end || *begin);
     
     Conjecture::Range r;
     r.begin = begin;
     r.end = end;
     r.inclusive = inclusive;
-    r.keep_alive = keep_alive;
+    r.container = container;
     Block b;
     b.is_link = false;
     b.is_decision = true;
