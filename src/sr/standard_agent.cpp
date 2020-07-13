@@ -75,27 +75,27 @@ DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface *px,
 
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(pattern_memb[i]) )
         {
-            SequenceInterface *x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
-            ASSERT( x_seq )( "itemise for x didn't match itemise for pattern");
-            TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, x_seq->size(), pattern_seq->size() );
-            DecidedQuerySequence( r, *x_seq, *pattern_seq, choices );
+            SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
+            ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
+            TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
+            DecidedQuerySequence( r, p_x_seq, *pattern_seq, choices );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
-            CollectionInterface *x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
-            ASSERT( x_col )( "itemise for x didn't match itemise for pattern");
-            TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, x_col->size(), pattern_col->size() );
-            DecidedQueryCollection( r, *x_col, *pattern_col, choices, decisions );
+            CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
+            ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
+            TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
+            DecidedQueryCollection( r, p_x_col, *pattern_col, choices, decisions );
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
             if( TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be NULL meaning no restriction
             {
-                TreePtrInterface *x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
-                ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
+                TreePtrInterface *p_x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
+                ASSERT( p_x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
                 Agent *ap = Agent::AsAgent(*pattern_ptr);
-                r.AddLink(false, ap, x_ptr);
+                r.AddLink(false, ap, p_x_ptr);
             }
         }
         else
@@ -110,7 +110,7 @@ DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface *px,
 }
 
 void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
-                                          SequenceInterface &x,
+                                          SequenceInterface *px,
 		                                  SequenceInterface &pattern,
                                           const Conjecture::Choices &choices ) const
 {
@@ -119,7 +119,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
     
 	// Attempt to match all the elements between start and the end of the sequence; stop
 	// if either pattern or subject runs out.
-	ContainerInterface::iterator xit = x.begin();
+	ContainerInterface::iterator xit = px->begin();
 	int p_remaining;
 
     int pattern_num_non_star = 0;
@@ -134,18 +134,18 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
         else
             pattern_num_non_star++;
     }
-    if( x.size() < pattern_num_non_star )
+    if( px->size() < pattern_num_non_star )
     {
         r.AddLocalMatch(false);   // TODO break to get the final trace?
         return;
     }
-    ContainerInterface::iterator xit_star_limit = x.end();            
+    ContainerInterface::iterator xit_star_limit = px->end();            
     for( int i=0; i<pattern_num_non_star; i++ )
         --xit_star_limit;
         
 	for( pit = pattern.begin(), p_remaining = pattern.size(); pit != pattern.end(); ++pit, --p_remaining )
 	{
- 		ASSERT( xit == x.end() || *xit );
+ 		ASSERT( xit == px->end() || *xit );
 
 		// Get the next element of the pattern
 		TreePtr<Node> pe( *pit );
@@ -167,7 +167,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
             {
                 // Decide how many elements the current * should match, using conjecture. The star's range
                 // ends at the chosen element. Be inclusive because what we really want is a range.
-                ASSERT( xit == x.end() || *xit );
+                ASSERT( xit == px->end() || *xit );
                 xit_star_end = r.AddDecision( xit, xit_star_limit, true, choices );
             }
             
@@ -183,7 +183,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
         }
  	    else // not a Star so match singly...
 	    {
-            if( xit == x.end() )
+            if( xit == px->end() )
                 break;
        
             r.AddLink( false, pea, &*xit );
@@ -191,14 +191,14 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
             
             // Every non-star pattern node we pass means there's one fewer remaining
             // and we can match a star one step further
-            ASSERT(xit_star_limit != x.end());
+            ASSERT(xit_star_limit != px->end());
             ++xit_star_limit;
 	    }
 	}
 
     // If we finished the job and pattern and subject are still aligned, then it was a match
-	TRACE("Finishing compare sequence %d %d\n", xit==x.end(), pit==pattern.end() );
-    r.AddLocalMatch( xit==x.end() && pit==pattern.end() );
+	TRACE("Finishing compare sequence %d %d\n", xit==px->end(), pit==pattern.end() );
+    r.AddLocalMatch( xit==px->end() && pit==pattern.end() );
     if( r.IsLocalMatch() )
     {
         ASSERT( p_remaining==0 );
@@ -207,7 +207,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 
 
 void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
-                                            CollectionInterface &x,
+                                            CollectionInterface *px,
 		 					                CollectionInterface &pattern,
                                             const Conjecture::Choices &choices,
                                             const Conjecture::Ranges &decisions ) const
@@ -218,8 +218,8 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
 	// after decisions.
     TreePtr<StarAgent::SubCollection> xremaining( new StarAgent::SubCollection );
-    FOREACH( const TreePtrInterface &xe, x )
-        xremaining->insert( xe );
+    FOREACH( const TreePtrInterface &xe, *px )
+        xremaining->insert( xe ); // Note: the new element in xremaining will not be the one from the original x (it's a TreePtr<Node>)
     
     StarAgent *star = NULL;
 
@@ -260,10 +260,11 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
                 // Note that r.AddDecision() increments r.GetDecisionCount()
                 xit = r.AddDecision( decisions[r.GetDecisionCount()].begin, decisions[r.GetDecisionCount()].end, false, choices, decisions[r.GetDecisionCount()].container );
             }
-#else
-            xit = r.AddDecision( x.begin(), x.end(), false, choices );
-#endif
             r.AddLocalLink( false, pia, *xit );
+#else
+            xit = r.AddDecision( px->begin(), px->end(), false, choices );
+            r.AddLink( false, pia, xit );
+#endif
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.

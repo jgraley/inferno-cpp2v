@@ -26,11 +26,11 @@ public:
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
     void DecidedQuerySequence( DecidedQueryResult &r,
-                               SequenceInterface &x,
+                               SequenceInterface *px,
     	                       SequenceInterface &pattern,
                                const Conjecture::Choices &choices ) const;
     void DecidedQueryCollection( DecidedQueryResult &r,
-                                 CollectionInterface &x,
+                                 CollectionInterface *px,
     		                     CollectionInterface &pattern,
                                  const Conjecture::Choices &choices,
                                  const Conjecture::Ranges &decisions ) const;
