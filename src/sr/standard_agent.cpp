@@ -252,7 +252,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
             else
             {
                 xremaining->clear();
-                //for( TreePtr<Node> xx : *(decisions[r.GetDecisionCount()].container) )
+                //for( TreePtr<Node> xx : *(decisions[r.GetDecisionCount()].container) ) TODO #21
                 for( ContainerInterface::iterator it=decisions[r.GetDecisionCount()].container->begin();
                      it != decisions[r.GetDecisionCount()].container->end();
                      ++it )
