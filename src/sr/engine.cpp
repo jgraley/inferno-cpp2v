@@ -192,7 +192,7 @@ bool Engine::CompareLinks( const DecidedQueryResult &query_result,
 			TRACE("Comparing block %d\n", i);
 	 
 			// Get x for linked node
-			const TreePtrInterface *px = b.GetX();
+			const TreePtrInterface *px = b.GetPX();
 			ASSERT( *px );
 			   
 			// Recurse now       
@@ -208,7 +208,7 @@ bool Engine::CompareLinks( const DecidedQueryResult &query_result,
 					made_coupling_keys = true;
 				}
 				
-				if( !Compare( b.agent, *px, coupling_keys ) )
+				if( !Compare( b.agent, px, coupling_keys ) )
 					return false;
 			}    
 			else
@@ -229,7 +229,7 @@ bool Engine::CompareLinks( const DecidedQueryResult &query_result,
 				else
 				{
 					// Recurse normally
-					if( !DecidedCompare(b.agent, *px, can_key, conj, local_keys, master_keys, reached) )
+					if( !DecidedCompare(b.agent, px, can_key, conj, local_keys, master_keys, reached) )
 						return false;
 				}
 			}
@@ -263,9 +263,9 @@ bool Engine::CompareEvaluatorLinks( const DecidedQueryResult &query_result,
 			ASSERT( b.abnormal )("When an evaluator is used, all blocks must be into abnormal contexts");
 	 
 			// Get x for linked node
-			const TreePtrInterface *px = b.GetX();
+			const TreePtrInterface *px = b.GetPX();
 								
-			compare_results.push_back( Compare( b.agent, *px, coupling_keys ) );
+			compare_results.push_back( Compare( b.agent, px, coupling_keys ) );
 			i++;
 		}
     }
@@ -281,7 +281,7 @@ bool Engine::CompareEvaluatorLinks( const DecidedQueryResult &query_result,
 
 
 bool Engine::DecidedCompare( Agent *agent,
-                             const TreePtrInterface &x,
+                             const TreePtrInterface *px,
                              bool can_key,
                              Conjecture &conj,
                              CouplingMap &local_keys,      // applies ACROSS PASSES
@@ -289,17 +289,17 @@ bool Engine::DecidedCompare( Agent *agent,
                              Set<Agent *> &reached ) const // applies to CURRENT PASS only
 {
     INDENT(" ");
-    ASSERT( &x ); // Ref to target must not be NULL (i.e. corrupted ref)
-    ASSERT( x ); // Target must not be NULL
+    ASSERT( px ); // Ref to target must not be NULL (i.e. corrupted ref)
+    ASSERT( *px ); // Target must not be NULL
             	
     // Obtain the choices from the conjecture
     Conjecture::Choices choices = conj.GetChoices(agent);
     Conjecture::Ranges previous_decisions = conj.GetDecisions(agent);
 
     // Run the compare implementation to get the blocks based on the choices
-    TRACE(*agent)("?=")(*x)(" Gathering blocks\n");    
-    DecidedQueryResult query_result = agent->DecidedQuery( x, choices, previous_decisions );
-    TRACE(*agent)("?=")(*x)(" local match ")(query_result.IsLocalMatch())("\n");
+    TRACE(*agent)("?=")(**px)(" Gathering blocks\n");    
+    DecidedQueryResult query_result = agent->DecidedQuery( px, choices, previous_decisions );
+    TRACE(*agent)("?=")(**px)(" local match ")(query_result.IsLocalMatch())("\n");
     
     // Feed the decisions info in the blocks structure back to the conjecture
     Conjecture::Ranges decisions;
@@ -315,7 +315,7 @@ bool Engine::DecidedCompare( Agent *agent,
     // Remember the coupling before recursing, as we can hit the same node 
     // (eg identifier) and we need to have coupled it. 
     if( can_key && !local_keys.IsExist(agent) )
-        local_keys[agent] = x;
+        local_keys[agent] = *px;
         
     // Remember we reached this agent in this pass
     reached.insert( agent );
@@ -323,12 +323,12 @@ bool Engine::DecidedCompare( Agent *agent,
     // Use worker function to go through the blocks, special case if there is evaluator
     if( !query_result.GetEvaluator() )
     {
-		TRACE(*agent)("?=")(*x)(" Comparing blocks\n");
+		TRACE(*agent)("?=")(**px)(" Comparing blocks\n");
         return CompareLinks( query_result, can_key, conj, local_keys, master_keys, reached );
 	}
     else if( !can_key )
     {
-		TRACE(*agent)("?=")(*x)(" Comparing evaluator blocks\n");
+		TRACE(*agent)("?=")(**px)(" Comparing evaluator blocks\n");
         return CompareEvaluatorLinks( query_result, conj, local_keys, master_keys, reached );
 	}
     else
@@ -337,35 +337,36 @@ bool Engine::DecidedCompare( Agent *agent,
 
 
 // This one operates from root for a stand-alone compare operation (side API)
-bool Engine::Compare( const TreePtrInterface &start_x,
+bool Engine::Compare( const TreePtrInterface *p_start_x,
                       const CouplingMap &master_keys ) const
 {
 	ASSERT( root_agent );
-    return Compare( root_agent, start_x, master_keys );
+    return Compare( root_agent, p_start_x, master_keys );
 }
 
 
 // This one if you don't want the resulting keys and conj (ie not doing a replace)
 bool Engine::Compare( Agent *start_agent,
-                      const TreePtrInterface &start_x,
+                      const TreePtrInterface *p_start_x,
                       const CouplingMap &master_keys ) const
 {
     Conjecture conj(my_agents);
     CouplingMap local_keys; 
-    return Compare( start_agent, start_x, conj, local_keys, master_keys );
+    return Compare( start_agent, p_start_x, conj, local_keys, master_keys );
 }
 
 
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
 bool Engine::Compare( Agent *start_agent,
-                      const TreePtrInterface &start_x,
+                      const TreePtrInterface *p_start_x,
                       Conjecture &conj,
                       CouplingMap &local_keys,
                       const CouplingMap &master_keys ) const
 {
     INDENT("C");
-    ASSERT( start_x );
-    TRACE("Compare x=")(*start_x);
+    ASSERT( p_start_x );
+    ASSERT( *p_start_x );
+    TRACE("Compare x=")(**p_start_x);
     TRACE(" pattern=")(*start_agent);
     ASSERT( &local_keys != &master_keys );
     //TRACE(**pcontext)(" @%p\n", pcontext);
@@ -373,7 +374,7 @@ bool Engine::Compare( Agent *start_agent,
     SimpleCompare sc;
     if( master_keys.IsExist(start_agent) )
 	{
-		return sc( start_x, master_keys.At(start_agent) );
+		return sc( *p_start_x, master_keys.At(start_agent) );
 	}      
            
     // Create the conjecture object we will use for this compare, and keep iterating
@@ -399,7 +400,7 @@ bool Engine::Compare( Agent *start_agent,
         {
             conj.PrepareForDecidedCompare(0);
 			Set<Agent *> reached;
-            r = DecidedCompare( start_agent, start_x, true, conj, local_keys, master_keys, reached );
+            r = DecidedCompare( start_agent, p_start_x, true, conj, local_keys, master_keys, reached );
         }
                
         if( r )
@@ -409,7 +410,7 @@ bool Engine::Compare( Agent *start_agent,
             // seen earlier (eg in an abnormal context where keying is impossible)
             conj.PrepareForDecidedCompare(1);
             Set<Agent *> reached;
-            r = DecidedCompare( start_agent, start_x, false, conj, local_keys, master_keys, reached );
+            r = DecidedCompare( start_agent, p_start_x, false, conj, local_keys, master_keys, reached );
         }
         
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
@@ -468,7 +469,7 @@ void Engine::GatherCouplings( CouplingMap &coupling_keys ) const
 }
 
 
-bool Engine::SingleCompareReplace( TreePtr<Node> *proot,
+bool Engine::SingleCompareReplace( TreePtr<Node> *p_root,
                                    const CouplingMap &master_keys ) 
 {
     INDENT(">");
@@ -477,7 +478,7 @@ bool Engine::SingleCompareReplace( TreePtr<Node> *proot,
     Conjecture conj(my_agents);
 
     TRACE("Begin search\n");
-    bool r = Compare( root_agent, *proot, conj, local_keys, master_keys );
+    bool r = Compare( root_agent, p_root, conj, local_keys, master_keys );
     if( !r )
         return false;
        
@@ -493,7 +494,7 @@ bool Engine::SingleCompareReplace( TreePtr<Node> *proot,
 	}
 
     TRACE("Now replacing\n");
-    *proot = Replace();
+    *p_root = Replace();
     
     // Clear out all the replace keys (the ones inside the agents) now that replace is done
     FOREACH( Agent *a, my_agents )

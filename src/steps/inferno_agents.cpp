@@ -75,7 +75,7 @@ void IdentifierByNameAgent::GetGraphAppearance( bool *bold, string *text, string
 bool IdentifierByNameAgent::IsMatch( const TreePtrInterface &x ) const
 {
     string newname = name; 
-    TreePtr<Node> nx = x; // TODO dynamic_pointer_cast support for TreePtrInterface
+    TreePtr<Node> nx = x; // TODO dynamic_pointer_cast support for TreePtrInterface #27
     if( TreePtr<CPPTree::SpecificIdentifier> si = dynamic_pointer_cast<CPPTree::SpecificIdentifier>(nx) )
     {
         TRACE("IsMatch comparing ")(si->GetRender())(" with ")(newname);
@@ -101,7 +101,7 @@ PatternQueryResult NestedAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult NestedAgent::DecidedQuery( const TreePtrInterface &x, 
+DecidedQueryResult NestedAgent::DecidedQuery( const TreePtrInterface *px, 
                                               const Conjecture::Choices &choices ) const                          
 {
     INDENT("N");
@@ -109,7 +109,7 @@ DecidedQueryResult NestedAgent::DecidedQuery( const TreePtrInterface &x,
     
     string s;
     // Keep advancing until we get NULL, and remember the last non-null position
-    TreePtr<Node> xt = x;
+    TreePtr<Node> xt = *px;
     int i = 0;
     while( TreePtr<Node> tt = Advance(xt, &s) )
     {
@@ -181,11 +181,12 @@ TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode )
 
 //---------------------------------- IsLabelReached ------------------------------------    
 
-DecidedQueryResult IsLabelReached::DecidedQuery( const TreePtrInterface &xx, 
+DecidedQueryResult IsLabelReached::DecidedQuery( const TreePtrInterface *pxx, 
                                                  const Conjecture::Choices &choices ) const
 {
 	INDENT("L");
 	ASSERT( pattern );
+    ASSERT(pxx);
     DecidedQueryResult r;
 	
 	// TODO Flushable mechanism removed - flush every time for safety (if
@@ -199,10 +200,10 @@ DecidedQueryResult IsLabelReached::DecidedQuery( const TreePtrInterface &xx,
 		n = pattern;
 	TreePtr<Expression> y = dynamic_pointer_cast<Expression>( n );
 	ASSERT( y )("IsLabelReached saw pattern coupled to ")(*n)(" but an Expression is needed\n"); 
-	ASSERT( xx );
-	TreePtr<Node> nxx = xx;
+	ASSERT( *pxx );
+	TreePtr<Node> nxx = *pxx;
 	TreePtr<LabelIdentifier> x = dynamic_pointer_cast<LabelIdentifier>( nxx );
-	ASSERT( x )("IsLabelReached at ")(*xx)(" but is of type LabelIdentifier\n"); 
+	ASSERT( x )("IsLabelReached at ")(**pxx)(" but is of type LabelIdentifier\n"); 
 	TRACE("Can label id ")(*x)(" reach expression ")(*y)("?\n");
 
 	Set< TreePtr<InstanceIdentifier> > uf;        

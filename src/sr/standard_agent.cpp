@@ -48,7 +48,7 @@ PatternQueryResult StandardAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface &x, 
+DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface *px, 
                                                 const Conjecture::Choices &choices,
                                                 const Conjecture::Ranges &decisions ) const
 {
@@ -56,7 +56,7 @@ DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface &x,
     DecidedQueryResult r;
     
     // Check pre-restriction
-    if( !IsLocalMatch(x.get()) )        
+    if( !IsLocalMatch(px->get()) )        
     {
         r.AddLocalMatch(false);  
         return r;
@@ -66,7 +66,7 @@ DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface &x,
     // dynamic_cast onto the type of pattern, and itemises over that type. x must
     // be dynamic_castable to pattern's type.
     vector< Itemiser::Element * > pattern_memb = Itemise();
-    vector< Itemiser::Element * > x_memb = Itemise( x.get() );   // Get the members of x corresponding to pattern's class
+    vector< Itemiser::Element * > x_memb = Itemise( px->get() );   // Get the members of x corresponding to pattern's class
     ASSERT( pattern_memb.size() == x_memb.size() );
     for( int i=0; i<pattern_memb.size(); i++ )
     {
@@ -95,7 +95,7 @@ DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface &x,
                 ASSERT( x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
                 Agent *ap = Agent::AsAgent(*pattern_ptr);
-                r.AddLink(false, ap, *x_ptr);
+                r.AddLink(false, ap, x_ptr);
             }
         }
         else
@@ -186,7 +186,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
             if( xit == x.end() )
                 break;
        
-            r.AddLink( false, pea, *xit );
+            r.AddLink( false, pea, &*xit );
             ++xit;
             
             // Every non-star pattern node we pass means there's one fewer remaining

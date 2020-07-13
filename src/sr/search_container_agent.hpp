@@ -21,7 +21,7 @@ private:
 
 public:
     virtual PatternQueryResult PatternQuery() const;
-    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
+    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
                                              const Conjecture::Choices &choices ) const;
     virtual void KeyReplace( const TreePtrInterface &x,
                              Conjecture::Choices choices ); 

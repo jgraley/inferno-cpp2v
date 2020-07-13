@@ -12,14 +12,15 @@ PatternQueryResult GreenGrassAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult GreenGrassAgent::DecidedQuery( const TreePtrInterface &x, 
+DecidedQueryResult GreenGrassAgent::DecidedQuery( const TreePtrInterface *px, 
                                                   const Conjecture::Choices &choices ) const
 {
     INDENT("G");
+    ASSERT(px);
     DecidedQueryResult r;
     
     // Check pre-restriction
-    if( !IsLocalMatch(x.get()) )        
+    if( !IsLocalMatch(px->get()) )        
     {
         r.AddLocalMatch(false);  
         return r;
@@ -27,17 +28,17 @@ DecidedQueryResult GreenGrassAgent::DecidedQuery( const TreePtrInterface &x,
     
     // Restrict so that everything in the input program under here must be "green grass"
     // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
-    if( engine->GetOverallMaster()->dirty_grass.find( x ) != engine->GetOverallMaster()->dirty_grass.end() )
+    if( engine->GetOverallMaster()->dirty_grass.find( *px ) != engine->GetOverallMaster()->dirty_grass.end() )
     {
-        TRACE(*x)(" is dirty grass so rejecting\n");
+        TRACE(**px)(" is dirty grass so rejecting\n");
         {
             r.AddLocalMatch(false);  
             return r;
         }
     }
-    TRACE("subtree under ")(*x)(" is green grass\n");
+    TRACE("subtree under ")(**px)(" is green grass\n");
     // Normal matching for the through path
-    r.AddLink( false, AsAgent(GetThrough()), x );
+    r.AddLink( false, AsAgent(GetThrough()), px );
     return r;
 }
 

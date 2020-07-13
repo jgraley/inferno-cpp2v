@@ -51,19 +51,19 @@ public:
 protected:
     bool SingleCompareReplace( TreePtr<Node> *proot,
                                const CouplingMap &master_keys );
-    bool Compare( const TreePtrInterface &start_x,
+    bool Compare( const TreePtrInterface *p_start_x,
                   const CouplingMap &master_keys = CouplingMap() ) const;
     bool Compare( Agent *start_agent,
-                  const TreePtrInterface &start_x,
+                  const TreePtrInterface *p_start_x,
                   const CouplingMap &master_keys ) const;
     bool Compare( Agent *start_agent,
-                  const TreePtrInterface &start_x,
+                  const TreePtrInterface *p_start_x,
                   Conjecture &conj,
                   CouplingMap &local_keys,
                   const CouplingMap &master_keys ) const;
 private:
     bool DecidedCompare( Agent *agent,
-                         const TreePtrInterface &x,
+                         const TreePtrInterface *px,
                          bool can_key,
                          Conjecture &conj,
                          CouplingMap &local_keys,

@@ -76,16 +76,16 @@ void PatternQueryResult::AddLink( bool abnormal, Agent *a )
 }
 
 
-void DecidedQueryResult::AddLink( bool abnormal, Agent *a, const TreePtrInterface &x )
+void DecidedQueryResult::AddLink( bool abnormal, Agent *a, const TreePtrInterface *px )
 {
     Block b;
     b.is_link = true;
     b.abnormal = abnormal;
     b.agent = a;
-    b.px = &x;
+    b.px = px;
     b.local_x = TreePtr<Node>();
     b.is_decision = false;
-    TRACE("Remembering block %d ", blocks.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
+    TRACE("Remembering block %d ", blocks.size())(*a)(" -> ")(**px)(abnormal?" abnormal":" normal")("\n");
     blocks.push_back( b );
 }
 

@@ -20,21 +20,21 @@ PatternQueryResult SlaveAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult SlaveAgent::DecidedQuery( const TreePtrInterface &x, 
+DecidedQueryResult SlaveAgent::DecidedQuery( const TreePtrInterface *px, 
                                              const Conjecture::Choices &choices ) const
 {
     INDENT("l");
     DecidedQueryResult r;
 
     // Check pre-restriction
-    if( !IsLocalMatch(x.get()) )        
+    if( !IsLocalMatch(px->get()) )        
     {
         r.AddLocalMatch(false);  
         return r;
     }
 
     // When a slave node seen duriung search, just forward through the "through" path
-    r.AddLink( false, AsAgent(GetThrough()), x );
+    r.AddLink( false, AsAgent(GetThrough()), px );
     return r;
 }
 

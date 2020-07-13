@@ -15,14 +15,15 @@ PatternQueryResult StarAgent::PatternQuery() const
 
 // NOTE this is a DecidedCompare() not DecidedCompareImpl() so some of the AgentCommon 
 // stuff has to be done explicitly in here.
-DecidedQueryResult StarAgent::DecidedQuery( const TreePtrInterface &x, 
+DecidedQueryResult StarAgent::DecidedQuery( const TreePtrInterface *px, 
                                             const Conjecture::Choices &choices ) const
 {
     INDENT("*");
-    ASSERT(x);
+    ASSERT(px);
+    ASSERT(*px);
     DecidedQueryResult r;
                 
-    ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
+    ContainerInterface *xc = dynamic_cast<ContainerInterface *>(px->get());
     ASSERT(xc)("Nodes passed to StarAgent::DecidedCompare() must implement ContainerInterface, since * matches multiple things");
     
     // Check pre-restriction

@@ -13,19 +13,19 @@ PatternQueryResult OverlayAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult OverlayAgent::DecidedQuery( const TreePtrInterface &x, 
+DecidedQueryResult OverlayAgent::DecidedQuery( const TreePtrInterface *px, 
                                                const Conjecture::Choices &choices ) const
 {
     DecidedQueryResult r;
     
     // Check pre-restriction
-    if( !IsLocalMatch(x.get()) )        
+    if( !IsLocalMatch(px->get()) )        
     {
         r.AddLocalMatch(false);  
         return r;
     }
 
-    r.AddLink( false, AsAgent(GetThrough()), x );
+    r.AddLink( false, AsAgent(GetThrough()), px );
     return r;
 }
 

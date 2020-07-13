@@ -81,7 +81,7 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
 }
 
 
-DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface &x,
+DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface *px,
                                                         const Conjecture::Choices &choices ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const{
     INDENT("'");    
@@ -116,7 +116,7 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface &
     wrapper_result.local_match = true; // ready for and-rule 
     
     // Query the wrapped node for blocks and decisions
-    DecidedQueryResult wrapped_result = wrapped_agent->DecidedQuery( x, wrapped_choices );
+    DecidedQueryResult wrapped_result = wrapped_agent->DecidedQuery( px, wrapped_choices );
     
     // Early-out on local mismatch of wrapped node.
     if( !wrapped_result.local_match )
@@ -181,7 +181,7 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface &
 			// Get the keys that the sub-engine will need to use, and invoke it on the block
 			// Theory is that, of the enclosing engine's agents, the terminal ones are the only ones the sub-engine will see.
 			CouplingMap coupling_keys = MapUnion( master_keys, terminal_keys ); 
-			bool result = al.engine.Compare( l.GetX(), coupling_keys );
+			bool result = al.engine.Compare( l.GetPX(), coupling_keys );
 			
 			// Deal with result - store for evaluator otherwise do AND-rule with early-out
 			if( evaluator )

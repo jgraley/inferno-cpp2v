@@ -15,28 +15,29 @@ PatternQueryResult SearchContainerAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult SearchContainerAgent::DecidedQuery( const TreePtrInterface &x, 
+DecidedQueryResult SearchContainerAgent::DecidedQuery( const TreePtrInterface *px, 
                                                        const Conjecture::Choices &choices ) const
 {
     INDENT("#");
     ASSERT( this );
+    ASSERT(px);
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
     DecidedQueryResult r;
     
     // Check pre-restriction
-    if( !IsLocalMatch(x.get()) )        
+    if( !IsLocalMatch(px->get()) )        
     {
         r.AddLocalMatch(false);  
         return r;
     }
 
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(*x)("\n");
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(**px)("\n");
 
     // Get an interface to the container we will search
     // TODO what is keeping pwx alive after this funciton exits? Are the iterators 
     // doing it? (they are stores in Conjecture). Maybe pwx is just a stateless
     // facade for the iterators and can be abandoned safely?
-    shared_ptr<ContainerInterface> pwx = GetContainerInterface( x );
+    shared_ptr<ContainerInterface> pwx = GetContainerInterface( *px );
     
     if( pwx->empty() )
     {
@@ -46,7 +47,7 @@ DecidedQueryResult SearchContainerAgent::DecidedQuery( const TreePtrInterface &x
 
     // Get choice from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = r.AddDecision( pwx->begin(), pwx->end(), false, choices );
-    r.AddLink( false, AsAgent(terminus), *thistime );
+    r.AddLink( false, AsAgent(terminus), &*thistime );
 
     // Let subclasses implement further restrictions
     DecidedQueryRestrictions( r, thistime );

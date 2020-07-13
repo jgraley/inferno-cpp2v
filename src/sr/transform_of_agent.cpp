@@ -10,7 +10,7 @@ PatternQueryResult TransformOfAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult TransformOfAgent::DecidedQuery( const TreePtrInterface &x,
+DecidedQueryResult TransformOfAgent::DecidedQuery( const TreePtrInterface *px,
                                                    const Conjecture::Choices &choices ) const
 {
     INDENT("T");
@@ -18,7 +18,7 @@ DecidedQueryResult TransformOfAgent::DecidedQuery( const TreePtrInterface &x,
     
     // Transform the candidate expression, sharing the overall S&R context so that
     // things like GetDeclaration can work (they search the whole program tree).
-    TreePtr<Node> xt = (*transformation)( *(engine->GetOverallMaster()->pcontext), x );
+    TreePtr<Node> xt = (*transformation)( *(engine->GetOverallMaster()->pcontext), *px );
 	if( xt )
 	{
 	    // Punt it back into the search/replace engine

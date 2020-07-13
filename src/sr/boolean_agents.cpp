@@ -14,7 +14,7 @@ PatternQueryResult NotMatchAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult NotMatchAgent::DecidedQuery( const TreePtrInterface &x, 
+DecidedQueryResult NotMatchAgent::DecidedQuery( const TreePtrInterface *px, 
                                                 const Conjecture::Choices &choices ) const
 {
     INDENT("!");
@@ -22,14 +22,14 @@ DecidedQueryResult NotMatchAgent::DecidedQuery( const TreePtrInterface &x,
     DecidedQueryResult r;
     
     // Check pre-restriction
-    if( !IsLocalMatch(x.get()) )      
+    if( !IsLocalMatch(px->get()) )      
     {
         r.AddLocalMatch(false);  
         return r;
     }
     
     // Context is abnormal because patterns must not match
-    r.AddLink( true, AsAgent(GetPattern()), x );
+    r.AddLink( true, AsAgent(GetPattern()), px );
     r.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
     return r;
 }
@@ -67,7 +67,7 @@ PatternQueryResult MatchAllAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult MatchAllAgent::DecidedQuery( const TreePtrInterface &x, 
+DecidedQueryResult MatchAllAgent::DecidedQuery( const TreePtrInterface *px, 
                                                 const Conjecture::Choices &choices ) const
 { 
     INDENT("&");
@@ -75,7 +75,7 @@ DecidedQueryResult MatchAllAgent::DecidedQuery( const TreePtrInterface &x,
     DecidedQueryResult r;
     
     // Check pre-restriction
-    if( !IsLocalMatch(x.get()) )        
+    if( !IsLocalMatch(px->get()) )        
     {
         r.AddLocalMatch(false);  
         return r;
@@ -86,7 +86,7 @@ DecidedQueryResult MatchAllAgent::DecidedQuery( const TreePtrInterface &x,
         ASSERT( p );
         // Context is normal because all patterns must match (but none should contain
         // nodes with reploace functionlity because they will not be invoked during replace) 
-        r.AddLink( false, AsAgent(p), x );
+        r.AddLink( false, AsAgent(p), px );
     }
     return r;
 }    
@@ -117,7 +117,7 @@ PatternQueryResult MatchAnyAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult MatchAnyAgent::DecidedQuery( const TreePtrInterface &x, 
+DecidedQueryResult MatchAnyAgent::DecidedQuery( const TreePtrInterface *px, 
                                                 const Conjecture::Choices &choices ) const
 {
     INDENT("|");
@@ -125,7 +125,7 @@ DecidedQueryResult MatchAnyAgent::DecidedQuery( const TreePtrInterface &x,
     DecidedQueryResult r;
     
     // Check pre-restriction
-    if( !IsLocalMatch(x.get()) )        
+    if( !IsLocalMatch(px->get()) )        
     {
         r.AddLocalMatch(false);  
         return r;
@@ -135,7 +135,7 @@ DecidedQueryResult MatchAnyAgent::DecidedQuery( const TreePtrInterface &x,
     {
         ASSERT( p );
         // Context is abnormal because not all patterns must match
-        r.AddLink( true, AsAgent(p), x );
+        r.AddLink( true, AsAgent(p), px );
     }
     r.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
     return r;

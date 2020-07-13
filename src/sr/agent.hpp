@@ -47,7 +47,7 @@ class DecidedQueryResult
 public:    
     struct Block 
     {
-        const TreePtrInterface *GetX() const
+        const TreePtrInterface *GetPX() const
         {
 			if( px )
 				return px; // linked x is in input tree
@@ -71,7 +71,7 @@ public:
         evaluator = shared_ptr<BooleanEvaluator>();        
     }
 
-    void AddLink( bool abnormal, Agent *a, const TreePtrInterface &x ); 
+    void AddLink( bool abnormal, Agent *a, const TreePtrInterface *px ); 
     void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ); 
     void AddEvaluator( shared_ptr<BooleanEvaluator> e ); 
     ContainerInterface::iterator AddDecision( ContainerInterface::iterator begin,
@@ -111,10 +111,10 @@ public:
     /// List the Agents reached via blocks during search
     virtual PatternQueryResult PatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
-    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
+    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
                                              const Conjecture::Choices &choices,
-                                             const Conjecture::Ranges &decisions ) const { return DecidedQuery(x, choices); }                                
-    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface &x,
+                                             const Conjecture::Ranges &decisions ) const { return DecidedQuery(px, choices); }                                
+    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
                                              const Conjecture::Choices &choices ) const { ASSERT(!"implement DecidedQuery()"); return DecidedQueryResult(); }                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
