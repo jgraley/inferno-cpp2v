@@ -6,8 +6,6 @@
 #include "standard_agent.hpp"
 #include "star_agent.hpp"
 
-#define USE_REMAINING 1
-
 using namespace SR;
 
 PatternQueryResult StandardAgent::PatternQuery() const
@@ -240,9 +238,10 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
 	    	// Note: would like to use xremaining, but it will fall out of scope
 	    	// Report a block for the chosen node
             ContainerInterface::iterator xit;
-#if USE_REMAINING
+
             shared_ptr< Collection<Node> > x_decision;
-            if( r.GetDecisionCount() >= decisions.size() )
+            int cd_index = r.GetDecisionCount();
+            if( cd_index >= decisions.size() )
             {
                 x_decision = make_shared< Collection<Node> >();
                 for( TreePtr<Node> xx : *xremaining )
@@ -251,20 +250,16 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
             }
             else
             {
+                // Note that r.AddDecision() increments r.GetDecisionCount()
+                xit = r.AddDecision( decisions[cd_index].begin, decisions[cd_index].end, false, choices, decisions[cd_index].container );
                 xremaining->clear();
                 //for( TreePtr<Node> xx : *(decisions[r.GetDecisionCount()].container) ) TODO #21
-                for( ContainerInterface::iterator it=decisions[r.GetDecisionCount()].container->begin();
-                     it != decisions[r.GetDecisionCount()].container->end();
+                for( ContainerInterface::iterator it=decisions[cd_index].container->begin();
+                     it != decisions[cd_index].container->end();
                      ++it )
                     xremaining->push_back(*it);
-                // Note that r.AddDecision() increments r.GetDecisionCount()
-                xit = r.AddDecision( decisions[r.GetDecisionCount()].begin, decisions[r.GetDecisionCount()].end, false, choices, decisions[r.GetDecisionCount()].container );
             }
             r.AddLocalLink( false, pia, *xit );
-#else
-            xit = r.AddDecision( px->begin(), px->end(), false, choices );
-            r.AddLink( false, pia, xit );
-#endif
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.
