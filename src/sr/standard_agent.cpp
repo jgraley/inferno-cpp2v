@@ -239,24 +239,25 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
 	    	// Report a block for the chosen node
             ContainerInterface::iterator xit;
 
-            shared_ptr< Collection<Node> > x_decision;
             int cd_index = r.GetDecisionCount();
             if( cd_index >= decisions.size() )
             {
-                x_decision = make_shared< Collection<Node> >();
+                // New decision: take a copy of xremaining and pass it to the DecidedQueryResult.
+                // Use a shared_ptr<> so that the exact same Collection<Node> will come back to us 
+                // in future calls.
+                auto x_decision = make_shared< Collection<Node> >();
                 *x_decision = xremaining;
-                //for( TreePtr<Node> xx : xremaining )
-                //    x_decision->push_back(xx);
                 xit = r.AddDecision( x_decision->begin(), x_decision->end(), false, choices, x_decision );
             }
             else
             {
-                // Note that r.AddDecision() increments r.GetDecisionCount()
-                xit = r.AddDecision( decisions[cd_index].begin, decisions[cd_index].end, false, choices, decisions[cd_index].container );
+                const Conjecture::Range &ext_decision = decisions[cd_index];
+                // Decision already in conjecture and valid. Immediately re-submit the exact same decision.
+                xit = r.AddDecision( ext_decision.begin, ext_decision.end, false, choices, ext_decision.container );
+                // Now take a copy.
                 xremaining.clear();
-                //for( TreePtr<Node> xx : *(decisions[r.GetDecisionCount()].container) ) TODO #21
-                for( ContainerInterface::iterator it=decisions[cd_index].container->begin();
-                     it != decisions[cd_index].container->end();
+                for( ContainerInterface::iterator it=ext_decision.container->begin();
+                     it != ext_decision.container->end();
                      ++it )
                     xremaining.push_back(*it);
             }
