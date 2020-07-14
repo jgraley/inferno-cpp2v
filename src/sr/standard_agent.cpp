@@ -215,16 +215,16 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
 	// after decisions.
-    TreePtr<StarAgent::SubCollection> xremaining( new StarAgent::SubCollection );
+    Collection<Node> xremaining;
     FOREACH( const TreePtrInterface &xe, *px )
-        xremaining->insert( xe ); // Note: the new element in xremaining will not be the one from the original x (it's a TreePtr<Node>)
+        xremaining.insert( xe ); // Note: the new element in xremaining will not be the one from the original x (it's a TreePtr<Node>)
     
     StarAgent *star = NULL;
 
     for( CollectionInterface::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
     {
     	TRACE("Collection compare %d remain out of %d; looking at ",
-                xremaining->size(),
+                xremaining.size(),
                 pattern.size() )(**pit)(" in pattern\n" );
         Agent *pia = Agent::AsAgent(TreePtr<Node>(*pit));
         if( StarAgent *s = dynamic_cast<StarAgent *>( pia ) ) // Star in pattern collection?
@@ -232,7 +232,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
         	ASSERT(!star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
             star = s; // remember for later and skip to next pattern
         }
-	    else if( !xremaining->empty() ) // not a Star so match singly...
+	    else if( !xremaining.empty() ) // not a Star so match singly...
 	    {
 	    	// We have to decide which node in the tree to match, so use the present conjecture
 	    	// Note: would like to use xremaining, but it will fall out of scope
@@ -244,27 +244,28 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
             if( cd_index >= decisions.size() )
             {
                 x_decision = make_shared< Collection<Node> >();
-                for( TreePtr<Node> xx : *xremaining )
-                    x_decision->push_back(xx);
+                *x_decision = xremaining;
+                //for( TreePtr<Node> xx : xremaining )
+                //    x_decision->push_back(xx);
                 xit = r.AddDecision( x_decision->begin(), x_decision->end(), false, choices, x_decision );
             }
             else
             {
                 // Note that r.AddDecision() increments r.GetDecisionCount()
                 xit = r.AddDecision( decisions[cd_index].begin, decisions[cd_index].end, false, choices, decisions[cd_index].container );
-                xremaining->clear();
+                xremaining.clear();
                 //for( TreePtr<Node> xx : *(decisions[r.GetDecisionCount()].container) ) TODO #21
                 for( ContainerInterface::iterator it=decisions[cd_index].container->begin();
                      it != decisions[cd_index].container->end();
                      ++it )
-                    xremaining->push_back(*it);
+                    xremaining.push_back(*it);
             }
             r.AddLocalLink( false, pia, *xit );
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.
 	    	// We'll just return false so we do not stop trying further choices (xit+1 may be legal).
-	    	if( xremaining->erase( *xit ) == 0 )
+	    	if( xremaining.erase( *xit ) == 0 )
             {
                 ASSERT(!"failed to remove element from collection");
             }
@@ -280,19 +281,21 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
     // Now handle the star if there was one; all the non-star matches have been erased from
     // the collection, leaving only the star matches.
 
-    if( !xremaining->empty() && !star )
+    if( !xremaining.empty() && !star )
     {
         TRACE("mismatch - x left over\n");
         r.AddLocalMatch(false); // there were elements left over and no star to match them against
         return;
     }
 
-    TRACE("seen_star %d size of xremaining %d\n", !!star, xremaining->size() );
+    TRACE("seen_star %d size of xremaining %d\n", !!star, xremaining.size() );
 
     // Apply pre-restriction to the star
     if( star )
     {
-        r.AddLocalLink( false, star, xremaining );
+        TreePtr<StarAgent::SubCollection> x_subcollection( new StarAgent::SubCollection );
+        *x_subcollection = xremaining;
+        r.AddLocalLink( false, star, x_subcollection );
     }
     TRACE("matched\n");
 }

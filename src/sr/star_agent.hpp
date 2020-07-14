@@ -66,11 +66,21 @@ public:
                          SubContainer
     {
         NODE_FUNCTIONS_FINAL 
+        SubSequence &operator=( Sequence<Node> o )
+        {
+            (void)Sequence<Node>::operator=(o);
+            return *this;
+        }
     };
     struct SubCollection : Collection<Node>,
                            SubContainer
     {
         NODE_FUNCTIONS_FINAL
+        SubCollection &operator=( Collection<Node> o )
+        {
+            (void)Collection<Node>::operator=(o);
+            return *this;
+        }
     };       
 };
 
