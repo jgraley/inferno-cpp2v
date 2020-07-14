@@ -326,11 +326,13 @@ string Graph::Colour( TreePtr<Node> n )
 	if( dynamic_pointer_cast<Identifier>(n) )
 		return "gray60";
 	else if( dynamic_pointer_cast<Declaration>(n) )
-		return "seagreen1";
+		return "plum";
+	else if( dynamic_pointer_cast<Initialiser>(n) )
+		return "plum";
 	else if( dynamic_pointer_cast<MapOperand>(n) )
 		return "goldenrod2";
 	else if( dynamic_pointer_cast<Type>(n) )
-		return "plum";
+		return "seagreen1";
 	else if( dynamic_pointer_cast<Literal>(n) )
 		return "goldenrod2";
 	else if( dynamic_pointer_cast<Expression>(n) )
@@ -339,8 +341,6 @@ string Graph::Colour( TreePtr<Node> n )
 		return "olivedrab3";
 	else if( dynamic_pointer_cast<Statement>(n) )
 		return "brown1";
-	else if( dynamic_pointer_cast<Initialiser>(n) )
-		return "olivedrab3";
 	else if( dynamic_pointer_cast<Scope>(n) )
 		return "cyan";
 	else

@@ -42,18 +42,18 @@ void Conjecture::PrepareForDecidedCompare(int pass)
 
 bool Conjecture::IncrementBlock( AgentBlock *block )
 {    
-	if( block->choices.empty() )
+    ASSERT( block->choices.size() == block->decisions.size() );
+	if( block->decisions.empty() )
 	{
-		block->decisions.clear(); // make it defunct
-	    return false;
+	    return false;  // this block is defunct
 	}
-	
     auto &decision = block->decisions[block->choices.size()-1];
 
     // Inclusive case - we let the choice go to end() but we won't go any further
     if( decision.inclusive && block->choices.back() == decision.end )
     {
         block->choices.pop_back();
+        block->decisions.pop_back();
         return IncrementBlock( block );
 	}
 
@@ -66,6 +66,7 @@ bool Conjecture::IncrementBlock( AgentBlock *block )
     if( !decision.inclusive && block->choices.back() == decision.end )
     {
         block->choices.pop_back();
+        block->decisions.pop_back();
         return IncrementBlock( block );
 	}
 		

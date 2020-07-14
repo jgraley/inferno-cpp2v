@@ -242,7 +242,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
             ContainerInterface::iterator xit;
 #if USE_REMAINING
             shared_ptr< Collection<Node> > x_decision;
-            if( r.GetDecisionCount() >= choices.size() )
+            if( r.GetDecisionCount() >= decisions.size() )
             {
                 x_decision = make_shared< Collection<Node> >();
                 for( TreePtr<Node> xx : *xremaining )
