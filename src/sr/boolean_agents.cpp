@@ -102,7 +102,7 @@ void MatchAllAgent::GetGraphAppearance( bool *bold, string *text, string *shape 
 	// src/tree/operator_db.txt  
 	*bold = true;
 	*shape = "circle";
-	*text = string("!");
+	*text = string("&");
 }
 
 //---------------------------------- MatchAny ------------------------------------    
