@@ -173,19 +173,19 @@ void Engine::GetGraphInfo( vector<string> *labels,
 }
 
 
-bool Engine::CompareLinks( const DecidedQueryResult &query_result,
+bool Engine::CompareLinks( const AgentQueryState &query,
                            bool can_key,
                            Conjecture &conj,
                            CouplingMap &local_keys,      
                            const CouplingMap &master_keys,
                            Set<Agent *> &reached ) const
 {
-	ASSERT( !query_result.GetEvaluator() );
+	ASSERT( !query.GetEvaluator() );
     // Follow up on any blocks that were noted by the agent impl
     bool made_coupling_keys = false;  
     CouplingMap coupling_keys;
     int i=0;
-    FOREACH( const DecidedQueryResult::Block &b, query_result.GetBlocks() )
+    FOREACH( const DecidedQueryResult::Block &b, query.GetBlocks() )
     {
         if( b.is_link ) // skip decisions    
 		{
@@ -243,19 +243,19 @@ bool Engine::CompareLinks( const DecidedQueryResult &query_result,
 
 
 // Only to be called in the restricting pass
-bool Engine::CompareEvaluatorLinks( const DecidedQueryResult &query_result,
+bool Engine::CompareEvaluatorLinks( const AgentQueryState &query,
 									Conjecture &conj,
 									CouplingMap &local_keys,      
 									const CouplingMap &master_keys,
 									Set<Agent *> &reached ) const
 {
-	ASSERT( query_result.GetEvaluator() );
+	ASSERT( query.GetEvaluator() );
     CouplingMap coupling_keys = MapUnion( master_keys, local_keys );
 
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
     list<bool> compare_results;
-    FOREACH( const DecidedQueryResult::Block &b, query_result.GetBlocks() )
+    FOREACH( const DecidedQueryResult::Block &b, query.GetBlocks() )
     {
         if( b.is_link ) // skikp decisions
 		{
@@ -270,7 +270,7 @@ bool Engine::CompareEvaluatorLinks( const DecidedQueryResult &query_result,
 		}
     }
     
-    shared_ptr<BooleanEvaluator> evaluator = query_result.GetEvaluator();
+    shared_ptr<BooleanEvaluator> evaluator = query.GetEvaluator();
 	bool match = (*evaluator)( compare_results );
 	TRACE(" Evaluating ");
 	FOREACH(bool b, compare_results)
@@ -297,19 +297,21 @@ bool Engine::DecidedCompare( Agent *agent,
     Conjecture::Ranges previous_decisions = conj.GetDecisions(agent);
 
     // Run the compare implementation to get the blocks based on the choices
+    AgentQueryState query;
     TRACE(*agent)("?=")(**px)(" Gathering blocks\n");    
-    DecidedQueryResult query_result = agent->DecidedQuery( px, choices, previous_decisions );
-    TRACE(*agent)("?=")(**px)(" local match ")(query_result.IsLocalMatch())("\n");
+    query.SetCD(&choices, &previous_decisions);
+    agent->DecidedQuery( px, query );
+    TRACE(*agent)("?=")(**px)(" local match ")(query.IsLocalMatch())("\n");
     
     // Feed the decisions info in the blocks structure back to the conjecture
     Conjecture::Ranges decisions;
-    FOREACH( const DecidedQueryResult::Block &b, query_result.GetBlocks() )
+    FOREACH( const DecidedQueryResult::Block &b, query.GetBlocks() )
         if( b.is_decision ) 
             decisions.push_back( b.decision );
-    conj.RegisterDecisions( agent, query_result.IsLocalMatch(), decisions );
+    conj.RegisterDecisions( agent, query.IsLocalMatch(), decisions );
         
     // Stop if the node itself mismatched (can be for any reason depending on agent)
-    if(!query_result.IsLocalMatch())
+    if(!query.IsLocalMatch())
         return false;
 
     // Remember the coupling before recursing, as we can hit the same node 
@@ -321,15 +323,15 @@ bool Engine::DecidedCompare( Agent *agent,
     reached.insert( agent );
       
     // Use worker function to go through the blocks, special case if there is evaluator
-    if( !query_result.GetEvaluator() )
+    if( !query.GetEvaluator() )
     {
 		TRACE(*agent)("?=")(**px)(" Comparing blocks\n");
-        return CompareLinks( query_result, can_key, conj, local_keys, master_keys, reached );
+        return CompareLinks( query, can_key, conj, local_keys, master_keys, reached );
 	}
     else if( !can_key )
     {
 		TRACE(*agent)("?=")(**px)(" Comparing evaluator blocks\n");
-        return CompareEvaluatorLinks( query_result, conj, local_keys, master_keys, reached );
+        return CompareEvaluatorLinks( query, conj, local_keys, master_keys, reached );
 	}
     else
         return true;

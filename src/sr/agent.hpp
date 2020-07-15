@@ -93,6 +93,27 @@ private:
     int decision_count = 0;
 };
 
+
+class AgentQueryState : public DecidedQueryResult
+{
+public:
+    void SetCD( const Conjecture::Choices *c,
+                const Conjecture::Ranges *d )
+    {
+        choices = c;
+        decisions = d;
+    }
+private: friend class Agent; 
+    void SetDQR( const DecidedQueryResult &dqr )
+    {
+        DecidedQueryResult::operator=( dqr );
+    }
+
+    const Conjecture::Choices *choices;
+    const Conjecture::Ranges *decisions;
+};
+
+
 bool operator<(const DecidedQueryResult::Block &l0, const DecidedQueryResult::Block &l1);
 
 
@@ -111,6 +132,8 @@ public:
     /// List the Agents reached via blocks during search
     virtual PatternQueryResult PatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
+    virtual void DecidedQuery( const TreePtrInterface *px,
+                               AgentQueryState &state ) const { auto dqr = DecidedQuery(px, *(state.choices), *(state.decisions)); state.SetDQR(dqr); }                                
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
                                              const Conjecture::Choices &choices,
                                              const Conjecture::Ranges &decisions ) const { return DecidedQuery(px, choices); }                                
