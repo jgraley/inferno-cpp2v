@@ -1,6 +1,7 @@
 #ifndef ENGINE_HPP
 #define ENGINE_HPP
 
+#include "query.hpp"
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"

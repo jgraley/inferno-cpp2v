@@ -7,6 +7,7 @@
 #include "helpers/transformation.hpp"
 #include "conjecture.hpp"
 #include "boolean_evaluator.hpp"
+#include "query.hpp"
 #include <vector>
 #include <boost/type_traits.hpp>
   
@@ -15,107 +16,6 @@ namespace SR
 class SpecialBase;
 class Engine;
 class Agent;
-
-class PatternQueryResult 
-{
-public:    
-    struct Block 
-    {
-        bool abnormal;
-        Agent *agent;
-    };
-        
-    void clear()
-    {
-		blocks.clear();
-        evaluator = shared_ptr<BooleanEvaluator>();
-    }
-    void AddLink( bool abnormal, Agent *a );
-    void AddEvaluator( shared_ptr<BooleanEvaluator> e );
-    
-    list<Block> GetBlocks() const { return blocks; }
-    shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
-
-private:
-    list<Block> blocks;
-    shared_ptr<BooleanEvaluator> evaluator;
-};
-
-
-class DecidedQueryResult 
-{
-public:    
-    struct Block 
-    {
-        const TreePtrInterface *GetPX() const
-        {
-			if( px )
-				return px; // linked x is in input tree
-			else
-				return &local_x; // linked x is local, kept alive by local_x    
-		}	
-
-        bool is_link;
-        bool abnormal;
-        Agent *agent;
-        const TreePtrInterface *px;
-        TreePtr<Node> local_x;
-        bool is_decision;
-        Conjecture::Range decision;
-    };
-        
-    void clear()
-    {
-        blocks.clear();
-        decision_count = 0;
-        evaluator = shared_ptr<BooleanEvaluator>();        
-    }
-
-    void AddLink( bool abnormal, Agent *a, const TreePtrInterface *px ); 
-    void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ); 
-    void AddEvaluator( shared_ptr<BooleanEvaluator> e ); 
-    ContainerInterface::iterator AddDecision( ContainerInterface::iterator begin,
-                                              ContainerInterface::iterator end,
-                                              bool inclusive,
-                                              const Conjecture::Choices &choices,
-                                              std::shared_ptr<ContainerInterface> container=nullptr );
-    void AddLocalMatch( bool local_match );
-                                                  
-    list<Block> GetBlocks() const { return blocks; }
-    shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
-    bool IsLocalMatch() { return local_match; }
-    int GetDecisionCount() const { return decision_count; }
-    
-private:
-    list<Block> blocks; 
-    shared_ptr<BooleanEvaluator> evaluator;
-    bool local_match = true;
-    int decision_count = 0;
-};
-
-
-class AgentQueryState : public DecidedQueryResult
-{
-public:
-    void SetCD( const Conjecture::Choices *c,
-                const Conjecture::Ranges *d )
-    {
-        choices = c;
-        decisions = d;
-    }
-private: friend class Agent; 
-    void SetDQR( const DecidedQueryResult &dqr )
-    {
-        DecidedQueryResult::operator=( dqr );
-    }
-
-    const Conjecture::Choices *choices;
-    const Conjecture::Ranges *decisions;
-};
-
-
-bool operator<(const DecidedQueryResult::Block &l0, const DecidedQueryResult::Block &l1);
-
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Traceable,

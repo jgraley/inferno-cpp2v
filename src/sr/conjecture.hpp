@@ -1,6 +1,7 @@
 #ifndef CONJECTURE_HPP
 #define CONJECTURE_HPP
 
+#include "query.hpp"
 #include "common/common.hpp"
 #include <vector>
 
@@ -14,24 +15,10 @@ class Agent;
 class Conjecture
 {
 public:
-    struct Range
-    {
-        ContainerInterface::iterator begin;
-        ContainerInterface::iterator end;    
-        bool inclusive; // If true, include "end" as a possible choice
-        std::shared_ptr<ContainerInterface> container; // Only needed if the container is not part of the x tree
-        bool operator==(const Range &o) const // Only required for an ASSERT
-        {
-			return begin==o.begin && end==o.end && inclusive==o.inclusive && container==o.container;
-		}
-    };
-
-    // There is a "random access" in DecidedQueryResult::AddDecision()
-    typedef vector<ContainerInterface::iterator> Choices; 
+    typedef DecidedQueryResult::Range Range;
+    typedef DecidedQueryResult::Ranges Ranges;
+    typedef DecidedQueryResult::Choices Choices;
     
-    // There is a "random access" in IncrementBlock()
-    typedef vector<Range> Ranges;
-
     struct AgentBlock
     {
 		Agent *agent;
