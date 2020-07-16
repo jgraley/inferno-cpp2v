@@ -19,22 +19,22 @@ public:
     typedef DecidedQueryResult::Ranges Ranges;
     typedef DecidedQueryResult::Choices Choices;
     
-    struct AgentBlock
+    struct AgentRecord
     {
 		Agent *agent;
 		Ranges decisions;
 		Choices choices;
-		AgentBlock *previous_block;
+		AgentRecord *previous_block;
 		bool seen;
 		bool local_match;
 	};
-    typedef pair<Agent * const, AgentBlock> BlockPair;
+    typedef pair<Agent * const, AgentRecord> BlockPair;
 
 public:
     Conjecture(Set<Agent *> my_agents);
     ~Conjecture();
 	void PrepareForDecidedCompare(int pass);    
-	bool IncrementBlock( AgentBlock *block );			                                     
+	bool IncrementBlock( AgentRecord *block );			                                     
     bool Increment(); // returns true for try again, false for give up				 
     				       
     // Standard interface for decided compare functions
@@ -43,8 +43,8 @@ public:
     Conjecture::Ranges GetDecisions(Agent *agent);
 				   
 private:
-	Map<Agent *, AgentBlock> agent_blocks;
-	AgentBlock *last_block;	
+	Map<Agent *, AgentRecord> agent_blocks;
+	AgentRecord *last_block;	
 	bool prepared;
 };
 

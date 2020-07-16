@@ -10,7 +10,7 @@ Conjecture::Conjecture(Set<Agent *> my_agents)
     last_block = NULL;
     FOREACH( Agent *a, my_agents )
     {
-		AgentBlock block;
+		AgentRecord block;
 		block.agent = a;
 		block.seen = false;
 		agent_blocks[a] = block;
@@ -30,17 +30,17 @@ void Conjecture::PrepareForDecidedCompare(int pass)
 
 	TRACE("Decision prepare\n");
     
-	typedef pair<Agent * const, AgentBlock> BlockPair;
+	typedef pair<Agent * const, AgentRecord> BlockPair;
 	FOREACH( BlockPair &p, agent_blocks )
 	{
-		AgentBlock &block = p.second;
+		AgentRecord &block = p.second;
 		block.seen = false;
 	}          
 	prepared = true;
 }
 
 
-bool Conjecture::IncrementBlock( AgentBlock *block )
+bool Conjecture::IncrementBlock( AgentRecord *block )
 {    
     ASSERT( block->choices.size() == block->decisions.size() );
 	if( block->decisions.empty() )
@@ -98,7 +98,7 @@ void Conjecture::RegisterDecisions( Agent *agent, bool local_match, Ranges decis
 	ASSERT( prepared );
 	
 	ASSERT( agent_blocks.IsExist(agent) )(*agent);
- 	AgentBlock &block = agent_blocks[agent];
+ 	AgentRecord &block = agent_blocks[agent];
     block.local_match = local_match; // always overwrite this field - if the local match fails it will be the last call here before Increment()
 
 	if( decisions.empty() )
