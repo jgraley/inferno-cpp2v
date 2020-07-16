@@ -14,7 +14,7 @@ PatternQueryResult PointerIsAgent::PatternQuery() const
 
 
 DecidedQueryResult PointerIsAgent::DecidedQuery( const TreePtrInterface *px, 
-                                                 const Conjecture::Choices &choices ) const
+                                                 const AgentQuery::Choices &choices ) const
 {
 	INDENT("@");
     DecidedQueryResult r;

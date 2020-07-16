@@ -40,7 +40,7 @@ struct BuildIdentifierAgent : public virtual InfernoAgent
         return PatternQueryResult(); 
     }
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
-                                             const Conjecture::Choices &choices ) const 
+                                             const AgentQuery::Choices &choices ) const 
     { 
         return DecidedQueryResult(); 
     }   
@@ -155,7 +155,7 @@ struct InstanceIdentifierByName : Special<CPPTree::InstanceIdentifier>,
     InstanceIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px, 
-                                             const Conjecture::Choices &choices ) const                                  
+                                             const AgentQuery::Choices &choices ) const                                  
     {
         DecidedQueryResult r;
         r.AddLocalMatch( IsMatch( *px ) );
@@ -173,7 +173,7 @@ struct TypeIdentifierByName : Special<CPPTree::TypeIdentifier>,
     TypeIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px, 
-                                             const Conjecture::Choices &choices ) const                                  
+                                             const AgentQuery::Choices &choices ) const                                  
     {
         DecidedQueryResult r;
         r.AddLocalMatch( IsMatch( *px ) );
@@ -191,7 +191,7 @@ struct LabelIdentifierByName : Special<CPPTree::LabelIdentifier>,
     LabelIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px, 
-                                             const Conjecture::Choices &choices ) const                                  
+                                             const AgentQuery::Choices &choices ) const                                  
     {
         DecidedQueryResult r;
         r.AddLocalMatch( IsMatch( *px ) );
@@ -209,7 +209,7 @@ struct NestedAgent : public virtual InfernoAgent
 {
     virtual PatternQueryResult PatternQuery() const;
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
-                                             const Conjecture::Choices &choices ) const;
+                                             const AgentQuery::Choices &choices ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
     virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const = 0;
     TreePtr<Node> terminus; 
@@ -256,7 +256,7 @@ private:
         return PatternQueryResult(); 
     }
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
-                                             const Conjecture::Choices &choices ) const 
+                                             const AgentQuery::Choices &choices ) const 
     { 
         return DecidedQueryResult(); 
     }   
@@ -283,7 +283,7 @@ struct IsLabelReached : public virtual InfernoAgent,
         return PatternQueryResult(); 
     }
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
-                                             const Conjecture::Choices &choices ) const;
+                                             const AgentQuery::Choices &choices ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
     TreePtr<CPPTree::Expression> pattern;           
            

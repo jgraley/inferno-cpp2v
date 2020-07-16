@@ -13,7 +13,7 @@ PatternQueryResult GreenGrassAgent::PatternQuery() const
 
 
 DecidedQueryResult GreenGrassAgent::DecidedQuery( const TreePtrInterface *px, 
-                                                  const Conjecture::Choices &choices ) const
+                                                  const AgentQuery::Choices &choices ) const
 {
     INDENT("G");
     ASSERT(px);

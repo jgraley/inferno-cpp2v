@@ -35,14 +35,14 @@ public:
     virtual void DecidedQuery( const TreePtrInterface *px,
                                AgentQuery &state ) const { auto dqr = DecidedQuery(px, *(state.choices), *(state.decisions)); state.SetDQR(dqr); }                                
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
-                                             const Conjecture::Choices &choices,
-                                             const Conjecture::Ranges &decisions ) const { return DecidedQuery(px, choices); }                                
+                                             const AgentQuery::Choices &choices,
+                                             const AgentQuery::Ranges &decisions ) const { return DecidedQuery(px, choices); }                                
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
-                                             const Conjecture::Choices &choices ) const { ASSERT(!"implement DecidedQuery()"); return DecidedQueryResult(); }                                
+                                             const AgentQuery::Choices &choices ) const { ASSERT(!"implement DecidedQuery()"); return DecidedQueryResult(); }                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const TreePtrInterface &x,
-                             Conjecture::Choices choices ) = 0;
+                             AgentQuery::Choices choices ) = 0;
     virtual void TrackingKey( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
 	virtual void AgentConfigure( const Engine *e ) = 0;
@@ -68,7 +68,7 @@ public:
     TreePtr<Node> GetCoupled();                                  
     void ResetKey();    
     virtual void KeyReplace( const TreePtrInterface &x,
-                             Conjecture::Choices choices );
+                             AgentQuery::Choices choices );
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplace();
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );

@@ -15,7 +15,7 @@ PatternQueryResult NotMatchAgent::PatternQuery() const
 
 
 DecidedQueryResult NotMatchAgent::DecidedQuery( const TreePtrInterface *px, 
-                                                const Conjecture::Choices &choices ) const
+                                                const AgentQuery::Choices &choices ) const
 {
     INDENT("!");
     ASSERT( GetPattern() );
@@ -68,7 +68,7 @@ PatternQueryResult MatchAllAgent::PatternQuery() const
 
 
 DecidedQueryResult MatchAllAgent::DecidedQuery( const TreePtrInterface *px, 
-                                                const Conjecture::Choices &choices ) const
+                                                const AgentQuery::Choices &choices ) const
 { 
     INDENT("&");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!
@@ -118,7 +118,7 @@ PatternQueryResult MatchAnyAgent::PatternQuery() const
 
 
 DecidedQueryResult MatchAnyAgent::DecidedQuery( const TreePtrInterface *px, 
-                                                const Conjecture::Choices &choices ) const
+                                                const AgentQuery::Choices &choices ) const
 {
     INDENT("|");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!

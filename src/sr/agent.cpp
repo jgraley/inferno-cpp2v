@@ -67,7 +67,7 @@ void AgentCommon::ResetKey()
 
 
 void AgentCommon::KeyReplace( const TreePtrInterface &x,
-                              Conjecture::Choices choices )
+                              AgentQuery::Choices choices )
 {   
     DoKey(x);  
 }

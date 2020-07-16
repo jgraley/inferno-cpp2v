@@ -47,8 +47,8 @@ PatternQueryResult StandardAgent::PatternQuery() const
 
 
 DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface *px, 
-                                                const Conjecture::Choices &choices,
-                                                const Conjecture::Ranges &decisions ) const
+                                                const AgentQuery::Choices &choices,
+                                                const AgentQuery::Ranges &decisions ) const
 {
     INDENT(".");
     DecidedQueryResult r;
@@ -110,7 +110,7 @@ DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface *px,
 void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
                                           SequenceInterface *px,
 		                                  SequenceInterface &pattern,
-                                          const Conjecture::Choices &choices ) const
+                                          const AgentQuery::Choices &choices ) const
 {
     INDENT(" ");
 	ContainerInterface::iterator pit, npit, nnpit, nxit;
@@ -207,8 +207,8 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
                                             CollectionInterface *px,
 		 					                CollectionInterface &pattern,
-                                            const Conjecture::Choices &choices,
-                                            const Conjecture::Ranges &decisions ) const
+                                            const AgentQuery::Choices &choices,
+                                            const AgentQuery::Ranges &decisions ) const
 {
     INDENT(" ");
     

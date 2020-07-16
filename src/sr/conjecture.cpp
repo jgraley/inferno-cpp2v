@@ -127,7 +127,7 @@ void Conjecture::RegisterDecisions( Agent *agent, bool local_match, Ranges decis
 }
 
 
-Conjecture::Choices Conjecture::GetChoices(Agent *agent)
+AgentQuery::Choices Conjecture::GetChoices(Agent *agent)
 {            
     if( agent_blocks.IsExist(agent) )
     {
@@ -139,7 +139,7 @@ Conjecture::Choices Conjecture::GetChoices(Agent *agent)
 	}    
 }
 
-Conjecture::Ranges Conjecture::GetDecisions(Agent *agent)
+AgentQuery::Ranges Conjecture::GetDecisions(Agent *agent)
 {            
     if( agent_blocks.IsExist(agent) )
     {

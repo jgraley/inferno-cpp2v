@@ -22,9 +22,9 @@ private:
 public:
     virtual PatternQueryResult PatternQuery() const;
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
-                                             const Conjecture::Choices &choices ) const;
+                                             const AgentQuery::Choices &choices ) const;
     virtual void KeyReplace( const TreePtrInterface &x,
-                             Conjecture::Choices choices ); 
+                             AgentQuery::Choices choices ); 
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) const = 0;
     virtual void PatternQueryRestrictions() const {};

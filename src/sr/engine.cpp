@@ -293,8 +293,8 @@ bool Engine::DecidedCompare( Agent *agent,
     ASSERT( *px ); // Target must not be NULL
             	
     // Obtain the choices from the conjecture
-    Conjecture::Choices choices = conj.GetChoices(agent);
-    Conjecture::Ranges previous_decisions = conj.GetDecisions(agent);
+    AgentQuery::Choices choices = conj.GetChoices(agent);
+    AgentQuery::Ranges previous_decisions = conj.GetDecisions(agent);
 
     // Run the compare implementation to get the blocks based on the choices
     AgentQuery query;
@@ -304,7 +304,7 @@ bool Engine::DecidedCompare( Agent *agent,
     TRACE(*agent)("?=")(**px)(" local match ")(query.IsLocalMatch())("\n");
     
     // Feed the decisions info in the blocks structure back to the conjecture
-    Conjecture::Ranges decisions;
+    AgentQuery::Ranges decisions;
     FOREACH( const DecidedQueryResult::Block &b, query.GetBlocks() )
         if( b.is_decision ) 
             decisions.push_back( b.decision );

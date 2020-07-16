@@ -17,7 +17,7 @@ class PointerIsAgent : public virtual AgentCommon
 public:
     virtual PatternQueryResult PatternQuery() const;
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
-                                             const Conjecture::Choices &choices ) const;
+                                             const AgentQuery::Choices &choices ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
     virtual TreePtr<Node> GetPointer() const = 0;

@@ -82,10 +82,10 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
 
 
 DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface *px,
-                                                        const Conjecture::Choices &choices ) const;
+                                                        const AgentQuery::Choices &choices ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const{
     INDENT("'");    
-    Conjecture::Choices wrapped_choices, wrapper_choices; // JSG2020 wrapper_choices either is choices or should be init'd from it?
+    AgentQuery::Choices wrapped_choices, wrapper_choices; // JSG2020 wrapper_choices either is choices or should be init'd from it?
 
     PatternQueryResult wrapped_result = wrapped_agent->PatternQuery();
     wrapper_result.evaluator = wrapped_result.evaluator;

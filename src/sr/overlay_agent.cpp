@@ -14,7 +14,7 @@ PatternQueryResult OverlayAgent::PatternQuery() const
 
 
 DecidedQueryResult OverlayAgent::DecidedQuery( const TreePtrInterface *px, 
-                                               const Conjecture::Choices &choices ) const
+                                               const AgentQuery::Choices &choices ) const
 {
     DecidedQueryResult r;
     
