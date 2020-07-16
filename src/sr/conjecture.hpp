@@ -22,7 +22,6 @@ public:
     struct AgentRecord
     {
 		Agent *agent;
-        shared_ptr<AgentQuery> query;
 		Ranges decisions;
 		Choices choices;
 		AgentRecord *previous_record;
@@ -39,8 +38,10 @@ public:
     				       
     // Standard interface for decided compare functions
     void RegisterDecisions( Agent *agent, bool local_match, Ranges decisions=Ranges() );      
+    void RegisterQuery( Agent *agent, shared_ptr<AgentQuery> query );      
     AgentQuery::Choices GetChoices(Agent *agent);
     AgentQuery::Ranges GetDecisions(Agent *agent);
+    shared_ptr<AgentQuery> GetQuery(Agent *agent);
 				   
 private:
 	Map<Agent *, AgentRecord> agent_records;

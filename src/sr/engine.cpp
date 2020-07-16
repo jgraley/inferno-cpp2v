@@ -293,25 +293,18 @@ bool Engine::DecidedCompare( Agent *agent,
     ASSERT( *px ); // Target must not be NULL
             	
     // Obtain the choices from the conjecture
-    AgentQuery::Choices choices = conj.GetChoices(agent);
-    AgentQuery::Ranges previous_decisions = conj.GetDecisions(agent);
+    shared_ptr<AgentQuery> query = conj.GetQuery(agent);
 
     // Run the compare implementation to get the blocks based on the choices
-    AgentQuery query;
     TRACE(*agent)("?=")(**px)(" Gathering blocks\n");    
-    query.SetCD(&choices, &previous_decisions);
-    agent->DecidedQuery( px, query );
-    TRACE(*agent)("?=")(**px)(" local match ")(query.IsLocalMatch())("\n");
+    agent->DecidedQuery( px, *query );
+    TRACE(*agent)("?=")(**px)(" local match ")(query->IsLocalMatch())("\n");
     
     // Feed the decisions info in the blocks structure back to the conjecture
-    AgentQuery::Ranges decisions;
-    FOREACH( const DecidedQueryResult::Block &b, query.GetBlocks() )
-        if( b.is_decision ) 
-            decisions.push_back( b.decision );
-    conj.RegisterDecisions( agent, query.IsLocalMatch(), decisions );
+    conj.RegisterQuery( agent, query );
         
     // Stop if the node itself mismatched (can be for any reason depending on agent)
-    if(!query.IsLocalMatch())
+    if(!query->IsLocalMatch())
         return false;
 
     // Remember the coupling before recursing, as we can hit the same node 
@@ -323,15 +316,15 @@ bool Engine::DecidedCompare( Agent *agent,
     reached.insert( agent );
       
     // Use worker function to go through the blocks, special case if there is evaluator
-    if( !query.GetEvaluator() )
+    if( !query->GetEvaluator() )
     {
 		TRACE(*agent)("?=")(**px)(" Comparing blocks\n");
-        return CompareLinks( query, can_key, conj, local_keys, master_keys, reached );
+        return CompareLinks( *query, can_key, conj, local_keys, master_keys, reached );
 	}
     else if( !can_key )
     {
 		TRACE(*agent)("?=")(**px)(" Comparing evaluator blocks\n");
-        return CompareEvaluatorLinks( query, conj, local_keys, master_keys, reached );
+        return CompareEvaluatorLinks( *query, conj, local_keys, master_keys, reached );
 	}
     else
         return true;

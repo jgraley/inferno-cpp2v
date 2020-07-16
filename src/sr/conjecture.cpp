@@ -92,13 +92,19 @@ bool Conjecture::Increment()
 }
 
 
-void Conjecture::RegisterDecisions( Agent *agent, bool local_match, Ranges decisions )
-{                
+void Conjecture::RegisterQuery( Agent *agent, shared_ptr<AgentQuery> query )
+{
 	ASSERT( prepared );
-	
+                	
 	ASSERT( agent_records.IsExist(agent) )(*agent);
  	AgentRecord &record = agent_records[agent];
-    record.local_match = local_match; // always overwrite this field - if the local match fails it will be the last call here before Increment()
+
+    // Feed the decisions info in the blocks structure back to the conjecture
+    AgentQuery::Ranges decisions;
+    FOREACH( const DecidedQueryResult::Block &b, query->GetBlocks() )
+        if( b.is_decision ) 
+            decisions.push_back( b.decision );
+    record.local_match = query->IsLocalMatch(); // always overwrite this field - if the local match fails it will be the last call here before Increment()
 
 	if( decisions.empty() )
 	    return;
@@ -139,6 +145,7 @@ AgentQuery::Choices Conjecture::GetChoices(Agent *agent)
 	}    
 }
 
+
 AgentQuery::Ranges Conjecture::GetDecisions(Agent *agent)
 {            
     if( agent_records.IsExist(agent) )
@@ -149,6 +156,14 @@ AgentQuery::Ranges Conjecture::GetDecisions(Agent *agent)
 	{
 		return Ranges(); // no decisions
 	}    
+}
+
+shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
+{
+    ASSERT( agent_records.IsExist(agent) );
+    auto query = make_shared<AgentQuery>();
+    query->SetCD( &agent_records[agent].choices, &agent_records[agent].decisions );
+    return query;
 }
 
 };
