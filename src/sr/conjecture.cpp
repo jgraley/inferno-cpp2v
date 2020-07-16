@@ -115,24 +115,23 @@ void Conjecture::RegisterQuery( Agent *agent, shared_ptr<AgentQuery> query )
 	
 	if( record.seen )
 	{
-	    ASSERT( record.decisions == decisions )(*agent)(" %d!=%d %d", record.decisions.size(), decisions.size(), record.choices.size());
+	    ASSERT( *query->decisions == decisions )(*agent)(" %d!=%d %d", query->decisions->size(), decisions.size(), query->choices->size());
 	}
 	else
 	{
-		if( record.decisions.empty() ) // new block or defunct
+		if( query->decisions->empty() ) // new block or defunct
 		{
 			record.previous_record = last_record;	
 			last_record = &record;
-            
 		}
 		record.seen = true;
-		record.decisions = decisions;
-		while( record.choices.size() < record.decisions.size() )
+		*query->decisions = decisions; // important
+		while( query->choices->size() < query->decisions->size() )
 		{
-			int index = record.choices.size();
-			record.choices.push_back( record.decisions[index].begin );
+			int index = query->choices->size();
+			query->choices->push_back( (*query->decisions)[index].begin );
 		}
-		ASSERT( record.choices.size()==record.decisions.size() )("%d != %d", record.choices.size(), record.decisions.size() );
+		ASSERT( query->choices->size()==query->decisions->size() )("%d != %d", query->choices->size(), query->decisions->size() );
 	}
 }
 

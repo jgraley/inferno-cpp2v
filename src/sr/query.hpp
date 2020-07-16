@@ -112,8 +112,8 @@ private:
 class AgentQuery : public DecidedQueryResult
 {
 public:
-    void SetCD( const Choices *c,
-                const Ranges *d )
+    void SetCD( Choices *c,
+                Ranges *d )
     {
         choices = c;
         decisions = d;
@@ -124,8 +124,8 @@ private: friend class Agent; friend class Conjecture;
         DecidedQueryResult::operator=( dqr );
     }
 
-    const Choices *choices;
-    const Ranges *decisions;
+    Choices *choices;
+    Ranges *decisions;
 };
 /*
           // Update our DecidedQueryResult
