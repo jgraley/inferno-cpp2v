@@ -118,7 +118,7 @@ public:
         choices = c;
         decisions = d;
     }
-private: friend class Agent; 
+private: friend class Agent; friend class Conjecture; 
     void SetDQR( const DecidedQueryResult &dqr )
     {
         DecidedQueryResult::operator=( dqr );

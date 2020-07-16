@@ -99,6 +99,10 @@ void Conjecture::RegisterQuery( Agent *agent, shared_ptr<AgentQuery> query )
 	ASSERT( agent_records.IsExist(agent) )(*agent);
  	AgentRecord &record = agent_records[agent];
 
+    // query should have come from GetQuery(agent) (and should be same agent)
+    ASSERT( query->decisions = &record.decisions );
+    ASSERT( query->choices = &record.choices );
+
     // Feed the decisions info in the blocks structure back to the conjecture
     AgentQuery::Ranges decisions;
     FOREACH( const DecidedQueryResult::Block &b, query->GetBlocks() )
