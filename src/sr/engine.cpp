@@ -173,7 +173,7 @@ void Engine::GetGraphInfo( vector<string> *labels,
 }
 
 
-bool Engine::CompareLinks( const AgentQueryState &query,
+bool Engine::CompareLinks( const AgentQuery &query,
                            bool can_key,
                            Conjecture &conj,
                            CouplingMap &local_keys,      
@@ -243,7 +243,7 @@ bool Engine::CompareLinks( const AgentQueryState &query,
 
 
 // Only to be called in the restricting pass
-bool Engine::CompareEvaluatorLinks( const AgentQueryState &query,
+bool Engine::CompareEvaluatorLinks( const AgentQuery &query,
 									Conjecture &conj,
 									CouplingMap &local_keys,      
 									const CouplingMap &master_keys,
@@ -297,7 +297,7 @@ bool Engine::DecidedCompare( Agent *agent,
     Conjecture::Ranges previous_decisions = conj.GetDecisions(agent);
 
     // Run the compare implementation to get the blocks based on the choices
-    AgentQueryState query;
+    AgentQuery query;
     TRACE(*agent)("?=")(**px)(" Gathering blocks\n");    
     query.SetCD(&choices, &previous_decisions);
     agent->DecidedQuery( px, query );

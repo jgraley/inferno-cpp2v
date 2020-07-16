@@ -109,7 +109,7 @@ private:
 };
 
 
-class AgentQueryState : public DecidedQueryResult
+class AgentQuery : public DecidedQueryResult
 {
 public:
     void SetCD( const Choices *c,

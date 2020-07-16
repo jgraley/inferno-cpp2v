@@ -70,13 +70,13 @@ private:
                          CouplingMap &local_keys,
                          const CouplingMap &master_keys,
                          Set<Agent *> &reached ) const;
-    bool CompareLinks( const AgentQueryState &query,
+    bool CompareLinks( const AgentQuery &query,
                        bool can_key,
                        Conjecture &conj,
                        CouplingMap &local_keys,
                        const CouplingMap &master_keys,
                        Set<Agent *> &reached ) const;
-    bool CompareEvaluatorLinks( const AgentQueryState &query,
+    bool CompareEvaluatorLinks( const AgentQuery &query,
 							    Conjecture &conj,
 							    CouplingMap &local_keys,
 							    const CouplingMap &master_keys,
