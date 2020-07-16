@@ -7,13 +7,13 @@ namespace SR
 
 Conjecture::Conjecture(Set<Agent *> my_agents)
 {
-    last_block = NULL;
+    last_record = NULL;
     FOREACH( Agent *a, my_agents )
     {
-		AgentRecord block;
-		block.agent = a;
-		block.seen = false;
-		agent_blocks[a] = block;
+		AgentRecord record;
+		record.agent = a;
+		record.seen = false;
+		agent_records[a] = record;
 	}        
 	prepared = false;
 }
@@ -30,44 +30,43 @@ void Conjecture::PrepareForDecidedCompare(int pass)
 
 	TRACE("Decision prepare\n");
     
-	typedef pair<Agent * const, AgentRecord> BlockPair;
-	FOREACH( BlockPair &p, agent_blocks )
+	FOREACH( auto &p, agent_records )
 	{
-		AgentRecord &block = p.second;
-		block.seen = false;
+		AgentRecord &record = p.second;
+		record.seen = false;
 	}          
 	prepared = true;
 }
 
 
-bool Conjecture::IncrementBlock( AgentRecord *block )
+bool Conjecture::IncrementAgent( AgentRecord *record )
 {    
-    ASSERT( block->choices.size() == block->decisions.size() );
-	if( block->decisions.empty() )
+    ASSERT( record->choices.size() == record->decisions.size() );
+	if( record->decisions.empty() )
 	{
-	    return false;  // this block is defunct
+	    return false;  // this query is defunct
 	}
-    auto &decision = block->decisions[block->choices.size()-1];
+    auto &decision = record->decisions[record->choices.size()-1];
 
     // Inclusive case - we let the choice go to end() but we won't go any further
-    if( decision.inclusive && block->choices.back() == decision.end )
+    if( decision.inclusive && record->choices.back() == decision.end )
     {
-        block->choices.pop_back();
-        block->decisions.pop_back();
-        return IncrementBlock( block );
+        record->choices.pop_back();
+        record->decisions.pop_back();
+        return IncrementAgent( record );
 	}
 
-	if( block->choices.back() != decision.end ) 
+	if( record->choices.back() != decision.end ) 
 	{
-        ++(last_block->choices.back()); 
+        ++(last_record->choices.back()); 
     }
 		
     // Exclusive case - we don't let the choice be end
-    if( !decision.inclusive && block->choices.back() == decision.end )
+    if( !decision.inclusive && record->choices.back() == decision.end )
     {
-        block->choices.pop_back();
-        block->decisions.pop_back();
-        return IncrementBlock( block );
+        record->choices.pop_back();
+        record->decisions.pop_back();
+        return IncrementAgent( record );
 	}
 		
     return true;
@@ -79,13 +78,13 @@ bool Conjecture::Increment()
     prepared = false;
 
 	// If we've run out of choices, we're done.
-	if( last_block==NULL )
+	if( last_record==NULL )
 	    return false;
 	
-    bool ok = IncrementBlock( last_block );
+    bool ok = IncrementAgent( last_record );
     if( !ok )
     {		
-		last_block = last_block->previous_block;
+		last_record = last_record->previous_record;
 		return Increment();
 	}
  
@@ -97,41 +96,42 @@ void Conjecture::RegisterDecisions( Agent *agent, bool local_match, Ranges decis
 {                
 	ASSERT( prepared );
 	
-	ASSERT( agent_blocks.IsExist(agent) )(*agent);
- 	AgentRecord &block = agent_blocks[agent];
-    block.local_match = local_match; // always overwrite this field - if the local match fails it will be the last call here before Increment()
+	ASSERT( agent_records.IsExist(agent) )(*agent);
+ 	AgentRecord &record = agent_records[agent];
+    record.local_match = local_match; // always overwrite this field - if the local match fails it will be the last call here before Increment()
 
 	if( decisions.empty() )
 	    return;
 	
-	if( block.seen )
+	if( record.seen )
 	{
-	    ASSERT( block.decisions == decisions )(*agent)(" %d!=%d %d", block.decisions.size(), decisions.size(), block.choices.size());
+	    ASSERT( record.decisions == decisions )(*agent)(" %d!=%d %d", record.decisions.size(), decisions.size(), record.choices.size());
 	}
 	else
 	{
-		if( block.decisions.empty() ) // new block or defunct
+		if( record.decisions.empty() ) // new block or defunct
 		{
-			block.previous_block = last_block;	
-			last_block = &block;
+			record.previous_record = last_record;	
+			last_record = &record;
+            
 		}
-		block.seen = true;
-		block.decisions = decisions;
-		while( block.choices.size() < block.decisions.size() )
+		record.seen = true;
+		record.decisions = decisions;
+		while( record.choices.size() < record.decisions.size() )
 		{
-			int index = block.choices.size();
-			block.choices.push_back( block.decisions[index].begin );
+			int index = record.choices.size();
+			record.choices.push_back( record.decisions[index].begin );
 		}
-		ASSERT( block.choices.size()==block.decisions.size() )("%d != %d", block.choices.size(), block.decisions.size() );
+		ASSERT( record.choices.size()==record.decisions.size() )("%d != %d", record.choices.size(), record.decisions.size() );
 	}
 }
 
 
 AgentQuery::Choices Conjecture::GetChoices(Agent *agent)
 {            
-    if( agent_blocks.IsExist(agent) )
+    if( agent_records.IsExist(agent) )
     {
-        return agent_blocks[agent].choices;
+        return agent_records[agent].choices;
 	}
 	else
 	{
@@ -141,9 +141,9 @@ AgentQuery::Choices Conjecture::GetChoices(Agent *agent)
 
 AgentQuery::Ranges Conjecture::GetDecisions(Agent *agent)
 {            
-    if( agent_blocks.IsExist(agent) )
+    if( agent_records.IsExist(agent) )
     {
-        return agent_blocks[agent].decisions;
+        return agent_records[agent].decisions;
 	}
 	else
 	{

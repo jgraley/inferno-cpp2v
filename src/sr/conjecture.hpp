@@ -22,19 +22,19 @@ public:
     struct AgentRecord
     {
 		Agent *agent;
+        shared_ptr<AgentQuery> query;
 		Ranges decisions;
 		Choices choices;
-		AgentRecord *previous_block;
+		AgentRecord *previous_record;
 		bool seen;
 		bool local_match;
 	};
-    typedef pair<Agent * const, AgentRecord> BlockPair;
 
 public:
     Conjecture(Set<Agent *> my_agents);
     ~Conjecture();
 	void PrepareForDecidedCompare(int pass);    
-	bool IncrementBlock( AgentRecord *block );			                                     
+	bool IncrementAgent( AgentRecord *block );			                                     
     bool Increment(); // returns true for try again, false for give up				 
     				       
     // Standard interface for decided compare functions
@@ -43,8 +43,8 @@ public:
     AgentQuery::Ranges GetDecisions(Agent *agent);
 				   
 private:
-	Map<Agent *, AgentRecord> agent_blocks;
-	AgentRecord *last_block;	
+	Map<Agent *, AgentRecord> agent_records;
+	AgentRecord *last_record;	
 	bool prepared;
 };
 

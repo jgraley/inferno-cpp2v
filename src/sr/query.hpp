@@ -54,7 +54,7 @@ public:
 		}
     };
     
-    // There is a "random access" in IncrementBlock()
+    // There is a "random access" in IncrementAgent()
     typedef vector<Range> Ranges;
 
     // There is a "random access" in DecidedQueryResult::AddDecision()
@@ -127,7 +127,16 @@ private: friend class Agent;
     const Choices *choices;
     const Ranges *decisions;
 };
-
+/*
+          // Update our DecidedQueryResult
+        DecidedQueryResult::operator=( dqr );
+        
+        // Update our decisions
+        decisions.clear();
+        FOREACH( const DecidedQueryResult::Block &b, dqr.GetBlocks() )
+            if( b.is_decision ) 
+                decisions.push_back( b.decision );        
+*/
 
 bool operator<(const DecidedQueryResult::Block &l0, const DecidedQueryResult::Block &l1);
 };
