@@ -41,31 +41,34 @@ void Conjecture::PrepareForDecidedCompare(int pass)
 
 bool Conjecture::IncrementAgent( AgentRecord *record )
 {    
-    ASSERT( record->choices.size() == record->decisions.size() );
-	if( record->decisions.empty() )
+    ASSERT( record->query );
+    ASSERT( record->query->GetChoices()->size() == record->query->GetDecisions()->size() );
+	if( record->query->GetDecisions()->empty() )
 	{
-	    return false;  // this query is defunct
+        // this query is defunct
+        record->query = nullptr;
+	    return false;  
 	}
-    auto &decision = record->decisions[record->choices.size()-1];
+    auto &decision = (*record->query->GetDecisions())[record->query->GetChoices()->size()-1];
 
     // Inclusive case - we let the choice go to end() but we won't go any further
-    if( decision.inclusive && record->choices.back() == decision.end )
+    if( decision.inclusive && record->query->GetChoices()->back() == decision.end )
     {
-        record->choices.pop_back();
-        record->decisions.pop_back();
+        record->query->GetChoices()->pop_back();
+        record->query->GetDecisions()->pop_back();
         return IncrementAgent( record );
 	}
 
-	if( record->choices.back() != decision.end ) 
+	if( record->query->GetChoices()->back() != decision.end ) 
 	{
-        ++(last_record->choices.back()); 
+        ++(last_record->query->GetChoices()->back()); 
     }
 		
     // Exclusive case - we don't let the choice be end
-    if( !decision.inclusive && record->choices.back() == decision.end )
+    if( !decision.inclusive && record->query->GetChoices()->back() == decision.end )
     {
-        record->choices.pop_back();
-        record->decisions.pop_back();
+        record->query->GetChoices()->pop_back();
+        record->query->GetDecisions()->pop_back();
         return IncrementAgent( record );
 	}
 		
@@ -92,46 +95,44 @@ bool Conjecture::Increment()
 }
 
 
-void Conjecture::RegisterQuery( Agent *agent, shared_ptr<AgentQuery> query )
+void Conjecture::RegisterQuery( Agent *agent )
 {
 	ASSERT( prepared );
                 	
 	ASSERT( agent_records.IsExist(agent) )(*agent);
  	AgentRecord &record = agent_records[agent];
 
-    // query should have come from GetQuery(agent) (and should be same agent)
-    ASSERT( query->decisions = &record.decisions );
-    ASSERT( query->choices = &record.choices );
-
     // Feed the decisions info in the blocks structure back to the conjecture
     AgentQuery::Ranges decisions;
-    FOREACH( const DecidedQueryResult::Block &b, query->GetBlocks() )
+    FOREACH( const DecidedQueryResult::Block &b, record.query->GetBlocks() )
         if( b.is_decision ) 
             decisions.push_back( b.decision );
-    record.local_match = query->IsLocalMatch(); // always overwrite this field - if the local match fails it will be the last call here before Increment()
+    record.local_match = record.query->IsLocalMatch(); // always overwrite this field - if the local match fails it will be the last call here before Increment()
 
 	if( decisions.empty() )
 	    return;
 	
 	if( record.seen )
 	{
-	    ASSERT( *query->decisions == decisions )(*agent)(" %d!=%d %d", query->decisions->size(), decisions.size(), query->choices->size());
+	    ASSERT( *record.query->GetDecisions() == decisions )(*agent)
+              (" %d!=%d %d", record.query->GetDecisions()->size(), decisions.size(), record.query->GetChoices()->size());
 	}
 	else
 	{
-		if( query->decisions->empty() ) // new block or defunct
+		if( record.query->GetDecisions()->empty() ) // new block or defunct
 		{
 			record.previous_record = last_record;	
 			last_record = &record;
 		}
 		record.seen = true;
-		*query->decisions = decisions; // important
-		while( query->choices->size() < query->decisions->size() )
+		*record.query->GetDecisions() = decisions; // important
+		while( record.query->GetChoices()->size() < record.query->GetDecisions()->size() )
 		{
-			int index = query->choices->size();
-			query->choices->push_back( (*query->decisions)[index].begin );
+			int index = record.query->GetChoices()->size();
+			record.query->GetChoices()->push_back( (*record.query->GetDecisions())[index].begin );
 		}
-		ASSERT( query->choices->size()==query->decisions->size() )("%d != %d", query->choices->size(), query->decisions->size() );
+		ASSERT( record.query->GetChoices()->size()==record.query->GetDecisions()->size() )
+              ("%d != %d", record.query->GetChoices()->size(), record.query->GetDecisions()->size() );
 	}
 }
 
@@ -140,7 +141,7 @@ AgentQuery::Choices Conjecture::GetChoices(Agent *agent)
 {            
     if( agent_records.IsExist(agent) )
     {
-        return agent_records[agent].choices;
+        return *agent_records[agent].query->GetChoices();
 	}
 	else
 	{
@@ -153,7 +154,7 @@ AgentQuery::Ranges Conjecture::GetDecisions(Agent *agent)
 {            
     if( agent_records.IsExist(agent) )
     {
-        return agent_records[agent].decisions;
+        return *agent_records[agent].query->GetDecisions();
 	}
 	else
 	{
@@ -164,9 +165,14 @@ AgentQuery::Ranges Conjecture::GetDecisions(Agent *agent)
 shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
 {
     ASSERT( agent_records.IsExist(agent) );
-    auto query = make_shared<AgentQuery>();
-    query->SetCD( &agent_records[agent].choices, &agent_records[agent].decisions );
-    return query;
+ 	AgentRecord &record = agent_records[agent];
+    
+    if( !record.query )
+    {
+        record.query = make_shared<AgentQuery>();
+    }
+    
+    return agent_records[agent].query;
 }
 
 };

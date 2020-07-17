@@ -33,7 +33,7 @@ public:
     virtual PatternQueryResult PatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual void DecidedQuery( const TreePtrInterface *px,
-                               AgentQuery &state ) const { auto dqr = DecidedQuery(px, *(state.choices), *(state.decisions)); state.SetDQR(dqr); }                                
+                               AgentQuery &state ) const { auto dqr = DecidedQuery(px, state.choices, state.decisions); state.SetDQR(dqr); }                                
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
                                              const AgentQuery::Choices &choices,
                                              const AgentQuery::Ranges &decisions ) const { return DecidedQuery(px, choices); }                                

@@ -111,32 +111,20 @@ private:
 
 class AgentQuery : public DecidedQueryResult
 {
-public:
-    void SetCD( Choices *c,
-                Ranges *d )
-    {
-        choices = c;
-        decisions = d;
-    }
-private: friend class Agent; friend class Conjecture; 
+public:   
+    Choices *GetChoices() { return &choices; }
+    Ranges *GetDecisions() { return &decisions; }
+    
+private: friend class Agent; 
     void SetDQR( const DecidedQueryResult &dqr )
     {
         DecidedQueryResult::operator=( dqr );
     }
 
-    Choices *choices;
-    Ranges *decisions;
+    Choices choices;
+    Ranges decisions;
 };
-/*
-          // Update our DecidedQueryResult
-        DecidedQueryResult::operator=( dqr );
-        
-        // Update our decisions
-        decisions.clear();
-        FOREACH( const DecidedQueryResult::Block &b, dqr.GetBlocks() )
-            if( b.is_decision ) 
-                decisions.push_back( b.decision );        
-*/
+
 
 bool operator<(const DecidedQueryResult::Block &l0, const DecidedQueryResult::Block &l1);
 };

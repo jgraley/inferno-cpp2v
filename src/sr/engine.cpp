@@ -301,7 +301,7 @@ bool Engine::DecidedCompare( Agent *agent,
     TRACE(*agent)("?=")(**px)(" local match ")(query->IsLocalMatch())("\n");
     
     // Feed the decisions info in the blocks structure back to the conjecture
-    conj.RegisterQuery( agent, query );
+    conj.RegisterQuery( agent );
         
     // Stop if the node itself mismatched (can be for any reason depending on agent)
     if(!query->IsLocalMatch())
