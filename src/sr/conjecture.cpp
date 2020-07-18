@@ -120,10 +120,10 @@ void Conjecture::RegisterQuery( Agent *agent )
 	    return;	// TODO ideally, we'd determine this from a PatternQuery(), and not even have an agent record for it
  
     // Feed the decisions info in the blocks structure back to the conjecture
-    AgentQuery::Ranges decisions;
+    record.query->GetDecisions()->clear();
     FOREACH( const DecidedQueryResult::Block &b, record.query->GetBlocks() )
         if( b.is_decision ) 
-            decisions.push_back( b.decision );
+            record.query->GetDecisions()->push_back( b.decision );
     record.local_match = record.query->IsLocalMatch(); // always overwrite this field - if the local match fails it will be the last call here before Increment()
     
     if( !record.active ) // new block or defunct
@@ -133,7 +133,6 @@ void Conjecture::RegisterQuery( Agent *agent )
         last_record = &record;
     }
     record.seen_in_current_pass = true;
-    *record.query->GetDecisions() = decisions; // important
     while( record.query->GetChoices()->size() < record.query->GetDecisions()->size() )
     {
         int index = record.query->GetChoices()->size();
