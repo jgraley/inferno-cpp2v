@@ -24,8 +24,9 @@ public:
 		Agent *agent;
         shared_ptr<AgentQuery> query;
 		AgentRecord *previous_record;
-		bool seen;
+		bool seen_in_current_pass;
 		bool local_match;
+        bool active;
 	};
 
 public:
@@ -46,6 +47,7 @@ private:
 	Map<Agent *, AgentRecord> agent_records;
 	AgentRecord *last_record;	
 	bool prepared;
+    int current_pass;
 };
 
 };

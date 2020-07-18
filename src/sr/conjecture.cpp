@@ -12,10 +12,12 @@ Conjecture::Conjecture(Set<Agent *> my_agents)
     {
 		AgentRecord record;
 		record.agent = a;
-		record.seen = false;
+        record.previous_record = nullptr;
+        record.active = false;
 		agent_records[a] = record;
 	}        
 	prepared = false;
+    current_pass = -1;
 }
 
 
@@ -33,9 +35,10 @@ void Conjecture::PrepareForDecidedCompare(int pass)
 	FOREACH( auto &p, agent_records )
 	{
 		AgentRecord &record = p.second;
-		record.seen = false;
+		record.seen_in_current_pass = false;    
 	}          
 	prepared = true;
+    current_pass = pass;
 }
 
 
@@ -79,7 +82,8 @@ bool Conjecture::IncrementAgent( AgentRecord *record )
 bool Conjecture::Increment()
 {   
     prepared = false;
-
+    current_pass = 1000;
+    
 	// If we've run out of choices, we're done.
 	if( last_record==NULL )
 	    return false;
@@ -87,7 +91,10 @@ bool Conjecture::Increment()
     bool ok = IncrementAgent( last_record );
     if( !ok )
     {		
-		last_record = last_record->previous_record;
+        AgentRecord *record_to_remove = last_record;
+		last_record = record_to_remove->previous_record;
+        record_to_remove->previous_record = nullptr;
+        record_to_remove->active = false;
 		return Increment();
 	}
  
@@ -102,38 +109,39 @@ void Conjecture::RegisterQuery( Agent *agent )
 	ASSERT( agent_records.IsExist(agent) )(*agent);
  	AgentRecord &record = agent_records[agent];
 
+	if( record.seen_in_current_pass )
+	{
+	    ASSERT( record.query->GetDecisionCount() == record.query->GetDecisions()->size() )(*agent)
+              (" %d!=%d %d", record.query->GetDecisionCount(), record.query->GetDecisions()->size(), record.query->GetChoices()->size());
+        return;
+	}
+
+	if( record.query->GetDecisionCount()==0 )
+	    return;	// TODO ideally, we'd determine this from a PatternQuery(), and not even have an agent record for it
+ 
     // Feed the decisions info in the blocks structure back to the conjecture
     AgentQuery::Ranges decisions;
     FOREACH( const DecidedQueryResult::Block &b, record.query->GetBlocks() )
         if( b.is_decision ) 
             decisions.push_back( b.decision );
     record.local_match = record.query->IsLocalMatch(); // always overwrite this field - if the local match fails it will be the last call here before Increment()
-
-	if( decisions.empty() )
-	    return;
-	
-	if( record.seen )
-	{
-	    ASSERT( *record.query->GetDecisions() == decisions )(*agent)
-              (" %d!=%d %d", record.query->GetDecisions()->size(), decisions.size(), record.query->GetChoices()->size());
-	}
-	else
-	{
-		if( record.query->GetDecisions()->empty() ) // new block or defunct
-		{
-			record.previous_record = last_record;	
-			last_record = &record;
-		}
-		record.seen = true;
-		*record.query->GetDecisions() = decisions; // important
-		while( record.query->GetChoices()->size() < record.query->GetDecisions()->size() )
-		{
-			int index = record.query->GetChoices()->size();
-			record.query->GetChoices()->push_back( (*record.query->GetDecisions())[index].begin );
-		}
-		ASSERT( record.query->GetChoices()->size()==record.query->GetDecisions()->size() )
-              ("%d != %d", record.query->GetChoices()->size(), record.query->GetDecisions()->size() );
-	}
+    
+    if( !record.active ) // new block or defunct
+    {
+        record.previous_record = last_record;	
+        record.active = true;
+        last_record = &record;
+    }
+    record.seen_in_current_pass = true;
+    *record.query->GetDecisions() = decisions; // important
+    while( record.query->GetChoices()->size() < record.query->GetDecisions()->size() )
+    {
+        int index = record.query->GetChoices()->size();
+        record.query->GetChoices()->push_back( (*record.query->GetDecisions())[index].begin );
+    }
+    
+    ASSERT( record.query->GetChoices()->size()==record.query->GetDecisions()->size() )
+          ("%d != %d", record.query->GetChoices()->size(), record.query->GetDecisions()->size() );
 }
 
 
@@ -169,6 +177,7 @@ shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
     
     if( !record.query )
     {
+        ASSERT( !record.active );
         record.query = make_shared<AgentQuery>();
     }
     
