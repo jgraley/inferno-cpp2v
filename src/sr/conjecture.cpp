@@ -29,7 +29,7 @@ bool Conjecture::IncrementAgent( AgentRecord *record )
     ASSERT( record );
     ASSERT( record->query );
 
-    FillMissingChoicesWithBegin(record);
+    FillMissingChoicesWithBegin(record->query);
     
 	if( record->query->GetDecisions()->empty() )
 	{
@@ -118,17 +118,16 @@ shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
         record.active = true;
     }
     
-    FillMissingChoicesWithBegin(&record);
-    return agent_records[agent].query;
+    shared_ptr<AgentQuery> query = agent_records[agent].query;
+    FillMissingChoicesWithBegin(query);
+    return query;
 }
 
 
-void Conjecture::FillMissingChoicesWithBegin( AgentRecord *record )
+void Conjecture::FillMissingChoicesWithBegin( shared_ptr<AgentQuery> query )
 {
-    ASSERT( record );
-    shared_ptr<AgentQuery> query = record->query;
     ASSERT( query );
-    
+       
     while( query->GetChoices()->size() < query->GetDecisions()->size() )
     {
         int index = query->GetChoices()->size();
@@ -136,7 +135,7 @@ void Conjecture::FillMissingChoicesWithBegin( AgentRecord *record )
     }
     
     ASSERT( query->GetChoices()->size()==query->GetDecisions()->size() )
-          ("%d != %d", query->GetChoices()->size(), query->GetDecisions()->size() );
+            ("%d != %d", query->GetChoices()->size(), query->GetDecisions()->size() );
 }
 
 };

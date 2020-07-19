@@ -38,7 +38,7 @@ public:
     shared_ptr<AgentQuery> GetQuery(Agent *agent);
 				   
 private:
-    void FillMissingChoicesWithBegin( AgentRecord *record );      
+    void FillMissingChoicesWithBegin( shared_ptr<AgentQuery> query );      
 	Map<Agent *, AgentRecord> agent_records;
 	AgentRecord *last_record;	
 };
