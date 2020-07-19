@@ -16,8 +16,6 @@ Conjecture::Conjecture(Set<Agent *> my_agents)
         record.active = false;
 		agent_records[a] = record;
 	}        
-	prepared = false;
-    current_pass = -1;
 }
 
 
@@ -26,52 +24,42 @@ Conjecture::~Conjecture()
 }
 
 
-void Conjecture::PrepareForDecidedCompare(int pass)
-{
-	ASSERT( this );
-
-	TRACE("Decision prepare\n");
-    
-	FOREACH( auto &p, agent_records )
-	{
-		AgentRecord &record = p.second;
-		record.seen_in_current_pass = false;    
-	}          
-	prepared = true;
-    current_pass = pass;
-}
-
-
 bool Conjecture::IncrementAgent( AgentRecord *record )
 {    
+    ASSERT( record );
     ASSERT( record->query );
-    ASSERT( record->query->GetChoices()->size() == record->query->GetDecisions()->size() );
+
+    FillMissingChoicesWithBegin(record);
+    
 	if( record->query->GetDecisions()->empty() )
 	{
         // this query is defunct
         record->query = nullptr;
 	    return false;  
 	}
-    const auto &back_decision = record->query->GetDecisions()->back();
-    ContainerInterface::iterator back_choice = record->query->GetChoices()->back();
+    
+    shared_ptr<AgentQuery> query = record->query;
+    ASSERT( query );
+    const auto &back_decision = query->GetDecisions()->back();
+    ContainerInterface::iterator back_choice = query->GetChoices()->back();
     
     // Inclusive case - we let the choice go to end but we won't go any further
     if( back_decision.inclusive && back_choice == back_decision.end )
     {
-        record->query->InvalidateBack();
+        query->InvalidateBack();
         return IncrementAgent( record );
 	}
 
 	if( back_choice != back_decision.end ) 
 	{
         ++back_choice; 
-        record->query->SetBackChoice( back_choice );
+        query->SetBackChoice( back_choice );
     }
 		
     // Exclusive case - we don't let the choice be end
     if( !back_decision.inclusive && back_choice == back_decision.end )
     {
-        record->query->InvalidateBack();
+        query->InvalidateBack();
         return IncrementAgent( record );
 	}
 		
@@ -81,9 +69,6 @@ bool Conjecture::IncrementAgent( AgentRecord *record )
 
 bool Conjecture::Increment()
 {   
-    prepared = false;
-    current_pass = 1000;
-    
 	// If we've run out of choices, we're done.
 	if( last_record==NULL )
 	    return false;
@@ -102,24 +87,6 @@ bool Conjecture::Increment()
 }
 
 
-void Conjecture::RegisterQuery( Agent *agent )
-{
-	ASSERT( prepared );
-                	
-	ASSERT( agent_records.IsExist(agent) )(*agent);
- 	AgentRecord &record = agent_records[agent];
-
-    while( record.query->GetChoices()->size() < record.query->GetDecisions()->size() )
-    {
-        int index = record.query->GetChoices()->size();
-        record.query->PushBackChoice( (*record.query->GetDecisions())[index].begin );
-    }
-    
-    ASSERT( record.query->GetChoices()->size()==record.query->GetDecisions()->size() )
-          ("%d != %d", record.query->GetChoices()->size(), record.query->GetDecisions()->size() );
-}
-
-
 AgentQuery::Choices Conjecture::GetChoices(Agent *agent)
 {            
     if( agent_records.IsExist(agent) )
@@ -133,23 +100,11 @@ AgentQuery::Choices Conjecture::GetChoices(Agent *agent)
 }
 
 
-AgentQuery::Ranges Conjecture::GetDecisions(Agent *agent)
-{            
-    if( agent_records.IsExist(agent) )
-    {
-        return *agent_records[agent].query->GetDecisions();
-	}
-	else
-	{
-		return Ranges(); // no decisions
-	}    
-}
-
 shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
 {
     ASSERT( agent_records.IsExist(agent) );
  	AgentRecord &record = agent_records[agent];
-    
+        
     if( !record.query )
     {
         ASSERT( !record.active );
@@ -163,7 +118,25 @@ shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
         record.active = true;
     }
     
+    FillMissingChoicesWithBegin(&record);
     return agent_records[agent].query;
+}
+
+
+void Conjecture::FillMissingChoicesWithBegin( AgentRecord *record )
+{
+    ASSERT( record );
+    shared_ptr<AgentQuery> query = record->query;
+    ASSERT( query );
+    
+    while( query->GetChoices()->size() < query->GetDecisions()->size() )
+    {
+        int index = query->GetChoices()->size();
+        query->PushBackChoice( (*query->GetDecisions())[index].begin );
+    }
+    
+    ASSERT( query->GetChoices()->size()==query->GetDecisions()->size() )
+          ("%d != %d", query->GetChoices()->size(), query->GetDecisions()->size() );
 }
 
 };

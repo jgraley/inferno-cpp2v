@@ -299,10 +299,7 @@ bool Engine::DecidedCompare( Agent *agent,
     TRACE(*agent)("?=")(**px)(" Gathering blocks\n");    
     agent->DecidedQuery( px, *query );
     TRACE(*agent)("?=")(**px)(" local match ")(query->IsLocalMatch())("\n");
-    
-    // Feed the decisions info in the blocks structure back to the conjecture
-    conj.RegisterQuery( agent );
-        
+            
     // Stop if the node itself mismatched (can be for any reason depending on agent)
     if(!query->IsLocalMatch())
         return false;
@@ -393,7 +390,6 @@ bool Engine::Compare( Agent *start_agent,
 
         // Do a two-pass matching process: first get the keys...
         {
-            conj.PrepareForDecidedCompare(0);
 			Set<Agent *> reached;
             r = DecidedCompare( start_agent, p_start_x, true, conj, local_keys, master_keys, reached );
         }
@@ -403,7 +399,6 @@ bool Engine::Compare( Agent *start_agent,
             // ...now restrict the search according to the couplings. This 
             // allows a coupling keyed late in the walk to restrict something 
             // seen earlier (eg in an abnormal context where keying is impossible)
-            conj.PrepareForDecidedCompare(1);
             Set<Agent *> reached;
             r = DecidedCompare( start_agent, p_start_x, false, conj, local_keys, master_keys, reached );
         }

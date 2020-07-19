@@ -24,28 +24,23 @@ public:
 		Agent *agent;
         shared_ptr<AgentQuery> query;
 		AgentRecord *previous_record;
-		bool seen_in_current_pass;
         bool active;
 	};
 
 public:
     Conjecture(Set<Agent *> my_agents);
     ~Conjecture();
-	void PrepareForDecidedCompare(int pass);    
-	bool IncrementAgent( AgentRecord *block );			                                     
+	bool IncrementAgent( AgentRecord *record );			                                     
     bool Increment(); // returns true for try again, false for give up				 
     				       
     // Standard interface for decided compare functions
-    void RegisterQuery( Agent *agent );      
     AgentQuery::Choices GetChoices(Agent *agent);
-    AgentQuery::Ranges GetDecisions(Agent *agent);
     shared_ptr<AgentQuery> GetQuery(Agent *agent);
 				   
 private:
+    void FillMissingChoicesWithBegin( AgentRecord *record );      
 	Map<Agent *, AgentRecord> agent_records;
 	AgentRecord *last_record;	
-	bool prepared;
-    int current_pass;
 };
 
 };
