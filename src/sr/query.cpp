@@ -135,6 +135,12 @@ void AgentQuery::SetBackChoice( ContainerInterface::iterator newc )
 }
 
 
+void AgentQuery::PushBackChoice( ContainerInterface::iterator newc )
+{
+    choices.push_back(newc);
+}
+
+
 void AgentQuery::SetDQR( const DecidedQueryResult &dqr )
 {
     DecidedQueryResult::operator=( dqr );

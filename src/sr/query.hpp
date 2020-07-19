@@ -112,10 +112,11 @@ protected:
 class AgentQuery : public DecidedQueryResult
 {
 public:   
-    Choices *GetChoices() { return &choices; }
-    Ranges *GetDecisions() { return &decisions; }
+    const Choices *GetChoices() { return &choices; }
+    const Ranges *GetDecisions() { return &decisions; }
     void InvalidateBack();
     void SetBackChoice( ContainerInterface::iterator newc );
+    void PushBackChoice( ContainerInterface::iterator newc );
     
 private: friend class Agent; 
     void SetDQR( const DecidedQueryResult &dqr );

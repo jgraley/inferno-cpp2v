@@ -52,7 +52,7 @@ bool Conjecture::IncrementAgent( AgentRecord *record )
         record->query = nullptr;
 	    return false;  
 	}
-    auto &back_decision = record->query->GetDecisions()->back();
+    const auto &back_decision = record->query->GetDecisions()->back();
     ContainerInterface::iterator back_choice = record->query->GetChoices()->back();
     
     // Inclusive case - we let the choice go to end but we won't go any further
@@ -125,7 +125,7 @@ void Conjecture::RegisterQuery( Agent *agent )
     while( record.query->GetChoices()->size() < record.query->GetDecisions()->size() )
     {
         int index = record.query->GetChoices()->size();
-        record.query->GetChoices()->push_back( (*record.query->GetDecisions())[index].begin );
+        record.query->PushBackChoice( (*record.query->GetDecisions())[index].begin );
     }
     
     ASSERT( record.query->GetChoices()->size()==record.query->GetDecisions()->size() )
