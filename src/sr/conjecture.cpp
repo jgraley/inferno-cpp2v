@@ -109,12 +109,6 @@ void Conjecture::RegisterQuery( Agent *agent )
 	ASSERT( agent_records.IsExist(agent) )(*agent);
  	AgentRecord &record = agent_records[agent];
 
-    if( !record.active ) // new block or defunct
-    {
-        record.previous_record = last_record;	
-        last_record = &record;
-        record.active = true;
-    }
     while( record.query->GetChoices()->size() < record.query->GetDecisions()->size() )
     {
         int index = record.query->GetChoices()->size();
@@ -160,6 +154,13 @@ shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
     {
         ASSERT( !record.active );
         record.query = make_shared<AgentQuery>();
+    }
+    
+    if( !record.active ) // new block or defunct
+    {
+        record.previous_record = last_record;	
+        last_record = &record;
+        record.active = true;
     }
     
     return agent_records[agent].query;
