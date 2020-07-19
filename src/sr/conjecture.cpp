@@ -109,13 +109,6 @@ void Conjecture::RegisterQuery( Agent *agent )
 	ASSERT( agent_records.IsExist(agent) )(*agent);
  	AgentRecord &record = agent_records[agent];
 
-	if( record.seen_in_current_pass )
-        return;
-    record.seen_in_current_pass = true;
-
-	if( record.query->GetDecisionCount()==0 )
-	    return;	// TODO ideally, we'd determine this from a PatternQuery(), and not even have an agent record for it
-     
     if( !record.active ) // new block or defunct
     {
         record.previous_record = last_record;	
