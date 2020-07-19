@@ -118,9 +118,7 @@ void Conjecture::RegisterQuery( Agent *agent )
 
 	if( record.query->GetDecisionCount()==0 )
 	    return;	// TODO ideally, we'd determine this from a PatternQuery(), and not even have an agent record for it
- 
-    record.local_match = record.query->IsLocalMatch(); // always overwrite this field - if the local match fails it will be the last call here before Increment()
-    
+     
     if( !record.active ) // new block or defunct
     {
         record.previous_record = last_record;	

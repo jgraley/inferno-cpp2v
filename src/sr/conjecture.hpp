@@ -25,7 +25,6 @@ public:
         shared_ptr<AgentQuery> query;
 		AgentRecord *previous_record;
 		bool seen_in_current_pass;
-		bool local_match;
         bool active;
 	};
 
@@ -37,7 +36,6 @@ public:
     bool Increment(); // returns true for try again, false for give up				 
     				       
     // Standard interface for decided compare functions
-    void RegisterDecisions( Agent *agent, bool local_match, Ranges decisions=Ranges() );      
     void RegisterQuery( Agent *agent );      
     AgentQuery::Choices GetChoices(Agent *agent);
     AgentQuery::Ranges GetDecisions(Agent *agent);
