@@ -117,3 +117,13 @@ bool SR::operator<(const SR::DecidedQueryResult::Block &l0, const SR::DecidedQue
     return false; // equal
 }
 
+void AgentQuery::SetDQR( const DecidedQueryResult &dqr )
+{
+    DecidedQueryResult::operator=( dqr );
+
+    // Feed the decisions info in the blocks structure back to the conjecture
+    decisions.clear();
+    for( const DecidedQueryResult::Block &b : dqr.GetBlocks() )
+        if( b.is_decision ) 
+            decisions.push_back( b.decision );
+}

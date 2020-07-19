@@ -101,7 +101,7 @@ public:
     bool IsLocalMatch() { return local_match; }
     int GetDecisionCount() const { return decision_count; }
     
-private:
+protected:
     list<Block> blocks; 
     shared_ptr<BooleanEvaluator> evaluator;
     bool local_match = true;
@@ -114,12 +114,8 @@ class AgentQuery : public DecidedQueryResult
 public:   
     Choices *GetChoices() { return &choices; }
     Ranges *GetDecisions() { return &decisions; }
-    
 private: friend class Agent; 
-    void SetDQR( const DecidedQueryResult &dqr )
-    {
-        DecidedQueryResult::operator=( dqr );
-    }
+    void SetDQR( const DecidedQueryResult &dqr );
 
     Choices choices;
     Ranges decisions;
