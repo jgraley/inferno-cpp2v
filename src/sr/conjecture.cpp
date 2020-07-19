@@ -53,26 +53,25 @@ bool Conjecture::IncrementAgent( AgentRecord *record )
 	    return false;  
 	}
     auto &back_decision = record->query->GetDecisions()->back();
-    auto &back_choice = record->query->GetChoices()->back();
+    ContainerInterface::iterator back_choice = record->query->GetChoices()->back();
     
-    // Inclusive case - we let the choice go to end() but we won't go any further
+    // Inclusive case - we let the choice go to end but we won't go any further
     if( back_decision.inclusive && back_choice == back_decision.end )
     {
-        record->query->GetChoices()->pop_back();
-        record->query->GetDecisions()->pop_back();
+        record->query->InvalidateBack();
         return IncrementAgent( record );
 	}
 
 	if( back_choice != back_decision.end ) 
 	{
         ++back_choice; 
+        record->query->SetBackChoice( back_choice );
     }
 		
     // Exclusive case - we don't let the choice be end
     if( !back_decision.inclusive && back_choice == back_decision.end )
     {
-        record->query->GetChoices()->pop_back();
-        record->query->GetDecisions()->pop_back();
+        record->query->InvalidateBack();
         return IncrementAgent( record );
 	}
 		

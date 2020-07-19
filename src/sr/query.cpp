@@ -117,6 +117,24 @@ bool SR::operator<(const SR::DecidedQueryResult::Block &l0, const SR::DecidedQue
     return false; // equal
 }
 
+
+void AgentQuery::InvalidateBack()
+{
+    // TODO may not need all thes preconditions
+    ASSERT( !choices.empty() );
+    ASSERT( !decisions.empty() );
+    ASSERT( choices.size() == decisions.size() ); 
+    choices.pop_back();
+    decisions.pop_back();    
+}
+
+
+void AgentQuery::SetBackChoice( ContainerInterface::iterator newc )
+{
+    choices.back() = newc;
+}
+
+
 void AgentQuery::SetDQR( const DecidedQueryResult &dqr )
 {
     DecidedQueryResult::operator=( dqr );
