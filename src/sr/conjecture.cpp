@@ -52,23 +52,24 @@ bool Conjecture::IncrementAgent( AgentRecord *record )
         record->query = nullptr;
 	    return false;  
 	}
-    auto &decision = (*record->query->GetDecisions())[record->query->GetChoices()->size()-1];
-
+    auto &back_decision = record->query->GetDecisions()->back();
+    auto &back_choice = record->query->GetChoices()->back();
+    
     // Inclusive case - we let the choice go to end() but we won't go any further
-    if( decision.inclusive && record->query->GetChoices()->back() == decision.end )
+    if( back_decision.inclusive && back_choice == back_decision.end )
     {
         record->query->GetChoices()->pop_back();
         record->query->GetDecisions()->pop_back();
         return IncrementAgent( record );
 	}
 
-	if( record->query->GetChoices()->back() != decision.end ) 
+	if( back_choice != back_decision.end ) 
 	{
-        ++(last_record->query->GetChoices()->back()); 
+        ++back_choice; 
     }
 		
     // Exclusive case - we don't let the choice be end
-    if( !decision.inclusive && record->query->GetChoices()->back() == decision.end )
+    if( !back_decision.inclusive && back_choice == back_decision.end )
     {
         record->query->GetChoices()->pop_back();
         record->query->GetDecisions()->pop_back();
@@ -110,11 +111,8 @@ void Conjecture::RegisterQuery( Agent *agent )
  	AgentRecord &record = agent_records[agent];
 
 	if( record.seen_in_current_pass )
-	{
-	    ASSERT( record.query->GetDecisionCount() == record.query->GetDecisions()->size() )(*agent)
-              (" %d!=%d %d", record.query->GetDecisionCount(), record.query->GetDecisions()->size(), record.query->GetChoices()->size());
         return;
-	}
+    record.seen_in_current_pass = true;
 
 	if( record.query->GetDecisionCount()==0 )
 	    return;	// TODO ideally, we'd determine this from a PatternQuery(), and not even have an agent record for it
@@ -122,10 +120,9 @@ void Conjecture::RegisterQuery( Agent *agent )
     if( !record.active ) // new block or defunct
     {
         record.previous_record = last_record;	
-        record.active = true;
         last_record = &record;
+        record.active = true;
     }
-    record.seen_in_current_pass = true;
     while( record.query->GetChoices()->size() < record.query->GetDecisions()->size() )
     {
         int index = record.query->GetChoices()->size();
