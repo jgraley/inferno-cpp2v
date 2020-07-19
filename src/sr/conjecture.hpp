@@ -24,13 +24,12 @@ public:
 		Agent *agent;
         shared_ptr<AgentQuery> query;
 		AgentRecord *previous_record;
-        bool active;
 	};
 
 public:
     Conjecture(Set<Agent *> my_agents);
     ~Conjecture();
-	bool IncrementAgent( AgentRecord *record );			                                     
+	bool IncrementAgent( shared_ptr<AgentQuery> query );			                                     
     bool Increment(); // returns true for try again, false for give up				 
     				       
     // Standard interface for decided compare functions

@@ -13,7 +13,6 @@ Conjecture::Conjecture(Set<Agent *> my_agents)
 		AgentRecord record;
 		record.agent = a;
         record.previous_record = nullptr;
-        record.active = false;
 		agent_records[a] = record;
 	}        
 }
@@ -24,22 +23,18 @@ Conjecture::~Conjecture()
 }
 
 
-bool Conjecture::IncrementAgent( AgentRecord *record )
+bool Conjecture::IncrementAgent( shared_ptr<AgentQuery> query )
 {    
-    ASSERT( record );
-    ASSERT( record->query );
+    ASSERT( query );
 
-    FillMissingChoicesWithBegin(record->query);
+    FillMissingChoicesWithBegin(query);
     
-	if( record->query->GetDecisions()->empty() )
+	if( query->GetDecisions()->empty() )
 	{
         // this query is defunct
-        record->query = nullptr;
 	    return false;  
 	}
     
-    shared_ptr<AgentQuery> query = record->query;
-    ASSERT( query );
     const auto &back_decision = query->GetDecisions()->back();
     ContainerInterface::iterator back_choice = query->GetChoices()->back();
     
@@ -47,7 +42,7 @@ bool Conjecture::IncrementAgent( AgentRecord *record )
     if( back_decision.inclusive && back_choice == back_decision.end )
     {
         query->InvalidateBack();
-        return IncrementAgent( record );
+        return IncrementAgent( query );
 	}
 
 	if( back_choice != back_decision.end ) 
@@ -60,7 +55,7 @@ bool Conjecture::IncrementAgent( AgentRecord *record )
     if( !back_decision.inclusive && back_choice == back_decision.end )
     {
         query->InvalidateBack();
-        return IncrementAgent( record );
+        return IncrementAgent( query );
 	}
 		
     return true;
@@ -73,13 +68,13 @@ bool Conjecture::Increment()
 	if( last_record==NULL )
 	    return false;
 	
-    bool ok = IncrementAgent( last_record );
+    bool ok = IncrementAgent( last_record->query );
     if( !ok )
     {		
         AgentRecord *record_to_remove = last_record;
+        record_to_remove->query = nullptr;
 		last_record = record_to_remove->previous_record;
         record_to_remove->previous_record = nullptr;
-        record_to_remove->active = false;
 		return Increment();
 	}
  
@@ -107,15 +102,9 @@ shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
         
     if( !record.query )
     {
-        ASSERT( !record.active );
         record.query = make_shared<AgentQuery>();
-    }
-    
-    if( !record.active ) // new block or defunct
-    {
         record.previous_record = last_record;	
         last_record = &record;
-        record.active = true;
     }
     
     shared_ptr<AgentQuery> query = agent_records[agent].query;
