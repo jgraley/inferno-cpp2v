@@ -20,6 +20,7 @@ public:
     {
         bool abnormal;
         Agent *agent;
+        void *whodat; // the gdb magic you require is eg "info line *b.whodat"
     };
         
     void clear()
@@ -30,7 +31,7 @@ public:
     void AddLink( bool abnormal, Agent *a );
     void AddEvaluator( shared_ptr<BooleanEvaluator> e );
     
-    list<Block> GetBlocks() const { return blocks; }
+    const list<Block> *GetBlocks() const { return &blocks; } // pointer returned because the blocks contain the local links
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
 
 private:
@@ -77,6 +78,7 @@ public:
         TreePtr<Node> local_x;
         bool is_decision;
         Range decision;
+        void *whodat; // the gdb magic you require is eg "info line *b.whodat"
     };
         
     void clear()
@@ -96,7 +98,7 @@ public:
                                               std::shared_ptr<ContainerInterface> container=nullptr );
     void AddLocalMatch( bool local_match );
                                                   
-    list<Block> GetBlocks() const { return blocks; }
+    const list<Block> *GetBlocks() const { return &blocks; } // pointer returned because the blocks contain the local links
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
     bool IsLocalMatch() { return local_match; }
     int GetDecisionCount() const { return decision_count; }

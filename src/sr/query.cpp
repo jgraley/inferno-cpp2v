@@ -11,6 +11,10 @@ void PatternQueryResult::AddLink( bool abnormal, Agent *a )
     Block b;
     b.abnormal = abnormal;
     b.agent = a;
+    
+    // For debugging
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    
     TRACE("Remembering block %d ", blocks.size())(*a)(abnormal?" abnormal":" normal")("\n");
     blocks.push_back( b );
 }
@@ -25,6 +29,10 @@ void DecidedQueryResult::AddLink( bool abnormal, Agent *a, const TreePtrInterfac
     b.px = px;
     b.local_x = TreePtr<Node>();
     b.is_decision = false;
+    
+    // For debugging
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    
     TRACE("Remembering block %d ", blocks.size())(*a)(" -> ")(**px)(abnormal?" abnormal":" normal")("\n");
     blocks.push_back( b );
 }
@@ -40,6 +48,10 @@ void DecidedQueryResult::AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x 
     b.px = NULL;    
     b.local_x = x;
     b.is_decision = false;
+    
+    // For debugging
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    
     TRACE("Remembering local block %d ", blocks.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
     blocks.push_back( b );
 }
@@ -90,6 +102,10 @@ ContainerInterface::iterator DecidedQueryResult::AddDecision( ContainerInterface
     b.is_link = false;
     b.is_decision = true;
     b.decision = r;    
+    
+    // For debugging
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    
     blocks.push_back( b );
     decision_count++;
         
@@ -147,7 +163,7 @@ void AgentQuery::SetDQR( const DecidedQueryResult &dqr )
 
     // Feed the decisions info in the blocks structure back to the conjecture
     decisions.clear();
-    for( const DecidedQueryResult::Block &b : dqr.GetBlocks() )
+    for( const DecidedQueryResult::Block &b : *dqr.GetBlocks() )
         if( b.is_decision ) 
             decisions.push_back( b.decision );
 }

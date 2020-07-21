@@ -11,7 +11,7 @@ using namespace SR;
 PatternQueryResult StandardAgent::PatternQuery() const
 {
     PatternQueryResult r;
-    vector< Itemiser::Element * > pattern_memb = Itemise();
+    const vector< Itemiser::Element * > pattern_memb = Itemise();
     FOREACH( Itemiser::Element *ie, pattern_memb )
     {
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )

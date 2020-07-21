@@ -185,7 +185,7 @@ bool Engine::CompareLinks( const AgentQuery &query,
     bool made_coupling_keys = false;  
     CouplingMap coupling_keys;
     int i=0;
-    FOREACH( const DecidedQueryResult::Block &b, query.GetBlocks() )
+    FOREACH( const DecidedQueryResult::Block &b, *query.GetBlocks() )
     {
         if( b.is_link ) // skip decisions    
 		{
@@ -255,7 +255,7 @@ bool Engine::CompareEvaluatorLinks( const AgentQuery &query,
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
     list<bool> compare_results;
-    FOREACH( const DecidedQueryResult::Block &b, query.GetBlocks() )
+    FOREACH( const DecidedQueryResult::Block &b, *query.GetBlocks() )
     {
         if( b.is_link ) // skikp decisions
 		{
@@ -295,11 +295,14 @@ bool Engine::DecidedCompare( Agent *agent,
     // Obtain the choices from the conjecture
     shared_ptr<AgentQuery> query = conj.GetQuery(agent);
 
-    // Run the compare implementation to get the blocks based on the choices
-    TRACE(*agent)("?=")(**px)(" Gathering blocks\n");    
-    agent->DecidedQuery( px, *query );
-    TRACE(*agent)("?=")(**px)(" local match ")(query->IsLocalMatch())("\n");
-            
+    if( can_key ) // only in first pass...
+    {
+        // Run the compare implementation to get the blocks based on the choices
+        TRACE(*agent)("?=")(**px)(" Gathering blocks\n");    
+        agent->DecidedQuery( px, *query );
+        TRACE(*agent)("?=")(**px)(" local match ")(query->IsLocalMatch())("\n");
+    }
+                
     // Stop if the node itself mismatched (can be for any reason depending on agent)
     if(!query->IsLocalMatch())
         return false;
@@ -318,7 +321,7 @@ bool Engine::DecidedCompare( Agent *agent,
 		TRACE(*agent)("?=")(**px)(" Comparing blocks\n");
         return CompareLinks( *query, can_key, conj, local_keys, master_keys, reached );
 	}
-    else if( !can_key )
+    else if( !can_key ) // only in second pass...
     {
 		TRACE(*agent)("?=")(**px)(" Comparing evaluator blocks\n");
         return CompareEvaluatorLinks( *query, conj, local_keys, master_keys, reached );
