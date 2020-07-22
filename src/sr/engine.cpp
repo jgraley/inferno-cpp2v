@@ -202,7 +202,7 @@ bool Engine::CompareLinks( const AgentQuery &query,
 				if( can_key )
 					continue; // Only check abnormals in restricting pass
 					
-				if( !made_coupling_keys ) // optimisation: only make them once, if needed at all.
+				if( !made_coupling_keys ) // optimisation: only make them once, if needed at all. See #43
 				{
 					coupling_keys = MapUnion( master_keys, local_keys ); 
 					made_coupling_keys = true;
@@ -250,7 +250,7 @@ bool Engine::CompareEvaluatorLinks( const AgentQuery &query,
 									Set<Agent *> &reached ) const
 {
 	ASSERT( query.GetEvaluator() );
-    CouplingMap coupling_keys = MapUnion( master_keys, local_keys );
+    CouplingMap coupling_keys = MapUnion( master_keys, local_keys ); // see #43
 
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
@@ -291,11 +291,15 @@ bool Engine::DecidedCompare( Agent *agent,
     INDENT(" ");
     ASSERT( px ); // Ref to target must not be NULL (i.e. corrupted ref)
     ASSERT( *px ); // Target must not be NULL
-            	
-    // Obtain the choices from the conjecture
+    ASSERT( !reached.IsExist(agent) ); // Only call this once per agent in a given pass
+
+    // Remember we reached this agent in this pass
+    reached.insert( agent );
+
+    // Obtain the query state from the conjecture
     shared_ptr<AgentQuery> query = conj.GetQuery(agent);
 
-    if( can_key && !reached.IsExist(agent) ) // only in first pass...
+    if( can_key ) // only in first pass...
     {
         // Run the compare implementation to get the blocks based on the choices
         TRACE(*agent)("?=")(**px)(" Gathering blocks\n");    
@@ -311,11 +315,8 @@ bool Engine::DecidedCompare( Agent *agent,
         if( !local_keys.IsExist(agent) )
             local_keys[agent] = *px;
     }
-    
-    // Remember we reached this agent in this pass
-    reached.insert( agent );
-      
-    // Use worker function to go through the blocks, special case if there is evaluator
+          
+    // Use worker functions to go through the blocks, special case if there is evaluator
     if( !query->GetEvaluator() )
     {
 		TRACE(*agent)("?=")(**px)(" Comparing blocks\n");
