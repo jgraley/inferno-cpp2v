@@ -217,14 +217,14 @@ bool Engine::CompareLinks( const AgentQuery &query,
 				SimpleCompare sc;
 				if( master_keys.IsExist(b.agent) )
 				{
-					if( !sc( *px, master_keys.At(b.agent) ) )
-						return false;
+                    if( can_key && !sc( *px, master_keys.At(b.agent) ) ) // only in first pass...
+                        return false;
 				}
 				// Check for a coupling match to one of our agents we reached earlier in this pass.
 				else if( reached.IsExist(b.agent) )
 				{
-					if( !sc( *px, local_keys.At(b.agent) ) )
-						return false;
+                    if( can_key && !sc( *px, local_keys.At(b.agent) ) ) // only in first pass...
+					    return false;
 				}
 				else
 				{
@@ -257,7 +257,7 @@ bool Engine::CompareEvaluatorLinks( const AgentQuery &query,
     list<bool> compare_results;
     FOREACH( const DecidedQueryResult::Block &b, *query.GetBlocks() )
     {
-        if( b.is_link ) // skikp decisions
+        if( b.is_link ) // skip decisions
 		{
 			TRACE("Comparing block %d\n", i);
 			ASSERT( b.abnormal )("When an evaluator is used, all blocks must be into abnormal contexts");
@@ -295,23 +295,23 @@ bool Engine::DecidedCompare( Agent *agent,
     // Obtain the choices from the conjecture
     shared_ptr<AgentQuery> query = conj.GetQuery(agent);
 
-    if( can_key ) // only in first pass...
+    if( can_key && !reached.IsExist(agent) ) // only in first pass...
     {
         // Run the compare implementation to get the blocks based on the choices
         TRACE(*agent)("?=")(**px)(" Gathering blocks\n");    
         agent->DecidedQuery( px, *query );
         TRACE(*agent)("?=")(**px)(" local match ")(query->IsLocalMatch())("\n");
-    }
                 
-    // Stop if the node itself mismatched (can be for any reason depending on agent)
-    if(!query->IsLocalMatch())
-        return false;
+        // Stop if the node itself mismatched (can be for any reason depending on agent)
+        if(!query->IsLocalMatch())
+            return false;
 
-    // Remember the coupling before recursing, as we can hit the same node 
-    // (eg identifier) and we need to have coupled it. 
-    if( can_key && !local_keys.IsExist(agent) )
-        local_keys[agent] = *px;
-        
+        // Remember the coupling before recursing, as we can hit the same node 
+        // (eg identifier) and we need to have coupled it. 
+        if( !local_keys.IsExist(agent) )
+            local_keys[agent] = *px;
+    }
+    
     // Remember we reached this agent in this pass
     reached.insert( agent );
       
