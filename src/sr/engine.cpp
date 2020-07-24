@@ -217,13 +217,13 @@ bool Engine::CompareLinks( const AgentQuery &query,
 				SimpleCompare sc;
 				if( master_keys.IsExist(b.agent) )
 				{
-                    if( can_key && !sc( *px, master_keys.At(b.agent) ) ) // only in first pass...
+                    if( can_key && !sc( *px, master_keys.At(b.agent) ) ) // only in first pass
                         return false;
 				}
 				// Check for a coupling match to one of our agents we reached earlier in this pass.
 				else if( reached.IsExist(b.agent) )
 				{
-                    if( can_key && !sc( *px, local_keys.At(b.agent) ) ) // only in first pass...
+                    if( can_key && !sc( *px, local_keys.At(b.agent) ) ) // only in first pass
 					    return false;
 				}
 				else

@@ -73,8 +73,7 @@ struct SharedPtrInterface : virtual SUB_BASE, public Traceable
 };
 
 template<typename VALUE_TYPE, typename SUB_BASE, typename VALUE_INTERFACE>
-struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared_ptr<VALUE_TYPE>,
-                   SerialNumber
+struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared_ptr<VALUE_TYPE>
 {
     inline SharedPtr() {}
 
@@ -187,14 +186,14 @@ struct SharedPtr : virtual SharedPtrInterface<SUB_BASE, VALUE_INTERFACE>, shared
         ASSERTFAIL("MakeValueArchitype() not implemented for this SharedPtr\n");
     }
 
-    inline bool operator<( const SharedPtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE> &other )
-    {
-        return SerialNumber::operator<(other);
-    }    
-    string GetAddr() const
-    {
-        return SerialNumber::GetAddr(); // avoiding the need for virtual inheritance
-    }
+    //inline bool operator<( const SharedPtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE> &other )
+    //{
+    //    return SerialNumber::operator<(other);
+    //}    
+    //string GetAddr() const
+    //{
+    //    return SerialNumber::GetAddr(); // avoiding the need for virtual inheritance
+   // }
 };
 
 // Similar signature to boost shared_ptr operator==, and we restrict the pointers
