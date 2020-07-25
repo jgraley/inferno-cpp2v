@@ -222,3 +222,9 @@ ContainerInterface::iterator AgentQuery::AddNextOldDecision()
 {
     return AddDecision( GetNextOldDecision() );
 }
+
+
+void AgentQuery::Reset()
+{
+    DecidedQueryResult::clear();
+}

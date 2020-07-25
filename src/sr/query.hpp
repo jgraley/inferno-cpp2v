@@ -131,6 +131,7 @@ public:
     bool IsAlreadyGotNextOldDecision();
     const Range &GetNextOldDecision();
     ContainerInterface::iterator AddNextOldDecision();
+    void Reset();
     
 private:
     Choices choices;

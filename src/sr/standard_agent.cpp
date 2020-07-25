@@ -50,7 +50,7 @@ void StandardAgent::DecidedQuery( AgentQuery &query,
                                   const TreePtrInterface *px ) const
 {
     INDENT(".");
-    query.DecidedQueryResult::clear();
+    query.Reset();
 
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )        
@@ -244,7 +244,7 @@ void StandardAgent::DecidedQueryCollection( AgentQuery &query,
                 // Decision already in conjecture and valid. 
                 const Conjecture::Range &old_decision = query.GetNextOldDecision();
                 
-                // Now take a copy.
+                // Now take a copy. Would like range-for here #54
                 xremaining.clear();
                 for( ContainerInterface::iterator it=old_decision.container->begin();
                      it != old_decision.container->end();
