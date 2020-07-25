@@ -50,6 +50,7 @@ void StandardAgent::DecidedQuery( AgentQuery &query,
                                   const TreePtrInterface *px ) const
 {
     INDENT(".");
+    query.DecidedQueryResult::clear();
     DecidedQueryResult r;
     const AgentQuery::Choices &choices = *(query.GetChoices());
     const AgentQuery::Ranges &decisions = *(query.GetDecisions());
