@@ -51,15 +51,15 @@ void StandardAgent::DecidedQuery( AgentQuery &query,
 {
     INDENT(".");
     query.DecidedQueryResult::clear();
-    DecidedQueryResult r;
+    //(DecidedQueryResult &)query = DecidedQueryResult();
+    //DecidedQueryResult &r = (DecidedQueryResult &)query;
     const AgentQuery::Choices &choices = *(query.GetChoices());
     const AgentQuery::Ranges &decisions = *(query.GetDecisions());
 
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )        
     {
-        r.AddLocalMatch(false);  
-        query.SetDQR( r );
+        query.AddLocalMatch(false);  
         return;
     }
 
@@ -79,14 +79,14 @@ void StandardAgent::DecidedQuery( AgentQuery &query,
             SequenceInterface *p_x_seq = dynamic_cast<SequenceInterface *>(x_memb[i]);
             ASSERT( p_x_seq )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Sequence, x %d elts, pattern %d elts\n", i, p_x_seq->size(), pattern_seq->size() );
-            DecidedQuerySequence( r, p_x_seq, *pattern_seq, choices );
+            DecidedQuerySequence( query, p_x_seq, *pattern_seq );
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(pattern_memb[i]) )
         {
             CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            DecidedQueryCollection( r, p_x_col, *pattern_col, choices, decisions );
+            DecidedQueryCollection( query, p_x_col, *pattern_col );
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -96,7 +96,7 @@ void StandardAgent::DecidedQuery( AgentQuery &query,
                 ASSERT( p_x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
                 Agent *ap = Agent::AsAgent(*pattern_ptr);
-                r.AddLink(false, ap, p_x_ptr);
+                query.AddLink(false, ap, p_x_ptr);
             }
         }
         else
@@ -104,20 +104,19 @@ void StandardAgent::DecidedQuery( AgentQuery &query,
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
         }
 
-        if( !r.IsLocalMatch() )
+        if( !query.IsLocalMatch() )
         {
-            query.SetDQR( r );
+            query.PopulateDecisions();
             return;
         }
     }
-    query.SetDQR( r );
+    query.PopulateDecisions();
     return;
 }
 
-void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
+void StandardAgent::DecidedQuerySequence( AgentQuery &query,
                                           SequenceInterface *px,
-		                                  SequenceInterface &pattern,
-                                          const AgentQuery::Choices &choices ) const
+		                                  SequenceInterface &pattern ) const
 {
     INDENT(" ");
 	ContainerInterface::iterator pit, npit, nnpit, nxit;
@@ -141,7 +140,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
     }
     if( px->size() < pattern_num_non_star )
     {
-        r.AddLocalMatch(false);   // TODO break to get the final trace?
+        query.AddLocalMatch(false);   // TODO break to get the final trace?
         return;
     }
     ContainerInterface::iterator xit_star_limit = px->end();            
@@ -173,7 +172,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
                 // Decide how many elements the current * should match, using conjecture. The star's range
                 // ends at the chosen element. Be inclusive because what we really want is a range.
                 ASSERT( xit == px->end() || *xit );
-                xit_star_end = r.AddDecision( xit, xit_star_limit, true, choices );
+                xit_star_end = query.AddDecision( xit, xit_star_limit, true, *(query.GetChoices()) );
             }
             
             // Star matched [xit, xit_star_end) i.e. xit-xit_begin_star elements
@@ -181,7 +180,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern restriction
-            r.AddLocalLink( false, psa, xss );
+            query.AddLocalLink( false, psa, xss );
             
             // Resume at the first element after the matched range
             xit = xit_star_end;
@@ -191,7 +190,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
             if( xit == px->end() )
                 break;
        
-            r.AddLink( false, pea, &*xit );
+            query.AddLink( false, pea, &*xit );
             ++xit;
             
             // Every non-star pattern node we pass means there's one fewer remaining
@@ -203,19 +202,17 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
 
     // If we finished the job and pattern and subject are still aligned, then it was a match
 	TRACE("Finishing compare sequence %d %d\n", xit==px->end(), pit==pattern.end() );
-    r.AddLocalMatch( xit==px->end() && pit==pattern.end() );
-    if( r.IsLocalMatch() )
+    query.AddLocalMatch( xit==px->end() && pit==pattern.end() );
+    if( query.IsLocalMatch() )
     {
         ASSERT( p_remaining==0 );
 	}
 }
 
 
-void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
+void StandardAgent::DecidedQueryCollection( AgentQuery &query,
                                             CollectionInterface *px,
-		 					                CollectionInterface &pattern,
-                                            const AgentQuery::Choices &choices,
-                                            const AgentQuery::Ranges &decisions ) const
+		 					                CollectionInterface &pattern ) const
 {
     INDENT(" ");
     
@@ -246,21 +243,21 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
 	    	// Report a block for the chosen node
             ContainerInterface::iterator xit;
 
-            int cd_index = r.GetDecisionCount();
-            if( cd_index >= decisions.size() )
+            int cd_index = query.GetDecisionCount();
+            if( cd_index >= query.GetDecisions()->size() )
             {
                 // New decision: take a copy of xremaining and pass it to the DecidedQueryResult.
                 // Use a shared_ptr<> so that the exact same Collection<Node> will come back to us 
                 // in future calls.
                 auto x_decision = make_shared< Collection<Node> >();
                 *x_decision = xremaining;
-                xit = r.AddDecision( x_decision->begin(), x_decision->end(), false, choices, x_decision );
+                xit = query.AddDecision( x_decision->begin(), x_decision->end(), false, *(query.GetChoices()), x_decision );
             }
             else
             {
-                const Conjecture::Range &ext_decision = decisions[cd_index];
+                const Conjecture::Range &ext_decision = (*(query.GetDecisions()))[cd_index];
                 // Decision already in conjecture and valid. Immediately re-submit the exact same decision.
-                xit = r.AddDecision( ext_decision.begin, ext_decision.end, false, choices, ext_decision.container );
+                xit = query.AddDecision( ext_decision.begin, ext_decision.end, false, *(query.GetChoices()), ext_decision.container );
                 // Now take a copy.
                 xremaining.clear();
                 for( ContainerInterface::iterator it=ext_decision.container->begin();
@@ -268,7 +265,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
                      ++it )
                     xremaining.push_back(*it);
             }
-            r.AddLocalLink( false, pia, *xit );
+            query.AddLocalLink( false, pia, *xit );
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.
@@ -281,7 +278,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
 	    else // ran out of x elements - local mismatch
         {
             TRACE("mismatch - x ran out\n");
-            r.AddLocalMatch(false);
+            query.AddLocalMatch(false);
             return;
         }
     }
@@ -292,7 +289,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
     if( !xremaining.empty() && !star )
     {
         TRACE("mismatch - x left over\n");
-        r.AddLocalMatch(false); // there were elements left over and no star to match them against
+        query.AddLocalMatch(false); // there were elements left over and no star to match them against
         return;
     }
 
@@ -303,7 +300,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryResult &r,
     {
         TreePtr<StarAgent::SubCollection> x_subcollection( new StarAgent::SubCollection );
         *x_subcollection = xremaining;
-        r.AddLocalLink( false, star, x_subcollection );
+        query.AddLocalLink( false, star, x_subcollection );
     }
     TRACE("matched\n");
 }

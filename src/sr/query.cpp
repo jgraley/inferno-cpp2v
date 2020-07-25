@@ -160,10 +160,15 @@ void AgentQuery::PushBackChoice( ContainerInterface::iterator newc )
 void AgentQuery::SetDQR( const DecidedQueryResult &dqr )
 {
     DecidedQueryResult::operator=( dqr );
+    PopulateDecisions();
+}
 
+
+void AgentQuery::PopulateDecisions()
+{
     // Feed the decisions info in the blocks structure back to the conjecture
     decisions.clear();
-    for( const DecidedQueryResult::Block &b : *dqr.GetBlocks() )
+    for( const DecidedQueryResult::Block &b : *GetBlocks() )
         if( b.is_decision ) 
             decisions.push_back( b.decision );
 }

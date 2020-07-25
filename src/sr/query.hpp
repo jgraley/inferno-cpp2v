@@ -120,6 +120,7 @@ public:
     void SetBackChoice( ContainerInterface::iterator newc );
     void PushBackChoice( ContainerInterface::iterator newc );    
     void SetDQR( const DecidedQueryResult &dqr );
+    void PopulateDecisions();
 
 private:
     Choices choices;

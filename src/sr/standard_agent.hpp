@@ -24,15 +24,12 @@ public:
                                const TreePtrInterface *px ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
-    void DecidedQuerySequence( DecidedQueryResult &r,
+    void DecidedQuerySequence( AgentQuery &query,
                                SequenceInterface *px,
-    	                       SequenceInterface &pattern,
-                               const AgentQuery::Choices &choices ) const;
-    void DecidedQueryCollection( DecidedQueryResult &r,
+    	                       SequenceInterface &pattern ) const;
+    void DecidedQueryCollection( AgentQuery &query,
                                  CollectionInterface *px,
-    		                     CollectionInterface &pattern,
-                                 const AgentQuery::Choices &choices,
-                                 const AgentQuery::Ranges &decisions ) const;
+    		                     CollectionInterface &pattern ) const;
 public:
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
