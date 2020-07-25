@@ -28,7 +28,6 @@ void AgentQuery::AddLink( bool abnormal, Agent *a, const TreePtrInterface *px )
     b.agent = a;
     b.px = px;
     b.local_x = TreePtr<Node>();
-    b.is_decision = false;
     
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
@@ -47,7 +46,6 @@ void AgentQuery::AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
     b.agent = a;
     b.px = NULL;    
     b.local_x = x;
-    b.is_decision = false;
     
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
@@ -72,43 +70,37 @@ void AgentQuery::AddEvaluator( shared_ptr<BooleanEvaluator> e )
 
 
 ContainerInterface::iterator AgentQuery::AddDecision( ContainerInterface::iterator begin,
-                                                              ContainerInterface::iterator end,
-                                                              bool inclusive,
-                                                              const Choices &choices,
-                                                              shared_ptr<ContainerInterface> container )
+                                                      ContainerInterface::iterator end,
+                                                      bool inclusive,
+                                                      const Choices &choices,
+                                                      shared_ptr<ContainerInterface> container )
 {
-    ASSERT( inclusive || begin != end )("no empty decisions");
-    ContainerInterface::iterator it;
-    if( decision_count >= choices.size() )
-    {
-        it = begin; // No choice was given to us so assume first one
-        ASSERT( it == end || *it );
-    }
-    else
-    {
-        it = choices[decision_count]; // Use and consume the choice that was given to us
-        ASSERT( inclusive || it != end );
-        ASSERT( it == end || *it );
-    }    
-    
-    ASSERT(begin==end || *begin);
-    
     Range r;
     r.begin = begin;
     r.end = end;
     r.inclusive = inclusive;
     r.container = container;
-    Block b;
-    b.is_link = false;
-    b.is_decision = true;
-    b.decision = r;    
-    
-    // For debugging
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
-    
-    blocks.push_back( b );
-    decision_count++;
-        
+
+    ASSERT( r.inclusive || r.begin != r.end )("no empty decisions");
+    ContainerInterface::iterator it;
+    if( next_decision == decisions.end() ) // run out of decisions?
+    {
+        it = r.begin; // No choice was given to us so assume first one
+        ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
+        decisions.push_back(r); // this will be a new decision
+        next_decision = decisions.end(); // beware iterator invalidation
+    }
+    else
+    {
+        ASSERT( next_choice != choices.end() );
+        it = *next_choice; // Use the choice that was given to us
+        ASSERT( r.inclusive || it != r.end )("A choice can only be end if the decision is inclusive");
+        ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
+        *next_decision = r; // overwrite TODO they should be identical!
+        ++next_decision; 
+        ++next_choice;
+    }    
+            
     return it;
 }
                                                                     
@@ -159,11 +151,6 @@ void AgentQuery::PushBackChoice( ContainerInterface::iterator newc )
 
 void AgentQuery::PopulateDecisions()
 {
-    // Feed the decisions info in the blocks structure back to the conjecture
-    decisions.clear();
-    for( const Block &b : *GetBlocks() )
-        if( b.is_decision ) 
-            decisions.push_back( b.decision );
 }
 
 
@@ -176,9 +163,9 @@ ContainerInterface::iterator AgentQuery::AddDecision( ContainerInterface::iterat
 }                                                      
 
 
-ContainerInterface::iterator AgentQuery::AddDecision( const Range &d )
+ContainerInterface::iterator AgentQuery::AddDecision( const Range &r )
 {
-    return AddDecision( d.begin, d.end, d.inclusive, d.container );
+    return AddDecision( r.begin, r.end, r.inclusive, r.container );
 }                                                      
 
 
@@ -200,14 +187,14 @@ ContainerInterface::iterator AgentQuery::AddDecision( const ContainerInterface &
 
 bool AgentQuery::IsAlreadyGotNextOldDecision()
 {
-    return decision_count < decisions.size();
+    return next_decision != decisions.end();
 }
 
 
 const Conjecture::Range &AgentQuery::GetNextOldDecision()
 {
     ASSERT( IsAlreadyGotNextOldDecision() );
-    return decisions[decision_count];
+    return *next_decision;
 }
 
 
@@ -220,6 +207,7 @@ ContainerInterface::iterator AgentQuery::AddNextOldDecision()
 void AgentQuery::Reset()
 {
     blocks.clear();
-    decision_count = 0;
-    evaluator = shared_ptr<BooleanEvaluator>();        
+    evaluator = shared_ptr<BooleanEvaluator>();    
+    next_decision = decisions.begin();  
+    next_choice = choices.begin();  
 }

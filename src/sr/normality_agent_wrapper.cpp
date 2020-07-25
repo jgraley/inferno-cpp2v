@@ -128,7 +128,6 @@ void NormalityAgentWrapper::DecidedQuery( AgentQuery &wrapper_query,
     {
 		if( b.is_link && b.abnormal )
 		{
-			ASSERT( !b.is_decision ); // Don't know what to do with decision joined to abnormal link TODO decide
 			al = *alit;
 			++alit;
 			

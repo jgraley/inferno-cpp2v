@@ -55,10 +55,10 @@ public:
 		}
     };
     
-    // There is a "random access" in IncrementAgent()
+    // There is a "random access" in Conjecture::IncrementAgent() not sure if true any more
     typedef vector<Range> Ranges;
 
-    // There is a "random access" in AddDecision()
+    // There is a "random access" in AddDecision() not sure if true any more
     typedef vector<ContainerInterface::iterator> Choices; 
 
     struct Block 
@@ -76,11 +76,14 @@ public:
         Agent *agent;
         const TreePtrInterface *px;
         TreePtr<Node> local_x;
-        bool is_decision;
-        Range decision;
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
     };
-
+    
+    AgentQuery() :
+        next_decision( decisions.begin() ), // will be end()
+        next_choice( choices.begin() ) // will be end()
+    {
+    }
     void AddLink( bool abnormal, Agent *a, const TreePtrInterface *px ); 
     void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ); 
     void AddEvaluator( shared_ptr<BooleanEvaluator> e ); 
@@ -94,7 +97,6 @@ public:
     const list<Block> *GetBlocks() const { return &blocks; } // pointer returned because the blocks contain the local links
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
     bool IsLocalMatch() { return local_match; }
-    int GetDecisionCount() const { return decision_count; }
       
     const Choices *GetChoices() { return &choices; }
     const Ranges *GetDecisions() { return &decisions; }
@@ -118,9 +120,11 @@ private:
     list<Block> blocks; 
     shared_ptr<BooleanEvaluator> evaluator;
     bool local_match = true;
-    int decision_count = 0;
     Choices choices;
     Ranges decisions;
+    
+    Ranges::iterator next_decision;
+    Choices::iterator next_choice;
 };
 
 
