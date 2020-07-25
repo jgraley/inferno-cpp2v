@@ -172,3 +172,53 @@ void AgentQuery::PopulateDecisions()
         if( b.is_decision ) 
             decisions.push_back( b.decision );
 }
+
+
+ContainerInterface::iterator AgentQuery::AddDecision( ContainerInterface::iterator begin,
+                                                      ContainerInterface::iterator end,
+                                                      bool inclusive,
+                                                      std::shared_ptr<ContainerInterface> container )
+{
+    return DecidedQueryResult::AddDecision( begin, end, inclusive, choices, container );
+}                                                      
+
+
+ContainerInterface::iterator AgentQuery::AddDecision( const Range &d )
+{
+    return AddDecision( d.begin, d.end, d.inclusive, d.container );
+}                                                      
+
+
+ContainerInterface::iterator AgentQuery::AddDecision( shared_ptr<ContainerInterface> container, bool inclusive )
+{
+    ASSERT( container );
+    return AddDecision( container->begin(), container->end(), inclusive, container );
+}                                                      
+
+
+/* Need to fix OOStd to permit the assignment  #53
+ContainerInterface::iterator AgentQuery::AddDecision( const ContainerInterface &container, bool inclusive )
+{
+    auto container_for_query = make_shared< Collection<Node> >();
+    *container_for_query = container;
+    return AddDecision( container_for_query, inclusive );
+}                                                      
+*/
+
+bool AgentQuery::IsAlreadyGotNextOldDecision()
+{
+    return decision_count < decisions.size();
+}
+
+
+const Conjecture::Range &AgentQuery::GetNextOldDecision()
+{
+    ASSERT( IsAlreadyGotNextOldDecision() );
+    return decisions[decision_count];
+}
+
+
+ContainerInterface::iterator AgentQuery::AddNextOldDecision()
+{
+    return AddDecision( GetNextOldDecision() );
+}

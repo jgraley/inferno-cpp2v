@@ -121,7 +121,17 @@ public:
     void PushBackChoice( ContainerInterface::iterator newc );    
     void SetDQR( const DecidedQueryResult &dqr );
     void PopulateDecisions();
-
+    ContainerInterface::iterator AddDecision( ContainerInterface::iterator begin,
+                                              ContainerInterface::iterator end,
+                                              bool inclusive,
+                                              std::shared_ptr<ContainerInterface> container=nullptr );
+    ContainerInterface::iterator AddDecision( const Range &d );
+    ContainerInterface::iterator AddDecision( std::shared_ptr<ContainerInterface> container, bool inclusive );
+    //ContainerInterface::iterator AddDecision( const ContainerInterface &container, bool inclusive );
+    bool IsAlreadyGotNextOldDecision();
+    const Range &GetNextOldDecision();
+    ContainerInterface::iterator AddNextOldDecision();
+    
 private:
     Choices choices;
     Ranges decisions;

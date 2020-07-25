@@ -51,10 +51,6 @@ void StandardAgent::DecidedQuery( AgentQuery &query,
 {
     INDENT(".");
     query.DecidedQueryResult::clear();
-    //(DecidedQueryResult &)query = DecidedQueryResult();
-    //DecidedQueryResult &r = (DecidedQueryResult &)query;
-    const AgentQuery::Choices &choices = *(query.GetChoices());
-    const AgentQuery::Ranges &decisions = *(query.GetDecisions());
 
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )        
@@ -172,7 +168,7 @@ void StandardAgent::DecidedQuerySequence( AgentQuery &query,
                 // Decide how many elements the current * should match, using conjecture. The star's range
                 // ends at the chosen element. Be inclusive because what we really want is a range.
                 ASSERT( xit == px->end() || *xit );
-                xit_star_end = query.AddDecision( xit, xit_star_limit, true, *(query.GetChoices()) );
+                xit_star_end = query.AddDecision( xit, xit_star_limit, true );
             }
             
             // Star matched [xit, xit_star_end) i.e. xit-xit_begin_star elements
@@ -243,27 +239,29 @@ void StandardAgent::DecidedQueryCollection( AgentQuery &query,
 	    	// Report a block for the chosen node
             ContainerInterface::iterator xit;
 
-            int cd_index = query.GetDecisionCount();
-            if( cd_index >= query.GetDecisions()->size() )
+            if( query.IsAlreadyGotNextOldDecision() )
+            {
+                // Decision already in conjecture and valid. 
+                const Conjecture::Range &old_decision = query.GetNextOldDecision();
+                
+                // Now take a copy.
+                xremaining.clear();
+                for( ContainerInterface::iterator it=old_decision.container->begin();
+                     it != old_decision.container->end();
+                     ++it )
+                    xremaining.push_back(*it);
+                    
+                // re-submit the exact same decision.
+                xit = query.AddNextOldDecision();
+            }
+            else
             {
                 // New decision: take a copy of xremaining and pass it to the DecidedQueryResult.
                 // Use a shared_ptr<> so that the exact same Collection<Node> will come back to us 
                 // in future calls.
                 auto x_decision = make_shared< Collection<Node> >();
                 *x_decision = xremaining;
-                xit = query.AddDecision( x_decision->begin(), x_decision->end(), false, *(query.GetChoices()), x_decision );
-            }
-            else
-            {
-                const Conjecture::Range &ext_decision = (*(query.GetDecisions()))[cd_index];
-                // Decision already in conjecture and valid. Immediately re-submit the exact same decision.
-                xit = query.AddDecision( ext_decision.begin, ext_decision.end, false, *(query.GetChoices()), ext_decision.container );
-                // Now take a copy.
-                xremaining.clear();
-                for( ContainerInterface::iterator it=ext_decision.container->begin();
-                     it != ext_decision.container->end();
-                     ++it )
-                    xremaining.push_back(*it);
+                xit = query.AddDecision( x_decision, false );
             }
             query.AddLocalLink( false, pia, *xit );
 
