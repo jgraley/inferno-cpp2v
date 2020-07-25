@@ -101,11 +101,11 @@ PatternQueryResult NestedAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult NestedAgent::DecidedQuery( const TreePtrInterface *px, 
-                                              const AgentQuery::Choices &choices ) const                          
+void NestedAgent::DecidedQuery( AgentQuery &query,
+                                const TreePtrInterface *px ) const                          
 {
     INDENT("N");
-    DecidedQueryResult r;
+    query.Reset();
     
     string s;
     // Keep advancing until we get NULL, and remember the last non-null position
@@ -118,16 +118,14 @@ DecidedQueryResult NestedAgent::DecidedQuery( const TreePtrInterface *px,
             
     // Compare the last position with the terminus pattern
     // TODO I don't think a local link should be needed here?
-    r.AddLocalLink( false, AsAgent(terminus), xt );
+    query.AddLocalLink( false, AsAgent(terminus), xt );
     
     // Compare the depth with the supplied pattern if present
     if( depth )
     {
         TreePtr<Node> cur_depth( new SpecificString(s) );
-        r.AddLocalLink( false, AsAgent(depth), cur_depth );
+        query.AddLocalLink( false, AsAgent(depth), cur_depth );
     }
-    
-    return r;    
 }    
 
 
@@ -181,13 +179,13 @@ TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode )
 
 //---------------------------------- IsLabelReached ------------------------------------    
 
-DecidedQueryResult IsLabelReached::DecidedQuery( const TreePtrInterface *pxx, 
-                                                 const AgentQuery::Choices &choices ) const
+void IsLabelReached::DecidedQuery( AgentQuery &query,
+                                   const TreePtrInterface *pxx ) const
 {
 	INDENT("L");
 	ASSERT( pattern );
     ASSERT(pxx);
-    DecidedQueryResult r;
+    query.Reset();
 	
 	// TODO Flushable mechanism removed - flush every time for safety (if
 	// this code ever gets used again). This may be slow!
@@ -207,9 +205,8 @@ DecidedQueryResult IsLabelReached::DecidedQuery( const TreePtrInterface *pxx,
 	TRACE("Can label id ")(*x)(" reach expression ")(*y)("?\n");
 
 	Set< TreePtr<InstanceIdentifier> > uf;        
-	r.AddLocalMatch( CanReachExpr(&uf, x, y) );
-	TRACE("I reakon ")(*x)(r.IsLocalMatch()?" does ":" does not ")("reach ")(*y)("\n"); 
-	return r;
+	query.AddLocalMatch( CanReachExpr(&uf, x, y) );
+	TRACE("I reakon ")(*x)(query.IsLocalMatch()?" does ":" does not ")("reach ")(*y)("\n"); 
 }                 
 
 

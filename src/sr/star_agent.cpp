@@ -15,13 +15,13 @@ PatternQueryResult StarAgent::PatternQuery() const
 
 // NOTE this is a DecidedCompare() not DecidedCompareImpl() so some of the AgentCommon 
 // stuff has to be done explicitly in here.
-DecidedQueryResult StarAgent::DecidedQuery( const TreePtrInterface *px, 
-                                            const AgentQuery::Choices &choices ) const
+void StarAgent::DecidedQuery( AgentQuery &query,
+                              const TreePtrInterface *px ) const
 {
     INDENT("*");
     ASSERT(px);
     ASSERT(*px);
-    DecidedQueryResult r;
+    query.Reset();
                 
     ContainerInterface *xc = dynamic_cast<ContainerInterface *>(px->get());
     ASSERT(xc)("Nodes passed to StarAgent::DecidedCompare() must implement ContainerInterface, since * matches multiple things");
@@ -32,8 +32,8 @@ DecidedQueryResult StarAgent::DecidedQuery( const TreePtrInterface *px,
     {
         if( !IsLocalMatch( xe.get()) )
         {
-            r.AddLocalMatch(false);
-            return r;
+            query.AddLocalMatch(false);
+            return;
         }
     }
      
@@ -43,12 +43,11 @@ DecidedQueryResult StarAgent::DecidedQuery( const TreePtrInterface *px,
         // Apply pattern restriction - will be at least as strict as pre-restriction
         FOREACH( const TreePtrInterface &xe, *xc )
         {
-            r.AddLocalLink( true, AsAgent(p), xe );
+            query.AddLocalLink( true, AsAgent(p), xe );
         }
     }
  
     TRACE("done\n");
-    return r;
 }                       
 
 

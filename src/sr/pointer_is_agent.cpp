@@ -13,19 +13,18 @@ PatternQueryResult PointerIsAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult PointerIsAgent::DecidedQuery( const TreePtrInterface *px, 
-                                                 const AgentQuery::Choices &choices ) const
+void PointerIsAgent::DecidedQuery( AgentQuery &query,
+                                   const TreePtrInterface *px ) const
 {
 	INDENT("@");
-    DecidedQueryResult r;
+    query.Reset();
 	
 	// Note: using MakeValueArchitype() means we need to be using the 
 	// TreePtr<Blah> from the original node, not converted to TreePtr<Node>.
 	// Thus, it must be passed around via const TreePtrInterface &        
 	TreePtr<Node> ptr_arch = px->MakeValueArchitype();
 	
-	r.AddLocalLink( false, AsAgent(GetPointer()), ptr_arch );
-	return r;
+	query.AddLocalLink( false, AsAgent(GetPointer()), ptr_arch );
 }
 
 

@@ -14,24 +14,23 @@ PatternQueryResult NotMatchAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult NotMatchAgent::DecidedQuery( const TreePtrInterface *px, 
-                                                const AgentQuery::Choices &choices ) const
+void NotMatchAgent::DecidedQuery( AgentQuery &query,
+                                  const TreePtrInterface *px ) const
 {
     INDENT("!");
     ASSERT( GetPattern() );
-    DecidedQueryResult r;
+    query.Reset();
     
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )      
     {
-        r.AddLocalMatch(false);  
-        return r;
+        query.AddLocalMatch(false);  
+        return;
     }
     
     // Context is abnormal because patterns must not match
-    r.AddLink( true, AsAgent(GetPattern()), px );
-    r.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
-    return r;
+    query.AddLink( true, AsAgent(GetPattern()), px );
+    query.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
 }
 
 
@@ -67,18 +66,18 @@ PatternQueryResult MatchAllAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult MatchAllAgent::DecidedQuery( const TreePtrInterface *px, 
-                                                const AgentQuery::Choices &choices ) const
+void MatchAllAgent::DecidedQuery( AgentQuery &query,
+                                  const TreePtrInterface *px ) const
 { 
     INDENT("&");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!
-    DecidedQueryResult r;
+    query.Reset();
     
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )        
     {
-        r.AddLocalMatch(false);  
-        return r;
+        query.AddLocalMatch(false);  
+        return;
     }
     
     FOREACH( const TreePtr<Node> p, GetPatterns() )
@@ -86,9 +85,8 @@ DecidedQueryResult MatchAllAgent::DecidedQuery( const TreePtrInterface *px,
         ASSERT( p );
         // Context is normal because all patterns must match (but none should contain
         // nodes with reploace functionlity because they will not be invoked during replace) 
-        r.AddLink( false, AsAgent(p), px );
+        query.AddLink( false, AsAgent(p), px );
     }
-    return r;
 }    
 
 
@@ -117,28 +115,27 @@ PatternQueryResult MatchAnyAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult MatchAnyAgent::DecidedQuery( const TreePtrInterface *px, 
-                                                const AgentQuery::Choices &choices ) const
+void MatchAnyAgent::DecidedQuery( AgentQuery &query,
+                                  const TreePtrInterface *px ) const
 {
     INDENT("|");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!
-    DecidedQueryResult r;
+    query.Reset();
     
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )        
     {
-        r.AddLocalMatch(false);  
-        return r;
+        query.AddLocalMatch(false);  
+        return;
     }
     
     FOREACH( const TreePtr<Node> p, GetPatterns() )
     {
         ASSERT( p );
         // Context is abnormal because not all patterns must match
-        r.AddLink( true, AsAgent(p), px );
+        query.AddLink( true, AsAgent(p), px );
     }
-    r.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
-    return r;
+    query.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
 }
 
 

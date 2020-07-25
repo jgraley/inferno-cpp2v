@@ -19,8 +19,8 @@ class NormalityAgentWrapper : public virtual Agent
 	                const Engine *master );
 	void SetMasterKeys( const CouplingMap &keys ); // Keys of the enclosing engine's master (call this at top of engine Compare())
     virtual PatternQueryResult PatternQuery() const;
-    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
-                                             const AgentQuery::Choices &choices ) const;
+    virtual void DecidedQuery( AgentQuery &query,
+                               const TreePtrInterface *px ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     shared_ptr<ContainerInterface> GetVisibleChildren() const;

@@ -10,11 +10,11 @@ PatternQueryResult TransformOfAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult TransformOfAgent::DecidedQuery( const TreePtrInterface *px,
-                                                   const AgentQuery::Choices &choices ) const
+void TransformOfAgent::DecidedQuery( AgentQuery &query,
+                                     const TreePtrInterface *px ) const
 {
     INDENT("T");
-    DecidedQueryResult r;
+    query.Reset();
     
     // Transform the candidate expression, sharing the overall S&R context so that
     // things like GetDeclaration can work (they search the whole program tree).
@@ -22,16 +22,14 @@ DecidedQueryResult TransformOfAgent::DecidedQuery( const TreePtrInterface *px,
 	if( xt )
 	{
 	    // Punt it back into the search/replace engine
-	    r.AddLocalLink( false, AsAgent(pattern), xt );
+	    query.AddLocalLink( false, AsAgent(pattern), xt );
 	}
 	else
 	{
 	    // Transformation returned NULL, probably because the candidate was incompatible
         // with the transofrmation - a search MISS.
-	    r.AddLocalMatch(false);
+	    query.AddLocalMatch(false);
 	}
-    
-    return r;
 }
 
 

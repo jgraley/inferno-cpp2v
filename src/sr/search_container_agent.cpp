@@ -15,20 +15,20 @@ PatternQueryResult SearchContainerAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult SearchContainerAgent::DecidedQuery( const TreePtrInterface *px, 
-                                                       const AgentQuery::Choices &choices ) const
+void SearchContainerAgent::DecidedQuery( AgentQuery &query,
+                                         const TreePtrInterface *px ) const
 {
     INDENT("#");
     ASSERT( this );
     ASSERT(px);
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
-    DecidedQueryResult r;
+    query.Reset();
     
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )        
     {
-        r.AddLocalMatch(false);  
-        return r;
+        query.AddLocalMatch(false);  
+        return;
     }
 
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(**px)("\n");
@@ -41,18 +41,18 @@ DecidedQueryResult SearchContainerAgent::DecidedQuery( const TreePtrInterface *p
     
     if( pwx->empty() )
     {
-        r.AddLocalMatch(false);   // The search container is empty, thus terminus could never be matched
-        return r;
+        query.AddLocalMatch(false);   // The search container is empty, thus terminus could never be matched
+        return;
     }
 
     // Get choice from conjecture about where we are in the walk
-	ContainerInterface::iterator thistime = r.AddDecision( pwx->begin(), pwx->end(), false, choices );
-    r.AddLink( false, AsAgent(terminus), &*thistime );
+	ContainerInterface::iterator thistime = query.AddDecision( pwx->begin(), pwx->end(), false );
+    query.AddLink( false, AsAgent(terminus), &*thistime );
 
     // Let subclasses implement further restrictions
-    DecidedQueryRestrictions( r, thistime );
-                
-    return r;
+    DecidedQueryRestrictions( query, thistime );
+    
+    query.PopulateDecisions();    
 }
 
 
@@ -114,7 +114,7 @@ void StuffAgent::PatternQueryRestrictions( PatternQueryResult &r ) const
 }
 
 
-void StuffAgent::DecidedQueryRestrictions( DecidedQueryResult &r, ContainerInterface::iterator thistime ) const
+void StuffAgent::DecidedQueryRestrictions( AgentQuery &query, ContainerInterface::iterator thistime ) const
 {
     // Where a recurse restriction is in use, apply it to all the recursion points
     // underlying the current iterator, thistime.
@@ -126,7 +126,7 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryResult &r, ContainerInter
 
         // Check all the nodes that we recursed through in order to get here
         FOREACH( TreePtr<Node> n, pwtt->GetPath() )
-            r.AddLocalLink( true, AsAgent(recurse_restriction), n );
+            query.AddLocalLink( true, AsAgent(recurse_restriction), n );
     }   
 }
 

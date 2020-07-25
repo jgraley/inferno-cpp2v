@@ -25,8 +25,8 @@ class NotMatchAgent : public BooleanAgent
 {
 public:
     virtual PatternQueryResult PatternQuery() const;
-    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
-                                             const AgentQuery::Choices &choices ) const;
+    virtual void DecidedQuery( AgentQuery &query,
+                               const TreePtrInterface *px ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     
 private:
@@ -65,8 +65,8 @@ class MatchAllAgent : public BooleanAgent
 {
 public:
     virtual PatternQueryResult PatternQuery() const;
-    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
-                                             const AgentQuery::Choices &choices ) const;
+    virtual void DecidedQuery( AgentQuery &query,
+                               const TreePtrInterface *px ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
     virtual CollectionInterface &GetPatterns() const = 0;
@@ -96,8 +96,8 @@ class MatchAnyAgent : public BooleanAgent
 {
 public:
     virtual PatternQueryResult PatternQuery() const;
-    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
-                                             const AgentQuery::Choices &choices ) const;
+    virtual void DecidedQuery( AgentQuery &query,
+                               const TreePtrInterface *px ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
     virtual CollectionInterface &GetPatterns() const = 0;

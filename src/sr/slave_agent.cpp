@@ -20,22 +20,21 @@ PatternQueryResult SlaveAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult SlaveAgent::DecidedQuery( const TreePtrInterface *px, 
-                                             const AgentQuery::Choices &choices ) const
+void SlaveAgent::DecidedQuery( AgentQuery &query,
+                               const TreePtrInterface *px ) const
 {
     INDENT("l");
-    DecidedQueryResult r;
+    query.Reset();
 
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )        
     {
-        r.AddLocalMatch(false);  
-        return r;
+        query.AddLocalMatch(false);  
+        return;
     }
 
     // When a slave node seen duriung search, just forward through the "through" path
-    r.AddLink( false, AsAgent(GetThrough()), px );
-    return r;
+    query.AddLink( false, AsAgent(GetThrough()), px );
 }
 
 

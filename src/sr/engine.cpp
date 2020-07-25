@@ -185,7 +185,7 @@ bool Engine::CompareLinks( const AgentQuery &query,
     bool made_coupling_keys = false;  
     CouplingMap coupling_keys;
     int i=0;
-    FOREACH( const DecidedQueryResult::Block &b, *query.GetBlocks() )
+    FOREACH( const AgentQuery::Block &b, *query.GetBlocks() )
     {
         if( b.is_link ) // skip decisions    
 		{
@@ -255,7 +255,7 @@ bool Engine::CompareEvaluatorLinks( const AgentQuery &query,
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
     list<bool> compare_results;
-    FOREACH( const DecidedQueryResult::Block &b, *query.GetBlocks() )
+    FOREACH( const AgentQuery::Block &b, *query.GetBlocks() )
     {
         if( b.is_link ) // skip decisions
 		{

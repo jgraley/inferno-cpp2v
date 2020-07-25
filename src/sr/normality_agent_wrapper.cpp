@@ -81,15 +81,12 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
 }
 
 
-DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface *px,
-                                                        const AgentQuery::Choices &choices ) const;
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const{
+void NormalityAgentWrapper::DecidedQuery( AgentQuery &wrapper_query,
+                                          const TreePtrInterface *px ) const
+{
     INDENT("'");    
-    AgentQuery::Choices wrapped_choices, wrapper_choices; // JSG2020 wrapper_choices either is choices or should be init'd from it?
-
-    PatternQueryResult wrapped_result = wrapped_agent->PatternQuery();
-    wrapper_result.evaluator = wrapped_result.evaluator;
 	
+    AgentQuery wrapped_query;
     list< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
     int i=0;
     FOREACH( PatternQueryResult::Block b, plinks.blocks ) // JSG2020 wrapped_result.blocks?
@@ -100,36 +97,34 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface *
 			++alit;
 			FOREACH( Agent *ta, al->terminal_agents )
 			{
-				wrapped_choices.push_back( *(wrapper_choices[i]) ); 
+				wrapped_query.PushBackChoice( *((*wrapper_query.GetChoices())[i]) ); 
 				i++;
 			}
 		}
 		else
 		{
-			wrapped_choices.push_back( *(wrapper_choices[i]) ); 
+			wrapped_query.PushBackChoice( *((*wrapper_query.GetChoices())[i]) ); 
 			i++;
 		}
 	}
     
-    PatternQueryResult wrapper_result;
-    wrapper_result.evaluator = false; // we will hide evaluators
-    wrapper_result.local_match = true; // ready for and-rule 
+    wrapper_query.Reset();
     
     // Query the wrapped node for blocks and decisions
-    DecidedQueryResult wrapped_result = wrapped_agent->DecidedQuery( px, wrapped_choices );
+    wrapped_agent->DecidedQuery( wrapped_query, px );
     
     // Early-out on local mismatch of wrapped node.
-    if( !wrapped_result.local_match )
+    if( !wrapped_result.GetLocalMatch() )
     {
-        wrapper_result.local_match = false;
-		return wrapper_result;
+        wrapped_query.SetLocalMatch(false);
+		return;
 	}           
 
     // Loop over the wrapped node's returned blocks. Abnormal entries are co-looped with our
     // own abnormal_links container.
     list<bool> compare_results;
     list< AbnormalLink >::iterator alit = abnormal_links.begin();    
-    FOREACH( DecidedQueryResult::Block b, wrapped_result.blocks )
+    FOREACH( AgentQuery::Block b, *(wrapped_query.GetBlocks()) )
     {
 		if( b.is_link && b.abnormal )
 		{
@@ -150,29 +145,8 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface *
 				// TODO see "Problems with context walk" below
 				
 				// Give that walker to the conjecture as a decision and make a block
-				ContainerInterface::iterator cit;
-				if( wrapper_choices.empty() )
-				{
-					cit = pwc->begin(); // No choice was given to us so assume first one
-				}
-				else
-				{
-					cit = wrapper_choices.front();  // Use and consume the choice that was given to us
-					ASSERT( cit != end );
-					wrapper_choices.pop_front();
-				}
-				DecidedQueryResult::Block nb;
-				nb.is_link = true;
-				nb.abnormal = false;
-				nb.agent = ta;
-				nb.px = &(*cit); // do not simplify! we want a simple pointer, not an iterator TODO or do we
-				nb.local_x = TreePtr<Node>();					
-				Conjecture::Range r; // JSG2020 these 3 lines can be removed; see nb.decision =...
-				r.begin = pwc->begin();
-				r.end = pwc->end();
-				nb.is_decision = true;
-				nb.decision = Conjecture::Range( false, pwc->begin(), pwc->end() );
-				wrapped_result.push_back( nb );
+                ContainerInterface::iterator thistime = wrapped_query.AddDecision( pwc->begin(), pwc->end(), false );
+                wrapped_query.AddLink( false, AsAgent(terminus), &*thistime );
 
 				// Consider the chosen (or pushed) node to be a key for the benefit of the local engine
 				terminal_keys[ta] = *cit;				
@@ -194,14 +168,14 @@ DecidedQueryResult NormalityAgentWrapper::DecidedQuery( const TreePtrInterface *
     	}
 	    else
 	    {
-		    wrapped_result.push_back( b ); // JSG2020 wrapper_result?
+		    wrapper_query.AddBlock( b ); // TODO implement
 		}
     }
 	
 	// Run the evaluator if one was supplied.
-	if( wrapped_result.evaluator )
-	    wrapper_result.local_match = (*evaluator)( compare_results );
-    return wrapper_result;
+	if( wrapped_query.IsEvaluator() )
+	    wrapper_query.SetLocalMatch( (*evaluator)( compare_results ) );
+    return wrapper_query;
 }
 
 // Note: Problems with context walk

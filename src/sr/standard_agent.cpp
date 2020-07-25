@@ -256,7 +256,7 @@ void StandardAgent::DecidedQueryCollection( AgentQuery &query,
             }
             else
             {
-                // New decision: take a copy of xremaining and pass it to the DecidedQueryResult.
+                // New decision: take a copy of xremaining and pass it to the query.
                 // Use a shared_ptr<> so that the exact same Collection<Node> will come back to us 
                 // in future calls.
                 auto x_decision = make_shared< Collection<Node> >();
