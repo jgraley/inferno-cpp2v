@@ -118,11 +118,10 @@ public:
     const Ranges *GetDecisions() { return &decisions; }
     void InvalidateBack();
     void SetBackChoice( ContainerInterface::iterator newc );
-    void PushBackChoice( ContainerInterface::iterator newc );
-    
-private: friend class Agent; 
+    void PushBackChoice( ContainerInterface::iterator newc );    
     void SetDQR( const DecidedQueryResult &dqr );
 
+private:
     Choices choices;
     Ranges decisions;
 };

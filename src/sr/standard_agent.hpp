@@ -20,9 +20,8 @@ class StandardAgent : public virtual AgentCommon
 {
 public:
     virtual PatternQueryResult PatternQuery() const;
-    virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
-                                             const AgentQuery::Choices &choices,
-                                             const AgentQuery::Ranges &decisions ) const;
+    virtual void DecidedQuery( AgentQuery &query,
+                               const TreePtrInterface *px ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
     void DecidedQuerySequence( DecidedQueryResult &r,

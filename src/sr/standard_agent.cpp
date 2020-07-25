@@ -46,18 +46,20 @@ PatternQueryResult StandardAgent::PatternQuery() const
 }
 
 
-DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface *px, 
-                                                const AgentQuery::Choices &choices,
-                                                const AgentQuery::Ranges &decisions ) const
+void StandardAgent::DecidedQuery( AgentQuery &query,
+                                  const TreePtrInterface *px ) const
 {
     INDENT(".");
     DecidedQueryResult r;
-    
+    const AgentQuery::Choices &choices = *(query.GetChoices());
+    const AgentQuery::Ranges &decisions = *(query.GetDecisions());
+
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )        
     {
         r.AddLocalMatch(false);  
-        return r;
+        query.SetDQR( r );
+        return;
     }
 
     // Recurse through the children. Note that the itemiser internally does a
@@ -102,9 +104,13 @@ DecidedQueryResult StandardAgent::DecidedQuery( const TreePtrInterface *px,
         }
 
         if( !r.IsLocalMatch() )
-            return r;
+        {
+            query.SetDQR( r );
+            return;
+        }
     }
-    return r;
+    query.SetDQR( r );
+    return;
 }
 
 void StandardAgent::DecidedQuerySequence( DecidedQueryResult &r,
