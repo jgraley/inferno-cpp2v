@@ -40,7 +40,7 @@ private:
 };
 
 
-class DecidedQueryResult 
+class AgentQuery 
 {
 public:    
     struct Range
@@ -58,7 +58,7 @@ public:
     // There is a "random access" in IncrementAgent()
     typedef vector<Range> Ranges;
 
-    // There is a "random access" in DecidedQueryResult::AddDecision()
+    // There is a "random access" in AddDecision()
     typedef vector<ContainerInterface::iterator> Choices; 
 
     struct Block 
@@ -80,13 +80,6 @@ public:
         Range decision;
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
     };
-        
-    void clear()
-    {
-        blocks.clear();
-        decision_count = 0;
-        evaluator = shared_ptr<BooleanEvaluator>();        
-    }
 
     void AddLink( bool abnormal, Agent *a, const TreePtrInterface *px ); 
     void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ); 
@@ -102,24 +95,12 @@ public:
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
     bool IsLocalMatch() { return local_match; }
     int GetDecisionCount() const { return decision_count; }
-    
-protected:
-    list<Block> blocks; 
-    shared_ptr<BooleanEvaluator> evaluator;
-    bool local_match = true;
-    int decision_count = 0;
-};
-
-
-class AgentQuery : public DecidedQueryResult
-{
-public:   
+      
     const Choices *GetChoices() { return &choices; }
     const Ranges *GetDecisions() { return &decisions; }
     void InvalidateBack();
     void SetBackChoice( ContainerInterface::iterator newc );
     void PushBackChoice( ContainerInterface::iterator newc );    
-    void SetDQR( const DecidedQueryResult &dqr );
     void PopulateDecisions();
     ContainerInterface::iterator AddDecision( ContainerInterface::iterator begin,
                                               ContainerInterface::iterator end,
@@ -134,11 +115,15 @@ public:
     void Reset();
     
 private:
+    list<Block> blocks; 
+    shared_ptr<BooleanEvaluator> evaluator;
+    bool local_match = true;
+    int decision_count = 0;
     Choices choices;
     Ranges decisions;
 };
 
 
-bool operator<(const DecidedQueryResult::Block &l0, const DecidedQueryResult::Block &l1);
+bool operator<(const AgentQuery::Block &l0, const AgentQuery::Block &l1);
 };
 #endif

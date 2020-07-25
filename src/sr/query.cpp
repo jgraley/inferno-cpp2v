@@ -20,7 +20,7 @@ void PatternQueryResult::AddLink( bool abnormal, Agent *a )
 }
 
 
-void DecidedQueryResult::AddLink( bool abnormal, Agent *a, const TreePtrInterface *px )
+void AgentQuery::AddLink( bool abnormal, Agent *a, const TreePtrInterface *px )
 {
     Block b;
     b.is_link = true;
@@ -38,7 +38,7 @@ void DecidedQueryResult::AddLink( bool abnormal, Agent *a, const TreePtrInterfac
 }
 
 
-void DecidedQueryResult::AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
+void AgentQuery::AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
 {
     ASSERT(x);
     Block b;
@@ -64,14 +64,14 @@ void PatternQueryResult::AddEvaluator( shared_ptr<BooleanEvaluator> e )
 }	
 
 
-void DecidedQueryResult::AddEvaluator( shared_ptr<BooleanEvaluator> e )
+void AgentQuery::AddEvaluator( shared_ptr<BooleanEvaluator> e )
 {
 	ASSERT( !evaluator ); // should not register more than one
 	evaluator = e;
 }	
 
 
-ContainerInterface::iterator DecidedQueryResult::AddDecision( ContainerInterface::iterator begin,
+ContainerInterface::iterator AgentQuery::AddDecision( ContainerInterface::iterator begin,
                                                               ContainerInterface::iterator end,
                                                               bool inclusive,
                                                               const Choices &choices,
@@ -113,13 +113,13 @@ ContainerInterface::iterator DecidedQueryResult::AddDecision( ContainerInterface
 }
                                                                     
                                         
-void DecidedQueryResult::AddLocalMatch( bool lm )
+void AgentQuery::AddLocalMatch( bool lm )
 {
     local_match = lm;
 }                                    
                                         
                                         
-bool SR::operator<(const SR::DecidedQueryResult::Block &l0, const SR::DecidedQueryResult::Block &l1)
+bool SR::operator<(const SR::AgentQuery::Block &l0, const SR::AgentQuery::Block &l1)
 {
     if( l0.abnormal != l1.abnormal )
         return (int)l0.abnormal < (int)l1.abnormal;
@@ -157,18 +157,11 @@ void AgentQuery::PushBackChoice( ContainerInterface::iterator newc )
 }
 
 
-void AgentQuery::SetDQR( const DecidedQueryResult &dqr )
-{
-    DecidedQueryResult::operator=( dqr );
-    PopulateDecisions();
-}
-
-
 void AgentQuery::PopulateDecisions()
 {
     // Feed the decisions info in the blocks structure back to the conjecture
     decisions.clear();
-    for( const DecidedQueryResult::Block &b : *GetBlocks() )
+    for( const Block &b : *GetBlocks() )
         if( b.is_decision ) 
             decisions.push_back( b.decision );
 }
@@ -179,7 +172,7 @@ ContainerInterface::iterator AgentQuery::AddDecision( ContainerInterface::iterat
                                                       bool inclusive,
                                                       std::shared_ptr<ContainerInterface> container )
 {
-    return DecidedQueryResult::AddDecision( begin, end, inclusive, choices, container );
+    return AddDecision( begin, end, inclusive, choices, container );
 }                                                      
 
 
@@ -226,5 +219,7 @@ ContainerInterface::iterator AgentQuery::AddNextOldDecision()
 
 void AgentQuery::Reset()
 {
-    DecidedQueryResult::clear();
+    blocks.clear();
+    decision_count = 0;
+    evaluator = shared_ptr<BooleanEvaluator>();        
 }
