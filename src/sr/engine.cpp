@@ -303,7 +303,7 @@ bool Engine::DecidedCompare( Agent *agent,
     {
         // Run the compare implementation to get the blocks based on the choices
         TRACE(*agent)("?=")(**px)(" Gathering blocks\n");    
-        agent->DecidedQuery( px, *query );
+        agent->DecidedQuery( *query, px );
         TRACE(*agent)("?=")(**px)(" local match ")(query->IsLocalMatch())("\n");
                 
         // Stop if the node itself mismatched (can be for any reason depending on agent)

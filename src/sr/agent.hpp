@@ -32,8 +32,8 @@ public:
     /// List the Agents reached via blocks during search
     virtual PatternQueryResult PatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
-    virtual void DecidedQuery( const TreePtrInterface *px,
-                               AgentQuery &state ) const { auto dqr = DecidedQuery(px, state.choices, state.decisions); state.SetDQR(dqr); }                                
+    virtual void DecidedQuery( AgentQuery &query,
+                               const TreePtrInterface *px ) const { query.SetDQR( DecidedQuery(px, query.choices, query.decisions) ); }                                
     virtual DecidedQueryResult DecidedQuery( const TreePtrInterface *px,
                                              const AgentQuery::Choices &choices,
                                              const AgentQuery::Ranges &decisions ) const { return DecidedQuery(px, choices); }                                
