@@ -15,9 +15,9 @@ class Agent;
 class Conjecture
 {
 public:
-    typedef AgentQuery::Range Range;
-    typedef AgentQuery::Ranges Ranges;
-    typedef AgentQuery::Choices Choices;
+    typedef QueryCommonInterface::Range Range;
+    typedef QueryCommonInterface::Ranges Ranges;
+    typedef QueryCommonInterface::Choices Choices;
     
     struct AgentRecord
     {

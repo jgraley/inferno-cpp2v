@@ -101,7 +101,7 @@ PatternQueryResult NestedAgent::PatternQuery() const
 }
 
 
-void NestedAgent::DecidedQuery( AgentQuery &query,
+void NestedAgent::DecidedQuery( QueryAgentInterface &query,
                                 const TreePtrInterface *px ) const                          
 {
     INDENT("N");
@@ -179,7 +179,7 @@ TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode )
 
 //---------------------------------- IsLabelReached ------------------------------------    
 
-void IsLabelReached::DecidedQuery( AgentQuery &query,
+void IsLabelReached::DecidedQuery( QueryAgentInterface &query,
                                    const TreePtrInterface *pxx ) const
 {
 	INDENT("L");

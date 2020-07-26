@@ -46,7 +46,7 @@ PatternQueryResult StandardAgent::PatternQuery() const
 }
 
 
-void StandardAgent::DecidedQuery( AgentQuery &query,
+void StandardAgent::DecidedQuery( QueryAgentInterface &query,
                                   const TreePtrInterface *px ) const
 {
     INDENT(".");
@@ -102,15 +102,13 @@ void StandardAgent::DecidedQuery( AgentQuery &query,
 
         if( !query.IsLocalMatch() )
         {
-            query.PopulateDecisions();
             return;
         }
     }
-    query.PopulateDecisions();
     return;
 }
 
-void StandardAgent::DecidedQuerySequence( AgentQuery &query,
+void StandardAgent::DecidedQuerySequence( QueryAgentInterface &query,
                                           SequenceInterface *px,
 		                                  SequenceInterface &pattern ) const
 {
@@ -206,7 +204,7 @@ void StandardAgent::DecidedQuerySequence( AgentQuery &query,
 }
 
 
-void StandardAgent::DecidedQueryCollection( AgentQuery &query,
+void StandardAgent::DecidedQueryCollection( QueryAgentInterface &query,
                                             CollectionInterface *px,
 		 					                CollectionInterface &pattern ) const
 {

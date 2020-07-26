@@ -15,7 +15,7 @@ PatternQueryResult StarAgent::PatternQuery() const
 
 // NOTE this is a DecidedCompare() not DecidedCompareImpl() so some of the AgentCommon 
 // stuff has to be done explicitly in here.
-void StarAgent::DecidedQuery( AgentQuery &query,
+void StarAgent::DecidedQuery( QueryAgentInterface &query,
                               const TreePtrInterface *px ) const
 {
     INDENT("*");

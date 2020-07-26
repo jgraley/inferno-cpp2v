@@ -81,7 +81,7 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
 }
 
 
-void NormalityAgentWrapper::DecidedQuery( AgentQuery &wrapper_query,
+void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
                                           const TreePtrInterface *px ) const
 {
     INDENT("'");    

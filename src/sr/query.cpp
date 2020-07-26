@@ -67,42 +67,6 @@ void AgentQuery::AddEvaluator( shared_ptr<BooleanEvaluator> e )
 }	
 
 
-ContainerInterface::iterator AgentQuery::AddDecision( ContainerInterface::iterator begin,
-                                                      ContainerInterface::iterator end,
-                                                      bool inclusive,
-                                                      const Choices &choices,
-                                                      shared_ptr<ContainerInterface> container )
-{
-    Range r;
-    r.begin = begin;
-    r.end = end;
-    r.inclusive = inclusive;
-    r.container = container;
-
-    ASSERT( r.inclusive || r.begin != r.end )("no empty decisions");
-    ContainerInterface::iterator it;
-    if( next_decision == decisions.end() ) // run out of decisions?
-    {
-        it = r.begin; // No choice was given to us so assume first one
-        ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
-        decisions.push_back(r); // this will be a new decision
-        next_decision = decisions.end(); // beware iterator invalidation
-    }
-    else
-    {
-        ASSERT( next_choice != choices.end() );
-        it = *next_choice; // Use the choice that was given to us
-        ASSERT( r.inclusive || it != r.end )("A choice can only be end if the decision is inclusive");
-        ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
-        *next_decision = r; // overwrite TODO they should be identical!
-        ++next_decision; 
-        ++next_choice;
-    }    
-            
-    return it;
-}
-                                                                    
-                                        
 void AgentQuery::AddLocalMatch( bool lm )
 {
     local_match = lm;
@@ -147,26 +111,48 @@ void AgentQuery::PushBackChoice( ContainerInterface::iterator newc )
 }
 
 
-void AgentQuery::PopulateDecisions()
+ContainerInterface::iterator AgentQuery::AddDecision( const Range &r )
 {
-}
+ 
+    ASSERT( r.inclusive || r.begin != r.end )("no empty decisions");
+    ContainerInterface::iterator it;
+    if( next_decision == decisions.end() ) // run out of decisions?
+    {
+        it = r.begin; // No choice was given to us so assume first one
+        ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
+        decisions.push_back(r); // this will be a new decision
+        next_decision = decisions.end(); // beware iterator invalidation
+    }
+    else
+    {
+        ASSERT( next_choice != choices.end() );
+        it = *next_choice; // Use the choice that was given to us
+        ASSERT( r.inclusive || it != r.end )("A choice can only be end if the decision is inclusive");
+        ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
+        *next_decision = r; // overwrite TODO they should be identical!
+        ++next_decision; 
+        ++next_choice;
+    }    
+    
+    return it;
+}                                                      
 
 
 ContainerInterface::iterator AgentQuery::AddDecision( ContainerInterface::iterator begin,
                                                       ContainerInterface::iterator end,
                                                       bool inclusive,
-                                                      std::shared_ptr<ContainerInterface> container )
+                                                      shared_ptr<ContainerInterface> container )
 {
-    return AddDecision( begin, end, inclusive, choices, container );
-}                                                      
-
-
-ContainerInterface::iterator AgentQuery::AddDecision( const Range &r )
-{
-    return AddDecision( r.begin, r.end, r.inclusive, r.container );
-}                                                      
-
-
+    Range r;
+    r.begin = begin;
+    r.end = end;
+    r.inclusive = inclusive;
+    r.container = container;
+            
+    return AddDecision( r );
+}
+                                                                    
+                               
 ContainerInterface::iterator AgentQuery::AddDecision( shared_ptr<ContainerInterface> container, bool inclusive )
 {
     ASSERT( container );

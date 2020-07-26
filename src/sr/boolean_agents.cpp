@@ -14,7 +14,7 @@ PatternQueryResult NotMatchAgent::PatternQuery() const
 }
 
 
-void NotMatchAgent::DecidedQuery( AgentQuery &query,
+void NotMatchAgent::DecidedQuery( QueryAgentInterface &query,
                                   const TreePtrInterface *px ) const
 {
     INDENT("!");
@@ -66,7 +66,7 @@ PatternQueryResult MatchAllAgent::PatternQuery() const
 }
 
 
-void MatchAllAgent::DecidedQuery( AgentQuery &query,
+void MatchAllAgent::DecidedQuery( QueryAgentInterface &query,
                                   const TreePtrInterface *px ) const
 { 
     INDENT("&");
@@ -115,7 +115,7 @@ PatternQueryResult MatchAnyAgent::PatternQuery() const
 }
 
 
-void MatchAnyAgent::DecidedQuery( AgentQuery &query,
+void MatchAnyAgent::DecidedQuery( QueryAgentInterface &query,
                                   const TreePtrInterface *px ) const
 {
     INDENT("|");

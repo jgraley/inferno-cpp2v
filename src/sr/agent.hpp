@@ -32,7 +32,7 @@ public:
     /// List the Agents reached via blocks during search
     virtual PatternQueryResult PatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
-    virtual void DecidedQuery( AgentQuery &query,
+    virtual void DecidedQuery( QueryAgentInterface &query,
                                const TreePtrInterface *px ) const = 0;                                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     

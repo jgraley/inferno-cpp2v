@@ -15,7 +15,7 @@ PatternQueryResult SearchContainerAgent::PatternQuery() const
 }
 
 
-void SearchContainerAgent::DecidedQuery( AgentQuery &query,
+void SearchContainerAgent::DecidedQuery( QueryAgentInterface &query,
                                          const TreePtrInterface *px ) const
 {
     INDENT("#");
@@ -51,13 +51,11 @@ void SearchContainerAgent::DecidedQuery( AgentQuery &query,
 
     // Let subclasses implement further restrictions
     DecidedQueryRestrictions( query, thistime );
-    
-    query.PopulateDecisions();    
 }
 
 
 void SearchContainerAgent::KeyReplace( const TreePtrInterface &x,
-                                       AgentQuery::Choices choices )
+                                       QueryCommonInterface::Choices choices )
 {
     ASSERT( choices.size() == 1 )("Expected a single choice, choices.size()=%d", choices.size());
     ContainerInterface::iterator thistime = choices.front();
@@ -114,7 +112,7 @@ void StuffAgent::PatternQueryRestrictions( PatternQueryResult &r ) const
 }
 
 
-void StuffAgent::DecidedQueryRestrictions( AgentQuery &query, ContainerInterface::iterator thistime ) const
+void StuffAgent::DecidedQueryRestrictions( QueryAgentInterface &query, ContainerInterface::iterator thistime ) const
 {
     // Where a recurse restriction is in use, apply it to all the recursion points
     // underlying the current iterator, thistime.

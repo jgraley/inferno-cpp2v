@@ -13,7 +13,7 @@ PatternQueryResult OverlayAgent::PatternQuery() const
 }
 
 
-void OverlayAgent::DecidedQuery( AgentQuery &query,
+void OverlayAgent::DecidedQuery( QueryAgentInterface &query,
                                  const TreePtrInterface *px ) const
 {
     query.Reset();

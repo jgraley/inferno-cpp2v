@@ -13,7 +13,7 @@ PatternQueryResult PointerIsAgent::PatternQuery() const
 }
 
 
-void PointerIsAgent::DecidedQuery( AgentQuery &query,
+void PointerIsAgent::DecidedQuery( QueryAgentInterface &query,
                                    const TreePtrInterface *px ) const
 {
 	INDENT("@");

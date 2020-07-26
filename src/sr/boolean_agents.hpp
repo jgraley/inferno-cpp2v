@@ -25,7 +25,7 @@ class NotMatchAgent : public BooleanAgent
 {
 public:
     virtual PatternQueryResult PatternQuery() const;
-    virtual void DecidedQuery( AgentQuery &query,
+    virtual void DecidedQuery( QueryAgentInterface &query,
                                const TreePtrInterface *px ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     
@@ -65,7 +65,7 @@ class MatchAllAgent : public BooleanAgent
 {
 public:
     virtual PatternQueryResult PatternQuery() const;
-    virtual void DecidedQuery( AgentQuery &query,
+    virtual void DecidedQuery( QueryAgentInterface &query,
                                const TreePtrInterface *px ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
@@ -96,7 +96,7 @@ class MatchAnyAgent : public BooleanAgent
 {
 public:
     virtual PatternQueryResult PatternQuery() const;
-    virtual void DecidedQuery( AgentQuery &query,
+    virtual void DecidedQuery( QueryAgentInterface &query,
                                const TreePtrInterface *px ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:

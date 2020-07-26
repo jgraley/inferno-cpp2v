@@ -10,7 +10,7 @@ PatternQueryResult TransformOfAgent::PatternQuery() const
 }
 
 
-void TransformOfAgent::DecidedQuery( AgentQuery &query,
+void TransformOfAgent::DecidedQuery( QueryAgentInterface &query,
                                      const TreePtrInterface *px ) const
 {
     INDENT("T");

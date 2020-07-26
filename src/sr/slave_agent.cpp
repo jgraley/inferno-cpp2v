@@ -20,7 +20,7 @@ PatternQueryResult SlaveAgent::PatternQuery() const
 }
 
 
-void SlaveAgent::DecidedQuery( AgentQuery &query,
+void SlaveAgent::DecidedQuery( QueryAgentInterface &query,
                                const TreePtrInterface *px ) const
 {
     INDENT("l");

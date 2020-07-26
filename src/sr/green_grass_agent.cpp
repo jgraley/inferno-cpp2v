@@ -12,7 +12,7 @@ PatternQueryResult GreenGrassAgent::PatternQuery() const
 }
 
 
-void GreenGrassAgent::DecidedQuery( AgentQuery &query,
+void GreenGrassAgent::DecidedQuery( QueryAgentInterface &query,
                                     const TreePtrInterface *px ) const
 {
     INDENT("G");
