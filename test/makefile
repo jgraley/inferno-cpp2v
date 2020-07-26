@@ -1,7 +1,7 @@
 
 # Slower ones first
 CASES = sctest13 sctest11 sctest12 sctest08 sctest10 sctest02
-CASES += sctest01 sctest03 sctest04 sctest05 sctest06 sctest07 sctest08 sctest09 sctest15
+CASES += sctest01 sctest03 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
 
 KINDS = default sr rep
 
@@ -13,8 +13,7 @@ $(CASES:%=test/results/default/%.pass) : test/results/default/%.pass : test/exam
 	@rm -f test/results/default/$*.
 	test/test.sh $< -tq 2>&1 > test/results/default/$*.log 
 	touch test/results/default/$*.pass
-	
-	
+		
 test/results/default.pass : $(CASES:%=test/results/default/%.pass)
 	@touch $@
 	@echo ------------------------------------------
@@ -38,7 +37,7 @@ test/results/sr.pass : $(CASES:%=test/results/sr/%.pass)
 $(CASES:%=test/results/rep/%.pass) : test/results/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe
 	@mkdir -p test/results/rep
 	@rm -f test/results/rep/$*.
-	test/test.sh $< -tq 2>&1 > test/results/rep/$*.log 
+	test/reptest.sh $< -tq 2>&1 > test/results/rep/$*.log 
 	touch test/results/rep/$*.pass
 	
 test/results/rep.pass : $(CASES:%=test/results/rep/%.pass)
