@@ -67,9 +67,9 @@ void AgentQuery::AddEvaluator( shared_ptr<BooleanEvaluator> e )
 }	
 
 
-void AgentQuery::AddLocalMatch( bool lm )
+void AgentQuery::AddLocalMismatch()
 {
-    local_match = lm;
+    local_match = false;
 }                                    
                                         
                                         

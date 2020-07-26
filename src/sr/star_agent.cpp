@@ -32,7 +32,7 @@ void StarAgent::DecidedQuery( QueryAgentInterface &query,
     {
         if( !IsLocalMatch( xe.get()) )
         {
-            query.AddLocalMatch(false);
+            query.AddLocalMismatch();
             return;
         }
     }

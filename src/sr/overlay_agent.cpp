@@ -21,7 +21,7 @@ void OverlayAgent::DecidedQuery( QueryAgentInterface &query,
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )        
     {
-        query.AddLocalMatch(false);  
+        query.AddLocalMismatch();  
         return;
     }
 

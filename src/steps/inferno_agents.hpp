@@ -158,7 +158,8 @@ private:
                                const TreePtrInterface *px ) const                
     {
         query.Reset();
-        query.AddLocalMatch( IsMatch( *px ) );
+        if( !IsMatch( *px ) )
+            query.AddLocalMismatch();
     }                                
 };
 
@@ -175,7 +176,8 @@ private:
                                const TreePtrInterface *px ) const
     {
         query.Reset();
-        query.AddLocalMatch( IsMatch( *px ) );
+        if( !IsMatch( *px ) )
+            query.AddLocalMismatch();
     }                                
 };
 
@@ -192,7 +194,8 @@ private:
                                const TreePtrInterface *px ) const                 
     {
         query.Reset();
-        query.AddLocalMatch( IsMatch( *px ) );
+        if( !IsMatch( *px ) )
+            query.AddLocalMismatch();
     }                                
 };
 

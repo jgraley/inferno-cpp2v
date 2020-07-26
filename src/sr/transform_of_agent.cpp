@@ -28,7 +28,7 @@ void TransformOfAgent::DecidedQuery( QueryAgentInterface &query,
 	{
 	    // Transformation returned NULL, probably because the candidate was incompatible
         // with the transofrmation - a search MISS.
-	    query.AddLocalMatch(false);
+	    query.AddLocalMismatch();
 	}
 }
 

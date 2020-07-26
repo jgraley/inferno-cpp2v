@@ -55,7 +55,7 @@ void StandardAgent::DecidedQuery( QueryAgentInterface &query,
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )        
     {
-        query.AddLocalMatch(false);  
+        query.AddLocalMismatch();  
         return;
     }
 
@@ -134,7 +134,7 @@ void StandardAgent::DecidedQuerySequence( QueryAgentInterface &query,
     }
     if( px->size() < pattern_num_non_star )
     {
-        query.AddLocalMatch(false);   // TODO break to get the final trace?
+        query.AddLocalMismatch();   // TODO break to get the final trace?
         return;
     }
     ContainerInterface::iterator xit_star_limit = px->end();            
@@ -196,11 +196,12 @@ void StandardAgent::DecidedQuerySequence( QueryAgentInterface &query,
 
     // If we finished the job and pattern and subject are still aligned, then it was a match
 	TRACE("Finishing compare sequence %d %d\n", xit==px->end(), pit==pattern.end() );
-    query.AddLocalMatch( xit==px->end() && pit==pattern.end() );
-    if( query.IsLocalMatch() )
-    {
+    if( xit != px->end() )
+        query.AddLocalMismatch();
+    else if( pit != pattern.end() )
+        query.AddLocalMismatch();
+    else 
         ASSERT( p_remaining==0 );
-	}
 }
 
 
@@ -272,7 +273,7 @@ void StandardAgent::DecidedQueryCollection( QueryAgentInterface &query,
 	    else // ran out of x elements - local mismatch
         {
             TRACE("mismatch - x ran out\n");
-            query.AddLocalMatch(false);
+            query.AddLocalMismatch();
             return;
         }
     }
@@ -283,7 +284,7 @@ void StandardAgent::DecidedQueryCollection( QueryAgentInterface &query,
     if( !xremaining.empty() && !star )
     {
         TRACE("mismatch - x left over\n");
-        query.AddLocalMatch(false); // there were elements left over and no star to match them against
+        query.AddLocalMismatch(); // there were elements left over and no star to match them against
         return;
     }
 

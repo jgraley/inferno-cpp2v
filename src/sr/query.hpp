@@ -103,7 +103,7 @@ public:
     virtual void AddLink( bool abnormal, Agent *a, const TreePtrInterface *px ) = 0; 
     virtual void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) = 0; 
     virtual void AddEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
-    virtual void AddLocalMatch( bool local_match ) = 0;
+    virtual void AddLocalMismatch() = 0;
 };
 
 
@@ -145,7 +145,7 @@ public:
     void AddLink( bool abnormal, Agent *a, const TreePtrInterface *px ); 
     void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ); 
     void AddEvaluator( shared_ptr<BooleanEvaluator> e ); 
-    void AddLocalMatch( bool local_match );
+    void AddLocalMismatch();
                                                   
     const Links *GetLinks() const { return &links; } // pointer returned because the links contain the local links
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }

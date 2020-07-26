@@ -24,7 +24,7 @@ void NotMatchAgent::DecidedQuery( QueryAgentInterface &query,
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )      
     {
-        query.AddLocalMatch(false);  
+        query.AddLocalMismatch();  
         return;
     }
     
@@ -76,7 +76,7 @@ void MatchAllAgent::DecidedQuery( QueryAgentInterface &query,
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )        
     {
-        query.AddLocalMatch(false);  
+        query.AddLocalMismatch();  
         return;
     }
     
@@ -125,7 +125,7 @@ void MatchAnyAgent::DecidedQuery( QueryAgentInterface &query,
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )        
     {
-        query.AddLocalMatch(false);  
+        query.AddLocalMismatch();  
         return;
     }
     

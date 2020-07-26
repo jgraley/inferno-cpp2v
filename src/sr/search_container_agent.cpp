@@ -27,7 +27,7 @@ void SearchContainerAgent::DecidedQuery( QueryAgentInterface &query,
     // Check pre-restriction
     if( !IsLocalMatch(px->get()) )        
     {
-        query.AddLocalMatch(false);  
+        query.AddLocalMismatch();  
         return;
     }
 
@@ -41,7 +41,7 @@ void SearchContainerAgent::DecidedQuery( QueryAgentInterface &query,
     
     if( pwx->empty() )
     {
-        query.AddLocalMatch(false);   // The search container is empty, thus terminus could never be matched
+        query.AddLocalMismatch();   // The search container is empty, thus terminus could never be matched
         return;
     }
 
