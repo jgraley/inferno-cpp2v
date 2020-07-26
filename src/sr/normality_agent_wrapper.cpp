@@ -22,7 +22,7 @@ void NormalityAgentWrapper::Configure( const Set<Agent *> &engine_agents,
     PatternQueryResult plinks = wrapped_agent->PatternQuery();
 
     abnormal_links.clear();    
-    FOREACH( PatternQueryResult::Block b, plinks.blocks )
+    FOREACH( PatternQueryResult::Link b, plinks.blocks )
     {
 		if( b.abnormal )
 		{
@@ -58,7 +58,7 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
     wrapper_result.evaluator = wrapped_result.evaluator;
 	
     list< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
-    FOREACH( PatternQueryResult::Block b, plinks.blocks ) // JSG2020 wrapped_result.blocks?
+    FOREACH( PatternQueryResult::Link b, plinks.blocks ) // JSG2020 wrapped_result.blocks?
     {
 		if( b.abnormal )
 		{
@@ -66,7 +66,7 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
 			++alit;
 			FOREACH( Agent *ta, al->terminal_agents )
 			{
-				PatternQueryResult::Block nb;
+				PatternQueryResult::Link nb;
 				nb.abnormal = false;
 				nb.agent = ta;
 				wrapped_result.push_back( nb ); // JSG2020 wrapper_result.push_back?
@@ -89,7 +89,7 @@ void NormalityAgentWrapper::DecidedQuery( AgentQuery &wrapper_query,
     AgentQuery wrapped_query;
     list< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
     int i=0;
-    FOREACH( PatternQueryResult::Block b, plinks.blocks ) // JSG2020 wrapped_result.blocks?
+    FOREACH( PatternQueryResult::Link b, plinks.blocks ) // JSG2020 wrapped_result.blocks?
     {
 		if( b.abnormal )
 		{
@@ -124,9 +124,9 @@ void NormalityAgentWrapper::DecidedQuery( AgentQuery &wrapper_query,
     // own abnormal_links container.
     list<bool> compare_results;
     list< AbnormalLink >::iterator alit = abnormal_links.begin();    
-    FOREACH( AgentQuery::Block b, *(wrapped_query.GetBlocks()) )
+    FOREACH( AgentQuery::Link b, *(wrapped_query.GetLinks()) )
     {
-		if( b.is_link && b.abnormal )
+		if( b.abnormal )
 		{
 			al = *alit;
 			++alit;
@@ -167,7 +167,7 @@ void NormalityAgentWrapper::DecidedQuery( AgentQuery &wrapper_query,
     	}
 	    else
 	    {
-		    wrapper_query.AddBlock( b ); // TODO implement
+		    wrapper_query.AddLink( b ); // TODO implement
 		}
     }
 	
@@ -244,7 +244,7 @@ shared_ptr<ContainerInterface> NormalityAgentWrapper::GetVisibleChildren() const
 	shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
 
     // Hide the abnormal children. I need different names for things.
-    FOREACH( PatternQueryResult::Block b, plinks.blocks )
+    FOREACH( PatternQueryResult::Link b, plinks.blocks )
 		if( !b.abnormal )
 			seq->push_back( b.agent );
 			

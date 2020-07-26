@@ -8,7 +8,7 @@ using namespace SR;
 
 void PatternQueryResult::AddLink( bool abnormal, Agent *a )
 {
-    Block b;
+    Link b;
     b.abnormal = abnormal;
     b.agent = a;
     
@@ -22,8 +22,7 @@ void PatternQueryResult::AddLink( bool abnormal, Agent *a )
 
 void AgentQuery::AddLink( bool abnormal, Agent *a, const TreePtrInterface *px )
 {
-    Block b;
-    b.is_link = true;
+    Link b;
     b.abnormal = abnormal;
     b.agent = a;
     b.px = px;
@@ -40,8 +39,7 @@ void AgentQuery::AddLink( bool abnormal, Agent *a, const TreePtrInterface *px )
 void AgentQuery::AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
 {
     ASSERT(x);
-    Block b;
-    b.is_link = true;
+    Link b;
     b.abnormal = abnormal;
     b.agent = a;
     b.px = NULL;    
@@ -111,7 +109,7 @@ void AgentQuery::AddLocalMatch( bool lm )
 }                                    
                                         
                                         
-bool SR::operator<(const SR::AgentQuery::Block &l0, const SR::AgentQuery::Block &l1)
+bool SR::operator<(const SR::AgentQuery::Link &l0, const SR::AgentQuery::Link &l1)
 {
     if( l0.abnormal != l1.abnormal )
         return (int)l0.abnormal < (int)l1.abnormal;

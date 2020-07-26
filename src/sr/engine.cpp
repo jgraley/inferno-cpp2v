@@ -185,57 +185,54 @@ bool Engine::CompareLinks( const AgentQuery &query,
     bool made_coupling_keys = false;  
     CouplingMap coupling_keys;
     int i=0;
-    FOREACH( const AgentQuery::Block &b, *query.GetBlocks() )
+    FOREACH( const AgentQuery::Link &b, *query.GetLinks() )
     {
-        if( b.is_link ) // skip decisions    
-		{
-			TRACE("Comparing block %d\n", i);
-	 
-			// Get x for linked node
-			const TreePtrInterface *px = b.GetPX();
-			ASSERT( *px );
-			   
-			// Recurse now       
-			if( b.abnormal )
-			{
-				// Non-evaluator abnormal cases only.
-				if( can_key )
-					continue; // Only check abnormals in restricting pass
-					
-				if( !made_coupling_keys ) // optimisation: only make them once, if needed at all. See #43
-				{
-					coupling_keys = MapUnion( master_keys, local_keys ); 
-					made_coupling_keys = true;
-				}
-				
-				if( !Compare( b.agent, px, coupling_keys ) )
-					return false;
-			}    
-			else
-			{
-				// Check for a coupling match to a master engine's agent. 
-				SimpleCompare sc;
-				if( master_keys.IsExist(b.agent) )
-				{
-                    if( can_key && !sc( *px, master_keys.At(b.agent) ) ) // only in first pass
-                        return false;
-				}
-				// Check for a coupling match to one of our agents we reached earlier in this pass.
-				else if( reached.IsExist(b.agent) )
-				{
-                    if( can_key && !sc( *px, local_keys.At(b.agent) ) ) // only in first pass
-					    return false;
-				}
-				else
-				{
-					// Recurse normally
-					if( !DecidedCompare(b.agent, px, can_key, conj, local_keys, master_keys, reached) )
-						return false;
-				}
-			}
-			
-			i++;
-		}
+        TRACE("Comparing block %d\n", i);
+ 
+        // Get x for linked node
+        const TreePtrInterface *px = b.GetPX();
+        ASSERT( *px );
+           
+        // Recurse now       
+        if( b.abnormal )
+        {
+            // Non-evaluator abnormal cases only.
+            if( can_key )
+                continue; // Only check abnormals in restricting pass
+                
+            if( !made_coupling_keys ) // optimisation: only make them once, if needed at all. See #43
+            {
+                coupling_keys = MapUnion( master_keys, local_keys ); 
+                made_coupling_keys = true;
+            }
+            
+            if( !Compare( b.agent, px, coupling_keys ) )
+                return false;
+        }    
+        else
+        {
+            // Check for a coupling match to a master engine's agent. 
+            SimpleCompare sc;
+            if( master_keys.IsExist(b.agent) )
+            {
+                if( can_key && !sc( *px, master_keys.At(b.agent) ) ) // only in first pass
+                    return false;
+            }
+            // Check for a coupling match to one of our agents we reached earlier in this pass.
+            else if( reached.IsExist(b.agent) )
+            {
+                if( can_key && !sc( *px, local_keys.At(b.agent) ) ) // only in first pass
+                    return false;
+            }
+            else
+            {
+                // Recurse normally
+                if( !DecidedCompare(b.agent, px, can_key, conj, local_keys, master_keys, reached) )
+                    return false;
+            }
+        }
+        
+        i++;
     }
       
     return true;
@@ -255,19 +252,16 @@ bool Engine::CompareEvaluatorLinks( const AgentQuery &query,
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
     list<bool> compare_results;
-    FOREACH( const AgentQuery::Block &b, *query.GetBlocks() )
+    FOREACH( const AgentQuery::Link &b, *query.GetLinks() )
     {
-        if( b.is_link ) // skip decisions
-		{
-			TRACE("Comparing block %d\n", i);
-			ASSERT( b.abnormal )("When an evaluator is used, all blocks must be into abnormal contexts");
-	 
-			// Get x for linked node
-			const TreePtrInterface *px = b.GetPX();
-								
-			compare_results.push_back( Compare( b.agent, px, coupling_keys ) );
-			i++;
-		}
+        TRACE("Comparing block %d\n", i);
+        ASSERT( b.abnormal )("When an evaluator is used, all blocks must be into abnormal contexts");
+ 
+        // Get x for linked node
+        const TreePtrInterface *px = b.GetPX();
+                            
+        compare_results.push_back( Compare( b.agent, px, coupling_keys ) );
+        i++;
     }
     
     shared_ptr<BooleanEvaluator> evaluator = query.GetEvaluator();

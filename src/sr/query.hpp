@@ -16,7 +16,7 @@ class Agent;
 class PatternQueryResult 
 {
 public:    
-    struct Block 
+    struct Link 
     {
         bool abnormal;
         Agent *agent;
@@ -31,11 +31,11 @@ public:
     void AddLink( bool abnormal, Agent *a );
     void AddEvaluator( shared_ptr<BooleanEvaluator> e );
     
-    const list<Block> *GetBlocks() const { return &blocks; } // pointer returned because the blocks contain the local links
+    const list<Link> *GetLinks() const { return &blocks; } // pointer returned because the blocks contain the local links
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
 
 private:
-    list<Block> blocks;
+    list<Link> blocks;
     shared_ptr<BooleanEvaluator> evaluator;
 };
 
@@ -55,13 +55,11 @@ public:
 		}
     };
     
-    // There is a "random access" in Conjecture::IncrementAgent() not sure if true any more
+    // There is a "random access" in Conjecture::FillMissingChoicesWithBegin()
     typedef vector<Range> Ranges;
-
-    // There is a "random access" in AddDecision() not sure if true any more
     typedef vector<ContainerInterface::iterator> Choices; 
 
-    struct Block 
+    struct Link 
     {
         const TreePtrInterface *GetPX() const
         {
@@ -71,7 +69,6 @@ public:
 				return &local_x; // linked x is local, kept alive by local_x    
 		}	
 
-        bool is_link;
         bool abnormal;
         Agent *agent;
         const TreePtrInterface *px;
@@ -94,7 +91,7 @@ public:
                                               std::shared_ptr<ContainerInterface> container=nullptr );
     void AddLocalMatch( bool local_match );
                                                   
-    const list<Block> *GetBlocks() const { return &blocks; } // pointer returned because the blocks contain the local links
+    const list<Link> *GetLinks() const { return &blocks; } // pointer returned because the blocks contain the local links
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
     bool IsLocalMatch() { return local_match; }
       
@@ -117,7 +114,7 @@ public:
     void Reset();
     
 private:
-    list<Block> blocks; 
+    list<Link> blocks; 
     shared_ptr<BooleanEvaluator> evaluator;
     bool local_match = true;
     Choices choices;
@@ -128,6 +125,6 @@ private:
 };
 
 
-bool operator<(const AgentQuery::Block &l0, const AgentQuery::Block &l1);
+bool operator<(const AgentQuery::Link &l0, const AgentQuery::Link &l1);
 };
 #endif
