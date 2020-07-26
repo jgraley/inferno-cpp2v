@@ -244,10 +244,13 @@ void StandardAgent::DecidedQueryCollection( QueryAgentInterface &query,
                 
                 // Now take a copy. Would like range-for here #54
                 xremaining.clear();
-                for( ContainerInterface::iterator it=old_decision.container->begin();
-                     it != old_decision.container->end();
-                     ++it )
-                    xremaining.push_back(*it);
+                FOREACH( TreePtr<Node> tp, *old_decision.container )
+                    xremaining.push_back(tp);
+                
+                //for( ContainerInterface::iterator it=old_decision.container->begin();
+                //     it != old_decision.container->end();
+                //     ++it )
+                //    xremaining.push_back(*it);
                     
                 // re-submit the exact same decision.
                 xit = query.AddNextOldDecision();
