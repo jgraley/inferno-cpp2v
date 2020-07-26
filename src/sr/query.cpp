@@ -184,7 +184,11 @@ const Conjecture::Range &AgentQuery::GetNextOldDecision()
 
 ContainerInterface::iterator AgentQuery::AddNextOldDecision()
 {
-    return AddDecision( GetNextOldDecision() );
+    ASSERT( next_choice != choices.end() );
+    ContainerInterface::iterator it = *next_choice; // Use the choice that was given to us
+    ++next_decision; 
+    ++next_choice;
+    return it;
 }
 
 
