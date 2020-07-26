@@ -1,5 +1,7 @@
 include makefile.common
 include src/makefile
+include test/makefile
+include resource/makefile
 
 .PHONY: default all get_libs test docs force_subordinate_makefiles clean iclean resource publish doxygen pattern_graphs doc_graphs
 default : inferno.exe
@@ -65,23 +67,11 @@ clean_libclang%.a :
 	-cd llvm/tools/clang/lib/$(patsubst clean_libclang%.a,%,$@) && $(MAKE) $(LLVM_CLANG_OPTIONS) clean	
     	   	
 #
-# Compile inferno sources
-#    	
-#build/inferno.a : force_subordinate_makefiles
-#	cd src && $(MAKE) --jobs=$(JOBS) build/inferno.a
-
-#
 # Link inferno executable
 #
 STANDARD_LIBS += -lstdc++
 inferno.exe : makefile makefile.common build/inferno.a $(LLVM_CLANG_LIB_PATHS)
 	$(ICC) build/inferno.a $(LLVM_CLANG_LIB_PATHS) $(STANDARD_LIBS) -ggdb -pg -no-pie -o inferno.exe
-
-#
-# Build the resources
-#
-resource : force_subordinate_makefiles 
-	cd resource && $(MAKE)
 
 #
 # Build the doxygen docs
@@ -116,20 +106,17 @@ publish : makefile docs inferno.exe docs/web/publish.sh
 #
 # Run the main Inforno tests
 #
-test : makefile inferno.exe resource
-	test/runtests.sh
+test : test/results/default.pass
 	
 #
 # Run the search and replace tests (requires reference outputs to be in in test/reference/srtest/)
 #
-srtest : makefile inferno.exe resource
-	test/runtests.sh sr
+srtest : test/results/sr.pass
 	
 #
 # Run the repeatbility tests (requires reference trace logs to be in in test/reference/reptest/)
 #
-reptest : makefile inferno.exe resource
-	test/runtests.sh rep
+reptest : test/results/rep.pass
 	
 #
 # Cleaning up

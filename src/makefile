@@ -1,5 +1,3 @@
-include makefile.common
-
 SRC = src
 SRC_OPTIONS = $(OPTIONS) -I$(SRC)
 
