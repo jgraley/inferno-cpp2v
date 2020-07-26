@@ -1,4 +1,6 @@
 include makefile.common
+include src/makefile
+
 .PHONY: default all get_libs test docs force_subordinate_makefiles clean iclean resource publish doxygen pattern_graphs doc_graphs
 default : inferno.exe
 all : clean get_libs inferno.exe resource docs test
@@ -65,15 +67,15 @@ clean_libclang%.a :
 #
 # Compile inferno sources
 #    	
-src/build/inferno.a : force_subordinate_makefiles
-	cd src && $(MAKE) --jobs=$(JOBS) build/inferno.a
+#build/inferno.a : force_subordinate_makefiles
+#	cd src && $(MAKE) --jobs=$(JOBS) build/inferno.a
 
 #
 # Link inferno executable
 #
 STANDARD_LIBS += -lstdc++
-inferno.exe : makefile makefile.common src/build/inferno.a $(LLVM_CLANG_LIB_PATHS)
-	$(ICC) src/build/inferno.a $(LLVM_CLANG_LIB_PATHS) $(STANDARD_LIBS) -ggdb -pg -no-pie -o inferno.exe
+inferno.exe : makefile makefile.common build/inferno.a $(LLVM_CLANG_LIB_PATHS)
+	$(ICC) build/inferno.a $(LLVM_CLANG_LIB_PATHS) $(STANDARD_LIBS) -ggdb -pg -no-pie -o inferno.exe
 
 #
 # Build the resources
