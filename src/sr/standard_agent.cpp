@@ -242,15 +242,10 @@ void StandardAgent::DecidedQueryCollection( QueryAgentInterface &query,
                 // Decision already in conjecture and valid. 
                 const Conjecture::Range &old_decision = query.GetNextOldDecision();
                 
-                // Now take a copy. Would like range-for here #54
+                // Now take a copy. 
                 xremaining.clear();
                 FOREACH( TreePtr<Node> tp, *old_decision.container )
                     xremaining.push_back(tp);
-                
-                //for( ContainerInterface::iterator it=old_decision.container->begin();
-                //     it != old_decision.container->end();
-                //     ++it )
-                //    xremaining.push_back(*it);
                     
                 // re-submit the exact same decision.
                 xit = query.AddNextOldDecision();
