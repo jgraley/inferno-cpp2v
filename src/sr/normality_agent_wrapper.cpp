@@ -4,8 +4,8 @@
 
 using namespace SR;
 
-// Terminology: abnormal context, as normal, means the subtree under an abnormal block
-// evaluator context means an evaluator node and all the abnormal contexts it blocks into
+// Terminology: abnormal context, as usual, means the subtree under an abnormal block;
+// evaluator context means an evaluator node and all the abnormal contexts it links into
 // in both cases, contexts end at couplings.
 // The region contains all the agents in a context.
 
@@ -22,7 +22,7 @@ void NormalityAgentWrapper::Configure( const Set<Agent *> &engine_agents,
     PatternQueryResult plinks = wrapped_agent->PatternQuery();
 
     abnormal_links.clear();    
-    FOREACH( PatternQueryResult::Link b, plinks.blocks )
+    FOREACH( PatternQueryResult::Link b, plinks.GetLinks() )
     {
 		if( b.abnormal )
 		{
@@ -58,7 +58,7 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
     wrapper_result.evaluator = wrapped_result.evaluator;
 	
     list< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
-    FOREACH( PatternQueryResult::Link b, plinks.blocks ) // JSG2020 wrapped_result.blocks?
+    FOREACH( PatternQueryResult::Link b, wrapper_result.GetLinks() ) 
     {
 		if( b.abnormal )
 		{
@@ -69,12 +69,12 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
 				PatternQueryResult::Link nb;
 				nb.abnormal = false;
 				nb.agent = ta;
-				wrapped_result.push_back( nb ); // JSG2020 wrapper_result.push_back?
+				wrapper_result.push_back( nb );
 			}
 		}
 		else
 		{
-			wrapped_result.push_back( b ); // JSG2020 wrapper_result.push_back?
+			wrapper_result.push_back( b );
 		}
 	}
 	return wrapper_result;
@@ -89,7 +89,7 @@ void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
     AgentQuery wrapped_query;
     list< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
     int i=0;
-    FOREACH( PatternQueryResult::Link b, plinks.blocks ) // JSG2020 wrapped_result.blocks?
+    FOREACH( PatternQueryResult::Link b, wrapper_query.GetLinks() ) // JSG2020 wrapped_result.blocks?
     {
 		if( b.abnormal )
 		{
@@ -110,7 +110,7 @@ void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
     
     wrapper_query.Reset();
     
-    // Query the wrapped node for blocks and decisions
+    // Query the wrapped node for links and decisions
     wrapped_agent->DecidedQuery( wrapped_query, px );
     
     // Early-out on local mismatch of wrapped node.
@@ -120,7 +120,7 @@ void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
 		return;
 	}           
 
-    // Loop over the wrapped node's returned blocks. Abnormal entries are co-looped with our
+    // Loop over the wrapped node's returned links. Abnormal entries are co-looped with our
     // own abnormal_links container.
     list<bool> compare_results;
     list< AbnormalLink >::iterator alit = abnormal_links.begin();    
@@ -201,7 +201,7 @@ void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
 
 /* What might happen:
  * A pass reaches a NormalityAgentWrapper for an evaluator context. The wrapper registers whole-domain 
- * decisions for all couplings OUT of the evaluator's abnormals and gets choices. It blocks out back
+ * decisions for all couplings OUT of the evaluator's abnormals and gets choices. It links out back
  * into the surrounding context with these choices, and they are therefore evaluated using the 
  * global AND-rule. But this is CORRECT! Since a coupling must include at least one normal 
  * context, that normal context will restrict the entire search to successful matches of the
@@ -215,9 +215,9 @@ void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
  *     - from master root, so truly fixed
  * - moving the domains to equivalence classes (modulo SimpleCompare) is a seperate optimisation
  * - need coupling pushing to avoid the extra decision search resulting from the new decision
- *     - this can only work of regions come last, but now this is an efficiency concern
+ *     - this can only work if regions come last, but now this is an efficiency concern
  *       rather than correctness.
- *     - coupling pushing needs blocks and decisions to be more closely bound, and that is
+ *     - coupling pushing needs links and decisions to be more closely bound, and that is
  *       the next Agent tweak I would say.
  */
 
@@ -244,7 +244,7 @@ shared_ptr<ContainerInterface> NormalityAgentWrapper::GetVisibleChildren() const
 	shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
 
     // Hide the abnormal children. I need different names for things.
-    FOREACH( PatternQueryResult::Link b, plinks.blocks )
+    FOREACH( PatternQueryResult::Link b, *(wrapped_query.GetLinks()) )
 		if( !b.abnormal )
 			seq->push_back( b.agent );
 			

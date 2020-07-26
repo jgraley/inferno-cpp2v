@@ -255,7 +255,7 @@ bool Engine::CompareEvaluatorLinks( const AgentQuery &query,
     FOREACH( const AgentQuery::Link &b, *query.GetLinks() )
     {
         TRACE("Comparing block %d\n", i);
-        ASSERT( b.abnormal )("When an evaluator is used, all blocks must be into abnormal contexts");
+        ASSERT( b.abnormal )("When an evaluator is used, all links must be into abnormal contexts");
  
         // Get x for linked node
         const TreePtrInterface *px = b.GetPX();
@@ -295,8 +295,8 @@ bool Engine::DecidedCompare( Agent *agent,
 
     if( can_key ) // only in first pass...
     {
-        // Run the compare implementation to get the blocks based on the choices
-        TRACE(*agent)("?=")(**px)(" Gathering blocks\n");    
+        // Run the compare implementation to get the links based on the choices
+        TRACE(*agent)("?=")(**px)(" Gathering links\n");    
         agent->DecidedQuery( *query, px );
         TRACE(*agent)("?=")(**px)(" local match ")(query->IsLocalMatch())("\n");
                 
@@ -310,15 +310,15 @@ bool Engine::DecidedCompare( Agent *agent,
             local_keys[agent] = *px;
     }
           
-    // Use worker functions to go through the blocks, special case if there is evaluator
+    // Use worker functions to go through the links, special case if there is evaluator
     if( !query->GetEvaluator() )
     {
-		TRACE(*agent)("?=")(**px)(" Comparing blocks\n");
+		TRACE(*agent)("?=")(**px)(" Comparing links\n");
         return CompareLinks( *query, can_key, conj, local_keys, master_keys, reached );
 	}
     else if( !can_key ) // only in second pass...
     {
-		TRACE(*agent)("?=")(**px)(" Comparing evaluator blocks\n");
+		TRACE(*agent)("?=")(**px)(" Comparing evaluator links\n");
         return CompareEvaluatorLinks( *query, conj, local_keys, master_keys, reached );
 	}
     else

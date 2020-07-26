@@ -25,7 +25,7 @@ class NormalityAgentWrapper : public virtual Agent
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     shared_ptr<ContainerInterface> GetVisibleChildren() const;
     
-    // Holder for info beyond what PatternQuery provides (the agent) for abnormal blocks.     
+    // Holder for info beyond what PatternQuery provides (the agent) for abnormal links.     
     struct AbnormalLink
     {
 		AbnormalLink() : engine(false) {} // Engine is compare, not search
@@ -38,10 +38,10 @@ class NormalityAgentWrapper : public virtual Agent
 	};
     
     // The agent we are wrapping. Typically we will wrap all agents with >0 
-    // abnormal blocks.
+    // abnormal links.
     Agent * const wrapped_agent;    
     
-    // Additional block info for abnormal blocks, in same order as Pattern/DecidedQuery
+    // Additional info for abnormal links, in same order as Pattern/DecidedQuery
     list< shared_ptr<AbnormalLink> > abnormal_links;
     
     // Map of keys

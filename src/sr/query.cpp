@@ -15,8 +15,8 @@ void PatternQueryResult::AddLink( bool abnormal, Agent *a )
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
-    TRACE("Remembering block %d ", blocks.size())(*a)(abnormal?" abnormal":" normal")("\n");
-    blocks.push_back( b );
+    TRACE("Remembering block %d ", links.size())(*a)(abnormal?" abnormal":" normal")("\n");
+    links.push_back( b );
 }
 
 
@@ -31,8 +31,8 @@ void AgentQuery::AddLink( bool abnormal, Agent *a, const TreePtrInterface *px )
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
-    TRACE("Remembering block %d ", blocks.size())(*a)(" -> ")(**px)(abnormal?" abnormal":" normal")("\n");
-    blocks.push_back( b );
+    TRACE("Remembering block %d ", links.size())(*a)(" -> ")(**px)(abnormal?" abnormal":" normal")("\n");
+    links.push_back( b );
 }
 
 
@@ -48,8 +48,8 @@ void AgentQuery::AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
-    TRACE("Remembering local block %d ", blocks.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
-    blocks.push_back( b );
+    TRACE("Remembering local block %d ", links.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
+    links.push_back( b );
 }
 
 
@@ -190,7 +190,7 @@ ContainerInterface::iterator AgentQuery::AddNextOldDecision()
 
 void AgentQuery::Reset()
 {
-    blocks.clear();
+    links.clear();
     evaluator = shared_ptr<BooleanEvaluator>();    
     next_decision = decisions.begin();  
     next_choice = choices.begin();  

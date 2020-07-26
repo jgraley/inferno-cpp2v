@@ -29,7 +29,7 @@ public:
         return *this;
     }
 
-    /// List the Agents reached via blocks during search
+    /// List the Agents reached via links during search
     virtual PatternQueryResult PatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual void DecidedQuery( QueryAgentInterface &query,

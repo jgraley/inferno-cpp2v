@@ -23,19 +23,21 @@ public:
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
     };
         
+    typedef list<Link> Links;       
+        
     void clear()
     {
-		blocks.clear();
+		links.clear();
         evaluator = shared_ptr<BooleanEvaluator>();
     }
     void AddLink( bool abnormal, Agent *a );
     void AddEvaluator( shared_ptr<BooleanEvaluator> e );
     
-    const list<Link> *GetLinks() const { return &blocks; } // pointer returned because the blocks contain the local links
+    const Links *GetLinks() const { return &links; } // pointer returned because the links contain the local links
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
 
 private:
-    list<Link> blocks;
+    Links links;
     shared_ptr<BooleanEvaluator> evaluator;
 };
 
@@ -55,10 +57,6 @@ public:
 		}
     };
     
-    // There is a "random access" in Conjecture::FillMissingChoicesWithBegin()
-    typedef vector<Range> Ranges;
-    typedef vector<ContainerInterface::iterator> Choices; 
-
     struct Link 
     {
         const TreePtrInterface *GetPX() const
@@ -75,6 +73,11 @@ public:
         TreePtr<Node> local_x;
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
     };
+    
+    // There is a "random access" in Conjecture::FillMissingChoicesWithBegin()
+    typedef vector<Range> Ranges;
+    typedef vector<ContainerInterface::iterator> Choices; 
+    typedef list<Link> Links;
     
     virtual bool IsLocalMatch() = 0;
     virtual const Choices *GetChoices() = 0;
@@ -107,8 +110,9 @@ public:
 class QueryClientInterface : virtual public QueryCommonInterface
 {
 public:
-    virtual const list<Link> *GetLinks() const = 0; // pointer returned because the blocks contain the local links
+    virtual const Links *GetLinks() const = 0; // pointer returned because the links contain the local links
     virtual shared_ptr<BooleanEvaluator> GetEvaluator() const = 0;
+    
     virtual const Ranges *GetDecisions() = 0;
     virtual void InvalidateBack() = 0;
     virtual void SetBackChoice( ContainerInterface::iterator newc ) = 0;
@@ -125,20 +129,8 @@ public:
         next_choice( choices.begin() ) // will be end()
     {
     }
-    void AddLink( bool abnormal, Agent *a, const TreePtrInterface *px ); 
-    void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ); 
-    void AddEvaluator( shared_ptr<BooleanEvaluator> e ); 
-    void AddLocalMatch( bool local_match );
-                                                  
-    const list<Link> *GetLinks() const { return &blocks; } // pointer returned because the blocks contain the local links
-    shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
-    bool IsLocalMatch() { return local_match; }
-      
-    const Choices *GetChoices() { return &choices; }
-    const Ranges *GetDecisions() { return &decisions; }
-    void InvalidateBack();
-    void SetBackChoice( ContainerInterface::iterator newc );
-    void PushBackChoice( ContainerInterface::iterator newc );    
+    void Reset();
+
     ContainerInterface::iterator AddDecision( const Range &d );
     ContainerInterface::iterator AddDecision( ContainerInterface::iterator begin,
                                               ContainerInterface::iterator end,
@@ -149,16 +141,29 @@ public:
     bool IsAlreadyGotNextOldDecision();
     const Range &GetNextOldDecision();
     ContainerInterface::iterator AddNextOldDecision();
-    void Reset();
+
+    void AddLink( bool abnormal, Agent *a, const TreePtrInterface *px ); 
+    void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ); 
+    void AddEvaluator( shared_ptr<BooleanEvaluator> e ); 
+    void AddLocalMatch( bool local_match );
+                                                  
+    const Links *GetLinks() const { return &links; } // pointer returned because the links contain the local links
+    shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
+    bool IsLocalMatch() { return local_match; }
+      
+    const Choices *GetChoices() { return &choices; }
+    const Ranges *GetDecisions() { return &decisions; }
+    void InvalidateBack();
+    void SetBackChoice( ContainerInterface::iterator newc );
+    void PushBackChoice( ContainerInterface::iterator newc );    
     
 private:
-    list<Link> blocks; 
     shared_ptr<BooleanEvaluator> evaluator;
     bool local_match = true;
-    Choices choices;
+    Links links; 
     Ranges decisions;
-    
     Ranges::iterator next_decision;
+    Choices choices;
     Choices::iterator next_choice;
 };
 
