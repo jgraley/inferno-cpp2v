@@ -22,13 +22,17 @@ pre-restriction
 	StandardAgent (subcontainers)
 	StarAgent (pattern restriction)
 	
-Subcontainer is constructed - even though it could be refs...?	
+Subcontainer is constructed - even though it could be pointers...?	
  - TODO maybe merge star algo back in to SA (maybe absorb stars into 
    SAs in a pre-pass).
 	
 	SearchContainerAgent (recurse restriction)
 	
-Comes from Walk_iterator::GetPath(). Whole thing would need to use refs.
+Comes from Walk_iterator::GetPath(). Whole thing would need to use pointers - 
+No, I think we just need a pointers version of Walk_iterator::GetPath(),
+I think the poointers can be got via eg &*iterator, and the off by one
+needs sorting (include root, exclude whatever's on the leaves - but 
+check current behaviour).
 	
 	TransformOfAgent
 
@@ -36,11 +40,8 @@ Is output of a transformation (input tree nodes crossed with transformations)
 	
 	PointerIsAgent
 	
-Architype is created locally (but 1:1 with input tree nodes)
-
-	NestedAgent (terminus)
-	
-Need Advance() etc to work with refs; not difficult TODO
+Architype is created locally (but 1:1 with input tree nodes)(no, better 
+than that, there is only one architype for each node TYPE).
 	
 	NestedAgent (depth)
 

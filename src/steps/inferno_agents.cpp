@@ -109,16 +109,15 @@ void NestedAgent::DecidedQuery( QueryAgentInterface &query,
     
     string s;
     // Keep advancing until we get NULL, and remember the last non-null position
-    TreePtr<Node> xt = *px;
+    const TreePtrInterface *pxt = px;
     int i = 0;
-    while( TreePtr<Node> tt = Advance(xt, &s) )
+    while( const TreePtrInterface *ptt = Advance(pxt, &s) )
     {
-        xt = tt;
+        pxt = ptt;
     } 
             
     // Compare the last position with the terminus pattern
-    // TODO I don't think a local link should be needed here?
-    query.AddLocalLink( false, AsAgent(terminus), xt );
+    query.AddLink( false, AsAgent(terminus), pxt );
     
     // Compare the depth with the supplied pattern if present
     if( depth )
@@ -129,30 +128,34 @@ void NestedAgent::DecidedQuery( QueryAgentInterface &query,
 }    
 
 
-TreePtr<Node> NestedArray::Advance( TreePtr<Node> n, string *depth ) const
+const TreePtrInterface *NestedArray::Advance(const TreePtrInterface *px, 
+                                             string *depth ) const
 {
-    if( TreePtr<Array> a = dynamic_pointer_cast<Array>(n) )         
-        return a->element; // TODO support depth string (or integer)
+    TreePtr<Node> n = *px;
+    if( auto a = dynamic_pointer_cast<Array>(n) )         
+        return &(a->element); // TODO support depth string (or integer)
     else
-        return TreePtr<Node>();
+        return nullptr;
 }
 
 
-TreePtr<Node> NestedSubscriptLookup::Advance( TreePtr<Node> n, string *depth ) const
+const TreePtrInterface *NestedSubscriptLookup::Advance( const TreePtrInterface *px, 
+                                                        string *depth ) const
 {
-    if( TreePtr<Subscript> s = dynamic_pointer_cast<Subscript>(n) )            
+    TreePtr<Node> n = *px;
+    if( auto s = dynamic_pointer_cast<Subscript>(n) )            
     {
         *depth += "S";
-        return s->operands.front(); // the base, not the index
+        return &(s->operands.front()); // the base, not the index
     }
-    else if( TreePtr<Lookup> l  = dynamic_pointer_cast<Lookup>(n) )            
+    else if( auto l = dynamic_pointer_cast<Lookup>(n) )            
     {
         *depth += "L";
-        return l->member; 
+        return &(l->member); 
     }
     else
     {
-        return TreePtr<Node>();
+        return nullptr;
     }
 }
 

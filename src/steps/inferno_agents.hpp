@@ -211,7 +211,9 @@ struct NestedAgent : public virtual InfernoAgent
     virtual void DecidedQuery( QueryAgentInterface &query,
                                const TreePtrInterface *px ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
-    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const = 0;
+    virtual const TreePtrInterface *Advance( const TreePtrInterface *px, 
+                                             string *depth ) const = 0;
+    
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;    
 };
@@ -224,7 +226,8 @@ struct NestedAgent : public virtual InfernoAgent
 struct NestedArray : NestedAgent, Special<CPPTree::Type>
 {
     SPECIAL_NODE_FUNCTIONS
-    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const;
+    virtual const TreePtrInterface *Advance( const TreePtrInterface *px, 
+                                             string *depth ) const;
 };
 
 
@@ -237,7 +240,8 @@ struct NestedArray : NestedAgent, Special<CPPTree::Type>
 struct NestedSubscriptLookup : NestedAgent, Special<CPPTree::Expression>
 {
     SPECIAL_NODE_FUNCTIONS
-    virtual TreePtr<Node> Advance( TreePtr<Node> n, string *depth ) const;
+    virtual const TreePtrInterface *Advance( const TreePtrInterface *px, 
+                                             string *depth ) const;
 };
 
 //---------------------------------- BuildContainerSize ------------------------------------    

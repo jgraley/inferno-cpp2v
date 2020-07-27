@@ -34,7 +34,7 @@ void SearchContainerAgent::DecidedQuery( QueryAgentInterface &query,
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(**px)("\n");
 
     // Get an interface to the container we will search
-    // TODO what is keeping pwx alive after this funciton exits? Are the iterators 
+    // TODO what is keeping pwx alive after this function exits? Are the iterators 
     // doing it? (they are stores in Conjecture). Maybe pwx is just a stateless
     // facade for the iterators and can be abandoned safely?
     shared_ptr<ContainerInterface> pwx = GetContainerInterface( *px );
