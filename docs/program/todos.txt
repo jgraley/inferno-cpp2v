@@ -1,0 +1,86 @@
+TODO list (to get the sequential phase looking good)
+
+Sweep for TODOs in code, but quite high theshold
+Get web page to reference all the docs 
+   - including this one
+
+figure out how to keep using the non-SC tests
+
+more reduction of reliance on Module - SC detection should be changed to not only work in Modules.
+
+sc_signal support
+   - maybe just replace all fundy types
+   - not sure where to put, earlier means new vars generated after step, later reduces usefulness of trace
+   - allowed everywhere though
+   - sc_signal for enums to be only just wide enough - make sure this works with state variables
+
+sc_trace for all sc_signals so they appear in VCD files (VCD trace otherwise done)
+   - due to statically declared modules strategy, output name must be trace.vcd, so move in test.sh etc
+
+fix steps with too-strong "and-not" clauses 
+   - like UseTempForReturnValue, for example 
+
+assertions for redundant intermediates? - no, builtin_return_address() will not match link label if there's caller-side epilog code
+
+tidy-up step to move module member temps back down into a function temp where possible (sensiblising)
+
+deal with returning from a thread module correctly (for elegance mostly)
+   - SC terminates when no pending events
+   - need to be able to exit the superloop in a SC_THREAD
+   - and fail to next_trigger() in SC_MEHTOD
+   - I think we already generate explicit return statements, so act on these during ThreadToMethod
+   
+get rid of Callable, CallableParams, Procedure etc. It's all guff. Just have Function
+
+add ability to lower wait(X) into yielding wait loop 
+   - not really critical at this stage, but makes the intention clearer for SC users
+   - moved out of 0.2, not actually sure if belongs in sequential phase
+
+new Transformation interface, allows returning a bool for "hit or missed" result (ie xformations used for emasurement)
+   - Make a "keep going until miss" meta-transformation, maybe use in S&R, definitely for cleanups
+
+make node-specific graphing be based on virtual functions in nodes, so that graph plotter does not need so many deps
+   - problem with hacky code in graph plotter that needs to decide when to recurse
+
+step to get the parameters of a function together into a single struct
+   - use this just before the step that passes params via temp, that way no need for additional temp
+
+function merging would be lighter touch if the callee was inserted near the first call point, not at the end
+   - obviously, the return label should lie below the inserted function
+   - manifestly no iteration for a call when only one call point 
+   - would tend to leave a top level superloop in place
+
+do not lower a manifest superloop if it is compatible with conversion directly to Method
+   - need to choose cannonical form, probably do...while(cond);
+     
+now that we have SimpleCompare factored out of S&R, why not also factor out a SimpleDuplicate for program tree->program tree duplication?
+   - but don't use for Stuff node substitution, because that terminates back into pattern subst!
+
+introduce intermediate called Departure, a base for Goto, Return, Break, Continue, Cease, Exit etc
+   - and maybe Arrival for labels?
+
+fix the test of delta cycles in the init state to use a 64-bit zero
+   - otherwise the compare is happening after downcasting to 32 bits and we will wrap prematurely
+   - probably need overloaded constructor for SpecificInteger
+   - or a templated one that uses the detection in type_db
+   - render in graphs using verilog notation eg 0'64
+
+maybe add an intermediate node Yield, that is a base for Wait etc. 
+   - It could go in cpptree, and so let us talk about yields generally.
+   - Backfit where Wait is searched for as a general yield rather than the actual SC wait.
+   - Uncombable, obviously
+
+do not like getting Wait(); state=blah; goto state; sequence
+   - Should be state=blah; Wait(); goto state;
+   - Only works at the moment because Wait does not invalidate blah which can be local/temp; conceptually wrong
+   - turn step for Wait-Wait, Goto, Label into step for Wait->State, Wait, Goto, Label bringing in fu from Goto->State, Goto 
+   - maybe get YieldGotoPolicy to insist that the wait comes last in the state block, slightly safer/more correct.
+
+do not enforce return in Thread functions - let them drop out
+
+come up with a way of getting result code out of test cases without needing exit/cease. 
+   - Excercise the "dropping out" capability 
+
+try out that new "gold" linker
+
+

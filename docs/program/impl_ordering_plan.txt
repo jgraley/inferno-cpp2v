@@ -1,0 +1,39 @@
+
+Implementation ordering plan
+
+Rationale:
+1. Repeatable renderings for test and diffing. Implies ordering preserved across rebuilds.
+2. Optmisations to simple compare and simple find on collections. Wildcarding not in scope of current plan (hard!)
+
+General:
+Create a strict weak ordering on subtrees. Take into account as much as 
+possible. This means commencing a walk until a difference is found. Then 
+provide that as a comparison op to the std::multset that underlies Collection, 
+and finally exploit as a speedup where possible.
+
+Tasks:
+- Add GetLocalCmp() to node interface. Return value as per strcmp() (hence "Cmp"). Use the type name string (mangled) DONE
+- Add overrides for payloaded nodes DONE
+- Add overide for Identifiers. Use identifier string, then address.
+- Add GetCmp() to TreePtr. Check (1) nullness, (2) local cmp, (3) elements (via Itemise) DONE - but move node part into Node Ordered
+- Add GetCmp() to Containers. Check members, in their natural order (assumes Collections are ordered) DONE
+- Add std::less, based on GetCmp(), to Collection.
+- Make TreePtr a const pointer, and redo all affected code
+- Replace SimpleCompare with a direct call to GetCmp()
+
+Notes:
+Do NOT supply this to STL in the form of operator<, because it would then get used in all std::blah<TreePtr> which is not what we want 
+because maps require a strong ordering and should be by identity (pointer) not value. Instead provide as a std::less just in the 
+Collection, which is a std::multiset.
+
+Such a scheme simulates value semantics - it is as if the subtree is a containment hierarchy.
+
+Associative containers require their keys to be immutable. When we use the pointer semantic, it's just the pointer that has to remain
+constant, which is easy(ish). But in value semantics the whole subtree must be constant since it is all used in the comparisons. So we 
+may as well make TreePtr always a const pointer, heavily restricting our options for creating and editing trees (though caching 
+side data presumably gets easier). 
+
+At which point, maybe TreePtr should have reference semantics and be called something other than "Ptr".
+
+Render is still likely to suffer in the uniquifying of identifiers. Identifiers with the same name can vary in the order in which they 
+are seen when iterating a Collection. Thus, the uniqifications will differ. Maybe identifiers should have global serial numbers?

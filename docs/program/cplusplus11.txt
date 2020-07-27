@@ -1,0 +1,47 @@
+
+Notes on move to C++11
+
+ - used GCC 4.8.5 for this
+
+Default is C++98
+
+Specified C++03
+
+ - No issues
+ 
+Specified C++11
+
+ - Needed to change boot includes to <memory> and <algorithm> and then 
+   using std rather than using boost. All in standard.h
+   
+ - Some errors like "error: defaulted move assignment for ‘...’ calls a
+   non-trivial move assignment operator for virtual base '...'"
+   There are no moves in Inferno, so I assume these result from
+   abuse of copy assignments. Added ones to disambiguate virtual
+   hierarchies at the MI class (forward to impl base, not interface bases).
+
+   Use this EXACT pattern when C : virtual A, virtual B 
+   where A is impl and B is interface:
+ 
+    // C++11 fix
+    C& operator=(const C& other)
+    {
+        (void)A::operator=(other);
+        return *this;
+    }
+ 
+   Const is needed so this copy assignment can be used when the 
+   compiler thinks it needs a move assignment (basically). OR sometimes 
+   don't use the const. Don't know why.
+
+ - "cannot convert ‘std::shared_ptr<...>’ to ‘bool’"
+   Use an explicit cast to bool
+
+ - C++11 has stronger template checks (checks are performed before expansion)
+   therefore we can no longer get away with specualtive argument lists.
+   Instead, use parameter packs (varadic templates) for a better solution anyway.
+
+ - LLVM: was defining its own alignof() template, now a keyword. Not
+   too many places need fixup (lots of __align__ but they're fine)
+   TODO update the patcher
+   

@@ -1,0 +1,66 @@
+// JSG I have disabled this test vector  because it has init lists, which need to be lowered out
+// when constuctors are lowered out in as-yet unwritten steps, before the existing state-out
+// can work. Essentially, init lists are "not allowed" at state-out.
+
+class Y
+{
+public:
+    Y( char c )
+    {
+    }
+};
+
+class X
+{
+public:
+    int i;
+    Y y;
+    
+    X() :
+        y('d')
+    {
+        i = 9;
+    }
+    
+    X(int a) :
+        y('a')
+     
+    {
+        i = a;
+    }
+    
+    ~X()
+    {
+        i=2;
+    }
+    
+    void foo()
+    {
+    }
+};
+/*
+struct P 
+{
+    virtual void f()=0;
+};
+
+struct Q : P
+{
+    virtual void f() {}
+};
+*/
+
+const int ggg=0;
+
+int main()
+{
+    X x; 
+    x.foo();   
+    
+    X *px = new X(7);
+    delete px;
+    
+    X *pax = ::new X[66];
+    ::delete[] pax;
+    return x.i;
+}
