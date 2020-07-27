@@ -3,7 +3,7 @@ Search and Replace Optimization plan - History
 
 At the time of writing, the sequential phase is "ready" for serious use in a software context, for eg
  - Stating out an algorithm for a call-in cooperative scheduler (removing the need for contexts)
- - Stating out an algorithm to run across multiple invocations of an ISR
+ - Stating out an algorithm to run over multiple invocations of an ISR
  - etc
 
 However, the remaining impediment to actual deployment would be the speed of the search and replace engine itself, which for certain patterns has been seen to be at least O(n^4) in input program size, effectively prohibiting use on programs large enough to justify automation (and doing it by hand will be less than quartic order, I would think).
@@ -12,7 +12,7 @@ Past measurements seemed to show the replace taking longer than search, which is
 
 Existing Terminology/Concepts
 
-Containers hold 0 or more pointers to child nodes. A Sequence is a container that remembers the order; a collection is a container that does not. Pointers can also be placed directly in nodes for a 1:1 relationship. There can be multiple of each.
+Containers hold 0 or more pointers to child nodes. A Sequence is a container that remembers the order; a colelction is a container that does not. Pointers can also be placed directly ni nodes for a 1:1 relationship. There can be multiple of each.
 
 A "system" is here used to refer to a collection of functions that are all mutually recursive, (and would form a single cycle group in gprof). There is a search system which walks search pattern and input program, checking for a match. There is the replace system which walks the replace pattern building the output program as it goes.
 
@@ -20,11 +20,9 @@ Conjectures are collections of Decisions, and Decisions are between one or more 
 
 The existing conjecture mechanism is designed to avoid the so-called "multiple choices" bug, in which a choice is made in a decision leading to a match (and a coupling is keyed), the search engine then unwinds back out of that branch of the pattern and into another, which contains a choice coupled to the earlier key and cannot match. A simple recursive walk would give up, assuming the second branch is unmatchable, when in fact a different choice in the first branch may have allowed the second branch to find a match.
 
-The multiple choices bug is designed out at present by establishing control of decisions in the Conjecture class, a stacked state machine. As the main search system walks the tree, all decisions are referred to the Conjecture object which logs the decision and provides a choice. If a search pass then fails to match, the last decision recorded by the conjecture is incremented etc. When that runs out of choices, it is discarded, and the penultimate decision incremented etc. Thus the decisions are held in a stack and the conjecture class is a state out walk over the tree of  reported decisions. 
+The multiple choices bug is designed out at present by establishing control of decisions in the Conjecture class, a recursible state machine. As the main search system walks the tree, all decisions are referred to the Conjecture object which logs the decision and provides a choice. If a search pass then fails to match, the last decision recorded by the conjecture is incremented etc. When that runs out of choices, it is discarded, and the penultimate decision incremented etc. Thus the decisions are held in a stack and the conjecture class is a state out walk over the tree of  reported decisions. 
 
 Note that this tree does not co-incide with the pattern tree at all. Two neighbouring branches in the pattern tree (assuming they contain decisions) become parent and child in the conjecture. This is the brute-force method by which the above counter-example is fixed - now they are parent-and-child they will be crossed as required to try all possibilities (Crossing means trying all pairs of choices when you have two decisions, an N^2 operation).
-
-It is "full backtracking".
 
 General Observations
 
