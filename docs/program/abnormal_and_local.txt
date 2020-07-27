@@ -4,20 +4,23 @@
 	NotMatchAgent
 	MatchAnyAgent
 
+(non-local links)
 And-rule does not apply (evaluator context)
 Permitted non-match means maybe cannot key
 
 	SearchContainerAgent (recurse restriction)		
-	StarAgent
+	StarAgent (pattern restriction)
 
+(local links)
 Reuse of agent confuses conjecture (multiuse context)	
-
+Note: StarAgent only needs links for pattern restriction, not 
+pre-restriction
 
 		Local links:
 		------------
 
 	StandardAgent (subcontainers)
-	StarAgent
+	StarAgent (pattern restriction)
 	
 Subcontainer is constructed - even though it could be refs...?	
  - TODO maybe merge star algo back in to SA (maybe absorb stars into 
