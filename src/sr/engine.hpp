@@ -55,33 +55,33 @@ protected:
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const { ASSERTFAIL(); } 
     
 public:
-    void GatherCouplings( CouplingMap &coupling_keys ) const;
+    void GatherCouplings( CouplingMap *coupling_keys ) const;
     int RepeatingCompareReplace( TreePtr<Node> *proot,
-                                 const CouplingMap &master_keys );
+                                 const CouplingMap *master_keys );
     
 protected:
     bool SingleCompareReplace( TreePtr<Node> *proot,
-                               const CouplingMap &master_keys );
+                               const CouplingMap *master_keys );
     bool Compare( const TreePtrInterface *p_start_x,
-                  const CouplingMap &master_keys = CouplingMap() ) const;
+                  const CouplingMap *master_keys = nullptr ) const;
     bool Compare( Agent *start_agent,
                   const TreePtrInterface *p_start_x,
-                  const CouplingMap &master_keys ) const;
+                  const CouplingMap *master_keys ) const;
     bool Compare( Agent *start_agent,
                   const TreePtrInterface *p_start_x,
-                  Conjecture &conj,
-                  CouplingMap &slave_keys,
-                  const CouplingMap &master_keys ) const;
+                  Conjecture *conj,
+                  CouplingMap *slave_keys,
+                  const CouplingMap *master_keys ) const;
 private:
     bool DecidedCompare( Agent *agent,
                          const TreePtrInterface *px,
                          CompareState &state ) const;
-    bool CompareLinks( const AgentQuery &query,
+    bool CompareLinks( shared_ptr<const AgentQuery> query,
                        CompareState &state ) const;
-    bool CompareEvaluatorLinks( const AgentQuery &query,
-							    CouplingMap &slave_keys ) const;
+    bool CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
+							    const CouplingMap *slave_keys ) const;
     void KeyReplaceNodes( Conjecture &conj,
-                          const CouplingMap &coupling_keys) const;
+                          const CouplingMap *coupling_keys) const;
     TreePtr<Node> Replace() const;
 
 public:

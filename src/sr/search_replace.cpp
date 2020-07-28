@@ -65,7 +65,7 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
     
     Map< Agent *, TreePtr<Node> > empty;
     
-    (void)RepeatingCompareReplace( proot, empty );   
+    (void)RepeatingCompareReplace( proot, &empty );   
 
     pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
 }
