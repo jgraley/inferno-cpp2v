@@ -60,27 +60,24 @@ protected:
     bool Compare( Agent *start_agent,
                   const TreePtrInterface *p_start_x,
                   Conjecture &conj,
-                  CouplingMap &local_keys,
+                  CouplingMap &slave_keys,
                   const CouplingMap &master_keys ) const;
 private:
     bool DecidedCompare( Agent *agent,
                          const TreePtrInterface *px,
                          bool can_key,
                          Conjecture &conj,
-                         CouplingMap &local_keys,
+                         CouplingMap &slave_keys,
                          const CouplingMap &master_keys,
                          Set<Agent *> &reached ) const;
     bool CompareLinks( const AgentQuery &query,
                        bool can_key,
                        Conjecture &conj,
-                       CouplingMap &local_keys,
+                       CouplingMap &slave_keys,
                        const CouplingMap &master_keys,
                        Set<Agent *> &reached ) const;
     bool CompareEvaluatorLinks( const AgentQuery &query,
-							    Conjecture &conj,
-							    CouplingMap &local_keys,
-							    const CouplingMap &master_keys,
-							    Set<Agent *> &reached ) const;
+							    CouplingMap &slave_keys ) const;
     void KeyReplaceNodes( Conjecture &conj,
                           const CouplingMap &coupling_keys) const;
     TreePtr<Node> Replace() const;

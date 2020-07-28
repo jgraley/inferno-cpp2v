@@ -176,14 +176,13 @@ void Engine::GetGraphInfo( vector<string> *labels,
 bool Engine::CompareLinks( const AgentQuery &query,
                            bool can_key,
                            Conjecture &conj,
-                           CouplingMap &local_keys,      
+                           CouplingMap &slave_keys,      
                            const CouplingMap &master_keys,
                            Set<Agent *> &reached ) const
 {
 	ASSERT( !query.GetEvaluator() );
     // Follow up on any blocks that were noted by the agent impl
-    bool made_coupling_keys = false;  
-    CouplingMap coupling_keys;
+
     int i=0;
     FOREACH( const AgentQuery::Link &b, *query.GetLinks() )
     {
@@ -199,14 +198,8 @@ bool Engine::CompareLinks( const AgentQuery &query,
             // Non-evaluator abnormal cases only.
             if( can_key )
                 continue; // Only check abnormals in restricting pass
-                
-            if( !made_coupling_keys ) // optimisation: only make them once, if needed at all. See #43
-            {
-                coupling_keys = MapUnion( master_keys, local_keys ); 
-                made_coupling_keys = true;
-            }
-            
-            if( !Compare( b.agent, px, coupling_keys ) )
+
+            if( !Compare( b.agent, px, slave_keys ) )
                 return false;
         }    
         else
@@ -221,13 +214,13 @@ bool Engine::CompareLinks( const AgentQuery &query,
             // Check for a coupling match to one of our agents we reached earlier in this pass.
             else if( reached.IsExist(b.agent) )
             {
-                if( can_key && !sc( *px, local_keys.At(b.agent) ) ) // only in first pass
+                if( can_key && !sc( *px, slave_keys.At(b.agent) ) ) // only in first pass
                     return false;
             }
             else
             {
                 // Recurse normally
-                if( !DecidedCompare(b.agent, px, can_key, conj, local_keys, master_keys, reached) )
+                if( !DecidedCompare(b.agent, px, can_key, conj, slave_keys, master_keys, reached) )
                     return false;
             }
         }
@@ -241,14 +234,9 @@ bool Engine::CompareLinks( const AgentQuery &query,
 
 // Only to be called in the restricting pass
 bool Engine::CompareEvaluatorLinks( const AgentQuery &query,
-									Conjecture &conj,
-									CouplingMap &local_keys,      
-									const CouplingMap &master_keys,
-									Set<Agent *> &reached ) const
+									CouplingMap &slave_keys ) const
 {
 	ASSERT( query.GetEvaluator() );
-    CouplingMap coupling_keys = MapUnion( master_keys, local_keys ); // see #43
-
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
     list<bool> compare_results;
@@ -259,8 +247,9 @@ bool Engine::CompareEvaluatorLinks( const AgentQuery &query,
  
         // Get x for linked node
         const TreePtrInterface *px = b.GetPX();
-                            
-        compare_results.push_back( Compare( b.agent, px, coupling_keys ) );
+                                 
+        compare_results.push_back( Compare( b.agent, px, slave_keys ) );
+
         i++;
     }
     
@@ -278,7 +267,7 @@ bool Engine::DecidedCompare( Agent *agent,
                              const TreePtrInterface *px,
                              bool can_key,
                              Conjecture &conj,
-                             CouplingMap &local_keys,      // applies ACROSS PASSES
+                             CouplingMap &slave_keys,      // applies ACROSS PASSES
                              const CouplingMap &master_keys,
                              Set<Agent *> &reached ) const // applies to CURRENT PASS only
 {
@@ -306,20 +295,20 @@ bool Engine::DecidedCompare( Agent *agent,
 
         // Remember the coupling before recursing, as we can hit the same node 
         // (eg identifier) and we need to have coupled it. 
-        if( !local_keys.IsExist(agent) )
-            local_keys[agent] = *px;
+        if( !slave_keys.IsExist(agent) )
+            slave_keys[agent] = *px;
     }
           
     // Use worker functions to go through the links, special case if there is evaluator
     if( !query->GetEvaluator() )
     {
 		TRACE(*agent)("?=")(**px)(" Comparing links\n");
-        return CompareLinks( *query, can_key, conj, local_keys, master_keys, reached );
+        return CompareLinks( *query, can_key, conj, slave_keys, master_keys, reached );
 	}
     else if( !can_key ) // only in second pass...
     {
 		TRACE(*agent)("?=")(**px)(" Comparing evaluator links\n");
-        return CompareEvaluatorLinks( *query, conj, local_keys, master_keys, reached );
+        return CompareEvaluatorLinks( *query, slave_keys );
 	}
     else
         return true;
@@ -341,8 +330,8 @@ bool Engine::Compare( Agent *start_agent,
                       const CouplingMap &master_keys ) const
 {
     Conjecture conj(my_agents);
-    CouplingMap local_keys; 
-    return Compare( start_agent, p_start_x, conj, local_keys, master_keys );
+    CouplingMap slave_keys; 
+    return Compare( start_agent, p_start_x, conj, slave_keys, master_keys );
 }
 
 
@@ -350,7 +339,7 @@ bool Engine::Compare( Agent *start_agent,
 bool Engine::Compare( Agent *start_agent,
                       const TreePtrInterface *p_start_x,
                       Conjecture &conj,
-                      CouplingMap &local_keys,
+                      CouplingMap &slave_keys,
                       const CouplingMap &master_keys ) const
 {
     INDENT("C");
@@ -358,7 +347,7 @@ bool Engine::Compare( Agent *start_agent,
     ASSERT( *p_start_x );
     TRACE("Compare x=")(**p_start_x);
     TRACE(" pattern=")(*start_agent);
-    ASSERT( &local_keys != &master_keys );
+    ASSERT( &slave_keys != &master_keys );
     //TRACE(**pcontext)(" @%p\n", pcontext);
            
     SimpleCompare sc;
@@ -384,21 +373,23 @@ bool Engine::Compare( Agent *start_agent,
         
         // Initialise keys to the ones inherited from master, keeping 
         // none of our own from any previous unsuccessful attempt.
-        local_keys = CouplingMap();
+        slave_keys = CouplingMap();
 
         // Do a two-pass matching process: first get the keys...
         {
 			Set<Agent *> reached;
-            r = DecidedCompare( start_agent, p_start_x, true, conj, local_keys, master_keys, reached );
+            r = DecidedCompare( start_agent, p_start_x, true, conj, slave_keys, master_keys, reached );
         }
                
         if( r )
         {
+            slave_keys = MapUnion( master_keys, slave_keys );            
+           
             // ...now restrict the search according to the couplings. This 
             // allows a coupling keyed late in the walk to restrict something 
             // seen earlier (eg in an abnormal context where keying is impossible)
             Set<Agent *> reached;
-            r = DecidedCompare( start_agent, p_start_x, false, conj, local_keys, master_keys, reached );
+            r = DecidedCompare( start_agent, p_start_x, false, conj, slave_keys, master_keys, reached );
         }
         
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
@@ -414,7 +405,7 @@ bool Engine::Compare( Agent *start_agent,
         //assert(i<1000);
         //i++;
     }
-    // by now, we succeeded and local_keys is the right set of keys
+    // by now, we succeeded and slave_keys is the right set of keys
     return r;
 }
 
@@ -462,20 +453,20 @@ bool Engine::SingleCompareReplace( TreePtr<Node> *p_root,
 {
     INDENT(">");
 
-    CouplingMap local_keys;
+    CouplingMap slave_keys;
     Conjecture conj(my_agents);
 
     TRACE("Begin search\n");
-    bool r = Compare( root_agent, p_root, conj, local_keys, master_keys );
+    bool r = Compare( root_agent, p_root, conj, slave_keys, master_keys );
     if( !r )
         return false;
        
     TRACE("Search successful, now keying replace nodes\n");
-    KeyReplaceNodes( conj, local_keys );
+    KeyReplaceNodes( conj, slave_keys );
 
     if( !my_slaves.empty() )
     {
-		CouplingMap coupling_keys = MapUnion( master_keys, local_keys );    
+		CouplingMap coupling_keys = MapUnion( master_keys, slave_keys );    
 		
         FOREACH( SlaveAgent *sa, my_slaves )
             sa->SetMasterCouplingKeys( coupling_keys );
