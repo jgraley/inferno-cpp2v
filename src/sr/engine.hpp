@@ -21,6 +21,16 @@ class CompareReplace;
 /// Common implementation for search+replace, compare+replace and slaves
 class Engine : public virtual Traceable
 {  
+private:
+    struct CompareState
+    {
+        bool can_key;
+        Conjecture *conj;
+        CouplingMap *slave_keys; // applies ACROSS PASSES
+        const CouplingMap *master_keys;
+        Set<Agent *> reached; // applies to CURRENT PASS only
+    };
+    
 public:
     Engine( bool is_s );
                     
@@ -65,17 +75,9 @@ protected:
 private:
     bool DecidedCompare( Agent *agent,
                          const TreePtrInterface *px,
-                         bool can_key,
-                         Conjecture &conj,
-                         CouplingMap &slave_keys,
-                         const CouplingMap &master_keys,
-                         Set<Agent *> &reached ) const;
+                         CompareState &state ) const;
     bool CompareLinks( const AgentQuery &query,
-                       bool can_key,
-                       Conjecture &conj,
-                       CouplingMap &slave_keys,
-                       const CouplingMap &master_keys,
-                       Set<Agent *> &reached ) const;
+                       CompareState &state ) const;
     bool CompareEvaluatorLinks( const AgentQuery &query,
 							    CouplingMap &slave_keys ) const;
     void KeyReplaceNodes( Conjecture &conj,

@@ -174,11 +174,7 @@ void Engine::GetGraphInfo( vector<string> *labels,
 
 
 bool Engine::CompareLinks( const AgentQuery &query,
-                           bool can_key,
-                           Conjecture &conj,
-                           CouplingMap &slave_keys,      
-                           const CouplingMap &master_keys,
-                           Set<Agent *> &reached ) const
+                           CompareState &state ) const
 {
 	ASSERT( !query.GetEvaluator() );
     // Follow up on any blocks that were noted by the agent impl
@@ -196,31 +192,31 @@ bool Engine::CompareLinks( const AgentQuery &query,
         if( b.abnormal )
         {
             // Non-evaluator abnormal cases only.
-            if( can_key )
+            if( state.can_key )
                 continue; // Only check abnormals in restricting pass
 
-            if( !Compare( b.agent, px, slave_keys ) )
+            if( !Compare( b.agent, px, *(state.slave_keys) ) )
                 return false;
         }    
         else
         {
             // Check for a coupling match to a master engine's agent. 
             SimpleCompare sc;
-            if( master_keys.IsExist(b.agent) )
+            if( state.master_keys->IsExist(b.agent) )
             {
-                if( can_key && !sc( *px, master_keys.At(b.agent) ) ) // only in first pass
+                if( state.can_key && !sc( *px, state.master_keys->At(b.agent) ) ) // only in first pass
                     return false;
             }
             // Check for a coupling match to one of our agents we reached earlier in this pass.
-            else if( reached.IsExist(b.agent) )
+            else if( state.reached.IsExist(b.agent) )
             {
-                if( can_key && !sc( *px, slave_keys.At(b.agent) ) ) // only in first pass
+                if( state.can_key && !sc( *px, state.slave_keys->At(b.agent) ) ) // only in first pass
                     return false;
             }
             else
             {
                 // Recurse normally
-                if( !DecidedCompare(b.agent, px, can_key, conj, slave_keys, master_keys, reached) )
+                if( !DecidedCompare(b.agent, px, state) )
                     return false;
             }
         }
@@ -265,24 +261,20 @@ bool Engine::CompareEvaluatorLinks( const AgentQuery &query,
 
 bool Engine::DecidedCompare( Agent *agent,
                              const TreePtrInterface *px,
-                             bool can_key,
-                             Conjecture &conj,
-                             CouplingMap &slave_keys,      // applies ACROSS PASSES
-                             const CouplingMap &master_keys,
-                             Set<Agent *> &reached ) const // applies to CURRENT PASS only
+                             CompareState &state ) const // applies to CURRENT PASS only
 {
     INDENT(" ");
     ASSERT( px ); // Ref to target must not be NULL (i.e. corrupted ref)
     ASSERT( *px ); // Target must not be NULL
-    ASSERT( !reached.IsExist(agent) ); // Only call this once per agent in a given pass
+    ASSERT( !state.reached.IsExist(agent) ); // Only call this once per agent in a given pass
 
     // Remember we reached this agent in this pass
-    reached.insert( agent );
+    state.reached.insert( agent );
 
     // Obtain the query state from the conjecture
-    shared_ptr<AgentQuery> query = conj.GetQuery(agent);
+    shared_ptr<AgentQuery> query = state.conj->GetQuery(agent);
 
-    if( can_key ) // only in first pass...
+    if( state.can_key ) // only in first pass...
     {
         // Run the compare implementation to get the links based on the choices
         TRACE(*agent)("?=")(**px)(" Gathering links\n");    
@@ -295,20 +287,20 @@ bool Engine::DecidedCompare( Agent *agent,
 
         // Remember the coupling before recursing, as we can hit the same node 
         // (eg identifier) and we need to have coupled it. 
-        if( !slave_keys.IsExist(agent) )
-            slave_keys[agent] = *px;
+        if( !state.slave_keys->IsExist(agent) )
+            (*state.slave_keys)[agent] = *px;
     }
           
     // Use worker functions to go through the links, special case if there is evaluator
     if( !query->GetEvaluator() )
     {
 		TRACE(*agent)("?=")(**px)(" Comparing links\n");
-        return CompareLinks( *query, can_key, conj, slave_keys, master_keys, reached );
+        return CompareLinks( *query, state );
 	}
-    else if( !can_key ) // only in second pass...
+    else if( !state.can_key ) // only in second pass...
     {
 		TRACE(*agent)("?=")(**px)(" Comparing evaluator links\n");
-        return CompareEvaluatorLinks( *query, slave_keys );
+        return CompareEvaluatorLinks( *query, *(state.slave_keys) );
 	}
     else
         return true;
@@ -355,6 +347,11 @@ bool Engine::Compare( Agent *start_agent,
 	{
 		return sc( *p_start_x, master_keys.At(start_agent) );
 	}      
+    
+    CompareState state;
+    state.master_keys = &master_keys;
+    state.slave_keys = &slave_keys;
+    state.conj = &conj;
            
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
@@ -373,23 +370,25 @@ bool Engine::Compare( Agent *start_agent,
         
         // Initialise keys to the ones inherited from master, keeping 
         // none of our own from any previous unsuccessful attempt.
-        slave_keys = CouplingMap();
+        state.slave_keys->clear();
 
         // Do a two-pass matching process: first get the keys...
         {
-			Set<Agent *> reached;
-            r = DecidedCompare( start_agent, p_start_x, true, conj, slave_keys, master_keys, reached );
+			state.reached.clear();
+            state.can_key = true;
+            r = DecidedCompare( start_agent, p_start_x, state );
         }
                
         if( r )
         {
-            slave_keys = MapUnion( master_keys, slave_keys );            
+            *(state.slave_keys) = MapUnion( master_keys, *(state.slave_keys) );            
            
             // ...now restrict the search according to the couplings. This 
             // allows a coupling keyed late in the walk to restrict something 
             // seen earlier (eg in an abnormal context where keying is impossible)
-            Set<Agent *> reached;
-            r = DecidedCompare( start_agent, p_start_x, false, conj, slave_keys, master_keys, reached );
+			state.reached.clear();
+            state.can_key = false;
+            r = DecidedCompare( start_agent, p_start_x, state );
         }
         
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
@@ -405,6 +404,7 @@ bool Engine::Compare( Agent *start_agent,
         //assert(i<1000);
         //i++;
     }
+    
     // by now, we succeeded and slave_keys is the right set of keys
     return r;
 }
