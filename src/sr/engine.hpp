@@ -24,11 +24,12 @@ class Engine : public virtual Traceable
 private:
     struct CompareState
     {
-        bool can_key;
+        int pass;
         Conjecture *conj;
         CouplingMap *slave_keys; // applies ACROSS PASSES
         const CouplingMap *master_keys;
         Set<Agent *> reached; // applies to CURRENT PASS only
+        std::list< shared_ptr<AgentQuery> > evaluator_queries;    // applies ACROSS PASSES
     };
     
 public:

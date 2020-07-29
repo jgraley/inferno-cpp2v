@@ -191,11 +191,7 @@ bool Engine::CompareLinks( shared_ptr<const AgentQuery> query,
         // Recurse now       
         if( b.abnormal )
         {
-            // Non-evaluator abnormal cases only.
-            if( state.can_key )
-                continue; // Only check abnormals in restricting pass
-
-            if( !Compare( b.agent, px, state.slave_keys ) )
+            if( state.pass==1 && !Compare( b.agent, px, state.slave_keys ) ) // Only check abnormals in second pass
                 return false;
         }    
         else
@@ -204,13 +200,13 @@ bool Engine::CompareLinks( shared_ptr<const AgentQuery> query,
             SimpleCompare sc;
             if( state.master_keys->IsExist(b.agent) )
             {
-                if( state.can_key && !sc( *px, state.master_keys->At(b.agent) ) ) // only in first pass
+                if( state.pass==0 && !sc( *px, state.master_keys->At(b.agent) ) ) // only in first pass
                     return false;
             }
             // Check for a coupling match to one of our agents we reached earlier in this pass.
             else if( state.reached.IsExist(b.agent) )
             {
-                if( state.can_key && !sc( *px, state.slave_keys->At(b.agent) ) ) // only in first pass
+                if( state.pass==0 && !sc( *px, state.slave_keys->At(b.agent) ) ) // only in first pass
                     return false;
             }
             else
@@ -274,7 +270,7 @@ bool Engine::DecidedCompare( Agent *agent,
     // Obtain the query state from the conjecture
     shared_ptr<AgentQuery> query = state.conj->GetQuery(agent);
 
-    if( state.can_key ) // only in first pass...
+    if( state.pass==0 ) // only in first pass...
     {
         // Run the compare implementation to get the links based on the choices
         TRACE(*agent)("?=")(**px)(" Gathering links\n");    
@@ -297,13 +293,16 @@ bool Engine::DecidedCompare( Agent *agent,
 		TRACE(*agent)("?=")(**px)(" Comparing links\n");
         return CompareLinks( query, state );
 	}
-    else if( !state.can_key ) // only in second pass...
+    else if( state.pass==1 ) // only in second pass...
     {
+#ifdef EXTRACT_EVALUATORS
+        state.evaluator_queries.push_back(query);
+#else
 		TRACE(*agent)("?=")(**px)(" Comparing evaluator links\n");
         return CompareEvaluatorLinks( query, state.slave_keys );
+#endif
 	}
-    else
-        return true;
+    return true;
 }
 
 
@@ -384,20 +383,42 @@ bool Engine::Compare( Agent *start_agent,
             state.slave_keys = slave_keys;
             
 			state.reached.clear();
-            state.can_key = true;
+            state.evaluator_queries.clear();
+            state.pass = 0;
             r = DecidedCompare( start_agent, p_start_x, state );
         }
                
         if( r )
         {
             CouplingMap combined_keys = MapUnion( *master_keys, *(state.slave_keys) );            
+#ifndef EXTRACT_EVALUATORS
             state.slave_keys = &combined_keys;
+#endif            
+            
             // ...now restrict the search according to the couplings. This 
             // allows a coupling keyed late in the walk to restrict something 
             // seen earlier (eg in an abnormal context where keying is impossible)
+#ifdef EXTRACT_EVALUATORS
+            for( shared_ptr<AgentQuery> query : state.evaluator_queries )
+            {
+                //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
+                if( !CompareEvaluatorLinks( query, &combined_keys ) )
+                {
+                    r = false;
+                    break;
+                }                    
+            }
+#else
 			state.reached.clear();
-            state.can_key = false;
+            state.pass = 1;
             r = DecidedCompare( start_agent, p_start_x, state );
+			if(r)
+            {
+                state.reached.clear();
+                state.pass = 2;
+                r = DecidedCompare( start_agent, p_start_x, state );
+            }
+#endif
         }
         
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
