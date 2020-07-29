@@ -293,14 +293,9 @@ bool Engine::DecidedCompare( Agent *agent,
 		TRACE(*agent)("?=")(**px)(" Comparing links\n");
         return CompareLinks( query, state );
 	}
-    else if( state.pass==1 ) // only in second pass...
+    else if( state.pass==0 ) // only in first pass...
     {
-#ifdef EXTRACT_EVALUATORS
-        state.evaluator_queries.push_back(query);
-#else
-		TRACE(*agent)("?=")(**px)(" Comparing evaluator links\n");
-        return CompareEvaluatorLinks( query, state.slave_keys );
-#endif
+        state.evaluator_queries.insert(query);
 	}
     return true;
 }
@@ -387,18 +382,27 @@ bool Engine::Compare( Agent *start_agent,
             state.pass = 0;
             r = DecidedCompare( start_agent, p_start_x, state );
         }
-               
+        
+        CouplingMap combined_keys;
         if( r )
         {
-            CouplingMap combined_keys = MapUnion( *master_keys, *(state.slave_keys) );            
-#ifndef EXTRACT_EVALUATORS
+            combined_keys = MapUnion( *master_keys, *(state.slave_keys) );     
+        }
+        
+        if( r )
+        {       
             state.slave_keys = &combined_keys;
-#endif            
             
             // ...now restrict the search according to the couplings. This 
             // allows a coupling keyed late in the walk to restrict something 
             // seen earlier (eg in an abnormal context where keying is impossible)
-#ifdef EXTRACT_EVALUATORS
+			state.reached.clear();
+            state.pass = 1;
+            r = DecidedCompare( start_agent, p_start_x, state );
+        }
+
+        if( r )
+        {
             for( shared_ptr<AgentQuery> query : state.evaluator_queries )
             {
                 //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
@@ -408,19 +412,8 @@ bool Engine::Compare( Agent *start_agent,
                     break;
                 }                    
             }
-#else
-			state.reached.clear();
-            state.pass = 1;
-            r = DecidedCompare( start_agent, p_start_x, state );
-			if(r)
-            {
-                state.reached.clear();
-                state.pass = 2;
-                r = DecidedCompare( start_agent, p_start_x, state );
-            }
-#endif
         }
-        
+
         // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
         if( r )
         {
