@@ -26,7 +26,7 @@ private:
     {
         bool can_key;
         Conjecture *conj;
-        CouplingMap *slave_keys; // applies ACROSS PASSES
+        CouplingMap *my_keys; // applies ACROSS PASSES
         const CouplingMap *master_keys;
         Set<Agent *> reached; // applies to CURRENT PASS only
     };
@@ -70,7 +70,7 @@ protected:
     bool Compare( Agent *start_agent,
                   const TreePtrInterface *p_start_x,
                   Conjecture *conj,
-                  CouplingMap *slave_keys,
+                  CouplingMap *my_keys,
                   const CouplingMap *master_keys ) const;
 private:
     bool DecidedCompare( Agent *agent,
@@ -79,7 +79,7 @@ private:
     bool CompareLinks( shared_ptr<const AgentQuery> query,
                        CompareState &state ) const;
     bool CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
-							    const CouplingMap *slave_keys ) const;
+							    const CouplingMap *my_keys ) const;
     void KeyReplaceNodes( Conjecture &conj,
                           const CouplingMap *coupling_keys) const;
     TreePtr<Node> Replace() const;
