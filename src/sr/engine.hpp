@@ -29,7 +29,8 @@ private:
         CouplingMap *slave_keys; // applies ACROSS PASSES
         const CouplingMap *master_keys;
         Set<Agent *> reached; // applies to CURRENT PASS only
-        Set< shared_ptr<AgentQuery> > evaluator_queries;    // applies ACROSS PASSES
+        Set< shared_ptr<const AgentQuery> > evaluator_queries;    // applies ACROSS PASSES
+        Set< std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > > abnormal_links;    // applies ACROSS PASSES
     };
     
 public:

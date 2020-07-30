@@ -191,15 +191,15 @@ bool Engine::CompareLinks( shared_ptr<const AgentQuery> query,
         // Recurse now       
         if( b.abnormal )
         {
-            if( state.pass==1 && !Compare( b.agent, px, state.slave_keys ) ) // Only check abnormals in second pass
-                return false;
+            if( state.pass==0 )
+                state.abnormal_links.insert( make_pair(query, &b) ); 
         }    
         else
         {
             // Check for a coupling match to a master engine's agent. 
             SimpleCompare sc;
             if( state.master_keys->IsExist(b.agent) )
-            {
+            {               
                 if( state.pass==0 && !sc( *px, state.master_keys->At(b.agent) ) ) // only in first pass
                     return false;
             }
@@ -276,6 +276,8 @@ bool Engine::DecidedCompare( Agent *agent,
         TRACE(*agent)("?=")(**px)(" Gathering links\n");    
         agent->DecidedQuery( *query, px );
         TRACE(*agent)("?=")(**px)(" local match ")(query->IsLocalMatch())("\n");
+                
+        (void)state.conj->GetQuery(agent);
                 
         // Stop if the node itself mismatched (can be for any reason depending on agent)
         if(!query->IsLocalMatch())
@@ -378,6 +380,7 @@ bool Engine::Compare( Agent *start_agent,
             state.slave_keys = slave_keys;
             
 			state.reached.clear();
+            state.abnormal_links.clear();
             state.evaluator_queries.clear();
             state.pass = 0;
             r = DecidedCompare( start_agent, p_start_x, state );
@@ -390,20 +393,20 @@ bool Engine::Compare( Agent *start_agent,
         }
         
         if( r )
-        {       
-            state.slave_keys = &combined_keys;
-            
-            // ...now restrict the search according to the couplings. This 
-            // allows a coupling keyed late in the walk to restrict something 
-            // seen earlier (eg in an abnormal context where keying is impossible)
-			state.reached.clear();
-            state.pass = 1;
-            r = DecidedCompare( start_agent, p_start_x, state );
+        {
+            for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : state.abnormal_links )
+            {            
+                if( !Compare( lp.second->agent, lp.second->GetPX(), &combined_keys ) ) 
+                {
+                    r = false;
+                    break;
+                }
+            }
         }
 
         if( r )
         {
-            for( shared_ptr<AgentQuery> query : state.evaluator_queries )
+            for( shared_ptr<const AgentQuery> query : state.evaluator_queries )
             {
                 //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
                 if( !CompareEvaluatorLinks( query, &combined_keys ) )
