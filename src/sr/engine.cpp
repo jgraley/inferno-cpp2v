@@ -191,8 +191,7 @@ bool Engine::CompareLinks( shared_ptr<const AgentQuery> query,
         // Recurse now       
         if( b.abnormal )
         {
-            if( state.pass==0 )
-                state.abnormal_links.insert( make_pair(query, &b) ); 
+            state.abnormal_links.insert( make_pair(query, &b) ); 
         }    
         else
         {
@@ -200,13 +199,13 @@ bool Engine::CompareLinks( shared_ptr<const AgentQuery> query,
             SimpleCompare sc;
             if( state.master_keys->IsExist(b.agent) )
             {               
-                if( state.pass==0 && !sc( *px, state.master_keys->At(b.agent) ) ) // only in first pass
+                if( !sc( *px, state.master_keys->At(b.agent) ) ) // only in first pass
                     return false;
             }
             // Check for a coupling match to one of our agents we reached earlier in this pass.
             else if( state.reached.IsExist(b.agent) )
             {
-                if( state.pass==0 && !sc( *px, state.slave_keys->At(b.agent) ) ) // only in first pass
+                if( !sc( *px, state.slave_keys->At(b.agent) ) ) // only in first pass
                     return false;
             }
             else
@@ -262,42 +261,39 @@ bool Engine::DecidedCompare( Agent *agent,
     INDENT(" ");
     ASSERT( px ); // Ref to target must not be NULL (i.e. corrupted ref)
     ASSERT( *px ); // Target must not be NULL
-    ASSERT( !state.reached.IsExist(agent) ); // Only call this once per agent in a given pass
+    ASSERT( !state.reached.IsExist(agent) ); // Only call this once per agent 
 
-    // Remember we reached this agent in this pass
+    // Remember we reached this agent 
     state.reached.insert( agent );
 
     // Obtain the query state from the conjecture
     shared_ptr<AgentQuery> query = state.conj->GetQuery(agent);
 
-    if( state.pass==0 ) // only in first pass...
-    {
-        // Run the compare implementation to get the links based on the choices
-        TRACE(*agent)("?=")(**px)(" Gathering links\n");    
-        agent->DecidedQuery( *query, px );
-        TRACE(*agent)("?=")(**px)(" local match ")(query->IsLocalMatch())("\n");
-                
-        (void)state.conj->FillMissingChoicesWithBegin(query);
-                
-        // Stop if the node itself mismatched (can be for any reason depending on agent)
-        if(!query->IsLocalMatch())
-            return false;
+    // Run the compare implementation to get the links based on the choices
+    TRACE(*agent)("?=")(**px)(" Gathering links\n");    
+    agent->DecidedQuery( *query, px );
+    TRACE(*agent)("?=")(**px)(" local match ")(query->IsLocalMatch())("\n");
+            
+    (void)state.conj->FillMissingChoicesWithBegin(query);
+            
+    // Stop if the node itself mismatched (can be for any reason depending on agent)
+    if(!query->IsLocalMatch())
+        return false;
 
-        // Remember the coupling before recursing, as we can hit the same node 
-        // (eg identifier) and we need to have coupled it. 
-        if( !state.slave_keys->IsExist(agent) )
-            (*state.slave_keys)[agent] = *px;
-    }
+    // Remember the coupling before recursing, as we can hit the same node 
+    // (eg identifier) and we need to have coupled it. 
+    if( !state.slave_keys->IsExist(agent) )
+        (*state.slave_keys)[agent] = *px;
           
     // Use worker functions to go through the links, special case if there is evaluator
-    if( !query->GetEvaluator() )
+    if( query->GetEvaluator() )
+    {
+        state.evaluator_queries.insert(query);
+	}
+    else
     {
 		TRACE(*agent)("?=")(**px)(" Comparing links\n");
         return CompareLinks( query, state );
-	}
-    else if( state.pass==0 ) // only in first pass...
-    {
-        state.evaluator_queries.insert(query);
 	}
     return true;
 }
@@ -382,7 +378,6 @@ bool Engine::Compare( Agent *start_agent,
 			state.reached.clear();
             state.abnormal_links.clear();
             state.evaluator_queries.clear();
-            state.pass = 0;
             r = DecidedCompare( start_agent, p_start_x, state );
         }
         
@@ -392,8 +387,13 @@ bool Engine::Compare( Agent *start_agent,
             combined_keys = MapUnion( *master_keys, *(state.slave_keys) );     
         }
         
+        
         if( r )
         {
+            // Process the free abnormal links. These may be more than one with the same linked pattern
+            // node and the number can vary depending on x. We wouldn't know which one to key to, so we 
+            // process them in a post-pass which ensures all the couplings have been keyed already.
+            // Examples are the pattern restrictions on Star and Stuff.
             for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : state.abnormal_links )
             {            
                 if( !Compare( lp.second->agent, lp.second->GetPX(), &combined_keys ) ) 
@@ -406,6 +406,11 @@ bool Engine::Compare( Agent *start_agent,
 
         if( r )
         {
+            // Process the evaluator queries. These can match when their children have not matched and
+            // we wouldn't be able to reliably key those children so we process them in a post-pass 
+            // which ensures all the couplings have been keyed already.
+            // Examples are MatchAny and NotMatch (but not MatchAll, because MatchAll conforms with
+            // the global and-rule and so its children can key couplings.
             for( shared_ptr<const AgentQuery> query : state.evaluator_queries )
             {
                 //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries

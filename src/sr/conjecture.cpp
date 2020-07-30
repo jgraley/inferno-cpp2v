@@ -26,8 +26,6 @@ Conjecture::~Conjecture()
 bool Conjecture::IncrementAgent( shared_ptr<AgentQuery> query )
 {    
     ASSERT( query );
-
-    FillMissingChoicesWithBegin(query);
     
 	if( query->GetDecisions()->empty() )
 	{

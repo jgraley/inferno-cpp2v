@@ -24,7 +24,6 @@ class Engine : public virtual Traceable
 private:
     struct CompareState
     {
-        int pass;
         Conjecture *conj;
         CouplingMap *slave_keys; // applies ACROSS PASSES
         const CouplingMap *master_keys;
