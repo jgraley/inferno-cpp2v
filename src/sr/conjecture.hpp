@@ -35,9 +35,9 @@ public:
     // Standard interface for decided compare functions
     AgentQuery::Choices GetChoices(Agent *agent);
     shared_ptr<AgentQuery> GetQuery(Agent *agent);
+    void FillMissingChoicesWithBegin( shared_ptr<AgentQuery> query );      
 				   
 private:
-    void FillMissingChoicesWithBegin( shared_ptr<AgentQuery> query );      
 	Map<Agent *, AgentRecord> agent_records;
 	AgentRecord *last_record;	
 };

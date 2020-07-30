@@ -108,7 +108,7 @@ shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
     }
     
     shared_ptr<AgentQuery> query = agent_records[agent].query;
-    FillMissingChoicesWithBegin(query);
+    //FillMissingChoicesWithBegin(query);
     return query;
 }
 

@@ -277,7 +277,7 @@ bool Engine::DecidedCompare( Agent *agent,
         agent->DecidedQuery( *query, px );
         TRACE(*agent)("?=")(**px)(" local match ")(query->IsLocalMatch())("\n");
                 
-        (void)state.conj->GetQuery(agent);
+        (void)state.conj->FillMissingChoicesWithBegin(query);
                 
         // Stop if the node itself mismatched (can be for any reason depending on agent)
         if(!query->IsLocalMatch())
