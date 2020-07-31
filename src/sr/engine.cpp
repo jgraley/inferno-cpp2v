@@ -199,14 +199,12 @@ void Engine::CompareLinks( shared_ptr<const AgentQuery> query,
             SimpleCompare sc;
             if( state.master_keys->IsExist(b.agent) )
             {               
-                if( !sc( *px, state.master_keys->At(b.agent) ) ) // only in first pass
-                    throw MismatchPlaceholder();
+                sc( *px, state.master_keys->At(b.agent) );
             }
             // Check for a coupling match to one of our agents we reached earlier in this pass.
             else if( state.reached.IsExist(b.agent) )
             {
-                if( !sc( *px, state.slave_keys->At(b.agent) ) ) // only in first pass
-                    throw MismatchPlaceholder();
+                sc( *px, state.slave_keys->At(b.agent) );
             }
             else
             {
@@ -338,11 +336,19 @@ bool Engine::Compare( Agent *start_agent,
     ASSERT( &slave_keys != &master_keys );
     //TRACE(**pcontext)(" @%p\n", pcontext);
            
-    SimpleCompare sc;
-    if( master_keys->IsExist(start_agent) )
-	{
-		return sc( *p_start_x, master_keys->At(start_agent) );
-	}      
+    try
+    {
+        SimpleCompare sc;
+        if( master_keys->IsExist(start_agent) )
+        {
+            sc( *p_start_x, master_keys->At(start_agent) );
+            return true; // we're done, because we were started right on top of one of the couplings we were given
+        }              
+    }
+    catch( const ::Mismatch& mismatch )
+    {                
+        return false; // we're done, because we were started right on top of one of the couplings we were given
+    }
     
     CompareState state;
     state.master_keys = master_keys;    
@@ -402,7 +408,7 @@ bool Engine::Compare( Agent *start_agent,
                 CompareEvaluatorLinks( query, &combined_keys );
             }
         }
-        catch( const ::SR::Mismatch& mismatch )
+        catch( const ::Mismatch& mismatch )
         {                
             TRACE("Engine miss, trying increment conjecture\n");
             if( conj->Increment() )

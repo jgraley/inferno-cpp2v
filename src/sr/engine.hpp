@@ -6,8 +6,8 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
+#include "helpers/mismatch.hpp"
 #include "agent.hpp"
-#include "mismatch.hpp"
 #include <set>
 
 /// SR namespace contains the search and replace implementation
@@ -34,7 +34,7 @@ private:
     };
     
     // Any mismatch this class throws
-    class Mismatch : public ::SR::Mismatch
+    class Mismatch : public ::Mismatch
     {
     };
     
