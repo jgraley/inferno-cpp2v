@@ -294,20 +294,21 @@ void Engine::DecidedCompare( Agent *agent,
 }
 
 
+// This one operates from root for a stand-alone compare operation and
+// no master keys.
+bool Engine::Compare( const TreePtrInterface *p_start_x ) const
+{
+    CouplingMap master_keys;
+    return Compare( root_agent, p_start_x, &master_keys );
+}
+
+
 // This one operates from root for a stand-alone compare operation (side API)
 bool Engine::Compare( const TreePtrInterface *p_start_x,
                       const CouplingMap *master_keys ) const
 {
 	ASSERT( root_agent );
-    if( master_keys==nullptr )
-    {
-        CouplingMap mk;
-        return Compare( root_agent, p_start_x, &mk );
-    }
-    else
-    {
-        return Compare( root_agent, p_start_x, master_keys );
-    }
+    return Compare( root_agent, p_start_x, master_keys );
 }
 
 
@@ -403,7 +404,6 @@ bool Engine::Compare( Agent *start_agent,
         }
         catch( const ::SR::Mismatch& mismatch )
         {                
- 
             TRACE("Engine miss, trying increment conjecture\n");
             if( conj->Increment() )
                 continue; // Conjecture would like us to try again with new choices

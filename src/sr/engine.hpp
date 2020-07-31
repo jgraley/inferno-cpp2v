@@ -80,8 +80,9 @@ public:
 protected:
     bool SingleCompareReplace( TreePtr<Node> *proot,
                                const CouplingMap *master_keys );
+    bool Compare( const TreePtrInterface *p_start_x ) const;
     bool Compare( const TreePtrInterface *p_start_x,
-                  const CouplingMap *master_keys = nullptr ) const;
+                  const CouplingMap *master_keys ) const;
     bool Compare( Agent *start_agent,
                   const TreePtrInterface *p_start_x,
                   const CouplingMap *master_keys ) const;
