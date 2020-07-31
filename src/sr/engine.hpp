@@ -7,6 +7,7 @@
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 #include "agent.hpp"
+#include "mismatch.hpp"
 #include <set>
 
 /// SR namespace contains the search and replace implementation
@@ -30,6 +31,12 @@ private:
         Set<Agent *> reached; // applies to CURRENT PASS only
         Set< shared_ptr<const AgentQuery> > evaluator_queries;    // applies ACROSS PASSES
         Set< std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > > abnormal_links;    // applies ACROSS PASSES
+    };
+    
+    // Generated when some comparison function returns false 
+    // TODO should not need this once all the throws are in 
+    class MismatchPlaceholder : public ::SR::Mismatch
+    {
     };
     
 public:

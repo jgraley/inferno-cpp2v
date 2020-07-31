@@ -354,42 +354,37 @@ bool Engine::Compare( Agent *start_agent,
            
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
-    bool r;
     //int i=0;
     while(1)
     {
-        // Try out the current conjecture. This will call RememberDecision() once for each decision;
-        // RememberDecision() will return the current choice for that decision, if absent it will
-        // add the decision and choose the first choice, if the decision reaches the end it
-        // will remove the decision.
-
-        // Only key if the keys are already set to KEYING (which is 
-        // the initial value). Keys could be RESTRICTING if we're under
-        // a SoftNot node, in which case we only want to restrict.
-        
-        // Initialise keys to the ones inherited from master, keeping 
-        // none of our own from any previous unsuccessful attempt.
-        slave_keys->clear();
-
-        // Do a two-pass matching process: first get the keys...
+        try
         {
-            state.slave_keys = slave_keys;
+            // Try out the current conjecture. This will call RememberDecision() once for each decision;
+            // RememberDecision() will return the current choice for that decision, if absent it will
+            // add the decision and choose the first choice, if the decision reaches the end it
+            // will remove the decision.
+
+            // Only key if the keys are already set to KEYING (which is 
+            // the initial value). Keys could be RESTRICTING if we're under
+            // a SoftNot node, in which case we only want to restrict.
             
-			state.reached.clear();
-            state.abnormal_links.clear();
-            state.evaluator_queries.clear();
-            r = DecidedCompare( start_agent, p_start_x, state );
-        }
-        
-        CouplingMap combined_keys;
-        if( r )
-        {
-            combined_keys = MapUnion( *master_keys, *(state.slave_keys) );     
-        }
-        
-        
-        if( r )
-        {
+            // Initialise keys to the ones inherited from master, keeping 
+            // none of our own from any previous unsuccessful attempt.
+            slave_keys->clear();
+
+            // Do a two-pass matching process: first get the keys...
+            {
+                state.slave_keys = slave_keys;
+                
+                state.reached.clear();
+                state.abnormal_links.clear();
+                state.evaluator_queries.clear();
+                if( !DecidedCompare( start_agent, p_start_x, state ) )
+                    throw MismatchPlaceholder();
+            }
+            
+            CouplingMap combined_keys = MapUnion( *master_keys, *(state.slave_keys) );     
+                        
             // Process the free abnormal links. These may be more than one with the same linked pattern
             // node and the number can vary depending on x. We wouldn't know which one to key to, so we 
             // process them in a post-pass which ensures all the couplings have been keyed already.
@@ -397,15 +392,10 @@ bool Engine::Compare( Agent *start_agent,
             for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : state.abnormal_links )
             {            
                 if( !Compare( lp.second->agent, lp.second->GetPX(), &combined_keys ) ) 
-                {
-                    r = false;
-                    break;
-                }
+                    throw MismatchPlaceholder();
             }
-        }
 
-        if( r )
-        {
+
             // Process the evaluator queries. These can match when their children have not matched and
             // we wouldn't be able to reliably key those children so we process them in a post-pass 
             // which ensures all the couplings have been keyed already.
@@ -415,29 +405,26 @@ bool Engine::Compare( Agent *start_agent,
             {
                 //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
                 if( !CompareEvaluatorLinks( query, &combined_keys ) )
-                {
-                    r = false;
-                    break;
-                }                    
+                    throw MismatchPlaceholder();
             }
         }
-
-        // If we got a match, we're done. If we didn't, and we've run out of choices, we're done.
-        if( r )
-        {
-            TRACE("Engine hit\n");
-            break; // Success
+        catch( const ::SR::Mismatch& mismatch )
+        {                
+ 
+            TRACE("Engine miss, trying increment conjecture\n");
+            if( conj->Increment() )
+                continue; // Conjecture would like us to try again with new choices
+                
+            // We didn't match and we've run out of choices, so we're done.              
+            return false; // TODO rethrow?
         }
-        TRACE("Engine miss, trying increment conjecture\n");
-        if( !conj->Increment() )
-            break; // Failure                   
-
-        //assert(i<1000);
-        //i++;
+        // We got a match so we're done. 
+        TRACE("Engine hit\n");
+        break; // Success
     }
     
     // by now, we succeeded and slave_keys is the right set of keys
-    return r;
+    return true;
 }
 
 

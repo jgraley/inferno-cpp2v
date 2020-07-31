@@ -24,8 +24,8 @@ test/results/default.pass : $(CASES:%=test/results/default/%.pass)
 $(CASES:%=test/results/sr/%.pass) : test/results/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe
 	@mkdir -p test/results/sr
 	@rm -f test/results/sr/$*.
-	test/srtest.sh $< -tq 2>&1 > test/results/sr/$*.log
-	touch test/results/sr/$*.pass
+	test/srtest.sh $< -tq
+	@touch test/results/sr/$*.pass
 	
 test/results/sr.pass : $(CASES:%=test/results/sr/%.pass)
 	@touch $@
