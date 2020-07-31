@@ -173,7 +173,7 @@ void Engine::GetGraphInfo( vector<string> *labels,
 }
 
 
-bool Engine::CompareLinks( shared_ptr<const AgentQuery> query,
+void Engine::CompareLinks( shared_ptr<const AgentQuery> query,
                            CompareState &state ) const
 {
 	ASSERT( !query->GetEvaluator() );
@@ -200,31 +200,28 @@ bool Engine::CompareLinks( shared_ptr<const AgentQuery> query,
             if( state.master_keys->IsExist(b.agent) )
             {               
                 if( !sc( *px, state.master_keys->At(b.agent) ) ) // only in first pass
-                    return false;
+                    throw MismatchPlaceholder();
             }
             // Check for a coupling match to one of our agents we reached earlier in this pass.
             else if( state.reached.IsExist(b.agent) )
             {
                 if( !sc( *px, state.slave_keys->At(b.agent) ) ) // only in first pass
-                    return false;
+                    throw MismatchPlaceholder();
             }
             else
             {
                 // Recurse normally
-                if( !DecidedCompare(b.agent, px, state) )
-                    return false;
+                DecidedCompare(b.agent, px, state);                
             }
         }
         
         i++;
     }
-      
-    return true;
 }
 
 
 // Only to be called in the restricting pass
-bool Engine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
+void Engine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
 									const CouplingMap *slave_keys ) const
 {
 	ASSERT( query->GetEvaluator() );
@@ -245,16 +242,15 @@ bool Engine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
     }
     
     shared_ptr<BooleanEvaluator> evaluator = query->GetEvaluator();
-	bool match = (*evaluator)( compare_results );
 	TRACE(" Evaluating ");
 	FOREACH(bool b, compare_results)
 	    TRACE(b)(" ");
-	TRACE("got ")(match)("\n");
-	return match;
+	if( !(*evaluator)( compare_results ) )
+        throw MismatchPlaceholder();
 }
 
 
-bool Engine::DecidedCompare( Agent *agent,
+void Engine::DecidedCompare( Agent *agent,
                              const TreePtrInterface *px,
                              CompareState &state ) const // applies to CURRENT PASS only
 {
@@ -278,7 +274,7 @@ bool Engine::DecidedCompare( Agent *agent,
             
     // Stop if the node itself mismatched (can be for any reason depending on agent)
     if(!query->IsLocalMatch())
-        return false;
+        throw MismatchPlaceholder();
 
     // Remember the coupling before recursing, as we can hit the same node 
     // (eg identifier) and we need to have coupled it. 
@@ -293,9 +289,8 @@ bool Engine::DecidedCompare( Agent *agent,
     else
     {
 		TRACE(*agent)("?=")(**px)(" Comparing links\n");
-        return CompareLinks( query, state );
+        CompareLinks( query, state );
 	}
-    return true;
 }
 
 
@@ -379,8 +374,7 @@ bool Engine::Compare( Agent *start_agent,
                 state.reached.clear();
                 state.abnormal_links.clear();
                 state.evaluator_queries.clear();
-                if( !DecidedCompare( start_agent, p_start_x, state ) )
-                    throw MismatchPlaceholder();
+                DecidedCompare( start_agent, p_start_x, state );
             }
             
             CouplingMap combined_keys = MapUnion( *master_keys, *(state.slave_keys) );     
@@ -404,8 +398,7 @@ bool Engine::Compare( Agent *start_agent,
             for( shared_ptr<const AgentQuery> query : state.evaluator_queries )
             {
                 //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
-                if( !CompareEvaluatorLinks( query, &combined_keys ) )
-                    throw MismatchPlaceholder();
+                CompareEvaluatorLinks( query, &combined_keys );
             }
         }
         catch( const ::SR::Mismatch& mismatch )

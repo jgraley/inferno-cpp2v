@@ -33,9 +33,19 @@ private:
         Set< std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > > abnormal_links;    // applies ACROSS PASSES
     };
     
+    // Any mismatch this class throws
+    class Mismatch : public ::SR::Mismatch
+    {
+    };
+    
     // Generated when some comparison function returns false 
     // TODO should not need this once all the throws are in 
-    class MismatchPlaceholder : public ::SR::Mismatch
+    class MismatchPlaceholder : public Mismatch
+    {
+    };
+    
+    // Conjecture ran out of choices
+    class NoSolution : public Mismatch
     {
     };
     
@@ -81,12 +91,12 @@ protected:
                   CouplingMap *slave_keys,
                   const CouplingMap *master_keys ) const;
 private:
-    bool DecidedCompare( Agent *agent,
+    void DecidedCompare( Agent *agent,
                          const TreePtrInterface *px,
                          CompareState &state ) const;
-    bool CompareLinks( shared_ptr<const AgentQuery> query,
+    void CompareLinks( shared_ptr<const AgentQuery> query,
                        CompareState &state ) const;
-    bool CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
+    void CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
 							    const CouplingMap *slave_keys ) const;
     void KeyReplaceNodes( Conjecture &conj,
                           const CouplingMap *coupling_keys) const;
