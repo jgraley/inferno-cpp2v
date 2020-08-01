@@ -31,9 +31,17 @@ bool CompareReplace::IsMatch( TreePtr<Node> context,
                               TreePtr<Node> root )
 {
     pcontext = &context;
-    bool r = Compare(&root); // Using &root here in principle allows a PointerIs to operate on the root (yeah, I know right?)
-    pcontext = NULL;
-    return r == true;
+    try
+    {
+        Compare(&root); // Using &root here in principle allows a PointerIs to operate on the root (yeah, I know right?)
+        pcontext = NULL;
+        return true;
+    }
+    catch( ::Mismatch & )
+    {
+        pcontext = NULL;
+        return false;
+    }
 }
 
 

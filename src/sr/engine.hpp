@@ -83,15 +83,15 @@ public:
                                  const CouplingMap *master_keys );
     
 protected:
-    bool SingleCompareReplace( TreePtr<Node> *proot,
+    void SingleCompareReplace( TreePtr<Node> *proot,
                                const CouplingMap *master_keys );
-    bool Compare( const TreePtrInterface *p_start_x ) const;
-    bool Compare( const TreePtrInterface *p_start_x,
+    void Compare( const TreePtrInterface *p_start_x ) const;
+    void Compare( const TreePtrInterface *p_start_x,
                   const CouplingMap *master_keys ) const;
-    bool Compare( Agent *start_agent,
+    void Compare( Agent *start_agent,
                   const TreePtrInterface *p_start_x,
                   const CouplingMap *master_keys ) const;
-    bool Compare( Agent *start_agent,
+    void Compare( Agent *start_agent,
                   const TreePtrInterface *p_start_x,
                   Conjecture *conj,
                   CouplingMap *slave_keys,

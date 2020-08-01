@@ -234,7 +234,15 @@ void Engine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
         // Get x for linked node
         const TreePtrInterface *px = b.GetPX();
                                  
-        compare_results.push_back( Compare( b.agent, px, slave_keys ) );
+        try 
+        {
+            Compare( b.agent, px, slave_keys );
+            compare_results.push_back( true );
+        }
+        catch( ::Mismatch & )
+        {
+            compare_results.push_back( false );
+        }
 
         i++;
     }
@@ -289,35 +297,35 @@ void Engine::DecidedCompare( Agent *agent,
 
 // This one operates from root for a stand-alone compare operation and
 // no master keys.
-bool Engine::Compare( const TreePtrInterface *p_start_x ) const
+void Engine::Compare( const TreePtrInterface *p_start_x ) const
 {
     CouplingMap master_keys;
-    return Compare( root_agent, p_start_x, &master_keys );
+    Compare( root_agent, p_start_x, &master_keys );
 }
 
 
 // This one operates from root for a stand-alone compare operation (side API)
-bool Engine::Compare( const TreePtrInterface *p_start_x,
+void Engine::Compare( const TreePtrInterface *p_start_x,
                       const CouplingMap *master_keys ) const
 {
 	ASSERT( root_agent );
-    return Compare( root_agent, p_start_x, master_keys );
+    Compare( root_agent, p_start_x, master_keys );
 }
 
 
 // This one if you don't want the resulting keys and conj (ie not doing a replace)
-bool Engine::Compare( Agent *start_agent,
+void Engine::Compare( Agent *start_agent,
                       const TreePtrInterface *p_start_x,
                       const CouplingMap *master_keys ) const
 {
     Conjecture conj(my_agents);
     CouplingMap slave_keys; 
-    return Compare( start_agent, p_start_x, &conj, &slave_keys, master_keys );
+    Compare( start_agent, p_start_x, &conj, &slave_keys, master_keys );
 }
 
 
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
-bool Engine::Compare( Agent *start_agent,
+void Engine::Compare( Agent *start_agent,
                       const TreePtrInterface *p_start_x,
                       Conjecture *conj,
                       CouplingMap *slave_keys,
@@ -331,19 +339,12 @@ bool Engine::Compare( Agent *start_agent,
     ASSERT( &slave_keys != &master_keys );
     //TRACE(**pcontext)(" @%p\n", pcontext);
            
-    try
+    SimpleCompare sc;
+    if( master_keys->IsExist(start_agent) )
     {
-        SimpleCompare sc;
-        if( master_keys->IsExist(start_agent) )
-        {
-            sc( *p_start_x, master_keys->At(start_agent) );
-            return true; // we're done, because we were started right on top of one of the couplings we were given
-        }              
-    }
-    catch( const ::Mismatch& mismatch )
-    {                
-        return false; // we're done, because we were started right on top of one of the couplings we were given
-    }
+        sc( *p_start_x, master_keys->At(start_agent) );
+        return; // we're done, because we were started right on top of one of the couplings we were given
+    }              
     
     CompareState state;
     state.master_keys = master_keys;    
@@ -387,8 +388,7 @@ bool Engine::Compare( Agent *start_agent,
             // Examples are the pattern restrictions on Star and Stuff.
             for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : state.abnormal_links )
             {            
-                if( !Compare( lp.second->agent, lp.second->GetPX(), &combined_keys ) ) 
-                    throw MismatchPlaceholder();
+                Compare( lp.second->agent, lp.second->GetPX(), &combined_keys );
             }
 
 
@@ -410,15 +410,14 @@ bool Engine::Compare( Agent *start_agent,
                 continue; // Conjecture would like us to try again with new choices
                 
             // We didn't match and we've run out of choices, so we're done.              
-            return false; // TODO rethrow?
+            throw NoSolution();
         }
         // We got a match so we're done. 
         TRACE("Engine hit\n");
         break; // Success
     }
     
-    // by now, we succeeded and slave_keys is the right set of keys
-    return true;
+    // By now, we succeeded and slave_keys is the right set of keys
 }
 
 
@@ -460,7 +459,7 @@ void Engine::GatherCouplings( CouplingMap *coupling_keys ) const
 }
 
 
-bool Engine::SingleCompareReplace( TreePtr<Node> *p_root,
+void Engine::SingleCompareReplace( TreePtr<Node> *p_root,
                                    const CouplingMap *master_keys ) 
 {
     INDENT(">");
@@ -469,10 +468,8 @@ bool Engine::SingleCompareReplace( TreePtr<Node> *p_root,
     Conjecture conj(my_agents);
 
     TRACE("Begin search\n");
-    bool r = Compare( root_agent, p_root, &conj, &slave_keys, master_keys );
-    if( !r )
-        return false;
-       
+    Compare( root_agent, p_root, &conj, &slave_keys, master_keys );
+           
     TRACE("Search successful, now keying replace nodes\n");
     KeyReplaceNodes( conj, &slave_keys );
 
@@ -490,8 +487,6 @@ bool Engine::SingleCompareReplace( TreePtr<Node> *p_root,
     // Clear out all the replace keys (the ones inside the agents) now that replace is done
     FOREACH( Agent *a, my_agents )
         a->ResetKey();
-
-    return true;
 }
 
 
@@ -515,11 +510,12 @@ int Engine::RepeatingCompareReplace( TreePtr<Node> *proot,
         if( stop )
             FOREACH( Engine *e, my_slaves )
                 e->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
-                
-        bool r = SingleCompareReplace( proot, master_keys );
-        TRACE("SCR result %d\n", r);        
-        
-        if( !r )
+               
+        try
+        {
+            SingleCompareReplace( proot, master_keys );
+        }
+        catch( ::Mismatch )
         {
             if( depth < stop_after.size() )
                 ASSERT(stop_after[depth]<i)("Stop requested after hit that doesn't happen, there are only %d", i);
