@@ -12,7 +12,7 @@ Conjecture::Conjecture(Set<Agent *> my_agents)
     {
 		AgentRecord record;
 		record.agent = a;
-        record.previous_record = nullptr;
+        record.previous_agent = nullptr;
         record.linked = false;
         record.query = make_shared<AgentQuery>();        
 		agent_records[a] = record;
@@ -65,14 +65,12 @@ bool Conjecture::IncrementAgent( shared_ptr<AgentQuery> query )
 
 bool Conjecture::IncrementConjecture(AgentRecord *record)
 {   
-	// If we've run out of choices, we're done.
-	if( record==NULL )
-	    return false;
-	
     bool ok = IncrementAgent( record->query );
     if( !ok )
-    {		
-		return IncrementConjecture(record->previous_record);
+    {	if( record->previous_agent )
+            return IncrementConjecture( &agent_records.at(record->previous_agent) );
+        else
+            return false;
 	}
  
     return true;
@@ -81,7 +79,10 @@ bool Conjecture::IncrementConjecture(AgentRecord *record)
 
 bool Conjecture::Increment()
 {
-    return IncrementConjecture(last_record);
+    if( last_record )
+        return IncrementConjecture(last_record);
+    else
+        return false;
 }
 
 
@@ -105,7 +106,10 @@ shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
         
     if( !record.linked )
     {
-        record.previous_record = last_record;	
+        if( last_record )
+            record.previous_agent = last_record->agent;
+        else
+            record.previous_agent = nullptr;
         last_record = &record;
         record.linked = true;
     }

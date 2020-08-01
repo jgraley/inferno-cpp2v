@@ -23,7 +23,7 @@ public:
     {
 		Agent *agent;
         shared_ptr<AgentQuery> query;
-		AgentRecord *previous_record;
+ 		Agent *previous_agent;
         bool linked;
 	};
 
