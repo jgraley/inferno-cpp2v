@@ -20,21 +20,14 @@ void GreenGrassAgent::DecidedQuery( QueryAgentInterface &query,
     query.Reset();
     
     // Check pre-restriction
-    if( !IsLocalMatch(px->get()) )        
-    {
-        query.AddLocalMismatch();  
-        return;
-    }
+    CheckLocalMatch(px->get());
     
     // Restrict so that everything in the input program under here must be "green grass"
     // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
     if( engine->GetOverallMaster()->dirty_grass.find( *px ) != engine->GetOverallMaster()->dirty_grass.end() )
     {
         TRACE(**px)(" is dirty grass so rejecting\n");
-        {
-            query.AddLocalMismatch();  
-            return;
-        }
+        throw Mismatch();            
     }
     TRACE("subtree under ")(**px)(" is green grass\n");
     // Normal matching for the through path

@@ -53,11 +53,7 @@ void StandardAgent::DecidedQuery( QueryAgentInterface &query,
     query.Reset();
 
     // Check pre-restriction
-    if( !IsLocalMatch(px->get()) )        
-    {
-        query.AddLocalMismatch();  
-        return;
-    }
+    CheckLocalMatch(px->get());
 
     // Recurse through the children. Note that the itemiser internally does a
     // dynamic_cast onto the type of pattern, and itemises over that type. x must
@@ -99,11 +95,6 @@ void StandardAgent::DecidedQuery( QueryAgentInterface &query,
         {
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
         }
-
-        if( !query.IsLocalMatch() )
-        {
-            return;
-        }
     }
     return;
 }
@@ -134,8 +125,7 @@ void StandardAgent::DecidedQuerySequence( QueryAgentInterface &query,
     }
     if( px->size() < pattern_num_non_star )
     {
-        query.AddLocalMismatch();   // TODO break to get the final trace?
-        return;
+        throw Mismatch();     // TODO break to get the final trace?
     }
     ContainerInterface::iterator xit_star_limit = px->end();            
     for( int i=0; i<pattern_num_non_star; i++ )
@@ -197,9 +187,9 @@ void StandardAgent::DecidedQuerySequence( QueryAgentInterface &query,
     // If we finished the job and pattern and subject are still aligned, then it was a match
 	TRACE("Finishing compare sequence %d %d\n", xit==px->end(), pit==pattern.end() );
     if( xit != px->end() )
-        query.AddLocalMismatch();
+        throw Mismatch();  
     else if( pit != pattern.end() )
-        query.AddLocalMismatch();
+        throw Mismatch();  
     else 
         ASSERT( p_remaining==0 );
 }
@@ -273,8 +263,7 @@ void StandardAgent::DecidedQueryCollection( QueryAgentInterface &query,
 	    else // ran out of x elements - local mismatch
         {
             TRACE("mismatch - x ran out\n");
-            query.AddLocalMismatch();
-            return;
+            throw Mismatch();  
         }
     }
 
@@ -284,8 +273,7 @@ void StandardAgent::DecidedQueryCollection( QueryAgentInterface &query,
     if( !xremaining.empty() && !star )
     {
         TRACE("mismatch - x left over\n");
-        query.AddLocalMismatch(); // there were elements left over and no star to match them against
-        return;
+        throw Mismatch();   // there were elements left over and no star to match them against
     }
 
     TRACE("seen_star %d size of xremaining %d\n", !!star, xremaining.size() );

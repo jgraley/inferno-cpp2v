@@ -159,7 +159,7 @@ private:
     {
         query.Reset();
         if( !IsMatch( *px ) )
-            query.AddLocalMismatch();
+            throw Mismatch();  
     }                                
 };
 
@@ -177,7 +177,7 @@ private:
     {
         query.Reset();
         if( !IsMatch( *px ) )
-            query.AddLocalMismatch();
+            throw Mismatch();  
     }                                
 };
 
@@ -195,7 +195,7 @@ private:
     {
         query.Reset();
         if( !IsMatch( *px ) )
-            query.AddLocalMismatch();
+            throw Mismatch();  
     }                                
 };
 

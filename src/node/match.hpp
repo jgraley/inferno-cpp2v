@@ -4,16 +4,31 @@
 #include <typeinfo>
 #include <string>
 #include "common/trace.hpp"
+#include "common/mismatch.hpp"
 
 /// Support class allowing hierarchical type comparisons between nodes
 struct Matcher
 {
+    // Any mismatch this class throws
+    class Mismatch : public ::Mismatch
+    {
+    };
+    
+    class LocalMismatch : public Mismatch
+    {
+    };
+
 	virtual bool IsSubclass( const Matcher *source_architype ) const = 0;
 	virtual bool IsLocalMatch( const Matcher *candidate ) const
 	{
 		// Default local matching criterion checks only the type of the candidate. If the
 		// candidate's class is a (non-strict) subclass of this class, we have a match.
 		return IsSubclass( candidate );
+	}
+	virtual void CheckLocalMatch( const Matcher *candidate ) const
+	{
+        if( !IsLocalMatch( candidate ) )
+            throw LocalMismatch();
 	}
     virtual ~Matcher() {}
     template< class TARGET_TYPE >

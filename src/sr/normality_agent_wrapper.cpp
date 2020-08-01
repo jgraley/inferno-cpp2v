@@ -161,8 +161,7 @@ void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
 				compare_results.push_back(result);
 			else if( !result )
 			{
-				wrapper_result.local_match = false;
-				return wrapper_result;
+				throw Mismatch
 			}
     	}
 	    else

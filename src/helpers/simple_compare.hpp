@@ -1,7 +1,7 @@
 #include "node/node.hpp"
 #include "common/common.hpp"
 #include "common/trace.hpp"
-#include "mismatch.hpp"
+#include "common/mismatch.hpp"
 
 #ifndef SIMPLE_COMPARE_HPP
 #define SIMPLE_COMPARE_HPP

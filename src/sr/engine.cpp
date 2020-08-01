@@ -244,7 +244,7 @@ void Engine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
 	FOREACH(bool b, compare_results)
 	    TRACE(b)(" ");
 	if( !(*evaluator)( compare_results ) )
-        throw MismatchPlaceholder();
+        throw EvaluatorFalse();
 }
 
 
@@ -264,15 +264,10 @@ void Engine::DecidedCompare( Agent *agent,
     shared_ptr<AgentQuery> query = state.conj->GetQuery(agent);
 
     // Run the compare implementation to get the links based on the choices
-    TRACE(*agent)("?=")(**px)(" Gathering links\n");    
+    TRACE(*agent)("?=")(**px)(" DecidedQuery()\n");    
     agent->DecidedQuery( *query, px );
-    TRACE(*agent)("?=")(**px)(" local match ")(query->IsLocalMatch())("\n");
-            
+                        
     (void)state.conj->FillMissingChoicesWithBegin(query);
-            
-    // Stop if the node itself mismatched (can be for any reason depending on agent)
-    if(!query->IsLocalMatch())
-        throw MismatchPlaceholder();
 
     // Remember the coupling before recursing, as we can hit the same node 
     // (eg identifier) and we need to have coupled it. 

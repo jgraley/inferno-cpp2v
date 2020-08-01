@@ -5,7 +5,9 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
+
 #include "boolean_evaluator.hpp"
+
 #include <vector>
 #include <boost/type_traits.hpp>
   
@@ -79,7 +81,6 @@ public:
     typedef vector<ContainerInterface::iterator> Choices; 
     typedef list<Link> Links;
     
-    virtual bool IsLocalMatch() = 0;
     virtual const Choices *GetChoices() = 0;
 };
 
@@ -103,7 +104,6 @@ public:
     virtual void AddLink( bool abnormal, Agent *a, const TreePtrInterface *px ) = 0; 
     virtual void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) = 0; 
     virtual void AddEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
-    virtual void AddLocalMismatch() = 0;
 };
 
 
@@ -149,7 +149,6 @@ public:
                                                   
     const Links *GetLinks() const { return &links; } // pointer returned because the links contain the local links
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
-    bool IsLocalMatch() { return local_match; }
       
     const Choices *GetChoices() { return &choices; }
     const Ranges *GetDecisions() { return &decisions; }
@@ -159,7 +158,6 @@ public:
     
 private:
     shared_ptr<BooleanEvaluator> evaluator;
-    bool local_match = true;
     Links links; 
     Ranges decisions;
     Ranges::iterator next_decision;

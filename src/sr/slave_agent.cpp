@@ -27,12 +27,8 @@ void SlaveAgent::DecidedQuery( QueryAgentInterface &query,
     query.Reset();
 
     // Check pre-restriction
-    if( !IsLocalMatch(px->get()) )        
-    {
-        query.AddLocalMismatch();  
-        return;
-    }
-
+    CheckLocalMatch(px->get());
+    
     // When a slave node seen duriung search, just forward through the "through" path
     query.AddLink( false, AsAgent(GetThrough()), px );
 }

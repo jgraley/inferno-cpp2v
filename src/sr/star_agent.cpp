@@ -30,11 +30,7 @@ void StarAgent::DecidedQuery( QueryAgentInterface &query,
     TRACE("MatchRange pre-res\n");
     FOREACH( TreePtr<Node> xe, *xc )
     {
-        if( !IsLocalMatch( xe.get()) )
-        {
-            query.AddLocalMismatch();
-            return;
-        }
+        CheckLocalMatch( xe.get() );
     }
      
     if( TreePtr<Node> p = GetRestriction() )

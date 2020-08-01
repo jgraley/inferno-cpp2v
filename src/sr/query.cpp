@@ -65,13 +65,7 @@ void AgentQuery::AddEvaluator( shared_ptr<BooleanEvaluator> e )
 	ASSERT( !evaluator ); // should not register more than one
 	evaluator = e;
 }	
-
-
-void AgentQuery::AddLocalMismatch()
-{
-    local_match = false;
-}                                    
-                                        
+                         
                                         
 bool SR::operator<(const SR::AgentQuery::Link &l0, const SR::AgentQuery::Link &l1)
 {

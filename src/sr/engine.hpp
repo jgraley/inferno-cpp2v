@@ -6,7 +6,7 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
-#include "helpers/mismatch.hpp"
+#include "common/mismatch.hpp"
 #include "agent.hpp"
 #include <set>
 
@@ -46,6 +46,11 @@ private:
     
     // Conjecture ran out of choices
     class NoSolution : public Mismatch
+    {
+    };
+    
+    // Evaluator returned false
+    class EvaluatorFalse : public Mismatch
     {
     };
     

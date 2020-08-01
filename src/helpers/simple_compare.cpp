@@ -11,8 +11,8 @@ void SimpleCompare::operator()( TreePtr<Node> x, TreePtr<Node> y )
     
     // Local comparison deals with node type (or any overloaded matching rule)
     // Try both ways to explicitly disallow wildcarding (this fn guaranteed symmetrical)
-    if( !x->IsLocalMatch(y.get()) || !y->IsLocalMatch(x.get()))
-        throw LocalMismatch();
+    x->CheckLocalMatch(y.get());
+    y->CheckLocalMatch(x.get());
 
     // Itemise them both and chuck out if sizes do not match
     vector< Itemiser::Element * > x_memb = x->Itemise();

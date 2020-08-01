@@ -25,12 +25,8 @@ void SearchContainerAgent::DecidedQuery( QueryAgentInterface &query,
     query.Reset();
     
     // Check pre-restriction
-    if( !IsLocalMatch(px->get()) )        
-    {
-        query.AddLocalMismatch();  
-        return;
-    }
-
+    CheckLocalMatch(px->get());
+    
     TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(**px)("\n");
 
     // Get an interface to the container we will search
@@ -41,8 +37,7 @@ void SearchContainerAgent::DecidedQuery( QueryAgentInterface &query,
     
     if( pwx->empty() )
     {
-        query.AddLocalMismatch();   // The search container is empty, thus terminus could never be matched
-        return;
+        throw Mismatch();     // The search container is empty, thus terminus could never be matched
     }
 
     // Get choice from conjecture about where we are in the walk

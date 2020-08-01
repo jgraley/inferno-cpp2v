@@ -22,11 +22,7 @@ void NotMatchAgent::DecidedQuery( QueryAgentInterface &query,
     query.Reset();
     
     // Check pre-restriction
-    if( !IsLocalMatch(px->get()) )      
-    {
-        query.AddLocalMismatch();  
-        return;
-    }
+    CheckLocalMatch(px->get());
     
     // Context is abnormal because patterns must not match
     query.AddLink( true, AsAgent(GetPattern()), px );
@@ -74,11 +70,7 @@ void MatchAllAgent::DecidedQuery( QueryAgentInterface &query,
     query.Reset();
     
     // Check pre-restriction
-    if( !IsLocalMatch(px->get()) )        
-    {
-        query.AddLocalMismatch();  
-        return;
-    }
+    CheckLocalMatch(px->get());
     
     FOREACH( const TreePtr<Node> p, GetPatterns() )
     {
@@ -123,11 +115,7 @@ void MatchAnyAgent::DecidedQuery( QueryAgentInterface &query,
     query.Reset();
     
     // Check pre-restriction
-    if( !IsLocalMatch(px->get()) )        
-    {
-        query.AddLocalMismatch();  
-        return;
-    }
+    CheckLocalMatch(px->get());
     
     FOREACH( const TreePtr<Node> p, GetPatterns() )
     {

@@ -10,7 +10,8 @@
 #include "query.hpp"
 #include <vector>
 #include <boost/type_traits.hpp>
-  
+#include "common/mismatch.hpp"
+
 namespace SR
 { 
 class SpecialBase;
@@ -22,6 +23,11 @@ class Agent : public virtual Traceable,
               public virtual Node
 {
 public:
+    // Any mismatch this class throws
+    class Mismatch : public ::Mismatch
+    {
+    };
+    
     // C++11 fix
     Agent& operator=(Agent& other)
     {

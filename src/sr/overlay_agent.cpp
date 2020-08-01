@@ -19,11 +19,7 @@ void OverlayAgent::DecidedQuery( QueryAgentInterface &query,
     query.Reset();
     
     // Check pre-restriction
-    if( !IsLocalMatch(px->get()) )        
-    {
-        query.AddLocalMismatch();  
-        return;
-    }
+    CheckLocalMatch(px->get());
 
     query.AddLink( false, AsAgent(GetThrough()), px );
 }

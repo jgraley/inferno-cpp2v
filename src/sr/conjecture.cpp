@@ -32,6 +32,7 @@ bool Conjecture::IncrementAgent( shared_ptr<AgentQuery> query )
         // this query is defunct
 	    return false;  
 	}
+    FillMissingChoicesWithBegin(query);
     
     const auto &back_decision = query->GetDecisions()->back();
     ContainerInterface::iterator back_choice = query->GetChoices()->back();

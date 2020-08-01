@@ -209,8 +209,8 @@ void IsLabelReached::DecidedQuery( QueryAgentInterface &query,
 
 	Set< TreePtr<InstanceIdentifier> > uf;        
     if( !CanReachExpr(&uf, x, y) )
-        query.AddLocalMismatch();
-	TRACE("I reakon ")(*x)(query.IsLocalMatch()?" does ":" does not ")("reach ")(*y)("\n"); 
+        throw Mismatch();  
+	TRACE("I reakon ")(*x)(" reaches ")(*y)("\n"); 
 }                 
 
 
