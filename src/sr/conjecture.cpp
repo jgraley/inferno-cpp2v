@@ -13,6 +13,8 @@ Conjecture::Conjecture(Set<Agent *> my_agents)
 		AgentRecord record;
 		record.agent = a;
         record.previous_record = nullptr;
+        record.linked = false;
+        record.query = make_shared<AgentQuery>();        
 		agent_records[a] = record;
 	}        
 }
@@ -61,23 +63,25 @@ bool Conjecture::IncrementAgent( shared_ptr<AgentQuery> query )
 }
 
 
-bool Conjecture::Increment()
+bool Conjecture::IncrementConjecture(AgentRecord *record)
 {   
 	// If we've run out of choices, we're done.
-	if( last_record==NULL )
+	if( record==NULL )
 	    return false;
 	
-    bool ok = IncrementAgent( last_record->query );
+    bool ok = IncrementAgent( record->query );
     if( !ok )
     {		
-        AgentRecord *record_to_remove = last_record;
-        record_to_remove->query = nullptr;
-		last_record = record_to_remove->previous_record;
-        record_to_remove->previous_record = nullptr;
-		return Increment();
+		return IncrementConjecture(record->previous_record);
 	}
  
     return true;
+}
+
+
+bool Conjecture::Increment()
+{
+    return IncrementConjecture(last_record);
 }
 
 
@@ -99,11 +103,11 @@ shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
     ASSERT( agent_records.IsExist(agent) );
  	AgentRecord &record = agent_records[agent];
         
-    if( !record.query )
+    if( !record.linked )
     {
-        record.query = make_shared<AgentQuery>();
         record.previous_record = last_record;	
         last_record = &record;
+        record.linked = true;
     }
     
     shared_ptr<AgentQuery> query = agent_records[agent].query;
