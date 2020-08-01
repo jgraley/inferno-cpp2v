@@ -11,7 +11,7 @@
 #include <list>
 
 using namespace SR;
- 
+
 int Engine::repetitions;
 bool Engine::rep_error;
 
@@ -195,22 +195,8 @@ void Engine::CompareLinks( shared_ptr<const AgentQuery> query,
         }    
         else
         {
-            // Check for a coupling match to a master engine's agent. 
-            SimpleCompare sc;
-            if( state.master_keys->IsExist(b.agent) )
-            {               
-                sc( *px, state.master_keys->At(b.agent) );
-            }
-            // Check for a coupling match to one of our agents we reached earlier in this pass.
-            else if( state.reached.IsExist(b.agent) )
-            {
-                sc( *px, state.slave_keys->At(b.agent) );
-            }
-            else
-            {
-                // Recurse normally
-                DecidedCompare(b.agent, px, state);                
-            }
+            // Recurse normally
+            DecidedCompare(b.agent, px, state);                
         }
         
         i++;
@@ -263,7 +249,20 @@ void Engine::DecidedCompare( Agent *agent,
     INDENT(" ");
     ASSERT( px ); // Ref to target must not be NULL (i.e. corrupted ref)
     ASSERT( *px ); // Target must not be NULL
-    ASSERT( !state.reached.IsExist(agent) ); // Only call this once per agent 
+
+    // Check for a coupling match to a master engine's agent. 
+    SimpleCompare sc;
+    if( state.master_keys->IsExist(agent) )
+    {               
+        sc( *px, state.master_keys->At(agent) );
+        return;
+    }
+    // Check for a coupling match to one of our agents we reached earlier in this pass.
+    else if( state.reached.IsExist(agent) )
+    {
+        sc( *px, state.slave_keys->At(agent) );
+        return;
+    }
 
     // Remember we reached this agent 
     state.reached.insert( agent );
@@ -339,13 +338,6 @@ void Engine::Compare( Agent *start_agent,
     ASSERT( &slave_keys != &master_keys );
     //TRACE(**pcontext)(" @%p\n", pcontext);
            
-    SimpleCompare sc;
-    if( master_keys->IsExist(start_agent) )
-    {
-        sc( *p_start_x, master_keys->At(start_agent) );
-        return; // we're done, because we were started right on top of one of the couplings we were given
-    }              
-    
     CompareState state;
     state.master_keys = master_keys;    
     state.conj = conj;
