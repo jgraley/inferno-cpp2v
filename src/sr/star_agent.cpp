@@ -39,7 +39,7 @@ void StarAgent::DecidedQuery( QueryAgentInterface &query,
         // Apply pattern restriction - will be at least as strict as pre-restriction
         FOREACH( const TreePtrInterface &xe, *xc )
         {
-            query.AddLocalLink( true, AsAgent(p), xe );
+            query.AddLocalAbnormalLink( AsAgent(p), xe );
         }
     }
  

@@ -9,7 +9,6 @@ namespace SR
 
 Conjecture::Conjecture(Set<Agent *> my_agents, Agent *root_agent)
 {
-    last_agent = NULL;
     FOREACH( Agent *a, my_agents )
     {
 		AgentRecord record;
@@ -19,15 +18,27 @@ Conjecture::Conjecture(Set<Agent *> my_agents, Agent *root_agent)
         record.query = make_shared<AgentQuery>();        
 		agent_records[a] = record;
 	}        
-#ifdef STIFF_LINKS
-    RecordWalk( &agent_records.at(root_agent) );
+    last_agent = nullptr;
+    RecordWalk( root_agent );
+#ifndef STIFF_LINKS
+    // Undo the linking
+    FOREACH( Agent *a, my_agents )
+    {
+        AgentRecord *record = &agent_records.at(a);
+        record->linked = false;
+    }
+    last_agent = nullptr;
 #endif
 }
 
 
-void Conjecture::RecordWalk( AgentRecord *record )
+void Conjecture::RecordWalk( Agent *agent )
 {
-    Agent *agent = record->agent;
+    if( agent_records.count(agent)==0 ) // Probably belongs to master
+        return;
+
+    AgentRecord *record = &agent_records.at(agent);
+
     if( record->linked );
         return; // already reached: probably a coupling
         
@@ -44,10 +55,7 @@ void Conjecture::RecordWalk( AgentRecord *record )
         return; // we don't process evaluators
     
     for( const PatternQueryResult::Link &l : *r.GetNormalLinks() )
-    {
-        if( agent_records.count(l.agent)>0 ) // Probably belongs to master
-            RecordWalk( &agent_records.at(l.agent) );
-    }
+        RecordWalk( l.agent );
 }
 
 

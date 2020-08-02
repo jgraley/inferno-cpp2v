@@ -24,7 +24,7 @@ void PointerIsAgent::DecidedQuery( QueryAgentInterface &query,
 	// Thus, it must be passed around via const TreePtrInterface &        
 	TreePtr<Node> ptr_arch = px->MakeValueArchitype();
 	
-	query.AddLocalLink( false, AsAgent(GetPointer()), ptr_arch );
+	query.AddLocalNormalLink( AsAgent(GetPointer()), ptr_arch );
 }
 
 

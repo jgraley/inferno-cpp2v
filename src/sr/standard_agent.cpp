@@ -164,7 +164,7 @@ void StandardAgent::DecidedQuerySequence( QueryAgentInterface &query,
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern restriction
-            query.AddLocalLink( false, psa, xss );
+            query.AddLocalNormalLink( psa, xss );
             
             // Resume at the first element after the matched range
             xit = xit_star_end;
@@ -250,7 +250,7 @@ void StandardAgent::DecidedQueryCollection( QueryAgentInterface &query,
                 *x_decision = xremaining;
                 xit = query.AddDecision( x_decision, false );
             }
-            query.AddLocalLink( false, pia, *xit );
+            query.AddLocalNormalLink( pia, *xit );
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.
@@ -283,7 +283,7 @@ void StandardAgent::DecidedQueryCollection( QueryAgentInterface &query,
     {
         TreePtr<StarAgent::SubCollection> x_subcollection( new StarAgent::SubCollection );
         *x_subcollection = xremaining;
-        query.AddLocalLink( false, star, x_subcollection );
+        query.AddLocalNormalLink( star, x_subcollection );
     }
     TRACE("matched\n");
 }

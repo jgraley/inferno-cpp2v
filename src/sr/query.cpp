@@ -58,7 +58,7 @@ void AgentQuery::AddAbnormalLink( Agent *a, const TreePtrInterface *px )
 }
 
 
-void AgentQuery::AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
+void AgentQuery::AddLocalNormalLink( Agent *a, TreePtr<Node> x )
 {
     ASSERT(x);
     Link b;
@@ -69,10 +69,22 @@ void AgentQuery::AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
-    if( abnormal )
-        abnormal_links.push_back( b );
-    else
-        normal_links.push_back( b );        
+    normal_links.push_back( b );        
+}
+
+
+void AgentQuery::AddLocalAbnormalLink( Agent *a, TreePtr<Node> x )
+{
+    ASSERT(x);
+    Link b;
+    b.agent = a;
+    b.px = NULL;    
+    b.local_x = x;
+    
+    // For debugging
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    
+    abnormal_links.push_back( b );
 }
 
 

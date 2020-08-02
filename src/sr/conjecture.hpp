@@ -31,7 +31,7 @@ public:
     Conjecture(Set<Agent *> my_agents, Agent *root_agent);
     ~Conjecture();
 
-    void RecordWalk( AgentRecord *record );
+    void RecordWalk( Agent *agent );
 	bool IncrementAgent( shared_ptr<AgentQuery> query );			                                     
     bool Increment(); // returns true for try again, false for give up				 
     bool IncrementConjecture( Agent *agent ); 

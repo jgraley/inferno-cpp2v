@@ -105,7 +105,8 @@ public:
 
     virtual void AddNormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
     virtual void AddAbnormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
-    virtual void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) = 0; 
+    virtual void AddLocalNormalLink( Agent *a, TreePtr<Node> x ) = 0; 
+    virtual void AddLocalAbnormalLink( Agent *a, TreePtr<Node> x ) = 0; 
     virtual void AddEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
 };
 
@@ -148,7 +149,8 @@ public:
 
     void AddNormalLink( Agent *a, const TreePtrInterface *px ); 
     void AddAbnormalLink( Agent *a, const TreePtrInterface *px ); 
-    void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ); 
+    void AddLocalNormalLink( Agent *a, TreePtr<Node> x ); 
+    void AddLocalAbnormalLink( Agent *a, TreePtr<Node> x ); 
     void AddEvaluator( shared_ptr<BooleanEvaluator> e ); 
     void AddLocalMismatch();
                                                   

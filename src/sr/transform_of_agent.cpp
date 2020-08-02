@@ -22,7 +22,7 @@ void TransformOfAgent::DecidedQuery( QueryAgentInterface &query,
 	if( xt )
 	{
 	    // Punt it back into the search/replace engine
-	    query.AddLocalLink( false, AsAgent(pattern), xt );
+	    query.AddLocalNormalLink( AsAgent(pattern), xt );
 	}
 	else
 	{

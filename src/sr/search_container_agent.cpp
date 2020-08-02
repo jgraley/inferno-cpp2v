@@ -119,7 +119,7 @@ void StuffAgent::DecidedQueryRestrictions( QueryAgentInterface &query, Container
 
         // Check all the nodes that we recursed through in order to get here
         FOREACH( TreePtr<Node> n, pwtt->GetPath() )
-            query.AddLocalLink( true, AsAgent(recurse_restriction), n );
+            query.AddLocalAbnormalLink( AsAgent(recurse_restriction), n );
     }   
 }
 
