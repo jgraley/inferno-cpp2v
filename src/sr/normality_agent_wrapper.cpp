@@ -22,24 +22,21 @@ void NormalityAgentWrapper::Configure( const Set<Agent *> &engine_agents,
     PatternQueryResult plinks = wrapped_agent->PatternQuery();
 
     abnormal_links.clear();    
-    FOREACH( PatternQueryResult::Link b, plinks.GetLinks() )
+    FOREACH( PatternQueryResult::Link b, plinks.GetAbnormalLinks() )
     {
-		if( b.abnormal )
-		{
-			shared_ptr<AbnormalLink> al( new AbnormalLink() );
-			
-			// Find the terminal agents
-			TerminalFinder tf( b.agent, engine_agents, master_agents, al->terminal_agents );
-			FOREACH( TreePtr<Node> n, tf )
-			{ // Don't do anything: the TerminalFinder itself fills in al->terminal_agents
-			}
-			
-			// Configure the engine for this abnormal block
-			Set< Agent * > surrounding_agents = SetUnion( master_agents, al->terminal_agents );
-			al.engine.Configure( b.agent, TreePtr<Node>(), surrounding_agents, engine );
-			
-			abnormal_links.push_back( al );
-		}
+        shared_ptr<AbnormalLink> al( new AbnormalLink() );
+        
+        // Find the terminal agents
+        TerminalFinder tf( b.agent, engine_agents, master_agents, al->terminal_agents );
+        FOREACH( TreePtr<Node> n, tf )
+        { // Don't do anything: the TerminalFinder itself fills in al->terminal_agents
+        }
+        
+        // Configure the engine for this abnormal block
+        Set< Agent * > surrounding_agents = SetUnion( master_agents, al->terminal_agents );
+        al.engine.Configure( b.agent, TreePtr<Node>(), surrounding_agents, engine );
+        
+        abnormal_links.push_back( al );
 	}
 	evaluator = blocks.evaluator;
 }
@@ -58,25 +55,22 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
     wrapper_result.evaluator = wrapped_result.evaluator;
 	
     list< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
-    FOREACH( PatternQueryResult::Link b, wrapper_result.GetLinks() ) 
+    FOREACH( PatternQueryResult::Link b, wrapped_result.GetAbnormalLinks() ) 
     {
-		if( b.abnormal )
-		{
-			al = *alit;
-			++alit;
-			FOREACH( Agent *ta, al->terminal_agents )
-			{
-				PatternQueryResult::Link nb;
-				nb.abnormal = false;
-				nb.agent = ta;
-				wrapper_result.push_back( nb );
-			}
-		}
-		else
-		{
-			wrapper_result.push_back( b );
-		}
+        al = *alit;
+        ++alit;
+        FOREACH( Agent *ta, al->terminal_agents )
+        {
+            PatternQueryResult::Link nb;
+            wrapper_result.AddNormalLink( ta );
+        }
+    }
+
+    FOREACH( const PatternQueryResult::Link &b, wrapped_result.GetNormalLinks() ) 
+	{
+		wrapper_result.AddNormalLink( b.agent );
 	}
+
 	return wrapper_result;
 }
 
@@ -89,23 +83,21 @@ void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
     AgentQuery wrapped_query;
     list< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
     int i=0;
-    FOREACH( PatternQueryResult::Link b, wrapper_query.GetLinks() ) // JSG2020 wrapped_result.blocks?
+    FOREACH( PatternQueryResult::Link b, wrapper_query.GetAbnormalLinks() ) // JSG2020 wrapped_result.blocks?
     {
-		if( b.abnormal )
-		{
-			al = *alit;
-			++alit;
-			FOREACH( Agent *ta, al->terminal_agents )
-			{
-				wrapped_query.PushBackChoice( *((*wrapper_query.GetChoices())[i]) ); 
-				i++;
-			}
-		}
-		else
-		{
-			wrapped_query.PushBackChoice( *((*wrapper_query.GetChoices())[i]) ); 
-			i++;
-		}
+        al = *alit;
+        ++alit;
+        FOREACH( Agent *ta, al->terminal_agents )
+        {
+            wrapped_query.PushBackChoice( *((*wrapper_query.GetChoices())[i]) ); 
+            i++;
+        }
+    }
+    
+    FOREACH( PatternQueryResult::Link b, wrapper_query.GetNormalLinks() ) // JSG2020 wrapped_result.blocks?
+    {
+        wrapped_query.PushBackChoice( *((*wrapper_query.GetChoices())[i]) ); 
+        i++;
 	}
     
     wrapper_query.Reset();
@@ -124,50 +116,47 @@ void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
     // own abnormal_links container.
     list<bool> compare_results;
     list< AbnormalLink >::iterator alit = abnormal_links.begin();    
-    FOREACH( AgentQuery::Link b, *(wrapped_query.GetLinks()) )
+    FOREACH( AgentQuery::Link b, *(wrapped_query.GetAbnormalLinks()) )
     {
-		if( b.abnormal )
-		{
-			al = *alit;
-			++alit;
-			
-			// TODO should do this before the wrapped_agent->DecidedQuery() since it *might* help with
-			// choice pushing into the wrapped node.
-			// Create whole-domain decisions for the terminal agents and key them with the resultant choices 
-			CouplingMap terminal_keys;			
-			FOREACH( Agent *ta, terminal_agents )
-			{
-				// Get the root of everything
-				TreePtr<Node> c = *(engine->GetOverallMaster()->pcontext);
-				// Make a walker of everything
-				shared_ptr<ContainerInterface> pwc = shared_ptr<ContainerInterface>( new Walk( c, NULL, NULL ) );
-				// TODO see "Problems with context walk" below
-				
-				// Give that walker to the conjecture as a decision and make a block
-                ContainerInterface::iterator thistime = wrapped_query.AddDecision( pwc->begin(), pwc->end(), false );
-                wrapped_query.AddLink( false, AsAgent(terminus), &*thistime );
+        al = *alit;
+        ++alit;
+        
+        // TODO should do this before the wrapped_agent->DecidedQuery() since it *might* help with
+        // choice pushing into the wrapped node.
+        // Create whole-domain decisions for the terminal agents and key them with the resultant choices 
+        CouplingMap terminal_keys;			
+        FOREACH( Agent *ta, terminal_agents )
+        {
+            // Get the root of everything
+            TreePtr<Node> c = *(engine->GetOverallMaster()->pcontext);
+            // Make a walker of everything
+            shared_ptr<ContainerInterface> pwc = shared_ptr<ContainerInterface>( new Walk( c, NULL, NULL ) );
+            // TODO see "Problems with context walk" below
+            
+            // Give that walker to the conjecture as a decision and make a block
+            ContainerInterface::iterator thistime = wrapped_query.AddDecision( pwc->begin(), pwc->end(), false );
+            wrapped_query.AddNormalLink( AsAgent(terminus), &*thistime );
 
-				// Consider the chosen (or pushed) node to be a key for the benefit of the local engine
-				terminal_keys[ta] = *cit;				
-			}
-			
-			// Get the keys that the sub-engine will need to use, and invoke it on the block
-			// Theory is that, of the enclosing engine's agents, the terminal ones are the only ones the sub-engine will see.
-			CouplingMap coupling_keys = MapUnion( master_keys, terminal_keys ); 
-			bool result = al.engine.Compare( l.GetPX(), coupling_keys );
-			
-			// Deal with result - store for evaluator otherwise do AND-rule with early-out
-			if( evaluator )
-				compare_results.push_back(result);
-			else if( !result )
-			{
-				throw Mismatch
-			}
-    	}
-	    else
-	    {
-		    wrapper_query.AddLink( b ); // TODO implement
-		}
+            // Consider the chosen (or pushed) node to be a key for the benefit of the local engine
+            terminal_keys[ta] = *cit;				
+        }
+        
+        // Get the keys that the sub-engine will need to use, and invoke it on the block
+        // Theory is that, of the enclosing engine's agents, the terminal ones are the only ones the sub-engine will see.
+        CouplingMap coupling_keys = MapUnion( master_keys, terminal_keys ); 
+        bool result = al.engine.Compare( l.GetPX(), coupling_keys );
+        
+        // Deal with result - store for evaluator otherwise do AND-rule with early-out
+        if( evaluator )
+            compare_results.push_back(result);
+        else if( !result )
+        {
+            throw Mismatch
+        }
+    }
+    FOREACH( AgentQuery::Link b, *(wrapped_query.GetNormalLinks()) )
+    {
+        wrapper_query.AddNormalLink( b ); // TODO implement
     }
 	
 	// Run the evaluator if one was supplied.
@@ -243,9 +232,8 @@ shared_ptr<ContainerInterface> NormalityAgentWrapper::GetVisibleChildren() const
 	shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
 
     // Hide the abnormal children. I need different names for things.
-    FOREACH( PatternQueryResult::Link b, *(wrapped_query.GetLinks()) )
-		if( !b.abnormal )
-			seq->push_back( b.agent );
+    FOREACH( PatternQueryResult::Link b, *(wrapped_query.GetNormalLinks()) )
+        seq->push_back( b.agent );
 			
 	return seq;
 }

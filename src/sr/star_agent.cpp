@@ -8,7 +8,7 @@ PatternQueryResult StarAgent::PatternQuery() const
 {
     PatternQueryResult r;
     if( TreePtr<Node> p = GetRestriction() )
-        r.AddLink( true, AsAgent(p) );
+        r.AddAbnormalLink( AsAgent(p) );
     return r;
 }
 

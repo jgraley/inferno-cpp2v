@@ -8,7 +8,7 @@ using namespace SR;
 PatternQueryResult OverlayAgent::PatternQuery() const
 {
     PatternQueryResult r;
-	r.AddLink( false, AsAgent(GetThrough()) );
+	r.AddNormalLink( AsAgent(GetThrough()) );
     return r;
 }
 
@@ -21,7 +21,7 @@ void OverlayAgent::DecidedQuery( QueryAgentInterface &query,
     // Check pre-restriction
     CheckLocalMatch(px->get());
 
-    query.AddLink( false, AsAgent(GetThrough()), px );
+    query.AddNormalLink( AsAgent(GetThrough()), px );
 }
 
 

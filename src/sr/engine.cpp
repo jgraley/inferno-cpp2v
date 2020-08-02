@@ -10,6 +10,8 @@
 #include "common/common.hpp"
 #include <list>
 
+//#define TEST_PATTERN_QUERY
+
 using namespace SR;
 
 int Engine::repetitions;
@@ -179,27 +181,21 @@ void Engine::CompareLinks( shared_ptr<const AgentQuery> query,
 	ASSERT( !query->GetEvaluator() );
     // Follow up on any blocks that were noted by the agent impl
 
-    int i=0;
-    FOREACH( const AgentQuery::Link &b, *query->GetLinks() )
+    int i=0;        
+    FOREACH( const AgentQuery::Link &b, *query->GetAbnormalLinks() )
     {
-        TRACE("Comparing block %d\n", i);
- 
+        state.abnormal_links.insert( make_pair(query, &b) ); 
+    }    
+    FOREACH( const AgentQuery::Link &b, *query->GetNormalLinks() )
+    {
+        TRACE("Comparing normal link %d\n", i);
+        // Recurse normally
         // Get x for linked node
         const TreePtrInterface *px = b.GetPX();
         ASSERT( *px );
-           
-        // Recurse now       
-        if( b.abnormal )
-        {
-            state.abnormal_links.insert( make_pair(query, &b) ); 
-        }    
-        else
-        {
-            // Recurse normally
-            DecidedCompare(b.agent, px, state);                
-        }
         
-        i++;
+        DecidedCompare(b.agent, px, state);   
+        i++;             
     }
 }
 
@@ -209,13 +205,14 @@ void Engine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
 									const CouplingMap *slave_keys ) const
 {
 	ASSERT( query->GetEvaluator() );
+    ASSERT( query->GetNormalLinks()->empty() )("When an evaluator is used, all links must be into abnormal contexts");
+
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
     list<bool> compare_results;
-    FOREACH( const AgentQuery::Link &b, *query->GetLinks() )
+    FOREACH( const AgentQuery::Link &b, *query->GetAbnormalLinks() )
     {
         TRACE("Comparing block %d\n", i);
-        ASSERT( b.abnormal )("When an evaluator is used, all links must be into abnormal contexts");
  
         // Get x for linked node
         const TreePtrInterface *px = b.GetPX();
@@ -273,6 +270,16 @@ void Engine::DecidedCompare( Agent *agent,
     // Run the compare implementation to get the links based on the choices
     TRACE(*agent)("?=")(**px)(" DecidedQuery()\n");    
     agent->DecidedQuery( *query, px );
+
+#ifdef TEST_PATTERN_QUERY
+    PatternQueryResult r = agent->PatternQuery();
+    ASSERT( r.GetNormalLinks()->size() == query->GetNormalLinks()->size() )
+          ("PatternQuery disagrees with DecidedQuery!!!!\n")
+          ("GetNormalLinks()->size() : %d != %d!!\n", r.GetNormalLinks()->size(), query->GetNormalLinks()->size() )
+          (*agent);
+    // Note: number of abnormal links can depend on x, for example
+    // in the case of pattern restriction on Star, Stuff. See #60 
+#endif
                         
     (void)state.conj->FillMissingChoicesWithBegin(query);
 
@@ -317,7 +324,7 @@ void Engine::Compare( Agent *start_agent,
                       const TreePtrInterface *p_start_x,
                       const CouplingMap *master_keys ) const
 {
-    Conjecture conj(my_agents);
+    Conjecture conj(my_agents, start_agent);
     CouplingMap slave_keys; 
     Compare( start_agent, p_start_x, &conj, &slave_keys, master_keys );
 }
@@ -382,7 +389,6 @@ void Engine::Compare( Agent *start_agent,
             {            
                 Compare( lp.second->agent, lp.second->GetPX(), &combined_keys );
             }
-
 
             // Process the evaluator queries. These can match when their children have not matched and
             // we wouldn't be able to reliably key those children so we process them in a post-pass 
@@ -457,7 +463,7 @@ void Engine::SingleCompareReplace( TreePtr<Node> *p_root,
     INDENT(">");
 
     CouplingMap slave_keys;
-    Conjecture conj(my_agents);
+    Conjecture conj(my_agents, root_agent);
 
     TRACE("Begin search\n");
     Compare( root_agent, p_root, &conj, &slave_keys, master_keys );

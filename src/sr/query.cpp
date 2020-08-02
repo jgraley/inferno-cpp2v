@@ -6,24 +6,33 @@
 
 using namespace SR;
 
-void PatternQueryResult::AddLink( bool abnormal, Agent *a )
+void PatternQueryResult::AddNormalLink( Agent *a )
 {
     Link b;
-    b.abnormal = abnormal;
     b.agent = a;
     
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
-    TRACE("Remembering block %d ", links.size())(*a)(abnormal?" abnormal":" normal")("\n");
-    links.push_back( b );
+    normal_links.push_back( b );        
 }
 
 
-void AgentQuery::AddLink( bool abnormal, Agent *a, const TreePtrInterface *px )
+void PatternQueryResult::AddAbnormalLink( Agent *a )
 {
     Link b;
-    b.abnormal = abnormal;
+    b.agent = a;
+    
+    // For debugging
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    
+    abnormal_links.push_back( b );       
+}
+
+
+void AgentQuery::AddNormalLink( Agent *a, const TreePtrInterface *px )
+{
+    Link b;
     b.agent = a;
     b.px = px;
     b.local_x = TreePtr<Node>();
@@ -31,8 +40,21 @@ void AgentQuery::AddLink( bool abnormal, Agent *a, const TreePtrInterface *px )
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
-    TRACE("Remembering block %d ", links.size())(*a)(" -> ")(**px)(abnormal?" abnormal":" normal")("\n");
-    links.push_back( b );
+    normal_links.push_back( b );        
+}
+
+
+void AgentQuery::AddAbnormalLink( Agent *a, const TreePtrInterface *px )
+{
+    Link b;
+    b.agent = a;
+    b.px = px;
+    b.local_x = TreePtr<Node>();
+    
+    // For debugging
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    
+    abnormal_links.push_back( b );     
 }
 
 
@@ -40,7 +62,6 @@ void AgentQuery::AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
 {
     ASSERT(x);
     Link b;
-    b.abnormal = abnormal;
     b.agent = a;
     b.px = NULL;    
     b.local_x = x;
@@ -48,8 +69,10 @@ void AgentQuery::AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x )
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
-    TRACE("Remembering local block %d ", links.size())(*a)(" -> ")(*x)(abnormal?" abnormal":" normal")("\n");
-    links.push_back( b );
+    if( abnormal )
+        abnormal_links.push_back( b );
+    else
+        normal_links.push_back( b );        
 }
 
 
@@ -69,8 +92,6 @@ void AgentQuery::AddEvaluator( shared_ptr<BooleanEvaluator> e )
                                         
 bool SR::operator<(const SR::AgentQuery::Link &l0, const SR::AgentQuery::Link &l1)
 {
-    if( l0.abnormal != l1.abnormal )
-        return (int)l0.abnormal < (int)l1.abnormal;
     if( l0.agent != l1.agent )
         return l0.agent < l1.agent;
     if( l0.px != l1.px )
@@ -188,7 +209,8 @@ ContainerInterface::iterator AgentQuery::AddNextOldDecision()
 
 void AgentQuery::Reset()
 {
-    links.clear();
+    normal_links.clear();
+	abnormal_links.clear();
     evaluator = shared_ptr<BooleanEvaluator>();    
     next_decision = decisions.begin();  
     next_choice = choices.begin();  

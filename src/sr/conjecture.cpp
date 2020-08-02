@@ -2,12 +2,14 @@
 #include "search_replace.hpp"
 #include "conjecture.hpp"
 
+//#define STIFF_LINKS
+
 namespace SR 
 {
 
-Conjecture::Conjecture(Set<Agent *> my_agents)
+Conjecture::Conjecture(Set<Agent *> my_agents, Agent *root_agent)
 {
-    last_record = NULL;
+    last_agent = NULL;
     FOREACH( Agent *a, my_agents )
     {
 		AgentRecord record;
@@ -17,6 +19,35 @@ Conjecture::Conjecture(Set<Agent *> my_agents)
         record.query = make_shared<AgentQuery>();        
 		agent_records[a] = record;
 	}        
+#ifdef STIFF_LINKS
+    RecordWalk( &agent_records.at(root_agent) );
+#endif
+}
+
+
+void Conjecture::RecordWalk( AgentRecord *record )
+{
+    Agent *agent = record->agent;
+    if( record->linked );
+        return; // already reached: probably a coupling
+        
+    if( last_agent )
+        record->previous_agent = last_agent;
+    else
+        record->previous_agent = nullptr;
+    last_agent = agent;
+    record->linked = true;
+
+    PatternQueryResult r = agent->PatternQuery();
+    
+    if( r.GetEvaluator() )
+        return; // we don't process evaluators
+    
+    for( const PatternQueryResult::Link &l : *r.GetNormalLinks() )
+    {
+        if( agent_records.count(l.agent)>0 ) // Probably belongs to master
+            RecordWalk( &agent_records.at(l.agent) );
+    }
 }
 
 
@@ -63,12 +94,13 @@ bool Conjecture::IncrementAgent( shared_ptr<AgentQuery> query )
 }
 
 
-bool Conjecture::IncrementConjecture(AgentRecord *record)
+bool Conjecture::IncrementConjecture(Agent *agent)
 {   
+    AgentRecord *record = &agent_records.at(agent);
     bool ok = IncrementAgent( record->query );
     if( !ok )
     {	if( record->previous_agent )
-            return IncrementConjecture( &agent_records.at(record->previous_agent) );
+            return IncrementConjecture( record->previous_agent );
         else
             return false;
 	}
@@ -79,8 +111,8 @@ bool Conjecture::IncrementConjecture(AgentRecord *record)
 
 bool Conjecture::Increment()
 {
-    if( last_record )
-        return IncrementConjecture(last_record);
+    if( last_agent )
+        return IncrementConjecture(last_agent);
     else
         return false;
 }
@@ -104,15 +136,17 @@ shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
     ASSERT( agent_records.IsExist(agent) );
  	AgentRecord &record = agent_records[agent];
         
+#ifndef STIFF_LINKS
     if( !record.linked )
     {
-        if( last_record )
-            record.previous_agent = last_record->agent;
+        if( last_agent )
+            record.previous_agent = last_agent;
         else
             record.previous_agent = nullptr;
-        last_record = &record;
+        last_agent = agent;
         record.linked = true;
     }
+#endif
     
     shared_ptr<AgentQuery> query = agent_records[agent].query;
     //FillMissingChoicesWithBegin(query);

@@ -7,7 +7,7 @@ using namespace SR;
 PatternQueryResult GreenGrassAgent::PatternQuery() const
 {
     PatternQueryResult r;
-    r.AddLink( false, AsAgent(GetThrough()) );
+    r.AddNormalLink( AsAgent(GetThrough()) );
     return r;
 }
 
@@ -31,7 +31,7 @@ void GreenGrassAgent::DecidedQuery( QueryAgentInterface &query,
     }
     TRACE("subtree under ")(**px)(" is green grass\n");
     // Normal matching for the through path
-    query.AddLink( false, AsAgent(GetThrough()), px );
+    query.AddNormalLink( AsAgent(GetThrough()), px );
 }
 
 

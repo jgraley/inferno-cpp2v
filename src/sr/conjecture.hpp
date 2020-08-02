@@ -28,12 +28,14 @@ public:
 	};
 
 public:
-    Conjecture(Set<Agent *> my_agents);
+    Conjecture(Set<Agent *> my_agents, Agent *root_agent);
     ~Conjecture();
+
+    void RecordWalk( AgentRecord *record );
 	bool IncrementAgent( shared_ptr<AgentQuery> query );			                                     
     bool Increment(); // returns true for try again, false for give up				 
-    bool IncrementConjecture( AgentRecord *record ); 
-    				       
+    bool IncrementConjecture( Agent *agent ); 
+        				       
     // Standard interface for decided compare functions
     AgentQuery::Choices GetChoices(Agent *agent);
     shared_ptr<AgentQuery> GetQuery(Agent *agent);
@@ -41,7 +43,7 @@ public:
 				   
 private:
 	Map<Agent *, AgentRecord> agent_records;
-	AgentRecord *last_record;		
+	Agent *last_agent;		
 };
 
 };

@@ -17,7 +17,7 @@ PatternQueryResult StandardAgent::PatternQuery() const
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )
         {
    			FOREACH( TreePtr<Node> pe, *pattern_seq )
-				r.AddLink(false, AsAgent(pe));    
+				r.AddNormalLink(AsAgent(pe));    
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )
         {
@@ -27,15 +27,15 @@ PatternQueryResult StandardAgent::PatternQuery() const
 				if( StarAgent *s = dynamic_cast<StarAgent *>( AsAgent(pe) ) ) // per the impl, the star in a collection is not linked
 				    star = s;
 				else
-				    r.AddLink(false, AsAgent(pe));    	    
+				    r.AddNormalLink(AsAgent(pe));    	    
 		    }
 		    if( star )
-		        r.AddLink(false, star);    
+		        r.AddNormalLink(star);    
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
         {
             if( TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be NULL meaning no restriction            
-                r.AddLink(false, AsAgent(*pattern_ptr));
+                r.AddNormalLink(AsAgent(*pattern_ptr));
         }
         else
         {
@@ -88,7 +88,7 @@ void StandardAgent::DecidedQuery( QueryAgentInterface &query,
                 ASSERT( p_x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
                 Agent *ap = Agent::AsAgent(*pattern_ptr);
-                query.AddLink(false, ap, p_x_ptr);
+                query.AddNormalLink(ap, p_x_ptr);
             }
         }
         else
@@ -174,7 +174,7 @@ void StandardAgent::DecidedQuerySequence( QueryAgentInterface &query,
             if( xit == px->end() )
                 break;
        
-            query.AddLink( false, pea, &*xit );
+            query.AddNormalLink( pea, &*xit );
             ++xit;
             
             // Every non-star pattern node we pass means there's one fewer remaining

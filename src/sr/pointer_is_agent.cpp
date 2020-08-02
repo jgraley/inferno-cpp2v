@@ -8,7 +8,7 @@ using namespace SR;
 PatternQueryResult PointerIsAgent::PatternQuery() const
 {
     PatternQueryResult r;
-	r.AddLink( false, AsAgent(GetPointer()) );
+	r.AddNormalLink( AsAgent(GetPointer()) );
     return r;
 }
 

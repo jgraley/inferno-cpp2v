@@ -10,7 +10,7 @@ using namespace SR;
 PatternQueryResult SearchContainerAgent::PatternQuery() const
 {
     PatternQueryResult r;
-	r.AddLink( false, AsAgent(terminus) );
+	r.AddNormalLink( AsAgent(terminus) );
     return r;
 }
 
@@ -42,7 +42,7 @@ void SearchContainerAgent::DecidedQuery( QueryAgentInterface &query,
 
     // Get choice from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = query.AddDecision( pwx->begin(), pwx->end(), false );
-    query.AddLink( false, AsAgent(terminus), &*thistime );
+    query.AddNormalLink( AsAgent(terminus), &*thistime );
 
     // Let subclasses implement further restrictions
     DecidedQueryRestrictions( query, thistime );
@@ -103,7 +103,7 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> 
 void StuffAgent::PatternQueryRestrictions( PatternQueryResult &r ) const
 {
     if( recurse_restriction )
-        r.AddLink( true, AsAgent(recurse_restriction) );
+        r.AddAbnormalLink( AsAgent(recurse_restriction) );
 }
 
 

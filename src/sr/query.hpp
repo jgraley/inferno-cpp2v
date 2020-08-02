@@ -20,7 +20,6 @@ class PatternQueryResult
 public:    
     struct Link 
     {
-        bool abnormal;
         Agent *agent;
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
     };
@@ -29,17 +28,21 @@ public:
         
     void clear()
     {
-		links.clear();
+		normal_links.clear();
+		abnormal_links.clear();
         evaluator = shared_ptr<BooleanEvaluator>();
     }
-    void AddLink( bool abnormal, Agent *a );
+    void AddNormalLink( Agent *a );
+    void AddAbnormalLink( Agent *a );
     void AddEvaluator( shared_ptr<BooleanEvaluator> e );
     
-    const Links *GetLinks() const { return &links; } // pointer returned because the links contain the local links
+    const Links *GetNormalLinks() const { return &normal_links; } // pointer returned because the links contain the local links
+    const Links *GetAbnormalLinks() const { return &abnormal_links; } // pointer returned because the links contain the local links
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
 
 private:
-    Links links;
+    Links normal_links; 
+    Links abnormal_links; 
     shared_ptr<BooleanEvaluator> evaluator;
 };
 
@@ -69,7 +72,6 @@ public:
 				return &local_x; // linked x is local, kept alive by local_x    
 		}	
 
-        bool abnormal;
         Agent *agent;
         const TreePtrInterface *px;
         TreePtr<Node> local_x;
@@ -101,7 +103,8 @@ public:
     virtual const Range &GetNextOldDecision() = 0; 
     virtual ContainerInterface::iterator AddNextOldDecision() = 0; 
 
-    virtual void AddLink( bool abnormal, Agent *a, const TreePtrInterface *px ) = 0; 
+    virtual void AddNormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
+    virtual void AddAbnormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
     virtual void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ) = 0; 
     virtual void AddEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
 };
@@ -110,7 +113,8 @@ public:
 class QueryClientInterface : virtual public QueryCommonInterface
 {
 public:
-    virtual const Links *GetLinks() const = 0; // pointer returned because the links contain the local links
+    virtual const Links *GetNormalLinks() const = 0; // pointer returned because the links contain the local links
+    virtual const Links *GetAbnormalLinks() const = 0; // pointer returned because the links contain the local links
     virtual shared_ptr<BooleanEvaluator> GetEvaluator() const = 0;
     
     virtual const Ranges *GetDecisions() = 0;
@@ -142,12 +146,14 @@ public:
     const Range &GetNextOldDecision();
     ContainerInterface::iterator AddNextOldDecision();
 
-    void AddLink( bool abnormal, Agent *a, const TreePtrInterface *px ); 
+    void AddNormalLink( Agent *a, const TreePtrInterface *px ); 
+    void AddAbnormalLink( Agent *a, const TreePtrInterface *px ); 
     void AddLocalLink( bool abnormal, Agent *a, TreePtr<Node> x ); 
     void AddEvaluator( shared_ptr<BooleanEvaluator> e ); 
     void AddLocalMismatch();
                                                   
-    const Links *GetLinks() const { return &links; } // pointer returned because the links contain the local links
+    const Links *GetNormalLinks() const { return &normal_links; } // pointer returned because the links contain the local links
+    const Links *GetAbnormalLinks() const { return &abnormal_links; } // pointer returned because the links contain the local links
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
       
     const Choices *GetChoices() { return &choices; }
@@ -158,7 +164,8 @@ public:
     
 private:
     shared_ptr<BooleanEvaluator> evaluator;
-    Links links; 
+    Links normal_links; 
+    Links abnormal_links; 
     Ranges decisions;
     Ranges::iterator next_decision;
     Choices choices;

@@ -94,9 +94,9 @@ bool IdentifierByNameAgent::IsMatch( const TreePtrInterface &x ) const
 PatternQueryResult NestedAgent::PatternQuery() const
 {
     PatternQueryResult r;
-	r.AddLink( false, AsAgent(terminus) );
+	r.AddNormalLink( AsAgent(terminus) );
 	if( depth )
-		r.AddLink( false, AsAgent(depth) );
+		r.AddNormalLink( AsAgent(depth) );
     return r;
 }
 
@@ -117,7 +117,7 @@ void NestedAgent::DecidedQuery( QueryAgentInterface &query,
     } 
             
     // Compare the last position with the terminus pattern
-    query.AddLink( false, AsAgent(terminus), pxt );
+    query.AddNormalLink( AsAgent(terminus), pxt );
     
     // Compare the depth with the supplied pattern if present
     if( depth )

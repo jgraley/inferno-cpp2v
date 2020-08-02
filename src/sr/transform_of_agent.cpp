@@ -5,7 +5,7 @@ using namespace SR;
 PatternQueryResult TransformOfAgent::PatternQuery() const
 {
     PatternQueryResult r;
-	r.AddLink( false, AsAgent(pattern) );
+	r.AddNormalLink( AsAgent(pattern) );
     return r;
 }
 

@@ -8,7 +8,7 @@ using namespace SR;
 PatternQueryResult NotMatchAgent::PatternQuery() const
 {
     PatternQueryResult r;
-	r.AddLink( true, AsAgent(GetPattern()) );
+	r.AddAbnormalLink( AsAgent(GetPattern()) );
 	r.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
     return r;
 }
@@ -25,7 +25,7 @@ void NotMatchAgent::DecidedQuery( QueryAgentInterface &query,
     CheckLocalMatch(px->get());
     
     // Context is abnormal because patterns must not match
-    query.AddLink( true, AsAgent(GetPattern()), px );
+    query.AddAbnormalLink( AsAgent(GetPattern()), px );
     query.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
 }
 
@@ -56,7 +56,7 @@ PatternQueryResult MatchAllAgent::PatternQuery() const
 {
     PatternQueryResult r;
     FOREACH( const TreePtr<Node> p, GetPatterns() )
-	    r.AddLink( false, AsAgent(p) );
+	    r.AddNormalLink( AsAgent(p) );
         
     return r;
 }
@@ -77,7 +77,7 @@ void MatchAllAgent::DecidedQuery( QueryAgentInterface &query,
         ASSERT( p );
         // Context is normal because all patterns must match (but none should contain
         // nodes with reploace functionlity because they will not be invoked during replace) 
-        query.AddLink( false, AsAgent(p), px );
+        query.AddNormalLink( AsAgent(p), px );
     }
 }    
 
@@ -101,7 +101,7 @@ PatternQueryResult MatchAnyAgent::PatternQuery() const
 {
     PatternQueryResult r;
     FOREACH( const TreePtr<Node> p, GetPatterns() )
-	    r.AddLink( true, AsAgent(p) );
+	    r.AddAbnormalLink( AsAgent(p) );
 	r.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
     return r;
 }
@@ -121,7 +121,7 @@ void MatchAnyAgent::DecidedQuery( QueryAgentInterface &query,
     {
         ASSERT( p );
         // Context is abnormal because not all patterns must match
-        query.AddLink( true, AsAgent(p), px );
+        query.AddAbnormalLink( AsAgent(p), px );
     }
     query.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
 }
