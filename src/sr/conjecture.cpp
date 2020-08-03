@@ -3,21 +3,29 @@
 #include "conjecture.hpp"
 
 //#define STIFF_LINKS
+//#define STIFF_CHECK
+//#define ROOT_CHECK
 
 namespace SR 
 {
 
 Conjecture::Conjecture(Set<Agent *> my_agents, Agent *root_agent)
 {
+#ifdef ROOT_CHECK
+    ASSERT( my_agents.IsExist( root_agent ) );
+#endif
     FOREACH( Agent *a, my_agents )
     {
 		AgentRecord record;
 		record.agent = a;
-        record.previous_agent = nullptr;
+        record.previous_agent = (Agent *)0xFEEDF00D;
         record.linked = false;
         record.query = make_shared<AgentQuery>();        
 		agent_records[a] = record;
 	}        
+#ifdef ROOT_CHECK
+    ASSERT(agent_records.count(root_agent) > 0);
+#endif
     last_agent = nullptr;
     RecordWalk( root_agent );
 #ifndef STIFF_LINKS
@@ -42,10 +50,7 @@ void Conjecture::RecordWalk( Agent *agent )
     if( record->linked );
         return; // already reached: probably a coupling
         
-    if( last_agent )
-        record->previous_agent = last_agent;
-    else
-        record->previous_agent = nullptr;
+    record->previous_agent = last_agent;
     last_agent = agent;
     record->linked = true;
 
@@ -147,10 +152,10 @@ shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
 #ifndef STIFF_LINKS
     if( !record.linked )
     {
-        if( last_agent )
-            record.previous_agent = last_agent;
-        else
-            record.previous_agent = nullptr;
+#ifdef STIFF_CHECK
+        ASSERT(record.previous_agent == last_agent);
+#endif
+        record.previous_agent = last_agent;
         last_agent = agent;
         record.linked = true;
     }
