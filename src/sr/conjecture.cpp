@@ -9,9 +9,24 @@
 namespace SR 
 {
 
-Conjecture::Conjecture(Set<Agent *> my_agents, Agent *root_agent)
+Conjecture::Conjecture() : 
+    configured(false)
+{
+}
+
+
+Conjecture::~Conjecture()
+{
+}
+
+
+void Conjecture::Configure(Set<Agent *> my_agents, Agent *root_agent)
 {
 #ifdef ROOT_CHECK
+    // Not a fair check: eg in CleanupDuplicateLabels there is
+    // an Evaluator agent (the |) which goes directly to coupled
+    // identifiers (the slave S&R is supposed to hit on both 
+    // identifiers).
     ASSERT( my_agents.IsExist( root_agent ) );
 #endif
     FOREACH( Agent *a, my_agents )
@@ -21,6 +36,7 @@ Conjecture::Conjecture(Set<Agent *> my_agents, Agent *root_agent)
         record.previous_agent = (Agent *)0xFEEDF00D;
         record.linked = false;
         record.query = make_shared<AgentQuery>();        
+        record.story = 0;
 		agent_records[a] = record;
 	}        
 #ifdef ROOT_CHECK
@@ -37,6 +53,7 @@ Conjecture::Conjecture(Set<Agent *> my_agents, Agent *root_agent)
     }
     last_agent = nullptr;
 #endif
+    configured = true;
 }
 
 
@@ -47,25 +64,24 @@ void Conjecture::RecordWalk( Agent *agent )
 
     AgentRecord *record = &agent_records.at(agent);
 
-    if( record->linked );
+    record->story += 0x1;
+    if( record->linked )
         return; // already reached: probably a coupling
         
     record->previous_agent = last_agent;
     last_agent = agent;
     record->linked = true;
+    record->story += 0x100;
 
     PatternQueryResult r = agent->PatternQuery();
     
-    if( r.GetEvaluator() )
-        return; // we don't process evaluators
+    // Makes sense, but we won't match the old algo with this
+    //if( r.GetEvaluator() )
+    //    return; // we don't process evaluators
+    record->story += 0x10000;
     
     for( const PatternQueryResult::Link &l : *r.GetNormalLinks() )
         RecordWalk( l.agent );
-}
-
-
-Conjecture::~Conjecture()
-{
 }
 
 
@@ -124,6 +140,7 @@ bool Conjecture::IncrementConjecture(Agent *agent)
 
 bool Conjecture::Increment()
 {
+    ASSERT(configured);
     if( last_agent )
         return IncrementConjecture(last_agent);
     else
@@ -133,6 +150,7 @@ bool Conjecture::Increment()
 
 AgentQuery::Choices Conjecture::GetChoices(Agent *agent)
 {            
+    ASSERT(configured);
     if( agent_records.IsExist(agent) )
     {
         return *agent_records[agent].query->GetChoices();
@@ -146,6 +164,7 @@ AgentQuery::Choices Conjecture::GetChoices(Agent *agent)
 
 shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
 {
+    ASSERT(configured);
     ASSERT( agent_records.IsExist(agent) );
  	AgentRecord &record = agent_records[agent];
         

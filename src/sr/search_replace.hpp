@@ -6,7 +6,7 @@
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 #include "agent.hpp"
-#include "engine.hpp"
+#include "scr_engine.hpp"
 #include <set>
 
 /// SR namespace contains the search and replace implementation
@@ -17,7 +17,7 @@ class Conjecture;
 class SpecialBase;
 
 /// Main implementation of a compare and replace function, that matches at the root of the program tree
-class CompareReplace : public Engine,
+class CompareReplace : public SCREngine,
                        virtual public InPlaceTransformation, 
                        public Filter 
 {  
@@ -47,7 +47,7 @@ public:
                           TreePtr<Node> root );
     virtual void SetStopAfter( vector<int> ssa, int d=0 )
     {
-        Engine::SetStopAfter( ssa, d );
+        SCREngine::SetStopAfter( ssa, d );
     }
 };
 

@@ -17,7 +17,7 @@ NormalityAgentWrapper::NormalityAgentWrapper( Agent *agent ) :
 
 void NormalityAgentWrapper::Configure( const Set<Agent *> &engine_agents, 
                                   const Set<Agent *> &master_agents, 
-                                  const Engine *engine )
+                                  const SCREngine *engine )
 {
     PatternQueryResult plinks = wrapped_agent->PatternQuery();
 

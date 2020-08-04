@@ -11,7 +11,7 @@ using namespace SR;
 CompareReplace::CompareReplace( TreePtr<Node> cp,
                                 TreePtr<Node> rp,
                                 bool search ) :
-    Engine( search )
+    SCREngine( search )
 {
     // If cp and rp are provided, do an instant configuration
     if( cp )
@@ -22,8 +22,8 @@ CompareReplace::CompareReplace( TreePtr<Node> cp,
 void CompareReplace::GetGraphInfo( vector<string> *labels, 
                                    vector< TreePtr<Node> > *blocks ) const
 {
-    // Disambiguate conflict between Transformation and Engine
-    Engine::GetGraphInfo( labels, blocks );
+    // Disambiguate conflict between Transformation and SCREngine
+    SCREngine::GetGraphInfo( labels, blocks );
 }
 
     

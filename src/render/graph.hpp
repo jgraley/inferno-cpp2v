@@ -3,7 +3,7 @@
 
 #include "tree/cpptree.hpp"
 #include "helpers/transformation.hpp"
-#include "sr/engine.hpp"
+#include "sr/scr_engine.hpp"
 
 //
 // Generate a GraphViz compatible graph description from a subtree (when used as a
@@ -22,9 +22,9 @@ private:
     string MakeGraphTx(Transformation *root);
     void Disburse( string s );
     string UniqueWalk( TreePtr<Node> root, bool links_pass );
-    string UniqueWalk( SR::Engine *e, string id, bool links_pass );
-	string DoEngine( SR::Engine *e, string id );
-	string DoEngineLinks( SR::Engine *e, string id );
+    string UniqueWalk( SR::SCREngine *e, string id, bool links_pass );
+	string DoEngine( SR::SCREngine *e, string id );
+	string DoEngineLinks( SR::SCREngine *e, string id );
     string Id( void *p );
     string SeqField( int i, int j=0 );
     string Sanitise( string s, bool remove_tp=false );

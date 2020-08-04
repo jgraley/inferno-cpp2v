@@ -20,7 +20,7 @@ class SpecialBase;
 class CompareReplace;
 
 /// Common implementation for search+replace, compare+replace and slaves
-class Engine : public virtual Traceable
+class SCREngine : public virtual Traceable
 {  
 private:
     struct CompareState
@@ -55,19 +55,19 @@ private:
     };
     
 public:
-    Engine( bool is_s );
+    SCREngine( bool is_s );
                     
     // Call this to set the patterns after construction. This should not be virtual since
     // the constructor calls it.
     virtual void Configure( TreePtr<Node> cp,
                             TreePtr<Node> rp = TreePtr<Node>(),
                             const Set<Agent *> &master_agents = Set<Agent *>(),
-                            const Engine *master = NULL /* if null, IT'S YOU!!!! */ );
+                            const SCREngine *master = NULL /* if null, IT'S YOU!!!! */ );
 
 protected:
     // A configure that doesn't know what the search and replace patterns are
     virtual void Configure( const Set<Agent *> &master_agents,
-                            const Engine *master /* if null, IT'S YOU!!!! */ );
+                            const SCREngine *master /* if null, IT'S YOU!!!! */ );
 private:
     virtual void ConfigInstallRootAgents( TreePtr<Node> cp,
 										  TreePtr<Node> rp );
@@ -128,7 +128,7 @@ private:
     bool is_search;
     TreePtr<Node> pattern;
     Agent *root_agent;
-    const Engine *master_ptr;
+    const SCREngine *master_ptr;
     Set<SlaveAgent *> my_slaves;   
     Set<Agent *> my_agents;   
     

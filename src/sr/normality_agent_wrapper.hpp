@@ -2,7 +2,7 @@
 #define NORMALITY_AGENT_WRAPPER_HPP
 
 #include "agent.hpp"
-#include "engine.hpp"
+#include "scr_engine.hpp"
 #include "common/common.hpp"
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
@@ -16,7 +16,7 @@ class NormalityAgentWrapper : public virtual Agent
 	NormalityAgentWrapper( Agent *agent ); 
 	void Configure( const Set<Agent *> &engine_agents, // Agents of the enclosing engine
 	                const Set<Agent *> &master_agents, // Agents of the enclosing engine's master
-	                const Engine *master );
+	                const SCREngine *master );
 	void SetMasterKeys( const CouplingMap &keys ); // Keys of the enclosing engine's master (call this at top of engine Compare())
     virtual PatternQueryResult PatternQuery() const;
     virtual void DecidedQuery( QueryAgentInterface &query,
@@ -28,10 +28,10 @@ class NormalityAgentWrapper : public virtual Agent
     // Holder for info beyond what PatternQuery provides (the agent) for abnormal links.     
     struct AbnormalLink
     {
-		AbnormalLink() : engine(false) {} // Engine is compare, not search
+		AbnormalLink() : engine(false) {} // SCREngine is compare, not search
 		
 		// An engine instance to do the comparing within the context,
-		Engine engine;
+		SCREngine engine;
 		// A set of terminal couplings which are couplings into the master's normal
         // context, and which terminate the abnormal context.		
         Set< Agent * > terminal_agents;

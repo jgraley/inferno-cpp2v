@@ -15,7 +15,7 @@
 namespace SR
 { 
 class SpecialBase;
-class Engine;
+class SCREngine;
 class Agent;
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
@@ -46,7 +46,7 @@ public:
                              AgentQuery::Choices choices ) = 0;
     virtual void TrackingKey( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
-	virtual void AgentConfigure( const Engine *e ) = 0;
+	virtual void AgentConfigure( const SCREngine *e ) = 0;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const = 0;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const = 0;
 		
@@ -63,7 +63,7 @@ class AgentCommon : public Agent
 {
 public:
     AgentCommon();
-    void AgentConfigure( const Engine *e );
+    void AgentConfigure( const SCREngine *e );
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
     void DoKey( TreePtr<Node> x );
     TreePtr<Node> GetCoupled();                                  
@@ -79,7 +79,7 @@ public:
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
-    const Engine *engine;    
+    const SCREngine *engine;    
 			
 private:    
     TreePtr<Node> coupling_key;    

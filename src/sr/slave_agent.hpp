@@ -21,7 +21,7 @@ class SearchReplace;
 /// via the `search_pattern` and `replace_pattern` pointers until no more 
 /// matches are found (the usual reductive style).  
 class SlaveAgent : public virtual AgentCommon, 
-                   public Engine   
+                   public SCREngine   
 {
 public:
     SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );
@@ -32,7 +32,7 @@ public:
     virtual TreePtr<Node> GetThrough() const = 0;    
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *blocks ) const;
-    virtual void Configure( const Set<Agent *> &agents_already_configured, const Engine *master );
+    virtual void Configure( const Set<Agent *> &agents_already_configured, const SCREngine *master );
     void SetMasterCouplingKeys( const CouplingMap &keys );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;

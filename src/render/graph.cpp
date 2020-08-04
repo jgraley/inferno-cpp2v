@@ -10,7 +10,7 @@
 #include "sr/search_replace.hpp"
 #include "sr/pointer_is_agent.hpp"
 #include "sr/transform_of_agent.hpp"
-#include "sr/engine.hpp"
+#include "sr/scr_engine.hpp"
 #include "common/trace.hpp"
 #include "common/read_args.hpp"
 #include "graph.hpp"
@@ -66,7 +66,7 @@ string Graph::MakeGraphTx(Transformation *root)
         FOREACH( shared_ptr<Transformation> t, *tv )
             s = MakeGraphTx( t.get() ) + s; // seem to have to pre-pend to get them appearing in the right order
     }
-    else if( Engine *e = dynamic_cast<Engine *>(root) )
+    else if( SCREngine *e = dynamic_cast<SCREngine *>(root) )
     {
         unique_filter.Reset();
 	    s += UniqueWalk( e, Id(root), false );
@@ -155,7 +155,7 @@ string Graph::UniqueWalk( TreePtr<Node> root, bool links_pass )
 }
 
 
-string Graph::UniqueWalk( Engine *e, string id, bool links_pass )
+string Graph::UniqueWalk( SCREngine *e, string id, bool links_pass )
 {
 	string s;
     s += links_pass ? DoEngineLinks(e, id) : DoEngine(e, id);
@@ -165,7 +165,7 @@ string Graph::UniqueWalk( Engine *e, string id, bool links_pass )
         virtual bool IsMatch( TreePtr<Node> context,
                               TreePtr<Node> root )
         {
-            return !dynamic_cast<Engine*>(root.get());
+            return !dynamic_cast<SCREngine*>(root.get());
         }
     } no_tx_filter;
     
@@ -189,7 +189,7 @@ string Graph::UniqueWalk( Engine *e, string id, bool links_pass )
 }
 
 
-string Graph::DoEngine( Engine *e,
+string Graph::DoEngine( SCREngine *e,
                         string id )
 {    
     vector<string> labels;
@@ -232,7 +232,7 @@ string Graph::DoEngine( Engine *e,
 }
 
 
-string Graph::DoEngineLinks( Engine *e, string id )
+string Graph::DoEngineLinks( SCREngine *e, string id )
 {
     vector<string> labels;
     vector< TreePtr<Node> > links;
@@ -429,7 +429,7 @@ string Graph::SimpleLabel( string name, TreePtr<Node> n )
 
 string Graph::DoNode( TreePtr<Node> n )
 {
-    if( Engine *e = dynamic_cast<Engine *>(n.get()) )
+    if( SCREngine *e = dynamic_cast<SCREngine *>(n.get()) )
 	    return UniqueWalk( e, Id( n.get() ), false );
 
 	string s;
@@ -474,7 +474,7 @@ string Graph::DoNode( TreePtr<Node> n )
 
 string Graph::DoNodeLinks( TreePtr<Node> n )
 {
-    if( Engine *e = dynamic_cast<Engine *>(n.get()) )
+    if( SCREngine *e = dynamic_cast<SCREngine *>(n.get()) )
         return UniqueWalk( e, Id( n.get() ), true );
 
     string s;

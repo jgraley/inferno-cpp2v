@@ -21,7 +21,7 @@ AgentCommon::AgentCommon() :
 }
 
 
-void AgentCommon::AgentConfigure( const Engine *e )
+void AgentCommon::AgentConfigure( const SCREngine *e )
 {
     // Repeat configuration regarded as an error because it suggests I maybe don't
     // have a clue what should actaually be configing the agent. Plus general lifecycle 

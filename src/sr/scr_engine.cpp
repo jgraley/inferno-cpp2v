@@ -1,4 +1,4 @@
-#include "engine.hpp"
+#include "scr_engine.hpp"
 #include "search_replace.hpp"
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
@@ -14,11 +14,11 @@
 
 using namespace SR;
 
-int Engine::repetitions;
-bool Engine::rep_error;
+int SCREngine::repetitions;
+bool SCREngine::rep_error;
 
 
-Engine::Engine( bool is_s ) :
+SCREngine::SCREngine( bool is_s ) :
     is_search( is_s ),
     master_ptr( NULL ),
     depth( 0 )
@@ -30,14 +30,14 @@ Engine::Engine( bool is_s ) :
 // configure because they were already configured by a master, and masters take 
 // higher priority for configuration (so when an agent is reached from multiple
 // engines, it's the most masterish one that "owns" it).
-void Engine::Configure( TreePtr<Node> cp,
+void SCREngine::Configure( TreePtr<Node> cp,
                         TreePtr<Node> rp,
                         const Set<Agent *> &master_agents,
-                        const Engine *master )
+                        const SCREngine *master )
 {
     INDENT(" ");
     ASSERT(!master_ptr)("Calling configure on already-configured ")(*this);
-    TRACE("Entering Engine::Configure on ")(*this)("\n");
+    TRACE("Entering SCREngine::Configure on ")(*this)("\n");
     master_ptr = master;
     
     ConfigInstallRootAgents(cp, rp);
@@ -48,14 +48,14 @@ void Engine::Configure( TreePtr<Node> cp,
 } 
 
 
-void Engine::Configure( const Set<Agent *> &master_agents,
-                        const Engine *master )
+void SCREngine::Configure( const Set<Agent *> &master_agents,
+                        const SCREngine *master )
 {
-    ASSERTFAIL("Engine::Configure(already, master) Must be overridden by a subclass");
+    ASSERTFAIL("SCREngine::Configure(already, master) Must be overridden by a subclass");
 }
 
 
-void Engine::ConfigInstallRootAgents( TreePtr<Node> cp,
+void SCREngine::ConfigInstallRootAgents( TreePtr<Node> cp,
 									  TreePtr<Node> rp )
 {
     ASSERT( cp )("Compare pattern must always be provided\n");
@@ -91,7 +91,7 @@ void Engine::ConfigInstallRootAgents( TreePtr<Node> cp,
 }
     
 
-void Engine::ConfigCategoriseSubs( const Set<Agent *> &master_agents )
+void SCREngine::ConfigCategoriseSubs( const Set<Agent *> &master_agents )
 {
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
     // So that the compare and replace subtrees of slaves are "obsucured" and not visible
@@ -110,17 +110,17 @@ void Engine::ConfigCategoriseSubs( const Set<Agent *> &master_agents )
         if( SlaveAgent *sa = dynamic_cast<SlaveAgent *>(a) )
             my_slaves.insert( sa );
         else
-            ASSERT( !dynamic_cast<Engine *>(a) ); // not expecting to see any engine other than a slave
+            ASSERT( !dynamic_cast<SCREngine *>(a) ); // not expecting to see any engine other than a slave
 }
 
 
-void Engine::ConfigConfigureSubs( const Set<Agent *> &master_agents )
+void SCREngine::ConfigConfigureSubs( const Set<Agent *> &master_agents )
 {
     // Determine which agents our slaves should not configure
     Set<Agent *> surrounding_agents = SetUnion( master_agents, my_agents ); 
             
     // Recurse into the slaves' configure
-    FOREACH( Engine *e, my_slaves )
+    FOREACH( SCREngine *e, my_slaves )
     {
         TRACE("Recursing to configure slave ")(*e)("\n");
         e->Configure(surrounding_agents, this);
@@ -135,9 +135,9 @@ void Engine::ConfigConfigureSubs( const Set<Agent *> &master_agents )
 }
 
 
-const CompareReplace * Engine::GetOverallMaster() const
+const CompareReplace * SCREngine::GetOverallMaster() const
 {
-    const Engine *m = this;
+    const SCREngine *m = this;
     while( m->master_ptr )
         m = m->master_ptr;
     const CompareReplace *cr = dynamic_cast<const CompareReplace *>(m);
@@ -146,7 +146,7 @@ const CompareReplace * Engine::GetOverallMaster() const
 }
 
 
-void Engine::GetGraphInfo( vector<string> *labels, 
+void SCREngine::GetGraphInfo( vector<string> *labels, 
                            vector< TreePtr<Node> > *blocks ) const
 {
     // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
@@ -175,7 +175,7 @@ void Engine::GetGraphInfo( vector<string> *labels,
 }
 
 
-void Engine::CompareLinks( shared_ptr<const AgentQuery> query,
+void SCREngine::CompareLinks( shared_ptr<const AgentQuery> query,
                            CompareState &state ) const
 {
 	ASSERT( !query->GetEvaluator() );
@@ -201,7 +201,7 @@ void Engine::CompareLinks( shared_ptr<const AgentQuery> query,
 
 
 // Only to be called in the restricting pass
-void Engine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
+void SCREngine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
 									const CouplingMap *slave_keys ) const
 {
 	ASSERT( query->GetEvaluator() );
@@ -239,9 +239,9 @@ void Engine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
 }
 
 
-void Engine::DecidedCompare( Agent *agent,
+void SCREngine::DecidedCompare( Agent *agent,
                              const TreePtrInterface *px,
-                             CompareState &state ) const // applies to CURRENT PASS only
+                             CompareState &state ) const 
 {
     INDENT(" ");
     ASSERT( px ); // Ref to target must not be NULL (i.e. corrupted ref)
@@ -303,7 +303,7 @@ void Engine::DecidedCompare( Agent *agent,
 
 // This one operates from root for a stand-alone compare operation and
 // no master keys.
-void Engine::Compare( const TreePtrInterface *p_start_x ) const
+void SCREngine::Compare( const TreePtrInterface *p_start_x ) const
 {
     CouplingMap master_keys;
     Compare( root_agent, p_start_x, &master_keys );
@@ -311,7 +311,7 @@ void Engine::Compare( const TreePtrInterface *p_start_x ) const
 
 
 // This one operates from root for a stand-alone compare operation (side API)
-void Engine::Compare( const TreePtrInterface *p_start_x,
+void SCREngine::Compare( const TreePtrInterface *p_start_x,
                       const CouplingMap *master_keys ) const
 {
 	ASSERT( root_agent );
@@ -320,18 +320,19 @@ void Engine::Compare( const TreePtrInterface *p_start_x,
 
 
 // This one if you don't want the resulting keys and conj (ie not doing a replace)
-void Engine::Compare( Agent *start_agent,
+void SCREngine::Compare( Agent *start_agent,
                       const TreePtrInterface *p_start_x,
                       const CouplingMap *master_keys ) const
 {
-    Conjecture conj(my_agents, start_agent);
+    Conjecture conj;
+    conj.Configure(my_agents, start_agent);
     CouplingMap slave_keys; 
     Compare( start_agent, p_start_x, &conj, &slave_keys, master_keys );
 }
 
 
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
-void Engine::Compare( Agent *start_agent,
+void SCREngine::Compare( Agent *start_agent,
                       const TreePtrInterface *p_start_x,
                       Conjecture *conj,
                       CouplingMap *slave_keys,
@@ -403,7 +404,7 @@ void Engine::Compare( Agent *start_agent,
         }
         catch( const ::Mismatch& mismatch )
         {                
-            TRACE("Engine miss, trying increment conjecture\n");
+            TRACE("SCREngine miss, trying increment conjecture\n");
             if( conj->Increment() )
                 continue; // Conjecture would like us to try again with new choices
                 
@@ -411,7 +412,7 @@ void Engine::Compare( Agent *start_agent,
             throw NoSolution();
         }
         // We got a match so we're done. 
-        TRACE("Engine hit\n");
+        TRACE("SCREngine hit\n");
         break; // Success
     }
     
@@ -419,7 +420,7 @@ void Engine::Compare( Agent *start_agent,
 }
 
 
-void Engine::KeyReplaceNodes( Conjecture &conj,
+void SCREngine::KeyReplaceNodes( Conjecture &conj,
                               const CouplingMap *coupling_keys ) const
 {
     INDENT("K");   
@@ -439,7 +440,7 @@ void Engine::KeyReplaceNodes( Conjecture &conj,
 }
 
 
-TreePtr<Node> Engine::Replace() const
+TreePtr<Node> SCREngine::Replace() const
 {
     INDENT("R");
     
@@ -448,7 +449,7 @@ TreePtr<Node> Engine::Replace() const
 }
 
 
-void Engine::GatherCouplings( CouplingMap *coupling_keys ) const
+void SCREngine::GatherCouplings( CouplingMap *coupling_keys ) const
 {
 	// Get couplings from agents into the supplied map if not there already
     FOREACH( Agent *a, my_agents )
@@ -457,13 +458,14 @@ void Engine::GatherCouplings( CouplingMap *coupling_keys ) const
 }
 
 
-void Engine::SingleCompareReplace( TreePtr<Node> *p_root,
+void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
                                    const CouplingMap *master_keys ) 
 {
     INDENT(">");
 
     CouplingMap slave_keys;
-    Conjecture conj(my_agents, root_agent);
+    Conjecture conj;
+    conj.Configure(my_agents, root_agent);
 
     TRACE("Begin search\n");
     Compare( root_agent, p_root, &conj, &slave_keys, master_keys );
@@ -492,13 +494,13 @@ void Engine::SingleCompareReplace( TreePtr<Node> *p_root,
 // on supplied patterns and couplings. Does search and replace
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
-int Engine::RepeatingCompareReplace( TreePtr<Node> *proot,
+int SCREngine::RepeatingCompareReplace( TreePtr<Node> *proot,
                                      const CouplingMap *master_keys )
 {
     INDENT("}");
     TRACE("begin RCR\n");
         
-    ASSERT( pattern )("Engine object was not configured before invocation.\n"
+    ASSERT( pattern )("SCREngine object was not configured before invocation.\n"
                       "Either call Configure() or supply pattern arguments to constructor.\n"
                       "Thank you for taking the time to read this message.\n");
     
@@ -506,7 +508,7 @@ int Engine::RepeatingCompareReplace( TreePtr<Node> *proot,
     {
         bool stop = depth < stop_after.size() && stop_after[depth]==i;
         if( stop )
-            FOREACH( Engine *e, my_slaves )
+            FOREACH( SCREngine *e, my_slaves )
                 e->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
                
         try
@@ -536,13 +538,13 @@ int Engine::RepeatingCompareReplace( TreePtr<Node> *proot,
 }
 
 
-shared_ptr<ContainerInterface::iterator_interface> Engine::VisibleWalk_iterator::Clone() const
+shared_ptr<ContainerInterface::iterator_interface> SCREngine::VisibleWalk_iterator::Clone() const
 {
 	return shared_ptr<VisibleWalk_iterator>( new VisibleWalk_iterator(*this) );
 }      
 
 
-shared_ptr<ContainerInterface> Engine::VisibleWalk_iterator::GetChildContainer( TreePtr<Node> n ) const
+shared_ptr<ContainerInterface> SCREngine::VisibleWalk_iterator::GetChildContainer( TreePtr<Node> n ) const
 {
 	return Agent::AsAgent(n)->GetVisibleChildren(); 
 }

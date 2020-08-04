@@ -25,12 +25,14 @@ public:
         shared_ptr<AgentQuery> query;
  		Agent *previous_agent;
         bool linked;
+        int story;
 	};
 
 public:
-    Conjecture(Set<Agent *> my_agents, Agent *root_agent);
+    Conjecture();
     ~Conjecture();
 
+    void Configure(Set<Agent *> my_agents, Agent *root_agent);
     void RecordWalk( Agent *agent );
 	bool IncrementAgent( shared_ptr<AgentQuery> query );			                                     
     bool Increment(); // returns true for try again, false for give up				 
@@ -44,6 +46,7 @@ public:
 private:
 	Map<Agent *, AgentRecord> agent_records;
 	Agent *last_agent;		
+    bool configured;
 };
 
 };
