@@ -43,14 +43,9 @@ public:
     
     void CompareLinks( shared_ptr<const AgentQuery> query ) const;
     void CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
-							    const CouplingMap *slave_keys ) const;
+							    const CouplingMap *coupling_keys ) const;
     void DecidedCompare( Agent *agent,
                          const TreePtrInterface *px ) const;
-    void Compare( Agent *start_agent,
-                  const TreePtrInterface *p_start_x,
-                  Conjecture *conj,
-                  CouplingMap *slave_keys,
-                  const CouplingMap *master_keys ) const;
     void Compare( Agent *start_agent,
                   const TreePtrInterface *p_start_x,
                   const CouplingMap *master_keys ) const;
@@ -59,8 +54,8 @@ protected:
     std::shared_ptr< Set<Agent *> > my_agents;   
 
     // See #66 for getting rid of mutable
-    mutable Conjecture *conj;
-    mutable CouplingMap *slave_keys; // applies ACROSS PASSES
+    mutable Conjecture conj;
+    mutable CouplingMap slave_keys; // applies ACROSS PASSES
     mutable const CouplingMap *master_keys;
     mutable Set<Agent *> reached; // applies to CURRENT PASS only
     mutable Set< shared_ptr<const AgentQuery> > evaluator_queries;    // applies ACROSS PASSES

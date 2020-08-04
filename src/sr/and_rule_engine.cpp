@@ -46,7 +46,7 @@ void AndRuleEngine::CompareLinks( shared_ptr<const AgentQuery> query ) const
 
 // Only to be called in the restricting pass
 void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
-					   				       const CouplingMap *slave_keys ) const
+							               const CouplingMap *coupling_keys ) const
 {
 	ASSERT( query->GetEvaluator() );
     ASSERT( query->GetNormalLinks()->empty() )("When an evaluator is used, all links must be into abnormal contexts");
@@ -65,7 +65,7 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
         {
             AndRuleEngine e;
             e.Configure(my_agents);
-            e.Compare( b.agent, px, slave_keys );
+            e.Compare( b.agent, px, coupling_keys );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -102,7 +102,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     // Check for a coupling match to one of our agents we reached earlier in this pass.
     else if( reached.IsExist(agent) )
     {
-        sc( *px, slave_keys->At(agent) );
+        sc( *px, slave_keys.At(agent) );
         return;
     }
 
@@ -110,7 +110,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     reached.insert( agent );
 
     // Obtain the query state from the conjecture
-    shared_ptr<AgentQuery> query = conj->GetQuery(agent);
+    shared_ptr<AgentQuery> query = conj.GetQuery(agent);
 
     // Run the compare implementation to get the links based on the choices
     TRACE(*agent)("?=")(**px)(" DecidedQuery()\n");    
@@ -126,12 +126,12 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     // in the case of pattern restriction on Star, Stuff. See #60 
 #endif
                         
-    (void)conj->FillMissingChoicesWithBegin(query);
+    (void)conj.FillMissingChoicesWithBegin(query);
 
     // Remember the coupling before recursing, as we can hit the same node 
     // (eg identifier) and we need to have coupled it. 
-    if( !slave_keys->IsExist(agent) )
-        (*slave_keys)[agent] = *px;
+    if( !slave_keys.IsExist(agent) )
+        slave_keys[agent] = *px;
           
     // Use worker functions to go through the links, special case if there is evaluator
     if( query->GetEvaluator() )
@@ -149,8 +149,6 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
 void AndRuleEngine::Compare( Agent *start_agent,
                              const TreePtrInterface *p_start_x,
-                             Conjecture *conj_,
-                             CouplingMap *slave_keys_,
                              const CouplingMap *master_keys_ ) const
 {
     INDENT("C");
@@ -158,11 +156,10 @@ void AndRuleEngine::Compare( Agent *start_agent,
     ASSERT( *p_start_x );
     TRACE("Compare x=")(**p_start_x);
     TRACE(" pattern=")(*start_agent);
-    ASSERT( &slave_keys_ != &master_keys_ );
     //TRACE(**pcontext)(" @%p\n", pcontext);
            
     master_keys = master_keys_;    
-    conj = conj_;
+    conj.Configure(*my_agents, start_agent);
            
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
@@ -182,19 +179,17 @@ void AndRuleEngine::Compare( Agent *start_agent,
             
             // Initialise keys to the ones inherited from master, keeping 
             // none of our own from any previous unsuccessful attempt.
-            slave_keys_->clear();
+            slave_keys.clear();
 
             // Do a two-pass matching process: first get the keys...
             {
-                slave_keys = slave_keys_;
-                
                 reached.clear();
                 abnormal_links.clear();
                 evaluator_queries.clear();
                 DecidedCompare( start_agent, p_start_x );
             }
             
-            CouplingMap combined_keys = MapUnion( *master_keys, *slave_keys );     
+            CouplingMap combined_keys = MapUnion( *master_keys, slave_keys );     
                         
             // Process the free abnormal links. These may be more than one with the same linked pattern
             // node and the number can vary depending on x. We wouldn't know which one to key to, so we 
@@ -221,7 +216,7 @@ void AndRuleEngine::Compare( Agent *start_agent,
         catch( const ::Mismatch& mismatch )
         {                
             TRACE("SCREngine miss, trying increment conjecture\n");
-            if( conj->Increment() )
+            if( conj.Increment() )
                 continue; // Conjecture would like us to try again with new choices
                 
             // We didn't match and we've run out of choices, so we're done.              
@@ -234,18 +229,3 @@ void AndRuleEngine::Compare( Agent *start_agent,
     
     // By now, we succeeded and slave_keys is the right set of keys
 }
-
-
-// This one if you don't want the resulting keys and conj (ie not doing a replace)
-void AndRuleEngine::Compare( Agent *start_agent,
-                             const TreePtrInterface *p_start_x,
-                             const CouplingMap *master_keys ) const
-{
-    Conjecture conj;
-    conj.Configure(*my_agents, start_agent);
-    CouplingMap slave_keys; 
-    Compare( start_agent, p_start_x, &conj, &slave_keys, master_keys );
-}
-
-
-

@@ -236,12 +236,8 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
 {
     INDENT(">");
 
-    CouplingMap slave_keys;
-    Conjecture conj;
-    conj.Configure(*my_agents, root_agent);
-
     TRACE("Begin search\n");
-    AndRuleEngine::Compare( root_agent, p_root, &conj, &slave_keys, master_keys );
+    AndRuleEngine::Compare( root_agent, p_root, master_keys );
            
     TRACE("Search successful, now keying replace nodes\n");
     KeyReplaceNodes( conj, &slave_keys );
