@@ -23,16 +23,6 @@ class CompareReplace;
 class AndRuleEngine : public virtual Traceable
 {
 protected:
-    struct CompareState
-    {
-        Conjecture *conj;
-        CouplingMap *slave_keys; // applies ACROSS PASSES
-        const CouplingMap *master_keys;
-        Set<Agent *> reached; // applies to CURRENT PASS only
-        Set< shared_ptr<const AgentQuery> > evaluator_queries;    // applies ACROSS PASSES
-        Set< std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > > abnormal_links;    // applies ACROSS PASSES
-    };
-    
     // Any mismatch this class throws
     class Mismatch : public ::Mismatch
     {
@@ -47,14 +37,15 @@ protected:
     class EvaluatorFalse : public Mismatch
     {
     };
+    
 public:
-    void CompareLinks( shared_ptr<const AgentQuery> query,
-                       CompareState &state ) const;
+    void Configure( std::shared_ptr< Set<Agent *> > _my_agents);
+    
+    void CompareLinks( shared_ptr<const AgentQuery> query ) const;
     void CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
 							    const CouplingMap *slave_keys ) const;
     void DecidedCompare( Agent *agent,
-                         const TreePtrInterface *px,
-                         CompareState &state ) const;
+                         const TreePtrInterface *px ) const;
     void Compare( Agent *start_agent,
                   const TreePtrInterface *p_start_x,
                   Conjecture *conj,
@@ -66,6 +57,14 @@ public:
 
 protected:
     std::shared_ptr< Set<Agent *> > my_agents;   
+
+    // See #66 for getting rid of mutable
+    mutable Conjecture *conj;
+    mutable CouplingMap *slave_keys; // applies ACROSS PASSES
+    mutable const CouplingMap *master_keys;
+    mutable Set<Agent *> reached; // applies to CURRENT PASS only
+    mutable Set< shared_ptr<const AgentQuery> > evaluator_queries;    // applies ACROSS PASSES
+    mutable Set< std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > > abnormal_links;    // applies ACROSS PASSES
 };
 
 #endif

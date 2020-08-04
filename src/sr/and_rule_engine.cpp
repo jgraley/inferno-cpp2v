@@ -14,8 +14,13 @@
 
 using namespace SR;
 
-void AndRuleEngine::CompareLinks( shared_ptr<const AgentQuery> query,
-                                  CompareState &state ) const
+void AndRuleEngine::Configure( std::shared_ptr< Set<Agent *> > _my_agents )
+{
+    my_agents = _my_agents;
+}
+
+
+void AndRuleEngine::CompareLinks( shared_ptr<const AgentQuery> query ) const
 {
 	ASSERT( !query->GetEvaluator() );
     // Follow up on any blocks that were noted by the agent impl
@@ -23,7 +28,7 @@ void AndRuleEngine::CompareLinks( shared_ptr<const AgentQuery> query,
     int i=0;        
     FOREACH( const AgentQuery::Link &b, *query->GetAbnormalLinks() )
     {
-        state.abnormal_links.insert( make_pair(query, &b) ); 
+        abnormal_links.insert( make_pair(query, &b) ); 
     }    
     FOREACH( const AgentQuery::Link &b, *query->GetNormalLinks() )
     {
@@ -33,7 +38,7 @@ void AndRuleEngine::CompareLinks( shared_ptr<const AgentQuery> query,
         const TreePtrInterface *px = b.GetPX();
         ASSERT( *px );
         
-        DecidedCompare(b.agent, px, state);   
+        DecidedCompare(b.agent, px);   
         i++;             
     }
 }
@@ -58,7 +63,9 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
                                  
         try 
         {
-            Compare( b.agent, px, slave_keys );
+            AndRuleEngine e;
+            e.Configure(my_agents);
+            e.Compare( b.agent, px, slave_keys );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -79,8 +86,7 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
 
 
 void AndRuleEngine::DecidedCompare( Agent *agent,
-                                    const TreePtrInterface *px,
-                                    CompareState &state ) const 
+                                    const TreePtrInterface *px ) const 
 {
     INDENT(" ");
     ASSERT( px ); // Ref to target must not be NULL (i.e. corrupted ref)
@@ -88,23 +94,23 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 
     // Check for a coupling match to a master engine's agent. 
     SimpleCompare sc;
-    if( state.master_keys->IsExist(agent) )
+    if( master_keys->IsExist(agent) )
     {               
-        sc( *px, state.master_keys->At(agent) );
+        sc( *px, master_keys->At(agent) );
         return;
     }
     // Check for a coupling match to one of our agents we reached earlier in this pass.
-    else if( state.reached.IsExist(agent) )
+    else if( reached.IsExist(agent) )
     {
-        sc( *px, state.slave_keys->At(agent) );
+        sc( *px, slave_keys->At(agent) );
         return;
     }
 
     // Remember we reached this agent 
-    state.reached.insert( agent );
+    reached.insert( agent );
 
     // Obtain the query state from the conjecture
-    shared_ptr<AgentQuery> query = state.conj->GetQuery(agent);
+    shared_ptr<AgentQuery> query = conj->GetQuery(agent);
 
     // Run the compare implementation to get the links based on the choices
     TRACE(*agent)("?=")(**px)(" DecidedQuery()\n");    
@@ -120,22 +126,22 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     // in the case of pattern restriction on Star, Stuff. See #60 
 #endif
                         
-    (void)state.conj->FillMissingChoicesWithBegin(query);
+    (void)conj->FillMissingChoicesWithBegin(query);
 
     // Remember the coupling before recursing, as we can hit the same node 
     // (eg identifier) and we need to have coupled it. 
-    if( !state.slave_keys->IsExist(agent) )
-        (*state.slave_keys)[agent] = *px;
+    if( !slave_keys->IsExist(agent) )
+        (*slave_keys)[agent] = *px;
           
     // Use worker functions to go through the links, special case if there is evaluator
     if( query->GetEvaluator() )
     {
-        state.evaluator_queries.insert(query);
+        evaluator_queries.insert(query);
 	}
     else
     {
 		TRACE(*agent)("?=")(**px)(" Comparing links\n");
-        CompareLinks( query, state );
+        CompareLinks( query );
 	}
 }
 
@@ -143,21 +149,20 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
 void AndRuleEngine::Compare( Agent *start_agent,
                              const TreePtrInterface *p_start_x,
-                             Conjecture *conj,
-                             CouplingMap *slave_keys,
-                             const CouplingMap *master_keys ) const
+                             Conjecture *conj_,
+                             CouplingMap *slave_keys_,
+                             const CouplingMap *master_keys_ ) const
 {
     INDENT("C");
     ASSERT( p_start_x );
     ASSERT( *p_start_x );
     TRACE("Compare x=")(**p_start_x);
     TRACE(" pattern=")(*start_agent);
-    ASSERT( &slave_keys != &master_keys );
+    ASSERT( &slave_keys_ != &master_keys_ );
     //TRACE(**pcontext)(" @%p\n", pcontext);
            
-    CompareState state;
-    state.master_keys = master_keys;    
-    state.conj = conj;
+    master_keys = master_keys_;    
+    conj = conj_;
            
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
@@ -177,27 +182,29 @@ void AndRuleEngine::Compare( Agent *start_agent,
             
             // Initialise keys to the ones inherited from master, keeping 
             // none of our own from any previous unsuccessful attempt.
-            slave_keys->clear();
+            slave_keys_->clear();
 
             // Do a two-pass matching process: first get the keys...
             {
-                state.slave_keys = slave_keys;
+                slave_keys = slave_keys_;
                 
-                state.reached.clear();
-                state.abnormal_links.clear();
-                state.evaluator_queries.clear();
-                DecidedCompare( start_agent, p_start_x, state );
+                reached.clear();
+                abnormal_links.clear();
+                evaluator_queries.clear();
+                DecidedCompare( start_agent, p_start_x );
             }
             
-            CouplingMap combined_keys = MapUnion( *master_keys, *(state.slave_keys) );     
+            CouplingMap combined_keys = MapUnion( *master_keys, *slave_keys );     
                         
             // Process the free abnormal links. These may be more than one with the same linked pattern
             // node and the number can vary depending on x. We wouldn't know which one to key to, so we 
             // process them in a post-pass which ensures all the couplings have been keyed already.
             // Examples are the pattern restrictions on Star and Stuff.
-            for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : state.abnormal_links )
+            for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : abnormal_links )
             {            
-                Compare( lp.second->agent, lp.second->GetPX(), &combined_keys );
+                AndRuleEngine e;
+                e.Configure(my_agents);
+                e.Compare( lp.second->agent, lp.second->GetPX(), &combined_keys );
             }
 
             // Process the evaluator queries. These can match when their children have not matched and
@@ -205,7 +212,7 @@ void AndRuleEngine::Compare( Agent *start_agent,
             // which ensures all the couplings have been keyed already.
             // Examples are MatchAny and NotMatch (but not MatchAll, because MatchAll conforms with
             // the global and-rule and so its children can key couplings.
-            for( shared_ptr<const AgentQuery> query : state.evaluator_queries )
+            for( shared_ptr<const AgentQuery> query : evaluator_queries )
             {
                 //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
                 CompareEvaluatorLinks( query, &combined_keys );

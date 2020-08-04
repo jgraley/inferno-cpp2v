@@ -30,9 +30,9 @@ SCREngine::SCREngine( bool is_s ) :
 // higher priority for configuration (so when an agent is reached from multiple
 // engines, it's the most masterish one that "owns" it).
 void SCREngine::Configure( TreePtr<Node> cp,
-                        TreePtr<Node> rp,
-                        const Set<Agent *> &master_agents,
-                        const SCREngine *master )
+                           TreePtr<Node> rp,
+                           const Set<Agent *> &master_agents,
+                           const SCREngine *master )
 {
     INDENT(" ");
     ASSERT(!master_ptr)("Calling configure on already-configured ")(*this);
@@ -48,14 +48,14 @@ void SCREngine::Configure( TreePtr<Node> cp,
 
 
 void SCREngine::Configure( const Set<Agent *> &master_agents,
-                        const SCREngine *master )
+                           const SCREngine *master )
 {
     ASSERTFAIL("SCREngine::Configure(already, master) Must be overridden by a subclass");
 }
 
 
 void SCREngine::ConfigInstallRootAgents( TreePtr<Node> cp,
-									  TreePtr<Node> rp )
+								    	 TreePtr<Node> rp )
 {
     ASSERT( cp )("Compare pattern must always be provided\n");
     
@@ -147,7 +147,7 @@ const CompareReplace * SCREngine::GetOverallMaster() const
 
 
 void SCREngine::GetGraphInfo( vector<string> *labels, 
-                           vector< TreePtr<Node> > *blocks ) const
+                              vector< TreePtr<Node> > *blocks ) const
 {
     // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
     // nodes under the SR, CR or slave. These are obviously unnecessary, maybe I
@@ -194,7 +194,7 @@ void SCREngine::Compare( const TreePtrInterface *p_start_x,
 
 
 void SCREngine::KeyReplaceNodes( Conjecture &conj,
-                              const CouplingMap *coupling_keys ) const
+                                 const CouplingMap *coupling_keys ) const
 {
     INDENT("K");   
     // NO! coupling_keys now contains the master's couplings - we must not touch the 
@@ -232,7 +232,7 @@ void SCREngine::GatherCouplings( CouplingMap *coupling_keys ) const
 
 
 void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
-                                   const CouplingMap *master_keys ) 
+                                      const CouplingMap *master_keys ) 
 {
     INDENT(">");
 
@@ -268,7 +268,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
 // operations repeatedly until there are no more matches. Returns how
 // many hits we got.
 int SCREngine::RepeatingCompareReplace( TreePtr<Node> *proot,
-                                     const CouplingMap *master_keys )
+                                        const CouplingMap *master_keys )
 {
     INDENT("}");
     TRACE("begin RCR\n");
