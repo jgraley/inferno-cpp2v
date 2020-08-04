@@ -55,11 +55,11 @@ protected:
 
     // See #66 for getting rid of mutable
     mutable Conjecture conj;
-    mutable CouplingMap slave_keys; // applies ACROSS PASSES
+    mutable CouplingMap slave_keys; 
     mutable const CouplingMap *master_keys;
-    mutable Set<Agent *> reached; // applies to CURRENT PASS only
-    mutable Set< shared_ptr<const AgentQuery> > evaluator_queries;    // applies ACROSS PASSES
-    mutable Set< std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > > abnormal_links;    // applies ACROSS PASSES
+    mutable Set<Agent *> reached; 
+    mutable Set< shared_ptr<const AgentQuery> > evaluator_queries;   
+    mutable Set< std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > > abnormal_links; 
 };
 
 #endif
