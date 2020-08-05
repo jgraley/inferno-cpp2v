@@ -148,12 +148,12 @@ bool Conjecture::Increment()
 }
 
 
-AgentQuery::Choices Conjecture::GetChoices(Agent *agent)
+AgentQuery::Choices Conjecture::GetChoices(Agent *agent) const 
 {            
     ASSERT(configured);
     if( agent_records.IsExist(agent) )
     {
-        return *agent_records[agent].query->GetChoices();
+        return *agent_records.at(agent).query->GetChoices();
 	}
 	else
 	{

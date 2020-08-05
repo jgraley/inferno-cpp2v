@@ -229,3 +229,15 @@ void AndRuleEngine::Compare( Agent *start_agent,
     
     // By now, we succeeded and slave_keys is the right set of keys
 }
+
+
+const Conjecture &AndRuleEngine::GetConjecture()
+{
+    return conj;
+}
+
+
+const CouplingMap &AndRuleEngine::GetCouplingKeys()
+{
+    return slave_keys;
+}

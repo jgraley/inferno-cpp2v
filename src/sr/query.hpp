@@ -83,7 +83,7 @@ public:
     typedef vector<ContainerInterface::iterator> Choices; 
     typedef list<Link> Links;
     
-    virtual const Choices *GetChoices() = 0;
+    virtual const Choices *GetChoices() const = 0;
 };
 
 
@@ -118,7 +118,7 @@ public:
     virtual const Links *GetAbnormalLinks() const = 0; // pointer returned because the links contain the local links
     virtual shared_ptr<BooleanEvaluator> GetEvaluator() const = 0;
     
-    virtual const Ranges *GetDecisions() = 0;
+    virtual const Ranges *GetDecisions() const = 0;
     virtual void InvalidateBack() = 0;
     virtual void SetBackChoice( ContainerInterface::iterator newc ) = 0;
     virtual void PushBackChoice( ContainerInterface::iterator newc ) = 0;    
@@ -158,8 +158,8 @@ public:
     const Links *GetAbnormalLinks() const { return &abnormal_links; } // pointer returned because the links contain the local links
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
       
-    const Choices *GetChoices() { return &choices; }
-    const Ranges *GetDecisions() { return &decisions; }
+    const Choices *GetChoices() const { return &choices; }
+    const Ranges *GetDecisions() const { return &decisions; }
     void InvalidateBack();
     void SetBackChoice( ContainerInterface::iterator newc );
     void PushBackChoice( ContainerInterface::iterator newc );    

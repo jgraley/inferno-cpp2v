@@ -49,6 +49,9 @@ public:
     void Compare( Agent *start_agent,
                   const TreePtrInterface *p_start_x,
                   const CouplingMap *master_keys ) const;
+    
+    const Conjecture &GetConjecture();
+    const CouplingMap &GetCouplingKeys();
 
 protected:
     std::shared_ptr< Set<Agent *> > my_agents;   

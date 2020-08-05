@@ -21,7 +21,7 @@ class SpecialBase;
 class CompareReplace;
 
 /// Common implementation for search+replace, compare+replace and slaves
-class SCREngine : public AndRuleEngine
+class SCREngine : public virtual Traceable
 {      
 public:
     SCREngine( bool is_s );
@@ -58,7 +58,7 @@ protected:
     void Compare( const TreePtrInterface *p_start_x,
                   const CouplingMap *master_keys ) const;
 private:
-    void KeyReplaceNodes( Conjecture &conj,
+    void KeyReplaceNodes( const Conjecture &conj,
                           const CouplingMap *coupling_keys) const;
     TreePtr<Node> Replace() const;
 
@@ -83,6 +83,7 @@ private:
     TreePtr<Node> pattern;
     Agent *root_agent;
     const SCREngine *master_ptr;
+    std::shared_ptr< Set<Agent *> > my_agents;   
     Set<SlaveAgent *> my_slaves;   
     
     static int repetitions;
@@ -90,6 +91,8 @@ private:
     
     vector<int> stop_after;
     int depth;    
+
+    AndRuleEngine and_rule_engine;
 
 	/** Walks the tree, avoiding the "search"/"compare" and "replace" members of slaves
 		but still recurses through the "through" member. Therefore, it visits all the

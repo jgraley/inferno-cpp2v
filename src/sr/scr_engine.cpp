@@ -44,6 +44,8 @@ void SCREngine::Configure( TreePtr<Node> cp,
     TRACE("Elaborating ")(*this );    
     ConfigCategoriseSubs( master_agents );    
     ConfigConfigureSubs( master_agents );
+    
+    and_rule_engine.Configure(my_agents);    
 } 
 
 
@@ -180,7 +182,7 @@ void SCREngine::GetGraphInfo( vector<string> *labels,
 void SCREngine::Compare( const TreePtrInterface *p_start_x ) const
 {
     CouplingMap master_keys;
-    AndRuleEngine::Compare( root_agent, p_start_x, &master_keys );
+    and_rule_engine.Compare( root_agent, p_start_x, &master_keys );
 }
 
 
@@ -189,11 +191,11 @@ void SCREngine::Compare( const TreePtrInterface *p_start_x,
                          const CouplingMap *master_keys ) const
 {
 	ASSERT( root_agent );
-    AndRuleEngine::Compare( root_agent, p_start_x, master_keys );
+    and_rule_engine.Compare( root_agent, p_start_x, master_keys );
 }
 
 
-void SCREngine::KeyReplaceNodes( Conjecture &conj,
+void SCREngine::KeyReplaceNodes( const Conjecture &conj,
                                  const CouplingMap *coupling_keys ) const
 {
     INDENT("K");   
@@ -237,14 +239,16 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
     INDENT(">");
 
     TRACE("Begin search\n");
-    AndRuleEngine::Compare( root_agent, p_root, master_keys );
+    and_rule_engine.Compare( root_agent, p_root, master_keys );
            
     TRACE("Search successful, now keying replace nodes\n");
-    KeyReplaceNodes( conj, &slave_keys );
+    KeyReplaceNodes( and_rule_engine.GetConjecture(), 
+                     &and_rule_engine.GetCouplingKeys() );
 
     if( !my_slaves.empty() )
     {
-		CouplingMap coupling_keys = MapUnion( *master_keys, slave_keys );    
+		CouplingMap coupling_keys = MapUnion( *master_keys, 
+                                              and_rule_engine.GetCouplingKeys() );    
 		
         FOREACH( SlaveAgent *sa, my_slaves )
             sa->SetMasterCouplingKeys( coupling_keys );

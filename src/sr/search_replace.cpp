@@ -67,9 +67,9 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
     // tree node - then the walk at context will follow the new *proot pointer and get
     // into the new subtree.
     if( c == *proot )
-	pcontext = proot;
+	    pcontext = proot;
     else
-	pcontext = &c;
+	    pcontext = &c;
     
     Map< Agent *, TreePtr<Node> > empty;
     

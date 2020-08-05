@@ -39,7 +39,7 @@ public:
     bool IncrementConjecture( Agent *agent ); 
         				       
     // Standard interface for decided compare functions
-    AgentQuery::Choices GetChoices(Agent *agent);
+    AgentQuery::Choices GetChoices(Agent *agent) const;
     shared_ptr<AgentQuery> GetQuery(Agent *agent);
     void FillMissingChoicesWithBegin( shared_ptr<AgentQuery> query );      
 				   
