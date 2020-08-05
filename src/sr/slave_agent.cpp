@@ -5,7 +5,7 @@
 using namespace SR;
 
 SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search ) :
-    SCREngine( is_search ),
+    scr_engine( make_shared<SCREngine>(is_search) ),
     search_pattern( sp ),
     replace_pattern( rp )
 {
@@ -48,14 +48,15 @@ void SlaveAgent::GetGraphInfo( vector<string> *labels,
 {
     labels->push_back("through");
     blocks->push_back(GetThrough());
-    SCREngine::GetGraphInfo( labels, blocks );
+    scr_engine->GetGraphInfo( labels, blocks );
 }
 
 
 void SlaveAgent::Configure( const Set<Agent *> &agents_already_configured, const SCREngine *master )
 {
     ASSERT(master); // must not be overall master (i.e. NULL)
-    SCREngine::Configure(search_pattern, replace_pattern, agents_already_configured, master);
+    const CompareReplace *overall_master = master->GetOverallMaster();
+    scr_engine->Configure(overall_master, search_pattern, replace_pattern, agents_already_configured, master);
 }    
 
 
@@ -78,7 +79,7 @@ TreePtr<Node> SlaveAgent::BuildReplaceImpl( TreePtr<Node> keynode )
     engine->GatherCouplings( &master_keys );
     
     // Run the slave engine
-    (void)SCREngine::RepeatingCompareReplace( &dest, &master_keys );   
+    (void)scr_engine->RepeatingCompareReplace( &dest, &master_keys );   
     
     ASSERT( dest );
     return dest;

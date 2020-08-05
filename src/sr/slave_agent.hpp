@@ -20,8 +20,7 @@ class SearchReplace;
 /// operates on the resulting subtree, performing search and replace operations
 /// via the `search_pattern` and `replace_pattern` pointers until no more 
 /// matches are found (the usual reductive style).  
-class SlaveAgent : public virtual AgentCommon, 
-                   public SCREngine   
+class SlaveAgent : public virtual AgentCommon
 {
 public:
     SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );
@@ -37,11 +36,15 @@ public:
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
+	virtual shared_ptr<SCREngine> GetSCREngine() const { return scr_engine; }
 
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;   
     
     CouplingMap master_keys;
+
+private:
+    std::shared_ptr<SCREngine> scr_engine;
 };
 
 

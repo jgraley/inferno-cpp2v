@@ -156,7 +156,6 @@ void AndRuleEngine::Compare( Agent *start_agent,
     ASSERT( *p_start_x );
     TRACE("Compare x=")(**p_start_x);
     TRACE(" pattern=")(*start_agent);
-    //TRACE(**pcontext)(" @%p\n", pcontext);
            
     master_keys = master_keys_;    
     conj.Configure(*my_agents, start_agent);

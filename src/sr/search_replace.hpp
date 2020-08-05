@@ -17,7 +17,7 @@ class Conjecture;
 class SpecialBase;
 
 /// Main implementation of a compare and replace function, that matches at the root of the program tree
-class CompareReplace : public SCREngine,
+class CompareReplace : public virtual Traceable,
                        virtual public InPlaceTransformation, 
                        public Filter 
 {  
@@ -28,8 +28,12 @@ public:
                     TreePtr<Node> rp = TreePtr<Node>(),
                     bool search=false );
                     
-    
+    virtual void Configure( TreePtr<Node> cp,
+                            TreePtr<Node> rp = TreePtr<Node>() );
+    static void SetMaxReps( int n, bool e ) { SCREngine::SetMaxReps(n, e); }
+                            
     using Transformation::operator();
+    
     // Functor style interface for RepeatingSearchReplace; implements Pass interface.
     void operator()( TreePtr<Node> context, 
                      TreePtr<Node> *proot );
@@ -47,8 +51,10 @@ public:
                           TreePtr<Node> root );
     virtual void SetStopAfter( vector<int> ssa, int d=0 )
     {
-        SCREngine::SetStopAfter( ssa, d );
+        scr_engine.SetStopAfter( ssa, d );
     }
+private:
+    SCREngine scr_engine;
 };
 
 

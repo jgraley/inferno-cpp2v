@@ -11,19 +11,26 @@ using namespace SR;
 CompareReplace::CompareReplace( TreePtr<Node> cp,
                                 TreePtr<Node> rp,
                                 bool search ) :
-    SCREngine( search )
+    scr_engine( search )
 {
     // If cp and rp are provided, do an instant configuration
     if( cp )
-        Configure( cp, rp );
+        scr_engine.Configure( this, cp, rp );
 }    
+
+
+void CompareReplace::Configure( TreePtr<Node> cp,
+                                TreePtr<Node> rp )
+{
+    scr_engine.Configure( this, cp, rp );
+}
 
 
 void CompareReplace::GetGraphInfo( vector<string> *labels, 
                                    vector< TreePtr<Node> > *blocks ) const
 {
     // Disambiguate conflict between Transformation and SCREngine
-    SCREngine::GetGraphInfo( labels, blocks );
+    scr_engine.GetGraphInfo( labels, blocks );
 }
 
     
@@ -33,7 +40,7 @@ bool CompareReplace::IsMatch( TreePtr<Node> context,
     pcontext = &context;
     try
     {
-        Compare(&root); // Using &root here in principle allows a PointerIs to operate on the root (yeah, I know right?)
+        scr_engine.Compare(&root); // Using &root here in principle allows a PointerIs to operate on the root (yeah, I know right?)
         pcontext = NULL;
         return true;
     }
@@ -73,7 +80,7 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
     
     Map< Agent *, TreePtr<Node> > empty;
     
-    (void)RepeatingCompareReplace( proot, &empty );   
+    (void)scr_engine.RepeatingCompareReplace( proot, &empty );   
 
     pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
 }

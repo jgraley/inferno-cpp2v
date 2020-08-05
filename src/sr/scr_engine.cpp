@@ -29,7 +29,8 @@ SCREngine::SCREngine( bool is_s ) :
 // configure because they were already configured by a master, and masters take 
 // higher priority for configuration (so when an agent is reached from multiple
 // engines, it's the most masterish one that "owns" it).
-void SCREngine::Configure( TreePtr<Node> cp,
+void SCREngine::Configure( const CompareReplace *overall_master,
+                           TreePtr<Node> cp,
                            TreePtr<Node> rp,
                            const Set<Agent *> &master_agents,
                            const SCREngine *master )
@@ -37,6 +38,7 @@ void SCREngine::Configure( TreePtr<Node> cp,
     INDENT(" ");
     ASSERT(!master_ptr)("Calling configure on already-configured ")(*this);
     TRACE("Entering SCREngine::Configure on ")(*this)("\n");
+    overall_master_ptr = overall_master;
     master_ptr = master;
     
     ConfigInstallRootAgents(cp, rp);
@@ -122,10 +124,10 @@ void SCREngine::ConfigConfigureSubs( const Set<Agent *> &master_agents )
     Set<Agent *> surrounding_agents = SetUnion( master_agents, *my_agents ); 
             
     // Recurse into the slaves' configure
-    FOREACH( SCREngine *e, my_slaves )
+    FOREACH( SlaveAgent *slave, my_slaves )
     {
-        TRACE("Recursing to configure slave ")(*e)("\n");
-        e->Configure(surrounding_agents, this);
+        TRACE("Recursing to configure slave ")(*slave)("\n");
+        slave->Configure(surrounding_agents, this);
     }
     
     // Give agents pointers to here and our coupling keys
@@ -139,12 +141,7 @@ void SCREngine::ConfigConfigureSubs( const Set<Agent *> &master_agents )
 
 const CompareReplace * SCREngine::GetOverallMaster() const
 {
-    const SCREngine *m = this;
-    while( m->master_ptr )
-        m = m->master_ptr;
-    const CompareReplace *cr = dynamic_cast<const CompareReplace *>(m);
-    ASSERT(cr);
-    return cr;
+    return overall_master_ptr;
 }
 
 
@@ -281,8 +278,8 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *proot,
     {
         bool stop = depth < stop_after.size() && stop_after[depth]==i;
         if( stop )
-            FOREACH( SCREngine *e, my_slaves )
-                e->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
+            FOREACH( SlaveAgent *slave, my_slaves )
+                slave->GetSCREngine()->SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
                
         try
         {

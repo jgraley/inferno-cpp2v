@@ -28,10 +28,11 @@ public:
                     
     // Call this to set the patterns after construction. This should not be virtual since
     // the constructor calls it.
-    virtual void Configure( TreePtr<Node> cp,
+    virtual void Configure( const CompareReplace *overall_master,
+                            TreePtr<Node> cp,
                             TreePtr<Node> rp = TreePtr<Node>(),
-                            const Set<Agent *> &master_agents = Set<Agent *>(),
-                            const SCREngine *master = NULL /* if null, IT'S YOU!!!! */ );
+                            const Set<Agent *> &master_agents = Set<Agent *>(),                            
+                            const SCREngine *master = NULL); /* if null, IT'S YOU!!!! */
 
 protected:
     // A configure that doesn't know what the search and replace patterns are
@@ -51,7 +52,6 @@ public:
     int RepeatingCompareReplace( TreePtr<Node> *proot,
                                  const CouplingMap *master_keys );
     
-protected:
     void SingleCompareReplace( TreePtr<Node> *proot,
                                const CouplingMap *master_keys );
     void Compare( const TreePtrInterface *p_start_x ) const;
@@ -79,7 +79,9 @@ public:
     }
         
 private:
-    bool is_search;
+    const bool is_search;
+    
+    const CompareReplace *overall_master_ptr;
     TreePtr<Node> pattern;
     Agent *root_agent;
     const SCREngine *master_ptr;
