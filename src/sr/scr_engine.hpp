@@ -34,7 +34,6 @@ public:
                             const Set<Agent *> &master_agents = Set<Agent *>(),                            
                             const SCREngine *master = NULL); /* if null, IT'S YOU!!!! */
 
-protected:
     // A configure that doesn't know what the search and replace patterns are
     virtual void Configure( const Set<Agent *> &master_agents,
                             const SCREngine *master /* if null, IT'S YOU!!!! */ );
@@ -43,9 +42,6 @@ private:
 										  TreePtr<Node> rp );
     virtual void ConfigCategoriseSubs( const Set<Agent *> &master_agents );
     virtual void ConfigConfigureSubs( const Set<Agent *> &master_agents );
-
-protected: 
-    virtual shared_ptr<ContainerInterface> GetVisibleChildren() const { ASSERTFAIL(); } 
     
 public:
     void GatherCouplings( CouplingMap *coupling_keys ) const;
@@ -94,7 +90,8 @@ private:
     vector<int> stop_after;
     int depth;    
 
-    AndRuleEngine and_rule_engine;
+    // See #66 for getting rid of mutable
+    mutable AndRuleEngine and_rule_engine;
 
 	/** Walks the tree, avoiding the "search"/"compare" and "replace" members of slaves
 		but still recurses through the "through" member. Therefore, it visits all the

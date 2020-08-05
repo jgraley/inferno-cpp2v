@@ -20,7 +20,7 @@ void AndRuleEngine::Configure( std::shared_ptr< Set<Agent *> > _my_agents )
 }
 
 
-void AndRuleEngine::CompareLinks( shared_ptr<const AgentQuery> query ) const
+void AndRuleEngine::CompareLinks( shared_ptr<const AgentQuery> query ) 
 {
 	ASSERT( !query->GetEvaluator() );
     // Follow up on any blocks that were noted by the agent impl
@@ -46,7 +46,7 @@ void AndRuleEngine::CompareLinks( shared_ptr<const AgentQuery> query ) const
 
 // Only to be called in the restricting pass
 void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
-							               const CouplingMap *coupling_keys ) const
+							               const CouplingMap *coupling_keys ) 
 {
 	ASSERT( query->GetEvaluator() );
     ASSERT( query->GetNormalLinks()->empty() )("When an evaluator is used, all links must be into abnormal contexts");
@@ -86,7 +86,7 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
 
 
 void AndRuleEngine::DecidedCompare( Agent *agent,
-                                    const TreePtrInterface *px ) const 
+                                    const TreePtrInterface *px )  
 {
     INDENT(" ");
     ASSERT( px ); // Ref to target must not be NULL (i.e. corrupted ref)
@@ -149,7 +149,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
 void AndRuleEngine::Compare( Agent *start_agent,
                              const TreePtrInterface *p_start_x,
-                             const CouplingMap *master_keys_ ) const
+                             const CouplingMap *master_keys_ ) 
 {
     INDENT("C");
     ASSERT( p_start_x );

@@ -22,7 +22,7 @@ class CompareReplace;
 /// Solve an and-rule matching problem
 class AndRuleEngine : public virtual Traceable
 {
-protected:
+public:
     // Any mismatch this class throws
     class Mismatch : public ::Mismatch
     {
@@ -38,31 +38,29 @@ protected:
     {
     };
     
-public:
     void Configure( std::shared_ptr< Set<Agent *> > _my_agents);
     
-    void CompareLinks( shared_ptr<const AgentQuery> query ) const;
+    void CompareLinks( shared_ptr<const AgentQuery> query );
     void CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
-							    const CouplingMap *coupling_keys ) const;
+							    const CouplingMap *coupling_keys );
     void DecidedCompare( Agent *agent,
-                         const TreePtrInterface *px ) const;
+                         const TreePtrInterface *px );
     void Compare( Agent *start_agent,
                   const TreePtrInterface *p_start_x,
-                  const CouplingMap *master_keys ) const;
+                  const CouplingMap *master_keys );
     
     const Conjecture &GetConjecture();
     const CouplingMap &GetCouplingKeys();
 
-protected:
+private:
     std::shared_ptr< Set<Agent *> > my_agents;   
 
-    // See #66 for getting rid of mutable
-    mutable Conjecture conj;
-    mutable CouplingMap slave_keys; 
-    mutable const CouplingMap *master_keys;
-    mutable Set<Agent *> reached; 
-    mutable Set< shared_ptr<const AgentQuery> > evaluator_queries;   
-    mutable Set< std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > > abnormal_links; 
+    Conjecture conj;
+    CouplingMap slave_keys; 
+    const CouplingMap *master_keys;
+    Set<Agent *> reached; 
+    Set< shared_ptr<const AgentQuery> > evaluator_queries;   
+    Set< std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > > abnormal_links; 
 };
 
 #endif
