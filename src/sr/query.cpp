@@ -30,6 +30,18 @@ void PatternQueryResult::AddAbnormalLink( Agent *a )
 }
 
 
+void PatternQueryResult::AddMultiplicityLink( Agent *a )
+{
+    Link b;
+    b.agent = a;
+    
+    // For debugging
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    
+    multiplicity_links.push_back( b );       
+}
+
+
 void AgentQuery::AddNormalLink( Agent *a, const TreePtrInterface *px )
 {
     Link b;
@@ -55,6 +67,20 @@ void AgentQuery::AddAbnormalLink( Agent *a, const TreePtrInterface *px )
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
     abnormal_links.push_back( b );     
+}
+
+
+void AgentQuery::AddMultiplicityLink( Agent *a, const TreePtrInterface *px )
+{
+    Link b;
+    b.agent = a;
+    b.px = px;
+    b.local_x = TreePtr<Node>();
+    
+    // For debugging
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    
+    multiplicity_links.push_back( b );     
 }
 
 

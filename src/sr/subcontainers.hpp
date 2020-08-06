@@ -10,7 +10,7 @@ namespace SR
     
 // Internal node classes - NOTE these are not agents, they are local tree nodes
 
-struct SubContainer : Node 
+struct SubContainer : Node // TODO #69
 {
     NODE_FUNCTIONS
 };

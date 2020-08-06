@@ -25,11 +25,11 @@ void AndRuleEngine::CompareLinks( shared_ptr<const AgentQuery> query )
 	ASSERT( !query->GetEvaluator() );
     // Follow up on any blocks that were noted by the agent impl
 
-    int i=0;        
     FOREACH( const AgentQuery::Link &b, *query->GetAbnormalLinks() )
     {
         abnormal_links.insert( make_pair(query, &b) ); 
     }    
+    int i=0;        
     FOREACH( const AgentQuery::Link &b, *query->GetNormalLinks() )
     {
         TRACE("Comparing normal link %d\n", i);
@@ -39,6 +39,48 @@ void AndRuleEngine::CompareLinks( shared_ptr<const AgentQuery> query )
         ASSERT( *px );
         
         DecidedCompare(b.agent, px);   
+        i++;             
+    }
+    i=0;
+    FOREACH( const AgentQuery::Link &b, *query->GetMultiplicityLinks() )
+    {
+        TRACE("Comparing multiplicity link %d\n", i);
+        // Recurse normally
+        // Get x for linked node
+        const TreePtrInterface *px = b.GetPX();
+        ASSERT( *px );
+        
+        if( const TreePtr<SubSequence> px_subsequence = TreePtr<SubSequence>::DynamicCast(*px) )
+        {
+            //FOREACH( const TreePtrInterface &x_element, *px_subcontainer )
+            for( SubSequence::iterator it = px_subsequence->begin(); it != px_subsequence->end(); ++it )
+            {
+                auto & x_element = *it;
+                DecidedCompare(b.agent, &x_element);   
+            }            
+        }
+        else if( const TreePtr<SubSequenceRange> px_subsequence = TreePtr<SubSequenceRange>::DynamicCast(*px) )
+        {
+            //FOREACH( const TreePtrInterface &x_element, *px_subcontainer )
+            for( SubSequenceRange::iterator it = px_subsequence->begin(); it != px_subsequence->end(); ++it )
+            {
+                auto & x_element = *it;
+                DecidedCompare(b.agent, &x_element);   
+            }            
+        }
+        else if( const TreePtr<SubCollection> px_subcollection = TreePtr<SubCollection>::DynamicCast(*px) )
+        {
+            //FOREACH( const TreePtrInterface &x_element, *px_subcontainer )
+            for( SubCollection::iterator it = px_subcollection->begin(); it != px_subcollection->end(); ++it )
+            {
+                auto & x_element = *it;
+                DecidedCompare(b.agent, &x_element);   
+            }            
+        }
+        else
+        {
+            ASSERT(false)("Unrecognised multiplicity x type");
+        }
         i++;             
     }
 }

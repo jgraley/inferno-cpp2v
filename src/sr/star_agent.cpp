@@ -5,11 +5,20 @@
 
 using namespace SR;
 
+//#define USE_MULTIPLICITY
+
 PatternQueryResult StarAgent::PatternQuery() const
 {
     PatternQueryResult r;
     if( TreePtr<Node> p = GetRestriction() )
+    {
+#ifdef USE_MULTIPLICITY
+        r.AddMultiplicityLink( AsAgent(p) );
+#else        
         r.AddAbnormalLink( AsAgent(p) );
+#endif
+    }
+
     return r;
 }
 
@@ -25,10 +34,11 @@ void StarAgent::DecidedQuery( QueryAgentInterface &query,
     query.Reset();
                 
     ContainerInterface *xc = dynamic_cast<ContainerInterface *>(px->get());
+
     ASSERT(xc)("Nodes passed to StarAgent::DecidedCompare() must implement ContainerInterface, since * matches multiple things");
     
     // Check pre-restriction
-    TRACE("MatchRange pre-res\n");
+    TRACE("StarAgent pre-res\n");
     FOREACH( TreePtr<Node> xe, *xc )
     {
         CheckLocalMatch( xe.get() );
@@ -36,12 +46,16 @@ void StarAgent::DecidedQuery( QueryAgentInterface &query,
      
     if( TreePtr<Node> p = GetRestriction() )
     {
-        TRACE("MatchRange pattern\n");
+        TRACE("StarAgent pattern\n");
         // Apply pattern restriction - will be at least as strict as pre-restriction
+#ifdef USE_MULTIPLICITY
+        query.AddMultiplicityLink( AsAgent(p), px );
+#else
         FOREACH( const TreePtrInterface &xe, *xc )
         {
             query.AddLocalAbnormalLink( AsAgent(p), xe );
         }
+#endif
     }
  
     TRACE("done\n");

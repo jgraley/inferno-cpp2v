@@ -110,6 +110,7 @@ public:
 
     virtual void AddNormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
     virtual void AddAbnormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
+    virtual void AddMultiplicityLink( Agent *a, const TreePtrInterface *px ) = 0; 
     virtual void AddLocalNormalLink( Agent *a, TreePtr<Node> x ) = 0; 
     virtual void AddLocalAbnormalLink( Agent *a, TreePtr<Node> x ) = 0; 
     virtual void AddLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x ) = 0; 
@@ -156,6 +157,7 @@ public:
 
     void AddNormalLink( Agent *a, const TreePtrInterface *px ); 
     void AddAbnormalLink( Agent *a, const TreePtrInterface *px ); 
+    void AddMultiplicityLink( Agent *a, const TreePtrInterface *px ); 
     void AddLocalNormalLink( Agent *a, TreePtr<Node> x ); 
     void AddLocalAbnormalLink( Agent *a, TreePtr<Node> x ); 
     void AddLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x ); 
