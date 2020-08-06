@@ -1,5 +1,6 @@
 #include "star_agent.hpp"
 #include "helpers/simple_compare.hpp"
+#include "subcontainers.hpp" 
 #include "search_replace.hpp" 
 
 using namespace SR;

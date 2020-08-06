@@ -7,6 +7,7 @@
 #include "helpers/transformation.hpp"
 
 #include "boolean_evaluator.hpp"
+#include "subcontainers.hpp" 
 
 #include <vector>
 #include <boost/type_traits.hpp>
@@ -30,19 +31,23 @@ public:
     {
 		normal_links.clear();
 		abnormal_links.clear();
+        multiplicity_links.clear();
         evaluator = shared_ptr<BooleanEvaluator>();
     }
     void AddNormalLink( Agent *a );
     void AddAbnormalLink( Agent *a );
+    void AddMultiplicityLink( Agent *a );
     void AddEvaluator( shared_ptr<BooleanEvaluator> e );
     
     const Links *GetNormalLinks() const { return &normal_links; } // pointer returned because the links contain the local links
     const Links *GetAbnormalLinks() const { return &abnormal_links; } // pointer returned because the links contain the local links
+    const Links *GetMultiplicityLinks() const { return &multiplicity_links; } // pointer returned because the links contain the local links
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
 
 private:
     Links normal_links; 
     Links abnormal_links; 
+    Links multiplicity_links; 
     shared_ptr<BooleanEvaluator> evaluator;
 };
 
@@ -107,6 +112,7 @@ public:
     virtual void AddAbnormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
     virtual void AddLocalNormalLink( Agent *a, TreePtr<Node> x ) = 0; 
     virtual void AddLocalAbnormalLink( Agent *a, TreePtr<Node> x ) = 0; 
+    virtual void AddLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x ) = 0; 
     virtual void AddEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
 };
 
@@ -116,6 +122,7 @@ class QueryClientInterface : virtual public QueryCommonInterface
 public:
     virtual const Links *GetNormalLinks() const = 0; // pointer returned because the links contain the local links
     virtual const Links *GetAbnormalLinks() const = 0; // pointer returned because the links contain the local links
+    virtual const Links *GetMultiplicityLinks() const = 0; // pointer returned because the links contain the local links
     virtual shared_ptr<BooleanEvaluator> GetEvaluator() const = 0;
     
     virtual const Ranges *GetDecisions() const = 0;
@@ -151,11 +158,13 @@ public:
     void AddAbnormalLink( Agent *a, const TreePtrInterface *px ); 
     void AddLocalNormalLink( Agent *a, TreePtr<Node> x ); 
     void AddLocalAbnormalLink( Agent *a, TreePtr<Node> x ); 
+    void AddLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x ); 
     void AddEvaluator( shared_ptr<BooleanEvaluator> e ); 
     void AddLocalMismatch();
                                                   
     const Links *GetNormalLinks() const { return &normal_links; } // pointer returned because the links contain the local links
     const Links *GetAbnormalLinks() const { return &abnormal_links; } // pointer returned because the links contain the local links
+    const Links *GetMultiplicityLinks() const { return &multiplicity_links; } // pointer returned because the links contain the local links
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
       
     const Choices *GetChoices() const { return &choices; }
@@ -168,6 +177,7 @@ private:
     shared_ptr<BooleanEvaluator> evaluator;
     Links normal_links; 
     Links abnormal_links; 
+    Links multiplicity_links; 
     Ranges decisions;
     Ranges::iterator next_decision;
     Choices choices;

@@ -160,7 +160,7 @@ void StandardAgent::DecidedQuerySequence( QueryAgentInterface &query,
             }
             
             // Star matched [xit, xit_star_end) i.e. xit-xit_begin_star elements
-            TreePtr<StarAgent::SubSequenceRange> xss( new StarAgent::SubSequenceRange( xit, xit_star_end ) );
+            TreePtr<SubSequenceRange> xss( new SubSequenceRange( xit, xit_star_end ) );
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern restriction
@@ -281,7 +281,7 @@ void StandardAgent::DecidedQueryCollection( QueryAgentInterface &query,
     // Apply pre-restriction to the star
     if( star )
     {
-        TreePtr<StarAgent::SubCollection> x_subcollection( new StarAgent::SubCollection );
+        TreePtr<SubCollection> x_subcollection( new SubCollection );
         *x_subcollection = xremaining;
         query.AddLocalNormalLink( star, x_subcollection );
     }

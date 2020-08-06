@@ -88,6 +88,21 @@ void AgentQuery::AddLocalAbnormalLink( Agent *a, TreePtr<Node> x )
 }
 
 
+void AgentQuery::AddLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x )
+{
+    ASSERT(x);
+    Link b;
+    b.agent = a;
+    b.px = NULL;    
+    b.local_x = x;
+    
+    // For debugging
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+
+    multiplicity_links.push_back( b );
+}
+
+
 void PatternQueryResult::AddEvaluator( shared_ptr<BooleanEvaluator> e )
 {
 	ASSERT( !evaluator ); // should not register more than one
@@ -223,6 +238,7 @@ void AgentQuery::Reset()
 {
     normal_links.clear();
 	abnormal_links.clear();
+    multiplicity_links.clear();
     evaluator = shared_ptr<BooleanEvaluator>();    
     next_decision = decisions.begin();  
     next_choice = choices.begin();  
