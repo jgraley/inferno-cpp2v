@@ -217,9 +217,7 @@ void AndRuleEngine::Compare( Agent *start_agent,
 
                 FOREACH( const TreePtrInterface &xe, *xc )
                 {
-                    TRACE("wat\n");
                     e.Compare( lp.second->agent, &xe, &combined_keys );
-                    TRACE("wut\n");
                 }
 
                 i++;

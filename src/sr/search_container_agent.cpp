@@ -113,13 +113,17 @@ void StuffAgent::DecidedQueryRestrictions( QueryAgentInterface &query, Container
     // underlying the current iterator, thistime.
     if( recurse_restriction )
     {
+        TreePtr<SubSequence> xpr_ss( new SubSequence() );
+
         // See if we are looking at a walk iterator
         const Walk::iterator *pwtt = dynamic_cast<const Walk::iterator *>(thistime.GetUnderlyingIterator());
         ASSERT(pwtt)("Failed to get Walk::iterator out of the decision iterator");    
 
         // Check all the nodes that we recursed through in order to get here
         FOREACH( TreePtr<Node> n, pwtt->GetPath() )
-            query.AddLocalAbnormalLink( AsAgent(recurse_restriction), n );
+            xpr_ss->push_back( n );
+
+        query.AddLocalMultiplicityLink( AsAgent(recurse_restriction), xpr_ss );            
     }   
 }
 

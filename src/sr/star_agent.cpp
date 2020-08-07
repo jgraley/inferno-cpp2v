@@ -5,18 +5,13 @@
 
 using namespace SR;
 
-#define USE_MULTIPLICITY
 
 PatternQueryResult StarAgent::PatternQuery() const
 {
     PatternQueryResult r;
     if( TreePtr<Node> p = GetRestriction() )
     {
-#ifdef USE_MULTIPLICITY
         r.AddMultiplicityLink( AsAgent(p) );
-#else        
-        r.AddAbnormalLink( AsAgent(p) );
-#endif
     }
 
     return r;
@@ -48,14 +43,7 @@ void StarAgent::DecidedQuery( QueryAgentInterface &query,
     {
         TRACE("StarAgent pattern, size is %d\n", xc->size());
         // Apply pattern restriction - will be at least as strict as pre-restriction
-#ifdef USE_MULTIPLICITY
         query.AddMultiplicityLink( AsAgent(p), px );
-#else
-        FOREACH( const TreePtrInterface &xe, *xc )
-        {
-            query.AddLocalAbnormalLink( AsAgent(p), xe );
-        }
-#endif
     }
 }                       
 
