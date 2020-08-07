@@ -209,6 +209,7 @@ void SCREngine::KeyReplaceNodes( const Conjecture &conj,
         if( coupling_keys->IsExist( a ) && !a->GetCoupled() )
             a->KeyReplace(coupling_keys->at(a), conj.GetChoices(a));
 	}
+    TRACE("OK\n");
 }
 
 
@@ -257,6 +258,8 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
     // Clear out all the replace keys (the ones inside the agents) now that replace is done
     FOREACH( Agent *a, *my_agents )
         a->ResetKey();
+
+    TRACE("OK\n");
 }
 
 
@@ -289,11 +292,13 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *proot,
         {
             if( depth < stop_after.size() )
                 ASSERT(stop_after[depth]<i)("Stop requested after hit that doesn't happen, there are only %d", i);
+            TRACE("OK\n");
             return i; // when the compare fails, we're done
         }
         if( stop )
         {
             TRACE("Stopping after hit %d\n", stop_after[depth]);
+            TRACE("OK\n");
             return i;
         }    
     }
@@ -304,6 +309,7 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *proot,
            "Try using -rn%d to suppress this error\n", repetitions, repetitions);
        
     TRACE("exiting\n");
+    TRACE("OK\n");
     return repetitions;
 }
 

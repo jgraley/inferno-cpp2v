@@ -26,9 +26,11 @@ void AndRuleEngine::CompareLinks( shared_ptr<const AgentQuery> query )
     // Follow up on any blocks that were noted by the agent impl
 
     FOREACH( const AgentQuery::Link &b, *query->GetAbnormalLinks() )
-    {
         abnormal_links.insert( make_pair(query, &b) ); 
-    }    
+        
+    FOREACH( const AgentQuery::Link &b, *query->GetMultiplicityLinks() )
+        multiplicity_links.insert( make_pair(query, &b) ); 
+    
     int i=0;        
     FOREACH( const AgentQuery::Link &b, *query->GetNormalLinks() )
     {
@@ -39,48 +41,6 @@ void AndRuleEngine::CompareLinks( shared_ptr<const AgentQuery> query )
         ASSERT( *px );
         
         DecidedCompare(b.agent, px);   
-        i++;             
-    }
-    i=0;
-    FOREACH( const AgentQuery::Link &b, *query->GetMultiplicityLinks() )
-    {
-        TRACE("Comparing multiplicity link %d\n", i);
-        // Recurse normally
-        // Get x for linked node
-        const TreePtrInterface *px = b.GetPX();
-        ASSERT( *px );
-        
-        if( const TreePtr<SubSequence> px_subsequence = TreePtr<SubSequence>::DynamicCast(*px) )
-        {
-            //FOREACH( const TreePtrInterface &x_element, *px_subcontainer )
-            for( SubSequence::iterator it = px_subsequence->begin(); it != px_subsequence->end(); ++it )
-            {
-                auto & x_element = *it;
-                DecidedCompare(b.agent, &x_element);   
-            }            
-        }
-        else if( const TreePtr<SubSequenceRange> px_subsequence = TreePtr<SubSequenceRange>::DynamicCast(*px) )
-        {
-            //FOREACH( const TreePtrInterface &x_element, *px_subcontainer )
-            for( SubSequenceRange::iterator it = px_subsequence->begin(); it != px_subsequence->end(); ++it )
-            {
-                auto & x_element = *it;
-                DecidedCompare(b.agent, &x_element);   
-            }            
-        }
-        else if( const TreePtr<SubCollection> px_subcollection = TreePtr<SubCollection>::DynamicCast(*px) )
-        {
-            //FOREACH( const TreePtrInterface &x_element, *px_subcontainer )
-            for( SubCollection::iterator it = px_subcollection->begin(); it != px_subcollection->end(); ++it )
-            {
-                auto & x_element = *it;
-                DecidedCompare(b.agent, &x_element);   
-            }            
-        }
-        else
-        {
-            ASSERT(false)("Unrecognised multiplicity x type");
-        }
         i++;             
     }
 }
@@ -185,6 +145,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 		TRACE(*agent)("?=")(**px)(" Comparing links\n");
         CompareLinks( query );
 	}
+    TRACE("OK\n");
 }
 
 
@@ -226,21 +187,42 @@ void AndRuleEngine::Compare( Agent *start_agent,
             {
                 reached.clear();
                 abnormal_links.clear();
+                multiplicity_links.clear();
                 evaluator_queries.clear();
                 DecidedCompare( start_agent, p_start_x );
             }
             
             CouplingMap combined_keys = MapUnion( *master_keys, slave_keys );     
                         
-            // Process the free abnormal links. These may be more than one with the same linked pattern
-            // node and the number can vary depending on x. We wouldn't know which one to key to, so we 
-            // process them in a post-pass which ensures all the couplings have been keyed already.
-            // Examples are the pattern restrictions on Star and Stuff.
+            // Process the free abnormal links.
             for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : abnormal_links )
             {            
                 AndRuleEngine e;
                 e.Configure(my_agents);
                 e.Compare( lp.second->agent, lp.second->GetPX(), &combined_keys );
+            }
+
+            // Process the free multiplicity links.
+            int i=0;
+            for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : multiplicity_links )
+            {            
+                AndRuleEngine e;
+                e.Configure(my_agents);
+
+                const TreePtrInterface *px = lp.second->GetPX();
+                ASSERT( *px );
+                ContainerInterface *xc = dynamic_cast<ContainerInterface *>(px->get());
+                ASSERT(xc)("Multiplicity x must implement ContainerInterface");
+                TRACE("Comparing multiplicity link %d size %d\n", i, xc->size());
+
+                FOREACH( const TreePtrInterface &xe, *xc )
+                {
+                    TRACE("wat\n");
+                    e.Compare( lp.second->agent, &xe, &combined_keys );
+                    TRACE("wut\n");
+                }
+
+                i++;
             }
 
             // Process the evaluator queries. These can match when their children have not matched and
@@ -269,6 +251,7 @@ void AndRuleEngine::Compare( Agent *start_agent,
     }
     
     // By now, we succeeded and slave_keys is the right set of keys
+    TRACE("OK\n");
 }
 
 

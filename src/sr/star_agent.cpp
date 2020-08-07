@@ -5,7 +5,7 @@
 
 using namespace SR;
 
-//#define USE_MULTIPLICITY
+#define USE_MULTIPLICITY
 
 PatternQueryResult StarAgent::PatternQuery() const
 {
@@ -46,7 +46,7 @@ void StarAgent::DecidedQuery( QueryAgentInterface &query,
      
     if( TreePtr<Node> p = GetRestriction() )
     {
-        TRACE("StarAgent pattern\n");
+        TRACE("StarAgent pattern, size is %d\n", xc->size());
         // Apply pattern restriction - will be at least as strict as pre-restriction
 #ifdef USE_MULTIPLICITY
         query.AddMultiplicityLink( AsAgent(p), px );
@@ -57,8 +57,6 @@ void StarAgent::DecidedQuery( QueryAgentInterface &query,
         }
 #endif
     }
- 
-    TRACE("done\n");
 }                       
 
 

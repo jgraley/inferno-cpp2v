@@ -61,6 +61,7 @@ private:
     Set<Agent *> reached; 
     Set< shared_ptr<const AgentQuery> > evaluator_queries;   
     Set< std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > > abnormal_links; 
+    Set< std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > > multiplicity_links;
 };
 
 #endif
