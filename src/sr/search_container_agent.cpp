@@ -103,7 +103,7 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> 
 void StuffAgent::PatternQueryRestrictions( PatternQueryResult &r ) const
 {
     if( recurse_restriction )
-        r.AddAbnormalLink( AsAgent(recurse_restriction) );
+        r.AddMultiplicityLink( AsAgent(recurse_restriction) );
 }
 
 

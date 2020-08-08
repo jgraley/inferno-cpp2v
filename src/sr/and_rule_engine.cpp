@@ -14,8 +14,9 @@
 
 using namespace SR;
 
-void AndRuleEngine::Configure( std::shared_ptr< Set<Agent *> > _my_agents )
+void AndRuleEngine::Configure( Agent *root_agent_, std::shared_ptr< Set<Agent *> > _my_agents )
 {
+    root_agent = root_agent_;
     my_agents = _my_agents;
 }
 
@@ -66,8 +67,8 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
         try 
         {
             AndRuleEngine e;
-            e.Configure(my_agents);
-            e.Compare( b.agent, px, coupling_keys );
+            e.Configure( b.agent, my_agents );
+            e.Compare( px, coupling_keys );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -150,18 +151,17 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 
 
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
-void AndRuleEngine::Compare( Agent *start_agent,
-                             const TreePtrInterface *p_start_x,
-                             const CouplingMap *master_keys_ ) 
+void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
+                             const CouplingMap *master_keys_ )
 {
     INDENT("C");
     ASSERT( p_start_x );
     ASSERT( *p_start_x );
     TRACE("Compare x=")(**p_start_x);
-    TRACE(" pattern=")(*start_agent);
+    TRACE(" pattern=")(*root_agent);
            
     master_keys = master_keys_;    
-    conj.Configure(*my_agents, start_agent);
+    conj.Configure(*my_agents, root_agent);
            
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
@@ -189,7 +189,7 @@ void AndRuleEngine::Compare( Agent *start_agent,
                 abnormal_links.clear();
                 multiplicity_links.clear();
                 evaluator_queries.clear();
-                DecidedCompare( start_agent, p_start_x );
+                DecidedCompare( root_agent, p_start_x );
             }
             
             CouplingMap combined_keys = MapUnion( *master_keys, slave_keys );     
@@ -198,8 +198,8 @@ void AndRuleEngine::Compare( Agent *start_agent,
             for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : abnormal_links )
             {            
                 AndRuleEngine e;
-                e.Configure(my_agents);
-                e.Compare( lp.second->agent, lp.second->GetPX(), &combined_keys );
+                e.Configure( lp.second->agent, my_agents );
+                e.Compare( lp.second->GetPX(), &combined_keys );
             }
 
             // Process the free multiplicity links.
@@ -207,7 +207,7 @@ void AndRuleEngine::Compare( Agent *start_agent,
             for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : multiplicity_links )
             {            
                 AndRuleEngine e;
-                e.Configure(my_agents);
+                e.Configure(lp.second->agent, my_agents);
 
                 const TreePtrInterface *px = lp.second->GetPX();
                 ASSERT( *px );
@@ -217,7 +217,7 @@ void AndRuleEngine::Compare( Agent *start_agent,
 
                 FOREACH( const TreePtrInterface &xe, *xc )
                 {
-                    e.Compare( lp.second->agent, &xe, &combined_keys );
+                    e.Compare( &xe, &combined_keys );
                 }
 
                 i++;
@@ -250,6 +250,15 @@ void AndRuleEngine::Compare( Agent *start_agent,
     
     // By now, we succeeded and slave_keys is the right set of keys
     TRACE("OK\n");
+}
+
+
+// This one operates from root for a stand-alone compare operation and
+// no master keys.
+void AndRuleEngine::Compare( const TreePtrInterface *p_start_x )
+{
+    CouplingMap master_keys;
+    Compare( p_start_x, &master_keys );
 }
 
 

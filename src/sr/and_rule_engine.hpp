@@ -38,21 +38,22 @@ public:
     {
     };
     
-    void Configure( std::shared_ptr< Set<Agent *> > _my_agents);
+    void Configure( Agent *root_agent_, std::shared_ptr< Set<Agent *> > _my_agents);
     
     void CompareLinks( shared_ptr<const AgentQuery> query );
     void CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
 							    const CouplingMap *coupling_keys );
     void DecidedCompare( Agent *agent,
                          const TreePtrInterface *px );
-    void Compare( Agent *start_agent,
-                  const TreePtrInterface *p_start_x,
+    void Compare( const TreePtrInterface *p_start_x,
                   const CouplingMap *master_keys );
-    
+    void Compare( const TreePtrInterface *p_start_x );
+
     const Conjecture &GetConjecture();
     const CouplingMap &GetCouplingKeys();
 
 private:
+    Agent *root_agent;
     std::shared_ptr< Set<Agent *> > my_agents;   
 
     Conjecture conj;

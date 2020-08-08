@@ -47,7 +47,7 @@ void SCREngine::Configure( const CompareReplace *overall_master,
     ConfigCategoriseSubs( master_agents );    
     ConfigConfigureSubs( master_agents );
     
-    and_rule_engine.Configure(my_agents);    
+    and_rule_engine.Configure(root_agent, my_agents);    
 } 
 
 
@@ -173,23 +173,20 @@ void SCREngine::GetGraphInfo( vector<string> *labels,
     }
 }
 
-
 // This one operates from root for a stand-alone compare operation and
 // no master keys.
 void SCREngine::Compare( const TreePtrInterface *p_start_x ) const
 {
-    CouplingMap master_keys;
-    and_rule_engine.Compare( root_agent, p_start_x, &master_keys );
+    and_rule_engine.Compare( p_start_x );
 }
 
 
 // This one operates from root for a stand-alone compare operation (side API)
-void SCREngine::Compare( const TreePtrInterface *p_start_x,
-                         const CouplingMap *master_keys ) const
-{
-	ASSERT( root_agent );
-    and_rule_engine.Compare( root_agent, p_start_x, master_keys );
-}
+//void SCREngine::Compare( const TreePtrInterface *p_start_x,
+//                         const CouplingMap *master_keys ) const
+//{
+//    and_rule_engine.Compare( p_start_x, master_keys );
+//}
 
 
 void SCREngine::KeyReplaceNodes( const Conjecture &conj,
@@ -237,7 +234,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
     INDENT(">");
 
     TRACE("Begin search\n");
-    and_rule_engine.Compare( root_agent, p_root, master_keys );
+    and_rule_engine.Compare( p_root, master_keys );
            
     TRACE("Search successful, now keying replace nodes\n");
     KeyReplaceNodes( and_rule_engine.GetConjecture(), 
