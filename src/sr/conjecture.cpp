@@ -2,9 +2,13 @@
 #include "search_replace.hpp"
 #include "conjecture.hpp"
 
-#define STIFF_LINKS
-#define STIFF_CHECK
+//#define STIFF_LINKS
+//#define STIFF_CHECK
 //#define ROOT_CHECK
+
+#if defined(STIFF_CHECK) && !defined(STIFF_LINKS)
+#error STIFF_LINKS needs STIFF_CHECK undefined
+#endif
 
 namespace SR 
 {
