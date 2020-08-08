@@ -65,7 +65,7 @@ void BuildSequence( vector< shared_ptr<Transformation> > *sequence )
         sequence->push_back( shared_ptr<Transformation>( new SwitchToIfGoto ) );
         sequence->push_back( shared_ptr<Transformation>( new SplitInstanceDeclarations ) );  
         sequence->push_back( shared_ptr<Transformation>( new IfToIfGoto ) ); 
-        // All remaining uncomables at the top level and in SUSP style
+        // All remaining uncombables at the top level and in SUSP style
     }    
     { // Initial treatment of gotos and labels
         sequence->push_back( shared_ptr<Transformation>( new NormaliseConditionalGotos ) );
@@ -168,13 +168,31 @@ int main( int argc, char *argv[] )
     vector< shared_ptr<Transformation> > sequence;
     BuildSequence( &sequence );
     
-    // If a pattern graph was requested, generate it now
-    if( ReadArgs::pattern_graph != -1 )
+    if( !ReadArgs::pattern_graph_name.empty() )
     {
-        ASSERT( ReadArgs::pattern_graph >= 0 )("Negative step number is silly\n");
-        ASSERT( ReadArgs::pattern_graph < sequence.size() )("There are only %d steps at present\n", sequence.size() );
+        ReadArgs::pattern_graph_index = 0;
+        FOREACH( shared_ptr<Transformation> t, sequence )
+        {
+            if( t->GetName() == ReadArgs::pattern_graph_name )
+                break;
+            ReadArgs::pattern_graph_index++;
+        }
+        if( ReadArgs::pattern_graph_index == sequence.size() )
+        {
+            fprintf(stderr, "Cannot find step named %s. Known step names:\n", ReadArgs::pattern_graph_name.c_str() );  
+            FOREACH( shared_ptr<Transformation> t, sequence )
+                fprintf(stderr, "%s\n", t->GetName().c_str() );
+            ASSERT(false);
+        }
+    }
+    
+    // If a pattern graph was requested, generate it now
+    if( ReadArgs::pattern_graph_index != -1 )
+    {
+        ASSERT( ReadArgs::pattern_graph_index >= 0 )("Negative step number is silly\n");
+        ASSERT( ReadArgs::pattern_graph_index < sequence.size() )("There are only %d steps at present\n", sequence.size() );
         Graph g( ReadArgs::outfile );
-        g( sequence[ReadArgs::pattern_graph].get() );
+        g( sequence[ReadArgs::pattern_graph_index].get() );
     }        
     
     // If there was no input program then there's nothing more to do

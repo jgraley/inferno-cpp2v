@@ -8,15 +8,16 @@
 
 using namespace std;
 
-std::string ReadArgs::exename;
-std::string ReadArgs::infile;
-std::string ReadArgs::outfile;
+string ReadArgs::exename;
+string ReadArgs::infile;
+string ReadArgs::outfile;
 bool ReadArgs::intermediate_graph = false;
-int ReadArgs::pattern_graph = -1; // -1 disables
+int ReadArgs::pattern_graph_index = -1; // -1 disables
+string ReadArgs::pattern_graph_name = ""; // "" disables
 bool ReadArgs::trace = false;
 bool ReadArgs::trace_hits = false;
 bool ReadArgs::trace_quiet = false;
-std::string ReadArgs::hits_format;
+string ReadArgs::hits_format;
 bool ReadArgs::selftest = false;
 int ReadArgs::runonlystep = 0; 
 bool ReadArgs::runonlyenable = false; 
@@ -44,7 +45,7 @@ void ReadArgs::Usage()
                     "            Note: -q<n> makes -t and -r operate only on step n.\n"                
                     "-n<n>       Only run step <n>. User must ensure input program meets any restrictions of the step.\n"                    
 	                "-gi         Generate Graphviz dot file for output or intermediate if used with -q.\n"
-	                "-gp<n>      Generate dot file for specified transformation step n.\n"
+	                "-gp<n>      Generate dot file for specified transformation step n or by name.\n"
 	                "-gd         Generate dot files for documentation; -o specifies directory.\n"
                     "-rn<n>      Stop search and replace after n repetitions and do not generate an error.\n"
                     "-re<n>      Stop search and replace after n repetitions and do generate an error.\n"
@@ -55,18 +56,18 @@ void ReadArgs::Usage()
     exit(1);
 }
 
-std::string ReadArgs::GetArg( int al )
+string ReadArgs::GetArg( int al )
 {
     if( strlen(argv[curarg]) > al+1 )
     {
-        return std::string( argv[curarg]+al+1 );
+        return string( argv[curarg]+al+1 );
     }
     else
     {
         curarg++;
         if(curarg >= argc)
             Usage();
-        return std::string( argv[curarg] );
+        return string( argv[curarg] );
     }    
 }
 
@@ -77,7 +78,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
 	exename = argv[0];
     for( curarg=1; curarg<argc; curarg++ )
     {
-    	if( argv[curarg][0] != '-' || ((std::string)(argv[curarg])).size()<2 )
+    	if( argv[curarg][0] != '-' || ((string)(argv[curarg])).size()<2 )
     		Usage();
 
         char option = argv[curarg][1];
@@ -111,7 +112,14 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             if( option2=='i' )
                 intermediate_graph = true;
             else if( option2=='p' )
-                pattern_graph = strtoul( GetArg(2).c_str(), NULL, 10 );
+            {
+                string s = GetArg(2);
+                int v = strtoul( s.c_str(), NULL, 10 );
+                if( v==0 && s!="0" ) // Did strtoul fail?
+                    pattern_graph_name = s;
+                else
+                    pattern_graph_index = v;
+            }
             else if( option2=='d' )
                 documentation_graphs = true;
             else
@@ -162,8 +170,9 @@ ReadArgs::ReadArgs( int ac, char *av[] )
     // infile or selftest is always required
     if( infile.empty() && 
         !selftest && 
-        pattern_graph==-1 && 
-        !(trace_hits && hits_format==std::string("?") ) &&
+        pattern_graph_index==-1 && 
+        pattern_graph_name=="" && 
+        !(trace_hits && hits_format==string("?") ) &&
         !documentation_graphs )
         Usage();
 }
