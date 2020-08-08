@@ -41,6 +41,8 @@ shared_ptr<ContainerInterface> AgentCommon::GetVisibleChildren() const
    typedef ContainerFromIterator< FlattenNode_iterator, const Node * > FlattenNodePtr;
    return shared_ptr<ContainerInterface>( new FlattenNodePtr(this) );
     // Note: a pattern query should be just as good...
+    // Incorrect! This gets the replace-side stuff as well; PatternQuery()
+    // is only for search.
 }
 
     

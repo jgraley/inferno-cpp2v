@@ -14,10 +14,25 @@
 
 using namespace SR;
 
-void AndRuleEngine::Configure( Agent *root_agent_, std::shared_ptr< Set<Agent *> > _my_agents )
+void AndRuleEngine::Configure( Agent *root_agent_, std::shared_ptr< Set<Agent *> > scr_agents_ )
 {
     root_agent = root_agent_;
-    my_agents = _my_agents;
+    scr_agents = scr_agents_;
+
+    Set<Agent *> normal_agents;
+    ConfigPopulateNormalAgents( &normal_agents, root_agent );
+    
+    my_agents = make_shared< Set<Agent *> >();
+    *my_agents = SetIntersection( *scr_agents, normal_agents );
+}
+
+
+void AndRuleEngine::ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, Agent *current_agent )
+{
+    normal_agents->insert(current_agent);
+    PatternQueryResult query = current_agent->PatternQuery();
+    FOREACH( const PatternQueryResult::Link &b, *query.GetNormalLinks() )
+        ConfigPopulateNormalAgents( normal_agents, b.agent );
 }
 
 
@@ -67,7 +82,7 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
         try 
         {
             AndRuleEngine e;
-            e.Configure( b.agent, my_agents );
+            e.Configure( b.agent, scr_agents );
             e.Compare( px, coupling_keys );
             compare_results.push_back( true );
         }
@@ -198,7 +213,7 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
             for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : abnormal_links )
             {            
                 AndRuleEngine e;
-                e.Configure( lp.second->agent, my_agents );
+                e.Configure( lp.second->agent, scr_agents );
                 e.Compare( lp.second->GetPX(), &combined_keys );
             }
 
@@ -207,7 +222,7 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
             for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : multiplicity_links )
             {            
                 AndRuleEngine e;
-                e.Configure(lp.second->agent, my_agents);
+                e.Configure(lp.second->agent, scr_agents);
 
                 const TreePtrInterface *px = lp.second->GetPX();
                 ASSERT( *px );
@@ -272,3 +287,4 @@ const CouplingMap &AndRuleEngine::GetCouplingKeys()
 {
     return slave_keys;
 }
+

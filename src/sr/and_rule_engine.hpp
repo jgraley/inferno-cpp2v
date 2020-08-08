@@ -38,8 +38,9 @@ public:
     {
     };
     
-    void Configure( Agent *root_agent_, std::shared_ptr< Set<Agent *> > _my_agents);
-    
+    void Configure( Agent *root_agent, std::shared_ptr< Set<Agent *> > scr_agents);
+    void ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, Agent *current_agent );
+
     void CompareLinks( shared_ptr<const AgentQuery> query );
     void CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
 							    const CouplingMap *coupling_keys );
@@ -54,6 +55,7 @@ public:
 
 private:
     Agent *root_agent;
+    std::shared_ptr< Set<Agent *> > scr_agents;   
     std::shared_ptr< Set<Agent *> > my_agents;   
 
     Conjecture conj;
