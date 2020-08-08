@@ -2,8 +2,8 @@
 #include "search_replace.hpp"
 #include "conjecture.hpp"
 
-//#define STIFF_LINKS
-//#define STIFF_CHECK
+#define STIFF_LINKS
+#define STIFF_CHECK
 //#define ROOT_CHECK
 
 namespace SR 
