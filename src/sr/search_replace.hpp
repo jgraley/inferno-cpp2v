@@ -53,6 +53,7 @@ public:
     {
         scr_engine.SetStopAfter( ssa, d );
     }
+    SCREngine *GetRootEngine() { return &scr_engine; }
 private:
     SCREngine scr_engine;
 };

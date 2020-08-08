@@ -66,16 +66,15 @@ string Graph::MakeGraphTx(Transformation *root)
         FOREACH( shared_ptr<Transformation> t, *tv )
             s = MakeGraphTx( t.get() ) + s; // seem to have to pre-pend to get them appearing in the right order
     }
-    else if( SCREngine *e = dynamic_cast<SCREngine *>(root) )
+    else if( CompareReplace *cr = dynamic_cast<CompareReplace *>(root) )
     {
         unique_filter.Reset();
-	    s += UniqueWalk( e, Id(root), false );
+	    s += UniqueWalk( cr->GetRootEngine(), Id(root), false );
         unique_filter.Reset();
-	    s += UniqueWalk( e, Id(root), true );
+	    s += UniqueWalk( cr->GetRootEngine(), Id(root), true );
 	}
 	else
     {
-        ASSERT(false)(*root);
         ASSERTFAIL("Unknown kind of transformation in graph plotter");
     }
 	return s;
