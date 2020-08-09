@@ -2,14 +2,6 @@
 #include "search_replace.hpp"
 #include "conjecture.hpp"
 
-//#define STIFF_LINKS
-#define STIFF_CHECK
-//#define ROOT_CHECK
-
-#if defined(STIFF_CHECK) && defined(STIFF_LINKS)
-#error STIFF_LINKS needs STIFF_CHECK undefined
-#endif
-
 namespace SR 
 {
 
@@ -26,13 +18,6 @@ Conjecture::~Conjecture()
 
 void Conjecture::Configure(Set<Agent *> my_agents, Agent *root_agent)
 {
-#ifdef ROOT_CHECK
-    // Not a fair check: eg in CleanupDuplicateLabels there is
-    // an Evaluator agent (the |) which goes directly to coupled
-    // identifiers (the slave S&R is supposed to hit on both 
-    // identifiers).
-    ASSERT( my_agents.IsExist( root_agent ) );
-#endif
     FOREACH( Agent *a, my_agents )
     {
 		AgentRecord record;
@@ -40,23 +25,10 @@ void Conjecture::Configure(Set<Agent *> my_agents, Agent *root_agent)
         record.previous_agent = (Agent *)0xFEEDF00D;
         record.linked = false;
         record.query = make_shared<AgentQuery>();        
-        record.story = 0;
 		agent_records[a] = record;
 	}        
-#ifdef ROOT_CHECK
-    ASSERT(agent_records.count(root_agent) > 0);
-#endif
     last_agent = nullptr;
     RecordWalk( root_agent );
-#ifndef STIFF_LINKS
-    // Undo the linking
-    FOREACH( Agent *a, my_agents )
-    {
-        AgentRecord *record = &agent_records.at(a);
-        record->linked = false;
-    }
-    last_agent = nullptr;
-#endif
     configured = true;
 }
 
@@ -68,21 +40,18 @@ void Conjecture::RecordWalk( Agent *agent )
 
     AgentRecord *record = &agent_records.at(agent);
 
-    record->story += 0x1;
     if( record->linked )
         return; // already reached: probably a coupling
         
     record->previous_agent = last_agent;
     last_agent = agent;
     record->linked = true;
-    record->story += 0x100;
 
     PatternQueryResult r = agent->PatternQuery();
     
     // Makes sense, but we won't match the old algo with this
     //if( r.GetEvaluator() )
     //    return; // we don't process evaluators
-    record->story += 0x10000;
     
     for( const PatternQueryResult::Link &l : *r.GetNormalLinks() )
         RecordWalk( l.agent );
@@ -172,20 +141,7 @@ shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
     ASSERT( agent_records.IsExist(agent) );
  	AgentRecord &record = agent_records[agent];
         
-#ifndef STIFF_LINKS
-    if( !record.linked )
-    {
-#ifdef STIFF_CHECK
-        ASSERT(record.previous_agent == last_agent);
-#endif
-        record.previous_agent = last_agent;
-        last_agent = agent;
-        record.linked = true;
-    }
-#endif
-    
     shared_ptr<AgentQuery> query = agent_records[agent].query;
-    //FillMissingChoicesWithBegin(query);
     return query;
 }
 
