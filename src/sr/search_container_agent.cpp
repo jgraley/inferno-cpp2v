@@ -11,6 +11,10 @@ PatternQueryResult SearchContainerAgent::PatternQuery() const
 {
     PatternQueryResult r;
 	r.AddNormalLink( AsAgent(terminus) );
+    
+    // Allow subclasses to further restrict
+    PatternQueryRestrictions( r );
+    
     return r;
 }
 

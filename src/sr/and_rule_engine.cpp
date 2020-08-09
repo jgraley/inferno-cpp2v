@@ -21,16 +21,33 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
     Set<Agent *> normal_agents;
     ConfigPopulateNormalAgents( &normal_agents, root_agent );    
     my_agents = SetDifference( normal_agents, master_agents );       
-    surrounding_agents = SetUnion( master_agents, my_agents ); 
+    Set<Agent *> surrounding_agents = SetUnion( master_agents, my_agents ); 
+        
+    for( std::pair<Agent * const, AndRuleEngine> &pae : my_abnormal_engines )
+        pae.second.Configure( pae.first, surrounding_agents );
+        
+    for( std::pair<Agent * const, AndRuleEngine> &pae : my_multiplicity_engines )
+        pae.second.Configure( pae.first, surrounding_agents );
 }
 
 
 void AndRuleEngine::ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, Agent *current_agent )
 {
     normal_agents->insert(current_agent);
+    
     PatternQueryResult query = current_agent->PatternQuery();
     FOREACH( const PatternQueryResult::Link &b, *query.GetNormalLinks() )
         ConfigPopulateNormalAgents( normal_agents, b.agent );
+        
+    FOREACH( const PatternQueryResult::Link &b, *query.GetAbnormalLinks() )
+        my_abnormal_engines.emplace(std::piecewise_construct,
+                                 std::forward_as_tuple(b.agent),
+                                 std::forward_as_tuple());    
+
+    FOREACH( const PatternQueryResult::Link &b, *query.GetMultiplicityLinks() )
+        my_multiplicity_engines.emplace(std::piecewise_construct,
+                                     std::forward_as_tuple(b.agent),
+                                     std::forward_as_tuple());
 }
 
 
@@ -79,9 +96,7 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
                                  
         try 
         {
-            AndRuleEngine e;
-            e.Configure( b.agent, surrounding_agents );
-            e.Compare( px, coupling_keys );
+            my_abnormal_engines.at(b.agent).Compare( px, coupling_keys );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -210,24 +225,21 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
             // Process the free abnormal links.
             for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : abnormal_links )
             {            
-                AndRuleEngine e;
-                e.Configure( lp.second->agent, surrounding_agents );
-                e.Compare( lp.second->GetPX(), &combined_keys );
+                my_abnormal_engines.at(lp.second->agent).Compare( lp.second->GetPX(), &combined_keys );
             }
 
             // Process the free multiplicity links.
             int i=0;
             for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : multiplicity_links )
             {            
-                AndRuleEngine e;
-                e.Configure(lp.second->agent, surrounding_agents);
+                AndRuleEngine &e = my_multiplicity_engines.at(lp.second->agent);
 
                 const TreePtrInterface *px = lp.second->GetPX();
                 ASSERT( *px );
                 ContainerInterface *xc = dynamic_cast<ContainerInterface *>(px->get());
                 ASSERT(xc)("Multiplicity x must implement ContainerInterface");
                 TRACE("Comparing multiplicity link %d size %d\n", i, xc->size());
-
+                
                 FOREACH( const TreePtrInterface &xe, *xc )
                 {
                     e.Compare( &xe, &combined_keys );

@@ -27,7 +27,7 @@ public:
                              QueryCommonInterface::Choices choices ); 
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     virtual shared_ptr<ContainerInterface> GetContainerInterface( TreePtr<Node> x ) const = 0;
-    virtual void PatternQueryRestrictions() const {};
+    virtual void PatternQueryRestrictions( PatternQueryResult &r ) const {};
     virtual void DecidedQueryRestrictions( QueryAgentInterface &query, ContainerInterface::iterator thistime ) const {};
 
     TreePtr<Node> terminus; // A node somewhere under Stuff, that matches normally, truncating the subtree

@@ -56,8 +56,9 @@ public:
 private:
     Agent *root_agent;
     Set<Agent *> my_agents;   
-    Set<Agent *> surrounding_agents;
-    
+    std::map< Agent *, AndRuleEngine > my_abnormal_engines;
+    std::map< Agent *, AndRuleEngine > my_multiplicity_engines;
+        
     Conjecture conj;
     CouplingMap slave_keys; 
     const CouplingMap *master_keys;
