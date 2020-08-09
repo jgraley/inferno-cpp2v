@@ -38,7 +38,7 @@ public:
     {
     };
     
-    void Configure( Agent *root_agent, std::shared_ptr< Set<Agent *> > scr_agents);
+    void Configure( Agent *root_agent, const Set<Agent *> &master_agents);
     void ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, Agent *current_agent );
 
     void CompareLinks( shared_ptr<const AgentQuery> query );
@@ -57,7 +57,8 @@ private:
     Agent *root_agent;
     std::shared_ptr< Set<Agent *> > scr_agents;   
     std::shared_ptr< Set<Agent *> > my_agents;   
-
+    Set<Agent *> surrounding_agents;
+    
     Conjecture conj;
     CouplingMap slave_keys; 
     const CouplingMap *master_keys;

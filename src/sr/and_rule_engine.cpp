@@ -14,16 +14,17 @@
 
 using namespace SR;
 
-void AndRuleEngine::Configure( Agent *root_agent_, std::shared_ptr< Set<Agent *> > scr_agents_ )
+void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_agents )
 {
     root_agent = root_agent_;
-    scr_agents = scr_agents_;
 
     Set<Agent *> normal_agents;
     ConfigPopulateNormalAgents( &normal_agents, root_agent );
     
     my_agents = make_shared< Set<Agent *> >();
-    *my_agents = SetIntersection( *scr_agents, normal_agents );
+    *my_agents = SetDifference( normal_agents, master_agents );   
+    
+    surrounding_agents = SetUnion( master_agents, *my_agents ); 
 }
 
 
@@ -82,7 +83,7 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
         try 
         {
             AndRuleEngine e;
-            e.Configure( b.agent, scr_agents );
+            e.Configure( b.agent, surrounding_agents );
             e.Compare( px, coupling_keys );
             compare_results.push_back( true );
         }
@@ -213,7 +214,7 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
             for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : abnormal_links )
             {            
                 AndRuleEngine e;
-                e.Configure( lp.second->agent, scr_agents );
+                e.Configure( lp.second->agent, surrounding_agents );
                 e.Compare( lp.second->GetPX(), &combined_keys );
             }
 
@@ -222,7 +223,7 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
             for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : multiplicity_links )
             {            
                 AndRuleEngine e;
-                e.Configure(lp.second->agent, scr_agents);
+                e.Configure(lp.second->agent, surrounding_agents);
 
                 const TreePtrInterface *px = lp.second->GetPX();
                 ASSERT( *px );

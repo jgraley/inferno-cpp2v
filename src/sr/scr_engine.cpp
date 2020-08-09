@@ -47,7 +47,7 @@ void SCREngine::Configure( const CompareReplace *overall_master,
     ConfigCategoriseSubs( master_agents );    
     ConfigConfigureSubs( master_agents );
     
-    and_rule_engine.Configure(root_agent, my_agents);    
+    and_rule_engine.Configure(root_agent, master_agents);    
 } 
 
 
