@@ -19,12 +19,9 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
     root_agent = root_agent_;
 
     Set<Agent *> normal_agents;
-    ConfigPopulateNormalAgents( &normal_agents, root_agent );
-    
-    my_agents = make_shared< Set<Agent *> >();
-    *my_agents = SetDifference( normal_agents, master_agents );   
-    
-    surrounding_agents = SetUnion( master_agents, *my_agents ); 
+    ConfigPopulateNormalAgents( &normal_agents, root_agent );    
+    my_agents = SetDifference( normal_agents, master_agents );       
+    surrounding_agents = SetUnion( master_agents, my_agents ); 
 }
 
 
@@ -177,7 +174,7 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
     TRACE(" pattern=")(*root_agent);
            
     master_keys = master_keys_;    
-    conj.Configure(*my_agents, root_agent);
+    conj.Configure(my_agents, root_agent);
            
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.

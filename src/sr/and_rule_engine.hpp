@@ -55,8 +55,7 @@ public:
 
 private:
     Agent *root_agent;
-    std::shared_ptr< Set<Agent *> > scr_agents;   
-    std::shared_ptr< Set<Agent *> > my_agents;   
+    Set<Agent *> my_agents;   
     Set<Agent *> surrounding_agents;
     
     Conjecture conj;
