@@ -50,8 +50,8 @@ void Conjecture::RecordWalk( Agent *agent )
     PatternQueryResult r = agent->PatternQuery();
     
     // Makes sense, but we won't match the old algo with this
-    //if( r.GetEvaluator() )
-    //    return; // we don't process evaluators
+    if( r.GetEvaluator() )
+        return; // we don't process evaluators
     
     for( const PatternQueryResult::Link &l : *r.GetNormalLinks() )
         RecordWalk( l.agent );

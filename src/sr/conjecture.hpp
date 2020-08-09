@@ -25,7 +25,6 @@ public:
         shared_ptr<AgentQuery> query;
  		Agent *previous_agent;
         bool linked;
-        int story;
 	};
 
 public:
