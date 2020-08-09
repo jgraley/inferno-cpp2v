@@ -70,23 +70,33 @@ bool Conjecture::IncrementAgent( shared_ptr<AgentQuery> query )
     FillMissingChoicesWithBegin(query);
     
     const auto &back_decision = query->GetDecisions()->back();
-    ContainerInterface::iterator back_choice = query->GetChoices()->back();
+    QueryCommonInterface::Choice back_choice = query->GetChoices()->back();
     
     // Inclusive case - we let the choice go to end but we won't go any further
-    if( back_decision.inclusive && back_choice == back_decision.end )
+    if( back_choice.mode==QueryCommonInterface::Choice::ITER && back_decision.inclusive && back_choice.iter == back_decision.end )
     {
         query->InvalidateBack();
         return IncrementAgent( query );
 	}
 
-	if( back_choice != back_decision.end ) 
+	if( back_choice.mode==QueryCommonInterface::Choice::BEGIN || back_choice.iter != back_decision.end ) 
 	{
-        ++back_choice; 
+        switch( back_choice.mode )
+        {
+            case QueryCommonInterface::Choice::ITER:
+                ++back_choice.iter; 
+                break;
+            
+            case QueryCommonInterface::Choice::BEGIN:
+                back_choice.iter = back_decision.begin;
+                back_choice.mode = QueryCommonInterface::Choice::ITER;
+                break;
+        }        
         query->SetBackChoice( back_choice );
     }
 		
     // Exclusive case - we don't let the choice be end
-    if( !back_decision.inclusive && back_choice == back_decision.end )
+    if( back_choice.mode==QueryCommonInterface::Choice::ITER && !back_decision.inclusive && back_choice.iter == back_decision.end )
     {
         query->InvalidateBack();
         return IncrementAgent( query );
@@ -138,11 +148,7 @@ AgentQuery::Choices Conjecture::GetChoices(Agent *agent) const
 shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
 {
     ASSERT(configured);
-    ASSERT( agent_records.IsExist(agent) );
- 	AgentRecord &record = agent_records[agent];
-        
-    shared_ptr<AgentQuery> query = agent_records[agent].query;
-    return query;
+    return agent_records.at(agent).query;
 }
 
 
@@ -152,8 +158,12 @@ void Conjecture::FillMissingChoicesWithBegin( shared_ptr<AgentQuery> query )
        
     while( query->GetChoices()->size() < query->GetDecisions()->size() )
     {
-        int index = query->GetChoices()->size();
-        query->PushBackChoice( (*query->GetDecisions())[index].begin );
+        QueryCommonInterface::Choice new_choice;
+        new_choice.mode = QueryCommonInterface::Choice::BEGIN;
+        query->PushBackChoice( new_choice );
+        
+        //int index = query->GetChoices()->size();
+        //query->PushBackChoice( (*query->GetDecisions())[index].begin );
     }
     
     ASSERT( query->GetChoices()->size()==query->GetDecisions()->size() )

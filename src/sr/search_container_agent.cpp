@@ -57,7 +57,8 @@ void SearchContainerAgent::KeyReplace( const TreePtrInterface &x,
                                        QueryCommonInterface::Choices choices )
 {
     ASSERT( choices.size() == 1 )("Expected a single choice, choices.size()=%d", choices.size());
-    ContainerInterface::iterator thistime = choices.front();
+    ASSERT( choices.front().mode == QueryCommonInterface::Choice::ITER );
+    ContainerInterface::iterator thistime = choices.front().iter;
     terminus_key = *thistime;
     DoKey(x);
 }

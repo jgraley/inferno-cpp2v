@@ -67,6 +67,16 @@ public:
 		}
     };
     
+    struct Choice
+    {
+        enum
+        {
+            BEGIN,
+            ITER
+        } mode;
+        ContainerInterface::iterator iter;
+    };
+    
     struct Link 
     {
         const TreePtrInterface *GetPX() const
@@ -85,7 +95,7 @@ public:
     
     // There is a "random access" in Conjecture::FillMissingChoicesWithBegin()
     typedef vector<Range> Ranges;
-    typedef vector<ContainerInterface::iterator> Choices; 
+    typedef vector<Choice> Choices; 
     typedef list<Link> Links;
     
     virtual const Choices *GetChoices() const = 0;
@@ -128,8 +138,9 @@ public:
     
     virtual const Ranges *GetDecisions() const = 0;
     virtual void InvalidateBack() = 0;
-    virtual void SetBackChoice( ContainerInterface::iterator newc ) = 0;
-    virtual void PushBackChoice( ContainerInterface::iterator newc ) = 0;    
+    virtual void SetBackChoice( Choice newc ) = 0;
+    virtual void PushBackChoice( Choice newc ) = 0;    
+    virtual void EnsureChoicesHaveIterators() = 0;
 };
 
 
@@ -172,8 +183,9 @@ public:
     const Choices *GetChoices() const { return &choices; }
     const Ranges *GetDecisions() const { return &decisions; }
     void InvalidateBack();
-    void SetBackChoice( ContainerInterface::iterator newc );
-    void PushBackChoice( ContainerInterface::iterator newc );    
+    void SetBackChoice( Choice newc );
+    void PushBackChoice( Choice newc );    
+    void EnsureChoicesHaveIterators();
     
 private:
     shared_ptr<BooleanEvaluator> evaluator;

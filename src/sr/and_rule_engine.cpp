@@ -157,7 +157,8 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     // in the case of pattern restriction on Star, Stuff. See #60 
 #endif
                         
-    (void)conj.FillMissingChoicesWithBegin(query);
+    conj.FillMissingChoicesWithBegin(query);
+    query->EnsureChoicesHaveIterators();
 
     // Remember the coupling before recursing, as we can hit the same node 
     // (eg identifier) and we need to have coupled it. 

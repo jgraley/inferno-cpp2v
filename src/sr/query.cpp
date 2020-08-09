@@ -167,15 +167,29 @@ void AgentQuery::InvalidateBack()
 }
 
 
-void AgentQuery::SetBackChoice( ContainerInterface::iterator newc )
+void AgentQuery::SetBackChoice( Choice newc )
 {
     choices.back() = newc;
 }
 
 
-void AgentQuery::PushBackChoice( ContainerInterface::iterator newc )
+void AgentQuery::PushBackChoice( Choice newc )
 {
     choices.push_back(newc);
+}
+
+
+void AgentQuery::EnsureChoicesHaveIterators()
+{
+    for( int i=0; i<choices.size(); i++ )
+    {
+        QueryCommonInterface::Choice &choice = choices[i];
+        if( choice.mode == QueryCommonInterface::Choice::BEGIN )
+        {        
+            choice.mode = QueryCommonInterface::Choice::ITER;
+            choice.iter = decisions[i].begin;
+        }
+    }
 }
 
 
@@ -194,7 +208,16 @@ ContainerInterface::iterator AgentQuery::AddDecision( const Range &r )
     else
     {
         ASSERT( next_choice != choices.end() );
-        it = *next_choice; // Use the choice that was given to us
+        switch( next_choice->mode )
+        {
+            case Choice::ITER:
+                it = next_choice->iter; // Use the iterator that was given to us
+                break;
+            
+            case Choice::BEGIN:
+                it = r.begin; // we have been asked to use begin
+                break;
+        }
         ASSERT( r.inclusive || it != r.end )("A choice can only be end if the decision is inclusive");
         ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
         *next_decision = r; // overwrite TODO they should be identical!
@@ -253,7 +276,17 @@ const Conjecture::Range &AgentQuery::GetNextOldDecision()
 ContainerInterface::iterator AgentQuery::AddNextOldDecision()
 {
     ASSERT( next_choice != choices.end() );
-    ContainerInterface::iterator it = *next_choice; // Use the choice that was given to us
+    ContainerInterface::iterator it;
+    switch( next_choice->mode )
+    {
+        case Choice::ITER:
+            it = next_choice->iter; // Use the iterator that was given to us
+            break;
+        
+        case Choice::BEGIN:
+            it = next_decision->begin; // we have been asked to use begin
+            break;
+    }
     ++next_decision; 
     ++next_choice;
     return it;
