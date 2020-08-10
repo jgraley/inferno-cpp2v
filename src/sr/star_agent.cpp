@@ -11,7 +11,7 @@ PatternQueryResult StarAgent::PatternQuery() const
     PatternQueryResult r;
     if( TreePtr<Node> p = GetRestriction() )
     {
-        r.AddMultiplicityLink( AsAgent(p) );
+        r.RegisterMultiplicityLink( AsAgent(p) );
     }
 
     return r;
@@ -43,7 +43,7 @@ void StarAgent::DecidedQuery( QueryAgentInterface &query,
     {
         TRACE("StarAgent pattern, size is %d\n", xc->size());
         // Apply pattern restriction - will be at least as strict as pre-restriction
-        query.AddMultiplicityLink( AsAgent(p), px );
+        query.RegisterMultiplicityLink( AsAgent(p), px );
     }
 }                       
 

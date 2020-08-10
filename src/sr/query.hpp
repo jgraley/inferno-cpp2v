@@ -34,10 +34,10 @@ public:
         multiplicity_links.clear();
         evaluator = shared_ptr<BooleanEvaluator>();
     }
-    void AddNormalLink( Agent *a );
-    void AddAbnormalLink( Agent *a );
-    void AddMultiplicityLink( Agent *a );
-    void AddEvaluator( shared_ptr<BooleanEvaluator> e );
+    void RegisterNormalLink( Agent *a );
+    void RegisterAbnormalLink( Agent *a );
+    void RegisterMultiplicityLink( Agent *a );
+    void RegisterEvaluator( shared_ptr<BooleanEvaluator> e );
     
     const Links *GetNormalLinks() const { return &normal_links; } // pointer returned because the links contain the local links
     const Links *GetAbnormalLinks() const { return &abnormal_links; } // pointer returned because the links contain the local links
@@ -107,24 +107,24 @@ class QueryAgentInterface : virtual public QueryCommonInterface
 public:
     virtual void Reset() = 0;
 
-    virtual ContainerInterface::iterator AddDecision( const Range &d ) = 0; 
-    virtual ContainerInterface::iterator AddDecision( ContainerInterface::iterator begin,
-                                                      ContainerInterface::iterator end,
-                                                      bool inclusive,
-                                                      std::shared_ptr<ContainerInterface> container=nullptr ) = 0; 
-    virtual ContainerInterface::iterator AddDecision( std::shared_ptr<ContainerInterface> container, bool inclusive ) = 0; 
-    //virtual ContainerInterface::iterator AddDecision( const ContainerInterface &container, bool inclusive );
+    virtual ContainerInterface::iterator RegisterDecision( const Range &d ) = 0; 
+    virtual ContainerInterface::iterator RegisterDecision( ContainerInterface::iterator begin,
+                                                           ContainerInterface::iterator end,
+                                                           bool inclusive,
+                                                           std::shared_ptr<ContainerInterface> container=nullptr ) = 0; 
+    virtual ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive ) = 0; 
+    //virtual ContainerInterface::iterator RegisterDecision( const ContainerInterface &container, bool inclusive );
     virtual bool IsAlreadyGotNextOldDecision() = 0; 
     virtual const Range &GetNextOldDecision() = 0; 
-    virtual ContainerInterface::iterator AddNextOldDecision() = 0; 
+    virtual ContainerInterface::iterator RegisterNextOldDecision() = 0; 
 
-    virtual void AddNormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
-    virtual void AddAbnormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
-    virtual void AddMultiplicityLink( Agent *a, const TreePtrInterface *px ) = 0; 
-    virtual void AddLocalNormalLink( Agent *a, TreePtr<Node> x ) = 0; 
-    virtual void AddLocalAbnormalLink( Agent *a, TreePtr<Node> x ) = 0; 
-    virtual void AddLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x ) = 0; 
-    virtual void AddEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
+    virtual void RegisterNormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
+    virtual void RegisterAbnormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
+    virtual void RegisterMultiplicityLink( Agent *a, const TreePtrInterface *px ) = 0; 
+    virtual void RegisterLocalNormalLink( Agent *a, TreePtr<Node> x ) = 0; 
+    virtual void RegisterLocalAbnormalLink( Agent *a, TreePtr<Node> x ) = 0; 
+    virtual void RegisterLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x ) = 0; 
+    virtual void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
 };
 
 
@@ -155,25 +155,24 @@ public:
     }
     void Reset();
 
-    ContainerInterface::iterator AddDecision( const Range &d );
-    ContainerInterface::iterator AddDecision( ContainerInterface::iterator begin,
-                                              ContainerInterface::iterator end,
-                                              bool inclusive,
-                                              std::shared_ptr<ContainerInterface> container=nullptr );
-    ContainerInterface::iterator AddDecision( std::shared_ptr<ContainerInterface> container, bool inclusive );
-    //ContainerInterface::iterator AddDecision( const ContainerInterface &container, bool inclusive );
+    ContainerInterface::iterator RegisterDecision( const Range &d );
+    ContainerInterface::iterator RegisterDecision( ContainerInterface::iterator begin,
+                                                   ContainerInterface::iterator end,
+                                                   bool inclusive,
+                                                   std::shared_ptr<ContainerInterface> container=nullptr );
+    ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive );
+    //ContainerInterface::iterator RegisterDecision( const ContainerInterface &container, bool inclusive );
     bool IsAlreadyGotNextOldDecision();
     const Range &GetNextOldDecision();
-    ContainerInterface::iterator AddNextOldDecision();
+    ContainerInterface::iterator RegisterNextOldDecision();
 
-    void AddNormalLink( Agent *a, const TreePtrInterface *px ); 
-    void AddAbnormalLink( Agent *a, const TreePtrInterface *px ); 
-    void AddMultiplicityLink( Agent *a, const TreePtrInterface *px ); 
-    void AddLocalNormalLink( Agent *a, TreePtr<Node> x ); 
-    void AddLocalAbnormalLink( Agent *a, TreePtr<Node> x ); 
-    void AddLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x ); 
-    void AddEvaluator( shared_ptr<BooleanEvaluator> e ); 
-    void AddLocalMismatch();
+    void RegisterNormalLink( Agent *a, const TreePtrInterface *px ); 
+    void RegisterAbnormalLink( Agent *a, const TreePtrInterface *px ); 
+    void RegisterMultiplicityLink( Agent *a, const TreePtrInterface *px ); 
+    void RegisterLocalNormalLink( Agent *a, TreePtr<Node> x ); 
+    void RegisterLocalAbnormalLink( Agent *a, TreePtr<Node> x ); 
+    void RegisterLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x ); 
+    void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ); 
                                                   
     const Links *GetNormalLinks() const { return &normal_links; } // pointer returned because the links contain the local links
     const Links *GetAbnormalLinks() const { return &abnormal_links; } // pointer returned because the links contain the local links

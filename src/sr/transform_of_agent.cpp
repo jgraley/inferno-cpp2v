@@ -5,7 +5,7 @@ using namespace SR;
 PatternQueryResult TransformOfAgent::PatternQuery() const
 {
     PatternQueryResult r;
-	r.AddNormalLink( AsAgent(pattern) );
+	r.RegisterNormalLink( AsAgent(pattern) );
     return r;
 }
 
@@ -22,7 +22,7 @@ void TransformOfAgent::DecidedQuery( QueryAgentInterface &query,
 	if( xt )
 	{
 	    // Punt it back into the search/replace engine
-	    query.AddLocalNormalLink( AsAgent(pattern), xt );
+	    query.RegisterLocalNormalLink( AsAgent(pattern), xt );
 	}
 	else
 	{

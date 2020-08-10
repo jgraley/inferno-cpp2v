@@ -10,7 +10,7 @@ using namespace SR;
 PatternQueryResult SearchContainerAgent::PatternQuery() const
 {
     PatternQueryResult r;
-	r.AddNormalLink( AsAgent(terminus) );
+	r.RegisterNormalLink( AsAgent(terminus) );
     
     // Allow subclasses to further restrict
     PatternQueryRestrictions( r );
@@ -45,8 +45,8 @@ void SearchContainerAgent::DecidedQuery( QueryAgentInterface &query,
     }
 
     // Get choice from conjecture about where we are in the walk
-	ContainerInterface::iterator thistime = query.AddDecision( pwx->begin(), pwx->end(), false );
-    query.AddNormalLink( AsAgent(terminus), &*thistime );
+	ContainerInterface::iterator thistime = query.RegisterDecision( pwx->begin(), pwx->end(), false );
+    query.RegisterNormalLink( AsAgent(terminus), &*thistime );
 
     // Let subclasses implement further restrictions
     DecidedQueryRestrictions( query, thistime );
@@ -108,7 +108,7 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> 
 void StuffAgent::PatternQueryRestrictions( PatternQueryResult &r ) const
 {
     if( recurse_restriction )
-        r.AddMultiplicityLink( AsAgent(recurse_restriction) );
+        r.RegisterMultiplicityLink( AsAgent(recurse_restriction) );
 }
 
 
@@ -128,7 +128,7 @@ void StuffAgent::DecidedQueryRestrictions( QueryAgentInterface &query, Container
         FOREACH( TreePtr<Node> n, pwtt->GetPath() )
             xpr_ss->push_back( n );
 
-        query.AddLocalMultiplicityLink( AsAgent(recurse_restriction), xpr_ss );            
+        query.RegisterLocalMultiplicityLink( AsAgent(recurse_restriction), xpr_ss );            
     }   
 }
 

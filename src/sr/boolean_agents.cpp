@@ -8,8 +8,8 @@ using namespace SR;
 PatternQueryResult NotMatchAgent::PatternQuery() const
 {
     PatternQueryResult r;
-	r.AddAbnormalLink( AsAgent(GetPattern()) );
-	r.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
+	r.RegisterAbnormalLink( AsAgent(GetPattern()) );
+	r.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
     return r;
 }
 
@@ -25,8 +25,8 @@ void NotMatchAgent::DecidedQuery( QueryAgentInterface &query,
     CheckLocalMatch(px->get());
     
     // Context is abnormal because patterns must not match
-    query.AddAbnormalLink( AsAgent(GetPattern()), px );
-    query.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
+    query.RegisterAbnormalLink( AsAgent(GetPattern()), px );
+    query.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
 }
 
 
@@ -56,7 +56,7 @@ PatternQueryResult MatchAllAgent::PatternQuery() const
 {
     PatternQueryResult r;
     FOREACH( const TreePtr<Node> p, GetPatterns() )
-	    r.AddNormalLink( AsAgent(p) );
+	    r.RegisterNormalLink( AsAgent(p) );
         
     return r;
 }
@@ -77,7 +77,7 @@ void MatchAllAgent::DecidedQuery( QueryAgentInterface &query,
         ASSERT( p );
         // Context is normal because all patterns must match (but none should contain
         // nodes with reploace functionlity because they will not be invoked during replace) 
-        query.AddNormalLink( AsAgent(p), px );
+        query.RegisterNormalLink( AsAgent(p), px );
     }
 }    
 
@@ -101,8 +101,8 @@ PatternQueryResult MatchAnyAgent::PatternQuery() const
 {
     PatternQueryResult r;
     FOREACH( const TreePtr<Node> p, GetPatterns() )
-	    r.AddAbnormalLink( AsAgent(p) );
-	r.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
+	    r.RegisterAbnormalLink( AsAgent(p) );
+	r.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
     return r;
 }
 
@@ -121,9 +121,9 @@ void MatchAnyAgent::DecidedQuery( QueryAgentInterface &query,
     {
         ASSERT( p );
         // Context is abnormal because not all patterns must match
-        query.AddAbnormalLink( AsAgent(p), px );
+        query.RegisterAbnormalLink( AsAgent(p), px );
     }
-    query.AddEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
+    query.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
 }
 
 

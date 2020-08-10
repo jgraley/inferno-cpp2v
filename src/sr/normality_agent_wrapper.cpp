@@ -62,13 +62,13 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
         FOREACH( Agent *ta, al->terminal_agents )
         {
             PatternQueryResult::Link nb;
-            wrapper_result.AddNormalLink( ta );
+            wrapper_result.RegisterNormalLink( ta );
         }
     }
 
     FOREACH( const PatternQueryResult::Link &b, wrapped_result.GetNormalLinks() ) 
 	{
-		wrapper_result.AddNormalLink( b.agent );
+		wrapper_result.RegisterNormalLink( b.agent );
 	}
 
 	return wrapper_result;
@@ -134,8 +134,8 @@ void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
             // TODO see "Problems with context walk" below
             
             // Give that walker to the conjecture as a decision and make a block
-            ContainerInterface::iterator thistime = wrapped_query.AddDecision( pwc->begin(), pwc->end(), false );
-            wrapped_query.AddNormalLink( AsAgent(terminus), &*thistime );
+            ContainerInterface::iterator thistime = wrapped_query.RegisterDecision( pwc->begin(), pwc->end(), false );
+            wrapped_query.RegisterNormalLink( AsAgent(terminus), &*thistime );
 
             // Consider the chosen (or pushed) node to be a key for the benefit of the local engine
             terminal_keys[ta] = *cit;				
@@ -156,7 +156,7 @@ void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
     }
     FOREACH( AgentQuery::Link b, *(wrapped_query.GetNormalLinks()) )
     {
-        wrapper_query.AddNormalLink( b ); // TODO implement
+        wrapper_query.RegisterNormalLink( b ); // TODO implement
     }
 	
 	// Run the evaluator if one was supplied.

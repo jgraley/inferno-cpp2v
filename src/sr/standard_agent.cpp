@@ -17,7 +17,7 @@ PatternQueryResult StandardAgent::PatternQuery() const
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )
         {
    			FOREACH( TreePtr<Node> pe, *pattern_seq )
-				r.AddNormalLink(AsAgent(pe));    
+				r.RegisterNormalLink(AsAgent(pe));    
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )
         {
@@ -27,15 +27,15 @@ PatternQueryResult StandardAgent::PatternQuery() const
 				if( StarAgent *s = dynamic_cast<StarAgent *>( AsAgent(pe) ) ) // per the impl, the star in a collection is not linked
 				    star = s;
 				else
-				    r.AddNormalLink(AsAgent(pe));    	    
+				    r.RegisterNormalLink(AsAgent(pe));    	    
 		    }
 		    if( star )
-		        r.AddNormalLink(star);    
+		        r.RegisterNormalLink(star);    
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
         {
             if( TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be NULL meaning no restriction            
-                r.AddNormalLink(AsAgent(*pattern_ptr));
+                r.RegisterNormalLink(AsAgent(*pattern_ptr));
         }
         else
         {
@@ -88,7 +88,7 @@ void StandardAgent::DecidedQuery( QueryAgentInterface &query,
                 ASSERT( p_x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
                 Agent *ap = Agent::AsAgent(*pattern_ptr);
-                query.AddNormalLink(ap, p_x_ptr);
+                query.RegisterNormalLink(ap, p_x_ptr);
             }
         }
         else
@@ -156,7 +156,7 @@ void StandardAgent::DecidedQuerySequence( QueryAgentInterface &query,
                 // Decide how many elements the current * should match, using conjecture. The star's range
                 // ends at the chosen element. Be inclusive because what we really want is a range.
                 ASSERT( xit == px->end() || *xit );
-                xit_star_end = query.AddDecision( xit, xit_star_limit, true );
+                xit_star_end = query.RegisterDecision( xit, xit_star_limit, true );
             }
             
             // Star matched [xit, xit_star_end) i.e. xit-xit_begin_star elements
@@ -164,7 +164,7 @@ void StandardAgent::DecidedQuerySequence( QueryAgentInterface &query,
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern restriction
-            query.AddLocalNormalLink( psa, xss );
+            query.RegisterLocalNormalLink( psa, xss );
             
             // Resume at the first element after the matched range
             xit = xit_star_end;
@@ -174,7 +174,7 @@ void StandardAgent::DecidedQuerySequence( QueryAgentInterface &query,
             if( xit == px->end() )
                 break;
        
-            query.AddNormalLink( pea, &*xit );
+            query.RegisterNormalLink( pea, &*xit );
             ++xit;
             
             // Every non-star pattern node we pass means there's one fewer remaining
@@ -239,7 +239,7 @@ void StandardAgent::DecidedQueryCollection( QueryAgentInterface &query,
                     xremaining.push_back(tp);
                     
                 // re-submit the exact same decision.
-                xit = query.AddNextOldDecision();
+                xit = query.RegisterNextOldDecision();
             }
             else
             {
@@ -248,9 +248,9 @@ void StandardAgent::DecidedQueryCollection( QueryAgentInterface &query,
                 // in future calls.
                 auto x_decision = make_shared< Collection<Node> >();
                 *x_decision = xremaining;
-                xit = query.AddDecision( x_decision, false );
+                xit = query.RegisterDecision( x_decision, false );
             }
-            query.AddLocalNormalLink( pia, *xit );
+            query.RegisterLocalNormalLink( pia, *xit );
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.
@@ -283,7 +283,7 @@ void StandardAgent::DecidedQueryCollection( QueryAgentInterface &query,
     {
         TreePtr<SubCollection> x_subcollection( new SubCollection );
         *x_subcollection = xremaining;
-        query.AddLocalNormalLink( star, x_subcollection );
+        query.RegisterLocalNormalLink( star, x_subcollection );
     }
     TRACE("matched\n");
 }

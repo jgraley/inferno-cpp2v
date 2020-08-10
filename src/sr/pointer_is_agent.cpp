@@ -8,7 +8,7 @@ using namespace SR;
 PatternQueryResult PointerIsAgent::PatternQuery() const
 {
     PatternQueryResult r;
-	r.AddNormalLink( AsAgent(GetPointer()) );
+	r.RegisterNormalLink( AsAgent(GetPointer()) );
     return r;
 }
 
@@ -24,7 +24,7 @@ void PointerIsAgent::DecidedQuery( QueryAgentInterface &query,
 	// Thus, it must be passed around via const TreePtrInterface &        
 	TreePtr<Node> ptr_arch = px->MakeValueArchitype();
 	
-	query.AddLocalNormalLink( AsAgent(GetPointer()), ptr_arch );
+	query.RegisterLocalNormalLink( AsAgent(GetPointer()), ptr_arch );
 }
 
 

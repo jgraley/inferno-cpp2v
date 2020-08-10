@@ -6,7 +6,7 @@
 
 using namespace SR;
 
-void PatternQueryResult::AddNormalLink( Agent *a )
+void PatternQueryResult::RegisterNormalLink( Agent *a )
 {
     Link b;
     b.agent = a;
@@ -18,7 +18,7 @@ void PatternQueryResult::AddNormalLink( Agent *a )
 }
 
 
-void PatternQueryResult::AddAbnormalLink( Agent *a )
+void PatternQueryResult::RegisterAbnormalLink( Agent *a )
 {
     Link b;
     b.agent = a;
@@ -30,7 +30,7 @@ void PatternQueryResult::AddAbnormalLink( Agent *a )
 }
 
 
-void PatternQueryResult::AddMultiplicityLink( Agent *a )
+void PatternQueryResult::RegisterMultiplicityLink( Agent *a )
 {
     Link b;
     b.agent = a;
@@ -42,7 +42,7 @@ void PatternQueryResult::AddMultiplicityLink( Agent *a )
 }
 
 
-void AgentQuery::AddNormalLink( Agent *a, const TreePtrInterface *px )
+void AgentQuery::RegisterNormalLink( Agent *a, const TreePtrInterface *px )
 {
     Link b;
     b.agent = a;
@@ -56,7 +56,7 @@ void AgentQuery::AddNormalLink( Agent *a, const TreePtrInterface *px )
 }
 
 
-void AgentQuery::AddAbnormalLink( Agent *a, const TreePtrInterface *px )
+void AgentQuery::RegisterAbnormalLink( Agent *a, const TreePtrInterface *px )
 {
     Link b;
     b.agent = a;
@@ -70,7 +70,7 @@ void AgentQuery::AddAbnormalLink( Agent *a, const TreePtrInterface *px )
 }
 
 
-void AgentQuery::AddMultiplicityLink( Agent *a, const TreePtrInterface *px )
+void AgentQuery::RegisterMultiplicityLink( Agent *a, const TreePtrInterface *px )
 {
     Link b;
     b.agent = a;
@@ -84,7 +84,7 @@ void AgentQuery::AddMultiplicityLink( Agent *a, const TreePtrInterface *px )
 }
 
 
-void AgentQuery::AddLocalNormalLink( Agent *a, TreePtr<Node> x )
+void AgentQuery::RegisterLocalNormalLink( Agent *a, TreePtr<Node> x )
 {
     ASSERT(x);
     Link b;
@@ -99,7 +99,7 @@ void AgentQuery::AddLocalNormalLink( Agent *a, TreePtr<Node> x )
 }
 
 
-void AgentQuery::AddLocalAbnormalLink( Agent *a, TreePtr<Node> x )
+void AgentQuery::RegisterLocalAbnormalLink( Agent *a, TreePtr<Node> x )
 {
     ASSERT(x);
     Link b;
@@ -114,7 +114,7 @@ void AgentQuery::AddLocalAbnormalLink( Agent *a, TreePtr<Node> x )
 }
 
 
-void AgentQuery::AddLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x )
+void AgentQuery::RegisterLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x )
 {
     ASSERT(x);
     Link b;
@@ -129,14 +129,14 @@ void AgentQuery::AddLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x )
 }
 
 
-void PatternQueryResult::AddEvaluator( shared_ptr<BooleanEvaluator> e )
+void PatternQueryResult::RegisterEvaluator( shared_ptr<BooleanEvaluator> e )
 {
 	ASSERT( !evaluator ); // should not register more than one
 	evaluator = e;
 }	
 
 
-void AgentQuery::AddEvaluator( shared_ptr<BooleanEvaluator> e )
+void AgentQuery::RegisterEvaluator( shared_ptr<BooleanEvaluator> e )
 {
 	ASSERT( !evaluator ); // should not register more than one
 	evaluator = e;
@@ -193,7 +193,7 @@ void AgentQuery::EnsureChoicesHaveIterators()
 }
 
 
-ContainerInterface::iterator AgentQuery::AddDecision( const Range &r )
+ContainerInterface::iterator AgentQuery::RegisterDecision( const Range &r )
 {
  
     ASSERT( r.inclusive || r.begin != r.end )("no empty decisions");
@@ -229,7 +229,7 @@ ContainerInterface::iterator AgentQuery::AddDecision( const Range &r )
 }                                                      
 
 
-ContainerInterface::iterator AgentQuery::AddDecision( ContainerInterface::iterator begin,
+ContainerInterface::iterator AgentQuery::RegisterDecision( ContainerInterface::iterator begin,
                                                       ContainerInterface::iterator end,
                                                       bool inclusive,
                                                       shared_ptr<ContainerInterface> container )
@@ -240,23 +240,23 @@ ContainerInterface::iterator AgentQuery::AddDecision( ContainerInterface::iterat
     r.inclusive = inclusive;
     r.container = container;
             
-    return AddDecision( r );
+    return RegisterDecision( r );
 }
                                                                     
                                
-ContainerInterface::iterator AgentQuery::AddDecision( shared_ptr<ContainerInterface> container, bool inclusive )
+ContainerInterface::iterator AgentQuery::RegisterDecision( shared_ptr<ContainerInterface> container, bool inclusive )
 {
     ASSERT( container );
-    return AddDecision( container->begin(), container->end(), inclusive, container );
+    return RegisterDecision( container->begin(), container->end(), inclusive, container );
 }                                                      
 
 
 /* Need to fix OOStd to permit the assignment  #53
-ContainerInterface::iterator AgentQuery::AddDecision( const ContainerInterface &container, bool inclusive )
+ContainerInterface::iterator AgentQuery::RegisterDecision( const ContainerInterface &container, bool inclusive )
 {
     auto container_for_query = make_shared< Collection<Node> >();
     *container_for_query = container;
-    return AddDecision( container_for_query, inclusive );
+    return RegisterDecision( container_for_query, inclusive );
 }                                                      
 */
 
@@ -273,7 +273,7 @@ const Conjecture::Range &AgentQuery::GetNextOldDecision()
 }
 
 
-ContainerInterface::iterator AgentQuery::AddNextOldDecision()
+ContainerInterface::iterator AgentQuery::RegisterNextOldDecision()
 {
     ASSERT( next_choice != choices.end() );
     ContainerInterface::iterator it;

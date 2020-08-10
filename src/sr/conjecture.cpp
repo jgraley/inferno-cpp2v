@@ -161,9 +161,6 @@ void Conjecture::FillMissingChoicesWithBegin( shared_ptr<AgentQuery> query )
         QueryCommonInterface::Choice new_choice;
         new_choice.mode = QueryCommonInterface::Choice::BEGIN;
         query->PushBackChoice( new_choice );
-        
-        //int index = query->GetChoices()->size();
-        //query->PushBackChoice( (*query->GetDecisions())[index].begin );
     }
     
     ASSERT( query->GetChoices()->size()==query->GetDecisions()->size() )

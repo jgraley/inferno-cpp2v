@@ -39,15 +39,16 @@ void AndRuleEngine::ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, Age
     FOREACH( const PatternQueryResult::Link &b, *query.GetNormalLinks() )
         ConfigPopulateNormalAgents( normal_agents, b.agent );
         
+    // Can be nicer in C++17, apparently.
     FOREACH( const PatternQueryResult::Link &b, *query.GetAbnormalLinks() )
         my_abnormal_engines.emplace(std::piecewise_construct,
-                                 std::forward_as_tuple(b.agent),
-                                 std::forward_as_tuple());    
+                                    std::forward_as_tuple(b.agent),
+                                    std::forward_as_tuple());    
 
     FOREACH( const PatternQueryResult::Link &b, *query.GetMultiplicityLinks() )
         my_multiplicity_engines.emplace(std::piecewise_construct,
-                                     std::forward_as_tuple(b.agent),
-                                     std::forward_as_tuple());
+                                        std::forward_as_tuple(b.agent),
+                                        std::forward_as_tuple());
 }
 
 
