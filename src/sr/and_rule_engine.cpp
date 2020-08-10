@@ -149,14 +149,16 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     agent->RunDecidedQuery( *query, px );
 
 #ifdef TEST_PATTERN_QUERY
-    PatternQuery r = agent->GetPatternQuery();
-    ASSERT( r.GetNormalLinks()->size() == query->GetNormalLinks()->size() &&
-            r.GetAbnormalLinks()->size() == query->GetAbnormalLinks()->size() &&
-            r.GetMultiplicityLinks()->size() == query->GetMultiplicityLinks()->size() )
+    PatternQuery pq = agent->GetPatternQuery();
+    ASSERT( pq.GetNormalLinks()->size() == query->GetNormalLinks()->size() &&
+            pq.GetAbnormalLinks()->size() == query->GetAbnormalLinks()->size() &&
+            pq.GetMultiplicityLinks()->size() == query->GetMultiplicityLinks()->size() &&
+            pq.GetDecisions()->size() == query->GetDecisions()->size() )
           ("GetPatternQuery disagrees with RunDecidedQuery!!!!\n")
-          ("GetNormalLinks()->size() : %d != %d!!\n", r.GetNormalLinks()->size(), query->GetNormalLinks()->size() )
-          ("GetAbnormalLinks()->size() : %d != %d!!\n", r.GetAbnormalLinks()->size(), query->GetAbnormalLinks()->size() )
-          ("GetMultiplicityLinks()->size() : %d != %d!!\n", r.GetMultiplicityLinks()->size(), query->GetMultiplicityLinks()->size() )
+          ("GetNormalLinks()->size() : %d vs %d\n", pq.GetNormalLinks()->size(), query->GetNormalLinks()->size() )
+          ("GetAbnormalLinks()->size() : %d vs %d\n", pq.GetAbnormalLinks()->size(), query->GetAbnormalLinks()->size() )
+          ("GetMultiplicityLinks()->size() : %d vs %d\n", pq.GetMultiplicityLinks()->size(), query->GetMultiplicityLinks()->size() )
+          ("GetDecisions()->size() : %d vs %d\n", pq.GetDecisions()->size(), query->GetDecisions()->size() )
           (*agent);
     // Note: number of abnormal links doe NOT now depend on x; #60 completed
 #endif

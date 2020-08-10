@@ -9,13 +9,15 @@ using namespace SR;
 
 PatternQuery SearchContainerAgent::GetPatternQuery() const
 {
-    PatternQuery r;
-	r.RegisterNormalLink( AsAgent(terminus) );
+    PatternQuery query;
+    
+	query.RegisterDecision( false ); // Exclusive, please.
+	query.RegisterNormalLink( AsAgent(terminus) );
     
     // Allow subclasses to further restrict
-    PatternQueryRestrictions( r );
+    PatternQueryRestrictions( query );
     
-    return r;
+    return query;
 }
 
 

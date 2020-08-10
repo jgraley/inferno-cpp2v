@@ -7,9 +7,9 @@ using namespace SR;
 
 PatternQuery OverlayAgent::GetPatternQuery() const
 {
-    PatternQuery r;
-	r.RegisterNormalLink( AsAgent(GetThrough()) );
-    return r;
+    PatternQuery query;
+	query.RegisterNormalLink( AsAgent(GetThrough()) );
+    return query;
 }
 
 

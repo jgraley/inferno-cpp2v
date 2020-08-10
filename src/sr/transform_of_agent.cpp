@@ -4,9 +4,9 @@ using namespace SR;
 
 PatternQuery TransformOfAgent::GetPatternQuery() const
 {
-    PatternQuery r;
-	r.RegisterNormalLink( AsAgent(pattern) );
-    return r;
+    PatternQuery query;
+	query.RegisterNormalLink( AsAgent(pattern) );
+    return query;
 }
 
 

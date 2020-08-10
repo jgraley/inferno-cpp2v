@@ -8,13 +8,13 @@ using namespace SR;
 
 PatternQuery StarAgent::GetPatternQuery() const
 {
-    PatternQuery r;
+    PatternQuery query;
     if( TreePtr<Node> p = GetRestriction() )
     {
-        r.RegisterMultiplicityLink( AsAgent(p) );
+        query.RegisterMultiplicityLink( AsAgent(p) );
     }
 
-    return r;
+    return query;
 }
 
 

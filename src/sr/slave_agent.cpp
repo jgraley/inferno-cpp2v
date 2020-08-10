@@ -14,9 +14,9 @@ SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search ) :
 
 PatternQuery SlaveAgent::GetPatternQuery() const
 {
-    PatternQuery r;
-	r.RegisterNormalLink( AsAgent(GetThrough()) );
-    return r;
+    PatternQuery query;
+	query.RegisterNormalLink( AsAgent(GetThrough()) );
+    return query;
 }
 
 

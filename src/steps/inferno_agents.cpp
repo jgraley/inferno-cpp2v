@@ -93,11 +93,11 @@ bool IdentifierByNameAgent::IsMatch( const TreePtrInterface &x ) const
 
 PatternQuery NestedAgent::GetPatternQuery() const
 {
-    PatternQuery r;
-	r.RegisterNormalLink( AsAgent(terminus) );
+    PatternQuery query;
+	query.RegisterNormalLink( AsAgent(terminus) );
 	if( depth )
-		r.RegisterNormalLink( AsAgent(depth) );
-    return r;
+		query.RegisterNormalLink( AsAgent(depth) );
+    return query;
 }
 
 

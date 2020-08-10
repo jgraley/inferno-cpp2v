@@ -7,10 +7,10 @@ using namespace SR;
 
 PatternQuery NotMatchAgent::GetPatternQuery() const
 {
-    PatternQuery r;
-	r.RegisterAbnormalLink( AsAgent(GetPattern()) );
-	r.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
-    return r;
+    PatternQuery query;
+	query.RegisterAbnormalLink( AsAgent(GetPattern()) );
+	query.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
+    return query;
 }
 
 
@@ -99,11 +99,11 @@ void MatchAllAgent::GetGraphAppearance( bool *bold, string *text, string *shape 
 
 PatternQuery MatchAnyAgent::GetPatternQuery() const
 {
-    PatternQuery r;
+    PatternQuery query;
     FOREACH( const TreePtr<Node> p, GetPatterns() )
-	    r.RegisterAbnormalLink( AsAgent(p) );
-	r.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
-    return r;
+	    query.RegisterAbnormalLink( AsAgent(p) );
+	query.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
+    return query;
 }
 
 

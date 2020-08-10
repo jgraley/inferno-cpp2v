@@ -7,9 +7,9 @@ using namespace SR;
 
 PatternQuery PointerIsAgent::GetPatternQuery() const
 {
-    PatternQuery r;
-	r.RegisterNormalLink( AsAgent(GetPointer()) );
-    return r;
+    PatternQuery query;
+	query.RegisterNormalLink( AsAgent(GetPointer()) );
+    return query;
 }
 
 

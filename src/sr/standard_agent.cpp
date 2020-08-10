@@ -10,14 +10,33 @@ using namespace SR;
 
 PatternQuery StandardAgent::GetPatternQuery() const
 {
-    PatternQuery r;
+    PatternQuery query;
     const vector< Itemiser::Element * > pattern_memb = Itemise();
     FOREACH( Itemiser::Element *ie, pattern_memb )
     {
         if( SequenceInterface *pattern_seq = dynamic_cast<SequenceInterface *>(ie) )
         {
+            int num_stars = 0;
    			FOREACH( TreePtr<Node> pe, *pattern_seq )
-				r.RegisterNormalLink(AsAgent(pe));    
+            {
+                ASSERT( pe );
+                Agent *pea = AsAgent(pe);
+                if( dynamic_cast<StarAgent *>(pea) )
+                    num_stars++;
+            }
+            num_stars--; // Don't register a decision for the last Star
+   			FOREACH( TreePtr<Node> pe, *pattern_seq )
+            {
+                ASSERT( pe );
+                Agent *pea = AsAgent(pe);
+                if( dynamic_cast<StarAgent *>(pea) && num_stars>0 )
+                {
+                    query.RegisterDecision( true ); // Inclusive, please.
+                    num_stars--;
+                }
+
+				query.RegisterNormalLink(AsAgent(pe));    
+            }
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )
         {
@@ -27,22 +46,25 @@ PatternQuery StandardAgent::GetPatternQuery() const
 				if( StarAgent *s = dynamic_cast<StarAgent *>( AsAgent(pe) ) ) // per the impl, the star in a collection is not linked
 				    star = s;
 				else
-				    r.RegisterNormalLink(AsAgent(pe));    	    
+                {
+                    query.RegisterDecision( false ); // Exclusive, please
+				    query.RegisterNormalLink(AsAgent(pe));    	    
+                }
 		    }
 		    if( star )
-		        r.RegisterNormalLink(star);    
+		        query.RegisterNormalLink(star);    
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
         {
             if( TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be NULL meaning no restriction            
-                r.RegisterNormalLink(AsAgent(*pattern_ptr));
+                query.RegisterNormalLink(AsAgent(*pattern_ptr));
         }
         else
         {
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
         }
     }
-    return r;
+    return query;
 }
 
 
