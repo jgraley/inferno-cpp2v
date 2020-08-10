@@ -10,7 +10,7 @@
 #include "common/common.hpp"
 #include <list>
 
-//#define TEST_PATTERN_QUERY
+#define TEST_PATTERN_QUERY
 
 using namespace SR;
 
@@ -150,12 +150,15 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 
 #ifdef TEST_PATTERN_QUERY
     PatternQueryResult r = agent->PatternQuery();
-    ASSERT( r.GetNormalLinks()->size() == query->GetNormalLinks()->size() )
+    ASSERT( r.GetNormalLinks()->size() == query->GetNormalLinks()->size() &&
+            r.GetAbnormalLinks()->size() == query->GetAbnormalLinks()->size() &&
+            r.GetMultiplicityLinks()->size() == query->GetMultiplicityLinks()->size() )
           ("PatternQuery disagrees with DecidedQuery!!!!\n")
           ("GetNormalLinks()->size() : %d != %d!!\n", r.GetNormalLinks()->size(), query->GetNormalLinks()->size() )
+          ("GetAbnormalLinks()->size() : %d != %d!!\n", r.GetAbnormalLinks()->size(), query->GetAbnormalLinks()->size() )
+          ("GetMultiplicityLinks()->size() : %d != %d!!\n", r.GetMultiplicityLinks()->size(), query->GetMultiplicityLinks()->size() )
           (*agent);
-    // Note: number of abnormal links can depend on x, for example
-    // in the case of pattern restriction on Star, Stuff. See #60 
+    // Note: number of abnormal links doe NOT now depend on x; #60 completed
 #endif
                         
     conj.FillMissingChoicesWithBegin(query);
