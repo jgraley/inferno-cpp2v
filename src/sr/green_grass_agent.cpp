@@ -4,15 +4,15 @@
 
 using namespace SR;
 
-PatternQueryResult GreenGrassAgent::PatternQuery() const
+PatternQuery GreenGrassAgent::GetPatternQuery() const
 {
-    PatternQueryResult r;
+    PatternQuery r;
     r.RegisterNormalLink( AsAgent(GetThrough()) );
     return r;
 }
 
 
-void GreenGrassAgent::DecidedQuery( QueryAgentInterface &query,
+void GreenGrassAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
                                     const TreePtrInterface *px ) const
 {
     INDENT("G");

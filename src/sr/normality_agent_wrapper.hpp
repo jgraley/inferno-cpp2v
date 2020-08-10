@@ -18,14 +18,14 @@ class NormalityAgentWrapper : public virtual Agent
 	                const Set<Agent *> &master_agents, // Agents of the enclosing engine's master
 	                const SCREngine *master );
 	void SetMasterKeys( const CouplingMap &keys ); // Keys of the enclosing engine's master (call this at top of engine Compare())
-    virtual PatternQueryResult PatternQuery() const;
-    virtual void DecidedQuery( QueryAgentInterface &query,
+    virtual PatternQuery GetPatternQuery() const;
+    virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                const TreePtrInterface *px ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
     shared_ptr<ContainerInterface> GetVisibleChildren() const;
     
-    // Holder for info beyond what PatternQuery provides (the agent) for abnormal links.     
+    // Holder for info beyond what GetPatternQuery provides (the agent) for abnormal links.     
     struct AbnormalLink
     {
 		AbnormalLink() : engine(false) {} // SCREngine is compare, not search
@@ -41,7 +41,7 @@ class NormalityAgentWrapper : public virtual Agent
     // abnormal links.
     Agent * const wrapped_agent;    
     
-    // Additional info for abnormal links, in same order as Pattern/DecidedQuery
+    // Additional info for abnormal links, in same order as Pattern/RunDecidedQuery
     list< shared_ptr<AbnormalLink> > abnormal_links;
     
     // Map of keys

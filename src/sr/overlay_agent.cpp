@@ -5,15 +5,15 @@
 
 using namespace SR;
 
-PatternQueryResult OverlayAgent::PatternQuery() const
+PatternQuery OverlayAgent::GetPatternQuery() const
 {
-    PatternQueryResult r;
+    PatternQuery r;
 	r.RegisterNormalLink( AsAgent(GetThrough()) );
     return r;
 }
 
 
-void OverlayAgent::DecidedQuery( QueryAgentInterface &query,
+void OverlayAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
                                  const TreePtrInterface *px ) const
 {
     query.Reset();

@@ -16,9 +16,13 @@ namespace SR
 { 
 class Agent;
 
-class PatternQueryResult 
+class PatternQuery 
 {
 public:    
+    struct Decision
+    {
+        bool inclusive; // If true, include "end" as a possible choice
+    };
     struct Link 
     {
         Agent *agent;
@@ -26,7 +30,8 @@ public:
     };
         
     typedef list<Link> Links;       
-        
+    typedef vector<Decision> Decisions;
+
     void clear()
     {
 		normal_links.clear();
@@ -34,17 +39,21 @@ public:
         multiplicity_links.clear();
         evaluator = shared_ptr<BooleanEvaluator>();
     }
+    
+    void RegisterDecision( bool inclusive ); 
     void RegisterNormalLink( Agent *a );
     void RegisterAbnormalLink( Agent *a );
     void RegisterMultiplicityLink( Agent *a );
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e );
     
+    const Decisions *GetDecisions() const { return &decisions; } 
     const Links *GetNormalLinks() const { return &normal_links; } // pointer returned because the links contain the local links
     const Links *GetAbnormalLinks() const { return &abnormal_links; } // pointer returned because the links contain the local links
     const Links *GetMultiplicityLinks() const { return &multiplicity_links; } // pointer returned because the links contain the local links
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
 
 private:
+    Decisions decisions; // ha ha!
     Links normal_links; 
     Links abnormal_links; 
     Links multiplicity_links; 
@@ -52,7 +61,7 @@ private:
 };
 
 
-class QueryCommonInterface
+class DecidedQueryCommon
 {
 public:
     struct Range
@@ -102,7 +111,7 @@ public:
 };
 
 
-class QueryAgentInterface : virtual public QueryCommonInterface
+class DecidedQueryAgentInterface : virtual public DecidedQueryCommon
 {
 public:
     virtual void Reset() = 0;
@@ -128,7 +137,7 @@ public:
 };
 
 
-class QueryClientInterface : virtual public QueryCommonInterface
+class DecidedQueryClientInterface : virtual public DecidedQueryCommon
 {
 public:
     virtual const Links *GetNormalLinks() const = 0; // pointer returned because the links contain the local links
@@ -144,11 +153,11 @@ public:
 };
 
 
-class AgentQuery : virtual public QueryClientInterface,
-                   virtual public QueryAgentInterface
+class DecidedQuery : virtual public DecidedQueryClientInterface,
+                   virtual public DecidedQueryAgentInterface
 {
 public:    
-    AgentQuery() :
+    DecidedQuery() :
         next_decision( decisions.begin() ), // will be end()
         next_choice( choices.begin() ) // will be end()
     {
@@ -198,6 +207,6 @@ private:
 };
 
 
-bool operator<(const AgentQuery::Link &l0, const AgentQuery::Link &l1);
+bool operator<(const DecidedQuery::Link &l0, const DecidedQuery::Link &l1);
 };
 #endif

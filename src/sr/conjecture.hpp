@@ -15,14 +15,14 @@ class Agent;
 class Conjecture
 {
 public:
-    typedef QueryCommonInterface::Range Range;
-    typedef QueryCommonInterface::Ranges Ranges;
-    typedef QueryCommonInterface::Choices Choices;
+    typedef DecidedQueryCommon::Range Range;
+    typedef DecidedQueryCommon::Ranges Ranges;
+    typedef DecidedQueryCommon::Choices Choices;
     
     struct AgentRecord
     {
 		Agent *agent;
-        shared_ptr<AgentQuery> query;
+        shared_ptr<DecidedQuery> query;
  		Agent *previous_agent;
         bool linked;
 	};
@@ -33,14 +33,14 @@ public:
 
     void Configure(Set<Agent *> my_agents, Agent *root_agent);
     void RecordWalk( Agent *agent );
-	bool IncrementAgent( shared_ptr<AgentQuery> query );			                                     
+	bool IncrementAgent( shared_ptr<DecidedQuery> query );			                                     
     bool Increment(); // returns true for try again, false for give up				 
     bool IncrementConjecture( Agent *agent ); 
         				       
     // Standard interface for decided compare functions
-    AgentQuery::Choices GetChoices(Agent *agent) const;
-    shared_ptr<AgentQuery> GetQuery(Agent *agent);
-    void FillMissingChoicesWithBegin( shared_ptr<AgentQuery> query );      
+    DecidedQuery::Choices GetChoices(Agent *agent) const;
+    shared_ptr<DecidedQuery> GetQuery(Agent *agent);
+    void FillMissingChoicesWithBegin( shared_ptr<DecidedQuery> query );      
 				   
 private:
 	Map<Agent *, AgentRecord> agent_records;

@@ -35,36 +35,36 @@ void AndRuleEngine::ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, Age
 {
     normal_agents->insert(current_agent);
     
-    PatternQueryResult query = current_agent->PatternQuery();
-    FOREACH( const PatternQueryResult::Link &b, *query.GetNormalLinks() )
+    PatternQuery query = current_agent->GetPatternQuery();
+    FOREACH( const PatternQuery::Link &b, *query.GetNormalLinks() )
         ConfigPopulateNormalAgents( normal_agents, b.agent );
         
     // Can be nicer in C++17, apparently.
-    FOREACH( const PatternQueryResult::Link &b, *query.GetAbnormalLinks() )
+    FOREACH( const PatternQuery::Link &b, *query.GetAbnormalLinks() )
         my_abnormal_engines.emplace(std::piecewise_construct,
                                     std::forward_as_tuple(b.agent),
                                     std::forward_as_tuple());    
 
-    FOREACH( const PatternQueryResult::Link &b, *query.GetMultiplicityLinks() )
+    FOREACH( const PatternQuery::Link &b, *query.GetMultiplicityLinks() )
         my_multiplicity_engines.emplace(std::piecewise_construct,
                                         std::forward_as_tuple(b.agent),
                                         std::forward_as_tuple());
 }
 
 
-void AndRuleEngine::CompareLinks( shared_ptr<const AgentQuery> query ) 
+void AndRuleEngine::CompareLinks( shared_ptr<const DecidedQuery> query ) 
 {
 	ASSERT( !query->GetEvaluator() );
     // Follow up on any blocks that were noted by the agent impl
 
-    FOREACH( const AgentQuery::Link &b, *query->GetAbnormalLinks() )
+    FOREACH( const DecidedQuery::Link &b, *query->GetAbnormalLinks() )
         abnormal_links.insert( make_pair(query, &b) ); 
         
-    FOREACH( const AgentQuery::Link &b, *query->GetMultiplicityLinks() )
+    FOREACH( const DecidedQuery::Link &b, *query->GetMultiplicityLinks() )
         multiplicity_links.insert( make_pair(query, &b) ); 
     
     int i=0;        
-    FOREACH( const AgentQuery::Link &b, *query->GetNormalLinks() )
+    FOREACH( const DecidedQuery::Link &b, *query->GetNormalLinks() )
     {
         TRACE("Comparing normal link %d\n", i);
         // Recurse normally
@@ -79,7 +79,7 @@ void AndRuleEngine::CompareLinks( shared_ptr<const AgentQuery> query )
 
 
 // Only to be called in the restricting pass
-void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
+void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const DecidedQuery> query,
 							               const CouplingMap *coupling_keys ) 
 {
 	ASSERT( query->GetEvaluator() );
@@ -88,7 +88,7 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
     list<bool> compare_results;
-    FOREACH( const AgentQuery::Link &b, *query->GetAbnormalLinks() )
+    FOREACH( const DecidedQuery::Link &b, *query->GetAbnormalLinks() )
     {
         TRACE("Comparing block %d\n", i);
  
@@ -142,18 +142,18 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     reached.insert( agent );
 
     // Obtain the query state from the conjecture
-    shared_ptr<AgentQuery> query = conj.GetQuery(agent);
+    shared_ptr<DecidedQuery> query = conj.GetQuery(agent);
 
     // Run the compare implementation to get the links based on the choices
-    TRACE(*agent)("?=")(**px)(" DecidedQuery()\n");    
-    agent->DecidedQuery( *query, px );
+    TRACE(*agent)("?=")(**px)(" RunDecidedQuery()\n");    
+    agent->RunDecidedQuery( *query, px );
 
 #ifdef TEST_PATTERN_QUERY
-    PatternQueryResult r = agent->PatternQuery();
+    PatternQuery r = agent->GetPatternQuery();
     ASSERT( r.GetNormalLinks()->size() == query->GetNormalLinks()->size() &&
             r.GetAbnormalLinks()->size() == query->GetAbnormalLinks()->size() &&
             r.GetMultiplicityLinks()->size() == query->GetMultiplicityLinks()->size() )
-          ("PatternQuery disagrees with DecidedQuery!!!!\n")
+          ("GetPatternQuery disagrees with RunDecidedQuery!!!!\n")
           ("GetNormalLinks()->size() : %d != %d!!\n", r.GetNormalLinks()->size(), query->GetNormalLinks()->size() )
           ("GetAbnormalLinks()->size() : %d != %d!!\n", r.GetAbnormalLinks()->size(), query->GetAbnormalLinks()->size() )
           ("GetMultiplicityLinks()->size() : %d != %d!!\n", r.GetMultiplicityLinks()->size(), query->GetMultiplicityLinks()->size() )
@@ -228,14 +228,14 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
             CouplingMap combined_keys = MapUnion( *master_keys, slave_keys );     
                         
             // Process the free abnormal links.
-            for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : abnormal_links )
+            for( std::pair< shared_ptr<const DecidedQuery>, const DecidedQuery::Link * > lp : abnormal_links )
             {            
                 my_abnormal_engines.at(lp.second->agent).Compare( lp.second->GetPX(), &combined_keys );
             }
 
             // Process the free multiplicity links.
             int i=0;
-            for( std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > lp : multiplicity_links )
+            for( std::pair< shared_ptr<const DecidedQuery>, const DecidedQuery::Link * > lp : multiplicity_links )
             {            
                 AndRuleEngine &e = my_multiplicity_engines.at(lp.second->agent);
 
@@ -258,7 +258,7 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
             // which ensures all the couplings have been keyed already.
             // Examples are MatchAny and NotMatch (but not MatchAll, because MatchAll conforms with
             // the global and-rule and so its children can key couplings.
-            for( shared_ptr<const AgentQuery> query : evaluator_queries )
+            for( shared_ptr<const DecidedQuery> query : evaluator_queries )
             {
                 //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
                 CompareEvaluatorLinks( query, &combined_keys );

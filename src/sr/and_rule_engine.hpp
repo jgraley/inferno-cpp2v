@@ -41,8 +41,8 @@ public:
     void Configure( Agent *root_agent, const Set<Agent *> &master_agents);
     void ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, Agent *current_agent );
 
-    void CompareLinks( shared_ptr<const AgentQuery> query );
-    void CompareEvaluatorLinks( shared_ptr<const AgentQuery> query,
+    void CompareLinks( shared_ptr<const DecidedQuery> query );
+    void CompareEvaluatorLinks( shared_ptr<const DecidedQuery> query,
 							    const CouplingMap *coupling_keys );
     void DecidedCompare( Agent *agent,
                          const TreePtrInterface *px );
@@ -63,9 +63,9 @@ private:
     CouplingMap slave_keys; 
     const CouplingMap *master_keys;
     Set<Agent *> reached; 
-    Set< shared_ptr<const AgentQuery> > evaluator_queries;   
-    Set< std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > > abnormal_links; 
-    Set< std::pair< shared_ptr<const AgentQuery>, const AgentQuery::Link * > > multiplicity_links;
+    Set< shared_ptr<const DecidedQuery> > evaluator_queries;   
+    Set< std::pair< shared_ptr<const DecidedQuery>, const DecidedQuery::Link * > > abnormal_links; 
+    Set< std::pair< shared_ptr<const DecidedQuery>, const DecidedQuery::Link * > > multiplicity_links;
 };
 
 #endif

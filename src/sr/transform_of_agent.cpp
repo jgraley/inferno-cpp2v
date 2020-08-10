@@ -2,15 +2,15 @@
 
 using namespace SR;
 
-PatternQueryResult TransformOfAgent::PatternQuery() const
+PatternQuery TransformOfAgent::GetPatternQuery() const
 {
-    PatternQueryResult r;
+    PatternQuery r;
 	r.RegisterNormalLink( AsAgent(pattern) );
     return r;
 }
 
 
-void TransformOfAgent::DecidedQuery( QueryAgentInterface &query,
+void TransformOfAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
                                      const TreePtrInterface *px ) const
 {
     INDENT("T");

@@ -8,9 +8,9 @@
 
 using namespace SR;
 
-PatternQueryResult StandardAgent::PatternQuery() const
+PatternQuery StandardAgent::GetPatternQuery() const
 {
-    PatternQueryResult r;
+    PatternQuery r;
     const vector< Itemiser::Element * > pattern_memb = Itemise();
     FOREACH( Itemiser::Element *ie, pattern_memb )
     {
@@ -46,7 +46,7 @@ PatternQueryResult StandardAgent::PatternQuery() const
 }
 
 
-void StandardAgent::DecidedQuery( QueryAgentInterface &query,
+void StandardAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   const TreePtrInterface *px ) const
 {
     INDENT(".");
@@ -99,7 +99,7 @@ void StandardAgent::DecidedQuery( QueryAgentInterface &query,
     return;
 }
 
-void StandardAgent::DecidedQuerySequence( QueryAgentInterface &query,
+void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
                                           SequenceInterface *px,
 		                                  SequenceInterface &pattern ) const
 {
@@ -113,7 +113,7 @@ void StandardAgent::DecidedQuerySequence( QueryAgentInterface &query,
 
     int pattern_num_non_star = 0;
     ContainerInterface::iterator p_last_star;
-	for( pit = pattern.begin(); pit != pattern.end(); ++pit ) // @TODO this is just pattern analysis - do in PatternQuery and cache?
+	for( pit = pattern.begin(); pit != pattern.end(); ++pit ) // @TODO this is just pattern analysis - do in GetPatternQuery and cache?
     {
 		TreePtr<Node> pe( *pit );
 		ASSERT( pe );
@@ -195,7 +195,7 @@ void StandardAgent::DecidedQuerySequence( QueryAgentInterface &query,
 }
 
 
-void StandardAgent::DecidedQueryCollection( QueryAgentInterface &query,
+void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                             CollectionInterface *px,
 		 					                CollectionInterface &pattern ) const
 {

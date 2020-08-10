@@ -24,7 +24,7 @@ void Conjecture::Configure(Set<Agent *> my_agents, Agent *root_agent)
 		record.agent = a;
         record.previous_agent = (Agent *)0xFEEDF00D;
         record.linked = false;
-        record.query = make_shared<AgentQuery>();        
+        record.query = make_shared<DecidedQuery>();        
 		agent_records[a] = record;
 	}        
     last_agent = nullptr;
@@ -47,18 +47,18 @@ void Conjecture::RecordWalk( Agent *agent )
     last_agent = agent;
     record->linked = true;
 
-    PatternQueryResult r = agent->PatternQuery();
+    PatternQuery r = agent->GetPatternQuery();
     
     // Makes sense, but we won't match the old algo with this
     if( r.GetEvaluator() )
         return; // we don't process evaluators
     
-    for( const PatternQueryResult::Link &l : *r.GetNormalLinks() )
+    for( const PatternQuery::Link &l : *r.GetNormalLinks() )
         RecordWalk( l.agent );
 }
 
 
-bool Conjecture::IncrementAgent( shared_ptr<AgentQuery> query )
+bool Conjecture::IncrementAgent( shared_ptr<DecidedQuery> query )
 {    
     ASSERT( query );
     
@@ -70,33 +70,33 @@ bool Conjecture::IncrementAgent( shared_ptr<AgentQuery> query )
     FillMissingChoicesWithBegin(query);
     
     const auto &back_decision = query->GetDecisions()->back();
-    QueryCommonInterface::Choice back_choice = query->GetChoices()->back();
+    DecidedQueryCommon::Choice back_choice = query->GetChoices()->back();
     
     // Inclusive case - we let the choice go to end but we won't go any further
-    if( back_choice.mode==QueryCommonInterface::Choice::ITER && back_decision.inclusive && back_choice.iter == back_decision.end )
+    if( back_choice.mode==DecidedQueryCommon::Choice::ITER && back_decision.inclusive && back_choice.iter == back_decision.end )
     {
         query->InvalidateBack();
         return IncrementAgent( query );
 	}
 
-	if( back_choice.mode==QueryCommonInterface::Choice::BEGIN || back_choice.iter != back_decision.end ) 
+	if( back_choice.mode==DecidedQueryCommon::Choice::BEGIN || back_choice.iter != back_decision.end ) 
 	{
         switch( back_choice.mode )
         {
-            case QueryCommonInterface::Choice::ITER:
+            case DecidedQueryCommon::Choice::ITER:
                 ++back_choice.iter; 
                 break;
             
-            case QueryCommonInterface::Choice::BEGIN:
+            case DecidedQueryCommon::Choice::BEGIN:
                 back_choice.iter = back_decision.begin;
-                back_choice.mode = QueryCommonInterface::Choice::ITER;
+                back_choice.mode = DecidedQueryCommon::Choice::ITER;
                 break;
         }        
         query->SetBackChoice( back_choice );
     }
 		
     // Exclusive case - we don't let the choice be end
-    if( back_choice.mode==QueryCommonInterface::Choice::ITER && !back_decision.inclusive && back_choice.iter == back_decision.end )
+    if( back_choice.mode==DecidedQueryCommon::Choice::ITER && !back_decision.inclusive && back_choice.iter == back_decision.end )
     {
         query->InvalidateBack();
         return IncrementAgent( query );
@@ -131,7 +131,7 @@ bool Conjecture::Increment()
 }
 
 
-AgentQuery::Choices Conjecture::GetChoices(Agent *agent) const 
+DecidedQuery::Choices Conjecture::GetChoices(Agent *agent) const 
 {            
     ASSERT(configured);
     if( agent_records.IsExist(agent) )
@@ -145,21 +145,21 @@ AgentQuery::Choices Conjecture::GetChoices(Agent *agent) const
 }
 
 
-shared_ptr<AgentQuery> Conjecture::GetQuery(Agent *agent)
+shared_ptr<DecidedQuery> Conjecture::GetQuery(Agent *agent)
 {
     ASSERT(configured);
     return agent_records.at(agent).query;
 }
 
 
-void Conjecture::FillMissingChoicesWithBegin( shared_ptr<AgentQuery> query )
+void Conjecture::FillMissingChoicesWithBegin( shared_ptr<DecidedQuery> query )
 {
     ASSERT( query );
        
     while( query->GetChoices()->size() < query->GetDecisions()->size() )
     {
-        QueryCommonInterface::Choice new_choice;
-        new_choice.mode = QueryCommonInterface::Choice::BEGIN;
+        DecidedQueryCommon::Choice new_choice;
+        new_choice.mode = DecidedQueryCommon::Choice::BEGIN;
         query->PushBackChoice( new_choice );
     }
     

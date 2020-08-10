@@ -5,16 +5,16 @@ using namespace SR;
 
 //---------------------------------- NotMatch ------------------------------------    
 
-PatternQueryResult NotMatchAgent::PatternQuery() const
+PatternQuery NotMatchAgent::GetPatternQuery() const
 {
-    PatternQueryResult r;
+    PatternQuery r;
 	r.RegisterAbnormalLink( AsAgent(GetPattern()) );
 	r.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
     return r;
 }
 
 
-void NotMatchAgent::DecidedQuery( QueryAgentInterface &query,
+void NotMatchAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   const TreePtrInterface *px ) const
 {
     INDENT("!");
@@ -52,9 +52,9 @@ bool NotMatchAgent::BooleanEvaluatorNot::operator()( list<bool> &inputs ) const
 
 //---------------------------------- MatchAll ------------------------------------    
 
-PatternQueryResult MatchAllAgent::PatternQuery() const
+PatternQuery MatchAllAgent::GetPatternQuery() const
 {
-    PatternQueryResult r;
+    PatternQuery r;
     FOREACH( const TreePtr<Node> p, GetPatterns() )
 	    r.RegisterNormalLink( AsAgent(p) );
         
@@ -62,7 +62,7 @@ PatternQueryResult MatchAllAgent::PatternQuery() const
 }
 
 
-void MatchAllAgent::DecidedQuery( QueryAgentInterface &query,
+void MatchAllAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   const TreePtrInterface *px ) const
 { 
     INDENT("&");
@@ -97,9 +97,9 @@ void MatchAllAgent::GetGraphAppearance( bool *bold, string *text, string *shape 
 
 //---------------------------------- MatchAny ------------------------------------    
 
-PatternQueryResult MatchAnyAgent::PatternQuery() const
+PatternQuery MatchAnyAgent::GetPatternQuery() const
 {
-    PatternQueryResult r;
+    PatternQuery r;
     FOREACH( const TreePtr<Node> p, GetPatterns() )
 	    r.RegisterAbnormalLink( AsAgent(p) );
 	r.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
@@ -107,7 +107,7 @@ PatternQueryResult MatchAnyAgent::PatternQuery() const
 }
 
 
-void MatchAnyAgent::DecidedQuery( QueryAgentInterface &query,
+void MatchAnyAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   const TreePtrInterface *px ) const
 {
     INDENT("|");

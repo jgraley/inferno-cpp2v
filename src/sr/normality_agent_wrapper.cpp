@@ -19,10 +19,10 @@ void NormalityAgentWrapper::Configure( const Set<Agent *> &engine_agents,
                                   const Set<Agent *> &master_agents, 
                                   const SCREngine *engine )
 {
-    PatternQueryResult plinks = wrapped_agent->PatternQuery();
+    PatternQuery plinks = wrapped_agent->GetPatternQuery();
 
     abnormal_links.clear();    
-    FOREACH( PatternQueryResult::Link b, plinks.GetAbnormalLinks() )
+    FOREACH( PatternQuery::Link b, plinks.GetAbnormalLinks() )
     {
         shared_ptr<AbnormalLink> al( new AbnormalLink() );
         
@@ -48,25 +48,25 @@ void SetMasterKeys( const CouplingMap &keys )
 }
 
 
-PatternQueryResult NormalityAgentWrapper::PatternQuery() const
+PatternQuery NormalityAgentWrapper::GetPatternQuery() const
 {
-    PatternQueryResult wrapped_result = wrapped_agent->PatternQuery();
-    PatternQueryResult wrapper_result;
+    PatternQuery wrapped_result = wrapped_agent->GetPatternQuery();
+    PatternQuery wrapper_result;
     wrapper_result.evaluator = wrapped_result.evaluator;
 	
     list< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
-    FOREACH( PatternQueryResult::Link b, wrapped_result.GetAbnormalLinks() ) 
+    FOREACH( PatternQuery::Link b, wrapped_result.GetAbnormalLinks() ) 
     {
         al = *alit;
         ++alit;
         FOREACH( Agent *ta, al->terminal_agents )
         {
-            PatternQueryResult::Link nb;
+            PatternQuery::Link nb;
             wrapper_result.RegisterNormalLink( ta );
         }
     }
 
-    FOREACH( const PatternQueryResult::Link &b, wrapped_result.GetNormalLinks() ) 
+    FOREACH( const PatternQuery::Link &b, wrapped_result.GetNormalLinks() ) 
 	{
 		wrapper_result.RegisterNormalLink( b.agent );
 	}
@@ -75,15 +75,15 @@ PatternQueryResult NormalityAgentWrapper::PatternQuery() const
 }
 
 
-void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
+void NormalityAgentWrapper::RunDecidedQuery( DecidedQueryAgentInterface &wrapper_query,
                                           const TreePtrInterface *px ) const
 {
     INDENT("'");    
 	
-    AgentQuery wrapped_query;
+    DecidedQuery wrapped_query;
     list< shared_ptr<AbnormalLink> >::iterator alit = abnormal_links.begin();    
     int i=0;
-    FOREACH( PatternQueryResult::Link b, wrapper_query.GetAbnormalLinks() ) // JSG2020 wrapped_result.blocks?
+    FOREACH( PatternQuery::Link b, wrapper_query.GetAbnormalLinks() ) // JSG2020 wrapped_result.blocks?
     {
         al = *alit;
         ++alit;
@@ -94,7 +94,7 @@ void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
         }
     }
     
-    FOREACH( PatternQueryResult::Link b, wrapper_query.GetNormalLinks() ) // JSG2020 wrapped_result.blocks?
+    FOREACH( PatternQuery::Link b, wrapper_query.GetNormalLinks() ) // JSG2020 wrapped_result.blocks?
     {
         wrapped_query.PushBackChoice( *((*wrapper_query.GetChoices())[i]) ); 
         i++;
@@ -103,7 +103,7 @@ void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
     wrapper_query.Reset();
     
     // Query the wrapped node for links and decisions
-    wrapped_agent->DecidedQuery( wrapped_query, px );
+    wrapped_agent->RunDecidedQuery( wrapped_query, px );
     
     // Early-out on local mismatch of wrapped node.
     if( !wrapped_result.GetLocalMatch() )
@@ -116,12 +116,12 @@ void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
     // own abnormal_links container.
     list<bool> compare_results;
     list< AbnormalLink >::iterator alit = abnormal_links.begin();    
-    FOREACH( AgentQuery::Link b, *(wrapped_query.GetAbnormalLinks()) )
+    FOREACH( DecidedQuery::Link b, *(wrapped_query.GetAbnormalLinks()) )
     {
         al = *alit;
         ++alit;
         
-        // TODO should do this before the wrapped_agent->DecidedQuery() since it *might* help with
+        // TODO should do this before the wrapped_agent->RunDecidedQuery() since it *might* help with
         // choice pushing into the wrapped node.
         // Create whole-domain decisions for the terminal agents and key them with the resultant choices 
         CouplingMap terminal_keys;			
@@ -154,7 +154,7 @@ void NormalityAgentWrapper::DecidedQuery( QueryAgentInterface &wrapper_query,
             throw Mismatch
         }
     }
-    FOREACH( AgentQuery::Link b, *(wrapped_query.GetNormalLinks()) )
+    FOREACH( DecidedQuery::Link b, *(wrapped_query.GetNormalLinks()) )
     {
         wrapper_query.RegisterNormalLink( b ); // TODO implement
     }
@@ -228,11 +228,11 @@ void NormalityAgentWrapper::GetGraphAppearance( bool *bold, string *text, string
 
 shared_ptr<ContainerInterface> NormalityAgentWrapper::GetVisibleChildren() const
 {
-    PatternQueryResult plinks = wrapped_agent->PatternQuery();
+    PatternQuery plinks = wrapped_agent->GetPatternQuery();
 	shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
 
     // Hide the abnormal children. I need different names for things.
-    FOREACH( PatternQueryResult::Link b, *(wrapped_query.GetNormalLinks()) )
+    FOREACH( PatternQuery::Link b, *(wrapped_query.GetNormalLinks()) )
         seq->push_back( b.agent );
 			
 	return seq;

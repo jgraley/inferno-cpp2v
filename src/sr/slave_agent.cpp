@@ -12,15 +12,15 @@ SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search ) :
 }
 
 
-PatternQueryResult SlaveAgent::PatternQuery() const
+PatternQuery SlaveAgent::GetPatternQuery() const
 {
-    PatternQueryResult r;
+    PatternQuery r;
 	r.RegisterNormalLink( AsAgent(GetThrough()) );
     return r;
 }
 
 
-void SlaveAgent::DecidedQuery( QueryAgentInterface &query,
+void SlaveAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
                                const TreePtrInterface *px ) const
 {
     INDENT("l");

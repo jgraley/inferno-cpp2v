@@ -36,14 +36,14 @@ public:
     }
 
     /// List the Agents reached via links during search
-    virtual PatternQueryResult PatternQuery() const = 0;
+    virtual PatternQuery GetPatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
-    virtual void DecidedQuery( QueryAgentInterface &query,
+    virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                const TreePtrInterface *px ) const = 0;                                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const TreePtrInterface &x,
-                             AgentQuery::Choices choices ) = 0;
+                             DecidedQuery::Choices choices ) = 0;
     virtual void TrackingKey( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
 	virtual void AgentConfigure( const SCREngine *e ) = 0;
@@ -69,7 +69,7 @@ public:
     TreePtr<Node> GetCoupled();                                  
     void ResetKey();    
     virtual void KeyReplace( const TreePtrInterface &x,
-                             AgentQuery::Choices choices );
+                             DecidedQuery::Choices choices );
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplace();
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );

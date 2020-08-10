@@ -7,9 +7,9 @@ using namespace SR;
 
 //---------------------------------- SearchContainerAgent ------------------------------------    
 
-PatternQueryResult SearchContainerAgent::PatternQuery() const
+PatternQuery SearchContainerAgent::GetPatternQuery() const
 {
-    PatternQueryResult r;
+    PatternQuery r;
 	r.RegisterNormalLink( AsAgent(terminus) );
     
     // Allow subclasses to further restrict
@@ -19,7 +19,7 @@ PatternQueryResult SearchContainerAgent::PatternQuery() const
 }
 
 
-void SearchContainerAgent::DecidedQuery( QueryAgentInterface &query,
+void SearchContainerAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
                                          const TreePtrInterface *px ) const
 {
     INDENT("#");
@@ -54,10 +54,10 @@ void SearchContainerAgent::DecidedQuery( QueryAgentInterface &query,
 
 
 void SearchContainerAgent::KeyReplace( const TreePtrInterface &x,
-                                       QueryCommonInterface::Choices choices )
+                                       DecidedQueryCommon::Choices choices )
 {
     ASSERT( choices.size() == 1 )("Expected a single choice, choices.size()=%d", choices.size());
-    ASSERT( choices.front().mode == QueryCommonInterface::Choice::ITER );
+    ASSERT( choices.front().mode == DecidedQueryCommon::Choice::ITER );
     ContainerInterface::iterator thistime = choices.front().iter;
     terminus_key = *thistime;
     DoKey(x);
@@ -105,14 +105,14 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> 
 }
 
 
-void StuffAgent::PatternQueryRestrictions( PatternQueryResult &r ) const
+void StuffAgent::PatternQueryRestrictions( PatternQuery &r ) const
 {
     if( recurse_restriction )
         r.RegisterMultiplicityLink( AsAgent(recurse_restriction) );
 }
 
 
-void StuffAgent::DecidedQueryRestrictions( QueryAgentInterface &query, ContainerInterface::iterator thistime ) const
+void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, ContainerInterface::iterator thistime ) const
 {
     // Where a recurse restriction is in use, apply it to all the recursion points
     // underlying the current iterator, thistime.

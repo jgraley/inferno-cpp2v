@@ -5,15 +5,15 @@
 using namespace SR;
 
 
-PatternQueryResult PointerIsAgent::PatternQuery() const
+PatternQuery PointerIsAgent::GetPatternQuery() const
 {
-    PatternQueryResult r;
+    PatternQuery r;
 	r.RegisterNormalLink( AsAgent(GetPointer()) );
     return r;
 }
 
 
-void PointerIsAgent::DecidedQuery( QueryAgentInterface &query,
+void PointerIsAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
                                    const TreePtrInterface *px ) const
 {
 	INDENT("@");
