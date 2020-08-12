@@ -3,7 +3,6 @@
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
 #include "helpers/simple_compare.hpp"
-#include "slave_agent.hpp"
 #include "standard_agent.hpp"
 #include "overlay_agent.hpp"
 #include "search_container_agent.hpp"
@@ -45,9 +44,9 @@ void SCREngine::Configure( const CompareReplace *overall_master,
             
     TRACE("Elaborating ")(*this );    
 
-    Set<SlaveAgent *> my_slaves;   
-    ConfigCategoriseSubs( master_agents, my_slaves );    
-    ConfigCreateSlaveEngines( my_slaves );    
+    Set<AgentCommonNeedSCREngine *> my_agents_needing_engines;   
+    ConfigCategoriseSubs( master_agents, my_agents_needing_engines );    
+    ConfigCreateMyEngines( my_agents_needing_engines );    
     ConfigConfigureSubs( master_agents );
     
     and_rule_engine.Configure(root_agent, master_agents);    
@@ -97,7 +96,7 @@ void SCREngine::ConfigInstallRootAgents( TreePtr<Node> cp,
 }
     
 
-void SCREngine::ConfigCategoriseSubs( const Set<Agent *> &master_agents, Set<SlaveAgent *> &my_slaves )
+void SCREngine::ConfigCategoriseSubs( const Set<Agent *> &master_agents, Set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
 {
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
     // So that the compare and replace subtrees of slaves are "obsucured" and not visible
@@ -113,20 +112,18 @@ void SCREngine::ConfigCategoriseSubs( const Set<Agent *> &master_agents, Set<Sla
 
     // Determine who our slaves are
     FOREACH( Agent *a, *my_agents )
-        if( SlaveAgent *sa = dynamic_cast<SlaveAgent *>(a) )
-            my_slaves.insert( sa );
-        else
-            ASSERT( !dynamic_cast<SCREngine *>(a) ); // not expecting to see any engine other than a slave
+        if( AgentCommonNeedSCREngine *sa = dynamic_cast<AgentCommonNeedSCREngine *>(a) )
+            my_agents_needing_engines.insert( sa );
 }
 
 
-void SCREngine::ConfigCreateSlaveEngines( const Set<SlaveAgent *> &my_slaves )
+void SCREngine::ConfigCreateMyEngines( const Set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
 {
-    FOREACH( SlaveAgent *a, my_slaves )
+    FOREACH( AgentCommonNeedSCREngine *a, my_agents_needing_engines )
     {
-        my_slaves_and_engines.emplace( std::piecewise_construct,
-                                       std::forward_as_tuple( a ),
-                                       std::forward_as_tuple( a->IsSearch() ) );
+        my_engines.emplace( std::piecewise_construct,
+                            std::forward_as_tuple( a ),
+                            std::forward_as_tuple( a->IsSearch() ) );
     }
         
 }
@@ -138,7 +135,7 @@ void SCREngine::ConfigConfigureSubs( const Set<Agent *> &master_agents )
     Set<Agent *> surrounding_agents = SetUnion( master_agents, *my_agents ); 
             
     // Recurse into the slaves' configure
-    for( pair<SlaveAgent * const, SCREngine> &p : my_slaves_and_engines )
+    for( pair<AgentCommonNeedSCREngine * const, SCREngine> &p : my_engines )
     {
         TRACE("Recursing to configure slave ")(*p.first)("\n");
         p.second.Configure( overall_master_ptr, 
@@ -152,8 +149,8 @@ void SCREngine::ConfigConfigureSubs( const Set<Agent *> &master_agents )
     // Give agents pointers to here and our coupling keys
     FOREACH( Agent *a, *my_agents )
     {        
-        if( dynamic_cast<SlaveAgent *>(a) )
-            continue;
+        if( dynamic_cast<AgentCommonNeedSCREngine *>(a) )
+            continue; // TODO yuck, should determine this in ConfigCategoriseSubs()
         TRACE("Configuring agent ")(*a)("\n");
         a->AgentConfigure( this );             
     }    
@@ -261,12 +258,12 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
     KeyReplaceNodes( and_rule_engine.GetConjecture(), 
                      &and_rule_engine.GetCouplingKeys() );
 
-    if( !my_slaves_and_engines.empty() )
+    if( !my_engines.empty() )
     {
 		CouplingMap coupling_keys = MapUnion( *master_keys, 
                                               and_rule_engine.GetCouplingKeys() );    
 		
-        for( pair<SlaveAgent * const, SCREngine> &p : my_slaves_and_engines )
+        for( pair<AgentCommonNeedSCREngine * const, SCREngine> &p : my_engines )
             p.first->SetMasterCouplingKeys( coupling_keys );
 	}
 
@@ -299,7 +296,7 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *proot,
     {
         bool stop = depth < stop_after.size() && stop_after[depth]==i;
         if( stop )
-            for( pair<SlaveAgent * const, SCREngine> &p : my_slaves_and_engines )
+            for( pair<AgentCommonNeedSCREngine * const, SCREngine> &p : my_engines )
                 p.second.SetStopAfter(stop_after, depth+1); // and propagate the remaining ones
         try
         {

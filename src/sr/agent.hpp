@@ -17,6 +17,7 @@ namespace SR
 class SpecialBase;
 class SCREngine;
 class Agent;
+typedef Map< Agent *, TreePtr<Node> > CouplingMap;
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Traceable,
@@ -90,8 +91,11 @@ private:
 class AgentCommonNeedSCREngine : public AgentCommon
 {
 public:
+	virtual bool IsSearch() const = 0;
+	virtual TreePtr<Node> GetSearchPattern() const = 0;
+	virtual TreePtr<Node> GetReplacePattern() const = 0;
     virtual void AgentConfigure( const SCREngine *master_engine, SCREngine *my_engine ) = 0;
-	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const = 0;
+    virtual void SetMasterCouplingKeys( const CouplingMap &keys ) = 0;
 };
 
 // --- General note on SPECIAL_NODE_FUNCTIONS and PRE_RESTRICTION ---
@@ -133,6 +137,5 @@ public:
     }
 };
 
-typedef Map< Agent *, TreePtr<Node> > CouplingMap;
 };
 #endif

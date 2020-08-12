@@ -16,7 +16,6 @@
 namespace SR 
 {
 class Agent;
-class SlaveAgent;
 class Conjecture;
 class SpecialBase;
 class CompareReplace;
@@ -41,8 +40,8 @@ public:
 private:
     virtual void ConfigInstallRootAgents( TreePtr<Node> cp,
 										  TreePtr<Node> rp );
-    virtual void ConfigCategoriseSubs( const Set<Agent *> &master_agents, Set<SlaveAgent *> &my_slaves );
-    virtual void ConfigCreateSlaveEngines( const Set<SlaveAgent *> &my_slaves );
+    virtual void ConfigCategoriseSubs( const Set<Agent *> &master_agents, Set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
+    virtual void ConfigCreateMyEngines( const Set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
     virtual void ConfigConfigureSubs( const Set<Agent *> &master_agents );
     
 public:
@@ -84,7 +83,7 @@ private:
     Agent *root_agent;
     const SCREngine *master_ptr;
     std::shared_ptr< Set<Agent *> > my_agents;   
-    std::map<SlaveAgent *, SCREngine> my_slaves_and_engines;   
+    std::map<AgentCommonNeedSCREngine *, SCREngine> my_engines;   
     
     static int repetitions;
     static bool rep_error;
