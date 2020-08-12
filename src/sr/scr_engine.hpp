@@ -11,7 +11,6 @@
 #include "and_rule_engine.hpp"
 #include <set>
 
-#define MAKE_SUB_ENGINES
 
 /// SR namespace contains the search and replace implementation
 namespace SR 
@@ -42,12 +41,8 @@ public:
 private:
     virtual void ConfigInstallRootAgents( TreePtr<Node> cp,
 										  TreePtr<Node> rp );
-#ifdef MAKE_SUB_ENGINES
     virtual void ConfigCategoriseSubs( const Set<Agent *> &master_agents, Set<SlaveAgent *> &my_slaves );
     virtual void ConfigCreateSlaveEngines( const Set<SlaveAgent *> &my_slaves );
-#else
-    virtual void ConfigCategoriseSubs( const Set<Agent *> &master_agents );
-#endif
     virtual void ConfigConfigureSubs( const Set<Agent *> &master_agents );
     
 public:
@@ -89,11 +84,7 @@ private:
     Agent *root_agent;
     const SCREngine *master_ptr;
     std::shared_ptr< Set<Agent *> > my_agents;   
-#ifdef MAKE_SUB_ENGINES
     std::map<SlaveAgent *, SCREngine> my_slaves_and_engines;   
-#else
-    Set<SlaveAgent *> my_slaves;   
-#endif
     
     static int repetitions;
     static bool rep_error;

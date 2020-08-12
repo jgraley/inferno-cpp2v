@@ -6,11 +6,7 @@ using namespace SR;
 
 SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search_ ) :
     is_search( is_search_ ),
-#ifdef MAKE_SUB_ENGINES
     my_engine( nullptr ),
-#else
-    my_engine( make_shared<SCREngine>(is_search_) ),
-#endif
     search_pattern( sp ),
     replace_pattern( rp )
 {
@@ -57,20 +53,11 @@ void SlaveAgent::GetGraphInfo( vector<string> *labels,
 }
 
 
-#ifdef MAKE_SUB_ENGINES
 void SlaveAgent::AgentConfigure( const SCREngine *master_engine, SCREngine *my_engine_ )
 {
     AgentCommon::AgentConfigure(master_engine);
     my_engine = my_engine_;
 }
-#else
-void SlaveAgent::Configure( const Set<Agent *> &agents_already_configured, const SCREngine *master )
-{
-    ASSERT(master); // must not be overall master (i.e. NULL)
-    const CompareReplace *overall_master = master->GetOverallMaster();
-    my_engine->Configure(overall_master, search_pattern, replace_pattern, agents_already_configured, master);
-}    
-#endif
 
 void SlaveAgent::SetMasterCouplingKeys( const CouplingMap &keys )
 {
