@@ -154,7 +154,7 @@ public:
 
 
 class DecidedQuery : virtual public DecidedQueryClientInterface,
-                   virtual public DecidedQueryAgentInterface
+                     virtual public DecidedQueryAgentInterface
 {
 public:    
     DecidedQuery() :

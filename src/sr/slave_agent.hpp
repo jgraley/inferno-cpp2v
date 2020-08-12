@@ -20,7 +20,11 @@ class SearchReplace;
 /// operates on the resulting subtree, performing search and replace operations
 /// via the `search_pattern` and `replace_pattern` pointers until no more 
 /// matches are found (the usual reductive style).  
+#ifdef MAKE_SUB_ENGINES
+class SlaveAgent : public virtual AgentCommonNeedSCREngine
+#else
 class SlaveAgent : public virtual AgentCommon
+#endif
 {
 public:
     SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );
@@ -31,12 +35,19 @@ public:
     virtual TreePtr<Node> GetThrough() const = 0;    
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *blocks ) const;
+#ifdef MAKE_SUB_ENGINES
+    virtual void AgentConfigure( const SCREngine *master_engine, SCREngine *my_engine );
+#else
     virtual void Configure( const Set<Agent *> &agents_already_configured, const SCREngine *master );
+#endif
     void SetMasterCouplingKeys( const CouplingMap &keys );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
-	virtual shared_ptr<SCREngine> GetSCREngine() const { return scr_engine; }
+	virtual SCREngine *GetSCREngine() const { return &*my_engine; }
+	virtual bool IsSearch() const { return is_search; }
+	virtual TreePtr<Node> GetSearchPattern() const { return search_pattern; }
+	virtual TreePtr<Node> GetReplacePattern() const { return replace_pattern; }
 
     TreePtr<Node> search_pattern;
     TreePtr<Node> replace_pattern;   
@@ -44,7 +55,12 @@ public:
     CouplingMap master_keys;
 
 private:
-    std::shared_ptr<SCREngine> scr_engine;
+    bool is_search;
+#ifdef MAKE_SUB_ENGINES
+    SCREngine *my_engine;
+#else    
+    std::shared_ptr<SCREngine> my_engine;
+#endif    
 };
 
 

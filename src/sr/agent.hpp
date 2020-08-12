@@ -35,6 +35,8 @@ public:
         return *this;
     }
 
+	virtual void AgentConfigure( const SCREngine *master_engine ) = 0;
+
     /// List the Agents reached via links during search
     virtual PatternQuery GetPatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
@@ -46,7 +48,6 @@ public:
                              DecidedQuery::Choices choices ) = 0;
     virtual void TrackingKey( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
-	virtual void AgentConfigure( const SCREngine *e ) = 0;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const = 0;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const = 0;
 		
@@ -63,7 +64,7 @@ class AgentCommon : public Agent
 {
 public:
     AgentCommon();
-    void AgentConfigure( const SCREngine *e );
+    virtual void AgentConfigure( const SCREngine *master_engine );
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
     void DoKey( TreePtr<Node> x );
     TreePtr<Node> GetCoupled();                                  
@@ -85,6 +86,13 @@ private:
     TreePtr<Node> coupling_key;    
 };
 
+
+class AgentCommonNeedSCREngine : public AgentCommon
+{
+public:
+    virtual void AgentConfigure( const SCREngine *master_engine, SCREngine *my_engine ) = 0;
+	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const = 0;
+};
 
 // --- General note on SPECIAL_NODE_FUNCTIONS and PRE_RESTRICTION ---
 // Special nodes (that is nodes defined here with special S&R behaviour)

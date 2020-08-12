@@ -429,7 +429,7 @@ string Graph::SimpleLabel( string name, TreePtr<Node> n )
 string Graph::DoNode( TreePtr<Node> n )
 {
     if( SlaveAgent *s = dynamic_cast<SlaveAgent *>(n.get()) )
-	    return UniqueWalk( s->GetSCREngine().get(), Id( n.get() ), false );
+	    return UniqueWalk( s->GetSCREngine(), Id( n.get() ), false );
 
 	string s;
 	bool bold;
@@ -474,7 +474,7 @@ string Graph::DoNode( TreePtr<Node> n )
 string Graph::DoNodeLinks( TreePtr<Node> n )
 {
     if( SlaveAgent *s = dynamic_cast<SlaveAgent *>(n.get()) )
-        return UniqueWalk( s->GetSCREngine().get(), Id( n.get() ), true );
+        return UniqueWalk( s->GetSCREngine(), Id( n.get() ), true );
 
     string s;
     TRACE("Itemising\n");
