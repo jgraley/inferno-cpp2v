@@ -33,8 +33,14 @@ void Agent::DoDecidedQuery( DecidedQueryAgentInterface &query,
         while( query.GetDecisions()->size() < pq.GetDecisions()->size() )
             query.RegisterEmptyDecision();
             
+        query.last_activity = DecidedQueryCommon::QUERY;
+            
         rethrow_exception(current_exception());
     }
+    
+    PatternQuery pq = GetPatternQuery();
+    ASSERT( query.GetDecisions()->size() == pq.GetDecisions()->size() );
+    query.last_activity = DecidedQueryCommon::QUERY;
 }                             
 
 

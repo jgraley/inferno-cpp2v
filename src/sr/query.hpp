@@ -117,6 +117,13 @@ public:
     
     virtual const Choices *GetChoices() const = 0;
     virtual const Ranges *GetDecisions() const = 0;
+    
+    enum
+    {
+        NEW,
+        QUERY,
+        CONJECTURE
+    } last_activity = NEW;
 };
 
 

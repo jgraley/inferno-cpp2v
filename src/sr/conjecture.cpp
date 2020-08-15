@@ -69,7 +69,8 @@ bool Conjecture::IncrementAgent( Agent *agent )
 	    return false;  
 	}
     FillMissingChoicesWithBegin(agent);
-    
+    ASSERT( query->GetDecisions()->size() == query->GetChoices()->size() );
+
     const auto &back_decision = query->GetDecisions()->back();
     DecidedQueryCommon::Choice back_choice = query->GetChoices()->back();
     
@@ -109,10 +110,29 @@ bool Conjecture::IncrementAgent( Agent *agent )
 
 bool Conjecture::IncrementConjecture(Agent *agent)
 {       
-    bool ok = IncrementAgent( agent );
+    AgentRecord *record = &agent_records.at(agent);
+    auto query = record->query;
+    PatternQuery pq = agent->GetPatternQuery();
+    
+    bool ok = false;
+    switch( query->last_activity )
+    {
+        case DecidedQueryCommon::NEW:
+            ASSERT( query->GetDecisions()->size() == 0 );
+            break;
+            
+        case DecidedQueryCommon::QUERY:
+            ASSERT( query->GetDecisions()->size() == pq.GetDecisions()->size() );
+            ok = IncrementAgent( agent );
+            query->last_activity = DecidedQueryCommon::CONJECTURE;
+            break;
+            
+        case DecidedQueryCommon::CONJECTURE:
+            break;
+    }
+
     if( !ok )
     {
-        AgentRecord *record = &agent_records.at(agent);
         if( record->previous_agent )
             return IncrementConjecture( record->previous_agent );
         else
@@ -158,6 +178,7 @@ void Conjecture::FillMissingChoicesWithBegin( Agent *agent )
 {
     auto query = agent_records.at(agent).query;
     ASSERT( query );
+    PatternQuery pq = agent->GetPatternQuery();
        
     while( query->GetChoices()->size() < query->GetDecisions()->size() )
     {
