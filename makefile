@@ -126,7 +126,7 @@ iclean : makefile
 	-rm -f resource/script/* resource/lib/*
 
 #
-# Subordinate makefiles included last so they don't hijack the makefile goal
+# Subordinate makefiles included last so they don't hijack the makefile default goal
 #
 include src/makefile
 include test/makefile
