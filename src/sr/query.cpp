@@ -172,7 +172,16 @@ void DecidedQuery::InvalidateBack()
     ASSERT( !decisions.empty() );
     ASSERT( choices.size() == decisions.size() ); 
     choices.pop_back();
-    decisions.pop_back();    
+    if( next_decision==decisions.end() ) // Note: possibly always true
+    {
+        decisions.pop_back();    
+        next_decision=decisions.end(); // Force agent to regenerate decision
+    }
+    else
+    {
+        decisions.pop_back();    
+    }
+    
 }
 
 
@@ -205,7 +214,7 @@ void DecidedQuery::EnsureChoicesHaveIterators()
 ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
 {
  
-    ASSERT( r.inclusive || r.begin != r.end )("no empty decisions");
+    //ASSERT( r.inclusive || r.begin != r.end )("no empty decisions");
     ContainerInterface::iterator it;
     if( next_decision == decisions.end() ) // run out of decisions?
     {
@@ -229,7 +238,7 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
         }
         ASSERT( r.inclusive || it != r.end )("A choice can only be end if the decision is inclusive");
         ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
-        ASSERT( *next_decision == r ); 
+        ASSERT( *next_decision == r ); // can only re-register an identical decision
         ++next_decision; 
         ++next_choice;
     }    
@@ -277,14 +286,15 @@ bool DecidedQuery::IsAlreadyGotNextOldDecision() const
 
 const DecidedQueryCommon::Range &DecidedQuery::GetNextOldDecision() const
 {
-    ASSERT( IsAlreadyGotNextOldDecision() );
+    ASSERT( next_decision != decisions.end() )
+          ("%d [%p %p ... %p] %p\n", decisions.size(), &decisions[0], &decisions[1], &decisions.back(), &*next_decision);
     return *next_decision;
 }
 
 
-DecidedQueryCommon::Ranges::iterator DecidedQuery::GetNextDecisionIterator() const
+int DecidedQuery::GetNextDecisionIterator() const
 {
-    return next_decision;
+    return &*next_decision - &decisions.front();  // really an index TODO go back to iterator when we're sure the vector won't be relocated
 }
 
 
@@ -305,6 +315,13 @@ ContainerInterface::iterator DecidedQuery::RegisterNextOldDecision()
     ++next_decision; 
     ++next_choice;
     return it;
+}
+
+
+void DecidedQuery::RegisterEmptyDecision()
+{
+    auto empty_container = make_shared< Collection<Node> >();
+    (void)RegisterDecision( empty_container, false );
 }
 
 

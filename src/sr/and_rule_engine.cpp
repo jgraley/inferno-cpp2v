@@ -146,7 +146,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 
     // Run the compare implementation to get the links based on the choices
     TRACE(*agent)("?=")(**px)(" RunDecidedQuery()\n");    
-    agent->RunDecidedQuery( *query, px );
+    agent->DoDecidedQuery( *query, px );
 
     PatternQuery pq = agent->GetPatternQuery();
     ASSERT( pq.GetNormalLinks()->size() == query->GetNormalLinks()->size() &&

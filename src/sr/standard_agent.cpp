@@ -72,7 +72,7 @@ void StandardAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
                                      const TreePtrInterface *px ) const
 {
     INDENT(".");
-    
+    int old_end_decision = query.GetNextDecisionIterator();
     query.Reset();
 
     // Check pre-restriction
@@ -101,7 +101,7 @@ void StandardAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
             CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            DecidedQueryCollection( query, p_x_col, *pattern_col );
+            DecidedQueryCollection( query, p_x_col, *pattern_col, old_end_decision );
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -220,7 +220,8 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 
 void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                             CollectionInterface *px,
-		 					                CollectionInterface &pattern ) const
+		 					                CollectionInterface &pattern,
+                                            int old_end_decision ) const
 {
     INDENT(" ");
     
@@ -251,7 +252,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
 	    	// Report a block for the chosen node
             ContainerInterface::iterator xit;
 
-            if( query.IsAlreadyGotNextOldDecision() )
+            if( query.GetNextDecisionIterator() < old_end_decision )
             {
                 // Decision already in conjecture and valid. 
                 const Conjecture::Range &old_decision = query.GetNextOldDecision();
@@ -262,7 +263,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                     xremaining.push_back(tp);
                     
                 // re-submit the exact same decision.
-                xit = query.RegisterNextOldDecision();
+                xit = query.RegisterDecision( old_decision );
             }
             else
             {

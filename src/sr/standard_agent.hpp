@@ -29,7 +29,8 @@ private:
     	                       SequenceInterface &pattern ) const;
     void DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                  CollectionInterface *px,
-    		                     CollectionInterface &pattern ) const;
+    		                     CollectionInterface &pattern,
+                                 int old_end_decision ) const;
 public:
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );

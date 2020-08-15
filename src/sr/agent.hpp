@@ -41,8 +41,8 @@ public:
     /// List the Agents reached via links during search
     virtual PatternQuery GetPatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
-    virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
-                               const TreePtrInterface *px ) const = 0;                                                
+    virtual void DoDecidedQuery( DecidedQueryAgentInterface &query,
+                                 const TreePtrInterface *px ) const;                                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const TreePtrInterface &x,
@@ -53,6 +53,10 @@ public:
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const = 0;
 		
 	static Agent *AsAgent( TreePtr<Node> node );
+
+protected:
+    virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
+                                  const TreePtrInterface *px ) const = 0;                                                
 };
 
 

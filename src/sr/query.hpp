@@ -116,6 +116,7 @@ public:
     typedef list<Link> Links;
     
     virtual const Choices *GetChoices() const = 0;
+    virtual const Ranges *GetDecisions() const = 0;
 };
 
 
@@ -132,9 +133,10 @@ public:
     virtual ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive ) = 0; 
     virtual bool IsAlreadyGotNextOldDecision() const = 0;
     virtual const Range &GetNextOldDecision() const = 0;
-    virtual Ranges::iterator GetNextDecisionIterator() const = 0;
+    virtual int GetNextDecisionIterator() const = 0;
     virtual ContainerInterface::iterator RegisterNextOldDecision() = 0;
-
+    virtual void RegisterEmptyDecision() = 0;
+    
     virtual void RegisterNormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
     virtual void RegisterAbnormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
     virtual void RegisterMultiplicityLink( Agent *a, const TreePtrInterface *px ) = 0; 
@@ -153,7 +155,6 @@ public:
     virtual const Links *GetMultiplicityLinks() const = 0; // pointer returned because the links contain the local links
     virtual shared_ptr<BooleanEvaluator> GetEvaluator() const = 0;
     
-    virtual const Ranges *GetDecisions() const = 0;
     virtual void InvalidateBack() = 0;
     virtual void SetBackChoice( Choice newc ) = 0;
     virtual void PushBackChoice( Choice newc ) = 0;    
@@ -180,8 +181,9 @@ public:
     ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive );
     bool IsAlreadyGotNextOldDecision() const;
     const Range &GetNextOldDecision() const;
-    Ranges::iterator GetNextDecisionIterator() const;
+    int GetNextDecisionIterator() const;
     ContainerInterface::iterator RegisterNextOldDecision();
+    void RegisterEmptyDecision();
 
     void RegisterNormalLink( Agent *a, const TreePtrInterface *px ); 
     void RegisterAbnormalLink( Agent *a, const TreePtrInterface *px ); 

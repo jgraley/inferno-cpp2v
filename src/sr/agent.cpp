@@ -3,6 +3,7 @@
 #include "common/hit_count.hpp"
 #include "helpers/simple_compare.hpp"
 #include "agent.hpp"
+#include <stdexcept>
 
 using namespace SR;
 
@@ -13,6 +14,24 @@ Agent *Agent::AsAgent( TreePtr<Node> node )
     ASSERT( agent )("Called AsAgent(")(*node)(") with non-Agent");
     return agent;
 }
+
+
+void Agent::DoDecidedQuery( DecidedQueryAgentInterface &query,
+                             const TreePtrInterface *px ) const
+{
+    try
+    {
+        RunDecidedQuery( query, px );
+    }
+    catch( ::Mismatch & )
+    {
+        PatternQuery pq = GetPatternQuery();
+        while( query.GetDecisions()->size() < pq.GetDecisions()->size() )
+            query.RegisterEmptyDecision();
+            
+        rethrow_exception(current_exception());
+    }
+}                             
 
 
 AgentCommon::AgentCommon() :
