@@ -170,17 +170,12 @@ void DecidedQuery::InvalidateBack()
     // TODO may not need all thes preconditions
     ASSERT( !choices.empty() );
     ASSERT( !decisions.empty() );
-    ASSERT( choices.size() == decisions.size() ); 
+    //ASSERT( choices.size() == decisions.size() ); 
+    if( next_decision-decisions.begin() == choices.size() ) // Note: possibly always true
+        --next_decision; // Force agent to regenerate decision
+  
+    //decisions.pop_back();    
     choices.pop_back();
-    if( next_decision==decisions.end() ) // Note: possibly always true
-    {
-        decisions.pop_back();    
-        next_decision=decisions.end(); // Force agent to regenerate decision
-    }
-    else
-    {
-        decisions.pop_back();    
-    }
     
 }
 
@@ -238,7 +233,7 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
         }
         ASSERT( r.inclusive || it != r.end )("A choice can only be end if the decision is inclusive");
         ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
-        ASSERT( *next_decision == r ); // can only re-register an identical decision
+        *next_decision = r;
         ++next_decision; 
         ++next_choice;
     }    

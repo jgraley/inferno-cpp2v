@@ -63,16 +63,14 @@ bool Conjecture::IncrementAgent( Agent *agent )
     auto query = agent_records.at(agent).query;
     ASSERT( query );
     
-	if( query->GetDecisions()->empty() )
+	if( query->GetChoices()->empty() )
 	{
         // this query is defunct
 	    return false;  
 	}
-    FillMissingChoicesWithBegin(agent);
-    ASSERT( query->GetDecisions()->size() == query->GetChoices()->size() );
 
-    const auto &back_decision = query->GetDecisions()->back();
     DecidedQueryCommon::Choice back_choice = query->GetChoices()->back();
+    const auto &back_decision = (*query->GetDecisions())[query->GetChoices()->size()-1];
     
     // Inclusive case - we let the choice go to end but we won't go any further
     if( back_choice.mode==DecidedQueryCommon::Choice::ITER && back_decision.inclusive && back_choice.iter == back_decision.end )
@@ -123,7 +121,10 @@ bool Conjecture::IncrementConjecture(Agent *agent)
             
         case DecidedQueryCommon::QUERY:
             ASSERT( query->GetDecisions()->size() == pq.GetDecisions()->size() );
+            FillMissingChoicesWithBegin(agent);
+            ASSERT( query->GetDecisions()->size() == query->GetChoices()->size() );
             ok = IncrementAgent( agent );
+            FillMissingChoicesWithBegin(agent);
             query->last_activity = DecidedQueryCommon::CONJECTURE;
             break;
             
