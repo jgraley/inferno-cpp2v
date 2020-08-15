@@ -32,11 +32,11 @@ public:
                             TreePtr<Node> cp,
                             TreePtr<Node> rp = TreePtr<Node>(),
                             const Set<Agent *> &master_agents = Set<Agent *>(),                            
-                            const SCREngine *master = NULL); /* if null, IT'S YOU!!!! */
+                            const SCREngine *master = NULL); /* if null, you are overall master */
 
     // A configure that doesn't know what the search and replace patterns are
     virtual void Configure( const Set<Agent *> &master_agents,
-                            const SCREngine *master /* if null, IT'S YOU!!!! */ );
+                            const SCREngine *master /* if null, you are overall master */ );
 private:
     virtual void ConfigInstallRootAgents( TreePtr<Node> cp,
 										  TreePtr<Node> rp );
@@ -52,8 +52,7 @@ public:
     void SingleCompareReplace( TreePtr<Node> *proot,
                                const CouplingMap *master_keys );
     void Compare( const TreePtrInterface *p_start_x ) const;
-    //void Compare( const TreePtrInterface *p_start_x,
-    //              const CouplingMap *master_keys ) const;
+
 private:
     void KeyReplaceNodes( const Conjecture &conj,
                           const CouplingMap *coupling_keys) const;

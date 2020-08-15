@@ -69,9 +69,10 @@ PatternQuery StandardAgent::GetPatternQuery() const
 
 
 void StandardAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                  const TreePtrInterface *px ) const
+                                     const TreePtrInterface *px ) const
 {
     INDENT(".");
+    
     query.Reset();
 
     // Check pre-restriction

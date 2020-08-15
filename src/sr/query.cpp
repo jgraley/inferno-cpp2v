@@ -229,7 +229,7 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
         }
         ASSERT( r.inclusive || it != r.end )("A choice can only be end if the decision is inclusive");
         ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
-        *next_decision = r; // overwrite TODO they should be identical!
+        ASSERT( *next_decision == r ); 
         ++next_decision; 
         ++next_choice;
     }    
@@ -269,16 +269,22 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const ContainerInte
 }                                                      
 */
 
-bool DecidedQuery::IsAlreadyGotNextOldDecision()
+bool DecidedQuery::IsAlreadyGotNextOldDecision() const
 {
     return next_decision != decisions.end();
 }
 
 
-const Conjecture::Range &DecidedQuery::GetNextOldDecision()
+const DecidedQueryCommon::Range &DecidedQuery::GetNextOldDecision() const
 {
     ASSERT( IsAlreadyGotNextOldDecision() );
     return *next_decision;
+}
+
+
+DecidedQueryCommon::Ranges::iterator DecidedQuery::GetNextDecisionIterator() const
+{
+    return next_decision;
 }
 
 

@@ -135,7 +135,13 @@ bool FlattenNode_iterator::operator==( const ContainerInterface::iterator_interf
 	ASSERT(pi)("Comparing traversing iterator with something else ")(ib);
 	if( pi->IsAtEnd() || IsAtEnd() )
 		return pi->IsAtEnd() && IsAtEnd();
-	return pi->mit==mit && pi->cit==cit; 
+	if( pi->mit != mit )
+        return false;
+    ASSERT( GetCurrentMember() == pi->GetCurrentMember() ); // because the mits match
+    if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
+        if( pi->cit != cit )
+            return false;
+    return true;
 }
 
 void FlattenNode_iterator::Overwrite( FlattenNode_iterator::pointer v ) const

@@ -199,23 +199,10 @@ void SCREngine::Compare( const TreePtrInterface *p_start_x ) const
 }
 
 
-// This one operates from root for a stand-alone compare operation (side API)
-//void SCREngine::Compare( const TreePtrInterface *p_start_x,
-//                         const CouplingMap *master_keys ) const
-//{
-//    and_rule_engine.Compare( p_start_x, master_keys );
-//}
-
-
 void SCREngine::KeyReplaceNodes( const Conjecture &conj,
                                  const CouplingMap *coupling_keys ) const
 {
     INDENT("K");   
-    // NO! coupling_keys now contains the master's couplings - we must not touch the 
-    // master's agents 
-    //typedef pair< Agent *, TreePtr<Node> > keypair;
-    //FOREACH( keypair c, coupling_keys )
-    //    c.first->KeyReplace(c.second, conj.GetChoices(c.first));
         
     FOREACH( Agent *a, *my_agents )
     {

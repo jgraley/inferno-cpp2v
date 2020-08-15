@@ -72,7 +72,15 @@ public:
         std::shared_ptr<ContainerInterface> container; // Only needed if the container is not part of the x tree
         bool operator==(const Range &o) const // Only required for an ASSERT
         {
-			return begin==o.begin && end==o.end && inclusive==o.inclusive && container==o.container;
+			if( begin != o.begin )
+                return false;
+            if( end != o.end )
+                return false;
+            if( inclusive != o.inclusive )
+                return false;
+            if( container != o.container )
+                return false;
+            return true;
 		}
     };
     
@@ -122,10 +130,10 @@ public:
                                                            bool inclusive,
                                                            std::shared_ptr<ContainerInterface> container=nullptr ) = 0; 
     virtual ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive ) = 0; 
-    //virtual ContainerInterface::iterator RegisterDecision( const ContainerInterface &container, bool inclusive );
-    virtual bool IsAlreadyGotNextOldDecision() = 0; 
-    virtual const Range &GetNextOldDecision() = 0; 
-    virtual ContainerInterface::iterator RegisterNextOldDecision() = 0; 
+    virtual bool IsAlreadyGotNextOldDecision() const = 0;
+    virtual const Range &GetNextOldDecision() const = 0;
+    virtual Ranges::iterator GetNextDecisionIterator() const = 0;
+    virtual ContainerInterface::iterator RegisterNextOldDecision() = 0;
 
     virtual void RegisterNormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
     virtual void RegisterAbnormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
@@ -170,9 +178,9 @@ public:
                                                    bool inclusive,
                                                    std::shared_ptr<ContainerInterface> container=nullptr );
     ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive );
-    //ContainerInterface::iterator RegisterDecision( const ContainerInterface &container, bool inclusive );
-    bool IsAlreadyGotNextOldDecision();
-    const Range &GetNextOldDecision();
+    bool IsAlreadyGotNextOldDecision() const;
+    const Range &GetNextOldDecision() const;
+    Ranges::iterator GetNextDecisionIterator() const;
     ContainerInterface::iterator RegisterNextOldDecision();
 
     void RegisterNormalLink( Agent *a, const TreePtrInterface *px ); 

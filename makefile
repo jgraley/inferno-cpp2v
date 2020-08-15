@@ -1,7 +1,4 @@
 include makefile.common
-include src/makefile
-include test/makefile
-include resource/makefile
 
 .PHONY: default all get_libs test docs force_subordinate_makefiles clean iclean resource publish doxygen pattern_graphs doc_graphs
 default : inferno.exe
@@ -128,3 +125,9 @@ iclean : makefile
 	-rm -f inferno.exe
 	-rm -f resource/script/* resource/lib/*
 
+#
+# Subordinate makefiles included last so they don't hijack the makefile goal
+#
+include src/makefile
+include test/makefile
+include resource/makefile
