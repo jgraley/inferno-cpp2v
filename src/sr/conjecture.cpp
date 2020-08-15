@@ -58,8 +58,9 @@ void Conjecture::RecordWalk( Agent *agent )
 }
 
 
-bool Conjecture::IncrementAgent( shared_ptr<DecidedQuery> query )
+bool Conjecture::IncrementAgent( Agent *agent )
 {    
+    auto query = agent_records.at(agent).query;
     ASSERT( query );
     
 	if( query->GetDecisions()->empty() )
@@ -67,7 +68,7 @@ bool Conjecture::IncrementAgent( shared_ptr<DecidedQuery> query )
         // this query is defunct
 	    return false;  
 	}
-    FillMissingChoicesWithBegin(query);
+    FillMissingChoicesWithBegin(agent);
     
     const auto &back_decision = query->GetDecisions()->back();
     DecidedQueryCommon::Choice back_choice = query->GetChoices()->back();
@@ -76,7 +77,7 @@ bool Conjecture::IncrementAgent( shared_ptr<DecidedQuery> query )
     if( back_choice.mode==DecidedQueryCommon::Choice::ITER && back_decision.inclusive && back_choice.iter == back_decision.end )
     {
         query->InvalidateBack();
-        return IncrementAgent( query );
+        return IncrementAgent( agent );
 	}
 
 	if( back_choice.mode==DecidedQueryCommon::Choice::BEGIN || back_choice.iter != back_decision.end ) 
@@ -99,7 +100,7 @@ bool Conjecture::IncrementAgent( shared_ptr<DecidedQuery> query )
     if( back_choice.mode==DecidedQueryCommon::Choice::ITER && !back_decision.inclusive && back_choice.iter == back_decision.end )
     {
         query->InvalidateBack();
-        return IncrementAgent( query );
+        return IncrementAgent( agent );
 	}
 		
     return true;
@@ -107,11 +108,12 @@ bool Conjecture::IncrementAgent( shared_ptr<DecidedQuery> query )
 
 
 bool Conjecture::IncrementConjecture(Agent *agent)
-{   
-    AgentRecord *record = &agent_records.at(agent);
-    bool ok = IncrementAgent( record->query );
+{       
+    bool ok = IncrementAgent( agent );
     if( !ok )
-    {	if( record->previous_agent )
+    {
+        AgentRecord *record = &agent_records.at(agent);
+        if( record->previous_agent )
             return IncrementConjecture( record->previous_agent );
         else
             return false;
@@ -152,8 +154,9 @@ shared_ptr<DecidedQuery> Conjecture::GetQuery(Agent *agent)
 }
 
 
-void Conjecture::FillMissingChoicesWithBegin( shared_ptr<DecidedQuery> query )
+void Conjecture::FillMissingChoicesWithBegin( Agent *agent )
 {
+    auto query = agent_records.at(agent).query;
     ASSERT( query );
        
     while( query->GetChoices()->size() < query->GetDecisions()->size() )

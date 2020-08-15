@@ -17,7 +17,7 @@ Agent *Agent::AsAgent( TreePtr<Node> node )
 
 
 void Agent::DoDecidedQuery( DecidedQueryAgentInterface &query,
-                             const TreePtrInterface *px ) const
+                            const TreePtrInterface *px ) const
 {
     try
     {
@@ -25,6 +25,10 @@ void Agent::DoDecidedQuery( DecidedQueryAgentInterface &query,
     }
     catch( ::Mismatch & )
     {
+        // We may not have managed to register all our decisions before
+        // throwing a mismatch. In that case, submit empry decisions
+        // until the required number is reached. There are no valid choices
+        // for an empty decision, but that's OK since we mismatched anyway.
         PatternQuery pq = GetPatternQuery();
         while( query.GetDecisions()->size() < pq.GetDecisions()->size() )
             query.RegisterEmptyDecision();

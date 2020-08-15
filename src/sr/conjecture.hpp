@@ -33,14 +33,14 @@ public:
 
     void Configure(Set<Agent *> my_agents, Agent *root_agent);
     void RecordWalk( Agent *agent );
-	bool IncrementAgent( shared_ptr<DecidedQuery> query );			                                     
+	bool IncrementAgent( Agent *agent );			                                     
     bool Increment(); // returns true for try again, false for give up				 
     bool IncrementConjecture( Agent *agent ); 
         				       
     // Standard interface for decided compare functions
     DecidedQuery::Choices GetChoices(Agent *agent) const;
     shared_ptr<DecidedQuery> GetQuery(Agent *agent);
-    void FillMissingChoicesWithBegin( shared_ptr<DecidedQuery> query );      
+    void FillMissingChoicesWithBegin( Agent *agent );      
 				   
 private:
 	Map<Agent *, AgentRecord> agent_records;

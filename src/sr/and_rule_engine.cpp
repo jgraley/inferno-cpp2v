@@ -161,7 +161,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
           (*agent);
     // Note: number of abnormal links doe NOT now depend on x; #60 completed
                         
-    conj.FillMissingChoicesWithBegin(query);
+    conj.FillMissingChoicesWithBegin(agent);
     query->EnsureChoicesHaveIterators();
 
     // Remember the coupling before recursing, as we can hit the same node 
