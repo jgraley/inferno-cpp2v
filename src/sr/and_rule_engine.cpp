@@ -10,7 +10,7 @@
 #include "common/common.hpp"
 #include <list>
 
-#define TEST_PATTERN_QUERY
+//#define TEST_PATTERN_QUERY
 
 using namespace SR;
 
@@ -148,6 +148,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     TRACE(*agent)("?=")(**px)(" RunDecidedQuery()\n");    
     agent->DoDecidedQuery( *query, px );
 
+#ifdef TEST_PATTERN_QUERY
     PatternQuery pq = agent->GetPatternQuery();
     ASSERT( pq.GetNormalLinks()->size() == query->GetNormalLinks()->size() &&
             pq.GetAbnormalLinks()->size() == query->GetAbnormalLinks()->size() &&
@@ -160,6 +161,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
           ("GetDecisions()->size() : %d vs %d\n", pq.GetDecisions()->size(), query->GetDecisions()->size() )
           (*agent);
     // Note: number of abnormal links doe NOT now depend on x; #60 completed
+#endif
                         
     conj.FillMissingChoicesWithBegin(agent);
     query->EnsureChoicesHaveIterators();

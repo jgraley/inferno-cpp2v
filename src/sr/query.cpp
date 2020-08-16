@@ -273,12 +273,6 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const ContainerInte
 }                                                      
 */
 
-bool DecidedQuery::IsAlreadyGotNextOldDecision() const
-{
-    return next_decision != decisions.end();
-}
-
-
 const DecidedQueryCommon::Range &DecidedQuery::GetNextOldDecision() const
 {
     ASSERT( next_decision != decisions.end() )
@@ -290,26 +284,6 @@ const DecidedQueryCommon::Range &DecidedQuery::GetNextOldDecision() const
 int DecidedQuery::GetNextDecisionIterator() const
 {
     return &*next_decision - &decisions.front();  // really an index TODO go back to iterator when we're sure the vector won't be relocated
-}
-
-
-ContainerInterface::iterator DecidedQuery::RegisterNextOldDecision()
-{
-    ASSERT( next_choice != choices.end() );
-    ContainerInterface::iterator it;
-    switch( next_choice->mode )
-    {
-        case Choice::ITER:
-            it = next_choice->iter; // Use the iterator that was given to us
-            break;
-        
-        case Choice::BEGIN:
-            it = next_decision->begin; // we have been asked to use begin
-            break;
-    }
-    ++next_decision; 
-    ++next_choice;
-    return it;
 }
 
 

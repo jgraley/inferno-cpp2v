@@ -22,6 +22,7 @@ public:
     struct AgentRecord
     {
 		Agent *agent;
+        shared_ptr<PatternQuery> pq;
         shared_ptr<DecidedQuery> query;
  		Agent *previous_agent;
         bool linked;
@@ -32,7 +33,7 @@ public:
     ~Conjecture();
 
     void Configure(Set<Agent *> my_agents, Agent *root_agent);
-    void RecordWalk( Agent *agent );
+    void ConfigRecordWalk( Agent *agent );
 	bool IncrementAgent( Agent *agent );			                                     
     bool Increment(); // returns true for try again, false for give up				 
     bool IncrementConjecture( Agent *agent ); 

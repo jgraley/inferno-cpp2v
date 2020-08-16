@@ -16,34 +16,6 @@ Agent *Agent::AsAgent( TreePtr<Node> node )
 }
 
 
-void Agent::DoDecidedQuery( DecidedQueryAgentInterface &query,
-                            const TreePtrInterface *px ) const
-{
-    try
-    {
-        RunDecidedQuery( query, px );
-    }
-    catch( ::Mismatch & )
-    {
-        // We may not have managed to register all our decisions before
-        // throwing a mismatch. In that case, submit empry decisions
-        // until the required number is reached. There are no valid choices
-        // for an empty decision, but that's OK since we mismatched anyway.
-        PatternQuery pq = GetPatternQuery();
-        while( query.GetDecisions()->size() < pq.GetDecisions()->size() )
-            query.RegisterEmptyDecision();
-            
-        query.last_activity = DecidedQueryCommon::QUERY;
-            
-        rethrow_exception(current_exception());
-    }
-    
-    PatternQuery pq = GetPatternQuery();
-    ASSERT( query.GetDecisions()->size() == pq.GetDecisions()->size() );
-    query.last_activity = DecidedQueryCommon::QUERY;
-}                             
-
-
 AgentCommon::AgentCommon() :
     engine(NULL)
 {
@@ -61,6 +33,9 @@ void AgentCommon::AgentConfigure( const SCREngine *e )
                    ("\nCould be result of coupling this node across sibling slaves - not allowed :(");
     ASSERT(e);
     engine = e;
+    
+    auto pq = GetPatternQuery();
+    num_decisions = pq.GetDecisions()->size();
 }
 
 
@@ -75,6 +50,32 @@ shared_ptr<ContainerInterface> AgentCommon::GetVisibleChildren() const
 }
 
     
+void AgentCommon::DoDecidedQuery( DecidedQueryAgentInterface &query,
+                                  const TreePtrInterface *px ) const
+{
+    try
+    {
+        RunDecidedQuery( query, px );
+    }
+    catch( ::Mismatch & )
+    {
+        // We may not have managed to register all our decisions before
+        // throwing a mismatch. In that case, submit empry decisions
+        // until the required number is reached. There are no valid choices
+        // for an empty decision, but that's OK since we mismatched anyway.
+        while( query.GetDecisions()->size() < num_decisions )
+            query.RegisterEmptyDecision();
+            
+        query.last_activity = DecidedQueryCommon::QUERY;
+            
+        rethrow_exception(current_exception());
+    }
+    
+    ASSERT( query.GetDecisions()->size() == num_decisions );
+    query.last_activity = DecidedQueryCommon::QUERY;
+}                             
+
+
 void AgentCommon::DoKey( TreePtr<Node> x )
 {
     ASSERT(x);

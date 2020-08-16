@@ -42,7 +42,7 @@ public:
     virtual PatternQuery GetPatternQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual void DoDecidedQuery( DecidedQueryAgentInterface &query,
-                                 const TreePtrInterface *px ) const;                                                
+                                 const TreePtrInterface *px ) const = 0;                                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const TreePtrInterface &x,
@@ -53,10 +53,6 @@ public:
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const = 0;
 		
 	static Agent *AsAgent( TreePtr<Node> node );
-
-protected:
-    virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                  const TreePtrInterface *px ) const = 0;                                                
 };
 
 
@@ -71,6 +67,8 @@ public:
     AgentCommon();
     virtual void AgentConfigure( const SCREngine *master_engine );
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
+    virtual void DoDecidedQuery( DecidedQueryAgentInterface &query,
+                                 const TreePtrInterface *px ) const;                                                
     void DoKey( TreePtr<Node> x );
     TreePtr<Node> GetCoupled();                                  
     void ResetKey();    
@@ -85,10 +83,13 @@ public:
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
+    virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
+                                  const TreePtrInterface *px ) const = 0;                                                
     const SCREngine *engine;    
 			
 private:    
     TreePtr<Node> coupling_key;    
+    int num_decisions;
 };
 
 

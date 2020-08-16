@@ -18,22 +18,24 @@ Conjecture::~Conjecture()
 
 void Conjecture::Configure(Set<Agent *> my_agents, Agent *root_agent)
 {
-    FOREACH( Agent *a, my_agents )
+    FOREACH( Agent *agent, my_agents )
     {
 		AgentRecord record;
-		record.agent = a;
+		record.agent = agent;
         record.previous_agent = (Agent *)0xFEEDF00D;
         record.linked = false;
+        record.pq = make_shared<PatternQuery>();
+        *(record.pq) = agent->GetPatternQuery();
         record.query = make_shared<DecidedQuery>();        
-		agent_records[a] = record;
+		agent_records[agent] = record;
 	}        
     last_agent = nullptr;
-    RecordWalk( root_agent );
+    ConfigRecordWalk( root_agent );
     configured = true;
 }
 
 
-void Conjecture::RecordWalk( Agent *agent )
+void Conjecture::ConfigRecordWalk( Agent *agent )
 {
     if( agent_records.count(agent)==0 ) // Probably belongs to master
         return;
@@ -46,15 +48,14 @@ void Conjecture::RecordWalk( Agent *agent )
     record->previous_agent = last_agent;
     last_agent = agent;
     record->linked = true;
-
-    PatternQuery r = agent->GetPatternQuery();
+    auto pq = record->pq;
     
     // Makes sense, but we won't match the old algo with this
-    if( r.GetEvaluator() )
+    if( pq->GetEvaluator() )
         return; // we don't process evaluators
     
-    for( const PatternQuery::Link &l : *r.GetNormalLinks() )
-        RecordWalk( l.agent );
+    for( const PatternQuery::Link &l : *(pq->GetNormalLinks()) )
+        ConfigRecordWalk( l.agent );
 }
 
 
@@ -110,7 +111,7 @@ bool Conjecture::IncrementConjecture(Agent *agent)
 {       
     AgentRecord *record = &agent_records.at(agent);
     auto query = record->query;
-    PatternQuery pq = agent->GetPatternQuery();
+    auto pq = record->pq;
     
     bool ok = false;
     switch( query->last_activity )
@@ -120,7 +121,7 @@ bool Conjecture::IncrementConjecture(Agent *agent)
             break;
             
         case DecidedQueryCommon::QUERY:
-            ASSERT( query->GetDecisions()->size() == pq.GetDecisions()->size() );
+            ASSERT( query->GetDecisions()->size() == pq->GetDecisions()->size() );
             FillMissingChoicesWithBegin(agent);
             ASSERT( query->GetDecisions()->size() == query->GetChoices()->size() );
             ok = IncrementAgent( agent );
@@ -177,11 +178,12 @@ shared_ptr<DecidedQuery> Conjecture::GetQuery(Agent *agent)
 
 void Conjecture::FillMissingChoicesWithBegin( Agent *agent )
 {
-    auto query = agent_records.at(agent).query;
-    ASSERT( query );
-    PatternQuery pq = agent->GetPatternQuery();
-       
-    while( query->GetChoices()->size() < query->GetDecisions()->size() )
+    AgentRecord *record = &agent_records.at(agent);
+    auto query = record->query;
+    auto pq = record->pq;
+    ASSERT( query->GetDecisions()->size() == pq->GetDecisions()->size() );
+           
+    while( query->GetChoices()->size() < pq->GetDecisions()->size() )
     {
         DecidedQueryCommon::Choice new_choice;
         new_choice.mode = DecidedQueryCommon::Choice::BEGIN;
