@@ -210,7 +210,7 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
 {
     // ASSERT( next_decision != decisions.end() ); // run out of decisions?
 
-    //ASSERT( r.inclusive || r.begin != r.end )("no empty decisions"); // TODO route RegisterEmptyDecision() past here and re-instate
+    ASSERT( r.inclusive || r.begin != r.end )("no empty decisions"); // TODO route RegisterEmptyDecision() past here and re-instate
     ContainerInterface::iterator it;
     if( next_decision == decisions.end() ) // run out of decisions?
     {
@@ -232,7 +232,7 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
                 it = r.begin; // we have been asked to use begin
                 break;
         }
-        //ASSERT( r.inclusive || it != r.end )("no empty decisions"); // TODO route RegisterEmptyDecision() past here and re-instate
+        ASSERT( r.inclusive || it != r.end )("no empty decisions"); // TODO route RegisterEmptyDecision() past here and re-instate
         ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
         *next_decision = r;
         ++next_decision; 
@@ -288,25 +288,31 @@ int DecidedQuery::GetNextDecisionIterator() const
 }
 
 
-void DecidedQuery::RegisterEmptyDecision()
-{
-    auto empty_container = make_shared< Collection<Node> >();
-    (void)RegisterDecision( empty_container, false );
-}
-
-
 void DecidedQuery::FillEmptyDecisions( int n )
 {
-    TRACE("At start of FillEmptyDecisions() I have %d decisions %d choices and next decision is %d next choice is %d target %d\n", 
-          decisions.size(), choices.size(), &*next_decision - &decisions.front(), &*next_choice - &choices.front(), n);
-    auto old_i = &*next_decision - &decisions.front();
-    next_choice = choices.begin() + old_i;
-    while( &*next_decision - &decisions.front() < n )
-        RegisterEmptyDecision();
-    next_decision = decisions.begin() + old_i;
-    next_choice = choices.begin() + old_i;
-    TRACE("At end of FillEmptyDecisions() I have %d decisions %d choices and next decision is %d next choice is %d old_i = %d\n", 
-          decisions.size(), choices.size(), &*next_decision - &decisions.front(), &*next_choice - &choices.front(), old_i);
+    auto empty_container = make_shared< Collection<Node> >();
+    Range r;
+    r.begin = empty_container->begin();
+    r.end = empty_container->end();
+    r.inclusive = false;
+    r.container = empty_container;
+    
+    // This part needed after each DQ
+    auto nd = next_decision;
+    while( nd != decisions.end() )
+    {
+        *nd = r;
+        ++nd; 
+    }    
+
+    // This part only needed at Start() I think
+    auto old_i = &*next_decision - &decisions.front(); // remember an index, because decisions.push_back() will invalidate
+    while( decisions.size() < n )
+    {
+        decisions.push_back(r); // this will be a new decision
+        nd = decisions.end(); // beware iterator invalidation
+    }
+    next_decision = decisions.begin() + old_i; // re-create due to invalidation
 }
 
 
