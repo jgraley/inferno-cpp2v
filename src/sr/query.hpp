@@ -141,7 +141,8 @@ public:
     virtual const Range &GetNextOldDecision() const = 0;
     virtual int GetNextDecisionIterator() const = 0;
     virtual void RegisterEmptyDecision() = 0;
-    
+    virtual void FillEmptyDecisions( int n ) = 0;
+
     virtual void RegisterNormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
     virtual void RegisterAbnormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
     virtual void RegisterMultiplicityLink( Agent *a, const TreePtrInterface *px ) = 0; 
@@ -187,6 +188,7 @@ public:
     const Range &GetNextOldDecision() const;
     int GetNextDecisionIterator() const;
     void RegisterEmptyDecision();
+    void FillEmptyDecisions( int n );
 
     void RegisterNormalLink( Agent *a, const TreePtrInterface *px ); 
     void RegisterAbnormalLink( Agent *a, const TreePtrInterface *px ); 

@@ -181,7 +181,7 @@ void Conjecture::FillMissingChoicesWithBegin( Agent *agent )
     AgentRecord *record = &agent_records.at(agent);
     auto query = record->query;
     auto pq = record->pq;
-    ASSERT( query->GetDecisions()->size() == pq->GetDecisions()->size() );
+    //ASSERT( query->GetDecisions()->size() == pq->GetDecisions()->size() );
            
     while( query->GetChoices()->size() < pq->GetDecisions()->size() )
     {
@@ -190,8 +190,8 @@ void Conjecture::FillMissingChoicesWithBegin( Agent *agent )
         query->PushBackChoice( new_choice );
     }
     
-    ASSERT( query->GetChoices()->size()==query->GetDecisions()->size() )
-            ("%d != %d", query->GetChoices()->size(), query->GetDecisions()->size() );
+    ASSERT( query->GetChoices()->size()==pq->GetDecisions()->size() )
+            ("%d != %d", query->GetChoices()->size(), pq->GetDecisions()->size() );
 }
 
 };

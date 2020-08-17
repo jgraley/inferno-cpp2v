@@ -208,8 +208,9 @@ void DecidedQuery::EnsureChoicesHaveIterators()
 
 ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
 {
- 
-    //ASSERT( r.inclusive || r.begin != r.end )("no empty decisions");
+    // ASSERT( next_decision != decisions.end() ); // run out of decisions?
+
+    //ASSERT( r.inclusive || r.begin != r.end )("no empty decisions"); // TODO route RegisterEmptyDecision() past here and re-instate
     ContainerInterface::iterator it;
     if( next_decision == decisions.end() ) // run out of decisions?
     {
@@ -231,7 +232,7 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
                 it = r.begin; // we have been asked to use begin
                 break;
         }
-        ASSERT( r.inclusive || it != r.end )("A choice can only be end if the decision is inclusive");
+        //ASSERT( r.inclusive || it != r.end )("no empty decisions"); // TODO route RegisterEmptyDecision() past here and re-instate
         ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
         *next_decision = r;
         ++next_decision; 
@@ -291,6 +292,21 @@ void DecidedQuery::RegisterEmptyDecision()
 {
     auto empty_container = make_shared< Collection<Node> >();
     (void)RegisterDecision( empty_container, false );
+}
+
+
+void DecidedQuery::FillEmptyDecisions( int n )
+{
+    TRACE("At start of FillEmptyDecisions() I have %d decisions %d choices and next decision is %d next choice is %d target %d\n", 
+          decisions.size(), choices.size(), &*next_decision - &decisions.front(), &*next_choice - &choices.front(), n);
+    auto old_i = &*next_decision - &decisions.front();
+    next_choice = choices.begin() + old_i;
+    while( &*next_decision - &decisions.front() < n )
+        RegisterEmptyDecision();
+    next_decision = decisions.begin() + old_i;
+    next_choice = choices.begin() + old_i;
+    TRACE("At end of FillEmptyDecisions() I have %d decisions %d choices and next decision is %d next choice is %d old_i = %d\n", 
+          decisions.size(), choices.size(), &*next_decision - &decisions.front(), &*next_choice - &choices.front(), old_i);
 }
 
 

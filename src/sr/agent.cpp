@@ -5,6 +5,9 @@
 #include "agent.hpp"
 #include <stdexcept>
 
+#define FILL_DECISIONS_BEFORE
+#define FILL_DECISIONS_ON_THROW
+
 using namespace SR;
 
 Agent *Agent::AsAgent( TreePtr<Node> node )
@@ -53,6 +56,11 @@ shared_ptr<ContainerInterface> AgentCommon::GetVisibleChildren() const
 void AgentCommon::DoDecidedQuery( DecidedQueryAgentInterface &query,
                                   const TreePtrInterface *px ) const
 {
+    query.last_activity = DecidedQueryCommon::QUERY;
+#ifdef FILL_DECISIONS_BEFORE
+    query.FillEmptyDecisions( num_decisions );
+#endif    
+#ifdef FILL_DECISIONS_ON_THROW
     try
     {
         RunDecidedQuery( query, px );
@@ -63,16 +71,14 @@ void AgentCommon::DoDecidedQuery( DecidedQueryAgentInterface &query,
         // throwing a mismatch. In that case, submit empry decisions
         // until the required number is reached. There are no valid choices
         // for an empty decision, but that's OK since we mismatched anyway.
-        while( query.GetDecisions()->size() < num_decisions )
-            query.RegisterEmptyDecision();
-            
-        query.last_activity = DecidedQueryCommon::QUERY;
-            
+        query.FillEmptyDecisions( num_decisions );
+                        
         rethrow_exception(current_exception());
     }
-    
+#else
+    RunDecidedQuery( query, px );
+#endif    
     ASSERT( query.GetDecisions()->size() == num_decisions );
-    query.last_activity = DecidedQueryCommon::QUERY;
 }                             
 
 

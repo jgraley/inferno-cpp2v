@@ -144,6 +144,8 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     // Obtain the query state from the conjecture
     shared_ptr<DecidedQuery> query = conj.GetQuery(agent);
 
+    conj.FillMissingChoicesWithBegin(agent);
+
     // Run the compare implementation to get the links based on the choices
     TRACE(*agent)("?=")(**px)(" RunDecidedQuery()\n");    
     agent->DoDecidedQuery( *query, px );
