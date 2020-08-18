@@ -140,7 +140,7 @@ public:
     virtual ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive ) = 0; 
     virtual const Range &GetNextOldDecision() const = 0;
     virtual int GetNextDecisionIterator() const = 0;
-    virtual void FillEmptyDecisions( int n ) = 0;
+    virtual void CompleteDecisionsWithEmpty() = 0;
 
     virtual void RegisterNormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
     virtual void RegisterAbnormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
@@ -149,6 +149,18 @@ public:
     virtual void RegisterLocalAbnormalLink( Agent *a, TreePtr<Node> x ) = 0; 
     virtual void RegisterLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x ) = 0; 
     virtual void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
+
+    class RAIIDecisionsCleanup
+    {
+    public:
+        RAIIDecisionsCleanup( DecidedQueryAgentInterface &query_ ) : query(query_) {}
+        ~RAIIDecisionsCleanup()
+        {
+            query.CompleteDecisionsWithEmpty();
+        }
+        DecidedQueryAgentInterface &query;
+    };
+    
 };
 
 
@@ -182,7 +194,7 @@ public:
     ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive );
     const Range &GetNextOldDecision() const;
     int GetNextDecisionIterator() const;
-    void FillEmptyDecisions( int n );
+    void CompleteDecisionsWithEmpty();
 
     void RegisterNormalLink( Agent *a, const TreePtrInterface *px ); 
     void RegisterAbnormalLink( Agent *a, const TreePtrInterface *px ); 
@@ -213,6 +225,7 @@ private:
     Ranges::iterator next_decision;
     Choices choices;
     Choices::iterator next_choice;
+    static shared_ptr< Collection<Node> > empty_container;
 };
 
 

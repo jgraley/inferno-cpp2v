@@ -57,7 +57,7 @@ DecidedQuery::DecidedQuery(const PatternQuery &pq) :
     choices( pq.GetDecisions()->size() ),
     next_choice( choices.begin() ) 
 {
-    FillEmptyDecisions( pq.GetDecisions()->size() );
+    CompleteDecisionsWithEmpty();
 }
 
 
@@ -222,32 +222,23 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
 
     ASSERT( r.inclusive || r.begin != r.end )("no empty decisions"); // TODO route RegisterEmptyDecision() past here and re-instate
     ContainerInterface::iterator it;
-    if( next_decision == decisions.end() ) // run out of decisions?
+    ASSERT( next_decision != decisions.end() ); // run out of decisions? Shouldn't happen now.
+    ASSERT( next_choice != choices.end() );
+    switch( next_choice->mode )
     {
-        it = r.begin; // No choice was given to us so assume first one
-        ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
-        decisions.push_back(r); // this will be a new decision
-        next_decision = decisions.end(); // beware iterator invalidation
+        case Choice::ITER:
+            it = next_choice->iter; // Use the iterator that was given to us
+            break;
+        
+        case Choice::BEGIN:
+            it = r.begin; // we have been asked to use begin
+            break;
     }
-    else
-    {
-        ASSERT( next_choice != choices.end() );
-        switch( next_choice->mode )
-        {
-            case Choice::ITER:
-                it = next_choice->iter; // Use the iterator that was given to us
-                break;
-            
-            case Choice::BEGIN:
-                it = r.begin; // we have been asked to use begin
-                break;
-        }
-        ASSERT( r.inclusive || it != r.end )("no empty decisions"); // TODO route RegisterEmptyDecision() past here and re-instate
-        ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
-        *next_decision = r;
-        ++next_decision; 
-        ++next_choice;
-    }    
+    ASSERT( r.inclusive || it != r.end )("no empty decisions"); // TODO route RegisterEmptyDecision() past here and re-instate
+    ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
+    *next_decision = r;
+    ++next_decision; 
+    ++next_choice;
     
     return it;
 }                                                      
@@ -298,9 +289,8 @@ int DecidedQuery::GetNextDecisionIterator() const
 }
 
 
-void DecidedQuery::FillEmptyDecisions( int n )
+void DecidedQuery::CompleteDecisionsWithEmpty()
 {
-    auto empty_container = make_shared< Collection<Node> >();
     Range r;
     r.begin = empty_container->begin();
     r.end = empty_container->end();
@@ -326,3 +316,6 @@ void DecidedQuery::Reset()
     next_decision = decisions.begin();  
     next_choice = choices.begin();  
 }
+
+
+shared_ptr< Collection<Node> > DecidedQuery::empty_container = make_shared< Collection<Node> >();

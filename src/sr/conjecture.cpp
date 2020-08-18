@@ -117,13 +117,10 @@ bool Conjecture::IncrementConjecture(Agent *agent)
     switch( query->last_activity )
     {
         case DecidedQueryCommon::NEW:
-            ASSERT( query->GetDecisions()->size() == pq->GetDecisions()->size() );
             break;
             
         case DecidedQueryCommon::QUERY:
-            ASSERT( query->GetDecisions()->size() == pq->GetDecisions()->size() );
             FillMissingChoicesWithBegin(agent);
-            ASSERT( query->GetDecisions()->size() == query->GetChoices()->size() );
             ok = IncrementAgent( agent );
             FillMissingChoicesWithBegin(agent);
             query->last_activity = DecidedQueryCommon::CONJECTURE;

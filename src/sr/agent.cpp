@@ -5,8 +5,6 @@
 #include "agent.hpp"
 #include <stdexcept>
 
-#define FILL_DECISIONS_ON_THROW
-
 using namespace SR;
 
 Agent *Agent::AsAgent( TreePtr<Node> node )
@@ -65,25 +63,8 @@ void AgentCommon::DoDecidedQuery( DecidedQueryAgentInterface &query,
 {
     query.last_activity = DecidedQueryCommon::QUERY;
    
-#ifdef FILL_DECISIONS_ON_THROW
-    try
-    {
-        RunDecidedQuery( query, px );
-    }
-    catch( ::Mismatch & )
-    {
-        // We may not have managed to register all our decisions before
-        // throwing a mismatch. In that case, submit empry decisions
-        // until the required number is reached. There are no valid choices
-        // for an empty decision, but that's OK since we mismatched anyway.
-        query.FillEmptyDecisions( num_decisions );
-                        
-        rethrow_exception(current_exception());
-    }
-#else
+    DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     RunDecidedQuery( query, px );
-#endif    
-    ASSERT( query.GetDecisions()->size() == num_decisions );
 }                             
 
 
