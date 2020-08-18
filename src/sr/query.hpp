@@ -11,7 +11,7 @@
 
 #include <vector>
 #include <boost/type_traits.hpp>
-  
+
 namespace SR
 { 
 class Agent;

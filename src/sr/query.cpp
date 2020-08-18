@@ -218,9 +218,7 @@ void DecidedQuery::EnsureChoicesHaveIterators()
 
 ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
 {
-    // ASSERT( next_decision != decisions.end() ); // run out of decisions?
-
-    ASSERT( r.inclusive || r.begin != r.end )("no empty decisions"); // TODO route RegisterEmptyDecision() past here and re-instate
+    ASSERT( r.inclusive || r.begin != r.end )("no empty decisions"); 
     ContainerInterface::iterator it;
     ASSERT( next_decision != decisions.end() ); // run out of decisions? Shouldn't happen now.
     ASSERT( next_choice != choices.end() );
@@ -234,7 +232,7 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
             it = r.begin; // we have been asked to use begin
             break;
     }
-    ASSERT( r.inclusive || it != r.end )("no empty decisions"); // TODO route RegisterEmptyDecision() past here and re-instate
+    ASSERT( r.inclusive || it != r.end )("no empty decisions"); 
     ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
     *next_decision = r;
     ++next_decision; 
