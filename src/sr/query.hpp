@@ -171,11 +171,7 @@ class DecidedQuery : virtual public DecidedQueryClientInterface,
                      virtual public DecidedQueryAgentInterface
 {
 public:    
-    DecidedQuery() :
-        next_decision( decisions.begin() ), // will be end()
-        next_choice( choices.begin() ) // will be end()
-    {
-    }
+    DecidedQuery(const PatternQuery &pq);
     void Reset();
 
     ContainerInterface::iterator RegisterDecision( const Range &d );

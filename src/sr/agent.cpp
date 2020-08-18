@@ -5,7 +5,6 @@
 #include "agent.hpp"
 #include <stdexcept>
 
-#define FILL_DECISIONS_BEFORE
 #define FILL_DECISIONS_ON_THROW
 
 using namespace SR;
@@ -37,8 +36,8 @@ void AgentCommon::AgentConfigure( const SCREngine *e )
     ASSERT(e);
     engine = e;
     
-    auto pq = GetPatternQuery();
-    num_decisions = pq.GetDecisions()->size();
+    pattern_query = GetPatternQuery();
+    num_decisions = pattern_query.GetDecisions()->size();
 }
 
 
@@ -53,13 +52,19 @@ shared_ptr<ContainerInterface> AgentCommon::GetVisibleChildren() const
 }
 
     
+shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
+{
+    ASSERT( engine ); // check we have been configured
+    
+    return make_shared<DecidedQuery>( pattern_query );
+}
+    
+    
 void AgentCommon::DoDecidedQuery( DecidedQueryAgentInterface &query,
                                   const TreePtrInterface *px ) const
 {
     query.last_activity = DecidedQueryCommon::QUERY;
-#ifdef FILL_DECISIONS_BEFORE
-    query.FillEmptyDecisions( num_decisions );
-#endif    
+   
 #ifdef FILL_DECISIONS_ON_THROW
     try
     {

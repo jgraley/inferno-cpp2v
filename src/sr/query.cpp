@@ -51,6 +51,16 @@ void PatternQuery::RegisterMultiplicityLink( Agent *a )
 }
 
 
+DecidedQuery::DecidedQuery(const PatternQuery &pq) :
+    decisions( pq.GetDecisions()->size() ),
+    next_decision( decisions.begin() ), 
+    choices( pq.GetDecisions()->size() ),
+    next_choice( choices.begin() ) 
+{
+    FillEmptyDecisions( pq.GetDecisions()->size() );
+}
+
+
 void DecidedQuery::RegisterNormalLink( Agent *a, const TreePtrInterface *px )
 {
     Link b;
@@ -304,15 +314,6 @@ void DecidedQuery::FillEmptyDecisions( int n )
         *nd = r;
         ++nd; 
     }    
-
-    // This part only needed at Start() I think
-    auto old_i = &*next_decision - &decisions.front(); // remember an index, because decisions.push_back() will invalidate
-    while( decisions.size() < n )
-    {
-        decisions.push_back(r); // this will be a new decision
-        nd = decisions.end(); // beware iterator invalidation
-    }
-    next_decision = decisions.begin() + old_i; // re-create due to invalidation
 }
 
 

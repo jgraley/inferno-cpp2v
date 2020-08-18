@@ -40,6 +40,7 @@ public:
 
     /// List the Agents reached via links during search
     virtual PatternQuery GetPatternQuery() const = 0;
+    virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual void DoDecidedQuery( DecidedQueryAgentInterface &query,
                                  const TreePtrInterface *px ) const = 0;                                                
@@ -59,7 +60,7 @@ public:
 // - Configure
 // - Pre-restriction
 // - Keying (default case)
-// - Compare and MAtchingDecidedCompare rings
+// - Compare and MatchingDecidedCompare rings
 /// Implments misc functionality common to all or most agents
 class AgentCommon : public Agent
 {
@@ -67,6 +68,7 @@ public:
     AgentCommon();
     virtual void AgentConfigure( const SCREngine *master_engine );
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
+    virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
     virtual void DoDecidedQuery( DecidedQueryAgentInterface &query,
                                  const TreePtrInterface *px ) const;                                                
     void DoKey( TreePtr<Node> x );
@@ -89,6 +91,7 @@ protected:
 			
 private:    
     TreePtr<Node> coupling_key;    
+    PatternQuery pattern_query;
     int num_decisions;
 };
 

@@ -26,7 +26,7 @@ void Conjecture::Configure(Set<Agent *> my_agents, Agent *root_agent)
         record.linked = false;
         record.pq = make_shared<PatternQuery>();
         *(record.pq) = agent->GetPatternQuery();
-        record.query = make_shared<DecidedQuery>();        
+        record.query = agent->CreateDecidedQuery();        
 		agent_records[agent] = record;
 	}        
     last_agent = nullptr;
@@ -117,7 +117,7 @@ bool Conjecture::IncrementConjecture(Agent *agent)
     switch( query->last_activity )
     {
         case DecidedQueryCommon::NEW:
-            ASSERT( query->GetDecisions()->size() == 0 );
+            ASSERT( query->GetDecisions()->size() == pq->GetDecisions()->size() );
             break;
             
         case DecidedQueryCommon::QUERY:
