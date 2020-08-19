@@ -139,7 +139,7 @@ public:
                                                            std::shared_ptr<ContainerInterface> container=nullptr ) = 0; 
     virtual ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive ) = 0; 
     virtual const Range &GetNextOldDecision() const = 0;
-    virtual int GetNextDecisionIterator() const = 0;
+    virtual Ranges::iterator GetNextDecisionIterator() const = 0;
     virtual void CompleteDecisionsWithEmpty() = 0;
 
     virtual void RegisterNormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
@@ -193,7 +193,7 @@ public:
                                                    std::shared_ptr<ContainerInterface> container=nullptr );
     ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive );
     const Range &GetNextOldDecision() const;
-    int GetNextDecisionIterator() const;
+    Ranges::iterator GetNextDecisionIterator() const;
     void CompleteDecisionsWithEmpty();
 
     void RegisterNormalLink( Agent *a, const TreePtrInterface *px ); 

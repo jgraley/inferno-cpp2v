@@ -281,9 +281,9 @@ const DecidedQueryCommon::Range &DecidedQuery::GetNextOldDecision() const
 }
 
 
-int DecidedQuery::GetNextDecisionIterator() const
+DecidedQuery::Ranges::iterator DecidedQuery::GetNextDecisionIterator() const
 {
-    return &*next_decision - &decisions.front();  // really an index TODO go back to iterator when we're sure the vector won't be relocated
+    return next_decision;  // really an index TODO go back to iterator when we're sure the vector won't be relocated
 }
 
 

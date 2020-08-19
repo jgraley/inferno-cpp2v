@@ -72,7 +72,7 @@ void StandardAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
                                      const TreePtrInterface *px ) const
 {
     INDENT(".");
-    int old_end_decision = query.GetNextDecisionIterator();
+    DecidedQueryAgentInterface::Ranges::iterator old_end_decision = query.GetNextDecisionIterator();
     query.Reset();
 
     // Check pre-restriction
@@ -221,7 +221,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                             CollectionInterface *px,
 		 					                CollectionInterface &pattern,
-                                            int old_end_decision ) const
+                                            DecidedQueryAgentInterface::Ranges::iterator old_end_decision ) const
 {
     INDENT(" ");
     

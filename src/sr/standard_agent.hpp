@@ -30,7 +30,7 @@ private:
     void DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                  CollectionInterface *px,
     		                     CollectionInterface &pattern,
-                                 int old_end_decision ) const;
+                                 DecidedQueryAgentInterface::Ranges::iterator old_end_decision ) const;
 public:
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
