@@ -28,6 +28,8 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
         
     for( std::pair<Agent * const, AndRuleEngine> &pae : my_multiplicity_engines )
         pae.second.Configure( pae.first, surrounding_agents );
+
+    conj.Configure(my_agents, root_agent);
 }
 
 
@@ -193,7 +195,6 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
     TRACE(" pattern=")(*root_agent);
            
     master_keys = master_keys_;    
-    conj.Configure(my_agents, root_agent);
     conj.Start();
            
     // Create the conjecture object we will use for this compare, and keep iterating

@@ -26,7 +26,6 @@ void Conjecture::Configure(Set<Agent *> my_agents, Agent *root_agent)
         record.linked = false;
         record.pq = make_shared<PatternQuery>();
         *(record.pq) = agent->GetPatternQuery();
-        record.query = agent->CreateDecidedQuery();        
 		agent_records[agent] = record;
 	}        
     last_agent = nullptr;
@@ -62,7 +61,11 @@ void Conjecture::ConfigRecordWalk( Agent *agent )
 void Conjecture::Start()
 {
     for( auto &p : agent_records )
-        FillChoicesWithHardBegin( p.first );
+    {
+        Agent *agent = p.first;
+        p.second.query = agent->CreateDecidedQuery();
+        FillChoicesWithHardBegin( agent );
+    }
 }
 
 
