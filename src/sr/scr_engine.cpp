@@ -242,6 +242,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
     and_rule_engine.Compare( p_root, master_keys );
            
     TRACE("Search successful, now keying replace nodes\n");
+    and_rule_engine.EnsureChoicesHaveIterators(); // Replace can't deal with hard BEGINs
     KeyReplaceNodes( and_rule_engine.GetConjecture(), 
                      &and_rule_engine.GetCouplingKeys() );
 

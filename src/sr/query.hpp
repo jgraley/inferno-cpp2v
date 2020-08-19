@@ -110,7 +110,6 @@ public:
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
     };
     
-    // There is a "random access" in Conjecture::FillMissingChoicesWithBegin()
     typedef vector<Range> Ranges;
     typedef vector<Choice> Choices; 
     typedef list<Link> Links;
@@ -172,8 +171,8 @@ public:
     virtual const Links *GetMultiplicityLinks() const = 0; // pointer returned because the links contain the local links
     virtual shared_ptr<BooleanEvaluator> GetEvaluator() const = 0;
     
-    virtual void InvalidateBack() = 0;
-    virtual void SetBackChoice( Choice newc ) = 0;
+    virtual void Invalidate( int bc ) = 0;
+    virtual void SetChoice( int bc, Choice newc ) = 0;
     virtual void PushBackChoice( Choice newc ) = 0;    
     virtual void EnsureChoicesHaveIterators() = 0;
 };
@@ -211,8 +210,8 @@ public:
       
     const Choices *GetChoices() const { return &choices; }
     const Ranges *GetDecisions() const { return &decisions; }
-    void InvalidateBack();
-    void SetBackChoice( Choice newc );
+    void Invalidate( int bc );
+    void SetChoice( int bc, Choice newc );
     void PushBackChoice( Choice newc );    
     void EnsureChoicesHaveIterators();
     

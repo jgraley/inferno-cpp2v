@@ -144,8 +144,6 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     // Obtain the query state from the conjecture
     shared_ptr<DecidedQuery> query = conj.GetQuery(agent);
 
-    conj.FillMissingChoicesWithBegin(agent);
-
     // Run the compare implementation to get the links based on the choices
     TRACE(*agent)("?=")(**px)(" RunDecidedQuery()\n");    
     agent->DoDecidedQuery( *query, px );
@@ -165,9 +163,6 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     // Note: number of abnormal links doe NOT now depend on x; #60 completed
 #endif
                         
-    conj.FillMissingChoicesWithBegin(agent);
-    query->EnsureChoicesHaveIterators();
-
     // Remember the coupling before recursing, as we can hit the same node 
     // (eg identifier) and we need to have coupled it. 
     if( !slave_keys.IsExist(agent) )
@@ -199,6 +194,7 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
            
     master_keys = master_keys_;    
     conj.Configure(my_agents, root_agent);
+    conj.Start();
            
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
@@ -293,6 +289,12 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x )
 {
     CouplingMap master_keys;
     Compare( p_start_x, &master_keys );
+}
+
+
+void AndRuleEngine::EnsureChoicesHaveIterators()
+{
+    conj.EnsureChoicesHaveIterators();
 }
 
 

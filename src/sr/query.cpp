@@ -175,24 +175,26 @@ bool SR::operator<(const SR::DecidedQuery::Link &l0, const SR::DecidedQuery::Lin
 }
 
 
-void DecidedQuery::InvalidateBack()
+void DecidedQuery::Invalidate( int bc )
 {
     // TODO may not need all thes preconditions
     ASSERT( !choices.empty() );
-    ASSERT( !decisions.empty() );
-    //ASSERT( choices.size() == decisions.size() ); 
-    if( next_decision-decisions.begin() == choices.size() ) // Note: possibly always true
-        --next_decision; // Force agent to regenerate decision
+    ASSERT( bc >= 0 );
+    ASSERT( bc < choices.size() );
+    if( next_decision > decisions.begin() + bc ) 
+        next_decision = decisions.begin() + bc; 
   
     //decisions.pop_back();    
-    choices.pop_back();
-    
+    choices[bc].mode = Choice::BEGIN;    
 }
 
 
-void DecidedQuery::SetBackChoice( Choice newc )
+void DecidedQuery::SetChoice( int bc, Choice newc )
 {
-    choices.back() = newc;
+    ASSERT( !choices.empty() );
+    ASSERT( bc >= 0 );
+    ASSERT( bc < choices.size() );
+    choices[bc] = newc;
 }
 
 

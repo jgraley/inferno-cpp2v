@@ -59,22 +59,50 @@ void Conjecture::ConfigRecordWalk( Agent *agent )
 }
 
 
-bool Conjecture::IncrementAgent( Agent *agent )
+void Conjecture::Start()
+{
+    for( auto &p : agent_records )
+        FillChoicesWithHardBegin( p.first );
+}
+
+
+void Conjecture::FillChoicesWithHardBegin( Agent *agent )
+{
+    AgentRecord *record = &agent_records.at(agent);
+    auto query = record->query;
+
+    for( int i=0; i<query->GetChoices()->size(); i++ )
+    {
+        DecidedQueryCommon::Choice new_choice;
+        new_choice.mode = DecidedQueryCommon::Choice::BEGIN;
+        query->SetChoice( i, new_choice );
+    }
+}
+
+
+void Conjecture::EnsureChoicesHaveIterators()
+{
+    for( auto &p : agent_records )
+        p.second.query->EnsureChoicesHaveIterators();
+}
+
+
+bool Conjecture::IncrementAgent( Agent *agent, int bc )
 {    
     auto query = agent_records.at(agent).query;
     ASSERT( query );
     
-    DecidedQueryCommon::Choice back_choice = query->GetChoices()->back();
-    const auto &back_decision = (*query->GetDecisions())[query->GetChoices()->size()-1];
+    DecidedQueryCommon::Choice back_choice = (*query->GetChoices())[bc];
+    const auto &back_decision = (*query->GetDecisions())[bc];
     
     // Inclusive case - we let the choice go to end but we won't go any further
     if( back_choice.mode==DecidedQueryCommon::Choice::ITER && back_decision.inclusive && back_choice.iter == back_decision.end )
     {
-        query->InvalidateBack();
-        if( query->GetChoices()->empty() )
+        query->Invalidate(bc);
+        if( bc==0 )
             return false;
         else
-            return IncrementAgent( agent );
+            return IncrementAgent( agent, bc - 1 );
 	}
 
 	if( back_choice.mode==DecidedQueryCommon::Choice::BEGIN || back_choice.iter != back_decision.end ) 
@@ -90,17 +118,17 @@ bool Conjecture::IncrementAgent( Agent *agent )
                 back_choice.mode = DecidedQueryCommon::Choice::ITER;
                 break;
         }        
-        query->SetBackChoice( back_choice );
+        query->SetChoice( bc, back_choice );
     }
 		
     // Exclusive case - we don't let the choice be end
     if( back_choice.mode==DecidedQueryCommon::Choice::ITER && !back_decision.inclusive && back_choice.iter == back_decision.end )
     {
-        query->InvalidateBack();
-        if( query->GetChoices()->empty() )
+        query->Invalidate(bc);
+        if( bc==0 )
             return false;
         else
-            return IncrementAgent( agent );
+            return IncrementAgent( agent, bc - 1 );
 	}
 		
     return true;
@@ -123,9 +151,7 @@ bool Conjecture::IncrementConjecture(Agent *agent)
                 break;
                 
             case DecidedQueryCommon::QUERY:
-                FillMissingChoicesWithBegin(agent);
-                ok = IncrementAgent( agent );
-                FillMissingChoicesWithBegin(agent);
+                ok = IncrementAgent( agent, pq->GetDecisions()->size() - 1 );
                 query->last_activity = DecidedQueryCommon::CONJECTURE;
                 break;
                 
@@ -174,25 +200,6 @@ shared_ptr<DecidedQuery> Conjecture::GetQuery(Agent *agent)
 {
     ASSERT(configured);
     return agent_records.at(agent).query;
-}
-
-
-void Conjecture::FillMissingChoicesWithBegin( Agent *agent )
-{
-    AgentRecord *record = &agent_records.at(agent);
-    auto query = record->query;
-    auto pq = record->pq;
-    //ASSERT( query->GetDecisions()->size() == pq->GetDecisions()->size() );
-           
-    while( query->GetChoices()->size() < pq->GetDecisions()->size() )
-    {
-        DecidedQueryCommon::Choice new_choice;
-        new_choice.mode = DecidedQueryCommon::Choice::BEGIN;
-        query->PushBackChoice( new_choice );
-    }
-    
-    ASSERT( query->GetChoices()->size()==pq->GetDecisions()->size() )
-            ("%d != %d", query->GetChoices()->size(), pq->GetDecisions()->size() );
 }
 
 };

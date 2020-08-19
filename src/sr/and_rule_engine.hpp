@@ -49,6 +49,7 @@ public:
     void Compare( const TreePtrInterface *p_start_x,
                   const CouplingMap *master_keys );
     void Compare( const TreePtrInterface *p_start_x );
+    void EnsureChoicesHaveIterators();
 
     const Conjecture &GetConjecture();
     const CouplingMap &GetCouplingKeys();
