@@ -25,7 +25,6 @@ public:
         shared_ptr<PatternQuery> pq;
         shared_ptr<DecidedQuery> query;
  		Agent *previous_agent;
-        bool linked;
 	};
 
 public:
@@ -52,6 +51,7 @@ private:
 	Map<Agent *, AgentRecord> agent_records;
 	Agent *last_agent;		
     bool configured;
+    Set<AgentRecord *> reached;
 };
 
 };

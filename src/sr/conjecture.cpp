@@ -23,7 +23,6 @@ void Conjecture::Configure(Set<Agent *> my_agents, Agent *root_agent)
 		AgentRecord record;
 		record.agent = agent;
         record.previous_agent = (Agent *)0xFEEDF00D;
-        record.linked = false;
         record.pq = make_shared<PatternQuery>();
         *(record.pq) = agent->GetPatternQuery();
 		agent_records[agent] = record;
@@ -41,17 +40,21 @@ void Conjecture::ConfigRecordWalk( Agent *agent )
 
     AgentRecord *record = &agent_records.at(agent);
 
-    if( record->linked )
+    if( reached.IsExist(record) )
         return; // already reached: probably a coupling
-        
-    record->previous_agent = last_agent;
-    last_agent = agent;
-    record->linked = true;
+    reached.insert(record);
+
     auto pq = record->pq;
     
     // Makes sense, but we won't match the old algo with this
     if( pq->GetEvaluator() )
-        return; // we don't process evaluators
+        return; // we don't process evaluators or their children
+        
+    if( !pq->GetDecisions()->empty() )
+    {           
+        record->previous_agent = last_agent;
+        last_agent = agent;
+    }
     
     for( const PatternQuery::Link &l : *(pq->GetNormalLinks()) )
         ConfigRecordWalk( l.agent );
