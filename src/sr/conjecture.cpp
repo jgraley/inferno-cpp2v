@@ -64,12 +64,6 @@ bool Conjecture::IncrementAgent( Agent *agent )
     auto query = agent_records.at(agent).query;
     ASSERT( query );
     
-	if( query->GetChoices()->empty() )
-	{
-        // this query is defunct
-	    return false;  
-	}
-
     DecidedQueryCommon::Choice back_choice = query->GetChoices()->back();
     const auto &back_decision = (*query->GetDecisions())[query->GetChoices()->size()-1];
     
@@ -77,7 +71,10 @@ bool Conjecture::IncrementAgent( Agent *agent )
     if( back_choice.mode==DecidedQueryCommon::Choice::ITER && back_decision.inclusive && back_choice.iter == back_decision.end )
     {
         query->InvalidateBack();
-        return IncrementAgent( agent );
+        if( query->GetChoices()->empty() )
+            return false;
+        else
+            return IncrementAgent( agent );
 	}
 
 	if( back_choice.mode==DecidedQueryCommon::Choice::BEGIN || back_choice.iter != back_decision.end ) 
@@ -100,7 +97,10 @@ bool Conjecture::IncrementAgent( Agent *agent )
     if( back_choice.mode==DecidedQueryCommon::Choice::ITER && !back_decision.inclusive && back_choice.iter == back_decision.end )
     {
         query->InvalidateBack();
-        return IncrementAgent( agent );
+        if( query->GetChoices()->empty() )
+            return false;
+        else
+            return IncrementAgent( agent );
 	}
 		
     return true;
@@ -114,20 +114,24 @@ bool Conjecture::IncrementConjecture(Agent *agent)
     auto pq = record->pq;
     
     bool ok = false;
-    switch( query->last_activity )
+
+    if( !pq->GetDecisions()->empty() )
     {
-        case DecidedQueryCommon::NEW:
-            break;
-            
-        case DecidedQueryCommon::QUERY:
-            FillMissingChoicesWithBegin(agent);
-            ok = IncrementAgent( agent );
-            FillMissingChoicesWithBegin(agent);
-            query->last_activity = DecidedQueryCommon::CONJECTURE;
-            break;
-            
-        case DecidedQueryCommon::CONJECTURE:
-            break;
+        switch( query->last_activity )
+        {
+            case DecidedQueryCommon::NEW:
+                break;
+                
+            case DecidedQueryCommon::QUERY:
+                FillMissingChoicesWithBegin(agent);
+                ok = IncrementAgent( agent );
+                FillMissingChoicesWithBegin(agent);
+                query->last_activity = DecidedQueryCommon::CONJECTURE;
+                break;
+                
+            case DecidedQueryCommon::CONJECTURE:
+                break;
+        }
     }
 
     if( !ok )
