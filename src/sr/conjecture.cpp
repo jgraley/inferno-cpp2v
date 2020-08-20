@@ -18,33 +18,35 @@ Conjecture::~Conjecture()
 
 void Conjecture::Configure(Set<Agent *> my_agents, Agent *root_agent)
 {
+    last_agent = agent_records.end();
+    configured = true;
+
+    if( my_agents.empty() )
+        return; // no decisions at all this time!
+
     FOREACH( Agent *agent, my_agents )
     {
 		AgentRecord record;
-		record.agent = agent;
-        record.previous_agent = (Agent *)0xFEEDF00D;
         record.pq = make_shared<PatternQuery>();
         *(record.pq) = agent->GetPatternQuery();
 		agent_records[agent] = record;
 	}        
-    last_agent = nullptr;
-    ConfigRecordWalk( root_agent );
-    configured = true;
+    AgentRecords::iterator root_rit = agent_records.find(root_agent);
+    ASSERT( root_rit != agent_records.end() );
+    ConfigRecordWalk( root_rit );
 }
 
 
-void Conjecture::ConfigRecordWalk( Agent *agent )
+void Conjecture::ConfigRecordWalk( AgentRecords::iterator rit )
 {
-    if( agent_records.count(agent)==0 ) // Probably belongs to master
-        return;
+    Agent *agent = rit->first;
+    AgentRecord &record = rit->second;
 
-    AgentRecord *record = &agent_records.at(agent);
-
-    if( reached.IsExist(record) )
+    if( reached.IsExist(&record) ) // TODO put the rits in there?
         return; // already reached: probably a coupling
-    reached.insert(record);
+    reached.insert(&record);
 
-    auto pq = record->pq;
+    auto pq = record.pq;
     
     // Makes sense, but we won't match the old algo with this
     if( pq->GetEvaluator() )
@@ -52,30 +54,36 @@ void Conjecture::ConfigRecordWalk( Agent *agent )
         
     if( !pq->GetDecisions()->empty() )
     {           
-        record->previous_agent = last_agent;
-        last_agent = agent;
+        record.previous_agent = last_agent;
+        last_agent = rit;
     }
     
     for( const PatternQuery::Link &l : *(pq->GetNormalLinks()) )
-        ConfigRecordWalk( l.agent );
+    {
+        AgentRecords::iterator child_rit = agent_records.find(l.agent);
+        if( child_rit != agent_records.end() ) // If fails, probably belongs to master
+            ConfigRecordWalk( child_rit );
+    }
 }
 
 
 void Conjecture::Start()
 {
-    for( auto &p : agent_records )
+    for( AgentRecords::iterator rit=agent_records.begin(); 
+         rit != agent_records.end();
+         ++rit )
     {
-        Agent *agent = p.first;
-        p.second.query = agent->CreateDecidedQuery();
-        FillChoicesWithHardBegin( agent );
+        Agent *agent = rit->first;
+        rit->second.query = agent->CreateDecidedQuery();
+        FillChoicesWithHardBegin( rit );
     }
 }
 
 
-void Conjecture::FillChoicesWithHardBegin( Agent *agent )
+void Conjecture::FillChoicesWithHardBegin( AgentRecords::iterator rit )
 {
-    AgentRecord *record = &agent_records.at(agent);
-    auto query = record->query;
+    AgentRecord record = rit->second;
+    auto query = record.query;
 
     for( int i=0; i<query->GetChoices()->size(); i++ )
     {
@@ -93,10 +101,11 @@ void Conjecture::EnsureChoicesHaveIterators()
 }
 
 
-bool Conjecture::IncrementAgent( Agent *agent, int bc )
+bool Conjecture::IncrementAgent( AgentRecords::iterator rit, int bc )
 {    
-    auto query = agent_records.at(agent).query;
-    ASSERT( query );
+    Agent *agent = rit->first;    
+    AgentRecord record = rit->second;
+    auto query = record.query;
     
     DecidedQueryCommon::Choice back_choice = (*query->GetChoices())[bc];
     const auto &back_decision = (*query->GetDecisions())[bc];
@@ -108,7 +117,7 @@ bool Conjecture::IncrementAgent( Agent *agent, int bc )
         if( bc==0 )
             return false;
         else
-            return IncrementAgent( agent, bc - 1 );
+            return IncrementAgent( rit, bc - 1 );
 	}
 
 	if( back_choice.mode==DecidedQueryCommon::Choice::BEGIN || back_choice.iter != back_decision.end ) 
@@ -134,18 +143,19 @@ bool Conjecture::IncrementAgent( Agent *agent, int bc )
         if( bc==0 )
             return false;
         else
-            return IncrementAgent( agent, bc - 1 );
+            return IncrementAgent( rit, bc - 1 );
 	}
 		
     return true;
 }
 
 
-bool Conjecture::IncrementConjecture(Agent *agent)
+bool Conjecture::IncrementConjecture(AgentRecords::iterator rit)
 {       
-    AgentRecord *record = &agent_records.at(agent);
-    auto query = record->query;
-    auto pq = record->pq;
+    Agent *agent = rit->first;    
+    AgentRecord record = rit->second;
+    auto query = record.query;
+    auto pq = record.pq;
     
     bool ok = false;
 
@@ -157,7 +167,7 @@ bool Conjecture::IncrementConjecture(Agent *agent)
                 break;
                 
             case DecidedQueryCommon::QUERY:
-                ok = IncrementAgent( agent, pq->GetDecisions()->size() - 1 );
+                ok = IncrementAgent( rit, pq->GetDecisions()->size() - 1 );
                 query->last_activity = DecidedQueryCommon::CONJECTURE;
                 break;
                 
@@ -168,8 +178,8 @@ bool Conjecture::IncrementConjecture(Agent *agent)
 
     if( !ok )
     {
-        if( record->previous_agent )
-            return IncrementConjecture( record->previous_agent );
+        if( record.previous_agent != agent_records.end() )
+            return IncrementConjecture( record.previous_agent );
         else
             return false;
 	}
@@ -181,10 +191,10 @@ bool Conjecture::IncrementConjecture(Agent *agent)
 bool Conjecture::Increment()
 {
     ASSERT(configured);
-    if( last_agent )
+    if( last_agent != agent_records.end() )
         return IncrementConjecture(last_agent);
     else
-        return false;
+        return false; // no decisions at all this time!
 }
 
 

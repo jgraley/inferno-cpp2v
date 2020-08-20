@@ -19,12 +19,13 @@ public:
     typedef DecidedQueryCommon::Ranges Ranges;
     typedef DecidedQueryCommon::Choices Choices;
     
+    struct AgentRecord;
+	typedef Map<Agent *, AgentRecord> AgentRecords;
     struct AgentRecord
     {
-		Agent *agent;
         shared_ptr<PatternQuery> pq;
         shared_ptr<DecidedQuery> query;
- 		Agent *previous_agent;
+ 		AgentRecords::iterator previous_agent;
 	};
 
 public:
@@ -32,24 +33,23 @@ public:
     ~Conjecture();
 
     void Configure(Set<Agent *> my_agents, Agent *root_agent);
-    void ConfigRecordWalk( Agent *agent );
+    void ConfigRecordWalk( AgentRecords::iterator rit );
     
     void Start();
-    void FillChoicesWithHardBegin( Agent *agent );      
+    void FillChoicesWithHardBegin( AgentRecords::iterator rit );      
     void EnsureChoicesHaveIterators();
     
-	bool IncrementAgent( Agent *agent, int bc );			                                     
+	bool IncrementAgent( AgentRecords::iterator rit, int bc );			                                     
     bool Increment(); // returns true for try again, false for give up				 
-    bool IncrementConjecture( Agent *agent ); 
-    
+    bool IncrementConjecture( AgentRecords::iterator rit );     
         				       
     // Standard interface for decided compare functions
     DecidedQuery::Choices GetChoices( Agent *agent ) const;
     shared_ptr<DecidedQuery> GetQuery( Agent *agent );
 				   
 private:
-	Map<Agent *, AgentRecord> agent_records;
-	Agent *last_agent;		
+    AgentRecords agent_records;
+	AgentRecords::iterator last_agent;		
     bool configured;
     Set<AgentRecord *> reached;
 };
