@@ -39,10 +39,10 @@ public:
 	virtual void AgentConfigure( const SCREngine *master_engine ) = 0;
 
     /// List the Agents reached via links during search
-    virtual PatternQuery GetPatternQuery() const = 0;
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const = 0;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
-    virtual void DoDecidedQuery( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                  const TreePtrInterface *px ) const = 0;                                                
     virtual TreePtr<Node> GetCoupled() = 0;                                  
     virtual void ResetKey() = 0;     
@@ -69,8 +69,8 @@ public:
     virtual void AgentConfigure( const SCREngine *master_engine );
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
-    virtual void DoDecidedQuery( DecidedQueryAgentInterface &query,
-                                 const TreePtrInterface *px ) const;                                                
+    virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
+                                  const TreePtrInterface *px ) const;                                                
     void DoKey( TreePtr<Node> x );
     TreePtr<Node> GetCoupled();                                  
     void ResetKey();    
@@ -85,13 +85,13 @@ public:
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
-    virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
+    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                   const TreePtrInterface *px ) const = 0;                                                
     const SCREngine *engine;    
 			
 private:    
     TreePtr<Node> coupling_key;    
-    PatternQuery pattern_query;
+    shared_ptr<PatternQuery> pattern_query;
     int num_decisions;
 };
 

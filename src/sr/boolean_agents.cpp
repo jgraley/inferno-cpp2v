@@ -5,16 +5,16 @@ using namespace SR;
 
 //---------------------------------- NotMatch ------------------------------------    
 
-PatternQuery NotMatchAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> NotMatchAgent::GetPatternQuery() const
 {
-    PatternQuery query;
-	query.RegisterAbnormalLink( AsAgent(GetPattern()) );
-	query.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
-    return query;
+    auto pq = make_shared<PatternQuery>();
+	pq->RegisterAbnormalLink( AsAgent(GetPattern()) );
+	pq->RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
+    return pq;
 }
 
 
-void NotMatchAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
+void NotMatchAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                   const TreePtrInterface *px ) const
 {
     INDENT("!");
@@ -52,17 +52,17 @@ bool NotMatchAgent::BooleanEvaluatorNot::operator()( list<bool> &inputs ) const
 
 //---------------------------------- MatchAll ------------------------------------    
 
-PatternQuery MatchAllAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> MatchAllAgent::GetPatternQuery() const
 {
-    PatternQuery r;
+    auto pq = make_shared<PatternQuery>();
     FOREACH( const TreePtr<Node> p, GetPatterns() )
-	    r.RegisterNormalLink( AsAgent(p) );
+	    pq->RegisterNormalLink( AsAgent(p) );
         
-    return r;
+    return pq;
 }
 
 
-void MatchAllAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
+void MatchAllAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                   const TreePtrInterface *px ) const
 { 
     INDENT("&");
@@ -97,17 +97,17 @@ void MatchAllAgent::GetGraphAppearance( bool *bold, string *text, string *shape 
 
 //---------------------------------- MatchAny ------------------------------------    
 
-PatternQuery MatchAnyAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> MatchAnyAgent::GetPatternQuery() const
 {
-    PatternQuery query;
+    auto pq = make_shared<PatternQuery>();
     FOREACH( const TreePtr<Node> p, GetPatterns() )
-	    query.RegisterAbnormalLink( AsAgent(p) );
-	query.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
-    return query;
+	    pq->RegisterAbnormalLink( AsAgent(p) );
+	pq->RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
+    return pq;
 }
 
 
-void MatchAnyAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
+void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                   const TreePtrInterface *px ) const
 {
     INDENT("|");

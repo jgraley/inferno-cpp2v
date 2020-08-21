@@ -8,9 +8,9 @@
 
 using namespace SR;
 
-PatternQuery StandardAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 {
-    PatternQuery query;
+    auto pq = make_shared<PatternQuery>();
     const vector< Itemiser::Element * > pattern_memb = Itemise();
     FOREACH( Itemiser::Element *ie, pattern_memb )
     {
@@ -31,11 +31,11 @@ PatternQuery StandardAgent::GetPatternQuery() const
                 Agent *pea = AsAgent(pe);
                 if( dynamic_cast<StarAgent *>(pea) && num_stars>0 )
                 {
-                    query.RegisterDecision( true ); // Inclusive, please.
+                    pq->RegisterDecision( true ); // Inclusive, please.
                     num_stars--;
                 }
 
-				query.RegisterNormalLink(AsAgent(pe));    
+				pq->RegisterNormalLink(AsAgent(pe));    
             }
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )
@@ -47,28 +47,28 @@ PatternQuery StandardAgent::GetPatternQuery() const
 				    star = s;
 				else
                 {
-                    query.RegisterDecision( false ); // Exclusive, please
-				    query.RegisterNormalLink(AsAgent(pe));    	    
+                    pq->RegisterDecision( false ); // Exclusive, please
+				    pq->RegisterNormalLink(AsAgent(pe));    	    
                 }
 		    }
 		    if( star )
-		        query.RegisterNormalLink(star);    
+		        pq->RegisterNormalLink(star);    
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
         {
             if( TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be NULL meaning no restriction            
-                query.RegisterNormalLink(AsAgent(*pattern_ptr));
+                pq->RegisterNormalLink(AsAgent(*pattern_ptr));
         }
         else
         {
             ASSERTFAIL("got something from itemise that isnt a Sequence, Collection or a TreePtr");
         }
     }
-    return query;
+    return pq;
 }
 
 
-void StandardAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
+void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                      const TreePtrInterface *px ) const
 {
     INDENT(".");
@@ -136,7 +136,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 
     int pattern_num_non_star = 0;
     ContainerInterface::iterator p_last_star;
-	for( pit = pattern.begin(); pit != pattern.end(); ++pit ) // @TODO this is just pattern analysis - do in GetPatternQuery and cache?
+	for( pit = pattern.begin(); pit != pattern.end(); ++pit ) // @TODO this is just pattern analysis - do in GetPatternQuery() and cache?
     {
 		TreePtr<Node> pe( *pit );
 		ASSERT( pe );

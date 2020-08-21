@@ -75,7 +75,7 @@ PatternQuery NormalityAgentWrapper::GetPatternQuery() const
 }
 
 
-void NormalityAgentWrapper::RunDecidedQuery( DecidedQueryAgentInterface &wrapper_query,
+void NormalityAgentWrapper::RunDecidedQueryImpl( DecidedQueryAgentInterface &wrapper_query,
                                           const TreePtrInterface *px ) const
 {
     INDENT("'");    
@@ -103,7 +103,7 @@ void NormalityAgentWrapper::RunDecidedQuery( DecidedQueryAgentInterface &wrapper
     wrapper_query.Reset();
     
     // Query the wrapped node for links and decisions
-    wrapped_agent->RunDecidedQuery( wrapped_query, px );
+    wrapped_agent->RunDecidedQueryImpl( wrapped_query, px );
     
     // Early-out on local mismatch of wrapped node.
     if( !wrapped_result.GetLocalMatch() )
@@ -121,7 +121,7 @@ void NormalityAgentWrapper::RunDecidedQuery( DecidedQueryAgentInterface &wrapper
         al = *alit;
         ++alit;
         
-        // TODO should do this before the wrapped_agent->RunDecidedQuery() since it *might* help with
+        // TODO should do this before the wrapped_agent->RunDecidedQueryImpl() since it *might* help with
         // choice pushing into the wrapped node.
         // Create whole-domain decisions for the terminal agents and key them with the resultant choices 
         CouplingMap terminal_keys;			

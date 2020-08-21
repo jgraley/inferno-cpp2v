@@ -37,17 +37,17 @@ void AndRuleEngine::ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, Age
 {
     normal_agents->insert(current_agent);
     
-    PatternQuery query = current_agent->GetPatternQuery();
-    FOREACH( const PatternQuery::Link &b, *query.GetNormalLinks() )
+    shared_ptr<PatternQuery> pq = current_agent->GetPatternQuery();
+    FOREACH( const PatternQuery::Link &b, *pq->GetNormalLinks() )
         ConfigPopulateNormalAgents( normal_agents, b.agent );
         
     // Can be nicer in C++17, apparently.
-    FOREACH( const PatternQuery::Link &b, *query.GetAbnormalLinks() )
+    FOREACH( const PatternQuery::Link &b, *pq->GetAbnormalLinks() )
         my_abnormal_engines.emplace(std::piecewise_construct,
                                     std::forward_as_tuple(b.agent),
                                     std::forward_as_tuple());    
 
-    FOREACH( const PatternQuery::Link &b, *query.GetMultiplicityLinks() )
+    FOREACH( const PatternQuery::Link &b, *pq->GetMultiplicityLinks() )
         my_multiplicity_engines.emplace(std::piecewise_construct,
                                         std::forward_as_tuple(b.agent),
                                         std::forward_as_tuple());
@@ -147,20 +147,20 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     shared_ptr<DecidedQuery> query = conj.GetQuery(agent);
 
     // Run the compare implementation to get the links based on the choices
-    TRACE(*agent)("?=")(**px)(" RunDecidedQuery()\n");    
-    agent->DoDecidedQuery( *query, px );
+    TRACE(*agent)("?=")(**px)(" RunDecidedQueryImpl()\n");    
+    agent->RunDecidedQuery( *query, px );
 
 #ifdef TEST_PATTERN_QUERY
-    PatternQuery pq = agent->GetPatternQuery();
-    ASSERT( pq.GetNormalLinks()->size() == query->GetNormalLinks()->size() &&
-            pq.GetAbnormalLinks()->size() == query->GetAbnormalLinks()->size() &&
-            pq.GetMultiplicityLinks()->size() == query->GetMultiplicityLinks()->size() &&
-            pq.GetDecisions()->size() == query->GetDecisions()->size() )
-          ("GetPatternQuery disagrees with RunDecidedQuery!!!!\n")
-          ("GetNormalLinks()->size() : %d vs %d\n", pq.GetNormalLinks()->size(), query->GetNormalLinks()->size() )
-          ("GetAbnormalLinks()->size() : %d vs %d\n", pq.GetAbnormalLinks()->size(), query->GetAbnormalLinks()->size() )
-          ("GetMultiplicityLinks()->size() : %d vs %d\n", pq.GetMultiplicityLinks()->size(), query->GetMultiplicityLinks()->size() )
-          ("GetDecisions()->size() : %d vs %d\n", pq.GetDecisions()->size(), query->GetDecisions()->size() )
+    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
+    ASSERT( pq->GetNormalLinks()->size() == query->GetNormalLinks()->size() &&
+            pq->GetAbnormalLinks()->size() == query->GetAbnormalLinks()->size() &&
+            pq->GetMultiplicityLinks()->size() == query->GetMultiplicityLinks()->size() &&
+            pq->GetDecisions()->size() == query->GetDecisions()->size() )
+          ("PatternQuery disagrees with DecidedQuery!!!!\n")
+          ("GetNormalLinks()->size() : %d vs %d\n", pq->GetNormalLinks()->size(), query->GetNormalLinks()->size() )
+          ("GetAbnormalLinks()->size() : %d vs %d\n", pq->GetAbnormalLinks()->size(), query->GetAbnormalLinks()->size() )
+          ("GetMultiplicityLinks()->size() : %d vs %d\n", pq->GetMultiplicityLinks()->size(), query->GetMultiplicityLinks()->size() )
+          ("GetDecisions()->size() : %d vs %d\n", pq->GetDecisions()->size(), query->GetDecisions()->size() )
           (*agent);
     // Note: number of abnormal links doe NOT now depend on x; #60 completed
 #endif

@@ -5,15 +5,15 @@
 
 using namespace SR;
 
-PatternQuery OverlayAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> OverlayAgent::GetPatternQuery() const
 {
-    PatternQuery query;
-	query.RegisterNormalLink( AsAgent(GetThrough()) );
-    return query;
+    auto pq = make_shared<PatternQuery>();
+	pq->RegisterNormalLink( AsAgent(GetThrough()) );
+    return pq;
 }
 
 
-void OverlayAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
+void OverlayAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                  const TreePtrInterface *px ) const
 {
     query.Reset();

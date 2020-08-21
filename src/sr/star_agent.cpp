@@ -6,21 +6,21 @@
 using namespace SR;
 
 
-PatternQuery StarAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 {
-    PatternQuery query;
+    auto pq = make_shared<PatternQuery>();
     if( TreePtr<Node> p = GetRestriction() )
     {
-        query.RegisterMultiplicityLink( AsAgent(p) );
+        pq->RegisterMultiplicityLink( AsAgent(p) );
     }
 
-    return query;
+    return pq;
 }
 
 
 // NOTE this is a DecidedCompare() not DecidedCompareImpl() so some of the AgentCommon 
 // stuff has to be done explicitly in here.
-void StarAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
+void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                               const TreePtrInterface *px ) const
 {
     INDENT("*");

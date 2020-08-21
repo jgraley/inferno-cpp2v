@@ -27,8 +27,7 @@ void Conjecture::Configure(Set<Agent *> my_agents, Agent *root_agent)
     FOREACH( Agent *agent, my_agents )
     {
 		AgentRecord record;
-        record.pq = make_shared<PatternQuery>();
-        *(record.pq) = agent->GetPatternQuery();
+        record.pq = agent->GetPatternQuery();
 		agent_records[agent] = record;
 	}        
     AgentRecords::iterator root_rit = agent_records.find(root_agent);

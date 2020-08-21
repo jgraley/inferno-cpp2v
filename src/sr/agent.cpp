@@ -35,7 +35,7 @@ void AgentCommon::AgentConfigure( const SCREngine *e )
     engine = e;
     
     pattern_query = GetPatternQuery();
-    num_decisions = pattern_query.GetDecisions()->size();
+    num_decisions = pattern_query->GetDecisions()->size();
 }
 
 
@@ -58,13 +58,13 @@ shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
 }
     
     
-void AgentCommon::DoDecidedQuery( DecidedQueryAgentInterface &query,
+void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   const TreePtrInterface *px ) const
 {
     query.last_activity = DecidedQueryCommon::QUERY;
    
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
-    RunDecidedQuery( query, px );
+    RunDecidedQueryImpl( query, px );
 }                             
 
 

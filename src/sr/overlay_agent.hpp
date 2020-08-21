@@ -20,8 +20,8 @@ namespace SR
 class OverlayAgent : public virtual AgentCommon
 {
 public:
-    virtual PatternQuery GetPatternQuery() const;
-    virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
+    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                const TreePtrInterface *px ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );

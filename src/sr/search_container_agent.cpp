@@ -7,22 +7,22 @@ using namespace SR;
 
 //---------------------------------- SearchContainerAgent ------------------------------------    
 
-PatternQuery SearchContainerAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> SearchContainerAgent::GetPatternQuery() const
 {
-    PatternQuery query;
+    auto pq = make_shared<PatternQuery>();
     
-	query.RegisterDecision( false ); // Exclusive, please.
-	query.RegisterNormalLink( AsAgent(terminus) );
+	pq->RegisterDecision( false ); // Exclusive, please.
+	pq->RegisterNormalLink( AsAgent(terminus) );
     
     // Allow subclasses to further restrict
-    PatternQueryRestrictions( query );
+    PatternQueryRestrictions( pq );
     
-    return query;
+    return pq;
 }
 
 
-void SearchContainerAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                         const TreePtrInterface *px ) const
+void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                            const TreePtrInterface *px ) const
 {
     INDENT("#");
     ASSERT( this );
@@ -107,10 +107,10 @@ shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> 
 }
 
 
-void StuffAgent::PatternQueryRestrictions( PatternQuery &r ) const
+void StuffAgent::PatternQueryRestrictions( shared_ptr<PatternQuery> pq ) const
 {
     if( recurse_restriction )
-        r.RegisterMultiplicityLink( AsAgent(recurse_restriction) );
+        pq->RegisterMultiplicityLink( AsAgent(recurse_restriction) );
 }
 
 

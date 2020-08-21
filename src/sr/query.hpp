@@ -182,7 +182,7 @@ class DecidedQuery : virtual public DecidedQueryClientInterface,
                      virtual public DecidedQueryAgentInterface
 {
 public:    
-    DecidedQuery(const PatternQuery &pq);
+    DecidedQuery( shared_ptr<const PatternQuery> pq );
     void Reset();
 
     ContainerInterface::iterator RegisterDecision( const Range &d );

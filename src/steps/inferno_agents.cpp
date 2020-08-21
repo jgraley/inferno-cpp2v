@@ -91,17 +91,17 @@ bool IdentifierByNameAgent::IsMatch( const TreePtrInterface &x ) const
 
 //---------------------------------- Nested ------------------------------------    
 
-PatternQuery NestedAgent::GetPatternQuery() const
+shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
 {
-    PatternQuery query;
-	query.RegisterNormalLink( AsAgent(terminus) );
+    auto pq = make_shared<PatternQuery>();
+	pq->RegisterNormalLink( AsAgent(terminus) );
 	if( depth )
-		query.RegisterNormalLink( AsAgent(depth) );
-    return query;
+		pq->RegisterNormalLink( AsAgent(depth) );
+    return pq;
 }
 
 
-void NestedAgent::RunDecidedQuery( DecidedQueryAgentInterface &query,
+void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                 const TreePtrInterface *px ) const                          
 {
     INDENT("N");
@@ -182,7 +182,7 @@ TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode )
 
 //---------------------------------- IsLabelReached ------------------------------------    
 
-void IsLabelReached::RunDecidedQuery( DecidedQueryAgentInterface &query,
+void IsLabelReached::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                    const TreePtrInterface *pxx ) const
 {
 	INDENT("L");
