@@ -137,8 +137,9 @@ public:
                                                            bool inclusive,
                                                            std::shared_ptr<ContainerInterface> container=nullptr ) = 0; 
     virtual ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive ) = 0; 
+    virtual bool IsNextChoiceValid() const = 0;
     virtual const Range &GetNextOldDecision() const = 0;
-    virtual bool IsNextChoiceHardBegin() const = 0;
+    virtual ContainerInterface::iterator SkipDecision() = 0;
 
     virtual void CompleteDecisionsWithEmpty() = 0;
 
@@ -192,8 +193,9 @@ public:
                                                    bool inclusive,
                                                    std::shared_ptr<ContainerInterface> container=nullptr );
     ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive );
+    bool IsNextChoiceValid() const;
     const Range &GetNextOldDecision() const;
-    bool IsNextChoiceHardBegin() const;
+    ContainerInterface::iterator SkipDecision();
     void CompleteDecisionsWithEmpty();
 
     void RegisterNormalLink( Agent *a, const TreePtrInterface *px ); 
@@ -222,8 +224,8 @@ private:
     Links abnormal_links; 
     Links multiplicity_links; 
     Ranges decisions;
-    Ranges::iterator next_decision;
     Choices choices;
+    Ranges::iterator next_decision;
     Choices::iterator next_choice;
     static shared_ptr< Collection<Node> > empty_container;
 };

@@ -227,16 +227,21 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
     switch( next_choice->mode )
     {
         case Choice::ITER:
+            // We have an iterator already: any range submitted here must match the previous one
+            // so that the iterator remains valid. See range::operator==(). If this cannot be achieved, 
+            // then the agent must use IsNextChoiceValid() and if it returns true, call SkipDecision()
             it = next_choice->iter; // Use the iterator that was given to us
+            ASSERT( r == *next_decision );
             break;
         
         case Choice::BEGIN:
+            // We do not have an iterator: we are able to change the range
             it = r.begin; // we have been asked to use begin
+            *next_decision = r;
             break;
     }
     ASSERT( r.inclusive || it != r.end )("no empty decisions"); 
     ASSERT( it == r.end || *it )("A choice cannot be a nullptr");
-    *next_decision = r;
     ++next_decision; 
     ++next_choice;
     
@@ -275,6 +280,12 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const ContainerInte
 }                                                      
 */
 
+bool DecidedQuery::IsNextChoiceValid() const
+{
+    return next_choice->mode == Choice::ITER;
+}
+
+
 const DecidedQueryCommon::Range &DecidedQuery::GetNextOldDecision() const
 {
     ASSERT( next_decision != decisions.end() )
@@ -283,9 +294,26 @@ const DecidedQueryCommon::Range &DecidedQuery::GetNextOldDecision() const
 }
 
 
-bool DecidedQuery::IsNextChoiceHardBegin() const
+ContainerInterface::iterator DecidedQuery::SkipDecision()
 {
-    return next_choice->mode == Choice::BEGIN;
+    ContainerInterface::iterator it;
+    ASSERT( next_decision != decisions.end() ); // run out of decisions? Shouldn't happen now.
+    ASSERT( next_choice != choices.end() );
+    switch( next_choice->mode )
+    {
+        case Choice::ITER:
+            it = next_choice->iter; // Use the iterator that was given to us
+            break;
+        
+        case Choice::BEGIN:
+            it = next_decision->begin; // we have been asked to use begin
+            break;
+    }
+    ASSERT( it == next_decision->end || *it )("A choice cannot be a nullptr");
+    ++next_decision; 
+    ++next_choice;
+    
+    return it;
 }
 
 

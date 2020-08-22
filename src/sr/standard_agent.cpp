@@ -250,7 +250,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
 	    	// Report a block for the chosen node
             ContainerInterface::iterator xit;
 
-            if( !query.IsNextChoiceHardBegin() )
+            if( query.IsNextChoiceValid() )
             {
                 // Decision already in conjecture and valid. 
                 const Conjecture::Range &old_decision = query.GetNextOldDecision();
@@ -261,7 +261,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                     xremaining.push_back(tp);
                     
                 // re-submit the exact same decision.
-                xit = query.RegisterDecision( old_decision );
+                xit = query.SkipDecision();
             }
             else
             {
@@ -272,6 +272,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                 *x_decision = xremaining;
                 xit = query.RegisterDecision( x_decision, false );
             }
+            
             query.RegisterLocalNormalLink( pia, *xit );
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
