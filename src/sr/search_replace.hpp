@@ -79,7 +79,9 @@ public:
 #include "green_grass_agent.hpp"
 #include "overlay_agent.hpp"
 #include "slave_agent.hpp"
-#include "boolean_agents.hpp"
+#include "match_all_agent.hpp"
+#include "match_any_agent.hpp"
+#include "not_match_agent.hpp"
 #include "pointer_is_agent.hpp"
 #include "transform_of_agent.hpp"
 
