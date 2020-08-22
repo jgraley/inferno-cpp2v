@@ -224,13 +224,14 @@ private:
     Links abnormal_links; 
     Links multiplicity_links; 
     Ranges decisions;
-    Choices choices;
     Ranges::iterator next_decision;
+    Choices choices;
     Choices::iterator next_choice;
     static shared_ptr< Collection<Node> > empty_container;
 };
 
 
 bool operator<(const DecidedQuery::Link &l0, const DecidedQuery::Link &l1);
+
 };
 #endif

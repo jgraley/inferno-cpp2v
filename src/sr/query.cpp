@@ -227,7 +227,7 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
     switch( next_choice->mode )
     {
         case Choice::ITER:
-            // We have an iterator already: any range submitted here must match the previous one
+            // We have an iterator already: any decision submitted here must match the previous one
             // so that the iterator remains valid. See range::operator==(). If this cannot be achieved, 
             // then the agent must use IsNextChoiceValid() and if it returns true, call SkipDecision()
             it = next_choice->iter; // Use the iterator that was given to us
@@ -235,7 +235,7 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const Range &r )
             break;
         
         case Choice::BEGIN:
-            // We do not have an iterator: we are able to change the range
+            // We do not have an iterator: we are able to change the decision
             it = r.begin; // we have been asked to use begin
             *next_decision = r;
             break;
