@@ -7,6 +7,8 @@
 #include "slave_agent.hpp"
 #include "boolean_evaluator.hpp"
 
+#define DECISIONISED_MATCH_ANY
+
 namespace SR
 {
 
@@ -22,11 +24,16 @@ public:
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
     virtual CollectionInterface &GetPatterns() const = 0;
+#ifdef DECISIONISED_MATCH_ANY
+    virtual void AgentConfigure( const SCREngine *master_engine );
+    shared_ptr< Collection<Node> > options;
+#else
     class BooleanEvaluatorOr : public BooleanEvaluator
     {
 	public:
    	    virtual bool operator()( list<bool> &inputs ) const;
 	};
+#endif
 };
 
 

@@ -82,7 +82,7 @@ void DecidedQuery::RegisterNormalLink( Agent *a, const TreePtrInterface *px )
 }
 
 
-void DecidedQuery::RegisterAbnormalLink( Agent *a, const TreePtrInterface *px )
+void DecidedQuery::RegisterAbnormalLink( Agent *a, const TreePtrInterface *px ) 
 {
     Link b;
     b.agent = a;
@@ -152,6 +152,23 @@ void DecidedQuery::RegisterLocalMultiplicityLink( Agent *a, TreePtr<SubContainer
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
 
     multiplicity_links.push_back( b );
+}
+
+
+void DecidedQuery::RegisterAlwaysMatchingLink( TreePtr<Node> pattern )
+{
+    Link b;
+    b.agent = Agent::AsAgent(pattern);
+    b.px = NULL;    
+    // Supply the pattern as x. Pattern are usually not valid x nodes
+    // (because can have NULL pointers) but there's logic in 
+    // the AndRuleEngine to early-out in this case. 
+    b.local_x = pattern;
+    
+    // For debugging
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    
+    normal_links.push_back( b );      
 }
 
 

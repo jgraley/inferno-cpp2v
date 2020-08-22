@@ -72,7 +72,7 @@ void AgentCommon::DoKey( TreePtr<Node> x )
 {
     ASSERT(x);
     if( !coupling_key )
-    {
+    { 
         coupling_key = x;
     }
 }

@@ -106,7 +106,7 @@ public:
 
         Agent *agent;
         const TreePtrInterface *px;
-        TreePtr<Node> local_x;
+        TreePtr<Node> local_x; 
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
     };
     
@@ -149,6 +149,7 @@ public:
     virtual void RegisterLocalNormalLink( Agent *a, TreePtr<Node> x ) = 0; 
     virtual void RegisterLocalAbnormalLink( Agent *a, TreePtr<Node> x ) = 0; 
     virtual void RegisterLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x ) = 0; 
+    virtual void RegisterAlwaysMatchingLink( TreePtr<Node> pattern ) = 0; // Is a normal link
     virtual void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
 
     class RAIIDecisionsCleanup
@@ -207,6 +208,7 @@ public:
     void RegisterLocalNormalLink( Agent *a, TreePtr<Node> x ); 
     void RegisterLocalAbnormalLink( Agent *a, TreePtr<Node> x ); 
     void RegisterLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x ); 
+    void RegisterAlwaysMatchingLink( TreePtr<Node> pattern ); // Is a normal link
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ); 
                                                   
     const Links *GetNormalLinks() const { return &normal_links; } // pointer returned because the links contain the local links

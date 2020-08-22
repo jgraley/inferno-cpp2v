@@ -68,14 +68,18 @@ void AndRuleEngine::CompareLinks( shared_ptr<const DecidedQuery> query )
     int i=0;        
     FOREACH( const DecidedQuery::Link &b, *query->GetNormalLinks() )
     {
-        TRACE("Comparing normal link %d\n", i);
-        // Recurse normally
+        TRACE("Comparing normal link %d\n", i++);
+        // Recurse normally 
         // Get x for linked node
         const TreePtrInterface *px = b.GetPX();
         ASSERT( *px );
         
+        // This is needed for decisionised MatchAny. Other schemes for
+        // RegisterAlwaysMatchingLinkRegisterAlwaysMatchingLink() could be deployed.
+        if( &**px == (Node *)(b.agent) )
+            continue; // Pattern nodes immediately match themselves
+        
         DecidedCompare(b.agent, px);   
-        i++;             
     }
 }
 
