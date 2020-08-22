@@ -283,9 +283,9 @@ const DecidedQueryCommon::Range &DecidedQuery::GetNextOldDecision() const
 }
 
 
-DecidedQuery::Ranges::iterator DecidedQuery::GetNextDecisionIterator() const
+bool DecidedQuery::IsNextChoiceHardBegin() const
 {
-    return next_decision;  // really an index TODO go back to iterator when we're sure the vector won't be relocated
+    return next_choice->mode == Choice::BEGIN;
 }
 
 

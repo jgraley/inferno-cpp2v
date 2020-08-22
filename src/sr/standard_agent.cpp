@@ -72,7 +72,6 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                      const TreePtrInterface *px ) const
 {
     INDENT(".");
-    DecidedQueryAgentInterface::Ranges::iterator old_end_decision = query.GetNextDecisionIterator();
     query.Reset();
 
     // Check pre-restriction
@@ -101,7 +100,7 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             CollectionInterface *p_x_col = dynamic_cast<CollectionInterface *>(x_memb[i]);
             ASSERT( p_x_col )( "itemise for x didn't match itemise for pattern");
             TRACE("Member %d is Collection, x %d elts, pattern %d elts\n", i, p_x_col->size(), pattern_col->size() );
-            DecidedQueryCollection( query, p_x_col, *pattern_col, old_end_decision );
+            DecidedQueryCollection( query, p_x_col, *pattern_col );
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(pattern_memb[i]) )
         {
@@ -220,8 +219,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 
 void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                             CollectionInterface *px,
-		 					                CollectionInterface &pattern,
-                                            DecidedQueryAgentInterface::Ranges::iterator old_end_decision ) const
+		 					                CollectionInterface &pattern ) const
 {
     INDENT(" ");
     
@@ -252,7 +250,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
 	    	// Report a block for the chosen node
             ContainerInterface::iterator xit;
 
-            if( query.GetNextDecisionIterator() < old_end_decision )
+            if( !query.IsNextChoiceHardBegin() )
             {
                 // Decision already in conjecture and valid. 
                 const Conjecture::Range &old_decision = query.GetNextOldDecision();
