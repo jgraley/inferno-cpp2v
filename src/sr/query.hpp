@@ -168,6 +168,8 @@ public:
 class DecidedQueryClientInterface : virtual public DecidedQueryCommon
 {
 public:
+    virtual void Start() = 0;
+
     virtual const Links *GetNormalLinks() const = 0; // pointer returned because the links contain the local links
     virtual const Links *GetAbnormalLinks() const = 0; // pointer returned because the links contain the local links
     virtual const Links *GetMultiplicityLinks() const = 0; // pointer returned because the links contain the local links
@@ -185,6 +187,7 @@ class DecidedQuery : virtual public DecidedQueryClientInterface,
 {
 public:    
     DecidedQuery( shared_ptr<const PatternQuery> pq );
+    void Start();
     void Reset();
 
     ContainerInterface::iterator RegisterDecision( const Range &d );
@@ -218,7 +221,7 @@ public:
     void PushBackChoice( Choice newc );    
     void EnsureChoicesHaveIterators();
     
-private:
+private: friend class Conjecture;
     shared_ptr<BooleanEvaluator> evaluator;
     Links normal_links; 
     Links abnormal_links; 
@@ -228,6 +231,7 @@ private:
     Choices choices;
     Choices::iterator next_choice;
     static shared_ptr< Collection<Node> > empty_container;
+    static Range empty_range;
 };
 
 

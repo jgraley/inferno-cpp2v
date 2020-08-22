@@ -28,6 +28,7 @@ void Conjecture::Configure(Set<Agent *> my_agents, Agent *root_agent)
     {
 		AgentRecord record;
         record.pq = agent->GetPatternQuery();
+        record.query = agent->CreateDecidedQuery();
 		agent_records[agent] = record;
 	}        
     AgentRecords::iterator root_rit = agent_records.find(root_agent);
@@ -72,8 +73,7 @@ void Conjecture::Start()
          rit != agent_records.end();
          ++rit )
     {
-        Agent *agent = rit->first;
-        rit->second.query = agent->CreateDecidedQuery();
+        rit->second.query->Start();
         FillChoicesWithHardBegin( rit );
     }
 }

@@ -61,6 +61,13 @@ DecidedQuery::DecidedQuery( shared_ptr<const PatternQuery> pq ) :
 }
 
 
+void DecidedQuery::Start()
+{
+    for( Range &r : decisions )
+        r = empty_range;
+}
+
+
 void DecidedQuery::RegisterNormalLink( Agent *a, const TreePtrInterface *px )
 {
     Link b;
@@ -319,17 +326,11 @@ ContainerInterface::iterator DecidedQuery::SkipDecision()
 
 void DecidedQuery::CompleteDecisionsWithEmpty()
 {
-    Range r;
-    r.begin = empty_container->begin();
-    r.end = empty_container->end();
-    r.inclusive = false;
-    r.container = empty_container;
-    
     // This part needed after each DQ
     auto nd = next_decision;
     while( nd != decisions.end() )
     {
-        *nd = r;
+        *nd = empty_range;
         ++nd; 
     }    
 }
@@ -347,3 +348,4 @@ void DecidedQuery::Reset()
 
 
 shared_ptr< Collection<Node> > DecidedQuery::empty_container = make_shared< Collection<Node> >();
+DecidedQuery::Range DecidedQuery::empty_range { empty_container->begin(), empty_container->end(), false, empty_container };
