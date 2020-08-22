@@ -61,7 +61,7 @@ private:
     std::map< Agent *, AndRuleEngine > my_multiplicity_engines;
         
     Conjecture conj;
-    CouplingMap slave_keys; 
+    CouplingMap my_keys; 
     const CouplingMap *master_keys;
     Set<Agent *> reached; 
     Set< shared_ptr<const DecidedQuery> > evaluator_queries;   

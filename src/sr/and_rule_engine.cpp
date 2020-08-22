@@ -136,12 +136,9 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     // Check for a coupling match to one of our agents we reached earlier in this pass.
     else if( reached.IsExist(agent) )
     {
-        sc( *px, slave_keys.At(agent) );
+        sc( *px, my_keys.At(agent) );
         return;
     }
-
-    // Remember we reached this agent 
-    reached.insert( agent );
 
     // Obtain the query state from the conjecture
     shared_ptr<DecidedQuery> query = conj.GetQuery(agent);
@@ -164,12 +161,14 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
           (*agent);
     // Note: number of abnormal links doe NOT now depend on x; #60 completed
 #endif
-                        
+                                  
     // Remember the coupling before recursing, as we can hit the same node 
     // (eg identifier) and we need to have coupled it. 
-    if( !slave_keys.IsExist(agent) )
-        slave_keys[agent] = *px;
-          
+    my_keys[agent] = *px;
+
+    // Remember we reached this agent 
+    reached.insert( agent );
+
     // Use worker functions to go through the links, special case if there is evaluator
     if( query->GetEvaluator() )
     {
@@ -215,18 +214,14 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
             
             // Initialise keys to the ones inherited from master, keeping 
             // none of our own from any previous unsuccessful attempt.
-            slave_keys.clear();
-
-            // Do a two-pass matching process: first get the keys...
-            {
-                reached.clear();
-                abnormal_links.clear();
-                multiplicity_links.clear();
-                evaluator_queries.clear();
-                DecidedCompare( root_agent, p_start_x );
-            }
+            my_keys.clear();
+            reached.clear();
+            abnormal_links.clear();
+            multiplicity_links.clear();
+            evaluator_queries.clear();
+            DecidedCompare( root_agent, p_start_x );
             
-            CouplingMap combined_keys = MapUnion( *master_keys, slave_keys );     
+            CouplingMap combined_keys = MapUnion( *master_keys, my_keys );     
                         
             // Process the free abnormal links.
             for( std::pair< shared_ptr<const DecidedQuery>, const DecidedQuery::Link * > lp : abnormal_links )
@@ -307,6 +302,6 @@ const Conjecture &AndRuleEngine::GetConjecture()
 
 const CouplingMap &AndRuleEngine::GetCouplingKeys()
 {
-    return slave_keys;
+    return my_keys;
 }
 
