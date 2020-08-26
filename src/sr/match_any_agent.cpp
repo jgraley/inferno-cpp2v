@@ -20,10 +20,10 @@ shared_ptr<PatternQuery> MatchAnyAgent::GetPatternQuery() const
 #ifdef DECISIONISED_MATCH_ANY
     pq->RegisterDecision(false); // Exclusive, please
     FOREACH( const TreePtr<Node> p, GetPatterns() )
-	    pq->RegisterNormalLink( AsAgent(p) );
+	    pq->RegisterNormalLink( p );
 #else
     FOREACH( const TreePtr<Node> p, GetPatterns() )
-	    pq->RegisterAbnormalLink( AsAgent(p) );
+	    pq->RegisterAbnormalLink( p );
 	pq->RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
 #endif
 
@@ -50,7 +50,7 @@ void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         {
             // Yes, so supply the "real" x for this link. We'll really
             // test x against this pattern.
-            query.RegisterNormalLink( AsAgent(p), px ); 
+            query.RegisterNormalLink( p, px ); 
         }
         else
         {
@@ -68,7 +68,7 @@ void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     {
         ASSERT( p );
         // Context is abnormal because not all patterns must match
-        query.RegisterAbnormalLink( AsAgent(p), px );
+        query.RegisterAbnormalLink( p, px );
     }
     query.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
 #endif

@@ -41,9 +41,9 @@ public:
     }
     
     void RegisterDecision( bool inclusive ); 
-    void RegisterNormalLink( Agent *a );
-    void RegisterAbnormalLink( Agent *a );
-    void RegisterMultiplicityLink( Agent *a );
+    void RegisterNormalLink( TreePtr<Node> pattern );
+    void RegisterAbnormalLink( TreePtr<Node> pattern );
+    void RegisterMultiplicityLink( TreePtr<Node> pattern );
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e );
     
     const Decisions *GetDecisions() const { return &decisions; } 
@@ -143,12 +143,12 @@ public:
 
     virtual void CompleteDecisionsWithEmpty() = 0;
 
-    virtual void RegisterNormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
-    virtual void RegisterAbnormalLink( Agent *a, const TreePtrInterface *px ) = 0; 
-    virtual void RegisterMultiplicityLink( Agent *a, const TreePtrInterface *px ) = 0; 
-    virtual void RegisterLocalNormalLink( Agent *a, TreePtr<Node> x ) = 0; 
-    virtual void RegisterLocalAbnormalLink( Agent *a, TreePtr<Node> x ) = 0; 
-    virtual void RegisterLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x ) = 0; 
+    virtual void RegisterNormalLink( TreePtr<Node> pattern, const TreePtrInterface *px ) = 0; 
+    virtual void RegisterAbnormalLink( TreePtr<Node> pattern, const TreePtrInterface *px ) = 0; 
+    virtual void RegisterMultiplicityLink( TreePtr<Node> pattern, const TreePtrInterface *px ) = 0; 
+    virtual void RegisterLocalNormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) = 0; 
+    virtual void RegisterLocalAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) = 0; 
+    virtual void RegisterLocalMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x ) = 0; 
     virtual void RegisterAlwaysMatchingLink( TreePtr<Node> pattern ) = 0; // Is a normal link
     virtual void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
 
@@ -202,12 +202,12 @@ public:
     ContainerInterface::iterator SkipDecision();
     void CompleteDecisionsWithEmpty();
 
-    void RegisterNormalLink( Agent *a, const TreePtrInterface *px ); 
-    void RegisterAbnormalLink( Agent *a, const TreePtrInterface *px ); 
-    void RegisterMultiplicityLink( Agent *a, const TreePtrInterface *px ); 
-    void RegisterLocalNormalLink( Agent *a, TreePtr<Node> x ); 
-    void RegisterLocalAbnormalLink( Agent *a, TreePtr<Node> x ); 
-    void RegisterLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x ); 
+    void RegisterNormalLink( TreePtr<Node> pattern, const TreePtrInterface *px ); 
+    void RegisterAbnormalLink( TreePtr<Node> pattern, const TreePtrInterface *px ); 
+    void RegisterMultiplicityLink( TreePtr<Node> pattern, const TreePtrInterface *px ); 
+    void RegisterLocalNormalLink( TreePtr<Node> pattern, TreePtr<Node> x ); 
+    void RegisterLocalAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x ); 
+    void RegisterLocalMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x ); 
     void RegisterAlwaysMatchingLink( TreePtr<Node> pattern ); // Is a normal link
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ); 
                                                   

@@ -14,11 +14,11 @@ void PatternQuery::RegisterDecision( bool inclusive )
     decisions.push_back(d);
 }
 
-
-void PatternQuery::RegisterNormalLink( Agent *a )
+ 
+void PatternQuery::RegisterNormalLink( TreePtr<Node> pattern )
 {
     Link b;
-    b.agent = a;
+    b.agent = Agent::AsAgent(pattern);
     
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
@@ -27,10 +27,10 @@ void PatternQuery::RegisterNormalLink( Agent *a )
 }
 
 
-void PatternQuery::RegisterAbnormalLink( Agent *a )
+void PatternQuery::RegisterAbnormalLink( TreePtr<Node> pattern )
 {
     Link b;
-    b.agent = a;
+    b.agent = Agent::AsAgent(pattern);
     
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
@@ -39,10 +39,10 @@ void PatternQuery::RegisterAbnormalLink( Agent *a )
 }
 
 
-void PatternQuery::RegisterMultiplicityLink( Agent *a )
+void PatternQuery::RegisterMultiplicityLink( TreePtr<Node> pattern )
 {
     Link b;
-    b.agent = a;
+    b.agent = Agent::AsAgent(pattern);
     
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
@@ -68,10 +68,10 @@ void DecidedQuery::Start()
 }
 
 
-void DecidedQuery::RegisterNormalLink( Agent *a, const TreePtrInterface *px )
+void DecidedQuery::RegisterNormalLink( TreePtr<Node> pattern, const TreePtrInterface *px )
 {
     Link b;
-    b.agent = a;
+    b.agent = Agent::AsAgent(pattern);
     b.px = px;
     b.local_x = TreePtr<Node>();
     
@@ -82,10 +82,10 @@ void DecidedQuery::RegisterNormalLink( Agent *a, const TreePtrInterface *px )
 }
 
 
-void DecidedQuery::RegisterAbnormalLink( Agent *a, const TreePtrInterface *px ) 
+void DecidedQuery::RegisterAbnormalLink( TreePtr<Node> pattern, const TreePtrInterface *px ) 
 {
     Link b;
-    b.agent = a;
+    b.agent = Agent::AsAgent(pattern);
     b.px = px;
     b.local_x = TreePtr<Node>();
     
@@ -96,10 +96,10 @@ void DecidedQuery::RegisterAbnormalLink( Agent *a, const TreePtrInterface *px )
 }
 
 
-void DecidedQuery::RegisterMultiplicityLink( Agent *a, const TreePtrInterface *px )
+void DecidedQuery::RegisterMultiplicityLink( TreePtr<Node> pattern, const TreePtrInterface *px )
 {
     Link b;
-    b.agent = a;
+    b.agent = Agent::AsAgent(pattern);
     b.px = px;
     b.local_x = TreePtr<Node>();
     
@@ -110,11 +110,11 @@ void DecidedQuery::RegisterMultiplicityLink( Agent *a, const TreePtrInterface *p
 }
 
 
-void DecidedQuery::RegisterLocalNormalLink( Agent *a, TreePtr<Node> x )
+void DecidedQuery::RegisterLocalNormalLink( TreePtr<Node> pattern, TreePtr<Node> x )
 {
     ASSERT(x);
     Link b;
-    b.agent = a;
+    b.agent = Agent::AsAgent(pattern);
     b.px = NULL;    
     b.local_x = x;
     
@@ -125,11 +125,11 @@ void DecidedQuery::RegisterLocalNormalLink( Agent *a, TreePtr<Node> x )
 }
 
 
-void DecidedQuery::RegisterLocalAbnormalLink( Agent *a, TreePtr<Node> x )
+void DecidedQuery::RegisterLocalAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x )
 {
     ASSERT(x);
     Link b;
-    b.agent = a;
+    b.agent = Agent::AsAgent(pattern);
     b.px = NULL;    
     b.local_x = x;
     
@@ -140,11 +140,11 @@ void DecidedQuery::RegisterLocalAbnormalLink( Agent *a, TreePtr<Node> x )
 }
 
 
-void DecidedQuery::RegisterLocalMultiplicityLink( Agent *a, TreePtr<SubContainer> x )
+void DecidedQuery::RegisterLocalMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x )
 {
     ASSERT(x);
     Link b;
-    b.agent = a;
+    b.agent = Agent::AsAgent(pattern);
     b.px = NULL;    
     b.local_x = x;
     

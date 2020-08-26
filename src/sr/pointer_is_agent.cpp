@@ -8,13 +8,13 @@ using namespace SR;
 shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
-	pq->RegisterNormalLink( AsAgent(GetPointer()) );
+	pq->RegisterNormalLink( GetPointer() );
     return pq;
 }
 
 
 void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                   const TreePtrInterface *px ) const
+                                          const TreePtrInterface *px ) const
 {
 	INDENT("@");
     query.Reset();
@@ -24,7 +24,7 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 	// Thus, it must be passed around via const TreePtrInterface &        
 	TreePtr<Node> ptr_arch = px->MakeValueArchitype();
 	
-	query.RegisterLocalNormalLink( AsAgent(GetPointer()), ptr_arch );
+	query.RegisterLocalNormalLink( GetPointer(), ptr_arch );
 }
 
 

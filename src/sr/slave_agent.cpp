@@ -16,7 +16,7 @@ SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search_ ) :
 shared_ptr<PatternQuery> SlaveAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
-	pq->RegisterNormalLink( AsAgent(GetThrough()) );
+	pq->RegisterNormalLink( GetThrough() );
     return pq;
 }
 
@@ -31,7 +31,7 @@ void SlaveAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     CheckLocalMatch(px->get());
     
     // When a slave node seen duriung search, just forward through the "through" path
-    query.RegisterNormalLink( AsAgent(GetThrough()), px );
+    query.RegisterNormalLink( GetThrough(), px );
 }
 
 

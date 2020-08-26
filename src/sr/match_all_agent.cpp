@@ -7,7 +7,7 @@ shared_ptr<PatternQuery> MatchAllAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
     FOREACH( const TreePtr<Node> p, GetPatterns() )
-	    pq->RegisterNormalLink( AsAgent(p) );
+	    pq->RegisterNormalLink( p );
         
     return pq;
 }
@@ -28,7 +28,7 @@ void MatchAllAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         ASSERT( p );
         // Context is normal because all patterns must match (but none should contain
         // nodes with reploace functionlity because they will not be invoked during replace) 
-        query.RegisterNormalLink( AsAgent(p), px );
+        query.RegisterNormalLink( p, px );
     }
 }    
 

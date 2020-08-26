@@ -74,8 +74,8 @@ void AndRuleEngine::CompareLinks( shared_ptr<const DecidedQuery> query )
         const TreePtrInterface *px = b.GetPX();
         ASSERT( *px );
         
-        // This is needed for decisionised MatchAny. Other schemes for
-        // RegisterAlwaysMatchingLinkRegisterAlwaysMatchingLink() could be deployed.
+        // This is needed for decisionised MatchAny #75. Other schemes for
+        // RegisterAlwaysMatchingLink() could be deployed.
         if( &**px == (Node *)(b.agent) )
             continue; // Pattern nodes immediately match themselves
         
