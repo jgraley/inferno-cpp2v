@@ -266,7 +266,7 @@ bool IsLabelReached::CanReachVar( Set< TreePtr<InstanceIdentifier> > *f,
 		return cache[rr];
 	}
 	bool r = false;        
-	Walk e( *(engine->GetOverallMaster()->pcontext) ); 
+	Walk e( engine->GetOverallMaster()->GetContext() ); 
 	
 	if( f->IsExist(y) )
 		return false; // already processing this identifier, so we have a loop

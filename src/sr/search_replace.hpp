@@ -42,7 +42,6 @@ public:
     // is required. Call GetProgram() if program root needed; call DecidedCompare() to recurse
     // back into the general search algorithm.
     TreePtr<Node> GetContext() const { ASSERT(pcontext&&*pcontext); return *pcontext; }
-    TreePtr<Node> *pcontext;
     mutable Set< TreePtr<Node> > dirty_grass;    
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *blocks ) const;    
@@ -55,6 +54,7 @@ public:
     }
     SCREngine *GetRootEngine() { return &scr_engine; }
 private:
+    TreePtr<Node> *pcontext;
     SCREngine scr_engine;
 };
 

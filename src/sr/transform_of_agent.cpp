@@ -18,7 +18,7 @@ void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     
     // Transform the candidate expression, sharing the overall S&R context so that
     // things like GetDeclaration can work (they search the whole program tree).
-    TreePtr<Node> xt = (*transformation)( *(engine->GetOverallMaster()->pcontext), *px );
+    TreePtr<Node> xt = (*transformation)( engine->GetOverallMaster()->GetContext(), *px );
 	if( xt )
 	{
 	    // Punt it back into the search/replace engine
