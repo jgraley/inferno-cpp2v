@@ -20,14 +20,14 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
    			FOREACH( TreePtr<Node> pe, *pattern_seq )
             {
                 ASSERT( pe );
-                if( dynamic_cast<StarAgent *>(AsAgent(pe)) )
+                if( dynamic_pointer_cast<StarAgent>(pe) )
                     num_stars++;
             }
             num_stars--; // Don't register a decision for the last Star
    			FOREACH( TreePtr<Node> pe, *pattern_seq )
             {
                 ASSERT( pe );
-                if( dynamic_cast<StarAgent *>(AsAgent(pe)) && num_stars>0 )
+                if( dynamic_pointer_cast<StarAgent>(pe) && num_stars>0 )
                 {
                     pq->RegisterDecision( true ); // Inclusive, please.
                     num_stars--;
@@ -41,7 +41,7 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
    			TreePtr<Node> p_star = NULL;
    			FOREACH( TreePtr<Node> pe, *pattern_col )
    			{
-				if( dynamic_cast<StarAgent *>( AsAgent(pe) ) ) // per the impl, the star in a collection is not linked
+				if( dynamic_pointer_cast<StarAgent>(pe) ) // per the impl, the star in a collection is not linked
 				{
                     p_star = pe;
                 }
@@ -109,7 +109,6 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                 TreePtrInterface *p_x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
                 ASSERT( p_x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
-                Agent *ap = Agent::AsAgent(*pattern_ptr);
                 query.RegisterNormalLink(*pattern_ptr, p_x_ptr);
             }
         }
@@ -139,7 +138,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
     {
 		TreePtr<Node> pe( *pit );
 		ASSERT( pe );
-        if( dynamic_cast<StarAgent *>(AsAgent(pe)) )
+        if( dynamic_pointer_cast<StarAgent>(pe) )
             p_last_star = pit;
         else
             pattern_num_non_star++;
@@ -159,7 +158,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 		// Get the next element of the pattern
 		TreePtr<Node> pe( *pit );
 		ASSERT( pe );
-        if( dynamic_cast<StarAgent *>(AsAgent(pe)) )
+        if( dynamic_pointer_cast<StarAgent>(pe) )
         {
             // We have a Star type wildcard that can match multiple elements.
             ContainerInterface::iterator xit_star_end;
@@ -234,10 +233,11 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
     	TRACE("Collection compare %d remain out of %d; looking at ",
                 xremaining.size(),
                 pattern.size() )(**pit)(" in pattern\n" );
-        if( dynamic_cast<StarAgent *>( Agent::AsAgent(*pit) ) ) // Star in pattern collection?
+		TreePtr<Node> pe( *pit );
+        if( dynamic_pointer_cast<StarAgent>(pe) ) // Star in pattern collection?
         {
         	ASSERT(!p_star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
-            p_star = *pit; // remember for later and skip to next pattern
+            p_star = pe; // remember for later and skip to next pattern
         }
 	    else if( !xremaining.empty() ) // not a Star so match singly...
 	    {
@@ -269,7 +269,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                 xit = query.RegisterDecision( x_decision, false );
             }
             
-            query.RegisterLocalNormalLink( *pit, *xit );
+            query.RegisterLocalNormalLink( pe, *xit );
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.

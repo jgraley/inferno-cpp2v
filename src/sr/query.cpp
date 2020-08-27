@@ -295,14 +295,24 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( shared_ptr<Containe
 }                                                      
 
 
-/* Need to fix OOStd to permit the assignment  #53
-ContainerInterface::iterator DecidedQuery::RegisterDecision( const ContainerInterface &container, bool inclusive )
+ContainerInterface::iterator DecidedQuery::RegisterDecision( const Sequence<Node> &container, bool inclusive )
+{
+    auto container_for_query = make_shared< Sequence<Node> >();
+    *container_for_query = container;
+    ContainerInterface::iterator query_it = RegisterDecision( container_for_query, inclusive );
+    //auto p_myit = dynamic_cast<const Sequence<Node>::iterator *>(query_it.GetUnderlyingIterator()); // for #109
+    return query_it;
+}                                                      
+
+ContainerInterface::iterator DecidedQuery::RegisterDecision( const Collection<Node> &container, bool inclusive )
 {
     auto container_for_query = make_shared< Collection<Node> >();
     *container_for_query = container;
-    return RegisterDecision( container_for_query, inclusive );
+    ContainerInterface::iterator query_it = RegisterDecision( container_for_query, inclusive );
+    //auto p_myit = dynamic_cast<const Collection<Node>::iterator *>(query_it.GetUnderlyingIterator()); // for #109
+    return query_it;
 }                                                      
-*/
+
 
 bool DecidedQuery::IsNextChoiceValid() const
 {

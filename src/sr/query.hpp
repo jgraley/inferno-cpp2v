@@ -197,6 +197,8 @@ public:
                                                    bool inclusive,
                                                    std::shared_ptr<ContainerInterface> container=nullptr );
     ContainerInterface::iterator RegisterDecision( std::shared_ptr<ContainerInterface> container, bool inclusive );
+    ContainerInterface::iterator RegisterDecision( const Sequence<Node> &container, bool inclusive );
+    ContainerInterface::iterator RegisterDecision( const Collection<Node> &container, bool inclusive );
     bool IsNextChoiceValid() const;
     const Range &GetNextOldDecision() const;
     ContainerInterface::iterator SkipDecision();
