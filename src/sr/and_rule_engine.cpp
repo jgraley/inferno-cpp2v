@@ -76,7 +76,7 @@ void AndRuleEngine::CompareLinks( shared_ptr<const DecidedQuery> query )
         
         // This is needed for decisionised MatchAny #75. Other schemes for
         // RegisterAlwaysMatchingLink() could be deployed.
-        if( &*x == (Node *)(b.agent) )
+        if( x.get() == (Node *)(b.agent) )
             continue; // Pattern nodes immediately match themselves
         
         DecidedCompare(b.agent, x);   

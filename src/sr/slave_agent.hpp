@@ -36,7 +36,7 @@ public:
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
-	virtual SCREngine *GetSCREngine() const { return &*my_engine; }
+	virtual SCREngine *GetSCREngine() const { return my_engine; }
 	virtual bool IsSearch() const { return is_search; }
 	virtual TreePtr<Node> GetSearchPattern() const { return search_pattern; }
 	virtual TreePtr<Node> GetReplacePattern() const { return replace_pattern; }
