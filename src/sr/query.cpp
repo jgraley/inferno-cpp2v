@@ -72,8 +72,7 @@ void DecidedQuery::RegisterNormalLink( TreePtr<Node> pattern, const TreePtrInter
 {
     Link b;
     b.agent = Agent::AsAgent(pattern);
-    b.px = px;
-    b.local_x = TreePtr<Node>();
+    b.x = *px;
     
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
@@ -86,8 +85,7 @@ void DecidedQuery::RegisterAbnormalLink( TreePtr<Node> pattern, const TreePtrInt
 {
     Link b;
     b.agent = Agent::AsAgent(pattern);
-    b.px = px;
-    b.local_x = TreePtr<Node>();
+    b.x = *px;
     
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
@@ -100,9 +98,8 @@ void DecidedQuery::RegisterMultiplicityLink( TreePtr<Node> pattern, const TreePt
 {
     Link b;
     b.agent = Agent::AsAgent(pattern);
-    b.px = px;
-    b.local_x = TreePtr<Node>();
-    
+    b.x = *px;
+
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
@@ -115,8 +112,7 @@ void DecidedQuery::RegisterLocalNormalLink( TreePtr<Node> pattern, TreePtr<Node>
     ASSERT(x);
     Link b;
     b.agent = Agent::AsAgent(pattern);
-    b.px = NULL;    
-    b.local_x = x;
+    b.x = x;
     
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
@@ -130,8 +126,7 @@ void DecidedQuery::RegisterLocalAbnormalLink( TreePtr<Node> pattern, TreePtr<Nod
     ASSERT(x);
     Link b;
     b.agent = Agent::AsAgent(pattern);
-    b.px = NULL;    
-    b.local_x = x;
+    b.x = x;
     
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
@@ -145,8 +140,7 @@ void DecidedQuery::RegisterLocalMultiplicityLink( TreePtr<Node> pattern, TreePtr
     ASSERT(x);
     Link b;
     b.agent = Agent::AsAgent(pattern);
-    b.px = NULL;    
-    b.local_x = x;
+    b.x = x;
     
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
@@ -159,11 +153,10 @@ void DecidedQuery::RegisterAlwaysMatchingLink( TreePtr<Node> pattern )
 {
     Link b;
     b.agent = Agent::AsAgent(pattern);
-    b.px = NULL;    
     // Supply the pattern as x. Pattern are usually not valid x nodes
     // (because can have NULL pointers) but there's logic in 
     // the AndRuleEngine to early-out in this case. 
-    b.local_x = pattern;
+    b.x = pattern;
     
     // For debugging
     b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
@@ -190,10 +183,8 @@ bool SR::operator<(const SR::DecidedQuery::Link &l0, const SR::DecidedQuery::Lin
 {
     if( l0.agent != l1.agent )
         return l0.agent < l1.agent;
-    if( l0.px != l1.px )
-        return l0.px < l1.px;    
-    if( l0.local_x != l1.local_x )
-        return l0.local_x < l1.local_x;    
+    if( l0.x != l1.x )
+        return l0.x < l1.x;
         
     return false; // equal
 }

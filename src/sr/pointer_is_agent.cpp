@@ -38,18 +38,18 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 	Walk e( engine->GetOverallMaster()->GetContext() ); 
 	for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
 	{
-		if( *wit == x ) // found ourself
+		if( *wit == x ) // found ourself TODO use find()
         {            
             if(found_one_already)
                 throw Mismatch(); // X has multiple parents - ambiguous, so don't match
+            found_one_already = true;
                 
             // Get the pointer that points to us
             const TreePtrInterface *px = wit.GetCurrentParentPointer();         
-            // Make an architypical node of the type of the pointer   
+            // Make an architypical node matching the pointer's type
             TreePtr<Node> ptr_arch = px->MakeValueArchitype();
             // Stick that in your pipe + smoke it
-            query.RegisterLocalNormalLink( GetPointer(), ptr_arch );
-            found_one_already = true;
+            query.RegisterLocalNormalLink( GetPointer(), ptr_arch );            
         }
     }
 #endif

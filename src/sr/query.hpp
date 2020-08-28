@@ -98,15 +98,11 @@ public:
     {
         const TreePtrInterface *GetPX() const
         {
-			if( px )
-				return px; // linked x is in input tree
-			else
-				return &local_x; // linked x is local, kept alive by local_x    
+			return &x; // linked x is local, kept alive by local_x    
 		}	
 
         Agent *agent;
-        const TreePtrInterface *px;
-        TreePtr<Node> local_x; 
+        TreePtr<Node> x; 
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
     };
     
