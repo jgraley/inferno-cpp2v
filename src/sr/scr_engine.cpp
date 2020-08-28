@@ -193,9 +193,9 @@ void SCREngine::GetGraphInfo( vector<string> *labels,
 
 // This one operates from root for a stand-alone compare operation and
 // no master keys.
-void SCREngine::Compare( const TreePtrInterface *p_start_x ) const
+void SCREngine::Compare( TreePtr<Node> start_x ) const
 {
-    and_rule_engine.Compare( p_start_x );
+    and_rule_engine.Compare( start_x );
 }
 
 
@@ -239,7 +239,9 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
     INDENT(">");
 
     TRACE("Begin search\n");
-    and_rule_engine.Compare( p_root, master_keys );
+    // Note: comparing doesn't require double pointer any more, but
+    // replace does so it can change the root node.
+    and_rule_engine.Compare( *p_root, master_keys );
            
     TRACE("Search successful, now keying replace nodes\n");
     and_rule_engine.EnsureChoicesHaveIterators(); // Replace can't deal with hard BEGINs

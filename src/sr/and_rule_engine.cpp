@@ -71,15 +71,15 @@ void AndRuleEngine::CompareLinks( shared_ptr<const DecidedQuery> query )
         TRACE("Comparing normal link %d\n", i++);
         // Recurse normally 
         // Get x for linked node
-        const TreePtrInterface *px = b.GetPX();
-        ASSERT( *px );
+        TreePtr<Node> x = b.GetX();
+        ASSERT( x );
         
         // This is needed for decisionised MatchAny #75. Other schemes for
         // RegisterAlwaysMatchingLink() could be deployed.
-        if( &**px == (Node *)(b.agent) )
+        if( &*x == (Node *)(b.agent) )
             continue; // Pattern nodes immediately match themselves
         
-        DecidedCompare(b.agent, px);   
+        DecidedCompare(b.agent, x);   
     }
 }
 
@@ -99,11 +99,11 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const DecidedQuery> query,
         TRACE("Comparing block %d\n", i);
  
         // Get x for linked node
-        const TreePtrInterface *px = b.GetPX();
+        TreePtr<Node> x = b.GetX();
                                  
         try 
         {
-            my_abnormal_engines.at(b.agent).Compare( px, coupling_keys );
+            my_abnormal_engines.at(b.agent).Compare( x, coupling_keys );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -124,23 +124,22 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const DecidedQuery> query,
 
 
 void AndRuleEngine::DecidedCompare( Agent *agent,
-                                    const TreePtrInterface *px )  
+                                    TreePtr<Node> x )  
 {
     INDENT(" ");
-    ASSERT( px ); // Ref to target must not be NULL (i.e. corrupted ref)
-    ASSERT( *px ); // Target must not be NULL
+    ASSERT( x ); // Target must not be NULL
 
     // Check for a coupling match to a master engine's agent. 
     SimpleCompare sc;
     if( master_keys->IsExist(agent) )
     {               
-        sc( *px, master_keys->At(agent) );
+        sc( x, master_keys->At(agent) );
         return;
     }
     // Check for a coupling match to one of our agents we reached earlier in this pass.
     else if( reached.IsExist(agent) )
     {
-        sc( *px, my_keys.At(agent) );
+        sc( x, my_keys.At(agent) );
         return;
     }
 
@@ -148,8 +147,8 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     shared_ptr<DecidedQuery> query = conj.GetQuery(agent);
 
     // Run the compare implementation to get the links based on the choices
-    TRACE(*agent)("?=")(**px)(" RunDecidedQueryImpl()\n");    
-    agent->RunDecidedQuery( *query, px );
+    TRACE(*agent)("?=")(*x)(" RunDecidedQueryImpl()\n");    
+    agent->RunDecidedQuery( *query, x );
 
 #ifdef TEST_PATTERN_QUERY
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
@@ -168,7 +167,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
                                   
     // Remember the coupling before recursing, as we can hit the same node 
     // (eg identifier) and we need to have coupled it. 
-    my_keys[agent] = *px;
+    my_keys[agent] = x;
 
     // Remember we reached this agent 
     reached.insert( agent );
@@ -180,7 +179,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 	}
     else
     {
-		TRACE(*agent)("?=")(**px)(" Comparing links\n");
+		TRACE(*agent)("?=")(*x)(" Comparing links\n");
         CompareLinks( query );
 	}
     TRACE("OK\n");
@@ -188,13 +187,12 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 
 
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
-void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
+void AndRuleEngine::Compare( TreePtr<Node> start_x,
                              const CouplingMap *master_keys_ )
 {
     INDENT("C");
-    ASSERT( p_start_x );
-    ASSERT( *p_start_x );
-    TRACE("Compare x=")(**p_start_x);
+    ASSERT( start_x );
+    TRACE("Compare x=")(*start_x);
     TRACE(" pattern=")(*root_agent);
            
     master_keys = master_keys_;    
@@ -223,14 +221,14 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
             abnormal_links.clear();
             multiplicity_links.clear();
             evaluator_queries.clear();
-            DecidedCompare( root_agent, p_start_x );
+            DecidedCompare( root_agent, start_x );
             
             CouplingMap combined_keys = MapUnion( *master_keys, my_keys );     
                         
             // Process the free abnormal links.
             for( std::pair< shared_ptr<const DecidedQuery>, const DecidedQuery::Link * > lp : abnormal_links )
             {            
-                my_abnormal_engines.at(lp.second->agent).Compare( lp.second->GetPX(), &combined_keys );
+                my_abnormal_engines.at(lp.second->agent).Compare( lp.second->GetX(), &combined_keys );
             }
 
             // Process the free multiplicity links.
@@ -239,15 +237,15 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
             {            
                 AndRuleEngine &e = my_multiplicity_engines.at(lp.second->agent);
 
-                const TreePtrInterface *px = lp.second->GetPX();
-                ASSERT( *px );
-                ContainerInterface *xc = dynamic_cast<ContainerInterface *>(px->get());
+                TreePtr<Node> x = lp.second->GetX();
+                ASSERT( x );
+                ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
                 ASSERT(xc)("Multiplicity x must implement ContainerInterface");
                 TRACE("Comparing multiplicity link %d size %d\n", i, xc->size());
                 
-                FOREACH( const TreePtrInterface &xe, *xc )
+                FOREACH( TreePtr<Node> xe, *xc )
                 {
-                    e.Compare( &xe, &combined_keys );
+                    e.Compare( xe, &combined_keys );
                 }
 
                 i++;
@@ -285,10 +283,10 @@ void AndRuleEngine::Compare( const TreePtrInterface *p_start_x,
 
 // This one operates from root for a stand-alone compare operation and
 // no master keys.
-void AndRuleEngine::Compare( const TreePtrInterface *p_start_x )
+void AndRuleEngine::Compare( TreePtr<Node> start_x )
 {
     CouplingMap master_keys;
-    Compare( p_start_x, &master_keys );
+    Compare( start_x, &master_keys );
 }
 
 

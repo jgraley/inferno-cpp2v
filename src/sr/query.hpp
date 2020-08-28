@@ -96,9 +96,9 @@ public:
     
     struct Link 
     {
-        const TreePtrInterface *GetPX() const
+        TreePtr<Node> GetX() const
         {
-			return &x; // linked x is local, kept alive by local_x    
+			return x; // linked x is local, kept alive by local_x    
 		}	
 
         Agent *agent;

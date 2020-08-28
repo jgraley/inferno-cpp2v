@@ -51,7 +51,7 @@ public:
     
     void SingleCompareReplace( TreePtr<Node> *proot,
                                const CouplingMap *master_keys );
-    void Compare( const TreePtrInterface *p_start_x ) const;
+    void Compare( TreePtr<Node> start_x ) const;
 
 private:
     void KeyReplaceNodes( const Conjecture &conj,

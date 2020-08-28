@@ -59,12 +59,12 @@ shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
     
     
 void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                  const TreePtrInterface *px ) const
+                                   TreePtr<Node> x ) const
 {
     query.last_activity = DecidedQueryCommon::QUERY;
    
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
-    RunDecidedQueryImpl( query, *px );
+    RunDecidedQueryImpl( query, x );
 }                             
 
 

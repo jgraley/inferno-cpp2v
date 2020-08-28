@@ -45,10 +45,10 @@ public:
     void CompareEvaluatorLinks( shared_ptr<const DecidedQuery> query,
 							    const CouplingMap *coupling_keys );
     void DecidedCompare( Agent *agent,
-                         const TreePtrInterface *px );
-    void Compare( const TreePtrInterface *p_start_x,
+                         TreePtr<Node> x );
+    void Compare( TreePtr<Node> start_x,
                   const CouplingMap *master_keys );
-    void Compare( const TreePtrInterface *p_start_x );
+    void Compare( TreePtr<Node> start_x );
     void EnsureChoicesHaveIterators();
 
     const Conjecture &GetConjecture();

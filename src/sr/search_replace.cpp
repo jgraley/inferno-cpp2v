@@ -40,7 +40,7 @@ bool CompareReplace::IsMatch( TreePtr<Node> context,
     pcontext = &context;
     try
     {
-        scr_engine.Compare(&root); // Using &root here in principle allows a PointerIs to operate on the root (yeah, I know right?)
+        scr_engine.Compare(root); 
         pcontext = NULL;
         return true;
     }
