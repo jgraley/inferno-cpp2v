@@ -62,7 +62,9 @@ bool SystemicConstraint::Test( list< TreePtr<Node> > values )
             agent->RunDecidedQuery( *query, x );
 
             // The query now has populated links, which should be full
-            // (otherwise RunDecidedQuery() should have thrown). 
+            // (otherwise RunDecidedQuery() (DQ) should have thrown). We loop 
+            // over both and check that they refer to the same x nodes
+            // we were passed. Mismatch will throw, same as in DQ.
             auto nlinks = query->GetNormalLinks();
             ASSERT( nlinks->size() == values.size() );
             auto nit = nlinks->begin();            
@@ -75,11 +77,16 @@ bool SystemicConstraint::Test( list< TreePtr<Node> > values )
         }
         catch( ::Mismatch & )
         {
+            // We will get here on a mismatch, whether detected by DQ or our
+            // own comparison between links and values. Permit the conjecture
+            // to move to a new set of choices.
             if( conj->Increment() )
                 continue; // Conjecture would like us to try again with new choices
-            return false;
+            
+            // Conjecture has run out of choices to try.
+            return false; 
         }            
-        break; // Success
+        break; // Didn't throw: success
     }
     return true;
 }
