@@ -22,7 +22,7 @@ private:
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                               const TreePtrInterface *px ) const;                  
+                                      TreePtr<Node> x ) const;                  
     virtual void KeyReplace( const TreePtrInterface &x,
                              DecidedQueryCommon::Choices choices ); 
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );

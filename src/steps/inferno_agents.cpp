@@ -102,22 +102,22 @@ shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
 
 
 void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                const TreePtrInterface *px ) const                          
+                                       TreePtr<Node> x ) const                          
 {
     INDENT("N");
     query.Reset();
     
     string s;
     // Keep advancing until we get NULL, and remember the last non-null position
-    const TreePtrInterface *pxt = px;
     int i = 0;
-    while( const TreePtrInterface *ptt = Advance(pxt, &s) )
+    TreePtr<Node> xt = x;
+    while( TreePtr<Node> tt = Advance(xt, &s) )
     {
-        pxt = ptt;
+        xt = tt;
     } 
             
     // Compare the last position with the terminus pattern
-    query.RegisterNormalLink( terminus, pxt );
+    query.RegisterNormalLink( terminus, xt );
     
     // Compare the depth with the supplied pattern if present
     if( depth )
@@ -128,30 +128,28 @@ void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }    
 
 
-const TreePtrInterface *NestedArray::Advance(const TreePtrInterface *px, 
-                                             string *depth ) const
+TreePtr<Node> NestedArray::Advance( TreePtr<Node> x, 
+                                    string *depth ) const
 {
-    TreePtr<Node> n = *px;
-    if( auto a = dynamic_pointer_cast<Array>(n) )         
-        return &(a->element); // TODO support depth string (or integer)
+    if( auto a = dynamic_pointer_cast<Array>(x) )         
+        return a->element; // TODO support depth string (or integer)
     else
         return nullptr;
 }
 
 
-const TreePtrInterface *NestedSubscriptLookup::Advance( const TreePtrInterface *px, 
-                                                        string *depth ) const
+TreePtr<Node> NestedSubscriptLookup::Advance( TreePtr<Node> x, 
+                                              string *depth ) const
 {
-    TreePtr<Node> n = *px;
-    if( auto s = dynamic_pointer_cast<Subscript>(n) )            
+    if( auto s = dynamic_pointer_cast<Subscript>(x) )            
     {
         *depth += "S";
-        return &(s->operands.front()); // the base, not the index
+        return s->operands.front(); // the base, not the index
     }
-    else if( auto l = dynamic_pointer_cast<Lookup>(n) )            
+    else if( auto l = dynamic_pointer_cast<Lookup>(x) )            
     {
         *depth += "L";
-        return &(l->member); 
+        return l->member; 
     }
     else
     {
@@ -183,11 +181,10 @@ TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode )
 //---------------------------------- IsLabelReached ------------------------------------    
 
 void IsLabelReached::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                   const TreePtrInterface *pxx ) const
+                                          TreePtr<Node> xx ) const
 {
 	INDENT("L");
 	ASSERT( pattern );
-    ASSERT(pxx);
     query.Reset();
 	
 	// TODO Flushable mechanism removed - flush every time for safety (if
@@ -201,10 +198,10 @@ void IsLabelReached::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 		n = pattern;
 	TreePtr<Expression> y = dynamic_pointer_cast<Expression>( n );
 	ASSERT( y )("IsLabelReached saw pattern coupled to ")(*n)(" but an Expression is needed\n"); 
-	ASSERT( *pxx );
-	TreePtr<Node> nxx = *pxx;
+	ASSERT( xx );
+	TreePtr<Node> nxx = xx;
 	TreePtr<LabelIdentifier> x = dynamic_pointer_cast<LabelIdentifier>( nxx );
-	ASSERT( x )("IsLabelReached at ")(**pxx)(" but is of type LabelIdentifier\n"); 
+	ASSERT( x )("IsLabelReached at ")(*xx)(" but is of type LabelIdentifier\n"); 
 	TRACE("Can label id ")(*x)(" reach expression ")(*y)("?\n");
 
 	Set< TreePtr<InstanceIdentifier> > uf;        

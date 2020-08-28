@@ -86,7 +86,7 @@ public:
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
 protected:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      const TreePtrInterface *px ) const = 0;                                                
+                                      TreePtr<Node> x ) const = 0;                                          
     const SCREngine *engine;    
 			
 private:    

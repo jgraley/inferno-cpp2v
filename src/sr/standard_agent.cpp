@@ -69,19 +69,19 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 
 
 void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                     const TreePtrInterface *px ) const
+                                         TreePtr<Node> x ) const
 {
     INDENT(".");
     query.Reset();
 
     // Check pre-restriction
-    CheckLocalMatch(px->get());
+    CheckLocalMatch(x.get());
 
     // Recurse through the children. Note that the itemiser internally does a
     // dynamic_cast onto the type of pattern, and itemises over that type. x must
     // be dynamic_castable to pattern's type.
     vector< Itemiser::Element * > pattern_memb = Itemise();
-    vector< Itemiser::Element * > x_memb = Itemise( px->get() );   // Get the members of x corresponding to pattern's class
+    vector< Itemiser::Element * > x_memb = Itemise( x.get() );   // Get the members of x corresponding to pattern's class
     ASSERT( pattern_memb.size() == x_memb.size() );
     for( int i=0; i<pattern_memb.size(); i++ )
     {
@@ -109,7 +109,7 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                 TreePtrInterface *p_x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
                 ASSERT( p_x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
-                query.RegisterNormalLink(*pattern_ptr, p_x_ptr);
+                query.RegisterNormalLink(*pattern_ptr, *p_x_ptr);
             }
         }
         else
@@ -192,7 +192,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
             if( xit == px->end() )
                 break;
        
-            query.RegisterNormalLink( pe, &*xit );
+            query.RegisterNormalLink( pe, *xit );
             ++xit;
             
             // Every non-star pattern node we pass means there's one fewer remaining

@@ -21,7 +21,7 @@ class TransformOfAgent : public virtual AgentCommon
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                               const TreePtrInterface *px ) const;                  
+                                      TreePtr<Node> x ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     TreePtr<Node> pattern; 
     Transformation *transformation;

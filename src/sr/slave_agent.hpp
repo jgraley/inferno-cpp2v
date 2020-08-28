@@ -26,7 +26,7 @@ public:
     SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search );
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                               const TreePtrInterface *px ) const;                  
+                                      TreePtr<Node> x ) const;                  
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> GetThrough() const = 0;    
     virtual void GetGraphInfo( vector<string> *labels, 

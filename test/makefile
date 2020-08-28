@@ -22,6 +22,7 @@ test/results/default.pass : $(CASES:%=test/results/default/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "ALL TESTS PASSED"
+	@spd-say -r -100 -p -100 "the tests have passed"
 
 $(SRCASES:%=test/results/sr/%.pass) : test/results/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe
 	@mkdir -p test/results/sr
@@ -35,6 +36,7 @@ test/results/sr.pass : $(SRCASES:%=test/results/sr/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "ALL TESTS PASSED"
+	@spd-say -r -100 -p -100 "the tests have passed"
 
 $(CASES:%=test/results/rep/%.pass) : test/results/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe
 	@mkdir -p test/results/rep
@@ -48,5 +50,6 @@ test/results/rep.pass : $(CASES:%=test/results/rep/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "ALL TESTS PASSED"
+	@spd-say -r -100 -p -100 "the tests have passed"
 
 .PHONY: all test

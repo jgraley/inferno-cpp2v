@@ -32,7 +32,7 @@ shared_ptr<PatternQuery> MatchAnyAgent::GetPatternQuery() const
 
 
 void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                         const TreePtrInterface *px ) const
+                                         TreePtr<Node> x ) const
 {
     INDENT("|");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!
@@ -50,7 +50,7 @@ void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         {
             // Yes, so supply the "real" x for this link. We'll really
             // test x against this pattern.
-            query.RegisterNormalLink( p, px ); 
+            query.RegisterNormalLink( p, x ); 
         }
         else
         {
@@ -62,13 +62,13 @@ void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     }
 #else
     // Check pre-restriction 
-    CheckLocalMatch(px->get());
+    CheckLocalMatch(x.get());
     
     FOREACH( const TreePtr<Node> p, GetPatterns() )
     {
         ASSERT( p );
         // Context is abnormal because not all patterns must match
-        query.RegisterAbnormalLink( p, px );
+        query.RegisterAbnormalLink( p, x );
     }
     query.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorOr() ) );
 #endif
@@ -79,6 +79,10 @@ void MatchAnyAgent::GetGraphAppearance( bool *bold, string *text, string *shape 
 {
 	// The MatchAny node appears as a small circle with an | character inside it. The affected subtrees are 
 	// on the right.
+	// NOTE this node controls the action of the search engine in Inferno search/replace. It is not 
+    // a node that represents a boolean operation in the program being processed. Those nodes would 
+    // appear as rounded rectangles with the name at the top. Their names may be found in
+	// src/tree/operator_db.txt  
 	*bold = true;
 	*shape = "circle";
 	*text = string("|");

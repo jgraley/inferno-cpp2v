@@ -68,45 +68,6 @@ void DecidedQuery::Start()
 }
 
 
-void DecidedQuery::RegisterNormalLink( TreePtr<Node> pattern, const TreePtrInterface *px )
-{
-    Link b;
-    b.agent = Agent::AsAgent(pattern);
-    b.x = *px;
-    
-    // For debugging
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
-    
-    normal_links.push_back( b );        
-}
-
-
-void DecidedQuery::RegisterAbnormalLink( TreePtr<Node> pattern, const TreePtrInterface *px ) 
-{
-    Link b;
-    b.agent = Agent::AsAgent(pattern);
-    b.x = *px;
-    
-    // For debugging
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
-    
-    abnormal_links.push_back( b );     
-}
-
-
-void DecidedQuery::RegisterMultiplicityLink( TreePtr<Node> pattern, const TreePtrInterface *px )
-{
-    Link b;
-    b.agent = Agent::AsAgent(pattern);
-    b.x = *px;
-
-    // For debugging
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
-    
-    multiplicity_links.push_back( b );     
-}
-
-
 void DecidedQuery::RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x )
 {
     ASSERT(x);

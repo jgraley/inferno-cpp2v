@@ -139,9 +139,6 @@ public:
 
     virtual void CompleteDecisionsWithEmpty() = 0;
 
-    virtual void RegisterNormalLink( TreePtr<Node> pattern, const TreePtrInterface *px ) = 0; 
-    virtual void RegisterAbnormalLink( TreePtr<Node> pattern, const TreePtrInterface *px ) = 0; 
-    virtual void RegisterMultiplicityLink( TreePtr<Node> pattern, const TreePtrInterface *px ) = 0; 
     virtual void RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) = 0; 
     virtual void RegisterAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) = 0; 
     virtual void RegisterMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x ) = 0; 

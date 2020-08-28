@@ -20,7 +20,7 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 
 
 void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                          const TreePtrInterface *px ) const
+                                          TreePtr<Node> x ) const
 {
 	INDENT("@");
     query.Reset();
@@ -30,9 +30,7 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     TreePtr<Node> ptr_arch = wrong_ptr_arch.MakeValueArchitype();
 	query.RegisterNormalLink( GetPointer(), ptr_arch );	
 #endif
-#else
-    TreePtr<Node> x = *px; // only use x - that's the whole point!
-    
+#else   
     // Do a walk over context (the whole x tree)
     bool found_one_already = false;
 	Walk e( engine->GetOverallMaster()->GetContext() ); 

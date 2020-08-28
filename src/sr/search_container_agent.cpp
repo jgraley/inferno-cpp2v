@@ -22,24 +22,23 @@ shared_ptr<PatternQuery> SearchContainerAgent::GetPatternQuery() const
 
 
 void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                            const TreePtrInterface *px ) const
+                                                TreePtr<Node> x ) const
 {
     INDENT("#");
     ASSERT( this );
-    ASSERT(px);
     ASSERT( terminus )("Stuff node without terminus, seems pointless, if there's a reason for it remove this assert");
     query.Reset();
     
     // Check pre-restriction
-    CheckLocalMatch(px->get());
+    CheckLocalMatch(x.get());
     
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(**px)("\n");
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(*x)("\n");
 
     // Get an interface to the container we will search
     // TODO what is keeping pwx alive after this function exits? Are the iterators 
     // doing it? (they are stores in Conjecture). Maybe pwx is just a stateless
     // facade for the iterators and can be abandoned safely?
-    shared_ptr<ContainerInterface> pwx = GetContainerInterface( *px );
+    shared_ptr<ContainerInterface> pwx = GetContainerInterface( x );
     
     if( pwx->empty() )
     {
@@ -48,7 +47,7 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 
     // Get choice from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = query.RegisterDecision( pwx->begin(), pwx->end(), false );
-    query.RegisterNormalLink( terminus, &*thistime );
+    query.RegisterNormalLink( terminus, *thistime );
 
     // Let subclasses implement further restrictions
     DecidedQueryRestrictions( query, thistime );

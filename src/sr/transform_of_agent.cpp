@@ -11,14 +11,14 @@ shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 
 
 void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                     const TreePtrInterface *px ) const
+                                            TreePtr<Node> x ) const
 {
     INDENT("T");
     query.Reset();
     
     // Transform the candidate expression, sharing the overall S&R context so that
     // things like GetDeclaration can work (they search the whole program tree).
-    TreePtr<Node> xt = (*transformation)( engine->GetOverallMaster()->GetContext(), *px );
+    TreePtr<Node> xt = (*transformation)( engine->GetOverallMaster()->GetContext(), x );
 	if( xt )
 	{
 	    // Punt it back into the search/replace engine

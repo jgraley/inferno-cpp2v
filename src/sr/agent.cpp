@@ -64,7 +64,7 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
     query.last_activity = DecidedQueryCommon::QUERY;
    
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
-    RunDecidedQueryImpl( query, px );
+    RunDecidedQueryImpl( query, *px );
 }                             
 
 

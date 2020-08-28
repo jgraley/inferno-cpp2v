@@ -40,7 +40,7 @@ struct BuildIdentifierAgent : public virtual InfernoAgent
         return make_shared<PatternQuery>();
     }
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                               const TreePtrInterface *px ) const             
+                                      TreePtr<Node> x ) const             
     { 
         query.Reset();
     }   
@@ -155,10 +155,10 @@ struct InstanceIdentifierByName : Special<CPPTree::InstanceIdentifier>,
     InstanceIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                               const TreePtrInterface *px ) const                
+                                      TreePtr<Node> x ) const                
     {
         query.Reset();
-        if( !IsMatch( *px ) )
+        if( !IsMatch( x ) )
             throw Mismatch();  
     }                                
 };
@@ -173,10 +173,10 @@ struct TypeIdentifierByName : Special<CPPTree::TypeIdentifier>,
     TypeIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                               const TreePtrInterface *px ) const
+                                      TreePtr<Node> x ) const
     {
         query.Reset();
-        if( !IsMatch( *px ) )
+        if( !IsMatch( x ) )
             throw Mismatch();  
     }                                
 };
@@ -191,10 +191,10 @@ struct LabelIdentifierByName : Special<CPPTree::LabelIdentifier>,
     LabelIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                               const TreePtrInterface *px ) const                 
+                                      TreePtr<Node> x ) const                 
     {
         query.Reset();
-        if( !IsMatch( *px ) )
+        if( !IsMatch( x ) )
             throw Mismatch();  
     }                                
 };
@@ -209,10 +209,10 @@ struct NestedAgent : public virtual InfernoAgent
 {
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                               const TreePtrInterface *px ) const;                  
+                                      TreePtr<Node> x ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
-    virtual const TreePtrInterface *Advance( const TreePtrInterface *px, 
-                                             string *depth ) const = 0;
+    virtual TreePtr<Node> Advance( TreePtr<Node> x, 
+                                   string *depth ) const = 0;
     
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;    
@@ -226,8 +226,8 @@ struct NestedAgent : public virtual InfernoAgent
 struct NestedArray : NestedAgent, Special<CPPTree::Type>
 {
     SPECIAL_NODE_FUNCTIONS
-    virtual const TreePtrInterface *Advance( const TreePtrInterface *px, 
-                                             string *depth ) const;
+    virtual TreePtr<Node> Advance( TreePtr<Node> x, 
+                                   string *depth ) const;
 };
 
 
@@ -240,8 +240,8 @@ struct NestedArray : NestedAgent, Special<CPPTree::Type>
 struct NestedSubscriptLookup : NestedAgent, Special<CPPTree::Expression>
 {
     SPECIAL_NODE_FUNCTIONS
-    virtual const TreePtrInterface *Advance( const TreePtrInterface *px, 
-                                             string *depth ) const;
+    virtual TreePtr<Node> Advance( TreePtr<Node> x, 
+                                   string *depth ) const;
 };
 
 //---------------------------------- BuildContainerSize ------------------------------------    
@@ -260,7 +260,7 @@ private:
         return make_shared<PatternQuery>();
     }
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                               const TreePtrInterface *px ) const
+                                      TreePtr<Node> x ) const
     { 
         query.Reset(); 
     }   
@@ -287,14 +287,14 @@ struct IsLabelReached : public virtual InfernoAgent,
         return make_shared<PatternQuery>();
     }
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                               const TreePtrInterface *px ) const;
+                                      TreePtr<Node> x ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
     TreePtr<CPPTree::Expression> pattern;           
            
 private:
     bool CanReachExpr( Set< TreePtr<CPPTree::InstanceIdentifier> > *f,
-                         TreePtr<CPPTree::LabelIdentifier> x, 
-                         TreePtr<CPPTree::Expression> y ) const; // y is expression. Can it yield label x?
+                       TreePtr<CPPTree::LabelIdentifier> x, 
+                       TreePtr<CPPTree::Expression> y ) const; // y is expression. Can it yield label x?
     
     bool CanReachVar( Set< TreePtr<CPPTree::InstanceIdentifier> > *f,
                       TreePtr<CPPTree::LabelIdentifier> x, 
