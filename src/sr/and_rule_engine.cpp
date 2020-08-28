@@ -162,7 +162,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
           ("GetMultiplicityLinks()->size() : %d vs %d\n", pq->GetMultiplicityLinks()->size(), query->GetMultiplicityLinks()->size() )
           ("GetDecisions()->size() : %d vs %d\n", pq->GetDecisions()->size(), query->GetDecisions()->size() )
           (*agent);
-    // Note: number of abnormal links doe NOT now depend on x; #60 completed
+    // Note: number of abnormal links does NOT now depend on x; #60 completed
 #endif
                                   
     // Remember the coupling before recursing, as we can hit the same node 
