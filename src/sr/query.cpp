@@ -107,7 +107,7 @@ void DecidedQuery::RegisterMultiplicityLink( TreePtr<Node> pattern, const TreePt
 }
 
 
-void DecidedQuery::RegisterLocalNormalLink( TreePtr<Node> pattern, TreePtr<Node> x )
+void DecidedQuery::RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x )
 {
     ASSERT(x);
     Link b;
@@ -121,7 +121,7 @@ void DecidedQuery::RegisterLocalNormalLink( TreePtr<Node> pattern, TreePtr<Node>
 }
 
 
-void DecidedQuery::RegisterLocalAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x )
+void DecidedQuery::RegisterAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x )
 {
     ASSERT(x);
     Link b;
@@ -135,7 +135,7 @@ void DecidedQuery::RegisterLocalAbnormalLink( TreePtr<Node> pattern, TreePtr<Nod
 }
 
 
-void DecidedQuery::RegisterLocalMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x )
+void DecidedQuery::RegisterMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x )
 {
     ASSERT(x);
     Link b;

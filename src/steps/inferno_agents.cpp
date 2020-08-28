@@ -123,7 +123,7 @@ void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     if( depth )
     {
         TreePtr<Node> cur_depth( new SpecificString(s) );
-        query.RegisterLocalNormalLink( depth, cur_depth );
+        query.RegisterNormalLink( depth, cur_depth );
     }
 }    
 

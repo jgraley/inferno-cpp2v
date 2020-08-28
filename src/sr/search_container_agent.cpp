@@ -130,7 +130,7 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
         FOREACH( TreePtr<Node> n, pwtt->GetCurrentPath() )
             xpr_ss->push_back( n );
 
-        query.RegisterLocalMultiplicityLink( recurse_restriction, xpr_ss );            
+        query.RegisterMultiplicityLink( recurse_restriction, xpr_ss );            
     }   
 }
 

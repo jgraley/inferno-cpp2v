@@ -28,7 +28,7 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 #ifdef SPIKE_MISMATCH
 	TreePtr<CPPTree::Integer> wrong_ptr_arch; // won't match in the use-case
     TreePtr<Node> ptr_arch = wrong_ptr_arch.MakeValueArchitype();
-	query.RegisterLocalNormalLink( GetPointer(), ptr_arch );	
+	query.RegisterNormalLink( GetPointer(), ptr_arch );	
 #endif
 #else
     TreePtr<Node> x = *px; // only use x - that's the whole point!
@@ -49,7 +49,7 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             // Make an architypical node matching the pointer's type
             TreePtr<Node> ptr_arch = px->MakeValueArchitype();
             // Stick that in your pipe + smoke it
-            query.RegisterLocalNormalLink( GetPointer(), ptr_arch );            
+            query.RegisterNormalLink( GetPointer(), ptr_arch );            
         }
     }
 #endif

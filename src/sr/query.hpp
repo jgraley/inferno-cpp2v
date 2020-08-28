@@ -142,9 +142,9 @@ public:
     virtual void RegisterNormalLink( TreePtr<Node> pattern, const TreePtrInterface *px ) = 0; 
     virtual void RegisterAbnormalLink( TreePtr<Node> pattern, const TreePtrInterface *px ) = 0; 
     virtual void RegisterMultiplicityLink( TreePtr<Node> pattern, const TreePtrInterface *px ) = 0; 
-    virtual void RegisterLocalNormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) = 0; 
-    virtual void RegisterLocalAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) = 0; 
-    virtual void RegisterLocalMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x ) = 0; 
+    virtual void RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) = 0; 
+    virtual void RegisterAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) = 0; 
+    virtual void RegisterMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x ) = 0; 
     virtual void RegisterAlwaysMatchingLink( TreePtr<Node> pattern ) = 0; // Is a normal link
     virtual void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
 
@@ -203,9 +203,9 @@ public:
     void RegisterNormalLink( TreePtr<Node> pattern, const TreePtrInterface *px ); 
     void RegisterAbnormalLink( TreePtr<Node> pattern, const TreePtrInterface *px ); 
     void RegisterMultiplicityLink( TreePtr<Node> pattern, const TreePtrInterface *px ); 
-    void RegisterLocalNormalLink( TreePtr<Node> pattern, TreePtr<Node> x ); 
-    void RegisterLocalAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x ); 
-    void RegisterLocalMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x ); 
+    void RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x ); 
+    void RegisterAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x ); 
+    void RegisterMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x ); 
     void RegisterAlwaysMatchingLink( TreePtr<Node> pattern ); // Is a normal link
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ); 
                                                   
