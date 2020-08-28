@@ -9,8 +9,9 @@
 //
 
 // If PointerIs is stuck on match, CleanupCompoundExpression will try to covert
-// this into a statement, and fail an internal type-consistency check.
-// (Note: gcc does not accept this)
+// this into a statement, and fail an internal type-consistency check. Such as
+// OOStd inferred dynamic cast has failed: from CPPTree::Compound#30-339-0 to type CPPTree::Declaration
+// (Note: gcc does not accept this usage of statement-expression)
 int a = 99 * ({ do {} while(0); 233; }) + 44;
 
 int main()

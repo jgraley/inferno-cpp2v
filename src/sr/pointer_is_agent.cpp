@@ -3,7 +3,7 @@
 #include "agent.hpp"
 
 using namespace SR;
-//#define POINTER_IS_VIA_PARENT
+#define POINTER_IS_VIA_PARENT
 //#define SPIKE
 //#define SPIKE_MISMATCH
 
