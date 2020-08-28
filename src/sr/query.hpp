@@ -96,11 +96,6 @@ public:
     
     struct Link 
     {
-        TreePtr<Node> GetX() const
-        {
-			return x; // linked x is local, kept alive by local_x    
-		}	
-
         Agent *agent;
         TreePtr<Node> x; 
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"

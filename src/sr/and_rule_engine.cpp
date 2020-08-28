@@ -71,7 +71,7 @@ void AndRuleEngine::CompareLinks( shared_ptr<const DecidedQuery> query )
         TRACE("Comparing normal link %d\n", i++);
         // Recurse normally 
         // Get x for linked node
-        TreePtr<Node> x = b.GetX();
+        TreePtr<Node> x = b.x;
         ASSERT( x );
         
         // This is needed for decisionised MatchAny #75. Other schemes for
@@ -99,7 +99,7 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const DecidedQuery> query,
         TRACE("Comparing block %d\n", i);
  
         // Get x for linked node
-        TreePtr<Node> x = b.GetX();
+        TreePtr<Node> x = b.x;
                                  
         try 
         {
@@ -228,7 +228,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // Process the free abnormal links.
             for( std::pair< shared_ptr<const DecidedQuery>, const DecidedQuery::Link * > lp : abnormal_links )
             {            
-                my_abnormal_engines.at(lp.second->agent).Compare( lp.second->GetX(), &combined_keys );
+                my_abnormal_engines.at(lp.second->agent).Compare( lp.second->x, &combined_keys );
             }
 
             // Process the free multiplicity links.
@@ -237,7 +237,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             {            
                 AndRuleEngine &e = my_multiplicity_engines.at(lp.second->agent);
 
-                TreePtr<Node> x = lp.second->GetX();
+                TreePtr<Node> x = lp.second->x;
                 ASSERT( x );
                 ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
                 ASSERT(xc)("Multiplicity x must implement ContainerInterface");
