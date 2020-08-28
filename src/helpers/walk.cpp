@@ -223,8 +223,20 @@ Walk_iterator::pointer Walk_iterator::operator->() const
 }
 
 
+TreePtr<Node> Walk_iterator::GetCurrentParent() const
+{
+    return state.back().node;
+}
+
+
+const TreePtrInterface *Walk_iterator::GetCurrentParentPointer() const
+{
+    return &*(state.back().iterator);
+}
+
+
 // See note in header about recurse nodes
-list< TreePtr<Node> > Walk_iterator::GetPath() const
+list< TreePtr<Node> > Walk_iterator::GetCurrentPath() const
 {
     list< TreePtr<Node> > l;
     FOREACH( const StateEntry &se, state )

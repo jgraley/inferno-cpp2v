@@ -1141,7 +1141,7 @@ private:
 		else
 		    s->statements.push_back( st );
 
-		// FlattenNode the "sub" statements of labels etc
+		// Flatten the "sub" statements of labels etc
 		if( TreePtr<Label> l = dynamic_pointer_cast<Label>( st ) )
 		{
 			ASSERT( backing_labels[l] );
@@ -2062,6 +2062,17 @@ private:
 
 		return hold_expr.ToRaw( e );
 	}
+
+    virtual ExprResult ActOnStmtExpr(clang::SourceLocation LPLoc, StmtTy *SubStmt,
+                                     clang::SourceLocation RPLoc) // "({..})"
+    {
+		TreePtr<Compound> cb( dynamic_pointer_cast<Compound>( hold_stmt.FromRaw( SubStmt ) ) );
+        ASSERT(cb); // Let's hope the only statement Clang gives us is a compound
+
+		TreePtr<CompoundExpression> ce( new CompoundExpression );
+		ce->statements = cb->statements;
+		return hold_expr.ToRaw( ce );
+    }
 
 	//--------------------------------------------- unimplemented actions -----------------------------------------------
 	// Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC

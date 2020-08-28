@@ -127,7 +127,7 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
         ASSERT(pwtt)("Failed to get Walk::iterator out of the decision iterator");    
 
         // Check all the nodes that we recursed through in order to get here
-        FOREACH( TreePtr<Node> n, pwtt->GetPath() )
+        FOREACH( TreePtr<Node> n, pwtt->GetCurrentPath() )
             xpr_ss->push_back( n );
 
         query.RegisterLocalMultiplicityLink( recurse_restriction, xpr_ss );            

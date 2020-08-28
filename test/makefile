@@ -3,6 +3,8 @@
 CASES = sctest13 sctest11 sctest12 sctest08 sctest10 sctest02
 CASES += sctest01 sctest03 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
 
+SRCASES = pointeris $(CASES)
+
 KINDS = default sr rep
 
 test/autotestd : autotestd.cpp
@@ -21,13 +23,13 @@ test/results/default.pass : $(CASES:%=test/results/default/%.pass)
 	@date
 	@echo "ALL TESTS PASSED"
 
-$(CASES:%=test/results/sr/%.pass) : test/results/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe
+$(SRCASES:%=test/results/sr/%.pass) : test/results/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe
 	@mkdir -p test/results/sr
 	@rm -f test/results/sr/$*.
 	test/srtest.sh $< -tq
 	@touch test/results/sr/$*.pass
 	
-test/results/sr.pass : $(CASES:%=test/results/sr/%.pass)
+test/results/sr.pass : $(SRCASES:%=test/results/sr/%.pass)
 	@touch $@
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
