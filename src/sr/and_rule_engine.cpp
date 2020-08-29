@@ -96,6 +96,11 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const DecidedQuery> query,
     list<bool> compare_results;
     FOREACH( const DecidedQuery::Link &b, *query->GetAbnormalLinks() )
     {
+#ifdef NEW_EVALUATOR_RULES
+        // Don't let this link go into the general AND-rule
+        abnormal_links.erase( make_pair(query, &b) ); 
+#endif
+        
         TRACE("Comparing block %d\n", i);
  
         // Get x for linked node
@@ -177,7 +182,9 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     {
         evaluator_queries.insert(query);
 	}
+#ifndef NEW_EVALUATOR_RULES
     else
+#endif
     {
 		TRACE(*agent)("?=")(*x)(" Comparing links\n");
         CompareLinks( query );
@@ -224,11 +231,26 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             DecidedCompare( root_agent, start_x );
             
             CouplingMap combined_keys = MapUnion( *master_keys, my_keys );     
-                        
+                                                
+#ifdef NEW_EVALUATOR_RULES
+            // Process the evaluator queries. These can match when their children have not matched and
+            // we wouldn't be able to reliably key those children so we process them in a post-pass 
+            // which ensures all the couplings have been keyed already.
+            // Examples are MatchAny and NotMatch (but not MatchAll, because MatchAll conforms with
+            // the global and-rule and so its children can key couplings.
+            for( shared_ptr<const DecidedQuery> query : evaluator_queries )
+            {
+                //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
+                CompareEvaluatorLinks( query, &combined_keys );
+            }
+#endif            
+
             // Process the free abnormal links.
             for( std::pair< shared_ptr<const DecidedQuery>, const DecidedQuery::Link * > lp : abnormal_links )
             {            
-                my_abnormal_engines.at(lp.second->agent).Compare( lp.second->x, &combined_keys );
+                AndRuleEngine &e = my_abnormal_engines.at(lp.second->agent);
+                TreePtr<Node> xe = lp.second->x;
+                e.Compare( xe, &combined_keys );
             }
 
             // Process the free multiplicity links.
@@ -251,6 +273,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
                 i++;
             }
 
+#ifndef NEW_EVALUATOR_RULES
             // Process the evaluator queries. These can match when their children have not matched and
             // we wouldn't be able to reliably key those children so we process them in a post-pass 
             // which ensures all the couplings have been keyed already.
@@ -261,6 +284,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
                 //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
                 CompareEvaluatorLinks( query, &combined_keys );
             }
+#endif            
         }
         catch( const ::Mismatch& mismatch )
         {                

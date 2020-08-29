@@ -26,7 +26,21 @@ int SystemicConstraint::GetDegree() const
 }
 
 
-bool SystemicConstraint::Test( list< TreePtr<Node> > values )
+std::list<SystemicConstraint::VariableId> SystemicConstraint::GetVariables() const
+{
+    std::list<VariableId> vars;
+    
+    vars.push_back( agent ); // Our agent is one of them!
+    
+    FOREACH( const PatternQuery::Link &b, *pq->GetNormalLinks() )
+        vars.push_back( b.agent );  // This rest are our normal linked agents
+        
+    return vars;
+}
+
+
+bool SystemicConstraint::Test( list< TreePtr<Node> > values,
+                               SideInfo *side_info )
 {
     ASSERT( values.size() == GetDegree() );
     
@@ -43,6 +57,7 @@ bool SystemicConstraint::Test( list< TreePtr<Node> > values )
     // is being moved around the X tree).
     TreePtr<Node> x = values.front();
     values.pop_front();
+    shared_ptr<DecidedQuery> query;
     
     // All the other values are normal links. These degrees of freedom
     // will be a mixture of (a) depending on our our decisions or (b)
@@ -58,7 +73,7 @@ bool SystemicConstraint::Test( list< TreePtr<Node> > values )
         {
             // Similar to AndRuleEngine::DecidedCompare(), we get the
             // Query object from conjecture, and run a query on it.
-            shared_ptr<DecidedQuery> query = conj->GetQuery(agent);
+            query = conj->GetQuery(agent);
             agent->RunDecidedQuery( *query, x );
 
             // The query now has populated links, which should be full
@@ -88,5 +103,25 @@ bool SystemicConstraint::Test( list< TreePtr<Node> > values )
         }            
         break; // Didn't throw: success
     }
+    
+    // Side-info is info required by the Engins that isn't part of the CSP model
+    // and would be difficult to re-create from it outside of this class
+    // (i.e. only given a set of values for variables).
+    if( side_info )
+    {
+        ASSERT(query); // we should still have the last query that was tried - and matched
+        
+        // Stolen from AndRuleEngine::CompareLinks()
+        FOREACH( const DecidedQuery::Link &b, *query->GetAbnormalLinks() )
+            side_info->abnormal_links.insert( make_pair(query, &b) ); 
+        
+        FOREACH( const DecidedQuery::Link &b, *query->GetMultiplicityLinks() )
+            side_info->multiplicity_links.insert( make_pair(query, &b) ); 
+            
+        // Stolen from AndRuleEngine::DecidedCompare()
+        if( query->GetEvaluator() )
+            side_info->evaluator_queries.insert(query);
+    }
+    
     return true;
 }
