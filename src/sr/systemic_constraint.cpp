@@ -39,11 +39,14 @@ std::list<SystemicConstraint::VariableId> SystemicConstraint::GetVariables() con
 }
 
 
-bool SystemicConstraint::Test( list< TreePtr<Node> > values,
+bool SystemicConstraint::Test( list< Value > values,
                                SideInfo *side_info )
 {
     ASSERT( values.size() == GetDegree() );
-    
+    for( Value v : values )
+    {
+        ASSERT( v != NullValue );
+    }
     // We're going to be lazy and borrow the Conjecture class for now.
     // Our constructor has already configured it to have our agent and
     // only our agent, so we won't really be using the multi-agent support

@@ -37,6 +37,8 @@ public:
      * introduce a typedef for them.
      */
     typedef Agent * VariableId;
+    typedef TreePtr<Node> Value;
+    static const Value NullValue;
 
     /**
      * Get the degree of the constraint.
@@ -61,7 +63,7 @@ public:
      * @retval true the values are in the constraint, same ordering as return of GetVariables().
      * @retval false the values are not in the constraint
      */
-    virtual bool Test( std::list< TreePtr<Node> > values, 
+    virtual bool Test( std::list< Value > values, 
                        SideInfo *side_info = nullptr ) = 0;        
 };
 

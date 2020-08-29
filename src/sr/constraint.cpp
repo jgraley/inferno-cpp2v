@@ -3,3 +3,5 @@
 #include "agent.hpp"
 
 using namespace SR;
+
+const Constraint::Value Constraint::NullValue = nullptr;

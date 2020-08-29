@@ -16,7 +16,8 @@ class Agent;
 class SimpleSolver
 {
 public:
-    void Configure( const std::set<Constraint *> &my_constraints_ );
+    SimpleSolver( const std::list<Constraint *> &constraints_, 
+                  const std::list<Constraint::Value> &initial_domain_ );
 
     void Start();
 
@@ -24,8 +25,16 @@ public:
                           Constraint::SideInfo *side_info = nullptr );
 
 private:
-    std::set<Constraint *> my_constraints;
-    std::set<Constraint::VariableId> my_variables;
+    static std::list<Constraint::VariableId> DeduceVariables( const std::list<Constraint *> &constraints );
+
+    bool Test( std::map<Constraint::VariableId, Constraint::Value> &assigns );
+
+    const std::list<Constraint *> constraints;
+    const std::list<Constraint::Value> initial_domain;
+    const std::list<Constraint::VariableId> variables;
+    
+    std::map<Constraint::VariableId, Constraint::Value> assignments;
+    std::list<Constraint::VariableId>::const_iterator current;
 };
 
 };
