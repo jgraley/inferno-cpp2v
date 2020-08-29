@@ -86,7 +86,7 @@ bool SystemicConstraint::Test( list< TreePtr<Node> > values,
             for( TreePtr<Node> child_x : values )
             {
                 if( child_x != nit->x )
-                    throw Mismatch();  
+                    throw NormalLinkMismatch();  
                 nit++;
             }
         }
