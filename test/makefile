@@ -5,6 +5,8 @@ CASES += sctest01 sctest03 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
 
 SRCASES = pointeris $(CASES)
 
+SRMINICASES = sctest15 sctest03 sctest04
+
 KINDS = default sr rep
 
 test/autotestd : autotestd.cpp
@@ -21,13 +23,13 @@ test/results/default.pass : $(CASES:%=test/results/default/%.pass)
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
 	@date
-	@echo "ALL TESTS PASSED"
-	@spd-say -r -100 -p -100 "the tests have passed"
+	@echo "DEFAULT TESTS PASSED"
+	@spd-say -r -100 -p -100 "the default tests have passed"
 
 $(SRCASES:%=test/results/sr/%.pass) : test/results/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe
 	@mkdir -p test/results/sr
 	@rm -f test/results/sr/$*.
-	test/srtest.sh $< -tq
+	test/srtest.sh $< test/reference/srtest -tq
 	@touch test/results/sr/$*.pass
 	
 test/results/sr.pass : $(SRCASES:%=test/results/sr/%.pass)
@@ -35,8 +37,22 @@ test/results/sr.pass : $(SRCASES:%=test/results/sr/%.pass)
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
 	@date
-	@echo "ALL TESTS PASSED"
-	@spd-say -r -100 -p -100 "the tests have passed"
+	@echo "SR TESTS PASSED"
+	@spd-say -r -100 -p -100 "the search and replace tests have passed"
+
+$(SRMINICASES:%=test/results/srmini/%.pass) : test/results/srmini/%.pass : test/examples/%.cpp test/makefile inferno.exe
+	@mkdir -p test/results/srmini
+	@rm -f test/results/srmini/$*.
+	test/srtest.sh $< test/reference/srminitest -tq -q15
+	@touch test/results/srmini/$*.pass
+	
+test/results/srmini.pass : $(SRMINICASES:%=test/results/srmini/%.pass)
+	@touch $@
+	@echo ------------------------------------------
+	@echo -n "Tests Run: "
+	@date
+	@echo "SR MINI TESTS PASSED"
+	@spd-say -r -100 -p -100 "the mini search and replace tests have passed"
 
 $(CASES:%=test/results/rep/%.pass) : test/results/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe
 	@mkdir -p test/results/rep
@@ -49,7 +65,7 @@ test/results/rep.pass : $(CASES:%=test/results/rep/%.pass)
 	@echo ------------------------------------------
 	@echo -n "Tests Run: "
 	@date
-	@echo "ALL TESTS PASSED"
-	@spd-say -r -100 -p -100 "the tests have passed"
+	@echo "REP TESTS PASSED"
+	@spd-say -r -100 -p -100 "the repeatability tests have passed"
 
 .PHONY: all test

@@ -14,7 +14,7 @@
 using namespace CPPTree;
 using namespace Steps;
 using namespace SR;
-
+ 
 TreePtr<Node> Steps::MakeCheckUncombable( TreePtr<CPPTree::Statement> construct )
 {
     MakePatternPtr< MatchAll<Node> > all;

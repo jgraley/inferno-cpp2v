@@ -25,6 +25,8 @@ fi
 
 infile=$1
 shift
+refbase=$1
+shift
 iargs=$*
 fb=`basename $infile`
 fbnx=`basename $infile .cpp` # only removes .cpp extension
@@ -32,7 +34,7 @@ fbnx=`basename $infile .cpp` # only removes .cpp extension
 mkdir -p test/results/$fbnx
 rm -f test/results/$fbnx/*
 outdir=test/results/$fbnx
-refdir=test/reference/srtest/$fbnx
+refdir=$refbase/$fbnx
 outbase=$outdir/$fbnx
 
 echo

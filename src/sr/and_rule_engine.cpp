@@ -10,7 +10,7 @@
 #include "common/common.hpp"
 #include <list>
 
-//#define TEST_PATTERN_QUERY
+#define TEST_PATTERN_QUERY
 
 using namespace SR;
 

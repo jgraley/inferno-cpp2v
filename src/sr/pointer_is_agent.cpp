@@ -4,6 +4,8 @@
 
 using namespace SR;
 //#define SPIKE
+// SPIKE with neiter SPIKE_MATCH nor SPIKE_MATCH will fail to register the link
+//#define SPIKE_MATCH
 //#define SPIKE_MISMATCH
 
 #ifdef SPIKE
@@ -25,6 +27,10 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 	INDENT("@");
     query.Reset();
 #ifdef SPIKE
+#ifdef SPIKE_MATCH
+    TreePtr<Node> node( new Node );
+	query.RegisterNormalLink( GetPointer(), node );	
+#endif
 #ifdef SPIKE_MISMATCH
 	TreePtr<CPPTree::Integer> wrong_ptr_arch; // won't match in the use-case
     TreePtr<Node> ptr_arch = wrong_ptr_arch.MakeValueArchitype();
@@ -49,6 +55,14 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             // Stick that in your pipe + smoke it
             query.RegisterNormalLink( GetPointer(), ptr_arch );            
         }
+    }
+    if(!found_one_already)
+    {
+        // If there's no parent we must be at the root of the x tree,
+        // so simulate a link that allows anything (because in fact
+        // you can replace the root node with anything).
+        TreePtr<Node> node( new Node );
+        query.RegisterNormalLink( GetPointer(), node );	
     }
 #endif
 }
