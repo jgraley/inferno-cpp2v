@@ -6,7 +6,7 @@
 #include "node/node.hpp"
 #include "common/common.hpp"
 
-namespace SR
+namespace CSP
 { 
     
 class Agent;
@@ -16,25 +16,31 @@ class Agent;
 class SimpleSolver
 {
 public:
-    SimpleSolver( const std::list<Constraint *> &constraints_, 
-                  const std::list<Constraint::Value> &initial_domain_ );
+    SimpleSolver( const list<Constraint *> &constraints_, 
+                  const list<Value> &initial_domain_ );
 
     void Start();
 
-    bool GetNextSolution( std::list< TreePtr<Node> > *values = nullptr, 
-                          Constraint::SideInfo *side_info = nullptr );
+    bool GetNextSolution( map< Constraint *, list< Value > > *values = nullptr, 
+                          SideInfo *side_info = nullptr );
 
 private:
-    static std::list<Constraint::VariableId> DeduceVariables( const std::list<Constraint *> &constraints );
+    typedef map<VariableId, Value> Assignments;
 
-    bool Test( std::map<Constraint::VariableId, Constraint::Value> &assigns );
+    static list<VariableId> DeduceVariables( const list<Constraint *> &constraints );
 
-    const std::list<Constraint *> constraints;
-    const std::list<Constraint::Value> initial_domain;
-    const std::list<Constraint::VariableId> variables;
+    bool TryVariable( list<VariableId>::const_iterator current );
+    bool Test( map<VariableId, Value> &assigns, 
+               SideInfo *side_info = nullptr );
+    list<Value> GetConstraintValues( const Constraint *c, const Assignments &a );
     
-    std::map<Constraint::VariableId, Constraint::Value> assignments;
-    std::list<Constraint::VariableId>::const_iterator current;
+    const list<Constraint *> constraints;
+    const list<Value> initial_domain;
+    const list<VariableId> variables;
+    
+    Assignments assignments;
+    list< pair<Assignments, SideInfo> > matches;
+    list< pair<Assignments, SideInfo> >::const_iterator next_match;
 };
 
 };

@@ -2,6 +2,6 @@
 #include "query.hpp"
 #include "agent.hpp"
 
-using namespace SR;
+using namespace CSP;
 
-const Constraint::Value Constraint::NullValue = nullptr;
+const Value NullValue = nullptr;

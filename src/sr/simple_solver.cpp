@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-using namespace SR;
+using namespace CSP;
 
 
 SimpleSolver::SimpleSolver( const list<Constraint *> &constraints_, 
@@ -19,42 +19,49 @@ SimpleSolver::SimpleSolver( const list<Constraint *> &constraints_,
 void SimpleSolver::Start()
 {
     assignments.clear();
-    for( Constraint::VariableId v : variables )
+    for( VariableId v : variables )
     {
-        assignments[v] = Constraint::NullValue; // means "unassigned"
+        assignments[v] = NullValue; // means "unassigned"
     }
-    current = variables.begin();
+    matches.clear();
+    
+    TryVariable( variables.begin() );
+    
+    next_match = matches.begin();
 }
 
 
-bool SimpleSolver::GetNextSolution( std::list< TreePtr<Node> > *values, 
-                                    Constraint::SideInfo *side_info )
+bool SimpleSolver::GetNextSolution( map< Constraint *, list< Value > > *values, 
+                                    SideInfo *side_info )
 {
-    for( Constraint::Value v : initial_domain )
+    if( next_match == matches.end() )
+        return false;
+    if( values )
     {
-        assignments[*current] = v;
-        
-        bool ok = Test(assignments); // Ask for side data if assignment is complete
-        
-        // Three possibilities
-        // - Fail: backtrack (continue iterating; at end return to caller with previous variable, at initial frame fail out)
-        // - Hit but incomplete assignment: Recurse into next variable
-        // - Hit and complete: AWESOME!!!, we've MADE IT!!! but can continue to look for more hits: co-routine suspend or state-out?
+        values->clear();
+        for( Constraint *c : constraints )
+        {
+            (*values)[c] = GetConstraintValues(c, next_match->first);
+            ASSERT( values->at(c).size() == c->GetDegree() ); // Assignments should be complete
+        }
     }
-    return false;
+    if( side_info )
+        *side_info = next_match->second;
+    next_match++;
+    return true;
 }
 
 
-list<Constraint::VariableId> SimpleSolver::DeduceVariables( const list<Constraint *> &constraints )
+list<VariableId> SimpleSolver::DeduceVariables( const list<Constraint *> &constraints )
 {
-    list<Constraint::VariableId> variables;
+    list<VariableId> variables;
     for( Constraint *c : constraints )
     {
-        list<Constraint::VariableId> vars = c->GetVariables();
+        list<VariableId> vars = c->GetVariables();
         
-        for( Constraint::VariableId v : vars )
+        for( VariableId v : vars )
         {
-            if( std::find(variables.begin(), variables.end(), v) == variables.end() )
+            if( find(variables.begin(), variables.end(), v) == variables.end() )
                 variables.push_back( v );
         }
     }
@@ -62,28 +69,67 @@ list<Constraint::VariableId> SimpleSolver::DeduceVariables( const list<Constrain
 }
 
 
-bool SimpleSolver::Test( std::map<Constraint::VariableId, Constraint::Value> &assigns ) // TODO side_data: merge it from all the Tests
+bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
+{
+    list<VariableId>::const_iterator next = current;
+    ++next;
+    bool complete = (next == variables.end());
+    
+    for( Value v : initial_domain )
+    {
+        assignments[*current] = v;
+     
+        shared_ptr<SideInfo> side_info;
+        if( complete )
+        {
+            side_info = make_shared<SideInfo>();
+        }        
+        
+        bool ok = Test( assignments, side_info.get() ); // Ask for side info if assignment is complete
+        
+        if( !ok )
+            continue; // backtrack
+            
+        if( complete )
+            matches.push_back( make_pair(assignments, *side_info) );
+        else
+            TryVariable( next );
+
+    }
+    return false;
+
+}
+
+bool SimpleSolver::Test( map<VariableId, Value> &assigns, 
+                         SideInfo *side_info )
 {
     bool ok = true; // AND-rule
     for( Constraint *c : constraints )
     {
-        list<Constraint::VariableId> vars = c->GetVariables();
-        list<Constraint::Value> vals;
-        for( Constraint::VariableId var : vars )
-        {
-            Constraint::Value val = assignments.at(var); 
-            if( val == Constraint::NullValue )
-                break; // unassigned variable
-            vals.push_back( val );
-        }
-        
+        list<Value> vals = GetConstraintValues( c, assignments );
+
         if( vals.size() < c->GetDegree() )
             continue; // There were unassigned variables, don't bother testing this constraint
             
-        ok = c->Test(vals); 
+        ok = c->Test(vals, side_info); 
         
         if( !ok )
             break;
     }    
     return ok;
+}
+
+
+list<Value> SimpleSolver::GetConstraintValues( const Constraint *c, const Assignments &a )
+{
+    list<VariableId> vars = c->GetVariables();
+    list<Value> vals;
+    for( VariableId var : vars )
+    {
+        Value val = a.at(var); 
+        if( val == NullValue )
+            continue; // unassigned variable
+        vals.push_back( val );
+    }    
+    return vals;
 }

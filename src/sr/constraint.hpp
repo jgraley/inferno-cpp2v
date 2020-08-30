@@ -11,35 +11,35 @@
 #include <memory>
 
 namespace SR
-{ 
-    
+{
 class Agent;
+}
 
-class Conjecture;
+namespace CSP
+{ 
+struct SideInfo
+{
+    Set< shared_ptr<const SR::DecidedQuery> > evaluator_queries;   
+    Set< pair< shared_ptr<const SR::DecidedQuery>, const SR::DecidedQuery::Link * > > abnormal_links; 
+    Set< pair< shared_ptr<const SR::DecidedQuery>, const SR::DecidedQuery::Link * > > multiplicity_links;
+};
+
+/**
+ * Embed the assumption that variables are simply 1:1 with agents. Note
+ * that this class will _always_ take and Agent * in its constructor, 
+ * because that's what "systemic constraint" means - and so the constructor
+ * takes Agent * explicitly. But the variables could change, so we 
+ * introduce a typedef for them.
+ */
+typedef SR::Agent * VariableId;
+typedef TreePtr<Node> Value;
+const Value NullValue;
 
 /** Implements a systemic constraint as discussed in #107
  */
 class Constraint
 {
 public:
-    struct SideInfo
-    {
-        Set< shared_ptr<const DecidedQuery> > evaluator_queries;   
-        Set< std::pair< shared_ptr<const DecidedQuery>, const DecidedQuery::Link * > > abnormal_links; 
-        Set< std::pair< shared_ptr<const DecidedQuery>, const DecidedQuery::Link * > > multiplicity_links;
-    };
-
-    /**
-     * Embed the assumption that variables are simply 1:1 with agents. Note
-     * that this class will _always_ take and Agent * in its constructor, 
-     * because that's what "systemic constraint" means - and so the constructor
-     * takes Agent * explicitly. But the variables could change, so we 
-     * introduce a typedef for them.
-     */
-    typedef Agent * VariableId;
-    typedef TreePtr<Node> Value;
-    static const Value NullValue;
-
     /**
      * Get the degree of the constraint.
      * 
@@ -52,7 +52,7 @@ public:
      * 
      * @return A list of variables affecteed by this constraint. Size equals the return from GetDegree()
      */
-    virtual std::list<VariableId> GetVariables() const = 0;
+    virtual list<VariableId> GetVariables() const = 0;
     
     /**
      * Test a list of variable values for inclusion in the constraint.
@@ -63,7 +63,7 @@ public:
      * @retval true the values are in the constraint, same ordering as return of GetVariables().
      * @retval false the values are not in the constraint
      */
-    virtual bool Test( std::list< Value > values, 
+    virtual bool Test( list< Value > values, 
                        SideInfo *side_info = nullptr ) = 0;        
 };
 
