@@ -10,6 +10,12 @@
 #include "agent.hpp"
 #include <set>
 
+namespace CSP
+{
+class SimpleSolver;
+class Constraint;
+};
+    
 /// SR namespace contains the search and replace implementation
 namespace SR 
 {
@@ -57,10 +63,12 @@ public:
 private:
     Agent *root_agent;
     Set<Agent *> my_agents;   
-    std::map< Agent *, AndRuleEngine > my_abnormal_engines;
-    std::map< Agent *, AndRuleEngine > my_multiplicity_engines;
-        
+    map< Agent *, AndRuleEngine > my_abnormal_engines;
+    map< Agent *, AndRuleEngine > my_multiplicity_engines;
+    map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
+    
     Conjecture conj;
+    shared_ptr<CSP::SimpleSolver> solver;
     CouplingMap my_keys; 
     const CouplingMap *master_keys;
     Set<Agent *> reached; 

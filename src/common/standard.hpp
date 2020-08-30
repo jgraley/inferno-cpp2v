@@ -13,7 +13,7 @@ using namespace std;
 
 #include <memory>
 #include <algorithm>
-using namespace std;
+using namespace std; // This is done twice, in order to make certain it "takes"
 
 // JSG we now use boost's FOREACH which means we depend on Boost 1.34 (I think)
 #include <boost/foreach.hpp>

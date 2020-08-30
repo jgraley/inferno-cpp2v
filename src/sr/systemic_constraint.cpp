@@ -107,7 +107,7 @@ bool SystemicConstraint::Test( list< Value > values,
         break; // Didn't throw: success
     }
     
-    // Side-info is info required by the Engins that isn't part of the CSP model
+    // Side-info is info required by the Engine that isn't part of the CSP model
     // and would be difficult to re-create from it outside of this class
     // (i.e. only given a set of values for variables).
     if( side_info )

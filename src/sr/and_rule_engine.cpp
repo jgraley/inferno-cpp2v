@@ -12,6 +12,8 @@
 
 #define TEST_PATTERN_QUERY
 
+//#define USE_SOLVER
+
 using namespace SR;
 
 void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_agents )
@@ -29,7 +31,18 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
     for( std::pair<Agent * const, AndRuleEngine> &pae : my_multiplicity_engines )
         pae.second.Configure( pae.first, surrounding_agents );
 
+#ifdef USE_SOLVER
+    list<Constraint *> constraints;
+    for( Agent *a : my_agents )
+    {
+        shared_ptr<Constraint> c = make_shared<CSP::SystemicConstraint>( a );
+        my_constraints[a] = c;    
+        constraints.push_back(c);
+    }
+    solver = make_shared<SimpleSolver>(constraints);
+#else
     conj.Configure(my_agents, root_agent);
+#endif
 }
 
 
@@ -199,33 +212,57 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
     TRACE(" pattern=")(*root_agent);
            
     master_keys = master_keys_;    
+#ifdef USE_SOLVER
+    list< TreePtr<Node> > x_nodes;
+	Walk w( start_x ); 
+	for( Walk::iterator wit=w.begin(); wit!=w.end(); ++wit )
+        x_nodes.push_back(*wit);
+    solver.Start( x_nodes );
+#else
     conj.Start();
+#endif
            
     // Create the conjecture object we will use for this compare, and keep iterating
     // though different conjectures trying to find one that allows a match.
     //int i=0;
     while(1)
     {
+#ifdef USE_SOLVER        
+        SideInfo side_info;
+        map< shared_ptr<CSP::Constraint>, list< TreePtr<Node> > > values;
+        bool match = GetNextSolution( values, &side_info );        
+        if( !match )
+            throw NoSolution();
+
+        my_keys.clear();
+        for( pair< Agent *, shared_ptr<Constraint> > p : my_constraints )
+        {
+            list< TreePtr<Node> > &vals = values.at(p->second);
+            list< Agent * > vars = p.second->GetVariables();
+            ASSERT( vars.front() == p.first );
+            my_keys[vars.front()] = vals.front(); // For now only do the first one, which is 
+        }
+        
+        abnormal_links = side_info.abnormal_links;
+        multiplicity_links = side_info.multiplicity_links;
+        evaluator_queries = side_info.evaluator_queries;
+#endif
         try
         {
-            // Try out the current conjecture. This will call RememberDecision() once for each decision;
-            // RememberDecision() will return the current choice for that decision, if absent it will
+#ifndef USE_SOLVER
+            // Try out the current conjecture. This will call RegisterDecision() once for each decision;
+            // RegisterDecision() will return the current choice for that decision, if absent it will
             // add the decision and choose the first choice, if the decision reaches the end it
             // will remove the decision.
-
-            // Only key if the keys are already set to KEYING (which is 
-            // the initial value). Keys could be RESTRICTING if we're under
-            // a SoftNot node, in which case we only want to restrict.
             
             // Initialise keys to the ones inherited from master, keeping 
             // none of our own from any previous unsuccessful attempt.
-            my_keys.clear();
             reached.clear();
             abnormal_links.clear();
             multiplicity_links.clear();
             evaluator_queries.clear();
             DecidedCompare( root_agent, start_x );
-            
+#endif
             CouplingMap combined_keys = MapUnion( *master_keys, my_keys );     
                                                 
             // Process the evaluator queries. These can match when their children have not matched and
@@ -270,12 +307,17 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
         }
         catch( const ::Mismatch& mismatch )
         {                
-            TRACE("SCREngine miss, trying increment conjecture\n");
+#ifdef USE_SOLVER
+            TRACE("Miss after recursion, trying next solution\n");
+            continue; // Get another solution from the solver
+#else
+            TRACE("AndRuleEngine miss, trying increment conjecture\n");
             if( conj.Increment() )
                 continue; // Conjecture would like us to try again with new choices
                 
             // We didn't match and we've run out of choices, so we're done.              
             throw NoSolution();
+#endif            
         }
         // We got a match so we're done. 
         TRACE("SCREngine hit\n");

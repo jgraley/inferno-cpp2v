@@ -16,31 +16,33 @@ class Agent;
 class SimpleSolver
 {
 public:
-    SimpleSolver( const list<Constraint *> &constraints_, 
-                  const list<Value> &initial_domain_ );
+    SimpleSolver( const list< shared_ptr<Constraint> > &constraints_ );
 
-    void Start();
+    void Start( const list<Value> &initial_domain_ );
 
-    bool GetNextSolution( map< Constraint *, list< Value > > *values = nullptr, 
+    bool GetNextSolution( map< shared_ptr<Constraint>, list< Value > > *values = nullptr, 
                           SideInfo *side_info = nullptr );
 
 private:
     typedef map<VariableId, Value> Assignments;
 
-    static list<VariableId> DeduceVariables( const list<Constraint *> &constraints );
+    static list<VariableId> DeduceVariables( const list< shared_ptr<Constraint> > &constraints );
 
     bool TryVariable( list<VariableId>::const_iterator current );
     bool Test( map<VariableId, Value> &assigns, 
                SideInfo *side_info = nullptr );
-    list<Value> GetConstraintValues( const Constraint *c, const Assignments &a );
+    list<Value> GetConstraintValues( shared_ptr<Constraint> c, const Assignments &a );
     
-    const list<Constraint *> constraints;
-    const list<Value> initial_domain;
+    // Set by constructor - depends on pattern only
+    const list< shared_ptr<Constraint> > constraints;
     const list<VariableId> variables;
-    
+
+    // Used during solve - depends on pattern and x
+    list<Value> initial_domain;    
     Assignments assignments;
-    list< pair<Assignments, SideInfo> > matches;
-    list< pair<Assignments, SideInfo> >::const_iterator next_match;
+    
+    // Only needed to reserialise the matches TODO move to "holder" class
+    list< pair<Assignments, shared_ptr<SideInfo> > > matches;
 };
 
 };
