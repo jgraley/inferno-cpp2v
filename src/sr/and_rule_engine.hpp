@@ -57,7 +57,7 @@ public:
     void Compare( TreePtr<Node> start_x );
     void EnsureChoicesHaveIterators();
 
-    const Conjecture &GetConjecture();
+    const shared_ptr<Conjecture> GetConjecture();
     const CouplingMap &GetCouplingKeys();
 
 private:
@@ -67,7 +67,7 @@ private:
     map< Agent *, AndRuleEngine > my_multiplicity_engines;
     map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
     
-    Conjecture conj;
+    shared_ptr<Conjecture> conj;
     shared_ptr<CSP::SimpleSolver> solver;
     CouplingMap my_keys; 
     const CouplingMap *master_keys;

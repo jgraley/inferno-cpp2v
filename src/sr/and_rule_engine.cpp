@@ -1,3 +1,5 @@
+#include "systemic_constraint.hpp"
+#include "simple_solver.hpp"
 #include "scr_engine.hpp"
 #include "search_replace.hpp"
 #include "conjecture.hpp"
@@ -32,16 +34,17 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
         pae.second.Configure( pae.first, surrounding_agents );
 
 #ifdef USE_SOLVER
-    list<Constraint *> constraints;
+    list< shared_ptr<CSP::Constraint> > constraints;
     for( Agent *a : my_agents )
     {
-        shared_ptr<Constraint> c = make_shared<CSP::SystemicConstraint>( a );
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( a );
         my_constraints[a] = c;    
         constraints.push_back(c);
     }
-    solver = make_shared<SimpleSolver>(constraints);
+    solver = make_shared<CSP::SimpleSolver>(constraints);
 #else
-    conj.Configure(my_agents, root_agent);
+    conj = make_shared<Conjecture>();
+    conj->Configure(my_agents, root_agent);
 #endif
 }
 
@@ -161,7 +164,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     }
 
     // Obtain the query state from the conjecture
-    shared_ptr<DecidedQuery> query = conj.GetQuery(agent);
+    shared_ptr<DecidedQuery> query = conj->GetQuery(agent);
 
     // Run the compare implementation to get the links based on the choices
     TRACE(*agent)("?=")(*x)(" RunDecidedQueryImpl()\n");    
@@ -217,9 +220,9 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
 	Walk w( start_x ); 
 	for( Walk::iterator wit=w.begin(); wit!=w.end(); ++wit )
         x_nodes.push_back(*wit);
-    solver.Start( x_nodes );
+    solver->Start( x_nodes );
 #else
-    conj.Start();
+    conj->Start();
 #endif
            
     // Create the conjecture object we will use for this compare, and keep iterating
@@ -228,21 +231,24 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
     while(1)
     {
 #ifdef USE_SOLVER        
-        SideInfo side_info;
+        // Get a solution from the solver
+        CSP::SideInfo side_info;
         map< shared_ptr<CSP::Constraint>, list< TreePtr<Node> > > values;
-        bool match = GetNextSolution( values, &side_info );        
+        bool match = solver->GetNextSolution( &values, &side_info );        
         if( !match )
             throw NoSolution();
 
+        // Recreate my_keys
         my_keys.clear();
-        for( pair< Agent *, shared_ptr<Constraint> > p : my_constraints )
+        for( pair< Agent *, shared_ptr<CSP::Constraint> > p : my_constraints )
         {
-            list< TreePtr<Node> > &vals = values.at(p->second);
+            list< TreePtr<Node> > &vals = values.at(p.second);
             list< Agent * > vars = p.second->GetVariables();
             ASSERT( vars.front() == p.first );
             my_keys[vars.front()] = vals.front(); // For now only do the first one, which is 
         }
         
+        // Grab the side info into our containers
         abnormal_links = side_info.abnormal_links;
         multiplicity_links = side_info.multiplicity_links;
         evaluator_queries = side_info.evaluator_queries;
@@ -312,7 +318,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             continue; // Get another solution from the solver
 #else
             TRACE("AndRuleEngine miss, trying increment conjecture\n");
-            if( conj.Increment() )
+            if( conj->Increment() )
                 continue; // Conjecture would like us to try again with new choices
                 
             // We didn't match and we've run out of choices, so we're done.              
@@ -340,12 +346,15 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x )
 
 void AndRuleEngine::EnsureChoicesHaveIterators()
 {
-    conj.EnsureChoicesHaveIterators();
+#ifndef USE_SOLVER
+    conj->EnsureChoicesHaveIterators();
+#endif
 }
 
 
-const Conjecture &AndRuleEngine::GetConjecture()
+const shared_ptr<Conjecture> AndRuleEngine::GetConjecture()
 {
+    ASSERT( conj ); // Can't do this if using solver
     return conj;
 }
 
