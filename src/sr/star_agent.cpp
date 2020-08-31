@@ -30,7 +30,9 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     ContainerInterface *x_ci = dynamic_cast<ContainerInterface *>(x.get());
     auto x_sc = TreePtr<SubContainer>::DynamicCast(x);
 
-    ASSERT(x_sc&&x_ci)("Nodes passed to StarAgent::RunDecidedQueryImpl() must be a SubContainer, since * matches multiple things");
+    // Nodes passed to StarAgent::RunDecidedQueryImpl() must be a SubContainer, since * matches multiple things
+    if( !( x_sc && x_ci ) )
+        throw Mismatch();
     
     // Check pre-restriction
     TRACE("StarAgent pre-res\n");

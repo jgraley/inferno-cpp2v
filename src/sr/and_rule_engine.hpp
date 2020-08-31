@@ -52,6 +52,7 @@ public:
 							    const CouplingMap *coupling_keys );
     void DecidedCompare( Agent *agent,
                          TreePtr<Node> x );
+    void ExpandDomain( Agent *agent, set< TreePtr<Node> > &domain );
     void Compare( TreePtr<Node> start_x,
                   const CouplingMap *master_keys );
     void Compare( TreePtr<Node> start_x );

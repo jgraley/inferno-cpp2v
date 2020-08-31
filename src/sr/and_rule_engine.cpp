@@ -14,7 +14,7 @@
 
 #define TEST_PATTERN_QUERY
 
-//#define USE_SOLVER
+#define USE_SOLVER
 
 using namespace SR;
 
@@ -204,6 +204,20 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 }
 
 
+void AndRuleEngine::ExpandDomain( Agent *agent, set< TreePtr<Node> > &domain )
+{
+    // It's important that this walk hits parents first because local node 
+    // transformations occur in parent-then-child order. That's why this 
+    // part is here and not in the CSP stuff: it exploits knowlege of 
+    // the directedenss of the pattern trees.
+    my_constraints.at(agent)->ExpandDomain( domain );  
+    
+    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
+    FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
+        ExpandDomain( b->agent, domain );
+}
+
+
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
 void AndRuleEngine::Compare( TreePtr<Node> start_x,
                              const CouplingMap *master_keys_ )
@@ -215,23 +229,15 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
            
     master_keys = master_keys_;    
 #ifdef USE_SOLVER
-    set< TreePtr<Node> > x_nodes;
+    set< TreePtr<Node> > domain;
 	Walk wx( start_x ); 
 	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
-        x_nodes.insert(*wx_it);
+        domain.insert(*wx_it);
     
-    Walk wp( root_agent ); 
-    // Expand the domain to include generated child x nodes. It's 
-    // important that this walk hits parents first because local node 
-    // transformations occur in parent-then-child order. That's why this 
-    // part is here and not in the CSP stuff: it exploits knowlege of 
-    // the directedenss of the pattern and x trees.
-	for( Walk::iterator wp_it=wp.begin(); wp_it!=wp.end(); ++wp_it )
-    {
-        Agent *agent = Agent::AsAgent(*wp_it);
-        my_constraints.at(agent)->ExpandDomain( x_nodes );        
-    }    
-    solver->Start( x_nodes );
+    // Expand the domain to include generated child y nodes.
+    ExpandDomain( root_agent, domain );
+    
+    solver->Start( domain );
 #else
     conj->Start();
 #endif
