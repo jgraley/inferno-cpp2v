@@ -116,7 +116,7 @@ bool SystemicConstraint::Test( list< Value > values,
         
         // Stolen from AndRuleEngine::CompareLinks()
         FOREACH( shared_ptr<const SR::DecidedQuery::Link> b, *query->GetAbnormalLinks() )
-            side_info->abnormal_links.insert( make_pair(query, b) ); 
+            side_info->abnormal_links.insert( b ); 
         
         FOREACH( shared_ptr<const SR::DecidedQuery::Link> b, *query->GetMultiplicityLinks() )
             side_info->multiplicity_links.insert( make_pair(query, b) ); 

@@ -74,7 +74,7 @@ void AndRuleEngine::CompareLinks( shared_ptr<const DecidedQuery> query )
 {
 
     FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetAbnormalLinks() )
-        abnormal_links.insert( make_pair(query, l) ); 
+        abnormal_links.insert( l ); 
         
     FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetMultiplicityLinks() )
         multiplicity_links.insert( make_pair(query, l) ); 
@@ -114,7 +114,7 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const DecidedQuery> query,
     FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetAbnormalLinks() )
     {
         // Don't let this link go into the general AND-rule
-        abnormal_links.erase( make_pair(query, l) ); 
+        abnormal_links.erase( l ); 
         
         TRACE("Comparing block %d\n", i);
  
@@ -295,10 +295,10 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             }
 
             // Process the free abnormal links.
-            for( std::pair< shared_ptr<const DecidedQuery>, shared_ptr<const DecidedQuery::Link> > lp : abnormal_links )
+            for( shared_ptr<const DecidedQuery::Link> lp : abnormal_links )
             {            
-                AndRuleEngine &e = my_abnormal_engines.at(lp.second->agent);
-                TreePtr<Node> xe = lp.second->x;
+                AndRuleEngine &e = my_abnormal_engines.at(lp->agent);
+                TreePtr<Node> xe = lp->x;
                 e.Compare( xe, &combined_keys );
             }
 
