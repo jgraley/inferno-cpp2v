@@ -199,18 +199,18 @@ void SCREngine::Compare( TreePtr<Node> start_x ) const
 }
 
 
-void SCREngine::KeyReplaceNodes( const Conjecture &conj,
-                                 const CouplingMap *coupling_keys ) const
+void SCREngine::KeyReplaceNodes( const CouplingMap *coupling_keys ) const
 {
     INDENT("K");   
         
     FOREACH( Agent *a, *my_agents )
     {
-		TRACE(*a)(coupling_keys->IsExist( a )?" is in coupling_keys ":" is not in coupling_keys")
-		     (a->GetKey()?" and is self-coupled\n":" and is not self-coupled\n");
+        TRACE(*a)(coupling_keys->IsExist( a )?" is in coupling_keys ":" is not in coupling_keys")
+             (a->GetKey()?" and is self-coupled\n":" and is not self-coupled\n");
         if( coupling_keys->IsExist( a ) && !a->GetKey() )
-            a->KeyReplace(coupling_keys->at(a), conj.GetChoices(a));
-	}
+            a->KeyReplace(coupling_keys);
+    }
+    
     TRACE("OK\n");
 }
 
@@ -245,8 +245,7 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
            
     TRACE("Search successful, now keying replace nodes\n");
     and_rule_engine.EnsureChoicesHaveIterators(); // Replace can't deal with hard BEGINs
-    KeyReplaceNodes( *and_rule_engine.GetConjecture(), 
-                     &and_rule_engine.GetCouplingKeys() );
+    KeyReplaceNodes( &and_rule_engine.GetCouplingKeys() );
 
     if( !my_engines.empty() )
     {

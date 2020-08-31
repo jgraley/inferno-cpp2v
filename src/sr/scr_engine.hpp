@@ -54,8 +54,7 @@ public:
     void Compare( TreePtr<Node> start_x ) const;
 
 private:
-    void KeyReplaceNodes( const Conjecture &conj,
-                          const CouplingMap *coupling_keys) const;
+    void KeyReplaceNodes( const CouplingMap *coupling_keys) const;
     TreePtr<Node> Replace() const;
 
 public:

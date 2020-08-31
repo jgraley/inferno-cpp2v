@@ -363,13 +363,6 @@ void AndRuleEngine::EnsureChoicesHaveIterators()
 }
 
 
-const shared_ptr<Conjecture> AndRuleEngine::GetConjecture()
-{
-    ASSERT( conj ); // Can't do this if using solver
-    return conj;
-}
-
-
 const CouplingMap &AndRuleEngine::GetCouplingKeys()
 {
     return my_keys;

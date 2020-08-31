@@ -90,10 +90,9 @@ void AgentCommon::ResetKey()
 }
 
 
-void AgentCommon::KeyReplace( const TreePtrInterface &x,
-                              DecidedQuery::Choices choices )
+void AgentCommon::KeyReplace( const CouplingMap *coupling_keys )
 {   
-    SetKey(x);  
+    SetKey( coupling_keys->at(this) );  
 }
 
 

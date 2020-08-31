@@ -54,14 +54,10 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 }
 
 
-void SearchContainerAgent::KeyReplace( const TreePtrInterface &x,
-                                       DecidedQueryCommon::Choices choices )
+void SearchContainerAgent::KeyReplace( const CouplingMap *coupling_keys )
 {
-    ASSERT( choices.size() == 1 )("Expected a single choice, choices.size()=%d", choices.size());
-    ASSERT( choices.front().mode == DecidedQueryCommon::Choice::ITER );
-    ContainerInterface::iterator thistime = choices.front().iter;
-    terminus_key = *thistime;
-    SetKey(x);
+    terminus_key = coupling_keys->at(AsAgent(terminus));
+    SetKey( coupling_keys->at(this) );  
 }
 
 

@@ -46,8 +46,7 @@ public:
                                   TreePtr<Node> x ) const = 0;                                                
     virtual TreePtr<Node> GetKey() = 0;                                  
     virtual void ResetKey() = 0;     
-    virtual void KeyReplace( const TreePtrInterface &x,
-                             DecidedQuery::Choices choices ) = 0;
+    virtual void KeyReplace( const CouplingMap *coupling_keys ) = 0;
     virtual void TrackingKey( Agent *from ) = 0;
     virtual TreePtr<Node> BuildReplace() = 0;
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const = 0;
@@ -74,8 +73,7 @@ public:
     void SetKey( TreePtr<Node> x );
     TreePtr<Node> GetKey();                                  
     void ResetKey();    
-    virtual void KeyReplace( const TreePtrInterface &x,
-                             DecidedQuery::Choices choices );
+    virtual void KeyReplace( const CouplingMap *coupling_keys );
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplace();
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );

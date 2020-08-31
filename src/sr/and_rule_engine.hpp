@@ -57,7 +57,6 @@ public:
     void Compare( TreePtr<Node> start_x );
     void EnsureChoicesHaveIterators();
 
-    const shared_ptr<Conjecture> GetConjecture();
     const CouplingMap &GetCouplingKeys();
 
 private:
