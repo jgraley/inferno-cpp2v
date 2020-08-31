@@ -44,7 +44,7 @@ public:
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   TreePtr<Node> x ) const = 0;                                                
-    virtual TreePtr<Node> GetCoupled() = 0;                                  
+    virtual TreePtr<Node> GetKey() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const TreePtrInterface &x,
                              DecidedQuery::Choices choices ) = 0;
@@ -71,8 +71,8 @@ public:
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   TreePtr<Node> x ) const;                                                
-    void DoKey( TreePtr<Node> x );
-    TreePtr<Node> GetCoupled();                                  
+    void SetKey( TreePtr<Node> x );
+    TreePtr<Node> GetKey();                                  
     void ResetKey();    
     virtual void KeyReplace( const TreePtrInterface &x,
                              DecidedQuery::Choices choices );

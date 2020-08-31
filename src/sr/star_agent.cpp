@@ -44,7 +44,7 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         TRACE("StarAgent pattern, size is %d\n", x_ci->size());
         // Apply pattern restriction - will be at least as strict as pre-restriction
         
-        query.RegisterMultiplicityLink( p, x_sc );
+        query.RegisterMultiplicityLink( p, x_sc ); // Links into X
     }
 }                       
 

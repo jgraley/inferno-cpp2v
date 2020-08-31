@@ -18,7 +18,7 @@ class SimpleSolver
 public:
     SimpleSolver( const list< shared_ptr<Constraint> > &constraints_ );
 
-    void Start( const list<Value> &initial_domain_ );
+    void Start( const set<Value> &initial_domain_ );
 
     bool GetNextSolution( map< shared_ptr<Constraint>, list< Value > > *values = nullptr, 
                           SideInfo *side_info = nullptr );
@@ -38,7 +38,7 @@ private:
     const list<VariableId> variables;
 
     // Used during solve - depends on pattern and x
-    list<Value> initial_domain;    
+    set<Value> initial_domain;    
     Assignments assignments;
     
     // Only needed to reserialise the matches TODO move to "holder" class

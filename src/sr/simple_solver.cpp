@@ -14,7 +14,7 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_ )
 }
 
 
-void SimpleSolver::Start( const list< TreePtr<Node> > &initial_domain_ )
+void SimpleSolver::Start( const set< TreePtr<Node> > &initial_domain_ )
 {
     initial_domain = initial_domain_;
 

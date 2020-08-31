@@ -20,8 +20,8 @@ namespace CSP
 struct SideInfo
 {
     Set< shared_ptr<const SR::DecidedQuery> > evaluator_queries;   
-    Set< pair< shared_ptr<const SR::DecidedQuery>, const SR::DecidedQuery::Link * > > abnormal_links; 
-    Set< pair< shared_ptr<const SR::DecidedQuery>, const SR::DecidedQuery::Link * > > multiplicity_links;
+    Set< pair< shared_ptr<const SR::DecidedQuery>, shared_ptr<const SR::DecidedQuery::Link> > > abnormal_links; 
+    Set< pair< shared_ptr<const SR::DecidedQuery>, shared_ptr<const SR::DecidedQuery::Link> > > multiplicity_links;
 };
 
 /**
@@ -32,6 +32,13 @@ struct SideInfo
  * introduce a typedef for them.
  */
 typedef SR::Agent * VariableId;
+
+enum ValueCategory
+{
+    BY_LOCATION, // The "X" nodes whose location in the tree is significant
+    BY_VALUE     // The "Y" nodes whose location dous not matter, only subtree "value"
+};
+
 typedef TreePtr<Node> Value;
 const Value NullValue;
 
@@ -65,6 +72,16 @@ public:
      */
     virtual bool Test( list< Value > values, 
                        SideInfo *side_info = nullptr ) = 0;        
+
+    /**
+     * Given a set of possible values for variable 0, expand the domain
+     * to include all possible values for the other variables. This permits
+     * "local links" to appear in the domain.
+     *
+     * @param domain [inout] The domain to expand
+     */
+    void ExpandDomain( set< TreePtr<Node> > &domain ) { /* not yet implemented */ }
+
 };
 
 };

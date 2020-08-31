@@ -31,7 +31,7 @@ void SlaveAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     CheckLocalMatch(x.get());
     
     // When a slave node seen duriung search, just forward through the "through" path
-    query.RegisterNormalLink( GetThrough(), x );
+    query.RegisterNormalLink( GetThrough(), x ); // Link into X
 }
 
 
@@ -39,7 +39,7 @@ void SlaveAgent::TrackingKey( Agent *from )
 {
     INDENT("l");
     // Make slaves "invisible" to Overlay key propagation
-    DoKey( from->GetCoupled() );
+    SetKey( from->GetKey() );
     AsAgent(GetThrough())->TrackingKey(from);   
 }
 

@@ -21,7 +21,7 @@ void OverlayAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     // Check pre-restriction
     CheckLocalMatch(x.get());
 
-    query.RegisterNormalLink( GetThrough(), x );
+    query.RegisterNormalLink( GetThrough(), x ); // Link into X
 }
 
 

@@ -28,7 +28,7 @@ void MatchAllAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         ASSERT( p );
         // Context is normal because all patterns must match (but none should contain
         // nodes with reploace functionlity because they will not be invoked during replace) 
-        query.RegisterNormalLink( p, x );
+        query.RegisterNormalLink( p, x ); // Link into X
     }
 }    
 

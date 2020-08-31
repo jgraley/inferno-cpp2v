@@ -73,8 +73,8 @@ private:
     const CouplingMap *master_keys;
     Set<Agent *> reached; 
     Set< shared_ptr<const DecidedQuery> > evaluator_queries;   
-    Set< std::pair< shared_ptr<const DecidedQuery>, const DecidedQuery::Link * > > abnormal_links; 
-    Set< std::pair< shared_ptr<const DecidedQuery>, const DecidedQuery::Link * > > multiplicity_links;
+    Set< std::pair< shared_ptr<const DecidedQuery>, shared_ptr<const DecidedQuery::Link> > > abnormal_links; 
+    Set< std::pair< shared_ptr<const DecidedQuery>, shared_ptr<const DecidedQuery::Link> > > multiplicity_links;
 };
 
 #endif

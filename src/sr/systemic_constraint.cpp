@@ -11,7 +11,7 @@ SystemicConstraint::SystemicConstraint( SR::Agent *agent_ ) :
 {    
     Set<SR::Agent *> my_agents;
     my_agents.insert( agent ); // just the one agent this time
-    conj->Configure(my_agents, agent_);
+    conj->Configure(my_agents, agent);
 }
 
 
@@ -32,8 +32,8 @@ list<VariableId> SystemicConstraint::GetVariables() const
     
     vars.push_back( agent ); // Our agent is one of them!
     
-    FOREACH( const SR::PatternQuery::Link &b, *pq->GetNormalLinks() )
-        vars.push_back( b.agent );  // This rest are our normal linked agents
+    FOREACH( shared_ptr<const SR::PatternQuery::Link> b, *pq->GetNormalLinks() )
+        vars.push_back( b->agent );  // This rest are our normal linked agents
         
     return vars;
 }
@@ -88,7 +88,7 @@ bool SystemicConstraint::Test( list< Value > values,
             auto nit = nlinks->begin();            
             for( TreePtr<Node> child_x : values )
             {
-                if( child_x != nit->x )
+                if( child_x != (*nit)->x )
                     throw NormalLinkMismatch();  
                 nit++;
             }
@@ -115,11 +115,11 @@ bool SystemicConstraint::Test( list< Value > values,
         ASSERT(query); // we should still have the last query that was tried - and matched
         
         // Stolen from AndRuleEngine::CompareLinks()
-        FOREACH( const SR::DecidedQuery::Link &b, *query->GetAbnormalLinks() )
-            side_info->abnormal_links.insert( make_pair(query, &b) ); 
+        FOREACH( shared_ptr<const SR::DecidedQuery::Link> b, *query->GetAbnormalLinks() )
+            side_info->abnormal_links.insert( make_pair(query, b) ); 
         
-        FOREACH( const SR::DecidedQuery::Link &b, *query->GetMultiplicityLinks() )
-            side_info->multiplicity_links.insert( make_pair(query, &b) ); 
+        FOREACH( shared_ptr<const SR::DecidedQuery::Link> b, *query->GetMultiplicityLinks() )
+            side_info->multiplicity_links.insert( make_pair(query, b) ); 
             
         // Stolen from AndRuleEngine::DecidedCompare()
         if( query->GetEvaluator() )
@@ -128,3 +128,60 @@ bool SystemicConstraint::Test( list< Value > values,
     
     return true;
 }
+
+
+
+
+
+
+
+
+
+#if 0
+        list< TreePtr<Node> > x_to_add;
+        Conjecture lconj;
+        Set<SR::Agent *> lagents;
+        lagents.insert( agent ); // just the one agent this time
+        lconj.Configure(lagents, agent);
+        for( TreePtr<Node> x : x_nodes )
+        {
+            lconj.Start();
+            while(1)
+            {
+                try
+                {
+                    query = lconj.GetQuery(agent);
+                    agent->RunDecidedQuery( *query, x );
+                    FOREACH( shared_ptr<const DecidedQuery::Link> b, *query->GetNormalLinks() )
+                    x_to_add.push_back(b->x);
+                }
+                catch( ::Mismatch & )
+                {                    
+                    if( conj->Increment() )
+                        continue; // Conjecture would like us to try again with new choices                    
+                    break; 
+                }            
+            }
+        }
+        
+        SimpleCompare sc;
+        while( !x_to_add.empty() )
+        {
+            bool found = false;
+            for( TreePtr<Node> x : x_nodes )
+            {
+                try
+                {
+                    sc( x, x_to_add.front() );
+                    found = true;
+                    break;
+                }
+                catch( ::Mismatch & )
+                {
+                }                
+            }
+            if( !found )
+            
+        }
+
+#endif

@@ -68,7 +68,7 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 }                             
 
 
-void AgentCommon::DoKey( TreePtr<Node> x )
+void AgentCommon::SetKey( TreePtr<Node> x )
 {
     ASSERT(x);
     if( !coupling_key )
@@ -78,7 +78,7 @@ void AgentCommon::DoKey( TreePtr<Node> x )
 }
 
 
-TreePtr<Node> AgentCommon::GetCoupled()
+TreePtr<Node> AgentCommon::GetKey()
 {
     return coupling_key; 
 }
@@ -93,7 +93,7 @@ void AgentCommon::ResetKey()
 void AgentCommon::KeyReplace( const TreePtrInterface &x,
                               DecidedQuery::Choices choices )
 {   
-    DoKey(x);  
+    SetKey(x);  
 }
 
 
@@ -101,7 +101,7 @@ void AgentCommon::TrackingKey( Agent *from )
 {
     // This function is called on nodes under the "overlay" branch of Overlay nodes.
     // Some special nodes will not know what to do...
-    ASSERT(GetCoupled())(*this)(" cannot appear in a replace-only context");
+    ASSERT(GetKey())(*this)(" cannot appear in a replace-only context");
 }
 
 
@@ -113,7 +113,7 @@ TreePtr<Node> AgentCommon::BuildReplace()
     
     // See if the pattern node is coupled to anything. The keynode that was passed
     // in is just a suggestion and will be overriden if we are keyed.
-    TreePtr<Node> keynode = GetCoupled();
+    TreePtr<Node> keynode = GetKey();
     
     return BuildReplaceImpl( keynode );    
 }

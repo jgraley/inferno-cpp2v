@@ -109,7 +109,7 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                 TreePtrInterface *p_x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
                 ASSERT( p_x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
-                query.RegisterNormalLink(*pattern_ptr, *p_x_ptr);
+                query.RegisterNormalLink(*pattern_ptr, *p_x_ptr); // Link into X
             }
         }
         else
@@ -182,7 +182,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern restriction
-            query.RegisterNormalLink( pe, xss );
+            query.RegisterNormalLink( pe, xss ); // Link to Generated Subsequence
             
             // Resume at the first element after the matched range
             xit = xit_star_end;
@@ -192,7 +192,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
             if( xit == px->end() )
                 break;
        
-            query.RegisterNormalLink( pe, *xit );
+            query.RegisterNormalLink( pe, *xit ); // Link into X
             ++xit;
             
             // Every non-star pattern node we pass means there's one fewer remaining
@@ -269,7 +269,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                 xit = query.RegisterDecision( x_decision, false );
             }
             
-            query.RegisterNormalLink( pe, *xit );
+            query.RegisterNormalLink( pe, *xit ); // Link into X
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.
@@ -302,7 +302,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         // Apply pre-restriction to the star
         TreePtr<SubCollection> x_subcollection( new SubCollection );
         *x_subcollection = xremaining;
-        query.RegisterNormalLink( p_star, x_subcollection );
+        query.RegisterNormalLink( p_star, x_subcollection ); // Link to Generated Subcollection
     }
     TRACE("matched\n");
 }
@@ -312,17 +312,17 @@ void StandardAgent::TrackingKey( Agent *from )
 {
     INDENT(".");
     ASSERT( from );
-    TreePtr<Node> key = from->GetCoupled();
+    TreePtr<Node> key = from->GetKey();
     ASSERT( key );
     TRACE(*this)("::TrackingKey(")(*(key))(" from ")(*(from))(")\n");
     
-    if( GetCoupled() )
+    if( GetKey() )
         return; // Already keyed, no point wasting time keying this (and the subtree under it) again
         
     if( !IsLocalMatch(from) ) 
         return; // Not compatible with pattern: recursion stops here
         
-    DoKey( key );
+    SetKey( key );
     
     // Loop over all the elements of keynode and dest that do not appear in pattern or
     // appear in pattern but are NULL TreePtr<>s. Duplicate from keynode into dest.

@@ -54,18 +54,18 @@ void AndRuleEngine::ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, Age
     normal_agents->insert(current_agent);
     
     shared_ptr<PatternQuery> pq = current_agent->GetPatternQuery();
-    FOREACH( const PatternQuery::Link &b, *pq->GetNormalLinks() )
-        ConfigPopulateNormalAgents( normal_agents, b.agent );
+    FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
+        ConfigPopulateNormalAgents( normal_agents, b->agent );
         
     // Can be nicer in C++17, apparently.
-    FOREACH( const PatternQuery::Link &b, *pq->GetAbnormalLinks() )
+    FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetAbnormalLinks() )
         my_abnormal_engines.emplace(std::piecewise_construct,
-                                    std::forward_as_tuple(b.agent),
+                                    std::forward_as_tuple(b->agent),
                                     std::forward_as_tuple());    
 
-    FOREACH( const PatternQuery::Link &b, *pq->GetMultiplicityLinks() )
+    FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetMultiplicityLinks() )
         my_multiplicity_engines.emplace(std::piecewise_construct,
-                                        std::forward_as_tuple(b.agent),
+                                        std::forward_as_tuple(b->agent),
                                         std::forward_as_tuple());
 }
 
@@ -73,27 +73,27 @@ void AndRuleEngine::ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, Age
 void AndRuleEngine::CompareLinks( shared_ptr<const DecidedQuery> query ) 
 {
 
-    FOREACH( const DecidedQuery::Link &b, *query->GetAbnormalLinks() )
-        abnormal_links.insert( make_pair(query, &b) ); 
+    FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetAbnormalLinks() )
+        abnormal_links.insert( make_pair(query, l) ); 
         
-    FOREACH( const DecidedQuery::Link &b, *query->GetMultiplicityLinks() )
-        multiplicity_links.insert( make_pair(query, &b) ); 
+    FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetMultiplicityLinks() )
+        multiplicity_links.insert( make_pair(query, l) ); 
     
     int i=0;        
-    FOREACH( const DecidedQuery::Link &b, *query->GetNormalLinks() )
+    FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetNormalLinks() )
     {
         TRACE("Comparing normal link %d\n", i++);
         // Recurse normally 
         // Get x for linked node
-        TreePtr<Node> x = b.x;
+        TreePtr<Node> x = l->x;
         ASSERT( x );
         
         // This is needed for decisionised MatchAny #75. Other schemes for
         // RegisterAlwaysMatchingLink() could be deployed.
-        if( x.get() == (Node *)(b.agent) )
+        if( x.get() == (Node *)(l->agent) )
             continue; // Pattern nodes immediately match themselves
         
-        DecidedCompare(b.agent, x);   
+        DecidedCompare(l->agent, x);   
     }
 }
 
@@ -111,19 +111,19 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const DecidedQuery> query,
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
     list<bool> compare_results;
-    FOREACH( const DecidedQuery::Link &b, *query->GetAbnormalLinks() )
+    FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetAbnormalLinks() )
     {
         // Don't let this link go into the general AND-rule
-        abnormal_links.erase( make_pair(query, &b) ); 
+        abnormal_links.erase( make_pair(query, l) ); 
         
         TRACE("Comparing block %d\n", i);
  
         // Get x for linked node
-        TreePtr<Node> x = b.x;
+        TreePtr<Node> x = l->x;
                                  
         try 
         {
-            my_abnormal_engines.at(b.agent).Compare( x, coupling_keys );
+            my_abnormal_engines.at(l->agent).Compare( x, coupling_keys );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -216,10 +216,22 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
            
     master_keys = master_keys_;    
 #ifdef USE_SOLVER
-    list< TreePtr<Node> > x_nodes;
-	Walk w( start_x ); 
-	for( Walk::iterator wit=w.begin(); wit!=w.end(); ++wit )
-        x_nodes.push_back(*wit);
+    set< TreePtr<Node> > x_nodes;
+	Walk wx( start_x ); 
+	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
+        x_nodes.insert(*wx_it);
+    
+    Walk wp( root_agent ); 
+    // Expand the domain to include generated child x nodes. It's 
+    // important that this walk hits parents first because local node 
+    // transformations occur in parent-then-child order. That's why this 
+    // part is here and not in the CSP stuff: it exploits knowlege of 
+    // the directedenss of the pattern and x trees.
+	for( Walk::iterator wp_it=wp.begin(); wp_it!=wp.end(); ++wp_it )
+    {
+        Agent *agent = Agent::AsAgent(*wp_it);
+        my_constraints.at(agent)->ExpandDomain( x_nodes );        
+    }    
     solver->Start( x_nodes );
 #else
     conj->Start();
@@ -283,7 +295,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             }
 
             // Process the free abnormal links.
-            for( std::pair< shared_ptr<const DecidedQuery>, const DecidedQuery::Link * > lp : abnormal_links )
+            for( std::pair< shared_ptr<const DecidedQuery>, shared_ptr<const DecidedQuery::Link> > lp : abnormal_links )
             {            
                 AndRuleEngine &e = my_abnormal_engines.at(lp.second->agent);
                 TreePtr<Node> xe = lp.second->x;
@@ -292,7 +304,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
 
             // Process the free multiplicity links.
             int i=0;
-            for( std::pair< shared_ptr<const DecidedQuery>, const DecidedQuery::Link * > lp : multiplicity_links )
+            for( std::pair< shared_ptr<const DecidedQuery>, shared_ptr<const DecidedQuery::Link> > lp : multiplicity_links )
             {            
                 AndRuleEngine &e = my_multiplicity_engines.at(lp.second->agent);
 

@@ -47,7 +47,7 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 
     // Get choice from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = query.RegisterDecision( pwx->begin(), pwx->end(), false );
-    query.RegisterNormalLink( terminus, *thistime );
+    query.RegisterNormalLink( terminus, *thistime ); // Link into X
 
     // Let subclasses implement further restrictions
     DecidedQueryRestrictions( query, thistime );
@@ -61,7 +61,7 @@ void SearchContainerAgent::KeyReplace( const TreePtrInterface &x,
     ASSERT( choices.front().mode == DecidedQueryCommon::Choice::ITER );
     ContainerInterface::iterator thistime = choices.front().iter;
     terminus_key = *thistime;
-    DoKey(x);
+    SetKey(x);
 }
 
 
@@ -129,7 +129,7 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
         FOREACH( TreePtr<Node> n, pwtt->GetCurrentPath() )
             xpr_ss->push_back( n );
 
-        query.RegisterMultiplicityLink( recurse_restriction, xpr_ss );            
+        query.RegisterMultiplicityLink( recurse_restriction, xpr_ss ); // Links into X     
     }   
 }
 

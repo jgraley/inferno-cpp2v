@@ -63,12 +63,12 @@ private:
 	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode ) 
 	{
 		INDENT("%");
-		if( !GetCoupled() )
+		if( !GetKey() )
 		{
 			// Call the soft pattern impl 
 			string newname = GetNewName();
 			keynode = TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
-			DoKey( keynode );
+			SetKey( keynode );
 		}
 		// Note that the keynode could have been set via coupling - but still not
 		// likely to do anything sensible, so explicitly check
@@ -86,12 +86,12 @@ private:
 	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode ) 
 	{
 		INDENT("%");
-		if( !GetCoupled() )
+		if( !GetKey() )
 		{
 			// Call the soft pattern impl 
 			string newname = GetNewName();
 			keynode = TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) );
-			DoKey( keynode );
+			SetKey( keynode );
 		}
 		// Note that the keynode could have been set via coupling - but still not
 		// likely to do anything sensible, so explicitly check
@@ -110,12 +110,12 @@ private:
 	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode ) 
 	{
 		INDENT("%");
-		if( !GetCoupled() )
+		if( !GetKey() )
 		{
 			// Call the soft pattern impl 
 			string newname = GetNewName();
 			keynode = TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) );
-			DoKey( keynode );
+			SetKey( keynode );
 		}
 		// Note that the keynode could have been set via coupling - but still not
 		// likely to do anything sensible, so explicitly check

@@ -23,7 +23,7 @@ void NotMatchAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     CheckLocalMatch(x.get());
     
     // Context is abnormal because patterns must not match
-    query.RegisterAbnormalLink( GetPattern(), x );
+    query.RegisterAbnormalLink( GetPattern(), x ); // Link into X, abnormal
     query.RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
 }
 

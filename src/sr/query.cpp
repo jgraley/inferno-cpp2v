@@ -17,11 +17,11 @@ void PatternQuery::RegisterDecision( bool inclusive )
  
 void PatternQuery::RegisterNormalLink( TreePtr<Node> pattern )
 {
-    Link b;
-    b.agent = Agent::AsAgent(pattern);
+    auto b = make_shared<Link>();
+    b->agent = Agent::AsAgent(pattern);
     
     // For debugging
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
     normal_links.push_back( b );        
 }
@@ -29,11 +29,11 @@ void PatternQuery::RegisterNormalLink( TreePtr<Node> pattern )
 
 void PatternQuery::RegisterAbnormalLink( TreePtr<Node> pattern )
 {
-    Link b;
-    b.agent = Agent::AsAgent(pattern);
+    auto b = make_shared<Link>();
+    b->agent = Agent::AsAgent(pattern);
     
     // For debugging
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
     abnormal_links.push_back( b );       
 }
@@ -41,11 +41,11 @@ void PatternQuery::RegisterAbnormalLink( TreePtr<Node> pattern )
 
 void PatternQuery::RegisterMultiplicityLink( TreePtr<Node> pattern )
 {
-    Link b;
-    b.agent = Agent::AsAgent(pattern);
+    auto b = make_shared<Link>();
+    b->agent = Agent::AsAgent(pattern);
     
     // For debugging
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
     multiplicity_links.push_back( b );       
 }
@@ -71,12 +71,12 @@ void DecidedQuery::Start()
 void DecidedQuery::RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x )
 {
     ASSERT(x);
-    Link b;
-    b.agent = Agent::AsAgent(pattern);
-    b.x = x;
+    auto b = make_shared<Link>();
+    b->agent = Agent::AsAgent(pattern);
+    b->x = x;
     
     // For debugging
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
     normal_links.push_back( b );        
 }
@@ -85,12 +85,12 @@ void DecidedQuery::RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x )
 void DecidedQuery::RegisterAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x )
 {
     ASSERT(x);
-    Link b;
-    b.agent = Agent::AsAgent(pattern);
-    b.x = x;
+    auto b = make_shared<Link>();
+    b->agent = Agent::AsAgent(pattern);
+    b->x = x;
     
     // For debugging
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
     abnormal_links.push_back( b );
 }
@@ -99,12 +99,12 @@ void DecidedQuery::RegisterAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x 
 void DecidedQuery::RegisterMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x )
 {
     ASSERT(x);
-    Link b;
-    b.agent = Agent::AsAgent(pattern);
-    b.x = x;
+    auto b = make_shared<Link>();
+    b->agent = Agent::AsAgent(pattern);
+    b->x = x;
     
     // For debugging
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
 
     multiplicity_links.push_back( b );
 }
@@ -112,15 +112,15 @@ void DecidedQuery::RegisterMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubC
 
 void DecidedQuery::RegisterAlwaysMatchingLink( TreePtr<Node> pattern )
 {
-    Link b;
-    b.agent = Agent::AsAgent(pattern);
+    auto b = make_shared<Link>();
+    b->agent = Agent::AsAgent(pattern);
     // Supply the pattern as x. Pattern are usually not valid x nodes
     // (because can have NULL pointers) but there's logic in 
     // the AndRuleEngine to early-out in this case. 
-    b.x = pattern;
+    b->x = pattern;
     
     // For debugging
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
     
     normal_links.push_back( b );      
 }
@@ -138,19 +138,8 @@ void DecidedQuery::RegisterEvaluator( shared_ptr<BooleanEvaluator> e )
 	ASSERT( !evaluator ); // should not register more than one
 	evaluator = e;
 }	
-                         
-                                        
-bool SR::operator<(const SR::DecidedQuery::Link &l0, const SR::DecidedQuery::Link &l1)
-{
-    if( l0.agent != l1.agent )
-        return l0.agent < l1.agent;
-    if( l0.x != l1.x )
-        return l0.x < l1.x;
         
-    return false; // equal
-}
-
-
+        
 void DecidedQuery::Invalidate( int bc )
 {
     // TODO may not need all thes preconditions

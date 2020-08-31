@@ -29,7 +29,7 @@ public:
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
     };
         
-    typedef list<Link> Links;       
+    typedef list< shared_ptr<Link> > Links;       
     typedef vector<Decision> Decisions;
 
     void clear()
@@ -103,7 +103,7 @@ public:
     
     typedef vector<Range> Ranges;
     typedef vector<Choice> Choices; 
-    typedef list<Link> Links;
+    typedef list< shared_ptr<Link> > Links;
     
     virtual const Choices *GetChoices() const = 0;
     virtual const Ranges *GetDecisions() const = 0;
@@ -225,9 +225,6 @@ private: friend class Conjecture;
     static shared_ptr< Collection<Node> > empty_container;
     static Range empty_range;
 };
-
-
-bool operator<(const DecidedQuery::Link &l0, const DecidedQuery::Link &l1);
 
 };
 #endif

@@ -28,13 +28,13 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     query.Reset();
 #ifdef SPIKE
 #ifdef SPIKE_MATCH
-    TreePtr<Node> node( new Node );
-	query.RegisterNormalLink( GetPointer(), node );	
+    TreePtr<Node> spike( new Node );
+	query.RegisterNormalLink( GetPointer(), spike );	// Singular Link
 #endif
 #ifdef SPIKE_MISMATCH
-	TreePtr<CPPTree::Integer> wrong_ptr_arch; // won't match in the use-case
-    TreePtr<Node> ptr_arch = wrong_ptr_arch.MakeValueArchitype();
-	query.RegisterNormalLink( GetPointer(), ptr_arch );	
+	TreePtr<CPPTree::Integer> spikex; // won't match in the use-case
+    TreePtr<Node> spike = spikex.MakeValueArchitype();
+	query.RegisterNormalLink( GetPointer(), spike );	// Singular Link
 #endif
 #else   
     // Do a walk over context (the whole x tree)
@@ -53,7 +53,7 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             // Make an architypical node matching the pointer's type
             TreePtr<Node> ptr_arch = px->MakeValueArchitype();
             // Stick that in your pipe + smoke it
-            query.RegisterNormalLink( GetPointer(), ptr_arch );            
+            query.RegisterNormalLink( GetPointer(), ptr_arch ); // Generated Link (one-to-one with X)  
         }
     }
     if(!found_one_already)
@@ -62,7 +62,7 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         // so simulate a link that allows anything (because in fact
         // you can replace the root node with anything).
         TreePtr<Node> node( new Node );
-        query.RegisterNormalLink( GetPointer(), node );	
+        query.RegisterNormalLink( GetPointer(), node );	// Singular Link
     }
 #endif
 }

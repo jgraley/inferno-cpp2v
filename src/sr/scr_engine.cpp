@@ -207,8 +207,8 @@ void SCREngine::KeyReplaceNodes( const Conjecture &conj,
     FOREACH( Agent *a, *my_agents )
     {
 		TRACE(*a)(coupling_keys->IsExist( a )?" is in coupling_keys ":" is not in coupling_keys")
-		     (a->GetCoupled()?" and is self-coupled\n":" and is not self-coupled\n");
-        if( coupling_keys->IsExist( a ) && !a->GetCoupled() )
+		     (a->GetKey()?" and is self-coupled\n":" and is not self-coupled\n");
+        if( coupling_keys->IsExist( a ) && !a->GetKey() )
             a->KeyReplace(coupling_keys->at(a), conj.GetChoices(a));
 	}
     TRACE("OK\n");
@@ -228,8 +228,8 @@ void SCREngine::GatherCouplings( CouplingMap *coupling_keys ) const
 {
 	// Get couplings from agents into the supplied map if not there already
     FOREACH( Agent *a, *my_agents )
-        if( a->GetCoupled() && !coupling_keys->IsExist( a ) )
-            (*coupling_keys)[a] = a->GetCoupled();	
+        if( a->GetKey() && !coupling_keys->IsExist( a ) )
+            (*coupling_keys)[a] = a->GetKey();	
 }
 
 

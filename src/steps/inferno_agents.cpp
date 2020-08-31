@@ -96,7 +96,7 @@ shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
     auto pq = make_shared<PatternQuery>();
 	pq->RegisterNormalLink( terminus );
 	if( depth )
-		pq->RegisterNormalLink( depth );
+		pq->RegisterNormalLink( depth ); 
     return pq;
 }
 
@@ -117,13 +117,13 @@ void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     } 
             
     // Compare the last position with the terminus pattern
-    query.RegisterNormalLink( terminus, xt );
+    query.RegisterNormalLink( terminus, xt ); // Link into X
     
     // Compare the depth with the supplied pattern if present
     if( depth )
     {
         TreePtr<Node> cur_depth( new SpecificString(s) );
-        query.RegisterNormalLink( depth, cur_depth );
+        query.RegisterNormalLink( depth, cur_depth );  // Generated Link (string)
     }
 }    
 
@@ -162,7 +162,7 @@ TreePtr<Node> NestedSubscriptLookup::Advance( TreePtr<Node> x,
 TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
 	INDENT("%");
-	if( !GetCoupled() )
+	if( !GetKey() )
 	{
 		ASSERT( container );
 		TreePtr<Node> n = AsAgent( container )->BuildReplace();
@@ -171,7 +171,7 @@ TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode )
 		ASSERT( n_container );
 		int size = n_container->size();
 		keynode = MakePatternPtr<SpecificInteger>(size);
-		DoKey( keynode );
+		SetKey( keynode );
 	}
 	// Note that the keynode could have been set via coupling - but still not
 	// likely to do anything sensible, so explicitly check
@@ -193,7 +193,7 @@ void IsLabelReached::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 	// y is nominally the goto expression, coupled in
 	FlushCache();
 	
-	TreePtr<Node> n = AsAgent(pattern)->GetCoupled(); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
+	TreePtr<Node> n = AsAgent(pattern)->GetKey(); // TODO a templates version that returns same type as pattern, so we don't need to convert here?
 	if( !n )
 		n = pattern;
 	TreePtr<Expression> y = dynamic_pointer_cast<Expression>( n );
