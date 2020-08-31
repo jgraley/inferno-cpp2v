@@ -48,7 +48,7 @@ public:
     void ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, Agent *current_agent );
 
     void CompareLinks( shared_ptr<const DecidedQuery> query );
-    void CompareEvaluatorLinks( shared_ptr<const DecidedQuery> query,
+    void CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > record,
 							    const CouplingMap *coupling_keys );
     void DecidedCompare( Agent *agent,
                          TreePtr<Node> x );
@@ -72,7 +72,7 @@ private:
     CouplingMap my_keys; 
     const CouplingMap *master_keys;
     Set<Agent *> reached; 
-    Set< shared_ptr<const DecidedQuery> > evaluator_queries;   
+    Set< pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > > evaluator_records;   
     Set< shared_ptr<const DecidedQuery::Link> > abnormal_links; 
     Set< shared_ptr<const DecidedQuery::Link> > multiplicity_links;
 };

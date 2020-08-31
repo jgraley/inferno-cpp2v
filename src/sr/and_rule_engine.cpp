@@ -102,16 +102,15 @@ void AndRuleEngine::CompareLinks( shared_ptr<const DecidedQuery> query )
 // - Abnormal links will be collected up and submitted to the evaluator functor.
 // - Normal and multiplicity links will be handled as usual. 
 
-void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const DecidedQuery> query,
+void AndRuleEngine::CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > record,
 							               const CouplingMap *coupling_keys ) 
 {
-	ASSERT( query->GetEvaluator() );
-    ASSERT( query->GetNormalLinks()->empty() )("When an evaluator is used, all links must be into abnormal contexts");
+	ASSERT( record.first );
 
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
     list<bool> compare_results;
-    FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetAbnormalLinks() )
+    FOREACH( shared_ptr<const DecidedQuery::Link> l, record.second )
     {
         // Don't let this link go into the general AND-rule
         abnormal_links.erase( l ); 
@@ -134,7 +133,7 @@ void AndRuleEngine::CompareEvaluatorLinks( shared_ptr<const DecidedQuery> query,
         i++;
     }
     
-    shared_ptr<BooleanEvaluator> evaluator = query->GetEvaluator();
+    shared_ptr<BooleanEvaluator> evaluator = record.first;
 	TRACE(" Evaluating ");
 	FOREACH(bool b, compare_results)
 	    TRACE(b)(" ");
@@ -194,13 +193,13 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 
     // Use worker functions to go through the links, special case if there is evaluator
     if( query->GetEvaluator() )
-    {
-        evaluator_queries.insert(query);
+    {        
+        evaluator_records.insert( make_pair( query->GetEvaluator(), *query->GetAbnormalLinks() ) );
 	}
-    {
-		TRACE(*agent)("?=")(*x)(" Comparing links\n");
-        CompareLinks( query );
-	}
+
+    TRACE(*agent)("?=")(*x)(" Comparing links\n");
+    CompareLinks( query );
+
     TRACE("OK\n");
 }
 
@@ -263,7 +262,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
         // Grab the side info into our containers
         abnormal_links = side_info.abnormal_links;
         multiplicity_links = side_info.multiplicity_links;
-        evaluator_queries = side_info.evaluator_queries;
+        evaluator_records = side_info.evaluator_records;
 #endif
         try
         {
@@ -278,7 +277,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             reached.clear();
             abnormal_links.clear();
             multiplicity_links.clear();
-            evaluator_queries.clear();
+            evaluator_records.clear();
             DecidedCompare( root_agent, start_x );
 #endif
             CouplingMap combined_keys = MapUnion( *master_keys, my_keys );     
@@ -288,10 +287,10 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // which ensures all the couplings have been keyed already.
             // Examples are MatchAny and NotMatch (but not MatchAll, because MatchAll conforms with
             // the global and-rule and so its children can key couplings.
-            for( shared_ptr<const DecidedQuery> query : evaluator_queries )
+            for( pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > record : evaluator_records )
             {
                 //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
-                CompareEvaluatorLinks( query, &combined_keys );
+                CompareEvaluatorLinks( record, &combined_keys );
             }
 
             // Process the free abnormal links.

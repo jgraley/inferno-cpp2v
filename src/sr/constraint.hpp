@@ -13,13 +13,14 @@
 namespace SR
 {
 class Agent;
+class BooleanEvaluator;
 }
 
 namespace CSP
 { 
 struct SideInfo
 {
-    Set< shared_ptr<const SR::DecidedQuery> > evaluator_queries;   
+    Set< pair< shared_ptr<SR::BooleanEvaluator>, SR::DecidedQuery::Links > > evaluator_records;   
     Set< shared_ptr<const SR::DecidedQuery::Link> > abnormal_links; 
     Set< shared_ptr<const SR::DecidedQuery::Link> > multiplicity_links;
 };

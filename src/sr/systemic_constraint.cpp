@@ -123,7 +123,7 @@ bool SystemicConstraint::Test( list< Value > values,
             
         // Stolen from AndRuleEngine::DecidedCompare()
         if( query->GetEvaluator() )
-            side_info->evaluator_queries.insert(query);
+            side_info->evaluator_records.insert( make_pair( query->GetEvaluator(), *query->GetAbnormalLinks() ) );
     }
     
     return true;
