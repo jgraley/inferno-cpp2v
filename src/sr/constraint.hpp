@@ -21,7 +21,7 @@ struct SideInfo
 {
     Set< shared_ptr<const SR::DecidedQuery> > evaluator_queries;   
     Set< shared_ptr<const SR::DecidedQuery::Link> > abnormal_links; 
-    Set< pair< shared_ptr<const SR::DecidedQuery>, shared_ptr<const SR::DecidedQuery::Link> > > multiplicity_links;
+    Set< shared_ptr<const SR::DecidedQuery::Link> > multiplicity_links;
 };
 
 /**

@@ -77,7 +77,7 @@ void AndRuleEngine::CompareLinks( shared_ptr<const DecidedQuery> query )
         abnormal_links.insert( l ); 
         
     FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetMultiplicityLinks() )
-        multiplicity_links.insert( make_pair(query, l) ); 
+        multiplicity_links.insert( l ); 
     
     int i=0;        
     FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetNormalLinks() )
@@ -304,11 +304,11 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
 
             // Process the free multiplicity links.
             int i=0;
-            for( std::pair< shared_ptr<const DecidedQuery>, shared_ptr<const DecidedQuery::Link> > lp : multiplicity_links )
+            for( shared_ptr<const DecidedQuery::Link> lp : multiplicity_links )
             {            
-                AndRuleEngine &e = my_multiplicity_engines.at(lp.second->agent);
+                AndRuleEngine &e = my_multiplicity_engines.at(lp->agent);
 
-                TreePtr<Node> x = lp.second->x;
+                TreePtr<Node> x = lp->x;
                 ASSERT( x );
                 ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
                 ASSERT(xc)("Multiplicity x must implement ContainerInterface");
