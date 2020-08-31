@@ -1,5 +1,5 @@
-#ifndef CONSTRAINT
-#define CONSTRAINT
+#ifndef CONSTRAINT_HPP
+#define CONSTRAINT_HPP
 
 #include "query.hpp"
 

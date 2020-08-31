@@ -1,5 +1,5 @@
-#ifndef SIMPLE_SOLVER
-#define SIMPLE_SOLVER
+#ifndef SIMPLE_SOLVER_HPP
+#define SIMPLE_SOLVER_HPP
 
 #include "constraint.hpp"
 
@@ -10,6 +10,7 @@ namespace CSP
 { 
     
 class Agent;
+class SolverHolder;
     
 /** A simple back-tracking solver
  */
@@ -18,10 +19,7 @@ class SimpleSolver
 public:
     SimpleSolver( const list< shared_ptr<Constraint> > &constraints_ );
 
-    void Start( const set<Value> &initial_domain_ );
-
-    bool GetNextSolution( map< shared_ptr<Constraint>, list< Value > > *values = nullptr, 
-                          SideInfo *side_info = nullptr );
+    void Run( SolverHolder *holder, const set<Value> &initial_domain_ );
 
 private:
     typedef map<VariableId, Value> Assignments;
@@ -31,8 +29,12 @@ private:
     bool TryVariable( list<VariableId>::const_iterator current );
     bool Test( map<VariableId, Value> &assigns, 
                SideInfo *side_info = nullptr );
-    list<Value> GetConstraintValues( shared_ptr<Constraint> c, const Assignments &a );
+    list<Value> GetConstraintValues( shared_ptr<Constraint> c, const Assignments &a );    
+    void ReportSolution( const Assignments &assignments, 
+                         shared_ptr<SideInfo> side_info );
     
+    SolverHolder *holder;
+        
     // Set by constructor - depends on pattern only
     const list< shared_ptr<Constraint> > constraints;
     const list<VariableId> variables;
@@ -40,9 +42,6 @@ private:
     // Used during solve - depends on pattern and x
     set<Value> initial_domain;    
     Assignments assignments;
-    
-    // Only needed to reserialise the matches TODO move to "holder" class
-    list< pair<Assignments, shared_ptr<SideInfo> > > matches;
 };
 
 };

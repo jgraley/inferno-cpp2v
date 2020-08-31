@@ -41,7 +41,8 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
         my_constraints[a] = c;    
         constraints.push_back(c);
     }
-    solver = make_shared<CSP::SimpleSolver>(constraints);
+    salg = make_shared<CSP::SimpleSolver>(constraints);
+    solver = make_shared<CSP::SolverHolder>(salg);
 #else
     conj = make_shared<Conjecture>();
     conj->Configure(my_agents, root_agent);

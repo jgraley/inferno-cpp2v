@@ -1,5 +1,5 @@
-#ifndef SYSTEMIC_CONSTRAINT
-#define SYSTEMIC_CONSTRAINT
+#ifndef SYSTEMIC_CONSTRAINT_HPP
+#define SYSTEMIC_CONSTRAINT_HPP
 
 #include "constraint.hpp"
 

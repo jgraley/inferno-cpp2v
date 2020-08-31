@@ -1,4 +1,5 @@
 #include "simple_solver.hpp"
+#include "solver_holder.hpp"
 #include "query.hpp"
 #include "agent.hpp"
 
@@ -14,8 +15,9 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_ )
 }
 
 
-void SimpleSolver::Start( const set< TreePtr<Node> > &initial_domain_ )
+void SimpleSolver::Run( SolverHolder *holder_, const set< TreePtr<Node> > &initial_domain_ )
 {
+    holder = holder_;
     initial_domain = initial_domain_;
 
     assignments.clear();
@@ -23,30 +25,8 @@ void SimpleSolver::Start( const set< TreePtr<Node> > &initial_domain_ )
     {
         assignments[v] = NullValue; // means "unassigned"
     }
-    matches.clear();
     
     TryVariable( variables.begin() );    
-}
-
-
-bool SimpleSolver::GetNextSolution( map< shared_ptr<Constraint>, list< Value > > *values, 
-                                    SideInfo *side_info )
-{
-    if( matches.empty() )
-        return false;
-    if( values )
-    {
-        values->clear();
-        for( shared_ptr<Constraint> c : constraints )
-        {
-            (*values)[c] = GetConstraintValues(c, matches.front().first);
-            ASSERT( values->at(c).size() == c->GetDegree() ); // Assignments should be complete
-        }
-    }
-    if( side_info )
-        *side_info = *matches.front().second;
-    matches.pop_front();
-    return true;
 }
 
 
@@ -87,10 +67,9 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
             continue; // backtrack
             
         if( complete )
-            matches.push_back( make_pair(assignments, side_info) );
+            ReportSolution( assignments, side_info );
         else
             TryVariable( next );
-
     }
     return false;
 
@@ -129,3 +108,19 @@ list<Value> SimpleSolver::GetConstraintValues( shared_ptr<Constraint> c, const A
     }    
     return vals;
 }
+
+
+void SimpleSolver::ReportSolution( const Assignments &assignments, 
+                                   shared_ptr<SideInfo> side_info )
+{
+    map< shared_ptr<Constraint>, list< Value > > vals;
+    vals.clear();
+    for( shared_ptr<Constraint> c : constraints )
+    {
+        vals[c] = GetConstraintValues(c, assignments);
+        ASSERT( vals.at(c).size() == c->GetDegree() ); // Assignments should be complete
+    }
+    
+    holder->ReportSolution( vals, side_info );
+}                     
+
