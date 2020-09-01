@@ -11,7 +11,16 @@ namespace CSP
     
 class SolverHolderReportInterface;
     
-/** Interface class for constraint problem solvers
+/** Interface class for constraint problem solvers. 
+ * 
+ * This class is unstated - i.e.
+ * it insists on doing an entire problem-solve in a single method call (called
+ * `Run()`). It's not sufficient to merely throw an exception on a hit to 
+ * simplify unwind, since it's likely to produce multiple solutions and we 
+ * may not be able to use the first (eg a sub-engine mismatches). So we 
+ * provide an observer interface and leave it to that class's implementation 
+ * to "just deal with it". This class has no idea how that will happen
+ * but hopes it will be both fun and safe.
  */
 class Solver
 {
@@ -19,7 +28,7 @@ public:
     /**
      * Interface presented to Solver objects for discovered solution reportage.
      */    
-    class ReportageInterface
+    class ReportageObserver
     {
     public:
         /**
@@ -57,7 +66,7 @@ public:
      * 
      * @param initial_domain [in] the domain for all the variables, could get expanded depending on the solver algorithm.
      */
-    virtual void Run( ReportageInterface *holder, 
+    virtual void Run( ReportageObserver *holder, 
                       const set<Value> &initial_domain ) = 0;
 };
 

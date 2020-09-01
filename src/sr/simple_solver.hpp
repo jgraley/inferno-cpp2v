@@ -20,7 +20,7 @@ class SimpleSolver : public Solver
 public:
     SimpleSolver( const list< shared_ptr<Constraint> > &constraints );
 
-    void Run( ReportageInterface *holder, const set<Value> &initial_domain );
+    void Run( ReportageObserver *holder, const set<Value> &initial_domain );
 
 private:
     typedef map<VariableId, Value> Assignments;
@@ -34,7 +34,7 @@ private:
     void ReportSolution( const Assignments &assignments, 
                          shared_ptr<SideInfo> side_info );
     
-    ReportageInterface *holder;
+    ReportageObserver *holder;
         
     // Set by constructor - depends on pattern only
     const list< shared_ptr<Constraint> > constraints;

@@ -16,7 +16,7 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_ )
 }
 
 
-void SimpleSolver::Run( ReportageInterface *holder_, const set< TreePtr<Node> > &initial_domain_ )
+void SimpleSolver::Run( ReportageObserver *holder_, const set< TreePtr<Node> > &initial_domain_ )
 {
     ASSERT(holder==nullptr)("You can bind a solver to more than one holder, but you obviously can't overlap their Run()s, stupid.");
     holder = holder_;
