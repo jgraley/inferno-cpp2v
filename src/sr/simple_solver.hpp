@@ -2,6 +2,7 @@
 #define SIMPLE_SOLVER_HPP
 
 #include "constraint.hpp"
+#include "solver.hpp"
 
 #include "node/node.hpp"
 #include "common/common.hpp"
@@ -14,12 +15,12 @@ class SolverHolder;
     
 /** A simple back-tracking solver
  */
-class SimpleSolver
+class SimpleSolver : public Solver
 {
 public:
-    SimpleSolver( const list< shared_ptr<Constraint> > &constraints_ );
+    SimpleSolver( const list< shared_ptr<Constraint> > &constraints );
 
-    void Run( SolverHolder *holder, const set<Value> &initial_domain_ );
+    void Run( ReportageInterface *holder, const set<Value> &initial_domain );
 
 private:
     typedef map<VariableId, Value> Assignments;
@@ -33,7 +34,7 @@ private:
     void ReportSolution( const Assignments &assignments, 
                          shared_ptr<SideInfo> side_info );
     
-    SolverHolder *holder;
+    ReportageInterface *holder;
         
     // Set by constructor - depends on pattern only
     const list< shared_ptr<Constraint> > constraints;

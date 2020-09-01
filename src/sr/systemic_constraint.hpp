@@ -32,13 +32,12 @@ public:
      */
     explicit SystemicConstraint( SR::Agent *agent_ );
     
-    // Documented in the base class
+private:
     int GetDegree() const;
     list<VariableId> GetVariables() const;
     bool Test( list< TreePtr<Node> > values, 
                SideInfo *side_info = nullptr );
         
-private:
     class NormalLinkMismatch : public ::Mismatch
     {
     };

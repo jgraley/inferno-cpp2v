@@ -1,5 +1,6 @@
 #include "systemic_constraint.hpp"
 #include "simple_solver.hpp"
+#include "solver_holder.hpp"
 #include "scr_engine.hpp"
 #include "search_replace.hpp"
 #include "conjecture.hpp"
@@ -41,7 +42,7 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
         my_constraints[a] = c;    
         constraints.push_back(c);
     }
-    salg = make_shared<CSP::SimpleSolver>(constraints);
+    auto salg = make_shared<CSP::SimpleSolver>(constraints);
     solver = make_shared<CSP::SolverHolder>(salg);
 #else
     conj = make_shared<Conjecture>();

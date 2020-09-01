@@ -1,5 +1,5 @@
 #include "solver_holder.hpp"
-#include "simple_solver.hpp"
+#include "solver.hpp"
 #include "query.hpp"
 #include "agent.hpp"
 
@@ -8,7 +8,7 @@
 using namespace CSP;
 
 
-SolverHolder::SolverHolder( shared_ptr<SimpleSolver> solver_ ) :
+SolverHolder::SolverHolder( shared_ptr<Solver> solver_ ) :
     solver( solver_ )
 {
 }

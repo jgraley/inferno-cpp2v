@@ -12,7 +12,7 @@
 
 namespace CSP
 {
-class SimpleSolver;
+class SolverHolder;
 class Constraint;
 };
     
@@ -68,7 +68,7 @@ private:
     map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
     
     shared_ptr<Conjecture> conj;
-    shared_ptr<CSP::SimpleSolver> solver;
+    shared_ptr<CSP::SolverHolder> solver;
     CouplingMap my_keys; 
     const CouplingMap *master_keys;
     Set<Agent *> reached; 

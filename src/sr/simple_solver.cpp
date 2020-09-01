@@ -9,14 +9,16 @@ using namespace CSP;
 
 
 SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_ ) :
+    holder(nullptr),
     constraints(constraints_),
     variables(DeduceVariables(constraints))
 {
 }
 
 
-void SimpleSolver::Run( SolverHolder *holder_, const set< TreePtr<Node> > &initial_domain_ )
+void SimpleSolver::Run( ReportageInterface *holder_, const set< TreePtr<Node> > &initial_domain_ )
 {
+    ASSERT(holder==nullptr)("You can bind a solver to more than one holder, but you obviously can't overlap their Run()s, stupid.");
     holder = holder_;
     initial_domain = initial_domain_;
 
@@ -27,6 +29,8 @@ void SimpleSolver::Run( SolverHolder *holder_, const set< TreePtr<Node> > &initi
     }
     
     TryVariable( variables.begin() );    
+
+    holder = nullptr;
 }
 
 

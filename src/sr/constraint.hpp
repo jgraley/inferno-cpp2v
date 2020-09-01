@@ -48,6 +48,9 @@ const Value NullValue;
 class Constraint
 {
 public:
+    Constraint() {}
+    virtual ~Constraint() {}
+
     /**
      * Get the degree of the constraint.
      * 
