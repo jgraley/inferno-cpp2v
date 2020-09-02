@@ -60,7 +60,7 @@ bool SystemicConstraint::Test( list< Value > values,
     // is being moved around the X tree).
     TreePtr<Node> x = values.front();
     values.pop_front();
-    shared_ptr<SR::DecidedQuery> query;
+    shared_ptr<SR::DecidedQuery> query; 
     
     // All the other values are normal links. These degrees of freedom
     // will be a mixture of (a) depending on our our decisions or (b)

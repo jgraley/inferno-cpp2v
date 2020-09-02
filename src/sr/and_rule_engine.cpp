@@ -35,6 +35,14 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
         pae.second.Configure( pae.first, surrounding_agents );
 
 #ifdef USE_SOLVER
+    if( my_agents.empty() ) 
+        return;  // Early-out on trivial problems: TODO do for conjecture mode too; see #126
+
+    list<Agent *> normal_agents_ordered;
+    set<Agent *> master_boundary_agents;
+    
+    ConfigPopulateForSolver(&normal_agents_ordered, &master_boundary_agents, root_agent, master_agents);
+
     list< shared_ptr<CSP::Constraint> > constraints;
     for( Agent *a : my_agents )
     {
@@ -42,7 +50,11 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
         my_constraints[a] = c;    
         constraints.push_back(c);
     }
-    auto salg = make_shared<CSP::SimpleSolver>(constraints);
+    // Passing in normal_agents_ordered will force SimpleSolver's backtracker to
+    // take the same route we do with DecidedCompare(). Note that master agents
+    // have not been removed from this list - it's easier if solver knows about 
+    // them and we constrain their values explicitly.
+    auto salg = make_shared<CSP::SimpleSolver>(constraints, &normal_agents_ordered);
     solver = make_shared<CSP::SolverHolder>(salg);
 #else
     conj = make_shared<Conjecture>();
@@ -51,8 +63,40 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
 }
 
 
-void AndRuleEngine::ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, Agent *current_agent )
+void AndRuleEngine::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
+                                             set<Agent *> *master_boundary_agents, 
+                                             Agent *current_agent,
+                                             const Set<Agent *> &master_agents )
 {
+    // Ignore repeated hits
+    if( find(normal_agents_ordered->begin(), normal_agents_ordered->end(), current_agent) != normal_agents_ordered->end() )
+        return; 
+
+    if( master_agents.count( current_agent ) > 0 )
+    {
+        normal_agents_ordered->push_back( current_agent );
+        // It's a master boundary variable/agent because:
+        // 1. It's a master agent
+        // 2. It's not the child of a master agent (we don't recurse on them)
+        // See #125
+        master_boundary_agents->insert( current_agent );
+    }
+    else
+    {
+        normal_agents_ordered->push_back( current_agent );
+        shared_ptr<PatternQuery> pq = current_agent->GetPatternQuery();
+        FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
+            ConfigPopulateForSolver( normal_agents_ordered, master_boundary_agents, b->agent, master_agents );        
+    }
+}
+
+
+void AndRuleEngine::ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, 
+                                                Agent *current_agent )
+{
+    if( normal_agents->count(current_agent) != 0 )
+        return; // Only act on couplings the first time they are reached
+    
     normal_agents->insert(current_agent);
     
     shared_ptr<PatternQuery> pq = current_agent->GetPatternQuery();

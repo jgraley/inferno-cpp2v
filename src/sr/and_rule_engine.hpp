@@ -45,8 +45,13 @@ public:
     };
     
     void Configure( Agent *root_agent, const Set<Agent *> &master_agents);
-    void ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, Agent *current_agent );
-
+    void ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
+                                  set<Agent *> *master_boundary_agents, 
+                                  Agent *current_agent,
+                                  const Set<Agent *> &master_agents );
+    void ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, 
+                                     Agent *current_agent );
+                                     
     void CompareLinks( shared_ptr<const DecidedQuery> query );
     void CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > record,
 							    const CouplingMap *coupling_keys );

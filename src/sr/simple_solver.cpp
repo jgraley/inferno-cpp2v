@@ -5,13 +5,15 @@
 
 #include <algorithm>
 
+#define MATCH_OLD_VARIABLE_ORDERING
+
 using namespace CSP;
 
-
-SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_ ) :
+SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_, 
+                            const list<VariableId> *variables_ ) :
     holder(nullptr),
     constraints(constraints_),
-    variables(DeduceVariables(constraints))
+    variables( DeduceVariables(constraints, variables_) )
 {
 }
 
@@ -34,20 +36,39 @@ void SimpleSolver::Run( ReportageObserver *holder_, const set< TreePtr<Node> > &
 }
 
 
-list<VariableId> SimpleSolver::DeduceVariables( const list< shared_ptr<Constraint> > &constraints )
+list<VariableId> SimpleSolver::DeduceVariables( const list< shared_ptr<Constraint> > &constraints, 
+                                                const list<VariableId> *variables_ )
 {
-    list<VariableId> variables;
+    list<VariableId> my_variables;
+    set<VariableId> variables_check_set;
+
     for( shared_ptr<Constraint> c : constraints )
     {
         list<VariableId> vars = c->GetVariables();
         
         for( VariableId v : vars )
         {
-            if( find(variables.begin(), variables.end(), v) == variables.end() )
-                variables.push_back( v );
+            if( variables_check_set.count(v) == 0 )
+            {
+                variables_check_set.insert( v );
+                if( variables_ == nullptr )
+                    my_variables.push_back( v ); 
+            }
         }
     }
-    return variables;
+    
+    if( variables_ == nullptr )
+    {
+        // No variables list was supplied, so return the one we generated
+        return my_variables;
+    }
+    else
+    {
+        // A variables list was supplied and it must have the same set of variables
+        for( VariableId v : *variables_ )
+            ASSERT( variables_check_set.count(v) == 1 );
+        return *variables_;
+    }
 }
 
 
