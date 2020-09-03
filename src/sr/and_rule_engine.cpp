@@ -198,13 +198,15 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     SimpleCompare sc;
     if( master_keys->IsExist(agent) )
     {               
-        sc( x, master_keys->At(agent) );
+        if( !sc( x, master_keys->At(agent) ) )
+            throw Mismatch();
         return;
     }
     // Check for a coupling match to one of our agents we reached earlier in this pass.
     else if( reached.IsExist(agent) )
     {
-        sc( x, my_keys.At(agent) );
+        if( !sc( x, my_keys.At(agent) ) )
+            throw Mismatch();
         return;
     }
 
@@ -278,7 +280,8 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
         SimpleCompare sc;
         try
         {
-            sc( start_x, master_keys_->at(root_agent) );
+            if( !sc( start_x, master_keys_->at(root_agent) ) )
+                throw Mismatch();
         }
         catch( const ::Mismatch& mismatch ) 
         {
