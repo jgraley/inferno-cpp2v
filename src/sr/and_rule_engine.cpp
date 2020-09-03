@@ -26,6 +26,9 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
     Set<Agent *> normal_agents;
     ConfigPopulateNormalAgents( &normal_agents, root_agent );    
     my_agents = SetDifference( normal_agents, master_agents );       
+    if( my_agents.empty() ) 
+        return;  // Early-out on trivial problems: TODO do for conjecture mode too; see #126
+
     Set<Agent *> surrounding_agents = SetUnion( master_agents, my_agents ); 
         
     for( std::pair<Agent * const, AndRuleEngine> &pae : my_abnormal_engines )
@@ -35,9 +38,6 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
         pae.second.Configure( pae.first, surrounding_agents );
 
 #ifdef USE_SOLVER
-    if( my_agents.empty() ) 
-        return;  // Early-out on trivial problems: TODO do for conjecture mode too; see #126
-
     list<Agent *> normal_agents_ordered;
     set<Agent *> master_boundary_agents;
     
@@ -272,6 +272,20 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
     ASSERT( start_x );
     TRACE("Compare x=")(*start_x);
     TRACE(" pattern=")(*root_agent);
+           
+    if( my_agents.empty() )
+    {
+        SimpleCompare sc;
+        try
+        {
+            sc( start_x, master_keys_->at(root_agent) );
+        }
+        catch( const ::Mismatch& mismatch ) 
+        {
+            throw NoSolution();
+        }
+        return;
+    }
            
     master_keys = master_keys_;    
 #ifdef USE_SOLVER
