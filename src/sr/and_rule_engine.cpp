@@ -116,6 +116,17 @@ void AndRuleEngine::ConfigPopulateNormalAgents( Set<Agent *> *normal_agents,
 }
 
 
+void AndRuleEngine::CompareCoupling( Agent *agent,
+                                     TreePtr<Node> x,
+                                     const CouplingMap *keys )
+{
+    // This function establishes the policy for couplings in one place.
+    // Today, it's SimpleCompare.
+    static SimpleCompare couplings_comparer;
+    if( !couplings_comparer( x, keys->At(agent) ) )
+        throw Mismatch();    
+}                                     
+
 void AndRuleEngine::CompareLinks( shared_ptr<const DecidedQuery> query ) 
 {
 
@@ -198,15 +209,13 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     SimpleCompare sc;
     if( master_keys->IsExist(agent) )
     {               
-        if( !sc( x, master_keys->At(agent) ) )
-            throw Mismatch();
+        CompareCoupling( agent, x, master_keys );
         return;
     }
     // Check for a coupling match to one of our agents we reached earlier in this pass.
     else if( reached.IsExist(agent) )
     {
-        if( !sc( x, my_keys.At(agent) ) )
-            throw Mismatch();
+        CompareCoupling( agent, x, &my_keys );
         return;
     }
 
@@ -275,13 +284,18 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
     TRACE("Compare x=")(*start_x);
     TRACE(" pattern=")(*root_agent);
            
+    master_keys = master_keys_;    
+
     if( my_agents.empty() )
     {
-        SimpleCompare sc;
+        // Trivial case: we have no agents, so there won't be any decisions
+        // and so no problem to solve. Spare all algorithms the hassle of 
+        // dealing with this. Root agent should have been keyed by master,
+        // otherwise it'd be in my_agents.
+        ASSERT( master_keys->count(root_agent) );
         try
-        {
-            if( !sc( start_x, master_keys_->at(root_agent) ) )
-                throw Mismatch();
+        {            
+            CompareCoupling( root_agent, start_x, master_keys );
         }
         catch( const ::Mismatch& mismatch ) 
         {
@@ -290,7 +304,6 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
         return;
     }
            
-    master_keys = master_keys_;    
 #ifdef USE_SOLVER
     set< TreePtr<Node> > domain;
 	Walk wx( start_x ); 
