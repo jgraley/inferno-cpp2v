@@ -46,8 +46,8 @@ public:
     
     void Configure( Agent *root_agent, const Set<Agent *> &master_agents);
     void ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
-                                  set<Agent *> *master_boundary_agents, 
-                                  Agent *current_agent,
+                                  Agent *agent,
+                                  Agent *parent_agent,
                                   const Set<Agent *> &master_agents );
     void ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, 
                                      Agent *current_agent );
@@ -55,10 +55,12 @@ public:
     void CompareCoupling( Agent *agent,
                           TreePtr<Node> x,
                           const CouplingMap *keys );
-    void CompareLinks( shared_ptr<const DecidedQuery> query );
+    void CompareLinks( Agent *agent,
+                       shared_ptr<const DecidedQuery> query );
     void CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > record,
 							    const CouplingMap *coupling_keys );
     void DecidedCompare( Agent *agent,
+                         Agent *parent_agent,
                          TreePtr<Node> x );
     void ExpandDomain( Agent *agent, set< TreePtr<Node> > &domain );
     void Compare( TreePtr<Node> start_x,
@@ -75,6 +77,7 @@ private:
     map< Agent *, AndRuleEngine > my_multiplicity_engines;
     map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
     set<Agent *> master_boundary_agents;
+    set< pair<Agent *, Agent *> > coupling_residuals;
     
     shared_ptr<Conjecture> conj;
     shared_ptr<CSP::SolverHolder> solver;

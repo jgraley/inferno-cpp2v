@@ -39,9 +39,11 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
 
     list<Agent *> normal_agents_ordered;
     master_boundary_agents.clear();    
+    coupling_residuals.clear();
+    reached.clear();
     ConfigPopulateForSolver(&normal_agents_ordered, 
-                            &master_boundary_agents, 
                             root_agent, 
+                            nullptr,
                             master_agents);
 
 #ifdef USE_SOLVER
@@ -66,30 +68,41 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
 
 
 void AndRuleEngine::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
-                                             set<Agent *> *master_boundary_agents, 
-                                             Agent *current_agent,
+                                             Agent *agent,
+                                             Agent *parent_agent,
                                              const Set<Agent *> &master_agents )
 {
-    // Ignore repeated hits
-    if( find(normal_agents_ordered->begin(), normal_agents_ordered->end(), current_agent) != normal_agents_ordered->end() )
-        return; 
+    if( master_agents.count( agent ) > 0 )
+    {
+        if( !reached.IsExist(agent) )
+        {
+            normal_agents_ordered->push_back( agent );
+            // It's a master boundary variable/agent because:
+            // 1. It's a master agent
+            // 2. It's not the child of a master agent (we don't recurse on them)
+            // See #125
+            master_boundary_agents.insert( agent );
+            reached.insert(agent);
+        }
+        return;
+    }
 
-    if( master_agents.count( current_agent ) > 0 )
+    // Ignore repeated hits
+    if( reached.IsExist(agent) )
     {
-        normal_agents_ordered->push_back( current_agent );
-        // It's a master boundary variable/agent because:
-        // 1. It's a master agent
-        // 2. It's not the child of a master agent (we don't recurse on them)
-        // See #125
-        master_boundary_agents->insert( current_agent );
+        ASSERT( parent_agent ); // Should not be reached if we're still only on root agent
+        auto link = make_pair(parent_agent, agent);
+        ASSERT( coupling_residuals.count(link) == 0 ); // See #129, can fail on legal patterns
+        coupling_residuals.insert( link );
+        return; 
     }
-    else
-    {
-        normal_agents_ordered->push_back( current_agent );
-        shared_ptr<PatternQuery> pq = current_agent->GetPatternQuery();
-        FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
-            ConfigPopulateForSolver( normal_agents_ordered, master_boundary_agents, b->agent, master_agents );        
-    }
+    
+    reached.insert(agent);
+    
+    normal_agents_ordered->push_back( agent );
+    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
+    FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
+        ConfigPopulateForSolver( normal_agents_ordered, b->agent, agent, master_agents );        
 }
 
 
@@ -129,9 +142,10 @@ void AndRuleEngine::CompareCoupling( Agent *agent,
         throw Mismatch();    
 }                                     
 
-void AndRuleEngine::CompareLinks( shared_ptr<const DecidedQuery> query ) 
-{
 
+void AndRuleEngine::CompareLinks( Agent *agent,
+                                  shared_ptr<const DecidedQuery> query ) 
+{
     FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetAbnormalLinks() )
         abnormal_links.insert( l ); 
         
@@ -152,14 +166,10 @@ void AndRuleEngine::CompareLinks( shared_ptr<const DecidedQuery> query )
         if( x.get() == (Node *)(l->agent) )
             continue; // Pattern nodes immediately match themselves
         
-        DecidedCompare(l->agent, x);   
+        DecidedCompare(l->agent, agent, x);   
     }
 }
 
-
-// New rules for evaluators:
-// - Abnormal links will be collected up and submitted to the evaluator functor.
-// - Normal and multiplicity links will be handled as usual. 
 
 void AndRuleEngine::CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > record,
 							               const CouplingMap *coupling_keys ) 
@@ -202,6 +212,7 @@ void AndRuleEngine::CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, D
 
 
 void AndRuleEngine::DecidedCompare( Agent *agent,
+                                    Agent *parent_agent,
                                     TreePtr<Node> x )  
 {
     INDENT(" ");
@@ -215,9 +226,12 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
         CompareCoupling( agent, x, master_keys );
         return;
     }
-    // Check for a coupling match to one of our agents we reached earlier in this pass.
-    else if( reached.IsExist(agent) )
+    // Are we at a coupling for not the first time.
+    if( reached.IsExist(agent) )
+    //if( coupling_residuals.count( make_pair(parent_agent, agent) ) > 0 ) // See #129
     {
+        ASSERT( reached.IsExist(agent) );
+        ASSERT( my_keys.IsExist(agent) );
         CompareCoupling( agent, x, &my_keys );
         return;
     }
@@ -258,7 +272,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 	}
 
     TRACE(*agent)("?=")(*x)(" Comparing links\n");
-    CompareLinks( query );
+    CompareLinks( agent, query );
 
     TRACE("OK\n");
 }
@@ -363,7 +377,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             abnormal_links.clear();
             multiplicity_links.clear();
             evaluator_records.clear();
-            DecidedCompare( root_agent, start_x );
+            DecidedCompare( root_agent, nullptr, start_x );
 #endif
             CouplingMap combined_keys = MapUnion( *master_keys, my_keys );     
                                                 
