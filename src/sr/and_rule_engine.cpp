@@ -37,12 +37,14 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
     for( std::pair<Agent * const, AndRuleEngine> &pae : my_multiplicity_engines )
         pae.second.Configure( pae.first, surrounding_agents );
 
-#ifdef USE_SOLVER
     list<Agent *> normal_agents_ordered;
-    set<Agent *> master_boundary_agents;
-    
-    ConfigPopulateForSolver(&normal_agents_ordered, &master_boundary_agents, root_agent, master_agents);
+    master_boundary_agents.clear();    
+    ConfigPopulateForSolver(&normal_agents_ordered, 
+                            &master_boundary_agents, 
+                            root_agent, 
+                            master_agents);
 
+#ifdef USE_SOLVER
     list< shared_ptr<CSP::Constraint> > constraints;
     for( Agent *a : my_agents )
     {
@@ -207,8 +209,9 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 
     // Check for a coupling match to a master engine's agent. 
     SimpleCompare sc;
-    if( master_keys->IsExist(agent) )
+    if( master_boundary_agents.count(agent) > 0 )
     {               
+        ASSERT( master_keys->IsExist(agent) );
         CompareCoupling( agent, x, master_keys );
         return;
     }

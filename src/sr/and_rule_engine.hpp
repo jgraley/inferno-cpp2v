@@ -74,6 +74,7 @@ private:
     map< Agent *, AndRuleEngine > my_abnormal_engines;
     map< Agent *, AndRuleEngine > my_multiplicity_engines;
     map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
+    set<Agent *> master_boundary_agents;
     
     shared_ptr<Conjecture> conj;
     shared_ptr<CSP::SolverHolder> solver;
