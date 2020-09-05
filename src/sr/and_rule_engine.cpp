@@ -206,7 +206,7 @@ void AndRuleEngine::CompareCoupling( Agent *agent,
     // This function establishes the policy for couplings in one place.
     // Today, it's SimpleCompare.
     static SimpleCompare couplings_comparer;
-    if( !couplings_comparer( x, keys->At(agent) ) )
+    if( !couplings_comparer( x, keys->at(agent) ) )
         throw Mismatch();    
 }                                     
 

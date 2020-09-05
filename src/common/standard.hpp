@@ -46,15 +46,6 @@ private:
 template< typename KEY, typename DATA >
 class Map : public map<KEY, DATA>
 {
-public:
-    // Tried to just do a const version of [], but it was getting called in
-    // non-const cases, which is crap because C++ should use the non-const one
-    // where it needs to.
-    const DATA& At(const KEY& k) const
-    {
-		typename map<KEY, DATA>::const_iterator cit = map<KEY, DATA>::find(k);
-		return (*cit).second;
-	}
 };
 
 
@@ -70,12 +61,6 @@ inline Map<KEY, DATA> MapUnion( const Map<KEY, DATA> m1, const Map<KEY, DATA> m2
     }
     return result; 
 }
-
-
-template< typename KEY, typename DATA >
-class MultiMap : public multimap<KEY, DATA>
-{
-};
 
 
 template< typename KEY >
