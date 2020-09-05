@@ -8,7 +8,7 @@ using namespace CSP;
 SystemicConstraint::SystemicConstraint( SR::Agent *agent_, 
                                         const set<SR::Agent *> &coupling_residuals_ ) :
     agent( agent_ ),
-    coupling_residuals( coupling_residuals_ ),
+    coupling_residual_links( coupling_residuals_ ),
     pq( agent->GetPatternQuery() ),
     conj( make_shared<SR::Conjecture>() ),
     simple_compare( make_shared<SimpleCompare>() )
@@ -92,7 +92,7 @@ bool SystemicConstraint::Test( list< Value > values,
             auto nit = nlinks->begin();            
             for( TreePtr<Node> val : values )
             {
-                if( coupling_residuals.count( (*nit)->agent ) )
+                if( coupling_residual_links.count( (*nit)->agent ) )
                 {
                     if( !(*simple_compare)( val, (*nit)->x ) )
                         throw CouplingResidualLinkMismatch();  

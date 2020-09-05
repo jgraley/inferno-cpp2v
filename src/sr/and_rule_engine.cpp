@@ -45,18 +45,20 @@ void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_ag
                              root_agent, 
                              master_agents );
 
-    coupling_keyers.clear();
-    coupling_residuals.clear();
+    coupling_keyer_links.clear();
+    coupling_residual_links.clear();
     ConfigDetermineKeyers( root_agent, nullptr, master_agents );
     ConfigDetermineResiduals( root_agent, nullptr, master_agents );
 #ifdef USE_SOLVER
     list< shared_ptr<CSP::Constraint> > constraints;
     for( Agent *a : my_agents )
     {
+        // This bit needs to be improved, see #131
         set<Agent *> cr;
-        for( auto p : coupling_residuals )
+        for( auto p : coupling_residual_links )
             if( p.first == a )
                 cr.insert( p.second );
+                
         shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( a, cr );
         my_constraints[a] = c;    
         constraints.push_back(c);
@@ -117,8 +119,8 @@ void AndRuleEngine::ConfigDetermineKeyersModuloMatchAny( Agent *agent,
     }
     else
     {
-        ASSERT( coupling_keyers.count(agent) == 0 );  // See #129, can fail on legal patterns - will also fail on illegal MatchAny couplings
-        coupling_keyers[agent] = parent_agent;
+        ASSERT( coupling_keyer_links.count(agent) == 0 );  // See #129, can fail on legal patterns - will also fail on illegal MatchAny couplings
+        coupling_keyer_links[agent] = parent_agent;
         senior_agents->insert( agent );
              
         shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
@@ -144,7 +146,7 @@ void AndRuleEngine::ConfigDetermineKeyers( Agent *agent,
     
     // Now do all the links under the MatchAny nodes' links. Keying is allowed in each
     // of these junior regions individually, but no cross-keying is allowed if not keyed already.
-    // Where that happens, there will be a conflict writing to coupling_keyers and the
+    // Where that happens, there will be a conflict writing to coupling_keyer_links and the
     // ASSERT will fail.
     for( Agent *ma_agent : my_matchany_agents )
     {
@@ -159,13 +161,13 @@ void AndRuleEngine::ConfigDetermineResiduals( Agent *agent,
                                               Agent *parent_agent,
                                               set<Agent *> master_agents )
 {
-    if( (coupling_keyers.count(agent) > 0 && 
-         coupling_keyers.at(agent) != parent_agent) ||
+    if( (coupling_keyer_links.count(agent) > 0 && 
+         coupling_keyer_links.at(agent) != parent_agent) ||
          master_agents.count(agent) > 0 )
     {
         auto link = make_pair(parent_agent, agent);
-        ASSERT( coupling_residuals.count(link) == 0 ); // See #129, can fail on legal patterns
-        coupling_residuals.insert(link);
+        ASSERT( coupling_residual_links.count(link) == 0 ); // See #129, can fail on legal patterns
+        coupling_residual_links.insert(link);
         return; 
     }
         
@@ -291,7 +293,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     ASSERT( x ); // Target must not be NULL
 
     // Are we at a residual coupling?
-    if( coupling_residuals.count( make_pair(parent_agent, agent) ) > 0 ) // See #129
+    if( coupling_residual_links.count( make_pair(parent_agent, agent) ) > 0 ) // See #129
     {
         const CouplingMap *keys;
         if( master_boundary_agents.count(agent) > 0 )
@@ -392,6 +394,10 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
 	Walk wx( start_x ); 
 	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
         domain.insert(*wx_it);
+    
+    CouplingMap forces = *master_keys;
+    forces[root_agent] = start_x;
+    // TODO use the forces #125
     
     // Expand the domain to include generated child y nodes.
     ExpandDomain( root_agent, domain );

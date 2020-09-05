@@ -32,10 +32,10 @@ public:
      * 
      * @param agent the agent from which the constraint will be created.
      * 
-     * @param coupling_residuals the linked agents that should be tested using SimpleCompare
+     * @param coupling_residual_links the linked agents that should be tested using SimpleCompare
      */
     explicit SystemicConstraint( SR::Agent *agent, 
-                                 const set<SR::Agent *> &coupling_residuals );
+                                 const set<SR::Agent *> &coupling_residual_links );
     
 private:
     int GetDegree() const;
@@ -51,7 +51,7 @@ private:
     };
 
     SR::Agent * const agent;
-    const set<SR::Agent *> coupling_residuals;
+    const set<SR::Agent *> coupling_residual_links;
     const shared_ptr<SR::PatternQuery> pq;
     const shared_ptr<SR::Conjecture> conj;
     const shared_ptr<SimpleCompare> simple_compare;

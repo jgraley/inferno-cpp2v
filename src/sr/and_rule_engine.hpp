@@ -86,8 +86,8 @@ private:
     map< Agent *, AndRuleEngine > my_multiplicity_engines;
     map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
     set<Agent *> master_boundary_agents;
-    map< Agent *, Agent * > coupling_keyers;
-    set< pair<Agent *, Agent *> > coupling_residuals;
+    map< Agent *, Agent * > coupling_keyer_links; // maps from child to parent
+    set< pair<Agent *, Agent *> > coupling_residual_links;
     
     shared_ptr<Conjecture> conj;
     shared_ptr<CSP::SolverHolder> solver;
