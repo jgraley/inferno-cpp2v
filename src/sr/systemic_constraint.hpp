@@ -15,6 +15,8 @@ namespace SR
 class Conjecture;    
 }
 
+class SimpleCompare;
+
 namespace CSP
 { 
 
@@ -28,9 +30,12 @@ public:
      * 
      * The constraint is permanently associated with the supplied agent.
      * 
-     * @param agnet_ the agent from which the constraint will be created.
+     * @param agent the agent from which the constraint will be created.
+     * 
+     * @param coupling_residuals the linked agents that should be tested using SimpleCompare
      */
-    explicit SystemicConstraint( SR::Agent *agent_ );
+    explicit SystemicConstraint( SR::Agent *agent, 
+                                 const set<SR::Agent *> &coupling_residuals );
     
 private:
     int GetDegree() const;
@@ -41,10 +46,15 @@ private:
     class NormalLinkMismatch : public ::Mismatch
     {
     };
+    class CouplingResidualLinkMismatch : public ::Mismatch
+    {
+    };
 
     SR::Agent * const agent;
+    const set<SR::Agent *> coupling_residuals;
     const shared_ptr<SR::PatternQuery> pq;
     const shared_ptr<SR::Conjecture> conj;
+    const shared_ptr<SimpleCompare> simple_compare;
 };
 
 };

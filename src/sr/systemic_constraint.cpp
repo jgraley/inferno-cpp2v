@@ -1,13 +1,17 @@
 #include "systemic_constraint.hpp"
 #include "query.hpp"
 #include "agent.hpp"
+#include "helpers/simple_compare.hpp"
 
 using namespace CSP;
 
-SystemicConstraint::SystemicConstraint( SR::Agent *agent_ ) :
-    agent(agent_),
+SystemicConstraint::SystemicConstraint( SR::Agent *agent_, 
+                                        const set<SR::Agent *> &coupling_residuals_ ) :
+    agent( agent_ ),
+    coupling_residuals( coupling_residuals_ ),
     pq( agent->GetPatternQuery() ),
-    conj( make_shared<SR::Conjecture>() )
+    conj( make_shared<SR::Conjecture>() ),
+    simple_compare( make_shared<SimpleCompare>() )
 {    
     Set<SR::Agent *> my_agents;
     my_agents.insert( agent ); // just the one agent this time
@@ -86,10 +90,18 @@ bool SystemicConstraint::Test( list< Value > values,
             auto nlinks = query->GetNormalLinks();
             ASSERT( nlinks->size() == values.size() );
             auto nit = nlinks->begin();            
-            for( TreePtr<Node> child_x : values )
+            for( TreePtr<Node> val : values )
             {
-                if( child_x != (*nit)->x )
-                    throw NormalLinkMismatch();  
+                if( coupling_residuals.count( (*nit)->agent ) )
+                {
+                    if( !(*simple_compare)( val, (*nit)->x ) )
+                        throw CouplingResidualLinkMismatch();  
+                }
+                else
+                {
+                    if( val != (*nit)->x )
+                        throw NormalLinkMismatch();  
+                }
                 nit++;
             }
         }

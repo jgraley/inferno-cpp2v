@@ -40,19 +40,24 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
 
     list<Agent *> normal_agents_ordered;
     master_boundary_agents.clear();    
-    coupling_residuals.clear();
     reached.clear();
     ConfigPopulateForSolver( &normal_agents_ordered, 
                              root_agent, 
                              master_agents );
 
+    coupling_keyers.clear();
+    coupling_residuals.clear();
     ConfigDetermineKeyers( root_agent, nullptr, master_agents );
     ConfigDetermineResiduals( root_agent, nullptr, master_agents );
 #ifdef USE_SOLVER
     list< shared_ptr<CSP::Constraint> > constraints;
     for( Agent *a : my_agents )
     {
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( a );
+        set<Agent *> cr;
+        for( auto p : coupling_residuals )
+            if( p.first == a )
+                cr.insert( p.second );
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( a, cr );
         my_constraints[a] = c;    
         constraints.push_back(c);
     }
@@ -73,25 +78,20 @@ void AndRuleEngine::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordere
                                              Agent *agent,
                                              const Set<Agent *> &master_agents )
 {
+    // Ignore repeated hits
+    if( reached.IsExist(agent) )    
+        return; 
+
     if( master_agents.count( agent ) > 0 )
     {
-        if( !reached.IsExist(agent) )
-        {
-            normal_agents_ordered->push_back( agent );
-            // It's a master boundary variable/agent because:
-            // 1. It's a master agent
-            // 2. It's not the child of a master agent (we don't recurse on them)
-            // See #125
-            master_boundary_agents.insert( agent );
-            reached.insert(agent);
-        }
+        normal_agents_ordered->push_back( agent );
+        // It's a master boundary variable/agent because:
+        // 1. It's a master agent
+        // 2. It's not the child of a master agent (we don't recurse on them)
+        // See #125
+        master_boundary_agents.insert( agent );
+        reached.insert(agent);
         return;
-    }
-
-    // Ignore repeated hits
-    if( reached.IsExist(agent) )
-    {
-        return; 
     }
     
     reached.insert(agent);
@@ -105,48 +105,52 @@ void AndRuleEngine::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordere
 
 void AndRuleEngine::ConfigDetermineKeyersModuloMatchAny( Agent *agent,
                                                          Agent *parent_agent,
-                                                         Set<Agent *> *master_agents,
-                                                         Set<Agent *> *match_any_agents )
+                                                         Set<Agent *> *senior_agents,
+                                                         Set<Agent *> *matchany_agents )
 {
-    if( master_agents->count( agent ) > 0 )
+    if( senior_agents->count( agent ) > 0 )
         return; // will be fixed values for our solver
         
     if( dynamic_cast<MatchAnyAgent *>(agent) )
     {
-        match_any_agents->insert( agent );
-        return;
+        matchany_agents->insert( agent );
     }
-        
-    ASSERT( coupling_keyers.count(agent) == 0 );  // See #129, can fail on legal patterns - will also fail on illegal MatchAny couplings
-    coupling_keyers[agent] = parent_agent;
-    master_agents->insert( agent );
-         
-    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-    FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
-        ConfigDetermineKeyersModuloMatchAny( b->agent, agent, master_agents, match_any_agents );        
+    else
+    {
+        ASSERT( coupling_keyers.count(agent) == 0 );  // See #129, can fail on legal patterns - will also fail on illegal MatchAny couplings
+        coupling_keyers[agent] = parent_agent;
+        senior_agents->insert( agent );
+             
+        shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
+        FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
+            ConfigDetermineKeyersModuloMatchAny( b->agent, agent, senior_agents, matchany_agents );        
+    }
 }
         
         
 void AndRuleEngine::ConfigDetermineKeyers( Agent *agent,
                                            Agent *parent_agent,
-                                           Set<Agent *> master_agents )
+                                           Set<Agent *> senior_agents )
 {
-    Set<Agent *> my_match_any_agents;
-    Set<Agent *> my_master_agents = master_agents;
-    ConfigDetermineKeyersModuloMatchAny( agent, parent_agent, &my_master_agents, &my_match_any_agents );
+    // Scan the senior region. We wish to break off at MatchAny nodes. Senior is the
+    // region up to and including a MatchAny; junior is the region under each of its
+    // links.
+    Set<Agent *> my_matchany_agents;
+    Set<Agent *> my_senior_agents = senior_agents;
+    ConfigDetermineKeyersModuloMatchAny( agent, parent_agent, &my_senior_agents, &my_matchany_agents );
     // After this:
     // - my_master_agents has union of master_agents and all the identified keyed agents
     // - my_match_any_agents has the MatchAny agents that we saw, BUT SKIPPED
     
-    // Now do all the links under the MatchAny nodes. Keying is allowed in each
-    // of these contexts individually, but no cross-keying is allowed if not keyed already.
+    // Now do all the links under the MatchAny nodes' links. Keying is allowed in each
+    // of these junior regions individually, but no cross-keying is allowed if not keyed already.
     // Where that happens, there will be a conflict writing to coupling_keyers and the
     // ASSERT will fail.
-    for( Agent *ma_agent : my_match_any_agents )
+    for( Agent *ma_agent : my_matchany_agents )
     {
         shared_ptr<PatternQuery> pq = ma_agent->GetPatternQuery();
         FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
-            ConfigDetermineKeyers( b->agent, ma_agent, my_master_agents );        
+            ConfigDetermineKeyers( b->agent, ma_agent, my_senior_agents );        
     }
 }
         
@@ -291,7 +295,6 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
         return;
     }
     // Are we at a coupling for not the first time.
-    //if( reached.IsExist(agent) )
     if( coupling_residuals.count( make_pair(parent_agent, agent) ) > 0 ) // See #129
     {
         ASSERT( reached.IsExist(agent) );
