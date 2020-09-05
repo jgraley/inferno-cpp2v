@@ -48,7 +48,7 @@ private:
     
     ReportageObserver *holder;
         
-    // Set by constructor - depends on pattern only
+    // set by constructor - depends on pattern only
     const list< shared_ptr<Constraint> > constraints;
     const list<VariableId> variables;
 

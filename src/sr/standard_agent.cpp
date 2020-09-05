@@ -386,7 +386,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
     vector< Itemiser::Element * > pattern_memb = Itemise();
     vector< Itemiser::Element * > dest_memb = Itemise( dest.get() ); // Get the members of dest corresponding to pattern's class
     ASSERT( pattern_memb.size() == dest_memb.size() );
-    Set< Itemiser::Element * > present_in_pattern; // Repeatability audit: OK since only checking for existance 
+    set< Itemiser::Element * > present_in_pattern; // Repeatability audit: OK since only checking for existance 
     
     TRACE("Copying %d members from pattern=%s dest=%s\n", dest_memb.size(), TypeInfo(this).name().c_str(), TypeInfo(dest).name().c_str());
     for( int i=0; i<dest_memb.size(); i++ )

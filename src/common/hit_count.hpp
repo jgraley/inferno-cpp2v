@@ -19,7 +19,7 @@ public:
     };
     
 private:
-    Map<Category, unsigned> counter;
+    map<Category, unsigned> counter;
     typedef pair<Category, unsigned> pc;
     unsigned current_step;
     static bool enable;

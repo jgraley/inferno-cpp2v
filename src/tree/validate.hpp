@@ -18,8 +18,8 @@ private:
 	void OnLink( TreePtr<Node> p, TreePtr<Node> c );
 
 	bool is_pattern;
-	Map< TreePtr<Node>, unsigned > decl_refs;
-	Map< TreePtr<Node>, unsigned > total_refs;
+	map< TreePtr<Node>, unsigned > decl_refs;
+	map< TreePtr<Node>, unsigned > total_refs;
 };
 
 // TODO

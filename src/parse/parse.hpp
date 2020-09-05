@@ -131,20 +131,20 @@ private:
 	private:
 		// Parameters are parsed outside function scope, so we defer entering them
 		// into the ident_track until we're in the function. This stores the clang identifiers.
-		Map<TreePtr<Declaration> , clang::IdentifierInfo *> backing_params;
+		map<TreePtr<Declaration> , clang::IdentifierInfo *> backing_params;
 
 		// The statement after a label is parsed as a sub-construct under the label which
 		// is not how the inferno tree does it. Remember that relationship here and
 		// generate the extra nodes when rendering a compound statement.
-		Map<TreePtr<Label> , TreePtr<Statement> > backing_labels;
-		Map<TreePtr<SwitchTarget> , TreePtr<Statement> > backing_targets;
-		Map<TreePtr<Declaration> , TreePtr<Declaration> >
+		map<TreePtr<Label> , TreePtr<Statement> > backing_labels;
+		map<TreePtr<SwitchTarget> , TreePtr<Statement> > backing_targets;
+		map<TreePtr<Declaration> , TreePtr<Declaration> >
 				backing_paired_decl;
 
 		// Members of records go in an unordered collection, but when parsing
 		// we might need the order, eg for C-style initialisers or auto-generated
 		// constructor calls.
-		Map<TreePtr<Scope> , Sequence<Declaration> > backing_ordering;
+		map<TreePtr<Scope> , Sequence<Declaration> > backing_ordering;
 
 		// In ActOnTag, when we see a record decl, we store it here and generate it
 		// at the next IssueDeclaration, called from ActOnDeclaration. This allows

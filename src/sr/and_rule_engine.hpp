@@ -44,21 +44,21 @@ public:
     {
     };
     
-    void Configure( Agent *root_agent, const Set<Agent *> &master_agents);
+    void Configure( Agent *root_agent, const set<Agent *> &master_agents);
     void ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
                                   Agent *agent,
-                                  const Set<Agent *> &master_agents );
+                                  const set<Agent *> &master_agents );
     void ConfigDetermineKeyersModuloMatchAny( Agent *agent,
                                               Agent *parent_agent,
-                                              Set<Agent *> *master_agents,
-                                              Set<Agent *> *match_any_agents );
+                                              set<Agent *> *master_agents,
+                                              set<Agent *> *match_any_agents );
     void ConfigDetermineKeyers( Agent *agent,
                                 Agent *parent_agent,
-                                Set<Agent *> master_agents );
+                                set<Agent *> master_agents );
     void ConfigDetermineResiduals( Agent *agent,
                                    Agent *parent_agent,
-                                   Set<Agent *> master_agents );
-    void ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, 
+                                   set<Agent *> master_agents );
+    void ConfigPopulateNormalAgents( set<Agent *> *normal_agents, 
                                      Agent *current_agent );
                                       
     void CompareCoupling( Agent *agent,
@@ -81,7 +81,7 @@ public:
 
 private:
     Agent *root_agent;
-    Set<Agent *> my_agents;   
+    set<Agent *> my_agents;   
     map< Agent *, AndRuleEngine > my_abnormal_engines;
     map< Agent *, AndRuleEngine > my_multiplicity_engines;
     map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
@@ -93,10 +93,10 @@ private:
     shared_ptr<CSP::SolverHolder> solver;
     CouplingMap my_keys; 
     const CouplingMap *master_keys;
-    Set<Agent *> reached; 
-    Set< pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > > evaluator_records;   
-    Set< shared_ptr<const DecidedQuery::Link> > abnormal_links; 
-    Set< shared_ptr<const DecidedQuery::Link> > multiplicity_links;
+    set<Agent *> reached; 
+    set< pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > > evaluator_records;   
+    set< shared_ptr<const DecidedQuery::Link> > abnormal_links; 
+    set< shared_ptr<const DecidedQuery::Link> > multiplicity_links;
 };
 
 #endif

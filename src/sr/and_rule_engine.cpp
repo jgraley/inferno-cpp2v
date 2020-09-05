@@ -20,17 +20,17 @@
 
 using namespace SR;
 
-void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_agents )
+void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_agents )
 {
     root_agent = root_agent_;
 
-    Set<Agent *> normal_agents;
+    set<Agent *> normal_agents;
     ConfigPopulateNormalAgents( &normal_agents, root_agent );    
     my_agents = SetDifference( normal_agents, master_agents );       
     if( my_agents.empty() ) 
         return;  // Early-out on trivial problems: TODO do for conjecture mode too; see #126
 
-    Set<Agent *> surrounding_agents = SetUnion( master_agents, my_agents ); 
+    set<Agent *> surrounding_agents = SetUnion( master_agents, my_agents ); 
         
     for( std::pair<Agent * const, AndRuleEngine> &pae : my_abnormal_engines )
         pae.second.Configure( pae.first, surrounding_agents );
@@ -76,7 +76,7 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
 
 void AndRuleEngine::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
                                              Agent *agent,
-                                             const Set<Agent *> &master_agents )
+                                             const set<Agent *> &master_agents )
 {
     // Ignore repeated hits
     if( reached.count(agent) > 0 )    
@@ -105,8 +105,8 @@ void AndRuleEngine::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordere
 
 void AndRuleEngine::ConfigDetermineKeyersModuloMatchAny( Agent *agent,
                                                          Agent *parent_agent,
-                                                         Set<Agent *> *senior_agents,
-                                                         Set<Agent *> *matchany_agents )
+                                                         set<Agent *> *senior_agents,
+                                                         set<Agent *> *matchany_agents )
 {
     if( senior_agents->count( agent ) > 0 )
         return; // will be fixed values for our solver
@@ -130,13 +130,13 @@ void AndRuleEngine::ConfigDetermineKeyersModuloMatchAny( Agent *agent,
         
 void AndRuleEngine::ConfigDetermineKeyers( Agent *agent,
                                            Agent *parent_agent,
-                                           Set<Agent *> senior_agents )
+                                           set<Agent *> senior_agents )
 {
     // Scan the senior region. We wish to break off at MatchAny nodes. Senior is the
     // region up to and including a MatchAny; junior is the region under each of its
     // links.
-    Set<Agent *> my_matchany_agents;
-    Set<Agent *> my_senior_agents = senior_agents;
+    set<Agent *> my_matchany_agents;
+    set<Agent *> my_senior_agents = senior_agents;
     ConfigDetermineKeyersModuloMatchAny( agent, parent_agent, &my_senior_agents, &my_matchany_agents );
     // After this:
     // - my_master_agents has union of master_agents and all the identified keyed agents
@@ -157,7 +157,7 @@ void AndRuleEngine::ConfigDetermineKeyers( Agent *agent,
         
 void AndRuleEngine::ConfigDetermineResiduals( Agent *agent,
                                               Agent *parent_agent,
-                                              Set<Agent *> master_agents )
+                                              set<Agent *> master_agents )
 {
     if( coupling_keyers.count(agent) > 0 && 
         coupling_keyers.at(agent) != parent_agent )
@@ -174,7 +174,7 @@ void AndRuleEngine::ConfigDetermineResiduals( Agent *agent,
 }
 
 
-void AndRuleEngine::ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, 
+void AndRuleEngine::ConfigPopulateNormalAgents( set<Agent *> *normal_agents, 
                                                 Agent *current_agent )
 {
     if( normal_agents->count(current_agent) != 0 )

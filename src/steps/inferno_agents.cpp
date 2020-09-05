@@ -204,14 +204,14 @@ void IsLabelReached::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 	ASSERT( x )("IsLabelReached at ")(*xx)(" but is of type LabelIdentifier\n"); 
 	TRACE("Can label id ")(*x)(" reach expression ")(*y)("?\n");
 
-	Set< TreePtr<InstanceIdentifier> > uf;        
+	set< TreePtr<InstanceIdentifier> > uf;        
     if( !CanReachExpr(&uf, x, y) )
         throw Mismatch();  
 	TRACE("I reakon ")(*x)(" reaches ")(*y)("\n"); 
 }                 
 
 
-bool IsLabelReached::CanReachExpr( Set< TreePtr<InstanceIdentifier> > *f,
+bool IsLabelReached::CanReachExpr( set< TreePtr<InstanceIdentifier> > *f,
 								   TreePtr<LabelIdentifier> x, 
 					               TreePtr<Expression> y ) const // y is expression. Can it yield label x?
 {
@@ -251,7 +251,7 @@ bool IsLabelReached::CanReachExpr( Set< TreePtr<InstanceIdentifier> > *f,
 }    
 
 
-bool IsLabelReached::CanReachVar( Set< TreePtr<InstanceIdentifier> > *f,
+bool IsLabelReached::CanReachVar( set< TreePtr<InstanceIdentifier> > *f,
 			            	      TreePtr<LabelIdentifier> x, 
 				                  TreePtr<InstanceIdentifier> y ) const // y is instance identifier. Can expression x be assigned to it?
 {

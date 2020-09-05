@@ -292,11 +292,11 @@ struct IsLabelReached : public virtual InfernoAgent,
     TreePtr<CPPTree::Expression> pattern;           
            
 private:
-    bool CanReachExpr( Set< TreePtr<CPPTree::InstanceIdentifier> > *f,
+    bool CanReachExpr( set< TreePtr<CPPTree::InstanceIdentifier> > *f,
                        TreePtr<CPPTree::LabelIdentifier> x, 
                        TreePtr<CPPTree::Expression> y ) const; // y is expression. Can it yield label x?
     
-    bool CanReachVar( Set< TreePtr<CPPTree::InstanceIdentifier> > *f,
+    bool CanReachVar( set< TreePtr<CPPTree::InstanceIdentifier> > *f,
                       TreePtr<CPPTree::LabelIdentifier> x, 
                       TreePtr<CPPTree::InstanceIdentifier> y ) const; // y is instance identifier. Can expression x be assigned to it?
     
@@ -310,7 +310,7 @@ private:
             return from==other.from ? to<other.to : from<other.from;
         }
     };
-    mutable Map<Reaching, bool> cache; // it's a cache, so sue me
+    mutable map<Reaching, bool> cache; // it's a cache, so sue me
 };
 
 #endif

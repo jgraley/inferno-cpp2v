@@ -13,7 +13,7 @@ SystemicConstraint::SystemicConstraint( SR::Agent *agent_,
     conj( make_shared<SR::Conjecture>() ),
     simple_compare( make_shared<SimpleCompare>() )
 {    
-    Set<SR::Agent *> my_agents;
+    set<SR::Agent *> my_agents;
     my_agents.insert( agent ); // just the one agent this time
     conj->Configure(my_agents, agent);
 }
@@ -154,7 +154,7 @@ bool SystemicConstraint::Test( list< Value > values,
 
         list< TreePtr<Node> > x_to_add;
         Conjecture lconj;
-        Set<SR::Agent *> lagents;
+        set<SR::Agent *> lagents;
         lagents.insert( agent ); // just the one agent this time
         lconj.Configure(lagents, agent);
         for( TreePtr<Node> x : x_nodes )

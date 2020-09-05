@@ -20,9 +20,9 @@ namespace CSP
 { 
 struct SideInfo
 {
-    Set< pair< shared_ptr<SR::BooleanEvaluator>, SR::DecidedQuery::Links > > evaluator_records;   
-    Set< shared_ptr<const SR::DecidedQuery::Link> > abnormal_links; 
-    Set< shared_ptr<const SR::DecidedQuery::Link> > multiplicity_links;
+    set< pair< shared_ptr<SR::BooleanEvaluator>, SR::DecidedQuery::Links > > evaluator_records;   
+    set< shared_ptr<const SR::DecidedQuery::Link> > abnormal_links; 
+    set< shared_ptr<const SR::DecidedQuery::Link> > multiplicity_links;
 };
 
 /**

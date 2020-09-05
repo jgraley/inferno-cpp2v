@@ -17,7 +17,7 @@ namespace SR
 class SpecialBase;
 class SCREngine;
 class Agent;
-typedef Map< Agent *, TreePtr<Node> > CouplingMap;
+typedef map< Agent *, TreePtr<Node> > CouplingMap;
 
 /// Interface for Agents, which co-exist with pattern nodes and implement the search and replace funcitonality for each pattern node.
 class Agent : public virtual Traceable,

@@ -13,15 +13,15 @@
 // the same form into our scheme, as it we created them, then uniqueness is guaranteed (but we will sometimes
 // want to change the number, so what started as foo_2 could become foo_3 by the time we're done with it).
 
-typedef Set< unsigned > NameUsage;
+typedef set< unsigned > NameUsage;
 
 struct UniquifyIdentifiers;
 
 struct VisibleIdentifiers
 {
-	// Map of basenames to their offset number tables
+	// map of basenames to their offset number tables
 	typedef pair<const string, NameUsage> NameUsagePair;
-	Map< string, NameUsage > name_usages;
+	map< string, NameUsage > name_usages;
 
 	string AddIdentifierNumber( NameUsage &nu, TreePtr<CPPTree::SpecificIdentifier> i, string b, unsigned n );
 	string AddIdentifier( TreePtr<CPPTree::SpecificIdentifier> i );
@@ -30,7 +30,7 @@ struct VisibleIdentifiers
 	static void SplitName( TreePtr<CPPTree::SpecificIdentifier> i, string *b, unsigned *n ); // note static
 };
 
-struct UniquifyIdentifiers : public Map< TreePtr<CPPTree::SpecificIdentifier>, string >
+struct UniquifyIdentifiers : public map< TreePtr<CPPTree::SpecificIdentifier>, string >
 {
 	typedef pair<const TreePtr<CPPTree::SpecificIdentifier>, string> IdentifierNamePair;
 	void UniquifyScope( TreePtr<Node> root, VisibleIdentifiers v = VisibleIdentifiers() ); // Not a ref because we want a copy so we can go back TODO optimise

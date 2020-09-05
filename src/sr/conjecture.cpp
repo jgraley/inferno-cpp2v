@@ -16,7 +16,7 @@ Conjecture::~Conjecture()
 }
 
 
-void Conjecture::Configure(Set<Agent *> my_agents, Agent *root_agent)
+void Conjecture::Configure(set<Agent *> my_agents, Agent *root_agent)
 {
     last_agent = agent_records.end();
     configured = true;

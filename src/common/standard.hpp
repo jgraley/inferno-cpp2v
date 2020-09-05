@@ -43,18 +43,13 @@ private:
     std::stack<T> &st;
 };
 
-template< typename KEY, typename DATA >
-class Map : public map<KEY, DATA>
-{
-};
-
 
 // Union two maps. Second overrules first!!
 template< typename KEY, typename DATA >
-inline Map<KEY, DATA> MapUnion( const Map<KEY, DATA> m1, const Map<KEY, DATA> m2 )
+inline map<KEY, DATA> MapUnion( const map<KEY, DATA> m1, const map<KEY, DATA> m2 )
 {
 	typedef pair<KEY, DATA> Pair;
-    Map<KEY, DATA> result = m1;
+    map<KEY, DATA> result = m1;
     FOREACH( Pair x, m2 )
     {
 		result[x.first] = x.second;
@@ -63,17 +58,11 @@ inline Map<KEY, DATA> MapUnion( const Map<KEY, DATA> m1, const Map<KEY, DATA> m2
 }
 
 
-template< typename KEY >
-class Set : public set<KEY>
-{
-};
-
-
 // Union two sets, without the pain of iterators
 template< typename KEY >
-inline Set<KEY> SetUnion( const Set<KEY> s1, const Set<KEY> s2 )
+inline set<KEY> SetUnion( const set<KEY> s1, const set<KEY> s2 )
 {
-    Set<KEY> result;
+    set<KEY> result;
     std::set_union( s1.begin(), s1.end(), 
                     s2.begin(), s2.end(),
                     std::inserter(result, result.end()) );
@@ -83,9 +72,9 @@ inline Set<KEY> SetUnion( const Set<KEY> s1, const Set<KEY> s2 )
 
 // Intersect two sets, without the pain of iterators
 template< typename KEY >
-inline Set<KEY> SetIntersection( const Set<KEY> s1, const Set<KEY> s2 )
+inline set<KEY> SetIntersection( const set<KEY> s1, const set<KEY> s2 )
 {
-    Set<KEY> result;
+    set<KEY> result;
     std::set_intersection( s1.begin(), s1.end(), 
                             s2.begin(), s2.end(),
                             std::inserter(result, result.end()) );
@@ -95,9 +84,9 @@ inline Set<KEY> SetIntersection( const Set<KEY> s1, const Set<KEY> s2 )
 
 // Intersect set with complement, without the pain of iterators
 template< typename KEY >
-inline Set<KEY> SetDifference( const Set<KEY> s1, const Set<KEY> s2 )
+inline set<KEY> SetDifference( const set<KEY> s1, const set<KEY> s2 )
 {
-    Set<KEY> result;
+    set<KEY> result;
     std::set_difference( s1.begin(), s1.end(), 
                          s2.begin(), s2.end(),
                          std::inserter(result, result.end()) );

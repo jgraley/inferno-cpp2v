@@ -20,7 +20,7 @@ public:
     typedef DecidedQueryCommon::Choices Choices;
     
     struct AgentRecord;
-	typedef Map<Agent *, AgentRecord> AgentRecords;
+	typedef map<Agent *, AgentRecord> AgentRecords;
     struct AgentRecord
     {
         shared_ptr<PatternQuery> pq;
@@ -32,7 +32,7 @@ public:
     Conjecture();
     ~Conjecture();
 
-    void Configure(Set<Agent *> my_agents, Agent *root_agent);
+    void Configure(set<Agent *> my_agents, Agent *root_agent);
     void ConfigRecordWalk( AgentRecords::iterator rit );
     
     void Start();
@@ -51,7 +51,7 @@ private:
     AgentRecords agent_records;
 	AgentRecords::iterator last_agent;		
     bool configured;
-    Set<AgentRecord *> reached;
+    set<AgentRecord *> reached;
 };
 
 };

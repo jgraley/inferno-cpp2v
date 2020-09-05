@@ -31,18 +31,18 @@ public:
     virtual void Configure( const CompareReplace *overall_master,
                             TreePtr<Node> cp,
                             TreePtr<Node> rp = TreePtr<Node>(),
-                            const Set<Agent *> &master_agents = Set<Agent *>(),                            
+                            const set<Agent *> &master_agents = set<Agent *>(),                            
                             const SCREngine *master = NULL); /* if null, you are overall master */
 
     // A configure that doesn't know what the search and replace patterns are
-    virtual void Configure( const Set<Agent *> &master_agents,
+    virtual void Configure( const set<Agent *> &master_agents,
                             const SCREngine *master /* if null, you are overall master */ );
 private:
     virtual void ConfigInstallRootAgents( TreePtr<Node> cp,
 										  TreePtr<Node> rp );
-    virtual void ConfigCategoriseSubs( const Set<Agent *> &master_agents, Set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
-    virtual void ConfigCreateMyEngines( const Set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
-    virtual void ConfigConfigureSubs( const Set<Agent *> &master_agents );
+    virtual void ConfigCategoriseSubs( const set<Agent *> &master_agents, set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
+    virtual void ConfigCreateMyEngines( const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
+    virtual void ConfigConfigureSubs( const set<Agent *> &master_agents );
     
 public:
     void GatherCouplings( CouplingMap *coupling_keys ) const;
@@ -80,7 +80,7 @@ private:
     TreePtr<Node> pattern;
     Agent *root_agent;
     const SCREngine *master_ptr;
-    std::shared_ptr< Set<Agent *> > my_agents;   
+    std::shared_ptr< set<Agent *> > my_agents;   
     std::map<AgentCommonNeedSCREngine *, SCREngine> my_engines;   
     
     static int repetitions;

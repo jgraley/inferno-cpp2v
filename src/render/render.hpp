@@ -19,7 +19,7 @@ private:
     UniquifyIdentifiers unique;
     // Remember the orders of collections when we sort them. Mirrors the same
     // map in the parser.
-    Map< TreePtr<CPPTree::Scope>, Sequence<CPPTree::Declaration> > backing_ordering;
+    map< TreePtr<CPPTree::Scope>, Sequence<CPPTree::Declaration> > backing_ordering;
 
     bool IsSystemC( TreePtr<Node> root );
     string RenderLiteral( TreePtr<CPPTree::Literal> sp );

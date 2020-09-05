@@ -31,7 +31,7 @@ SCREngine::SCREngine( bool is_s ) :
 void SCREngine::Configure( const CompareReplace *overall_master,
                            TreePtr<Node> cp,
                            TreePtr<Node> rp,
-                           const Set<Agent *> &master_agents,
+                           const set<Agent *> &master_agents,
                            const SCREngine *master )
 {
     INDENT(" ");
@@ -44,7 +44,7 @@ void SCREngine::Configure( const CompareReplace *overall_master,
             
     TRACE("Elaborating ")(*this );    
 
-    Set<AgentCommonNeedSCREngine *> my_agents_needing_engines;   
+    set<AgentCommonNeedSCREngine *> my_agents_needing_engines;   
     ConfigCategoriseSubs( master_agents, my_agents_needing_engines );    
     ConfigCreateMyEngines( my_agents_needing_engines );    
     ConfigConfigureSubs( master_agents );
@@ -53,7 +53,7 @@ void SCREngine::Configure( const CompareReplace *overall_master,
 } 
 
 
-void SCREngine::Configure( const Set<Agent *> &master_agents,
+void SCREngine::Configure( const set<Agent *> &master_agents,
                            const SCREngine *master )
 {
     ASSERTFAIL("SCREngine::Configure(already, master) Must be overridden by a subclass");
@@ -96,18 +96,18 @@ void SCREngine::ConfigInstallRootAgents( TreePtr<Node> cp,
 }
     
 
-void SCREngine::ConfigCategoriseSubs( const Set<Agent *> &master_agents, Set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
+void SCREngine::ConfigCategoriseSubs( const set<Agent *> &master_agents, set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
 {
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
     // So that the compare and replace subtrees of slaves are "obsucured" and not visible
     VisibleWalk tp(pattern); 
-    Set<Agent *> visible_agents;
+    set<Agent *> visible_agents;
     FOREACH( TreePtr<Node> n, tp )
         visible_agents.insert( Agent::AsAgent(n) );
     
     // Determine which ones really belong to us (some might be visible from one of our masters, 
     // in which case it should be in the supplied set.        
-    my_agents = make_shared< Set<Agent *> >();
+    my_agents = make_shared< set<Agent *> >();
     *my_agents = SetDifference( visible_agents, master_agents );         
 
     // Determine who our slaves are
@@ -117,7 +117,7 @@ void SCREngine::ConfigCategoriseSubs( const Set<Agent *> &master_agents, Set<Age
 }
 
 
-void SCREngine::ConfigCreateMyEngines( const Set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
+void SCREngine::ConfigCreateMyEngines( const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
 {
     FOREACH( AgentCommonNeedSCREngine *a, my_agents_needing_engines )
     {
@@ -129,10 +129,10 @@ void SCREngine::ConfigCreateMyEngines( const Set<AgentCommonNeedSCREngine *> &my
 }
 
 
-void SCREngine::ConfigConfigureSubs( const Set<Agent *> &master_agents )
+void SCREngine::ConfigConfigureSubs( const set<Agent *> &master_agents )
 {
     // Determine which agents our slaves should not configure
-    Set<Agent *> surrounding_agents = SetUnion( master_agents, *my_agents ); 
+    set<Agent *> surrounding_agents = SetUnion( master_agents, *my_agents ); 
             
     // Recurse into the slaves' configure
     for( pair<AgentCommonNeedSCREngine * const, SCREngine> &p : my_engines )
