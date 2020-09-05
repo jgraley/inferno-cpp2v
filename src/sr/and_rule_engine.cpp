@@ -11,6 +11,7 @@
 #include "overlay_agent.hpp"
 #include "search_container_agent.hpp"
 #include "common/common.hpp"
+#include "match_any_agent.hpp"
 #include <list>
 
 #define TEST_PATTERN_QUERY
@@ -41,11 +42,12 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
     master_boundary_agents.clear();    
     coupling_residuals.clear();
     reached.clear();
-    ConfigPopulateForSolver(&normal_agents_ordered, 
-                            root_agent, 
-                            nullptr,
-                            master_agents);
+    ConfigPopulateForSolver( &normal_agents_ordered, 
+                             root_agent, 
+                             master_agents );
 
+    ConfigDetermineKeyers( root_agent, nullptr, master_agents );
+    ConfigDetermineResiduals( root_agent, nullptr, master_agents );
 #ifdef USE_SOLVER
     list< shared_ptr<CSP::Constraint> > constraints;
     for( Agent *a : my_agents )
@@ -69,7 +71,6 @@ void AndRuleEngine::Configure( Agent *root_agent_, const Set<Agent *> &master_ag
 
 void AndRuleEngine::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
                                              Agent *agent,
-                                             Agent *parent_agent,
                                              const Set<Agent *> &master_agents )
 {
     if( master_agents.count( agent ) > 0 )
@@ -90,19 +91,82 @@ void AndRuleEngine::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordere
     // Ignore repeated hits
     if( reached.IsExist(agent) )
     {
-        ASSERT( parent_agent ); // Should not be reached if we're still only on root agent
-        auto link = make_pair(parent_agent, agent);
-        ASSERT( coupling_residuals.count(link) == 0 ); // See #129, can fail on legal patterns
-        coupling_residuals.insert( link );
         return; 
     }
     
     reached.insert(agent);
-    
+     
     normal_agents_ordered->push_back( agent );
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
-        ConfigPopulateForSolver( normal_agents_ordered, b->agent, agent, master_agents );        
+        ConfigPopulateForSolver( normal_agents_ordered, b->agent, master_agents );        
+}
+
+
+void AndRuleEngine::ConfigDetermineKeyersModuloMatchAny( Agent *agent,
+                                                         Agent *parent_agent,
+                                                         Set<Agent *> *master_agents,
+                                                         Set<Agent *> *match_any_agents )
+{
+    if( master_agents->count( agent ) > 0 )
+        return; // will be fixed values for our solver
+        
+    if( dynamic_cast<MatchAnyAgent *>(agent) )
+    {
+        match_any_agents->insert( agent );
+        return;
+    }
+        
+    ASSERT( coupling_keyers.count(agent) == 0 );  // See #129, can fail on legal patterns - will also fail on illegal MatchAny couplings
+    coupling_keyers[agent] = parent_agent;
+    master_agents->insert( agent );
+         
+    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
+    FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
+        ConfigDetermineKeyersModuloMatchAny( b->agent, agent, master_agents, match_any_agents );        
+}
+        
+        
+void AndRuleEngine::ConfigDetermineKeyers( Agent *agent,
+                                           Agent *parent_agent,
+                                           Set<Agent *> master_agents )
+{
+    Set<Agent *> my_match_any_agents;
+    Set<Agent *> my_master_agents = master_agents;
+    ConfigDetermineKeyersModuloMatchAny( agent, parent_agent, &my_master_agents, &my_match_any_agents );
+    // After this:
+    // - my_master_agents has union of master_agents and all the identified keyed agents
+    // - my_match_any_agents has the MatchAny agents that we saw, BUT SKIPPED
+    
+    // Now do all the links under the MatchAny nodes. Keying is allowed in each
+    // of these contexts individually, but no cross-keying is allowed if not keyed already.
+    // Where that happens, there will be a conflict writing to coupling_keyers and the
+    // ASSERT will fail.
+    for( Agent *ma_agent : my_match_any_agents )
+    {
+        shared_ptr<PatternQuery> pq = ma_agent->GetPatternQuery();
+        FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
+            ConfigDetermineKeyers( b->agent, ma_agent, my_master_agents );        
+    }
+}
+        
+        
+void AndRuleEngine::ConfigDetermineResiduals( Agent *agent,
+                                              Agent *parent_agent,
+                                              Set<Agent *> master_agents )
+{
+    if( coupling_keyers.count(agent) > 0 && 
+        coupling_keyers.at(agent) != parent_agent )
+    {
+        auto link = make_pair(parent_agent, agent);
+        ASSERT( coupling_residuals.count(link) == 0 ); // See #129, can fail on legal patterns
+        coupling_residuals.insert(link);
+        return; 
+    }
+        
+    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
+    FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
+        ConfigDetermineResiduals( b->agent, agent, master_agents );        
 }
 
 
@@ -227,8 +291,8 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
         return;
     }
     // Are we at a coupling for not the first time.
-    if( reached.IsExist(agent) )
-    //if( coupling_residuals.count( make_pair(parent_agent, agent) ) > 0 ) // See #129
+    //if( reached.IsExist(agent) )
+    if( coupling_residuals.count( make_pair(parent_agent, agent) ) > 0 ) // See #129
     {
         ASSERT( reached.IsExist(agent) );
         ASSERT( my_keys.IsExist(agent) );

@@ -47,11 +47,20 @@ public:
     void Configure( Agent *root_agent, const Set<Agent *> &master_agents);
     void ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
                                   Agent *agent,
-                                  Agent *parent_agent,
                                   const Set<Agent *> &master_agents );
+    void ConfigDetermineKeyersModuloMatchAny( Agent *agent,
+                                              Agent *parent_agent,
+                                              Set<Agent *> *master_agents,
+                                              Set<Agent *> *match_any_agents );
+    void ConfigDetermineKeyers( Agent *agent,
+                                Agent *parent_agent,
+                                Set<Agent *> master_agents );
+    void ConfigDetermineResiduals( Agent *agent,
+                                   Agent *parent_agent,
+                                   Set<Agent *> master_agents );
     void ConfigPopulateNormalAgents( Set<Agent *> *normal_agents, 
                                      Agent *current_agent );
-                                     
+                                      
     void CompareCoupling( Agent *agent,
                           TreePtr<Node> x,
                           const CouplingMap *keys );
@@ -77,6 +86,7 @@ private:
     map< Agent *, AndRuleEngine > my_multiplicity_engines;
     map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
     set<Agent *> master_boundary_agents;
+    map< Agent *, Agent * > coupling_keyers;
     set< pair<Agent *, Agent *> > coupling_residuals;
     
     shared_ptr<Conjecture> conj;
