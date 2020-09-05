@@ -1127,7 +1127,7 @@ private:
 		 */
 		if( TreePtr<Declaration> d = dynamic_pointer_cast<Declaration>( st ) )
 		{
-			if( backing_paired_decl.IsExist(d) )
+			if( backing_paired_decl.count(d) > 0 )
 			{
 				TreePtr<Declaration> bd = backing_paired_decl[d];
 				ASSERT( bd );
@@ -1682,7 +1682,7 @@ private:
 
 	{
 		// Get a reference to the ordered list of members for this scope from a backing list
-		ASSERT( backing_ordering.IsExist(scope) )("Supplied scope did not make it into the backing ordering list");
+		ASSERT( backing_ordering.count(scope) > 0 )("Supplied scope did not make it into the backing ordering list");
 		Sequence<Declaration> &scope_ordered = backing_ordering[scope];
 		//TRACE("%p %p\n", &scope->members, scope.get());
 

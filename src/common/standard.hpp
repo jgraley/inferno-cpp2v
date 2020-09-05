@@ -47,11 +47,6 @@ template< typename KEY, typename DATA >
 class Map : public map<KEY, DATA>
 {
 public:
-    // Find out whether an element exists in the map, without the pain of iterators
-    inline bool IsExist( const KEY &k ) const 
-    {
-        return map<KEY, DATA>::find( k ) != map<KEY, DATA>::end();
-    }
     // Tried to just do a const version of [], but it was getting called in
     // non-const cases, which is crap because C++ should use the non-const one
     // where it needs to.
@@ -80,24 +75,12 @@ inline Map<KEY, DATA> MapUnion( const Map<KEY, DATA> m1, const Map<KEY, DATA> m2
 template< typename KEY, typename DATA >
 class MultiMap : public multimap<KEY, DATA>
 {
-public:
-    // Find out whether an element exists in the map, without the pain of iterators
-    inline bool IsExist( const KEY &k ) const 
-    {
-        return multimap<KEY, DATA>::find( k ) != multimap<KEY, DATA>::end();
-    }
 };
 
 
 template< typename KEY >
 class Set : public set<KEY>
 {
-public:    
-    // Find out whether an element exists in the map, without the pain of iterators
-    inline bool IsExist( const KEY &k ) const 
-    {
-        return set<KEY>::find( k ) != set<KEY>::end();
-    }
 };
 
 

@@ -459,7 +459,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
         ASSERT( keynode_memb[i] )( "itemise returned null element" );
         ASSERT( dest_memb[i] )( "itemise returned null element" );
         
-        if( present_in_pattern.IsExist(dest_memb[i]) )
+        if( present_in_pattern.count(dest_memb[i]) > 0 )
             continue; // already did this one in the above loop
 
     	TRACE("Member %d from key\n", i );

@@ -419,7 +419,7 @@ bool UniqueFilter::IsMatch( TreePtr<Node> context,
     
     //TRACE("Got ")(*root)("\n");
     
-    if( seen.IsExist( root ) )
+    if( seen.count( root ) > 0 )
         return false;
     
     seen.insert( root );

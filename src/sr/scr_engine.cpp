@@ -205,9 +205,9 @@ void SCREngine::KeyReplaceNodes( const CouplingMap *coupling_keys ) const
         
     FOREACH( Agent *a, *my_agents )
     {
-        TRACE(*a)(coupling_keys->IsExist( a )?" is in coupling_keys ":" is not in coupling_keys")
+        TRACE(*a)(coupling_keys->count( a )?" is in coupling_keys ":" is not in coupling_keys")
              (a->GetKey()?" and is self-coupled\n":" and is not self-coupled\n");
-        if( coupling_keys->IsExist( a ) && !a->GetKey() )
+        if( coupling_keys->count( a ) > 0 && !a->GetKey() )
             a->KeyReplace(coupling_keys);
     }
     
@@ -228,7 +228,7 @@ void SCREngine::GatherCouplings( CouplingMap *coupling_keys ) const
 {
 	// Get couplings from agents into the supplied map if not there already
     FOREACH( Agent *a, *my_agents )
-        if( a->GetKey() && !coupling_keys->IsExist( a ) )
+        if( a->GetKey() && !coupling_keys->count( a ) > 0 )
             (*coupling_keys)[a] = a->GetKey();	
 }
 

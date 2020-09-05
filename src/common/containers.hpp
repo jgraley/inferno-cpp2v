@@ -195,7 +195,6 @@ template< class SUB_BASE, typename VALUE_INTERFACE >
 struct SimpleAssociativeContainerInterface : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>
 {
 	virtual int erase( const VALUE_INTERFACE &gx ) = 0;
-	virtual bool IsExist( const VALUE_INTERFACE &gx ) = 0;
 };
 
 
@@ -481,12 +480,6 @@ struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTE
 	{
 		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(gx) );
 		return CONTAINER_IMPL::erase( sx );
-	}
-	virtual bool IsExist( const VALUE_INTERFACE &gx )
-	{
-		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(gx) );
-		typename CONTAINER_IMPL::iterator it = CONTAINER_IMPL::find( sx );
-		return it != CONTAINER_IMPL::end();
 	}
 
 	iterator my_begin, my_end;

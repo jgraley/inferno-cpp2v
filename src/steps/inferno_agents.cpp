@@ -257,7 +257,7 @@ bool IsLabelReached::CanReachVar( Set< TreePtr<InstanceIdentifier> > *f,
 {
 	INDENT(" ");
 	Reaching rr( x, y );
-	if( cache.IsExist(rr) )
+	if( cache.count(rr) > 0 )
 	{
 		TRACE("cache hit yeah yeah\n");
 		return cache[rr];
@@ -265,7 +265,7 @@ bool IsLabelReached::CanReachVar( Set< TreePtr<InstanceIdentifier> > *f,
 	bool r = false;        
 	Walk e( engine->GetOverallMaster()->GetContext() ); 
 	
-	if( f->IsExist(y) )
+	if( f->count(y) > 0 )
 		return false; // already processing this identifier, so we have a loop
 					  // so don't recurse further
 					  

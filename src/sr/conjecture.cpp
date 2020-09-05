@@ -42,7 +42,7 @@ void Conjecture::ConfigRecordWalk( AgentRecords::iterator rit )
     Agent *agent = rit->first;
     AgentRecord &record = rit->second;
 
-    if( reached.IsExist(&record) ) // TODO put the rits in there?
+    if( reached.count(&record) > 0 ) // TODO put the rits in there?
         return; // already reached: probably a coupling
     reached.insert(&record);
 
@@ -200,7 +200,7 @@ bool Conjecture::Increment()
 DecidedQuery::Choices Conjecture::GetChoices(Agent *agent) const 
 {            
     ASSERT(configured);
-    if( agent_records.IsExist(agent) )
+    if( agent_records.count(agent) > 0 )
     {
         return *agent_records.at(agent).query->GetChoices();
 	}

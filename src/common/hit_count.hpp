@@ -36,7 +36,7 @@ public:
         c.instance = caller_this;        
         c.prefix = prefix;
         int count=0;
-        if( counter.IsExist( c ) )        
+        if( counter.count( c ) > 0 )        
             count = counter[c];
         count++;
         counter[c] = count;            

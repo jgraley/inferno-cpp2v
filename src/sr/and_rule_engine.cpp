@@ -79,7 +79,7 @@ void AndRuleEngine::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordere
                                              const Set<Agent *> &master_agents )
 {
     // Ignore repeated hits
-    if( reached.IsExist(agent) )    
+    if( reached.count(agent) > 0 )    
         return; 
 
     if( master_agents.count( agent ) > 0 )
@@ -290,15 +290,15 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     SimpleCompare sc;
     if( master_boundary_agents.count(agent) > 0 )
     {               
-        ASSERT( master_keys->IsExist(agent) );
+        ASSERT( master_keys->count(agent) > 0 );
         CompareCoupling( agent, x, master_keys );
         return;
     }
     // Are we at a coupling for not the first time.
     if( coupling_residuals.count( make_pair(parent_agent, agent) ) > 0 ) // See #129
     {
-        ASSERT( reached.IsExist(agent) );
-        ASSERT( my_keys.IsExist(agent) );
+        ASSERT( reached.count(agent) > 0 );
+        ASSERT( my_keys.count(agent) > 0 );
         CompareCoupling( agent, x, &my_keys );
         return;
     }
