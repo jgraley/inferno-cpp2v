@@ -159,8 +159,9 @@ void AndRuleEngine::ConfigDetermineResiduals( Agent *agent,
                                               Agent *parent_agent,
                                               set<Agent *> master_agents )
 {
-    if( coupling_keyers.count(agent) > 0 && 
-        coupling_keyers.at(agent) != parent_agent )
+    if( (coupling_keyers.count(agent) > 0 && 
+         coupling_keyers.at(agent) != parent_agent) ||
+         master_agents.count(agent) > 0 )
     {
         auto link = make_pair(parent_agent, agent);
         ASSERT( coupling_residuals.count(link) == 0 ); // See #129, can fail on legal patterns
@@ -203,8 +204,11 @@ void AndRuleEngine::CompareCoupling( Agent *agent,
                                      TreePtr<Node> x,
                                      const CouplingMap *keys )
 {
+    ASSERT( keys->count(agent) > 0 );
+
     // This function establishes the policy for couplings in one place.
-    // Today, it's SimpleCompare.
+    // Today, it's SimpleCompare. 
+    // And it always will be: see #121; para starting at "No!!"
     static SimpleCompare couplings_comparer;
     if( !couplings_comparer( x, keys->at(agent) ) )
         throw Mismatch();    
@@ -286,20 +290,15 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     INDENT(" ");
     ASSERT( x ); // Target must not be NULL
 
-    // Check for a coupling match to a master engine's agent. 
-    SimpleCompare sc;
-    if( master_boundary_agents.count(agent) > 0 )
-    {               
-        ASSERT( master_keys->count(agent) > 0 );
-        CompareCoupling( agent, x, master_keys );
-        return;
-    }
-    // Are we at a coupling for not the first time.
+    // Are we at a residual coupling?
     if( coupling_residuals.count( make_pair(parent_agent, agent) ) > 0 ) // See #129
     {
-        ASSERT( reached.count(agent) > 0 );
-        ASSERT( my_keys.count(agent) > 0 );
-        CompareCoupling( agent, x, &my_keys );
+        const CouplingMap *keys;
+        if( master_boundary_agents.count(agent) > 0 )
+            keys = master_keys;
+        else
+            keys = &my_keys;
+        CompareCoupling( agent, x, keys );
         return;
     }
 
