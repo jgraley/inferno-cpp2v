@@ -48,16 +48,20 @@ public:
     void ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
                                   Agent *agent,
                                   const set<Agent *> &master_agents );
-    void ConfigDetermineKeyersModuloMatchAny( Agent *agent,
+    void ConfigDetermineKeyersModuloMatchAny( map< Agent *, Agent * > *possible_keyer_links,
+                                              Agent *agent,
                                               Agent *parent_agent,
                                               set<Agent *> *master_agents,
-                                              set<Agent *> *match_any_agents );
-    void ConfigDetermineKeyers( Agent *agent,
-                                Agent *parent_agent,
-                                set<Agent *> master_agents );
-    void ConfigDetermineResiduals( Agent *agent,
+                                              set<Agent *> *match_any_agents ) const;
+    void ConfigDeterminePossibleKeyers( map< Agent *, Agent * > *possible_keyer_links,
+                                        Agent *agent,
+                                        Agent *parent_agent,
+                                        set<Agent *> master_agents ) const;
+    void ConfigDetermineResiduals( map< Agent *, Agent * > *possible_keyer_links,
+                                   Agent *agent,
                                    Agent *parent_agent,
                                    set<Agent *> master_agents );
+    void ConfigFilterKeyers(map< Agent *, Agent * > *possible_keyer_links);
     void ConfigPopulateNormalAgents( set<Agent *> *normal_agents, 
                                      Agent *current_agent );
                                       
@@ -86,12 +90,13 @@ private:
     map< Agent *, AndRuleEngine > my_multiplicity_engines;
     map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
     set<Agent *> master_boundary_agents;
-    map< Agent *, Agent * > coupling_keyer_links; // maps from child to parent
-    set< pair<Agent *, Agent *> > coupling_residual_links;
+    set< pair<Agent *, Agent *> > coupling_keyer_links; // (child, parent)
+    set< pair<Agent *, Agent *> > coupling_residual_links; // (child, parent)
     
     shared_ptr<Conjecture> conj;
     shared_ptr<CSP::SolverHolder> solver;
     CouplingMap my_keys; 
+    CouplingMap solution_keys; 
     const CouplingMap *master_keys;
     set<Agent *> reached; 
     set< pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > > evaluator_records;   
