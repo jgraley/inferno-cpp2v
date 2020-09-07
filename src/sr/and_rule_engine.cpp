@@ -20,10 +20,11 @@
 
 using namespace SR;
 
-void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_agents )
+void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_agents_ )
 {
     root_agent = root_agent_;
-
+    master_agents = master_agents_;
+    
     set<Agent *> normal_agents;
     ConfigPopulateNormalAgents( &normal_agents, root_agent );    
     my_agents = SetDifference( normal_agents, master_agents );       
@@ -57,7 +58,8 @@ void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_ag
         CSP::VariableQueryLambda vql = [&](Agent *link_agent)
         {
             CSP::VariableFlags flags;
-            if( coupling_residual_links.count(make_pair(link_agent, cons_agent)) > 0 )
+            if( coupling_residual_links.count(make_pair(link_agent, cons_agent)) > 0 ||
+                master_agents.count(link_agent) > 0 )            
                 flags.comparison_rule = CSP::ComparisonRule::BY_VALUE;
             else
                 flags.comparison_rule = CSP::ComparisonRule::BY_LOCATION;
@@ -169,9 +171,8 @@ void AndRuleEngine::ConfigDetermineResiduals( map< Agent *, Agent * > *possible_
                                               Agent *parent_agent,
                                               set<Agent *> master_agents ) 
 {
-    if( (possible_keyer_links->count(agent) > 0 && 
-         possible_keyer_links->at(agent) != parent_agent) ||
-         master_agents.count(agent) > 0 )
+    if( possible_keyer_links->count(agent) > 0 && 
+        possible_keyer_links->at(agent) != parent_agent )
     {
         auto link = make_pair(agent, parent_agent);
         ASSERT( coupling_residual_links.count(link) == 0 ); // See #129, can fail on legal patterns
@@ -320,12 +321,14 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     // Are we at a residual coupling?
     if( coupling_residual_links.count( make_pair(agent, parent_agent) ) > 0 ) // See #129
     {
-        const CouplingMap *keys;
-        if( master_boundary_agents.count(agent) > 0 )
-            keys = master_keys;
-        else
-            keys = &my_keys;
-        CompareCoupling( agent, x, keys );
+        CompareCoupling( agent, x, &my_keys );
+        return;
+    }
+    
+    // Master couplings are now checked in a post-pass
+    if( master_boundary_agents.count(agent) > 0 )
+    {
+        master_coupling_candidates[agent] = x;
         return;
     }
 
@@ -480,7 +483,22 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             abnormal_links.clear();
             multiplicity_links.clear();
             evaluator_records.clear();
+            master_coupling_candidates.clear();
+            
             DecidedCompare( root_agent, nullptr, start_x );
+            
+            for( auto agent : master_boundary_agents )
+            {
+                // We have to allow for coupling candidates that are missing
+                // because a MatchAny agent early-outed on the corresponding option
+                // TODO we _could_ set up as a subset for each MatchAny and require
+                // exactly one match.  #135
+                if( master_coupling_candidates.count(agent) > 0 )
+                {
+                    auto x = master_coupling_candidates.at(agent);
+                    CompareCoupling( agent, x, master_keys );
+                }
+            }
 #endif
             CouplingMap combined_keys = MapUnion( *master_keys, solution_keys );     
                                                 

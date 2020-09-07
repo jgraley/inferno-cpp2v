@@ -85,6 +85,7 @@ public:
 
 private:
     Agent *root_agent;
+    set<Agent *> master_agents;
     set<Agent *> my_agents;   
     map< Agent *, AndRuleEngine > my_abnormal_engines;
     map< Agent *, AndRuleEngine > my_multiplicity_engines;
@@ -97,6 +98,7 @@ private:
     shared_ptr<CSP::SolverHolder> solver;
     CouplingMap my_keys; 
     CouplingMap solution_keys; 
+    CouplingMap master_coupling_candidates;
     const CouplingMap *master_keys;
     set<Agent *> reached; 
     set< pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > > evaluator_records;   
