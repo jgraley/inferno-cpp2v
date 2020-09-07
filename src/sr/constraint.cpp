@@ -4,5 +4,5 @@
 
 using namespace CSP;
 
-const Value::Id Value::Null = nullptr;
+const Value CSP::NullValue = nullptr;
  

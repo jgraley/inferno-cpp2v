@@ -39,10 +39,10 @@ public:
     
 private:
     int GetDegree() const;
-    list<Variable::Id> GetVariables() const { return GetVariablesImpl(agent, pq); }
-    static list<Variable::Id> GetVariablesImpl( SR::Agent * const agent, 
+    list<VariableId> GetVariables() const { return GetVariablesImpl(agent, pq); }
+    static list<VariableId> GetVariablesImpl( SR::Agent * const agent, 
                                               shared_ptr<SR::PatternQuery> pq );
-    static list<Variable::Flags> GetFlags( list<Variable::Id> vars, VariableQueryLambda vql );
+    static list<VariableFlags> GetFlags( list<VariableId> vars, VariableQueryLambda vql );
     bool Test( list< TreePtr<Node> > values, 
                SideInfo *side_info = nullptr );
         
@@ -55,7 +55,7 @@ private:
 
     SR::Agent * const agent;
     const shared_ptr<SR::PatternQuery> pq;
-    const list<Variable::Flags> flags;
+    const list<VariableFlags> flags;
     
     const shared_ptr<SR::Conjecture> conj;
     const shared_ptr<SimpleCompare> simple_compare;

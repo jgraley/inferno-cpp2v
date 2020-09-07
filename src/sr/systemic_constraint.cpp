@@ -15,7 +15,7 @@ SystemicConstraint::SystemicConstraint( SR::Agent *agent_,
 {    
     // This implementation doesn't know how to model the first varaible
     // by any means other than by location (i.e. by address)
-    ASSERT( (flags.front() & Variable::MASK_BY) == Variable::BY_LOCATION );
+    ASSERT( flags.front().comparison_rule == ComparisonRule::BY_LOCATION );
     
     // Configure our embedded Conjecture object
     set<SR::Agent *> my_agents;
@@ -35,10 +35,10 @@ int SystemicConstraint::GetDegree() const
 }
 
 
-list<Variable::Id> SystemicConstraint::GetVariablesImpl( SR::Agent * const agent, 
+list<VariableId> SystemicConstraint::GetVariablesImpl( SR::Agent * const agent, 
                                                        shared_ptr<SR::PatternQuery> pq )
 {
-    list<Variable::Id> vars;
+    list<VariableId> vars;
     
     vars.push_back( agent ); // Our agent is one of them!
     
@@ -49,22 +49,22 @@ list<Variable::Id> SystemicConstraint::GetVariablesImpl( SR::Agent * const agent
 }
 
 
-list<Variable::Flags> SystemicConstraint::GetFlags( list<Variable::Id> vars, VariableQueryLambda vql )
+list<VariableFlags> SystemicConstraint::GetFlags( list<VariableId> vars, VariableQueryLambda vql )
 {
-    list<Variable::Flags> flags;
-    for( Variable::Id v : vars )
+    list<VariableFlags> flags;
+    for( VariableId v : vars )
         flags.push_back( vql( v ) );
     return flags;
 }
 
 
-bool SystemicConstraint::Test( list< Value::Id > values,
+bool SystemicConstraint::Test( list< Value > values,
                                SideInfo *side_info )
 {
     ASSERT( values.size() == GetDegree() );
-    for( Value::Id v : values )
+    for( Value v : values )
     {
-        ASSERT( v != Value::Null );
+        ASSERT( v != NullValue );
     }
     // We're going to be lazy and borrow the Conjecture class for now.
     // Our constructor has already configured it to have our agent and
@@ -109,14 +109,14 @@ bool SystemicConstraint::Test( list< Value::Id > values,
             fit++; // skip "me"
             for( TreePtr<Node> val : values )
             {
-                switch( *fit & Variable::MASK_BY )
+                switch( fit->comparison_rule )
                 {
-                case Variable::BY_VALUE:
+                case ComparisonRule::BY_VALUE:
                     if( !(*simple_compare)( val, (*nit)->x ) )
                         throw ByValueLinkMismatch();  
                     break;
                     
-                case Variable::BY_LOCATION:
+                case ComparisonRule::BY_LOCATION:
                     if( val != (*nit)->x )
                         throw ByLocationLinkMismatch();  
                     break;

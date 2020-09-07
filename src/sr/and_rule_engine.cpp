@@ -56,11 +56,11 @@ void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_ag
     {
         CSP::VariableQueryLambda vql = [&](Agent *link_agent)
         {
-            CSP::Variable::Flags flags = 0;
+            CSP::VariableFlags flags;
             if( coupling_residual_links.count(make_pair(link_agent, cons_agent)) > 0 )
-                flags |= CSP::Variable::BY_VALUE;
+                flags.comparison_rule = CSP::ComparisonRule::BY_VALUE;
             else
-                flags |= CSP::Variable::BY_LOCATION;
+                flags.comparison_rule = CSP::ComparisonRule::BY_LOCATION;
             return flags;
         };
                 

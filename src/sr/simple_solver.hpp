@@ -29,20 +29,20 @@ public:
      * @param [input] if non-null, the variables to use. Must be the same set that we would deduce from querying the constraints, but in any order.
      */
     SimpleSolver( const list< shared_ptr<Constraint> > &constraints, 
-                  const list<Variable::Id> *variables = nullptr );
+                  const list<VariableId> *variables = nullptr );
 
-    void Run( ReportageObserver *holder, const set<Value::Id> &initial_domain );
+    void Run( ReportageObserver *holder, const set<Value> &initial_domain );
 
 private:
-    typedef map<Variable::Id, Value::Id> Assignments;
+    typedef map<VariableId, Value> Assignments;
 
-    static list<Variable::Id> DeduceVariables( const list< shared_ptr<Constraint> > &constraints, 
-                                               const list<Variable::Id> *variables );
+    static list<VariableId> DeduceVariables( const list< shared_ptr<Constraint> > &constraints, 
+                                               const list<VariableId> *variables );
 
-    bool TryVariable( list<Variable::Id>::const_iterator current );
-    bool Test( map<Variable::Id, Value::Id> &assigns, 
+    bool TryVariable( list<VariableId>::const_iterator current );
+    bool Test( map<VariableId, Value> &assigns, 
                SideInfo *side_info = nullptr );
-    list<Value::Id> GetConstraintValues( shared_ptr<Constraint> c, const Assignments &a );    
+    list<Value> GetConstraintValues( shared_ptr<Constraint> c, const Assignments &a );    
     void ReportSolution( const Assignments &assignments, 
                          shared_ptr<SideInfo> side_info );
     
@@ -50,10 +50,10 @@ private:
         
     // set by constructor - depends on pattern only
     const list< shared_ptr<Constraint> > constraints;
-    const list<Variable::Id> variables;
+    const list<VariableId> variables;
 
     // Used during solve - depends on pattern and x
-    set<Value::Id> initial_domain;    
+    set<Value> initial_domain;    
     Assignments assignments;
 };
 
