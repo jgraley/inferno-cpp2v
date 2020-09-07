@@ -6,16 +6,21 @@
 using namespace CSP;
 
 SystemicConstraint::SystemicConstraint( SR::Agent *agent_, 
-                                        const set<SR::Agent *> &coupling_residuals_ ) :
+                                        VariableQueryLambda vql ) :
     agent( agent_ ),
-    coupling_residual_links( coupling_residuals_ ),
     pq( agent->GetPatternQuery() ),
+    flags( GetFlags( GetVariablesImpl( agent, pq ), vql ) ),
     conj( make_shared<SR::Conjecture>() ),
     simple_compare( make_shared<SimpleCompare>() )
 {    
+    // This implementation doesn't know how to model the first varaible
+    // by any means other than by location (i.e. by address)
+    ASSERT( (flags.front() & Variable::MASK_BY) == Variable::BY_LOCATION );
+    
+    // Configure our embedded Conjecture object
     set<SR::Agent *> my_agents;
     my_agents.insert( agent ); // just the one agent this time
-    conj->Configure(my_agents, agent);
+    conj->Configure(my_agents, agent);    
 }
 
 
@@ -30,9 +35,10 @@ int SystemicConstraint::GetDegree() const
 }
 
 
-list<VariableId> SystemicConstraint::GetVariables() const
+list<Variable::Id> SystemicConstraint::GetVariablesImpl( SR::Agent * const agent, 
+                                                       shared_ptr<SR::PatternQuery> pq )
 {
-    list<VariableId> vars;
+    list<Variable::Id> vars;
     
     vars.push_back( agent ); // Our agent is one of them!
     
@@ -43,13 +49,22 @@ list<VariableId> SystemicConstraint::GetVariables() const
 }
 
 
-bool SystemicConstraint::Test( list< Value > values,
+list<Variable::Flags> SystemicConstraint::GetFlags( list<Variable::Id> vars, VariableQueryLambda vql )
+{
+    list<Variable::Flags> flags;
+    for( Variable::Id v : vars )
+        flags.push_back( vql( v ) );
+    return flags;
+}
+
+
+bool SystemicConstraint::Test( list< Value::Id > values,
                                SideInfo *side_info )
 {
     ASSERT( values.size() == GetDegree() );
-    for( Value v : values )
+    for( Value::Id v : values )
     {
-        ASSERT( v != NullValue );
+        ASSERT( v != Value::Null );
     }
     // We're going to be lazy and borrow the Conjecture class for now.
     // Our constructor has already configured it to have our agent and
@@ -89,20 +104,25 @@ bool SystemicConstraint::Test( list< Value > values,
             // we were passed. Mismatch will throw, same as in DQ.
             auto nlinks = query->GetNormalLinks();
             ASSERT( nlinks->size() == values.size() );
-            auto nit = nlinks->begin();            
+            auto nit = nlinks->begin();      
+            auto fit = flags.begin();      
+            fit++; // skip "me"
             for( TreePtr<Node> val : values )
             {
-                if( coupling_residual_links.count( (*nit)->agent ) )
+                switch( *fit & Variable::MASK_BY )
                 {
+                case Variable::BY_VALUE:
                     if( !(*simple_compare)( val, (*nit)->x ) )
-                        throw CouplingResidualLinkMismatch();  
-                }
-                else
-                {
+                        throw ByValueLinkMismatch();  
+                    break;
+                    
+                case Variable::BY_LOCATION:
                     if( val != (*nit)->x )
-                        throw NormalLinkMismatch();  
+                        throw ByLocationLinkMismatch();  
+                    break;
                 }
                 nit++;
+                fit++;
             }
         }
         catch( ::Mismatch & )

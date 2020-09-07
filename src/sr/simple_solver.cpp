@@ -10,7 +10,7 @@
 using namespace CSP;
 
 SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_, 
-                            const list<VariableId> *variables_ ) :
+                            const list<Variable::Id> *variables_ ) :
     holder(nullptr),
     constraints(constraints_),
     variables( DeduceVariables(constraints, variables_) )
@@ -25,9 +25,9 @@ void SimpleSolver::Run( ReportageObserver *holder_, const set< TreePtr<Node> > &
     initial_domain = initial_domain_;
 
     assignments.clear();
-    for( VariableId v : variables )
+    for( Variable::Id v : variables )
     {
-        assignments[v] = NullValue; // means "unassigned"
+        assignments[v] = Value::Null; // means "unassigned"
     }
     
     TryVariable( variables.begin() );    
@@ -36,17 +36,17 @@ void SimpleSolver::Run( ReportageObserver *holder_, const set< TreePtr<Node> > &
 }
 
 
-list<VariableId> SimpleSolver::DeduceVariables( const list< shared_ptr<Constraint> > &constraints, 
-                                                const list<VariableId> *variables_ )
+list<Variable::Id> SimpleSolver::DeduceVariables( const list< shared_ptr<Constraint> > &constraints, 
+                                                  const list<Variable::Id> *variables_ )
 {
-    list<VariableId> my_variables;
-    set<VariableId> variables_check_set;
+    list<Variable::Id> my_variables;
+    set<Variable::Id> variables_check_set;
 
     for( shared_ptr<Constraint> c : constraints )
     {
-        list<VariableId> vars = c->GetVariables();
+        list<Variable::Id> vars = c->GetVariables();
         
-        for( VariableId v : vars )
+        for( Variable::Id v : vars )
         {
             if( variables_check_set.count(v) == 0 )
             {
@@ -65,20 +65,20 @@ list<VariableId> SimpleSolver::DeduceVariables( const list< shared_ptr<Constrain
     else
     {
         // A variables list was supplied and it must have the same set of variables
-        for( VariableId v : *variables_ )
+        for( Variable::Id v : *variables_ )
             ASSERT( variables_check_set.count(v) == 1 );
         return *variables_;
     }
 }
 
 
-bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
+bool SimpleSolver::TryVariable( list<Variable::Id>::const_iterator current )
 {
-    list<VariableId>::const_iterator next = current;
+    list<Variable::Id>::const_iterator next = current;
     ++next;
     bool complete = (next == variables.end());
     
-    for( Value v : initial_domain )
+    for( Value::Id v : initial_domain )
     {
         assignments[*current] = v;
      
@@ -100,13 +100,13 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
 
 }
 
-bool SimpleSolver::Test( map<VariableId, Value> &assigns, 
+bool SimpleSolver::Test( map<Variable::Id, Value::Id> &assigns, 
                          SideInfo *side_info )
 {
     bool ok = true; // AND-rule
     for( shared_ptr<Constraint> c : constraints )
     {
-        list<Value> vals = GetConstraintValues( c, assignments );
+        list<Value::Id> vals = GetConstraintValues( c, assignments );
 
         if( vals.size() < c->GetDegree() )
             continue; // There were unassigned variables, don't bother testing this constraint
@@ -120,14 +120,14 @@ bool SimpleSolver::Test( map<VariableId, Value> &assigns,
 }
 
 
-list<Value> SimpleSolver::GetConstraintValues( shared_ptr<Constraint> c, const Assignments &a )
+list<Value::Id> SimpleSolver::GetConstraintValues( shared_ptr<Constraint> c, const Assignments &a )
 {
-    list<VariableId> vars = c->GetVariables();
-    list<Value> vals;
-    for( VariableId var : vars )
+    list<Variable::Id> vars = c->GetVariables();
+    list<Value::Id> vals;
+    for( Variable::Id var : vars )
     {
-        Value val = a.at(var); 
-        if( val == NullValue )
+        Value::Id val = a.at(var); 
+        if( val == Value::Null )
             continue; // unassigned variable
         vals.push_back( val );
     }    
@@ -138,7 +138,7 @@ list<Value> SimpleSolver::GetConstraintValues( shared_ptr<Constraint> c, const A
 void SimpleSolver::ReportSolution( const Assignments &assignments, 
                                    shared_ptr<SideInfo> side_info )
 {
-    map< shared_ptr<Constraint>, list< Value > > vals;
+    map< shared_ptr<Constraint>, list< Value::Id > > vals;
     vals.clear();
     for( shared_ptr<Constraint> c : constraints )
     {

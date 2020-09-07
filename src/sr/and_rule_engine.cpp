@@ -50,18 +50,22 @@ void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_ag
     coupling_residual_links.clear();
     ConfigDetermineResiduals( &possible_keyer_links, root_agent, nullptr, master_agents );
     ConfigFilterKeyers(&possible_keyer_links);
-#ifdef USE_SOLVER
+#ifdef USE_SOLVER    
     list< shared_ptr<CSP::Constraint> > constraints;
-    for( Agent *a : my_agents )
+    for( Agent *cons_agent : my_agents )
     {
-        // This bit needs to be improved, see #131
-        set<Agent *> cr;
-        for( auto p : coupling_residual_links )
-            if( p.first == a )
-                cr.insert( p.second );
+        CSP::VariableQueryLambda vql = [&](Agent *link_agent)
+        {
+            CSP::Variable::Flags flags = 0;
+            if( coupling_residual_links.count(make_pair(link_agent, cons_agent)) > 0 )
+                flags |= CSP::Variable::BY_VALUE;
+            else
+                flags |= CSP::Variable::BY_LOCATION;
+            return flags;
+        };
                 
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( a, cr );
-        my_constraints[a] = c;    
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( cons_agent, vql );
+        my_constraints[cons_agent] = c;    
         constraints.push_back(c);
     }
     // Passing in normal_agents_ordered will force SimpleSolver's backtracker to

@@ -9,12 +9,13 @@
 #include <memory>
 #include <list>
 #include <memory>
+#include <functional>
 
 namespace SR
 {
 class Agent;
 class BooleanEvaluator;
-}
+};
 
 namespace CSP
 { 
@@ -32,16 +33,35 @@ struct SideInfo
  * takes Agent * explicitly. But the variables could change, so we 
  * introduce a typedef for them.
  */
-typedef SR::Agent * VariableId;
-
-enum ValueCategory
+namespace Value
+{
+enum Category
 {
     BY_LOCATION, // The "X" nodes whose location in the tree is significant
     BY_VALUE     // The "Y" nodes whose location dous not matter, only subtree "value"
 };
 
-typedef TreePtr<Node> Value;
-const Value NullValue;
+typedef TreePtr<Node> Id;
+extern const Id Null;
+}
+
+namespace Variable
+{
+
+typedef SR::Agent * Id;
+
+// Flags is a bitfield, modulated by flags
+enum : int
+{
+    MASK_BY = 0x01,
+    BY_LOCATION = 0x00,
+    BY_VALUE = 0x01
+};
+typedef int Flags;
+
+};
+
+typedef function< Variable::Flags( Variable::Id ) > VariableQueryLambda;
 
 /** Implements a systemic constraint as discussed in #107
  */
@@ -63,7 +83,7 @@ public:
      * 
      * @return A list of variables affecteed by this constraint. Size equals the return from GetDegree()
      */
-    virtual list<VariableId> GetVariables() const = 0;
+    virtual list<Variable::Id> GetVariables() const = 0;
     
     /**
      * Test a list of variable values for inclusion in the constraint.
@@ -74,7 +94,7 @@ public:
      * @retval true the values are in the constraint, same ordering as return of GetVariables().
      * @retval false the values are not in the constraint
      */
-    virtual bool Test( list< Value > values, 
+    virtual bool Test( list< Value::Id > values, 
                        SideInfo *side_info = nullptr ) = 0;        
 
     /**

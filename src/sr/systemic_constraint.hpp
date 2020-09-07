@@ -32,27 +32,31 @@ public:
      * 
      * @param agent the agent from which the constraint will be created.
      * 
-     * @param coupling_residual_links the linked agents that should be tested using SimpleCompare
+     * @param vql callback that requests information about variables
      */
     explicit SystemicConstraint( SR::Agent *agent, 
-                                 const set<SR::Agent *> &coupling_residual_links );
+                                 VariableQueryLambda vql );
     
 private:
     int GetDegree() const;
-    list<VariableId> GetVariables() const;
+    list<Variable::Id> GetVariables() const { return GetVariablesImpl(agent, pq); }
+    static list<Variable::Id> GetVariablesImpl( SR::Agent * const agent, 
+                                              shared_ptr<SR::PatternQuery> pq );
+    static list<Variable::Flags> GetFlags( list<Variable::Id> vars, VariableQueryLambda vql );
     bool Test( list< TreePtr<Node> > values, 
                SideInfo *side_info = nullptr );
         
-    class NormalLinkMismatch : public ::Mismatch
+    class ByLocationLinkMismatch : public ::Mismatch
     {
     };
-    class CouplingResidualLinkMismatch : public ::Mismatch
+    class ByValueLinkMismatch : public ::Mismatch
     {
     };
 
     SR::Agent * const agent;
-    const set<SR::Agent *> coupling_residual_links;
     const shared_ptr<SR::PatternQuery> pq;
+    const list<Variable::Flags> flags;
+    
     const shared_ptr<SR::Conjecture> conj;
     const shared_ptr<SimpleCompare> simple_compare;
 };

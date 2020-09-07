@@ -14,21 +14,21 @@ SolverHolder::SolverHolder( shared_ptr<Solver> solver_ ) :
 }
 
 
-void SolverHolder::Start( const set<Value> &initial_domain_ )
+void SolverHolder::Start( const set<Value::Id> &initial_domain_ )
 {
     matches.clear();
     solver->Run( this, initial_domain_ );
 }
 
 
-void SolverHolder::ReportSolution( const map< shared_ptr<Constraint>, list< Value > > &values, 
+void SolverHolder::ReportSolution( const map< shared_ptr<Constraint>, list< Value::Id > > &values, 
                                    shared_ptr<SideInfo> side_info )
 {
     matches.push_back( make_pair(values, side_info) );
 }
 
 
-bool SolverHolder::GetNextSolution( map< shared_ptr<Constraint>, list< Value > > *values, 
+bool SolverHolder::GetNextSolution( map< shared_ptr<Constraint>, list< Value::Id > > *values, 
                                     SideInfo *side_info )
 {
     if( matches.empty() )

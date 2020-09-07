@@ -34,7 +34,7 @@ public:
      * 
      * @param initial_domain [in] the domain for all the variables, could get expanded depending on the solver algorithm.
      */
-    void Start( const set<Value> &initial_domain );
+    void Start( const set<Value::Id> &initial_domain );
 
     /**
      * Try to extract a single solution from the solver. 
@@ -46,18 +46,18 @@ public:
      * @retval true A solution was found, and non-null arguments are filled in
      * @retval false No solutions are left, and the pointer arguments are unused
      */
-    bool GetNextSolution( map< shared_ptr<Constraint>, list< Value > > *values = nullptr, 
+    bool GetNextSolution( map< shared_ptr<Constraint>, list< Value::Id > > *values = nullptr, 
                           SideInfo *side_info = nullptr );
 
  
 private:
-    void ReportSolution( const map< shared_ptr<Constraint>, list< Value > > &values, 
+    void ReportSolution( const map< shared_ptr<Constraint>, list< Value::Id > > &values, 
                          shared_ptr<SideInfo> side_info );
 
     const shared_ptr<Solver> solver;
 
     // Only needed to reserialise the matches TODO move to "holder" class
-    list< pair< map< shared_ptr<Constraint>, list< Value > >, shared_ptr<SideInfo> > > matches;    
+    list< pair< map< shared_ptr<Constraint>, list< Value::Id > >, shared_ptr<SideInfo> > > matches;    
 };
 
 };
