@@ -55,6 +55,10 @@ private:
     // Used during solve - depends on pattern and x
     set<Value> initial_domain;    
     Assignments assignments;
+    
+    // Only needed for debug output
+    Assignments best_assignments;
+    int best_num_assignments;
 };
 
 };
