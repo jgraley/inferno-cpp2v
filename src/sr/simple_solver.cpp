@@ -37,14 +37,14 @@ void SimpleSolver::Run( ReportageObserver *holder_, const set< TreePtr<Node> > &
 
 
 list<VariableId> SimpleSolver::DeduceVariables( const list< shared_ptr<Constraint> > &constraints, 
-                                                  const list<VariableId> *variables_ )
+                                                const list<VariableId> *variables_ )
 {
     list<VariableId> my_variables;
     set<VariableId> variables_check_set;
 
     for( shared_ptr<Constraint> c : constraints )
     {
-        list<VariableId> vars = c->GetVariables();
+        list<VariableId> vars = c->GetFreeVariables();
         
         for( VariableId v : vars )
         {
@@ -108,21 +108,21 @@ bool SimpleSolver::Test( map<VariableId, Value> &assigns,
     {
         list<Value> vals = GetConstraintValues( c, assignments );
 
-        if( vals.size() < c->GetDegree() )
+        if( vals.size() < c->GetFreeDegree() )
             continue; // There were unassigned variables, don't bother testing this constraint
             
         ok = c->Test(vals, side_info); 
         
         if( !ok )
             break;
-    }    
+    }        
     return ok;
 }
 
 
 list<Value> SimpleSolver::GetConstraintValues( shared_ptr<Constraint> c, const Assignments &a )
 {
-    list<VariableId> vars = c->GetVariables();
+    list<VariableId> vars = c->GetFreeVariables();
     list<Value> vals;
     for( VariableId var : vars )
     {
@@ -143,7 +143,7 @@ void SimpleSolver::ReportSolution( const Assignments &assignments,
     for( shared_ptr<Constraint> c : constraints )
     {
         vals[c] = GetConstraintValues(c, assignments);
-        ASSERT( vals.at(c).size() == c->GetDegree() ); // Assignments should be complete
+        ASSERT( vals.at(c).size() == c->GetFreeDegree() ); // Assignments should be complete
     }
     
     holder->ReportSolution( vals, side_info );

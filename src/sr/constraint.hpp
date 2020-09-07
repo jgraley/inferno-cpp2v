@@ -35,12 +35,19 @@ struct SideInfo
  */
 
 // Flags is a bitfield, modulated by flags
-enum class ComparisonRule
+enum class CompareBy
 {
-    BY_LOCATION,
-    BY_VALUE
+    LOCATION,
+    VALUE
 };
 
+
+// Flags is a bitfield, modulated by flags
+enum class Freedom
+{
+    FORCED,
+    FREE
+};
 
 typedef TreePtr<Node> Value;
 extern const Value NullValue;
@@ -48,7 +55,7 @@ extern const Value NullValue;
 struct ValueFlags
 {
     // TODO Would like to use bitfields but gcc says no https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242
-    ComparisonRule comparison_rule; 
+    CompareBy compare_by; 
 };
 
 
@@ -57,7 +64,8 @@ typedef SR::Agent * VariableId;
 struct VariableFlags
 {
     // TODO Would like to use bitfields but gcc says no https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242
-    ComparisonRule comparison_rule; 
+    CompareBy compare_by; 
+    Freedom freedom;
 };
 
 
@@ -76,14 +84,21 @@ public:
      * 
      * @return The constraint's degree.
      */
-    virtual int GetDegree() const = 0;
+    virtual int GetFreeDegree() const = 0;
     
     /**
      * Get the degree of the constraint.
      * 
-     * @return A list of variables affecteed by this constraint. Size equals the return from GetDegree()
+     * @return A list of free variables affecteed by this constraint. Size equals the return from GetFreeDegree()
      */
-    virtual list<VariableId> GetVariables() const = 0;
+    virtual list<VariableId> GetFreeVariables() const = 0;
+    
+    /**
+     * Set the values of the forced varibles
+     * 
+     * @param forces [in] a map from varaibles to forced values
+     */    
+    virtual void SetForces( const map<VariableId, Value> &forces ) = 0;    
     
     /**
      * Test a list of variable values for inclusion in the constraint.
@@ -91,7 +106,7 @@ public:
      * @param values [in] the values of the variables, size should be the degree.
      * @param side_info [out] information relating to abnormal contexts etc, only defined if true is returned.
      * 
-     * @retval true the values are in the constraint, same ordering as return of GetVariables().
+     * @retval true the values are in the constraint, same ordering as return of GetFreeVariables().
      * @retval false the values are not in the constraint
      */
     virtual bool Test( list< Value > values, 

@@ -53,28 +53,46 @@ void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_ag
     ConfigFilterKeyers(&possible_keyer_links);
 #ifdef USE_SOLVER    
     list< shared_ptr<CSP::Constraint> > constraints;
-    for( Agent *cons_agent : my_agents )
+    for( Agent *constraint_agent : my_agents )
     {
         CSP::VariableQueryLambda vql = [&](Agent *link_agent)
         {
             CSP::VariableFlags flags;
-            if( coupling_residual_links.count(make_pair(link_agent, cons_agent)) > 0 ||
-                master_agents.count(link_agent) > 0 )            
-                flags.comparison_rule = CSP::ComparisonRule::BY_VALUE;
+            
+            if( link_agent==constraint_agent ) // Self-variable must be by location
+                flags.compare_by = CSP::CompareBy::LOCATION;   
+            else if( coupling_residual_links.count( make_pair(link_agent, constraint_agent) ) > 0 ) // Coupling residuals are by value
+                flags.compare_by = CSP::CompareBy::VALUE;
+            else if( master_boundary_agents.count(link_agent) > 0) // Couplings to master are by value
+                flags.compare_by = CSP::CompareBy::VALUE;
             else
-                flags.comparison_rule = CSP::ComparisonRule::BY_LOCATION;
+                flags.compare_by = CSP::CompareBy::LOCATION;   
+                                 
+            if( link_agent==root_agent ) // Root variable will be forced
+                flags.freedom = CSP::Freedom::FORCED;
+            else if( master_boundary_agents.count(link_agent) > 0) // Couplings to master are forced
+                flags.freedom = CSP::Freedom::FORCED;
+            else
+                flags.freedom = CSP::Freedom::FREE;
+            
             return flags;
         };
                 
-        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( cons_agent, vql );
-        my_constraints[cons_agent] = c;    
+        shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( constraint_agent, vql );
+        my_constraints[constraint_agent] = c;    
         constraints.push_back(c);
     }
     // Passing in normal_agents_ordered will force SimpleSolver's backtracker to
-    // take the same route we do with DecidedCompare(). Note that master agents
-    // have not been removed from this list - it's easier if solver knows about 
-    // them and we constrain their values explicitly.
-    auto salg = make_shared<CSP::SimpleSolver>(constraints, &normal_agents_ordered);
+    // take the same route we do with DecidedCompare(). Need to remove FORCED agents
+    // though.
+    list<Agent *> free_normal_agents_ordered;
+    for( Agent *agent : normal_agents_ordered )
+    {
+        if( agent != root_agent &&
+            master_boundary_agents.count(agent) == 0 )
+            free_normal_agents_ordered.push_back( agent );
+    }
+    auto salg = make_shared<CSP::SimpleSolver>(constraints, &free_normal_agents_ordered);
     solver = make_shared<CSP::SolverHolder>(salg);
 #else
     conj = make_shared<Conjecture>();
@@ -430,7 +448,8 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
     
     CouplingMap forces = *master_keys;
     forces[root_agent] = start_x;
-    // TODO use the forces #125
+    for( pair< Agent *, shared_ptr<CSP::Constraint> > p : my_constraints )
+        p.second->SetForces( forces );
     
     // Expand the domain to include generated child y nodes.
     ExpandDomain( root_agent, domain );
@@ -459,7 +478,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
         for( pair< Agent *, shared_ptr<CSP::Constraint> > p : my_constraints )
         {
             list< TreePtr<Node> > &vals = values.at(p.second);
-            list< Agent * > vars = p.second->GetVariables();
+            list< Agent * > vars = p.second->GetFreeVariables();
             ASSERT( vars.front() == p.first );
             solution_keys[vars.front()] = vals.front(); // For now only do the first one, which is 
         }

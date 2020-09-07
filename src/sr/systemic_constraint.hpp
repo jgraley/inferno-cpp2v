@@ -38,11 +38,12 @@ public:
                                  VariableQueryLambda vql );
     
 private:
-    int GetDegree() const;
-    list<VariableId> GetVariables() const { return GetVariablesImpl(agent, pq); }
     static list<VariableId> GetVariablesImpl( SR::Agent * const agent, 
                                               shared_ptr<SR::PatternQuery> pq );
     static list<VariableFlags> GetFlags( list<VariableId> vars, VariableQueryLambda vql );
+    int GetFreeDegree() const;
+    list<VariableId> GetFreeVariables() const;
+    virtual void SetForces( const map<VariableId, Value> &forces );    
     bool Test( list< TreePtr<Node> > values, 
                SideInfo *side_info = nullptr );
         
@@ -54,11 +55,12 @@ private:
     };
 
     SR::Agent * const agent;
-    const shared_ptr<SR::PatternQuery> pq;
-    const list<VariableFlags> flags;
+    const shared_ptr<SR::PatternQuery> pq; // links run over all vars minus agent
+    const list<VariableFlags> flags; // over ALL vars
     
     const shared_ptr<SR::Conjecture> conj;
     const shared_ptr<SimpleCompare> simple_compare;
+    list<Value> forces; // only FREE vars
 };
 
 };

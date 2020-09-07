@@ -15,7 +15,7 @@ SystemicConstraint::SystemicConstraint( SR::Agent *agent_,
 {    
     // This implementation doesn't know how to model the first varaible
     // by any means other than by location (i.e. by address)
-    ASSERT( flags.front().comparison_rule == ComparisonRule::BY_LOCATION );
+    ASSERT( flags.front().compare_by == CompareBy::LOCATION );
     
     // Configure our embedded Conjecture object
     set<SR::Agent *> my_agents;
@@ -24,23 +24,12 @@ SystemicConstraint::SystemicConstraint( SR::Agent *agent_,
 }
 
 
-int SystemicConstraint::GetDegree() const
-{
-    // There's a variable for each pattern node. Count the number 
-    // potentially constrained by our agent. Exclude abnormal links 
-    // and multiplicities - we only want ones that will be part of our 
-    // AndRule region.
-    return pq->GetNormalLinks()->size() + 
-           1; // plus one for the location of our x (constaints are non-localised)
-}
-
-
 list<VariableId> SystemicConstraint::GetVariablesImpl( SR::Agent * const agent, 
                                                        shared_ptr<SR::PatternQuery> pq )
 {
     list<VariableId> vars;
     
-    vars.push_back( agent ); // Our agent is one of them!
+    vars.push_back( agent ); // The me-variable
     
     FOREACH( shared_ptr<const SR::PatternQuery::Link> b, *pq->GetNormalLinks() )
         vars.push_back( b->agent );  // This rest are our normal linked agents
@@ -58,14 +47,85 @@ list<VariableFlags> SystemicConstraint::GetFlags( list<VariableId> vars, Variabl
 }
 
 
+int SystemicConstraint::GetFreeDegree() const
+{
+    int free_degree = 0;
+    for( auto f : flags )
+    {
+        if( f.freedom == Freedom::FREE )
+            free_degree++;
+    }
+    return free_degree;
+}
+
+
+list<VariableId> SystemicConstraint::GetFreeVariables() const
+{ 
+    list<VariableId> vars = GetVariablesImpl(agent, pq); 
+    list<VariableId> free_vars;
+    auto fit = flags.begin();
+    for( auto var : vars )
+    {
+        if( fit->freedom == Freedom::FREE )
+            free_vars.push_back( var );
+        fit++;
+    }
+    return free_vars;
+}
+
+
+void SystemicConstraint::SetForces( const map<VariableId, Value> &forces_ )
+{
+    list<VariableId> vars = GetVariablesImpl(agent, pq); 
+    forces.clear();
+    auto fit = flags.begin();
+    for( auto var : vars )
+    {
+        if( fit->freedom == Freedom::FORCED )
+            forces.push_back( forces_.at( var ) );
+        fit++;
+    }    
+}   
+
+
 bool SystemicConstraint::Test( list< Value > values,
                                SideInfo *side_info )
 {
-    ASSERT( values.size() == GetDegree() );
+    ASSERT( values.size() == GetFreeDegree() );
     for( Value v : values )
     {
         ASSERT( v != NullValue );
     }
+    
+    // Merge incoming values with the forces to get a full set of 
+    // values that must tally up with the DQ links.
+    TreePtr<Node> x;
+    list< Value > expanded_values;
+    auto fit = forces.begin();
+    bool first = true; // First flag refers to the me-variable
+    for( const VariableFlags &f : flags )
+    {
+        switch( f.freedom )
+        {
+        case Freedom::FORCED:
+            if( first )         
+                x = *fit;
+            else
+                expanded_values.push_back( *fit );
+            fit++;
+            break;
+        
+        case Freedom::FREE:
+            if( first )             
+                x = values.front();
+            else
+                expanded_values.push_back( values.front() );
+            values.pop_front();
+            break;
+        }
+        first = false;
+    }    
+    
     // We're going to be lazy and borrow the Conjecture class for now.
     // Our constructor has already configured it to have our agent and
     // only our agent, so we won't really be using the multi-agent support
@@ -74,11 +134,6 @@ bool SystemicConstraint::Test( list< Value > values,
     //
     // Prepare the conjecture for a series of iterations.
     conj->Start();
-    
-    // "our" X is simply the first value (i.e. first degree of freedom
-    // is being moved around the X tree).
-    TreePtr<Node> x = values.front();
-    values.pop_front();
     shared_ptr<SR::DecidedQuery> query; 
     
     // All the other values are normal links. These degrees of freedom
@@ -103,20 +158,20 @@ bool SystemicConstraint::Test( list< Value > values,
             // over both and check that they refer to the same x nodes
             // we were passed. Mismatch will throw, same as in DQ.
             auto nlinks = query->GetNormalLinks();
-            ASSERT( nlinks->size() == values.size() );
+            ASSERT( nlinks->size() == expanded_values.size() );
             auto nit = nlinks->begin();      
             auto fit = flags.begin();      
             fit++; // skip "me"
-            for( TreePtr<Node> val : values )
+            for( TreePtr<Node> val : expanded_values )
             {
-                switch( fit->comparison_rule )
+                switch( fit->compare_by )
                 {
-                case ComparisonRule::BY_VALUE:
+                case CompareBy::VALUE:
                     if( !(*simple_compare)( val, (*nit)->x ) )
                         throw ByValueLinkMismatch();  
                     break;
                     
-                case ComparisonRule::BY_LOCATION:
+                case CompareBy::LOCATION:
                     if( val != (*nit)->x )
                         throw ByLocationLinkMismatch();  
                     break;

@@ -37,7 +37,7 @@ private:
     typedef map<VariableId, Value> Assignments;
 
     static list<VariableId> DeduceVariables( const list< shared_ptr<Constraint> > &constraints, 
-                                               const list<VariableId> *variables );
+                                             const list<VariableId> *variables );
 
     bool TryVariable( list<VariableId>::const_iterator current );
     bool Test( map<VariableId, Value> &assigns, 

@@ -39,7 +39,7 @@ public:
     /**
      * Try to extract a single solution from the solver. 
      * 
-     * @param values [out] if non-null and solution exists: values that solve the CSP, organsied into a list for each constraint. Each list is ordered as per `Constraint::GetVariables()`.
+     * @param values [out] if non-null and solution exists: values that solve the CSP, organsied into a list for each constraint. Each list is ordered as per `Constraint::GetFreeVariables()`.
      * 
      * @param side_info [out] if non-null and solution exists: side-information as required by the `AndRuleEngine` in order to make use of the solution.
      *
