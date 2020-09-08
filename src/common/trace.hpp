@@ -33,6 +33,7 @@ public:
         ABORT = 4    // Crash out in destructor
     };
     Tracer( const char *f, int l, const char *fu, Flags fl=(Flags)0, const char *c=0 );
+    Tracer( Flags fl=(Flags)0, const char *c=0 );
     ~Tracer();
     Tracer &operator()();
     Tracer &operator()(const char *fmt, ...);
@@ -68,6 +69,22 @@ public:
         friend class Tracer;
     };
 
+    class RAIIEnable
+    {
+    public:
+    	inline RAIIEnable( bool enable_ ) : 
+    	    old_enable(enable) 
+    	{ 
+            enable = enable_; 
+        } 
+    	inline ~RAIIEnable() 
+    	{ 
+            enable = old_enable; 
+        } 
+    private:
+        const bool old_enable;
+    };
+
 private:
     const char * const file;
     const int line;
@@ -83,6 +100,7 @@ private:
 
 #define FTRACE Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, Tracer::FORCE )
 #define TRACE if(Tracer::IsEnabled()) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION )
+#define TRACEC if(Tracer::IsEnabled()) Tracer()
 
 // New assert uses functor. Can be used as ASSERT(cond); or ASSERT(cond)(printf args);
 #define ASSERT(CONDITION) if(!(CONDITION)) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )

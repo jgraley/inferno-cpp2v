@@ -116,7 +116,7 @@ public:
 	inline MakePatternPtr(const CP& ... cp) : 
 	    TreePtr<NODE_TYPE>( Maker::Make(cp...) ) 
 	{ 
-        TRACE("MakePatternPtr made a ")(*this)("\n");
+        //TRACE("MakePatternPtr made a ")(*this)("\n");
 	}
 };
 

@@ -22,7 +22,7 @@ class SolverHolderReportInterface;
  * to "just deal with it". This class has no idea how that will happen
  * but hopes it will be both fun and safe.
  */
-class Solver
+class Solver : public Traceable
 {
 public:
     /**
@@ -57,6 +57,11 @@ public:
      */
     virtual ~Solver();
     
+    /**
+     * Write info about the problem to log via TRACE
+     */
+    virtual void TraceProblem() const = 0;
+
     /**
      * Run the solver to exhaustion (i.e. it will discover all the
      * solutions) given an initial domain. Solutions will be reported

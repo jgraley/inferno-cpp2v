@@ -22,7 +22,7 @@ protected:
         if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>( n ) ) // an instance...
             if( dynamic_pointer_cast<Callable>( i->type ) ) // ...of a function
             {
-                TRACE("special behaviour for ")(*n)("\n");
+                //TRACE("special behaviour for ")(*n)("\n");
                 // it's an instance, so set up a container containing type and identifier only, 
                 // not initialiser (others don't matter for deps purposes). We need 
                 // the type for params etc
@@ -32,7 +32,7 @@ protected:
                 return seq;
             }
         // it's not a slave, so proceed as for UniqueWalk
-        TRACE("defaulting ")(*n)("\n");
+        //TRACE("defaulting ")(*n)("\n");
         return UniqueWalk::iterator::GetChildContainer(n);
     }
 };
@@ -56,11 +56,11 @@ private:
         // We need to create a container of elements of the child.
         if( dynamic_pointer_cast<Indirection>( n ) ) // an instance...
         {
-            TRACE("special behaviour for ")(*n)("\n");
+            //TRACE("special behaviour for ")(*n)("\n");
             shared_ptr< Sequence<Node> > seq( new Sequence<Node> );
             return seq;
         }
-        TRACE("defaulting ")(*n)("\n");
+        //TRACE("defaulting ")(*n)("\n");
         // it's not a slave, so proceed as for UniqueWalk
         return UniqueWalkNoBody::iterator::GetChildContainer(n);
     }
@@ -86,7 +86,7 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     TreePtr<Identifier> ib = GetIdentifier( b );
     ASSERT(ib);
           
-  	TRACE("Looking for dependencies on ")(*b)(" (identifier ")(*ib)(") under ")(*a)(ignore_indirection?"":" not")(" ignoring indirection\n");      
+  	//TRACE("Looking for dependencies on ")(*b)(" (identifier ")(*ib)(") under ")(*a)(ignore_indirection?"":" not")(" ignoring indirection\n");      
           
     // Always ignore function bodies since these are taken outboard by the renderer anyway      
     UniqueWalkNoBody wnb( a );
@@ -96,7 +96,7 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     ContainerInterface::iterator wa=w->begin();
     while(!(wa == w->end()))
     {
-        TRACE("Seen node ")(**wa)("\n");
+        //TRACE("Seen node ")(**wa)("\n");
     /*	if( ignore_indirection ) // are we to ignore pointers/refs?
     	{
     		if( TreePtr<Indirection> inda = TreePtr<Indirection>::DynamicCast(*wa) ) // is a a pointer or ref?
@@ -111,7 +111,7 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     	*/
         if( TreePtr<Node>(*wa) == TreePtr<Node>(ib) ) // If we see b in *any* other context under a's type, there's dep.
         {
-            TRACE("Found dependency\n");
+            //TRACE("Found dependency\n");
             return true;     
         }           
 
@@ -126,7 +126,7 @@ bool IsDependOn( TreePtr<Declaration> a, TreePtr<Declaration> b, bool ignore_ind
     	    if( IsDependOn( a, memberb, ignore_indirection_to_record ) )
     	        return true;
     }
-    TRACE("Did not find dependency\n");
+    //TRACE("Did not find dependency\n");
     return false; 
 }
 

@@ -22,6 +22,8 @@ CompareReplace::CompareReplace( TreePtr<Node> cp,
 void CompareReplace::Configure( TreePtr<Node> cp,
                                 TreePtr<Node> rp )
 {
+    TRACE(GetName());
+    INDENT(" ");
     scr_engine.Configure( this, cp, rp );
 }
 

@@ -15,6 +15,7 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_,
     constraints(constraints_),
     variables( DeduceVariables(constraints, variables_) )
 {
+    TraceProblem();
 }
 
 
@@ -74,22 +75,7 @@ void SimpleSolver::Run( ReportageObserver *holder_, const set< TreePtr<Node> > &
     TryVariable( variables.begin() );    
 
 #ifdef TRACK_BEST_ASSIGNMENT    
-    TRACE("Best assignment assigned %d of %d/%d variables:\n", best_num_assignments, assignments.size(), best_assignments.size());
-    ASSERT( assignments.size() == best_assignments.size() );
-    for( VariableId var : variables )
-    {
-        if( best_assignments.at(var) != NullValue )
-        {
-            TRACE("Variable ")(*var)(" assigned ")(*best_assignments.at(var))("\n");
-        }
-        else 
-        {
-            TRACE("Variable ")(*var)(" could not be matched after trying:\n");
-            for( Value val : initial_domain )
-                TRACE(*val)("\n");                
-            break;
-        }
-    }
+    ShowBestAssignment();
 #endif
 
     holder = nullptr;
@@ -110,7 +96,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
         if( complete )
             side_info = make_shared<SideInfo>();        
         
-        bool ok = Test( assignments, side_info.get() ); // Ask for side info if assignment is complete
+        bool ok = Test( assignments, *current, side_info.get() ); // Ask for side info if assignment is complete
         
         if( !ok )
         {
@@ -118,7 +104,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
             continue; // backtrack
         }
             
-#ifdef TRACK_BEST_ASSIGNMENT       
+#ifdef TRACK_BEST_ASSIGNMENT    
         int num=0;
         for( auto p : assignments )
             num += ( p.second != NullValue );
@@ -137,27 +123,39 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
     return false;
 }
 
-bool SimpleSolver::Test( map<VariableId, Value> &assigns, 
+
+bool SimpleSolver::Test( const Assignments &assigns, 
+                         VariableId variable_of_interest,
                          SideInfo *side_info )
 {
     bool ok = true; // AND-rule
     for( shared_ptr<Constraint> c : constraints )
     {
-        list<Value> vals = GetConstraintValues( c, assignments );
+        list<Value> vals = GetValuesForConstraint( c, assignments );
 
         if( vals.size() < c->GetFreeDegree() )
             continue; // There were unassigned variables, don't bother testing this constraint
             
+        TimedOperations(); // overhead should be hidden by Constraint::Test()
         ok = c->Test(vals, side_info); 
         
         if( !ok )
             break;
-    }        
+                            
+        // Only expected to pass for base (which we only know about if 
+        // it's FREE). We don't check whether the other 
+        // values accepted by the constraint are compatible with the 
+        // variable's deduced type, because that is the job of the 
+        // constraint that is based upon it.
+        // for( VariableId var : c->GetFreeVariables() )
+        //     CheckConsistent( assigns, var );   
+    } 
+
     return ok;
 }
 
 
-list<Value> SimpleSolver::GetConstraintValues( shared_ptr<Constraint> c, const Assignments &a )
+list<Value> SimpleSolver::GetValuesForConstraint( shared_ptr<Constraint> c, const Assignments &a )
 {
     list<VariableId> vars = c->GetFreeVariables();
     list<Value> vals;
@@ -179,10 +177,69 @@ void SimpleSolver::ReportSolution( const Assignments &assignments,
     vals.clear();
     for( shared_ptr<Constraint> c : constraints )
     {
-        vals[c] = GetConstraintValues(c, assignments);
+        vals[c] = GetValuesForConstraint(c, assignments);
         ASSERT( vals.at(c).size() == c->GetFreeDegree() ); // Assignments should be complete
     }
     
     holder->ReportSolution( vals, side_info );
 }                     
+
+
+void SimpleSolver::TraceProblem() const
+{
+    TRACEC("SimpleSolver; %d constraints", constraints.size());
+    INDENT(" ");
+    for( shared_ptr<Constraint> c : constraints )
+    {
+        c->TraceProblem();
+    }
+}
+
+
+void SimpleSolver::CheckConsistent( const Assignments &assignments, VariableId variable )
+{
+    ASSERT( assignments.count(variable) > 0 );   // in the assignment
+    ::CheckConsistent( variable, assignments.at(variable) );
+}
+
+
+void SimpleSolver::ShowBestAssignment()
+{
+    if( best_assignments.empty() )
+        return; // didn't get around to updating it yet
+    TRACE("Best assignment assigned %d of %d variables:\n", best_num_assignments, best_assignments.size());
+    INDENT(" ");
+    ASSERT( assignments.size() == best_assignments.size() );
+    for( VariableId var : variables )
+    {
+        if( best_assignments.at(var) != NullValue )
+        {
+            TRACEC("Variable ")(*var)(" assigned ")(*best_assignments.at(var));
+            if( var->IsLocalMatch(best_assignments.at(var).get()) )
+                TRACEC(" is consistent\n");
+            else
+                TRACEC(" is not consistent (two reasons this might be OK)\n");            
+            // Reason 1: At the point we gave up, no constraint containing this 
+            // variable was complete (ie had a full set of assigned variables)
+            // Reason 2: Complete constraints contained this variable but that
+            // didn't include one which had the variable as its base, and so 
+            // local match was not enforced.
+        }
+        else 
+        {
+            TRACEC("Variable ")(*var)(" could not be matched.\n");
+            break; // later ones won't even have been tried
+        }
+    }
+}
+
+
+void SimpleSolver::TimedOperations()
+{
+    auto now = chrono::steady_clock::now();
+    auto since = now - last_report;
+    if( since > chrono::seconds(3) )
+        ShowBestAssignment();
+    last_report = now;
+}
 

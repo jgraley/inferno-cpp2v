@@ -7,6 +7,8 @@
 #include "node/node.hpp"
 #include "common/common.hpp"
 
+#include <chrono>
+
 namespace CSP
 { 
     
@@ -40,12 +42,17 @@ private:
                                              const list<VariableId> *variables );
 
     bool TryVariable( list<VariableId>::const_iterator current );
-    bool Test( map<VariableId, Value> &assigns, 
+    bool Test( const Assignments &assigns, 
+               VariableId variable_of_interest,
                SideInfo *side_info = nullptr );
-    list<Value> GetConstraintValues( shared_ptr<Constraint> c, const Assignments &a );    
+    list<Value> GetValuesForConstraint( shared_ptr<Constraint> c, const Assignments &a );    
     void ReportSolution( const Assignments &assignments, 
                          shared_ptr<SideInfo> side_info );
-    
+    void TraceProblem() const;
+    static void CheckConsistent( const Assignments &assignments, VariableId variable );
+    void ShowBestAssignment();
+    void TimedOperations();
+
     ReportageObserver *holder;
         
     // set by constructor - depends on pattern only
@@ -59,6 +66,9 @@ private:
     // Only needed for debug output
     Assignments best_assignments;
     int best_num_assignments;
+    
+    // Timed reports
+    chrono::time_point<chrono::steady_clock> last_report;
 };
 
 };

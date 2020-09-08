@@ -22,6 +22,8 @@ using namespace SR;
 
 void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_agents_ )
 {
+    TRACE(GetName());
+    INDENT(" ");
     root_agent = root_agent_;
     master_agents = master_agents_;
     
@@ -417,8 +419,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
 {
     INDENT("C");
     ASSERT( start_x );
-    TRACE("Compare x=")(*start_x);
-    TRACE(" pattern=")(*root_agent);
+    TRACE("Compare x=")(*start_x)(" pattern=")(*root_agent)("\n");
            
     master_keys = master_keys_;    
 

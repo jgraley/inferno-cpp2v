@@ -42,7 +42,9 @@ private:
                                               shared_ptr<SR::PatternQuery> pq );
     static list<VariableFlags> GetFlags( list<VariableId> vars, VariableQueryLambda vql );
     int GetFreeDegree() const;
+    list<VariableId> GetVariables() const;
     list<VariableId> GetFreeVariables() const;
+    void TraceProblem() const;
     virtual void SetForces( const map<VariableId, Value> &forces );    
     bool Test( list< TreePtr<Node> > values, 
                SideInfo *side_info = nullptr );

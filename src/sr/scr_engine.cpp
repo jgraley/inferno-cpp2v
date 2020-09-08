@@ -34,15 +34,16 @@ void SCREngine::Configure( const CompareReplace *overall_master,
                            const set<Agent *> &master_agents,
                            const SCREngine *master )
 {
+    TRACE(GetName());
     INDENT(" ");
     ASSERT(!master_ptr)("Calling configure on already-configured ")(*this);
-    TRACE("Entering SCREngine::Configure on ")(*this)("\n");
+    //TRACE("Entering SCREngine::Configure on ")(*this)("\n");
     overall_master_ptr = overall_master;
     master_ptr = master;
     
     ConfigInstallRootAgents(cp, rp);
             
-    TRACE("Elaborating ")(*this );    
+    //TRACE("Elaborating ")(*this );    
 
     set<AgentCommonNeedSCREngine *> my_agents_needing_engines;   
     ConfigCategoriseSubs( master_agents, my_agents_needing_engines );    
@@ -137,7 +138,7 @@ void SCREngine::ConfigConfigureSubs( const set<Agent *> &master_agents )
     // Recurse into the slaves' configure
     for( pair<AgentCommonNeedSCREngine * const, SCREngine> &p : my_engines )
     {
-        TRACE("Recursing to configure slave ")(*p.first)("\n");
+        //TRACE("Recursing to configure slave ")(*p.first)("\n");
         p.second.Configure( overall_master_ptr, 
                             p.first->GetSearchPattern(),
                             p.first->GetReplacePattern(),
@@ -151,7 +152,7 @@ void SCREngine::ConfigConfigureSubs( const set<Agent *> &master_agents )
     {        
         if( dynamic_cast<AgentCommonNeedSCREngine *>(a) )
             continue; // TODO yuck, should determine this in ConfigCategoriseSubs()
-        TRACE("Configuring agent ")(*a)("\n");
+        //TRACE("Configuring agent ")(*a)("\n");
         a->AgentConfigure( this );             
     }    
 }

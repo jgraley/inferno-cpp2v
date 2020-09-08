@@ -74,6 +74,53 @@ list<VariableId> SystemicConstraint::GetFreeVariables() const
 }
 
 
+void SystemicConstraint::TraceProblem() const
+{
+    TRACEC("SystemicConstraint degree %d free degree %d\n", flags.size(), GetFreeDegree());
+    INDENT(" ");
+    list<VariableId> vars = GetVariablesImpl(agent, pq); 
+    auto fit = flags.begin();
+    bool first = true;
+    for( auto var : vars )
+    {
+        string scat = " ";
+        if( first )
+            scat += "(base)";
+        else
+            scat += "(link)";
+        first = false;    
+        
+        string sflags;
+        sflags += "; compare by ";
+        switch( fit->compare_by )
+        {
+        case CompareBy::LOCATION:
+            sflags += "LOCATION";
+            break;
+            
+        case CompareBy::VALUE:
+            sflags += "VALUE";
+            break;
+        }
+        sflags += "; is ";
+        switch( fit->freedom )
+        {
+        case Freedom::FREE:
+            sflags += "FREE";
+            break;
+            
+        case Freedom::FORCED:
+            sflags += "FORCED";
+            break;
+        }
+        fit++;
+        
+        TRACEC(*var)(scat)(sflags)("\n");
+    }
+    
+}
+
+
 void SystemicConstraint::SetForces( const map<VariableId, Value> &forces_ )
 {
     list<VariableId> vars = GetVariablesImpl(agent, pq); 
@@ -102,6 +149,7 @@ bool SystemicConstraint::Test( list< Value > values,
     TreePtr<Node> x;
     list< Value > expanded_values;
     auto fit = forces.begin();
+    auto valit = values.begin();
     bool first = true; // First flag refers to the me-variable
     for( const VariableFlags &f : flags )
     {
@@ -119,8 +167,8 @@ bool SystemicConstraint::Test( list< Value > values,
             if( first )             
                 x = values.front();
             else
-                expanded_values.push_back( values.front() );
-            values.pop_front();
+                expanded_values.push_back( *valit );
+            valit++;
             break;
         }
         first = false;
@@ -148,18 +196,21 @@ bool SystemicConstraint::Test( list< Value > values,
         // Try block catches mismatches which are thrown as exceptions
         try
         {
-            // Similar to AndRuleEngine::DecidedCompare(), we get the
-            // Query object from conjecture, and run a query on it.
-            query = conj->GetQuery(agent);
-            agent->RunDecidedQuery( *query, x );
-
+            {
+                Tracer::RAIIEnable silencer( false ); // make DQ be quiet
+                // Similar to AndRuleEngine::DecidedCompare(), we get the
+                // Query object from conjecture, and run a query on it.
+                query = conj->GetQuery(agent);
+                agent->RunDecidedQuery( *query, x );
+            }
+            
             // The query now has populated links, which should be full
             // (otherwise RunDecidedQuery() (DQ) should have thrown). We loop 
             // over both and check that they refer to the same x nodes
             // we were passed. Mismatch will throw, same as in DQ.
-            auto nlinks = query->GetNormalLinks();
-            ASSERT( nlinks->size() == expanded_values.size() );
-            auto nit = nlinks->begin();      
+            auto links = query->GetNormalLinks();
+            ASSERT( links->size() == expanded_values.size() );
+            auto linkit = links->begin();      
             auto fit = flags.begin();      
             fit++; // skip "me"
             for( TreePtr<Node> val : expanded_values )
@@ -167,21 +218,27 @@ bool SystemicConstraint::Test( list< Value > values,
                 switch( fit->compare_by )
                 {
                 case CompareBy::VALUE:
-                    if( !(*simple_compare)( val, (*nit)->x ) )
+                    if( !(*simple_compare)( val, (*linkit)->x ) )
                         throw ByValueLinkMismatch();  
                     break;
                     
                 case CompareBy::LOCATION:
-                    if( val != (*nit)->x )
+                    if( val != (*linkit)->x )
                         throw ByLocationLinkMismatch();  
                     break;
                 }
-                nit++;
+                // Not expected to pass. We don't check whether the link values
+                // we generate from our given base value are compatible with
+                // the child agent, because that the job of that agent's 
+                // constraint.
+                //CheckConsistent( (*linkit)->agent, val );   
+                linkit++;
                 fit++;
             }
         }
         catch( ::Mismatch & )
         {
+            Tracer::RAIIEnable silencer( false ); // make DQ be quiet
             // We will get here on a mismatch, whether detected by DQ or our
             // own comparison between links and values. Permit the conjecture
             // to move to a new set of choices.
@@ -192,7 +249,7 @@ bool SystemicConstraint::Test( list< Value > values,
             return false; 
         }            
         break; // Didn't throw: success
-    }
+    }    
     
     // Side-info is info required by the Engine that isn't part of the CSP model
     // and would be difficult to re-create from it outside of this class

@@ -71,9 +71,12 @@ struct VariableFlags
 
 typedef function< VariableFlags( VariableId ) > VariableQueryLambda;
 
+void CheckConsistent( VariableId variable, Value value );
+
+
 /** Implements a systemic constraint as discussed in #107
  */
-class Constraint
+class Constraint : public Traceable
 {
 public:
     Constraint() {}
@@ -93,6 +96,11 @@ public:
      */
     virtual list<VariableId> GetFreeVariables() const = 0;
     
+    /**
+     * Write info about the problem to log via TRACE
+     */
+    virtual void TraceProblem() const = 0;
+        
     /**
      * Set the values of the forced varibles
      * 
