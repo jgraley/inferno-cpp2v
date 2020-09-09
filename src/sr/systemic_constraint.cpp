@@ -139,10 +139,6 @@ bool SystemicConstraint::Test( list< Value > values,
                                SideInfo *side_info )
 {
     ASSERT( values.size() == GetFreeDegree() );
-    for( Value v : values )
-    {
-        ASSERT( v != NullValue );
-    }
     
     // Merge incoming values with the forces to get a full set of 
     // values that must tally up with the DQ links.
@@ -231,7 +227,7 @@ bool SystemicConstraint::Test( list< Value > values,
                 // we generate from our given base value are compatible with
                 // the child agent, because that the job of that agent's 
                 // constraint.
-                //CheckConsistent( (*linkit)->agent, val );   
+                //CheckLocalMatch( (*linkit)->agent, val );   
                 linkit++;
                 fit++;
             }

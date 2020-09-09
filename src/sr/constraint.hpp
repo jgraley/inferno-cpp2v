@@ -50,7 +50,6 @@ enum class Freedom
 };
 
 typedef TreePtr<Node> Value;
-extern const Value NullValue;
 
 struct ValueFlags
 {

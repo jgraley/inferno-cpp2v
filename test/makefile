@@ -5,7 +5,7 @@ CASES += sctest01 sctest03 sctest04 sctest05 sctest06 sctest07 sctest09 sctest15
 
 SRCASES = pointeris $(CASES)
 
-SRMINICASES = sctest15 sctest03 sctest04
+SRMINICASES = sctest15
 
 KINDS = default sr rep
 
@@ -43,7 +43,7 @@ test/results/sr.pass : $(SRCASES:%=test/results/sr/%.pass)
 $(SRMINICASES:%=test/results/srmini/%.pass) : test/results/srmini/%.pass : test/examples/%.cpp test/makefile inferno.exe
 	@mkdir -p test/results/srmini
 	@rm -f test/results/srmini/$*.
-	test/srtest.sh $< test/reference/srminitest -tq -q15
+	test/srtest.sh $< test/reference/srminitest -t -q0.3
 	@touch test/results/srmini/$*.pass
 	
 test/results/srmini.pass : $(SRMINICASES:%=test/results/srmini/%.pass)

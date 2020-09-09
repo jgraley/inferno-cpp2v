@@ -62,10 +62,6 @@ void SimpleSolver::Run( ReportageObserver *holder_, const set< TreePtr<Node> > &
     initial_domain = initial_domain_;
 
     assignments.clear();
-    for( VariableId var : variables )
-    {
-        assignments[var] = NullValue; // means "unassigned"
-    }
     
 #ifdef TRACK_BEST_ASSIGNMENT    
     best_assignments.clear();
@@ -100,14 +96,14 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
         
         if( !ok )
         {
-            assignments[*current] = NullValue; // put failed variable back to NULL
+            assignments.erase(*current); // remove failed variable 
             continue; // backtrack
         }
             
 #ifdef TRACK_BEST_ASSIGNMENT    
         int num=0;
         for( auto p : assignments )
-            num += ( p.second != NullValue );
+            num++;
         if( num > best_num_assignments )
         {
              best_assignments = assignments;
@@ -161,10 +157,11 @@ list<Value> SimpleSolver::GetValuesForConstraint( shared_ptr<Constraint> c, cons
     list<Value> vals;
     for( VariableId var : vars )
     {
-        Value val = a.at(var); 
-        if( val == NullValue )
-            continue; // unassigned variable
-        vals.push_back( val );
+        if( a.count(var) > 0 )
+        {
+            Value val = a.at(var); 
+            vals.push_back( val );
+        }
     }    
     return vals;
 }
@@ -209,10 +206,9 @@ void SimpleSolver::ShowBestAssignment()
         return; // didn't get around to updating it yet
     TRACE("Best assignment assigned %d of %d variables:\n", best_num_assignments, best_assignments.size());
     INDENT(" ");
-    ASSERT( assignments.size() == best_assignments.size() );
     for( VariableId var : variables )
     {
-        if( best_assignments.at(var) != NullValue )
+        if( best_assignments.count(var) > 0 )
         {
             TRACEC("Variable ")(*var)(" assigned ")(*best_assignments.at(var));
             if( var->IsLocalMatch(best_assignments.at(var).get()) )
