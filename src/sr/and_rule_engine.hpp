@@ -71,7 +71,8 @@ public:
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
     void CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > record,
-							    const CouplingMap *coupling_keys );
+							    const CouplingMap *hypothetical_solution_keys,
+                                const CouplingMap *master_keys );
     void DecidedCompare( Agent *agent,
                          Agent *parent_agent,
                          TreePtr<Node> x );
@@ -87,6 +88,8 @@ private:
     Agent *root_agent;
     set<Agent *> master_agents;
     set<Agent *> my_agents;   
+    map< Agent *, shared_ptr<BooleanEvaluator> > my_evaluators;   
+    map< Agent *, AndRuleEngine > my_evaluator_engines;
     map< Agent *, AndRuleEngine > my_abnormal_engines;
     map< Agent *, AndRuleEngine > my_multiplicity_engines;
     map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
@@ -98,6 +101,7 @@ private:
     shared_ptr<CSP::SolverHolder> solver;
     CouplingMap my_keys; 
     CouplingMap solution_keys; 
+    CouplingMap hypothetical_solution_keys; 
     CouplingMap master_coupling_candidates;
     const CouplingMap *master_keys;
     set<Agent *> reached; 

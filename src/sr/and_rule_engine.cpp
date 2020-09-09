@@ -18,6 +18,9 @@
 
 //#define USE_SOLVER
 
+// See #119
+//#define SIDE_INFO_BY_AGENT
+
 using namespace SR;
 
 void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_agents_ )
@@ -224,14 +227,18 @@ void AndRuleEngine::ConfigFilterKeyers(map< Agent *, Agent * > *possible_keyer_l
 
 
 void AndRuleEngine::ConfigPopulateNormalAgents( set<Agent *> *normal_agents, 
-                                                Agent *current_agent )
+                                                Agent *agent )
 {
-    if( normal_agents->count(current_agent) != 0 )
+    if( normal_agents->count(agent) != 0 )
         return; // Only act on couplings the first time they are reached
+
+    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     
-    normal_agents->insert(current_agent);
+    normal_agents->insert(agent);
     
-    shared_ptr<PatternQuery> pq = current_agent->GetPatternQuery();
+    if( pq->GetEvaluator() )
+        my_evaluators[agent] = pq->GetEvaluator();
+    
     FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
         ConfigPopulateNormalAgents( normal_agents, b->agent );
         
@@ -285,15 +292,30 @@ void AndRuleEngine::CompareLinks( Agent *agent,
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
     FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetAbnormalLinks() )
+    {
+        ASSERT( abnormal_links.count(l)==0 )("Links info conflict!\n");
         abnormal_links.insert( l ); 
+#ifdef SIDE_INFO_BY_AGENT
+        ASSERT( hypothetical_solution_keys.count(l->agent)==0 )("Coupling conflict!\n");
+        hypothetical_solution_keys[l->agent] = l->x;
+#endif
+    }
         
     FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetMultiplicityLinks() )
+    {
+        ASSERT( multiplicity_links.count(l)==0 )("Links info conflict!\n");
         multiplicity_links.insert( l ); 
+#ifdef SIDE_INFO_BY_AGENT
+        ASSERT( hypothetical_solution_keys.count(l->agent)==0 )("Coupling conflict!\n");
+        hypothetical_solution_keys[l->agent] = l->x;
+#endif        
+    }
 }
 
 
 void AndRuleEngine::CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > record,
-							               const CouplingMap *coupling_keys ) 
+							               const CouplingMap *hypothetical_solution_keys,
+							               const CouplingMap *master_keys ) 
 {
 	ASSERT( record.first );
 
@@ -308,11 +330,19 @@ void AndRuleEngine::CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, D
         TRACE("Comparing block %d\n", i);
  
         // Get x for linked node
+#ifdef SIDE_INFO_BY_AGENT
+        ASSERT(l->x == hypothetical_solution_keys->at(l->agent))
+              ("Agent ")(*l->agent)("\n")
+              ("hypothetical_solution_keys says x=")(*hypothetical_solution_keys->at(l->agent))("\n")
+              ("abnormal_links says x=")(*l->x)("\n");
+        TreePtr<Node> x = hypothetical_solution_keys->at(l->agent);
+#else        
         TreePtr<Node> x = l->x;
-                                 
+#endif
+                                
         try 
         {
-            my_abnormal_engines.at(l->agent).Compare( x, coupling_keys );
+            my_abnormal_engines.at(l->agent).Compare( x, master_keys );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -379,7 +409,10 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     // (eg identifier) and we need to have coupled it. The "if" statement
     // tests coupling_keyer_links as well as providing a small optimisation.
     if( coupling_keyer_links.count( make_pair(agent, parent_agent) ) > 0 )
+    {
+        ASSERT( my_keys.count(agent) == 0 )("Coupling conflict!\n");
         my_keys[agent] = x;
+    }
         
     TRACE(*agent)("?=")(*x)(" Comparing links\n");
     CompareLinks( agent, query );
@@ -391,7 +424,8 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 	}
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-    solution_keys[agent] = x;
+    ASSERT( hypothetical_solution_keys.count(agent) == 0 )("Coupling conflict!\n");
+    hypothetical_solution_keys[agent] = x;
 
     TRACE("OK\n");
 }
@@ -463,7 +497,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
     //int i=0;
     while(1)
     {
-        solution_keys.clear();
+        hypothetical_solution_keys.clear();
         my_keys.clear();
 #ifdef USE_SOLVER        
         // Get a solution from the solver
@@ -479,7 +513,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             list< TreePtr<Node> > &vals = values.at(p.second);
             list< Agent * > vars = p.second->GetFreeVariables();
             ASSERT( vars.front() == p.first );
-            solution_keys[vars.front()] = vals.front(); // For now only do the first one, which is 
+            hypothetical_solution_keys[vars.front()] = vals.front(); // For now only do the first one, which is 
         }
         
         // Grab the side info into our containers
@@ -516,7 +550,26 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
                     CompareCoupling( agent, x, master_keys );
                 }
             }
+
+            // #143 missing solutions should be due to early out caused by 
+            // MatchAny agents. We put nullptr in there.
+            //for( auto agent : my_agents )
+            // {
+            //     if( hypothetical_solution_keys.count(agent) == 0 )
+            //         hypothetical_solution_keys[agent] = nullptr;
+            // }
 #endif
+            // The hypothetical_solution_keys contain keys for agents reached
+            // through abnormal or multiplicity links. They are needed to 
+            // recursively drive sub-engines. However, we don't want to 
+            // propagate them into those engines or into replace, so generate
+            // the "regular" key set here (this is what contributes to the
+            // final solution).
+            solution_keys.clear();
+            for( auto agent : my_agents )
+                if( hypothetical_solution_keys.count(agent) != 0 )
+                    solution_keys[agent] = hypothetical_solution_keys.at(agent);
+                
             CouplingMap combined_keys = MapUnion( *master_keys, solution_keys );     
                                                 
             // Process the evaluator queries. These can match when their children have not matched and
@@ -527,14 +580,18 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             for( pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > record : evaluator_records )
             {
                 //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
-                CompareEvaluatorLinks( record, &combined_keys );
+                CompareEvaluatorLinks( record, &hypothetical_solution_keys, &combined_keys );
             }
 
             // Process the free abnormal links.
             for( shared_ptr<const DecidedQuery::Link> lp : abnormal_links )
             {            
                 AndRuleEngine &e = my_abnormal_engines.at(lp->agent);
+#ifdef SIDE_INFO_BY_AGENT
+                TreePtr<Node> xe = hypothetical_solution_keys.at(lp->agent);
+#else                
                 TreePtr<Node> xe = lp->x;
+#endif                
                 e.Compare( xe, &combined_keys );
             }
 
@@ -544,7 +601,11 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             {            
                 AndRuleEngine &e = my_multiplicity_engines.at(lp->agent);
 
+#ifdef SIDE_INFO_BY_AGENT
+                TreePtr<Node> x = hypothetical_solution_keys.at(lp->agent);
+#else                
                 TreePtr<Node> x = lp->x;
+#endif                
                 ASSERT( x );
                 ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
                 ASSERT(xc)("Multiplicity x must implement ContainerInterface");
@@ -554,10 +615,8 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
                 {
                     e.Compare( xe, &combined_keys );
                 }
-
                 i++;
-            }
-
+            }            
         }
         catch( const ::Mismatch& mismatch )
         {                
