@@ -216,9 +216,13 @@ void SimpleSolver::ShowBestAssignment()
         {
             TRACEC("Variable ")(*var)(" assigned ")(*best_assignments.at(var));
             if( var->IsLocalMatch(best_assignments.at(var).get()) )
+            {
                 TRACEC(" is consistent\n");
+            }
             else
+            {
                 TRACEC(" is not consistent (two reasons this might be OK)\n");            
+            }
             // Reason 1: At the point we gave up, no constraint containing this 
             // variable was complete (ie had a full set of assigned variables)
             // Reason 2: Complete constraints contained this variable but that
@@ -239,7 +243,9 @@ void SimpleSolver::TimedOperations()
     auto now = chrono::steady_clock::now();
     auto since = now - last_report;
     if( since > chrono::seconds(3) )
+    {
         ShowBestAssignment();
-    last_report = now;
+        last_report = now;
+    }
 }
 

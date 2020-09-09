@@ -201,8 +201,11 @@ int main( int argc, char *argv[] )
 
     // Parse the input program
     TreePtr<Node> program = TreePtr<Node>();
-    Parse p(ReadArgs::infile);
-    p( program, &program );
+    {
+        Tracer::RAIIEnable silencer( false ); // make parse be quiet
+        Parse p(ReadArgs::infile);
+        p( program, &program );
+    }
             
     if( ReadArgs::runonlyenable )
     {
@@ -261,11 +264,13 @@ int main( int argc, char *argv[] )
         HitCount::instance.Dump();    
     else if( ReadArgs::intermediate_graph && !ReadArgs::output_all )
     {
+        Tracer::RAIIEnable silencer( false ); // make grapher be quiet
         Graph g( ReadArgs::outfile );
         g( &program );    
     }
     else if( !ReadArgs::output_all )   
     {
+        Tracer::RAIIEnable silencer( false ); // make render be quiet
         Render r( ReadArgs::outfile );
         r( &program );     
     }
