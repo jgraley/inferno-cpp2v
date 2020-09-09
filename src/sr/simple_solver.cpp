@@ -144,7 +144,7 @@ bool SimpleSolver::Test( const Assignments &assigns,
         // variable's deduced type, because that is the job of the 
         // constraint that is based upon it.
         // for( VariableId var : c->GetFreeVariables() )
-        //     CheckConsistent( assigns, var );   
+        //     CheckLocalMatch( assigns, var );   
     } 
 
     return ok;
@@ -193,10 +193,10 @@ void SimpleSolver::TraceProblem() const
 }
 
 
-void SimpleSolver::CheckConsistent( const Assignments &assignments, VariableId variable )
+void SimpleSolver::CheckLocalMatch( const Assignments &assignments, VariableId variable )
 {
     ASSERT( assignments.count(variable) > 0 );   // in the assignment
-    ::CheckConsistent( variable, assignments.at(variable) );
+    ::CheckLocalMatch( variable, assignments.at(variable) );
 }
 
 

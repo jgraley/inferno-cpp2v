@@ -49,7 +49,7 @@ private:
     void ReportSolution( const Assignments &assignments, 
                          shared_ptr<SideInfo> side_info );
     void TraceProblem() const;
-    static void CheckConsistent( const Assignments &assignments, VariableId variable );
+    static void CheckLocalMatch( const Assignments &assignments, VariableId variable );
     void ShowBestAssignment();
     void TimedOperations();
 

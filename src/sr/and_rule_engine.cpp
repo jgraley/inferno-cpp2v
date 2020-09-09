@@ -14,9 +14,9 @@
 #include "match_any_agent.hpp"
 #include <list>
 
-#define TEST_PATTERN_QUERY
+//#define TEST_PATTERN_QUERY
 
-#define USE_SOLVER
+//#define USE_SOLVER
 
 using namespace SR;
 
@@ -265,13 +265,7 @@ void AndRuleEngine::CompareCoupling( Agent *agent,
 
 void AndRuleEngine::CompareLinks( Agent *agent,
                                   shared_ptr<const DecidedQuery> query ) 
-{
-    FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetAbnormalLinks() )
-        abnormal_links.insert( l ); 
-        
-    FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetMultiplicityLinks() )
-        multiplicity_links.insert( l ); 
-    
+{    
     int i=0;        
     FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetNormalLinks() )
     {
@@ -288,6 +282,13 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         
         DecidedCompare(l->agent, agent, x);   
     }
+
+    // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
+    FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetAbnormalLinks() )
+        abnormal_links.insert( l ); 
+        
+    FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetMultiplicityLinks() )
+        multiplicity_links.insert( l ); 
 }
 
 
@@ -380,17 +381,14 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     if( coupling_keyer_links.count( make_pair(agent, parent_agent) ) > 0 )
         my_keys[agent] = x;
         
-    // Remember we reached this agent 
-    reached.insert( agent );
+    TRACE(*agent)("?=")(*x)(" Comparing links\n");
+    CompareLinks( agent, query );
 
     // Use worker functions to go through the links, special case if there is evaluator
     if( query->GetEvaluator() )
     {        
         evaluator_records.insert( make_pair( query->GetEvaluator(), *query->GetAbnormalLinks() ) );
 	}
-
-    TRACE(*agent)("?=")(*x)(" Comparing links\n");
-    CompareLinks( agent, query );
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
     solution_keys[agent] = x;
@@ -499,7 +497,6 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             
             // Initialise keys to the ones inherited from master, keeping 
             // none of our own from any previous unsuccessful attempt.
-            reached.clear();
             abnormal_links.clear();
             multiplicity_links.clear();
             evaluator_records.clear();

@@ -4,7 +4,7 @@
 
 using namespace CSP;
 
-void CSP::CheckConsistent( VariableId variable, Value value )
+void CSP::CheckLocalMatch( VariableId variable, Value value )
 {
     ASSERT( variable->IsLocalMatch(value.get()) ); // Consistent with variable's type (i.e. in LocalMatch-implied domain)
 }

@@ -70,7 +70,7 @@ struct VariableFlags
 
 typedef function< VariableFlags( VariableId ) > VariableQueryLambda;
 
-void CheckConsistent( VariableId variable, Value value );
+void CheckLocalMatch( VariableId variable, Value value );
 
 
 /** Implements a systemic constraint as discussed in #107
