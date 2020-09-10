@@ -14,6 +14,12 @@ void EnsureOnStack( const TreePtrInterface *ppattern )
 }
 
 
+PatternQuery::Link::Link()
+{
+    ppattern = nullptr;
+}
+
+
 bool PatternQuery::Link::operator<(const Link &other)
 {
     // PatternQuery::Link is unique across parent-child links in
@@ -25,7 +31,10 @@ bool PatternQuery::Link::operator<(const Link &other)
 
 Agent *PatternQuery::Link::GetChildAgent() const
 {
-    return Agent::AsAgent(*ppattern);
+    if( ppattern )
+        return Agent::AsAgent(*ppattern);
+    else
+        return nullptr;
 }
 
 
@@ -82,6 +91,12 @@ void PatternQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern )
 }
 
 
+DecidedQuery::Link::Link()
+{
+    ppattern = nullptr;
+}
+
+
 bool DecidedQuery::Link::operator<(const Link &other)
 {
     // pattern is primary ordering for consistency with 
@@ -95,7 +110,10 @@ bool DecidedQuery::Link::operator<(const Link &other)
 
 Agent *DecidedQuery::Link::GetChildAgent() const
 {
-    return Agent::AsAgent(*ppattern);
+    if( ppattern )
+        return Agent::AsAgent(*ppattern);
+    else
+        return nullptr;
 }
 
 

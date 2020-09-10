@@ -31,6 +31,7 @@ public:
 #ifdef KEEP_WHODAT_INFO
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
 #endif
+        Link();
         bool operator<(const Link &other);
         Agent *GetChildAgent() const;
     };
@@ -109,6 +110,7 @@ public:
 #ifdef KEEP_WHODAT_INFO
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
 #endif
+        Link();
         bool operator<(const Link &other);
         Agent *GetChildAgent() const;
         PatternQuery::Link GetPatternLink() const;
