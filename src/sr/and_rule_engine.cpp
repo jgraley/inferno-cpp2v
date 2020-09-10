@@ -315,33 +315,33 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         
         // This is needed for decisionised MatchAny #75. Other schemes for
         // RegisterAlwaysMatchingLink() could be deployed.
-        if( x.get() == (Node *)(l->agent) )
+        if( x.get() == (Node *)(l->GetChildAgent()) )
             continue; // Pattern nodes immediately match themselves
         
         // Are we at a residual coupling?
-        if( coupling_residual_links.count( make_pair(l->agent, agent) ) > 0 ) // See #129
+        if( coupling_residual_links.count( make_pair(l->GetChildAgent(), agent) ) > 0 ) // See #129
         {
-            CompareCoupling( l->agent, x, &my_keys );
-            return;
+            CompareCoupling( l->GetChildAgent(), x, &my_keys );
+            continue;
         }
         
         // Master couplings are now checked in a post-pass
-        if( master_boundary_agents.count(l->agent) > 0 )
+        if( master_boundary_agents.count(l->GetChildAgent()) > 0 )
         {
-            master_coupling_candidates[l->agent] = x;
-            return;
+            master_coupling_candidates[l->GetChildAgent()] = x;
+            continue;
         }
 
         // Remember the coupling before recursing, as we can hit the same node 
         // (eg identifier) and we need to have coupled it. The "if" statement
         // tests coupling_keyer_links as well as providing a small optimisation.
-        if( coupling_keyer_links.count( make_pair(l->agent, agent) ) > 0 )
+        if( coupling_keyer_links.count( make_pair(l->GetChildAgent(), agent) ) > 0 )
         {
-            ASSERT( my_keys.count(l->agent) == 0 )("Coupling conflict!\n");
-            KeyCoupling( l->agent, x, &my_keys );
+            ASSERT( my_keys.count(l->GetChildAgent()) == 0 )("Coupling conflict!\n");
+            KeyCoupling( l->GetChildAgent(), x, &my_keys );
         }
 
-        DecidedCompare(l->agent, x);   
+        DecidedCompare(l->GetChildAgent(), x);   
     }
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
@@ -350,7 +350,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         ASSERT( abnormal_links.count(l)==0 )("Links info conflict!\n");
         abnormal_links.insert( l ); 
 #ifdef SIDE_INFO_BY_AGENT
-        KeyCoupling( l->agent, l->x, &hypothetical_solution_keys );
+        KeyCoupling( l->GetChildAgent(), l->x, &hypothetical_solution_keys );
 #endif
     }
         
@@ -359,7 +359,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         ASSERT( multiplicity_links.count(l)==0 )("Links info conflict!\n");
         multiplicity_links.insert( l ); 
 #ifdef SIDE_INFO_BY_AGENT
-        KeyCoupling( l->agent, l->x, &hypothetical_solution_keys );
+        KeyCoupling( l->GetChildAgent(), l->x, &hypothetical_solution_keys );
 #endif        
     }
 }
@@ -384,17 +384,17 @@ void AndRuleEngine::CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, D
         // Get x for linked node
 #ifdef SIDE_INFO_BY_AGENT
         ASSERT(l->x == hypothetical_solution_keys->at(l->agent))
-              ("Agent ")(*l->agent)("\n")
-              ("hypothetical_solution_keys says x=")(*hypothetical_solution_keys->at(l->agent))("\n")
+              ("Agent ")(*l->GetChildAgent())("\n")
+              ("hypothetical_solution_keys says x=")(*hypothetical_solution_keys->at(l->GetChildAgent()))("\n")
               ("abnormal_links says x=")(*l->x)("\n");
-        TreePtr<Node> x = hypothetical_solution_keys->at(l->agent);
+        TreePtr<Node> x = hypothetical_solution_keys->at(l->GetChildAgent());
 #else        
         TreePtr<Node> x = l->x;
 #endif
                                 
         try 
         {
-            my_abnormal_engines.at(l->agent).Compare( x, master_keys );
+            my_abnormal_engines.at(l->GetChildAgent()).Compare( x, master_keys );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -415,7 +415,6 @@ void AndRuleEngine::CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, D
 
 
 void AndRuleEngine::DecidedCompare( Agent *agent,
-                                    Agent *parent_agent,
                                     TreePtr<Node> x )  
 {
     INDENT(" ");
@@ -565,7 +564,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             evaluator_records.clear();
             master_coupling_candidates.clear();
             
-            DecidedCompare( root_agent, nullptr, start_x );
+            DecidedCompare( root_agent, start_x );
             
             for( auto agent : master_boundary_agents )
             {
@@ -615,9 +614,9 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // Process the free abnormal links.
             for( shared_ptr<const DecidedQuery::Link> lp : abnormal_links )
             {            
-                AndRuleEngine &e = my_abnormal_engines.at(lp->agent);
+                AndRuleEngine &e = my_abnormal_engines.at(lp->GetChildAgent());
 #ifdef SIDE_INFO_BY_AGENT
-                TreePtr<Node> xe = hypothetical_solution_keys.at(lp->agent);
+                TreePtr<Node> xe = hypothetical_solution_keys.at(lp->GetChildAgent());
 #else                
                 TreePtr<Node> xe = lp->x;
 #endif                
@@ -628,10 +627,10 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             int i=0;
             for( shared_ptr<const DecidedQuery::Link> lp : multiplicity_links )
             {            
-                AndRuleEngine &e = my_multiplicity_engines.at(lp->agent);
+                AndRuleEngine &e = my_multiplicity_engines.at(lp->GetChildAgent());
 
 #ifdef SIDE_INFO_BY_AGENT
-                TreePtr<Node> x = hypothetical_solution_keys.at(lp->agent);
+                TreePtr<Node> x = hypothetical_solution_keys.at(lp->GetChildAgent());
 #else                
                 TreePtr<Node> x = lp->x;
 #endif                

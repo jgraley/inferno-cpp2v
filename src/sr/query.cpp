@@ -82,6 +82,31 @@ void PatternQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern )
 }
 
 
+bool DecidedQuery::Link::operator<(const Link &other)
+{
+    // pattern is primary ordering for consistency with 
+    // PatternQuery::Link
+    if( ppattern != other.ppattern )
+        return ppattern < other.ppattern;
+        
+    return x < other.x;    
+}
+
+
+Agent *DecidedQuery::Link::GetChildAgent() const
+{
+    return Agent::AsAgent(*ppattern);
+}
+
+
+PatternQuery::Link DecidedQuery::Link::GetPatternLink() const
+{
+    PatternQuery::Link l;
+    l.ppattern = ppattern;
+    return l;
+}
+
+
 DecidedQuery::DecidedQuery( shared_ptr<const PatternQuery> pq ) :
     decisions( pq->GetDecisions()->size() ),
     next_decision( decisions.begin() ), 
@@ -105,8 +130,7 @@ void DecidedQuery::RegisterNormalLink( const TreePtrInterface *ppattern, TreePtr
     auto b = make_shared<Link>();
     EnsureOnStack( ppattern );
     b->ppattern = ppattern;
-    TreePtr<Node> npattern(*ppattern);
-    b->agent = Agent::AsAgent(npattern);
+
     b->x = x;
     
     // For debugging
@@ -124,8 +148,6 @@ void DecidedQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern, TreeP
     auto b = make_shared<Link>();
     EnsureOnStack( ppattern );
     b->ppattern = ppattern;
-    TreePtr<Node> npattern(*ppattern);
-    b->agent = Agent::AsAgent(npattern);
     b->x = x;
     
     // For debugging
@@ -143,8 +165,6 @@ void DecidedQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern, T
     auto b = make_shared<Link>();
     EnsureOnStack( ppattern );
     b->ppattern = ppattern;
-    TreePtr<Node> npattern(*ppattern);
-    b->agent = Agent::AsAgent(npattern);
     b->x = x;
     
     // For debugging
@@ -161,8 +181,6 @@ void DecidedQuery::RegisterAlwaysMatchingLink( const TreePtrInterface *ppattern 
     auto b = make_shared<Link>();
     EnsureOnStack( ppattern );
     b->ppattern = ppattern;
-    TreePtr<Node> npattern(*ppattern);
-    b->agent = Agent::AsAgent(npattern);
     // Supply the pattern as x. Pattern are usually not valid x nodes
     // (because can have NULL pointers) but there's logic in 
     // the AndRuleEngine to early-out in this case. 

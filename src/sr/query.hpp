@@ -105,11 +105,13 @@ public:
     struct Link 
     {
         const TreePtrInterface *ppattern;
-        Agent *agent;
         TreePtr<Node> x; 
 #ifdef KEEP_WHODAT_INFO
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
 #endif
+        bool operator<(const Link &other);
+        Agent *GetChildAgent() const;
+        PatternQuery::Link GetPatternLink() const;
     };
     
     typedef vector<Range> Ranges;
