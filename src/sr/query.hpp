@@ -42,14 +42,10 @@ public:
     
     void RegisterDecision( bool inclusive ); 
     
-    void RegisterNormalLink( const TreePtrInterface *pattern, bool bp = false );
-    void RegisterAbnormalLink( const TreePtrInterface *pattern, bool bp = false );
-    void RegisterMultiplicityLink( const TreePtrInterface *pattern, bool bp = false );
+    void RegisterNormalLink( const TreePtrInterface *ppattern );
+    void RegisterAbnormalLink( const TreePtrInterface *ppattern );
+    void RegisterMultiplicityLink( const TreePtrInterface *ppattern );
     
-    //void RegisterNormalLink( TreePtr<Node> pattern ) { RegisterNormalLink( &pattern, true ); }
-    //void RegisterAbnormalLink( TreePtr<Node> pattern ) { RegisterAbnormalLink( &pattern, true ); }
-    //void RegisterMultiplicityLink( TreePtr<Node> pattern ) { RegisterMultiplicityLink( &pattern, true ); }
-
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e );
     
     const Decisions *GetDecisions() const { return &decisions; } 
@@ -140,15 +136,10 @@ public:
 
     virtual void CompleteDecisionsWithEmpty() = 0;
 
-    virtual void RegisterNormalLink( const TreePtrInterface *pattern, TreePtr<Node> x, bool bp = false ) = 0; 
-    virtual void RegisterAbnormalLink( const TreePtrInterface *pattern, TreePtr<Node> x, bool bp = false ) = 0; 
-    virtual void RegisterMultiplicityLink( const TreePtrInterface *pattern, TreePtr<SubContainer> x, bool bp = false ) = 0; 
-    virtual void RegisterAlwaysMatchingLink( const TreePtrInterface *pattern, bool bp = false ) = 0; // Is a normal link
-
-    //virtual void RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) = 0; 
-    //virtual void RegisterAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) = 0; 
-    //virtual void RegisterMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x ) = 0; 
-    //virtual void RegisterAlwaysMatchingLink( TreePtr<Node> pattern ) = 0; // Is a normal link
+    virtual void RegisterNormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x ) = 0; 
+    virtual void RegisterAbnormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x ) = 0; 
+    virtual void RegisterMultiplicityLink( const TreePtrInterface *ppattern, TreePtr<SubContainer> x ) = 0; 
+    virtual void RegisterAlwaysMatchingLink( const TreePtrInterface *ppattern ) = 0; // Is a normal link
     
     virtual void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
 
@@ -204,15 +195,10 @@ public:
     ContainerInterface::iterator SkipDecision();
     void CompleteDecisionsWithEmpty();
 
-    void RegisterNormalLink( const TreePtrInterface *pattern, TreePtr<Node> x, bool bp = false ); 
-    void RegisterAbnormalLink( const TreePtrInterface *pattern, TreePtr<Node> x, bool bp = false ); 
-    void RegisterMultiplicityLink( const TreePtrInterface *pattern, TreePtr<SubContainer> x, bool bp = false ); 
-    void RegisterAlwaysMatchingLink( const TreePtrInterface *pattern, bool bp = false ); // Is a normal link
-
-    //void RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) { RegisterNormalLink( &pattern, x, true ); }
-    //void RegisterAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) { RegisterAbnormalLink( &pattern, x, true ); }; 
-    //void RegisterMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x ) { RegisterMultiplicityLink( &pattern, x, true ); }; 
-    //void RegisterAlwaysMatchingLink( TreePtr<Node> pattern ) { RegisterAlwaysMatchingLink( &pattern, true ); }; // Is a normal link
+    void RegisterNormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x ); 
+    void RegisterAbnormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x ); 
+    void RegisterMultiplicityLink( const TreePtrInterface *ppattern, TreePtr<SubContainer> x ); 
+    void RegisterAlwaysMatchingLink( const TreePtrInterface *ppattern ); // Is a normal link
 
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ); 
                                                   
