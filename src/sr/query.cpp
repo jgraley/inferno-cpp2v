@@ -20,12 +20,18 @@ PatternQuery::Link::Link()
 }
 
 
-bool PatternQuery::Link::operator<(const Link &other)
+bool PatternQuery::Link::operator<(const Link &other) const
 {
     // PatternQuery::Link is unique across parent-child links in
     // the pattern. This operator will permit PatternQuery::Link to 
     // act as keys in maps.
     return ppattern < other.ppattern;
+}
+
+
+PatternQuery::Link::operator bool() const
+{
+    return ppattern != nullptr;
 }
 
 
@@ -97,7 +103,7 @@ DecidedQuery::Link::Link()
 }
 
 
-bool DecidedQuery::Link::operator<(const Link &other)
+bool DecidedQuery::Link::operator<(const Link &other) const
 {
     // pattern is primary ordering for consistency with 
     // PatternQuery::Link
@@ -105,6 +111,12 @@ bool DecidedQuery::Link::operator<(const Link &other)
         return ppattern < other.ppattern;
         
     return x < other.x;    
+}
+
+
+DecidedQuery::Link::operator bool() const
+{
+    return ppattern != nullptr;
 }
 
 

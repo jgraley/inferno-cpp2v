@@ -32,7 +32,8 @@ public:
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
 #endif
         Link();
-        bool operator<(const Link &other);
+        bool operator<(const Link &other) const;
+        explicit operator bool() const;
         Agent *GetChildAgent() const;
     };
         
@@ -111,7 +112,8 @@ public:
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
 #endif
         Link();
-        bool operator<(const Link &other);
+        bool operator<(const Link &other) const;
+        explicit operator bool() const;
         Agent *GetChildAgent() const;
         PatternQuery::Link GetPatternLink() const;
     };
