@@ -318,6 +318,20 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         if( x.get() == (Node *)(l->agent) )
             continue; // Pattern nodes immediately match themselves
         
+        // Are we at a residual coupling?
+        if( coupling_residual_links.count( make_pair(l->agent, agent) ) > 0 ) // See #129
+        {
+            CompareCoupling( l->agent, x, &my_keys );
+            return;
+        }
+        
+        // Master couplings are now checked in a post-pass
+        if( master_boundary_agents.count(l->agent) > 0 )
+        {
+            master_coupling_candidates[l->agent] = x;
+            return;
+        }
+
         // Remember the coupling before recursing, as we can hit the same node 
         // (eg identifier) and we need to have coupled it. The "if" statement
         // tests coupling_keyer_links as well as providing a small optimisation.
@@ -327,7 +341,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
             KeyCoupling( l->agent, x, &my_keys );
         }
 
-        DecidedCompare(l->agent, agent, x);   
+        DecidedCompare(l->agent, x);   
     }
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
@@ -406,20 +420,6 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 {
     INDENT(" ");
     ASSERT( x ); // Target must not be NULL
-
-    // Are we at a residual coupling?
-    if( coupling_residual_links.count( make_pair(agent, parent_agent) ) > 0 ) // See #129
-    {
-        CompareCoupling( agent, x, &my_keys );
-        return;
-    }
-    
-    // Master couplings are now checked in a post-pass
-    if( master_boundary_agents.count(agent) > 0 )
-    {
-        master_coupling_candidates[agent] = x;
-        return;
-    }
 
     // Obtain the query state from the conjecture
     shared_ptr<DecidedQuery> query = conj->GetQuery(agent);
