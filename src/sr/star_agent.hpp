@@ -31,7 +31,7 @@ public:
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
-    virtual TreePtr<Node> GetRestriction() const = 0;
+    virtual const TreePtrInterface *GetRestriction() const = 0;
 
 public:
 };
@@ -45,9 +45,9 @@ class Star : public StarAgent,
 public:
     SPECIAL_NODE_FUNCTIONS
     TreePtr<PRE_RESTRICTION> restriction; 
-    virtual TreePtr<Node> GetRestriction() const
+    virtual const TreePtrInterface *GetRestriction() const
     {
-        return restriction;
+        return &restriction;
     }
 };
 

@@ -24,10 +24,11 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
                     num_stars++;
             }
             num_stars--; // Don't register a decision for the last Star
-   			FOREACH( TreePtr<Node> pe, *pattern_seq )
-            {
+   			for( CollectionInterface::iterator pit = pattern_seq->begin(); pit != pattern_seq->end(); ++pit )                 
+   			{
+                const TreePtrInterface *pe = &*pit; 
                 ASSERT( pe );
-                if( dynamic_pointer_cast<StarAgent>(pe) && num_stars>0 )
+                if( dynamic_cast<StarAgent *>(pe->get()) && num_stars>0 )
                 {
                     pq->RegisterDecision( true ); // Inclusive, please.
                     num_stars--;
@@ -38,10 +39,11 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )
         {
-   			TreePtr<Node> p_star = NULL;
-   			FOREACH( TreePtr<Node> pe, *pattern_col )
+   			const TreePtrInterface *p_star = nullptr;
+   			for( CollectionInterface::iterator pit = pattern_col->begin(); pit != pattern_col->end(); ++pit )                 
    			{
-				if( dynamic_pointer_cast<StarAgent>(pe) ) // per the impl, the star in a collection is not linked
+                const TreePtrInterface *pe = &*pit; 
+				if( dynamic_cast<StarAgent *>(pe->get()) ) // per the impl, the star in a collection is not linked
 				{
                     p_star = pe;
                 }
@@ -51,13 +53,13 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 				    pq->RegisterNormalLink(pe);    	     
                 }
 		    }
-		    if( p_star )
-		        pq->RegisterNormalLink(p_star);    
+            if( p_star )
+                pq->RegisterNormalLink(p_star);   		     
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
         {
             if( TreePtr<Node>(*pattern_ptr) ) // TreePtrs are allowed to be NULL meaning no restriction            
-                pq->RegisterNormalLink(*pattern_ptr);
+                pq->RegisterNormalLink(pattern_ptr);
         }
         else
         {
@@ -109,7 +111,7 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                 TreePtrInterface *p_x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
                 ASSERT( p_x_ptr )( "itemise for x didn't match itemise for pattern");
                 TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
-                query.RegisterNormalLink(*pattern_ptr, *p_x_ptr); // Link into X
+                query.RegisterNormalLink(pattern_ptr, *p_x_ptr); // Link into X
             }
         }
         else
@@ -182,7 +184,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern restriction
-            query.RegisterNormalLink( pe, xss ); // Link to Generated Subsequence
+            query.RegisterNormalLink( &*pit, xss ); // Link to Generated Subsequence
             
             // Resume at the first element after the matched range
             xit = xit_star_end;
@@ -192,7 +194,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
             if( xit == px->end() )
                 break;
        
-            query.RegisterNormalLink( pe, *xit ); // Link into X
+            query.RegisterNormalLink( &*pit, *xit ); // Link into X
             ++xit;
             
             // Every non-star pattern node we pass means there's one fewer remaining
@@ -226,7 +228,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
     FOREACH( const TreePtrInterface &xe, *px )
         xremaining.insert( xe ); // Note: the new element in xremaining will not be the one from the original x (it's a TreePtr<Node>)
     
-    TreePtr<Node> p_star = NULL;
+    const TreePtrInterface *p_star = nullptr;
 
     for( CollectionInterface::iterator pit = pattern.begin(); pit != pattern.end(); ++pit )
     {
@@ -237,7 +239,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         if( dynamic_pointer_cast<StarAgent>(pe) ) // Star in pattern collection?
         {
         	ASSERT(!p_star)("Only one Star node (or NULL ptr) allowed in a search pattern Collection");
-            p_star = pe; // remember for later and skip to next pattern
+            p_star = &*pit; // remember for later and skip to next pattern
         }
 	    else if( !xremaining.empty() ) // not a Star so match singly...
 	    {
@@ -269,7 +271,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                 xit = query.RegisterDecision( x_decision, false );
             }
             
-            query.RegisterNormalLink( pe, *xit ); // Link into X
+            query.RegisterNormalLink( &*pit, *xit ); // Link into X
 
 	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
 	    	// then the present chosen iterator has been chosen before and the choices are conflicting.

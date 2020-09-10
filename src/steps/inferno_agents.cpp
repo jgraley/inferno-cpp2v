@@ -94,9 +94,9 @@ bool IdentifierByNameAgent::IsMatch( const TreePtrInterface &x ) const
 shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
-	pq->RegisterNormalLink( terminus );
+	pq->RegisterNormalLink( &terminus );
 	if( depth )
-		pq->RegisterNormalLink( depth ); 
+		pq->RegisterNormalLink( &depth ); 
     return pq;
 }
 
@@ -117,13 +117,13 @@ void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     } 
             
     // Compare the last position with the terminus pattern
-    query.RegisterNormalLink( terminus, xt ); // Link into X
+    query.RegisterNormalLink( &terminus, xt ); // Link into X
     
     // Compare the depth with the supplied pattern if present
     if( depth )
     {
         TreePtr<Node> cur_depth( new SpecificString(s) );
-        query.RegisterNormalLink( depth, cur_depth );  // Generated Link (string)
+        query.RegisterNormalLink( &depth, cur_depth );  // Generated Link (string)
     }
 }    
 

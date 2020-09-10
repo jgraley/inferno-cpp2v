@@ -17,9 +17,12 @@ shared_ptr<PatternQuery> MatchAnyAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
     pq->RegisterDecision(false); // Exclusive, please
-    FOREACH( const TreePtr<Node> p, GetPatterns() )
+    for( CollectionInterface::iterator pit = GetPatterns().begin(); pit != GetPatterns().end(); ++pit )                 
+    {
+        const TreePtrInterface *p = &*pit; 
 	    pq->RegisterNormalLink( p );
-
+    }
+    
     return pq;
 }
 
@@ -33,12 +36,13 @@ void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     
     // We register a decision that actually chooses between our agents - that
     // is, the options for the OR operation.
-    ContainerInterface::iterator it = query.RegisterDecision( options, false );
-    FOREACH( const TreePtr<Node> p, GetPatterns() )
+    ContainerInterface::iterator choice_it = query.RegisterDecision( options, false );
+    for( CollectionInterface::iterator pit = GetPatterns().begin(); pit != GetPatterns().end(); ++pit )                 
     {
-        ASSERT( p );
+        const TreePtrInterface *p = &*pit; 
+        ASSERT( *p );
         // Context is normal because all patterns must match
-        if( p == *it ) // Is this the pattern that was chosen?
+        if( *p == *choice_it ) // Is this the pattern that was chosen?
         {
             // Yes, so supply the "real" x for this link. We'll really
             // test x against this pattern.

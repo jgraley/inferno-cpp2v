@@ -9,9 +9,9 @@ using namespace SR;
 shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
-    if( TreePtr<Node> p = GetRestriction() )
+    if( *GetRestriction() )
     {
-        pq->RegisterMultiplicityLink( p );
+        pq->RegisterMultiplicityLink( GetRestriction() );
     }
 
     return pq;
@@ -41,12 +41,12 @@ void StarAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         CheckLocalMatch( xe.get() );
     }
      
-    if( TreePtr<Node> p = GetRestriction() )
+    if( *GetRestriction() )
     {
         TRACE("StarAgent pattern, size is %d\n", x_ci->size());
         // Apply pattern restriction - will be at least as strict as pre-restriction
         
-        query.RegisterMultiplicityLink( p, x_sc ); // Links into X
+        query.RegisterMultiplicityLink( GetRestriction(), x_sc ); // Links into X
     }
 }                       
 

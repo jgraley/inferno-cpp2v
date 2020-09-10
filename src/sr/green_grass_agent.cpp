@@ -37,9 +37,9 @@ void GreenGrassAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 TreePtr<Node> GreenGrassAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT("G");
-    ASSERT( GetThrough() );          
-    TRACE("GreenGrass node through=")(*GetThrough())("\n");
-    return AsAgent(GetThrough())->BuildReplace();
+    ASSERT( *GetThrough() );          
+    TRACE("GreenGrass node through=")(**GetThrough())("\n");
+    return AsAgent(*GetThrough())->BuildReplace();
 }
 
 

@@ -28,7 +28,7 @@ public:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       TreePtr<Node> x ) const;                  
     virtual void TrackingKey( Agent *from );
-    virtual TreePtr<Node> GetThrough() const = 0;    
+    virtual const TreePtrInterface *GetThrough() const = 0;    
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *blocks ) const;
     virtual void AgentConfigure( const SCREngine *master_engine, SCREngine *my_engine );
@@ -68,9 +68,9 @@ public:
     }
 
     TreePtr<PRE_RESTRICTION> through;
-    virtual TreePtr<Node> GetThrough() const
+    virtual const TreePtrInterface *GetThrough() const
     {
-        return TreePtr<Node>( through );
+        return &through;
     }
 };
 

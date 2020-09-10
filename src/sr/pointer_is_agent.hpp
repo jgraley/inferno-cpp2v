@@ -20,7 +20,7 @@ public:
                                       TreePtr<Node> x ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
-    virtual TreePtr<Node> GetPointer() const = 0;
+    virtual const TreePtrInterface *GetPointer() const = 0;
 };
 	
 template<class PRE_RESTRICTION>
@@ -30,9 +30,9 @@ class PointerIs : public Special<PRE_RESTRICTION>,
 public:
     SPECIAL_NODE_FUNCTIONS
     TreePtr<PRE_RESTRICTION> pointer;
-    virtual TreePtr<Node> GetPointer() const
+    virtual const TreePtrInterface *GetPointer() const
     {
-        return (TreePtr<Node>)pointer;
+        return &pointer;
     }
 };
 

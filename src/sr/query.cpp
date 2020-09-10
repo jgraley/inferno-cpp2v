@@ -3,8 +3,15 @@
 #include "common/hit_count.hpp"
 #include "helpers/simple_compare.hpp"
 #include "agent.hpp"
+#include <inttypes.h>
 
 using namespace SR;
+
+void EnsureOnStack( const TreePtrInterface *pattern, bool bp )
+{
+    ASSERT( bp || (((uint64_t)pattern & 0x7fff00000000ULL) != 0x7fff00000000ULL) )
+          ("Supplied agent link seems like it's probably on the stack, usually a bad sign\n");
+}
 
 
 void PatternQuery::RegisterDecision( bool inclusive )
@@ -15,10 +22,12 @@ void PatternQuery::RegisterDecision( bool inclusive )
 }
 
  
-void PatternQuery::RegisterNormalLink( TreePtr<Node> pattern )
+void PatternQuery::RegisterNormalLink( const TreePtrInterface *pattern, bool bp )
 {
     auto b = make_shared<Link>();
-    b->agent = Agent::AsAgent(pattern);
+    EnsureOnStack( pattern, bp );
+    TreePtr<Node> npattern(*pattern);
+    b->agent = Agent::AsAgent(npattern);
     
     // For debugging
     b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
@@ -27,10 +36,12 @@ void PatternQuery::RegisterNormalLink( TreePtr<Node> pattern )
 }
 
 
-void PatternQuery::RegisterAbnormalLink( TreePtr<Node> pattern )
+void PatternQuery::RegisterAbnormalLink( const TreePtrInterface *pattern, bool bp )
 {
     auto b = make_shared<Link>();
-    b->agent = Agent::AsAgent(pattern);
+    EnsureOnStack( pattern, bp );
+    TreePtr<Node> npattern(*pattern);
+    b->agent = Agent::AsAgent(npattern);
     
     // For debugging
     b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
@@ -39,10 +50,12 @@ void PatternQuery::RegisterAbnormalLink( TreePtr<Node> pattern )
 }
 
 
-void PatternQuery::RegisterMultiplicityLink( TreePtr<Node> pattern )
+void PatternQuery::RegisterMultiplicityLink( const TreePtrInterface *pattern, bool bp )
 {
     auto b = make_shared<Link>();
-    b->agent = Agent::AsAgent(pattern);
+    EnsureOnStack( pattern, bp );
+    TreePtr<Node> npattern(*pattern);
+    b->agent = Agent::AsAgent(npattern);
     
     // For debugging
     b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
@@ -68,11 +81,13 @@ void DecidedQuery::Start()
 }
 
 
-void DecidedQuery::RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x )
+void DecidedQuery::RegisterNormalLink( const TreePtrInterface *pattern, TreePtr<Node> x, bool bp )
 {
     ASSERT(x);
     auto b = make_shared<Link>();
-    b->agent = Agent::AsAgent(pattern);
+    EnsureOnStack( pattern, bp );
+    TreePtr<Node> npattern(*pattern);
+    b->agent = Agent::AsAgent(npattern);
     b->x = x;
     
     // For debugging
@@ -82,11 +97,13 @@ void DecidedQuery::RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x )
 }
 
 
-void DecidedQuery::RegisterAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x )
+void DecidedQuery::RegisterAbnormalLink( const TreePtrInterface *pattern, TreePtr<Node> x, bool bp )
 {
     ASSERT(x);
     auto b = make_shared<Link>();
-    b->agent = Agent::AsAgent(pattern);
+    EnsureOnStack( pattern, bp );
+    TreePtr<Node> npattern(*pattern);
+    b->agent = Agent::AsAgent(npattern);
     b->x = x;
     
     // For debugging
@@ -96,11 +113,13 @@ void DecidedQuery::RegisterAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x 
 }
 
 
-void DecidedQuery::RegisterMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x )
+void DecidedQuery::RegisterMultiplicityLink( const TreePtrInterface *pattern, TreePtr<SubContainer> x, bool bp )
 {
     ASSERT(x);
     auto b = make_shared<Link>();
-    b->agent = Agent::AsAgent(pattern);
+    EnsureOnStack( pattern, bp );
+    TreePtr<Node> npattern(*pattern);
+    b->agent = Agent::AsAgent(npattern);
     b->x = x;
     
     // For debugging
@@ -110,14 +129,16 @@ void DecidedQuery::RegisterMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubC
 }
 
 
-void DecidedQuery::RegisterAlwaysMatchingLink( TreePtr<Node> pattern )
+void DecidedQuery::RegisterAlwaysMatchingLink( const TreePtrInterface *pattern, bool bp )
 {
     auto b = make_shared<Link>();
-    b->agent = Agent::AsAgent(pattern);
+    EnsureOnStack( pattern, bp );
+    TreePtr<Node> npattern(*pattern);
+    b->agent = Agent::AsAgent(npattern);
     // Supply the pattern as x. Pattern are usually not valid x nodes
     // (because can have NULL pointers) but there's logic in 
     // the AndRuleEngine to early-out in this case. 
-    b->x = pattern;
+    b->x = *pattern;
     
     // For debugging
     b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));

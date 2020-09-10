@@ -5,7 +5,7 @@ using namespace SR;
 shared_ptr<PatternQuery> TransformOfAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
-	pq->RegisterNormalLink( pattern );
+	pq->RegisterNormalLink( &pattern );
     return pq;
 }
 
@@ -22,7 +22,7 @@ void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 	if( xt )
 	{
 	    // Punt it back into the search/replace engine
-	    query.RegisterNormalLink( pattern, xt );  // Link to Generated (could be elsewhere in x)
+	    query.RegisterNormalLink( &pattern, xt );  // Link to Generated (could be elsewhere in x)
 	}
 	else
 	{

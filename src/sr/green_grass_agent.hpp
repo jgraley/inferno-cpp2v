@@ -21,7 +21,7 @@ class GreenGrassAgent : public virtual AgentCommon
                                       TreePtr<Node> x ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
-    virtual TreePtr<Node> GetThrough() const = 0;
+    virtual const TreePtrInterface *GetThrough() const = 0;
 };
 
 
@@ -32,9 +32,9 @@ class GreenGrass : public GreenGrassAgent,
 public:
     SPECIAL_NODE_FUNCTIONS
     TreePtr<PRE_RESTRICTION> through;
-    virtual TreePtr<Node> GetThrough() const
+    virtual const TreePtrInterface *GetThrough() const
     {
-        return TreePtr<Node>( through );
+        return &through;
     }
 };
 

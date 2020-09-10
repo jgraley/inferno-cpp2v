@@ -26,8 +26,8 @@ public:
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:
-    virtual TreePtr<Node> GetThrough() const = 0;
-    virtual TreePtr<Node> GetOverlay() const = 0;    
+    virtual const TreePtrInterface *GetThrough() const = 0;
+    virtual const TreePtrInterface *GetOverlay() const = 0;    
 };
 
 
@@ -39,13 +39,13 @@ public:
     SPECIAL_NODE_FUNCTIONS
     TreePtr<PRE_RESTRICTION> through;
     TreePtr<PRE_RESTRICTION> overlay;
-    virtual TreePtr<Node> GetThrough() const 
+    virtual const TreePtrInterface *GetThrough() const 
     {
-        return (TreePtr<Node>)through;
+        return &through;
     }
-    virtual TreePtr<Node> GetOverlay() const
+    virtual const TreePtrInterface *GetOverlay() const
     {
-        return (TreePtr<Node>)overlay;
+        return &overlay;
     }
 };
 

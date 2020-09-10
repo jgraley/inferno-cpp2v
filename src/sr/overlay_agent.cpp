@@ -28,12 +28,12 @@ void OverlayAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 TreePtr<Node> OverlayAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT("O");    
-    ASSERT( GetOverlay() );          
+    ASSERT( *GetOverlay() );          
     // Key as many nodes as possible on the replace side
-    TRACE(*this)(" transferring key from ")(*AsAgent(GetThrough()))(" to ")(AsAgent(GetOverlay()));
-    AsAgent(GetOverlay())->TrackingKey(AsAgent(GetThrough()));
-    TRACE("Overlay node through=")(*(GetThrough()))(" overlay=")(*(GetOverlay()))("\n");
-    return AsAgent(GetOverlay())->BuildReplace();
+    TRACE(*this)(" transferring key from ")(*AsAgent(*GetThrough()))(" to ")(AsAgent(*GetOverlay()));
+    AsAgent(*GetOverlay())->TrackingKey(AsAgent(*GetThrough()));
+    TRACE("Overlay node through=")(*(*GetThrough()))(" overlay=")(*(*GetOverlay()))("\n");
+    return AsAgent(*GetOverlay())->BuildReplace();
 }
 
 

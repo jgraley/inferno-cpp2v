@@ -41,9 +41,15 @@ public:
     }
     
     void RegisterDecision( bool inclusive ); 
-    void RegisterNormalLink( TreePtr<Node> pattern );
-    void RegisterAbnormalLink( TreePtr<Node> pattern );
-    void RegisterMultiplicityLink( TreePtr<Node> pattern );
+    
+    void RegisterNormalLink( const TreePtrInterface *pattern, bool bp = false );
+    void RegisterAbnormalLink( const TreePtrInterface *pattern, bool bp = false );
+    void RegisterMultiplicityLink( const TreePtrInterface *pattern, bool bp = false );
+    
+    //void RegisterNormalLink( TreePtr<Node> pattern ) { RegisterNormalLink( &pattern, true ); }
+    //void RegisterAbnormalLink( TreePtr<Node> pattern ) { RegisterAbnormalLink( &pattern, true ); }
+    //void RegisterMultiplicityLink( TreePtr<Node> pattern ) { RegisterMultiplicityLink( &pattern, true ); }
+
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e );
     
     const Decisions *GetDecisions() const { return &decisions; } 
@@ -134,10 +140,16 @@ public:
 
     virtual void CompleteDecisionsWithEmpty() = 0;
 
-    virtual void RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) = 0; 
-    virtual void RegisterAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) = 0; 
-    virtual void RegisterMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x ) = 0; 
-    virtual void RegisterAlwaysMatchingLink( TreePtr<Node> pattern ) = 0; // Is a normal link
+    virtual void RegisterNormalLink( const TreePtrInterface *pattern, TreePtr<Node> x, bool bp = false ) = 0; 
+    virtual void RegisterAbnormalLink( const TreePtrInterface *pattern, TreePtr<Node> x, bool bp = false ) = 0; 
+    virtual void RegisterMultiplicityLink( const TreePtrInterface *pattern, TreePtr<SubContainer> x, bool bp = false ) = 0; 
+    virtual void RegisterAlwaysMatchingLink( const TreePtrInterface *pattern, bool bp = false ) = 0; // Is a normal link
+
+    //virtual void RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) = 0; 
+    //virtual void RegisterAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) = 0; 
+    //virtual void RegisterMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x ) = 0; 
+    //virtual void RegisterAlwaysMatchingLink( TreePtr<Node> pattern ) = 0; // Is a normal link
+    
     virtual void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
 
     class RAIIDecisionsCleanup
@@ -192,13 +204,16 @@ public:
     ContainerInterface::iterator SkipDecision();
     void CompleteDecisionsWithEmpty();
 
-    void RegisterNormalLink( TreePtr<Node> pattern, const TreePtrInterface *px ); 
-    void RegisterAbnormalLink( TreePtr<Node> pattern, const TreePtrInterface *px ); 
-    void RegisterMultiplicityLink( TreePtr<Node> pattern, const TreePtrInterface *px ); 
-    void RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x ); 
-    void RegisterAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x ); 
-    void RegisterMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x ); 
-    void RegisterAlwaysMatchingLink( TreePtr<Node> pattern ); // Is a normal link
+    void RegisterNormalLink( const TreePtrInterface *pattern, TreePtr<Node> x, bool bp = false ); 
+    void RegisterAbnormalLink( const TreePtrInterface *pattern, TreePtr<Node> x, bool bp = false ); 
+    void RegisterMultiplicityLink( const TreePtrInterface *pattern, TreePtr<SubContainer> x, bool bp = false ); 
+    void RegisterAlwaysMatchingLink( const TreePtrInterface *pattern, bool bp = false ); // Is a normal link
+
+    //void RegisterNormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) { RegisterNormalLink( &pattern, x, true ); }
+    //void RegisterAbnormalLink( TreePtr<Node> pattern, TreePtr<Node> x ) { RegisterAbnormalLink( &pattern, x, true ); }; 
+    //void RegisterMultiplicityLink( TreePtr<Node> pattern, TreePtr<SubContainer> x ) { RegisterMultiplicityLink( &pattern, x, true ); }; 
+    //void RegisterAlwaysMatchingLink( TreePtr<Node> pattern ) { RegisterAlwaysMatchingLink( &pattern, true ); }; // Is a normal link
+
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ); 
                                                   
     const Links *GetNormalLinks() const { return &normal_links; } // pointer returned because the links contain the local links

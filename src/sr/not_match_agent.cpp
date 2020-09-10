@@ -16,7 +16,7 @@ void NotMatchAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                          TreePtr<Node> x ) const
 {
     INDENT("!");
-    ASSERT( GetPattern() );
+    ASSERT( *GetPattern() );
     query.Reset();
     
     // Check pre-restriction

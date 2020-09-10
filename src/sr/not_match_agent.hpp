@@ -22,7 +22,7 @@ public:
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     
 private:
-    virtual TreePtr<Node> GetPattern() const = 0;
+    virtual const TreePtrInterface *GetPattern() const = 0;
     class BooleanEvaluatorNot : public BooleanEvaluator
     {
 	public:
@@ -42,9 +42,9 @@ public:
     // GetPattern() anyway, for consistency.
     TreePtr<Node> pattern;
 private:
-    virtual TreePtr<Node> GetPattern() const
+    virtual const TreePtrInterface *GetPattern() const
     {
-        return (TreePtr<Node>)pattern;
+        return &pattern;
     }
 };
     
