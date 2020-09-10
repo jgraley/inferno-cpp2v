@@ -33,6 +33,8 @@ public:
 #endif
         Link();
         bool operator<(const Link &other) const;
+        bool operator!=(const Link &other) const;
+        bool operator==(const Link &other) const;
         explicit operator bool() const;
         Agent *GetChildAgent() const;
     };

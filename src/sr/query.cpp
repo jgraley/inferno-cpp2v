@@ -29,6 +29,17 @@ bool PatternQuery::Link::operator<(const Link &other) const
 }
 
 
+bool PatternQuery::Link::operator!=(const Link &other) const
+{
+    return ppattern != other.ppattern;
+}
+
+
+bool PatternQuery::Link::operator==(const Link &other) const
+{
+    return ppattern == other.ppattern;
+}
+
 PatternQuery::Link::operator bool() const
 {
     return ppattern != nullptr;

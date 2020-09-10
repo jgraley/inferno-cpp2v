@@ -49,20 +49,23 @@ public:
     void ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
                                   Agent *agent,
                                   const set<Agent *> &master_agents );
-    void ConfigDetermineKeyersModuloMatchAny( map< Agent *, Agent * > *possible_keyer_links,
+    void ConfigDetermineKeyersModuloMatchAny( set<PatternQuery::Link> *possible_keyer_links,
                                               Agent *agent,
+                                              PatternQuery::Link link,
                                               Agent *parent_agent,
                                               set<Agent *> *master_agents,
                                               set<Agent *> *match_any_agents ) const;
-    void ConfigDeterminePossibleKeyers( map< Agent *, Agent * > *possible_keyer_links,
+    void ConfigDeterminePossibleKeyers( set<PatternQuery::Link> *possible_keyer_links,
                                         Agent *agent,
+                                        PatternQuery::Link link,
                                         Agent *parent_agent,
                                         set<Agent *> master_agents ) const;
-    void ConfigDetermineResiduals( map< Agent *, Agent * > *possible_keyer_links,
+    void ConfigDetermineResiduals( set<PatternQuery::Link> *possible_keyer_links,
                                    Agent *agent,
+                                   PatternQuery::Link link,
                                    Agent *parent_agent,
                                    set<Agent *> master_agents );
-    void ConfigFilterKeyers(map< Agent *, Agent * > *possible_keyer_links);
+    void ConfigFilterKeyers(set<PatternQuery::Link> *possible_keyer_links);
     void ConfigPopulateNormalAgents( set<Agent *> *normal_agents, 
                                      Agent *current_agent );
                                       
@@ -97,8 +100,8 @@ private:
     map< Agent *, AndRuleEngine > my_multiplicity_engines;
     map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
     set<Agent *> master_boundary_agents;
-    set< pair<Agent *, Agent *> > coupling_keyer_links; // (child, parent)
-    set< pair<Agent *, Agent *> > coupling_residual_links; // (child, parent)
+    set< PatternQuery::Link > coupling_keyer_links;
+    set< PatternQuery::Link > coupling_residual_links;
     map< Agent *, PlaceholderAgent > diversion_agents; // real -> diversion
     
     shared_ptr<Conjecture> conj;
