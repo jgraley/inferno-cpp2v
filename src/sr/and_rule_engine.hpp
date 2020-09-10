@@ -8,6 +8,7 @@
 #include "helpers/transformation.hpp"
 #include "common/mismatch.hpp"
 #include "agent.hpp"
+#include "placeholder_agent.hpp"
 #include <set>
 
 namespace CSP
@@ -68,6 +69,9 @@ public:
     void CompareCoupling( Agent *agent,
                           TreePtr<Node> x,
                           const CouplingMap *keys );
+    void KeyCoupling( Agent *agent,
+                      TreePtr<Node> x,
+                      CouplingMap *keys );
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
     void CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > record,
@@ -96,6 +100,7 @@ private:
     set<Agent *> master_boundary_agents;
     set< pair<Agent *, Agent *> > coupling_keyer_links; // (child, parent)
     set< pair<Agent *, Agent *> > coupling_residual_links; // (child, parent)
+    map< Agent *, PlaceholderAgent > diversion_agents; // real -> diversion
     
     shared_ptr<Conjecture> conj;
     shared_ptr<CSP::SolverHolder> solver;

@@ -21,6 +21,9 @@
 // See #119
 //#define SIDE_INFO_BY_AGENT
 
+// Not unique! See #119
+//#define DIVERSIONS
+
 using namespace SR;
 
 void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_agents_ )
@@ -244,14 +247,28 @@ void AndRuleEngine::ConfigPopulateNormalAgents( set<Agent *> *normal_agents,
         
     // Can be nicer in C++17, apparently.
     FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetAbnormalLinks() )
+    {        
         my_abnormal_engines.emplace(std::piecewise_construct,
                                     std::forward_as_tuple(b->agent),
                                     std::forward_as_tuple());    
-
+#ifdef DIVERSIONS
+        diversion_agents.emplace(std::piecewise_construct,
+                                 std::forward_as_tuple(b->agent),
+                                 std::forward_as_tuple());    
+#endif
+    }
+    
     FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetMultiplicityLinks() )
+    {
         my_multiplicity_engines.emplace(std::piecewise_construct,
                                         std::forward_as_tuple(b->agent),
                                         std::forward_as_tuple());
+#ifdef DIVERSIONS
+        diversion_agents.emplace(std::piecewise_construct,
+                                 std::forward_as_tuple(b->agent),
+                                 std::forward_as_tuple());    
+#endif
+    }
 }
 
 
@@ -267,6 +284,20 @@ void AndRuleEngine::CompareCoupling( Agent *agent,
     static SimpleCompare couplings_comparer;
     if( !couplings_comparer( x, keys->at(agent) ) )
         throw Mismatch();    
+}                                     
+
+
+void AndRuleEngine::KeyCoupling( Agent *agent,
+                                 TreePtr<Node> x,
+                                 CouplingMap *keys )
+{
+    ASSERT( keys->count(agent) == 0 )("Coupling conflict!\n");
+
+#ifdef DIVERSIONS
+    if( diversion_agents.count(agent) )
+        agent = &diversion_agents.at(agent);
+#endif
+    (*keys)[agent] = x;
 }                                     
 
 
@@ -296,8 +327,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         ASSERT( abnormal_links.count(l)==0 )("Links info conflict!\n");
         abnormal_links.insert( l ); 
 #ifdef SIDE_INFO_BY_AGENT
-        ASSERT( hypothetical_solution_keys.count(l->agent)==0 )("Coupling conflict!\n");
-        hypothetical_solution_keys[l->agent] = l->x;
+        KeyCoupling( l->agent, l->x, &hypothetical_solution_keys );
 #endif
     }
         
@@ -306,8 +336,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         ASSERT( multiplicity_links.count(l)==0 )("Links info conflict!\n");
         multiplicity_links.insert( l ); 
 #ifdef SIDE_INFO_BY_AGENT
-        ASSERT( hypothetical_solution_keys.count(l->agent)==0 )("Coupling conflict!\n");
-        hypothetical_solution_keys[l->agent] = l->x;
+        KeyCoupling( l->agent, l->x, &hypothetical_solution_keys );
 #endif        
     }
 }
@@ -411,7 +440,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     if( coupling_keyer_links.count( make_pair(agent, parent_agent) ) > 0 )
     {
         ASSERT( my_keys.count(agent) == 0 )("Coupling conflict!\n");
-        my_keys[agent] = x;
+        KeyCoupling( agent, x, &my_keys );
     }
         
     TRACE(*agent)("?=")(*x)(" Comparing links\n");
@@ -425,7 +454,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
     ASSERT( hypothetical_solution_keys.count(agent) == 0 )("Coupling conflict!\n");
-    hypothetical_solution_keys[agent] = x;
+    KeyCoupling( agent, x, &hypothetical_solution_keys );
 
     TRACE("OK\n");
 }
