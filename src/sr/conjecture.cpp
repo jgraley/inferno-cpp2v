@@ -60,7 +60,7 @@ void Conjecture::ConfigRecordWalk( AgentRecords::iterator rit )
     
     for( const shared_ptr<PatternQuery::Link> l : *(pq->GetNormalLinks()) )
     {
-        AgentRecords::iterator child_rit = agent_records.find(l->agent);
+        AgentRecords::iterator child_rit = agent_records.find(l->GetChildAgent());
         if( child_rit != agent_records.end() ) // If fails, probably belongs to master
             ConfigRecordWalk( child_rit );
     }

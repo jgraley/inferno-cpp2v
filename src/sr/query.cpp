@@ -14,6 +14,21 @@ void EnsureOnStack( const TreePtrInterface *ppattern )
 }
 
 
+bool PatternQuery::Link::operator<(const Link &other)
+{
+    // PatternQuery::Link is unique across parent-child links in
+    // the pattern. This operator will permit PatternQuery::Link to 
+    // act as keys in maps.
+    return ppattern < other.ppattern;
+}
+
+
+Agent *PatternQuery::Link::GetChildAgent() const
+{
+    return Agent::AsAgent(*ppattern);
+}
+
+
 void PatternQuery::RegisterDecision( bool inclusive )
 {
     Decision d;
@@ -26,11 +41,12 @@ void PatternQuery::RegisterNormalLink( const TreePtrInterface *ppattern )
 {
     auto b = make_shared<Link>();
     EnsureOnStack( ppattern );
-    TreePtr<Node> npattern(*ppattern);
-    b->agent = Agent::AsAgent(npattern);
+    b->ppattern = ppattern;
     
     // For debugging
+#ifdef KEEP_WHODAT_INFO
     b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+#endif
     
     normal_links.push_back( b );        
 }
@@ -40,11 +56,12 @@ void PatternQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern )
 {
     auto b = make_shared<Link>();
     EnsureOnStack( ppattern );
-    TreePtr<Node> npattern(*ppattern);
-    b->agent = Agent::AsAgent(npattern);
+    b->ppattern = ppattern;
     
     // For debugging
+#ifdef KEEP_WHODAT_INFO
     b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+#endif
     
     abnormal_links.push_back( b );       
 }
@@ -54,11 +71,12 @@ void PatternQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern )
 {
     auto b = make_shared<Link>();
     EnsureOnStack( ppattern );
-    TreePtr<Node> npattern(*ppattern);
-    b->agent = Agent::AsAgent(npattern);
+    b->ppattern = ppattern;
     
     // For debugging
+#ifdef KEEP_WHODAT_INFO
     b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+#endif
     
     multiplicity_links.push_back( b );       
 }
@@ -86,12 +104,15 @@ void DecidedQuery::RegisterNormalLink( const TreePtrInterface *ppattern, TreePtr
     ASSERT(x);
     auto b = make_shared<Link>();
     EnsureOnStack( ppattern );
+    b->ppattern = ppattern;
     TreePtr<Node> npattern(*ppattern);
     b->agent = Agent::AsAgent(npattern);
     b->x = x;
     
     // For debugging
+#ifdef KEEP_WHODAT_INFO
     b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+#endif
     
     normal_links.push_back( b );        
 }
@@ -102,13 +123,16 @@ void DecidedQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern, TreeP
     ASSERT(x);
     auto b = make_shared<Link>();
     EnsureOnStack( ppattern );
+    b->ppattern = ppattern;
     TreePtr<Node> npattern(*ppattern);
     b->agent = Agent::AsAgent(npattern);
     b->x = x;
     
     // For debugging
+#ifdef KEEP_WHODAT_INFO
     b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
-    
+#endif
+
     abnormal_links.push_back( b );
 }
 
@@ -118,12 +142,15 @@ void DecidedQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern, T
     ASSERT(x);
     auto b = make_shared<Link>();
     EnsureOnStack( ppattern );
+    b->ppattern = ppattern;
     TreePtr<Node> npattern(*ppattern);
     b->agent = Agent::AsAgent(npattern);
     b->x = x;
     
     // For debugging
+#ifdef KEEP_WHODAT_INFO
     b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+#endif
 
     multiplicity_links.push_back( b );
 }
@@ -133,6 +160,7 @@ void DecidedQuery::RegisterAlwaysMatchingLink( const TreePtrInterface *ppattern 
 {
     auto b = make_shared<Link>();
     EnsureOnStack( ppattern );
+    b->ppattern = ppattern;
     TreePtr<Node> npattern(*ppattern);
     b->agent = Agent::AsAgent(npattern);
     // Supply the pattern as x. Pattern are usually not valid x nodes
@@ -141,7 +169,9 @@ void DecidedQuery::RegisterAlwaysMatchingLink( const TreePtrInterface *ppattern 
     b->x = *ppattern;
     
     // For debugging
+#ifdef KEEP_WHODAT_INFO
     b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+#endif
     
     normal_links.push_back( b );      
 }

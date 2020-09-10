@@ -134,7 +134,7 @@ void AndRuleEngine::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordere
     normal_agents_ordered->push_back( agent );
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
-        ConfigPopulateForSolver( normal_agents_ordered, b->agent, master_agents );        
+        ConfigPopulateForSolver( normal_agents_ordered, b->GetChildAgent(), master_agents );        
 }
 
 
@@ -159,7 +159,7 @@ void AndRuleEngine::ConfigDetermineKeyersModuloMatchAny( map< Agent *, Agent * >
              
         shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
         FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
-            ConfigDetermineKeyersModuloMatchAny( possible_keyer_links, b->agent, agent, senior_agents, matchany_agents );        
+            ConfigDetermineKeyersModuloMatchAny( possible_keyer_links, b->GetChildAgent(), agent, senior_agents, matchany_agents );        
     }
 }
         
@@ -187,7 +187,7 @@ void AndRuleEngine::ConfigDeterminePossibleKeyers( map< Agent *, Agent * > *poss
     {
         shared_ptr<PatternQuery> pq = ma_agent->GetPatternQuery();
         FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
-            ConfigDeterminePossibleKeyers( possible_keyer_links, b->agent, ma_agent, my_senior_agents );        
+            ConfigDeterminePossibleKeyers( possible_keyer_links, b->GetChildAgent(), ma_agent, my_senior_agents );        
     }
 }
         
@@ -208,7 +208,7 @@ void AndRuleEngine::ConfigDetermineResiduals( map< Agent *, Agent * > *possible_
         
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
-        ConfigDetermineResiduals( possible_keyer_links, b->agent, agent, master_agents );        
+        ConfigDetermineResiduals( possible_keyer_links, b->GetChildAgent(), agent, master_agents );        
 }
 
 
@@ -243,17 +243,17 @@ void AndRuleEngine::ConfigPopulateNormalAgents( set<Agent *> *normal_agents,
         my_evaluators[agent] = pq->GetEvaluator();
     
     FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
-        ConfigPopulateNormalAgents( normal_agents, b->agent );
+        ConfigPopulateNormalAgents( normal_agents, b->GetChildAgent() );
         
     // Can be nicer in C++17, apparently.
     FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetAbnormalLinks() )
     {        
         my_abnormal_engines.emplace(std::piecewise_construct,
-                                    std::forward_as_tuple(b->agent),
+                                    std::forward_as_tuple(b->GetChildAgent()),
                                     std::forward_as_tuple());    
 #ifdef DIVERSIONS
         diversion_agents.emplace(std::piecewise_construct,
-                                 std::forward_as_tuple(b->agent),
+                                 std::forward_as_tuple(b->GetChildAgent()),
                                  std::forward_as_tuple());    
 #endif
     }
@@ -261,11 +261,11 @@ void AndRuleEngine::ConfigPopulateNormalAgents( set<Agent *> *normal_agents,
     FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetMultiplicityLinks() )
     {
         my_multiplicity_engines.emplace(std::piecewise_construct,
-                                        std::forward_as_tuple(b->agent),
+                                        std::forward_as_tuple(b->GetChildAgent()),
                                         std::forward_as_tuple());
 #ifdef DIVERSIONS
         diversion_agents.emplace(std::piecewise_construct,
-                                 std::forward_as_tuple(b->agent),
+                                 std::forward_as_tuple(b->GetChildAgent()),
                                  std::forward_as_tuple());    
 #endif
     }
@@ -318,6 +318,15 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         if( x.get() == (Node *)(l->agent) )
             continue; // Pattern nodes immediately match themselves
         
+        // Remember the coupling before recursing, as we can hit the same node 
+        // (eg identifier) and we need to have coupled it. The "if" statement
+        // tests coupling_keyer_links as well as providing a small optimisation.
+        if( coupling_keyer_links.count( make_pair(l->agent, agent) ) > 0 )
+        {
+            ASSERT( my_keys.count(l->agent) == 0 )("Coupling conflict!\n");
+            KeyCoupling( l->agent, x, &my_keys );
+        }
+
         DecidedCompare(l->agent, agent, x);   
     }
 
@@ -433,16 +442,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
           (*agent);
     // Note: number of abnormal links does NOT now depend on x; #60 completed
 #endif
-                                  
-    // Remember the coupling before recursing, as we can hit the same node 
-    // (eg identifier) and we need to have coupled it. The "if" statement
-    // tests coupling_keyer_links as well as providing a small optimisation.
-    if( coupling_keyer_links.count( make_pair(agent, parent_agent) ) > 0 )
-    {
-        ASSERT( my_keys.count(agent) == 0 )("Coupling conflict!\n");
-        KeyCoupling( agent, x, &my_keys );
-    }
-        
+                                          
     TRACE(*agent)("?=")(*x)(" Comparing links\n");
     CompareLinks( agent, query );
 
@@ -470,7 +470,7 @@ void AndRuleEngine::ExpandDomain( Agent *agent, set< TreePtr<Node> > &domain )
     
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
-        ExpandDomain( b->agent, domain );
+        ExpandDomain( b->GetChildAgent(), domain );
 }
 
 

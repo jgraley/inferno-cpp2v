@@ -32,7 +32,7 @@ list<VariableId> SystemicConstraint::GetVariablesImpl( SR::Agent * const agent,
     vars.push_back( agent ); // The me-variable
     
     FOREACH( shared_ptr<const SR::PatternQuery::Link> b, *pq->GetNormalLinks() )
-        vars.push_back( b->agent );  // This rest are our normal linked agents
+        vars.push_back( b->GetChildAgent() );  // This rest are our normal linked agents
         
     return vars;
 }

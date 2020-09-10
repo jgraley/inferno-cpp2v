@@ -12,6 +12,8 @@
 #include <vector>
 #include <boost/type_traits.hpp>
 
+
+
 namespace SR
 { 
 class Agent;
@@ -25,8 +27,12 @@ public:
     };
     struct Link 
     {
-        Agent *agent;
+        const TreePtrInterface *ppattern;
+#ifdef KEEP_WHODAT_INFO
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
+#endif
+        bool operator<(const Link &other);
+        Agent *GetChildAgent() const;
     };
         
     typedef list< shared_ptr<Link> > Links;       
@@ -98,9 +104,12 @@ public:
     
     struct Link 
     {
+        const TreePtrInterface *ppattern;
         Agent *agent;
         TreePtr<Node> x; 
+#ifdef KEEP_WHODAT_INFO
         void *whodat; // the gdb magic you require is eg "info line *b.whodat"
+#endif
     };
     
     typedef vector<Range> Ranges;
