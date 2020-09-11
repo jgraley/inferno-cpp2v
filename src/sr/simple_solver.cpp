@@ -198,7 +198,7 @@ void SimpleSolver::ShowBestAssignment()
 {
     if( best_assignments.empty() )
         return; // didn't get around to updating it yet
-    TRACE("Best assignment assigned %d of %d variables:\n", best_num_assignments, best_assignments.size());
+    TRACE("Best assignment assigned %d of %d variables:\n", best_assignments.size(), variables.size());
     INDENT(" ");
     for( VariableId var : variables )
     {
@@ -207,11 +207,12 @@ void SimpleSolver::ShowBestAssignment()
             TRACEC("Variable ")(*var)(" assigned ")(*best_assignments.at(var));
             if( var->IsLocalMatch(best_assignments.at(var).get()) )
             {
-                TRACEC(" is consistent\n");
+                TRACEC(" is a local match\n");
             }
             else
             {
-                TRACEC(" is not consistent (two reasons this might be OK)\n");            
+                TRACEC(" is not a local match (two reasons this might be OK)\n");            
+                ASSERT(best_assignments.size() < variables.size())("local mismatch in passing complete assignment");
             }
             // Reason 1: At the point we gave up, no constraint containing this 
             // variable was complete (ie had a full set of assigned variables)
@@ -221,7 +222,7 @@ void SimpleSolver::ShowBestAssignment()
         }
         else 
         {
-            TRACEC("Variable ")(*var)(" could not be matched.\n");
+            TRACEC("Variable ")(*var)(" could not be assigned a consistent value.\n");
             break; // later ones won't even have been tried
         }
     }

@@ -16,7 +16,7 @@
 
 //#define TEST_PATTERN_QUERY
 
-#define USE_SOLVER
+//#define USE_SOLVER
 
 using namespace SR;
 

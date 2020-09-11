@@ -264,15 +264,16 @@ bool SystemicConstraint::Test( list< Value > values )
             fit++; // skip "me"
             for( TreePtr<Node> val : expanded_values )
             {
+                Value x = (*linkit)->x;
                 switch( fit->compare_by )
                 {
                 case CompareBy::VALUE:
-                    if( !(*simple_compare)( val, (*linkit)->x ) )
+                    if( !(*simple_compare)( val, x ) )
                         throw ByValueLinkMismatch();  
                     break;
                     
                 case CompareBy::LOCATION:
-                    if( val != (*linkit)->x )
+                    if( val != x )
                         throw ByLocationLinkMismatch();  
                     break;
                 }
