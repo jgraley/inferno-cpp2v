@@ -93,7 +93,7 @@ private:
     map< PatternQuery::Link, AndRuleEngine > my_evaluator_abnormal_engines;
     map< PatternQuery::Link, AndRuleEngine > my_free_abnormal_engines;
     map< PatternQuery::Link, AndRuleEngine > my_multiplicity_engines;
-    map< PatternQuery::Link, PlaceholderAgent > diversion_agents; // link to real :-> diversion
+    map< PatternQuery::Link, PlaceholderAgent > diversion_agents; 
     map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
     set<Agent *> master_boundary_agents;
     set< PatternQuery::Link > coupling_keyer_links;

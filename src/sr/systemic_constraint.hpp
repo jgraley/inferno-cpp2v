@@ -38,10 +38,6 @@ public:
                                  VariableQueryLambda vql );
     
 private:
-    static list<VariableId> GetVariablesImpl( SR::Agent * const agent, 
-                                              shared_ptr<SR::PatternQuery> pq );
-    static list<VariableFlags> GetFlags( list<VariableId> vars, VariableQueryLambda vql );
-    static map<VariableId, VariableId> GetDiversions( list<VariableId> vars, list<VariableFlags> flags );
     int GetFreeDegree() const;
     list<VariableId> GetFreeVariables() const;
     void TraceProblem() const;
@@ -55,14 +51,23 @@ private:
     {
     };
 
-    SR::Agent * const agent;
-    const shared_ptr<SR::PatternQuery> pq; // links run over all vars minus agent
-    const list<VariableFlags> flags; // over ALL vars
+    const struct Plan
+    {
+        explicit Plan( SR::Agent *agent, 
+                       VariableQueryLambda vql );
+        void GetAllVariables();
+        void RunVariableQueries( list<VariableId> vars, VariableQueryLambda vql );
+                                 
+        SR::Agent * agent;
+        shared_ptr<SR::PatternQuery> pq; // links run over all vars minus agent
+        list<VariableId> all_variables;
+        list<VariableFlags> flags; // over ALL vars
+        map<VariableId, VariableId> diversions;
+    } plan;
     
     const shared_ptr<SR::Conjecture> conj;
     const shared_ptr<SimpleCompare> simple_compare;
     list<Value> forces; // only FREE vars
-    map<VariableId, VariableId> diversion_variables;
 };
 
 };

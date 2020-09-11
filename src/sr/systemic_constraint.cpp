@@ -5,46 +5,52 @@
 
 using namespace CSP;
 
-SystemicConstraint::SystemicConstraint( SR::Agent *agent_, 
-                                        VariableQueryLambda vql ) :
+SystemicConstraint::Plan::Plan( SR::Agent *agent_, 
+                                VariableQueryLambda vql ) :
     agent( agent_ ),
-    pq( agent->GetPatternQuery() ),
-    flags( GetFlags( GetVariablesImpl( agent, pq ), vql ) ),
-    conj( make_shared<SR::Conjecture>() ),
-    simple_compare( make_shared<SimpleCompare>() )
-{    
+    pq( agent->GetPatternQuery() )
+{
+    GetAllVariables();
+    RunVariableQueries( all_variables, vql );
+    
     // This implementation doesn't know how to model the first varaible
     // by any means other than by location (i.e. by address)
     ASSERT( flags.front().compare_by == CompareBy::LOCATION );
-    
-    // Configure our embedded Conjecture object
-    set<SR::Agent *> my_agents;
-    my_agents.insert( agent ); // just the one agent this time
-    conj->Configure(my_agents, agent);    
 }
 
 
-list<VariableId> SystemicConstraint::GetVariablesImpl( SR::Agent * const agent, 
-                                                       shared_ptr<SR::PatternQuery> pq )
+SystemicConstraint::SystemicConstraint( SR::Agent *agent_, 
+                                        VariableQueryLambda vql ) :
+    plan( agent_, vql ),
+    conj( make_shared<SR::Conjecture>() ),
+    simple_compare( make_shared<SimpleCompare>() )
 {
-    list<VariableId> vars;
+    // Configure our embedded Conjecture object
+    set<SR::Agent *> my_agents;
+    my_agents.insert( plan.agent ); // just the one agent this time
+    conj->Configure(my_agents, plan.agent);    
+}
+
     
-    vars.push_back( agent ); // The me-variable
+void SystemicConstraint::Plan::GetAllVariables()
+{
+    all_variables.clear();
+    
+    all_variables.push_back( agent ); // The me-variable
     
     FOREACH( shared_ptr<const SR::PatternQuery::Link> b, pq->GetAllLinks() )
     {
         VariableId var = b->GetChildAgent();
-        vars.push_back( var );  
+        all_variables.push_back( var );  
     }
-    return vars;
 }
 
 
-static list<VariableId> diversions;
 
-list<VariableFlags> SystemicConstraint::GetFlags( list<VariableId> vars, VariableQueryLambda vql )
-{
-    list<VariableFlags> flags;
+void SystemicConstraint::Plan::RunVariableQueries( list<VariableId> vars, VariableQueryLambda vql )
+{ 
+    diversions.clear();
+    flags.clear();
     for( VariableId v : vars )
     {
         pair<VariableFlags, VariableId> r = vql( v );
@@ -57,40 +63,17 @@ list<VariableFlags> SystemicConstraint::GetFlags( list<VariableId> vars, Variabl
             
         case Correspondance::DIVERTED:
             ASSERT( r.second != v );
-            diversions.push_back(r.second);
+            diversions[v] = r.second;
             break;
         }
     }
-    return flags;
-}
-
-
-map<VariableId, VariableId> SystemicConstraint::GetDiversions( list<VariableId> vars, list<VariableFlags> flags )
-{
-    map<VariableId, VariableId> dv;
-    list<VariableFlags>::iterator flags_it = flags.begin();
-    for( VariableId v : vars )
-    {
-        switch( flags_it->correspondance )
-        {
-        case Correspondance::DIRECT:
-            break;
-            
-        case Correspondance::DIVERTED:
-            dv[v] = diversions.front();
-            diversions.pop_front();
-            break;
-        }
-        flags_it++;
-    }
-    return dv;
 }
 
 
 int SystemicConstraint::GetFreeDegree() const
 {
     int free_degree = 0;
-    for( auto f : flags )
+    for( auto f : plan.flags )
     {
         if( f.freedom == Freedom::FREE )
             free_degree++;
@@ -101,13 +84,12 @@ int SystemicConstraint::GetFreeDegree() const
 
 list<VariableId> SystemicConstraint::GetFreeVariables() const
 { 
-    list<VariableId> vars = GetVariablesImpl(agent, pq); 
     list<VariableId> free_vars;
-    auto fit = flags.begin();
-    for( auto var : vars )
+    auto fit = plan.flags.begin();
+    for( auto var : plan.all_variables )
     {
-        if( diversion_variables.count(var) > 0 )
-            var = diversion_variables.at(var);
+        if( plan.diversions.count(var) > 0 )
+            var = plan.diversions.at(var);
 
         if( fit->freedom == Freedom::FREE )
             free_vars.push_back( var );
@@ -119,12 +101,11 @@ list<VariableId> SystemicConstraint::GetFreeVariables() const
 
 void SystemicConstraint::TraceProblem() const
 {
-    TRACEC("SystemicConstraint degree %d free degree %d\n", flags.size(), GetFreeDegree());
+    TRACEC("SystemicConstraint degree %d free degree %d\n", plan.flags.size(), GetFreeDegree());
     INDENT(" ");
-    list<VariableId> vars = GetVariablesImpl(agent, pq); 
-    auto fit = flags.begin();
+    auto fit = plan.flags.begin();
     bool first = true;
-    for( auto var : vars )
+    for( auto var : plan.all_variables )
     {
         string scat = " ";
         if( first )
@@ -177,13 +158,19 @@ void SystemicConstraint::TraceProblem() const
 
 void SystemicConstraint::SetForces( const map<VariableId, Value> &forces_ )
 {
-    list<VariableId> vars = GetVariablesImpl(agent, pq); 
     forces.clear();
-    auto fit = flags.begin();
-    for( auto var : vars )
+    auto fit = plan.flags.begin();
+    for( auto var : plan.all_variables )
     {
-        if( fit->freedom == Freedom::FORCED )
+        switch( fit->freedom )
+        {
+        case Freedom::FREE:
+            break;
+            
+        case Freedom::FORCED:
             forces.push_back( forces_.at( var ) );
+            break;
+        }
         fit++;
     }    
 }   
@@ -200,7 +187,7 @@ bool SystemicConstraint::Test( list< Value > values )
     auto fit = forces.begin();
     auto valit = values.begin();
     bool first = true; // First flag refers to the me-variable
-    for( const VariableFlags &f : flags )
+    for( const VariableFlags &f : plan.flags )
     {
         switch( f.freedom )
         {
@@ -249,8 +236,8 @@ bool SystemicConstraint::Test( list< Value > values )
                 Tracer::RAIIEnable silencer( false ); // make DQ be quiet
                 // Similar to AndRuleEngine::DecidedCompare(), we get the
                 // Query object from conjecture, and run a query on it.
-                query = conj->GetQuery(agent);
-                agent->RunDecidedQuery( *query, x );
+                query = conj->GetQuery(plan.agent);
+                plan.agent->RunDecidedQuery( *query, x );
             }
             
             // The query now has populated links, which should be full
@@ -260,7 +247,7 @@ bool SystemicConstraint::Test( list< Value > values )
             auto links = query->GetAllLinks();
             ASSERT( links.size() == expanded_values.size() );
             auto linkit = links.begin();      
-            auto fit = flags.begin();      
+            auto fit = plan.flags.begin();      
             fit++; // skip "me"
             for( TreePtr<Node> val : expanded_values )
             {
@@ -318,8 +305,8 @@ bool SystemicConstraint::Test( list< Value > values )
         list< TreePtr<Node> > x_to_add;
         Conjecture lconj;
         set<SR::Agent *> lagents;
-        lagents.insert( agent ); // just the one agent this time
-        lconj.Configure(lagents, agent);
+        lagents.insert( plan.agent ); // just the one agent this time
+        lconj.Configure(lagents, plan.agent);
         for( TreePtr<Node> x : x_nodes )
         {
             lconj.Start();
@@ -327,8 +314,8 @@ bool SystemicConstraint::Test( list< Value > values )
             {
                 try
                 {
-                    query = lconj.GetQuery(agent);
-                    agent->RunDecidedQuery( *query, x );
+                    query = lconj.GetQuery(plan.agent);
+                    plan.agent->RunDecidedQuery( *query, x );
                     FOREACH( shared_ptr<const DecidedQuery::Link> b, *query->GetAllLinks() )
                     x_to_add.push_back(b->x);
                 }
