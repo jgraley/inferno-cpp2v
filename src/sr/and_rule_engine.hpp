@@ -96,7 +96,7 @@ private:
     set<Agent *> master_boundary_agents;
     set< PatternQuery::Link > coupling_keyer_links;
     set< PatternQuery::Link > coupling_residual_links;
-    map< Agent *, PlaceholderAgent > diversion_agents; // real -> diversion
+    map< PatternQuery::Link, PlaceholderAgent > diversion_agents; // link to real :-> diversion
     
     shared_ptr<Conjecture> conj;
     shared_ptr<CSP::SolverHolder> solver;

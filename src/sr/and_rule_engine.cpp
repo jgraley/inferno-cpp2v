@@ -269,30 +269,30 @@ void AndRuleEngine::ConfigPopulateNormalAgents( set<Agent *> *normal_agents,
     if( pq->GetEvaluator() )
         my_evaluators[agent] = pq->GetEvaluator();
     
-    FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
-        ConfigPopulateNormalAgents( normal_agents, b->GetChildAgent() );
+    FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetNormalLinks() )
+        ConfigPopulateNormalAgents( normal_agents, pl->GetChildAgent() );
         
     // Can be nicer in C++17, apparently.
-    FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetAbnormalLinks() )
+    FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetAbnormalLinks() )
     {        
         my_abnormal_engines.emplace(std::piecewise_construct,
-                                    std::forward_as_tuple(b->GetChildAgent()),
+                                    std::forward_as_tuple(pl->GetChildAgent()),
                                     std::forward_as_tuple());    
 #ifdef DIVERSIONS
         diversion_agents.emplace(std::piecewise_construct,
-                                 std::forward_as_tuple(b->GetChildAgent()),
+                                 std::forward_as_tuple(*pl),
                                  std::forward_as_tuple());    
 #endif
     }
     
-    FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetMultiplicityLinks() )
+    FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetMultiplicityLinks() )
     {
         my_multiplicity_engines.emplace(std::piecewise_construct,
-                                        std::forward_as_tuple(b->GetChildAgent()),
+                                        std::forward_as_tuple(pl->GetChildAgent()),
                                         std::forward_as_tuple());
 #ifdef DIVERSIONS
         diversion_agents.emplace(std::piecewise_construct,
-                                 std::forward_as_tuple(b->GetChildAgent()),
+                                 std::forward_as_tuple(*pl),
                                  std::forward_as_tuple());    
 #endif
     }
@@ -319,11 +319,6 @@ void AndRuleEngine::KeyCoupling( Agent *agent,
                                  CouplingMap *keys )
 {
     ASSERT( keys->count(agent) == 0 )("Coupling conflict!\n");
-
-#ifdef DIVERSIONS
-    if( diversion_agents.count(agent) )
-        agent = &diversion_agents.at(agent);
-#endif
     (*keys)[agent] = x;
 }                                     
 
@@ -373,21 +368,29 @@ void AndRuleEngine::CompareLinks( Agent *agent,
     }
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-    FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetAbnormalLinks() )
+    FOREACH( shared_ptr<const DecidedQuery::Link> pl, *query->GetAbnormalLinks() )
     {
-        ASSERT( abnormal_links.count(l)==0 )("Links info conflict!\n");
-        abnormal_links.insert( l ); 
+        ASSERT( abnormal_links.count(pl)==0 )("Links info conflict!\n");
+        abnormal_links.insert( pl ); 
+#ifdef DIVERSIONS
+    if( diversion_agents.count(*pl) )
+        agent = &diversion_agents.at(*pl);
+#endif
 #ifdef SIDE_INFO_BY_AGENT
-        KeyCoupling( l->GetChildAgent(), l->x, &hypothetical_solution_keys );
+        KeyCoupling( pl->GetChildAgent(), pl->x, &hypothetical_solution_keys );
 #endif
     }
         
-    FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetMultiplicityLinks() )
+    FOREACH( shared_ptr<const DecidedQuery::Link> pl, *query->GetMultiplicityLinks() )
     {
-        ASSERT( multiplicity_links.count(l)==0 )("Links info conflict!\n");
-        multiplicity_links.insert( l ); 
+        ASSERT( multiplicity_links.count(pl)==0 )("Links info conflict!\n");
+        multiplicity_links.insert( pl ); 
+#ifdef DIVERSIONS
+    if( diversion_agents.count(*pl) )
+        agent = &diversion_agents.at(*pl);
+#endif
 #ifdef SIDE_INFO_BY_AGENT
-        KeyCoupling( l->GetChildAgent(), l->x, &hypothetical_solution_keys );
+        KeyCoupling( pl->GetChildAgent(), pl->x, &hypothetical_solution_keys );
 #endif        
     }
 }
