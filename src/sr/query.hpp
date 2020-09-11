@@ -117,7 +117,7 @@ public:
         bool operator<(const Link &other) const;
         explicit operator bool() const;
         Agent *GetChildAgent() const;
-        PatternQuery::Link GetPatternLink() const;
+        operator PatternQuery::Link() const;
     };
     
     typedef vector<Range> Ranges;

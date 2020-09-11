@@ -138,7 +138,7 @@ Agent *DecidedQuery::Link::GetChildAgent() const
 }
 
 
-PatternQuery::Link DecidedQuery::Link::GetPatternLink() const
+DecidedQuery::Link::operator PatternQuery::Link() const
 {
     PatternQuery::Link l;
     l.ppattern = ppattern;

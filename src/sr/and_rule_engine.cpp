@@ -21,9 +21,6 @@
 // See #119
 //#define SIDE_INFO_BY_AGENT
 
-// Not unique! See #119
-//#define DIVERSIONS
-
 using namespace SR;
 
 void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_agents_ )
@@ -278,11 +275,9 @@ void AndRuleEngine::ConfigPopulateNormalAgents( set<Agent *> *normal_agents,
         my_abnormal_engines.emplace(std::piecewise_construct,
                                     std::forward_as_tuple(pl->GetChildAgent()),
                                     std::forward_as_tuple());    
-#ifdef DIVERSIONS
         diversion_agents.emplace(std::piecewise_construct,
                                  std::forward_as_tuple(*pl),
                                  std::forward_as_tuple());    
-#endif
     }
     
     FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetMultiplicityLinks() )
@@ -290,11 +285,9 @@ void AndRuleEngine::ConfigPopulateNormalAgents( set<Agent *> *normal_agents,
         my_multiplicity_engines.emplace(std::piecewise_construct,
                                         std::forward_as_tuple(pl->GetChildAgent()),
                                         std::forward_as_tuple());
-#ifdef DIVERSIONS
         diversion_agents.emplace(std::piecewise_construct,
                                  std::forward_as_tuple(*pl),
                                  std::forward_as_tuple());    
-#endif
     }
 }
 
@@ -327,44 +320,43 @@ void AndRuleEngine::CompareLinks( Agent *agent,
                                   shared_ptr<const DecidedQuery> query ) 
 {    
     int i=0;        
-    FOREACH( shared_ptr<const DecidedQuery::Link> l, *query->GetNormalLinks() )
+    FOREACH( shared_ptr<const DecidedQuery::Link> pl, *query->GetNormalLinks() )
     {
         TRACE("Comparing normal link %d\n", i++);
         // Recurse normally 
         // Get x for linked node
-        TreePtr<Node> x = l->x;
+        TreePtr<Node> x = pl->x;
         ASSERT( x );
         
         // This is needed for decisionised MatchAny #75. Other schemes for
         // RegisterAlwaysMatchingLink() could be deployed.
-        if( x.get() == (Node *)(l->GetChildAgent()) )
+        if( x.get() == (Node *)(pl->GetChildAgent()) )
             continue; // Pattern nodes immediately match themselves
         
         // Are we at a residual coupling?
-        PatternQuery::Link l2 = l->GetPatternLink();
-        if( coupling_residual_links.count( l2 ) > 0 ) // See #129
+        if( coupling_residual_links.count( *pl ) > 0 ) // See #129
         {
-            CompareCoupling( l->GetChildAgent(), x, &my_keys );
+            CompareCoupling( pl->GetChildAgent(), x, &my_keys );
             continue;
         }
         
         // Master couplings are now checked in a post-pass
-        if( master_boundary_agents.count(l->GetChildAgent()) > 0 )
+        if( master_boundary_agents.count(pl->GetChildAgent()) > 0 )
         {
-            master_coupling_candidates[l->GetChildAgent()] = x;
+            master_coupling_candidates[pl->GetChildAgent()] = x;
             continue;
         }
 
         // Remember the coupling before recursing, as we can hit the same node 
         // (eg identifier) and we need to have coupled it. The "if" statement
         // tests coupling_keyer_links as well as providing a small optimisation.
-        if( coupling_keyer_links.count( l2 ) )
+        if( coupling_keyer_links.count( *pl ) )
         {
-            ASSERT( my_keys.count(l->GetChildAgent()) == 0 )("Coupling conflict!\n");
-            KeyCoupling( l->GetChildAgent(), x, &my_keys );
+            ASSERT( my_keys.count(pl->GetChildAgent()) == 0 )("Coupling conflict!\n");
+            KeyCoupling( pl->GetChildAgent(), x, &my_keys );
         }
 
-        DecidedCompare(l->GetChildAgent(), x);   
+        DecidedCompare(pl->GetChildAgent(), x);   
     }
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
@@ -372,12 +364,10 @@ void AndRuleEngine::CompareLinks( Agent *agent,
     {
         ASSERT( abnormal_links.count(pl)==0 )("Links info conflict!\n");
         abnormal_links.insert( pl ); 
-#ifdef DIVERSIONS
-    if( diversion_agents.count(*pl) )
-        agent = &diversion_agents.at(*pl);
-#endif
+        ASSERT( diversion_agents.count(*pl) );
+        Agent *diversion_agent = &diversion_agents.at(*pl);
 #ifdef SIDE_INFO_BY_AGENT
-        KeyCoupling( pl->GetChildAgent(), pl->x, &hypothetical_solution_keys );
+        KeyCoupling( diversion_agent, pl->x, &hypothetical_solution_keys );
 #endif
     }
         
@@ -385,12 +375,10 @@ void AndRuleEngine::CompareLinks( Agent *agent,
     {
         ASSERT( multiplicity_links.count(pl)==0 )("Links info conflict!\n");
         multiplicity_links.insert( pl ); 
-#ifdef DIVERSIONS
-    if( diversion_agents.count(*pl) )
-        agent = &diversion_agents.at(*pl);
-#endif
+        ASSERT( diversion_agents.count(*pl) );
+        Agent *diversion_agent = &diversion_agents.at(*pl);
 #ifdef SIDE_INFO_BY_AGENT
-        KeyCoupling( pl->GetChildAgent(), pl->x, &hypothetical_solution_keys );
+        KeyCoupling( diversion_agent, pl->x, &hypothetical_solution_keys );
 #endif        
     }
 }
