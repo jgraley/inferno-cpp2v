@@ -166,14 +166,17 @@ void AndRuleEngine::ConfigDetermineKeyersModuloMatchAny( set<PatternQuery::Link>
     }
     else
     {
-        // See #129, can fail on legal patterns - will also fail on illegal MatchAny couplings
-        for( PatternQuery::Link l : *possible_keyer_links )        
-            ASSERT( l.GetChildAgent() != link.GetChildAgent() )
-                  ("Conflicting coupling in and-rule pattern: check MatchAny nodes\n");
+        if( link )
+        {
+            // See #129, can fail on legal patterns - will also fail on illegal MatchAny couplings
+            for( PatternQuery::Link l : *possible_keyer_links )        
+                ASSERT( l.GetChildAgent() != link.GetChildAgent() )
+                      ("Conflicting coupling in and-rule pattern: check MatchAny nodes\n");
 
-        possible_keyer_links->insert(link);
-        senior_agents->insert( agent );
-             
+            possible_keyer_links->insert(link);
+            senior_agents->insert( agent );
+        }
+        
         shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
         FOREACH( shared_ptr<const PatternQuery::Link> l, *pq->GetNormalLinks() )
             ConfigDetermineKeyersModuloMatchAny( possible_keyer_links, l->GetChildAgent(), *l, agent, senior_agents, matchany_agents );        

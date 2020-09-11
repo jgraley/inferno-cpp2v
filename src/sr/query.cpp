@@ -48,10 +48,9 @@ PatternQuery::Link::operator bool() const
 
 Agent *PatternQuery::Link::GetChildAgent() const
 {
-    if( ppattern )
-        return Agent::AsAgent(*ppattern);
-    else
-        return nullptr;
+    ASSERT( ppattern )
+          ("GetChildAgent() called on uninitialised (NULL) link\n");
+    return Agent::AsAgent(*ppattern);    
 }
 
 
@@ -133,10 +132,9 @@ DecidedQuery::Link::operator bool() const
 
 Agent *DecidedQuery::Link::GetChildAgent() const
 {
-    if( ppattern )
-        return Agent::AsAgent(*ppattern);
-    else
-        return nullptr;
+    ASSERT( ppattern )
+          ("GetChildAgent() called on uninitialised (NULL) link\n");
+    return Agent::AsAgent(*ppattern);
 }
 
 
