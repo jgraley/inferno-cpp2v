@@ -41,13 +41,12 @@ private:
     static list<VariableId> GetVariablesImpl( SR::Agent * const agent, 
                                               shared_ptr<SR::PatternQuery> pq );
     static list<VariableFlags> GetFlags( list<VariableId> vars, VariableQueryLambda vql );
+    static map<VariableId, VariableId> GetDiversions( list<VariableId> vars, list<VariableFlags> flags );
     int GetFreeDegree() const;
-    list<VariableId> GetVariables() const;
     list<VariableId> GetFreeVariables() const;
     void TraceProblem() const;
     virtual void SetForces( const map<VariableId, Value> &forces );    
-    bool Test( list< TreePtr<Node> > values, 
-               SideInfo *side_info = nullptr );
+    bool Test( list< TreePtr<Node> > values );
         
     class ByLocationLinkMismatch : public ::Mismatch
     {
@@ -63,6 +62,7 @@ private:
     const shared_ptr<SR::Conjecture> conj;
     const shared_ptr<SimpleCompare> simple_compare;
     list<Value> forces; // only FREE vars
+    map<VariableId, VariableId> diversion_variables;
 };
 
 };

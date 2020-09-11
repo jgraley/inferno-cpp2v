@@ -19,13 +19,6 @@ class BooleanEvaluator;
 
 namespace CSP
 { 
-struct SideInfo
-{
-    set< pair< shared_ptr<SR::BooleanEvaluator>, SR::DecidedQuery::Links > > evaluator_records;   
-    set< shared_ptr<const SR::DecidedQuery::Link> > abnormal_links; 
-    set< shared_ptr<const SR::DecidedQuery::Link> > multiplicity_links;
-};
-
 /**
  * Embed the assumption that variables are simply 1:1 with agents. Note
  * that this class will _always_ take and Agent * in its constructor, 
@@ -34,7 +27,6 @@ struct SideInfo
  * introduce a typedef for them.
  */
 
-// Flags is a bitfield, modulated by flags
 enum class CompareBy
 {
     LOCATION,
@@ -42,11 +34,17 @@ enum class CompareBy
 };
 
 
-// Flags is a bitfield, modulated by flags
 enum class Freedom
 {
     FORCED,
     FREE
+};
+
+
+enum class Correspondance
+{
+    DIRECT,
+    DIVERTED
 };
 
 typedef TreePtr<Node> Value;
@@ -65,10 +63,11 @@ struct VariableFlags
     // TODO Would like to use bitfields but gcc says no https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242
     CompareBy compare_by; 
     Freedom freedom;
+    Correspondance correspondance;
 };
 
 
-typedef function< VariableFlags( VariableId ) > VariableQueryLambda;
+typedef function< pair<VariableFlags, VariableId>( VariableId ) > VariableQueryLambda;
 
 void CheckLocalMatch( VariableId variable, Value value );
 
@@ -116,8 +115,7 @@ public:
      * @retval true the values are in the constraint, same ordering as return of GetFreeVariables().
      * @retval false the values are not in the constraint
      */
-    virtual bool Test( list< Value > values, 
-                       SideInfo *side_info = nullptr ) = 0;        
+    virtual bool Test( list< Value > values ) = 0;        
 
     /**
      * Given a set of possible values for variable 0, expand the domain

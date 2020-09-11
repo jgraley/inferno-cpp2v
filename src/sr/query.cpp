@@ -107,6 +107,19 @@ void PatternQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern )
 }
 
 
+PatternQuery::Links PatternQuery::GetAllLinks() const
+{
+    Links links;
+    for( shared_ptr<Link> link : *GetNormalLinks() )
+        links.push_back( link );
+    for( shared_ptr<Link> link : *GetAbnormalLinks() )
+        links.push_back( link );
+    for( shared_ptr<Link> link : *GetMultiplicityLinks() )
+        links.push_back( link );
+    return links;
+}
+
+
 DecidedQuery::Link::Link()
 {
     ppattern = nullptr;
@@ -420,6 +433,19 @@ void DecidedQuery::Reset()
     evaluator = shared_ptr<BooleanEvaluator>();    
     next_decision = decisions.begin();  
     next_choice = choices.begin();  
+}
+
+
+DecidedQuery::Links DecidedQuery::GetAllLinks() const
+{
+    Links links;
+    for( shared_ptr<Link> link : *GetNormalLinks() )
+        links.push_back( link );
+    for( shared_ptr<Link> link : *GetAbnormalLinks() )
+        links.push_back( link );
+    for( shared_ptr<Link> link : *GetMultiplicityLinks() )
+        links.push_back( link );
+    return links;
 }
 
 

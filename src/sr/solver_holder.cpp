@@ -21,22 +21,18 @@ void SolverHolder::Start( const set<Value> &initial_domain_ )
 }
 
 
-void SolverHolder::ReportSolution( const map< shared_ptr<Constraint>, list< Value > > &values, 
-                                   shared_ptr<SideInfo> side_info )
+void SolverHolder::ReportSolution( const map< shared_ptr<Constraint>, list< Value > > &values )
 {
-    matches.push_back( make_pair(values, side_info) );
+    matches.push_back( values );
 }
 
 
-bool SolverHolder::GetNextSolution( map< shared_ptr<Constraint>, list< Value > > *values, 
-                                    SideInfo *side_info )
+bool SolverHolder::GetNextSolution( map< shared_ptr<Constraint>, list< Value > > *values )
 {
     if( matches.empty() )
         return false;
     if( values )
-        *values = matches.front().first;
-    if( side_info )
-        *side_info = *matches.front().second;
+        *values = matches.front();
     matches.pop_front();
     return true;
 }

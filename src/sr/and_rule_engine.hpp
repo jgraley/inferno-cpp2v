@@ -71,7 +71,7 @@ public:
                       CouplingMap *keys );
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
-    void CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > record,
+    void CompareEvaluatorLinks( Agent *agent,
 							    const CouplingMap *hypothetical_solution_keys,
                                 const CouplingMap *master_keys );
     void DecidedCompare( Agent *agent,
@@ -88,15 +88,16 @@ private:
     Agent *root_agent;
     set<Agent *> master_agents;
     set<Agent *> my_agents;   
-    map< Agent *, shared_ptr<BooleanEvaluator> > my_evaluators;   
+    set< Agent *> my_evaluators;   
     map< Agent *, AndRuleEngine > my_evaluator_engines;
-    map< Agent *, AndRuleEngine > my_abnormal_engines;
-    map< Agent *, AndRuleEngine > my_multiplicity_engines;
+    map< PatternQuery::Link, AndRuleEngine > my_evaluator_abnormal_engines;
+    map< PatternQuery::Link, AndRuleEngine > my_free_abnormal_engines;
+    map< PatternQuery::Link, AndRuleEngine > my_multiplicity_engines;
+    map< PatternQuery::Link, PlaceholderAgent > diversion_agents; // link to real :-> diversion
     map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
     set<Agent *> master_boundary_agents;
     set< PatternQuery::Link > coupling_keyer_links;
     set< PatternQuery::Link > coupling_residual_links;
-    map< PatternQuery::Link, PlaceholderAgent > diversion_agents; // link to real :-> diversion
     
     shared_ptr<Conjecture> conj;
     shared_ptr<CSP::SolverHolder> solver;
@@ -106,9 +107,6 @@ private:
     CouplingMap master_coupling_candidates;
     const CouplingMap *master_keys;
     set<Agent *> reached; 
-    set< pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > > evaluator_records;   
-    set< shared_ptr<const DecidedQuery::Link> > abnormal_links; 
-    set< shared_ptr<const DecidedQuery::Link> > multiplicity_links;
 };
 
 #endif

@@ -31,19 +31,59 @@ list<VariableId> SystemicConstraint::GetVariablesImpl( SR::Agent * const agent,
     
     vars.push_back( agent ); // The me-variable
     
-    FOREACH( shared_ptr<const SR::PatternQuery::Link> b, *pq->GetNormalLinks() )
-        vars.push_back( b->GetChildAgent() );  // This rest are our normal linked agents
-        
+    FOREACH( shared_ptr<const SR::PatternQuery::Link> b, pq->GetAllLinks() )
+    {
+        VariableId var = b->GetChildAgent();
+        vars.push_back( var );  
+    }
     return vars;
 }
 
+
+static list<VariableId> diversions;
 
 list<VariableFlags> SystemicConstraint::GetFlags( list<VariableId> vars, VariableQueryLambda vql )
 {
     list<VariableFlags> flags;
     for( VariableId v : vars )
-        flags.push_back( vql( v ) );
+    {
+        pair<VariableFlags, VariableId> r = vql( v );
+        flags.push_back( r.first );
+        switch( r.first.correspondance )
+        {
+        case Correspondance::DIRECT:
+            ASSERT( r.second == nullptr );
+            break;
+            
+        case Correspondance::DIVERTED:
+            ASSERT( r.second != v );
+            diversions.push_back(r.second);
+            break;
+        }
+    }
     return flags;
+}
+
+
+map<VariableId, VariableId> SystemicConstraint::GetDiversions( list<VariableId> vars, list<VariableFlags> flags )
+{
+    map<VariableId, VariableId> dv;
+    list<VariableFlags>::iterator flags_it = flags.begin();
+    for( VariableId v : vars )
+    {
+        switch( flags_it->correspondance )
+        {
+        case Correspondance::DIRECT:
+            break;
+            
+        case Correspondance::DIVERTED:
+            dv[v] = diversions.front();
+            diversions.pop_front();
+            break;
+        }
+        flags_it++;
+    }
+    return dv;
 }
 
 
@@ -66,6 +106,9 @@ list<VariableId> SystemicConstraint::GetFreeVariables() const
     auto fit = flags.begin();
     for( auto var : vars )
     {
+        if( diversion_variables.count(var) > 0 )
+            var = diversion_variables.at(var);
+
         if( fit->freedom == Freedom::FREE )
             free_vars.push_back( var );
         fit++;
@@ -113,6 +156,17 @@ void SystemicConstraint::TraceProblem() const
             sflags += "FORCED";
             break;
         }
+        sflags += " and ";
+        switch( fit->correspondance )
+        {
+        case Correspondance::DIRECT:
+            sflags += "DIRECT";
+            break;
+            
+        case Correspondance::DIVERTED:
+            sflags += "DIVERTED";
+            break;
+        }
         fit++;
         
         TRACEC(*var)(scat)(sflags)("\n");
@@ -135,8 +189,7 @@ void SystemicConstraint::SetForces( const map<VariableId, Value> &forces_ )
 }   
 
 
-bool SystemicConstraint::Test( list< Value > values,
-                               SideInfo *side_info )
+bool SystemicConstraint::Test( list< Value > values )
 {
     ASSERT( values.size() == GetFreeDegree() );
     
@@ -204,9 +257,9 @@ bool SystemicConstraint::Test( list< Value > values,
             // (otherwise RunDecidedQuery() (DQ) should have thrown). We loop 
             // over both and check that they refer to the same x nodes
             // we were passed. Mismatch will throw, same as in DQ.
-            auto links = query->GetNormalLinks();
-            ASSERT( links->size() == expanded_values.size() );
-            auto linkit = links->begin();      
+            auto links = query->GetAllLinks();
+            ASSERT( links.size() == expanded_values.size() );
+            auto linkit = links.begin();      
             auto fit = flags.begin();      
             fit++; // skip "me"
             for( TreePtr<Node> val : expanded_values )
@@ -246,26 +299,7 @@ bool SystemicConstraint::Test( list< Value > values,
         }            
         break; // Didn't throw: success
     }    
-    
-    // Side-info is info required by the Engine that isn't part of the CSP model
-    // and would be difficult to re-create from it outside of this class
-    // (i.e. only given a set of values for variables).
-    if( side_info )
-    {
-        ASSERT(query); // we should still have the last query that was tried - and matched
-        
-        // Stolen from AndRuleEngine::CompareLinks()
-        FOREACH( shared_ptr<const SR::DecidedQuery::Link> b, *query->GetAbnormalLinks() )
-            side_info->abnormal_links.insert( b ); 
-        
-        FOREACH( shared_ptr<const SR::DecidedQuery::Link> b, *query->GetMultiplicityLinks() )
-            side_info->multiplicity_links.insert( b ); 
-            
-        // Stolen from AndRuleEngine::DecidedCompare()
-        if( query->GetEvaluator() )
-            side_info->evaluator_records.insert( make_pair( query->GetEvaluator(), *query->GetAbnormalLinks() ) );
-    }
-    
+
     return true;
 }
 
@@ -294,7 +328,7 @@ bool SystemicConstraint::Test( list< Value > values,
                 {
                     query = lconj.GetQuery(agent);
                     agent->RunDecidedQuery( *query, x );
-                    FOREACH( shared_ptr<const DecidedQuery::Link> b, *query->GetNormalLinks() )
+                    FOREACH( shared_ptr<const DecidedQuery::Link> b, *query->GetAllLinks() )
                     x_to_add.push_back(b->x);
                 }
                 catch( ::Mismatch & )

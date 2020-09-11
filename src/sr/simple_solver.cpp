@@ -88,11 +88,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
     {
         assignments[*current] = v;
      
-        shared_ptr<SideInfo> side_info;
-        if( complete )
-            side_info = make_shared<SideInfo>();        
-        
-        bool ok = Test( assignments, *current, side_info.get() ); // Ask for side info if assignment is complete
+        bool ok = Test( assignments, *current );
         
         if( !ok )
         {
@@ -112,7 +108,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
 #endif
         
         if( complete )
-            ReportSolution( assignments, side_info );
+            ReportSolution( assignments );
         else
             TryVariable( next );
     }
@@ -121,8 +117,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
 
 
 bool SimpleSolver::Test( const Assignments &assigns, 
-                         VariableId variable_of_interest,
-                         SideInfo *side_info )
+                         VariableId variable_of_interest )
 {
     bool ok = true; // AND-rule
     for( shared_ptr<Constraint> c : constraints )
@@ -133,7 +128,7 @@ bool SimpleSolver::Test( const Assignments &assigns,
             continue; // There were unassigned variables, don't bother testing this constraint
             
         TimedOperations(); // overhead should be hidden by Constraint::Test()
-        ok = c->Test(vals, side_info); 
+        ok = c->Test(vals); 
         
         if( !ok )
             break;
@@ -167,8 +162,7 @@ list<Value> SimpleSolver::GetValuesForConstraint( shared_ptr<Constraint> c, cons
 }
 
 
-void SimpleSolver::ReportSolution( const Assignments &assignments, 
-                                   shared_ptr<SideInfo> side_info )
+void SimpleSolver::ReportSolution( const Assignments &assignments )
 {
     map< shared_ptr<Constraint>, list< Value > > vals;
     vals.clear();
@@ -178,7 +172,7 @@ void SimpleSolver::ReportSolution( const Assignments &assignments,
         ASSERT( vals.at(c).size() == c->GetFreeDegree() ); // Assignments should be complete
     }
     
-    holder->ReportSolution( vals, side_info );
+    holder->ReportSolution( vals );
 }                     
 
 

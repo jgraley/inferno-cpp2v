@@ -38,8 +38,7 @@ public:
          * 
          * @param side_info [in] side-information as required by the `AndRuleEngine` in order to make use of the solution.
          */
-        virtual void ReportSolution( const map< shared_ptr<Constraint>, list< Value > > &values, 
-                                     shared_ptr<SideInfo> side_info ) = 0;
+        virtual void ReportSolution( const map< shared_ptr<Constraint>, list< Value > > &values ) = 0;
     }; 
     
     /** Create a solver object.

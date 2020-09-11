@@ -16,10 +16,7 @@
 
 //#define TEST_PATTERN_QUERY
 
-//#define USE_SOLVER
-
-// See #119
-//#define SIDE_INFO_BY_AGENT
+#define USE_SOLVER
 
 using namespace SR;
 
@@ -38,11 +35,14 @@ void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_ag
 
     set<Agent *> surrounding_agents = SetUnion( master_agents, my_agents ); 
         
-    for( std::pair<Agent * const, AndRuleEngine> &pae : my_abnormal_engines )
-        pae.second.Configure( pae.first, surrounding_agents );
+    for( std::pair<const PatternQuery::Link, AndRuleEngine> &pae : my_evaluator_abnormal_engines )
+        pae.second.Configure( pae.first.GetChildAgent(), surrounding_agents );
         
-    for( std::pair<Agent * const, AndRuleEngine> &pae : my_multiplicity_engines )
-        pae.second.Configure( pae.first, surrounding_agents );
+    for( std::pair<const PatternQuery::Link, AndRuleEngine> &pae : my_free_abnormal_engines )
+        pae.second.Configure( pae.first.GetChildAgent(), surrounding_agents );
+        
+    for( std::pair<const PatternQuery::Link, AndRuleEngine> &pae : my_multiplicity_engines )
+        pae.second.Configure( pae.first.GetChildAgent(), surrounding_agents );
 
     list<Agent *> normal_agents_ordered;
     master_boundary_agents.clear();    
@@ -60,19 +60,19 @@ void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_ag
     list< shared_ptr<CSP::Constraint> > constraints;
     for( Agent *constraint_agent : my_agents )
     {        
-        CSP::VariableQueryLambda vql = [&](Agent *link_agent)
+        CSP::VariableQueryLambda vql = [&](Agent *link_agent) -> pair<CSP::VariableFlags, Agent *>
         {
             CSP::VariableFlags flags;
             
             shared_ptr<PatternQuery> pq = constraint_agent->GetPatternQuery();
             PatternQuery::Link link;
-            for( PatternQuery::Link l : *pq->GetNormalLinks() )
+            for( shared_ptr<PatternQuery::Link> pl : pq->GetAllLinks() )
             {
-                if( l->GetChildAgent() == link_agent )
+                if( pl->GetChildAgent() == link_agent )
                 {
                     ASSERT(!link);
-                    ASSERT(l);
-                    link = l; // Found a link the the agent the constaint mentioned: not safe! TODO could be parallel links!
+                    ASSERT(*pl);
+                    link = *pl; // Found a link the the agent the constaint mentioned: not safe! TODO could be parallel links!
                 }
             }
                     
@@ -92,7 +92,15 @@ void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_ag
             else
                 flags.freedom = CSP::Freedom::FREE;
             
-            return flags;
+            if( diversion_agents.count(link) > 0 )
+                flags.correspondance = CSP::Correspondance::DIVERTED;
+            else
+                flags.correspondance = CSP::Correspondance::DIRECT;
+            
+            if( flags.correspondance == CSP::Correspondance::DIVERTED )
+                return make_pair(flags, &diversion_agents.at(link));
+            else
+                return make_pair(flags, nullptr);            
         };
                 
         shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( constraint_agent, vql );
@@ -264,7 +272,7 @@ void AndRuleEngine::ConfigPopulateNormalAgents( set<Agent *> *normal_agents,
     normal_agents->insert(agent);
     
     if( pq->GetEvaluator() )
-        my_evaluators[agent] = pq->GetEvaluator();
+        my_evaluators.insert(agent);
     
     FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetNormalLinks() )
         ConfigPopulateNormalAgents( normal_agents, pl->GetChildAgent() );
@@ -272,9 +280,18 @@ void AndRuleEngine::ConfigPopulateNormalAgents( set<Agent *> *normal_agents,
     // Can be nicer in C++17, apparently.
     FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetAbnormalLinks() )
     {        
-        my_abnormal_engines.emplace(std::piecewise_construct,
-                                    std::forward_as_tuple(pl->GetChildAgent()),
-                                    std::forward_as_tuple());    
+        if( pq->GetEvaluator() )
+        {
+            my_evaluator_abnormal_engines.emplace(std::piecewise_construct,
+                                                  std::forward_as_tuple(*pl),
+                                                  std::forward_as_tuple());  
+        }
+        else
+        {
+            my_free_abnormal_engines.emplace(std::piecewise_construct,
+                                             std::forward_as_tuple(*pl),
+                                             std::forward_as_tuple());  
+        }
         diversion_agents.emplace(std::piecewise_construct,
                                  std::forward_as_tuple(*pl),
                                  std::forward_as_tuple());    
@@ -283,7 +300,7 @@ void AndRuleEngine::ConfigPopulateNormalAgents( set<Agent *> *normal_agents,
     FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetMultiplicityLinks() )
     {
         my_multiplicity_engines.emplace(std::piecewise_construct,
-                                        std::forward_as_tuple(pl->GetChildAgent()),
+                                        std::forward_as_tuple(*pl),
                                         std::forward_as_tuple());
         diversion_agents.emplace(std::piecewise_construct,
                                  std::forward_as_tuple(*pl),
@@ -362,58 +379,42 @@ void AndRuleEngine::CompareLinks( Agent *agent,
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
     FOREACH( shared_ptr<const DecidedQuery::Link> pl, *query->GetAbnormalLinks() )
     {
-        ASSERT( abnormal_links.count(pl)==0 )("Links info conflict!\n");
-        abnormal_links.insert( pl ); 
         ASSERT( diversion_agents.count(*pl) );
         Agent *diversion_agent = &diversion_agents.at(*pl);
-#ifdef SIDE_INFO_BY_AGENT
         KeyCoupling( diversion_agent, pl->x, &hypothetical_solution_keys );
-#endif
     }
         
     FOREACH( shared_ptr<const DecidedQuery::Link> pl, *query->GetMultiplicityLinks() )
     {
-        ASSERT( multiplicity_links.count(pl)==0 )("Links info conflict!\n");
-        multiplicity_links.insert( pl ); 
         ASSERT( diversion_agents.count(*pl) );
         Agent *diversion_agent = &diversion_agents.at(*pl);
-#ifdef SIDE_INFO_BY_AGENT
         KeyCoupling( diversion_agent, pl->x, &hypothetical_solution_keys );
-#endif        
     }
 }
 
 
-void AndRuleEngine::CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > record,
-							               const CouplingMap *hypothetical_solution_keys,
+void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
+                                           const CouplingMap *hypothetical_solution_keys,
 							               const CouplingMap *master_keys ) 
 {
-	ASSERT( record.first );
+    auto pq = agent->GetPatternQuery();
+    shared_ptr<BooleanEvaluator> evaluator = pq->GetEvaluator();
+	ASSERT( evaluator );
 
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
     list<bool> compare_results;
-    FOREACH( shared_ptr<const DecidedQuery::Link> l, record.second )
+    FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetAbnormalLinks() )
     {
-        // Don't let this link go into the general AND-rule
-        abnormal_links.erase( l ); 
-        
         TRACE("Comparing block %d\n", i);
  
         // Get x for linked node
-#ifdef SIDE_INFO_BY_AGENT
-        ASSERT(l->x == hypothetical_solution_keys->at(l->agent))
-              ("Agent ")(*l->GetChildAgent())("\n")
-              ("hypothetical_solution_keys says x=")(*hypothetical_solution_keys->at(l->GetChildAgent()))("\n")
-              ("abnormal_links says x=")(*l->x)("\n");
-        TreePtr<Node> x = hypothetical_solution_keys->at(l->GetChildAgent());
-#else        
-        TreePtr<Node> x = l->x;
-#endif
+        Agent *diversion_agent = &diversion_agents.at(*pl);
+        TreePtr<Node> x = hypothetical_solution_keys->at(diversion_agent);
                                 
         try 
         {
-            my_abnormal_engines.at(l->GetChildAgent()).Compare( x, master_keys );
+            my_evaluator_abnormal_engines.at(*pl).Compare( x, master_keys );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -424,7 +425,6 @@ void AndRuleEngine::CompareEvaluatorLinks( pair< shared_ptr<BooleanEvaluator>, D
         i++;
     }
     
-    shared_ptr<BooleanEvaluator> evaluator = record.first;
 	TRACE(" Evaluating ");
 	FOREACH(bool b, compare_results)
 	    TRACE(b)(" ");
@@ -463,12 +463,6 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
                                           
     TRACE(*agent)("?=")(*x)(" Comparing links\n");
     CompareLinks( agent, query );
-
-    // Use worker functions to go through the links, special case if there is evaluator
-    if( query->GetEvaluator() )
-    {        
-        evaluator_records.insert( make_pair( query->GetEvaluator(), *query->GetAbnormalLinks() ) );
-	}
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
     ASSERT( hypothetical_solution_keys.count(agent) == 0 )("Coupling conflict!\n");
@@ -548,9 +542,8 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
         my_keys.clear();
 #ifdef USE_SOLVER        
         // Get a solution from the solver
-        CSP::SideInfo side_info;
         map< shared_ptr<CSP::Constraint>, list< TreePtr<Node> > > values;
-        bool match = solver->GetNextSolution( &values, &side_info );        
+        bool match = solver->GetNextSolution( &values );        
         if( !match )
             throw NoSolution();
 
@@ -562,11 +555,6 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             ASSERT( vars.front() == p.first );
             hypothetical_solution_keys[vars.front()] = vals.front(); // For now only do the first one, which is 
         }
-        
-        // Grab the side info into our containers
-        abnormal_links = side_info.abnormal_links;
-        multiplicity_links = side_info.multiplicity_links;
-        evaluator_records = side_info.evaluator_records;
 #endif
         try
         {
@@ -578,9 +566,6 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             
             // Initialise keys to the ones inherited from master, keeping 
             // none of our own from any previous unsuccessful attempt.
-            abnormal_links.clear();
-            multiplicity_links.clear();
-            evaluator_records.clear();
             master_coupling_candidates.clear();
             
             DecidedCompare( root_agent, start_x );
@@ -617,42 +602,37 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
                 if( hypothetical_solution_keys.count(agent) != 0 )
                     solution_keys[agent] = hypothetical_solution_keys.at(agent);
                 
-            CouplingMap combined_keys = MapUnion( *master_keys, solution_keys );     
+            CouplingMap combined_keys = MapUnion( *master_keys, solution_keys );    
                                                 
             // Process the evaluator queries. These can match when their children have not matched and
             // we wouldn't be able to reliably key those children so we process them in a post-pass 
             // which ensures all the couplings have been keyed already.
             // Examples are MatchAny and NotMatch (but not MatchAll, because MatchAll conforms with
             // the global and-rule and so its children can key couplings.
-            for( pair< shared_ptr<BooleanEvaluator>, DecidedQuery::Links > record : evaluator_records )
+            for( Agent *agent : my_evaluators )
             {
                 //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
-                CompareEvaluatorLinks( record, &hypothetical_solution_keys, &combined_keys );
+                CompareEvaluatorLinks( agent, &hypothetical_solution_keys, &combined_keys );
             }
 
             // Process the free abnormal links.
-            for( shared_ptr<const DecidedQuery::Link> lp : abnormal_links )
+            for( std::pair<const PatternQuery::Link, AndRuleEngine> &pae : my_free_abnormal_engines )
             {            
-                AndRuleEngine &e = my_abnormal_engines.at(lp->GetChildAgent());
-#ifdef SIDE_INFO_BY_AGENT
-                TreePtr<Node> xe = hypothetical_solution_keys.at(lp->GetChildAgent());
-#else                
-                TreePtr<Node> xe = lp->x;
-#endif                
-                e.Compare( xe, &combined_keys );
+                AndRuleEngine &e = pae.second;
+                Agent *diversion_agent = &diversion_agents.at(pae.first);
+                TreePtr<Node> x = hypothetical_solution_keys.at(diversion_agent);  
+                           
+                e.Compare( x, &combined_keys );
             }
 
             // Process the free multiplicity links.
             int i=0;
-            for( shared_ptr<const DecidedQuery::Link> lp : multiplicity_links )
+            for( std::pair<const PatternQuery::Link, AndRuleEngine> &pae : my_multiplicity_engines )
             {            
-                AndRuleEngine &e = my_multiplicity_engines.at(lp->GetChildAgent());
-
-#ifdef SIDE_INFO_BY_AGENT
-                TreePtr<Node> x = hypothetical_solution_keys.at(lp->GetChildAgent());
-#else                
-                TreePtr<Node> x = lp->x;
-#endif                
+                AndRuleEngine &e = pae.second;
+                Agent *diversion_agent = &diversion_agents.at(pae.first);
+                TreePtr<Node> x = hypothetical_solution_keys.at(diversion_agent);
+                    
                 ASSERT( x );
                 ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
                 ASSERT(xc)("Multiplicity x must implement ContainerInterface");

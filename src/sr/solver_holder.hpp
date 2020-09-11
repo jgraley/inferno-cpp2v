@@ -46,18 +46,16 @@ public:
      * @retval true A solution was found, and non-null arguments are filled in
      * @retval false No solutions are left, and the pointer arguments are unused
      */
-    bool GetNextSolution( map< shared_ptr<Constraint>, list< Value > > *values = nullptr, 
-                          SideInfo *side_info = nullptr );
+    bool GetNextSolution( map< shared_ptr<Constraint>, list< Value > > *values = nullptr );
 
  
 private:
-    void ReportSolution( const map< shared_ptr<Constraint>, list< Value > > &values, 
-                         shared_ptr<SideInfo> side_info );
+    void ReportSolution( const map< shared_ptr<Constraint>, list< Value > > &values );
 
     const shared_ptr<Solver> solver;
 
     // Only needed to reserialise the matches TODO move to "holder" class
-    list< pair< map< shared_ptr<Constraint>, list< Value > >, shared_ptr<SideInfo> > > matches;    
+    list< map< shared_ptr<Constraint>, list< Value > > > matches;    
 };
 
 };

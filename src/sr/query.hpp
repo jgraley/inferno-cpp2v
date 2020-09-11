@@ -59,9 +59,12 @@ public:
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e );
     
     const Decisions *GetDecisions() const { return &decisions; } 
+
     const Links *GetNormalLinks() const { return &normal_links; } // pointer returned because the links contain the local links
     const Links *GetAbnormalLinks() const { return &abnormal_links; } // pointer returned because the links contain the local links
     const Links *GetMultiplicityLinks() const { return &multiplicity_links; } // pointer returned because the links contain the local links
+    Links GetAllLinks() const; 
+
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
 
 private:
@@ -179,9 +182,11 @@ class DecidedQueryClientInterface : virtual public DecidedQueryCommon
 public:
     virtual void Start() = 0;
 
-    virtual const Links *GetNormalLinks() const = 0; // pointer returned because the links contain the local links
-    virtual const Links *GetAbnormalLinks() const = 0; // pointer returned because the links contain the local links
-    virtual const Links *GetMultiplicityLinks() const = 0; // pointer returned because the links contain the local links
+    virtual const Links *GetNormalLinks() const = 0; 
+    virtual const Links *GetAbnormalLinks() const = 0; 
+    virtual const Links *GetMultiplicityLinks() const = 0; 
+    virtual Links GetAllLinks() const = 0; 
+
     virtual shared_ptr<BooleanEvaluator> GetEvaluator() const = 0;
     
     virtual void Invalidate( int bc ) = 0;
@@ -219,9 +224,11 @@ public:
 
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ); 
                                                   
-    const Links *GetNormalLinks() const { return &normal_links; } // pointer returned because the links contain the local links
-    const Links *GetAbnormalLinks() const { return &abnormal_links; } // pointer returned because the links contain the local links
-    const Links *GetMultiplicityLinks() const { return &multiplicity_links; } // pointer returned because the links contain the local links
+    const Links *GetNormalLinks() const { return &normal_links; } 
+    const Links *GetAbnormalLinks() const { return &abnormal_links; }
+    const Links *GetMultiplicityLinks() const { return &multiplicity_links; }
+    Links GetAllLinks() const; 
+
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
       
     const Choices *GetChoices() const { return &choices; }
