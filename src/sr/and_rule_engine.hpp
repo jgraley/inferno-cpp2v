@@ -51,19 +51,13 @@ public:
                                   const set<Agent *> &master_agents );
     void ConfigDetermineKeyersModuloMatchAny( set<PatternQuery::Link> *possible_keyer_links,
                                               Agent *agent,
-                                              PatternQuery::Link link,
-                                              Agent *parent_agent,
                                               set<Agent *> *master_agents,
                                               set<Agent *> *match_any_agents ) const;
     void ConfigDeterminePossibleKeyers( set<PatternQuery::Link> *possible_keyer_links,
                                         Agent *agent,
-                                        PatternQuery::Link link,
-                                        Agent *parent_agent,
                                         set<Agent *> master_agents ) const;
     void ConfigDetermineResiduals( set<PatternQuery::Link> *possible_keyer_links,
                                    Agent *agent,
-                                   PatternQuery::Link link,
-                                   Agent *parent_agent,
                                    set<Agent *> master_agents );
     void ConfigFilterKeyers(set<PatternQuery::Link> *possible_keyer_links);
     void ConfigPopulateNormalAgents( set<Agent *> *normal_agents, 

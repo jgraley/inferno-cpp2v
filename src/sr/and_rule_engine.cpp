@@ -55,9 +55,9 @@ void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_ag
                              master_agents );
 
     set<PatternQuery::Link> possible_keyer_links; // maps from child to parent
-    ConfigDeterminePossibleKeyers( &possible_keyer_links, root_agent, PatternQuery::Link(), nullptr, master_agents );
+    ConfigDeterminePossibleKeyers( &possible_keyer_links, root_agent, master_agents );
     coupling_residual_links.clear();
-    ConfigDetermineResiduals( &possible_keyer_links, root_agent, PatternQuery::Link(), nullptr, master_agents );
+    ConfigDetermineResiduals( &possible_keyer_links, root_agent, master_agents );
     ConfigFilterKeyers(&possible_keyer_links);
 #ifdef USE_SOLVER    
     list< shared_ptr<CSP::Constraint> > constraints;
@@ -152,42 +152,37 @@ void AndRuleEngine::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordere
 
 void AndRuleEngine::ConfigDetermineKeyersModuloMatchAny( set<PatternQuery::Link> *possible_keyer_links,
                                                          Agent *agent,
-                                                         PatternQuery::Link link,
-                                                         Agent *parent_agent,
                                                          set<Agent *> *senior_agents,
                                                          set<Agent *> *matchany_agents ) const
 {
-    if( senior_agents->count( agent ) > 0 )
-        return; // will be fixed values for our solver
-        
-    if( dynamic_cast<MatchAnyAgent *>(agent) )
+    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
+    FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetNormalLinks() )
     {
-        matchany_agents->insert( agent );
-    }
-    else
-    {
-        if( link )
+        PatternQuery::Link link = *pl; 
+        if( senior_agents->count( link.GetChildAgent() ) > 0 )
+            continue; // will be fixed values for our solver
+            
+        if( dynamic_cast<MatchAnyAgent *>(link.GetChildAgent()) )
         {
-            // See #129, can fail on legal patterns - will also fail on illegal MatchAny couplings
-            for( PatternQuery::Link l : *possible_keyer_links )        
-                ASSERT( l.GetChildAgent() != link.GetChildAgent() )
-                      ("Conflicting coupling in and-rule pattern: check MatchAny nodes\n");
-
-            possible_keyer_links->insert(link);
-            senior_agents->insert( agent );
+            matchany_agents->insert( link.GetChildAgent() );
+            continue;
         }
-        
-        shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-        FOREACH( shared_ptr<const PatternQuery::Link> l, *pq->GetNormalLinks() )
-            ConfigDetermineKeyersModuloMatchAny( possible_keyer_links, l->GetChildAgent(), *l, agent, senior_agents, matchany_agents );        
+
+        // See #129, can fail on legal patterns - will also fail on illegal MatchAny couplings
+        for( PatternQuery::Link l : *possible_keyer_links )        
+            ASSERT( l.GetChildAgent() != link.GetChildAgent() )
+                  ("Conflicting coupling in and-rule pattern: check MatchAny nodes\n");
+
+        possible_keyer_links->insert(link);
+        senior_agents->insert( link.GetChildAgent() );
+    
+        ConfigDetermineKeyersModuloMatchAny( possible_keyer_links, link.GetChildAgent(), senior_agents, matchany_agents );        
     }
 }
         
         
 void AndRuleEngine::ConfigDeterminePossibleKeyers( set<PatternQuery::Link> *possible_keyer_links,
                                                    Agent *agent,
-                                                   PatternQuery::Link link,
-                                                   Agent *parent_agent,
                                                    set<Agent *> senior_agents ) const
 {
     // Scan the senior region. We wish to break off at MatchAny nodes. Senior is the
@@ -195,7 +190,7 @@ void AndRuleEngine::ConfigDeterminePossibleKeyers( set<PatternQuery::Link> *poss
     // links.
     set<Agent *> my_matchany_agents;
     set<Agent *> my_senior_agents = senior_agents;
-    ConfigDetermineKeyersModuloMatchAny( possible_keyer_links, agent, link, parent_agent, &my_senior_agents, &my_matchany_agents );
+    ConfigDetermineKeyersModuloMatchAny( possible_keyer_links, agent, &my_senior_agents, &my_matchany_agents );
     // After this:
     // - my_master_agents has union of master_agents and all the identified keyed agents
     // - my_match_any_agents has the MatchAny agents that we saw, BUT SKIPPED
@@ -207,20 +202,24 @@ void AndRuleEngine::ConfigDeterminePossibleKeyers( set<PatternQuery::Link> *poss
     for( Agent *ma_agent : my_matchany_agents )
     {
         shared_ptr<PatternQuery> pq = ma_agent->GetPatternQuery();
-        FOREACH( shared_ptr<const PatternQuery::Link> l, *pq->GetNormalLinks() )
-            ConfigDeterminePossibleKeyers( possible_keyer_links, l->GetChildAgent(), *l, ma_agent, my_senior_agents );        
+        FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetNormalLinks() )
+        {
+            PatternQuery::Link link = *pl;
+            ConfigDeterminePossibleKeyers( possible_keyer_links, link.GetChildAgent(), my_senior_agents );        
+        }
     }
 }
         
         
 void AndRuleEngine::ConfigDetermineResiduals( set<PatternQuery::Link> *possible_keyer_links,
                                               Agent *agent,
-                                              PatternQuery::Link link,
-                                              Agent *parent_agent,
                                               set<Agent *> master_agents ) 
 {
-    if( link )
-    {
+    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
+    FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetNormalLinks() )
+    {    
+        PatternQuery::Link link = *pl;
+        
         PatternQuery::Link keyer;
         for( PatternQuery::Link l : *possible_keyer_links )
         {
@@ -232,13 +231,11 @@ void AndRuleEngine::ConfigDetermineResiduals( set<PatternQuery::Link> *possible_
         {
             ASSERT( coupling_residual_links.count(link) == 0 );
             coupling_residual_links.insert(link);
-            return; // Coupling residuals do not recurse (keyer does that and it only needs to be done once)
+            continue; // Coupling residuals do not recurse (keyer does that and it only needs to be done once)
         }
-    }
         
-    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-    FOREACH( shared_ptr<const PatternQuery::Link> l, *pq->GetNormalLinks() )
-        ConfigDetermineResiduals( possible_keyer_links, l->GetChildAgent(), *l, agent, master_agents );        
+        ConfigDetermineResiduals( possible_keyer_links, link.GetChildAgent(), master_agents );        
+    }
 }
 
 
