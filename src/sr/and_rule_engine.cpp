@@ -20,7 +20,13 @@
 
 using namespace SR;
 
-AndRuleEngine::AndRuleEngine( Agent *root_agent_, const set<Agent *> &master_agents_ )
+AndRuleEngine::AndRuleEngine( Agent *root_agent_, const set<Agent *> &master_agents_ ) :
+    plan( this, root_agent_, master_agents_ )
+{
+}    
+
+AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<Agent *> &master_agents_) :
+    algo( algo_ )
 {
     TRACE(GetName());
     INDENT(" ");
@@ -90,7 +96,7 @@ AndRuleEngine::AndRuleEngine( Agent *root_agent_, const set<Agent *> &master_age
                 flags.correspondance = CSP::Correspondance::DIRECT;
             
             if( flags.correspondance == CSP::Correspondance::DIVERTED )
-                return make_pair(flags, &diversion_agents.at(link));
+                return make_pair(flags, diversion_agents.at(link).get());
             else
                 return make_pair(flags, nullptr);            
         };
@@ -118,7 +124,7 @@ AndRuleEngine::AndRuleEngine( Agent *root_agent_, const set<Agent *> &master_age
 }
 
 
-void AndRuleEngine::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
+void AndRuleEngine::Plan::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
                                              Agent *agent,
                                              const set<Agent *> &master_agents )
 {
@@ -147,7 +153,7 @@ void AndRuleEngine::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordere
 }
 
 
-void AndRuleEngine::ConfigDetermineKeyersModuloMatchAny( set<PatternQuery::Link> *possible_keyer_links,
+void AndRuleEngine::Plan::ConfigDetermineKeyersModuloMatchAny( set<PatternQuery::Link> *possible_keyer_links,
                                                          Agent *agent,
                                                          set<Agent *> *senior_agents,
                                                          set<Agent *> *matchany_agents ) const
@@ -178,7 +184,7 @@ void AndRuleEngine::ConfigDetermineKeyersModuloMatchAny( set<PatternQuery::Link>
 }
         
         
-void AndRuleEngine::ConfigDeterminePossibleKeyers( set<PatternQuery::Link> *possible_keyer_links,
+void AndRuleEngine::Plan::ConfigDeterminePossibleKeyers( set<PatternQuery::Link> *possible_keyer_links,
                                                    Agent *agent,
                                                    set<Agent *> senior_agents ) const
 {
@@ -208,7 +214,7 @@ void AndRuleEngine::ConfigDeterminePossibleKeyers( set<PatternQuery::Link> *poss
 }
         
         
-void AndRuleEngine::ConfigDetermineResiduals( set<PatternQuery::Link> *possible_keyer_links,
+void AndRuleEngine::Plan::ConfigDetermineResiduals( set<PatternQuery::Link> *possible_keyer_links,
                                               Agent *agent,
                                               set<Agent *> master_agents ) 
 {
@@ -236,7 +242,7 @@ void AndRuleEngine::ConfigDetermineResiduals( set<PatternQuery::Link> *possible_
 }
 
 
-void AndRuleEngine::ConfigFilterKeyers(set<PatternQuery::Link> *possible_keyer_links)
+void AndRuleEngine::Plan::ConfigFilterKeyers(set<PatternQuery::Link> *possible_keyer_links)
 {
     coupling_keyer_links.clear();
     for( PatternQuery::Link keyer_l : *possible_keyer_links )
@@ -253,7 +259,7 @@ void AndRuleEngine::ConfigFilterKeyers(set<PatternQuery::Link> *possible_keyer_l
 }
 
 
-void AndRuleEngine::ConfigPopulateNormalAgents( set<Agent *> *normal_agents, 
+void AndRuleEngine::Plan::ConfigPopulateNormalAgents( set<Agent *> *normal_agents, 
                                                 Agent *agent )
 {
     if( normal_agents->count(agent) != 0 )
@@ -266,7 +272,7 @@ void AndRuleEngine::ConfigPopulateNormalAgents( set<Agent *> *normal_agents,
 }
 
 
-void AndRuleEngine::ConfigCreateEvaluatorsEnginesDiversions( const set<Agent *> &normal_agents, 
+void AndRuleEngine::Plan::ConfigCreateEvaluatorsEnginesDiversions( const set<Agent *> &normal_agents, 
                                                              const set<Agent *> &surrounding_agents )
 {
     for( auto agent : normal_agents )
@@ -281,29 +287,22 @@ void AndRuleEngine::ConfigCreateEvaluatorsEnginesDiversions( const set<Agent *> 
         {        
             if( pq->GetEvaluator() )
             {
-                my_evaluator_abnormal_engines.emplace(std::piecewise_construct,
-                                                      std::forward_as_tuple(*pl),
-                                                      std::forward_as_tuple(pl->GetChildAgent(), surrounding_agents));  
+                my_evaluator_abnormal_engines[*pl] = make_shared<AndRuleEngine>( pl->GetChildAgent(), 
+                                                                                 surrounding_agents );  
             }
             else
             {
-                my_free_abnormal_engines.emplace(std::piecewise_construct,
-                                                 std::forward_as_tuple(*pl),
-                                                 std::forward_as_tuple(pl->GetChildAgent(), surrounding_agents));  
+                my_free_abnormal_engines[*pl] = make_shared<AndRuleEngine>( pl->GetChildAgent(), 
+                                                                            surrounding_agents );  
             }
-            diversion_agents.emplace(std::piecewise_construct,
-                                     std::forward_as_tuple(*pl),
-                                     std::forward_as_tuple());    
+            diversion_agents[*pl] = make_shared<PlaceholderAgent>(); 
         }
         
         FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetMultiplicityLinks() )
         {
-            my_multiplicity_engines.emplace(std::piecewise_construct,
-                                            std::forward_as_tuple(*pl),
-                                            std::forward_as_tuple(pl->GetChildAgent(), surrounding_agents));
-            diversion_agents.emplace(std::piecewise_construct,
-                                     std::forward_as_tuple(*pl),
-                                     std::forward_as_tuple());    
+            my_multiplicity_engines[*pl] = make_shared<AndRuleEngine>( pl->GetChildAgent(), 
+                                                                       surrounding_agents );  
+            diversion_agents[*pl] = make_shared<PlaceholderAgent>(); 
         }
     }
 }
@@ -351,14 +350,14 @@ void AndRuleEngine::CompareLinks( Agent *agent,
             continue; // Pattern nodes immediately match themselves
         
         // Are we at a residual coupling?
-        if( coupling_residual_links.count( *pl ) > 0 ) // See #129
+        if( plan.coupling_residual_links.count( *pl ) > 0 ) // See #129
         {
             CompareCoupling( pl->GetChildAgent(), x, &my_keys );
             continue;
         }
         
         // Master couplings are now checked in a post-pass
-        if( master_boundary_agents.count(pl->GetChildAgent()) > 0 )
+        if( plan.master_boundary_agents.count(pl->GetChildAgent()) > 0 )
         {
             master_coupling_candidates[pl->GetChildAgent()] = x;
             continue;
@@ -367,7 +366,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         // Remember the coupling before recursing, as we can hit the same node 
         // (eg identifier) and we need to have coupled it. The "if" statement
         // tests coupling_keyer_links as well as providing a small optimisation.
-        if( coupling_keyer_links.count( *pl ) )
+        if( plan.coupling_keyer_links.count( *pl ) )
         {
             ASSERT( my_keys.count(pl->GetChildAgent()) == 0 )("Coupling conflict!\n");
             KeyCoupling( pl->GetChildAgent(), x, &my_keys );
@@ -379,15 +378,15 @@ void AndRuleEngine::CompareLinks( Agent *agent,
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
     FOREACH( shared_ptr<const DecidedQuery::Link> pl, *query->GetAbnormalLinks() )
     {
-        ASSERT( diversion_agents.count(*pl) );
-        Agent *diversion_agent = &diversion_agents.at(*pl);
+        ASSERT( plan.diversion_agents.count(*pl) );
+        Agent *diversion_agent = plan.diversion_agents.at(*pl).get();
         KeyCoupling( diversion_agent, pl->x, &hypothetical_solution_keys );
     }
         
     FOREACH( shared_ptr<const DecidedQuery::Link> pl, *query->GetMultiplicityLinks() )
     {
-        ASSERT( diversion_agents.count(*pl) );
-        Agent *diversion_agent = &diversion_agents.at(*pl);
+        ASSERT( plan.diversion_agents.count(*pl) );
+        Agent *diversion_agent = plan.diversion_agents.at(*pl).get();
         KeyCoupling( diversion_agent, pl->x, &hypothetical_solution_keys );
     }
 }
@@ -409,12 +408,12 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
         TRACE("Comparing block %d\n", i);
  
         // Get x for linked node
-        Agent *diversion_agent = &diversion_agents.at(*pl);
+        Agent *diversion_agent = plan.diversion_agents.at(*pl).get();
         TreePtr<Node> x = hypothetical_solution_keys->at(diversion_agent);
                                 
         try 
         {
-            my_evaluator_abnormal_engines.at(*pl).Compare( x, master_keys );
+            plan.my_evaluator_abnormal_engines.at(*pl)->Compare( x, master_keys );
             compare_results.push_back( true );
         }
         catch( ::Mismatch & )
@@ -440,7 +439,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     ASSERT( x ); // Target must not be NULL
 
     // Obtain the query state from the conjecture
-    shared_ptr<DecidedQuery> query = conj->GetQuery(agent);
+    shared_ptr<DecidedQuery> query = plan.conj->GetQuery(agent);
 
     // Run the compare implementation to get the links based on the choices
     TRACE(*agent)("?=")(*x)(" RunDecidedQueryImpl()\n");    
@@ -478,7 +477,7 @@ void AndRuleEngine::ExpandDomain( Agent *agent, set< TreePtr<Node> > &domain )
     // transformations occur in parent-then-child order. That's why this 
     // part is here and not in the CSP stuff: it exploits knowlege of 
     // the directedenss of the pattern trees.
-    my_constraints.at(agent)->ExpandDomain( domain );  
+    plan.my_constraints.at(agent)->ExpandDomain( domain );  
     
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
@@ -492,20 +491,20 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
 {
     INDENT("C");
     ASSERT( start_x );
-    TRACE("Compare x=")(*start_x)(" pattern=")(*root_agent)("\n");
+    TRACE("Compare x=")(*start_x)(" pattern=")(*plan.root_agent)("\n");
            
     master_keys = master_keys_;    
 
-    if( my_agents.empty() )
+    if( plan.my_agents.empty() )
     {
         // Trivial case: we have no agents, so there won't be any decisions
         // and so no problem to solve. Spare all algorithms the hassle of 
         // dealing with this. Root agent should have been keyed by master,
         // otherwise it'd be in my_agents.
-        ASSERT( master_keys->count(root_agent) );
+        ASSERT( master_keys->count(plan.root_agent) );
         try
         {            
-            CompareCoupling( root_agent, start_x, master_keys );
+            CompareCoupling( plan.root_agent, start_x, master_keys );
         }
         catch( const ::Mismatch& mismatch ) 
         {
@@ -521,16 +520,16 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
         domain.insert(*wx_it);
     
     CouplingMap forces = *master_keys;
-    forces[root_agent] = start_x;
-    for( pair< Agent *, shared_ptr<CSP::Constraint> > p : my_constraints )
+    forces[plan.root_agent] = start_x;
+    for( pair< Agent *, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
         p.second->SetForces( forces );
     
     // Expand the domain to include generated child y nodes.
-    ExpandDomain( root_agent, domain );
+    ExpandDomain( plan.root_agent, domain );
     
-    solver->Start( domain );
+    plan.solver->Start( domain );
 #else
-    conj->Start();
+    plan.conj->Start();
 #endif
            
     // Create the conjecture object we will use for this compare, and keep iterating
@@ -543,12 +542,12 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
 #ifdef USE_SOLVER        
         // Get a solution from the solver
         map< shared_ptr<CSP::Constraint>, list< TreePtr<Node> > > values;
-        bool match = solver->GetNextSolution( &values );        
+        bool match = plan.solver->GetNextSolution( &values );        
         if( !match )
             throw NoSolution();
 
         // Recreate my_keys
-        for( pair< Agent *, shared_ptr<CSP::Constraint> > p : my_constraints )
+        for( pair< Agent *, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
         {
             list< TreePtr<Node> > &vals = values.at(p.second);
             list< Agent * > vars = p.second->GetFreeVariables();
@@ -568,9 +567,9 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // none of our own from any previous unsuccessful attempt.
             master_coupling_candidates.clear();
             
-            DecidedCompare( root_agent, start_x );
+            DecidedCompare( plan.root_agent, start_x );
             
-            for( auto agent : master_boundary_agents )
+            for( auto agent : plan.master_boundary_agents )
             {
                 // We have to allow for coupling candidates that are missing
                 // because a MatchAny agent early-outed on the corresponding option
@@ -598,7 +597,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // the "regular" key set here (this is what contributes to the
             // final solution).
             solution_keys.clear();
-            for( auto agent : my_agents )
+            for( auto agent : plan.my_agents )
                 if( hypothetical_solution_keys.count(agent) != 0 )
                     solution_keys[agent] = hypothetical_solution_keys.at(agent);
                 
@@ -609,28 +608,28 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // which ensures all the couplings have been keyed already.
             // Examples are MatchAny and NotMatch (but not MatchAll, because MatchAll conforms with
             // the global and-rule and so its children can key couplings.
-            for( Agent *agent : my_evaluators )
+            for( Agent *agent : plan.my_evaluators )
             {
                 //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
                 CompareEvaluatorLinks( agent, &hypothetical_solution_keys, &combined_keys );
             }
 
             // Process the free abnormal links.
-            for( std::pair<const PatternQuery::Link, AndRuleEngine> &pae : my_free_abnormal_engines )
+            for( const std::pair< const PatternQuery::Link, shared_ptr<AndRuleEngine> > &pae : plan.my_free_abnormal_engines )
             {            
-                AndRuleEngine &e = pae.second;
-                Agent *diversion_agent = &diversion_agents.at(pae.first);
+                shared_ptr<AndRuleEngine> e = pae.second;
+                Agent *diversion_agent = plan.diversion_agents.at(pae.first).get();
                 TreePtr<Node> x = hypothetical_solution_keys.at(diversion_agent);  
                            
-                e.Compare( x, &combined_keys );
+                e->Compare( x, &combined_keys );
             }
 
             // Process the free multiplicity links.
             int i=0;
-            for( std::pair<const PatternQuery::Link, AndRuleEngine> &pae : my_multiplicity_engines )
+            for( const std::pair< const PatternQuery::Link, shared_ptr<AndRuleEngine> > &pae : plan.my_multiplicity_engines )
             {            
-                AndRuleEngine &e = pae.second;
-                Agent *diversion_agent = &diversion_agents.at(pae.first);
+                shared_ptr<AndRuleEngine> e = pae.second;
+                Agent *diversion_agent = plan.diversion_agents.at(pae.first).get();
                 TreePtr<Node> x = hypothetical_solution_keys.at(diversion_agent);
                     
                 ASSERT( x );
@@ -640,7 +639,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
                 
                 FOREACH( TreePtr<Node> xe, *xc )
                 {
-                    e.Compare( xe, &combined_keys );
+                    e->Compare( xe, &combined_keys );
                 }
                 i++;
             }            
@@ -652,7 +651,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             continue; // Get another solution from the solver
 #else
             TRACE("AndRuleEngine miss, trying increment conjecture\n");
-            if( conj->Increment() )
+            if( plan.conj->Increment() )
                 continue; // Conjecture would like us to try again with new choices
                 
             // We didn't match and we've run out of choices, so we're done.              
@@ -681,7 +680,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x )
 void AndRuleEngine::EnsureChoicesHaveIterators()
 {
 #ifndef USE_SOLVER
-    conj->EnsureChoicesHaveIterators();
+    plan.conj->EnsureChoicesHaveIterators();
 #endif
 }
 

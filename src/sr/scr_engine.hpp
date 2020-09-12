@@ -32,13 +32,33 @@ public:
                const SCREngine *master = NULL); /* if null, you are overall master */ 
                     
 private:
-    virtual void ConfigInstallRootAgents( TreePtr<Node> cp,
-										  TreePtr<Node> rp );
-    virtual void ConfigCategoriseSubs( const set<Agent *> &master_agents, set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
-    virtual void ConfigCreateMyEngines( const set<Agent *> &master_agents, 
-                                        const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
-    virtual void ConfigConfigureSubs();
-    
+    const struct Plan : public virtual Traceable
+    {            
+        Plan( SCREngine *algo,
+              bool is_search,
+              const CompareReplace *overall_master,
+              TreePtr<Node> cp,
+              TreePtr<Node> rp = TreePtr<Node>(),
+              const set<Agent *> &master_agents = set<Agent *>(),                            
+              const SCREngine *master = NULL); /* if null, you are overall master */ 
+        void ConfigInstallRootAgents( TreePtr<Node> cp,
+                                      TreePtr<Node> rp );
+        void ConfigCategoriseSubs( const set<Agent *> &master_agents, 
+                                   set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
+        void ConfigCreateMyEngines( const set<Agent *> &master_agents, 
+                                    const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
+        void ConfigConfigureSubs();
+
+        SCREngine * const algo;
+        const bool is_search;    
+        const CompareReplace *overall_master_ptr;
+        TreePtr<Node> pattern;
+        Agent *root_agent;
+        const SCREngine *master_ptr;
+        std::shared_ptr< set<Agent *> > my_agents;   
+        std::map< AgentCommonNeedSCREngine *, shared_ptr<SCREngine> > my_engines;   
+        shared_ptr<AndRuleEngine> and_rule_engine;
+    } plan;
 public:
     void GatherCouplings( CouplingMap *coupling_keys ) const;
     int RepeatingCompareReplace( TreePtr<Node> *proot,
@@ -68,23 +88,12 @@ public:
         depth = d;
     }
         
-private:
-    const bool is_search;
-    
-    const CompareReplace *overall_master_ptr;
-    TreePtr<Node> pattern;
-    Agent *root_agent;
-    const SCREngine *master_ptr;
-    std::shared_ptr< set<Agent *> > my_agents;   
-    std::map<AgentCommonNeedSCREngine *, SCREngine> my_engines;   
-    
+private:    
     static int repetitions;
     static bool rep_error;
     
     vector<int> stop_after;
     int depth;    
-
-    shared_ptr<AndRuleEngine> and_rule_engine;
 
 	/** Walks the tree, avoiding the "search"/"compare" and "replace" members of slaves
 		but still recurses through the "through" member. Therefore, it visits all the

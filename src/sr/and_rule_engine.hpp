@@ -46,25 +46,48 @@ public:
     };
     
     AndRuleEngine( Agent *root_agent, const set<Agent *> &master_agents);
-    void ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
-                                  Agent *agent,
-                                  const set<Agent *> &master_agents );
-    void ConfigDetermineKeyersModuloMatchAny( set<PatternQuery::Link> *possible_keyer_links,
-                                              Agent *agent,
-                                              set<Agent *> *master_agents,
-                                              set<Agent *> *match_any_agents ) const;
-    void ConfigDeterminePossibleKeyers( set<PatternQuery::Link> *possible_keyer_links,
-                                        Agent *agent,
-                                        set<Agent *> master_agents ) const;
-    void ConfigDetermineResiduals( set<PatternQuery::Link> *possible_keyer_links,
-                                   Agent *agent,
-                                   set<Agent *> master_agents );
-    void ConfigFilterKeyers(set<PatternQuery::Link> *possible_keyer_links);
-    void ConfigPopulateNormalAgents( set<Agent *> *normal_agents, 
-                                     Agent *agent );
-    void ConfigCreateEvaluatorsEnginesDiversions( const set<Agent *> &normal_agents, 
-                                                  const set<Agent *> &surrounding_agents );
-                                      
+    
+    const struct Plan : public virtual Traceable
+    {
+        Plan( AndRuleEngine *algo, Agent *root_agent, const set<Agent *> &master_agents);
+        void ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
+                                      Agent *agent,
+                                      const set<Agent *> &master_agents );
+        void ConfigDetermineKeyersModuloMatchAny( set<PatternQuery::Link> *possible_keyer_links,
+                                                  Agent *agent,
+                                                  set<Agent *> *master_agents,
+                                                  set<Agent *> *match_any_agents ) const;
+        void ConfigDeterminePossibleKeyers( set<PatternQuery::Link> *possible_keyer_links,
+                                            Agent *agent,
+                                            set<Agent *> master_agents ) const;
+        void ConfigDetermineResiduals( set<PatternQuery::Link> *possible_keyer_links,
+                                       Agent *agent,
+                                       set<Agent *> master_agents );
+        void ConfigFilterKeyers(set<PatternQuery::Link> *possible_keyer_links);
+        void ConfigPopulateNormalAgents( set<Agent *> *normal_agents, 
+                                         Agent *agent );
+        void ConfigCreateEvaluatorsEnginesDiversions( const set<Agent *> &normal_agents, 
+                                                      const set<Agent *> &surrounding_agents );
+
+        AndRuleEngine * const algo;
+        Agent *root_agent;
+        set<Agent *> master_agents;
+        set<Agent *> my_agents;   
+        set< Agent *> my_evaluators;   
+        map< PatternQuery::Link, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
+        map< PatternQuery::Link, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
+        map< PatternQuery::Link, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
+        map< PatternQuery::Link, shared_ptr<PlaceholderAgent> > diversion_agents; 
+        map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
+        set<Agent *> master_boundary_agents;
+        set< PatternQuery::Link > coupling_keyer_links;
+        set< PatternQuery::Link > coupling_residual_links;
+        shared_ptr<Conjecture> conj;
+        shared_ptr<CSP::SolverHolder> solver;
+    private: // working varaibles in plan construction
+        set<Agent *> reached; 
+    } plan;
+    
     void CompareCoupling( Agent *agent,
                           TreePtr<Node> x,
                           const CouplingMap *keys );
@@ -86,29 +109,12 @@ public:
 
     const CouplingMap &GetCouplingKeys();
 
-private:
-    Agent *root_agent;
-    set<Agent *> master_agents;
-    set<Agent *> my_agents;   
-    set< Agent *> my_evaluators;   
-    map< Agent *, AndRuleEngine > my_evaluator_engines;
-    map< PatternQuery::Link, AndRuleEngine > my_evaluator_abnormal_engines;
-    map< PatternQuery::Link, AndRuleEngine > my_free_abnormal_engines;
-    map< PatternQuery::Link, AndRuleEngine > my_multiplicity_engines;
-    map< PatternQuery::Link, PlaceholderAgent > diversion_agents; 
-    map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
-    set<Agent *> master_boundary_agents;
-    set< PatternQuery::Link > coupling_keyer_links;
-    set< PatternQuery::Link > coupling_residual_links;
-    
-    shared_ptr<Conjecture> conj;
-    shared_ptr<CSP::SolverHolder> solver;
+private:    
     CouplingMap my_keys; 
     CouplingMap solution_keys; 
     CouplingMap hypothetical_solution_keys; 
     CouplingMap master_coupling_candidates;
     const CouplingMap *master_keys;
-    set<Agent *> reached; 
 };
 
 #endif
