@@ -16,7 +16,7 @@
 
 //#define TEST_PATTERN_QUERY
 
-//#define USE_SOLVER
+#define USE_SOLVER
 
 using namespace SR;
 
@@ -118,8 +118,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
     auto salg = make_shared<CSP::SimpleSolver>(constraints, &free_normal_agents_ordered);
     solver = make_shared<CSP::SolverHolder>(salg);
 #else
-    conj = make_shared<Conjecture>();
-    conj->Configure(my_agents, root_agent);
+    conj = make_shared<Conjecture>(my_agents, root_agent);
 #endif
 }
 

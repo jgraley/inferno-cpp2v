@@ -25,33 +25,36 @@ public:
     {
         shared_ptr<PatternQuery> pq;
         shared_ptr<DecidedQuery> query;
- 		AgentRecords::iterator previous_agent;
+ 		AgentRecords::const_iterator previous_agent;
 	};
 
 public:
-    Conjecture();
+    Conjecture( set<Agent *> my_agents, Agent *root_agent );
     ~Conjecture();
 
-    void Configure(set<Agent *> my_agents, Agent *root_agent);
+    const struct Plan
+    {
+        Plan( set<Agent *> my_agents, Agent *root_agent );
+        void ConfigRecordWalk( AgentRecords::iterator rit );
+        
+        AgentRecords agent_records;
+        AgentRecords::iterator last_agent;		
+        set<AgentRecord *> reached;
+    } plan;
+
     void ConfigRecordWalk( AgentRecords::iterator rit );
     
     void Start();
-    void FillChoicesWithHardBegin( AgentRecords::iterator rit );      
+    void FillChoicesWithHardBegin( AgentRecords::const_iterator rit );      
     void EnsureChoicesHaveIterators();
     
-	bool IncrementAgent( AgentRecords::iterator rit, int bc );			                                     
+	bool IncrementAgent( AgentRecords::const_iterator rit, int bc );			                                     
     bool Increment(); // returns true for try again, false for give up				 
-    bool IncrementConjecture( AgentRecords::iterator rit );     
+    bool IncrementConjecture( AgentRecords::const_iterator rit );     
         				       
     // Standard interface for decided compare functions
     DecidedQuery::Choices GetChoices( Agent *agent ) const;
     shared_ptr<DecidedQuery> GetQuery( Agent *agent );
-				   
-private:
-    AgentRecords agent_records;
-	AgentRecords::iterator last_agent;		
-    bool configured;
-    set<AgentRecord *> reached;
 };
 
 };

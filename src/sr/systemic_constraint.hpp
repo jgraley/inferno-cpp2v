@@ -63,10 +63,10 @@ private:
         list<VariableId> all_variables;
         list<VariableFlags> flags; // over ALL vars
         map<VariableId, VariableId> diversions;
+        shared_ptr<SR::Conjecture> conj;
+        shared_ptr<SimpleCompare> simple_compare;
     } plan;
     
-    const shared_ptr<SR::Conjecture> conj;
-    const shared_ptr<SimpleCompare> simple_compare;
     list<Value> forces; // only FREE vars
 };
 

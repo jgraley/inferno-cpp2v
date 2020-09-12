@@ -8,7 +8,8 @@ using namespace CSP;
 SystemicConstraint::Plan::Plan( SR::Agent *agent_, 
                                 VariableQueryLambda vql ) :
     agent( agent_ ),
-    pq( agent->GetPatternQuery() )
+    pq( agent->GetPatternQuery() ),
+    simple_compare( make_shared<SimpleCompare>() )
 {
     GetAllVariables();
     RunVariableQueries( all_variables, vql );
@@ -16,19 +17,18 @@ SystemicConstraint::Plan::Plan( SR::Agent *agent_,
     // This implementation doesn't know how to model the first varaible
     // by any means other than by location (i.e. by address)
     ASSERT( flags.front().compare_by == CompareBy::LOCATION );
+
+    // Configure our embedded Conjecture object
+    set<SR::Agent *> my_agents;
+    my_agents.insert( agent ); // just the one agent this time
+    conj = make_shared<SR::Conjecture>(my_agents, agent);    
 }
 
 
 SystemicConstraint::SystemicConstraint( SR::Agent *agent_, 
                                         VariableQueryLambda vql ) :
-    plan( agent_, vql ),
-    conj( make_shared<SR::Conjecture>() ),
-    simple_compare( make_shared<SimpleCompare>() )
+    plan( agent_, vql )
 {
-    // Configure our embedded Conjecture object
-    set<SR::Agent *> my_agents;
-    my_agents.insert( plan.agent ); // just the one agent this time
-    conj->Configure(my_agents, plan.agent);    
 }
 
     
@@ -216,7 +216,7 @@ bool SystemicConstraint::Test( list< Value > values )
     // Conjecture::IncrementAgent().
     //
     // Prepare the conjecture for a series of iterations.
-    conj->Start();
+    plan.conj->Start();
     shared_ptr<SR::DecidedQuery> query; 
     
     // All the other values are normal links. These degrees of freedom
@@ -235,7 +235,7 @@ bool SystemicConstraint::Test( list< Value > values )
                 Tracer::RAIIEnable silencer( false ); // make DQ be quiet
                 // Similar to AndRuleEngine::DecidedCompare(), we get the
                 // Query object from conjecture, and run a query on it.
-                query = conj->GetQuery(plan.agent);
+                query = plan.conj->GetQuery(plan.agent);
                 plan.agent->RunDecidedQuery( *query, x );
             }
             
@@ -254,7 +254,7 @@ bool SystemicConstraint::Test( list< Value > values )
                 switch( fit->compare_by )
                 {
                 case CompareBy::VALUE:
-                    if( !(*simple_compare)( val, x ) )
+                    if( !(*plan.simple_compare)( val, x ) )
                         throw ByValueLinkMismatch();  
                     break;
                     
@@ -278,7 +278,7 @@ bool SystemicConstraint::Test( list< Value > values )
             // We will get here on a mismatch, whether detected by DQ or our
             // own comparison between links and values. Permit the conjecture
             // to move to a new set of choices.
-            if( conj->Increment() )
+            if( plan.conj->Increment() )
                 continue; // Conjecture would like us to try again with new choices
             
             // Conjecture has run out of choices to try.

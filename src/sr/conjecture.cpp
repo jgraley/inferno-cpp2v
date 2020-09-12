@@ -4,22 +4,9 @@
 
 namespace SR 
 {
-
-Conjecture::Conjecture() : 
-    configured(false)
-{
-}
-
-
-Conjecture::~Conjecture()
-{
-}
-
-
-void Conjecture::Configure(set<Agent *> my_agents, Agent *root_agent)
+Conjecture::Plan::Plan( set<Agent *> my_agents, Agent *root_agent )
 {
     last_agent = agent_records.end();
-    configured = true;
 
     if( my_agents.empty() )
         return; // no decisions at all this time!
@@ -37,7 +24,7 @@ void Conjecture::Configure(set<Agent *> my_agents, Agent *root_agent)
 }
 
 
-void Conjecture::ConfigRecordWalk( AgentRecords::iterator rit )
+void Conjecture::Plan::ConfigRecordWalk( AgentRecords::iterator rit )
 {
     Agent *agent = rit->first;
     AgentRecord &record = rit->second;
@@ -67,10 +54,21 @@ void Conjecture::ConfigRecordWalk( AgentRecords::iterator rit )
 }
 
 
+Conjecture::Conjecture( set<Agent *> my_agents, Agent *root_agent ) :
+    plan( my_agents, root_agent )
+{
+}
+
+
+Conjecture::~Conjecture()
+{
+}
+
+
 void Conjecture::Start()
 {
-    for( AgentRecords::iterator rit=agent_records.begin(); 
-         rit != agent_records.end();
+    for( AgentRecords::const_iterator rit=plan.agent_records.begin(); 
+         rit != plan.agent_records.end();
          ++rit )
     {
         rit->second.query->Start();
@@ -79,7 +77,7 @@ void Conjecture::Start()
 }
 
 
-void Conjecture::FillChoicesWithHardBegin( AgentRecords::iterator rit )
+void Conjecture::FillChoicesWithHardBegin( AgentRecords::const_iterator rit )
 {
     AgentRecord record = rit->second;
     auto query = record.query;
@@ -95,12 +93,12 @@ void Conjecture::FillChoicesWithHardBegin( AgentRecords::iterator rit )
 
 void Conjecture::EnsureChoicesHaveIterators()
 {
-    for( auto &p : agent_records )
+    for( auto &p : plan.agent_records )
         p.second.query->EnsureChoicesHaveIterators();
 }
 
 
-bool Conjecture::IncrementAgent( AgentRecords::iterator rit, int bc )
+bool Conjecture::IncrementAgent( AgentRecords::const_iterator rit, int bc )
 {    
     Agent *agent = rit->first;    
     AgentRecord record = rit->second;
@@ -149,7 +147,7 @@ bool Conjecture::IncrementAgent( AgentRecords::iterator rit, int bc )
 }
 
 
-bool Conjecture::IncrementConjecture(AgentRecords::iterator rit)
+bool Conjecture::IncrementConjecture(AgentRecords::const_iterator rit)
 {       
     Agent *agent = rit->first;    
     AgentRecord record = rit->second;
@@ -177,7 +175,7 @@ bool Conjecture::IncrementConjecture(AgentRecords::iterator rit)
 
     if( !ok )
     {
-        if( record.previous_agent != agent_records.end() )
+        if( record.previous_agent != plan.agent_records.end() )
             return IncrementConjecture( record.previous_agent );
         else
             return false;
@@ -189,9 +187,8 @@ bool Conjecture::IncrementConjecture(AgentRecords::iterator rit)
 
 bool Conjecture::Increment()
 {
-    ASSERT(configured);
-    if( last_agent != agent_records.end() )
-        return IncrementConjecture(last_agent);
+    if( plan.last_agent != plan.agent_records.end() )
+        return IncrementConjecture(plan.last_agent);
     else
         return false; // no decisions at all this time!
 }
@@ -199,10 +196,9 @@ bool Conjecture::Increment()
 
 DecidedQuery::Choices Conjecture::GetChoices(Agent *agent) const 
 {            
-    ASSERT(configured);
-    if( agent_records.count(agent) > 0 )
+    if( plan.agent_records.count(agent) > 0 )
     {
-        return *agent_records.at(agent).query->GetChoices();
+        return *plan.agent_records.at(agent).query->GetChoices();
 	}
 	else
 	{
@@ -213,8 +209,7 @@ DecidedQuery::Choices Conjecture::GetChoices(Agent *agent) const
 
 shared_ptr<DecidedQuery> Conjecture::GetQuery(Agent *agent)
 {
-    ASSERT(configured);
-    return agent_records.at(agent).query;
+    return plan.agent_records.at(agent).query;
 }
 
 };

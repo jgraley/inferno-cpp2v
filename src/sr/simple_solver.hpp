@@ -36,10 +36,17 @@ public:
     void Run( ReportageObserver *holder, const set<Value> &initial_domain );
 
 private:
-    typedef map<VariableId, Value> Assignments;
+    const struct Plan
+    {
+        Plan( const list< shared_ptr<Constraint> > &constraints, 
+              const list<VariableId> *variables = nullptr );
+        void DeduceVariables( const list<VariableId> *variables );
 
-    static list<VariableId> DeduceVariables( const list< shared_ptr<Constraint> > &constraints, 
-                                             const list<VariableId> *variables );
+        list< shared_ptr<Constraint> > constraints;
+        list<VariableId> variables;
+    } plan;
+
+    typedef map<VariableId, Value> Assignments;
 
     bool TryVariable( list<VariableId>::const_iterator current );
     bool Test( const Assignments &assigns, 
@@ -53,10 +60,6 @@ private:
 
     ReportageObserver *holder;
         
-    // set by constructor - depends on pattern only
-    const list< shared_ptr<Constraint> > constraints;
-    const list<VariableId> variables;
-
     // Used during solve - depends on pattern and x
     set<Value> initial_domain;    
     Assignments assignments;

@@ -9,18 +9,16 @@
 
 using namespace CSP;
 
-SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_, 
-                            const list<VariableId> *variables_ ) :
-    holder(nullptr),
-    constraints(constraints_),
-    variables( DeduceVariables(constraints, variables_) )
+
+SimpleSolver::Plan::Plan( const list< shared_ptr<Constraint> > &constraints_, 
+                          const list<VariableId> *variables_ ) :
+    constraints(constraints_)
 {
-    TraceProblem();
+    DeduceVariables(variables_);
 }
 
 
-list<VariableId> SimpleSolver::DeduceVariables( const list< shared_ptr<Constraint> > &constraints, 
-                                                const list<VariableId> *variables_ )
+void SimpleSolver::Plan::DeduceVariables( const list<VariableId> *variables_ )
 {
     list<VariableId> my_variables;
     set<VariableId> variables_check_set;
@@ -43,17 +41,26 @@ list<VariableId> SimpleSolver::DeduceVariables( const list< shared_ptr<Constrain
     if( variables_ == nullptr )
     {
         // No variables list was supplied, so return the one we generated
-        return my_variables;
+        variables = my_variables;
     }
     else
     {
         // A variables list was supplied and it must have the same set of variables
         for( VariableId v : *variables_ )
             ASSERT( variables_check_set.count(v) == 1 );
-        return *variables_;
+        variables = *variables_;
     }
 }
 
+
+SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_, 
+                            const list<VariableId> *variables_ ) :
+    plan( constraints_, variables_ ),
+    holder(nullptr)
+{
+    TraceProblem();
+}
+                        
 
 void SimpleSolver::Run( ReportageObserver *holder_, const set< TreePtr<Node> > &initial_domain_ )
 {
@@ -68,7 +75,7 @@ void SimpleSolver::Run( ReportageObserver *holder_, const set< TreePtr<Node> > &
     best_num_assignments = 0;
 #endif    
     
-    TryVariable( variables.begin() );    
+    TryVariable( plan.variables.begin() );    
 
 #ifdef TRACK_BEST_ASSIGNMENT    
     ShowBestAssignment();
@@ -82,7 +89,7 @@ bool SimpleSolver::TryVariable( list<VariableId>::const_iterator current )
 {
     list<VariableId>::const_iterator next = current;
     ++next;
-    bool complete = (next == variables.end());
+    bool complete = (next == plan.variables.end());
     
     for( Value v : initial_domain )
     {
@@ -120,7 +127,7 @@ bool SimpleSolver::Test( const Assignments &assigns,
                          VariableId variable_of_interest )
 {
     bool ok = true; // AND-rule
-    for( shared_ptr<Constraint> c : constraints )
+    for( shared_ptr<Constraint> c : plan.constraints )
     {
         list<Value> vals = GetValuesForConstraint( c, assignments );
 
@@ -166,7 +173,7 @@ void SimpleSolver::ReportSolution( const Assignments &assignments )
 {
     map< shared_ptr<Constraint>, list< Value > > vals;
     vals.clear();
-    for( shared_ptr<Constraint> c : constraints )
+    for( shared_ptr<Constraint> c : plan.constraints )
     {
         vals[c] = GetValuesForConstraint(c, assignments);
         ASSERT( vals.at(c).size() == c->GetFreeDegree() ); // Assignments should be complete
@@ -178,9 +185,9 @@ void SimpleSolver::ReportSolution( const Assignments &assignments )
 
 void SimpleSolver::TraceProblem() const
 {
-    TRACEC("SimpleSolver; %d constraints", constraints.size());
+    TRACEC("SimpleSolver; %d constraints", plan.constraints.size());
     INDENT(" ");
-    for( shared_ptr<Constraint> c : constraints )
+    for( shared_ptr<Constraint> c : plan.constraints )
     {
         c->TraceProblem();
     }
@@ -198,9 +205,9 @@ void SimpleSolver::ShowBestAssignment()
 {
     if( best_assignments.empty() )
         return; // didn't get around to updating it yet
-    TRACE("Best assignment assigned %d of %d variables:\n", best_assignments.size(), variables.size());
+    TRACE("Best assignment assigned %d of %d variables:\n", best_assignments.size(), plan.variables.size());
     INDENT(" ");
-    for( VariableId var : variables )
+    for( VariableId var : plan.variables )
     {
         if( best_assignments.count(var) > 0 )
         {
@@ -212,7 +219,7 @@ void SimpleSolver::ShowBestAssignment()
             else
             {
                 TRACEC(" is not a local match (two reasons this might be OK)\n");            
-                ASSERT(best_assignments.size() < variables.size())("local mismatch in passing complete assignment");
+                ASSERT(best_assignments.size() < plan.variables.size())("local mismatch in passing complete assignment");
             }
             // Reason 1: At the point we gave up, no constraint containing this 
             // variable was complete (ie had a full set of assigned variables)
