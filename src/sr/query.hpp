@@ -58,7 +58,7 @@ public:
     
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e );
     
-    const Decisions *GetDecisions() const { return &decisions; } 
+    const Decisions &GetDecisions() const { return decisions; } 
 
     const Links &GetNormalLinks() const { return normal_links; } // pointer returned because the links contain the local links
     const Links &GetAbnormalLinks() const { return abnormal_links; } // pointer returned because the links contain the local links
@@ -127,8 +127,8 @@ public:
     typedef vector<Choice> Choices; 
     typedef list<Link> Links;
     
-    virtual const Choices *GetChoices() const = 0;
-    virtual const Ranges *GetDecisions() const = 0;
+    virtual const Choices &GetChoices() const = 0;
+    virtual const Ranges &GetDecisions() const = 0;
     
     enum
     {
@@ -231,8 +231,8 @@ public:
 
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
       
-    const Choices *GetChoices() const { return &choices; }
-    const Ranges *GetDecisions() const { return &decisions; }
+    const Choices &GetChoices() const { return choices; }
+    const Ranges &GetDecisions() const { return decisions; }
     void Invalidate( int bc );
     void SetChoice( int bc, Choice newc );
     void PushBackChoice( Choice newc );    

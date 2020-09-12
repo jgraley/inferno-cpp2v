@@ -39,7 +39,7 @@ void Conjecture::Plan::RecordWalk( AgentRecords::iterator rit )
     if( pq->GetEvaluator() )
         return; // we don't process evaluators or their children
         
-    if( !pq->GetDecisions()->empty() )
+    if( !pq->GetDecisions().empty() )
     {           
         record.previous_agent = last_agent;
         last_agent = rit;
@@ -82,7 +82,7 @@ void Conjecture::FillChoicesWithHardBegin( AgentRecords::const_iterator rit )
     AgentRecord record = rit->second;
     auto query = record.query;
 
-    for( int i=0; i<query->GetChoices()->size(); i++ )
+    for( int i=0; i<query->GetChoices().size(); i++ )
     {
         DecidedQueryCommon::Choice new_choice;
         new_choice.mode = DecidedQueryCommon::Choice::BEGIN;
@@ -104,8 +104,8 @@ bool Conjecture::IncrementAgent( AgentRecords::const_iterator rit, int bc )
     AgentRecord record = rit->second;
     auto query = record.query;
     
-    DecidedQueryCommon::Choice back_choice = (*query->GetChoices())[bc];
-    const auto &back_decision = (*query->GetDecisions())[bc];
+    DecidedQueryCommon::Choice back_choice = query->GetChoices()[bc];
+    const auto &back_decision = query->GetDecisions()[bc];
     
     // Inclusive case - we let the choice go to end but we won't go any further
     if( back_choice.mode==DecidedQueryCommon::Choice::ITER && back_decision.inclusive && back_choice.iter == back_decision.end )
@@ -156,7 +156,7 @@ bool Conjecture::IncrementConjecture(AgentRecords::const_iterator rit)
     
     bool ok = false;
 
-    if( !pq->GetDecisions()->empty() )
+    if( !pq->GetDecisions().empty() )
     {
         switch( query->last_activity )
         {
@@ -164,7 +164,7 @@ bool Conjecture::IncrementConjecture(AgentRecords::const_iterator rit)
                 break;
                 
             case DecidedQueryCommon::QUERY:
-                ok = IncrementAgent( rit, pq->GetDecisions()->size() - 1 );
+                ok = IncrementAgent( rit, pq->GetDecisions().size() - 1 );
                 query->last_activity = DecidedQueryCommon::CONJECTURE;
                 break;
                 
@@ -191,19 +191,6 @@ bool Conjecture::Increment()
         return IncrementConjecture(plan.last_agent);
     else
         return false; // no decisions at all this time!
-}
-
-
-DecidedQuery::Choices Conjecture::GetChoices(Agent *agent) const 
-{            
-    if( plan.agent_records.count(agent) > 0 )
-    {
-        return *plan.agent_records.at(agent).query->GetChoices();
-	}
-	else
-	{
-		return Choices(); // no choices
-	}    
 }
 
 

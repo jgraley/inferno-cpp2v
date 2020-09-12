@@ -35,7 +35,7 @@ void AgentCommon::AgentConfigure( const SCREngine *e )
     engine = e;
     
     pattern_query = GetPatternQuery();
-    num_decisions = pattern_query->GetDecisions()->size();
+    num_decisions = pattern_query->GetDecisions().size();
 }
 
 

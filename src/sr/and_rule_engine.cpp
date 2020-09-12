@@ -444,12 +444,12 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     ASSERT( pq->GetNormalLinks().size() == query->GetNormalLinks().size() &&
             pq->GetAbnormalLinks().size() == query->GetAbnormalLinks().size() &&
             pq->GetMultiplicityLinks().size() == query.GetMultiplicityLinks()->size() &&
-            pq->GetDecisions()->size() == query->GetDecisions()->size() )
+            pq->GetDecisions().size() == query->GetDecisions().size() )
           ("PatternQuery disagrees with DecidedQuery!!!!\n")
           ("GetNormalLinks().size() : %d vs %d\n", pq->GetNormalLinks().size(), query->GetNormalLinks().size() )
           ("GetAbnormalLinks().size() : %d vs %d\n", pq->GetAbnormalLinks().size(), query->GetAbnormalLinks().size() )
           ("GetMultiplicityLinks().size() : %d vs %d\n", pq->GetMultiplicityLinks().size(), query->GetMultiplicityLinks().size() )
-          ("GetDecisions()->size() : %d vs %d\n", pq->GetDecisions()->size(), query->GetDecisions()->size() )
+          ("GetDecisions().size() : %d vs %d\n", pq->GetDecisions().size(), query->GetDecisions().size() )
           (*agent);
     // Note: number of abnormal links does NOT now depend on x; #60 completed
 #endif

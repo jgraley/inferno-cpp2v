@@ -160,9 +160,9 @@ DecidedQuery::Link::operator PatternQuery::Link() const
 
 
 DecidedQuery::DecidedQuery( shared_ptr<const PatternQuery> pq ) :
-    decisions( pq->GetDecisions()->size() ),
+    decisions( pq->GetDecisions().size() ),
     next_decision( decisions.begin() ), 
-    choices( pq->GetDecisions()->size() ),
+    choices( pq->GetDecisions().size() ),
     next_choice( choices.begin() ) 
 {
     CompleteDecisionsWithEmpty();

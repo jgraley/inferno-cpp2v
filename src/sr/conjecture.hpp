@@ -53,7 +53,6 @@ public:
     bool IncrementConjecture( AgentRecords::const_iterator rit );     
         				       
     // Standard interface for decided compare functions
-    DecidedQuery::Choices GetChoices( Agent *agent ) const;
     shared_ptr<DecidedQuery> GetQuery( Agent *agent );
 };
 
