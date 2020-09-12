@@ -10,12 +10,14 @@ using namespace SR;
 
 CompareReplace::CompareReplace( TreePtr<Node> cp,
                                 TreePtr<Node> rp,
-                                bool search ) :
-    scr_engine( search )
+                                bool is_search_ ) :
+    is_search(is_search_)
 {
     // If cp and rp are provided, do an instant configuration
     if( cp )
-        scr_engine.Configure( this, cp, rp );
+    {
+        scr_engine = make_shared<SCREngine>(is_search, this, cp, rp);
+    }
 }    
 
 
@@ -24,7 +26,7 @@ void CompareReplace::Configure( TreePtr<Node> cp,
 {
     TRACE(GetName());
     INDENT(" ");
-    scr_engine.Configure( this, cp, rp );
+    scr_engine = make_shared<SCREngine>(is_search, this, cp, rp);
 }
 
 
@@ -32,7 +34,7 @@ void CompareReplace::GetGraphInfo( vector<string> *labels,
                                    vector< TreePtr<Node> > *blocks ) const
 {
     // Disambiguate conflict between Transformation and SCREngine
-    scr_engine.GetGraphInfo( labels, blocks );
+    scr_engine->GetGraphInfo( labels, blocks );
 }
 
     
@@ -42,7 +44,7 @@ bool CompareReplace::IsMatch( TreePtr<Node> context,
     pcontext = &context;
     try
     {
-        scr_engine.Compare(root); 
+        scr_engine->Compare(root); 
         pcontext = NULL;
         return true;
     }
@@ -82,7 +84,7 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
     
     map< Agent *, TreePtr<Node> > empty;
     
-    (void)scr_engine.RepeatingCompareReplace( proot, &empty );   
+    (void)scr_engine->RepeatingCompareReplace( proot, &empty );   
 
     pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
 }

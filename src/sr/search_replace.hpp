@@ -26,7 +26,7 @@ public:
     // specified here, so that we have a fully confiugured functor.
     CompareReplace( TreePtr<Node> cp = TreePtr<Node>(),
                     TreePtr<Node> rp = TreePtr<Node>(),
-                    bool search=false );
+                    bool is_search=false );
                     
     virtual void Configure( TreePtr<Node> cp,
                             TreePtr<Node> rp = TreePtr<Node>() );
@@ -50,12 +50,13 @@ public:
                           TreePtr<Node> root );
     virtual void SetStopAfter( vector<int> ssa, int d=0 )
     {
-        scr_engine.SetStopAfter( ssa, d );
+        scr_engine->SetStopAfter( ssa, d );
     }
-    SCREngine *GetRootEngine() { return &scr_engine; }
+    SCREngine *GetRootEngine() { return scr_engine.get(); }
 private:
     TreePtr<Node> *pcontext;
-    SCREngine scr_engine;
+    const bool is_search;
+    shared_ptr<SCREngine> scr_engine;
 };
 
 

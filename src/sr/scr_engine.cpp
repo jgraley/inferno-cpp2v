@@ -16,23 +16,19 @@ int SCREngine::repetitions;
 bool SCREngine::rep_error;
 
 
-SCREngine::SCREngine( bool is_s ) :
-    is_search( is_s ),
-    master_ptr( NULL ),
-    depth( 0 )
-{
-}    
-    
-    
 // The master_agents argument is a set of agents that we should not
 // configure because they were already configured by a master, and masters take 
 // higher priority for configuration (so when an agent is reached from multiple
 // engines, it's the most masterish one that "owns" it).
-void SCREngine::Configure( const CompareReplace *overall_master,
-                           TreePtr<Node> cp,
-                           TreePtr<Node> rp,
-                           const set<Agent *> &master_agents,
-                           const SCREngine *master )
+SCREngine::SCREngine( bool is_search_,
+                      const CompareReplace *overall_master,
+                      TreePtr<Node> cp,
+                      TreePtr<Node> rp,
+                      const set<Agent *> &master_agents,
+                      const SCREngine *master ) :
+    is_search( is_search_ ),
+    master_ptr( NULL ),
+    depth( 0 )
 {
     TRACE(GetName());
     INDENT(" ");
@@ -47,18 +43,11 @@ void SCREngine::Configure( const CompareReplace *overall_master,
 
     set<AgentCommonNeedSCREngine *> my_agents_needing_engines;   
     ConfigCategoriseSubs( master_agents, my_agents_needing_engines );    
-    ConfigCreateMyEngines( my_agents_needing_engines );    
-    ConfigConfigureSubs( master_agents );
+    ConfigCreateMyEngines( master_agents, my_agents_needing_engines );    
+    ConfigConfigureSubs();
     
-    and_rule_engine.Configure(root_agent, master_agents);    
+    and_rule_engine = make_shared<AndRuleEngine>(root_agent, master_agents);
 } 
-
-
-void SCREngine::Configure( const set<Agent *> &master_agents,
-                           const SCREngine *master )
-{
-    ASSERTFAIL("SCREngine::Configure(already, master) Must be overridden by a subclass");
-}
 
 
 void SCREngine::ConfigInstallRootAgents( TreePtr<Node> cp,
@@ -118,35 +107,32 @@ void SCREngine::ConfigCategoriseSubs( const set<Agent *> &master_agents, set<Age
 }
 
 
-void SCREngine::ConfigCreateMyEngines( const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
+void SCREngine::ConfigCreateMyEngines( const set<Agent *> &master_agents, const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
 {
+    // Determine which agents our slaves should not configure
+    set<Agent *> surrounding_agents = SetUnion( master_agents, *my_agents ); 
+            
     FOREACH( AgentCommonNeedSCREngine *a, my_agents_needing_engines )
     {
         my_engines.emplace( std::piecewise_construct,
                             std::forward_as_tuple( a ),
-                            std::forward_as_tuple( a->IsSearch() ) );
+                            std::forward_as_tuple( a->IsSearch(),
+                                                   overall_master_ptr, 
+                                                   a->GetSearchPattern(),
+                                                   a->GetReplacePattern(),
+                                                   surrounding_agents, 
+                                                   this ) );
+                            
+        //TRACE("Recursing to configure slave ")(*p.first)("\n");
+        a->AgentConfigure( this, 
+                           &my_engines.at(a) );
     }
         
 }
 
 
-void SCREngine::ConfigConfigureSubs( const set<Agent *> &master_agents )
+void SCREngine::ConfigConfigureSubs()
 {
-    // Determine which agents our slaves should not configure
-    set<Agent *> surrounding_agents = SetUnion( master_agents, *my_agents ); 
-            
-    // Recurse into the slaves' configure
-    for( pair<AgentCommonNeedSCREngine * const, SCREngine> &p : my_engines )
-    {
-        //TRACE("Recursing to configure slave ")(*p.first)("\n");
-        p.second.Configure( overall_master_ptr, 
-                            p.first->GetSearchPattern(),
-                            p.first->GetReplacePattern(),
-                            surrounding_agents, 
-                            this );
-        p.first->AgentConfigure( this, 
-                                 &p.second );
-    }
     // Give agents pointers to here and our coupling keys
     FOREACH( Agent *a, *my_agents )
     {        
@@ -194,9 +180,9 @@ void SCREngine::GetGraphInfo( vector<string> *labels,
 
 // This one operates from root for a stand-alone compare operation and
 // no master keys.
-void SCREngine::Compare( TreePtr<Node> start_x ) const
+void SCREngine::Compare( TreePtr<Node> start_x )
 {
-    and_rule_engine.Compare( start_x );
+    and_rule_engine->Compare( start_x );
 }
 
 
@@ -242,16 +228,16 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but
     // replace does so it can change the root node.
-    and_rule_engine.Compare( *p_root, master_keys );
+    and_rule_engine->Compare( *p_root, master_keys );
            
     TRACE("Search successful, now keying replace nodes\n");
-    and_rule_engine.EnsureChoicesHaveIterators(); // Replace can't deal with hard BEGINs
-    KeyReplaceNodes( &and_rule_engine.GetCouplingKeys() );
+    and_rule_engine->EnsureChoicesHaveIterators(); // Replace can't deal with hard BEGINs
+    KeyReplaceNodes( &and_rule_engine->GetCouplingKeys() );
 
     if( !my_engines.empty() )
     {
 		CouplingMap coupling_keys = MapUnion( *master_keys, 
-                                              and_rule_engine.GetCouplingKeys() );    
+                                              and_rule_engine->GetCouplingKeys() );    
 		
         for( pair<AgentCommonNeedSCREngine * const, SCREngine> &p : my_engines )
             p.first->SetMasterCouplingKeys( coupling_keys );

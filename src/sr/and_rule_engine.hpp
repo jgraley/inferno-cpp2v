@@ -45,7 +45,7 @@ public:
     {
     };
     
-    void Configure( Agent *root_agent, const set<Agent *> &master_agents);
+    AndRuleEngine( Agent *root_agent, const set<Agent *> &master_agents);
     void ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
                                   Agent *agent,
                                   const set<Agent *> &master_agents );
@@ -61,7 +61,9 @@ public:
                                    set<Agent *> master_agents );
     void ConfigFilterKeyers(set<PatternQuery::Link> *possible_keyer_links);
     void ConfigPopulateNormalAgents( set<Agent *> *normal_agents, 
-                                     Agent *current_agent );
+                                     Agent *agent );
+    void ConfigCreateEvaluatorsEnginesDiversions( const set<Agent *> &normal_agents, 
+                                                  const set<Agent *> &surrounding_agents );
                                       
     void CompareCoupling( Agent *agent,
                           TreePtr<Node> x,

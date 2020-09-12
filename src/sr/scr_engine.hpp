@@ -24,25 +24,20 @@ class CompareReplace;
 class SCREngine : public virtual Traceable
 {      
 public:
-    SCREngine( bool is_s );
+    SCREngine( bool is_search,
+               const CompareReplace *overall_master,
+               TreePtr<Node> cp,
+               TreePtr<Node> rp = TreePtr<Node>(),
+               const set<Agent *> &master_agents = set<Agent *>(),                            
+               const SCREngine *master = NULL); /* if null, you are overall master */ 
                     
-    // Call this to set the patterns after construction. This should not be virtual since
-    // the constructor calls it.
-    virtual void Configure( const CompareReplace *overall_master,
-                            TreePtr<Node> cp,
-                            TreePtr<Node> rp = TreePtr<Node>(),
-                            const set<Agent *> &master_agents = set<Agent *>(),                            
-                            const SCREngine *master = NULL); /* if null, you are overall master */
-
-    // A configure that doesn't know what the search and replace patterns are
-    virtual void Configure( const set<Agent *> &master_agents,
-                            const SCREngine *master /* if null, you are overall master */ );
 private:
     virtual void ConfigInstallRootAgents( TreePtr<Node> cp,
 										  TreePtr<Node> rp );
     virtual void ConfigCategoriseSubs( const set<Agent *> &master_agents, set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
-    virtual void ConfigCreateMyEngines( const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
-    virtual void ConfigConfigureSubs( const set<Agent *> &master_agents );
+    virtual void ConfigCreateMyEngines( const set<Agent *> &master_agents, 
+                                        const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
+    virtual void ConfigConfigureSubs();
     
 public:
     void GatherCouplings( CouplingMap *coupling_keys ) const;
@@ -51,7 +46,7 @@ public:
     
     void SingleCompareReplace( TreePtr<Node> *proot,
                                const CouplingMap *master_keys );
-    void Compare( TreePtr<Node> start_x ) const;
+    void Compare( TreePtr<Node> start_x );
 
 private:
     void KeyReplaceNodes( const CouplingMap *coupling_keys) const;
@@ -89,8 +84,7 @@ private:
     vector<int> stop_after;
     int depth;    
 
-    // See #66 for getting rid of mutable
-    mutable AndRuleEngine and_rule_engine;
+    shared_ptr<AndRuleEngine> and_rule_engine;
 
 	/** Walks the tree, avoiding the "search"/"compare" and "replace" members of slaves
 		but still recurses through the "through" member. Therefore, it visits all the

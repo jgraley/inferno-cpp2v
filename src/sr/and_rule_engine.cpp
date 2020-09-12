@@ -20,7 +20,7 @@
 
 using namespace SR;
 
-void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_agents_ )
+AndRuleEngine::AndRuleEngine( Agent *root_agent_, const set<Agent *> &master_agents_ )
 {
     TRACE(GetName());
     INDENT(" ");
@@ -33,17 +33,9 @@ void AndRuleEngine::Configure( Agent *root_agent_, const set<Agent *> &master_ag
     if( my_agents.empty() ) 
         return;  // Early-out on trivial problems: TODO do for conjecture mode too; see #126
 
-    set<Agent *> surrounding_agents = SetUnion( master_agents, my_agents ); 
+    set<Agent *> surrounding_agents = SetUnion( master_agents, my_agents );         
+    ConfigCreateEvaluatorsEnginesDiversions( normal_agents, surrounding_agents );    
         
-    for( std::pair<const PatternQuery::Link, AndRuleEngine> &pae : my_evaluator_abnormal_engines )
-        pae.second.Configure( pae.first.GetChildAgent(), surrounding_agents );
-        
-    for( std::pair<const PatternQuery::Link, AndRuleEngine> &pae : my_free_abnormal_engines )
-        pae.second.Configure( pae.first.GetChildAgent(), surrounding_agents );
-        
-    for( std::pair<const PatternQuery::Link, AndRuleEngine> &pae : my_multiplicity_engines )
-        pae.second.Configure( pae.first.GetChildAgent(), surrounding_agents );
-
     list<Agent *> normal_agents_ordered;
     master_boundary_agents.clear();    
     reached.clear();
@@ -266,45 +258,53 @@ void AndRuleEngine::ConfigPopulateNormalAgents( set<Agent *> *normal_agents,
 {
     if( normal_agents->count(agent) != 0 )
         return; // Only act on couplings the first time they are reached
-
-    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-    
     normal_agents->insert(agent);
-    
-    if( pq->GetEvaluator() )
-        my_evaluators.insert(agent);
-    
+
+    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();   
     FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetNormalLinks() )
-        ConfigPopulateNormalAgents( normal_agents, pl->GetChildAgent() );
-        
-    // Can be nicer in C++17, apparently.
-    FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetAbnormalLinks() )
-    {        
-        if( pq->GetEvaluator() )
-        {
-            my_evaluator_abnormal_engines.emplace(std::piecewise_construct,
-                                                  std::forward_as_tuple(*pl),
-                                                  std::forward_as_tuple());  
-        }
-        else
-        {
-            my_free_abnormal_engines.emplace(std::piecewise_construct,
-                                             std::forward_as_tuple(*pl),
-                                             std::forward_as_tuple());  
-        }
-        diversion_agents.emplace(std::piecewise_construct,
-                                 std::forward_as_tuple(*pl),
-                                 std::forward_as_tuple());    
-    }
-    
-    FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetMultiplicityLinks() )
+        ConfigPopulateNormalAgents( normal_agents, pl->GetChildAgent() );        
+}
+
+
+void AndRuleEngine::ConfigCreateEvaluatorsEnginesDiversions( const set<Agent *> &normal_agents, 
+                                                             const set<Agent *> &surrounding_agents )
+{
+    for( auto agent : normal_agents )
     {
-        my_multiplicity_engines.emplace(std::piecewise_construct,
-                                        std::forward_as_tuple(*pl),
-                                        std::forward_as_tuple());
-        diversion_agents.emplace(std::piecewise_construct,
-                                 std::forward_as_tuple(*pl),
-                                 std::forward_as_tuple());    
+        shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
+            
+        if( pq->GetEvaluator() )
+            my_evaluators.insert(agent);
+        
+        // Can be nicer in C++17, apparently.
+        FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetAbnormalLinks() )
+        {        
+            if( pq->GetEvaluator() )
+            {
+                my_evaluator_abnormal_engines.emplace(std::piecewise_construct,
+                                                      std::forward_as_tuple(*pl),
+                                                      std::forward_as_tuple(pl->GetChildAgent(), surrounding_agents));  
+            }
+            else
+            {
+                my_free_abnormal_engines.emplace(std::piecewise_construct,
+                                                 std::forward_as_tuple(*pl),
+                                                 std::forward_as_tuple(pl->GetChildAgent(), surrounding_agents));  
+            }
+            diversion_agents.emplace(std::piecewise_construct,
+                                     std::forward_as_tuple(*pl),
+                                     std::forward_as_tuple());    
+        }
+        
+        FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetMultiplicityLinks() )
+        {
+            my_multiplicity_engines.emplace(std::piecewise_construct,
+                                            std::forward_as_tuple(*pl),
+                                            std::forward_as_tuple(pl->GetChildAgent(), surrounding_agents));
+            diversion_agents.emplace(std::piecewise_construct,
+                                     std::forward_as_tuple(*pl),
+                                     std::forward_as_tuple());    
+        }
     }
 }
 

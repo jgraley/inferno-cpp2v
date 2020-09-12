@@ -46,7 +46,6 @@ void SystemicConstraint::Plan::GetAllVariables()
 }
 
 
-
 void SystemicConstraint::Plan::RunVariableQueries( list<VariableId> vars, VariableQueryLambda vql )
 { 
     diversions.clear();
