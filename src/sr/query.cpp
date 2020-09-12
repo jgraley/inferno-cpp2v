@@ -64,13 +64,13 @@ void PatternQuery::RegisterDecision( bool inclusive )
  
 void PatternQuery::RegisterNormalLink( const TreePtrInterface *ppattern )
 {
-    auto b = make_shared<Link>();
+    Link b;
     EnsureOnStack( ppattern );
-    b->ppattern = ppattern;
+    b.ppattern = ppattern;
     
     // For debugging
 #ifdef KEEP_WHODAT_INFO
-    b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
 #endif
     
     normal_links.push_back( b );        
@@ -79,13 +79,13 @@ void PatternQuery::RegisterNormalLink( const TreePtrInterface *ppattern )
 
 void PatternQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern )
 {
-    auto b = make_shared<Link>();
+    Link b;
     EnsureOnStack( ppattern );
-    b->ppattern = ppattern;
+    b.ppattern = ppattern;
     
     // For debugging
 #ifdef KEEP_WHODAT_INFO
-    b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
 #endif
     
     abnormal_links.push_back( b );       
@@ -94,13 +94,13 @@ void PatternQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern )
 
 void PatternQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern )
 {
-    auto b = make_shared<Link>();
+    Link b;
     EnsureOnStack( ppattern );
-    b->ppattern = ppattern;
+    b.ppattern = ppattern;
     
     // For debugging
 #ifdef KEEP_WHODAT_INFO
-    b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
 #endif
     
     multiplicity_links.push_back( b );       
@@ -110,11 +110,11 @@ void PatternQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern )
 PatternQuery::Links PatternQuery::GetAllLinks() const
 {
     Links links;
-    for( shared_ptr<Link> link : *GetNormalLinks() )
+    for( auto link : *GetNormalLinks() )
         links.push_back( link );
-    for( shared_ptr<Link> link : *GetAbnormalLinks() )
+    for( auto link : *GetAbnormalLinks() )
         links.push_back( link );
-    for( shared_ptr<Link> link : *GetMultiplicityLinks() )
+    for( auto link : *GetMultiplicityLinks() )
         links.push_back( link );
     return links;
 }
@@ -179,15 +179,15 @@ void DecidedQuery::Start()
 void DecidedQuery::RegisterNormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x )
 {
     ASSERT(x);
-    auto b = make_shared<Link>();
+    Link b;
     EnsureOnStack( ppattern );
-    b->ppattern = ppattern;
+    b.ppattern = ppattern;
 
-    b->x = x;
+    b.x = x;
     
     // For debugging
 #ifdef KEEP_WHODAT_INFO
-    b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
 #endif
     
     normal_links.push_back( b );        
@@ -197,14 +197,14 @@ void DecidedQuery::RegisterNormalLink( const TreePtrInterface *ppattern, TreePtr
 void DecidedQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x )
 {
     ASSERT(x);
-    auto b = make_shared<Link>();
+    Link b;
     EnsureOnStack( ppattern );
-    b->ppattern = ppattern;
-    b->x = x;
+    b.ppattern = ppattern;
+    b.x = x;
     
     // For debugging
 #ifdef KEEP_WHODAT_INFO
-    b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
 #endif
 
     abnormal_links.push_back( b );
@@ -214,14 +214,14 @@ void DecidedQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern, TreeP
 void DecidedQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern, TreePtr<SubContainer> x )
 {
     ASSERT(x);
-    auto b = make_shared<Link>();
+    Link b;
     EnsureOnStack( ppattern );
-    b->ppattern = ppattern;
-    b->x = x;
+    b.ppattern = ppattern;
+    b.x = x;
     
     // For debugging
 #ifdef KEEP_WHODAT_INFO
-    b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
 #endif
 
     multiplicity_links.push_back( b );
@@ -230,17 +230,17 @@ void DecidedQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern, T
 
 void DecidedQuery::RegisterAlwaysMatchingLink( const TreePtrInterface *ppattern )
 {
-    auto b = make_shared<Link>();
+    Link b;
     EnsureOnStack( ppattern );
-    b->ppattern = ppattern;
+    b.ppattern = ppattern;
     // Supply the pattern as x. Pattern are usually not valid x nodes
     // (because can have NULL pointers) but there's logic in 
     // the AndRuleEngine to early-out in this case. 
-    b->x = *ppattern;
+    b.x = *ppattern;
     
     // For debugging
 #ifdef KEEP_WHODAT_INFO
-    b->whodat = __builtin_extract_return_addr (__builtin_return_address (0));
+    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
 #endif
     
     normal_links.push_back( b );      
@@ -439,11 +439,11 @@ void DecidedQuery::Reset()
 DecidedQuery::Links DecidedQuery::GetAllLinks() const
 {
     Links links;
-    for( shared_ptr<Link> link : *GetNormalLinks() )
+    for( auto link : *GetNormalLinks() )
         links.push_back( link );
-    for( shared_ptr<Link> link : *GetAbnormalLinks() )
+    for( auto link : *GetAbnormalLinks() )
         links.push_back( link );
-    for( shared_ptr<Link> link : *GetMultiplicityLinks() )
+    for( auto link : *GetMultiplicityLinks() )
         links.push_back( link );
     return links;
 }

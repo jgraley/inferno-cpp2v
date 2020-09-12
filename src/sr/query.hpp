@@ -39,7 +39,7 @@ public:
         Agent *GetChildAgent() const;
     };
         
-    typedef list< shared_ptr<Link> > Links;       
+    typedef list<Link> Links;       
     typedef vector<Decision> Decisions;
 
     void clear()
@@ -125,7 +125,7 @@ public:
     
     typedef vector<Range> Ranges;
     typedef vector<Choice> Choices; 
-    typedef list< shared_ptr<Link> > Links;
+    typedef list<Link> Links;
     
     virtual const Choices *GetChoices() const = 0;
     virtual const Ranges *GetDecisions() const = 0;
