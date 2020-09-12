@@ -35,14 +35,14 @@ public:
     const struct Plan
     {
         Plan( set<Agent *> my_agents, Agent *root_agent );
-        void ConfigRecordWalk( AgentRecords::iterator rit );
+        void RecordWalk( AgentRecords::iterator rit );
         
         AgentRecords agent_records;
         AgentRecords::iterator last_agent;		
         set<AgentRecord *> reached;
     } plan;
 
-    void ConfigRecordWalk( AgentRecords::iterator rit );
+    void RecordWalk( AgentRecords::iterator rit );
     
     void Start();
     void FillChoicesWithHardBegin( AgentRecords::const_iterator rit );      

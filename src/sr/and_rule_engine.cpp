@@ -16,7 +16,7 @@
 
 //#define TEST_PATTERN_QUERY
 
-#define USE_SOLVER
+//#define USE_SOLVER
 
 using namespace SR;
 
@@ -34,26 +34,26 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
     master_agents = master_agents_;
     
     set<Agent *> normal_agents;
-    ConfigPopulateNormalAgents( &normal_agents, root_agent );    
+    PopulateNormalAgents( &normal_agents, root_agent );    
     my_agents = SetDifference( normal_agents, master_agents );       
     if( my_agents.empty() ) 
         return;  // Early-out on trivial problems: TODO do for conjecture mode too; see #126
 
     set<Agent *> surrounding_agents = SetUnion( master_agents, my_agents );         
-    ConfigCreateEvaluatorsEnginesDiversions( normal_agents, surrounding_agents );    
+    CreateVariousThings( normal_agents, surrounding_agents );    
         
     list<Agent *> normal_agents_ordered;
     master_boundary_agents.clear();    
     reached.clear();
-    ConfigPopulateForSolver( &normal_agents_ordered, 
+    PopulateForSolver( &normal_agents_ordered, 
                              root_agent, 
                              master_agents );
 
     set<PatternQuery::Link> possible_keyer_links; // maps from child to parent
-    ConfigDeterminePossibleKeyers( &possible_keyer_links, root_agent, master_agents );
+    DeterminePossibleKeyers( &possible_keyer_links, root_agent, master_agents );
     coupling_residual_links.clear();
-    ConfigDetermineResiduals( &possible_keyer_links, root_agent, master_agents );
-    ConfigFilterKeyers(&possible_keyer_links);
+    DetermineResiduals( &possible_keyer_links, root_agent, master_agents );
+    FilterKeyers(&possible_keyer_links);
 #ifdef USE_SOLVER    
     list< shared_ptr<CSP::Constraint> > constraints;
     for( Agent *constraint_agent : my_agents )
@@ -123,7 +123,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
 }
 
 
-void AndRuleEngine::Plan::ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
+void AndRuleEngine::Plan::PopulateForSolver( list<Agent *> *normal_agents_ordered, 
                                              Agent *agent,
                                              const set<Agent *> &master_agents )
 {
@@ -148,11 +148,11 @@ void AndRuleEngine::Plan::ConfigPopulateForSolver( list<Agent *> *normal_agents_
     normal_agents_ordered->push_back( agent );
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     FOREACH( shared_ptr<const PatternQuery::Link> b, *pq->GetNormalLinks() )
-        ConfigPopulateForSolver( normal_agents_ordered, b->GetChildAgent(), master_agents );        
+        PopulateForSolver( normal_agents_ordered, b->GetChildAgent(), master_agents );        
 }
 
 
-void AndRuleEngine::Plan::ConfigDetermineKeyersModuloMatchAny( set<PatternQuery::Link> *possible_keyer_links,
+void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( set<PatternQuery::Link> *possible_keyer_links,
                                                          Agent *agent,
                                                          set<Agent *> *senior_agents,
                                                          set<Agent *> *matchany_agents ) const
@@ -178,12 +178,12 @@ void AndRuleEngine::Plan::ConfigDetermineKeyersModuloMatchAny( set<PatternQuery:
         possible_keyer_links->insert(link);
         senior_agents->insert( link.GetChildAgent() );
     
-        ConfigDetermineKeyersModuloMatchAny( possible_keyer_links, link.GetChildAgent(), senior_agents, matchany_agents );        
+        DetermineKeyersModuloMatchAny( possible_keyer_links, link.GetChildAgent(), senior_agents, matchany_agents );        
     }
 }
         
         
-void AndRuleEngine::Plan::ConfigDeterminePossibleKeyers( set<PatternQuery::Link> *possible_keyer_links,
+void AndRuleEngine::Plan::DeterminePossibleKeyers( set<PatternQuery::Link> *possible_keyer_links,
                                                    Agent *agent,
                                                    set<Agent *> senior_agents ) const
 {
@@ -192,7 +192,7 @@ void AndRuleEngine::Plan::ConfigDeterminePossibleKeyers( set<PatternQuery::Link>
     // links.
     set<Agent *> my_matchany_agents;
     set<Agent *> my_senior_agents = senior_agents;
-    ConfigDetermineKeyersModuloMatchAny( possible_keyer_links, agent, &my_senior_agents, &my_matchany_agents );
+    DetermineKeyersModuloMatchAny( possible_keyer_links, agent, &my_senior_agents, &my_matchany_agents );
     // After this:
     // - my_master_agents has union of master_agents and all the identified keyed agents
     // - my_match_any_agents has the MatchAny agents that we saw, BUT SKIPPED
@@ -207,13 +207,13 @@ void AndRuleEngine::Plan::ConfigDeterminePossibleKeyers( set<PatternQuery::Link>
         FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetNormalLinks() )
         {
             PatternQuery::Link link = *pl;
-            ConfigDeterminePossibleKeyers( possible_keyer_links, link.GetChildAgent(), my_senior_agents );        
+            DeterminePossibleKeyers( possible_keyer_links, link.GetChildAgent(), my_senior_agents );        
         }
     }
 }
         
         
-void AndRuleEngine::Plan::ConfigDetermineResiduals( set<PatternQuery::Link> *possible_keyer_links,
+void AndRuleEngine::Plan::DetermineResiduals( set<PatternQuery::Link> *possible_keyer_links,
                                               Agent *agent,
                                               set<Agent *> master_agents ) 
 {
@@ -236,12 +236,12 @@ void AndRuleEngine::Plan::ConfigDetermineResiduals( set<PatternQuery::Link> *pos
             continue; // Coupling residuals do not recurse (keyer does that and it only needs to be done once)
         }
         
-        ConfigDetermineResiduals( possible_keyer_links, link.GetChildAgent(), master_agents );        
+        DetermineResiduals( possible_keyer_links, link.GetChildAgent(), master_agents );        
     }
 }
 
 
-void AndRuleEngine::Plan::ConfigFilterKeyers(set<PatternQuery::Link> *possible_keyer_links)
+void AndRuleEngine::Plan::FilterKeyers(set<PatternQuery::Link> *possible_keyer_links)
 {
     coupling_keyer_links.clear();
     for( PatternQuery::Link keyer_l : *possible_keyer_links )
@@ -258,7 +258,7 @@ void AndRuleEngine::Plan::ConfigFilterKeyers(set<PatternQuery::Link> *possible_k
 }
 
 
-void AndRuleEngine::Plan::ConfigPopulateNormalAgents( set<Agent *> *normal_agents, 
+void AndRuleEngine::Plan::PopulateNormalAgents( set<Agent *> *normal_agents, 
                                                 Agent *agent )
 {
     if( normal_agents->count(agent) != 0 )
@@ -267,11 +267,11 @@ void AndRuleEngine::Plan::ConfigPopulateNormalAgents( set<Agent *> *normal_agent
 
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();   
     FOREACH( shared_ptr<const PatternQuery::Link> pl, *pq->GetNormalLinks() )
-        ConfigPopulateNormalAgents( normal_agents, pl->GetChildAgent() );        
+        PopulateNormalAgents( normal_agents, pl->GetChildAgent() );        
 }
 
 
-void AndRuleEngine::Plan::ConfigCreateEvaluatorsEnginesDiversions( const set<Agent *> &normal_agents, 
+void AndRuleEngine::Plan::CreateVariousThings( const set<Agent *> &normal_agents, 
                                                              const set<Agent *> &surrounding_agents )
 {
     for( auto agent : normal_agents )

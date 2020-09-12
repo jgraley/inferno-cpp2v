@@ -41,13 +41,13 @@ private:
               TreePtr<Node> rp = TreePtr<Node>(),
               const set<Agent *> &master_agents = set<Agent *>(),                            
               const SCREngine *master = NULL); /* if null, you are overall master */ 
-        void ConfigInstallRootAgents( TreePtr<Node> cp,
-                                      TreePtr<Node> rp );
-        void ConfigCategoriseSubs( const set<Agent *> &master_agents, 
-                                   set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
-        void ConfigCreateMyEngines( const set<Agent *> &master_agents, 
-                                    const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
-        void ConfigConfigureSubs();
+        void InstallRootAgents( TreePtr<Node> cp,
+                                TreePtr<Node> rp );
+        void CategoriseSubs( const set<Agent *> &master_agents, 
+                             set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
+        void CreateMyEngines( const set<Agent *> &master_agents,                       
+                              const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines );
+        void ConfigureAgents();
 
         SCREngine * const algo;
         const bool is_search;    

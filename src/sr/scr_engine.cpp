@@ -50,20 +50,20 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     overall_master_ptr = overall_master;
     master_ptr = master;
     
-    ConfigInstallRootAgents(cp, rp);
+    InstallRootAgents(cp, rp);
             
     //TRACE("Elaborating ")(*this );    
 
     set<AgentCommonNeedSCREngine *> my_agents_needing_engines;   
-    ConfigCategoriseSubs( master_agents, my_agents_needing_engines );    
-    ConfigCreateMyEngines( master_agents, my_agents_needing_engines );    
-    ConfigConfigureSubs();
+    CategoriseSubs( master_agents, my_agents_needing_engines );    
+    CreateMyEngines( master_agents, my_agents_needing_engines );    
+    ConfigureAgents();
     
     and_rule_engine = make_shared<AndRuleEngine>(root_agent, master_agents);
 } 
 
 
-void SCREngine::Plan::ConfigInstallRootAgents( TreePtr<Node> cp,
+void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
 						     		    	   TreePtr<Node> rp )
 {
     ASSERT( cp )("Compare pattern must always be provided\n");
@@ -99,7 +99,7 @@ void SCREngine::Plan::ConfigInstallRootAgents( TreePtr<Node> cp,
 }
     
 
-void SCREngine::Plan::ConfigCategoriseSubs( const set<Agent *> &master_agents, 
+void SCREngine::Plan::CategoriseSubs( const set<Agent *> &master_agents, 
                                             set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
 {
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
@@ -121,7 +121,7 @@ void SCREngine::Plan::ConfigCategoriseSubs( const set<Agent *> &master_agents,
 }
 
 
-void SCREngine::Plan::ConfigCreateMyEngines( const set<Agent *> &master_agents, 
+void SCREngine::Plan::CreateMyEngines( const set<Agent *> &master_agents, 
                                              const set<AgentCommonNeedSCREngine *> &my_agents_needing_engines )
 {
     // Determine which agents our slaves should not configure
@@ -144,13 +144,13 @@ void SCREngine::Plan::ConfigCreateMyEngines( const set<Agent *> &master_agents,
 }
 
 
-void SCREngine::Plan::ConfigConfigureSubs()
+void SCREngine::Plan::ConfigureAgents()
 {
     // Give agents pointers to here and our coupling keys
     FOREACH( Agent *a, *my_agents )
     {        
         if( dynamic_cast<AgentCommonNeedSCREngine *>(a) )
-            continue; // TODO yuck, should determine this in ConfigCategoriseSubs()
+            continue; // TODO yuck, should determine this in CategoriseSubs()
         //TRACE("Configuring agent ")(*a)("\n");
         a->AgentConfigure( algo );             
     }    

@@ -50,24 +50,24 @@ public:
     const struct Plan : public virtual Traceable
     {
         Plan( AndRuleEngine *algo, Agent *root_agent, const set<Agent *> &master_agents);
-        void ConfigPopulateForSolver( list<Agent *> *normal_agents_ordered, 
-                                      Agent *agent,
-                                      const set<Agent *> &master_agents );
-        void ConfigDetermineKeyersModuloMatchAny( set<PatternQuery::Link> *possible_keyer_links,
-                                                  Agent *agent,
-                                                  set<Agent *> *master_agents,
-                                                  set<Agent *> *match_any_agents ) const;
-        void ConfigDeterminePossibleKeyers( set<PatternQuery::Link> *possible_keyer_links,
+        void PopulateForSolver( list<Agent *> *normal_agents_ordered, 
+                                Agent *agent,
+                                const set<Agent *> &master_agents );
+        void DetermineKeyersModuloMatchAny( set<PatternQuery::Link> *possible_keyer_links,
                                             Agent *agent,
-                                            set<Agent *> master_agents ) const;
-        void ConfigDetermineResiduals( set<PatternQuery::Link> *possible_keyer_links,
-                                       Agent *agent,
-                                       set<Agent *> master_agents );
-        void ConfigFilterKeyers(set<PatternQuery::Link> *possible_keyer_links);
-        void ConfigPopulateNormalAgents( set<Agent *> *normal_agents, 
-                                         Agent *agent );
-        void ConfigCreateEvaluatorsEnginesDiversions( const set<Agent *> &normal_agents, 
-                                                      const set<Agent *> &surrounding_agents );
+                                            set<Agent *> *master_agents,
+                                            set<Agent *> *match_any_agents ) const;
+        void DeterminePossibleKeyers( set<PatternQuery::Link> *possible_keyer_links,
+                                      Agent *agent,
+                                      set<Agent *> master_agents ) const;
+        void DetermineResiduals( set<PatternQuery::Link> *possible_keyer_links,
+                                 Agent *agent,
+                                 set<Agent *> master_agents );
+        void FilterKeyers( set<PatternQuery::Link> *possible_keyer_links );
+        void PopulateNormalAgents( set<Agent *> *normal_agents, 
+                                   Agent *agent );
+        void CreateVariousThings( const set<Agent *> &normal_agents, 
+                                  const set<Agent *> &surrounding_agents );
 
         AndRuleEngine * const algo;
         Agent *root_agent;

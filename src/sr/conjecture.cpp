@@ -20,11 +20,11 @@ Conjecture::Plan::Plan( set<Agent *> my_agents, Agent *root_agent )
 	}        
     AgentRecords::iterator root_rit = agent_records.find(root_agent);
     ASSERT( root_rit != agent_records.end() );
-    ConfigRecordWalk( root_rit );
+    RecordWalk( root_rit );
 }
 
 
-void Conjecture::Plan::ConfigRecordWalk( AgentRecords::iterator rit )
+void Conjecture::Plan::RecordWalk( AgentRecords::iterator rit )
 {
     Agent *agent = rit->first;
     AgentRecord &record = rit->second;
@@ -49,7 +49,7 @@ void Conjecture::Plan::ConfigRecordWalk( AgentRecords::iterator rit )
     {
         AgentRecords::iterator child_rit = agent_records.find(l->GetChildAgent());
         if( child_rit != agent_records.end() ) // If fails, probably belongs to master
-            ConfigRecordWalk( child_rit );
+            RecordWalk( child_rit );
     }
 }
 
