@@ -110,11 +110,11 @@ void PatternQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern )
 PatternQuery::Links PatternQuery::GetAllLinks() const
 {
     Links links;
-    for( auto link : *GetNormalLinks() )
+    for( auto link : GetNormalLinks() )
         links.push_back( link );
-    for( auto link : *GetAbnormalLinks() )
+    for( auto link : GetAbnormalLinks() )
         links.push_back( link );
-    for( auto link : *GetMultiplicityLinks() )
+    for( auto link : GetMultiplicityLinks() )
         links.push_back( link );
     return links;
 }
@@ -439,11 +439,11 @@ void DecidedQuery::Reset()
 DecidedQuery::Links DecidedQuery::GetAllLinks() const
 {
     Links links;
-    for( auto link : *GetNormalLinks() )
+    for( auto link : GetNormalLinks() )
         links.push_back( link );
-    for( auto link : *GetAbnormalLinks() )
+    for( auto link : GetAbnormalLinks() )
         links.push_back( link );
-    for( auto link : *GetMultiplicityLinks() )
+    for( auto link : GetMultiplicityLinks() )
         links.push_back( link );
     return links;
 }
