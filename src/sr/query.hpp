@@ -8,6 +8,7 @@
 
 #include "boolean_evaluator.hpp"
 #include "subcontainers.hpp" 
+#include "link.hpp"
 
 #include <vector>
 #include <boost/type_traits.hpp>
@@ -25,21 +26,8 @@ public:
     {
         bool inclusive; // If true, include "end" as a possible choice
     };
-    struct Link 
-    {
-        const TreePtrInterface *ppattern;
-#ifdef KEEP_WHODAT_INFO
-        void *whodat; // the gdb magic you require is eg "info line *b.whodat"
-#endif
-        Link();
-        bool operator<(const Link &other) const;
-        bool operator!=(const Link &other) const;
-        bool operator==(const Link &other) const;
-        explicit operator bool() const;
-        Agent *GetChildAgent() const;
-    };
-        
-    typedef list<Link> Links;       
+    typedef PatternLink Link;        
+    typedef list<PatternLink> Links;       
     typedef vector<Decision> Decisions;
 
     void clear()
@@ -109,23 +97,10 @@ public:
         ContainerInterface::iterator iter;
     };
     
-    struct Link 
-    {
-        const TreePtrInterface *ppattern;
-        TreePtr<Node> x; 
-#ifdef KEEP_WHODAT_INFO
-        void *whodat; // the gdb magic you require is eg "info line *b.whodat"
-#endif
-        Link();
-        bool operator<(const Link &other) const;
-        explicit operator bool() const;
-        Agent *GetChildAgent() const;
-        operator PatternQuery::Link() const;
-    };
-    
+    typedef LocatedLink Link;
     typedef vector<Range> Ranges;
     typedef vector<Choice> Choices; 
-    typedef list<Link> Links;
+    typedef list<LocatedLink> Links;
     
     virtual const Choices &GetChoices() const = 0;
     virtual const Ranges &GetDecisions() const = 0;

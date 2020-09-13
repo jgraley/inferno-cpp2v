@@ -53,17 +53,17 @@ public:
         void PopulateForSolver( list<Agent *> *normal_agents_ordered, 
                                 Agent *agent,
                                 const set<Agent *> &master_agents );
-        void DetermineKeyersModuloMatchAny( set<PatternQuery::Link> *possible_keyer_links,
+        void DetermineKeyersModuloMatchAny( set<PatternLink> *possible_keyer_links,
                                             Agent *agent,
                                             set<Agent *> *master_agents,
                                             set<Agent *> *match_any_agents ) const;
-        void DeterminePossibleKeyers( set<PatternQuery::Link> *possible_keyer_links,
+        void DeterminePossibleKeyers( set<PatternLink> *possible_keyer_links,
                                       Agent *agent,
                                       set<Agent *> master_agents ) const;
-        void DetermineResiduals( set<PatternQuery::Link> *possible_keyer_links,
+        void DetermineResiduals( set<PatternLink> *possible_keyer_links,
                                  Agent *agent,
                                  set<Agent *> master_agents );
-        void FilterKeyers( set<PatternQuery::Link> *possible_keyer_links );
+        void FilterKeyers( set<PatternLink> *possible_keyer_links );
         void PopulateNormalAgents( set<Agent *> *normal_agents, 
                                    Agent *agent );
         void CreateVariousThings( const set<Agent *> &normal_agents, 
@@ -74,14 +74,14 @@ public:
         set<Agent *> master_agents;
         set<Agent *> my_agents;   
         set< Agent *> my_evaluators;   
-        map< PatternQuery::Link, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
-        map< PatternQuery::Link, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
-        map< PatternQuery::Link, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
-        map< PatternQuery::Link, shared_ptr<PlaceholderAgent> > diversion_agents; 
+        map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
+        map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
+        map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
+        map< PatternLink, shared_ptr<PlaceholderAgent> > diversion_agents; 
         map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
         set<Agent *> master_boundary_agents;
-        set< PatternQuery::Link > coupling_keyer_links;
-        set< PatternQuery::Link > coupling_residual_links;
+        set< PatternLink > coupling_keyer_links;
+        set< PatternLink > coupling_residual_links;
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;
     private: // working varaibles in plan construction

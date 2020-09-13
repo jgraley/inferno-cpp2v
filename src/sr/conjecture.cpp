@@ -45,7 +45,7 @@ void Conjecture::Plan::RecordWalk( AgentRecords::iterator rit )
         last_agent = rit;
     }
     
-    for( PatternQuery::Link link : pq->GetNormalLinks() )
+    for( PatternLink link : pq->GetNormalLinks() )
     {
         AgentRecords::iterator child_rit = agent_records.find(link.GetChildAgent());
         if( child_rit != agent_records.end() ) // If fails, probably belongs to master

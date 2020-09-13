@@ -49,7 +49,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
                              root_agent, 
                              master_agents );
 
-    set<PatternQuery::Link> possible_keyer_links; // maps from child to parent
+    set<PatternLink> possible_keyer_links; // maps from child to parent
     DeterminePossibleKeyers( &possible_keyer_links, root_agent, master_agents );
     coupling_residual_links.clear();
     DetermineResiduals( &possible_keyer_links, root_agent, master_agents );
@@ -63,8 +63,8 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
             CSP::VariableFlags flags;
             
             shared_ptr<PatternQuery> pq = constraint_agent->GetPatternQuery();
-            PatternQuery::Link link;
-            for( PatternQuery::Link cur_link : pq->GetAllLinks() )
+            PatternLink link;
+            for( PatternLink cur_link : pq->GetAllLinks() )
             {
                 if( cur_link.GetChildAgent() == link_agent )
                 {
@@ -147,18 +147,18 @@ void AndRuleEngine::Plan::PopulateForSolver( list<Agent *> *normal_agents_ordere
      
     normal_agents_ordered->push_back( agent );
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-    FOREACH( PatternQuery::Link link, pq->GetNormalLinks() )
+    FOREACH( PatternLink link, pq->GetNormalLinks() )
         PopulateForSolver( normal_agents_ordered, link.GetChildAgent(), master_agents );        
 }
 
 
-void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( set<PatternQuery::Link> *possible_keyer_links,
+void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( set<PatternLink> *possible_keyer_links,
                                                          Agent *agent,
                                                          set<Agent *> *senior_agents,
                                                          set<Agent *> *matchany_agents ) const
 {
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-    FOREACH( PatternQuery::Link link, pq->GetNormalLinks() )
+    FOREACH( PatternLink link, pq->GetNormalLinks() )
     {
         if( senior_agents->count( link.GetChildAgent() ) > 0 )
             continue; // will be fixed values for our solver
@@ -170,7 +170,7 @@ void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( set<PatternQuery::Link>
         }
 
         // See #129, can fail on legal patterns - will also fail on illegal MatchAny couplings
-        for( PatternQuery::Link l : *possible_keyer_links )        
+        for( PatternLink l : *possible_keyer_links )        
             ASSERT( l.GetChildAgent() != link.GetChildAgent() )
                   ("Conflicting coupling in and-rule pattern: check MatchAny nodes\n");
 
@@ -182,7 +182,7 @@ void AndRuleEngine::Plan::DetermineKeyersModuloMatchAny( set<PatternQuery::Link>
 }
         
         
-void AndRuleEngine::Plan::DeterminePossibleKeyers( set<PatternQuery::Link> *possible_keyer_links,
+void AndRuleEngine::Plan::DeterminePossibleKeyers( set<PatternLink> *possible_keyer_links,
                                                    Agent *agent,
                                                    set<Agent *> senior_agents ) const
 {
@@ -203,7 +203,7 @@ void AndRuleEngine::Plan::DeterminePossibleKeyers( set<PatternQuery::Link> *poss
     for( Agent *ma_agent : my_matchany_agents )
     {
         shared_ptr<PatternQuery> pq = ma_agent->GetPatternQuery();
-        FOREACH( PatternQuery::Link link, pq->GetNormalLinks() )
+        FOREACH( PatternLink link, pq->GetNormalLinks() )
         {
             DeterminePossibleKeyers( possible_keyer_links, link.GetChildAgent(), my_senior_agents );        
         }
@@ -211,15 +211,15 @@ void AndRuleEngine::Plan::DeterminePossibleKeyers( set<PatternQuery::Link> *poss
 }
         
         
-void AndRuleEngine::Plan::DetermineResiduals( set<PatternQuery::Link> *possible_keyer_links,
+void AndRuleEngine::Plan::DetermineResiduals( set<PatternLink> *possible_keyer_links,
                                               Agent *agent,
                                               set<Agent *> master_agents ) 
 {
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-    FOREACH( PatternQuery::Link link, pq->GetNormalLinks() )
+    FOREACH( PatternLink link, pq->GetNormalLinks() )
     {            
-        PatternQuery::Link keyer;
-        for( PatternQuery::Link l : *possible_keyer_links )
+        PatternLink keyer;
+        for( PatternLink l : *possible_keyer_links )
         {
             if( l.GetChildAgent() == link.GetChildAgent() )
                 keyer = l; // keyer keys the same child node that we're looking at
@@ -237,12 +237,12 @@ void AndRuleEngine::Plan::DetermineResiduals( set<PatternQuery::Link> *possible_
 }
 
 
-void AndRuleEngine::Plan::FilterKeyers(set<PatternQuery::Link> *possible_keyer_links)
+void AndRuleEngine::Plan::FilterKeyers(set<PatternLink> *possible_keyer_links)
 {
     coupling_keyer_links.clear();
-    for( PatternQuery::Link keyer_l : *possible_keyer_links )
+    for( PatternLink keyer_l : *possible_keyer_links )
     {
-        for( PatternQuery::Link residual_l : coupling_residual_links )
+        for( PatternLink residual_l : coupling_residual_links )
         {
             if( residual_l.GetChildAgent() == keyer_l.GetChildAgent() )
             {
@@ -262,7 +262,7 @@ void AndRuleEngine::Plan::PopulateNormalAgents( set<Agent *> *normal_agents,
     normal_agents->insert(agent);
 
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();   
-    FOREACH( PatternQuery::Link link, pq->GetNormalLinks() )
+    FOREACH( PatternLink link, pq->GetNormalLinks() )
         PopulateNormalAgents( normal_agents, link.GetChildAgent() );        
 }
 
@@ -277,7 +277,7 @@ void AndRuleEngine::Plan::CreateVariousThings( const set<Agent *> &normal_agents
         if( pq->GetEvaluator() )
             my_evaluators.insert(agent);
         
-        FOREACH( PatternQuery::Link link, pq->GetAbnormalLinks() )
+        FOREACH( PatternLink link, pq->GetAbnormalLinks() )
         {        
             if( pq->GetEvaluator() )
             {
@@ -292,7 +292,7 @@ void AndRuleEngine::Plan::CreateVariousThings( const set<Agent *> &normal_agents
             diversion_agents[link] = make_shared<PlaceholderAgent>(); 
         }
         
-        FOREACH( PatternQuery::Link link, pq->GetMultiplicityLinks() )
+        FOREACH( PatternLink link, pq->GetMultiplicityLinks() )
         {
             my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link.GetChildAgent(), 
                                                                         surrounding_agents );  
@@ -330,12 +330,12 @@ void AndRuleEngine::CompareLinks( Agent *agent,
                                   shared_ptr<const DecidedQuery> query ) 
 {    
     int i=0;        
-    FOREACH( const DecidedQuery::Link &link, query->GetNormalLinks() )
+    FOREACH( const LocatedLink &link, query->GetNormalLinks() )
     {
         TRACE("Comparing normal link %d\n", i++);
         // Recurse normally 
         // Get x for linked node
-        TreePtr<Node> x = link.x;
+        TreePtr<Node> x = link.GetChildX();
         ASSERT( x );
         
         // This is needed for decisionised MatchAny #75. Other schemes for
@@ -370,18 +370,18 @@ void AndRuleEngine::CompareLinks( Agent *agent,
     }
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-    FOREACH( const DecidedQuery::Link &link, query->GetAbnormalLinks() )
+    FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
     {
         ASSERT( plan.diversion_agents.count(link) );
         Agent *diversion_agent = plan.diversion_agents.at(link).get();
-        KeyCoupling( diversion_agent, link.x, &hypothetical_solution_keys );
+        KeyCoupling( diversion_agent, link.GetChildX(), &hypothetical_solution_keys );
     }
         
-    FOREACH( const DecidedQuery::Link &link, query->GetMultiplicityLinks() )
+    FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
     {
         ASSERT( plan.diversion_agents.count(link) );
         Agent *diversion_agent = plan.diversion_agents.at(link).get();
-        KeyCoupling( diversion_agent, link.x, &hypothetical_solution_keys );
+        KeyCoupling( diversion_agent, link.GetChildX(), &hypothetical_solution_keys );
     }
 }
 
@@ -397,7 +397,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
     // Follow up on any blocks that were noted by the agent impl    
     int i=0;
     list<bool> compare_results;
-    FOREACH( PatternQuery::Link link, pq->GetAbnormalLinks() )
+    FOREACH( PatternLink link, pq->GetAbnormalLinks() )
     {
         TRACE("Comparing block %d\n", i);
  
@@ -474,7 +474,7 @@ void AndRuleEngine::ExpandDomain( Agent *agent, set< TreePtr<Node> > &domain )
     plan.my_constraints.at(agent)->ExpandDomain( domain );  
     
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-    FOREACH( PatternQuery::Link link, pq->GetNormalLinks() )
+    FOREACH( PatternLink link, pq->GetNormalLinks() )
         ExpandDomain( link.GetChildAgent(), domain );
 }
 
@@ -609,7 +609,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             }
 
             // Process the free abnormal links.
-            for( const std::pair< const PatternQuery::Link, shared_ptr<AndRuleEngine> > &pae : plan.my_free_abnormal_engines )
+            for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_free_abnormal_engines )
             {            
                 shared_ptr<AndRuleEngine> e = pae.second;
                 Agent *diversion_agent = plan.diversion_agents.at(pae.first).get();
@@ -620,7 +620,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
 
             // Process the free multiplicity links.
             int i=0;
-            for( const std::pair< const PatternQuery::Link, shared_ptr<AndRuleEngine> > &pae : plan.my_multiplicity_engines )
+            for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_multiplicity_engines )
             {            
                 shared_ptr<AndRuleEngine> e = pae.second;
                 Agent *diversion_agent = plan.diversion_agents.at(pae.first).get();

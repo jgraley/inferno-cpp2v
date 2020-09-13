@@ -7,52 +7,14 @@
 
 using namespace SR;
 
-void EnsureOnStack( const TreePtrInterface *ppattern )
-{
-    ASSERT( (((uint64_t)ppattern & 0x7fff00000000ULL) != 0x7fff00000000ULL) )
-          ("Supplied agent link seems like it's probably on the stack, usually a bad sign\n");
-}
 
-
-PatternQuery::Link::Link()
-{
-    ppattern = nullptr;
-}
-
-
-bool PatternQuery::Link::operator<(const Link &other) const
-{
-    // PatternQuery::Link is unique across parent-child links in
-    // the pattern. This operator will permit PatternQuery::Link to 
-    // act as keys in maps.
-    return ppattern < other.ppattern;
-}
-
-
-bool PatternQuery::Link::operator!=(const Link &other) const
-{
-    return ppattern != other.ppattern;
-}
-
-
-bool PatternQuery::Link::operator==(const Link &other) const
-{
-    return ppattern == other.ppattern;
-}
-
-PatternQuery::Link::operator bool() const
-{
-    return ppattern != nullptr;
-}
-
-
-Agent *PatternQuery::Link::GetChildAgent() const
-{
-    ASSERT( ppattern )
-          ("GetChildAgent() called on uninitialised (NULL) link\n");
-    return Agent::AsAgent(*ppattern);    
-}
-
+// For debugging
+#ifdef KEEP_WHODAT_INFO
+#define WHODAT() __builtin_extract_return_addr (__builtin_return_address (0))
+#else
+#define WHODAT() nullptr
+#endif
+ 
 
 void PatternQuery::RegisterDecision( bool inclusive )
 {
@@ -64,45 +26,21 @@ void PatternQuery::RegisterDecision( bool inclusive )
  
 void PatternQuery::RegisterNormalLink( const TreePtrInterface *ppattern )
 {
-    Link b;
-    EnsureOnStack( ppattern );
-    b.ppattern = ppattern;
-    
-    // For debugging
-#ifdef KEEP_WHODAT_INFO
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
-#endif
-    
+    PatternLink b( ppattern, WHODAT() );
     normal_links.push_back( b );        
 }
 
 
 void PatternQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern )
 {
-    Link b;
-    EnsureOnStack( ppattern );
-    b.ppattern = ppattern;
-    
-    // For debugging
-#ifdef KEEP_WHODAT_INFO
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
-#endif
-    
+    PatternLink b( ppattern, WHODAT() );
     abnormal_links.push_back( b );       
 }
 
 
 void PatternQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern )
 {
-    Link b;
-    EnsureOnStack( ppattern );
-    b.ppattern = ppattern;
-    
-    // For debugging
-#ifdef KEEP_WHODAT_INFO
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
-#endif
-    
+    PatternLink b( ppattern, WHODAT() );
     multiplicity_links.push_back( b );       
 }
 
@@ -117,45 +55,6 @@ PatternQuery::Links PatternQuery::GetAllLinks() const
     for( auto link : GetMultiplicityLinks() )
         links.push_back( link );
     return links;
-}
-
-
-DecidedQuery::Link::Link()
-{
-    ppattern = nullptr;
-}
-
-
-bool DecidedQuery::Link::operator<(const Link &other) const
-{
-    // pattern is primary ordering for consistency with 
-    // PatternQuery::Link
-    if( ppattern != other.ppattern )
-        return ppattern < other.ppattern;
-        
-    return x < other.x;    
-}
-
-
-DecidedQuery::Link::operator bool() const
-{
-    return ppattern != nullptr;
-}
-
-
-Agent *DecidedQuery::Link::GetChildAgent() const
-{
-    ASSERT( ppattern )
-          ("GetChildAgent() called on uninitialised (NULL) link\n");
-    return Agent::AsAgent(*ppattern);
-}
-
-
-DecidedQuery::Link::operator PatternQuery::Link() const
-{
-    PatternQuery::Link l;
-    l.ppattern = ppattern;
-    return l;
 }
 
 
@@ -178,72 +77,32 @@ void DecidedQuery::Start()
 
 void DecidedQuery::RegisterNormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x )
 {
-    ASSERT(x);
-    Link b;
-    EnsureOnStack( ppattern );
-    b.ppattern = ppattern;
-
-    b.x = x;
-    
-    // For debugging
-#ifdef KEEP_WHODAT_INFO
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
-#endif
-    
-    normal_links.push_back( b );        
+    LocatedLink link( ppattern, x, WHODAT() );
+    normal_links.push_back( link );        
 }
 
 
 void DecidedQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x )
 {
-    ASSERT(x);
-    Link b;
-    EnsureOnStack( ppattern );
-    b.ppattern = ppattern;
-    b.x = x;
-    
-    // For debugging
-#ifdef KEEP_WHODAT_INFO
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
-#endif
-
-    abnormal_links.push_back( b );
+    LocatedLink link( ppattern, x, WHODAT() );
+    abnormal_links.push_back( link );
 }
 
 
 void DecidedQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern, TreePtr<SubContainer> x )
 {
-    ASSERT(x);
-    Link b;
-    EnsureOnStack( ppattern );
-    b.ppattern = ppattern;
-    b.x = x;
-    
-    // For debugging
-#ifdef KEEP_WHODAT_INFO
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
-#endif
-
-    multiplicity_links.push_back( b );
+    LocatedLink link( ppattern, x, WHODAT() );
+    multiplicity_links.push_back( link );
 }
 
 
 void DecidedQuery::RegisterAlwaysMatchingLink( const TreePtrInterface *ppattern )
 {
-    Link b;
-    EnsureOnStack( ppattern );
-    b.ppattern = ppattern;
     // Supply the pattern as x. Pattern are usually not valid x nodes
     // (because can have NULL pointers) but there's logic in 
     // the AndRuleEngine to early-out in this case. 
-    b.x = *ppattern;
-    
-    // For debugging
-#ifdef KEEP_WHODAT_INFO
-    b.whodat = __builtin_extract_return_addr (__builtin_return_address (0));
-#endif
-    
-    normal_links.push_back( b );      
+    LocatedLink link( ppattern, *ppattern, WHODAT() );
+    normal_links.push_back( link );      
 }
 
 

@@ -38,7 +38,7 @@ void SystemicConstraint::Plan::GetAllVariables()
     
     all_variables.push_back( agent ); // The me-variable
     
-    FOREACH( SR::PatternQuery::Link link, pq->GetAllLinks() )
+    FOREACH( SR::PatternLink link, pq->GetAllLinks() )
     {
         VariableId var = link.GetChildAgent();
         all_variables.push_back( var );  
@@ -250,7 +250,7 @@ bool SystemicConstraint::Test( list< Value > values )
             fit++; // skip "me"
             for( TreePtr<Node> val : expanded_values )
             {
-                Value x = linkit->x;
+                Value x = linkit->GetChildX();
                 switch( fit->compare_by )
                 {
                 case CompareBy::VALUE:
@@ -315,7 +315,7 @@ bool SystemicConstraint::Test( list< Value > values )
                 {
                     query = lconj.GetQuery(plan.agent);
                     plan.agent->RunDecidedQuery( *query, x );
-                    FOREACH( const SR::DecidedQuery::Link &link, *query->GetAllLinks() )
+                    FOREACH( const SR::LocatedLink &link, *query->GetAllLinks() )
                     x_to_add.push_back(x);
                 }
                 catch( ::Mismatch & )
