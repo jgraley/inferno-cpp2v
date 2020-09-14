@@ -88,7 +88,7 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     MakePatternPtr< Compound > s_comp, r_comp, sx_comp;  
     MakePatternPtr< Goto > then_goto, s_else_goto, r_goto, sx_goto;// TODO sx_goto could be any departure, like Return or Cease etc
     MakePatternPtr< Star<Declaration> > decls;
-    MakePatternPtr< Star<Statement> > pre, post, sx_post;
+    MakePatternPtr< Star<Statement> > pre, sx_pre, post, sx_post;
     MakePatternPtr< Multiplexor > mult;
     MakePatternPtr< Label > label;    
     MakePatternPtr< BuildLabelIdentifier > label_id("PROCEED");
@@ -102,7 +102,7 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     iif->else_body = MakePatternPtr<Nop>(); 
     s_comp->members = ( decls );    
     s_comp->statements = ( pre, iif, post );    
-    sx_comp->statements = ( pre, iif, sx_goto, sx_post );    
+    sx_comp->statements = ( sx_pre, iif, sx_goto, sx_post );    
 
     label->identifier = label_id;
     r_goto->destination = label_id;
@@ -146,7 +146,7 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
     MakePatternPtr< Expression > cond;      
     MakePatternPtr< Compound > s_comp, r_comp, sx_comp;  
     MakePatternPtr< Goto > r_goto;
-    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Declaration> > decls, sx_decls;
     MakePatternPtr< Star<Statement> > pre, post, sx_pre, sx_post;
     MakePatternPtr< Multiplexor > mult;
     MakePatternPtr< Label > label;    
@@ -159,7 +159,7 @@ AddGotoBeforeLabel::AddGotoBeforeLabel() // TODO really slow!!11
     s_comp->members = ( decls );    
     s_comp->statements = ( pre, label, post );    
     label->identifier = label_id;
-    sx_comp->members = ( decls );    
+    sx_comp->members = ( sx_decls );    
     sx_comp->statements = ( sx_pre, MakePatternPtr<Goto>(), label, sx_post );
 
     r_comp->members = ( decls );    

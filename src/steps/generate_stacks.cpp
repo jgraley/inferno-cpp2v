@@ -23,7 +23,7 @@ ExplicitiseReturn::ExplicitiseReturn()
     MakePatternPtr< Instance > fi;
     MakePatternPtr<Compound> s_comp, sx_comp, r_comp;        
     MakePatternPtr< Star<Statement> > pre, sx_pre;
-    MakePatternPtr< Star<Declaration> > decls;
+    MakePatternPtr< Star<Declaration> > decls, sx_decls;
     MakePatternPtr< Overlay<Compound> > over;
     MakePatternPtr<Return> sx_return, r_return;
     MakePatternPtr< MatchAny<Callable> > s_any;
@@ -43,7 +43,7 @@ ExplicitiseReturn::ExplicitiseReturn()
     over->through = s_all;
     s_all->patterns = (s_comp, s_not);
     s_not->pattern = sx_comp;
-    sx_comp->members = decls;
+    sx_comp->members = sx_decls;
     sx_comp->statements = (sx_pre, sx_return);
     
     over->overlay = r_comp;

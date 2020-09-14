@@ -301,12 +301,15 @@ void AndRuleEngine::Plan::CreateVariousThings( const set<Agent *> &normal_agents
     }
 }
 
-
+#include "tree/cpptree.hpp"
 void AndRuleEngine::CompareCoupling( Agent *agent,
                                      TreePtr<Node> x,
                                      const CouplingMap *keys )
 {
     ASSERT( keys->count(agent) > 0 );
+
+    // Enforce rule #149
+    ASSERT( !TreePtr<SubContainer>::DynamicCast( keys->at(agent) ) ); 
 
     // This function establishes the policy for couplings in one place.
     // Today, it's SimpleCompare. 
