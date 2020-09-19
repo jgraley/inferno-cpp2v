@@ -17,7 +17,7 @@ Agent *Agent::AsAgent( TreePtr<Node> node )
 
 
 AgentCommon::AgentCommon() :
-    engine(NULL)
+    master_scr_engine(NULL)
 {
 }
 
@@ -29,10 +29,10 @@ void AgentCommon::AgentConfigure( const SCREngine *e )
     // rule enforcement.
     // Why no coupling across sibling slaves? Would need an ordering for keying
     // but ordering not defined on sibling slaves.
-    ASSERT(!engine)("Detected repeat configuration of ")(*this)
-                   ("\nCould be result of coupling this node across sibling slaves - not allowed :(");
+    ASSERT(!master_scr_engine)("Detected repeat configuration of ")(*this)
+                              ("\nCould be result of coupling this node across sibling slaves - not allowed :(");
     ASSERT(e);
-    engine = e;
+    master_scr_engine = e;
     
     pattern_query = GetPatternQuery();
     num_decisions = pattern_query->GetDecisions().size();
@@ -52,7 +52,7 @@ shared_ptr<ContainerInterface> AgentCommon::GetVisibleChildren() const
     
 shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
 {
-    ASSERT( engine ); // check we have been configured
+    ASSERT( master_scr_engine ); // check we have been configured
     
     return make_shared<DecidedQuery>( pattern_query );
 }
@@ -108,7 +108,7 @@ TreePtr<Node> AgentCommon::BuildReplace()
 {
     INDENT(" ");
     ASSERT(this);
-    ASSERT(engine)("Agent ")(*this)(" at appears not to have been configured");
+    ASSERT(master_scr_engine)("Agent ")(*this)(" at appears not to have been configured");
     
     // See if the pattern node is coupled to anything. The keynode that was passed
     // in is just a suggestion and will be overriden if we are keyed.
@@ -135,12 +135,12 @@ TreePtr<Node> AgentCommon::DuplicateNode( TreePtr<Node> source,
     TreePtr<Node> dest = dynamic_pointer_cast<Node>( dup_dest );
     ASSERT(dest);
 
-    bool source_dirty = engine->GetOverallMaster()->dirty_grass.find( source ) != engine->GetOverallMaster()->dirty_grass.end();
+    bool source_dirty = master_scr_engine->GetOverallMaster()->dirty_grass.find( source ) != master_scr_engine->GetOverallMaster()->dirty_grass.end();
     if( force_dirty || // requested by caller
         source_dirty ) // source was dirty
     {
         //TRACE("dirtying ")(*dest)(" force=%d source=%d (")(*source)(")\n", force_dirty, source_dirty);        
-        engine->GetOverallMaster()->dirty_grass.insert( dest );
+        master_scr_engine->GetOverallMaster()->dirty_grass.insert( dest );
     }
     
     return dest;    

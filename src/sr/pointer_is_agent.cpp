@@ -39,7 +39,7 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 #else   
     // Do a walk over context (the whole x tree)
     bool found_one_already = false;
-	Walk e( engine->GetOverallMaster()->GetContext() ); 
+	Walk e( master_scr_engine->GetOverallMaster()->GetContext() ); 
 	for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
 	{
 		if( *wit == x ) // found ourself TODO use find()

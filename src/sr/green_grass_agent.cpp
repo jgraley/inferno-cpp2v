@@ -23,7 +23,7 @@ void GreenGrassAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     
     // Restrict so that everything in the input program under here must be "green grass"
     // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
-    if( engine->GetOverallMaster()->dirty_grass.find( x ) != engine->GetOverallMaster()->dirty_grass.end() )
+    if( master_scr_engine->GetOverallMaster()->dirty_grass.find( x ) != master_scr_engine->GetOverallMaster()->dirty_grass.end() )
     {
         TRACE(*x)(" is dirty grass so rejecting\n");
         throw Mismatch();            

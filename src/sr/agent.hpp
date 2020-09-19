@@ -36,7 +36,7 @@ public:
         return *this;
     }
 
-	virtual void AgentConfigure( const SCREngine *master_engine ) = 0;
+	virtual void AgentConfigure( const SCREngine *master_scr_engine ) = 0;
 
     /// List the Agents reached via links during search
     virtual shared_ptr<PatternQuery> GetPatternQuery() const = 0;
@@ -65,7 +65,7 @@ class AgentCommon : public Agent
 {
 public:
     AgentCommon();
-    virtual void AgentConfigure( const SCREngine *master_engine );
+    virtual void AgentConfigure( const SCREngine *master_scr_engine );
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
@@ -85,7 +85,7 @@ public:
 protected:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       TreePtr<Node> x ) const = 0;                                          
-    const SCREngine *engine;    
+    const SCREngine *master_scr_engine;    
 			
 private:    
     TreePtr<Node> coupling_key;    
@@ -100,7 +100,7 @@ public:
 	virtual bool IsSearch() const = 0;
 	virtual TreePtr<Node> GetSearchPattern() const = 0;
 	virtual TreePtr<Node> GetReplacePattern() const = 0;
-    virtual void AgentConfigure( const SCREngine *master_engine, SCREngine *my_engine ) = 0;
+    virtual void AgentConfigure( const SCREngine *master_scr_engine, SCREngine *my_engine ) = 0;
     virtual void SetMasterCouplingKeys( const CouplingMap &keys ) = 0;
 };
 
