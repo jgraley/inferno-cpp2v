@@ -7,7 +7,7 @@
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 #include "common/mismatch.hpp"
-#include "agent.hpp"
+#include "agents/agent.hpp"
 #include "and_rule_engine.hpp"
 #include <set>
 

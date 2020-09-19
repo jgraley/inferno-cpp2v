@@ -1,5 +1,5 @@
 #include "link.hpp"
-#include "agent.hpp"
+#include "agents/agent.hpp"
 
 using namespace SR;
 

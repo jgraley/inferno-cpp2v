@@ -1,11 +1,11 @@
 #ifndef MATCH_ALL_AGENT_HPP
 #define MATCH_ALL_AGENT_HPP
 
-#include "search_replace.hpp"
+#include "../search_replace.hpp"
 #include "helpers/transformation.hpp"
 #include "overlay_agent.hpp"
 #include "slave_agent.hpp"
-#include "boolean_evaluator.hpp"
+#include "../boolean_evaluator.hpp"
 
 namespace SR
 {

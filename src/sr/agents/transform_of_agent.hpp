@@ -1,7 +1,7 @@
 #ifndef TRANSFORM_OF_AGENT_HPP
 #define TRANSFORM_OF_AGENT_HPP
 
-#include "search_replace.hpp"
+#include "../search_replace.hpp"
 #include "helpers/transformation.hpp"
 #include "agent.hpp"
 #include "overlay_agent.hpp"

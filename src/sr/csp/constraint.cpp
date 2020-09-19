@@ -1,6 +1,6 @@
 #include "constraint.hpp"
 #include "query.hpp"
-#include "agent.hpp"
+#include "agents/agent.hpp"
 
 using namespace CSP;
 

@@ -1,7 +1,7 @@
 #include "search_container_agent.hpp"
 #include "helpers/simple_compare.hpp"
-#include "search_replace.hpp" 
-#include "conjecture.hpp" 
+#include "../search_replace.hpp" 
+#include "../conjecture.hpp" 
 
 using namespace SR;
 

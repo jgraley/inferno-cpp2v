@@ -1,5 +1,5 @@
 #include "pointer_is_agent.hpp"
-#include "search_replace.hpp"
+#include "../search_replace.hpp"
 #include "agent.hpp"
 
 using namespace SR;

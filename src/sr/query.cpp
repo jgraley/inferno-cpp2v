@@ -2,7 +2,7 @@
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
 #include "helpers/simple_compare.hpp"
-#include "agent.hpp"
+#include "agents/agent.hpp"
 #include <inttypes.h>
 
 using namespace SR;

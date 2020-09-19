@@ -7,8 +7,8 @@
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 #include "common/mismatch.hpp"
-#include "agent.hpp"
-#include "placeholder_agent.hpp"
+#include "agents/agent.hpp"
+#include "agents/placeholder_agent.hpp"
 #include <set>
 
 namespace CSP

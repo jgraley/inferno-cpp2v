@@ -2,7 +2,7 @@
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
 #include "helpers/simple_compare.hpp"
-#include "slave_agent.hpp"
+#include "agents/slave_agent.hpp"
 #include <list>
 
 using namespace SR;

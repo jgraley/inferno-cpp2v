@@ -3,9 +3,9 @@
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
 #include "helpers/simple_compare.hpp"
-#include "standard_agent.hpp"
-#include "overlay_agent.hpp"
-#include "search_container_agent.hpp"
+#include "agents/standard_agent.hpp"
+#include "agents/overlay_agent.hpp"
+#include "agents/search_container_agent.hpp"
 #include "common/common.hpp"
 #include <list>
 

@@ -5,9 +5,9 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
-#include "conjecture.hpp"
-#include "boolean_evaluator.hpp"
-#include "query.hpp"
+#include "../conjecture.hpp"
+#include "../boolean_evaluator.hpp"
+#include "../query.hpp"
 #include <vector>
 #include <boost/type_traits.hpp>
 #include "common/mismatch.hpp"

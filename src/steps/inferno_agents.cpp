@@ -1,6 +1,10 @@
 #include "inferno_agents.hpp"
 #include "tree/cpptree.hpp"
 #include "tree/sctree.hpp"
+#include "sr/agents/agent.hpp"
+#include "sr/agents/standard_agent.hpp"
+#include "sr/scr_engine.hpp"
+#include "sr/search_replace.hpp"
 
 using namespace CPPTree;
 

@@ -1,7 +1,7 @@
 #include "solver_holder.hpp"
 #include "solver.hpp"
 #include "query.hpp"
-#include "agent.hpp"
+#include "agents/agent.hpp"
 
 #include <algorithm>
 
