@@ -12,6 +12,7 @@
 #include "agents/search_container_agent.hpp"
 #include "common/common.hpp"
 #include "agents/match_any_agent.hpp"
+#include "and_rule_engine.hpp"
 #include <list>
 
 //#define TEST_PATTERN_QUERY
@@ -24,7 +25,7 @@ AndRuleEngine::AndRuleEngine( Agent *root_agent_, const set<Agent *> &master_age
     plan( this, root_agent_, master_agents_ )
 {
 }    
-
+ 
 AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<Agent *> &master_agents_) :
     algo( algo_ )
 {

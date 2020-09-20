@@ -5,8 +5,6 @@
 #include "common/read_args.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
-#include "agents/agent.hpp"
-#include "scr_engine.hpp"
 #include <set>
 
 /// SR namespace contains the search and replace implementation
@@ -15,6 +13,7 @@ namespace SR
 class Agent;
 class Conjecture;
 class SpecialBase;
+class SCREngine;
 
 /// Main implementation of a compare and replace function, that matches at the root of the program tree
 class CompareReplace : public virtual Traceable,
@@ -30,7 +29,7 @@ public:
                     
     virtual void Configure( TreePtr<Node> cp,
                             TreePtr<Node> rp = TreePtr<Node>() );
-    static void SetMaxReps( int n, bool e ) { SCREngine::SetMaxReps(n, e); }
+    static void SetMaxReps( int n, bool e );
                             
     using Transformation::operator();
     
@@ -48,11 +47,8 @@ public:
     friend class Conjecture;
     virtual bool IsMatch( TreePtr<Node> context,       
                           TreePtr<Node> root );
-    virtual void SetStopAfter( vector<int> ssa, int d=0 )
-    {
-        scr_engine->SetStopAfter( ssa, d );
-    }
-    SCREngine *GetRootEngine() { return scr_engine.get(); }
+    virtual void SetStopAfter( vector<int> ssa, int d=0 );
+    SCREngine *GetRootEngine();
 private:
     TreePtr<Node> *pcontext;
     const bool is_search;

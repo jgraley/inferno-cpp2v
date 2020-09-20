@@ -3,6 +3,8 @@
 #include "common/hit_count.hpp"
 #include "helpers/simple_compare.hpp"
 #include "agent.hpp"
+#include "scr_engine.hpp"
+
 #include <stdexcept>
 
 using namespace SR;

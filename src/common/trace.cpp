@@ -2,8 +2,6 @@
 #include <boost/assert.hpp>
 #include <stdarg.h>
 #include <string.h>
-#include <malloc.h>
-#include <unistd.h>
 
 bool Tracer::continuation = false;
 bool Tracer::enable = false; ///< call Tracer::Enable(true) to begin tracing

@@ -1,23 +1,20 @@
 #ifndef STANDARD_HPP
 #define STANDARD_HPP
 
-#include <assert.h>
-#include <stdio.h>
 #include <vector>
 #include <stack>
 #include <map>
 #include <set>
-using namespace std;
-#include <stdarg.h> 
-#include <stdint.h>
-
+#include <bits/stdint-uintn.h>
 #include <memory>
 #include <algorithm>
-using namespace std; // This is done twice, in order to make certain it "takes"
 
 // JSG we now use boost's FOREACH which means we depend on Boost 1.34 (I think)
 #include <boost/foreach.hpp>
 #define FOREACH BOOST_FOREACH
+
+using namespace std;
+
 
 // How many members in an array
 #define COUNTOF( array ) ( sizeof( array )/sizeof( array[0] ) )

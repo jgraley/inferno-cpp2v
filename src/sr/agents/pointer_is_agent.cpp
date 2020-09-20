@@ -1,6 +1,7 @@
 #include "pointer_is_agent.hpp"
 #include "../search_replace.hpp"
 #include "agent.hpp"
+#include "../scr_engine.hpp"
 
 using namespace SR;
 //#define SPIKE

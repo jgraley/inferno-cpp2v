@@ -2,7 +2,7 @@
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
 #include "helpers/simple_compare.hpp"
-#include "agents/slave_agent.hpp"
+#include "scr_engine.hpp"
 #include <list>
 
 using namespace SR;
@@ -30,6 +30,12 @@ void CompareReplace::Configure( TreePtr<Node> cp,
 }
 
 
+void CompareReplace::SetMaxReps( int n, bool e ) 
+{ 
+    SCREngine::SetMaxReps(n, e); 
+}
+
+
 void CompareReplace::GetGraphInfo( vector<string> *labels, 
                                    vector< TreePtr<Node> > *blocks ) const
 {
@@ -53,6 +59,18 @@ bool CompareReplace::IsMatch( TreePtr<Node> context,
         pcontext = NULL;
         return false;
     }
+}
+
+
+void CompareReplace::SetStopAfter( vector<int> ssa, int d )
+{
+    scr_engine->SetStopAfter( ssa, d );
+}
+
+
+SCREngine *CompareReplace::GetRootEngine() 
+{ 
+    return scr_engine.get(); 
 }
 
 

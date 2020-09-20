@@ -2,6 +2,7 @@
 #include "trace.hpp"
 #include <stdarg.h>
 #include <cxxabi.h>
+#include <stdio.h>
 
 string SSPrintf(const char *fmt, ...)
 {

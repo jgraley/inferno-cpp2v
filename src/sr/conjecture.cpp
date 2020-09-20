@@ -1,6 +1,7 @@
 
 #include "search_replace.hpp"
 #include "conjecture.hpp"
+#include "agents/agent.hpp"
 
 namespace SR 
 {

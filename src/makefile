@@ -30,51 +30,55 @@ MAIN_MODULES = $(MAIN)/inferno
 
 ALL_MODULES = $(COMMON_MODULES) $(NODE_MODULES) $(HELPERS_MODULES) $(TREE_MODULES) $(SR_MODULES) $(SR_CSP_MODULES) $(SR_AGENTS_MODULES) $(PARSE_MODULES) $(RENDER_MODULES) $(STEPS_MODULES) $(MAIN_MODULES) 
 
+# Include the auto-generated .d files which contain rules for the
+# include dependencies.
+-include $(ALL_MODULES:%=build/%.d)
+
 build/inferno.a : $(ALL_MODULES:%=build/%.o)
 	mkdir -p build$(NODE)/type_db 
 	$(AR) -r build/inferno.a $(ALL_MODULES:%=build/%.o)
 
-$(COMMON_MODULES:%=build/%.o) : build/%.o : %.cpp $(COMMON)/*.hpp $(DEPS)
+$(COMMON_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_OPTIONS) $< -o $@ 
 
-$(NODE_MODULES:%=build/%.o) : build/%.o : %.cpp $(COMMON)/*.hpp $(NODE)/*.hpp $(DEPS)
+$(NODE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_OPTIONS) $< -o $@ 
 
-$(HELPERS_MODULES:%=build/%.o) : build/%.o : %.cpp $(COMMON)/*.hpp $(NODE)/*.hpp $(HELPERS)/*.hpp $(DEPS)
+$(HELPERS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_OPTIONS) $< -o $@ 
 
-$(TREE_MODULES:%=build/%.o) : build/%.o : %.cpp $(COMMON)/*.hpp $(NODE)/*.hpp $(HELPERS)/*.hpp $(TREE)/*.hpp $(TREE)/*.inc $(DEPS)
+$(TREE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_OPTIONS) $< -o $@
 
-$(SR_MODULES:%=build/%.o) : build/%.o : %.cpp $(COMMON)/*.hpp $(NODE)/*.hpp $(HELPERS)/*.hpp $(SR)/*.hpp $(DEPS)
+$(SR_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_SR_OPTIONS) $< -o $@
 
-$(SR_CSP_MODULES:%=build/%.o) : build/%.o : %.cpp $(COMMON)/*.hpp $(NODE)/*.hpp $(HELPERS)/*.hpp $(SR)/*.hpp $(SR_CSP)/*.hpp $(DEPS)
+$(SR_CSP_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_SR_OPTIONS) $< -o $@
 
-$(SR_AGENTS_MODULES:%=build/%.o) : build/%.o : %.cpp $(COMMON)/*.hpp $(NODE)/*.hpp $(HELPERS)/*.hpp $(SR)/*.hpp $(SR_AGENTS)/*.hpp $(DEPS)
+$(SR_AGENTS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_SR_OPTIONS) $< -o $@
 
-$(PARSE_MODULES:%=build/%.o) : build/%.o : %.cpp $(COMMON)/*.hpp $(NODE)/*.hpp $(HELPERS)/*.hpp $(TREE)/*.hpp $(TREE)/*.inc $(SR)/*.hpp $(PARSE)/*.hpp $(DEPS)
+$(PARSE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_OPTIONS) $< -o $@
 
-$(RENDER_MODULES:%=build/%.o) : build/%.o : %.cpp $(COMMON)/*.hpp $(NODE)/*.hpp $(HELPERS)/*.hpp $(TREE)/*.hpp $(TREE)/*.inc $(SR)/*.hpp $(RENDER)/*.hpp $(DEPS)
+$(RENDER_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_OPTIONS) $< -o $@ 
 
-$(STEPS_MODULES:%=build/%.o) : build/%.o : %.cpp $(COMMON)/*.hpp $(NODE)/*.hpp $(HELPERS)/*.hpp $(TREE)/*.hpp $(TREE)/*.inc $(SR)/*.hpp $(STEPS)/*.hpp $(DEPS)
+$(STEPS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_OPTIONS) $< -o $@ 
 
-$(MAIN_MODULES:%=build/%.o) : build/%.o : %.cpp $(COMMON)/*.hpp $(NODE)/*.hpp $(HELPERS)/*.hpp $(TREE)/*.hpp $(TREE)/*.inc $(SR)/*.hpp $(PARSE)/*.hpp $(RENDER)/*.hpp $(STEPS)/*.hpp $(DEPS)
+$(MAIN_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_OPTIONS) $< -o $@
 

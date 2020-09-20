@@ -7,8 +7,6 @@
 #include "helpers/walk.hpp"
 #include "helpers/transformation.hpp"
 #include "common/mismatch.hpp"
-#include "agents/agent.hpp"
-#include "and_rule_engine.hpp"
 #include <set>
 
 
@@ -16,9 +14,11 @@
 namespace SR 
 {
 class Agent;
+class AgentCommonNeedSCREngine;
 class Conjecture;
 class SpecialBase;
 class CompareReplace;
+class AndRuleEngine;
 
 /// Common implementation for search+replace, compare+replace and slaves
 class SCREngine : public virtual Traceable
@@ -32,6 +32,7 @@ public:
                const SCREngine *master = NULL); /* if null, you are overall master */ 
                     
 private:
+    typedef map< Agent *, TreePtr<Node> > CouplingMap;
     const struct Plan : public virtual Traceable
     {            
         Plan( SCREngine *algo,
@@ -82,11 +83,7 @@ public:
     //friend class StandardAgent;
     friend class Conjecture;
 
-    virtual void SetStopAfter( vector<int> ssa, int d=0 )
-    {
-        stop_after = ssa;
-        depth = d;
-    }
+    virtual void SetStopAfter( vector<int> ssa, int d=0 );
         
 private:    
     static int repetitions;

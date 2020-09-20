@@ -68,7 +68,7 @@ clean_libclang%.a :
 #
 STANDARD_LIBS += -lstdc++
 inferno.exe : makefile makefile.common build/inferno.a $(LLVM_CLANG_LIB_PATHS)
-	$(ICC) build/inferno.a $(LLVM_CLANG_LIB_PATHS) $(STANDARD_LIBS) -ggdb -pg -no-pie -o inferno.exe
+	$(ICC) build/inferno.a $(LLVM_CLANG_LIB_PATHS) $(STANDARD_LIBS) -fuse-ld=gold -ggdb -pg -no-pie -o inferno.exe
 
 #
 # Build the doxygen docs
@@ -122,7 +122,7 @@ reptest : test/results/rep.pass
 clean : makefile $(LLVM_CLANG_LIBS:%=clean_%) iclean
 
 iclean : makefile 
-	-rm -rf src/build/
+	-rm -rf build/*
 	-rm -f inferno.exe
 	-rm -f resource/script/* resource/lib/*
 

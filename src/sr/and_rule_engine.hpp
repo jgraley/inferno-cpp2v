@@ -68,7 +68,7 @@ public:
                                    Agent *agent );
         void CreateVariousThings( const set<Agent *> &normal_agents, 
                                   const set<Agent *> &surrounding_agents );
-
+ 
         AndRuleEngine * const algo;
         Agent *root_agent;
         set<Agent *> master_agents;

@@ -7,6 +7,8 @@
 #include "agents/overlay_agent.hpp"
 #include "agents/search_container_agent.hpp"
 #include "common/common.hpp"
+#include "agents/agent.hpp"
+#include "and_rule_engine.hpp"
 #include <list>
 
 using namespace SR;
@@ -160,6 +162,13 @@ void SCREngine::Plan::ConfigureAgents()
 const CompareReplace * SCREngine::GetOverallMaster() const
 {
     return plan.overall_master_ptr;
+}
+
+
+void SCREngine::SetStopAfter( vector<int> ssa, int d )
+{
+    stop_after = ssa;
+    depth = d;
 }
 
 

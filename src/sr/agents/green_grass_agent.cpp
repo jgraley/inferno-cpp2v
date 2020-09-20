@@ -1,6 +1,7 @@
 #include "green_grass_agent.hpp"
 #include "helpers/simple_compare.hpp"
 #include "../search_replace.hpp" 
+#include "../scr_engine.hpp"
 
 using namespace SR;
 

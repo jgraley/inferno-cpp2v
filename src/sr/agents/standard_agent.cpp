@@ -5,6 +5,7 @@
 #include "overlay_agent.hpp"
 #include "standard_agent.hpp"
 #include "star_agent.hpp"
+#include "scr_engine.hpp"
 
 using namespace SR;
 
