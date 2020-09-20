@@ -12,7 +12,10 @@
 #include "agents/search_container_agent.hpp"
 #include "common/common.hpp"
 #include "agents/match_any_agent.hpp"
+#include "link.hpp"
+
 #include "and_rule_engine.hpp"
+
 #include <list>
 
 //#define TEST_PATTERN_QUERY

@@ -2,6 +2,7 @@
 #include "../search_replace.hpp"
 #include "agent.hpp"
 #include "../scr_engine.hpp"
+#include "link.hpp"
 
 using namespace SR;
 //#define SPIKE

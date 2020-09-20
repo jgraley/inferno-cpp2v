@@ -36,15 +36,9 @@ struct BuildIdentifierAgent : public virtual InfernoAgent
 {
 	// TODO do this via a transformation as with TransformOf/TransformOf
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const
-    { 
-        return make_shared<PatternQuery>();
-    }
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const             
-    { 
-        query.Reset();
-    }   
+                                      TreePtr<Node> x ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     Sequence<CPPTree::Identifier> sources;
     string GetNewName();
@@ -61,20 +55,7 @@ struct BuildInstanceIdentifier : Special<CPPTree::InstanceIdentifier>,
     BuildInstanceIdentifier() : BuildIdentifierAgent("unnamed") {}
 private:
     
-	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode ) 
-	{
-		INDENT("%");
-		if( !GetKey() )
-		{
-			// Call the soft pattern impl 
-			string newname = GetNewName();
-			keynode = TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
-			SetKey( keynode );
-		}
-		// Note that the keynode could have been set via coupling - but still not
-		// likely to do anything sensible, so explicitly check
-		return DuplicateSubtree(keynode);   
-    }                                                   
+	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
 };
 
 
@@ -84,20 +65,7 @@ struct BuildTypeIdentifier : Special<CPPTree::TypeIdentifier>,
     SPECIAL_NODE_FUNCTIONS
     BuildTypeIdentifier( string s="Unnamed", int f=0 ) : BuildIdentifierAgent(s,f) {}
 private:
-	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode ) 
-	{
-		INDENT("%");
-		if( !GetKey() )
-		{
-			// Call the soft pattern impl 
-			string newname = GetNewName();
-			keynode = TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) );
-			SetKey( keynode );
-		}
-		// Note that the keynode could have been set via coupling - but still not
-		// likely to do anything sensible, so explicitly check
-		return DuplicateSubtree(keynode);   
-    }                                                   
+	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );       
 };
 
 
@@ -108,20 +76,7 @@ struct BuildLabelIdentifier : Special<CPPTree::LabelIdentifier>,
     BuildLabelIdentifier() : BuildIdentifierAgent("UNNAMED") {}
     BuildLabelIdentifier( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
 private:
-	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode ) 
-	{
-		INDENT("%");
-		if( !GetKey() )
-		{
-			// Call the soft pattern impl 
-			string newname = GetNewName();
-			keynode = TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) );
-			SetKey( keynode );
-		}
-		// Note that the keynode could have been set via coupling - but still not
-		// likely to do anything sensible, so explicitly check
-		return DuplicateSubtree(keynode);   
-    }                                                   
+	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );   
 };
 
 //---------------------------------- IdentifierByName ------------------------------------    
@@ -138,10 +93,7 @@ struct IdentifierByNameAgent : public virtual InfernoAgent
 {
     IdentifierByNameAgent( string n ) : name(n) {}
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const
-    { 
-        return make_shared<PatternQuery>();
-    }
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     bool IsMatch( const TreePtrInterface &x ) const;
     string name;
 };
@@ -156,12 +108,7 @@ struct InstanceIdentifierByName : Special<CPPTree::InstanceIdentifier>,
     InstanceIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const                
-    {
-        query.Reset();
-        if( !IsMatch( x ) )
-            throw Mismatch();  
-    }                                
+                                      TreePtr<Node> x ) const;
 };
 
 
@@ -174,12 +121,7 @@ struct TypeIdentifierByName : Special<CPPTree::TypeIdentifier>,
     TypeIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const
-    {
-        query.Reset();
-        if( !IsMatch( x ) )
-            throw Mismatch();  
-    }                                
+                                      TreePtr<Node> x ) const;                          
 };
 
 
@@ -192,12 +134,7 @@ struct LabelIdentifierByName : Special<CPPTree::LabelIdentifier>,
     LabelIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
 private:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const                 
-    {
-        query.Reset();
-        if( !IsMatch( x ) )
-            throw Mismatch();  
-    }                                
+                                      TreePtr<Node> x ) const;                      
 };
 
 //---------------------------------- Nested ------------------------------------    
@@ -256,15 +193,9 @@ struct BuildContainerSize : public virtual InfernoAgent,
     SPECIAL_NODE_FUNCTIONS
     shared_ptr< StarAgent > container;
 private:
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const
-    { 
-        return make_shared<PatternQuery>();
-    }
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const
-    { 
-        query.Reset(); 
-    }   
+                                      TreePtr<Node> x ) const;
 	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
 }; 
@@ -278,15 +209,8 @@ struct IsLabelReached : public virtual InfernoAgent,
                         Special<CPPTree::LabelIdentifier>
 {
 	SPECIAL_NODE_FUNCTIONS	
-	virtual void FlushCache() const 
-	{
-        ASSERT(0);
-	    cache.clear();
-	}
-    virtual shared_ptr<PatternQuery> GetPatternQuery() const
-    { 
-        return make_shared<PatternQuery>();
-    }
+	virtual void FlushCache() const;
+    virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       TreePtr<Node> x ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance

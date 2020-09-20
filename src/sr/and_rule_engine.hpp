@@ -4,8 +4,6 @@
 #include "query.hpp"
 #include "common/common.hpp"
 #include "common/read_args.hpp"
-#include "helpers/walk.hpp"
-#include "helpers/transformation.hpp"
 #include "common/mismatch.hpp"
 #include "agents/agent.hpp"
 #include "agents/placeholder_agent.hpp"

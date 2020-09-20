@@ -5,10 +5,24 @@
 #include "sr/agents/standard_agent.hpp"
 #include "sr/scr_engine.hpp"
 #include "sr/search_replace.hpp"
+#include "sr/link.hpp"
 
 using namespace CPPTree;
 
 //---------------------------------- BuildIdentifier ------------------------------------    
+
+shared_ptr<PatternQuery> BuildIdentifierAgent::GetPatternQuery() const
+{ 
+    return make_shared<PatternQuery>();
+}
+
+
+void BuildIdentifierAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                                TreePtr<Node> x ) const             
+{ 
+    query.Reset();
+}   
+
 
 void BuildIdentifierAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
 {
@@ -63,6 +77,57 @@ string BuildIdentifierAgent::GetNewName()
     }
 }
 
+//---------------------------------- BuildInstanceIdentifier ------------------------------------    
+
+TreePtr<Node> BuildInstanceIdentifier::BuildReplaceImpl( TreePtr<Node> keynode ) 
+{
+    INDENT("%");
+    if( !GetKey() )
+    {
+        // Call the soft pattern impl 
+        string newname = GetNewName();
+        keynode = TreePtr<CPPTree::SpecificInstanceIdentifier>( new CPPTree::SpecificInstanceIdentifier( newname ) );
+        SetKey( keynode );
+    }
+    // Note that the keynode could have been set via coupling - but still not
+    // likely to do anything sensible, so explicitly check
+    return DuplicateSubtree(keynode);   
+}                                                   
+
+//---------------------------------- BuildTypeIdentifier ------------------------------------    
+
+TreePtr<Node> BuildTypeIdentifier::BuildReplaceImpl( TreePtr<Node> keynode ) 
+{
+    INDENT("%");
+    if( !GetKey() )
+    {
+        // Call the soft pattern impl 
+        string newname = GetNewName();
+        keynode = TreePtr<CPPTree::SpecificTypeIdentifier>( new CPPTree::SpecificTypeIdentifier( newname ) );
+        SetKey( keynode );
+    }
+    // Note that the keynode could have been set via coupling - but still not
+    // likely to do anything sensible, so explicitly check
+    return DuplicateSubtree(keynode);   
+}                                                   
+
+//---------------------------------- BuildLabelIdentifier ------------------------------------    
+
+TreePtr<Node> BuildLabelIdentifier::BuildReplaceImpl( TreePtr<Node> keynode ) 
+{
+    INDENT("%");
+    if( !GetKey() )
+    {
+        // Call the soft pattern impl 
+        string newname = GetNewName();
+        keynode = TreePtr<CPPTree::SpecificLabelIdentifier>( new CPPTree::SpecificLabelIdentifier( newname ) );
+        SetKey( keynode );
+    }
+    // Note that the keynode could have been set via coupling - but still not
+    // likely to do anything sensible, so explicitly check
+    return DuplicateSubtree(keynode);   
+}                                                   
+
 //---------------------------------- IdentifierByName ------------------------------------    
 
 void IdentifierByNameAgent::GetGraphAppearance( bool *bold, string *text, string *shape ) const
@@ -73,6 +138,11 @@ void IdentifierByNameAgent::GetGraphAppearance( bool *bold, string *text, string
 	*bold = true;
 	*shape = "trapezium";
 	*text = name;
+}
+
+shared_ptr<PatternQuery> IdentifierByNameAgent::GetPatternQuery() const
+{ 
+    return make_shared<PatternQuery>();
 }
 
 
@@ -92,6 +162,36 @@ bool IdentifierByNameAgent::IsMatch( const TreePtrInterface &x ) const
     }
     return false;
 }
+
+//---------------------------------- InstanceIdentifierByName ------------------------------------    
+
+void InstanceIdentifierByName::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                                    TreePtr<Node> x ) const                
+{
+    query.Reset();
+    if( !IsMatch( x ) )
+        throw Mismatch();  
+}                                
+
+//---------------------------------- TypeIdentifierByName ------------------------------------    
+
+void TypeIdentifierByName::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                                TreePtr<Node> x ) const
+{
+    query.Reset();
+    if( !IsMatch( x ) )
+        throw Mismatch();  
+}                                
+
+//---------------------------------- LabelIdentifierByName ------------------------------------    
+
+void LabelIdentifierByName::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                                 TreePtr<Node> x ) const                 
+{
+    query.Reset();
+    if( !IsMatch( x ) )
+        throw Mismatch();  
+}                                
 
 //---------------------------------- Nested ------------------------------------    
 
@@ -163,6 +263,19 @@ TreePtr<Node> NestedSubscriptLookup::Advance( TreePtr<Node> x,
 
 //---------------------------------- BuildContainerSize ------------------------------------    
 
+shared_ptr<PatternQuery> BuildContainerSize::GetPatternQuery() const
+{ 
+    return make_shared<PatternQuery>();
+}
+
+
+void BuildContainerSize::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                                      TreePtr<Node> x ) const
+{ 
+    query.Reset(); 
+}   
+
+
 TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
 	INDENT("%");
@@ -184,6 +297,19 @@ TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode )
 
 //---------------------------------- IsLabelReached ------------------------------------    
 
+void IsLabelReached::FlushCache() const 
+{
+    ASSERT(0);
+    cache.clear();
+}
+
+
+shared_ptr<PatternQuery> IsLabelReached::GetPatternQuery() const
+{ 
+    return make_shared<PatternQuery>();
+}
+    
+    
 void IsLabelReached::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                           TreePtr<Node> xx ) const
 {

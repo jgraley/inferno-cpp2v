@@ -9,6 +9,8 @@
 #include "common/common.hpp"
 #include "agents/agent.hpp"
 #include "and_rule_engine.hpp"
+#include "link.hpp"
+
 #include <list>
 
 using namespace SR;

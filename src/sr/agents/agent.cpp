@@ -4,6 +4,7 @@
 #include "helpers/simple_compare.hpp"
 #include "agent.hpp"
 #include "scr_engine.hpp"
+#include "link.hpp"
 
 #include <stdexcept>
 

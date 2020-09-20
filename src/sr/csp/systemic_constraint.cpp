@@ -1,7 +1,9 @@
 #include "systemic_constraint.hpp"
+
 #include "query.hpp"
 #include "agents/agent.hpp"
 #include "helpers/simple_compare.hpp"
+#include "link.hpp"
 
 using namespace CSP;
 

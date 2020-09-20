@@ -1,5 +1,6 @@
 #include "not_match_agent.hpp"
 #include "conjecture.hpp"
+#include "link.hpp"
 
 using namespace SR;
 

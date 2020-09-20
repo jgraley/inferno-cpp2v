@@ -8,16 +8,15 @@
 
 #include "boolean_evaluator.hpp"
 #include "subcontainers.hpp" 
-#include "link.hpp"
 
 #include <vector>
 #include <boost/type_traits.hpp>
 
-
-
 namespace SR
 { 
 class Agent;
+class PatternLink;
+class LocatedLink;
 
 class PatternQuery 
 {
@@ -30,13 +29,7 @@ public:
     typedef list<PatternLink> Links;       
     typedef vector<Decision> Decisions;
 
-    void clear()
-    {
-		normal_links.clear();
-		abnormal_links.clear();
-        multiplicity_links.clear();
-        evaluator = shared_ptr<BooleanEvaluator>();
-    }
+    void clear();
     
     void RegisterDecision( bool inclusive ); 
     

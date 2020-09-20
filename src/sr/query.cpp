@@ -3,6 +3,8 @@
 #include "common/hit_count.hpp"
 #include "helpers/simple_compare.hpp"
 #include "agents/agent.hpp"
+#include "link.hpp"
+
 #include <inttypes.h>
 
 using namespace SR;
@@ -15,6 +17,14 @@ using namespace SR;
 #define WHODAT() nullptr
 #endif
  
+void PatternQuery::clear()
+{
+    normal_links.clear();
+    abnormal_links.clear();
+    multiplicity_links.clear();
+    evaluator = shared_ptr<BooleanEvaluator>();
+}
+
 
 void PatternQuery::RegisterDecision( bool inclusive )
 {

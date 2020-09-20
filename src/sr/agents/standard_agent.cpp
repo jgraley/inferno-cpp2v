@@ -6,6 +6,7 @@
 #include "standard_agent.hpp"
 #include "star_agent.hpp"
 #include "scr_engine.hpp"
+#include "link.hpp"
 
 using namespace SR;
 

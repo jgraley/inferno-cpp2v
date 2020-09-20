@@ -2,6 +2,7 @@
 #include "helpers/simple_compare.hpp"
 #include "../subcontainers.hpp" 
 #include "../search_replace.hpp" 
+#include "link.hpp"
 
 using namespace SR;
 

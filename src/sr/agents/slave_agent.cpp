@@ -2,6 +2,7 @@
 #include "helpers/simple_compare.hpp"
 #include "../search_replace.hpp" 
 #include "../scr_engine.hpp"
+#include "link.hpp"
 
 using namespace SR;
 
