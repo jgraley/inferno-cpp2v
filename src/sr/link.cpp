@@ -50,6 +50,7 @@ bool PatternLink::operator==(const PatternLink &other) const
     return ppattern == other.ppattern;
 }
 
+
 PatternLink::operator bool() const
 {
     return ppattern != nullptr;
@@ -96,6 +97,18 @@ bool LocatedLink::operator<(const LocatedLink &other) const
         return ppattern < other.ppattern;
         
     return x < other.x;    
+}
+
+
+bool LocatedLink::operator!=(const LocatedLink &other) const
+{
+    return ppattern != other.ppattern || x != other.x;
+}
+
+
+bool LocatedLink::operator==(const LocatedLink &other) const
+{
+    return ppattern == other.ppattern && x == other.x;
 }
 
 

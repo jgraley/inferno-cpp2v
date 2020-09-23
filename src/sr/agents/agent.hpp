@@ -29,13 +29,11 @@ public:
     {
     };
     
-    // C++11 fix
-    Agent& operator=(Agent& other)
+    class NormalLinksMismatch : public Mismatch
     {
-        (void)Node::operator=(other);
-        return *this;
-    }
-
+    };
+    
+    Agent& operator=(Agent& other);
 	virtual void AgentConfigure( const SCREngine *master_scr_engine ) = 0;
 
     /// List the Agents reached via links during search
@@ -44,6 +42,9 @@ public:
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   TreePtr<Node> x ) const = 0;                                                
+    virtual void RunNormalLinkedQuery( DecidedQuery &query,
+                                       TreePtr<Node> x,
+                                       const list<LocatedLink> &required_links ) const = 0;                                                
     virtual TreePtr<Node> GetKey() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const CouplingMap *coupling_keys ) = 0;
@@ -70,6 +71,9 @@ public:
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   TreePtr<Node> x ) const;                                                
+    virtual void RunNormalLinkedQuery( DecidedQuery &query,
+                                       TreePtr<Node> x,
+                                       const list<LocatedLink> &required_links ) const;                                                
     void SetKey( TreePtr<Node> x );
     TreePtr<Node> GetKey();                                  
     void ResetKey();    

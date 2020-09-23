@@ -36,6 +36,8 @@ public:
                  const TreePtr<Node> &x_,
                  void *whodat=nullptr );
     bool operator<(const LocatedLink &other) const;
+    bool operator!=(const LocatedLink &other) const;
+    bool operator==(const LocatedLink &other) const;
     explicit operator bool() const;
     Agent *GetChildAgent() const;
     const TreePtr<Node> &GetChildX() const;

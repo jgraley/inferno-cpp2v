@@ -7,18 +7,19 @@
 
 namespace SR 
 {
-Conjecture::Plan::Plan( set<Agent *> my_agents, Agent *root_agent )
+Conjecture::Plan::Plan( set<Agent *> my_agents, const Agent *root_agent )
 {
     last_agent = agent_records.end();
 
     if( my_agents.empty() )
         return; // no decisions at all this time!
 
-    FOREACH( Agent *agent, my_agents )
+    FOREACH( const Agent *agent, my_agents )
     {
 		AgentRecord record;
         record.pq = agent->GetPatternQuery();
-        record.query = agent->CreateDecidedQuery();
+        record.query_owning = agent->CreateDecidedQuery();
+        record.query = record.query_owning.get();
 		agent_records[agent] = record;
 	}        
     AgentRecords::iterator root_rit = agent_records.find(root_agent);
@@ -27,9 +28,23 @@ Conjecture::Plan::Plan( set<Agent *> my_agents, Agent *root_agent )
 }
 
 
+Conjecture::Plan::Plan( const Agent *agent, DecidedQuery *query )
+{
+    last_agent = agent_records.end();
+
+    AgentRecord record;
+    record.pq = agent->GetPatternQuery();
+    record.query = query;
+    agent_records[agent] = record;
+
+    AgentRecords::iterator root_rit = agent_records.find(agent);
+    ASSERT( root_rit != agent_records.end() );
+    RecordWalk( root_rit );
+}
+
+
 void Conjecture::Plan::RecordWalk( AgentRecords::iterator rit )
 {
-    Agent *agent = rit->first;
     AgentRecord &record = rit->second;
 
     if( reached.count(&record) > 0 ) // TODO put the rits in there?
@@ -57,8 +72,14 @@ void Conjecture::Plan::RecordWalk( AgentRecords::iterator rit )
 }
 
 
-Conjecture::Conjecture( set<Agent *> my_agents, Agent *root_agent ) :
+Conjecture::Conjecture( set<Agent *> my_agents, const Agent *root_agent ) :
     plan( my_agents, root_agent )
+{
+}
+
+
+Conjecture::Conjecture( const Agent *agent, DecidedQuery *query ) :
+    plan( agent, query )
 {
 }
 
@@ -103,7 +124,6 @@ void Conjecture::EnsureChoicesHaveIterators()
 
 bool Conjecture::IncrementAgent( AgentRecords::const_iterator rit, int bc )
 {    
-    Agent *agent = rit->first;    
     AgentRecord record = rit->second;
     auto query = record.query;
     
@@ -152,7 +172,6 @@ bool Conjecture::IncrementAgent( AgentRecords::const_iterator rit, int bc )
 
 bool Conjecture::IncrementConjecture(AgentRecords::const_iterator rit)
 {       
-    Agent *agent = rit->first;    
     AgentRecord record = rit->second;
     auto query = record.query;
     auto pq = record.pq;
@@ -197,9 +216,11 @@ bool Conjecture::Increment()
 }
 
 
-shared_ptr<DecidedQuery> Conjecture::GetQuery(Agent *agent)
+shared_ptr<DecidedQuery> Conjecture::GetQuery(const Agent *agent)
 {
-    return plan.agent_records.at(agent).query;
+    shared_ptr<DecidedQuery> r = plan.agent_records.at(agent).query_owning;
+    ASSERT(r); // must have been created by this class, see the constructors
+    return r;
 }
 
 };

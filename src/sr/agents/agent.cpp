@@ -10,6 +10,15 @@
 
 using namespace SR;
 
+
+// C++11 fix
+Agent& Agent::operator=(Agent& other)
+{
+    (void)Node::operator=(other);
+    return *this;
+}
+
+
 Agent *Agent::AsAgent( TreePtr<Node> node )
 {
     ASSERT( node )("Called AsAgent(")(node)(") with NULL TreePtr");
@@ -69,6 +78,51 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     RunDecidedQueryImpl( query, x );
 }                             
+
+
+void AgentCommon::RunNormalLinkedQuery( DecidedQuery &query,
+                                        TreePtr<Node> x,
+                                        const list<LocatedLink> &required_links ) const
+{
+    // TODO 
+    // Arrange for conj to "know" about choices that have already been made in 
+    // query. These should be the choices relating to abnormal or multiplicity 
+    // links. See #151 
+    SR::Conjecture conj(this, &query);            
+    conj.Start();
+    
+    while(1)
+    {
+        try
+        {
+            {
+                Tracer::RAIIEnable silencer( false ); // make DQ be quiet
+                RunDecidedQuery( query, x );
+            }
+            
+            // The query now has populated links, which should be full
+            // (otherwise RunDecidedQuery() (DQ) should have thrown). We loop 
+            // over both and check that they refer to the same x nodes
+            // we were passed. Mismatch will throw, same as in DQ.
+            auto normal_links = query.GetNormalLinks();
+            ASSERT( normal_links.size() == required_links.size() );
+            if( normal_links == required_links )
+                break; // Great, the normal links matched
+        }
+        catch( ::Mismatch & )
+        {
+        }
+        
+        Tracer::RAIIEnable silencer( false ); // make conjecture be quiet
+        // We will get here on a mismatch, whether detected by DQ or our
+        // own comparison of the normal links. Permit the conjecture
+        // to move to a new set of choices.
+        if( !conj.Increment() )
+            throw NormalLinksMismatch(); // Conjecture has run out of choices to try.
+            
+        // Conjecture would like us to try again with new choices
+    }     
+}                           
 
 
 void AgentCommon::SetKey( TreePtr<Node> x )
