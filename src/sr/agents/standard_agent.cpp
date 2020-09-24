@@ -29,7 +29,7 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
                     num_stars++;
             }
             num_stars--; // Don't register a decision for the last Star
-   			for( CollectionInterface::iterator pit = pattern_seq->begin(); pit != pattern_seq->end(); ++pit )                 
+   			for( SequenceInterface::iterator pit = pattern_seq->begin(); pit != pattern_seq->end(); ++pit )                 
    			{
                 const TreePtrInterface *pe = &*pit; 
                 ASSERT( pe );
