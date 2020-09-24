@@ -18,7 +18,7 @@
 
 #include <list>
 
-//#define TEST_PATTERN_QUERY
+#define TEST_PATTERN_QUERY
 
 //#define USE_SOLVER
 
@@ -450,7 +450,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     ASSERT( pq->GetNormalLinks().size() == query->GetNormalLinks().size() &&
             pq->GetAbnormalLinks().size() == query->GetAbnormalLinks().size() &&
-            pq->GetMultiplicityLinks().size() == query.GetMultiplicityLinks()->size() &&
+            pq->GetMultiplicityLinks().size() == query->GetMultiplicityLinks().size() &&
             pq->GetDecisions().size() == query->GetDecisions().size() )
           ("PatternQuery disagrees with DecidedQuery!!!!\n")
           ("GetNormalLinks().size() : %d vs %d\n", pq->GetNormalLinks().size(), query->GetNormalLinks().size() )
@@ -459,6 +459,14 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
           ("GetDecisions().size() : %d vs %d\n", pq->GetDecisions().size(), query->GetDecisions().size() )
           (*agent);
     // Note: number of abnormal links does NOT now depend on x; #60 completed
+    auto query_it = query->GetAbnormalLinks().begin();
+    for( auto pq_it = pq->GetAbnormalLinks().begin();
+         pq_it != pq->GetAbnormalLinks().end();
+         ++pq_it )
+    {
+        ASSERT( pq_it->GetChildAgent() == query_it->GetChildAgent() );
+        ++query_it;
+    }
 #endif
                                           
     TRACE(*agent)("?=")(*x)(" Comparing links\n");
@@ -623,6 +631,9 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
                 TreePtr<Node> x = hypothetical_solution_keys.at(diversion_agent);  
                            
                 e->Compare( x, &combined_keys );
+                
+                // Free abnormal links are AND-rule and singular so they can key
+                KeyCoupling( pae.first.GetChildAgent(), x, &solution_keys );
             }
 
             // Process the free multiplicity links.

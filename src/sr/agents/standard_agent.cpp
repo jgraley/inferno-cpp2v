@@ -10,6 +10,9 @@
 
 using namespace SR;
 
+//#define COLLECTION_STAR_ABNORMAL
+
+
 shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
@@ -30,13 +33,17 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
    			{
                 const TreePtrInterface *pe = &*pit; 
                 ASSERT( pe );
-                if( dynamic_cast<StarAgent *>(pe->get()) && num_stars>0 )
+                if( dynamic_cast<StarAgent *>(pe->get()) )
                 {
-                    pq->RegisterDecision( true ); // Inclusive, please.
+                    if( num_stars>0 )
+                        pq->RegisterDecision( true ); // Inclusive, please.
                     num_stars--;
+                    pq->RegisterAbnormalLink(pe);    
                 }
-
-				pq->RegisterNormalLink(pe);    
+                else
+                {
+                    pq->RegisterNormalLink(pe);    
+                }
             }
         }
         else if( CollectionInterface *pattern_col = dynamic_cast<CollectionInterface *>(ie) )
@@ -56,7 +63,13 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
                 }
 		    }
             if( p_star )
+            {
+#ifdef COLLECTION_STAR_ABNORMAL
+                pq->RegisterAbnormalLink(p_star);   		     
+#else
                 pq->RegisterNormalLink(p_star);   		     
+#endif                
+            }
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
         {
@@ -186,8 +199,8 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
 
             // Apply couplings to this Star and matched range
             // Restrict to pre-restriction or pattern restriction
-            query.RegisterNormalLink( &*pit, xss ); // Link to Generated Subsequence
-            
+            query.RegisterAbnormalLink( &*pit, xss ); // Link to Generated Subsequence
+                   
             // Resume at the first element after the matched range
             xit = xit_star_end;
         }
@@ -306,7 +319,11 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         // Apply pre-restriction to the star
         TreePtr<SubCollection> x_subcollection( new SubCollection );
         *x_subcollection = xremaining;
+#ifdef COLLECTION_STAR_ABNORMAL
+        query.RegisterAbnormalLink( p_star, x_subcollection ); // Link to Generated Subcollection
+#else
         query.RegisterNormalLink( p_star, x_subcollection ); // Link to Generated Subcollection
+#endif
     }
     TRACE("matched\n");
 }

@@ -84,11 +84,11 @@ void AgentCommon::RunNormalLinkedQuery( DecidedQuery &query,
                                         TreePtr<Node> x,
                                         const list<LocatedLink> &required_links ) const
 {
-    // TODO 
-    // Arrange for conj to "know" about choices that have already been made in 
-    // query. These should be the choices relating to abnormal or multiplicity 
-    // links. See #151 
     SR::Conjecture conj(this, &query);            
+
+    // TODO Arrange for conj to "know" about choices that have already been made in 
+    // query. These should be the choices relating to abnormal or multiplicity 
+    // links. conj should leave them alone. See #151 
     conj.Start();
     
     while(1)
