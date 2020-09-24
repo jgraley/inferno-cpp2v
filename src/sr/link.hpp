@@ -7,6 +7,7 @@
 namespace SR
 { 
 class Agent;
+class LocatedLink;
 
 class PatternLink 
 {
@@ -17,6 +18,7 @@ public:
     bool operator<(const PatternLink &other) const;
     bool operator!=(const PatternLink &other) const;
     bool operator==(const PatternLink &other) const;
+    bool operator==(const LocatedLink &other) const;
     explicit operator bool() const;
     Agent *GetChildAgent() const;
 
@@ -43,13 +45,15 @@ public:
     const TreePtr<Node> &GetChildX() const;
     operator PatternLink() const;
 
-private:
+private: friend class PatternLink;
     const TreePtrInterface *ppattern;
     TreePtr<Node> x; 
 #ifdef KEEP_WHODAT_INFO
     void *whodat; // the gdb magic you require is eg "info line *b.whodat"
 #endif
 };
+
+bool operator==( const list<PatternLink> &left, const list<LocatedLink> &right );
 
 };
 

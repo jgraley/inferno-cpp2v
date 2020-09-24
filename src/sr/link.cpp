@@ -51,6 +51,12 @@ bool PatternLink::operator==(const PatternLink &other) const
 }
 
 
+bool PatternLink::operator==(const LocatedLink &other) const
+{
+    return ppattern == other.ppattern;
+}
+
+
 PatternLink::operator bool() const
 {
     return ppattern != nullptr;
@@ -136,3 +142,21 @@ LocatedLink::operator PatternLink() const
 {
     return PatternLink( ppattern );
 }
+
+
+bool SR::operator==( const list<PatternLink> &left, const list<LocatedLink> &right )
+{
+    auto left_it = left.begin();
+    auto right_it = right.begin();
+    while( left_it != left.end() || right_it != right.end() )         
+    {
+        if( left_it == left.end() || right_it == right.end() )
+            return false; // differing length
+        if( left_it->GetChildAgent() != right_it->GetChildAgent() )
+            return false; // differing content
+        ++left_it;
+        ++right_it;
+    }
+    return true;
+}
+

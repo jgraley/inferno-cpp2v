@@ -10,7 +10,7 @@
 
 using namespace SR;
 
-//#define COLLECTION_STAR_ABNORMAL
+#define COLLECTION_STAR_ABNORMAL
 
 
 shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const

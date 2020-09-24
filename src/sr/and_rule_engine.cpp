@@ -448,9 +448,9 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 
 #ifdef TEST_PATTERN_QUERY
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-    ASSERT( pq->GetNormalLinks().size() == query->GetNormalLinks().size() &&
-            pq->GetAbnormalLinks().size() == query->GetAbnormalLinks().size() &&
-            pq->GetMultiplicityLinks().size() == query->GetMultiplicityLinks().size() &&
+    ASSERT( pq->GetNormalLinks() == query->GetNormalLinks() &&
+            pq->GetAbnormalLinks() == query->GetAbnormalLinks() &&
+            pq->GetMultiplicityLinks() == query->GetMultiplicityLinks() &&
             pq->GetDecisions().size() == query->GetDecisions().size() )
           ("PatternQuery disagrees with DecidedQuery!!!!\n")
           ("GetNormalLinks().size() : %d vs %d\n", pq->GetNormalLinks().size(), query->GetNormalLinks().size() )
@@ -458,15 +458,6 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
           ("GetMultiplicityLinks().size() : %d vs %d\n", pq->GetMultiplicityLinks().size(), query->GetMultiplicityLinks().size() )
           ("GetDecisions().size() : %d vs %d\n", pq->GetDecisions().size(), query->GetDecisions().size() )
           (*agent);
-    // Note: number of abnormal links does NOT now depend on x; #60 completed
-    auto query_it = query->GetAbnormalLinks().begin();
-    for( auto pq_it = pq->GetAbnormalLinks().begin();
-         pq_it != pq->GetAbnormalLinks().end();
-         ++pq_it )
-    {
-        ASSERT( pq_it->GetChildAgent() == query_it->GetChildAgent() );
-        ++query_it;
-    }
 #endif
                                           
     TRACE(*agent)("?=")(*x)(" Comparing links\n");
