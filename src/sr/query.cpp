@@ -9,6 +9,7 @@
 
 using namespace SR;
 
+//#define KEEP_WHODAT_INFO
 
 // For debugging
 #ifdef KEEP_WHODAT_INFO

@@ -18,7 +18,7 @@
 
 #include <list>
 
-#define TEST_PATTERN_QUERY
+//#define TEST_PATTERN_QUERY
 
 //#define USE_SOLVER
 
@@ -575,6 +575,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
                 // because a MatchAny agent early-outed on the corresponding option
                 // TODO we _could_ set up as a subset for each MatchAny and require
                 // exactly one match.  #135
+                // OR don't early-out #143
                 if( master_coupling_candidates.count(agent) > 0 )
                 {
                     auto x = master_coupling_candidates.at(agent);
@@ -619,12 +620,15 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             {            
                 shared_ptr<AndRuleEngine> e = pae.second;
                 Agent *diversion_agent = plan.diversion_agents.at(pae.first).get();
-                TreePtr<Node> x = hypothetical_solution_keys.at(diversion_agent);  
+                if( hypothetical_solution_keys.count(diversion_agent) ) // MatchAny nodes could short-circuit, preventing keying; #143 gets rid
+                {
+                    TreePtr<Node> x = hypothetical_solution_keys.at(diversion_agent);  
                            
-                e->Compare( x, &combined_keys );
-                
-                // Free abnormal links are AND-rule and singular so they can key
-                KeyCoupling( pae.first.GetChildAgent(), x, &solution_keys );
+                    e->Compare( x, &combined_keys );
+                    
+                    // Free abnormal links are AND-rule and singular so they can key
+                    KeyCoupling( pae.first.GetChildAgent(), x, &solution_keys );
+                }
             }
 
             // Process the free multiplicity links.
