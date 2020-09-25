@@ -10,9 +10,6 @@
 
 using namespace SR;
 
-#define COLLECTION_STAR_ABNORMAL
-
-
 shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>();
@@ -64,11 +61,7 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 		    }
             if( p_star )
             {
-#ifdef COLLECTION_STAR_ABNORMAL
-                pq->RegisterAbnormalLink(p_star);   		     
-#else
-                pq->RegisterNormalLink(p_star);   		     
-#endif                
+                pq->RegisterAbnormalLink(p_star);   		                    
             }
         }
         else if( TreePtrInterface *pattern_ptr = dynamic_cast<TreePtrInterface *>(ie) )
@@ -319,11 +312,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
         // Apply pre-restriction to the star
         TreePtr<SubCollection> x_subcollection( new SubCollection );
         *x_subcollection = xremaining;
-#ifdef COLLECTION_STAR_ABNORMAL
         query.RegisterAbnormalLink( p_star, x_subcollection ); // Link to Generated Subcollection
-#else
-        query.RegisterNormalLink( p_star, x_subcollection ); // Link to Generated Subcollection
-#endif
     }
     TRACE("matched\n");
 }
