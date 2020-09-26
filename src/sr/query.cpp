@@ -75,6 +75,9 @@ PatternQuery::Links PatternQuery::GetAllLinks() const
 }
 
 
+const TreePtr<DecidedQueryCommon::MMAX> DecidedQueryCommon::MMAX_Node = MakeTreePtr<DecidedQueryCommon::MMAX>();
+
+
 DecidedQuery::DecidedQuery( shared_ptr<const PatternQuery> pq ) :
     base_agent( pq->GetBaseAgent() ),
     decisions( pq->GetDecisions().size() ),
@@ -115,11 +118,8 @@ void DecidedQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern, T
 
 
 void DecidedQuery::RegisterAlwaysMatchingLink( const TreePtrInterface *ppattern )
-{
-    // Supply the pattern as x. Pattern are usually not valid x nodes
-    // (because can have NULL pointers) but there's logic in 
-    // the AndRuleEngine to early-out in this case. 
-    LocatedLink link( base_agent, ppattern, *ppattern, WHODAT() );
+{ 
+    LocatedLink link( base_agent, ppattern, MMAX_Node, WHODAT() );
     normal_links.push_back( link );      
 }
 
@@ -242,6 +242,7 @@ ContainerInterface::iterator DecidedQuery::RegisterDecision( const Sequence<Node
     //auto p_myit = dynamic_cast<const Sequence<Node>::iterator *>(query_it.GetUnderlyingIterator()); // for #109
     return query_it;
 }                                                      
+
 
 ContainerInterface::iterator DecidedQuery::RegisterDecision( const Collection<Node> &container, bool inclusive )
 {

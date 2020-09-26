@@ -108,6 +108,11 @@ public:
         QUERY,
         CONJECTURE
     } last_activity = NEW;
+    
+    struct MMAX : virtual Node { NODE_FUNCTIONS_FINAL }; 
+    
+    // Magic Match Anything X node: 
+    static const TreePtr<MMAX> MMAX_Node;
 };
 
 

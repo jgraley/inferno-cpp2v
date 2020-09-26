@@ -76,7 +76,20 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
     query.last_activity = DecidedQueryCommon::QUERY;
    
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
-    RunDecidedQueryImpl( query, x );
+    
+    if( x == DecidedQueryCommon::MMAX_Node )
+    {
+        query.Reset();
+        // Magic Match Anything node: all normal children also match anything
+        // This is just to keep normal-domain solver happy, so we 
+        // only need normals. 
+        for( PatternLink l : pattern_query->GetNormalLinks() )       
+            query.RegisterAlwaysMatchingLink( l.GetPatternPtr() );
+    }   
+    else
+    {
+        RunDecidedQueryImpl( query, x );
+    }
 }                             
 
 

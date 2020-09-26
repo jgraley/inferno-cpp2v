@@ -317,6 +317,10 @@ void AndRuleEngine::CompareCoupling( Agent *agent,
     // Enforce rule #149
     ASSERT( !TreePtr<SubContainer>::DynamicCast( keys->at(agent) ) ); 
 
+    // Allow Magic Match Anything 
+    if( x == DecidedQueryCommon::MMAX_Node )
+        return;
+
     // This function establishes the policy for couplings in one place.
     // Today, it's SimpleCompare. 
     // And it always will be: see #121; para starting at "No!!"
@@ -330,7 +334,7 @@ void AndRuleEngine::KeyCoupling( Agent *agent,
                                  TreePtr<Node> x,
                                  CouplingMap *keys )
 {
-    ASSERT( keys->count(agent) == 0 )("Coupling conflict!\n");
+    ASSERT( keys->count(agent) == 0 )("Coupling conflict!\n");    
     (*keys)[agent] = x;
 }                                     
 
@@ -348,14 +352,13 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         
         // This is needed for decisionised MatchAny #75. Other schemes for
         // RegisterAlwaysMatchingLink() could be deployed.
-        if( x.get() == (Node *)(link.GetChildAgent()) )
-            continue; // Pattern nodes immediately match themselves
+        //if( x == DecidedQueryCommon::MMAX_Node )
+        //    continue; // Pattern nodes immediately match themselves
         
         // Are we at a residual coupling?
         if( plan.coupling_residual_links.count( link ) > 0 ) // See #129
         {
             CompareCoupling( link.GetChildAgent(), x, &my_keys );
-            TRACEC("Coupling matched\n");
             continue;
         }
         
@@ -371,7 +374,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         // tests coupling_keyer_links as well as providing a small optimisation.
         if( plan.coupling_keyer_links.count( link ) )
         {
-            ASSERT( my_keys.count(link.GetChildAgent()) == 0 )("Coupling conflict!\n");
+            ASSERT( x != DecidedQueryCommon::MMAX_Node )("Can't key with MMAX because would leak");
             KeyCoupling( link.GetChildAgent(), x, &my_keys );
         }
 
@@ -445,8 +448,11 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     shared_ptr<DecidedQuery> query = plan.conj->GetQuery(agent);
 
     // Run the compare implementation to get the links based on the choices
-    TRACE(*agent)("?=")(*x)(" RunDecidedQueryImpl()\n");    
+    TRACE(*agent)(" ?= ")(*x)(" RunDecidedQuery()\n");     
     agent->RunDecidedQuery( *query, x );
+    TRACEC("Normal ")(query->GetNormalLinks())("\n")
+          ("Abormal ")(query->GetAbnormalLinks())("\n")
+          ("Multiplicity ")(query->GetMultiplicityLinks())("\n");    
 
 #ifdef TEST_PATTERN_QUERY
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
@@ -462,7 +468,6 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
           (*agent);
 #endif
                                           
-    TRACE(*agent)("?=")(*x)(" Comparing links\n");
     CompareLinks( agent, query );
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
@@ -573,25 +578,10 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             
             for( auto agent : plan.master_boundary_agents )
             {
-                // We have to allow for coupling candidates that are missing
-                // because a MatchAny agent early-outed on the corresponding option
-                // TODO we _could_ set up as a subset for each MatchAny and require
-                // exactly one match.  #135
-                // OR don't early-out #143
-                if( master_coupling_candidates.count(agent) > 0 )
-                {
-                    auto x = master_coupling_candidates.at(agent);
-                    CompareCoupling( agent, x, master_keys );
-                }
+                auto x = master_coupling_candidates.at(agent);
+                CompareCoupling( agent, x, master_keys );
             }
 
-            // #143 missing solutions should be due to early out caused by 
-            // MatchAny agents. We put nullptr in there.
-            //for( auto agent : my_agents )
-            // {
-            //     if( hypothetical_solution_keys.count(agent) == 0 )
-            //         hypothetical_solution_keys[agent] = nullptr;
-            // }
 #endif
             // The hypothetical_solution_keys contain keys for agents reached
             // through abnormal or multiplicity links. They are needed to 
