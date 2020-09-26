@@ -95,7 +95,8 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 
 void AgentCommon::RunNormalLinkedQuery( DecidedQuery &query,
                                         TreePtr<Node> x,
-                                        const list<LocatedLink> &required_links ) const
+                                        const list<LocatedLink> &required_links,
+                                        const set<PatternLink> &compare_by_value ) const
 {
     SR::Conjecture conj(this, &query);            
 
@@ -109,7 +110,7 @@ void AgentCommon::RunNormalLinkedQuery( DecidedQuery &query,
         try
         {
             {
-                Tracer::RAIIEnable silencer( false ); // make DQ be quiet
+                //Tracer::RAIIEnable silencer( false ); // make DQ be quiet
                 RunDecidedQuery( query, x );
             }
             
@@ -117,9 +118,42 @@ void AgentCommon::RunNormalLinkedQuery( DecidedQuery &query,
             // (otherwise RunDecidedQuery() should have thrown). We loop 
             // over both and check that they refer to the same x nodes
             // we were passed. Mismatch will throw, same as in DQ.
-            auto normal_links = query.GetNormalLinks();
-            ASSERT( normal_links.size() == required_links.size() );
-            if( normal_links == required_links )
+            auto actual_links = query.GetNormalLinks();
+            ASSERT( actual_links.size() == required_links.size() );
+            TRACE("Actual links   ")(actual_links)("\n");
+            TRACEC("Required links ")(required_links)("\n");
+            
+            bool match = true;
+            auto alit = actual_links.begin();
+            auto rlit = required_links.begin();
+            for( ;
+                 alit != actual_links.end() || rlit != required_links.end();
+                 ++alit, ++rlit )
+            {
+                if( alit == actual_links.end() || rlit == required_links.end() )
+                {
+                    match = false;
+                    break;
+                }
+                ASSERT( alit->GetChildAgent() == rlit->GetChildAgent() );
+                if( alit->GetChildX() == DecidedQueryCommon::MMAX_Node )
+                    continue;
+                if( compare_by_value.count(*alit) )
+                {
+                    // BY_VALUE
+                    static SimpleCompare by_value_comparer;
+                    if( !by_value_comparer( alit->GetChildX(), rlit->GetChildX() ) )
+                        match = false;
+                }
+                else
+                {
+                    // BY_LOCATION
+                    if( alit->GetChildX() != rlit->GetChildX() )
+                        match = false;
+                }                                
+            }
+            
+            if( match )
                 break; // Great, the normal links matched
         }
         catch( ::Mismatch & )

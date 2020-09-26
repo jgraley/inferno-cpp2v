@@ -44,7 +44,12 @@ string Traceable::CPPFilt( string s )
     ps = abi::__cxa_demangle(s.c_str(), 0, 0, &status);
     s = ps;
     free(ps); // as ordained
+    return s;
+}
 
+
+string Traceable::Denamespace( string s )
+{
     // fprintf(stderr, "[[[%s]]]", s.c_str());
 
     // We wish to strip off namespaces to reduce clutter, but
@@ -78,7 +83,7 @@ string Traceable::CPPFilt( string s )
 
 string Traceable::GetTypeName() const
 {
-    return CPPFilt( typeid( *this ).name() );
+    return Denamespace( CPPFilt( typeid( *this ).name() ) );
 }
 
 

@@ -74,6 +74,7 @@ Tracer::~Tracer()
     }
 }
 
+
 Tracer &Tracer::operator()()
 {
     if( (flags & DISABLE) || !(enable || (flags & FORCE)) )
@@ -88,6 +89,7 @@ Tracer &Tracer::operator()()
     
     return *this;
 }
+
 
 Tracer &Tracer::operator()(const char *fmt, ...)
 {
@@ -112,20 +114,30 @@ Tracer &Tracer::operator()(const char *fmt, ...)
     return *this;
 }
 
+
 Tracer &Tracer::operator()(const string &s)
 {    
     return operator()("%s", s.c_str());
 }
+
 
 Tracer &Tracer::operator()(const Traceable &s)
 {    
     return operator()(s.GetTrace());
 }
 
+
 Tracer &Tracer::operator()(bool b)
 {    
     return operator()(b?"true":"false");
 }
+
+
+Tracer &Tracer::operator()(const exception &e)
+{
+    return operator()( e.what() );
+}
+
 
 void Tracer::EndContinuation()
 {
@@ -135,6 +147,7 @@ void Tracer::EndContinuation()
         continuation = false;
     }   
 }
+
 
 void Tracer::Enable( bool e )
 {

@@ -1,14 +1,21 @@
 #ifndef MISMATCH_HPP
 #define MISMATCH_HPP
 
+#include "standard.hpp"
+
 #include <exception>
 	
 // This is just an interface for mismatch exceptions. They should
 // be subclassed inside each class that throws them. To throw outside 
 // of a call to Engine::Compare() is an error.
-class Mismatch : public std::exception
+class Mismatch : public exception
 {
-    virtual std::string Explanation() { return std::string(typeid(*this).name()); }
+public:    
+    virtual const char* what() const noexcept;
+    string What() const noexcept;
+    
+private:
+    mutable string w;
 };    
 
 #endif

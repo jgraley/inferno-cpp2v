@@ -14,7 +14,7 @@ MAIN = $(SRC)/main
 SRC_OPTIONS = $(OPTIONS) -I$(SRC)
 SRC_SR_OPTIONS = $(SRC_OPTIONS) -I$(SR)
 
-COMMON_MODULES = $(COMMON)/standard $(COMMON)/read_args $(COMMON)/trace $(COMMON)/hit_count
+COMMON_MODULES = $(COMMON)/standard $(COMMON)/read_args $(COMMON)/trace $(COMMON)/hit_count $(COMMON)/mismatch
 NODE_MODULES = $(NODE)/node $(NODE)/itemise 
 HELPERS_MODULES = $(HELPERS)/walk $(HELPERS)/simple_compare $(HELPERS)/duplicate
 TREE_MODULES = $(TREE)/cpptree $(TREE)/validate $(TREE)/scope $(TREE)/misc $(TREE)/typeof $(TREE)/type_db 

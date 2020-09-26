@@ -26,7 +26,8 @@ using namespace std;
 #include <list>
 #include <set>
 #include <map>
-
+#include <exception>
+	
 class Tracer
 {
 public:
@@ -44,6 +45,7 @@ public:
     Tracer &operator()(const string &s); // not a printf because of risk of accidental format specifiers
     Tracer &operator()(const Traceable &s); 
     Tracer &operator()(bool b); 
+    Tracer &operator()(const exception &e); 
 
     template<typename T>
     Tracer &operator()(const list<T> &l) 
@@ -92,8 +94,25 @@ public:
         return operator()("}");
     }
 
+    template<typename TF, typename TS>
+    Tracer &operator()(const pair<TF, TS> &p) 
+    {
+        operator()("(");
+        operator()(p.first);
+        operator()(", ");
+        operator()(p.second);
+        return operator()(")");
+    }
+
     template<typename T>
     Tracer &operator()(const T *p) 
+    {
+        operator()("&");
+        return operator()(*p);        
+    }
+
+    template<typename T>
+    Tracer &operator()(shared_ptr<T> p) 
     {
         operator()("&");
         return operator()(*p);        

@@ -96,6 +96,8 @@ class Traceable
 {
 public:
     static string CPPFilt( string s );
+    static string Denamespace( string s );
+    
     virtual string GetTypeName() const; 
     virtual string GetName() const; // used by parse, render etc
     virtual string GetAddr() const; 

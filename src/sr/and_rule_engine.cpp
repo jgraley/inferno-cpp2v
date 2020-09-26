@@ -359,6 +359,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         if( plan.coupling_residual_links.count( link ) > 0 ) // See #129
         {
             CompareCoupling( link.GetChildAgent(), x, &my_keys );
+            TRACE("Accepted normal coupling for ")(link.GetChildAgent())(" x=")(x)(" key=")(my_keys.at(link.GetChildAgent()))("\n");
             continue;
         }
         
@@ -580,8 +581,8 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             {
                 auto x = master_coupling_candidates.at(agent);
                 CompareCoupling( agent, x, master_keys );
+                TRACE("Accepted master coupling for ")(agent)(" x=")(x)(" key=")(master_keys->at(agent))("\n");
             }
-
 #endif
             // The hypothetical_solution_keys contain keys for agents reached
             // through abnormal or multiplicity links. They are needed to 
@@ -601,19 +602,19 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             {
                 TreePtr<Node> x = solution_keys.at(agent);
                 auto pq = agent->GetPatternQuery();
-                TRACE("In after-pass, trying to match ")(*agent)(" at ")(*x)("\n");    
+                TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(*x)("\n");    
                 TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
                 TRACEC("Based on ")(ref_keys)("\n");    
                 list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), ref_keys );
+                TRACEC("Relocated links ")(ll)("\n");    
                 DecidedQuery query(pq);
                 try
                 {
-                    agent->RunNormalLinkedQuery( query, x, ll );
+                    agent->RunNormalLinkedQuery( query, x, ll, plan.coupling_residual_links );
                 }
                 catch( const ::Mismatch& mismatch )
                 {
-                    string s;
-                    ASSERT(false)("In after-pass, failed to match ")(*agent)(" at ")(*x)(" and links ")(ll)("\n");                    
+                    ASSERT(false)("Unexpected mismatch thrown from RunNormalLinkedQuery(): ")(mismatch)("...\n");                    
                 }
                 // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
                 FOREACH( const LocatedLink &link, query.GetAbnormalLinks() )
@@ -652,6 +653,9 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             {            
                 shared_ptr<AndRuleEngine> e = pae.second;
                 Agent *diversion_agent = plan.diversion_agents.at(pae.first).get();
+                TRACE("Checking free abnormal ")(pae)(" diversion=")(diversion_agent)("\n");
+                TRACEC("HSK ")(hypothetical_solution_keys)("\n");
+                
                 if( hypothetical_solution_keys.count(diversion_agent) ) // MatchAny nodes could short-circuit, preventing keying; #143 gets rid
                 {
                     TreePtr<Node> x = hypothetical_solution_keys.at(diversion_agent);  
@@ -669,6 +673,8 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             {            
                 shared_ptr<AndRuleEngine> e = pae.second;
                 Agent *diversion_agent = plan.diversion_agents.at(pae.first).get();
+                TRACE("Checking multiplicity ")(pae)(" diversion=")(diversion_agent)("\n");
+                TRACEC("HSK ")(hypothetical_solution_keys)("\n");
                 TreePtr<Node> x = hypothetical_solution_keys.at(diversion_agent);
                     
                 ASSERT( x );
