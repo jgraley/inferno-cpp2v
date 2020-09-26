@@ -9,7 +9,7 @@ using namespace SR;
 
 shared_ptr<PatternQuery> StarAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>();
+    auto pq = make_shared<PatternQuery>(this);
     if( *GetRestriction() )
     {
         pq->RegisterMultiplicityLink( GetRestriction() );

@@ -47,34 +47,34 @@ struct BuildIdentifierAgent : public virtual InfernoAgent
 };
 
 
-struct BuildInstanceIdentifier : Special<CPPTree::InstanceIdentifier>,                             
-                                 BuildIdentifierAgent
+struct BuildInstanceIdentifierAgent : Special<CPPTree::InstanceIdentifier>,                             
+                                      BuildIdentifierAgent
 {
     SPECIAL_NODE_FUNCTIONS
-    BuildInstanceIdentifier( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
-    BuildInstanceIdentifier() : BuildIdentifierAgent("unnamed") {}
+    BuildInstanceIdentifierAgent( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
+    BuildInstanceIdentifierAgent() : BuildIdentifierAgent("unnamed") {}
 private:
     
 	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
 };
 
 
-struct BuildTypeIdentifier : Special<CPPTree::TypeIdentifier>,                             
-                             BuildIdentifierAgent
+struct BuildTypeIdentifierAgent : Special<CPPTree::TypeIdentifier>,                             
+                                  BuildIdentifierAgent
 {
     SPECIAL_NODE_FUNCTIONS
-    BuildTypeIdentifier( string s="Unnamed", int f=0 ) : BuildIdentifierAgent(s,f) {}
+    BuildTypeIdentifierAgent( string s="Unnamed", int f=0 ) : BuildIdentifierAgent(s,f) {}
 private:
 	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );       
 };
 
 
-struct BuildLabelIdentifier : Special<CPPTree::LabelIdentifier>,                             
-                              BuildIdentifierAgent
+struct BuildLabelIdentifierAgent : Special<CPPTree::LabelIdentifier>,                             
+                                   BuildIdentifierAgent
 {
     SPECIAL_NODE_FUNCTIONS
-    BuildLabelIdentifier() : BuildIdentifierAgent("UNNAMED") {}
-    BuildLabelIdentifier( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
+    BuildLabelIdentifierAgent() : BuildIdentifierAgent("UNNAMED") {}
+    BuildLabelIdentifierAgent( string s, int f=0 ) : BuildIdentifierAgent(s,f) {}
 private:
 	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );   
 };
@@ -99,39 +99,39 @@ struct IdentifierByNameAgent : public virtual InfernoAgent
 };
 
 
-struct InstanceIdentifierByName : Special<CPPTree::InstanceIdentifier>,                             
-                                  IdentifierByNameAgent
+struct InstanceIdentifierByNameAgent : Special<CPPTree::InstanceIdentifier>,                             
+                                       IdentifierByNameAgent
 {
     SPECIAL_NODE_FUNCTIONS
 
-    InstanceIdentifierByName() : IdentifierByNameAgent(string()) {}    
-    InstanceIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
+    InstanceIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
+    InstanceIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}
 private:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       TreePtr<Node> x ) const;
 };
 
 
-struct TypeIdentifierByName : Special<CPPTree::TypeIdentifier>,                             
-                              IdentifierByNameAgent
+struct TypeIdentifierByNameAgent : Special<CPPTree::TypeIdentifier>,                             
+                                   IdentifierByNameAgent
 {
     SPECIAL_NODE_FUNCTIONS
 
-    TypeIdentifierByName() : IdentifierByNameAgent(string()) {}    
-    TypeIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
+    TypeIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
+    TypeIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}
 private:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       TreePtr<Node> x ) const;                          
 };
 
 
-struct LabelIdentifierByName : Special<CPPTree::LabelIdentifier>,                             
-                               IdentifierByNameAgent
+struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,                             
+                                    IdentifierByNameAgent
 {
     SPECIAL_NODE_FUNCTIONS
 
-    LabelIdentifierByName() : IdentifierByNameAgent(string()) {}    
-    LabelIdentifierByName( string n ) : IdentifierByNameAgent(n) {}
+    LabelIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
+    LabelIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}
 private:
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                       TreePtr<Node> x ) const;                      
@@ -161,7 +161,7 @@ struct NestedAgent : public virtual InfernoAgent
 /// the "element" member, not the "size" member. So this will get you from the type
 /// of an instance to the type of the eventual element in a nested array decl.
 /// `depth` is not checked.
-struct NestedArray : NestedAgent, Special<CPPTree::Type>
+struct NestedArrayAgent : NestedAgent, Special<CPPTree::Type>
 {
     SPECIAL_NODE_FUNCTIONS
     virtual TreePtr<Node> Advance( TreePtr<Node> x, 
@@ -175,20 +175,20 @@ struct NestedArray : NestedAgent, Special<CPPTree::Type>
 /// The `depth` pointer must match a `String` node corresponding to the
 /// nodes that were seen during traversal, where the letter `S` corresponds 
 /// to a `Substript` and `L` corresponds to a `Lookup`.
-struct NestedSubscriptLookup : NestedAgent, Special<CPPTree::Expression>
+struct NestedSubscriptLookupAgent : NestedAgent, Special<CPPTree::Expression>
 {
     SPECIAL_NODE_FUNCTIONS
     virtual TreePtr<Node> Advance( TreePtr<Node> x, 
                                    string *depth ) const;
 };
 
-//---------------------------------- BuildContainerSize ------------------------------------    
+//---------------------------------- BuildContainerSizeAgent ------------------------------------    
 
-/// `BuildContainerSize` is used in replace context to create an integer-valued
+/// `BuildContainerSizeAgent` is used in replace context to create an integer-valued
 /// constant that is the size of a `Star` node pointed to by `container`. The
 /// container should couple the star node.
-struct BuildContainerSize : public virtual InfernoAgent,
-                            Special<CPPTree::Integer>
+struct BuildContainerSizeAgent : public virtual InfernoAgent,
+                                 Special<CPPTree::Integer>
 {
     SPECIAL_NODE_FUNCTIONS
     shared_ptr< StarAgent > container;
@@ -200,13 +200,13 @@ private:
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
 }; 
 
-//---------------------------------- IsLabelReached ------------------------------------    
+//---------------------------------- IsLabelReachedAgent ------------------------------------    
 
-/// `IsLabelReached` matches a `LabelIdentifier` if that label is used
+/// `IsLabelReachedAgent` matches a `LabelIdentifier` if that label is used
 /// anywhere in the expression pointed to by `pattern`.
 /// TODO generalise to more than just labels.
-struct IsLabelReached : public virtual InfernoAgent, 
-                        Special<CPPTree::LabelIdentifier>
+struct IsLabelReachedAgent : public virtual InfernoAgent, 
+                             Special<CPPTree::LabelIdentifier>
 {
 	SPECIAL_NODE_FUNCTIONS	
 	virtual void FlushCache() const;

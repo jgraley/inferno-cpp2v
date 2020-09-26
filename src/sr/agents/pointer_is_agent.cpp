@@ -17,7 +17,7 @@ using namespace SR;
 
 shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>();
+    auto pq = make_shared<PatternQuery>(this);
 	pq->RegisterNormalLink( GetPointer() );
     return pq;
 }

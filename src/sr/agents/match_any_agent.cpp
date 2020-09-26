@@ -16,7 +16,7 @@ void MatchAnyAgent::AgentConfigure( const SCREngine *master_scr_engine )
 
 shared_ptr<PatternQuery> MatchAnyAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>();
+    auto pq = make_shared<PatternQuery>(this);
     pq->RegisterDecision(false); // Exclusive, please
     for( CollectionInterface::iterator pit = GetPatterns().begin(); pit != GetPatterns().end(); ++pit )                 
     {

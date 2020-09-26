@@ -20,7 +20,12 @@ PatternLink::PatternLink() :
 }
 
 
-PatternLink::PatternLink(const TreePtrInterface *ppattern_, void *whodat_) :
+PatternLink::PatternLink(const Agent *parent_pattern_,
+                         const TreePtrInterface *ppattern_, 
+                         void *whodat_) :
+#ifdef LINKS_ENHANCED_TRACE
+    parent_pattern( parent_pattern_ ),
+#endif
     ppattern( ppattern_ )
 {
     EnsureNotOnStack( ppattern );
@@ -71,6 +76,22 @@ Agent *PatternLink::GetChildAgent() const
 }
 
 
+const TreePtrInterface *PatternLink::GetPatternPtr() const
+{
+    return ppattern;
+}
+
+
+string PatternLink::GetTrace() const
+{
+#ifdef LINKS_ENHANCED_TRACE
+    return parent_pattern->GetTrace() + "->" + GetChildAgent()->GetTrace();
+#else
+    return ".->" GetChildAgent()->GetTrace();
+#endif    
+}
+
+
 LocatedLink::LocatedLink() :
     ppattern( nullptr )
 {
@@ -80,10 +101,14 @@ LocatedLink::LocatedLink() :
 }
 
 
-LocatedLink::LocatedLink( const TreePtrInterface *ppattern_, 
+LocatedLink::LocatedLink( const Agent *parent_pattern_,
+                          const TreePtrInterface *ppattern_, 
                           const TreePtr<Node> &x_,
                           void *whodat_ ) :
+    parent_pattern( parent_pattern_ ),
+#ifdef LINKS_ENHANCED_TRACE
     ppattern( ppattern_ ),
+#endif
     x( x_ )
 {
     EnsureNotOnStack( ppattern );
@@ -92,6 +117,22 @@ LocatedLink::LocatedLink( const TreePtrInterface *ppattern_,
 #ifdef KEEP_WHODAT_INFO
     whodat = whodat_;
 #endif  
+}
+
+
+LocatedLink::LocatedLink( const PatternLink &plink, 
+                          const TreePtr<Node> &x_ ) :
+    parent_pattern( plink.parent_pattern ),
+#ifdef LINKS_ENHANCED_TRACE
+    ppattern( plink.ppattern ),
+#endif
+    x( x_ )                                                  
+{
+    ASSERT(x);
+
+#ifdef KEEP_WHODAT_INFO
+    whodat = plink.whodat;
+#endif
 }
 
 
@@ -132,6 +173,12 @@ Agent *LocatedLink::GetChildAgent() const
 }
 
 
+const TreePtrInterface *LocatedLink::GetPatternPtr() const
+{
+    return ppattern;
+}
+
+
 const TreePtr<Node> &LocatedLink::GetChildX() const
 {
     return x;
@@ -140,7 +187,22 @@ const TreePtr<Node> &LocatedLink::GetChildX() const
 
 LocatedLink::operator PatternLink() const
 {
-    return PatternLink( ppattern );
+#ifdef LINKS_ENHANCED_TRACE
+    return PatternLink( parent_pattern, ppattern );
+#else
+    return PatternLink( nullptr, ppattern );
+#endif    
+
+}
+
+
+string LocatedLink::GetTrace() const
+{
+#ifdef LINKS_ENHANCED_TRACE
+    return parent_pattern->GetTrace() + "->" + GetChildAgent()->GetTrace() + string("@") + x->GetTrace();
+#else
+    return ".->" GetChildAgent()->GetTrace() + string("@") + x->GetTrace();
+#endif       
 }
 
 
@@ -160,3 +222,16 @@ bool SR::operator==( const list<PatternLink> &left, const list<LocatedLink> &rig
     return true;
 }
 
+
+list<LocatedLink> SR::LocateLinksFromMap( const list<PatternLink> &plinks, 
+                                          const map< Agent *, TreePtr<Node> > &mappy )
+{
+    list<LocatedLink> llinks;
+    for( PatternLink plink : plinks )
+    {
+        Agent *child_agent = plink.GetChildAgent();
+        LocatedLink llink( plink, mappy.at(child_agent) );
+        llinks.push_back( llink );
+    }
+    return llinks;
+}                                      

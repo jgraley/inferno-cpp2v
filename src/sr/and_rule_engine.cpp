@@ -22,6 +22,8 @@
 
 //#define USE_SOLVER
 
+//#define REGENERATE_HYPOTHETICAL_KEYS
+
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( Agent *root_agent_, const set<Agent *> &master_agents_ ) :
@@ -336,10 +338,9 @@ void AndRuleEngine::KeyCoupling( Agent *agent,
 void AndRuleEngine::CompareLinks( Agent *agent,
                                   shared_ptr<const DecidedQuery> query ) 
 {    
-    int i=0;        
     FOREACH( const LocatedLink &link, query->GetNormalLinks() )
     {
-        TRACE("Comparing normal link %d\n", i++);
+        TRACE("Comparing normal link ")(link)(" keyer? %d residual? %d master? %d\n", plan.coupling_keyer_links.count( link ), plan.coupling_residual_links.count( link ), plan.master_boundary_agents.count(link.GetChildAgent()) );
         // Recurse normally 
         // Get x for linked node
         TreePtr<Node> x = link.GetChildX();
@@ -354,6 +355,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         if( plan.coupling_residual_links.count( link ) > 0 ) // See #129
         {
             CompareCoupling( link.GetChildAgent(), x, &my_keys );
+            TRACEC("Coupling matched\n");
             continue;
         }
         
@@ -601,6 +603,46 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             for( auto agent : plan.my_agents )
                 if( hypothetical_solution_keys.count(agent) != 0 )
                     solution_keys[agent] = hypothetical_solution_keys.at(agent);
+                
+#ifdef REGENERATE_HYPOTHETICAL_KEYS
+            CouplingMap new_solution_keys = solution_keys;
+            CouplingMap ref_keys = MapUnion( *master_keys, solution_keys );    
+            for( auto agent : plan.my_agents )
+            {
+                TreePtr<Node> x = solution_keys.at(agent);
+                auto pq = agent->GetPatternQuery();
+                TRACE("In after-pass, trying to match ")(*agent)(" at ")(*x)("\n");    
+                TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
+                TRACEC("Based on ")(ref_keys)("\n");    
+                list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), ref_keys );
+                DecidedQuery query(pq);
+                try
+                {
+                    agent->RunNormalLinkedQuery( query, x, ll );
+                }
+                catch( const ::Mismatch& mismatch )
+                {
+                    string s;
+                    ASSERT(false)("In after-pass, failed to match ")(*agent)(" at ")(*x)(" and links ")(ll)("\n");                    
+                }
+                // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
+                FOREACH( const LocatedLink &link, query.GetAbnormalLinks() )
+                {
+                    ASSERT( plan.diversion_agents.count(link) );
+                    Agent *diversion_agent = plan.diversion_agents.at(link).get();
+                    KeyCoupling( diversion_agent, link.GetChildX(), &new_solution_keys );
+                }                    
+                FOREACH( const LocatedLink &link, query.GetMultiplicityLinks() )
+                {
+                    ASSERT( plan.diversion_agents.count(link) );
+                    Agent *diversion_agent = plan.diversion_agents.at(link).get();
+                    KeyCoupling( diversion_agent, link.GetChildX(), &new_solution_keys );
+                }
+            }      
+            //ASSERT( new_solution_keys == hypothetical_solution_keys )
+            //      ("new keys ")(new_solution_keys)("\n")
+            //      ("hyp keys ")(hypothetical_solution_keys)("\n");
+#endif             
                 
             CouplingMap combined_keys = MapUnion( *master_keys, solution_keys );    
                                                 

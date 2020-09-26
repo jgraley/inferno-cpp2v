@@ -10,7 +10,7 @@ using namespace SR;
 
 shared_ptr<PatternQuery> SearchContainerAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>();
+    auto pq = make_shared<PatternQuery>(this);
     
 	pq->RegisterDecision( false ); // Exclusive, please.
 	pq->RegisterNormalLink( &terminus );

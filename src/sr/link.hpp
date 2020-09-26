@@ -4,16 +4,19 @@
 #include "common/common.hpp"
 #include "node/specialise_oostd.hpp"
 
+#define LINKS_ENHANCED_TRACE
+
 namespace SR
 { 
 class Agent;
 class LocatedLink;
 
-class PatternLink 
+class PatternLink : public Traceable
 {
 public:
     PatternLink();
-    PatternLink( const TreePtrInterface *ppattern, 
+    PatternLink( const Agent *parent_pattern,
+                 const TreePtrInterface *ppattern, 
                  void *whodat=nullptr );
     bool operator<(const PatternLink &other) const;
     bool operator!=(const PatternLink &other) const;
@@ -21,8 +24,13 @@ public:
     bool operator==(const LocatedLink &other) const;
     explicit operator bool() const;
     Agent *GetChildAgent() const;
-
-private:
+    const TreePtrInterface *GetPatternPtr() const;
+    string GetTrace() const; // used for debug
+    
+private: friend class LocatedLink;
+#ifdef LINKS_ENHANCED_TRACE
+    const Agent *parent_pattern;
+#endif    
     const TreePtrInterface *ppattern;
 #ifdef KEEP_WHODAT_INFO
     void *whodat; // the gdb magic you require is eg "info line *b.whodat"
@@ -30,22 +38,30 @@ private:
 };
 
 
-class LocatedLink 
+class LocatedLink : public Traceable
 {
 public:
     LocatedLink();
-    LocatedLink( const TreePtrInterface *ppattern_, 
+    LocatedLink( const Agent *parent_pattern,
+                 const TreePtrInterface *ppattern_, 
                  const TreePtr<Node> &x_,
                  void *whodat=nullptr );
+    LocatedLink( const PatternLink &plink, 
+                 const TreePtr<Node> &x_);
     bool operator<(const LocatedLink &other) const;
     bool operator!=(const LocatedLink &other) const;
     bool operator==(const LocatedLink &other) const;
     explicit operator bool() const;
     Agent *GetChildAgent() const;
+    const TreePtrInterface *GetPatternPtr() const;
     const TreePtr<Node> &GetChildX() const;
     operator PatternLink() const;
+    string GetTrace() const; // used for debug
 
 private: friend class PatternLink;
+#ifdef LINKS_ENHANCED_TRACE
+    const Agent *parent_pattern;
+#endif
     const TreePtrInterface *ppattern;
     TreePtr<Node> x; 
 #ifdef KEEP_WHODAT_INFO
@@ -55,6 +71,8 @@ private: friend class PatternLink;
 
 bool operator==( const list<PatternLink> &left, const list<LocatedLink> &right );
 
+list<LocatedLink> LocateLinksFromMap( const list<PatternLink> &plinks, 
+                                      const map< Agent *, TreePtr<Node> > &mappy );
 };
 
 #endif

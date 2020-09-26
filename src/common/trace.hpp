@@ -23,6 +23,10 @@ using namespace std;
  * that assures a stack dump. We define our own ASSERT() to use BOOST_ASSERT().
  */
 
+#include <list>
+#include <set>
+#include <map>
+
 class Tracer
 {
 public:
@@ -40,6 +44,60 @@ public:
     Tracer &operator()(const string &s); // not a printf because of risk of accidental format specifiers
     Tracer &operator()(const Traceable &s); 
     Tracer &operator()(bool b); 
+
+    template<typename T>
+    Tracer &operator()(const list<T> &l) 
+    {
+        operator()("[");
+        bool first = true;
+        for( auto x : l )
+        {
+            if( !first )
+                operator()(", ");
+            operator()(x);
+            first = false;
+        }
+        return operator()("]");
+    }
+
+    template<typename T>
+    Tracer &operator()(const set<T> &s) 
+    {
+        operator()("{");
+        bool first = true;
+        for( auto x : s )
+        {
+            if( !first )
+                operator()(", ");
+            operator()(x);
+            first = false;            
+        }
+        return operator()("}");
+    }
+
+    template<typename TK, typename TV>
+    Tracer &operator()(const map<TK, TV> &m) 
+    {
+        operator()("{");
+        bool first = true;
+        for( auto p : m )
+        {
+            if( !first )
+                operator()(", ");
+            operator()(p.first);
+            operator()(": ");
+            operator()(p.second);
+            first = false;            
+        }
+        return operator()("}");
+    }
+
+    template<typename T>
+    Tracer &operator()(const T *p) 
+    {
+        operator()("&");
+        return operator()(*p);        
+    }
 
     static void EndContinuation();
     static void Enable( bool e ); ///< enable/disable tracing, only for top level funciton to call, overridden by flags

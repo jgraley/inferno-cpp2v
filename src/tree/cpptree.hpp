@@ -108,7 +108,7 @@ struct SpecificString : String
 	} 
 	virtual string GetRender() const /// Produce a string for debug
 	{
-		// Since this is a string literal, output it quoted
+		// Since this is a string literal, output it double quoted
 		return "\"" + value + "\"";
 	}
     virtual string GetTrace() const
@@ -252,7 +252,8 @@ struct SpecificIdentifier : virtual Property
 	}
     virtual string GetTrace() const
     {
-        return GetName() + "(" + GetRender() + ")" + GetAddr();
+        // Since this is text from the program, use single quotes
+        return GetName() + "('" + GetRender() + "')" + GetAddr();
     }
 private:
 	string name;

@@ -43,7 +43,7 @@ CleanupCompoundExpression::CleanupCompoundExpression() // LIMITAION: decls in bo
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr<Temporary> r_temp;
     MakePatternPtr< TransformOf<Expression> > last( &TypeOf::instance );
-    MakePatternPtr<BuildInstanceIdentifier> r_temp_id("result");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("result");
     MakePatternPtr<Assign> r_assign;
     MakePatternPtr< Overlay<Expression> > overlay;
     MakePatternPtr<Type> r_type;
@@ -167,7 +167,7 @@ CleanupDuplicateLabels::CleanupDuplicateLabels()
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, post;
     MakePatternPtr<LabelIdentifier> s_labelid1, s_labelid2;
-    MakePatternPtr<BuildLabelIdentifier> r_labelid("%s_%s", BYPASS_WHEN_IDENTICAL);
+    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("%s_%s", BYPASS_WHEN_IDENTICAL);
     MakePatternPtr< MatchAny<LabelIdentifier> > l_s_orrule;
     MakePatternPtr<InstanceIdentifier> identifier;
     MakePatternPtr<Callable> type;
@@ -222,7 +222,7 @@ CleanupIneffectualLabels::CleanupIneffectualLabels()
     MakePatternPtr< Star<Declaration> > decls;
     MakePatternPtr< Star<Statement> > pre, post;
     MakePatternPtr<LabelIdentifier> s_labelid1, s_labelid2;
-    MakePatternPtr<BuildLabelIdentifier> r_labelid("%s_%s", BYPASS_WHEN_IDENTICAL);
+    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("%s_%s", BYPASS_WHEN_IDENTICAL);
     MakePatternPtr< MatchAny<LabelIdentifier> > l_s_orrule;
     MakePatternPtr<InstanceIdentifier> identifier;
     MakePatternPtr<Callable> type;
@@ -384,7 +384,7 @@ CleanupUnusedVariables::CleanupUnusedVariables()
     MakePatternPtr< Overlay<Scope> > over_scope; 
     MakePatternPtr< Star<Declaration> > decls;    
     MakePatternPtr<Instance> inst;
-    MakePatternPtr<NestedArray> nested_array;
+    MakePatternPtr<NestedArrayAgent> nested_array;
     MakePatternPtr< NotMatch<Type> > sx_not;
     MakePatternPtr< MatchAny<Type> > sx_any;
     MakePatternPtr< TransformOf<TypeIdentifier> > getdecl( &GetDeclaration::instance ); // TODO should be modulo typedefs

@@ -12,7 +12,7 @@ using namespace SR;
 
 shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>();
+    auto pq = make_shared<PatternQuery>(this);
     const vector< Itemiser::Element * > pattern_memb = Itemise();
     FOREACH( Itemiser::Element *ie, pattern_memb )
     {
@@ -118,7 +118,7 @@ void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
             {
                 TreePtrInterface *p_x_ptr = dynamic_cast<TreePtrInterface *>(x_memb[i]);
                 ASSERT( p_x_ptr )( "itemise for x didn't match itemise for pattern");
-                TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr);
+                TRACE("Member %d is TreePtr, pattern=", i)(*pattern_ptr)("\n");
                 query.RegisterNormalLink(pattern_ptr, *p_x_ptr); // Link into X
             }
         }

@@ -21,6 +21,7 @@ class LocatedLink;
 class PatternQuery 
 {
 public:    
+    PatternQuery( const Agent *base_agent );
     struct Decision
     {
         bool inclusive; // If true, include "end" as a possible choice
@@ -48,7 +49,10 @@ public:
 
     shared_ptr<BooleanEvaluator> GetEvaluator() const { return evaluator; }
 
+    const Agent *GetBaseAgent() const { return base_agent; }
+
 private:
+    const Agent *base_agent;
     Decisions decisions; // ha ha!
     Links normal_links; 
     Links abnormal_links; 
@@ -205,8 +209,10 @@ public:
     void SetChoice( int bc, Choice newc );
     void PushBackChoice( Choice newc );    
     void EnsureChoicesHaveIterators();
+    const Agent *GetBaseAgent() const { return base_agent; }
     
 private: friend class Conjecture;
+    const Agent *base_agent;
     shared_ptr<BooleanEvaluator> evaluator;
     Links normal_links; 
     Links abnormal_links; 

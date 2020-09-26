@@ -34,7 +34,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr< Star<Statement> > func_stmts;
     MakePatternPtr< Star<Base> > bases;
     MakePatternPtr<Enum> r_module_enum;
-    MakePatternPtr<BuildTypeIdentifier> r_enum_id("%sStates");
+    MakePatternPtr<BuildTypeIdentifierAgent> r_enum_id("%sStates");
     MakePatternPtr<InstanceIdentifier> var_id;
     MakePatternPtr<TypeIdentifier> module_id;
     MakePatternPtr< Star<Declaration> > l_func_decls, l_enum_vals, l_decls, l_module_decls;
@@ -44,10 +44,10 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr<Enum> ls_enum, lr_enum;     
     MakePatternPtr< NotMatch<Statement> > xs_rr;
     MakePatternPtr<Static> lr_state_decl;    
-    MakePatternPtr<BuildInstanceIdentifier> lr_state_id("%s_STATE_%s");
+    MakePatternPtr<BuildInstanceIdentifierAgent> lr_state_id("%s_STATE_%s");
     MakePatternPtr<Case> lr_case;
     MakePatternPtr<Signed> lr_int;
-    MakePatternPtr<BuildContainerSize> lr_count;
+    MakePatternPtr<BuildContainerSizeAgent> lr_count;
     MakePatternPtr<LabelIdentifier> ls_label_id;
     MakePatternPtr<Instance> var_decl, l_var_decl;
     MakePatternPtr< MatchAll<Node> > ll_all;
@@ -67,7 +67,7 @@ PlaceLabelsInArray::PlaceLabelsInArray()
     MakePatternPtr<Scope> l_module;
     MakePatternPtr<Field> l_func;
     MakePatternPtr<Static> r_lmap, l_lmap;
-    MakePatternPtr<BuildInstanceIdentifier> r_lmap_id("lmap");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_lmap_id("lmap");
     MakePatternPtr<Array> r_array;
     MakePatternPtr<MakeArray> r_make, ls_make, lr_make, lls_make;
     MakePatternPtr< Overlay<Expression> > l_mover;
@@ -334,9 +334,9 @@ LabelVarsToEnum::LabelVarsToEnum()
     MakePatternPtr<Expression> l_index;
     MakePatternPtr< MatchAll<Node> > ms_all;
     MakePatternPtr< AnyNode<Node> > ms_anynode;    
-    MakePatternPtr<NestedArray> nested_array;
-    MakePatternPtr<NestedSubscriptLookup> nested_subscript, nested_subscript2, nested_subscript3;
-    MakePatternPtr<NestedSubscriptLookup> l_nested_subscript, m_nested_subscript, m_nested_subscript2;
+    MakePatternPtr<NestedArrayAgent> nested_array;
+    MakePatternPtr<NestedSubscriptLookupAgent> nested_subscript, nested_subscript2, nested_subscript3;
+    MakePatternPtr<NestedSubscriptLookupAgent> l_nested_subscript, m_nested_subscript, m_nested_subscript2;
     MakePatternPtr<Instance> msx_inst;
     MakePatternPtr<String> depth;
     MakePatternPtr< Stuff<Scope> > lmap_stuff;
@@ -434,7 +434,7 @@ AddStateEnumVar::AddStateEnumVar()
     MakePatternPtr<Assign> lr_assign;
     MakePatternPtr<Automatic> state_var;
     MakePatternPtr< NotMatch<Expression> > lx_not;
-    MakePatternPtr< BuildInstanceIdentifier > state_var_id("state");
+    MakePatternPtr< BuildInstanceIdentifierAgent > state_var_id("state");
     MakePatternPtr< GreenGrass<Compound> > s_gg;
     MakePatternPtr<Subscript> s_sub, ls_sub, lr_sub;
     MakePatternPtr<InstanceIdentifier> array;

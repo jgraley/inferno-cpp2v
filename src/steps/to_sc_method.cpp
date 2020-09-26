@@ -191,7 +191,7 @@ ExplicitiseReturns::ExplicitiseReturns()
     MakePatternPtr< Star<Statement> > stmts, m_pre, m_mid, m_post;
     MakePatternPtr<Temporary> r_flag;
     MakePatternPtr<Boolean> r_boolean;
-    MakePatternPtr<BuildInstanceIdentifier> r_flag_id("enabled");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_flag_id("enabled");
     MakePatternPtr<False> lr_false;
     MakePatternPtr<True> r_true;
     MakePatternPtr<Uninitialised> s_uninit, ls_uninit, m_uninit;

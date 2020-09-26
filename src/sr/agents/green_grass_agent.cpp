@@ -8,7 +8,7 @@ using namespace SR;
 
 shared_ptr<PatternQuery> GreenGrassAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>();
+    auto pq = make_shared<PatternQuery>(this);
     pq->RegisterNormalLink( GetThrough() );
     return pq;
 }

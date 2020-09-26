@@ -225,7 +225,7 @@ ForToWhile::ForToWhile()
     
     MakePatternPtr<Continue> l_s_cont;
     MakePatternPtr<Nop> l_r_nop;
-    MakePatternPtr<BuildLabelIdentifier> r_cont_labelid("CONTINUE");
+    MakePatternPtr<BuildLabelIdentifierAgent> r_cont_labelid("CONTINUE");
     MakePatternPtr<Label> r_cont_label;
     MakePatternPtr<Goto> lr_goto;
 
@@ -290,7 +290,7 @@ IfToIfGoto::IfToIfGoto()
     MakePatternPtr<Nop> l_r_nop, r_nop;
     MakePatternPtr<Compound> r_comp;
     MakePatternPtr<LogicalNot> r_not;
-    MakePatternPtr<BuildLabelIdentifier> r_labelid1("THEN"), r_labelid2("ELSE");
+    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid1("THEN"), r_labelid2("ELSE");
     MakePatternPtr<Label> r_label1, r_label2;
     
     s_and->patterns = (s_if, l_r_not);
@@ -337,7 +337,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     MakePatternPtr<Statement> body;
     MakePatternPtr<Type> cond_type;
     MakePatternPtr<Automatic> r_decl;
-    MakePatternPtr<BuildInstanceIdentifier> id("switch_value");
+    MakePatternPtr<BuildInstanceIdentifierAgent> id("switch_value");
     MakePatternPtr< TransformOf<Expression> > s_cond( &TypeOf::instance );
     
     // SlaveSearchReplace for default
@@ -346,7 +346,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     MakePatternPtr< Star<Statement> > l1_pre, l1_post;
     MakePatternPtr< Default > l1_s_default;
     MakePatternPtr< Label > l1_r_label;
-    MakePatternPtr<BuildLabelIdentifier> l1_r_labelid("DEFAULT");
+    MakePatternPtr<BuildLabelIdentifierAgent> l1_r_labelid("DEFAULT");
     MakePatternPtr<Goto> l1_r_goto;
     
     l1_s_body->members = l1_decls;
@@ -365,7 +365,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     MakePatternPtr< Star<Statement> > l2_pre, l2_post;
     MakePatternPtr< Case > l2_s_case;
     MakePatternPtr< Label > l2_r_label;
-    MakePatternPtr<BuildLabelIdentifier> l2_r_labelid("CASE");
+    MakePatternPtr<BuildLabelIdentifierAgent> l2_r_labelid("CASE");
     MakePatternPtr<If> l2_r_if;
     MakePatternPtr<Nop> l2_r_nop;
     MakePatternPtr<Goto> l2_r_goto;
@@ -393,7 +393,7 @@ SwitchToIfGoto::SwitchToIfGoto()
     MakePatternPtr< Star<Statement> > l3_pre, l3_post;
     MakePatternPtr< RangeCase > l3_s_case;
     MakePatternPtr< Label > l3_r_label;
-    MakePatternPtr<BuildLabelIdentifier> l3_r_labelid("CASE");
+    MakePatternPtr<BuildLabelIdentifierAgent> l3_r_labelid("CASE");
     MakePatternPtr<If> l3_r_if;
     MakePatternPtr<Nop> l3_r_nop;
     MakePatternPtr<Goto> l3_r_goto;
@@ -450,7 +450,7 @@ DoToIfGoto::DoToIfGoto()
     MakePatternPtr<Goto> r_goto, l_r_goto;
     MakePatternPtr<Nop> r_nop;    
     MakePatternPtr<Compound> r_comp;
-    MakePatternPtr<BuildLabelIdentifier> r_labelid("NEXT"), l_r_cont_labelid("CONTINUE");
+    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("NEXT"), l_r_cont_labelid("CONTINUE");
     MakePatternPtr<Label> r_label, r_cont_label;
     MakePatternPtr< Stuff<Statement> > l_stuff;
     MakePatternPtr< Overlay<Statement> > l_overlay;
@@ -495,7 +495,7 @@ BreakToGoto::BreakToGoto()
     MakePatternPtr< NotMatch<Statement> > sx_not;
     MakePatternPtr<Break> s_break;
     MakePatternPtr<Goto> r_goto;
-    MakePatternPtr<BuildLabelIdentifier> r_labelid("BREAK");
+    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("BREAK");
     MakePatternPtr<Label> r_label;
     MakePatternPtr<Compound> r_comp;
     
@@ -519,7 +519,7 @@ LogicalAndToIf::LogicalAndToIf()
     MakePatternPtr<LogicalAnd> s_and;
     MakePatternPtr<Expression> op1, op2;
     MakePatternPtr<CompoundExpression> r_comp;
-    MakePatternPtr<BuildInstanceIdentifier> r_temp_id("andtemp");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("andtemp");
     MakePatternPtr<Temporary> r_temp;
     MakePatternPtr<Boolean> r_boolean;
     MakePatternPtr<If> r_if;
@@ -547,7 +547,7 @@ LogicalOrToIf::LogicalOrToIf()
     MakePatternPtr<LogicalOr> s_or;
     MakePatternPtr<Expression> op1, op2;
     MakePatternPtr<CompoundExpression> r_comp;
-    MakePatternPtr<BuildInstanceIdentifier> r_temp_id("ortemp");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("ortemp");
     MakePatternPtr<Temporary> r_temp;
     MakePatternPtr<Boolean> r_boolean;
     MakePatternPtr<If> r_if;
@@ -575,7 +575,7 @@ MultiplexorToIf::MultiplexorToIf()
     MakePatternPtr<Multiplexor> s_mux;
     MakePatternPtr<Expression> op1, op3;
     MakePatternPtr<CompoundExpression> r_comp;
-    MakePatternPtr<BuildInstanceIdentifier> r_temp_id("muxtemp");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("muxtemp");
     MakePatternPtr<Temporary> r_temp;
     MakePatternPtr< TransformOf<Expression> > op2( &TypeOf::instance );
     MakePatternPtr<Type> type;
@@ -603,7 +603,7 @@ MultiplexorToIf::MultiplexorToIf()
 ExtractCallParams::ExtractCallParams()
 {
     MakePatternPtr<Call> s_call, r_call;
-    MakePatternPtr<BuildInstanceIdentifier> r_temp_id("temp_%s");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("temp_%s");
     MakePatternPtr<Temporary> r_temp;
     MakePatternPtr<CompoundExpression> r_ce;
     MakePatternPtr<Assign> r_assign;

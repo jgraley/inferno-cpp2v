@@ -44,6 +44,34 @@ string Traceable::CPPFilt( string s )
     ps = abi::__cxa_demangle(s.c_str(), 0, 0, &status);
     s = ps;
     free(ps); // as ordained
+
+    // fprintf(stderr, "[[[%s]]]", s.c_str());
+
+    // We wish to strip off namespaces to reduce clutter, but
+    // we don't want to break template representations.
+    // I.e. we'd like to turn "SR::MatchAny<CPPTree::Type>"
+    // into "MatchAny<Type>". 
+    list<string> parts;
+    while(1)
+    {
+        size_t p = s.rfind("<");
+        if( p == string::npos )
+            break;
+        parts.push_back( s.substr(0, p+1) );
+        s = s.substr( p+1 );
+    }
+    parts.push_back( s );
+
+    s.clear();
+    for( string part : parts )
+    {
+        size_t p = part.rfind("::");
+        if( p != string::npos )
+            part = part.substr(p+2);
+        s += part;
+    }
+    
+    
     return s;
 }
 
@@ -110,7 +138,7 @@ void SerialNumber::SetStep( int s )
 
 string SerialNumber::GetAddr() const
 {
-    string ss = SSPrintf("#%d-%lu-%lu", step, location, serial);  
+    string ss = SSPrintf("#%d/%lu/%lu", step, location, serial);  
     //ss += SSPrintf("@%p", this);
     return ss;
 }

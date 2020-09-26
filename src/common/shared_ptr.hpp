@@ -70,6 +70,10 @@ struct SharedPtrInterface : virtual SUB_BASE, public Traceable
     	return *this;
     }
     virtual SharedPtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE> MakeValueArchitype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone 
+    virtual string GetTrace() const
+    {
+        return string("&") + operator*().GetTrace();
+    }  
 };
 
 template<typename VALUE_TYPE, typename SUB_BASE, typename VALUE_INTERFACE>

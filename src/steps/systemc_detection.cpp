@@ -26,7 +26,7 @@ public:
         MakePatternPtr< Star<Declaration> > decls;
         MakePatternPtr< UserType > s_usertype;
         MakePatternPtr< SCNODE > lr_scnode;
-        MakePatternPtr< TypeIdentifierByName > s_token( lr_scnode->GetToken() );                
+        MakePatternPtr< TypeIdentifierByNameAgent > s_token( lr_scnode->GetToken() );                
         MakePatternPtr< SlaveSearchReplace<Node> > r_slave( over, s_token, lr_scnode );    
         
         // Eliminate the declaration that came from isystemc.h
@@ -62,7 +62,7 @@ public:
         MakePatternPtr< InheritanceRecord > ls_class;
         MakePatternPtr< Base > ls_base;            
         MakePatternPtr< TypeIdentifier > l_tid;
-        MakePatternPtr< TypeIdentifierByName > s_token( lr_scclass->GetToken() ); 
+        MakePatternPtr< TypeIdentifierByNameAgent > s_token( lr_scclass->GetToken() ); 
         MakePatternPtr< SlaveSearchReplace<Node> > r_slave( over, ls_class, lr_scclass );    
         
         // Eliminate the declaration that came from isystemc.h
@@ -94,8 +94,8 @@ public:
         MakePatternPtr< SCFUNC > r_dynamic;
         MakePatternPtr< Call > s_call;
         MakePatternPtr< MapOperand > s_arg;            
-        MakePatternPtr< InstanceIdentifierByName > s_token( r_dynamic->GetToken() ); 
-        MakePatternPtr< InstanceIdentifierByName > s_param_id( "p1" ); 
+        MakePatternPtr< InstanceIdentifierByNameAgent > s_token( r_dynamic->GetToken() ); 
+        MakePatternPtr< InstanceIdentifierByNameAgent > s_param_id( "p1" ); 
         MakePatternPtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
                         
         s_call->callee = s_token;       
@@ -117,7 +117,7 @@ public:
     {
         MakePatternPtr< SCFUNC > r_static;
         MakePatternPtr< Call > s_call;
-        MakePatternPtr< InstanceIdentifierByName > s_token( r_static->GetToken() ); 
+        MakePatternPtr< InstanceIdentifierByNameAgent > s_token( r_static->GetToken() ); 
                           
         s_call->callee = s_token;   
         //s_call->operands = ();       
@@ -135,9 +135,9 @@ public:
         MakePatternPtr< SCFUNC > r_delta;
         MakePatternPtr< Call > s_call;
         MakePatternPtr< MapOperand > s_arg;            
-        MakePatternPtr< InstanceIdentifierByName > s_token( r_delta->GetToken() ); 
-        MakePatternPtr< InstanceIdentifierByName > s_param_id( "p1" ); 
-        MakePatternPtr< InstanceIdentifierByName > s_arg_id( "SC_ZERO_TIME" ); 
+        MakePatternPtr< InstanceIdentifierByNameAgent > s_token( r_delta->GetToken() ); 
+        MakePatternPtr< InstanceIdentifierByNameAgent > s_param_id( "p1" ); 
+        MakePatternPtr< InstanceIdentifierByNameAgent > s_arg_id( "SC_ZERO_TIME" ); 
                         
         s_call->callee = s_token;       
         s_call->operands = (s_arg);
@@ -164,8 +164,8 @@ public:
         MakePatternPtr< Expression > event;
         MakePatternPtr< Call > s_call;
         MakePatternPtr< MapOperand > s_arg;            
-        MakePatternPtr< InstanceIdentifierByName > s_token( r_tf->GetToken() ); 
-        MakePatternPtr< InstanceIdentifierByName > s_param_id( "p1" ); 
+        MakePatternPtr< InstanceIdentifierByNameAgent > s_token( r_tf->GetToken() ); 
+        MakePatternPtr< InstanceIdentifierByNameAgent > s_param_id( "p1" ); 
                 
         s_call->callee = s_token;       
         s_call->operands = (s_arg);
@@ -199,8 +199,8 @@ public:
         MakePatternPtr< Star<Base> > l_bases;        
         MakePatternPtr<Constructor> l_ctype;
         MakePatternPtr<InstanceIdentifier> l_ident;
-        MakePatternPtr< InstanceIdentifierByName > s_token( lr_scprocess->GetToken() ); 
-        MakePatternPtr< InstanceIdentifierByName > s_arg_id( "func" );
+        MakePatternPtr< InstanceIdentifierByNameAgent > s_token( lr_scprocess->GetToken() ); 
+        MakePatternPtr< InstanceIdentifierByNameAgent > s_arg_id( "func" );
         MakePatternPtr< SlaveSearchReplace<Node> > r_slave( over, l_module, l_module );            
         
         // Eliminate the declaration that came from isystemc.h
@@ -254,7 +254,7 @@ public:
         MakePatternPtr<Lookup> s_lookup;
         MakePatternPtr<Event> s_event;
         MakePatternPtr<NotifyImmediate> r_notify;
-        MakePatternPtr< InstanceIdentifierByName > s_token( r_notify->GetToken() );                
+        MakePatternPtr< InstanceIdentifierByNameAgent > s_token( r_notify->GetToken() );                
         MakePatternPtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
         //MakePatternPtr< Expression > eexpr; 
                 
@@ -284,9 +284,9 @@ public:
         MakePatternPtr<Event> s_event;
         MakePatternPtr<NotifyDelta> r_notify;
         MakePatternPtr<MapOperand> s_arg;
-        MakePatternPtr< InstanceIdentifierByName > s_zero_token( "SC_ZERO_TIME" );                
-        MakePatternPtr< InstanceIdentifierByName > s_arg_id( "p1" ); 
-        MakePatternPtr< InstanceIdentifierByName > s_token( r_notify->GetToken() );                
+        MakePatternPtr< InstanceIdentifierByNameAgent > s_zero_token( "SC_ZERO_TIME" );                
+        MakePatternPtr< InstanceIdentifierByNameAgent > s_arg_id( "p1" ); 
+        MakePatternPtr< InstanceIdentifierByNameAgent > s_token( r_notify->GetToken() );                
         MakePatternPtr< TransformOf<Expression> > eexpr( &TypeOf::instance ); 
         //MakePatternPtr< Expression > eexpr; 
                 

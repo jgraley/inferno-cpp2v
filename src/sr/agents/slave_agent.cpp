@@ -17,7 +17,7 @@ SlaveAgent::SlaveAgent( TreePtr<Node> sp, TreePtr<Node> rp, bool is_search_ ) :
 
 shared_ptr<PatternQuery> SlaveAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>();
+    auto pq = make_shared<PatternQuery>(this);
 	pq->RegisterNormalLink( GetThrough() );
     return pq;
 }

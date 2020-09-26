@@ -35,7 +35,7 @@ GotoAfterWait::GotoAfterWait()
     MakePatternPtr< Overlay<Statement> > over, all_over;
     MakePatternPtr<Goto> sx_goto, r_goto;
     MakePatternPtr<Label> r_label;
-    MakePatternPtr<BuildLabelIdentifier> r_labelid("YIELD");
+    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("YIELD");
           
     all_over->through = all;
     all_over->overlay = anynode;
@@ -65,7 +65,7 @@ GotoAfterWait::GotoAfterWait()
     MakePatternPtr< NotMatch<Statement> > notmatch;
     MakePatternPtr<Goto> sx_goto, r_goto;
     MakePatternPtr<Label> r_label;
-    MakePatternPtr<BuildLabelIdentifier> r_labelid("YIELD");
+    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("YIELD");
         
     s_comp->members = (decls);
     s_comp->statements = (pre, wait, notmatch, post);
@@ -90,7 +90,7 @@ NormaliseConditionalGotos::NormaliseConditionalGotos()
     MakePatternPtr< Star<Statement> > pre, sx_pre, post, sx_post;
     MakePatternPtr< Multiplexor > mult;
     MakePatternPtr< Label > label;    
-    MakePatternPtr< BuildLabelIdentifier > label_id("PROCEED");
+    MakePatternPtr< BuildLabelIdentifierAgent > label_id("PROCEED");
     MakePatternPtr< MatchAll<Statement> > s_all;
     MakePatternPtr< NotMatch<Statement> > sx_not;    
     
@@ -191,7 +191,7 @@ EnsureBootstrap::EnsureBootstrap()
     MakePatternPtr< Star<Statement> > pre, sx_pre, post;
     MakePatternPtr<Goto> r_goto;
     MakePatternPtr<Label> r_label;    
-    MakePatternPtr<BuildLabelIdentifier> r_labelid("BOOTSTRAP");
+    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("BOOTSTRAP");
     MakePatternPtr< NotMatch<Statement> > stop;
     MakePatternPtr<Goto> sx_goto;
         
@@ -229,7 +229,7 @@ AddStateLabelVar::AddStateLabelVar()
     MakePatternPtr<Assign> lr_assign;
     MakePatternPtr<Automatic> state_var;
     MakePatternPtr< NotMatch<Expression> > sx_not, lsx_not;
-    MakePatternPtr< BuildInstanceIdentifier > state_var_id("state");
+    MakePatternPtr< BuildInstanceIdentifierAgent > state_var_id("state");
     
     ls_goto->destination = lsx_not;
     lsx_not->pattern = state_var_id; //  MakePatternPtr<InstanceIdentifier>();
@@ -300,7 +300,7 @@ ShareGotos::ShareGotos()
     MakePatternPtr< Star<Statement> > pre, post;    
     MakePatternPtr< Goto > first_goto, r_goto;
     MakePatternPtr<Label> r_label;    
-    MakePatternPtr<BuildLabelIdentifier> r_labelid("ITERATE");
+    MakePatternPtr<BuildLabelIdentifierAgent> r_labelid("ITERATE");
                     
     loop->body = over;
     loop->condition = MakePatternPtr<SpecificInteger>(1);
@@ -335,18 +335,18 @@ InsertSwitch::InsertSwitch()
     MakePatternPtr<Switch> r_switch, l_switch;     
     MakePatternPtr<Enum> r_enum, ls_enum, lr_enum;         
     MakePatternPtr< NotMatch<Statement> > s_prenot, s_postnot, xs_rr;
-    MakePatternPtr<BuildTypeIdentifier> r_enum_id("%sStates");
+    MakePatternPtr<BuildTypeIdentifierAgent> r_enum_id("%sStates");
     MakePatternPtr<Static> lr_state_decl;    
-    MakePatternPtr<BuildInstanceIdentifier> lr_state_id("STATE_%s");
+    MakePatternPtr<BuildInstanceIdentifierAgent> lr_state_id("STATE_%s");
     MakePatternPtr<Case> lr_case;
     MakePatternPtr<Signed> lr_int;
-    MakePatternPtr<BuildContainerSize> lr_count;
-    MakePatternPtr<IsLabelReached> ls_label_id;
+    MakePatternPtr<BuildContainerSizeAgent> lr_count;
+    MakePatternPtr<IsLabelReachedAgent> ls_label_id;
     MakePatternPtr<InstanceIdentifier> var_id;
     MakePatternPtr<Instance> var_decl, l_var_decl;
     MakePatternPtr< Overlay<Type> > var_over;  
     MakePatternPtr<Label> xs_pre_label;
-    MakePatternPtr<IsLabelReached> xs_pre_reach;
+    MakePatternPtr<IsLabelReachedAgent> xs_pre_reach;
     MakePatternPtr< MatchAll<Node> > ll_all;
     MakePatternPtr< NotMatch<Node> > lls_not1, lls_not2;    
     MakePatternPtr< AnyNode<Node> > ll_any;
@@ -419,7 +419,7 @@ InsertSwitch::InsertSwitch()
     lr_switch_comp->statements = (l_pre, lr_case, /*ls_label,*/ l_post); 
     // TODO retain the label for direct gotos, BUT we are spinning at 1st slave because we think the
     // label is still a state, because we think it reaches state var, because the LABEL->STATE_LABEL change 
-    // is not being seen by IsLabelReached, because this is done by 2nd slave and stays in temps until
+    // is not being seen by IsLabelReachedAgent, because this is done by 2nd slave and stays in temps until
     // the master's SingleCompareReplace() completes. Uh-oh!
     // Only fix after fixing S&R to ensure slave output goes into context
     lr_case->value = lr_state_id;
@@ -539,7 +539,7 @@ AddYieldFlag::AddYieldFlag()
     MakePatternPtr< Overlay<Compound> > func_over, over;
     MakePatternPtr<Temporary> r_flag_decl;
     MakePatternPtr<Assign> r_flag_init, mr_assign, msx_assign;
-    MakePatternPtr<BuildInstanceIdentifier> r_flag_id("yield_flag");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_flag_id("yield_flag");
     MakePatternPtr< MatchAll<Compound> > ms_all;
     MakePatternPtr< NotMatch<Compound> > ms_not;
     

@@ -6,7 +6,7 @@ using namespace SR;
 
 shared_ptr<PatternQuery> MatchAllAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>();
+    auto pq = make_shared<PatternQuery>(this);
     for( CollectionInterface::iterator pit = GetPatterns().begin(); pit != GetPatterns().end(); ++pit )                 
     {
         const TreePtrInterface *p = &*pit; 

@@ -71,7 +71,7 @@ public:
         // GetName() works via RTTI so no amount of casting of "this" will stop the full
         // final node's name being returned. So we have to actually make a temp in the
         // node type and use that.
-        return NODE_TYPE().GetTypeName();
+        return string("Agent<") + NODE_TYPE().GetTypeName() + string(">");        
     }
 };
 

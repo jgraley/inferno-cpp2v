@@ -13,7 +13,7 @@ using namespace CPPTree;
 
 shared_ptr<PatternQuery> BuildIdentifierAgent::GetPatternQuery() const
 { 
-    return make_shared<PatternQuery>();
+    return make_shared<PatternQuery>(this);
 }
 
 
@@ -77,9 +77,9 @@ string BuildIdentifierAgent::GetNewName()
     }
 }
 
-//---------------------------------- BuildInstanceIdentifier ------------------------------------    
+//---------------------------------- BuildInstanceIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildInstanceIdentifier::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> BuildInstanceIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT("%");
     if( !GetKey() )
@@ -94,9 +94,9 @@ TreePtr<Node> BuildInstanceIdentifier::BuildReplaceImpl( TreePtr<Node> keynode )
     return DuplicateSubtree(keynode);   
 }                                                   
 
-//---------------------------------- BuildTypeIdentifier ------------------------------------    
+//---------------------------------- BuildTypeIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildTypeIdentifier::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> BuildTypeIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT("%");
     if( !GetKey() )
@@ -111,9 +111,9 @@ TreePtr<Node> BuildTypeIdentifier::BuildReplaceImpl( TreePtr<Node> keynode )
     return DuplicateSubtree(keynode);   
 }                                                   
 
-//---------------------------------- BuildLabelIdentifier ------------------------------------    
+//---------------------------------- BuildLabelIdentifierAgent ------------------------------------    
 
-TreePtr<Node> BuildLabelIdentifier::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> BuildLabelIdentifierAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
     INDENT("%");
     if( !GetKey() )
@@ -142,7 +142,7 @@ void IdentifierByNameAgent::GetGraphAppearance( bool *bold, string *text, string
 
 shared_ptr<PatternQuery> IdentifierByNameAgent::GetPatternQuery() const
 { 
-    return make_shared<PatternQuery>();
+    return make_shared<PatternQuery>(this);
 }
 
 
@@ -163,30 +163,30 @@ bool IdentifierByNameAgent::IsMatch( const TreePtrInterface &x ) const
     return false;
 }
 
-//---------------------------------- InstanceIdentifierByName ------------------------------------    
+//---------------------------------- InstanceIdentifierByNameAgent ------------------------------------    
 
-void InstanceIdentifierByName::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                                    TreePtr<Node> x ) const                
+void InstanceIdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                                         TreePtr<Node> x ) const                
 {
     query.Reset();
     if( !IsMatch( x ) )
         throw Mismatch();  
 }                                
 
-//---------------------------------- TypeIdentifierByName ------------------------------------    
+//---------------------------------- TypeIdentifierByNameAgent ------------------------------------    
 
-void TypeIdentifierByName::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                                TreePtr<Node> x ) const
+void TypeIdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                                     TreePtr<Node> x ) const
 {
     query.Reset();
     if( !IsMatch( x ) )
         throw Mismatch();  
 }                                
 
-//---------------------------------- LabelIdentifierByName ------------------------------------    
+//---------------------------------- LabelIdentifierByNameAgent ------------------------------------    
 
-void LabelIdentifierByName::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                                 TreePtr<Node> x ) const                 
+void LabelIdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                                      TreePtr<Node> x ) const                 
 {
     query.Reset();
     if( !IsMatch( x ) )
@@ -197,7 +197,7 @@ void LabelIdentifierByName::RunDecidedQueryImpl( DecidedQueryAgentInterface &que
 
 shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>();
+    auto pq = make_shared<PatternQuery>(this);
 	pq->RegisterNormalLink( &terminus );
 	if( depth )
 		pq->RegisterNormalLink( &depth ); 
@@ -232,7 +232,7 @@ void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }    
 
 
-TreePtr<Node> NestedArray::Advance( TreePtr<Node> x, 
+TreePtr<Node> NestedArrayAgent::Advance( TreePtr<Node> x, 
                                     string *depth ) const
 {
     if( auto a = dynamic_pointer_cast<Array>(x) )         
@@ -242,7 +242,7 @@ TreePtr<Node> NestedArray::Advance( TreePtr<Node> x,
 }
 
 
-TreePtr<Node> NestedSubscriptLookup::Advance( TreePtr<Node> x, 
+TreePtr<Node> NestedSubscriptLookupAgent::Advance( TreePtr<Node> x, 
                                               string *depth ) const
 {
     if( auto s = dynamic_pointer_cast<Subscript>(x) )            
@@ -261,22 +261,22 @@ TreePtr<Node> NestedSubscriptLookup::Advance( TreePtr<Node> x,
     }
 }
 
-//---------------------------------- BuildContainerSize ------------------------------------    
+//---------------------------------- BuildContainerSizeAgent ------------------------------------    
 
-shared_ptr<PatternQuery> BuildContainerSize::GetPatternQuery() const
+shared_ptr<PatternQuery> BuildContainerSizeAgent::GetPatternQuery() const
 { 
-    return make_shared<PatternQuery>();
+    return make_shared<PatternQuery>(this);
 }
 
 
-void BuildContainerSize::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                                      TreePtr<Node> x ) const
+void BuildContainerSizeAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                                   TreePtr<Node> x ) const
 { 
     query.Reset(); 
 }   
 
 
-TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode ) 
+TreePtr<Node> BuildContainerSizeAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
 	INDENT("%");
 	if( !GetKey() )
@@ -295,22 +295,22 @@ TreePtr<Node> BuildContainerSize::BuildReplaceImpl( TreePtr<Node> keynode )
 	return DuplicateSubtree(keynode);   
 }                                                   
 
-//---------------------------------- IsLabelReached ------------------------------------    
+//---------------------------------- IsLabelReachedAgent ------------------------------------    
 
-void IsLabelReached::FlushCache() const 
+void IsLabelReachedAgent::FlushCache() const 
 {
     ASSERT(0);
     cache.clear();
 }
 
 
-shared_ptr<PatternQuery> IsLabelReached::GetPatternQuery() const
+shared_ptr<PatternQuery> IsLabelReachedAgent::GetPatternQuery() const
 { 
-    return make_shared<PatternQuery>();
+    return make_shared<PatternQuery>(this);
 }
     
     
-void IsLabelReached::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+void IsLabelReachedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                           TreePtr<Node> xx ) const
 {
 	INDENT("L");
@@ -327,11 +327,11 @@ void IsLabelReached::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 	if( !n )
 		n = pattern;
 	TreePtr<Expression> y = dynamic_pointer_cast<Expression>( n );
-	ASSERT( y )("IsLabelReached saw pattern coupled to ")(*n)(" but an Expression is needed\n"); 
+	ASSERT( y )("IsLabelReachedAgent saw pattern coupled to ")(*n)(" but an Expression is needed\n"); 
 	ASSERT( xx );
 	TreePtr<Node> nxx = xx;
 	TreePtr<LabelIdentifier> x = dynamic_pointer_cast<LabelIdentifier>( nxx );
-	ASSERT( x )("IsLabelReached at ")(*xx)(" but is of type LabelIdentifier\n"); 
+	ASSERT( x )("IsLabelReachedAgent at ")(*xx)(" but is of type LabelIdentifier\n"); 
 	TRACE("Can label id ")(*x)(" reach expression ")(*y)("?\n");
 
 	set< TreePtr<InstanceIdentifier> > uf;        
@@ -341,7 +341,7 @@ void IsLabelReached::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
 }                 
 
 
-bool IsLabelReached::CanReachExpr( set< TreePtr<InstanceIdentifier> > *f,
+bool IsLabelReachedAgent::CanReachExpr( set< TreePtr<InstanceIdentifier> > *f,
 								   TreePtr<LabelIdentifier> x, 
 					               TreePtr<Expression> y ) const // y is expression. Can it yield label x?
 {
@@ -373,7 +373,7 @@ bool IsLabelReached::CanReachExpr( set< TreePtr<InstanceIdentifier> > *f,
     }
 	else if( dynamic_pointer_cast<Dereference>( y ) )
     {
-        ASSERTFAIL("IsLabelReached used on expression that is read from memory, cannot figure out the answer\n");
+        ASSERTFAIL("IsLabelReachedAgent used on expression that is read from memory, cannot figure out the answer\n");
     }
 		
 	TRACE("I reakon ")(*x)(r?" does ":" does not ")("reach ")(*y)("\n"); 
@@ -381,7 +381,7 @@ bool IsLabelReached::CanReachExpr( set< TreePtr<InstanceIdentifier> > *f,
 }    
 
 
-bool IsLabelReached::CanReachVar( set< TreePtr<InstanceIdentifier> > *f,
+bool IsLabelReachedAgent::CanReachVar( set< TreePtr<InstanceIdentifier> > *f,
 			            	      TreePtr<LabelIdentifier> x, 
 				                  TreePtr<InstanceIdentifier> y ) const // y is instance identifier. Can expression x be assigned to it?
 {

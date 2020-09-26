@@ -77,7 +77,7 @@ UseTempForReturnValue::UseTempForReturnValue()
     TreePtr<Compound> r_sub_comp( new Compound );
     TreePtr< Temporary > r_newvar( new Temporary );
     r_newvar->type = type;
-    MakePatternPtr<BuildInstanceIdentifier> id("temp_retval");
+    MakePatternPtr<BuildInstanceIdentifierAgent> id("temp_retval");
     r_newvar->identifier = id;
     r_newvar->initialiser = MakePatternPtr<Uninitialised>();
     r_sub_comp->members = ( r_newvar );
@@ -112,7 +112,7 @@ ReturnViaTemp::ReturnViaTemp()
     MakePatternPtr< Star<MapOperand> > m_operands;
     MakePatternPtr<Temporary> r_temp;
     MakePatternPtr<Assign> mr_assign, lr_assign;
-    MakePatternPtr<BuildInstanceIdentifier> r_temp_id("%s_return");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("%s_return");
     MakePatternPtr<Return> ls_return, lr_return;
     MakePatternPtr<Expression> l_return_value;
     MakePatternPtr<CompoundExpression> mr_comp;
@@ -169,11 +169,11 @@ AddLinkAddress::AddLinkAddress()
     MakePatternPtr< Star<Declaration> > decls;    
     MakePatternPtr< Star<Base> > bases;    
     MakePatternPtr<Temporary> r_retaddr;
-    MakePatternPtr<BuildInstanceIdentifier> r_retaddr_id("%s_link");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_retaddr_id("%s_link");
     MakePatternPtr<Automatic> lr_retaddr;
-    MakePatternPtr<BuildInstanceIdentifier> lr_retaddr_id("link");
+    MakePatternPtr<BuildInstanceIdentifierAgent> lr_retaddr_id("link");
     MakePatternPtr<TempReturnAddress> lr_temp_retaddr;
-    MakePatternPtr<BuildInstanceIdentifier> lr_temp_retaddr_id("temp_link");
+    MakePatternPtr<BuildInstanceIdentifierAgent> lr_temp_retaddr_id("temp_link");
     MakePatternPtr< NotMatch<Declaration> > s_nm, ls_nm;
     MakePatternPtr< GreenGrass<Declaration> > gg;
     MakePatternPtr<Instance> l_inst;
@@ -185,7 +185,7 @@ AddLinkAddress::AddLinkAddress()
     MakePatternPtr<Call> ms_call, mr_call;
     MakePatternPtr<Compound> mr_comp, msx_comp;
     MakePatternPtr<Label> mr_label;
-    MakePatternPtr<BuildLabelIdentifier> mr_labelid("LINK");
+    MakePatternPtr<BuildLabelIdentifierAgent> mr_labelid("LINK");
     MakePatternPtr< MatchAll<Statement> > m_all;
     MakePatternPtr< AnyNode<Statement> > m_any; // TODO rename AnyNode -> Blob
     MakePatternPtr< NotMatch<Statement> > ms_not;
@@ -283,7 +283,7 @@ ParamsViaTemps::ParamsViaTemps()
     MakePatternPtr<Temporary> r_temp;
     MakePatternPtr<Assign> mr_assign;
     MakePatternPtr<Expression> m_expr;
-    MakePatternPtr<BuildInstanceIdentifier> r_temp_id("%s_%s");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_temp_id("%s_%s");
     MakePatternPtr< Overlay<Declaration> > over;
     
     ms_call->callee = func_id;
@@ -365,8 +365,8 @@ GenerateStacks::GenerateStacks()
     MakePatternPtr<Return> ret;
     MakePatternPtr<Subscript> l_r_sub;
     MakePatternPtr< MatchAll<Node> > s_and3;
-    MakePatternPtr<BuildInstanceIdentifier> r_index_identifier("%s_stack_index");
-    MakePatternPtr<BuildInstanceIdentifier> r_identifier("%s_stack");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_index_identifier("%s_stack_index");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_identifier("%s_stack");
     MakePatternPtr< GreenGrass<Statement> > s_gg;
     MakePatternPtr<Assign> r_index_init;
     MakePatternPtr< Star<Declaration> > members;
@@ -499,8 +499,8 @@ GenerateStacks::GenerateStacks()
     MakePatternPtr<Return> ret;
     MakePatternPtr<Subscript> l_r_sub;
     MakePatternPtr< MatchAll<Node> > s_and3;
-    MakePatternPtr<BuildInstanceIdentifier> r_index_identifier("%s_stack_index");
-    MakePatternPtr<BuildInstanceIdentifier> r_identifier("%s_stack");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_index_identifier("%s_stack_index");
+    MakePatternPtr<BuildInstanceIdentifierAgent> r_identifier("%s_stack");
     MakePatternPtr< GreenGrass<Statement> > s_gg;
 
     // Master search - look for functions satisfying the construct limitation and get
@@ -587,7 +587,7 @@ MergeFunctions::MergeFunctions()
     MakePatternPtr<Call> s_call, ls_call;
     MakePatternPtr<InstanceIdentifier> func_id;
     MakePatternPtr<Label> r_label;
-    MakePatternPtr< BuildLabelIdentifier > r_label_id("ENTER_%s");
+    MakePatternPtr< BuildLabelIdentifierAgent > r_label_id("ENTER_%s");
     MakePatternPtr< MatchAll<Compound> > s_all;
     MakePatternPtr< Stuff<Compound> > s_stuff, func_stuff;
     MakePatternPtr<TypeIdentifier> module_id;

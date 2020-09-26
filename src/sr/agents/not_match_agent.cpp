@@ -6,7 +6,7 @@ using namespace SR;
 
 shared_ptr<PatternQuery> NotMatchAgent::GetPatternQuery() const
 {
-    auto pq = make_shared<PatternQuery>();
+    auto pq = make_shared<PatternQuery>(this);
 	pq->RegisterAbnormalLink( GetPattern() );
 	pq->RegisterEvaluator( shared_ptr<BooleanEvaluator>( new BooleanEvaluatorNot() ) );
     return pq;

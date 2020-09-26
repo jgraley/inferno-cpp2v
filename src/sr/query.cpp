@@ -18,6 +18,12 @@ using namespace SR;
 #define WHODAT() nullptr
 #endif
  
+PatternQuery::PatternQuery( const Agent *base_agent_ ) :
+    base_agent( base_agent_ )
+{
+}
+ 
+ 
 void PatternQuery::clear()
 {
     normal_links.clear();
@@ -37,21 +43,21 @@ void PatternQuery::RegisterDecision( bool inclusive )
  
 void PatternQuery::RegisterNormalLink( const TreePtrInterface *ppattern )
 {
-    PatternLink b( ppattern, WHODAT() );
+    PatternLink b( base_agent, ppattern, WHODAT() );
     normal_links.push_back( b );        
 }
 
 
 void PatternQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern )
 {
-    PatternLink b( ppattern, WHODAT() );
+    PatternLink b( base_agent, ppattern, WHODAT() );
     abnormal_links.push_back( b );       
 }
 
 
 void PatternQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern )
 {
-    PatternLink b( ppattern, WHODAT() );
+    PatternLink b( base_agent, ppattern, WHODAT() );
     multiplicity_links.push_back( b );       
 }
 
@@ -70,6 +76,7 @@ PatternQuery::Links PatternQuery::GetAllLinks() const
 
 
 DecidedQuery::DecidedQuery( shared_ptr<const PatternQuery> pq ) :
+    base_agent( pq->GetBaseAgent() ),
     decisions( pq->GetDecisions().size() ),
     next_decision( decisions.begin() ), 
     choices( pq->GetDecisions().size() ),
@@ -88,21 +95,21 @@ void DecidedQuery::Start()
 
 void DecidedQuery::RegisterNormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x )
 {
-    LocatedLink link( ppattern, x, WHODAT() );
+    LocatedLink link( base_agent, ppattern, x, WHODAT() );
     normal_links.push_back( link );        
 }
 
 
 void DecidedQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x )
 {
-    LocatedLink link( ppattern, x, WHODAT() );
+    LocatedLink link( base_agent, ppattern, x, WHODAT() );
     abnormal_links.push_back( link );
 }
 
 
 void DecidedQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern, TreePtr<SubContainer> x )
 {
-    LocatedLink link( ppattern, x, WHODAT() );
+    LocatedLink link( base_agent, ppattern, x, WHODAT() );
     multiplicity_links.push_back( link );
 }
 
@@ -112,7 +119,7 @@ void DecidedQuery::RegisterAlwaysMatchingLink( const TreePtrInterface *ppattern 
     // Supply the pattern as x. Pattern are usually not valid x nodes
     // (because can have NULL pointers) but there's logic in 
     // the AndRuleEngine to early-out in this case. 
-    LocatedLink link( ppattern, *ppattern, WHODAT() );
+    LocatedLink link( base_agent, ppattern, *ppattern, WHODAT() );
     normal_links.push_back( link );      
 }
 

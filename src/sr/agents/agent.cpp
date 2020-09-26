@@ -101,7 +101,7 @@ void AgentCommon::RunNormalLinkedQuery( DecidedQuery &query,
             }
             
             // The query now has populated links, which should be full
-            // (otherwise RunDecidedQuery() (DQ) should have thrown). We loop 
+            // (otherwise RunDecidedQuery() should have thrown). We loop 
             // over both and check that they refer to the same x nodes
             // we were passed. Mismatch will throw, same as in DQ.
             auto normal_links = query.GetNormalLinks();
