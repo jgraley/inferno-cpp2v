@@ -3,6 +3,7 @@
 
 #include "../search_replace.hpp"
 #include "agent.hpp"
+#include "../cache.hpp"
 
 namespace SR
 {
@@ -21,6 +22,8 @@ public:
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:
     virtual const TreePtrInterface *GetPointer() const = 0;
+    
+    mutable CacheByLocation cache;
 };
 	
 template<class PRE_RESTRICTION>

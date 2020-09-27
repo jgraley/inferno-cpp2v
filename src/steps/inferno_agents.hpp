@@ -6,6 +6,7 @@
 #include "helpers/transformation.hpp"
 #include "tree/sctree.hpp"
 #include "sr/agents/star_agent.hpp"
+#include "sr/cache.hpp"
 
 using namespace SR;
 // TODO pollutes client namespace
@@ -154,6 +155,9 @@ struct NestedAgent : public virtual InfernoAgent
     
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;    
+    
+private:
+    mutable CacheByLocation cache;    
 };
 
 

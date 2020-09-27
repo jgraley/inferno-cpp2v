@@ -50,6 +50,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
         
     list<Agent *> normal_agents_ordered;
     master_boundary_agents.clear();    
+    master_boundary_links.clear();
     reached.clear();
     PopulateForSolver( &normal_agents_ordered, 
                              root_agent, 
@@ -152,9 +153,16 @@ void AndRuleEngine::Plan::PopulateForSolver( list<Agent *> *normal_agents_ordere
     reached.insert(agent);
      
     normal_agents_ordered->push_back( agent );
+    
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     FOREACH( PatternLink link, pq->GetNormalLinks() )
+    {
         PopulateForSolver( normal_agents_ordered, link.GetChildAgent(), master_agents );        
+        
+        // Note: here, we won't see root if root is a master agent (i.e. trivial pattern)
+        if( master_boundary_agents.count( link.GetChildAgent() ) )
+            master_boundary_links.insert( link );
+    }
 }
 
 
@@ -344,7 +352,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
 {    
     FOREACH( const LocatedLink &link, query->GetNormalLinks() )
     {
-        TRACE("Comparing normal link ")(link)(" keyer? %d residual? %d master? %d\n", plan.coupling_keyer_links.count( link ), plan.coupling_residual_links.count( link ), plan.master_boundary_agents.count(link.GetChildAgent()) );
+        TRACE("Comparing normal link ")(link)(" keyer? %d residual? %d master? %d\n", plan.coupling_keyer_links.count( link ), plan.coupling_residual_links.count( link ), plan.master_boundary_links.count(link) );
         // Recurse normally 
         // Get x for linked node
         TreePtr<Node> x = link.GetChildX();
@@ -364,7 +372,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         }
         
         // Master couplings are now checked in a post-pass
-        if( plan.master_boundary_agents.count(link.GetChildAgent()) > 0 )
+        if( plan.master_boundary_links.count(link) > 0 )
         {
             master_coupling_candidates[link.GetChildAgent()] = x;
             continue;
@@ -577,11 +585,11 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             
             DecidedCompare( plan.root_agent, start_x );
             
-            for( auto agent : plan.master_boundary_agents )
+            for( auto link : plan.master_boundary_links )
             {
-                auto x = master_coupling_candidates.at(agent);
-                CompareCoupling( agent, x, master_keys );
-                TRACE("Accepted master coupling for ")(agent)(" x=")(x)(" key=")(master_keys->at(agent))("\n");
+                auto x = master_coupling_candidates.at(link.GetChildAgent());
+                CompareCoupling( link.GetChildAgent(), x, master_keys );
+                TRACE("Accepted master coupling for ")(link.GetChildAgent())(" x=")(x)(" key=")(master_keys->at(link.GetChildAgent()))("\n");
             }
 #endif
             // The hypothetical_solution_keys contain keys for agents reached
@@ -598,6 +606,8 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
 #ifdef REGENERATE_HYPOTHETICAL_KEYS
             CouplingMap new_solution_keys = solution_keys;
             CouplingMap ref_keys = MapUnion( *master_keys, solution_keys );    
+            set<PatternLink> compare_by_value_links = SetUnion( plan.coupling_residual_links, 
+                                                                plan.master_boundary_links );    
             for( auto agent : plan.my_agents )
             {
                 TreePtr<Node> x = solution_keys.at(agent);
@@ -610,7 +620,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
                 DecidedQuery query(pq);
                 try
                 {
-                    agent->RunNormalLinkedQuery( query, x, ll, plan.coupling_residual_links );
+                    agent->RunNormalLinkedQuery( query, x, ll, compare_by_value_links );
                 }
                 catch( const ::Mismatch& mismatch )
                 {

@@ -200,7 +200,7 @@ shared_ptr<PatternQuery> NestedAgent::GetPatternQuery() const
     auto pq = make_shared<PatternQuery>(this);
 	pq->RegisterNormalLink( &terminus );
 	if( depth )
-		pq->RegisterNormalLink( &depth ); 
+		pq->RegisterNormalLink( &depth ); // local
     return pq;
 }
 
@@ -226,14 +226,20 @@ void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     // Compare the depth with the supplied pattern if present
     if( depth )
     {
-        TreePtr<Node> cur_depth( new SpecificString(s) );
-        query.RegisterNormalLink( &depth, cur_depth );  // Generated Link (string)
+        auto op = [&](TreePtr<Node> x) -> TreePtr<Node>
+        {
+            TreePtr<Node> cur_depth( new SpecificString(s) );
+            return cur_depth;
+        };
+        // note: not caching the recursive algorithm because we
+        // need terminus from it. See #153 for discussion
+        query.RegisterNormalLink( &depth, cache( x, op ) );  // Generated Link (string)
     }
 }    
 
 
 TreePtr<Node> NestedArrayAgent::Advance( TreePtr<Node> x, 
-                                    string *depth ) const
+                                         string *depth ) const
 {
     if( auto a = dynamic_pointer_cast<Array>(x) )         
         return a->element; // TODO support depth string (or integer)
@@ -243,7 +249,7 @@ TreePtr<Node> NestedArrayAgent::Advance( TreePtr<Node> x,
 
 
 TreePtr<Node> NestedSubscriptLookupAgent::Advance( TreePtr<Node> x, 
-                                              string *depth ) const
+                                                   string *depth ) const
 {
     if( auto s = dynamic_pointer_cast<Subscript>(x) )            
     {

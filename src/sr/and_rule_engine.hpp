@@ -78,8 +78,9 @@ public:
         map< PatternLink, shared_ptr<PlaceholderAgent> > diversion_agents; 
         map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
         set<Agent *> master_boundary_agents;
-        set< PatternLink > coupling_keyer_links;
-        set< PatternLink > coupling_residual_links;
+        set<PatternLink> master_boundary_links;
+        set<PatternLink> coupling_keyer_links;
+        set<PatternLink> coupling_residual_links;
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;
     private: // working varaibles in plan construction

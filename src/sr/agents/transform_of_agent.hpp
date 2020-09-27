@@ -6,6 +6,7 @@
 #include "agent.hpp"
 #include "overlay_agent.hpp"
 #include "slave_agent.hpp"
+#include "../cache.hpp"
 
 namespace SR
 {
@@ -30,9 +31,12 @@ public:
     	pattern(p)
     {
     }
-    
+
 protected: 
     TransformOfAgent() {}    
+    
+private:
+    mutable CacheByLocation cache;    
 };
 
 

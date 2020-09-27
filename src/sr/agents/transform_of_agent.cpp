@@ -18,20 +18,24 @@ void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     INDENT("T");
     query.Reset();
     
-    // Transform the candidate expression, sharing the overall S&R context so that
-    // things like GetDeclaration can work (they search the whole program tree).
-    TreePtr<Node> xt = (*transformation)( master_scr_engine->GetOverallMaster()->GetContext(), x );
-	if( xt )
-	{
-	    // Punt it back into the search/replace engine
-	    query.RegisterNormalLink( &pattern, xt );  // Link to Generated (could be elsewhere in x)
-	}
-	else
-	{
-	    // Transformation returned NULL, probably because the candidate was incompatible
-        // with the transofrmation - a search MISS.
-	    throw Mismatch();  
-	}
+    auto op = [&](TreePtr<Node> x) -> TreePtr<Node>
+    {
+        // Transform the candidate expression, sharing the overall S&R context so that
+        // things like GetDeclaration can work (they search the whole program tree).
+        TreePtr<Node> xt = (*transformation)( master_scr_engine->GetOverallMaster()->GetContext(), x );
+        if( xt )
+        {
+            // Punt it back into the search/replace engine
+            return xt;  // Link to Generated (could be elsewhere in x)
+        }
+        else
+        {
+            // Transformation returned NULL, probably because the candidate was incompatible
+            // with the transofrmation - a search MISS.
+            throw Mismatch();  
+        }
+    };
+    query.RegisterNormalLink( &pattern, cache( x, op ) );    
 }
 
 
