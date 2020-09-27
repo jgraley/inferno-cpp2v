@@ -109,6 +109,8 @@ public:
     const CouplingMap &GetCouplingKeys();
 
 private:    
+    void AssertNewCoupling( const CouplingMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
+
     CouplingMap my_keys; 
     CouplingMap solution_keys; 
     CouplingMap hypothetical_solution_keys; 

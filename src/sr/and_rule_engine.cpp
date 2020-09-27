@@ -22,7 +22,7 @@
 
 //#define USE_SOLVER
 
-#define REGENERATE_HYPOTHETICAL_KEYS
+//#define REGENERATE_HYPOTHETICAL_KEYS
 
 using namespace SR;
 
@@ -604,7 +604,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
                     solution_keys[agent] = hypothetical_solution_keys.at(agent);
                 
 #ifdef REGENERATE_HYPOTHETICAL_KEYS
-            CouplingMap new_solution_keys = solution_keys;
+            CouplingMap new_hypothetical_solution_keys = solution_keys;
             CouplingMap ref_keys = MapUnion( *master_keys, solution_keys );    
             set<PatternLink> compare_by_value_links = SetUnion( plan.coupling_residual_links, 
                                                                 plan.master_boundary_links );    
@@ -631,18 +631,22 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
                 {
                     ASSERT( plan.diversion_agents.count(link) );
                     Agent *diversion_agent = plan.diversion_agents.at(link).get();
-                    KeyCoupling( diversion_agent, link.GetChildX(), &new_solution_keys );
+                    AssertNewCoupling( hypothetical_solution_keys, diversion_agent, link.GetChildX(), agent ); 
+                    KeyCoupling( diversion_agent, link.GetChildX(), &new_hypothetical_solution_keys );
                 }                    
                 FOREACH( const LocatedLink &link, query.GetMultiplicityLinks() )
                 {
                     ASSERT( plan.diversion_agents.count(link) );
                     Agent *diversion_agent = plan.diversion_agents.at(link).get();
-                    KeyCoupling( diversion_agent, link.GetChildX(), &new_solution_keys );
+                    AssertNewCoupling( hypothetical_solution_keys, diversion_agent, link.GetChildX(), agent ); 
+                    KeyCoupling( diversion_agent, link.GetChildX(), &new_hypothetical_solution_keys );
                 }
             }      
-            //ASSERT( new_solution_keys == hypothetical_solution_keys )
-            //      ("new keys ")(new_solution_keys)("\n")
-            //      ("hyp keys ")(hypothetical_solution_keys)("\n");
+            ASSERT( new_hypothetical_solution_keys.size() == hypothetical_solution_keys.size() )
+                  ("new keys ")(new_hypothetical_solution_keys)("\n")
+                  ("hyp keys ")(hypothetical_solution_keys)("\n");
+                  
+            hypothetical_solution_keys = new_hypothetical_solution_keys;
 #endif             
                 
             CouplingMap combined_keys = MapUnion( *master_keys, solution_keys );    
@@ -745,3 +749,37 @@ const CouplingMap &AndRuleEngine::GetCouplingKeys()
     return solution_keys;
 }
 
+
+void AndRuleEngine::AssertNewCoupling( const CouplingMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent )
+{
+    ASSERT( old.count(new_agent) == 1 );
+    if( TreePtr<SubContainer>::DynamicCast(new_x) )
+    {                    
+        SimpleCompare sc;
+        bool same  = sc( old.at(new_agent), new_x );
+        if( !same )
+        {
+            TRACE("New x ")(new_x)(" mismatches old ")(old.at(new_agent))
+                 (" for agent ")(new_agent)(" with parent ")(parent_agent)("\n");
+            if( TreePtr<SubSequence>::DynamicCast(new_x) && TreePtr<SubSequence>::DynamicCast(old.at(new_agent)))
+                TRACEC("SubSequence\n");
+            else if( TreePtr<SubSequenceRange>::DynamicCast(new_x) && TreePtr<SubSequenceRange>::DynamicCast(old.at(new_agent)))
+                TRACEC("SubSequenceRange\n");
+            else if( TreePtr<SubCollection>::DynamicCast(new_x) && TreePtr<SubCollection>::DynamicCast(old.at(new_agent)))
+                TRACEC("SubCollections\n");
+            else
+                TRACEC("Container types don't match\n");
+            ContainerInterface *xc = dynamic_cast<ContainerInterface *>(old.at(new_agent).get());
+            FOREACH( TreePtr<Node> n, *xc )
+                TRACEC("old: ")( n )("\n");
+            xc = dynamic_cast<ContainerInterface *>(new_x.get());
+            FOREACH( TreePtr<Node> n, *xc )
+                TRACEC("new: ")( n )("\n");
+        }
+        ASSERT( same );                                                
+    }
+    else
+    {
+        ASSERT( old.at(new_agent) == new_x );
+    }
+}

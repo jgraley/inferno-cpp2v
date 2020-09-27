@@ -110,7 +110,7 @@ void AgentCommon::RunNormalLinkedQuery( DecidedQuery &query,
         try
         {
             {
-                //Tracer::RAIIEnable silencer( false ); // make DQ be quiet
+                Tracer::RAIIEnable silencer( false ); // make DQ be quiet
                 RunDecidedQuery( query, x );
             }
             
@@ -120,8 +120,8 @@ void AgentCommon::RunNormalLinkedQuery( DecidedQuery &query,
             // we were passed. Mismatch will throw, same as in DQ.
             auto actual_links = query.GetNormalLinks();
             ASSERT( actual_links.size() == required_links.size() );
-            TRACE("Actual links   ")(actual_links)("\n");
-            TRACEC("Required links ")(required_links)("\n");
+            // TRACE("Actual links   ")(actual_links)("\n");
+            // TRACEC("Required links ")(required_links)("\n");
             
             bool match = true;
             auto alit = actual_links.begin();
