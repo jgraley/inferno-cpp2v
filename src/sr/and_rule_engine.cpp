@@ -22,7 +22,7 @@
 
 //#define USE_SOLVER
 
-//#define REGENERATE_HYPOTHETICAL_KEYS
+#define REGENERATE_HYPOTHETICAL_KEYS
 
 using namespace SR;
 
