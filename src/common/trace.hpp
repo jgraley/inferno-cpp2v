@@ -175,9 +175,10 @@ private:
 // can be BOOST_CURRENT_FUNCTION if you want full signature but I find
 // it can get in the way
 
-#define FTRACE Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, Tracer::FORCE )
 #define TRACE if(Tracer::IsEnabled()) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION )
+#define FTRACE Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, Tracer::FORCE )
 #define TRACEC if(Tracer::IsEnabled()) Tracer()
+#define FTRACEC Tracer(Tracer::FORCE)
 
 // New assert uses functor. Can be used as ASSERT(cond); or ASSERT(cond)(printf args);
 #define ASSERT(CONDITION) if(!(CONDITION)) Tracer( __FILE__, __LINE__, INFERNO_CURRENT_FUNCTION, (Tracer::Flags)(Tracer::ABORT|Tracer::FORCE), #CONDITION )

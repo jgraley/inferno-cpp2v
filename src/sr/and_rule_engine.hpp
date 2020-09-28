@@ -70,7 +70,7 @@ public:
         AndRuleEngine * const algo;
         Agent *root_agent;
         set<Agent *> master_agents;
-        set<Agent *> my_agents;   
+        set<Agent *> my_normal_agents;   
         set< Agent *> my_evaluators;   
         map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
         map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
@@ -96,7 +96,7 @@ public:
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
     void CompareEvaluatorLinks( Agent *agent,
-							    const CouplingMap *hypothetical_solution_keys,
+							    const CouplingMap *after_pass_keys,
                                 const CouplingMap *master_keys );
     void DecidedCompare( Agent *agent,
                          TreePtr<Node> x );
@@ -111,9 +111,9 @@ public:
 private:    
     void AssertNewCoupling( const CouplingMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
 
-    CouplingMap my_keys; 
+    CouplingMap working_keys; 
     CouplingMap solution_keys; 
-    CouplingMap hypothetical_solution_keys; 
+    CouplingMap after_pass_keys; 
     CouplingMap master_coupling_candidates;
     const CouplingMap *master_keys;
 };
