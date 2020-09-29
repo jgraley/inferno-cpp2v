@@ -87,6 +87,10 @@ public:
         set<Agent *> reached; 
     } plan;
     
+    void ExpandDomain( Agent *agent, set< TreePtr<Node> > &domain );
+    void StartCSPSolver( TreePtr<Node> start_x,
+                         const CouplingMap *master_keys );
+    void GetNextCSPSolution();
     void CompareCoupling( Agent *agent,
                           TreePtr<Node> x,
                           const CouplingMap *keys );
@@ -95,14 +99,17 @@ public:
                       CouplingMap *keys );
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
+    void DecidedCompare( Agent *agent,
+                         TreePtr<Node> x );
     void CompareEvaluatorLinks( Agent *agent,
 							    const CouplingMap *after_pass_keys,
                                 const CouplingMap *master_keys );
-    void DecidedCompare( Agent *agent,
-                         TreePtr<Node> x );
-    void ExpandDomain( Agent *agent, set< TreePtr<Node> > &domain );
+    void CompareAfterPass( const CouplingMap *master_keys );
     void Compare( TreePtr<Node> start_x,
                   const CouplingMap *master_keys );
+    void CompareTrivialProblem( TreePtr<Node> start_x,
+                                const CouplingMap *master_keys );
+    void CompareMasterKeys( const CouplingMap *master_keys );
     void Compare( TreePtr<Node> start_x );
     void EnsureChoicesHaveIterators();
 

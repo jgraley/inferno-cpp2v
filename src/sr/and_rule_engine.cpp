@@ -13,6 +13,7 @@
 #include "common/common.hpp"
 #include "agents/match_any_agent.hpp"
 #include "link.hpp"
+#include "tree/cpptree.hpp"
 
 #include "and_rule_engine.hpp"
 
@@ -22,7 +23,15 @@
 
 //#define USE_SOLVER
 
-//#define REGENERATE_HYPOTHETICAL_KEYS
+// After-pass restricts based on evaluators, free abnormals and
+// multiplicities. REGENERATE is the new algo that figures out where
+// they are based on normals, using RunNormalLocatedQuery().
+//#define REGENERATE_AFTER_PASS_KEYS
+
+// EXTRACT is the old algo that gets them from CompareLinks() (in 
+// DC solver) or diversions (CSP solver). Latter probably broken.
+// Enable both and ASSERTs will confirm they match.
+#define EXTRACT_AFTER_PASS_KEYS
 
 using namespace SR;
 
@@ -315,7 +324,68 @@ void AndRuleEngine::Plan::CreateVariousThings( const set<Agent *> &normal_agents
     }
 }
 
-#include "tree/cpptree.hpp"
+
+void AndRuleEngine::ExpandDomain( Agent *agent, set< TreePtr<Node> > &domain )
+{
+    // It's important that this walk hits parents first because local node 
+    // transformations occur in parent-then-child order. That's why this 
+    // part is here and not in the CSP stuff: it exploits knowlege of 
+    // the directedenss of the pattern trees.
+    plan.my_constraints.at(agent)->ExpandDomain( domain );  
+    
+    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
+    FOREACH( PatternLink link, pq->GetNormalLinks() )
+        ExpandDomain( link.GetChildAgent(), domain );
+}
+
+
+void AndRuleEngine::StartCSPSolver( TreePtr<Node> start_x,
+                                    const CouplingMap *master_keys_ )
+{
+    set< TreePtr<Node> > domain;
+	Walk wx( start_x ); 
+	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
+        domain.insert(*wx_it);
+    
+    CouplingMap forces = *master_keys;
+    forces[plan.root_agent] = start_x;
+    for( pair< Agent *, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
+        p.second->SetForces( forces );
+    
+    // Expand the domain to include generated child y nodes.
+    ExpandDomain( plan.root_agent, domain );
+    
+    plan.solver->Start( domain );
+}
+
+
+void AndRuleEngine::GetNextCSPSolution()
+{
+    map< shared_ptr<CSP::Constraint>, list< TreePtr<Node> > > values;
+    bool match = plan.solver->GetNextSolution( &values );        
+    if( !match )
+        throw NoSolution();
+
+    // Recreate working_keys
+    for( pair< Agent *, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
+    {
+        list< TreePtr<Node> > &vals = values.at(p.second);
+        list< Agent * > vars = p.second->GetFreeVariables();
+        ASSERT( vars.front() == p.first );
+        if( plan.my_normal_agents.count(vars.front()) )
+            solution_keys[vars.front()] = vals.front(); 
+#ifdef EXTRACT_AFTER_PASS_KEYS
+        else
+            after_pass_keys[vars.front()] = vals.front();
+        // Note: suspect this doesn't work, and that you need to loop
+        // over the constraint's variables and check through them to
+        // find the abnormals, because diversion links/variables don't 
+        // have their own constraints.
+#endif                
+    }
+}
+
+
 void AndRuleEngine::CompareCoupling( Agent *agent,
                                      TreePtr<Node> x,
                                      const CouplingMap *keys )
@@ -389,7 +459,8 @@ void AndRuleEngine::CompareLinks( Agent *agent,
 
         DecidedCompare(link.GetChildAgent(), x);   
     }
-
+    
+#ifdef EXTRACT_AFTER_PASS_KEYS
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
     FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
     {
@@ -404,46 +475,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         Agent *diversion_agent = plan.diversion_agents.at(link).get();
         KeyCoupling( diversion_agent, link.GetChildX(), &after_pass_keys );
     }
-}
-
-
-void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
-                                           const CouplingMap *input_keys,
-							               const CouplingMap *master_keys ) 
-{
-    auto pq = agent->GetPatternQuery();
-    shared_ptr<BooleanEvaluator> evaluator = pq->GetEvaluator();
-	ASSERT( evaluator );
-
-    // Follow up on any blocks that were noted by the agent impl    
-    int i=0;
-    list<bool> compare_results;
-    FOREACH( PatternLink link, pq->GetAbnormalLinks() )
-    {
-        TRACE("Comparing block %d\n", i);
- 
-        // Get x for linked node
-        Agent *diversion_agent = plan.diversion_agents.at(link).get();
-        TreePtr<Node> x = input_keys->at(diversion_agent);
-                                
-        try 
-        {
-            plan.my_evaluator_abnormal_engines.at(link)->Compare( x, master_keys );
-            compare_results.push_back( true );
-        }
-        catch( ::Mismatch & )
-        {
-            compare_results.push_back( false );
-        }
-
-        i++;
-    }
-    
-	TRACE(" Evaluating ");
-	FOREACH(bool b, compare_results)
-	    TRACE(b)(" ");
-	if( !(*evaluator)( compare_results ) )
-        throw EvaluatorFalse();
+#endif    
 }
 
 
@@ -487,17 +519,181 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 }
 
 
-void AndRuleEngine::ExpandDomain( Agent *agent, set< TreePtr<Node> > &domain )
+void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
+                                           const CouplingMap *input_keys,
+							               const CouplingMap *master_keys ) 
 {
-    // It's important that this walk hits parents first because local node 
-    // transformations occur in parent-then-child order. That's why this 
-    // part is here and not in the CSP stuff: it exploits knowlege of 
-    // the directedenss of the pattern trees.
-    plan.my_constraints.at(agent)->ExpandDomain( domain );  
+    auto pq = agent->GetPatternQuery();
+    shared_ptr<BooleanEvaluator> evaluator = pq->GetEvaluator();
+	ASSERT( evaluator );
+
+    // Follow up on any blocks that were noted by the agent impl    
+    int i=0;
+    list<bool> compare_results;
+    FOREACH( PatternLink link, pq->GetAbnormalLinks() )
+    {
+        TRACE("Comparing block %d\n", i);
+ 
+        // Get x for linked node
+        Agent *diversion_agent = plan.diversion_agents.at(link).get();
+        TreePtr<Node> x = input_keys->at(diversion_agent);
+                                
+        try 
+        {
+            plan.my_evaluator_abnormal_engines.at(link)->Compare( x, master_keys );
+            compare_results.push_back( true );
+        }
+        catch( ::Mismatch & )
+        {
+            compare_results.push_back( false );
+        }
+
+        i++;
+    }
     
-    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-    FOREACH( PatternLink link, pq->GetNormalLinks() )
-        ExpandDomain( link.GetChildAgent(), domain );
+	TRACE(" Evaluating ");
+	FOREACH(bool b, compare_results)
+	    TRACE(b)(" ");
+	if( !(*evaluator)( compare_results ) )
+        throw EvaluatorFalse();
+}
+
+
+void AndRuleEngine::CompareAfterPass( const CouplingMap *master_keys )
+{
+    const CouplingMap combined_keys = MapUnion( *master_keys, solution_keys );    
+
+#ifdef REGENERATE_AFTER_PASS_KEYS
+    CouplingMap new_after_pass_keys;
+    set<PatternLink> compare_by_value_links = SetUnion( plan.coupling_residual_links, 
+                                                        plan.master_boundary_links );    // TODO move into plan
+    for( auto agent : plan.my_normal_agents )
+    {
+        TreePtr<Node> x = solution_keys.at(agent);
+        auto pq = agent->GetPatternQuery();
+        TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(*x)("\n");    
+        TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
+        TRACEC("Based on ")(combined_keys)("\n");    
+        list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), combined_keys );
+        TRACEC("Relocated links ")(ll)("\n");    
+        DecidedQuery query(pq);
+        try
+        {
+            agent->RunNormalLinkedQuery( query, x, ll, compare_by_value_links );
+        }
+        catch( const ::Mismatch& mismatch )
+        {
+            ASSERT(false)("Unexpected mismatch thrown from RunNormalLinkedQuery(): ")(mismatch)("\n");                    
+        }
+        // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
+        FOREACH( const LocatedLink &link, query.GetAbnormalLinks() )
+        {
+            ASSERT( plan.diversion_agents.count(link) );
+            Agent *diversion_agent = plan.diversion_agents.at(link).get();
+#ifdef EXTRACT_AFTER_PASS_KEYS // Need both methods to double-check            
+            AssertNewCoupling( after_pass_keys, diversion_agent, link.GetChildX(), agent ); 
+#endif
+            KeyCoupling( diversion_agent, link.GetChildX(), &new_after_pass_keys );
+        }                    
+        FOREACH( const LocatedLink &link, query.GetMultiplicityLinks() )
+        {
+            ASSERT( plan.diversion_agents.count(link) );
+            Agent *diversion_agent = plan.diversion_agents.at(link).get();
+#ifdef EXTRACT_AFTER_PASS_KEYS // Need both methods to double-check            
+            AssertNewCoupling( after_pass_keys, diversion_agent, link.GetChildX(), agent ); 
+#endif
+            KeyCoupling( diversion_agent, link.GetChildX(), &new_after_pass_keys );
+        }
+    }      
+    ASSERT( new_after_pass_keys.size() == after_pass_keys.size() )
+          ("new keys ")(new_after_pass_keys)("\n")
+          ("hyp keys ")(after_pass_keys)("\n");
+          
+    after_pass_keys = new_after_pass_keys;
+#endif             
+                                                        
+    // Process the evaluator queries. These can match when their children have not matched and
+    // we wouldn't be able to reliably key those children so we process them in a post-pass 
+    // which ensures all the couplings have been keyed already.
+    // Examples are MatchAny and NotMatch (but not MatchAll, because MatchAll conforms with
+    // the global and-rule and so its children can key couplings.
+    for( Agent *agent : plan.my_evaluators )
+    {
+        //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
+        CompareEvaluatorLinks( agent, &after_pass_keys, &combined_keys );
+    }
+
+    // Process the free abnormal links.
+    for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_free_abnormal_engines )
+    {            
+        shared_ptr<AndRuleEngine> e = pae.second;
+        Agent *diversion_agent = plan.diversion_agents.at(pae.first).get();
+        TRACE("Checking free abnormal ")(pae)(" diversion=")(diversion_agent)("\n");
+        TRACEC("HSK ")(after_pass_keys)("\n");
+        
+        if( after_pass_keys.count(diversion_agent) ) // MatchAny nodes could short-circuit, preventing keying; #143 gets rid
+        {
+            TreePtr<Node> x = after_pass_keys.at(diversion_agent);  
+                   
+            e->Compare( x, &combined_keys );
+            
+            // Free abnormal links are AND-rule and singular so they can key
+            KeyCoupling( pae.first.GetChildAgent(), x, &solution_keys );
+        }
+    }
+
+    // Process the free multiplicity links.
+    int i=0;
+    for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_multiplicity_engines )
+    {            
+        shared_ptr<AndRuleEngine> e = pae.second;
+        Agent *diversion_agent = plan.diversion_agents.at(pae.first).get();
+        TRACE("Checking multiplicity ")(pae)(" diversion=")(diversion_agent)("\n");
+        TRACEC("HSK ")(after_pass_keys)("\n");
+        TreePtr<Node> x = after_pass_keys.at(diversion_agent);
+            
+        ASSERT( x );
+        ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
+        ASSERT(xc)("Multiplicity x must implement ContainerInterface");
+        TRACE("Comparing multiplicity link %d size %d\n", i, xc->size());
+        
+        FOREACH( TreePtr<Node> xe, *xc )
+        {
+            e->Compare( xe, &combined_keys );
+        }
+        i++;
+    }                
+}
+
+
+void AndRuleEngine::CompareTrivialProblem( TreePtr<Node> start_x,
+                                           const CouplingMap *master_keys )
+{
+    // Trivial case: we have no agents, so there won't be any decisions
+    // and so no problem to solve. Spare all algorithms the hassle of 
+    // dealing with this. Root agent should have been keyed by master,
+    // otherwise it'd be in my_normal_agents.
+    ASSERT( master_keys->count(plan.root_agent) );
+    try
+    {            
+        CompareCoupling( plan.root_agent, start_x, master_keys );
+    }
+    catch( const ::Mismatch& mismatch ) 
+    {
+        throw NoSolution();
+    }
+    return;
+}
+
+
+void AndRuleEngine::CompareMasterKeys( const CouplingMap *master_keys )
+{
+    for( auto link : plan.master_boundary_links )
+    {
+        auto x = master_coupling_candidates.at(link.GetChildAgent());
+        CompareCoupling( link.GetChildAgent(), x, master_keys );
+        TRACE("Accepted master coupling for ")(link.GetChildAgent())(" x=")(x)(" key=")(master_keys->at(link.GetChildAgent()))("\n");
+    }
 }
 
 
@@ -513,37 +709,12 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
 
     if( plan.my_normal_agents.empty() )
     {
-        // Trivial case: we have no agents, so there won't be any decisions
-        // and so no problem to solve. Spare all algorithms the hassle of 
-        // dealing with this. Root agent should have been keyed by master,
-        // otherwise it'd be in my_normal_agents.
-        ASSERT( master_keys->count(plan.root_agent) );
-        try
-        {            
-            CompareCoupling( plan.root_agent, start_x, master_keys );
-        }
-        catch( const ::Mismatch& mismatch ) 
-        {
-            throw NoSolution();
-        }
+        CompareTrivialProblem( start_x, master_keys );
         return;
     }
            
 #ifdef USE_SOLVER
-    set< TreePtr<Node> > domain;
-	Walk wx( start_x ); 
-	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
-        domain.insert(*wx_it);
-    
-    CouplingMap forces = *master_keys;
-    forces[plan.root_agent] = start_x;
-    for( pair< Agent *, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
-        p.second->SetForces( forces );
-    
-    // Expand the domain to include generated child y nodes.
-    ExpandDomain( plan.root_agent, domain );
-    
-    plan.solver->Start( domain );
+    StartCSPSolver( start_x, master_keys );
 #else
     plan.conj->Start();
 #endif
@@ -558,22 +729,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
         working_keys.clear();
 #ifdef USE_SOLVER        
         // Get a solution from the solver
-        map< shared_ptr<CSP::Constraint>, list< TreePtr<Node> > > values;
-        bool match = plan.solver->GetNextSolution( &values );        
-        if( !match )
-            throw NoSolution();
-
-        // Recreate working_keys
-        for( pair< Agent *, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
-        {
-            list< TreePtr<Node> > &vals = values.at(p.second);
-            list< Agent * > vars = p.second->GetFreeVariables();
-            ASSERT( vars.front() == p.first );
-            if( plan.my_normal_agents.count(vars.front()) )
-                solution_keys[vars.front()] = vals.front(); 
-            else
-                after_pass_keys[vars.front()] = vals.front();
-        }
+        GetNextCSPSolution();
 #endif
         try
         {
@@ -585,117 +741,11 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             
             // Initialise keys to the ones inherited from master, keeping 
             // none of our own from any previous unsuccessful attempt.
-            master_coupling_candidates.clear();
-            
-            DecidedCompare( plan.root_agent, start_x );
-            
-            for( auto link : plan.master_boundary_links )
-            {
-                auto x = master_coupling_candidates.at(link.GetChildAgent());
-                CompareCoupling( link.GetChildAgent(), x, master_keys );
-                TRACE("Accepted master coupling for ")(link.GetChildAgent())(" x=")(x)(" key=")(master_keys->at(link.GetChildAgent()))("\n");
-            }
+            master_coupling_candidates.clear();            
+            DecidedCompare( plan.root_agent, start_x );            
+            CompareMasterKeys( master_keys );
 #endif
-
-#ifdef REGENERATE_HYPOTHETICAL_KEYS
-            CouplingMap new_after_pass_keys;
-            CouplingMap ref_keys = MapUnion( *master_keys, solution_keys );    
-            set<PatternLink> compare_by_value_links = SetUnion( plan.coupling_residual_links, 
-                                                                plan.master_boundary_links );    // TODO move into plan
-            for( auto agent : plan.my_normal_agents )
-            {
-                TreePtr<Node> x = solution_keys.at(agent);
-                auto pq = agent->GetPatternQuery();
-                TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(*x)("\n");    
-                TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
-                TRACEC("Based on ")(ref_keys)("\n");    
-                list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), ref_keys );
-                TRACEC("Relocated links ")(ll)("\n");    
-                DecidedQuery query(pq);
-                try
-                {
-                    agent->RunNormalLinkedQuery( query, x, ll, compare_by_value_links );
-                }
-                catch( const ::Mismatch& mismatch )
-                {
-                    ASSERT(false)("Unexpected mismatch thrown from RunNormalLinkedQuery(): ")(mismatch)("\n");                    
-                }
-                // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-                FOREACH( const LocatedLink &link, query.GetAbnormalLinks() )
-                {
-                    ASSERT( plan.diversion_agents.count(link) );
-                    Agent *diversion_agent = plan.diversion_agents.at(link).get();
-                    AssertNewCoupling( after_pass_keys, diversion_agent, link.GetChildX(), agent ); 
-                    KeyCoupling( diversion_agent, link.GetChildX(), &new_after_pass_keys );
-                }                    
-                FOREACH( const LocatedLink &link, query.GetMultiplicityLinks() )
-                {
-                    ASSERT( plan.diversion_agents.count(link) );
-                    Agent *diversion_agent = plan.diversion_agents.at(link).get();
-                    AssertNewCoupling( after_pass_keys, diversion_agent, link.GetChildX(), agent ); 
-                    KeyCoupling( diversion_agent, link.GetChildX(), &new_after_pass_keys );
-                }
-            }      
-            ASSERT( new_after_pass_keys.size() == after_pass_keys.size() )
-                  ("new keys ")(new_after_pass_keys)("\n")
-                  ("hyp keys ")(after_pass_keys)("\n");
-                  
-            after_pass_keys = new_after_pass_keys;
-#endif             
-                
-            CouplingMap combined_keys = MapUnion( *master_keys, solution_keys );    
-                                                
-            // Process the evaluator queries. These can match when their children have not matched and
-            // we wouldn't be able to reliably key those children so we process them in a post-pass 
-            // which ensures all the couplings have been keyed already.
-            // Examples are MatchAny and NotMatch (but not MatchAll, because MatchAll conforms with
-            // the global and-rule and so its children can key couplings.
-            for( Agent *agent : plan.my_evaluators )
-            {
-                //TRACE(*query)(" Comparing evaluator query\n"); TODO get useful trace off queries
-                CompareEvaluatorLinks( agent, &after_pass_keys, &combined_keys );
-            }
-
-            // Process the free abnormal links.
-            for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_free_abnormal_engines )
-            {            
-                shared_ptr<AndRuleEngine> e = pae.second;
-                Agent *diversion_agent = plan.diversion_agents.at(pae.first).get();
-                TRACE("Checking free abnormal ")(pae)(" diversion=")(diversion_agent)("\n");
-                TRACEC("HSK ")(after_pass_keys)("\n");
-                
-                if( after_pass_keys.count(diversion_agent) ) // MatchAny nodes could short-circuit, preventing keying; #143 gets rid
-                {
-                    TreePtr<Node> x = after_pass_keys.at(diversion_agent);  
-                           
-                    e->Compare( x, &combined_keys );
-                    
-                    // Free abnormal links are AND-rule and singular so they can key
-                    KeyCoupling( pae.first.GetChildAgent(), x, &solution_keys );
-                }
-            }
-
-            // Process the free multiplicity links.
-            int i=0;
-            for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_multiplicity_engines )
-            {            
-                shared_ptr<AndRuleEngine> e = pae.second;
-                Agent *diversion_agent = plan.diversion_agents.at(pae.first).get();
-                TRACE("Checking multiplicity ")(pae)(" diversion=")(diversion_agent)("\n");
-                TRACEC("HSK ")(after_pass_keys)("\n");
-                TreePtr<Node> x = after_pass_keys.at(diversion_agent);
-                    
-                ASSERT( x );
-                ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
-                ASSERT(xc)("Multiplicity x must implement ContainerInterface");
-                TRACE("Comparing multiplicity link %d size %d\n", i, xc->size());
-                
-                FOREACH( TreePtr<Node> xe, *xc )
-                {
-                    e->Compare( xe, &combined_keys );
-                }
-                i++;
-            }            
+            CompareAfterPass( master_keys );
         }
         catch( const ::Mismatch& mismatch )
         {                
