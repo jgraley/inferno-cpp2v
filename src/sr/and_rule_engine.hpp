@@ -83,13 +83,13 @@ public:
         set<PatternLink> coupling_residual_links;
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;
+        set<PatternLink> compare_by_value_links;
     private: // working varaibles in plan construction
         set<Agent *> reached; 
     } plan;
     
     void ExpandDomain( Agent *agent, set< TreePtr<Node> > &domain );
-    void StartCSPSolver( TreePtr<Node> start_x,
-                         const CouplingMap *master_keys );
+    void StartCSPSolver( TreePtr<Node> start_x );
     void GetNextCSPSolution();
     void CompareCoupling( Agent *agent,
                           TreePtr<Node> x,
@@ -101,15 +101,19 @@ public:
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( Agent *agent,
                          TreePtr<Node> x );
-    void CompareEvaluatorLinks( Agent *agent,
-							    const CouplingMap *after_pass_keys,
-                                const CouplingMap *master_keys );
-    void CompareAfterPass( const CouplingMap *master_keys );
+    shared_ptr<DecidedQuery> GetNormalLinkedQuery( Agent *agent, 
+                                                   const CouplingMap *combined_keys );
+    void CompareEvaluatorLinks( Agent *agent, 
+                                const CouplingMap *combined_keys );
+    void CompareFreeAbnormalLinks( PatternLink link, 
+                                   const CouplingMap *combined_keys ); 
+    void CompareMultiplicityLinks( PatternLink link, 
+                                   const CouplingMap *combined_keys ); 
+    void CompareAfterPass();
     void Compare( TreePtr<Node> start_x,
                   const CouplingMap *master_keys );
-    void CompareTrivialProblem( TreePtr<Node> start_x,
-                                const CouplingMap *master_keys );
-    void CompareMasterKeys( const CouplingMap *master_keys );
+    void CompareTrivialProblem( TreePtr<Node> start_x );
+    void CompareMasterKeys();
     void Compare( TreePtr<Node> start_x );
     void EnsureChoicesHaveIterators();
 

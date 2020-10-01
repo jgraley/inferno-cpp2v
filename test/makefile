@@ -24,7 +24,7 @@ test/results/default.pass : $(CASES:%=test/results/default/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "DEFAULT TESTS PASSED"
-	@spd-say -r -100 -p -100 "the tests have passed"
+	@spd-say -r -100 -p -100 "the tests have parssed"
 
 $(SRCASES:%=test/results/sr/%.pass) : test/results/sr/%.pass : test/examples/%.cpp test/makefile inferno.exe
 	@mkdir -p test/results/sr
@@ -38,7 +38,7 @@ test/results/sr.pass : $(SRCASES:%=test/results/sr/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "SR TESTS PASSED"
-	@spd-say -r -100 -p -100 "the tests have passed"
+	@spd-say -r -100 -p -100 "the tests have parssed"
 
 $(SRMINICASES:%=test/results/srmini/%.pass) : test/results/srmini/%.pass : test/examples/%.cpp test/makefile inferno.exe
 	@mkdir -p test/results/srmini
@@ -52,7 +52,7 @@ test/results/srmini.pass : $(SRMINICASES:%=test/results/srmini/%.pass)
 	@echo -n "Tests Run: "
 	@date
 	@echo "SR MINI TESTS PASSED"
-	@spd-say -r -100 -p -100 "the tests have passed"
+	@spd-say -r -100 -p -100 "the tests have parssed"
 
 $(CASES:%=test/results/rep/%.pass) : test/results/rep/%.pass : test/examples/%.cpp test/makefile inferno.exe
 	@mkdir -p test/results/rep
