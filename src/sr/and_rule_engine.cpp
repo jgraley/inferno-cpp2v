@@ -494,8 +494,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     agent->RunDecidedQuery( *query, x );
     TRACEC("Normal ")(query->GetNormalLinks())("\n")
           ("Abormal ")(query->GetAbnormalLinks())("\n")
-          ("Multiplicity ")(query->GetMultiplicityLinks())("\n");    
-
+          ("Multiplicity ")(query->GetMultiplicityLinks())("\n");  
 #ifdef TEST_PATTERN_QUERY
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     ASSERT( pq->GetNormalLinks() == query->GetNormalLinks() &&
@@ -532,7 +531,7 @@ shared_ptr<DecidedQuery> AndRuleEngine::GetNormalLinkedQuery( Agent *agent, cons
     auto query = make_shared<DecidedQuery>(pq);
     try
     {
-        agent->RunNormalLinkedQuery( *query, x, ll, plan.compare_by_value_links );
+        agent->RunNormalLinkedQuery( query, x, ll, plan.compare_by_value_links );
     }
     catch( const ::Mismatch& mismatch )
     {

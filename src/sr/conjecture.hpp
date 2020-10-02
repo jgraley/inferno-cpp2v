@@ -24,21 +24,20 @@ public:
     struct AgentRecord
     {
         shared_ptr<PatternQuery> pq;
-        DecidedQuery *query;
-        shared_ptr<DecidedQuery> query_owning;
+        shared_ptr<DecidedQuery> query;
  		AgentRecords::const_iterator previous_agent;
 	};
 
 public:
     Conjecture( set<Agent *> my_agents, const Agent *root_agent );
-    Conjecture( const Agent *agent, DecidedQuery *query );
+    Conjecture( const Agent *agent, shared_ptr<DecidedQuery> query );
     
     ~Conjecture();
 
     const struct Plan
     {
         Plan( set<Agent *> my_agents, const Agent *root_agent );
-        Plan( const Agent *agent, DecidedQuery *query );
+        Plan( const Agent *agent, shared_ptr<DecidedQuery> query );
         void RecordWalk( AgentRecords::iterator rit );
         
         AgentRecords agent_records;
@@ -58,8 +57,6 @@ public:
         				       
     // Standard interface for decided compare functions
     shared_ptr<DecidedQuery> GetQuery( const Agent *agent );
-    
-    static set<const Agent *> GodDamnIt( set<Agent *> my_agents );
 };
 
 };

@@ -42,7 +42,11 @@ public:
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   TreePtr<Node> x ) const = 0;                                                
-    virtual void RunNormalLinkedQuery( DecidedQuery &query,
+    virtual void IncrementNormalLinkedQuery( Conjecture &conj,
+                                             TreePtr<Node> x,
+                                             const list<LocatedLink> &required_links,
+                                             const set<PatternLink> &compare_by_value ) const = 0;
+    virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
                                        TreePtr<Node> x,
                                        const list<LocatedLink> &required_links,
                                        const set<PatternLink> &compare_by_value ) const = 0;                                                
@@ -72,7 +76,11 @@ public:
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
                                   TreePtr<Node> x ) const;                                                
-    virtual void RunNormalLinkedQuery( DecidedQuery &query,
+    virtual void IncrementNormalLinkedQuery( Conjecture &conj,
+                                             TreePtr<Node> x,
+                                             const list<LocatedLink> &required_links,
+                                             const set<PatternLink> &compare_by_value ) const;
+    virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
                                        TreePtr<Node> x,
                                        const list<LocatedLink> &required_links,
                                        const set<PatternLink> &compare_by_value ) const;                                                

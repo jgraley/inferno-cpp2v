@@ -18,8 +18,7 @@ Conjecture::Plan::Plan( set<Agent *> my_agents, const Agent *root_agent )
     {
 		AgentRecord record;
         record.pq = agent->GetPatternQuery();
-        record.query_owning = agent->CreateDecidedQuery();
-        record.query = record.query_owning.get();
+        record.query = agent->CreateDecidedQuery();
 		agent_records[agent] = record;
 	}        
     AgentRecords::iterator root_rit = agent_records.find(root_agent);
@@ -28,7 +27,7 @@ Conjecture::Plan::Plan( set<Agent *> my_agents, const Agent *root_agent )
 }
 
 
-Conjecture::Plan::Plan( const Agent *agent, DecidedQuery *query )
+Conjecture::Plan::Plan( const Agent *agent, shared_ptr<DecidedQuery> query )
 {
     last_agent = agent_records.end();
 
@@ -78,7 +77,7 @@ Conjecture::Conjecture( set<Agent *> my_agents, const Agent *root_agent ) :
 }
 
 
-Conjecture::Conjecture( const Agent *agent, DecidedQuery *query ) :
+Conjecture::Conjecture( const Agent *agent, shared_ptr<DecidedQuery> query ) :
     plan( agent, query )
 {
 }
@@ -218,9 +217,7 @@ bool Conjecture::Increment()
 
 shared_ptr<DecidedQuery> Conjecture::GetQuery(const Agent *agent)
 {
-    shared_ptr<DecidedQuery> r = plan.agent_records.at(agent).query_owning;
-    ASSERT(r); // must have been created by this class, see the constructors
-    return r;
+    return plan.agent_records.at(agent).query;
 }
 
 };

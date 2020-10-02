@@ -93,32 +93,26 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 }                             
 
 
-void AgentCommon::RunNormalLinkedQuery( DecidedQuery &query,
-                                        TreePtr<Node> x,
-                                        const list<LocatedLink> &required_links,
-                                        const set<PatternLink> &compare_by_value ) const
-{
-    SR::Conjecture conj(this, &query);            
-
-    // TODO Arrange for conj to "know" about choices that have already been made in 
-    // query. These should be the choices relating to abnormal or multiplicity 
-    // links. conj should leave them alone. See #151 
-    conj.Start();
-    
+void AgentCommon::IncrementNormalLinkedQuery( Conjecture &conj,
+                                              TreePtr<Node> x,
+                                              const list<LocatedLink> &required_links,
+                                              const set<PatternLink> &compare_by_value ) const
+{    
     while(1)
     {
         try
         {
+            shared_ptr<DecidedQuery> query = conj.GetQuery(this);
             {
                 Tracer::RAIIEnable silencer( false ); // make DQ be quiet
-                RunDecidedQuery( query, x );
+                RunDecidedQuery( *query, x );
             }
             
             // The query now has populated links, which should be full
             // (otherwise RunDecidedQuery() should have thrown). We loop 
             // over both and check that they refer to the same x nodes
             // we were passed. Mismatch will throw, same as in DQ.
-            auto actual_links = query.GetNormalLinks();
+            auto actual_links = query->GetNormalLinks();
             ASSERT( actual_links.size() == required_links.size() );
             // TRACE("Actual links   ")(actual_links)("\n");
             // TRACEC("Required links ")(required_links)("\n");
@@ -170,6 +164,22 @@ void AgentCommon::RunNormalLinkedQuery( DecidedQuery &query,
         // Conjecture would like us to try again with new choices
     }     
 }                           
+
+
+void AgentCommon::RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
+                                        TreePtr<Node> x,
+                                        const list<LocatedLink> &required_links,
+                                        const set<PatternLink> &compare_by_value ) const
+{
+    Conjecture conj(this, query);            
+    conj.Start();
+    
+    // RunNormalLinkedQuery() only wants to determine whether there
+    // is at least one match, so a single call suffices. To get all
+    // the matches, call IncrementNormalLinkedQuery() directly with 
+    // your own Conjecture object.
+    IncrementNormalLinkedQuery( conj, x, required_links, compare_by_value );
+}
 
 
 void AgentCommon::SetKey( TreePtr<Node> x )
