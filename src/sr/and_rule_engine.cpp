@@ -627,7 +627,7 @@ void AndRuleEngine::CompareAfterPassRegenerate()
             ASSERT(false)("Unexpected mismatch thrown from RunNormalLinkedQuery(): ")(mismatch)("\n");                    
         }
         
-        combined_keys.clear();
+        CouplingMap local_keys;
         // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
         FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
         {
@@ -636,7 +636,10 @@ void AndRuleEngine::CompareAfterPassRegenerate()
 #ifdef EXTRACT_AFTER_PASS_KEYS // Need both methods to double-check            
             AssertNewCoupling( extracted_after_pass_keys, diversion_agent, link.GetChildX(), agent ); 
 #endif
-            KeyCoupling( diversion_agent, link.GetChildX(), &regenerated_after_pass_keys );            
+            KeyCoupling( diversion_agent, link.GetChildX(), &local_keys );
+            
+            if( plan.my_free_abnormal_engines.count(link) )
+                CompareFreeAbnormalLinks( link, &combined_keys, &local_keys );
         }                    
         FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
         {
@@ -645,25 +648,21 @@ void AndRuleEngine::CompareAfterPassRegenerate()
 #ifdef EXTRACT_AFTER_PASS_KEYS // Need both methods to double-check            
             AssertNewCoupling( extracted_after_pass_keys, diversion_agent, link.GetChildX(), agent ); 
 #endif
-            KeyCoupling( diversion_agent, link.GetChildX(), &regenerated_after_pass_keys );
+            KeyCoupling( diversion_agent, link.GetChildX(), &local_keys );
+
+            if( plan.my_multiplicity_engines.count(link) )
+                CompareMultiplicityLinks( link, &combined_keys, &local_keys );  
         }
-        // Process if an evaluator agent.
-        if( plan.my_evaluators.count( agent ) > 0 )
-            CompareEvaluatorLinks( agent, &combined_keys, &regenerated_after_pass_keys );
+
+        // Process the evaluator agents.
+        if( plan.my_evaluators.count( agent ) )
+            CompareEvaluatorLinks( agent, &combined_keys, &local_keys );
+
+        regenerated_after_pass_keys = MapUnion( regenerated_after_pass_keys, local_keys );    
     }      
     ASSERT( regenerated_after_pass_keys.size() == extracted_after_pass_keys.size() )
           ("regenerated keys ")(regenerated_after_pass_keys)("\n")
-          ("extracted keys   ")(extracted_after_pass_keys)("\n");
-          
-    
-
-    // Process the free abnormal links.
-    for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_free_abnormal_engines )
-        CompareFreeAbnormalLinks( pae.first, &combined_keys, &regenerated_after_pass_keys );
-
-    // Process the free multiplicity links.
-    for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_multiplicity_engines )
-        CompareMultiplicityLinks( pae.first, &combined_keys, &regenerated_after_pass_keys );        
+          ("extracted keys   ")(extracted_after_pass_keys)("\n");    
 }
 
 
