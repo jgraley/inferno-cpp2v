@@ -68,6 +68,8 @@ private:
     } plan;
     
     list<Value> forces; // only FREE vars
+    
+    virtual string GetTrace() const;
 };
 
 };

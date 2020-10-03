@@ -89,7 +89,7 @@ public:
     
     void ExpandDomain( Agent *agent, set< TreePtr<Node> > &domain );
     void StartCSPSolver( TreePtr<Node> start_x );
-    void GetNextCSPSolution();
+    void GetNextCSPSolution( TreePtr<Node> start_x );
     void CompareCoupling( Agent *agent,
                           TreePtr<Node> x,
                           const CouplingMap *keys );

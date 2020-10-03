@@ -40,7 +40,7 @@ void SystemicConstraint::Plan::GetAllVariables()
     
     all_variables.push_back( agent ); // The me-variable
     
-    FOREACH( SR::PatternLink link, pq->GetAllLinks() )
+    FOREACH( SR::PatternLink link, pq->GetNormalLinks() )
     {
         VariableId var = link.GetChildAgent();
         all_variables.push_back( var );  
@@ -87,7 +87,7 @@ list<VariableId> SystemicConstraint::GetFreeVariables() const
 
 void SystemicConstraint::TraceProblem() const
 {
-    TRACEC("SystemicConstraint degree %d free degree %d\n", plan.flags.size(), GetFreeDegree());
+    TRACEC("SystemicConstraint ")(*this)(" degree %d free degree %d\n", plan.flags.size(), GetFreeDegree());
     INDENT("T");
     auto fit = plan.flags.begin();
     bool first = true;
@@ -219,7 +219,7 @@ bool SystemicConstraint::Test( list< Value > values )
             // (otherwise RunDecidedQuery() (DQ) should have thrown). We loop 
             // over both and check that they refer to the same x nodes
             // we were passed. Mismatch will throw, same as in DQ.
-            auto links = query->GetAllLinks();
+            auto links = query->GetNormalLinks();
             ASSERT( links.size() == expanded_values.size() );
             auto linkit = links.begin();      
             auto fit = plan.flags.begin();      
@@ -267,6 +267,10 @@ bool SystemicConstraint::Test( list< Value > values )
 }
 
 
+string SystemicConstraint::GetTrace() const
+{
+    return string("SystemicConstraint(") + plan.agent->GetTrace() + ")";
+}      
 
 
 
@@ -291,7 +295,7 @@ bool SystemicConstraint::Test( list< Value > values )
                 {
                     query = lconj.GetQuery(plan.agent);
                     plan.agent->RunDecidedQuery( *query, x );
-                    FOREACH( const SR::LocatedLink &link, *query->GetAllLinks() )
+                    FOREACH( const SR::LocatedLink &link, *query->GetNormalLinks() )
                     x_to_add.push_back(x);
                 }
                 catch( ::Mismatch & )

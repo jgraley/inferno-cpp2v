@@ -340,7 +340,7 @@ void AndRuleEngine::StartCSPSolver( TreePtr<Node> start_x )
 }
 
 
-void AndRuleEngine::GetNextCSPSolution()
+void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
 {
     map< shared_ptr<CSP::Constraint>, list< TreePtr<Node> > > values;
     bool match = plan.solver->GetNextSolution( &values );        
@@ -350,11 +350,23 @@ void AndRuleEngine::GetNextCSPSolution()
     // Recreate working_keys
     for( pair< Agent *, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
     {
-        list< TreePtr<Node> > &vals = values.at(p.second);
-        list< Agent * > vars = p.second->GetFreeVariables();
-        ASSERT( vars.front() == p.first );
-        if( plan.my_normal_agents.count(vars.front()) )
-            solution_keys[vars.front()] = vals.front();                
+        if( p.first == plan.root_agent ) 
+        {
+            // TODO it would be nice to be able to do p.second->GetAllVariables()
+            // and and obtain the force back from the constraint
+            solution_keys[plan.root_agent] = start_x;
+        }
+        else
+        {
+            list< TreePtr<Node> > &vals = values.at(p.second);
+            list< Agent * > vars = p.second->GetFreeVariables();
+            ASSERT( vars.front() == p.first )
+                  (vars)("\n")
+                  (p)("\n")
+                  (plan.root_agent)("\n");
+            if( plan.my_normal_agents.count(vars.front()) )
+                solution_keys[vars.front()] = vals.front();    
+        }            
     }
 }
 
@@ -679,7 +691,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
         working_keys.clear();
 #ifdef USE_SOLVER        
         // Get a solution from the solver
-        GetNextCSPSolution();
+        GetNextCSPSolution( start_x );
 #endif
         try
         {

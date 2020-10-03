@@ -59,6 +59,26 @@ SimpleSolver::SimpleSolver( const list< shared_ptr<Constraint> > &constraints_,
     holder(nullptr)
 {
     TraceProblem();
+
+    set<VariableId> variables_used;
+    for( shared_ptr<Constraint> c : plan.constraints )
+    {
+        list<VariableId> cfv = c->GetFreeVariables();
+        for( VariableId v : cfv )
+        {
+            ASSERT( find( plan.variables.begin(), plan.variables.end(), v ) != plan.variables.end() )
+                  ("Planning error: ")(c)(" is missing variables\n")
+                  ("expecting ")(cfv)("\n")
+                  ("provided ")(plan.variables)("\n");
+            variables_used.insert( v );
+        }
+    }
+    for( VariableId v : plan.variables )
+    {
+        ASSERT( variables_used.count(v) > 0 )
+              ("Planning error: variable ")(v)(" is not used by any constraints\n")
+              ("Variables used: ")(variables_used)("\n");
+    }
 }
                         
 
@@ -176,7 +196,10 @@ void SimpleSolver::ReportSolution( const Assignments &assignments )
     for( shared_ptr<Constraint> c : plan.constraints )
     {
         vals[c] = GetValuesForConstraint(c, assignments);
-        ASSERT( vals.at(c).size() == c->GetFreeDegree() ); // Assignments should be complete
+        ASSERT( vals.at(c).size() == c->GetFreeDegree() )
+              ("Incomplete assignment of ")(c)("\n")
+              ("vals=")(vals.at(c))("\n")
+              ("free degree = %d\n", c->GetFreeDegree());
     }
     
     holder->ReportSolution( vals );
