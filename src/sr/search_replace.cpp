@@ -25,7 +25,7 @@ void CompareReplace::Configure( TreePtr<Node> cp,
                                 TreePtr<Node> rp )
 {
     TRACE(GetName());
-    INDENT(" ");
+    INDENT("P");
     scr_engine = make_shared<SCREngine>(is_search, this, cp, rp);
 }
 

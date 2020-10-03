@@ -48,7 +48,7 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     master_ptr( NULL )
 {
     TRACE(GetName());
-    INDENT(" ");
+    INDENT("P");
     ASSERT(!master_ptr)("Calling configure on already-configured ")(*this);
     //TRACE("Entering SCREngine::Configure on ")(*this)("\n");
     overall_master_ptr = overall_master;
@@ -221,8 +221,6 @@ void SCREngine::KeyReplaceNodes( const CouplingMap *coupling_keys ) const
         if( coupling_keys->count( a ) > 0 && !a->GetKey() )
             a->KeyReplace(coupling_keys);
     }
-    
-    TRACE("OK\n");
 }
 
 
@@ -273,8 +271,6 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
     // Clear out all the replace keys (the ones inside the agents) now that replace is done
     FOREACH( Agent *a, *plan.my_agents )
         a->ResetKey();
-
-    TRACE("OK\n");
 }
 
 
@@ -322,8 +318,6 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *proot,
           ("Still getting matches after %d repetitions, may be repeating forever.\n"
            "Try using -rn%d to suppress this error\n", repetitions, repetitions);
        
-    TRACE("exiting\n");
-    TRACE("OK\n");
     return repetitions;
 }
 

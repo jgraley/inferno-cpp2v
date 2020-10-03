@@ -16,7 +16,7 @@ void Tracer::Descend::Indent()
     if( leftmost_pre.size() < last_traced_pre.size() && leftmost_pre.size() < pre.size() )
         fprintf(stderr, "%s\n", leftmost_pre.c_str());
     last_traced_pre = leftmost_pre = pre;
-    fprintf(stderr, "%s", pre.c_str());
+    fprintf(stderr, "%s ", pre.c_str());
 }
 
 inline void InfernoAbort()
@@ -152,6 +152,30 @@ void Tracer::EndContinuation()
 void Tracer::Enable( bool e )
 {
     enable = e;
+}
+
+
+Tracer::Descend::Descend( string s ) : 
+    os(pre.size()) 
+{ 
+    pre += s; 
+    Tracer::EndContinuation(); 
+} 
+
+
+Tracer::Descend::~Descend() 
+{ 
+    if(Tracer::IsEnabled())
+    {
+        if( uncaught_exception() )
+            Tracer()("Ouch!\n");
+        else                    
+            Tracer()("OK\n");
+    }
+    
+    pre = pre.substr(0, os); 
+    if( pre.size() < leftmost_pre.size() )
+        leftmost_pre = pre;
 }
 
 

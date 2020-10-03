@@ -81,7 +81,7 @@ shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 void StandardAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                                          TreePtr<Node> x ) const
 {
-    INDENT(".");
+    INDENT("Q");
     query.Reset();
 
     // Check pre-restriction
@@ -134,7 +134,7 @@ void StandardAgent::DecidedQuerySequence( DecidedQueryAgentInterface &query,
                                           SequenceInterface *px,
 		                                  SequenceInterface &pattern ) const
 {
-    INDENT(" ");
+    INDENT("S");
 	ContainerInterface::iterator pit, npit, nnpit, nxit;
     
 	// Attempt to match all the elements between start and the end of the sequence; stop
@@ -227,7 +227,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
                                             CollectionInterface *px,
 		 					                CollectionInterface &pattern ) const
 {
-    INDENT(" ");
+    INDENT("C");
     
     // Make a copy of the elements in the tree. As we go though the pattern, we'll erase them from
 	// here so that (a) we can tell which ones we've done so far and (b) we can get the remainder
@@ -320,7 +320,7 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
 
 void StandardAgent::TrackingKey( Agent *from )
 {
-    INDENT(".");
+    INDENT("T");
     ASSERT( from );
     TreePtr<Node> key = from->GetKey();
     ASSERT( key );
@@ -364,7 +364,7 @@ void StandardAgent::TrackingKey( Agent *from )
 
 TreePtr<Node> StandardAgent::BuildReplaceImpl( TreePtr<Node> keynode ) 
 {
-    INDENT(".");
+    INDENT("B");
     if( keynode && IsLocalMatch(keynode.get()) ) 
         return BuildReplaceOverlay( keynode );
     else
@@ -374,7 +374,7 @@ TreePtr<Node> StandardAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 
 TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // under substitution if not NULL
 {
-	INDENT(" ");
+	INDENT("O");
     ASSERT( keynode );
     
     ASSERT( IsLocalMatch(keynode.get()) )
@@ -521,7 +521,7 @@ TreePtr<Node> StandardAgent::BuildReplaceOverlay( TreePtr<Node> keynode )  // un
     
 TreePtr<Node> StandardAgent::BuildReplaceNormal() 
 {
-	INDENT(" ");
+	INDENT("N");
  
 	// Make a new node, force dirty because from pattern
     // Use clone here because we never want to place an Agent object in the output program tree.

@@ -186,7 +186,7 @@ void SimpleSolver::ReportSolution( const Assignments &assignments )
 void SimpleSolver::TraceProblem() const
 {
     TRACEC("SimpleSolver; %d constraints", plan.constraints.size());
-    INDENT(" ");
+    INDENT("T");
     for( shared_ptr<Constraint> c : plan.constraints )
     {
         c->TraceProblem();
@@ -206,7 +206,7 @@ void SimpleSolver::ShowBestAssignment()
     if( best_assignments.empty() )
         return; // didn't get around to updating it yet
     TRACE("Best assignment assigned %d of %d variables:\n", best_assignments.size(), plan.variables.size());
-    INDENT(" ");
+    INDENT("B");
     for( VariableId var : plan.variables )
     {
         if( best_assignments.count(var) > 0 )

@@ -220,7 +220,7 @@ void AgentCommon::TrackingKey( Agent *from )
 
 TreePtr<Node> AgentCommon::BuildReplace()
 {
-    INDENT(" ");
+    INDENT("B");
     ASSERT(this);
     ASSERT(master_scr_engine)("Agent ")(*this)(" at appears not to have been configured");
     
@@ -242,7 +242,7 @@ TreePtr<Node> AgentCommon::BuildReplaceImpl( TreePtr<Node> keynode )
 TreePtr<Node> AgentCommon::DuplicateNode( TreePtr<Node> source,
                                           bool force_dirty ) const
 {
-    INDENT(" ");
+    INDENT("D");
 
     // Make the new node (destination node)
     shared_ptr<Cloner> dup_dest = source->Duplicate(source);
@@ -265,7 +265,7 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
                                              TreePtr<Node> source_terminus,
                                              TreePtr<Node> dest_terminus ) const
 {
-    INDENT(" ");
+    INDENT("D");
     ASSERT( source );
     if( source_terminus )
         ASSERT( dest_terminus );

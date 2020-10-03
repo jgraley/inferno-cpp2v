@@ -103,7 +103,7 @@ list<VariableId> SystemicConstraint::GetFreeVariables() const
 void SystemicConstraint::TraceProblem() const
 {
     TRACEC("SystemicConstraint degree %d free degree %d\n", plan.flags.size(), GetFreeDegree());
-    INDENT(" ");
+    INDENT("T");
     auto fit = plan.flags.begin();
     bool first = true;
     for( auto var : plan.all_variables )

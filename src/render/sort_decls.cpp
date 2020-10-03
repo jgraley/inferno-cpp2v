@@ -17,7 +17,7 @@ public:
 protected:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
     {
-        INDENT(" ");
+        INDENT("G");
         // We need to create a container of elements of the child.
         if( shared_ptr<Instance> i = dynamic_pointer_cast<Instance>( n ) ) // an instance...
             if( dynamic_pointer_cast<Callable>( i->type ) ) // ...of a function
@@ -52,7 +52,7 @@ public:
 private:
     virtual shared_ptr<ContainerInterface> GetChildContainer( TreePtr<Node> n ) const
     {
-        INDENT(" ");
+        INDENT("G");
         // We need to create a container of elements of the child.
         if( dynamic_pointer_cast<Indirection>( n ) ) // an instance...
         {
