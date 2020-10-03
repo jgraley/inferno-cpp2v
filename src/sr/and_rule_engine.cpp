@@ -413,7 +413,7 @@ void AndRuleEngine::KeyCoupling( Agent *agent,
                                  TreePtr<Node> x,
                                  CouplingMap *keys )
 {
-    //ASSERT( keys->count(agent) == 0 )("Coupling conflict!\n");    
+    ASSERT( keys->count(agent) == 0 )("Coupling conflict!\n");    
     (*keys)[agent] = x;
 }                                     
 
@@ -519,7 +519,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 
 void AndRuleEngine::CompareEvaluatorLinks( Agent *agent, 
                                            const CouplingMap *combined_keys, 
-                                           const CouplingMap *after_pass_keys ) 
+                                           const CouplingMap *keys ) 
 {
     INDENT("E");
     auto pq = agent->GetPatternQuery();
@@ -535,7 +535,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
  
         // Get x for linked node
         Agent *diversion_agent = plan.diversion_agents.at(link).get();
-        TreePtr<Node> x = after_pass_keys->at(diversion_agent);
+        TreePtr<Node> x = keys->at(diversion_agent);
                                 
         try 
         {
@@ -560,23 +560,20 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
 
 void AndRuleEngine::CompareFreeAbnormalLinks( PatternLink link, 
                                               const CouplingMap *combined_keys, 
-                                              const CouplingMap *after_pass_keys ) 
+                                              const CouplingMap *keys ) 
 {
     INDENT("A");
 
     shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at(link);
     Agent *diversion_agent = plan.diversion_agents.at(link).get();
     TRACE("Checking free abnormal ")(link)(" diversion=")(diversion_agent)("\n");
-    TRACEC("HSK ")(after_pass_keys)("\n");
+    TRACEC("HSK ")(keys)("\n");
     
-    if( after_pass_keys->count(diversion_agent) ) // agent can be missing from after_pass_keys, not sure why
+    if( keys->count(diversion_agent) ) // agent can be missing from after_pass_keys, not sure why
     {
-        TreePtr<Node> x = after_pass_keys->at(diversion_agent);  
+        TreePtr<Node> x = keys->at(diversion_agent);  
                
         e->Compare( x, combined_keys );
-        
-        // Free abnormal links are AND-rule and singular so they can key
-        KeyCoupling( link.GetChildAgent(), x, &solution_keys );
     }
 }
 
@@ -681,6 +678,17 @@ void AndRuleEngine::CompareAfterPassRegenerate()
          //   AssertNewCoupling( extracted_after_pass_keys, diversion_agent, link.GetChildX(), agent ); 
         }
 #endif
+
+        FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
+        {
+            Agent *diversion_agent = plan.diversion_agents.at(link).get();
+            if( plan.my_free_abnormal_engines.count(link) &&
+                local_keys.count(diversion_agent) )      
+            {
+                TreePtr<Node> x = local_keys.at(diversion_agent);                  
+                KeyCoupling( link.GetChildAgent(), x, &solution_keys );
+            }
+        }
 
         regenerated_after_pass_keys = MapUnion( regenerated_after_pass_keys, local_keys );  
     }      
