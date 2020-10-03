@@ -569,7 +569,7 @@ void AndRuleEngine::CompareFreeAbnormalLinks( PatternLink link,
     TRACE("Checking free abnormal ")(link)(" diversion=")(diversion_agent)("\n");
     TRACEC("HSK ")(keys)("\n");
     
-    if( keys->count(diversion_agent) ) // agent can be missing from after_pass_keys, not sure why
+    if( keys->count(diversion_agent) )  // Unexplained if statement #155 
     {
         TreePtr<Node> x = keys->at(diversion_agent);  
                
@@ -682,8 +682,8 @@ void AndRuleEngine::CompareAfterPassRegenerate()
         FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
         {
             Agent *diversion_agent = plan.diversion_agents.at(link).get();
-            if( plan.my_free_abnormal_engines.count(link) &&
-                local_keys.count(diversion_agent) )      
+            if( plan.my_free_abnormal_engines.count(link) )
+                if( local_keys.count(diversion_agent) )   // Unexplained if statement #155 
             {
                 TreePtr<Node> x = local_keys.at(diversion_agent);                  
                 KeyCoupling( link.GetChildAgent(), x, &solution_keys );
