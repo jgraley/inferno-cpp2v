@@ -377,7 +377,7 @@ void AndRuleEngine::GetNextCSPSolution()
             solution_keys[vars.front()] = vals.front(); 
 #ifdef EXTRACT_AFTER_PASS_KEYS
         else
-            after_pass_keys[vars.front()] = vals.front();
+            extracted_after_pass_keys[vars.front()] = vals.front();
         // Note: suspect this doesn't work, and that you need to loop
         // over the constraint's variables and check through them to
         // find the abnormals, because diversion links/variables don't 
@@ -467,14 +467,14 @@ void AndRuleEngine::CompareLinks( Agent *agent,
     {
         ASSERT( plan.diversion_agents.count(link) );
         Agent *diversion_agent = plan.diversion_agents.at(link).get();
-        KeyCoupling( diversion_agent, link.GetChildX(), &after_pass_keys );
+        KeyCoupling( diversion_agent, link.GetChildX(), &extracted_after_pass_keys );
     }
         
     FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
     {
         ASSERT( plan.diversion_agents.count(link) );
         Agent *diversion_agent = plan.diversion_agents.at(link).get();
-        KeyCoupling( diversion_agent, link.GetChildX(), &after_pass_keys );
+        KeyCoupling( diversion_agent, link.GetChildX(), &extracted_after_pass_keys );
     }
 #endif    
 }
@@ -519,30 +519,9 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 }
 
 
-shared_ptr<DecidedQuery> AndRuleEngine::GetNormalLinkedQuery( Agent *agent, const CouplingMap *combined_keys )
-{
-    TreePtr<Node> x = solution_keys.at(agent);
-    auto pq = agent->GetPatternQuery();
-    TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(*x)("\n");    
-    TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
-    TRACEC("Based on ")(combined_keys)("\n");    
-    list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), *combined_keys );
-    TRACEC("Relocated links ")(ll)("\n");    
-    auto query = make_shared<DecidedQuery>(pq);
-    try
-    {
-        agent->RunNormalLinkedQuery( query, x, ll, plan.compare_by_value_links );
-    }
-    catch( const ::Mismatch& mismatch )
-    {
-        ASSERT(false)("Unexpected mismatch thrown from RunNormalLinkedQuery(): ")(mismatch)("\n");                    
-    }
-    return query;
-}
-
-
 void AndRuleEngine::CompareEvaluatorLinks( Agent *agent, 
-                                           const CouplingMap *combined_keys ) 
+                                           const CouplingMap *combined_keys, 
+                                           const CouplingMap *after_pass_keys ) 
 {
     auto pq = agent->GetPatternQuery();
     shared_ptr<BooleanEvaluator> evaluator = pq->GetEvaluator();
@@ -557,7 +536,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
  
         // Get x for linked node
         Agent *diversion_agent = plan.diversion_agents.at(link).get();
-        TreePtr<Node> x = after_pass_keys.at(diversion_agent);
+        TreePtr<Node> x = after_pass_keys->at(diversion_agent);
                                 
         try 
         {
@@ -581,16 +560,17 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
 
 
 void AndRuleEngine::CompareFreeAbnormalLinks( PatternLink link, 
-                                              const CouplingMap *combined_keys ) 
+                                              const CouplingMap *combined_keys, 
+                                              const CouplingMap *after_pass_keys ) 
 {
     shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at(link);
     Agent *diversion_agent = plan.diversion_agents.at(link).get();
     TRACE("Checking free abnormal ")(link)(" diversion=")(diversion_agent)("\n");
     TRACEC("HSK ")(after_pass_keys)("\n");
     
-    if( after_pass_keys.count(diversion_agent) ) // agent can be missing from after_pass_keys, not sure why
+    if( after_pass_keys->count(diversion_agent) ) // agent can be missing from after_pass_keys, not sure why
     {
-        TreePtr<Node> x = after_pass_keys.at(diversion_agent);  
+        TreePtr<Node> x = after_pass_keys->at(diversion_agent);  
                
         e->Compare( x, combined_keys );
         
@@ -601,13 +581,14 @@ void AndRuleEngine::CompareFreeAbnormalLinks( PatternLink link,
 
 
 void AndRuleEngine::CompareMultiplicityLinks( PatternLink link, 
-                                              const CouplingMap *combined_keys ) 
+                                              const CouplingMap *combined_keys, 
+                                              const CouplingMap *after_pass_keys ) 
 {
     shared_ptr<AndRuleEngine> e = plan.my_multiplicity_engines.at(link);
     Agent *diversion_agent = plan.diversion_agents.at(link).get();
     TRACE("Checking multiplicity ")(link)(" diversion=")(diversion_agent)("\n");
     TRACEC("HSK ")(after_pass_keys)("\n");
-    TreePtr<Node> x = after_pass_keys.at(diversion_agent);
+    TreePtr<Node> x = after_pass_keys->at(diversion_agent);
         
     ASSERT( x );
     ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
@@ -620,15 +601,31 @@ void AndRuleEngine::CompareMultiplicityLinks( PatternLink link,
 }
 
 
-void AndRuleEngine::CompareAfterPass()
+void AndRuleEngine::CompareAfterPassRegenerate()
 {
     const CouplingMap combined_keys = MapUnion( *master_keys, solution_keys );    
 
-#ifdef REGENERATE_AFTER_PASS_KEYS
-    CouplingMap new_after_pass_keys;
+    CouplingMap regenerated_after_pass_keys;
     for( auto agent : plan.my_normal_agents )
     {
-        shared_ptr<DecidedQuery> query = GetNormalLinkedQuery(agent, &combined_keys);
+        TreePtr<Node> x = solution_keys.at(agent);
+        auto pq = agent->GetPatternQuery();
+        TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(*x)("\n");    
+        TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
+        TRACEC("Based on ")(combined_keys)("\n");    
+        list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), combined_keys );
+        TRACEC("Relocated links ")(ll)("\n");    
+        auto query = make_shared<DecidedQuery>(pq);
+        Conjecture conj(agent, query);            
+        conj.Start();
+        try
+        {
+            agent->IncrementNormalLinkedQuery( conj, x, ll, plan.compare_by_value_links );
+        }
+        catch( const ::Mismatch& mismatch )
+        {
+            ASSERT(false)("Unexpected mismatch thrown from RunNormalLinkedQuery(): ")(mismatch)("\n");                    
+        }
         
         // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
         FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
@@ -636,38 +633,53 @@ void AndRuleEngine::CompareAfterPass()
             ASSERT( plan.diversion_agents.count(link) );
             Agent *diversion_agent = plan.diversion_agents.at(link).get();
 #ifdef EXTRACT_AFTER_PASS_KEYS // Need both methods to double-check            
-            AssertNewCoupling( after_pass_keys, diversion_agent, link.GetChildX(), agent ); 
+            AssertNewCoupling( extracted_after_pass_keys, diversion_agent, link.GetChildX(), agent ); 
 #endif
-            KeyCoupling( diversion_agent, link.GetChildX(), &new_after_pass_keys );
+            KeyCoupling( diversion_agent, link.GetChildX(), &regenerated_after_pass_keys );
         }                    
         FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
         {
             ASSERT( plan.diversion_agents.count(link) );
             Agent *diversion_agent = plan.diversion_agents.at(link).get();
 #ifdef EXTRACT_AFTER_PASS_KEYS // Need both methods to double-check            
-            AssertNewCoupling( after_pass_keys, diversion_agent, link.GetChildX(), agent ); 
+            AssertNewCoupling( extracted_after_pass_keys, diversion_agent, link.GetChildX(), agent ); 
 #endif
-            KeyCoupling( diversion_agent, link.GetChildX(), &new_after_pass_keys );
+            KeyCoupling( diversion_agent, link.GetChildX(), &regenerated_after_pass_keys );
         }
     }      
-    ASSERT( new_after_pass_keys.size() == after_pass_keys.size() )
-          ("new keys ")(new_after_pass_keys)("\n")
-          ("hyp keys ")(after_pass_keys)("\n");
+    ASSERT( regenerated_after_pass_keys.size() == extracted_after_pass_keys.size() )
+          ("regenerated keys ")(regenerated_after_pass_keys)("\n")
+          ("extracted keys   ")(extracted_after_pass_keys)("\n");
           
-    after_pass_keys = new_after_pass_keys;
-#endif             
-
     // Process the evaluator agents.
     for( Agent *agent : plan.my_evaluators )
-        CompareEvaluatorLinks( agent, &combined_keys );
+        CompareEvaluatorLinks( agent, &combined_keys, &regenerated_after_pass_keys );
 
     // Process the free abnormal links.
     for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_free_abnormal_engines )
-        CompareFreeAbnormalLinks( pae.first, &combined_keys );
+        CompareFreeAbnormalLinks( pae.first, &combined_keys, &regenerated_after_pass_keys );
 
     // Process the free multiplicity links.
     for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_multiplicity_engines )
-        CompareMultiplicityLinks( pae.first, &combined_keys );        
+        CompareMultiplicityLinks( pae.first, &combined_keys, &regenerated_after_pass_keys );        
+}
+
+
+void AndRuleEngine::CompareAfterPassExtractOnly()
+{
+    const CouplingMap combined_keys = MapUnion( *master_keys, solution_keys );    
+
+    // Process the evaluator agents.
+    for( Agent *agent : plan.my_evaluators )
+        CompareEvaluatorLinks( agent, &combined_keys, &extracted_after_pass_keys );
+
+    // Process the free abnormal links.
+    for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_free_abnormal_engines )
+        CompareFreeAbnormalLinks( pae.first, &combined_keys, &extracted_after_pass_keys );
+
+    // Process the free multiplicity links.
+    for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_multiplicity_engines )
+        CompareMultiplicityLinks( pae.first, &combined_keys, &extracted_after_pass_keys );        
 }
 
 
@@ -728,7 +740,9 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
     //int i=0;
     while(1)
     {
-        after_pass_keys.clear();
+#ifdef EXTRACT_AFTER_PASS_KEYS 
+        extracted_after_pass_keys.clear();
+#endif
         solution_keys.clear();
         working_keys.clear();
 #ifdef USE_SOLVER        
@@ -749,7 +763,11 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             DecidedCompare( plan.root_agent, start_x );            
             CompareMasterKeys();
 #endif
-            CompareAfterPass();
+#ifdef REGENERATE_AFTER_PASS_KEYS
+            CompareAfterPassRegenerate();
+#else
+            CompareAfterPassExtractOnly();
+#endif
         }
         catch( const ::Mismatch& mismatch )
         {                
@@ -807,7 +825,7 @@ void AndRuleEngine::AssertNewCoupling( const CouplingMap &old, Agent *new_agent,
         bool same  = sc( old.at(new_agent), new_x );
         if( !same )
         {
-            FTRACE("New x ")(new_x)(" mismatches old ")(old.at(new_agent))
+            FTRACE("New x ")(new_x)(" mismatches old x ")(old.at(new_agent))
                   (" for agent ")(new_agent)(" with parent ")(parent_agent)("\n");
             if( TreePtr<SubSequence>::DynamicCast(new_x) && TreePtr<SubSequence>::DynamicCast(old.at(new_agent)))
                 FTRACEC("SubSequence\n");

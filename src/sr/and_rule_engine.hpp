@@ -101,15 +101,17 @@ public:
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( Agent *agent,
                          TreePtr<Node> x );
-    shared_ptr<DecidedQuery> GetNormalLinkedQuery( Agent *agent, 
-                                                   const CouplingMap *combined_keys );
     void CompareEvaluatorLinks( Agent *agent, 
-                                const CouplingMap *combined_keys );
+                                const CouplingMap *combined_keys, 
+                                const CouplingMap *after_pass_keys );
     void CompareFreeAbnormalLinks( PatternLink link, 
-                                   const CouplingMap *combined_keys ); 
+                                   const CouplingMap *combined_keys, 
+                                   const CouplingMap *after_pass_keys ); 
     void CompareMultiplicityLinks( PatternLink link, 
-                                   const CouplingMap *combined_keys ); 
-    void CompareAfterPass();
+                                   const CouplingMap *combined_keys, 
+                                   const CouplingMap *after_pass_keys ); 
+    void CompareAfterPassRegenerate();
+    void CompareAfterPassExtractOnly();
     void Compare( TreePtr<Node> start_x,
                   const CouplingMap *master_keys );
     void CompareTrivialProblem( TreePtr<Node> start_x );
@@ -124,7 +126,7 @@ private:
 
     CouplingMap working_keys; 
     CouplingMap solution_keys; 
-    CouplingMap after_pass_keys; 
+    CouplingMap extracted_after_pass_keys; 
     CouplingMap master_coupling_candidates;
     const CouplingMap *master_keys;
 };
