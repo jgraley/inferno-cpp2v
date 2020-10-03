@@ -26,7 +26,7 @@
 // After-pass restricts based on evaluators, free abnormals and
 // multiplicities. REGENERATE is the new algo that figures out where
 // they are based on normals, using RunNormalLocatedQuery().
-//#define REGENERATE_AFTER_PASS_KEYS
+#define REGENERATE_AFTER_PASS_KEYS
 
 // EXTRACT is the old algo that gets them from CompareLinks() (in 
 // DC solver) or diversions (CSP solver). Latter probably broken.
@@ -627,6 +627,7 @@ void AndRuleEngine::CompareAfterPassRegenerate()
             ASSERT(false)("Unexpected mismatch thrown from RunNormalLinkedQuery(): ")(mismatch)("\n");                    
         }
         
+        combined_keys.clear();
         // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
         FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
         {
@@ -635,7 +636,7 @@ void AndRuleEngine::CompareAfterPassRegenerate()
 #ifdef EXTRACT_AFTER_PASS_KEYS // Need both methods to double-check            
             AssertNewCoupling( extracted_after_pass_keys, diversion_agent, link.GetChildX(), agent ); 
 #endif
-            KeyCoupling( diversion_agent, link.GetChildX(), &regenerated_after_pass_keys );
+            KeyCoupling( diversion_agent, link.GetChildX(), &regenerated_after_pass_keys );            
         }                    
         FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
         {
@@ -646,14 +647,15 @@ void AndRuleEngine::CompareAfterPassRegenerate()
 #endif
             KeyCoupling( diversion_agent, link.GetChildX(), &regenerated_after_pass_keys );
         }
+        // Process if an evaluator agent.
+        if( plan.my_evaluators.count( agent ) > 0 )
+            CompareEvaluatorLinks( agent, &combined_keys, &regenerated_after_pass_keys );
     }      
     ASSERT( regenerated_after_pass_keys.size() == extracted_after_pass_keys.size() )
           ("regenerated keys ")(regenerated_after_pass_keys)("\n")
           ("extracted keys   ")(extracted_after_pass_keys)("\n");
           
-    // Process the evaluator agents.
-    for( Agent *agent : plan.my_evaluators )
-        CompareEvaluatorLinks( agent, &combined_keys, &regenerated_after_pass_keys );
+    
 
     // Process the free abnormal links.
     for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_free_abnormal_engines )
