@@ -111,7 +111,6 @@ public:
                                    const CouplingMap *combined_keys, 
                                    const CouplingMap *after_pass_keys ); 
     void CompareAfterPassRegenerate();
-    void CompareAfterPassExtractOnly();
     void Compare( TreePtr<Node> start_x,
                   const CouplingMap *master_keys );
     void CompareTrivialProblem( TreePtr<Node> start_x );
@@ -126,7 +125,6 @@ private:
 
     CouplingMap working_keys; 
     CouplingMap solution_keys; 
-    CouplingMap extracted_after_pass_keys; 
     CouplingMap master_coupling_candidates;
     const CouplingMap *master_keys;
 };

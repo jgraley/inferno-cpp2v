@@ -28,11 +28,6 @@
 // they are based on normals, using RunNormalLocatedQuery().
 #define REGENERATE_AFTER_PASS_KEYS
 
-// EXTRACT is the old algo that gets them from CompareLinks() (in 
-// DC solver) or diversions (CSP solver). Latter probably broken.
-// Enable both and ASSERTs will confirm they match.
-//#define EXTRACT_AFTER_PASS_KEYS
-
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( Agent *root_agent_, const set<Agent *> &master_agents_ ) :
@@ -374,15 +369,7 @@ void AndRuleEngine::GetNextCSPSolution()
         list< Agent * > vars = p.second->GetFreeVariables();
         ASSERT( vars.front() == p.first );
         if( plan.my_normal_agents.count(vars.front()) )
-            solution_keys[vars.front()] = vals.front(); 
-#ifdef EXTRACT_AFTER_PASS_KEYS
-        else
-            extracted_after_pass_keys[vars.front()] = vals.front();
-        // Note: suspect this doesn't work, and that you need to loop
-        // over the constraint's variables and check through them to
-        // find the abnormals, because diversion links/variables don't 
-        // have their own constraints.
-#endif                
+            solution_keys[vars.front()] = vals.front();                
     }
 }
 
@@ -460,23 +447,6 @@ void AndRuleEngine::CompareLinks( Agent *agent,
 
         DecidedCompare(link.GetChildAgent(), x);   
     }
-    
-#ifdef EXTRACT_AFTER_PASS_KEYS
-    // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-    FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
-    {
-        ASSERT( plan.diversion_agents.count(link) );
-        Agent *diversion_agent = plan.diversion_agents.at(link).get();
-        KeyCoupling( diversion_agent, link.GetChildX(), &extracted_after_pass_keys );
-    }
-        
-    FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
-    {
-        ASSERT( plan.diversion_agents.count(link) );
-        Agent *diversion_agent = plan.diversion_agents.at(link).get();
-        KeyCoupling( diversion_agent, link.GetChildX(), &extracted_after_pass_keys );
-    }
-#endif    
 }
 
 
@@ -625,7 +595,7 @@ void AndRuleEngine::CompareAfterPassRegenerate()
         int i=0;
         while(1)
         {
-            agent->IncrementNormalLinkedQuery( conj, x, ll, plan.compare_by_value_links );
+            agent->ResumeNormalLinkedQuery( conj, x, ll, plan.compare_by_value_links );
             i++;
 
             try
@@ -666,18 +636,6 @@ void AndRuleEngine::CompareAfterPassRegenerate()
             if( !conj.Increment() )
                 throw Agent::NormalLinksMismatch(); // Conjecture has run out of choices to try.            
         }    
-#ifdef EXTRACT_AFTER_PASS_KEYS // Need both methods to double-check            
-        FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
-        {
-            Agent *diversion_agent = plan.diversion_agents.at(link).get();
-           // AssertNewCoupling( extracted_after_pass_keys, diversion_agent, link.GetChildX(), agent ); 
-        }
-        FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
-        {
-            Agent *diversion_agent = plan.diversion_agents.at(link).get();
-         //   AssertNewCoupling( extracted_after_pass_keys, diversion_agent, link.GetChildX(), agent ); 
-        }
-#endif
 
         FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
         {
@@ -692,29 +650,6 @@ void AndRuleEngine::CompareAfterPassRegenerate()
 
         regenerated_after_pass_keys = MapUnion( regenerated_after_pass_keys, local_keys );  
     }      
-#ifdef EXTRACT_AFTER_PASS_KEYS // Need both methods to double-check            
-    ASSERT( regenerated_after_pass_keys.size() == extracted_after_pass_keys.size() )
-          ("regenerated keys ")(regenerated_after_pass_keys)("\n")
-          ("extracted keys   ")(extracted_after_pass_keys)("\n");    
-#endif
-}
-
-
-void AndRuleEngine::CompareAfterPassExtractOnly()
-{
-    const CouplingMap combined_keys = MapUnion( *master_keys, solution_keys );    
-
-    // Process the evaluator agents.
-    for( Agent *agent : plan.my_evaluators )
-        CompareEvaluatorLinks( agent, &combined_keys, &extracted_after_pass_keys );
-
-    // Process the free abnormal links.
-    for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_free_abnormal_engines )
-        CompareFreeAbnormalLinks( pae.first, &combined_keys, &extracted_after_pass_keys );
-
-    // Process the free multiplicity links.
-    for( const std::pair< const PatternLink, shared_ptr<AndRuleEngine> > &pae : plan.my_multiplicity_engines )
-        CompareMultiplicityLinks( pae.first, &combined_keys, &extracted_after_pass_keys );        
 }
 
 
@@ -775,9 +710,6 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
     //int i=0;
     while(1)
     {
-#ifdef EXTRACT_AFTER_PASS_KEYS 
-        extracted_after_pass_keys.clear();
-#endif
         solution_keys.clear();
         working_keys.clear();
 #ifdef USE_SOLVER        
@@ -800,8 +732,6 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
 #endif
 #ifdef REGENERATE_AFTER_PASS_KEYS
             CompareAfterPassRegenerate();
-#else
-            CompareAfterPassExtractOnly();
 #endif
         }
         catch( const ::Mismatch& mismatch )

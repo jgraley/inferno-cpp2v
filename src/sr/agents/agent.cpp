@@ -93,7 +93,7 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 }                             
 
 
-void AgentCommon::IncrementNormalLinkedQuery( Conjecture &conj,
+void AgentCommon::ResumeNormalLinkedQuery( Conjecture &conj,
                                               TreePtr<Node> x,
                                               const list<LocatedLink> &required_links,
                                               const set<PatternLink> &compare_by_value ) const
@@ -176,9 +176,9 @@ void AgentCommon::RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
     
     // RunNormalLinkedQuery() only wants to determine whether there
     // is at least one match, so a single call suffices. To get all
-    // the matches, call IncrementNormalLinkedQuery() directly with 
+    // the matches, call ResumeNormalLinkedQuery() directly with 
     // your own Conjecture object.
-    IncrementNormalLinkedQuery( conj, x, required_links, compare_by_value );
+    ResumeNormalLinkedQuery( conj, x, required_links, compare_by_value );
 }
 
 
