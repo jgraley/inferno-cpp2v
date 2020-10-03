@@ -607,7 +607,7 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
             throw Agent::NormalLinksMismatch(); // Conjecture has run out of choices to try.            
     }    
 
-    // Undo diversions for the benefit of replace
+    // Key undiverted free abnormals for the benefit of replace
     FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
     {
         Agent *diversion_agent = plan.diversion_agents.at(link).get();
@@ -617,7 +617,6 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
             KeyCoupling( link.GetChildAgent(), x, &solution_keys );
         }
     }
-    //solution_keys = MapUnion( solution_keys, local_keys );
 }      
 
 
