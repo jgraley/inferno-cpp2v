@@ -110,7 +110,10 @@ public:
     void CompareMultiplicityLinks( PatternLink link, 
                                    const CouplingMap *combined_keys, 
                                    const CouplingMap *after_pass_keys ); 
-    void CompareAfterPassRegenerate();
+    void CompareAfterPassAgent( Agent *agent, 
+                                TreePtr<Node> x,
+                                const CouplingMap *combined_keys );
+    void CompareAfterPass();
     void Compare( TreePtr<Node> start_x,
                   const CouplingMap *master_keys );
     void CompareTrivialProblem( TreePtr<Node> start_x );

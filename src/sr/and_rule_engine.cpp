@@ -23,11 +23,6 @@
 
 //#define USE_SOLVER
 
-// After-pass restricts based on evaluators, free abnormals and
-// multiplicities. REGENERATE is the new algo that figures out where
-// they are based on normals, using RunNormalLocatedQuery().
-#define REGENERATE_AFTER_PASS_KEYS
-
 using namespace SR;
 
 AndRuleEngine::AndRuleEngine( Agent *root_agent_, const set<Agent *> &master_agents_ ) :
@@ -572,84 +567,89 @@ void AndRuleEngine::CompareMultiplicityLinks( PatternLink link,
 }
 
 
-void AndRuleEngine::CompareAfterPassRegenerate()
+void AndRuleEngine::CompareAfterPassAgent( Agent *agent, 
+                                           TreePtr<Node> x,
+                                           const CouplingMap *combined_keys )
+{
+    auto pq = agent->GetPatternQuery();
+    TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(*x)("\n");    
+    TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
+    TRACEC("Based on ")(*combined_keys)("\n");    
+    list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), *combined_keys );
+    TRACEC("Relocated links ")(ll)("\n");    
+    auto query = make_shared<DecidedQuery>(pq);
+    Conjecture conj(agent, query);            
+    conj.Start();
+    CouplingMap local_keys;
+    int i=0;
+    while(1)
+    {
+        agent->ResumeNormalLinkedQuery( conj, x, ll, plan.compare_by_value_links );
+        i++;
+
+        try
+        {
+            TRACE("Try out query, attempt %d (1-based)\n", i);    
+            local_keys.clear();
+            // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
+            FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
+            {
+                ASSERT( plan.diversion_agents.count(link) );
+                Agent *diversion_agent = plan.diversion_agents.at(link).get();
+                KeyCoupling( diversion_agent, link.GetChildX(), &local_keys );
+                
+                if( plan.my_free_abnormal_engines.count(link) )
+                    CompareFreeAbnormalLinks( link, combined_keys, &local_keys );
+            }                    
+            FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
+            {
+                ASSERT( plan.diversion_agents.count(link) );
+                Agent *diversion_agent = plan.diversion_agents.at(link).get();
+                KeyCoupling( diversion_agent, link.GetChildX(), &local_keys );
+
+                if( plan.my_multiplicity_engines.count(link) )
+                    CompareMultiplicityLinks( link, combined_keys, &local_keys );  
+            }
+
+            // Process the evaluator agents.
+            if( plan.my_evaluators.count( agent ) )
+                CompareEvaluatorLinks( agent, combined_keys, &local_keys );            
+            
+            // if we got here, we're done!
+            TRACE("Leaving while loop after %d tries\n", i);    
+            break;
+        }
+        catch( const ::Mismatch& mismatch )
+        {
+        }
+        if( !conj.Increment() )
+            throw Agent::NormalLinksMismatch(); // Conjecture has run out of choices to try.            
+    }    
+
+    FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
+    {
+        Agent *diversion_agent = plan.diversion_agents.at(link).get();
+        if( plan.my_free_abnormal_engines.count(link) )
+            if( local_keys.count(diversion_agent) )   // Unexplained if statement #155 
+        {
+            TreePtr<Node> x = local_keys.at(diversion_agent);                  
+            KeyCoupling( link.GetChildAgent(), x, &solution_keys );
+        }
+    }
+}      
+
+
+void AndRuleEngine::CompareAfterPass()
 {
     INDENT("R");
     
     const CouplingMap combined_keys = MapUnion( *master_keys, solution_keys );    
 
-    CouplingMap regenerated_after_pass_keys;
     for( auto agent : plan.my_normal_agents )
     {
         TreePtr<Node> x = solution_keys.at(agent);
-        auto pq = agent->GetPatternQuery();
-        TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(*x)("\n");    
-        TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
-        TRACEC("Based on ")(combined_keys)("\n");    
-        list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), combined_keys );
-        TRACEC("Relocated links ")(ll)("\n");    
-        auto query = make_shared<DecidedQuery>(pq);
-        Conjecture conj(agent, query);            
-        conj.Start();
-        CouplingMap local_keys;
-        int i=0;
-        while(1)
-        {
-            agent->ResumeNormalLinkedQuery( conj, x, ll, plan.compare_by_value_links );
-            i++;
-
-            try
-            {
-                TRACE("Try out query, attempt %d (1-based)\n", i);    
-                local_keys.clear();
-                // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-                FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
-                {
-                    ASSERT( plan.diversion_agents.count(link) );
-                    Agent *diversion_agent = plan.diversion_agents.at(link).get();
-                    KeyCoupling( diversion_agent, link.GetChildX(), &local_keys );
-                    
-                    if( plan.my_free_abnormal_engines.count(link) )
-                        CompareFreeAbnormalLinks( link, &combined_keys, &local_keys );
-                }                    
-                FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
-                {
-                    ASSERT( plan.diversion_agents.count(link) );
-                    Agent *diversion_agent = plan.diversion_agents.at(link).get();
-                    KeyCoupling( diversion_agent, link.GetChildX(), &local_keys );
-
-                    if( plan.my_multiplicity_engines.count(link) )
-                        CompareMultiplicityLinks( link, &combined_keys, &local_keys );  
-                }
-
-                // Process the evaluator agents.
-                if( plan.my_evaluators.count( agent ) )
-                    CompareEvaluatorLinks( agent, &combined_keys, &local_keys );            
-                
-                // if we got here, we're done!
-                TRACE("Leaving while loop after %d tries\n", i);    
-                break;
-            }
-            catch( const ::Mismatch& mismatch )
-            {
-            }
-            if( !conj.Increment() )
-                throw Agent::NormalLinksMismatch(); // Conjecture has run out of choices to try.            
-        }    
-
-        FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
-        {
-            Agent *diversion_agent = plan.diversion_agents.at(link).get();
-            if( plan.my_free_abnormal_engines.count(link) )
-                if( local_keys.count(diversion_agent) )   // Unexplained if statement #155 
-            {
-                TreePtr<Node> x = local_keys.at(diversion_agent);                  
-                KeyCoupling( link.GetChildAgent(), x, &solution_keys );
-            }
-        }
-
-        regenerated_after_pass_keys = MapUnion( regenerated_after_pass_keys, local_keys );  
-    }      
+        CompareAfterPassAgent( agent, x, &combined_keys );
+    }
 }
 
 
@@ -730,9 +730,8 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             DecidedCompare( plan.root_agent, start_x );            
             CompareMasterKeys();
 #endif
-#ifdef REGENERATE_AFTER_PASS_KEYS
-            CompareAfterPassRegenerate();
-#endif
+
+            CompareAfterPass();
         }
         catch( const ::Mismatch& mismatch )
         {                
