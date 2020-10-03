@@ -523,33 +523,14 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
 }
 
 
-void AndRuleEngine::CompareFreeAbnormalLinks( PatternLink link, 
-                                              const CouplingMap *combined_keys, 
-                                              const CouplingMap *keys ) 
-{
-    INDENT("A");
-
-    shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at(link);
-    Agent *diversion_agent = plan.diversion_agents.at(link).get();
-    TRACE("Checking free abnormal ")(link)(" diversion=")(diversion_agent)("\n");
-    TRACEC("HSK ")(keys)("\n");
-    
-    TreePtr<Node> x = keys->at(diversion_agent);             
-    e->Compare( x, combined_keys );
-}
-
-
-void AndRuleEngine::CompareMultiplicityLinks( PatternLink link, 
-                                              const CouplingMap *combined_keys, 
-                                              const CouplingMap *keys ) 
+void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link, 
+                                              const CouplingMap *combined_keys ) 
 {
     INDENT("M");
 
     shared_ptr<AndRuleEngine> e = plan.my_multiplicity_engines.at(link);
-    Agent *diversion_agent = plan.diversion_agents.at(link).get();
-    TRACE("Checking multiplicity ")(link)(" diversion=")(diversion_agent)("\n");
-    TRACEC("Using keys: ")(keys)("\n");
-    TreePtr<Node> x = keys->at(diversion_agent);
+    TRACE("Checking multiplicity ")(link)("\n");
+    TreePtr<Node> x = link.GetChildX();
         
     ASSERT( x );
     ContainerInterface *xc = dynamic_cast<ContainerInterface *>(x.get());
@@ -595,7 +576,11 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
                 KeyCoupling( diversion_agent, link.GetChildX(), &local_keys );
                 
                 if( plan.my_free_abnormal_engines.count(link) )
-                    CompareFreeAbnormalLinks( link, combined_keys, &local_keys );
+                {
+                    shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at(link);
+                    TreePtr<Node> x = local_keys.at(diversion_agent);             
+                    e->Compare( x, combined_keys );
+                }
             }                    
             FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
             {
@@ -604,7 +589,7 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
                 KeyCoupling( diversion_agent, link.GetChildX(), &local_keys );
 
                 if( plan.my_multiplicity_engines.count(link) )
-                    CompareMultiplicityLinks( link, combined_keys, &local_keys );  
+                    CompareMultiplicityLinks( link, combined_keys );  
             }
 
             // Process the evaluator agents.
@@ -622,6 +607,7 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
             throw Agent::NormalLinksMismatch(); // Conjecture has run out of choices to try.            
     }    
 
+    // Undo diversions for the benefit of replace
     FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
     {
         Agent *diversion_agent = plan.diversion_agents.at(link).get();
@@ -631,6 +617,7 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
             KeyCoupling( link.GetChildAgent(), x, &solution_keys );
         }
     }
+    //solution_keys = MapUnion( solution_keys, local_keys );
 }      
 
 

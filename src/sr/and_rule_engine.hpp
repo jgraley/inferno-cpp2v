@@ -104,12 +104,8 @@ public:
     void CompareEvaluatorLinks( Agent *agent, 
                                 const CouplingMap *combined_keys, 
                                 const CouplingMap *after_pass_keys );
-    void CompareFreeAbnormalLinks( PatternLink link, 
-                                   const CouplingMap *combined_keys, 
-                                   const CouplingMap *after_pass_keys ); 
-    void CompareMultiplicityLinks( PatternLink link, 
-                                   const CouplingMap *combined_keys, 
-                                   const CouplingMap *after_pass_keys ); 
+    void CompareMultiplicityLinks( LocatedLink link, 
+                                   const CouplingMap *combined_keys ); 
     void CompareAfterPassAgent( Agent *agent, 
                                 TreePtr<Node> x,
                                 const CouplingMap *combined_keys );
