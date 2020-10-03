@@ -64,7 +64,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
     list< shared_ptr<CSP::Constraint> > constraints;
     for( Agent *constraint_agent : my_normal_agents )
     {        
-        CSP::VariableQueryLambda vql = [&](Agent *link_agent) -> pair<CSP::VariableFlags, Agent *>
+        CSP::VariableQueryLambda vql = [&](Agent *link_agent) -> CSP::VariableFlags
         {
             CSP::VariableFlags flags;
             
@@ -96,15 +96,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
             else
                 flags.freedom = CSP::Freedom::FREE;
             
-            if( diversion_agents.count(link) > 0 )
-                flags.correspondance = CSP::Correspondance::DIVERTED;
-            else
-                flags.correspondance = CSP::Correspondance::DIRECT;
-            
-            if( flags.correspondance == CSP::Correspondance::DIVERTED )
-                return make_pair(flags, diversion_agents.at(link).get());
-            else
-                return make_pair(flags, nullptr);            
+            return flags;            
         };
                 
         shared_ptr<CSP::Constraint> c = make_shared<CSP::SystemicConstraint>( constraint_agent, vql );
@@ -304,14 +296,12 @@ void AndRuleEngine::Plan::CreateVariousThings( const set<Agent *> &normal_agents
                 my_free_abnormal_engines[link] = make_shared<AndRuleEngine>( link.GetChildAgent(), 
                                                                              surrounding_agents );  
             }
-            diversion_agents[link] = make_shared<PlaceholderAgent>(); 
         }
         
         FOREACH( PatternLink link, pq->GetMultiplicityLinks() )
         {
             my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link.GetChildAgent(), 
                                                                         surrounding_agents );  
-            diversion_agents[link] = make_shared<PlaceholderAgent>(); 
         }
     }
 }
@@ -499,8 +489,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
         TRACE("Comparing block %d\n", i);
  
         // Get x for linked node
-        Agent *diversion_agent = plan.diversion_agents.at(link).get();
-        TreePtr<Node> x = keys->at(diversion_agent);
+        TreePtr<Node> x = keys->at(link.GetChildAgent());
                                 
         try 
         {
@@ -571,22 +560,18 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
             // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
             FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
             {
-                ASSERT( plan.diversion_agents.count(link) );
-                Agent *diversion_agent = plan.diversion_agents.at(link).get();
-                KeyCoupling( diversion_agent, link.GetChildX(), &local_keys );
+                KeyCoupling( link.GetChildAgent(), link.GetChildX(), &local_keys );
                 
                 if( plan.my_free_abnormal_engines.count(link) )
                 {
                     shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at(link);
-                    TreePtr<Node> x = local_keys.at(diversion_agent);             
+                    TreePtr<Node> x = local_keys.at(link.GetChildAgent());             
                     e->Compare( x, combined_keys );
                 }
             }                    
             FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
             {
-                ASSERT( plan.diversion_agents.count(link) );
-                Agent *diversion_agent = plan.diversion_agents.at(link).get();
-                KeyCoupling( diversion_agent, link.GetChildX(), &local_keys );
+                KeyCoupling( link.GetChildAgent(), link.GetChildX(), &local_keys );
 
                 if( plan.my_multiplicity_engines.count(link) )
                     CompareMultiplicityLinks( link, combined_keys );  
@@ -610,10 +595,9 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
     // Key undiverted free abnormals for the benefit of replace
     FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
     {
-        Agent *diversion_agent = plan.diversion_agents.at(link).get();
         if( plan.my_free_abnormal_engines.count(link) )
         {
-            TreePtr<Node> x = local_keys.at(diversion_agent);                  
+            TreePtr<Node> x = local_keys.at(link.GetChildAgent());                  
             KeyCoupling( link.GetChildAgent(), x, &solution_keys );
         }
     }
@@ -681,7 +665,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
     }
            
 #ifdef USE_SOLVER
-    StartCSPSolver( start_x, master_keys );
+    StartCSPSolver( start_x );
 #else
     plan.conj->Start();
 #endif

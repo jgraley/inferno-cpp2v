@@ -41,12 +41,6 @@ enum class Freedom
 };
 
 
-enum class Correspondance
-{
-    DIRECT,
-    DIVERTED
-};
-
 typedef TreePtr<Node> Value;
 
 struct ValueFlags
@@ -63,11 +57,10 @@ struct VariableFlags
     // TODO Would like to use bitfields but gcc says no https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51242
     CompareBy compare_by; 
     Freedom freedom;
-    Correspondance correspondance;
 };
 
 
-typedef function< pair<VariableFlags, VariableId>( VariableId ) > VariableQueryLambda;
+typedef function< VariableFlags( VariableId ) > VariableQueryLambda;
 
 void CheckLocalMatch( VariableId variable, Value value );
 

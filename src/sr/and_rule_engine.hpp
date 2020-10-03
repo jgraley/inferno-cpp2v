@@ -75,7 +75,6 @@ public:
         map< PatternLink, shared_ptr<AndRuleEngine> > my_evaluator_abnormal_engines;
         map< PatternLink, shared_ptr<AndRuleEngine> > my_free_abnormal_engines;
         map< PatternLink, shared_ptr<AndRuleEngine> > my_multiplicity_engines;
-        map< PatternLink, shared_ptr<PlaceholderAgent> > diversion_agents; 
         map< Agent *, shared_ptr<CSP::Constraint> > my_constraints;
         set<Agent *> master_boundary_agents;
         set<PatternLink> master_boundary_links;

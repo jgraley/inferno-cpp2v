@@ -50,23 +50,11 @@ void SystemicConstraint::Plan::GetAllVariables()
 
 void SystemicConstraint::Plan::RunVariableQueries( list<VariableId> vars, VariableQueryLambda vql )
 { 
-    diversions.clear();
     flags.clear();
     for( VariableId v : vars )
     {
-        pair<VariableFlags, VariableId> r = vql( v );
-        flags.push_back( r.first );
-        switch( r.first.correspondance )
-        {
-        case Correspondance::DIRECT:
-            ASSERT( r.second == nullptr );
-            break;
-            
-        case Correspondance::DIVERTED:
-            ASSERT( r.second != v );
-            diversions[v] = r.second;
-            break;
-        }
+        VariableFlags r = vql( v );
+        flags.push_back( r );
     }
 }
 
@@ -89,9 +77,6 @@ list<VariableId> SystemicConstraint::GetFreeVariables() const
     auto fit = plan.flags.begin();
     for( auto var : plan.all_variables )
     {
-        if( plan.diversions.count(var) > 0 )
-            var = plan.diversions.at(var);
-
         if( fit->freedom == Freedom::FREE )
             free_vars.push_back( var );
         fit++;
@@ -136,17 +121,6 @@ void SystemicConstraint::TraceProblem() const
             
         case Freedom::FORCED:
             sflags += "FORCED";
-            break;
-        }
-        sflags += " and ";
-        switch( fit->correspondance )
-        {
-        case Correspondance::DIRECT:
-            sflags += "DIRECT";
-            break;
-            
-        case Correspondance::DIVERTED:
-            sflags += "DIVERTED";
             break;
         }
         fit++;

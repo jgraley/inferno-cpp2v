@@ -56,13 +56,13 @@ private:
         explicit Plan( SR::Agent *agent, 
                        VariableQueryLambda vql );
         void GetAllVariables();
-        void RunVariableQueries( list<VariableId> vars, VariableQueryLambda vql );
+        void RunVariableQueries( list<VariableId> vars, 
+                                 VariableQueryLambda vql );
                                  
         SR::Agent * agent;
         shared_ptr<SR::PatternQuery> pq; // links run over all vars minus agent
         list<VariableId> all_variables;
         list<VariableFlags> flags; // over ALL vars
-        map<VariableId, VariableId> diversions;
         shared_ptr<SR::Conjecture> conj;
         shared_ptr<SimpleCompare> simple_compare;
     } plan;
