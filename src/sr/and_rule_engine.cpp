@@ -21,7 +21,7 @@
 
 //#define TEST_PATTERN_QUERY
 
-//#define USE_SOLVER
+#define USE_SOLVER
 
 using namespace SR;
 
@@ -47,13 +47,11 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
     set<Agent *> surrounding_agents = SetUnion( master_agents, my_normal_agents );         
     CreateVariousThings( normal_agents, surrounding_agents );    
         
-    list<Agent *> normal_agents_ordered;
     master_boundary_agents.clear();    
     master_boundary_links.clear();
     reached.clear();
-    PopulateForSolver( &normal_agents_ordered, 
-                             root_agent, 
-                             master_agents );
+    PopulateForSolver( root_agent, 
+                       master_agents );
 
     set<PatternLink> possible_keyer_links; // maps from child to parent
     DeterminePossibleKeyers( &possible_keyer_links, root_agent, master_agents );
@@ -70,7 +68,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
             
             shared_ptr<PatternQuery> pq = constraint_agent->GetPatternQuery();
             PatternLink link;
-            for( PatternLink cur_link : pq->GetAllLinks() )
+            for( PatternLink cur_link : pq->GetNormalLinks() )
             {
                 if( cur_link.GetChildAgent() == link_agent )
                 {
@@ -79,8 +77,14 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
                     link = cur_link; // Found a link the the agent the constaint mentioned: not safe! TODO could be parallel links!
                 }
             }
+            // Link will be NULL if this is the self-variable
+            ASSERT( link || link_agent==constraint_agent )
+                  ("Engine being queried via lambda about a non-normal linked agent\n")
+                  ("Constraint agent ")(constraint_agent)("\n")
+                  ("Linked agent ")(link_agent)("\n");
+            
                     
-            if( link_agent==constraint_agent ) // Self-variable must be by location
+            if( !link ) // Self-variable must be by location
                 flags.compare_by = CSP::CompareBy::LOCATION;   
             else if( coupling_residual_links.count(link) > 0 ) // Coupling residuals are by value
                 flags.compare_by = CSP::CompareBy::VALUE;
@@ -123,34 +127,30 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
 }
 
 
-void AndRuleEngine::Plan::PopulateForSolver( list<Agent *> *normal_agents_ordered, 
-                                             Agent *agent,
+void AndRuleEngine::Plan::PopulateForSolver( Agent *agent,
                                              const set<Agent *> &master_agents )
 {
     // Ignore repeated hits
     if( reached.count(agent) > 0 )    
         return; 
+    reached.insert(agent);
+
+    normal_agents_ordered.push_back( agent );
 
     if( master_agents.count( agent ) > 0 )
     {
-        normal_agents_ordered->push_back( agent );
         // It's a master boundary variable/agent because:
         // 1. It's a master agent
         // 2. It's not the child of a master agent (we don't recurse on them)
         // See #125
         master_boundary_agents.insert( agent );
-        reached.insert(agent);
         return;
-    }
-    
-    reached.insert(agent);
-     
-    normal_agents_ordered->push_back( agent );
-    
+    } 
+         
     shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
     FOREACH( PatternLink link, pq->GetNormalLinks() )
     {
-        PopulateForSolver( normal_agents_ordered, link.GetChildAgent(), master_agents );        
+        PopulateForSolver( link.GetChildAgent(), master_agents );        
         
         // Note: here, we won't see root if root is a master agent (i.e. trivial pattern)
         if( master_boundary_agents.count( link.GetChildAgent() ) )
@@ -307,34 +307,37 @@ void AndRuleEngine::Plan::CreateVariousThings( const set<Agent *> &normal_agents
 }
 
 
-void AndRuleEngine::ExpandDomain( Agent *agent, set< TreePtr<Node> > &domain )
+void AndRuleEngine::ExpandDomain( set< TreePtr<Node> > &domain )
 {
+    INDENT("X");
     // It's important that this walk hits parents first because local node 
     // transformations occur in parent-then-child order. That's why this 
     // part is here and not in the CSP stuff: it exploits knowlege of 
     // the directedenss of the pattern trees.
-    plan.my_constraints.at(agent)->ExpandDomain( domain );  
-    
-    shared_ptr<PatternQuery> pq = agent->GetPatternQuery();
-    FOREACH( PatternLink link, pq->GetNormalLinks() )
-        ExpandDomain( link.GetChildAgent(), domain );
+    for( Agent *agent : plan.normal_agents_ordered )
+        if( plan.master_boundary_agents.count(agent) == 0 )
+            plan.my_constraints.at(agent)->ExpandDomain( domain );  
 }
 
 
 void AndRuleEngine::StartCSPSolver( TreePtr<Node> start_x )
 {
+    // Put all the nodes in the X tree into the domain
     set< TreePtr<Node> > domain;
 	Walk wx( start_x ); 
 	for( Walk::iterator wx_it=wx.begin(); wx_it!=wx.end(); ++wx_it )
         domain.insert(*wx_it);
     
+    // Determine the full set of forces 
     CouplingMap forces = *master_keys;
     forces[plan.root_agent] = start_x;
+    
+    // Tell all the constraints about them
     for( pair< Agent *, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
         p.second->SetForces( forces );
     
     // Expand the domain to include generated child y nodes.
-    ExpandDomain( plan.root_agent, domain );
+    ExpandDomain( domain );
     
     plan.solver->Start( domain );
 }
@@ -352,12 +355,14 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
     {
         if( p.first == plan.root_agent ) 
         {
+            // Constraint's self-variable is fixed because we're at root
             // TODO it would be nice to be able to do p.second->GetAllVariables()
             // and and obtain the force back from the constraint
             solution_keys[plan.root_agent] = start_x;
         }
         else
         {
+            // Constraint's self-variable is free so grab it
             list< TreePtr<Node> > &vals = values.at(p.second);
             list< Agent * > vars = p.second->GetFreeVariables();
             ASSERT( vars.front() == p.first )

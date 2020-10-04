@@ -156,112 +156,62 @@ bool SystemicConstraint::Test( list< Value > values )
     ASSERT( values.size() == GetFreeDegree() );
     
     // Merge incoming values with the forces to get a full set of 
-    // values that must tally up with the DQ links.
+    // values that must tally up with the links required by NLQ.
     TreePtr<Node> x;
-    list< Value > expanded_values;
-    auto fit = forces.begin();
+    list<SR::LocatedLink> expanded_links;
+    set<SR::PatternLink> compare_by_value;
+    auto forceit = forces.begin();
     auto valit = values.begin();
-    bool first = true; // First flag refers to the me-variable
+    auto patit = plan.pq->GetNormalLinks().begin();
+    bool first = true; // First flag refers to the self-variable
     for( const VariableFlags &f : plan.flags )
     {
         switch( f.freedom )
         {
         case Freedom::FORCED:
             if( first )         
-                x = *fit;
+                x = *forceit;
             else
-                expanded_values.push_back( *fit );
-            fit++;
+                expanded_links.push_back( SR::LocatedLink(*patit, *forceit) );     
+            forceit++;
             break;
         
         case Freedom::FREE:
             if( first )             
-                x = values.front();
+                x = *valit;
             else
-                expanded_values.push_back( *valit );
+                expanded_links.push_back( SR::LocatedLink(*patit, *valit) );            
             valit++;
             break;
         }
+        
+        switch( f.compare_by )
+        {
+        case CompareBy::VALUE:
+            ASSERT(!first)("SystemicConstraint cannot handle self-variable by anything other than location\n");
+            compare_by_value.insert(*patit);
+            break;
+            
+        case CompareBy::LOCATION:
+            break;
+        }
+        
+        if( !first )
+            patit++;
         first = false;
     }    
-    
-    // We're going to be lazy and borrow the Conjecture class for now.
-    // Our constructor has already configured it to have our agent and
-    // only our agent, so we won't really be using the multi-agent support
-    // the Conjecture offers. We really just want the algorithm out of
-    // Conjecture::IncrementAgent().
-    //
-    // Prepare the conjecture for a series of iterations.
-    plan.conj->Start();
-    shared_ptr<SR::DecidedQuery> query; 
-    
-    // All the other values are normal links. These degrees of freedom
-    // will be a mixture of (a) depending on our our decisions or (b)
-    // fixed single value resulting from x.
-    
-    // This block resembles AndRuleEngine::Compare() (the big one) because
-    // it walks the conjecture through to success (match) or failure (out
-    // of options).
-    while(1)
+
+    // Use a normal-linked query on our underlying agent
+    shared_ptr<SR::DecidedQuery> query = plan.agent->CreateDecidedQuery();
+    try
     {
-        // Try block catches mismatches which are thrown as exceptions
-        try
-        {
-            {
-                Tracer::RAIIEnable silencer( false ); // make DQ be quiet
-                // Similar to AndRuleEngine::DecidedCompare(), we get the
-                // Query object from conjecture, and run a query on it.
-                query = plan.conj->GetQuery(plan.agent);
-                plan.agent->RunDecidedQuery( *query, x );
-            }
-            
-            // The query now has populated links, which should be full
-            // (otherwise RunDecidedQuery() (DQ) should have thrown). We loop 
-            // over both and check that they refer to the same x nodes
-            // we were passed. Mismatch will throw, same as in DQ.
-            auto links = query->GetNormalLinks();
-            ASSERT( links.size() == expanded_values.size() );
-            auto linkit = links.begin();      
-            auto fit = plan.flags.begin();      
-            fit++; // skip "me"
-            for( TreePtr<Node> val : expanded_values )
-            {
-                Value x = linkit->GetChildX();
-                switch( fit->compare_by )
-                {
-                case CompareBy::VALUE:
-                    if( !(*plan.simple_compare)( val, x ) )
-                        throw ByValueLinkMismatch();  
-                    break;
-                    
-                case CompareBy::LOCATION:
-                    if( val != x )
-                        throw ByLocationLinkMismatch();  
-                    break;
-                }
-                // Not expected to pass. We don't check whether the link values
-                // we generate from our given base value are compatible with
-                // the child agent, because that the job of that agent's 
-                // constraint.
-                //CheckLocalMatch( (*linkit)->agent, val );   
-                linkit++;
-                fit++;
-            }
-        }
-        catch( ::Mismatch & )
-        {
-            Tracer::RAIIEnable silencer( false ); // make DQ be quiet
-            // We will get here on a mismatch, whether detected by DQ or our
-            // own comparison between links and values. Permit the conjecture
-            // to move to a new set of choices.
-            if( plan.conj->Increment() )
-                continue; // Conjecture would like us to try again with new choices
-            
-            // Conjecture has run out of choices to try.
-            return false; 
-        }            
-        break; // Didn't throw: success
-    }    
+        plan.agent->RunNormalLinkedQuery( query, x, expanded_links, compare_by_value );      
+    }
+    catch( ::Mismatch & )
+    {
+        // RunNormalLinkedQuery() couldn't match.
+        return false; 
+    }               
 
     return true;
 }

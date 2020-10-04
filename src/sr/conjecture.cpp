@@ -29,6 +29,7 @@ Conjecture::Plan::Plan( set<Agent *> my_agents, const Agent *root_agent )
 
 Conjecture::Plan::Plan( const Agent *agent, shared_ptr<DecidedQuery> query )
 {
+    ASSERT( query );
     last_agent = agent_records.end();
 
     AgentRecord record;

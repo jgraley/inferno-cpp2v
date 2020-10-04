@@ -48,8 +48,7 @@ public:
     const struct Plan : public virtual Traceable
     {
         Plan( AndRuleEngine *algo, Agent *root_agent, const set<Agent *> &master_agents);
-        void PopulateForSolver( list<Agent *> *normal_agents_ordered, 
-                                Agent *agent,
+        void PopulateForSolver( Agent *agent,
                                 const set<Agent *> &master_agents );
         void DetermineKeyersModuloMatchAny( set<PatternLink> *possible_keyer_links,
                                             Agent *agent,
@@ -83,11 +82,12 @@ public:
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;
         set<PatternLink> compare_by_value_links;
+        list<Agent *> normal_agents_ordered;
     private: // working varaibles in plan construction
         set<Agent *> reached; 
     } plan;
     
-    void ExpandDomain( Agent *agent, set< TreePtr<Node> > &domain );
+    void ExpandDomain( set< TreePtr<Node> > &domain );
     void StartCSPSolver( TreePtr<Node> start_x );
     void GetNextCSPSolution( TreePtr<Node> start_x );
     void CompareCoupling( Agent *agent,
