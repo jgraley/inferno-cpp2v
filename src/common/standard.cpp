@@ -106,7 +106,7 @@ string Traceable::GetTrace() const
 
 
 SerialNumber::SNType SerialNumber::master_location_serial;
-int SerialNumber::step;
+int SerialNumber::current_step;
 map<void *, SerialNumber::SNType> SerialNumber::location_serial;
 map<void *, SerialNumber::SNType> SerialNumber::master_serial;
 
@@ -119,7 +119,7 @@ void SerialNumber::Construct()
     map<void *, SNType>::iterator it = location_serial.find(lp);
     if( it == location_serial.end() )
     {
-        // We don't know about this location, so produce a new location seriel number and start the construction count 
+        // We don't know about this location, so produce a new location serial number and start the construction count 
         location_serial.insert( pair<void *, SerialNumber::SNType>(lp, master_location_serial) );
         master_serial.insert( pair<void *, SerialNumber::SNType>(lp, 0) );
         master_location_serial++;
@@ -128,6 +128,7 @@ void SerialNumber::Construct()
     // Remember values for this object
     serial = master_serial[lp];
     location = location_serial[lp];
+    step = current_step;
     
     // produce a new construction serial number
     master_serial[lp]++;
@@ -135,7 +136,7 @@ void SerialNumber::Construct()
 
 void SerialNumber::SetStep( int s )
 {
-    step = s;
+    current_step = s;
     // Just bin the structures we built up - this forces step to be primary ordering
     location_serial = map<void *, SNType>();
     master_serial = map<void *, SNType>();
@@ -143,7 +144,21 @@ void SerialNumber::SetStep( int s )
 
 string SerialNumber::GetAddr() const
 {
-    string ss = SSPrintf("#%d/%lu/%lu", step, location, serial);  
-    //ss += SSPrintf("@%p", this);
+    string ss;
+    switch( step )
+    {
+        case -3: // inputting
+            ss = SSPrintf("#I-%lu-%lu", location, serial);  
+            break;
+        case -2: // outputting
+            ss = SSPrintf("#O-%lu-%lu", location, serial);  
+            break;
+        case -1: // planning
+            ss = SSPrintf("#P-%lu-%lu", location, serial);  
+            break;
+        default: // during a step
+            ss = SSPrintf("#%d-%lu-%lu", step, location, serial);  
+            break;
+    }
     return ss;
 }

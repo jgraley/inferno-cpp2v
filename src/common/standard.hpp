@@ -122,11 +122,12 @@ class SerialNumber
 {
     typedef uint64_t SNType;
     static SNType master_location_serial;
-    static int step;
+    static int current_step;
     static map<void *, SNType> location_serial;
     static map<void *, SNType> master_serial;
     SNType serial;
     SNType location;
+    SNType step;
 
 protected:
     void Construct();

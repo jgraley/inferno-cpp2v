@@ -199,6 +199,9 @@ int main( int argc, char *argv[] )
     if( ReadArgs::infile.empty() )
         return 0;
 
+    HitCount::instance.SetStep(-3);
+    SerialNumber::SetStep(-3);
+
     // Parse the input program
     TreePtr<Node> program = TreePtr<Node>();
     {
@@ -210,10 +213,12 @@ int main( int argc, char *argv[] )
     if( ReadArgs::runonlyenable )
     {
         // Apply only the transformation requested
+        SerialNumber::SetStep(ReadArgs::runonlystep);
+        HitCount::instance.SetStep(ReadArgs::runonlystep);
+        
         shared_ptr<Transformation> t = sequence[ReadArgs::runonlystep];
         if( !ReadArgs::trace_quiet )
             fprintf(stderr, "%s step %d: %s\n", ReadArgs::infile.c_str(), ReadArgs::runonlystep, t->GetName().c_str() ); 
-        HitCount::instance.SetStep(ReadArgs::runonlystep);
         CompareReplace::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
         (*t)( &program );
     }
@@ -223,6 +228,9 @@ int main( int argc, char *argv[] )
         int i=0;
         FOREACH( shared_ptr<Transformation> t, sequence )
         {
+            SerialNumber::SetStep(i);
+            HitCount::instance.SetStep(i);
+            
             bool allow = ReadArgs::quitafter.empty() || ReadArgs::quitafter[0]==i;
             if( !ReadArgs::trace_quiet )
                 fprintf(stderr, "%s step %d: %s\n", ReadArgs::infile.c_str(), i, t->GetName().c_str() ); 
@@ -232,8 +240,6 @@ int main( int argc, char *argv[] )
                 CompareReplace::SetMaxReps( ReadArgs::repetitions, ReadArgs::rep_error );
             else
                 CompareReplace::SetMaxReps( 100, true );
-            HitCount::instance.SetStep(i);
-            SerialNumber::SetStep(i);
             if( allow )
                 t->SetStopAfter(ReadArgs::quitafter, 1);
             (*t)( &program );
