@@ -11,6 +11,7 @@
 #include <vector>
 #include <boost/type_traits.hpp>
 #include "common/mismatch.hpp"
+#include "../equivalence.hpp"
 
 namespace SR
 { 
@@ -45,11 +46,11 @@ public:
     virtual void ResumeNormalLinkedQuery( Conjecture &conj,
                                              TreePtr<Node> x,
                                              const list<LocatedLink> &required_links,
-                                             const set<PatternLink> &compare_by_value ) const = 0;
+                                             const set<PatternLink> &by_equivalence ) const = 0;
     virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
                                        TreePtr<Node> x,
                                        const list<LocatedLink> &required_links,
-                                       const set<PatternLink> &compare_by_value ) const = 0;                                                
+                                       const set<PatternLink> &by_equivalence ) const = 0;                                                
     virtual TreePtr<Node> GetKey() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const CouplingMap *coupling_keys ) = 0;
@@ -79,11 +80,11 @@ public:
     virtual void ResumeNormalLinkedQuery( Conjecture &conj,
                                              TreePtr<Node> x,
                                              const list<LocatedLink> &required_links,
-                                             const set<PatternLink> &compare_by_value ) const;
+                                             const set<PatternLink> &by_equivalence ) const;
     virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
                                        TreePtr<Node> x,
                                        const list<LocatedLink> &required_links,
-                                       const set<PatternLink> &compare_by_value ) const;                                                
+                                       const set<PatternLink> &by_equivalence ) const;                                                
     void SetKey( TreePtr<Node> x );
     TreePtr<Node> GetKey();                                  
     void ResetKey();    
@@ -105,6 +106,7 @@ private:
     TreePtr<Node> coupling_key;    
     shared_ptr<PatternQuery> pattern_query;
     int num_decisions;
+    shared_ptr<EquivalenceRelation> equivalence_relation;
 };
 
 

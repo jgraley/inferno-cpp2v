@@ -2,7 +2,6 @@
 
 #include "query.hpp"
 #include "agents/agent.hpp"
-#include "helpers/simple_compare.hpp"
 #include "link.hpp"
 
 using namespace CSP;
@@ -10,8 +9,7 @@ using namespace CSP;
 SystemicConstraint::Plan::Plan( SR::Agent *agent_, 
                                 VariableQueryLambda vql ) :
     agent( agent_ ),
-    pq( agent->GetPatternQuery() ),
-    simple_compare( make_shared<SimpleCompare>() )
+    pq( agent->GetPatternQuery() )
 {
     GetAllVariables();
     RunVariableQueries( all_variables, vql );
@@ -108,8 +106,8 @@ void SystemicConstraint::TraceProblem() const
             sflags += "LOCATION";
             break;
             
-        case CompareBy::VALUE:
-            sflags += "VALUE";
+        case CompareBy::EQUIVALENCE:
+            sflags += "EQUIVALENCE";
             break;
         }
         sflags += "; is ";
@@ -159,7 +157,7 @@ bool SystemicConstraint::Test( list< Value > values )
     // values that must tally up with the links required by NLQ.
     TreePtr<Node> x;
     list<SR::LocatedLink> expanded_links;
-    set<SR::PatternLink> compare_by_value;
+    set<SR::PatternLink> by_equivalence;
     auto forceit = forces.begin();
     auto valit = values.begin();
     auto patit = plan.pq->GetNormalLinks().begin();
@@ -187,9 +185,9 @@ bool SystemicConstraint::Test( list< Value > values )
         
         switch( f.compare_by )
         {
-        case CompareBy::VALUE:
+        case CompareBy::EQUIVALENCE:
             ASSERT(!first)("SystemicConstraint cannot handle self-variable by anything other than location\n");
-            compare_by_value.insert(*patit);
+            by_equivalence.insert(*patit);
             break;
             
         case CompareBy::LOCATION:
@@ -205,7 +203,7 @@ bool SystemicConstraint::Test( list< Value > values )
     shared_ptr<SR::DecidedQuery> query = plan.agent->CreateDecidedQuery();
     try
     {
-        plan.agent->RunNormalLinkedQuery( query, x, expanded_links, compare_by_value );      
+        plan.agent->RunNormalLinkedQuery( query, x, expanded_links, by_equivalence );      
     }
     catch( ::Mismatch & )
     {
@@ -257,7 +255,7 @@ string SystemicConstraint::GetTrace() const
             }
         }
         
-        SimpleCompare sc;
+        EquivalenceRelation sc;
         while( !x_to_add.empty() )
         {
             bool found = false;

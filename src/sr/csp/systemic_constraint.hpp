@@ -15,8 +15,6 @@ namespace SR
 class Conjecture;    
 }
 
-class SimpleCompare;
-
 namespace CSP
 { 
 
@@ -64,7 +62,6 @@ private:
         list<VariableId> all_variables;
         list<VariableFlags> flags; // over ALL vars
         shared_ptr<SR::Conjecture> conj;
-        shared_ptr<SimpleCompare> simple_compare;
     } plan;
     
     list<Value> forces; // only FREE vars

@@ -2,7 +2,6 @@
 #include "search_replace.hpp"
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
-#include "helpers/simple_compare.hpp"
 #include "agents/standard_agent.hpp"
 #include "agents/overlay_agent.hpp"
 #include "agents/search_container_agent.hpp"

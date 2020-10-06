@@ -30,7 +30,7 @@ namespace CSP
 enum class CompareBy
 {
     LOCATION,
-    VALUE
+    EQUIVALENCE
 };
 
 

@@ -5,7 +5,6 @@
 #include "search_replace.hpp"
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
-#include "helpers/simple_compare.hpp"
 #include "agents/slave_agent.hpp"
 #include "agents/standard_agent.hpp"
 #include "agents/overlay_agent.hpp"
@@ -14,6 +13,7 @@
 #include "agents/match_any_agent.hpp"
 #include "link.hpp"
 #include "tree/cpptree.hpp"
+#include "equivalence.hpp"
 
 #include "and_rule_engine.hpp"
 
@@ -87,9 +87,9 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
             if( !link ) // Self-variable must be by location
                 flags.compare_by = CSP::CompareBy::LOCATION;   
             else if( coupling_residual_links.count(link) > 0 ) // Coupling residuals are by value
-                flags.compare_by = CSP::CompareBy::VALUE;
+                flags.compare_by = CSP::CompareBy::EQUIVALENCE;
             else if( master_boundary_agents.count(link_agent) > 0) // Couplings to master are by value
-                flags.compare_by = CSP::CompareBy::VALUE;
+                flags.compare_by = CSP::CompareBy::EQUIVALENCE;
             else
                 flags.compare_by = CSP::CompareBy::LOCATION;   
                                  
@@ -122,8 +122,11 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
 #else
     conj = make_shared<Conjecture>(my_normal_agents, root_agent);
 #endif
-    compare_by_value_links = SetUnion( coupling_residual_links, 
-                                       master_boundary_links );                              
+    // Aside from CompareCoupling(), this is the other place where
+    // we establish the couplings criterion as the  EquivalenceRelation, 
+    // whatever that might be...? (it's SimpleCompare)
+    by_equivalence_links = SetUnion( coupling_residual_links, 
+                                     master_boundary_links );                           
 }
 
 
@@ -389,11 +392,12 @@ void AndRuleEngine::CompareCoupling( Agent *agent,
     if( x == DecidedQueryCommon::MMAX_Node )
         return;
 
-    // This function establishes the policy for couplings in one place.
-    // Today, it's SimpleCompare. 
+    // This function establishes the policy for couplings in one place,
+    // apart from the other place which is plan.by_equivalence_links.
+    // Today, it's SimpleCompare, via EquivalenceRelation. 
     // And it always will be: see #121; para starting at "No!!"
-    static SimpleCompare couplings_comparer;
-    if( !couplings_comparer( x, keys->at(agent) ) )
+    static EquivalenceRelation equivalence_relation;
+    if( !equivalence_relation( x, keys->at(agent) ) )
         throw Mismatch();    
 }                                     
 
@@ -567,7 +571,7 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
     int i=0;
     while(1)
     {
-        agent->ResumeNormalLinkedQuery( conj, x, ll, plan.compare_by_value_links );
+        agent->ResumeNormalLinkedQuery( conj, x, ll, plan.by_equivalence_links );
         i++;
 
         try
@@ -766,8 +770,8 @@ void AndRuleEngine::AssertNewCoupling( const CouplingMap &extracted, Agent *new_
     ASSERT( extracted.count(new_agent) == 1 );
     if( TreePtr<SubContainer>::DynamicCast(new_x) )
     {                    
-        SimpleCompare sc;
-        bool same  = sc( extracted.at(new_agent), new_x );
+        EquivalenceRelation equivalence_relation;
+        bool same  = equivalence_relation( extracted.at(new_agent), new_x );
         if( !same )
         {
             FTRACE("New x ")(new_x)(" mismatches extracted x ")(extracted.at(new_agent))

@@ -81,7 +81,7 @@ public:
         set<PatternLink> coupling_residual_links;
         shared_ptr<Conjecture> conj;
         shared_ptr<CSP::SolverHolder> solver;
-        set<PatternLink> compare_by_value_links;
+        set<PatternLink> by_equivalence_links;
         list<Agent *> normal_agents_ordered;
     private: // working varaibles in plan construction
         set<Agent *> reached; 

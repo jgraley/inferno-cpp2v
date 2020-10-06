@@ -1,7 +1,6 @@
 #include "../search_replace.hpp"
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
-#include "helpers/simple_compare.hpp"
 #include "overlay_agent.hpp"
 #include "standard_agent.hpp"
 #include "star_agent.hpp"
