@@ -118,7 +118,6 @@ public:
         return operator()(*p);        
     }
 
-    static void EndContinuation();
     static void Enable( bool e ); ///< enable/disable tracing, only for top level funciton to call, overridden by flags
     inline static bool IsEnabled() { return enable; }
     static string GetPrefix() { return Descend::pre; }
@@ -152,12 +151,17 @@ public:
         const bool old_enable;
     };
 
-private:
+    static void MaybePrintEndl();
+
+private:    
+    void MaybePrintBanner();
+
     const char * const file;
     const int line;
     const char * const function;
     Flags flags;
-    static bool continuation;
+    static bool require_endl;
+    static bool require_banner;
     static bool enable;
 };
 

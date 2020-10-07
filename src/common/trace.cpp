@@ -3,10 +3,13 @@
 #include <stdarg.h>
 #include <string.h>
 
-bool Tracer::continuation = false;
+bool Tracer::require_endl = false;
+bool Tracer::require_banner = true;
 bool Tracer::enable = false; ///< call Tracer::Enable(true) to begin tracing
 string Tracer::Descend::pre;
 string Tracer::Descend::last_traced_pre, Tracer::Descend::leftmost_pre;
+
+using namespace std;
 
 void Tracer::Descend::Indent()
 {
@@ -22,9 +25,7 @@ void Tracer::Descend::Indent()
 inline void InfernoAbort()
 {
     fflush( stderr ); 
-
-    // The C library provides abort(), but I'm not getting a stack dump under cygwin
-    (*(int*)-1)++; 
+    abort(); 
 }
 
 Tracer::Tracer( const char *f, int l, const char *fu, Flags fl, char const *c ) :
@@ -36,32 +37,18 @@ Tracer::Tracer( const char *f, int l, const char *fu, Flags fl, char const *c ) 
     // If we're going to abort, get this out first, then usual trace message if required as a continuation
     if( flags & ABORT )
     {
-        EndContinuation();
+        MaybePrintEndl();
         fprintf( stderr, "\n");
         Descend::Indent();
-        fprintf( stderr, "----Assertion failed: %s\n", c);
-        Descend::Indent();
-        fprintf( stderr, "----%s:%d in %s()\n", file, line, function);
-        continuation = true;
+        fprintf( stderr, "----ASSERTION FAILED: %s\n", c);
+        MaybePrintBanner();
     }
 }
 
 
 Tracer::Tracer( Flags fl, char const *c ) :
-    file( "" ),
-    line( 0 ),
-    function( "" ),
-    flags( fl )
+    Tracer( "", 0, "", fl, c )
 {
-    // If we're going to abort, get this out first, then usual trace message if required as a continuation
-    if( flags & ABORT )
-    {
-        EndContinuation();
-        fprintf( stderr, "\n");
-        Descend::Indent();
-        fprintf( stderr, "----Assertion failed: %s\n", c);
-        continuation = true;
-    }
 }
 
 
@@ -69,9 +56,10 @@ Tracer::~Tracer()
 {
     if( flags & ABORT )
     {
-        EndContinuation();
+        MaybePrintEndl();
         InfernoAbort();
     }
+    require_banner = true;
 }
 
 
@@ -80,12 +68,8 @@ Tracer &Tracer::operator()()
     if( (flags & DISABLE) || !(enable || (flags & FORCE)) )
         return *this;
  
-    EndContinuation();
-    if( file != "" || line != 0 || function != "" )
-    {
-        Descend::Indent();
-        fprintf( stderr, "----%s:%d in %s()\n", file, line, function);
-    }
+    MaybePrintEndl();
+    MaybePrintBanner();
     
     return *this;
 }
@@ -98,19 +82,15 @@ Tracer &Tracer::operator()(const char *fmt, ...)
 
     va_list vl;
     va_start( vl, fmt );
-    if( !continuation ) 
+    if( !require_endl ) 
     {    	
-        if( file != "" || line != 0 || function != "" )
-        {
-            Descend::Indent();
-            fprintf( stderr, "----%s:%d in %s()\n", file, line, function);
-        }
+        MaybePrintBanner();
         Descend::Indent();
     }
     vfprintf( stderr, fmt, vl );
     va_end( vl );
     
-    continuation = (fmt[strlen(fmt)-1]!='\n');
+    require_endl = (strlen(fmt)==0 || fmt[strlen(fmt)-1]!='\n');
     return *this;
 }
 
@@ -139,19 +119,30 @@ Tracer &Tracer::operator()(const exception &e)
 }
 
 
-void Tracer::EndContinuation()
+void Tracer::Enable( bool e )
 {
-    if( continuation ) 
+    enable = e;
+}
+
+
+void Tracer::MaybePrintEndl()
+{
+    if( require_endl ) 
     {
         fprintf(stderr, "\n");
-        continuation = false;
+        require_endl = false;
     }   
 }
 
 
-void Tracer::Enable( bool e )
+void Tracer::MaybePrintBanner()
 {
-    enable = e;
+    if( require_banner && (file != "" || line != 0 || function != "") )
+    {
+        Descend::Indent();
+        fprintf( stderr, "----%s:%d in %s()\n", file, line, function);
+        require_banner = false;
+    }    
 }
 
 
@@ -159,7 +150,7 @@ Tracer::Descend::Descend( string s ) :
     os(pre.size()) 
 { 
     pre += s; 
-    Tracer::EndContinuation(); 
+    Tracer::MaybePrintEndl(); 
 } 
 
 
@@ -179,11 +170,14 @@ Tracer::Descend::~Descend()
 }
 
 
+
+
+
 // Make BOOST_ASSERT work (we don't use them but other code might)
 void boost::assertion_failed(char const * expr, char const * function, char const * file, long line)
 {
-    Tracer::EndContinuation();
-    Tracer( file, line, function, Tracer::FORCE )( "Assertion failed: %s\n\n", expr );
+    Tracer::MaybePrintEndl();
+    Tracer( file, line, function, Tracer::FORCE )( "BOOST ASSERTION FAILED: %s\n\n", expr );
     InfernoAbort();
 }
 
