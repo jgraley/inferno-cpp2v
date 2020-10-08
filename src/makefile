@@ -54,7 +54,7 @@ $(TREE_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_OPTIONS) $< -o $@
 
-$(SR_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
+$(SR_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS) 
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_SR_OPTIONS) $< -o $@
 
@@ -81,7 +81,5 @@ $(STEPS_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 $(MAIN_MODULES:%=build/%.o) : build/%.o : %.cpp $(DEPS)
 	mkdir -p $(dir $@)
 	$(ICC) -c $(SRC_OPTIONS) $< -o $@
-
-
 
  

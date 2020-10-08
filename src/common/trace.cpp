@@ -3,6 +3,10 @@
 #include <stdarg.h>
 #include <string.h>
 
+#ifdef __GLIBC__
+#include <execinfo.h>
+#endif
+
 bool Tracer::require_endl = false;
 bool Tracer::require_banner = true;
 bool Tracer::enable = false; ///< call Tracer::Enable(true) to begin tracing
@@ -22,11 +26,32 @@ void Tracer::Descend::Indent()
     fprintf(stderr, "%s ", pre.c_str());
 }
 
+
+#ifdef __GLIBC__
+inline void InfernoBacktrace()
+{
+  void *return_addresses[1000];
+  size_t size;
+
+  // get void*'s for all entries on the stack
+  size = backtrace(return_addresses, 1000);
+
+  // print out all the frames to stderr
+  backtrace_symbols_fd(return_addresses, size, STDERR_FILENO);
+}
+#endif
+
+
 inline void InfernoAbort()
 {
+#ifdef __GLIBC__
+    //InfernoBacktrace();
+    // Doesn't work :(
+#endif    
     fflush( stderr ); 
     abort(); 
 }
+
 
 Tracer::Tracer( const char *f, int l, const char *fu, Flags fl, char const *c ) :
     file( f ),
