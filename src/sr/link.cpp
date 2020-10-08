@@ -71,7 +71,7 @@ PatternLink::operator bool() const
 Agent *PatternLink::GetChildAgent() const
 {
     ASSERT( ppattern )
-          ("GetChildAgent() called on uninitialised (NULL) link\n");
+          ("GetChildAgent() called on uninitialised (nullptr) link\n");
     return Agent::AsAgent(*ppattern);    
 }
 
@@ -168,7 +168,7 @@ LocatedLink::operator bool() const
 Agent *LocatedLink::GetChildAgent() const
 {
     ASSERT( ppattern )
-          ("GetChildAgent() called on uninitialised (NULL) link\n");
+          ("GetChildAgent() called on uninitialised (nullptr) link\n");
     return Agent::AsAgent(*ppattern);
 }
 

@@ -40,7 +40,7 @@ public:
     	}
     	else
     	{
-    		return string("NULL");
+    		return string("nullptr");
     	}
     }
 };

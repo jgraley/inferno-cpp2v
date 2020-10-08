@@ -114,7 +114,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
             else if( option2=='p' )
             {
                 string s = GetArg(2);
-                int v = strtoul( s.c_str(), NULL, 10 );
+                int v = strtoul( s.c_str(), nullptr, 10 );
                 if( v==0 && s!="0" ) // Did strtoul fail?
                     pattern_graph_name = s;
                 else
@@ -134,7 +134,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
                 rep_error = false;
             else
                 Usage();
-            repetitions = strtoul( GetArg(2).c_str(), NULL, 10 );
+            repetitions = strtoul( GetArg(2).c_str(), nullptr, 10 );
         }
         else if( option=='s' )
         {
@@ -154,7 +154,7 @@ ReadArgs::ReadArgs( int ac, char *av[] )
         }
         else if( option=='n' )
         {
-        	runonlystep = strtoul( GetArg().c_str(), NULL, 10 );
+        	runonlystep = strtoul( GetArg().c_str(), nullptr, 10 );
         	runonlyenable = true;
         }
         else if( option=='f' )

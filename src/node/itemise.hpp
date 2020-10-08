@@ -85,8 +85,8 @@ public:
     {
 		//TRACE("Itemise() arch=%p *arch=", itemise_architype)(*itemise_architype)
 		//               ("obj=%p *obj=", itemise_object)(*itemise_object)("\n");
-        ASSERT( itemise_architype )("Itemiser got itemise_architype=NULL\n");
-        ASSERT( itemise_object )("Itemiser got itemise_object=NULL\n");
+        ASSERT( itemise_architype )("Itemiser got itemise_architype=nullptr\n");
+        ASSERT( itemise_object )("Itemiser got itemise_object=nullptr\n");
         
         // Do a safety check: itemise_object we're itemising must be same as or derived
 		// from the architype, so that all the architype's members are also in itemise_object.        

@@ -164,8 +164,8 @@ const bool FlattenNode_iterator::IsOrdered() const
 ////////////////////////// Walk //////////////////////////
 
 Walk_iterator::Walk_iterator() :
-    out_filter( NULL ),
-    recurse_filter( NULL ),
+    out_filter( nullptr ),
+    recurse_filter( nullptr ),
     done( true )
 {
 }        
@@ -306,7 +306,7 @@ void Walk_iterator::AdvanceInto()
 	ASSERT( !IsAtEndOfChildren() );
 	TreePtr<Node> element = **this; // look at current node
 	bool recurse = false;
-	if( element ) // must be non-NULL
+	if( element ) // must be non-nullptr
 	{
 		if( recurse_filter ) // is there a filter on recursion?
 			recurse = recurse_filter->IsMatch( element, element ); // must pass the restriction
@@ -454,7 +454,7 @@ ParentWalk_iterator &ParentWalk_iterator::operator=( const ParentWalk_iterator &
 }
 
 ParentWalk_iterator::ParentWalk_iterator( TreePtr<Node> &root ) :
-    Walk_iterator( root, NULL, unique_filter = new UniqueFilter )
+    Walk_iterator( root, nullptr, unique_filter = new UniqueFilter )
 {
 }
 
@@ -492,7 +492,7 @@ UniqueWalk_iterator &UniqueWalk_iterator::operator=( const UniqueWalk_iterator &
 }
 
 UniqueWalk_iterator::UniqueWalk_iterator( TreePtr<Node> &root ) :
-    Walk_iterator( root, unique_filter = new UniqueFilter, NULL )
+    Walk_iterator( root, unique_filter = new UniqueFilter, nullptr )
 {
 }
 

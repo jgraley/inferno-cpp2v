@@ -23,7 +23,7 @@ class IdentifierTracker
     // scope. A TNode t should only have other TNodes pointing to it if it is a scope.
     // Example:
     // class C { void F() { struct S { int X; }; } };
-    // has parent pointers as: X -> S -> F -> C -> (NULL)
+    // has parent pointers as: X -> S -> F -> C -> (nullptr)
     // F has no identifier info, since it's name is not relevent to scopes (anonymous scope)
     // All should have valid node pointers (TODO fill in for compound statements)
     // C, F, S should have clang scope cs filled in.      
@@ -33,7 +33,7 @@ class IdentifierTracker
         shared_ptr<TNode> parent;
         shared_ptr<Node> node;
         clang::Scope *cs; // Note: this is the *corresponding* scope, not the containing scope.
-                          // Eg given struct A { int B; }; then A->cs is the struct scope and B->cs is NULL
+                          // Eg given struct A { int B; }; then A->cs is the struct scope and B->cs is nullptr
         clang::IdentifierInfo *II;
     };
     
@@ -78,12 +78,12 @@ public:
   
     // Extract the Declaration for the clang::Identifier. Where the identifier is differently declared
     // in nested scopes, we get the one that applies currently (which is the innermost one)  
-    // Optionally: Can specify a C++ scope, which must match exactly (NULL, falls back to current scope)
+    // Optionally: Can specify a C++ scope, which must match exactly (nullptr, falls back to current scope)
     //             Can ask for the corresponding decl node for the found node
     //             Can turn off recursion so only a direct match allowed
     shared_ptr<Node> Get( const clang::IdentifierInfo *II, shared_ptr<Node> iscope = shared_ptr<Node>(), bool recurse = true );                                         
   
-    // Version that just results NULL if identifier has not been added yet
+    // Version that just results nullptr if identifier has not been added yet
     shared_ptr<Node> TryGet( const clang::IdentifierInfo *II, shared_ptr<Node> iscope = shared_ptr<Node>(), bool recurse = true );      
     
     // Indicate that the next Add() call will have the supplied node as parent.

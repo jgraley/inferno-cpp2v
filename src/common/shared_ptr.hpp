@@ -11,10 +11,10 @@
 #include "common/common.hpp"
 #include "common/magic.hpp"
 
-// Covariant NULL pointer bug
+// Covariant nullptr pointer bug
 //
 // JSG: There's an unfortunate bug in GCC 3.4.4 on cygwin whereby a covariant return thunk
-// for a pointer goes wrong when the pointer is NULL. We can end up dereferencing a NULL (or offset-from-NULL)
+// for a pointer goes wrong when the pointer is nullptr. We can end up dereferencing a nullptr (or offset-from-nullptr)
 // pointer inside the thunk itself which is opaque code, not a lot of fun overall.
 //
 // It seems to be OK on GCC4 on Linux, and c++/20746 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=20746) seems to have a fix,
@@ -60,7 +60,7 @@ struct SharedPtrInterface : virtual SUB_BASE, public Traceable
 	virtual operator shared_ptr<VALUE_INTERFACE>() const = 0;
 	virtual operator SharedPtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE>() const = 0;
 
-    virtual operator bool() const = 0; // for testing against NULL
+    virtual operator bool() const = 0; // for testing against nullptr
     virtual VALUE_INTERFACE *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
     virtual VALUE_INTERFACE &operator *() const = 0; 
     virtual SharedPtrInterface &operator=( const SharedPtrInterface &o )

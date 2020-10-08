@@ -29,7 +29,7 @@ public:
                TreePtr<Node> cp,
                TreePtr<Node> rp = TreePtr<Node>(),
                const set<Agent *> &master_agents = set<Agent *>(),                            
-               const SCREngine *master = NULL); /* if null, you are overall master */ 
+               const SCREngine *master = nullptr); /* if null, you are overall master */ 
                     
 private:
     typedef map< Agent *, TreePtr<Node> > CouplingMap;
@@ -41,7 +41,7 @@ private:
               TreePtr<Node> cp,
               TreePtr<Node> rp = TreePtr<Node>(),
               const set<Agent *> &master_agents = set<Agent *>(),                            
-              const SCREngine *master = NULL); /* if null, you are overall master */ 
+              const SCREngine *master = nullptr); /* if null, you are overall master */ 
         void InstallRootAgents( TreePtr<Node> cp,
                                 TreePtr<Node> rp );
         void CategoriseSubs( const set<Agent *> &master_agents, 

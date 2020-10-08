@@ -15,7 +15,7 @@ namespace SR
 /// Agent implementation used for all standard pattern nodes. Normal agents are
 /// constructed using `MakePatternPtr`. All the `TreePtr` members are treated
 /// as pointers to sub-patterns and must match. Direct members (i.e. not in a 
-/// `Collection`) may be NULL to indicate a full wildcard (matches anything). 
+/// `Collection`) may be nullptr to indicate a full wildcard (matches anything). 
 class StandardAgent : public virtual AgentCommon
 {
 public:
@@ -34,7 +34,7 @@ public:
     virtual void TrackingKey( Agent *from );
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:	
-	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not NULL
+	TreePtr<Node> BuildReplaceOverlay( TreePtr<Node> keynode ); // under substitution if not nullptr
     TreePtr<Node> BuildReplaceNormal();
 };
 

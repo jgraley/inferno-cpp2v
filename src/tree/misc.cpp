@@ -54,7 +54,7 @@ TreePtr<Instance> GetDeclaration::Get( TreePtr<Node> context, TreePtr<InstanceId
 
 GetDeclaration GetDeclaration::instance; // TODO Use this instead of constructing a temp (could contain lookup tables etc in the future)
 
-// Look for a record, skipping over typedefs. Returns NULL if not a record.
+// Look for a record, skipping over typedefs. Returns nullptr if not a record.
 TreePtr<Record> GetRecordDeclaration( TreePtr<Node> context, TreePtr<TypeIdentifier> id )
 {
 	TreePtr<Node> ut = GetDeclaration()( context, id );

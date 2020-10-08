@@ -80,7 +80,7 @@ template<class PRE_RESTRICTION>
 class SlaveCompareReplace : public Slave<PRE_RESTRICTION>
 {
 public:
-    SlaveCompareReplace() : Slave<PRE_RESTRICTION>( NULL, NULL, NULL, false ) {}      
+    SlaveCompareReplace() : Slave<PRE_RESTRICTION>( nullptr, nullptr, nullptr, false ) {}      
     SlaveCompareReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
         Slave<PRE_RESTRICTION>( t, sp, rp, false ) {}
 };
@@ -91,7 +91,7 @@ template<class PRE_RESTRICTION>
 class SlaveSearchReplace : public Slave<PRE_RESTRICTION>
 {
 public:
-    SlaveSearchReplace() : Slave<PRE_RESTRICTION>( NULL, NULL, NULL, true ) {}      
+    SlaveSearchReplace() : Slave<PRE_RESTRICTION>( nullptr, nullptr, nullptr, true ) {}      
     SlaveSearchReplace( TreePtr<PRE_RESTRICTION> t, TreePtr<Node> sp=TreePtr<Node>(), TreePtr<Node> rp=TreePtr<Node>() ) :
         Slave<PRE_RESTRICTION>( t, sp, rp, true ) {}
 };

@@ -50,12 +50,12 @@ bool CompareReplace::IsMatch( TreePtr<Node> context,
     try
     {
         scr_engine->Compare(root); 
-        pcontext = NULL;
+        pcontext = nullptr;
         return true;
     }
     catch( ::Mismatch & )
     {
-        pcontext = NULL;
+        pcontext = nullptr;
         return false;
     }
 }
@@ -103,7 +103,7 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
     
     (void)scr_engine->RepeatingCompareReplace( proot, &empty );   
 
-    pcontext = NULL; // just to avoid us relying on the context outside of a search+replace pass
+    pcontext = nullptr; // just to avoid us relying on the context outside of a search+replace pass
 }
 
 

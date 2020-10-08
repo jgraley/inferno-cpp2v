@@ -30,7 +30,7 @@ void TransformOfAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         }
         else
         {
-            // Transformation returned NULL, probably because the candidate was incompatible
+            // Transformation returned nullptr, probably because the candidate was incompatible
             // with the transofrmation - a search MISS.
             throw Mismatch();  
         }

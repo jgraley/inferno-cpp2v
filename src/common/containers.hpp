@@ -132,7 +132,7 @@ public:
 			if( pib )
 				return pib.get();
 			else
-				return NULL;
+				return nullptr;
 		}
 		
 		virtual shared_ptr<iterator_interface> Clone() // TODO does this need to be virtual?
@@ -543,7 +543,7 @@ struct PointIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::ite
     VALUE_INTERFACE * element;
 
     PointIterator() :
-        element(NULL) // means end-of-range
+        element(nullptr) // means end-of-range
     {
     }
 
@@ -555,7 +555,7 @@ struct PointIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::ite
     PointIterator( VALUE_INTERFACE *i ) :
         element(i)
     {      
-        ASSERT(i); // We don't allow NULL as input because it means end-of-range
+        ASSERT(i); // We don't allow nullptr as input because it means end-of-range
     }
 
 	virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
@@ -566,19 +566,19 @@ struct PointIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::ite
 
 	virtual PointIterator &operator++()
 	{
-		element = NULL; // ie if we increment, we get to the end of the range
+		element = nullptr; // ie if we increment, we get to the end of the range
 		return *this;
 	}
 
 	virtual VALUE_INTERFACE &operator*() const
 	{
-	    ASSERT(element)("Tried to dereference NULL PointIterator");
+	    ASSERT(element)("Tried to dereference nullptr PointIterator");
 		return *element;
 	}
 
 	virtual VALUE_INTERFACE *operator->() const
 	{
-	    ASSERT(element)("Tried to dereference NULL PointIterator");
+	    ASSERT(element)("Tried to dereference nullptr PointIterator");
 		return element;
 	}
 

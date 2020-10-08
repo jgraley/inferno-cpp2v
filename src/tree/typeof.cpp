@@ -304,7 +304,7 @@ TreePtr<Type> TypeOf::GetSpecial( TreePtr<Operator> op, Sequence<Type> &optypes 
 	{
         Sequence<Type>::iterator optypes_it = optypes.begin();
         ++optypes_it;
-		return *optypes_it; // middle element TODO do this properly, consider cond ? NULL : &x
+		return *optypes_it; // middle element TODO do this properly, consider cond ? nullptr : &x
 	}
     else if( dynamic_pointer_cast<This>(op) )
     {
@@ -363,7 +363,7 @@ TreePtr<Type> TypeOf::GetLiteral( TreePtr<Literal> l )
 
 
 // Is this call really a constructor call? If so return the object being
-// constructed. Otherwise, return NULL
+// constructed. Otherwise, return nullptr
 TreePtr<Expression> TypeOf::IsConstructorCall( TreePtr<Node> c, TreePtr<Call> call )
 {
 	context = c;

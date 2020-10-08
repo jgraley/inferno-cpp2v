@@ -46,7 +46,7 @@ private:
     bool ShouldSplitInstance( TreePtr<CPPTree::Instance> o );
     string RenderDeclaration( TreePtr<CPPTree::Declaration> declaration, 
                               string sep, 
-                              TreePtr<CPPTree::AccessSpec> *current_access = NULL,
+                              TreePtr<CPPTree::AccessSpec> *current_access = nullptr,
                               bool showtype = true, 
                               bool force_incomplete = false,
                               bool shownonfuncinit = true );

@@ -17,7 +17,7 @@ private:
 	TreePtr<CPPTree::Instance> Get( TreePtr<Node> context, TreePtr<CPPTree::InstanceIdentifier> id );
 };
 
-// Look for a record, skipping over typedefs. Returns NULL if not a record.
+// Look for a record, skipping over typedefs. Returns nullptr if not a record.
 // TODO make this a Transformation
 TreePtr<CPPTree::Record> GetRecordDeclaration( TreePtr<Node> context, TreePtr<CPPTree::TypeIdentifier> id );
 

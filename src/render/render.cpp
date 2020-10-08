@@ -34,7 +34,7 @@ using namespace SCTree;
     string( "\n" );
 
 #define ERROR_UNSUPPORTED(P) \
-    ERROR_UNKNOWN( P ? typeid(*P).name() : "<NULL>" );
+    ERROR_UNKNOWN( P ? typeid(*P).name() : "<nullptr>" );
 
 
 Render::Render( string of ) :
@@ -746,7 +746,7 @@ string Render::RenderDeclaration( TreePtr<Declaration> declaration,
 		this_access = MakeTreePtr<Public>();
 
 	// Now decide whether we actually need to render an access spec (ie has it changed?)
-	if( current_access && // NULL means dont ever render access specs
+	if( current_access && // nullptr means dont ever render access specs
 		typeid(*this_access) != typeid(**current_access) ) // current_access spec must have changed
 	{
 		s += RenderAccess( this_access ) + ":\n";
@@ -959,7 +959,7 @@ string Render::RenderSequence( Sequence<ELEMENT> spe,
 		string sep = (separate_last || it!=last_it) ? separator : "";
 		TreePtr<ELEMENT> pe = *it;
 		if( TreePtr<Declaration> d = dynamic_pointer_cast< Declaration >(pe) )
-			s += RenderDeclaration( d, sep, init_access ? &init_access : NULL, showtype, false, shownonfuncinit );
+			s += RenderDeclaration( d, sep, init_access ? &init_access : nullptr, showtype, false, shownonfuncinit );
 		else if( TreePtr<Statement> st = dynamic_pointer_cast< Statement >(pe) )
 			s += RenderStatement( st, sep );
 		else
@@ -1072,7 +1072,7 @@ string Render::RenderDeclarationCollection( TreePtr<Scope> sd,
 	FOREACH( TreePtr<Declaration> pd, sorted ) //for( int i=0; i<sorted.size(); i++ )
 		if( TreePtr<Record> r = dynamic_pointer_cast<Record>(pd) ) // is a record
 			if( !dynamic_pointer_cast<Enum>(r) ) // but not an enum
-				s += RenderDeclaration( r, separator, init_access ? &init_access : NULL, showtype, true );
+				s += RenderDeclaration( r, separator, init_access ? &init_access : nullptr, showtype, true );
 
     // For SystemC modules, we generate a constructor based on the other decls in
     // the module. Nothing goes in the Inferno tree for a module constructor, since

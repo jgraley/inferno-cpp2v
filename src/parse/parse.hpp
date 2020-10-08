@@ -51,7 +51,7 @@ public:
 
 	void operator()(TreePtr<Node> context, TreePtr<Node> *proot)
 	{
-		// Allow proot to point to a NULL TreePtr; in this case we will create a Program node and parse into it.
+		// Allow proot to point to a nullptr TreePtr; in this case we will create a Program node and parse into it.
 		// Otherwise *proot must be a Scope, and we will append whatever we parse into that scope.
 		ASSERT( proot );
 		if (!*proot)
@@ -642,7 +642,7 @@ private:
 			// if Declarator has one
 			TreePtr<Node> cxxs = FromCXXScope(&SS);
 
-			// Use C++ scope if non-NULL; do not recurse (=precise match only)
+			// Use C++ scope if non-nullptr; do not recurse (=precise match only)
 			TreePtr<Node> found_n = ident_track.TryGet(ID, cxxs, recurse);
 			//TRACE("Looked for %s, result %p (%p)\n", ID->getName(),
 			//		found_n.get(), cxxs.get());
@@ -655,7 +655,7 @@ private:
 
 			TreePtr<Declaration> found_d =
 					dynamic_pointer_cast<Declaration> (found_n);
-			// If the found match is not a declaration, cast will fail and we'll return NULL for "not found"
+			// If the found match is not a declaration, cast will fail and we'll return nullptr for "not found"
 			return found_d;
 		}
 
@@ -880,7 +880,7 @@ private:
 		TRACE("finish fn %d statements %d total\n", cb->statements.size(), (dynamic_pointer_cast<Compound>(o->initialiser))->statements.size() );
 
 		inferno_scope_stack.pop(); // we dont use these - we use the clang-managed compound statement instead (passed in via Body)
-        ident_track.PopScope(NULL);
+        ident_track.PopScope(nullptr);
 		return Decl;
 	}
 
@@ -1485,7 +1485,7 @@ private:
 			static int ac=0;
 			sprintf( an, "__anon%d", ac++ );
 			h->identifier = CreateTypeIdentifier(an);
-			ident_track.Add(NULL, h, S);
+			ident_track.Add(nullptr, h, S);
 		}
 
 		//TODO should we do something with TagKind? Maybe needed for render.
@@ -1911,7 +1911,7 @@ private:
 		TRACE();
 		TreePtr<Node> n = FromCXXScope( &SS );
 		ASSERT(n);
-		ident_track.PushScope( NULL, n );
+		ident_track.PushScope( nullptr, n );
 	}
 
 	/// ActOnCXXExitDeclaratorScope - Called when a declarator that previously
@@ -1922,7 +1922,7 @@ private:
 	virtual void ActOnCXXExitDeclaratorScope(clang::Scope *S, const clang::CXXScopeSpec &SS)
 	{
 		TRACE();
-		ident_track.PopScope( NULL );
+		ident_track.PopScope( nullptr );
 	}
 
 	TreePtr<Instance> GetConstructor( TreePtr<Type> t )
@@ -2075,7 +2075,7 @@ private:
     }
 
 	//--------------------------------------------- unimplemented actions -----------------------------------------------
-	// Note: only actions that return something (so we don't get NULL XTy going around the place). No obj-C or GCC
+	// Note: only actions that return something (so we don't get nullptr XTy going around the place). No obj-C or GCC
 	// extensions. These all assert out immediately.
 
 	virtual DeclTy *ActOnFileScopeAsmDecl(clang::SourceLocation Loc, ExprArg AsmString)

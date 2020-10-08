@@ -44,7 +44,7 @@ SCREngine::Plan::Plan( SCREngine *algo_,
                        const SCREngine *master ) :
     algo( algo_ ),
     is_search( is_search_ ),
-    master_ptr( NULL )
+    master_ptr( nullptr )
 {
     TRACE(GetName());
     INDENT("P");

@@ -77,7 +77,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<A
                     link = cur_link; // Found a link the the agent the constaint mentioned: not safe! TODO could be parallel links!
                 }
             }
-            // Link will be NULL if this is the self-variable
+            // Link will be nullptr if this is the self-variable
             ASSERT( link || link_agent==constraint_agent )
                   ("Engine being queried via lambda about a non-normal linked agent\n")
                   ("Constraint agent ")(constraint_agent)("\n")
@@ -460,7 +460,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
                                     TreePtr<Node> x )  
 {
     INDENT("D");
-    ASSERT( x ); // Target must not be NULL
+    ASSERT( x ); // Target must not be nullptr
 
     // Obtain the query state from the conjecture
     shared_ptr<DecidedQuery> query = plan.conj->GetQuery(agent);

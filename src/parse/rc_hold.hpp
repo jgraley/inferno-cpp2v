@@ -35,14 +35,14 @@ public:
 
     RAW ToRaw( TreePtr<NODE> p )
     {
-        ASSERT( p )( "Cannot convert NULL pointer to raw" );
+        ASSERT( p )( "Cannot convert nullptr pointer to raw" );
         uintptr_t i = (unsigned)hold_list.size(); // the index of the next push_back()
         ASSERT( (i & 0xFF000000) == 0 )( "gone over maximum number of elements, probably due to infinite loop, if not rejig id" );
         i |= id; // embed an id for the current hold object  
         //TRACE("ToRaw 0x%08x\n", i );
         void *vp = reinterpret_cast<void *>( i ); 
         hold_list.push_back( p );
-        ASSERT(vp); // cannot return a NULL pointer, since clang inteprets that as an error
+        ASSERT(vp); // cannot return a nullptr pointer, since clang inteprets that as an error
         return vp;
     }
     

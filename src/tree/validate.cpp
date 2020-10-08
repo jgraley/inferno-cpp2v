@@ -57,8 +57,8 @@ void Validate::operator()( TreePtr<Node> context,
 		const TreePtr<Node> x = *wit;
 		if( !is_pattern ) // Don't do these checks on search/replace patterns
 		{
-			// NULL pointers not allowed in program tree (though they are allowed in search/replace patterns)
-			ASSERT( x )("Found NULL pointer in tree at ")( wit );
+			// nullptr pointers not allowed in program tree (though they are allowed in search/replace patterns)
+			ASSERT( x )("Found nullptr pointer in tree at ")( wit );
 
 			// Intermediate nodes are only allowed in search and replace patterns; the trees for programs
 			// must be built from final nodes.

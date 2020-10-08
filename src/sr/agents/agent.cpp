@@ -20,7 +20,7 @@ Agent& Agent::operator=(Agent& other)
 
 Agent *Agent::AsAgent( TreePtr<Node> node )
 {
-    ASSERT( node )("Called AsAgent(")(node)(") with NULL TreePtr");
+    ASSERT( node )("Called AsAgent(")(node)(") with nullptr TreePtr");
     Agent *agent = dynamic_cast<Agent *>(node.get());
     ASSERT( agent )("Called AsAgent(")(*node)(") with non-Agent");
     return agent;
@@ -28,7 +28,7 @@ Agent *Agent::AsAgent( TreePtr<Node> node )
 
 
 AgentCommon::AgentCommon() :
-    master_scr_engine(NULL),
+    master_scr_engine(nullptr),
     equivalence_relation( make_shared<EquivalenceRelation>() )
 {
 }
@@ -289,7 +289,7 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
 
     TRACE("Duplicating %d members source=", dest_memb.size())(*source)(" dest=")(*dest)("\n");
     // Loop over all the members of source (which can be a subset of dest)
-    // and for non-NULL members, duplicate them by recursing and write the
+    // and for non-nullptr members, duplicate them by recursing and write the
     // duplicates to the destination.
     for( int i=0; i<dest_memb.size(); i++ )
     {
@@ -306,7 +306,7 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
             //TRACE("Duplicating container size %d\n", keynode_con->size() );
             FOREACH( const TreePtrInterface &p, *keynode_con )
             {
-                ASSERT( p ); // present simplified scheme disallows NULL
+                ASSERT( p ); // present simplified scheme disallows nullptr
                 //TRACE("Duplicating ")(*p)("\n");
                 TreePtr<Node> n = DuplicateSubtree( p, source_terminus, dest_terminus );
                 //TRACE("inserting ")(*n)(" directly\n");
@@ -317,7 +317,7 @@ TreePtr<Node> AgentCommon::DuplicateSubtree( TreePtr<Node> source,
         {
             //TRACE("Duplicating node ")(*keynode_ptr)("\n");
             TreePtrInterface *dest_ptr = dynamic_cast<TreePtrInterface *>(dest_memb[i]);
-            ASSERT( *keynode_ptr )("source should be non-NULL");
+            ASSERT( *keynode_ptr )("source should be non-nullptr");
             *dest_ptr = DuplicateSubtree( *keynode_ptr, source_terminus, dest_terminus );
             ASSERT( *dest_ptr );
             ASSERT( TreePtr<Node>(*dest_ptr)->IsFinal() );            

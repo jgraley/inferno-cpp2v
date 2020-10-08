@@ -212,7 +212,7 @@ void NestedAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
     query.Reset();
     
     string s;
-    // Keep advancing until we get NULL, and remember the last non-null position
+    // Keep advancing until we get nullptr, and remember the last non-null position
     int i = 0;
     TreePtr<Node> xt = x;
     while( TreePtr<Node> tt = Advance(xt, &s) )

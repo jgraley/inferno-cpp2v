@@ -9,9 +9,9 @@ IdentifierTracker::IdentifierTracker( shared_ptr<Node> g ) :
     global( g )
 {
     shared_ptr<TNode> ts( new TNode );    
-    ts->cs = NULL;
+    ts->cs = nullptr;
     ts->parent = shared_ptr<TNode>(); 
-    ts->II = NULL;
+    ts->II = nullptr;
     ts->node = g;
     tnodes.push_back( ts );
     //TRACE("Global tnode %s\n", ToString(ts).c_str() );
@@ -42,9 +42,9 @@ void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<Node> n )
     else
     {
         ts = shared_ptr<TNode>( new TNode );    
-        ts->cs = NULL;
+        ts->cs = nullptr;
         ts->parent = shared_ptr<TNode>(); 
-        ts->II = NULL;
+        ts->II = nullptr;
         ts->node = shared_ptr<Node>();
     }
         
@@ -56,7 +56,7 @@ void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<Node> n )
 void IdentifierTracker::PushScope( clang::Scope *S, shared_ptr<TNode> ts )
 {
     // If scope has no decls, clang will not invoke ActOnPopScope()
-    // so we set a non-NULL rubbish value in there whenever we push, in order
+    // so we set a non-nullptr rubbish value in there whenever we push, in order
     // to be sure of getting a corresponding pop
     //TRACE("push new=%s clang=S%p top=%s\n", ToString( ts ).c_str(), S, ToString( scope_stack.top() ).c_str() );
     
@@ -106,7 +106,7 @@ void IdentifierTracker::NewScope( clang::Scope *S )
         // We were not warned about the new scope, so just make a new anonymous one.
         TRACE("no next_record; \n");
         shared_ptr<TNode> ts = shared_ptr<TNode>( new TNode );    
-        ts->II = NULL;
+        ts->II = nullptr;
         ts->parent = scope_stack.empty()?shared_ptr<TNode>():scope_stack.top();
         PushScope( S, ts );
     }
@@ -115,7 +115,7 @@ void IdentifierTracker::NewScope( clang::Scope *S )
 void IdentifierTracker::SeenScope( clang::Scope *S )
 {
     // Detect a change of scope and create a new scope if required. Do not do anything for
-    // global scope (=no parent) - in that case, we leave the current scope as NULL
+    // global scope (=no parent) - in that case, we leave the current scope as nullptr
     ASSERT(S);
     if( S->getParent() && (scope_stack.empty() || !scope_stack.top() || scope_stack.top()->cs != S) )
     {
@@ -137,7 +137,7 @@ void IdentifierTracker::Add( clang::IdentifierInfo *II, shared_ptr<Node> node, c
     i->II = II;
     i->node = node;
     i->parent = scope_stack.top();  
-    i->cs = NULL; // Remember cs is the clang scope *owned* by i
+    i->cs = nullptr; // Remember cs is the clang scope *owned* by i
     tnodes.push_back( i );
       
     //TRACE("added %s new=%p top=%s clang=S%p\n", ToString( i ).c_str(), node.get(), ToString( scope_stack.top() ).c_str(), S );    
@@ -221,7 +221,7 @@ int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNod
     // until we match the identifier's scope.
     while( !IsIdentical( cur_it, id_it ) )
     {
-        if( cur_it == NULL || !recurse )
+        if( cur_it == nullptr || !recurse )
         {
             return NOMATCH; 
         }

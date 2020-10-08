@@ -48,7 +48,7 @@ private:
     ContainerInterface::iterator c_end;
     const Node *root;
     TreePtr<Node> ref_holder;
-    bool empty; // TODO use NULL root for empty
+    bool empty; // TODO use nullptr root for empty
 };
 
 /*! Stated out traversal across a node's children. UniqueWalks the members and elements of containers
@@ -83,8 +83,8 @@ public:
     virtual void AdvanceInto();
     Walk_iterator(); // makes "end" iterator
     Walk_iterator( TreePtr<Node> &root,
-                   Filter *out_filter = NULL,
-    		       Filter *recurse_filter = NULL );
+                   Filter *out_filter = nullptr,
+    		       Filter *recurse_filter = nullptr );
     virtual TreePtr<Node> GetCurrentParent() const; // Go back a whole step
     virtual const TreePtrInterface *GetCurrentParentPointer() const;// Go back half a step
     // Get all the true recursions made so far (i.e. excluding root and current position)
@@ -169,7 +169,7 @@ protected:
     UniqueFilter *unique_filter;
 };
 
-/*! UniqueWalk presents each element exactly once, and skips NULL pointers */
+/*! UniqueWalk presents each element exactly once, and skips nullptr pointers */
 typedef ContainerFromIterator< UniqueWalk_iterator, TreePtr<Node> > UniqueWalk;
 
 #endif
