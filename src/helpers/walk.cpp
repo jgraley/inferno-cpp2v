@@ -75,16 +75,19 @@ FlattenNode_iterator::FlattenNode_iterator( const FlattenNode_iterator & other )
 
 string FlattenNode_iterator::GetName() const
 {
+    string s = root->GetTrace();
     if (IsAtEnd())
-    	return string("end");
+    	s += string("end()");
     else if( dynamic_cast<CollectionInterface *>(GetCurrentMember()) )
-        return string("{") + TypeInfo(cit->get()).name() + string("}");
+        s += string("{}.") + cit->GetTrace() + SSPrintf("@%p", cit->get());
 	else if( dynamic_cast<SequenceInterface *>(GetCurrentMember()) )
-        return string("[") + TypeInfo(cit->get()).name() + string("]");
+        s += string("[].") + cit->GetTrace() + SSPrintf("@%p", cit->get());
     else if( TreePtrInterface *ptr = dynamic_cast<TreePtrInterface *>(GetCurrentMember()) )
-       	return TypeInfo(*(ptr->get())).name();
+       	s += string(".") + ptr->GetTrace() + SSPrintf("@%p", ptr->get());
     else
         ASSERTFAIL("got something from itemise that isn't a container or a shared pointer");
+        
+    return s;
 }
 
 shared_ptr<ContainerInterface::iterator_interface> FlattenNode_iterator::Clone() const
@@ -129,20 +132,39 @@ FlattenNode_iterator::pointer FlattenNode_iterator::operator->() const
 	return &operator*();
 }
 
-bool FlattenNode_iterator::operator==( const ContainerInterface::iterator_interface &ib ) const
-{
-	const FlattenNode_iterator *pi = dynamic_cast<const FlattenNode_iterator *>(&ib);
-	ASSERT(pi)("Comparing traversing iterator with something else ")(ib);
-	if( pi->IsAtEnd() || IsAtEnd() )
-		return pi->IsAtEnd() && IsAtEnd();
-	if( pi->mit != mit )
+bool FlattenNode_iterator::operator==( const ContainerInterface::iterator_interface &ciii_o ) const
+{ 
+	const FlattenNode_iterator &o = *dynamic_cast<const FlattenNode_iterator *>(&ciii_o);
+	ASSERT(&o)("Comparing flattern iterator with something else ")(ciii_o);
+
+	if( IsAtEnd() || o.IsAtEnd() )
+		return IsAtEnd() && o.IsAtEnd();
+    if( root != o.root )
         return false;
-    ASSERT( GetCurrentMember() == pi->GetCurrentMember() ); // because the mits match
+	if( mit != o.mit )
+        return false;
+    ASSERT( GetCurrentMember() == o.GetCurrentMember() ); // because the mits match
     if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
-        if( pi->cit != cit )
+        if( cit != o.cit )
             return false;
     return true;
 }
+
+
+/*bool FlattenNode_iterator::operator<( const FlattenNode_iterator &o ) const
+{
+	if( IsAtEnd() || o.IsAtEnd() )
+		return !IsAtEnd() && o.IsAtEnd();
+    if( root != o.root )
+        return root < o.root;
+	if( mit != o.mit )
+        return mit < o.mit;
+    ASSERT( GetCurrentMember() == o.GetCurrentMember() ); // because the mits match
+    if( dynamic_cast<ContainerInterface *>(GetCurrentMember()) )
+        return cit < o.cit;            
+    return false;
+}*/
+
 
 void FlattenNode_iterator::Overwrite( FlattenNode_iterator::pointer v ) const
 {

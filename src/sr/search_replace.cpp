@@ -1,7 +1,9 @@
+#include "scr_engine.hpp"
+
 #include "search_replace.hpp"
 #include "conjecture.hpp"
 #include "common/hit_count.hpp"
-#include "scr_engine.hpp"
+
 #include <list>
 
 using namespace SR;
@@ -42,24 +44,6 @@ void CompareReplace::GetGraphInfo( vector<string> *labels,
     scr_engine->GetGraphInfo( labels, blocks );
 }
 
-    
-bool CompareReplace::IsMatch( TreePtr<Node> context,       
-                              TreePtr<Node> root )
-{
-    pcontext = &context;
-    try
-    {
-        scr_engine->Compare(root); 
-        pcontext = nullptr;
-        return true;
-    }
-    catch( ::Mismatch & )
-    {
-        pcontext = nullptr;
-        return false;
-    }
-}
-
 
 void CompareReplace::SetStopAfter( vector<int> ssa, int d )
 {
@@ -78,6 +62,7 @@ void CompareReplace::operator()( TreePtr<Node> c, TreePtr<Node> *proot )
 {
     INDENT(")");
     TRACE("Enter S&R instance ")(*this);
+    ASSERT(c==*proot);
     
     // If the initial root and context are the same node, then arrange for the context
     // to follow the root node as we modify it (in SingleSearchReplace()). This ensures

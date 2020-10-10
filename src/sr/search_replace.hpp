@@ -17,8 +17,7 @@ class SCREngine;
 
 /// Main implementation of a compare and replace function, that matches at the root of the program tree
 class CompareReplace : public virtual Traceable,
-                       virtual public InPlaceTransformation, 
-                       public Filter 
+                       virtual public InPlaceTransformation
 {  
 public:
     // Constructor and destructor. Search and replace patterns and couplings are
@@ -44,11 +43,9 @@ public:
     mutable set< TreePtr<Node> > dirty_grass;    
     virtual void GetGraphInfo( vector<string> *labels, 
                                vector< TreePtr<Node> > *blocks ) const;    
-    friend class Conjecture;
-    virtual bool IsMatch( TreePtr<Node> context,       
-                          TreePtr<Node> root );
     virtual void SetStopAfter( vector<int> ssa, int d=0 );
     SCREngine *GetRootEngine();
+    
 private:
     TreePtr<Node> *pcontext;
     const bool is_search;

@@ -95,7 +95,7 @@ struct IdentifierByNameAgent : public virtual InfernoAgent
     IdentifierByNameAgent( string n ) : name(n) {}
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    bool IsMatch( const TreePtrInterface &x ) const;
+    bool IsIdMatch( const TreePtrInterface &x ) const;
     string name;
 };
 

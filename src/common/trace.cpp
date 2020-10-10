@@ -138,6 +138,12 @@ Tracer &Tracer::operator()(bool b)
 }
 
 
+Tracer &Tracer::operator()(int i)
+{    
+    return operator()( to_string(i) );
+}
+
+
 Tracer &Tracer::operator()(const exception &e)
 {
     return operator()( e.what() );

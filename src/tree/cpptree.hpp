@@ -144,7 +144,11 @@ struct SpecificInteger : Integer, llvm::APSInt
 	{
 		ASSERT( candidate );
     	const SpecificInteger *c = dynamic_cast<const SpecificInteger *>(candidate);
-    	return c && *(llvm::APSInt *)c == *(llvm::APSInt *)this;
+        // A local match will require all fields to match, not just the numerical value.
+    	return c && 
+               c->isUnsigned() == isUnsigned() &&
+               c->getBitWidth() == getBitWidth() &&
+               *(llvm::APSInt *)c == *(llvm::APSInt *)this;
 	}
 	virtual string GetRender() const /// Produce a string for debug
 	{
@@ -176,7 +180,10 @@ struct SpecificFloat : Float, llvm::APFloat
 	{
 		ASSERT( candidate );
     	const SpecificFloat *c = dynamic_cast<const SpecificFloat *>(candidate);
-    	return c && bitwiseIsEqual( *c );
+        // A local match will require all fields to match, not just the numerical value.
+    	return c && 
+            //    c->getSemantics() == getSemantics() && //TODO
+               bitwiseIsEqual( *c );
 	}
 	virtual string GetRender() const /// Produce a string for graphing
 	{

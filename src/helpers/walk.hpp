@@ -23,8 +23,9 @@ public:
 	virtual FlattenNode_iterator &operator++();
 	virtual reference operator*() const;
 	virtual pointer operator->() const;
-	virtual bool operator==( const ContainerInterface::iterator_interface &ib ) const;
-	virtual bool operator!=( const ContainerInterface::iterator_interface &ib ) const { return !operator==(ib); }
+	virtual bool operator==( const ContainerInterface::iterator_interface &ciii_o ) const;
+	virtual bool operator!=( const ContainerInterface::iterator_interface &ciii_o ) const { return !operator==(ciii_o); }
+	//virtual bool operator<( const FlattenNode_iterator &o ) const;
 	virtual void Overwrite( pointer v ) const;
     virtual const bool IsOrdered() const;
     // Some additional operations specific to walk iterators

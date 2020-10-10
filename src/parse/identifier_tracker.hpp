@@ -54,7 +54,7 @@ class IdentifierTracker
     void NewScope( clang::Scope *S );
     string ToString( shared_ptr<TNode> ts );
     bool IsIdentical( shared_ptr<TNode> current, shared_ptr<TNode> ident );
-    int IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNode> current, shared_ptr<TNode> ident, bool recurse );
+    int IsIdentifierMatch( const clang::IdentifierInfo *II, shared_ptr<TNode> current, shared_ptr<TNode> ident, bool recurse );
 
     shared_ptr<Node> global;
 

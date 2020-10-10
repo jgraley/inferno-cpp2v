@@ -9,8 +9,11 @@
 #include "agents/agent.hpp"
 #include "and_rule_engine.hpp"
 #include "link.hpp"
+#include "equivalence.hpp"
 
 #include <list>
+
+//#define CANNONICALISE
 
 using namespace SR;
 using namespace std;
@@ -245,6 +248,12 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
                                       const CouplingMap *master_keys ) 
 {
     INDENT(">");
+    TRACE("Cannonicalise\n");
+
+#ifdef CANNONICALISE
+    Cannonicaliser cz;
+    cz( *p_root, p_root );
+#endif
 
     TRACE("Begin search\n");
     // Note: comparing doesn't require double pointer any more, but

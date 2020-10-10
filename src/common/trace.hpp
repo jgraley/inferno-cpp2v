@@ -45,10 +45,26 @@ public:
     Tracer &operator()(const string &s); // not a printf because of risk of accidental format specifiers
     Tracer &operator()(const Traceable &s); 
     Tracer &operator()(bool b); 
+    Tracer &operator()(int i); 
     Tracer &operator()(const exception &e); 
 
     template<typename T>
     Tracer &operator()(const list<T> &l) 
+    {
+        operator()("[");
+        bool first = true;
+        for( auto x : l )
+        {
+            if( !first )
+                operator()(", ");
+            operator()(x);
+            first = false;
+        }
+        return operator()("]");
+    }
+    
+    template<typename T>
+    Tracer &operator()(const vector<T> &l) 
     {
         operator()("[");
         bool first = true;

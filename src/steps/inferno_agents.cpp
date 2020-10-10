@@ -146,13 +146,13 @@ shared_ptr<PatternQuery> IdentifierByNameAgent::GetPatternQuery() const
 }
 
 
-bool IdentifierByNameAgent::IsMatch( const TreePtrInterface &x ) const
+bool IdentifierByNameAgent::IsIdMatch( const TreePtrInterface &x ) const
 {
     string newname = name; 
     TreePtr<Node> nx = x; // TODO dynamic_pointer_cast support for TreePtrInterface #27
     if( TreePtr<CPPTree::SpecificIdentifier> si = dynamic_pointer_cast<CPPTree::SpecificIdentifier>(nx) )
     {
-        TRACE("IsMatch comparing ")(si->GetRender())(" with ")(newname);
+        TRACE("IsIdMatch comparing ")(si->GetRender())(" with ")(newname);
         if( si->GetRender() == newname )
         {
             TRACE(" : same\n");
@@ -169,7 +169,7 @@ void InstanceIdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterf
                                                          TreePtr<Node> x ) const                
 {
     query.Reset();
-    if( !IsMatch( x ) )
+    if( !IsIdMatch( x ) )
         throw Mismatch();  
 }                                
 
@@ -179,7 +179,7 @@ void TypeIdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface 
                                                      TreePtr<Node> x ) const
 {
     query.Reset();
-    if( !IsMatch( x ) )
+    if( !IsIdMatch( x ) )
         throw Mismatch();  
 }                                
 
@@ -189,7 +189,7 @@ void LabelIdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface
                                                       TreePtr<Node> x ) const                 
 {
     query.Reset();
-    if( !IsMatch( x ) )
+    if( !IsIdMatch( x ) )
         throw Mismatch();  
 }                                
 

@@ -197,7 +197,7 @@ bool IdentifierTracker::IsIdentical( shared_ptr<TNode> current, shared_ptr<TNode
 
 // Does identifier "II" found in scope "current" match rooted "ident"? if not return NOMATCH otherwise
 // return the number of scopes we went down through from current to get a match (effectively a distance)
-int IdentifierTracker::IsMatch( const clang::IdentifierInfo *II, shared_ptr<TNode> start, shared_ptr<TNode> ident, bool recurse )
+int IdentifierTracker::IsIdentifierMatch( const clang::IdentifierInfo *II, shared_ptr<TNode> start, shared_ptr<TNode> ident, bool recurse )
 {
     //string cs, ips;
     //cs = ToString( start );
@@ -286,7 +286,7 @@ shared_ptr<Node> IdentifierTracker::TryGet( const clang::IdentifierInfo *II, sha
     for( int i=0; i<tnodes.size(); i++ )
     {
         
-        int distance = IsMatch( II, start, tnodes[i], recurse );
+        int distance = IsIdentifierMatch( II, start, tnodes[i], recurse );
         if( distance < best_distance )
         {
             best_distance = distance;

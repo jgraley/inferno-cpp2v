@@ -16,7 +16,7 @@ SRC_SR_OPTIONS = $(SRC_OPTIONS) -I$(SR)
 
 COMMON_MODULES = $(COMMON)/standard $(COMMON)/read_args $(COMMON)/trace $(COMMON)/hit_count $(COMMON)/mismatch
 NODE_MODULES = $(NODE)/node $(NODE)/itemise 
-HELPERS_MODULES = $(HELPERS)/walk $(HELPERS)/simple_compare $(HELPERS)/duplicate
+HELPERS_MODULES = $(HELPERS)/walk $(HELPERS)/simple_compare $(HELPERS)/duplicate $(HELPERS)/transformation
 TREE_MODULES = $(TREE)/cpptree $(TREE)/validate $(TREE)/scope $(TREE)/misc $(TREE)/typeof $(TREE)/type_db 
 SR_MODULES = $(SR)/equivalence $(SR)/cache $(SR)/link $(SR)/query $(SR)/search_replace $(SR)/scr_engine $(SR)/and_rule_engine $(SR)/conjecture
 SR_AGENTS_MODULES = $(SR_AGENTS)/agent $(SR_AGENTS)/standard_agent $(SR_AGENTS)/match_all_agent $(SR_AGENTS)/match_any_agent $(SR_AGENTS)/not_match_agent
