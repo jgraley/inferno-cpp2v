@@ -88,27 +88,28 @@ bool SimpleCompare::operator()( CollectionInterface &x, CollectionInterface &y )
     Collection<Node> xremaining;
     FOREACH( const TreePtrInterface &xe, x )
         xremaining.insert( xe );
-
-    ContainerInterface::iterator xit, yit;
+    
     FOREACH( const TreePtrInterface &ye, y )
     {
         bool found = false;
         TreePtr<Node> xfound;
-        FOREACH( const TreePtrInterface &xe, xremaining )
+        ContainerInterface::iterator xit, xit_found;
+        for( xit=xremaining.begin(); xit != xremaining.end(); ++xit )
         {
+            const TreePtrInterface &xe = *xit;
             if( operator()( xe, ye ) )
             {
                 found = true;
                 xfound = xe;
+                xit_found = xit;
                 break;
             }
         }
         if( !found )
             return false;
         
-        // Try to erase the element
-        int ner = xremaining.erase( xfound );
-        ASSERT( ner == 1 )("Erase erased %d elements, huh?\n", ner );
+        // Erase the element ising iterator in case of duplicates in xremaining
+        xremaining.erase( xit_found );
     }
 
     // survived to the end? then we have a match.

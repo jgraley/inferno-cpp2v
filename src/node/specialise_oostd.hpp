@@ -148,7 +148,7 @@ public:
     
 	virtual const iterator &begin() { return my_begin; }
     virtual const iterator &end()   { return my_end; }
-    virtual void erase( ContainerInterface::iterator ) { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
+    virtual void erase( const ContainerInterface::iterator_interface & ) { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
     virtual void clear()                               { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }    
     virtual void insert( const TreePtrInterface & )    { ASSERTFAIL("Cannot modify ContainerFromIterator<>"); }
 private:

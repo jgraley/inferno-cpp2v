@@ -30,7 +30,7 @@ public:
     }
     virtual const iterator_interface &begin() { return *my_begin; }
     virtual const iterator_interface &end()   { return *my_end; }
-    virtual void erase( iterator )                      { ASSERTFAIL("Cannot modify SubSequenceRange"); }
+    virtual void erase( const iterator_interface & )    { ASSERTFAIL("Cannot modify SubSequenceRange"); }
     virtual void clear()                                { ASSERTFAIL("Cannot modify SubSequenceRange"); }    
     virtual void insert( const TreePtrInterface & )     { ASSERTFAIL("Cannot modify SubSequenceRange"); }
 #if SEQUENCE_HAS_RANDOM_ACCESS

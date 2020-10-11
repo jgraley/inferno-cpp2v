@@ -9,6 +9,8 @@
 
 using namespace SR;
 
+//#define ERASE_ITERATOR
+
 shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 {
     auto pq = make_shared<PatternQuery>(this);
@@ -280,13 +282,20 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
             
             query.RegisterNormalLink( &*pit, *xit ); // Link into X
 
-	    	// Remove the chosen element from the remaineder collection. If it is not there (ret val==0)
-	    	// then the present chosen iterator has been chosen before and the choices are conflicting.
-	    	// We'll just return false so we do not stop trying further choices (xit+1 may be legal).
-	    	if( xremaining.erase( *xit ) == 0 )
+	    	// Remove the chosen element from the remaineder collection. 
+#ifdef ERASE_ITERATOR
+            xremaining.erase( xit );
+#else           
+            int n = xremaining.erase( *xit );
+	    	if( n == 0 )
             {
                 ASSERT(!"failed to remove element from collection");
             }
+            if( n > 1 )
+            {
+                ASSERT(false)("Removed ")(n)(" elements\n");
+            }
+#endif        
 	    }
 	    else // ran out of x elements - local mismatch
         {

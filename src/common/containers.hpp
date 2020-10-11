@@ -127,7 +127,7 @@ public:
 			return pib->GetCount();
 		}
 
-		iterator_interface *GetUnderlyingIterator()
+		iterator_interface *GetUnderlyingIterator() const
 		{
 			if( pib )
 				return pib.get();
@@ -166,7 +166,7 @@ public:
     virtual void insert( const VALUE_INTERFACE &gx ) = 0;
 	virtual const iterator_interface &begin() = 0;
     virtual const iterator_interface &end() = 0;
-    virtual void erase( typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator it ) = 0;
+    virtual void erase( const iterator_interface &it ) = 0;
     virtual bool empty() { return begin()==end(); }
     virtual int size() const
     {
@@ -249,11 +249,15 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
 
 	typedef iterator const_iterator;
 
-    virtual void erase( typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator it )
+    virtual void erase( const typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator &it )
     {
-        iterator *cit = dynamic_cast<iterator *>( it.GetUnderlyingIterator() );
+        erase( *it.GetUnderlyingIterator() );
+    }
+    virtual void erase( const typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface &it )
+    {
+        auto cit = dynamic_cast<const iterator *>( &it );
         ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator
-        CONTAINER_IMPL::erase( *(typename CONTAINER_IMPL::iterator *)cit );
+        CONTAINER_IMPL::erase( *(typename CONTAINER_IMPL::iterator *)cit );    
     }
     virtual bool empty() 
     {
@@ -332,6 +336,7 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
         // Like multiset, we do allow more than one copy of the same element
 		push_back( gx );
 	}
+    using ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::erase;
     virtual int erase( const VALUE_INTERFACE &gx ) // Simulating the SimpleAssociatedContaner API 
     {
         // Like multiset, we erase all matching elemnts. Doing this though the API, bearing in 
@@ -476,6 +481,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTE
 		typename CONTAINER_IMPL::value_type sx(gx);
 		CONTAINER_IMPL::insert( sx );
 	}
+    using ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::erase;
 	virtual int erase( const VALUE_INTERFACE &gx )
 	{
 		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(gx) );
