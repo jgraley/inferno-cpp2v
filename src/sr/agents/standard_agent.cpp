@@ -10,6 +10,7 @@
 using namespace SR;
 
 //#define ERASE_ITERATOR
+//#define CHECK_ITERATOR_IN_CONTAINER
 
 shared_ptr<PatternQuery> StandardAgent::GetPatternQuery() const
 {
@@ -283,6 +284,13 @@ void StandardAgent::DecidedQueryCollection( DecidedQueryAgentInterface &query,
             query.RegisterNormalLink( &*pit, *xit ); // Link into X
 
 	    	// Remove the chosen element from the remaineder collection. 
+#ifdef CHECK_ITERATOR_IN_CONTAINER
+            bool found = false;
+            for( ContainerInterface::iterator checkit=xremaining.begin(); checkit != xremaining.end(); ++checkit )
+                if( checkit==xit )
+                    found=true;
+            ASSERT( found );
+#endif
 #ifdef ERASE_ITERATOR
             xremaining.erase( xit );
 #else           
