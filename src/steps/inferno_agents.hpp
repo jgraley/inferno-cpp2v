@@ -95,7 +95,9 @@ struct IdentifierByNameAgent : public virtual InfernoAgent
     IdentifierByNameAgent( string n ) : name(n) {}
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
-    bool IsIdMatch( const TreePtrInterface &x ) const;
+    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                      TreePtr<Node> x ) const;
+
     string name;
 };
 
@@ -107,9 +109,6 @@ struct InstanceIdentifierByNameAgent : Special<CPPTree::InstanceIdentifier>,
 
     InstanceIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
     InstanceIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}
-private:
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const;
 };
 
 
@@ -119,10 +118,7 @@ struct TypeIdentifierByNameAgent : Special<CPPTree::TypeIdentifier>,
     SPECIAL_NODE_FUNCTIONS
 
     TypeIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
-    TypeIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}
-private:
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const;                          
+    TypeIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                         
 };
 
 
@@ -132,10 +128,7 @@ struct LabelIdentifierByNameAgent : Special<CPPTree::LabelIdentifier>,
     SPECIAL_NODE_FUNCTIONS
 
     LabelIdentifierByNameAgent() : IdentifierByNameAgent(string()) {}    
-    LabelIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}
-private:
-    virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const;                      
+    LabelIdentifierByNameAgent( string n ) : IdentifierByNameAgent(n) {}                    
 };
 
 //---------------------------------- Nested ------------------------------------    

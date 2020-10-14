@@ -140,58 +140,32 @@ void IdentifierByNameAgent::GetGraphAppearance( bool *bold, string *text, string
 	*text = name;
 }
 
+
 shared_ptr<PatternQuery> IdentifierByNameAgent::GetPatternQuery() const
 { 
     return make_shared<PatternQuery>(this);
 }
 
 
-bool IdentifierByNameAgent::IsIdMatch( const TreePtrInterface &x ) const
+void IdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
+                                                 TreePtr<Node> x ) const                
 {
+    query.Reset();
     string newname = name; 
     TreePtr<Node> nx = x; // TODO dynamic_pointer_cast support for TreePtrInterface #27
     if( TreePtr<CPPTree::SpecificIdentifier> si = dynamic_pointer_cast<CPPTree::SpecificIdentifier>(nx) )
     {
-        TRACE("IsIdMatch comparing ")(si->GetRender())(" with ")(newname);
+        TRACE("Comparing ")(si->GetRender())(" with ")(newname);
         if( si->GetRender() == newname )
         {
             TRACE(" : same\n");
-            return true;
+            return;
         }
         TRACE(" : different\n");
     }
-    return false;
-}
-
-//---------------------------------- InstanceIdentifierByNameAgent ------------------------------------    
-
-void InstanceIdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                                         TreePtr<Node> x ) const                
-{
-    query.Reset();
-    if( !IsIdMatch( x ) )
-        throw Mismatch();  
+    throw Mismatch();  
 }                                
 
-//---------------------------------- TypeIdentifierByNameAgent ------------------------------------    
-
-void TypeIdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                                     TreePtr<Node> x ) const
-{
-    query.Reset();
-    if( !IsIdMatch( x ) )
-        throw Mismatch();  
-}                                
-
-//---------------------------------- LabelIdentifierByNameAgent ------------------------------------    
-
-void LabelIdentifierByNameAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                                      TreePtr<Node> x ) const                 
-{
-    query.Reset();
-    if( !IsIdMatch( x ) )
-        throw Mismatch();  
-}                                
 
 //---------------------------------- Nested ------------------------------------    
 
