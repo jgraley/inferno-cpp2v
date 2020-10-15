@@ -1,6 +1,7 @@
 #include "uniquify_identifiers.hpp"
 #include "helpers/walk.hpp"
 #include "tree/misc.hpp"
+#include "helpers/flatten.hpp"
 
 using namespace CPPTree;
 

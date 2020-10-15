@@ -5,6 +5,7 @@
 #include "node/node.hpp"
 #include "helpers/transformation.hpp"
 #include "helpers/walk.hpp"
+#include "helpers/flatten.hpp"
 
 #include <memory>
 

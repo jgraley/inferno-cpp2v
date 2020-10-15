@@ -95,26 +95,12 @@ struct String : Literal { NODE_FUNCTIONS };
 struct SpecificString : String
 {
 	NODE_FUNCTIONS_FINAL
-    SpecificString() {} ///< default constructor, for making architypes 
-    SpecificString( string s ) :
-    	value(s) /// Construct with a given STL string
-    {
-    }
-	virtual bool IsLocalMatch( const Matcher *candidate ) const /// Overloaded comparison for search&replace
-	{
-		ASSERT( candidate );
-    	const SpecificString *c = dynamic_cast<const SpecificString *>(candidate);
-    	return c && c->value == value;
-	} 
-	virtual string GetRender() const /// Produce a string for debug
-	{
-		// Since this is a string literal, output it double quoted
-		return "\"" + value + "\"";
-	}
-    virtual string GetTrace() const
-    {
-        return GetName() + "(" + GetRender() + ")" + GetAddr();
-    }
+    SpecificString(); ///< default constructor, for making architypes 
+    SpecificString( string s ); /// Construct with a given STL string
+	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
+	virtual string GetRender() const; /// Produce a string for debug
+    virtual string GetTrace() const;
+    
 private:
     string value; ///< The string itself
 };
@@ -137,31 +123,12 @@ struct Integer : Number { NODE_FUNCTIONS };
 struct SpecificInteger : Integer, llvm::APSInt
 {
 	NODE_FUNCTIONS_FINAL
-    SpecificInteger() {} ///< default constructor, for making architypes 
-    SpecificInteger( llvm::APSInt i ) : llvm::APSInt(i) {} ///< Construct with an LLVM-style integer
-    SpecificInteger( int i ) : llvm::APSInt(INTEGER_DEFAULT_WIDTH) { *(llvm::APSInt *)this = i; } ///< Construct with an ordinary int
-	virtual bool IsLocalMatch( const Matcher *candidate ) const /// Overloaded comparison for search&replace
-	{
-		ASSERT( candidate );
-    	const SpecificInteger *c = dynamic_cast<const SpecificInteger *>(candidate);
-        // A local match will require all fields to match, not just the numerical value.
-    	return c && 
-               c->isUnsigned() == isUnsigned() &&
-               c->getBitWidth() == getBitWidth() &&
-               *(llvm::APSInt *)c == *(llvm::APSInt *)this;
-	}
-	virtual string GetRender() const /// Produce a string for debug
-	{
-        return string(toString(10)) + // decimal
-               (isUnsigned() ? "U" : "") +
-               (getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_unspecified] ? "L" : "") +
-               (getBitWidth()>TypeDb::integral_bits[clang::DeclSpec::TSW_long] ? "L" : "");
-               // note, assuming longlong bigger than long, so second L appends first to get LL
-	}
-    virtual string GetTrace() const
-    {
-        return GetName() + "(" + GetRender() + ")" + GetAddr();
-    }
+    SpecificInteger(); ///< default constructor, for making architypes 
+    SpecificInteger( llvm::APSInt i ); ///< Construct with an LLVM-style integer
+    SpecificInteger( int i ); ///< Construct with an ordinary int
+	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
+	virtual string GetRender() const; /// Produce a string for debug
+    virtual string GetTrace() const;
 };
 
 /// Intermediate property node that represents a floating point number of any value. 
@@ -174,30 +141,11 @@ struct Float : Number { NODE_FUNCTIONS };
 struct SpecificFloat : Float, llvm::APFloat
 {
 	NODE_FUNCTIONS_FINAL
-    SpecificFloat() : llvm::APFloat(0.0) {} ///< default constructor, for making architypes 
-    SpecificFloat( llvm::APFloat v ) : llvm::APFloat(v) {}; ///< Construct with an LLVM-style float
-	virtual bool IsLocalMatch( const Matcher *candidate ) const /// Overloaded comparison for search&replace
-	{
-		ASSERT( candidate );
-    	const SpecificFloat *c = dynamic_cast<const SpecificFloat *>(candidate);
-        // A local match will require all fields to match, not just the numerical value.
-    	return c && 
-            //    c->getSemantics() == getSemantics() && //TODO
-               bitwiseIsEqual( *c );
-	}
-	virtual string GetRender() const /// Produce a string for graphing
-	{
-		char hs[256];
-		// generate hex float since it can be exact
-		convertToHexString( hs, 0, false, llvm::APFloat::rmTowardNegative); // note rounding mode ignored when hex_digits==0
-		return string(hs) +
-			   (&getSemantics()==TypeDb::float_semantics ? "F" : "") +
-			   (&getSemantics()==TypeDb::long_double_semantics ? "L" : "");
-	}
-    virtual string GetTrace() const
-    {
-        return GetName() + "(" + GetRender() + ")" + GetAddr();
-    }
+    SpecificFloat(); ///< default constructor, for making architypes 
+    SpecificFloat( llvm::APFloat v ); ///< Construct with an LLVM-style float
+	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
+	virtual string GetRender() const; /// Produce a string for graphing
+    virtual string GetTrace() const;
 };
 
 /// Intermediate property node that represents either boolean value.
@@ -241,27 +189,13 @@ struct Identifier : virtual Property { NODE_FUNCTIONS };
 struct SpecificIdentifier : virtual Property
 { 
     NODE_FUNCTIONS
-	SpecificIdentifier() {} ///< default constructor, for making architypes 
-	SpecificIdentifier( string s ) : name(s) {} ///< construct with a given name
-    virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p ) /// Overloaded duplication function for search&replace
-    {
-    	return p; // duplicating specific identifiers just gets the same id, since they are unique.
-    	// This means x.Duplicate() matches x, wheras x.Clone() does not
-    }
-	virtual bool IsLocalMatch( const Matcher *candidate ) const /// Overloaded comparison for search&replace
-	{
-		ASSERT( candidate );
-		return candidate == this;
-	}
-	virtual string GetRender() const /// This is relied upon to just return the identifier name for rendering
-	{
-		return name;
-	}
-    virtual string GetTrace() const
-    {
-        // Since this is text from the program, use single quotes
-        return GetName() + "('" + GetRender() + "')" + GetAddr();
-    }
+	SpecificIdentifier(); ///< default constructor, for making architypes 
+	SpecificIdentifier( string s ); ///< construct with a given name
+    virtual shared_ptr<Cloner> Duplicate( shared_ptr<Cloner> p ); /// Overloaded duplication function for search&replace
+	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
+	virtual string GetRender() const; /// This is relied upon to just return the identifier name for rendering
+    virtual string GetTrace() const;
+
 private:
 	string name;
 };
@@ -560,21 +494,10 @@ struct FloatSemantics : Property { NODE_FUNCTIONS };
 struct SpecificFloatSemantics : FloatSemantics
 {
 	NODE_FUNCTIONS_FINAL
-    SpecificFloatSemantics() {} ///< default constructor, for making architypes 
-    SpecificFloatSemantics( const llvm::fltSemantics *s ) : /// Construct from LLVM's class
-    	value(s)
-    {
-    }
-	virtual bool IsLocalMatch( const Matcher *candidate ) const /// Overloaded comparison for search&replace
-	{
-		ASSERT( candidate );
-    	const SpecificFloatSemantics *c = dynamic_cast<const SpecificFloatSemantics *>(candidate);
-    	return c && c->value == value;
-	}
-	operator const llvm::fltSemantics &() const /// convert back to LLVM's class
-	{
-		return *value;
-	}
+    SpecificFloatSemantics(); ///< default constructor, for making architypes 
+    SpecificFloatSemantics( const llvm::fltSemantics *s ); /// Construct from LLVM's class
+	virtual bool IsLocalMatch( const Matcher *candidate ) const; /// Overloaded comparison for search&replace
+	operator const llvm::fltSemantics &() const; /// convert back to LLVM's class
 	// TODO no render?
     const llvm::fltSemantics *value;
 };    
