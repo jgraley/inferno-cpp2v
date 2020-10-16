@@ -16,7 +16,6 @@
 #define USE_LIST_FOR_SEQUENCE 1
 #endif
 
-#define USE_DEQUE_FOR_COLLECTION 0
 #define USE_LIST_FOR_COLLECTION 1
 
 // Inferno tree shared pointers
@@ -53,10 +52,6 @@ private:
 
 #if USE_LIST_FOR_COLLECTION
 #define COLLECTION_IMPL list
-#define COLLECTION_BASE OOStd::Sequence
-#define COLLECTION_INTERFACE_BASE OOStd::SequenceInterface
-#elif USE_DEQUE_FOR_COLLECTION
-#define COLLECTION_IMPL deque
 #define COLLECTION_BASE OOStd::Sequence
 #define COLLECTION_INTERFACE_BASE OOStd::SequenceInterface
 #else
