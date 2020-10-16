@@ -679,7 +679,6 @@ inline pair<L,R> operator,( const L &l, const R &r )
 #define COLLECTION_BASE OOStd::SimpleAssociativeContainer
 #endif
 
-// Inferno tree containers
 typedef OOStd::ContainerInterface ContainerInterface;
 typedef OOStd::PointIterator PointIterator;
 typedef OOStd::CountingIterator CountingIterator;
@@ -711,7 +710,9 @@ struct Sequence : virtual OOStd::Sequential< VALUE_TYPE >,
 #define COLLECTION_BASE SimpleAssociativeContainer
 #endif
 
-// Inferno tree containers
+struct SequenceInterface : virtual ContainerInterface
+{
+};
 
 struct CollectionInterface : virtual ContainerInterface
 {

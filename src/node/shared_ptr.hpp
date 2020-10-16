@@ -13,7 +13,7 @@
 #include "itemise.hpp"
 #include "node.hpp"
 
-#define OOSTD_NAMESPACE
+//#define OOSTD_NAMESPACE
 
 // Covariant nullptr pointer bug
 //
