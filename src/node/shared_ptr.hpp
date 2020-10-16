@@ -110,11 +110,17 @@ struct SharedPtr : virtual SharedPtrInterface, shared_ptr<VALUE_TYPE>
     	return shared_ptr<VALUE_TYPE>::operator *();
     }
 
-    virtual SharedPtr &operator=( shared_ptr<Node> n )
+    virtual SharedPtr &operator=( const SharedPtrInterface &n )
+    {
+    	(void)SharedPtr::operator=( shared_ptr<Node>(n) );
+    	return *this;
+    }
+
+    virtual SharedPtr &operator=( const shared_ptr<Node> &n )
     {   
         if( n )
         {
-            shared_ptr<VALUE_TYPE> p = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<Node>(n));
+            shared_ptr<VALUE_TYPE> p = dynamic_pointer_cast<VALUE_TYPE>(n);
             ASSERT( p )("OOStd inferred dynamic cast has failed: from ")(*n)
 			           (" to type ")(Traceable::CPPFilt( typeid( VALUE_TYPE ).name() ))("\n");
          	(void)shared_ptr<VALUE_TYPE>::operator=( p );
@@ -127,15 +133,9 @@ struct SharedPtr : virtual SharedPtrInterface, shared_ptr<VALUE_TYPE>
     }
 
     template< typename OTHER >
-    inline SharedPtr &operator=( SharedPtr<OTHER> n )
+    inline SharedPtr &operator=( const shared_ptr<OTHER> &n )
     {
-    	(void)operator=( shared_ptr<OTHER>(n) );
-    	return *this;
-    }
-
-    virtual SharedPtr &operator=( const SharedPtrInterface &n )
-    {
-    	(void)operator=( shared_ptr<Node>(n) );
+    	(void)shared_ptr<VALUE_TYPE>::operator=( (n) );
     	return *this;
     }
 
@@ -176,7 +176,7 @@ struct SharedPtr : virtual SharedPtrInterface, shared_ptr<VALUE_TYPE>
 	}
 	virtual SharedPtr<Node> MakeValueArchitype() const
 	{
-        ASSERTFAIL("MakeValueArchitype() not implemented for this SharedPtr\n");
+        return new VALUE_TYPE; // means VALUE_TYPE must be constructable
     }
 
     //inline bool operator<( const SharedPtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE> &other )
@@ -189,36 +189,14 @@ struct SharedPtr : virtual SharedPtrInterface, shared_ptr<VALUE_TYPE>
    // }
 };
 
-// Similar signature to boost shared_ptr operator==, and we restrict the pointers
-// to having the same subbase and base target
-template< typename X, typename Y >
-inline bool operator==( const SharedPtr<X> &x,
-		                const SharedPtr<Y> &y)
-{
-	return operator==( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
-}
-
-// Similar signature to boost shared_ptr operator==, and we restrict the pointers
-// to having the same subbase and base target
-inline bool operator==( const SharedPtrInterface &x,
-		                const SharedPtrInterface &y)
-{
-	return x.get() == y.get();
-}
-
-template< typename X, typename Y >
-inline bool operator!=( const SharedPtr<X> &x,
-		                const SharedPtr<Y> &y)
-{
-	return operator!=( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
-}
-
 }; // namespace
+
 
 // TODO optimise SharedPtr, it seems to be somewhat slower than shared_ptr!!!
 typedef OOStd::SharedPtrInterface TreePtrInterface;
+#define TreePtr OOStd::SharedPtr
 
-template<typename VALUE_TYPE>
+/*template<typename VALUE_TYPE>
 class TreePtr : public OOStd::SharedPtr<VALUE_TYPE>
 {
     typedef OOStd::SharedPtr<VALUE_TYPE> SPType; // just to save typing!
@@ -242,6 +220,33 @@ public:
     }
 private:    
 };
+*/
+
+// Similar signature to boost shared_ptr operator==, and we restrict the pointers
+// to having the same subbase and base target
+template< typename X, typename Y >
+inline bool operator==( const TreePtr<X> &x,
+		                const TreePtr<Y> &y)
+{
+	return operator==( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
+}
+
+// Similar signature to boost shared_ptr operator==, and we restrict the pointers
+// to having the same subbase and base target
+inline bool operator==( const TreePtrInterface &x,
+		                const TreePtrInterface &y)
+{
+	return x.get() == y.get();
+}
+
+template< typename X, typename Y >
+inline bool operator!=( const TreePtr<X> &x,
+		                const TreePtr<Y> &y)
+{
+	return operator!=( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
+}
+
+
 
 
 
