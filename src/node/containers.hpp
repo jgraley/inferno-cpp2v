@@ -8,7 +8,8 @@
 #ifndef CONTAINERS_HPP
 #define CONTAINERS_HPP
 
-#include "common.hpp"
+#include "common/common.hpp"
+#include "itemise.hpp"
 
 #define SEQUENCE_HAS_RANDOM_ACCESS 0
 
@@ -19,12 +20,12 @@ namespace OOStd {
 // Template for a base class for STL containers with forward iterators.
 // Supports direct calls and iterators.
 //
-// The base container will be derived from SUB_BASE. VALUE_INTERFACE should
+// VALUE_INTERFACE should
 // be a base (or compatible type) for the elements of all sub-containers.
 //
 
-template< class SUB_BASE, typename VALUE_INTERFACE >
-class ContainerInterface : public virtual Traceable, public virtual SUB_BASE
+template< typename VALUE_INTERFACE >
+class ContainerInterface : public virtual Traceable, public virtual Itemiser::Element
 {
 public:
 	// Abstract base class for the implementation-specific iterators in containers.
@@ -181,8 +182,8 @@ public:
 };
 
 
-template< class SUB_BASE, typename VALUE_INTERFACE >
-struct SequenceInterface : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>
+template< typename VALUE_INTERFACE >
+struct SequenceInterface : virtual ContainerInterface<VALUE_INTERFACE>
 {
 #if SEQUENCE_HAS_RANDOM_ACCESS
     virtual VALUE_INTERFACE &operator[]( int i ) = 0;
@@ -191,8 +192,8 @@ struct SequenceInterface : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>
 };
 
 
-template< class SUB_BASE, typename VALUE_INTERFACE >
-struct SimpleAssociativeContainerInterface : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>
+template< typename VALUE_INTERFACE >
+struct SimpleAssociativeContainerInterface : virtual ContainerInterface<VALUE_INTERFACE>
 {
 	virtual int erase( const VALUE_INTERFACE &gx ) = 0;
 };
@@ -204,8 +205,8 @@ struct SimpleAssociativeContainerInterface : virtual ContainerInterface<SUB_BASE
 // Params as for ContainerInterface except we now have to fill in CONTAINER_IMPL
 // as the stl container class eg std::list<blah>
 //
-template<class SUB_BASE, typename VALUE_INTERFACE, class CONTAINER_IMPL>
-struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, CONTAINER_IMPL
+template<typename VALUE_INTERFACE, class CONTAINER_IMPL>
+struct ContainerCommon : virtual ContainerInterface<VALUE_INTERFACE>, CONTAINER_IMPL
 {
     // C++11 fix
     ContainerCommon& operator=(const ContainerCommon& other)
@@ -215,7 +216,7 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
     }
     
 	struct iterator : public CONTAINER_IMPL::iterator,
-	                  public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface
+	                  public ContainerInterface<VALUE_INTERFACE>::iterator_interface
 	{
 		virtual iterator &operator++()
 		{
@@ -239,7 +240,7 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
 			return CONTAINER_IMPL::iterator::operator->();
 		}
 
-		virtual bool operator==( const typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface &ib ) const
+		virtual bool operator==( const typename ContainerInterface<VALUE_INTERFACE>::iterator_interface &ib ) const
 		{
 		    const typename CONTAINER_IMPL::iterator *pi = dynamic_cast<const typename CONTAINER_IMPL::iterator *>(&ib);
 		    ASSERT(pi)("Comparing iterators of different type");
@@ -249,11 +250,11 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
 
 	typedef iterator const_iterator;
 
-    virtual void erase( const typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator &it )
+    virtual void erase( const typename ContainerInterface<VALUE_INTERFACE>::iterator &it )
     {
         erase( *it.GetUnderlyingIterator() );
     }
-    virtual void erase( const typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface &it )
+    virtual void erase( const typename ContainerInterface<VALUE_INTERFACE>::iterator_interface &it )
     {
         auto cit = dynamic_cast<const iterator *>( &it );
         ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator
@@ -282,19 +283,19 @@ struct ContainerCommon : virtual ContainerInterface<SUB_BASE, VALUE_INTERFACE>, 
 // Template for containers that use ordered STL containers as implementation
 // (basically vector, deque etc). Instantiate as per ContainerCommon.
 //
-template<class SUB_BASE, typename VALUE_INTERFACE, class CONTAINER_IMPL>
-struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>, virtual SequenceInterface<SUB_BASE, VALUE_INTERFACE>
+template<typename VALUE_INTERFACE, class CONTAINER_IMPL>
+struct Sequence : virtual ContainerCommon<VALUE_INTERFACE, CONTAINER_IMPL>, virtual SequenceInterface<VALUE_INTERFACE>
 {
     // C++11 fix
     Sequence& operator=(const Sequence& other)
     {
-        (void)ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::operator=(other);
+        (void)ContainerCommon<VALUE_INTERFACE, CONTAINER_IMPL>::operator=(other);
         return *this;
     }
 
     using typename CONTAINER_IMPL::insert; // due to silly C++ rule where different overloads hide each other
-    inline Sequence<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>() {}
-	struct iterator : public ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator
+    inline Sequence<VALUE_INTERFACE, CONTAINER_IMPL>() {}
+	struct iterator : public ContainerCommon<VALUE_INTERFACE, CONTAINER_IMPL>::iterator
     {
 		inline iterator( typename CONTAINER_IMPL::iterator &i ) : CONTAINER_IMPL::iterator(i) {}
 		inline iterator() {}
@@ -306,7 +307,7 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 		{
 			return CONTAINER_IMPL::iterator::operator->();
 		}
-		virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
+		virtual shared_ptr<typename ContainerInterface<VALUE_INTERFACE>::iterator_interface> Clone() const
 		{
 			shared_ptr<iterator> ni( new iterator );
 			*ni = *this;
@@ -336,7 +337,7 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
         // Like multiset, we do allow more than one copy of the same element
 		push_back( gx );
 	}
-    using ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::erase;
+    using ContainerCommon<VALUE_INTERFACE, CONTAINER_IMPL>::erase;
     virtual int erase( const VALUE_INTERFACE &gx ) // Simulating the SimpleAssociatedContaner API 
     {
         // Like multiset, we erase all matching elemnts. Doing this though the API, bearing in 
@@ -391,11 +392,11 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
     	my_end.CONTAINER_IMPL::iterator::operator=( CONTAINER_IMPL::end() );
     	return my_end;
     }
-	Sequence( const SequenceInterface<SUB_BASE, VALUE_INTERFACE> &cns )
+	Sequence( const SequenceInterface<VALUE_INTERFACE> &cns )
 	{
 		// TODO support const_interator properly and get rid of this const_cast
-		SequenceInterface<SUB_BASE, VALUE_INTERFACE> *ns = const_cast< SequenceInterface<SUB_BASE, VALUE_INTERFACE> * >( &cns );
-		for( typename SequenceInterface<SUB_BASE, VALUE_INTERFACE>::iterator i=ns->begin();
+		SequenceInterface<VALUE_INTERFACE> *ns = const_cast< SequenceInterface<VALUE_INTERFACE> * >( &cns );
+		for( typename SequenceInterface<VALUE_INTERFACE>::iterator i=ns->begin();
 		     i != ns->end();
 		     ++i )
 		{
@@ -410,10 +411,10 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 	template<typename L, typename R>
 	inline Sequence( const pair<L, R> &p )
 	{
-		*this = Sequence<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>( p.first );
-		Sequence<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL> t( p.second );
+		*this = Sequence<VALUE_INTERFACE, CONTAINER_IMPL>( p.first );
+		Sequence<VALUE_INTERFACE, CONTAINER_IMPL> t( p.second );
 
-		for( typename Sequence<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator i=t.begin();
+		for( typename Sequence<VALUE_INTERFACE, CONTAINER_IMPL>::iterator i=t.begin();
 		     i != t.end();
 		     ++i )
 		{
@@ -440,15 +441,15 @@ struct Sequence : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_I
 // Template for containers that use unordered STL containers as implementation
 // (basically associative containers). Instantiate as per ContainerCommon.
 //
-template<class SUB_BASE, typename VALUE_INTERFACE, class CONTAINER_IMPL>
-struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>, virtual SimpleAssociativeContainerInterface<SUB_BASE, VALUE_INTERFACE>
+template<typename VALUE_INTERFACE, class CONTAINER_IMPL>
+struct SimpleAssociativeContainer : virtual ContainerCommon<VALUE_INTERFACE, CONTAINER_IMPL>, virtual SimpleAssociativeContainerInterface<VALUE_INTERFACE>
 {
-    inline SimpleAssociativeContainer<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>() {}
-	struct iterator : public ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator
+    inline SimpleAssociativeContainer<VALUE_INTERFACE, CONTAINER_IMPL>() {}
+	struct iterator : public ContainerCommon<VALUE_INTERFACE, CONTAINER_IMPL>::iterator
     {
 		inline iterator( typename CONTAINER_IMPL::iterator &i ) : CONTAINER_IMPL::iterator(i) {}
 		inline iterator() {}
-		virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
+		virtual shared_ptr<typename ContainerInterface<VALUE_INTERFACE>::iterator_interface> Clone() const
 		{
 			shared_ptr<iterator> ni( new iterator );
 			*ni = *this;
@@ -467,7 +468,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTE
     	{
     		return false; // no, SimpleAssociativeContainers are not ordered
     	}
-        SimpleAssociativeContainer<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL> *owner;
+        SimpleAssociativeContainer<VALUE_INTERFACE, CONTAINER_IMPL> *owner;
 	};
 
 	virtual void insert( const VALUE_INTERFACE &gx )
@@ -481,7 +482,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTE
 		typename CONTAINER_IMPL::value_type sx(gx);
 		CONTAINER_IMPL::insert( sx );
 	}
-    using ContainerCommon<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::erase;
+    using ContainerCommon<VALUE_INTERFACE, CONTAINER_IMPL>::erase;
 	virtual int erase( const VALUE_INTERFACE &gx )
 	{
 		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(gx) );
@@ -501,11 +502,11 @@ struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTE
     	my_end.owner = this;
     	return my_end;
     }
-    SimpleAssociativeContainer( const ContainerInterface<SUB_BASE, VALUE_INTERFACE> &cns )
+    SimpleAssociativeContainer( const ContainerInterface<VALUE_INTERFACE> &cns )
 	{
 		// TODO support const_interator properly and get rid of this const_cast
-    	ContainerInterface<SUB_BASE, VALUE_INTERFACE> *ns = const_cast< ContainerInterface<SUB_BASE, VALUE_INTERFACE> * >( &cns );
-		for( typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator i=ns->begin();
+    	ContainerInterface<VALUE_INTERFACE> *ns = const_cast< ContainerInterface<VALUE_INTERFACE> * >( &cns );
+		for( typename ContainerInterface<VALUE_INTERFACE>::iterator i=ns->begin();
 		     i != ns->end();
 		     ++i )
 		{
@@ -520,10 +521,10 @@ struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTE
 	template<typename L, typename R>
 	inline SimpleAssociativeContainer( const pair<L, R> &p )
 	{
-		*this = SimpleAssociativeContainer<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>( p.first );
-		SimpleAssociativeContainer<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL> t( p.second );
+		*this = SimpleAssociativeContainer<VALUE_INTERFACE, CONTAINER_IMPL>( p.first );
+		SimpleAssociativeContainer<VALUE_INTERFACE, CONTAINER_IMPL> t( p.second );
 
-		for( typename SimpleAssociativeContainer<SUB_BASE, VALUE_INTERFACE, CONTAINER_IMPL>::iterator i=t.begin();
+		for( typename SimpleAssociativeContainer<VALUE_INTERFACE, CONTAINER_IMPL>::iterator i=t.begin();
 		     i != t.end();
 		     ++i )
 		{
@@ -543,8 +544,8 @@ struct SimpleAssociativeContainer : virtual ContainerCommon<SUB_BASE, VALUE_INTE
 // ContainerInterface::iterator be used generically even when objects are
 // not in containers.
 //
-template<class SUB_BASE, typename VALUE_INTERFACE>
-struct PointIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface
+template<typename VALUE_INTERFACE>
+struct PointIterator : public ContainerInterface<VALUE_INTERFACE>::iterator_interface
 {
     VALUE_INTERFACE * element;
 
@@ -564,7 +565,7 @@ struct PointIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::ite
         ASSERT(i); // We don't allow nullptr as input because it means end-of-range
     }
 
-	virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
+	virtual shared_ptr<typename ContainerInterface<VALUE_INTERFACE>::iterator_interface> Clone() const
 	{
 		shared_ptr<PointIterator> ni( new PointIterator(*this) );
 		return ni;
@@ -588,7 +589,7 @@ struct PointIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::ite
 		return element;
 	}
 
-	virtual bool operator==( const typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface &ib ) const
+	virtual bool operator==( const typename ContainerInterface<VALUE_INTERFACE>::iterator_interface &ib ) const
 	{
 		const PointIterator *pi = dynamic_cast<const PointIterator *>(&ib);
 		ASSERT(pi)("Comparing point iterator with something else ")(ib);
@@ -606,8 +607,8 @@ struct PointIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::ite
 	}
 };
 
-template<class SUB_BASE, typename VALUE_INTERFACE>
-struct CountingIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface
+template<typename VALUE_INTERFACE>
+struct CountingIterator : public ContainerInterface<VALUE_INTERFACE>::iterator_interface
 {
     int element;
 
@@ -621,7 +622,7 @@ struct CountingIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::
     {
     }
 
-	virtual shared_ptr<typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface> Clone() const
+	virtual shared_ptr<typename ContainerInterface<VALUE_INTERFACE>::iterator_interface> Clone() const
 	{
 		shared_ptr<CountingIterator> ni( new CountingIterator(*this) );
 		return ni;
@@ -649,7 +650,7 @@ struct CountingIterator : public ContainerInterface<SUB_BASE, VALUE_INTERFACE>::
 		ASSERTFAIL("Cannot dereference CountingIterator, use GetCount instead");
 	}
 
-	virtual bool operator==( const typename ContainerInterface<SUB_BASE, VALUE_INTERFACE>::iterator_interface &ib ) const
+	virtual bool operator==( const typename ContainerInterface<VALUE_INTERFACE>::iterator_interface &ib ) const
 	{
 		const CountingIterator *pi = dynamic_cast<const CountingIterator *>(&ib);
 		ASSERT(pi)("Comparing counting iterator with something else ")( ib );

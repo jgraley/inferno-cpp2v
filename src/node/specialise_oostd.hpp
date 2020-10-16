@@ -2,9 +2,8 @@
 #define SPECIALISE_OOSTD_HPP
 
 #include "common/common.hpp"
-#include "common/shared_ptr.hpp"
-#include "common/containers.hpp"
-#include "itemise.hpp"
+#include "shared_ptr.hpp"
+#include "containers.hpp"
 #include <deque>
 #include <list>
 #include <set>
@@ -25,17 +24,17 @@
 struct Node;
 
 // TODO optimise SharedPtr, it seems to be somewhat slower than shared_ptr!!!
-typedef OOStd::SharedPtrInterface<Itemiser::Element, Node> TreePtrInterface;
+typedef OOStd::SharedPtrInterface<Node> TreePtrInterface;
 
 template<typename VALUE_TYPE>
-class TreePtr : public OOStd::SharedPtr<VALUE_TYPE, Itemiser::Element, Node>
+class TreePtr : public OOStd::SharedPtr<VALUE_TYPE, Node>
 {
-    typedef OOStd::SharedPtr<VALUE_TYPE, Itemiser::Element, Node> SPType; // just to save typing!
+    typedef OOStd::SharedPtr<VALUE_TYPE, Node> SPType; // just to save typing!
 public:
 	inline TreePtr() : SPType() {}
 	inline TreePtr( VALUE_TYPE *o ) : SPType(o) {}
 	inline TreePtr( const TreePtrInterface &g ) : SPType(g) {}
-    inline operator TreePtr<Node>() const { return SPType::operator OOStd::SharedPtr<Node, Itemiser::Element, Node>(); }
+    inline operator TreePtr<Node>() const { return SPType::operator OOStd::SharedPtr<Node, Node>(); }
 	inline TreePtr( const SPType &g ) : SPType(g) {}
 	template< typename OTHER >
 	inline TreePtr( const shared_ptr<OTHER> &o ) : SPType(o) {}
@@ -45,7 +44,7 @@ public:
 	{
 		return SPType::DynamicCast(g);
 	}
-	virtual OOStd::SharedPtr<Node, Itemiser::Element, Node> MakeValueArchitype() const
+	virtual OOStd::SharedPtr<Node, Node> MakeValueArchitype() const
     {
         return new VALUE_TYPE; // means VALUE_TYPE must be constructable
     }
@@ -74,18 +73,18 @@ private:
 #endif
 
 // Inferno tree containers
-typedef OOStd::ContainerInterface<Itemiser::Element, TreePtrInterface> ContainerInterface;
-typedef OOStd::PointIterator<Itemiser::Element, TreePtrInterface> PointIterator;
-typedef OOStd::CountingIterator<Itemiser::Element, TreePtrInterface> CountingIterator;
-struct SequenceInterface : virtual OOStd::SequenceInterface<Itemiser::Element, TreePtrInterface>
+typedef OOStd::ContainerInterface<TreePtrInterface> ContainerInterface;
+typedef OOStd::PointIterator<TreePtrInterface> PointIterator;
+typedef OOStd::CountingIterator<TreePtrInterface> CountingIterator;
+struct SequenceInterface : virtual OOStd::SequenceInterface<TreePtrInterface>
 {
 };
-struct CollectionInterface : virtual COLLECTION_INTERFACE_BASE<Itemiser::Element, TreePtrInterface>
+struct CollectionInterface : virtual COLLECTION_INTERFACE_BASE<TreePtrInterface>
 {
 };
 
 template<typename VALUE_TYPE>
-struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > >,
+struct Sequence : virtual OOStd::Sequence< TreePtrInterface, SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > >,
                   virtual SequenceInterface
 {
 	typedef SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > Impl;
@@ -93,20 +92,20 @@ struct Sequence : virtual OOStd::Sequence< Itemiser::Element, TreePtrInterface, 
 	inline Sequence() {}
 	template<typename L, typename R>
 	inline Sequence( const pair<L, R> &p ) :
-		OOStd::Sequence< Itemiser::Element, TreePtrInterface, Impl >( p ) {}
+		OOStd::Sequence< TreePtrInterface, Impl >( p ) {}
 	template< typename OTHER >
 	inline Sequence( const TreePtr<OTHER> &v ) :
-		OOStd::Sequence< Itemiser::Element, TreePtrInterface, Impl >( v ) {}
+		OOStd::Sequence< TreePtrInterface, Impl >( v ) {}
     Sequence& operator=( std::initializer_list< TreePtr<VALUE_TYPE> > ilv )
     {
-        (void)OOStd::Sequence< Itemiser::Element, TreePtrInterface, Impl >::operator=(ilv);
+        (void)OOStd::Sequence< TreePtrInterface, Impl >::operator=(ilv);
         return *this;
     }
 };
 
 
 template<typename VALUE_TYPE> 
-struct Collection : virtual COLLECTION_BASE< Itemiser::Element, TreePtrInterface, COLLECTION_IMPL< TreePtr<VALUE_TYPE> > >,
+struct Collection : virtual COLLECTION_BASE< TreePtrInterface, COLLECTION_IMPL< TreePtr<VALUE_TYPE> > >,
                     virtual CollectionInterface
 {
  	typedef COLLECTION_IMPL< TreePtr<VALUE_TYPE> > Impl;
@@ -114,10 +113,10 @@ struct Collection : virtual COLLECTION_BASE< Itemiser::Element, TreePtrInterface
  	inline Collection<VALUE_TYPE>() {}
 	template<typename L, typename R>
 	inline Collection( const pair<L, R> &p ) :
-		COLLECTION_BASE< Itemiser::Element, TreePtrInterface, Impl >( p ) {}
+		COLLECTION_BASE< TreePtrInterface, Impl >( p ) {}
 	template< typename OTHER >
 	inline Collection( const TreePtr<OTHER> &v ) :
-		COLLECTION_BASE< Itemiser::Element, TreePtrInterface, Impl >( v ) {}
+		COLLECTION_BASE< TreePtrInterface, Impl >( v ) {}
 };
 
 

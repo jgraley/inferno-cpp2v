@@ -2,7 +2,6 @@
 #define NODE_HPP
 
 #include "common/common.hpp"
-#include "common/shared_ptr.hpp"
 #include "specialise_oostd.hpp"
 #include "itemise.hpp"
 #include "type_info.hpp"
