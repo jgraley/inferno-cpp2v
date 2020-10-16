@@ -12,6 +12,13 @@
 #include "itemise.hpp"
 #include "shared_ptr.hpp"
 
+#include <list>
+#include <set>
+#include <iterator>
+
+#define ASSOCIATIVE_IMPL multiset
+#define SEQUENCE_IMPL list
+
 /// OOStd namespace contains wrappers for STL and Boost features adding run-time polymorphism
 namespace OOStd {
 
@@ -145,7 +152,7 @@ public:
 		    if( pib )
 		        return (string)(Traceable::CPPFilt( typeid( *pib ).name() ));
 		    else 
-		        return (string)("no-impl");
+		        return (string)("no-Impl");
 		}
 	private:
 		void EnsureUnique()
@@ -182,7 +189,6 @@ public:
 
 struct SequenceInterface : virtual ContainerInterface
 {
-
     virtual void push_back( const SharedPtrInterface &gx ) = 0;
 };
 
@@ -196,49 +202,51 @@ struct SimpleAssociativeContainerInterface : virtual ContainerInterface
 //
 // Abstract template for containers that will be use any STL container as
 // the actual implementation.
-// Params as for ContainerInterface except we now have to fill in CONTAINER_IMPL
+// Params as for ContainerInterface except we now have to fill in Impl
 // as the stl container class eg std::list<blah>
 //
 template<class CONTAINER_IMPL>
 struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
 {
+    typedef CONTAINER_IMPL Impl;
+    
     // C++11 fix
     ContainerCommon& operator=(const ContainerCommon& other)
     {
-        (void)CONTAINER_IMPL::operator=(other);
+        (void)Impl::operator=(other);
         return *this;
     }
     
-	struct iterator : public CONTAINER_IMPL::iterator,
+	struct iterator : public Impl::iterator,
 	                  public ContainerInterface::iterator_interface
 	{
 		virtual iterator &operator++()
 		{
-			CONTAINER_IMPL::iterator::operator++();
+			Impl::iterator::operator++();
 		    return *this;
 		}
 
 		virtual iterator &operator--()
 		{
-			CONTAINER_IMPL::iterator::operator--();
+			Impl::iterator::operator--();
 		    return *this;
 		}
 
-		virtual const typename CONTAINER_IMPL::value_type &operator*() const
+		virtual const typename Impl::value_type &operator*() const
 		{
-			return CONTAINER_IMPL::iterator::operator*();
+			return Impl::iterator::operator*();
 		}
 
-		virtual const typename CONTAINER_IMPL::value_type *operator->() const
+		virtual const typename Impl::value_type *operator->() const
 		{
-			return CONTAINER_IMPL::iterator::operator->();
+			return Impl::iterator::operator->();
 		}
 
 		virtual bool operator==( const typename ContainerInterface::iterator_interface &ib ) const
 		{
-		    const typename CONTAINER_IMPL::iterator *pi = dynamic_cast<const typename CONTAINER_IMPL::iterator *>(&ib);
+		    const typename Impl::iterator *pi = dynamic_cast<const typename Impl::iterator *>(&ib);
 		    ASSERT(pi)("Comparing iterators of different type");
-			return *(const typename CONTAINER_IMPL::iterator *)this == *pi;
+			return *(const typename Impl::iterator *)this == *pi;
 		}
 	};
 
@@ -252,23 +260,23 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
     {
         auto cit = dynamic_cast<const iterator *>( &it );
         ASSERT( cit ); // if this fails, you passed erase() the wrong kind of iterator
-        CONTAINER_IMPL::erase( *(typename CONTAINER_IMPL::iterator *)cit );    
+        Impl::erase( *(typename Impl::iterator *)cit );    
     }
     virtual bool empty() 
     {
-        return CONTAINER_IMPL::empty();
+        return Impl::empty();
     }
     virtual int size() const
     {
-        return CONTAINER_IMPL::size();
+        return Impl::size();
     }
     virtual void clear()
     {
-    	return CONTAINER_IMPL::clear();
+    	return Impl::clear();
     }
 	virtual operator string() const
 	{
-        return Traceable::CPPFilt( typeid( typename CONTAINER_IMPL::value_type ).name() );
+        return Traceable::CPPFilt( typeid( typename Impl::value_type ).name() );
 	}
 };
 
@@ -277,29 +285,32 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
 // Template for containers that use ordered STL containers as implementation
 // (basically vector, deque etc). Instantiate as per ContainerCommon.
 //
-template<class CONTAINER_IMPL>
-struct Sequence : virtual ContainerCommon<CONTAINER_IMPL>, virtual SequenceInterface
+template<class VALUE_TYPE>
+struct Sequence : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > >, 
+                  virtual SequenceInterface
 {
+    typedef SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > Impl;
+    
     // C++11 fix
     Sequence& operator=(const Sequence& other)
     {
-        (void)ContainerCommon<CONTAINER_IMPL>::operator=(other);
+        (void)ContainerCommon<Impl>::operator=(other);
         return *this;
     }
 
-    using typename CONTAINER_IMPL::insert; // due to silly C++ rule where different overloads hide each other
-    inline Sequence<CONTAINER_IMPL>() {}
-	struct iterator : public ContainerCommon<CONTAINER_IMPL>::iterator
+    using typename Impl::insert; // due to silly C++ rule where different overloads hide each other
+    inline Sequence<VALUE_TYPE>() {}
+	struct iterator : public ContainerCommon<Impl>::iterator
     {
-		inline iterator( typename CONTAINER_IMPL::iterator &i ) : CONTAINER_IMPL::iterator(i) {}
+		inline iterator( typename Impl::iterator &i ) : Impl::iterator(i) {}
 		inline iterator() {}
-		virtual typename CONTAINER_IMPL::value_type &operator*() const
+		virtual typename Impl::value_type &operator*() const
 		{
-			return CONTAINER_IMPL::iterator::operator*();
+			return Impl::iterator::operator*();
 		}
-		virtual typename CONTAINER_IMPL::value_type *operator->() const
+		virtual typename Impl::value_type *operator->() const
 		{
-			return CONTAINER_IMPL::iterator::operator->();
+			return Impl::iterator::operator->();
 		}
 		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
 		{
@@ -311,8 +322,8 @@ struct Sequence : virtual ContainerCommon<CONTAINER_IMPL>, virtual SequenceInter
 		{
 		    // JSG Overwrite() just writes through the pointer got from dereferencing the iterator,
 		    // because in Sequences (ordererd containers) elements may be modified.
-    		typename CONTAINER_IMPL::value_type x( CONTAINER_IMPL::value_type::InferredDynamicCast(*v) );
-		    CONTAINER_IMPL::iterator::operator*() = x;
+    		typename Impl::value_type x( Impl::value_type::InferredDynamicCast(*v) );
+		    Impl::iterator::operator*() = x;
 		}
     	virtual const bool IsOrdered() const
     	{
@@ -325,13 +336,13 @@ struct Sequence : virtual ContainerCommon<CONTAINER_IMPL>, virtual SequenceInter
         // Like multiset, we do allow more than one copy of the same element
 		push_back( gx );
 	}
-    using ContainerCommon<CONTAINER_IMPL>::erase;
+    using ContainerCommon<Impl>::erase;
     virtual int erase( const SharedPtrInterface &gx ) // Simulating the SimpleAssociatedContaner API 
     {
         // Like multiset, we erase all matching elemnts. Doing this though the API, bearing in 
         // mind validity rules post-erase, is horrible.
-        typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(gx) );
-        typename CONTAINER_IMPL::iterator it;
+        typename Impl::value_type sx( Impl::value_type::InferredDynamicCast(gx) );
+        typename Impl::iterator it;
         int count = 0;
         do 
         {
@@ -339,7 +350,7 @@ struct Sequence : virtual ContainerCommon<CONTAINER_IMPL>, virtual SequenceInter
             {
                 if( *it==sx )
                 {
-                    CONTAINER_IMPL::erase(it);
+                    Impl::erase(it);
                     count++;
                     break;
                 }
@@ -350,14 +361,14 @@ struct Sequence : virtual ContainerCommon<CONTAINER_IMPL>, virtual SequenceInter
     }
 	virtual void push_back( const SharedPtrInterface &gx )
 	{
-		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(gx) );
-		CONTAINER_IMPL::push_back( sx );
+		typename Impl::value_type sx( Impl::value_type::InferredDynamicCast(gx) );
+		Impl::push_back( sx );
 	}
 	template<typename OTHER>
 	inline void push_back( const OTHER &gx )
 	{
-		typename CONTAINER_IMPL::value_type sx(gx);
-		CONTAINER_IMPL::push_back( sx );
+		typename Impl::value_type sx(gx);
+		Impl::push_back( sx );
 	}
 
 	// Covariant style only works with refs and pointers, so force begin/end to return refs safely
@@ -372,12 +383,12 @@ struct Sequence : virtual ContainerCommon<CONTAINER_IMPL>, virtual SequenceInter
 
     virtual const iterator &begin()
     {
-    	my_begin.CONTAINER_IMPL::iterator::operator=( CONTAINER_IMPL::begin() );
+    	my_begin.Impl::iterator::operator=( Impl::begin() );
     	return my_begin;
     }
     virtual const iterator &end()
     {
-    	my_end.CONTAINER_IMPL::iterator::operator=( CONTAINER_IMPL::end() );
+    	my_end.Impl::iterator::operator=( Impl::end() );
     	return my_end;
     }
 	Sequence( const SequenceInterface &cns )
@@ -388,37 +399,37 @@ struct Sequence : virtual ContainerCommon<CONTAINER_IMPL>, virtual SequenceInter
 		     i != ns->end();
 		     ++i )
 		{
-            CONTAINER_IMPL::push_back( (typename CONTAINER_IMPL::value_type)*i );
+            Impl::push_back( (typename Impl::value_type)*i );
 		}
 	}
 	Sequence( const SharedPtrInterface &nx )
 	{
-		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(nx) );
-		CONTAINER_IMPL::push_back( sx );
+		typename Impl::value_type sx( Impl::value_type::InferredDynamicCast(nx) );
+		Impl::push_back( sx );
 	}
 	template<typename L, typename R>
 	inline Sequence( const pair<L, R> &p )
 	{
-		*this = Sequence<CONTAINER_IMPL>( p.first );
-		Sequence<CONTAINER_IMPL> t( p.second );
+		*this = Sequence<VALUE_TYPE>( p.first );
+		Sequence<VALUE_TYPE> t( p.second );
 
-		for( typename Sequence<CONTAINER_IMPL>::iterator i=t.begin();
+		for( typename Sequence<VALUE_TYPE>::iterator i=t.begin();
 		     i != t.end();
 		     ++i )
 		{
-            CONTAINER_IMPL::push_back( *i );
+            Impl::push_back( *i );
 		}
 	}
-    Sequence& operator=( std::initializer_list<typename CONTAINER_IMPL::value_type> ilv )
+    Sequence& operator=( std::initializer_list<typename Impl::value_type> ilv )
     {
-        CONTAINER_IMPL::clear();
-		for( const typename CONTAINER_IMPL::value_type &v : ilv )
+        Impl::clear();
+		for( const typename Impl::value_type &v : ilv )
 		{
-            CONTAINER_IMPL::push_back( v );
+            Impl::push_back( v );
 		}        
         return *this;
     }
-	inline Sequence( const typename CONTAINER_IMPL::value_type &v )
+	inline Sequence( const typename Impl::value_type &v )
 	{
 		push_back( v );
 	}
@@ -429,13 +440,16 @@ struct Sequence : virtual ContainerCommon<CONTAINER_IMPL>, virtual SequenceInter
 // Template for containers that use unordered STL containers as implementation
 // (basically associative containers). Instantiate as per ContainerCommon.
 //
-template<class CONTAINER_IMPL>
-struct SimpleAssociativeContainer : virtual ContainerCommon<CONTAINER_IMPL>, virtual SimpleAssociativeContainerInterface
+template<class VALUE_TYPE>
+struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< TreePtr<VALUE_TYPE> > >, 
+                                    virtual SimpleAssociativeContainerInterface
 {
-    inline SimpleAssociativeContainer<CONTAINER_IMPL>() {}
-	struct iterator : public ContainerCommon<CONTAINER_IMPL>::iterator
+    typedef ASSOCIATIVE_IMPL< TreePtr<VALUE_TYPE> > Impl;
+    
+    inline SimpleAssociativeContainer<VALUE_TYPE>() {}
+	struct iterator : public ContainerCommon<Impl>::iterator
     {
-		inline iterator( typename CONTAINER_IMPL::iterator &i ) : CONTAINER_IMPL::iterator(i) {}
+		inline iterator( typename Impl::iterator &i ) : Impl::iterator(i) {}
 		inline iterator() {}
 		virtual shared_ptr<typename ContainerInterface::iterator_interface> Clone() const
 		{
@@ -448,45 +462,45 @@ struct SimpleAssociativeContainer : virtual ContainerCommon<CONTAINER_IMPL>, vir
 		    // SimpleAssociativeContainers (unordered containers) do not allow elements to be modified
 		    // because the internal data structure depends on element values. So we 
 		    // erase the old element and insert the new one; thus, Overwrite() should not be assumed O(1)
-    		typename CONTAINER_IMPL::value_type s( CONTAINER_IMPL::value_type::InferredDynamicCast(*v) );
-    		((CONTAINER_IMPL *)owner)->erase( *this );
-		    *(typename CONTAINER_IMPL::iterator *)this = ((CONTAINER_IMPL *)owner)->insert( s ); // become an iterator for the newly inserted element
+    		typename Impl::value_type s( Impl::value_type::InferredDynamicCast(*v) );
+    		((Impl *)owner)->erase( *this );
+		    *(typename Impl::iterator *)this = ((Impl *)owner)->insert( s ); // become an iterator for the newly inserted element
  		}
     	virtual const bool IsOrdered() const
     	{
     		return false; // no, SimpleAssociativeContainers are not ordered
     	}
-        SimpleAssociativeContainer<CONTAINER_IMPL> *owner;
+        SimpleAssociativeContainer<VALUE_TYPE> *owner;
 	};
 
 	virtual void insert( const SharedPtrInterface &gx )
 	{
-		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(gx) );
-		CONTAINER_IMPL::insert( sx );
+		typename Impl::value_type sx( Impl::value_type::InferredDynamicCast(gx) );
+		Impl::insert( sx );
 	}
 	template<typename OTHER>
 	inline void insert( const OTHER &gx )
 	{
-		typename CONTAINER_IMPL::value_type sx(gx);
-		CONTAINER_IMPL::insert( sx );
+		typename Impl::value_type sx(gx);
+		Impl::insert( sx );
 	}
-    using ContainerCommon<CONTAINER_IMPL>::erase;
+    using ContainerCommon<Impl>::erase;
 	virtual int erase( const SharedPtrInterface &gx )
 	{
-		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(gx) );
-		return CONTAINER_IMPL::erase( sx );
+		typename Impl::value_type sx( Impl::value_type::InferredDynamicCast(gx) );
+		return Impl::erase( sx );
 	}
 
 	iterator my_begin, my_end;
     virtual const iterator &begin()
     {
-    	my_begin.CONTAINER_IMPL::iterator::operator=( CONTAINER_IMPL::begin() );
+    	my_begin.Impl::iterator::operator=( Impl::begin() );
     	my_begin.owner = this;
     	return my_begin;
     }
     virtual const iterator &end()
     {
-    	my_end.CONTAINER_IMPL::iterator::operator=( CONTAINER_IMPL::end() );
+    	my_end.Impl::iterator::operator=( Impl::end() );
     	my_end.owner = this;
     	return my_end;
     }
@@ -498,28 +512,28 @@ struct SimpleAssociativeContainer : virtual ContainerCommon<CONTAINER_IMPL>, vir
 		     i != ns->end();
 		     ++i )
 		{
-            CONTAINER_IMPL::insert( *i );
+            Impl::insert( *i );
 		}
 	}
     SimpleAssociativeContainer( const SharedPtrInterface &nx )
 	{
-		typename CONTAINER_IMPL::value_type sx( CONTAINER_IMPL::value_type::InferredDynamicCast(nx) );
-        CONTAINER_IMPL::insert( sx );
+		typename Impl::value_type sx( Impl::value_type::InferredDynamicCast(nx) );
+        Impl::insert( sx );
 	}
 	template<typename L, typename R>
 	inline SimpleAssociativeContainer( const pair<L, R> &p )
 	{
-		*this = SimpleAssociativeContainer<CONTAINER_IMPL>( p.first );
-		SimpleAssociativeContainer<CONTAINER_IMPL> t( p.second );
+		*this = SimpleAssociativeContainer<VALUE_TYPE>( p.first );
+		SimpleAssociativeContainer<VALUE_TYPE> t( p.second );
 
-		for( typename SimpleAssociativeContainer<CONTAINER_IMPL>::iterator i=t.begin();
+		for( typename SimpleAssociativeContainer<VALUE_TYPE>::iterator i=t.begin();
 		     i != t.end();
 		     ++i )
 		{
-            CONTAINER_IMPL::insert( *i );
+            Impl::insert( *i );
 		}
 	}
-	inline SimpleAssociativeContainer( const typename CONTAINER_IMPL::value_type &v )
+	inline SimpleAssociativeContainer( const typename Impl::value_type &v )
 	{
 		insert( v );
 	}

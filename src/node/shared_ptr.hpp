@@ -215,4 +215,34 @@ inline bool operator!=( const SharedPtr<X> &x,
 
 }; // namespace
 
+// TODO optimise SharedPtr, it seems to be somewhat slower than shared_ptr!!!
+typedef OOStd::SharedPtrInterface TreePtrInterface;
+
+template<typename VALUE_TYPE>
+class TreePtr : public OOStd::SharedPtr<VALUE_TYPE>
+{
+    typedef OOStd::SharedPtr<VALUE_TYPE> SPType; // just to save typing!
+public:
+	inline TreePtr() : SPType() {}
+	inline TreePtr( VALUE_TYPE *o ) : SPType(o) {}
+	inline TreePtr( const TreePtrInterface &g ) : SPType(g) {}
+    inline operator TreePtr<Node>() const { return SPType::operator OOStd::SharedPtr<Node>(); }
+	inline TreePtr( const SPType &g ) : SPType(g) {}
+	template< typename OTHER >
+	inline TreePtr( const shared_ptr<OTHER> &o ) : SPType(o) {}
+	template< typename OTHER >
+	inline TreePtr( const TreePtr<OTHER> &o ) : SPType(o) {}
+	static inline TreePtr<VALUE_TYPE> DynamicCast( const TreePtrInterface &g )
+	{
+		return SPType::DynamicCast(g);
+	}
+	virtual OOStd::SharedPtr<Node> MakeValueArchitype() const
+    {
+        return new VALUE_TYPE; // means VALUE_TYPE must be constructable
+    }
+private:    
+};
+
+
+
 #endif /* SHARED_PTR_HPP */
