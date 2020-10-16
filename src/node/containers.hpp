@@ -422,15 +422,6 @@ struct Sequence : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > 
             Impl::push_back( *i );
 		}
 	}
-    Sequence& operator=( std::initializer_list<value_type> ilv )
-    {
-        Impl::clear();
-		for( const value_type &v : ilv )
-		{
-            Impl::push_back( v );
-		}        
-        return *this;
-    }
 	inline Sequence( const value_type &v )
 	{
 		push_back( v );
@@ -684,5 +675,59 @@ inline pair<L,R> operator,( const L &l, const R &r )
 }
 
 }; // namespace
+
+
+#define USE_LIST_FOR_COLLECTION 1
+
+// Inferno tree shared pointers
+
+
+
+#if USE_LIST_FOR_COLLECTION
+#define COLLECTION_BASE OOStd::Sequence
+#define COLLECTION_INTERFACE_BASE OOStd::SequenceInterface
+#else
+#define COLLECTION_BASE OOStd::SimpleAssociativeContainer
+#define COLLECTION_INTERFACE_BASE OOStd::SimpleAssociativeContainerInterface
+#endif
+
+// Inferno tree containers
+typedef OOStd::ContainerInterface ContainerInterface;
+typedef OOStd::PointIterator PointIterator;
+typedef OOStd::CountingIterator CountingIterator;
+struct SequenceInterface : virtual OOStd::SequenceInterface
+{
+};
+struct CollectionInterface : virtual COLLECTION_INTERFACE_BASE
+{
+};
+
+template<typename VALUE_TYPE>
+struct Sequence : virtual OOStd::Sequence< VALUE_TYPE >,
+                  virtual SequenceInterface
+{
+	inline Sequence() {}
+	template<typename L, typename R>
+	inline Sequence( const pair<L, R> &p ) :
+		OOStd::Sequence< VALUE_TYPE >( p ) {}
+	template< typename OTHER >
+	inline Sequence( const TreePtr<OTHER> &v ) :
+		OOStd::Sequence< VALUE_TYPE >( v ) {}
+};
+
+
+template<typename VALUE_TYPE> 
+struct Collection : virtual COLLECTION_BASE< VALUE_TYPE >,
+                    virtual CollectionInterface
+{
+ 	inline Collection<VALUE_TYPE>() {}
+	template<typename L, typename R>
+	inline Collection( const pair<L, R> &p ) :
+		COLLECTION_BASE< VALUE_TYPE >( p ) {}
+	template< typename OTHER >
+	inline Collection( const TreePtr<OTHER> &v ) :
+		COLLECTION_BASE< VALUE_TYPE >( v ) {}
+};
+
 
 #endif /* GENERICS_HPP */

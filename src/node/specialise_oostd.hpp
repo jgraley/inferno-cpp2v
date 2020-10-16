@@ -8,68 +8,6 @@
 #include <set>
 #include <iterator>
 
-#define USE_LIST_FOR_COLLECTION 1
-
-// Inferno tree shared pointers
-
-
-
-#if USE_LIST_FOR_COLLECTION
-#define COLLECTION_IMPL list
-#define COLLECTION_BASE OOStd::Sequence
-#define COLLECTION_INTERFACE_BASE OOStd::SequenceInterface
-#else
-#define COLLECTION_IMPL multiset
-#define COLLECTION_BASE OOStd::SimpleAssociativeContainer
-#define COLLECTION_INTERFACE_BASE OOStd::SimpleAssociativeContainerInterface
-#endif
-
-#define SEQUENCE_IMPL list
-
-// Inferno tree containers
-typedef OOStd::ContainerInterface ContainerInterface;
-typedef OOStd::PointIterator PointIterator;
-typedef OOStd::CountingIterator CountingIterator;
-struct SequenceInterface : virtual OOStd::SequenceInterface
-{
-};
-struct CollectionInterface : virtual COLLECTION_INTERFACE_BASE
-{
-};
-
-template<typename VALUE_TYPE>
-struct Sequence : virtual OOStd::Sequence< VALUE_TYPE >,
-                  virtual SequenceInterface
-{
-	inline Sequence() {}
-	template<typename L, typename R>
-	inline Sequence( const pair<L, R> &p ) :
-		OOStd::Sequence< VALUE_TYPE >( p ) {}
-	template< typename OTHER >
-	inline Sequence( const TreePtr<OTHER> &v ) :
-		OOStd::Sequence< VALUE_TYPE >( v ) {}
-    Sequence& operator=( std::initializer_list< TreePtr<VALUE_TYPE> > ilv )
-    {
-        (void)OOStd::Sequence< VALUE_TYPE >::operator=(ilv);
-        return *this;
-    }
-};
-
-
-template<typename VALUE_TYPE> 
-struct Collection : virtual COLLECTION_BASE< VALUE_TYPE >,
-                    virtual CollectionInterface
-{
- 	inline Collection<VALUE_TYPE>() {}
-	template<typename L, typename R>
-	inline Collection( const pair<L, R> &p ) :
-		COLLECTION_BASE< VALUE_TYPE >( p ) {}
-	template< typename OTHER >
-	inline Collection( const TreePtr<OTHER> &v ) :
-		COLLECTION_BASE< VALUE_TYPE >( v ) {}
-};
-
-
 /** Produce a container around an iterator that has already been defined.
     Iterator's constructor should produce an "end" iterator if constructed
     without parameters, otherwise a "begin" iterator. The begin constructors
