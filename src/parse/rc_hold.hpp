@@ -2,7 +2,7 @@
 #define RCHOLD_HPP
 
 #include "common/common.hpp"
-#include "node/node.hpp"
+#include "node/specialise_oostd.hpp"
 #include <inttypes.h>
 
 template<typename NODE, typename RAW>

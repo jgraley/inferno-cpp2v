@@ -6,7 +6,7 @@
 #ifndef DUPLICATE_HPP
 #define DUPLICATE_HPP
 
-#include "node/node.hpp"
+#include "node/specialise_oostd.hpp"
 #include "common/trace.hpp"
 
 class Duplicate

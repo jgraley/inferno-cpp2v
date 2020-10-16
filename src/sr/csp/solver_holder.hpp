@@ -4,7 +4,7 @@
 #include "constraint.hpp"
 #include "solver.hpp"
 
-#include "node/node.hpp"
+#include "node/specialise_oostd.hpp"
 #include "common/common.hpp"
 
 namespace CSP

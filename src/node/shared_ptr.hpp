@@ -11,6 +11,7 @@
 #include "common/common.hpp"
 #include "common/magic.hpp"
 #include "itemise.hpp"
+#include "node.hpp"
 
 // Covariant nullptr pointer bug
 //
@@ -22,11 +23,10 @@
 // but I think it only applies to GCC4 (4.0.2 and 4.1).
 //
 // So I've just hacked covariant returns to not be covariant whenever I get a problem (just returns same as
-// base class, is this "isovariant"?)
+// base class, is this "isovariant"? No, "invariant")
 //
 
 // Shared pointer wrapper with OO support
-
 namespace OOStd {
 
 //    
@@ -37,44 +37,36 @@ namespace OOStd {
 // - Tracing support
 // - Can obtain an architype object for the type of an object
 //
-// Additionally, template parameters SUB_BASE and VALUE_INTERFACE may be supplied 
-// (presumbaby by a wrapper class). These work as follows:
-// - SUB_BASE is a parent class of the SharedPtr, allowing
-//   containers of different types to be treated polymorphically.
-// - VALUE_INTERFACE is a parent class for the pointed-to object, allowing 
-//   contained objects to be handled polymorphically.
-//
-template<typename VALUE_TYPE, typename VALUE_INTERFACE=VALUE_TYPE>
+template<typename VALUE_TYPE>
 struct SharedPtr;
 
 // An interface for our SharedPtr object. This interface works regardless of pointed-to
 // type; it also masquerades as a SharedPtr to the VALUE_INTERFACE type, which should be the
 // base class of the pointed-to things.
-template<typename VALUE_INTERFACE>
 struct SharedPtrInterface : virtual Itemiser::Element, public Traceable
 {
     // Convert to and from shared_ptr<VALUE_INTERFACE> and SharedPtr<VALUE_INTERFACE>
-	virtual operator shared_ptr<VALUE_INTERFACE>() const = 0;
-	virtual operator SharedPtr<VALUE_INTERFACE, VALUE_INTERFACE>() const = 0;
+	virtual operator shared_ptr<Node>() const = 0;
+	virtual operator SharedPtr<Node>() const = 0;
 
     virtual operator bool() const = 0; // for testing against nullptr
-    virtual VALUE_INTERFACE *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
-    virtual VALUE_INTERFACE &operator *() const = 0; 
+    virtual Node *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
+    virtual Node &operator *() const = 0; 
     virtual SharedPtrInterface &operator=( const SharedPtrInterface &o )
     {
     	(void)Itemiser::Element::operator=( o ); 
     	(void)Traceable::operator=( o );
     	return *this;
     }
-    virtual SharedPtr<VALUE_INTERFACE, VALUE_INTERFACE> MakeValueArchitype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone 
+    virtual SharedPtr<Node> MakeValueArchitype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
     virtual string GetTrace() const
     {
         return string("&") + operator*().GetTrace();
     }  
 };
 
-template<typename VALUE_TYPE, typename VALUE_INTERFACE>
-struct SharedPtr : virtual SharedPtrInterface<VALUE_INTERFACE>, shared_ptr<VALUE_TYPE>
+template<typename VALUE_TYPE>
+struct SharedPtr : virtual SharedPtrInterface, shared_ptr<VALUE_TYPE>
 {
     inline SharedPtr() {}
 
@@ -90,21 +82,21 @@ struct SharedPtr : virtual SharedPtrInterface<VALUE_INTERFACE>, shared_ptr<VALUE
     }
 
     template< typename OTHER >
-    inline SharedPtr( const SharedPtr<OTHER, VALUE_INTERFACE> &o ) :
+    inline SharedPtr( const SharedPtr<OTHER> &o ) :
         shared_ptr<VALUE_TYPE>( (shared_ptr<OTHER>)(o) )
     {
     }
 
-    virtual operator shared_ptr<VALUE_INTERFACE>() const
+    virtual operator shared_ptr<Node>() const
     {
         const shared_ptr<VALUE_TYPE> p = (const shared_ptr<VALUE_TYPE>)*this;
         return p;
     }
 
-	virtual operator SharedPtr<VALUE_INTERFACE, VALUE_INTERFACE>() const
+	virtual operator SharedPtr<Node>() const
 	{
         const shared_ptr<VALUE_TYPE> p1 = *(const shared_ptr<VALUE_TYPE> *)this;
-        return SharedPtr<VALUE_INTERFACE, VALUE_INTERFACE>( p1 );
+        return SharedPtr<Node>( p1 );
 	}
 
     virtual VALUE_TYPE *get() const 
@@ -118,11 +110,11 @@ struct SharedPtr : virtual SharedPtrInterface<VALUE_INTERFACE>, shared_ptr<VALUE
     	return shared_ptr<VALUE_TYPE>::operator *();
     }
 
-    virtual SharedPtr &operator=( shared_ptr<VALUE_INTERFACE> n )
+    virtual SharedPtr &operator=( shared_ptr<Node> n )
     {   
         if( n )
         {
-            shared_ptr<VALUE_TYPE> p = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(n));
+            shared_ptr<VALUE_TYPE> p = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<Node>(n));
             ASSERT( p )("OOStd inferred dynamic cast has failed: from ")(*n)
 			           (" to type ")(Traceable::CPPFilt( typeid( VALUE_TYPE ).name() ))("\n");
          	(void)shared_ptr<VALUE_TYPE>::operator=( p );
@@ -135,15 +127,15 @@ struct SharedPtr : virtual SharedPtrInterface<VALUE_INTERFACE>, shared_ptr<VALUE
     }
 
     template< typename OTHER >
-    inline SharedPtr &operator=( SharedPtr<OTHER, VALUE_INTERFACE> n )
+    inline SharedPtr &operator=( SharedPtr<OTHER> n )
     {
     	(void)operator=( shared_ptr<OTHER>(n) );
     	return *this;
     }
 
-    virtual SharedPtr &operator=( const SharedPtrInterface<VALUE_INTERFACE> &n )
+    virtual SharedPtr &operator=( const SharedPtrInterface &n )
     {
-    	(void)operator=( shared_ptr<VALUE_INTERFACE>(n) );
+    	(void)operator=( shared_ptr<Node>(n) );
     	return *this;
     }
 
@@ -152,37 +144,37 @@ struct SharedPtr : virtual SharedPtrInterface<VALUE_INTERFACE>, shared_ptr<VALUE
     	return !!*(const shared_ptr<VALUE_TYPE> *)this;
     }
 
-	static inline SharedPtr<VALUE_TYPE, VALUE_INTERFACE>
-	    DynamicCast( const SharedPtrInterface<VALUE_INTERFACE> &g )
+	static inline SharedPtr<VALUE_TYPE>
+	    DynamicCast( const SharedPtrInterface &g )
 	{
 		if( g )
 		{
-			shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(g));
-			return SharedPtr<VALUE_TYPE, VALUE_INTERFACE>(v);
+			shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<Node>(g));
+			return SharedPtr<VALUE_TYPE>(v);
 		}
 		else
 		{
-			return SharedPtr<VALUE_TYPE, VALUE_INTERFACE>();
+			return SharedPtr<VALUE_TYPE>();
 		}
 	}
 	// For when OOStd itself needs to dyncast, as opposed to the user asking for it.
-	static inline SharedPtr<VALUE_TYPE, VALUE_INTERFACE>
-	    InferredDynamicCast( const SharedPtrInterface<VALUE_INTERFACE> &g )
+	static inline SharedPtr<VALUE_TYPE>
+	    InferredDynamicCast( const SharedPtrInterface &g )
 	{
 		if( g )
 		{
-			shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<VALUE_INTERFACE>(g));
+			shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<Node>(g));
 			ASSERT( v )("OOStd inferred dynamic cast has failed: from ")(*g)
 			           (" to type ")(Traceable::CPPFilt( typeid( VALUE_TYPE ).name() ))("\n");
-			return SharedPtr<VALUE_TYPE, VALUE_INTERFACE>(v);
+			return SharedPtr<VALUE_TYPE>(v);
 		}
 		else
 		{
 		    // Null came in, null goes out.
-			return SharedPtr<VALUE_TYPE, VALUE_INTERFACE>();
+			return SharedPtr<VALUE_TYPE>();
 		}
 	}
-	virtual SharedPtr<VALUE_INTERFACE, VALUE_INTERFACE> MakeValueArchitype() const
+	virtual SharedPtr<Node> MakeValueArchitype() const
 	{
         ASSERTFAIL("MakeValueArchitype() not implemented for this SharedPtr\n");
     }
@@ -199,25 +191,24 @@ struct SharedPtr : virtual SharedPtrInterface<VALUE_INTERFACE>, shared_ptr<VALUE
 
 // Similar signature to boost shared_ptr operator==, and we restrict the pointers
 // to having the same subbase and base target
-template< typename VALUE_INTERFACE, typename X, typename Y >
-inline bool operator==( const SharedPtr<X, VALUE_INTERFACE> &x,
-		                const SharedPtr<Y, VALUE_INTERFACE> &y)
+template< typename X, typename Y >
+inline bool operator==( const SharedPtr<X> &x,
+		                const SharedPtr<Y> &y)
 {
 	return operator==( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
 }
 
 // Similar signature to boost shared_ptr operator==, and we restrict the pointers
 // to having the same subbase and base target
-template< typename VALUE_INTERFACE >
-inline bool operator==( const SharedPtrInterface<VALUE_INTERFACE> &x,
-		                const SharedPtrInterface<VALUE_INTERFACE> &y)
+inline bool operator==( const SharedPtrInterface &x,
+		                const SharedPtrInterface &y)
 {
 	return x.get() == y.get();
 }
 
-template< typename VALUE_INTERFACE, typename X, typename Y >
-inline bool operator!=( const SharedPtr<X, VALUE_INTERFACE> &x,
-		                const SharedPtr<Y, VALUE_INTERFACE> &y)
+template< typename X, typename Y >
+inline bool operator!=( const SharedPtr<X> &x,
+		                const SharedPtr<Y> &y)
 {
 	return operator!=( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
 }

@@ -2,7 +2,6 @@
 #define NODE_HPP
 
 #include "common/common.hpp"
-#include "specialise_oostd.hpp"
 #include "itemise.hpp"
 #include "type_info.hpp"
 #include "clone.hpp"
@@ -56,20 +55,6 @@ struct Node : NodeBases
     virtual ~Node(){}  // be a virtual hierarchy
     // Node must be inherited virtually, to allow MI diamonds
     // without making Node ambiguous
-};
-
-
-template<>
-struct MakeTreePtr<Node> : TreePtr<Node>
-{
-	MakeTreePtr() : TreePtr<Node>( new Node ) {}
-	template<typename CP0>
-	MakeTreePtr(const CP0 &cp0) : TreePtr<Node>( new Node(cp0) ) {}
-	template<typename CP0, typename CP1>
-	MakeTreePtr(const CP0 &cp0, const CP1 &cp1) : TreePtr<Node>( new Node(cp0, cp1) ) {}
-	template<typename CP0, typename CP1, typename CP2>
-	MakeTreePtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : TreePtr<Node>( new Node(cp0, cp1, cp2) ) {}
-	// Add more params as needed...
 };
 
 

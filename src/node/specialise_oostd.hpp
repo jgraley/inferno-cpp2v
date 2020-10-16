@@ -21,20 +21,19 @@
 
 // Inferno tree shared pointers
 
-struct Node;
 
 // TODO optimise SharedPtr, it seems to be somewhat slower than shared_ptr!!!
-typedef OOStd::SharedPtrInterface<Node> TreePtrInterface;
+typedef OOStd::SharedPtrInterface TreePtrInterface;
 
 template<typename VALUE_TYPE>
-class TreePtr : public OOStd::SharedPtr<VALUE_TYPE, Node>
+class TreePtr : public OOStd::SharedPtr<VALUE_TYPE>
 {
-    typedef OOStd::SharedPtr<VALUE_TYPE, Node> SPType; // just to save typing!
+    typedef OOStd::SharedPtr<VALUE_TYPE> SPType; // just to save typing!
 public:
 	inline TreePtr() : SPType() {}
 	inline TreePtr( VALUE_TYPE *o ) : SPType(o) {}
 	inline TreePtr( const TreePtrInterface &g ) : SPType(g) {}
-    inline operator TreePtr<Node>() const { return SPType::operator OOStd::SharedPtr<Node, Node>(); }
+    inline operator TreePtr<Node>() const { return SPType::operator OOStd::SharedPtr<Node>(); }
 	inline TreePtr( const SPType &g ) : SPType(g) {}
 	template< typename OTHER >
 	inline TreePtr( const shared_ptr<OTHER> &o ) : SPType(o) {}
@@ -44,7 +43,7 @@ public:
 	{
 		return SPType::DynamicCast(g);
 	}
-	virtual OOStd::SharedPtr<Node, Node> MakeValueArchitype() const
+	virtual OOStd::SharedPtr<Node> MakeValueArchitype() const
     {
         return new VALUE_TYPE; // means VALUE_TYPE must be constructable
     }
@@ -73,18 +72,18 @@ private:
 #endif
 
 // Inferno tree containers
-typedef OOStd::ContainerInterface<TreePtrInterface> ContainerInterface;
-typedef OOStd::PointIterator<TreePtrInterface> PointIterator;
-typedef OOStd::CountingIterator<TreePtrInterface> CountingIterator;
-struct SequenceInterface : virtual OOStd::SequenceInterface<TreePtrInterface>
+typedef OOStd::ContainerInterface ContainerInterface;
+typedef OOStd::PointIterator PointIterator;
+typedef OOStd::CountingIterator CountingIterator;
+struct SequenceInterface : virtual OOStd::SequenceInterface
 {
 };
-struct CollectionInterface : virtual COLLECTION_INTERFACE_BASE<TreePtrInterface>
+struct CollectionInterface : virtual COLLECTION_INTERFACE_BASE
 {
 };
 
 template<typename VALUE_TYPE>
-struct Sequence : virtual OOStd::Sequence< TreePtrInterface, SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > >,
+struct Sequence : virtual OOStd::Sequence< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > >,
                   virtual SequenceInterface
 {
 	typedef SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > Impl;
@@ -92,20 +91,20 @@ struct Sequence : virtual OOStd::Sequence< TreePtrInterface, SEQUENCE_IMPL< Tree
 	inline Sequence() {}
 	template<typename L, typename R>
 	inline Sequence( const pair<L, R> &p ) :
-		OOStd::Sequence< TreePtrInterface, Impl >( p ) {}
+		OOStd::Sequence< Impl >( p ) {}
 	template< typename OTHER >
 	inline Sequence( const TreePtr<OTHER> &v ) :
-		OOStd::Sequence< TreePtrInterface, Impl >( v ) {}
+		OOStd::Sequence< Impl >( v ) {}
     Sequence& operator=( std::initializer_list< TreePtr<VALUE_TYPE> > ilv )
     {
-        (void)OOStd::Sequence< TreePtrInterface, Impl >::operator=(ilv);
+        (void)OOStd::Sequence< Impl >::operator=(ilv);
         return *this;
     }
 };
 
 
 template<typename VALUE_TYPE> 
-struct Collection : virtual COLLECTION_BASE< TreePtrInterface, COLLECTION_IMPL< TreePtr<VALUE_TYPE> > >,
+struct Collection : virtual COLLECTION_BASE< COLLECTION_IMPL< TreePtr<VALUE_TYPE> > >,
                     virtual CollectionInterface
 {
  	typedef COLLECTION_IMPL< TreePtr<VALUE_TYPE> > Impl;
@@ -113,10 +112,10 @@ struct Collection : virtual COLLECTION_BASE< TreePtrInterface, COLLECTION_IMPL< 
  	inline Collection<VALUE_TYPE>() {}
 	template<typename L, typename R>
 	inline Collection( const pair<L, R> &p ) :
-		COLLECTION_BASE< TreePtrInterface, Impl >( p ) {}
+		COLLECTION_BASE< Impl >( p ) {}
 	template< typename OTHER >
 	inline Collection( const TreePtr<OTHER> &v ) :
-		COLLECTION_BASE< TreePtrInterface, Impl >( v ) {}
+		COLLECTION_BASE< Impl >( v ) {}
 };
 
 
@@ -177,6 +176,18 @@ struct MakeTreePtr : TreePtr<VALUE_TYPE>
 	// Add more params as needed...
 };
 
+template<>
+struct MakeTreePtr<Node> : TreePtr<Node>
+{
+	MakeTreePtr() : TreePtr<Node>( new Node ) {}
+	template<typename CP0>
+	MakeTreePtr(const CP0 &cp0) : TreePtr<Node>( new Node(cp0) ) {}
+	template<typename CP0, typename CP1>
+	MakeTreePtr(const CP0 &cp0, const CP1 &cp1) : TreePtr<Node>( new Node(cp0, cp1) ) {}
+	template<typename CP0, typename CP1, typename CP2>
+	MakeTreePtr(const CP0 &cp0, const CP1 &cp1, const CP2 &cp2) : TreePtr<Node>( new Node(cp0, cp1, cp2) ) {}
+	// Add more params as needed...
+};
 
 #endif
 

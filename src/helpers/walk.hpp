@@ -1,7 +1,7 @@
 #ifndef WALK_HPP
 #define WALK_HPP
 
-#include "node/node.hpp"
+#include "node/specialise_oostd.hpp"
 #include "transformation.hpp"
 #include <deque>
 #include <list>

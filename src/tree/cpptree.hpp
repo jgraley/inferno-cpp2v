@@ -6,7 +6,7 @@
 #include "llvm/ADT/APSInt.h"
 #include "llvm/ADT/APFloat.h"
 #include <string>
-#include "node/node.hpp"
+#include "node/specialise_oostd.hpp"
 #include "clang/Parse/DeclSpec.h"
 #include "tree/type_db.hpp"
 

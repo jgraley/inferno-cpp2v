@@ -1,7 +1,7 @@
 #ifndef TRANSFORMATION_HPP
 #define TRANSFORMATION_HPP
 
-#include "node/node.hpp"
+#include "node/specialise_oostd.hpp"
 
 // TODO For in-place, use (*pcontext, *proot) rather than (context, *root). This 
 // way the caller has to decide whether the context node is the same as the root node, 

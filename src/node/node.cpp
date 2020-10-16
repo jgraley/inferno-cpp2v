@@ -4,6 +4,7 @@
  */
 
 #include "node.hpp"
+#include "specialise_oostd.hpp"
 
 struct MyNode : Node
 {

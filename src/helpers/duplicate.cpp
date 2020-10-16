@@ -1,6 +1,6 @@
 
 #include "duplicate.hpp"
-#include "node/node.hpp"
+#include "node/specialise_oostd.hpp"
 #include "common/trace.hpp"
 
 TreePtr<Node> Duplicate::DuplicateNode( TreePtr<Node> source ) 

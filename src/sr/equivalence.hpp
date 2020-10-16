@@ -2,7 +2,7 @@
 #define EQUIVALENCE_HPP
 
 #include "common/common.hpp"
-#include "node/node.hpp"
+#include "node/specialise_oostd.hpp"
 #include "helpers/transformation.hpp"
 #include "helpers/walk.hpp"
 #include "helpers/flatten.hpp"
