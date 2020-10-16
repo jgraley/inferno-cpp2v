@@ -196,31 +196,6 @@ struct SharedPtr : virtual SharedPtrInterface, shared_ptr<VALUE_TYPE>
 typedef OOStd::SharedPtrInterface TreePtrInterface;
 #define TreePtr OOStd::SharedPtr
 
-/*template<typename VALUE_TYPE>
-class TreePtr : public OOStd::SharedPtr<VALUE_TYPE>
-{
-    typedef OOStd::SharedPtr<VALUE_TYPE> SPType; // just to save typing!
-public:
-	inline TreePtr() : SPType() {}
-	inline TreePtr( VALUE_TYPE *o ) : SPType(o) {}
-	inline TreePtr( const TreePtrInterface &g ) : SPType(g) {}
-    inline operator TreePtr<Node>() const { return SPType::operator OOStd::SharedPtr<Node>(); }
-	inline TreePtr( const SPType &g ) : SPType(g) {}
-	template< typename OTHER >
-	inline TreePtr( const shared_ptr<OTHER> &o ) : SPType(o) {}
-	template< typename OTHER >
-	inline TreePtr( const TreePtr<OTHER> &o ) : SPType(o) {}
-	static inline TreePtr<VALUE_TYPE> DynamicCast( const TreePtrInterface &g )
-	{
-		return SPType::DynamicCast(g);
-	}
-	virtual OOStd::SharedPtr<Node> MakeValueArchitype() const
-    {
-        return new VALUE_TYPE; // means VALUE_TYPE must be constructable
-    }
-private:    
-};
-*/
 
 // Similar signature to boost shared_ptr operator==, and we restrict the pointers
 // to having the same subbase and base target

@@ -107,13 +107,13 @@ private:
 
 // Handy typing saver for creating objects and SharedPtrs to them.
 // MakeTreePtr<X> may be constructed in the same way as X, but will then
-// masquerade as a SharedPtr<X> where the pointed-to X has been allocated
+// masquerade as a TreePtr<X> where the pointed-to X has been allocated
 // using new. Similar to Boost's make_shared<>() except that being an object
 // with a constructor, rather than a free function, it may be used in a
 // declaration as well as in a function-like way. So both of the following
 // are OK:
 // existing_shared_ptr = MakeTreePtr<X>(10); // as per Boost: construction of temporary looks like function call
-// MakeTreePtr<X> new_shared_ptr(10); // new Inferno form: new_shared_ptr may now be used like a SharedPtr<X>
+// MakeTreePtr<X> new_shared_ptr(10); // new Inferno form: new_shared_ptr may now be used like a TreePtr<X>
 template<typename VALUE_TYPE>
 struct MakeTreePtr : TreePtr<VALUE_TYPE>
 {
