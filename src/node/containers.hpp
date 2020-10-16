@@ -12,8 +12,6 @@
 #include "itemise.hpp"
 #include "shared_ptr.hpp"
 
-#define SEQUENCE_HAS_RANDOM_ACCESS 0
-
 /// OOStd namespace contains wrappers for STL and Boost features adding run-time polymorphism
 namespace OOStd {
 
@@ -184,9 +182,7 @@ public:
 
 struct SequenceInterface : virtual ContainerInterface
 {
-#if SEQUENCE_HAS_RANDOM_ACCESS
-    virtual SharedPtrInterface &operator[]( int i ) = 0;
-#endif
+
     virtual void push_back( const SharedPtrInterface &gx ) = 0;
 };
 
@@ -324,12 +320,6 @@ struct Sequence : virtual ContainerCommon<CONTAINER_IMPL>, virtual SequenceInter
     	}
 	};
 
-#if SEQUENCE_HAS_RANDOM_ACCESS
-    virtual typename CONTAINER_IMPL::value_type &operator[]( int i )
-    {
-    	return CONTAINER_IMPL::operator[](i);
-    }
-#endif
 	virtual void insert( const SharedPtrInterface &gx ) // Simulating the SimpleAssociatedContaner API 
 	{
         // Like multiset, we do allow more than one copy of the same element

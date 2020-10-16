@@ -9,13 +9,6 @@
 #include <set>
 #include <iterator>
 
-// This should be enabled to make inferno use a sequence-like container for 
-// it's collections, so that insertion order always applies to walks over the 
-// collection. This will improve repeatability (and output will better resemble input).
-#if SEQUENCE_HAS_RANDOM_ACCESS==0
-#define USE_LIST_FOR_SEQUENCE 1
-#endif
-
 #define USE_LIST_FOR_COLLECTION 1
 
 // Inferno tree shared pointers
@@ -60,11 +53,7 @@ private:
 #define COLLECTION_INTERFACE_BASE OOStd::SimpleAssociativeContainerInterface
 #endif
 
-#if USE_LIST_FOR_SEQUENCE
 #define SEQUENCE_IMPL list
-#else
-#define SEQUENCE_IMPL deque
-#endif
 
 // Inferno tree containers
 typedef OOStd::ContainerInterface ContainerInterface;
