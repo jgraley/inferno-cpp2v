@@ -19,8 +19,10 @@
 #define ASSOCIATIVE_IMPL multiset
 #define SEQUENCE_IMPL list
 
+#ifdef OOSTD_NAMESPACE
 /// OOStd namespace contains wrappers for STL and Boost features adding run-time polymorphism
 namespace OOStd {
+#endif
 
 //
 // Template for a base class for STL containers with forward iterators.
@@ -187,18 +189,6 @@ public:
 };
 
 
-struct SequenceInterface : virtual ContainerInterface
-{
-    virtual void push_back( const SharedPtrInterface &gx ) = 0;
-};
-
-
-struct SimpleAssociativeContainerInterface : virtual ContainerInterface
-{
-	virtual int erase( const SharedPtrInterface &gx ) = 0;
-};
-
-
 //
 // Abstract template for containers that will be use any STL container as
 // the actual implementation.
@@ -287,21 +277,20 @@ struct ContainerCommon : virtual ContainerInterface, CONTAINER_IMPL
 // (basically vector, deque etc). Instantiate as per ContainerCommon.
 //
 template<class VALUE_TYPE>
-struct Sequence : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > >, 
-                  virtual SequenceInterface
+struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > >
 {
     typedef SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > Impl;
     typedef TreePtr<VALUE_TYPE> value_type;
     
     // C++11 fix
-    Sequence& operator=(const Sequence& other)
+    Sequential& operator=(const Sequential& other)
     {
         (void)ContainerCommon<Impl>::operator=(other);
         return *this;
     }
 
     using typename Impl::insert; // due to silly C++ rule where different overloads hide each other
-    inline Sequence<VALUE_TYPE>() {}
+    inline Sequential<VALUE_TYPE>() {}
 	struct iterator : public ContainerCommon<Impl>::iterator
     {
 		inline iterator( typename Impl::iterator &i ) : Impl::iterator(i) {}
@@ -393,36 +382,36 @@ struct Sequence : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > 
     	my_end.Impl::iterator::operator=( Impl::end() );
     	return my_end;
     }
-	Sequence( const SequenceInterface &cns )
+	Sequential( const ContainerInterface &cns )
 	{
 		// TODO support const_interator properly and get rid of this const_cast
-		SequenceInterface *ns = const_cast< SequenceInterface * >( &cns );
-		for( typename SequenceInterface::iterator i=ns->begin();
+		ContainerInterface *ns = const_cast< ContainerInterface * >( &cns );
+		for( typename ContainerInterface::iterator i=ns->begin();
 		     i != ns->end();
 		     ++i )
 		{
             Impl::push_back( (value_type)*i );
 		}
 	}
-	Sequence( const SharedPtrInterface &nx )
+	Sequential( const SharedPtrInterface &nx )
 	{
 		value_type sx( value_type::InferredDynamicCast(nx) );
 		Impl::push_back( sx );
 	}
 	template<typename L, typename R>
-	inline Sequence( const pair<L, R> &p )
+	inline Sequential( const pair<L, R> &p )
 	{
-		*this = Sequence<VALUE_TYPE>( p.first );
-		Sequence<VALUE_TYPE> t( p.second );
+		*this = Sequential<VALUE_TYPE>( p.first );
+		Sequential<VALUE_TYPE> t( p.second );
 
-		for( typename Sequence<VALUE_TYPE>::iterator i=t.begin();
+		for( typename Sequential<VALUE_TYPE>::iterator i=t.begin();
 		     i != t.end();
 		     ++i )
 		{
             Impl::push_back( *i );
 		}
 	}
-	inline Sequence( const value_type &v )
+	inline Sequential( const value_type &v )
 	{
 		push_back( v );
 	}
@@ -434,8 +423,7 @@ struct Sequence : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> > 
 // (basically associative containers). Instantiate as per ContainerCommon.
 //
 template<class VALUE_TYPE>
-struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< TreePtr<VALUE_TYPE> > >, 
-                                    virtual SimpleAssociativeContainerInterface
+struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< TreePtr<VALUE_TYPE> > >
 {
     typedef ASSOCIATIVE_IMPL< TreePtr<VALUE_TYPE> > Impl;
     typedef TreePtr<VALUE_TYPE> value_type;
@@ -674,47 +662,75 @@ inline pair<L,R> operator,( const L &l, const R &r )
     return pair<L,R>(l,r);
 }
 
+#ifdef OOSTD_NAMESPACE
 }; // namespace
-
+#endif
 
 #define USE_LIST_FOR_COLLECTION 1
 
 // Inferno tree shared pointers
 
 
+#ifdef OOSTD_NAMESPACE
 
 #if USE_LIST_FOR_COLLECTION
-#define COLLECTION_BASE OOStd::Sequence
-#define COLLECTION_INTERFACE_BASE OOStd::SequenceInterface
+#define COLLECTION_BASE OOStd::Sequential
 #else
 #define COLLECTION_BASE OOStd::SimpleAssociativeContainer
-#define COLLECTION_INTERFACE_BASE OOStd::SimpleAssociativeContainerInterface
 #endif
 
 // Inferno tree containers
 typedef OOStd::ContainerInterface ContainerInterface;
 typedef OOStd::PointIterator PointIterator;
 typedef OOStd::CountingIterator CountingIterator;
-struct SequenceInterface : virtual OOStd::SequenceInterface
+struct SequenceInterface : virtual OOStd::ContainerInterface
 {
 };
-struct CollectionInterface : virtual COLLECTION_INTERFACE_BASE
+struct CollectionInterface : virtual OOStd::ContainerInterface
 {
 };
 
 template<typename VALUE_TYPE>
-struct Sequence : virtual OOStd::Sequence< VALUE_TYPE >,
+struct Sequence : virtual OOStd::Sequential< VALUE_TYPE >,
                   virtual SequenceInterface
 {
 	inline Sequence() {}
 	template<typename L, typename R>
 	inline Sequence( const pair<L, R> &p ) :
-		OOStd::Sequence< VALUE_TYPE >( p ) {}
+		OOStd::Sequential< VALUE_TYPE >( p ) {}
 	template< typename OTHER >
 	inline Sequence( const TreePtr<OTHER> &v ) :
-		OOStd::Sequence< VALUE_TYPE >( v ) {}
+		OOStd::Sequential< VALUE_TYPE >( v ) {}
 };
 
+#else
+
+#if USE_LIST_FOR_COLLECTION
+#define COLLECTION_BASE Sequential
+#else
+#define COLLECTION_BASE SimpleAssociativeContainer
+#endif
+
+// Inferno tree containers
+
+struct CollectionInterface : virtual ContainerInterface
+{
+};
+
+template<typename VALUE_TYPE>
+struct Sequence : virtual Sequential< VALUE_TYPE >,
+                  virtual SequenceInterface
+{
+	inline Sequence() {}
+	template<typename L, typename R>
+	inline Sequence( const pair<L, R> &p ) :
+		Sequential< VALUE_TYPE >( p ) {}
+	template< typename OTHER >
+	inline Sequence( const TreePtr<OTHER> &v ) :
+		Sequential< VALUE_TYPE >( v ) {}
+};
+
+#endif
 
 template<typename VALUE_TYPE> 
 struct Collection : virtual COLLECTION_BASE< VALUE_TYPE >,
@@ -728,6 +744,5 @@ struct Collection : virtual COLLECTION_BASE< VALUE_TYPE >,
 	inline Collection( const TreePtr<OTHER> &v ) :
 		COLLECTION_BASE< VALUE_TYPE >( v ) {}
 };
-
 
 #endif /* GENERICS_HPP */

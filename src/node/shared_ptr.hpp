@@ -13,6 +13,8 @@
 #include "itemise.hpp"
 #include "node.hpp"
 
+#define OOSTD_NAMESPACE
+
 // Covariant nullptr pointer bug
 //
 // JSG: There's an unfortunate bug in GCC 3.4.4 on cygwin whereby a covariant return thunk
@@ -26,8 +28,10 @@
 // base class, is this "isovariant"? No, "invariant")
 //
 
+#ifdef OOSTD_NAMESPACE
 // Shared pointer wrapper with OO support
 namespace OOStd {
+#endif
 
 //    
 // This is the interface for SharedPtr<>. It may be used like shared_ptr, with 
@@ -189,12 +193,18 @@ struct SharedPtr : virtual SharedPtrInterface, shared_ptr<VALUE_TYPE>
    // }
 };
 
+#ifdef OOSTD_NAMESPACE
 }; // namespace
-
+#endif
 
 // TODO optimise SharedPtr, it seems to be somewhat slower than shared_ptr!!!
+#ifdef OOSTD_NAMESPACE
 typedef OOStd::SharedPtrInterface TreePtrInterface;
 #define TreePtr OOStd::SharedPtr
+#else
+typedef SharedPtrInterface TreePtrInterface;
+#define TreePtr SharedPtr
+#endif
 
 
 // Similar signature to boost shared_ptr operator==, and we restrict the pointers
@@ -220,9 +230,5 @@ inline bool operator!=( const TreePtr<X> &x,
 {
 	return operator!=( (const shared_ptr<X> &)x, (const shared_ptr<Y> &)y );
 }
-
-
-
-
 
 #endif /* SHARED_PTR_HPP */
