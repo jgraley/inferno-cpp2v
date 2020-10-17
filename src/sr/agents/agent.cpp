@@ -71,13 +71,13 @@ shared_ptr<DecidedQuery> AgentCommon::CreateDecidedQuery() const
     
     
 void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                   TreePtr<Node> x ) const
+                                   XLink x ) const
 {
     query.last_activity = DecidedQueryCommon::QUERY;
    
     DecidedQueryAgentInterface::RAIIDecisionsCleanup cleanup(query);
     
-    if( x == DecidedQueryCommon::MMAX_Node )
+    if( x.GetChildX() == DecidedQueryCommon::MMAX_Node )
     {
         query.Reset();
         // Magic Match Anything node: all normal children also match anything
@@ -94,9 +94,9 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 
 
 void AgentCommon::ResumeNormalLinkedQuery( Conjecture &conj,
-                                              TreePtr<Node> x,
-                                              const list<LocatedLink> &required_links,
-                                              const set<PatternLink> &by_equivalence ) const
+                                           XLink x,
+                                           const list<LocatedLink> &required_links,
+                                           const set<PatternLink> &by_equivalence ) const
 {    
     while(1)
     {
@@ -166,7 +166,7 @@ void AgentCommon::ResumeNormalLinkedQuery( Conjecture &conj,
 
 
 void AgentCommon::RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
-                                        TreePtr<Node> x,
+                                        XLink x,
                                         const list<LocatedLink> &required_links,
                                         const set<PatternLink> &by_equivalence ) const
 {

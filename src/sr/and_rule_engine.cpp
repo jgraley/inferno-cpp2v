@@ -419,8 +419,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         TRACE("Comparing normal link ")(link)(" keyer? %d residual? %d master? %d\n", plan.coupling_keyer_links.count( link ), plan.coupling_residual_links.count( link ), plan.master_boundary_links.count(link) );
         // Recurse normally 
         // Get x for linked node
-        TreePtr<Node> x = link.GetChildX();
-        ASSERT( x );
+        ASSERT( link.GetChildX() );
         
         // This is needed for decisionised MatchAny #75. Other schemes for
         // RegisterAlwaysMatchingLink() could be deployed.
@@ -430,15 +429,15 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         // Are we at a residual coupling?
         if( plan.coupling_residual_links.count( link ) > 0 ) // See #129
         {
-            CompareCoupling( link.GetChildAgent(), x, &working_keys );
-            TRACE("Accepted normal coupling for ")(link.GetChildAgent())(" x=")(x)(" key=")(working_keys.at(link.GetChildAgent()))("\n");
+            CompareCoupling( link.GetChildAgent(), link.GetChildX(), &working_keys );
+            TRACE("Accepted normal coupling for ")(link.GetChildAgent())(" link=")(link)(" key=")(working_keys.at(link.GetChildAgent()))("\n");
             continue;
         }
         
         // Master couplings are now checked in a post-pass
         if( plan.master_boundary_links.count(link) > 0 )
         {
-            master_coupling_candidates[link.GetChildAgent()] = x;
+            master_coupling_candidates[link.GetChildAgent()] = link.GetChildX();
             continue;
         }
 
@@ -447,17 +446,17 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         // tests coupling_keyer_links as well as providing a small optimisation.
         if( plan.coupling_keyer_links.count( link ) )
         {
-            ASSERT( x != DecidedQueryCommon::MMAX_Node )("Can't key with MMAX because would leak");
-            KeyCoupling( link.GetChildAgent(), x, &working_keys );
+            ASSERT( link.GetChildX() != DecidedQueryCommon::MMAX_Node )("Can't key with MMAX because would leak");
+            KeyCoupling( link.GetChildAgent(), link.GetChildX(), &working_keys );
         }
 
-        DecidedCompare(link.GetChildAgent(), x);   
+        DecidedCompare(link.GetChildAgent(), XLink(link));   
     }
 }
 
 
 void AndRuleEngine::DecidedCompare( Agent *agent,
-                                    TreePtr<Node> x )  
+                                    XLink x )  
 {
     INDENT("D");
     ASSERT( x ); // Target must not be nullptr
@@ -466,7 +465,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
     shared_ptr<DecidedQuery> query = plan.conj->GetQuery(agent);
 
     // Run the compare implementation to get the links based on the choices
-    TRACE(*agent)(" ?= ")(*x)(" RunDecidedQuery()\n");     
+    TRACE(*agent)(" ?= ")(x)(" RunDecidedQuery()\n");     
     agent->RunDecidedQuery( *query, x );
     TRACEC("Normal ")(query->GetNormalLinks())("\n")
           ("Abormal ")(query->GetAbnormalLinks())("\n")
@@ -489,7 +488,7 @@ void AndRuleEngine::DecidedCompare( Agent *agent,
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
     ASSERT( solution_keys.count(agent) == 0 )("Coupling conflict!\n");
-    KeyCoupling( agent, x, &solution_keys );
+    KeyCoupling( agent, x.GetChildX(), &solution_keys );
 }
 
 
@@ -713,7 +712,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // Initialise keys to the ones inherited from master, keeping 
             // none of our own from any previous unsuccessful attempt.
             master_coupling_candidates.clear();            
-            DecidedCompare( plan.root_agent, start_x );            
+            DecidedCompare( plan.root_agent, XLink(start_x) );            
             CompareMasterKeys();
 #endif
 

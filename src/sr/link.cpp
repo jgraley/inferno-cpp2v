@@ -4,12 +4,13 @@
 using namespace SR;
 
 
-void EnsureNotOnStack( const TreePtrInterface *ppattern )
+void EnsureNotOnStack( const TreePtrInterface *p )
 {
-    ASSERT( (((uint64_t)ppattern & 0x7fff00000000ULL) != 0x7fff00000000ULL) )
-          ("Supplied agent link seems like it's probably on the stack, usually a bad sign\n");
+    ASSERT( (((uint64_t)p & 0x7fff00000000ULL) != 0x7fff00000000ULL) )
+          ("Supplied link ")(p)(" seems like it's probably on the stack, usually a bad sign\n");
 }
 
+//////////////////////////// PatternLink ///////////////////////////////
 
 PatternLink::PatternLink() :
     ppattern( nullptr )
@@ -91,6 +92,76 @@ string PatternLink::GetTrace() const
 #endif    
 }
 
+//////////////////////////// XLink ///////////////////////////////
+
+XLink::XLink() :
+    x( nullptr )
+{
+#ifdef KEEP_WHODAT_INFO
+    whodat = nullptr;
+#endif
+}
+
+
+XLink::XLink( const TreePtr<Node> &x_,
+              void *whodat ) :
+    x( x_ )              
+{
+    ASSERT(x);
+
+#ifdef KEEP_WHODAT_INFO
+    whodat = whodat_;
+#endif  
+}
+
+              
+XLink::XLink( const LocatedLink &l ) :
+    x( l.x )              
+{
+    ASSERT(x);
+
+#ifdef KEEP_WHODAT_INFO
+    whodat = l.whodat;
+#endif  
+}
+
+              
+bool XLink::operator<(const XLink &other) const
+{
+    return x < other.x;    
+}
+
+    
+bool XLink::operator!=(const XLink &other) const
+{
+    return x != other.x;    
+}
+
+
+bool XLink::operator==(const XLink &other) const
+{
+    return x == other.x;    
+}
+
+
+XLink::operator bool() const
+{
+    return x != nullptr;
+}
+
+
+const TreePtr<Node> &XLink::GetChildX() const
+{
+    return x;
+}
+
+
+string XLink::GetTrace() const // used for debug
+{
+    return string("@") + x->GetTrace();
+}
+
+//////////////////////////// LocatedLink ///////////////////////////////
 
 LocatedLink::LocatedLink() :
     ppattern( nullptr )
@@ -105,10 +176,10 @@ LocatedLink::LocatedLink( const Agent *parent_pattern_,
                           const TreePtrInterface *ppattern_, 
                           const TreePtr<Node> &x_,
                           void *whodat_ ) :
-    parent_pattern( parent_pattern_ ),
 #ifdef LINKS_ENHANCED_TRACE
-    ppattern( ppattern_ ),
+    parent_pattern( parent_pattern_ ),
 #endif
+    ppattern( ppattern_ ),
     x( x_ )
 {
     EnsureNotOnStack( ppattern );
@@ -122,11 +193,45 @@ LocatedLink::LocatedLink( const Agent *parent_pattern_,
 
 LocatedLink::LocatedLink( const PatternLink &plink, 
                           const TreePtr<Node> &x_ ) :
-    parent_pattern( plink.parent_pattern ),
 #ifdef LINKS_ENHANCED_TRACE
-    ppattern( plink.ppattern ),
+    parent_pattern( plink.parent_pattern ),
 #endif
+    ppattern( plink.ppattern ),
     x( x_ )                                                  
+{
+    ASSERT(x);
+
+#ifdef KEEP_WHODAT_INFO
+    whodat = plink.whodat;
+#endif
+}
+
+
+LocatedLink::LocatedLink( const Agent *parent_pattern_,
+                          const TreePtrInterface *ppattern_, 
+                          const XLink &xlink ) :
+#ifdef LINKS_ENHANCED_TRACE
+    parent_pattern( parent_pattern_ ),
+#endif
+    ppattern( ppattern_ ),
+    x( xlink.x )
+{
+    EnsureNotOnStack( ppattern );
+    ASSERT(x);
+
+#ifdef KEEP_WHODAT_INFO
+    whodat = whodat_;
+#endif  
+}
+
+
+LocatedLink::LocatedLink( const PatternLink &plink, 
+                          const XLink &xlink) :
+#ifdef LINKS_ENHANCED_TRACE
+    parent_pattern( plink.parent_pattern ),
+#endif
+    ppattern( plink.ppattern ),
+    x( xlink.x )                                                  
 {
     ASSERT(x);
 

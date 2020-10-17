@@ -22,7 +22,7 @@ shared_ptr<PatternQuery> SearchContainerAgent::GetPatternQuery() const
 
 
 void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                                TreePtr<Node> x ) const
+                                                XLink x ) const
 {
     INDENT("#");
     ASSERT( this );
@@ -30,9 +30,9 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
     query.Reset();
     
     // Check pre-restriction
-    CheckLocalMatch(x.get());
+    CheckLocalMatch(x.GetChildX().get());
     
-    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(*x)("\n");
+    TRACE("SearchContainer agent ")(*this)(" terminus pattern is ")(*(terminus))(" at ")(x)("\n");
 
     // Get an interface to the container we will search
     // TODO what is keeping pwx alive after this function exits? Are the iterators 
@@ -47,7 +47,7 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 
     // Get choice from conjecture about where we are in the walk
 	ContainerInterface::iterator thistime = query.RegisterDecision( pwx->begin(), pwx->end(), false );
-    query.RegisterNormalLink( &terminus, *thistime ); // Link into X
+    query.RegisterNormalLink( &terminus, XLink(*thistime) ); // Link into X
 
     // Let subclasses implement further restrictions
     DecidedQueryRestrictions( query, thistime );
@@ -75,11 +75,11 @@ TreePtr<Node> SearchContainerAgent::BuildReplaceImpl( TreePtr<Node> keynode )
 
 //---------------------------------- AnyNode ------------------------------------    
 
-shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( TreePtr<Node> x ) const
+shared_ptr<ContainerInterface> AnyNodeAgent::GetContainerInterface( XLink x ) const
 { 
     // Note: does not do the flatten every time - instead, the FlattenNode object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
-    return shared_ptr<ContainerInterface>( new FlattenNode( x ) );
+    return shared_ptr<ContainerInterface>( new FlattenNode( x.GetChildX() ) );
 }
 
 
@@ -94,11 +94,11 @@ void AnyNodeAgent::GetGraphAppearance( bool *bold, string *text, string *shape )
 
 //---------------------------------- Stuff ------------------------------------    
 
-shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( TreePtr<Node> x ) const
+shared_ptr<ContainerInterface> StuffAgent::GetContainerInterface( XLink x ) const
 {    
     // Note: does not do the walk every time - instead, the Walk object's range is presented
     // to the Conjecture object, which increments it only when trying alternative choice
-    return shared_ptr<ContainerInterface>( new Walk( x, nullptr, nullptr ) );
+    return shared_ptr<ContainerInterface>( new Walk( x.GetChildX(), nullptr, nullptr ) );
 }
 
 
@@ -125,7 +125,7 @@ void StuffAgent::DecidedQueryRestrictions( DecidedQueryAgentInterface &query, Co
         FOREACH( TreePtr<Node> n, pwtt->GetCurrentPath() )
             xpr_ss->push_back( n );
 
-        query.RegisterMultiplicityLink( &recurse_restriction, xpr_ss ); // Links into X     
+        query.RegisterMultiplicityLink( &recurse_restriction, XLinkMultiplicity(xpr_ss) ); // Links into X     
     }   
 }
 

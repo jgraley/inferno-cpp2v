@@ -242,7 +242,7 @@ string SystemicConstraint::GetTrace() const
                 try
                 {
                     query = lconj.GetQuery(plan.agent);
-                    plan.agent->RunDecidedQuery( *query, x );
+                    plan.agent->RunDecidedQuery( *query, XLink(x) );
                     FOREACH( const SR::LocatedLink &link, *query->GetNormalLinks() )
                     x_to_add.push_back(x);
                 }
