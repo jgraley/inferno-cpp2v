@@ -19,11 +19,6 @@
 #define ASSOCIATIVE_IMPL multiset
 #define SEQUENCE_IMPL list
 
-#ifdef OOSTD_NAMESPACE
-/// OOStd namespace contains wrappers for STL and Boost features adding run-time polymorphism
-namespace OOStd {
-#endif
-
 //
 // Template for a base class for STL containers with forward iterators.
 // Supports direct calls and iterators.
@@ -42,10 +37,10 @@ public:
 		virtual shared_ptr<iterator_interface> Clone() const = 0; // Make another copy of the present iterator
 		virtual iterator_interface &operator++() = 0;
 		virtual iterator_interface &operator--() { ASSERTFAIL("Only on reversible iterator"); };
-		const virtual SharedPtrInterface &operator*() const = 0;
-		const virtual SharedPtrInterface *operator->() const = 0;
+		const virtual TreePtrInterface &operator*() const = 0;
+		const virtual TreePtrInterface *operator->() const = 0;
 		virtual bool operator==( const iterator_interface &ib ) const = 0;
-		virtual void Overwrite( const SharedPtrInterface *v ) const = 0;
+		virtual void Overwrite( const TreePtrInterface *v ) const = 0;
 		virtual const bool IsOrdered() const = 0;
 		virtual const int GetCount() const { ASSERTFAIL("Only on CountingIterator"); }
 	};
@@ -59,7 +54,7 @@ public:
 	{
 	public:
 		typedef forward_iterator_tag iterator_category;
-		typedef SharedPtrInterface value_type;
+		typedef TreePtrInterface value_type;
 		typedef int difference_type;
 		typedef const value_type *pointer;
 		typedef const value_type &reference;
@@ -171,7 +166,7 @@ public:
 	typedef iterator const_iterator; // TODO const iterators properly
 
 	// These direct calls to the container are designed to support co-variance.
-    virtual void insert( const SharedPtrInterface &gx ) = 0;
+    virtual void insert( const TreePtrInterface &gx ) = 0;
 	virtual const iterator_interface &begin() = 0;
     virtual const iterator_interface &end() = 0;
     virtual void erase( const iterator_interface &it ) = 0;
@@ -181,13 +176,22 @@ public:
     	// TODO support const_interator properly and get rid of this const_cast
     	ContainerInterface *nct = const_cast<ContainerInterface *>(this);
     	int n=0;
-    	FOREACH( const SharedPtrInterface &x, *nct )
+    	FOREACH( const TreePtrInterface &x, *nct )
     	    n++;
     	return n;
     }
     virtual void clear() = 0;
 };
 
+
+struct SequenceInterface : virtual ContainerInterface
+{
+};
+
+
+struct CollectionInterface : virtual ContainerInterface
+{
+};
 
 //
 // Abstract template for containers that will be use any STL container as
@@ -309,7 +313,7 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
 			*ni = *this;
 			return ni;
 		}
-    	virtual void Overwrite( const SharedPtrInterface *v ) const
+    	virtual void Overwrite( const TreePtrInterface *v ) const
 		{
 		    // JSG Overwrite() just writes through the pointer got from dereferencing the iterator,
 		    // because in Sequences (ordererd containers) elements may be modified.
@@ -322,13 +326,13 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
     	}
 	};
 
-	virtual void insert( const SharedPtrInterface &gx ) // Simulating the SimpleAssociatedContaner API 
+	virtual void insert( const TreePtrInterface &gx ) // Simulating the SimpleAssociatedContaner API 
 	{
         // Like multiset, we do allow more than one copy of the same element
 		push_back( gx );
 	}
     using ContainerCommon<Impl>::erase;
-    virtual int erase( const SharedPtrInterface &gx ) // Simulating the SimpleAssociatedContaner API 
+    virtual int erase( const TreePtrInterface &gx ) // Simulating the SimpleAssociatedContaner API 
     {
         // Like multiset, we erase all matching elemnts. Doing this though the API, bearing in 
         // mind validity rules post-erase, is horrible.
@@ -350,7 +354,7 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
         while( it != end() );
         return count;
     }
-	virtual void push_back( const SharedPtrInterface &gx )
+	virtual void push_back( const TreePtrInterface &gx )
 	{
 		value_type sx( value_type::InferredDynamicCast(gx) );
 		Impl::push_back( sx );
@@ -393,7 +397,7 @@ struct Sequential : virtual ContainerCommon< SEQUENCE_IMPL< TreePtr<VALUE_TYPE> 
             Impl::push_back( (value_type)*i );
 		}
 	}
-	Sequential( const SharedPtrInterface &nx )
+	Sequential( const TreePtrInterface &nx )
 	{
 		value_type sx( value_type::InferredDynamicCast(nx) );
 		Impl::push_back( sx );
@@ -439,7 +443,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 			*ni = *this;
 			return ni;
 		}
-    	virtual void Overwrite( const SharedPtrInterface *v ) const
+    	virtual void Overwrite( const TreePtrInterface *v ) const
 		{
 		    // SimpleAssociativeContainers (unordered containers) do not allow elements to be modified
 		    // because the internal data structure depends on element values. So we 
@@ -455,7 +459,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
         SimpleAssociativeContainer<VALUE_TYPE> *owner;
 	};
 
-	virtual void insert( const SharedPtrInterface &gx )
+	virtual void insert( const TreePtrInterface &gx )
 	{
 		value_type sx( value_type::InferredDynamicCast(gx) );
 		Impl::insert( sx );
@@ -467,7 +471,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 		Impl::insert( sx );
 	}
     using ContainerCommon<Impl>::erase;
-	virtual int erase( const SharedPtrInterface &gx )
+	virtual int erase( const TreePtrInterface &gx )
 	{
 		value_type sx( value_type::InferredDynamicCast(gx) );
 		return Impl::erase( sx );
@@ -497,7 +501,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
             Impl::insert( *i );
 		}
 	}
-    SimpleAssociativeContainer( const SharedPtrInterface &nx )
+    SimpleAssociativeContainer( const TreePtrInterface &nx )
 	{
 		value_type sx( value_type::InferredDynamicCast(nx) );
         Impl::insert( sx );
@@ -530,7 +534,7 @@ struct SimpleAssociativeContainer : virtual ContainerCommon< ASSOCIATIVE_IMPL< T
 //
 struct PointIterator : public ContainerInterface::iterator_interface
 {
-    SharedPtrInterface * element;
+    TreePtrInterface * element;
 
     PointIterator() :
         element(nullptr) // means end-of-range
@@ -542,7 +546,7 @@ struct PointIterator : public ContainerInterface::iterator_interface
     {
     }
 
-    PointIterator( SharedPtrInterface *i ) :
+    PointIterator( TreePtrInterface *i ) :
         element(i)
     {      
         ASSERT(i); // We don't allow nullptr as input because it means end-of-range
@@ -560,13 +564,13 @@ struct PointIterator : public ContainerInterface::iterator_interface
 		return *this;
 	}
 
-	virtual SharedPtrInterface &operator*() const
+	virtual TreePtrInterface &operator*() const
 	{
 	    ASSERT(element)("Tried to dereference nullptr PointIterator");
 		return *element;
 	}
 
-	virtual SharedPtrInterface *operator->() const
+	virtual TreePtrInterface *operator->() const
 	{
 	    ASSERT(element)("Tried to dereference nullptr PointIterator");
 		return element;
@@ -579,7 +583,7 @@ struct PointIterator : public ContainerInterface::iterator_interface
 		return pi->element == element;
 	}
 	
-	virtual void Overwrite( const SharedPtrInterface *v ) const
+	virtual void Overwrite( const TreePtrInterface *v ) const
 	{
 	    *element = *v;
 	}
@@ -622,12 +626,12 @@ struct CountingIterator : public ContainerInterface::iterator_interface
 		return *this;
 	}
 
-	virtual SharedPtrInterface &operator*() const
+	virtual TreePtrInterface &operator*() const
 	{
 	    ASSERTFAIL("Cannot dereference CountingIterator, use GetCount instead");
 	}
 
-	const virtual SharedPtrInterface *operator->() const
+	const virtual TreePtrInterface *operator->() const
 	{
 		ASSERTFAIL("Cannot dereference CountingIterator, use GetCount instead");
 	}
@@ -639,7 +643,7 @@ struct CountingIterator : public ContainerInterface::iterator_interface
 		return pi->element == element;
 	}
 
-	virtual void Overwrite( const SharedPtrInterface *v ) const
+	virtual void Overwrite( const TreePtrInterface *v ) const
 	{
 	    ASSERTFAIL("Cannot Overwrite through CountingIterator");
 	}
@@ -662,61 +666,15 @@ inline pair<L,R> operator,( const L &l, const R &r )
     return pair<L,R>(l,r);
 }
 
-#ifdef OOSTD_NAMESPACE
-}; // namespace
-#endif
-
 #define USE_LIST_FOR_COLLECTION 1
 
 // Inferno tree shared pointers
-
-
-#ifdef OOSTD_NAMESPACE
-
-#if USE_LIST_FOR_COLLECTION
-#define COLLECTION_BASE OOStd::Sequential
-#else
-#define COLLECTION_BASE OOStd::SimpleAssociativeContainer
-#endif
-
-typedef OOStd::ContainerInterface ContainerInterface;
-typedef OOStd::PointIterator PointIterator;
-typedef OOStd::CountingIterator CountingIterator;
-struct SequenceInterface : virtual OOStd::ContainerInterface
-{
-};
-struct CollectionInterface : virtual OOStd::ContainerInterface
-{
-};
-
-template<typename VALUE_TYPE>
-struct Sequence : virtual OOStd::Sequential< VALUE_TYPE >,
-                  virtual SequenceInterface
-{
-	inline Sequence() {}
-	template<typename L, typename R>
-	inline Sequence( const pair<L, R> &p ) :
-		OOStd::Sequential< VALUE_TYPE >( p ) {}
-	template< typename OTHER >
-	inline Sequence( const TreePtr<OTHER> &v ) :
-		OOStd::Sequential< VALUE_TYPE >( v ) {}
-};
-
-#else
 
 #if USE_LIST_FOR_COLLECTION
 #define COLLECTION_BASE Sequential
 #else
 #define COLLECTION_BASE SimpleAssociativeContainer
 #endif
-
-struct SequenceInterface : virtual ContainerInterface
-{
-};
-
-struct CollectionInterface : virtual ContainerInterface
-{
-};
 
 template<typename VALUE_TYPE>
 struct Sequence : virtual Sequential< VALUE_TYPE >,
@@ -730,8 +688,6 @@ struct Sequence : virtual Sequential< VALUE_TYPE >,
 	inline Sequence( const TreePtr<OTHER> &v ) :
 		Sequential< VALUE_TYPE >( v ) {}
 };
-
-#endif
 
 template<typename VALUE_TYPE> 
 struct Collection : virtual COLLECTION_BASE< VALUE_TYPE >,

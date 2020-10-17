@@ -13,8 +13,6 @@
 #include "itemise.hpp"
 #include "node.hpp"
 
-//#define OOSTD_NAMESPACE
-
 // Covariant nullptr pointer bug
 //
 // JSG: There's an unfortunate bug in GCC 3.4.4 on cygwin whereby a covariant return thunk
@@ -28,13 +26,8 @@
 // base class, is this "isovariant"? No, "invariant")
 //
 
-#ifdef OOSTD_NAMESPACE
-// Shared pointer wrapper with OO support
-namespace OOStd {
-#endif
-
 //    
-// This is the interface for SharedPtr<>. It may be used like shared_ptr, with 
+// This is the interface for TreePtr<>. It may be used like shared_ptr, with 
 // template parameter VALUE_TYPE set to the pointed-to type. Various
 // benefits accrue, including:
 // - SerialNumber is used for inequality comparisons, for repeatability
@@ -42,27 +35,27 @@ namespace OOStd {
 // - Can obtain an architype object for the type of an object
 //
 template<typename VALUE_TYPE>
-struct SharedPtr;
+struct TreePtr;
 
-// An interface for our SharedPtr object. This interface works regardless of pointed-to
-// type; it also masquerades as a SharedPtr to the VALUE_INTERFACE type, which should be the
+// An interface for our TreePtr object. This interface works regardless of pointed-to
+// type; it also masquerades as a TreePtr to the VALUE_INTERFACE type, which should be the
 // base class of the pointed-to things.
-struct SharedPtrInterface : virtual Itemiser::Element, public Traceable
+struct TreePtrInterface : virtual Itemiser::Element, public Traceable
 {
-    // Convert to and from shared_ptr<VALUE_INTERFACE> and SharedPtr<VALUE_INTERFACE>
+    // Convert to and from shared_ptr<VALUE_INTERFACE> and TreePtr<VALUE_INTERFACE>
 	virtual operator shared_ptr<Node>() const = 0;
-	virtual operator SharedPtr<Node>() const = 0;
+	virtual operator TreePtr<Node>() const = 0;
 
     virtual operator bool() const = 0; // for testing against nullptr
     virtual Node *get() const = 0; // As per shared_ptr<>, ie gets the actual C pointer
     virtual Node &operator *() const = 0; 
-    virtual SharedPtrInterface &operator=( const SharedPtrInterface &o )
+    virtual TreePtrInterface &operator=( const TreePtrInterface &o )
     {
     	(void)Itemiser::Element::operator=( o ); 
     	(void)Traceable::operator=( o );
     	return *this;
     }
-    virtual SharedPtr<Node> MakeValueArchitype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
+    virtual TreePtr<Node> MakeValueArchitype() const = 0; // construct an object of the VALUE_TYPE type (NOT a clone)
     virtual string GetTrace() const
     {
         return string("&") + operator*().GetTrace();
@@ -70,23 +63,23 @@ struct SharedPtrInterface : virtual Itemiser::Element, public Traceable
 };
 
 template<typename VALUE_TYPE>
-struct SharedPtr : virtual SharedPtrInterface, shared_ptr<VALUE_TYPE>
+struct TreePtr : virtual TreePtrInterface, shared_ptr<VALUE_TYPE>
 {
-    inline SharedPtr() {}
+    inline TreePtr() {}
 
-    inline SharedPtr( VALUE_TYPE *o ) :
+    inline TreePtr( VALUE_TYPE *o ) :
         shared_ptr<VALUE_TYPE>( o )
     {
     }
 
     template< typename OTHER >
-    inline SharedPtr( const shared_ptr<OTHER> &o ) :
+    inline TreePtr( const shared_ptr<OTHER> &o ) :
         shared_ptr<VALUE_TYPE>( o )
     {
     }
 
     template< typename OTHER >
-    inline SharedPtr( const SharedPtr<OTHER> &o ) :
+    inline TreePtr( const TreePtr<OTHER> &o ) :
         shared_ptr<VALUE_TYPE>( (shared_ptr<OTHER>)(o) )
     {
     }
@@ -97,10 +90,10 @@ struct SharedPtr : virtual SharedPtrInterface, shared_ptr<VALUE_TYPE>
         return p;
     }
 
-	virtual operator SharedPtr<Node>() const
+	virtual operator TreePtr<Node>() const
 	{
         const shared_ptr<VALUE_TYPE> p1 = *(const shared_ptr<VALUE_TYPE> *)this;
-        return SharedPtr<Node>( p1 );
+        return TreePtr<Node>( p1 );
 	}
 
     virtual VALUE_TYPE *get() const 
@@ -114,13 +107,13 @@ struct SharedPtr : virtual SharedPtrInterface, shared_ptr<VALUE_TYPE>
     	return shared_ptr<VALUE_TYPE>::operator *();
     }
 
-    virtual SharedPtr &operator=( const SharedPtrInterface &n )
+    virtual TreePtr &operator=( const TreePtrInterface &n )
     {
-    	(void)SharedPtr::operator=( shared_ptr<Node>(n) );
+    	(void)TreePtr::operator=( shared_ptr<Node>(n) );
     	return *this;
     }
 
-    virtual SharedPtr &operator=( const shared_ptr<Node> &n )
+    virtual TreePtr &operator=( const shared_ptr<Node> &n )
     {   
         if( n )
         {
@@ -137,7 +130,7 @@ struct SharedPtr : virtual SharedPtrInterface, shared_ptr<VALUE_TYPE>
     }
 
     template< typename OTHER >
-    inline SharedPtr &operator=( const shared_ptr<OTHER> &n )
+    inline TreePtr &operator=( const shared_ptr<OTHER> &n )
     {
     	(void)shared_ptr<VALUE_TYPE>::operator=( (n) );
     	return *this;
@@ -148,42 +141,42 @@ struct SharedPtr : virtual SharedPtrInterface, shared_ptr<VALUE_TYPE>
     	return !!*(const shared_ptr<VALUE_TYPE> *)this;
     }
 
-	static inline SharedPtr<VALUE_TYPE>
-	    DynamicCast( const SharedPtrInterface &g )
+	static inline TreePtr<VALUE_TYPE>
+	    DynamicCast( const TreePtrInterface &g )
 	{
 		if( g )
 		{
 			shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<Node>(g));
-			return SharedPtr<VALUE_TYPE>(v);
+			return TreePtr<VALUE_TYPE>(v);
 		}
 		else
 		{
-			return SharedPtr<VALUE_TYPE>();
+			return TreePtr<VALUE_TYPE>();
 		}
 	}
 	// For when OOStd itself needs to dyncast, as opposed to the user asking for it.
-	static inline SharedPtr<VALUE_TYPE>
-	    InferredDynamicCast( const SharedPtrInterface &g )
+	static inline TreePtr<VALUE_TYPE>
+	    InferredDynamicCast( const TreePtrInterface &g )
 	{
 		if( g )
 		{
 			shared_ptr<VALUE_TYPE> v = dynamic_pointer_cast<VALUE_TYPE>(shared_ptr<Node>(g));
 			ASSERT( v )("OOStd inferred dynamic cast has failed: from ")(*g)
 			           (" to type ")(Traceable::CPPFilt( typeid( VALUE_TYPE ).name() ))("\n");
-			return SharedPtr<VALUE_TYPE>(v);
+			return TreePtr<VALUE_TYPE>(v);
 		}
 		else
 		{
 		    // Null came in, null goes out.
-			return SharedPtr<VALUE_TYPE>();
+			return TreePtr<VALUE_TYPE>();
 		}
 	}
-	virtual SharedPtr<Node> MakeValueArchitype() const
+	virtual TreePtr<Node> MakeValueArchitype() const
 	{
         return new VALUE_TYPE; // means VALUE_TYPE must be constructable
     }
 
-    //inline bool operator<( const SharedPtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE> &other )
+    //inline bool operator<( const TreePtr<VALUE_INTERFACE, SUB_BASE, VALUE_INTERFACE> &other )
     //{
     //    return SerialNumber::operator<(other);
     //}    
@@ -192,20 +185,6 @@ struct SharedPtr : virtual SharedPtrInterface, shared_ptr<VALUE_TYPE>
     //    return SerialNumber::GetAddr(); // avoiding the need for virtual inheritance
    // }
 };
-
-#ifdef OOSTD_NAMESPACE
-}; // namespace
-#endif
-
-// TODO optimise SharedPtr, it seems to be somewhat slower than shared_ptr!!!
-#ifdef OOSTD_NAMESPACE
-typedef OOStd::SharedPtrInterface TreePtrInterface;
-#define TreePtr OOStd::SharedPtr
-#else
-typedef SharedPtrInterface TreePtrInterface;
-#define TreePtr SharedPtr
-#endif
-
 
 // Similar signature to boost shared_ptr operator==, and we restrict the pointers
 // to having the same subbase and base target
