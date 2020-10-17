@@ -489,7 +489,7 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
     shared_ptr<DecidedQuery> query = plan.conj->GetQuery(agent);
 
     // Run the compare implementation to get the links based on the choices
-    TRACE(*agent)(" ?= ")(*x)(" RunDecidedQuery()\n");     
+    TRACE(*agent)(" ?= ")(x)(" RunDecidedQuery()\n");     
     agent->RunDecidedQuery( *query, x );
     TRACEC("Normal ")(query->GetNormalLinks())("\n")
           ("Abormal ")(query->GetAbnormalLinks())("\n")

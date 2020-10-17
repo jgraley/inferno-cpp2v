@@ -14,22 +14,22 @@ shared_ptr<PatternQuery> GreenGrassAgent::GetPatternQuery() const
 
 
 void GreenGrassAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                           TreePtr<Node> x ) const
+                                           XLink x ) const
 {
     INDENT("G");
     query.Reset();
     
     // Check pre-restriction
-    CheckLocalMatch(x.get());
+    CheckLocalMatch(x.GetChildX().get());
     
     // Restrict so that everything in the input program under here must be "green grass"
     // ie unmodified by previous replaces in this RepeatingSearchReplace() run.
-    if( master_scr_engine->GetOverallMaster()->dirty_grass.find( x ) != master_scr_engine->GetOverallMaster()->dirty_grass.end() )
+    if( master_scr_engine->GetOverallMaster()->dirty_grass.find( x.GetChildX() ) != master_scr_engine->GetOverallMaster()->dirty_grass.end() )
     {
-        TRACE(*x)(" is dirty grass so rejecting\n");
+        TRACE(x)(" is dirty grass so rejecting\n");
         throw Mismatch();            
     }
-    TRACE("subtree under ")(*x)(" is green grass\n");
+    TRACE("subtree under ")(x)(" is green grass\n");
     // Normal matching for the through path
     query.RegisterNormalLink( GetThrough(), x ); // Link into X
 }

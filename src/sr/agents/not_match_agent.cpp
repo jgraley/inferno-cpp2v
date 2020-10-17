@@ -14,14 +14,14 @@ shared_ptr<PatternQuery> NotMatchAgent::GetPatternQuery() const
 
 
 void NotMatchAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                         TreePtr<Node> x ) const
+                                         XLink x ) const
 {
     INDENT("!");
     ASSERT( *GetPattern() );
     query.Reset();
     
     // Check pre-restriction
-    CheckLocalMatch(x.get());
+    CheckLocalMatch(x.GetChildX().get());
     
     // Context is abnormal because patterns must not match
     query.RegisterAbnormalLink( GetPattern(), x ); // Link into X, abnormal

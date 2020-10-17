@@ -23,13 +23,13 @@ shared_ptr<PatternQuery> SlaveAgent::GetPatternQuery() const
 
 
 void SlaveAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const
+                                      XLink x ) const
 {
     INDENT("l");
     query.Reset();
 
     // Check pre-restriction
-    CheckLocalMatch(x.get());
+    CheckLocalMatch(x.GetChildX().get());
     
     // When a slave node seen duriung search, just forward through the "through" path
     query.RegisterNormalLink( GetThrough(), x ); // Link into X

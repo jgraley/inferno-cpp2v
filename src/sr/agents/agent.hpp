@@ -42,12 +42,13 @@ public:
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const = 0;
     /// Produce info about an Agent given location (x) and a vector of choices (conj). 
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                  TreePtr<Node> x ) const = 0;                                                
+                                  XLink x ) const = 0;                                                
     virtual void ResumeNormalLinkedQuery( Conjecture &conj,
-                                             TreePtr<Node> x,
+                                             XLink x,
                                              const list<LocatedLink> &required_links ) const = 0;
+
     virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
-                                       TreePtr<Node> x,
+                                       XLink x,
                                        const list<LocatedLink> &required_links ) const = 0;                                                
     virtual TreePtr<Node> GetKey() = 0;                                  
     virtual void ResetKey() = 0;     
@@ -74,12 +75,12 @@ public:
     virtual shared_ptr<ContainerInterface> GetVisibleChildren() const;
     virtual shared_ptr<DecidedQuery> CreateDecidedQuery() const;
     virtual void RunDecidedQuery( DecidedQueryAgentInterface &query,
-                                  TreePtr<Node> x ) const;                                                
+                                  XLink x ) const;                                                
     virtual void ResumeNormalLinkedQuery( Conjecture &conj,
-                                             TreePtr<Node> x,
+                                             XLink x,
                                              const list<LocatedLink> &required_links ) const;
     virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
-                                       TreePtr<Node> x,
+                                       XLink x,
                                        const list<LocatedLink> &required_links ) const;                                                
     void SetKey( TreePtr<Node> x );
     TreePtr<Node> GetKey();                                  
@@ -93,9 +94,9 @@ public:
     TreePtr<Node> DuplicateSubtree( TreePtr<Node> source,
                                     TreePtr<Node> source_terminus = TreePtr<Node>(),
                                     TreePtr<Node> dest_terminus = TreePtr<Node>() ) const;
-protected:
+protected:                                  
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const = 0;                                          
+                                      XLink x ) const = 0;                                      
     const SCREngine *master_scr_engine;    
 			
 private:    

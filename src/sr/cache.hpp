@@ -3,6 +3,8 @@
 
 #include "common/common.hpp"
 #include "node/specialise_oostd.hpp"
+#include "link.hpp"
+
 #include <map>
 #include <functional>
 
@@ -20,8 +22,8 @@ class LocatedLink;
 class CacheByLocation
 {
 public:       
-    typedef TreePtr<Node> Value;
-    typedef TreePtr<Node> Key;
+    typedef XLink Value;
+    typedef XLink Key;
     typedef function<Value(Key key)> CannonicalOperation;
 
     /**

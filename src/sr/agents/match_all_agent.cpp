@@ -18,14 +18,14 @@ shared_ptr<PatternQuery> MatchAllAgent::GetPatternQuery() const
 
 
 void MatchAllAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                         TreePtr<Node> x ) const
+                                         XLink x ) const
 { 
     INDENT("&");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!
     query.Reset();
     
     // Check pre-restriction
-    CheckLocalMatch(x.get());
+    CheckLocalMatch(x.GetChildX().get());
     
     for( CollectionInterface::iterator pit = GetPatterns().begin(); pit != GetPatterns().end(); ++pit )                 
     {

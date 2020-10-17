@@ -9,7 +9,7 @@ shared_ptr<PatternQuery> PlaceholderAgent::GetPatternQuery() const
 
 
 void PlaceholderAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                            TreePtr<Node> x ) const
+                                            XLink x ) const
 { 
     ASSERTFAIL();
 }    

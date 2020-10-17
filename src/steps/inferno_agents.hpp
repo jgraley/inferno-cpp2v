@@ -39,7 +39,7 @@ struct BuildIdentifierAgent : public virtual InfernoAgent
     BuildIdentifierAgent( string s, int f=0 ) : format(s), flags(f) {}
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const;
+                                      XLink x ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     Sequence<CPPTree::Identifier> sources;
     string GetNewName();
@@ -96,7 +96,7 @@ struct IdentifierByNameAgent : public virtual InfernoAgent
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const;
+                                      XLink x ) const;
 
     string name;
 };
@@ -141,10 +141,10 @@ struct NestedAgent : public virtual InfernoAgent
 {
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const;                  
+                                      XLink x ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
-    virtual TreePtr<Node> Advance( TreePtr<Node> x, 
-                                   string *depth ) const = 0;
+    virtual XLink Advance( XLink x, 
+                           string *depth ) const = 0;
     
     TreePtr<Node> terminus; 
     TreePtr<CPPTree::String> depth;    
@@ -161,8 +161,8 @@ private:
 struct NestedArrayAgent : NestedAgent, Special<CPPTree::Type>
 {
     SPECIAL_NODE_FUNCTIONS
-    virtual TreePtr<Node> Advance( TreePtr<Node> x, 
-                                   string *depth ) const;
+    virtual XLink Advance( XLink x, 
+                           string *depth ) const;
 };
 
 
@@ -175,8 +175,8 @@ struct NestedArrayAgent : NestedAgent, Special<CPPTree::Type>
 struct NestedSubscriptLookupAgent : NestedAgent, Special<CPPTree::Expression>
 {
     SPECIAL_NODE_FUNCTIONS
-    virtual TreePtr<Node> Advance( TreePtr<Node> x, 
-                                   string *depth ) const;
+    virtual XLink Advance( XLink x, 
+                           string *depth ) const;
 };
 
 //---------------------------------- BuildContainerSizeAgent ------------------------------------    
@@ -192,7 +192,7 @@ struct BuildContainerSizeAgent : public virtual InfernoAgent,
 private:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const;
+                                      XLink x ) const;
 	TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode );
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
 }; 
@@ -209,7 +209,7 @@ struct IsLabelReachedAgent : public virtual InfernoAgent,
 	virtual void FlushCache() const;
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      TreePtr<Node> x ) const;
+                                      XLink x ) const;
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const {} // TODO give own appearance
     TreePtr<CPPTree::Expression> pattern;           
            
