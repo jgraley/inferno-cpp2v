@@ -69,6 +69,7 @@ public:
         AndRuleEngine * const algo;
         TreePtr<Node> root_pattern;
         Agent *root_agent;
+        TreePtr< MatchAll<Node> > closure_pattern;
         set<Agent *> master_agents;
         set<Agent *> my_normal_agents;   
         set< Agent *> my_evaluators;   
