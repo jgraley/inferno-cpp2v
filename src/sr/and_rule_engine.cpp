@@ -42,6 +42,7 @@ AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, co
     // For closure under semi-link model, we need a link to root, and therefore a parent of root
     closure_pattern = MakePatternPtr< MatchAll<Node> >();
     closure_pattern->patterns = (root_pattern);
+    root_pattern_link = PatternLink( Agent::AsAgent(closure_pattern), &closure_pattern->patterns.front() );
     
     set<Agent *> normal_agents;
     PopulateNormalAgents( &normal_agents, root_agent );    
@@ -382,38 +383,6 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
         }            
     }
 }
-
-
-void AndRuleEngine::CompareCoupling( Agent *agent,
-                                     TreePtr<Node> x,
-                                     const CouplingMap *keys )
-{
-    ASSERT( keys->count(agent) > 0 );
-
-    // Enforce rule #149
-    ASSERT( !TreePtr<SubContainer>::DynamicCast( keys->at(agent) ) ); 
-
-    // Allow Magic Match Anything 
-    if( x == DecidedQueryCommon::MMAX_Node )
-        return;
-
-    // This function establishes the policy for couplings in one place,
-    // apart from the other place which is plan.by_equivalence_links.
-    // Today, it's SimpleCompare, via EquivalenceRelation. 
-    // And it always will be: see #121; para starting at "No!!"
-    static EquivalenceRelation equivalence_relation;
-    if( !equivalence_relation( x, keys->at(agent) ) )
-        throw Mismatch();    
-}                                     
-
-
-void AndRuleEngine::KeyCoupling( Agent *agent,
-                                 TreePtr<Node> x,
-                                 CouplingMap *keys )
-{
-    ASSERT( keys->count(agent) == 0 )("Coupling conflict!\n");    
-    (*keys)[agent] = x;
-}                                     
 
 
 void AndRuleEngine::CompareLinks( Agent *agent,
@@ -768,6 +737,70 @@ const CouplingMap &AndRuleEngine::GetCouplingKeys()
 {
     return solution_keys;
 }
+
+
+void AndRuleEngine::CompareCoupling( Agent *agent,
+                                     TreePtr<Node> x,
+                                     const CouplingMap *keys )
+{
+    ASSERT( keys->count(agent) > 0 );
+
+    // Enforce rule #149
+    ASSERT( !TreePtr<SubContainer>::DynamicCast( keys->at(agent) ) ); 
+
+    // Allow Magic Match Anything 
+    if( x == DecidedQueryCommon::MMAX_Node )
+        return;
+
+    // This function establishes the policy for couplings in one place,
+    // apart from the other place which is plan.by_equivalence_links.
+    // Today, it's SimpleCompare, via EquivalenceRelation. 
+    // And it always will be: see #121; para starting at "No!!"
+    static EquivalenceRelation equivalence_relation;
+    if( !equivalence_relation( x, keys->at(agent) ) )
+        throw Mismatch();    
+}                                     
+
+
+void AndRuleEngine::KeyCoupling( Agent *agent,
+                                 TreePtr<Node> x,
+                                 CouplingMap *keys )
+{
+    ASSERT( keys->count(agent) == 0 )("Coupling conflict!\n");    
+    (*keys)[agent] = x;
+}                                     
+
+
+void AndRuleEngine::CompareCoupling( PatternLink pattern,
+                                     TreePtr<Node> x,
+                                     const CouplingLinkMap *keys )
+{
+    ASSERT( keys->count(pattern) > 0 );
+
+    // Enforce rule #149
+    ASSERT( !TreePtr<SubContainer>::DynamicCast( keys->at(pattern) ) ); 
+
+    // Allow Magic Match Anything 
+    if( x == DecidedQueryCommon::MMAX_Node )
+        return;
+
+    // This function establishes the policy for couplings in one place,
+    // apart from the other place which is plan.by_equivalence_links.
+    // Today, it's SimpleCompare, via EquivalenceRelation. 
+    // And it always will be: see #121; para starting at "No!!"
+    static EquivalenceRelation equivalence_relation;
+    if( !equivalence_relation( x, keys->at(pattern) ) )
+        throw Mismatch();    
+}                                     
+
+
+void AndRuleEngine::KeyCoupling( PatternLink pattern,
+                                 TreePtr<Node> x,
+                                 CouplingLinkMap *keys )
+{
+    ASSERT( keys->count(pattern) == 0 )("Coupling conflict!\n");    
+    (*keys)[pattern] = x;
+}                                     
 
 
 void AndRuleEngine::AssertNewCoupling( const CouplingMap &extracted, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent )

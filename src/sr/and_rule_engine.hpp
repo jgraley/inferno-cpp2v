@@ -7,6 +7,8 @@
 #include "common/mismatch.hpp"
 #include "agents/agent.hpp"
 #include "agents/placeholder_agent.hpp"
+#include "agents/match_all_agent.hpp"
+#include "link.hpp"
 #include <set>
 
 namespace CSP
@@ -69,6 +71,7 @@ public:
         AndRuleEngine * const algo;
         TreePtr<Node> root_pattern;
         Agent *root_agent;
+        PatternLink root_pattern_link;
         TreePtr< MatchAll<Node> > closure_pattern;
         set<Agent *> master_agents;
         set<Agent *> my_normal_agents;   
@@ -92,12 +95,6 @@ public:
     void ExpandDomain( set< TreePtr<Node> > &domain );
     void StartCSPSolver( TreePtr<Node> start_x );
     void GetNextCSPSolution( TreePtr<Node> start_x );
-    void CompareCoupling( Agent *agent,
-                          TreePtr<Node> x,
-                          const CouplingMap *keys );
-    void KeyCoupling( Agent *agent,
-                      TreePtr<Node> x,
-                      CouplingMap *keys );
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( Agent *agent,
@@ -121,6 +118,20 @@ public:
     const CouplingMap &GetCouplingKeys();
 
 private:    
+    typedef map< PatternLink, TreePtr<Node> > CouplingLinkMap;
+
+    void CompareCoupling( Agent *agent,
+                          TreePtr<Node> x,
+                          const CouplingMap *keys );
+    void KeyCoupling( Agent *agent,
+                      TreePtr<Node> x,
+                      CouplingMap *keys );
+    void CompareCoupling( PatternLink pattern,
+                          TreePtr<Node> x,
+                          const CouplingLinkMap *keys );
+    void KeyCoupling( PatternLink pattern,
+                      TreePtr<Node> x,
+                      CouplingLinkMap *keys );
     void AssertNewCoupling( const CouplingMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
 
     CouplingMap working_keys; 
