@@ -65,12 +65,12 @@ SCREngine::Plan::Plan( SCREngine *algo_,
     CreateMyEngines( master_agents, my_agents_needing_engines );    
     ConfigureAgents();
     
-    and_rule_engine = make_shared<AndRuleEngine>(root_agent, master_agents);
+    and_rule_engine = make_shared<AndRuleEngine>(root_pattern, master_agents);
 } 
 
 
 void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
-						     		    	   TreePtr<Node> rp )
+						     		     TreePtr<Node> rp )
 {
     ASSERT( cp )("Compare pattern must always be provided\n");
     
@@ -100,8 +100,8 @@ void SCREngine::Plan::InstallRootAgents( TreePtr<Node> cp,
     }
     
     ASSERT( cp==rp ); // Should have managed to reduce to a single pattern by now
-    pattern = cp; 
-    root_agent = Agent::AsAgent(pattern);
+    root_pattern = cp; 
+    root_agent = Agent::AsAgent(root_pattern);
 }
     
 
@@ -110,7 +110,7 @@ void SCREngine::Plan::CategoriseSubs( const set<Agent *> &master_agents,
 {
     // Walkers for compare and replace patterns that do not recurse beyond slaves (except via "through")
     // So that the compare and replace subtrees of slaves are "obsucured" and not visible
-    VisibleWalk tp(pattern); 
+    VisibleWalk tp(root_pattern); 
     set<Agent *> visible_agents;
     FOREACH( TreePtr<Node> n, tp )
         visible_agents.insert( Agent::AsAgent(n) );
@@ -182,7 +182,7 @@ void SCREngine::GetGraphInfo( vector<string> *labels,
     // TODO pretty sure this can "suck in" explicitly placed stuff and overlay 
     // nodes under the SR, CR or slave. These are obviously unnecessary, maybe I
     // should error on them?
-    TreePtr<Node> original_pattern = plan.pattern;
+    TreePtr<Node> original_pattern = plan.root_pattern;
     if( plan.is_search )
     {
         TreePtr< Stuff<Node> > stuff = dynamic_pointer_cast< Stuff<Node> >(original_pattern);
@@ -292,9 +292,9 @@ int SCREngine::RepeatingCompareReplace( TreePtr<Node> *proot,
     INDENT("}");
     TRACE("begin RCR\n");
         
-    ASSERT( plan.pattern )("SCREngine object was not configured before invocation.\n"
-                           "Either call Configure() or supply pattern arguments to constructor.\n"
-                           "Thank you for taking the time to read this message.\n");
+    ASSERT( plan.root_pattern )("SCREngine object was not configured before invocation.\n"
+                                "Either call Configure() or supply pattern arguments to constructor.\n"
+                                "Thank you for taking the time to read this message.\n");
     
     for(int i=0; i<repetitions; i++) 
     {

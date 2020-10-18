@@ -25,17 +25,18 @@
 
 using namespace SR;
 
-AndRuleEngine::AndRuleEngine( Agent *root_agent_, const set<Agent *> &master_agents_ ) :
-    plan( this, root_agent_, master_agents_ )
+AndRuleEngine::AndRuleEngine( TreePtr<Node> root_pattern_, const set<Agent *> &master_agents_ ) :
+    plan( this, root_pattern_, master_agents_ )
 {
 }    
  
-AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, Agent *root_agent_, const set<Agent *> &master_agents_) :
+AndRuleEngine::Plan::Plan( AndRuleEngine *algo_, TreePtr<Node> root_pattern_, const set<Agent *> &master_agents_) :
     algo( algo_ )
 {
     TRACE(GetName());
     INDENT("P");
-    root_agent = root_agent_;
+    root_pattern = root_pattern_;
+    root_agent = Agent::AsAgent(root_pattern);
     master_agents = master_agents_;
     
     set<Agent *> normal_agents;
@@ -291,19 +292,19 @@ void AndRuleEngine::Plan::CreateVariousThings( const set<Agent *> &normal_agents
         {        
             if( pq->GetEvaluator() )
             {
-                my_evaluator_abnormal_engines[link] = make_shared<AndRuleEngine>( link.GetChildAgent(), 
+                my_evaluator_abnormal_engines[link] = make_shared<AndRuleEngine>( link.GetPattern(), 
                                                                                   surrounding_agents );  
             }
             else
             {
-                my_free_abnormal_engines[link] = make_shared<AndRuleEngine>( link.GetChildAgent(), 
+                my_free_abnormal_engines[link] = make_shared<AndRuleEngine>( link.GetPattern(), 
                                                                              surrounding_agents );  
             }
         }
         
         FOREACH( PatternLink link, pq->GetMultiplicityLinks() )
         {
-            my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link.GetChildAgent(), 
+            my_multiplicity_engines[link] = make_shared<AndRuleEngine>( link.GetPattern(), 
                                                                         surrounding_agents );  
         }
     }

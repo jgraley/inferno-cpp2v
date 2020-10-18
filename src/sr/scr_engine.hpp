@@ -53,7 +53,7 @@ private:
         SCREngine * const algo;
         const bool is_search;    
         const CompareReplace *overall_master_ptr;
-        TreePtr<Node> pattern;
+        TreePtr<Node> root_pattern;
         Agent *root_agent;
         const SCREngine *master_ptr;
         std::shared_ptr< set<Agent *> > my_agents;   

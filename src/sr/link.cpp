@@ -76,6 +76,12 @@ Agent *PatternLink::GetChildAgent() const
 }
 
 
+TreePtr<Node> PatternLink::GetPattern() const
+{
+    return *ppattern;
+}
+
+
 const TreePtrInterface *PatternLink::GetPatternPtr() const
 {
     return ppattern;

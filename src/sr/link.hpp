@@ -24,6 +24,7 @@ public:
     bool operator==(const LocatedLink &other) const;
     explicit operator bool() const;
     Agent *GetChildAgent() const;
+    TreePtr<Node> GetPattern() const;
     const TreePtrInterface *GetPatternPtr() const;
     string GetTrace() const; // used for debug
     
