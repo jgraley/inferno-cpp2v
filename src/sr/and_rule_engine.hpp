@@ -99,7 +99,7 @@ public:
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( Agent *agent,
-                         XLink x );
+                         TreePtr<Node> x );
     void CompareEvaluatorLinks( Agent *agent, 
                                 const CouplingMap *combined_keys, 
                                 const CouplingMap *after_pass_keys );

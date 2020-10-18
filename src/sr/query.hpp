@@ -8,7 +8,6 @@
 
 #include "boolean_evaluator.hpp"
 #include "subcontainers.hpp" 
-#include "link.hpp" 
 
 #include <vector>
 #include <boost/type_traits.hpp>
@@ -16,6 +15,8 @@
 namespace SR
 { 
 class Agent;
+class PatternLink;
+class LocatedLink;
 
 class PatternQuery 
 {
@@ -132,9 +133,9 @@ public:
 
     virtual void CompleteDecisionsWithEmpty() = 0;
 
-    virtual void RegisterNormalLink( const TreePtrInterface *ppattern, XLink xlink ) = 0; 
-    virtual void RegisterAbnormalLink( const TreePtrInterface *ppattern, XLink xlink ) = 0; 
-    virtual void RegisterMultiplicityLink( const TreePtrInterface *ppattern, XLinkMultiplicity xlink ) = 0; 
+    virtual void RegisterNormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x ) = 0; 
+    virtual void RegisterAbnormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x ) = 0; 
+    virtual void RegisterMultiplicityLink( const TreePtrInterface *ppattern, TreePtr<SubContainer> x ) = 0; 
     virtual void RegisterAlwaysMatchingLink( const TreePtrInterface *ppattern ) = 0; // Is a normal link
     
     virtual void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ) = 0; 
@@ -193,9 +194,9 @@ public:
     ContainerInterface::iterator SkipDecision();
     void CompleteDecisionsWithEmpty();
 
-    void RegisterNormalLink( const TreePtrInterface *ppattern, XLink xlink ); 
-    void RegisterAbnormalLink( const TreePtrInterface *ppattern, XLink xlink ); 
-    void RegisterMultiplicityLink( const TreePtrInterface *ppattern, XLinkMultiplicity xlink ); 
+    void RegisterNormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x ); 
+    void RegisterAbnormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x ); 
+    void RegisterMultiplicityLink( const TreePtrInterface *ppattern, TreePtr<SubContainer> x ); 
     void RegisterAlwaysMatchingLink( const TreePtrInterface *ppattern ); // Is a normal link
 
     void RegisterEvaluator( shared_ptr<BooleanEvaluator> e ); 

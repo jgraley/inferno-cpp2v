@@ -14,12 +14,12 @@ shared_ptr<PatternQuery> OverlayAgent::GetPatternQuery() const
 
 
 void OverlayAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                        XLink x ) const
+                                        TreePtr<Node> x ) const
 {
     query.Reset();
     
     // Check pre-restriction
-    CheckLocalMatch(x.GetChildX().get());
+    CheckLocalMatch(x.get());
 
     query.RegisterNormalLink( GetThrough(), x ); // Link into X
 }

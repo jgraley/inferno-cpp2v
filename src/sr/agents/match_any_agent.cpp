@@ -29,7 +29,7 @@ shared_ptr<PatternQuery> MatchAnyAgent::GetPatternQuery() const
 
 
 void MatchAnyAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                         XLink x ) const
+                                         TreePtr<Node> x ) const
 {
     INDENT("|");
     ASSERT( !GetPatterns().empty() ); // must be at least one thing!

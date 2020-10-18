@@ -24,10 +24,10 @@ shared_ptr<PatternQuery> PointerIsAgent::GetPatternQuery() const
 
 
 void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                          XLink x ) const
+                                          TreePtr<Node> x ) const
 {
 	INDENT("@");
-    auto op = [&](XLink x) -> XLink
+    auto op = [&](TreePtr<Node> x) -> TreePtr<Node>
     {
 #ifdef SPIKE
 #ifdef SPIKE_MATCH
@@ -45,7 +45,7 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
         Walk e( master_scr_engine->GetOverallMaster()->GetContext() ); 
         for( Walk::iterator wit=e.begin(); wit!=e.end(); ++wit )
         {
-            if( *wit == x.GetChildX() ) // found ourself TODO use find()
+            if( *wit == x ) // found ourself TODO use find()
             {            
                 if(found_one_already)
                     throw Mismatch(); // X has multiple parents - ambiguous, so don't match
@@ -56,7 +56,7 @@ void PointerIsAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
                 // Make an architypical node matching the pointer's type
                 TreePtr<Node> ptr_arch = px->MakeValueArchitype();
                 // Stick that in your pipe + smoke it
-                return XLink(ptr_arch); // Generated Link (one-to-one with X)  
+                return ptr_arch; // Generated Link (one-to-one with X)  
             }
         }
         if(!found_one_already)

@@ -27,7 +27,7 @@ class StarAgent : public virtual AgentCommon
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;                  
+                                      TreePtr<Node> x ) const;                  
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
 private:

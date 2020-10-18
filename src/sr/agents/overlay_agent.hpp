@@ -18,11 +18,11 @@ namespace SR
 /// be overlayed over the pattern under `through`, to the extent that this
 /// is unambiguous and the structures of the two subtrees match.
 class OverlayAgent : public virtual AgentCommon
-{  
+{
 public:
     virtual shared_ptr<PatternQuery> GetPatternQuery() const;
     virtual void RunDecidedQueryImpl( DecidedQueryAgentInterface &query,
-                                      XLink x ) const;                  
+                                      TreePtr<Node> x ) const;                  
 	virtual void GetGraphAppearance( bool *bold, string *text, string *shape ) const;
     virtual TreePtr<Node> BuildReplaceImpl( TreePtr<Node> keynode=TreePtr<Node>() );
 private:

@@ -95,23 +95,23 @@ void DecidedQuery::Start()
 }
 
 
-void DecidedQuery::RegisterNormalLink( const TreePtrInterface *ppattern, XLink xlink )
+void DecidedQuery::RegisterNormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x )
 {
-    LocatedLink link( base_agent, ppattern, xlink );
+    LocatedLink link( base_agent, ppattern, x, WHODAT() );
     normal_links.push_back( link );        
 }
 
 
-void DecidedQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern, XLink xlink )
+void DecidedQuery::RegisterAbnormalLink( const TreePtrInterface *ppattern, TreePtr<Node> x )
 {
-    LocatedLink link( base_agent, ppattern, xlink );
+    LocatedLink link( base_agent, ppattern, x, WHODAT() );
     abnormal_links.push_back( link );
 }
 
 
-void DecidedQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern, XLinkMultiplicity xlink )
+void DecidedQuery::RegisterMultiplicityLink( const TreePtrInterface *ppattern, TreePtr<SubContainer> x )
 {
-    LocatedLink link( base_agent, ppattern, xlink );
+    LocatedLink link( base_agent, ppattern, x, WHODAT() );
     multiplicity_links.push_back( link );
 }
 
