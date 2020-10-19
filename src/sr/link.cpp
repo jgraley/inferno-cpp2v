@@ -230,13 +230,13 @@ bool SR::operator==( const list<PatternLink> &left, const list<LocatedLink> &rig
 
 
 list<LocatedLink> SR::LocateLinksFromMap( const list<PatternLink> &plinks, 
-                                          const map< PatternLink, TreePtr<Node> > &solution_keys )
+                                          const map< PatternLink, TreePtr<Node> > &internal_solution )
 {
     list<LocatedLink> llinks;
     for( PatternLink plink : plinks )
     {
-        ASSERT( solution_keys.count(plink) > 0 );
-        LocatedLink llink( plink, solution_keys.at(plink) );
+        ASSERT( internal_solution.count(plink) > 0 );
+        LocatedLink llink( plink, internal_solution.at(plink) );
         llinks.push_back( llink );
     }
     return llinks;

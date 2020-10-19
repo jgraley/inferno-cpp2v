@@ -109,7 +109,7 @@ private:
     void CompareAfterPassAgent( Agent *agent, 
                                 TreePtr<Node> x,
                                 const CouplingMap &external_combined_keys,
-                                const CouplingLinkMap &internal_combined_keys );
+                                const CouplingLinkMap &internal_combined_solution );
     void CompareAfterPass();
     
 public:
@@ -120,24 +120,27 @@ public:
     void Compare( TreePtr<Node> start_x );
     void EnsureChoicesHaveIterators();
 
-    const CouplingMap GetCouplingKeys();
+    const CouplingMap &GetCouplingKeys();
 
 private:    
     void CompareCoupling( LocatedLink link,
                           const CouplingMap *keys );
     void KeyCoupling( LocatedLink link,
                       CouplingMap *keys );
-    void KeyCoupling( LocatedLink link,
-                      CouplingLinkMap *keys );
     static CouplingMap CouplingMapFromLinkMap( CouplingLinkMap links );
     void AssertNewCoupling( const CouplingMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
 
-    CouplingMap internal_coupling_keys; 
+    // Keys are mapped agaist agents, even though one of the links into
+    // the agent is the keyer. This is well-defined and avoids merging
+    // this instance's problem into master instance's problems.
     const CouplingMap *master_keys;
+    CouplingMap internal_coupling_keys; 
+    CouplingMap external_keys; 
 
-    CouplingLinkMap solution_keys; 
-    CouplingLinkMap external_solution_keys; 
+    // These are partial solutions, and are mapped against the links
+    // into the agents (half-link model).
     CouplingLinkMap master_coupling_candidates;
+    CouplingLinkMap internal_solution; 
 };
 
 #endif
