@@ -73,8 +73,7 @@ private: friend class PatternLink;
 bool operator==( const list<PatternLink> &left, const list<LocatedLink> &right );
 
 list<LocatedLink> LocateLinksFromMap( const list<PatternLink> &plinks, 
-                                      const map< PatternLink, TreePtr<Node> > &solution_keys,
-                                      const map< Agent *, TreePtr<Node> > &mappy );
+                                      const map< PatternLink, TreePtr<Node> > &keys );
 };
 
 #endif

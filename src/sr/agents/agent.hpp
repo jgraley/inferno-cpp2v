@@ -45,12 +45,10 @@ public:
                                   TreePtr<Node> x ) const = 0;                                                
     virtual void ResumeNormalLinkedQuery( Conjecture &conj,
                                              TreePtr<Node> x,
-                                             const list<LocatedLink> &required_links,
-                                             const set<PatternLink> &by_equivalence ) const = 0;
+                                             const list<LocatedLink> &required_links ) const = 0;
     virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
                                        TreePtr<Node> x,
-                                       const list<LocatedLink> &required_links,
-                                       const set<PatternLink> &by_equivalence ) const = 0;                                                
+                                       const list<LocatedLink> &required_links ) const = 0;                                                
     virtual TreePtr<Node> GetKey() = 0;                                  
     virtual void ResetKey() = 0;     
     virtual void KeyReplace( const CouplingMap *coupling_keys ) = 0;
@@ -79,12 +77,10 @@ public:
                                   TreePtr<Node> x ) const;                                                
     virtual void ResumeNormalLinkedQuery( Conjecture &conj,
                                              TreePtr<Node> x,
-                                             const list<LocatedLink> &required_links,
-                                             const set<PatternLink> &by_equivalence ) const;
+                                             const list<LocatedLink> &required_links ) const;
     virtual void RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
                                        TreePtr<Node> x,
-                                       const list<LocatedLink> &required_links,
-                                       const set<PatternLink> &by_equivalence ) const;                                                
+                                       const list<LocatedLink> &required_links ) const;                                                
     void SetKey( TreePtr<Node> x );
     TreePtr<Node> GetKey();                                  
     void ResetKey();    

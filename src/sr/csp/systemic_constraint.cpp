@@ -157,7 +157,6 @@ bool SystemicConstraint::Test( list< Value > values )
     // values that must tally up with the links required by NLQ.
     TreePtr<Node> x;
     list<SR::LocatedLink> expanded_links;
-    set<SR::PatternLink> by_equivalence;
     auto forceit = forces.begin();
     auto valit = values.begin();
     auto patit = plan.pq->GetNormalLinks().begin();
@@ -183,17 +182,6 @@ bool SystemicConstraint::Test( list< Value > values )
             break;
         }
         
-        switch( f.compare_by )
-        {
-        case CompareBy::EQUIVALENCE:
-            ASSERT(!first)("SystemicConstraint cannot handle self-variable by anything other than location\n");
-            by_equivalence.insert(*patit);
-            break;
-            
-        case CompareBy::LOCATION:
-            break;
-        }
-        
         if( !first )
             patit++;
         first = false;
@@ -203,7 +191,7 @@ bool SystemicConstraint::Test( list< Value > values )
     shared_ptr<SR::DecidedQuery> query = plan.agent->CreateDecidedQuery();
     try
     {
-        plan.agent->RunNormalLinkedQuery( query, x, expanded_links, by_equivalence );      
+        plan.agent->RunNormalLinkedQuery( query, x, expanded_links );      
     }
     catch( ::Mismatch & )
     {

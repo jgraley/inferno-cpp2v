@@ -94,9 +94,8 @@ void AgentCommon::RunDecidedQuery( DecidedQueryAgentInterface &query,
 
 
 void AgentCommon::ResumeNormalLinkedQuery( Conjecture &conj,
-                                              TreePtr<Node> x,
-                                              const list<LocatedLink> &required_links,
-                                              const set<PatternLink> &by_equivalence ) const
+                                           TreePtr<Node> x,
+                                           const list<LocatedLink> &required_links ) const
 {    
     while(1)
     {
@@ -132,17 +131,11 @@ void AgentCommon::ResumeNormalLinkedQuery( Conjecture &conj,
                 ASSERT( alit->GetChildAgent() == rlit->GetChildAgent() );
                 if( alit->GetChildX() == DecidedQueryCommon::MMAX_Node )
                     continue;
-                if( by_equivalence.count(*alit) )
+                // Compare by location
+                if( alit->GetChildX() != rlit->GetChildX() )
                 {
-                    // Compare by equivalence
-                    if( !(*equivalence_relation)( alit->GetChildX(), rlit->GetChildX() ) )
-                        match = false;
-                }
-                else
-                {
-                    // Compare by location
-                    if( alit->GetChildX() != rlit->GetChildX() )
-                        match = false;
+                    match = false;
+                    // TODO break?
                 }                                
             }
             
@@ -167,8 +160,7 @@ void AgentCommon::ResumeNormalLinkedQuery( Conjecture &conj,
 
 void AgentCommon::RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
                                         TreePtr<Node> x,
-                                        const list<LocatedLink> &required_links,
-                                        const set<PatternLink> &by_equivalence ) const
+                                        const list<LocatedLink> &required_links ) const
 {
     Conjecture conj(this, query);            
     conj.Start();
@@ -177,7 +169,7 @@ void AgentCommon::RunNormalLinkedQuery( shared_ptr<DecidedQuery> query,
     // is at least one match, so a single call suffices. To get all
     // the matches, call ResumeNormalLinkedQuery() directly with 
     // your own Conjecture object.
-    ResumeNormalLinkedQuery( conj, x, required_links, by_equivalence );
+    ResumeNormalLinkedQuery( conj, x, required_links );
 }
 
 

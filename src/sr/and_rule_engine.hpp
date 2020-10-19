@@ -109,7 +109,7 @@ private:
                                    const CouplingMap *combined_keys ); 
     void CompareAfterPassAgent( Agent *agent, 
                                 TreePtr<Node> x,
-                                const CouplingMap *combined_keys,
+                                const CouplingMap &external_combined_keys,
                                 const CouplingLinkMap &internal_combined_keys );
     void CompareAfterPass();
 public:

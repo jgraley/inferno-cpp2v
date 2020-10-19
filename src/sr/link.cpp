@@ -230,23 +230,14 @@ bool SR::operator==( const list<PatternLink> &left, const list<LocatedLink> &rig
 
 
 list<LocatedLink> SR::LocateLinksFromMap( const list<PatternLink> &plinks, 
-                                          const map< PatternLink, TreePtr<Node> > &solution_keys,
-                                          const map< Agent *, TreePtr<Node> > &mappy )
+                                          const map< PatternLink, TreePtr<Node> > &solution_keys )
 {
     list<LocatedLink> llinks;
     for( PatternLink plink : plinks )
     {
-        if( solution_keys.count(plink) > 0 )
-        {
-            LocatedLink llink( plink, solution_keys.at(plink) );
-            llinks.push_back( llink );
-        }
-        else
-        {
-            Agent *child_agent = plink.GetChildAgent();
-            LocatedLink llink( plink, mappy.at(child_agent) );
-            llinks.push_back( llink );
-        }
+        ASSERT( solution_keys.count(plink) > 0 );
+        LocatedLink llink( plink, solution_keys.at(plink) );
+        llinks.push_back( llink );
     }
     return llinks;
 }                                      
