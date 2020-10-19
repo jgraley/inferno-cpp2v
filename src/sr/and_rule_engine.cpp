@@ -541,13 +541,15 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
 
 void AndRuleEngine::CompareAfterPassAgent( Agent *agent, 
                                            TreePtr<Node> x,
-                                           const CouplingMap *combined_keys )
+                                           const CouplingMap *combined_keys,
+                                           const CouplingLinkMap &internal_combined_keys )
 {
     auto pq = agent->GetPatternQuery();
     TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(*x)("\n");    
     TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
     TRACEC("Based on ")(*combined_keys)("\n");    
-    list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), solution_keys, *master_keys );
+    map< Agent *, TreePtr<Node> > empty;
+    list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), internal_combined_keys, empty );
     TRACEC("Relocated links ")(ll)("\n");    
     auto query = make_shared<DecidedQuery>(pq);
     Conjecture conj(agent, query);            
@@ -616,11 +618,13 @@ void AndRuleEngine::CompareAfterPass()
     INDENT("R");
     const CouplingMap external_solution_keys_by_agent = CouplingMapFromLinkMap(external_solution_keys);
     const CouplingMap external_combined_keys = MapUnion( *master_keys, external_solution_keys_by_agent );      
+    
+    const CouplingLinkMap internal_combined_keys = MapUnion( master_coupling_candidates, solution_keys );      
 
     for( auto agent : plan.my_normal_agents )
     {
         TreePtr<Node> x = external_solution_keys_by_agent.at(agent);
-        CompareAfterPassAgent( agent, x, &external_combined_keys );
+        CompareAfterPassAgent( agent, x, &external_combined_keys, internal_combined_keys );
     }
 }
 

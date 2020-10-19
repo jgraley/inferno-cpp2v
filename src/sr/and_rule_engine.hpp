@@ -92,6 +92,9 @@ public:
         set<Agent *> reached; 
     } plan;
     
+private:    
+    typedef map< PatternLink, TreePtr<Node> > CouplingLinkMap;
+
     void ExpandDomain( set< TreePtr<Node> > &domain );
     void StartCSPSolver( TreePtr<Node> start_x );
     void GetNextCSPSolution( TreePtr<Node> start_x );
@@ -106,8 +109,10 @@ public:
                                    const CouplingMap *combined_keys ); 
     void CompareAfterPassAgent( Agent *agent, 
                                 TreePtr<Node> x,
-                                const CouplingMap *combined_keys );
+                                const CouplingMap *combined_keys,
+                                const CouplingLinkMap &internal_combined_keys );
     void CompareAfterPass();
+public:
     void Compare( TreePtr<Node> start_x,
                   const CouplingMap *master_keys );
     void CompareTrivialProblem( TreePtr<Node> start_x );
@@ -118,8 +123,6 @@ public:
     const CouplingMap GetCouplingKeys();
 
 private:    
-    typedef map< PatternLink, TreePtr<Node> > CouplingLinkMap;
-
     void CompareCoupling( Agent *agent,
                           TreePtr<Node> x,
                           const CouplingMap *keys );
