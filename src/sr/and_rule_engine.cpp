@@ -425,16 +425,18 @@ void AndRuleEngine::CompareLinks( Agent *agent,
             KeyCoupling( link.GetChildAgent(), x, &working_keys );
         }
 
-        DecidedCompare(link.GetChildAgent(), x);   
+        DecidedCompare(link, x);   
     }
 }
 
 
-void AndRuleEngine::DecidedCompare( Agent *agent,
+void AndRuleEngine::DecidedCompare( PatternLink plink,
                                     TreePtr<Node> x )  
 {
     INDENT("D");
+    ASSERT( plink ); // Pattern must not be nullptr
     ASSERT( x ); // Target must not be nullptr
+    Agent *agent = plink.GetChildAgent();
 
     // Obtain the query state from the conjecture
     shared_ptr<DecidedQuery> query = plan.conj->GetQuery(agent);
@@ -687,7 +689,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // Initialise keys to the ones inherited from master, keeping 
             // none of our own from any previous unsuccessful attempt.
             master_coupling_candidates.clear();            
-            DecidedCompare( plan.root_agent, start_x );            
+            DecidedCompare( plan.root_pattern_link, start_x );            
             CompareMasterKeys();
 #endif
 
@@ -801,6 +803,25 @@ void AndRuleEngine::KeyCoupling( PatternLink pattern,
     ASSERT( keys->count(pattern) == 0 )("Coupling conflict!\n");    
     (*keys)[pattern] = x;
 }                                     
+
+
+CouplingMap AndRuleEngine::CouplingMapFromLinkMap( CouplingLinkMap links )
+{
+    // We wish to use links for couplin maps internal to the
+    // AndRuleEngine (semi-linked model), but due to the awkward need 
+    // for a closure link for root agent, AndRuleEngine's external 
+    // interface and surrounding classes like SCREngine will continue 
+    // to use node-model maps (CouplingMap). This does the conversion.
+    CouplingMap c;
+    
+    for( pair< PatternLink, TreePtr<Node> > p : links )
+    {
+        ASSERT( p.first );
+        c[p.first.GetChildAgent()] = p.second;
+    }
+    
+    return c;
+}
 
 
 void AndRuleEngine::AssertNewCoupling( const CouplingMap &extracted, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent )

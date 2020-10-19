@@ -97,7 +97,7 @@ public:
     void GetNextCSPSolution( TreePtr<Node> start_x );
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
-    void DecidedCompare( Agent *agent,
+    void DecidedCompare( PatternLink plink,
                          TreePtr<Node> x );
     void CompareEvaluatorLinks( Agent *agent, 
                                 const CouplingMap *combined_keys, 
@@ -132,6 +132,7 @@ private:
     void KeyCoupling( PatternLink pattern,
                       TreePtr<Node> x,
                       CouplingLinkMap *keys );
+    static CouplingMap CouplingMapFromLinkMap( CouplingLinkMap links );
     void AssertNewCoupling( const CouplingMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
 
     CouplingMap working_keys; 
