@@ -106,6 +106,7 @@ public:
                                    const CouplingMap *combined_keys ); 
     void CompareAfterPassAgent( Agent *agent, 
                                 TreePtr<Node> x,
+                                const CouplingMap *external_combined_keys,
                                 const CouplingMap *combined_keys );
     void CompareAfterPass();
     void Compare( TreePtr<Node> start_x,
@@ -141,6 +142,7 @@ private:
 
     CouplingLinkMap working_keys; 
     CouplingLinkMap solution_keys; 
+    CouplingLinkMap external_solution_keys; 
     CouplingLinkMap master_coupling_candidates;
     const CouplingMap *master_keys;
 };
