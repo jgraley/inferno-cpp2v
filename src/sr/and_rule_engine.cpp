@@ -477,7 +477,7 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
 
 void AndRuleEngine::CompareEvaluatorLinks( Agent *agent, 
                                            const CouplingMap *combined_keys, 
-                                           const CouplingMap *keys ) 
+                                           const CouplingLinkMap *keys ) 
 {
     INDENT("E");
     auto pq = agent->GetPatternQuery();
@@ -492,7 +492,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
         TRACE("Comparing block %d\n", i);
  
         // Get x for linked node
-        TreePtr<Node> x = keys->at(link.GetChildAgent());
+        TreePtr<Node> x = keys->at(link);
                                 
         try 
         {
@@ -550,7 +550,6 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
     auto query = make_shared<DecidedQuery>(pq);
     Conjecture conj(agent, query);            
     conj.Start();
-    CouplingMap local_keys;
     int i=0;
     while(1)
     {
@@ -560,22 +559,24 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
         try
         {
             TRACE("Try out query, attempt %d (1-based)\n", i);    
-            local_keys.clear();
+            CouplingLinkMap evaluator_keys;
             // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
             FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
             {
-                KeyCoupling( link, &local_keys );
+                if( plan.my_evaluator_abnormal_engines.count(link) )
+                    KeyCoupling( link, &evaluator_keys );                   
                 
                 if( plan.my_free_abnormal_engines.count(link) )
                 {
                     shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at(link);
-                    TreePtr<Node> x = local_keys.at(link.GetChildAgent());             
-                    e->Compare( x, &external_combined_keys );
+                    e->Compare( link.GetChildX(), &external_combined_keys );
+                    external_solution_keys[link] = link.GetChildX();
                 }
             }                    
             FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
             {
-                KeyCoupling( link, &local_keys );
+                if( plan.my_evaluator_abnormal_engines.count(link) )
+                    KeyCoupling( link, &evaluator_keys );
 
                 if( plan.my_multiplicity_engines.count(link) )
                     CompareMultiplicityLinks( link, &external_combined_keys );  
@@ -583,7 +584,7 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
 
             // Process the evaluator agents.
             if( plan.my_evaluators.count( agent ) )
-                CompareEvaluatorLinks( agent, &external_combined_keys, &local_keys );            
+                CompareEvaluatorLinks( agent, &external_combined_keys, &evaluator_keys );            
             
             // if we got here, we're done!
             TRACE("Leaving while loop after %d tries\n", i);    
@@ -594,19 +595,7 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
         }
         if( !conj.Increment() )
             throw Agent::NormalLinksMismatch(); // Conjecture has run out of choices to try.            
-    }    
-
-    // Key free abnormals for the benefit of replace
-    FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
-    {
-        if( plan.my_free_abnormal_engines.count(link) )
-        {
-            TreePtr<Node> x = local_keys.at(link.GetChildAgent());   
-            LocatedLink local_link( link, x );
-            KeyCoupling( local_link, &solution_keys );
-            KeyCoupling( local_link, &external_solution_keys );
-        }
-    }
+    } 
 }      
 
 

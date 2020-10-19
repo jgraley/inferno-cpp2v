@@ -103,7 +103,7 @@ private:
     void DecidedCompare( LocatedLink link );
     void CompareEvaluatorLinks( Agent *agent, 
                                 const CouplingMap *combined_keys, 
-                                const CouplingMap *after_pass_keys );
+                                const CouplingLinkMap *after_pass_keys );
     void CompareMultiplicityLinks( LocatedLink link, 
                                    const CouplingMap *combined_keys ); 
     void CompareAfterPassAgent( Agent *agent, 
@@ -111,6 +111,7 @@ private:
                                 const CouplingMap &external_combined_keys,
                                 const CouplingLinkMap &internal_combined_keys );
     void CompareAfterPass();
+    
 public:
     void Compare( TreePtr<Node> start_x,
                   const CouplingMap *master_keys );
