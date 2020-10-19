@@ -141,7 +141,7 @@ private:
 
     CouplingLinkMap working_keys; 
     CouplingMap solution_keys; 
-    CouplingMap master_coupling_candidates;
+    CouplingLinkMap master_coupling_candidates;
     const CouplingMap *master_keys;
 };
 

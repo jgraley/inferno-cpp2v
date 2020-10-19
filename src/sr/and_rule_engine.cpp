@@ -412,7 +412,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         // Master couplings are now checked in a post-pass
         if( plan.master_boundary_links.count(link) > 0 )
         {
-            master_coupling_candidates[link.GetChildAgent()] = x;
+            master_coupling_candidates[link] = x;
             continue;
         }
 
@@ -638,7 +638,7 @@ void AndRuleEngine::CompareMasterKeys()
 {
     for( auto link : plan.master_boundary_links )
     {
-        auto x = master_coupling_candidates.at(link.GetChildAgent());
+        auto x = master_coupling_candidates.at(link);
         CompareCoupling( link.GetChildAgent(), x, master_keys );
         TRACE("Accepted master coupling for ")(link.GetChildAgent())(" x=")(x)(" key=")(master_keys->at(link.GetChildAgent()))("\n");
     }
