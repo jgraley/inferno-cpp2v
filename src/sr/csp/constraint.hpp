@@ -118,7 +118,6 @@ public:
      * @param domain [inout] The domain to expand
      */
     void ExpandDomain( set< TreePtr<Node> > &domain ) { /* not yet implemented */ }
-
 };
 
 };

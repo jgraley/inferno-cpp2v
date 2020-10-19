@@ -132,10 +132,14 @@ private:
     void KeyCoupling( PatternLink pattern,
                       TreePtr<Node> x,
                       CouplingLinkMap *keys );
+    void CompareCoupling( LocatedLink link,                          
+                          const CouplingLinkMap *keys );
+    void KeyCoupling( LocatedLink link,
+                      CouplingLinkMap *keys );
     static CouplingMap CouplingMapFromLinkMap( CouplingLinkMap links );
     void AssertNewCoupling( const CouplingMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
 
-    CouplingMap working_keys; 
+    CouplingLinkMap working_keys; 
     CouplingMap solution_keys; 
     CouplingMap master_coupling_candidates;
     const CouplingMap *master_keys;

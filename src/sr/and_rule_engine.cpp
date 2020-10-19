@@ -404,8 +404,8 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         // Are we at a residual coupling?
         if( plan.coupling_residual_links.count( link ) > 0 ) // See #129
         {
-            CompareCoupling( link.GetChildAgent(), x, &working_keys );
-            TRACE("Accepted normal coupling for ")(link.GetChildAgent())(" x=")(x)(" key=")(working_keys.at(link.GetChildAgent()))("\n");
+            CompareCoupling( link, &working_keys );
+            TRACE("Accepted working coupling for ")(link)(" key=")(working_keys.at(link))("\n");
             continue;
         }
         
@@ -422,7 +422,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         if( plan.coupling_keyer_links.count( link ) )
         {
             ASSERT( x != DecidedQueryCommon::MMAX_Node )("Can't key with MMAX because would leak");
-            KeyCoupling( link.GetChildAgent(), x, &working_keys );
+            KeyCoupling( link, &working_keys );
         }
 
         DecidedCompare(link, x);   
@@ -777,10 +777,23 @@ void AndRuleEngine::CompareCoupling( PatternLink pattern,
                                      TreePtr<Node> x,
                                      const CouplingLinkMap *keys )
 {
-    ASSERT( keys->count(pattern) > 0 );
+    PatternLink found_pattern;
+    TreePtr<Node> found_x;
+    for( pair< PatternLink, TreePtr<Node> > p : *keys )
+    {
+        if( p.first.GetChildAgent() == pattern.GetChildAgent() )
+        {
+            found_pattern = p.first;
+            found_x = p.second;
+        }
+    }
+    
+    ASSERT( found_x )
+          ("Keys: ")(*keys)("\n")
+          ("Pattern: ")(pattern)("\n");
 
     // Enforce rule #149
-    ASSERT( !TreePtr<SubContainer>::DynamicCast( keys->at(pattern) ) ); 
+    ASSERT( !TreePtr<SubContainer>::DynamicCast( found_x ) ); 
 
     // Allow Magic Match Anything 
     if( x == DecidedQueryCommon::MMAX_Node )
@@ -791,7 +804,7 @@ void AndRuleEngine::CompareCoupling( PatternLink pattern,
     // Today, it's SimpleCompare, via EquivalenceRelation. 
     // And it always will be: see #121; para starting at "No!!"
     static EquivalenceRelation equivalence_relation;
-    if( !equivalence_relation( x, keys->at(pattern) ) )
+    if( !equivalence_relation( x, found_x ) )
         throw Mismatch();    
 }                                     
 
@@ -802,6 +815,20 @@ void AndRuleEngine::KeyCoupling( PatternLink pattern,
 {
     ASSERT( keys->count(pattern) == 0 )("Coupling conflict!\n");    
     (*keys)[pattern] = x;
+}                                     
+
+
+void AndRuleEngine::CompareCoupling( LocatedLink link,
+                                     const CouplingLinkMap *keys )
+{
+    CompareCoupling( (PatternLink)link, link.GetChildX(), keys );
+}                                     
+
+
+void AndRuleEngine::KeyCoupling( LocatedLink link,
+                                 CouplingLinkMap *keys )
+{
+    KeyCoupling( (PatternLink)link, link.GetChildX(), keys );
 }                                     
 
 
