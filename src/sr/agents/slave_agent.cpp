@@ -60,7 +60,7 @@ void SlaveAgent::AgentConfigure( const SCREngine *master_scr_engine, SCREngine *
     my_scr_engine = my_scr_engine_;
 }
 
-void SlaveAgent::SetMasterCouplingKeys( const CouplingMap &keys )
+void SlaveAgent::SetMasterCouplingKeys( const CouplingKeys &keys )
 {
 	master_keys = keys;
 }

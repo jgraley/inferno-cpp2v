@@ -338,7 +338,7 @@ void AndRuleEngine::StartCSPSolver( TreePtr<Node> start_x )
         domain.insert(*wx_it);
     
     // Determine the full set of forces 
-    CouplingMap forces = *master_keys;
+    CouplingKeys forces = *master_keys;
     forces[plan.root_agent] = start_x;
     
     // Tell all the constraints about them
@@ -477,8 +477,8 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
 
 
 void AndRuleEngine::CompareEvaluatorLinks( Agent *agent, 
-                                           const CouplingMap *combined_keys, 
-                                           const CouplingLinkMap *keys ) 
+                                           const CouplingKeys *combined_keys, 
+                                           const SolutionMap *keys ) 
 {
     INDENT("E");
     auto pq = agent->GetPatternQuery();
@@ -517,7 +517,7 @@ void AndRuleEngine::CompareEvaluatorLinks( Agent *agent,
 
 
 void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link, 
-                                              const CouplingMap *combined_keys ) 
+                                              const CouplingKeys *combined_keys ) 
 {
     INDENT("M");
 
@@ -539,8 +539,8 @@ void AndRuleEngine::CompareMultiplicityLinks( LocatedLink link,
 
 void AndRuleEngine::CompareAfterPassAgent( Agent *agent, 
                                            TreePtr<Node> x,
-                                           const CouplingMap &external_combined_keys,
-                                           const CouplingLinkMap &internal_combined_solution )
+                                           const CouplingKeys &external_combined_keys,
+                                           const SolutionMap &internal_combined_solution )
 {
     auto pq = agent->GetPatternQuery();
     TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(*x)("\n");    
@@ -560,7 +560,7 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
         try
         {
             TRACE("Try out query, attempt %d (1-based)\n", i);    
-            CouplingLinkMap solution_for_evaluators;
+            SolutionMap solution_for_evaluators;
             // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
             FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
             {
@@ -611,10 +611,10 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
 void AndRuleEngine::CompareAfterPass()
 {
     INDENT("R");
-    const CouplingMap external_combined_keys = MapUnion( *master_keys, external_keys );          
+    const CouplingKeys external_combined_keys = MapUnion( *master_keys, external_keys );          
     TRACEC("External combined keys ")(external_combined_keys)("\n");    
 
-    const CouplingLinkMap internal_combined_solution = MapUnion( master_coupling_candidates, internal_solution );      
+    const SolutionMap internal_combined_solution = MapUnion( master_coupling_candidates, internal_solution );      
     TRACEC("Internal combined solution ")(internal_combined_solution)("\n");    
 
     for( auto agent : plan.my_normal_agents )
@@ -657,7 +657,7 @@ void AndRuleEngine::CompareMasterKeys()
 
 // This one if you want the resulting couplings and conj (ie doing a replace imminently)
 void AndRuleEngine::Compare( TreePtr<Node> start_x,
-                             const CouplingMap *master_keys_ )
+                             const CouplingKeys *master_keys_ )
 {
     INDENT("C");
     ASSERT( start_x );
@@ -735,7 +735,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
 // no master keys.
 void AndRuleEngine::Compare( TreePtr<Node> start_x )
 {
-    CouplingMap master_keys;
+    CouplingKeys master_keys;
     Compare( start_x, &master_keys );
 }
 
@@ -748,14 +748,14 @@ void AndRuleEngine::EnsureChoicesHaveIterators()
 }
 
 
-const CouplingMap &AndRuleEngine::GetCouplingKeys()
+const CouplingKeys &AndRuleEngine::GetCouplingKeys()
 {
     return external_keys;
 }
 
 
 void AndRuleEngine::CompareCoupling( LocatedLink residual_link,
-                                     const CouplingMap *keys )
+                                     const CouplingKeys *keys )
 {
     // Allow Magic Match Anything 
     if( residual_link.GetChildX() == DecidedQueryCommon::MMAX_Node )
@@ -778,7 +778,7 @@ void AndRuleEngine::CompareCoupling( LocatedLink residual_link,
 
 
 void AndRuleEngine::KeyCoupling( LocatedLink link,
-                                 CouplingMap *keys )
+                                 CouplingKeys *keys )
 {
     Agent *agent = link.GetChildAgent();
     ASSERT( keys->count(agent) == 0 )("Coupling conflict!\n");    
@@ -786,14 +786,14 @@ void AndRuleEngine::KeyCoupling( LocatedLink link,
 }                                                       
 
 
-CouplingMap AndRuleEngine::CouplingMapFromLinkMap( CouplingLinkMap links )
+CouplingKeys AndRuleEngine::CouplingMapFromLinkMap( SolutionMap links )
 {
     // We wish to use links for couplin maps internal to the
     // AndRuleEngine (semi-linked model), but due to the awkward need 
     // for a closure link for root agent, AndRuleEngine's external 
     // interface and surrounding classes like SCREngine will continue 
-    // to use node-model maps (CouplingMap). This does the conversion.
-    CouplingMap c;
+    // to use node-model maps (CouplingKeys). This does the conversion.
+    CouplingKeys c;
     
     for( pair< PatternLink, TreePtr<Node> > p : links )
     {
@@ -805,7 +805,7 @@ CouplingMap AndRuleEngine::CouplingMapFromLinkMap( CouplingLinkMap links )
 }
 
 
-void AndRuleEngine::AssertNewCoupling( const CouplingMap &extracted, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent )
+void AndRuleEngine::AssertNewCoupling( const CouplingKeys &extracted, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent )
 {
     ASSERT( extracted.count(new_agent) == 1 );
     if( TreePtr<SubContainer>::DynamicCast(new_x) )

@@ -54,7 +54,7 @@ void SearchContainerAgent::RunDecidedQueryImpl( DecidedQueryAgentInterface &quer
 }
 
 
-void SearchContainerAgent::KeyReplace( const CouplingMap *coupling_keys )
+void SearchContainerAgent::KeyReplace( const CouplingKeys *coupling_keys )
 {
     terminus_key = coupling_keys->at(AsAgent(terminus));
     SetKey( coupling_keys->at(this) );  

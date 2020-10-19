@@ -93,7 +93,7 @@ public:
     } plan;
     
 private:    
-    typedef map< PatternLink, TreePtr<Node> > CouplingLinkMap;
+    typedef map< PatternLink, TreePtr<Node> > SolutionMap;
 
     void ExpandDomain( set< TreePtr<Node> > &domain );
     void StartCSPSolver( TreePtr<Node> start_x );
@@ -102,45 +102,45 @@ private:
                        shared_ptr<const DecidedQuery> query );
     void DecidedCompare( LocatedLink link );
     void CompareEvaluatorLinks( Agent *agent, 
-                                const CouplingMap *combined_keys, 
-                                const CouplingLinkMap *after_pass_keys );
+                                const CouplingKeys *combined_keys, 
+                                const SolutionMap *after_pass_keys );
     void CompareMultiplicityLinks( LocatedLink link, 
-                                   const CouplingMap *combined_keys ); 
+                                   const CouplingKeys *combined_keys ); 
     void CompareAfterPassAgent( Agent *agent, 
                                 TreePtr<Node> x,
-                                const CouplingMap &external_combined_keys,
-                                const CouplingLinkMap &internal_combined_solution );
+                                const CouplingKeys &external_combined_keys,
+                                const SolutionMap &internal_combined_solution );
     void CompareAfterPass();
     
 public:
     void Compare( TreePtr<Node> start_x,
-                  const CouplingMap *master_keys );
+                  const CouplingKeys *master_keys );
     void CompareTrivialProblem( LocatedLink root_link );
     void CompareMasterKeys();
     void Compare( TreePtr<Node> start_x );
     void EnsureChoicesHaveIterators();
 
-    const CouplingMap &GetCouplingKeys();
+    const CouplingKeys &GetCouplingKeys();
 
 private:    
     void CompareCoupling( LocatedLink link,
-                          const CouplingMap *keys );
+                          const CouplingKeys *keys );
     void KeyCoupling( LocatedLink link,
-                      CouplingMap *keys );
-    static CouplingMap CouplingMapFromLinkMap( CouplingLinkMap links );
-    void AssertNewCoupling( const CouplingMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
+                      CouplingKeys *keys );
+    static CouplingKeys CouplingMapFromLinkMap( SolutionMap links );
+    void AssertNewCoupling( const CouplingKeys &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
 
     // Keys are mapped agaist agents, even though one of the links into
     // the agent is the keyer. This is well-defined and avoids merging
     // this instance's problem into master instance's problems.
-    const CouplingMap *master_keys;
-    CouplingMap internal_coupling_keys; 
-    CouplingMap external_keys; 
+    const CouplingKeys *master_keys;
+    CouplingKeys internal_coupling_keys; 
+    CouplingKeys external_keys; 
 
     // These are partial solutions, and are mapped against the links
     // into the agents (half-link model).
-    CouplingLinkMap master_coupling_candidates;
-    CouplingLinkMap internal_solution; 
+    SolutionMap master_coupling_candidates;
+    SolutionMap internal_solution; 
 };
 
 #endif
