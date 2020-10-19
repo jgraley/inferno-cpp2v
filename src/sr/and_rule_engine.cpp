@@ -398,8 +398,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         TRACE("Comparing normal link ")(link)(" keyer? %d residual? %d master? %d\n", plan.coupling_keyer_links.count( link ), plan.coupling_residual_links.count( link ), plan.master_boundary_links.count(link) );
         // Recurse normally 
         // Get x for linked node
-        TreePtr<Node> x = link.GetChildX();
-        ASSERT( x );
+        ASSERT( link.GetChildX() );
         
         // This is needed for decisionised MatchAny #75. Other schemes for
         // RegisterAlwaysMatchingLink() could be deployed.
@@ -419,7 +418,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         // Master couplings are now checked in a post-pass
         if( plan.master_boundary_links.count(link) > 0 )
         {
-            master_coupling_candidates[link] = x;
+            master_coupling_candidates[link] = link.GetChildX();
             continue;
         }
 
@@ -428,22 +427,22 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         // tests coupling_keyer_links as well as providing a small optimisation.
         if( plan.coupling_keyer_links.count( link ) )
         {
-            ASSERT( x != DecidedQueryCommon::MMAX_Node )("Can't key with MMAX because would leak");
+            ASSERT( link.GetChildX() != DecidedQueryCommon::MMAX_Node )("Can't key with MMAX because would leak");
             KeyCoupling( link, &working_keys );
         }
 
-        DecidedCompare(link, x);   
+        DecidedCompare(link);   
     }
 }
 
 
-void AndRuleEngine::DecidedCompare( PatternLink plink,
-                                    TreePtr<Node> x )  
+void AndRuleEngine::DecidedCompare( LocatedLink link )  
 {
     INDENT("D");
-    ASSERT( plink ); // Pattern must not be nullptr
-    ASSERT( x ); // Target must not be nullptr
-    Agent *agent = plink.GetChildAgent();
+    ASSERT( link.GetChildAgent() ); // Pattern must not be nullptr
+    ASSERT( link.GetChildX() ); // Target must not be nullptr
+    Agent * const agent = link.GetChildAgent();
+    TreePtr<Node> const x = link.GetChildX();
 
     // Obtain the query state from the conjecture
     shared_ptr<DecidedQuery> query = plan.conj->GetQuery(agent);
@@ -471,10 +470,8 @@ void AndRuleEngine::DecidedCompare( PatternLink plink,
     CompareLinks( agent, query );
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-    ASSERT( solution_keys.count(plink) == 0 )("Coupling conflict!\n");
-    KeyCoupling( plink, x, &solution_keys );
-    ASSERT( external_solution_keys.count(plink) == 0 )("Coupling conflict!\n");
-    KeyCoupling( plink, x, &external_solution_keys );
+    KeyCoupling( link, x, &solution_keys );
+    KeyCoupling( link, x, &external_solution_keys );
 }
 
 
@@ -631,7 +628,7 @@ void AndRuleEngine::CompareAfterPass()
 }
 
 
-void AndRuleEngine::CompareTrivialProblem( TreePtr<Node> start_x )
+void AndRuleEngine::CompareTrivialProblem( LocatedLink root_link )
 {
     // Trivial case: we have no agents, so there won't be any decisions
     // and so no problem to solve. Spare all algorithms the hassle of 
@@ -640,7 +637,7 @@ void AndRuleEngine::CompareTrivialProblem( TreePtr<Node> start_x )
     ASSERT( master_keys->count(plan.root_agent) );
     try
     {            
-        CompareCoupling( plan.root_agent, start_x, master_keys );
+        CompareCoupling( root_link, master_keys );
     }
     catch( const ::Mismatch& mismatch ) 
     {
@@ -652,11 +649,11 @@ void AndRuleEngine::CompareTrivialProblem( TreePtr<Node> start_x )
 
 void AndRuleEngine::CompareMasterKeys()
 {
-    for( auto link : plan.master_boundary_links )
+    for( auto plink : plan.master_boundary_links )
     {
-        auto x = master_coupling_candidates.at(link);
-        CompareCoupling( link.GetChildAgent(), x, master_keys );
-        TRACE("Accepted master coupling for ")(link.GetChildAgent())(" x=")(x)(" key=")(master_keys->at(link.GetChildAgent()))("\n");
+        LocatedLink link(plink, master_coupling_candidates.at(plink));
+        CompareCoupling( link, master_keys );
+        TRACE("Accepted master coupling for link=")(link)(" key=")(master_keys->at(link.GetChildAgent()))("\n");
     }
 }
 
@@ -667,13 +664,15 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
 {
     INDENT("C");
     ASSERT( start_x );
-    TRACE("Compare x=")(*start_x)(" pattern=")(*plan.root_agent)("\n");
+    TRACE("Compare x=")(start_x)(" pattern=")(plan.root_pattern_link)("\n");
            
     master_keys = master_keys_;    
+    
+    LocatedLink root_link( plan.root_pattern_link, start_x );
 
     if( plan.my_normal_agents.empty() )
     {
-        CompareTrivialProblem( start_x );
+        CompareTrivialProblem( root_link );
         return;
     }
            
@@ -706,7 +705,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
             // Initialise keys to the ones inherited from master, keeping 
             // none of our own from any previous unsuccessful attempt.
             master_coupling_candidates.clear();            
-            DecidedCompare( plan.root_pattern_link, start_x );            
+            DecidedCompare( root_link );            
             CompareMasterKeys();
 #endif
 
@@ -759,10 +758,11 @@ const CouplingMap AndRuleEngine::GetCouplingKeys()
 }
 
 
-void AndRuleEngine::CompareCoupling( Agent *agent,
-                                     TreePtr<Node> x,
+void AndRuleEngine::CompareCoupling( LocatedLink link,
                                      const CouplingMap *keys )
 {
+    Agent *agent = link.GetChildAgent();
+    TreePtr<Node> x = link.GetChildX();
     ASSERT( keys->count(agent) > 0 );
 
     // Enforce rule #149

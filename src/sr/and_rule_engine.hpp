@@ -100,8 +100,7 @@ private:
     void GetNextCSPSolution( TreePtr<Node> start_x );
     void CompareLinks( Agent *agent,
                        shared_ptr<const DecidedQuery> query );
-    void DecidedCompare( PatternLink plink,
-                         TreePtr<Node> x );
+    void DecidedCompare( LocatedLink link );
     void CompareEvaluatorLinks( Agent *agent, 
                                 const CouplingMap *combined_keys, 
                                 const CouplingMap *after_pass_keys );
@@ -115,7 +114,7 @@ private:
 public:
     void Compare( TreePtr<Node> start_x,
                   const CouplingMap *master_keys );
-    void CompareTrivialProblem( TreePtr<Node> start_x );
+    void CompareTrivialProblem( LocatedLink root_link );
     void CompareMasterKeys();
     void Compare( TreePtr<Node> start_x );
     void EnsureChoicesHaveIterators();
@@ -123,8 +122,7 @@ public:
     const CouplingMap GetCouplingKeys();
 
 private:    
-    void CompareCoupling( Agent *agent,
-                          TreePtr<Node> x,
+    void CompareCoupling( LocatedLink link,
                           const CouplingMap *keys );
     void KeyCoupling( Agent *agent,
                       TreePtr<Node> x,
