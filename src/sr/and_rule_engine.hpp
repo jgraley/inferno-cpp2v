@@ -127,18 +127,17 @@ private:
                           const CouplingMap *keys );
     void KeyCoupling( LocatedLink link,
                       CouplingMap *keys );
-    void CompareCoupling( LocatedLink link,                          
-                          const CouplingLinkMap *keys );
     void KeyCoupling( LocatedLink link,
                       CouplingLinkMap *keys );
     static CouplingMap CouplingMapFromLinkMap( CouplingLinkMap links );
     void AssertNewCoupling( const CouplingMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
 
-    CouplingLinkMap working_keys; 
+    CouplingMap internal_coupling_keys; 
+    const CouplingMap *master_keys;
+
     CouplingLinkMap solution_keys; 
     CouplingLinkMap external_solution_keys; 
     CouplingLinkMap master_coupling_candidates;
-    const CouplingMap *master_keys;
 };
 
 #endif

@@ -359,7 +359,7 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
     if( !match )
         throw NoSolution();
 
-    // Recreate working_keys
+    // Recreate internal_coupling_keys
     for( pair< Agent *, shared_ptr<CSP::Constraint> > p : plan.my_constraints )
     {
         if( p.first == plan.root_agent ) 
@@ -408,8 +408,8 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         // Are we at a residual coupling?
         if( plan.coupling_residual_links.count( link ) > 0 ) // See #129
         {
-            CompareCoupling( link, &working_keys );
-            TRACE("Accepted working coupling for ")(link)(" key=")(working_keys.at(link))("\n");
+            CompareCoupling( link, &internal_coupling_keys );
+            TRACE("Accepted working coupling for ")(link)(" key=")(internal_coupling_keys.at(link.GetChildAgent()))("\n");
             ASSERT( solution_keys.count(link) == 0 )("Coupling conflict!\n");
             KeyCoupling( link, &solution_keys );
             continue;
@@ -428,7 +428,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         if( plan.coupling_keyer_links.count( link ) )
         {
             ASSERT( link.GetChildX() != DecidedQueryCommon::MMAX_Node )("Can't key with MMAX because would leak");
-            KeyCoupling( link, &working_keys );
+            KeyCoupling( link, &internal_coupling_keys );
         }
 
         DecidedCompare(link);   
@@ -679,7 +679,7 @@ void AndRuleEngine::Compare( TreePtr<Node> start_x,
     {
         solution_keys.clear();
         external_solution_keys.clear();
-        working_keys.clear();
+        internal_coupling_keys.clear();
 #ifdef USE_SOLVER        
         // Get a solution from the solver
         GetNextCSPSolution( start_x );
@@ -748,26 +748,25 @@ const CouplingMap AndRuleEngine::GetCouplingKeys()
 }
 
 
-void AndRuleEngine::CompareCoupling( LocatedLink link,
+void AndRuleEngine::CompareCoupling( LocatedLink residual_link,
                                      const CouplingMap *keys )
 {
-    Agent *agent = link.GetChildAgent();
-    TreePtr<Node> x = link.GetChildX();
+    // Allow Magic Match Anything 
+    if( residual_link.GetChildX() == DecidedQueryCommon::MMAX_Node )
+        return;
+
+    Agent *agent = residual_link.GetChildAgent();
     ASSERT( keys->count(agent) > 0 );
 
     // Enforce rule #149
     ASSERT( !TreePtr<SubContainer>::DynamicCast( keys->at(agent) ) ); 
-
-    // Allow Magic Match Anything 
-    if( x == DecidedQueryCommon::MMAX_Node )
-        return;
 
     // This function establishes the policy for couplings in one place,
     // apart from the other place which is plan.by_equivalence_links.
     // Today, it's SimpleCompare, via EquivalenceRelation. 
     // And it always will be: see #121; para starting at "No!!"
     static EquivalenceRelation equivalence_relation;
-    if( !equivalence_relation( x, keys->at(agent) ) )
+    if( !equivalence_relation( residual_link.GetChildX(), keys->at(agent) ) )
         throw Mismatch();    
 }                                     
 
@@ -778,42 +777,7 @@ void AndRuleEngine::KeyCoupling( LocatedLink link,
     Agent *agent = link.GetChildAgent();
     ASSERT( keys->count(agent) == 0 )("Coupling conflict!\n");    
     (*keys)[agent] = link.GetChildX();
-}                                     
-
-
-void AndRuleEngine::CompareCoupling( LocatedLink link,
-                                     const CouplingLinkMap *keys )
-{
-    PatternLink found_pattern;
-    TreePtr<Node> found_x;
-    for( pair< PatternLink, TreePtr<Node> > p : *keys )
-    {
-        if( p.first.GetChildAgent() == link.GetChildAgent() )
-        {
-            found_pattern = p.first;
-            found_x = p.second;
-        }
-    }
-    
-    ASSERT( found_x )
-          ("Keys: ")(*keys)("\n")
-          ("Link: ")(link)("\n");
-
-    // Enforce rule #149
-    ASSERT( !TreePtr<SubContainer>::DynamicCast( found_x ) ); 
-
-    // Allow Magic Match Anything 
-    if( link.GetChildX() == DecidedQueryCommon::MMAX_Node )
-        return;
-
-    // This function establishes the policy for couplings in one place,
-    // apart from the other place which is plan.by_equivalence_links.
-    // Today, it's SimpleCompare, via EquivalenceRelation. 
-    // And it always will be: see #121; para starting at "No!!"
-    static EquivalenceRelation equivalence_relation;
-    if( !equivalence_relation( link.GetChildX(), found_x ) )
-        throw Mismatch();    
-}                                     
+}                                                       
 
 
 void AndRuleEngine::KeyCoupling( LocatedLink link,

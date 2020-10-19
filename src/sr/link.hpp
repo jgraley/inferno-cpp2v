@@ -49,6 +49,8 @@ public:
                  void *whodat=nullptr );
     LocatedLink( const PatternLink &plink, 
                  const TreePtr<Node> &x_);
+    LocatedLink( const pair<PatternLink, TreePtr<Node>> &p ) :
+        LocatedLink(p.first, p.second) {}
     bool operator<(const LocatedLink &other) const;
     bool operator!=(const LocatedLink &other) const;
     bool operator==(const LocatedLink &other) const;
