@@ -470,8 +470,8 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
     CompareLinks( agent, query );
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-    KeyCoupling( link, x, &solution_keys );
-    KeyCoupling( link, x, &external_solution_keys );
+    KeyCoupling( link, &solution_keys );
+    KeyCoupling( link, &external_solution_keys );
 }
 
 
@@ -564,7 +564,7 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
             // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
             FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
             {
-                KeyCoupling( link.GetChildAgent(), link.GetChildX(), &local_keys );
+                KeyCoupling( link, &local_keys );
                 
                 if( plan.my_free_abnormal_engines.count(link) )
                 {
@@ -575,7 +575,7 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
             }                    
             FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
             {
-                KeyCoupling( link.GetChildAgent(), link.GetChildX(), &local_keys );
+                KeyCoupling( link, &local_keys );
 
                 if( plan.my_multiplicity_engines.count(link) )
                     CompareMultiplicityLinks( link, &external_combined_keys );  
@@ -601,9 +601,10 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
     {
         if( plan.my_free_abnormal_engines.count(link) )
         {
-            TreePtr<Node> x = local_keys.at(link.GetChildAgent());                  
-            KeyCoupling( link, x, &solution_keys );
-            KeyCoupling( link, x, &external_solution_keys );
+            TreePtr<Node> x = local_keys.at(link.GetChildAgent());   
+            LocatedLink local_link( link, x );
+            KeyCoupling( local_link, &solution_keys );
+            KeyCoupling( local_link, &external_solution_keys );
         }
     }
 }      
@@ -782,24 +783,23 @@ void AndRuleEngine::CompareCoupling( LocatedLink link,
 }                                     
 
 
-void AndRuleEngine::KeyCoupling( Agent *agent,
-                                 TreePtr<Node> x,
+void AndRuleEngine::KeyCoupling( LocatedLink link,
                                  CouplingMap *keys )
 {
+    Agent *agent = link.GetChildAgent();
     ASSERT( keys->count(agent) == 0 )("Coupling conflict!\n");    
-    (*keys)[agent] = x;
+    (*keys)[agent] = link.GetChildX();
 }                                     
 
 
-void AndRuleEngine::CompareCoupling( PatternLink pattern,
-                                     TreePtr<Node> x,
+void AndRuleEngine::CompareCoupling( LocatedLink link,
                                      const CouplingLinkMap *keys )
 {
     PatternLink found_pattern;
     TreePtr<Node> found_x;
     for( pair< PatternLink, TreePtr<Node> > p : *keys )
     {
-        if( p.first.GetChildAgent() == pattern.GetChildAgent() )
+        if( p.first.GetChildAgent() == link.GetChildAgent() )
         {
             found_pattern = p.first;
             found_x = p.second;
@@ -808,13 +808,13 @@ void AndRuleEngine::CompareCoupling( PatternLink pattern,
     
     ASSERT( found_x )
           ("Keys: ")(*keys)("\n")
-          ("Pattern: ")(pattern)("\n");
+          ("Link: ")(link)("\n");
 
     // Enforce rule #149
     ASSERT( !TreePtr<SubContainer>::DynamicCast( found_x ) ); 
 
     // Allow Magic Match Anything 
-    if( x == DecidedQueryCommon::MMAX_Node )
+    if( link.GetChildX() == DecidedQueryCommon::MMAX_Node )
         return;
 
     // This function establishes the policy for couplings in one place,
@@ -822,31 +822,16 @@ void AndRuleEngine::CompareCoupling( PatternLink pattern,
     // Today, it's SimpleCompare, via EquivalenceRelation. 
     // And it always will be: see #121; para starting at "No!!"
     static EquivalenceRelation equivalence_relation;
-    if( !equivalence_relation( x, found_x ) )
+    if( !equivalence_relation( link.GetChildX(), found_x ) )
         throw Mismatch();    
-}                                     
-
-
-void AndRuleEngine::KeyCoupling( PatternLink pattern,
-                                 TreePtr<Node> x,
-                                 CouplingLinkMap *keys )
-{
-    ASSERT( keys->count(pattern) == 0 )("Coupling conflict!\n");    
-    (*keys)[pattern] = x;
-}                                     
-
-
-void AndRuleEngine::CompareCoupling( LocatedLink link,
-                                     const CouplingLinkMap *keys )
-{
-    CompareCoupling( (PatternLink)link, link.GetChildX(), keys );
 }                                     
 
 
 void AndRuleEngine::KeyCoupling( LocatedLink link,
                                  CouplingLinkMap *keys )
 {
-    KeyCoupling( (PatternLink)link, link.GetChildX(), keys );
+    ASSERT( keys->count(link) == 0 )("Coupling conflict!\n");    
+    (*keys)[link] = link.GetChildX();
 }                                     
 
 

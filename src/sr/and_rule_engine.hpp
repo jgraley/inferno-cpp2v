@@ -124,15 +124,8 @@ public:
 private:    
     void CompareCoupling( LocatedLink link,
                           const CouplingMap *keys );
-    void KeyCoupling( Agent *agent,
-                      TreePtr<Node> x,
+    void KeyCoupling( LocatedLink link,
                       CouplingMap *keys );
-    void CompareCoupling( PatternLink pattern,
-                          TreePtr<Node> x,
-                          const CouplingLinkMap *keys );
-    void KeyCoupling( PatternLink pattern,
-                      TreePtr<Node> x,
-                      CouplingLinkMap *keys );
     void CompareCoupling( LocatedLink link,                          
                           const CouplingLinkMap *keys );
     void KeyCoupling( LocatedLink link,
