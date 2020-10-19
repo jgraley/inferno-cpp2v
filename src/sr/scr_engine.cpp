@@ -262,7 +262,8 @@ void SCREngine::SingleCompareReplace( TreePtr<Node> *p_root,
            
     TRACE("Search successful, now keying replace nodes\n");
     plan.and_rule_engine->EnsureChoicesHaveIterators(); // Replace can't deal with hard BEGINs
-    KeyReplaceNodes( &plan.and_rule_engine->GetCouplingKeys() );
+    CouplingMap m = plan.and_rule_engine->GetCouplingKeys();
+    KeyReplaceNodes( &m );
 
     if( !plan.my_engines.empty() )
     {

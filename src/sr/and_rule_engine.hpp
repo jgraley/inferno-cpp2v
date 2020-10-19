@@ -115,7 +115,7 @@ public:
     void Compare( TreePtr<Node> start_x );
     void EnsureChoicesHaveIterators();
 
-    const CouplingMap &GetCouplingKeys();
+    const CouplingMap GetCouplingKeys();
 
 private:    
     typedef map< PatternLink, TreePtr<Node> > CouplingLinkMap;
@@ -140,7 +140,7 @@ private:
     void AssertNewCoupling( const CouplingMap &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
 
     CouplingLinkMap working_keys; 
-    CouplingMap solution_keys; 
+    CouplingLinkMap solution_keys; 
     CouplingLinkMap master_coupling_candidates;
     const CouplingMap *master_keys;
 };

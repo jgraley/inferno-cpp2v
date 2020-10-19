@@ -367,7 +367,7 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
             // Constraint's self-variable is fixed because we're at root
             // TODO it would be nice to be able to do p.second->GetAllVariables()
             // and and obtain the force back from the constraint
-            solution_keys[plan.root_agent] = start_x;
+            solution_keys[plan.root_pattern_link] = start_x;
         }
         else
         {
@@ -379,7 +379,10 @@ void AndRuleEngine::GetNextCSPSolution( TreePtr<Node> start_x )
                   (p)("\n")
                   (plan.root_agent)("\n");
             if( plan.my_normal_agents.count(vars.front()) )
-                solution_keys[vars.front()] = vals.front();    
+            {
+                ASSERT(false); // TODO!!
+                //solution_keys[vars.front()] = vals.front();    
+            }
         }            
     }
 }
@@ -464,8 +467,8 @@ void AndRuleEngine::DecidedCompare( PatternLink plink,
     CompareLinks( agent, query );
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-    ASSERT( solution_keys.count(agent) == 0 )("Coupling conflict!\n");
-    KeyCoupling( agent, x, &solution_keys );
+    ASSERT( solution_keys.count(plink) == 0 )("Coupling conflict!\n");
+    KeyCoupling( plink, x, &solution_keys );
 }
 
 
@@ -589,13 +592,13 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
             throw Agent::NormalLinksMismatch(); // Conjecture has run out of choices to try.            
     }    
 
-    // Key undiverted free abnormals for the benefit of replace
+    // Key free abnormals for the benefit of replace
     FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
     {
         if( plan.my_free_abnormal_engines.count(link) )
         {
             TreePtr<Node> x = local_keys.at(link.GetChildAgent());                  
-            KeyCoupling( link.GetChildAgent(), x, &solution_keys );
+            KeyCoupling( link, x, &solution_keys );
         }
     }
 }      
@@ -604,12 +607,12 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
 void AndRuleEngine::CompareAfterPass()
 {
     INDENT("R");
-    
-    const CouplingMap combined_keys = MapUnion( *master_keys, solution_keys );    
+    const CouplingMap solution_keys_by_agent = CouplingMapFromLinkMap(solution_keys);
+    const CouplingMap combined_keys = MapUnion( *master_keys, solution_keys_by_agent );    
 
     for( auto agent : plan.my_normal_agents )
     {
-        TreePtr<Node> x = solution_keys.at(agent);
+        TreePtr<Node> x = solution_keys_by_agent.at(agent);
         CompareAfterPassAgent( agent, x, &combined_keys );
     }
 }
@@ -735,9 +738,10 @@ void AndRuleEngine::EnsureChoicesHaveIterators()
 }
 
 
-const CouplingMap &AndRuleEngine::GetCouplingKeys()
+const CouplingMap AndRuleEngine::GetCouplingKeys()
 {
-    return solution_keys;
+    const CouplingMap solution_keys_by_agent = CouplingMapFromLinkMap(solution_keys);
+    return solution_keys_by_agent;
 }
 
 
