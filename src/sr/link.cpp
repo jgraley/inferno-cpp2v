@@ -171,6 +171,12 @@ LocatedLink::operator bool() const
 }
 
 
+LocatedLink::operator pair<const PatternLink, TreePtr<Node>>() const
+{
+    return make_pair( (PatternLink)*this, GetChildX() );
+}
+
+
 Agent *LocatedLink::GetChildAgent() const
 {
     ASSERT( ppattern )

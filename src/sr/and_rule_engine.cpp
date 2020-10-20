@@ -408,17 +408,16 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         // Are we at a residual coupling?
         if( plan.coupling_residual_links.count( link ) > 0 ) // See #129
         {
-            CompareCoupling( link, &internal_coupling_keys );
+            CompareCoupling( internal_coupling_keys, link );
             TRACE("Accepted working coupling for ")(link)(" key=")(internal_coupling_keys.at(link.GetChildAgent()))("\n");
-            ASSERT( internal_solution.count(link) == 0 )("Solution conflict!\n");    
-            internal_solution[link] = link.GetChildX();
+            InsertSolo( internal_solution, link );       
             continue;
         }
         
         // Master couplings are now checked in a post-pass
         if( plan.master_boundary_links.count(link) > 0 )
         {
-            master_coupling_candidates[link] = link.GetChildX();
+            InsertSolo( master_coupling_candidates, link);
             continue;
         }
 
@@ -428,7 +427,7 @@ void AndRuleEngine::CompareLinks( Agent *agent,
         if( plan.coupling_keyer_links.count( link ) )
         {
             ASSERT( link.GetChildX() != DecidedQueryCommon::MMAX_Node )("Can't key with MMAX because would leak");
-            KeyCoupling( link, &internal_coupling_keys );
+            KeyCoupling( internal_coupling_keys, link );
         }
 
         DecidedCompare(link);   
@@ -470,9 +469,8 @@ void AndRuleEngine::DecidedCompare( LocatedLink link )
     CompareLinks( agent, query );
 
     // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
-    ASSERT( internal_solution.count(link) == 0 )("Solution conflict!\n");    
-    internal_solution[link] = link.GetChildX();
-    KeyCoupling( link, &external_keys );
+    InsertSolo( internal_solution, link );                
+    KeyCoupling( external_keys, link );
 }
 
 
@@ -542,18 +540,24 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
                                            const CouplingKeys &external_combined_keys,
                                            const SolutionMap &internal_combined_solution )
 {
+    // Get a list of the links we must supply to the agent for regeneration
     auto pq = agent->GetPatternQuery();
     TRACE("In after-pass, trying to regenerate ")(*agent)(" at ")(*x)("\n");    
     TRACEC("Pattern links ")(pq->GetNormalLinks())("\n");    
-    map< Agent *, TreePtr<Node> > empty;
     list<LocatedLink> ll = LocateLinksFromMap( pq->GetNormalLinks(), internal_combined_solution );
     TRACEC("Relocated links ")(ll)("\n");    
+    
+    // We will need a conjecture, so that we can iterate through multiple 
+    // potentially valid values for the abnormals and multiplicities.
     auto query = make_shared<DecidedQuery>(pq);
     Conjecture conj(agent, query);            
     conj.Start();
+    
     int i=0;
     while(1)
     {
+        // Query the agent: our conj will be used for the iteration and
+        // therefore our query will hold the result 
         agent->ResumeNormalLinkedQuery( conj, x, ll );
         i++;
 
@@ -561,41 +565,43 @@ void AndRuleEngine::CompareAfterPassAgent( Agent *agent,
         {
             TRACE("Try out query, attempt %d (1-based)\n", i);    
             SolutionMap solution_for_evaluators;
-            // Fill this on the way out- by now I think we've succeeded in matching the current conjecture.
+            CouplingKeys provisional_external_keys;
+            
+            // Try matching the abnormal links (free and evaluator).
             FOREACH( const LocatedLink &link, query->GetAbnormalLinks() )
             {
-                if( plan.my_evaluator_abnormal_engines.count(link) )
-                {
-                    ASSERT( solution_for_evaluators.count(link) == 0 )("Solution conflict!\n");    
-                    solution_for_evaluators[link] = link.GetChildX();
-                }
+                // Actions if evaluator link
+                if( plan.my_evaluator_abnormal_engines.count(link) )                
+                    InsertSolo( solution_for_evaluators, link );                
                 
+                // Actions if free link
                 if( plan.my_free_abnormal_engines.count(link) )
                 {
                     shared_ptr<AndRuleEngine> e = plan.my_free_abnormal_engines.at(link);
                     e->Compare( link.GetChildX(), &external_combined_keys );
                     
                     // Replace needs these keys
-                    external_keys[link.GetChildAgent()] = link.GetChildX();
+                    KeyCoupling( provisional_external_keys, link );
                 }
             }                    
+            
+            // Try matching the multiplicity links.
             FOREACH( const LocatedLink &link, query->GetMultiplicityLinks() )
             {
                 if( plan.my_evaluator_abnormal_engines.count(link) )
-                {
-                    ASSERT( solution_for_evaluators.count(link) == 0 )("Solution conflict!\n");    
-                    solution_for_evaluators[link] = link.GetChildX();
-                }
+                    InsertSolo( solution_for_evaluators, link );                
 
                 if( plan.my_multiplicity_engines.count(link) )
                     CompareMultiplicityLinks( link, &external_combined_keys );  
             }
 
-            // Process the evaluator agents.
+            // Try matching the evaluator agents.
             if( plan.my_evaluators.count( agent ) )
                 CompareEvaluatorLinks( agent, &external_combined_keys, &solution_for_evaluators );            
             
             // if we got here, we're done!
+            external_keys = MapUnion( provisional_external_keys, external_keys );      
+            
             TRACE("Leaving while loop after %d tries\n", i);    
             break;
         }
@@ -634,7 +640,7 @@ void AndRuleEngine::CompareTrivialProblem( LocatedLink root_link )
     ASSERT( master_keys->count(plan.root_agent) );
     try
     {            
-        CompareCoupling( root_link, master_keys );
+        CompareCoupling( *master_keys, root_link );
     }
     catch( const ::Mismatch& mismatch ) 
     {
@@ -649,7 +655,7 @@ void AndRuleEngine::CompareMasterKeys()
     for( auto plink : plan.master_boundary_links )
     {
         LocatedLink link(plink, master_coupling_candidates.at(plink));
-        CompareCoupling( link, master_keys );
+        CompareCoupling( *master_keys, link );
         TRACE("Accepted master coupling for link=")(link)(" key=")(master_keys->at(link.GetChildAgent()))("\n");
     }
 }
@@ -754,55 +760,35 @@ const CouplingKeys &AndRuleEngine::GetCouplingKeys()
 }
 
 
-void AndRuleEngine::CompareCoupling( LocatedLink residual_link,
-                                     const CouplingKeys *keys )
+void AndRuleEngine::CompareCoupling( const CouplingKeys &keys, const LocatedLink &residual_link )
 {
     // Allow Magic Match Anything 
     if( residual_link.GetChildX() == DecidedQueryCommon::MMAX_Node )
         return;
 
     Agent *agent = residual_link.GetChildAgent();
-    ASSERT( keys->count(agent) > 0 );
+    ASSERT( keys.count(agent) > 0 );
 
     // Enforce rule #149
-    ASSERT( !TreePtr<SubContainer>::DynamicCast( keys->at(agent) ) ); 
+    ASSERT( !TreePtr<SubContainer>::DynamicCast( keys.at(agent) ) ); 
 
     // This function establishes the policy for couplings in one place,
     // apart from the other place which is plan.by_equivalence_links.
     // Today, it's SimpleCompare, via EquivalenceRelation. 
     // And it always will be: see #121; para starting at "No!!"
     static EquivalenceRelation equivalence_relation;
-    if( !equivalence_relation( residual_link.GetChildX(), keys->at(agent) ) )
+    if( !equivalence_relation( residual_link.GetChildX(), keys.at(agent) ) )
         throw Mismatch();    
 }                                     
 
 
-void AndRuleEngine::KeyCoupling( LocatedLink link,
-                                 CouplingKeys *keys )
+void AndRuleEngine::KeyCoupling( CouplingKeys &keys, const LocatedLink &keyer_link )
 {
-    Agent *agent = link.GetChildAgent();
-    ASSERT( keys->count(agent) == 0 )("Coupling conflict!\n");    
-    (*keys)[agent] = link.GetChildX();
+    // A coupling relates the coupled agent to an X node, not the
+    // link into the agent.
+    InsertSolo( keys, make_pair( keyer_link.GetChildAgent(), 
+                                 keyer_link.GetChildX() ) ); 
 }                                                       
-
-
-CouplingKeys AndRuleEngine::CouplingMapFromLinkMap( SolutionMap links )
-{
-    // We wish to use links for couplin maps internal to the
-    // AndRuleEngine (semi-linked model), but due to the awkward need 
-    // for a closure link for root agent, AndRuleEngine's external 
-    // interface and surrounding classes like SCREngine will continue 
-    // to use node-model maps (CouplingKeys). This does the conversion.
-    CouplingKeys c;
-    
-    for( pair< PatternLink, TreePtr<Node> > p : links )
-    {
-        ASSERT( p.first );
-        c[p.first.GetChildAgent()] = p.second;
-    }
-    
-    return c;
-}
 
 
 void AndRuleEngine::AssertNewCoupling( const CouplingKeys &extracted, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent )

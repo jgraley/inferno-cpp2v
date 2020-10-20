@@ -55,6 +55,7 @@ public:
     bool operator!=(const LocatedLink &other) const;
     bool operator==(const LocatedLink &other) const;
     explicit operator bool() const;
+    operator pair<const PatternLink, TreePtr<Node>>() const;
     Agent *GetChildAgent() const;
     const TreePtrInterface *GetPatternPtr() const;
     const TreePtr<Node> &GetChildX() const;

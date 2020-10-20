@@ -123,11 +123,8 @@ public:
     const CouplingKeys &GetCouplingKeys();
 
 private:    
-    void CompareCoupling( LocatedLink link,
-                          const CouplingKeys *keys );
-    void KeyCoupling( LocatedLink link,
-                      CouplingKeys *keys );
-    static CouplingKeys CouplingMapFromLinkMap( SolutionMap links );
+    void CompareCoupling( const CouplingKeys &keys, const LocatedLink &residual_link );
+    void KeyCoupling( CouplingKeys &keys, const LocatedLink &keyer_link );
     void AssertNewCoupling( const CouplingKeys &old, Agent *new_agent, TreePtr<Node> new_x, Agent *parent_agent );
 
     // Keys are mapped agaist agents, even though one of the links into
